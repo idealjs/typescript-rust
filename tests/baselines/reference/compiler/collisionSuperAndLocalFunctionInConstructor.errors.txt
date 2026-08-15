@@ -1,2 +1,0 @@
-collisionSuperAndLocalFunctionInConstructor.ts(11,9): error TS2349: This expression is not callable.
-collisionSuperAndLocalFunctionInConstructor.ts(18,9): error TS2349: This expression is not callable.

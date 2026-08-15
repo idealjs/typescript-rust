@@ -1,3 +1,2 @@
-classExpressionPropertyModifiers.ts(2,17): error TS2304: Cannot find name 'Cat'.
 classExpressionPropertyModifiers.ts(3,13): error TS1005: ';' expected.
 classExpressionPropertyModifiers.ts(4,12): error TS1005: ';' expected.

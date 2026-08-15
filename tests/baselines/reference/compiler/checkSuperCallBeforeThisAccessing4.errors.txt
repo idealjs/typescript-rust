@@ -1,2 +1,0 @@
-checkSuperCallBeforeThisAccessing4.ts(15,9): error TS2349: This expression is not callable.
-checkSuperCallBeforeThisAccessing4.ts(16,9): error TS2349: This expression is not callable.

@@ -248,6 +248,28 @@ impl Binder {
     ) -> Arc<Symbol> {
         let name = self.get_declaration_name(node);
 
+        // `var` hoisting: a function-scoped `var` declared inside a block
+        // (or loop initializer) must be declared in the nearest symbol
+        // container's table — the enclosing function's locals, or the
+        // file/module symbol's members at top level — NOT the block scope
+        // container. Block-scoped routing would hide the variable after the
+        // block (`function f() { { var x = 1; } use(x); }` → TS2304) and
+        // break `var`-`var` merging across sibling blocks. Mirrors Go's
+        // routing of FunctionScopedVariable declarations through
+        // `declareSymbolAndAddToSymbolTable` (which targets `b.container`,
+        // never `b.blockScopeContainer`). When `parent_symbol` is set (a
+        // declaration directly inside a symbol-ful container) the existing
+        // parent-member path below already lands in the right table.
+        let var_hoist_container: Option<Arc<Node>> =
+            if Self::declaration_is_var(node) && self.parent_symbol.is_none() {
+                self.container
+                    .as_ref()
+                    .filter(|c| is_var_container_kind(c.kind))
+                    .cloned()
+            } else {
+                None
+            };
+
         // Look up an existing symbol with the same name in the target scope.
         // If it exists and the kinds are mergeable, fold this declaration
         // into the existing symbol instead of creating a new one.
@@ -257,6 +279,21 @@ impl Binder {
                 .get(&name)
                 .cloned()
                 .or_else(|| parent_sym.exports.get(&name).cloned())
+        } else if let Some(hoist) = &var_hoist_container {
+            match hoist.kind {
+                SyntaxKind::SourceFile | SyntaxKind::ModuleDeclaration => self
+                    .symbol_map
+                    .symbol_of(hoist)
+                    .and_then(|sym| sym.members.get(&name).cloned()),
+                // Function-like containers: hoist into the function's locals.
+                _ => {
+                    let container_id = hoist.id();
+                    self.symbol_map
+                        .locals
+                        .get(&container_id)
+                        .and_then(|locals| locals.get(&name).cloned())
+                }
+            }
         } else if let Some(block_container) = &self.block_scope_container {
             let container_id = block_container.id();
             self.symbol_map
@@ -463,6 +500,31 @@ impl Binder {
                     (*parent_sym_mut)
                         .members
                         .insert(name.clone(), Arc::clone(&symbol));
+                }
+            } else if let Some(hoist) = &var_hoist_container {
+                // `var` hoisting (see `var_hoist_container` above): declare in
+                // the nearest symbol container's table — the enclosing
+                // function's locals, or the file/module symbol's members at
+                // top level — instead of the block scope container.
+                match hoist.kind {
+                    SyntaxKind::SourceFile | SyntaxKind::ModuleDeclaration => {
+                        if let Some(sym) = self.symbol_map.symbol_of(hoist) {
+                            let sym_mut = Arc::as_ptr(&sym) as *mut Symbol;
+                            unsafe {
+                                (*sym_mut)
+                                    .members
+                                    .insert(name.clone(), Arc::clone(&symbol));
+                            }
+                        }
+                    }
+                    _ => {
+                        let locals = self
+                            .symbol_map
+                            .locals
+                            .entry(hoist.id())
+                            .or_insert_with(SymbolTable::new);
+                        locals.insert(name.clone(), Arc::clone(&symbol));
+                    }
                 }
             } else if let Some(block_container) = &self.block_scope_container {
                 // Add to locals of the block-scoped container
@@ -710,6 +772,39 @@ impl Binder {
             }
         }
         false
+    }
+
+    /// Whether `node` is a function-scoped (`var`) variable declaration or a
+    /// binding element inside one (`var [{x, y:z}] = …`). Walks binding
+    /// elements up through their binding pattern to the enclosing
+    /// `VariableDeclaration`'s list keyword. Binding elements under other
+    /// declarations (e.g. `catch ({e})` parameters) bottom out at a
+    /// non-variable ancestor and count as block-scoped. Mirrors Go's
+    /// `ast.IsBlockOrCatchScoped` (inverted, for variable contexts) which
+    /// routes `var` bindings through `declareSymbolAndAddToSymbolTable`.
+    fn declaration_is_var(node: &Arc<Node>) -> bool {
+        let mut current = node;
+        loop {
+            match current.kind {
+                SyntaxKind::VariableDeclaration => {
+                    return if let Some(parent) = current.parent.as_ref() {
+                        parent.kind == SyntaxKind::VariableDeclarationList
+                            && !parent.flags.intersects(NodeFlags::Let | NodeFlags::Const)
+                    } else {
+                        false
+                    };
+                }
+                SyntaxKind::BindingElement
+                | SyntaxKind::ObjectBindingPattern
+                | SyntaxKind::ArrayBindingPattern => {
+                    match current.parent.as_ref() {
+                        Some(parent) => current = parent,
+                        None => return false,
+                    }
+                }
+                _ => return false,
+            }
+        }
     }
 
     /// Whether an existing symbol was declared as a function-scoped `var`.
@@ -961,6 +1056,24 @@ impl Binder {
         })
     }
 
+    /// Create a branch-label flow node used as an accumulation point for
+    /// jump edges (`break`/`continue` targets, labeled-statement break
+    /// targets). Unlike `FlowLabel::finish`, this node never collapses to
+    /// its single antecedent (or to the shared UNREACHABLE node when empty),
+    /// so edges added in place via `add_antecedent_to_flow` are never pushed
+    /// into — and never corrupt — an arbitrary unrelated node. The
+    /// accumulated antecedents are folded into the owning loop's post/pre
+    /// label when the loop finishes binding.
+    fn new_flow_accumulator() -> Arc<FlowNode> {
+        Arc::new(FlowNode {
+            flags: FlowFlags::BRANCH_LABEL,
+            node: None,
+            antecedent: None,
+            antecedents: Vec::new(),
+            switch_statement: None,
+        })
+    }
+
     /// Add an antecedent to a flow label (checking for duplicates).
     fn add_antecedent_to_flow(&self, label: &Arc<FlowNode>, antecedent: &Arc<FlowNode>) {
         if antecedent.flags.contains(FlowFlags::UNREACHABLE) {
@@ -1079,19 +1192,33 @@ impl Binder {
             post_while_label.add_antecedent(false_flow);
         }
 
-        // Save break/continue targets
+        // Save break/continue targets. Jump targets are accumulation nodes
+        // (never collapsed snapshots) so in-place edge additions from
+        // `break;`/`continue;` can't corrupt unrelated flow nodes; the
+        // accumulated edges are folded into the loop's labels below.
         let prev_break = self.current_break_target.take();
         let prev_continue = self.current_continue_target.take();
-        self.current_break_target =
-            Some(post_while_label.finish(self.unreachable_flow.as_ref().unwrap()));
-        self.current_continue_target =
-            Some(pre_while_label.finish(self.unreachable_flow.as_ref().unwrap()));
+        let break_acc = Self::new_flow_accumulator();
+        let continue_acc = Self::new_flow_accumulator();
+        self.current_break_target = Some(Arc::clone(&break_acc));
+        self.current_continue_target = Some(Arc::clone(&continue_acc));
+        // Back-fill enclosing labels (`l: while (…)`) so `continue l;`
+        // targets THIS loop. Mirrors Go's `setContinueTarget`.
+        self.set_continue_target(node, &continue_acc);
 
         // Body
         self.current_flow = Some(pre_body_label.finish(self.unreachable_flow.as_ref().unwrap()));
         self.bind(&stmt);
         if let Some(current) = &self.current_flow {
             pre_while_label.add_antecedent(Arc::clone(current));
+        }
+        // Fold `continue;` edges into the condition label.
+        for ant in &continue_acc.antecedents {
+            pre_while_label.add_antecedent(Arc::clone(ant));
+        }
+        // Fold `break;` edges into the post-loop label.
+        for ant in &break_acc.antecedents {
+            post_while_label.add_antecedent(Arc::clone(ant));
         }
 
         // Restore break/continue targets
@@ -1117,18 +1244,28 @@ impl Binder {
         }
         self.current_flow = Some(pre_do_label.finish(self.unreachable_flow.as_ref().unwrap()));
 
-        // Save break/continue targets
+        // Save break/continue targets. Jump targets are accumulation nodes
+        // (never collapsed snapshots) so in-place edge additions from
+        // `break;`/`continue;` can't corrupt unrelated flow nodes; the
+        // accumulated edges are folded into the loop's labels below.
         let prev_break = self.current_break_target.take();
         let prev_continue = self.current_continue_target.take();
-        self.current_break_target =
-            Some(post_do_label.finish(self.unreachable_flow.as_ref().unwrap()));
-        self.current_continue_target =
-            Some(pre_condition_label.finish(self.unreachable_flow.as_ref().unwrap()));
+        let break_acc = Self::new_flow_accumulator();
+        let continue_acc = Self::new_flow_accumulator();
+        self.current_break_target = Some(Arc::clone(&break_acc));
+        self.current_continue_target = Some(Arc::clone(&continue_acc));
+        // Back-fill enclosing labels (`l: do (…)`) so `continue l;`
+        // targets THIS loop. Mirrors Go's `setContinueTarget`.
+        self.set_continue_target(node, &continue_acc);
 
         // Body
         self.bind(&stmt);
         if let Some(current) = &self.current_flow {
             pre_condition_label.add_antecedent(Arc::clone(current));
+        }
+        // Fold `continue;` edges into the condition label.
+        for ant in &continue_acc.antecedents {
+            pre_condition_label.add_antecedent(Arc::clone(ant));
         }
 
         // Restore break/continue targets
@@ -1145,6 +1282,10 @@ impl Binder {
                 self.create_flow_condition(FlowFlags::FALSE_CONDITION, &current, &expr);
             pre_do_label.add_antecedent(true_flow);
             post_do_label.add_antecedent(false_flow);
+        }
+        // Fold `break;` edges into the post-loop label.
+        for ant in &break_acc.antecedents {
+            post_do_label.add_antecedent(Arc::clone(ant));
         }
 
         self.current_flow = Some(post_do_label.finish(self.unreachable_flow.as_ref().unwrap()));
@@ -1166,6 +1307,28 @@ impl Binder {
             ),
             _ => return,
         };
+
+        // Activate the ForStatement as the block-scoped container so its
+        // initializer variables (`for (let x = 1, y = 2; …)`) are scoped to
+        // THIS loop rather than the enclosing scope. Without this, two loops
+        // in the same block both declaring `let x` collide (TS2451) and the
+        // body sees the init as used-before-declaration (TS2448). This
+        // early-dispatch path otherwise skips `bind_container`.
+        //
+        // Mirrors Go's `bindContainer` for ForStatement (an
+        // `IsBlockScopedContainer`-only node): ONLY `block_scope_container`
+        // is advanced. `container` keeps pointing at the enclosing
+        // function-like container so `for (var i = 0; …)` still declares `i`
+        // in the function scope (var hoisting, see `declare_symbol`).
+        let prev_block = self.block_scope_container.take();
+        let prev_parent = self.parent_symbol.take();
+        self.block_scope_container = Some(Arc::clone(node));
+        self.symbol_map
+            .locals
+            .entry(node.id())
+            .or_insert_with(SymbolTable::new);
+        // parent_symbol stays None (ForStatement has no symbol) so declares
+        // route to this loop's locals.
 
         // Initializer
         if let Some(init) = initializer {
@@ -1195,19 +1358,29 @@ impl Binder {
             }
         }
 
-        // Save break/continue targets
+        // Save break/continue targets. Jump targets are accumulation nodes
+        // (never collapsed snapshots) so in-place edge additions from
+        // `break;`/`continue;` can't corrupt unrelated flow nodes; the
+        // accumulated edges are folded into the loop's labels below.
         let prev_break = self.current_break_target.take();
         let prev_continue = self.current_continue_target.take();
-        self.current_break_target =
-            Some(post_loop_label.finish(self.unreachable_flow.as_ref().unwrap()));
-        self.current_continue_target =
-            Some(pre_incr_label.finish(self.unreachable_flow.as_ref().unwrap()));
+        let break_acc = Self::new_flow_accumulator();
+        let continue_acc = Self::new_flow_accumulator();
+        self.current_break_target = Some(Arc::clone(&break_acc));
+        self.current_continue_target = Some(Arc::clone(&continue_acc));
+        // Back-fill enclosing labels (`l: for (…)`) so `continue l;`
+        // targets THIS loop. Mirrors Go's `setContinueTarget`.
+        self.set_continue_target(node, &continue_acc);
 
         // Body
         self.current_flow = Some(pre_body_label.finish(self.unreachable_flow.as_ref().unwrap()));
         self.bind(&statement);
         if let Some(current) = &self.current_flow {
             pre_incr_label.add_antecedent(Arc::clone(current));
+        }
+        // Fold `continue;` edges into the incrementor label.
+        for ant in &continue_acc.antecedents {
+            pre_incr_label.add_antecedent(Arc::clone(ant));
         }
 
         // Restore break/continue targets
@@ -1222,8 +1395,16 @@ impl Binder {
         if let Some(current) = &self.current_flow {
             pre_loop_label.add_antecedent(Arc::clone(current));
         }
+        // Fold `break;` edges into the post-loop label.
+        for ant in &break_acc.antecedents {
+            post_loop_label.add_antecedent(Arc::clone(ant));
+        }
 
         self.current_flow = Some(post_loop_label.finish(self.unreachable_flow.as_ref().unwrap()));
+
+        // Restore the enclosing block scope / parent symbol.
+        self.block_scope_container = prev_block;
+        self.parent_symbol = prev_parent;
     }
 
     /// Bind a for-in or for-of statement with proper control flow.
@@ -1240,6 +1421,23 @@ impl Binder {
             _ => return,
         };
 
+        // Activate the ForIn/ForOf statement as the block-scoped container so
+        // its loop variable (`for (let b of …)`) is scoped to THIS loop.
+        // Without this, two sibling `for (let b of …)` loops in the same
+        // function collide (TS2451). Mirrors Go's `bindContainer`, which sets
+        // `blockScopeContainer = node` before the children are bound. Like
+        // `bind_for_statement`, only `block_scope_container` is advanced so
+        // `for (var k in o)` still hoists `k` to the function scope.
+        let prev_block = self.block_scope_container.take();
+        let prev_parent = self.parent_symbol.take();
+        self.block_scope_container = Some(Arc::clone(node));
+        self.symbol_map
+            .locals
+            .entry(node.id())
+            .or_insert_with(SymbolTable::new);
+        // parent_symbol stays None (loop statements have no symbol) so
+        // block-scoped declares route to this loop's locals.
+
         // Expression
         self.bind(&expression);
 
@@ -1253,18 +1451,32 @@ impl Binder {
         // Initializer
         self.bind(&initializer);
 
-        // Save break/continue targets
+        // Save break/continue targets. Jump targets are accumulation nodes
+        // (never collapsed snapshots) so in-place edge additions from
+        // `break;`/`continue;` can't corrupt unrelated flow nodes; the
+        // accumulated edges are folded into the loop's labels below.
         let prev_break = self.current_break_target.take();
         let prev_continue = self.current_continue_target.take();
-        self.current_break_target =
-            Some(post_loop_label.finish(self.unreachable_flow.as_ref().unwrap()));
-        self.current_continue_target =
-            Some(pre_loop_label.finish(self.unreachable_flow.as_ref().unwrap()));
+        let break_acc = Self::new_flow_accumulator();
+        let continue_acc = Self::new_flow_accumulator();
+        self.current_break_target = Some(Arc::clone(&break_acc));
+        self.current_continue_target = Some(Arc::clone(&continue_acc));
+        // Back-fill enclosing labels (`l: for (… of …)`) so `continue l;`
+        // targets THIS loop. Mirrors Go's `setContinueTarget`.
+        self.set_continue_target(node, &continue_acc);
 
         // Body
         self.bind(&statement);
         if let Some(current) = &self.current_flow {
             pre_loop_label.add_antecedent(Arc::clone(current));
+        }
+        // Fold `continue;` edges into the pre-loop label (the next iteration).
+        for ant in &continue_acc.antecedents {
+            pre_loop_label.add_antecedent(Arc::clone(ant));
+        }
+        // Fold `break;` edges into the post-loop label.
+        for ant in &break_acc.antecedents {
+            post_loop_label.add_antecedent(Arc::clone(ant));
         }
 
         // Restore break/continue targets
@@ -1272,6 +1484,10 @@ impl Binder {
         self.current_continue_target = prev_continue;
 
         self.current_flow = Some(post_loop_label.finish(self.unreachable_flow.as_ref().unwrap()));
+
+        // Restore the enclosing block scope / parent symbol.
+        self.block_scope_container = prev_block;
+        self.parent_symbol = prev_parent;
     }
 
     /// Bind a switch statement with proper control flow.
@@ -1299,6 +1515,21 @@ impl Binder {
                 return;
             }
         };
+
+        // Activate the CaseBlock as the block-scoped container so
+        // case-clause declarations (`case 1: let x;`) are scoped to the
+        // switch rather than colliding with the enclosing block. Mirrors
+        // Go's `GetContainerFlags`: `KindCaseBlock` is an
+        // `IsBlockScopedContainer`-only node (all clauses share one scope).
+        // Like the loop binders, only `block_scope_container` is advanced so
+        // `case 1: var x;` still hoists to the function scope.
+        let prev_block = self.block_scope_container.take();
+        let prev_parent = self.parent_symbol.take();
+        self.block_scope_container = Some(Arc::clone(&case_block));
+        self.symbol_map
+            .locals
+            .entry(case_block.id())
+            .or_insert_with(SymbolTable::new);
 
         // Process each clause
         for clause in &clauses.nodes {
@@ -1328,6 +1559,10 @@ impl Binder {
         }
 
         self.current_flow = Some(post_switch_label.finish(self.unreachable_flow.as_ref().unwrap()));
+
+        // Restore the enclosing block scope / parent symbol.
+        self.block_scope_container = prev_block;
+        self.parent_symbol = prev_parent;
 
         // Restore break target
         self.current_break_target = prev_break;
@@ -1565,6 +1800,28 @@ impl Binder {
         self.current_flow = Some(self.unreachable_flow());
     }
 
+    /// Propagate a loop's continue target to enclosing labels while the loop
+    /// is directly labeled (`l: for (…)`, `a: b: while (…)`). Mirrors Go's
+    /// `setContinueTarget` (binder.go:1779): walks the loop node's parent
+    /// chain of `LabeledStatement`s in lockstep with the active label list
+    /// (innermost first), assigning the loop's own continue target so
+    /// `continue label;` routes to the correct loop rather than the
+    /// enclosing one.
+    fn set_continue_target(&mut self, loop_node: &Arc<Node>, target: &Arc<FlowNode>) {
+        let mut node = Arc::clone(loop_node);
+        let mut cursor = &mut self.active_label_list;
+        loop {
+            let Some(parent) = node.parent.clone() else { break };
+            if parent.kind != SyntaxKind::LabeledStatement {
+                break;
+            }
+            let Some(label) = cursor else { break };
+            label.continue_target = Some(Arc::clone(target));
+            node = parent;
+            cursor = &mut label.next;
+        }
+    }
+
     /// Bind a labeled statement.
     ///
     /// Mirrors `binder.bindLabeledStatement` in Go.
@@ -1575,21 +1832,21 @@ impl Binder {
         };
 
         let label_name = self.node_text(&stmt.label);
-        let break_label = FlowLabel::new(FlowFlags::BRANCH_LABEL);
-        let break_target = break_label.finish(self.unreachable_flow.as_ref().unwrap());
+        // Break target: a branch-label accumulation node. It must NOT be
+        // created by `FlowLabel::finish` before the statement is bound —
+        // an empty label collapses to the (shared) UNREACHABLE node, which
+        // would poison `current_flow` for everything after the labeled
+        // statement (all subsequent references narrow to `never`).
+        // `break label;` adds antecedents in place; the fallthrough
+        // antecedent is added after the statement is bound below.
+        let break_target = Self::new_flow_accumulator();
 
-        // Determine if this is a label for an iteration statement (has continue target)
-        let continue_target = match &stmt.statement.data {
-            NodeData::WhileStatement(_)
-            | NodeData::DoStatement(_)
-            | NodeData::ForStatement(_)
-            | NodeData::ForInOrOfStatement(_) => Some(
-                self.current_continue_target
-                    .clone()
-                    .unwrap_or_else(|| self.unreachable_flow()),
-            ),
-            _ => None,
-        };
+        // The continue target starts as `None` and is back-filled by the
+        // labeled iteration statement itself (see `set_continue_target`,
+        // called from the loop binders) — NOT from the enclosing loop, which
+        // would route `continue label;` to the wrong place. Mirrors Go's
+        // `bindLabeledStatement` (`continueTarget: nil`) + `setContinueTarget`.
+        let continue_target: Option<Arc<FlowNode>> = None;
 
         let active_label = Box::new(ActiveLabel {
             name: label_name,
@@ -1626,11 +1883,19 @@ impl Binder {
             }
         }
 
-        // Finish break target
+        // Finish break target: add the fallthrough antecedent (skipped when
+        // unreachable), mirroring Go's `b.addAntecedent(postStatementLabel,
+        // b.currentFlow); b.currentFlow = b.finishFlowLabel(...)`. A label
+        // that accumulated no antecedents (body always breaks/returns)
+        // finishes to the UNREACHABLE node, like Go's `finishFlowLabel`.
         if let Some(current) = &self.current_flow {
             self.add_antecedent_to_flow(&break_target, current);
         }
-        self.current_flow = Some(break_target);
+        self.current_flow = if break_target.antecedents.is_empty() {
+            Some(self.unreachable_flow())
+        } else {
+            Some(break_target)
+        };
     }
 
     /// Check if an identifier is push or unshift (for array mutation tracking).
@@ -2237,7 +2502,10 @@ impl Binder {
 
     /// Bind a container node: save/restore container context, then bind children.
     fn bind_container(&mut self, node: &Arc<Node>, flags: ContainerFlags) {
-        let prev_container = self.container.take();
+        // Save (clone, not take): block-only containers below leave
+        // `container` pointing at the enclosing function-like container, so
+        // `var` declarations inside them hoist correctly.
+        let prev_container = self.container.clone();
         let prev_block = self.block_scope_container.take();
         // Save the current `this_container`. If this node is a
         // `IS_THIS_CONTAINER` (function-like), it becomes the new
@@ -2252,10 +2520,22 @@ impl Binder {
         // it so children go into the block's locals.
         let prev_parent_symbol = self.parent_symbol.take();
 
-        self.container = Some(Arc::clone(node));
-
-        // Block-scoped containers get a new locals scope
-        if is_block_scoped_container(node.kind) {
+        // Mirrors Go's `bindContainer` (binder.go:1501-1510):
+        // - `IsContainer` nodes (functions, classes, source files, modules…)
+        //   advance BOTH `container` and `block_scope_container`.
+        // - Block-scoped-only containers (Block, For*, CatchClause, …) advance
+        //   ONLY `block_scope_container`.
+        // Keeping `container` at the nearest function-like container is what
+        // lets `var` declarations in nested blocks hoist to the function
+        // scope (see `declare_symbol`). Note: our `get_container_flags` marks
+        // `Block` as IS_CONTAINER (a deviation from Go), so block-only kinds
+        // are filtered out explicitly here.
+        let block_only = is_block_only_container(node.kind);
+        if flags.contains(ContainerFlags::IS_CONTAINER) && !block_only {
+            self.container = Some(Arc::clone(node));
+            self.block_scope_container = Some(Arc::clone(node));
+        } else {
+            // Block-scoped container (no symbol of its own for locals).
             self.block_scope_container = Some(Arc::clone(node));
         }
 
@@ -2512,6 +2792,45 @@ fn is_block_scoped_container(kind: SyntaxKind) -> bool {
             | SyntaxKind::ForStatement
             | SyntaxKind::ForInStatement
             | SyntaxKind::ForOfStatement
+            | SyntaxKind::Constructor
+    )
+}
+
+/// Node kinds that are block-scoped containers but NOT symbol containers —
+/// `Block`, the loop statements, `CatchClause`, and `CaseBlock`. These mirror
+/// the `ContainerFlagsIsBlockScopedContainer`-only kinds in Go's
+/// `GetContainerFlags`. Our `get_container_flags` additionally marks `Block`
+/// as IS_CONTAINER (a deviation), so `bind_container` filters these kinds out
+/// explicitly when deciding whether to advance `container`: `container` must
+/// keep pointing at the nearest function-like container so `var` declarations
+/// in nested blocks hoist to the function scope.
+fn is_block_only_container(kind: SyntaxKind) -> bool {
+    matches!(
+        kind,
+        SyntaxKind::Block
+            | SyntaxKind::CatchClause
+            | SyntaxKind::ForStatement
+            | SyntaxKind::ForInStatement
+            | SyntaxKind::ForOfStatement
+            | SyntaxKind::CaseBlock
+    )
+}
+
+/// Whether `kind` is a function-like (or module/file) container that `var`
+/// declarations hoist into. Mirrors the locals-bearing container kinds of Go's
+/// `declareSymbolAndAddToSymbolTable` (functions declare into their locals;
+/// source files / modules route through their symbol's member tables).
+fn is_var_container_kind(kind: SyntaxKind) -> bool {
+    matches!(
+        kind,
+        SyntaxKind::SourceFile
+            | SyntaxKind::ModuleDeclaration
+            | SyntaxKind::FunctionDeclaration
+            | SyntaxKind::FunctionExpression
+            | SyntaxKind::ArrowFunction
+            | SyntaxKind::MethodDeclaration
+            | SyntaxKind::GetAccessor
+            | SyntaxKind::SetAccessor
             | SyntaxKind::Constructor
     )
 }

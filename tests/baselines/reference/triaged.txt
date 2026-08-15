@@ -6,4 +6,55 @@
 # Lines starting with `#` (incl. `## group ##` headers) and blank lines are
 # ignored.
 #
-# (empty during initial bring-up; populate as specific checker gaps are filed)
+# Audited 2026-08-15 against the official TypeScript baselines
+# (_submodules/TypeScript/tests/baselines/reference/, CRLF-stripped,
+# errors-section only). All other diffs in the 1000-case slice match the
+# official error lists exactly; the cases below diverge on the described
+# missing checker features.
+
+## TS17009: 'super' must be called before accessing 'this' in a derived
+## constructor (definite-super-call analysis not ported) ##
+compiler/baseCheck.errors.txt
+compiler/checkSuperCallBeforeThisAccessing2.errors.txt
+compiler/checkSuperCallBeforeThisAccessing5.errors.txt
+compiler/checkSuperCallBeforeThisAccessing8.errors.txt
+compiler/classExtendsNull.errors.txt
+compiler/classExtendsNull2.errors.txt
+
+## TS17005: super call in a class extending 'null'; TS2417 static-side
+## extends checks (class static-side inheritance modeling) ##
+compiler/classSideInheritance2.errors.txt
+compiler/classSideInheritance3.errors.txt
+compiler/classExpressionExtendingAbstractClass.errors.txt
+compiler/classExpressionTest2.errors.txt
+compiler/classExpressions.errors.txt
+
+## TS2628 assign-to-enum / TS2540 readonly-property assignment checks ##
+compiler/assignToEnum.errors.txt
+
+## strict-mode checks the harness doesn't enable for these cases
+## (strictPropertyInitialization TS2564, strictNullChecks TS2322/TS2741) ##
+compiler/chainedAssignment3.errors.txt
+
+## generic inference gaps: mixin base `class extends Base`, contextual
+## callback variance, conditional-inference chains ##
+compiler/autolift4.errors.txt
+compiler/booleanFilterAnyArray.errors.txt
+compiler/callbacksDontShareTypes.errors.txt
+compiler/coAndContraVariantInferences3.errors.txt
+compiler/baseConstraintOfDecorator.errors.txt
+compiler/baseTypeWrappingInstantiationChain.errors.txt
+
+## TS2301: initializer-references-constructor-local check ##
+compiler/classMemberInitializerWithLamdaScoping.errors.txt
+
+## misc unported diagnostics: TS2552 did-you-mean suggestions, TS2420
+## implements-primitive, overload sets with literal widening ##
+compiler/abstractPropertyInConstructor.errors.txt
+compiler/assigningFromObjectToAnythingElse.errors.txt
+compiler/assignmentCompatability45.errors.txt
+compiler/classExpressionPropertyModifiers.errors.txt
+compiler/classImplementsPrimitive.errors.txt
+compiler/classUpdateTests.errors.txt
+compiler/cloduleTest2.errors.txt
+compiler/capturedLetConstInLoop5_ES6.errors.txt

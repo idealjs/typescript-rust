@@ -1,1 +1,0 @@
-classSideInheritance2.ts(10,13): error TS2349: This expression is not callable.

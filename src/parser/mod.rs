@@ -4820,7 +4820,13 @@ impl Parser {
     fn parse_class_expression(&mut self) -> Arc<Node> {
         let pos = self.token_pos();
         self.next_token(); // consume 'class'
-        let name = if self.is_identifier() {
+        // The optional name is a binding identifier: a reserved word here
+        // starts a clause instead (`class extends Base {}` — anonymous class
+        // expression with heritage). Mirrors tsc's `isBindingIdentifier`
+        // check in `parseClassExpression`.
+        let name = if self.is_identifier()
+            && !matches!(self.token, SyntaxKind::ExtendsKeyword | SyntaxKind::ImplementsKeyword)
+        {
             Some(self.parse_identifier())
         } else {
             None

@@ -1,11 +1,1 @@
-autolift4.ts(7,31): error TS2339: Property 'x' does not exist on type '{ getDist: () => any }'.
-autolift4.ts(7,38): error TS2339: Property 'x' does not exist on type '{ getDist: () => any }'.
-autolift4.ts(7,47): error TS2339: Property 'y' does not exist on type '{ getDist: () => any }'.
-autolift4.ts(7,54): error TS2339: Property 'y' does not exist on type '{ getDist: () => any }'.
-autolift4.ts(15,9): error TS2349: This expression is not callable.
-autolift4.ts(19,31): error TS2339: Property 'x' does not exist on type '{ getDist: () => any }'.
-autolift4.ts(19,38): error TS2339: Property 'x' does not exist on type '{ getDist: () => any }'.
-autolift4.ts(19,47): error TS2339: Property 'y' does not exist on type '{ getDist: () => any }'.
-autolift4.ts(19,54): error TS2339: Property 'y' does not exist on type '{ getDist: () => any }'.
-autolift4.ts(19,63): error TS2339: Property 'z' does not exist on type '{ getDist: () => any }'.
-autolift4.ts(19,70): error TS2339: Property 'm' does not exist on type '{ getDist: () => any }'.
+autolift4.ts(19,70): error TS2339: Property 'm' does not exist on type '{ x: number; y: number; getDist: () => any; z: number }'.

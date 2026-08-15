@@ -1,40 +1,4 @@
-error TS2451: Cannot redeclare block-scoped variable 'x'.
-error TS2451: Cannot redeclare block-scoped variable 'x'.
-error TS2451: Cannot redeclare block-scoped variable 'x'.
-error TS2451: Cannot redeclare block-scoped variable 'y'.
-error TS2451: Cannot redeclare block-scoped variable 'y'.
-error TS2451: Cannot redeclare block-scoped variable 'x'.
-error TS2451: Cannot redeclare block-scoped variable 'x'.
-error TS2451: Cannot redeclare block-scoped variable 'x'.
-error TS2451: Cannot redeclare block-scoped variable 'y'.
-error TS2451: Cannot redeclare block-scoped variable 'x'.
-error TS2451: Cannot redeclare block-scoped variable 'y'.
-error TS2451: Cannot redeclare block-scoped variable 'y'.
-capturedLetConstInLoop6_ES6.ts(5,9): error TS2448: Block-scoped variable 'x' used before its declaration.
-capturedLetConstInLoop6_ES6.ts(8,9): error TS2448: Block-scoped variable 'x' used before its declaration.
-capturedLetConstInLoop6_ES6.ts(16,9): error TS2448: Block-scoped variable 'x' used before its declaration.
-capturedLetConstInLoop6_ES6.ts(19,9): error TS2448: Block-scoped variable 'x' used before its declaration.
-capturedLetConstInLoop6_ES6.ts(25,17): error TS2448: Block-scoped variable 'x' used before its declaration.
-capturedLetConstInLoop6_ES6.ts(25,26): error TS2448: Block-scoped variable 'x' used before its declaration.
-capturedLetConstInLoop6_ES6.ts(28,9): error TS2448: Block-scoped variable 'x' used before its declaration.
-capturedLetConstInLoop6_ES6.ts(31,9): error TS2448: Block-scoped variable 'x' used before its declaration.
-capturedLetConstInLoop6_ES6.ts(60,17): error TS2448: Block-scoped variable 'y' used before its declaration.
-capturedLetConstInLoop6_ES6.ts(60,26): error TS2448: Block-scoped variable 'y' used before its declaration.
-capturedLetConstInLoop6_ES6.ts(72,24): error TS2448: Block-scoped variable 'x' used before its declaration.
-capturedLetConstInLoop6_ES6.ts(72,33): error TS2448: Block-scoped variable 'x' used before its declaration.
-capturedLetConstInLoop6_ES6.ts(75,9): error TS2448: Block-scoped variable 'x' used before its declaration.
-capturedLetConstInLoop6_ES6.ts(78,9): error TS2448: Block-scoped variable 'x' used before its declaration.
-capturedLetConstInLoop6_ES6.ts(107,17): error TS2448: Block-scoped variable 'y' used before its declaration.
-capturedLetConstInLoop6_ES6.ts(107,26): error TS2448: Block-scoped variable 'y' used before its declaration.
-capturedLetConstInLoop6_ES6.ts(124,9): error TS2448: Block-scoped variable 'x' used before its declaration.
-capturedLetConstInLoop6_ES6.ts(127,9): error TS2448: Block-scoped variable 'x' used before its declaration.
-capturedLetConstInLoop6_ES6.ts(135,9): error TS2448: Block-scoped variable 'x' used before its declaration.
-capturedLetConstInLoop6_ES6.ts(138,9): error TS2448: Block-scoped variable 'x' used before its declaration.
-capturedLetConstInLoop6_ES6.ts(144,19): error TS2448: Block-scoped variable 'x' used before its declaration.
 capturedLetConstInLoop6_ES6.ts(147,9): error TS2367: This comparison appears to be unintentional because the types '0' and '1' have no overlap.
-capturedLetConstInLoop6_ES6.ts(147,9): error TS2448: Block-scoped variable 'x' used before its declaration.
 capturedLetConstInLoop6_ES6.ts(150,9): error TS2367: This comparison appears to be unintentional because the types '0' and '2' have no overlap.
-capturedLetConstInLoop6_ES6.ts(150,9): error TS2448: Block-scoped variable 'x' used before its declaration.
-capturedLetConstInLoop6_ES6.ts(179,19): error TS2448: Block-scoped variable 'y' used before its declaration.
 capturedLetConstInLoop6_ES6.ts(194,9): error TS2367: This comparison appears to be unintentional because the types '0' and '1' have no overlap.
 capturedLetConstInLoop6_ES6.ts(197,9): error TS2367: This comparison appears to be unintentional because the types '0' and '2' have no overlap.

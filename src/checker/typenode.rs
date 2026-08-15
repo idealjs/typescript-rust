@@ -669,6 +669,34 @@ impl Checker {
                         /* contextual_signature */ None,
                         /* declaration */ Some(Arc::clone(member)),
                     );
+                    // Interface method overload group (`create(o): any;
+                    // create(o, props): any`): a same-named signature that
+                    // follows an earlier one is an overload — merge its
+                    // signature into the existing symbol's call signatures
+                    // instead of replacing the symbol (which would drop the
+                    // earlier overloads). Mirrors tsc's interface members
+                    // resolution collecting all same-named signatures.
+                    if let Some(existing) = symbol_table.get(&name).cloned() {
+                        let existing_type = self
+                            .value_symbol_links
+                            .get(&existing)
+                            .and_then(|l| l.resolved_type.clone());
+                        let merged_sigs = existing_type
+                            .as_ref()
+                            .and_then(|t| t.as_structured().map(|s| s.call_signatures().to_vec()))
+                            .unwrap_or_default();
+                        let mut all_sigs = merged_sigs;
+                        all_sigs.push(sig);
+                        let fn_type = self.create_function_or_constructor_type(all_sigs, false);
+                        self.value_symbol_links.insert(
+                            &existing,
+                            ValueSymbolLinks {
+                                resolved_type: Some(fn_type),
+                                ..Default::default()
+                            },
+                        );
+                        continue;
+                    }
                     let fn_type = self.create_function_or_constructor_type(vec![sig], false);
                     let symbol = Arc::new(Symbol::new(SymbolFlags::Property, name.clone()));
                     self.value_symbol_links.insert(
@@ -837,6 +865,61 @@ impl Checker {
                     );
                     self.suppress_cannot_find_name_in_type_nodes -= 1;
                     construct_signatures.push(sig);
+                }
+                NodeData::ConstructorDeclaration(data) => {
+                    // Parameter properties: `constructor(private N: number)`
+                    // declares an instance property `N` on the class. Mirrors
+                    // Go's `resolveDeclaredMembers` constructor case, which
+                    // creates a Property symbol for each parameter carrying a
+                    // parameter-property modifier (public/private/protected/
+                    // readonly) with a simple identifier name.
+                    for param in data.parameters.iter() {
+                        let NodeData::ParameterDeclaration(pd) = &param.data else {
+                            continue;
+                        };
+                        if pd.name.kind != SyntaxKind::Identifier {
+                            continue;
+                        }
+                        let Some(modifiers) = &pd.modifiers else {
+                            continue;
+                        };
+                        if !modifiers.modifier_flags.intersects(
+                            ModifierFlags::Public
+                                | ModifierFlags::Private
+                                | ModifierFlags::Protected
+                                | ModifierFlags::Readonly,
+                        ) {
+                            continue;
+                        }
+                        let name = pd.name.text().to_string();
+                        if name.is_empty() || symbol_table.get(&name).is_some() {
+                            continue;
+                        }
+                        let prop_type = match pd.type_node.as_ref() {
+                            Some(tn) => self.get_type_from_type_node(tn),
+                            None => match pd.initializer.as_ref() {
+                                Some(init) => self.get_type_of_node(init),
+                                None => self.get_any_type(),
+                            },
+                        };
+                        let mut symbol = Symbol::new(SymbolFlags::Property, name.clone());
+                        // Attach the parameter declaration so modifier checks
+                        // (e.g. TS2341 `private`) can inspect it.
+                        symbol.declarations.push(Arc::clone(param));
+                        if modifiers.modifier_flags.contains(ModifierFlags::Readonly) {
+                            symbol.check_flags |= CheckFlags::Readonly;
+                        }
+                        let symbol = Arc::new(symbol);
+                        self.value_symbol_links.insert(
+                            &symbol,
+                            ValueSymbolLinks {
+                                resolved_type: Some(prop_type),
+                                ..Default::default()
+                            },
+                        );
+                        symbol_table.insert(name, Arc::clone(&symbol));
+                        props.push(symbol);
+                    }
                 }
                 _ => {}
             }
@@ -1718,6 +1801,18 @@ impl Checker {
     }
 
     pub fn get_union_type(&mut self, types: Vec<Arc<Type>>) -> Arc<Type> {
+        if types.is_empty() {
+            return self.never_type();
+        }
+        // `never` constituents are absorbed by the union (`0 | never`
+        // reduces to `0`) — mirrors tsc's `getUnionType`, which removes
+        // never members unless the union would be empty. This matters for
+        // flow junctions where dead branches (e.g. after `break`) narrow
+        // to `never`; keeping them would poison comparability checks.
+        let types: Vec<Arc<Type>> = types
+            .into_iter()
+            .filter(|t| !t.flags.contains(TypeFlags::Never))
+            .collect();
         if types.is_empty() {
             return self.never_type();
         }

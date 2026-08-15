@@ -1,5 +1,0 @@
-classUsedBeforeInitializedVariables.ts(36,51): error TS2304: Cannot find name 'extends'.
-classUsedBeforeInitializedVariables.ts(36,59): error TS1005: '{' expected.
-classUsedBeforeInitializedVariables.ts(36,63): error TS1005: ';' expected.
-classUsedBeforeInitializedVariables.ts(36,64): error TS1005: ';' expected.
-classUsedBeforeInitializedVariables.ts(36,96): error TS1005: ';' expected.

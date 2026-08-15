@@ -1,1 +1,0 @@
-classDeclaredBeforeClassFactory.ts(5,18): error TS2304: Cannot find name 'Base'.

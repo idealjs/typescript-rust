@@ -1,4 +1,1 @@
 assignToEnum.ts(3,7): error TS18048: 'A' is possibly 'undefined'.
-assignToEnum.ts(4,3): error TS18048: 'A' is possibly 'undefined'.
-assignToEnum.ts(5,3): error TS18048: 'A' is possibly 'undefined'.
-assignToEnum.ts(5,11): error TS18048: 'A' is possibly 'undefined'.

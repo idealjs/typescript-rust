@@ -3343,18 +3343,93 @@ impl Checker {
         }
         self.pop_scope();
         if construct_sigs.is_empty() {
-            // No explicit constructor: `new Foo()` with zero args is valid.
-            // Synthesize a no-arg construct signature.
+            // No explicit constructor. A DERIVED class inherits its base's
+            // constructor (`class D extends B {}` — `new D(args)` takes B's
+            // parameters), so build the signature from the nearest base
+            // class's constructor declaration, with the derived instance
+            // type as the return. A base-less class gets a synthesized
+            // no-arg construct signature (`new Foo()` valid).
+            let mut inherited: Option<(Arc<Node>, Arc<Node>)> = None; // (base ctor decl, base class node)
+            let mut cursor = Arc::clone(node);
+            // Cycle guard: bounded by class-declaration count in the file.
+            for _ in 0..1000 {
+                let Some((base_node, _)) = self.extends_base_of(&cursor) else {
+                    break;
+                };
+                if Arc::ptr_eq(&base_node, &cursor) {
+                    break;
+                }
+                if let crate::ast::NodeData::ClassDeclaration(data) = &base_node.data {
+                    if let Some(ctor) = data.members.iter().find(|m| {
+                        matches!(m.data, crate::ast::NodeData::ConstructorDeclaration(_))
+                    }) {
+                        inherited = Some((Arc::clone(ctor), Arc::clone(&base_node)));
+                        break;
+                    }
+                }
+                cursor = base_node;
+            }
+            if let Some((ctor_decl, _)) = inherited {
+                if let crate::ast::NodeData::ConstructorDeclaration(data) = &ctor_decl.data {
+                    let params = Arc::clone(&data.parameters);
+                    let sig = self.build_signature_from_function_like_type_node(
+                        &params,
+                        Arc::clone(&instance_type),
+                        /* is_construct */ true,
+                        None,
+                        Some(ctor_decl),
+                    );
+                    construct_sigs.push(sig);
+                }
+            }
+        }
+        if construct_sigs.is_empty() {
             let sig = self.build_signature_from_function_like_type_node(
                 &Arc::new(NodeList::default()),
                 Arc::clone(&instance_type),
                 /* is_construct */ true,
                 None,
-                /* declaration */ None,
+                None,
             );
             construct_sigs.push(sig);
         }
         self.create_function_or_constructor_type(construct_sigs, /* is_construct */ true)
+    }
+
+    /// The `extends` base `ClassDeclaration` (and class symbol) of
+    /// `class_node`, if any. Resolves the base identifier through the
+    /// checker's current scope (callers check classes whose scope chain is
+    /// active); returns `None` for non-identifier or non-class bases.
+    fn extends_base_of(&self, class_node: &Arc<Node>) -> Option<(Arc<Node>, Arc<Symbol>)> {
+        let heritage = match &class_node.data {
+            crate::ast::NodeData::ClassDeclaration(data) => data.heritage_clauses.clone(),
+            _ => return None,
+        };
+        let extends_expr = heritage?.iter().find_map(|clause| {
+            if let crate::ast::NodeData::HeritageClause(hc) = &clause.data {
+                if hc.token == SyntaxKind::ExtendsKeyword {
+                    return hc.types.iter().next().cloned();
+                }
+            }
+            None
+        })?;
+        let base_expr = match &extends_expr.data {
+            crate::ast::NodeData::ExpressionWithTypeArguments(data) => Arc::clone(&data.expression),
+            _ => return None,
+        };
+        if base_expr.kind != SyntaxKind::Identifier {
+            return None;
+        }
+        let symbol = self.resolve_identifier(&base_expr)?;
+        if !symbol.flags.contains(SymbolFlags::Class) {
+            return None;
+        }
+        symbol
+            .declarations
+            .iter()
+            .find(|d| d.kind == SyntaxKind::ClassDeclaration)
+            .cloned()
+            .map(|n| (n, symbol))
     }
 
     /// Get the return type of a `CallExpression`. Resolves the called
@@ -4104,7 +4179,41 @@ impl Checker {
             }
             _ => return,
         };
+        // `super(args)` — a super call invokes the base class's constructor.
+        // The `super` keyword itself types as the enclosing class's instance
+        // type (not callable), so resolve the base class's constructor type
+        // here and check the arguments against its construct signatures.
+        // Mirrors Go's `checkCallExpression` super-call handling. When the
+        // base class can't be resolved, skip rather than reporting a false
+        // TS2349 against the constructor.
+        if !is_new && callee_expr.kind == SyntaxKind::SuperKeyword {
+            let Some(base_ctor_type) = self.resolve_base_class_constructor_type() else {
+                return;
+            };
+            self.check_call_arguments_against(
+                node,
+                &base_ctor_type,
+                &arguments,
+                callee_expr,
+                /*is_new*/ true,
+            );
+            return;
+        }
         let callee_type = self.get_type_of_node(callee_expr);
+        self.check_call_arguments_against(node, &callee_type, &arguments, callee_expr, is_new);
+    }
+
+    /// Argument-checking core shared by direct calls/constructs and `super()`
+    /// calls: select a signature from `callee_type`, check arity and each
+    /// argument's assignability. `callee_expr` is the diagnostic anchor.
+    fn check_call_arguments_against(
+        &mut self,
+        node: &Arc<Node>,
+        callee_type: &Arc<Type>,
+        arguments: &Arc<NodeList>,
+        callee_expr: &Arc<Node>,
+        is_new: bool,
+    ) {
         // `any` callee → skip (no false positives without a signature).
         if callee_type.flags.contains(TypeFlags::Any) {
             return;
@@ -5051,11 +5160,17 @@ impl Checker {
                             label: None,
                             is_iteration: false,
                         });
-                    // case_block is a CaseBlock node; walk its clauses.
+                    // case_block is a CaseBlock node; walk its clauses. Push
+                    // the case block's scope first so case-clause
+                    // declarations (`case 1: let x;`) resolve — the binder
+                    // scopes them to the CaseBlock (all clauses share one
+                    // scope, mirroring Go's block-scoped CaseBlock).
                     if let crate::ast::NodeData::CaseBlock(case_block) = &data.case_block.data {
+                        self.push_scope(&data.case_block);
                         for case in case_block.clauses.iter() {
                             self.check_case_clause(case);
                         }
+                        self.pop_scope();
                     }
                     self.break_continue_context_stack.pop();
                 }
@@ -5304,6 +5419,78 @@ impl Checker {
         }
     }
 
+    /// Check the computed property names inside a variable declaration's
+    /// binding pattern (`let {[a]: a} = …`). Those names are ordinary
+    /// expression positions — resolving them enables the used-before-
+    /// declaration check (TS2448) when a pattern references the symbol it
+    /// declares. Nested patterns (`{a: {b}}`) are walked recursively;
+    /// non-computed property names are declaration-side and skipped.
+    fn check_binding_pattern_computed_names(&mut self, name: &Arc<Node>) {
+        if !matches!(
+            name.kind,
+            SyntaxKind::ObjectBindingPattern | SyntaxKind::ArrayBindingPattern
+        ) {
+            return;
+        }
+        let mut stack = vec![Arc::clone(name)];
+        while let Some(n) = stack.pop() {
+            match &n.data {
+                crate::ast::NodeData::BindingPattern(data) => {
+                    for element in data.elements.iter() {
+                        stack.push(Arc::clone(element));
+                    }
+                }
+                crate::ast::NodeData::BindingElement(data) => {
+                    if let Some(pn) = &data.property_name {
+                        if pn.kind == SyntaxKind::ComputedPropertyName {
+                            if let crate::ast::NodeData::ComputedPropertyName(cd) = &pn.data {
+                                self.check_expression(&cd.expression);
+                                // TS2538: a computed property name whose
+                                // expression is `any` is not a valid index.
+                                // Mirrors tsc's `checkComputedPropertyName`
+                                // (`maybeTypeOfKind(type, TypeFlags.Any)`),
+                                // which fires for binding-pattern computed
+                                // names like `let {[a]: a} = …` where the
+                                // name resolves to the (implicit-any) symbol
+                                // it declares.
+                                let expr_type = self.get_type_of_node(&cd.expression);
+                                let is_any = match &expr_type.data {
+                                    crate::checker::types::TypeData::Union(u) => u
+                                        .union_or_intersection
+                                        .types
+                                        .iter()
+                                        .any(|t| t.flags.contains(TypeFlags::Any)),
+                                    _ => expr_type.flags.contains(TypeFlags::Any),
+                                };
+                                if is_any {
+                                    let file = self.current_file.clone();
+                                    let type_str = self.type_to_string(&expr_type);
+                                    let diagnostic = crate::ast::Diagnostic::new(
+                                        file,
+                                        cd.expression.loc,
+                                        crate::diagnostics::messages_generated::
+                                            TYPE_0_CANNOT_BE_USED_AS_AN_INDEX_TYPE,
+                                        vec![type_str],
+                                    );
+                                    self.diagnostics.add(diagnostic);
+                                }
+                            }
+                        }
+                    }
+                    if let Some(inner) = &data.name {
+                        if matches!(
+                            inner.kind,
+                            SyntaxKind::ObjectBindingPattern | SyntaxKind::ArrayBindingPattern
+                        ) {
+                            stack.push(Arc::clone(inner));
+                        }
+                    }
+                }
+                _ => {}
+            }
+        }
+    }
+
     fn check_variable_declaration_list(&mut self, node: &Arc<Node>) {
         if let crate::ast::NodeData::VariableDeclarationList(data) = &node.data {
             for decl in data.declarations.iter() {
@@ -5314,6 +5501,13 @@ impl Checker {
 
     fn check_variable_declaration(&mut self, node: &Arc<Node>) {
         if let crate::ast::NodeData::VariableDeclaration(data) = &node.data {
+            // A binding-pattern name's computed property names are reference
+            // positions: `let {[a]: a} = …` reads `a` before its own
+            // declaration (TS2448 via the regular identifier check). Plain
+            // property names (`{a: b}`) are not references. Mirrors Go's
+            // `checkComputedPropertyName` being invoked for binding patterns
+            // through the declaration check.
+            self.check_binding_pattern_computed_names(&data.name);
             if let Some(init) = &data.initializer {
                 self.check_expression(init);
             }
@@ -5583,6 +5777,29 @@ impl Checker {
             Some(base) => self.merge_instance_types(&own_type, &base),
             None => own_type,
         }
+    }
+
+    /// Resolve the base class's constructor (static-side) type for a
+    /// `super(...)` call in the currently enclosing class. Returns `None`
+    /// when there is no enclosing class, no `extends` clause, or the base
+    /// cannot be resolved to a class declaration.
+    fn resolve_base_class_constructor_type(&mut self) -> Option<Arc<Type>> {
+        let (base_node, symbol) = self.base_class_node_of_enclosing_class()?;
+        // Guard against self-referential `extends`.
+        let key = Arc::as_ptr(&symbol) as *const crate::ast::Symbol;
+        if !self.resolving_type_aliases.insert(key) {
+            return None;
+        }
+        let ctor_type = self.get_type_of_class_declaration(&base_node);
+        self.resolving_type_aliases.remove(&key);
+        Some(ctor_type)
+    }
+
+    /// The `ClassDeclaration` node (and class symbol) of the enclosing
+    /// class's `extends` base, if resolvable.
+    fn base_class_node_of_enclosing_class(&self) -> Option<(Arc<Node>, Arc<Symbol>)> {
+        let class_node = self.enclosing_class_stack.last().cloned()?;
+        self.extends_base_of(&class_node)
     }
 
     /// Resolve a base class reference from an `extends` heritage clause to
@@ -6418,6 +6635,15 @@ impl Checker {
                     self.check_expression(&data.expression);
                 }
             }
+            SyntaxKind::MethodDeclaration
+            | SyntaxKind::GetAccessor
+            | SyntaxKind::SetAccessor => {
+                // Object-literal methods/accessors have their own function
+                // scope like class members: locals (e.g. a hoisted `var
+                // _this = this`) live on the accessor node itself, so the
+                // scope must be pushed before walking the body.
+                self.check_class_member(node);
+            }
             _ => {
                 self.walk_children_for_expressions(node);
             }
@@ -6681,10 +6907,15 @@ impl Checker {
             return;
         }
         // Find the relevant declaration node (block-scoped or class-like).
+        // `BindingElement` covers destructuring declarations —
+        // `let {[a]: a} = …` declares `a` via a binding element, whose
+        // computed property name may reference `a` itself (TS2448).
         let declaration = symbol.declarations.iter().find(|d| {
             matches!(
                 d.kind,
-                SyntaxKind::VariableDeclaration | SyntaxKind::ClassDeclaration
+                SyntaxKind::VariableDeclaration
+                    | SyntaxKind::ClassDeclaration
+                    | SyntaxKind::BindingElement
             )
         });
         let Some(declaration) = declaration else {
@@ -6706,8 +6937,20 @@ impl Checker {
             return;
         }
         // If the declaration position is at or before the usage position,
-        // the variable is declared before use — no error.
-        if declaration.pos() <= node.pos() {
+        // the variable is declared before use — no error. The position used
+        // is the declaration's NAME node (`: b` in `{[b]: b}`), not the
+        // declaration's start: a binding element's computed property name
+        // precedes but lies within the element's span.
+        let decl_name_pos = match &declaration.data {
+            crate::ast::NodeData::VariableDeclaration(d) => d.name.pos(),
+            crate::ast::NodeData::BindingElement(d) => d
+                .name
+                .as_ref()
+                .map(|n| n.pos())
+                .unwrap_or(declaration.pos()),
+            _ => declaration.pos(),
+        };
+        if decl_name_pos <= node.pos() {
             return;
         }
         let file = self.current_file.clone();
@@ -8070,6 +8313,12 @@ fn is_declaration_name(node: &Arc<Node>) -> bool {
                     | SyntaxKind::NamespaceExportDeclaration
                     | SyntaxKind::NamespaceExport
                     | SyntaxKind::LabeledStatement
+                    // Class/function EXPRESSION names are declaration-side
+                    // too (`const W = class Wrapped {}` — `Wrapped` binds
+                    // the class itself, scoping references inside the class
+                    // body; it is not a reference to an outer variable).
+                    | SyntaxKind::ClassExpression
+                    | SyntaxKind::FunctionExpression
             );
         }
     }

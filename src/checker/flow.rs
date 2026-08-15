@@ -6,18 +6,23 @@
 //!
 //! ## Algorithm
 //!
-//! `narrow_type` walks backwards from the current flow node through the
-//! antecedent chain. For each flow node it checks whether the associated
-//! AST expression constrains the target symbol:
+//! `type_at_flow_node` walks the flow graph built by the binder to compute
+//! the type of a symbol AT a given flow node. Each node's type is a pure
+//! function of its antecedents' types plus the node's own constraint:
 //!
-//! - **TRUE_CONDITION** `x !== null` → remove `null` from the union.
-//! - **TRUE_CONDITION** `x === null` → narrow to `null`.
-//! - **FALSE_CONDITION** applies the inverse of the above.
-//! - **ASSIGNMENT** to `x` → replace the type with the RHS type.
-//! - **Junction** (multiple antecedents) → union of narrowed types.
+//! - **TRUE_CONDITION/FALSE_CONDITION** — narrow the antecedent type by the
+//!   associated condition (`if (x !== null)` removes `null`).
+//! - **ASSIGNMENT** to `x` — the node's type is the RHS type.
+//! - **Junction** (multiple antecedents) — union of antecedent types.
 //!
-//! Recursion is capped at `FLOW_MAX_DEPTH` to prevent stack overflow on
-//! cyclic or very deep flow graphs.
+//! Because a node's type depends only on the node (for a fixed symbol and
+//! query), results are memoized per flow node within one
+//! `get_narrowed_type_of_symbol` query — mirroring Go's `flowTypeCache`.
+//! Without the memo, walks through junction-heavy graphs (labeled loops with
+//! breaks/continues) explode combinatorially. Loop back-edges are cut by
+//! seeding the memo with the declared type when a node is re-entered while
+//! still being computed (one-unrolling, mirroring Go's cache pre-seeding).
+//! Recursion is additionally capped at `FLOW_MAX_DEPTH`.
 
 use std::sync::Arc;
 
@@ -26,10 +31,19 @@ use crate::ast::{FlowFlags, FlowNode, Node, NodeData, NodeFlags, Symbol, SymbolF
 use super::checker::Checker;
 use super::types::*;
 
-/// Maximum recursion depth for `narrow_type`. Prevents stack overflow on
-/// very deep or cyclic flow graphs. The Go implementation uses a similar
+/// Maximum recursion depth for `type_at_flow_node`. Prevents stack overflow
+/// on very deep or cyclic flow graphs. The Go implementation uses a similar
 /// cap via `relationStackDepth`.
 const FLOW_MAX_DEPTH: u32 = 200;
+
+/// Per-query memoization state for `type_at_flow_node`. `memo` caches the
+/// computed type for each visited flow node; `on_path` tracks nodes currently
+/// being computed (loop back-edge cycle detection).
+#[derive(Default)]
+struct FlowQuery {
+    memo: std::collections::HashMap<usize, Arc<Type>>,
+    on_path: std::collections::HashSet<usize>,
+}
 
 /// The kind of narrowing to apply for a condition.
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -67,7 +81,10 @@ impl Checker {
         // Reserve a slot to break cycles (write `declared` first so that
         // recursive lookups during narrowing get the un-narrowed type).
         self.flow_type_cache.insert(key, Arc::clone(&declared));
-        let narrowed = self.narrow_type(&declared, flow, symbol, 0);
+        // Fresh memo for this query — a node's type is a function of the node
+        // (for a fixed symbol), so results are shared across the whole walk.
+        let mut query = FlowQuery::default();
+        let narrowed = self.type_at_flow_node(&declared, flow, symbol, 0, &mut query);
         self.flow_type_cache.insert(key, Arc::clone(&narrowed));
         narrowed
     }
@@ -80,22 +97,53 @@ impl Checker {
         sym_id.rotate_left(17) ^ flow_ptr
     }
 
-    /// Narrow `type_` by walking the flow graph backwards from `flow`.
+    /// Compute the type of `symbol` AT `flow` — the core flow-typing
+    /// routine. Each node's type is derived from its ANTECEDENTS' types plus
+    /// the node's own constraint (condition/assignment/junction/…), so a
+    /// node's result is a pure function of the node and can be memoized for
+    /// the rest of the query.
     ///
-    /// This is the core narrowing routine. It inspects each flow node,
-    /// applies any applicable narrowing to `type_`, and recurses into
-    /// antecedent(s).
-    fn narrow_type(
+    /// The walk is guarded against cycles (loop back-edges: `continue`
+    /// targets the loop's pre-loop label, which the body flows back into).
+    /// A node re-entered while still being computed gets the declared type
+    /// seeded into the memo — mirroring how Go's `getTypeAtFlowNode` breaks
+    /// back-edges via its pre-seeded flow-type cache (one unrolling).
+    fn type_at_flow_node(
         &mut self,
-        type_: &Arc<Type>,
+        declared: &Arc<Type>,
         flow: &Arc<FlowNode>,
         symbol: &Arc<Symbol>,
         depth: u32,
+        query: &mut FlowQuery,
     ) -> Arc<Type> {
-        if depth >= FLOW_MAX_DEPTH {
-            return Arc::clone(type_);
+        let key = Arc::as_ptr(flow) as usize;
+        if let Some(t) = query.memo.get(&key) {
+            return Arc::clone(t);
         }
+        if !query.on_path.insert(key) {
+            // Cycle: stop walking this path (one-unrolling semantics). The
+            // seeded entry is overwritten once the in-flight node completes.
+            query.memo.insert(key, Arc::clone(declared));
+            return Arc::clone(declared);
+        }
+        let result = if depth >= FLOW_MAX_DEPTH {
+            Arc::clone(declared)
+        } else {
+            self.compute_type_at_flow_node(declared, flow, symbol, depth, query)
+        };
+        query.on_path.remove(&key);
+        query.memo.insert(key, Arc::clone(&result));
+        result
+    }
 
+    fn compute_type_at_flow_node(
+        &mut self,
+        declared: &Arc<Type>,
+        flow: &Arc<FlowNode>,
+        symbol: &Arc<Symbol>,
+        depth: u32,
+        query: &mut FlowQuery,
+    ) -> Arc<Type> {
         // UNREACHABLE flow → the code path is dead; `never`.
         if flow.flags.contains(FlowFlags::UNREACHABLE) {
             return self.never_type();
@@ -103,48 +151,38 @@ impl Checker {
 
         // START flow → no narrowing possible.
         if flow.flags.contains(FlowFlags::START) {
-            return Arc::clone(type_);
+            return Arc::clone(declared);
         }
 
-        // TRUE_CONDITION / FALSE_CONDITION → narrow based on the condition.
-        // Use `intersects` (not `contains`) because CONDITION is a composite
-        // mask of TRUE_CONDITION | FALSE_CONDITION, and a flow node only has
-        // one of those bits set. Mirrors Go's `flags&FlowFlagsCondition != 0`.
+        // TRUE_CONDITION / FALSE_CONDITION → narrow the ANTECEDENT type by
+        // the condition. Use `intersects` (not `contains`) because CONDITION
+        // is a composite mask of TRUE_CONDITION | FALSE_CONDITION, and a flow
+        // node only has one of those bits set. Mirrors Go's
+        // `flags&FlowFlagsCondition != 0`.
         if flow.flags.intersects(FlowFlags::CONDITION) {
             let kind = if flow.flags.contains(FlowFlags::TRUE_CONDITION) {
                 NarrowKind::TrueBranch
             } else {
                 NarrowKind::FalseBranch
             };
-            let narrowed = if let Some(expr) = &flow.node {
-                self.narrow_by_expression(type_, expr, symbol, kind, depth)
-            } else {
-                Arc::clone(type_)
-            };
-            // Recurse into the antecedent.
-            if let Some(antecedent) = &flow.antecedent {
-                return self.narrow_type(&narrowed, antecedent, symbol, depth + 1);
+            let antecedent_type = self.antecedent_type_at(declared, flow, symbol, depth, query);
+            if let Some(expr) = &flow.node {
+                return self.narrow_by_expression(&antecedent_type, expr, symbol, kind, depth);
             }
-            return narrowed;
+            return antecedent_type;
         }
 
-        // ASSIGNMENT → if the assignment is to `symbol`, the type becomes
-        // the RHS type.
+        // ASSIGNMENT → if the assignment is to `symbol`, the node's type is
+        // the RHS type (mirrors Go's `getTypeAtFlowAssignment`, which returns
+        // the expression type outright, ignoring the antecedent's type).
         if flow.flags.contains(FlowFlags::ASSIGNMENT) {
             if let Some(expr) = &flow.node {
                 if let Some(rhs_type) = self.assignment_rhs_type_for_symbol(expr, symbol) {
-                    // Recurse into the antecedent with the new type.
-                    if let Some(antecedent) = &flow.antecedent {
-                        return self.narrow_type(&rhs_type, antecedent, symbol, depth + 1);
-                    }
                     return rhs_type;
                 }
             }
-            // Not an assignment to our symbol; continue.
-            if let Some(antecedent) = &flow.antecedent {
-                return self.narrow_type(type_, antecedent, symbol, depth + 1);
-            }
-            return Arc::clone(type_);
+            // Not an assignment to our symbol; continue through the antecedent.
+            return self.antecedent_type_at(declared, flow, symbol, depth, query);
         }
 
         // SWITCH_CLAUSE → narrow based on the switch case expression.
@@ -152,11 +190,7 @@ impl Checker {
         // recurse into the antecedent to get the narrowed type at this flow
         // point, then apply switch-specific narrowing on top.
         if flow.flags.contains(FlowFlags::SWITCH_CLAUSE) {
-            let antecedent_type = if let Some(antecedent) = &flow.antecedent {
-                self.narrow_type(type_, antecedent, symbol, depth + 1)
-            } else {
-                Arc::clone(type_)
-            };
+            let antecedent_type = self.antecedent_type_at(declared, flow, symbol, depth, query);
             return self.narrow_by_switch_clause(&antecedent_type, flow, symbol);
         }
 
@@ -165,27 +199,23 @@ impl Checker {
         // applies when the declared type is `autoType`/`autoArrayType` (an
         // evolving array). If the mutated array (`arr` in `arr.push(1)`)
         // is the same reference as our symbol, the element type is evolved
-        // by unioning each argument's type. The antecedent's type is
-        // fetched recursively and then evolved.
+        // by unioning each argument's type onto the antecedent's type.
         if flow.flags.contains(FlowFlags::ARRAY_MUTATION) {
             if let Some(node) = &flow.node {
-                // Check if the declared type is an evolving array or the
-                // auto-array marker.
-                let is_evolving = type_.object_flags.contains(ObjectFlags::EvolvingArray)
-                    || self.is_auto_array_type(type_);
+                let is_evolving = declared.object_flags.contains(ObjectFlags::EvolvingArray)
+                    || self.is_auto_array_type(declared);
                 if is_evolving {
+                    let pre_type = self.antecedent_type_at(declared, flow, symbol, depth, query);
                     if let Some(evolved) =
-                        self.evolve_array_at_mutation(node, type_, symbol, flow, depth)
+                        self.evolve_array_at_mutation(node, &pre_type, symbol)
                     {
                         return evolved;
                     }
+                    return pre_type;
                 }
             }
             // Not an evolving array or not our symbol; recurse.
-            if let Some(antecedent) = &flow.antecedent {
-                return self.narrow_type(type_, antecedent, symbol, depth + 1);
-            }
-            return Arc::clone(type_);
+            return self.antecedent_type_at(declared, flow, symbol, depth, query);
         }
 
         // CALL → assertion function narrowing. If the call is to an
@@ -194,45 +224,57 @@ impl Checker {
         // if the assertion fails). Mirrors Go's `getTypeAtFlowCall`
         // (flow.go ~L288). Non-assertion calls just recurse.
         if flow.flags.contains(FlowFlags::CALL) {
-            let antecedent_type = if let Some(antecedent) = &flow.antecedent {
-                self.narrow_type(type_, antecedent, symbol, depth + 1)
-            } else {
-                Arc::clone(type_)
-            };
+            let antecedent_type = self.antecedent_type_at(declared, flow, symbol, depth, query);
             if let Some(call_expr) = &flow.node {
                 return self.narrow_by_assertion_call(&antecedent_type, call_expr, symbol);
             }
             return antecedent_type;
         }
 
-        // Junction (multiple antecedents): narrow through each and compute
-        // the union of results. This handles if/else merge points, loop
-        // back-edges, and switch clause falls.
+        // Junction (multiple antecedents): the union of the antecedent
+        // types. This handles if/else merge points, loop back-edges, and
+        // switch clause falls.
         if flow.antecedents.len() > 1 {
-            let mut narrowed_types: Vec<Arc<Type>> = Vec::new();
+            let mut antecedent_types: Vec<Arc<Type>> = Vec::new();
             for antecedent in &flow.antecedents {
-                let narrowed = self.narrow_type(type_, antecedent, symbol, depth + 1);
-                if !narrowed_types.iter().any(|t| Arc::ptr_eq(t, &narrowed)) {
-                    narrowed_types.push(narrowed);
+                let t =
+                    self.type_at_flow_node(declared, antecedent, symbol, depth + 1, query);
+                if !antecedent_types.iter().any(|u| Arc::ptr_eq(u, &t)) {
+                    antecedent_types.push(t);
                 }
             }
             // If only one distinct result, return it.
-            if narrowed_types.len() == 1 {
-                return narrowed_types.into_iter().next().expect("exactly one");
+            if antecedent_types.len() == 1 {
+                return antecedent_types.into_iter().next().expect("exactly one");
             }
-            // If multiple distinct results, compute their union.
-            if narrowed_types.is_empty() {
-                return Arc::clone(type_);
+            // If multiple distinct results, compute their union. Dead
+            // branches contribute `never`, which the union absorbs.
+            if antecedent_types.is_empty() {
+                return Arc::clone(declared);
             }
-            return self.get_union_type(narrowed_types);
+            return self.get_union_type(antecedent_types);
         }
 
-        // Single antecedent → recurse.
-        if let Some(antecedent) = &flow.antecedent {
-            return self.narrow_type(type_, antecedent, symbol, depth + 1);
-        }
+        // Single antecedent (or a branch label reduced to one) → recurse.
+        self.antecedent_type_at(declared, flow, symbol, depth, query)
+    }
 
-        Arc::clone(type_)
+    /// The type at `flow`'s single antecedent, or the declared type when the
+    /// node has no antecedent.
+    fn antecedent_type_at(
+        &mut self,
+        declared: &Arc<Type>,
+        flow: &Arc<FlowNode>,
+        symbol: &Arc<Symbol>,
+        depth: u32,
+        query: &mut FlowQuery,
+    ) -> Arc<Type> {
+        match &flow.antecedent {
+            Some(antecedent) => {
+                self.type_at_flow_node(declared, antecedent, symbol, depth + 1, query)
+            }
+            None => Arc::clone(declared),
+        }
     }
 
     /// Narrow a type based on a single condition expression.
@@ -2258,34 +2300,29 @@ impl Checker {
     ///
     /// Mirrors Go's `getTypeAtFlowArrayMutation` (flow.go ~L1383). If the
     /// mutated array (`arr` in `arr.push(1)`) is the same reference as
-    /// `symbol`, recurse into the antecedent to get the pre-mutation type,
-    /// then evolve the element type by adding each argument's (widened)
-    /// type. Returns `None` if the mutation doesn't target our symbol.
+    /// `symbol`, evolve `pre_type` (the type at the mutation's antecedent)
+    /// by adding each argument's (widened) type to the element type.
+    /// Returns `None` if the mutation doesn't target our symbol.
     fn evolve_array_at_mutation(
         &mut self,
         node: &Arc<Node>,
-        type_: &Arc<Type>,
+        pre_type: &Arc<Type>,
         symbol: &Arc<Symbol>,
-        flow: &Arc<FlowNode>,
-        depth: u32,
     ) -> Option<Arc<Type>> {
         // Extract the mutated array reference: `arr.push(1)` → `arr`.
         let receiver = self.get_array_mutation_receiver(node)?;
         if !self.is_symbol_identifier(&receiver, symbol) {
             return None;
         }
-        // Recurse into the antecedent to get the pre-mutation type.
-        let antecedent = flow.antecedent.clone()?;
-        let pre_type = self.narrow_type(type_, &antecedent, symbol, depth + 1);
         // If the pre-mutation type is the auto-array marker, convert it
         // to an evolving array with element `never`.
         let evolving = if pre_type.object_flags.contains(ObjectFlags::EvolvingArray) {
-            pre_type
-        } else if self.is_auto_array_type(&pre_type) {
+            Arc::clone(pre_type)
+        } else if self.is_auto_array_type(pre_type) {
             self.get_evolving_array_type(self.never_type())
         } else {
             // Not an evolving array; nothing to evolve.
-            return Some(pre_type);
+            return Some(Arc::clone(pre_type));
         };
         // Collect argument nodes first (to release the borrow on self),
         // then resolve each type.

@@ -1,1 +1,0 @@
-collectionPatternNoError.ts(24,39): error TS2339: Property 'messageList' does not exist on type '{ fetch: () => any }'.

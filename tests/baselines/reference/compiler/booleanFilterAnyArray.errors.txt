@@ -1,1 +1,1 @@
-booleanFilterAnyArray.ts(14,22): error TS2345: Argument of type '(v2: T) => boolean' is not assignable to parameter of type '(value: any) => unknown'.
+booleanFilterAnyArray.ts(14,22): error TS2345: Argument of type '(v2: T) => boolean' is not assignable to parameter of type '(value: any) => boolean'.
