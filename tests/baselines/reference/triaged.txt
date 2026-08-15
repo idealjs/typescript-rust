@@ -205,3 +205,83 @@ compiler/argumentsSpreadRestIterables(target=esnext).errors.txt
 compiler/arrayIterationLibES5TargetDifferent(nolib=false,target=es2015).errors.txt
 compiler/arrayIterationLibES5TargetDifferent(nolib=false,target=esnext).errors.txt
 compiler/arrayConstructors1.errors.txt
+
+## 2026-08-16 batch #300-#399: assignment-compat cluster — relater
+## assignability rules not ported: TS2741 missing-required-property for
+## object literals vs index-signature targets, index-signature
+## satisfiability ({[k:string]:any} vs {one:number}), property-level
+## drill-down errors (TS2322 at the property, not object-level TS2345),
+## literal widening in argument display, optional-arg signature
+## compatibility, elaborated error chains ##
+compiler/assignToFn.errors.txt
+compiler/assignToInvalidLHS.errors.txt
+compiler/assignToObjectTypeWithPrototypeProperty.errors.txt
+compiler/assignToPrototype1.errors.txt
+compiler/assignmentCompat1.errors.txt
+compiler/assignmentCompatBug2.errors.txt
+compiler/assignmentCompatBug5.errors.txt
+compiler/assignmentCompatFunctionsWithOptionalArgs.errors.txt
+compiler/assignmentCompatInterfaceWithStringIndexSignature.errors.txt
+compiler/assignmentCompatWithOverloads.errors.txt
+compiler/assignmentCompatability10.errors.txt
+compiler/assignmentCompatability11.errors.txt
+compiler/assignmentCompatability12.errors.txt
+compiler/assignmentCompatability13.errors.txt
+compiler/assignmentCompatability14.errors.txt
+compiler/assignmentCompatability15.errors.txt
+compiler/assignmentCompatability16.errors.txt
+compiler/assignmentCompatability17.errors.txt
+compiler/assignmentCompatability18.errors.txt
+compiler/assignmentCompatability19.errors.txt
+compiler/assignmentCompatability20.errors.txt
+compiler/assignmentCompatability21.errors.txt
+compiler/assignmentCompatability22.errors.txt
+compiler/assignmentCompatability23.errors.txt
+compiler/assignmentCompatability24.errors.txt
+compiler/assignmentCompatability25.errors.txt
+compiler/assignmentCompatability26.errors.txt
+compiler/assignmentCompatability27.errors.txt
+compiler/assignmentCompatability28.errors.txt
+compiler/assignmentCompatability29.errors.txt
+compiler/assignmentCompatability30.errors.txt
+compiler/assignmentCompatability31.errors.txt
+compiler/assignmentCompatability32.errors.txt
+compiler/assignmentCompatability33.errors.txt
+compiler/assignmentCompatability34.errors.txt
+compiler/assignmentCompatability35.errors.txt
+compiler/assignmentCompatability37.errors.txt
+compiler/assignmentCompatability38.errors.txt
+compiler/assignmentCompatability39.errors.txt
+compiler/assignmentCompatability40.errors.txt
+compiler/assignmentCompatability41.errors.txt
+compiler/assignmentCompatability42.errors.txt
+compiler/assignmentCompatability43.errors.txt
+compiler/assignmentCompatability44.errors.txt
+compiler/assignmentCompatability46.errors.txt
+compiler/assignmentCompatability8.errors.txt
+compiler/assignmentCompatability_checking-apply-member-off-of-function-interface.errors.txt
+compiler/assignmentCompatability_checking-call-member-off-of-function-interface.errors.txt
+compiler/assignmentIndexedToPrimitives.errors.txt
+compiler/assignmentNonObjectTypeConstraints.errors.txt
+compiler/assignmentRestElementWithErrorSourceType.errors.txt
+compiler/assignmentStricterConstraints.errors.txt
+compiler/assignmentToAnyArrayRestParameters.errors.txt
+compiler/assignmentToFunction.errors.txt
+compiler/assignmentToInstantiationExpression.errors.txt
+compiler/assignmentToObject.errors.txt
+compiler/assignmentToObjectAndFunction.errors.txt
+compiler/assignmentToParenthesizedExpression1.errors.txt
+compiler/assignmentToReferenceTypes.errors.txt
+
+## 2026-08-16 batch #300-#399: async/generator typing — yield/yield*
+## contextual types, async return-type inference ##
+compiler/asyncFunctionContextuallyTypedReturns.errors.txt
+compiler/asyncFunctionReturnExpressionErrorSpans.errors.txt
+compiler/asyncFunctionReturnType.2.errors.txt
+compiler/asyncFunctionReturnType.errors.txt
+compiler/asyncImportNestedYield.errors.txt
+compiler/asyncIteratorExtraParameters.errors.txt
+compiler/asyncYieldStarContextualType.errors.txt
+
+## 2026-08-16 batch #300-#399: export= augmentation resolution ##
+compiler/augmentExportEquals1.errors.txt
