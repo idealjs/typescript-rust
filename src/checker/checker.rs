@@ -554,6 +554,13 @@ pub struct Checker {
     /// fallback when a bare name fails to resolve inside a class.
     pub this_container_stack: Vec<ThisContainerKind>,
 
+    /// Depth of enclosing ambient contexts (`declare`-modified declarations,
+    /// e.g. `declare namespace N { class C { ... } }`). Mirrors Go's
+    /// NodeFlagsAmbient propagation: a class inside a declared namespace is
+    /// ambient even without its own `declare` modifier — TS2564/TS1005
+    /// grammar checks are suppressed there.
+    pub ambient_context_depth: usize,
+
     /// Contextual-parameter counts for arrow/function-expression arguments
     /// currently being checked (one entry per enclosing call-argument arrow;
     /// consumed by the ArrowFunction/FunctionExpression check so their
@@ -814,6 +821,7 @@ impl Checker {
             globals_populated: false,
             break_continue_context_stack: Vec::new(),
             this_container_stack: Vec::new(),
+            ambient_context_depth: 0,
             this_type_stack: Vec::new(),
             enclosing_class_stack: Vec::new(),
             call_arg_arrow_context: Vec::new(),
@@ -5773,7 +5781,13 @@ impl Checker {
                 }
             }
             SyntaxKind::ModuleDeclaration => {
-                // Check the module body.
+                // Check the module body. A `declare namespace/module` makes
+                // everything inside ambient (Go's NodeFlagsAmbient
+                // propagation).
+                let is_ambient = node.has_syntactic_modifier(ModifierFlags::Ambient);
+                if is_ambient {
+                    self.ambient_context_depth += 1;
+                }
                 self.push_scope(node);
                 if let crate::ast::NodeData::ModuleDeclaration(data) = &node.data {
                     if let Some(body) = &data.body {
@@ -5781,6 +5795,9 @@ impl Checker {
                     }
                 }
                 self.pop_scope();
+                if is_ambient {
+                    self.ambient_context_depth -= 1;
+                }
             }
             SyntaxKind::EmptyStatement => {
                 // No expressions to check.
@@ -6424,8 +6441,15 @@ impl Checker {
         if !self.strict_null_checks || !self.strict_property_initialization {
             return;
         }
-        // Skip ambient classes (`declare class`).
-        if class_node.has_syntactic_modifier(ModifierFlags::Ambient) {
+        // Skip ambient classes (`declare class`, or inside a `declare
+        // namespace` / .d.ts — Go's NodeFlagsAmbient propagation).
+        if class_node.has_syntactic_modifier(ModifierFlags::Ambient)
+            || self.ambient_context_depth > 0
+            || self
+                .current_file
+                .as_ref()
+                .is_some_and(|f| f.is_declaration_file)
+        {
             return;
         }
         let members = match &class_node.data {
@@ -6601,6 +6625,8 @@ impl Checker {
     fn class_member_name_node(node: &Arc<Node>) -> Option<Arc<Node>> {
         match &node.data {
             crate::ast::NodeData::MethodDeclaration(d) => Some(Arc::clone(&d.name)),
+            crate::ast::NodeData::GetAccessorDeclaration(d) => Some(Arc::clone(&d.name)),
+            crate::ast::NodeData::SetAccessorDeclaration(d) => Some(Arc::clone(&d.name)),
             _ => None,
         }
     }
@@ -7401,17 +7427,58 @@ impl Checker {
                 // Accessor grammar (Go `checkGrammarAccessor`): a body-less
                 // accessor in a non-ambient class needs `abstract` (TS1005
                 // "'{' expected" at the trailing `;`); an abstract accessor
-                // cannot have a body (TS1310).
+                // cannot have a body (TS1310); setter parameters reject
+                // rest/optional/initializer forms (TS1053/TS1090/TS1052).
                 if matches!(node.kind, SyntaxKind::GetAccessor | SyntaxKind::SetAccessor) {
                     let ambient = self
                         .enclosing_class_stack
                         .last()
                         .is_some_and(|c| c.has_syntactic_modifier(ModifierFlags::Ambient))
+                        || self.ambient_context_depth > 0
                         || self
                             .current_file
                             .as_ref()
                             .is_some_and(|f| f.is_declaration_file);
                     let is_abstract = node.has_syntactic_modifier(ModifierFlags::Abstract);
+                    if node.kind == SyntaxKind::SetAccessor
+                        && let Some(params) = &parameters
+                        && let Some(first) = params.iter().next()
+                        && let crate::ast::NodeData::ParameterDeclaration(pd) = &first.data
+                    {
+                        if let Some(rest) = &pd.dot_dot_dot_token {
+                            let file = self.current_file.clone();
+                            self.diagnostics.add(crate::ast::Diagnostic::new(
+                                file,
+                                rest.loc,
+                                crate::diagnostics::messages_generated::
+                                    A_SET_ACCESSOR_CANNOT_HAVE_REST_PARAMETER,
+                                vec![],
+                            ));
+                        }
+                        if let Some(question) = &pd.question_token {
+                            let file = self.current_file.clone();
+                            self.diagnostics.add(crate::ast::Diagnostic::new(
+                                file,
+                                question.loc,
+                                crate::diagnostics::messages_generated::
+                                    A_SET_ACCESSOR_CANNOT_HAVE_AN_OPTIONAL_PARAMETER,
+                                vec![],
+                            ));
+                        }
+                        if pd.initializer.is_some() {
+                            let name_loc = Self::class_member_name_node(node)
+                                .map(|n| n.loc)
+                                .unwrap_or(node.loc);
+                            let file = self.current_file.clone();
+                            self.diagnostics.add(crate::ast::Diagnostic::new(
+                                file,
+                                name_loc,
+                                crate::diagnostics::messages_generated::
+                                    A_SET_ACCESSOR_PARAMETER_CANNOT_HAVE_AN_INITIALIZER,
+                                vec![],
+                            ));
+                        }
+                    }
                     if body.is_none() && !ambient && !is_abstract && node.loc.end() > 0 {
                         // Locate the trailing `;` (Go reports at
                         // accessor.End()-1; our spans may swallow trailing

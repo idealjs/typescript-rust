@@ -80,3 +80,8 @@ compiler/abstractPropertyNegative(target=es2015).errors.txt
 ## inference from constructor tuple args (TS2345 over-report) + spurious
 ## TS2300 'Iterator' duplicate under @lib esnext (lib dedup gap) ##
 compiler/acceptSymbolAsWeakType.errors.txt
+
+## 2026-08-15 batch #61-#70: TS7023 circular return-type inference for
+## object-literal getters referencing themselves via `this` (deferred flow
+## analysis) ##
+compiler/accessorInferredReturnTypeErrorInReturnStatement.errors.txt

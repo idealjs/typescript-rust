@@ -4384,16 +4384,21 @@ impl Parser {
                 let type_parameters = self.parse_optional_type_parameters();
                 let parameters = self.parse_parameter_list();
                 let type_node = self.parse_optional_return_type();
-                // Object-literal accessors must have a body (unlike ambient
-                // class members). A missing `{` reports TS1005 "'{' expected",
-                // matching the Go oracle.
+                // Body-less object-literal accessors: no parser error —
+                // Go's parseFunctionBlockOrSemicolon silently ASIs on `}`/
+                // `;` and leaves the TS1005 to the checker's accessor
+                // grammar check (anchored at End()-1).
                 let body = if self.token == SyntaxKind::OpenBraceToken {
                     Some(self.parse_block())
                 } else {
-                    self.expect(SyntaxKind::OpenBraceToken);
+                    self.parse_semicolon();
                     None
                 };
-                let end = body.as_ref().map_or(self.token_pos(), |b| b.end());
+                // Go's finishNode ends at the current token's FULL start
+                // (leading trivia included).
+                let end = body
+                    .as_ref()
+                    .map_or(self.scanner.full_start_pos(), |b| b.end());
                 let range = TextRange::new(pos, end);
                 return match accessor_kind {
                     SyntaxKind::GetKeyword => Arc::new(Node::with_loc(
@@ -7152,7 +7157,13 @@ impl Parser {
             self.parse_semicolon();
             None
         };
-        let end = body.as_ref().map_or(self.token_pos(), |b| b.end());
+        // Go's finishNode ends at the current token's FULL start (leading
+        // trivia included): after a consumed `;` that's just past it; after
+        // an ASI'd `}` it's right after `)`. The checker's TS1005 anchor
+        // (End()-1) depends on this.
+        let end = body
+            .as_ref()
+            .map_or(self.scanner.full_start_pos(), |b| b.end());
         let range = TextRange::new(pos, end);
         match accessor_kind {
             SyntaxKind::GetKeyword => Arc::new(Node::with_loc(
