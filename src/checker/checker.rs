@@ -6882,6 +6882,21 @@ impl Checker {
             _ => return,
         };
         if data.token == SyntaxKind::ExtendsKeyword {
+            // TS1174: `extends A, B` — classes extend a single class
+            // (Go's checkGrammarClassDeclarationHeritageClause; reported on
+            // the second-and-later type reference's first token).
+            if data.types.len() > 1 {
+                for type_ref in data.types.iter().skip(1) {
+                    let file = self.current_file.clone();
+                    self.diagnostics.add(crate::ast::Diagnostic::new(
+                        file,
+                        type_ref.loc,
+                        crate::diagnostics::messages_generated::
+                            CLASSES_CAN_ONLY_EXTEND_A_SINGLE_CLASS,
+                        Vec::new(),
+                    ));
+                }
+            }
             // For `extends` clauses, resolve the base class expression as a
             // type reference (suppressing false TS2304 for global names like
             // `Object` that are resolvable in type position). The base-class
@@ -6889,6 +6904,23 @@ impl Checker {
             // Here we just try to resolve the expression to suppress TS2304.
             for type_ref in data.types.iter() {
                 if let crate::ast::NodeData::ExpressionWithTypeArguments(ewa) = &type_ref.data {
+                    // TS2689: `extends` naming an INTERFACE-only symbol
+                    // (Go's checkClassExtends → Cannot_extend_an_interface).
+                    if ewa.expression.kind == SyntaxKind::Identifier {
+                        if let Some(sym) = self.resolve_identifier(&ewa.expression)
+                            && sym.flags == SymbolFlags::Interface
+                        {
+                            let name = ewa.expression.text().to_string();
+                            let file = self.current_file.clone();
+                            self.diagnostics.add(crate::ast::Diagnostic::new(
+                                file,
+                                ewa.expression.loc,
+                                crate::diagnostics::messages_generated::
+                                    CANNOT_EXTEND_AN_INTERFACE_0_DID_YOU_MEAN_IMPLEMENTS,
+                                vec![name],
+                            ));
+                        }
+                    }
                     // Try to resolve the expression as a type reference.
                     // This populates type_node_links without emitting TS2304.
                     self.push_ts2304_suppression();

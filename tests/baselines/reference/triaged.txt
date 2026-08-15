@@ -425,3 +425,54 @@ compiler/checkTypePredicateForRedundantProperties.errors.txt
 compiler/checkerInitializationCrash.errors.txt
 compiler/checkingObjectWithThisInNamePositionNoCrash.errors.txt
 compiler/class2.errors.txt
+
+## 2026-08-16 batch #700-#799: class heritage/member subsystem —
+## TS2720 implements-a-class head+elaboration, TS2411 property-vs-index
+## conflicts, super-in-field-initializers, class-expression decorators,
+## member-initializer scoping, qualified-name extends resolution,
+## class/module merge constructor rules ##
+compiler/classDeclarationShouldBeOutOfScopeInComputedNames.errors.txt
+compiler/classExpressionAssignment.errors.txt
+compiler/classExpressionWithDecorator1.errors.txt
+compiler/classExpressionWithResolutionOfNamespaceOfSameName01.errors.txt
+compiler/classExtendingAbstractClassWithMemberCalledTheSameAsItsOwnTypeParam.errors.txt
+compiler/classExtendingQualifiedName.errors.txt
+compiler/classExtendsClauseClassMergedWithModuleNotReferingConstructor.errors.txt
+compiler/classExtendsClauseClassNotReferringConstructor.errors.txt
+compiler/classExtendsInterfaceInExpression.errors.txt
+compiler/classExtendsInterfaceInModule.errors.txt
+compiler/classExtendsInterfaceThatExtendsClassWithPrivates1.errors.txt
+compiler/classExtendsInterface_not.errors.txt
+compiler/classExtendsNull3.errors.txt
+compiler/classFieldSuperAccessible.errors.txt
+compiler/classFieldSuperAccessibleJs1.errors.txt
+compiler/classFieldSuperNotAccessible.errors.txt
+compiler/classFieldSuperNotAccessibleJs.errors.txt
+compiler/classFunctionMerging.errors.txt
+compiler/classHeritageWithTrailingSeparator.errors.txt
+compiler/classImplementsClass2.errors.txt
+compiler/classImplementsClass4.errors.txt
+compiler/classImplementsClass5.errors.txt
+compiler/classImplementsClass6.errors.txt
+compiler/classImplementsClass7.errors.txt
+compiler/classIndexer2.errors.txt
+compiler/classIndexer3.errors.txt
+compiler/classIndexer4.errors.txt
+compiler/classInheritence.errors.txt
+compiler/classMemberInitializerScoping.errors.txt
+compiler/classMemberInitializerWithLamdaScoping2.errors.txt
+compiler/classMemberInitializerWithLamdaScoping3.errors.txt
+compiler/classMemberInitializerWithLamdaScoping4.errors.txt
+compiler/classMemberWithMissingIdentifier.errors.txt
+compiler/classMemberWithMissingIdentifier2.errors.txt
+compiler/classMergedWithInterfaceMultipleBasesNoError.errors.txt
+compiler/classNameReferencesInStaticElements.errors.txt
+compiler/classNonUniqueSymbolMethodHasSymbolIndexer.errors.txt
+compiler/classOrder2.errors.txt
+compiler/classPropertyErrorOnNameOnly.errors.txt
+compiler/classPropertyInferenceFromBroaderTypeConst.errors.txt
+compiler/classReferencedInContextualParameterWithinItsOwnBaseExpression.errors.txt
+compiler/classSideInheritance1.errors.txt
+compiler/classStaticInitializersUsePropertiesBeforeDeclaration.errors.txt
+compiler/classStaticPropertyAccess(target=es2015).errors.txt
+compiler/classTypeParametersInStatics.errors.txt
