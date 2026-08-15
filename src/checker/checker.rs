@@ -8106,6 +8106,25 @@ impl Checker {
                     self.check_expression(&data.left);
                     self.check_expression(&data.right);
                     use crate::ast::SyntaxKind::*;
+                    // TS2873: a `null`-typed operand of a logical operator
+                    // (`||`/`&&`/`??`) is always falsy (Go's
+                    // checkBinaryLikeExpression truthiness check).
+                    if matches!(
+                        data.operator_token.kind,
+                        BarBarToken | AmpersandAmpersandToken | QuestionQuestionToken
+                    ) {
+                        let left_type = self.get_type_of_node(&data.left);
+                        if left_type.flags.contains(TypeFlags::Null) {
+                            let file = self.current_file.clone();
+                            self.diagnostics.add(crate::ast::Diagnostic::new(
+                                file,
+                                data.left.loc,
+                                crate::diagnostics::messages_generated::
+                                    THIS_KIND_OF_EXPRESSION_IS_ALWAYS_FALSY,
+                                vec![],
+                            ));
+                        }
+                    }
                     // TS2540: `obj.prop = value` where `prop` is declared
                     // `readonly` (a `readonly` modifier on a class property
                     // or parameter property). Mirrors Go's

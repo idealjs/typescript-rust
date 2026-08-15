@@ -116,3 +116,9 @@ compiler/aliasInstantiationExpressionGenericIntersectionNoCrash2.errors.txt
 ## alias-target resolution (a module's default export may be an interface —
 ## `export default interface` / `export { x as default }` chains) ##
 compiler/allowImportClausesToMergeWithTypes.errors.txt
+
+## 2026-08-15 batch #91-#100: TS2873/2872 truthiness of cast-of-null uses
+## the assertion's SOURCE type (Go anchors at the null operand); plus
+## typeof-import display ('typeof import("m")') and union-null TS2322
+## (we emit TS2741 with { x: any } instead) ##
+compiler/aliasUsageInOrExpression.errors.txt

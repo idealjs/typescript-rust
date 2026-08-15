@@ -560,7 +560,9 @@ impl Checker {
         if parts.is_empty() {
             "{}".to_string()
         } else {
-            format!("{{ {} }}", parts.join("; "))
+            // Go's printer terminates each member with ';' inside the braces
+            // (`{ x: number; }`).
+            format!("{{ {} }}", format!("{};", parts.join("; ")))
         }
     }
 
