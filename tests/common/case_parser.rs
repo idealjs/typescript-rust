@@ -78,6 +78,10 @@ pub fn extract_settings(content: &str) -> HashMap<String, String> {
         "filename",
     ];
     let mut map = HashMap::new();
+    // A leading BOM would hide the first line's `// @directive` from the
+    // line-prefix match (split_units strips it for content; do the same
+    // here so settings parse identically).
+    let content = content.strip_prefix('\u{feff}').unwrap_or(content);
     for line in content.lines() {
         if let Some((name, value)) = parse_directive_line(line) {
             let lower = name.to_ascii_lowercase();

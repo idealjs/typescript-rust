@@ -10368,6 +10368,27 @@ impl Checker {
                 *super_seen = true;
                 return;
             }
+            // `this` inside nested function-likes belongs to THEM (or is
+            // deferred, for arrows) — only DIRECT constructor-body `this`
+            // accesses report (Go's checkSuperCallBeforeThisAccessing:
+            // nested functions/arrows are exempt; checkSuperCallBefore-
+            // ThisAccessing4/6).
+            if matches!(
+                n.kind,
+                SyntaxKind::FunctionDeclaration
+                    | SyntaxKind::FunctionExpression
+                    | SyntaxKind::ArrowFunction
+                    | SyntaxKind::MethodDeclaration
+                    | SyntaxKind::GetAccessor
+                    | SyntaxKind::SetAccessor
+            ) {
+                return;
+            }
+            // A nested class's constructors are fresh contexts with their
+            // own super/this rules (checkSuperCallBeforeThisAccessing3).
+            if matches!(n.kind, SyntaxKind::ClassDeclaration | SyntaxKind::ClassExpression) {
+                return;
+            }
             crate::ast::node_data_generated::for_each_child(n, |child| {
                 visit(c, child, super_seen);
                 false

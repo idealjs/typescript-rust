@@ -399,3 +399,29 @@ compiler/cannotInvokeNewOnErrorExpression.errors.txt
 compiler/cannotInvokeNewOnIndexExpression.errors.txt
 compiler/captureThisInSuperCall.errors.txt
 compiler/blockScopedVariablesUseBeforeDef(target=es2015).errors.txt
+
+## 2026-08-16 batch #600-#699: misc checker depth — cast/as-expression
+## typing (yield casts, parenthesized assertion spans), chained
+## assignment destructuring checks, contextual generic-constraint calls,
+## UMD global merge, type-predicate redundant properties, crash-regression
+## shapes ##
+compiler/capturedParametersInInitializers1.errors.txt
+compiler/capturedParametersInInitializers2(target=es2015).errors.txt
+compiler/castOfYield.errors.txt
+compiler/castParentheses.errors.txt
+compiler/castTest.errors.txt
+compiler/catchClauseWithInitializer1.errors.txt
+compiler/chainedAssignment1.errors.txt
+compiler/chainedAssignment2.errors.txt
+compiler/chainedAssignmentChecking.errors.txt
+compiler/chainedCallsWithTypeParameterConstrainedToOtherTypeParameter.errors.txt
+compiler/chainedCallsWithTypeParameterConstrainedToOtherTypeParameter2.errors.txt
+compiler/chainedSpecializationToObjectTypeLiteral.errors.txt
+compiler/checkDestructuringShorthandAssigment2.errors.txt
+compiler/checkForObjectTooStrict(target=es2015).errors.txt
+compiler/checkInheritedProperty.errors.txt
+compiler/checkMergedGlobalUMDSymbol.errors.txt
+compiler/checkTypePredicateForRedundantProperties.errors.txt
+compiler/checkerInitializationCrash.errors.txt
+compiler/checkingObjectWithThisInNamePositionNoCrash.errors.txt
+compiler/class2.errors.txt
