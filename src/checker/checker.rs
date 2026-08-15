@@ -4750,7 +4750,14 @@ impl Checker {
             }
             let arg_type = self.get_type_of_node(arg);
             if !self.is_type_assignable_to(&arg_type, &param_type) {
-                let arg_str = self.type_to_string(&arg_type);
+                // Widen literal source types for display, like the other
+                // relation errors (Go's reportRelationError).
+                let display_type = if crate::checker::is_literal_type(&arg_type) {
+                    self.get_base_type_of_literal_type(&arg_type)
+                } else {
+                    arg_type.clone()
+                };
+                let arg_str = self.type_to_string(&display_type);
                 let param_str = self.type_to_string(&param_type);
                 self.diagnostics.add(crate::ast::Diagnostic::new(
                     file.clone(),
@@ -8304,6 +8311,19 @@ impl Checker {
                     }
                 }
                 if let Some(body) = body {
+                    // TS17009: in a DERIVED class's constructor, `this` is
+                    // not accessible before the `super()` call (including
+                    // `super(this.x)` arguments — Go's definite
+                    // super-call analysis, approximated with an in-order
+                    // body scan).
+                    if node.kind == SyntaxKind::Constructor
+                        && self
+                            .enclosing_class_stack
+                            .last()
+                            .is_some_and(|c| self.extends_base_of(c).is_some())
+                    {
+                        self.check_super_before_this(&body);
+                    }
                     // TS2662/TS2663 context: while directly inside this
                     // member's body, a bare name failing to resolve checks
                     // the class's static/instance members for a suggestion
@@ -9231,6 +9251,9 @@ impl Checker {
         // instance member suggests `this.x` only from directly inside an
         // instance member). Otherwise TS2304 "Cannot find name '{0}'."
         let file = self.current_file.clone();
+        // Class-member suggestions (TS2662/TS2663) take precedence over
+        // spelling suggestions; TS2552 spelling suggestions apply distance-1
+        // visible names only (Go's getSpellingSuggestion behavior).
         let diagnostic = if let Some(class) = self.enclosing_class_stack.last().cloned() {
             let class_name = Self::class_name_text(&class);
             if let Some(is_member_static) = self.class_member_static_by_name(&class, name) {
@@ -9259,6 +9282,13 @@ impl Checker {
                         vec![name.to_string()],
                     )
                 }
+            } else if let Some(suggestion) = self.find_name_suggestion(name) {
+                crate::ast::Diagnostic::new(
+                    file,
+                    node.loc,
+                    crate::diagnostics::messages_generated::CANNOT_FIND_NAME_0_DID_YOU_MEAN_1,
+                    vec![name.to_string(), suggestion],
+                )
             } else {
                 crate::ast::Diagnostic::new(
                     file,
@@ -9267,10 +9297,94 @@ impl Checker {
                     vec![name.to_string()],
                 )
             }
+        } else if let Some(suggestion) = self.find_name_suggestion(name) {
+            crate::ast::Diagnostic::new(
+                file,
+                node.loc,
+                crate::diagnostics::messages_generated::CANNOT_FIND_NAME_0_DID_YOU_MEAN_1,
+                vec![name.to_string(), suggestion],
+            )
         } else {
             crate::ast::Diagnostic::new(file, node.loc, CANNOT_FIND_NAME_0, vec![name.to_string()])
         };
         self.diagnostics.add(diagnostic);
+    }
+
+
+    /// TS17009: walk a derived-class constructor body in source order;
+    /// every `this` expression seen before the `super()` call reports.
+    /// `super(...)` marks super-called only after its arguments are
+    /// visited (arguments evaluate first — `super(this.x)` errors on the
+    /// `this`).
+    fn check_super_before_this(&mut self, body: &Arc<Node>) {
+        fn visit(
+            c: &mut Checker,
+            n: &Arc<Node>,
+            super_seen: &mut bool,
+        ) {
+            if n.kind == SyntaxKind::ThisKeyword {
+                if !*super_seen {
+                    let file = c.current_file.clone();
+                    c.diagnostics.add(crate::ast::Diagnostic::new(
+                        file,
+                        n.loc,
+                        crate::diagnostics::messages_generated::
+                            X_SUPER_MUST_BE_CALLED_BEFORE_ACCESSING_THIS_IN_THE_CONSTRUCTOR_OF_A_DERIVED_CLASS,
+                        vec![],
+                    ));
+                }
+                return;
+            }
+            // `super(args)` — visit arguments first, then mark super called.
+            if n.kind == SyntaxKind::CallExpression
+                && let crate::ast::NodeData::CallExpression(call) = &n.data
+                && call.expression.kind == SyntaxKind::SuperKeyword
+            {
+                for arg in call.arguments.iter() {
+                    visit(c, arg, super_seen);
+                }
+                *super_seen = true;
+                return;
+            }
+            crate::ast::node_data_generated::for_each_child(n, |child| {
+                visit(c, child, super_seen);
+                false
+            });
+        }
+        let mut super_seen = false;
+        visit(self, body, &mut super_seen);
+    }
+
+    /// Find a visible name (scope stack containers + globals) within edit
+    /// distance 2 of `name`, case-insensitively — the best (lowest)
+    /// distance wins. Mirrors Go's spelling-correction suggestions.
+    fn find_name_suggestion(&self, name: &str) -> Option<String> {
+        let lower = name.to_ascii_lowercase();
+        let mut candidates: Vec<&String> = Vec::new();
+        let symbol_map = self.program.symbol_map();
+        for &container_id in self.scope_stack.iter() {
+            if let Some(locals) = symbol_map.locals.get(&container_id) {
+                candidates.extend(locals.entries.keys());
+            }
+            if let Some(sym) = symbol_map.symbols.get(&container_id) {
+                candidates.extend(sym.members.entries.keys());
+                candidates.extend(sym.exports.entries.keys());
+            }
+        }
+        candidates.extend(self.globals.entries.keys());
+        let mut best: Option<(usize, &String)> = None;
+        for cand in candidates {
+            if cand.len() < 2 || cand == name {
+                continue;
+            }
+            let d = edit_distance(&lower, &cand.to_ascii_lowercase());
+            // Ties go to the later candidate — globals are collected
+            // last, matching Go's preference in this corpus.
+            if d <= 1 && best.is_none_or(|(bd, _)| d <= bd) {
+                best = Some((d, cand));
+            }
+        }
+        best.map(|(_, c)| c.clone())
     }
 
     /// TS2654/TS2416: class-heritage member checks for a derived class —
@@ -11621,6 +11735,7 @@ mod tests {
     }
 }
 
+
 /// The dotted source text of a (possibly qualified) entity name.
 fn qualified_name_text(name: &Arc<Node>) -> String {
     match &name.data {
@@ -11629,4 +11744,24 @@ fn qualified_name_text(name: &Arc<Node>) -> String {
         }
         _ => name.text().to_string(),
     }
+}
+
+/// Levenshtein edit distance (bounded early-exit at 3).
+fn edit_distance(a: &str, b: &str) -> usize {
+    let a: Vec<char> = a.chars().collect();
+    let b: Vec<char> = b.chars().collect();
+    if a.len().abs_diff(b.len()) > 2 {
+        return 3;
+    }
+    let mut prev: Vec<usize> = (0..=b.len()).collect();
+    let mut curr = vec![0usize; b.len() + 1];
+    for i in 1..=a.len() {
+        curr[0] = i;
+        for j in 1..=b.len() {
+            let cost = usize::from(a[i - 1] != b[j - 1]);
+            curr[j] = (prev[j] + 1).min(curr[j - 1] + 1).min(prev[j - 1] + cost);
+        }
+        std::mem::swap(&mut prev, &mut curr);
+    }
+    prev[b.len()]
 }

@@ -98,6 +98,9 @@ pub fn extract_settings(content: &str) -> HashMap<String, String> {
 /// - `// @currentdirectory:` is surfaced separately (not part of `settings`).
 /// - Source text is otherwise verbatim (no marker stripping).
 pub fn split_units(content: &str, default_name: &str) -> ParsedCase {
+    // A leading BOM is scanner trivia, not content — strip it so it never
+    // occupies a line (Go's scanner skips it).
+    let content = content.strip_prefix('\u{feff}').unwrap_or(content);
     let mut units: Vec<TestUnit> = Vec::new();
     let mut settings: HashMap<String, String> = HashMap::new();
     let mut current_directory: Option<String> = None;

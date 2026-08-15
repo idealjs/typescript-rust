@@ -14,10 +14,6 @@
 
 ## TS17009: 'super' must be called before accessing 'this' in a derived
 ## constructor (definite-super-call analysis not ported) ##
-compiler/baseCheck.errors.txt
-compiler/checkSuperCallBeforeThisAccessing2.errors.txt
-compiler/checkSuperCallBeforeThisAccessing5.errors.txt
-compiler/checkSuperCallBeforeThisAccessing8.errors.txt
 compiler/classExtendsNull.errors.txt
 compiler/classExtendsNull2.errors.txt
 
