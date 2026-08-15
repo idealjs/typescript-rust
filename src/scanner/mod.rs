@@ -1472,9 +1472,18 @@ impl Scanner {
         let mut best_match: Option<SyntaxKind> = None;
         let mut best_len = 0;
 
+        // Check 4-char tokens (`>>>=`). `get(..4)` for UTF-8 safety.
+        if remaining.len() >= 4 {
+            if let Some(slice) = remaining.get(..4) {
+                if let Some(kind) = string_to_token(slice) {
+                    best_match = Some(kind);
+                    best_len = 4;
+                }
+            }
+        }
         // Check 3-char tokens. Use `get(..3)` for safety: if byte 3 falls
         // inside a multi-byte UTF-8 character, `get` returns `None`.
-        if remaining.len() >= 3 {
+        if best_len == 0 && remaining.len() >= 3 {
             if let Some(slice) = remaining.get(..3) {
                 if let Some(kind) = string_to_token(slice) {
                     best_match = Some(kind);

@@ -885,20 +885,73 @@ impl Checker {
         checker
     }
 
+    /// Merge `src` into `dst` (Go's `mergeSymbol`): union flags, extend
+    /// declarations, and merge member/export tables recursively (same-name
+    /// members merge instead of replacing). Mutates through the raw pointer
+    /// — the checker initializes single-threaded.
+    fn merge_global_symbols(dst: &Arc<Symbol>, src: &Arc<Symbol>) {
+        let dst_mut = Arc::as_ptr(dst) as *mut Symbol;
+        unsafe {
+            (*dst_mut).flags |= src.flags;
+            for d in &src.declarations {
+                if !dst
+                    .declarations
+                    .iter()
+                    .any(|existing| Arc::ptr_eq(existing, d))
+                {
+                    (*dst_mut).declarations.push(Arc::clone(d));
+                }
+            }
+            if dst.value_declaration.is_none() {
+                (*dst_mut).value_declaration = src.value_declaration.clone();
+            }
+            for (name, member) in src.members.entries.iter() {
+                match (*dst_mut).members.entries.get(name) {
+                    Some(existing) => Self::merge_global_symbols(existing, member),
+                    None => {
+                        (*dst_mut).members.entries.insert(name.clone(), Arc::clone(member));
+                    }
+                }
+            }
+            for (name, export) in src.exports.entries.iter() {
+                match (*dst_mut).exports.entries.get(name) {
+                    Some(existing) => Self::merge_global_symbols(existing, export),
+                    None => {
+                        (*dst_mut).exports.entries.insert(name.clone(), Arc::clone(export));
+                    }
+                }
+            }
+        }
+    }
+
     /// Populate globals from source file symbols.
     fn populate_globals(&mut self) {
         for file in &self.files {
             // Look up the source file's symbol from the symbol map
             let symbol_map = self.program.symbol_map();
             if let Some(file_sym) = symbol_map.symbol_of(&file.node) {
-                // Merge the source file's members into globals
+                // Merge the source file's members into globals — same-name
+                // declarations across files MERGE (Go's mergeSymbol), so a
+                // lib interface augmentation (ReadonlyArray in
+                // lib.es2015.core) contributes members to the base symbol
+                // instead of replacing it.
                 for (name, sym) in file_sym.members.iter() {
-                    self.globals.insert(name.clone(), Arc::clone(sym));
+                    match self.globals.get(name) {
+                        Some(existing) => Self::merge_global_symbols(existing, sym),
+                        None => {
+                            self.globals.insert(name.clone(), Arc::clone(sym));
+                        }
+                    }
                 }
                 // Also merge the source file's locals
                 if let Some(locals) = symbol_map.locals_of(&file.node) {
                     for (name, sym) in locals.iter() {
-                        self.globals.insert(name.clone(), Arc::clone(sym));
+                        match self.globals.get(name) {
+                            Some(existing) => Self::merge_global_symbols(existing, sym),
+                            None => {
+                                self.globals.insert(name.clone(), Arc::clone(sym));
+                            }
+                        }
                     }
                 }
             }
@@ -5055,6 +5108,22 @@ impl Checker {
                 return idx;
             }
         }
+        // No signature accepted the arguments (Go reports the arity error
+        // against the FIRST ARITY-COMPATIBLE overload, not signatures[0] —
+        // `Promise.resolve(1)` with overloads [(), (value)] must blame the
+        // (value) overload's arity, or match it when only assignability
+        // failed).
+        let arg_count = arguments.len();
+        for (idx, sig) in signatures.iter().enumerate() {
+            let max_params = if sig.has_rest_parameter() {
+                usize::MAX
+            } else {
+                sig.parameters.len()
+            };
+            if arg_count <= max_params && arg_count >= sig.min_argument_count.max(0) as usize {
+                return idx;
+            }
+        }
         0
     }
 
@@ -5634,6 +5703,19 @@ impl Checker {
                 self.pop_scope();
             }
             SyntaxKind::ReturnStatement => {
+                // TS1108: `return` outside a function body (top level or
+                // namespace level) — Go's checkGrammarStatementInAmbientContext
+                // adjacent rule in checkReturnStatement.
+                if self.function_scope_count == 0 && self.arrow_function_scope_count == 0 {
+                    let file = self.current_file.clone();
+                    self.diagnostics.add(crate::ast::Diagnostic::new(
+                        file,
+                        node.loc,
+                        crate::diagnostics::messages_generated::
+                            A_RETURN_STATEMENT_CAN_ONLY_BE_USED_WITHIN_A_FUNCTION_BODY,
+                        Vec::new(),
+                    ));
+                }
                 if let crate::ast::NodeData::ReturnStatement(data) = &node.data {
                     if let Some(expr) = &data.expression {
                         self.check_expression(expr);
@@ -9217,6 +9299,33 @@ impl Checker {
                             }
                         }
                     }
+                    // TS2629: assigning to a class/enum/namespace-only
+                    // name (Go's checkDeprecatedSymbol/assignment checks:
+                    // `f += ''` where `f` is a class reports per operator).
+                    if Self::is_assignment_operator(data.operator_token.kind)
+                        && data.left.kind == SyntaxKind::Identifier
+                    {
+                        let name_text = data.left.text().to_string();
+                        if let Some(sym) = self.resolve_identifier(&data.left)
+                            && let base = self.resolve_alias_base(sym)
+                        {
+                            let msg = if base.flags.contains(SymbolFlags::Class) {
+                                Some(crate::diagnostics::messages_generated::
+                                    CANNOT_ASSIGN_TO_0_BECAUSE_IT_IS_A_CLASS)
+                            } else {
+                                None
+                            };
+                            if let Some(msg) = msg {
+                                let file = self.current_file.clone();
+                                self.diagnostics.add(crate::ast::Diagnostic::new(
+                                    file,
+                                    data.left.loc,
+                                    msg,
+                                    vec![name_text],
+                                ));
+                            }
+                        }
+                    }
                     // TS2588: Assigning to a `const` variable after its
                     // declaration. Mirrors Go's `checkAssignmentStatement`
                     // const-target check. Fires for every assignment operator
@@ -11089,10 +11198,20 @@ impl Checker {
             return true;
         }
         match (
-            crate::ast::get_source_file_of_node(node),
+            self.get_source_file_of_node(node),
             self.suppress_source_file,
         ) {
-            (Some(f), Some(id)) => f.id() != id,
+            (Some(f), Some(origin)) => {
+                if f.node.id() == origin {
+                    // Same file the suppression started in — intended.
+                    false
+                } else {
+                    // Cross-file resolution: USER files always report
+                    // (bundled-lib signature type parameters stay silenced
+                    // wherever they're reached from).
+                    !f.file_name.starts_with("bundled://")
+                }
+            }
             _ => false,
         }
     }

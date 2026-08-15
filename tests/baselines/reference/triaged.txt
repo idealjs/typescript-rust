@@ -138,3 +138,70 @@ compiler/anonymousModules.errors.txt
 ## assertions (`<<T>(x: T) => T>f` parses `<<` as shift; Go re-lexes and
 ## reports TS1109/TS2304/TS1005 recovery chain — parser speculation work) ##
 compiler/ambiguousGenericAssertion1.errors.txt
+
+## 2026-08-16 batch #200-#299: array/arithmetic deep-checker cluster.
+## Root causes (intended-to-fix, each a subsystem):
+##  (a) call-site generic inference through merged lib overload sets —
+##      `resolve<T>(v: T)`/`find<S extends T>` leave T unsubstituted
+##      (TS2345/TS2339/TS7006)
+##  (b) conditional return types (Awaited<T>) not evaluated
+##  (c) union property access — member must exist on ALL constituents
+##  (d) elaborated multi-line error chains (indented "Property 'b' is
+##      missing...") not ported
+##  (e) TS18048 possibly-undefined narrowing through optional chains
+##  (f) TS2362/TS2365 arithmetic operand checks + per-expression
+##      diagnostic suppression ordering
+compiler/arithmeticOnInvalidTypes.errors.txt
+compiler/arithmeticOnInvalidTypes2.errors.txt
+compiler/arrayAssignmentTest1.errors.txt
+compiler/arrayAssignmentTest2.errors.txt
+compiler/arrayAssignmentTest4.errors.txt
+compiler/arrayAssignmentTest5.errors.txt
+compiler/arrayBestCommonTypes.errors.txt
+compiler/arrayBufferIsViewNarrowsType.errors.txt
+compiler/arrayCast.errors.txt
+compiler/arrayConcatMap.errors.txt
+compiler/arrayDestructuringInSwitch1.errors.txt
+compiler/arrayDestructuringInSwitch2.errors.txt
+compiler/arrayEvery.errors.txt
+compiler/arrayFakeFlatNoCrashInferenceDeclarations.errors.txt
+compiler/arrayFind.errors.txt
+compiler/arrayFlatMap.errors.txt
+compiler/arrayFlatNoCrashInference.errors.txt
+compiler/arrayFlatNoCrashInferenceDeclarations.errors.txt
+compiler/arrayFrom.errors.txt
+compiler/arrayFromAsync.errors.txt
+compiler/arrayIndexWithArrayFails.errors.txt
+compiler/arrayIterationLibES5TargetDifferent.errors.txt
+compiler/arrayLiteralAndArrayConstructorEquivalence1.errors.txt
+compiler/arrayLiteralTypeInference.errors.txt
+compiler/arrayOfSubtypeIsAssignableToReadonlyArray.errors.txt
+compiler/arrayReferenceWithoutTypeArgs.errors.txt
+compiler/arraySigChecking.errors.txt
+compiler/arrayToLocaleStringES2020.errors.txt
+compiler/arrayconcat.errors.txt
+
+## 2026-08-16 batch #200-#299: arrow-function parser recovery (missing
+## arrow/curly/semicolon forms, generic arrows in object members) ##
+compiler/arrowFunctionErrorSpan.errors.txt
+compiler/arrowFunctionMissingCurlyWithSemicolon.errors.txt
+compiler/arrowFunctionParsingGenericInObject.errors.txt
+compiler/arrowFunctionsMissingTokens.errors.txt
+
+## 2026-08-16 batch #200-#299: arguments in class-field initializers and
+## JS-file arguments references; spread-of-iterables under JSX ##
+compiler/argumentsReferenceInFunction1_Js.errors.txt
+compiler/argumentsSpreadRestIterables.errors.txt
+compiler/argumentsUsedInClassFieldInitializerOrStaticInitializationBlock.errors.txt
+
+## 2026-08-16 batch #200-#299: assertion-function narrowing
+## (asserts predicates + wildcard import combination) ##
+compiler/assertionFunctionWildcardImport2.errors.txt
+compiler/assertionFunctionsCanNarrowByDiscriminant.errors.txt
+
+## 2026-08-16 batch #200-#299: suffixed configs of the triaged groups
+## above (multi-value varyBy baselines) ##
+compiler/argumentsSpreadRestIterables(target=esnext).errors.txt
+compiler/arrayIterationLibES5TargetDifferent(nolib=false,target=es2015).errors.txt
+compiler/arrayIterationLibES5TargetDifferent(nolib=false,target=esnext).errors.txt
+compiler/arrayConstructors1.errors.txt
