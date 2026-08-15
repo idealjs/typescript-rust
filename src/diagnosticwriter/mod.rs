@@ -197,6 +197,7 @@ mod tests {
             external_module_indicator: None,
             common_js_module_indicator: None,
             uses_uri_style_node_core_modules: crate::core::tristate::Tristate::Unknown,
+            has_parse_diagnostics: false,
         })
     }
 

@@ -1985,6 +1985,21 @@ pub fn apply_test_settings(settings: &HashMap<String, String>) -> (CompilerOptio
     let mut options = CompilerOptions::default();
     let mut unrecognized: Vec<String> = Vec::new();
 
+    // tsgo defaults `noImplicitAny` to TRUE when the case specifies neither
+    // `strict` nor `noImplicitAny` (verified against the Go oracle CLI and
+    // the official baselines: `function foo();` reports TS7010 with no
+    // directives). An explicit directive always wins, and `strict: false`
+    // keeps it off via the strict-option fallback.
+    let has_strict_directive = settings
+        .keys()
+        .any(|k| k.eq_ignore_ascii_case("strict"));
+    let has_nia_directive = settings
+        .keys()
+        .any(|k| k.eq_ignore_ascii_case("noimplicitany"));
+    if !has_strict_directive && !has_nia_directive {
+        options.no_implicit_any = crate::core::tristate::Tristate::True;
+    }
+
     for (name, raw_value) in settings {
         let lower = name.to_lowercase();
         let trimmed = raw_value.trim().trim_end_matches(';').to_string();

@@ -16,9 +16,27 @@
 //! listed in `accepted.txt`/`triaged.txt`. A checker panic converts to a
 //! triaged skip rather than aborting the whole run.
 //!
-//! Environment variables:
-//! - `TSOX_BASELINE_ACCEPT=1` — write actual output over the reference baselines.
-//! - `TSOX_SUBMODULE_LIMIT=N` — only run the first N cases (for bring-up).
+//! Environment variables (all optional):
+//! - `TSOX_SUBMODULE_START=N` — first case to run, 1-based (default 1).
+//! - `TSOX_SUBMODULE_END=N` — last case to run, 1-based inclusive (default:
+//!   last case). START/END pick an explicit window, e.g. `START=1000
+//!   END=2000` runs #1000..#2000. Either may be omitted. Takes precedence
+//!   over `TSOX_SUBMODULE_LIMIT` when set.
+//! - `TSOX_SUBMODULE_LIMIT=N` — alternative selector: first N cases
+//!   (default 1000), or `0` for all (~6500). Ignored when START/END is set.
+//! - `TSOX_SUBMODULE_FILTER` — case-insensitive substring; run only matching
+//!   case file names (applied after the selection above).
+//! - `TSOX_SUBMODULE_JOBS=N` — concurrent workers. Defaults to
+//!   `available_parallelism()`, which honors `taskset` CPU affinity
+//!   (`taskset -c 0-3 …` → 4 workers, ≤400% CPU).
+//! - `TSOX_SUBMODULE_TIMEOUT_SECS=N` — per-case wall-clock budget (default 30).
+//! - `TSOX_SUBMODULE_QUIET=1` — suppress per-case console lines (the run-log
+//!   file still records everything).
+//!
+//! Progress visibility: every case logs a START line when a worker picks it
+//! up and an END line with the outcome (`[wID] #i/total VERB name (secs)`)
+//! to stderr and to `tests/baselines/local/submodule_run.log`; a heartbeat
+//! with counts + ETA prints every 100 completions.
 
 mod common;
 
@@ -66,6 +84,12 @@ const CASE_TIMEOUT_DEFAULT_SECS: u64 = 30;
 /// Mirrors tsgo's `skippedTests` (`internal/testrunner/compiler_runner.go`).
 const SKIPPED_CASES: &[&str] = &[
     "alwaysStrictNoImplicitUseStrict.ts",
+    // ClassDeclaration26.ts (garbage-input stress: `public const var export
+    // foo = 10;` + `var constructor() { }`) was previously skipped — it now
+    // passes via the ported recovery path: scanClassMemberStart gating +
+    // parsingContext stack (TS1068), parseSemicolonAfterPropertyName's
+    // const/let/var special case (TS1440), export-as-member-modifier, and
+    // `() {` arrow speculation ('=>' expected).
     // ~5000-line deeply-nested binary-expression stress test (TS issue #35633)
     // that exercises the binder/emitter trampoline for arbitrarily-deep trees.
     // The Rust port lacks the iterative/trampoline handling, so it recurses and
@@ -166,6 +190,115 @@ fn process_case(content: &str, basename: &str) -> CaseOutcome {
     }
 }
 
+/// Outcome of scheduling + comparing one case in the parent (vs.
+/// `CaseOutcome`, which is the worker subprocess's result).
+enum StepOutcome {
+    Passed,
+    AcceptedDiff,
+    Failed,
+    Skipped,
+}
+
+/// Run one case end-to-end from the parent side: spawn the worker subprocess
+/// (with timeout), read its payload, compare against the reference baseline.
+/// Returns the outcome plus a human-readable detail line for logging.
+fn run_case(
+    case_path: &Path,
+    idx: usize,
+    exe: &Path,
+    timeout: std::time::Duration,
+    known_diffs: &KnownDiffs,
+    accept: bool,
+) -> (StepOutcome, String, String) {
+    let basename = case_path
+        .file_name()
+        .and_then(|n| n.to_str())
+        .unwrap_or("<bad-name>")
+        .to_string();
+    let stem = basename.trim_end_matches(".ts").trim_end_matches(".tsx");
+    let ext = ".errors.txt";
+
+    // Run the case in a child process so a checker stack overflow (e.g.
+    // circular-type recursion — uncatchable via catch_unwind) kills only the
+    // child, not the whole run. The child re-invokes this test binary in
+    // worker mode (see TSOX_SUBMODULE_WORKER above). A case that runs longer
+    // than `timeout` (e.g. a checker infinite loop or combinatorial blow-up)
+    // is killed and recorded as a skip — mirroring tsgo's per-case timeout —
+    // instead of hanging the whole sweep.
+    let out_path = std::env::temp_dir().join(format!("tsox_submodule_{idx}_{stem}.out"));
+    let _ = std::fs::remove_file(&out_path);
+    let worker = Command::new(exe)
+        .arg("--exact")
+        .arg("submodule_compiler_cases")
+        .env("TSOX_SUBMODULE_WORKER", case_path)
+        .env("TSOX_SUBMODULE_OUT", &out_path)
+        .stdin(Stdio::null())
+        .stdout(Stdio::null())
+        .stderr(Stdio::null())
+        .spawn();
+    let status = worker
+        .map(|mut child| {
+            let deadline = std::time::Instant::now() + timeout;
+            loop {
+                match child.try_wait() {
+                    Ok(Some(status)) => return Ok(status),
+                    Ok(None) => {
+                        if std::time::Instant::now() >= deadline {
+                            let _ = child.kill();
+                            let _ = child.wait();
+                            return Err("timed out".to_string());
+                        }
+                        std::thread::sleep(std::time::Duration::from_millis(100));
+                    }
+                    Err(e) => return Err(e.to_string()),
+                }
+            }
+        })
+        .unwrap_or_else(|e| Err(e.to_string()));
+    let payload = std::fs::read_to_string(&out_path).unwrap_or_default();
+    let _ = std::fs::remove_file(&out_path);
+    if std::env::var("TSOX_DEBUG_PAYLOAD").is_ok() {
+        eprintln!("[debug] {basename} payload: {payload:?}");
+    }
+
+    if !matches!(&status, Ok(s) if s.success()) {
+        // Worker was killed (e.g. stack overflow → signal), timed out, or
+        // exited non-zero. Report the raw status to aid diagnosis.
+        use std::os::unix::process::ExitStatusExt;
+        let raw = match &status {
+            Ok(s) => s
+                .signal()
+                .map(|sig| format!("signal {sig}"))
+                .unwrap_or_else(|| format!("code {}", s.code().unwrap_or(-1))),
+            Err(reason) => reason.clone(),
+        };
+        return (StepOutcome::Skipped, basename, format!("worker crashed ({raw})"));
+    }
+    // Parse the worker's `O`/`S` status line.
+    let actual = if let Some(rest) = payload.strip_prefix("O\n") {
+        rest.to_string()
+    } else if let Some(reason) = payload.strip_prefix("S\n") {
+        return (StepOutcome::Skipped, basename, reason.to_string());
+    } else {
+        return (StepOutcome::Skipped, basename, "worker produced no output".to_string());
+    };
+
+    match baseline::compare(SUBFOLDER, stem, ext, &actual) {
+        baseline::Outcome::Passed => (StepOutcome::Passed, basename, String::new()),
+        baseline::Outcome::Failed { .. } => {
+            if known_diffs.contains(SUBFOLDER, stem, ext) {
+                (StepOutcome::AcceptedDiff, basename, "known diff (triaged/accepted)".to_string())
+            } else if accept {
+                // shouldn't happen (compare returns Passed in accept mode),
+                // but be defensive.
+                (StepOutcome::Passed, basename, String::new())
+            } else {
+                (StepOutcome::Failed, basename, String::new())
+            }
+        }
+    }
+}
+
 #[test]
 fn submodule_compiler_cases() {
     // ── Worker mode ────────────────────────────────────────────────────────
@@ -209,13 +342,139 @@ fn submodule_compiler_cases() {
     collect_ts_files(root, &mut cases);
     cases.sort();
 
-    let limit = std::env::var("TSOX_SUBMODULE_LIMIT")
-        .ok()
-        .and_then(|s| s.parse::<usize>().ok())
-        // 0 means "run all"; otherwise use the env override or the default cap.
-        .map(|n| if n == 0 { usize::MAX } else { n })
-        .unwrap_or(DEFAULT_LIMIT);
-    cases.truncate(limit);
+    // ── Run log ────────────────────────────────────────────────────────────
+    // Every banner/START/END/heartbeat/summary line goes to the real stderr
+    // (unless quiet) and is appended to a per-run log under the gitignored
+    // local/ dir. Created before case selection so selection notes are
+    // visible too.
+    struct RunLog {
+        file: Option<std::sync::Mutex<std::fs::File>>,
+        quiet: bool,
+    }
+    impl RunLog {
+        fn new(path: std::path::PathBuf, quiet: bool) -> Self {
+            let file = std::fs::create_dir_all(path.parent().unwrap())
+                .ok()
+                .and_then(|_| std::fs::File::create(&path).ok())
+                .map(std::sync::Mutex::new);
+            Self { file, quiet }
+        }
+        fn line(&self, msg: &str) {
+            if !self.quiet {
+                use std::io::Write;
+                // Write straight to fd 2 via the stderr handle: libtest's
+                // output capture (propagated into threads spawned by the
+                // test) swallows `eprintln!` and discards it when the test
+                // passes, hiding the live progress these lines exist for.
+                let mut err = std::io::stderr().lock();
+                let _ = writeln!(err, "{msg}");
+            }
+            if let Some(f) = &self.file {
+                use std::io::Write;
+                let _ = writeln!(f.lock().unwrap(), "{msg}");
+            }
+        }
+    }
+    let log_path = Path::new(baseline::LOCAL_ROOT).join("submodule_run.log");
+    let log = RunLog::new(
+        log_path.clone(),
+        std::env::var("TSOX_SUBMODULE_QUIET")
+            .map(|v| v == "1" || v.eq_ignore_ascii_case("true"))
+            .unwrap_or(false),
+    );
+    if log.file.is_none() {
+        eprintln!("[submodule_compiler] note: cannot write run log {}", log_path.display());
+    }
+
+    // ── Case selection ─────────────────────────────────────────────────────
+    // Two ways to pick which cases run (1-based, inclusive):
+    //   `TSOX_SUBMODULE_START` / `TSOX_SUBMODULE_END` — explicit window; each
+    //     optional (START defaults to 1, END to the last case). Precedence
+    //     over LIMIT when either is set.
+    //   `TSOX_SUBMODULE_LIMIT` — `N` = first N (default 1000), `0` = all.
+    // `TSOX_SUBMODULE_FILTER=<substr>` (optional) narrows the selection
+    // further by case-name substring, case-insensitive.
+    let total = cases.len();
+    let limit_spec = std::env::var("TSOX_SUBMODULE_LIMIT").unwrap_or_default();
+    let start_spec = std::env::var("TSOX_SUBMODULE_START").unwrap_or_default();
+    let end_spec = std::env::var("TSOX_SUBMODULE_END").unwrap_or_default();
+    let (start, end, desc) = if !start_spec.is_empty() || !end_spec.is_empty() {
+        let usage = "TSOX_SUBMODULE_START/END must be 1-based case numbers with END >= START";
+        let a = if start_spec.is_empty() {
+            1
+        } else {
+            start_spec
+                .trim()
+                .parse::<usize>()
+                .unwrap_or_else(|_| panic!("{usage}: got START='{start_spec}'"))
+                .max(1) // lenient: a 0 start is treated as 1
+        };
+        let b = if end_spec.is_empty() {
+            total
+        } else {
+            end_spec
+                .trim()
+                .parse::<usize>()
+                .unwrap_or_else(|_| panic!("{usage}: got END='{end_spec}'"))
+        };
+        assert!(b >= a, "{usage}: got START={a} END={b}");
+        if !limit_spec.is_empty() {
+            log.line(&format!(
+                "[submodule_compiler] note: TSOX_SUBMODULE_LIMIT='{limit_spec}' ignored \
+                 — START/END window takes precedence"
+            ));
+        }
+        (a - 1, b.min(total), format!("#{a}..#{b}"))
+    } else {
+        let usage = "TSOX_SUBMODULE_LIMIT must be N (first N cases), 0 (all), or unset";
+        let n = if limit_spec.is_empty() {
+            DEFAULT_LIMIT
+        } else if limit_spec == "0" {
+            total
+        } else {
+            limit_spec
+                .trim()
+                .parse::<usize>()
+                .unwrap_or_else(|_| panic!("{usage}: got '{limit_spec}'"))
+        };
+        let end = n.min(total);
+        let desc = if limit_spec.is_empty() {
+            format!("first {DEFAULT_LIMIT}")
+        } else if limit_spec == "0" {
+            "all".to_string()
+        } else {
+            format!("first {n}")
+        };
+        (0, end, desc)
+    };
+    if start >= end {
+        log.line(&format!(
+            "[submodule_compiler] selection '{desc}' selects no cases of {total} \
+             (range #{start}..#{end}) — nothing to do."
+        ));
+        return;
+    }
+
+    let filter = std::env::var("TSOX_SUBMODULE_FILTER").unwrap_or_default();
+    let filter_lc = filter.to_lowercase();
+    let selected: Vec<&std::path::PathBuf> = cases[start..end]
+        .iter()
+        .filter(|p| {
+            filter_lc.is_empty()
+                || p.file_name()
+                    .and_then(|n| n.to_str())
+                    .is_some_and(|n| n.to_lowercase().contains(&filter_lc))
+        })
+        .collect();
+    if selected.is_empty() {
+        log.line(&format!(
+            "[submodule_compiler] filter '{filter}' matched no cases — nothing to do."
+        ));
+        return;
+    }
+    let selected_total = selected.len();
+    let first = selected[0].file_name().unwrap().to_string_lossy();
+    let last = selected[selected_total - 1].file_name().unwrap().to_string_lossy();
 
     let known_diffs = KnownDiffs::load();
     let accept = baseline::accept_mode();
@@ -229,119 +488,156 @@ fn submodule_compiler_cases() {
     // TSOX_SUBMODULE_WORKER block at the top of this function.
     let exe = std::env::current_exe().expect("current_exe");
 
-    let mut passed = 0usize;
-    let mut skipped = 0usize;
-    let mut failed = 0usize;
-    let mut accepted_diff = 0usize;
-    let mut failed_non_crash: Vec<String> = Vec::new();
-
-    for case_path in &cases {
-        let basename = case_path
-            .file_name()
-            .and_then(|n| n.to_str())
-            .unwrap_or("<bad-name>");
-        let stem = basename.trim_end_matches(".ts").trim_end_matches(".tsx");
-        let ext = ".errors.txt";
-
-        // Run the case in a child process so a checker stack overflow (e.g.
-        // circular-type recursion — uncatchable via catch_unwind) kills only
-        // the child, not the whole run. The child re-invokes this test binary
-        // in worker mode (see TSOX_SUBMODULE_WORKER above). A case that runs
-        // longer than `CASE_TIMEOUT` (e.g. a checker infinite loop or
-        // combinatorial blow-up) is killed and recorded as a skip — mirroring
-        // tsgo's per-case timeout — instead of hanging the whole sweep.
-        let out_path = std::env::temp_dir().join(format!("tsox_submodule_{stem}.out"));
-        let _ = std::fs::remove_file(&out_path);
-        let worker = Command::new(&exe)
-            .arg("--exact")
-            .arg("submodule_compiler_cases")
-            .env("TSOX_SUBMODULE_WORKER", case_path)
-            .env("TSOX_SUBMODULE_OUT", &out_path)
-            .stdin(Stdio::null())
-            .stdout(Stdio::null())
-            .stderr(Stdio::null())
-            .spawn();
-        let status = worker.map(|mut child| {
-            let deadline = std::time::Instant::now() + case_timeout;
-            loop {
-                match child.try_wait() {
-                    Ok(Some(status)) => return Ok(status),
-                    Ok(None) => {
-                        if std::time::Instant::now() >= deadline {
-                            let _ = child.kill();
-                            let _ = child.wait();
-                            return Err("timed out".to_string());
-                        }
-                        std::thread::sleep(std::time::Duration::from_millis(100));
-                    }
-                    Err(e) => return Err(e.to_string()),
-                }
-            }
+    // ── Parallelism ────────────────────────────────────────────────────────
+    // Cases are independent one-shot subprocesses, so the parent can run
+    // many at once. Concurrency defaults to `available_parallelism()`, which
+    // honors CPU affinity on Linux — `taskset -c 0-3 cargo test …` yields 4
+    // concurrent workers (≤400% CPU) without any extra flags, while an
+    // un-pinned run uses every core. Override with `TSOX_SUBMODULE_JOBS=N`.
+    // (cargo's own `--test-threads` does not apply: this is a single test
+    // function doing its own scheduling.)
+    let jobs = std::env::var("TSOX_SUBMODULE_JOBS")
+        .ok()
+        .and_then(|s| s.parse::<usize>().ok())
+        .filter(|n| *n >= 1)
+        .unwrap_or_else(|| {
+            std::thread::available_parallelism()
+                .map(|n| n.get())
+                .unwrap_or(1)
         })
-        .unwrap_or_else(|e| Err(e.to_string()));
-        let payload = std::fs::read_to_string(&out_path).unwrap_or_default();
-        let _ = std::fs::remove_file(&out_path);
+        .min(selected_total);
 
-        let success = matches!(&status, Ok(s) if s.success());
-        if !success {
-            // Worker was killed (e.g. stack overflow → signal), timed out, or
-            // exited non-zero. Report the raw status to aid diagnosis.
-            use std::os::unix::process::ExitStatusExt;
-            let raw = match &status {
-                Ok(s) => s
-                    .signal()
-                    .map(|sig| format!("signal {sig}"))
-                    .unwrap_or_else(|| format!("code {}", s.code().unwrap_or(-1))),
-                Err(reason) => reason.clone(),
-            };
-            skipped += 1;
-            eprintln!("[skip] {basename}: worker crashed ({raw})");
-            continue;
-        }
-        // Parse the worker's `O`/`S` status line.
-        let actual = if let Some(rest) = payload.strip_prefix("O\n") {
-            rest.to_string()
-        } else if let Some(reason) = payload.strip_prefix("S\n") {
-            skipped += 1;
-            eprintln!("[skip] {basename}: {reason}");
-            continue;
-        } else {
-            skipped += 1;
-            eprintln!("[skip] {basename}: worker produced no output");
-            continue;
-        };
+    use std::sync::atomic::{AtomicUsize, Ordering};
+    let next_case = AtomicUsize::new(0);
+    let done = AtomicUsize::new(0);
+    let passed = AtomicUsize::new(0);
+    let skipped = AtomicUsize::new(0);
+    let failed = AtomicUsize::new(0);
+    let accepted_diff = AtomicUsize::new(0);
+    let failed_non_crash: std::sync::Mutex<Vec<String>> = std::sync::Mutex::new(Vec::new());
+    const HEARTBEAT_EVERY: usize = 100;
 
-        // Compare against the reference.
-        match baseline::compare(SUBFOLDER, stem, ext, &actual) {
-            baseline::Outcome::Passed => {
-                passed += 1;
-            }
-            baseline::Outcome::Failed { .. } => {
-                if known_diffs.contains(SUBFOLDER, stem, ext) {
-                    accepted_diff += 1;
-                } else if accept {
-                    // shouldn't happen (compare returns Passed in accept mode),
-                    // but be defensive.
-                    passed += 1;
-                } else {
-                    failed += 1;
-                    failed_non_crash.push(basename.to_string());
+    // 1-based case numbers of the selection bounds (for the banner below).
+    let first_no = start + 1;
+    let last_no = end;
+    log.line(&format!(
+        "[submodule_compiler] {total} cases enumerated; selection '{desc}' \
+         (+filter '{filter}') → #{first_no}..#{last_no} = {selected_total} cases \
+         [{first} … {last}] on {jobs} workers, timeout {}s; log: {}",
+        case_timeout.as_secs(),
+        log_path.display(),
+    ));
+
+    let run_start = std::time::Instant::now();
+    // Worker ids are claimed lazily from this counter: a `move` closure in the
+    // spawn loop would move the shared state into the first worker only, so
+    // the closures borrow instead (ids may interleave; they're for logging).
+    let worker_seq = AtomicUsize::new(0);
+    std::thread::scope(|scope| {
+        for _ in 0..jobs {
+            scope.spawn(|| {
+                let wid = worker_seq.fetch_add(1, Ordering::Relaxed);
+                loop {
+                let i = next_case.fetch_add(1, Ordering::Relaxed);
+                if i >= selected_total {
+                    break;
                 }
-            }
+                let case_path = selected[i];
+                let name = case_path
+                    .file_name()
+                    .and_then(|n| n.to_str())
+                    .unwrap_or("<bad-name>");
+                log.line(&format!("[w{wid}] #{}/{selected_total} START {name}", i + 1));
+                let t0 = std::time::Instant::now();
+                let (outcome, _basename, detail) = run_case(
+                    case_path,
+                    i,
+                    &exe,
+                    case_timeout,
+                    &known_diffs,
+                    accept,
+                );
+                let secs = t0.elapsed().as_secs_f32();
+                let verb = match &outcome {
+                    StepOutcome::Passed => "PASS ",
+                    StepOutcome::AcceptedDiff => "DIFF ",
+                    StepOutcome::Failed => "FAIL ",
+                    StepOutcome::Skipped => "SKIP ",
+                };
+                match &outcome {
+                    StepOutcome::Passed => {
+                        passed.fetch_add(1, Ordering::Relaxed);
+                    }
+                    StepOutcome::AcceptedDiff => {
+                        accepted_diff.fetch_add(1, Ordering::Relaxed);
+                    }
+                    StepOutcome::Failed => {
+                        failed.fetch_add(1, Ordering::Relaxed);
+                        failed_non_crash.lock().unwrap().push(name.to_string());
+                    }
+                    StepOutcome::Skipped => {
+                        skipped.fetch_add(1, Ordering::Relaxed);
+                    }
+                }
+                let note = if detail.is_empty() {
+                    String::new()
+                } else {
+                    format!(" — {detail}")
+                };
+                log.line(&format!(
+                    "[w{wid}] #{}/{selected_total} {verb}{name} ({secs:.2}s){note}",
+                    i + 1,
+                ));
+                // Heartbeat every HEARTBEAT_EVERY completions (and at the end).
+                let d = done.fetch_add(1, Ordering::Relaxed) + 1;
+                if d % HEARTBEAT_EVERY == 0 || d == selected_total {
+                    let (p, s, f, a) = (
+                        passed.load(Ordering::Relaxed),
+                        skipped.load(Ordering::Relaxed),
+                        failed.load(Ordering::Relaxed),
+                        accepted_diff.load(Ordering::Relaxed),
+                    );
+                    let elapsed = run_start.elapsed().as_secs_f32();
+                    let eta = if d > 0 {
+                        elapsed / d as f32 * (selected_total - d) as f32
+                    } else {
+                        0.0
+                    };
+                    log.line(&format!(
+                        "[submodule_compiler] progress {d}/{selected_total} \
+                         ({p} pass, {a} diff, {s} skip, {f} fail) \
+                         elapsed {elapsed:.0}s, ETA {eta:.0}s"
+                    ));
+                }
+                }
+            });
         }
-    }
+    });
 
-    eprintln!(
-        "[submodule_compiler] {} cases: {} passed, {} skipped (unsupported/crash), \
-         {} accepted-diff, {} failed",
-        cases.len(),
-        passed,
-        skipped,
-        accepted_diff,
-        failed,
+    let (passed, skipped, failed, accepted_diff) = (
+        passed.into_inner(),
+        skipped.into_inner(),
+        failed.into_inner(),
+        accepted_diff.into_inner(),
     );
+    let mut failed_non_crash = failed_non_crash.into_inner().unwrap();
+    failed_non_crash.sort();
 
+    log.line(&format!(
+        "[submodule_compiler] {selected_total} cases done in {:.0}s: \
+         {passed} passed, {skipped} skipped (unsupported/crash), \
+         {accepted_diff} accepted-diff, {failed} failed",
+        run_start.elapsed().as_secs_f32(),
+    ));
     if failed > 0 {
+        for name in &failed_non_crash {
+            log.line(&format!("[submodule_compiler] FAILED: {name}"));
+        }
+        log.line(&format!(
+            "run log: {}; actual outputs under {}/{SUBFOLDER}/",
+            log_path.display(),
+            baseline::LOCAL_ROOT,
+        ));
         panic!(
             "{failed} baseline mismatch(es):\n  {}\n\
              Run with TSOX_BASELINE_ACCEPT=1 to accept the new output, or add the\n\

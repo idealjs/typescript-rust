@@ -399,6 +399,21 @@ impl Checker {
             return self.is_object_type_related_to(source, target, relation);
         }
 
+        // Type-parameter identity: TypeParameter types produced from the
+        // SAME type-parameter symbol (e.g. the class's `U` appearing both
+        // in a member's return annotation and in the `implements I<U>`
+        // instantiation) are the same type. Go relies on per-symbol
+        // interning (`source == target` pointer check); our cached
+        // construction usually yields the same Arc too, but instantiation
+        // may clone — so compare by symbol.
+        if s.contains(TypeFlags::TypeParameter)
+            && t.contains(TypeFlags::TypeParameter)
+            && let (Some(ss), Some(ts)) = (&source.symbol, &target.symbol)
+            && Arc::ptr_eq(ss, ts)
+        {
+            return true;
+        }
+
         // Handle type parameters: check constraints
         if s.contains(TypeFlags::TypeParameter) {
             // Source is a type parameter, check if its constraint is assignable to target

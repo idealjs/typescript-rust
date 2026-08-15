@@ -42,14 +42,52 @@ cases against committed snapshots in `tests/baselines/reference/`:
 # one-time: fetch the official test corpus (~6500 cases)
 git submodule update --init
 
-# run the default slice (first 1000 cases, ~15 min)
+# run the default slice (first 1000 cases)
 cargo test --test submodule_compiler
 
-# run ALL cases (~6500, ~100 min)
+# run ALL cases (~6500)
 TSOX_SUBMODULE_LIMIT=0 cargo test --test submodule_compiler
 
-# run only the first N cases
-TSOX_SUBMODULE_LIMIT=200 cargo test --test submodule_compiler
+# run a 1-based inclusive window, e.g. cases #1000 through #2000
+# (either bound may be omitted; START defaults to 1, END to the last case)
+TSOX_SUBMODULE_START=1000 TSOX_SUBMODULE_END=2000 cargo test --test submodule_compiler
+
+# further narrow by case-name substring (case-insensitive)
+TSOX_SUBMODULE_FILTER=classExpression cargo test --test submodule_compiler
+```
+
+**Progress logging**: every case logs a START line when a worker picks it up
+and a PASS/FAIL/SKIP/DIFF line with its duration when it finishes, plus a
+heartbeat with counts and ETA every 100 cases. Lines go to stderr (live) and
+to `tests/baselines/local/submodule_run.log` (always, with the final failure
+list). Set `TSOX_SUBMODULE_QUIET=1` to silence the console while keeping the
+file log. Example output:
+
+```
+[submodule_compiler] 6537 cases enumerated; selection '#1000..#2000' (+filter '') → #1000..#2000 = 1001 cases […]
+[w3] #1042/1001 START classExpressionTest2.ts
+[w3] #1042/1001 DIFF classExpressionTest2.ts (0.41s) — known diff (triaged/accepted)
+[submodule_compiler] progress 100/1001 (98 pass, 1 diff, 1 skip, 0 fail) elapsed 47s, ETA 423s
+```
+
+**Parallelism**: cases run as independent one-shot subprocesses, several at
+a time. The worker count defaults to the number of available cores and can
+be pinned explicitly:
+
+```sh
+cargo test --test submodule_compiler                        # uses all cores
+TSOX_SUBMODULE_JOBS=8 cargo test --test submodule_compiler  # exactly 8 workers
+```
+
+Note that cargo's `--test-threads` does **not** apply here — the target is a
+single test function that schedules its own per-case workers; use
+`TSOX_SUBMODULE_JOBS` instead. Serial runtime is ~1s per case (1000 cases
+≈ 15 min, all ≈ 100 min); with N workers it divides roughly by N.
+
+Combined example — run cases #1000–#2000 on 4 cores:
+
+```sh
+TSOX_SUBMODULE_START=1000 TSOX_SUBMODULE_END=2000 TSOX_SUBMODULE_JOBS=4 cargo test --test submodule_compiler
 ```
 
 On mismatch, the actual output is written under `tests/baselines/local/` for
@@ -57,12 +95,14 @@ inspection. To accept new output (after verifying it matches the official
 baselines), re-run with `TSOX_BASELINE_ACCEPT=1`; known gaps go into
 `tests/baselines/reference/triaged.txt`.
 
-**CPU usage**: the test suite (especially `submodule_compiler`, which spawns
-one subprocess per case) can saturate all cores. To keep the machine
-responsive, pin the run to a few cores, e.g. on Linux:
+**CPU usage**: to keep the machine responsive, cap the worker count with
+`TSOX_SUBMODULE_JOBS`, or pin the whole run with `taskset` — the default
+worker count follows CPU affinity, so on Linux either of these limits the
+run to ≤400% CPU:
 
 ```sh
-taskset -c 0-3 cargo test --test submodule_compiler   # ≤400% CPU
+taskset -c 0-3 cargo test --test submodule_compiler            # via affinity
+TSOX_SUBMODULE_JOBS=4 cargo test --test submodule_compiler     # via workers
 ```
 
 

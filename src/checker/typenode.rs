@@ -1167,9 +1167,40 @@ impl Checker {
         if let Some(t) = self.get_cached_type(node) {
             return t;
         }
-        let result = self.error_type();
+        let result = self.resolve_type_query(node);
         self.cache_type(node, result.clone());
         result
+    }
+
+    /// `typeof X` — the type of the VALUE `X`. For a class reference this is
+    /// the class's constructor type (construct signatures + statics), which
+    /// is what makes `declare const c: typeof A | typeof B` unions
+    /// constructable/abstract-checkable. Mirrors Go's
+    /// `getTypeFromTypeQueryNode` (identifier case).
+    fn resolve_type_query(&mut self, node: &Arc<Node>) -> Arc<Type> {
+        let NodeData::TypeQueryNode(d) = &node.data else {
+            return self.error_type();
+        };
+        if d.expr_name.kind != SyntaxKind::Identifier {
+            // Qualified `typeof a.b` — not yet resolved.
+            return self.error_type();
+        }
+        let Some(symbol) = self.resolve_identifier(&d.expr_name) else {
+            return self.error_type();
+        };
+        // A class reference yields the class (constructor) type.
+        for decl in &symbol.declarations {
+            if decl.kind == SyntaxKind::ClassDeclaration {
+                return self.get_type_of_class_declaration(decl);
+            }
+        }
+        // Other values: reuse the symbol's resolved value type when present.
+        if let Some(links) = self.value_symbol_links.get(&symbol)
+            && let Some(t) = &links.resolved_type
+        {
+            return t.clone();
+        }
+        self.error_type()
     }
 
     fn get_type_from_array_or_tuple_type_node(&mut self, node: &Arc<Node>) -> Arc<Type> {

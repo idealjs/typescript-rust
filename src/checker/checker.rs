@@ -18,6 +18,7 @@ use crate::core::compiler_options::{
 };
 use crate::core::text::TextRange;
 use crate::diagnostics::messages_generated::{
+    A_FUNCTION_WHOSE_DECLARED_TYPE_IS_NEITHER_UNDEFINED_VOID_NOR_ANY_MUST_RETURN_A_VALUE,
     A_SPREAD_ARGUMENT_MUST_EITHER_HAVE_A_TUPLE_TYPE_OR_BE_PASSED_TO_A_REST_PARAMETER,
     ARGUMENT_EXPRESSION_EXPECTED, ARGUMENT_OF_TYPE_0_IS_NOT_ASSIGNABLE_TO_PARAMETER_OF_TYPE_1,
     BLOCK_SCOPED_VARIABLE_0_USED_BEFORE_ITS_DECLARATION,
@@ -532,6 +533,19 @@ pub struct Checker {
     /// from within its declaring class. Empty outside any class body.
     pub enclosing_class_stack: Vec<Arc<Node>>,
 
+    /// Contextual-parameter counts for arrow/function-expression arguments
+    /// currently being checked (one entry per enclosing call-argument arrow;
+    /// consumed by the ArrowFunction/FunctionExpression check so their
+    /// parameters typed through the callee's callback-parameter signature
+    /// skip TS7006). Mirrors Go's contextual typing of call arguments.
+    pub call_arg_arrow_context: Vec<usize>,
+
+    /// Whether each enclosing function-like body is a CONSTRUCTOR body
+    /// (entries pushed per function-like; nested functions push `false`).
+    /// TS2715's "abstract property accessed in the constructor" check reads
+    /// the top — accesses inside nested functions run after construction.
+    pub in_ctor_body_stack: Vec<bool>,
+
     /// Stack of declared return types for the enclosing function. When
     /// checking a `return expr;` statement, `expr`'s type is compared
     /// against the top of this stack (the function's declared return
@@ -775,6 +789,8 @@ impl Checker {
             break_continue_context_stack: Vec::new(),
             this_type_stack: Vec::new(),
             enclosing_class_stack: Vec::new(),
+            call_arg_arrow_context: Vec::new(),
+            in_ctor_body_stack: Vec::new(),
             return_type_stack: Vec::new(),
 
             flow_analysis_disabled: false,
@@ -2519,9 +2535,20 @@ impl Checker {
             crate::ast::NodeData::SourceFile(data) => data.statements.iter().cloned().collect(),
             _ => Vec::new(),
         };
+        // Function-overload validation first (TS2389/2391), then the regular
+        // statement walk.
+        self.check_function_overloads_recursive(&statements);
         for stmt in &statements {
             self.check_statement(stmt);
         }
+
+        // TS2309: an `export =` cannot be used in a module with other
+        // exported elements (Go: checkExternalModuleExports — the
+        // export-equals symbol plus any exported VALUE member is an error
+        // on the `export =` declaration). Approximated syntactically: any
+        // other top-level statement with an `export` modifier that declares
+        // a value (class/function/variable/enum/namespace).
+        self.check_export_assignment_conflicts(&statements);
 
         self.pop_scope();
         self.current_file = None;
@@ -3307,7 +3334,7 @@ impl Checker {
     /// member. The construct signature's parameters are resolved (and
     /// cached on the parameter symbols) so `check_call_arguments` can verify
     /// `new Foo(arg)` calls (TS2345).
-    fn get_type_of_class_declaration(&mut self, node: &Arc<Node>) -> Arc<Type> {
+    pub(crate) fn get_type_of_class_declaration(&mut self, node: &Arc<Node>) -> Arc<Type> {
         let members = match &node.data {
             crate::ast::NodeData::ClassDeclaration(data) => {
                 (&data.members, data.heritage_clauses.clone())
@@ -3392,6 +3419,40 @@ impl Checker {
                 None,
             );
             construct_sigs.push(sig);
+        }
+        // An abstract class's construct signatures carry
+        // `SignatureFlagsAbstract` (mirrors Go's createClassType) — the flag
+        // `new`-expression checking reads for TS2511, including through
+        // unions of `typeof` class types.
+        if node.has_syntactic_modifier(ModifierFlags::Abstract) {
+            construct_sigs = construct_sigs
+                .into_iter()
+                .map(|sig| {
+                    let mut s = crate::checker::types::Signature {
+                        id: sig.id,
+                        flags: sig.flags
+                            | crate::checker::types::SignatureFlags::Abstract,
+                        min_argument_count: sig.min_argument_count,
+                        resolved_min_argument_count: sig.resolved_min_argument_count,
+                        declaration: sig.declaration.clone(),
+                        type_parameters: sig.type_parameters.clone(),
+                        parameters: sig.parameters.clone(),
+                        this_parameter: sig.this_parameter.clone(),
+                        resolved_return_type: std::sync::OnceLock::new(),
+                        resolved_type_predicate: sig.resolved_type_predicate.clone(),
+                        target: None,
+                        mapper: sig.mapper.clone(),
+                        isolated_signature_type: std::sync::OnceLock::new(),
+                    };
+                    if let Some(rt) = sig.resolved_return_type.get() {
+                        let _ = s.resolved_return_type.set(rt.clone());
+                    }
+                    if let Some(it) = sig.isolated_signature_type.get() {
+                        let _ = s.isolated_signature_type.set(it.clone());
+                    }
+                    Arc::new(s)
+                })
+                .collect();
         }
         self.create_function_or_constructor_type(construct_sigs, /* is_construct */ true)
     }
@@ -3647,6 +3708,143 @@ impl Checker {
     /// check for `new AbstractClass()`. Mirrors Go's
     /// `getDeclarationModifierFlagsFromDeclarations` abstract check in
     /// `checkNewExpression`.
+    /// Whether a property's declared type includes `undefined` (exempt from
+    /// TS2564).
+    fn property_type_includes_undefined(
+        &mut self,
+        data: &crate::ast::node_data_generated::PropertyDeclarationData,
+    ) -> bool {
+        let Some(tn) = &data.type_node else {
+            return false;
+        };
+        let t = self.get_type_from_type_node(tn);
+        if t.flags.contains(TypeFlags::Undefined) {
+            return true;
+        }
+        if let Some(u) = t.as_union_or_intersection() {
+            return u.types.iter().any(|m| m.flags.contains(TypeFlags::Undefined));
+        }
+        false
+    }
+
+    /// Whether any constructor body in the enclosing class assigns
+    /// `this.<name>` — approximates Go's definite-assignment flow analysis
+    /// for TS2564.
+    fn class_constructor_assigns_property(&self, name: &str) -> bool {
+        let Some(class) = self.enclosing_class_stack.last() else {
+            return false;
+        };
+        let crate::ast::NodeData::ClassDeclaration(cd) = &class.data else {
+            return false;
+        };
+        cd.members.iter().any(|member| {
+            if member.kind != SyntaxKind::Constructor {
+                return false;
+            }
+            let crate::ast::NodeData::ConstructorDeclaration(ctor) = &member.data else {
+                return false;
+            };
+            ctor.body
+                .as_ref()
+                .is_some_and(|body| body_assigns_this_property(body, name))
+        })
+    }
+
+    /// Check one call argument, pushing the contextual-parameter count for
+    /// arrow/function-expression arguments (consumed by their check arm to
+    /// exempt contextually-typed parameters from TS7006).
+    fn check_call_arg_with_context(
+        &mut self,
+        callee_expr: &Arc<Node>,
+        arg_index: usize,
+        arg: &Arc<Node>,
+    ) {
+        let is_function_arg =
+            matches!(arg.kind, SyntaxKind::ArrowFunction | SyntaxKind::FunctionExpression);
+        if is_function_arg {
+            let ctx = self.contextual_param_count_for_arg(callee_expr, arg_index);
+            self.call_arg_arrow_context.push(ctx);
+        }
+        self.check_expression(arg);
+        if is_function_arg {
+            self.call_arg_arrow_context.pop();
+        }
+    }
+
+    /// Contextual parameter count for an arrow/function-expression argument
+    /// at position `arg_index` of a call to `callee_expr`: when the callee's
+    /// corresponding parameter is itself a function type, its callback
+    /// parameters are contextually typed (exempt from TS7006); an `any` /
+    /// unresolvable parameter context leaves them implicit-any.
+    /// Approximates Go's contextual typing through generic signatures (e.g.
+    /// `[a].map(x => ...)`) without full type-parameter instantiation.
+    fn contextual_param_count_for_arg(
+        &mut self,
+        callee_expr: &Arc<Node>,
+        arg_index: usize,
+    ) -> usize {
+        let t = self.get_type_of_node(callee_expr);
+        if t.flags.contains(TypeFlags::Any) {
+            // Lib array iteration methods fall back to `any` here (no
+            // generic instantiation yet), but Go contextually types their
+            // callbacks from the lib signature — exempt up to the real
+            // signature's parameter count. Approximation until generic
+            // instantiation lands.
+            if let crate::ast::NodeData::PropertyAccessExpression(data) = &callee_expr.data {
+                let method = data.name.text().to_string();
+                const ARRAY_CALLBACK_SIGS: &[(&str, usize)] = &[
+                    ("map", 3),
+                    ("filter", 3),
+                    ("forEach", 3),
+                    ("every", 3),
+                    ("some", 3),
+                    ("find", 3),
+                    ("findIndex", 3),
+                    ("findLast", 3),
+                    ("findLastIndex", 3),
+                    ("flatMap", 3),
+                    ("reduce", 4),
+                    ("reduceRight", 4),
+                    ("sort", 2),
+                ];
+                if let Some((_, count)) = ARRAY_CALLBACK_SIGS.iter().find(|(m, _)| *m == method) {
+                    let recv_type = self.get_type_of_node(&data.expression);
+                    if self.is_array_type(&recv_type) {
+                        return *count;
+                    }
+                }
+            }
+            return 0;
+        }
+        let Some(structured) = t.as_structured() else {
+            return 0;
+        };
+        // Pick the first call signature whose parameter list reaches the
+        // argument, else the first signature.
+        let Some(sig) = structured
+            .call_signatures()
+            .iter()
+            .find(|s| s.parameters.len() > arg_index)
+            .or_else(|| structured.call_signatures().first())
+        else {
+            return 0;
+        };
+        let Some(param) = sig.parameters.get(arg_index) else {
+            return 0;
+        };
+        let param_type = self.get_type_of_symbol(param);
+        if param_type.flags.contains(TypeFlags::Any) {
+            return 0;
+        }
+        let Some(param_structured) = param_type.as_structured() else {
+            return 0;
+        };
+        param_structured
+            .call_signatures()
+            .first()
+            .map_or(0, |callback_sig| callback_sig.parameters.len())
+    }
+
     fn symbol_is_abstract_class(&self, symbol: &Arc<Symbol>) -> bool {
         for decl in &symbol.declarations {
             if decl.kind == SyntaxKind::ClassDeclaration
@@ -3654,6 +3852,35 @@ impl Checker {
             {
                 return true;
             }
+        }
+        false
+    }
+
+    /// Whether a callee type — possibly a union of constructor types —
+    /// includes an abstract class constructor. Mirrors Go's
+    /// `someSignature(constructSignatures, SignatureFlagsAbstract)` plus the
+    /// abstract-class-symbol check; our class constructor types carry the
+    /// class symbol, so the symbol check covers both.
+    fn type_includes_abstract_constructor(&self, t: &Arc<Type>) -> bool {
+        if t.flags.contains(TypeFlags::Any) {
+            return false;
+        }
+        if let Some(u) = t.as_union_or_intersection() {
+            return u.types.iter().any(|m| self.type_includes_abstract_constructor(m));
+        }
+        // Abstract construct signature: our signatures don't track the
+        // Abstract flag, but class constructor types carry the class symbol.
+        if t.flags.contains(TypeFlags::Object) {
+            if let Some(s) = t.as_structured()
+                && s.construct_signatures().iter().any(|sig| {
+                    sig.flags.contains(crate::checker::types::SignatureFlags::Abstract)
+                })
+            {
+                return true;
+            }
+        }
+        if let Some(symbol) = &t.symbol {
+            return self.symbol_is_abstract_class(symbol);
         }
         false
     }
@@ -4048,6 +4275,30 @@ impl Checker {
         // `checkPropertyAccess` (`getSymbolModifierFlags` → `private`).
         if let Some(structured) = obj_type.as_structured() {
             if let Some(member_symbol) = structured.members.get(name_text) {
+                // TS2715: an abstract property accessed via `this` inside a
+                // constructor body (nested functions exempt — they run after
+                // construction). Mirrors Go's `checkPropertyAccessibilityAtLocation`
+                // abstract-property branch.
+                if obj_expr.kind == SyntaxKind::ThisKeyword
+                    && self.in_ctor_body_stack.last() == Some(&true)
+                    && let Some(abstract_decl) = member_symbol.declarations.iter().find(|d| {
+                        d.kind == SyntaxKind::PropertyDeclaration
+                            && d.has_syntactic_modifier(ModifierFlags::Abstract)
+                    })
+                    && let Some(parent) = &abstract_decl.parent
+                    && parent.kind == SyntaxKind::ClassDeclaration
+                    && let Some(class_name) = class_declaration_name(parent)
+                {
+                    let file = self.current_file.clone();
+                    let diagnostic = crate::ast::Diagnostic::new(
+                        file,
+                        name.loc,
+                        crate::diagnostics::messages_generated::
+                            ABSTRACT_PROPERTY_0_IN_CLASS_1_CANNOT_BE_ACCESSED_IN_THE_CONSTRUCTOR,
+                        vec![name_text.to_string(), class_name],
+                    );
+                    self.diagnostics.add(diagnostic);
+                }
                 if let Some(declaring_class) = self.declaring_class_of_member(member_symbol) {
                     let is_private = member_symbol
                         .declarations
@@ -4218,9 +4469,52 @@ impl Checker {
         if callee_type.flags.contains(TypeFlags::Any) {
             return;
         }
-        let structured = match callee_type.as_structured() {
-            Some(s) => s,
-            None => {
+        // Union callee (e.g. `typeof A | typeof B`): constructable when every
+        // member carries construct signatures; the signatures flatten into
+        // one overload set (Go: `getSignaturesOfType` over union members).
+        // NOTE: union types also expose `as_structured` (member tables), so
+        // the union check must come FIRST for `new`.
+        let mut union_signatures: Vec<Arc<Signature>> = Vec::new();
+        let signatures: &[Arc<Signature>] =
+            if is_new && callee_type.as_union_or_intersection().is_some() {
+                // Flatten (possibly nested) union members; every leaf must carry
+                // construct signatures for the union to be constructable.
+                let mut leaves: Vec<&Arc<Type>> = Vec::new();
+                flatten_union_leaves(callee_type, &mut leaves);
+                let all_constructable = !leaves.is_empty()
+                    && leaves.iter().all(|m| {
+                        m.as_structured()
+                            .is_some_and(|s| !s.construct_signatures().is_empty())
+                    });
+                if all_constructable {
+                    for m in &leaves {
+                        if let Some(s) = m.as_structured() {
+                            union_signatures.extend(s.construct_signatures().iter().cloned());
+                        }
+                    }
+                    &union_signatures
+                } else {
+                    // Some member isn't constructable.
+                    let file = self.current_file.clone();
+                    self.diagnostics.add(crate::ast::Diagnostic::new(
+                        file,
+                        callee_expr.loc,
+                        if is_new {
+                            THIS_EXPRESSION_IS_NOT_CONSTRUCTABLE
+                        } else {
+                            THIS_EXPRESSION_IS_NOT_CALLABLE
+                        },
+                        vec![],
+                    ));
+                    return;
+                }
+            } else if let Some(structured) = callee_type.as_structured() {
+                if is_new {
+                    structured.construct_signatures()
+                } else {
+                    structured.call_signatures()
+                }
+            } else {
                 // Non-structured callee (primitive like `number`, `string`,
                 // etc.) is never callable/constructable. Mirrors Go's
                 // `invocationError` for types with no signatures.
@@ -4236,13 +4530,7 @@ impl Checker {
                     vec![],
                 ));
                 return;
-            }
-        };
-        let signatures = if is_new {
-            structured.construct_signatures()
-        } else {
-            structured.call_signatures()
-        };
+            };
         if signatures.is_empty() {
             // Structured type but no call/construct signatures — e.g.
             // calling a plain object literal or a number. Mirrors Go's
@@ -5187,6 +5475,43 @@ impl Checker {
                         let _ = tps; // TODO: check_grammar_type_parameter_list
                     }
                     self.check_grammar_parameter_list(&data.parameters);
+                    // TS2369: parameter properties are never allowed in a
+                    // function declaration (only constructor implementations).
+                    self.check_parameter_property_modifiers(&data.parameters, false);
+                    // TS7006/TS7019: implicit-any parameters; plus parameter
+                    // type annotations and the return-type annotation may
+                    // contain function-type nodes with their own parameters.
+                    self.check_parameter_implicit_any(node, &data.parameters, 0);
+                    for p in data.parameters.iter() {
+                        if let crate::ast::NodeData::ParameterDeclaration(pd) = &p.data
+                            && let Some(pt) = &pd.type_node
+                        {
+                            self.check_type_annotation(pt);
+                        }
+                    }
+                    if let Some(tn) = &data.type_node {
+                        self.check_type_annotation(tn);
+                    }
+                    // TS7010: a signature declaration without a body or
+                    // return-type annotation implicitly returns `any` under
+                    // noImplicitAny. Fires per declaration — even when an
+                    // implementation exists elsewhere (oracle-verified).
+                    if self.no_implicit_any
+                        && data.type_node.is_none()
+                        && data.body.is_none()
+                        && let Some(name) = &data.name
+                        && name.kind == SyntaxKind::Identifier
+                    {
+                        let file = self.current_file.clone();
+                        let diagnostic = crate::ast::Diagnostic::new(
+                            file,
+                            name.loc,
+                            crate::diagnostics::messages_generated::
+                                X_0_WHICH_LACKS_RETURN_TYPE_ANNOTATION_IMPLICITLY_HAS_AN_1_RETURN_TYPE,
+                            vec![name.text().to_string(), "any".to_string()],
+                        );
+                        self.diagnostics.add(diagnostic);
+                    }
                 }
                 // JSDoc check: validate @param tags against actual
                 // parameters. No-op until JSDoc parsing (P2.7) lands.
@@ -5245,17 +5570,17 @@ impl Checker {
                     _ => None,
                 };
                 self.return_type_stack.push(declared_return.clone());
+                self.in_ctor_body_stack.push(false);
                 if let crate::ast::NodeData::FunctionDeclaration(data) = &node.data {
                     if let Some(body) = &data.body {
                         self.check_statement(body);
                     }
                 }
-                // TS2366: a function whose declared return type excludes
-                // `undefined`/`void`/`any` must return a value on every code
-                // path. This uses a simple reachability heuristic — if the
-                // body's last statement does not unconditionally return (or
-                // throw), emit TS2366. Mirrors Go's `checkFunctionDeclaration`
-                // implicit-return check.
+                // TS2355 vs TS2366 (Go `checkFunctionAndBodies`): with a
+                // declared return type that isn't `undefined`/`void`/`any`:
+                //  - no `return` anywhere in the body → TS2355 on the
+                //    return-type annotation (the body never returns a value);
+                //  - some `return` but not all paths return → TS2366.
                 if let Some(ret_type) = &declared_return {
                     if !ret_type.flags.contains(TypeFlags::Void)
                         && !ret_type.flags.contains(TypeFlags::Undefined)
@@ -5264,24 +5589,48 @@ impl Checker {
                         if let crate::ast::NodeData::FunctionDeclaration(data) = &node.data {
                             if let Some(body) = &data.body {
                                 if !self.function_body_definitely_returns(body) {
-                                    self.diagnostics.add(crate::ast::Diagnostic::new(
-                                        self.current_file.clone(),
-                                        node.loc,
-                                        FUNCTION_LACKS_ENDING_RETURN_STATEMENT_AND_RETURN_TYPE_DOES_NOT_INCLUDE_UNDEFINED,
-                                        vec![],
-                                    ));
+                                    if !Self::function_body_has_explicit_return(body) {
+                                        // TS2355 — on the annotation, like Go.
+                                        let loc = data
+                                            .type_node
+                                            .as_ref()
+                                            .map_or(node.loc, |tn| tn.loc);
+                                        self.diagnostics.add(crate::ast::Diagnostic::new(
+                                            self.current_file.clone(),
+                                            loc,
+                                            A_FUNCTION_WHOSE_DECLARED_TYPE_IS_NEITHER_UNDEFINED_VOID_NOR_ANY_MUST_RETURN_A_VALUE,
+                                            vec![],
+                                        ));
+                                    } else {
+                                        self.diagnostics.add(crate::ast::Diagnostic::new(
+                                            self.current_file.clone(),
+                                            node.loc,
+                                            FUNCTION_LACKS_ENDING_RETURN_STATEMENT_AND_RETURN_TYPE_DOES_NOT_INCLUDE_UNDEFINED,
+                                            vec![],
+                                        ));
+                                    }
                                 }
                             }
                         }
                     }
                 }
                 self.return_type_stack.pop();
+                self.in_ctor_body_stack.pop();
                 self.break_continue_context_stack.pop();
                 self.pop_function_scope();
             }
             SyntaxKind::ClassDeclaration => {
                 // Grammar check: validate modifiers.
                 self.check_grammar_modifiers(node);
+                // Reserved type names (TS2414): `class any {}` etc.
+                if let crate::ast::NodeData::ClassDeclaration(data) = &node.data {
+                    if let Some(name) = &data.name {
+                        self.check_reserved_type_name(
+                            name,
+                            &crate::diagnostics::messages_generated::CLASS_NAME_CANNOT_BE_0,
+                        );
+                    }
+                }
                 // Push the class scope before building the instance type so
                 // that type-parameter references in property annotations
                 // (e.g. `value: T`) resolve correctly.
@@ -5301,6 +5650,11 @@ impl Checker {
                         for clause in heritage.iter() {
                             self.check_heritage_clause(clause);
                         }
+                    }
+                    // Overload-consecutiveness check (TS2389/2390/2391).
+                    // Ambient (`declare class`) members are exempt.
+                    if !node.has_syntactic_modifier(ModifierFlags::Ambient) {
+                        self.check_class_member_overloads(&data.members);
                     }
                     // Check member initializers / method bodies.
                     for member in data.members.iter() {
@@ -5328,8 +5682,18 @@ impl Checker {
                     }
                 }
             }
-            SyntaxKind::InterfaceDeclaration
-            | SyntaxKind::TypeAliasDeclaration
+            SyntaxKind::InterfaceDeclaration => {
+                // TS2427: reserved predefined type keywords can't name an
+                // interface (`interface string {}`).
+                if let crate::ast::NodeData::InterfaceDeclaration(data) = &node.data {
+                    self.check_reserved_type_name(
+                        &data.name,
+                        &crate::diagnostics::messages_generated::INTERFACE_NAME_CANNOT_BE_0,
+                    );
+                    self.check_interface_members(&data.members);
+                }
+            }
+            SyntaxKind::TypeAliasDeclaration
             | SyntaxKind::ImportDeclaration
             | SyntaxKind::ImportEqualsDeclaration
             | SyntaxKind::ExportDeclaration
@@ -5340,6 +5704,13 @@ impl Checker {
                 // or import-level.
             }
             SyntaxKind::EnumDeclaration => {
+                // Reserved type names (TS2431): `enum any {}` etc.
+                if let crate::ast::NodeData::EnumDeclaration(data) = &node.data {
+                    self.check_reserved_type_name(
+                        &data.name,
+                        &crate::diagnostics::messages_generated::ENUM_NAME_CANNOT_BE_0,
+                    );
+                }
                 // Check enum member initializers.
                 self.push_scope(node);
                 if let crate::ast::NodeData::EnumDeclaration(data) = &node.data {
@@ -5499,6 +5870,61 @@ impl Checker {
         }
     }
 
+    /// TS2715 for `let { x, y: y1 } = this;` in a constructor: each bound
+    /// element's property name (or shorthand name) that resolves to an
+    /// abstract property of the enclosing class errors on that name node.
+    /// Mirrors Go's `isThisInitializedObjectBindingExpression` branch.
+    fn check_this_destructuring_abstract_properties(
+        &mut self,
+        pattern: &Arc<Node>,
+        this_type: &Arc<Type>,
+    ) {
+        let Some(structured) = this_type.as_structured() else {
+            return;
+        };
+        let crate::ast::NodeData::BindingPattern(data) = &pattern.data else {
+            return;
+        };
+        for element in data.elements.iter() {
+            let crate::ast::NodeData::BindingElement(el) = &element.data else {
+                continue;
+            };
+            // The property read is the property name (`{y: y1}` reads `y`);
+            // shorthand (`{x}`) reads its own name.
+            let Some(prop_name_node) = el
+                .property_name
+                .as_ref()
+                .or(el.name.as_ref())
+                .filter(|n| n.kind == SyntaxKind::Identifier)
+            else {
+                continue;
+            };
+            let prop_text = prop_name_node.text();
+            let Some(member_symbol) = structured.members.get(prop_text) else {
+                continue;
+            };
+            let Some(abstract_decl) = member_symbol.declarations.iter().find(|d| {
+                d.kind == SyntaxKind::PropertyDeclaration
+                    && d.has_syntactic_modifier(ModifierFlags::Abstract)
+            }) else {
+                continue;
+            };
+            let Some(parent) = &abstract_decl.parent else { continue };
+            let Some(class_name) = class_declaration_name(parent) else {
+                continue;
+            };
+            let file = self.current_file.clone();
+            let diagnostic = crate::ast::Diagnostic::new(
+                file,
+                prop_name_node.loc,
+                crate::diagnostics::messages_generated::
+                    ABSTRACT_PROPERTY_0_IN_CLASS_1_CANNOT_BE_ACCESSED_IN_THE_CONSTRUCTOR,
+                vec![prop_text.to_string(), class_name],
+            );
+            self.diagnostics.add(diagnostic);
+        }
+    }
+
     fn check_variable_declaration(&mut self, node: &Arc<Node>) {
         if let crate::ast::NodeData::VariableDeclaration(data) = &node.data {
             // A binding-pattern name's computed property names are reference
@@ -5508,6 +5934,16 @@ impl Checker {
             // `checkComputedPropertyName` being invoked for binding patterns
             // through the declaration check.
             self.check_binding_pattern_computed_names(&data.name);
+            // TS2715 (destructuring form): `let { x, y } = this;` inside a
+            // constructor accesses each bound abstract property.
+            if data.name.kind == SyntaxKind::ObjectBindingPattern
+                && self.in_ctor_body_stack.last() == Some(&true)
+                && let Some(init) = &data.initializer
+                && init.kind == SyntaxKind::ThisKeyword
+            {
+                let this_type = self.get_type_of_node(init);
+                self.check_this_destructuring_abstract_properties(&data.name, &this_type);
+            }
             if let Some(init) = &data.initializer {
                 self.check_expression(init);
             }
@@ -6110,10 +6546,708 @@ impl Checker {
                 false
             }
             _ => false,
+
+    /// The `name` node of a class member that has one (`None` for
+    /// constructors — their "name" is the `constructor` keyword and errors
+    /// anchor on the member node itself, mirroring `name ?? node` in Go).
+    fn class_member_name_node(node: &Arc<Node>) -> Option<Arc<Node>> {
+        match &node.data {
+            crate::ast::NodeData::MethodDeclaration(d) => Some(Arc::clone(&d.name)),
+            _ => None,
+        }
+    }
+
+    /// Declaration-name text of a class member, rendered like Go's
+    /// `DeclarationNameToString`: identifiers verbatim, string literals WITH
+    /// their quotes, numeric literals verbatim. Constructors share the fixed
+    /// key `"constructor"`. `None` for non-literal names (computed/private).
+    fn class_member_name_text(node: &Arc<Node>) -> Option<String> {
+        if matches!(node.kind, SyntaxKind::Constructor) {
+            return Some("constructor".to_string());
+        }
+        let name = Self::class_member_name_node(node)?;
+        match name.kind {
+            // Go's `DeclarationNameToString`: string literals print WITH
+            // their quotes; identifiers and numeric literals print verbatim.
+            SyntaxKind::Identifier | SyntaxKind::NumericLiteral => {
+                let text = name.text().to_string();
+                if text.is_empty() {
+                    None
+                } else {
+                    Some(text)
+                }
+            }
+            SyntaxKind::StringLiteral => Some(format!("\"{}\"", name.text())),
+            _ => None,
+        }
+    }
+
+    /// Whether a method/constructor member has an implementation body.
+    fn class_member_has_body(node: &Arc<Node>) -> bool {
+        matches!(
+            &node.data,
+            crate::ast::NodeData::MethodDeclaration(d) if d.body.is_some()
+        ) || matches!(
+            &node.data,
+            crate::ast::NodeData::ConstructorDeclaration(d) if d.body.is_some()
+        )
+    }
+
+    /// Class-body overload validation, mirroring Go's
+    /// `checkFunctionOrConstructorSymbolWorker`: a run of overload signatures
+    /// must be immediately followed by its implementation. Reports
+    /// - TS2390 when a constructor overload group has no implementation,
+    /// - TS2391 when a method overload group has no implementation (or its
+    ///   signatures are not consecutive),
+    /// - TS2389 when a differently-named implementation directly follows an
+    ///   overload signature.
+    ///
+    /// Ambient (`declare`) class members are exempt — ambient declarations
+    /// can be interleaved. Abstract / optional members don't need bodies.
+    fn check_class_member_overloads(&mut self, members: &NodeList) {
+        // Group function-like members by name text, preserving order.
+        let mut groups: std::collections::BTreeMap<String, Vec<usize>> =
+            std::collections::BTreeMap::new();
+        for (idx, m) in members.iter().enumerate() {
+            if !matches!(m.kind, SyntaxKind::Constructor | SyntaxKind::MethodDeclaration) {
+                continue;
+            }
+            if let Some(name) = Self::class_member_name_text(m) {
+                groups.entry(name).or_default().push(idx);
+            }
+        }
+        for (_, idxs) in groups {
+            // Walk the group like Go's declaration loop: a signature not
+            // immediately followed (list-adjacency approximates Go's
+            // `previousDeclaration.End() == node.Pos()` trivia-adjacency)
+            // reports on the PREVIOUS signature; at the end, a trailing
+            // signature with no implementation reports on itself.
+            let mut prev: Option<usize> = None;
+            let mut has_body = false;
+            for &idx in &idxs {
+                let node = &members.nodes[idx];
+                if !Self::class_member_has_body(node) {
+                    if let Some(p) = prev {
+                        if p + 1 != idx {
+                            self.report_implementation_expected_error(members, p);
+                        }
+                    }
+                } else {
+                    has_body = true;
+                }
+                prev = Some(idx);
+            }
+            let last = idxs[idxs.len() - 1];
+            if !has_body {
+                let node = &members.nodes[last];
+                let exempt = node.has_syntactic_modifier(ModifierFlags::Abstract)
+                    || matches!(
+                        &node.data,
+                        crate::ast::NodeData::MethodDeclaration(d) if d.postfix_token.is_some()
+                    );
+                if !exempt {
+                    self.report_implementation_expected_error(members, last);
+                }
+            }
+        }
+    }
+
+    /// The `reportImplementationExpectedError` core: `node` is an overload
+    /// signature with no implementation. When the member immediately after it
+    /// is a same-kind implementation with a DIFFERENT name, that
+    /// implementation is really this overload's implementation gone wrong →
+    /// TS2389; otherwise the group is simply missing its implementation →
+    /// TS2390 (constructor) / TS2391 (method).
+    fn report_implementation_expected_error(&mut self, members: &NodeList, idx: usize) {
+        let node = Arc::clone(&members.nodes[idx]);
+        let name_text = Self::class_member_name_text(&node);
+        if let Some(sib) = members.nodes.get(idx + 1) {
+            if sib.kind == node.kind {
+                let sib_name = Self::class_member_name_text(sib);
+                let same_name = match (&name_text, &sib_name) {
+                    (Some(a), Some(b)) => a == b,
+                    _ => false,
+                };
+                // Same name: the overload has its implementation right after
+                // (static/instance mismatch is a separate Go check, not
+                // ported here).
+                if same_name {
+                    return;
+                }
+                if Self::class_member_has_body(sib) {
+                    // TS2389 on the implementation's name node, naming the
+                    // overload's declaration name.
+                    let file = self.current_file.clone();
+                    let loc = Self::class_member_name_node(sib)
+                        .map(|n| n.loc)
+                        .unwrap_or(sib.loc);
+                    let display_name = name_text.unwrap_or_default();
+                    let diagnostic = crate::ast::Diagnostic::new(
+                        file,
+                        loc,
+                        crate::diagnostics::messages_generated::
+                            FUNCTION_IMPLEMENTATION_NAME_MUST_BE_0,
+                        vec![display_name],
+                    );
+                    self.diagnostics.add(diagnostic);
+                    return;
+                }
+            }
+        }
+        // Missing implementation: constructor → TS2390 on the member; method
+        // → TS2391 on its name (or the member when the name is missing).
+        let file = self.current_file.clone();
+        let (loc, message): (crate::core::text::TextRange, crate::diagnostics::Message) =
+            if matches!(node.kind, SyntaxKind::Constructor) {
+                (
+                    node.loc,
+                    crate::diagnostics::messages_generated::CONSTRUCTOR_IMPLEMENTATION_IS_MISSING,
+                )
+            } else {
+                (
+                    Self::class_member_name_node(&node)
+                        .map(|n| n.loc)
+                        .unwrap_or(node.loc),
+                    crate::diagnostics::messages_generated::
+                        FUNCTION_IMPLEMENTATION_IS_MISSING_OR_NOT_IMMEDIATELY_FOLLOWING_THE_DECLARATION,
+                )
+            };
+        let diagnostic = crate::ast::Diagnostic::new(file, loc, message, Vec::new());
+        self.diagnostics.add(diagnostic);
+    }
+
+    /// TS2369: parameter properties (`constructor(private x)`) are only
+    /// allowed in a constructor IMPLEMENTATION (one with a body). Mirrors
+    /// Go's `checkParameter` modifier check.
+    fn check_parameter_property_modifiers(&mut self, params: &NodeList, is_ctor_impl: bool) {
+        if is_ctor_impl {
+            return;
+        }
+        for param in params.iter() {
+            let crate::ast::NodeData::ParameterDeclaration(pd) = &param.data else {
+                continue;
+            };
+            let Some(modifiers) = &pd.modifiers else { continue };
+            if modifiers.modifier_flags.intersects(
+                ModifierFlags::Public
+                    | ModifierFlags::Private
+                    | ModifierFlags::Protected
+                    | ModifierFlags::Readonly,
+            ) {
+                let file = self.current_file.clone();
+                let diagnostic = crate::ast::Diagnostic::new(
+                    file,
+                    param.loc,
+                    crate::diagnostics::messages_generated::
+                        A_PARAMETER_PROPERTY_IS_ONLY_ALLOWED_IN_A_CONSTRUCTOR_IMPLEMENTATION,
+                    Vec::new(),
+                );
+                self.diagnostics.add(diagnostic);
+            }
+        }
+    }
+
+    /// TS7006/TS7019: parameters without a type annotation or initializer
+    /// implicitly have an `any` (rest: `any[]`) type under `noImplicitAny`.
+    /// Reported on the parameter node for every function-like context —
+    /// implementations, overload signatures, interface members and ambient
+    /// `declare`s alike (oracle-verified: `declare function g(y);` in a
+    /// source file still reports). Mirrors Go's `reportImplicitAny`.
+    ///
+    /// Exemptions (parameters that are NOT implicitly any):
+    /// - `contextual_param_count`: parameters of contextually-typed function
+    ///   expressions / arrows (`let f: (x: number) => number = (x) => ...`)
+    ///   inherit their type from the contextual signature.
+    /// - parameters typed via a JSDoc `@param {T}` tag.
+    /// KNOWN GAP: binding-pattern parameters don't report per-element
+    /// implicit-any errors yet.
+    fn check_parameter_implicit_any(
+        &mut self,
+        node: &Arc<Node>,
+        params: &NodeList,
+        contextual_param_count: usize,
+    ) {
+        if !self.no_implicit_any {
+            return;
+        }
+        for (i, param) in params.iter().enumerate() {
+            let crate::ast::NodeData::ParameterDeclaration(pd) = &param.data else {
+                continue;
+            };
+            if pd.type_node.is_some() || pd.initializer.is_some() {
+                continue;
+            }
+            let name = &pd.name;
+            if name.kind != SyntaxKind::Identifier || name.text() == "this" {
+                continue;
+            }
+            // Contextually typed: the corresponding contextual-signature
+            // parameter supplies the type.
+            if i < contextual_param_count {
+                continue;
+            }
+            // JSDoc `@param {T} name` provides the type.
+            if self.param_has_typed_jsdoc_tag(node, name.text()) {
+                continue;
+            }
+            let file = self.current_file.clone();
+            let name_text = name.text().to_string();
+            let diagnostic = if pd.dot_dot_dot_token.is_some() {
+                crate::ast::Diagnostic::new(
+                    file,
+                    param.loc,
+                    crate::diagnostics::messages_generated::
+                        REST_PARAMETER_0_IMPLICITLY_HAS_AN_ANY_TYPE,
+                    vec![name_text],
+                )
+            } else {
+                crate::ast::Diagnostic::new(
+                    file,
+                    param.loc,
+                    crate::diagnostics::messages_generated::PARAMETER_0_IMPLICITLY_HAS_AN_1_TYPE,
+                    vec![name_text, "any".to_string()],
+                )
+            };
+            self.diagnostics.add(diagnostic);
+        }
+    }
+
+    /// Whether the function `node` has a JSDoc `@param {T} <name>` tag with a
+    /// type expression for the given parameter name. Resolves the node's
+    /// JSDoc comments through the source file's lazy JSDoc cache.
+    fn param_has_typed_jsdoc_tag(&self, node: &Arc<Node>, param_name: &str) -> bool {
+        let Some(file) = &self.current_file else {
+            return false;
+        };
+        for jsdoc in file.resolve_jsdoc(node) {
+            let crate::ast::NodeData::JSDoc(d) = &jsdoc.data else {
+                continue;
+            };
+            let Some(tags) = &d.tags else { continue };
+            for tag in tags.iter() {
+                if let crate::ast::NodeData::JSDocParameterOrPropertyTag(td) = &tag.data
+                    && td.name.kind == SyntaxKind::Identifier
+                    && td.name.text() == param_name
+                    && td.type_expression.is_some()
+                {
+                    return true;
+                }
+            }
+        }
+        false
+    }
+
+    /// Walk a type annotation, checking nested function/constructor TYPE
+    /// nodes: their parameters are function-likes for TS2369 (parameter
+    /// properties) and TS7006 (implicit any), and nested annotations are
+    /// recursed. This is how `(public B) => C` annotations get their
+    /// parameter-level diagnostics (Go checks type nodes via
+    /// `checkSourceElement` → `checkFunctionTypeNode`).
+    fn check_type_annotation(&mut self, tn: &Arc<Node>) {
+        match tn.kind {
+            SyntaxKind::FunctionType | SyntaxKind::ConstructorType => {
+                let (params, return_type): (&NodeList, Option<&Arc<Node>>) = match &tn.data {
+                    crate::ast::NodeData::FunctionTypeNode(d) => {
+                        (&d.parameters, d.type_node.as_ref())
+                    }
+                    crate::ast::NodeData::ConstructorTypeNode(d) => {
+                        (&d.parameters, d.type_node.as_ref())
+                    }
+                    _ => return,
+                };
+                self.check_parameter_property_modifiers(params, false);
+                self.check_parameter_implicit_any(tn, params, 0);
+                for p in params.iter() {
+                    if let crate::ast::NodeData::ParameterDeclaration(pd) = &p.data
+                        && let Some(pt) = &pd.type_node
+                    {
+                        self.check_type_annotation(pt);
+                    }
+                }
+                if let Some(rt) = return_type {
+                    self.check_type_annotation(rt);
+                }
+            }
+            SyntaxKind::TypeReference => {
+                if let crate::ast::NodeData::TypeReferenceNode(d) = &tn.data
+                    && let Some(args) = &d.type_arguments
+                {
+                    for a in args.iter() {
+                        self.check_type_annotation(a);
+                    }
+                }
+            }
+            SyntaxKind::UnionType | SyntaxKind::IntersectionType => {
+                if let crate::ast::NodeData::UnionTypeNode(d) = &tn.data {
+                    for t in d.types.iter() {
+                        self.check_type_annotation(t);
+                    }
+                }
+                if let crate::ast::NodeData::IntersectionTypeNode(d) = &tn.data {
+                    for t in d.types.iter() {
+                        self.check_type_annotation(t);
+                    }
+                }
+            }
+            SyntaxKind::ParenthesizedType => {
+                if let crate::ast::NodeData::ParenthesizedTypeNode(d) = &tn.data {
+                    self.check_type_annotation(&d.type_node);
+                }
+            }
+            SyntaxKind::ArrayType | SyntaxKind::TypeOperator => {
+                if let crate::ast::NodeData::ArrayTypeNode(d) = &tn.data {
+                    self.check_type_annotation(&d.element_type);
+                }
+                if let crate::ast::NodeData::TypeOperatorNode(d) = &tn.data {
+                    self.check_type_annotation(&d.type_node);
+                }
+            }
+            SyntaxKind::TupleType => {
+                if let crate::ast::NodeData::TupleTypeNode(d) = &tn.data {
+                    for t in d.elements.iter() {
+                        self.check_type_annotation(t);
+                    }
+                }
+            }
+            SyntaxKind::IndexedAccessType => {
+                if let crate::ast::NodeData::IndexedAccessTypeNode(d) = &tn.data {
+                    self.check_type_annotation(&d.object_type);
+                    self.check_type_annotation(&d.index_type);
+                }
+            }
+            _ => {}
+        }
+    }
+
+    /// Whether a function body contains any `return` statement outside
+    /// nested function-likes — Go's binder `NodeFlagsHasExplicitReturn`.
+    fn function_body_has_explicit_return(body: &Arc<Node>) -> bool {
+        fn walk(n: &Arc<Node>) -> bool {
+            match n.kind {
+                SyntaxKind::ReturnStatement => return true,
+                // Nested function-likes track their own return flags.
+                SyntaxKind::FunctionDeclaration
+                | SyntaxKind::FunctionExpression
+                | SyntaxKind::ArrowFunction
+                | SyntaxKind::MethodDeclaration
+                | SyntaxKind::GetAccessor
+                | SyntaxKind::SetAccessor => return false,
+                _ => {}
+            }
+            let mut found = false;
+            crate::ast::node_data_generated::for_each_child(n, |child| {
+                if walk(child) {
+                    found = true;
+                    true
+                } else {
+                    false
+                }
+            });
+            found
+        }
+        walk(body)
+    }
+
+    /// Interface-member checks: signature parameters (TS2369 parameter
+    /// properties, TS7006 implicit any), implicit-any returns (TS7010 for
+    /// methods, TS7013 construct / TS7010-analog call signatures — Go's
+    /// `reportImplicitAny` switch), and type annotations that hold
+    /// function-type nodes. Mirrors Go's `checkInterfaceDeclaration` →
+    /// `checkSourceElement` walk over members.
+    fn check_interface_members(&mut self, members: &NodeList) {
+        for member in members.iter() {
+            match member.kind {
+                SyntaxKind::MethodSignature => {
+                    let crate::ast::NodeData::MethodSignatureDeclaration(d) = &member.data
+                    else {
+                        continue;
+                    };
+                    self.check_parameter_property_modifiers(&d.parameters, false);
+                    self.check_parameter_implicit_any(member, &d.parameters, 0);
+                    for p in d.parameters.iter() {
+                        if let crate::ast::NodeData::ParameterDeclaration(pd) = &p.data
+                            && let Some(pt) = &pd.type_node
+                        {
+                            self.check_type_annotation(pt);
+                        }
+                    }
+                    if let Some(tn) = &d.type_node {
+                        self.check_type_annotation(tn);
+                    }
+                    // TS7010: no return-type annotation on a method signature.
+                    if self.no_implicit_any
+                        && d.type_node.is_none()
+                        && d.name.kind == SyntaxKind::Identifier
+                    {
+                        let file = self.current_file.clone();
+                        let diagnostic = crate::ast::Diagnostic::new(
+                            file,
+                            d.name.loc,
+                            crate::diagnostics::messages_generated::
+                                X_0_WHICH_LACKS_RETURN_TYPE_ANNOTATION_IMPLICITLY_HAS_AN_1_RETURN_TYPE,
+                            vec![d.name.text().to_string(), "any".to_string()],
+                        );
+                        self.diagnostics.add(diagnostic);
+                    }
+                }
+                SyntaxKind::ConstructSignature | SyntaxKind::CallSignature => {
+                    let (params, type_node) = match &member.data {
+                        crate::ast::NodeData::ConstructSignatureDeclaration(d) => {
+                            (&d.parameters, d.type_node.as_ref())
+                        }
+                        crate::ast::NodeData::CallSignatureDeclaration(d) => {
+                            (&d.parameters, d.type_node.as_ref())
+                        }
+                        _ => continue,
+                    };
+                    self.check_parameter_property_modifiers(params, false);
+                    self.check_parameter_implicit_any(member, params, 0);
+                    for p in params.iter() {
+                        if let crate::ast::NodeData::ParameterDeclaration(pd) = &p.data
+                            && let Some(pt) = &pd.type_node
+                        {
+                            self.check_type_annotation(pt);
+                        }
+                    }
+                    if let Some(tn) = type_node {
+                        self.check_type_annotation(tn);
+                    }
+                    // TS7013 (construct) / TS7010-analog (call): signature
+                    // without a return-type annotation implicitly returns any.
+                    if self.no_implicit_any && type_node.is_none() {
+                        let message = if member.kind == SyntaxKind::ConstructSignature {
+                            crate::diagnostics::messages_generated::
+                                CONSTRUCT_SIGNATURE_WHICH_LACKS_RETURN_TYPE_ANNOTATION_IMPLICITLY_HAS_AN_ANY_RETURN_TYPE
+                        } else {
+                            crate::diagnostics::messages_generated::
+                                CALL_SIGNATURE_WHICH_LACKS_RETURN_TYPE_ANNOTATION_IMPLICITLY_HAS_AN_ANY_RETURN_TYPE
+                        };
+                        let file = self.current_file.clone();
+                        let diagnostic =
+                            crate::ast::Diagnostic::new(file, member.loc, message, vec![]);
+                        self.diagnostics.add(diagnostic);
+                    }
+                }
+                SyntaxKind::PropertySignature => {
+                    if let crate::ast::NodeData::PropertySignatureDeclaration(d) = &member.data {
+                        self.check_type_annotation(&d.type_node);
+                    }
+                }
+                _ => {}
+            }
+        }
+    }
+
+    /// `check_statement_function_overloads` over a statement list AND the
+    /// nested statement lists of blocks and namespace bodies — overloads
+    /// declared inside `{ ... }` blocks or `namespace N { ... }` follow the
+    /// same implementation-must-follow rule (Go's check is symbol-based and
+    /// covers declarations wherever they appear). Skipped entirely in
+    /// declaration files, where overload groups need no implementation
+    /// (Go's `inAmbientContext` covers everything in a .d.ts).
+    fn check_function_overloads_recursive(&mut self, statements: &[Arc<Node>]) {
+        if self
+            .current_file
+            .as_ref()
+            .is_some_and(|f| f.is_declaration_file)
+        {
+            return;
+        }
+        self.check_statement_function_overloads(statements);
+        for s in statements {
+            match &s.data {
+                crate::ast::NodeData::Block(d) => {
+                    self.check_function_overloads_recursive(&d.statements.nodes);
+                }
+                crate::ast::NodeData::ModuleDeclaration(d) => {
+                    // Ambient modules (`declare module "..."` / `declare
+                    // namespace N`): everything inside is ambient — overload
+                    // groups need no implementation.
+                    if d
+                        .modifiers
+                        .as_ref()
+                        .is_some_and(|m| m.modifier_flags.intersects(ModifierFlags::Ambient))
+                    {
+                        continue;
+                    }
+                    if let Some(body) = &d.body
+                        && matches!(body.kind, SyntaxKind::Block | SyntaxKind::ModuleBlock)
+                        && let crate::ast::NodeData::Block(bd) = &body.data
+                    {
+                        self.check_function_overloads_recursive(&bd.statements.nodes);
+                    }
+                    if let Some(body) = &d.body
+                        && body.kind == SyntaxKind::ModuleBlock
+                        && let crate::ast::NodeData::ModuleBlock(bd) = &body.data
+                    {
+                        self.check_function_overloads_recursive(&bd.statements.nodes);
+                    }
+                }
+                _ => {}
+            }
+        }
+    }
+
+    /// Top-level function overload validation — the statement-list sibling of
+    /// `check_class_member_overloads` (Go funnels both through
+    /// `checkFunctionOrConstructorSymbolWorker`): same-named overload
+    /// signatures must be immediately followed by their implementation.
+    /// Ambient (`declare function`) signatures are exempt from the
+    /// implementation requirement.
+    fn check_statement_function_overloads(&mut self, statements: &[Arc<Node>]) {
+        let mut groups: std::collections::BTreeMap<String, Vec<usize>> =
+            std::collections::BTreeMap::new();
+        for (idx, s) in statements.iter().enumerate() {
+            if s.kind != SyntaxKind::FunctionDeclaration {
+                continue;
+            }
+            if let crate::ast::NodeData::FunctionDeclaration(d) = &s.data
+                && let Some(n) = &d.name
+                && n.kind == SyntaxKind::Identifier
+            {
+                groups.entry(n.text().to_string()).or_default().push(idx);
+            }
+        }
+        for (_, idxs) in groups {
+            let mut prev: Option<usize> = None;
+            let mut has_body = false;
+            for &idx in &idxs {
+                let body = matches!(
+                    &statements[idx].data,
+                    crate::ast::NodeData::FunctionDeclaration(d) if d.body.is_some()
+                );
+                if !body {
+                    if let Some(p) = prev {
+                        if p + 1 != idx {
+                            self.report_function_impl_expected(statements, p);
+                        }
+                    }
+                } else {
+                    has_body = true;
+                }
+                prev = Some(idx);
+            }
+            if !has_body {
+                let last = idxs[idxs.len() - 1];
+                if !statements[last].has_syntactic_modifier(ModifierFlags::Ambient) {
+                    self.report_function_impl_expected(statements, last);
+                }
+            }
+        }
+    }
+
+    /// `reportImplementationExpectedError` for statement-level function
+    /// declarations: TS2389 when a differently-named implementation follows
+    /// the signature immediately, TS2391 otherwise.
+    fn report_function_impl_expected(&mut self, statements: &[Arc<Node>], idx: usize) {
+        let node = Arc::clone(&statements[idx]);
+        let (name_text, name_loc) = match &node.data {
+            crate::ast::NodeData::FunctionDeclaration(d) => match &d.name {
+                Some(n) => (n.text().to_string(), n.loc),
+                None => return,
+            },
+            _ => return,
+        };
+        if let Some(sib) = statements.get(idx + 1) {
+            if sib.kind == SyntaxKind::FunctionDeclaration {
+                let sib_name = match &sib.data {
+                    crate::ast::NodeData::FunctionDeclaration(d) => match &d.name {
+                        Some(n) => (n.text().to_string(), n.loc, d.body.is_some()),
+                        None => (String::new(), sib.loc, false),
+                    },
+                    _ => (String::new(), sib.loc, false),
+                };
+                if sib_name.0 == name_text {
+                    return;
+                }
+                if sib_name.2 {
+                    let file = self.current_file.clone();
+                    let diagnostic = crate::ast::Diagnostic::new(
+                        file,
+                        sib_name.1,
+                        crate::diagnostics::messages_generated::
+                            FUNCTION_IMPLEMENTATION_NAME_MUST_BE_0,
+                        vec![name_text],
+                    );
+                    self.diagnostics.add(diagnostic);
+                    return;
+                }
+            }
+        }
+        let file = self.current_file.clone();
+        let diagnostic = crate::ast::Diagnostic::new(
+            file,
+            name_loc,
+            crate::diagnostics::messages_generated::
+                FUNCTION_IMPLEMENTATION_IS_MISSING_OR_NOT_IMMEDIATELY_FOLLOWING_THE_DECLARATION,
+            Vec::new(),
+        );
+        self.diagnostics.add(diagnostic);
+    }
+
+    /// TS2309 helper: `export =` conflicts with any other exported VALUE
+    /// element in the module (statement-level approximation of Go's
+    /// `hasExportedMembersOfKind(SymbolFlagsValue)`).
+    fn check_export_assignment_conflicts(&mut self, statements: &[Arc<Node>]) {
+        let export_equals = statements.iter().find(|s| {
+            matches!(
+                &s.data,
+                crate::ast::NodeData::ExportAssignment(d) if d.is_export_equals
+            )
+        });
+        let Some(eq_decl) = export_equals else { return };
+        let has_other_value_export = statements.iter().any(|s| {
+            if Arc::ptr_eq(s, eq_decl) {
+                return false;
+            }
+            let value_declaring = matches!(
+                s.kind,
+                SyntaxKind::ClassDeclaration
+                    | SyntaxKind::FunctionDeclaration
+                    | SyntaxKind::EnumDeclaration
+                    | SyntaxKind::VariableStatement
+                    | SyntaxKind::ModuleDeclaration
+            );
+            value_declaring && s.has_syntactic_modifier(ModifierFlags::Export)
+        });
+        if has_other_value_export {
+            let file = self.current_file.clone();
+            let diagnostic = crate::ast::Diagnostic::new(
+                file,
+                eq_decl.loc,
+                crate::diagnostics::messages_generated::
+                    AN_EXPORT_ASSIGNMENT_CANNOT_BE_USED_IN_A_MODULE_WITH_OTHER_EXPORTED_ELEMENTS,
+                Vec::new(),
+            );
+            self.diagnostics.add(diagnostic);
+        }
+    }
+
+    /// TS 1.0 spec 3.6.1: predefined type keywords are reserved and cannot
+    /// name user-defined types. Class-likes report TS2414, enums TS2431.
+    fn check_reserved_type_name(&mut self, name: &Arc<Node>, message: &'static crate::diagnostics::Message) {
+        const RESERVED: &[&str] = &[
+            "any", "unknown", "never", "number", "bigint", "boolean", "string", "symbol",
+            "void", "object", "undefined",
+        ];
+        let text = name.text();
+        if RESERVED.contains(&text) {
+            let file = self.current_file.clone();
+            let diagnostic = crate::ast::Diagnostic::new(
+                file,
+                name.loc,
+                *message,
+                vec![text.to_string()],
+            );
+            self.diagnostics.add(diagnostic);
         }
     }
 
     fn check_class_member(&mut self, node: &Arc<Node>) {
+        // Grammar check on the member's modifiers (TS1248 `const` member,
+        // duplicate modifiers, etc.) — Go's checkPropertyDeclaration /
+        // checkMethodDeclaration call checkGrammarModifiers per member.
+        self.check_grammar_modifiers(node);
         match node.kind {
             SyntaxKind::MethodDeclaration
             | SyntaxKind::Constructor
@@ -6121,41 +7255,128 @@ impl Checker {
             | SyntaxKind::SetAccessor => {
                 // Only check the body; the name, parameters, and return type
                 // are declarations/types.
-                let (body, type_node): (Option<Arc<Node>>, Option<Arc<Node>>) = match &node.data {
+                let (body, type_node, parameters): (
+                    Option<Arc<Node>>,
+                    Option<Arc<Node>>,
+                    Option<Arc<NodeList>>,
+                ) = match &node.data {
                     crate::ast::NodeData::MethodDeclaration(d) => {
-                        (d.body.clone(), d.type_node.clone())
+                        (d.body.clone(), d.type_node.clone(), Some(Arc::clone(&d.parameters)))
                     }
                     crate::ast::NodeData::ConstructorDeclaration(d) => {
-                        (d.body.clone(), d.type_node.clone())
+                        (d.body.clone(), d.type_node.clone(), Some(Arc::clone(&d.parameters)))
                     }
                     crate::ast::NodeData::GetAccessorDeclaration(d) => {
-                        (d.body.clone(), d.type_node.clone())
+                        (d.body.clone(), d.type_node.clone(), Some(Arc::clone(&d.parameters)))
                     }
                     crate::ast::NodeData::SetAccessorDeclaration(d) => {
-                        (d.body.clone(), d.type_node.clone())
+                        (d.body.clone(), d.type_node.clone(), Some(Arc::clone(&d.parameters)))
                     }
-                    _ => (None, None),
+                    _ => (None, None, None),
                 };
+                // TS2369: parameter properties are only allowed in a
+                // constructor IMPLEMENTATION (one with a body).
+                if let Some(params) = &parameters {
+                    let is_ctor_impl =
+                        matches!(node.kind, SyntaxKind::Constructor) && body.is_some();
+                    self.check_parameter_property_modifiers(params, is_ctor_impl);
+                    // TS7006/TS7019: implicit-any parameters; parameter and
+                    // return type annotations may hold function-type nodes
+                    // with their own parameter checks (`(public A) => any`).
+                    // Accessor parameters are EXEMPT here: Go suppresses the
+                    // setter-param TS7006 when the paired getter carries a
+                    // type (and reports TS7032 instead) — that pairing rule
+                    // is not yet ported, so accessors stay unchecked rather
+                    // than over-reporting.
+                    if matches!(node.kind, SyntaxKind::MethodDeclaration | SyntaxKind::Constructor)
+                    {
+                        self.check_parameter_implicit_any(node, params, 0);
+                    }
+                    for p in params.iter() {
+                        if let crate::ast::NodeData::ParameterDeclaration(pd) = &p.data
+                            && let Some(pt) = &pd.type_node
+                        {
+                            self.check_type_annotation(pt);
+                        }
+                    }
+                }
+                if let Some(tn) = &type_node {
+                    self.check_type_annotation(tn);
+                }
+                // TS7010: a method signature without a body or return-type
+                // annotation implicitly returns `any` under noImplicitAny
+                // (constructors are exempt — Go's reportImplicitAny switch
+                // omits KindConstructor).
+                if self.no_implicit_any
+                    && matches!(node.kind, SyntaxKind::MethodDeclaration)
+                    && type_node.is_none()
+                    && body.is_none()
+                {
+                    if let Some(name) = Self::class_member_name_node(node) {
+                        if name.kind == SyntaxKind::Identifier {
+                            let file = self.current_file.clone();
+                            let diagnostic = crate::ast::Diagnostic::new(
+                                file,
+                                name.loc,
+                                crate::diagnostics::messages_generated::
+                                    X_0_WHICH_LACKS_RETURN_TYPE_ANNOTATION_IMPLICITLY_HAS_AN_1_RETURN_TYPE,
+                                vec![name.text().to_string(), "any".to_string()],
+                            );
+                            self.diagnostics.add(diagnostic);
+                        }
+                    }
+                }
                 if let Some(body) = body {
                     self.push_function_scope(node);
+                    // TS2715 context: constructor bodies count; other
+                    // function-likes (and anything nested in them) do not.
+                    self.in_ctor_body_stack
+                        .push(node.kind == SyntaxKind::Constructor);
                     // Push the declared return type so `return expr;`
                     // statements in the body can be checked against it.
                     // `None` means no explicit return-type annotation.
                     let declared_return = type_node
                         .as_ref()
                         .map(|tn| self.get_type_from_type_node(tn));
-                    self.return_type_stack.push(declared_return);
+                    self.return_type_stack.push(declared_return.clone());
                     match body.kind {
                         SyntaxKind::Block => self.check_statement(&body),
                         _ => self.check_expression(&body),
                     }
                     self.return_type_stack.pop();
+                    self.in_ctor_body_stack.pop();
                     self.pop_function_scope();
+                    // TS2355 (methods): declared non-`undefined`/`void`/`any`
+                    // return type + no `return` anywhere in the body →
+                    // "must return a value", on the annotation (Go
+                    // `checkFunctionAndBodies`; TS2366-all-paths checking is
+                    // currently function-declaration-only).
+                    if let Some(ret_type) = &declared_return
+                        && !ret_type.flags.contains(TypeFlags::Void)
+                        && !ret_type.flags.contains(TypeFlags::Undefined)
+                        && !ret_type.flags.contains(TypeFlags::Any)
+                        && matches!(node.kind, SyntaxKind::MethodDeclaration)
+                        && body.kind == SyntaxKind::Block
+                        && !self.function_body_definitely_returns(&body)
+                        && !Self::function_body_has_explicit_return(&body)
+                    {
+                        let loc = type_node
+                            .as_ref()
+                            .map_or(node.loc, |tn| tn.loc);
+                        self.diagnostics.add(crate::ast::Diagnostic::new(
+                            self.current_file.clone(),
+                            loc,
+                            A_FUNCTION_WHOSE_DECLARED_TYPE_IS_NEITHER_UNDEFINED_VOID_NOR_ANY_MUST_RETURN_A_VALUE,
+                            vec![],
+                        ));
+                    }
                 }
             }
             SyntaxKind::PropertyDeclaration => {
                 // Only check the initializer; the name and type are
                 // declarations/types.
+                // (TS2564 is handled class-level by `check_property_initialization`
+                // — the upstream implementation with its assignment-scan helpers.)
                 if let crate::ast::NodeData::PropertyDeclaration(data) = &node.data {
                     // Static members cannot reference class type parameters
                     // (TS2322). Force-resolve the type annotation with the
@@ -6430,8 +7651,8 @@ impl Checker {
             SyntaxKind::CallExpression => {
                 if let crate::ast::NodeData::CallExpression(data) = &node.data {
                     self.check_expression(&data.expression);
-                    for arg in data.arguments.iter() {
-                        self.check_expression(arg);
+                    for (i, arg) in data.arguments.iter().enumerate() {
+                        self.check_call_arg_with_context(&data.expression, i, arg);
                     }
                 }
                 self.check_call_arguments(node, /* is_new */ false);
@@ -6440,23 +7661,42 @@ impl Checker {
                 if let crate::ast::NodeData::NewExpression(data) = &node.data {
                     self.check_expression(&data.expression);
                     if let Some(args) = &data.arguments {
-                        for arg in args.iter() {
-                            self.check_expression(arg);
+                        for (i, arg) in args.iter().enumerate() {
+                            self.check_call_arg_with_context(&data.expression, i, arg);
                         }
                     }
                     // TS2511: `new AbstractClass()` where the resolved class
                     // declaration carries the `abstract` modifier. Mirrors
-                    // Go's `checkNewExpression` abstract-class guard.
+                    // Go's `checkNewExpression` abstract-class guard —
+                    // reported on the NewExpression node (`new`), not the
+                    // callee.
+                    let mut reported_abstract = false;
                     if data.expression.kind == SyntaxKind::Identifier {
                         if let Some(symbol) = self.resolve_identifier(&data.expression) {
                             if self.symbol_is_abstract_class(&symbol) {
                                 self.diagnostics.add(crate::ast::Diagnostic::new(
                                     self.current_file.clone(),
-                                    data.expression.loc,
+                                    node.loc,
                                     CANNOT_CREATE_AN_INSTANCE_OF_AN_ABSTRACT_CLASS,
                                     vec![],
                                 ));
+                                reported_abstract = true;
                             }
+                        }
+                    }
+                    // TS2511 via the callee's TYPE — covers non-identifier
+                    // callees and unions like `typeof A | typeof B` where ANY
+                    // member (Go: `someSignature` abstract / abstract class
+                    // symbol) is an abstract constructor.
+                    if !reported_abstract {
+                        let callee_type = self.get_type_of_node(&data.expression);
+                        if self.type_includes_abstract_constructor(&callee_type) {
+                            self.diagnostics.add(crate::ast::Diagnostic::new(
+                                self.current_file.clone(),
+                                node.loc,
+                                CANNOT_CREATE_AN_INSTANCE_OF_AN_ABSTRACT_CLASS,
+                                vec![],
+                            ));
                         }
                     }
                 }
@@ -6500,6 +7740,39 @@ impl Checker {
             }
             SyntaxKind::ArrowFunction | SyntaxKind::FunctionExpression => {
                 // Parameters are declarations; the body contains expressions.
+                // TS2369: parameter properties are never allowed in arrow
+                // functions / function expressions.
+                // TS7006: unannotated parameters are exempt when the function
+                // is contextually typed — its signature supplies the types
+                // (Go: contextual parameters aren't implicit-any). Sources:
+                // an annotation on the assignee (`let f: F = (x) => ...`) or
+                // a function-typed parameter of an enclosing call argument
+                // (`.map(x => ...)`); the latter is consumed from
+                // `call_arg_arrow_context` here.
+                let mut contextual_param_count = self
+                    .call_arg_arrow_context
+                    .last_mut()
+                    .map(|v| std::mem::replace(v, 0))
+                    .unwrap_or(0);
+                if contextual_param_count == 0 {
+                    contextual_param_count = self
+                        .get_contextual_type(node, ContextFlags::None)
+                        .as_ref()
+                        .and_then(|t| t.as_structured())
+                        .and_then(|s| s.call_signatures().first())
+                        .map_or(0, |sig| sig.parameters.len());
+                }
+                match &node.data {
+                    crate::ast::NodeData::ArrowFunction(d) => {
+                        self.check_parameter_property_modifiers(&d.parameters, false);
+                        self.check_parameter_implicit_any(node, &d.parameters, contextual_param_count);
+                    }
+                    crate::ast::NodeData::FunctionExpression(d) => {
+                        self.check_parameter_property_modifiers(&d.parameters, false);
+                        self.check_parameter_implicit_any(node, &d.parameters, contextual_param_count);
+                    }
+                    _ => {}
+                }
                 self.check_function_like_body(node);
             }
             SyntaxKind::TemplateExpression => {
@@ -6659,8 +7932,8 @@ impl Checker {
         // in `value_symbol_links` so that `check_function_like_body`'s
         // body walk (below) sees them when resolving parameter references.
         self.get_type_of_node(node);
-        // Walk children, but skip parameter names (they are declarations).
-        // The simplest correct approach is to dispatch on the body only.
+        // Nested function-likes run after construction — TS2715 exempt.
+        self.in_ctor_body_stack.push(false);
         let (body, type_node): (Option<Arc<Node>>, Option<Arc<Node>>) = match &node.data {
             crate::ast::NodeData::FunctionExpression(data) => {
                 (Some(data.body.clone()), data.type_node.clone())
@@ -6714,6 +7987,7 @@ impl Checker {
                 }
             }
             self.return_type_stack.pop();
+            self.in_ctor_body_stack.pop();
             if is_arrow {
                 self.pop_arrow_function_scope();
             } else {
@@ -8454,6 +9728,59 @@ fn is_compound_or_simple_assignment(kind: SyntaxKind) -> bool {
             | AmpersandAmpersandEqualsToken
             | QuestionQuestionEqualsToken
     )
+}
+
+/// Flatten a (possibly nested) union into its non-union leaf types.
+fn flatten_union_leaves<'a>(t: &'a Arc<Type>, leaves: &mut Vec<&'a Arc<Type>>) {
+    match t.as_union_or_intersection() {
+        Some(u) => {
+            for m in &u.types {
+                flatten_union_leaves(m, leaves);
+            }
+        }
+        None => leaves.push(t),
+    }
+}
+
+/// The declared name text of a class declaration, if any.
+fn class_declaration_name(class: &Arc<Node>) -> Option<String> {
+    if let crate::ast::NodeData::ClassDeclaration(d) = &class.data {
+        return d.name.as_ref().map(|n| n.text().to_string());
+    }
+    None
+}
+
+/// Whether a constructor body assigns `this.<name>` anywhere (outside nested
+/// function-likes) — the TS2564 definite-assignment approximation.
+fn body_assigns_this_property(n: &Arc<Node>, name: &str) -> bool {
+    match &n.data {
+        crate::ast::NodeData::BinaryExpression(b)
+            if b.operator_token.kind == SyntaxKind::EqualsToken =>
+        {
+            if let crate::ast::NodeData::PropertyAccessExpression(pa) = &b.left.data
+                && pa.expression.kind == SyntaxKind::ThisKeyword
+                && pa.name.kind == SyntaxKind::Identifier
+                && pa.name.text() == name
+            {
+                return true;
+            }
+        }
+        // Nested function-likes have their own `this`.
+        crate::ast::NodeData::FunctionDeclaration(_)
+        | crate::ast::NodeData::FunctionExpression(_)
+        | crate::ast::NodeData::ArrowFunction(_) => return false,
+        _ => {}
+    }
+    let mut found = false;
+    crate::ast::node_data_generated::for_each_child(n, |child| {
+        if body_assigns_this_property(child, name) {
+            found = true;
+            true
+        } else {
+            false
+        }
+    });
+    found
 }
 
 impl std::fmt::Debug for Checker {

@@ -343,6 +343,11 @@ pub struct SourceFile {
     /// Whether the file uses URI-style node core modules (`node:fs`).
     /// Mirrors Go's `SourceFile.UsesUriStyleNodeCoreModules`.
     pub uses_uri_style_node_core_modules: crate::core::tristate::Tristate,
+    /// Whether parsing this file produced diagnostics. Mirrors Go's
+    /// `hasParseDiagnostics` backing store (non-empty `ParseDiagnostics`) —
+    /// gates the checker's grammar checks (files with parse errors skip
+    /// them to avoid cascades).
+    pub has_parse_diagnostics: bool,
 }
 
 impl SourceFile {

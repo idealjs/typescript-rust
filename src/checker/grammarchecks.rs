@@ -35,6 +35,10 @@ impl Checker {
     }
 
     /// Emit a grammar error on the given node with formatted arguments.
+    ///
+    /// Mirrors Go's `grammarErrorOnNode`: silently skipped (returns `false`)
+    /// when the containing source file has parse diagnostics — grammar
+    /// checks never cascade on top of parse errors.
     pub(crate) fn grammar_error_on_node_with_args(
         &mut self,
         node: &Arc<Node>,
@@ -42,6 +46,9 @@ impl Checker {
         args: &[String],
     ) -> bool {
         let file = self.current_file.clone();
+        if file.as_ref().is_some_and(|f| f.has_parse_diagnostics) {
+            return false;
+        }
         let diagnostic = crate::ast::Diagnostic::new(file, node.loc, *message, args.to_vec());
         self.diagnostics.add(diagnostic);
         true
@@ -49,7 +56,8 @@ impl Checker {
 
     /// Emit a grammar error at a specific position range.
     ///
-    /// Mirrors Go's `grammarErrorAtPos`.
+    /// Mirrors Go's `grammarErrorAtPos`: skipped when the containing source
+    /// file has parse diagnostics.
     fn grammar_error_at_pos(
         &mut self,
         node_for_file: &Arc<Node>,
@@ -58,6 +66,9 @@ impl Checker {
         message: &Message,
     ) -> bool {
         let file = self.current_file.clone();
+        if file.as_ref().is_some_and(|f| f.has_parse_diagnostics) {
+            return false;
+        }
         let loc = crate::core::text::TextRange::new(start, start + length);
         let diagnostic = crate::ast::Diagnostic::new(file, loc, *message, Vec::new());
         self.diagnostics.add(diagnostic);
@@ -170,8 +181,16 @@ impl Checker {
                     if node.kind != SyntaxKind::EnumDeclaration
                         && node.kind != SyntaxKind::TypeParameter
                     {
+                        // Anchor on the member's name — the oracle reports
+                        // `static const H = 1;` at `H`, not at the modifiers.
+                        let anchor = match &node.data {
+                            NodeData::PropertyDeclaration(d) => Some(Arc::clone(&d.name)),
+                            NodeData::MethodDeclaration(d) => Some(Arc::clone(&d.name)),
+                            _ => None,
+                        };
+                        let anchor = anchor.unwrap_or_else(|| Arc::clone(node));
                         return self.grammar_error_on_node_with_args(
-                            node,
+                            &anchor,
                             &A_CLASS_MEMBER_CANNOT_HAVE_THE_0_KEYWORD,
                             &["const".to_string()],
                         );

@@ -8280,8 +8280,10 @@ fn checker_generic_constraint_call_no_error() {
 
 #[test]
 fn checker_generic_class_instantiation_no_error() {
+    // Oracle-verified (tsgo): `x: T` without initializer reports TS2564 under
+    // strictNullChecks + strictPropertyInitialization even in generic classes.
     let diags = check_source("class C<T> { x: T; }\nlet c = new C<number>();");
-    assert_no_diagnostics(&diags);
+    assert_diagnostic_code(&diags, 2564);
 }
 
 #[test]
