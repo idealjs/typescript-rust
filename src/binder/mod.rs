@@ -279,6 +279,21 @@ impl Binder {
                 .get(&name)
                 .cloned()
                 .or_else(|| parent_sym.exports.get(&name).cloned())
+                // Non-exported module children live in the module node's
+                // LOCALS — check there too so `namespace B` + `interface B`
+                // merge (mirrors the insertion routing below).
+                .or_else(|| {
+                    if self.container.as_ref().is_some_and(|c| {
+                        c.kind == SyntaxKind::ModuleDeclaration
+                    }) {
+                        self.symbol_map
+                            .locals
+                            .get(&self.container.as_ref().unwrap().id())
+                            .and_then(|l| l.get(&name).cloned())
+                    } else {
+                        None
+                    }
+                })
         } else if let Some(hoist) = &var_hoist_container {
             match hoist.kind {
                 SyntaxKind::SourceFile | SyntaxKind::ModuleDeclaration => self
@@ -714,12 +729,14 @@ impl Binder {
                 new_flags
             };
             // The non-namespace side must be one of: ValueModule, Function,
-            // Class, RegularEnum, ConstEnum.
+            // Class, RegularEnum, ConstEnum, Interface (`namespace B` +
+            // `interface B` merge into one symbol, like Go's binder).
             let can_merge_with_ns = other_existing.contains(SymbolFlags::ValueModule)
                 || other_existing.contains(SymbolFlags::Function)
                 || other_existing.contains(SymbolFlags::Class)
                 || other_existing.contains(SymbolFlags::RegularEnum)
-                || other_existing.contains(SymbolFlags::ConstEnum);
+                || other_existing.contains(SymbolFlags::ConstEnum)
+                || other_existing.contains(SymbolFlags::Interface);
             if can_merge_with_ns {
                 return true;
             }
@@ -880,10 +897,10 @@ impl Binder {
                 .as_ref()
                 .map(|n| self.node_text(n))
                 .unwrap_or_default(),
-            NodeData::ImportSpecifier(data) => data
-                .property_name
-                .as_ref()
-                .map_or_else(|| self.node_text(&data.name), |n| self.node_text(n)),
+            // `import { default as Foo }` binds the LOCAL name (`Foo`);
+            // the property name (`default`) is what's imported from the
+            // module.
+            NodeData::ImportSpecifier(data) => self.node_text(&data.name),
             NodeData::ImportClause(data) => data.name.as_ref().map_or_else(
                 || {
                     data.named_bindings

@@ -6101,9 +6101,49 @@ impl Checker {
     fn check_variable_declaration_list(&mut self, node: &Arc<Node>) {
         if let crate::ast::NodeData::VariableDeclarationList(data) = &node.data {
             for decl in data.declarations.iter() {
+                // TS1100/TS1215: `var arguments` / `var eval` in strict code
+                // (alwaysStrict, modules, or a "use strict" prologue) —
+                // Go's binder checkStrictModeEvalOrArguments.
+                if let crate::ast::NodeData::VariableDeclaration(vd) = &decl.data
+                    && vd.name.kind == SyntaxKind::Identifier
+                    && matches!(vd.name.text(), "eval" | "arguments")
+                    && matches!(vd.name.text(), "eval" | "arguments")
+                    && self.in_strict_context()
+                {
+                    let is_module = self
+                        .current_file
+                        .as_ref()
+                        .is_some_and(|f| f.external_module_indicator.is_some());
+                    let message = if is_module {
+                        crate::diagnostics::messages_generated::
+                            INVALID_USE_OF_0_MODULES_ARE_AUTOMATICALLY_IN_STRICT_MODE
+                    } else {
+                        crate::diagnostics::messages_generated::INVALID_USE_OF_0_IN_STRICT_MODE
+                    };
+                    let file = self.current_file.clone();
+                    self.diagnostics.add(crate::ast::Diagnostic::new(
+                        file,
+                        vd.name.loc,
+                        message,
+                        vec![vd.name.text().to_string()],
+                    ));
+                }
                 self.check_variable_declaration(decl);
             }
         }
+    }
+
+    /// Whether the current context is strict: `alwaysStrict`, an external
+    /// module, or the file starts with a "use strict" prologue.
+    fn in_strict_context(&self) -> bool {
+        if self.program.options().always_strict.is_true() {
+            return true;
+        }
+        self.current_file.as_ref().is_some_and(|f| {
+            f.external_module_indicator.is_some()
+                || f.text.trim_start().starts_with("\"use strict\"")
+                || f.text.trim_start().starts_with("'use strict'")
+        })
     }
 
     /// TS2715 for `let { x, y: y1 } = this;` in a constructor: each bound
@@ -7305,7 +7345,17 @@ impl Checker {
             | SymbolFlags::Method;
         let has_value_member = |table: &crate::ast::SymbolTable| {
             table.iter().any(|(name, s)| {
-                name != "export=" && s.flags.intersects(value_flags)
+                name != "export="
+                    && s.flags.intersects(value_flags)
+                    // Skip mis-routed parameter/signature symbols (a
+                    // method's parameters can land in the container's
+                    // members table; they don't make the namespace a value).
+                    && s.declarations.iter().any(|d| {
+                        !matches!(
+                            d.kind,
+                            SyntaxKind::Parameter | SyntaxKind::MethodSignature
+                        )
+                    })
             })
         };
         if has_value_member(&namespace.exports) || has_value_member(&namespace.members) {
@@ -7389,7 +7439,11 @@ impl Checker {
             .iter()
             .find(|d| d.kind == SyntaxKind::ImportSpecifier)?;
         let name = match &decl.data {
-            crate::ast::NodeData::ImportSpecifier(d) => d.name.text().to_string(),
+            // `import { default as Foo }` imports the PROPERTY name.
+            crate::ast::NodeData::ImportSpecifier(d) => d
+                .property_name
+                .as_ref()
+                .map_or_else(|| d.name.text().to_string(), |p| p.text().to_string()),
             _ => return None,
         };
         // Walk up through NamedImports/ImportClause to the ImportDeclaration.
@@ -7402,7 +7456,16 @@ impl Checker {
             _ => return None,
         };
         let module_sym = self.resolve_module_file_symbol(&module_spec)?;
-        let member = self.namespace_member_recursive(&module_sym, &name)?;
+        let Some(member) = self.namespace_member_recursive(&module_sym, &name) else {
+            // allowSyntheticDefaultImports: a missing `default` falls back
+            // to the module namespace (any-typed here).
+            if name == "default"
+                && self.program.options().allow_synthetic_default_imports.is_true()
+            {
+                return Some(self.get_any_type());
+            }
+            return None;
+        };
         if let Some(t) = self
             .value_symbol_links
             .get(&member)
@@ -7525,7 +7588,7 @@ impl Checker {
         let mut current: Option<&Arc<Node>> = Some(decl);
         while let Some(n) = current {
             if let crate::ast::NodeData::ModuleDeclaration(md) = &n.data {
-                parts.push(md.name.text().to_string());
+                parts.push(md.name.text().trim_matches(['"', '\'']).to_string());
             }
             current = n.parent.as_ref();
         }
@@ -9124,8 +9187,15 @@ impl Checker {
             // alias base (import-equals → module), then require the
             // namespace to have at least one value member (Go's
             // checkAndReportErrorForUsingNamespaceAsTypeOrValue).
+            // `export = ns` may legitimately reference a namespace (Go's
+            // isExportAssignmentExpressionName exemption).
+            let is_export_assignment_name = node
+                .parent
+                .as_ref()
+                .is_some_and(|p| p.kind == SyntaxKind::ExportAssignment);
             let base = self.resolve_alias_base(Arc::clone(&symbol));
-            if base.flags.contains(SymbolFlags::ValueModule)
+            if !is_export_assignment_name
+                && base.flags.contains(SymbolFlags::ValueModule)
                 && base
                     .declarations
                     .iter()
@@ -9484,7 +9554,7 @@ impl Checker {
     /// (modules/namespaces) or members. Follows alias symbols along the way;
     /// an `import X = require("...")` alias resolves to the module file's
     /// symbol (Go: `resolveEntityName` + `resolveExternalModuleName`).
-    pub fn resolve_qualified_symbol(&self, name: &Arc<Node>) -> Option<Arc<Symbol>> {
+    pub fn resolve_qualified_symbol(&mut self, name: &Arc<Node>) -> Option<Arc<Symbol>> {
         match self.resolve_qualified_symbol_traced(name) {
             Ok(s) => Some(s),
             Err(_) => None,
@@ -9496,7 +9566,7 @@ impl Checker {
     /// enough for the caller to emit TS2503 (unresolved namespace) or
     /// TS2694 (namespace has no exported member).
     pub fn resolve_qualified_symbol_traced(
-        &self,
+        &mut self,
         name: &Arc<Node>,
     ) -> Result<Arc<Symbol>, (Arc<Node>, String, String)> {
         match &name.data {
@@ -9510,11 +9580,50 @@ impl Checker {
                 symbol = self.resolve_alias_base(symbol);
                 // `right` is always an Identifier in valid syntax.
                 let text = data.right.text();
-                let next = symbol
+                let mut next = symbol
                     .exports
                     .get(text)
                     .or_else(|| symbol.members.get(text))
                     .cloned();
+                // Single-hop `export = <ns>` chase: when the module
+                // exports a namespace via export=, members resolve there
+                // (Go's resolveEntityName through export assignments). No
+                // recursion — the target's tables only.
+                if next.is_none()
+                    && let Some(ea_sym) = symbol.exports.get("export=")
+                    && let Some(decl) = ea_sym
+                        .declarations
+                        .iter()
+                        .find(|d| d.kind == SyntaxKind::ExportAssignment)
+                    && let crate::ast::NodeData::ExportAssignment(ea) = &decl.data
+                    && ea.is_export_equals
+                    && matches!(
+                        ea.expression.kind,
+                        SyntaxKind::Identifier | SyntaxKind::QualifiedName
+                    )
+                {
+                    // Resolve the export= entity with the module's scope
+                    // pushed, then look the member up in its tables.
+                    let scope = symbol
+                        .declarations
+                        .iter()
+                        .find(|d| d.kind == SyntaxKind::ModuleDeclaration)
+                        .cloned();
+                    if let Some(scope) = scope {
+                        self.push_scope(&scope);
+                        let target = self.resolve_identifier(&ea.expression);
+                        self.pop_scope();
+                        if let Some(target) = target
+                            && target.flags.contains(SymbolFlags::ValueModule)
+                        {
+                            next = target
+                                .exports
+                                .get(text)
+                                .or_else(|| target.members.get(text))
+                                .cloned();
+                        }
+                    }
+                }
                 match next {
                     Some(next) => match self.follow_alias(&next) {
                         Some(f) => Ok(f),
@@ -9537,7 +9646,7 @@ impl Checker {
     /// Resolve an alias symbol to its underlying base symbol: follows the
     /// `export_symbol` chain, and for `import X = require("./m")` aliases
     /// resolves the module file's symbol from the program's loaded files.
-    fn resolve_alias_base(&self, symbol: Arc<Symbol>) -> Arc<Symbol> {
+    fn resolve_alias_base(&mut self, symbol: Arc<Symbol>) -> Arc<Symbol> {
         if !symbol.flags.intersects(SymbolFlags::Alias) {
             return symbol;
         }

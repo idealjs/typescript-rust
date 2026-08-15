@@ -128,3 +128,7 @@ compiler/allowSyntheticDefaultImports10.errors.txt
 ## monorepo module resolution ('shared' bare specifier through workspace
 ## symlinks) not ported — TS2307 over-report ##
 compiler/allowJsCrossMonorepoPackage.errors.txt
+
+## 2026-08-15 batch #111-#120: TS5101 outFile-deprecation warnings not
+## emitted by the options layer ##
+compiler/alwaysStrictModule2.errors.txt

@@ -1821,6 +1821,7 @@ fn set_bool(options: &mut CompilerOptions, name: &str, b: bool) {
         "esmoduleinterop" => options.es_module_interop = t,
         "allowsyntheticdefaultimports" => options.allow_synthetic_default_imports = t,
         "allowjs" => options.allow_js = t,
+        "alwaysstrict" => options.always_strict = t,
         "checkjs" => options.check_js = t,
         "composite" => options.composite = t,
         "declaration" => options.declaration = t,
