@@ -3580,7 +3580,16 @@ impl Checker {
                 })
                 .collect();
         }
-        self.create_function_or_constructor_type(construct_sigs, /* is_construct */ true)
+        let ctor_type = self.create_function_or_constructor_type(construct_sigs, /* is_construct */ true);
+        // Attach the class symbol so the type displays as `typeof C`
+        // (Go's TypeToString for class constructor types) — e.g. TS2348.
+        if let Some(class_sym) = self.program.symbol_map().symbol_of(node) {
+            let t_mut = Arc::as_ptr(&ctor_type) as *mut crate::checker::types::Type;
+            unsafe {
+                (*t_mut).symbol = Some(Arc::clone(class_sym));
+            }
+        }
+        ctor_type
     }
 
     /// The `extends` base `ClassDeclaration` (and class symbol) of
@@ -4774,6 +4783,26 @@ impl Checker {
                 return;
             };
         if signatures.is_empty() {
+            if !is_new {
+                // TS2348: a type with construct signatures but no call
+                // signatures called without `new` (Go's
+                // Value_of_type_0_is_not_callable_Did_you_mean_to_include_new).
+                if callee_expr.kind == SyntaxKind::Identifier
+                    && let Some(structured) = callee_type.as_structured()
+                    && !structured.construct_signatures().is_empty()
+                {
+                    let type_str = self.type_to_string(callee_type);
+                    let file = self.current_file.clone();
+                    self.diagnostics.add(crate::ast::Diagnostic::new(
+                        file,
+                        callee_expr.loc,
+                        crate::diagnostics::messages_generated::
+                            VALUE_OF_TYPE_0_IS_NOT_CALLABLE_DID_YOU_MEAN_TO_INCLUDE_NEW,
+                        vec![type_str],
+                    ));
+                    return;
+                }
+            }
             if is_new {
                 // TS 1.0 Spec 4.11 (Go resolveNewExpression): an object type
                 // with NO construct signatures but call signatures is
@@ -4871,6 +4900,38 @@ impl Checker {
         // arguments and substitute them into each parameter type before the
         // assignability check. Mirrors Go's `getSignatureInstantiation` +
         // `isSignatureApplicable` flow inside `chooseOverload`.
+        // TS2558: explicit type-argument count must match the signature's
+        // type-parameter count (Go's getArityError for type arguments).
+        if !sig.type_parameters.is_empty() || Self::has_explicit_type_arguments(node) {
+            let provided = Self::explicit_type_argument_count(node);
+            if provided != 0 && provided != sig.type_parameters.len() {
+                let loc = match &node.data {
+                    crate::ast::NodeData::CallExpression(d) => d
+                        .type_arguments
+                        .as_ref()
+                        .and_then(|t| t.iter().next())
+                        .map(|t| t.loc)
+                        .unwrap_or(node.loc),
+                    crate::ast::NodeData::NewExpression(d) => d
+                        .type_arguments
+                        .as_ref()
+                        .and_then(|t| t.iter().next())
+                        .map(|t| t.loc)
+                        .unwrap_or(node.loc),
+                    _ => node.loc,
+                };
+                let file = self.current_file.clone();
+                self.diagnostics.add(crate::ast::Diagnostic::new(
+                    file,
+                    loc,
+                    crate::diagnostics::messages_generated::EXPECTED_0_TYPE_ARGUMENTS_BUT_GOT_1,
+                    vec![
+                        sig.type_parameters.len().to_string(),
+                        provided.to_string(),
+                    ],
+                ));
+            }
+        }
         let inferred_types = self.infer_call_type_arguments(node, &sig, &arguments.nodes);
         for (i, arg) in arguments.iter().enumerate() {
             // Determine the parameter type to check against.
@@ -9245,6 +9306,29 @@ impl Checker {
     /// Check an expression node: resolve identifier references and recurse
     /// into sub-expressions.
     ///
+    /// Number of explicit type arguments on a Call/New expression (0 when
+    /// none or not a call-like node).
+    fn explicit_type_argument_count(node: &Arc<Node>) -> usize {
+        match &node.data {
+            crate::ast::NodeData::CallExpression(d) => d
+                .type_arguments
+                .as_ref()
+                .map(|t| t.len())
+                .unwrap_or(0),
+            crate::ast::NodeData::NewExpression(d) => d
+                .type_arguments
+                .as_ref()
+                .map(|t| t.len())
+                .unwrap_or(0),
+            _ => 0,
+        }
+    }
+
+    /// Whether a Call/New expression carries explicit type arguments.
+    fn has_explicit_type_arguments(node: &Arc<Node>) -> bool {
+        Self::explicit_type_argument_count(node) > 0
+    }
+
     /// Display string for arithmetic/bitwise operator tokens (the parsed
     /// operator node carries no text).
     fn op_display(kind: crate::ast::SyntaxKind) -> &'static str {

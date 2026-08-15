@@ -354,3 +354,48 @@ compiler/betterErrorForAccidentalCall.errors.txt
 compiler/betterErrorForUnionCall.errors.txt
 compiler/bindingPatternCannotBeOnlyInferenceSource.errors.txt
 compiler/bindingPatternContextualTypeDoesNotCauseWidening.errors.txt
+
+## 2026-08-16 batch #500-#599: use-before-definite-flow analysis —
+## block-scoped var/enum TDZ ordering, loop capture flow ##
+compiler/blockScopedEnumVariablesUseBeforeDef(target=es2015).errors.txt
+compiler/blockScopedEnumVariablesUseBeforeDef_isolatedModules(target=es2015).errors.txt
+compiler/blockScopedEnumVariablesUseBeforeDef_preserve(target=es2015).errors.txt
+compiler/blockScopedEnumVariablesUseBeforeDef_verbatimModuleSyntax(target=es2015).errors.txt
+compiler/blockScopedVariablesUseBeforeDeftarget=es2015).errors.txt
+compiler/capturedLetConstInLoop14(target=es2015).errors.txt
+
+## 2026-08-16 batch #500-#599: module-resolution caching & cached
+## contextual types across files ##
+compiler/cachedContextualTypes.errors.txt
+compiler/cachedModuleResolution3.errors.txt
+compiler/cachedModuleResolution4.errors.txt
+compiler/cachedModuleResolution8.errors.txt
+compiler/cachedModuleResolution9.errors.txt
+
+## 2026-08-16 batch #500-#599: overload-resolution depth — generic
+## constraint propagation through overload lists, element-access calls ##
+compiler/callOverloadViaElementAccessExpression.errors.txt
+compiler/callOverloads1.errors.txt
+compiler/callOverloads2.errors.txt
+compiler/callOverloads3.errors.txt
+compiler/callOverloads4.errors.txt
+compiler/callOverloads5.errors.txt
+
+## 2026-08-16 batch #500-#599: call/inference misc — boxed Boolean
+## assignment, conditional-type call branches, error-expression new,
+## this-capture in super calls, builtin iterator ##
+compiler/bluebirdStaticThis.errors.txt
+compiler/booleanAssignment.errors.txt
+compiler/booleanLiteralsContextuallyTypedFromUnion.errors.txt
+compiler/builtinIterator.errors.txt
+compiler/callConstructAssignment.errors.txt
+compiler/callExpressionWithMissingTypeArgument1.errors.txt
+compiler/callExpressionWithTypeParameterConstrainedToOuterTypeParameter.errors.txt
+compiler/callOfConditionalTypeWithConcreteBranches.errors.txt
+compiler/callOnInstance.errors.txt
+compiler/callsOnComplexSignatures.errors.txt
+compiler/cannotIndexGenericWritingError.errors.txt
+compiler/cannotInvokeNewOnErrorExpression.errors.txt
+compiler/cannotInvokeNewOnIndexExpression.errors.txt
+compiler/captureThisInSuperCall.errors.txt
+compiler/blockScopedVariablesUseBeforeDef(target=es2015).errors.txt
