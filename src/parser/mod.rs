@@ -1325,15 +1325,31 @@ impl Parser {
             SyntaxKind::TryKeyword => self.parse_try_statement(),
             SyntaxKind::FunctionKeyword => self.parse_function_declaration(),
             SyntaxKind::ClassKeyword => self.parse_class_declaration(),
-            SyntaxKind::InterfaceKeyword => self.parse_interface_declaration(),
-            SyntaxKind::TypeKeyword => self.parse_type_alias_declaration(),
+            // Contextual keywords: Go's `parseStatement` gates these behind
+            // `isStartOfDeclaration()` before parsing them as declarations;
+            // otherwise they fall through to
+            // `parseExpressionOrLabeledStatement()` — so `module.exports = {}`,
+            // `type = 1`, or `import("./x")` parse as expression statements
+            // (the words are legal JS identifiers).
+            SyntaxKind::InterfaceKeyword if self.is_start_of_declaration() => {
+                self.parse_interface_declaration()
+            }
+            SyntaxKind::TypeKeyword if self.is_start_of_declaration() => {
+                self.parse_type_alias_declaration()
+            }
             SyntaxKind::EnumKeyword => self.parse_enum_declaration(),
-            SyntaxKind::NamespaceKeyword | SyntaxKind::ModuleKeyword => {
+            SyntaxKind::NamespaceKeyword | SyntaxKind::ModuleKeyword
+                if self.is_start_of_declaration() =>
+            {
                 self.parse_namespace_declaration()
             }
-            SyntaxKind::DeclareKeyword => self.parse_declaration_with_modifiers(Vec::new()),
+            SyntaxKind::DeclareKeyword if self.is_start_of_declaration() => {
+                self.parse_declaration_with_modifiers(Vec::new())
+            }
             SyntaxKind::AtToken => self.parse_declaration_with_modifiers(Vec::new()),
-            SyntaxKind::ImportKeyword => self.parse_import_declaration(),
+            SyntaxKind::ImportKeyword if self.is_start_of_declaration() => {
+                self.parse_import_declaration()
+            }
             SyntaxKind::ExportKeyword => self.parse_export_declaration(),
             SyntaxKind::DebuggerKeyword => self.parse_debugger_statement(),
             // Modifier keywords that may start a declaration. Go groups these
@@ -4437,6 +4453,18 @@ impl Parser {
                 None
             };
             let end = body.as_ref().map_or(self.token_pos(), |b| b.end());
+            return Arc::new(Node::with_loc(
+                SyntaxKind::MethodDeclaration,
+                NodeData::MethodDeclaration(MethodDeclarationData {
+                    modifiers: None,
+                    asterisk_token,
+                    name,
+                    postfix_token: None,
+                    type_parameters,
+                    parameters,
+                    type_node,
+                    full_signature: None,
+                    body,
                 }),
                 TextRange::new(pos, end),
             ));

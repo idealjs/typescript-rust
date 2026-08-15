@@ -9,11 +9,13 @@ use std::collections::HashMap;
 use std::sync::Arc;
 
 use crate::ast::NodeSymbolMap;
+use crate::ast::ScriptKind;
 use crate::ast::SourceFile;
 use crate::ast::diagnostic::Diagnostic;
 use crate::binder::Binder;
 use crate::core::compiler_options::CompilerOptions;
 use crate::core::text::TextRange;
+use crate::core::tristate::Tristate;
 use crate::diagnostics::Category;
 use crate::module;
 use crate::parser::{Parser, script_kind_from_file_name};
@@ -434,7 +436,52 @@ impl Program {
         } else {
             diagnostics.extend(self.symbol_map.binder_diagnostics.iter().cloned());
         }
+        // JS-file gating (Go: `Program.SkipTypeChecking` / `plainJSErrors` in
+        // `getBindAndCheckDiagnosticsWithChecker`): with `checkJs: false`,
+        // `.js`/`.jsx` files contribute no bind/check diagnostics at all, and
+        // plain JS (`checkJs` unset) only reports the restricted error set in
+        // `PLAIN_JS_ERROR_CODES`. Parse diagnostics (reported separately via
+        // `get_diagnostics_to_report`) are unaffected, matching Go.
+        diagnostics.retain(|d| self.includes_semantic_diagnostic(d));
         diagnostics
+    }
+
+    /// Mirrors Go `Program.canIncludeBindAndCheckDiagnostics` (the JS-file
+    /// portion): whether bind-and-check diagnostics from `file` are reported.
+    ///
+    /// - `.ts`/`.tsx`/external/deferred files are always checked;
+    /// - `.js`/`.jsx` files are checked when `checkJs` is enabled or left
+    ///   unset ("plain JS", which reports a restricted error set);
+    /// - an explicit `checkJs: false` excludes them entirely, so e.g. TS7006
+    ///   implicit-any errors are not reported for untyped JS parameters.
+    ///
+    /// Go additionally honors `// @ts-check` / `// @ts-nocheck` directives,
+    /// which the Rust port does not parse yet; files without such directives
+    /// behave identically in both implementations.
+    fn can_include_bind_and_check_diagnostics(&self, file: &SourceFile) -> bool {
+        match file.script_kind {
+            ScriptKind::Ts | ScriptKind::Tsx | ScriptKind::External | ScriptKind::Deferred => true,
+            ScriptKind::Js | ScriptKind::Jsx => !self.options.check_js.is_false(),
+            ScriptKind::Json | ScriptKind::Unknown => false,
+        }
+    }
+
+    /// Whether a semantic (bind/check) diagnostic is reported, applying the
+    /// JS-file gating from Go's `getBindAndCheckDiagnosticsWithChecker`:
+    /// diagnostics from excluded files are dropped, and plain-JS files only
+    /// report codes in `PLAIN_JS_ERROR_CODES`.
+    fn includes_semantic_diagnostic(&self, d: &Diagnostic) -> bool {
+        let Some(file) = &d.file else {
+            return true; // Global diagnostics are not gated per file.
+        };
+        if !self.can_include_bind_and_check_diagnostics(file) {
+            return false;
+        }
+        if is_plain_js_file(file, self.options.check_js) && !PLAIN_JS_ERROR_CODES.contains(&d.code)
+        {
+            return false;
+        }
+        true
     }
 
     /// Build a fully-initialized `Checker` for this program, with all source
@@ -564,6 +611,119 @@ impl crate::checker::Program for Program {
 pub fn is_external_library_file(file_name: &str) -> bool {
     file_name.contains("/node_modules/") || file_name.contains("\\node_modules\\")
 }
+
+/// Mirrors Go `ast.IsPlainJSFile`: a `.js`/`.jsx` file with no
+/// `// @ts-check`/`// @ts-nocheck` directive and `checkJs` left unset.
+/// Such files are type-checked, but only report the restricted error set
+/// in `PLAIN_JS_ERROR_CODES`.
+///
+/// Check-js directives are not parsed by the Rust port yet, so the
+/// directive condition is treated as satisfied (absent).
+fn is_plain_js_file(file: &SourceFile, check_js: Tristate) -> bool {
+    matches!(file.script_kind, ScriptKind::Js | ScriptKind::Jsx) && check_js.is_unknown()
+}
+
+/// Diagnostic codes reported for plain JS files (Go: `plainJSErrors` in
+/// `internal/compiler/program.go`). Plain JS — `.js`/`.jsx` files compiled
+/// with `allowJs` but without `checkJs` — only surfaces binder and grammar
+/// errors (plus one reference-equality type error); everything else,
+/// including TS7006 implicit-any, is suppressed.
+const PLAIN_JS_ERROR_CODES: &[i32] = &[
+    // binder errors
+    2451, // Cannot redeclare block-scoped variable '{0}'
+    2528, // A module cannot have multiple default exports
+    2753, // Another export default is here
+    2752, // The first export default is here
+    1262, // Identifier expected. '{0}' is a reserved word at the top-level of a module
+    1214, // Identifier expected. '{0}' is a reserved word in strict mode...
+    1359, // Identifier expected. '{0}' is a reserved word that cannot be used here
+    18012, // '{0}' is a reserved word (constructor)
+    1102, // 'delete' cannot be called on an identifier in strict mode
+    1210, // Code contained in a class is evaluated in JavaScript's strict mode...
+    1215, // Invalid use of '{0}' in strict mode (modules are automatically strict)
+    1100, // Invalid use of '{0}' in strict mode
+    1344, // A label is not allowed here
+    1101, // 'with' statements are not allowed in strict mode
+    // grammar errors
+    1105, // A 'break' statement can only be used within an enclosing iteration or switch statement
+    1116, // A 'break' statement can only jump to a label of an enclosing statement
+    1211, // A class declaration without the default modifier must have a name
+    1248, // A class member cannot have the '{0}' keyword
+    1171, // A comma expression is not allowed in a computed property name
+    1104, // A 'continue' statement can only be used within an enclosing iteration statement
+    1115, // A 'continue' statement can only jump to a label of an enclosing iteration statement
+    1113, // A 'default' clause can only appear more than once in a 'switch' statement
+    1258, // A default export must be at the top level of a file or module declaration
+    1255, // A definite assignment assertion '!' is not permitted in this context
+    1182, // A destructuring declaration must have an initializer
+    1054, // A 'get' accessor cannot have parameters
+    2501, // A rest element cannot contain a binding pattern
+    2566, // A rest element cannot have a property name
+    1186, // A rest element cannot have an initializer
+    2462, // A rest element must be last in a destructuring pattern
+    1048, // A rest parameter cannot have an initializer
+    1014, // A rest parameter must be last in a parameter list
+    1013, // A rest parameter or binding pattern may not have a trailing comma
+    18041, // A 'return' statement cannot be used inside a class static block
+    1053, // A 'set' accessor cannot have rest parameter
+    1049, // A 'set' accessor must have exactly one parameter
+    1474, // An export declaration can only be used at the top level of a module
+    1193, // An export declaration cannot have modifiers
+    1473, // An import declaration can only be used at the top level of a module
+    1191, // An import declaration cannot have modifiers
+    1162, // An object member cannot be declared optional
+    1325, // Argument of a dynamic import cannot be a spread element
+    2803, // Cannot assign to private method '{0}'...
+    2492, // Cannot redeclare identifier '{0}' in catch clause
+    1197, // Catch clause variable cannot have an initializer
+    18036, // Class decorators can't be used with static private identifier...
+    1174, // Classes can only extend a single class
+    18006, // Classes may not have a field named 'constructor'
+    1312, // Did you mean to use a ':'? An '=' can only follow a property name...
+    1114, // Duplicate label '{0}'
+    1450, // Dynamic imports can only accept a module specifier...
+    18038, // 'for await' loops cannot be used inside a class static block
+    17000, // JSX attributes must only be assigned a non-empty expression
+    17001, // JSX elements cannot have multiple attributes with the same name
+    18007, // JSX expressions may not use the comma operator...
+    2633, // JSX property access expressions cannot include JSX namespace names
+    1107, // Jump target cannot cross function boundary
+    1200, // Line terminator not permitted before arrow
+    1184, // Modifiers cannot appear here
+    1091, // Only a single variable declaration allowed in a 'for...in' statement
+    1188, // Only a single variable declaration allowed in a 'for...of' statement
+    18016, // Private identifiers are not allowed outside class bodies
+    1451, // Private identifiers are only allowed in class bodies...
+    18013, // Property '{0}' is not accessible outside class '{1}'...
+    1358, // Tagged template expressions are not permitted in an optional chain
+    1106, // The left-hand side of a 'for...of' statement may not be 'async'
+    1189, // The variable declaration of a 'for...in' statement cannot have an initializer
+    1190, // The variable declaration of a 'for...of' statement cannot have an initializer
+    1009, // Trailing comma not allowed
+    1123, // Variable declaration list cannot be empty
+    5076, // '{0}' and '{1}' operations cannot be mixed without parentheses
+    1005, // '{0}' expected
+    17012, // '{0}' is not a valid meta-property for keyword '{1}'...
+    1097, // '{0}' list cannot be empty
+    1030, // '{0}' modifier already seen
+    1089, // '{0}' modifier cannot appear on a constructor declaration
+    1044, // '{0}' modifier cannot appear on a module or namespace element
+    1090, // '{0}' modifier cannot appear on a parameter
+    1031, // '{0}' modifier cannot appear on class elements of this kind
+    1042, // '{0}' modifier cannot be used here
+    1029, // '{0}' modifier must precede '{1}' modifier
+    1156, // '{0}' declarations can only be declared inside a block
+    1155, // '{0}' declarations must be initialized
+    1172, // 'extends' clause already seen
+    2480, // 'let' is not allowed to be used as a name in 'let'/'const' declarations
+    1341, // Class constructor may not be an accessor
+    1368, // Class constructor may not be a generator
+    1308, // 'await' expressions are only allowed within async functions...
+    2852, // 'await using' statements are only allowed within async functions...
+    1111, // Private field '#{0}' must be declared in an enclosing class
+    // type errors
+    2839, // This condition will always return '{0}' since JavaScript compares objects by reference
+];
 
 /// Whether a JavaScript file inside `node_modules` should be skipped when
 /// loading source files. When `allowJs`/`checkJs` is false (the default),

@@ -540,6 +540,11 @@ pub struct Checker {
     /// skip TS7006). Mirrors Go's contextual typing of call arguments.
     pub call_arg_arrow_context: Vec<usize>,
 
+    /// Class symbols currently being resolved through
+    /// `resolve_base_class_constructor_type` — guards self-referential
+    /// `extends` cycles.
+    pub resolving_type_aliases: std::collections::HashSet<*const Symbol>,
+
     /// Whether each enclosing function-like body is a CONSTRUCTOR body
     /// (entries pushed per function-like; nested functions push `false`).
     /// TS2715's "abstract property accessed in the constructor" check reads
@@ -790,6 +795,7 @@ impl Checker {
             this_type_stack: Vec::new(),
             enclosing_class_stack: Vec::new(),
             call_arg_arrow_context: Vec::new(),
+            resolving_type_aliases: std::collections::HashSet::new(),
             in_ctor_body_stack: Vec::new(),
             return_type_stack: Vec::new(),
 
@@ -6546,6 +6552,8 @@ impl Checker {
                 false
             }
             _ => false,
+        }
+    }
 
     /// The `name` node of a class member that has one (`None` for
     /// constructors — their "name" is the `constructor` keyword and errors

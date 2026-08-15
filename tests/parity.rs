@@ -474,22 +474,23 @@ const CASES: &[Case] = &[
         name: "parser_js",
         // JavaScript parsing: function declarations, var/let/const, object
         // literals, prototype chains, template literals. allowJs:true,
-        // checkJs:false. NOTE: Rust checker type-checks .js files even with
-        // checkJs:false (gap), producing TS2339 for `Animal.prototype`.
-        // expect_success = false + skip_oracle until checkJs:false is
-        // honored.
+        // checkJs:false — JS files are excluded from bind-and-check
+        // diagnostics (Go: SkipTypeChecking), so the `Animal.prototype`
+        // TS2339s are suppressed and compilation succeeds.
         args: &[],
-        expect_success: false,
+        expect_success: true,
         expected_files: &[],
         stdout_contains: &[],
-        skip_oracle: true,
+        skip_oracle: false,
     },
     Case {
         name: "parser_jsx",
-        // JSX in .jsx: requires Node globals (require, module.exports)
-        // which are unresolvable without @types/node.
+        // JSX in .jsx with checkJs:false — semantic errors (unresolved
+        // `require`/Node globals) are suppressed, so compilation succeeds.
+        // Oracle comparison skipped: tsgo reports TS5011 (rootDir must be
+        // explicit in TS6) on this tsconfig, which tsox does not implement.
         args: &[],
-        expect_success: false,
+        expect_success: true,
         expected_files: &[],
         stdout_contains: &[],
         skip_oracle: true,
