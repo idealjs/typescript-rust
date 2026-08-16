@@ -1563,7 +1563,8 @@ impl Parser {
         };
         let initializer = if self.token == SyntaxKind::EqualsToken {
             self.next_token();
-            Some(self.parse_expression())
+            // Assignment expression only (see the object-binding variant).
+            Some(self.parse_assignment_expression())
         } else {
             None
         };
@@ -1616,7 +1617,9 @@ impl Parser {
         };
         let initializer = if self.token == SyntaxKind::EqualsToken {
             self.next_token();
-            Some(self.parse_expression())
+            // Assignment expression only — a comma-sequence initializer
+            // would eat the following binding elements (`{x = 10, y: z}`).
+            Some(self.parse_assignment_expression())
         } else {
             None
         };
@@ -2452,6 +2455,38 @@ impl Parser {
         }
         if t == SyntaxKind::DotDotDotToken {
             t = scanner.scan();
+        }
+        // Binding-pattern parameter (`({ name: alias }: N) => void` — Go's
+        // `skipParameterStart` accepts patterns): skip the balanced
+        // `{ … }` / `[ … ]`, then the same continuation check applies.
+        if t == SyntaxKind::OpenBraceToken || t == SyntaxKind::OpenBracketToken {
+            let mut depth = 1usize;
+            loop {
+                match scanner.scan() {
+                    SyntaxKind::OpenBraceToken
+                    | SyntaxKind::OpenBracketToken
+                    | SyntaxKind::OpenParenToken => depth += 1,
+                    SyntaxKind::CloseBraceToken
+                    | SyntaxKind::CloseBracketToken
+                    | SyntaxKind::CloseParenToken => {
+                        depth = depth.saturating_sub(1);
+                        if depth == 0 {
+                            break;
+                        }
+                    }
+                    SyntaxKind::EndOfFile => return false,
+                    _ => {}
+                }
+            }
+            let t2 = scanner.scan();
+            return matches!(
+                t2,
+                SyntaxKind::ColonToken
+                    | SyntaxKind::CommaToken
+                    | SyntaxKind::QuestionToken
+                    | SyntaxKind::EqualsToken
+            ) || (t2 == SyntaxKind::CloseParenToken
+                && scanner.scan() == SyntaxKind::EqualsGreaterThanToken);
         }
         // Try to skip a parameter start (identifier/binding pattern)
         if !is_identifier_or_keyword(t) {
