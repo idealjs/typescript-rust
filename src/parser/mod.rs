@@ -3431,7 +3431,27 @@ impl Parser {
                     SyntaxKind::CloseParenToken => {
                         depth = depth.saturating_sub(1);
                         if depth == 0 {
-                            return scanner.scan() == SyntaxKind::EqualsGreaterThanToken;
+                            let next = scanner.scan();
+                            if next == SyntaxKind::EqualsGreaterThanToken {
+                                return true;
+                            }
+                            if next == SyntaxKind::ColonToken {
+                                // Return-type annotation: `async (): T => …`.
+                                // A `:` after the closing paren is only
+                                // valid as an arrow return type; the
+                                // matching `=>` follows the annotation
+                                // (inner `=>`s belong to function-type
+                                // annotations — still an arrow either way).
+                                loop {
+                                    match scanner.scan() {
+                                        SyntaxKind::EqualsGreaterThanToken => return true,
+                                        SyntaxKind::EndOfFile
+                                        | SyntaxKind::SemicolonToken => return false,
+                                        _ => {}
+                                    }
+                                }
+                            }
+                            return false;
                         }
                     }
                     SyntaxKind::CloseBracketToken | SyntaxKind::CloseBraceToken => {

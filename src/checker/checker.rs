@@ -6010,10 +6010,13 @@ impl Checker {
                 // type is inferred) — in that case return-statement checking
                 // is skipped. Mirrors Go's `expectedReturn` tracking.
                 let declared_return = match &node.data {
-                    crate::ast::NodeData::FunctionDeclaration(data) => data
-                        .type_node
-                        .as_ref()
-                        .map(|tn| self.get_type_from_type_node(tn)),
+                    crate::ast::NodeData::FunctionDeclaration(data) => {
+                        let is_async = node.has_syntactic_modifier(ModifierFlags::Async);
+                        data.type_node
+                            .as_ref()
+                            .map(|tn| self.get_type_from_type_node(tn))
+                            .map(|t| self.unwrap_async_return_type(t, is_async))
+                    }
                     _ => None,
                 };
                 self.return_type_stack.push(declared_return.clone());
@@ -9286,9 +9289,11 @@ impl Checker {
                     {
                         Some(hint)
                     } else {
+                        let is_async = node.has_syntactic_modifier(ModifierFlags::Async);
                         type_node
                             .as_ref()
                             .map(|tn| self.get_type_from_type_node(tn))
+                            .map(|t| self.unwrap_async_return_type(t, is_async))
                     };
                     self.return_type_stack.push(declared_return.clone());
                     match body.kind {
@@ -10330,10 +10335,14 @@ impl Checker {
             }
             // Push the declared return type so `return expr;` statements
             // in the body can be checked against it. `None` means no
-            // explicit return-type annotation (return type inferred).
+            // explicit return-type annotation (return type inferred). For
+            // async function-likes a `Promise<X>` annotation unwraps to `X`
+            // (return values are promisified).
+            let is_async = node.has_syntactic_modifier(ModifierFlags::Async);
             let declared_return = type_node
                 .as_ref()
-                .map(|tn| self.get_type_from_type_node(tn));
+                .map(|tn| self.get_type_from_type_node(tn))
+                .map(|t| self.unwrap_async_return_type(t, is_async));
             self.return_type_stack.push(declared_return);
             match body.kind {
                 SyntaxKind::Block => self.check_statement(&body),
@@ -11820,6 +11829,33 @@ impl Checker {
                 vec![src_str, tgt_str],
             ));
         }
+    }
+
+    /// For an async function-like, the effective type that `return expr`
+    /// must satisfy: a declared `Promise<X>` unwraps to `X` (async return
+    /// values are promisified). Mirrors Go's `getReturnTypeOfSignature`
+    /// handling of async functions (`getPromisedTypeOfPromise`).
+    fn unwrap_async_return_type(&self, declared: Arc<Type>, is_async: bool) -> Arc<Type> {
+        if !is_async {
+            return declared;
+        }
+        // Promise<X> with one type argument → X. Generic references that
+        // are not yet instantiated (the type argument was dropped during
+        // resolution) degrade to `any` — the promised type is unknowable,
+        // so return-value checking is suppressed rather than mis-reported.
+        let is_promise = declared
+            .symbol
+            .as_ref()
+            .is_some_and(|s| s.name == "Promise");
+        if is_promise {
+            if let crate::checker::TypeData::Object(obj) = &declared.data {
+                if let Some(t) = obj.type_arguments.first() {
+                    return Arc::clone(t);
+                }
+            }
+            return self.get_any_type();
+        }
+        declared
     }
 
     /// The annotated type of an identifier's variable binding — used to

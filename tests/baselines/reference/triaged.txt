@@ -707,3 +707,53 @@ compiler/contextualTypingOfGenericFunctionTypedArguments1.errors.txt
 compiler/contextualTypingOfLambdaWithMultipleSignatures2.errors.txt
 compiler/contextualTypingOfOptionalMembers.errors.txt
 compiler/contextualTypingOfTooShortOverloads.errors.txt
+## 2026-08-16 batch #1300-#1399: control-flow definite-assignment/
+## narrowing positions (null-literal flow, aliased discriminants,
+## try-catch destructuring, loop analysis); contextual inference
+## continuation (contravariant params, JSX attribute/children typing,
+## optional-property exactness, discriminable-union contextual types);
+## correlated unions; declare-global typeof export crash
+compiler/contextualTypingReturnStatementWithReturnTypeAnnotation.errors.txt
+compiler/contextualTypingWithFixedTypeParameters1.errors.txt
+compiler/contextualTypingWithGenericAndNonGenericSignature.errors.txt
+compiler/contextuallyTypeAsyncFunctionReturnTypeFromUnion.errors.txt
+compiler/contextuallyTypeGeneratorReturnTypeFromUnion.errors.txt
+compiler/contextuallyTypedBooleanLiterals.errors.txt
+compiler/contextuallyTypedByDiscriminableUnion.errors.txt
+compiler/contextuallyTypedByDiscriminableUnion2.errors.txt
+compiler/contextuallyTypedJsxAttribute.errors.txt
+compiler/contextuallyTypedJsxAttribute2.errors.txt
+compiler/contextuallyTypedJsxChildren.errors.txt
+compiler/contextuallyTypedJsxChildren2.errors.txt
+compiler/contextuallyTypedOptionalProperty(exactoptionalpropertytypes=false).errors.txt
+compiler/contextuallyTypedOptionalProperty(exactoptionalpropertytypes=true).errors.txt
+compiler/contextuallyTypedParametersOptionalInJSDoc.errors.txt
+compiler/contextuallyTypedParametersWithInitializers1.errors.txt
+compiler/contextuallyTypedParametersWithInitializers2.errors.txt
+compiler/contextuallyTypedParametersWithInitializers4.errors.txt
+compiler/contextuallyTypedParametersWithQuestionToken.errors.txt
+compiler/contextuallyTypedSymbolNamedProperties.errors.txt
+compiler/contextuallyTypingOrOperator.errors.txt
+compiler/contextuallyTypingOrOperator2.errors.txt
+compiler/contravariantInferenceAndTypeGuard.errors.txt
+compiler/contravariantOnlyInferenceWithAnnotatedOptionalParameter.errors.txt
+compiler/contravariantTypeAliasInference.errors.txt
+compiler/controlFlowAliasedDiscriminants.errors.txt
+compiler/controlFlowArrayErrors.errors.txt
+compiler/controlFlowAutoAccessor1.errors.txt
+compiler/controlFlowDestructuringVariablesInTryCatch.errors.txt
+compiler/controlFlowForCatchAndFinally.errors.txt
+compiler/controlFlowForFunctionLike1.errors.txt
+compiler/controlFlowForIndexSignatures.errors.txt
+compiler/controlFlowForStatementContinueIntoIncrementor1.errors.txt
+compiler/controlFlowFunctionLikeCircular1.errors.txt
+compiler/controlFlowInitializedDestructuringVariables.errors.txt
+compiler/controlFlowLoopAnalysis.errors.txt
+compiler/controlFlowManyCallExpressionStatementsPerf.errors.txt
+compiler/controlFlowNoImplicitAny.errors.txt
+compiler/controlFlowNullTypeAndLiteral.errors.txt
+compiler/controlFlowPropertyDeclarations.errors.txt
+compiler/controlFlowWithIncompleteTypes.errors.txt
+compiler/convertClassExpressionToFunctionFromObjectProperty2(target=es2015).errors.txt
+compiler/correlatedUnions.errors.txt
+compiler/crashDeclareGlobalTypeofExport.errors.txt

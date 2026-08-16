@@ -405,8 +405,9 @@ impl Checker {
         let TypeData::Tuple(tuple) = &t.data else {
             return "[]".to_string();
         };
+        let readonly_prefix = if tuple.readonly { "readonly " } else { "" };
         if tuple.element_infos.is_empty() {
-            return "[]".to_string();
+            return format!("{readonly_prefix}[]");
         }
         let parts: Vec<String> = tuple
             .element_infos
@@ -428,7 +429,7 @@ impl Checker {
                 }
             })
             .collect();
-        format!("[{}]", parts.join(", "))
+        format!("{readonly_prefix}[{}]", parts.join(", "))
     }
 
     /// Format a reference type: `Foo<T>` or `T[]` (for arrays).

@@ -2141,7 +2141,31 @@ impl Checker {
                         self.error_type()
                     }
                 }
-                SyntaxKind::ReadonlyKeyword => self.get_type_from_type_node(&data.type_node),
+                SyntaxKind::ReadonlyKeyword => {
+                    let inner = self.get_type_from_type_node(&data.type_node);
+                    // `readonly [A, B]` — flag the tuple so display and
+                    // mutation checks see the readonly modifier.
+                    if let TypeData::Tuple(tuple) = &inner.data {
+                        if !tuple.readonly {
+                            return Arc::new(Type {
+                                flags: inner.flags,
+                                object_flags: inner.object_flags,
+                                id: 0,
+                                symbol: None,
+                                alias: None,
+                                data: TypeData::Tuple(TupleTypeData {
+                                    interface_data: InterfaceTypeData::default(),
+                                    element_infos: tuple.element_infos.clone(),
+                                    min_length: tuple.min_length,
+                                    fixed_length: tuple.fixed_length,
+                                    combined_flags: tuple.combined_flags,
+                                    readonly: true,
+                                }),
+                            });
+                        }
+                    }
+                    inner
+                }
                 _ => self.error_type(),
             },
             _ => self.error_type(),
