@@ -757,3 +757,30 @@ compiler/controlFlowWithIncompleteTypes.errors.txt
 compiler/convertClassExpressionToFunctionFromObjectProperty2(target=es2015).errors.txt
 compiler/correlatedUnions.errors.txt
 compiler/crashDeclareGlobalTypeofExport.errors.txt
+## 2026-08-16 batch #1400-#1499: generic instantiation display
+## ('A<B>' renders as 'A' — type args dropped at TypeReferenceNode
+## resolution; also Promise<T>/Array<T> unwrapping), ambient-module
+## augmentation resolution (TS2664), dotted-namespace cross-statement
+## symbol merging, TS2872 always-truthy, TS2693/TS1011 keyword-as-value
+## in lib generic indexing, branded lib displays (Uint8Array),
+## TS1320 await-of-thenable, TS1038 declare-in-ambient-context,
+## crash-family inference displays
+compiler/crashInEmitTokenWithComment.errors.txt
+compiler/crashInYieldStarInAsyncFunction.errors.txt
+compiler/crashInsourcePropertyIsRelatableToTargetProperty.errors.txt
+compiler/crashIntypeCheckInvocationExpression.errors.txt
+compiler/crashRegressionTest.errors.txt
+compiler/createArray.errors.txt
+compiler/crossFileOverloadModifierConsistency.errors.txt
+compiler/ctsFileInEsnextHelpers.errors.txt
+compiler/customEventDetail.errors.txt
+compiler/dataViewConstructor.errors.txt
+compiler/declFileAliasUseBeforeDeclaration2.errors.txt
+compiler/declFileAmbientExternalModuleWithSingleExportedModule.errors.txt
+compiler/declFileGenericType.errors.txt
+compiler/declFileGenericType2.errors.txt
+compiler/declFileImportModuleWithExportAssignment.errors.txt
+compiler/declFileTypeAnnotationParenType(target=es2015).errors.txt
+compiler/declFileWithErrorsInInputDeclarationFile.errors.txt
+compiler/declFileWithErrorsInInputDeclarationFileWithOut.errors.txt
+compiler/declFileWithExtendsClauseThatHasItsContainerNameConflict.errors.txt

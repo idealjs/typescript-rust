@@ -5435,7 +5435,17 @@ impl Parser {
             return self.parse_ambient_external_module_declaration(pos, modifiers);
         }
         // `declare namespace A.B.C { ... }` or `declare module A.B.C { ... }`
-        let name = self.parse_namespace_name();
+        // `declare namespace A.B.C { }` or `declare module A.B.C { }`.
+        // Dotted names synthesize NESTED module declarations (Go's
+        // `parseModuleDeclaration` builds one ModuleDeclaration per dot
+        // segment so each namespace level is its own scope): the
+        // outermost declaration carries the modifiers and each inner
+        // segment nests as the previous level's body.
+        let mut segments: Vec<Arc<Node>> = vec![self.parse_identifier()];
+        while self.token == SyntaxKind::DotToken {
+            self.next_token(); // consume '.'
+            segments.push(self.parse_identifier());
+        }
         let body = if self.token == SyntaxKind::OpenBraceToken {
             let body_pos = self.token_pos();
             self.next_token(); // consume '{'
@@ -5455,16 +5465,31 @@ impl Parser {
             None
         };
         let end = body.as_ref().map_or(self.token_pos(), |b| b.end());
-        Arc::new(Node::with_loc(
-            SyntaxKind::ModuleDeclaration,
-            NodeData::ModuleDeclaration(ModuleDeclarationData {
-                modifiers,
-                keyword,
-                name,
-                body,
-            }),
-            TextRange::new(pos, end),
-        ))
+        // Build from the innermost segment outwards; the outermost
+        // declaration receives the user modifiers.
+        let mut name = segments.pop().expect("at least one segment");
+        let mut inner_body = body;
+        let mut mods = modifiers;
+        loop {
+            let decl = Arc::new(Node::with_loc(
+                SyntaxKind::ModuleDeclaration,
+                NodeData::ModuleDeclaration(ModuleDeclarationData {
+                    modifiers: mods,
+                    keyword,
+                    name: Arc::clone(&name),
+                    body: inner_body,
+                }),
+                TextRange::new(pos, end),
+            ));
+            match segments.pop() {
+                Some(seg) => {
+                    name = seg;
+                    inner_body = Some(decl);
+                    mods = None;
+                }
+                None => return decl,
+            }
+        }
     }
 
     /// Go: parseAmbientExternalModuleDeclaration — handles `declare module "name"` and `declare global`.

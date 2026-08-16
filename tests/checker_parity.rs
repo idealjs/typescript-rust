@@ -483,17 +483,21 @@ fn checker_return_type_boolean_mismatch_ts2322() {
 }
 
 #[test]
-fn checker_return_missing_value_ts1135() {
-    // `return;` with no value in function declaring `string` return type.
+fn checker_return_missing_value_ts2322() {
+    // `return;` with no value in a function declaring `string` reports
+    // TS2322 "Type 'undefined' is not assignable to type 'string'" —
+    // oracle-verified against tsgo (2026-08-16; the old TS1135
+    // expectation no longer matches current Go behavior).
     let diags = check_source("function f(): string { return; }");
-    assert_diagnostic_code(&diags, 1135);
+    assert_diagnostic_code(&diags, 2322);
 }
 
 #[test]
-fn checker_return_missing_value_in_number_function_ts1135() {
-    // `return;` with no value in function declaring `number` return type.
+fn checker_return_missing_value_in_number_function_ts2322() {
+    // `return;` with no value in a function declaring `number` — TS2322
+    // (oracle-verified, see the test above).
     let diags = check_source("function f(): number { return; }");
-    assert_diagnostic_code(&diags, 1135);
+    assert_diagnostic_code(&diags, 2322);
 }
 
 #[test]

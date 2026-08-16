@@ -4955,8 +4955,16 @@ impl Checker {
             } else {
                 base_param_type
             };
-            // `any` parameter → always assignable, skip.
-            if param_type.flags.contains(TypeFlags::Any) {
+            // `any` parameter → always assignable, skip. When the
+            // signature is generic but inference produced NO candidates,
+            // the parameter type stays an unsubstituted type parameter —
+            // Go falls back to the constraint/`unknown` there, which
+            // accepts any argument; don't mis-report TS2345.
+            let inference_empty =
+                !sig.type_parameters.is_empty() && inferred_types.is_empty();
+            if param_type.flags.contains(TypeFlags::Any)
+                || (inference_empty && param_type.is_type_parameter())
+            {
                 continue;
             }
             // Contextual element checks for literal arguments
@@ -5828,20 +5836,22 @@ impl Checker {
                         }
                     } else {
                         // `return;` with no value — if the function declares
-                        // a non-void/non-undefined return type, this is an
-                        // error (TS1135). Mirrors Go's `checkReturnStatement`
-                        // empty-return branch.
+                        // a non-void/non-undefined return type, Go reports
+                        // TS2322 "Type 'undefined' is not assignable to type
+                        // '<expected>'" on the return statement (the same
+                        // checkReturnExpression path as valued returns).
                         let expected = self.return_type_stack.last().and_then(|opt| opt.clone());
                         if let Some(expected) = expected {
                             if !expected.flags.contains(TypeFlags::Void)
                                 && !expected.flags.contains(TypeFlags::Undefined)
                                 && !expected.flags.contains(TypeFlags::Any)
                             {
+                                let expected_str = self.type_to_string(&expected);
                                 self.diagnostics.add(crate::ast::Diagnostic::new(
                                     self.current_file.clone(),
                                     node.loc,
-                                    ARGUMENT_EXPRESSION_EXPECTED,
-                                    vec![],
+                                    TYPE_0_IS_NOT_ASSIGNABLE_TO_TYPE_1,
+                                    vec!["undefined".to_string(), expected_str],
                                 ));
                             }
                         }
@@ -9313,7 +9323,6 @@ impl Checker {
                         && !ret_type.flags.contains(TypeFlags::Void)
                         && !ret_type.flags.contains(TypeFlags::Undefined)
                         && !ret_type.flags.contains(TypeFlags::Any)
-                        && matches!(node.kind, SyntaxKind::MethodDeclaration)
                         && body.kind == SyntaxKind::Block
                         && !self.function_body_definitely_returns(&body)
                         && !Self::function_body_has_explicit_return(&body)
@@ -9321,12 +9330,27 @@ impl Checker {
                         let loc = type_node
                             .as_ref()
                             .map_or(node.loc, |tn| tn.loc);
-                        self.diagnostics.add(crate::ast::Diagnostic::new(
-                            self.current_file.clone(),
-                            loc,
-                            A_FUNCTION_WHOSE_DECLARED_TYPE_IS_NEITHER_UNDEFINED_VOID_NOR_ANY_MUST_RETURN_A_VALUE,
-                            vec![],
-                        ));
+                        if matches!(node.kind, SyntaxKind::MethodDeclaration) {
+                            self.diagnostics.add(crate::ast::Diagnostic::new(
+                                self.current_file.clone(),
+                                loc,
+                                A_FUNCTION_WHOSE_DECLARED_TYPE_IS_NEITHER_UNDEFINED_VOID_NOR_ANY_MUST_RETURN_A_VALUE,
+                                vec![],
+                            ));
+                        } else if node.kind == SyntaxKind::GetAccessor {
+                            // Getter with an annotation whose body never
+                            // returns: Go reports TS2322 "Type 'undefined'
+                            // is not assignable to type '<annotation>'" on
+                            // the annotation (checkFunctionAndBodies'
+                            // accessor branch).
+                            let tgt = self.type_to_string(ret_type);
+                            self.diagnostics.add(crate::ast::Diagnostic::new(
+                                self.current_file.clone(),
+                                loc,
+                                TYPE_0_IS_NOT_ASSIGNABLE_TO_TYPE_1,
+                                vec!["undefined".to_string(), tgt],
+                            ));
+                        }
                     }
                 }
             }
