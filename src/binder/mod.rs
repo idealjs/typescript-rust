@@ -13,6 +13,11 @@ pub mod referenceresolver;
 use crate::ast::*;
 use crate::diagnostics::messages_generated::{
     CANNOT_REDECLARE_BLOCK_SCOPED_VARIABLE_0, DUPLICATE_IDENTIFIER_0,
+    IDENTIFIER_EXPECTED_0_IS_A_RESERVED_WORD_AT_THE_TOP_LEVEL_OF_A_MODULE,
+    IDENTIFIER_EXPECTED_0_IS_A_RESERVED_WORD_IN_STRICT_MODE,
+    IDENTIFIER_EXPECTED_0_IS_A_RESERVED_WORD_IN_STRICT_MODE_CLASS_DEFINITIONS_ARE_AUTOMATICALLY_IN_STRICT_MODE,
+    IDENTIFIER_EXPECTED_0_IS_A_RESERVED_WORD_IN_STRICT_MODE_MODULES_ARE_AUTOMATICALLY_IN_STRICT_MODE,
+    IDENTIFIER_EXPECTED_0_IS_A_RESERVED_WORD_THAT_CANNOT_BE_USED_HERE,
 };
 use std::sync::Arc;
 
@@ -325,8 +330,19 @@ impl Binder {
             None
         };
 
+        // Set when `existing` was found but is non-mergeable with this
+        // declaration (see the conflict comment below).
+        let mut conflicted = false;
+
         if let Some(existing) = existing {
-            if self.can_merge_symbols(existing.flags, includes) {
+            // `var` + `var` merge like Go (a plain `var` redeclaration is
+            // legal and folds into the hoisted symbol). The Rust binder
+            // assigns BlockScopedVariable to every variable, so the generic
+            // merge check would treat this as a conflict.
+            let var_var_merge = Self::declaration_is_var(node)
+                && existing.flags == SymbolFlags::BlockScopedVariable
+                && existing.declarations.iter().all(|d| Self::declaration_is_var(d));
+            if self.can_merge_symbols(existing.flags, includes) || var_var_merge {
                 // Merge: add this declaration to the existing symbol, union
                 // the flags, and map the node to the existing symbol.
                 let existing_mut = Arc::as_ptr(&existing) as *mut Symbol;
@@ -346,8 +362,17 @@ impl Binder {
                 return existing;
             }
             // Non-mergeable redeclaration: fall through to create a new
-            // symbol (overwrites the previous entry). Determine the kind of
-            // conflict and report the appropriate diagnostic.
+            // symbol for this declaration. Go's `declareSymbolEx` does NOT
+            // write the replacement back into the symbol table on conflict,
+            // so a later same-name declaration re-conflicts with the
+            // ORIGINAL symbol and reports again (e.g. `var foo; function
+            // foo(){} function foo(){}` reports TS2300 on the third
+            // declaration too) — mirrored by the `conflicted` flag set in
+            // the report paths below. Quiet fall-throughs (Rust models
+            // `var` + `var` as non-mergeable where Go merges them) still
+            // replace the table entry.
+            // Determine the kind of conflict and report the appropriate
+            // diagnostic.
             //
             // Skip anonymous (empty-name) declarations: they are internal
             // symbols (e.g. interface/object members whose names are resolved
@@ -411,8 +436,14 @@ impl Binder {
                             self,
                             &CANNOT_REDECLARE_BLOCK_SCOPED_VARIABLE_0,
                         );
+                        // A real Go conflict (block-scoped redeclare): keep
+                        // the original table entry so later same-name
+                        // declarations re-conflict (see `conflicted`).
+                        conflicted = true;
                     }
                     // else: `var` + `var` — redeclaration is legal, no error.
+                    // (Rust models var+var as non-mergeable; Go merges them,
+                    // so the table replacement below must still happen.)
                 } else {
                     // TS2300 is a *scope-level* duplicate-identifier check.
                     // Member-level declarations (parameters, properties,
@@ -461,6 +492,7 @@ impl Binder {
                         // verified against typescript-go; the old TS5
                         // coexistence no longer holds).
                         report_all(self, &DUPLICATE_IDENTIFIER_0);
+                        conflicted = true;
                     }
                 }
             }
@@ -492,9 +524,13 @@ impl Binder {
         //   to `locals` (so they're visible inside the namespace but not via
         //   `N.x` from outside).
         // - ClassDeclaration/InterfaceDeclaration/etc.: members go to
-        //   `members`.
+        // `members`.
         // - Block-scoped containers: locals.
-        if let Some(container) = &self.container {
+        //
+        // Skipped entirely on conflict (see `conflicted` above): Go leaves
+        // the original symbol in the table so later redeclarations of the
+        // same name re-conflict against it.
+        if !conflicted && let Some(container) = &self.container {
             if container.kind == SyntaxKind::ModuleDeclaration {
                 // Namespace member: exported → exports, non-exported → locals.
                 // Use combined modifier flags to handle `export const x`
@@ -2176,6 +2212,72 @@ impl Binder {
     // ─────────────────────────────────────────────────────────────────────
 
     /// Bind a single node: create symbols, set flow nodes, then recurse.
+    /// Go binder.go:1301 `checkContextualIdentifier` — an identifier whose
+    /// text is a future-reserved word (implements/interface/let/package/
+    /// private/protected/public/static/yield) in strict mode reports
+    /// TS1213 (inside a class), TS1214 (module), or TS1100 (plain strict).
+    /// `await`/`yield` misuse reports TS1262/TS1359 in the matching
+    /// contexts. Skipped when the file has parse errors (Go reports only
+    /// on clean parses), in ambient contexts, for JSDoc-synthesized
+    /// identifiers, and in identifier-name positions (`a.static`,
+    /// `{ static: 1 }`, member names) where keywords are legal.
+    fn check_contextual_identifier(&mut self, node: &Arc<Node>) {
+        let Some(file) = self.current_source_file.clone() else {
+            return;
+        };
+        if file.has_parse_diagnostics
+            || node.flags.contains(NodeFlags::Ambient)
+            || node.flags.contains(NodeFlags::JSDoc)
+            || is_identifier_name(node)
+        {
+            return;
+        }
+        let Some(kind) = crate::scanner::string_to_keyword(node.text()) else {
+            return;
+        };
+        let is_future_reserved = matches!(
+            kind,
+            SyntaxKind::ImplementsKeyword
+                | SyntaxKind::InterfaceKeyword
+                | SyntaxKind::LetKeyword
+                | SyntaxKind::PackageKeyword
+                | SyntaxKind::PrivateKeyword
+                | SyntaxKind::ProtectedKeyword
+                | SyntaxKind::PublicKeyword
+                | SyntaxKind::StaticKeyword
+                | SyntaxKind::YieldKeyword
+        );
+        let message = if is_future_reserved {
+            if crate::ast::utilities::get_containing_class(node).is_some() {
+                IDENTIFIER_EXPECTED_0_IS_A_RESERVED_WORD_IN_STRICT_MODE_CLASS_DEFINITIONS_ARE_AUTOMATICALLY_IN_STRICT_MODE
+            } else if file.external_module_indicator.is_some() {
+                IDENTIFIER_EXPECTED_0_IS_A_RESERVED_WORD_IN_STRICT_MODE_MODULES_ARE_AUTOMATICALLY_IN_STRICT_MODE
+            } else {
+                IDENTIFIER_EXPECTED_0_IS_A_RESERVED_WORD_IN_STRICT_MODE
+            }
+        } else if kind == SyntaxKind::AwaitKeyword {
+            if file.external_module_indicator.is_some()
+                && crate::ast::utilities::is_in_top_level_context(node)
+            {
+                IDENTIFIER_EXPECTED_0_IS_A_RESERVED_WORD_AT_THE_TOP_LEVEL_OF_A_MODULE
+            } else if node.flags.contains(NodeFlags::AwaitContext) {
+                IDENTIFIER_EXPECTED_0_IS_A_RESERVED_WORD_THAT_CANNOT_BE_USED_HERE
+            } else {
+                return;
+            }
+        } else if kind == SyntaxKind::YieldKeyword && node.flags.contains(NodeFlags::YieldContext) {
+            IDENTIFIER_EXPECTED_0_IS_A_RESERVED_WORD_THAT_CANNOT_BE_USED_HERE
+        } else {
+            return;
+        };
+        self.symbol_map.binder_diagnostics.push(Diagnostic::new(
+            Some(file),
+            node.loc,
+            message,
+            vec![node.text().to_string()],
+        ));
+    }
+
     fn bind(&mut self, node: &Arc<Node>) {
         // Set flow node for expressions
         match node.kind {
@@ -2183,6 +2285,7 @@ impl Binder {
                 if let Some(flow) = &self.current_flow {
                     self.symbol_map.set_flow_node(node, Arc::clone(flow));
                 }
+                self.check_contextual_identifier(node);
             }
             SyntaxKind::ThisKeyword | SyntaxKind::SuperKeyword => {
                 if let Some(flow) = &self.current_flow {

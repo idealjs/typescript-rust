@@ -5900,6 +5900,13 @@ impl Checker {
             SyntaxKind::FunctionDeclaration => {
                 // Grammar check: validate modifiers and parameter list.
                 self.check_grammar_modifiers(node);
+                // TS2393: two or more same-name function declarations in the
+                // same container have bodies. Go's
+                // `checkFunctionOrConstructorSymbol` reports on EVERY
+                // function declaration of the name (overload signatures
+                // included); reported once, when visiting the first
+                // declaration in source order.
+                self.check_duplicate_function_implementations(node);
                 if let crate::ast::NodeData::FunctionDeclaration(data) = &node.data {
                     if let Some(tps) = &data.type_parameters {
                         let _ = tps; // TODO: check_grammar_type_parameter_list
@@ -6709,6 +6716,118 @@ impl Checker {
 
     fn check_variable_declaration(&mut self, node: &Arc<Node>) {
         if let crate::ast::NodeData::VariableDeclaration(data) = &node.data {
+            // TS1155: a `const` declaration must be initialized (Go's
+            // `checkVariableDeclaration`). Skipped for for-in/for-of
+            // declarations (`for (const k in o)`) and ambient declarations.
+            if data.initializer.is_none() {
+                let is_const = node
+                    .parent
+                    .as_ref()
+                    .is_some_and(|list| list.flags.contains(NodeFlags::Const));
+                let in_for_in_of = node.parent.as_ref().and_then(|l| l.parent.as_ref())
+                    .is_some_and(|g| {
+                        matches!(
+                            g.kind,
+                            SyntaxKind::ForInStatement | SyntaxKind::ForOfStatement
+                        )
+                    });
+                let is_ambient = self.ambient_context_depth > 0
+                    || node.flags.contains(NodeFlags::Ambient)
+                    || node
+                        .parent
+                        .as_ref()
+                        .and_then(|p| p.parent.as_ref())
+                        .is_some_and(|stmt| {
+                            stmt.has_syntactic_modifier(ModifierFlags::Ambient)
+                        })
+                    || {
+                        // Ambient ancestor (e.g. `declare namespace M { const
+                        // x }` — the declare is on the namespace).
+                        let mut anc = node.parent.as_ref();
+                        let mut found = false;
+                        while let Some(a) = anc {
+                            if a.has_syntactic_modifier(ModifierFlags::Ambient) {
+                                found = true;
+                                break;
+                            }
+                            anc = a.parent.as_ref();
+                        }
+                        found
+                    }
+                    || self
+                        .current_file
+                        .as_ref()
+                        .is_some_and(|f| f.is_declaration_file);
+                if is_const && !in_for_in_of && !is_ambient {
+                    let file = self.current_file.clone();
+                    let name_loc = data.name.loc;
+                    self.diagnostics.add(crate::ast::Diagnostic::new(
+                        file,
+                        name_loc,
+                        crate::diagnostics::messages_generated::X_0_DECLARATIONS_MUST_BE_INITIALIZED,
+                        vec!["const".to_string()],
+                    ));
+                }
+            }
+            // TS2481 (Go `checkVarDeclaredNamesNotShadowed`): a `var` with
+            // initializer whose name lexically resolves to a DIFFERENT
+            // block-scoped symbol (the block-scoped binding binds tighter,
+            // so the initializer would write to it). Only fires when the
+            // block-scoped declaration lives in a plain nested block —
+            // when its container is the function body / module / source
+            // file scope, hoisting makes the names share a scope and the
+            // binder's duplicate check covers it instead.
+            if data.initializer.is_some() && data.name.kind == SyntaxKind::Identifier {
+                let list_is_var = node.parent.as_ref().is_none_or(|l| {
+                    !(l.flags.contains(NodeFlags::Let) || l.flags.contains(NodeFlags::Const))
+                });
+                let is_param = node
+                    .parent
+                    .as_ref()
+                    .is_some_and(|l| l.kind == SyntaxKind::Parameter);
+                if list_is_var && !is_param {
+                    let own = self.program.symbol_map().symbol_of(node).cloned();
+                    if let Some(local) = self.resolve_identifier(&data.name)
+                        && own.as_ref().is_none_or(|o| !Arc::ptr_eq(o, &local))
+                        && local.flags.contains(SymbolFlags::BlockScopedVariable)
+                        && let Some(vd) = local.value_declaration.clone()
+                        && vd.kind == SyntaxKind::VariableDeclaration
+                        && let Some(list) = vd.parent.as_ref()
+                        && list.kind == SyntaxKind::VariableDeclarationList
+                    {
+                        let container = list.parent.as_ref().and_then(|s| s.parent.as_ref());
+                        let names_share_scope = container.is_some_and(|c| {
+                            c.kind == SyntaxKind::ModuleBlock
+                                || c.kind == SyntaxKind::ModuleDeclaration
+                                || c.kind == SyntaxKind::SourceFile
+                                || (c.kind == SyntaxKind::Block
+                                    && c.parent.as_ref().is_some_and(|p| {
+                                        matches!(
+                                            p.kind,
+                                            SyntaxKind::FunctionDeclaration
+                                                | SyntaxKind::FunctionExpression
+                                                | SyntaxKind::ArrowFunction
+                                                | SyntaxKind::MethodDeclaration
+                                                | SyntaxKind::Constructor
+                                                | SyntaxKind::GetAccessor
+                                                | SyntaxKind::SetAccessor
+                                        )
+                                    }))
+                        });
+                        if !names_share_scope {
+                            let name_text = data.name.text().to_string();
+                            let file = self.current_file.clone();
+                            self.diagnostics.add(crate::ast::Diagnostic::new(
+                                file,
+                                node.loc,
+                                crate::diagnostics::messages_generated::
+                                    CANNOT_INITIALIZE_OUTER_SCOPED_VARIABLE_0_IN_THE_SAME_SCOPE_AS_BLOCK_SCOPED_DECLARATION_1,
+                                vec![name_text.clone(), name_text],
+                            ));
+                        }
+                    }
+                }
+            }
             // A binding-pattern name's computed property names are reference
             // positions: `let {[a]: a} = …` reads `a` before its own
             // declaration (TS2448 via the regular identifier check). Plain
@@ -7552,14 +7671,22 @@ impl Checker {
     /// allowed in a constructor IMPLEMENTATION (one with a body). Mirrors
     /// Go's `checkParameter` modifier check.
     fn check_parameter_property_modifiers(&mut self, params: &NodeList, is_ctor_impl: bool) {
-        if is_ctor_impl {
-            return;
-        }
         for param in params.iter() {
             let crate::ast::NodeData::ParameterDeclaration(pd) = &param.data else {
                 continue;
             };
+            // Grammar-check modifiers on every parameter regardless of
+            // context — Go's `checkParameter` (checker.go:2661) calls
+            // `checkGrammarModifiers`, reporting TS1090 (`static`/`export`
+            // modifier cannot appear on a parameter), TS1028 (accessibility
+            // modifier already seen), etc.
+            if pd.modifiers.is_some() {
+                self.check_grammar_modifiers(param);
+            }
             let Some(modifiers) = &pd.modifiers else { continue };
+            if is_ctor_impl {
+                continue;
+            }
             if modifiers.modifier_flags.intersects(
                 ModifierFlags::Public
                     | ModifierFlags::Private
@@ -8699,6 +8826,10 @@ impl Checker {
         // duplicate modifiers, etc.) — Go's checkPropertyDeclaration /
         // checkMethodDeclaration call checkGrammarModifiers per member.
         self.check_grammar_modifiers(node);
+        // TS2392: multiple constructor implementations in one class.
+        if node.kind == SyntaxKind::Constructor {
+            self.check_multiple_constructor_implementations(node);
+        }
         // TS2300: same-name class members that can't merge (two properties,
         // two methods of identical shape, property+method). Getter/setter
         // pairs and method overloads are exempt (Go's
@@ -9715,6 +9846,20 @@ impl Checker {
                             }
                         }
                     }
+                    // TS2540: `M.x <op>= v` where `M` is a namespace and `x`
+                    // a `const` member (all assignment operators, mirroring
+                    // Go's checkReferenceExpression const check). Element
+                    // accesses with string-literal arguments (`M["x"] = 0`)
+                    // behave the same.
+                    if Self::is_assignment_operator(data.operator_token.kind)
+                        && matches!(
+                            data.left.kind,
+                            SyntaxKind::PropertyAccessExpression
+                                | SyntaxKind::ElementAccessExpression
+                        )
+                    {
+                        self.check_const_property_assignment(&data.left);
+                    }
                     // TS2322: Assignment type check is deferred until type
                     // resolution is more precise (currently causes false
                     // positives due to imprecise left-side type inference).
@@ -9763,11 +9908,20 @@ impl Checker {
             SyntaxKind::PrefixUnaryExpression => {
                 if let crate::ast::NodeData::PrefixUnaryExpression(data) = &node.data {
                     self.check_expression(&data.operand);
+                    // `++x`/`--x` assign to the operand: a `const` target
+                    // reports TS2588 (Go checks ++/-- through the
+                    // assignment pipeline's `checkReferenceExpression`).
+                    if matches!(data.operator, SyntaxKind::PlusPlusToken | SyntaxKind::MinusMinusToken) {
+                        self.check_const_assignment_target(&data.operand);
+                    }
                 }
             }
             SyntaxKind::PostfixUnaryExpression => {
                 if let crate::ast::NodeData::PostfixUnaryExpression(data) = &node.data {
                     self.check_expression(&data.operand);
+                    if matches!(data.operator, SyntaxKind::PlusPlusToken | SyntaxKind::MinusMinusToken) {
+                        self.check_const_assignment_target(&data.operand);
+                    }
                 }
             }
             SyntaxKind::ParenthesizedExpression => {
@@ -10285,6 +10439,15 @@ impl Checker {
         // Skip property access right-hand sides (e.g., `x.foo` — `foo` is a
         // property name, not a reference).
         if is_property_access_name(node) {
+            return;
+        }
+        // TS2301: an instance member initializer referencing a name declared
+        // in the class constructor (parameter or local). Reported even when
+        // the name resolves to an outer declaration, because the initializer
+        // is emitted into the constructor where that declaration shadows it.
+        // Mirrors Go's `checkAndReportErrorForInvalidInitializer`, reached
+        // from the name resolver's PropertyDeclaration scope-climb case.
+        if self.check_invalid_initializer_reference(node, name) {
             return;
         }
 
@@ -11204,6 +11367,319 @@ impl Checker {
         None
     }
 
+    /// TS2301: `Initializer of instance member variable 'x' cannot reference
+    /// identifier 'y' declared in the constructor.` Walks up from the
+    /// identifier to the nearest enclosing non-static property declaration
+    /// and checks whether the class's constructor (the one with a body)
+    /// declares the name as a parameter or local. Mirrors the Go name
+    /// resolver's `KindPropertyDeclaration` scope-climb case plus
+    /// `checkAndReportErrorForInvalidInitializer`. Returns true when the
+    /// diagnostic was reported (resolution treats the name as "handled").
+    /// TS2393: `Duplicate function implementation.` Collects same-name
+    /// `function` declarations among the node's siblings (same container);
+    /// when two or more have bodies, reports on every one of them (overload
+    /// signatures included — oracle-verified: `function f(): number;` above
+    /// two implementations also reports at the signature). Skipped in
+    /// ambient contexts (.d.ts / `declare`), mirroring Go's
+    /// `checkFunctionOrConstructorSymbolWorker`.
+    fn check_duplicate_function_implementations(&mut self, node: &Arc<Node>) {
+        let crate::ast::NodeData::FunctionDeclaration(data) = &node.data else {
+            return;
+        };
+        let Some(name) = &data.name else { return };
+        if name.kind != SyntaxKind::Identifier {
+            return;
+        }
+        let Some(parent) = node.parent.as_ref() else {
+            return;
+        };
+        let stmts = match &parent.data {
+            crate::ast::NodeData::SourceFile(sf) => Some(&sf.statements),
+            crate::ast::NodeData::ModuleBlock(mb) => Some(&mb.statements),
+            _ => None,
+        };
+        let Some(stmts) = stmts else {
+            return;
+        };
+        let is_ambient = node.flags.contains(NodeFlags::Ambient)
+            || self
+                .current_file
+                .as_ref()
+                .is_some_and(|f| f.is_declaration_file);
+        let fns: Vec<&Arc<Node>> = stmts
+            .iter()
+            .filter(|s| {
+                s.kind == SyntaxKind::FunctionDeclaration
+                    && matches!(&s.data, crate::ast::NodeData::FunctionDeclaration(d) if d
+                        .name
+                        .as_ref()
+                        .is_some_and(|n| n.text() == name.text()))
+            })
+            .collect();
+        // Report only when visiting the first declaration of the name, so the
+        // per-name error set is emitted exactly once.
+        if fns.first().is_none_or(|first| !Arc::ptr_eq(first, node)) {
+            return;
+        }
+        let bodied = fns
+            .iter()
+            .filter(|f| {
+                matches!(&f.data, crate::ast::NodeData::FunctionDeclaration(d) if d.body.is_some())
+            })
+            .count();
+        let file = self.current_file.clone();
+        if bodied >= 2 && !is_ambient {
+            for f in &fns {
+                if let crate::ast::NodeData::FunctionDeclaration(d) = &f.data
+                    && let Some(fname) = &d.name
+                {
+                    self.diagnostics.add(crate::ast::Diagnostic::new(
+                        file.clone(),
+                        fname.loc,
+                        crate::diagnostics::messages_generated::DUPLICATE_FUNCTION_IMPLEMENTATION,
+                        vec![],
+                    ));
+                }
+            }
+        }
+        // TS2384 (Go `checkFlagAgreementBetweenOverloads`): the canonical
+        // declaration is the implementation when one exists in this
+        // container, else the first overload; every body-less overload
+        // whose ambient-ness deviates reports on its name.
+        let is_ambient_decl = |f: &Arc<Node>| {
+            f.has_syntactic_modifier(ModifierFlags::Ambient)
+                || f.flags.contains(NodeFlags::Ambient)
+        };
+        let canonical = fns
+            .iter()
+            .find(|f| {
+                matches!(&f.data, crate::ast::NodeData::FunctionDeclaration(d) if d.body.is_some())
+            })
+            .or_else(|| fns.first());
+        if let Some(canonical) = canonical {
+            let canonical_ambient = is_ambient_decl(canonical);
+            for f in &fns {
+                let has_body =
+                    matches!(&f.data, crate::ast::NodeData::FunctionDeclaration(d) if d.body.is_some());
+                if !has_body && is_ambient_decl(f) != canonical_ambient {
+                    if let crate::ast::NodeData::FunctionDeclaration(d) = &f.data
+                        && let Some(fname) = &d.name
+                    {
+                        self.diagnostics.add(crate::ast::Diagnostic::new(
+                            file.clone(),
+                            fname.loc,
+                            crate::diagnostics::messages_generated::
+                                OVERLOAD_SIGNATURES_MUST_ALL_BE_AMBIENT_OR_NON_AMBIENT,
+                            vec![],
+                        ));
+                    }
+                }
+            }
+        }
+    }
+
+    /// TS2392: `Multiple constructor implementations are not allowed.` When
+    /// two or more of the class's constructor declarations have bodies,
+    /// report on every constructor declaration (overload signatures
+    /// included). Mirrors Go's `checkFunctionOrConstructorSymbolWorker` via
+    /// the constructor symbol's merged declarations.
+    fn check_multiple_constructor_implementations(&mut self, node: &Arc<Node>) {
+        let Some(class) = node.parent.as_ref() else {
+            return;
+        };
+        if !matches!(class.kind, SyntaxKind::ClassDeclaration | SyntaxKind::ClassExpression) {
+            return;
+        }
+        let crate::ast::NodeData::ClassDeclaration(cd) = &class.data else {
+            return;
+        };
+        let ctors: Vec<&Arc<Node>> = cd
+            .members
+            .iter()
+            .filter(|m| m.kind == SyntaxKind::Constructor)
+            .collect();
+        if ctors.first().is_none_or(|first| !Arc::ptr_eq(first, node)) {
+            return;
+        }
+        let bodied = ctors
+            .iter()
+            .filter(|c| {
+                matches!(&c.data, crate::ast::NodeData::ConstructorDeclaration(d) if d.body.is_some())
+            })
+            .count();
+        if bodied < 2 {
+            return;
+        }
+        let file = self.current_file.clone();
+        for ctor in ctors {
+            self.diagnostics.add(crate::ast::Diagnostic::new(
+                file.clone(),
+                ctor.loc,
+                crate::diagnostics::messages_generated::
+                    MULTIPLE_CONSTRUCTOR_IMPLEMENTATIONS_ARE_NOT_ALLOWED,
+                vec![],
+            ));
+        }
+    }
+
+    fn check_invalid_initializer_reference(&mut self, node: &Arc<Node>, name: &str) -> bool {
+        if self.emit_standard_class_fields {
+            return false;
+        }
+        let Some(parent) = node.parent.as_ref() else {
+            return false;
+        };
+        let Some(property) = crate::ast::utilities::find_ancestor(parent, |n| {
+            n.kind == SyntaxKind::PropertyDeclaration
+        }) else {
+            return false;
+        };
+        if property.has_syntactic_modifier(ModifierFlags::Static) {
+            return false;
+        }
+        let Some(class) = property.parent.as_ref() else {
+            return false;
+        };
+        if !matches!(class.kind, SyntaxKind::ClassDeclaration | SyntaxKind::ClassExpression) {
+            return false;
+        }
+        // Go's FindConstructorDeclaration: the first constructor with a body.
+        let crate::ast::NodeData::ClassDeclaration(cd) = &class.data else {
+            return false;
+        };
+        let ctor = cd.members.iter().find(|m| {
+            m.kind == SyntaxKind::Constructor
+                && matches!(&m.data, crate::ast::NodeData::ConstructorDeclaration(d) if d.body.is_some())
+        });
+        let Some(ctor) = ctor else {
+            return false;
+        };
+        let symbol_map = self.program.symbol_map();
+        let ctor_has_name = symbol_map
+            .locals
+            .get(&ctor.id())
+            .is_some_and(|locals| {
+                locals
+                    .get(name)
+                    .is_some_and(|sym| sym.flags.intersects(SymbolFlags::VALUE))
+            });
+        if !ctor_has_name {
+            return false;
+        }
+        let file = self.current_file.clone();
+        let property_name = property
+            .name()
+            .map(|n| n.text().to_string())
+            .unwrap_or_default();
+        self.diagnostics.add(crate::ast::Diagnostic::new(
+            file,
+            node.loc,
+            crate::diagnostics::messages_generated::
+                INITIALIZER_OF_INSTANCE_MEMBER_VARIABLE_0_CANNOT_REFERENCE_IDENTIFIER_1_DECLARED_IN_THE_CONSTRUCTOR,
+            vec![property_name, name.to_string()],
+        ));
+        true
+    }
+
+    /// TS2588/TS2540 for assignment-like targets. `x = 1` / `++x` with an
+    /// identifier LHS resolving to a `const` binding reports TS2588 on the
+    /// operand; `M.x = 1` / `++M.x` where `M` is a namespace and `x` a
+    /// const member reports TS2540 (read-only property) on the property
+    /// name (Go: the assignment pipeline's `checkReferenceExpression`
+    /// resolving the property symbol and checking its const-ness).
+    fn check_const_assignment_target(&mut self, operand: &Arc<Node>) {
+        // Unwrap parentheses (`++((x))` — Go's checkReferenceExpression
+        // walks through parenthesized expressions).
+        let mut target = operand;
+        while target.kind == SyntaxKind::ParenthesizedExpression {
+            let inner = match &target.data {
+                crate::ast::NodeData::ParenthesizedExpression(p) => &p.expression,
+                _ => break,
+            };
+            target = inner;
+        }
+        let operand = target;
+        if operand.kind == SyntaxKind::PropertyAccessExpression
+            || operand.kind == SyntaxKind::ElementAccessExpression
+        {
+            self.check_const_property_assignment(operand);
+            return;
+        }
+        if operand.kind != SyntaxKind::Identifier {
+            return;
+        }
+        if let Some(symbol) = self.resolve_identifier(operand)
+            && self.symbol_is_const_variable(&symbol)
+        {
+            let name_text = operand.text();
+            self.diagnostics.add(crate::ast::Diagnostic::new(
+                self.current_file.clone(),
+                operand.loc,
+                CANNOT_ASSIGN_TO_0_BECAUSE_IT_IS_A_CONSTANT,
+                vec![name_text.to_string()],
+            ));
+        }
+    }
+
+    /// TS2540: assigning to a namespace's `const` member (`M.x = 1`).
+    /// Resolves the member through the namespace symbol's exports/members
+    /// (and the module declaration's locals for ambient namespaces) — the
+    /// same lookup as `get_type_of_property_access`'s namespace path.
+    fn check_const_property_assignment(&mut self, node: &Arc<Node>) {
+        // `M.x` or `M["x"]` (a string-literal element access behaves like a
+        // property access).
+        let (obj_expr, name, name_loc) = match &node.data {
+            crate::ast::NodeData::PropertyAccessExpression(data) => {
+                (&data.expression, &data.name, data.name.loc)
+            }
+            crate::ast::NodeData::ElementAccessExpression(data) => {
+                let arg = &data.argument_expression;
+                if arg.kind != SyntaxKind::StringLiteral {
+                    return;
+                }
+                (&data.expression, arg, arg.loc)
+            }
+            _ => return,
+        };
+        if obj_expr.kind != SyntaxKind::Identifier {
+            return;
+        }
+        let Some(sym) = self.resolve_identifier(obj_expr) else {
+            return;
+        };
+        let base = self.resolve_alias_base(sym);
+        if !base.flags.contains(SymbolFlags::ValueModule) {
+            return;
+        }
+        let name_text = name.text();
+        let member = base
+            .exports
+            .get(name_text)
+            .or_else(|| base.members.get(name_text))
+            .cloned()
+            .or_else(|| {
+                base.declarations
+                    .iter()
+                    .filter(|d| d.kind == SyntaxKind::ModuleDeclaration)
+                    .find_map(|d| {
+                        self.program
+                            .symbol_map()
+                            .locals
+                            .get(&d.id())
+                            .and_then(|l| l.get(name_text).cloned())
+                    })
+            });
+        if member.is_some_and(|m| self.symbol_is_const_variable(&m)) {
+            let file = self.current_file.clone();
+            self.diagnostics.add(crate::ast::Diagnostic::new(
+                file,
+                name_loc,
+                CANNOT_ASSIGN_TO_0_BECAUSE_IT_IS_A_READ_ONLY_PROPERTY,
+                vec![name_text.to_string()],
+            ));
+        }
+    }
+
     /// TS2448: Check if a block-scoped variable (`let`/`const`/`class`) is
     /// used before its declaration. Mirrors Go's
     /// `checkResolvedBlockScopedVariable` + `isBlockScopedNameDeclaredBeforeUse`.
@@ -11278,6 +11754,17 @@ impl Checker {
         };
         if decl_name_pos <= node.pos() {
             return;
+        }
+        // Cross-file references never report TS2448 (Go's
+        // `isBlockScopedNameDeclaredBeforeUse`: nodes in different files
+        // have no determinable order — e.g. `const x = 0` in file1.ts,
+        // `x++` in file2.ts).
+        let decl_file = self.get_source_file_of_node(declaration);
+        let use_file = self.get_source_file_of_node(node);
+        if let (Some(df), Some(uf)) = (&decl_file, &use_file) {
+            if df.file_name != uf.file_name {
+                return;
+            }
         }
         let file = self.current_file.clone();
         self.diagnostics.add(crate::ast::Diagnostic::new(
@@ -11744,8 +12231,15 @@ impl Checker {
                 // method must be written `this.foo` / `C.foo` (Go's
                 // `resolveName` never consults class `Members`; the checker
                 // instead reports TS2662/TS2663 suggestions when a bare name
-                // fails to resolve inside a class).
-                if !container_sym.flags.intersects(SymbolFlags::Class) {
+                // fails to resolve inside a class). Exception: a symbol that
+                // merged an ambient class with a function
+                // (`declare class P {}` + `function P() {}`) is ALSO the
+                // function's declaration symbol — its members include the
+                // function's parameters, which ARE in scope in the body
+                // (oracle: no TS2304 for `function P(x) { this.x = x; }`).
+                if !container_sym.flags.intersects(SymbolFlags::Class)
+                    || container_sym.flags.intersects(SymbolFlags::Function)
+                {
                     if let Some(sym) = container_sym.members.get(name) {
                         if sym.flags.intersects(meaning) {
                             return self.follow_alias(sym);

@@ -1391,6 +1391,57 @@ pub fn get_containing_class(node: &Arc<Node>) -> Option<Arc<Node>> {
     find_ancestor(parent, is_class_like)
 }
 
+/// Mirrors `ast.IsIdentifierName` in Go (utilities.go:292): whether the node
+/// is in a *name* position where keywords are legal — `a.static`'s `static`,
+/// `{ static: 1 }`'s key, member/enum-member names, qualified-name right
+/// sides, binding-element/import-specifier property names, and JSX names.
+pub fn is_identifier_name(node: &Arc<Node>) -> bool {
+    let Some(parent) = node.parent.as_ref() else {
+        return false;
+    };
+    match parent.kind {
+        SyntaxKind::PropertyDeclaration
+        | SyntaxKind::PropertySignature
+        | SyntaxKind::MethodDeclaration
+        | SyntaxKind::MethodSignature
+        | SyntaxKind::GetAccessor
+        | SyntaxKind::SetAccessor
+        | SyntaxKind::EnumMember
+        | SyntaxKind::PropertyAssignment
+        | SyntaxKind::PropertyAccessExpression => parent.name().is_some_and(|n| Arc::ptr_eq(n, node)),
+        SyntaxKind::QualifiedName => {
+            matches!(&parent.data, crate::ast::NodeData::QualifiedName(q) if Arc::ptr_eq(&q.right, node))
+        }
+        SyntaxKind::BindingElement => {
+            matches!(&parent.data, crate::ast::NodeData::BindingElement(b) if b
+                .property_name
+                .as_ref()
+                .is_some_and(|n| Arc::ptr_eq(n, node)))
+        }
+        SyntaxKind::ImportSpecifier => {
+            matches!(&parent.data, crate::ast::NodeData::ImportSpecifier(i) if i
+                .property_name
+                .as_ref()
+                .is_some_and(|n| Arc::ptr_eq(n, node)))
+        }
+        SyntaxKind::ExportSpecifier
+        | SyntaxKind::JsxAttribute
+        | SyntaxKind::JsxSelfClosingElement
+        | SyntaxKind::JsxOpeningElement
+        | SyntaxKind::JsxClosingElement => true,
+        _ => false,
+    }
+}
+
+/// Mirrors `ast.IsInTopLevelContext` in Go: whether a node is in the
+/// top-level scope of its source file (no enclosing function-like node).
+pub fn is_in_top_level_context(node: &Arc<Node>) -> bool {
+    let Some(parent) = node.parent.as_ref() else {
+        return true;
+    };
+    !find_ancestor(parent, is_function_like).is_some()
+}
+
 // ────────────────────────────────────────────────────────────────────────────
 // Module helpers
 // ────────────────────────────────────────────────────────────────────────────

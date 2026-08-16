@@ -241,7 +241,10 @@ impl Checker {
                 | SyntaxKind::ProtectedKeyword
                 | SyntaxKind::PrivateKeyword => {
                     let text = visibility_to_string(modifier.kind);
-                    if flags.contains(ModifierFlags::AccessibilityModifier) {
+                    // Go: `flags&ModifierFlagsAccessibilityModifier != 0` —
+                    // intersects, not contains (the mask spans public/private/
+                    // protected).
+                    if flags.intersects(ModifierFlags::AccessibilityModifier) {
                         return self
                             .grammar_error_on_node(modifier, &ACCESSIBILITY_MODIFIER_ALREADY_SEEN);
                     } else if flags.contains(ModifierFlags::Override)

@@ -6279,43 +6279,115 @@ impl Parser {
         })
     }
 
-    fn parse_parameter(&mut self) -> Arc<Node> {
-        let pos = self.token_pos();
-        // Parameter modifiers (a.k.a. parameter properties): `public`/
-        // `private`/`protected`/`readonly`/`override`. The parser accepts them
-        // on any parameter; the checker reports TS2369 ("A parameter property
-        // is only allowed in a constructor") when they appear elsewhere (e.g.
-        // on an accessor). Mirrors Go's `tryParseParameterModifiers`. A
-        // modifier is only consumed when the following token can start the
-        // parameter name/pattern, so `(public)` keeps `public` as the name.
-        let mut mods: Vec<(SyntaxKind, usize, usize)> = Vec::new();
+    /// Go `nextTokenCanFollowModifier` (parser.go:4009): whether the token
+    /// after the current modifier keyword can legally follow it. Scanner-clone
+    /// lookahead instead of Go's mark/rewind. `s` must be positioned on the
+    /// token following the modifier.
+    fn token_after_modifier_can_follow(
+        &self,
+        s: &mut crate::scanner::Scanner,
+    ) -> bool {
+        match self.token {
+            // 'const' is only a modifier if followed by 'enum'.
+            SyntaxKind::ConstKeyword => s.token() == SyntaxKind::EnumKeyword,
+            SyntaxKind::ExportKeyword => {
+                match s.token() {
+                    SyntaxKind::DefaultKeyword => {
+                        let t = s.scan();
+                        Self::token_can_follow_default_keyword(t, s)
+                    }
+                    SyntaxKind::TypeKeyword => {
+                        let t = s.scan();
+                        Self::can_follow_export_modifier(t)
+                    }
+                    _ => Self::can_follow_export_modifier(s.token()),
+                }
+            }
+            SyntaxKind::DefaultKeyword => Self::token_can_follow_default_keyword(s.token(), s),
+            // Note: like Go, `static` has no same-line requirement here.
+            SyntaxKind::StaticKeyword => Self::token_can_follow_modifier(s.token()),
+            _ => !s.has_preceding_line_break() && Self::token_can_follow_modifier(s.token()),
+        }
+    }
+
+    /// Go `parseModifiersEx(allowDecorators=true, permitConstAsModifier=false,
+    /// stopOnStartOfClassStaticBlock=false)` as used by `parseParameterEx`
+    /// (parser.go:3374): full modifier parsing in parameter position. All
+    /// modifier kinds are accepted (export/declare/static/const/…); the
+    /// checker's grammar checks report the invalid ones (TS1090, TS1028, …).
+    /// A modifier is still only consumed when the next token can follow it,
+    /// so `(public)` keeps `public` as the parameter name.
+    fn parse_parameter_modifiers(&mut self) -> Option<Arc<ModifierList>> {
+        enum Entry {
+            Mod(SyntaxKind, usize, usize),
+            Dec(Arc<Node>),
+        }
+        let mut entries: Vec<Entry> = Vec::new();
+        let mut flags = ModifierFlags::empty();
+        let mut has_leading_modifier = false;
+        let mut has_trailing_decorator = false;
+        let mut has_trailing_modifier = false;
+        let mut has_static_modifier = false;
         loop {
-            if !matches!(
-                self.token,
-                SyntaxKind::PublicKeyword
-                    | SyntaxKind::PrivateKeyword
-                    | SyntaxKind::ProtectedKeyword
-                    | SyntaxKind::ReadonlyKeyword
-                    | SyntaxKind::OverrideKeyword
-            ) {
+            if self.token == SyntaxKind::AtToken && !has_trailing_modifier {
+                let dec = self.parse_decorator();
+                if has_leading_modifier {
+                    has_trailing_decorator = true;
+                }
+                flags |= ModifierFlags::Decorator;
+                entries.push(Entry::Dec(dec));
+                continue;
+            }
+            // tryParseModifier: a second `static` stops modifier collection so
+            // it can become the parameter name (`constructor(static static)`).
+            if has_static_modifier && self.token == SyntaxKind::StaticKeyword {
+                break;
+            }
+            if !is_modifier_kind(self.token) {
                 break;
             }
             let mut s = self.scanner.clone();
             s.scan();
-            if s.has_preceding_line_break() || !Self::token_can_follow_modifier(s.token()) {
+            if !self.token_after_modifier_can_follow(&mut s) {
                 break;
             }
             let kind = self.token;
             let mpos = self.token_pos();
             let mend = self.token_end();
             self.next_token();
-            mods.push((kind, mpos, mend));
+            if kind == SyntaxKind::StaticKeyword {
+                has_static_modifier = true;
+            }
+            flags |= Self::modifier_flag(kind);
+            entries.push(Entry::Mod(kind, mpos, mend));
+            if has_trailing_decorator {
+                has_trailing_modifier = true;
+            } else {
+                has_leading_modifier = true;
+            }
         }
-        let modifiers = if mods.is_empty() {
-            None
-        } else {
-            Some(self.make_modifier_list(mods))
-        };
+        if entries.is_empty() {
+            return None;
+        }
+        let nodes = entries
+            .into_iter()
+            .map(|e| match e {
+                Entry::Mod(kind, pos, end) => Arc::new(Node::with_loc(
+                    kind,
+                    NodeData::Token,
+                    TextRange::new(pos, end),
+                )),
+                Entry::Dec(n) => n,
+            })
+            .collect();
+        Some(Arc::new(ModifierList::new(nodes, flags)))
+    }
+
+    fn parse_parameter(&mut self) -> Arc<Node> {
+        let pos = self.token_pos();
+        // Parameter modifiers (a.k.a. parameter properties). Full
+        // `parseModifiersEx` port — see `parse_parameter_modifiers`.
+        let modifiers = self.parse_parameter_modifiers();
 
         let dot_dot_dot_token = self.parse_optional_token(SyntaxKind::DotDotDotToken);
 
@@ -9004,5 +9076,21 @@ mod tests {
         let mut p = Parser::new("interface Box<in out T> { value: T; }");
         p.parse_statement();
         assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics);
+    }
+}
+
+#[cfg(test)]
+mod batch1100_tests {
+    use super::*;
+
+    #[test]
+    fn parse_constructor_param_static_modifier() {
+        let (_, diags) = Parser::parse_source_file_text_with_diagnostics(
+            "a.ts",
+            "class foo {\n    constructor (static a: number) {\n    }\n}".to_string(),
+        );
+        eprintln!("diags: {diags:?}");
+        let mut p = Parser::new("constructor (static a: number) {}");
+        let _ = p.parse_expression();
     }
 }
