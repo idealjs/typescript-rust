@@ -3,7 +3,7 @@
 1. 每次测试 1000 个测试用例,不需要考虑回归。指令如下
 
 ```
-TSOX_SUBMODULE_START=4100 TSOX_SUBMODULE_END=5099 TSOX_SUBMODULE_JOBS=4 cargo test --test submodule_compiler
+TSOX_SUBMODULE_START=5100 TSOX_SUBMODULE_END=6099 TSOX_SUBMODULE_JOBS=4 cargo test --test submodule_compiler
 ```
 
 2. 测试完成后，检查测试日志，对比 go 版，是否符合测试预期。
@@ -56,7 +56,7 @@ grep -c '^compiler/' tests/baselines/reference/triaged.txt
 sed -n '/const-enum checker family/,/^## 2026-/{/^##/!p}' tests/baselines/reference/triaged.txt | grep '^compiler/'
 
 # 复核单个用例的真实差异：先跑它，再对比参考与实际输出
-TSOX_SUBMODULE_START=4100 TSOX_SUBMODULE_END=5099 TSOX_SUBMODULE_FILTER=<用例名> \
+TSOX_SUBMODULE_START=5100 TSOX_SUBMODULE_END=6099 TSOX_SUBMODULE_FILTER=<用例名> \
   TSOX_SUBMODULE_JOBS=1 cargo test --test submodule_compiler
 diff "tests/baselines/reference/compiler/<stem>.errors.txt" \
      "tests/baselines/local/compiler/<stem>.errors.txt"
@@ -67,8 +67,8 @@ diff "tests/baselines/reference/compiler/<stem>.errors.txt" \
 
 # 当前批次
 
-- start: 4100
-- end: 5099
+- start: 5100
+- end: 6099
 
 # 测试流程修改
 
