@@ -3248,3 +3248,202 @@ compiler/typeInterfaceDeclarationsInBlockStatements1.errors.txt
 compiler/typeLiteralCallback.errors.txt
 compiler/typeName1.errors.txt
 compiler/typeParamExtendsOtherTypeParam.errors.txt
+
+## 2026-08-16 batch #6100-#6536 (final partial batch, 437 cases):
+
+## type-parameter & type-predicate checks (final) —
+## diamond constraints, fixing with context-sensitive args,
+## predicate inheritance/structural match ##
+compiler/typeParameterDiamond2.errors.txt
+compiler/typeParameterDiamond3.errors.txt
+compiler/typeParameterDiamond4.errors.txt
+compiler/typeParameterDoesntBlockParameterLookup.errors.txt
+compiler/typeParameterEquality.errors.txt
+compiler/typeParameterExplicitlyExtendsAny.errors.txt
+compiler/typeParameterExtendingUnion2.errors.txt
+compiler/typeParameterExtendsPrimitive.errors.txt
+compiler/typeParameterFixingWithContextSensitiveArguments.errors.txt
+compiler/typeParameterFixingWithContextSensitiveArguments2.errors.txt
+compiler/typeParameterFixingWithContextSensitiveArguments3.errors.txt
+compiler/typeParameterFixingWithContextSensitiveArguments4.errors.txt
+compiler/typeParameterFixingWithContextSensitiveArguments5.errors.txt
+compiler/typeParameterLeak.errors.txt
+compiler/typeParameterOrderReversal.errors.txt
+compiler/typeParametersAndParametersInComputedNames.errors.txt
+compiler/typeParametersInStaticAccessors.errors.txt
+compiler/typeParametersInStaticMethods.errors.txt
+compiler/typeParametersShouldNotBeEqual.errors.txt
+compiler/typeParametersShouldNotBeEqual2.errors.txt
+compiler/typeParametersShouldNotBeEqual3.errors.txt
+compiler/typePartameterConstraintInstantiatedWithDefaultWhenCheckingDefault.errors.txt
+compiler/typePredicateFreshLiteralWidening.errors.txt
+compiler/typePredicateInLoop.errors.txt
+compiler/typePredicateInherit.errors.txt
+compiler/typePredicateStructuralMatch.errors.txt
+compiler/typePredicateWithThisParameter.errors.txt
+compiler/typePredicatesInUnion3.errors.txt
+compiler/typePredicatesOptionalChaining1.errors.txt
+compiler/typePredicatesOptionalChaining3.errors.txt
+compiler/typeVariableConstraintIntersections.errors.txt
+compiler/typeVariableConstraintedToAliasNotAssignableToUnion.errors.txt
+compiler/typeVariableTypeGuards.errors.txt
+
+## misc final-batch singles — UMD globals, unicode
+## identifier escapes, strict-mode unary ops, uncalled function
+## checks, typed-array overloads, type-reference directives,
+## type-as-value errors ##
+compiler/typeReferenceDirectiveScopedPackageCustomTypeRoot.errors.txt
+compiler/typeReferenceDirectiveWithFailedFromTypeRoot.errors.txt
+compiler/typeReferenceDirectives11.errors.txt
+compiler/typeReferenceDirectives12.errors.txt
+compiler/typeReferenceDirectives7.errors.txt
+compiler/typeReferenceDirectives9.errors.txt
+compiler/typeUsedAsTypeLiteralIndex.errors.txt
+compiler/typeUsedAsValueError.errors.txt
+compiler/typeUsedAsValueError2.errors.txt
+compiler/typeValueConflict1.errors.txt
+compiler/typeValueConflict2.errors.txt
+compiler/typecheckCommaExpression.errors.txt
+compiler/typecheckIfCondition.errors.txt
+compiler/typedArrayConstructorOverloads.errors.txt
+compiler/typedArrays.errors.txt
+compiler/typedArraysCrossAssignability01.errors.txt
+compiler/umdGlobalAugmentationNoCrash.errors.txt
+compiler/umdGlobalConflict.errors.txt
+compiler/umdNamespaceMergedWithGlobalAugmentationIsNotCircular.errors.txt
+compiler/unaryOperatorsInStrictMode.errors.txt
+compiler/uncalledFunctionChecksInConditional.errors.txt
+compiler/uncalledFunctionChecksInConditional2.errors.txt
+compiler/unclosedExportClause01.errors.txt
+compiler/unclosedExportClause02.errors.txt
+compiler/undeclaredBase.errors.txt
+compiler/undeclaredModuleError.errors.txt
+compiler/undeclaredVarEmit.errors.txt
+compiler/underscoreMapFirst.errors.txt
+compiler/underscoreTest1.errors.txt
+compiler/unexpectedStatementBlockTerminator.errors.txt
+compiler/unicodeEscapesInNames01(target=es2015).errors.txt
+compiler/unicodeEscapesInNames01(target=esnext).errors.txt
+compiler/unicodeEscapesInNames02(target=es2015).errors.txt
+compiler/unicodeIdentifierName2.errors.txt
+compiler/unterminatedStringLiteralWithBackslash1.errors.txt
+
+## 'typeof' type queries (final) — typeof classes/enums/
+## interfaces/modules, freshness stripping, typeof-this ##
+compiler/typeofAmbientExternalModules.errors.txt
+compiler/typeofClass.errors.txt
+compiler/typeofEnum.errors.txt
+compiler/typeofExternalModules.errors.txt
+compiler/typeofInterface.errors.txt
+compiler/typeofInternalModules.errors.txt
+compiler/typeofProperty.errors.txt
+compiler/typeofSimple.errors.txt
+compiler/typeofStripsFreshness.errors.txt
+compiler/typeofThisInMethodSignature.errors.txt
+compiler/typeofUndefined.errors.txt
+compiler/typeofUsedBeforeBlockScoped.errors.txt
+
+## undefined/unknown/inference edges (final) — undefined
+## type args, unknown symbols, unmet constraints in import() ##
+compiler/undefinedArgumentInference.errors.txt
+compiler/undefinedAssignableToGenericMappedIntersection.errors.txt
+compiler/undefinedInferentialTyping.errors.txt
+compiler/undefinedTypeArgument1.errors.txt
+compiler/undefinedTypeArgument2.errors.txt
+compiler/undefinedTypeAssignment1.errors.txt
+compiler/undefinedTypeAssignment2.errors.txt
+compiler/undefinedTypeAssignment3.errors.txt
+compiler/undefinedTypeAssignment4.errors.txt
+compiler/unknownLikeUnionObjectFlagsNotPropagated.errors.txt
+compiler/unknownPropertiesAreAssignableToObjectUnion.errors.txt
+compiler/unknownSymbolInGenericReturnType.errors.txt
+compiler/unknownSymbolOffContextualType1.errors.txt
+compiler/unknownSymbols1.errors.txt
+compiler/unknownSymbols2.errors.txt
+compiler/unknownTypeArgOnCall.errors.txt
+compiler/unmetTypeConstraintInImportCall.errors.txt
+compiler/unspecializedConstraints.errors.txt
+compiler/untypedFunctionCallsWithTypeParameters1.errors.txt
+compiler/untypedModuleImport_withAugmentation2.errors.txt
+
+## union-type relations (final) — subtype reduction,
+## discriminant error messages, index+method signatures,
+## parenthesization grammar in unions ##
+compiler/unionCallMixedTypeParameterPresence.errors.txt
+compiler/unionErrorMessageOnMatchingDiscriminant.errors.txt
+compiler/unionOfArraysFilterCall.errors.txt
+compiler/unionOfFunctionAndSignatureIsCallable.errors.txt
+compiler/unionPropertyExistence.errors.txt
+compiler/unionPropertyOfProtectedAndIntersectionProperty.errors.txt
+compiler/unionReductionWithStringMappingAndIdenticalBaseTypeExistsNoCrash.errors.txt
+compiler/unionRelationshipCheckPasses.errors.txt
+compiler/unionSubtypeReductionErrors.errors.txt
+compiler/unionTypeErrorMessageTypeRefs01.errors.txt
+compiler/unionTypeParameterInference.errors.txt
+compiler/unionTypeWithIndexAndMethodSignature.errors.txt
+compiler/unionTypeWithRecursiveSubtypeReduction2.errors.txt
+compiler/unionTypeWithRecursiveSubtypeReduction3.errors.txt
+compiler/unionWithIndexSignature.errors.txt
+compiler/unparenthesizedConstructorTypeInUnionOrIntersection.errors.txt
+compiler/unparenthesizedFunctionTypeInUnionOrIntersection.errors.txt
+
+## use-before-declaration (final) — class decorators,
+## destructuring, property assignments, super class ##
+compiler/unusedLocalsInMethod4.errors.txt
+compiler/useBeforeDeclaration_classDecorators.1.errors.txt
+compiler/useBeforeDeclaration_classDecorators.2(experimentaldecorators=false).errors.txt
+compiler/useBeforeDeclaration_classDecorators.2(experimentaldecorators=true).errors.txt
+compiler/useBeforeDeclaration_destructuring.errors.txt
+compiler/useBeforeDeclaration_jsx.errors.txt
+compiler/useBeforeDeclaration_propertyAssignment.errors.txt
+compiler/useBeforeDeclaration_superClass.errors.txt
+compiler/useUnknownInCatchVariables01.errors.txt
+
+## var/varargs checks (final) — varArg typing, var-as-ID,
+## name conflicts with imports ##
+compiler/varArgConstructorMemberParameter.errors.txt
+compiler/varArgParamTypeCheck.errors.txt
+compiler/varArgWithNoParamName.errors.txt
+compiler/varBlock.errors.txt
+compiler/varNameConflictsWithImportInDifferentPartOfModule.errors.txt
+compiler/vararg.errors.txt
+
+## variance annotations — measurement/propagation,
+## in/out validation, variance references ##
+compiler/varianceAnnotationValidation.errors.txt
+compiler/varianceMeasurement.errors.txt
+compiler/variancePropagation.errors.txt
+compiler/varianceReferences.errors.txt
+
+## with-statement checking — TS2410 invalid targets,
+## nested scope, comment emit ##
+compiler/withStatement.errors.txt
+compiler/withStatementErrors.errors.txt
+compiler/withStatementInternalComments.errors.txt
+compiler/withStatementNestedScope.errors.txt
+
+## yield* / generator contextual typing (final) ##
+compiler/wrappedRecursiveGenericType.errors.txt
+compiler/yieldExpression1.errors.txt
+compiler/yieldExpressionInFlowLoop.errors.txt
+compiler/yieldInForInInDownlevelGenerator(target=es2015).errors.txt
+compiler/yieldStarContextualType.errors.txt
+
+## misc single-root gaps (batch #6100-#6536) ##
+compiler/typedGenericPrototypeMember.errors.txt
+compiler/uncaughtCompilerError2.errors.txt
+compiler/uniqueSymbolAllowsIndexInObjectWithIndexSignature.errors.txt
+compiler/unresolvableSelfReferencingAwaitedUnion.errors.txt
+compiler/usingModuleWithExportImportInValuePosition.errors.txt
+compiler/valueOfTypedArray.errors.txt
+compiler/variableDeclarationInStrictMode1.errors.txt
+compiler/variableDeclaratorResolvedDuringContextualTyping.errors.txt
+compiler/verbatim-declarations-parameters.errors.txt
+compiler/visibilityOfCrossModuleTypeUsage.errors.txt
+compiler/voidAsNonAmbiguousReturnType.errors.txt
+compiler/voidAsOperator.errors.txt
+compiler/weakType.errors.txt
+compiler/widenToAny1.errors.txt
+compiler/widenToAny2.errors.txt
+compiler/widenedTypes.errors.txt
+compiler/wideningWithTopLevelTypeParameter.errors.txt

@@ -67,8 +67,8 @@ diff "tests/baselines/reference/compiler/<stem>.errors.txt" \
 
 # 当前批次
 
-- start: 6100
-- end: 6536
+全部 6537 个用例已扫完（2026-08-16，批次 0-6536，全部 0 fail）。
+下一步工作变为按 triaged.txt 台账的根因组逐个修复子系统（见分诊规则章节）。
 
 # 测试流程修改
 
