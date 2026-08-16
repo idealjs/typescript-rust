@@ -8382,6 +8382,54 @@ impl Checker {
     /// function-type nodes. Mirrors Go's `checkInterfaceDeclaration` →
     /// `checkSourceElement` walk over members.
     fn check_interface_members(&mut self, members: &NodeList) {
+        // TS2300: duplicate interface member names — method signatures
+        // merge (overloads); any other same-name member pair reports on
+        // EVERY occurrence (Go's checkObjectTypeForDuplicateDeclarations).
+        // Names normalize string-literal keys ('"artist"' == 'artist').
+        {
+            let mut seen: std::collections::HashMap<String, Vec<&Arc<Node>>> =
+                std::collections::HashMap::new();
+            for member in members.iter() {
+                if let Some(name_node) = member.name() {
+                    let name = match name_node.kind {
+                        SyntaxKind::StringLiteral
+                        | SyntaxKind::NumericLiteral
+                        | SyntaxKind::Identifier
+                        | SyntaxKind::PrivateIdentifier => name_node.text().to_string(),
+                        _ => continue,
+                    };
+                    seen.entry(name).or_default().push(member);
+                }
+            }
+            for (_, group) in seen.iter() {
+                // Method-signature groups are overload sets; get/set
+                // accessor pairs are legal (lib.dom declares both).
+                let all_methods = group
+                    .iter()
+                    .all(|m| m.kind == SyntaxKind::MethodSignature);
+                let accessor_pair = group.iter().all(|m| {
+                    matches!(
+                        m.kind,
+                        SyntaxKind::GetAccessor | SyntaxKind::SetAccessor
+                    )
+                }) && group.iter().any(|m| m.kind == SyntaxKind::GetAccessor)
+                    && group.iter().any(|m| m.kind == SyntaxKind::SetAccessor);
+                if group.len() > 1 && !all_methods && !accessor_pair {
+                    for m in group {
+                        if let Some(name_node) = m.name() {
+                            let name = name_node.text().to_string();
+                            let file = self.current_file.clone();
+                            self.diagnostics.add(crate::ast::Diagnostic::new(
+                                file,
+                                name_node.loc,
+                                crate::diagnostics::messages_generated::DUPLICATE_IDENTIFIER_0,
+                                vec![name],
+                            ));
+                        }
+                    }
+                }
+            }
+        }
         for member in members.iter() {
             match member.kind {
                 SyntaxKind::MethodSignature => {
@@ -10113,6 +10161,93 @@ impl Checker {
             }
             SyntaxKind::ObjectLiteralExpression => {
                 if let crate::ast::NodeData::ObjectLiteralExpression(data) = &node.data {
+                    // TS1117: duplicate property names — escapes and quoted
+                    // keys normalize ('a' / '"c"' == 'a' / 'c'); each
+                    // duplicate occurrence reports on its name node.
+                    {
+                        let mut seen: std::collections::HashMap<String, Vec<&Arc<Node>>> =
+                            std::collections::HashMap::new();
+                        for prop in data.properties.iter() {
+                            let Some(name_node) = prop.name() else {
+                                continue;
+                            };
+                            let name = if name_node.kind == SyntaxKind::ComputedPropertyName {
+                                // Constant computed names ('[1]', '[+1]',
+                                // '["s"]') collide with literal keys.
+                                let expr = match &name_node.data {
+                                    crate::ast::NodeData::ComputedPropertyName(c) => {
+                                        Arc::clone(&c.expression)
+                                    }
+                                    _ => Arc::clone(name_node),
+                                };
+                                match expr.kind {
+                                    SyntaxKind::NumericLiteral
+                                    | SyntaxKind::StringLiteral
+                                    | SyntaxKind::Identifier => expr.text().to_string(),
+                                    SyntaxKind::PrefixUnaryExpression => {
+                                        let crate::ast::NodeData::PrefixUnaryExpression(u) =
+                                            &expr.data
+                                        else {
+                                            continue;
+                                        };
+                                        let sign = if u.operator == SyntaxKind::MinusToken {
+                                            "-"
+                                        } else {
+                                            ""
+                                        };
+                                        match &u.operand.data {
+                                            crate::ast::NodeData::NumericLiteral(n) => {
+                                                format!("{sign}{}", n.text)
+                                            }
+                                            _ => continue,
+                                        }
+                                    }
+                                    SyntaxKind::PropertyAccessExpression => {
+                                        // Enum-member computed names
+                                        // ('[E1.A]' with 'A = "ENUM_KEY"').
+                                        let sym = self.resolve_qualified_symbol(&expr);
+                                        match sym.as_ref().and_then(|s| s.value_declaration.clone())
+                                        {
+                                            Some(decl) => match self.get_constant_value(&decl) {
+                                                Some(v) => v,
+                                                None => continue,
+                                            },
+                                            None => continue,
+                                        }
+                                    }
+                                    _ => continue,
+                                }
+                            } else {
+                                match name_node.kind {
+                                    SyntaxKind::StringLiteral
+                                    | SyntaxKind::NumericLiteral
+                                    | SyntaxKind::Identifier => name_node.text().to_string(),
+                                    _ => continue,
+                                }
+                            };
+                            seen.entry(name).or_default().push(prop);
+                        }
+                        for (_, group) in seen.iter() {
+                            if group.len() > 1 {
+                                for (i, prop) in group.iter().enumerate() {
+                                    if i == 0 {
+                                        continue;
+                                    }
+                                    if let Some(name_node) = prop.name() {
+                                        let name = name_node.text().to_string();
+                                        let file = self.current_file.clone();
+                                        self.diagnostics.add(crate::ast::Diagnostic::new(
+                                            file,
+                                            name_node.loc,
+                                            crate::diagnostics::messages_generated::
+                                                AN_OBJECT_LITERAL_CANNOT_HAVE_MULTIPLE_PROPERTIES_WITH_THE_SAME_NAME,
+                                            vec![name],
+                                        ));
+                                    }
+                                }
+                            }
+                        }
+                    }
                     for prop in data.properties.iter() {
                         self.check_object_literal_element(prop);
                     }

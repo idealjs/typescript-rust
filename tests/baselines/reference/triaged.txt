@@ -1050,3 +1050,58 @@ compiler/dottedModuleName2.errors.txt
 compiler/dottedSymbolResolution1.errors.txt
 compiler/doubleMixinConditionalTypeBaseClassWorks.errors.txt
 compiler/doubleUnderscoreExportStarConflict.errors.txt
+## 2026-08-16 batch #2000-#2099: duplicate-declaration checks
+## (cont.) — unicode-escape identifiers (scanner gap feeding
+## TS1117), enum-member computed names, mixed TS1117/TS2300 splits,
+## catch-block function redeclaration TS2403, cross-file/package
+## duplicate merging, dynamic import() semantics, downlevel let/const
+## emit baselines, elaborated relater chains
+compiler/downlevelLetConst11.errors.txt
+compiler/downlevelLetConst12(target=es2015).errors.txt
+compiler/downlevelLetConst2.errors.txt
+compiler/downlevelLetConst6.errors.txt
+compiler/duplicateClassElements.errors.txt
+compiler/duplicateDefaultExport.errors.txt
+compiler/duplicateErrorAssignability.errors.txt
+compiler/duplicateErrorClassExpression.errors.txt
+compiler/duplicateErrorNameNotFound.errors.txt
+compiler/duplicateIdentifierBindingElementInParameterDeclaration1(target=es2015).errors.txt
+compiler/duplicateIdentifierBindingElementInParameterDeclaration2(target=es2015).errors.txt
+compiler/duplicateIdentifierComputedName.errors.txt
+compiler/duplicateIdentifierDifferentModifiers.errors.txt
+compiler/duplicateIdentifierDifferentSpelling.errors.txt
+compiler/duplicateIdentifierEnum.errors.txt
+compiler/duplicateIdentifierInCatchBlock.errors.txt
+compiler/duplicateIdentifierRelatedSpans6.errors.txt
+compiler/duplicateIdentifierRelatedSpans7.errors.txt
+compiler/duplicateIdentifierRelatedSpans_moduleAugmentation.errors.txt
+compiler/duplicateIdentifiersAcrossContainerBoundaries.errors.txt
+compiler/duplicateIdentifiersAcrossFileBoundaries.errors.txt
+compiler/duplicateLocalVariable2.errors.txt
+compiler/duplicateLocalVariable3.errors.txt
+compiler/duplicateLocalVariable4.errors.txt
+compiler/duplicateObjectLiteralProperty(target=es2015).errors.txt
+compiler/duplicateObjectLiteralProperty_computedName2.errors.txt
+compiler/duplicateObjectLiteralProperty_computedName3.errors.txt
+compiler/duplicatePackage.errors.txt
+compiler/duplicatePackage_globalMerge.errors.txt
+compiler/duplicatePackage_packageIdIncludesSubModule.errors.txt
+compiler/duplicatePackage_referenceTypes.errors.txt
+compiler/duplicatePackage_relativeImportWithinPackage.errors.txt
+compiler/duplicatePackage_relativeImportWithinPackage_scoped.errors.txt
+compiler/duplicatePackage_subModule.errors.txt
+compiler/duplicatePackage_withErrors.errors.txt
+compiler/duplicateSymbolsExportMatching.errors.txt
+compiler/duplicateVarAndImport.errors.txt
+compiler/duplicateVarAndImport2.errors.txt
+compiler/duplicateVariablesWithAny.errors.txt
+compiler/duplicateVarsAcrossFileBoundaries.errors.txt
+compiler/dynamicImportEvaluateSpecifier.errors.txt
+compiler/dynamicImportInDefaultExportExpression.errors.txt
+compiler/dynamicImportTrailingComma.errors.txt
+compiler/dynamicImportsDeclaration.errors.txt
+compiler/dynamicNames.errors.txt
+compiler/elaboratedErrors.errors.txt
+compiler/elaboratedErrorsOnNullableTargets01.errors.txt
+compiler/elaborationForPossiblyCallableTypeStillReferencesArgumentAtTopLevel.errors.txt
+compiler/elidedEmbeddedStatementsReplacedWithSemicolon.errors.txt

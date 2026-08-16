@@ -2578,6 +2578,36 @@ impl Binder {
                 self.declare_symbol(node, SymbolFlags::BlockScopedVariable, SymbolFlags::VALUE);
             }
             SyntaxKind::TypeParameter => {
+                // TS2300: duplicate names in one type-parameter list (Go's
+                // checkTypeParameters). The parameter's parent is the list
+                // node; earlier same-name siblings make this one a dupe.
+                if let Some(list) = node.parent.as_ref()
+                    && let Some(name) = node.name()
+                    && name.kind == SyntaxKind::Identifier
+                {
+                    let mut dup = false;
+                    crate::ast::node_data_generated::for_each_child(list, |sibling| {
+                        if Arc::ptr_eq(sibling, node) {
+                            return true; // stop at self — only EARLIER entries count
+                        }
+                        if sibling.kind == SyntaxKind::TypeParameter
+                            && sibling
+                                .name()
+                                .is_some_and(|sn| sn.text() == name.text())
+                        {
+                            dup = true;
+                        }
+                        false
+                    });
+                    if dup {
+                        self.symbol_map.binder_diagnostics.push(Diagnostic::new(
+                            self.current_source_file.clone(),
+                            name.loc,
+                            DUPLICATE_IDENTIFIER_0,
+                            vec![name.text().to_string()],
+                        ));
+                    }
+                }
                 self.bind_type_parameter(node);
             }
             SyntaxKind::ObjectLiteralExpression => {
