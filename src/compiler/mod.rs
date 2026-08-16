@@ -406,41 +406,43 @@ impl Program {
         let skip_default_lib = self.options.skip_default_lib_check.is_true();
 
         let mut checker = self.build_checker_internal(skip_lib, skip_default_lib);
-        let mut diagnostics = checker.get_semantic_diagnostics();
+        let check_diagnostics = checker.get_semantic_diagnostics();
         // Surface binder-level diagnostics (e.g. TS2451 block-scoped
         // redeclarations) alongside the checker's semantic diagnostics,
-        // applying the same skip filtering.
-        if skip_lib {
-            diagnostics.extend(
-                self.symbol_map
-                    .binder_diagnostics
-                    .iter()
-                    .filter(|d| {
-                        d.file
-                            .as_ref()
-                            .map(|f| {
-                                !f.is_declaration_file && !is_external_library_file(&f.file_name)
-                            })
-                            .unwrap_or(true)
-                    })
-                    .cloned(),
-            );
+        // applying the same skip filtering. Binder diagnostics come FIRST in
+        // the concatenation: the harness's stable position sort then keeps
+        // them ahead of same-position check diagnostics (Go concatenates
+        // bind- then check-phase diagnostics the same way).
+        let mut diagnostics: Vec<Diagnostic> = if skip_lib {
+            self.symbol_map
+                .binder_diagnostics
+                .iter()
+                .filter(|d| {
+                    d.file
+                        .as_ref()
+                        .map(|f| {
+                            !f.is_declaration_file && !is_external_library_file(&f.file_name)
+                        })
+                        .unwrap_or(true)
+                })
+                .cloned()
+                .collect()
         } else if skip_default_lib {
-            diagnostics.extend(
-                self.symbol_map
-                    .binder_diagnostics
-                    .iter()
-                    .filter(|d| {
-                        d.file
-                            .as_ref()
-                            .map(|f| !self.default_library_file_names.contains(&f.file_name))
-                            .unwrap_or(true)
-                    })
-                    .cloned(),
-            );
+            self.symbol_map
+                .binder_diagnostics
+                .iter()
+                .filter(|d| {
+                    d.file
+                        .as_ref()
+                        .map(|f| !self.default_library_file_names.contains(&f.file_name))
+                        .unwrap_or(true)
+                })
+                .cloned()
+                .collect()
         } else {
-            diagnostics.extend(self.symbol_map.binder_diagnostics.iter().cloned());
-        }
+            self.symbol_map.binder_diagnostics.iter().cloned().collect()
+        };
+        diagnostics.extend(check_diagnostics);
         // JS-file gating (Go: `Program.SkipTypeChecking` / `plainJSErrors` in
         // `getBindAndCheckDiagnosticsWithChecker`): with `checkJs: false`,
         // `.js`/`.jsx` files contribute no bind/check diagnostics at all, and

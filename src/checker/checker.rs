@@ -6045,9 +6045,15 @@ impl Checker {
                                             vec![],
                                         ));
                                     } else {
+                                        // Go anchors TS2366 on the return
+                                        // type annotation (`fn.Type()`).
+                                        let loc = data
+                                            .type_node
+                                            .as_ref()
+                                            .map_or(node.loc, |tn| tn.loc);
                                         self.diagnostics.add(crate::ast::Diagnostic::new(
                                             self.current_file.clone(),
-                                            node.loc,
+                                            loc,
                                             FUNCTION_LACKS_ENDING_RETURN_STATEMENT_AND_RETURN_TYPE_DOES_NOT_INCLUDE_UNDEFINED,
                                             vec![],
                                         ));
@@ -9929,6 +9935,16 @@ impl Checker {
                     self.check_expression(&data.expression);
                 }
             }
+            SyntaxKind::ClassExpression => {
+                // Grammar-check members (TS1248 `const` member, duplicate
+                // modifiers, …) — class expressions don't go through the
+                // statement-level class checker.
+                if let crate::ast::NodeData::ClassExpression(data) = &node.data {
+                    for member in data.members.iter() {
+                        self.check_grammar_modifiers(member);
+                    }
+                }
+            }
             SyntaxKind::CallExpression => {
                 if let crate::ast::NodeData::CallExpression(data) = &node.data {
                     self.check_expression(&data.expression);
@@ -10101,6 +10117,20 @@ impl Checker {
                         &data.expression,
                         &data.type_node,
                     );
+                    // TS1355 (Go `checkAssertion`): `x as const` requires a
+                    // literal or an enum-member reference on the left.
+                    if Self::is_const_type_node(&data.type_node)
+                        && !self.is_valid_const_assertion_argument(&data.expression)
+                    {
+                        let file = self.current_file.clone();
+                        self.diagnostics.add(crate::ast::Diagnostic::new(
+                            file,
+                            data.expression.loc,
+                            crate::diagnostics::messages_generated::
+                                A_CONST_ASSERTION_CAN_ONLY_BE_APPLIED_TO_REFERENCES_TO_ENUM_MEMBERS_OR_STRING_NUMBER_BOOLEAN_ARRAY_OR_OBJECT_LITERALS,
+                            vec![],
+                        ));
+                    }
                 }
             }
             SyntaxKind::TypeAssertionExpression => {
@@ -11581,6 +11611,78 @@ impl Checker {
         true
     }
 
+    /// Go `isValidConstAssertionArgument`: valid left sides of `as const`.
+    fn is_valid_const_assertion_argument(&mut self, node: &Arc<Node>) -> bool {
+        match node.kind {
+            SyntaxKind::StringLiteral
+            | SyntaxKind::NoSubstitutionTemplateLiteral
+            | SyntaxKind::NumericLiteral
+            | SyntaxKind::BigIntLiteral
+            | SyntaxKind::TrueKeyword
+            | SyntaxKind::FalseKeyword
+            | SyntaxKind::ArrayLiteralExpression
+            | SyntaxKind::ObjectLiteralExpression
+            | SyntaxKind::TemplateExpression => true,
+            SyntaxKind::ParenthesizedExpression => match &node.data {
+                crate::ast::NodeData::ParenthesizedExpression(p) => {
+                    self.is_valid_const_assertion_argument(&p.expression)
+                }
+                _ => false,
+            },
+            SyntaxKind::PrefixUnaryExpression => match &node.data {
+                crate::ast::NodeData::PrefixUnaryExpression(p) => {
+                    let arg_kind = p.operand.kind;
+                    (p.operator == SyntaxKind::MinusToken
+                        && matches!(
+                            arg_kind,
+                            SyntaxKind::NumericLiteral | SyntaxKind::BigIntLiteral
+                        ))
+                        || (p.operator == SyntaxKind::PlusToken
+                            && arg_kind == SyntaxKind::NumericLiteral)
+                }
+                _ => false,
+            },
+            SyntaxKind::PropertyAccessExpression | SyntaxKind::ElementAccessExpression => {
+                // An enum-member reference: `E.a` / `E["a"]` resolving to an
+                // enum symbol.
+                let (obj, _name) = match &node.data {
+                    crate::ast::NodeData::PropertyAccessExpression(d) => {
+                        (Some(d.expression.clone()), d.name.text().to_string())
+                    }
+                    crate::ast::NodeData::ElementAccessExpression(d) => {
+                        let arg = &d.argument_expression;
+                        if arg.kind == SyntaxKind::StringLiteral {
+                            (Some(d.expression.clone()), arg.text().to_string())
+                        } else {
+                            (None, String::new())
+                        }
+                    }
+                    _ => (None, String::new()),
+                };
+                match obj {
+                    Some(obj) if obj.kind == SyntaxKind::Identifier => {
+                        self.resolve_qualified_symbol(node)
+                            .or_else(|| self.resolve_identifier(&obj))
+                            .map(|sym| {
+                                sym.flags
+                                    .intersects(SymbolFlags::ENUM | SymbolFlags::EnumMember)
+                            })
+                            .unwrap_or(false)
+                    }
+                    _ => false,
+                }
+            }
+            _ => false,
+        }
+    }
+
+    /// Go `isConstTypeReference`: the type side of an `as const` assertion
+    /// is exactly the keyword `const` (the parser produces a `ConstKeyword`
+    /// type node for the asserted type).
+    fn is_const_type_node(type_node: &Arc<Node>) -> bool {
+        type_node.kind == SyntaxKind::ConstKeyword
+    }
+
     /// TS2588/TS2540 for assignment-like targets. `x = 1` / `++x` with an
     /// identifier LHS resolving to a `const` binding reports TS2588 on the
     /// operand; `M.x = 1` / `++M.x` where `M` is a namespace and `x` a
@@ -11591,12 +11693,14 @@ impl Checker {
         // Unwrap parentheses (`++((x))` — Go's checkReferenceExpression
         // walks through parenthesized expressions).
         let mut target = operand;
-        while target.kind == SyntaxKind::ParenthesizedExpression {
-            let inner = match &target.data {
+        loop {
+            target = match &target.data {
+                // Parentheses (`++((x))`) and non-null assertions (`x!++`)
+                // — Go's checkReferenceExpression walks through both.
                 crate::ast::NodeData::ParenthesizedExpression(p) => &p.expression,
+                crate::ast::NodeData::NonNullExpression(n) => &n.expression,
                 _ => break,
             };
-            target = inner;
         }
         let operand = target;
         if operand.kind == SyntaxKind::PropertyAccessExpression

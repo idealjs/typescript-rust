@@ -6010,6 +6010,19 @@ impl Parser {
                 return self.parse_export_declaration_tail(pos, true);
             }
             SyntaxKind::ConstKeyword | SyntaxKind::LetKeyword | SyntaxKind::VarKeyword => {
+                // `export const enum E { ... }` is an exported const enum
+                // (Go: `const` is a modifier only when followed by `enum`);
+                // route through the modifier-collecting declaration parser.
+                if self.token == SyntaxKind::ConstKeyword {
+                    let mut s = self.scanner.clone();
+                    if s.scan() == SyntaxKind::EnumKeyword {
+                        return self.parse_declaration_with_modifiers(vec![(
+                            SyntaxKind::ExportKeyword,
+                            pos,
+                            export_end,
+                        )]);
+                    }
+                }
                 // export const/let/var x = ...
                 let export_mod = self.make_export_modifier(pos, export_end);
                 let declaration_list = self.parse_variable_declaration_list(false);

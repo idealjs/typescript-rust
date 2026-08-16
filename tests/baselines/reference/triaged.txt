@@ -599,3 +599,59 @@ compiler/conflictMarkerTrivia4.errors.txt
 compiler/conflictingDeclarationsImportFromNamespace1.errors.txt
 compiler/conflictingDeclarationsImportFromNamespace2.errors.txt
 compiler/conflictingMemberTypesInBases.errors.txt
+
+## 2026-08-16 batch #1100-#1199: const-enum checker family not ported —
+## TS2567 enum-merge validation, TS2651 forward refs, TS2474/2477/2478
+## constant-expression evaluation, TS2475/2476 usage restrictions, enum
+## element-access TS2339 ('typeof E' message), TS2349 mis-typing after
+## enum case labels, and const-enum emit/module-resolution baselines ##
+compiler/constEnumBadPropertyNames.errors.txt
+compiler/constEnumErrors.errors.txt
+compiler/constEnumSyntheticNodesComments.errors.txt
+compiler/constEnumNamespaceReferenceCausesNoImport.errors.txt
+compiler/constEnumNamespaceReferenceCausesNoImport2.errors.txt
+compiler/constEnumNamespaceReferenceCausesNoImport(isolatedmodules=false).errors.txt
+compiler/constEnumNamespaceReferenceCausesNoImport(isolatedmodules=true).errors.txt
+
+## 2026-08-16 batch #1100-#1199: contextual typing / inference — overload
+## list from unions (TS7006 false positives), nested return-type
+## inference through contextually-typed parameters ##
+compiler/contextSensitiveReturnTypeInference.errors.txt
+compiler/contextualComputedNonBindablePropertyType.errors.txt
+compiler/contextualExpressionTypecheckingDoesntBlowStack(target=es2015).errors.txt
+compiler/contextualOuterTypeParameters.errors.txt
+compiler/contextualOverloadListFromArrayUnion.errors.txt
+compiler/contextualOverloadListFromUnionWithPrimitiveNoImplicitAny.errors.txt
+compiler/contextualParamTypeVsNestedReturnTypeInference1.errors.txt
+compiler/contextualParamTypeVsNestedReturnTypeInference2.errors.txt
+compiler/contextualParamTypeVsNestedReturnTypeInference3.errors.txt
+compiler/contextualParamTypeVsNestedReturnTypeInference4.errors.txt
+
+## 2026-08-16 batch #1100-#1199: type-parameter constraint checking —
+## same-list constraint references, indexed-access constraints,
+## prototype-property constraints ##
+compiler/constraintReferencingTypeParameterFromSameTypeParameterList.errors.txt
+compiler/constraintWithIndexedAccess.errors.txt
+compiler/constraints0.errors.txt
+compiler/constraintsUsedInPrototypeProperty.errors.txt
+
+## 2026-08-16 batch #1100-#1199: constructor signature family — TS2769
+## detailed overload-failure output, TS2377 definite super-call analysis,
+## TS2349 namespace class+fn callability, TS2409/TS2558 construct-signature
+## checks, specialized-signature comparisons ##
+compiler/constructorAsType.errors.txt
+compiler/constructorInvocationWithTooFewTypeArgs.errors.txt
+compiler/constructorOverloads1.errors.txt
+compiler/constructorOverloads3.errors.txt
+compiler/constructorOverloads4.errors.txt
+compiler/constructorReturningAPrimitive.errors.txt
+compiler/constructorReturnsInvalidType.errors.txt
+compiler/constructorWithCapturedSuper.errors.txt
+compiler/constructorWithParameterPropertiesAndPrivateFields.es2015.errors.txt
+compiler/constructorsWithSpecializedSignatures.errors.txt
+
+## 2026-08-16 batch #1100-#1199: relater/inference misc — TS2564 definite
+## assignment + parameter symbol transfer through merged declarations;
+## TS2741 Record mapped-type assignability (alias vs non-alias) ##
+compiler/conflictingTypeParameterSymbolTransfer.errors.txt
+compiler/consistentAliasVsNonAliasRecordBehavior.errors.txt
