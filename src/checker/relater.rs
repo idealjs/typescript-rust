@@ -354,6 +354,15 @@ impl Checker {
         target: &Arc<Type>,
         relation: RelationKind,
     ) -> bool {
+        // Go (relater.go isTypeRelatedTo): under the comparable relation,
+        // the swapped simple check runs first — literal/primitive mismatches
+        // like number vs `1` are comparable in either direction.
+        if relation == RelationKind::Comparable
+            && !target.flags.contains(TypeFlags::Never)
+            && self.is_simple_type_related_to(target, source, relation)
+        {
+            return true;
+        }
         if self.is_simple_type_related_to(source, target, relation) {
             return true;
         }
@@ -770,11 +779,14 @@ impl Checker {
                     return false;
                 }
             };
-            // Check that the source property type is assignable to the
-            // target property type (depth check).
+            // Check that the source property type is related to the
+            // target property type (depth check) under the SAME relation —
+            // Go's `propertiesRelatedTo` recurses with the incoming
+            // relation, so the comparable relation widens literal property
+            // types (number ~ 1).
             let source_type = self.get_type_of_symbol(source_prop);
             let target_type = self.get_type_of_symbol(target_prop);
-            if !self.is_type_assignable_to(&source_type, &target_type) {
+            if !self.is_type_related_to(&source_type, &target_type, relation) {
                 return false;
             }
         }

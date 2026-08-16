@@ -4959,6 +4959,16 @@ impl Checker {
             if param_type.flags.contains(TypeFlags::Any) {
                 continue;
             }
+            // Contextual element checks for literal arguments
+            // (`f([1, "a"])` with `param: number[]` — per-element TS2322,
+            // excess TS2353 on nested object literals).
+            if matches!(
+                arg.kind,
+                SyntaxKind::ArrayLiteralExpression | SyntaxKind::ObjectLiteralExpression
+            ) {
+                let pt = Arc::clone(&param_type);
+                self.check_contextual_elements(arg, &pt, arg.loc);
+            }
             let arg_type = self.get_type_of_node(arg);
             if !self.is_type_assignable_to(&arg_type, &param_type) {
                 // Widen literal source types for display, like the other
@@ -6864,6 +6874,15 @@ impl Checker {
             let resolved_type = match (&data.type_node, &data.initializer) {
                 (Some(type_node), Some(init)) => {
                     let annotation_type = self.get_type_from_type_node(type_node);
+                    // Nested literal elements (`var v: {id:number}[] =
+                    // [{id:1}, {id:2, name:"x"}]`): the direct
+                    // object-literal checks below cover non-array
+                    // initializers; array literals need per-element
+                    // contextual checks (TS2353/TS2741/TS2322).
+                    if init.kind == SyntaxKind::ArrayLiteralExpression {
+                        let at = Arc::clone(&annotation_type);
+                        self.check_contextual_elements(init, &at, init.loc);
+                    }
                     let init_type = self.get_type_of_node(init);
                     let assignable = self.is_type_assignable_to(&init_type, &annotation_type);
                     let mut reported_error = false;
@@ -8293,8 +8312,12 @@ impl Checker {
         } else {
             expr_type
         };
-        let comparable = self.is_type_assignable_to(&expr_base, &target_type)
-            || self.is_type_assignable_to(&target_type, &expr_base);
+        // Go's checkAssertion uses `isTypeComparableTo` in both directions
+        // (comparability widens primitive literals: `{n: 1}` overlaps IFoo
+        // because number ~ 1); plain assignability over-reports casts of
+        // partial object literals.
+        let comparable = self.is_type_comparable_to(&expr_base, &target_type)
+            || self.is_type_comparable_to(&target_type, &expr_base);
         if !comparable {
             let source_str = self.type_to_string(&expr_base);
             let target_str = self.type_to_string(&target_type);
@@ -9333,6 +9356,14 @@ impl Checker {
                         });
                         self.check_expression(init);
                         self.this_container_stack.pop();
+                        // Contextual element checks for annotated property
+                        // initializers (`public bar:{id:number} =
+                        // {id:5, name:"foo"}` — TS2353/TS2741/TS2322).
+                        if let Some(tn) = &data.type_node {
+                            let target = self.get_type_from_type_node(tn);
+                            let anchor = data.name.loc;
+                            self.check_contextual_elements(init, &target, anchor);
+                        }
                     }
                 }
             }
@@ -9850,6 +9881,21 @@ impl Checker {
                                     vec![name_text.to_string()],
                                 ));
                             }
+                        }
+                    }
+                    // Contextual element checks for `x = <literal>` with an
+                    // annotated LHS: excess/missing properties on object
+                    // literals, per-element checks for array literals
+                    // (TS2353/TS2741/TS2322).
+                    if data.operator_token.kind == EqualsToken
+                        && data.left.kind == SyntaxKind::Identifier
+                    {
+                        if let Some(target) = self.declared_annotation_type_of(&data.left) {
+                            self.check_contextual_elements(
+                                &data.right,
+                                &target,
+                                data.right.loc,
+                            );
                         }
                     }
                     // TS2540: `M.x <op>= v` where `M` is a namespace and `x`
@@ -11609,6 +11655,191 @@ impl Checker {
             vec![property_name, name.to_string()],
         ));
         true
+    }
+
+    /// Contextual element check for literal expressions against a target
+    /// type (Go's contextual typing of array/object literals): recurses
+    /// into array-literal elements against the target's element type,
+    /// reports TS2353 excess properties and TS2741 missing properties on
+    /// object literals, and TS2322 for primitive-literal elements that
+    /// don't match a non-any target. Anchored at the offending property
+    /// name / element, like the official baselines.
+    fn check_contextual_elements(
+        &mut self,
+        expr: &Arc<Node>,
+        target: &Arc<Type>,
+        missing_anchor: TextRange,
+    ) {
+        if target.flags.contains(TypeFlags::Any) {
+            return;
+        }
+        if expr.kind == SyntaxKind::ArrayLiteralExpression {
+            let crate::ast::NodeData::ArrayLiteralExpression(data) = &expr.data else {
+                return;
+            };
+            let elem_t = self.get_array_element_type(target);
+            if elem_t.flags.contains(TypeFlags::Any) {
+                // A numeric index signature on the target (`interface I {
+                // [x: number]: Date }`) also types the elements.
+                let indexed = target.as_structured().and_then(|s| {
+                    s.index_infos
+                        .iter()
+                        .find(|info| {
+                            info.key_type
+                                .as_ref()
+                                .is_some_and(|k| k.flags.contains(TypeFlags::Number))
+                        })
+                        .and_then(|info| info.value_type.clone())
+                });
+                let Some(elem_t) = indexed else {
+                    return;
+                };
+                if elem_t.flags.contains(TypeFlags::Any) {
+                    return;
+                }
+                let mut inner = Vec::new();
+                for el in data.elements.iter() {
+                    if el.kind == SyntaxKind::SpreadElement {
+                        continue;
+                    }
+                    inner.push(Arc::clone(el));
+                }
+                for el in inner {
+                    let loc = el.loc;
+                    self.check_contextual_elements(&el, &elem_t, loc);
+                }
+                return;
+            }
+            for el in data.elements.iter() {
+                if el.kind == SyntaxKind::SpreadElement {
+                    continue;
+                }
+                self.check_contextual_elements(el, &elem_t, el.loc);
+            }
+            return;
+        }
+        // Type-assertion elements (`[<foo>({})]`): check the ASSERTED type
+        // against the element type (Go checks the contextually-typed
+        // assertion result — TS2741 on class types missing properties).
+        if matches!(
+            expr.kind,
+            SyntaxKind::TypeAssertionExpression | SyntaxKind::AsExpression
+        ) {
+            let target = Arc::clone(target);
+            let anchor = expr.loc;
+            let assertion_type = match &expr.data {
+                crate::ast::NodeData::TypeAssertion(d) => {
+                    self.get_type_from_type_node(&d.type_node)
+                }
+                crate::ast::NodeData::AsExpression(d) => {
+                    self.get_type_from_type_node(&d.type_node)
+                }
+                _ => return,
+            };
+            let missing =
+                self.get_missing_required_properties(&assertion_type, &target);
+            let file = self.current_file.clone();
+            let src_str = self.type_to_string(&assertion_type);
+            let tgt_str = self.type_to_string(&target);
+            if missing.len() == 1 {
+                self.diagnostics.add(crate::ast::Diagnostic::new(
+                    file,
+                    anchor,
+                    PROPERTY_0_IS_MISSING_IN_TYPE_1_BUT_REQUIRED_IN_TYPE_2,
+                    vec![missing[0].clone(), src_str, tgt_str],
+                ));
+            } else if missing.len() > 1 {
+                self.diagnostics.add(crate::ast::Diagnostic::new(
+                    file,
+                    anchor,
+                    TYPE_0_IS_MISSING_THE_FOLLOWING_PROPERTIES_FROM_TYPE_1_COLON_2,
+                    vec![src_str, tgt_str, missing.join(", ")],
+                ));
+            }
+            return;
+        }
+        let expr_type = self.get_type_of_node(expr);
+        if expr.kind == SyntaxKind::ObjectLiteralExpression {
+            if let Some(excess) = self.get_excess_property_name(&expr_type, target) {
+                let loc = self
+                    .find_object_literal_property_name_node(expr, &excess)
+                    .unwrap_or(expr.loc);
+                let tgt_str = self.type_to_string(target);
+                self.diagnostics.add(crate::ast::Diagnostic::new(
+                    self.current_file.clone(),
+                    loc,
+                    OBJECT_LITERAL_MAY_ONLY_SPECIFY_KNOWN_PROPERTIES_AND_0_DOES_NOT_EXIST_IN_TYPE_1,
+                    vec![excess, tgt_str],
+                ));
+                return;
+            }
+            let missing = self.get_missing_required_properties(&expr_type, target);
+            let file = self.current_file.clone();
+            let src_str = self.type_to_string(&expr_type);
+            let tgt_str = self.type_to_string(target);
+            if missing.len() == 1 {
+                self.diagnostics.add(crate::ast::Diagnostic::new(
+                    file,
+                    missing_anchor,
+                    PROPERTY_0_IS_MISSING_IN_TYPE_1_BUT_REQUIRED_IN_TYPE_2,
+                    vec![missing[0].clone(), src_str, tgt_str],
+                ));
+            } else if missing.len() > 1 {
+                self.diagnostics.add(crate::ast::Diagnostic::new(
+                    file,
+                    missing_anchor,
+                    TYPE_0_IS_MISSING_THE_FOLLOWING_PROPERTIES_FROM_TYPE_1_COLON_2,
+                    vec![src_str, tgt_str, missing.join(", ")],
+                ));
+            }
+            return;
+        }
+        // Primitive literals: report only genuine mismatches (null/undefined
+        // excluded — their assignability depends on strictNullChecks).
+        if matches!(
+            expr.kind,
+            SyntaxKind::StringLiteral
+                | SyntaxKind::NoSubstitutionTemplateLiteral
+                | SyntaxKind::NumericLiteral
+                | SyntaxKind::BigIntLiteral
+                | SyntaxKind::TrueKeyword
+                | SyntaxKind::FalseKeyword
+        ) && !self.is_type_assignable_to(&expr_type, target)
+        {
+            let display_type = if crate::checker::is_literal_type(&expr_type) {
+                self.get_base_type_of_literal_type(&expr_type)
+            } else {
+                expr_type.clone()
+            };
+            let src_str = self.type_to_string(&display_type);
+            let tgt_str = self.type_to_string(target);
+            self.diagnostics.add(crate::ast::Diagnostic::new(
+                self.current_file.clone(),
+                expr.loc,
+                TYPE_0_IS_NOT_ASSIGNABLE_TO_TYPE_1,
+                vec![src_str, tgt_str],
+            ));
+        }
+    }
+
+    /// The annotated type of an identifier's variable binding — used to
+    /// contextually check assignment right-hand sides (`foo = {...}` where
+    /// `foo: {id:number}`). Only VariableDeclaration annotations are
+    /// consulted; parameters and properties are checked at their own sites.
+    fn declared_annotation_type_of(&mut self, node: &Arc<Node>) -> Option<Arc<Type>> {
+        if node.kind != SyntaxKind::Identifier {
+            return None;
+        }
+        let sym = self.resolve_identifier(node)?;
+        let decl = sym.value_declaration.clone()?;
+        if decl.kind != SyntaxKind::VariableDeclaration {
+            return None;
+        }
+        let crate::ast::NodeData::VariableDeclaration(vd) = &decl.data else {
+            return None;
+        };
+        let tn = vd.type_node.as_ref()?;
+        Some(self.get_type_from_type_node(tn))
     }
 
     /// Go `isValidConstAssertionArgument`: valid left sides of `as const`.

@@ -655,3 +655,55 @@ compiler/constructorsWithSpecializedSignatures.errors.txt
 ## TS2741 Record mapped-type assignability (alias vs non-alias) ##
 compiler/conflictingTypeParameterSymbolTransfer.errors.txt
 compiler/consistentAliasVsNonAliasRecordBehavior.errors.txt
+
+## 2026-08-16 batch #1200-#1299: contextual SIGNATURE instantiation —
+## function-expression parameters/returns contextually typed by target
+## signatures (incl. overload sets), IIFE return inference, mapped/negated
+## type constraints, intersection-with-any propagation, yield* typing;
+## plus elaborated multi-line relation error chains (TS2322/TS2345/TS2352
+## drill-down) and typeof-E display for overload sets ##
+compiler/contextualParameterAndSelfReferentialConstraint1.errors.txt
+compiler/contextualPropertyOfGenericFilteringMappedType.errors.txt
+compiler/contextualPropertyOfGenericMappedType.errors.txt
+compiler/contextualReturnTypeOfIIFE.errors.txt
+compiler/contextualReturnTypeOfIIFE2.errors.txt
+compiler/contextualReturnTypeOfIIFE3.errors.txt
+compiler/contextualSigInstantiationRestParams.errors.txt
+compiler/contextualSignatureConditionalTypeInstantiationUsingDefault.errors.txt
+compiler/contextualSignatureInObjectFreeze.errors.txt
+compiler/contextualSignatureInstantiation1.errors.txt
+compiler/contextualSignatureInstantiation2.errors.txt
+compiler/contextualSignatureInstantiation3.errors.txt
+compiler/contextualSignatureInstantiation4.errors.txt
+compiler/contextualSignatureInstantiationWithTypeParameterConstrainedToOuterTypeParameter.errors.txt
+compiler/contextualSignatureInstatiationContravariance.errors.txt
+compiler/contextualTupleTypeParameterReadonly.errors.txt
+compiler/contextualTypeAny.errors.txt
+compiler/contextualTypeAppliedToVarArgs.errors.txt
+compiler/contextualTypeArrayReturnType.errors.txt
+compiler/contextualTypeBasedOnIntersectionWithAnyInTheMix1.errors.txt
+compiler/contextualTypeBasedOnIntersectionWithAnyInTheMix2.errors.txt
+compiler/contextualTypeBasedOnIntersectionWithAnyInTheMix3.errors.txt
+compiler/contextualTypeBasedOnIntersectionWithAnyInTheMix4.errors.txt
+compiler/contextualTypeBasedOnIntersectionWithAnyInTheMix5.errors.txt
+compiler/contextualTypeCaching.errors.txt
+compiler/contextualTypeForInitalizedVariablesFiltersUndefined.errors.txt
+compiler/contextualTypeFunctionObjectPropertyIntersection.errors.txt
+compiler/contextualTypeOfIndexedAccessParameter.errors.txt
+compiler/contextualTypeOnYield1.errors.txt
+compiler/contextualTypeOnYield2.errors.txt
+compiler/contextualTypeSelfReferencing.errors.txt
+compiler/contextualTypesNegatedTypeLikeConstraintInGenericMappedType1.errors.txt
+compiler/contextualTypesNegatedTypeLikeConstraintInGenericMappedType2.errors.txt
+compiler/contextualTypesNegatedTypeLikeConstraintInGenericMappedType3.errors.txt
+compiler/contextualTyping.errors.txt
+compiler/contextualTyping24.errors.txt
+compiler/contextualTyping33.errors.txt
+compiler/contextualTyping39.errors.txt
+compiler/contextualTyping41.errors.txt
+compiler/contextualTypingArrayDestructuringWithDefaults.errors.txt
+compiler/contextualTypingOfConditionalExpression2.errors.txt
+compiler/contextualTypingOfGenericFunctionTypedArguments1.errors.txt
+compiler/contextualTypingOfLambdaWithMultipleSignatures2.errors.txt
+compiler/contextualTypingOfOptionalMembers.errors.txt
+compiler/contextualTypingOfTooShortOverloads.errors.txt

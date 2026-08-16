@@ -275,10 +275,14 @@ impl Checker {
             return self.symbol_type_to_string(t, sym, flags);
         }
 
-        // Anonymous object literal types
+        // Anonymous object literal types (including the empty literal `{}`,
+        // which renders as `{}` rather than falling through to "object").
         if let Some(structured) = t.as_structured() {
             if !structured.properties.is_empty() || !structured.call_signatures().is_empty() {
                 return self.object_literal_to_string(t, structured, flags);
+            }
+            if t.object_flags.contains(ObjectFlags::ObjectLiteral) && t.symbol.is_none() {
+                return "{}".to_string();
             }
         }
 
