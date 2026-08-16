@@ -84,6 +84,13 @@ pub fn format_diagnostic_pretty(diag: &Diagnostic, locale: Option<&Locale>) -> S
 /// Resolve the flattened message text of a diagnostic (including its chain).
 /// When `locale` is `Some`, each message is localized.
 pub fn message_text(diag: &Diagnostic, locale: Option<&Locale>) -> String {
+    message_text_ex(diag, locale, 0)
+}
+
+/// Depth-aware message text: chain entries render on their own lines with
+/// a 2-space indent per depth level, matching the official baseline format
+/// ('  Property \'x\' is missing in type ...').
+fn message_text_ex(diag: &Diagnostic, locale: Option<&Locale>, depth: usize) -> String {
     let mut out = match &diag.message {
         Some(msg) => {
             let args: Vec<&str> = diag.message_args.iter().map(|s| s.as_str()).collect();
@@ -96,7 +103,8 @@ pub fn message_text(diag: &Diagnostic, locale: Option<&Locale>) -> String {
     };
     for chain in &diag.message_chain {
         out.push('\n');
-        out.push_str(&message_text(chain, locale));
+        out.push_str(&"  ".repeat(depth + 1));
+        out.push_str(&message_text_ex(chain, locale, depth + 1));
     }
     out
 }

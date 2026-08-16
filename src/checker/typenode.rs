@@ -359,6 +359,23 @@ impl Checker {
         } else {
             return self.error_type();
         };
+        // TS2314 / TS2344: type-reference arity + constraint checks (Go's
+        // checkTypeArguments at resolveTypeReference time). Purely
+        // syntactic on the declared type-parameter list — no instantiation
+        // needed. Skipped for the bundled lib (its generic instantiations
+        // resolve imperfectly in this port and would mis-fire).
+        if !self
+            .current_file
+            .as_ref()
+            .is_some_and(|f| f.file_name.starts_with("bundled://"))
+            && symbol
+                .flags
+                .intersects(SymbolFlags::Interface | SymbolFlags::Class | SymbolFlags::TypeAlias)
+            && !type_name_inside_conditional_branch(type_name)
+            && !type_name_shadowed_by_type_parameter(type_name)
+        {
+            self.check_type_reference_arguments(node, type_name, &symbol);
+        }
         // Type parameter: build a TypeParameter type with the constraint
         // resolved from the declaration (`<T extends Constraint>`).
         if symbol.flags.contains(SymbolFlags::TypeParameter) {
@@ -1708,6 +1725,184 @@ impl Checker {
                 self.create_tuple_type(element_types)
             }
             _ => self.error_type(),
+        }
+    }
+
+    /// TS2314 (arity) and TS2344 (constraint satisfaction) for a type
+    /// reference to a generic interface/class/type-alias. Message formats
+    /// follow the official baselines (which differ slightly from the
+    /// current tsgo CLI): TS2314 names the generic WITH its parameter
+    /// list ('G<T, U>'); a constraint failure caused by missing
+    /// properties appends a TS2741-style elaboration chain.
+    fn check_type_reference_arguments(
+        &mut self,
+        _node: &Arc<Node>,
+        type_name: &Arc<Node>,
+        symbol: &Arc<Symbol>,
+    ) {
+        // Declared type parameters: the first declaration carrying a list.
+        let params: Vec<Arc<Node>> = symbol
+            .declarations
+            .iter()
+            .find_map(|d| {
+                let tps = match &d.data {
+                    NodeData::InterfaceDeclaration(i) => i.type_parameters.as_ref(),
+                    NodeData::ClassDeclaration(c) => c.type_parameters.as_ref(),
+                    NodeData::TypeAliasDeclaration(t) => t.type_parameters.as_ref(),
+                    _ => None,
+                }?;
+                Some(tps.iter().cloned().collect())
+            })
+            .unwrap_or_default();
+        if params.is_empty() {
+            return;
+        }
+        let provided: Vec<Arc<Node>> = type_name
+            .parent
+            .as_ref()
+            .and_then(|p| match &p.data {
+                NodeData::TypeReferenceNode(tr) => tr.type_arguments.clone(),
+                // Extends/implements clause members carry their type
+                // arguments on the ExpressionWithTypeArguments node.
+                NodeData::ExpressionWithTypeArguments(e) => e.type_arguments.clone(),
+                _ => None,
+            })
+            .map(|list| list.iter().cloned().collect())
+            .unwrap_or_default();
+        // Params with defaults may be omitted from the tail.
+        let required = params
+            .iter()
+            .rposition(|p| {
+                !matches!(&p.data, NodeData::TypeParameterDeclaration(d) if d.default_type.is_some())
+            })
+            .map_or(0, |i| i + 1);
+        let file = self
+            .get_source_file_of_node(type_name)
+            .or_else(|| self.current_file.clone());
+        if provided.len() < required || provided.len() > params.len() {
+            let display = format!(
+                "{}<{}>",
+                symbol.name,
+                params
+                    .iter()
+                    .filter_map(|p| p.name().map(|n| n.text().to_string()))
+                    .collect::<Vec<_>>()
+                    .join(", ")
+            );
+            let already = self
+                .diagnostics
+                .get_all()
+                .iter()
+                .any(|d| d.code == 2314 && d.loc == type_name.loc);
+            if !already {
+                self.diagnostics.add(crate::ast::Diagnostic::new(
+                    file,
+                    type_name.loc,
+                    crate::diagnostics::messages_generated::GENERIC_TYPE_0_REQUIRES_1_TYPE_ARGUMENT_S,
+                    vec![display, params.len().to_string()],
+                ));
+            }
+            return;
+        }
+        // Constraint satisfaction for each provided argument.
+        for (i, arg_node) in provided.iter().enumerate() {
+            let Some(param) = params.get(i) else { continue };
+            let NodeData::TypeParameterDeclaration(pd) = &param.data else {
+                continue;
+            };
+            let Some(constraint_node) = &pd.constraint else {
+                continue;
+            };
+            // Constraints referencing the SAME declaration's type
+            // parameters ('C<T>' in 'A<T, U extends C<T>>') require
+            // instantiation with the earlier arguments — not available
+            // here; skip to avoid false positives (left triaged).
+            let param_names: Vec<String> = params
+                .iter()
+                .filter_map(|p| p.name().map(|n| n.text().to_string()))
+                .collect();
+            if type_node_references_names(constraint_node, &param_names) {
+                continue;
+            }
+            let arg_type = self.get_type_from_type_node(arg_node);
+            // Skip unresolved/deferred arguments: type parameters of an
+            // enclosing generic (constraint is checked after substitution
+            // in Go), error types, any, and never.
+            if arg_type.flags.intersects(TypeFlags::Any | TypeFlags::Never)
+                || arg_type.is_type_parameter()
+            {
+                continue;
+            }
+            let constraint_type = self.get_type_from_type_node(constraint_node);
+            if constraint_type.flags.intersects(TypeFlags::Any | TypeFlags::Never) {
+                continue;
+            }
+            if self.is_type_assignable_to(&arg_type, &constraint_type) {
+                continue;
+            }
+            // Only report clear-cut failures where the relater's verdict is
+            // trustworthy: primitive/literal arguments (TS2344 core case),
+            // or object-vs-object missing-property failures (the elaborated
+            // form). Composite shapes (tuples, function types, unions,
+            // intersections, indexed accesses) depend on relater features
+            // that are still being ported — defer those.
+            let primitive_like = |t: &Arc<Type>| {
+                t.flags.intersects(
+                    TypeFlags::String
+                        | TypeFlags::Number
+                        | TypeFlags::Boolean
+                        | TypeFlags::BigInt
+                        | TypeFlags::ESSymbol
+                        | TypeFlags::Enum
+                        | TypeFlags::StringLiteral
+                        | TypeFlags::NumberLiteral
+                        | TypeFlags::BooleanLiteral
+                        | TypeFlags::EnumLiteral
+                        | TypeFlags::Null
+                        | TypeFlags::Undefined,
+                )
+            };
+            let object_like = |t: &Arc<Type>| {
+                t.flags.contains(TypeFlags::Object)
+                    && t.as_structured().is_some()
+                    && !t.object_flags.contains(ObjectFlags::Tuple)
+                    && !t.object_flags.contains(ObjectFlags::Reference)
+                    && t.as_structured()
+                        .is_some_and(|s| s.call_signature_count == 0)
+            };
+            let clear_cut = (primitive_like(&arg_type) && (primitive_like(&constraint_type) || object_like(&constraint_type)))
+                || (object_like(&arg_type) && object_like(&constraint_type));
+            if !clear_cut {
+                continue;
+            }
+            let arg_str = self.type_to_string(&arg_type);
+            let constraint_str = self.type_to_string(&constraint_type);
+            let mut diag = crate::ast::Diagnostic::new(
+                file.clone(),
+                arg_node.loc,
+                crate::diagnostics::messages_generated::TYPE_0_DOES_NOT_SATISFY_THE_CONSTRAINT_1,
+                vec![arg_str.clone(), constraint_str.clone()],
+            );
+            // Missing-property failures elaborate with the TS2741-style
+            // chain entry, like the official baselines.
+            let missing = self.get_missing_required_properties(&arg_type, &constraint_type);
+            if missing.len() == 1 {
+                diag.message_chain.push(crate::ast::Diagnostic::new(
+                    None,
+                    arg_node.loc,
+                    crate::diagnostics::messages_generated::
+                        PROPERTY_0_IS_MISSING_IN_TYPE_1_BUT_REQUIRED_IN_TYPE_2,
+                    vec![missing[0].clone(), arg_str.clone(), constraint_str.clone()],
+                ));
+            }
+            let already = self
+                .diagnostics
+                .get_all()
+                .iter()
+                .any(|d| d.code == 2344 && d.loc == arg_node.loc);
+            if !already {
+                self.diagnostics.add(diag);
+            }
         }
     }
 
@@ -3120,4 +3315,104 @@ mod tests {
         );
         assert!(t.flags.contains(TypeFlags::Union));
     }
+}
+
+/// Walk a type node looking for Identifier leaves matching any of `names`.
+fn type_node_references_names(node: &Arc<Node>, names: &[String]) -> bool {
+    let mut found = false;
+    NodeWalker { names, found: &mut found }.walk(node);
+    found
+}
+
+struct NodeWalker<'a> {
+    names: &'a [String],
+    found: &'a mut bool,
+}
+
+impl<'a> NodeWalker<'a> {
+    fn walk(&mut self, node: &Arc<Node>) {
+        if *self.found {
+            return;
+        }
+        if node.kind == SyntaxKind::Identifier && names_contain(self.names, node.text()) {
+            *self.found = true;
+            return;
+        }
+        crate::ast::node_data_generated::for_each_child(node, |c| {
+            self.walk(c);
+            *self.found
+        });
+    }
+}
+
+fn names_contain(names: &[String], text: &str) -> bool {
+    names.iter().any(|n| n == text)
+}
+
+/// Whether a type reference sits inside a CONDITIONAL type's true/false
+/// branch — those are deferred (resolved only when the conditional
+/// instantiates), so arity/constraint errors there are not reported
+/// eagerly.
+fn type_name_inside_conditional_branch(node: &Arc<Node>) -> bool {
+    let mut cur = node.parent.as_ref();
+    while let Some(a) = cur {
+        if matches!(&a.data, NodeData::ConditionalTypeNode(_)) {
+            // The node is in a branch if it's under the extendsType's
+            // parent conditional's trueType/falseType — approximate: any
+            // position inside the conditional except the checkType/
+            // extendsType themselves.
+            if let NodeData::ConditionalTypeNode(c) = &a.data {
+                if node_inside(node, &c.check_type) || node_inside(node, &c.extends_type) {
+                    cur = a.parent.as_ref();
+                    continue;
+                }
+            }
+            return true;
+        }
+        cur = a.parent.as_ref();
+    }
+    false
+}
+
+fn node_inside(node: &Arc<Node>, root: &Arc<Node>) -> bool {
+    if Arc::ptr_eq(node, root) {
+        return true;
+    }
+    let mut cur = node.parent.as_ref();
+    while let Some(a) = cur {
+        if Arc::ptr_eq(a, root) {
+            return true;
+        }
+        cur = a.parent.as_ref();
+    }
+    false
+}
+
+/// Whether an enclosing declaration declares a TYPE PARAMETER with the
+/// reference's name — the local parameter shadows any same-named global
+/// generic ('type Or<A, B> = [A, B] ...' with a global 'interface A<T>').
+/// Our resolution doesn't always honor that shadowing, so the arity check
+/// is skipped for such names.
+fn type_name_shadowed_by_type_parameter(type_name: &Arc<Node>) -> bool {
+    let name = type_name.text();
+    let mut cur = type_name.parent.as_ref();
+    while let Some(a) = cur {
+        let tps = match &a.data {
+            NodeData::TypeAliasDeclaration(t) => t.type_parameters.as_ref(),
+            NodeData::InterfaceDeclaration(i) => i.type_parameters.as_ref(),
+            NodeData::ClassDeclaration(c) => c.type_parameters.as_ref(),
+            NodeData::MethodDeclaration(m) => m.type_parameters.as_ref(),
+            NodeData::FunctionDeclaration(f) => f.type_parameters.as_ref(),
+            _ => None,
+        };
+        if let Some(list) = tps
+            && list.iter().any(|p| {
+                p.name().is_some_and(|n| n.text() == name)
+            })
+        {
+            return true;
+        }
+        cur = a.parent.as_ref();
+    }
+    false
 }

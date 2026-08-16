@@ -546,6 +546,11 @@ impl Binder {
                 // from outside is handled by the checker consulting the
                 // namespace's locals for ambient containers (see
                 // `ambient_namespace_locals_visible`).
+                //
+                // A nested `namespace A.B` declares B inside A — the PARSER
+                // synthesizes an export modifier on every dotted segment
+                // (Go's parseModuleDeclaration behavior), so the plain
+                // modifier check covers it.
                 let has_export = self
                     .get_combined_modifier_flags(node)
                     .contains(ModifierFlags::Export);
@@ -2230,8 +2235,21 @@ impl Binder {
             || node.flags.contains(NodeFlags::Ambient)
             || node.flags.contains(NodeFlags::JSDoc)
             || is_identifier_name(node)
+            || file.is_declaration_file
         {
             return;
+        }
+        // Ambient ancestors: `declare namespace M { … }` / `declare function`
+        // etc. exempt all nested identifiers (Go's Ambient flag propagates
+        // to descendants; we walk instead).
+        {
+            let mut anc = node.parent.as_ref();
+            while let Some(a) = anc {
+                if a.has_syntactic_modifier(ModifierFlags::Ambient) {
+                    return;
+                }
+                anc = a.parent.as_ref();
+            }
         }
         let Some(kind) = crate::scanner::string_to_keyword(node.text()) else {
             return;

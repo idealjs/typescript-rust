@@ -5535,7 +5535,7 @@ impl Checker {
     /// Return the names of `target` properties that are required (non-optional)
     /// but absent from `source`. Mirrors Go's `getUnmatchedProperties` for the
     /// missing-required-property case.
-    fn get_missing_required_properties(
+    pub(crate) fn get_missing_required_properties(
         &self,
         source: &Arc<Type>,
         target: &Arc<Type>,
@@ -8073,6 +8073,35 @@ impl Checker {
         if has_value_member(&namespace.exports) || has_value_member(&namespace.members) {
             return true;
         }
+        // Nested modules bind into the module DECLARATION node's locals
+        // table (keyed by node id), not the symbol's members — scan those
+        // too ('declare namespace Foo.Bar { export var foo; }' makes Foo a
+        // value through Bar).
+        for d in &namespace.declarations {
+            if d.kind != SyntaxKind::ModuleDeclaration {
+                continue;
+            }
+            let entries: Vec<(String, Arc<Symbol>)> = self
+                .program
+                .symbol_map()
+                .locals
+                .get(&d.id())
+                .map(|table| {
+                    table
+                        .iter()
+                        .map(|(k, v)| (k.clone(), Arc::clone(v)))
+                        .collect()
+                })
+                .unwrap_or_default();
+            if entries.iter().any(|(name, s)| {
+                name != "export="
+                    && (s.flags.intersects(value_flags)
+                        || (s.flags.contains(SymbolFlags::ValueModule)
+                            && self.namespace_has_value_side(s)))
+            }) {
+                return true;
+            }
+        }
         // A nested namespace with its own value side makes this one a
         // value too (`namespace Outer { export namespace Inner { export
         // class C {} } }` — Outer is a value). Depth-limited recursion.
@@ -10231,7 +10260,12 @@ impl Checker {
                             seen.entry(name).or_default().push(prop);
                         }
                         for (_, group) in seen.iter() {
-                            if group.len() > 1 {
+                            // Accessor pairs (get/set of the same name) are
+                            // legal in object literals.
+                            let accessor_pair = group.iter().all(|p| {
+                                matches!(p.kind, SyntaxKind::GetAccessor | SyntaxKind::SetAccessor)
+                            }) && group.len() == 2;
+                            if group.len() > 1 && !accessor_pair {
                                 for (i, prop) in group.iter().enumerate() {
                                     if i == 0 {
                                         continue;
@@ -11432,6 +11466,19 @@ impl Checker {
     /// members in the namespace's LOCALS (routing them into `exports`
     /// perturbs lazily-resolved lib types), so outside visibility of ambient
     /// locals is decided here.
+    /// Whether any ancestor declaration carries the `declare` modifier —
+    /// Go's Ambient flag propagates to all descendants.
+    fn ambient_ancestor(&self, node: &Arc<Node>) -> bool {
+        let mut cur = node.parent.as_ref();
+        while let Some(a) = cur {
+            if a.has_syntactic_modifier(ModifierFlags::Ambient) {
+                return true;
+            }
+            cur = a.parent.as_ref();
+        }
+        false
+    }
+
     pub(crate) fn ambient_namespace_locals_visible(&self, ns: &Arc<Symbol>) -> bool {
         if std::env::var_os("TSOX_NO_AMBIENT").is_some() {
             return false;
@@ -11439,6 +11486,7 @@ impl Checker {
         ns.declarations.iter().any(|d| {
             d.kind == SyntaxKind::ModuleDeclaration
                 && (d.has_syntactic_modifier(ModifierFlags::Ambient)
+                    || self.ambient_ancestor(d)
                     || self
                         .get_source_file_of_node(d)
                         .is_some_and(|f| f.is_declaration_file))
@@ -11908,6 +11956,36 @@ impl Checker {
         }) else {
             return false;
         };
+        // Go's scope climb flags the reference when it reaches the
+        // PropertyDeclaration without finding the name in an intermediate
+        // container — i.e. an outer-scope binding still reports (oracle:
+        // `var x; class A { a = x; constructor(x) {} }` → TS2301), but a
+        // binding INSIDE a nested function in the initializer (the arrow's
+        // own parameter in `messageHandler = (message) => message`) is
+        // found before the climb reaches the property and is exempt.
+        if let Some(sym) = self.resolve_identifier(node) {
+            let binds_in_initializer_fn = sym.declarations.iter().any(|d| {
+                let mut cur = d.parent.as_ref();
+                while let Some(a) = cur {
+                    if Arc::ptr_eq(a, &property) {
+                        return false;
+                    }
+                    if matches!(
+                        a.kind,
+                        SyntaxKind::FunctionDeclaration
+                            | SyntaxKind::FunctionExpression
+                            | SyntaxKind::ArrowFunction
+                    ) {
+                        return true;
+                    }
+                    cur = a.parent.as_ref();
+                }
+                false
+            });
+            if binds_in_initializer_fn {
+                return false;
+            }
+        }
         if property.has_syntactic_modifier(ModifierFlags::Static) {
             return false;
         }
@@ -13060,8 +13138,15 @@ impl Checker {
                         }
                     }
                 }
-                // Module/namespace export lookup.
-                if container_sym.flags.intersects(SymbolFlags::MODULE) {
+                // Module/namespace export lookup. Skipped for symbols
+                // merged with a CLASS (`declare namespace A {}` +
+                // `export class A {}`): inside the class body the
+                // namespace side's exports are not lexically visible
+                // (they need `A.x` qualification), matching the members
+                // gate above.
+                if container_sym.flags.intersects(SymbolFlags::MODULE)
+                    && !container_sym.flags.intersects(SymbolFlags::Class)
+                {
                     if let Some(sym) = container_sym.exports.get(name) {
                         // Skip pure alias export specifiers (e.g. `export { X }`).
                         let is_export_specifier = sym.flags == SymbolFlags::Alias

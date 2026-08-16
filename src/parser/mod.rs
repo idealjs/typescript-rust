@@ -5516,15 +5516,41 @@ impl Parser {
         };
         let end = body.as_ref().map_or(self.token_pos(), |b| b.end());
         // Build from the innermost segment outwards; the outermost
-        // declaration receives the user modifiers.
+        // declaration receives the user modifiers. Synthesized INNER
+        // segments get an ExportKeyword modifier (dotted-name segments are
+        // exported in Go's parseModuleDeclaration semantics), using the
+        // outer keyword's span for the token location.
         let mut name = segments.pop().expect("at least one segment");
         let mut inner_body = body;
-        let mut mods = modifiers;
+        // User modifiers (declare/export) belong to the OUTER declaration;
+        // inner segments get only the synthesized export.
+        let user_modifiers = modifiers;
+        let mut mods = if segments.is_empty() {
+            user_modifiers.clone()
+        } else {
+            None
+        };
+        let mut outermost = segments.is_empty();
+        // Dotted-name inner segments are implicitly exported — synthesize
+        // the modifier up front (it applies from the first inner decl).
+        let export_only: Option<Arc<ModifierList>> = if segments.is_empty() {
+            None
+        } else {
+            let export_tok = Arc::new(Node::with_loc(
+                SyntaxKind::ExportKeyword,
+                NodeData::Token,
+                TextRange::new(pos, pos + 6),
+            ));
+            Some(Arc::new(ModifierList::new(
+                vec![export_tok],
+                ModifierFlags::Export,
+            )))
+        };
         loop {
             let decl = Arc::new(Node::with_loc(
                 SyntaxKind::ModuleDeclaration,
                 NodeData::ModuleDeclaration(ModuleDeclarationData {
-                    modifiers: mods,
+                    modifiers: mods.clone().or_else(|| export_only.clone()),
                     keyword,
                     name: Arc::clone(&name),
                     body: inner_body,
@@ -5537,7 +5563,19 @@ impl Parser {
                     inner_body = Some(decl);
                     mods = None;
                 }
-                None => return decl,
+                None => {
+                    // The outermost declaration gets the user modifiers
+                    // back (declare/export on 'namespace A.B' belong to A).
+                    if !outermost {
+                        let decl_mut = Arc::as_ptr(&decl) as *mut Node;
+                        unsafe {
+                            if let NodeData::ModuleDeclaration(d) = &mut (*decl_mut).data {
+                                d.modifiers = user_modifiers.clone();
+                            }
+                        }
+                    }
+                    return decl;
+                }
             }
         }
     }

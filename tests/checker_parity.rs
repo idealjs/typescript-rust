@@ -4882,10 +4882,13 @@ fn checker_mapped_type_identity_mismatch_ts2322() {
 #[test]
 fn checker_keyof_constrained_type_parameter_no_error() {
     // `keyof T` where T extends { a: number; b: string } → "a" | "b".
+    // The argument { a: 1; b: 2 } does NOT satisfy the constraint (b: 2 vs
+    // b: string) — TS2344 fires (oracle-verified against tsgo 2026-08-16;
+    // the old no-diagnostics expectation predates constraint checking).
     let diags = check_source(
         "type K<T extends { a: number; b: string }> = keyof T;\nlet x: \"a\" | \"b\" = null as any as K<{ a: 1; b: 2 }>;",
     );
-    assert_no_diagnostics(&diags);
+    assert_diagnostic_code(&diags, 2344);
 }
 
 // ────────────────────────────────────────────────────────────────────────────
