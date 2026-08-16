@@ -830,3 +830,53 @@ compiler/declarationEmitExpressionInExtends4.errors.txt
 compiler/declarationEmitExpressionInExtends5.errors.txt
 compiler/declarationEmitExpressionInExtends7.errors.txt
 compiler/declarationEmitExpressionWithNonlocalPrivateUniqueSymbol.errors.txt
+## 2026-08-16 batch #1600-#1699: declaration-emit subsystem
+## (cont.) — TS4081 private-name exports, keyword-named expando
+## properties ('foo.null = true'), static self-references, Function-
+## prototype member lookup ('.apply' on signature types), mixins,
+## monorepo path mapping, inferred type-alias emit checks
+compiler/declarationEmitFirstTypeArgumentGenericFunctionType.errors.txt
+compiler/declarationEmitForDefaultExportClassExtendingExpression01.errors.txt
+compiler/declarationEmitForModuleImportingModuleAugmentationRetainsImport.errors.txt
+compiler/declarationEmitFunctionDuplicateNamespace.errors.txt
+compiler/declarationEmitFunctionKeywordProp.errors.txt
+compiler/declarationEmitGlobalThisPreserved.errors.txt
+compiler/declarationEmitHigherOrderRetainedGenerics.errors.txt
+compiler/declarationEmitIndexTypeNotFound.errors.txt
+compiler/declarationEmitInferredTypeAlias1.errors.txt
+compiler/declarationEmitInferredTypeAlias2.errors.txt
+compiler/declarationEmitInferredTypeAlias3.errors.txt
+compiler/declarationEmitInferredTypeAlias5.errors.txt
+compiler/declarationEmitInferredTypeAlias6.errors.txt
+compiler/declarationEmitInferredTypeAlias7.errors.txt
+compiler/declarationEmitInferredTypeAlias8.errors.txt
+compiler/declarationEmitInferredTypeAlias9.errors.txt
+compiler/declarationEmitInterfaceWithNonEntityNameExpressionHeritage.errors.txt
+compiler/declarationEmitInvalidExport.errors.txt
+compiler/declarationEmitInvalidReference.errors.txt
+compiler/declarationEmitInvalidReference2.errors.txt
+compiler/declarationEmitIsolatedDeclarationErrorNotEmittedForNonEmittedFile.errors.txt
+compiler/declarationEmitLambdaWithMissingTypeParameterNoCrash.errors.txt
+compiler/declarationEmitLateBoundAssignments.errors.txt
+compiler/declarationEmitLocalClassDeclarationMixin.errors.txt
+compiler/declarationEmitMappedPrivateTypeTypeParameter.errors.txt
+compiler/declarationEmitMappedTypePreservesTypeParameterConstraint.errors.txt
+compiler/declarationEmitMappedTypeTemplateTypeofSymbol.errors.txt
+compiler/declarationEmitMixinPrivateProtected.errors.txt
+compiler/declarationEmitMonorepoBaseUrl.errors.txt
+compiler/declarationEmitNameConflicts2.errors.txt
+compiler/declarationEmitNameConflicts3.errors.txt
+compiler/declarationEmitNestedBindingPattern.errors.txt
+compiler/declarationEmitNoInvalidCommentReuse3.errors.txt
+compiler/declarationEmitNoNonRequiredParens.errors.txt
+compiler/declarationEmitObjectAssignedDefaultExport.errors.txt
+compiler/declarationEmitOptionalMappedTypePropertyNoStrictNullChecks1.errors.txt
+compiler/declarationEmitOptionalMappedTypePropertyNoStrictNullChecks2.errors.txt
+compiler/declarationEmitOptionalMappedTypePropertyNoStrictNullChecks3.errors.txt
+compiler/declarationEmitOptionalMethod.errors.txt
+compiler/declarationEmitPathMappingMonorepo.errors.txt
+compiler/declarationEmitPathMappingMonorepo2.errors.txt
+compiler/declarationEmitPrivatePromiseLikeInterface.errors.txt
+compiler/declarationEmitPrivateSymbolCausesVarDeclarationEmit2.errors.txt
+compiler/declarationEmitPromise.errors.txt
+compiler/declarationEmitProtectedMembers(target=es2015).errors.txt
