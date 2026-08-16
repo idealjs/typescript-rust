@@ -988,3 +988,65 @@ compiler/destructuredLateBoundNameHasCorrectTypes.errors.txt
 compiler/destructuringAssignmentWithDefault.errors.txt
 compiler/destructuringAssignmentWithDefault2.errors.txt
 compiler/destructuringAssignmentWithExportedName.errors.txt
+## 2026-08-16 batch #1900-#1999: discriminated-union narrowing
+## (discriminant property flow analysis); divergent getter/setter
+## pair typing; destructuring tuple/spread protocol checks
+## (TS2488 iterables), did-you-mean elaborations, target-library
+## suggestions, dotted namespace VALUE usage (A.B.x), block-scoped
+## suppression after parse errors
+compiler/destructuringAssignmentWithStrictNullChecks.errors.txt
+compiler/destructuringAssignment_private.errors.txt
+compiler/destructuringControlFlowNoCrash.errors.txt
+compiler/destructuringFromUnionSpread.errors.txt
+compiler/destructuringPropertyAssignmentNameIsNotAssignmentTarget.errors.txt
+compiler/destructuringTuple.errors.txt
+compiler/destructuringTypeGuardFlow.errors.txt
+compiler/destructuringUnspreadableIntoRest.errors.txt
+compiler/destructuringWithGenericParameter.errors.txt
+compiler/didYouMeanElaborationsForExpressionsWhichCouldBeCalled.errors.txt
+compiler/didYouMeanStringLiteral.errors.txt
+compiler/didYouMeanSuggestionErrors.errors.txt
+compiler/differentTypesWithSameName.errors.txt
+compiler/disallowedBlockScopedInPresenceOfParseErrors1.errors.txt
+compiler/discriminableUnionWithIntersectedMembers.errors.txt
+compiler/discriminantElementAccessCheck.errors.txt
+compiler/discriminantNarrowingCouldBeCircular.errors.txt
+compiler/discriminantOrderIndependence.errors.txt
+compiler/discriminantPropertyCheck.errors.txt
+compiler/discriminantPropertyInference.errors.txt
+compiler/discriminantUsingEvaluatableTemplateExpression.errors.txt
+compiler/discriminantsAndNullOrUndefined.errors.txt
+compiler/discriminateObjectTypesOnly.errors.txt
+compiler/discriminateWithDivergentAccessors1.errors.txt
+compiler/discriminateWithOptionalProperty1(exactoptionalpropertytypes=false).errors.txt
+compiler/discriminateWithOptionalProperty1(exactoptionalpropertytypes=true).errors.txt
+compiler/discriminateWithOptionalProperty2(exactoptionalpropertytypes=false).errors.txt
+compiler/discriminateWithOptionalProperty2(exactoptionalpropertytypes=true).errors.txt
+compiler/discriminateWithOptionalProperty3(exactoptionalpropertytypes=false).errors.txt
+compiler/discriminateWithOptionalProperty3(exactoptionalpropertytypes=true).errors.txt
+compiler/discriminateWithOptionalProperty4(exactoptionalpropertytypes=false).errors.txt
+compiler/discriminateWithOptionalProperty4(exactoptionalpropertytypes=true).errors.txt
+compiler/discriminatedUnionErrorMessage.errors.txt
+compiler/dissallowSymbolAsWeakType.errors.txt
+compiler/distributiveConditionalTypeConstraints.errors.txt
+compiler/divergentAccessorsTypes1.errors.txt
+compiler/divergentAccessorsTypes2.errors.txt
+compiler/divergentAccessorsTypes4(target=es2015).errors.txt
+compiler/divergentAccessorsTypes5(target=es2015).errors.txt
+compiler/divergentAccessorsTypes6.errors.txt
+compiler/divergentAccessorsTypes7.errors.txt
+compiler/divergentAccessorsTypes8.errors.txt
+compiler/divergentAccessorsVisibility1.errors.txt
+compiler/divideAndConquerIntersections.errors.txt
+compiler/doNotElaborateAssignabilityToTypeParameters(target=es2015).errors.txt
+compiler/doNotInferUnrelatedTypes.errors.txt
+compiler/doNotWidenAtObjectLiteralPropertyAssignment.errors.txt
+compiler/doYouNeedToChangeYourTargetLibraryES2015.errors.txt
+compiler/doYouNeedToChangeYourTargetLibraryES2016Plus.errors.txt
+compiler/doYouNeedToChangeYourTargetLibraryES2023(target=esnext).errors.txt
+compiler/dontShowCompilerGeneratedMembers.errors.txt
+compiler/dottedModuleName.errors.txt
+compiler/dottedModuleName2.errors.txt
+compiler/dottedSymbolResolution1.errors.txt
+compiler/doubleMixinConditionalTypeBaseClassWorks.errors.txt
+compiler/doubleUnderscoreExportStarConflict.errors.txt

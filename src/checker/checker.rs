@@ -4981,7 +4981,9 @@ impl Checker {
             if !self.is_type_assignable_to(&arg_type, &param_type) {
                 // Widen literal source types for display, like the other
                 // relation errors (Go's reportRelationError).
-                let display_type = if crate::checker::is_literal_type(&arg_type) {
+                let display_type = if crate::checker::is_literal_type(&arg_type)
+                    && !crate::checker::is_literal_type(&param_type)
+                {
                     self.get_base_type_of_literal_type(&arg_type)
                 } else {
                     arg_type.clone()
@@ -6928,7 +6930,13 @@ impl Checker {
                         // Generalize literal types for error display (mirrors Go's
                         // reportRelationError: when source is a literal type and
                         // target can't have singleton types, widen to base type).
-                        let display_type = if crate::checker::is_literal_type(&init_type) {
+                        // Widen a literal source for display only when the
+                        // target can't have singleton types — Go's
+                        // reportRelationError keeps both literals
+                        // ('"no_dunder"' vs '"__dunder"').
+                        let display_type = if crate::checker::is_literal_type(&init_type)
+                            && !crate::checker::is_literal_type(&annotation_type)
+                        {
                             self.get_base_type_of_literal_type(&init_type)
                         } else {
                             init_type.clone()
