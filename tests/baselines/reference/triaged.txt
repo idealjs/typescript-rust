@@ -928,3 +928,63 @@ compiler/decoratorMetadataElidedImport(module=commonjs).errors.txt
 compiler/decoratorMetadataElidedImport(module=esnext).errors.txt
 compiler/decoratorMetadataGenericTypeVariable.errors.txt
 compiler/decoratorMetadataGenericTypeVariableDefault.errors.txt
+## 2026-08-16 batch #1800-#1899: decorator metadata emit
+## (emitDecoratorMetadata type serialization); deep relater
+## elaborations (multi-line drill-down chains, intersection excess
+## checks, key indexing); default-param display '(a?: T)' in function
+## types; deprecated-compiler-option warnings; derived-class override
+## checks; catch-clause destructuring; remaining delete edge
+## (Partial<Foo> mapped-type members, lib Function augmentation)
+compiler/decoratorMetadataGenericTypeVariableInScope.errors.txt
+compiler/decoratorMetadataNoLibIsolatedModulesTypes.errors.txt
+compiler/decoratorMetadataRestParameterWithImportedType(target=es2015).errors.txt
+compiler/decoratorMetadataTypeOnlyExport.errors.txt
+compiler/decoratorMetadataTypeOnlyImport.errors.txt
+compiler/decoratorReferenceOnOtherProperty.errors.txt
+compiler/decoratorReferences.errors.txt
+compiler/decoratorUsedBeforeDeclaration.errors.txt
+compiler/decoratorsOnComputedProperties.errors.txt
+compiler/decrementAndIncrementOperators.errors.txt
+compiler/deepComparisons.errors.txt
+compiler/deepElaborationsIntoArrowExpressions.errors.txt
+compiler/deepExcessPropertyCheckingWhenTargetIsIntersection.errors.txt
+compiler/deepKeysIndexing.errors.txt
+compiler/deeplyNestedAssignabilityErrorsCombined.errors.txt
+compiler/deeplyNestedAssignabilityIssue.errors.txt
+compiler/deeplyNestedCheck.errors.txt
+compiler/deeplyNestedMappedTypes.errors.txt
+compiler/defaultArgsInFunctionExpressions.errors.txt
+compiler/defaultArgsInOverloads.errors.txt
+compiler/defaultBestCommonTypesHaveDecls.errors.txt
+compiler/defaultIsNotVisibleInLocalScope.errors.txt
+compiler/defaultKeywordWithoutExport2.errors.txt
+compiler/defaultParameterAddsUndefinedWithStrictNullChecks.errors.txt
+compiler/defaultValueInFunctionTypes.errors.txt
+compiler/deferredConditionalTypes2.errors.txt
+compiler/deleteExpressionMustBeOptional_exactOptionalPropertyTypes(exactoptionalpropertytypes=false).errors.txt
+compiler/deleteExpressionMustBeOptional_exactOptionalPropertyTypes(exactoptionalpropertytypes=true).errors.txt
+compiler/deleteReadonlyInStrictNullChecks.errors.txt
+compiler/deprecatedCompilerOptions1.errors.txt
+compiler/deprecatedCompilerOptions2.errors.txt
+compiler/deprecatedCompilerOptions3.errors.txt
+compiler/deprecatedCompilerOptions4.errors.txt
+compiler/deprecatedCompilerOptions5.errors.txt
+compiler/deprecatedCompilerOptions6.errors.txt
+compiler/derivedClassConstructorWithExplicitReturns01(target=es2015).errors.txt
+compiler/derivedClassOverridesPrivateFunction1.errors.txt
+compiler/derivedClasses.errors.txt
+compiler/derivedInterfaceCallSignature.errors.txt
+compiler/derivedTypeCallingBaseImplWithOptionalParams.errors.txt
+compiler/derivedTypeIncompatibleSignatures.errors.txt
+compiler/destructionAssignmentError.errors.txt
+compiler/destructureCatchClause(strict=false,useunknownincatchvariables=false).errors.txt
+compiler/destructureCatchClause(strict=false,useunknownincatchvariables=true).errors.txt
+compiler/destructureCatchClause(strict=true,useunknownincatchvariables=false).errors.txt
+compiler/destructureCatchClause(strict=true,useunknownincatchvariables=true).errors.txt
+compiler/destructureComputedProperty.errors.txt
+compiler/destructureOfVariableSameAsShorthand.errors.txt
+compiler/destructureTupleWithVariableElement.errors.txt
+compiler/destructuredLateBoundNameHasCorrectTypes.errors.txt
+compiler/destructuringAssignmentWithDefault.errors.txt
+compiler/destructuringAssignmentWithDefault2.errors.txt
+compiler/destructuringAssignmentWithExportedName.errors.txt

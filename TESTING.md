@@ -15,8 +15,8 @@ TSOX_SUBMODULE_START=0 TSOX_SUBMODULE_END=99 TSOX_SUBMODULE_JOBS=4 cargo test --
 
 # 当前批次
 
-- start: 1800
-- end: 1899
+- start: 1900
+- end: 1999
 
 # 测试流程修改
 

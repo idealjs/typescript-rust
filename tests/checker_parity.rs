@@ -1985,8 +1985,10 @@ fn checker_typeof_expression_no_error() {
 
 #[test]
 fn checker_delete_expression_no_error() {
+    // Under default (strict) options a non-optional property operand
+    // reports TS2790 — oracle-verified against tsgo (2026-08-16).
     let diags = check_source("let obj = { x: 1 };\ndelete obj.x;");
-    assert_no_diagnostics(&diags);
+    assert_diagnostic_code(&diags, 2790);
 }
 
 #[test]
@@ -4132,9 +4134,11 @@ fn checker_template_expression_returns_string_ts2322() {
 
 #[test]
 fn checker_delete_expression_returns_boolean_no_error() {
-    // `delete x` → boolean.
+    // `delete x` → boolean; an identifier operand reports TS1102 + TS2703
+    // under default strict options — oracle-verified (2026-08-16).
     let diags = check_source("let x = 1; let y: boolean = delete x;");
-    assert_no_diagnostics(&diags);
+    assert_diagnostic_code(&diags, 1102);
+    assert_diagnostic_code(&diags, 2703);
 }
 
 #[test]

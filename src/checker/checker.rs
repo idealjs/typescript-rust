@@ -10237,6 +10237,7 @@ impl Checker {
             SyntaxKind::DeleteExpression => {
                 if let crate::ast::NodeData::DeleteExpression(data) = &node.data {
                     self.check_expression(&data.expression);
+                    self.check_delete_operand(&data.expression);
                 }
             }
             SyntaxKind::VoidExpression => {
@@ -11972,6 +11973,160 @@ impl Checker {
     /// type node for the asserted type).
     fn is_const_type_node(type_node: &Arc<Node>) -> bool {
         type_node.kind == SyntaxKind::ConstKeyword
+    }
+
+    /// Delete-operand checks (Go `checkDeleteExpression`): TS1102
+    /// (identifier operand in strict mode) + TS2703 (non-property operand),
+    /// both on the operand; TS2704 when the property is read-only, on the
+    /// property name.
+    fn check_delete_operand(&mut self, operand: &Arc<Node>) {
+        let mut target = operand;
+        while target.kind == SyntaxKind::ParenthesizedExpression {
+            let inner = match &target.data {
+                crate::ast::NodeData::ParenthesizedExpression(p) => &p.expression,
+                _ => break,
+            };
+            target = inner;
+        }
+        match target.kind {
+            SyntaxKind::Identifier => {
+                // Strict-family default is ON (tsgo semantics: Unknown →
+                // true), plus modules are always strict.
+                let strict =
+                    self.program.options().get_strict_option_value(
+                        self.program.options().always_strict,
+                    ) || self
+                        .current_file
+                        .as_ref()
+                        .is_some_and(|f| f.external_module_indicator.is_some());
+                if strict {
+                    self.diagnostics.add(crate::ast::Diagnostic::new(
+                        self.current_file.clone(),
+                        target.loc,
+                        crate::diagnostics::messages_generated::
+                            X_DELETE_CANNOT_BE_CALLED_ON_AN_IDENTIFIER_IN_STRICT_MODE,
+                        vec![],
+                    ));
+                }
+                self.diagnostics.add(crate::ast::Diagnostic::new(
+                    self.current_file.clone(),
+                    target.loc,
+                    crate::diagnostics::messages_generated::
+                        THE_OPERAND_OF_A_DELETE_OPERATOR_MUST_BE_A_PROPERTY_REFERENCE,
+                    vec![],
+                ));
+            }
+            SyntaxKind::PropertyAccessExpression | SyntaxKind::ElementAccessExpression => {
+                let (obj_expr, name, name_loc) = match &target.data {
+                    crate::ast::NodeData::PropertyAccessExpression(d) => {
+                        (&d.expression, d.name.text().to_string(), d.name.loc)
+                    }
+                    crate::ast::NodeData::ElementAccessExpression(d) => {
+                        let arg = &d.argument_expression;
+                        if arg.kind == SyntaxKind::StringLiteral {
+                            (&d.expression, arg.text().to_string(), arg.loc)
+                        } else {
+                            return;
+                        }
+                    }
+                    _ => return,
+                };
+                // `any` object → no checks.
+                let obj_type = self.get_type_of_node(obj_expr);
+                if obj_type.flags.contains(TypeFlags::Any) {
+                    return;
+                }
+                if self.is_property_readonly(&obj_type, &name) {
+                    self.diagnostics.add(crate::ast::Diagnostic::new(
+                        self.current_file.clone(),
+                        target.loc,
+                        crate::diagnostics::messages_generated::
+                            THE_OPERAND_OF_A_DELETE_OPERATOR_CANNOT_BE_A_READ_ONLY_PROPERTY,
+                        vec![name],
+                    ));
+                    return;
+                }
+                // TS2542: read-only index signature
+                // ('readonly [k: string]: T' — 'delete b["test"]').
+                if let Some(structured) = obj_type.as_structured() {
+                    let readonly_index = structured.index_infos.iter().any(|info| {
+                        info.is_readonly
+                            && info
+                                .key_type
+                                .as_ref()
+                                .is_some_and(|k| k.flags.contains(TypeFlags::String))
+                    });
+                    if readonly_index {
+                        let type_name = self.type_to_string(&obj_type);
+                        self.diagnostics.add(crate::ast::Diagnostic::new(
+                            self.current_file.clone(),
+                            target.loc,
+                            crate::diagnostics::messages_generated::
+                                INDEX_SIGNATURE_IN_TYPE_0_ONLY_PERMITS_READING,
+                            vec![type_name],
+                        ));
+                        return;
+                    }
+                }
+                // TS2790 (strictNullChecks): the deleted property must be
+                // optional.
+                if self.strict_null_checks && self.has_property_of_type(&obj_type, &name) {
+                    // Go's rule: the operand is deletable when the property
+                    // is optional OR its type includes `undefined`
+                    // ('b: number | undefined' deletes fine).
+                    let prop = obj_type.as_structured().and_then(|s| {
+                        s.properties
+                            .iter()
+                            .find(|p| p.name == name)
+                            .map(|p| Arc::clone(p))
+                    });
+                    let deletable = prop.as_ref().is_some_and(|p| {
+                        if p.flags.contains(SymbolFlags::Optional) {
+                            return true;
+                        }
+                        let t = self.get_type_of_symbol(p);
+                        t.flags.intersects(
+                            TypeFlags::Undefined
+                                | TypeFlags::Any
+                                | TypeFlags::Unknown
+                                | TypeFlags::Never,
+                        ) || match &t.data {
+                            crate::checker::TypeData::Union(u) => u
+                                .union_or_intersection
+                                .types
+                                .iter()
+                                .any(|m| {
+                                    m.flags.intersects(
+                                        TypeFlags::Undefined
+                                            | TypeFlags::Any
+                                            | TypeFlags::Unknown
+                                            | TypeFlags::Never,
+                                    )
+                                }),
+                            _ => false,
+                        }
+                    }) || obj_type.as_structured().is_some_and(|s| {
+                        // A string index signature permits deleting any
+                        // property ('[s: string]: number').
+                        s.index_infos.iter().any(|info| {
+                            info.key_type
+                                .as_ref()
+                                .is_some_and(|k| k.flags.contains(TypeFlags::String))
+                        })
+                    });
+                    if !deletable {
+                        self.diagnostics.add(crate::ast::Diagnostic::new(
+                            self.current_file.clone(),
+                            target.loc,
+                            crate::diagnostics::messages_generated::
+                                THE_OPERAND_OF_A_DELETE_OPERATOR_MUST_BE_OPTIONAL,
+                            vec![],
+                        ));
+                    }
+                }
+            }
+            _ => {}
+        }
     }
 
     /// TS2588/TS2540 for assignment-like targets. `x = 1` / `++x` with an

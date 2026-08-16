@@ -12,6 +12,7 @@ pub mod referenceresolver;
 
 use crate::ast::*;
 use crate::diagnostics::messages_generated::{
+    A_PARAMETER_INITIALIZER_IS_ONLY_ALLOWED_IN_A_FUNCTION_OR_CONSTRUCTOR_IMPLEMENTATION,
     CANNOT_REDECLARE_BLOCK_SCOPED_VARIABLE_0, DUPLICATE_IDENTIFIER_0,
     IDENTIFIER_EXPECTED_0_IS_A_RESERVED_WORD_AT_THE_TOP_LEVEL_OF_A_MODULE,
     IDENTIFIER_EXPECTED_0_IS_A_RESERVED_WORD_IN_STRICT_MODE,
@@ -2481,6 +2482,39 @@ impl Binder {
                 }
             }
             SyntaxKind::Parameter => {
+                // TS2371: parameter initializers are only allowed on
+                // function/constructor IMPLEMENTATIONS (Go's
+                // checkGrammarParameters via checkSignatureDeclaration) —
+                // overload signatures, method signatures, and type-level
+                // function types have no body and reject initializers.
+                // Parent pointers are populated before binding, so the
+                // enclosing function-like's body presence is checkable here.
+                let mut report_2371 = |b: &mut Self, loc: crate::core::text::TextRange| {
+                    b.symbol_map.binder_diagnostics.push(Diagnostic::new(
+                        b.current_source_file.clone(),
+                        loc,
+                        A_PARAMETER_INITIALIZER_IS_ONLY_ALLOWED_IN_A_FUNCTION_OR_CONSTRUCTOR_IMPLEMENTATION,
+                        vec![],
+                    ));
+                };
+                if let NodeData::ParameterDeclaration(pd) = &node.data
+                    && let Some(parent) = node.parent.as_ref()
+                    && !fn_like_body_present(parent)
+                {
+                    if pd.initializer.is_some() {
+                        report_2371(self, node.loc);
+                    } else {
+                        // Binding-pattern parameters: initializers live on
+                        // the binding elements ('({ first = 0 }: …)').
+                        let mut elements: Vec<&Arc<Node>> = Vec::new();
+                        collect_binding_elements(&pd.name, &mut elements);
+                        for el in elements {
+                            if matches!(&el.data, NodeData::BindingElement(be) if be.initializer.is_some()) {
+                                report_2371(self, el.loc);
+                            }
+                        }
+                    }
+                }
                 self.declare_symbol(
                     node,
                     SymbolFlags::FunctionScopedVariable,
@@ -3151,6 +3185,40 @@ fn is_var_container_kind(kind: SyntaxKind) -> bool {
 }
 
 /// Whether a node kind has locals (a local symbol table).
+/// Collect BindingElement nodes from a binding pattern (recursively —
+/// patterns nest).
+fn collect_binding_elements<'a>(node: &'a Arc<Node>, out: &mut Vec<&'a Arc<Node>>) {
+    if let NodeData::BindingPattern(pattern) = &node.data {
+        for el in pattern.elements.iter() {
+            out.push(el);
+            let name = match &el.data {
+                NodeData::BindingElement(be) => &be.name,
+                _ => continue,
+            };
+            if let Some(name_node) = name
+                && matches!(name_node.data, NodeData::BindingPattern(_))
+            {
+                collect_binding_elements(name_node, out);
+            }
+        }
+    }
+}
+
+/// Whether a function-like node has an implementation body (arrow and
+/// function expressions always do; declarations may be overload
+/// signatures; method/type signatures never do).
+fn fn_like_body_present(parent: &Arc<Node>) -> bool {
+    match &parent.data {
+        NodeData::FunctionDeclaration(d) => d.body.is_some(),
+        NodeData::MethodDeclaration(d) => d.body.is_some(),
+        NodeData::ConstructorDeclaration(d) => d.body.is_some(),
+        NodeData::GetAccessorDeclaration(d) => d.body.is_some(),
+        NodeData::SetAccessorDeclaration(d) => d.body.is_some(),
+        NodeData::FunctionExpression(_) | NodeData::ArrowFunction(_) => true,
+        _ => false,
+    }
+}
+
 fn has_locals(kind: SyntaxKind) -> bool {
     matches!(
         kind,

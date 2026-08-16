@@ -957,10 +957,14 @@ impl Checker {
                         }
                     }
                     value_type = Some(self.get_type_from_type_node(&data.type_node));
+                    let is_readonly = member
+                        .modifiers()
+                        .as_ref()
+                        .is_some_and(|m| m.flags().contains(ModifierFlags::Readonly));
                     index_infos.push(Arc::new(crate::checker::IndexInfo {
                         key_type,
                         value_type,
-                        is_readonly: false,
+                        is_readonly,
                         declaration: Some(Arc::clone(member)),
                         index_symbol: None,
                         components: Vec::new(),
@@ -1832,10 +1836,14 @@ impl Checker {
                         }
                     }
                     value_type = Some(self.get_type_from_type_node(&data.type_node));
+                    let is_readonly = member
+                        .modifiers()
+                        .as_ref()
+                        .is_some_and(|m| m.flags().contains(ModifierFlags::Readonly));
                     index_infos.push(Arc::new(crate::checker::IndexInfo {
                         key_type,
                         value_type,
-                        is_readonly: false,
+                        is_readonly,
                         declaration: Some(Arc::clone(member)),
                         index_symbol: None,
                         components: Vec::new(),
