@@ -3432,17 +3432,32 @@ impl Parser {
     }
 
     fn scanner_reaches_arrow_before_line_end(scanner: &mut Scanner) -> bool {
+        // The return-type annotation may itself contain braces/brackets/
+        // parens (object/tuple/function types: '): { r: 1 } =>'); track
+        // nesting so those don't terminate the scan. An '=>' at nesting
+        // depth 0 (or appearing inside a nested function type, which still
+        // implies an arrow) completes the arrow lookahead.
+        let mut depth = 0usize;
         loop {
             let token = scanner.scan();
             if scanner.has_preceding_line_break() {
                 return false;
             }
             match token {
-                SyntaxKind::EqualsGreaterThanToken => return true,
-                SyntaxKind::EndOfFile
-                | SyntaxKind::OpenBraceToken
-                | SyntaxKind::SemicolonToken
-                | SyntaxKind::CommaToken => return false,
+                SyntaxKind::EqualsGreaterThanToken if depth == 0 => return true,
+                SyntaxKind::OpenBraceToken
+                | SyntaxKind::OpenBracketToken
+                | SyntaxKind::OpenParenToken => depth += 1,
+                SyntaxKind::CloseBraceToken
+                | SyntaxKind::CloseBracketToken
+                | SyntaxKind::CloseParenToken => {
+                    depth = depth.saturating_sub(1);
+                }
+                SyntaxKind::EndOfFile | SyntaxKind::SemicolonToken | SyntaxKind::CommaToken
+                    if depth == 0 =>
+                {
+                    return false
+                }
                 _ => {}
             }
         }

@@ -880,3 +880,51 @@ compiler/declarationEmitPrivatePromiseLikeInterface.errors.txt
 compiler/declarationEmitPrivateSymbolCausesVarDeclarationEmit2.errors.txt
 compiler/declarationEmitPromise.errors.txt
 compiler/declarationEmitProtectedMembers(target=es2015).errors.txt
+## 2026-08-16 batch #1700-#1799: declaration-emit subsystem
+## (cont.) — 'typeof this.x' type queries, symlinked reexports,
+## module-augmentation triple-slash retention, computed readonly
+## properties, recursive conditional aliases, package.json typings
+compiler/declarationEmitReadonlyComputedProperty.errors.txt
+compiler/declarationEmitRecursiveConditionalAliasPreserved.errors.txt
+compiler/declarationEmitRedundantTripleSlashModuleAugmentation.errors.txt
+compiler/declarationEmitReexportedSymlinkReference.errors.txt
+compiler/declarationEmitReexportedSymlinkReference2.errors.txt
+compiler/declarationEmitReexportedSymlinkReference3.errors.txt
+compiler/declarationEmitRelativeModuleError.errors.txt
+compiler/declarationEmitRetainedAnnotationRetainsImportInOutput.errors.txt
+compiler/declarationEmitReusesLambdaParameterNodes.errors.txt
+compiler/declarationEmitSymlinkPaths(target=es2015).errors.txt
+compiler/declarationEmitToDeclarationDirWithoutCompositeAndDeclarationOptions.errors.txt
+compiler/declarationEmitTypeAliasTypeParameterExtendingUnknownSymbol.errors.txt
+compiler/declarationEmitTypeAliasWithTypeParameters4.errors.txt
+compiler/declarationEmitTypeAliasWithTypeParameters5.errors.txt
+compiler/declarationEmitTypeAliasWithTypeParameters6.errors.txt
+compiler/declarationEmitTypeofRest.errors.txt
+compiler/declarationEmitTypeofThisInClass.errors.txt
+compiler/declarationEmitUnknownImport(target=es2015).errors.txt
+compiler/declarationEmitUnknownImport2(target=es2015).errors.txt
+compiler/declarationEmitUnnessesaryTypeReferenceNotAdded(target=es2015).errors.txt
+compiler/declarationEmitUnsafeImportSymbolName.errors.txt
+compiler/declarationEmitUsingAlternativeContainingModules1.errors.txt
+compiler/declarationEmitUsingAlternativeContainingModules2.errors.txt
+compiler/declarationEmitUsingTypeAlias1.errors.txt
+compiler/declarationEmitUsingTypeAlias2.errors.txt
+compiler/declarationEmitVarInElidedBlock.errors.txt
+compiler/declarationEmitWithDefaultAsComputedName(target=es2015).errors.txt
+compiler/declarationEmitWithDefaultAsComputedName2(target=es2015).errors.txt
+compiler/declarationEmitWithInvalidPackageJsonTypings.errors.txt
+compiler/declarationFileNoCrashOnExtraExportModifier.errors.txt
+compiler/declarationMaps.errors.txt
+compiler/declarationMapsWithoutDeclaration.errors.txt
+compiler/declarationsIndirectGeneratedAliasReference.errors.txt
+compiler/declarationsWithRecursiveInternalTypesProduceUniqueTypeParams.errors.txt
+compiler/declareAlreadySeen.errors.txt
+compiler/declareClassInterfaceImplementation.errors.txt
+compiler/declareDottedExtend.errors.txt
+compiler/declareFileExportAssignment.errors.txt
+compiler/declareFileExportAssignmentWithVarFromVariableStatement.errors.txt
+compiler/declareModifierOnImport1.errors.txt
+compiler/decoratorMetadataElidedImport(module=commonjs).errors.txt
+compiler/decoratorMetadataElidedImport(module=esnext).errors.txt
+compiler/decoratorMetadataGenericTypeVariable.errors.txt
+compiler/decoratorMetadataGenericTypeVariableDefault.errors.txt
