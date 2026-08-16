@@ -1,16 +1,16 @@
 # 测试流程
 
-1. 每次测试 100 个测试用例,不需要考虑回归。指令如下
+1. 每次测试 1000 个测试用例,不需要考虑回归。指令如下
 
 ```
-TSOX_SUBMODULE_START=0 TSOX_SUBMODULE_END=99 TSOX_SUBMODULE_JOBS=4 cargo test --test submodule_compiler
+TSOX_SUBMODULE_START=3100 TSOX_SUBMODULE_END=4099 TSOX_SUBMODULE_JOBS=4 cargo test --test submodule_compiler
 ```
 
 2. 测试完成后，检查测试日志，对比 go 版，是否符合测试预期。
   - 如果不符合预期，检查原逻辑，尝试修复，重复测试步骤
   - 如果符合测试预期，记录到`当前批次`后，执行后100个测试用例，重复测试步骤
 
-3. 严格 100 个一批、只向前、不做回归
+3. 严格 1000 个一批、只向前、不做回归
 4. 不允许原逻辑未跳过的情况下，进行跳过测试用例
 
 # 分诊（triage）规则
@@ -56,7 +56,7 @@ grep -c '^compiler/' tests/baselines/reference/triaged.txt
 sed -n '/const-enum checker family/,/^## 2026-/{/^##/!p}' tests/baselines/reference/triaged.txt | grep '^compiler/'
 
 # 复核单个用例的真实差异：先跑它，再对比参考与实际输出
-TSOX_SUBMODULE_START=2100 TSOX_SUBMODULE_END=2199 TSOX_SUBMODULE_FILTER=<用例名> \
+TSOX_SUBMODULE_START=3100 TSOX_SUBMODULE_END=4099 TSOX_SUBMODULE_FILTER=<用例名> \
   TSOX_SUBMODULE_JOBS=1 cargo test --test submodule_compiler
 diff "tests/baselines/reference/compiler/<stem>.errors.txt" \
      "tests/baselines/local/compiler/<stem>.errors.txt"
@@ -67,8 +67,8 @@ diff "tests/baselines/reference/compiler/<stem>.errors.txt" \
 
 # 当前批次
 
-- start: 2100
-- end: 2199
+- start: 3100
+- end: 4099
 
 # 测试流程修改
 

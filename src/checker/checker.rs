@@ -5929,6 +5929,9 @@ impl Checker {
                 // included); reported once, when visiting the first
                 // declaration in source order.
                 self.check_duplicate_function_implementations(node);
+                // TS2391: body-less declarations must be immediately
+                // followed by the implementation / next overload.
+                self.check_overload_implementation_follows(node);
                 if let crate::ast::NodeData::FunctionDeclaration(data) = &node.data {
                     if let Some(tps) = &data.type_parameters {
                         let _ = tps; // TODO: check_grammar_type_parameter_list
@@ -11728,6 +11731,124 @@ impl Checker {
                     }
                 }
             }
+        }
+    }
+
+    /// TS2391: a body-less function declaration must be IMMEDIATELY
+    /// followed by its implementation or the next overload of the same
+    /// name (Go's `reportImplementationExpectedError`). Ambient/declare
+    /// signatures are exempt. Reported on the function name.
+    fn check_overload_implementation_follows(&mut self, node: &Arc<Node>) {
+        let crate::ast::NodeData::FunctionDeclaration(data) = &node.data else {
+            return;
+        };
+        if data.body.is_some() {
+            return;
+        }
+        let Some(name) = &data.name else { return };
+        if name.kind != SyntaxKind::Identifier {
+            return;
+        }
+        let Some(parent) = node.parent.as_ref() else {
+            return;
+        };
+        let stmts = match &parent.data {
+            crate::ast::NodeData::SourceFile(sf) => Some(&sf.statements),
+            crate::ast::NodeData::ModuleBlock(mb) => Some(&mb.statements),
+            _ => None,
+        };
+        let Some(stmts) = stmts else { return };
+        let is_ambient = node.has_syntactic_modifier(ModifierFlags::Ambient)
+            || node.flags.contains(NodeFlags::Ambient)
+            || self.ambient_context_depth > 0
+            // Any ambient ancestor ('declare module M { … }').
+            || node
+                .parent
+                .as_ref()
+                .is_some_and(|_| {
+                    let mut anc = node.parent.as_ref();
+                    let mut found = false;
+                    while let Some(a) = anc {
+                        if a.has_syntactic_modifier(ModifierFlags::Ambient) {
+                            found = true;
+                            break;
+                        }
+                        anc = a.parent.as_ref();
+                    }
+                    found
+                })
+            || self
+                .current_file
+                .as_ref()
+                .is_some_and(|f| f.is_declaration_file);
+        if is_ambient {
+            return;
+        }
+        let next = stmts.iter().enumerate().find_map(|(i, s)| {
+            if Arc::ptr_eq(s, node) {
+                stmts.nodes.get(i + 1).cloned()
+            } else {
+                None
+            }
+        });
+        // Same-name subsequent function → overload chain continues.
+        if next.as_ref().is_some_and(|n| {
+            matches!(&n.data, crate::ast::NodeData::FunctionDeclaration(d) if d
+                .name
+                .as_ref()
+                .is_some_and(|n2| n2.text() == name.text()))
+        }) {
+            return;
+        }
+        // A subsequent function with a DIFFERENT name and a body → TS2389
+        // on that function's name ('function foo(x); function bar() {}');
+        // without a body it's a separate overload set → fall through to
+        // TS2391 on this declaration (oracle: fo2 'a(); b();' reports
+        // TS2391 on both).
+        if let Some(n) = &next
+            && matches!(&n.data, crate::ast::NodeData::FunctionDeclaration(d) if d.body.is_some())
+            && n.kind == SyntaxKind::FunctionDeclaration
+        {
+            if let crate::ast::NodeData::FunctionDeclaration(d) = &n.data
+                && let Some(next_name) = &d.name
+                && next_name.kind == SyntaxKind::Identifier
+                && next_name.text() != name.text()
+            {
+                // Dedupe like the TS2391 report below (the function
+                // arm may be visited through two dispatch paths).
+                let already = self
+                    .diagnostics
+                    .get_all()
+                    .iter()
+                    .any(|d| d.code == 2389 && d.loc == next_name.loc);
+                if !already {
+                    let file = self.current_file.clone();
+                    self.diagnostics.add(crate::ast::Diagnostic::new(
+                        file,
+                        next_name.loc,
+                        crate::diagnostics::messages_generated::
+                            FUNCTION_IMPLEMENTATION_NAME_MUST_BE_0,
+                        vec![name.text().to_string()],
+                    ));
+                }
+                return;
+            }
+        }
+        // Dedupe: this node may be visited through two dispatch paths.
+        let already = self
+            .diagnostics
+            .get_all()
+            .iter()
+            .any(|d| d.code == 2391 && d.loc == name.loc);
+        if !already {
+            let file = self.current_file.clone();
+            self.diagnostics.add(crate::ast::Diagnostic::new(
+                file,
+                name.loc,
+                crate::diagnostics::messages_generated::
+                    FUNCTION_IMPLEMENTATION_IS_MISSING_OR_NOT_IMMEDIATELY_FOLLOWING_THE_DECLARATION,
+                vec![],
+            ));
         }
     }
 
