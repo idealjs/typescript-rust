@@ -982,21 +982,138 @@ pub fn compare_types(t1: &Type, t2: &Type) -> std::cmp::Ordering {
 // ────────────────────────────────────────────────────────────────────────────
 
 pub fn get_assignment_target_kind(node: &Node) -> AssignmentKind {
-    // TODO: needs ast.GetAssignmentTarget which requires complex tree walking
-    let _ = node;
-    AssignmentKind::None
+    let Some(target) = get_assignment_target(node) else {
+        return AssignmentKind::None;
+    };
+    match &target.data {
+        crate::ast::NodeData::BinaryExpression(bin) => {
+            // `=` and logical/coalescing assignments are definite; every
+            // other assignment operator (`+=`, `||=`'s arithmetic kin, …)
+            // is compound (Go getAssignmentTargetKind).
+            if matches!(
+                bin.operator_token.kind,
+                SyntaxKind::EqualsToken
+                    | SyntaxKind::AmpersandAmpersandEqualsToken
+                    | SyntaxKind::BarBarEqualsToken
+                    | SyntaxKind::QuestionQuestionEqualsToken
+            ) {
+                AssignmentKind::Definite
+            } else {
+                AssignmentKind::Compound
+            }
+        }
+        crate::ast::NodeData::PrefixUnaryExpression(_)
+        | crate::ast::NodeData::PostfixUnaryExpression(_) => AssignmentKind::Compound,
+        crate::ast::NodeData::ForInOrOfStatement(_) => AssignmentKind::Definite,
+        _ => AssignmentKind::None,
+    }
+}
+
+/// The innermost assignment target containing `node`, if any (Go
+/// `ast.GetAssignmentTarget`): walks up through parenthesized expressions,
+/// stopping at a binary assignment whose left operand is on the path, a
+/// `++`/`--` unary on the path, or a for-in/of initializer on the path.
+/// Node identity is compared by pointer — each `Node` has exactly one
+/// owning `Arc`, so `*const Node` equality is node identity.
+fn get_assignment_target(node: &Node) -> Option<&Node> {
+    fn is_assignment_operator(kind: SyntaxKind) -> bool {
+        use SyntaxKind::*;
+        matches!(
+            kind,
+            EqualsToken
+                | PlusEqualsToken
+                | MinusEqualsToken
+                | AsteriskEqualsToken
+                | SlashEqualsToken
+                | PercentEqualsToken
+                | AsteriskAsteriskEqualsToken
+                | LessThanLessThanEqualsToken
+                | GreaterThanGreaterThanEqualsToken
+                | GreaterThanGreaterThanGreaterThanEqualsToken
+                | AmpersandEqualsToken
+                | BarEqualsToken
+                | CaretEqualsToken
+                | AmpersandAmpersandEqualsToken
+                | BarBarEqualsToken
+                | QuestionQuestionEqualsToken
+        )
+    }
+    let mut current: &Node = node;
+    loop {
+        let parent = current.parent.as_ref()?;
+        match &parent.data {
+            crate::ast::NodeData::BinaryExpression(bin) => {
+                let on_path = Arc::as_ref(&bin.left) as *const Node == current;
+                return if on_path && is_assignment_operator(bin.operator_token.kind) {
+                    Some(parent)
+                } else {
+                    None
+                };
+            }
+            crate::ast::NodeData::PrefixUnaryExpression(pre) => {
+                let incdec = matches!(
+                    pre.operator,
+                    SyntaxKind::PlusPlusToken | SyntaxKind::MinusMinusToken
+                );
+                let on_path = Arc::as_ref(&pre.operand) as *const Node == current;
+                return if incdec && on_path {
+                    Some(parent)
+                } else {
+                    None
+                };
+            }
+            crate::ast::NodeData::PostfixUnaryExpression(post) => {
+                let incdec = matches!(
+                    post.operator,
+                    SyntaxKind::PlusPlusToken | SyntaxKind::MinusMinusToken
+                );
+                let on_path = Arc::as_ref(&post.operand) as *const Node == current;
+                return if incdec && on_path {
+                    Some(parent)
+                } else {
+                    None
+                };
+            }
+            crate::ast::NodeData::ForInOrOfStatement(for_stmt) => {
+                let on_path = Arc::as_ref(&for_stmt.initializer) as *const Node == current;
+                return if on_path { Some(parent) } else { None };
+            }
+            crate::ast::NodeData::ParenthesizedExpression(_) => {
+                current = parent;
+            }
+            _ => return None,
+        }
+    }
 }
 
 pub fn is_compound_like_assignment(assignment: &Node) -> bool {
-    // TODO: needs skip_parentheses + binary expression accessor
-    let _ = assignment;
-    false
+    // Go isCompoundLikeAssignment: a plain `=` whose RHS (parens skipped) is
+    // a binary expression with a shift-or-higher operator.
+    let crate::ast::NodeData::BinaryExpression(bin) = &assignment.data else {
+        return false;
+    };
+    if bin.operator_token.kind != SyntaxKind::EqualsToken {
+        return false;
+    }
+    let mut right = &bin.right;
+    while let crate::ast::NodeData::ParenthesizedExpression(p) = &right.data {
+        right = &p.expression;
+    }
+    matches!(&right.data, crate::ast::NodeData::BinaryExpression(rhs)
+        if is_shift_operator_or_higher(rhs.operator_token.kind))
 }
 
+/// Shift operators and tighter-binding arithmetic (Go isShiftOperatorOrHigher
+/// = shift ops ∪ additive-or-higher) — see the shared helper above.
 pub fn is_in_compound_like_assignment(node: &Node) -> bool {
-    // TODO: needs get_assignment_target + is_assignment_expression
-    let _ = node;
-    false
+    let Some(target) = get_assignment_target(node) else {
+        return false;
+    };
+    // Go: target is a (non-compound) assignment expression AND compound-like.
+    let crate::ast::NodeData::BinaryExpression(bin) = &target.data else {
+        return false;
+    };
+    bin.operator_token.kind == SyntaxKind::EqualsToken && is_compound_like_assignment(target)
 }
 
 pub fn is_delete_target(node: &Node) -> bool {

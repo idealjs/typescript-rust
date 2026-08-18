@@ -186,7 +186,7 @@ const VARY_BY: &[&str] = &[
     "nofallthroughcasesinswitch", "noimplicitany", "noimplicitoverride",
     "noimplicitreturns", "noimplicitthis", "nolib", "nopropertyaccessfromindexsignature",
     "noresolve", "nouncheckedindexedaccess", "nouncheckedsideeffectimports",
-    "nounusedlocals", "nounusedparameters", "preserveconstenums", "removecomments",
+    "preserveconstenums", "removecomments",
     "resolvejsonmodule", "resolvepackagejsonexports", "resolvepackagejsonimports",
     "rewriterelativeimportextensions", "skipdefaultlibcheck", "skiplibcheck",
     "sourcemap", "stabletypeordering", "strict", "strictbindcallapply",
@@ -632,40 +632,55 @@ fn submodule_compiler_cases() {
         std::env::var("TSOX_SUBMODULE_WORKER"),
         std::env::var("TSOX_SUBMODULE_OUT"),
     ) {
-        let basename = Path::new(&case_path)
-            .file_name()
-            .and_then(|n| n.to_str())
-            .unwrap_or("")
-            .to_string();
-        // Payload: one JSON array entry per configuration —
-        // `{"suffix": "...", "skip": null, "text": "..."}` for output,
-        // `{"suffix": "...", "skip": "reason", "text": null}` for a skip.
-        // (JSON framing keeps multi-line baseline text unambiguous.)
-        let payload = match std::fs::read_to_string(&case_path) {
-            Ok(content) => {
-                let configs = process_case(&content, &basename);
-                serde_json::to_string(
-                    &configs
-                        .iter()
-                        .map(|c| {
-                            let mut entry = serde_json::json!({ "suffix": c.suffix });
-                            match &c.outcome {
-                                CaseOutcome::Skip(reason) => {
-                                    entry["skip"] = serde_json::json!(reason);
-                                }
-                                CaseOutcome::Output(text) => {
-                                    entry["text"] = serde_json::json!(text);
-                                }
-                            }
-                            entry
-                        })
-                        .collect::<Vec<_>>(),
-                )
-                .unwrap_or_else(|_| "[]".to_string())
-            }
-            Err(e) => serde_json::json!([{ "suffix": "", "skip": format!("unreadable as UTF-8: {e}") }])
-                .to_string(),
-        };
+        // libtest runs test functions on threads whose stack is smaller
+        // than the CLI's main-thread stack; deep checker recursion that
+        // survives the CLI (Go relies on growable goroutine stacks) would
+        // overflow here. Compile on a dedicated large-stack thread.
+        let case_path = case_path.clone();
+        let payload = std::thread::Builder::new()
+            .stack_size(256 * 1024 * 1024)
+            .spawn(move || {
+                let basename = Path::new(&case_path)
+                    .file_name()
+                    .and_then(|n| n.to_str())
+                    .unwrap_or("")
+                    .to_string();
+                // Payload: one JSON array entry per configuration —
+                // `{"suffix": "...", "skip": null, "text": "..."}` for output,
+                // `{"suffix": "...", "skip": "reason", "text": null}` for a skip.
+                // (JSON framing keeps multi-line baseline text unambiguous.)
+                match std::fs::read_to_string(&case_path) {
+                    Ok(content) => {
+                        let configs = process_case(&content, &basename);
+                        serde_json::to_string(
+                            &configs
+                                .iter()
+                                .map(|c| {
+                                    let mut entry = serde_json::json!({ "suffix": c.suffix });
+                                    match &c.outcome {
+                                        CaseOutcome::Skip(reason) => {
+                                            entry["skip"] = serde_json::json!(reason);
+                                        }
+                                        CaseOutcome::Output(text) => {
+                                            entry["text"] = serde_json::json!(text);
+                                        }
+                                    }
+                                    entry
+                                })
+                                .collect::<Vec<_>>(),
+                        )
+                        .unwrap_or_else(|_| "[]".to_string())
+                    }
+                    Err(e) => serde_json::json!([{
+                        "suffix": "",
+                        "skip": format!("unreadable as UTF-8: {e}")
+                    }])
+                    .to_string(),
+                }
+            })
+            .expect("spawn worker compile thread")
+            .join()
+            .unwrap_or_else(|_| "[]".to_string());
         let _ = std::fs::write(&out_path, payload);
         return;
     }
@@ -1009,6 +1024,35 @@ fn collect_ts_files(dir: &std::path::Path, out: &mut Vec<std::path::PathBuf>) {
     }
 }
 
+/// Copy `_submodules/TypeScript/tests/lib/**` into the in-memory VFS under
+/// `/.lib/**`. The official runner mounts this directory at the virtual FS
+/// root so `/// <reference path="/.lib/react.d.ts" />` resolves; missing
+/// files are skipped (the fixture set only exists with the submodule).
+fn mount_test_lib_fixtures(fs: &Arc<InMemoryFS>) {
+    fn walk(fs: &Arc<InMemoryFS>, src: &Path, mount: &str) {
+        let Ok(entries) = std::fs::read_dir(src) else {
+            return;
+        };
+        fs.insert_dir(mount);
+        for entry in entries.flatten() {
+            let p = entry.path();
+            let name = p.file_name().and_then(|n| n.to_str()).unwrap_or("");
+            if name.is_empty() {
+                continue;
+            }
+            let mount_path = format!("{mount}/{name}");
+            if p.is_dir() {
+                walk(fs, &p, &mount_path);
+            } else if let Ok(text) = std::fs::read_to_string(&p) {
+                fs.insert_file(&mount_path, &text);
+            }
+        }
+    }
+    let root = Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("_submodules/TypeScript/tests/lib");
+    walk(fs, &root, "/.lib");
+}
+
 /// Build a Program over the virtual files and return semantic diagnostics.
 fn build_and_check(
     options: &CompilerOptions,
@@ -1016,6 +1060,11 @@ fn build_and_check(
 ) -> Vec<Diagnostic> {
     let fs = Arc::new(InMemoryFS::new());
     fs.insert_dir("/proj");
+    // Mount the official test-runner fixture libs (react.d.ts,
+    // react16.d.ts, react18/, …) at `/.lib/`, matching the Go test
+    // runner's virtual filesystem: cases reference them via absolute
+    // triple-slash paths like `/// <reference path="/.lib/react.d.ts" />`.
+    mount_test_lib_fixtures(&fs);
 
     let mut file_names: Vec<String> = Vec::new();
     for unit in units {

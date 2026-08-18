@@ -253,6 +253,143 @@ impl Checker {
             return self.template_literal_to_string(tl, flags);
         }
 
+        // Instantiable types without structure of their own: keyof (Index),
+        // string mappings (`Uppercase<T>`), mapped types, conditional types,
+        // and substitutions. Deferred instances of these previously fell
+        // through to "<unknown type>".
+        if let TypeData::Index(i) = &t.data {
+            let target = i
+                .target
+                .as_ref()
+                .map(|tt| self.type_to_string_ex(tt, flags))
+                .unwrap_or_else(|| "any".to_string());
+            return format!("keyof {target}");
+        }
+        if let TypeData::StringMapping(s) = &t.data {
+            let target = s
+                .target
+                .as_ref()
+                .map(|tt| self.type_to_string_ex(tt, flags))
+                .unwrap_or_else(|| "any".to_string());
+            let name = t
+                .symbol
+                .as_ref()
+                .map(|sym| sym.name.clone())
+                .unwrap_or_default();
+            if name.is_empty() {
+                return target;
+            }
+            return format!("{name}<{target}>");
+        }
+        if let TypeData::Mapped(m) = &t.data {
+            // When referenced through an alias, official prints the alias
+            // form (`Partial<Foo>`) rather than the expanded mapped body.
+            if let Some(alias) = &t.alias
+                && let Some(sym) = &alias.symbol
+            {
+                let args: Vec<String> = alias
+                    .type_arguments
+                    .iter()
+                    .map(|a| self.type_to_string_ex(a, flags))
+                    .collect();
+                if args.is_empty() {
+                    return sym.name.clone();
+                }
+                return format!("{}<{}>", sym.name, args.join(", "));
+            }
+            let tp = m
+                .type_parameter
+                .as_ref()
+                .map(|tp| self.type_to_string_ex(tp, flags))
+                .unwrap_or_else(|| "K".to_string());
+            let constraint = m
+                .constraint_type
+                .as_ref()
+                .map(|c| self.type_to_string_ex(c, flags))
+                .unwrap_or_else(|| "keyof any".to_string());
+            let as_clause = m
+                .name_type
+                .as_ref()
+                .map(|n| format!(" as {}", self.type_to_string_ex(n, flags)))
+                .unwrap_or_default();
+            let template = m
+                .template_type
+                .as_ref()
+                .map(|tt| self.type_to_string_ex(tt, flags))
+                .unwrap_or_else(|| "any".to_string());
+            return format!("{{ [{tp} in {constraint}{as_clause}]: {template} }}");
+        }
+        if let TypeData::Substitution(sub) = &t.data {
+            if let Some(base) = &sub.base_type {
+                return self.type_to_string_ex(base, flags);
+            }
+            if let Some(c) = &sub.constraint {
+                return self.type_to_string_ex(c, flags);
+            }
+        }
+        if let TypeData::Conditional(c) = &t.data {
+            // Prefer the alias form when the conditional was referenced
+            // through one (`Unwrap<this["prop"]>`).
+            if let Some(alias) = &t.alias
+                && let Some(sym) = &alias.symbol
+            {
+                let args: Vec<String> = alias
+                    .type_arguments
+                    .iter()
+                    .map(|a| self.type_to_string_ex(a, flags))
+                    .collect();
+                if args.is_empty() {
+                    return sym.name.clone();
+                }
+                return format!("{}<{}>", sym.name, args.join(", "));
+            }
+            let root = c.root.as_ref();
+            let check = root
+                .and_then(|r| r.check_type.clone())
+                .or_else(|| c.check_type.clone())
+                .map(|ct| self.type_to_string_ex(&ct, flags))
+                .unwrap_or_else(|| "unknown".to_string());
+            let extends = root
+                .and_then(|r| r.extends_type.clone())
+                .or_else(|| c.extends_type.clone())
+                .map(|et| self.type_to_string_ex(&et, flags))
+                .unwrap_or_else(|| "unknown".to_string());
+            // Print the branches AS WRITTEN (official serializes the
+            // conditional's source node): when the evaluated branch types
+            // haven't been computed, resolve the branch type nodes.
+            let (true_node, false_node) = root.and_then(|r| r.node.as_ref()).map(|n| {
+                match &n.data {
+                    crate::ast::NodeData::ConditionalTypeNode(d) => {
+                        (Some(Arc::clone(&d.true_type)), Some(Arc::clone(&d.false_type)))
+                    }
+                    _ => (None, None),
+                }
+            }).unwrap_or((None, None));
+            let true_t = c
+                .resolved_true_type
+                .get()
+                .map(|tt| self.type_to_string_ex(tt, flags))
+                .or_else(|| {
+                    true_node.map(|n| {
+                        let t = self.get_type_from_type_node(&n);
+                        self.type_to_string_ex(&t, flags)
+                    })
+                })
+                .unwrap_or_else(|| "...".to_string());
+            let false_t = c
+                .resolved_false_type
+                .get()
+                .map(|ft| self.type_to_string_ex(ft, flags))
+                .or_else(|| {
+                    false_node.map(|n| {
+                        let t = self.get_type_from_type_node(&n);
+                        self.type_to_string_ex(&t, flags)
+                    })
+                })
+                .unwrap_or_else(|| "...".to_string());
+            return format!("{check} extends {extends} ? {true_t} : {false_t}");
+        }
+
         // Tuple types
         if t.object_flags.contains(ObjectFlags::Tuple) {
             return self.tuple_to_string(t, flags);
@@ -369,7 +506,19 @@ impl Checker {
         let obj = ia
             .object_type
             .as_ref()
-            .map(|t| self.type_to_string_ex(t, flags))
+            .map(|t| {
+                let s = self.type_to_string_ex(t, flags);
+                // Conditional/mapped objects need parens (official prints
+                // `(T extends X ? A : B)["k"]`).
+                if matches!(
+                    t.data,
+                    TypeData::Conditional(_) | TypeData::Mapped(_)
+                ) {
+                    format!("({s})")
+                } else {
+                    s
+                }
+            })
             .unwrap_or_else(|| "any".to_string());
         let idx = ia
             .index_type

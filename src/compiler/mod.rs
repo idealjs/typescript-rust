@@ -13,7 +13,7 @@ use crate::ast::ScriptKind;
 use crate::ast::SourceFile;
 use crate::ast::diagnostic::Diagnostic;
 use crate::binder::Binder;
-use crate::core::compiler_options::CompilerOptions;
+use crate::core::compiler_options::{CompilerOptions, ScriptTarget};
 use crate::core::text::TextRange;
 use crate::core::tristate::Tristate;
 use crate::diagnostics::Category;
@@ -1015,7 +1015,12 @@ fn extract_reference_lib_directives(text: &str) -> Vec<String> {
 
 /// Determine the default lib file name(s) from compiler options.
 ///
-/// Mirrors a simplified `compiler.GetDefaultLibFileName` / `getDefaultLibFilenames`.
+/// Mirrors Go `tsoptions.GetDefaultLibFileName` + `targetToLibMap`
+/// (enummaps.go): each ES2015+ script target selects its own entry lib
+/// (`lib.es6.d.ts` for ES2015 — deliberately not `.full` per the Go comment —
+/// `lib.es20XX.full.d.ts` for ES2016..ES2025, `lib.esnext.full.d.ts` for
+/// ESNext). Targets below ES2015 (and the unset/JSON targets) keep
+/// `lib.d.ts`. An explicit `lib` option always wins.
 fn default_lib_file_names(options: &CompilerOptions) -> Vec<String> {
     if !options.lib.is_empty() {
         return options
@@ -1030,8 +1035,22 @@ fn default_lib_file_names(options: &CompilerOptions) -> Vec<String> {
             })
             .collect();
     }
-    // Default: lib.d.ts (which references es5 + dom).
-    vec!["lib.d.ts".to_string()]
+    let entry = match options.get_emit_script_target() {
+        ScriptTarget::ESNext => "lib.esnext.full.d.ts",
+        ScriptTarget::ES2025 => "lib.es2025.full.d.ts",
+        ScriptTarget::ES2024 => "lib.es2024.full.d.ts",
+        ScriptTarget::ES2023 => "lib.es2023.full.d.ts",
+        ScriptTarget::ES2022 => "lib.es2022.full.d.ts",
+        ScriptTarget::ES2021 => "lib.es2021.full.d.ts",
+        ScriptTarget::ES2020 => "lib.es2020.full.d.ts",
+        ScriptTarget::ES2019 => "lib.es2019.full.d.ts",
+        ScriptTarget::ES2018 => "lib.es2018.full.d.ts",
+        ScriptTarget::ES2017 => "lib.es2017.full.d.ts",
+        ScriptTarget::ES2016 => "lib.es2016.full.d.ts",
+        ScriptTarget::ES2015 => "lib.es6.d.ts",
+        _ => "lib.d.ts",
+    };
+    vec![entry.to_string()]
 }
 
 // ────────────────────────────────────────────────────────────────────────────

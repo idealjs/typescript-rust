@@ -25,7 +25,12 @@ pub fn line_and_character(line_map: &LineMap, text: &str, offset: usize) -> (usi
     // out-of-range position (e.g. a recovery/missing-token position past EOF);
     // a display helper must never panic on it. Mirrors the Go behavior of
     // returning a clamped position.
-    let offset = offset.min(text.len());
+    let mut offset = offset.min(text.len());
+    // Positions may also land inside a multi-byte character (Go slices bytes
+    // freely; Rust must snap to a char boundary to avoid panicking).
+    while offset > 0 && !text.is_char_boundary(offset) {
+        offset -= 1;
+    }
     // Binary search for the last line start <= offset.
     let mut lo = 0usize;
     let mut hi = starts.len();

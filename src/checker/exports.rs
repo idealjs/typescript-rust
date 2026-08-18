@@ -198,17 +198,8 @@ impl Checker {
     // Contextual typing
     // ────────────────────────────────────────────────────────────────────────
 
-    /// Go: `GetTypeOfPropertyOfContextualType`.
-    ///
-    /// TODO: Full `getTypeOfPropertyOfContextualType` not yet ported.
-    pub fn get_type_of_property_of_contextual_type(
-        &self,
-        t: &Arc<Type>,
-        name: &str,
-    ) -> Option<Arc<Type>> {
-        // TODO: call self.get_type_of_property_of_contextual_type_internal(t, name)
-        None
-    }
+    /// Go: `GetTypeOfPropertyOfContextualType` — implemented in
+    /// `inference.rs` (`get_type_of_property_of_contextual_type`).
 
     // ────────────────────────────────────────────────────────────────────────
     // Declared type of symbol

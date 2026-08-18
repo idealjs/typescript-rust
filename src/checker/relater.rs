@@ -154,6 +154,15 @@ pub struct RelationCacheKey {
     pub relation: RelationKind,
 }
 
+/// One entry of the relater error chain (Go `ErrorChain`, relater.go
+/// ~L2581). Pushed innermost-first; the chain is rendered head-last into
+/// the nested "compatibility pyramid" diagnostic.
+#[derive(Debug, Clone)]
+pub struct RelaterChainEntry {
+    pub message: crate::diagnostics::Message,
+    pub args: Vec<String>,
+}
+
 /// A relation cache that stores comparison results.
 #[derive(Debug)]
 pub struct Relation {
@@ -291,6 +300,13 @@ impl Checker {
         } else {
             Arc::clone(target)
         };
+        // Pointer identity fast path (Go's `source == target` check in
+        // `isRelatedToEx`): a type is trivially related to itself — this
+        // also makes union members match their interned selves (e.g. the
+        // `object` keyword type inside `boolean | object`).
+        if Arc::ptr_eq(&source, &target) {
+            return true;
+        };
         // Recursion guard: structural comparisons on recursive types
         // (e.g. `type Box<T> = { next: Box<T> | null }`) can blow the native
         // stack. Once we exceed `RELATER_MAX_DEPTH`, report overflow.
@@ -316,6 +332,8 @@ impl Checker {
             self.relation_cache.clear();
             self.relation_in_progress.clear();
             self.relater_overflow = false;
+            self.relater_source_stack.clear();
+            self.relater_target_stack.clear();
             // Go uses (16_000_000 - relation.size()) / 8. We use a fixed
             // budget since we don't track relation cache size.
             self.relation_count = 2_000_000;
@@ -331,13 +349,35 @@ impl Checker {
             return true;
         }
         // Cache hit: a previous sub-comparison within this top-level call
-        // already determined the result.
+        // already determined the result. When ELABORATING a failure (chain
+        // recording active), Go re-runs failed comparisons so the error
+        // chain gets built (relater.go ~L3113: "we will do the comparison
+        // again to generate an error message") — a cached `false` from a
+        // nested non-reporting context must not short-circuit the retry.
         if let Some(&cached) = self.relation_cache.get(&key) {
-            return cached;
+            if cached || !self.relater_chain_active {
+                return cached;
+            }
         }
         self.relation_in_progress.insert(key);
         self.relater_depth += 1;
-        let result = self.is_type_related_to_inner(&source, &target, relation);
+        // Deeply-nested early termination (Go `recursiveTypeRelatedTo`,
+        // relater.go ~L3152: when both source and target chains hit
+        // `isDeeplyNestedType` the comparison is presumed equal — this is
+        // what stops ever-expanding generic instantiation chains such as
+        // react's `FC<PropsWithChildren<...>>` compositions from blowing up).
+        let source_deep = self.is_deeply_nested_type(&source, &self.relater_source_stack, 3);
+        let target_deep = self.is_deeply_nested_type(&target, &self.relater_target_stack, 3);
+        let result = if source_deep && target_deep {
+            true
+        } else {
+            self.relater_source_stack.push(Arc::clone(&source));
+            self.relater_target_stack.push(Arc::clone(&target));
+            let r = self.is_type_related_to_inner(&source, &target, relation);
+            self.relater_source_stack.pop();
+            self.relater_target_stack.pop();
+            r
+        };
         self.relater_depth -= 1;
         self.relation_in_progress.remove(&key);
         // Decrement complexity budget on failed comparisons (Go: relater.go:3163).
@@ -346,6 +386,251 @@ impl Checker {
         }
         self.relation_cache.insert(key, result);
         result
+    }
+
+    /// Chain entry `index` from the top (0 = most recent push), by message
+    /// key (Go `getChainMessage`).
+    fn chain_message_key(&self, index: usize) -> Option<&'static str> {
+        let len = self.relater_error_chain.len();
+        if len <= index {
+            return None;
+        }
+        Some(self.relater_error_chain[len - 1 - index].message.key)
+    }
+
+    /// Args of chain entry `index` from the top.
+    fn chain_args(&self, index: usize) -> Option<&[String]> {
+        let len = self.relater_error_chain.len();
+        if len <= index {
+            return None;
+        }
+        Some(&self.relater_error_chain[len - 1 - index].args)
+    }
+
+    /// Go `getPropertyNameArg` + `addToDottedName` (relater.go ~L4931):
+    /// quoted property names index (`["x"]`), others join with '.'; a
+    /// `new ` prefix or parenthesised head is preserved on the tail.
+    fn property_chain_name(head: &str, tail: &str) -> String {
+        fn get_property_name_arg(arg: &str) -> String {
+            if let Some(first) = arg.chars().next()
+                && matches!(first, '"' | '\'' | '`')
+            {
+                format!("[{}]", arg)
+            } else {
+                arg.to_string()
+            }
+        }
+        let head = get_property_name_arg(head);
+        let tail = get_property_name_arg(tail);
+        let mut head = head;
+        if head.starts_with("new ") {
+            head = format!("({})", head);
+        }
+        let mut pos = 0;
+        let bytes = tail.as_bytes();
+        loop {
+            if tail[pos..].starts_with('(') {
+                pos += 1;
+            } else if tail[pos..].starts_with("new ") {
+                pos += 4;
+            } else {
+                break;
+            }
+        }
+        let _ = bytes;
+        let suffix = &tail[pos..];
+        let prefix = &tail[..pos];
+        if suffix.starts_with('[') {
+            format!("{}{}{}", prefix, head, suffix)
+        } else {
+            format!("{}{}.{}", prefix, head, suffix)
+        }
+    }
+
+    /// Relater chain push with Go's post-processing (Go `(*Relater).
+    /// reportError`, relater.go ~L4880): signature-return transforms
+    /// (marker entries 2202-2205 collapse into "The types returned by
+    /// 'x()' ..."), dotted property-name chaining ('x' → 'x.y'), and
+    /// excess-property suppression.
+    fn relater_report_error(
+        &mut self,
+        message: crate::diagnostics::Message,
+        mut args: Vec<String>,
+    ) {
+        use crate::diagnostics::messages_generated as msg;
+        if !self.relater_chain_active {
+            return;
+        }
+        if message.key == msg::TYPES_OF_PROPERTY_0_ARE_INCOMPATIBLE.key {
+            // Suppress if the next entry is an excess-property error.
+            if let Some(top) = self.chain_message_key(0)
+                && (top == msg::OBJECT_LITERAL_MAY_ONLY_SPECIFY_KNOWN_PROPERTIES_AND_0_DOES_NOT_EXIST_IN_TYPE_1.key
+                    || top == msg::OBJECT_LITERAL_MAY_ONLY_SPECIFY_KNOWN_PROPERTIES_BUT_0_DOES_NOT_EXIST_IN_TYPE_1_DID_YOU_MEAN_TO_WRITE_2.key)
+            {
+                return;
+            }
+            // Property incompatibility + signature-return incompatibility →
+            // single "types returned by 'x()'/'new x()'/'x(...)'" entry.
+            let marker = self.chain_message_key(1).map(str::to_string);
+            if let Some(m1) = marker {
+                let arg = if m1 == msg::CALL_SIGNATURES_WITH_NO_ARGUMENTS_HAVE_INCOMPATIBLE_RETURN_TYPES_0_AND_1.key {
+                    Some(format!("{}()", args[0]))
+                } else if m1 == msg::CONSTRUCT_SIGNATURES_WITH_NO_ARGUMENTS_HAVE_INCOMPATIBLE_RETURN_TYPES_0_AND_1.key {
+                    Some(format!("new {}()", args[0]))
+                } else if m1 == msg::CALL_SIGNATURE_RETURN_TYPES_0_AND_1_ARE_INCOMPATIBLE.key {
+                    Some(format!("{}(...)", args[0]))
+                } else if m1 == msg::CONSTRUCT_SIGNATURE_RETURN_TYPES_0_AND_1_ARE_INCOMPATIBLE.key {
+                    Some(format!("new {}(...)", args[0]))
+                } else {
+                    None
+                };
+                if let Some(arg) = arg {
+                    self.relater_error_chain.pop();
+                    self.relater_error_chain.pop();
+                    self.relater_error_chain.push(RelaterChainEntry {
+                        message: msg::THE_TYPES_RETURNED_BY_0_ARE_INCOMPATIBLE_BETWEEN_THESE_TYPES,
+                        args: vec![arg],
+                    });
+                    return;
+                }
+                // Property 'x' → (elaboration) → property 'y' chains into a
+                // single 'x.y' entry.
+                if (m1 == msg::TYPES_OF_PROPERTY_0_ARE_INCOMPATIBLE.key
+                    || m1 == msg::THE_TYPES_OF_0_ARE_INCOMPATIBLE_BETWEEN_THESE_TYPES.key
+                    || m1 == msg::THE_TYPES_RETURNED_BY_0_ARE_INCOMPATIBLE_BETWEEN_THESE_TYPES.key)
+                    && let Some(tail_args) = self.chain_args(1).map(|a| a[0].clone())
+                {
+                    let dotted = Self::property_chain_name(&args[0], &tail_args);
+                    self.relater_error_chain.pop();
+                    self.relater_error_chain.pop();
+                    self.relater_error_chain.push(RelaterChainEntry {
+                        message: msg::THE_TYPES_OF_0_ARE_INCOMPATIBLE_BETWEEN_THESE_TYPES,
+                        args: vec![dotted],
+                    });
+                    return;
+                }
+            }
+        }
+        self.relater_error_chain.push(RelaterChainEntry { message, args });
+    }
+
+
+    /// Go `isDeeplyNestedType` (relater.go ~L768), simplified: a type is
+    /// deeply nested when its recursion identity (the symbol for nominal
+    /// references, the type itself for anonymous ones) occurs `max_depth`
+    /// times on the comparison stack as *distinct* instantiations. Go's
+    /// increasing-type-id filter is approximated by requiring distinct
+    /// `Arc` pointers between consecutive matches — exact repeats are cut
+    /// by `relation_in_progress` before reaching here. Intersections are
+    /// deeply nested when any constituent is (Go: same rule).
+    fn is_deeply_nested_type(&self, t: &Arc<Type>, stack: &[Arc<Type>], max_depth: usize) -> bool {
+        if stack.len() < max_depth {
+            return false;
+        }
+        if t.flags.contains(TypeFlags::Intersection) {
+            if let Some(constituents) = t.types() {
+                for c in constituents {
+                    if self.is_deeply_nested_type(c, stack, max_depth) {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+        let mut count = 0usize;
+        let mut last_ptr: *const Type = std::ptr::null();
+        for s in stack {
+            let same = match (&t.symbol, &s.symbol) {
+                (Some(a), Some(b)) => Arc::ptr_eq(a, b),
+                (None, None) => Arc::ptr_eq(t, s),
+                _ => false,
+            };
+            if same {
+                let p = Arc::as_ptr(s);
+                if p != last_ptr {
+                    count += 1;
+                    if count >= max_depth {
+                        return true;
+                    }
+                }
+                last_ptr = p;
+            }
+        }
+        false
+    }
+
+    /// The constraint of a DEFERRED indexed access `T[K]` (Go
+    /// `getConstraintFromIndexedAccess`, checker.go ~L17284): resolve the
+    /// access against the object parameter's base constraint —
+    /// `T["content"]` with `T extends { content: C }` constrains to `C`.
+    /// Returns `None` when there is no usable constraint information.
+    fn constraint_of_indexed_access(&mut self, t: &Arc<Type>) -> Option<Arc<Type>> {
+        let ia = match &t.data {
+            TypeData::IndexedAccess(ia) => ia,
+            _ => return None,
+        };
+        let object = ia.object_type.as_ref()?;
+        let index = ia.index_type.as_ref()?;
+        // The object's base constraint. Placeholder type-parameter instances
+        // (minted during circular resolution) carry no constraint — recover
+        // it from the symbol's canonical type. Nested deferred objects
+        // (indexed access / conditional) constrain recursively.
+        let obj_constraint = if object.flags.contains(TypeFlags::TypeParameter) {
+            match self.get_constraint_of_type_parameter(object) {
+                Some(c) => c,
+                None => {
+                    let sym = object.symbol.as_ref()?;
+                    // Canonical type first; a constraint-less canonical (a
+                    // placeholder cached mid-resolution) falls through to
+                    // reading the constraint declaration node directly —
+                    // the same extraction get_type_parameter_from_symbol
+                    // performs.
+                    let canonical = self
+                        .type_alias_links
+                        .get(sym)
+                        .and_then(|l| l.declared_type.clone())
+                        .and_then(|c| self.get_constraint_of_type_parameter(&c));
+                    match canonical {
+                        Some(c) => c,
+                        None => {
+                            let mut from_decl = None;
+                            for decl in &sym.declarations {
+                                if let crate::ast::NodeData::TypeParameterDeclaration(data) =
+                                    &decl.data
+                                {
+                                    if let Some(constraint_node) = &data.constraint {
+                                        from_decl =
+                                            Some(self.get_type_from_type_node(constraint_node));
+                                    }
+                                    break;
+                                }
+                            }
+                            from_decl?
+                        }
+                    }
+                }
+            }
+        } else if matches!(
+            &object.data,
+            TypeData::IndexedAccess(_) | TypeData::Conditional(_)
+        ) {
+            self.constraint_of_indexed_access(object)?
+        } else {
+            return None;
+        };
+        // A constraint that carries no information must not become the
+        // relation result.
+        if matches!(
+            obj_constraint.intrinsic_name(),
+            Some("any") | Some("unknown") | Some("error")
+        ) {
+            return None;
+        }
+        let resolved = self.get_indexed_access_type(&obj_constraint, index);
+        if matches!(resolved.intrinsic_name(), Some("any") | Some("error")) {
+            return None;
+        }
+        Some(resolved)
     }
 
     fn is_type_related_to_inner(
@@ -370,6 +655,38 @@ impl Checker {
         let s = source.flags;
         let t = target.flags;
 
+        // Source is a type parameter: reduce it to its constraint FIRST —
+        // Go's `recursiveTypeRelatedTo` performs this before any
+        // union/structural dispatch, so `K extends "a" | "b"` is assignable
+        // to `"a" | "b" | "c"` as a whole union (not member-by-member
+        // against the type parameter).
+        if s.contains(TypeFlags::TypeParameter) {
+            if let Some(constraint) = self.get_constraint_of_type_parameter(source) {
+                if self.is_type_related_to(&constraint, target, relation) {
+                    return true;
+                }
+            }
+        }
+
+        // Deferred indexed accesses reduce through their constraint first
+        // (Go isRelatedToWorker's TypeVariable branch, relater.go ~L3706):
+        // `T["content"]` with `T extends { content: C }` is assignable to
+        // `C` because the access resolved against the object parameter's
+        // base constraint yields `C`. Only fires when the target is not
+        // itself an indexed access (component-wise comparison handles that).
+        // (Flag-based check plus a data-based fallback: deferred accesses
+        // created in some paths carry no IndexedAccess flag bit, though the
+        // nodebuilder still dispatches on the data variant.)
+        let source_is_indexed_access = s.contains(TypeFlags::IndexedAccess)
+            || matches!(source.data, TypeData::IndexedAccess(_));
+        if source_is_indexed_access && !t.contains(TypeFlags::IndexedAccess) {
+            if let Some(constraint) = self.constraint_of_indexed_access(source)
+                && self.is_type_related_to(&constraint, target, relation)
+            {
+                return true;
+            }
+        }
+
         // NOTE: `intersects` (not `contains`) — a type "is a union or
         // intersection" if it has *any* of those bits set, not both. `contains`
         // would require the argument to be a subset of the type's flags, so
@@ -380,6 +697,18 @@ impl Checker {
             || t.intersects(TYPE_FLAGS_UNION_OR_INTERSECTION)
         {
             return self.is_union_or_intersection_related_to(source, target, relation);
+        }
+
+        // Primitive sources compare against OBJECT targets through their
+        // boxed apparent type (Go maps the source via getApparentType in
+        // structuredTypeRelatedToWorker): `2` is assignable to `Number`,
+        // `"s"` to `String`, under any non-identity relation.
+        if t.contains(TypeFlags::Object)
+            && !s.contains(TypeFlags::Object)
+            && relation != RelationKind::Identity
+            && let Some(boxed) = self.boxed_apparent_type_of_primitive(source)
+        {
+            return self.is_type_related_to(&boxed, target, relation);
         }
 
         if s.contains(TypeFlags::Object) && t.contains(TypeFlags::Object) {
@@ -423,15 +752,8 @@ impl Checker {
             return true;
         }
 
-        // Handle type parameters: check constraints
-        if s.contains(TypeFlags::TypeParameter) {
-            // Source is a type parameter, check if its constraint is assignable to target
-            if let Some(constraint) = self.get_constraint_of_type_parameter(source) {
-                if self.is_type_related_to(&constraint, target, relation) {
-                    return true;
-                }
-            }
-        }
+        // Handle type parameters: target-side constraint check (the
+        // source-side reduction now happens before the union dispatch).
         if t.contains(TypeFlags::TypeParameter) {
             // Target is a type parameter with a constraint
             if let Some(constraint) = self.get_constraint_of_type_parameter(target) {
@@ -442,9 +764,90 @@ impl Checker {
             }
         }
 
+        // Deferred indexed-access target (Go relater.go ~L3483):
+        // 1. S[K] is related to T[J] if S is related to T and K is related
+        //    to J (component-wise comparison of the two accesses).
+        // 2. Otherwise (assignable/comparable relation) S is related to
+        //    T[J] if S is related to C, where C is the resolved access of
+        //    the base constraints of T and J ("for writing").
+        if t.contains(TypeFlags::IndexedAccess) {
+            if let TypeData::IndexedAccess(target_access) = &target.data {
+                if s.contains(TypeFlags::IndexedAccess)
+                    && let TypeData::IndexedAccess(source_access) = &source.data
+                    && let (Some(source_object), Some(source_index)) = (
+                        &source_access.object_type,
+                        &source_access.index_type,
+                    )
+                    && let (Some(target_object), Some(target_index)) = (
+                        &target_access.object_type,
+                        &target_access.index_type,
+                    )
+                {
+                    let objects_related =
+                        self.is_type_related_to(source_object, target_object, relation);
+                    if objects_related {
+                        let indexes_related =
+                            self.is_type_related_to(source_index, target_index, relation);
+                        if indexes_related {
+                            return true;
+                        }
+                    }
+                }
+                if relation == RelationKind::Assignable || relation == RelationKind::Comparable {
+                    if let (Some(object_type), Some(index_type)) =
+                        (&target_access.object_type, &target_access.index_type)
+                    {
+                        let base_object = self.get_base_constraint_or_type(object_type);
+                        let base_index = self.get_base_constraint_or_type(index_type);
+                        let object_changed = !Arc::ptr_eq(&base_object, object_type);
+                        if !self.type_flags_is_generic_object_type(&base_object)
+                            && !self.type_flags_is_generic_index_type(&base_index)
+                        {
+                            let mut access_flags = AccessFlags::Writing;
+                            if object_changed {
+                                access_flags |= AccessFlags::NoIndexSignatures;
+                            }
+                            if let Some(constraint) = self.try_get_indexed_access_type(
+                                &base_object,
+                                &base_index,
+                                access_flags,
+                            ) {
+                                if self.is_type_related_to(source, &constraint, relation) {
+                                    return true;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // `keyof` target (Go relater.go ~L3526): a keyof S is related to a
+        // keyof T if T is related to S (the derived interface's key set is
+        // a subset of the base's, so `keyof Derived` narrows `keyof Base`).
+        if t.contains(TypeFlags::Index)
+            && let TypeData::Index(target_index) = &target.data
+            && let Some(target_of) = &target_index.target
+        {
+            if s.contains(TypeFlags::Index)
+                && let TypeData::Index(source_index) = &source.data
+                && let Some(source_of) = &source_index.target
+            {
+                if self.is_type_related_to(target_of, source_of, relation) {
+                    return true;
+                }
+            }
+        }
+
         // Handle conditional types: use resolved type if available
         if s.contains(TypeFlags::Conditional) {
-            if let Some(resolved) = self.get_resolved_type_of_conditional_type(source) {
+            let resolved = match self.get_resolved_type_of_conditional_type(source) {
+                Some(resolved) => Some(resolved),
+                // Eagerly attempt resolution (Go resolves conditionals during
+                // `instantiateType`, so by comparison time they are concrete).
+                None => self.resolve_conditional_type(source),
+            };
+            if let Some(resolved) = resolved {
                 if self.is_type_related_to(&resolved, target, relation) {
                     return true;
                 }
@@ -453,9 +856,19 @@ impl Checker {
         if t.contains(TypeFlags::Conditional) {
             // First, try the resolved-type fast path (used when the
             // conditional has already been evaluated to a concrete type).
-            if let Some(resolved) = self.get_resolved_type_of_conditional_type(target) {
+            let resolved = match self.get_resolved_type_of_conditional_type(target) {
+                Some(resolved) => Some(resolved),
+                None => self.resolve_conditional_type(target),
+            };
+            if let Some(resolved) = resolved {
                 if self.is_type_related_to(source, &resolved, relation) {
                     return true;
+                }
+                // A successfully resolved target conditional is authoritative:
+                // Go never falls back to branch-wise comparison once the
+                // conditional has been instantiated to a concrete type.
+                if !type_contains_type_parameter(&resolved) {
+                    return false;
                 }
             }
             // Otherwise, fall back to the conditional-target comparison
@@ -681,10 +1094,23 @@ impl Checker {
         relation: RelationKind,
     ) -> bool {
         if let Some(ui) = source.as_union_or_intersection() {
+            // Chain hygiene (Go saveErrorState/restoreErrorState around
+            // union-member trials, relater.go ~L3304): a failed trial's
+            // entries are rolled back; on overall failure the deepest
+            // (longest) trial chain is kept for the pyramid.
+            let save_len = self.relater_error_chain.len();
+            let mut best: Option<Vec<RelaterChainEntry>> = None;
             for t in &ui.types {
                 if self.is_type_related_to(t, target, relation) {
                     return true;
                 }
+                if best.as_ref().is_none_or(|b| b.len() < self.relater_error_chain.len()) {
+                    best = Some(self.relater_error_chain.clone());
+                }
+                self.relater_error_chain.truncate(save_len);
+            }
+            if let Some(b) = best {
+                self.relater_error_chain = b;
             }
         }
         false
@@ -717,10 +1143,20 @@ impl Checker {
         relation: RelationKind,
     ) -> bool {
         if let Some(ui) = target.as_union_or_intersection() {
+            // Chain hygiene — see some_type_related_to_type.
+            let save_len = self.relater_error_chain.len();
+            let mut best: Option<Vec<RelaterChainEntry>> = None;
             for t in &ui.types {
                 if self.is_type_related_to(source, t, relation) {
                     return true;
                 }
+                if best.as_ref().is_none_or(|b| b.len() < self.relater_error_chain.len()) {
+                    best = Some(self.relater_error_chain.clone());
+                }
+                self.relater_error_chain.truncate(save_len);
+            }
+            if let Some(b) = best {
+                self.relater_error_chain = b;
             }
         }
         false
@@ -763,6 +1199,7 @@ impl Checker {
         };
 
         // Check properties: target properties must exist in source with compatible types
+        let mut missing_props: Vec<String> = Vec::new();
         for target_prop in &target_struct.properties {
             // Check that source has a matching property by name.
             let source_prop = match source_struct.members.get(&target_prop.name) {
@@ -776,7 +1213,8 @@ impl Checker {
                     if target_prop.flags.contains(SymbolFlags::Optional) {
                         continue;
                     }
-                    return false;
+                    missing_props.push(target_prop.name.clone());
+                    continue;
                 }
             };
             // Check that the source property type is related to the
@@ -787,7 +1225,87 @@ impl Checker {
             let source_type = self.get_type_of_symbol(source_prop);
             let target_type = self.get_type_of_symbol(target_prop);
             if !self.is_type_related_to(&source_type, &target_type, relation) {
+                // Chain (Go propertiesRelatedTo → reportError, relater.go
+                // ~L4353): the nested failure's entries are already on the
+                // chain; push this property's head then the property
+                // incompatibility marker (whose post-processing collapses
+                // signature-return and dotted-name chains).
+                let prop_source_str = self.type_to_string(&source_type);
+                let prop_target_str = self.type_to_string(&target_type);
+                self.relater_report_error(
+                    crate::diagnostics::messages_generated::TYPE_0_IS_NOT_ASSIGNABLE_TO_TYPE_1,
+                    vec![prop_source_str, prop_target_str],
+                );
+                self.relater_report_error(
+                    crate::diagnostics::messages_generated::TYPES_OF_PROPERTY_0_ARE_INCOMPATIBLE,
+                    vec![target_prop.name.clone()],
+                );
                 return false;
+            }
+        }
+        // Missing-required-property chain entries (Go relater.go ~L4403:
+        // one property → TS2741-style single message; several → the
+        // "missing the following properties" form with up to three names
+        // plus a count).
+        if !missing_props.is_empty() {
+            let source_str = self.type_to_string(source);
+            let target_str = self.type_to_string(target);
+            if missing_props.len() == 1 {
+                self.relater_report_error(
+                    crate::diagnostics::messages_generated::
+                        PROPERTY_0_IS_MISSING_IN_TYPE_1_BUT_REQUIRED_IN_TYPE_2,
+                    vec![missing_props[0].clone(), source_str, target_str],
+                );
+            } else if missing_props.len() <= 4 {
+                self.relater_report_error(
+                    crate::diagnostics::messages_generated::
+                        TYPE_0_IS_MISSING_THE_FOLLOWING_PROPERTIES_FROM_TYPE_1_COLON_2,
+                    vec![
+                        source_str,
+                        target_str,
+                        missing_props.join(", "),
+                    ],
+                );
+            } else {
+                self.relater_report_error(
+                    crate::diagnostics::messages_generated::
+                        TYPE_0_IS_MISSING_THE_FOLLOWING_PROPERTIES_FROM_TYPE_1_COLON_2_AND_3_MORE,
+                    vec![
+                        source_str,
+                        target_str,
+                        missing_props[..3].join(", "),
+                        (missing_props.len() - 3).to_string(),
+                    ],
+                );
+            }
+            return false;
+        }
+
+        // Tuple targets require their element positions as properties
+        // (Go's `getPropertiesOfType` exposes tuple elements as '0'..'n-1',
+        // so a non-tuple source — e.g. a function type — is not assignable
+        // to a tuple). Array sources are exempt: array-literal→tuple
+        // contextual typing isn't ported, and the suite's baselines rely
+        // on the permissive array→tuple behavior.
+        if self.is_tuple_type(target)
+            && !self.is_array_type(source)
+            && source.object_flags.contains(ObjectFlags::EvolvingArray) == false
+            && let TypeData::Tuple(tup) = &target.data
+        {
+            for (i, ei) in tup.element_infos.iter().enumerate() {
+                let Some(elem_type) = &ei.type_ else { continue };
+                let name = i.to_string();
+                let Some(source_prop) = source_struct.members.get(&name) else {
+                    let optional = ei.flags.contains(ElementFlags::Optional);
+                    if optional {
+                        continue;
+                    }
+                    return false;
+                };
+                let source_type = self.get_type_of_symbol(source_prop);
+                if !self.is_type_related_to(&source_type, elem_type, relation) {
+                    return false;
+                }
             }
         }
 
@@ -826,6 +1344,23 @@ impl Checker {
             (TypeData::TypeParameter(s), TypeData::TypeParameter(t)) => {
                 s.is_this_type == t.is_this_type
             }
+            // Two deferred indexed accesses are identical when both their
+            // object and index types are (Go relater.go ~L3360, identity
+            // relation).
+            (TypeData::IndexedAccess(s), TypeData::IndexedAccess(t)) => {
+                match (&s.object_type, &t.object_type, &s.index_type, &t.index_type) {
+                    (Some(so), Some(to), Some(si), Some(ti)) => {
+                        self.is_type_identical_to(so, to) && self.is_type_identical_to(si, ti)
+                    }
+                    _ => Arc::ptr_eq(source, target),
+                }
+            }
+            // Two `keyof` types are identical when their target types are
+            // (Go relater.go ~L3364, identity relation).
+            (TypeData::Index(s), TypeData::Index(t)) => match (&s.target, &t.target) {
+                (Some(so), Some(to)) => self.is_type_identical_to(so, to),
+                _ => Arc::ptr_eq(source, target),
+            },
             _ => {
                 // For other types, fall back to flag comparison.
                 // Full structural comparison requires the full relater.
@@ -973,6 +1508,15 @@ impl Checker {
         if s.contains(TypeFlags::Object)
             && t.contains(TypeFlags::NonPrimitive)
             && !(relation == RelationKind::StrictSubtype)
+        {
+            return true;
+        }
+
+        // `object` is related to itself (identity by intrinsic name; the
+        // type is interned so the pointer fast path usually catches this).
+        if s.contains(TypeFlags::NonPrimitive)
+            && t.contains(TypeFlags::NonPrimitive)
+            && source.intrinsic_name() == target.intrinsic_name()
         {
             return true;
         }
@@ -1352,30 +1896,22 @@ impl Checker {
             return Ternary::False;
         }
 
-        // 5. Generic signature instantiation. We don't yet support generic
-        //    signature instantiation in the relater (it requires
-        //    `instantiateSignatureInContextOf` from `inference.go`).
-        //    Instead we erase — `getErasedSignature` returns the same
-        //    signature when there are no type parameters, which is the
-        //    common case for our current parity fixtures.
-        let source = if !source.type_parameters.is_empty()
+        // 5. Generic source signatures are instantiated in the context of
+        //    the canonicalized target signature before comparing, and the
+        //    target is replaced by its canonical form for the remainder of
+        //    the comparison. Mirrors Go relater.go ~L1527.
+        let mut source = Arc::clone(source);
+        let mut target = Arc::clone(target);
+        if !source.type_parameters.is_empty()
             && !type_parameters_same(
                 source.type_parameters.as_slice(),
                 target.type_parameters.as_slice(),
-            ) {
-            self.get_erased_signature(source)
-        } else {
-            Arc::clone(source)
-        };
-        let target = if !source.type_parameters.is_empty()
-            && !type_parameters_same(
-                source.type_parameters.as_slice(),
-                target.type_parameters.as_slice(),
-            ) {
-            self.get_erased_signature(target)
-        } else {
-            Arc::clone(target)
-        };
+            )
+        {
+            let canonical_target = self.get_canonical_signature(&target);
+            source = self.instantiate_signature_in_context_of(&source, &canonical_target);
+            target = canonical_target;
+        }
 
         let source_count = self.get_parameter_count(&source);
         let source_rest = self.get_non_array_rest_type(&source);
@@ -1449,16 +1985,68 @@ impl Checker {
                 continue;
             }
 
-            // Bivariant/contravariant parameter comparison.
-            // Default: bivariant — try source→target first, fall back to target→source.
-            let mut related = Ternary::False;
-            if !check_mode.contains(SignatureCheckMode::Callback) && !strict_variance {
-                related =
-                    self.compare_types(source_type.clone(), target_type.clone(), relation, false);
+            // Callback detection (Go relater.go ~L1590): when both
+            // parameter types are single-call-signature functions (and
+            // neither position was instantiated from a generic parameter,
+            // and their null/undefined facts agree), compare the two
+            // signatures covariantly-in-parameters (callback mode) instead
+            // of the usual bivariant type comparison.
+            let mut source_sig: Option<Arc<Signature>> = None;
+            if !check_mode.contains(SignatureCheckMode::Callback)
+                && !self.is_instantiated_generic_parameter(&source, i)
+            {
+                let non_nullable = self.get_non_nullable_type_of(&source_type);
+                source_sig = self.get_single_call_signature(&non_nullable);
             }
-            if related.is_false() {
-                related =
-                    self.compare_types(target_type.clone(), source_type.clone(), relation, false);
+            let mut target_sig: Option<Arc<Signature>> = None;
+            if !check_mode.contains(SignatureCheckMode::Callback)
+                && !self.is_instantiated_generic_parameter(&target, i)
+            {
+                let non_nullable = self.get_non_nullable_type_of(&target_type);
+                target_sig = self.get_single_call_signature(&non_nullable);
+            }
+            let callbacks = source_sig.is_some()
+                && target_sig.is_some()
+                && self
+                    .get_type_predicate_of_signature(source_sig.as_ref().unwrap())
+                    .is_none()
+                && self
+                    .get_type_predicate_of_signature(target_sig.as_ref().unwrap())
+                    .is_none()
+                && self.type_is_undefined_or_null(&source_type)
+                    == self.type_is_undefined_or_null(&target_type);
+
+            let mut related = Ternary::False;
+            if callbacks {
+                let callback_mode = if check_mode.contains(SignatureCheckMode::StrictArity) {
+                    SignatureCheckMode::StrictArity
+                } else {
+                    SignatureCheckMode::None
+                } | if strict_variance {
+                    SignatureCheckMode::StrictCallback
+                } else {
+                    SignatureCheckMode::BivariantCallback
+                };
+                // Note the reversed order (target, source): callback
+                // parameters are output positions, so the comparison runs
+                // against the parameter's own variance direction.
+                related = self.compare_signatures_related(
+                    target_sig.as_ref().unwrap(),
+                    source_sig.as_ref().unwrap(),
+                    callback_mode,
+                    relation,
+                );
+            } else {
+                // Bivariant/contravariant parameter comparison.
+                // Default: bivariant — try source→target first, fall back to target→source.
+                if !check_mode.contains(SignatureCheckMode::Callback) && !strict_variance {
+                    related =
+                        self.compare_types(source_type.clone(), target_type.clone(), relation, false);
+                }
+                if related.is_false() {
+                    related =
+                        self.compare_types(target_type.clone(), source_type.clone(), relation, false);
+                }
             }
             if related.is_false() {
                 return Ternary::False;
@@ -1509,10 +2097,33 @@ impl Checker {
                         );
                     }
                     if related.is_false() {
-                        related = self.compare_types(source_return, target_return, relation, false);
+                        related = self.compare_types(source_return.clone(), target_return.clone(), relation, false);
                     }
                     result = result.and(related);
                     if result.is_false() {
+                        // Chain marker (Go compareSignaturesRelated,
+                        // relater.go ~L1661): the elided signature-return
+                        // entries drive reportError's transform into
+                        // "The types returned by 'x()' ..." heads.
+                        if self.relater_chain_active {
+                            let no_args =
+                                source.parameters.is_empty() && target.parameters.is_empty();
+                            let construct =
+                                source.flags.contains(crate::checker::types::SignatureFlags::Construct);
+                            let message = match (construct, no_args) {
+                                (false, true) => crate::diagnostics::messages_generated::
+                                    CALL_SIGNATURES_WITH_NO_ARGUMENTS_HAVE_INCOMPATIBLE_RETURN_TYPES_0_AND_1,
+                                (true, true) => crate::diagnostics::messages_generated::
+                                    CONSTRUCT_SIGNATURES_WITH_NO_ARGUMENTS_HAVE_INCOMPATIBLE_RETURN_TYPES_0_AND_1,
+                                (false, false) => crate::diagnostics::messages_generated::
+                                    CALL_SIGNATURE_RETURN_TYPES_0_AND_1_ARE_INCOMPATIBLE,
+                                (true, false) => crate::diagnostics::messages_generated::
+                                    CONSTRUCT_SIGNATURE_RETURN_TYPES_0_AND_1_ARE_INCOMPATIBLE,
+                            };
+                            let sr = self.type_to_string(&source_return);
+                            let tr = self.type_to_string(&target_return);
+                            self.relater_report_error(message, vec![sr, tr]);
+                        }
                         return result;
                     }
                 }
@@ -1864,6 +2475,37 @@ impl Checker {
         sig: &Arc<Signature>,
         pos: usize,
     ) -> Option<Arc<Type>> {
+        // Instantiated signatures resolve parameter types from the
+        // substitution table (keyed by parameter index; the rest parameter
+        // keeps its array type with the element substituted).
+        if let Some(overrides) = &sig.instantiated_parameter_types {
+            let rest_offset = if sig.has_rest_parameter() { 1 } else { 0 };
+            let param_count = overrides.len().saturating_sub(rest_offset);
+            if pos < param_count {
+                return Some(Arc::clone(&overrides[pos]));
+            }
+            if sig.has_rest_parameter() {
+                let rest_type = Arc::clone(&overrides[param_count]);
+                if is_tuple_type(&rest_type) {
+                    if let TypeData::Tuple(t) = &rest_type.data {
+                        let index = pos - param_count;
+                        let has_variadic =
+                            t.combined_flags.contains(ElementFlags::Variadic);
+                        if index < t.fixed_length || has_variadic {
+                            return t
+                                .element_infos
+                                .get(index)
+                                .and_then(|info| info.type_.clone())
+                                .or_else(|| Some(self.any_type()));
+                        }
+                    }
+                } else if let Some(elem) = self.get_array_element_type_of(&rest_type) {
+                    return Some(elem);
+                }
+                return Some(self.any_type());
+            }
+            return None;
+        }
         let rest_offset = if sig.has_rest_parameter() { 1 } else { 0 };
         let param_count = sig.parameters.len() - rest_offset;
         if pos < param_count {
@@ -1934,6 +2576,9 @@ impl Checker {
         if !sig.has_rest_parameter() {
             return None;
         }
+        if let Some(overrides) = &sig.instantiated_parameter_types {
+            return overrides.last().cloned();
+        }
         let last = sig.parameters.last()?;
         let rest_type = self.get_type_of_symbol(last);
         // If the rest type is a tuple, the effective rest is the tuple itself
@@ -1951,6 +2596,16 @@ impl Checker {
         if !sig.has_rest_parameter() {
             return None;
         }
+        if let Some(overrides) = &sig.instantiated_parameter_types {
+            let rest_type = overrides.last()?.clone();
+            if is_tuple_type(&rest_type) {
+                return Some(rest_type);
+            }
+            if self.is_array_type(&rest_type) {
+                return self.get_type_arguments(&rest_type).into_iter().next();
+            }
+            return Some(rest_type);
+        }
         let last = sig.parameters.last()?;
         let rest_type = self.get_type_of_symbol(last);
         // If it's a tuple, we don't treat it as an array rest.
@@ -1962,6 +2617,14 @@ impl Checker {
             return self.get_type_arguments(&rest_type).into_iter().next();
         }
         Some(rest_type)
+    }
+
+    /// Element type of an array-shaped override type, if array-like.
+    fn get_array_element_type_of(&self, t: &Arc<Type>) -> Option<Arc<Type>> {
+        if self.is_array_type(t) {
+            return Some(self.get_array_element_type(t));
+        }
+        None
     }
 
     /// Whether a signature is `(...args: any) => any` or
@@ -2029,11 +2692,403 @@ impl Checker {
         Arc::clone(sig)
     }
 
-    /// Get the canonical form of a signature. Since we don't yet support
-    /// generic signature instantiation, this returns the same signature.
-    /// Mirrors Go's `getCanonicalSignature`.
-    pub fn get_canonical_signature(&self, sig: &Arc<Signature>) -> Arc<Signature> {
-        Arc::clone(sig)
+    /// Instantiate `sig` with explicit type arguments: each parameter type
+    /// and the return type are substituted, and the result carries no type
+    /// parameters. Mirrors Go's `getSignatureInstantiation`
+    /// (checker.go ~L19352) for the non-JS, non-inferred-params shape.
+    pub fn get_signature_instantiation(
+        &mut self,
+        sig: &Arc<Signature>,
+        type_args: &[Arc<Type>],
+    ) -> Arc<Signature> {
+        if type_args.is_empty() || sig.type_parameters.is_empty() {
+            return Arc::clone(sig);
+        }
+        // Substitute each declared parameter's type (the rest parameter
+        // keeps its array/tuple shape with the element substituted).
+        let mut param_types: Vec<Arc<Type>> = Vec::with_capacity(sig.parameters.len());
+        let rest_offset = if sig.has_rest_parameter() { 1 } else { 0 };
+        let fixed = sig.parameters.len() - rest_offset;
+        for i in 0..fixed {
+            let t = self
+                .try_get_type_at_position(sig, i)
+                .unwrap_or_else(|| self.any_type());
+            param_types.push(
+                self.substitute_infer_type_parameters(&t, &sig.type_parameters, type_args),
+            );
+        }
+        if rest_offset == 1 {
+            let last = sig.parameters.last().expect("rest parameter");
+            let rest_type = self.get_type_of_symbol(last);
+            param_types.push(
+                self.substitute_infer_type_parameters(&rest_type, &sig.type_parameters, type_args),
+            );
+        }
+        let mut inst = Signature::new();
+        inst.flags = sig.flags;
+        inst.min_argument_count = sig.min_argument_count;
+        inst.resolved_min_argument_count = sig.resolved_min_argument_count;
+        inst.declaration = sig.declaration.clone();
+        // An instantiated signature has no type parameters; its `target`
+        // records the original signature (Go: the instantiated signature's
+        // target/mapper pair).
+        inst.target = Some(Arc::clone(sig));
+        inst.parameters = sig.parameters.clone();
+        inst.this_parameter = sig.this_parameter.clone();
+        inst.resolved_type_predicate = sig.resolved_type_predicate.clone();
+        inst.instantiated_parameter_types = Some(param_types);
+        if let Some(rt) = self.get_return_type_of_signature(sig) {
+            let substituted =
+                self.substitute_infer_type_parameters(&rt, &sig.type_parameters, type_args);
+            let _ = inst.resolved_return_type.set(substituted);
+        }
+        Arc::new(inst)
+    }
+
+    /// Instantiate a generic signature in the context of a non-generic
+    /// contextual signature: infer the source's type parameters from the
+    /// contextual signature's parameter types (contravariant positions)
+    /// and — without an outer inference context — its return type, then
+    /// instantiate. Mirrors Go's `instantiateSignatureInContextOf`
+    /// (checker.go ~L19525) with the relater's `nil` inference-context
+    /// shape (relater.go ~L1527): parameter iteration follows
+    /// `applyToParameterTypes` (this-types, min-count params, rest) and
+    /// the return inference follows `applyToReturnTypes` (only when the
+    /// generic return could contain type variables).
+    pub fn instantiate_signature_in_context_of(
+        &mut self,
+        source: &Arc<Signature>,
+        contextual: &Arc<Signature>,
+    ) -> Arc<Signature> {
+        if source.type_parameters.is_empty() {
+            return Arc::clone(source);
+        }
+        let inferences: Vec<crate::checker::inference::InferenceInfo> = source
+            .type_parameters
+            .iter()
+            .map(|p| crate::checker::inference::InferenceInfo::new(Arc::clone(p)))
+            .collect();
+        let mut context = crate::checker::inference::InferenceContext::new(inferences);
+        context.signature = Some(Arc::clone(source));
+
+        // applyToParameterTypes(contextual, generic): this-types first.
+        if let (Some(contextual_this), Some(source_this)) = (
+            self.get_this_type_of_signature(contextual),
+            self.get_this_type_of_signature(source),
+        ) {
+            self.infer_types(
+                &mut context.inferences,
+                Some(contextual_this),
+                Some(source_this),
+                crate::checker::inference::InferencePriority::None,
+                false,
+            );
+        }
+        // Then the shared non-rest prefix (min count when the contextual
+        // side has no rest), then the generic signature's rest type.
+        let contextual_count = self.get_parameter_count(contextual);
+        let generic_count = self.get_parameter_count(source);
+        let contextual_rest = self.get_effective_rest_type(contextual);
+        let generic_rest = self.get_effective_rest_type(source);
+        let generic_non_rest = generic_count.saturating_sub(usize::from(generic_rest.is_some()));
+        let param_count = if contextual_rest.is_none() {
+            contextual_count.min(generic_non_rest)
+        } else {
+            generic_non_rest
+        };
+        for i in 0..param_count {
+            let s = self.get_type_at_position(contextual, i);
+            let t = self.get_type_at_position(source, i);
+            self.infer_types(
+                &mut context.inferences,
+                Some(s),
+                Some(t),
+                crate::checker::inference::InferencePriority::None,
+                false,
+            );
+        }
+        if let Some(generic_rest) = generic_rest {
+            let s = self.get_type_at_position(contextual, param_count);
+            self.infer_types(
+                &mut context.inferences,
+                Some(s),
+                Some(generic_rest),
+                crate::checker::inference::InferencePriority::None,
+                false,
+            );
+        }
+        // inferenceContext == nil → also infer from return types, but only
+        // when the generic return type could contain type variables
+        // (applyToReturnTypes).
+        if let Some(source_return) = self.get_return_type_of_signature(source) {
+            if type_contains_type_parameter(&source_return) {
+                if let Some(contextual_return) = self.get_return_type_of_signature(contextual) {
+                    self.infer_types(
+                        &mut context.inferences,
+                        Some(contextual_return),
+                        Some(source_return),
+                        crate::checker::inference::InferencePriority::ReturnType,
+                        false,
+                    );
+                }
+            }
+        }
+        let inferred = self.get_inferred_types(&mut context);
+        self.get_signature_instantiation(source, &inferred)
+    }
+
+    /// Get the canonical form of a signature. Mirrors Go's
+    /// `getCanonicalSignature`/`createCanonicalSignature` (checker.go
+    /// ~L19468): an instantiation of the signature where each
+    /// unconstrained type parameter is replaced with its original
+    /// (`tp.target`), so signatures from different instantiation
+    /// generations of the same generic member compare by identity.
+    pub fn get_canonical_signature(&mut self, sig: &Arc<Signature>) -> Arc<Signature> {
+        if sig.type_parameters.is_empty() {
+            return Arc::clone(sig);
+        }
+        let type_arguments: Vec<Arc<Type>> = sig
+            .type_parameters
+            .iter()
+            .map(|tp| match &tp.data {
+                TypeData::TypeParameter(tpd) => {
+                    match tpd.target.as_ref() {
+                        Some(original)
+                            if self.get_constraint_of_type_parameter(original).is_none() =>
+                        {
+                            Arc::clone(original)
+                        }
+                        _ => Arc::clone(tp),
+                    }
+                }
+                _ => Arc::clone(tp),
+            })
+            .collect();
+        // Identity mapping for every parameter: nothing to canonicalize.
+        if type_arguments
+            .iter()
+            .zip(sig.type_parameters.iter())
+            .all(|(arg, param)| Arc::ptr_eq(arg, param))
+        {
+            return Arc::clone(sig);
+        }
+        self.get_signature_instantiation(sig, &type_arguments)
+    }
+
+    /// `getBaseConstraintOrType`: the base constraint when available, the
+    /// type itself otherwise (Go checker.go ~L27496).
+    pub fn get_base_constraint_or_type(&self, t: &Arc<Type>) -> Arc<Type> {
+        self.get_base_constraint_of_type(t)
+            .or_else(|| self.get_constraint_of_type_parameter(t))
+            .unwrap_or_else(|| Arc::clone(t))
+    }
+
+    /// Whether `t` is (or contains, for unions) an instantiable generic
+    /// object — the `ObjectFlagsIsGenericObjectType` half of Go's
+    /// `getGenericObjectFlags` (checker.go ~L24946), simplified: generic
+    /// mapped/tuple detection approximates to their type-argument contents.
+    pub fn type_flags_is_generic_object_type(&self, t: &Arc<Type>) -> bool {
+        if t.flags.intersects(TYPE_FLAGS_UNION_OR_INTERSECTION | TypeFlags::Substitution) {
+            return t
+                .types()
+                .map(|ts| ts.iter().any(|u| self.type_flags_is_generic_object_type(u)))
+                .unwrap_or(false);
+        }
+        if t.flags.intersects(TYPE_FLAGS_INSTANTIABLE_NON_PRIMITIVE) {
+            return true;
+        }
+        // Generic mapped types / generic tuples: any type argument or the
+        // mapped constraint mentioning a type variable keeps it generic.
+        match &t.data {
+            TypeData::Mapped(m) => m
+                .constraint_type
+                .as_ref()
+                .map(|c| self.type_flags_is_generic_index_type(c))
+                .unwrap_or(false),
+            TypeData::Tuple(tup) => tup.element_infos.iter().any(|ei| {
+                ei.type_.as_ref().map(type_contains_type_parameter).unwrap_or(false)
+            }),
+            _ => false,
+        }
+    }
+
+    /// The `ObjectFlagsIsGenericIndexType` half of Go's
+    /// `getGenericObjectFlags`: instantiable non-primitive, index, or
+    /// generic string-like types can appear as (or contain) generic index
+    /// types.
+    pub fn type_flags_is_generic_index_type(&self, t: &Arc<Type>) -> bool {
+        if t.flags.intersects(TYPE_FLAGS_UNION_OR_INTERSECTION | TypeFlags::Substitution) {
+            return t
+                .types()
+                .map(|ts| ts.iter().any(|u| self.type_flags_is_generic_index_type(u)))
+                .unwrap_or(false);
+        }
+        t.flags.intersects(
+            TYPE_FLAGS_INSTANTIABLE_NON_PRIMITIVE | TypeFlags::Index | TypeFlags::TemplateLiteral,
+        )
+    }
+
+    /// `getSingleCallSignature` (Go checker.go): the sole call signature of
+    /// an object type, or `None`.
+    pub fn get_single_call_signature(&self, t: &Arc<Type>) -> Option<Arc<Signature>> {
+        let sigs = self.get_signatures_of_type(t, SignatureKind::Call);
+        if sigs.len() == 1 {
+            sigs.into_iter().next()
+        } else {
+            None
+        }
+    }
+
+    /// `GetNonNullableType` (Go utilities.go): strip `null`/`undefined`
+    /// constituents from a union; other types pass through unchanged.
+    pub fn get_non_nullable_type_of(&mut self, t: &Arc<Type>) -> Arc<Type> {
+        if t.flags.contains(TypeFlags::Union)
+            && let Some(constituents) = t.types()
+        {
+            let kept: Vec<Arc<Type>> = constituents
+                .iter()
+                .filter(|c| {
+                    !c.flags.intersects(TypeFlags::Null | TypeFlags::Undefined)
+                })
+                .cloned()
+                .collect();
+            if !kept.is_empty() && kept.len() != constituents.len() {
+                return self.get_union_type(kept);
+            }
+        }
+        Arc::clone(t)
+    }
+
+    /// `getTypeFacts(t, TypeFactsIsUndefinedOrNull)` reduced to a bool:
+    /// whether the type admits `undefined` or `null` (top types admit
+    /// everything). Used to gate the callback-mode comparison the same way
+    /// Go compares the two types' nullability facts for equality.
+    pub fn type_is_undefined_or_null(&self, t: &Arc<Type>) -> bool {
+        if t.flags.intersects(
+            TypeFlags::Undefined
+                | TypeFlags::Null
+                | TypeFlags::Any
+                | TypeFlags::Unknown,
+        ) {
+            return true;
+        }
+        match &t.data {
+            TypeData::Union(u) => u
+                .union_or_intersection
+                .types
+                .iter()
+                .any(|c| self.type_is_undefined_or_null(c)),
+            _ => false,
+        }
+    }
+
+    /// `isInstantiatedGenericParameter` (Go relater.go ~L1961): whether the
+    /// parameter at `pos` of an instantiated signature's *target* (the
+    /// original signature) is generic — used to skip callback-mode
+    /// comparison for positions instantiated from a generic parameter.
+    pub fn is_instantiated_generic_parameter(
+        &mut self,
+        sig: &Arc<Signature>,
+        pos: usize,
+    ) -> bool {
+        let Some(target) = &sig.target else {
+            return false;
+        };
+        match self.try_get_type_at_position(target, pos) {
+            Some(t) => self.is_generic_type(&t),
+            None => false,
+        }
+    }
+
+    /// Whether a type is generic — a type parameter, or a reference with
+    /// type-variable arguments (Go `isGenericType`, utilities.go).
+    pub fn is_generic_type(&self, t: &Arc<Type>) -> bool {
+        if t.flags.contains(TypeFlags::TypeParameter) {
+            return true;
+        }
+        t.types()
+            .map(|ts| ts.iter().any(type_contains_type_parameter))
+            .is_some()
+    }
+
+    /// Strict variant of `get_indexed_access_type` mirroring Go's
+    /// `getIndexedAccessTypeOrUndefined` for the relation paths: resolves
+    /// `object_type[index_type]` when the answer is deterministic and
+    /// returns `None` where the permissive variant would fall back to
+    /// `any`. Used by the indexed-access relation to decide whether the
+    /// base-constraint fallback applies at all.
+    pub fn try_get_indexed_access_type(
+        &mut self,
+        object_type: &Arc<Type>,
+        index_type: &Arc<Type>,
+        access_flags: AccessFlags,
+    ) -> Option<Arc<Type>> {
+        if object_type.flags.contains(TypeFlags::Any)
+            || index_type.flags.contains(TypeFlags::Any)
+        {
+            return Some(self.any_type());
+        }
+        if object_type.flags.contains(TypeFlags::Unknown) {
+            return Some(self.unknown_type());
+        }
+        // Union index: resolve each constituent and union the results.
+        if index_type.flags.contains(TypeFlags::Union) {
+            let constituents = index_type.types()?.to_vec();
+            let mut resolved = Vec::with_capacity(constituents.len());
+            for c in &constituents {
+                resolved.push(self.try_get_indexed_access_type(object_type, c, access_flags)?);
+            }
+            return Some(self.get_union_type(resolved));
+        }
+        // Type-parameter object: resolve through the constraint.
+        if object_type.flags.contains(TypeFlags::TypeParameter) {
+            let constraint = self.get_constraint_of_type_parameter(object_type)?;
+            return self.try_get_indexed_access_type(&constraint, index_type, access_flags);
+        }
+        if let Some(structured) = object_type.as_structured() {
+            // String-literal index: member lookup, then (unless suppressed)
+            // index signatures.
+            if index_type.flags.contains(TypeFlags::StringLiteral)
+                && let TypeData::Literal(lit) = &index_type.data
+                && let LiteralValue::String(name) = &lit.value
+            {
+                if let Some(sym) = structured.members.get(name) {
+                    return Some(self.get_type_of_symbol(sym));
+                }
+                if !access_flags.contains(AccessFlags::NoIndexSignatures) {
+                    if let Some(value_type) =
+                        self.lookup_index_signature_value(structured, index_type)
+                    {
+                        return Some(value_type);
+                    }
+                }
+                return None;
+            }
+            // `number` index on arrays/tuples: element type.
+            if index_type.flags.intersects(TypeFlags::Number | TypeFlags::NumberLiteral) {
+                if let Some(elem) = self.get_array_element_type_of(object_type) {
+                    return Some(elem);
+                }
+                if self.is_tuple_type(object_type) {
+                    let elem_types: Vec<Arc<Type>> = structured
+                        .properties
+                        .iter()
+                        .map(|p| self.get_type_of_symbol(p))
+                        .collect();
+                    if !elem_types.is_empty() {
+                        return Some(self.get_union_type(elem_types));
+                    }
+                }
+                return None;
+            }
+            // String-like index: index signatures only.
+            if index_type.flags.intersects(TypeFlags::String | TypeFlags::StringLiteral)
+                && !access_flags.contains(AccessFlags::NoIndexSignatures)
+            {
+                return self.lookup_index_signature_value(structured, index_type);
+            }
+        }
+        None
     }
 
     /// Format a signature as a string for diagnostics.
@@ -2067,8 +3122,10 @@ impl Checker {
             return true;
         }
         if target_sigs.is_empty() {
-            // Source has call signatures but target doesn't.
-            return relation == RelationKind::Comparable;
+            // Source has call signatures but target doesn't: an empty
+            // target signature set imposes no requirement (Go's
+            // `signaturesRelatedTo` loop runs zero times → True).
+            return true;
         }
         if source_sigs.is_empty() {
             // Target has call signatures but source doesn't.
@@ -2093,7 +3150,10 @@ impl Checker {
             return true;
         }
         if target_sigs.is_empty() {
-            return relation == RelationKind::Comparable;
+            // Empty target construct-signature set imposes no requirement
+            // (Go's loop runs zero times → True) — this is what makes
+            // `typeof SomeClass` assignable to plain object shapes.
+            return true;
         }
         if source_sigs.is_empty() {
             return false;
@@ -2308,11 +3368,59 @@ impl Checker {
         t: &Arc<Type>,
         key_type: &Arc<Type>,
     ) -> Option<Arc<IndexInfo>> {
-        let infos = self.get_index_infos_of_type(t);
-        for info in infos {
+        for info in self.get_index_infos_of_type(t) {
             if let Some(info_key) = &info.key_type {
                 if Arc::ptr_eq(info_key, key_type) || info_key.flags == key_type.flags {
                     return Some(info);
+                }
+            }
+        }
+        // Tuples (and arrays) inherit a NUMBER index info from their Array
+        // base type (Go getTupleBaseType → Array<union-of-elements>, whose
+        // number index signature carries the element type): `['a'][I]` with
+        // `I extends number` indexes legally.
+        if key_type.flags.contains(TypeFlags::Number) {
+            if let TypeData::Tuple(tuple) = &t.data {
+                let elements: Vec<Arc<Type>> = tuple
+                    .element_infos
+                    .iter()
+                    .filter_map(|e| e.type_.clone())
+                    .collect();
+                if !elements.is_empty() {
+                    let value = if elements.len() == 1 {
+                        Arc::clone(&elements[0])
+                    } else if elements.iter().all(|e| Arc::ptr_eq(e, &elements[0])) {
+                        Arc::clone(&elements[0])
+                    } else {
+                        // Union construction without mutation: all tuple
+                        // element types participate.
+                        Arc::new(Type {
+                            flags: TypeFlags::Union,
+                            object_flags: ObjectFlags::None,
+                            id: 0,
+                            symbol: None,
+                            alias: None,
+                            data: TypeData::Union(UnionTypeData {
+                                union_or_intersection: UnionOrIntersectionTypeData {
+                                    structured: StructuredTypeData::default(),
+                                    types: elements,
+                                },
+                                resolved_reduced_type: std::sync::OnceLock::new(),
+                                regular_type: std::sync::OnceLock::new(),
+                                origin: None,
+                                key_property_name: None,
+                                constituent_map: std::collections::HashMap::new(),
+                            }),
+                        })
+                    };
+                    return Some(Arc::new(IndexInfo {
+                        key_type: Some(self.number_type()),
+                        value_type: Some(value),
+                        is_readonly: tuple.readonly,
+                        declaration: None,
+                        index_symbol: None,
+                        components: Vec::new(),
+                    }));
                 }
             }
         }
@@ -3183,6 +4291,89 @@ impl Checker {
             return Some(Arc::clone(&check_type));
         }
 
+        // Distributive conditional types are distributed over union types:
+        // when the (substituted) check type of a distributive root is a
+        // union `A | B`, the result is `(A extends E ? X : Y) | (B extends E
+        // ? X : Y)`. Direct port of Go's `getConditionalTypeInstantiation`
+        // (checker.go ~L22544): the per-constituent resolution runs with the
+        // check type parameter mapped to the constituent
+        // (`prependTypeMapping(checkType, t, newMapper)`), which our
+        // type_argument_stack models by pushing a shadowing entry.
+        // Copy out the small root fields (the root itself isn't `Clone`) so
+        // no borrow of `t.data` is held across the mutable calls below.
+        let (is_distributive, check_tp_symbol) = match ct.root.as_ref() {
+            Some(root) => (
+                root.is_distributive,
+                root.check_type_parameter_symbol.clone(),
+            ),
+            None => (false, None),
+        };
+        if is_distributive && let Some(tp_symbol) = &check_tp_symbol {
+            if check_type.flags.contains(TypeFlags::Never) {
+                // Distributing over `never` yields `never` (Go maps over an
+                // empty constituent list).
+                let never = self.never_type();
+                if let TypeData::Conditional(ct2) = &t.data {
+                    let _ = ct2.resolved_true_type.set(Arc::clone(&never));
+                }
+                return Some(never);
+            }
+            if let TypeData::Union(u) = &check_type.data {
+                let constituents = u.union_or_intersection.types.clone();
+                let key = Arc::as_ptr(tp_symbol) as *const crate::ast::Symbol;
+                let mut results: Vec<Arc<Type>> = Vec::with_capacity(constituents.len());
+                for constituent in constituents {
+                    let mut mapping = std::collections::HashMap::new();
+                    mapping.insert(key, Arc::clone(&constituent));
+                    self.type_argument_stack.push(mapping);
+                    let r =
+                        self.resolve_conditional_type_with_check(t, Some(Arc::clone(&constituent)));
+                    self.type_argument_stack.pop();
+                    results.push(r?);
+                }
+                let union = self.get_union_type(results);
+                return Some(union);
+            }
+        }
+
+        self.resolve_conditional_type_with_check(t, None)
+    }
+
+    /// Single (non-distributive) conditional resolution. `check_override`
+    /// replaces the conditional's check type — used by the distribution
+    /// path above, where the extends/branch nodes are also re-resolved with
+    /// the per-constituent substitution pushed on the type_argument_stack.
+    fn resolve_conditional_type_with_check(
+        &mut self,
+        t: &Arc<Type>,
+        check_override: Option<Arc<Type>>,
+    ) -> Option<Arc<Type>> {
+        let ct = match &t.data {
+            TypeData::Conditional(ct) => ct,
+            _ => return None,
+        };
+
+        let check_type = match check_override {
+            Some(ref c) => Arc::clone(c),
+            None => ct.check_type.clone()?,
+        };
+        let cond_node = ct.root.as_ref().and_then(|r| r.node.clone());
+        let extends_type = if check_override.is_some() {
+            // Distribution: re-resolve the extends node from the AST so
+            // references to the check type parameter inside the extends
+            // clause see the per-constituent mapping pushed by the caller.
+            let extends_node = match cond_node.as_ref().and_then(|n| match &n.data {
+                NodeData::ConditionalTypeNode(data) => Some(Arc::clone(&data.extends_type)),
+                _ => None,
+            }) {
+                Some(node) => node,
+                None => return None,
+            };
+            self.get_type_from_type_node(&extends_node)
+        } else {
+            ct.extends_type.clone()?
+        };
+
         // If the check type is still generic, we can't evaluate yet.
         // Go checks `isDeferredType`; we approximate by checking for any
         // TypeParameter flags anywhere in the check type.
@@ -3363,8 +4554,116 @@ impl Checker {
                     }
                     return self.create_array_type(new_elem);
                 }
-                // Other object types (interfaces, type references with a
-                // target, etc.) are not handled — return as-is.
+                // Generic type reference (`Promise<T>`, `Map<K, V>` — an
+                // Object with type arguments): substitute each type
+                // argument and rebuild, preserving target/symbol/flags.
+                if !o.type_arguments.is_empty() {
+                    let new_args: Vec<Arc<Type>> = o
+                        .type_arguments
+                        .iter()
+                        .map(|arg| {
+                            self.substitute_infer_type_parameters(arg, params, substitutions)
+                        })
+                        .collect();
+                    let changed = o
+                        .type_arguments
+                        .iter()
+                        .zip(new_args.iter())
+                        .any(|(old, new)| !Arc::ptr_eq(old, new));
+                    if changed {
+                        let mut rebuilt = Type::new(
+                            t.flags,
+                            TypeData::Object(ObjectTypeData {
+                                structured: StructuredTypeData::default(),
+                                target: o.target.clone(),
+                                mapper: o.mapper.clone(),
+                                type_arguments: new_args,
+                            }),
+                        );
+                        rebuilt.object_flags = t.object_flags;
+                        rebuilt.symbol = t.symbol.clone();
+                        return Arc::new(rebuilt);
+                    }
+                    return Arc::clone(t);
+                }
+                // Function/constructor type: an anonymous object whose only
+                // structure is its signatures. Substitute each signature's
+                // parameter and return types via the instantiation-override
+                // mechanism (Go: `instantiateSignature` under the mapper).
+                if t.object_flags.contains(ObjectFlags::Anonymous)
+                    && !o.structured.signatures.is_empty()
+                {
+                    let signatures = o.structured.signatures.clone();
+                    let call_signature_count = o.structured.call_signature_count;
+                    let mut changed = false;
+                    let mut new_sigs: Vec<Arc<Signature>> =
+                        Vec::with_capacity(signatures.len());
+                    for sig in &signatures {
+                        let rest_offset = usize::from(sig.has_rest_parameter());
+                        let fixed = sig.parameters.len().saturating_sub(rest_offset);
+                        let mut new_params: Vec<Arc<Type>> =
+                            Vec::with_capacity(sig.parameters.len());
+                        let mut old_params: Vec<Arc<Type>> =
+                            Vec::with_capacity(sig.parameters.len());
+                        for i in 0..fixed {
+                            let pt = self
+                                .try_get_type_at_position(sig, i)
+                                .unwrap_or_else(|| self.any_type());
+                            old_params.push(Arc::clone(&pt));
+                            new_params.push(
+                                self.substitute_infer_type_parameters(&pt, params, substitutions),
+                            );
+                        }
+                        if rest_offset == 1 {
+                            if let Some(last) = sig.parameters.last() {
+                                let rt = self.get_type_of_symbol(last);
+                                old_params.push(Arc::clone(&rt));
+                                new_params.push(
+                                    self.substitute_infer_type_parameters(&rt, params, substitutions),
+                                );
+                            }
+                        }
+                        let new_return = self
+                            .get_return_type_of_signature(sig)
+                            .map(|rt| {
+                                self.substitute_infer_type_parameters(&rt, params, substitutions)
+                            });
+                        let params_changed = old_params
+                            .iter()
+                            .zip(new_params.iter())
+                            .any(|(old, new)| !Arc::ptr_eq(old, new));
+                        let return_changed = new_return.as_ref().is_some_and(|nr| {
+                            self.get_return_type_of_signature(sig)
+                                .is_some_and(|old| !Arc::ptr_eq(nr, &old))
+                        });
+                        if !params_changed && !return_changed {
+                            new_sigs.push(Arc::clone(sig));
+                            continue;
+                        }
+                        changed = true;
+                        let mut inst = Signature::new();
+                        inst.flags = sig.flags;
+                        inst.min_argument_count = sig.min_argument_count;
+                        inst.resolved_min_argument_count = sig.resolved_min_argument_count;
+                        inst.declaration = sig.declaration.clone();
+                        inst.target = Some(Arc::clone(sig));
+                        inst.parameters = sig.parameters.clone();
+                        inst.this_parameter = sig.this_parameter.clone();
+                        inst.resolved_type_predicate = sig.resolved_type_predicate.clone();
+                        inst.instantiated_parameter_types = Some(new_params);
+                        if let Some(nr) = new_return {
+                            let _ = inst.resolved_return_type.set(nr);
+                        }
+                        new_sigs.push(Arc::new(inst));
+                    }
+                    if !changed {
+                        return Arc::clone(t);
+                    }
+                    let is_construct = call_signature_count == 0;
+                    return self.create_function_or_constructor_type(new_sigs, is_construct);
+                }
+                // Other object types (non-generic interfaces etc.) — return
+                // as-is.
                 Arc::clone(t)
             }
             TypeData::Tuple(tup) => {
@@ -3393,10 +4692,66 @@ impl Checker {
                 }
                 self.create_tuple_type(new_elems)
             }
-            // For nested conditional types, mapped types, indexed access
-            // types, etc., we don't recursively substitute (that would
-            // risk re-resolution or require a full `instantiateType`);
-            // return as-is. Go handles these via `instantiateType`.
+            // Deferred indexed access `Obj[Idx]`: substitute both the
+            // object and the index, rebuilding only when something changed
+            // (Go handles this via `instantiateType`).
+            TypeData::IndexedAccess(ia) => {
+                let new_object = ia
+                    .object_type
+                    .as_ref()
+                    .map(|o| self.substitute_infer_type_parameters(o, params, substitutions));
+                let new_index = ia
+                    .index_type
+                    .as_ref()
+                    .map(|idx| self.substitute_infer_type_parameters(idx, params, substitutions));
+                let object_changed = new_object
+                    .as_ref()
+                    .zip(ia.object_type.as_ref())
+                    .map(|(new, old)| !Arc::ptr_eq(new, old))
+                    .unwrap_or(false);
+                let index_changed = new_index
+                    .as_ref()
+                    .zip(ia.index_type.as_ref())
+                    .map(|(new, old)| !Arc::ptr_eq(new, old))
+                    .unwrap_or(false);
+                if !object_changed && !index_changed {
+                    return Arc::clone(t);
+                }
+                let mut rebuilt = Type::new(
+                    t.flags,
+                    TypeData::IndexedAccess(IndexedAccessTypeData {
+                        constrained: ConstrainedTypeData::default(),
+                        object_type: new_object.or_else(|| ia.object_type.clone()),
+                        index_type: new_index.or_else(|| ia.index_type.clone()),
+                        access_flags: ia.access_flags,
+                    }),
+                );
+                rebuilt.object_flags = t.object_flags;
+                rebuilt.symbol = t.symbol.clone();
+                Arc::new(rebuilt)
+            }
+            // A deferred conditional whose check type mentions a substituted
+            // parameter: substitute the check type and re-resolve (Go's
+            // `getConditionalTypeInstantiation` — instantiating a deferred
+            // conditional with concrete arguments resolves it, distributing
+            // over union check types when the root is distributive).
+            TypeData::Conditional(ct) => {
+                let Some(old_check) = ct.check_type.clone() else {
+                    return Arc::clone(t);
+                };
+                let new_check =
+                    self.substitute_infer_type_parameters(&old_check, params, substitutions);
+                if Arc::ptr_eq(&new_check, &old_check) || type_contains_type_parameter(&new_check)
+                {
+                    return Arc::clone(t);
+                }
+                self.resolve_conditional_type_with_check(t, Some(new_check))
+                    .unwrap_or_else(|| Arc::clone(t))
+            }
+            // For nested mapped types, indexed access types, etc., we don't
+            // recursively substitute (that would risk re-resolution or
+            // require a full `instantiateType`); return as-is. Go handles
+            // these via `instantiateType`.
             _ => Arc::clone(t),
         }
     }
@@ -3567,17 +4922,31 @@ impl Checker {
         self.is_type_related_to(source, target, relation)
     }
 
+    /// Top-level elaborating assignability check (Go
+    /// `checkTypeAssignableToAndOptionallyElaborate` →
+    /// `checkTypeRelatedToEx` + `reportErrorResults`/`reportRelationError`,
+    /// relater.go ~L426/4740). Runs the comparison with chain recording
+    /// enabled; on failure the collected chain becomes the nested
+    /// "compatibility pyramid" diagnostic, headed by the generalized
+    /// `Type 'X' is not assignable to type 'Y'` message.
     pub fn check_type_assignable_to_and_optionally_elaborate(
         &mut self,
         source: &Arc<Type>,
         target: &Arc<Type>,
-        _error_node: Option<&Arc<crate::ast::Node>>,
+        error_node: Option<&Arc<crate::ast::Node>>,
         _expr: Option<&Arc<crate::ast::Node>>,
         _head_message: Option<&crate::diagnostics::Message>,
         _diagnostic_output: Option<&mut Vec<crate::ast::Diagnostic>>,
     ) -> bool {
-        // TODO: elaborate error reporting
-        self.is_type_assignable_to(source, target)
+        self.check_type_related_to_and_optionally_elaborate(
+            source,
+            target,
+            RelationKind::Assignable,
+            error_node,
+            _expr,
+            _head_message,
+            _diagnostic_output,
+        )
     }
 
     pub fn check_type_related_to_and_optionally_elaborate(
@@ -3585,13 +4954,99 @@ impl Checker {
         source: &Arc<Type>,
         target: &Arc<Type>,
         relation: RelationKind,
-        _error_node: Option<&Arc<crate::ast::Node>>,
+        error_node: Option<&Arc<crate::ast::Node>>,
         _expr: Option<&Arc<crate::ast::Node>>,
-        _head_message: Option<&crate::diagnostics::Message>,
-        _diagnostic_output: Option<&mut Vec<crate::ast::Diagnostic>>,
+        head_message: Option<&crate::diagnostics::Message>,
+        diagnostic_output: Option<&mut Vec<crate::ast::Diagnostic>>,
     ) -> bool {
-        // TODO: elaborate error reporting
-        self.is_type_related_to(source, target, relation)
+        let saved_chain = std::mem::take(&mut self.relater_error_chain);
+        let was_active = self.relater_chain_active;
+        self.relater_chain_active = true;
+        let ok = self.is_type_related_to(source, target, relation);
+        if ok {
+            self.relater_chain_active = was_active;
+            self.relater_error_chain = saved_chain;
+            return true;
+        }
+        // Head message (Go `reportRelationError`, relater.go ~L4792):
+        // fresh literals display their base primitive when the target can't
+        // hold singletons (`5` vs `{}` shows `number`).
+        let source_str = self.type_to_string(source);
+        let target_str = self.type_to_string(target);
+        let (head_source, head_target) = if self.type_could_have_top_level_singleton_types(target)
+        {
+            (source_str.clone(), target_str.clone())
+        } else if crate::checker::is_fresh_literal_type(source)
+            || source.flags.intersects(TYPE_FLAGS_LITERAL)
+        {
+            let base = self.get_base_type_of_literal_type_for_display(source);
+            (self.type_to_string(&base), target_str.clone())
+        } else {
+            (source_str.clone(), target_str.clone())
+        };
+        let head = match head_message {
+            Some(m) => *m,
+            None if head_source == head_target => {
+                crate::diagnostics::messages_generated::
+                    TYPE_0_IS_NOT_ASSIGNABLE_TO_TYPE_1_TWO_DIFFERENT_TYPES_WITH_THIS_NAME_EXIST_BUT_THEY_ARE_UNRELATED
+            }
+            None => crate::diagnostics::messages_generated::TYPE_0_IS_NOT_ASSIGNABLE_TO_TYPE_1,
+        };
+        self.relater_report_error(head, vec![head_source, head_target]);
+
+        // Build the nested pyramid (Go
+        // `createDiagnosticChainFromErrorChain`, relater.go ~L402): walk
+        // from the most recent push (the head) to earlier entries, skipping
+        // elided marker messages.
+        let Some(error_node) = error_node else {
+            self.relater_chain_active = was_active;
+            self.relater_error_chain = saved_chain;
+            return false;
+        };
+        let file = self.get_source_file_of_node(error_node).or_else(|| self.current_file.clone());
+        let mut diagnostic: Option<crate::ast::Diagnostic> = None;
+        for entry in self.relater_error_chain.iter().rev() {
+            if entry.message.elided_in_compatibility_pyramid {
+                continue;
+            }
+            let mut d = crate::ast::Diagnostic::new(
+                file.clone(),
+                error_node.loc,
+                entry.message,
+                entry.args.clone(),
+            );
+            if let Some(prev) = diagnostic.take() {
+                d.message_chain = vec![prev];
+            }
+            diagnostic = Some(d);
+        }
+        if let Some(d) = diagnostic {
+            match diagnostic_output {
+                Some(out) => out.push(d),
+                None => self.diagnostics.add(d),
+            }
+        }
+        self.relater_chain_active = was_active;
+        self.relater_error_chain = saved_chain;
+        false
+    }
+
+    /// Display form of a literal type's base primitive (Go
+    /// `getBaseTypeOfLiteralType` used by `reportRelationError`'s
+    /// generalization).
+    fn get_base_type_of_literal_type_for_display(&mut self, t: &Arc<Type>) -> Arc<Type> {
+        if t.flags.contains(TypeFlags::StringLiteral) || t.flags.contains(TypeFlags::StringMapping)
+        {
+            self.string_type()
+        } else if t.flags.contains(TypeFlags::NumberLiteral) {
+            self.number_type()
+        } else if t.flags.contains(TypeFlags::BigIntLiteral) {
+            self.bigint_type()
+        } else if t.flags.contains(TypeFlags::BooleanLiteral) {
+            self.boolean_type()
+        } else {
+            Arc::clone(t)
+        }
     }
 
     // ────────────────────────────────────────────────────────────────────────
@@ -3647,22 +5102,6 @@ impl Checker {
     // ────────────────────────────────────────────────────────────────────────
     // Recursion and deeply nested types
     // ────────────────────────────────────────────────────────────────────────
-
-    pub fn is_deeply_nested_type(
-        &mut self,
-        t: &Arc<Type>,
-        stack: &[Arc<Type>],
-        max_depth: usize,
-    ) -> bool {
-        if stack.len() >= max_depth {
-            // TODO: handle instantiated mapped types + intersection recursion
-            // For now, count matching recursion identities
-            let count = stack.iter().filter(|s| Arc::ptr_eq(s, t)).count();
-            count >= max_depth
-        } else {
-            false
-        }
-    }
 
     pub fn get_mapped_target_with_symbol(&self, t: &Arc<Type>) -> Arc<Type> {
         // TODO: unwrap nested homomorphic mapped types
@@ -3852,16 +5291,33 @@ impl Checker {
         false
     }
 
+    /// Go `typeCouldHaveTopLevelSingletonTypes` (checker.go): whether a
+    /// type may contain literal/unique-singleton members at the top level —
+    /// true for literal targets, type parameters and deferred types whose
+    /// constraint might, and unions containing any such member.
     pub fn type_could_have_top_level_singleton_types(&mut self, t: &Arc<Type>) -> bool {
-        t.flags.intersects(
+        if t.flags.intersects(
             TypeFlags::StringLiteral
                 | TypeFlags::NumberLiteral
                 | TypeFlags::BigIntLiteral
                 | TypeFlags::BooleanLiteral
                 | TypeFlags::UniqueESSymbol
                 | TypeFlags::EnumLiteral
-                | TypeFlags::Union,
-        )
+                | TypeFlags::TypeParameter
+                | TypeFlags::IndexedAccess
+                | TypeFlags::Conditional,
+        ) || crate::checker::is_fresh_literal_type(t)
+        {
+            return true;
+        }
+        if t.flags.contains(TypeFlags::Union) {
+            if let Some(members) = t.types() {
+                return members
+                    .iter()
+                    .any(|m| self.type_could_have_top_level_singleton_types(m));
+            }
+        }
+        false
     }
 
     // ────────────────────────────────────────────────────────────────────────
@@ -3918,15 +5374,6 @@ impl Checker {
     ) -> usize {
         // TODO: full implementation with flags
         sig.min_argument_count.max(0) as usize
-    }
-
-    pub fn is_instantiated_generic_parameter(
-        &mut self,
-        _signature: &Arc<Signature>,
-        _pos: usize,
-    ) -> bool {
-        // TODO: full implementation
-        false
     }
 
     pub fn get_parameter_name_at_position(
@@ -4210,6 +5657,13 @@ pub fn is_hyphenated_jsx_name(name: &str) -> bool {
 }
 
 pub fn is_excess_property_check_target(t: &Type) -> bool {
+    // DEFERRED mapped types (`{ [K in keyof T]: V }` with a generic
+    // constraint) have no materialized members — excess-property checks
+    // against them would flag every property (Go exempts generic mapped
+    // types).
+    if matches!(&t.data, TypeData::Mapped(m) if m.type_parameter.is_some()) {
+        return false;
+    }
     if t.flags.contains(TypeFlags::Object)
         && !t
             .object_flags

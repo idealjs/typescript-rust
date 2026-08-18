@@ -381,6 +381,10 @@ pub struct FlowNode {
     /// expression. `None` for all other flow kinds. Mirrors the
     /// `FlowSwitchClauseData.SwitchStatement` field in Go.
     pub switch_statement: Option<Arc<Node>>,
+    /// For REDUCE_LABEL flows: the branch label whose antecedent set is
+    /// reduced to `antecedents` while the walk is inside this reduce label
+    /// (Go `FlowReduceLabelData.Target`). `None` for all other flow kinds.
+    pub reduce_target: Option<Arc<FlowNode>>,
 }
 
 impl FlowNode {
@@ -391,6 +395,7 @@ impl FlowNode {
             antecedent: None,
             antecedents: Vec::new(),
             switch_statement: None,
+            reduce_target: None,
         }
     }
 }

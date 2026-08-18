@@ -1,23 +1,7 @@
-# Triaged baseline diffs — known differences we intend to fix. Each group
-# should include a reference (issue link or description) to the gap.
-#
-# Format: one entry per line, relative to tests/baselines/reference/, e.g.
-#   compiler/foo.errors.txt
-# Lines starting with `#` (incl. `## group ##` headers) and blank lines are
-# ignored.
-#
-# Audited 2026-08-15 against the official TypeScript baselines
-# (_submodules/TypeScript/tests/baselines/reference/, CRLF-stripped,
-# errors-section only). All other diffs in the 1000-case slice match the
-# official error lists exactly; the cases below diverge on the described
-# missing checker features.
-
-## TS17009: 'super' must be called before accessing 'this' in a derived
 ## constructor (definite-super-call analysis not ported) ##
 compiler/classExtendsNull.errors.txt
 compiler/classExtendsNull2.errors.txt
 
-## TS17005: super call in a class extending 'null'; TS2417 static-side
 ## extends checks (class static-side inheritance modeling) ##
 compiler/classSideInheritance2.errors.txt
 compiler/classSideInheritance3.errors.txt
@@ -28,23 +12,16 @@ compiler/classExpressions.errors.txt
 ## TS2628 assign-to-enum / TS2540 readonly-property assignment checks ##
 compiler/assignToEnum.errors.txt
 
-## strict-mode checks the harness doesn't enable for these cases
 ## (strictPropertyInitialization TS2564, strictNullChecks TS2322/TS2741) ##
 compiler/chainedAssignment3.errors.txt
 
-## generic inference gaps: mixin base `class extends Base`, contextual
 ## callback variance, conditional-inference chains ##
 compiler/autolift4.errors.txt
-compiler/booleanFilterAnyArray.errors.txt
 compiler/callbacksDontShareTypes.errors.txt
 compiler/coAndContraVariantInferences3.errors.txt
 compiler/baseConstraintOfDecorator.errors.txt
 compiler/baseTypeWrappingInstantiationChain.errors.txt
 
-## TS2301: initializer-references-constructor-local check ##
-compiler/classMemberInitializerWithLamdaScoping.errors.txt
-
-## misc unported diagnostics: TS2552 did-you-mean suggestions, TS2420
 ## implements-primitive, overload sets with literal widening ##
 compiler/abstractPropertyInConstructor.errors.txt
 compiler/assigningFromObjectToAnythingElse.errors.txt
@@ -53,111 +30,57 @@ compiler/classExpressionPropertyModifiers.errors.txt
 compiler/classImplementsPrimitive.errors.txt
 compiler/classUpdateTests.errors.txt
 compiler/cloduleTest2.errors.txt
-compiler/capturedLetConstInLoop5_ES6.errors.txt
 
-## 2026-08-15 batch #41-#50: generic array-method instantiation
-## (3x TS2511 for `new cls()` inside .map callbacks requires generic
 ## signature instantiation of Array#map) ##
 compiler/abstractClassUnionInstantiation.errors.txt
 
-## 2026-08-15 batch #41-#50: binary-file recovery order — TS1490 scanner
-## error no longer collected (recovery aborts before scanning the binary
-## run) and TS1012 fallbacks instead of TS1128 after `@` decorator garbage
 ## (parseErrorForMissingSemicolonAfter recovery path partially ported) ##
 compiler/TransportStream.errors.txt
 
-## 2026-08-15 batch #51-#60: abstract-class inheritance diagnostics not yet
-## ported — TS2654 (non-abstract class missing abstract member impls) and
-## TS2416 (derived property type not assignable to base property) require
-## the checkClassHeritage member-relation pass ##
-
-## 2026-08-15 batch #51-#60: WeakMap/WeakRef/FinalizationRegistry generic
-## inference from constructor tuple args (TS2345 over-report) + spurious
 ## TS2300 'Iterator' duplicate under @lib esnext (lib dedup gap) ##
 compiler/acceptSymbolAsWeakType.errors.txt
 
-## 2026-08-15 batch #61-#70: TS7023 circular return-type inference for
-## object-literal getters referencing themselves via `this` (deferred flow
 ## analysis) ##
 compiler/accessorInferredReturnTypeErrorInReturnStatement.errors.txt
 
-## 2026-08-15 batch #71-#80: interface `extends` member/call-signature
-## merging not ported — derived interfaces don't inherit base call
-## signatures or merge method overloads (TS2554/TS2345 over-reports;
-## TS2430 incorrectly-extends check missing; TS2454 var definite-assignment
 ## for unassigned `var a: Bar; a()` also missing) ##
 compiler/addMoreOverloadsToBaseSignature.errors.txt
 
-## 2026-08-15 batch #71-#80: import-alias / namespace export resolution
-## (TS2694 namespace has no exported member, qualified-name alias chasing
 ## for `import x = a.b.c`) not ported ##
 compiler/aliasAssignments.errors.txt
 
-## 2026-08-15 batch #81-#90: cross-file import-alias resolution (`import X =
-## require('./f')` across @filename units — TS2304/TS2307 for moduleA-style
-## references; TS2708 namespace-as-value) — same alias-resolution family as
-## batch #71-#80 ##
-
-## 2026-08-15 batch #81-#90: TS2352 assertion overlap comparability
-## (related-info chain for intersection/construct-signature comparisons)
 ## not ported ##
 compiler/aliasInstantiationExpressionGenericIntersectionNoCrash1.errors.txt
 compiler/aliasInstantiationExpressionGenericIntersectionNoCrash2.errors.txt
 
-## 2026-08-15 diff-fix round: TS2749 for default-import aliases requires
-## alias-target resolution (a module's default export may be an interface —
 ## `export default interface` / `export { x as default }` chains) ##
 compiler/allowImportClausesToMergeWithTypes.errors.txt
 
-## 2026-08-15 batch #91-#100: TS2873/2872 truthiness of cast-of-null uses
-## the assertion's SOURCE type (Go anchors at the null operand); plus
-## typeof-import display ('typeof import("m")') and union-null TS2322
 ## (we emit TS2741 with { x: any } instead) ##
 compiler/aliasUsageInOrExpression.errors.txt
 
-## 2026-08-15 batch #101-#110: import-equals alias VALUE typing under
-## strict:false degrades to any — `Foo.default.bar()` misses TS2339
 ## (Property 'default' does not exist on typeof import) ##
 compiler/allowSyntheticDefaultImports10.errors.txt
 
-## 2026-08-15 batch #101-#110: node_modules / package.json "exports"
-## monorepo module resolution ('shared' bare specifier through workspace
 ## symlinks) not ported — TS2307 over-report ##
 compiler/allowJsCrossMonorepoPackage.errors.txt
 
-## 2026-08-15 batch #111-#120: TS5101 outFile-deprecation warnings not
 ## emitted by the options layer ##
 compiler/alwaysStrictModule2.errors.txt
 compiler/constDeclarations-useBeforeDefinition2.errors.txt
 
-## 2026-08-16 batch #100-#199: parser recovery for contextual `module`
-## keyword (TS2591 needs `module {` to reparse as an expression
 ## identifier — we emit only the TS1437 half) ##
 compiler/anonymousModules.errors.txt
 
-## 2026-08-16 batch #100-#199: `<<` re-scan for ambiguous generic
-## assertions (`<<T>(x: T) => T>f` parses `<<` as shift; Go re-lexes and
 ## reports TS1109/TS2304/TS1005 recovery chain — parser speculation work) ##
 compiler/ambiguousGenericAssertion1.errors.txt
 
-## 2026-08-16 batch #200-#299: array/arithmetic deep-checker cluster.
-## Root causes (intended-to-fix, each a subsystem):
-##  (a) call-site generic inference through merged lib overload sets —
-##      `resolve<T>(v: T)`/`find<S extends T>` leave T unsubstituted
-##      (TS2345/TS2339/TS7006)
-##  (b) conditional return types (Awaited<T>) not evaluated
-##  (c) union property access — member must exist on ALL constituents
-##  (d) elaborated multi-line error chains (indented "Property 'b' is
-##      missing...") not ported
-##  (e) TS18048 possibly-undefined narrowing through optional chains
-##  (f) TS2362/TS2365 arithmetic operand checks + per-expression
 ##      diagnostic suppression ordering
 compiler/arrayAssignmentTest1.errors.txt
 compiler/arrayAssignmentTest2.errors.txt
 compiler/arrayAssignmentTest4.errors.txt
 compiler/arrayAssignmentTest5.errors.txt
 compiler/arrayBestCommonTypes.errors.txt
-compiler/arrayBufferIsViewNarrowsType.errors.txt
 compiler/arrayCast.errors.txt
 compiler/arrayConcatMap.errors.txt
 compiler/arrayDestructuringInSwitch1.errors.txt
@@ -166,56 +89,39 @@ compiler/arrayEvery.errors.txt
 compiler/arrayFakeFlatNoCrashInferenceDeclarations.errors.txt
 compiler/arrayFind.errors.txt
 compiler/arrayFlatMap.errors.txt
-compiler/arrayFlatNoCrashInference.errors.txt
-compiler/arrayFlatNoCrashInferenceDeclarations.errors.txt
 compiler/arrayFrom.errors.txt
 compiler/arrayFromAsync.errors.txt
 compiler/arrayIndexWithArrayFails.errors.txt
 compiler/arrayIterationLibES5TargetDifferent.errors.txt
 compiler/arrayLiteralAndArrayConstructorEquivalence1.errors.txt
-compiler/arrayLiteralTypeInference.errors.txt
 compiler/arrayOfSubtypeIsAssignableToReadonlyArray.errors.txt
-compiler/arrayReferenceWithoutTypeArgs.errors.txt
 compiler/arraySigChecking.errors.txt
-compiler/arrayToLocaleStringES2020.errors.txt
 compiler/arrayconcat.errors.txt
 
-## 2026-08-16 batch #200-#299: arrow-function parser recovery (missing
 ## arrow/curly/semicolon forms, generic arrows in object members) ##
 compiler/arrowFunctionErrorSpan.errors.txt
 compiler/arrowFunctionMissingCurlyWithSemicolon.errors.txt
 compiler/arrowFunctionParsingGenericInObject.errors.txt
 compiler/arrowFunctionsMissingTokens.errors.txt
 
-## 2026-08-16 batch #200-#299: arguments in class-field initializers and
 ## JS-file arguments references; spread-of-iterables under JSX ##
 compiler/argumentsReferenceInFunction1_Js.errors.txt
 compiler/argumentsSpreadRestIterables.errors.txt
 compiler/argumentsUsedInClassFieldInitializerOrStaticInitializationBlock.errors.txt
 
-## 2026-08-16 batch #200-#299: assertion-function narrowing
 ## (asserts predicates + wildcard import combination) ##
 compiler/assertionFunctionWildcardImport2.errors.txt
 compiler/assertionFunctionsCanNarrowByDiscriminant.errors.txt
 
-## 2026-08-16 batch #200-#299: suffixed configs of the triaged groups
 ## above (multi-value varyBy baselines) ##
 compiler/argumentsSpreadRestIterables(target=esnext).errors.txt
 compiler/arrayIterationLibES5TargetDifferent(nolib=false,target=es2015).errors.txt
 compiler/arrayIterationLibES5TargetDifferent(nolib=false,target=esnext).errors.txt
 compiler/arrayConstructors1.errors.txt
 
-## 2026-08-16 batch #300-#399: assignment-compat cluster — relater
-## assignability rules not ported: TS2741 missing-required-property for
-## object literals vs index-signature targets, index-signature
-## satisfiability ({[k:string]:any} vs {one:number}), property-level
-## drill-down errors (TS2322 at the property, not object-level TS2345),
-## literal widening in argument display, optional-arg signature
 ## compatibility, elaborated error chains ##
 compiler/assignToFn.errors.txt
 compiler/assignToInvalidLHS.errors.txt
-compiler/assignToObjectTypeWithPrototypeProperty.errors.txt
-compiler/assignToPrototype1.errors.txt
 compiler/assignmentCompat1.errors.txt
 compiler/assignmentCompatBug2.errors.txt
 compiler/assignmentCompatBug5.errors.txt
@@ -261,7 +167,6 @@ compiler/assignmentCompatability8.errors.txt
 compiler/assignmentCompatability_checking-apply-member-off-of-function-interface.errors.txt
 compiler/assignmentCompatability_checking-call-member-off-of-function-interface.errors.txt
 compiler/assignmentIndexedToPrimitives.errors.txt
-compiler/assignmentNonObjectTypeConstraints.errors.txt
 compiler/assignmentRestElementWithErrorSourceType.errors.txt
 compiler/assignmentStricterConstraints.errors.txt
 compiler/assignmentToAnyArrayRestParameters.errors.txt
@@ -272,11 +177,9 @@ compiler/assignmentToObjectAndFunction.errors.txt
 compiler/assignmentToParenthesizedExpression1.errors.txt
 compiler/assignmentToReferenceTypes.errors.txt
 
-## 2026-08-16 batch #300-#399: async/generator typing — yield/yield*
 ## contextual types, async return-type inference ##
 compiler/asyncFunctionContextuallyTypedReturns.errors.txt
 compiler/asyncFunctionReturnExpressionErrorSpans.errors.txt
-compiler/asyncFunctionReturnType.2.errors.txt
 compiler/asyncFunctionReturnType.errors.txt
 compiler/asyncImportNestedYield.errors.txt
 compiler/asyncIteratorExtraParameters.errors.txt
@@ -285,7 +188,6 @@ compiler/asyncYieldStarContextualType.errors.txt
 ## 2026-08-16 batch #300-#399: export= augmentation resolution ##
 compiler/augmentExportEquals1.errors.txt
 
-## 2026-08-16 batch #400-#499: module augmentation via export= —
 ## TS2671 non-module-entity resolution, merged symbol exports ##
 compiler/augmentExportEquals2.errors.txt
 compiler/augmentExportEquals3.errors.txt
@@ -296,7 +198,6 @@ compiler/augmentExportEquals7.errors.txt
 compiler/augmentedClassWithPrototypePropertyOnModule.errors.txt
 compiler/augmentedTypesClass.errors.txt
 compiler/augmentedTypesClass2.errors.txt
-compiler/augmentedTypesClass2a.errors.txt
 compiler/augmentedTypesEnum.errors.txt
 compiler/augmentedTypesEnum2.errors.txt
 compiler/augmentedTypesEnum3.errors.txt
@@ -307,7 +208,6 @@ compiler/augmentedTypesModules2.errors.txt
 compiler/augmentedTypesModules3.errors.txt
 compiler/augmentedTypesVar.errors.txt
 
-## 2026-08-16 batch #400-#499: Awaited<T> conditional-type evaluation
 ## and await-specific operand typing ##
 compiler/awaitCallExpressionInSyncFunction.errors.txt
 compiler/awaitInNonAsyncFunction.errors.txt
@@ -318,11 +218,8 @@ compiler/awaitedTypeCrash.errors.txt
 compiler/awaitedTypeNoLib.errors.txt
 compiler/awaitedTypeStrictNull.errors.txt
 
-## 2026-08-16 batch #400-#499: bigint literal typing + target gating
 ## (ES2016 exponentiation, bigint index/property names) ##
-compiler/bigIntWithTargetES2016.errors.txt
 compiler/bigIntWithTargetLessThanES2016.errors.txt
-compiler/bigint64ArraySubarray.errors.txt
 compiler/bigintAmbientMinimal(target=es2015).errors.txt
 compiler/bigintArbirtraryIdentifier.errors.txt
 compiler/bigintIndex.errors.txt
@@ -330,8 +227,6 @@ compiler/bigintPropertyName.errors.txt
 compiler/bigintWithLib.errors.txt
 compiler/bigintWithoutLib(target=es2015).errors.txt
 
-## 2026-08-16 batch #400-#499: class heritage checks — base-member
-## relation errors, index-signature resolution through bases,
 ## private-member clash, improved mismatch messages ##
 compiler/baseClassImprovedMismatchErrors.errors.txt
 compiler/baseExpressionTypeParameters.errors.txt
@@ -339,8 +234,6 @@ compiler/baseIndexSignatureResolution.errors.txt
 compiler/baseTypePrivateMemberClash.errors.txt
 compiler/bases.errors.txt
 
-## 2026-08-16 batch #400-#499: inference & error-form misc — best-common-
-## type contextual ranking, accidental-call/union-call error forms,
 ## destructuring/binding-pattern inference, bad-array recovery ##
 compiler/autoLift2.errors.txt
 compiler/autoTypeAssignedUsingDestructuringFromNeverNoCrash.errors.txt
@@ -356,7 +249,6 @@ compiler/betterErrorForUnionCall.errors.txt
 compiler/bindingPatternCannotBeOnlyInferenceSource.errors.txt
 compiler/bindingPatternContextualTypeDoesNotCauseWidening.errors.txt
 
-## 2026-08-16 batch #500-#599: use-before-definite-flow analysis —
 ## block-scoped var/enum TDZ ordering, loop capture flow ##
 compiler/blockScopedEnumVariablesUseBeforeDef(target=es2015).errors.txt
 compiler/blockScopedEnumVariablesUseBeforeDef_isolatedModules(target=es2015).errors.txt
@@ -365,7 +257,6 @@ compiler/blockScopedEnumVariablesUseBeforeDef_verbatimModuleSyntax(target=es2015
 compiler/blockScopedVariablesUseBeforeDeftarget=es2015).errors.txt
 compiler/capturedLetConstInLoop14(target=es2015).errors.txt
 
-## 2026-08-16 batch #500-#599: module-resolution caching & cached
 ## contextual types across files ##
 compiler/cachedContextualTypes.errors.txt
 compiler/cachedModuleResolution3.errors.txt
@@ -373,7 +264,6 @@ compiler/cachedModuleResolution4.errors.txt
 compiler/cachedModuleResolution8.errors.txt
 compiler/cachedModuleResolution9.errors.txt
 
-## 2026-08-16 batch #500-#599: overload-resolution depth — generic
 ## constraint propagation through overload lists, element-access calls ##
 compiler/callOverloadViaElementAccessExpression.errors.txt
 compiler/callOverloads1.errors.txt
@@ -382,8 +272,6 @@ compiler/callOverloads3.errors.txt
 compiler/callOverloads4.errors.txt
 compiler/callOverloads5.errors.txt
 
-## 2026-08-16 batch #500-#599: call/inference misc — boxed Boolean
-## assignment, conditional-type call branches, error-expression new,
 ## this-capture in super calls, builtin iterator ##
 compiler/bluebirdStaticThis.errors.txt
 compiler/booleanAssignment.errors.txt
@@ -398,18 +286,12 @@ compiler/callsOnComplexSignatures.errors.txt
 compiler/cannotIndexGenericWritingError.errors.txt
 compiler/cannotInvokeNewOnErrorExpression.errors.txt
 compiler/cannotInvokeNewOnIndexExpression.errors.txt
-compiler/captureThisInSuperCall.errors.txt
 compiler/blockScopedVariablesUseBeforeDef(target=es2015).errors.txt
 
-## 2026-08-16 batch #600-#699: misc checker depth — cast/as-expression
-## typing (yield casts, parenthesized assertion spans), chained
-## assignment destructuring checks, contextual generic-constraint calls,
-## UMD global merge, type-predicate redundant properties, crash-regression
 ## shapes ##
 compiler/capturedParametersInInitializers1.errors.txt
 compiler/capturedParametersInInitializers2(target=es2015).errors.txt
 compiler/castOfYield.errors.txt
-compiler/castParentheses.errors.txt
 compiler/castTest.errors.txt
 compiler/catchClauseWithInitializer1.errors.txt
 compiler/chainedAssignment1.errors.txt
@@ -427,10 +309,6 @@ compiler/checkerInitializationCrash.errors.txt
 compiler/checkingObjectWithThisInNamePositionNoCrash.errors.txt
 compiler/class2.errors.txt
 
-## 2026-08-16 batch #700-#799: class heritage/member subsystem —
-## TS2720 implements-a-class head+elaboration, TS2411 property-vs-index
-## conflicts, super-in-field-initializers, class-expression decorators,
-## member-initializer scoping, qualified-name extends resolution,
 ## class/module merge constructor rules ##
 compiler/classDeclarationShouldBeOutOfScopeInComputedNames.errors.txt
 compiler/classExpressionAssignment.errors.txt
@@ -461,24 +339,19 @@ compiler/classIndexer3.errors.txt
 compiler/classIndexer4.errors.txt
 compiler/classInheritence.errors.txt
 compiler/classMemberInitializerScoping.errors.txt
-compiler/classMemberInitializerWithLamdaScoping2.errors.txt
-compiler/classMemberInitializerWithLamdaScoping3.errors.txt
 compiler/classMemberInitializerWithLamdaScoping4.errors.txt
 compiler/classMemberWithMissingIdentifier.errors.txt
 compiler/classMemberWithMissingIdentifier2.errors.txt
 compiler/classMergedWithInterfaceMultipleBasesNoError.errors.txt
 compiler/classNameReferencesInStaticElements.errors.txt
-compiler/classNonUniqueSymbolMethodHasSymbolIndexer.errors.txt
 compiler/classOrder2.errors.txt
 compiler/classPropertyErrorOnNameOnly.errors.txt
-compiler/classPropertyInferenceFromBroaderTypeConst.errors.txt
 compiler/classReferencedInContextualParameterWithinItsOwnBaseExpression.errors.txt
 compiler/classSideInheritance1.errors.txt
 compiler/classStaticInitializersUsePropertiesBeforeDeclaration.errors.txt
 compiler/classStaticPropertyAccess(target=es2015).errors.txt
 compiler/classTypeParametersInStatics.errors.txt
 
-## 2026-08-16 batch #800-#899: variance inference — co/contravariant
 ## inference ranking (extends the batch #101-#110 triage group) ##
 compiler/classVarianceResolveCircularity2.errors.txt
 compiler/coAndContraVariantInferences.errors.txt
@@ -487,10 +360,7 @@ compiler/coAndContraVariantInferences4.errors.txt
 compiler/coAndContraVariantInferences5.errors.txt
 compiler/coAndContraVariantInferences6.errors.txt
 compiler/coAndContraVariantInferences7.errors.txt
-compiler/coAndContraVariantInferences8.errors.txt
 
-## 2026-08-16 batch #800-#899: class+namespace (clodule) merge across
-## files — TS2433 same-file rule, static-member merging, duplicate
 ## members in merged clodules ##
 compiler/cloduleSplitAcrossFiles.errors.txt
 compiler/cloduleStaticMembers.errors.txt
@@ -499,9 +369,6 @@ compiler/cloduleWithDuplicateMember2.errors.txt
 compiler/cloduleWithPriorInstantiatedModule.errors.txt
 compiler/clodulesDerivedClasses.errors.txt
 
-## 2026-08-16 batch #800-#899: misc — TS2717 property-redecl type
-## mismatch, reserved require/exports names (TS2441), collision
-## arguments, empty type-parameter list, class-variance circularity,
 ## use-before-initialized class vars ##
 compiler/classUsedBeforeInitializedVariables(target=es2015).errors.txt
 compiler/classWithDuplicateIdentifier.errors.txt
@@ -511,9 +378,6 @@ compiler/collisionArgumentsClassConstructor(target=es2015).errors.txt
 compiler/collisionArgumentsClassMethod(target=es2015).errors.txt
 compiler/collisionExportsRequireAndAlias.errors.txt
 
-## 2026-08-16 batch #900-#999: comment placement parser recovery —
-## comments between array elements/elisions, parenthesized assertions,
-## class members, JSX expression comments (multi-config jsx/module
 ## varyBy baselines) ##
 compiler/commentEmitOnParenthesizedAssertionInReturnStatement.errors.txt
 compiler/commentEmitOnParenthesizedAssertionInReturnStatement2.errors.txt
@@ -521,24 +385,7 @@ compiler/commentOnArrayElement10.errors.txt
 compiler/commentOnArrayElement11.errors.txt
 compiler/commentOnArrayElement12.errors.txt
 compiler/commentOnArrayElement3.errors.txt
-compiler/commentsClassMembers(target=es2015).errors.txt
-compiler/commentsExternalModules3(target=es2015).errors.txt
-compiler/commentsModules(target=es2015).errors.txt
-compiler/commentsOnJSXExpressionsArePreserved(jsx=preserve,module=commonjs,moduledetection=auto).errors.txt
-compiler/commentsOnJSXExpressionsArePreserved(jsx=preserve,module=commonjs,moduledetection=force).errors.txt
-compiler/commentsOnJSXExpressionsArePreserved(jsx=preserve,module=commonjs,moduledetection=legacy).errors.txt
-compiler/commentsOnJSXExpressionsArePreserved(jsx=react,module=commonjs,moduledetection=auto).errors.txt
-compiler/commentsOnJSXExpressionsArePreserved(jsx=react,module=commonjs,moduledetection=force).errors.txt
-compiler/commentsOnJSXExpressionsArePreserved(jsx=react,module=commonjs,moduledetection=legacy).errors.txt
-compiler/commentsOnJSXExpressionsArePreserved(jsx=react-jsx,module=commonjs,moduledetection=auto).errors.txt
-compiler/commentsOnJSXExpressionsArePreserved(jsx=react-jsx,module=commonjs,moduledetection=force).errors.txt
-compiler/commentsOnJSXExpressionsArePreserved(jsx=react-jsx,module=commonjs,moduledetection=legacy).errors.txt
-compiler/commentsOnJSXExpressionsArePreserved(jsx=react-jsxdev,module=commonjs,moduledetection=auto).errors.txt
-compiler/commentsOnJSXExpressionsArePreserved(jsx=react-jsxdev,module=commonjs,moduledetection=force).errors.txt
-compiler/commentsOnJSXExpressionsArePreserved(jsx=react-jsxdev,module=commonjs,moduledetection=legacy).errors.txt
 
-## 2026-08-16 batch #1000-#1099: conditional-type evaluation —
-## checkType/extendsType resolution, distributive conditionals,
 ## literal-object equality (extends the Awaited<T> triage group) ##
 compiler/conditionalAnyCheckTypePicksBothBranches.errors.txt
 compiler/conditionalDoesntLeakUninstantiatedTypeParameter.errors.txt
@@ -546,7 +393,6 @@ compiler/conditionalEqualityOnLiteralObjects.errors.txt
 compiler/conditionalEqualityTestingNullability.errors.txt
 compiler/conditionalExpression1.errors.txt
 compiler/conditionalReturnExpression.errors.txt
-compiler/conditionalTypeBasedContextualTypeReturnTypeWidening.errors.txt
 compiler/conditionalTypeClassMembers.errors.txt
 compiler/conditionalTypeDoesntSpinForever.errors.txt
 compiler/conditionalTypeGenericInSignatureTypeParameterConstraint.errors.txt
@@ -555,8 +401,6 @@ compiler/conditionalTypeVarianceBigArrayConstraintsPerformance.errors.txt
 compiler/conditionalTypesASI.errors.txt
 compiler/conditionalTypesSimplifyWhenTrivial.errors.txt
 
-## 2026-08-16 batch #1000-#1099: complex generic relations — recursive
-## base-class references, indexed-access keyof bounds, privacy through
 ## generics, composite contextual signatures ##
 compiler/complexClassRelationships(target=es2015).errors.txt
 compiler/complexRecursiveCollections.errors.txt
@@ -568,7 +412,6 @@ compiler/compositeContextualSignature.errors.txt
 compiler/compositeGenericFunction.errors.txt
 compiler/compositeWithNodeModulesSourceFile.errors.txt
 
-## 2026-08-16 batch #1000-#1099: computed properties — destructuring
 ## computed keys, enum-member computed names (isolatedModules configs) ##
 compiler/computedEnumMemberSyntacticallyString(isolatedmodules=false).errors.txt
 compiler/computedEnumMemberSyntacticallyString(isolatedmodules=true).errors.txt
@@ -581,8 +424,6 @@ compiler/computedPropertiesInDestructuring2_ES6.errors.txt
 compiler/computedPropertiesNarrowed.errors.txt
 compiler/computedPropertyBindingElementDeclarationNoCrash1.errors.txt
 
-## 2026-08-16 batch #1000-#1099: misc — missing-semicolon ASI
-## recovery, commonjs export= type decl, commonSourceDirectory paths,
 ## type-parameter comments parser ##
 compiler/commentsTypeParameters.errors.txt
 compiler/commonJsExportTypeDeclarationError(target=es2015).errors.txt
@@ -600,10 +441,6 @@ compiler/conflictingDeclarationsImportFromNamespace1.errors.txt
 compiler/conflictingDeclarationsImportFromNamespace2.errors.txt
 compiler/conflictingMemberTypesInBases.errors.txt
 
-## 2026-08-16 batch #1100-#1199: const-enum checker family not ported —
-## TS2567 enum-merge validation, TS2651 forward refs, TS2474/2477/2478
-## constant-expression evaluation, TS2475/2476 usage restrictions, enum
-## element-access TS2339 ('typeof E' message), TS2349 mis-typing after
 ## enum case labels, and const-enum emit/module-resolution baselines ##
 compiler/constEnumBadPropertyNames.errors.txt
 compiler/constEnumErrors.errors.txt
@@ -613,8 +450,6 @@ compiler/constEnumNamespaceReferenceCausesNoImport2.errors.txt
 compiler/constEnumNamespaceReferenceCausesNoImport(isolatedmodules=false).errors.txt
 compiler/constEnumNamespaceReferenceCausesNoImport(isolatedmodules=true).errors.txt
 
-## 2026-08-16 batch #1100-#1199: contextual typing / inference — overload
-## list from unions (TS7006 false positives), nested return-type
 ## inference through contextually-typed parameters ##
 compiler/contextSensitiveReturnTypeInference.errors.txt
 compiler/contextualComputedNonBindablePropertyType.errors.txt
@@ -627,17 +462,10 @@ compiler/contextualParamTypeVsNestedReturnTypeInference2.errors.txt
 compiler/contextualParamTypeVsNestedReturnTypeInference3.errors.txt
 compiler/contextualParamTypeVsNestedReturnTypeInference4.errors.txt
 
-## 2026-08-16 batch #1100-#1199: type-parameter constraint checking —
-## same-list constraint references, indexed-access constraints,
 ## prototype-property constraints ##
 compiler/constraintReferencingTypeParameterFromSameTypeParameterList.errors.txt
 compiler/constraintWithIndexedAccess.errors.txt
-compiler/constraints0.errors.txt
-compiler/constraintsUsedInPrototypeProperty.errors.txt
 
-## 2026-08-16 batch #1100-#1199: constructor signature family — TS2769
-## detailed overload-failure output, TS2377 definite super-call analysis,
-## TS2349 namespace class+fn callability, TS2409/TS2558 construct-signature
 ## checks, specialized-signature comparisons ##
 compiler/constructorAsType.errors.txt
 compiler/constructorInvocationWithTooFewTypeArgs.errors.txt
@@ -646,21 +474,13 @@ compiler/constructorOverloads3.errors.txt
 compiler/constructorOverloads4.errors.txt
 compiler/constructorReturningAPrimitive.errors.txt
 compiler/constructorReturnsInvalidType.errors.txt
-compiler/constructorWithCapturedSuper.errors.txt
 compiler/constructorWithParameterPropertiesAndPrivateFields.es2015.errors.txt
 compiler/constructorsWithSpecializedSignatures.errors.txt
 
-## 2026-08-16 batch #1100-#1199: relater/inference misc — TS2564 definite
-## assignment + parameter symbol transfer through merged declarations;
 ## TS2741 Record mapped-type assignability (alias vs non-alias) ##
 compiler/conflictingTypeParameterSymbolTransfer.errors.txt
 compiler/consistentAliasVsNonAliasRecordBehavior.errors.txt
 
-## 2026-08-16 batch #1200-#1299: contextual SIGNATURE instantiation —
-## function-expression parameters/returns contextually typed by target
-## signatures (incl. overload sets), IIFE return inference, mapped/negated
-## type constraints, intersection-with-any propagation, yield* typing;
-## plus elaborated multi-line relation error chains (TS2322/TS2345/TS2352
 ## drill-down) and typeof-E display for overload sets ##
 compiler/contextualParameterAndSelfReferentialConstraint1.errors.txt
 compiler/contextualPropertyOfGenericFilteringMappedType.errors.txt
@@ -669,7 +489,6 @@ compiler/contextualReturnTypeOfIIFE.errors.txt
 compiler/contextualReturnTypeOfIIFE2.errors.txt
 compiler/contextualReturnTypeOfIIFE3.errors.txt
 compiler/contextualSigInstantiationRestParams.errors.txt
-compiler/contextualSignatureConditionalTypeInstantiationUsingDefault.errors.txt
 compiler/contextualSignatureInObjectFreeze.errors.txt
 compiler/contextualSignatureInstantiation1.errors.txt
 compiler/contextualSignatureInstantiation2.errors.txt
@@ -685,7 +504,6 @@ compiler/contextualTypeBasedOnIntersectionWithAnyInTheMix1.errors.txt
 compiler/contextualTypeBasedOnIntersectionWithAnyInTheMix2.errors.txt
 compiler/contextualTypeBasedOnIntersectionWithAnyInTheMix3.errors.txt
 compiler/contextualTypeBasedOnIntersectionWithAnyInTheMix4.errors.txt
-compiler/contextualTypeBasedOnIntersectionWithAnyInTheMix5.errors.txt
 compiler/contextualTypeCaching.errors.txt
 compiler/contextualTypeForInitalizedVariablesFiltersUndefined.errors.txt
 compiler/contextualTypeFunctionObjectPropertyIntersection.errors.txt
@@ -707,11 +525,6 @@ compiler/contextualTypingOfGenericFunctionTypedArguments1.errors.txt
 compiler/contextualTypingOfLambdaWithMultipleSignatures2.errors.txt
 compiler/contextualTypingOfOptionalMembers.errors.txt
 compiler/contextualTypingOfTooShortOverloads.errors.txt
-## 2026-08-16 batch #1300-#1399: control-flow definite-assignment/
-## narrowing positions (null-literal flow, aliased discriminants,
-## try-catch destructuring, loop analysis); contextual inference
-## continuation (contravariant params, JSX attribute/children typing,
-## optional-property exactness, discriminable-union contextual types);
 ## correlated unions; declare-global typeof export crash
 compiler/contextualTypingReturnStatementWithReturnTypeAnnotation.errors.txt
 compiler/contextualTypingWithFixedTypeParameters1.errors.txt
@@ -747,23 +560,13 @@ compiler/controlFlowForFunctionLike1.errors.txt
 compiler/controlFlowForIndexSignatures.errors.txt
 compiler/controlFlowForStatementContinueIntoIncrementor1.errors.txt
 compiler/controlFlowFunctionLikeCircular1.errors.txt
-compiler/controlFlowInitializedDestructuringVariables.errors.txt
 compiler/controlFlowLoopAnalysis.errors.txt
 compiler/controlFlowManyCallExpressionStatementsPerf.errors.txt
 compiler/controlFlowNoImplicitAny.errors.txt
-compiler/controlFlowNullTypeAndLiteral.errors.txt
 compiler/controlFlowPropertyDeclarations.errors.txt
-compiler/controlFlowWithIncompleteTypes.errors.txt
 compiler/convertClassExpressionToFunctionFromObjectProperty2(target=es2015).errors.txt
 compiler/correlatedUnions.errors.txt
 compiler/crashDeclareGlobalTypeofExport.errors.txt
-## 2026-08-16 batch #1400-#1499: generic instantiation display
-## ('A<B>' renders as 'A' — type args dropped at TypeReferenceNode
-## resolution; also Promise<T>/Array<T> unwrapping), ambient-module
-## augmentation resolution (TS2664), dotted-namespace cross-statement
-## symbol merging, TS2872 always-truthy, TS2693/TS1011 keyword-as-value
-## in lib generic indexing, branded lib displays (Uint8Array),
-## TS1320 await-of-thenable, TS1038 declare-in-ambient-context,
 ## crash-family inference displays
 compiler/crashInEmitTokenWithComment.errors.txt
 compiler/crashInYieldStarInAsyncFunction.errors.txt
@@ -775,18 +578,11 @@ compiler/crossFileOverloadModifierConsistency.errors.txt
 compiler/ctsFileInEsnextHelpers.errors.txt
 compiler/customEventDetail.errors.txt
 compiler/dataViewConstructor.errors.txt
-compiler/declFileAliasUseBeforeDeclaration2.errors.txt
-compiler/declFileAmbientExternalModuleWithSingleExportedModule.errors.txt
 compiler/declFileGenericType.errors.txt
-compiler/declFileGenericType2.errors.txt
 compiler/declFileImportModuleWithExportAssignment.errors.txt
 compiler/declFileTypeAnnotationParenType(target=es2015).errors.txt
 compiler/declFileWithErrorsInInputDeclarationFile.errors.txt
 compiler/declFileWithErrorsInInputDeclarationFileWithOut.errors.txt
-compiler/declFileWithExtendsClauseThatHasItsContainerNameConflict.errors.txt
-## 2026-08-16 batch #1500-#1599: declaration-emit subsystem —
-## TS2842 unused binding renames, TS4023 export nameability,
-## duplicate identifiers inside binding patterns, decl-emit-driven
 ## checks and .d.ts-output-only cases (harness compares errors only)
 compiler/declarationEmitAliasExportStar.errors.txt
 compiler/declarationEmitArrowFunctionNoRenaming.errors.txt
@@ -830,12 +626,7 @@ compiler/declarationEmitExpressionInExtends4.errors.txt
 compiler/declarationEmitExpressionInExtends5.errors.txt
 compiler/declarationEmitExpressionInExtends7.errors.txt
 compiler/declarationEmitExpressionWithNonlocalPrivateUniqueSymbol.errors.txt
-## 2026-08-16 batch #1600-#1699: declaration-emit subsystem
-## (cont.) — TS4081 private-name exports, keyword-named expando
-## properties ('foo.null = true'), static self-references, Function-
-## prototype member lookup ('.apply' on signature types), mixins,
 ## monorepo path mapping, inferred type-alias emit checks
-compiler/declarationEmitFirstTypeArgumentGenericFunctionType.errors.txt
 compiler/declarationEmitForDefaultExportClassExtendingExpression01.errors.txt
 compiler/declarationEmitForModuleImportingModuleAugmentationRetainsImport.errors.txt
 compiler/declarationEmitFunctionDuplicateNamespace.errors.txt
@@ -849,8 +640,6 @@ compiler/declarationEmitInferredTypeAlias3.errors.txt
 compiler/declarationEmitInferredTypeAlias5.errors.txt
 compiler/declarationEmitInferredTypeAlias6.errors.txt
 compiler/declarationEmitInferredTypeAlias7.errors.txt
-compiler/declarationEmitInferredTypeAlias8.errors.txt
-compiler/declarationEmitInferredTypeAlias9.errors.txt
 compiler/declarationEmitInterfaceWithNonEntityNameExpressionHeritage.errors.txt
 compiler/declarationEmitInvalidExport.errors.txt
 compiler/declarationEmitInvalidReference.errors.txt
@@ -860,15 +649,12 @@ compiler/declarationEmitLambdaWithMissingTypeParameterNoCrash.errors.txt
 compiler/declarationEmitLateBoundAssignments.errors.txt
 compiler/declarationEmitLocalClassDeclarationMixin.errors.txt
 compiler/declarationEmitMappedPrivateTypeTypeParameter.errors.txt
-compiler/declarationEmitMappedTypePreservesTypeParameterConstraint.errors.txt
 compiler/declarationEmitMappedTypeTemplateTypeofSymbol.errors.txt
 compiler/declarationEmitMixinPrivateProtected.errors.txt
 compiler/declarationEmitMonorepoBaseUrl.errors.txt
-compiler/declarationEmitNameConflicts2.errors.txt
 compiler/declarationEmitNameConflicts3.errors.txt
 compiler/declarationEmitNestedBindingPattern.errors.txt
 compiler/declarationEmitNoInvalidCommentReuse3.errors.txt
-compiler/declarationEmitNoNonRequiredParens.errors.txt
 compiler/declarationEmitObjectAssignedDefaultExport.errors.txt
 compiler/declarationEmitOptionalMappedTypePropertyNoStrictNullChecks1.errors.txt
 compiler/declarationEmitOptionalMappedTypePropertyNoStrictNullChecks2.errors.txt
@@ -878,11 +664,7 @@ compiler/declarationEmitPathMappingMonorepo.errors.txt
 compiler/declarationEmitPathMappingMonorepo2.errors.txt
 compiler/declarationEmitPrivatePromiseLikeInterface.errors.txt
 compiler/declarationEmitPrivateSymbolCausesVarDeclarationEmit2.errors.txt
-compiler/declarationEmitPromise.errors.txt
 compiler/declarationEmitProtectedMembers(target=es2015).errors.txt
-## 2026-08-16 batch #1700-#1799: declaration-emit subsystem
-## (cont.) — 'typeof this.x' type queries, symlinked reexports,
-## module-augmentation triple-slash retention, computed readonly
 ## properties, recursive conditional aliases, package.json typings
 compiler/declarationEmitReadonlyComputedProperty.errors.txt
 compiler/declarationEmitRecursiveConditionalAliasPreserved.errors.txt
@@ -920,7 +702,6 @@ compiler/declarationsIndirectGeneratedAliasReference.errors.txt
 compiler/declarationsWithRecursiveInternalTypesProduceUniqueTypeParams.errors.txt
 compiler/declareAlreadySeen.errors.txt
 compiler/declareClassInterfaceImplementation.errors.txt
-compiler/declareDottedExtend.errors.txt
 compiler/declareFileExportAssignment.errors.txt
 compiler/declareFileExportAssignmentWithVarFromVariableStatement.errors.txt
 compiler/declareModifierOnImport1.errors.txt
@@ -928,12 +709,6 @@ compiler/decoratorMetadataElidedImport(module=commonjs).errors.txt
 compiler/decoratorMetadataElidedImport(module=esnext).errors.txt
 compiler/decoratorMetadataGenericTypeVariable.errors.txt
 compiler/decoratorMetadataGenericTypeVariableDefault.errors.txt
-## 2026-08-16 batch #1800-#1899: decorator metadata emit
-## (emitDecoratorMetadata type serialization); deep relater
-## elaborations (multi-line drill-down chains, intersection excess
-## checks, key indexing); default-param display '(a?: T)' in function
-## types; deprecated-compiler-option warnings; derived-class override
-## checks; catch-clause destructuring; remaining delete edge
 ## (Partial<Foo> mapped-type members, lib Function augmentation)
 compiler/decoratorMetadataGenericTypeVariableInScope.errors.txt
 compiler/decoratorMetadataNoLibIsolatedModulesTypes.errors.txt
@@ -988,11 +763,6 @@ compiler/destructuredLateBoundNameHasCorrectTypes.errors.txt
 compiler/destructuringAssignmentWithDefault.errors.txt
 compiler/destructuringAssignmentWithDefault2.errors.txt
 compiler/destructuringAssignmentWithExportedName.errors.txt
-## 2026-08-16 batch #1900-#1999: discriminated-union narrowing
-## (discriminant property flow analysis); divergent getter/setter
-## pair typing; destructuring tuple/spread protocol checks
-## (TS2488 iterables), did-you-mean elaborations, target-library
-## suggestions, dotted namespace VALUE usage (A.B.x), block-scoped
 ## suppression after parse errors
 compiler/destructuringAssignmentWithStrictNullChecks.errors.txt
 compiler/destructuringAssignment_private.errors.txt
@@ -1000,7 +770,6 @@ compiler/destructuringControlFlowNoCrash.errors.txt
 compiler/destructuringFromUnionSpread.errors.txt
 compiler/destructuringPropertyAssignmentNameIsNotAssignmentTarget.errors.txt
 compiler/destructuringTuple.errors.txt
-compiler/destructuringTypeGuardFlow.errors.txt
 compiler/destructuringUnspreadableIntoRest.errors.txt
 compiler/destructuringWithGenericParameter.errors.txt
 compiler/didYouMeanElaborationsForExpressionsWhichCouldBeCalled.errors.txt
@@ -1022,14 +791,11 @@ compiler/discriminateWithOptionalProperty1(exactoptionalpropertytypes=false).err
 compiler/discriminateWithOptionalProperty1(exactoptionalpropertytypes=true).errors.txt
 compiler/discriminateWithOptionalProperty2(exactoptionalpropertytypes=false).errors.txt
 compiler/discriminateWithOptionalProperty2(exactoptionalpropertytypes=true).errors.txt
-compiler/discriminateWithOptionalProperty3(exactoptionalpropertytypes=false).errors.txt
-compiler/discriminateWithOptionalProperty3(exactoptionalpropertytypes=true).errors.txt
 compiler/discriminateWithOptionalProperty4(exactoptionalpropertytypes=false).errors.txt
 compiler/discriminateWithOptionalProperty4(exactoptionalpropertytypes=true).errors.txt
 compiler/discriminatedUnionErrorMessage.errors.txt
 compiler/dissallowSymbolAsWeakType.errors.txt
 compiler/distributiveConditionalTypeConstraints.errors.txt
-compiler/divergentAccessorsTypes1.errors.txt
 compiler/divergentAccessorsTypes2.errors.txt
 compiler/divergentAccessorsTypes4(target=es2015).errors.txt
 compiler/divergentAccessorsTypes5(target=es2015).errors.txt
@@ -1046,15 +812,8 @@ compiler/doYouNeedToChangeYourTargetLibraryES2016Plus.errors.txt
 compiler/doYouNeedToChangeYourTargetLibraryES2023(target=esnext).errors.txt
 compiler/dontShowCompilerGeneratedMembers.errors.txt
 compiler/dottedModuleName.errors.txt
-compiler/dottedModuleName2.errors.txt
-compiler/dottedSymbolResolution1.errors.txt
 compiler/doubleMixinConditionalTypeBaseClassWorks.errors.txt
 compiler/doubleUnderscoreExportStarConflict.errors.txt
-## 2026-08-16 batch #2000-#2099: duplicate-declaration checks
-## (cont.) — unicode-escape identifiers (scanner gap feeding
-## TS1117), enum-member computed names, mixed TS1117/TS2300 splits,
-## catch-block function redeclaration TS2403, cross-file/package
-## duplicate merging, dynamic import() semantics, downlevel let/const
 ## emit baselines, elaborated relater chains
 compiler/downlevelLetConst11.errors.txt
 compiler/downlevelLetConst12(target=es2015).errors.txt
@@ -1106,28 +865,21 @@ compiler/elaboratedErrorsOnNullableTargets01.errors.txt
 compiler/elaborationForPossiblyCallableTypeStillReferencesArgumentAtTopLevel.errors.txt
 compiler/elidedEmbeddedStatementsReplacedWithSemicolon.errors.txt
 
-## 2026-08-16 batch #2100-#3099 (1000-case batch):
-
-## module import/export interop & emit-driven checks — default
-## imports, export= / export default merging, CommonJS/ESM interop,
 ## emit-ordering baselines ##
 compiler/emitCapturingThisInTupleDestructuring1.errors.txt
 compiler/emitCapturingThisInTupleDestructuring2.errors.txt
 compiler/emitClassExpressionInDeclarationFile.errors.txt
 compiler/emitClassExpressionInDeclarationFile2.errors.txt
-compiler/emitClassMergedWithConstNamespaceNotElided.errors.txt
 compiler/emitDecoratorMetadata_isolatedModules(module=commonjs).errors.txt
 compiler/emitDecoratorMetadata_isolatedModules(module=esnext).errors.txt
 compiler/emitDecoratorMetadata_object(target=es2015).errors.txt
 compiler/emitDecoratorMetadata_restArgs(target=es2015).errors.txt
-compiler/emitMemberAccessExpression.errors.txt
 compiler/emitSkipsThisWithRestParameter.errors.txt
 compiler/emitThisInSuperMethodCall.errors.txt
 compiler/es5-commonjs3(target=es2015).errors.txt
 compiler/es5-commonjs4(target=es2015).errors.txt
 compiler/es6ClassTest.errors.txt
 compiler/es6ClassTest2.errors.txt
-compiler/es6ClassTest8.errors.txt
 compiler/es6ClassTest9.errors.txt
 compiler/es6ExportAssignment.errors.txt
 compiler/es6ExportAssignment2.errors.txt
@@ -1184,7 +936,6 @@ compiler/exportAssignmentWithDeclareAndExportModifiers.errors.txt
 compiler/exportAssignmentWithDeclareModifier.errors.txt
 compiler/exportAssignmentWithExportModifier.errors.txt
 compiler/exportAssignmentWithoutAllowSyntheticDefaultImportsError.errors.txt
-compiler/exportAssignmentWithoutIdentifier1.errors.txt
 compiler/exportClassExtendingIntersection.errors.txt
 compiler/exportClassWithoutName.errors.txt
 compiler/exportDeclarationInInternalModule(target=es2015).errors.txt
@@ -1204,7 +955,6 @@ compiler/exportDefaultInterfaceClassAndFunctionOverloads.errors.txt
 compiler/exportDefaultInterfaceClassAndValue.errors.txt
 compiler/exportDefaultProperty.errors.txt
 compiler/exportDefaultProperty2.errors.txt
-compiler/exportDefaultQualifiedNameNoError.errors.txt
 compiler/exportDefaultStripsFreshness.errors.txt
 compiler/exportDefaultTypeAndClass.errors.txt
 compiler/exportDefaultTypeAndFunctionOverloads.errors.txt
@@ -1218,8 +968,6 @@ compiler/exportEqualsProperty2.errors.txt
 compiler/exportImportAndClodule.errors.txt
 compiler/exportInterfaceClassAndValue.errors.txt
 compiler/exportInterfaceClassAndValueWithDuplicatesInImportList.errors.txt
-compiler/exportSpecifierAndExportedMemberDeclaration.errors.txt
-compiler/exportSpecifierAndLocalMemberDeclaration.errors.txt
 compiler/exportSpecifierForAGlobal.errors.txt
 compiler/exportSpecifierReferencingOuterDeclaration1.errors.txt
 compiler/exportSpecifierReferencingOuterDeclaration2.errors.txt
@@ -1232,7 +980,6 @@ compiler/externalModuleExportingGenericClass.errors.txt
 compiler/externalModuleImmutableBindings.errors.txt
 compiler/externalModuleRefernceResolutionOrderInImportDeclaration.errors.txt
 
-## enum checker family (cont.) — literal displays ('E.A'), TS2432
 ## multi-declaration initializers, computed members, bigint members ##
 compiler/enumAssignmentCompat.errors.txt
 compiler/enumAssignmentCompat2.errors.txt
@@ -1259,7 +1006,6 @@ compiler/enumWithNonLiteralStringInitializer.errors.txt
 compiler/enumsWithMultipleDeclarations1.errors.txt
 compiler/enumsWithMultipleDeclarations2.errors.txt
 
-## relater elaborated error chains & excess-property deep checks
 ## (intersection/discriminant/nested elaborations) ##
 compiler/errorElaboration.errors.txt
 compiler/errorElaborationDivesIntoApparentlyPresentPropsOnly.errors.txt
@@ -1292,8 +1038,6 @@ compiler/excessiveStackDepthFlatArray.errors.txt
 compiler/excessivelyLargeTupleSpread.errors.txt
 compiler/flatArrayNoExcessiveStackDepth.errors.txt
 
-## generic call-site inference & constraints — TS2344 constraint
-## satisfaction, TS2314 type-arg arity, overload specialization,
 ## mapped/conditional inference (top follow-up subsystem) ##
 compiler/extractInferenceImprovement.errors.txt
 compiler/fallbackToBindingPatternForTypeInference.errors.txt
@@ -1308,7 +1052,6 @@ compiler/genericArrayAssignmentCompatErrors.errors.txt
 compiler/genericArrayExtenstions.errors.txt
 compiler/genericArrayMethods1.errors.txt
 compiler/genericArrayPropertyAssignment.errors.txt
-compiler/genericArrayWithoutTypeAnnotation.errors.txt
 compiler/genericAssignmentCompatOfFunctionSignatures1.errors.txt
 compiler/genericAssignmentCompatWithInterfaces1.errors.txt
 compiler/genericBaseClassLiteralProperty.errors.txt
@@ -1340,8 +1083,6 @@ compiler/genericConditionalConstrainedToUnknownNotAssignableToConcreteObject.err
 compiler/genericConstraint1.errors.txt
 compiler/genericConstraint2.errors.txt
 compiler/genericConstraintDeclaration.errors.txt
-compiler/genericConstraintOnExtendedBuiltinTypes.errors.txt
-compiler/genericConstraintOnExtendedBuiltinTypes2.errors.txt
 compiler/genericConstraintSatisfaction1.errors.txt
 compiler/genericConstructInvocationWithNoTypeArg.errors.txt
 compiler/genericConstructSignatureInInterface.errors.txt
@@ -1364,7 +1105,6 @@ compiler/genericFunctionsWithOptionalParameters3.errors.txt
 compiler/genericFunduleInModule.errors.txt
 compiler/genericFunduleInModule2.errors.txt
 compiler/genericGetter.errors.txt
-compiler/genericGetter2.errors.txt
 compiler/genericGetter3.errors.txt
 compiler/genericImplements.errors.txt
 compiler/genericIndexTypeHasSensibleErrorMessage.errors.txt
@@ -1372,10 +1112,7 @@ compiler/genericIndexedAccessVarianceComparisonResultCorrect.errors.txt
 compiler/genericInference2.errors.txt
 compiler/genericInferenceDefaultTypeParameter.errors.txt
 compiler/genericInferenceDefaultTypeParameterJsxReact.errors.txt
-compiler/genericInheritedDefaultConstructors.errors.txt
-compiler/genericInterfaceTypeCall.errors.txt
 compiler/genericInterfacesWithoutTypeArguments.errors.txt
-compiler/genericLambaArgWithoutTypeArguments.errors.txt
 compiler/genericMappedTypeAsClause.errors.txt
 compiler/genericMemberFunction.errors.txt
 compiler/genericMergedDeclarationUsingTypeParameter.errors.txt
@@ -1394,7 +1131,6 @@ compiler/genericRecursiveImplicitConstructorErrors3.errors.txt
 compiler/genericReduce.errors.txt
 compiler/genericRestArgs.errors.txt
 compiler/genericRestTypes.errors.txt
-compiler/genericReturnTypeFromGetter1.errors.txt
 compiler/genericReversingTypeParameters.errors.txt
 compiler/genericReversingTypeParameters2.errors.txt
 compiler/genericSignatureIdentity.errors.txt
@@ -1412,18 +1148,13 @@ compiler/genericTypeAssertions6.errors.txt
 compiler/genericTypeConstraints.errors.txt
 compiler/genericTypeParameterEquivalence2.errors.txt
 compiler/genericTypeReferencesRequireTypeArgs.errors.txt
-compiler/genericTypeUsedWithoutTypeArguments1.errors.txt
-compiler/genericTypeUsedWithoutTypeArguments3.errors.txt
 compiler/genericTypeWithCallableMembers.errors.txt
 compiler/genericTypeWithCallableMembers2.errors.txt
 compiler/genericTypeWithNonGenericBaseMisMatch.errors.txt
 compiler/genericUnboundedTypeParamAssignability.errors.txt
 compiler/genericWithNoConstraintComparableWithCurlyCurly.errors.txt
 compiler/genericWithOpenTypeParameters1.errors.txt
-compiler/generics1.errors.txt
-compiler/generics2.errors.txt
 compiler/generics4.errors.txt
-compiler/generics5.errors.txt
 compiler/genericsAndHigherOrderFunctions.errors.txt
 compiler/genericsManyTypeParameters.errors.txt
 compiler/genericsWithoutTypeParameters1.errors.txt
@@ -1435,8 +1166,6 @@ compiler/identityForSignaturesWithTypeParametersSwitched.errors.txt
 ## for-in / for-await-of iteration typing, fallthrough analysis ##
 compiler/fallFromLastCase1.errors.txt
 compiler/fallFromLastCase2.errors.txt
-compiler/forAwaitForIntersection1.errors.txt
-compiler/forAwaitForUnion.errors.txt
 compiler/forIn.errors.txt
 compiler/forIn2.errors.txt
 compiler/forInStatement2.errors.txt
@@ -1444,15 +1173,10 @@ compiler/forInStatement4.errors.txt
 compiler/forInStatement5.errors.txt
 compiler/forInStatement6.errors.txt
 compiler/forInStatement7.errors.txt
-compiler/forInStrictNullChecksNoError.errors.txt
 compiler/forStatementInnerComments.errors.txt
 
-## overload resolution & function-signature compat — TS2391-family
-## ordering (partial fix landed), arity TS2345 variants, optional-param
 ## checks, rest-arg inference ##
-compiler/fatArrowfunctionAsType.errors.txt
 compiler/fatarrowfunctionsErrors.errors.txt
-compiler/fatarrowfunctionsInFunctionParameterDefaults.errors.txt
 compiler/fatarrowfunctionsOptionalArgs.errors.txt
 compiler/fatarrowfunctionsOptionalArgsErrors1.errors.txt
 compiler/fatarrowfunctionsOptionalArgsErrors2.errors.txt
@@ -1477,8 +1201,6 @@ compiler/functionCallOnConstrainedTypeVariable.errors.txt
 compiler/functionExpressionAndLambdaMatchesFunction.errors.txt
 compiler/functionExpressionInWithBlock.errors.txt
 compiler/functionExpressionShadowedByParams.errors.txt
-compiler/functionMergedWithModule.errors.txt
-compiler/functionOverloads1.errors.txt
 compiler/functionOverloads11.errors.txt
 compiler/functionOverloads17.errors.txt
 compiler/functionOverloads18.errors.txt
@@ -1504,7 +1226,6 @@ compiler/functionsWithModifiersInBlocks1.errors.txt
 compiler/fieldAndGetterWithSameName.errors.txt
 compiler/getAndSetNotIdenticalType2.errors.txt
 compiler/getAndSetNotIdenticalType3.errors.txt
-compiler/getSetEnumerable(target=es2015).errors.txt
 compiler/getterControlFlowStrictNull(target=es2015).errors.txt
 compiler/getterMissingReturnError.errors.txt
 compiler/getterSetterNonAccessor.errors.txt
@@ -1512,7 +1233,6 @@ compiler/getterSetterSubtypeAssignment.errors.txt
 compiler/gettersAndSetters.errors.txt
 compiler/gettersAndSettersAccessibility.errors.txt
 compiler/gettersAndSettersErrors.errors.txt
-compiler/gettersAndSettersTypesAgree.errors.txt
 compiler/illegalModifiersOnClassElements.errors.txt
 
 ## misc single-root gaps — narrowed during follow-up passes ##
@@ -1544,7 +1264,6 @@ compiler/errorWithSameNameType.errors.txt
 compiler/errorsForCallAndAssignmentAreSimilar.errors.txt
 compiler/errorsInGenericTypeReference.errors.txt
 compiler/errorsWithInvokablesInUnions01.errors.txt
-compiler/es2018ObjectAssign.errors.txt
 compiler/es5-asyncFunctionLongObjectLiteral(target=es2015).errors.txt
 compiler/es5-oldStyleOctalLiteralInEnums(target=es2015).errors.txt
 compiler/es5ExportDefaultClassDeclaration3(target=es2015).errors.txt
@@ -1559,7 +1278,6 @@ compiler/expandoFunctionBlockShadowing.errors.txt
 compiler/expandoFunctionContextualTypesJSDocInTs.errors.txt
 compiler/expandoFunctionExpressionsWithDynamicNames2.errors.txt
 compiler/expandoFunctionNestedAssigments.errors.txt
-compiler/expandoFunctionNestedAssigmentsDeclared.errors.txt
 compiler/expandoFunctionNullishProperty.errors.txt
 compiler/experimentalDecoratorMetadataUnresolvedTypeObjectInEmit.errors.txt
 compiler/expr.errors.txt
@@ -1601,7 +1319,6 @@ compiler/functionParameterArityMismatch.errors.txt
 compiler/functionToFunctionWithPropError.errors.txt
 compiler/funduleSplitAcrossFiles.errors.txt
 compiler/fuzzy.errors.txt
-compiler/generatorReturnExpressionIsChecked.errors.txt
 compiler/giant.errors.txt
 compiler/globalIsContextualKeyword.errors.txt
 compiler/globalThisDeclarationEmit.errors.txt
@@ -1616,14 +1333,9 @@ compiler/illegalSuperCallsInConstructor.errors.txt
 compiler/implementArrayInterface.errors.txt
 compiler/implementClausePrecedingExtends.errors.txt
 
-## 2026-08-16 batch #3100-#4099 (1000-case batch):
-
-## module import/export interop & isolated-declarations emit
-## checks (cont. batch 2100's group) — reexport chains, helpers
 ## (importHelpers/tslib), isolatedModules elision, decl-emit errors ##
 compiler/importAliasFromNamespace.errors.txt
 compiler/importAliasInModuleAugmentation.errors.txt
-compiler/importAnImport.errors.txt
 compiler/importAndVariableDeclarationConflict1.errors.txt
 compiler/importAndVariableDeclarationConflict4.errors.txt
 compiler/importAsBaseClass.errors.txt
@@ -1636,7 +1348,6 @@ compiler/importDeclWithDeclareModifier.errors.txt
 compiler/importDeclWithDeclareModifierInAmbientContext.errors.txt
 compiler/importDeclWithExportModifierAndExportAssignment.errors.txt
 compiler/importDeclWithExportModifierAndExportAssignmentInAmbientContext.errors.txt
-compiler/importDeclWithExportModifierInAmbientContext.errors.txt
 compiler/importDeclarationInModuleDeclaration1.errors.txt
 compiler/importHelpers(target=es2015).errors.txt
 compiler/importHelpersES6.errors.txt
@@ -1648,7 +1359,6 @@ compiler/importHelpersNoHelpersForAsyncGenerators(target=es2015).errors.txt
 compiler/importHelpersNoHelpersForPrivateFields.errors.txt
 compiler/importHelpersNoModule(target=es2015).errors.txt
 compiler/importHelpersWithImportOrExportDefaultNoTslib.1(esmoduleinterop=true,module=commonjs).errors.txt
-compiler/importHelpersWithImportOrExportDefaultNoTslib.2(esmoduleinterop=true,module=commonjs).errors.txt
 compiler/importHelpersWithImportOrExportDefaultNoTslib.3(esmoduleinterop=true,module=commonjs).errors.txt
 compiler/importInsideModule.errors.txt
 compiler/importNonExportedMember.errors.txt
@@ -1683,7 +1393,6 @@ compiler/isolatedDeclarationErrorsObjects.errors.txt
 compiler/isolatedDeclarationErrorsReturnTypes.errors.txt
 compiler/isolatedDeclarationLazySymbols.errors.txt
 compiler/isolatedDeclarationsAddUndefined.errors.txt
-compiler/isolatedDeclarationsAddUndefined2.errors.txt
 compiler/isolatedDeclarationsStrictBuiltinIteratorReturn(isolateddeclarations=false,strictbuiltiniteratorreturn=false).errors.txt
 compiler/isolatedDeclarationsStrictBuiltinIteratorReturn(isolateddeclarations=false,strictbuiltiniteratorreturn=true).errors.txt
 compiler/isolatedDeclarationsStrictBuiltinIteratorReturn(isolateddeclarations=true,strictbuiltiniteratorreturn=false).errors.txt
@@ -1704,7 +1413,6 @@ compiler/isolatedModulesSketchyAliasLocalMerge(isolatedmodules=true,verbatimmodu
 compiler/isolatedModulesSketchyAliasLocalMerge(isolatedmodules=true,verbatimmodulesyntax=true).errors.txt
 compiler/metadataImportType.errors.txt
 
-## 'in' operator narrowing (right operand to object),
 ## intersection property/relation checks, misc primitive checks ##
 compiler/inKeywordAndIntersection.errors.txt
 compiler/inKeywordAndUnknown.errors.txt
@@ -1714,7 +1422,6 @@ compiler/inOperator.errors.txt
 compiler/intTypeCheck.errors.txt
 compiler/intersectionOfMixinConstructorTypeAndNonConstructorType.errors.txt
 compiler/intersectionPropertyCheck.errors.txt
-compiler/intersectionSatisfiesConstraint.errors.txt
 compiler/intersectionTypeInference1.errors.txt
 compiler/intersectionTypeNormalization.errors.txt
 compiler/intersectionsAndOptionalProperties.errors.txt
@@ -1723,11 +1430,9 @@ compiler/intersectionsAndOptionalProperties3(exactoptionalpropertytypes=true).er
 compiler/intersectionsAndReadonlyProperties.errors.txt
 compiler/intersectionsOfLargeUnions.errors.txt
 compiler/intersectionsOfLargeUnions2.errors.txt
-compiler/ipromise2.errors.txt
 compiler/ipromise4.errors.txt
 compiler/isArray.errors.txt
 
-## inference subsystem (cont.) — inferential typing, indexed-access
 ## relations, mapped-type instantiation, keyof contextual types ##
 compiler/indexAt(target=es2021).errors.txt
 compiler/indexAt(target=es2022).errors.txt
@@ -1754,7 +1459,6 @@ compiler/indexWithoutParamType2.errors.txt
 compiler/indexedAccessCanBeHighOrder.errors.txt
 compiler/indexedAccessConstraints.errors.txt
 compiler/indexedAccessImplicitlyAny.errors.txt
-compiler/indexedAccessNormalization.errors.txt
 compiler/indexedAccessPrivateMemberOfGenericConstraint.errors.txt
 compiler/indexedAccessRelation.errors.txt
 compiler/indexedAccessWithFreshObjectLiteral.errors.txt
@@ -1773,13 +1477,10 @@ compiler/inferFromNestedSameShapeTuple.errors.txt
 compiler/inferPropertyWithContextSensitiveReturnStatement.errors.txt
 compiler/inferSecondaryParameter.errors.txt
 compiler/inferStringLiteralUnionForBindingElement.errors.txt
-compiler/inferTupleFromBindingPattern.errors.txt
 compiler/inferTypePredicates.errors.txt
 compiler/inferenceAndHKTs.errors.txt
 compiler/inferenceContextualReturnTypeUnion1.errors.txt
-compiler/inferenceContextualReturnTypeUnion2.errors.txt
 compiler/inferenceContextualReturnTypeUnion3.errors.txt
-compiler/inferenceContextualReturnTypeUnion4.errors.txt
 compiler/inferenceDoesNotAddUndefinedOrNull.errors.txt
 compiler/inferenceDoesntCompareAgainstUninstantiatedTypeParameter.errors.txt
 compiler/inferenceExactOptionalProperties2.errors.txt
@@ -1803,10 +1504,6 @@ compiler/inferentiallyTypingAnEmptyArray.errors.txt
 compiler/inferredReturnTypeIncorrectReuse1.errors.txt
 compiler/inferringAnyFunctionType1.errors.txt
 compiler/inferringAnyFunctionType2.errors.txt
-compiler/inferringAnyFunctionType3.errors.txt
-compiler/inferringAnyFunctionType4.errors.txt
-compiler/inferringAnyFunctionType5.errors.txt
-compiler/inferringReturnTypeFromConstructSignatureGeneric.errors.txt
 compiler/inlineConditionalHasSimilarAssignability.errors.txt
 compiler/inlinedAliasAssignableToConstraintSameAsAlias.errors.txt
 compiler/instantiateContextualTypes.errors.txt
@@ -1821,7 +1518,6 @@ compiler/mappedTypeGenericWithKnownKeys.errors.txt
 compiler/mappedTypeIndexedAccess.errors.txt
 compiler/mappedTypeIndexedAccessConstraint.errors.txt
 compiler/mappedTypeInferenceFromApparentType.errors.txt
-compiler/mappedTypeNestedGenericInstantiation.errors.txt
 compiler/mappedTypeNoTypeNoCrash.errors.txt
 compiler/mappedTypeNotMistakenlyHomomorphic.errors.txt
 compiler/mappedTypeRecursiveInference.errors.txt
@@ -1830,8 +1526,6 @@ compiler/mappedTypeUnionConstrainTupleTreatedAsArrayLike.errors.txt
 compiler/mappedTypeWithAsClauseAndLateBoundProperty.errors.txt
 compiler/mappedTypeWithCombinedTypeMappers.errors.txt
 
-## interface/class inheritance member compatibility — override
-## kinds (accessor vs method vs property), private-member
 ## collisions across bases, static-side compat, merging ##
 compiler/inheritFromGenericTypeParameter.errors.txt
 compiler/inheritSameNamePrivatePropertiesFromDifferentOrigins.errors.txt
@@ -1897,9 +1591,6 @@ compiler/interfaceWithImplements1.errors.txt
 compiler/interfaceWithMultipleDeclarations.errors.txt
 compiler/interfacedeclWithIndexerErrors.errors.txt
 
-## JSX type-checking subsystem — IntrinsicElements/
-## IntrinsicAttributes resolution, children & attribute contextual
-## typing, jsx factory/namespace pragmas (react-jsx runtimes),
 ## react fixture-lib resolution, JSX spread/inference ##
 compiler/jsxAttributeMissingInitializer.errors.txt
 compiler/jsxAttributeWithoutExpressionReact.errors.txt
@@ -1985,8 +1676,6 @@ compiler/jsxViaImport.2.errors.txt
 compiler/jsxViaImport.errors.txt
 compiler/keywordInJsxIdentifier.errors.txt
 
-## let-scoping edge cases (TS2300-vs-TS2451 choice, 'let' as
-## identifier parse recovery, use-before-assign TS2454) and
 ## merged-declaration export marking ##
 compiler/letAsIdentifier.errors.txt
 compiler/letAsIdentifierInStrictMode.errors.txt
@@ -2023,9 +1712,6 @@ compiler/mergedDeclarations5.errors.txt
 compiler/mergedDeclarations7.errors.txt
 compiler/mergedInstantiationAssignment.errors.txt
 compiler/mergedInterfaceFromMultipleFiles1.errors.txt
-compiler/mergedModuleDeclarationCodeGen2.errors.txt
-compiler/mergedModuleDeclarationCodeGen3.errors.txt
-compiler/mergedModuleDeclarationCodeGen5.errors.txt
 
 ## misc single-root gaps (batch #3100-#4099) ##
 compiler/implementGenericWithMismatchedTypes.errors.txt
@@ -2074,7 +1760,6 @@ compiler/innerModExport2.errors.txt
 compiler/instanceAndStaticDeclarations1.errors.txt
 compiler/internalAliasInterfaceInsideLocalModuleWithoutExportAccessError.errors.txt
 compiler/internalAliasUninitializedModuleInsideLocalModuleWithoutExportAccessError.errors.txt
-compiler/internalAliasWithDottedNameEmit.errors.txt
 compiler/internalImportInstantiatedModuleMergedWithClassNotReferencingInstance.errors.txt
 compiler/internalImportInstantiatedModuleNotReferencingInstance.errors.txt
 compiler/internalImportUnInstantiatedModuleMergedWithClassNotReferencingInstance.errors.txt
@@ -2107,7 +1792,6 @@ compiler/jsDeclarationEmitExportedClassWithExtends.errors.txt
 compiler/jsdocInTypeScript.errors.txt
 compiler/json.stringify.errors.txt
 compiler/keyRemappingKeyofResult.errors.txt
-compiler/keywordExpressionInternalComments.errors.txt
 compiler/knockout.errors.txt
 compiler/lambdaArgCrash.errors.txt
 compiler/lambdaParamTypes.errors.txt
@@ -2116,7 +1800,6 @@ compiler/lambdaPropSelf.errors.txt
 compiler/lastPropertyInLiteralWins.errors.txt
 compiler/lateBoundDestructuringImplicitAnyError.errors.txt
 compiler/lateBoundFunctionMemberAssignmentDeclarations.errors.txt
-compiler/libCompileChecks.errors.txt
 compiler/libMembers.errors.txt
 compiler/library_DatePrototypeProperties.errors.txt
 compiler/limitDeepInstantiations.errors.txt
@@ -2142,11 +1825,6 @@ compiler/memberScope.errors.txt
 compiler/memberVariableDeclarations1.errors.txt
 compiler/metadataOfClassFromAlias(strict=true,target=es2015).errors.txt
 
-## 2026-08-16 batch #4100-#5099 (1000-case batch):
-
-## module resolution & augmentation subsystem — augmentations
-## (TS2664 global/augment merge rules), node16/nodenext
-## resolution, path mappings, package.json self-names,
 ## suffix/symlink resolution, lib modularization ##
 compiler/modularizeLibrary_Dom.asynciterable.errors.txt
 compiler/modularizeLibrary_ErrorFromUsingES6ArrayWithOnlyES6ArrayLib(target=es2015).errors.txt
@@ -2159,7 +1837,6 @@ compiler/modularizeLibrary_TargetES6UsingES6Lib.errors.txt
 compiler/modularizeLibrary_UsingES5LibAndES6FeatureLibs.errors.txt
 compiler/modularizeLibrary_Worker.asynciterable.errors.txt
 compiler/moduleAndInterfaceSharingName2.errors.txt
-compiler/moduleAndInterfaceWithSameName.errors.txt
 compiler/moduleAsBaseType.errors.txt
 compiler/moduleAssignmentCompat1.errors.txt
 compiler/moduleAssignmentCompat2.errors.txt
@@ -2208,13 +1885,11 @@ compiler/moduleElementsInWrongContext.errors.txt
 compiler/moduleElementsInWrongContext2.errors.txt
 compiler/moduleElementsInWrongContext3.errors.txt
 compiler/moduleExports1.errors.txt
-compiler/moduleImport.errors.txt
 compiler/moduleInTypePosition1.errors.txt
 compiler/moduleKeywordDeprecated.errors.txt
 compiler/moduleKeywordRepeatError.errors.txt
 compiler/moduleLocalImportNotIncorrectlyRedirected.errors.txt
 compiler/moduleMemberMissingErrorIsRelative.errors.txt
-compiler/moduleMemberWithoutTypeAnnotation1.errors.txt
 compiler/moduleNodeDefaultImports(module=node16).errors.txt
 compiler/moduleNodeDefaultImports(module=node18).errors.txt
 compiler/moduleNodeDefaultImports(module=node20).errors.txt
@@ -2261,10 +1936,6 @@ compiler/moduleResolution_packageJson_yesAtPackageRoot_fakeScopedPackage.errors.
 compiler/moduleResolution_packageJson_yesAtPackageRoot_mainFieldInSubDirectory.errors.txt
 compiler/moduleResolution_relativeImportJsFile_noImplicitAny.errors.txt
 compiler/moduleScopingBug.errors.txt
-compiler/moduleSharesNameWithImportDeclarationInsideIt.errors.txt
-compiler/moduleSharesNameWithImportDeclarationInsideIt2.errors.txt
-compiler/moduleSharesNameWithImportDeclarationInsideIt4.errors.txt
-compiler/moduleSharesNameWithImportDeclarationInsideIt6.errors.txt
 compiler/moduleSymbolMerging.errors.txt
 compiler/moduleVariableArrayIndexer.errors.txt
 compiler/moduleVisibilityTest3.errors.txt
@@ -2273,7 +1944,6 @@ compiler/moduleWithNoValuesAsType.errors.txt
 compiler/moduleWithValuesAsType.errors.txt
 compiler/module_augmentUninstantiatedModule.errors.txt
 compiler/module_augmentUninstantiatedModule2.errors.txt
-compiler/moduledecl(target=es2015).errors.txt
 compiler/nodeColonModuleResolution2.errors.txt
 compiler/nodeModuleReexportFromDottedPath.errors.txt
 compiler/nodeNextEsmImportsOfPackagesWithExtensionlessMains.errors.txt
@@ -2308,7 +1978,6 @@ compiler/pathsValidation3.errors.txt
 compiler/pathsValidation4.errors.txt
 compiler/pathsValidation5.errors.txt
 
-## Promise inference family — then/catch chaining,
 ## promise identity/constraints, TS2403 display ##
 compiler/mutuallyRecursiveCallbacks.errors.txt
 compiler/promiseChaining.errors.txt
@@ -2331,16 +2000,12 @@ compiler/promiseTypeInferenceUnion.errors.txt
 compiler/promiseTypeStrictNull.errors.txt
 compiler/promiseVoidErrorCallback.errors.txt
 compiler/promiseWithResolvers.errors.txt
-compiler/promises.errors.txt
 compiler/promisesWithConstraints.errors.txt
 compiler/propagationOfPromiseInitialization.errors.txt
 
-## narrowing subsystem — switch-discriminant narrowing,
-## TS2839 reference-comparison, truthiness/destructuring
 ## narrowing, evolving-array containment ##
 compiler/narrowByClauseExpressionInSwitchTrue1.errors.txt
 compiler/narrowByClauseExpressionInSwitchTrue3.errors.txt
-compiler/narrowByClauseExpressionInSwitchTrue5.errors.txt
 compiler/narrowByClauseExpressionInSwitchTrue6.errors.txt
 compiler/narrowByClauseExpressionInSwitchTrue7.errors.txt
 compiler/narrowByEquality.errors.txt
@@ -2350,13 +2015,10 @@ compiler/narrowBySwitchDiscriminantUndefinedCase1(exactoptionalpropertytypes=fal
 compiler/narrowBySwitchDiscriminantUndefinedCase1(exactoptionalpropertytypes=true,nouncheckedindexedaccess=false).errors.txt
 compiler/narrowBySwitchDiscriminantUndefinedCase1(exactoptionalpropertytypes=true,nouncheckedindexedaccess=true).errors.txt
 compiler/narrowSwitchOptionalChainContainmentEvolvingArrayNoCrash1.errors.txt
-compiler/narrowTypeByInstanceof.errors.txt
 compiler/narrowedConstInMethod.errors.txt
 compiler/narrowedImports.errors.txt
-compiler/narrowingAssignmentReadonlyRespectsAssertion.errors.txt
 compiler/narrowingDestructuring.errors.txt
 compiler/narrowingMutualSubtypes.errors.txt
-compiler/narrowingNoInfer1.errors.txt
 compiler/narrowingOfQualifiedNames.errors.txt
 compiler/narrowingOrderIndependent.errors.txt
 compiler/narrowingPastLastAssignment.errors.txt
@@ -2368,8 +2030,6 @@ compiler/narrowingUnionToNeverAssigment.errors.txt
 compiler/narrowingUnionToUnion.errors.txt
 compiler/narrowingUnionWithBang.errors.txt
 
-## overload resolution (cont.) — literal-specialization
-## overload picking, TS2394 compat, modifier agreement,
 ## consecutiveness anchors in recovery contexts ##
 compiler/nearbyIdenticalGenericLambdasAssignable.errors.txt
 compiler/orderMattersForSignatureGroupIdentity.errors.txt
@@ -2402,7 +2062,6 @@ compiler/overloadsWithConstraints.errors.txt
 compiler/overloadsWithProvisionalErrors.errors.txt
 compiler/overloadsWithinClasses.errors.txt
 
-## implicit-any family (cont.) — destructuring/contextual
 ## exemptions, ambient parameters, indexer on object literals ##
 compiler/noImplicitAnyDestructuringInPrivateMethod.errors.txt
 compiler/noImplicitAnyDestructuringParameterDeclaration.errors.txt
@@ -2425,8 +2084,6 @@ compiler/noImplicitAnyWithOverloads.errors.txt
 compiler/noImplicitSymbolToString.errors.txt
 compiler/noImplicitThisFunctions.errors.txt
 
-## object-literal checking (cont.) — freshness/spread,
-## member modifiers in literals, semicolon/newline member
 ## separation, numeric-key literals ##
 compiler/objectBindingPatternContextuallyTypesArgument.errors.txt
 compiler/objectBindingPattern_restElementWithPropertyName.errors.txt
@@ -2467,8 +2124,6 @@ compiler/objectMembersOnTypes.errors.txt
 compiler/objectRestSpread.errors.txt
 compiler/objectTypeWithOptionalProperty1.errors.txt
 
-## optional-parameter & parameter checks — default-value
-## optionality ordering, parameter-property modifiers,
 ## tuple parameter lists ##
 compiler/optionalAccessorsInInterface1.errors.txt
 compiler/optionalArgsWithDefaultValues.errors.txt
@@ -2501,8 +2156,6 @@ compiler/parametersSyntaxErrorNoCrash3.errors.txt
 compiler/paramsOnlyHaveLiteralTypesWhenAppropriatelyContextualized.errors.txt
 compiler/paramterDestrcuturingDeclaration.errors.txt
 
-## parser error-recovery anchors/ordering — TS1005/TS1144
-## recovery chains, bigint literal scanning, comma-separated
 ## newline rules, import-attribute errors ##
 compiler/parse1.errors.txt
 compiler/parseAssertEntriesError.errors.txt
@@ -2526,7 +2179,6 @@ compiler/parserConstructorDeclaration12.errors.txt
 compiler/parserPrivateIdentifierInArrayAssignment.errors.txt
 compiler/parserUnparsedTokenCrash2.errors.txt
 
-## declaration-nameability/privacy checks (TS4023 family,
 ## private-name reachability in ambient/exported contexts) ##
 compiler/privacyCheckAnonymousFunctionParameter.errors.txt
 compiler/privacyCheckExportAssignmentOnExportedGenericInterface1.errors.txt
@@ -2609,7 +2261,6 @@ compiler/nestedFreshLiteral.errors.txt
 compiler/nestedGenericSpreadInference.errors.txt
 compiler/nestedGlobalNamespaceInClass.errors.txt
 compiler/nestedIfStatement.errors.txt
-compiler/nestedLoopTypeGuards.errors.txt
 compiler/nestedLoops(target=es2015).errors.txt
 compiler/nestedModulePrivateAccess.errors.txt
 compiler/nestedRecursiveArraysOrObjectsError01.errors.txt
@@ -2702,9 +2353,6 @@ compiler/propertiesAndIndexers.errors.txt
 compiler/propertiesAndIndexers2.errors.txt
 compiler/propertiesAndIndexersForNumericNames.errors.txt
 
-## 2026-08-16 batch #5100-#6099 (1000-case batch):
-
-## TSX/React checking — props inference for SFC/HOC,
 ## defaultProps, react namespace emit, node16 react resolution ##
 compiler/reactDefaultPropsInferenceSuccess.errors.txt
 compiler/reactHOCSpreadprops.errors.txt
@@ -2734,8 +2382,6 @@ compiler/tsxStatelessComponentDefaultProps.errors.txt
 compiler/tsxTypeArgumentPartialDefinitionStillErrors.errors.txt
 compiler/tsxUnionMemberChecksFilterDataProps.errors.txt
 
-## recursive-type handling — base-class cycle detection
-## (TS2310), recursive conditional/mapped types, recursion
 ## depth guards (stack-overflow family mostly skip-crashed) ##
 compiler/recursiveArrayNotCircular.errors.txt
 compiler/recursiveBaseCheck.errors.txt
@@ -2764,14 +2410,12 @@ compiler/recursiveLetConst.errors.txt
 compiler/recursiveNamedLambdaCall.errors.txt
 compiler/recursiveObjectLiteral.errors.txt
 compiler/recursiveResolveTypeMembers.errors.txt
-compiler/recursiveReverseMappedType.errors.txt
 compiler/recursiveSpecializationOfExtendedTypeWithError.errors.txt
 compiler/recursiveTupleTypeInference.errors.txt
 compiler/recursiveTypeComparison2.errors.txt
 compiler/recursiveTypeParameterConstraintReferenceLacksTypeArgs.errors.txt
 compiler/recursivelyExpandingUnionNoStackoverflow.errors.txt
 
-## scope/shadowing checks — class-property scope,
 ## shadowed compiler declarations, reserved words ##
 compiler/redeclareParameterInCatchBlock.errors.txt
 compiler/reservedNameOnInterfaceImport.errors.txt
@@ -2789,12 +2433,9 @@ compiler/shadowedFunctionScopedVariablesByBlockScopedOnes.errors.txt
 compiler/shadowedReservedCompilerDeclarationsWithNoEmit(target=es2015).errors.txt
 compiler/shadowingViaLocalValueOrBindingElement.errors.txt
 
-## regular-expression literal scanning — Annex B,
 ## character-class ordering, matchAll typing ##
 compiler/regExpWithOpenBracketInCharClass(target=es2015).errors.txt
 compiler/regExpWithOpenBracketInCharClass(target=esnext).errors.txt
-compiler/regexMatchAll-esnext.errors.txt
-compiler/regexMatchAll.errors.txt
 compiler/regexpExecAndMatchTypeUsages(strict=false).errors.txt
 compiler/regexpExecAndMatchTypeUsages(strict=true).errors.txt
 compiler/regularExpressionAnnexB.errors.txt
@@ -2802,9 +2443,7 @@ compiler/regularExpressionCharacterClassRangeOrder.errors.txt
 compiler/regularExpressionGroupNameSuggestions.errors.txt
 compiler/regularExpressionScanning(target=es2015).errors.txt
 compiler/regularExpressionScanning(target=esnext).errors.txt
-compiler/stringMatchAll.errors.txt
 
-## spread/rest typing — spread into index signatures,
 ## rest-parameter assignability, spread of params ##
 compiler/restArgAssignmentCompat.errors.txt
 compiler/restArgMissingName.errors.txt
@@ -2819,11 +2458,8 @@ compiler/spreadOfObjectLiteralAssignableToIndexSignature.errors.txt
 compiler/spreadOfParamsFromGeneratorMakesRequiredParams.errors.txt
 compiler/spreadUnionPropOverride.errors.txt
 
-## source-map validation baselines (emit-artifact
-## comparison — harness compares errors only; these need .map/.js
 ## output comparison or are skipped pending emit support) ##
 compiler/sourceMap-LineBreaks(target=es2015).errors.txt
-compiler/sourceMapSample.errors.txt
 compiler/sourceMapValidationDecorators(target=es2015).errors.txt
 compiler/sourceMapValidationDestructuringForArrayBindingPattern2(target=es2015).errors.txt
 compiler/sourceMapValidationDestructuringForArrayBindingPatternDefaultValues2(target=es2015).errors.txt
@@ -2841,8 +2477,6 @@ compiler/sourceMapValidationFor.errors.txt
 compiler/sourceMapValidationForIn.errors.txt
 compiler/sourceMapValidationStatements.errors.txt
 
-## static member checks — static/instance resolution
-## (TS2337? no—TS2749 family: static off instance, prototype on
 ## static), staticIndexSignature, static modifier dup (TS1028-style) ##
 compiler/staticAnonymousTypeNotReferencingTypeParameter.errors.txt
 compiler/staticAsIdentifier.errors.txt
@@ -2850,9 +2484,7 @@ compiler/staticClassProps.errors.txt
 compiler/staticIndexSignatureAndNormalIndexSignature.errors.txt
 compiler/staticInstanceResolution.errors.txt
 compiler/staticInstanceResolution2.errors.txt
-compiler/staticInstanceResolution3.errors.txt
 compiler/staticInstanceResolution5.errors.txt
-compiler/staticInterfaceAssignmentCompat.errors.txt
 compiler/staticMemberExportAccess.errors.txt
 compiler/staticMemberOfClassAndPublicMemberOfAnotherClassAssignment.errors.txt
 compiler/staticMethodReferencingTypeArgument1.errors.txt
@@ -2869,8 +2501,6 @@ compiler/statics.errors.txt
 compiler/staticsInAFunction.errors.txt
 compiler/staticsInConstructorBodies.errors.txt
 
-## super-call/property checks — definite-super analysis,
-## super in static methods/object literals/lambdas, super-call
 ## argument matching against base constructors, super with type args ##
 compiler/super.errors.txt
 compiler/super1.errors.txt
@@ -2905,7 +2535,6 @@ compiler/superWithTypeArgument2.errors.txt
 compiler/superWithTypeArgument3.errors.txt
 compiler/super_inside-object-literal-getters-and-setters(target=es2015).errors.txt
 
-## switch checking — case-expression comparability,
 ## multiple defaults, circular case references ##
 compiler/switchAssignmentCompat.errors.txt
 compiler/switchCaseCircularRefeference.errors.txt
@@ -2914,8 +2543,6 @@ compiler/switchCasesExpressionTypeMismatch.errors.txt
 compiler/switchStatementsWithMultipleDefaults.errors.txt
 compiler/switchStatementsWithMultipleDefaults1.errors.txt
 
-## triple-slash/tslib/symlink resolution — types refs
-## with missing exports, helper injection (tslib), symlinked
 ## workspace dependency name generation ##
 compiler/symbolLinkDeclarationEmitModuleNames.errors.txt
 compiler/symbolLinkDeclarationEmitModuleNamesRootDir.errors.txt
@@ -2935,8 +2562,6 @@ compiler/tslibMultipleMissingHelper.errors.txt
 compiler/tslibNotFoundDifferentModules.errors.txt
 compiler/tslibReExportHelpers2.errors.txt
 
-## tagged template & template-literal type checking —
-## template signature matching, escape scanning,
 ## template-literal type relations ##
 compiler/taggedTemplateStringWithSymbolExpression01.errors.txt
 compiler/taggedTemplateStringsHexadecimalEscapes.errors.txt
@@ -2967,8 +2592,6 @@ compiler/templateStringsArrayTypeDefinedInES5Mode(target=es2015).errors.txt
 compiler/templateStringsArrayTypeNotDefinedES5Mode(target=es2015).errors.txt
 compiler/templateStringsArrayTypeRedefinedInES6Mode.errors.txt
 
-## 'this' typing — this in modules/static methods/outer class
-## bodies/property bindings, this-predicates, this-shadowing spans,
 ## noImplicitThis contexts ##
 compiler/thisAssignmentInNamespaceDeclaration1.errors.txt
 compiler/thisBinding2.errors.txt
@@ -2987,13 +2610,10 @@ compiler/thisPredicateInObjectLiteral.errors.txt
 compiler/thisShadowingErrorSpans.errors.txt
 compiler/thisWhenTypeCheckFails.errors.txt
 compiler/this_inside-enum-should-not-be-allowed.errors.txt
-compiler/this_inside-object-literal-getters-and-setters.errors.txt
 compiler/thislessFunctionsNotContextSensitive1.errors.txt
 compiler/thislessFunctionsNotContextSensitive2.errors.txt
 compiler/thislessFunctionsNotContextSensitive3.errors.txt
 
-## type-argument inference & type-parameter checks (cont.)
-## — F-bounded params, constraint instantiation, apparent-type
 ## inference, typeof narrowing guards, type identity/brands ##
 compiler/typeAliasDeclarationEmit(target=es2015).errors.txt
 compiler/typeAliasDeclarationEmit3.errors.txt
@@ -3035,7 +2655,6 @@ compiler/typeInferenceReturnTypeCallback.errors.txt
 compiler/typeInferenceTypePredicate.errors.txt
 compiler/typeInferenceTypePredicate2.errors.txt
 compiler/typeInferenceWithExcessPropertiesJsx.errors.txt
-compiler/typeInferenceWithTypeAnnotation.errors.txt
 compiler/typeMatch1.errors.txt
 compiler/typeMatch2.errors.txt
 compiler/typeNamedUndefined1.errors.txt
@@ -3059,10 +2678,8 @@ compiler/typeParameterConstraintInstantiation.errors.txt
 ## misc single-root gaps (batch #5100-#6099) ##
 compiler/propertyAccess4.errors.txt
 compiler/propertyAccess5.errors.txt
-compiler/propertyAccessExpressionInnerComments.errors.txt
 compiler/propertyAccessOfReadonlyIndexSignature.errors.txt
 compiler/propertyAccessOnObjectLiteral.errors.txt
-compiler/propertyAccessibility2.errors.txt
 compiler/propertyAssignment.errors.txt
 compiler/propertyIdentityWithPrivacyMismatch.errors.txt
 compiler/propertyParameterWithQuestionMark.errors.txt
@@ -3071,7 +2688,6 @@ compiler/propertyWrappedInTry.errors.txt
 compiler/protectedAccessThroughContextualThis.errors.txt
 compiler/protectedMembers.errors.txt
 compiler/protectedMembersThisParameter.errors.txt
-compiler/prototypeInstantiatedWithBaseConstraint.errors.txt
 compiler/prototypeOnConstructorFunctions.errors.txt
 compiler/prototypes.errors.txt
 compiler/publicGetterProtectedSetterFromThisParameter(target=es2015).errors.txt
@@ -3081,7 +2697,6 @@ compiler/qualify.errors.txt
 compiler/quickIntersectionCheckCorrectlyCachesErrors.errors.txt
 compiler/quickinfoTypeAtReturnPositionsInaccurate.errors.txt
 compiler/quotedModuleNameMustBeAmbient.errors.txt
-compiler/ramdaToolsNoInfinite.errors.txt
 compiler/reExportGlobalDeclaration1.errors.txt
 compiler/reExportGlobalDeclaration2.errors.txt
 compiler/reExportGlobalDeclaration3.errors.txt
@@ -3091,7 +2706,6 @@ compiler/reachabilityCheckWithEmptyDefault.errors.txt
 compiler/reachabilityChecks4.errors.txt
 compiler/reachabilityChecksNoCrash1.errors.txt
 compiler/readonlyAssignmentInSubclassOfClassExpression.errors.txt
-compiler/readonlyInDeclarationFile(target=es2015).errors.txt
 compiler/readonlyMembers(target=es2015).errors.txt
 compiler/readonlyPropertySubtypeRelationDirected.errors.txt
 compiler/readonlyTupleAndArrayElaboration.errors.txt
@@ -3168,8 +2782,6 @@ compiler/signatureLengthMismatchInOverload.errors.txt
 compiler/signatureLengthMismatchWithOptionalParameters.errors.txt
 compiler/silentNeverPropagation.errors.txt
 compiler/simpleRecursionWithBaseCase1.errors.txt
-compiler/simpleRecursionWithBaseCase2.errors.txt
-compiler/simpleRecursionWithBaseCase3.errors.txt
 compiler/simpleRecursionWithBaseCase4.errors.txt
 compiler/simplifyingConditionalWithInteriorConditionalIsRelated.errors.txt
 compiler/slashBeforeVariableDeclaration1.errors.txt
@@ -3207,15 +2819,12 @@ compiler/stringIndexerAssignments2.errors.txt
 compiler/stringLiteralPropertyNameWithLineContinuation1.errors.txt
 compiler/stringLiteralsErrors.errors.txt
 compiler/stringMappingAssignability.errors.txt
-compiler/stringTrim.errors.txt
 compiler/styledComponentsInstantiaionLimitNotReached.errors.txt
-compiler/subclassUint8Array.errors.txt
 compiler/subtypeReductionWithAnyFunctionType.errors.txt
 compiler/subtypeRelationForNever.errors.txt
 compiler/subtypingTransitivity.errors.txt
 compiler/symbolMergeValueAndImportedType.errors.txt
 compiler/targetEs6DecoratorMetadataImportNotElided(target=es2015).errors.txt
-compiler/targetTypeCalls.errors.txt
 compiler/targetTypeTest1.errors.txt
 compiler/targetTypeVoidFunc.errors.txt
 compiler/temporal.errors.txt
@@ -3236,7 +2845,6 @@ compiler/trivialSubtypeReductionNoStructuralCheck(target=es2015).errors.txt
 compiler/truthinessCallExpressionCoercion.errors.txt
 compiler/truthinessCallExpressionCoercion1.errors.txt
 compiler/truthinessCallExpressionCoercion2.errors.txt
-compiler/truthinessCallExpressionCoercion3.errors.txt
 compiler/truthinessPromiseCoercion.errors.txt
 compiler/tsconfigMapOptionsAreCaseInsensitive.errors.txt
 compiler/tupleTypeInference.errors.txt
@@ -3245,14 +2853,9 @@ compiler/tupleTypes.errors.txt
 compiler/twiceNestedKeyofIndexInference.errors.txt
 compiler/typeAssignabilityErrorMessage.errors.txt
 compiler/typeInterfaceDeclarationsInBlockStatements1.errors.txt
-compiler/typeLiteralCallback.errors.txt
 compiler/typeName1.errors.txt
 compiler/typeParamExtendsOtherTypeParam.errors.txt
 
-## 2026-08-16 batch #6100-#6536 (final partial batch, 437 cases):
-
-## type-parameter & type-predicate checks (final) —
-## diamond constraints, fixing with context-sensitive args,
 ## predicate inheritance/structural match ##
 compiler/typeParameterDiamond2.errors.txt
 compiler/typeParameterDiamond3.errors.txt
@@ -3260,7 +2863,6 @@ compiler/typeParameterDiamond4.errors.txt
 compiler/typeParameterDoesntBlockParameterLookup.errors.txt
 compiler/typeParameterEquality.errors.txt
 compiler/typeParameterExplicitlyExtendsAny.errors.txt
-compiler/typeParameterExtendingUnion2.errors.txt
 compiler/typeParameterExtendsPrimitive.errors.txt
 compiler/typeParameterFixingWithContextSensitiveArguments.errors.txt
 compiler/typeParameterFixingWithContextSensitiveArguments2.errors.txt
@@ -3288,15 +2890,11 @@ compiler/typeVariableConstraintIntersections.errors.txt
 compiler/typeVariableConstraintedToAliasNotAssignableToUnion.errors.txt
 compiler/typeVariableTypeGuards.errors.txt
 
-## misc final-batch singles — UMD globals, unicode
-## identifier escapes, strict-mode unary ops, uncalled function
-## checks, typed-array overloads, type-reference directives,
 ## type-as-value errors ##
 compiler/typeReferenceDirectiveScopedPackageCustomTypeRoot.errors.txt
 compiler/typeReferenceDirectiveWithFailedFromTypeRoot.errors.txt
 compiler/typeReferenceDirectives11.errors.txt
 compiler/typeReferenceDirectives12.errors.txt
-compiler/typeReferenceDirectives7.errors.txt
 compiler/typeReferenceDirectives9.errors.txt
 compiler/typeUsedAsTypeLiteralIndex.errors.txt
 compiler/typeUsedAsValueError.errors.txt
@@ -3305,7 +2903,6 @@ compiler/typeValueConflict1.errors.txt
 compiler/typeValueConflict2.errors.txt
 compiler/typecheckCommaExpression.errors.txt
 compiler/typecheckIfCondition.errors.txt
-compiler/typedArrayConstructorOverloads.errors.txt
 compiler/typedArrays.errors.txt
 compiler/typedArraysCrossAssignability01.errors.txt
 compiler/umdGlobalAugmentationNoCrash.errors.txt
@@ -3328,7 +2925,6 @@ compiler/unicodeEscapesInNames02(target=es2015).errors.txt
 compiler/unicodeIdentifierName2.errors.txt
 compiler/unterminatedStringLiteralWithBackslash1.errors.txt
 
-## 'typeof' type queries (final) — typeof classes/enums/
 ## interfaces/modules, freshness stripping, typeof-this ##
 compiler/typeofAmbientExternalModules.errors.txt
 compiler/typeofClass.errors.txt
@@ -3343,7 +2939,6 @@ compiler/typeofThisInMethodSignature.errors.txt
 compiler/typeofUndefined.errors.txt
 compiler/typeofUsedBeforeBlockScoped.errors.txt
 
-## undefined/unknown/inference edges (final) — undefined
 ## type args, unknown symbols, unmet constraints in import() ##
 compiler/undefinedArgumentInference.errors.txt
 compiler/undefinedAssignableToGenericMappedIntersection.errors.txt
@@ -3366,8 +2961,6 @@ compiler/unspecializedConstraints.errors.txt
 compiler/untypedFunctionCallsWithTypeParameters1.errors.txt
 compiler/untypedModuleImport_withAugmentation2.errors.txt
 
-## union-type relations (final) — subtype reduction,
-## discriminant error messages, index+method signatures,
 ## parenthesization grammar in unions ##
 compiler/unionCallMixedTypeParameterPresence.errors.txt
 compiler/unionErrorMessageOnMatchingDiscriminant.errors.txt
@@ -3387,7 +2980,6 @@ compiler/unionWithIndexSignature.errors.txt
 compiler/unparenthesizedConstructorTypeInUnionOrIntersection.errors.txt
 compiler/unparenthesizedFunctionTypeInUnionOrIntersection.errors.txt
 
-## use-before-declaration (final) — class decorators,
 ## destructuring, property assignments, super class ##
 compiler/unusedLocalsInMethod4.errors.txt
 compiler/useBeforeDeclaration_classDecorators.1.errors.txt
@@ -3399,7 +2991,6 @@ compiler/useBeforeDeclaration_propertyAssignment.errors.txt
 compiler/useBeforeDeclaration_superClass.errors.txt
 compiler/useUnknownInCatchVariables01.errors.txt
 
-## var/varargs checks (final) — varArg typing, var-as-ID,
 ## name conflicts with imports ##
 compiler/varArgConstructorMemberParameter.errors.txt
 compiler/varArgParamTypeCheck.errors.txt
@@ -3408,14 +2999,12 @@ compiler/varBlock.errors.txt
 compiler/varNameConflictsWithImportInDifferentPartOfModule.errors.txt
 compiler/vararg.errors.txt
 
-## variance annotations — measurement/propagation,
 ## in/out validation, variance references ##
 compiler/varianceAnnotationValidation.errors.txt
 compiler/varianceMeasurement.errors.txt
 compiler/variancePropagation.errors.txt
 compiler/varianceReferences.errors.txt
 
-## with-statement checking — TS2410 invalid targets,
 ## nested scope, comment emit ##
 compiler/withStatement.errors.txt
 compiler/withStatementErrors.errors.txt
@@ -3426,7 +3015,6 @@ compiler/withStatementNestedScope.errors.txt
 compiler/wrappedRecursiveGenericType.errors.txt
 compiler/yieldExpression1.errors.txt
 compiler/yieldExpressionInFlowLoop.errors.txt
-compiler/yieldInForInInDownlevelGenerator(target=es2015).errors.txt
 compiler/yieldStarContextualType.errors.txt
 
 ## misc single-root gaps (batch #6100-#6536) ##
@@ -3437,7 +3025,6 @@ compiler/unresolvableSelfReferencingAwaitedUnion.errors.txt
 compiler/usingModuleWithExportImportInValuePosition.errors.txt
 compiler/valueOfTypedArray.errors.txt
 compiler/variableDeclarationInStrictMode1.errors.txt
-compiler/variableDeclaratorResolvedDuringContextualTyping.errors.txt
 compiler/verbatim-declarations-parameters.errors.txt
 compiler/visibilityOfCrossModuleTypeUsage.errors.txt
 compiler/voidAsNonAmbiguousReturnType.errors.txt

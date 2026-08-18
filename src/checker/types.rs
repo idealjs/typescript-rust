@@ -1087,6 +1087,12 @@ pub struct ConditionalRoot {
     pub check_type: Option<Arc<Type>>,
     pub extends_type: Option<Arc<Type>>,
     pub is_distributive: bool,
+    /// When the root is distributive (the check type as written is a naked
+    /// type parameter), the symbol of that type parameter. Distribution
+    /// substitutes this symbol per union constituent while re-resolving the
+    /// extends/branch nodes (Go: `prependTypeMapping(checkType, t,
+    /// newMapper)` in `getConditionalTypeInstantiation`).
+    pub check_type_parameter_symbol: Option<Arc<crate::ast::Symbol>>,
     pub infer_type_parameters: Vec<Arc<Type>>,
     pub outer_type_parameters: Vec<Arc<Type>>,
     pub alias: Option<Box<TypeAlias>>,
@@ -1316,6 +1322,12 @@ pub struct Signature {
     pub target: Option<Arc<Signature>>,
     pub mapper: Option<Arc<TypeMapper>>,
     pub isolated_signature_type: OnceLock<Arc<Type>>,
+    /// Substituted parameter types for contextually instantiated
+    /// signatures (Go: `getSignatureInstantiation` /
+    /// `instantiateSignatureInContextOf`). Keyed by PARAMETER INDEX (the
+    /// rest parameter keeps its array type with the element substituted).
+    /// `None` resolves through the parameter symbols as usual.
+    pub instantiated_parameter_types: Option<Vec<Arc<Type>>>,
 }
 
 impl Signature {
@@ -1334,6 +1346,7 @@ impl Signature {
             target: None,
             mapper: None,
             isolated_signature_type: OnceLock::new(),
+            instantiated_parameter_types: None,
         }
     }
 

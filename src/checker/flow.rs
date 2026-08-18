@@ -31,10 +31,38 @@ use crate::ast::{FlowFlags, FlowNode, Node, NodeData, NodeFlags, Symbol, SymbolF
 use super::checker::Checker;
 use super::types::*;
 
-/// Maximum recursion depth for `type_at_flow_node`. Prevents stack overflow
-/// on very deep or cyclic flow graphs. The Go implementation uses a similar
-/// cap via `relationStackDepth`.
-const FLOW_MAX_DEPTH: u32 = 200;
+/// Maximum recursion depth for `type_at_flow_node`. Go reports TS2563 at
+/// 2000 recursive invocations (flow.go ~L118) — matching that number keeps
+/// legitimate long chains (binaryArithmeticControlFlowGraphNotTooLarge,
+/// ~1600 assignments) below the limit while 10k-node bodies
+/// (largeControlFlowGraph) still trip it, as in official. Deep walks are
+/// safe stack-wise: the harness worker compiles on a dedicated large-stack
+/// thread.
+const FLOW_MAX_DEPTH: u32 = 2000;
+
+/// The reference a flow query narrows. Go threads a single `f.reference`
+/// node through `getTypeAtFlowNode` and matches against flow nodes with
+/// `isMatchingReference` (flow.go ~L1597); identifiers match by resolved
+/// symbol and property accesses match structurally. This port keeps the
+/// identifier path keyed by resolved symbol (`FlowRef::Symbol`) and adds
+/// the structural path for property/element-access references
+/// (`FlowRef::Node`).
+#[derive(Clone)]
+pub(super) enum FlowRef {
+    Symbol(Arc<Symbol>),
+    Node(Arc<Node>),
+}
+
+impl FlowRef {
+    /// A node to anchor TS2563 on (Go's `f.reference`): the reference node
+    /// itself, or the first declaration of the referenced symbol.
+    fn anchor_node(&self) -> Option<Arc<Node>> {
+        match self {
+            FlowRef::Node(n) => Some(Arc::clone(n)),
+            FlowRef::Symbol(s) => s.declarations.first().map(Arc::clone),
+        }
+    }
+}
 
 /// Per-query memoization state for `type_at_flow_node`. `memo` caches the
 /// computed type for each visited flow node; `on_path` tracks nodes currently
@@ -43,6 +71,10 @@ const FLOW_MAX_DEPTH: u32 = 200;
 struct FlowQuery {
     memo: std::collections::HashMap<usize, Arc<Type>>,
     on_path: std::collections::HashSet<usize>,
+    /// Active reduce-label scopes (Go `f.reduceLabels`): each entry maps a
+    /// branch-label node to the reduced antecedent set to use instead of
+    /// its full one while the walk is inside that reduce label.
+    reduce_labels: Vec<(std::sync::Arc<FlowNode>, Vec<std::sync::Arc<FlowNode>>)>,
 }
 
 /// The kind of narrowing to apply for a condition.
@@ -73,28 +105,144 @@ impl Checker {
         if self.flow_analysis_disabled {
             return declared;
         }
-        // Cache lookup: combine symbol ID and flow node pointer.
-        let key = self.flow_cache_key(symbol, flow);
+        let target = FlowRef::Symbol(Arc::clone(symbol));
+        let key = self.flow_cache_key(&target, flow, &declared);
         if let Some(cached) = self.flow_type_cache.get(&key) {
             return Arc::clone(cached);
         }
-        // Reserve a slot to break cycles (write `declared` first so that
-        // recursive lookups during narrowing get the un-narrowed type).
         self.flow_type_cache.insert(key, Arc::clone(&declared));
-        // Fresh memo for this query — a node's type is a function of the node
-        // (for a fixed symbol), so results are shared across the whole walk.
         let mut query = FlowQuery::default();
-        let narrowed = self.type_at_flow_node(&declared, flow, symbol, 0, &mut query);
+        let narrowed = self.type_at_flow_node(&declared, &declared, flow, &target, 0, &mut query);
         self.flow_type_cache.insert(key, Arc::clone(&narrowed));
         narrowed
     }
 
-    /// Compute a cache key for (symbol, flow) pairs.
-    fn flow_cache_key(&self, symbol: &Arc<Symbol>, flow: &Arc<FlowNode>) -> u64 {
-        let sym_id = symbol.id();
+    /// Flow-narrow an arbitrary reference expression (`obj.val`,
+    /// `obj['val']`, `this.x`) from its declared type. Mirrors Go's
+    /// `getFlowTypeOfReference` (flow.go ~L77): reads the flow node the
+    /// binder attached to the reference and walks the flow graph matching
+    /// references structurally via `isMatchingReference`.
+    pub fn get_flow_type_of_reference(
+        &mut self,
+        reference: &Arc<Node>,
+        declared: &Arc<Type>,
+    ) -> Arc<Type> {
+        let Some(flow) = self.program.symbol_map().flow_node_of(reference).map(Arc::clone)
+        else {
+            return Arc::clone(declared);
+        };
+        if self.flow_analysis_disabled {
+            return Arc::clone(declared);
+        }
+        let target = FlowRef::Node(Arc::clone(reference));
+        let key = self.flow_cache_key(&target, &flow, declared);
+        if let Some(cached) = self.flow_type_cache.get(&key) {
+            return Arc::clone(cached);
+        }
+        self.flow_type_cache.insert(key, Arc::clone(declared));
+        let mut query = FlowQuery::default();
+        let narrowed = self.type_at_flow_node(declared, declared, &flow, &target, 0, &mut query);
+        self.flow_type_cache.insert(key, Arc::clone(&narrowed));
+        // The reference is the operand of a non-null assertion (`x!`) and
+        // the narrowed type would become `never` once null/undefined are
+        // excluded (without already being `never`): the assertion asserts
+        // the declared type instead. Mirrors Go's guard in
+        // `getFlowTypeOfReferenceEx` (flow.go ~L111).
+        if let Some(parent) = &reference.parent {
+            if parent.kind == SyntaxKind::NonNullExpression
+                && !narrowed.flags.contains(TypeFlags::Never)
+                && self.type_is_never_after_removing_nullable(&narrowed)
+            {
+                return Arc::clone(declared);
+            }
+        }
+        narrowed
+    }
+
+    /// Whether removing null/undefined constituents empties the type (i.e.
+    /// every constituent is nullable). Used by the non-null-assertion guard
+    /// in `get_flow_type_of_reference`.
+    fn type_is_never_after_removing_nullable(&self, t: &Arc<Type>) -> bool {
+        if !self.strict_null_checks {
+            return false;
+        }
+        if t.is_union() {
+            return self.constituent_types(t).iter().all(|c| {
+                c.flags.intersects(TypeFlags::Null | TypeFlags::Undefined)
+            });
+        }
+        t.flags.intersects(TypeFlags::Null | TypeFlags::Undefined)
+    }
+
+    /// Definite-assignment query: the flow type of `symbol` at `node`'s
+    /// flow point when the declaration seeds `declared | undefined` at the
+    /// flow start. Mirrors Go's `checkIdentifier` path (checker.go ~L11226)
+    /// where `initialType = getOptionalType(t)` and a flow type that still
+    /// contains `undefined` (while the declared type doesn't) triggers
+    /// TS2454. Returns the flow type; the caller decides reporting.
+    pub fn get_definite_assignment_flow_type(
+        &mut self,
+        symbol: &Arc<Symbol>,
+        node: &Arc<Node>,
+    ) -> Option<Arc<Type>> {
+        if self.flow_analysis_disabled {
+            return None;
+        }
+        let flow = self
+            .program
+            .symbol_map()
+            .flow_node_of(node)
+            .map(Arc::clone)?;
+        let declared = self.get_type_of_symbol(symbol);
+        let undefined = self.undefined_type();
+        let initial = if self.type_contains_undefined_local(&declared) {
+            Arc::clone(&declared)
+        } else {
+            self.get_union_type(vec![Arc::clone(&declared), undefined])
+        };
+        let target = FlowRef::Symbol(Arc::clone(symbol));
+        let key = self.flow_cache_key(&target, &flow, &initial);
+        if let Some(cached) = self.flow_type_cache.get(&key) {
+            return Some(Arc::clone(cached));
+        }
+        self.flow_type_cache.insert(key, Arc::clone(&declared));
+        let mut query = FlowQuery::default();
+        let narrowed = self.type_at_flow_node(&declared, &initial, &flow, &target, 0, &mut query);
+        self.flow_type_cache.insert(key, Arc::clone(&narrowed));
+        Some(narrowed)
+    }
+
+    /// Local undefined-containment check for flow queries.
+    fn type_contains_undefined_local(&self, t: &Arc<Type>) -> bool {
+        if t.flags.contains(TypeFlags::Undefined) {
+            return true;
+        }
+        if t.is_union() {
+            if let TypeData::Union(u) = &t.data {
+                return u
+                    .union_or_intersection
+                    .types
+                    .iter()
+                    .any(|c| c.flags.contains(TypeFlags::Undefined));
+            }
+        }
+        false
+    }
+
+    /// Compute a cache key for (target, flow, initial-type) triples. The
+    /// initial type participates because Go's flow cache keys on
+    /// `(declaredType, initialType)` — a definite-assignment query seeded
+    /// with `T | undefined` differs from a plain narrowing query.
+    fn flow_cache_key(&self, target: &FlowRef, flow: &Arc<FlowNode>, initial: &Arc<Type>) -> u64 {
+        let ref_part = match target {
+            FlowRef::Symbol(symbol) => symbol.id(),
+            FlowRef::Node(node) => node.id(),
+        };
         let flow_ptr = Arc::as_ptr(flow) as *const FlowNode as u64;
-        // Mix the two: rotate symbol ID and XOR with flow pointer.
-        sym_id.rotate_left(17) ^ flow_ptr
+        let initial_ptr = Arc::as_ptr(initial) as *const Type as u64;
+        // Mix the three: rotate the reference part, XOR with flow pointer
+        // and the initial type's identity.
+        (ref_part.rotate_left(17) ^ flow_ptr).rotate_left(29) ^ initial_ptr
     }
 
     /// Compute the type of `symbol` AT `flow` — the core flow-typing
@@ -111,8 +259,9 @@ impl Checker {
     fn type_at_flow_node(
         &mut self,
         declared: &Arc<Type>,
+        initial: &Arc<Type>,
         flow: &Arc<FlowNode>,
-        symbol: &Arc<Symbol>,
+        target: &FlowRef,
         depth: u32,
         query: &mut FlowQuery,
     ) -> Arc<Type> {
@@ -123,24 +272,81 @@ impl Checker {
         if !query.on_path.insert(key) {
             // Cycle: stop walking this path (one-unrolling semantics). The
             // seeded entry is overwritten once the in-flight node completes.
-            query.memo.insert(key, Arc::clone(declared));
-            return Arc::clone(declared);
+            query.memo.insert(key, Arc::clone(initial));
+            return Arc::clone(initial);
         }
         let result = if depth >= FLOW_MAX_DEPTH {
-            Arc::clone(declared)
+            // Go (flow.go ~L105 `getTypeAtFlowNode`): after 2000 recursive
+            // invocations it reports TS2563 and disables further control
+            // flow analysis for the containing function/module body so
+            // subsequent references skip the walk entirely (without this,
+            // a 10k-assignment body re-walks the graph per reference —
+            // quadratic time and unbounded memo growth, observed as an
+            // OOM abort on largeControlFlowGraph).
+            if !self.flow_analysis_disabled {
+                self.flow_analysis_disabled = true;
+                self.report_flow_control_error(target);
+            }
+            Arc::clone(initial)
         } else {
-            self.compute_type_at_flow_node(declared, flow, symbol, depth, query)
+            self.compute_type_at_flow_node(declared, initial, flow, target, depth, query)
         };
         query.on_path.remove(&key);
         query.memo.insert(key, Arc::clone(&result));
         result
     }
 
+    /// TS2563 (Go `reportFlowControlError`, flow.go ~L1590): the containing
+    /// function-or-module body is too large for control flow analysis.
+    /// Reported on the first token of the enclosing block's statement list.
+    fn report_flow_control_error(&mut self, target: &FlowRef) {
+        use crate::ast::SyntaxKind;
+        let Some(anchor) = target.anchor_node() else { return };
+        let mut block: Option<Arc<Node>> = None;
+        let mut cur = anchor.parent.clone();
+        while let Some(n) = cur {
+            let is_function_or_module_block = match n.kind {
+                SyntaxKind::SourceFile | SyntaxKind::ModuleBlock => true,
+                SyntaxKind::Block => n
+                    .parent
+                    .as_ref()
+                    .is_some_and(|p| crate::ast::utilities::is_function_like_kind(p.kind)),
+                _ => false,
+            };
+            if is_function_or_module_block {
+                block = Some(Arc::clone(&n));
+                break;
+            }
+            cur = n.parent.clone();
+        }
+        let Some(block) = block else { return };
+        // Range of the first token of the block's statement list (Go:
+        // `scanner.GetRangeOfTokenAtPosition(sourceFile, statements.Pos())`).
+        let mut loc = block.loc;
+        if let Some(stmts) = match &block.data {
+            crate::ast::NodeData::SourceFile(d) => Some(&d.statements),
+            crate::ast::NodeData::ModuleBlock(d) => Some(&d.statements),
+            crate::ast::NodeData::Block(d) => Some(&d.statements),
+            _ => None,
+        } && let Some(first) = stmts.nodes.first()
+        {
+            loc = crate::core::text::TextRange::new(first.loc.pos as usize, first.loc.pos as usize + 1);
+        }
+        self.diagnostics.add(crate::ast::Diagnostic::new(
+            self.current_file.clone(),
+            loc,
+            crate::diagnostics::messages_generated::
+                THE_CONTAINING_FUNCTION_OR_MODULE_BODY_IS_TOO_LARGE_FOR_CONTROL_FLOW_ANALYSIS,
+            Vec::new(),
+        ));
+    }
+
     fn compute_type_at_flow_node(
         &mut self,
         declared: &Arc<Type>,
+        initial: &Arc<Type>,
         flow: &Arc<FlowNode>,
-        symbol: &Arc<Symbol>,
+        target: &FlowRef,
         depth: u32,
         query: &mut FlowQuery,
     ) -> Arc<Type> {
@@ -149,9 +355,10 @@ impl Checker {
             return self.never_type();
         }
 
-        // START flow → no narrowing possible.
+        // START flow → the query's initial type (Go's `f.initialType`;
+        // definite-assignment queries seed `T | undefined` here).
         if flow.flags.contains(FlowFlags::START) {
-            return Arc::clone(declared);
+            return Arc::clone(initial);
         }
 
         // TRUE_CONDITION / FALSE_CONDITION → narrow the ANTECEDENT type by
@@ -165,24 +372,53 @@ impl Checker {
             } else {
                 NarrowKind::FalseBranch
             };
-            let antecedent_type = self.antecedent_type_at(declared, flow, symbol, depth, query);
+            let antecedent_type = self.antecedent_type_at(declared, initial, flow, target, depth, query);
             if let Some(expr) = &flow.node {
-                return self.narrow_by_expression(&antecedent_type, expr, symbol, kind, depth);
+                return self.narrow_by_expression(&antecedent_type, expr, target, kind, depth);
             }
             return antecedent_type;
         }
 
-        // ASSIGNMENT → if the assignment is to `symbol`, the node's type is
-        // the RHS type (mirrors Go's `getTypeAtFlowAssignment`, which returns
-        // the expression type outright, ignoring the antecedent's type).
+        // ASSIGNMENT → mirrors Go's `getTypeAtFlowAssignment` (flow.go
+        // ~L220): a matching assignment reduces a union declared type by
+        // the assigned type (`getAssignmentReducedType`); a non-union
+        // declared type is returned unchanged; evolving arrays keep the
+        // assigned type; assignments to a left-hand part of a dotted
+        // reference reset it to the declared type.
         if flow.flags.contains(FlowFlags::ASSIGNMENT) {
             if let Some(expr) = &flow.node {
-                if let Some(rhs_type) = self.assignment_rhs_type_for_symbol(expr, symbol) {
-                    return rhs_type;
+                if let Some(t) = self.assignment_flow_type(expr, target, declared) {
+                    return t;
+                }
+                // An assignment to a left-hand part of a dotted reference
+                // (`obj` of `obj.val`) invalidates narrowing: back to the
+                // declared type. Mirrors Go's `containsMatchingReference`
+                // branch in `getTypeAtFlowAssignment` (flow.go ~L255).
+                if let FlowRef::Node(reference) = target {
+                    if self.contains_matching_reference(reference, expr) {
+                        return Arc::clone(declared);
+                    }
+                }
+                // `for (const k in ref)` acts as a non-null assertion on
+                // `ref` (Go flow.go ~L269).
+                if expr.kind == SyntaxKind::VariableDeclaration {
+                    if let Some(for_in_expr) = Self::for_in_expression_of(expr) {
+                        if self.expr_matches_target(&for_in_expr, target)
+                            || self.optional_chain_contains_target(&for_in_expr, target)
+                        {
+                            let ante = self.antecedent_type_at(
+                                declared, initial, flow, target, depth, query,
+                            );
+                            if self.strict_null_checks {
+                                return self.remove_nullable_from_union(&ante);
+                            }
+                            return ante;
+                        }
+                    }
                 }
             }
-            // Not an assignment to our symbol; continue through the antecedent.
-            return self.antecedent_type_at(declared, flow, symbol, depth, query);
+            // Not an assignment to our target; continue through the antecedent.
+            return self.antecedent_type_at(declared, initial, flow, target, depth, query);
         }
 
         // SWITCH_CLAUSE → narrow based on the switch case expression.
@@ -190,8 +426,8 @@ impl Checker {
         // recurse into the antecedent to get the narrowed type at this flow
         // point, then apply switch-specific narrowing on top.
         if flow.flags.contains(FlowFlags::SWITCH_CLAUSE) {
-            let antecedent_type = self.antecedent_type_at(declared, flow, symbol, depth, query);
-            return self.narrow_by_switch_clause(&antecedent_type, flow, symbol);
+            let antecedent_type = self.antecedent_type_at(declared, initial, flow, target, depth, query);
+            return self.narrow_by_switch_clause(&antecedent_type, flow, target);
         }
 
         // ARRAY_MUTATION → evolve the element type of an evolving array.
@@ -205,9 +441,9 @@ impl Checker {
                 let is_evolving = declared.object_flags.contains(ObjectFlags::EvolvingArray)
                     || self.is_auto_array_type(declared);
                 if is_evolving {
-                    let pre_type = self.antecedent_type_at(declared, flow, symbol, depth, query);
+                    let pre_type = self.antecedent_type_at(declared, initial, flow, target, depth, query);
                     if let Some(evolved) =
-                        self.evolve_array_at_mutation(node, &pre_type, symbol)
+                        self.evolve_array_at_mutation(node, &pre_type, target)
                     {
                         return evolved;
                     }
@@ -215,7 +451,7 @@ impl Checker {
                 }
             }
             // Not an evolving array or not our symbol; recurse.
-            return self.antecedent_type_at(declared, flow, symbol, depth, query);
+            return self.antecedent_type_at(declared, initial, flow, target, depth, query);
         }
 
         // CALL → assertion function narrowing. If the call is to an
@@ -224,21 +460,58 @@ impl Checker {
         // if the assertion fails). Mirrors Go's `getTypeAtFlowCall`
         // (flow.go ~L288). Non-assertion calls just recurse.
         if flow.flags.contains(FlowFlags::CALL) {
-            let antecedent_type = self.antecedent_type_at(declared, flow, symbol, depth, query);
+            let antecedent_type = self.antecedent_type_at(declared, initial, flow, target, depth, query);
             if let Some(call_expr) = &flow.node {
-                return self.narrow_by_assertion_call(&antecedent_type, call_expr, symbol);
+                return self.narrow_by_assertion_call(&antecedent_type, call_expr, target);
             }
             return antecedent_type;
         }
 
+        // REDUCE_LABEL (Go flow.go ~L181): while the walk is inside this
+        // node, the target branch label's antecedent set is replaced by
+        // this node's reduced antecedents. This is how control flow past a
+        // try-finally only considers the normal-completion (or return, or
+        // exception) flows through the finally block.
+        if flow.flags.contains(FlowFlags::REDUCE_LABEL) {
+            if let Some(reduce_target) = &flow.reduce_target {
+                query.reduce_labels.push((
+                    Arc::clone(reduce_target),
+                    flow.antecedents.clone(),
+                ));
+                let t = self.antecedent_type_at(declared, initial, flow, target, depth, query);
+                query.reduce_labels.pop();
+                return t;
+            }
+            return self.antecedent_type_at(declared, initial, flow, target, depth, query);
+        }
+
         // Junction (multiple antecedents): the union of the antecedent
         // types. This handles if/else merge points, loop back-edges, and
-        // switch clause falls.
+        // switch clause falls. A branch label that is the target of an
+        // active reduce-label scope uses the reduced antecedent set
+        // instead (Go `getBranchLabelAntecedents`).
         if flow.antecedents.len() > 1 {
+            let effective: Vec<Arc<FlowNode>> = query
+                .reduce_labels
+                .iter()
+                .rev()
+                .find(|(reduce_target, _)| Arc::ptr_eq(reduce_target, flow))
+                .map(|(_, ants)| ants.clone())
+                .unwrap_or_else(|| flow.antecedents.clone());
+            if effective.len() == 1 {
+                return self.type_at_flow_node(
+                    declared,
+                    initial,
+                    &effective[0],
+                    target,
+                    depth + 1,
+                    query,
+                );
+            }
             let mut antecedent_types: Vec<Arc<Type>> = Vec::new();
-            for antecedent in &flow.antecedents {
+            for antecedent in &effective {
                 let t =
-                    self.type_at_flow_node(declared, antecedent, symbol, depth + 1, query);
+                    self.type_at_flow_node(declared, initial, antecedent, target, depth + 1, query);
                 if !antecedent_types.iter().any(|u| Arc::ptr_eq(u, &t)) {
                     antecedent_types.push(t);
                 }
@@ -256,7 +529,7 @@ impl Checker {
         }
 
         // Single antecedent (or a branch label reduced to one) → recurse.
-        self.antecedent_type_at(declared, flow, symbol, depth, query)
+        self.antecedent_type_at(declared, initial, flow, target, depth, query)
     }
 
     /// The type at `flow`'s single antecedent, or the declared type when the
@@ -264,16 +537,17 @@ impl Checker {
     fn antecedent_type_at(
         &mut self,
         declared: &Arc<Type>,
+        initial: &Arc<Type>,
         flow: &Arc<FlowNode>,
-        symbol: &Arc<Symbol>,
+        target: &FlowRef,
         depth: u32,
         query: &mut FlowQuery,
     ) -> Arc<Type> {
         match &flow.antecedent {
             Some(antecedent) => {
-                self.type_at_flow_node(declared, antecedent, symbol, depth + 1, query)
+                self.type_at_flow_node(declared, initial, antecedent, target, depth + 1, query)
             }
-            None => Arc::clone(declared),
+            None => Arc::clone(initial),
         }
     }
 
@@ -284,14 +558,14 @@ impl Checker {
         &mut self,
         type_: &Arc<Type>,
         expr: &Arc<Node>,
-        symbol: &Arc<Symbol>,
+        target: &FlowRef,
         kind: NarrowKind,
         depth: u32,
     ) -> Arc<Type> {
         // Parenthesized expression: unwrap and recurse.
         if expr.kind == SyntaxKind::ParenthesizedExpression {
             if let NodeData::ParenthesizedExpression(p) = &expr.data {
-                return self.narrow_by_expression(type_, &p.expression, symbol, kind, depth);
+                return self.narrow_by_expression(type_, &p.expression, target, kind, depth);
             }
         }
         // Logical AND: `a && b` — both sides are true in the true branch.
@@ -300,9 +574,9 @@ impl Checker {
                 if bin.operator_token.kind == SyntaxKind::AmpersandAmpersandToken {
                     if kind == NarrowKind::TrueBranch {
                         let narrowed =
-                            self.narrow_by_expression(type_, &bin.left, symbol, kind, depth);
+                            self.narrow_by_expression(type_, &bin.left, target, kind, depth);
                         return self
-                            .narrow_by_expression(&narrowed, &bin.right, symbol, kind, depth);
+                            .narrow_by_expression(&narrowed, &bin.right, target, kind, depth);
                     }
                     // False branch of `a && b`: either `a` is false OR
                     // (`a` is true AND `b` is false). We can't narrow
@@ -310,7 +584,7 @@ impl Checker {
                     return self.narrow_by_expression(
                         type_,
                         &bin.left,
-                        symbol,
+                        target,
                         NarrowKind::FalseBranch,
                         depth,
                     );
@@ -319,15 +593,15 @@ impl Checker {
                     if kind == NarrowKind::FalseBranch {
                         // False branch of `a || b`: both `a` and `b` are false.
                         let narrowed =
-                            self.narrow_by_expression(type_, &bin.left, symbol, kind, depth);
+                            self.narrow_by_expression(type_, &bin.left, target, kind, depth);
                         return self
-                            .narrow_by_expression(&narrowed, &bin.right, symbol, kind, depth);
+                            .narrow_by_expression(&narrowed, &bin.right, target, kind, depth);
                     }
                     // True branch of `a || b`: at least one is true. Check left.
                     return self.narrow_by_expression(
                         type_,
                         &bin.left,
-                        symbol,
+                        target,
                         NarrowKind::TrueBranch,
                         depth,
                     );
@@ -349,8 +623,8 @@ impl Checker {
                     // Narrow left by optionality (keep only null/undefined),
                     // then narrow right by truthiness (falsy).
                     let narrowed =
-                        self.narrow_by_optionality(type_, &bin.left, symbol, kind, depth);
-                    return self.narrow_by_expression(&narrowed, &bin.right, symbol, kind, depth);
+                        self.narrow_by_optionality(type_, &bin.left, target, kind, depth);
+                    return self.narrow_by_expression(&narrowed, &bin.right, target, kind, depth);
                 }
             }
         }
@@ -367,7 +641,7 @@ impl Checker {
                     return self.narrow_by_expression(
                         type_,
                         &unary.operand,
-                        symbol,
+                        target,
                         inverted,
                         depth,
                     );
@@ -377,14 +651,14 @@ impl Checker {
 
         // Binary comparison: `x === value`, `x !== null`, `typeof x === "string"`, etc.
         if expr.kind == SyntaxKind::BinaryExpression {
-            return self.narrow_by_binary(type_, expr, symbol, kind);
+            return self.narrow_by_binary(type_, expr, target, kind);
         }
 
         // Call expression: `isString(x)` — type predicate narrowing.
         // A user-defined type guard function (declared with `x is T`) narrows
         // its argument in the true/false branches.
         if expr.kind == SyntaxKind::CallExpression {
-            return self.narrow_by_call_expression(type_, expr, symbol, kind);
+            return self.narrow_by_call_expression(type_, expr, target, kind);
         }
 
         // Const alias inlining: if `expr` is an Identifier that resolves to
@@ -394,19 +668,19 @@ impl Checker {
         // KindIdentifier case (flow.go ~L383). Capped at 5 levels to
         // prevent infinite recursion.
         if expr.kind == SyntaxKind::Identifier
-            && !self.is_symbol_identifier(expr, symbol)
+            && !self.expr_matches_target(expr, target)
             && self.flow_inline_level < 5
         {
             if let Some(init_expr) = self.const_alias_initializer(expr) {
                 self.flow_inline_level += 1;
-                let result = self.narrow_by_expression(type_, &init_expr, symbol, kind, depth);
+                let result = self.narrow_by_expression(type_, &init_expr, target, kind, depth);
                 self.flow_inline_level -= 1;
                 return result;
             }
         }
 
         // Bare identifier: `if (x)` — truthiness narrowing.
-        if self.is_symbol_identifier(expr, symbol) {
+        if self.expr_matches_target(expr, target) {
             return self.narrow_by_truthiness(type_, kind);
         }
 
@@ -415,7 +689,7 @@ impl Checker {
         // `undefined`, which is falsy). Mirrors Go's `narrowTypeByTruthiness`
         // optional chain containment check (flow.go ~L432).
         if kind == NarrowKind::TrueBranch {
-            let contains = self.optional_chain_contains_reference(expr, symbol);
+            let contains = self.optional_chain_contains_target(expr, target);
             if contains {
                 return self.remove_nullable_from_union(type_);
             }
@@ -432,7 +706,7 @@ impl Checker {
         &mut self,
         type_: &Arc<Type>,
         expr: &Arc<Node>,
-        symbol: &Arc<Symbol>,
+        target: &FlowRef,
         kind: NarrowKind,
     ) -> Arc<Type> {
         let NodeData::BinaryExpression(bin) = &expr.data else {
@@ -443,12 +717,12 @@ impl Checker {
         // `instanceof`: `x instanceof Foo` — narrow to the instance type
         // of `Foo` in the true branch; remove it in the false branch.
         if op == SyntaxKind::InstanceOfKeyword {
-            return self.narrow_by_instanceof(type_, &bin.left, &bin.right, symbol, kind);
+            return self.narrow_by_instanceof(type_, &bin.left, &bin.right, target, kind);
         }
 
         // `in`: `"prop" in x` — narrow `x` by property presence.
         if op == SyntaxKind::InKeyword {
-            return self.narrow_by_in_keyword(type_, &bin.left, &bin.right, symbol, kind);
+            return self.narrow_by_in_keyword(type_, &bin.left, &bin.right, target, kind);
         }
 
         // Equality/inequality: `===`, `!==`, `==`, `!=`
@@ -476,12 +750,12 @@ impl Checker {
 
         // Handle `typeof x === "string"` patterns.
         if bin.left.kind == SyntaxKind::TypeOfExpression
-            && self.typeof_expr_matches_symbol(&bin.left, symbol)
+            && self.typeof_expr_matches_target(&bin.left, target)
         {
             return self.narrow_by_typeof(type_, &bin.right, narrow_to_value, is_loose);
         }
         if bin.right.kind == SyntaxKind::TypeOfExpression
-            && self.typeof_expr_matches_symbol(&bin.right, symbol)
+            && self.typeof_expr_matches_target(&bin.right, target)
         {
             return self.narrow_by_typeof(type_, &bin.left, narrow_to_value, is_loose);
         }
@@ -496,7 +770,7 @@ impl Checker {
                 type_,
                 &bin.left,
                 &bin.right,
-                symbol,
+                target,
                 narrow_to_value,
             ) {
                 return narrowed;
@@ -507,7 +781,7 @@ impl Checker {
                 type_,
                 &bin.right,
                 &bin.left,
-                symbol,
+                target,
                 narrow_to_value,
             ) {
                 return narrowed;
@@ -516,7 +790,7 @@ impl Checker {
 
         // Discriminated union narrowing: `obj.kind === "value"` narrows
         // `obj` to the union constituent whose `kind` property matches.
-        if let Some(narrowed) = self.try_narrow_by_discriminant_property(type_, expr, symbol, kind)
+        if let Some(narrowed) = self.try_narrow_by_discriminant_property(type_, expr, target, kind)
         {
             return narrowed;
         }
@@ -525,17 +799,17 @@ impl Checker {
         // excludes null/undefined, then `x` cannot be null/undefined.
         // Mirrors Go's `narrowTypeByOptionalChainContainment` (flow.go
         // ~L1019).
-        if self.optional_chain_contains_reference(&bin.left, symbol) {
+        if self.optional_chain_contains_target(&bin.left, target) {
             return self.narrow_by_optional_chain_containment(type_, op, &bin.right, kind);
         }
-        if self.optional_chain_contains_reference(&bin.right, symbol) {
+        if self.optional_chain_contains_target(&bin.right, target) {
             return self.narrow_by_optional_chain_containment(type_, op, &bin.left, kind);
         }
 
         // Simple `x === value` or `value === x` patterns.
-        let (value_node, is_symbol_on_left) = if self.is_symbol_identifier(&bin.left, symbol) {
+        let (value_node, is_symbol_on_left) = if self.expr_matches_target(&bin.left, target) {
             (&bin.right, true)
-        } else if self.is_symbol_identifier(&bin.right, symbol) {
+        } else if self.expr_matches_target(&bin.right, target) {
             (&bin.left, false)
         } else {
             return Arc::clone(type_);
@@ -803,10 +1077,10 @@ impl Checker {
         type_: &Arc<Type>,
         left: &Arc<Node>,
         right: &Arc<Node>,
-        symbol: &Arc<Symbol>,
+        target: &FlowRef,
         kind: NarrowKind,
     ) -> Arc<Type> {
-        if !self.is_symbol_identifier(left, symbol) {
+        if !self.expr_matches_target(left, target) {
             return Arc::clone(type_);
         }
         let right_type = self.get_type_of_node(right);
@@ -829,10 +1103,10 @@ impl Checker {
         type_: &Arc<Type>,
         left: &Arc<Node>,
         right: &Arc<Node>,
-        symbol: &Arc<Symbol>,
+        target: &FlowRef,
         kind: NarrowKind,
     ) -> Arc<Type> {
-        if !self.is_symbol_identifier(right, symbol) {
+        if !self.expr_matches_target(right, target) {
             return Arc::clone(type_);
         }
         let Some(prop_name) = Self::get_accessed_property_name_from_node(left) else {
@@ -873,9 +1147,16 @@ impl Checker {
         &mut self,
         type_: &Arc<Type>,
         expr: &Arc<Node>,
-        symbol: &Arc<Symbol>,
+        target: &FlowRef,
         kind: NarrowKind,
     ) -> Option<Arc<Type>> {
+        // Discriminant narrowing selects the union constituent that owns a
+        // matching `kind` property; it only applies when the narrowed target
+        // is the *receiver* (`obj` of `obj.kind`), never a property-access
+        // reference (whose own type the plain equality path narrows).
+        let FlowRef::Symbol(symbol) = target else {
+            return None;
+        };
         let NodeData::BinaryExpression(bin) = &expr.data else {
             return None;
         };
@@ -886,15 +1167,25 @@ impl Checker {
         if !is_strict_eq {
             return None;
         }
-        // Find which side is the property access on `symbol`.
-        let (access_node, value_node) = if self.is_property_access_on_symbol(&bin.left, symbol) {
-            (&bin.left, &bin.right)
+        // Find which side is the property access on `symbol` — directly
+        // (`obj.kind`) or through a const alias (`const k = obj.kind`,
+        // `const { kind: k } = obj`). Mirrors Go's
+        // `getCandidateDiscriminantPropertyAccess` identifier case
+        // (flow.go ~L1460).
+        let (access_node, value_node) = if let Some(alias) =
+            self.discriminant_alias_access(&bin.left, symbol)
+        {
+            (alias, &bin.right)
+        } else if let Some(alias) = self.discriminant_alias_access(&bin.right, symbol) {
+            (alias, &bin.left)
+        } else if self.is_property_access_on_symbol(&bin.left, symbol) {
+            (Arc::clone(&bin.left), &bin.right)
         } else if self.is_property_access_on_symbol(&bin.right, symbol) {
-            (&bin.right, &bin.left)
+            (Arc::clone(&bin.right), &bin.left)
         } else {
             return None;
         };
-        let prop_name = Self::get_accessed_property_name_from_node(access_node)?;
+        let prop_name = Self::get_accessed_property_name_from_node(&access_node)?;
         // For non-union types, narrowing by discriminant is a no-op.
         if !type_.is_union() {
             return Some(Arc::clone(type_));
@@ -931,18 +1222,24 @@ impl Checker {
         type_: &Arc<Type>,
         typeof_expr: &Arc<Node>,
         type_name_node: &Arc<Node>,
-        symbol: &Arc<Symbol>,
+        target: &FlowRef,
         narrow_to_value: bool,
     ) -> Option<Arc<Type>> {
+        let FlowRef::Symbol(symbol) = target else {
+            return None;
+        };
         let NodeData::TypeOfExpression(typeof_data) = &typeof_expr.data else {
             return None;
         };
         let target = &typeof_data.expression;
-        // Check if target is `obj.prop` (a property access on symbol).
-        if !self.is_property_access_on_symbol(target, symbol) {
-            return None;
-        }
-        let prop_name = Self::get_accessed_property_name_from_node(target)?;
+        // Check if target is `obj.prop` (a property access on symbol) or a
+        // const alias of one (`const k = obj.kind`).
+        let owned = match self.discriminant_alias_access(target, symbol) {
+            Some(alias) => alias,
+            None if self.is_property_access_on_symbol(target, symbol) => Arc::clone(target),
+            None => return None,
+        };
+        let prop_name = Self::get_accessed_property_name_from_node(&owned)?;
         // For non-union types, narrowing by discriminant is a no-op.
         if !type_.is_union() {
             return Some(Arc::clone(type_));
@@ -1023,7 +1320,7 @@ impl Checker {
         &mut self,
         type_: &Arc<Type>,
         flow: &Arc<FlowNode>,
-        symbol: &Arc<Symbol>,
+        target: &FlowRef,
     ) -> Arc<Type> {
         let Some(switch_stmt) = &flow.switch_statement else {
             return Arc::clone(type_);
@@ -1036,27 +1333,37 @@ impl Checker {
             return Arc::clone(type_);
         };
 
-        // Case 1: discriminant is the symbol itself → `switch (x) { ... }`
-        if self.is_symbol_identifier(discriminant, symbol) {
+        // Case 1: discriminant is the narrowed target → `switch (x) { ... }` /
+        // `switch (obj.val) { ... }`
+        if self.expr_matches_target(discriminant, target) {
             return self.narrow_by_switch_on_discriminant(type_, clause, switch_stmt);
         }
 
-        // Case 2: discriminant is a property access on the symbol →
-        // `switch (obj.kind) { ... }`
-        if self.is_property_access_on_symbol(discriminant, symbol) {
+        // Case 2: discriminant is a property access on the symbol —
+        // directly (`switch (obj.kind)`) or through a const alias
+        // (`const k = obj.kind; switch (k)`).
+        if let FlowRef::Symbol(symbol) = target {
+        if let Some(access) = self
+            .discriminant_alias_access(discriminant, symbol)
+            .or_else(|| {
+                self.is_property_access_on_symbol(discriminant, symbol)
+                    .then(|| Arc::clone(discriminant))
+            })
+        {
             return self.narrow_by_switch_on_discriminant_property(
                 type_,
                 clause,
                 switch_stmt,
-                discriminant,
+                &access,
             );
         }
+        }
 
-        // Case 3: discriminant is `typeof x` where `x` is the symbol →
+        // Case 3: discriminant is `typeof x` where `x` is the target →
         // `switch (typeof x) { case "string": ... }`
         if discriminant.kind == SyntaxKind::TypeOfExpression {
             if let NodeData::TypeOfExpression(typeof_data) = &discriminant.data {
-                if self.is_symbol_identifier(&typeof_data.expression, symbol) {
+                if self.expr_matches_target(&typeof_data.expression, target) {
                     return self.narrow_by_switch_on_typeof(type_, clause, switch_stmt);
                 }
             }
@@ -1066,7 +1373,7 @@ impl Checker {
         // Each case clause's expression is a boolean condition that narrows
         // the symbol. Mirrors Go's `narrowTypeBySwitchOnTrue` (flow.go ~L1166).
         if discriminant.kind == SyntaxKind::TrueKeyword {
-            return self.narrow_by_switch_on_true(type_, clause, switch_stmt, symbol);
+            return self.narrow_by_switch_on_true(type_, clause, switch_stmt, target);
         }
 
         Arc::clone(type_)
@@ -1095,7 +1402,7 @@ impl Checker {
         type_: &Arc<Type>,
         clause: &Arc<Node>,
         switch_stmt: &Arc<Node>,
-        symbol: &Arc<Symbol>,
+        target: &FlowRef,
     ) -> Arc<Type> {
         let NodeData::SwitchStatement(switch_data) = &switch_stmt.data else {
             return Arc::clone(type_);
@@ -1121,7 +1428,7 @@ impl Checker {
                     t = self.narrow_by_expression(
                         &t,
                         &cd.expression,
-                        symbol,
+                        target,
                         NarrowKind::FalseBranch,
                         0,
                     );
@@ -1137,7 +1444,7 @@ impl Checker {
                         t = self.narrow_by_expression(
                             &t,
                             &cd.expression,
-                            symbol,
+                            target,
                             NarrowKind::FalseBranch,
                             0,
                         );
@@ -1149,7 +1456,7 @@ impl Checker {
 
         // CaseClause: narrow with the condition being true.
         if let NodeData::CaseOrDefaultClause(cd) = &clause.data {
-            t = self.narrow_by_expression(&t, &cd.expression, symbol, NarrowKind::TrueBranch, 0);
+            t = self.narrow_by_expression(&t, &cd.expression, target, NarrowKind::TrueBranch, 0);
         }
         t
     }
@@ -1214,17 +1521,24 @@ impl Checker {
             let constituents = self.constituent_types(type_);
             let matching: Vec<Arc<Type>> = constituents
                 .into_iter()
-                .filter(|t| self.types_overlap(t, &implied))
+                .filter(|t| {
+                    // `case "function"` keeps only CALLABLE constituents (a
+                    // plain `object` constituent is excluded — `typeof {} ===
+                    // "object"`); other names keep overlapping constituents.
+                    if case_text == "function" {
+                        return self.types_overlap(t, &implied)
+                            && !self
+                                .get_signatures_of_type(t, SignatureKind::Call)
+                                .is_empty();
+                    }
+                    self.types_overlap(t, &implied)
+                })
                 .collect();
             return self.rebuild_union_or_never(type_, matching);
         }
         // Non-union: if the type overlaps the implied type, narrow to the
-        // implied type (e.g. `string | number` was already handled above;
-        // for a plain `string` type with `case "string":`, keep `string`).
+        // implied type.
         if self.types_overlap(type_, &implied) {
-            // If the original type is a subtype of (or equal to) the implied
-            // type, keep it as-is (e.g. a literal `"foo"` stays `"foo"`
-            // under `case "string":`).
             if self.is_type_assignable_to(type_, &implied) {
                 return Arc::clone(type_);
             }
@@ -1453,7 +1767,17 @@ impl Checker {
     ///
     /// Mirrors Go's `optionalChainContainsReference` (flow.go ~L1830).
     /// Walks down the optional chain: `x?.a?.b` → checks if `x` is `symbol`.
-    fn optional_chain_contains_reference(&self, source: &Arc<Node>, symbol: &Arc<Symbol>) -> bool {
+    fn optional_chain_contains_target(&self, source: &Arc<Node>, target: &FlowRef) -> bool {
+        let symbol = match target {
+            FlowRef::Symbol(symbol) => symbol,
+            FlowRef::Node(reference) => {
+                return self.optional_chain_contains_reference(source, reference)
+            }
+        };
+        self.optional_chain_contains_symbol(source, symbol)
+    }
+
+    fn optional_chain_contains_symbol(&self, source: &Arc<Node>, symbol: &Arc<Symbol>) -> bool {
         let mut current = Arc::clone(source);
         loop {
             let (inner, is_optional) = match &current.data {
@@ -1469,6 +1793,43 @@ impl Checker {
                 _ => return false,
             };
             if is_optional && self.is_symbol_identifier(inner, symbol) {
+                return true;
+            }
+            if !is_optional
+                && !matches!(
+                    &current.data,
+                    NodeData::NonNullExpression(_) | NodeData::ParenthesizedExpression(_)
+                )
+            {
+                // Not an optional chain and not a transparent wrapper — stop.
+                return false;
+            }
+            current = Arc::clone(inner);
+        }
+    }
+
+    /// Node-reference variant: the optional chain's root structurally matches
+    /// the reference being narrowed (`obj?.x` contains the reference `obj`).
+    fn optional_chain_contains_reference(
+        &self,
+        source: &Arc<Node>,
+        reference: &Arc<Node>,
+    ) -> bool {
+        let mut current = Arc::clone(source);
+        loop {
+            let (inner, is_optional) = match &current.data {
+                NodeData::PropertyAccessExpression(pa) => {
+                    (&pa.expression, pa.question_dot_token.is_some())
+                }
+                NodeData::ElementAccessExpression(ea) => {
+                    (&ea.expression, ea.question_dot_token.is_some())
+                }
+                NodeData::CallExpression(ce) => (&ce.expression, ce.question_dot_token.is_some()),
+                NodeData::NonNullExpression(ne) => (&ne.expression, false),
+                NodeData::ParenthesizedExpression(pe) => (&pe.expression, false),
+                _ => return false,
+            };
+            if is_optional && self.is_matching_reference(reference, inner) {
                 return true;
             }
             if !is_optional
@@ -1564,7 +1925,7 @@ impl Checker {
         &mut self,
         type_: &Arc<Type>,
         expr: &Arc<Node>,
-        symbol: &Arc<Symbol>,
+        target: &FlowRef,
         kind: NarrowKind,
     ) -> Arc<Type> {
         let NodeData::CallExpression(call) = &expr.data else {
@@ -1581,6 +1942,49 @@ impl Checker {
             if predicate.kind != TypePredicateKind::Identifier
                 && predicate.kind != TypePredicateKind::AssertsIdentifier
             {
+                // `this is T` predicates (Array#every/some overloads like
+                // `every<S extends T>(cb: (v: T) => v is S): this is S[]`)
+                // narrow the method RECEIVER when the callback argument
+                // carries its own `value is U` predicate (Go
+                // narrowTypeByCallExpression's TypePredicateKindThis arm via
+                // the effects signature instantiated at the call site).
+                if predicate.kind == TypePredicateKind::This
+                    && let Some(pred_type) = &predicate.t
+                {
+                    let receiver = match &call.expression.data {
+                        NodeData::PropertyAccessExpression(pa) => Some(&pa.expression),
+                        _ => None,
+                    };
+                    let Some(receiver) = receiver else {
+                        continue;
+                    };
+                    if !self.expr_matches_target(receiver, target) {
+                        continue;
+                    }
+                    let Some(callback_arg) = call.arguments.nodes.first() else {
+                        continue;
+                    };
+                    let Some(u) = self.callback_predicate_type(callback_arg) else {
+                        continue;
+                    };
+                    // Instantiate the declared predicate `S[]` with the
+                    // callback's predicate type before narrowing.
+                    let instantiated = if sig.type_parameters.is_empty() {
+                        Arc::clone(pred_type)
+                    } else {
+                        let args: Vec<Arc<Type>> = sig
+                            .type_parameters
+                            .iter()
+                            .map(|_| Arc::clone(&u))
+                            .collect();
+                        self.substitute_infer_type_parameters(
+                            pred_type,
+                            &sig.type_parameters,
+                            &args,
+                        )
+                    };
+                    return self.narrow_by_type_predicate(type_, &instantiated, assume_true);
+                }
                 continue;
             }
             let Some(pred_type) = &predicate.t else {
@@ -1590,8 +1994,8 @@ impl Checker {
             let Some(arg) = call.arguments.nodes.get(param_idx) else {
                 continue;
             };
-            // The argument must be the symbol being narrowed.
-            if !self.is_symbol_identifier(arg, symbol) {
+            // The argument must be the target being narrowed.
+            if !self.expr_matches_target(arg, target) {
                 continue;
             }
             return self.narrow_by_type_predicate(type_, pred_type, assume_true);
@@ -1599,11 +2003,28 @@ impl Checker {
         Arc::clone(type_)
     }
 
+    /// The `U` of a callback argument's own `value is U` signature — used by
+    /// `this is S[]` receiver narrowing (`arr.every(x is U)` narrows `arr`
+    /// to `U[]`).
+    fn callback_predicate_type(&mut self, arg: &Arc<Node>) -> Option<Arc<Type>> {
+        let arg_type = self.get_type_of_node(arg);
+        let sigs = self.get_signatures_of_type(&arg_type, SignatureKind::Call);
+        for sig in &sigs {
+            if let Some(pred) = self.compute_type_predicate_of_signature(sig)
+                && pred.kind == TypePredicateKind::Identifier
+                && let Some(t) = pred.t
+            {
+                return Some(t);
+            }
+        }
+        None
+    }
+
     /// Narrow `type_` after an assertion function call.
     ///
     /// Mirrors Go's `getTypeAtFlowCall` (flow.go ~L288). If `call_expr`
     /// calls an assertion function (`asserts x` or `asserts x is T`), the
-    /// argument corresponding to `symbol` is narrowed:
+    /// argument corresponding to `target` is narrowed:
     ///
     /// - `asserts x is T` → narrow to `T` (intersect with the predicate type).
     /// - `asserts x` (no type) → narrow to truthy (remove `null`/`undefined`).
@@ -1613,7 +2034,7 @@ impl Checker {
         &mut self,
         type_: &Arc<Type>,
         call_expr: &Arc<Node>,
-        symbol: &Arc<Symbol>,
+        target: &FlowRef,
     ) -> Arc<Type> {
         let NodeData::CallExpression(call) = &call_expr.data else {
             return Arc::clone(type_);
@@ -1640,8 +2061,8 @@ impl Checker {
             let Some(arg) = call.arguments.nodes.get(param_idx) else {
                 continue;
             };
-            // The argument must be the symbol being narrowed.
-            if !self.is_symbol_identifier(arg, symbol) {
+            // The argument must be the target being narrowed.
+            if !self.expr_matches_target(arg, target) {
                 continue;
             }
             if let Some(pred_type) = &predicate.t {
@@ -1672,12 +2093,12 @@ impl Checker {
         }
     }
 
-    /// Check if `expr` is `typeof <symbol>`.
-    fn typeof_expr_matches_symbol(&self, expr: &Arc<Node>, symbol: &Arc<Symbol>) -> bool {
+    /// Check if `expr` is `typeof <target>`.
+    fn typeof_expr_matches_target(&self, expr: &Arc<Node>, target: &FlowRef) -> bool {
         let NodeData::TypeOfExpression(typeof_data) = &expr.data else {
             return false;
         };
-        self.is_symbol_identifier(&typeof_data.expression, symbol)
+        self.expr_matches_target(&typeof_data.expression, target)
     }
 
     /// Narrow by `typeof x === "typename"`.
@@ -1757,13 +2178,13 @@ impl Checker {
         &mut self,
         type_: &Arc<Type>,
         expr: &Arc<Node>,
-        symbol: &Arc<Symbol>,
+        target: &FlowRef,
         kind: NarrowKind,
         _depth: u32,
     ) -> Arc<Type> {
-        // If the expression is a direct reference to our symbol, apply
+        // If the expression is a direct reference to our target, apply
         // optionality narrowing (remove/keep null/undefined).
-        if self.is_symbol_identifier(expr, symbol) {
+        if self.expr_matches_target(expr, target) {
             return match kind {
                 NarrowKind::TrueBranch => self.remove_nullable_from_union(type_),
                 NarrowKind::FalseBranch => {
@@ -1776,12 +2197,12 @@ impl Checker {
         if expr.kind == SyntaxKind::Identifier && self.flow_inline_level < 5 {
             if let Some(init_expr) = self.const_alias_initializer(expr) {
                 self.flow_inline_level += 1;
-                let result = self.narrow_by_optionality(type_, &init_expr, symbol, kind, _depth);
+                let result = self.narrow_by_optionality(type_, &init_expr, target, kind, _depth);
                 self.flow_inline_level -= 1;
                 return result;
             }
         }
-        // Expression doesn't reference our symbol; no narrowing.
+        // Expression doesn't reference our target; no narrowing.
         Arc::clone(type_)
     }
 
@@ -2233,6 +2654,277 @@ impl Checker {
         eq
     }
 
+    /// Whether `node` is the expression the flow query narrows. Identifier
+    /// targets match by symbol; property-access targets match structurally.
+    fn expr_matches_target(&self, node: &Arc<Node>, target: &FlowRef) -> bool {
+        match target {
+            FlowRef::Symbol(symbol) => self.is_symbol_identifier(node, symbol),
+            FlowRef::Node(reference) => self.is_matching_reference(reference, node),
+        }
+    }
+
+    /// Structurally compare two reference expressions for flow narrowing.
+    ///
+    /// Mirrors Go's `isMatchingReference` (flow.go ~L1597): unwraps
+    /// parentheses/non-null/assignment/comma wrappers on the flow side,
+    /// matches identifiers by resolved symbol, `this`/`super` by kind, and
+    /// property/element accesses by accessed property name plus recursively
+    /// matching receivers.
+    fn is_matching_reference(&self, source: &Arc<Node>, target: &Arc<Node>) -> bool {
+        match target.kind {
+            SyntaxKind::ParenthesizedExpression | SyntaxKind::NonNullExpression => {
+                let inner = Self::skip_parentheses(target);
+                return self.is_matching_reference(source, &inner);
+            }
+            SyntaxKind::BinaryExpression => {
+                if let NodeData::BinaryExpression(bin) = &target.data {
+                    if is_assignment_operator(bin.operator_token.kind)
+                        && self.is_matching_reference(source, &bin.left)
+                    {
+                        return true;
+                    }
+                    if bin.operator_token.kind == SyntaxKind::CommaToken
+                        && self.is_matching_reference(source, &bin.right)
+                    {
+                        return true;
+                    }
+                }
+                return false;
+            }
+            _ => {}
+        }
+        match source.kind {
+            SyntaxKind::Identifier | SyntaxKind::PrivateIdentifier => {
+                if target.kind != SyntaxKind::Identifier {
+                    return false;
+                }
+                match (
+                    self.resolve_identifier(source),
+                    self.resolve_identifier(target),
+                ) {
+                    (Some(s), Some(t)) => Arc::ptr_eq(&s, &t),
+                    _ => false,
+                }
+            }
+            SyntaxKind::ThisKeyword | SyntaxKind::SuperKeyword => target.kind == source.kind,
+            SyntaxKind::NonNullExpression
+            | SyntaxKind::ParenthesizedExpression
+            | SyntaxKind::SatisfiesExpression => {
+                if let Some(inner) = source.expression() {
+                    self.is_matching_reference(&inner, target)
+                } else {
+                    false
+                }
+            }
+            SyntaxKind::PropertyAccessExpression | SyntaxKind::ElementAccessExpression => {
+                if let Some(source_prop_name) = self.get_accessed_property_name(source) {
+                    if matches!(
+                        target.kind,
+                        SyntaxKind::PropertyAccessExpression | SyntaxKind::ElementAccessExpression
+                    ) {
+                        if let Some(target_prop_name) = self.get_accessed_property_name(target) {
+                            if target_prop_name == source_prop_name {
+                                let source_receiver = source.expression();
+                                let target_receiver = target.expression();
+                                if let (Some(s), Some(t)) = (source_receiver, target_receiver) {
+                                    return self.is_matching_reference(&s, &t);
+                                }
+                            }
+                        }
+                    }
+                }
+                // `a[i]` matches `a[j]` when `i` and `j` resolve to the same
+                // constant (or never-reassigned parameter/local) variable.
+                if source.kind == SyntaxKind::ElementAccessExpression
+                    && target.kind == SyntaxKind::ElementAccessExpression
+                {
+                    let (NodeData::ElementAccessExpression(source_ea),
+                         NodeData::ElementAccessExpression(target_ea)) =
+                        (&source.data, &target.data)
+                    else {
+                        return false;
+                    };
+                    if source_ea.argument_expression.kind == SyntaxKind::Identifier
+                        && target_ea.argument_expression.kind == SyntaxKind::Identifier
+                    {
+                        let matching_args = match (
+                            self.resolve_identifier(&source_ea.argument_expression),
+                            self.resolve_identifier(&target_ea.argument_expression),
+                        ) {
+                            (Some(s), Some(t)) if Arc::ptr_eq(&s, &t) => {
+                                self.symbol_is_const_variable(&s)
+                                    || (self.is_parameter_or_mutable_local(&s)
+                                        && !self.symbol_is_assigned(&s))
+                            }
+                            _ => false,
+                        };
+                        if matching_args {
+                            let (Some(s), Some(t)) = (
+                                source.expression(),
+                                target.expression(),
+                            ) else {
+                                return false;
+                            };
+                            return self.is_matching_reference(&s, &t);
+                        }
+                    }
+                }
+                false
+            }
+            SyntaxKind::QualifiedName => {
+                if let NodeData::QualifiedName(qualified) = &source.data {
+                    if matches!(
+                        target.kind,
+                        SyntaxKind::PropertyAccessExpression | SyntaxKind::ElementAccessExpression
+                    ) {
+                        if let Some(target_prop_name) = self.get_accessed_property_name(target) {
+                            if qualified.right.text() == target_prop_name {
+                                if let Some(t) = target.expression() {
+                                    return self.is_matching_reference(&qualified.left, &t);
+                                }
+                            }
+                        }
+                    }
+                }
+                false
+            }
+            _ => false,
+        }
+    }
+
+    /// Whether any left-hand part of the dotted `source` reference matches
+    /// `target` (`obj.val` contains `obj`). Mirrors Go's
+    /// `containsMatchingReference` (flow.go ~L1841).
+    fn contains_matching_reference(&self, source: &Arc<Node>, target: &Arc<Node>) -> bool {
+        let mut source = Arc::clone(source);
+        while matches!(
+            source.kind,
+            SyntaxKind::PropertyAccessExpression | SyntaxKind::ElementAccessExpression
+        ) {
+            let Some(inner) = source.expression() else {
+                break;
+            };
+            if self.is_matching_reference(inner, target) {
+                return true;
+            }
+            source = Arc::clone(inner);
+        }
+        false
+    }
+
+    /// The accessed property name of a property/element access, used for
+    /// structural reference matching. Mirrors Go's `getAccessedPropertyName`
+    /// (flow.go ~L1727): `a.b` → `b`, `a["b"]` → `b`, `a[0]` → `0`.
+    /// Returns `None` for non-literal element-access arguments.
+    fn get_accessed_property_name(&self, access: &Arc<Node>) -> Option<String> {
+        match &access.data {
+            NodeData::PropertyAccessExpression(pa) => Some(pa.name.text().to_string()),
+            NodeData::ElementAccessExpression(ea) => {
+                match &ea.argument_expression.data {
+                    NodeData::StringLiteral(s) => Some(s.text.clone()),
+                    NodeData::NumericLiteral(n) => Some(n.text.clone()),
+                    _ => None,
+                }
+            }
+            _ => None,
+        }
+    }
+
+    /// Whether `symbol` is a function parameter or a block-scoped local
+    /// (not a property, export, etc.). Mirrors the
+    /// `isParameterOrMutableLocalVariable` half of Go's element-access
+    /// argument matching (flow.go ~L1634).
+    fn is_parameter_or_mutable_local(&self, symbol: &Arc<Symbol>) -> bool {
+        symbol
+            .flags
+            .intersects(SymbolFlags::FunctionScopedVariable | SymbolFlags::BlockScopedVariable)
+    }
+
+    /// Whether `symbol` is assigned anywhere in its enclosing function or
+    /// source file. Mirrors Go's `isSymbolAssigned` (flow.go ~L2661, backed
+    /// by `markNodeAssignments`). This port conservatively scans assignment
+    /// targets by identifier name in the enclosing container: over-reporting
+    /// assignments only removes narrowing opportunities, never adds wrong
+    /// narrowing.
+    fn symbol_is_assigned(&self, symbol: &Arc<Symbol>) -> bool {
+        let Some(decl) = symbol.value_declaration.as_ref() else {
+            return true;
+        };
+        let Some(container) = Self::enclosing_function_or_source_file(decl) else {
+            return true;
+        };
+        let mut assigned = false;
+        Self::scan_assignment_targets(&container, &symbol.name, &mut assigned);
+        assigned
+    }
+
+    /// Nearest function-like or source-file ancestor of `node`.
+    pub(super) fn enclosing_function_or_source_file(node: &Arc<Node>) -> Option<Arc<Node>> {
+        let mut current = Arc::clone(node);
+        loop {
+            if matches!(
+                current.kind,
+                SyntaxKind::SourceFile
+                    | SyntaxKind::FunctionDeclaration
+                    | SyntaxKind::FunctionExpression
+                    | SyntaxKind::ArrowFunction
+                    | SyntaxKind::MethodDeclaration
+                    | SyntaxKind::Constructor
+                    | SyntaxKind::GetAccessor
+                    | SyntaxKind::SetAccessor
+            ) {
+                return Some(current);
+            }
+            current = Arc::clone(current.parent.as_ref()?);
+        }
+    }
+
+    /// Recursively mark identifiers in assignment-target positions whose
+    /// name matches `name`.
+    fn scan_assignment_targets(node: &Arc<Node>, name: &str, assigned: &mut bool) {
+        if *assigned {
+            return;
+        }
+        match &node.data {
+            NodeData::BinaryExpression(bin) => {
+                if is_assignment_operator(bin.operator_token.kind)
+                    && bin.left.kind == SyntaxKind::Identifier
+                    && bin.left.text() == name
+                {
+                    *assigned = true;
+                    return;
+                }
+            }
+            NodeData::PrefixUnaryExpression(unary) => {
+                if matches!(
+                    unary.operator,
+                    SyntaxKind::PlusPlusToken | SyntaxKind::MinusMinusToken
+                ) && unary.operand.kind == SyntaxKind::Identifier
+                    && unary.operand.text() == name
+                {
+                    *assigned = true;
+                    return;
+                }
+            }
+            NodeData::PostfixUnaryExpression(unary) => {
+                if matches!(
+                    unary.operator,
+                    SyntaxKind::PlusPlusToken | SyntaxKind::MinusMinusToken
+                ) && unary.operand.kind == SyntaxKind::Identifier
+                    && unary.operand.text() == name
+                {
+                    *assigned = true;
+                    return;
+                }
+            }
+            _ => {}
+        }
+        crate::ast::node_data_generated::for_each_child(node, |child| {
+            Self::scan_assignment_targets(child, name, assigned);
+            *assigned
+        });
+    }
+
     /// If `expr` is an Identifier referring to a `const` variable with a
     /// simple initializer (no type annotation), return the initializer
     /// expression (with parentheses unwrapped). Mirrors Go's
@@ -2307,11 +2999,11 @@ impl Checker {
         &mut self,
         node: &Arc<Node>,
         pre_type: &Arc<Type>,
-        symbol: &Arc<Symbol>,
+        target: &FlowRef,
     ) -> Option<Arc<Type>> {
         // Extract the mutated array reference: `arr.push(1)` → `arr`.
         let receiver = self.get_array_mutation_receiver(node)?;
-        if !self.is_symbol_identifier(&receiver, symbol) {
+        if !self.expr_matches_target(&receiver, target) {
             return None;
         }
         // If the pre-mutation type is the auto-array marker, convert it
@@ -2332,10 +3024,33 @@ impl Checker {
             let t = self.get_type_of_node(arg);
             arg_types.push(self.get_widened_type_of_literal(&t));
         }
-        // Evolve: add each argument's type to the element type.
+        // Evolve: add each argument's (widened) type to the element type.
+        // For an element-access assignment `arr[i] = x` (BinaryExpression
+        // mutation node), the "argument" is the RHS, applied only when the
+        // index is number-like (Go `getTypeAtFlowArrayMutation`,
+        // flow.go ~L1420).
         let mut evolved = evolving;
-        for arg_type in arg_types {
-            evolved = self.add_evolving_array_element_type(&evolved, arg_type);
+        match &node.data {
+            NodeData::BinaryExpression(bin)
+                if is_assignment_operator(bin.operator_token.kind) =>
+            {
+                if let NodeData::ElementAccessExpression(ea) = &bin.left.data {
+                    let index_type = self.get_type_of_node(&ea.argument_expression);
+                    if index_type
+                        .flags
+                        .intersects(TypeFlags::Number | TypeFlags::NumberLiteral)
+                    {
+                        let t = self.get_type_of_node(&bin.right);
+                        let widened = self.get_widened_type_of_literal(&t);
+                        evolved = self.add_evolving_array_element_type(&evolved, widened);
+                    }
+                }
+            }
+            _ => {
+                for arg_type in arg_types {
+                    evolved = self.add_evolving_array_element_type(&evolved, arg_type);
+                }
+            }
         }
         Some(evolved)
     }
@@ -2372,44 +3087,284 @@ impl Checker {
         }
     }
 
-    /// If `expr` is an assignment to `symbol`, return the type of the RHS.
-    fn assignment_rhs_type_for_symbol(
+    /// The flow type after a matching assignment. Mirrors Go's
+    /// `getTypeAtFlowAssignment` (flow.go ~L220): evolving arrays keep the
+    /// assigned type (the ARRAY_MUTATION machinery finalizes them); a union
+    /// declared type is reduced by the assigned type
+    /// (`getAssignmentReducedType`); any other declared type is returned
+    /// unchanged. Returns `None` when the assignment doesn't match the
+    /// target, or is compound (the antecedent walk then applies).
+    fn assignment_flow_type(
         &mut self,
         expr: &Arc<Node>,
-        symbol: &Arc<Symbol>,
+        target: &FlowRef,
+        declared: &Arc<Type>,
     ) -> Option<Arc<Type>> {
-        // `x = value`, `x += value`, etc.
-        if expr.kind == SyntaxKind::BinaryExpression {
-            if let NodeData::BinaryExpression(bin) = &expr.data {
-                if is_assignment_operator(bin.operator_token.kind)
-                    && self.is_symbol_identifier(&bin.left, symbol)
+        let evolving = declared.object_flags.contains(ObjectFlags::EvolvingArray)
+            || self.is_auto_array_type(declared);
+        match &expr.data {
+            // `x = value` — reduce the declared union by the RHS type.
+            NodeData::BinaryExpression(bin) => {
+                if !is_assignment_operator(bin.operator_token.kind) {
+                    return None;
+                }
+                if !self.expr_matches_target(&bin.left, target) {
+                    return None;
+                }
+                // Compound assignments (`x += v`) recompute from the
+                // antecedent type in Go (getBaseTypeOfLiteralType); the
+                // caller's antecedent walk approximates that.
+                if bin.operator_token.kind != SyntaxKind::EqualsToken {
+                    return None;
+                }
+                let assigned = self.get_type_of_node(&bin.right);
+                Some(self.reduced_assignment_type(declared, &assigned, evolving))
+            }
+            // `x++`, `x--` — numeric after the update.
+            NodeData::PostfixUnaryExpression(unary) => {
+                if matches!(
+                    unary.operator,
+                    SyntaxKind::PlusPlusToken | SyntaxKind::MinusMinusToken
+                ) && self.expr_matches_target(&unary.operand, target)
                 {
-                    return Some(self.get_type_of_node(&bin.right));
+                    Some(self.number_type())
+                } else {
+                    None
                 }
             }
-        }
-        // `x++`, `x--`
-        if expr.kind == SyntaxKind::PostfixUnaryExpression {
-            if let NodeData::PostfixUnaryExpression(unary) = &expr.data {
-                if (unary.operator == SyntaxKind::PlusPlusToken
-                    || unary.operator == SyntaxKind::MinusMinusToken)
-                    && self.is_symbol_identifier(&unary.operand, symbol)
+            NodeData::PrefixUnaryExpression(unary) => {
+                if matches!(
+                    unary.operator,
+                    SyntaxKind::PlusPlusToken | SyntaxKind::MinusMinusToken
+                ) && self.expr_matches_target(&unary.operand, target)
                 {
-                    return Some(self.number_type());
+                    Some(self.number_type())
+                } else {
+                    None
                 }
             }
+            // Declaration flow nodes (from `bindInitializedVariableFlow`):
+            // `let x = init`, destructured `const {a} = obj`, for-in/for-of
+            // loop variables.
+            NodeData::VariableDeclaration(_) | NodeData::BindingElement(_) => {
+                let FlowRef::Symbol(symbol) = target else {
+                    return None;
+                };
+                let matched = self
+                    .program
+                    .symbol_map()
+                    .symbol_of(expr)
+                    .is_some_and(|s| {
+                        Arc::ptr_eq(&s, symbol)
+                            || symbol
+                                .export_symbol
+                                .as_ref()
+                                .is_some_and(|e| Arc::ptr_eq(&s, e))
+                    });
+                if !matched {
+                    return None;
+                }
+                let assigned = self.initial_type_of_declaration(expr)?;
+                Some(self.reduced_assignment_type(declared, &assigned, evolving))
+            }
+            _ => None,
         }
-        if expr.kind == SyntaxKind::PrefixUnaryExpression {
-            if let NodeData::PrefixUnaryExpression(unary) = &expr.data {
-                if (unary.operator == SyntaxKind::PlusPlusToken
-                    || unary.operator == SyntaxKind::MinusMinusToken)
-                    && self.is_symbol_identifier(&unary.operand, symbol)
-                {
-                    return Some(self.number_type());
+    }
+
+    /// Apply Go's assignment narrowing: evolving arrays keep the assigned
+    /// type; unions reduce; everything else returns the declared type.
+    fn reduced_assignment_type(
+        &mut self,
+        declared: &Arc<Type>,
+        assigned: &Arc<Type>,
+        evolving: bool,
+    ) -> Arc<Type> {
+        if evolving {
+            return Arc::clone(assigned);
+        }
+        if !declared.is_union() {
+            return Arc::clone(declared);
+        }
+        self.get_assignment_reduced_type(declared, assigned)
+    }
+
+    /// Remove those constituents of `declared` to which no constituent of
+    /// `assigned` is assignable (e.g. `number | string` assigned `5` keeps
+    /// only `number`). When the crude filter produces an invalid result
+    /// (assigned not assignable to the remainder), give up and don't
+    /// narrow. Mirrors Go's `getAssignmentReducedType` (flow.go ~L2399).
+    fn get_assignment_reduced_type(
+        &mut self,
+        declared: &Arc<Type>,
+        assigned: &Arc<Type>,
+    ) -> Arc<Type> {
+        if Arc::ptr_eq(declared, assigned) {
+            return Arc::clone(declared);
+        }
+        if assigned.flags.contains(TypeFlags::Never) {
+            return Arc::clone(assigned);
+        }
+        let constituents = self.constituent_types(declared);
+        let kept: Vec<Arc<Type>> = constituents
+            .into_iter()
+            .filter(|t| self.type_maybe_assignable_to(assigned, t))
+            .collect();
+        let reduced = self.rebuild_union_or_never(declared, kept);
+        if self.is_type_assignable_to(assigned, &reduced) {
+            reduced
+        } else {
+            Arc::clone(declared)
+        }
+    }
+
+    /// Whether any constituent of `source` is assignable to `target`.
+    /// Mirrors Go's `typeMaybeAssignableTo` (flow.go ~L2430).
+    fn type_maybe_assignable_to(&mut self, source: &Arc<Type>, target: &Arc<Type>) -> bool {
+        if !source.is_union() {
+            return self.is_type_assignable_to(source, target);
+        }
+        let constituents = self.constituent_types(source);
+        if constituents.iter().any(|t| Arc::ptr_eq(t, target)) {
+            return true;
+        }
+        constituents
+            .iter()
+            .any(|t| self.is_type_assignable_to(t, target))
+    }
+
+    /// The initial (or assigned) type of a declaration flow node. Mirrors
+    /// Go's `getInitialType` family (flow.go ~L2234): a VariableDeclaration
+    /// uses its initializer (`string` for for-in, the iterated element type
+    /// for for-of); a BindingElement destructures from its parent pattern's
+    /// type, applying any default initializer
+    /// (`getTypeWithDefault`: non-undefined part ∪ default).
+    fn initial_type_of_declaration(&mut self, expr: &Arc<Node>) -> Option<Arc<Type>> {
+        match &expr.data {
+            NodeData::VariableDeclaration(vd) => {
+                if let Some(init) = &vd.initializer {
+                    return Some(self.get_type_of_node(init));
+                }
+                let for_stmt = Self::for_in_or_of_statement_of(expr)?;
+                let NodeData::ForInOrOfStatement(data) = &for_stmt.data else {
+                    return None;
+                };
+                match for_stmt.kind {
+                    SyntaxKind::ForInStatement => Some(self.string_type()),
+                    SyntaxKind::ForOfStatement => {
+                        let rhs = self.get_type_of_node(&data.expression);
+                        Some(self.iterated_element_type(&rhs))
+                    }
+                    _ => None,
                 }
             }
+            NodeData::BindingElement(be) => {
+                let pattern = Arc::clone(expr.parent.as_ref()?);
+                let pattern_parent = Arc::clone(pattern.parent.as_ref()?);
+                let parent_type = self.initial_type_of_declaration(&pattern_parent)?;
+                let mut t = match pattern.kind {
+                    SyntaxKind::ObjectBindingPattern => {
+                        let name = Self::binding_element_property_name(expr)?;
+                        self.get_property_type_of_type(&parent_type, &name)?
+                    }
+                    SyntaxKind::ArrayBindingPattern if be.dot_dot_dot_token.is_none() => {
+                        let index = Self::binding_element_index(&pattern, expr)?;
+                        self.destructured_array_element_type(&parent_type, index)?
+                    }
+                    _ => return None,
+                };
+                if let Some(default_expr) = &be.initializer {
+                    let non_undefined = self.remove_flags_from_union(&t, TypeFlags::Undefined);
+                    let default_type = self.get_type_of_node(default_expr);
+                    t = self.get_union_type(vec![non_undefined, default_type]);
+                }
+                Some(t)
+            }
+            _ => None,
         }
-        None
+    }
+
+    /// The property name a binding element destructures
+    /// (`{a: b}` → `a`, `{a}` → `a`). Mirrors Go's
+    /// `getBindingElementPropertyName`.
+    fn binding_element_property_name(element: &Arc<Node>) -> Option<String> {
+        let NodeData::BindingElement(be) = &element.data else {
+            return None;
+        };
+        if let Some(pn) = &be.property_name {
+            return Some(pn.text().to_string());
+        }
+        be.name.as_ref().map(|n| n.text().to_string())
+    }
+
+    /// The index of `element` within its binding pattern.
+    fn binding_element_index(pattern: &Arc<Node>, element: &Arc<Node>) -> Option<usize> {
+        let NodeData::BindingPattern(data) = &pattern.data else {
+            return None;
+        };
+        data.elements
+            .nodes
+            .iter()
+            .position(|e| Arc::ptr_eq(e, element))
+    }
+
+    /// The element type of a destructured array pattern position: tuples
+    /// give the positional element, arrays the element type, evolving
+    /// arrays their accumulated element.
+    fn destructured_array_element_type(
+        &mut self,
+        parent_type: &Arc<Type>,
+        index: usize,
+    ) -> Option<Arc<Type>> {
+        if self.is_tuple_type(parent_type) {
+            return self.get_tuple_element_type(parent_type, index);
+        }
+        if self.is_array_type(parent_type) {
+            return Some(self.get_array_element_type(parent_type));
+        }
+        Some(self.get_any_type())
+    }
+
+    /// The element type produced by iterating `rhs` in a for-of statement
+    /// (`checkRightHandSideOfForOf`): arrays/tuples yield their element
+    /// type, strings yield `string`, anything else `any`.
+    fn iterated_element_type(&mut self, rhs: &Arc<Type>) -> Arc<Type> {
+        if self.is_array_type(rhs) {
+            return self.get_array_element_type(rhs);
+        }
+        if rhs.flags.intersects(TypeFlags::String | TypeFlags::StringLiteral) {
+            return self.string_type();
+        }
+        self.get_any_type()
+    }
+
+    /// The for-in/for-of statement whose head declares `decl`, if any.
+    fn for_in_or_of_statement_of(decl: &Arc<Node>) -> Option<Arc<Node>> {
+        let list = decl.parent.as_ref()?;
+        if list.kind != SyntaxKind::VariableDeclarationList {
+            return None;
+        }
+        let stmt = list.parent.as_ref()?;
+        if matches!(
+            stmt.kind,
+            SyntaxKind::ForInStatement | SyntaxKind::ForOfStatement
+        ) {
+            Some(Arc::clone(stmt))
+        } else {
+            None
+        }
+    }
+
+    /// The iterated expression of the for-in statement whose head declares
+    /// `decl`.
+    fn for_in_expression_of(decl: &Arc<Node>) -> Option<Arc<Node>> {
+        let stmt = Self::for_in_or_of_statement_of(decl)?;
+        if stmt.kind != SyntaxKind::ForInStatement {
+            return None;
+        }
+        match &stmt.data {
+            NodeData::ForInOrOfStatement(d) => Some(Arc::clone(&d.expression)),
+            _ => None,
+        }
     }
 
     // ─────────────────────────────────────────────────────────────────
@@ -2424,6 +3379,17 @@ impl Checker {
     /// mirrors the existence check in `has_property_of_type`. Returns `None`
     /// for missing properties; callers then fall back to `any`.
     pub(super) fn get_property_of_type(&self, t: &Arc<Type>, name: &str) -> Option<Arc<Symbol>> {
+        // DEFERRED mapped types (`{ [K in keyof T]: V }` with a generic
+        // constraint) have no materialized members; property access stays
+        // permissive (any) as under the previous any-collapse — contextual
+        // typing recovers precise types via
+        // get_type_of_property_of_contextual_type.
+        if let TypeData::Mapped(m) = &t.data
+            && m.type_parameter.is_some()
+        {
+            let sym = Symbol::new(SymbolFlags::Property, name.to_string());
+            return Some(Arc::new(sym));
+        }
         // Structured member lookup. Uses a nested match (not `?`) so that
         // non-structured types (primitives) fall through to the fallbacks
         // below instead of short-circuiting to `None`.
@@ -2434,10 +3400,31 @@ impl Checker {
         }
         // Fallback for array types: array types created by `create_array_type`
         // carry no members, so resolve the property against the global
-        // `Array<T>` interface symbol.
-        if self.is_array_type(t) {
+        // `Array<T>` interface symbol. Evolving arrays (`let x = []` widened)
+        // are array types too — their members resolve the same way.
+        let is_array_like = self.is_array_type(t)
+            || matches!(&t.data, TypeData::EvolvingArray(_));
+        if is_array_like {
             if let Some(array_sym) = self.globals.get("Array") {
                 if let Some(member) = array_sym.members.get(name) {
+                    return Some(Arc::clone(member));
+                }
+            }
+        }
+        // Fallback for pure function types (an anonymous object whose only
+        // structure is its call signatures): function-typed values expose
+        // the members of the global `Function` interface (`bind`, `call`,
+        // `apply`, `length`, …). Mirrors Go's `getApparentType` merging
+        // `globalFunctionType` for signature types.
+        if t.flags.contains(TypeFlags::Object)
+            && t.object_flags.contains(ObjectFlags::Anonymous)
+            && let Some(structured) = t.as_structured()
+            && structured.call_signature_count > 0
+            && !self.is_array_type(t)
+            && !matches!(&t.data, TypeData::EvolvingArray(_))
+        {
+            if let Some(function_sym) = self.globals.get("Function") {
+                if let Some(member) = function_sym.members.get(name) {
                     return Some(Arc::clone(member));
                 }
             }
@@ -2569,8 +3556,87 @@ impl Checker {
             NodeData::ElementAccessExpression(ea) => {
                 Self::get_accessed_property_name_from_node(&ea.argument_expression)
             }
+            // Destructured discriminant: `{ kind: k }` → `kind`, `{ k }` →
+            // `k`. Mirrors Go's `getDestructuringPropertyName`.
+            NodeData::BindingElement(be) => be
+                .property_name
+                .as_ref()
+                .map(|pn| pn.text().to_string())
+                .or_else(|| be.name.as_ref().map(|n| n.text().to_string())),
             _ => None,
         }
+    }
+
+    /// Resolve a const alias of a discriminant property access on `symbol`:
+    /// `const k = obj.kind` (identifier alias) or `const { kind: k } = obj`
+    /// (destructured alias). Returns the aliased access node. Mirrors Go's
+    /// `getCandidateDiscriminantPropertyAccess` identifier case (flow.go
+    /// ~L1460).
+    fn discriminant_alias_access(
+        &self,
+        expr: &Arc<Node>,
+        symbol: &Arc<Symbol>,
+    ) -> Option<Arc<Node>> {
+        if expr.kind != SyntaxKind::Identifier {
+            return None;
+        }
+        let sym = self.resolve_identifier(expr)?;
+        if !self.symbol_is_const_variable(&sym) {
+            return None;
+        }
+        let decl = Arc::clone(sym.value_declaration.as_ref()?);
+        // `const k = obj.kind` — the initializer is an access whose receiver
+        // matches the symbol.
+        if let Some(init) = Self::candidate_variable_declaration_initializer(&decl) {
+            if matches!(
+                init.kind,
+                SyntaxKind::PropertyAccessExpression | SyntaxKind::ElementAccessExpression
+            ) {
+                if let Some(recv) = init.expression() {
+                    if self.is_symbol_identifier(recv, symbol) {
+                        return Some(init);
+                    }
+                }
+            }
+        }
+        // `const { kind: k } = obj` — a binding element alias without a
+        // default; the root declaration's initializer references the symbol.
+        if decl.kind == SyntaxKind::BindingElement {
+            let NodeData::BindingElement(be) = &decl.data else {
+                return None;
+            };
+            if be.dot_dot_dot_token.is_none() && be.initializer.is_none() {
+                let pattern = decl.parent.as_ref()?;
+                let var_decl = Arc::clone(pattern.parent.as_ref()?);
+                if let Some(init) = Self::candidate_variable_declaration_initializer(&var_decl) {
+                    let init_matches = match init.kind {
+                        SyntaxKind::Identifier => self.is_symbol_identifier(&init, symbol),
+                        SyntaxKind::PropertyAccessExpression
+                        | SyntaxKind::ElementAccessExpression => init
+                            .expression()
+                            .is_some_and(|recv| self.is_symbol_identifier(recv, symbol)),
+                        _ => false,
+                    };
+                    if init_matches {
+                        return Some(decl);
+                    }
+                }
+            }
+        }
+        None
+    }
+
+    /// A variable declaration's parenthesis-stripped initializer when the
+    /// declaration has no type annotation. Mirrors Go's
+    /// `getCandidateVariableDeclarationInitializer` (flow.go ~L1501).
+    fn candidate_variable_declaration_initializer(decl: &Arc<Node>) -> Option<Arc<Node>> {
+        let NodeData::VariableDeclaration(data) = &decl.data else {
+            return None;
+        };
+        if data.type_node.is_some() {
+            return None;
+        }
+        data.initializer.as_ref().map(Self::skip_parentheses)
     }
 
     /// Whether `node` is a property access on `symbol`, e.g.

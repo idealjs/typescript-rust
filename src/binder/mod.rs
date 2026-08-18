@@ -69,6 +69,7 @@ impl FlowLabel {
             antecedent: None,
             antecedents: self.node.antecedents.clone(),
             switch_statement: None,
+            reduce_target: None,
         })
     }
 }
@@ -1103,6 +1104,7 @@ impl Binder {
             antecedent: Some(Arc::clone(antecedent)),
             antecedents: Vec::new(),
             switch_statement: None,
+            reduce_target: None,
         })
     }
 
@@ -1122,6 +1124,7 @@ impl Binder {
             antecedent: Some(Arc::clone(antecedent)),
             antecedents: Vec::new(),
             switch_statement: None,
+            reduce_target: None,
         })
     }
 
@@ -1137,6 +1140,7 @@ impl Binder {
             antecedent: Some(Arc::clone(antecedent)),
             antecedents: Vec::new(),
             switch_statement: None,
+            reduce_target: None,
         })
     }
 
@@ -1157,6 +1161,7 @@ impl Binder {
             antecedent: Some(Arc::clone(antecedent)),
             antecedents: Vec::new(),
             switch_statement: None,
+            reduce_target: None,
         });
         // Add to exception target if we're inside a try block
         if let Some(target) = &self.current_exception_target {
@@ -1179,9 +1184,13 @@ impl Binder {
         }
     }
 
-    /// Create a reduce label node (for try-finally flow graph).
+    /// Create a reduce label node (for try-finally flow graph). While a
+    /// flow walk is inside this node (i.e. between here and `target`), the
+    /// `target` branch label's antecedent set is replaced by `antecedents`.
+    /// Mirrors Go's `createReduceLabel(target, antecedents, antecedent)`.
     fn create_reduce_label(
         &self,
+        target: &Arc<FlowNode>,
         antecedents: &[Arc<FlowNode>],
         antecedent: &Arc<FlowNode>,
     ) -> Arc<FlowNode> {
@@ -1191,6 +1200,7 @@ impl Binder {
             antecedent: Some(Arc::clone(antecedent)),
             antecedents: antecedents.to_vec(),
             switch_statement: None,
+            reduce_target: Some(Arc::clone(target)),
         })
     }
 
@@ -1209,6 +1219,7 @@ impl Binder {
             antecedent: None,
             antecedents: Vec::new(),
             switch_statement: None,
+            reduce_target: None,
         })
     }
 
@@ -1252,6 +1263,7 @@ impl Binder {
             antecedent: Some(Arc::clone(antecedent)),
             antecedents: Vec::new(),
             switch_statement: Some(Arc::clone(switch_statement)),
+            reduce_target: None,
         })
     }
 
@@ -1729,7 +1741,10 @@ impl Binder {
 
     /// Bind a try/catch/finally statement with proper control flow.
     ///
-    /// Mirrors `binder.bindTryStatement` in Go.
+    /// Mirrors `binder.bindTryStatement` in Go. Labels are dedicated
+    /// accumulator nodes (never collapsed early), so antecedents added
+    /// while binding the try/catch blocks (exception targets, mutation
+    /// flows) are never lost and never pushed into unrelated nodes.
     fn bind_try_statement(&mut self, node: &Arc<Node>) {
         let stmt = match &node.data {
             NodeData::TryStatement(data) => data,
@@ -1739,107 +1754,136 @@ impl Binder {
         let save_return_target = self.current_return_target.take();
         let save_exception_target = self.current_exception_target.take();
 
-        let mut normal_exit_label = FlowLabel::new(FlowFlags::BRANCH_LABEL);
-        let mut return_label = FlowLabel::new(FlowFlags::BRANCH_LABEL);
-        let mut exception_label = FlowLabel::new(FlowFlags::BRANCH_LABEL);
-
-        let mut finally_label = FlowLabel::new(FlowFlags::BRANCH_LABEL);
+        let normal_exit_label = Self::new_flow_accumulator();
+        let return_label = Self::new_flow_accumulator();
+        let mut exception_label = Self::new_flow_accumulator();
 
         if stmt.finally_block.is_some() {
-            self.current_return_target = Some(return_label.finish(&self.unreachable_flow()));
+            self.current_return_target = Some(Arc::clone(&return_label));
         }
 
-        // Add current flow as possible exception source
+        // Add current flow as possible exception source.
         if let Some(current) = &self.current_flow {
-            exception_label.add_antecedent(Arc::clone(current));
+            self.add_antecedent_to_flow(&exception_label, current);
         }
-        self.current_exception_target = Some(Arc::clone(
-            &exception_label.finish(&self.unreachable_flow()),
-        ));
+        self.current_exception_target = Some(Arc::clone(&exception_label));
 
-        // Bind try block
+        // Bind try block; its normal completion feeds normal_exit_label.
         self.bind(&stmt.try_block);
-        // Try block normal exit -> normal_exit_label
         if let Some(current) = &self.current_flow {
-            normal_exit_label.add_antecedent(Arc::clone(current));
+            self.add_antecedent_to_flow(&normal_exit_label, current);
         }
-        // Try block exception -> exception_label (already set above)
 
-        // Bind catch clause if present
+        // Bind catch clause if present. The start of the catch clause is
+        // the target of exceptions from the try block; a fresh exception
+        // label collects exceptions raised inside the catch clause itself.
         if let Some(catch_clause) = &stmt.catch_clause {
-            // Set current flow to exception label (the catch block starts here)
-            self.current_flow = Some(exception_label.finish(&self.unreachable_flow()));
-            self.bind(catch_clause);
-            // Catch block normal exit -> normal_exit_label
+            self.current_flow = Some(Self::finish_flow_node(
+                &exception_label,
+                &self.unreachable_flow(),
+            ));
+            let catch_exception_label = Self::new_flow_accumulator();
             if let Some(current) = &self.current_flow {
-                normal_exit_label.add_antecedent(Arc::clone(current));
+                self.add_antecedent_to_flow(&catch_exception_label, current);
+            }
+            self.current_exception_target = Some(Arc::clone(&catch_exception_label));
+            exception_label = catch_exception_label;
+            self.bind(catch_clause);
+            if let Some(current) = &self.current_flow {
+                self.add_antecedent_to_flow(&normal_exit_label, current);
             }
         }
 
         self.current_return_target = save_return_target;
         self.current_exception_target = save_exception_target;
 
-        // Bind finally block if present
+        // Bind finally block if present.
         if let Some(finally_block) = &stmt.finally_block {
-            // Combine all possible donors into the finally label
-            for ant in &normal_exit_label.node.antecedents {
-                finally_label.add_antecedent(Arc::clone(ant));
+            // Possible ways control can reach the finally block: normal
+            // completion of try or catch, returns, and exceptions.
+            let finally_label = Self::new_flow_accumulator();
+            for ant in normal_exit_label
+                .antecedents
+                .iter()
+                .chain(exception_label.antecedents.iter())
+                .chain(return_label.antecedents.iter())
+            {
+                self.add_antecedent_to_flow(&finally_label, ant);
             }
-            for ant in &exception_label.node.antecedents {
-                finally_label.add_antecedent(Arc::clone(ant));
-            }
-            for ant in &return_label.node.antecedents {
-                finally_label.add_antecedent(Arc::clone(ant));
-            }
-
-            self.current_flow = Some(finally_label.finish(&self.unreachable_flow()));
+            let finally_node = Self::finish_flow_node(&finally_label, &self.unreachable_flow());
+            self.current_flow = Some(Arc::clone(&finally_node));
             self.bind(finally_block);
 
             if self
                 .current_flow
                 .as_ref()
-                .map_or(false, |f| f.flags.contains(FlowFlags::UNREACHABLE))
+                .is_some_and(|f| f.flags.contains(FlowFlags::UNREACHABLE))
             {
+                // If the end of the finally block is unreachable, the end
+                // of the entire try statement is unreachable.
                 self.current_flow = Some(self.unreachable_flow());
             } else {
-                // Handle return paths through finally
-                if self.current_return_target.is_some() && !return_label.node.antecedents.is_empty()
+                let current_flow = self.current_flow.clone().expect("reachable flow");
+                // Return paths from try/catch go back through the finally
+                // block and only the return-statement flows.
+                if self.current_return_target.is_some()
+                    && !return_label.antecedents.is_empty()
+                    && let Some(rt) = &self.current_return_target
                 {
-                    if let Some(current_flow) = &self.current_flow {
-                        let reduce =
-                            self.create_reduce_label(&return_label.node.antecedents, current_flow);
-                        if let Some(rt) = &self.current_return_target {
-                            self.add_antecedent_to_flow(rt, &reduce);
-                        }
-                    }
+                    let reduce = self.create_reduce_label(
+                        &finally_node,
+                        &return_label.antecedents,
+                        &current_flow,
+                    );
+                    self.add_antecedent_to_flow(rt, &reduce);
                 }
-                // Handle exception paths through finally
+                // Exception paths from try/catch go back through the
+                // finally block and each possible exception source.
                 if self.current_exception_target.is_some()
-                    && !exception_label.node.antecedents.is_empty()
+                    && !exception_label.antecedents.is_empty()
+                    && let Some(et) = &self.current_exception_target
                 {
-                    if let Some(current_flow) = &self.current_flow {
-                        let reduce = self
-                            .create_reduce_label(&exception_label.node.antecedents, current_flow);
-                        if let Some(et) = &self.current_exception_target {
-                            self.add_antecedent_to_flow(et, &reduce);
-                        }
-                    }
+                    let reduce = self.create_reduce_label(
+                        &finally_node,
+                        &exception_label.antecedents,
+                        &current_flow,
+                    );
+                    self.add_antecedent_to_flow(et, &reduce);
                 }
-                // Normal exit path through finally
-                if !normal_exit_label.node.antecedents.is_empty() {
-                    if let Some(current_flow) = &self.current_flow {
-                        self.current_flow = Some(self.create_reduce_label(
-                            &normal_exit_label.node.antecedents,
-                            current_flow,
-                        ));
-                    }
+                // Past the finally block, only the normal-completion flows
+                // of try/catch continue (reduced antecedent set).
+                if !normal_exit_label.antecedents.is_empty() {
+                    self.current_flow = Some(self.create_reduce_label(
+                        &finally_node,
+                        &normal_exit_label.antecedents,
+                        &current_flow,
+                    ));
                 } else {
                     self.current_flow = Some(self.unreachable_flow());
                 }
             }
         } else {
-            self.current_flow = Some(normal_exit_label.finish(&self.unreachable_flow()));
+            self.current_flow = Some(Self::finish_flow_node(
+                &normal_exit_label,
+                &self.unreachable_flow(),
+            ));
         }
+    }
+
+    /// Collapse an accumulated label node: empty → the shared unreachable
+    /// flow, a single antecedent → that antecedent, otherwise the label
+    /// node itself (Go `finishFlowLabel`).
+    fn finish_flow_node(
+        node: &Arc<FlowNode>,
+        unreachable: &Arc<FlowNode>,
+    ) -> Arc<FlowNode> {
+        if node.antecedents.is_empty() {
+            return Arc::clone(unreachable);
+        }
+        if node.antecedents.len() == 1 {
+            return Arc::clone(&node.antecedents[0]);
+        }
+        Arc::clone(node)
     }
 
     /// Bind a break statement.
@@ -2166,11 +2210,19 @@ impl Binder {
                             .set_flow_node(&data.expression, Arc::clone(&assign_flow));
                         self.current_flow = Some(assign_flow);
                     }
-                    // Check for element access assignment (array mutation: arr[i] = val)
-                    if let NodeData::ElementAccessExpression(_) = &bin_data.left.data {
-                        let current = self.current_flow.clone();
-                        if let Some(current) = current {
-                            self.current_flow = Some(self.create_flow_mutation(&current, node));
+                    // Check for element access assignment (array mutation:
+                    // `arr[i] = val`). Go `bindBinaryExpressionFlow`
+                    // (binder.go ~L2242) attaches the *binary expression*
+                    // node and gates on the receiver being a narrowable
+                    // operand — the checker's `evolve_array_at_mutation`
+                    // extracts the receiver from it.
+                    if let NodeData::ElementAccessExpression(ea) = &bin_data.left.data {
+                        if self.is_narrowable_operand(&ea.expression) {
+                            let current = self.current_flow.clone();
+                            if let Some(current) = current {
+                                self.current_flow =
+                                    Some(self.create_flow_mutation(&current, &data.expression));
+                            }
                         }
                     }
                 }
@@ -2189,27 +2241,49 @@ impl Binder {
         }
     }
 
-    /// Bind a variable statement (with assignment flow for initializers).
-    fn bind_variable_statement(&mut self, node: &Arc<Node>) {
-        // Bind normally (creates symbols, recurses)
-        self.bind_children(node);
+    /// Whether `node`'s grandparent chain marks it as the loop variable of
+    /// a for-in/for-of head (`node.Parent.Parent` in Go). Mirrors the
+    /// `ast.IsForInOrOfStatement(node.Parent.Parent)` condition in Go's
+    /// `bindVariableDeclarationFlow`.
+    fn is_in_for_in_or_of_head(node: &Arc<Node>) -> bool {
+        let Some(parent) = &node.parent else {
+            return false;
+        };
+        let Some(grandparent) = &parent.parent else {
+            return false;
+        };
+        matches!(
+            grandparent.kind,
+            SyntaxKind::ForInStatement | SyntaxKind::ForOfStatement
+        )
+    }
 
-        // Add assignment flow for declarations with initializers
-        if let NodeData::VariableStatement(data) = &node.data {
-            if let NodeData::VariableDeclarationList(list_data) = &data.declaration_list.data {
-                for decl in &list_data.declarations.nodes {
-                    if let NodeData::VariableDeclaration(decl_data) = &decl.data {
-                        if decl_data.initializer.is_some() {
-                            if let Some(current) = self.current_flow.take() {
-                                let assign_flow = self.create_flow_assignment(&current, decl);
-                                self.symbol_map
-                                    .set_flow_node(decl, Arc::clone(&assign_flow));
-                                self.current_flow = Some(current);
-                            }
-                        }
-                    }
+    /// Add ASSIGNMENT flow nodes for a declaration with an initializer (or a
+    /// for-in/for-of loop variable). Binding-pattern names recurse so every
+    /// element gets its own assignment node. Mirrors Go's
+    /// `bindInitializedVariableFlow` (binder.go ~L2317).
+    fn bind_initialized_variable_flow(&mut self, node: &Arc<Node>) {
+        let name = match &node.data {
+            NodeData::VariableDeclaration(d) => Some(Arc::clone(&d.name)),
+            NodeData::BindingElement(d) => d.name.clone(),
+            _ => None,
+        };
+        let Some(name) = name else { return };
+        if matches!(
+            name.kind,
+            SyntaxKind::ObjectBindingPattern | SyntaxKind::ArrayBindingPattern
+        ) {
+            if let NodeData::BindingPattern(pattern) = &name.data {
+                for child in &pattern.elements.nodes {
+                    self.bind_initialized_variable_flow(child);
                 }
             }
+            return;
+        }
+        if let Some(current) = self.current_flow.take() {
+            let assign_flow = self.create_flow_assignment(&current, node);
+            self.symbol_map.set_flow_node(node, Arc::clone(&assign_flow));
+            self.current_flow = Some(assign_flow);
         }
     }
 
@@ -2354,11 +2428,27 @@ impl Binder {
                 );
             }
             SyntaxKind::ClassDeclaration => {
-                self.declare_symbol(
+                let class_symbol = self.declare_symbol(
                     node,
                     SymbolFlags::Class,
                     SymbolFlags::VALUE | SymbolFlags::TYPE,
                 );
+                // TS 1.0 spec (April 2014) 8.4: every class automatically
+                // contains a static property member named 'prototype', typed
+                // as an instantiation of the class type with `any` for each
+                // type parameter. The checker resolves that type when the
+                // symbol is accessed (Go binder.go ~L962 +
+                // getTypeOfPrototypeProperty checker.go ~L18096).
+                let prototype = Arc::new(Symbol::new(
+                    SymbolFlags::Property | SymbolFlags::Prototype,
+                    "prototype",
+                ));
+                let class_mut = Arc::as_ptr(&class_symbol) as *mut Symbol;
+                unsafe {
+                    (*class_mut).exports.insert("prototype", Arc::clone(&prototype));
+                    let proto_mut = Arc::as_ptr(&prototype) as *mut Symbol;
+                    (*proto_mut).parent = Some(Arc::clone(&class_symbol));
+                }
             }
             SyntaxKind::ClassExpression => {
                 self.bind_anonymous_declaration(
@@ -2692,7 +2782,28 @@ impl Binder {
                 return;
             }
             SyntaxKind::VariableStatement => {
-                self.bind_variable_statement(node);
+                // Plain child binding: per-declaration assignment flow nodes
+                // come from the `VariableDeclaration` arm below (Go's
+                // `bindVariableDeclarationFlow`).
+                self.bind_children(node);
+                return;
+            }
+            SyntaxKind::VariableDeclaration | SyntaxKind::BindingElement => {
+                // Bind children first (the initializer's flow becomes the
+                // assignment node's antecedent), then add an ASSIGNMENT flow
+                // node when the declaration has an initializer or sits in a
+                // for-in/for-of head. Binding-pattern names recurse per
+                // element. Mirrors Go's `bindVariableDeclarationFlow` /
+                // `bindInitializedVariableFlow` (binder.go ~L2307).
+                self.bind_children(node);
+                let has_initializer = match &node.data {
+                    NodeData::VariableDeclaration(d) => d.initializer.is_some(),
+                    NodeData::BindingElement(d) => d.initializer.is_some(),
+                    _ => false,
+                };
+                if has_initializer || Self::is_in_for_in_or_of_head(node) {
+                    self.bind_initialized_variable_flow(node);
+                }
                 return;
             }
             SyntaxKind::TryStatement => {
@@ -3155,12 +3266,28 @@ fn get_container_flags(kind: SyntaxKind) -> ContainerFlags {
                 | ContainerFlags::HAS_LOCALS
                 | ContainerFlags::IS_THIS_CONTAINER
         }
-        SyntaxKind::CallSignature
+        // Signature kinds (Go GetContainerFlags: `KindMethodSignature,
+        // KindCallSignature, KindFunctionType, KindConstructSignature,
+        // KindConstructorType` → IsContainer | IsControlFlowContainer |
+        // HasLocals | IsFunctionLike; they propagate the outer `this`
+        // rather than introducing one, so no IS_THIS_CONTAINER). Being
+        // HasLocals containers means each signature's type parameters are
+        // declared into the SIGNATURE's own locals — different methods of
+        // one interface declaring `K` must not merge into a single symbol
+        // (the merged symbol's constraint would come from whichever
+        // declaration was seen first).
+        SyntaxKind::MethodSignature
+        | SyntaxKind::CallSignature
         | SyntaxKind::ConstructSignature
-        | SyntaxKind::IndexSignature
         | SyntaxKind::FunctionType
         | SyntaxKind::ConstructorType => {
-            ContainerFlags::IS_CONTROL_FLOW_CONTAINER | ContainerFlags::IS_THIS_CONTAINER
+            ContainerFlags::IS_CONTAINER
+                | ContainerFlags::IS_CONTROL_FLOW_CONTAINER
+                | ContainerFlags::IS_FUNCTION_LIKE
+                | ContainerFlags::HAS_LOCALS
+        }
+        SyntaxKind::IndexSignature => {
+            ContainerFlags::IS_CONTAINER | ContainerFlags::HAS_LOCALS
         }
         SyntaxKind::Block | SyntaxKind::ModuleDeclaration | SyntaxKind::SourceFile => {
             ContainerFlags::IS_CONTAINER
@@ -3289,6 +3416,9 @@ fn has_locals(kind: SyntaxKind) -> bool {
             | SyntaxKind::CallSignature
             | SyntaxKind::ConstructSignature
             | SyntaxKind::IndexSignature
+            | SyntaxKind::MethodSignature
+            | SyntaxKind::FunctionType
+            | SyntaxKind::ConstructorType
     )
 }
 
