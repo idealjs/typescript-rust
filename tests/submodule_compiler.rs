@@ -1100,7 +1100,12 @@ fn build_and_check(
 
     let mut file_names: Vec<String> = Vec::new();
     for unit in units {
-        let abs = if unit.name.starts_with('/') {
+        // Rooted unit names (`// @Filename: A:/bar.ts` — Windows-volume-style
+        // virtual paths, or plain `/abs` names) mount as-is, like the
+        // official runner's VFS; cross-volume specifiers (`import "B:/baz"`)
+        // then resolve by rooted-path replacement. Bare names live under
+        // /proj as before.
+        let abs = if tsox::tspath::is_rooted_disk_path(&unit.name) {
             unit.name.clone()
         } else {
             format!("/proj/{}", unit.name)

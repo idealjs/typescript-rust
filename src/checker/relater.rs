@@ -4637,10 +4637,24 @@ impl Checker {
                         .zip(new_args.iter())
                         .any(|(old, new)| !Arc::ptr_eq(old, new));
                     if changed {
+                        // Preserve the resolved member table: the rebuilt
+                        // reference keeps its structure (Go re-instantiates
+                        // members under the new mapper; re-resolving here
+                        // would need the substitution stack — stale members
+                        // match the previous no-args behavior).
+                        // StructuredTypeData isn't Clone (OnceLock), so the
+                        // member tables are shared field-by-field.
                         let mut rebuilt = Type::new(
                             t.flags,
                             TypeData::Object(ObjectTypeData {
-                                structured: StructuredTypeData::default(),
+                                structured: StructuredTypeData {
+                                    members: o.structured.members.clone(),
+                                    properties: o.structured.properties.clone(),
+                                    signatures: o.structured.signatures.clone(),
+                                    call_signature_count: o.structured.call_signature_count,
+                                    index_infos: o.structured.index_infos.clone(),
+                                    ..Default::default()
+                                },
                                 target: o.target.clone(),
                                 mapper: o.mapper.clone(),
                                 type_arguments: new_args,
@@ -4715,6 +4729,7 @@ impl Checker {
                         inst.target = Some(Arc::clone(sig));
                         inst.parameters = sig.parameters.clone();
                         inst.this_parameter = sig.this_parameter.clone();
+                        inst.type_parameters = sig.type_parameters.clone();
                         inst.resolved_type_predicate = sig.resolved_type_predicate.clone();
                         inst.instantiated_parameter_types = Some(new_params);
                         if let Some(nr) = new_return {
@@ -4827,8 +4842,7 @@ impl Checker {
 /// `resolve_conditional_type` to decide whether the conditional can be
 /// evaluated now or must be deferred until the type parameters are
 /// substituted with concrete types.
-fn type_contains_type_parameter(t: &Arc<Type>) -> bool {
-    if t.flags.contains(TypeFlags::TypeParameter) {
+pub(crate) fn type_contains_type_parameter(t: &Arc<Type>) -> bool {    if t.flags.contains(TypeFlags::TypeParameter) {
         return true;
     }
     match &t.data {
@@ -4890,6 +4904,76 @@ fn type_contains_type_parameter(t: &Arc<Type>) -> bool {
         }
         TypeData::TypeParameter(_) => true,
         _ => false,
+    }
+}
+
+/// Whether `t` mentions the SPECIFIC type-parameter type `needle`
+/// (pointer identity) anywhere in its structure — used to decide whether
+/// an Array interface member's type needs element substitution
+/// (`push(...items: T[])` yes, `length: number` no).
+pub(crate) fn type_mentions_type_parameter(t: &Arc<Type>, needle: &Arc<Type>) -> bool {    if Arc::ptr_eq(t, needle) {
+        return true;
+    }
+    match &t.data {
+        TypeData::Union(u) => u
+            .union_or_intersection
+            .types
+            .iter()
+            .any(|ty| type_mentions_type_parameter(ty, needle)),
+        TypeData::Intersection(i) => i
+            .union_or_intersection
+            .types
+            .iter()
+            .any(|ty| type_mentions_type_parameter(ty, needle)),
+        TypeData::Object(o) => {
+            o.type_arguments
+                .iter()
+                .any(|ty| type_mentions_type_parameter(ty, needle))
+        }
+        TypeData::Tuple(tu) => tu
+            .element_infos
+            .iter()
+            .filter_map(|e| e.type_.as_ref())
+            .any(|ty| type_mentions_type_parameter(ty, needle)),
+        _ => false,
+    }
+}
+
+/// Collect the distinct free type-parameter types appearing in `t`'s
+/// parameter/return/type-argument structure (deduped by pointer). Used to
+/// substitute an Array interface member's free `T` with the element type —
+/// collecting from the member type itself sidesteps symbol-identity
+/// divergence across merged interface declarations.
+pub(crate) fn collect_free_type_parameters(t: &Arc<Type>, out: &mut Vec<Arc<Type>>) {
+    match &t.data {
+        TypeData::TypeParameter(_) => {
+            if !out.iter().any(|p| Arc::ptr_eq(p, t)) {
+                out.push(Arc::clone(t));
+            }
+        }
+        TypeData::Union(u) => {
+            for ty in &u.union_or_intersection.types {
+                collect_free_type_parameters(ty, out);
+            }
+        }
+        TypeData::Intersection(i) => {
+            for ty in &i.union_or_intersection.types {
+                collect_free_type_parameters(ty, out);
+            }
+        }
+        TypeData::Object(o) => {
+            for ty in &o.type_arguments {
+                collect_free_type_parameters(ty, out);
+            }
+        }
+        TypeData::Tuple(tu) => {
+            for ei in &tu.element_infos {
+                if let Some(ty) = &ei.type_ {
+                    collect_free_type_parameters(ty, out);
+                }
+            }
+        }
+        _ => {}
     }
 }
 
@@ -5061,9 +5145,15 @@ impl Checker {
         self.relater_report_error(head, vec![head_source, head_target]);
 
         // Build the nested pyramid (Go
-        // `createDiagnosticChainFromErrorChain`, relater.go ~L402): walk
-        // from the most recent push (the head) to earlier entries, skipping
-        // elided marker messages.
+        // `createDiagnosticChainFromErrorChain`, relater.go ~L402). Go's
+        // linked list is front-inserted: the head (pushed last, the
+        // generalized `Type 'X' is not assignable to type 'Y'`) sits at the
+        // chain's front and becomes the OUTERMOST diagnostic, with earlier
+        // entries nested progressively deeper. Our Vec is chronological
+        // (oldest first, head last), so iterate forward making each entry
+        // the parent of the previously accumulated diagnostic — the final
+        // entry (the head) ends up outermost, mirroring the
+        // `NewDiagnosticChain(next, chain.message, ...)` recursion.
         let Some(error_node) = error_node else {
             self.relater_chain_active = was_active;
             self.relater_error_chain = saved_chain;
@@ -5071,7 +5161,7 @@ impl Checker {
         };
         let file = self.get_source_file_of_node(error_node).or_else(|| self.current_file.clone());
         let mut diagnostic: Option<crate::ast::Diagnostic> = None;
-        for entry in self.relater_error_chain.iter().rev() {
+        for entry in self.relater_error_chain.iter() {
             if entry.message.elided_in_compatibility_pyramid {
                 continue;
             }
@@ -5081,8 +5171,8 @@ impl Checker {
                 entry.message,
                 entry.args.clone(),
             );
-            if let Some(prev) = diagnostic.take() {
-                d.message_chain = vec![prev];
+            if let Some(child) = diagnostic.take() {
+                d.message_chain = vec![child];
             }
             diagnostic = Some(d);
         }

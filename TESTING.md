@@ -67,6 +67,99 @@ diff "tests/baselines/reference/compiler/<stem>.errors.txt" \
 
 # 当前批次
 
+## 修复九（2026-08-19 深夜，全量跑 r2 后：fix-only，CLI 单点验证；未跑测试套件）
+
+基于上方全量跑 r2 结果 + 测试运行期间的 CLI/tsgo-ref 对照诊断（计划见
+`_scripts/FIXPLAN_20260819_r2.md`），八个根因修复：
+
+1. **F1 命名空间实例类型误滤 `__` 前缀导出**（typenode.rs resolve_namespace_
+   type）——内部符号已用 `\u{FE}` 前缀，旧的 `starts_with("__")` 是陈旧逻辑，
+   误伤官方测试 `__val__*` 命名（assignmentCompatability* 全族）。改为只滤
+   `\u{FE}` 前缀与 `export=`
+2. **F2 relater 错误链金字塔方向**（relater.rs）——Go 前插链表最新（顶层头）
+   在最外层；我们 Vec 时间序 + `.rev()` 把头包进最内层（CLI 实证与 tsgo-ref
+   完全倒置）。改为正向迭代、每项成为已累积诊断的父级。验证：ac11b 输出
+   4 层金字塔，头 `interfaceWith…<number, string>` 最外层 ✓
+3. **F4 类型显示**——(a) 数组元素联合/交叉/条件/keyof/函数类型补括号
+   （`(number | string)[]`，tsgo-ref 探测的官方规则）；(b) 泛型接口实例
+   记录 type_arguments（显示 `I<number, string>`）；配套守卫：check_
+   contextual_elements 与 inference 的 get_element_type_of_array 只对
+   真 array-like 取元素；relater 替换重建保留成员表
+4. **F3 数组方法实参检查 + every/some 收窄**（大修，多轮 CLI 定位）：
+   - `create_array_type` 保持廉价 bare 形态（挂 Array 符号与元素实参），
+     eager 实例化在 lib 规模指数爆炸（具体元素 × 40 成员级联 ConcatArray
+     实例化，RSS 涨至 480MB+）——**教训：resolve_interface_type_ex 的环
+     守卫不能改成实参感知键**（解除了 lib 互递归泛型的闸门，smoke.ts
+     直接挂死；已回退为符号键）
+   - 成员解析统一走声明态 `Array<T>` 合成成员表（binder 符号表不含接口
+     方法成员——它们是 AST 驱动解析；旧 globals["Array"].members 回退
+     对方法从来无效，length 靠硬编码撑着）
+   - 属性访问点（get_type_of_property_access + 字面量元素访问）惰性
+     substitute：从成员自身签名收集自由类型参数（绕开多声明 T 符号
+     分叉）全部替换为元素类型，(元素ptr, 成员ptr) 记忆化
+   - 替换重建签名补拷 type_parameters（every 的 S 丢失致 this-is 收窄
+     死路）；实参检查 6152/rest_element_type 改走 try_get 实例化表
+     （rest 分支注意 try_get 已返回元素类型，勿二次拆数组）
+   - `this is T` 谓词：parser 把 this 绑成 Identifier，compute_type_
+     predicate_of_signature 补文本判定 → arrayEvery 收窄复活
+   - 验证：ae1 arrayEvery 0 错误 ✓；`ss.push(123)` TS2345 vs string ✓；
+     `ss.push("x")` 零误报 ✓；probe5 用户泛型接口 ✓
+5. **F5 IIFE 元数规则**（Go checker.go ~L19931）——参数可选性补初始化器
+   与 IIFE 规则（立即调用、参数多于实参、无类型注解 → 可选）；
+   `((a)=>{})()` 合法、`((a: number)=>{})()` 报 2554 ✓ 与官方一致
+6. **F6 Windows 盘符虚拟路径**（tests/submodule_compiler.rs）——根路径
+   单元名（`// @Filename: A:/bar.ts`）按官方挂 VFS 原样，不再 /proj
+   前缀（跨盘符 `import "B:/baz"` 经 rooted 替换解析；resolver 本身
+   已忠实，是 harness 挂载错位）
+7. **F7 JSX 2602/7026**—— disproven：r2 全量日志显示该族用例已 PASS
+   （上午陈旧产物误导了 analyze_sweep 的族统计）
+8. **F8 decl-emit 函数族**——`async`/`*` 从 .d.ts 签名剥离（`export
+   declare async function` 非法语法）；无注解返回类型补 `: unknown`
+   （generator `: {}`）对齐官方 transpile 基线模式。TS9007 与新式 CJS
+   transform 仍缺（下轮）
+
+**本轮教训（台账）**：conformance 产物新旧混存（PASS 不重写旧差异产物），
+`analyze_sweep.py` 按产物分析会混入上午跑的陈旧族——下轮分析以当轮 log
+的 PASS/DIFF/SKIP 行为准。
+
+## 全量跑 r2（2026-08-19 晚，三套件基线重录 + 诊断驱动修复计划）
+
+**命令**：`bash run_full_sweep_20260819.sh`（日志 `submodule_full_run_r2_20260819.log`；
+进程中断后续跑尾段 `submodule_resume_run_20260819.log`：conformance 5300-5907 + transpile）。
+
+| 套件 | PASS | accepted-diff | SKIP | FAIL |
+| --- | --- | --- | --- | --- |
+| compiler | 2,799 | 2,676 | 1,061 | **0** |
+| conformance | 1,980 | 2,634 | 1,283 | **9** |
+| transpile | 0 | 22 | 0 | **0** |
+
+9 FAIL 明细：nodeModules* ×7（node16/18/20/next 解析 + 声明 emit 差异）、
+importAssertion3、jsxJsxsCjsTransformSubstitutesNames（transform/emit 层）。
+conformance 前段日志 outcome 行有 ±1 丢行（已知并发写问题，无损产物）。
+
+**跑测期间完成的诊断**（tsox CLI + /tmp/tsgo-ref 对照，未跑任何测试用例），
+修复计划落盘 `_scripts/FIXPLAN_20260819_r2.md`，八大根因：
+
+1. **F1 命名空间实例类型误滤 `__` 前缀导出**（typenode.rs:1936）——内部符号
+   已用 `\u{FE}` 前缀，`starts_with("__")` 是陈旧逻辑，误伤官方测试的
+   `__val__*` 命名（assignmentCompatability* 全族，UNDER 2322 ×78+63）
+2. **F2 relater 错误链金字塔方向反了**（relater.rs:5074 `iter().rev()`）——
+   Go 前插链表语义下最新（顶层头）应最外层；我们倒置（CLI 实证 ac11b
+   与 tsgo-ref 完全倒置），影响 x283/x247 文本差异族
+3. **F3 数组类型未按全局 Array<T> 实例化引用构造**（create_array_type 裸
+   Reference + get_property_of_type 回退查未实例化 Array 成员）——数组方法
+   调用参数检查整体静默（string[].push(123) 零报错）、every 谓词收窄死路
+   （gdb 实证 signatures 为空），影响 extra 2339 ×57+40、收窄族
+4. **F4 联合元素数组显示丢括号**——`(number|string)[]` 显示成
+   `number | string[]`（disp1.ts 实证）
+5. **F5 harness 忽略 `@noTypesAndSymbols: true`**（classWithStaticField
+   InParameter* 族多报 2554 ×25）
+6. **F6 Windows 盘符绝对虚拟路径说明符不解析**（commonSourceDir5 等
+   `A:/bar.ts` 布局 → 2307 族子集）
+7. **F7 JSX 2602/7026**：CLI 各种近似无法复现，需静态比对 harness 单元组装
+8. **F8 transpile/decl-emit**：`export declare async function` 非法语法、
+   TS9007 isolatedDeclarations 检查、新式 CJS transform——子系统缺口
+
 ## 最终确认跑（2026-08-19，补登后；三套件 0 FAIL 闭环）
 
 | 套件 | PASS | FAIL | accepted-diff | SKIP |

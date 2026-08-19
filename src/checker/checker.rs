@@ -586,6 +586,27 @@ pub struct Checker {
     pub global_this_type: OnceLock<Arc<Type>>,
     pub global_promise_type: OnceLock<Arc<Type>>,
 
+    /// Memoized `T[]` instantiations of the global `Array<T>` interface,
+    /// keyed by (Array symbol ptr, element type ptr). Mirrors Go's
+    /// shared instantiation cache for `createArrayType`.
+    pub array_type_cache: std::collections::HashMap<(usize, usize), Arc<Type>>,
+
+    /// Memoized generic interface instantiations, keyed by
+    /// [symbol ptr, arg ptrs...]. Without this, every member resolution
+    /// building a fresh instantiation (`ConcatArray<T>[]` inside Array's
+    /// own members) produces a distinct element-type pointer, misses
+    /// `array_type_cache`, and re-resolves the whole member tree —
+    /// exponential on lib scale. Mirrors Go's instantiation cache.
+    pub interface_instantiation_cache: std::collections::HashMap<Vec<usize>, Arc<Type>>,
+
+    /// Type-parameter symbols of the global `Array<T>` interface (lazily
+    /// collected for `instantiate_array_member_type`).
+    pub array_type_parameter_symbols: Option<Vec<Arc<crate::ast::Symbol>>>,
+
+    /// Memoized element-substituted Array member types, keyed by
+    /// (element type ptr, member symbol ptr).
+    pub array_member_type_cache: std::collections::HashMap<(usize, usize), Arc<Type>>,
+
     // Signatures
     pub any_signature: OnceLock<Arc<Signature>>,
     pub unknown_signature: OnceLock<Arc<Signature>>,
@@ -954,6 +975,10 @@ impl Checker {
             global_reg_exp_type: OnceLock::new(),
             global_this_type: OnceLock::new(),
             global_promise_type: OnceLock::new(),
+            array_type_cache: std::collections::HashMap::new(),
+            interface_instantiation_cache: std::collections::HashMap::new(),
+            array_type_parameter_symbols: None,
+            array_member_type_cache: std::collections::HashMap::new(),
 
             any_signature: OnceLock::new(),
             unknown_signature: OnceLock::new(),
@@ -2789,7 +2814,9 @@ impl Checker {
             .as_ref()
             .map(|tn| self.get_type_from_type_node(tn));
         let is_this = pred_data.parameter_name.kind == SyntaxKind::ThisKeyword
-            || pred_data.parameter_name.kind == SyntaxKind::ThisType;
+            || pred_data.parameter_name.kind == SyntaxKind::ThisType
+            || (pred_data.parameter_name.kind == SyntaxKind::Identifier
+                && pred_data.parameter_name.text() == "this");
         let kind = if pred_data.asserts_modifier.is_some() {
             if is_this {
                 TypePredicateKind::AssertsThis
@@ -4772,6 +4799,13 @@ impl Checker {
         let obj_type = self.get_type_of_node(obj_expr);
         let name_text = name.text();
         if let Some(sym) = self.get_property_of_type(&obj_type, &name_text) {
+            // Array interface members fall back to the UN-instantiated
+            // global interface — substitute the element type into the
+            // member's type here (Go resolves members through the
+            // instantiation mapper).
+            if let Some(substituted) = self.instantiate_array_member_type(&obj_type, &sym) {
+                return self.flow_type_of_access_expression(node, Some(&sym), substituted);
+            }
             let prop_type = self.get_type_of_symbol(&sym);
             return self.flow_type_of_access_expression(node, Some(&sym), prop_type);
         }
@@ -6067,8 +6101,19 @@ impl Checker {
             usize::MAX
         };
         let rest_element_type = if has_rest {
-            let rest_param_type = self.get_type_of_symbol(&sig.parameters[rest_index]);
-            Some(self.get_array_element_type(&rest_param_type))
+            // Prefer the signature's instantiated rest type — for array
+            // rests `try_get_type_at_position` already yields the ELEMENT
+            // type (element-substituted Array members like
+            // `push(...items: T[])`). Fall back to unwrapping the declared
+            // symbol's array type.
+            match self.try_get_type_at_position(&sig, rest_index) {
+                Some(t) => Some(t),
+                None => {
+                    let rest_param_type =
+                        self.get_type_of_symbol(&sig.parameters[rest_index]);
+                    Some(self.get_array_element_type(&rest_param_type))
+                }
+            }
         } else {
             None
         };
@@ -6115,7 +6160,11 @@ impl Checker {
                 // Rest position: check against the array element type.
                 Arc::clone(rest_element_type.as_ref().unwrap())
             } else if i < sig.parameters.len() {
-                self.get_type_of_symbol(&sig.parameters[i])
+                // Prefer the signature's instantiated parameter types
+                // (element-substituted Array members, contextual
+                // instantiations); fall back to the declared symbol type.
+                self.try_get_type_at_position(&sig, i)
+                    .unwrap_or_else(|| self.get_type_of_symbol(&sig.parameters[i]))
             } else {
                 // Beyond declared params with no rest — should have been
                 // caught by the arity check; skip to avoid false positives.
@@ -6410,10 +6459,13 @@ impl Checker {
         }
 
         // Member access via a string-literal key: `obj["prop"]` behaves like
-        // `obj.prop` for property lookup and participates in the same
+        // obj.prop for property lookup and participates in the same
         // reference-based flow narrowing.
         if let Some(member_name) = self.literal_element_access_name(arg_expr) {
             if let Some(sym) = self.get_property_of_type(&obj_type, &member_name) {
+                if let Some(substituted) = self.instantiate_array_member_type(&obj_type, &sym) {
+                    return self.flow_type_of_access_expression(node, Some(&sym), substituted);
+                }
                 let prop_type = self.get_type_of_symbol(&sym);
                 return self.flow_type_of_access_expression(node, Some(&sym), prop_type);
             }
@@ -14790,7 +14842,18 @@ impl Checker {
             let crate::ast::NodeData::ArrayLiteralExpression(data) = &expr.data else {
                 return;
             };
-            let elem_t = self.get_array_element_type(target);
+            // Element checks only apply to genuine array-like targets
+            // (`T[]`, evolving arrays) — a generic interface instantiation
+            // recorded its type arguments for display, and those must not
+            // be misread as an element type (`const x: Box<string> = [...]`
+            // is a bare TS2322, no per-element cascade).
+            let elem_t = if self.is_array_type(target)
+                || matches!(target.data, TypeData::EvolvingArray(_))
+            {
+                self.get_array_element_type(target)
+            } else {
+                self.get_any_type()
+            };
             if elem_t.flags.contains(TypeFlags::Any) {
                 // A numeric index signature on the target (`interface I {
                 // [x: number]: Date }`) also types the elements.

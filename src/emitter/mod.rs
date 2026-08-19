@@ -886,8 +886,25 @@ fn emit_declaration_statement(node: &Node, source: &str, start: usize, output: &
         NodeData::FunctionDeclaration(d) => {
             if let Some(body) = &d.body {
                 // Emit signature (up to body start), trim trailing space.
-                let sig = &source[start..body.pos()];
-                let sig_trimmed = sig.trim_end();
+                let mut sig = &source[start..body.pos()];
+                let mut sig_trimmed = sig.trim_end().to_string();
+
+                // Declaration emit drops the `async` keyword and the
+                // generator `*` (Go's declaration printer): the return type
+                // carries the asynchrony/iteration. `export declare async
+                // function f();` is not legal syntax.
+                let is_generator = d.asterisk_token.is_some();
+                if is_generator {
+                    sig_trimmed = sig_trimmed.replace("function*", "function");
+                }
+                if sig_trimmed.starts_with("async ")
+                    || sig_trimmed.contains(" async function")
+                {
+                    if let Some(pos) = sig_trimmed.find("async ") {
+                        sig_trimmed.replace_range(pos..pos + 6, "");
+                    }
+                }
+                sig = &sig_trimmed;
 
                 // Check if signature already has a return type annotation.
                 // If not, and the function body returns JSX, add the
@@ -899,10 +916,17 @@ fn emit_declaration_statement(node: &Node, source: &str, start: usize, output: &
 
                 if !has_return_type && function_returns_jsx(body) {
                     // Insert return type before the semicolon.
-                    output.push_str(sig_trimmed);
+                    output.push_str(&sig_trimmed);
                     output.push_str(": import(\"react\").JSX.Element;");
+                } else if !has_return_type {
+                    // Unannotated return in .d.ts: the barebones transpile
+                    // checker cannot infer — emit the fallback return type
+                    // (generators print `{}`, plain/async print `unknown`,
+                    // matching the official transpile baselines).
+                    output.push_str(&sig_trimmed);
+                    output.push_str(if is_generator { ": {};" } else { ": unknown;" });
                 } else {
-                    output.push_str(sig_trimmed);
+                    output.push_str(&sig_trimmed);
                     output.push(';');
                 }
                 // Emit trailing whitespace after the body's closing `}`.

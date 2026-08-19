@@ -3522,11 +3522,26 @@ impl Checker {
         // are array types too — their members resolve the same way.
         let is_array_like = self.is_array_type(t)
             || matches!(&t.data, TypeData::EvolvingArray(_));
-        if is_array_like {
-            if let Some(array_sym) = self.globals.get("Array") {
-                if let Some(member) = array_sym.members.get(name) {
-                    return Some(Arc::clone(member));
-                }
+        if is_array_like
+            && let Some(array_sym) = self.globals.get("Array")
+        {
+            // Interface METHOD members never enter the binder symbol tables
+            // (interface members resolve AST-side); the declared
+            // `Array<T>` type's synthetic member table is the source of
+            // truth — its symbols' types carry the REAL type parameter, so
+            // `instantiate_array_member_type` can element-substitute them.
+            if let Some(declared) = self
+                .type_alias_links
+                .get(array_sym)
+                .and_then(|l| l.declared_type.clone())
+                && let Some(structured) = declared.as_structured()
+                && let Some(member) = structured.members.get(name)
+            {
+                return Some(Arc::clone(member));
+            }
+            // Type parameters / index signatures live on the binder symbol.
+            if let Some(member) = array_sym.members.get(name) {
+                return Some(Arc::clone(member));
             }
         }
         // Fallback for pure function types (an anonymous object whose only

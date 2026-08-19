@@ -791,12 +791,27 @@ impl Checker {
         false
     }
 
+    /// Whether a type needs parentheses when printed in array-element
+    /// position (`T[]`). Official parenthesizes unions, intersections,
+    /// conditional types, `keyof` types, and function types
+    /// (`(number | string)[]`, `((x: number) => void)[]`), but not mapped
+    /// types or nested arrays (`{ [K in A]: B }[]`, `string[][]`).
+    fn needs_parens_as_array_element(&mut self, t: &Arc<Type>) -> bool {
+        if t.is_union() || t.is_intersection() {
+            return true;
+        }
+        if matches!(&t.data, TypeData::Conditional(_) | TypeData::Index(_)) {
+            return true;
+        }
+        self.needs_parens_in_union(t)
+    }
+
     /// Parenthesize array element types that need it:
-    /// - Function types: `(x: T) => U` → `((x: T) => U)[]`
-    /// - Union types with function members
+    /// - Union/intersection/conditional/keyof/function element types get
+    ///   parenthesized: `(number | string)[]`, `((x: T) => U)[]`
     fn maybe_parenthesize_array_element(&mut self, elem: &Arc<Type>) -> String {
         let s = self.type_to_string_ex(elem, TypeFormatFlags::NONE);
-        if self.needs_parens_in_union(elem) {
+        if self.needs_parens_as_array_element(elem) {
             format!("({})", s)
         } else {
             s

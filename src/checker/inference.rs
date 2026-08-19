@@ -1372,8 +1372,11 @@ impl Checker {
                 }
             }
         }
-        // Array<T>: return T (always succeeds, defaults to `any`).
-        if t.flags.contains(TypeFlags::Object) {
+        // Array<T>: return T (always succeeds, defaults to `any`). Only for
+        // genuine array-like types — a generic interface instantiation
+        // records type arguments for display, and those must not be
+        // misread as an element type.
+        if self.is_array_type(t) || matches!(t.data, TypeData::EvolvingArray(_)) {
             return Some(self.get_array_element_type(t));
         }
         None

@@ -739,8 +739,26 @@ impl Checker {
         symbol: &Arc<Symbol>,
         type_arguments: Option<Arc<NodeList>>,
     ) -> Arc<Type> {
+        let arg_types = type_arguments.map(|nodes| {
+            nodes
+                .iter()
+                .map(|a| self.get_type_from_type_node(a))
+                .collect()
+        });
+        self.resolve_interface_type_ex(symbol, arg_types)
+    }
+
+    /// `resolve_interface_type` with already-resolved type arguments —
+    /// used by `create_array_type` (Go's
+    /// `createTypeFromGenericGlobalType(globalArrayType, [elementType])`),
+    /// where the element type is a `Type`, not a type node.
+    pub(crate) fn resolve_interface_type_ex(
+        &mut self,
+        symbol: &Arc<Symbol>,
+        type_args: Option<Vec<Arc<Type>>>,
+    ) -> Arc<Type> {
         // For non-generic interfaces, reuse a cached declared type.
-        let has_type_args = type_arguments.is_some();
+        let has_type_args = type_args.is_some();
         if !has_type_args {
             if let Some(cached) = self
                 .type_alias_links
@@ -750,7 +768,32 @@ impl Checker {
                 return cached;
             }
         }
-        // Cycle guard for recursive interface references.
+        // Memoize generic instantiations per (symbol, argument pointers) —
+        // argument types are shared singletons in practice (intrinsics and
+        // symbol-cached type parameters), so pointer identity is a sound
+        // key, and repeated resolutions of e.g. `ConcatArray<T>[]` inside
+        // Array's own members collapse into one instance (without this,
+        // fresh instances defeat `array_type_cache` and member resolution
+        // blows up exponentially on lib scale).
+        let instantiation_key: Option<Vec<usize>> = type_args.as_ref().map(|args| {
+            let mut key = Vec::with_capacity(args.len() + 1);
+            key.push(Arc::as_ptr(symbol) as *const Symbol as usize);
+            key.extend(
+                args.iter()
+                    .map(|t| Arc::as_ptr(t) as *const crate::checker::types::Type as usize),
+            );
+            key
+        });
+        if let Some(key) = &instantiation_key
+            && let Some(cached) = self.interface_instantiation_cache.get(key)
+        {
+            return Arc::clone(cached);
+        }
+        // Cycle guard for recursive interface references. NOTE: unlike Go,
+        // the key is the bare symbol pointer (NOT arg-aware): an
+        // arg-specific key un-blocks nested instantiations of the same
+        // interface with different arguments, and the default libs'
+        // mutually-recursive generic interfaces then expand without bound.
         let key = Arc::as_ptr(symbol) as *const crate::ast::Symbol;
         if !self.push_type_resolution(
             key,
@@ -790,13 +833,8 @@ impl Checker {
                 };
                 // Push the type-argument substitution mapping for generic
                 // interfaces.
+                let arg_types: Vec<Arc<Type>> = type_args.unwrap_or_default();
                 if has_type_args {
-                    let arg_types: Vec<Arc<Type>> = type_arguments
-                        .as_ref()
-                        .unwrap()
-                        .iter()
-                        .map(|a| self.get_type_from_type_node(a))
-                        .collect();
                     let mut mapping = HashMap::new();
                     for (i, tp_sym) in tp_symbols.iter().enumerate() {
                         if let Some(arg) = arg_types.get(i) {
@@ -957,12 +995,20 @@ impl Checker {
                     }
                 }
                 // Attach the interface symbol so the type printer uses the
-                // declared name (Go's `Type.Symbol`). The type was just
+                // declared name (Go's `Type.Symbol`), and record the type
+                // arguments so generic instantiations display as `I<A, B>`
+                // (official keeps a type reference with its arguments; our
+                // anonymous object loses them otherwise). The type was just
                 // created above and is not yet shared.
                 {
                     let result_mut = Arc::as_ptr(&result) as *mut crate::checker::types::Type;
                     unsafe {
                         (*result_mut).symbol = Some(Arc::clone(symbol));
+                        if has_type_args
+                            && let TypeData::Object(o) = &mut (*result_mut).data
+                        {
+                            o.type_arguments = arg_types.clone();
+                        }
                     }
                 }
                 result
@@ -972,6 +1018,10 @@ impl Checker {
         self.pop_type_resolution();
         if !has_type_args {
             self.type_alias_links.get_or_default(symbol).declared_type = Some(result.clone());
+        }
+        if let Some(key) = instantiation_key {
+            self.interface_instantiation_cache
+                .insert(key, Arc::clone(&result));
         }
         result
     }
@@ -1932,8 +1982,14 @@ impl Checker {
         let mut symbol_table = SymbolTable::new();
         let mut props: Vec<Arc<Symbol>> = Vec::new();
         for (name, member_sym) in &members {
-            // Skip internal symbols (e.g. `__function` anonymous names).
-            if name.starts_with("__") {
+            // Skip compiler-internal symbols only. Internal names carry the
+            // `\u{FE}` prefix (INTERNAL_SYMBOL_NAME_PREFIX, mirroring Go's
+            // InternalSymbolName prefix); user code may legally export
+            // `__`-prefixed names (the official suites' `__val__*` pattern),
+            // and `export=` is the module-export-assignment slot.
+            if name.starts_with(crate::ast::INTERNAL_SYMBOL_NAME_PREFIX)
+                || name == crate::ast::INTERNAL_SYMBOL_NAME_EXPORT_EQUALS
+            {
                 continue;
             }
             let member_type = self.get_type_of_symbol(member_sym);
@@ -2506,6 +2562,48 @@ impl Checker {
     /// function-expression type inference (where the return type is inferred
     /// from the body via `infer_function_return_type`).
     ///
+    /// Whether `fn` is the callee of an immediately-invoked call with fewer
+    /// arguments than the function's parameter count (Go
+    /// `ast.GetImmediatelyInvokedFunctionExpression` + the
+    /// `len(parameters) > len(iife.Arguments())` clause of the min-arity
+    /// optionality rule). Such calls treat their untyped trailing
+    /// parameters as optional.
+    fn iife_with_too_few_arguments(
+        declaration: &Option<Arc<Node>>,
+        parameter_count: usize,
+    ) -> bool {
+        let Some(decl) = declaration else {
+            return false;
+        };
+        if !matches!(
+            decl.kind,
+            SyntaxKind::FunctionExpression | SyntaxKind::ArrowFunction
+        ) {
+            return false;
+        }
+        let mut prev: Arc<Node> = Arc::clone(decl);
+        let mut parent: Option<Arc<Node>> = decl.parent.clone();
+        while matches!(
+            parent.as_ref().map(|p| p.kind),
+            Some(SyntaxKind::ParenthesizedExpression)
+        ) {
+            prev = parent.clone().expect("checked Some above");
+            parent = prev.parent.clone();
+        }
+        let Some(parent) = parent else {
+            return false;
+        };
+        if parent.kind != SyntaxKind::CallExpression {
+            return false;
+        }
+        let crate::ast::NodeData::CallExpression(call) = &parent.data else {
+            return false;
+        };
+        // The callee must be the function's outermost paren wrapper (Go:
+        // `parent.Expression() == prev`, no callee-side unwrapping).
+        Arc::ptr_eq(&call.expression, &prev) && parameter_count > call.arguments.nodes.len()
+    }
+
     /// `contextual_signature` carries the contextual function type's call
     /// signature (when the function expression is the initializer of a
     /// variable/parameter/property with a function-type annotation). When a
@@ -2610,7 +2708,16 @@ impl Checker {
             if is_rest {
                 flags |= SignatureFlags::HasRestParameter;
                 reached_optional_or_rest = true;
-            } else if is_optional {
+            } else if is_optional
+                || pd.initializer.is_some()
+                || (pd.type_node.is_none()
+                    && Self::iife_with_too_few_arguments(&declaration, parameters.len()))
+            {
+                // Go's optionality rules for min-arity (checker.go ~L19931):
+                // `?`, an initializer, rest, or an untyped parameter of an
+                // immediately-invoked function expression whose parameter
+                // count exceeds the call's argument count — `((a) => {})()`
+                // is legal, `((a: number) => {})()` is TS2554.
                 reached_optional_or_rest = true;
             }
             if !reached_optional_or_rest {
@@ -3129,11 +3236,21 @@ impl Checker {
     }
 
     pub fn create_array_type(&mut self, element_type: Arc<Type>) -> Arc<Type> {
+        // Bare reference shape with the Array symbol and the element as its
+        // type argument (display prints `T[]`; `is_array_type` sees the
+        // Reference flag). Array interface MEMBERS are never eagerly built
+        // here — Go keeps instantiation lazy (deferred type references),
+        // and eagerly resolving the ~40-member table per element type melts
+        // down on default-lib scale (thousands of distinct elements, each
+        // cascading into ConcatArray/ReadonlyArray instantiations). Member
+        // types are element-substituted at property-access time instead —
+        // see `instantiate_array_member_type`.
+        let array_symbol = self.globals.get("Array").cloned();
         Arc::new(Type {
             flags: TypeFlags::Object,
             object_flags: ObjectFlags::Reference,
             id: 0,
-            symbol: None,
+            symbol: array_symbol,
             alias: None,
             data: TypeData::Object(ObjectTypeData {
                 structured: StructuredTypeData::default(),
@@ -3142,6 +3259,130 @@ impl Checker {
                 type_arguments: vec![element_type],
             }),
         })
+    }
+
+    /// The type-parameter symbols of the global `Array<T>` interface
+    /// (lazily collected, then cached).
+    pub(crate) fn array_type_parameter_symbols(&mut self) -> Vec<Arc<Symbol>> {
+        if let Some(cached) = &self.array_type_parameter_symbols {
+            return cached.clone();
+        }
+        let collected = self
+            .globals
+            .get("Array")
+            .and_then(|sym| {
+                let decl = sym
+                    .declarations
+                    .iter()
+                    .find(|d| matches!(d.data, NodeData::InterfaceDeclaration(_)))?;
+                let NodeData::InterfaceDeclaration(d) = &decl.data else {
+                    return None;
+                };
+                let sym_map = self.program.symbol_map();
+                Some(
+                    d.type_parameters
+                        .as_ref()?
+                        .iter()
+                        .filter_map(|tp| sym_map.symbol_of(tp).map(Arc::clone))
+                        .collect::<Vec<_>>(),
+                )
+            })
+            .unwrap_or_default();
+        self.array_type_parameter_symbols = Some(collected.clone());
+        collected
+    }
+
+    /// Element-substituted type of an `Array` interface member accessed on
+    /// an array type (`arr.push`, `arr.every`, …): the raw member's type
+    /// keeps the interface's type parameter free, so substitute it with the
+    /// array's element type (Go resolves members through the instantiation
+    /// mapper; we substitute at access time and memoize per
+    /// (element, member)). Returns `None` when `member` doesn't come from
+    /// the Array fallback or its type doesn't mention the type parameter
+    /// (`length: number`).
+    pub(crate) fn instantiate_array_member_type(
+        &mut self,
+        obj_type: &Arc<Type>,
+        member: &Arc<Symbol>,
+    ) -> Option<Arc<Type>> {
+        // Only the bare array shape (no structured members of its own).
+        if !self.is_array_type(obj_type) {
+            return None;
+        }
+        if let Some(structured) = obj_type.as_structured()
+            && structured.members.get(&member.name).is_some()
+        {
+            // The member belongs to the type's own table, not the Array
+            // fallback — nothing to substitute.
+            return None;
+        }
+        let TypeData::Object(o) = &obj_type.data else {
+            return None;
+        };
+        let element = match o.type_arguments.first() {
+            Some(e) => Arc::clone(e),
+            None => return None,
+        };
+        // Type the member through the DECLARED `Array<T>` type's structured
+        // member table: those synthetic symbols were resolved IN the
+        // interface's scope during declaration building, so `T` is the real
+        // type parameter (the binder member symbol resolves `T` to any
+        // outside that scope).
+        let declared = match self
+            .globals
+            .get("Array")
+            .and_then(|sym| {
+                self.type_alias_links
+                    .get(sym)
+                    .and_then(|l| l.declared_type.clone())
+            }) {
+            Some(d) => Some(d),
+            // Not yet resolved: force the declared resolution now.
+            None => self.globals.get("Array").cloned().map(|sym| {
+                self.resolve_interface_type(&sym, None)
+            }),
+        };
+        let raw = declared
+            .as_ref()
+            .and_then(|d| d.as_structured())
+            .and_then(|s| s.members.get(&member.name).cloned())
+            .map(|synthetic| self.get_type_of_symbol(&synthetic))?;
+        let key = (
+            Arc::as_ptr(&element) as *const crate::checker::types::Type as usize,
+            Arc::as_ptr(member) as *const crate::ast::Symbol as usize,
+        );
+        if let Some(cached) = self.array_member_type_cache.get(&key) {
+            return Some(Arc::clone(cached));
+        }
+        // Collect the FREE type parameters straight from the member's own
+        // parameter/return types and substitute each with the element type.
+        // Collecting from the member type itself sidesteps type-parameter
+        // symbol divergence across Array's merged lib declarations
+        // (same-named `T`s are distinct symbols per declaration).
+        let mut free_tps: Vec<Arc<Type>> = Vec::new();
+        for sig in self.get_signatures_of_type(&raw, SignatureKind::Call) {
+            // Read parameter types from the parameter SYMBOLS directly
+            // (`try_get_type_at_position` yields None for raw rest
+            // parameters outside the override table).
+            for param in &sig.parameters {
+                let pt = self.get_type_of_symbol(param);
+                crate::checker::relater::collect_free_type_parameters(&pt, &mut free_tps);
+            }
+            if let Some(rt) = self.get_return_type_of_signature(&sig) {
+                crate::checker::relater::collect_free_type_parameters(&rt, &mut free_tps);
+            }
+        }
+        if free_tps.is_empty() {
+            // Non-generic member (`length: number`) — return its type as-is.
+            return Some(raw);
+        }
+        let substitutions: Vec<Arc<Type>> =
+            std::iter::repeat(Arc::clone(&element)).take(free_tps.len()).collect();
+        let substituted =
+            self.substitute_infer_type_parameters(&raw, &free_tps, &substitutions);
+        self.array_member_type_cache
+            .insert(key, Arc::clone(&substituted));
+        Some(substituted)
     }
 
     pub fn create_tuple_type(&mut self, element_types: Vec<Arc<Type>>) -> Arc<Type> {
