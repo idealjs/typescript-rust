@@ -67,6 +67,47 @@ diff "tests/baselines/reference/compiler/<stem>.errors.txt" \
 
 # 当前批次
 
+## 修复十（2026-08-20 晨，r4 后 fix-only + CLI 对照验证；r5 全量验证进行中）
+
+基于 r4 的 26 FAIL（修复九回归为主）+ `_scripts/FIXPLAN_20260820_r4.md` 诊断，
+八项修复（细节见 commit 162caa92a）：
+
+1. **F3a 数组成员实例化重做**（typenode.rs instantiate_array_member_type）：
+   深收集器递归进回调签名找自由类型参数；只替换 Array 自有参数（map 的 U、
+   flat 的 D 保持自由供推断）；evolving 数组同表解析（元素取演化联合）
+2. **覆盖表接线**：签名显示（nodebuilder function_type_to_string）、
+   回调参数上下文定型（inference + typenode）读 instantiated_parameter_types
+3. **显式类型实参的重载选择**：按元数过滤候选（reduce\<number\> 选泛型
+   重载，TS2558 消除）
+4. **signature_accepts_arguments 重写**：rest 位置按元素检查、经 try_get
+   读覆盖表（concat 重载 1 正确匹配裸字符串）
+5. **relater 结构回退**：裸/evolving 数组源经声明态 Array 成员表满足
+   结构接口（string[] → ConcatArray\<string\>）
+6. **substituted_member_type_of**：实例成员类型经正确实例化读取（接口
+   resolve_interface_type_ex 重建；类走替换 fallback）——ConcatArray\<number\>.
+   slice 返回 number[] 而非原始 T[]
+7. **TS2430 裸泛型基成员 any 实例化**（官方 implicit-any 语义，
+   CompressionStream 族 lib 误报消除）
+8. **substitute_infer_type_parameters 类型参数按符号/名字身份匹配**
+   （多声明分叉兜底）
+
+**验证**（tsox CLI vs tsgo-ref 逐例）：r4 回归清单 **12/17 MATCH**——
+arrayConcat2、arrayFlat×2、emptyArrayDestructuring、genericContextual、
+genericIndexedAccess、narrowingNoInfer1、nestedSelf、specializations、
+typePredicateTopLevel、capturedShorthand、commentInMethodCall、
+commaOperator。新增 6 个单元测试（array_member_tests），**1313 全绿**。
+
+**本轮遗留**（r5 后下轮）：
+- concatError 幻影 TS2322（`fa.concat([0])` 数组字面量元素 vs 原始 T——
+  rest 覆盖表二次拆数组嫌疑）
+- functionSubtypingOfVarArgs：push 实参检查读了 push 后演化类型
+  （官方用 push 前 never）；`(args: any[])` rest 显示丢 `...` 前缀
+- inferentialTypingWithFunctionType2：泛型函数作回调的 relater 比较
+- assignmentCompatability9：类实例 type_arguments 未挂（substituted_
+  member_type_of 类分支拿不到实参）
+- TS2769 重载失败链（F3b）、D1 lib heritage 环丢失、D3 TS2823、
+  D6 nodeModules 自引用、D2 import 定型子系统（均见 FIXPLAN_20260820_r4.md）
+
 ## 全量跑 r4（2026-08-20 凌晨，单测修复后；诊断与修复计划见 `_scripts/FIXPLAN_20260820_r4.md`）
 
 **前置**：单测阶段修复三项并全绿（1307 通过）——(a) nodebuilder
