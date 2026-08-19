@@ -67,6 +67,34 @@ diff "tests/baselines/reference/compiler/<stem>.errors.txt" \
 
 # 当前批次
 
+## 全量跑 r5（2026-08-20 晨，修复十验证；干净机器无并发）
+
+**命令**：`bash run_full_sweep_r5_20260820.sh`（日志 `submodule_full_run_r5_20260820.log`）。
+
+| 套件 | PASS | accepted-diff | SKIP | FAIL | 对比 r4 |
+| --- | --- | --- | --- | --- | --- |
+| compiler | 2,844 | 2,638 | 1,050（超时 18） | **4** | PASS +849、FAIL 13→4（r4 前段超时污染实证：18 vs 1420） |
+| conformance | 2,003 | 2,656 | 1,236 | **12** | FAIL 13→12 |
+| transpile | 0 | 22 | 0 | **0** | 持平 |
+
+修复十生效：r4 的 9 个 compiler 回归全绿（arrayConcat2、arrayFlat×2、
+emptyArrayDestructuring、functionSubtypingOfVarArgs、genericContextual、
+narrowingNoInfer1、nestedSelf、specializationsShouldNotAffectEachOther、
+typePredicateTopLevel、genericIndexedAccess、capturedShorthand、
+commentInMethodCall、commaOperator——含 r3 曾 FAIL 的全部）；
+conformance 修复 jsxJsxsSubstitutesNames(+Fragment)、logicalAssignment5、
+optionalChainingInArrow、iteratorSpreadInArray7。
+
+**剩余 16 FAIL 清单**（下轮目标）：
+- compiler 4：assignmentCompatability9（类实例 type_arguments）、
+  concatError（`fa.concat([0])` 幻影 TS2322）、inferentialTypingWith
+  FunctionType2（泛型函数回调比较）、importHelpersWithImportOrExport
+  DefaultNoTslib.2（TS2354 helper 矩阵；r4 时为超时 SKIP，已知旧账）
+- conformance 12：nodeModules×9（D6：package.json 自引用/TS2883/
+  triple-slash 模式；子集每轮随超时漂移——D6 一揽子修）、
+  importAssertion3（D3：TS2823）、jsxJsxsCjsTransformCustomImport
+  （D1：lib heritage 环丢失）、tsxReactEmitSpreadAttribute（JSX emit）
+
 ## 修复十（2026-08-20 晨，r4 后 fix-only + CLI 对照验证；r5 全量验证进行中）
 
 基于 r4 的 26 FAIL（修复九回归为主）+ `_scripts/FIXPLAN_20260820_r4.md` 诊断，
