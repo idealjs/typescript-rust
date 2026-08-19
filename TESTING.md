@@ -67,6 +67,49 @@ diff "tests/baselines/reference/compiler/<stem>.errors.txt" \
 
 # 当前批次
 
+## 全量跑 r4（2026-08-20 凌晨，单测修复后；诊断与修复计划见 `_scripts/FIXPLAN_20260820_r4.md`）
+
+**前置**：单测阶段修复三项并全绿（1307 通过）——(a) nodebuilder
+`type_to_type_node` 泛型接口实例补 type_arguments；(b) parser
+`export default function/class` 丢弃 export/default 修饰符（Go 忠实挂载；
+  连带激活 CJS transform 的 exports.default 生成与 dts emit 的
+  `export default function f(): T;` 无 declare 形态）；(c) 对应 dts 单测
+断言更新。CLI 冒烟：dts/CJS emit/同文件类型全部符合官方。
+
+**命令**：`bash run_full_sweep_20260820.sh`（日志 `submodule_full_run_r4_20260820.log`）。
+
+| 套件 | PASS | accepted-diff | SKIP | FAIL |
+| --- | --- | --- | --- | --- |
+| compiler | 1,995 | 2,079 | 2,449（含 1,420 超时——**受污染**） | **13** |
+| conformance | 2,000 | 2,653 | 1,241 | **13** |
+| transpile | 0 | 22 | 0 | **0** |
+
+**重要注记**：
+1. compiler 段前 ~3000 例与并发 CLI 探测时段重合（本会话诊断用），
+   同序号窗口对账 r2=5.3s vs r4=15.4s（3x）而后段窗口持平（8.6≈8.7），
+   1,420 个超时 SKIP 主要为负载伪影——**compiler 的 PASS/SKIP 数字不可
+   与 r2 直接对比**；教训已入记忆（sweep 期间禁重探测）
+2. compiler 13 FAIL 全部为**修复九回归**（r2=0，r3 已复现）：F3a 数组
+   方法回调签名泄漏未替换元素类型参数 T（arrayFlat×2、concatError、
+   arrayConcat2、emptyArrayDestructuring、inferentialTypingWithFunction
+   Type2、narrowingNoInfer1、nestedSelf、typePredicateTopLevel、
+   genericContextualTypingSpecialization、specializationsShouldNotAffect
+   EachOther）、F1c 类实例属性未实例化比较（genericIndexedAccess）、
+   evolving array 成员（functionSubtypingOfVarArgs）
+3. conformance 13 FAIL：nodeModules×7（r2 已有 5 + 新 2：ImportHelpers
+   Collisions3、TripleSlashReferenceModeOverride4/ModeError——r2 时为超时
+   SKIP 未暴露）、jsxJsxsCjsTransformSubstitutesNames(+Fragment)（根因
+   D1：lib 接口 heritage 合并在环上静默丢失→react16.d.ts 865 行误报）、
+   importAssertion3 缺 TS2823（r2 已有，本轮它转 SKIP? 未出现——由
+   iteratorSpreadInArray7/logicalAssignment5/optionalChainingInArrow/
+   tsxReactEmitSpreadAttribute 等修复九回归补充）、iteratorSpreadInArray7、
+   logicalAssignment5、optionalChainingInArrow、tsxReactEmitSpreadAttribute
+4. conformance 与 r2 相比：PASS +20、FAIL 9→13（回归+新暴露），
+   数字可比（探测已停）
+5. r3（中断跑）compiler 段 22 FAIL 中 9 例本轮未再现
+   （assignmentCompatability9、capturedShorthand、commaOperator、
+   commentInMethodCall 等——outcome 行丢失无 FAIL 记录，产物对账待查）
+
 ## 修复九（2026-08-19 深夜，全量跑 r2 后：fix-only，CLI 单点验证；未跑测试套件）
 
 基于上方全量跑 r2 结果 + 测试运行期间的 CLI/tsgo-ref 对照诊断（计划见

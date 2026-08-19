@@ -805,8 +805,10 @@ fn emit_declaration_text(source_file: &SourceFile, _options: &CompilerOptions) -
         }
 
         // Insert `declare ` for declarations that need it (functions,
-        // variables, classes, enums — but NOT interfaces/type aliases).
-        if needs_declare_keyword(stmt) {
+        // variables, classes, enums — but NOT interfaces/type aliases, and
+        // NOT export-default declarations: official emit prints
+        // `export default function f(): T;` with no `declare`).
+        if needs_declare_keyword(stmt) && !has_default {
             output.push_str("declare ");
         }
 
@@ -4938,8 +4940,11 @@ mod tests {
         assert!(!dts.contains("reactLogo"));
         // Side-effect import is retained and gets an implicit semicolon.
         assert!(dts.contains("import './App.css';"));
-        // Function body is stripped; signature retained.
-        assert!(dts.contains("declare function App();"));
+        // Function body is stripped; signature retained. The return type
+        // is uninferable in single-file transpile mode, so it emits the
+        // official transpile fallback `: unknown` (cf. the
+        // declarationAsyncAndGeneratorFunctions baseline).
+        assert!(dts.contains("export default function App(): unknown;"));
         assert!(!dts.contains("return"));
     }
 

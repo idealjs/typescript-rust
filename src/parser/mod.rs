@@ -6086,12 +6086,22 @@ impl Parser {
             let default_end = self.token_end();
             self.next_token(); // consume 'default'
             if self.token == SyntaxKind::FunctionKeyword {
-                let func = self.parse_function_declaration();
-                return func; // export default function → FunctionDeclaration
+                // Go's parser attaches the export/default modifiers to the
+                // function declaration (parseDeclaration with modifiers);
+                // dropping them starves the binder's export path, the CJS
+                // transform, and declaration emit's `declare`-elision rule.
+                let modifiers = self.make_modifier_list(vec![
+                    (SyntaxKind::ExportKeyword, pos, export_end),
+                    (SyntaxKind::DefaultKeyword, default_pos, default_end),
+                ]);
+                return self.parse_function_declaration_with_modifiers(Some(modifiers));
             }
             if self.token == SyntaxKind::ClassKeyword {
-                let class = self.parse_class_declaration();
-                return class; // export default class → ClassDeclaration
+                let modifiers = self.make_modifier_list(vec![
+                    (SyntaxKind::ExportKeyword, pos, export_end),
+                    (SyntaxKind::DefaultKeyword, default_pos, default_end),
+                ]);
+                return self.parse_class_declaration_with_modifiers(Some(modifiers));
             }
             // `export default interface I {}` — a default-exported
             // interface declaration (Go routes KindInterfaceKeyword through

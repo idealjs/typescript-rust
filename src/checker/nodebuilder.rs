@@ -919,9 +919,23 @@ impl Checker {
             }
         }
 
-        // Object types with a symbol (class, interface, enum, type alias)
+        // Object types with a symbol (class, interface, enum, type alias).
+        // Generic instantiations carry their type arguments on the instance
+        // (the symbol's declared type is uninstantiated), so pass them
+        // through — mirrors `symbol_type_to_string` reading `t`'s own
+        // arguments (`Foo<number>`, not the bare `Foo`).
         if let Some(sym) = &t.symbol {
-            return self.symbol_to_type_node(sym, SymbolFlags::TYPE, None);
+            let instance_args = t.as_object().and_then(|obj| {
+                (!obj.type_arguments.is_empty()).then(|| {
+                    let arg_nodes: Vec<Arc<Node>> = obj
+                        .type_arguments
+                        .iter()
+                        .map(|ty| self.type_to_type_node(ty))
+                        .collect();
+                    Arc::new(NodeList::new(arg_nodes))
+                })
+            });
+            return self.symbol_to_type_node(sym, SymbolFlags::TYPE, instance_args);
         }
 
         // Anonymous object literal types
