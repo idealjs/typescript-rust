@@ -996,6 +996,16 @@ impl<'a> ResolutionState<'a> {
                 return Some(resolved);
             }
         }
+        // Self-name reference: a bare specifier that matches the enclosing
+        // package.json's `name` resolves through that package's own
+        // `exports` (Go `loadModuleFromSelfNameReference`).
+        if !tspath::is_external_module_name_relative(&self.name)
+            && self.features.contains(NodeResolutionFeatures::SelfName)
+        {
+            if let Some(resolved) = self.load_module_from_self_name_reference() {
+                return Some(resolved);
+            }
+        }
         if tspath::is_external_module_name_relative(&self.name) {
             // Relative path: normalize then load by relative name.
             let candidate =
@@ -1599,6 +1609,41 @@ impl<'a> ResolutionState<'a> {
             &package_directory,
             true, // is_imports
         )
+    }
+
+    /// Resolve a self-name reference (`import x from "mypkg/..."` from
+    /// inside package `mypkg` itself) through the enclosing package.json's
+    /// `exports`. Mirrors Go's `loadModuleFromSelfNameReference`.
+    fn load_module_from_self_name_reference(&mut self) -> Option<Resolved> {
+        let directory_path = tspath::get_normalized_absolute_path(
+            &self.containing_directory,
+            self.current_directory,
+        );
+        let (package_directory, fields) = self.get_package_scope_for_path(&directory_path)?;
+        let exports = &fields.path_fields.exports;
+        if !exports.json_value.is_present() || exports.json_value.is_falsy() {
+            return CONTINUE_SEARCHING;
+        }
+        let Some(package_name) = fields.header_fields.name.get_value() else {
+            return CONTINUE_SEARCHING;
+        };
+        // The specifier must begin with the package name (whole path
+        // components); the remainder is the exports subpath.
+        let parts: Vec<&str> = self.name.split('/').filter(|p| !p.is_empty()).collect();
+        let name_parts: Vec<&str> = package_name
+            .split('/')
+            .filter(|p| !p.is_empty())
+            .collect();
+        if parts.len() < name_parts.len() || parts[..name_parts.len()] != name_parts[..] {
+            return CONTINUE_SEARCHING;
+        }
+        let trailing = &parts[name_parts.len()..];
+        let subpath = if trailing.is_empty() {
+            ".".to_string()
+        } else {
+            format!("./{}", trailing.join("/"))
+        };
+        self.load_module_from_exports(self.extensions, &subpath, &package_directory, exports)
     }
 
     /// Walk ancestor directories from `directory` upwards to find the
