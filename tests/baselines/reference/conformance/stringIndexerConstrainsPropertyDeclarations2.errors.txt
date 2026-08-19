@@ -1,0 +1,8 @@
+stringIndexerConstrainsPropertyDeclarations2.ts(15,5): error TS2411: Property 'c' of type 'number' is not assignable to 'string' index type 'A'.
+stringIndexerConstrainsPropertyDeclarations2.ts(16,5): error TS2411: Property 'd' of type 'string' is not assignable to 'string' index type 'A'.
+stringIndexerConstrainsPropertyDeclarations2.ts(23,5): error TS2411: Property 'c' of type 'number' is not assignable to 'string' index type 'A'.
+stringIndexerConstrainsPropertyDeclarations2.ts(24,5): error TS2411: Property 'd' of type 'string' is not assignable to 'string' index type 'A'.
+stringIndexerConstrainsPropertyDeclarations2.ts(31,5): error TS2411: Property 'c' of type 'number' is not assignable to 'string' index type 'A'.
+stringIndexerConstrainsPropertyDeclarations2.ts(32,5): error TS2411: Property 'd' of type 'string' is not assignable to 'string' index type 'A'.
+stringIndexerConstrainsPropertyDeclarations2.ts(37,8): error TS2741: Property 'foo' is missing in type 'typeof A' but required in type 'A'.
+stringIndexerConstrainsPropertyDeclarations2.ts(38,8): error TS2741: Property 'foo' is missing in type 'typeof B' but required in type 'A'.

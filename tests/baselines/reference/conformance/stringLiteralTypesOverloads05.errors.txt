@@ -1,0 +1,2 @@
+stringLiteralTypesOverloads05.ts(6,10): error TS2394: This overload signature is not compatible with its implementation signature.
+stringLiteralTypesOverloads05.ts(10,5): error TS2322: Type 'undefined' is not assignable to type 'Moose'.

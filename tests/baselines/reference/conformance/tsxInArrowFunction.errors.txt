@@ -1,0 +1,1 @@
+tsxInArrowFunction.tsx(15,7): error TS7006: Parameter 'x' implicitly has an 'any' type.

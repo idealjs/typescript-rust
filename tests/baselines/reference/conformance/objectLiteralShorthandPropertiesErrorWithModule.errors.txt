@@ -1,0 +1,2 @@
+objectLiteralShorthandPropertiesErrorWithModule.ts(10,10): error TS1005: ',' expected.
+objectLiteralShorthandPropertiesErrorWithModule.ts(14,3): error TS2339: Property 'y' does not exist on type 'typeof m'.

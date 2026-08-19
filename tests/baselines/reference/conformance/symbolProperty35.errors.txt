@@ -1,0 +1,1 @@
+symbolProperty35.ts(8,11): error TS2320: Interface 'I3' cannot simultaneously extend types 'I1' and 'I2'.

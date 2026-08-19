@@ -1,0 +1,8 @@
+unionAndIntersectionInference1.ts(4,12): error TS2352: Conversion of type 'undefined' to type 'Y' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+unionAndIntersectionInference1.ts(13,44): error TS2352: Conversion of type 'undefined' to type 'Y' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+unionAndIntersectionInference1.ts(20,5): error TS2322: Type 'undefined' is not assignable to type 'boolean'.
+unionAndIntersectionInference1.ts(24,5): error TS2322: Type 'undefined' is not assignable to type 'boolean'.
+unionAndIntersectionInference1.ts(48,4): error TS2322: Type 'null' is not assignable to type 'U'.
+unionAndIntersectionInference1.ts(52,5): error TS2454: Variable 'foo' is used before being assigned.
+unionAndIntersectionInference1.ts(95,52): error TS2769: No overload matches this call.
+unionAndIntersectionInference1.ts(96,7): error TS2322: Type '{ func: <T>() => void; }' is not assignable to type '(() => void) & { func: any; }'.

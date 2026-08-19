@@ -1,0 +1,2 @@
+parserConstructorDeclaration8.ts(3,3): error TS2390: Constructor implementation is missing.
+parserConstructorDeclaration8.ts(3,21): error TS1005: '(' expected.

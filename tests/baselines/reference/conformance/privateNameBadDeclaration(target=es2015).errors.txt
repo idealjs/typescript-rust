@@ -1,0 +1,7 @@
+privateNameBadDeclaration.ts(3,3): error TS18016: Private identifiers are not allowed outside class bodies.
+privateNameBadDeclaration.ts(4,3): error TS18016: Private identifiers are not allowed outside class bodies.
+privateNameBadDeclaration.ts(5,7): error TS18016: Private identifiers are not allowed outside class bodies.
+privateNameBadDeclaration.ts(9,3): error TS18016: Private identifiers are not allowed outside class bodies.
+privateNameBadDeclaration.ts(10,3): error TS18016: Private identifiers are not allowed outside class bodies.
+privateNameBadDeclaration.ts(11,7): error TS18016: Private identifiers are not allowed outside class bodies.
+privateNameBadDeclaration.ts(15,10): error TS2339: Property '#z' does not exist on type 'C'.

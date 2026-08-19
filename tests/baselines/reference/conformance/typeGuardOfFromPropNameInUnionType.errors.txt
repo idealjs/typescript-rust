@@ -1,0 +1,9 @@
+typeGuardOfFromPropNameInUnionType.ts(1,11): error TS2564: Property 'a' has no initializer and is not definitely assigned in the constructor.
+typeGuardOfFromPropNameInUnionType.ts(2,11): error TS2564: Property 'b' has no initializer and is not definitely assigned in the constructor.
+typeGuardOfFromPropNameInUnionType.ts(3,11): error TS2564: Property 'b' has no initializer and is not definitely assigned in the constructor.
+typeGuardOfFromPropNameInUnionType.ts(4,11): error TS2564: Property 'a' has no initializer and is not definitely assigned in the constructor.
+typeGuardOfFromPropNameInUnionType.ts(37,15): error TS2322: Type 'string | undefined' is not assignable to type 'string'.
+typeGuardOfFromPropNameInUnionType.ts(51,28): error TS2564: Property 'prop' has no initializer and is not definitely assigned in the constructor.
+typeGuardOfFromPropNameInUnionType.ts(61,29): error TS2564: Property 'outer' has no initializer and is not definitely assigned in the constructor.
+typeGuardOfFromPropNameInUnionType.ts(72,15): error TS2564: Property 'prop' has no initializer and is not definitely assigned in the constructor.
+typeGuardOfFromPropNameInUnionType.ts(84,5): error TS2564: Property 'a' has no initializer and is not definitely assigned in the constructor.

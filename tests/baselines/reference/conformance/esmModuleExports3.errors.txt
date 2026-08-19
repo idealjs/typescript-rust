@@ -1,0 +1,5 @@
+/importer-cjs.cjs(2,5): error TS1362: 'Foo' cannot be used as a value because it was exported using 'export type'.
+/importer-cts.cts(2,5): error TS1362: 'Foo' cannot be used as a value because it was exported using 'export type'.
+/importer-cts.cts(5,5): error TS1362: 'Foo2' cannot be used as a value because it was exported using 'export type'.
+/importer-cts.cts(8,5): error TS1362: 'Foo3' cannot be used as a value because it was exported using 'export type'.
+/importer-cts.cts(10,10): error TS2614: Module '"./exporter.mjs"' has no exported member 'Oops'. Did you mean to use 'import Oops from "./exporter.mjs"' instead?

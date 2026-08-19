@@ -1,0 +1,9 @@
+unionAndIntersectionInference2.ts(8,4): error TS2454: Variable 'a1' is used before being assigned.
+unionAndIntersectionInference2.ts(9,4): error TS2454: Variable 'b1' is used before being assigned.
+unionAndIntersectionInference2.ts(10,4): error TS2454: Variable 'c1' is used before being assigned.
+unionAndIntersectionInference2.ts(11,4): error TS2454: Variable 'd1' is used before being assigned.
+unionAndIntersectionInference2.ts(12,4): error TS2454: Variable 'e1' is used before being assigned.
+unionAndIntersectionInference2.ts(20,4): error TS2454: Variable 'a2' is used before being assigned.
+unionAndIntersectionInference2.ts(21,4): error TS2454: Variable 'b2' is used before being assigned.
+unionAndIntersectionInference2.ts(22,4): error TS2454: Variable 'c2' is used before being assigned.
+unionAndIntersectionInference2.ts(23,4): error TS2454: Variable 'd2' is used before being assigned.

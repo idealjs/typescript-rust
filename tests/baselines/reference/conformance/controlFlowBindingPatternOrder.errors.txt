@@ -1,0 +1,2 @@
+controlFlowBindingPatternOrder.ts(10,11): error TS2322: Type '0 | 9' is not assignable to type '9'.
+controlFlowBindingPatternOrder.ts(25,11): error TS2322: Type '0 | 8 | 9' is not assignable to type '0 | 8'.

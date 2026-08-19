@@ -1,0 +1,6 @@
+typeGuardOfFormTypeOfPrimitiveSubtype.ts(3,12): error TS2454: Variable 'a' is used before being assigned.
+typeGuardOfFormTypeOfPrimitiveSubtype.ts(6,12): error TS2454: Variable 'a' is used before being assigned.
+typeGuardOfFormTypeOfPrimitiveSubtype.ts(9,12): error TS2454: Variable 'a' is used before being assigned.
+typeGuardOfFormTypeOfPrimitiveSubtype.ts(13,12): error TS2454: Variable 'b' is used before being assigned.
+typeGuardOfFormTypeOfPrimitiveSubtype.ts(16,12): error TS2454: Variable 'b' is used before being assigned.
+typeGuardOfFormTypeOfPrimitiveSubtype.ts(19,12): error TS2454: Variable 'b' is used before being assigned.

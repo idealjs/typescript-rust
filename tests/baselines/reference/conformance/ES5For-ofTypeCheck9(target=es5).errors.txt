@@ -1,0 +1,1 @@
+ES5For-ofTypeCheck9.ts(2,15): error TS2461: Type 'number | symbol | string[]' is not an array type.

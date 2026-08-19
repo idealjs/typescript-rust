@@ -1,0 +1,3 @@
+node_modules/inner/index.d.cts(5,1): error TS1036: Statements are not allowed in ambient contexts.
+node_modules/inner/index.d.mts(5,1): error TS1036: Statements are not allowed in ambient contexts.
+node_modules/inner/index.d.ts(5,1): error TS1036: Statements are not allowed in ambient contexts.

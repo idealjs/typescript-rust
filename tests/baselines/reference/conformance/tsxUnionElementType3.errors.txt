@@ -1,0 +1,3 @@
+file.tsx(34,17): error TS2322: Type 'string' is not assignable to type 'number'.
+file.tsx(37,10): error TS2741: Property 'x' is missing in type '{}' but required in type '{ x: number; }'.
+file.tsx(38,10): error TS2741: Property 'x' is missing in type '{ "data-extra": string; }' but required in type '{ x: number; }'.

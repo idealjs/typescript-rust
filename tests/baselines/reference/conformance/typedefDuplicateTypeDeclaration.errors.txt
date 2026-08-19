@@ -1,0 +1,1 @@
+typedefDuplicateTypeDeclaration.js(4,16): error TS8033: A JSDoc '@typedef' comment may not contain multiple '@type' tags.

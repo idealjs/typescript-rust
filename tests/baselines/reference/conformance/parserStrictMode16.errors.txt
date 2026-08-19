@@ -1,0 +1,4 @@
+parserStrictMode16.ts(2,8): error TS2703: The operand of a 'delete' operator must be a property reference.
+parserStrictMode16.ts(3,8): error TS2703: The operand of a 'delete' operator must be a property reference.
+parserStrictMode16.ts(4,8): error TS2703: The operand of a 'delete' operator must be a property reference.
+parserStrictMode16.ts(5,8): error TS2703: The operand of a 'delete' operator must be a property reference.

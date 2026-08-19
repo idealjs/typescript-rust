@@ -1,0 +1,2 @@
+parserGreaterThanTokenAmbiguity3.ts(1,1): error TS2365: Operator '>' cannot be applied to types 'boolean' and 'number'.
+parserGreaterThanTokenAmbiguity3.ts(1,8): error TS1109: Expression expected.

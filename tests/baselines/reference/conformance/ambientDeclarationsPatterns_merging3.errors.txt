@@ -1,0 +1,1 @@
+test.ts(6,6): error TS2339: Property 'a' does not exist on type 'OhNo'.

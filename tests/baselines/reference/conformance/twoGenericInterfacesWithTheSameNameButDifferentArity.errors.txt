@@ -1,0 +1,6 @@
+twoGenericInterfacesWithTheSameNameButDifferentArity.ts(1,11): error TS2428: All declarations of 'A' must have identical type parameters.
+twoGenericInterfacesWithTheSameNameButDifferentArity.ts(5,11): error TS2428: All declarations of 'A' must have identical type parameters.
+twoGenericInterfacesWithTheSameNameButDifferentArity.ts(10,15): error TS2428: All declarations of 'A' must have identical type parameters.
+twoGenericInterfacesWithTheSameNameButDifferentArity.ts(14,15): error TS2428: All declarations of 'A' must have identical type parameters.
+twoGenericInterfacesWithTheSameNameButDifferentArity.ts(32,22): error TS2428: All declarations of 'A' must have identical type parameters.
+twoGenericInterfacesWithTheSameNameButDifferentArity.ts(38,22): error TS2428: All declarations of 'A' must have identical type parameters.

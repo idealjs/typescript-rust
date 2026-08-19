@@ -1,0 +1,1 @@
+unionTypeCallSignatures5.ts(12,1): error TS2684: The 'this' context of type 'void' is not assignable to method's 'this' of type 'never'.

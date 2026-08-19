@@ -1021,7 +1021,10 @@ fn extract_reference_lib_directives(text: &str) -> Vec<String> {
 /// `lib.es20XX.full.d.ts` for ES2016..ES2025, `lib.esnext.full.d.ts` for
 /// ESNext). Targets below ES2015 (and the unset/JSON targets) keep
 /// `lib.d.ts`. An explicit `lib` option always wins.
-fn default_lib_file_names(options: &CompilerOptions) -> Vec<String> {
+/// The default-library file names for the given options (target → entry lib,
+/// or the explicit `lib` option). Public for the transpile module, mirroring
+/// Go's `tsoptions.GetDefaultLibFileName` consumer graph.
+pub fn default_lib_file_names(options: &CompilerOptions) -> Vec<String> {
     if !options.lib.is_empty() {
         return options
             .lib

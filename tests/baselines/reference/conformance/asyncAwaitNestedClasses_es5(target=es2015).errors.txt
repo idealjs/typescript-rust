@@ -1,0 +1,1 @@
+asyncAwaitNestedClasses_es5.ts(5,55): error TS2345: Argument of type 'null' is not assignable to parameter of type 'void | PromiseLike<void>'.

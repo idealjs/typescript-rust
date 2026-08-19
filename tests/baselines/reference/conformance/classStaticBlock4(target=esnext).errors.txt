@@ -1,0 +1,2 @@
+classStaticBlock4.ts(8,14): error TS2729: Property 's2' is used before its initialization.
+classStaticBlock4.ts(9,11): error TS2729: Property 's2' is used before its initialization.

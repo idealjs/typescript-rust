@@ -1,0 +1,1 @@
+symbolProperty21.ts(10,5): error TS2353: Object literal may only specify known properties, and '[Symbol.toPrimitive]' does not exist in type 'I<boolean, string>'.

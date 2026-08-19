@@ -1,0 +1,3 @@
+part2.ts(3,24): error TS2304: Cannot find name 'Point'.
+part2.ts(7,36): error TS2304: Cannot find name 'Point'.
+part2.ts(7,54): error TS2304: Cannot find name 'Point'.

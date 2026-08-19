@@ -1,0 +1,1 @@
+parserIndexMemberDeclaration2.ts(3,11): error TS2564: Property 'v' has no initializer and is not definitely assigned in the constructor.

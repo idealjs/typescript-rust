@@ -1,0 +1,2 @@
+classWithEmptyBody.ts(5,13): error TS2454: Variable 'c' is used before being assigned.
+classWithEmptyBody.ts(17,13): error TS2454: Variable 'd' is used before being assigned.

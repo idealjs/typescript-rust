@@ -1,0 +1,8 @@
+intersectionTypeMembers.ts(9,1): error TS2454: Variable 'abc' is used before being assigned.
+intersectionTypeMembers.ts(10,1): error TS2454: Variable 'abc' is used before being assigned.
+intersectionTypeMembers.ts(11,1): error TS2454: Variable 'abc' is used before being assigned.
+intersectionTypeMembers.ts(18,1): error TS2454: Variable 'xyz' is used before being assigned.
+intersectionTypeMembers.ts(19,1): error TS2454: Variable 'xyz' is used before being assigned.
+intersectionTypeMembers.ts(20,1): error TS2454: Variable 'xyz' is used before being assigned.
+intersectionTypeMembers.ts(26,9): error TS2454: Variable 'f' is used before being assigned.
+intersectionTypeMembers.ts(27,9): error TS2454: Variable 'f' is used before being assigned.

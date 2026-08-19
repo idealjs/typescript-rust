@@ -1,0 +1,5 @@
+foo1.ts(5,3): error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
+foo1.ts(9,12): error TS2339: Property 'x' does not exist on type 'C1'.
+foo2.ts(5,3): error TS2564: Property 'y' has no initializer and is not definitely assigned in the constructor.
+foo2.ts(8,12): error TS2339: Property 'y' does not exist on type 'C1'.
+foo2.ts(13,8): error TS2339: Property 'x' does not exist on type 'C1'.

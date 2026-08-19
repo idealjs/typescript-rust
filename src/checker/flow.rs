@@ -2633,6 +2633,19 @@ impl Checker {
     /// Check if `node` is an identifier that resolves to `symbol`.
     /// Uses the symbol_map for a direct lookup (avoids mutating scope state).
     fn is_symbol_identifier(&self, node: &Arc<Node>, symbol: &Arc<Symbol>) -> bool {
+        // A flow-assignment's node may be the declaration itself (a
+        // VariableDeclaration or BindingElement — Go's isMatchingReference
+        // matches an identifier reference against the declaration's symbol).
+        if matches!(
+            node.kind,
+            SyntaxKind::VariableDeclaration | SyntaxKind::BindingElement
+        ) {
+            return self
+                .program
+                .symbol_map()
+                .symbol_of(node)
+                .is_some_and(|s| Arc::ptr_eq(s, symbol));
+        }
         if node.kind != SyntaxKind::Identifier {
             return false;
         }
@@ -2695,16 +2708,44 @@ impl Checker {
         }
         match source.kind {
             SyntaxKind::Identifier | SyntaxKind::PrivateIdentifier => {
-                if target.kind != SyntaxKind::Identifier {
-                    return false;
+                if target.kind == SyntaxKind::Identifier {
+                    return match (
+                        self.resolve_identifier(source),
+                        self.resolve_identifier(target),
+                    ) {
+                        (Some(s), Some(t)) => Arc::ptr_eq(&s, &t),
+                        _ => false,
+                    };
                 }
-                match (
-                    self.resolve_identifier(source),
-                    self.resolve_identifier(target),
+                // A flow-assignment's node may be the declaration itself
+                // (Go isMatchingReference): an identifier matches a
+                // VariableDeclaration/BindingElement whose declared symbol it
+                // resolves to (export-symbol unwrapped).
+                if matches!(
+                    target.kind,
+                    SyntaxKind::VariableDeclaration | SyntaxKind::BindingElement
                 ) {
-                    (Some(s), Some(t)) => Arc::ptr_eq(&s, &t),
-                    _ => false,
+                    let Some(source_sym) = self.resolve_identifier(source) else {
+                        return false;
+                    };
+                    let Some(target_sym) =
+                        self.program.symbol_map().symbol_of(target).cloned()
+                    else {
+                        return false;
+                    };
+                    // Unwrap `export symbol` one hop (Go
+                    // getExportSymbolOfValueSymbolIfExported).
+                    let source_unwrapped = source_sym
+                        .export_symbol
+                        .clone()
+                        .unwrap_or_else(|| Arc::clone(&source_sym));
+                    let target_unwrapped = target_sym
+                        .export_symbol
+                        .clone()
+                        .unwrap_or(target_sym);
+                    return Arc::ptr_eq(&source_unwrapped, &target_unwrapped);
                 }
+                false
             }
             SyntaxKind::ThisKeyword | SyntaxKind::SuperKeyword => target.kind == source.kind,
             SyntaxKind::NonNullExpression
@@ -3094,6 +3135,32 @@ impl Checker {
     /// (`getAssignmentReducedType`); any other declared type is returned
     /// unchanged. Returns `None` when the assignment doesn't match the
     /// target, or is compound (the antecedent walk then applies).
+    /// Whether a BindingElement sits inside a `var`-declared destructuring
+    /// pattern (BindingElement → BindingPattern → VariableDeclaration →
+    /// VariableDeclarationList without let/const flags).
+    fn binding_element_in_var_pattern(element: &Arc<Node>) -> bool {
+        let pattern = element.parent.as_ref();
+        let Some(decl) = pattern.and_then(|p| p.parent.as_ref()) else {
+            return false;
+        };
+        if decl.kind != SyntaxKind::VariableDeclaration {
+            return false;
+        }
+        let Some(list) = decl.parent.as_ref() else {
+            return false;
+        };
+        if list.kind != SyntaxKind::VariableDeclarationList {
+            return false;
+        }
+        // `var` lists carry neither the Let nor the Const flag.
+        !(list
+            .flags
+            .intersects(crate::ast::node_flags::NodeFlags::Let)
+            || list
+                .flags
+                .intersects(crate::ast::node_flags::NodeFlags::Const))
+    }
+
     fn assignment_flow_type(
         &mut self,
         expr: &Arc<Node>,
@@ -3150,22 +3217,56 @@ impl Checker {
                 let FlowRef::Symbol(symbol) = target else {
                     return None;
                 };
-                let matched = self
-                    .program
-                    .symbol_map()
-                    .symbol_of(expr)
-                    .is_some_and(|s| {
-                        Arc::ptr_eq(&s, symbol)
+                let element_symbol = self.program.symbol_map().symbol_of(expr).cloned();
+                let matched = match &element_symbol {
+                    Some(s) => {
+                        Arc::ptr_eq(s, symbol)
                             || symbol
                                 .export_symbol
                                 .as_ref()
-                                .is_some_and(|e| Arc::ptr_eq(&s, e))
-                    });
+                                .is_some_and(|e| Arc::ptr_eq(s, e))
+                    }
+                    // Bare destructuring patterns (`({ a: a = 1 } = o)`,
+                    // `for ({ b } of xs)`) declare no element symbol: the
+                    // element's name identifier references the existing
+                    // variable.
+                    None => match &expr.data {
+                        NodeData::BindingElement(be) => be
+                            .name
+                            .as_ref()
+                            .and_then(|name| self.resolve_identifier(name))
+                            .is_some_and(|s| Arc::ptr_eq(&s, symbol)),
+                        _ => false,
+                    },
+                } || (
+                    // `var`-declared patterns hoist: the pattern element's
+                    // symbol and the outer `var` symbol are the same variable
+                    // (Go merges them into one symbol; our binder routes the
+                    // element to the loop's locals). Fall back to a name
+                    // match when the queried symbol is a function-scoped
+                    // variable and the element sits in a `var` pattern.
+                    element_symbol.as_ref().is_some_and(|s| {
+                        s.name == symbol.name
+                            && symbol
+                                .flags
+                                .contains(crate::ast::SymbolFlags::FunctionScopedVariable)
+                            && Self::binding_element_in_var_pattern(expr)
+                    })
+                );
                 if !matched {
                     return None;
                 }
                 let assigned = self.initial_type_of_declaration(expr)?;
                 Some(self.reduced_assignment_type(declared, &assigned, evolving))
+            }
+            // A bare reference assignment target (binder
+            // `bindAssignmentTargetFlow` — destructuring assignment
+            // patterns and bare for-in/of heads): a match marks the
+            // variable assigned; Go's `getTypeAtFlowAssignment` returns the
+            // declared type for non-union declared types (the
+            // definite-assignment mechanism that clears `undefined`).
+            NodeData::Identifier(_) if self.expr_matches_target(expr, target) => {
+                Some(Arc::clone(declared))
             }
             _ => None,
         }
@@ -3260,24 +3361,41 @@ impl Checker {
             NodeData::BindingElement(be) => {
                 let pattern = Arc::clone(expr.parent.as_ref()?);
                 let pattern_parent = Arc::clone(pattern.parent.as_ref()?);
-                let parent_type = self.initial_type_of_declaration(&pattern_parent)?;
-                let mut t = match pattern.kind {
-                    SyntaxKind::ObjectBindingPattern => {
-                        let name = Self::binding_element_property_name(expr)?;
-                        self.get_property_type_of_type(&parent_type, &name)?
+                let parent_type = self.initial_type_of_declaration(&pattern_parent);
+                let mut t = match (&parent_type, pattern.kind) {
+                    (Some(parent_type), SyntaxKind::ObjectBindingPattern) => {
+                        match Self::binding_element_property_name(expr) {
+                            Some(name) => self.get_property_type_of_type(parent_type, &name),
+                            None => None,
+                        }
                     }
-                    SyntaxKind::ArrayBindingPattern if be.dot_dot_dot_token.is_none() => {
-                        let index = Self::binding_element_index(&pattern, expr)?;
-                        self.destructured_array_element_type(&parent_type, index)?
+                    (
+                        Some(parent_type),
+                        SyntaxKind::ArrayBindingPattern,
+                    ) if be.dot_dot_dot_token.is_none() => {
+                        match Self::binding_element_index(&pattern, expr) {
+                            Some(index) => {
+                                self.destructured_array_element_type(parent_type, index)
+                            }
+                            None => None,
+                        }
                     }
-                    _ => return None,
+                    _ => None,
                 };
                 if let Some(default_expr) = &be.initializer {
-                    let non_undefined = self.remove_flags_from_union(&t, TypeFlags::Undefined);
                     let default_type = self.get_type_of_node(default_expr);
-                    t = self.get_union_type(vec![non_undefined, default_type]);
+                    // Go's getTypeWithDefault: a missing/undefined base type
+                    // falls back entirely to the default (`for (var {x: f = 1}
+                    // of [])` — iterating `never` still assigns the default).
+                    t = match t {
+                        Some(t) => {
+                            let non_undefined = self.remove_flags_from_union(&t, TypeFlags::Undefined);
+                            Some(self.get_union_type(vec![non_undefined, default_type]))
+                        }
+                        None => Some(default_type),
+                    };
                 }
-                Some(t)
+                t
             }
             _ => None,
         }

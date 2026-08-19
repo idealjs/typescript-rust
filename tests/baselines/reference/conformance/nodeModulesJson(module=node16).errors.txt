@@ -1,0 +1,9 @@
+/loosey.cts(1,36): error TS2823: Import attributes are only supported when the '--module' option is set to 'esnext', 'node18', 'node20', 'nodenext', or 'preserve'.
+/loosey.cts(6,9): error TS2339: Property 'default' does not exist on type '{ version: number; }'.
+/main.mts(5,36): error TS2823: Import attributes are only supported when the '--module' option is set to 'esnext', 'node18', 'node20', 'nodenext', or 'preserve'.
+/main.mts(6,52): error TS2823: Import attributes are only supported when the '--module' option is set to 'esnext', 'node18', 'node20', 'nodenext', or 'preserve'.
+/main.mts(9,47): error TS2823: Import attributes are only supported when the '--module' option is set to 'esnext', 'node18', 'node20', 'nodenext', or 'preserve'.
+/main.mts(10,10): error TS1544: Named imports from a JSON file into an ECMAScript module are not allowed when 'module' is set to 'Node16'.
+/main.mts(10,41): error TS2823: Import attributes are only supported when the '--module' option is set to 'esnext', 'node18', 'node20', 'nodenext', or 'preserve'.
+/main.mts(11,42): error TS2823: Import attributes are only supported when the '--module' option is set to 'esnext', 'node18', 'node20', 'nodenext', or 'preserve'.
+/main.mts(12,9): error TS2339: Property 'version' does not exist on type '{ default: { version: number; }; }'.

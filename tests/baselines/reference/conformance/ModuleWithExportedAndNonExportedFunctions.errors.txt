@@ -1,0 +1,4 @@
+ModuleWithExportedAndNonExportedFunctions.ts(8,9): error TS2322: Type 'null' is not assignable to type 'U'.
+ModuleWithExportedAndNonExportedFunctions.ts(16,9): error TS2322: Type 'null' is not assignable to type 'U'.
+ModuleWithExportedAndNonExportedFunctions.ts(28,13): error TS2339: Property 'fn2' does not exist on type 'typeof A'.
+ModuleWithExportedAndNonExportedFunctions.ts(29,14): error TS2551: Property 'fng2' does not exist on type 'typeof A'. Did you mean 'fng'?

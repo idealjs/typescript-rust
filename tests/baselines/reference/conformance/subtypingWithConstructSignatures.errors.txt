@@ -1,0 +1,4 @@
+subtypingWithConstructSignatures.ts(5,18): error TS2454: Variable 'rarg1' is used before being assigned.
+subtypingWithConstructSignatures.ts(7,19): error TS2454: Variable 'rarg2' is used before being assigned.
+subtypingWithConstructSignatures.ts(12,19): error TS2454: Variable 'r3arg1' is used before being assigned.
+subtypingWithConstructSignatures.ts(14,19): error TS2454: Variable 'r4arg1' is used before being assigned.

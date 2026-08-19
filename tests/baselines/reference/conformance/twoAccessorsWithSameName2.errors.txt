@@ -1,0 +1,4 @@
+twoAccessorsWithSameName2.ts(2,16): error TS2300: Duplicate identifier 'x'.
+twoAccessorsWithSameName2.ts(3,16): error TS2300: Duplicate identifier 'x'.
+twoAccessorsWithSameName2.ts(7,16): error TS2300: Duplicate identifier 'x'.
+twoAccessorsWithSameName2.ts(8,16): error TS2300: Duplicate identifier 'x'.

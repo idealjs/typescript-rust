@@ -1,0 +1,21 @@
+mergedInterfacesWithMultipleBases2.ts(5,5): error TS2564: Property 'a' has no initializer and is not definitely assigned in the constructor.
+mergedInterfacesWithMultipleBases2.ts(9,5): error TS2564: Property 'b' has no initializer and is not definitely assigned in the constructor.
+mergedInterfacesWithMultipleBases2.ts(13,5): error TS2564: Property 'c' has no initializer and is not definitely assigned in the constructor.
+mergedInterfacesWithMultipleBases2.ts(17,5): error TS2564: Property 'd' has no initializer and is not definitely assigned in the constructor.
+mergedInterfacesWithMultipleBases2.ts(30,5): error TS2564: Property 'a' has no initializer and is not definitely assigned in the constructor.
+mergedInterfacesWithMultipleBases2.ts(31,5): error TS2564: Property 'b' has no initializer and is not definitely assigned in the constructor.
+mergedInterfacesWithMultipleBases2.ts(32,5): error TS2564: Property 'c' has no initializer and is not definitely assigned in the constructor.
+mergedInterfacesWithMultipleBases2.ts(33,5): error TS2564: Property 'd' has no initializer and is not definitely assigned in the constructor.
+mergedInterfacesWithMultipleBases2.ts(34,5): error TS2564: Property 'y' has no initializer and is not definitely assigned in the constructor.
+mergedInterfacesWithMultipleBases2.ts(35,5): error TS2564: Property 'z' has no initializer and is not definitely assigned in the constructor.
+mergedInterfacesWithMultipleBases2.ts(39,9): error TS2454: Variable 'a' is used before being assigned.
+mergedInterfacesWithMultipleBases2.ts(44,9): error TS2564: Property 'a' has no initializer and is not definitely assigned in the constructor.
+mergedInterfacesWithMultipleBases2.ts(48,9): error TS2564: Property 'b' has no initializer and is not definitely assigned in the constructor.
+mergedInterfacesWithMultipleBases2.ts(52,9): error TS2564: Property 'c' has no initializer and is not definitely assigned in the constructor.
+mergedInterfacesWithMultipleBases2.ts(56,9): error TS2564: Property 'd' has no initializer and is not definitely assigned in the constructor.
+mergedInterfacesWithMultipleBases2.ts(68,9): error TS2564: Property 'a' has no initializer and is not definitely assigned in the constructor.
+mergedInterfacesWithMultipleBases2.ts(69,9): error TS2564: Property 'b' has no initializer and is not definitely assigned in the constructor.
+mergedInterfacesWithMultipleBases2.ts(70,9): error TS2564: Property 'c' has no initializer and is not definitely assigned in the constructor.
+mergedInterfacesWithMultipleBases2.ts(71,9): error TS2564: Property 'd' has no initializer and is not definitely assigned in the constructor.
+mergedInterfacesWithMultipleBases2.ts(72,9): error TS2564: Property 'y' has no initializer and is not definitely assigned in the constructor.
+mergedInterfacesWithMultipleBases2.ts(73,9): error TS2564: Property 'z' has no initializer and is not definitely assigned in the constructor.

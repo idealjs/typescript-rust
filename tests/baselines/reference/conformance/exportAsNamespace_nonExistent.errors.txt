@@ -1,0 +1,1 @@
+exportAsNamespace_nonExistent.ts(1,21): error TS2307: Cannot find module './nonexistent' or its corresponding type declarations.

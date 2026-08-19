@@ -1,0 +1,2 @@
+parserInterfaceDeclaration1.ts(1,21): error TS2304: Cannot find name 'A'.
+parserInterfaceDeclaration1.ts(1,23): error TS1172: 'extends' clause already seen.

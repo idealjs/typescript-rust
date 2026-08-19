@@ -1,0 +1,7 @@
+file.tsx(10,15): error TS2322: Type 'T & { "ignore-prop": number; }' is not assignable to type 'IntrinsicAttributes & { prop: number; "ignore-prop": string; }'.
+file.tsx(15,15): error TS2322: Type 'T' is not assignable to type 'IntrinsicAttributes & { prop: unknown; "ignore-prop": string; }'.
+file.tsx(22,19): error TS2322: Type '(a: number, b: string) => void' is not assignable to type '(arg: number) => void'.
+file.tsx(33,39): error TS2322: Type 'number' is not assignable to type 'string'.
+file.tsx(33,42): error TS2322: Type 'number' is not assignable to type 'string'.
+file.tsx(33,45): error TS2322: Type 'number' is not assignable to type 'string'.
+file.tsx(33,48): error TS2322: Type 'number' is not assignable to type 'string'.

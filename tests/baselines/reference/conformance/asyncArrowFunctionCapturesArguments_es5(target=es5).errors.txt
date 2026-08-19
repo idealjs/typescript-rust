@@ -1,0 +1,2 @@
+asyncArrowFunctionCapturesArguments_es5.ts(4,52): error TS2345: Argument of type 'IArguments' is not assignable to parameter of type '[]'.
+asyncArrowFunctionCapturesArguments_es5.ts(4,52): error TS2496: The 'arguments' object cannot be referenced in an arrow function in ES5. Consider using a standard function expression.

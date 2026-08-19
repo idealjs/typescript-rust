@@ -1,0 +1,7 @@
+conditionalTypes2.ts(15,5): error TS2322: Type 'Covariant<A>' is not assignable to type 'Covariant<B>'.
+conditionalTypes2.ts(19,5): error TS2322: Type 'Contravariant<B>' is not assignable to type 'Contravariant<A>'.
+conditionalTypes2.ts(24,5): error TS2322: Type 'Invariant<B>' is not assignable to type 'Invariant<A>'.
+conditionalTypes2.ts(25,5): error TS2322: Type 'Invariant<A>' is not assignable to type 'Invariant<B>'.
+conditionalTypes2.ts(73,12): error TS2345: Argument of type 'Extract<Extract<T, Foo>, Bar>' is not assignable to parameter of type '{ foo: string; bat: string; }'.
+conditionalTypes2.ts(74,12): error TS2345: Argument of type 'Extract<T, Foo & Bar>' is not assignable to parameter of type '{ foo: string; bat: string; }'.
+conditionalTypes2.ts(75,12): error TS2345: Argument of type 'Extract2<T, Foo, Bar>' is not assignable to parameter of type '{ foo: string; bat: string; }'.

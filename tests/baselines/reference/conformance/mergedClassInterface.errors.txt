@@ -1,0 +1,4 @@
+file1.ts(35,1): error TS2454: Variable 'c5' is used before being assigned.
+file1.ts(36,1): error TS2454: Variable 'c5' is used before being assigned.
+file1.ts(37,1): error TS2454: Variable 'c5' is used before being assigned.
+file1.ts(38,1): error TS2454: Variable 'c5' is used before being assigned.

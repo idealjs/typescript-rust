@@ -1,0 +1,2 @@
+overrideLateBindableIndexSignature1.ts(8,12): error TS4127: This member cannot have an 'override' modifier because its name is dynamic.
+overrideLateBindableIndexSignature1.ts(22,12): error TS4127: This member cannot have an 'override' modifier because its name is dynamic.

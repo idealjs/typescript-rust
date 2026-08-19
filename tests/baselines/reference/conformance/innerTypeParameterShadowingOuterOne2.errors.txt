@@ -1,0 +1,4 @@
+innerTypeParameterShadowingOuterOne2.ts(7,9): error TS2454: Variable 'x' is used before being assigned.
+innerTypeParameterShadowingOuterOne2.ts(12,9): error TS2454: Variable 'x' is used before being assigned.
+innerTypeParameterShadowingOuterOne2.ts(19,9): error TS2454: Variable 'x' is used before being assigned.
+innerTypeParameterShadowingOuterOne2.ts(24,9): error TS2454: Variable 'x' is used before being assigned.

@@ -1,0 +1,2 @@
+classAbstractClinterfaceAssignability.ts(15,5): error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
+classAbstractClinterfaceAssignability.ts(23,1): error TS2322: Type 'typeof A' is not assignable to type 'IConstructor'.

@@ -1,0 +1,5 @@
+tsxTypeErrors.tsx(2,10): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+tsxTypeErrors.tsx(5,10): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+tsxTypeErrors.tsx(9,10): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+tsxTypeErrors.tsx(12,10): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+tsxTypeErrors.tsx(16,3): error TS2564: Property 'props' has no initializer and is not definitely assigned in the constructor.

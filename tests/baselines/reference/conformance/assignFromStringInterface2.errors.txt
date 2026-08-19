@@ -1,0 +1,5 @@
+assignFromStringInterface2.ts(42,1): error TS2740: Type 'NotString' is missing the following properties from type 'String': codePointAt, includes, endsWith, normalize, and 16 more.
+assignFromStringInterface2.ts(44,1): error TS2322: Type 'String' is not assignable to type 'NotString'.
+assignFromStringInterface2.ts(45,1): error TS2322: Type 'string' is not assignable to type 'NotString'.
+assignFromStringInterface2.ts(47,1): error TS2322: Type 'String' is not assignable to type 'string'.
+assignFromStringInterface2.ts(48,1): error TS2322: Type 'NotString' is not assignable to type 'string'.

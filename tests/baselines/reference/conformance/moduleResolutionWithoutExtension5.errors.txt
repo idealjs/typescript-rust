@@ -1,0 +1,1 @@
+/src/buzz.mts(2,8): error TS2834: Relative import paths need explicit file extensions in ECMAScript imports when '--moduleResolution' is 'node16' or 'nodenext'. Consider adding an extension to the import path.

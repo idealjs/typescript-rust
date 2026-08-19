@@ -1,0 +1,1 @@
+negateOperatorWithNumberType.ts(41,1): error TS2695: Left side of comma operator is unused and has no side effects.

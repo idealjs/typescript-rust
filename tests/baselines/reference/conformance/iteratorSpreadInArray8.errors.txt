@@ -1,0 +1,1 @@
+iteratorSpreadInArray8.ts(10,17): error TS2488: Type 'SymbolIterator' must have a '[Symbol.iterator]()' method that returns an iterator.

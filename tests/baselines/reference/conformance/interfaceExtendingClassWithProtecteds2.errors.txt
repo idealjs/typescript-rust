@@ -1,0 +1,5 @@
+interfaceExtendingClassWithProtecteds2.ts(9,11): error TS2320: Interface 'I3' cannot simultaneously extend types 'Foo' and 'Bar'.
+interfaceExtendingClassWithProtecteds2.ts(12,11): error TS2430: Interface 'I4' incorrectly extends interface 'Bar'.
+interfaceExtendingClassWithProtecteds2.ts(12,11): error TS2430: Interface 'I4' incorrectly extends interface 'Foo'.
+interfaceExtendingClassWithProtecteds2.ts(26,12): error TS2445: Property 'x' is protected and only accessible within class 'Foo' and its subclasses.
+interfaceExtendingClassWithProtecteds2.ts(27,12): error TS2445: Property 'y' is protected and only accessible within class 'Baz' and its subclasses.

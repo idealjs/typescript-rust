@@ -1,0 +1,1 @@
+classAbstractInAModule.ts(6,1): error TS2511: Cannot create an instance of an abstract class.

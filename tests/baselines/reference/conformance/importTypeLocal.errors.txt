@@ -1,0 +1,2 @@
+foo2.ts(16,5): error TS2564: Property 'item' has no initializer and is not definitely assigned in the constructor.
+usage.ts(5,5): error TS2564: Property 'item' has no initializer and is not definitely assigned in the constructor.

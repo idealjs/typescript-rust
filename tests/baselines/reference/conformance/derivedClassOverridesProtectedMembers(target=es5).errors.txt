@@ -1,0 +1,5 @@
+derivedClassOverridesProtectedMembers.ts(5,15): error TS2564: Property 'a' has no initializer and is not definitely assigned in the constructor.
+derivedClassOverridesProtectedMembers.ts(9,15): error TS2564: Property 'd' has no initializer and is not definitely assigned in the constructor.
+derivedClassOverridesProtectedMembers.ts(21,15): error TS2564: Property 'a' has no initializer and is not definitely assigned in the constructor.
+derivedClassOverridesProtectedMembers.ts(25,15): error TS2416: Property 'd' in type 'Derived' is not assignable to the same property in base type 'Base'.
+derivedClassOverridesProtectedMembers.ts(25,15): error TS2564: Property 'd' has no initializer and is not definitely assigned in the constructor.

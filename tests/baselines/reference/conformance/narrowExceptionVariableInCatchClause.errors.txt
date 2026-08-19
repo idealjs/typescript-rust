@@ -1,0 +1,2 @@
+narrowExceptionVariableInCatchClause.ts(11,17): error TS2551: Property 'doPanic' does not exist on type '{ type: "foo"; dontPanic(): any; }'. Did you mean 'dontPanic'?
+narrowExceptionVariableInCatchClause.ts(16,17): error TS2551: Property 'massage' does not exist on type 'Error'. Did you mean 'message'?

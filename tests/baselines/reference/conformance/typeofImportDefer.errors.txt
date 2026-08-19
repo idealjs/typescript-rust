@@ -1,0 +1,4 @@
+b.ts(1,30): error TS1005: '(' expected.
+b.ts(1,30): error TS1141: String literal expected.
+b.ts(1,36): error TS1005: ')' expected.
+b.ts(1,44): error TS2339: Property 'Foo' does not exist on type '"./a"'.

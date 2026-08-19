@@ -1,0 +1,8 @@
+assignmentTargets.ts(1,44): error TS2339: Property 'blah' does not exist on type 'ImportMeta'.
+assignmentTargets.ts(1,63): error TS2339: Property 'blue' does not exist on type 'ImportMeta'.
+assignmentTargets.ts(2,1): error TS2364: The left-hand side of an assignment expression must be a variable or a property access.
+example.ts(6,28): error TS2339: Property 'scriptElement' does not exist on type 'ImportMeta'.
+moduleLookingFile01.ts(2,23): error TS17012: 'metal' is not a valid meta-property for keyword 'import'. Did you mean 'meta'?
+moduleLookingFile01.ts(3,23): error TS17012: 'import' is not a valid meta-property for keyword 'import'. Did you mean 'meta'?
+scriptLookingFile01.ts(2,22): error TS17012: 'metal' is not a valid meta-property for keyword 'import'. Did you mean 'meta'?
+scriptLookingFile01.ts(3,22): error TS17012: 'import' is not a valid meta-property for keyword 'import'. Did you mean 'meta'?

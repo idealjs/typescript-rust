@@ -1,0 +1,3 @@
+typeGuardsAsAssertions.ts(23,12): error TS2454: Variable 'cond' is used before being assigned.
+typeGuardsAsAssertions.ts(33,12): error TS2454: Variable 'cond' is used before being assigned.
+typeGuardsAsAssertions.ts(44,12): error TS2454: Variable 'cond' is used before being assigned.

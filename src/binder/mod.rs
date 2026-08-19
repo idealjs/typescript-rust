@@ -1601,6 +1601,16 @@ impl Binder {
         // Initializer
         self.bind(&initializer);
 
+        // A bare (no declaration keyword) for-in/of head destructures into
+        // its targets each iteration — an object/array literal there is a
+        // destructuring ASSIGNMENT pattern (Go
+        // bindForInOrOfStatement's `bindAssignmentTargetFlow`), creating
+        // ASSIGNMENT flow nodes for every target identifier (including
+        // `= default` initializers via bindDestructuringTargetFlow).
+        if initializer.kind != SyntaxKind::VariableDeclarationList {
+            self.bind_assignment_target_flow(&initializer);
+        }
+
         // Save break/continue targets. Jump targets are accumulation nodes
         // (never collapsed snapshots) so in-place edge additions from
         // `break;`/`continue;` can't corrupt unrelated flow nodes; the
@@ -2262,6 +2272,75 @@ impl Binder {
     /// for-in/for-of loop variable). Binding-pattern names recurse so every
     /// element gets its own assignment node. Mirrors Go's
     /// `bindInitializedVariableFlow` (binder.go ~L2317).
+    /// Walk a destructuring ASSIGNMENT target creating ASSIGNMENT flow nodes
+    /// for each assigned reference (Go `bindAssignmentTargetFlow`,
+    /// binder.go ~L1815). Used by bare for-in/of heads and destructuring
+    /// assignments (`({...} = expr)`).
+    fn bind_assignment_target_flow(&mut self, node: &Arc<Node>) {
+        match &node.data {
+            NodeData::ArrayLiteralExpression(arr) => {
+                for e in &arr.elements.nodes {
+                    if e.kind == SyntaxKind::SpreadElement {
+                        if let Some(inner) = e.expression() {
+                            self.bind_assignment_target_flow(&inner);
+                        }
+                    } else {
+                        self.bind_destructuring_target_flow(e);
+                    }
+                }
+            }
+            NodeData::ObjectLiteralExpression(obj) => {
+                for p in &obj.properties.nodes {
+                    match &p.data {
+                        NodeData::PropertyAssignment(pa) => {
+                            self.bind_destructuring_target_flow(&pa.initializer);
+                        }
+                        NodeData::ShorthandPropertyAssignment(sa) => {
+                            self.bind_assignment_target_flow(&sa.name);
+                        }
+                        NodeData::SpreadAssignment(sp) => {
+                            self.bind_assignment_target_flow(&sp.expression);
+                        }
+                        _ => {}
+                    }
+                }
+            }
+            _ => {
+                if self.is_narrowable_operand(node)
+                    && matches!(
+                        node.kind,
+                        SyntaxKind::Identifier
+                            | SyntaxKind::PropertyAccessExpression
+                            | SyntaxKind::ElementAccessExpression
+                            | SyntaxKind::ParenthesizedExpression
+                            | SyntaxKind::NonNullExpression
+                            | SyntaxKind::ThisKeyword
+                            | SyntaxKind::SuperKeyword
+                            | SyntaxKind::MetaProperty
+                    )
+                {
+                    if let Some(current) = self.current_flow.take() {
+                        let assign_flow = self.create_flow_assignment(&current, node);
+                        self.current_flow = Some(assign_flow);
+                    }
+                }
+            }
+        }
+    }
+
+    /// A destructuring element with a default (`{ a: b = 1 }` parsed as a
+    /// property with `b = 1` CoverInitializedName): the default's LEFT side
+    /// is the assignment target (Go `bindDestructuringTargetFlow`).
+    fn bind_destructuring_target_flow(&mut self, node: &Arc<Node>) {
+        if let NodeData::BinaryExpression(bin) = &node.data {
+            if bin.operator_token.kind == SyntaxKind::EqualsToken {
+                self.bind_assignment_target_flow(&bin.left);
+                return;
+            }
+        }
+        self.bind_assignment_target_flow(node);
+    }
+
     fn bind_initialized_variable_flow(&mut self, node: &Arc<Node>) {
         let name = match &node.data {
             NodeData::VariableDeclaration(d) => Some(Arc::clone(&d.name)),
@@ -2823,6 +2902,24 @@ impl Binder {
                 // `Class.prototype.method = fn` in JS files. Mirrors Go's
                 // `bindThisPropertyAssignment` (`binder.go:1121-1141`).
                 self.bind_this_property_assignment(node);
+                // Destructuring assignment (`({ a: b = 1 } = expr)`,
+                // `[x, y] = arr`): after the regular child walk, create
+                // ASSIGNMENT flow nodes for every target reference in the
+                // pattern (Go `bindDestructuringAssignmentFlow`,
+                // binder.go ~L2192).
+                if matches!(&node.data, NodeData::BinaryExpression(bin)
+                    if bin.operator_token.kind == SyntaxKind::EqualsToken
+                        && matches!(
+                            bin.left.kind,
+                            SyntaxKind::ObjectLiteralExpression
+                                | SyntaxKind::ArrayLiteralExpression
+                        ))
+                {
+                    if let NodeData::BinaryExpression(bin) = &node.data {
+                        let left = Arc::clone(&bin.left);
+                        self.bind_assignment_target_flow(&left);
+                    }
+                }
             }
             _ => {}
         }

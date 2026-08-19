@@ -1,0 +1,1 @@
+fileJs.js(1,18): error TS8010: Type annotations can only be used in TypeScript files.

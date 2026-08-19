@@ -1,0 +1,1 @@
+templateStringInCallExpressionES6.ts(1,1): error TS2349: This expression is not callable.

@@ -1,0 +1,3 @@
+file.tsx(5,3): error TS2564: Property 'props' has no initializer and is not definitely assigned in the constructor.
+file.tsx(11,22): error TS2322: Type '{ bar: string; }' is not assignable to type 'IntrinsicAttributes & { ref?: string | undefined; }'.
+react.d.ts(6,3): error TS7008: Member 'props' implicitly has an 'any' type.

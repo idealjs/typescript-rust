@@ -1,0 +1,1 @@
+asyncArrowFunction10_es6.ts(3,11): error TS2552: Cannot find name 'await'. Did you mean 'Awaited'?

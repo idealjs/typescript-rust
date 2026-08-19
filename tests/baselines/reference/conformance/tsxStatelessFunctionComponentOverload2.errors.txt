@@ -1,0 +1,1 @@
+file.tsx(30,38): error TS2783: 'yy' is specified more than once, so this usage will be overwritten.

@@ -1,0 +1,1 @@
+iteratorSpreadInArray11.ts(2,17): error TS2454: Variable 'iter' is used before being assigned.

@@ -1,0 +1,9 @@
+file.tsx(8,10): error TS2874: This JSX tag requires 'React' to be in scope, but it could not be found.
+file.tsx(9,10): error TS2874: This JSX tag requires 'React' to be in scope, but it could not be found.
+file.tsx(10,10): error TS2874: This JSX tag requires 'React' to be in scope, but it could not be found.
+file.tsx(11,10): error TS2874: This JSX tag requires 'React' to be in scope, but it could not be found.
+file.tsx(14,10): error TS2874: This JSX tag requires 'React' to be in scope, but it could not be found.
+file.tsx(15,10): error TS2874: This JSX tag requires 'React' to be in scope, but it could not be found.
+file.tsx(16,10): error TS2874: This JSX tag requires 'React' to be in scope, but it could not be found.
+file.tsx(17,10): error TS2874: This JSX tag requires 'React' to be in scope, but it could not be found.
+file.tsx(18,10): error TS2874: This JSX tag requires 'React' to be in scope, but it could not be found.

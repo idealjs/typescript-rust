@@ -1,0 +1,2 @@
+a.js(4,17): error TS2339: Property 'toFixed' does not exist on type 'number | "string"'.
+a.js(5,16): error TS2339: Property 'toFixed' does not exist on type 'number | "string"'.

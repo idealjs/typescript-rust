@@ -1,0 +1,4 @@
+/a.js(7,15): error TS1005: '{' expected.
+/a.js(8,2): error TS1005: '}' expected.
+/a.js(10,27): error TS1005: '{' expected.
+/a.js(10,30): error TS1005: '}' expected.

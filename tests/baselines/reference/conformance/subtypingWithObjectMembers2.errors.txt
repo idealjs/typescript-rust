@@ -1,0 +1,6 @@
+subtypingWithObjectMembers2.ts(17,15): error TS2430: Interface 'B' incorrectly extends interface 'A'.
+subtypingWithObjectMembers2.ts(27,15): error TS2430: Interface 'B2' incorrectly extends interface 'A2'.
+subtypingWithObjectMembers2.ts(37,15): error TS2430: Interface 'B3' incorrectly extends interface 'A3'.
+subtypingWithObjectMembers2.ts(50,15): error TS2430: Interface 'B' incorrectly extends interface 'A'.
+subtypingWithObjectMembers2.ts(60,15): error TS2430: Interface 'B2' incorrectly extends interface 'A2'.
+subtypingWithObjectMembers2.ts(70,15): error TS2430: Interface 'B3' incorrectly extends interface 'A3'.

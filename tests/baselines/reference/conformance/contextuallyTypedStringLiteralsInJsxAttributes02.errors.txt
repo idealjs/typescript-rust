@@ -1,0 +1,10 @@
+file.tsx(25,16): error TS2683: 'this' implicitly has type 'any' because it does not have a type annotation.
+file.tsx(28,12): error TS2683: 'this' implicitly has type 'any' because it does not have a type annotation.
+file.tsx(31,56): error TS2769: No overload matches this call.
+file.tsx(32,13): error TS2769: No overload matches this call.
+file.tsx(33,43): error TS2769: No overload matches this call.
+file.tsx(34,13): error TS2769: No overload matches this call.
+file.tsx(36,69): error TS2322: Type 'undefined' is not assignable to type 'Element'.
+file.tsx(37,57): error TS2322: Type '{ onClick: (k: "left" | "right") => void; extra: true; }' is not assignable to type 'IntrinsicAttributes & ButtonProps'.
+file.tsx(39,66): error TS2322: Type 'undefined' is not assignable to type 'Element'.
+file.tsx(40,44): error TS2322: Type '{ goTo: "home"; extra: true; }' is not assignable to type 'IntrinsicAttributes & LinkProps'.

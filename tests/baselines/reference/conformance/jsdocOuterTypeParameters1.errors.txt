@@ -1,0 +1,4 @@
+jsdocOuterTypeParameters1.js(1,14): error TS2304: Cannot find name 'T'.
+jsdocOuterTypeParameters1.js(4,17): error TS2304: Cannot find name 'T'.
+jsdocOuterTypeParameters1.js(4,19): error TS1069: Unexpected token. A type parameter name was expected without curly braces.
+jsdocOuterTypeParameters1.js(7,35): error TS2339: Property 'foo' does not exist on type 'Bar'.

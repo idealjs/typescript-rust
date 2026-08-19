@@ -1,0 +1,10 @@
+additionOperatorWithUndefinedValueAndValidOperator.ts(15,10): error TS18050: The value 'undefined' cannot be used here.
+additionOperatorWithUndefinedValueAndValidOperator.ts(16,10): error TS18050: The value 'undefined' cannot be used here.
+additionOperatorWithUndefinedValueAndValidOperator.ts(17,10): error TS18050: The value 'undefined' cannot be used here.
+additionOperatorWithUndefinedValueAndValidOperator.ts(18,10): error TS18050: The value 'undefined' cannot be used here.
+additionOperatorWithUndefinedValueAndValidOperator.ts(19,10): error TS18050: The value 'undefined' cannot be used here.
+additionOperatorWithUndefinedValueAndValidOperator.ts(20,14): error TS18050: The value 'undefined' cannot be used here.
+additionOperatorWithUndefinedValueAndValidOperator.ts(21,14): error TS18050: The value 'undefined' cannot be used here.
+additionOperatorWithUndefinedValueAndValidOperator.ts(22,15): error TS18050: The value 'undefined' cannot be used here.
+additionOperatorWithUndefinedValueAndValidOperator.ts(23,17): error TS18050: The value 'undefined' cannot be used here.
+additionOperatorWithUndefinedValueAndValidOperator.ts(24,20): error TS18050: The value 'undefined' cannot be used here.

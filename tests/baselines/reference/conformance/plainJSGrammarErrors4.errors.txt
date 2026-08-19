@@ -1,0 +1,1 @@
+plainJSGrammarErrors4.js(5,14): error TS1111: Private field '#b' must be declared in an enclosing class.

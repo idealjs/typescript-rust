@@ -1,0 +1,2 @@
+logicalAssignment4.ts(39,13): error TS18048: 'defaultValue' is possibly 'undefined'.
+logicalAssignment4.ts(45,13): error TS18048: 'defaultValue' is possibly 'undefined'.

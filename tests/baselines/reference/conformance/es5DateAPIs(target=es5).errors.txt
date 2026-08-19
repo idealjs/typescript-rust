@@ -1,0 +1,1 @@
+es5DateAPIs.ts(1,6): error TS2554: Expected 2-7 arguments, but got 1.

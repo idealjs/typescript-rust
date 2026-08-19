@@ -1,0 +1,1 @@
+file.tsx(12,1): error TS2339: Property 'span' does not exist on type 'JSX.IntrinsicElements'.

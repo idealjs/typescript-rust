@@ -1,0 +1,3 @@
+typeGuardsWithInstanceOf.ts(7,20): error TS2339: Property 'global' does not exist on type 'never'.
+typeGuardsWithInstanceOf.ts(36,11): error TS2339: Property 'onChanges' does not exist on type 'C | (Validator & Partial<OnChanges>)'.
+typeGuardsWithInstanceOf.ts(37,11): error TS2339: Property 'onChanges' does not exist on type 'C | (Validator & Partial<OnChanges>)'.

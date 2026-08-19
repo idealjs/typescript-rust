@@ -1,0 +1,1 @@
+typeOfThisInStaticMembers7.ts(9,27): error TS2340: Only public and protected methods of the base class are accessible via the 'super' keyword.

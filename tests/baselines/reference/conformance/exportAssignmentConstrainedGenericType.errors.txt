@@ -1,0 +1,2 @@
+foo_0.ts(2,2): error TS2564: Property 'test' has no initializer and is not definitely assigned in the constructor.
+foo_1.ts(2,17): error TS2345: Argument of type 'boolean' is not assignable to parameter of type '{ a: string; b: number; }'.

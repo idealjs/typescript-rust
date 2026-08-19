@@ -1,0 +1,1 @@
+iterableArrayPattern6.ts(17,8): error TS2322: Type 'Foo[]' is not assignable to type 'string[]'.

@@ -1,0 +1,6 @@
+initializersWidened.ts(18,10): error TS2873: This kind of expression is always falsy.
+initializersWidened.ts(19,10): error TS2873: This kind of expression is always falsy.
+initializersWidened.ts(20,10): error TS2873: This kind of expression is always falsy.
+initializersWidened.ts(22,10): error TS2873: This kind of expression is always falsy.
+initializersWidened.ts(23,10): error TS2873: This kind of expression is always falsy.
+initializersWidened.ts(24,10): error TS2873: This kind of expression is always falsy.

@@ -1,0 +1,2 @@
+parserParameterList7.ts(2,14): error TS2369: A parameter property is only allowed in a constructor implementation.
+parserParameterList7.ts(3,14): error TS2369: A parameter property is only allowed in a constructor implementation.

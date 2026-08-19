@@ -1,0 +1,1 @@
+/a/b/consumer.ts(2,1): error TS2304: Cannot find name '$2'.

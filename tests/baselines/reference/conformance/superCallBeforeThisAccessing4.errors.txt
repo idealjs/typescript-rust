@@ -1,0 +1,4 @@
+superCallBeforeThisAccessing4.ts(2,13): error TS7008: Member '_t' implicitly has an 'any' type.
+superCallBeforeThisAccessing4.ts(5,9): error TS17005: A constructor cannot contain a 'super' call when its class extends 'null'.
+superCallBeforeThisAccessing4.ts(10,13): error TS7008: Member '_t' implicitly has an 'any' type.
+superCallBeforeThisAccessing4.ts(12,9): error TS17005: A constructor cannot contain a 'super' call when its class extends 'null'.

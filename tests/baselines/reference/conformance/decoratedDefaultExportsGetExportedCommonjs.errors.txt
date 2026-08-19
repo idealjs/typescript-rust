@@ -1,0 +1,2 @@
+a.ts(3,2): error TS2454: Variable 'decorator' is used before being assigned.
+b.ts(3,2): error TS2454: Variable 'decorator' is used before being assigned.

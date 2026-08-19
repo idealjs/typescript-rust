@@ -1,0 +1,2 @@
+typesWithPrivateConstructor.ts(5,9): error TS2673: Constructor of class 'C' is private and only accessible within the class declaration.
+typesWithPrivateConstructor.ts(13,10): error TS2673: Constructor of class 'C2' is private and only accessible within the class declaration.

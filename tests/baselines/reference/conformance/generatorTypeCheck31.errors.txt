@@ -1,0 +1,1 @@
+generatorTypeCheck31.ts(2,11): error TS2322: Type 'Generator<(x: any) => any, void, unknown>' is not assignable to type '() => Iterable<(x: string) => number>'.

@@ -1,0 +1,6 @@
+twoGenericInterfacesWithDifferentConstraints.ts(1,11): error TS2428: All declarations of 'A' must have identical type parameters.
+twoGenericInterfacesWithDifferentConstraints.ts(5,11): error TS2428: All declarations of 'A' must have identical type parameters.
+twoGenericInterfacesWithDifferentConstraints.ts(10,15): error TS2428: All declarations of 'B' must have identical type parameters.
+twoGenericInterfacesWithDifferentConstraints.ts(14,15): error TS2428: All declarations of 'B' must have identical type parameters.
+twoGenericInterfacesWithDifferentConstraints.ts(32,22): error TS2428: All declarations of 'A' must have identical type parameters.
+twoGenericInterfacesWithDifferentConstraints.ts(38,22): error TS2428: All declarations of 'A' must have identical type parameters.

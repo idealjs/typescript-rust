@@ -1,0 +1,4 @@
+parenthesizedContexualTyping1.ts(27,32): error TS2695: Left side of comma operator is unused and has no side effects.
+parenthesizedContexualTyping1.ts(27,56): error TS2695: Left side of comma operator is unused and has no side effects.
+parenthesizedContexualTyping1.ts(28,33): error TS2695: Left side of comma operator is unused and has no side effects.
+parenthesizedContexualTyping1.ts(28,57): error TS2695: Left side of comma operator is unused and has no side effects.

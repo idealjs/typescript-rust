@@ -1,0 +1,8 @@
+contextualTypeWithTuple.ts(3,5): error TS2322: Type '[number, string, boolean]' is not assignable to type '[number, string]'.
+contextualTypeWithTuple.ts(15,1): error TS2322: Type '[number, string, boolean]' is not assignable to type '[number, string]'.
+contextualTypeWithTuple.ts(18,17): error TS2741: Property 'a' is missing in type '{}' but required in type '{ a: string; }'.
+contextualTypeWithTuple.ts(19,1): error TS2322: Type '[number, string]' is not assignable to type '[number, string, boolean]'.
+contextualTypeWithTuple.ts(20,5): error TS2322: Type '[string, string, number]' is not assignable to type '[string, string]'.
+contextualTypeWithTuple.ts(23,1): error TS2322: Type '[C, string | number, D]' is not assignable to type '[C, string | number]'.
+contextualTypeWithTuple.ts(24,1): error TS2322: Type '[C, string | number]' is not assignable to type '[C, string | number, D]'.
+contextualTypeWithTuple.ts(25,1): error TS2322: Type '[number, string | number]' is not assignable to type '[number, string]'.

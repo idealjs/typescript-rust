@@ -1,0 +1,1 @@
+a.js(2,11): error TS2304: Cannot find name 'b'.

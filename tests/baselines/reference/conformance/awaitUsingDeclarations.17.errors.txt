@@ -1,0 +1,5 @@
+awaitUsingDeclarations.17.ts(3,9): error TS1548: 'await using' declarations are not allowed in 'case' or 'default' clauses unless contained within a block.
+awaitUsingDeclarations.17.ts(7,9): error TS1548: 'await using' declarations are not allowed in 'case' or 'default' clauses unless contained within a block.
+awaitUsingDeclarations.17.ts(11,9): error TS1548: 'await using' declarations are not allowed in 'case' or 'default' clauses unless contained within a block.
+awaitUsingDeclarations.17.ts(17,13): error TS1548: 'await using' declarations are not allowed in 'case' or 'default' clauses unless contained within a block.
+awaitUsingDeclarations.17.ts(21,13): error TS1548: 'await using' declarations are not allowed in 'case' or 'default' clauses unless contained within a block.

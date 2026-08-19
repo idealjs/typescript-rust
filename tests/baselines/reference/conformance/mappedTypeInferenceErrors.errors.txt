@@ -1,0 +1,1 @@
+mappedTypeInferenceErrors.ts(16,9): error TS2322: Type 'number' is not assignable to type '() => unknown'.

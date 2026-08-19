@@ -506,6 +506,10 @@ pub struct Checker {
     /// reported TS2362/TS2363 — Go types the operator result as errorType
     /// there, so the compound-assignment type check must not add a TS2322.
     pub arith_operand_error_nodes: std::collections::HashSet<*const crate::ast::Node>,
+    /// Computed-property-name nodes already checked by
+    /// `check_computed_property_name` — Go memoizes the resolved type on the
+    /// node link so the TS2464 diagnostic fires once per node.
+    pub computed_property_name_checked: std::collections::HashSet<*const crate::ast::Node>,
     /// Reference kinds per symbol id (Go `symbolReferenceLinks`), recorded
     /// by identifier resolution and consumed by the unused-identifier
     /// checks (noUnusedLocals / noUnusedParameters).
@@ -896,6 +900,7 @@ impl Checker {
             interface_extends_reported: std::collections::HashSet::new(),
             indexed_access_2538_reported: std::collections::HashSet::new(),
             arith_operand_error_nodes: std::collections::HashSet::new(),
+            computed_property_name_checked: std::collections::HashSet::new(),
             symbol_reference_kinds: dashmap::DashMap::new(),
             spread_links: LinkStore::new(),
             variance_links: LinkStore::new(),
@@ -7365,6 +7370,12 @@ impl Checker {
                     // strictPropertyInitialization.
                     self.check_property_initialization(node);
                     self.check_class_heritage_members(node);
+                    // TS2411: properties (incl. computed-name members) must
+                    // be assignable to the class's index signatures (Go
+                    // checkIndexConstraints on the instance type).
+                    if let Some(this_type) = self.this_type_stack.last().cloned() {
+                        self.check_index_constraints(&this_type, node);
+                    }
                 }
                 self.pop_scope();
                 self.this_type_stack.pop();
@@ -7400,7 +7411,10 @@ impl Checker {
                 // interface types during checking).
                 let iface_sym = self.program.symbol_map().symbol_of(node).cloned();
                 if let Some(sym) = iface_sym {
-                    let _ = self.resolve_interface_type(&sym, None);
+                    let iface_type = self.resolve_interface_type(&sym, None);
+                    // TS2411: interface members must be assignable to the
+                    // interface's index signatures (Go checkIndexConstraints).
+                    self.check_index_constraints(&iface_type, node);
                 }
             }
             SyntaxKind::TypeAliasDeclaration
@@ -7852,6 +7866,10 @@ impl Checker {
                 crate::ast::NodeData::BindingElement(data) => {
                     if let Some(pn) = &data.property_name {
                         if pn.kind == SyntaxKind::ComputedPropertyName {
+                            // Go checkVariableLikeDeclaration's binding-element
+                            // branch: computed destructuring property names get
+                            // the TS2464 string/number/symbol check.
+                            self.check_computed_property_name(pn);
                             if let crate::ast::NodeData::ComputedPropertyName(cd) = &pn.data {
                                 self.check_expression(&cd.expression);
                                 // TS2538: a computed property name whose
@@ -8338,6 +8356,56 @@ impl Checker {
                 }
                 (None, None) => self.auto_type(),
             };
+            // TS2403: a symbol redeclared across variable-like declarations
+            // must keep the SAME type — the secondary declaration's widened
+            // type (auto converted to any) must be IDENTICAL to the primary
+            // declaration's (Go getTypeOfVariableOrParameterOrProperty's
+            // secondary branch → errorNextVariableOrPropertyDeclaration
+            // MustHaveSameType, checker.go ~L5973).
+            if let Some(symbol) = self.resolve_identifier(&data.name) {
+                let primary = symbol.value_declaration.clone();
+                if let Some(primary) = primary
+                    && !Arc::ptr_eq(&primary, node)
+                    && symbol.declarations.len() > 1
+                    && primary.kind == SyntaxKind::VariableDeclaration
+                    && symbol
+                        .flags
+                        .intersects(SymbolFlags::FunctionScopedVariable | SymbolFlags::BlockScopedVariable)
+                {
+                    let auto_to_any = |t: &Arc<Type>| -> Arc<Type> {
+                        if t.intrinsic_name() == Some("auto") {
+                            self.get_any_type()
+                        } else {
+                            Arc::clone(t)
+                        }
+                    };
+                    let primary_type = self
+                        .type_node_links
+                        .get(&primary)
+                        .and_then(|l| l.resolved_type.clone())
+                        .map(|t| auto_to_any(&t));
+                    let this_type = auto_to_any(&resolved_type);
+                    if let Some(primary_type) = primary_type
+                        && !matches!(primary_type.intrinsic_name(), Some("error"))
+                        && !matches!(this_type.intrinsic_name(), Some("error"))
+                        && !self
+                            .compare_types_identical(&primary_type, &this_type)
+                            .is_true()
+                    {
+                        let name_text = data.name.text().to_string();
+                        let first_str = self.type_to_string(&primary_type);
+                        let next_str = self.type_to_string(&this_type);
+                        let file = self.current_file.clone();
+                        self.diagnostics.add(crate::ast::Diagnostic::new(
+                            file,
+                            data.name.loc,
+                            crate::diagnostics::messages_generated::
+                                SUBSEQUENT_VARIABLE_DECLARATIONS_MUST_HAVE_THE_SAME_TYPE_VARIABLE_0_MUST_BE_OF_TYPE_1_BUT_HERE_HAS_TYPE_2,
+                            vec![name_text, first_str, next_str],
+                        ));
+                    }
+                }
+            }
             // Cache the resolved type on the VariableDeclaration node — this
             // is what `symbol.value_declaration` points to, so
             // `get_type_of_symbol` can recover the type via `type_node_links`.
@@ -8462,12 +8530,61 @@ impl Checker {
                 continue;
             }
             if !self.is_type_assignable_to(&instance_type, &interface_type) {
-                let iface_name = self.type_to_string(&interface_type);
-                self.grammar_error_on_node_with_args(
-                    class_node,
-                    &crate::diagnostics::messages_generated::CLASS_0_INCORRECTLY_IMPLEMENTS_INTERFACE_1,
-                    &[class_name.clone(), iface_name],
-                );
+                // Go `issueMemberSpecificError` (checker.go ~L4510): localize
+                // to the first incompatible OWN instance member — TS2416
+                // "Property 'x' in type 'C' is not assignable to the same
+                // property in base type 'I'" — and only fall back to the
+                // broad class-level TS2420 when no member localizes (e.g. a
+                // missing member).
+                let mut issued_member_error = false;
+                for member in class_data.members.iter() {
+                    if member.has_syntactic_modifier(ModifierFlags::Static) {
+                        continue;
+                    }
+                    let name_node = match &member.data {
+                        crate::ast::NodeData::PropertyDeclaration(d) => &d.name,
+                        crate::ast::NodeData::MethodDeclaration(d) => &d.name,
+                        crate::ast::NodeData::GetAccessorDeclaration(d) => &d.name,
+                        crate::ast::NodeData::SetAccessorDeclaration(d) => &d.name,
+                        _ => continue,
+                    };
+                    let prop_name = name_node.text().to_string();
+                    if prop_name.is_empty() {
+                        continue;
+                    }
+                    let Some(prop) = self.get_property_of_type(&instance_type, &prop_name)
+                    else {
+                        continue;
+                    };
+                    let Some(base_prop) = self.get_property_of_type(&interface_type, &prop_name)
+                    else {
+                        continue;
+                    };
+                    let prop_type = self.get_type_of_symbol(&prop);
+                    let base_type = self.get_type_of_symbol(&base_prop);
+                    if !self.is_type_assignable_to(&prop_type, &base_type) {
+                        let class_str = self.type_to_string(&instance_type);
+                        let iface_str = self.type_to_string(&interface_type);
+                        let file = self.current_file.clone();
+                        self.diagnostics.add(crate::ast::Diagnostic::new(
+                            file,
+                            name_node.loc,
+                            crate::diagnostics::messages_generated::
+                                PROPERTY_0_IN_TYPE_1_IS_NOT_ASSIGNABLE_TO_THE_SAME_PROPERTY_IN_BASE_TYPE_2,
+                            vec![prop_name, class_str, iface_str],
+                        ));
+                        issued_member_error = true;
+                        break;
+                    }
+                }
+                if !issued_member_error {
+                    let iface_name = self.type_to_string(&interface_type);
+                    self.grammar_error_on_node_with_args(
+                        class_node,
+                        &crate::diagnostics::messages_generated::CLASS_0_INCORRECTLY_IMPLEMENTS_INTERFACE_1,
+                        &[class_name.clone(), iface_name],
+                    );
+                }
             }
         }
     }
@@ -9003,6 +9120,82 @@ impl Checker {
     ///
     /// Ambient (`declare`) class members are exempt — ambient declarations
     /// can be interleaved. Abstract / optional members don't need bodies.
+    /// (parameters, declared-return-type) of a function-like overload or
+    /// implementation declaration (function/method/constructor).
+    fn function_like_params_and_return(
+        node: &Arc<Node>,
+    ) -> Option<(&Arc<NodeList>, Option<&Arc<Node>>)> {
+        match &node.data {
+            crate::ast::NodeData::FunctionDeclaration(d) => {
+                Some((&d.parameters, d.type_node.as_ref()))
+            }
+            crate::ast::NodeData::MethodDeclaration(d) => {
+                Some((&d.parameters, d.type_node.as_ref()))
+            }
+            crate::ast::NodeData::ConstructorDeclaration(d) => Some((&d.parameters, None)),
+            _ => None,
+        }
+    }
+
+    /// Go `isImplementationCompatibleWithOverload` (checker.go ~L3723):
+    /// return types compatible in EITHER direction (or the overload returns
+    /// void), and each parameter position compatible in either direction
+    /// (the assignable relation compares methods bivariantly; unannotated
+    /// parameters are `any` and always pass).
+    fn overload_signature_compatible_with_implementation(
+        &mut self,
+        overload: &Arc<Node>,
+        implementation: &Arc<Node>,
+    ) -> bool {
+        let Some((ov_params, ov_return)) = Self::function_like_params_and_return(overload)
+            .map(|(p, r)| (Arc::clone(p), r.cloned()))
+        else {
+            return true;
+        };
+        let Some((im_params, im_return)) = Self::function_like_params_and_return(implementation)
+            .map(|(p, r)| (Arc::clone(p), r.cloned()))
+        else {
+            return true;
+        };
+        // Return compatibility.
+        let return_ok = match (ov_return, im_return) {
+            (Some(ovn), Some(imn)) => {
+                let ov_t = self.get_type_from_type_node(&ovn);
+                let im_t = self.get_type_from_type_node(&imn);
+                ov_t.flags.contains(TypeFlags::Void)
+                    || self.is_type_assignable_to(&ov_t, &im_t)
+                    || self.is_type_assignable_to(&im_t, &ov_t)
+            }
+            _ => true,
+        };
+        if !return_ok {
+            return false;
+        }
+        // Parameter compatibility, position by position.
+        let n = ov_params.len().min(im_params.len());
+        for i in 0..n {
+            let ov_tn = match &ov_params.nodes[i].data {
+                crate::ast::NodeData::ParameterDeclaration(p) => p.type_node.as_ref(),
+                _ => None,
+            };
+            let im_tn = match &im_params.nodes[i].data {
+                crate::ast::NodeData::ParameterDeclaration(p) => p.type_node.as_ref(),
+                _ => None,
+            };
+            let (Some(o), Some(m)) = (ov_tn, im_tn) else {
+                continue;
+            };
+            let ov_t = self.get_type_from_type_node(&o);
+            let im_t = self.get_type_from_type_node(&m);
+            if !self.is_type_assignable_to(&ov_t, &im_t)
+                && !self.is_type_assignable_to(&im_t, &ov_t)
+            {
+                return false;
+            }
+        }
+        true
+    }
+
     fn check_class_member_overloads(&mut self, members: &NodeList) {
         // Group function-like members by name text, preserving order.
         let mut groups: std::collections::BTreeMap<String, Vec<usize>> =
@@ -9046,6 +9239,37 @@ impl Checker {
                     );
                 if !exempt {
                     self.report_implementation_expected_error(members, last);
+                }
+            } else {
+                // TS2394: each overload signature must be compatible with
+                // the implementation signature (Go
+                // isImplementationCompatibleWithOverload via
+                // checkFunctionOrConstructorSymbolWorker).
+                let impl_idx = idxs
+                    .iter()
+                    .copied()
+                    .find(|&i| Self::class_member_has_body(&members.nodes[i]))
+                    .unwrap_or(last);
+                let impl_node = Arc::clone(&members.nodes[impl_idx]);
+                for &i in &idxs {
+                    if i == impl_idx {
+                        continue;
+                    }
+                    let overload = Arc::clone(&members.nodes[i]);
+                    if !self.overload_signature_compatible_with_implementation(&overload, &impl_node)
+                        && let Some(name_node) = crate::ast::utilities::get_name_of_declaration(
+                            &overload,
+                        )
+                    {
+                        let file = self.current_file.clone();
+                        self.diagnostics.add(crate::ast::Diagnostic::new(
+                            file,
+                            name_node.loc,
+                            crate::diagnostics::messages_generated::
+                                THIS_OVERLOAD_SIGNATURE_IS_NOT_COMPATIBLE_WITH_ITS_IMPLEMENTATION_SIGNATURE,
+                            Vec::new(),
+                        ));
+                    }
                 }
             }
         }
@@ -10395,7 +10619,14 @@ impl Checker {
                             continue;
                         }
                         seen_shapes.push(shape);
-                        if overload_count < impl_required
+                        let arity_bad = !impl_rest && overload_count < impl_required;
+                        let overload_node = Arc::clone(&statements[i]);
+                        let impl_node = Arc::clone(&statements[impl_idx]);
+                        let compat = self
+                            .overload_signature_compatible_with_implementation(
+                                &overload_node, &impl_node,
+                            );
+                        if (arity_bad || !compat)
                             && let crate::ast::NodeData::FunctionDeclaration(d) = &statements[i].data
                             && let Some(n) = &d.name
                         {
@@ -10521,6 +10752,542 @@ impl Checker {
         }
     }
 
+    /// Go `isTypeAssignableToKind` (the slice this port needs): flags hit,
+    /// else assignability to the corresponding intrinsic type. Used by
+    /// `check_computed_property_name` for the string/number/symbol family.
+    fn is_type_assignable_to_kind_snf(&mut self, source: &Arc<Type>, kind: TypeFlags) -> bool {
+        if source.flags.intersects(kind) {
+            return true;
+        }
+        let number = self.number_type();
+        if kind.intersects(crate::checker::types::TYPE_FLAGS_NUMBER_LIKE)
+            && self.is_type_assignable_to(source, &number)
+        {
+            return true;
+        }
+        let string = self.string_type();
+        if kind.intersects(crate::checker::types::TYPE_FLAGS_STRING_LIKE)
+            && self.is_type_assignable_to(source, &string)
+        {
+            return true;
+        }
+        let symbol = self.es_symbol_type();
+        if kind.intersects(TypeFlags::ESSymbol) && self.is_type_assignable_to(source, &symbol) {
+            return true;
+        }
+        false
+    }
+
+    /// Port of Go `checkComputedPropertyName` (checker.go ~L26873): a
+    /// computed property name's expression must be typed string / number /
+    /// symbol / any (unions of these, enums, and unknown are allowed via
+    /// assignability), else TS2464 at the name node. `[k in T]` under a
+    /// type literal / class-like / interface member (non-accessor) is the
+    /// mapped-type-only form — it types as errorType with no diagnostic
+    /// here (the grammar checker reports it).
+    fn check_computed_property_name(&mut self, name: &Arc<Node>) {
+        if name.kind != SyntaxKind::ComputedPropertyName {
+            return;
+        }
+        if !self.computed_property_name_checked.insert(Arc::as_ptr(name)) {
+            return;
+        }
+        let expr = match &name.data {
+            crate::ast::NodeData::ComputedPropertyName(data) => Arc::clone(&data.expression),
+            _ => return,
+        };
+
+        // Go `isInvalidComputedPropertyName`: member (name.parent) sits in a
+        // type literal / class-like / interface container, the name
+        // expression is an `in` binary, and the member is not an accessor.
+        let invalid_in_form = matches!(&expr.data, crate::ast::NodeData::BinaryExpression(b)
+            if b.operator_token.kind == SyntaxKind::InKeyword)
+            && name.parent.as_ref().is_some_and(|member| {
+                !matches!(
+                    member.kind,
+                    SyntaxKind::GetAccessor | SyntaxKind::SetAccessor
+                ) && member
+                    .parent
+                    .as_ref()
+                    .is_some_and(|container| {
+                        matches!(
+                            container.kind,
+                            SyntaxKind::TypeLiteral
+                                | SyntaxKind::ClassDeclaration
+                                | SyntaxKind::ClassExpression
+                                | SyntaxKind::InterfaceDeclaration
+                        )
+                    })
+            });
+        if invalid_in_form {
+            return;
+        }
+
+        // Go runs checkExpression (which returns the type); our checker
+        // splits the semantic walk from type computation — run both.
+        self.check_expression(&expr);
+        let t = self.get_type_of_node(&expr);
+
+        let kind = crate::checker::types::TYPE_FLAGS_STRING_LIKE
+            | crate::checker::types::TYPE_FLAGS_NUMBER_LIKE
+            | crate::checker::types::TYPE_FLAGS_ES_SYMBOL_LIKE;
+        let bad = t.flags.intersects(crate::checker::types::TYPE_FLAGS_NULLABLE)
+            || (!self.is_type_assignable_to_kind_snf(&t, kind) && {
+                let target = self.get_union_type(vec![
+                    self.string_type(),
+                    self.number_type(),
+                    self.es_symbol_type(),
+                ]);
+                !self.is_type_assignable_to(&t, &target)
+            });
+        if bad {
+            let file = self.current_file.clone();
+            self.diagnostics.add(crate::ast::Diagnostic::new(
+                file,
+                name.loc,
+                crate::diagnostics::messages_generated::
+                    A_COMPUTED_PROPERTY_NAME_MUST_BE_OF_TYPE_STRING_NUMBER_SYMBOL_OR_ANY,
+                vec![],
+            ));
+        }
+    }
+
+    /// Name node of a method/accessor/property-like member (for the computed
+    /// property name check dispatch).
+    fn member_name_node(node: &Arc<Node>) -> Option<Arc<Node>> {
+        match &node.data {
+            crate::ast::NodeData::MethodDeclaration(d) => Some(Arc::clone(&d.name)),
+            crate::ast::NodeData::MethodSignatureDeclaration(d) => Some(Arc::clone(&d.name)),
+            crate::ast::NodeData::GetAccessorDeclaration(d) => Some(Arc::clone(&d.name)),
+            crate::ast::NodeData::SetAccessorDeclaration(d) => Some(Arc::clone(&d.name)),
+            crate::ast::NodeData::PropertyDeclaration(d) => Some(Arc::clone(&d.name)),
+            crate::ast::NodeData::PropertySignatureDeclaration(d) => Some(Arc::clone(&d.name)),
+            crate::ast::NodeData::PropertyAssignment(d) => Some(Arc::clone(&d.name)),
+            crate::ast::NodeData::ShorthandPropertyAssignment(d) => Some(Arc::clone(&d.name)),
+            _ => None,
+        }
+    }
+
+    /// Literal key type of a member name for index-applicability: computed
+    /// names use the expression's literal type (string/numeric literal) or
+    /// its resolved type; plain names parse as number when possible, else
+    /// string literal (Go `getLiteralTypeFromProperty` /
+    /// `getTypeOfExpression` on computed expressions).
+    fn property_name_key_type(&mut self, name: &Arc<Node>) -> Option<Arc<Type>> {
+        match &name.data {
+            crate::ast::NodeData::ComputedPropertyName(data) => {
+                let expr = &data.expression;
+                match &expr.data {
+                    crate::ast::NodeData::StringLiteral(s) => {
+                        Some(self.get_string_literal_type(&s.text))
+                    }
+                    crate::ast::NodeData::NumericLiteral(n) => {
+                        Some(self.get_number_literal_type(jsnum::Number::from_string(&n.text)))
+                    }
+                    _ => {
+                        // Non-literal computed name (e.g. `1 << 6`, calls):
+                        // use the expression's type.
+                        Some(self.get_type_of_node(expr))
+                    }
+                }
+            }
+            crate::ast::NodeData::Identifier(data) => {
+                if let Ok(_) = data.text.parse::<f64>() {
+                    Some(self.get_number_literal_type(jsnum::Number::from_string(&data.text)))
+                } else {
+                    Some(self.get_string_literal_type(&data.text))
+                }
+            }
+            crate::ast::NodeData::StringLiteral(data) => {
+                Some(self.get_string_literal_type(&data.text))
+            }
+            crate::ast::NodeData::NumericLiteral(data) => Some(
+                self.get_number_literal_type(jsnum::Number::from_string(&data.text)),
+            ),
+            _ => None,
+        }
+    }
+
+    /// Display form of a property name for the TS2411 message: computed
+    /// names render `[<expression source text>]` (official baselines show
+    /// the unevaluated expression, e.g. `'[1 << 6]'`), plain names as-is.
+    /// The text is sliced from the node's OWN source file — the checked
+    /// declaration and the property's declaration may live in different
+    /// files (inherited members).
+    fn property_name_display(&self, name: &Arc<Node>) -> String {
+        if name.kind == SyntaxKind::ComputedPropertyName {
+            if let Some(text) = self.node_source_text(name) {
+                let inner = text
+                    .strip_prefix('[')
+                    .and_then(|t| t.strip_suffix(']'))
+                    .unwrap_or(&text);
+                return format!("[{inner}]");
+            }
+        }
+        name.text().to_string()
+    }
+
+    /// Source text of `node`'s range, taken from the source file the node
+    /// belongs to (via the parent chain root). `None` when the file or the
+    /// byte range can't be located (e.g. synthesized nodes).
+    fn node_source_text(&self, node: &Arc<Node>) -> Option<String> {
+        let mut root: &Arc<Node> = node;
+        while let Some(p) = root.parent.as_ref() {
+            root = p;
+        }
+        for f in &self.files {
+            if Arc::ptr_eq(&f.node, root) {
+                return f
+                    .text
+                    .get(node.loc.pos()..node.loc.end())
+                    .map(|s| s.to_string());
+            }
+        }
+        None
+    }
+
+    /// The declared type of one member declaration for the TS2411 index
+    /// check: annotations resolve directly; accessors use the getter's
+    /// return type (annotation or body inference) / the setter's parameter
+    /// type; initializer-less properties fall back to the symbol type.
+    fn member_declared_type_for_index_check(&mut self, member: &Arc<Node>) -> Option<Arc<Type>> {
+        match &member.data {
+            crate::ast::NodeData::GetAccessorDeclaration(d) => Some(
+                self.infer_function_return_type(d.body.as_ref(), d.type_node.as_ref()),
+            ),
+            crate::ast::NodeData::SetAccessorDeclaration(d) => {
+                let tn = d.parameters.iter().next().and_then(|p| {
+                    match &p.data {
+                        crate::ast::NodeData::ParameterDeclaration(pd) => pd.type_node.clone(),
+                        _ => None,
+                    }
+                });
+                match tn {
+                    Some(t) => Some(self.get_type_from_type_node(&t)),
+                    None => Some(self.any_type()),
+                }
+            }
+            crate::ast::NodeData::PropertyDeclaration(d) => {
+                if let Some(t) = &d.type_node {
+                    Some(self.get_type_from_type_node(t))
+                } else if let Some(init) = &d.initializer {
+                    let init_t = self.get_type_of_node(init);
+                    Some(self.widen_initializer_type(&init_t))
+                } else {
+                    None
+                }
+            }
+            crate::ast::NodeData::PropertySignatureDeclaration(d) => {
+                Some(self.get_type_from_type_node(&d.type_node))
+            }
+            _ => None,
+        }
+    }
+
+    /// Port of Go `checkIndexConstraints` (checker.go ~L4834), the TS2411
+    /// family: every property of a type with index signatures must be
+    /// assignable to the applicable index signature's value type. Three
+    /// property sources (Go combines the first two):
+    ///  - named properties of the resolved type (locality picks the error
+    ///    node: local property decl → local index decl → interface decl);
+    ///  - computed-name members declared on `declaration` itself (Go's
+    ///    `!hasBindableName(member)` loop);
+    ///  - computed-name members inherited from base declarations, which our
+    ///    binder collapses into the "" member slot — walked from the base
+    ///    class/interface declarations so the local-index error-node path
+    ///    (Go's `localIndexDeclaration`) still fires.
+    fn check_index_constraints(&mut self, t: &Arc<Type>, declaration: &Arc<Node>) {
+        let index_infos = self.get_index_infos_of_type(t);
+        if index_infos.is_empty() {
+            return;
+        }
+        // Index signatures declared directly on this declaration (for the
+        // inherited-property error-node fallback).
+        let local_index: Option<Arc<crate::checker::IndexInfo>> = index_infos
+            .iter()
+            .find(|info| {
+                info.declaration
+                    .as_ref()
+                    .and_then(|d| d.parent.as_ref())
+                    .is_some_and(|p| Arc::ptr_eq(p, declaration))
+            })
+            .cloned();
+        let is_interface = declaration.kind == SyntaxKind::InterfaceDeclaration;
+
+        // A) Inherited named properties (declarations whose parent is NOT
+        // this declaration — local members are handled by B).
+        for prop in self.get_properties_of_type(t) {
+            let Some(first_decl) = prop.declarations.first().cloned() else {
+                continue;
+            };
+            if first_decl
+                .parent
+                .as_ref()
+                .is_some_and(|p| Arc::ptr_eq(p, declaration))
+            {
+                continue; // local — B covers it
+            }
+            let Some(name) = Self::member_name_node(&first_decl) else {
+                continue;
+            };
+            if name.kind == SyntaxKind::ComputedPropertyName {
+                continue; // handled by C (our binder collapses them)
+            }
+            let Some(key_type) = self.property_name_key_type(&name) else {
+                continue;
+            };
+            let prop_type = self.get_type_of_symbol(&prop);
+            let display = self.property_name_display(&name);
+            self.check_index_constraint_for_property(
+                t,
+                &key_type,
+                &prop_type,
+                &name,
+                &display,
+                None,
+                local_index.clone(),
+                is_interface.then(|| Arc::clone(declaration)),
+                &index_infos,
+            );
+        }
+
+        // B) Members declared on this declaration: every non-index member,
+        // named or computed. Named members take their type from the bound
+        // member symbol, falling back to the resolved type's synthetic
+        // property table (interface signatures are rebuilt declaration-less).
+        let props_by_name: std::collections::HashMap<String, Arc<Symbol>> = self
+            .get_properties_of_type(t)
+            .into_iter()
+            .map(|p| (p.name.clone(), p))
+            .collect();
+        let members: Vec<Arc<Node>> = match &declaration.data {
+            crate::ast::NodeData::ClassDeclaration(d) => {
+                d.members.iter().cloned().collect()
+            }
+            crate::ast::NodeData::InterfaceDeclaration(d) => {
+                d.members.iter().cloned().collect()
+            }
+            _ => Vec::new(),
+        };
+        for member in &members {
+            if member.kind == SyntaxKind::IndexSignature {
+                continue;
+            }
+            let Some(name) = Self::member_name_node(member) else {
+                continue;
+            };
+            let member_symbol = self.program.symbol_map().symbol_of(member).cloned();
+            let Some(key_type) = self.property_name_key_type(&name) else {
+                continue;
+            };
+            let prop_type = if name.kind != SyntaxKind::ComputedPropertyName {
+                // Named member: prefer the resolved type's synthetic entry
+                // (the same source the type builder resolved); fall back to
+                // the declaration's own type.
+                match props_by_name.get(name.text()) {
+                    Some(sym) => self.get_type_of_symbol(sym),
+                    None => match self.member_declared_type_for_index_check(member) {
+                        Some(t) => t,
+                        None => continue,
+                    },
+                }
+            } else {
+                // Computed names are skipped by the type builder (empty
+                // name): take the type straight from the declaration.
+                match self.member_declared_type_for_index_check(member) {
+                    Some(t) => t,
+                    None => match &member_symbol {
+                        Some(sym) => self.get_type_of_symbol(sym),
+                        None => continue,
+                    },
+                }
+            };
+            let display = self.property_name_display(&name);
+            let local_name_node = Some(Arc::clone(&name));
+            self.check_index_constraint_for_property(
+                t,
+                &key_type,
+                &prop_type,
+                &name,
+                &display,
+                local_name_node,
+                local_index.clone(),
+                is_interface.then(|| Arc::clone(declaration)),
+                &index_infos,
+            );
+        }
+
+        // C) Computed-name members inherited from base declarations — our
+        // instance-type merge replaces the "" property slot, so walk base
+        // declaration members directly. Errors land on the locally declared
+        // index signature (Go's localIndexDeclaration node).
+        let mut bases: Vec<Arc<Node>> = Vec::new();
+        let mut worklist: Vec<Arc<Node>> = vec![Arc::clone(declaration)];
+        let mut guard = 0;
+        while let Some(d) = worklist.pop() {
+            guard += 1;
+            if guard > 32 {
+                break;
+            }
+            let heritage = match &d.data {
+                crate::ast::NodeData::ClassDeclaration(cd) => {
+                    cd.heritage_clauses.clone()
+                }
+                crate::ast::NodeData::InterfaceDeclaration(id) => id.heritage_clauses.clone(),
+                _ => continue,
+            };
+            let Some(clauses) = heritage else { continue };
+            for clause in clauses.iter() {
+                let crate::ast::NodeData::HeritageClause(hc) = &clause.data else {
+                    continue;
+                };
+                for type_ref in hc.types.iter() {
+                    let base_expr = match &type_ref.data {
+                        crate::ast::NodeData::ExpressionWithTypeArguments(e) => {
+                            Arc::clone(&e.expression)
+                        }
+                        _ => continue,
+                    };
+                    let base_symbol = if base_expr.kind == SyntaxKind::Identifier {
+                        self.resolve_identifier(&base_expr)
+                    } else {
+                        None
+                    };
+                    let Some(base_symbol) = base_symbol else {
+                        continue;
+                    };
+                    for bd in &base_symbol.declarations {
+                        if matches!(
+                            bd.kind,
+                            SyntaxKind::ClassDeclaration | SyntaxKind::InterfaceDeclaration
+                        ) && !bases.iter().any(|b| Arc::ptr_eq(b, bd))
+                            && !Arc::ptr_eq(bd, &d)
+                        {
+                            bases.push(Arc::clone(bd));
+                            worklist.push(Arc::clone(bd));
+                        }
+                    }
+                }
+            }
+        }
+        for base in &bases {
+            let base_members: Vec<Arc<Node>> = match &base.data {
+                crate::ast::NodeData::ClassDeclaration(d) => {
+                    d.members.iter().cloned().collect()
+                }
+                crate::ast::NodeData::InterfaceDeclaration(d) => {
+                    d.members.iter().cloned().collect()
+                }
+                _ => continue,
+            };
+            for member in base_members {
+                let Some(name) = Self::member_name_node(&member) else {
+                    continue;
+                };
+                if name.kind != SyntaxKind::ComputedPropertyName {
+                    continue;
+                }
+                let Some(key_type) = self.property_name_key_type(&name) else {
+                    continue;
+                };
+                let Some(symbol) = self.program.symbol_map().symbol_of(&member).cloned()
+                else {
+                    continue;
+                };
+                let prop_type = self
+                    .member_declared_type_for_index_check(&member)
+                    .unwrap_or_else(|| self.get_type_of_symbol(&symbol));
+                let display = self.property_name_display(&name);
+                let index_for_error = local_index.clone();
+                let iface_decl = is_interface.then(|| Arc::clone(declaration));
+                self.check_index_constraint_for_property(
+                    t,
+                    &key_type,
+                    &prop_type,
+                    &name,
+                    &display,
+                    None,
+                    index_for_error,
+                    iface_decl,
+                    &index_infos,
+                );
+            }
+        }
+    }
+
+    /// One property vs the applicable index infos (Go
+    /// `checkIndexConstraintForProperty`). `local_name` supplies the local
+    /// declaration's name node when the property is declared on the checked
+    /// declaration; otherwise the local index declaration (or the interface
+    /// declaration) is the error node.
+    fn check_index_constraint_for_property(
+        &mut self,
+        _t: &Arc<Type>,
+        key_type: &Arc<Type>,
+        prop_type: &Arc<Type>,
+        name: &Arc<Node>,
+        display: &str,
+        local_name: Option<Arc<Node>>,
+        local_index: Option<Arc<crate::checker::IndexInfo>>,
+        interface_decl: Option<Arc<Node>>,
+        index_infos: &[Arc<crate::checker::IndexInfo>],
+    ) {
+        for info in index_infos {
+            let Some(info_key) = info.key_type.clone() else {
+                continue;
+            };
+            if !self.is_applicable_index_type(key_type, &info_key) {
+                continue;
+            }
+            let info_value = match info.value_type.clone() {
+                Some(v) => v,
+                None => continue,
+            };
+            if self.is_type_assignable_to(prop_type, &info_value) {
+                continue;
+            }
+            // Error node: local property name → local index declaration →
+            // interface declaration.
+            let (error_loc, related_index_decl) = if let Some(n) = &local_name {
+                (n.loc, None)
+            } else if let Some(idx) = &local_index {
+                (
+                    idx.declaration
+                        .as_ref()
+                        .map(|d| d.loc)
+                        .unwrap_or(name.loc),
+                    idx.declaration.clone(),
+                )
+            } else if let Some(idecl) = &interface_decl {
+                (idecl.loc, None)
+            } else {
+                continue;
+            };
+            let file = self.current_file.clone();
+            let mut diagnostic = crate::ast::Diagnostic::new(
+                file,
+                error_loc,
+                crate::diagnostics::messages_generated::
+                    PROPERTY_0_OF_TYPE_1_IS_NOT_ASSIGNABLE_TO_2_INDEX_TYPE_3,
+                vec![
+                    display.to_string(),
+                    self.type_to_string(prop_type),
+                    self.type_to_string(&info_key),
+                    self.type_to_string(&info_value),
+                ],
+            );
+            if let Some(idx_decl) = related_index_decl {
+                diagnostic.related_information = vec![crate::ast::Diagnostic::new(
+                    self.current_file.clone(),
+                    idx_decl.loc,
+                    crate::diagnostics::messages_generated::X_0_IS_DECLARED_HERE,
+                    vec![display.to_string()],
+                )];
+            }
+            self.diagnostics.add(diagnostic);
+        }
+    }
+
     fn check_class_member(&mut self, node: &Arc<Node>) {
         // Grammar check on the member's modifiers (TS1248 `const` member,
         // duplicate modifiers, etc.) — Go's checkPropertyDeclaration /
@@ -10585,6 +11352,15 @@ impl Checker {
             | SyntaxKind::Constructor
             | SyntaxKind::GetAccessor
             | SyntaxKind::SetAccessor => {
+                // Computed member names get the TS2464 string/number/symbol
+                // check (Go checkFunctionOrMethodDeclaration /
+                // checkAccessorDeclaration). Constructor names are never
+                // computed.
+                if node.kind != SyntaxKind::Constructor
+                    && let Some(name) = Self::member_name_node(node)
+                {
+                    self.check_computed_property_name(&name);
+                }
                 // Only check the body; the name, parameters, and return type
                 // are declarations/types.
                 let (body, type_node, parameters): (
@@ -11018,6 +11794,9 @@ impl Checker {
                 // (TS2564 is handled class-level by `check_property_initialization`
                 // — the upstream implementation with its assignment-scan helpers.)
                 if let crate::ast::NodeData::PropertyDeclaration(data) = &node.data {
+                    // Computed names get the TS2464 check (Go
+                    // checkVariableLikeDeclaration).
+                    self.check_computed_property_name(&data.name);
                     // Static members cannot reference class type parameters
                     // (TS2322). Force-resolve the type annotation with the
                     // `in_static_member_type` flag set so any TypeParameter
@@ -11055,7 +11834,12 @@ impl Checker {
                 }
             }
             SyntaxKind::PropertySignature => {
-                // All type-level — no expressions to check.
+                // All type-level — no expressions to check. Computed names
+                // still get the TS2464 check (Go checkPropertySignature →
+                // checkVariableLikeDeclaration).
+                if let crate::ast::NodeData::PropertySignatureDeclaration(data) = &node.data {
+                    self.check_computed_property_name(&data.name);
+                }
             }
             SyntaxKind::ClassStaticBlockDeclaration => {
                 if let crate::ast::NodeData::ClassStaticBlockDeclaration(data) = &node.data {
@@ -12420,6 +13204,12 @@ impl Checker {
     }
 
     fn check_object_literal_element(&mut self, node: &Arc<Node>) {
+        // Computed names are checked up front for every element kind (Go
+        // checkObjectLiteral's pre-pass, so spreads that bail early can't
+        // skip the TS2464 check).
+        if let Some(name) = Self::member_name_node(node) {
+            self.check_computed_property_name(&name);
+        }
         match node.kind {
             SyntaxKind::PropertyAssignment => {
                 if let crate::ast::NodeData::PropertyAssignment(data) = &node.data {
@@ -13444,7 +14234,7 @@ impl Checker {
     /// Ambient member lookup: the namespace's locals when the namespace is
     /// an implicit-export ambient container (see
     /// [`Self::ambient_namespace_locals_visible`]).
-    fn ambient_namespace_local(&self, ns: &Arc<Symbol>, name: &str) -> Option<Arc<Symbol>> {
+    pub(crate) fn ambient_namespace_local(&self, ns: &Arc<Symbol>, name: &str) -> Option<Arc<Symbol>> {
         if !self.ambient_namespace_locals_visible(ns) {
             return None;
         }
@@ -14693,10 +15483,24 @@ impl Checker {
             }
         }
         let file = self.current_file.clone();
+        // Message variant by symbol kind (Go checkResolvedBlockScoped
+        // Variable, checker.go ~L1910): block-scoped variable TS2448,
+        // class TS2449, enum TS2450 (enum-in-TDZ only under
+        // isolatedModules for const enums).
+        let message = if symbol.flags.contains(SymbolFlags::Class) {
+            crate::diagnostics::messages_generated::CLASS_0_USED_BEFORE_ITS_DECLARATION
+        } else if symbol.flags.intersects(SymbolFlags::RegularEnum)
+            || (symbol.flags.intersects(SymbolFlags::ConstEnum)
+                && self.compiler_options.isolated_modules.is_true())
+        {
+            crate::diagnostics::messages_generated::ENUM_0_USED_BEFORE_ITS_DECLARATION
+        } else {
+            BLOCK_SCOPED_VARIABLE_0_USED_BEFORE_ITS_DECLARATION
+        };
         self.diagnostics.add(crate::ast::Diagnostic::new(
             file,
             node.loc,
-            BLOCK_SCOPED_VARIABLE_0_USED_BEFORE_ITS_DECLARATION,
+            message,
             vec![name.to_string()],
         ));
     }
@@ -15786,8 +16590,59 @@ impl Checker {
 
             final_result
         } else {
-            // Cannot merge — return target as-is
+            // Cannot merge — Go reports the conflict here
+            // (`reportMergeSymbolError`, checker.go ~L14256): enum-vs-other
+            // TS2339-family message, block-scoped collision TS2451,
+            // otherwise TS2300, on EVERY declaration of both symbols.
+            self.report_merge_symbol_error(target, source);
             Arc::clone(target)
+        }
+    }
+
+    /// Go `reportMergeSymbolError` + `addDuplicateDeclarationErrorsForSymbols`:
+    /// a merge conflict is reported at each declaration's name of both the
+    /// target and source symbols (deduplicated per location+code).
+    fn report_merge_symbol_error(&mut self, target: &Arc<Symbol>, source: &Arc<Symbol>) {
+        let is_either_enum =
+            target.flags.contains(SymbolFlags::ENUM) || source.flags.contains(SymbolFlags::ENUM);
+        let is_either_block_scoped = target
+            .flags
+            .intersects(SymbolFlags::BlockScopedVariable)
+            || source.flags.intersects(SymbolFlags::BlockScopedVariable);
+        let message = if is_either_enum {
+            crate::diagnostics::messages_generated::
+                ENUM_DECLARATIONS_CAN_ONLY_MERGE_WITH_NAMESPACE_OR_OTHER_ENUM_DECLARATIONS
+        } else if is_either_block_scoped {
+            crate::diagnostics::messages_generated::CANNOT_REDECLARE_BLOCK_SCOPED_VARIABLE_0
+        } else {
+            crate::diagnostics::messages_generated::DUPLICATE_IDENTIFIER_0
+        };
+        let name = source.name.clone();
+        let mut locs: Vec<crate::core::text::TextRange> = Vec::new();
+        for sym in [target, source] {
+            for d in &sym.declarations {
+                let name_node =
+                    crate::ast::utilities::get_name_of_declaration(d).unwrap_or_else(|| Arc::clone(d));
+                locs.push(name_node.loc);
+            }
+        }
+        for loc in locs {
+            // Deduplicate identical (loc, code) reports — Go's diagnostics
+            // are deduplicated before emission.
+            if self
+                .diagnostics
+                .get_all()
+                .iter()
+                .any(|d| d.loc == loc && d.code == message.code)
+            {
+                continue;
+            }
+            self.diagnostics.add(crate::ast::Diagnostic::new(
+                self.current_file.clone(),
+                loc,
+                message,
+                vec![name.clone()],
+            ));
         }
     }
 
@@ -16173,10 +17028,70 @@ fn is_valid_identifier_text(s: &str) -> bool {
 
 /// Whether an identifier node is the left-hand side of an assignment (e.g.,
 /// the `v` in `v = 1` or `v += 1`). Used to skip TS2454 for write targets.
+/// Whether an object-literal node sits in a destructuring-assignment target
+/// position: the initializer of a for-in/for-of head, or the left side of an
+/// `=` assignment.
+fn object_literal_is_destructuring_target(literal: &Arc<Node>) -> bool {
+    let Some(parent) = literal.parent.as_ref() else {
+        return false;
+    };
+    match parent.kind {
+        SyntaxKind::ForInStatement | SyntaxKind::ForOfStatement => true,
+        SyntaxKind::BinaryExpression => {
+            matches!(&parent.data, crate::ast::NodeData::BinaryExpression(bin)
+                if bin.operator_token.kind == SyntaxKind::EqualsToken
+                    && std::ptr::eq(
+                        bin.left.as_ref() as *const Node,
+                        literal.as_ref() as *const Node
+                    ))
+        }
+        SyntaxKind::ParenthesizedExpression => {
+            object_literal_is_destructuring_target(parent)
+        }
+        _ => false,
+    }
+}
+
 fn is_assignment_target(node: &Arc<Node>) -> bool {
     let Some(parent) = node.parent.as_ref() else {
         return false;
     };
+    // The name of a binding element in a bare (no declaration keyword)
+    // destructuring pattern — `({ a: a = 1 } = o)`, `for ({ b } of xs)` — is
+    // an assignment TARGET (a write to the referenced variable), not a read.
+    if parent.kind == SyntaxKind::BindingElement {
+        if let crate::ast::NodeData::BindingElement(be) = &parent.data {
+            if let Some(name) = &be.name {
+                return std::ptr::eq(
+                    name.as_ref() as *const Node,
+                    node.as_ref() as *const Node,
+                ) && !matches!(
+                    name.kind,
+                    SyntaxKind::ObjectBindingPattern | SyntaxKind::ArrayBindingPattern
+                );
+            }
+        }
+        return false;
+    }
+    // The shorthand name in an object literal used as a destructuring
+    // assignment target — `for ({ b } of xs)`, `({ b } = o)` — is likewise a
+    // write, not a read.
+    if parent.kind == SyntaxKind::ShorthandPropertyAssignment {
+        if let crate::ast::NodeData::ShorthandPropertyAssignment(sa) = &parent.data {
+            let name_is_node =
+                std::ptr::eq(sa.name.as_ref() as *const Node, node.as_ref() as *const Node);
+            let literal = parent.parent.as_ref();
+            if name_is_node
+                && literal.is_some_and(|lit| {
+                    lit.kind == SyntaxKind::ObjectLiteralExpression
+                        && object_literal_is_destructuring_target(lit)
+                })
+            {
+                return true;
+            }
+        }
+        return false;
+    }
     if parent.kind != SyntaxKind::BinaryExpression {
         return false;
     }

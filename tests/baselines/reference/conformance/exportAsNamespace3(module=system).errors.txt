@@ -1,0 +1,4 @@
+1.ts(2,1): error TS2448: Block-scoped variable 'ns' used before its declaration.
+1.ts(2,1): error TS2454: Variable 'ns' is used before being assigned.
+1.ts(3,1): error TS2448: Block-scoped variable 'ns' used before its declaration.
+1.ts(3,1): error TS2454: Variable 'ns' is used before being assigned.

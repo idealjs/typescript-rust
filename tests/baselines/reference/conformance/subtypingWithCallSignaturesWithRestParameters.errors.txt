@@ -1,0 +1,13 @@
+subtypingWithCallSignaturesWithRestParameters.ts(18,11): error TS2430: Interface 'I1C' incorrectly extends interface 'Base'.
+subtypingWithCallSignaturesWithRestParameters.ts(34,11): error TS2430: Interface 'I3B' incorrectly extends interface 'Base'.
+subtypingWithCallSignaturesWithRestParameters.ts(60,11): error TS2430: Interface 'I6C' incorrectly extends interface 'Base'.
+subtypingWithCallSignaturesWithRestParameters.ts(86,11): error TS2430: Interface 'I10' incorrectly extends interface 'Base'.
+subtypingWithCallSignaturesWithRestParameters.ts(90,11): error TS2430: Interface 'I10B' incorrectly extends interface 'Base'.
+subtypingWithCallSignaturesWithRestParameters.ts(94,11): error TS2430: Interface 'I10C' incorrectly extends interface 'Base'.
+subtypingWithCallSignaturesWithRestParameters.ts(98,11): error TS2430: Interface 'I10D' incorrectly extends interface 'Base'.
+subtypingWithCallSignaturesWithRestParameters.ts(102,11): error TS2430: Interface 'I10E' incorrectly extends interface 'Base'.
+subtypingWithCallSignaturesWithRestParameters.ts(110,11): error TS2430: Interface 'I12' incorrectly extends interface 'Base'.
+subtypingWithCallSignaturesWithRestParameters.ts(114,11): error TS2430: Interface 'I13' incorrectly extends interface 'Base'.
+subtypingWithCallSignaturesWithRestParameters.ts(118,11): error TS2430: Interface 'I14' incorrectly extends interface 'Base'.
+subtypingWithCallSignaturesWithRestParameters.ts(126,11): error TS2430: Interface 'I16' incorrectly extends interface 'Base'.
+subtypingWithCallSignaturesWithRestParameters.ts(130,11): error TS2430: Interface 'I17' incorrectly extends interface 'Base'.

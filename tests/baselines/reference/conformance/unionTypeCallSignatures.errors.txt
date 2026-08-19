@@ -1,0 +1,28 @@
+unionTypeCallSignatures.ts(9,1): error TS2322: Type 'number | Date' is not assignable to type 'string | boolean'.
+unionTypeCallSignatures.ts(9,43): error TS2345: Argument of type 'string' is not assignable to parameter of type 'number'.
+unionTypeCallSignatures.ts(10,29): error TS2769: No overload matches this call.
+unionTypeCallSignatures.ts(15,29): error TS2769: No overload matches this call.
+unionTypeCallSignatures.ts(16,1): error TS2554: Expected 1 arguments, but got 0.
+unionTypeCallSignatures.ts(19,32): error TS2345: Argument of type '10' is not assignable to parameter of type 'never'.
+unionTypeCallSignatures.ts(20,32): error TS2345: Argument of type '"hello"' is not assignable to parameter of type 'never'.
+unionTypeCallSignatures.ts(21,1): error TS2554: Expected 1 arguments, but got 0.
+unionTypeCallSignatures.ts(24,1): error TS2554: Expected 1 arguments, but got 0.
+unionTypeCallSignatures.ts(26,36): error TS2345: Argument of type 'string' is not assignable to parameter of type 'number'.
+unionTypeCallSignatures.ts(29,1): error TS2554: Expected 2 arguments, but got 0.
+unionTypeCallSignatures.ts(30,1): error TS2554: Expected 2 arguments, but got 1.
+unionTypeCallSignatures.ts(36,49): error TS2345: Argument of type 'string' is not assignable to parameter of type 'number'.
+unionTypeCallSignatures.ts(37,12): error TS2554: Expected 1-2 arguments, but got 0.
+unionTypeCallSignatures.ts(40,12): error TS2554: Expected 2 arguments, but got 1.
+unionTypeCallSignatures.ts(42,49): error TS2345: Argument of type 'string' is not assignable to parameter of type 'number'.
+unionTypeCallSignatures.ts(43,12): error TS2554: Expected 2 arguments, but got 0.
+unionTypeCallSignatures.ts(48,49): error TS2345: Argument of type 'string' is not assignable to parameter of type 'number'.
+unionTypeCallSignatures.ts(49,12): error TS2554: Expected 1-2 arguments, but got 0.
+unionTypeCallSignatures.ts(55,45): error TS2345: Argument of type 'string' is not assignable to parameter of type 'number'.
+unionTypeCallSignatures.ts(56,12): error TS2555: Expected at least 1 arguments, but got 0.
+unionTypeCallSignatures.ts(59,12): error TS2554: Expected 2 arguments, but got 1.
+unionTypeCallSignatures.ts(61,49): error TS2554: Expected 2 arguments, but got 3.
+unionTypeCallSignatures.ts(62,45): error TS2345: Argument of type 'string' is not assignable to parameter of type 'number'.
+unionTypeCallSignatures.ts(63,12): error TS2554: Expected 2 arguments, but got 0.
+unionTypeCallSignatures.ts(69,45): error TS2345: Argument of type 'string' is not assignable to parameter of type 'number'.
+unionTypeCallSignatures.ts(70,12): error TS2555: Expected at least 1 arguments, but got 0.
+unionTypeCallSignatures.ts(73,12): error TS2554: Expected 2 arguments, but got 1.

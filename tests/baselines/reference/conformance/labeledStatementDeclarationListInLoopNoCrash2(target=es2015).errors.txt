@@ -1,0 +1,1 @@
+labeledStatementDeclarationListInLoopNoCrash2.ts(3,3): error TS1344: A label is not allowed here.

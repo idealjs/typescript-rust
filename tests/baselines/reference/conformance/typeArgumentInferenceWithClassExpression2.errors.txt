@@ -1,0 +1,4 @@
+typeArgumentInferenceWithClassExpression2.ts(1,29): error TS2564: Property 'prop' has no initializer and is not definitely assigned in the constructor.
+typeArgumentInferenceWithClassExpression2.ts(2,5): error TS2322: Type 'undefined' is not assignable to type 'T'.
+typeArgumentInferenceWithClassExpression2.ts(6,1): error TS2571: Object is of type 'unknown'.
+typeArgumentInferenceWithClassExpression2.ts(6,5): error TS2345: Argument of type 'typeof (Anonymous class)' is not assignable to parameter of type 'typeof (Anonymous class)'.

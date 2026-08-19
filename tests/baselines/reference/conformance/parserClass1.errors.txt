@@ -1,0 +1,1 @@
+parserClass1.ts(1,40): error TS2304: Cannot find name 'ILogger'.

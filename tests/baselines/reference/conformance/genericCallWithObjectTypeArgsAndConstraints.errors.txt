@@ -1,0 +1,6 @@
+genericCallWithObjectTypeArgsAndConstraints.ts(5,5): error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
+genericCallWithObjectTypeArgsAndConstraints.ts(9,5): error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
+genericCallWithObjectTypeArgsAndConstraints.ts(10,5): error TS2564: Property 'y' has no initializer and is not definitely assigned in the constructor.
+genericCallWithObjectTypeArgsAndConstraints.ts(14,5): error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
+genericCallWithObjectTypeArgsAndConstraints.ts(19,12): error TS2454: Variable 'x' is used before being assigned.
+genericCallWithObjectTypeArgsAndConstraints.ts(29,12): error TS2454: Variable 'x' is used before being assigned.

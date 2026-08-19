@@ -1,0 +1,19 @@
+intersectionAndUnionTypes.ts(17,5): error TS2454: Variable 'anb' is used before being assigned.
+intersectionAndUnionTypes.ts(18,5): error TS2454: Variable 'anb' is used before being assigned.
+intersectionAndUnionTypes.ts(19,1): error TS2322: Type 'A' is not assignable to type 'A & B'.
+intersectionAndUnionTypes.ts(20,1): error TS2322: Type 'B' is not assignable to type 'A & B'.
+intersectionAndUnionTypes.ts(23,1): error TS2322: Type 'A | B' is not assignable to type '(A & B) | (C & D)'.
+intersectionAndUnionTypes.ts(23,5): error TS2454: Variable 'aob' is used before being assigned.
+intersectionAndUnionTypes.ts(24,5): error TS2454: Variable 'cnd' is used before being assigned.
+intersectionAndUnionTypes.ts(25,1): error TS2322: Type 'C | D' is not assignable to type '(A & B) | (C & D)'.
+intersectionAndUnionTypes.ts(25,5): error TS2454: Variable 'cod' is used before being assigned.
+intersectionAndUnionTypes.ts(26,1): error TS2322: Type '(A & B) | (C & D)' is not assignable to type 'A & B'.
+intersectionAndUnionTypes.ts(27,1): error TS2322: Type '(A & B) | (C & D)' is not assignable to type 'A | B'.
+intersectionAndUnionTypes.ts(28,1): error TS2322: Type '(A & B) | (C & D)' is not assignable to type 'C & D'.
+intersectionAndUnionTypes.ts(29,1): error TS2322: Type '(A & B) | (C & D)' is not assignable to type 'C | D'.
+intersectionAndUnionTypes.ts(31,1): error TS2322: Type 'A & B' is not assignable to type '(A | B) & (C | D)'.
+intersectionAndUnionTypes.ts(32,1): error TS2322: Type 'A | B' is not assignable to type '(A | B) & (C | D)'.
+intersectionAndUnionTypes.ts(33,1): error TS2322: Type 'C & D' is not assignable to type '(A | B) & (C | D)'.
+intersectionAndUnionTypes.ts(34,1): error TS2322: Type 'C | D' is not assignable to type '(A | B) & (C | D)'.
+intersectionAndUnionTypes.ts(35,1): error TS2322: Type '(A | B) & (C | D)' is not assignable to type 'A & B'.
+intersectionAndUnionTypes.ts(37,1): error TS2322: Type '(A | B) & (C | D)' is not assignable to type 'C & D'.

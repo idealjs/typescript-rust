@@ -1,0 +1,10 @@
+bestCommonTypeOfConditionalExpressions.ts(7,14): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
+bestCommonTypeOfConditionalExpressions.ts(8,30): error TS2564: Property 'bar' has no initializer and is not definitely assigned in the constructor.
+bestCommonTypeOfConditionalExpressions.ts(9,31): error TS2564: Property 'baz' has no initializer and is not definitely assigned in the constructor.
+bestCommonTypeOfConditionalExpressions.ts(16,17): error TS2454: Variable 'a' is used before being assigned.
+bestCommonTypeOfConditionalExpressions.ts(17,17): error TS2454: Variable 'b' is used before being assigned.
+bestCommonTypeOfConditionalExpressions.ts(19,5): error TS2322: Type '((x: number) => void) | ((x: Object) => void)' is not assignable to type '(x: Object) => void'.
+bestCommonTypeOfConditionalExpressions.ts(21,24): error TS2454: Variable 'derived' is used before being assigned.
+bestCommonTypeOfConditionalExpressions.ts(22,18): error TS2454: Variable 'base' is used before being assigned.
+bestCommonTypeOfConditionalExpressions.ts(25,19): error TS2322: Type 'T' is not assignable to type 'Object'.
+bestCommonTypeOfConditionalExpressions.ts(25,23): error TS2322: Type 'U' is not assignable to type 'Object'.

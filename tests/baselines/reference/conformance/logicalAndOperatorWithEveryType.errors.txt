@@ -1,0 +1,30 @@
+logicalAndOperatorWithEveryType.ts(19,11): error TS1345: An expression of type 'void' cannot be tested for truthiness.
+logicalAndOperatorWithEveryType.ts(23,11): error TS2873: This kind of expression is always falsy.
+logicalAndOperatorWithEveryType.ts(24,12): error TS2873: This kind of expression is always falsy.
+logicalAndOperatorWithEveryType.ts(30,11): error TS1345: An expression of type 'void' cannot be tested for truthiness.
+logicalAndOperatorWithEveryType.ts(34,11): error TS2873: This kind of expression is always falsy.
+logicalAndOperatorWithEveryType.ts(35,12): error TS2873: This kind of expression is always falsy.
+logicalAndOperatorWithEveryType.ts(41,11): error TS1345: An expression of type 'void' cannot be tested for truthiness.
+logicalAndOperatorWithEveryType.ts(45,11): error TS2873: This kind of expression is always falsy.
+logicalAndOperatorWithEveryType.ts(46,12): error TS2873: This kind of expression is always falsy.
+logicalAndOperatorWithEveryType.ts(52,11): error TS1345: An expression of type 'void' cannot be tested for truthiness.
+logicalAndOperatorWithEveryType.ts(56,11): error TS2873: This kind of expression is always falsy.
+logicalAndOperatorWithEveryType.ts(57,12): error TS2873: This kind of expression is always falsy.
+logicalAndOperatorWithEveryType.ts(63,11): error TS1345: An expression of type 'void' cannot be tested for truthiness.
+logicalAndOperatorWithEveryType.ts(67,11): error TS2873: This kind of expression is always falsy.
+logicalAndOperatorWithEveryType.ts(68,12): error TS2873: This kind of expression is always falsy.
+logicalAndOperatorWithEveryType.ts(74,11): error TS1345: An expression of type 'void' cannot be tested for truthiness.
+logicalAndOperatorWithEveryType.ts(78,11): error TS2873: This kind of expression is always falsy.
+logicalAndOperatorWithEveryType.ts(79,12): error TS2873: This kind of expression is always falsy.
+logicalAndOperatorWithEveryType.ts(85,11): error TS1345: An expression of type 'void' cannot be tested for truthiness.
+logicalAndOperatorWithEveryType.ts(89,11): error TS2873: This kind of expression is always falsy.
+logicalAndOperatorWithEveryType.ts(90,12): error TS2873: This kind of expression is always falsy.
+logicalAndOperatorWithEveryType.ts(96,11): error TS1345: An expression of type 'void' cannot be tested for truthiness.
+logicalAndOperatorWithEveryType.ts(100,11): error TS2873: This kind of expression is always falsy.
+logicalAndOperatorWithEveryType.ts(101,12): error TS2873: This kind of expression is always falsy.
+logicalAndOperatorWithEveryType.ts(107,11): error TS1345: An expression of type 'void' cannot be tested for truthiness.
+logicalAndOperatorWithEveryType.ts(111,11): error TS2873: This kind of expression is always falsy.
+logicalAndOperatorWithEveryType.ts(112,12): error TS2873: This kind of expression is always falsy.
+logicalAndOperatorWithEveryType.ts(118,11): error TS1345: An expression of type 'void' cannot be tested for truthiness.
+logicalAndOperatorWithEveryType.ts(122,11): error TS2873: This kind of expression is always falsy.
+logicalAndOperatorWithEveryType.ts(123,12): error TS2873: This kind of expression is always falsy.

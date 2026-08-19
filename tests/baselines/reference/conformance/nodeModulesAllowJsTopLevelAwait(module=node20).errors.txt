@@ -1,0 +1,2 @@
+subfolder/index.js(2,11): error TS1309: The current file is a CommonJS module and cannot use 'await' at the top level.
+subfolder/index.js(4,5): error TS1309: The current file is a CommonJS module and cannot use 'await' at the top level.

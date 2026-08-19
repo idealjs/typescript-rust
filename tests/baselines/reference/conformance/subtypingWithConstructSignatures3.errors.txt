@@ -1,0 +1,48 @@
+subtypingWithConstructSignatures3.ts(5,18): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
+subtypingWithConstructSignatures3.ts(6,34): error TS2564: Property 'bar' has no initializer and is not definitely assigned in the constructor.
+subtypingWithConstructSignatures3.ts(7,38): error TS2564: Property 'baz' has no initializer and is not definitely assigned in the constructor.
+subtypingWithConstructSignatures3.ts(8,39): error TS2564: Property 'bing' has no initializer and is not definitely assigned in the constructor.
+subtypingWithConstructSignatures3.ts(58,19): error TS2454: Variable 'r1arg1' is used before being assigned.
+subtypingWithConstructSignatures3.ts(59,16): error TS2454: Variable 'r1arg2' is used before being assigned.
+subtypingWithConstructSignatures3.ts(59,24): error TS2454: Variable 'r1arg1' is used before being assigned.
+subtypingWithConstructSignatures3.ts(60,16): error TS2454: Variable 'r1arg1' is used before being assigned.
+subtypingWithConstructSignatures3.ts(60,24): error TS2454: Variable 'r1arg2' is used before being assigned.
+subtypingWithConstructSignatures3.ts(64,19): error TS2454: Variable 'r2arg1' is used before being assigned.
+subtypingWithConstructSignatures3.ts(65,16): error TS2454: Variable 'r2arg2' is used before being assigned.
+subtypingWithConstructSignatures3.ts(65,24): error TS2454: Variable 'r2arg1' is used before being assigned.
+subtypingWithConstructSignatures3.ts(66,16): error TS2454: Variable 'r2arg1' is used before being assigned.
+subtypingWithConstructSignatures3.ts(66,24): error TS2454: Variable 'r2arg2' is used before being assigned.
+subtypingWithConstructSignatures3.ts(70,19): error TS2454: Variable 'r3arg1' is used before being assigned.
+subtypingWithConstructSignatures3.ts(71,16): error TS2454: Variable 'r3arg2' is used before being assigned.
+subtypingWithConstructSignatures3.ts(71,24): error TS2454: Variable 'r3arg1' is used before being assigned.
+subtypingWithConstructSignatures3.ts(72,16): error TS2454: Variable 'r3arg1' is used before being assigned.
+subtypingWithConstructSignatures3.ts(72,24): error TS2454: Variable 'r3arg2' is used before being assigned.
+subtypingWithConstructSignatures3.ts(76,20): error TS2454: Variable 'r4arg1' is used before being assigned.
+subtypingWithConstructSignatures3.ts(77,16): error TS2454: Variable 'r4arg2' is used before being assigned.
+subtypingWithConstructSignatures3.ts(77,24): error TS2454: Variable 'r4arg1' is used before being assigned.
+subtypingWithConstructSignatures3.ts(78,16): error TS2454: Variable 'r4arg1' is used before being assigned.
+subtypingWithConstructSignatures3.ts(78,24): error TS2454: Variable 'r4arg2' is used before being assigned.
+subtypingWithConstructSignatures3.ts(82,20): error TS2454: Variable 'r5arg1' is used before being assigned.
+subtypingWithConstructSignatures3.ts(83,16): error TS2454: Variable 'r5arg2' is used before being assigned.
+subtypingWithConstructSignatures3.ts(83,24): error TS2454: Variable 'r5arg1' is used before being assigned.
+subtypingWithConstructSignatures3.ts(84,16): error TS2454: Variable 'r5arg1' is used before being assigned.
+subtypingWithConstructSignatures3.ts(84,24): error TS2454: Variable 'r5arg2' is used before being assigned.
+subtypingWithConstructSignatures3.ts(88,20): error TS2454: Variable 'r6arg1' is used before being assigned.
+subtypingWithConstructSignatures3.ts(89,16): error TS2454: Variable 'r6arg2' is used before being assigned.
+subtypingWithConstructSignatures3.ts(89,24): error TS2454: Variable 'r6arg1' is used before being assigned.
+subtypingWithConstructSignatures3.ts(90,16): error TS2454: Variable 'r6arg1' is used before being assigned.
+subtypingWithConstructSignatures3.ts(90,24): error TS2454: Variable 'r6arg2' is used before being assigned.
+subtypingWithConstructSignatures3.ts(94,20): error TS2454: Variable 'r7arg1' is used before being assigned.
+subtypingWithConstructSignatures3.ts(95,16): error TS2454: Variable 'r7arg2' is used before being assigned.
+subtypingWithConstructSignatures3.ts(95,24): error TS2454: Variable 'r7arg1' is used before being assigned.
+subtypingWithConstructSignatures3.ts(96,16): error TS2454: Variable 'r7arg1' is used before being assigned.
+subtypingWithConstructSignatures3.ts(96,24): error TS2454: Variable 'r7arg2' is used before being assigned.
+subtypingWithConstructSignatures3.ts(99,21): error TS2454: Variable 'r7arg3' is used before being assigned.
+subtypingWithConstructSignatures3.ts(100,16): error TS2454: Variable 'r7arg2' is used before being assigned.
+subtypingWithConstructSignatures3.ts(100,24): error TS2454: Variable 'r7arg3' is used before being assigned.
+subtypingWithConstructSignatures3.ts(101,16): error TS2454: Variable 'r7arg3' is used before being assigned.
+subtypingWithConstructSignatures3.ts(101,24): error TS2454: Variable 'r7arg2' is used before being assigned.
+subtypingWithConstructSignatures3.ts(104,20): error TS2454: Variable 'r8arg' is used before being assigned.
+subtypingWithConstructSignatures3.ts(107,20): error TS2454: Variable 'r9arg' is used before being assigned.
+subtypingWithConstructSignatures3.ts(114,19): error TS2454: Variable 'r2arg2' is used before being assigned.
+subtypingWithConstructSignatures3.ts(119,19): error TS2454: Variable 'r3arg2' is used before being assigned.

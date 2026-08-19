@@ -1,0 +1,10 @@
+classExtendingClass.ts(2,5): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
+classExtendingClass.ts(8,5): error TS2564: Property 'bar' has no initializer and is not definitely assigned in the constructor.
+classExtendingClass.ts(12,9): error TS2454: Variable 'd' is used before being assigned.
+classExtendingClass.ts(13,10): error TS2454: Variable 'd' is used before being assigned.
+classExtendingClass.ts(14,10): error TS2454: Variable 'd' is used before being assigned.
+classExtendingClass.ts(18,5): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
+classExtendingClass.ts(24,5): error TS2564: Property 'bar' has no initializer and is not definitely assigned in the constructor.
+classExtendingClass.ts(28,10): error TS2454: Variable 'd2' is used before being assigned.
+classExtendingClass.ts(29,10): error TS2454: Variable 'd2' is used before being assigned.
+classExtendingClass.ts(30,10): error TS2454: Variable 'd2' is used before being assigned.

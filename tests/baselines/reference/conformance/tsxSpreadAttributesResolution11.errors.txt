@@ -1,0 +1,3 @@
+file.tsx(30,25): error TS2783: 'x' is specified more than once, so this usage will be overwritten.
+file.tsx(31,25): error TS2783: 'overwrite' is specified more than once, so this usage will be overwritten.
+file.tsx(31,50): error TS2783: 'x' is specified more than once, so this usage will be overwritten.

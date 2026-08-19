@@ -1,0 +1,2 @@
+parserES5ComputedPropertyName9.ts(2,5): error TS2304: Cannot find name 'e'.
+parserES5ComputedPropertyName9.ts(2,9): error TS2304: Cannot find name 'Type'.

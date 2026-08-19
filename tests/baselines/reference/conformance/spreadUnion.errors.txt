@@ -1,0 +1,4 @@
+spreadUnion.ts(4,16): error TS2454: Variable 'union' is used before being assigned.
+spreadUnion.ts(7,16): error TS2454: Variable 'union' is used before being assigned.
+spreadUnion.ts(10,16): error TS2454: Variable 'union' is used before being assigned.
+spreadUnion.ts(10,26): error TS2454: Variable 'union' is used before being assigned.

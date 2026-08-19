@@ -1,0 +1,3 @@
+npm-install.js(4,49): error TS7006: Parameter 'next' implicitly has an 'any' type.
+npm-install.js(6,6): error TS7006: Parameter 'args' implicitly has an 'any' type.
+npm-install.js(7,9): error TS2322: Type 'string' is not assignable to type 'number'.

@@ -1,0 +1,1 @@
+stringLiteralsWithSwitchStatements01.ts(7,10): error TS2678: Type '"bar"' is not comparable to type '"foo"'.

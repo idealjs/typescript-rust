@@ -1,0 +1,15 @@
+constraintSatisfactionWithAny.ts(3,43): error TS2322: Type 'null' is not assignable to type 'T'.
+constraintSatisfactionWithAny.ts(4,51): error TS2322: Type 'null' is not assignable to type 'T'.
+constraintSatisfactionWithAny.ts(6,55): error TS2322: Type 'null' is not assignable to type 'T'.
+constraintSatisfactionWithAny.ts(8,5): error TS2345: Argument of type 'undefined' is not assignable to parameter of type 'String'.
+constraintSatisfactionWithAny.ts(9,6): error TS2345: Argument of type 'undefined' is not assignable to parameter of type '{ x: number; }'.
+constraintSatisfactionWithAny.ts(11,6): error TS2345: Argument of type 'undefined' is not assignable to parameter of type '<T>(x: T) => void'.
+constraintSatisfactionWithAny.ts(14,10): error TS2454: Variable 'b' is used before being assigned.
+constraintSatisfactionWithAny.ts(15,11): error TS2454: Variable 'b' is used before being assigned.
+constraintSatisfactionWithAny.ts(17,11): error TS2454: Variable 'b' is used before being assigned.
+constraintSatisfactionWithAny.ts(27,16): error TS2345: Argument of type 'undefined' is not assignable to parameter of type 'String'.
+constraintSatisfactionWithAny.ts(28,21): error TS2454: Variable 'b' is used before being assigned.
+constraintSatisfactionWithAny.ts(34,17): error TS2345: Argument of type 'undefined' is not assignable to parameter of type '{ x: number; }'.
+constraintSatisfactionWithAny.ts(35,22): error TS2454: Variable 'b' is used before being assigned.
+constraintSatisfactionWithAny.ts(48,17): error TS2345: Argument of type 'undefined' is not assignable to parameter of type '<T>(x: T) => T'.
+constraintSatisfactionWithAny.ts(49,22): error TS2454: Variable 'b' is used before being assigned.

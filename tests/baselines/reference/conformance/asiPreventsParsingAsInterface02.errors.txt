@@ -1,0 +1,2 @@
+asiPreventsParsingAsInterface02.ts(1,12): error TS1212: Identifier expected. 'interface' is a reserved word in strict mode.
+asiPreventsParsingAsInterface02.ts(2,5): error TS1212: Identifier expected. 'interface' is a reserved word in strict mode.

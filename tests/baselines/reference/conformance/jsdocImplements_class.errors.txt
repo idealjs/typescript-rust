@@ -1,0 +1,2 @@
+/a.js(13,5): error TS2416: Property 'method' in type 'B2' is not assignable to the same property in base type 'A'.
+/a.js(17,7): error TS2720: Class 'B3' incorrectly implements class 'A'. Did you mean to extend 'A' and inherit its members as a subclass?

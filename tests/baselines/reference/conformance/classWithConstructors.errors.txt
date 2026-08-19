@@ -1,0 +1,6 @@
+classWithConstructors.ts(6,13): error TS2554: Expected 1 arguments, but got 0.
+classWithConstructors.ts(15,14): error TS2554: Expected 1 arguments, but got 0.
+classWithConstructors.ts(21,13): error TS2554: Expected 1 arguments, but got 0.
+classWithConstructors.ts(31,13): error TS2554: Expected 1 arguments, but got 0.
+classWithConstructors.ts(40,14): error TS2554: Expected 1-2 arguments, but got 0.
+classWithConstructors.ts(46,13): error TS2554: Expected 1-2 arguments, but got 0.

@@ -1,0 +1,1 @@
+app.tsx(8,8): error TS2604: JSX element type 'this' does not have any construct or call signatures.

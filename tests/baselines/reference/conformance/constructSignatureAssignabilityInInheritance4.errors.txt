@@ -1,0 +1,4 @@
+constructSignatureAssignabilityInInheritance4.ts(3,14): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
+constructSignatureAssignabilityInInheritance4.ts(4,30): error TS2564: Property 'bar' has no initializer and is not definitely assigned in the constructor.
+constructSignatureAssignabilityInInheritance4.ts(5,34): error TS2564: Property 'baz' has no initializer and is not definitely assigned in the constructor.
+constructSignatureAssignabilityInInheritance4.ts(6,35): error TS2564: Property 'bing' has no initializer and is not definitely assigned in the constructor.

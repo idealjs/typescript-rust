@@ -1,0 +1,2 @@
+contextuallyTypeCommaOperator02.ts(3,1): error TS2322: Type '(a: string) => number' is not assignable to type '(a: string) => string'.
+contextuallyTypeCommaOperator02.ts(4,11): error TS2322: Type 'string' is not assignable to type 'number'.

@@ -1,0 +1,1 @@
+arbitraryModuleNamespaceIdentifiers_exportEmpty.ts(6,7): error TS2322: Type '"empty"' is not assignable to type '"type error expected here"'.

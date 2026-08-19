@@ -1,0 +1,3 @@
+parserX_ArrowFunction3.ts(1,10): error TS2304: Cannot find name 'a'.
+parserX_ArrowFunction3.ts(1,12): error TS1005: ',' expected.
+parserX_ArrowFunction3.ts(1,14): error TS1005: ';' expected.

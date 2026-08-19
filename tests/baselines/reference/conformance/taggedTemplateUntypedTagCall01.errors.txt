@@ -1,0 +1,1 @@
+taggedTemplateUntypedTagCall01.ts(2,1): error TS2454: Variable 'tag' is used before being assigned.

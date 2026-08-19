@@ -1,0 +1,1 @@
+inferTypesInvalidExtendsDeclaration.ts(1,42): error TS2304: Cannot find name 'B'.

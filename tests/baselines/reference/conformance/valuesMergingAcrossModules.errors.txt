@@ -1,0 +1,2 @@
+c.ts(1,10): error TS2440: Import declaration conflicts with local declaration of 'A'.
+c.ts(6,1): error TS2349: This expression is not callable.

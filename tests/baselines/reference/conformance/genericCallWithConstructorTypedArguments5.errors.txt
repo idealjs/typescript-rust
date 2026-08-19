@@ -1,0 +1,4 @@
+genericCallWithConstructorTypedArguments5.ts(4,23): error TS2345: Argument of type 'null' is not assignable to parameter of type 'T'.
+genericCallWithConstructorTypedArguments5.ts(11,14): error TS2345: Argument of type '{ cb: new <T>(x: T, y: T) => string; }' is not assignable to parameter of type '{ cb: new (t: unknown) => string; }'.
+genericCallWithConstructorTypedArguments5.ts(13,14): error TS2345: Argument of type '{ cb: new (x: string, y: number) => string; }' is not assignable to parameter of type '{ cb: new (t: string) => string; }'.
+genericCallWithConstructorTypedArguments5.ts(16,23): error TS2345: Argument of type 'null' is not assignable to parameter of type 'T'.

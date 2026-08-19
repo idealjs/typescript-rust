@@ -1,0 +1,2 @@
+multipleExportDefault1.ts(1,25): error TS2528: A module cannot have multiple default exports.
+multipleExportDefault1.ts(5,1): error TS2528: A module cannot have multiple default exports.

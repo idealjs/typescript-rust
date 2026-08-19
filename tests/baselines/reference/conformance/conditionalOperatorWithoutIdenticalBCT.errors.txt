@@ -1,0 +1,9 @@
+conditionalOperatorWithoutIdenticalBCT.ts(2,27): error TS2564: Property 'propertyX1' has no initializer and is not definitely assigned in the constructor.
+conditionalOperatorWithoutIdenticalBCT.ts(2,47): error TS2564: Property 'propertyX2' has no initializer and is not definitely assigned in the constructor.
+conditionalOperatorWithoutIdenticalBCT.ts(3,21): error TS2564: Property 'propertyA' has no initializer and is not definitely assigned in the constructor.
+conditionalOperatorWithoutIdenticalBCT.ts(4,21): error TS2564: Property 'propertyB' has no initializer and is not definitely assigned in the constructor.
+conditionalOperatorWithoutIdenticalBCT.ts(15,5): error TS2322: Type 'A | B' is not assignable to type 'A'.
+conditionalOperatorWithoutIdenticalBCT.ts(16,5): error TS2322: Type 'A | B' is not assignable to type 'B'.
+conditionalOperatorWithoutIdenticalBCT.ts(19,5): error TS2322: Type '((m: X) => number) | ((n: X) => string)' is not assignable to type '(t: X) => number'.
+conditionalOperatorWithoutIdenticalBCT.ts(20,5): error TS2322: Type '((m: X) => number) | ((n: X) => string)' is not assignable to type '(t: X) => string'.
+conditionalOperatorWithoutIdenticalBCT.ts(21,5): error TS2322: Type '((m: X) => number) | ((n: X) => string)' is not assignable to type '(t: X) => boolean'.

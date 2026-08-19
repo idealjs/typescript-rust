@@ -1,0 +1,1 @@
+/src/a.js(1,29): error TS8037: Type satisfaction expressions can only be used in TypeScript files.

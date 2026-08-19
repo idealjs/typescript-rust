@@ -1,0 +1,11 @@
+assignmentCompatWithCallSignaturesWithRestParameters.ts(13,5): error TS2322: Type '(...args: string[]) => number' is not assignable to type '(...args: number[]) => number'.
+assignmentCompatWithCallSignaturesWithRestParameters.ts(17,5): error TS2322: Type '(x?: string) => number' is not assignable to type '(...args: number[]) => number'.
+assignmentCompatWithCallSignaturesWithRestParameters.ts(26,5): error TS2322: Type '(x: number, ...args: string[]) => number' is not assignable to type '(x: number, ...z: number[]) => number'.
+assignmentCompatWithCallSignaturesWithRestParameters.ts(34,5): error TS2322: Type '(x: number, y: string) => number' is not assignable to type '(x: number, y?: string | undefined, ...z: number[]) => number'.
+assignmentCompatWithCallSignaturesWithRestParameters.ts(35,5): error TS2322: Type '(x: number, y?: number, z?: number) => number' is not assignable to type '(x: number, y?: string | undefined, ...z: number[]) => number'.
+assignmentCompatWithCallSignaturesWithRestParameters.ts(36,5): error TS2322: Type '(x: number, ...z: number[]) => number' is not assignable to type '(x: number, y?: string | undefined, ...z: number[]) => number'.
+assignmentCompatWithCallSignaturesWithRestParameters.ts(37,5): error TS2322: Type '(x: string, y?: string, z?: string) => number' is not assignable to type '(x: number, y?: string | undefined, ...z: number[]) => number'.
+assignmentCompatWithCallSignaturesWithRestParameters.ts(41,5): error TS2322: Type '(x?: number, y?: number) => number' is not assignable to type '(x?: number | undefined, y?: string | undefined, ...z: number[]) => number'.
+assignmentCompatWithCallSignaturesWithRestParameters.ts(42,5): error TS2322: Type '(x: number) => number' is not assignable to type '(x?: number | undefined, y?: string | undefined, ...z: number[]) => number'.
+assignmentCompatWithCallSignaturesWithRestParameters.ts(43,5): error TS2322: Type '(x: number, y?: number) => number' is not assignable to type '(x?: number | undefined, y?: string | undefined, ...z: number[]) => number'.
+assignmentCompatWithCallSignaturesWithRestParameters.ts(45,5): error TS2322: Type '(x: number, ...args: string[]) => number' is not assignable to type '(x?: number | undefined, y?: string | undefined, ...z: number[]) => number'.

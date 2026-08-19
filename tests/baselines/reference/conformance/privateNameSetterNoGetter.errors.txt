@@ -1,0 +1,1 @@
+privateNameSetterNoGetter.ts(4,9): error TS2806: Private accessor was defined without a getter.

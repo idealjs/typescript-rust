@@ -1,0 +1,7 @@
+twoMergedInterfacesWithDifferingOverloads2.ts(11,9): error TS2454: Variable 'a' is used before being assigned.
+twoMergedInterfacesWithDifferingOverloads2.ts(12,10): error TS2454: Variable 'a' is used before being assigned.
+twoMergedInterfacesWithDifferingOverloads2.ts(13,10): error TS2454: Variable 'a' is used before being assigned.
+twoMergedInterfacesWithDifferingOverloads2.ts(27,13): error TS2454: Variable 'a' is used before being assigned.
+twoMergedInterfacesWithDifferingOverloads2.ts(28,14): error TS2454: Variable 'a' is used before being assigned.
+twoMergedInterfacesWithDifferingOverloads2.ts(29,14): error TS2454: Variable 'a' is used before being assigned.
+twoMergedInterfacesWithDifferingOverloads2.ts(30,14): error TS2454: Variable 'a' is used before being assigned.

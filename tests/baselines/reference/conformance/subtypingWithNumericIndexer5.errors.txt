@@ -1,0 +1,4 @@
+subtypingWithNumericIndexer5.ts(11,7): error TS2420: Class 'B' incorrectly implements interface 'A'.
+subtypingWithNumericIndexer5.ts(32,11): error TS2420: Class 'B3<T>' incorrectly implements interface 'A<T>'.
+subtypingWithNumericIndexer5.ts(36,11): error TS2420: Class 'B4<T>' incorrectly implements interface 'A<T>'.
+subtypingWithNumericIndexer5.ts(40,11): error TS2420: Class 'B5<T>' incorrectly implements interface 'A<T>'.

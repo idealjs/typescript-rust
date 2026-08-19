@@ -1,0 +1,2 @@
+spreadDuplicate.ts(10,12): error TS2783: 'a' is specified more than once, so this usage will be overwritten.
+spreadDuplicate.ts(12,12): error TS2783: 'a' is specified more than once, so this usage will be overwritten.

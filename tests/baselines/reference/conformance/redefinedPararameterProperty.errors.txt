@@ -1,0 +1,1 @@
+redefinedPararameterProperty.ts(6,14): error TS2729: Property 'a' is used before its initialization.

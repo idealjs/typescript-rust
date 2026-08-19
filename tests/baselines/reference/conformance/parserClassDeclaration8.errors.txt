@@ -1,0 +1,1 @@
+parserClassDeclaration8.ts(2,3): error TS2390: Constructor implementation is missing.

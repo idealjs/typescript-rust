@@ -1,0 +1,1 @@
+interfaceWithConstructSignaturesThatHidesBaseSignature2.ts(10,13): error TS2454: Variable 'd' is used before being assigned.

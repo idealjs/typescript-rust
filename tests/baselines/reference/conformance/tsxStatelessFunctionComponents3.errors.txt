@@ -1,0 +1,1 @@
+file.tsx(15,37): error TS7008: Member 'children' implicitly has an 'any' type.

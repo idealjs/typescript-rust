@@ -1,0 +1,5 @@
+staticIndexSignature2.ts(6,1): error TS2542: Index signature in type 'typeof C' only permits reading.
+staticIndexSignature2.ts(7,1): error TS2542: Index signature in type 'typeof C' only permits reading.
+staticIndexSignature2.ts(9,1): error TS2542: Index signature in type 'typeof C' only permits reading.
+staticIndexSignature2.ts(10,1): error TS2322: Type '2' is not assignable to type '42'.
+staticIndexSignature2.ts(10,1): error TS2542: Index signature in type 'typeof C' only permits reading.

@@ -1,0 +1,2 @@
+thisTypeInAccessorsNegative.ts(10,11): error TS2784: 'get' and 'set' accessors cannot declare 'this' parameters.
+thisTypeInAccessorsNegative.ts(11,11): error TS2784: 'get' and 'set' accessors cannot declare 'this' parameters.

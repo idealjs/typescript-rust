@@ -1,0 +1,2 @@
+conditionalTypesExcessProperties.ts(8,5): error TS2322: Type '{ test: string; arg: A; }' is not assignable to type 'Something<A>'.
+conditionalTypesExcessProperties.ts(9,5): error TS2322: Type '{ test: string; arg: A; arr: A; }' is not assignable to type 'Something<A>'.

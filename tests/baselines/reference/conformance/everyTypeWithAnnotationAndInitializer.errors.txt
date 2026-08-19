@@ -1,0 +1,5 @@
+everyTypeWithAnnotationAndInitializer.ts(6,5): error TS2564: Property 'id' has no initializer and is not definitely assigned in the constructor.
+everyTypeWithAnnotationAndInitializer.ts(10,5): error TS2564: Property 'source' has no initializer and is not definitely assigned in the constructor.
+everyTypeWithAnnotationAndInitializer.ts(11,5): error TS2564: Property 'recurse' has no initializer and is not definitely assigned in the constructor.
+everyTypeWithAnnotationAndInitializer.ts(12,5): error TS2564: Property 'wrapped' has no initializer and is not definitely assigned in the constructor.
+everyTypeWithAnnotationAndInitializer.ts(19,9): error TS2564: Property 'name' has no initializer and is not definitely assigned in the constructor.

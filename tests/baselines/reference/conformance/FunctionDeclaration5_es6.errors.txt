@@ -1,0 +1,2 @@
+FunctionDeclaration5_es6.ts(1,14): error TS1212: Identifier expected. 'yield' is a reserved word in strict mode.
+FunctionDeclaration5_es6.ts(1,14): error TS7006: Parameter 'yield' implicitly has an 'any' type.

@@ -1,0 +1,1 @@
+/b.js(4,15): error TS8023: JSDoc '@augments A' does not match the 'extends B' clause.

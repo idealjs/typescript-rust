@@ -1,0 +1,4 @@
+file.tsx(21,23): error TS2322: Type '3' is not assignable to type '2'.
+file.tsx(22,25): error TS2322: Type 'string' is not assignable to type '2'.
+file.tsx(23,25): error TS2322: Type '3' is not assignable to type '2'.
+file.tsx(24,15): error TS2322: Type 'true' is not assignable to type '2'.

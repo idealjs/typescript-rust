@@ -1,0 +1,9 @@
+circularIndexedAccessErrors.ts(2,5): error TS2502: 'x' is referenced directly or indirectly in its own type annotation.
+circularIndexedAccessErrors.ts(11,11): error TS2589: Type instantiation is excessively deep and possibly infinite.
+circularIndexedAccessErrors.ts(18,5): error TS2502: 'x' is referenced directly or indirectly in its own type annotation.
+circularIndexedAccessErrors.ts(22,5): error TS2502: 'x' is referenced directly or indirectly in its own type annotation.
+circularIndexedAccessErrors.ts(26,5): error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
+circularIndexedAccessErrors.ts(27,5): error TS2564: Property 'y' has no initializer and is not definitely assigned in the constructor.
+circularIndexedAccessErrors.ts(28,5): error TS2564: Property 'z' has no initializer and is not definitely assigned in the constructor.
+circularIndexedAccessErrors.ts(37,24): error TS2313: Type parameter 'T' has a circular constraint.
+circularIndexedAccessErrors.ts(37,30): error TS2536: Type '"hello"' cannot be used to index type 'T'.

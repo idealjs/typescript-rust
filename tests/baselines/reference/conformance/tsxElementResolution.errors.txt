@@ -1,0 +1,2 @@
+tsxElementResolution.tsx(4,3): error TS7008: Member ''string_named'' implicitly has an 'any' type.
+tsxElementResolution.tsx(5,3): error TS7008: Member ''var'' implicitly has an 'any' type.

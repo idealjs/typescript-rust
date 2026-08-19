@@ -1,0 +1,2 @@
+contextualTypeWithUnionTypeCallSignatures.ts(33,54): error TS7006: Parameter 'a' implicitly has an 'any' type.
+contextualTypeWithUnionTypeCallSignatures.ts(36,54): error TS7006: Parameter 'a' implicitly has an 'any' type.

@@ -1,0 +1,2 @@
+classAbstractAssignabilityConstructorFunction.ts(7,1): error TS2322: Type 'typeof A' is not assignable to type 'new () => A'.
+classAbstractAssignabilityConstructorFunction.ts(8,1): error TS2322: Type 'string' is not assignable to type 'new () => A'.

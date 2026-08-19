@@ -1,0 +1,2 @@
+usingDeclarationsWithObjectLiterals1.ts(15,62): error TS2353: Object literal may only specify known properties, and 'extra' does not exist in type 'MyDisposable'.
+usingDeclarationsWithObjectLiterals1.ts(36,7): error TS2353: Object literal may only specify known properties, and 'extra' does not exist in type 'MyAsyncDisposable'.

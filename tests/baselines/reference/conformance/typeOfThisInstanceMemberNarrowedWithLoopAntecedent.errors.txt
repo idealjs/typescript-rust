@@ -1,0 +1,1 @@
+typeOfThisInstanceMemberNarrowedWithLoopAntecedent.ts(29,13): error TS2322: Type 'string | number' is not assignable to type 'number'.

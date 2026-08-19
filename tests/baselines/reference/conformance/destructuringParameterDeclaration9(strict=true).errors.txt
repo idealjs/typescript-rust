@@ -1,0 +1,1 @@
+index.js(15,9): error TS7031: Binding element 'json' implicitly has an 'any[]' type.

@@ -1,0 +1,1 @@
+parserClassDeclaration15.ts(2,4): error TS2391: Function implementation is missing or not immediately following the declaration.

@@ -1,0 +1,1 @@
+privateNameDeclarationMerging.ts(9,11): error TS2339: Property '#x' does not exist on type 'D'.

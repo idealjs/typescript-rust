@@ -1,0 +1,19 @@
+forStatementsMultipleInvalidDecl.ts(6,5): error TS2564: Property 'id' has no initializer and is not definitely assigned in the constructor.
+forStatementsMultipleInvalidDecl.ts(7,5): error TS2564: Property 'valid' has no initializer and is not definitely assigned in the constructor.
+forStatementsMultipleInvalidDecl.ts(11,5): error TS2564: Property 'name' has no initializer and is not definitely assigned in the constructor.
+forStatementsMultipleInvalidDecl.ts(15,5): error TS2564: Property 'source' has no initializer and is not definitely assigned in the constructor.
+forStatementsMultipleInvalidDecl.ts(16,5): error TS2564: Property 'recurse' has no initializer and is not definitely assigned in the constructor.
+forStatementsMultipleInvalidDecl.ts(17,5): error TS2564: Property 'wrapped' has no initializer and is not definitely assigned in the constructor.
+forStatementsMultipleInvalidDecl.ts(24,9): error TS2564: Property 'name' has no initializer and is not definitely assigned in the constructor.
+forStatementsMultipleInvalidDecl.ts(32,10): error TS2403: Subsequent variable declarations must have the same type.  Variable 'a' must be of type 'any', but here has type 'number'.
+forStatementsMultipleInvalidDecl.ts(33,10): error TS2403: Subsequent variable declarations must have the same type.  Variable 'a' must be of type 'any', but here has type 'string'.
+forStatementsMultipleInvalidDecl.ts(34,10): error TS2403: Subsequent variable declarations must have the same type.  Variable 'a' must be of type 'any', but here has type 'C'.
+forStatementsMultipleInvalidDecl.ts(35,10): error TS2403: Subsequent variable declarations must have the same type.  Variable 'a' must be of type 'any', but here has type 'D<string>'.
+forStatementsMultipleInvalidDecl.ts(36,10): error TS2403: Subsequent variable declarations must have the same type.  Variable 'a' must be of type 'any', but here has type 'typeof M'.
+forStatementsMultipleInvalidDecl.ts(39,10): error TS2403: Subsequent variable declarations must have the same type.  Variable 'b' must be of type 'I', but here has type 'C'.
+forStatementsMultipleInvalidDecl.ts(40,10): error TS2403: Subsequent variable declarations must have the same type.  Variable 'b' must be of type 'I', but here has type 'C2'.
+forStatementsMultipleInvalidDecl.ts(43,10): error TS2403: Subsequent variable declarations must have the same type.  Variable 'f' must be of type '(x: string) => number', but here has type '(x: number) => string'.
+forStatementsMultipleInvalidDecl.ts(46,10): error TS2403: Subsequent variable declarations must have the same type.  Variable 'arr' must be of type 'string[]', but here has type 'number[]'.
+forStatementsMultipleInvalidDecl.ts(47,10): error TS2403: Subsequent variable declarations must have the same type.  Variable 'arr' must be of type 'string[]', but here has type '(C | D<string>)[]'.
+forStatementsMultipleInvalidDecl.ts(50,10): error TS2403: Subsequent variable declarations must have the same type.  Variable 'arr2' must be of type 'D<string>[]', but here has type 'D<number>[]'.
+forStatementsMultipleInvalidDecl.ts(53,10): error TS2403: Subsequent variable declarations must have the same type.  Variable 'm' must be of type 'typeof M', but here has type 'typeof A'.

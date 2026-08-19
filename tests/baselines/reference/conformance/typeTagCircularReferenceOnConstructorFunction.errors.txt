@@ -1,0 +1,1 @@
+bug27346.js(2,11): error TS8030: The type of a function declaration must match the function's signature.

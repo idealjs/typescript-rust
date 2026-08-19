@@ -1,0 +1,1 @@
+ES3For-ofTypeCheck6.ts(2,15): error TS2454: Variable 'union' is used before being assigned.

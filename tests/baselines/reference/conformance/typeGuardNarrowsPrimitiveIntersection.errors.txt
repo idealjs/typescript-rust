@@ -1,0 +1,4 @@
+typeGuardNarrowsPrimitiveIntersection.ts(6,16): error TS2454: Variable 'value' is used before being assigned.
+typeGuardNarrowsPrimitiveIntersection.ts(9,12): error TS2454: Variable 'value' is used before being assigned.
+typeGuardNarrowsPrimitiveIntersection.ts(17,17): error TS2454: Variable 'value' is used before being assigned.
+typeGuardNarrowsPrimitiveIntersection.ts(20,13): error TS2454: Variable 'value' is used before being assigned.

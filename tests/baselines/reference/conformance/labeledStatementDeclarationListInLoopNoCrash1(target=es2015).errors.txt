@@ -1,0 +1,2 @@
+labeledStatementDeclarationListInLoopNoCrash1.ts(3,3): error TS1344: A label is not allowed here.
+labeledStatementDeclarationListInLoopNoCrash1.ts(3,11): error TS1123: Variable declaration list cannot be empty.

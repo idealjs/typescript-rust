@@ -1,0 +1,2 @@
+contextuallyTypeLogicalAnd02.ts(4,1): error TS2322: Type '(a: string) => number' is not assignable to type '(a: string) => string'.
+contextuallyTypeLogicalAnd02.ts(5,11): error TS2322: Type 'string' is not assignable to type 'number'.

@@ -1,0 +1,2 @@
+file.tsx(11,15): error TS2769: No overload matches this call.
+file.tsx(12,15): error TS2769: No overload matches this call.

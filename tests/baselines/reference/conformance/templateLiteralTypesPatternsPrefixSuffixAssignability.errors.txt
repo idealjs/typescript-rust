@@ -1,0 +1,2 @@
+templateLiteralTypesPatternsPrefixSuffixAssignability.ts(1,7): error TS2322: Type '":"' is not assignable to type '`:${string}:`'.
+templateLiteralTypesPatternsPrefixSuffixAssignability.ts(3,7): error TS2322: Type '"::"' is not assignable to type '`:${string}:${string}:`'.

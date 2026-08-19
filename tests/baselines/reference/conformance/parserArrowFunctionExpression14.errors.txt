@@ -1,0 +1,10 @@
+fileJs.js(1,1): error TS2304: Cannot find name 'a'.
+fileJs.js(1,11): error TS8010: Type annotations can only be used in TypeScript files.
+fileJs.js(1,20): error TS8009: The '?' modifier can only be used in TypeScript files.
+fileJs.js(1,23): error TS8010: Type annotations can only be used in TypeScript files.
+fileJs.js(1,32): error TS8010: Type annotations can only be used in TypeScript files.
+fileJs.js(1,40): error TS2304: Cannot find name 'd'.
+fileJs.js(1,46): error TS2304: Cannot find name 'e'.
+fileTs.ts(1,1): error TS2304: Cannot find name 'a'.
+fileTs.ts(1,40): error TS2304: Cannot find name 'd'.
+fileTs.ts(1,46): error TS2304: Cannot find name 'e'.

@@ -1,0 +1,1 @@
+ES5For-ofTypeCheck8.ts(3,6): error TS2322: Type 'string | number | symbol' is not assignable to type 'symbol'.

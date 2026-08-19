@@ -1,0 +1,3 @@
+file.tsx(13,2): error TS2322: Type '{ x: number; }' is not assignable to type 'string'.
+file.tsx(13,2): error TS2786: 'Obj1' cannot be used as a JSX component.
+file.tsx(19,2): error TS2322: Type '{ x: number; render: number; }' is not assignable to type 'string'.

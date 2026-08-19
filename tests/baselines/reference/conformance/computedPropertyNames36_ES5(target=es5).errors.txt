@@ -1,0 +1,1 @@
+computedPropertyNames36_ES5.ts(8,9): error TS2411: Property '["get1"]' of type 'Foo' is not assignable to 'string' index type 'Foo2'.

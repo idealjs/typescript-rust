@@ -1,0 +1,5 @@
+subtypingWithNumericIndexer2.ts(11,11): error TS2430: Interface 'B' incorrectly extends interface 'A'.
+subtypingWithNumericIndexer2.ts(24,27): error TS2344: Type 'Base' does not satisfy the constraint 'Derived'.
+subtypingWithNumericIndexer2.ts(32,15): error TS2430: Interface 'B3<T>' incorrectly extends interface 'A<T>'.
+subtypingWithNumericIndexer2.ts(36,15): error TS2430: Interface 'B4<T>' incorrectly extends interface 'A<T>'.
+subtypingWithNumericIndexer2.ts(40,15): error TS2430: Interface 'B5<T>' incorrectly extends interface 'A<T>'.

@@ -1,0 +1,3 @@
+/a.js(21,14): error TS1064: The return type of an async function or method must be the global Promise<T> type. Did you mean to write 'Promise<string>'?
+/a.js(27,12): error TS1065: The return type of an async function or method must be the global Promise<T> type.
+/a.js(45,12): error TS1065: The return type of an async function or method must be the global Promise<T> type.

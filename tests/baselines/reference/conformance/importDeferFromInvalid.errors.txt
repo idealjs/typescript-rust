@@ -1,0 +1,1 @@
+b.ts(1,8): error TS18058: Default imports are not allowed in a deferred import.

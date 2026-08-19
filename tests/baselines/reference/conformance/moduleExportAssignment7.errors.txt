@@ -1,0 +1,8 @@
+index.ts(2,24): error TS2694: Namespace '"mod".export=' has no exported member 'Thing'.
+index.ts(3,24): error TS2694: Namespace '"mod".export=' has no exported member 'AnotherThing'.
+index.ts(4,24): error TS2694: Namespace '"mod".export=' has no exported member 'foo'.
+index.ts(5,24): error TS2694: Namespace '"mod".export=' has no exported member 'qux'.
+index.ts(6,24): error TS2694: Namespace '"mod".export=' has no exported member 'baz'.
+index.ts(8,24): error TS2694: Namespace '"mod".export=' has no exported member 'literal'.
+index.ts(19,31): error TS2694: Namespace '"mod".export=' has no exported member 'buz'.
+main.js(20,35): error TS2694: Namespace '"mod".export=' has no exported member 'buz'.

@@ -1,0 +1,24 @@
+typeGuardOfFormNotExpr.ts(13,14): error TS2454: Variable 'strOrNum' is used before being assigned.
+typeGuardOfFormNotExpr.ts(14,5): error TS2454: Variable 'num' is used before being assigned.
+typeGuardOfFormNotExpr.ts(14,13): error TS2454: Variable 'strOrNum' is used before being assigned.
+typeGuardOfFormNotExpr.ts(20,14): error TS2454: Variable 'strOrNumOrBool' is used before being assigned.
+typeGuardOfFormNotExpr.ts(20,52): error TS2454: Variable 'strOrNumOrBool' is used before being assigned.
+typeGuardOfFormNotExpr.ts(21,5): error TS2322: Type 'string | number | boolean' is not assignable to type 'boolean'.
+typeGuardOfFormNotExpr.ts(21,12): error TS2454: Variable 'strOrNumOrBool' is used before being assigned.
+typeGuardOfFormNotExpr.ts(27,14): error TS2454: Variable 'strOrNumOrBool' is used before being assigned.
+typeGuardOfFormNotExpr.ts(27,55): error TS2454: Variable 'strOrNumOrBool' is used before being assigned.
+typeGuardOfFormNotExpr.ts(31,5): error TS2322: Type 'string | number | boolean' is not assignable to type 'boolean'.
+typeGuardOfFormNotExpr.ts(31,12): error TS2454: Variable 'strOrNumOrBool' is used before being assigned.
+typeGuardOfFormNotExpr.ts(34,14): error TS2454: Variable 'strOrNumOrBool' is used before being assigned.
+typeGuardOfFormNotExpr.ts(34,52): error TS2454: Variable 'strOrNumOrBool' is used before being assigned.
+typeGuardOfFormNotExpr.ts(38,5): error TS2322: Type 'string | number | boolean' is not assignable to type 'boolean'.
+typeGuardOfFormNotExpr.ts(38,12): error TS2454: Variable 'strOrNumOrBool' is used before being assigned.
+typeGuardOfFormNotExpr.ts(41,14): error TS2454: Variable 'strOrNumOrBool' is used before being assigned.
+typeGuardOfFormNotExpr.ts(41,55): error TS2454: Variable 'strOrNumOrBool' is used before being assigned.
+typeGuardOfFormNotExpr.ts(42,5): error TS2322: Type 'string | number | boolean' is not assignable to type 'boolean'.
+typeGuardOfFormNotExpr.ts(42,12): error TS2454: Variable 'strOrNumOrBool' is used before being assigned.
+typeGuardOfFormNotExpr.ts(48,14): error TS2454: Variable 'strOrNumOrBool' is used before being assigned.
+typeGuardOfFormNotExpr.ts(48,46): error TS2454: Variable 'numOrBool' is used before being assigned.
+typeGuardOfFormNotExpr.ts(48,60): error TS2454: Variable 'strOrNumOrBool' is used before being assigned.
+typeGuardOfFormNotExpr.ts(49,5): error TS2322: Type 'string | number | boolean' is not assignable to type 'number | boolean'.
+typeGuardOfFormNotExpr.ts(49,17): error TS2454: Variable 'strOrNumOrBool' is used before being assigned.

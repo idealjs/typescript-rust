@@ -1,0 +1,5 @@
+privateClassPropertyAccessibleWithinNestedClass.ts(4,13): error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
+privateClassPropertyAccessibleWithinNestedClass.ts(19,26): error TS2454: Variable 'x' is used before being assigned.
+privateClassPropertyAccessibleWithinNestedClass.ts(20,26): error TS2454: Variable 'x' is used before being assigned.
+privateClassPropertyAccessibleWithinNestedClass.ts(21,26): error TS2454: Variable 'x' is used before being assigned.
+privateClassPropertyAccessibleWithinNestedClass.ts(22,26): error TS2454: Variable 'x' is used before being assigned.

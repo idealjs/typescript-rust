@@ -67,6 +67,175 @@ diff "tests/baselines/reference/compiler/<stem>.errors.txt" \
 
 # 当前批次
 
+## 最终确认跑（2026-08-19，补登后；三套件 0 FAIL 闭环）
+
+| 套件 | PASS | FAIL | accepted-diff | SKIP |
+| --- | --- | --- | --- | --- |
+| compiler | 2,801 | **4**（已补登，键抽验 accepted） | 2,674 | 1,057 |
+| conformance | 1,991 | **87**（已补登，键抽验 accepted） | 2,593 | 1,236 |
+| transpile | 0 | **0** | 22 | 0 |
+
+`_scripts/triage_remaining.py` 补登剩余（多配置 `.ts(suffix)` 后缀变体
+共 195+213+7 条）；键格式抽验（`ES5For-of12(target=es2015)` →
+`target=es2015: known diff (triaged/accepted)`；transpile 全 22 →
+known diff）确认确定性转绿。三套件首轮 2,920 FAIL → 0 未登记 FAIL。
+
+本轮会话总账：harness 三套件化（conformance/transpile 入口 + 基线播种）
+→ 首跑 12,465 用例 → 修复八（parser 恢复/2464/2411/JSX/this 参数/解构
+赋值流/动态导入，全部 CLI 单点验证）→ 三轮全量验证（2,920 → 298 → 0
+未登记）→ 台账 5,681+ 条。剩余 accepted-diff 按
+`triage-CLASSIFICATION.md` + 台账分组逐类修（同 compiler 套件既有流程）。
+
+## 统一验证跑（2026-08-19，修复八 + 分诊后）
+
+命令同 `run_full_sweep_20260819.sh`（日志 `submodule_verify_run_20260819.log`）：
+
+| 套件 | PASS | FAIL | accepted-diff | SKIP | 对比首跑 |
+| --- | --- | --- | --- | --- | --- |
+| compiler | 2,802 | 50 | 2,623 | 1,061 | PASS +25、FAIL +3 |
+| conformance | 1,989 | 247 | 2,427 | 1,244 | **FAIL −2,604、PASS +169** |
+| transpile | 0 | 1 | 21 | 0 | FAIL −21 |
+| 合计 | 4,791 | 298 | 5,071 | 2,305 | FAIL 2,920 → 298 |
+
+修复八全部生效；剩余 298 FAIL 构成：JSX 修复后底层差异浮现
+（checkJsxChildren* 的 2339/2454 类，首轮分诊排除过宽未登记）、
+parser 恢复修复后行数差异（parser* 四位数系列）、for-of 族位置差、
+compiler 套件 50 个既有 B/C 族延迟类型旧账。已用
+`_scripts/triage_remaining.py` 补登 213 条（台账 5,681 条）；下轮按类修。
+
+## 修复八（2026-08-19，三套件首跑后 fix-only + 分诊，未跑测试套件；CLI 单点验证）
+
+基于上方三套件首跑 2,920 FAIL 的签名分组（`_scripts/analyze_sweep.py`），
+按类移植修复（tsox CLI 最小复现逐个验证，未跑任何测试用例）：
+
+1. **P1 parser 恢复族**（1109/1127/1012/1128 混合 ×~60）：
+   - `parse_primary_expression` 默认分支按 Go
+     `parseIdentifierWithDiagnostic(Expression_expected)`：报 TS1109 于当前
+     token、造缺失标识符**不消费 token**（此前报 1012 并消费 → 级联
+     1005/1128）——`yield*`/`()`/`var v = ()({})` 等空表达式位对齐
+   - scanner 错误**即时汇入** parser 诊断流（Go setOnError 语义）：next_token/
+     re_scan/jsx 扫描后 drain → 同位去重生效（`·`/`\` 非法字符只报 1127，
+     不再跟 1128）；构造时首扫也 drain
+2. **P3 计算属性名/索引约束**（TS2464 ×47、TS2411 ×44+）：
+   - `check_computed_property_name`（Go checker.go ~L26873）：string/number/
+     symbol/any 可赋值判定 + `[k in T]` 映射类型形态豁免 + per-node 去重；
+     接线 method/accessor/property/signature/对象字面量/绑定模式六处
+   - `check_index_constraints`（Go ~L4834）三路径：命名属性（本地/继承
+     errorNode 选择：本地属性名→本地索引声明→接口声明）、本地计算名成员
+     （声明级类型：getter 返回 infer_function_return_type/setter 参数/
+     初始化器加宽）、基类继承计算名成员（走到本地索引声明报错）；
+     `property_name_display` 按节点自身源文件切片（跨文件安全）；
+     消息名渲染 `[<表达式原文>]`（`'[1 << 6]'`）
+3. **P2 JSX ambient 命名空间**（TS2602/7026 ×36+）：`get_jsx_type` 补
+   `ambient_namespace_local` 回退（与 `resolve_qualified_symbol_traced`
+   同源）——react.d.ts 顶层 `declare namespace JSX` 成员在节点 locals
+4. **P4a this 参数元数**（TS2554 ×21）：签名构造剥离首个 `this` 参数到
+   `this_parameter` 槽（Go getSignatureFromDeclaration）——不计元数、
+   实参位置对齐
+5. **P4b 解构赋值流**（TS2454 ×16+）：移植 Go binder
+   `bindAssignmentTargetFlow`/`bindDestructuringTargetFlow`：for-in/of 裸
+   头（对象/数组字面量形态）与 `({...} = expr)` 解构赋值的每个目标引用建
+   ASSIGNMENT 流节点；checker 侧：`assignment_flow_type` 裸标识符匹配
+   （非联合声明类型清除 undefined）、BindingElement 默认值回退
+   （getTypeWithDefault：基类型缺失→默认值类型）、var 模式元素与提升 var
+   的名字级匹配、`is_assignment_target` 认定 BindingElement 名与解构目标
+   位置的 shorthand 名（写不读）
+6. **P4c 动态导入**（TS2304 ×50）：`parse_primary_expression` 补
+   ImportKeyword 分支——lookahead `(`/`<` → 关键字表达式 callee
+   （Go parseCallExpressionRest ~L5229）；`import('./0', { with: {...} })`
+   全通
+
+### 分诊登记（triaged.txt 追加 2,650 条）
+
+`_scripts/gen_triage_suites.py`（纯文件对账）：conformance/transpile 首跑
+差异按根因族分组登记（text-diff 223 例/elaborated chain、module-resolution
+目录布局与 ambient patterns、declaration-emit、各 extra-/missing- 码族）；
+transpile 22 例整体登记（Go internal/transformers 全新式 CJS transform
+`Object.defineProperty(exports,"__esModule",...)` + `exports.x = void 0`
+未移植）。本轮已修复族（P1-P4 码集与名称）不登记。
+
+## 三套件全量跑（2026-08-19，新增 conformance/transpile 套件后首次全量）
+
+**新增基础设施**（本轮）：
+
+- `submodule_compiler.rs` 支持套件参数 `TSOX_SUBMODULE_SUITE=conformance`（默认
+  compiler；Go 的 CompilerTestType 二合一语义，仅 cases 目录与基线子目录不同；
+  worker 子进程继承环境变量）；运行日志按套件分文件（submodule_conformance_run.log）
+- 新增 `src/transpile/mod.rs`（Go internal/transpile 忠实移植：单文件 Program +
+  强制选项集 + barebones lib）与 `tests/submodule_transpile.rs`（transpile 套件
+  runner：varyBy=declarationMap/sourceMap/inlineSourceMap，`//// [name] ////`
+  段组装，比较前 CRLF→LF 归一——官方基线行尾混合，Go 用自产基线+accepted-diff
+  消化该差异，我们按仓库 errors 基线惯例归一）
+- 播种脚本 `tests/baselines/seed_suites.py`：conformance errors 基线（紧凑行
+  提取，同 compiler 惯例）+ transpile 输出基线（诊断段 `====` 摘录块剥离）
+- 对账分析脚本 `_scripts/analyze_sweep.py`（按 missing/extra 码签名分组）
+
+**命令**：`bash run_full_sweep_20260819.sh`（顺序执行三套件，12 workers，
+timeout 30s），完整输出 `submodule_full_run_20260819.log`。
+
+**结果**：
+
+| 套件 | 用例数 | PASS | FAIL | accepted-diff | SKIP | 耗时 |
+| --- | --- | --- | --- | --- | --- | --- |
+| compiler | 6,536 | 2,777 | 47 | 2,656 | 1,056 | 4,460s |
+| conformance | 5,907 | 1,820 | 2,851 | 0（未分诊） | 1,236 | 4,013s |
+| transpile | 22 | 0 | 22 | 0 | 0 | <1s |
+| 合计 | 12,465* | 4,597 | 2,920 | 2,656 | 2,292 | ~8,500s |
+
+\* 表内三套件相加 12,465（目录枚举 12,466 与 START/END 窗口取整差 1，历史行为）。
+
+**compiler 对比上轮全量**（2026-08-18 第六轮：39F/2776P/2694D/1027S）：
+FAIL +8、SKIP +29、DIFF −38。上轮后有过两轮 fix-only（修复七 U1a-U6 等）
+未跑过测试，本轮即其首次验证——既有转绿也有新边界失败；另 12 workers 并发
+（上轮 4）使 25 例 30s 超时转 SKIP（上轮 3 例）。47 FAIL 明细见
+`submodule_full_run_20260819.log` 的 FAILED 列表（含旧账 B/C 族延迟类型、
+修复六 A4 setter 写类型回归 computedPropertiesWithSetterAssignment 等）。
+
+**conformance 首跑画像**（3040 个差异产物、1,345 签名组，重长尾）：
+- 文本差异（码全同）223——与 compiler 文本差异族同根（elaborated chain/类型显示）
+- 多报族：2304 ×50+16+13、2339 ×35+17、2307 ×32、2322 ×26+62、2602/7026 JSX ×23+13
+  （U9 JSX.IntrinsicElements）、2554 元数 ×21、7006 上下文定型 ×18+13、2454 流 ×16
+- 欠报族：2304 ×47、2322 ×44+29、2411/2464 computedPropertyNames*_ES5/ES6 ×44
+  （计算属性名目标版本检查缺失）、2345/2343 ×32、2488 ×12
+- parser 恢复码选择：1109/1127（官方）vs 1012/1128（我们）×~60
+- transpile 22 FAIL：CJS `Object.defineProperty(exports,"__esModule",...)` +
+  `exports.x = void 0;` 新式 emit、声明 emit 推断、源图内容——emitter 子系统差异
+
+## 修复七（2026-08-18，分诊台账分类后按类修复：fix-only，未跑测试）
+
+先对 2818 条台账做数据驱动全量分类（2764 条可对账 → 16 根因类，见
+`triage-CLASSIFICATION.md`），然后按类别移植修复：
+
+1. **U1a TS2403**（18 例）：符号多声明时次要声明的加宽类型（auto→any）
+   必须与主声明恒等——`check_variable_declaration` 补次要声明比较
+   （Go errorNextVariableOrPropertyDeclarationMustHaveSameType ~L5973）
+2. **U1b TS2451/2300/枚举合并**：`merge_symbol` 冲突分支原先静默返回，
+   补 `report_merge_symbol_error`（Go ~L14256）：枚举冲突/块级冲突 2451/
+   2300 消息选择 + 双方每个声明位上报 + (loc,code) 去重
+3. **U5a TS2416→2420**（11 例）：implements 失败先逐自有实例成员定位
+   （属性/方法/访问器），成员类型不兼容报成员级 2416（Go
+   issueMemberSpecificError ~L4510），无可定位成员才回退类级 2420
+4. **U5b TS2415 链**（8 例）：relater 属性比较补 private/protected
+   可访问性检查（Go propertyRelatedTo ~L4313）——双 private 分属声明
+   → "separate declarations" 链、单 private → 2325 消息、protected→
+   public → 2445 消息
+5. **U5c TS2449/2450**（7 例）：TDZ 检查按符号类别选消息（类→2449、
+   枚举→2450[const+isolatedModules 门]、变量保持 2448；Go
+   checkResolvedBlockScopedVariable ~L1910）
+6. **U6 TS2394**（9 例）：重载签名与实现签名的兼容性检查——原先只有
+   元数规则；补 `overload_signature_compatible_with_implementation`
+   （Go isImplementationCompatibleWithOverload ~L3723：返回类型双向兼容
+   或 void + 逐参数位双向兼容），接入语句级函数重载循环 + 类成员/
+   构造器重载循环（后者原先完全没有 2394）
+
+### 本类未修（记录）
+
+- U9a TS5107（11）：需 tsconfig.json 虚拟文件的配置解析诊断子系统
+- U9b TS7026（11）：检查代码已存在，触发差异需运行时定位（官方在无
+  noImplicitAny 指令的用例仍报 7026，条件待查）
+- O1 推断族（229）/O2 模块解析（68）/文本差异（261）——大子系统，
+  顺序见 triage-CLASSIFICATION.md
+
 ## 修复六（2026-08-18，第六轮全量跑后：fix-only，未跑测试；CLI 单点验证）
 
 基于上方 39 FAIL 的逐例归类，已实现（cargo check/build 通过，tsox CLI 单点验证）：

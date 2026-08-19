@@ -1,0 +1,1 @@
+a.js(2,10): error TS8006: 'export...type' declarations can only be used in TypeScript files.

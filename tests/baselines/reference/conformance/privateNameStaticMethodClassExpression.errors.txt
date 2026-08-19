@@ -1,0 +1,2 @@
+privateNameStaticMethodClassExpression.ts(9,14): error TS18013: Property '#method' is not accessible outside class 'D' because it has a private identifier.
+privateNameStaticMethodClassExpression.ts(10,14): error TS18013: Property '#field' is not accessible outside class 'D' because it has a private identifier.

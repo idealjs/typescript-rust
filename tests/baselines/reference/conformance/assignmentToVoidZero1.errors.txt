@@ -1,0 +1,2 @@
+assignmentToVoidZero1.js(2,1): error TS2322: Type 'undefined' is not assignable to type '2'.
+assignmentToVoidZero1.js(2,13): error TS2322: Type 'undefined' is not assignable to type '1'.

@@ -1,0 +1,2 @@
+foo2.ts(7,2): error TS2564: Property 'm1' has no initializer and is not definitely assigned in the constructor.
+foo3.ts(7,10): error TS2564: Property 'm1' has no initializer and is not definitely assigned in the constructor.

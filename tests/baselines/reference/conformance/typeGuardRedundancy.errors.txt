@@ -1,0 +1,14 @@
+typeGuardRedundancy.ts(3,17): error TS2454: Variable 'x' is used before being assigned.
+typeGuardRedundancy.ts(3,70): error TS2454: Variable 'x' is used before being assigned.
+typeGuardRedundancy.ts(3,72): error TS2339: Property 'toFixed' does not exist on type 'string | number'.
+typeGuardRedundancy.ts(5,19): error TS2454: Variable 'x' is used before being assigned.
+typeGuardRedundancy.ts(5,62): error TS2454: Variable 'x' is used before being assigned.
+typeGuardRedundancy.ts(5,64): error TS2339: Property 'toFixed' does not exist on type 'string | number'.
+typeGuardRedundancy.ts(7,17): error TS2454: Variable 'x' is used before being assigned.
+typeGuardRedundancy.ts(7,42): error TS2454: Variable 'x' is used before being assigned.
+typeGuardRedundancy.ts(7,70): error TS2454: Variable 'x' is used before being assigned.
+typeGuardRedundancy.ts(7,72): error TS2339: Property 'toFixed' does not exist on type 'string | number'.
+typeGuardRedundancy.ts(9,19): error TS2454: Variable 'x' is used before being assigned.
+typeGuardRedundancy.ts(9,44): error TS2454: Variable 'x' is used before being assigned.
+typeGuardRedundancy.ts(9,62): error TS2454: Variable 'x' is used before being assigned.
+typeGuardRedundancy.ts(9,64): error TS2339: Property 'toFixed' does not exist on type 'string | number'.

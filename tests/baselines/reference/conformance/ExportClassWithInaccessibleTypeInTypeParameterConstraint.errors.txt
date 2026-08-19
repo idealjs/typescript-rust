@@ -1,0 +1,4 @@
+ExportClassWithInaccessibleTypeInTypeParameterConstraint.ts(4,9): error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
+ExportClassWithInaccessibleTypeInTypeParameterConstraint.ts(5,9): error TS2564: Property 'y' has no initializer and is not definitely assigned in the constructor.
+ExportClassWithInaccessibleTypeInTypeParameterConstraint.ts(11,9): error TS2564: Property 'z' has no initializer and is not definitely assigned in the constructor.
+ExportClassWithInaccessibleTypeInTypeParameterConstraint.ts(20,13): error TS2322: Type 'null' is not assignable to type 'Line<Point>'.

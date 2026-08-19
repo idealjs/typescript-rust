@@ -1,0 +1,11 @@
+assignmentCompatWithConstructSignaturesWithOptionalParameters.ts(16,5): error TS2322: Type 'new (x: number) => number' is not assignable to type 'new () => number'.
+assignmentCompatWithConstructSignaturesWithOptionalParameters.ts(17,5): error TS2322: Type 'new (x: number, y?: number | undefined) => number' is not assignable to type 'new () => number'.
+assignmentCompatWithConstructSignaturesWithOptionalParameters.ts(19,5): error TS2322: Type 'new (x: number, y: number) => number' is not assignable to type 'new () => number'.
+assignmentCompatWithConstructSignaturesWithOptionalParameters.ts(24,5): error TS2322: Type 'new (x: number) => number' is not assignable to type 'new (x?: number | undefined) => number'.
+assignmentCompatWithConstructSignaturesWithOptionalParameters.ts(25,5): error TS2322: Type 'new (x: number, y?: number | undefined) => number' is not assignable to type 'new (x?: number | undefined) => number'.
+assignmentCompatWithConstructSignaturesWithOptionalParameters.ts(27,5): error TS2322: Type 'new (x: number, y: number) => number' is not assignable to type 'new (x?: number | undefined) => number'.
+assignmentCompatWithConstructSignaturesWithOptionalParameters.ts(35,5): error TS2322: Type 'new (x: number, y: number) => number' is not assignable to type 'new (x: number) => number'.
+assignmentCompatWithConstructSignaturesWithOptionalParameters.ts(43,5): error TS2322: Type 'new (x: number, y: number) => number' is not assignable to type 'new (x: number, y?: number | undefined) => number'.
+assignmentCompatWithConstructSignaturesWithOptionalParameters.ts(48,5): error TS2322: Type 'new (x: number) => number' is not assignable to type 'new (x?: number | undefined, y?: number | undefined) => number'.
+assignmentCompatWithConstructSignaturesWithOptionalParameters.ts(49,5): error TS2322: Type 'new (x: number, y?: number | undefined) => number' is not assignable to type 'new (x?: number | undefined, y?: number | undefined) => number'.
+assignmentCompatWithConstructSignaturesWithOptionalParameters.ts(51,5): error TS2322: Type 'new (x: number, y: number) => number' is not assignable to type 'new (x?: number | undefined, y?: number | undefined) => number'.

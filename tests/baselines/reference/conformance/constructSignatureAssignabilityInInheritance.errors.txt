@@ -1,0 +1,2 @@
+constructSignatureAssignabilityInInheritance.ts(61,15): error TS2430: Interface 'I2' incorrectly extends interface 'Base2'.
+constructSignatureAssignabilityInInheritance.ts(67,15): error TS2430: Interface 'I3' incorrectly extends interface 'Base2'.

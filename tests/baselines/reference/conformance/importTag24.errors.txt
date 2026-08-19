@@ -1,0 +1,4 @@
+a.js(3,10): error TS6133: 'f1' is declared but its value is never read.
+a.js(11,10): error TS6133: 'f3' is declared but its value is never read.
+a.js(19,10): error TS6133: 'f4' is declared but its value is never read.
+a.js(19,17): error TS2322: Type 'number' is not assignable to type 'string'.

@@ -1,0 +1,1 @@
+/a.js(17,7): error TS2420: Class 'BadSquare' incorrectly implements interface 'Drawable'.

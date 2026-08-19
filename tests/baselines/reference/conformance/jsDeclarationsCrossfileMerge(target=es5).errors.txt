@@ -1,0 +1,1 @@
+index.js(4,1): error TS6232: Declaration augments declaration in another file. This cannot be serialized.

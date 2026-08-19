@@ -1,0 +1,8 @@
+bitwiseNotOperatorWithNumberType.ts(8,12): error TS2564: Property 'a' has no initializer and is not definitely assigned in the constructor.
+bitwiseNotOperatorWithNumberType.ts(18,24): error TS2454: Variable 'NUMBER' is used before being assigned.
+bitwiseNotOperatorWithNumberType.ts(32,26): error TS2454: Variable 'NUMBER' is used before being assigned.
+bitwiseNotOperatorWithNumberType.ts(32,35): error TS2454: Variable 'NUMBER' is used before being assigned.
+bitwiseNotOperatorWithNumberType.ts(35,26): error TS2454: Variable 'NUMBER' is used before being assigned.
+bitwiseNotOperatorWithNumberType.ts(36,28): error TS2454: Variable 'NUMBER' is used before being assigned.
+bitwiseNotOperatorWithNumberType.ts(36,37): error TS2454: Variable 'NUMBER' is used before being assigned.
+bitwiseNotOperatorWithNumberType.ts(39,2): error TS2454: Variable 'NUMBER' is used before being assigned.

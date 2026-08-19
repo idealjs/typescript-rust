@@ -1,0 +1,4 @@
+ambientModuleDeclarationWithReservedIdentifierInDottedPath2.ts(9,1): error TS2304: Cannot find name 'declare'.
+ambientModuleDeclarationWithReservedIdentifierInDottedPath2.ts(9,9): error TS2304: Cannot find name 'namespace'.
+ambientModuleDeclarationWithReservedIdentifierInDottedPath2.ts(9,19): error TS2819: Namespace name cannot be 'debugger'.
+ambientModuleDeclarationWithReservedIdentifierInDottedPath2.ts(9,28): error TS1005: ';' expected.

@@ -104,7 +104,7 @@ impl Parser {
         let text = source_text.into();
         let mut scanner = Scanner::new(text);
         let token = scanner.scan();
-        Self {
+        let mut parser = Self {
             scanner,
             token,
             diagnostics: Vec::new(),
@@ -113,7 +113,11 @@ impl Parser {
             yield_context: false,
             await_context: false,
             parsing_contexts: 0,
-        }
+        };
+        // Surface errors from the very first scan before the parser reacts
+        // to the token (mirrors Go's setOnError firing during Scan).
+        parser.drain_scanner_errors();
+        parser
     }
 
     fn new_with_language_variant(
@@ -155,61 +159,11 @@ impl Parser {
         let pos = 0usize;
         let end = end_of_file.end();
 
-        // Collect scanner errors (invalid characters, unterminated strings)
-        // and merge them into parser diagnostics. Scanner errors bypass the
-        // parser's dedup logic since they originate from a different source.
-        let scanner_errors = parser.scanner.take_errors();
-        for err in &scanner_errors {
-            let message = match err.kind {
-                crate::scanner::DiagnosticKind::InvalidCharacter => diagnostics::INVALID_CHARACTER,
-                crate::scanner::DiagnosticKind::FileAppearsToBeBinary => {
-                    diagnostics::FILE_APPEARS_TO_BE_BINARY
-                }
-                crate::scanner::DiagnosticKind::UnterminatedStringLiteral => {
-                    diagnostics::UNTERMINATED_STRING_LITERAL
-                }
-                crate::scanner::DiagnosticKind::UnterminatedTemplateLiteral => {
-                    diagnostics::UNTERMINATED_TEMPLATE_LITERAL
-                }
-                crate::scanner::DiagnosticKind::UnterminatedRegularExpression => {
-                    diagnostics::UNTERMINATED_REGULAR_EXPRESSION_LITERAL
-                }
-                crate::scanner::DiagnosticKind::UnknownRegularExpressionFlag => {
-                    diagnostics::UNKNOWN_REGULAR_EXPRESSION_FLAG
-                }
-                crate::scanner::DiagnosticKind::DuplicateRegularExpressionFlag => {
-                    diagnostics::DUPLICATE_REGULAR_EXPRESSION_FLAG
-                }
-                crate::scanner::DiagnosticKind::UnicodeUAndVFlagsMutuallyExclusive => {
-                    diagnostics::THE_UNICODE_U_FLAG_AND_THE_UNICODE_SETS_V_FLAG_CANNOT_BE_SET_SIMULTANEOUSLY
-                }
-                crate::scanner::DiagnosticKind::OctalLiteralNotAllowed => {
-                    diagnostics::OCTAL_LITERALS_ARE_NOT_ALLOWED_USE_THE_SYNTAX_0
-                }
-                crate::scanner::DiagnosticKind::DecimalWithLeadingZero => {
-                    diagnostics::DECIMALS_WITH_LEADING_ZEROS_ARE_NOT_ALLOWED
-                }
-                crate::scanner::DiagnosticKind::NumericSeparatorNotAllowed => {
-                    diagnostics::NUMERIC_SEPARATORS_ARE_NOT_ALLOWED_HERE
-                }
-                crate::scanner::DiagnosticKind::RegexMessage(msg) => msg,
-            };
-            parser.diagnostics.push(ParserDiagnostic {
-                message,
-                message_args: match err.kind {
-                    crate::scanner::DiagnosticKind::OctalLiteralNotAllowed => {
-                        // Build the replacement syntax: `0o` + octal digits
-                        // extracted from the source text.
-                        let token_text = &text[err.pos..err.pos + err.length];
-                        let octal_digits = token_text.strip_prefix('-').unwrap_or(token_text);
-                        let digits = octal_digits.strip_prefix('0').unwrap_or(octal_digits);
-                        vec![format!("0o{digits}")]
-                    }
-                    _ => Vec::new(),
-                },
-                range: TextRange::new(err.pos, err.pos + err.length),
-            });
-        }
+        // Flush any scanner errors recorded after the last token advance.
+        // Scanner errors stream into the parser diagnostics at each advance
+        // (Go's setOnError wiring — see `drain_scanner_errors`); this final
+        // drain catches stragglers from the last EOF scan.
+        parser.drain_scanner_errors();
 
         // Set NodeFlags for JS/JSON files, mirroring Go's initializeState.
         let mut context_flags = crate::ast::node_flags::NodeFlags::empty();
@@ -331,7 +285,74 @@ impl Parser {
     /// Advance to the next token.
     fn next_token(&mut self) -> SyntaxKind {
         self.token = self.scanner.scan();
+        self.drain_scanner_errors();
         self.token
+    }
+
+    /// Route scanner errors recorded since the last advance into the parser's
+    /// diagnostic stream. Go wires `scanner.setOnError(scanError)` so scanner
+    /// errors interleave with parse errors in emission order and share
+    /// `parse_error_at_range`'s same-position dedupe — a parse error at the
+    /// exact position of a just-reported scanner error (e.g. TS1127 invalid
+    /// character, then the parser's reaction to that Unknown token) is
+    /// suppressed, leaving only the scanner's diagnostic.
+    fn drain_scanner_errors(&mut self) {
+        for err in self.scanner.take_errors() {
+            self.push_scanner_error(err);
+        }
+    }
+
+    /// Convert one scanner error to a parser diagnostic (shared with the
+    /// final flush in `parse_source_file_text_with_diagnostics`).
+    fn push_scanner_error(&mut self, err: crate::scanner::ScannerError) {
+        let message = match err.kind {
+            crate::scanner::DiagnosticKind::InvalidCharacter => diagnostics::INVALID_CHARACTER,
+            crate::scanner::DiagnosticKind::FileAppearsToBeBinary => {
+                diagnostics::FILE_APPEARS_TO_BE_BINARY
+            }
+            crate::scanner::DiagnosticKind::UnterminatedStringLiteral => {
+                diagnostics::UNTERMINATED_STRING_LITERAL
+            }
+            crate::scanner::DiagnosticKind::UnterminatedTemplateLiteral => {
+                diagnostics::UNTERMINATED_TEMPLATE_LITERAL
+            }
+            crate::scanner::DiagnosticKind::UnterminatedRegularExpression => {
+                diagnostics::UNTERMINATED_REGULAR_EXPRESSION_LITERAL
+            }
+            crate::scanner::DiagnosticKind::UnknownRegularExpressionFlag => {
+                diagnostics::UNKNOWN_REGULAR_EXPRESSION_FLAG
+            }
+            crate::scanner::DiagnosticKind::DuplicateRegularExpressionFlag => {
+                diagnostics::DUPLICATE_REGULAR_EXPRESSION_FLAG
+            }
+            crate::scanner::DiagnosticKind::UnicodeUAndVFlagsMutuallyExclusive => {
+                diagnostics::THE_UNICODE_U_FLAG_AND_THE_UNICODE_SETS_V_FLAG_CANNOT_BE_SET_SIMULTANEOUSLY
+            }
+            crate::scanner::DiagnosticKind::OctalLiteralNotAllowed => {
+                diagnostics::OCTAL_LITERALS_ARE_NOT_ALLOWED_USE_THE_SYNTAX_0
+            }
+            crate::scanner::DiagnosticKind::DecimalWithLeadingZero => {
+                diagnostics::DECIMALS_WITH_LEADING_ZEROS_ARE_NOT_ALLOWED
+            }
+            crate::scanner::DiagnosticKind::NumericSeparatorNotAllowed => {
+                diagnostics::NUMERIC_SEPARATORS_ARE_NOT_ALLOWED_HERE
+            }
+            crate::scanner::DiagnosticKind::RegexMessage(msg) => msg,
+        };
+        let args: Vec<String> = match err.kind {
+            crate::scanner::DiagnosticKind::OctalLiteralNotAllowed => {
+                // Build the replacement syntax: `0o` + octal digits
+                // extracted from the source text.
+                let token_text =
+                    &self.scanner.text()[err.pos..(err.pos + err.length).min(self.scanner.text().len())];
+                let octal_digits = token_text.strip_prefix('-').unwrap_or(token_text);
+                let digits = octal_digits.strip_prefix('0').unwrap_or(octal_digits);
+                vec![format!("0o{digits}")]
+            }
+            _ => Vec::new(),
+        };
+        let arg_refs: Vec<&str> = args.iter().map(|s| s.as_str()).collect();
+        self.parse_error_at_range(TextRange::new(err.pos, err.pos + err.length), message, &arg_refs);
     }
 
     fn look_ahead_token(&self) -> SyntaxKind {
@@ -356,6 +377,7 @@ impl Parser {
 
     fn next_template_token(&mut self) -> SyntaxKind {
         self.token = self.scanner.scan_template_continuation();
+        self.drain_scanner_errors();
         self.token
     }
 
@@ -378,29 +400,34 @@ impl Parser {
     /// Go: `reScanGreaterThanToken`.
     fn re_scan_greater_than(&mut self) {
         self.token = self.scanner.re_scan_greater_than();
+        self.drain_scanner_errors();
     }
 
     /// Re-scan the current `/` or `/=` as a regular expression literal.
     fn re_scan_slash_token(&mut self) -> SyntaxKind {
         self.token = self.scanner.re_scan_slash_token();
+        self.drain_scanner_errors();
         self.token
     }
 
     /// Scan a JSX token (text, `<`, `</`, `{`). Used after `>` in JSX content.
     fn scan_jsx_text(&mut self) -> SyntaxKind {
         self.token = self.scanner.scan_jsx_token();
+        self.drain_scanner_errors();
         self.token
     }
 
     /// Extend the current identifier with JSX identifier parts (dashes).
     fn scan_jsx_identifier(&mut self) -> SyntaxKind {
         self.token = self.scanner.scan_jsx_identifier();
+        self.drain_scanner_errors();
         self.token
     }
 
     /// Scan a JSX attribute value (quoted string or fall through to `{`).
     fn scan_jsx_attribute_value(&mut self) -> SyntaxKind {
         self.token = self.scanner.scan_jsx_attribute_value();
+        self.drain_scanner_errors();
         self.token
     }
 
@@ -4286,8 +4313,22 @@ impl Parser {
             SyntaxKind::FunctionKeyword => self.parse_function_expression(),
             SyntaxKind::ClassKeyword => self.parse_class_expression(),
             // `import.meta` — parse as MetaProperty when `import` is followed
-            // by `.` on the same line. Mirrors Go's parsePrimaryExpression.
-            SyntaxKind::ImportKeyword if self.is_import_meta() => self.parse_import_meta(),
+            // by `.` on the same line. `import(...)` / `import<T>(...)` —
+            // dynamic import call: `import` is a keyword-expression callee
+            // when followed by `(` or `<` (Go parseCallExpressionRest's
+            // KindImportKeyword branch, parser.go ~L5229).
+            SyntaxKind::ImportKeyword => {
+                if matches!(
+                    self.look_ahead_token(),
+                    SyntaxKind::OpenParenToken | SyntaxKind::LessThanToken
+                ) {
+                    self.parse_keyword_expression(SyntaxKind::ImportKeyword)
+                } else if self.is_import_meta() {
+                    self.parse_import_meta()
+                } else {
+                    self.parse_fallback_identifier_or_error()
+                }
+            }
             // `async function` expression: when `async` is followed by `function`
             // on the same line, parse as an async function expression.
             // Mirrors Go's parsePrimaryExpression AsyncKeyword case (line 5581).
@@ -4312,36 +4353,44 @@ impl Parser {
             }
             _ => {
                 // Contextual keywords (e.g. `assert`, `type`, `keyof`) can be
-                // used as identifiers in expression context. If the current
-                // token is a keyword that is valid as an identifier name,
-                // treat it as an identifier reference. Mirrors Go's
-                // `parseIdentifierName` fallback in expression context.
-                if is_identifier_or_keyword(self.token)
-                    && self.token != SyntaxKind::InKeyword
-                    && self.token != SyntaxKind::InstanceOfKeyword
-                {
-                    let text = self.scanner.token_text().to_string();
-                    let pos = self.token_pos();
-                    let end = self.token_end();
-                    self.next_token();
-                    Arc::new(Node::with_loc(
-                        SyntaxKind::Identifier,
-                        NodeData::Identifier(IdentifierData { text }),
-                        TextRange::new(pos, end),
-                    ))
-                } else {
-                    // Error recovery
-                    let pos = self.token_pos();
-                    let end = self.token_end();
-                    self.parse_error_at(pos, end, diagnostics::UNEXPECTED_TOKEN, &[]);
-                    self.next_token();
-                    Arc::new(Node::with_loc(
-                        SyntaxKind::Unknown,
-                        NodeData::Token,
-                        TextRange::new(pos, end),
-                    ))
-                }
+                // used as identifiers in expression context (Go's
+                // parseIdentifierName fallback); anything else is the TS1109
+                // missing-expression path.
+                self.parse_fallback_identifier_or_error()
             }
+        }
+    }
+
+    /// The parsePrimaryExpression default case: contextual-keyword identifiers
+    /// are taken as identifier references; anything else reports TS1109 at
+    /// the current token and yields a MISSING identifier WITHOUT consuming
+    /// it, so the caller's parseExpected/list-recovery machinery keeps the
+    /// token stream balanced (Go parseIdentifierWithDiagnostic).
+    fn parse_fallback_identifier_or_error(&mut self) -> Arc<Node> {
+        if is_identifier_or_keyword(self.token)
+            && self.token != SyntaxKind::InKeyword
+            && self.token != SyntaxKind::InstanceOfKeyword
+        {
+            let text = self.scanner.token_text().to_string();
+            let pos = self.token_pos();
+            let end = self.token_end();
+            self.next_token();
+            Arc::new(Node::with_loc(
+                SyntaxKind::Identifier,
+                NodeData::Identifier(IdentifierData { text }),
+                TextRange::new(pos, end),
+            ))
+        } else {
+            let pos = self.token_pos();
+            let end = self.token_end();
+            self.parse_error_at(pos, end, diagnostics::EXPRESSION_EXPECTED, &[]);
+            Arc::new(Node::with_loc(
+                SyntaxKind::Identifier,
+                NodeData::Identifier(IdentifierData {
+                    text: String::new(),
+                }),
+                TextRange::new(pos, pos),
+            ))
         }
     }
 

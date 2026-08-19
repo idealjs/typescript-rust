@@ -1,0 +1,6 @@
+foo2.ts(16,5): error TS2564: Property 'item' has no initializer and is not definitely assigned in the constructor.
+usage.ts(1,24): error TS2307: Cannot find module './fo' or its corresponding type declarations.
+usage.ts(2,22): error TS2307: Cannot find module './fo2' or its corresponding type declarations.
+usage.ts(3,36): error TS2694: Namespace '"foo2".Bar' has no exported member 'Q'.
+usage.ts(6,5): error TS2564: Property 'item' has no initializer and is not definitely assigned in the constructor.
+usage.ts(10,32): error TS2307: Cannot find module './fo2' or its corresponding type declarations.

@@ -1,0 +1,12 @@
+classExtendsItselfIndirectly_file1.ts(1,7): error TS2506: 'C' is referenced directly or indirectly in its own base expression.
+classExtendsItselfIndirectly_file1.ts(1,21): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
+classExtendsItselfIndirectly_file2.ts(1,7): error TS2506: 'D' is referenced directly or indirectly in its own base expression.
+classExtendsItselfIndirectly_file2.ts(1,21): error TS2564: Property 'bar' has no initializer and is not definitely assigned in the constructor.
+classExtendsItselfIndirectly_file3.ts(1,7): error TS2506: 'E' is referenced directly or indirectly in its own base expression.
+classExtendsItselfIndirectly_file3.ts(1,21): error TS2564: Property 'baz' has no initializer and is not definitely assigned in the constructor.
+classExtendsItselfIndirectly_file4.ts(1,7): error TS2506: 'C2' is referenced directly or indirectly in its own base expression.
+classExtendsItselfIndirectly_file4.ts(1,29): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
+classExtendsItselfIndirectly_file5.ts(1,7): error TS2506: 'D2' is referenced directly or indirectly in its own base expression.
+classExtendsItselfIndirectly_file5.ts(1,29): error TS2564: Property 'bar' has no initializer and is not definitely assigned in the constructor.
+classExtendsItselfIndirectly_file6.ts(1,7): error TS2506: 'E2' is referenced directly or indirectly in its own base expression.
+classExtendsItselfIndirectly_file6.ts(1,29): error TS2564: Property 'baz' has no initializer and is not definitely assigned in the constructor.

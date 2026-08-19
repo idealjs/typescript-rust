@@ -1,0 +1,1 @@
+/index.ts(1,21): error TS7016: Could not find a declaration file for module 'pkg'. '/node_modules/pkg/untyped.js' implicitly has an 'any' type.

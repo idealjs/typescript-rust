@@ -1,0 +1,1 @@
+assignmentCompatWithGenericCallSignatures3.ts(10,5): error TS2454: Variable 'h' is used before being assigned.

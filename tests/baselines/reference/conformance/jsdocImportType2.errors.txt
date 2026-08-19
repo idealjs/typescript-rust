@@ -1,0 +1,2 @@
+use.js(5,1): error TS2454: Variable 'c' is used before being assigned.
+use.js(10,1): error TS2454: Variable 'd' is used before being assigned.

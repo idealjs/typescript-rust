@@ -1,0 +1,2 @@
+logicalNotOperatorWithBooleanType.ts(21,25): error TS2872: This kind of expression is always truthy.
+logicalNotOperatorWithBooleanType.ts(36,1): error TS2695: Left side of comma operator is unused and has no side effects.

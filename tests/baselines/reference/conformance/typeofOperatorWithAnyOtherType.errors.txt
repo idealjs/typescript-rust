@@ -1,0 +1,7 @@
+typeofOperatorWithAnyOtherType.ts(46,32): error TS18050: The value 'null' cannot be used here.
+typeofOperatorWithAnyOtherType.ts(46,39): error TS18050: The value 'undefined' cannot be used here.
+typeofOperatorWithAnyOtherType.ts(47,32): error TS18050: The value 'null' cannot be used here.
+typeofOperatorWithAnyOtherType.ts(47,39): error TS18050: The value 'null' cannot be used here.
+typeofOperatorWithAnyOtherType.ts(48,32): error TS18050: The value 'undefined' cannot be used here.
+typeofOperatorWithAnyOtherType.ts(48,44): error TS18050: The value 'undefined' cannot be used here.
+typeofOperatorWithAnyOtherType.ts(58,1): error TS2695: Left side of comma operator is unused and has no side effects.

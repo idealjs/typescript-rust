@@ -1,0 +1,5 @@
+logicalNotOperatorWithStringType.ts(22,25): error TS2873: This kind of expression is always falsy.
+logicalNotOperatorWithStringType.ts(23,25): error TS2872: This kind of expression is always truthy.
+logicalNotOperatorWithStringType.ts(24,25): error TS2872: This kind of expression is always truthy.
+logicalNotOperatorWithStringType.ts(40,2): error TS2873: This kind of expression is always falsy.
+logicalNotOperatorWithStringType.ts(44,1): error TS2695: Left side of comma operator is unused and has no side effects.

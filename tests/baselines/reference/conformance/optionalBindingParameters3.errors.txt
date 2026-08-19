@@ -1,0 +1,1 @@
+/a.js(9,12): error TS2463: A binding pattern parameter cannot be optional in an implementation signature.

@@ -1,0 +1,1 @@
+generatorTypeCheck8.ts(2,17): error TS2322: Type 'Generator<string, any, any>' is not assignable to type 'BadGenerator'.

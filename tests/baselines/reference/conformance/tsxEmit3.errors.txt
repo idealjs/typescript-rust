@@ -1,0 +1,4 @@
+file.tsx(18,2): error TS2695: Left side of comma operator is unused and has no side effects.
+file.tsx(22,3): error TS2695: Left side of comma operator is unused and has no side effects.
+file.tsx(25,3): error TS2695: Left side of comma operator is unused and has no side effects.
+file.tsx(38,2): error TS2695: Left side of comma operator is unused and has no side effects.

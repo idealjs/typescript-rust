@@ -1,0 +1,1 @@
+stringLiteralTypesInImplementationSignatures2.ts(27,5): error TS2300: Duplicate identifier 'foo'.

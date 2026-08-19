@@ -1,0 +1,2 @@
+typeofOperatorWithBooleanType.ts(7,12): error TS2564: Property 'a' has no initializer and is not definitely assigned in the constructor.
+typeofOperatorWithBooleanType.ts(36,1): error TS2695: Left side of comma operator is unused and has no side effects.

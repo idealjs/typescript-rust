@@ -1,0 +1,12 @@
+objectTypeWithNumericProperty.ts(9,10): error TS2454: Variable 'c' is used before being assigned.
+objectTypeWithNumericProperty.ts(10,10): error TS2454: Variable 'c' is used before being assigned.
+objectTypeWithNumericProperty.ts(11,10): error TS2454: Variable 'c' is used before being assigned.
+objectTypeWithNumericProperty.ts(12,10): error TS2454: Variable 'c' is used before being assigned.
+objectTypeWithNumericProperty.ts(20,10): error TS2454: Variable 'i' is used before being assigned.
+objectTypeWithNumericProperty.ts(21,10): error TS2454: Variable 'i' is used before being assigned.
+objectTypeWithNumericProperty.ts(22,10): error TS2454: Variable 'i' is used before being assigned.
+objectTypeWithNumericProperty.ts(23,10): error TS2454: Variable 'i' is used before being assigned.
+objectTypeWithNumericProperty.ts(30,10): error TS2454: Variable 'a' is used before being assigned.
+objectTypeWithNumericProperty.ts(31,10): error TS2454: Variable 'a' is used before being assigned.
+objectTypeWithNumericProperty.ts(32,10): error TS2454: Variable 'a' is used before being assigned.
+objectTypeWithNumericProperty.ts(33,10): error TS2454: Variable 'a' is used before being assigned.

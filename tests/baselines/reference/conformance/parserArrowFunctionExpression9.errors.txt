@@ -1,0 +1,6 @@
+fileJs.js(1,1): error TS2304: Cannot find name 'b'.
+fileJs.js(1,6): error TS2304: Cannot find name 'c'.
+fileJs.js(1,16): error TS2304: Cannot find name 'e'.
+fileTs.ts(1,1): error TS2304: Cannot find name 'b'.
+fileTs.ts(1,6): error TS2304: Cannot find name 'c'.
+fileTs.ts(1,16): error TS2304: Cannot find name 'e'.

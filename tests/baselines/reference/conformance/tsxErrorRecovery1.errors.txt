@@ -1,0 +1,3 @@
+file.tsx(4,10): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+file.tsx(4,19): error TS1109: Expression expected.
+file.tsx(4,19): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.

@@ -1,0 +1,1 @@
+foo_2.ts(3,14): error TS2339: Property 'x' does not exist on type 'typeof import("vs/foo_0")'.

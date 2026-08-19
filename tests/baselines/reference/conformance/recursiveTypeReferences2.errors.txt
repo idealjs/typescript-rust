@@ -1,0 +1,1 @@
+bug39372.js(25,7): error TS2322: Type '{}' is not assignable to type 'XMLObject<{ foo: string; }>'.

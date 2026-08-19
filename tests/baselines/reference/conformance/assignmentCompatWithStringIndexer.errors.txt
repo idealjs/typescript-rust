@@ -1,0 +1,10 @@
+assignmentCompatWithStringIndexer.ts(15,1): error TS2322: Type 'A' is not assignable to type '{ [x: string]: Derived; }'.
+assignmentCompatWithStringIndexer.ts(19,1): error TS2322: Type 'A' is not assignable to type '{ [x: string]: Derived2; }'.
+assignmentCompatWithStringIndexer.ts(33,5): error TS2322: Type 'A<Base>' is not assignable to type '{ [x: string]: Derived; }'.
+assignmentCompatWithStringIndexer.ts(41,5): error TS2322: Type 'A<Base>' is not assignable to type '{ [x: string]: Derived2; }'.
+assignmentCompatWithStringIndexer.ts(46,9): error TS2322: Type '{ [x: string]: Derived; }' is not assignable to type 'A<T>'.
+assignmentCompatWithStringIndexer.ts(46,14): error TS2454: Variable 'b3' is used before being assigned.
+assignmentCompatWithStringIndexer.ts(47,9): error TS2322: Type 'A<T>' is not assignable to type '{ [x: string]: Derived; }'.
+assignmentCompatWithStringIndexer.ts(50,9): error TS2322: Type '{ [x: string]: Derived2; }' is not assignable to type 'A<T>'.
+assignmentCompatWithStringIndexer.ts(50,14): error TS2454: Variable 'b4' is used before being assigned.
+assignmentCompatWithStringIndexer.ts(51,9): error TS2322: Type 'A<T>' is not assignable to type '{ [x: string]: Derived2; }'.

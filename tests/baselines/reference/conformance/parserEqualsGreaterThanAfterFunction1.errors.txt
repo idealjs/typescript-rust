@@ -1,0 +1,2 @@
+parserEqualsGreaterThanAfterFunction1.ts(1,9): error TS7010: '(Missing)', which lacks return-type annotation, implicitly has an 'any' return type.
+parserEqualsGreaterThanAfterFunction1.ts(1,10): error TS1003: Identifier expected.

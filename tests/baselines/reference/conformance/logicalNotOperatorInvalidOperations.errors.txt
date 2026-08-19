@@ -1,0 +1,2 @@
+logicalNotOperatorInvalidOperations.ts(8,16): error TS2365: Operator '+' cannot be applied to types 'boolean' and 'number'.
+logicalNotOperatorInvalidOperations.ts(11,16): error TS1109: Expression expected.

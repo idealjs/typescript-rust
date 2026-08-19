@@ -1,0 +1,1 @@
+/a.js(3,7): error TS2720: Class 'B' incorrectly implements class 'A'. Did you mean to extend 'A' and inherit its members as a subclass?

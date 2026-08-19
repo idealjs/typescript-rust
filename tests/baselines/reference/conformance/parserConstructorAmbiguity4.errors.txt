@@ -1,0 +1,3 @@
+parserConstructorAmbiguity4.ts(1,10): error TS2304: Cannot find name 'A'.
+parserConstructorAmbiguity4.ts(1,14): error TS2304: Cannot find name 'B'.
+parserConstructorAmbiguity4.ts(1,18): error TS2304: Cannot find name 'C'.

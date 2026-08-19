@@ -1,0 +1,1 @@
+/real-imports.mts(1,19): error TS2307: Cannot find module 'pkg' or its corresponding type declarations.

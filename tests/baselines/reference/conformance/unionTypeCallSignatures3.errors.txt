@@ -1,0 +1,1 @@
+unionTypeCallSignatures3.ts(11,1): error TS2454: Variable 'fUnion' is used before being assigned.

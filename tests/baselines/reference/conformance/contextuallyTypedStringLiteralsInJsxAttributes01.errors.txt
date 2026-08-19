@@ -1,0 +1,2 @@
+contextuallyTypedStringLiteralsInJsxAttributes01.tsx(15,15): error TS2322: Type '"f"' is not assignable to type '"A" | "B" | "C"'.
+contextuallyTypedStringLiteralsInJsxAttributes01.tsx(16,15): error TS2322: Type '"f"' is not assignable to type '"A" | "B" | "C"'.

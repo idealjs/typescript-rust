@@ -1,0 +1,2 @@
+FunctionDeclaration6_es6.ts(1,18): error TS2523: 'yield' expressions cannot be used in a parameter initializer.
+FunctionDeclaration6_es6.ts(1,18): error TS7057: 'yield' expression implicitly results in an 'any' type because its containing generator lacks a return-type annotation.

@@ -1,0 +1,10 @@
+contextualTypeWithUnionTypeMembers.ts(24,39): error TS2454: Variable 'i1' is used before being assigned.
+contextualTypeWithUnionTypeMembers.ts(25,39): error TS2454: Variable 'i2' is used before being assigned.
+contextualTypeWithUnionTypeMembers.ts(52,52): error TS2454: Variable 'i1' is used before being assigned.
+contextualTypeWithUnionTypeMembers.ts(52,56): error TS2454: Variable 'i2' is used before being assigned.
+contextualTypeWithUnionTypeMembers.ts(87,27): error TS2454: Variable 'i11' is used before being assigned.
+contextualTypeWithUnionTypeMembers.ts(88,27): error TS2454: Variable 'i21' is used before being assigned.
+contextualTypeWithUnionTypeMembers.ts(105,42): error TS2454: Variable 'i11' is used before being assigned.
+contextualTypeWithUnionTypeMembers.ts(105,47): error TS2454: Variable 'i21' is used before being assigned.
+contextualTypeWithUnionTypeMembers.ts(105,52): error TS2454: Variable 'i11' is used before being assigned.
+contextualTypeWithUnionTypeMembers.ts(105,59): error TS2454: Variable 'i21' is used before being assigned.

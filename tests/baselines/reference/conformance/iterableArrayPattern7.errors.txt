@@ -1,0 +1,1 @@
+iterableArrayPattern7.ts(17,5): error TS2740: Type 'Foo' is missing the following properties from type 'string[]': length, pop, push, concat, and 25 more.

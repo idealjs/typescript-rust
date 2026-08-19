@@ -1,0 +1,1 @@
+assignmentTypeNarrowing.ts(26,11): error TS2454: Variable 'a' is used before being assigned.

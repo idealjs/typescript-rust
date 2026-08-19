@@ -1,0 +1,2 @@
+overrideLateBindableName1.ts(16,3): error TS4114: This member must have an 'override' modifier because it overrides a member in the base class 'Base2'.
+overrideLateBindableName1.ts(22,12): error TS4113: This member cannot have an 'override' modifier because it is not declared in the base class 'Base3'.

@@ -1,0 +1,2 @@
+importAttributes5.ts(1,20): error TS2307: Cannot find module './first' or its corresponding type declarations.
+importAttributes5.ts(1,36): error TS1005: '}' expected.

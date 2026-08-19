@@ -1,0 +1,9 @@
+callNonGenericFunctionWithTypeArguments.ts(5,11): error TS2558: Expected 0 type arguments, but got 1.
+callNonGenericFunctionWithTypeArguments.ts(8,13): error TS2558: Expected 0 type arguments, but got 1.
+callNonGenericFunctionWithTypeArguments.ts(11,13): error TS2558: Expected 0 type arguments, but got 1.
+callNonGenericFunctionWithTypeArguments.ts(18,22): error TS2558: Expected 0 type arguments, but got 1.
+callNonGenericFunctionWithTypeArguments.ts(24,14): error TS2558: Expected 0 type arguments, but got 1.
+callNonGenericFunctionWithTypeArguments.ts(31,23): error TS2558: Expected 0 type arguments, but got 1.
+callNonGenericFunctionWithTypeArguments.ts(37,15): error TS2558: Expected 0 type arguments, but got 1.
+callNonGenericFunctionWithTypeArguments.ts(40,10): error TS2347: Untyped function calls may not accept type arguments.
+callNonGenericFunctionWithTypeArguments.ts(43,10): error TS2347: Untyped function calls may not accept type arguments.

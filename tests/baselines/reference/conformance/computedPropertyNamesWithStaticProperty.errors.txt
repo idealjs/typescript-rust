@@ -1,0 +1,6 @@
+computedPropertyNamesWithStaticProperty.ts(3,10): error TS2449: Class 'C1' used before its declaration.
+computedPropertyNamesWithStaticProperty.ts(6,10): error TS2449: Class 'C1' used before its declaration.
+computedPropertyNamesWithStaticProperty.ts(9,6): error TS2449: Class 'C1' used before its declaration.
+computedPropertyNamesWithStaticProperty.ts(14,10): error TS2449: Class 'C2' used before its declaration.
+computedPropertyNamesWithStaticProperty.ts(17,10): error TS2449: Class 'C2' used before its declaration.
+computedPropertyNamesWithStaticProperty.ts(20,6): error TS2449: Class 'C2' used before its declaration.

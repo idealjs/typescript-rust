@@ -1,0 +1,2 @@
+subtypingWithNumericIndexer.ts(32,11): error TS2415: Class 'B3<T>' incorrectly extends base class 'A<T>'.
+subtypingWithNumericIndexer.ts(36,11): error TS2415: Class 'B4<T>' incorrectly extends base class 'A<T>'.

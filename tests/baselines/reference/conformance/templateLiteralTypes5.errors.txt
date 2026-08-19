@@ -1,0 +1,3 @@
+templateLiteralTypes5.ts(10,7): error TS2322: Type '<T0 extends "a" | "b">(x: `${T0}`) => TypeMap[T0]' is not assignable to type 'F2'.
+templateLiteralTypes5.ts(13,11): error TS2322: Type 'T3' is not assignable to type '`${T3}`'.
+templateLiteralTypes5.ts(14,11): error TS2322: Type '`${T3}`' is not assignable to type 'T3'.

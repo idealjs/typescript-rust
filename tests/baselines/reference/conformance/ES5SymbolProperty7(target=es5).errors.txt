@@ -1,0 +1,1 @@
+ES5SymbolProperty7.ts(1,5): error TS2403: Subsequent variable declarations must have the same type.  Variable 'Symbol' must be of type 'SymbolConstructor', but here has type '{ iterator: any; }'.

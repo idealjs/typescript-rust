@@ -1,0 +1,4 @@
+/a.ts(2,25): error TS7016: Could not find a declaration file for module 'foo/sub'. '/node_modules/foo/sub.js' implicitly has an 'any' type.
+/a.ts(3,25): error TS7016: Could not find a declaration file for module 'bar/sub'. '/node_modules/bar/sub.js' implicitly has an 'any' type.
+/a.ts(5,30): error TS7016: Could not find a declaration file for module '@scope/foo/sub'. '/node_modules/@scope/foo/sub.js' implicitly has an 'any' type.
+/a.ts(6,30): error TS7016: Could not find a declaration file for module '@scope/bar/sub'. '/node_modules/@scope/bar/sub.js' implicitly has an 'any' type.

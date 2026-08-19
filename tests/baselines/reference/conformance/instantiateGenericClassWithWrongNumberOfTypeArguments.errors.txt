@@ -1,0 +1,5 @@
+instantiateGenericClassWithWrongNumberOfTypeArguments.ts(5,5): error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
+instantiateGenericClassWithWrongNumberOfTypeArguments.ts(8,15): error TS2558: Expected 1 type arguments, but got 2.
+instantiateGenericClassWithWrongNumberOfTypeArguments.ts(11,5): error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
+instantiateGenericClassWithWrongNumberOfTypeArguments.ts(12,5): error TS2564: Property 'y' has no initializer and is not definitely assigned in the constructor.
+instantiateGenericClassWithWrongNumberOfTypeArguments.ts(16,15): error TS2558: Expected 2 type arguments, but got 1.

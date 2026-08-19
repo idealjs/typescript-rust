@@ -11,7 +11,7 @@ use std::collections::HashMap;
 use std::sync::Arc;
 
 use crate::ast::node_data_generated::NodeData;
-use crate::ast::{Symbol, SymbolFlags, SyntaxKind};
+use crate::ast::{ModifierFlags, Symbol, SymbolFlags, SyntaxKind};
 use crate::checker::is_tuple_type;
 use crate::evaluator::EvalValue;
 use crate::jsnum;
@@ -1217,6 +1217,72 @@ impl Checker {
                     continue;
                 }
             };
+            // Private/protected member accessibility (Go propertyRelatedTo,
+            // relater.go ~L4313): private members only match the SAME
+            // declaration; both-private-different-declaration → the
+            // "separate declarations" chain entry (the nested line of
+            // TS2415 class-extends errors); one-private → the mismatch
+            // message; protected-source vs public-target → protected error.
+            {
+                let src_mod =
+                    crate::checker::exports::get_declaration_modifier_flags_from_symbol(source_prop);
+                let tgt_mod =
+                    crate::checker::exports::get_declaration_modifier_flags_from_symbol(target_prop);
+                if src_mod.intersects(ModifierFlags::Private)
+                    || tgt_mod.intersects(ModifierFlags::Private)
+                {
+                    let same_decl = match (
+                        &source_prop.value_declaration,
+                        &target_prop.value_declaration,
+                    ) {
+                        (Some(a), Some(b)) => Arc::ptr_eq(a, b),
+                        _ => false,
+                    };
+                    if !same_decl {
+                        if src_mod.intersects(ModifierFlags::Private)
+                            && tgt_mod.intersects(ModifierFlags::Private)
+                        {
+                            self.relater_report_error(
+                                crate::diagnostics::messages_generated::
+                                    TYPES_HAVE_SEPARATE_DECLARATIONS_OF_A_PRIVATE_PROPERTY_0,
+                                vec![target_prop.name.clone()],
+                            );
+                        } else {
+                            let private_side = if src_mod
+                                .intersects(ModifierFlags::Private)
+                            {
+                                self.type_to_string(source)
+                            } else {
+                                self.type_to_string(target)
+                            };
+                            let public_side = if src_mod
+                                .intersects(ModifierFlags::Private)
+                            {
+                                self.type_to_string(target)
+                            } else {
+                                self.type_to_string(source)
+                            };
+                            self.relater_report_error(
+                                crate::diagnostics::messages_generated::
+                                    PROPERTY_0_IS_PRIVATE_IN_TYPE_1_BUT_NOT_IN_TYPE_2,
+                                vec![target_prop.name.clone(), private_side, public_side],
+                            );
+                        }
+                        return false;
+                    }
+                } else if src_mod.intersects(ModifierFlags::Protected)
+                    && !tgt_mod.intersects(ModifierFlags::Protected)
+                {
+                    let src_str = self.type_to_string(source);
+                    let tgt_str = self.type_to_string(target);
+                    self.relater_report_error(
+                        crate::diagnostics::messages_generated::
+                            PROPERTY_0_IS_PROTECTED_IN_TYPE_1_BUT_PUBLIC_IN_TYPE_2,
+                        vec![target_prop.name.clone(), src_str, tgt_str],
+                    );
+                    return false;
+                }
+            }
             // Check that the source property type is related to the
             // target property type (depth check) under the SAME relation —
             // Go's `propertiesRelatedTo` recurses with the incoming

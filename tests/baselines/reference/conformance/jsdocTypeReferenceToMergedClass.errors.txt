@@ -1,0 +1,1 @@
+jsdocTypeReferenceToMergedClass.js(4,1): error TS2454: Variable 'p' is used before being assigned.

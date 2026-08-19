@@ -1,0 +1,7 @@
+templateLiteralTypes1.ts(40,5): error TS2322: Type 'T' is not assignable to type '{ [P in keyof T & string as `p_${P}`]: T[P]; }'.
+templateLiteralTypes1.ts(45,5): error TS2322: Type '{ [P in B as `p_${P}`]: T; }' is not assignable to type '{ [Q in A as `p_${Q}`]: U; }'.
+templateLiteralTypes1.ts(165,15): error TS1338: 'infer' declarations are only permitted in the 'extends' clause of a conditional type.
+templateLiteralTypes1.ts(197,16): error TS2590: Expression produces a union type that is too complex to represent.
+templateLiteralTypes1.ts(201,16): error TS2590: Expression produces a union type that is too complex to represent.
+templateLiteralTypes1.ts(205,16): error TS2590: Expression produces a union type that is too complex to represent.
+templateLiteralTypes1.ts(252,7): error TS2590: Expression produces a union type that is too complex to represent.

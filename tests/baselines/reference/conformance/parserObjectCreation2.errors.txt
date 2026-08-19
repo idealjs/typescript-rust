@@ -1,0 +1,1 @@
+parserObjectCreation2.ts(1,9): error TS2304: Cannot find name 'Foo'.

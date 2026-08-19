@@ -1,0 +1,1 @@
+0.js(10,20): error TS2694: Namespace 'exports' has no exported member 'SomeName'.

@@ -1,0 +1,6 @@
+genericCallWithObjectTypeArgsAndConstraints5.ts(4,5): error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
+genericCallWithObjectTypeArgsAndConstraints5.ts(8,5): error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
+genericCallWithObjectTypeArgsAndConstraints5.ts(9,5): error TS2564: Property 'y' has no initializer and is not definitely assigned in the constructor.
+genericCallWithObjectTypeArgsAndConstraints5.ts(18,17): error TS2345: Argument of type 'C' is not assignable to parameter of type 'D'.
+genericCallWithObjectTypeArgsAndConstraints5.ts(19,23): error TS2345: Argument of type '() => void' is not assignable to parameter of type '() => number'.
+genericCallWithObjectTypeArgsAndConstraints5.ts(22,24): error TS2345: Argument of type 'C' is not assignable to parameter of type 'T'.

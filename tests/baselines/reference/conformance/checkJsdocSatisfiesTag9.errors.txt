@@ -1,0 +1,1 @@
+/a.js(11,26): error TS2353: Object literal may only specify known properties, and 'd' does not exist in type 'Color'.

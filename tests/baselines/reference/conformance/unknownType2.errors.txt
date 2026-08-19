@@ -1,0 +1,1 @@
+unknownType2.ts(216,13): error TS2322: Type '"maybe" | "no" | "yes"' is not assignable to type 'SomeResponse'.

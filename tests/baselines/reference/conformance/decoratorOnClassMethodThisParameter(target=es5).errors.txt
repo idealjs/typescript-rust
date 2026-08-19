@@ -1,0 +1,3 @@
+decoratorOnClassMethodThisParameter.ts(4,12): error TS1433: Neither decorators nor modifiers may be applied to 'this' parameters.
+decoratorOnClassMethodThisParameter.ts(8,29): error TS1433: Neither decorators nor modifiers may be applied to 'this' parameters.
+decoratorOnClassMethodThisParameter.ts(8,30): error TS2680: A 'this' parameter must be the first parameter.

@@ -1,0 +1,1 @@
+eof.js(2,20): error TS2304: Cannot find name 'bad'.

@@ -1,0 +1,6 @@
+a.js(4,17): error TS2339: Property 'toFixed' does not exist on type 'number | "string"'.
+a.js(5,16): error TS2339: Property 'toFixed' does not exist on type 'number | "string"'.
+mod1.js(2,1): error TS2323: Cannot redeclare exported variable 'bothBefore'.
+mod1.js(4,1): error TS2323: Cannot redeclare exported variable 'bothBefore'.
+mod1.js(5,1): error TS2323: Cannot redeclare exported variable 'bothAfter'.
+mod1.js(10,1): error TS2323: Cannot redeclare exported variable 'bothAfter'.

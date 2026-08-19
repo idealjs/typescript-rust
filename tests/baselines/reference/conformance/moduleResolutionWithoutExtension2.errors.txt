@@ -1,0 +1,1 @@
+/src/buzz.mts(2,22): error TS2307: Cannot find module './foo' or its corresponding type declarations.

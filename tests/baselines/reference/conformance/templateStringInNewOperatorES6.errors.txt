@@ -1,0 +1,1 @@
+templateStringInNewOperatorES6.ts(1,13): error TS2351: This expression is not constructable.

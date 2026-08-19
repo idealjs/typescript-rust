@@ -1,0 +1,6 @@
+parameterInitializersForwardReferencing1.ts(3,20): error TS2373: Parameter 'bar' cannot reference identifier 'foo' declared after it.
+parameterInitializersForwardReferencing1.ts(13,20): error TS2373: Parameter 'bar' cannot reference identifier 'foo' declared after it.
+parameterInitializersForwardReferencing1.ts(21,18): error TS2372: Parameter 'a' cannot reference itself.
+parameterInitializersForwardReferencing1.ts(25,22): error TS2372: Parameter 'async' cannot reference itself.
+parameterInitializersForwardReferencing1.ts(29,15): error TS2373: Parameter '{[foo]: bar}' cannot reference identifier 'foo' declared after it.
+parameterInitializersForwardReferencing1.ts(29,15): error TS2448: Block-scoped variable 'foo' used before its declaration.

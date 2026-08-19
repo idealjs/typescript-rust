@@ -1,0 +1,10 @@
+overloadResolution.ts(27,5): error TS2769: No overload matches this call.
+overloadResolution.ts(41,11): error TS2345: Argument of type 'string' is not assignable to parameter of type 'number'.
+overloadResolution.ts(63,5): error TS2558: Expected 3 type arguments, but got 4.
+overloadResolution.ts(70,21): error TS2345: Argument of type 'number' is not assignable to parameter of type 'string'.
+overloadResolution.ts(71,21): error TS2345: Argument of type 'string' is not assignable to parameter of type 'number'.
+overloadResolution.ts(81,5): error TS2344: Type 'boolean' does not satisfy the constraint 'number'.
+overloadResolution.ts(84,5): error TS2769: No overload matches this call.
+overloadResolution.ts(85,11): error TS2769: No overload matches this call.
+overloadResolution.ts(91,5): error TS2403: Subsequent variable declarations must have the same type.  Variable 'n' must be of type 'number', but here has type 'string'.
+overloadResolution.ts(91,22): error TS2551: Property 'toFixed' does not exist on type 'string'. Did you mean 'fixed'?

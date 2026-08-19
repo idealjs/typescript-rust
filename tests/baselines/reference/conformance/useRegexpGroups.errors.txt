@@ -1,0 +1,11 @@
+useRegexpGroups.ts(4,12): error TS18047: 'result' is possibly 'null'.
+useRegexpGroups.ts(6,13): error TS18047: 'result' is possibly 'null'.
+useRegexpGroups.ts(6,13): error TS18048: 'result.groups' is possibly 'undefined'.
+useRegexpGroups.ts(7,13): error TS18047: 'result' is possibly 'null'.
+useRegexpGroups.ts(9,14): error TS18047: 'result' is possibly 'null'.
+useRegexpGroups.ts(9,14): error TS18048: 'result.groups' is possibly 'undefined'.
+useRegexpGroups.ts(10,14): error TS18047: 'result' is possibly 'null'.
+useRegexpGroups.ts(12,12): error TS18047: 'result' is possibly 'null'.
+useRegexpGroups.ts(12,12): error TS18048: 'result.groups' is possibly 'undefined'.
+useRegexpGroups.ts(13,12): error TS18047: 'result' is possibly 'null'.
+useRegexpGroups.ts(15,11): error TS2532: Object is possibly 'undefined'.

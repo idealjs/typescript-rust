@@ -1,0 +1,1 @@
+assignmentCompatWithGenericCallSignatures4.ts(12,1): error TS2322: Type '<T extends I2<T>>(z: T) => void' is not assignable to type '<T extends I2<I2<T>>>(z: T) => void'.

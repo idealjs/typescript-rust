@@ -1,0 +1,8 @@
+intrinsicTypes.ts(6,22): error TS2344: Type 'number' does not satisfy the constraint 'string'.
+intrinsicTypes.ts(13,22): error TS2344: Type 'number' does not satisfy the constraint 'string'.
+intrinsicTypes.ts(20,23): error TS2344: Type 'number' does not satisfy the constraint 'string'.
+intrinsicTypes.ts(27,25): error TS2344: Type 'number' does not satisfy the constraint 'string'.
+intrinsicTypes.ts(35,38): error TS2795: The 'intrinsic' keyword can only be used to declare compiler provided intrinsic types.
+intrinsicTypes.ts(40,5): error TS2322: Type 'string' is not assignable to type 'Uppercase<T>'.
+intrinsicTypes.ts(42,5): error TS2322: Type 'string' is not assignable to type 'Uppercase<U>'.
+intrinsicTypes.ts(43,5): error TS2322: Type 'Uppercase<T>' is not assignable to type 'Uppercase<U>'.

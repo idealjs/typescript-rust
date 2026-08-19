@@ -1,0 +1,14 @@
+conditionalOperatorConditoinIsAnyType.ts(26,1): error TS2873: This kind of expression is always falsy.
+conditionalOperatorConditoinIsAnyType.ts(27,1): error TS2873: This kind of expression is always falsy.
+conditionalOperatorConditoinIsAnyType.ts(28,1): error TS2873: This kind of expression is always falsy.
+conditionalOperatorConditoinIsAnyType.ts(29,1): error TS2872: This kind of expression is always truthy.
+conditionalOperatorConditoinIsAnyType.ts(30,1): error TS2872: This kind of expression is always truthy.
+conditionalOperatorConditoinIsAnyType.ts(31,1): error TS2873: This kind of expression is always falsy.
+conditionalOperatorConditoinIsAnyType.ts(49,20): error TS2873: This kind of expression is always falsy.
+conditionalOperatorConditoinIsAnyType.ts(50,24): error TS2873: This kind of expression is always falsy.
+conditionalOperatorConditoinIsAnyType.ts(51,23): error TS2873: This kind of expression is always falsy.
+conditionalOperatorConditoinIsAnyType.ts(52,23): error TS2872: This kind of expression is always truthy.
+conditionalOperatorConditoinIsAnyType.ts(53,23): error TS2872: This kind of expression is always truthy.
+conditionalOperatorConditoinIsAnyType.ts(54,32): error TS2873: This kind of expression is always falsy.
+conditionalOperatorConditoinIsAnyType.ts(55,32): error TS2873: This kind of expression is always falsy.
+conditionalOperatorConditoinIsAnyType.ts(56,32): error TS2872: This kind of expression is always truthy.

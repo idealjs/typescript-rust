@@ -1,0 +1,1 @@
+ModuleWithExportedAndNonExportedEnums.ts(10,11): error TS2339: Property 'Day' does not exist on type 'typeof A'.

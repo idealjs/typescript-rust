@@ -1,0 +1,1 @@
+index.ts(1,14): error TS2883: The inferred type of 'a' cannot be named without a reference to 'Thing' from './node_modules/inner/private'. This is likely not portable. A type annotation is necessary.

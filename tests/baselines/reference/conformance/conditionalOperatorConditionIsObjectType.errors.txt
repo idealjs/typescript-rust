@@ -1,0 +1,17 @@
+conditionalOperatorConditionIsObjectType.ts(28,1): error TS2872: This kind of expression is always truthy.
+conditionalOperatorConditionIsObjectType.ts(29,1): error TS2872: This kind of expression is always truthy.
+conditionalOperatorConditionIsObjectType.ts(30,1): error TS2872: This kind of expression is always truthy.
+conditionalOperatorConditionIsObjectType.ts(31,1): error TS2872: This kind of expression is always truthy.
+conditionalOperatorConditionIsObjectType.ts(32,1): error TS2872: This kind of expression is always truthy.
+conditionalOperatorConditionIsObjectType.ts(33,1): error TS2872: This kind of expression is always truthy.
+conditionalOperatorConditionIsObjectType.ts(36,1): error TS1345: An expression of type 'void' cannot be tested for truthiness.
+conditionalOperatorConditionIsObjectType.ts(39,1): error TS1345: An expression of type 'void' cannot be tested for truthiness.
+conditionalOperatorConditionIsObjectType.ts(51,20): error TS2872: This kind of expression is always truthy.
+conditionalOperatorConditionIsObjectType.ts(52,24): error TS2872: This kind of expression is always truthy.
+conditionalOperatorConditionIsObjectType.ts(53,23): error TS2872: This kind of expression is always truthy.
+conditionalOperatorConditionIsObjectType.ts(54,23): error TS2872: This kind of expression is always truthy.
+conditionalOperatorConditionIsObjectType.ts(55,23): error TS2872: This kind of expression is always truthy.
+conditionalOperatorConditionIsObjectType.ts(56,32): error TS2872: This kind of expression is always truthy.
+conditionalOperatorConditionIsObjectType.ts(58,20): error TS1345: An expression of type 'void' cannot be tested for truthiness.
+conditionalOperatorConditionIsObjectType.ts(61,23): error TS1345: An expression of type 'void' cannot be tested for truthiness.
+conditionalOperatorConditionIsObjectType.ts(63,32): error TS1345: An expression of type 'void' cannot be tested for truthiness.

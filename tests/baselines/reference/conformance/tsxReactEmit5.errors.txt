@@ -1,0 +1,1 @@
+test.d.ts(1,12): error TS7005: Variable 'React' implicitly has an 'any' type.

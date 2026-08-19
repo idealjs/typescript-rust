@@ -1,0 +1,1 @@
+/importer-cts.cts(10,10): error TS2614: Module '"./exporter.mjs"' has no exported member 'Oops'. Did you mean to use 'import Oops from "./exporter.mjs"' instead?

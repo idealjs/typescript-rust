@@ -1,0 +1,1 @@
+file.tsx(15,10): error TS2322: Type '{ editable: true; }' is not assignable to type 'IntrinsicAttributes & (IntrinsicClassAttributes<TextComponent> & (TextProps & { children?: ReactNode | undefined; }))'.

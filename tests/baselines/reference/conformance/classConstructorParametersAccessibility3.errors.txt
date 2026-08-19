@@ -1,0 +1,1 @@
+classConstructorParametersAccessibility3.ts(13,1): error TS2454: Variable 'd' is used before being assigned.

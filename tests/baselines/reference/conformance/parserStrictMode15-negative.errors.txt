@@ -1,0 +1,2 @@
+parserStrictMode15-negative.ts(2,8): error TS2304: Cannot find name 'a'.
+parserStrictMode15-negative.ts(2,10): error TS2304: Cannot find name 'b'.

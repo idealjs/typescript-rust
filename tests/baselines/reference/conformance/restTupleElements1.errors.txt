@@ -1,0 +1,13 @@
+restTupleElements1.ts(3,22): error TS1257: A required element cannot follow an optional element.
+restTupleElements1.ts(9,13): error TS2574: A rest element type must be an array type.
+restTupleElements1.ts(10,13): error TS2574: A rest element type must be an array type.
+restTupleElements1.ts(10,16): error TS17019: '?' at the end of a type is not valid TypeScript syntax. Did you mean to write 'string | undefined'?
+restTupleElements1.ts(23,31): error TS2344: Type 'number[]' does not satisfy the constraint '[number, ...number[]]'.
+restTupleElements1.ts(24,31): error TS2344: Type '[]' does not satisfy the constraint '[number, ...number[]]'.
+restTupleElements1.ts(29,18): error TS2344: Type 'number[]' does not satisfy the constraint '[number]'.
+restTupleElements1.ts(30,18): error TS2344: Type '[number, ...number[]]' does not satisfy the constraint '[number]'.
+restTupleElements1.ts(32,31): error TS2344: Type '[number, ...string[]]' does not satisfy the constraint '[number, ...number[]]'.
+restTupleElements1.ts(33,31): error TS2344: Type '[string, ...number[]]' does not satisfy the constraint '[number, ...number[]]'.
+restTupleElements1.ts(34,31): error TS2344: Type '[number, number, string]' does not satisfy the constraint '[number, ...number[]]'.
+restTupleElements1.ts(35,31): error TS2344: Type '[number, number, number, string]' does not satisfy the constraint '[number, ...number[]]'.
+restTupleElements1.ts(59,4): error TS2345: Argument of type '[]' is not assignable to parameter of type '[unknown, ...unknown[]]'.

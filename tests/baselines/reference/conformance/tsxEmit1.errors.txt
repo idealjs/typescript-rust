@@ -1,0 +1,13 @@
+file.tsx(8,5): error TS7034: Variable 'p' implicitly has type 'any' in some locations where its type cannot be determined.
+file.tsx(20,31): error TS18048: 'p' is possibly 'undefined'.
+file.tsx(20,35): error TS18048: 'p' is possibly 'undefined'.
+file.tsx(21,31): error TS18048: 'p' is possibly 'undefined'.
+file.tsx(21,35): error TS18048: 'p' is possibly 'undefined'.
+file.tsx(26,26): error TS7005: Variable 'p' implicitly has an 'any' type.
+file.tsx(26,32): error TS7005: Variable 'p' implicitly has an 'any' type.
+file.tsx(26,35): error TS7005: Variable 'p' implicitly has an 'any' type.
+file.tsx(27,26): error TS7005: Variable 'p' implicitly has an 'any' type.
+file.tsx(30,28): error TS7005: Variable 'p' implicitly has an 'any' type.
+file.tsx(30,34): error TS7005: Variable 'p' implicitly has an 'any' type.
+file.tsx(30,37): error TS7005: Variable 'p' implicitly has an 'any' type.
+file.tsx(31,28): error TS7005: Variable 'p' implicitly has an 'any' type.

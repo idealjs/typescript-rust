@@ -1,0 +1,6 @@
+objectLiteralShorthandPropertiesAssignmentErrorFromMissingIdentifier.ts(4,43): error TS2353: Object literal may only specify known properties, and 'name' does not exist in type '{ b: string; id: number; }'.
+objectLiteralShorthandPropertiesAssignmentErrorFromMissingIdentifier.ts(5,81): error TS2322: Type 'string' is not assignable to type 'number'.
+objectLiteralShorthandPropertiesAssignmentErrorFromMissingIdentifier.ts(5,87): error TS2322: Type 'number' is not assignable to type 'string'.
+objectLiteralShorthandPropertiesAssignmentErrorFromMissingIdentifier.ts(7,16): error TS7008: Member 'name' implicitly has an 'any' type.
+objectLiteralShorthandPropertiesAssignmentErrorFromMissingIdentifier.ts(7,22): error TS7008: Member 'id' implicitly has an 'any' type.
+objectLiteralShorthandPropertiesAssignmentErrorFromMissingIdentifier.ts(8,5): error TS2322: Type '{ name: number; id: string; }' is not assignable to type '{ name: string; id: number; }'.

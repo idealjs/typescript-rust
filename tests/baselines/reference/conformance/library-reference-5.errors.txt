@@ -1,0 +1,1 @@
+/node_modules/bar/node_modules/alpha/index.d.ts(1,13): error TS2403: Subsequent variable declarations must have the same type.  Variable 'alpha' must be of type 'any', but here has type '{}'.

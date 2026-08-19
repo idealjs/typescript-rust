@@ -1,0 +1,4 @@
+ClassAndModuleThatMergeWithStaticFunctionAndExportedFunctionThatShareAName.ts(4,12): error TS2300: Duplicate identifier 'Origin'.
+ClassAndModuleThatMergeWithStaticFunctionAndExportedFunctionThatShareAName.ts(8,21): error TS2300: Duplicate identifier 'Origin'.
+ClassAndModuleThatMergeWithStaticFunctionAndExportedFunctionThatShareAName.ts(16,16): error TS2300: Duplicate identifier 'Origin'.
+ClassAndModuleThatMergeWithStaticFunctionAndExportedFunctionThatShareAName.ts(20,25): error TS2300: Duplicate identifier 'Origin'.

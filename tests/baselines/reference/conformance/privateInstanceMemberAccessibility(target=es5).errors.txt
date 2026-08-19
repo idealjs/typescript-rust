@@ -1,0 +1,5 @@
+privateInstanceMemberAccessibility.ts(5,7): error TS2415: Class 'Derived' incorrectly extends base class 'Base'.
+privateInstanceMemberAccessibility.ts(6,15): error TS2340: Only public and protected methods of the base class are accessible via the 'super' keyword.
+privateInstanceMemberAccessibility.ts(8,22): error TS2340: Only public and protected methods of the base class are accessible via the 'super' keyword.
+privateInstanceMemberAccessibility.ts(10,15): error TS2304: Cannot find name 'super'.
+privateInstanceMemberAccessibility.ts(12,12): error TS1442: Expected '=' for property initializer.

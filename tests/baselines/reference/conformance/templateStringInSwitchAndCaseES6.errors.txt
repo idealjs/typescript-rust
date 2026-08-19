@@ -1,0 +1,2 @@
+templateStringInSwitchAndCaseES6.ts(2,10): error TS2678: Type '"abc"' is not comparable to type '"abc0abc"'.
+templateStringInSwitchAndCaseES6.ts(3,10): error TS2678: Type '"123"' is not comparable to type '"abc0abc"'.

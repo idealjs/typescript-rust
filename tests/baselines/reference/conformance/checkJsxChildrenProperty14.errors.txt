@@ -1,0 +1,1 @@
+file.tsx(44,11): error TS2746: This JSX tag's 'children' prop expects a single child of type 'Element', but multiple children were provided.

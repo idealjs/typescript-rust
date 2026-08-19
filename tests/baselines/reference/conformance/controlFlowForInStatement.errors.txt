@@ -1,0 +1,2 @@
+controlFlowForInStatement.ts(8,9): error TS2454: Variable 'cond' is used before being assigned.
+controlFlowForInStatement.ts(12,9): error TS2454: Variable 'cond' is used before being assigned.

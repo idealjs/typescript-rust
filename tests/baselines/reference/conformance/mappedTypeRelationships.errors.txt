@@ -1,0 +1,28 @@
+mappedTypeRelationships.ts(11,5): error TS2322: Type 'T[keyof T]' is not assignable to type 'U[keyof T]'.
+mappedTypeRelationships.ts(16,5): error TS2322: Type 'T[K]' is not assignable to type 'U[K]'.
+mappedTypeRelationships.ts(20,5): error TS2536: Type 'keyof U' cannot be used to index type 'T'.
+mappedTypeRelationships.ts(21,12): error TS2536: Type 'keyof U' cannot be used to index type 'T'.
+mappedTypeRelationships.ts(25,5): error TS2536: Type 'K' cannot be used to index type 'T'.
+mappedTypeRelationships.ts(26,12): error TS2536: Type 'K' cannot be used to index type 'T'.
+mappedTypeRelationships.ts(30,5): error TS2322: Type 'T[keyof T] | undefined' is not assignable to type 'T[keyof T]'.
+mappedTypeRelationships.ts(35,5): error TS2322: Type 'T[K] | undefined' is not assignable to type 'T[K]'.
+mappedTypeRelationships.ts(40,5): error TS2322: Type 'U[keyof T] | undefined' is not assignable to type 'T[keyof T]'.
+mappedTypeRelationships.ts(41,5): error TS2322: Type 'T[keyof T]' is not assignable to type 'U[keyof T] | undefined'.
+mappedTypeRelationships.ts(45,5): error TS2322: Type 'U[K] | undefined' is not assignable to type 'T[K]'.
+mappedTypeRelationships.ts(46,5): error TS2322: Type 'T[K]' is not assignable to type 'U[K] | undefined'.
+mappedTypeRelationships.ts(51,5): error TS2542: Index signature in type 'Readonly<T>' only permits reading.
+mappedTypeRelationships.ts(56,5): error TS2542: Index signature in type 'Readonly<T>' only permits reading.
+mappedTypeRelationships.ts(61,5): error TS2322: Type 'T[keyof T]' is not assignable to type 'U[keyof T]'.
+mappedTypeRelationships.ts(61,5): error TS2542: Index signature in type 'Readonly<U>' only permits reading.
+mappedTypeRelationships.ts(66,5): error TS2322: Type 'T[K]' is not assignable to type 'U[K]'.
+mappedTypeRelationships.ts(66,5): error TS2542: Index signature in type 'Readonly<U>' only permits reading.
+mappedTypeRelationships.ts(72,5): error TS2322: Type 'Partial<T>' is not assignable to type 'T'.
+mappedTypeRelationships.ts(78,5): error TS2322: Type 'Partial<Thing>' is not assignable to type 'Partial<T>'.
+mappedTypeRelationships.ts(88,5): error TS2322: Type 'Readonly<Thing>' is not assignable to type 'Readonly<T>'.
+mappedTypeRelationships.ts(127,5): error TS2322: Type 'Partial<U>' is not assignable to type 'Identity<U>'.
+mappedTypeRelationships.ts(143,5): error TS2322: Type '{ [P in keyof T]: T[P]; }' is not assignable to type '{ [P in keyof T]: U[P]; }'.
+mappedTypeRelationships.ts(148,5): error TS2322: Type '{ [P in keyof T]: T[P]; }' is not assignable to type '{ [P in keyof U]: U[P]; }'.
+mappedTypeRelationships.ts(153,5): error TS2322: Type '{ [P in K]: T[P]; }' is not assignable to type '{ [P in keyof T]: T[P]; }'.
+mappedTypeRelationships.ts(158,5): error TS2322: Type '{ [P in K]: T[P]; }' is not assignable to type '{ [P in keyof U]: U[P]; }'.
+mappedTypeRelationships.ts(163,5): error TS2322: Type '{ [P in K]: T[P]; }' is not assignable to type '{ [P in keyof T]: U[P]; }'.
+mappedTypeRelationships.ts(168,5): error TS2322: Type '{ [P in K]: T[P]; }' is not assignable to type '{ [P in K]: U[P]; }'.

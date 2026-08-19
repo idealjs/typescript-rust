@@ -1,0 +1,6 @@
+typeAliases.ts(28,12): error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
+typeAliases.ts(55,7): error TS2454: Variable 'x13_1' is used before being assigned.
+typeAliases.ts(55,14): error TS2454: Variable 'x13_2' is used before being assigned.
+typeAliases.ts(56,7): error TS2454: Variable 'x13_2' is used before being assigned.
+typeAliases.ts(56,14): error TS2454: Variable 'x13_1' is used before being assigned.
+typeAliases.ts(77,5): error TS2454: Variable 'x' is used before being assigned.

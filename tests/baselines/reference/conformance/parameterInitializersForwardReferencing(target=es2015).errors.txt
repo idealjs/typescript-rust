@@ -1,0 +1,9 @@
+parameterInitializersForwardReferencing.ts(6,20): error TS2373: Parameter 'a' cannot reference identifier 'b' declared after it.
+parameterInitializersForwardReferencing.ts(11,21): error TS2373: Parameter 'a' cannot reference identifier 'b' declared after it.
+parameterInitializersForwardReferencing.ts(11,28): error TS2373: Parameter 'b' cannot reference identifier 'c' declared after it.
+parameterInitializersForwardReferencing.ts(17,21): error TS2304: Cannot find name 'b'.
+parameterInitializersForwardReferencing.ts(32,21): error TS2373: Parameter 'a' cannot reference identifier 'b' declared after it.
+parameterInitializersForwardReferencing.ts(33,16): error TS2373: Parameter 'a' cannot reference identifier 'b' declared after it.
+parameterInitializersForwardReferencing.ts(37,14): error TS2373: Parameter 'a' cannot reference identifier 'b' declared after it.
+parameterInitializersForwardReferencing.ts(37,21): error TS2373: Parameter 'b' cannot reference identifier 'c' declared after it.
+parameterInitializersForwardReferencing.ts(37,28): error TS2304: Cannot find name 'd'.

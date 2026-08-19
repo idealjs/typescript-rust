@@ -1,0 +1,2 @@
+parserES3Accessors4.ts(1,15): error TS7032: Property 'Foo' implicitly has type 'any', because its set accessor lacks a parameter type annotation.
+parserES3Accessors4.ts(1,19): error TS7006: Parameter 'a' implicitly has an 'any' type.

@@ -1,0 +1,3 @@
+controlFlowDeleteOperator.ts(10,12): error TS2790: The operand of a 'delete' operator must be optional.
+controlFlowDeleteOperator.ts(14,12): error TS1102: 'delete' cannot be called on an identifier in strict mode.
+controlFlowDeleteOperator.ts(14,12): error TS2703: The operand of a 'delete' operator must be a property reference.

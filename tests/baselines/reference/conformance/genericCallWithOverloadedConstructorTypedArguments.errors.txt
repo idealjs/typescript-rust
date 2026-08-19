@@ -1,0 +1,10 @@
+genericCallWithOverloadedConstructorTypedArguments.ts(11,23): error TS2769: No overload matches this call.
+genericCallWithOverloadedConstructorTypedArguments.ts(14,18): error TS2454: Variable 'a' is used before being assigned.
+genericCallWithOverloadedConstructorTypedArguments.ts(16,19): error TS2454: Variable 'b' is used before being assigned.
+genericCallWithOverloadedConstructorTypedArguments.ts(28,19): error TS2454: Variable 'a' is used before being assigned.
+genericCallWithOverloadedConstructorTypedArguments.ts(30,19): error TS2454: Variable 'b' is used before being assigned.
+genericCallWithOverloadedConstructorTypedArguments.ts(36,19): error TS2454: Variable 'a' is used before being assigned.
+genericCallWithOverloadedConstructorTypedArguments.ts(37,19): error TS2454: Variable 'b' is used before being assigned.
+genericCallWithOverloadedConstructorTypedArguments.ts(43,23): error TS2454: Variable 'b' is used before being assigned.
+genericCallWithOverloadedConstructorTypedArguments.ts(46,23): error TS2454: Variable 'c' is used before being assigned.
+genericCallWithOverloadedConstructorTypedArguments.ts(47,23): error TS2454: Variable 'c2' is used before being assigned.

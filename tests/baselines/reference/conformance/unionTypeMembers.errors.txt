@@ -1,0 +1,5 @@
+unionTypeMembers.ts(44,38): error TS2345: Argument of type 'string | number' is not assignable to parameter of type 'never'.
+unionTypeMembers.ts(51,3): error TS2339: Property 'propertyOnlyInI1' does not exist on type 'I1<number> | I2<number>'.
+unionTypeMembers.ts(52,3): error TS2339: Property 'propertyOnlyInI2' does not exist on type 'I1<number> | I2<number>'.
+unionTypeMembers.ts(53,3): error TS2339: Property 'methodOnlyInI1' does not exist on type 'I1<number> | I2<number>'.
+unionTypeMembers.ts(54,3): error TS2339: Property 'methodOnlyInI2' does not exist on type 'I1<number> | I2<number>'.

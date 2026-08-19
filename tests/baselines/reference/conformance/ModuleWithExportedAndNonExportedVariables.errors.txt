@@ -1,0 +1,1 @@
+ModuleWithExportedAndNonExportedVariables.ts(11,11): error TS2339: Property 'y' does not exist on type 'typeof A'.

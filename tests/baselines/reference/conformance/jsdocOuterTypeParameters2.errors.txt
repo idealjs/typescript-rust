@@ -1,0 +1,2 @@
+jsdocOuterTypeParameters1.js(1,14): error TS2355: A function whose declared type is neither 'undefined', 'void', nor 'any' must return a value.
+jsdocOuterTypeParameters1.js(7,35): error TS2339: Property 'foo' does not exist on type 'Bar'.

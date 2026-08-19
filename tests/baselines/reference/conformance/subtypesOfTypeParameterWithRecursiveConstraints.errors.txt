@@ -1,0 +1,45 @@
+subtypesOfTypeParameterWithRecursiveConstraints.ts(3,16): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
+subtypesOfTypeParameterWithRecursiveConstraints.ts(58,9): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
+subtypesOfTypeParameterWithRecursiveConstraints.ts(63,9): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
+subtypesOfTypeParameterWithRecursiveConstraints.ts(68,9): error TS2411: Property 'foo' of type 'U' is not assignable to 'string' index type 'T'.
+subtypesOfTypeParameterWithRecursiveConstraints.ts(68,9): error TS2416: Property 'foo' in type 'D2<T, U, V>' is not assignable to the same property in base type 'Base<T>'.
+subtypesOfTypeParameterWithRecursiveConstraints.ts(68,9): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
+subtypesOfTypeParameterWithRecursiveConstraints.ts(73,9): error TS2411: Property 'foo' of type 'V' is not assignable to 'string' index type 'T'.
+subtypesOfTypeParameterWithRecursiveConstraints.ts(73,9): error TS2416: Property 'foo' in type 'D3<T, U, V>' is not assignable to the same property in base type 'Base<T>'.
+subtypesOfTypeParameterWithRecursiveConstraints.ts(73,9): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
+subtypesOfTypeParameterWithRecursiveConstraints.ts(78,9): error TS2411: Property 'foo' of type 'T' is not assignable to 'string' index type 'U'.
+subtypesOfTypeParameterWithRecursiveConstraints.ts(78,9): error TS2416: Property 'foo' in type 'D4<T, U, V>' is not assignable to the same property in base type 'Base<U>'.
+subtypesOfTypeParameterWithRecursiveConstraints.ts(78,9): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
+subtypesOfTypeParameterWithRecursiveConstraints.ts(83,9): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
+subtypesOfTypeParameterWithRecursiveConstraints.ts(88,9): error TS2411: Property 'foo' of type 'V' is not assignable to 'string' index type 'U'.
+subtypesOfTypeParameterWithRecursiveConstraints.ts(88,9): error TS2416: Property 'foo' in type 'D6<T, U, V>' is not assignable to the same property in base type 'Base<U>'.
+subtypesOfTypeParameterWithRecursiveConstraints.ts(88,9): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
+subtypesOfTypeParameterWithRecursiveConstraints.ts(93,9): error TS2411: Property 'foo' of type 'T' is not assignable to 'string' index type 'V'.
+subtypesOfTypeParameterWithRecursiveConstraints.ts(93,9): error TS2416: Property 'foo' in type 'D7<T, U, V>' is not assignable to the same property in base type 'Base<V>'.
+subtypesOfTypeParameterWithRecursiveConstraints.ts(93,9): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
+subtypesOfTypeParameterWithRecursiveConstraints.ts(98,9): error TS2411: Property 'foo' of type 'U' is not assignable to 'string' index type 'V'.
+subtypesOfTypeParameterWithRecursiveConstraints.ts(98,9): error TS2416: Property 'foo' in type 'D8<T, U, V>' is not assignable to the same property in base type 'Base<V>'.
+subtypesOfTypeParameterWithRecursiveConstraints.ts(98,9): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
+subtypesOfTypeParameterWithRecursiveConstraints.ts(103,9): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
+subtypesOfTypeParameterWithRecursiveConstraints.ts(110,9): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
+subtypesOfTypeParameterWithRecursiveConstraints.ts(115,9): error TS2416: Property 'foo' in type 'D1<T, U, V>' is not assignable to the same property in base type 'Base2<T>'.
+subtypesOfTypeParameterWithRecursiveConstraints.ts(115,9): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
+subtypesOfTypeParameterWithRecursiveConstraints.ts(120,9): error TS2411: Property 'foo' of type 'U' is not assignable to 'string' index type 'T'.
+subtypesOfTypeParameterWithRecursiveConstraints.ts(120,9): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
+subtypesOfTypeParameterWithRecursiveConstraints.ts(125,9): error TS2411: Property 'foo' of type 'V' is not assignable to 'string' index type 'T'.
+subtypesOfTypeParameterWithRecursiveConstraints.ts(125,9): error TS2416: Property 'foo' in type 'D3<T, U, V>' is not assignable to the same property in base type 'Base2<T>'.
+subtypesOfTypeParameterWithRecursiveConstraints.ts(125,9): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
+subtypesOfTypeParameterWithRecursiveConstraints.ts(130,9): error TS2411: Property 'foo' of type 'T' is not assignable to 'string' index type 'U'.
+subtypesOfTypeParameterWithRecursiveConstraints.ts(130,9): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
+subtypesOfTypeParameterWithRecursiveConstraints.ts(135,9): error TS2416: Property 'foo' in type 'D5<T, U, V>' is not assignable to the same property in base type 'Base2<U>'.
+subtypesOfTypeParameterWithRecursiveConstraints.ts(135,9): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
+subtypesOfTypeParameterWithRecursiveConstraints.ts(140,9): error TS2411: Property 'foo' of type 'V' is not assignable to 'string' index type 'U'.
+subtypesOfTypeParameterWithRecursiveConstraints.ts(140,9): error TS2416: Property 'foo' in type 'D6<T, U, V>' is not assignable to the same property in base type 'Base2<U>'.
+subtypesOfTypeParameterWithRecursiveConstraints.ts(140,9): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
+subtypesOfTypeParameterWithRecursiveConstraints.ts(145,9): error TS2411: Property 'foo' of type 'T' is not assignable to 'string' index type 'V'.
+subtypesOfTypeParameterWithRecursiveConstraints.ts(145,9): error TS2416: Property 'foo' in type 'D7<T, U, V>' is not assignable to the same property in base type 'Base2<V>'.
+subtypesOfTypeParameterWithRecursiveConstraints.ts(145,9): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
+subtypesOfTypeParameterWithRecursiveConstraints.ts(150,9): error TS2411: Property 'foo' of type 'U' is not assignable to 'string' index type 'V'.
+subtypesOfTypeParameterWithRecursiveConstraints.ts(150,9): error TS2416: Property 'foo' in type 'D8<T, U, V>' is not assignable to the same property in base type 'Base2<V>'.
+subtypesOfTypeParameterWithRecursiveConstraints.ts(150,9): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
+subtypesOfTypeParameterWithRecursiveConstraints.ts(155,9): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.

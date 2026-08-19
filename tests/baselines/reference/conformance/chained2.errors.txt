@@ -1,0 +1,4 @@
+/d.ts(2,11): error TS2339: Property 'A' does not exist on type 'typeof import("/b")'.
+/d.ts(3,11): error TS2339: Property 'B' does not exist on type 'typeof import("/b")'.
+/d.ts(4,7): error TS2741: Property 'a' is missing in type '{}' but required in type 'A'.
+/d.ts(5,7): error TS2741: Property 'a' is missing in type '{}' but required in type 'A'.

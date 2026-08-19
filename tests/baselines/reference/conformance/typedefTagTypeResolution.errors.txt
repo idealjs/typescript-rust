@@ -1,0 +1,2 @@
+github20832.js(2,15): error TS2304: Cannot find name 'U'.
+github20832.js(17,12): error TS2304: Cannot find name 'V'.

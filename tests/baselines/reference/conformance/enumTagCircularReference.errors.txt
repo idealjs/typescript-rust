@@ -1,0 +1,1 @@
+bug27142.js(1,12): error TS2456: Type alias 'E' circularly references itself.

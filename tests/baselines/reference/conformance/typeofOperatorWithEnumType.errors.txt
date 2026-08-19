@@ -1,0 +1,1 @@
+typeofOperatorWithEnumType.ts(22,1): error TS2695: Left side of comma operator is unused and has no side effects.

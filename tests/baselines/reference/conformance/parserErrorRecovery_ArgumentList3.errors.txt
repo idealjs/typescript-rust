@@ -1,0 +1,3 @@
+parserErrorRecovery_ArgumentList3.ts(2,4): error TS2304: Cannot find name 'bar'.
+parserErrorRecovery_ArgumentList3.ts(2,8): error TS2304: Cannot find name 'a'.
+parserErrorRecovery_ArgumentList3.ts(3,4): error TS1135: Argument expression expected.

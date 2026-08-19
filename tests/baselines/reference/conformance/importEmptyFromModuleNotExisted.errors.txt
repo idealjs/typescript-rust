@@ -1,0 +1,1 @@
+importEmptyFromModuleNotExisted.ts(1,16): error TS2307: Cannot find module 'module-not-existed' or its corresponding type declarations.

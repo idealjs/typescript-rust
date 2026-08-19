@@ -1,0 +1,8 @@
+subtypesOfTypeParameterWithConstraints2.ts(38,12): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
+subtypesOfTypeParameterWithConstraints2.ts(39,15): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
+subtypesOfTypeParameterWithConstraints2.ts(45,11): error TS2564: Property 'baz' has no initializer and is not definitely assigned in the constructor.
+subtypesOfTypeParameterWithConstraints2.ts(101,21): error TS2454: Variable 'i1' is used before being assigned.
+subtypesOfTypeParameterWithConstraints2.ts(107,22): error TS2454: Variable 'c1' is used before being assigned.
+subtypesOfTypeParameterWithConstraints2.ts(113,22): error TS2454: Variable 'c2' is used before being assigned.
+subtypesOfTypeParameterWithConstraints2.ts(127,22): error TS2454: Variable 'af' is used before being assigned.
+subtypesOfTypeParameterWithConstraints2.ts(133,22): error TS2454: Variable 'ac' is used before being assigned.

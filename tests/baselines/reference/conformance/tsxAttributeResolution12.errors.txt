@@ -1,0 +1,3 @@
+file.tsx(25,11): error TS2322: Type '{}' is not assignable to type 'IntrinsicAttributes & { reqd: any; }'.
+file.tsx(28,11): error TS2322: Type '{}' is not assignable to type 'IntrinsicAttributes & { reqd: any; }'.
+react.d.ts(6,3): error TS7008: Member 'props' implicitly has an 'any' type.

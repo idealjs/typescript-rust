@@ -1,0 +1,1 @@
+computedPropertyNames23_ES5.ts(6,12): error TS2465: 'this' cannot be referenced in a computed property name.

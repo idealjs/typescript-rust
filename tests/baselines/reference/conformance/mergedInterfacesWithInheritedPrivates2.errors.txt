@@ -1,0 +1,5 @@
+mergedInterfacesWithInheritedPrivates2.ts(17,7): error TS2420: Class 'D' incorrectly implements interface 'A'.
+mergedInterfacesWithInheritedPrivates2.ts(23,7): error TS2415: Class 'E' incorrectly extends base class 'C2'.
+mergedInterfacesWithInheritedPrivates2.ts(23,7): error TS2420: Class 'E' incorrectly implements interface 'A'.
+mergedInterfacesWithInheritedPrivates2.ts(30,11): error TS2341: Property 'x' is private and only accessible within class 'C'.
+mergedInterfacesWithInheritedPrivates2.ts(31,12): error TS2341: Property 'w' is private and only accessible within class 'C2'.

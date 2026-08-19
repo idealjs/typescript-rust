@@ -1,0 +1,4 @@
+multipleExportDefault5.ts(1,25): error TS2323: Cannot redeclare exported variable 'default'.
+multipleExportDefault5.ts(1,25): error TS2814: Function with bodies can only merge with classes that are ambient.
+multipleExportDefault5.ts(2,22): error TS2323: Cannot redeclare exported variable 'default'.
+multipleExportDefault5.ts(2,22): error TS2813: Class declaration cannot implement overload list for 'default'.

@@ -1,0 +1,6 @@
+file.tsx(22,10): error TS2739: Type '{}' is missing the following properties from type 'PoisonedProp': x, y
+file.tsx(23,10): error TS2739: Type '{}' is missing the following properties from type 'PoisonedProp': x, y
+file.tsx(24,19): error TS2322: Type 'boolean' is not assignable to type 'string'.
+file.tsx(24,21): error TS2322: Type 'true' is not assignable to type '"2"'.
+file.tsx(25,10): error TS2322: Type '{ x: number; y: "2"; }' is not assignable to type 'PoisonedProp'.
+file.tsx(26,40): error TS2322: Type '{ x: number; y: "2"; X: string; }' is not assignable to type 'IntrinsicAttributes & IntrinsicClassAttributes<Poisoned> & PoisonedProp & { children?: ReactNode | undefined; }'.

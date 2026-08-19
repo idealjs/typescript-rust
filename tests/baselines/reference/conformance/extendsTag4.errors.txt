@@ -1,0 +1,1 @@
+foo.js(11,1): error TS8022: JSDoc '@extends' is not attached to a class.

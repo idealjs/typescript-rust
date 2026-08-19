@@ -1,0 +1,5 @@
+a.js(18,1): error TS2322: Type 'Covariant<unknown>' is not assignable to type 'Covariant<string>'.
+a.js(36,1): error TS2322: Type 'Contravariant<string>' is not assignable to type 'Contravariant<unknown>'.
+a.js(55,1): error TS2322: Type 'Invariant<string>' is not assignable to type 'Invariant<unknown>'.
+a.js(56,1): error TS2322: Type 'Invariant<unknown>' is not assignable to type 'Invariant<string>'.
+a.js(59,14): error TS1274: 'in' modifier can only appear on a type parameter of a class, interface or type alias

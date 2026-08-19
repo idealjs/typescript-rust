@@ -1,0 +1,1 @@
+instanceMemberAssignsToClassPrototype.ts(7,9): error TS2322: Type '() => void' is not assignable to type '(x: number) => number'.

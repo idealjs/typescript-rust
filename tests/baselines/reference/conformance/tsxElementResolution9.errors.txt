@@ -1,0 +1,6 @@
+file.tsx(2,22): error TS7008: Member 'something' implicitly has an 'any' type.
+file.tsx(11,2): error TS2769: No overload matches this call.
+file.tsx(18,2): error TS2769: No overload matches this call.
+file.tsx(18,2): error TS2786: 'Obj2' cannot be used as a JSX component.
+file.tsx(25,2): error TS2769: No overload matches this call.
+file.tsx(25,2): error TS2786: 'Obj3' cannot be used as a JSX component.

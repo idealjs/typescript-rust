@@ -1,0 +1,88 @@
+index.cjs(51,1): error TS8002: 'import ... =' can only be used in TypeScript files.
+index.cjs(52,1): error TS8002: 'import ... =' can only be used in TypeScript files.
+index.cjs(53,1): error TS8002: 'import ... =' can only be used in TypeScript files.
+index.cjs(54,1): error TS8002: 'import ... =' can only be used in TypeScript files.
+index.cjs(55,1): error TS8002: 'import ... =' can only be used in TypeScript files.
+index.cjs(56,1): error TS8002: 'import ... =' can only be used in TypeScript files.
+index.cjs(57,1): error TS8002: 'import ... =' can only be used in TypeScript files.
+index.cjs(58,1): error TS8002: 'import ... =' can only be used in TypeScript files.
+index.cjs(59,1): error TS8002: 'import ... =' can only be used in TypeScript files.
+index.cjs(60,1): error TS8002: 'import ... =' can only be used in TypeScript files.
+index.cjs(61,1): error TS8002: 'import ... =' can only be used in TypeScript files.
+index.cjs(75,21): error TS2307: Cannot find module './' or its corresponding type declarations.
+index.cjs(76,21): error TS2835: Relative import paths need explicit file extensions in ECMAScript imports when '--moduleResolution' is 'node16' or 'nodenext'. Did you mean './index.mjs'?
+index.cjs(77,21): error TS2834: Relative import paths need explicit file extensions in ECMAScript imports when '--moduleResolution' is 'node16' or 'nodenext'. Consider adding an extension to the import path.
+index.cjs(78,21): error TS2834: Relative import paths need explicit file extensions in ECMAScript imports when '--moduleResolution' is 'node16' or 'nodenext'. Consider adding an extension to the import path.
+index.cjs(79,21): error TS2835: Relative import paths need explicit file extensions in ECMAScript imports when '--moduleResolution' is 'node16' or 'nodenext'. Did you mean './subfolder/index.mjs'?
+index.cjs(80,21): error TS2834: Relative import paths need explicit file extensions in ECMAScript imports when '--moduleResolution' is 'node16' or 'nodenext'. Consider adding an extension to the import path.
+index.cjs(81,21): error TS2834: Relative import paths need explicit file extensions in ECMAScript imports when '--moduleResolution' is 'node16' or 'nodenext'. Consider adding an extension to the import path.
+index.cjs(82,21): error TS2835: Relative import paths need explicit file extensions in ECMAScript imports when '--moduleResolution' is 'node16' or 'nodenext'. Did you mean './subfolder2/index.mjs'?
+index.cjs(83,21): error TS2834: Relative import paths need explicit file extensions in ECMAScript imports when '--moduleResolution' is 'node16' or 'nodenext'. Consider adding an extension to the import path.
+index.cjs(84,21): error TS2834: Relative import paths need explicit file extensions in ECMAScript imports when '--moduleResolution' is 'node16' or 'nodenext'. Consider adding an extension to the import path.
+index.cjs(85,21): error TS2835: Relative import paths need explicit file extensions in ECMAScript imports when '--moduleResolution' is 'node16' or 'nodenext'. Did you mean './subfolder2/another/index.mjs'?
+index.js(14,22): error TS2307: Cannot find module './' or its corresponding type declarations.
+index.js(15,22): error TS2835: Relative import paths need explicit file extensions in ECMAScript imports when '--moduleResolution' is 'node16' or 'nodenext'. Did you mean './index.mjs'?
+index.js(16,22): error TS2834: Relative import paths need explicit file extensions in ECMAScript imports when '--moduleResolution' is 'node16' or 'nodenext'. Consider adding an extension to the import path.
+index.js(17,22): error TS2834: Relative import paths need explicit file extensions in ECMAScript imports when '--moduleResolution' is 'node16' or 'nodenext'. Consider adding an extension to the import path.
+index.js(18,22): error TS2835: Relative import paths need explicit file extensions in ECMAScript imports when '--moduleResolution' is 'node16' or 'nodenext'. Did you mean './subfolder/index.mjs'?
+index.js(19,22): error TS2834: Relative import paths need explicit file extensions in ECMAScript imports when '--moduleResolution' is 'node16' or 'nodenext'. Consider adding an extension to the import path.
+index.js(20,22): error TS2834: Relative import paths need explicit file extensions in ECMAScript imports when '--moduleResolution' is 'node16' or 'nodenext'. Consider adding an extension to the import path.
+index.js(21,22): error TS2835: Relative import paths need explicit file extensions in ECMAScript imports when '--moduleResolution' is 'node16' or 'nodenext'. Did you mean './subfolder2/index.mjs'?
+index.js(22,22): error TS2834: Relative import paths need explicit file extensions in ECMAScript imports when '--moduleResolution' is 'node16' or 'nodenext'. Consider adding an extension to the import path.
+index.js(23,22): error TS2834: Relative import paths need explicit file extensions in ECMAScript imports when '--moduleResolution' is 'node16' or 'nodenext'. Consider adding an extension to the import path.
+index.js(24,22): error TS2835: Relative import paths need explicit file extensions in ECMAScript imports when '--moduleResolution' is 'node16' or 'nodenext'. Did you mean './subfolder2/another/index.mjs'?
+index.js(50,1): error TS8002: 'import ... =' can only be used in TypeScript files.
+index.js(51,1): error TS8002: 'import ... =' can only be used in TypeScript files.
+index.js(52,1): error TS8002: 'import ... =' can only be used in TypeScript files.
+index.js(53,1): error TS8002: 'import ... =' can only be used in TypeScript files.
+index.js(54,1): error TS8002: 'import ... =' can only be used in TypeScript files.
+index.js(55,1): error TS8002: 'import ... =' can only be used in TypeScript files.
+index.js(56,1): error TS8002: 'import ... =' can only be used in TypeScript files.
+index.js(57,1): error TS8002: 'import ... =' can only be used in TypeScript files.
+index.js(58,1): error TS8002: 'import ... =' can only be used in TypeScript files.
+index.js(59,1): error TS8002: 'import ... =' can only be used in TypeScript files.
+index.js(60,1): error TS8002: 'import ... =' can only be used in TypeScript files.
+index.js(74,21): error TS2307: Cannot find module './' or its corresponding type declarations.
+index.js(75,21): error TS2835: Relative import paths need explicit file extensions in ECMAScript imports when '--moduleResolution' is 'node16' or 'nodenext'. Did you mean './index.mjs'?
+index.js(76,21): error TS2834: Relative import paths need explicit file extensions in ECMAScript imports when '--moduleResolution' is 'node16' or 'nodenext'. Consider adding an extension to the import path.
+index.js(77,21): error TS2834: Relative import paths need explicit file extensions in ECMAScript imports when '--moduleResolution' is 'node16' or 'nodenext'. Consider adding an extension to the import path.
+index.js(78,21): error TS2835: Relative import paths need explicit file extensions in ECMAScript imports when '--moduleResolution' is 'node16' or 'nodenext'. Did you mean './subfolder/index.mjs'?
+index.js(79,21): error TS2834: Relative import paths need explicit file extensions in ECMAScript imports when '--moduleResolution' is 'node16' or 'nodenext'. Consider adding an extension to the import path.
+index.js(80,21): error TS2834: Relative import paths need explicit file extensions in ECMAScript imports when '--moduleResolution' is 'node16' or 'nodenext'. Consider adding an extension to the import path.
+index.js(81,21): error TS2835: Relative import paths need explicit file extensions in ECMAScript imports when '--moduleResolution' is 'node16' or 'nodenext'. Did you mean './subfolder2/index.mjs'?
+index.js(82,21): error TS2834: Relative import paths need explicit file extensions in ECMAScript imports when '--moduleResolution' is 'node16' or 'nodenext'. Consider adding an extension to the import path.
+index.js(83,21): error TS2834: Relative import paths need explicit file extensions in ECMAScript imports when '--moduleResolution' is 'node16' or 'nodenext'. Consider adding an extension to the import path.
+index.js(84,21): error TS2835: Relative import paths need explicit file extensions in ECMAScript imports when '--moduleResolution' is 'node16' or 'nodenext'. Did you mean './subfolder2/another/index.mjs'?
+index.mjs(14,22): error TS2307: Cannot find module './' or its corresponding type declarations.
+index.mjs(15,22): error TS2835: Relative import paths need explicit file extensions in ECMAScript imports when '--moduleResolution' is 'node16' or 'nodenext'. Did you mean './index.mjs'?
+index.mjs(16,22): error TS2834: Relative import paths need explicit file extensions in ECMAScript imports when '--moduleResolution' is 'node16' or 'nodenext'. Consider adding an extension to the import path.
+index.mjs(17,22): error TS2834: Relative import paths need explicit file extensions in ECMAScript imports when '--moduleResolution' is 'node16' or 'nodenext'. Consider adding an extension to the import path.
+index.mjs(18,22): error TS2835: Relative import paths need explicit file extensions in ECMAScript imports when '--moduleResolution' is 'node16' or 'nodenext'. Did you mean './subfolder/index.mjs'?
+index.mjs(19,22): error TS2834: Relative import paths need explicit file extensions in ECMAScript imports when '--moduleResolution' is 'node16' or 'nodenext'. Consider adding an extension to the import path.
+index.mjs(20,22): error TS2834: Relative import paths need explicit file extensions in ECMAScript imports when '--moduleResolution' is 'node16' or 'nodenext'. Consider adding an extension to the import path.
+index.mjs(21,22): error TS2835: Relative import paths need explicit file extensions in ECMAScript imports when '--moduleResolution' is 'node16' or 'nodenext'. Did you mean './subfolder2/index.mjs'?
+index.mjs(22,22): error TS2834: Relative import paths need explicit file extensions in ECMAScript imports when '--moduleResolution' is 'node16' or 'nodenext'. Consider adding an extension to the import path.
+index.mjs(23,22): error TS2834: Relative import paths need explicit file extensions in ECMAScript imports when '--moduleResolution' is 'node16' or 'nodenext'. Consider adding an extension to the import path.
+index.mjs(24,22): error TS2835: Relative import paths need explicit file extensions in ECMAScript imports when '--moduleResolution' is 'node16' or 'nodenext'. Did you mean './subfolder2/another/index.mjs'?
+index.mjs(50,1): error TS8002: 'import ... =' can only be used in TypeScript files.
+index.mjs(51,1): error TS8002: 'import ... =' can only be used in TypeScript files.
+index.mjs(52,1): error TS8002: 'import ... =' can only be used in TypeScript files.
+index.mjs(53,1): error TS8002: 'import ... =' can only be used in TypeScript files.
+index.mjs(54,1): error TS8002: 'import ... =' can only be used in TypeScript files.
+index.mjs(55,1): error TS8002: 'import ... =' can only be used in TypeScript files.
+index.mjs(56,1): error TS8002: 'import ... =' can only be used in TypeScript files.
+index.mjs(57,1): error TS8002: 'import ... =' can only be used in TypeScript files.
+index.mjs(58,1): error TS8002: 'import ... =' can only be used in TypeScript files.
+index.mjs(59,1): error TS8002: 'import ... =' can only be used in TypeScript files.
+index.mjs(60,1): error TS8002: 'import ... =' can only be used in TypeScript files.
+index.mjs(74,21): error TS2307: Cannot find module './' or its corresponding type declarations.
+index.mjs(75,21): error TS2835: Relative import paths need explicit file extensions in ECMAScript imports when '--moduleResolution' is 'node16' or 'nodenext'. Did you mean './index.mjs'?
+index.mjs(76,21): error TS2834: Relative import paths need explicit file extensions in ECMAScript imports when '--moduleResolution' is 'node16' or 'nodenext'. Consider adding an extension to the import path.
+index.mjs(77,21): error TS2834: Relative import paths need explicit file extensions in ECMAScript imports when '--moduleResolution' is 'node16' or 'nodenext'. Consider adding an extension to the import path.
+index.mjs(78,21): error TS2835: Relative import paths need explicit file extensions in ECMAScript imports when '--moduleResolution' is 'node16' or 'nodenext'. Did you mean './subfolder/index.mjs'?
+index.mjs(79,21): error TS2834: Relative import paths need explicit file extensions in ECMAScript imports when '--moduleResolution' is 'node16' or 'nodenext'. Consider adding an extension to the import path.
+index.mjs(80,21): error TS2834: Relative import paths need explicit file extensions in ECMAScript imports when '--moduleResolution' is 'node16' or 'nodenext'. Consider adding an extension to the import path.
+index.mjs(81,21): error TS2835: Relative import paths need explicit file extensions in ECMAScript imports when '--moduleResolution' is 'node16' or 'nodenext'. Did you mean './subfolder2/index.mjs'?
+index.mjs(82,21): error TS2834: Relative import paths need explicit file extensions in ECMAScript imports when '--moduleResolution' is 'node16' or 'nodenext'. Consider adding an extension to the import path.
+index.mjs(83,21): error TS2834: Relative import paths need explicit file extensions in ECMAScript imports when '--moduleResolution' is 'node16' or 'nodenext'. Consider adding an extension to the import path.
+index.mjs(84,21): error TS2835: Relative import paths need explicit file extensions in ECMAScript imports when '--moduleResolution' is 'node16' or 'nodenext'. Did you mean './subfolder2/another/index.mjs'?

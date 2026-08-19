@@ -1,0 +1,11 @@
+constructorParameterProperties2.ts(2,5): error TS2564: Property 'y' has no initializer and is not definitely assigned in the constructor.
+constructorParameterProperties2.ts(10,5): error TS2564: Property 'y' has no initializer and is not definitely assigned in the constructor.
+constructorParameterProperties2.ts(11,24): error TS2300: Duplicate identifier 'y'.
+constructorParameterProperties2.ts(18,5): error TS2564: Property 'y' has no initializer and is not definitely assigned in the constructor.
+constructorParameterProperties2.ts(18,5): error TS2687: All declarations of 'y' must have identical modifiers.
+constructorParameterProperties2.ts(19,25): error TS2300: Duplicate identifier 'y'.
+constructorParameterProperties2.ts(19,25): error TS2687: All declarations of 'y' must have identical modifiers.
+constructorParameterProperties2.ts(26,5): error TS2564: Property 'y' has no initializer and is not definitely assigned in the constructor.
+constructorParameterProperties2.ts(26,5): error TS2687: All declarations of 'y' must have identical modifiers.
+constructorParameterProperties2.ts(27,27): error TS2300: Duplicate identifier 'y'.
+constructorParameterProperties2.ts(27,27): error TS2687: All declarations of 'y' must have identical modifiers.

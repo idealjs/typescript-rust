@@ -2542,12 +2542,19 @@ impl Checker {
         // non-rest) parameters.
         let mut min_argument_count: i32 = 0;
         let mut reached_optional_or_rest = false;
+        // A leading `this` parameter (Go `getSignatureFromDeclaration` /
+        // `IsThisInTypeScript`) is stored separately on the signature — it
+        // does not count toward arity and argument positions shift down.
+        let mut this_parameter: Option<Arc<Symbol>> = None;
         for (i, param) in parameters.iter().enumerate() {
             let NodeData::ParameterDeclaration(pd) = &param.data else {
                 continue;
             };
             let is_rest = pd.dot_dot_dot_token.is_some();
             let is_optional = pd.question_token.is_some();
+            let is_this_param = i == 0
+                && !is_rest
+                && matches!(&pd.name.data, NodeData::Identifier(id) if id.text == "this");
             // Resolve the parameter's type annotation. When no annotation is
             // present, fall back to the contextual signature's parameter
             // type at the same position (contextual typing for arrow/function
@@ -2593,6 +2600,13 @@ impl Checker {
                 },
             );
             param_symbols.push(sym);
+            if is_this_param && this_parameter.is_none() {
+                // Strip the just-pushed `this` parameter from the parameter
+                // list — it lives in `this_parameter` (arity/positions
+                // exclude it).
+                this_parameter = param_symbols.pop();
+                continue;
+            }
             if is_rest {
                 flags |= SignatureFlags::HasRestParameter;
                 reached_optional_or_rest = true;
@@ -2611,7 +2625,7 @@ impl Checker {
             declaration,
             type_parameters,
             parameters: param_symbols,
-            this_parameter: None,
+            this_parameter,
             resolved_return_type: std::sync::OnceLock::new(),
             resolved_type_predicate: None,
             target: None,

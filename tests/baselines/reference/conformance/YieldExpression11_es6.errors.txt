@@ -1,0 +1,1 @@
+YieldExpression11_es6.ts(3,11): error TS2663: Cannot find name 'foo'. Did you mean the instance member 'this.foo'?

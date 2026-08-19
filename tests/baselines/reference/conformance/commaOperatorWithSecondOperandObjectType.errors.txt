@@ -1,0 +1,27 @@
+commaOperatorWithSecondOperandObjectType.ts(8,5): error TS2564: Property 'num' has no initializer and is not definitely assigned in the constructor.
+commaOperatorWithSecondOperandObjectType.ts(12,6): error TS2454: Variable 'OBJECT' is used before being assigned.
+commaOperatorWithSecondOperandObjectType.ts(13,1): error TS2454: Variable 'BOOLEAN' is used before being assigned.
+commaOperatorWithSecondOperandObjectType.ts(13,10): error TS2454: Variable 'OBJECT' is used before being assigned.
+commaOperatorWithSecondOperandObjectType.ts(14,1): error TS2454: Variable 'NUMBER' is used before being assigned.
+commaOperatorWithSecondOperandObjectType.ts(14,9): error TS2454: Variable 'OBJECT' is used before being assigned.
+commaOperatorWithSecondOperandObjectType.ts(15,1): error TS2454: Variable 'STRING' is used before being assigned.
+commaOperatorWithSecondOperandObjectType.ts(15,9): error TS2454: Variable 'OBJECT' is used before being assigned.
+commaOperatorWithSecondOperandObjectType.ts(16,1): error TS2454: Variable 'OBJECT' is used before being assigned.
+commaOperatorWithSecondOperandObjectType.ts(16,9): error TS2454: Variable 'OBJECT' is used before being assigned.
+commaOperatorWithSecondOperandObjectType.ts(19,29): error TS2454: Variable 'OBJECT' is used before being assigned.
+commaOperatorWithSecondOperandObjectType.ts(20,24): error TS2454: Variable 'BOOLEAN' is used before being assigned.
+commaOperatorWithSecondOperandObjectType.ts(20,33): error TS2454: Variable 'OBJECT' is used before being assigned.
+commaOperatorWithSecondOperandObjectType.ts(21,24): error TS2454: Variable 'NUMBER' is used before being assigned.
+commaOperatorWithSecondOperandObjectType.ts(21,32): error TS2454: Variable 'OBJECT' is used before being assigned.
+commaOperatorWithSecondOperandObjectType.ts(22,24): error TS2454: Variable 'STRING' is used before being assigned.
+commaOperatorWithSecondOperandObjectType.ts(22,32): error TS2454: Variable 'OBJECT' is used before being assigned.
+commaOperatorWithSecondOperandObjectType.ts(23,24): error TS2454: Variable 'OBJECT' is used before being assigned.
+commaOperatorWithSecondOperandObjectType.ts(23,32): error TS2454: Variable 'OBJECT' is used before being assigned.
+commaOperatorWithSecondOperandObjectType.ts(26,7): error TS2454: Variable 'OBJECT' is used before being assigned.
+commaOperatorWithSecondOperandObjectType.ts(27,13): error TS2454: Variable 'OBJECT' is used before being assigned.
+commaOperatorWithSecondOperandObjectType.ts(29,2): error TS2454: Variable 'BOOLEAN' is used before being assigned.
+commaOperatorWithSecondOperandObjectType.ts(31,1): error TS2454: Variable 'STRING' is used before being assigned.
+commaOperatorWithSecondOperandObjectType.ts(33,30): error TS2454: Variable 'OBJECT' is used before being assigned.
+commaOperatorWithSecondOperandObjectType.ts(34,36): error TS2454: Variable 'OBJECT' is used before being assigned.
+commaOperatorWithSecondOperandObjectType.ts(36,25): error TS2454: Variable 'BOOLEAN' is used before being assigned.
+commaOperatorWithSecondOperandObjectType.ts(38,25): error TS2454: Variable 'STRING' is used before being assigned.

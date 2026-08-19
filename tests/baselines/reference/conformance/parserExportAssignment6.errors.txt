@@ -1,0 +1,1 @@
+parserExportAssignment6.ts(2,14): error TS2304: Cannot find name 'A'.

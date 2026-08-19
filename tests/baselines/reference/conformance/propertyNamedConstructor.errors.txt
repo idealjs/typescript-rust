@@ -1,0 +1,1 @@
+propertyNamedConstructor.ts(2,3): error TS18006: Classes may not have a field named 'constructor'.

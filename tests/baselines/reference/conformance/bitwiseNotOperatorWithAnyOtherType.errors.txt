@@ -1,0 +1,5 @@
+bitwiseNotOperatorWithAnyOtherType.ts(34,24): error TS18050: The value 'undefined' cannot be used here.
+bitwiseNotOperatorWithAnyOtherType.ts(35,24): error TS18050: The value 'null' cannot be used here.
+bitwiseNotOperatorWithAnyOtherType.ts(46,26): error TS2365: Operator '+' cannot be applied to types 'null' and 'undefined'.
+bitwiseNotOperatorWithAnyOtherType.ts(47,26): error TS2365: Operator '+' cannot be applied to types 'null' and 'null'.
+bitwiseNotOperatorWithAnyOtherType.ts(48,26): error TS2365: Operator '+' cannot be applied to types 'undefined' and 'undefined'.

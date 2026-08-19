@@ -1,0 +1,1 @@
+computedPropertyNames26_ES5.ts(8,12): error TS2466: 'super' cannot be referenced in a computed property name.

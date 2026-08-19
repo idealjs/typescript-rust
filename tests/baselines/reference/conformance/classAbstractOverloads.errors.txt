@@ -1,0 +1,5 @@
+classAbstractOverloads.ts(7,5): error TS2512: Overload signatures must all be abstract or non-abstract.
+classAbstractOverloads.ts(10,14): error TS2512: Overload signatures must all be abstract or non-abstract.
+classAbstractOverloads.ts(12,14): error TS2512: Overload signatures must all be abstract or non-abstract.
+classAbstractOverloads.ts(15,5): error TS2391: Function implementation is missing or not immediately following the declaration.
+classAbstractOverloads.ts(20,14): error TS2516: All declarations of an abstract method must be consecutive.

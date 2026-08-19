@@ -1,0 +1,4 @@
+assignEveryTypeToAny.ts(39,5): error TS2454: Variable 'g' is used before being assigned.
+assignEveryTypeToAny.ts(42,5): error TS2564: Property 'bar' has no initializer and is not definitely assigned in the constructor.
+assignEveryTypeToAny.ts(46,5): error TS2454: Variable 'h' is used before being assigned.
+assignEveryTypeToAny.ts(49,5): error TS2454: Variable 'i' is used before being assigned.

@@ -1,0 +1,12 @@
+mergeThreeInterfaces.ts(17,10): error TS2454: Variable 'a' is used before being assigned.
+mergeThreeInterfaces.ts(18,10): error TS2454: Variable 'a' is used before being assigned.
+mergeThreeInterfaces.ts(19,10): error TS2454: Variable 'a' is used before being assigned.
+mergeThreeInterfaces.ts(35,10): error TS2454: Variable 'b' is used before being assigned.
+mergeThreeInterfaces.ts(36,10): error TS2454: Variable 'b' is used before being assigned.
+mergeThreeInterfaces.ts(37,10): error TS2454: Variable 'b' is used before being assigned.
+mergeThreeInterfaces.ts(54,14): error TS2454: Variable 'a' is used before being assigned.
+mergeThreeInterfaces.ts(56,14): error TS2454: Variable 'a' is used before being assigned.
+mergeThreeInterfaces.ts(58,14): error TS2454: Variable 'a' is used before being assigned.
+mergeThreeInterfaces.ts(73,14): error TS2454: Variable 'b' is used before being assigned.
+mergeThreeInterfaces.ts(75,14): error TS2454: Variable 'b' is used before being assigned.
+mergeThreeInterfaces.ts(77,14): error TS2454: Variable 'b' is used before being assigned.

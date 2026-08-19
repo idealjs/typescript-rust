@@ -1,0 +1,1 @@
+/foo.js(2,20): error TS1109: Expression expected.

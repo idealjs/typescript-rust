@@ -1,0 +1,1 @@
+/c.ts(2,7): error TS2741: Property 'a' is missing in type '{}' but required in type 'A'.

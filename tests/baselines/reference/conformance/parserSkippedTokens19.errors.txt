@@ -1,0 +1,2 @@
+parserSkippedTokens19.ts(1,1): error TS1127: Invalid character.
+parserSkippedTokens19.ts(1,15): error TS7005: Variable 'v' implicitly has an 'any' type.

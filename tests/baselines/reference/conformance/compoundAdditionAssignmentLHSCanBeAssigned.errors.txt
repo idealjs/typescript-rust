@@ -1,0 +1,4 @@
+compoundAdditionAssignmentLHSCanBeAssigned.ts(32,7): error TS18050: The value 'null' cannot be used here.
+compoundAdditionAssignmentLHSCanBeAssigned.ts(33,7): error TS18050: The value 'undefined' cannot be used here.
+compoundAdditionAssignmentLHSCanBeAssigned.ts(39,7): error TS18050: The value 'null' cannot be used here.
+compoundAdditionAssignmentLHSCanBeAssigned.ts(40,7): error TS18050: The value 'undefined' cannot be used here.

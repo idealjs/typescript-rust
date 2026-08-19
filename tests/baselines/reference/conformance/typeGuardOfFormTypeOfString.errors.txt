@@ -1,0 +1,29 @@
+typeGuardOfFormTypeOfString.ts(1,19): error TS2564: Property 'p' has no initializer and is not definitely assigned in the constructor.
+typeGuardOfFormTypeOfString.ts(19,12): error TS2454: Variable 'strOrNum' is used before being assigned.
+typeGuardOfFormTypeOfString.ts(23,5): error TS2454: Variable 'num' is used before being assigned.
+typeGuardOfFormTypeOfString.ts(23,13): error TS2454: Variable 'strOrNum' is used before being assigned.
+typeGuardOfFormTypeOfString.ts(25,12): error TS2454: Variable 'strOrBool' is used before being assigned.
+typeGuardOfFormTypeOfString.ts(29,5): error TS2322: Type 'string | boolean' is not assignable to type 'boolean'.
+typeGuardOfFormTypeOfString.ts(29,12): error TS2454: Variable 'strOrBool' is used before being assigned.
+typeGuardOfFormTypeOfString.ts(31,12): error TS2454: Variable 'strOrNumOrBool' is used before being assigned.
+typeGuardOfFormTypeOfString.ts(35,5): error TS2322: Type 'string | number | boolean' is not assignable to type 'number | boolean'.
+typeGuardOfFormTypeOfString.ts(35,17): error TS2454: Variable 'strOrNumOrBool' is used before being assigned.
+typeGuardOfFormTypeOfString.ts(37,12): error TS2454: Variable 'strOrC' is used before being assigned.
+typeGuardOfFormTypeOfString.ts(41,5): error TS2322: Type 'string | C' is not assignable to type 'C'.
+typeGuardOfFormTypeOfString.ts(41,9): error TS2454: Variable 'strOrC' is used before being assigned.
+typeGuardOfFormTypeOfString.ts(44,12): error TS2454: Variable 'numOrBool' is used before being assigned.
+typeGuardOfFormTypeOfString.ts(48,32): error TS2454: Variable 'numOrBool' is used before being assigned.
+typeGuardOfFormTypeOfString.ts(54,12): error TS2454: Variable 'strOrNum' is used before being assigned.
+typeGuardOfFormTypeOfString.ts(55,5): error TS2454: Variable 'num' is used before being assigned.
+typeGuardOfFormTypeOfString.ts(55,13): error TS2454: Variable 'strOrNum' is used before being assigned.
+typeGuardOfFormTypeOfString.ts(60,12): error TS2454: Variable 'strOrBool' is used before being assigned.
+typeGuardOfFormTypeOfString.ts(61,5): error TS2322: Type 'string | boolean' is not assignable to type 'boolean'.
+typeGuardOfFormTypeOfString.ts(61,12): error TS2454: Variable 'strOrBool' is used before being assigned.
+typeGuardOfFormTypeOfString.ts(66,12): error TS2454: Variable 'strOrNumOrBool' is used before being assigned.
+typeGuardOfFormTypeOfString.ts(67,5): error TS2322: Type 'string | number | boolean' is not assignable to type 'number | boolean'.
+typeGuardOfFormTypeOfString.ts(67,17): error TS2454: Variable 'strOrNumOrBool' is used before being assigned.
+typeGuardOfFormTypeOfString.ts(72,12): error TS2454: Variable 'strOrC' is used before being assigned.
+typeGuardOfFormTypeOfString.ts(73,5): error TS2322: Type 'string | C' is not assignable to type 'C'.
+typeGuardOfFormTypeOfString.ts(73,9): error TS2454: Variable 'strOrC' is used before being assigned.
+typeGuardOfFormTypeOfString.ts(79,12): error TS2454: Variable 'numOrBool' is used before being assigned.
+typeGuardOfFormTypeOfString.ts(80,32): error TS2454: Variable 'numOrBool' is used before being assigned.

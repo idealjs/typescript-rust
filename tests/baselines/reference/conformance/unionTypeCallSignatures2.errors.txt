@@ -1,0 +1,9 @@
+unionTypeCallSignatures2.ts(22,10): error TS2454: Variable 'f1' is used before being assigned.
+unionTypeCallSignatures2.ts(23,10): error TS2454: Variable 'f1' is used before being assigned.
+unionTypeCallSignatures2.ts(24,10): error TS2454: Variable 'f1' is used before being assigned.
+unionTypeCallSignatures2.ts(27,10): error TS2454: Variable 'f2' is used before being assigned.
+unionTypeCallSignatures2.ts(28,10): error TS2454: Variable 'f2' is used before being assigned.
+unionTypeCallSignatures2.ts(29,10): error TS2454: Variable 'f2' is used before being assigned.
+unionTypeCallSignatures2.ts(32,10): error TS2454: Variable 'f3' is used before being assigned.
+unionTypeCallSignatures2.ts(33,10): error TS2454: Variable 'f3' is used before being assigned.
+unionTypeCallSignatures2.ts(34,10): error TS2454: Variable 'f3' is used before being assigned.

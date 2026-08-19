@@ -1,0 +1,10 @@
+typeOfThisGeneral.ts(14,13): error TS2403: Subsequent variable declarations must have the same type.  Variable 't' must be of type 'this', but here has type 'MyTestClass'.
+typeOfThisGeneral.ts(18,13): error TS2403: Subsequent variable declarations must have the same type.  Variable 'p' must be of type 'this', but here has type 'MyTestClass'.
+typeOfThisGeneral.ts(24,13): error TS2403: Subsequent variable declarations must have the same type.  Variable 'p' must be of type 'this', but here has type 'MyTestClass'.
+typeOfThisGeneral.ts(29,13): error TS2403: Subsequent variable declarations must have the same type.  Variable 'p' must be of type 'this', but here has type 'MyTestClass'.
+typeOfThisGeneral.ts(37,13): error TS2403: Subsequent variable declarations must have the same type.  Variable 't' must be of type 'this', but here has type 'MyTestClass'.
+typeOfThisGeneral.ts(83,13): error TS2403: Subsequent variable declarations must have the same type.  Variable 't' must be of type 'this', but here has type 'MyGenericTestClass<T, U>'.
+typeOfThisGeneral.ts(87,13): error TS2403: Subsequent variable declarations must have the same type.  Variable 'p' must be of type 'this', but here has type 'MyGenericTestClass<T, U>'.
+typeOfThisGeneral.ts(93,13): error TS2403: Subsequent variable declarations must have the same type.  Variable 'p' must be of type 'this', but here has type 'MyGenericTestClass<T, U>'.
+typeOfThisGeneral.ts(98,13): error TS2403: Subsequent variable declarations must have the same type.  Variable 'p' must be of type 'this', but here has type 'MyGenericTestClass<T, U>'.
+typeOfThisGeneral.ts(106,13): error TS2403: Subsequent variable declarations must have the same type.  Variable 't' must be of type 'this', but here has type 'MyGenericTestClass<T, U>'.

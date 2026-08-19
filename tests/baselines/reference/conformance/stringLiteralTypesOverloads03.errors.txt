@@ -1,0 +1,6 @@
+stringLiteralTypesOverloads03.ts(30,18): error TS2454: Variable 'hello' is used before being assigned.
+stringLiteralTypesOverloads03.ts(31,18): error TS2454: Variable 'world' is used before being assigned.
+stringLiteralTypesOverloads03.ts(32,18): error TS2454: Variable 'helloOrWorld' is used before being assigned.
+stringLiteralTypesOverloads03.ts(42,18): error TS2454: Variable 'hello' is used before being assigned.
+stringLiteralTypesOverloads03.ts(43,18): error TS2454: Variable 'world' is used before being assigned.
+stringLiteralTypesOverloads03.ts(44,18): error TS2454: Variable 'helloOrWorld' is used before being assigned.

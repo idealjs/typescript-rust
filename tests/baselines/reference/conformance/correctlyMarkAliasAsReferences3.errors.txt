@@ -1,0 +1,1 @@
+0.tsx(7,21): error TS2698: Spread types may only be created from object types.

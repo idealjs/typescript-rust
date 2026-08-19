@@ -1,0 +1,3 @@
+file.tsx(29,33): error TS2322: Type 'true' is not assignable to type 'false'.
+file.tsx(30,50): error TS2322: Type '3' is not assignable to type '2'.
+file.tsx(32,11): error TS2322: Type '{ x: 2; overwrite: string; y: true; }' is not assignable to type 'Prop'.

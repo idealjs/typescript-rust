@@ -1,0 +1,10 @@
+mod.mts(1,37): error TS2322: Type '{ field: 0; }' is not assignable to type 'ImportAttributes'.
+mod.mts(1,51): error TS2858: Import attribute values must be string literal expressions.
+mod.mts(2,51): error TS2858: Import attribute values must be string literal expressions.
+mod.mts(3,37): error TS2322: Type '{ field: RegExp; }' is not assignable to type 'ImportAttributes'.
+mod.mts(3,51): error TS2858: Import attribute values must be string literal expressions.
+mod.mts(4,37): error TS2322: Type '{ field: string[]; }' is not assignable to type 'ImportAttributes'.
+mod.mts(4,51): error TS2858: Import attribute values must be string literal expressions.
+mod.mts(5,37): error TS2322: Type '{ field: { a: number; }; }' is not assignable to type 'ImportAttributes'.
+mod.mts(5,51): error TS2858: Import attribute values must be string literal expressions.
+mod.mts(6,65): error TS2858: Import attribute values must be string literal expressions.

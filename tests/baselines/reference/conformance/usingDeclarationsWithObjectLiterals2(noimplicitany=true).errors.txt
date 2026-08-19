@@ -1,0 +1,2 @@
+usingDeclarationsWithObjectLiterals2.ts(2,38): error TS7018: Object literal's property 'value' implicitly has an 'any' type.
+usingDeclarationsWithObjectLiterals2.ts(7,57): error TS7018: Object literal's property 'value' implicitly has an 'any' type.

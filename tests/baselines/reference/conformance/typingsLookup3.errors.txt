@@ -1,0 +1,1 @@
+/a.ts(1,23): error TS2688: Cannot find type definition file for 'JqUeRy'.

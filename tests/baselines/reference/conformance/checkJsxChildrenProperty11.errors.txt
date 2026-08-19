@@ -1,0 +1,1 @@
+file.tsx(12,2): error TS2564: Property 'props' has no initializer and is not definitely assigned in the constructor.

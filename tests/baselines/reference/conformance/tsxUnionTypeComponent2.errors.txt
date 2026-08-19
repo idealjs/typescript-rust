@@ -1,0 +1,1 @@
+file.tsx(9,2): error TS2604: JSX element type 'X' does not have any construct or call signatures.

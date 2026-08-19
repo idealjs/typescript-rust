@@ -1,0 +1,1 @@
+iterableArrayPattern19.ts(17,5): error TS2345: Argument of type 'FooArrayIterator' is not assignable to parameter of type 'Bar[][]'.

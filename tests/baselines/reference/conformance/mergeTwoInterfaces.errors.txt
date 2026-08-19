@@ -1,0 +1,8 @@
+mergeTwoInterfaces.ts(13,10): error TS2454: Variable 'a' is used before being assigned.
+mergeTwoInterfaces.ts(14,10): error TS2454: Variable 'a' is used before being assigned.
+mergeTwoInterfaces.ts(27,10): error TS2454: Variable 'b' is used before being assigned.
+mergeTwoInterfaces.ts(28,10): error TS2454: Variable 'b' is used before being assigned.
+mergeTwoInterfaces.ts(41,14): error TS2454: Variable 'a' is used before being assigned.
+mergeTwoInterfaces.ts(43,14): error TS2454: Variable 'a' is used before being assigned.
+mergeTwoInterfaces.ts(54,14): error TS2454: Variable 'b' is used before being assigned.
+mergeTwoInterfaces.ts(56,14): error TS2454: Variable 'b' is used before being assigned.

@@ -1,0 +1,1 @@
+privateNamesUnique-5.ts(12,7): error TS2322: Type 'B' is not assignable to type 'A2'.

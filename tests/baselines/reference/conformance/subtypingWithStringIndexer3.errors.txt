@@ -1,0 +1,5 @@
+subtypingWithStringIndexer3.ts(11,7): error TS2415: Class 'B' incorrectly extends base class 'A'.
+subtypingWithStringIndexer3.ts(24,23): error TS2344: Type 'Base' does not satisfy the constraint 'Derived'.
+subtypingWithStringIndexer3.ts(32,11): error TS2415: Class 'B3<T>' incorrectly extends base class 'A<T>'.
+subtypingWithStringIndexer3.ts(36,11): error TS2415: Class 'B4<T>' incorrectly extends base class 'A<T>'.
+subtypingWithStringIndexer3.ts(40,11): error TS2415: Class 'B5<T>' incorrectly extends base class 'A<T>'.

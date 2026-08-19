@@ -1,0 +1,4 @@
+objectTypeWithCallSignatureAppearsToBeFunctionType.ts(9,16): error TS2454: Variable 'i' is used before being assigned.
+objectTypeWithCallSignatureAppearsToBeFunctionType.ts(10,37): error TS2454: Variable 'i' is used before being assigned.
+objectTypeWithCallSignatureAppearsToBeFunctionType.ts(16,16): error TS2454: Variable 'b' is used before being assigned.
+objectTypeWithCallSignatureAppearsToBeFunctionType.ts(17,37): error TS2454: Variable 'b' is used before being assigned.

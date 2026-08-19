@@ -1,0 +1,4 @@
+lateBoundAssignmentDeclarationSupport4.js(10,12): error TS7053: Element implicitly has an 'any' type because expression of type '"my-fake-sym"' can't be used to index type 'F'.
+lateBoundAssignmentDeclarationSupport4.js(11,12): error TS7053: Element implicitly has an 'any' type because expression of type 'unique symbol' can't be used to index type 'F'.
+usage.js(3,11): error TS7053: Element implicitly has an 'any' type because expression of type '"my-fake-sym"' can't be used to index type 'F'.
+usage.js(4,11): error TS7053: Element implicitly has an 'any' type because expression of type 'unique symbol' can't be used to index type 'F'.

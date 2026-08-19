@@ -1,0 +1,8 @@
+actual.ts(12,1): error TS18047: 'top' is possibly 'null'.
+actual.ts(12,5): error TS2339: Property 'a' does not exist on type 'Window'.
+actual.ts(13,1): error TS18047: 'top' is possibly 'null'.
+actual.ts(13,5): error TS2339: Property 'b' does not exist on type 'Window'.
+b.js(12,1): error TS18047: 'top' is possibly 'null'.
+b.js(12,5): error TS2339: Property 'a' does not exist on type 'Window'.
+b.js(13,1): error TS18047: 'top' is possibly 'null'.
+b.js(13,5): error TS2339: Property 'b' does not exist on type 'Window'.

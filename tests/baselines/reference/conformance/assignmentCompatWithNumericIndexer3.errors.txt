@@ -1,0 +1,3 @@
+assignmentCompatWithNumericIndexer3.ts(14,1): error TS2322: Type '{ [x: number]: Base; }' is not assignable to type 'A'.
+assignmentCompatWithNumericIndexer3.ts(23,1): error TS2322: Type 'A' is not assignable to type '{ [x: number]: Derived2; }'.
+assignmentCompatWithNumericIndexer3.ts(33,9): error TS2322: Type '{ [x: number]: Derived; }' is not assignable to type 'A<T>'.

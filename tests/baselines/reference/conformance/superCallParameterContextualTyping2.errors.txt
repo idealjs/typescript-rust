@@ -1,0 +1,1 @@
+superCallParameterContextualTyping2.ts(9,43): error TS2349: This expression is not callable.

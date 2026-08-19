@@ -1,0 +1,3 @@
+classStaticBlock3.ts(7,29): error TS2729: Property 'f2' is used before its initialization.
+classStaticBlock3.ts(7,35): error TS2729: Property 'f3' is used before its initialization.
+classStaticBlock3.ts(13,35): error TS2729: Property 'f3' is used before its initialization.

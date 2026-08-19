@@ -1,0 +1,2 @@
+genericCallWithGenericSignatureArguments3.ts(32,19): error TS2345: Argument of type '(a1: (y: string) => string) => (n: Object) => 1' is not assignable to parameter of type '(x: (a: string) => boolean) => (n: Object) => 1'.
+genericCallWithGenericSignatureArguments3.ts(33,69): error TS2345: Argument of type '(a2: (z: string) => boolean) => number' is not assignable to parameter of type '(x: (z: string) => boolean) => (n: Object) => 1'.

@@ -1,0 +1,2 @@
+asiPreventsParsingAsAmbientExternalModule01.ts(4,1): error TS2454: Variable 'declare' is used before being assigned.
+asiPreventsParsingAsAmbientExternalModule01.ts(5,1): error TS2454: Variable 'module' is used before being assigned.

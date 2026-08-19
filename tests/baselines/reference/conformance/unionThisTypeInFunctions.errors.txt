@@ -1,0 +1,1 @@
+unionThisTypeInFunctions.ts(10,5): error TS2684: The 'this' context of type 'Fake | Real' is not assignable to method's 'this' of type 'Real & Fake'.

@@ -1,0 +1,1 @@
+file.tsx(34,45): error TS2532: Object is possibly 'undefined'.

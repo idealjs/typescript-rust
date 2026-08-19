@@ -1,0 +1,1 @@
+merge.ts(1,10): error TS2440: Import declaration conflicts with local declaration of 'Enum'.

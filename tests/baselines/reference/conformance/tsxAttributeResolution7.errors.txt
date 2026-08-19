@@ -1,0 +1,1 @@
+file.tsx(9,2): error TS2322: Type '{ "data-foo": number; }' is not assignable to type '{ "data-foo"?: string | undefined; }'.

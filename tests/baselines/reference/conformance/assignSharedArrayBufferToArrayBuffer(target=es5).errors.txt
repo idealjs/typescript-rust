@@ -1,0 +1,1 @@
+assignSharedArrayBufferToArrayBuffer.ts(1,5): error TS2322: Type 'SharedArrayBuffer' is not assignable to type 'ArrayBuffer'.

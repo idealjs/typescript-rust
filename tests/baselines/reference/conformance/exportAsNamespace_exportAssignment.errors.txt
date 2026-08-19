@@ -1,0 +1,1 @@
+b.ts(1,21): error TS2498: Module '"a"' uses 'export =' and cannot be used with 'export *'.

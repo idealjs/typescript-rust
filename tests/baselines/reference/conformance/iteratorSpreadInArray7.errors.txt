@@ -1,0 +1,1 @@
+iteratorSpreadInArray7.ts(15,1): error TS2454: Variable 'array' is used before being assigned.

@@ -1,0 +1,4 @@
+templateStringInFunctionParameterType.ts(1,10): error TS7010: 'f', which lacks return-type annotation, implicitly has an 'any' return type.
+templateStringInFunctionParameterType.ts(1,12): error TS7006: Parameter '(Missing)' implicitly has an 'any' type.
+templateStringInFunctionParameterType.ts(1,12): error TS1003: Identifier expected.
+templateStringInFunctionParameterType.ts(2,10): error TS7010: 'f', which lacks return-type annotation, implicitly has an 'any' return type.

@@ -1,0 +1,1 @@
+logicalOrExpressionIsNotContextuallyTyped.ts(10,9): error TS2454: Variable 'a' is used before being assigned.

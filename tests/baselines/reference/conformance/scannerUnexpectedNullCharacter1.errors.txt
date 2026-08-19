@@ -1,0 +1,4 @@
+scannerUnexpectedNullCharacter1.ts(1,1): error TS2304: Cannot find name 'foo'.
+scannerUnexpectedNullCharacter1.ts(1,4): error TS1127: Invalid character.
+scannerUnexpectedNullCharacter1.ts(1,6): error TS1127: Invalid character.
+scannerUnexpectedNullCharacter1.ts(1,7): error TS2304: Cannot find name 'bar'.

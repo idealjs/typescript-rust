@@ -1,0 +1,4 @@
+subtypingWithNumericIndexer4.ts(11,7): error TS2415: Class 'B' incorrectly extends base class 'A'.
+subtypingWithNumericIndexer4.ts(20,11): error TS2415: Class 'B' incorrectly extends base class 'A<Base>'.
+subtypingWithNumericIndexer4.ts(20,23): error TS2344: Type 'Base' does not satisfy the constraint 'Derived'.
+subtypingWithNumericIndexer4.ts(24,11): error TS2415: Class 'B3<T>' incorrectly extends base class 'A<T>'.

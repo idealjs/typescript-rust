@@ -1,0 +1,7 @@
+objectLiteralNormalization.ts(7,14): error TS2322: Type 'number' is not assignable to type 'string'.
+objectLiteralNormalization.ts(8,1): error TS2322: Type '{ b: string; }' is not assignable to type '{ a: number; b?: undefined; c?: undefined; } | { a: number; b: string; c?: undefined; } | { a: number; b: string; c: boolean; }'.
+objectLiteralNormalization.ts(9,1): error TS2322: Type '{ c: true; }' is not assignable to type '{ a: number; b?: undefined; c?: undefined; } | { a: number; b: string; c?: undefined; } | { a: number; b: string; c: boolean; }'.
+objectLiteralNormalization.ts(17,1): error TS2322: Type '{ a: string; b: number; }' is not assignable to type '{ a: number; b: number; } | { b?: undefined; a: string; } | { b?: undefined; a?: undefined; }'.
+objectLiteralNormalization.ts(18,1): error TS2322: Type '{ a: number; }' is not assignable to type '{ a: number; b: number; } | { b?: undefined; a: string; } | { b?: undefined; a?: undefined; }'.
+objectLiteralNormalization.ts(48,20): error TS2322: Type '2' is not assignable to type '1'.
+objectLiteralNormalization.ts(49,14): error TS2322: Type '2' is not assignable to type '1'.

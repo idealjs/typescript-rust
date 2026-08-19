@@ -1,0 +1,1 @@
+taggedTemplateStringsWithManyCallAndMemberExpressions.ts(13,21): error TS2454: Variable 'f' is used before being assigned.

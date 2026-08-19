@@ -1,0 +1,2 @@
+spreadObjectOrFalsy.ts(2,14): error TS2698: Spread types may only be created from object types.
+spreadObjectOrFalsy.ts(10,14): error TS2698: Spread types may only be created from object types.

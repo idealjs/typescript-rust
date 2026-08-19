@@ -1,0 +1,10 @@
+override4.ts(4,5): error TS2564: Property 'p3' has no initializer and is not definitely assigned in the constructor.
+override4.ts(5,5): error TS2564: Property 'p4' has no initializer and is not definitely assigned in the constructor.
+override4.ts(11,5): error TS4114: This member must have an 'override' modifier because it overrides a member in the base class 'B'.
+override4.ts(13,5): error TS2564: Property 'p3' has no initializer and is not definitely assigned in the constructor.
+override4.ts(13,5): error TS4114: This member must have an 'override' modifier because it overrides a member in the base class 'B'.
+override4.ts(14,14): error TS2564: Property 'p4' has no initializer and is not definitely assigned in the constructor.
+override4.ts(17,5): error TS4114: This member must have an 'override' modifier because it overrides a member in the base class 'B'.
+override4.ts(22,14): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
+override4.ts(23,5): error TS2564: Property 'fooo' has no initializer and is not definitely assigned in the constructor.
+override4.ts(23,5): error TS4114: This member must have an 'override' modifier because it overrides a member in the base class 'B'.

@@ -1,0 +1,1 @@
+/a.js(5,14): error TS2353: Object literal may only specify known properties, and 'g' does not exist in type '{ f: (x: string) => string; }'.

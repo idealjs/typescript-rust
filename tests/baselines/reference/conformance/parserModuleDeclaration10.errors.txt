@@ -1,0 +1,2 @@
+parserModuleDeclaration10.ts(1,10): error TS2391: Function implementation is missing or not immediately following the declaration.
+parserModuleDeclaration10.ts(2,10): error TS2391: Function implementation is missing or not immediately following the declaration.

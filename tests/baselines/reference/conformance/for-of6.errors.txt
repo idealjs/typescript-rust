@@ -1,0 +1,1 @@
+for-of6.ts(1,6): error TS2304: Cannot find name 'v'.

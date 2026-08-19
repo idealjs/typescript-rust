@@ -1,0 +1,1 @@
+classExtendingOptionalChain.ts(9,21): error TS2500: A class can only implement an identifier/qualified-name with optional type arguments.

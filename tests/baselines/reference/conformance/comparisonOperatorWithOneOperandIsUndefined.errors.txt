@@ -1,0 +1,160 @@
+comparisonOperatorWithOneOperandIsUndefined.ts(6,22): error TS18048: 'x' is possibly 'undefined'.
+comparisonOperatorWithOneOperandIsUndefined.ts(7,22): error TS18048: 'x' is possibly 'undefined'.
+comparisonOperatorWithOneOperandIsUndefined.ts(8,23): error TS18048: 'x' is possibly 'undefined'.
+comparisonOperatorWithOneOperandIsUndefined.ts(9,23): error TS18048: 'x' is possibly 'undefined'.
+comparisonOperatorWithOneOperandIsUndefined.ts(15,18): error TS18048: 'x' is possibly 'undefined'.
+comparisonOperatorWithOneOperandIsUndefined.ts(16,18): error TS18048: 'x' is possibly 'undefined'.
+comparisonOperatorWithOneOperandIsUndefined.ts(17,18): error TS18048: 'x' is possibly 'undefined'.
+comparisonOperatorWithOneOperandIsUndefined.ts(18,18): error TS18048: 'x' is possibly 'undefined'.
+comparisonOperatorWithOneOperandIsUndefined.ts(34,12): error TS18048: 'x' is possibly 'undefined'.
+comparisonOperatorWithOneOperandIsUndefined.ts(34,16): error TS2454: Variable 'a' is used before being assigned.
+comparisonOperatorWithOneOperandIsUndefined.ts(35,12): error TS18048: 'x' is possibly 'undefined'.
+comparisonOperatorWithOneOperandIsUndefined.ts(35,16): error TS2454: Variable 'b' is used before being assigned.
+comparisonOperatorWithOneOperandIsUndefined.ts(36,12): error TS18048: 'x' is possibly 'undefined'.
+comparisonOperatorWithOneOperandIsUndefined.ts(36,16): error TS2454: Variable 'c' is used before being assigned.
+comparisonOperatorWithOneOperandIsUndefined.ts(37,12): error TS18048: 'x' is possibly 'undefined'.
+comparisonOperatorWithOneOperandIsUndefined.ts(38,12): error TS18048: 'x' is possibly 'undefined'.
+comparisonOperatorWithOneOperandIsUndefined.ts(38,16): error TS2454: Variable 'e' is used before being assigned.
+comparisonOperatorWithOneOperandIsUndefined.ts(39,12): error TS18048: 'x' is possibly 'undefined'.
+comparisonOperatorWithOneOperandIsUndefined.ts(39,16): error TS2454: Variable 'f' is used before being assigned.
+comparisonOperatorWithOneOperandIsUndefined.ts(40,12): error TS18048: 'x' is possibly 'undefined'.
+comparisonOperatorWithOneOperandIsUndefined.ts(40,16): error TS2454: Variable 'g' is used before being assigned.
+comparisonOperatorWithOneOperandIsUndefined.ts(42,12): error TS2454: Variable 'a' is used before being assigned.
+comparisonOperatorWithOneOperandIsUndefined.ts(42,16): error TS18048: 'x' is possibly 'undefined'.
+comparisonOperatorWithOneOperandIsUndefined.ts(43,12): error TS2454: Variable 'b' is used before being assigned.
+comparisonOperatorWithOneOperandIsUndefined.ts(43,16): error TS18048: 'x' is possibly 'undefined'.
+comparisonOperatorWithOneOperandIsUndefined.ts(44,12): error TS2454: Variable 'c' is used before being assigned.
+comparisonOperatorWithOneOperandIsUndefined.ts(44,16): error TS18048: 'x' is possibly 'undefined'.
+comparisonOperatorWithOneOperandIsUndefined.ts(45,16): error TS18048: 'x' is possibly 'undefined'.
+comparisonOperatorWithOneOperandIsUndefined.ts(46,12): error TS2454: Variable 'e' is used before being assigned.
+comparisonOperatorWithOneOperandIsUndefined.ts(46,16): error TS18048: 'x' is possibly 'undefined'.
+comparisonOperatorWithOneOperandIsUndefined.ts(47,12): error TS2454: Variable 'f' is used before being assigned.
+comparisonOperatorWithOneOperandIsUndefined.ts(47,16): error TS18048: 'x' is possibly 'undefined'.
+comparisonOperatorWithOneOperandIsUndefined.ts(48,12): error TS2454: Variable 'g' is used before being assigned.
+comparisonOperatorWithOneOperandIsUndefined.ts(48,16): error TS18048: 'x' is possibly 'undefined'.
+comparisonOperatorWithOneOperandIsUndefined.ts(51,12): error TS18048: 'x' is possibly 'undefined'.
+comparisonOperatorWithOneOperandIsUndefined.ts(51,16): error TS2454: Variable 'a' is used before being assigned.
+comparisonOperatorWithOneOperandIsUndefined.ts(52,12): error TS18048: 'x' is possibly 'undefined'.
+comparisonOperatorWithOneOperandIsUndefined.ts(52,16): error TS2454: Variable 'b' is used before being assigned.
+comparisonOperatorWithOneOperandIsUndefined.ts(53,12): error TS18048: 'x' is possibly 'undefined'.
+comparisonOperatorWithOneOperandIsUndefined.ts(53,16): error TS2454: Variable 'c' is used before being assigned.
+comparisonOperatorWithOneOperandIsUndefined.ts(54,12): error TS18048: 'x' is possibly 'undefined'.
+comparisonOperatorWithOneOperandIsUndefined.ts(55,12): error TS18048: 'x' is possibly 'undefined'.
+comparisonOperatorWithOneOperandIsUndefined.ts(55,16): error TS2454: Variable 'e' is used before being assigned.
+comparisonOperatorWithOneOperandIsUndefined.ts(56,12): error TS18048: 'x' is possibly 'undefined'.
+comparisonOperatorWithOneOperandIsUndefined.ts(56,16): error TS2454: Variable 'f' is used before being assigned.
+comparisonOperatorWithOneOperandIsUndefined.ts(57,12): error TS18048: 'x' is possibly 'undefined'.
+comparisonOperatorWithOneOperandIsUndefined.ts(57,16): error TS2454: Variable 'g' is used before being assigned.
+comparisonOperatorWithOneOperandIsUndefined.ts(59,12): error TS2454: Variable 'a' is used before being assigned.
+comparisonOperatorWithOneOperandIsUndefined.ts(59,16): error TS18048: 'x' is possibly 'undefined'.
+comparisonOperatorWithOneOperandIsUndefined.ts(60,12): error TS2454: Variable 'b' is used before being assigned.
+comparisonOperatorWithOneOperandIsUndefined.ts(60,16): error TS18048: 'x' is possibly 'undefined'.
+comparisonOperatorWithOneOperandIsUndefined.ts(61,12): error TS2454: Variable 'c' is used before being assigned.
+comparisonOperatorWithOneOperandIsUndefined.ts(61,16): error TS18048: 'x' is possibly 'undefined'.
+comparisonOperatorWithOneOperandIsUndefined.ts(62,16): error TS18048: 'x' is possibly 'undefined'.
+comparisonOperatorWithOneOperandIsUndefined.ts(63,12): error TS2454: Variable 'e' is used before being assigned.
+comparisonOperatorWithOneOperandIsUndefined.ts(63,16): error TS18048: 'x' is possibly 'undefined'.
+comparisonOperatorWithOneOperandIsUndefined.ts(64,12): error TS2454: Variable 'f' is used before being assigned.
+comparisonOperatorWithOneOperandIsUndefined.ts(64,16): error TS18048: 'x' is possibly 'undefined'.
+comparisonOperatorWithOneOperandIsUndefined.ts(65,12): error TS2454: Variable 'g' is used before being assigned.
+comparisonOperatorWithOneOperandIsUndefined.ts(65,16): error TS18048: 'x' is possibly 'undefined'.
+comparisonOperatorWithOneOperandIsUndefined.ts(68,12): error TS18048: 'x' is possibly 'undefined'.
+comparisonOperatorWithOneOperandIsUndefined.ts(68,17): error TS2454: Variable 'a' is used before being assigned.
+comparisonOperatorWithOneOperandIsUndefined.ts(69,12): error TS18048: 'x' is possibly 'undefined'.
+comparisonOperatorWithOneOperandIsUndefined.ts(69,17): error TS2454: Variable 'b' is used before being assigned.
+comparisonOperatorWithOneOperandIsUndefined.ts(70,12): error TS18048: 'x' is possibly 'undefined'.
+comparisonOperatorWithOneOperandIsUndefined.ts(70,17): error TS2454: Variable 'c' is used before being assigned.
+comparisonOperatorWithOneOperandIsUndefined.ts(71,12): error TS18048: 'x' is possibly 'undefined'.
+comparisonOperatorWithOneOperandIsUndefined.ts(72,12): error TS18048: 'x' is possibly 'undefined'.
+comparisonOperatorWithOneOperandIsUndefined.ts(72,17): error TS2454: Variable 'e' is used before being assigned.
+comparisonOperatorWithOneOperandIsUndefined.ts(73,12): error TS18048: 'x' is possibly 'undefined'.
+comparisonOperatorWithOneOperandIsUndefined.ts(73,17): error TS2454: Variable 'f' is used before being assigned.
+comparisonOperatorWithOneOperandIsUndefined.ts(74,12): error TS18048: 'x' is possibly 'undefined'.
+comparisonOperatorWithOneOperandIsUndefined.ts(74,17): error TS2454: Variable 'g' is used before being assigned.
+comparisonOperatorWithOneOperandIsUndefined.ts(76,12): error TS2454: Variable 'a' is used before being assigned.
+comparisonOperatorWithOneOperandIsUndefined.ts(76,17): error TS18048: 'x' is possibly 'undefined'.
+comparisonOperatorWithOneOperandIsUndefined.ts(77,12): error TS2454: Variable 'b' is used before being assigned.
+comparisonOperatorWithOneOperandIsUndefined.ts(77,17): error TS18048: 'x' is possibly 'undefined'.
+comparisonOperatorWithOneOperandIsUndefined.ts(78,12): error TS2454: Variable 'c' is used before being assigned.
+comparisonOperatorWithOneOperandIsUndefined.ts(78,17): error TS18048: 'x' is possibly 'undefined'.
+comparisonOperatorWithOneOperandIsUndefined.ts(79,17): error TS18048: 'x' is possibly 'undefined'.
+comparisonOperatorWithOneOperandIsUndefined.ts(80,12): error TS2454: Variable 'e' is used before being assigned.
+comparisonOperatorWithOneOperandIsUndefined.ts(80,17): error TS18048: 'x' is possibly 'undefined'.
+comparisonOperatorWithOneOperandIsUndefined.ts(81,12): error TS2454: Variable 'f' is used before being assigned.
+comparisonOperatorWithOneOperandIsUndefined.ts(81,17): error TS18048: 'x' is possibly 'undefined'.
+comparisonOperatorWithOneOperandIsUndefined.ts(82,12): error TS2454: Variable 'g' is used before being assigned.
+comparisonOperatorWithOneOperandIsUndefined.ts(82,17): error TS18048: 'x' is possibly 'undefined'.
+comparisonOperatorWithOneOperandIsUndefined.ts(85,12): error TS18048: 'x' is possibly 'undefined'.
+comparisonOperatorWithOneOperandIsUndefined.ts(85,17): error TS2454: Variable 'a' is used before being assigned.
+comparisonOperatorWithOneOperandIsUndefined.ts(86,12): error TS18048: 'x' is possibly 'undefined'.
+comparisonOperatorWithOneOperandIsUndefined.ts(86,17): error TS2454: Variable 'b' is used before being assigned.
+comparisonOperatorWithOneOperandIsUndefined.ts(87,12): error TS18048: 'x' is possibly 'undefined'.
+comparisonOperatorWithOneOperandIsUndefined.ts(87,17): error TS2454: Variable 'c' is used before being assigned.
+comparisonOperatorWithOneOperandIsUndefined.ts(88,12): error TS18048: 'x' is possibly 'undefined'.
+comparisonOperatorWithOneOperandIsUndefined.ts(89,12): error TS18048: 'x' is possibly 'undefined'.
+comparisonOperatorWithOneOperandIsUndefined.ts(89,17): error TS2454: Variable 'e' is used before being assigned.
+comparisonOperatorWithOneOperandIsUndefined.ts(90,12): error TS18048: 'x' is possibly 'undefined'.
+comparisonOperatorWithOneOperandIsUndefined.ts(90,17): error TS2454: Variable 'f' is used before being assigned.
+comparisonOperatorWithOneOperandIsUndefined.ts(91,12): error TS18048: 'x' is possibly 'undefined'.
+comparisonOperatorWithOneOperandIsUndefined.ts(91,17): error TS2454: Variable 'g' is used before being assigned.
+comparisonOperatorWithOneOperandIsUndefined.ts(93,12): error TS2454: Variable 'a' is used before being assigned.
+comparisonOperatorWithOneOperandIsUndefined.ts(93,17): error TS18048: 'x' is possibly 'undefined'.
+comparisonOperatorWithOneOperandIsUndefined.ts(94,12): error TS2454: Variable 'b' is used before being assigned.
+comparisonOperatorWithOneOperandIsUndefined.ts(94,17): error TS18048: 'x' is possibly 'undefined'.
+comparisonOperatorWithOneOperandIsUndefined.ts(95,12): error TS2454: Variable 'c' is used before being assigned.
+comparisonOperatorWithOneOperandIsUndefined.ts(95,17): error TS18048: 'x' is possibly 'undefined'.
+comparisonOperatorWithOneOperandIsUndefined.ts(96,17): error TS18048: 'x' is possibly 'undefined'.
+comparisonOperatorWithOneOperandIsUndefined.ts(97,12): error TS2454: Variable 'e' is used before being assigned.
+comparisonOperatorWithOneOperandIsUndefined.ts(97,17): error TS18048: 'x' is possibly 'undefined'.
+comparisonOperatorWithOneOperandIsUndefined.ts(98,12): error TS2454: Variable 'f' is used before being assigned.
+comparisonOperatorWithOneOperandIsUndefined.ts(98,17): error TS18048: 'x' is possibly 'undefined'.
+comparisonOperatorWithOneOperandIsUndefined.ts(99,12): error TS2454: Variable 'g' is used before being assigned.
+comparisonOperatorWithOneOperandIsUndefined.ts(99,17): error TS18048: 'x' is possibly 'undefined'.
+comparisonOperatorWithOneOperandIsUndefined.ts(102,17): error TS2454: Variable 'a' is used before being assigned.
+comparisonOperatorWithOneOperandIsUndefined.ts(103,17): error TS2454: Variable 'b' is used before being assigned.
+comparisonOperatorWithOneOperandIsUndefined.ts(104,17): error TS2454: Variable 'c' is used before being assigned.
+comparisonOperatorWithOneOperandIsUndefined.ts(106,17): error TS2454: Variable 'e' is used before being assigned.
+comparisonOperatorWithOneOperandIsUndefined.ts(107,17): error TS2454: Variable 'f' is used before being assigned.
+comparisonOperatorWithOneOperandIsUndefined.ts(108,17): error TS2454: Variable 'g' is used before being assigned.
+comparisonOperatorWithOneOperandIsUndefined.ts(110,12): error TS2454: Variable 'a' is used before being assigned.
+comparisonOperatorWithOneOperandIsUndefined.ts(111,12): error TS2454: Variable 'b' is used before being assigned.
+comparisonOperatorWithOneOperandIsUndefined.ts(112,12): error TS2454: Variable 'c' is used before being assigned.
+comparisonOperatorWithOneOperandIsUndefined.ts(114,12): error TS2454: Variable 'e' is used before being assigned.
+comparisonOperatorWithOneOperandIsUndefined.ts(115,12): error TS2454: Variable 'f' is used before being assigned.
+comparisonOperatorWithOneOperandIsUndefined.ts(116,12): error TS2454: Variable 'g' is used before being assigned.
+comparisonOperatorWithOneOperandIsUndefined.ts(119,17): error TS2454: Variable 'a' is used before being assigned.
+comparisonOperatorWithOneOperandIsUndefined.ts(120,17): error TS2454: Variable 'b' is used before being assigned.
+comparisonOperatorWithOneOperandIsUndefined.ts(121,17): error TS2454: Variable 'c' is used before being assigned.
+comparisonOperatorWithOneOperandIsUndefined.ts(123,17): error TS2454: Variable 'e' is used before being assigned.
+comparisonOperatorWithOneOperandIsUndefined.ts(124,17): error TS2454: Variable 'f' is used before being assigned.
+comparisonOperatorWithOneOperandIsUndefined.ts(125,17): error TS2454: Variable 'g' is used before being assigned.
+comparisonOperatorWithOneOperandIsUndefined.ts(127,12): error TS2454: Variable 'a' is used before being assigned.
+comparisonOperatorWithOneOperandIsUndefined.ts(128,12): error TS2454: Variable 'b' is used before being assigned.
+comparisonOperatorWithOneOperandIsUndefined.ts(129,12): error TS2454: Variable 'c' is used before being assigned.
+comparisonOperatorWithOneOperandIsUndefined.ts(131,12): error TS2454: Variable 'e' is used before being assigned.
+comparisonOperatorWithOneOperandIsUndefined.ts(132,12): error TS2454: Variable 'f' is used before being assigned.
+comparisonOperatorWithOneOperandIsUndefined.ts(133,12): error TS2454: Variable 'g' is used before being assigned.
+comparisonOperatorWithOneOperandIsUndefined.ts(136,18): error TS2454: Variable 'a' is used before being assigned.
+comparisonOperatorWithOneOperandIsUndefined.ts(137,18): error TS2454: Variable 'b' is used before being assigned.
+comparisonOperatorWithOneOperandIsUndefined.ts(138,18): error TS2454: Variable 'c' is used before being assigned.
+comparisonOperatorWithOneOperandIsUndefined.ts(140,18): error TS2454: Variable 'e' is used before being assigned.
+comparisonOperatorWithOneOperandIsUndefined.ts(141,18): error TS2454: Variable 'f' is used before being assigned.
+comparisonOperatorWithOneOperandIsUndefined.ts(142,18): error TS2454: Variable 'g' is used before being assigned.
+comparisonOperatorWithOneOperandIsUndefined.ts(144,12): error TS2454: Variable 'a' is used before being assigned.
+comparisonOperatorWithOneOperandIsUndefined.ts(145,12): error TS2454: Variable 'b' is used before being assigned.
+comparisonOperatorWithOneOperandIsUndefined.ts(146,12): error TS2454: Variable 'c' is used before being assigned.
+comparisonOperatorWithOneOperandIsUndefined.ts(148,12): error TS2454: Variable 'e' is used before being assigned.
+comparisonOperatorWithOneOperandIsUndefined.ts(149,12): error TS2454: Variable 'f' is used before being assigned.
+comparisonOperatorWithOneOperandIsUndefined.ts(150,12): error TS2454: Variable 'g' is used before being assigned.
+comparisonOperatorWithOneOperandIsUndefined.ts(153,18): error TS2454: Variable 'a' is used before being assigned.
+comparisonOperatorWithOneOperandIsUndefined.ts(154,18): error TS2454: Variable 'b' is used before being assigned.
+comparisonOperatorWithOneOperandIsUndefined.ts(155,18): error TS2454: Variable 'c' is used before being assigned.
+comparisonOperatorWithOneOperandIsUndefined.ts(157,18): error TS2454: Variable 'e' is used before being assigned.
+comparisonOperatorWithOneOperandIsUndefined.ts(158,18): error TS2454: Variable 'f' is used before being assigned.
+comparisonOperatorWithOneOperandIsUndefined.ts(159,18): error TS2454: Variable 'g' is used before being assigned.
+comparisonOperatorWithOneOperandIsUndefined.ts(161,12): error TS2454: Variable 'a' is used before being assigned.
+comparisonOperatorWithOneOperandIsUndefined.ts(162,12): error TS2454: Variable 'b' is used before being assigned.
+comparisonOperatorWithOneOperandIsUndefined.ts(163,12): error TS2454: Variable 'c' is used before being assigned.
+comparisonOperatorWithOneOperandIsUndefined.ts(165,12): error TS2454: Variable 'e' is used before being assigned.
+comparisonOperatorWithOneOperandIsUndefined.ts(166,12): error TS2454: Variable 'f' is used before being assigned.
+comparisonOperatorWithOneOperandIsUndefined.ts(167,12): error TS2454: Variable 'g' is used before being assigned.

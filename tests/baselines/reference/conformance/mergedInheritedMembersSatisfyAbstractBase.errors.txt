@@ -1,0 +1,1 @@
+mergedInheritedMembersSatisfyAbstractBase.ts(19,11): error TS2320: Interface 'IncorrectlyExtends' cannot simultaneously extend types 'BaseClass' and 'IncorrectGetters'.

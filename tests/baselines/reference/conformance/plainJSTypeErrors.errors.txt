@@ -1,0 +1,1 @@
+plainJSTypeErrors.js(2,5): error TS2839: This condition will always return 'false' since JavaScript compares objects by reference, not value.

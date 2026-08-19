@@ -1,0 +1,8 @@
+typeParameterAssignability3.ts(3,13): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
+typeParameterAssignability3.ts(8,9): error TS2454: Variable 'a' is used before being assigned.
+typeParameterAssignability3.ts(14,5): error TS2322: Type 'U' is not assignable to type 'T'.
+typeParameterAssignability3.ts(15,5): error TS2322: Type 'T' is not assignable to type 'U'.
+typeParameterAssignability3.ts(19,5): error TS2564: Property 't' has no initializer and is not definitely assigned in the constructor.
+typeParameterAssignability3.ts(20,5): error TS2564: Property 'u' has no initializer and is not definitely assigned in the constructor.
+typeParameterAssignability3.ts(22,9): error TS2322: Type 'U' is not assignable to type 'T'.
+typeParameterAssignability3.ts(23,9): error TS2322: Type 'T' is not assignable to type 'U'.

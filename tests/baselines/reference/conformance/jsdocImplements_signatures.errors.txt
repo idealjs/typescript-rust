@@ -1,0 +1,1 @@
+/a.js(2,7): error TS2420: Class 'B' incorrectly implements interface 'Sig'.

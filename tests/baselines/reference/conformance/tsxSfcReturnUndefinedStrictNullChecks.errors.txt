@@ -1,0 +1,2 @@
+file.tsx(11,14): error TS2786: 'Foo' cannot be used as a JSX component.
+file.tsx(12,12): error TS2786: 'Greet' cannot be used as a JSX component.

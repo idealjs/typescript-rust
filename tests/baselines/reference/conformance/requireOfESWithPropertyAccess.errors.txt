@@ -1,0 +1,1 @@
+main.js(4,3): error TS2339: Property 'x' does not exist on type '{ grey: {}; }'.

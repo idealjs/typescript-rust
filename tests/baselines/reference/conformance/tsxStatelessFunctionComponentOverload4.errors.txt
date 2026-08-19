@@ -1,0 +1,11 @@
+file.tsx(14,22): error TS2769: No overload matches this call.
+file.tsx(15,13): error TS2769: No overload matches this call.
+file.tsx(16,31): error TS2769: No overload matches this call.
+file.tsx(18,31): error TS2769: No overload matches this call.
+file.tsx(19,13): error TS2769: No overload matches this call.
+file.tsx(27,13): error TS2769: No overload matches this call.
+file.tsx(28,13): error TS2769: No overload matches this call.
+file.tsx(35,13): error TS2769: No overload matches this call.
+file.tsx(36,13): error TS2769: No overload matches this call.
+file.tsx(37,13): error TS2769: No overload matches this call.
+file.tsx(38,13): error TS2769: No overload matches this call.

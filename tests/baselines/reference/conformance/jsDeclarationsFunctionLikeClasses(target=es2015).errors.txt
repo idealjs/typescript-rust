@@ -1,0 +1,2 @@
+referencer.js(7,22): error TS18048: 'p.x' is possibly 'undefined'.
+referencer.js(7,33): error TS18048: 'p.y' is possibly 'undefined'.

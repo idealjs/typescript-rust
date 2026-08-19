@@ -1,0 +1,14 @@
+missingAndExcessProperties.ts(3,11): error TS2339: Property 'x' does not exist on type '{}'.
+missingAndExcessProperties.ts(3,14): error TS2339: Property 'y' does not exist on type '{}'.
+missingAndExcessProperties.ts(4,18): error TS2339: Property 'y' does not exist on type '{}'.
+missingAndExcessProperties.ts(5,11): error TS2339: Property 'x' does not exist on type '{}'.
+missingAndExcessProperties.ts(12,8): error TS2339: Property 'x' does not exist on type '{}'.
+missingAndExcessProperties.ts(12,11): error TS2339: Property 'y' does not exist on type '{}'.
+missingAndExcessProperties.ts(13,18): error TS2339: Property 'y' does not exist on type '{}'.
+missingAndExcessProperties.ts(14,8): error TS2339: Property 'x' does not exist on type '{}'.
+missingAndExcessProperties.ts(21,25): error TS2353: Object literal may only specify known properties, and 'y' does not exist in type '{ x: any; }'.
+missingAndExcessProperties.ts(22,19): error TS2353: Object literal may only specify known properties, and 'x' does not exist in type '{ y: any; }'.
+missingAndExcessProperties.ts(29,14): error TS2353: Object literal may only specify known properties, and 'x' does not exist in type '{}'.
+missingAndExcessProperties.ts(29,20): error TS2353: Object literal may only specify known properties, and 'y' does not exist in type '{}'.
+missingAndExcessProperties.ts(30,22): error TS2353: Object literal may only specify known properties, and 'y' does not exist in type '{ x: number; }'.
+missingAndExcessProperties.ts(31,16): error TS2353: Object literal may only specify known properties, and 'x' does not exist in type '{ y: number; }'.

@@ -1,0 +1,2 @@
+intersectionTypeOverloading.ts(10,9): error TS2454: Variable 'fg' is used before being assigned.
+intersectionTypeOverloading.ts(13,9): error TS2454: Variable 'gf' is used before being assigned.

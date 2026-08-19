@@ -1,0 +1,1 @@
+classAbstractUsingAbstractMethod1.ts(16,5): error TS2511: Cannot create an instance of an abstract class.

@@ -1,0 +1,1 @@
+destructuringTypeAssertionsES5_4.ts(1,23): error TS2304: Cannot find name 'foo'.

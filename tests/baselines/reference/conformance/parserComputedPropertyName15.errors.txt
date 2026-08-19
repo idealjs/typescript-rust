@@ -1,0 +1,1 @@
+parserComputedPropertyName15.ts(1,32): error TS2304: Cannot find name 'e'.

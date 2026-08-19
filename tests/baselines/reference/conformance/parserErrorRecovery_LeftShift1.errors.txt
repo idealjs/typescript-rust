@@ -1,0 +1,3 @@
+parserErrorRecovery_LeftShift1.ts(1,1): error TS2304: Cannot find name 'retValue'.
+parserErrorRecovery_LeftShift1.ts(1,12): error TS2304: Cannot find name 'bfs'.
+parserErrorRecovery_LeftShift1.ts(1,29): error TS1109: Expression expected.

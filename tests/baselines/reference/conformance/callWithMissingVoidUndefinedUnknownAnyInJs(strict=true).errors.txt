@@ -1,0 +1,12 @@
+jsfile.js(6,1): error TS2554: Expected 1 arguments, but got 0.
+jsfile.js(7,1): error TS2554: Expected 1 arguments, but got 0.
+jsfile.js(8,1): error TS2554: Expected 1 arguments, but got 0.
+jsfile.js(10,4): error TS2554: Expected 1 arguments, but got 0.
+jsfile.js(11,4): error TS2554: Expected 1 arguments, but got 0.
+jsfile.js(12,4): error TS2554: Expected 1 arguments, but got 0.
+tsfile.ts(6,1): error TS2554: Expected 1 arguments, but got 0.
+tsfile.ts(7,1): error TS2554: Expected 1 arguments, but got 0.
+tsfile.ts(8,1): error TS2554: Expected 1 arguments, but got 0.
+tsfile.ts(10,4): error TS2554: Expected 1 arguments, but got 0.
+tsfile.ts(11,4): error TS2554: Expected 1 arguments, but got 0.
+tsfile.ts(12,4): error TS2554: Expected 1 arguments, but got 0.

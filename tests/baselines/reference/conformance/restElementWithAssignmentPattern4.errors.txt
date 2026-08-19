@@ -1,0 +1,1 @@
+restElementWithAssignmentPattern4.ts(3,18): error TS2339: Property 'b' does not exist on type '[string, number]'.

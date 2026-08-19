@@ -1,0 +1,1 @@
+typeSatisfaction_contextualTyping2.ts(2,7): error TS7006: Parameter 's' implicitly has an 'any' type.

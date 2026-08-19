@@ -1,0 +1,6 @@
+file.tsx(43,16): error TS2683: 'this' implicitly has type 'any' because it does not have a type annotation.
+file.tsx(46,12): error TS2683: 'this' implicitly has type 'any' because it does not have a type annotation.
+file.tsx(50,13): error TS2769: No overload matches this call.
+file.tsx(56,51): error TS2769: No overload matches this call.
+file.tsx(57,68): error TS2769: No overload matches this call.
+file.tsx(58,13): error TS2769: No overload matches this call.

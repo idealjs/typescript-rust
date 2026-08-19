@@ -1,0 +1,9 @@
+stringIndexingResults.ts(7,10): error TS2454: Variable 'c' is used before being assigned.
+stringIndexingResults.ts(8,10): error TS2454: Variable 'c' is used before being assigned.
+stringIndexingResults.ts(9,10): error TS2454: Variable 'c' is used before being assigned.
+stringIndexingResults.ts(17,10): error TS2454: Variable 'i' is used before being assigned.
+stringIndexingResults.ts(18,10): error TS2454: Variable 'i' is used before being assigned.
+stringIndexingResults.ts(19,10): error TS2454: Variable 'i' is used before being assigned.
+stringIndexingResults.ts(26,10): error TS2454: Variable 'a' is used before being assigned.
+stringIndexingResults.ts(27,10): error TS2454: Variable 'a' is used before being assigned.
+stringIndexingResults.ts(28,10): error TS2454: Variable 'a' is used before being assigned.

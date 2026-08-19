@@ -1,0 +1,1 @@
+parserFunctionDeclaration6.ts(3,14): error TS2389: Function implementation name must be 'foo'.

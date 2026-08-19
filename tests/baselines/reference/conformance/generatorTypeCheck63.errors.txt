@@ -1,0 +1,3 @@
+generatorTypeCheck63.ts(24,61): error TS2345: Argument of type '(state: State) => Generator<number, State, any>' is not assignable to parameter of type '(a: State) => IterableIterator<State | undefined, void>'.
+generatorTypeCheck63.ts(32,62): error TS2345: Argument of type '(state: State) => Generator<never, number, any>' is not assignable to parameter of type '(a: State) => IterableIterator<State | undefined, void>'.
+generatorTypeCheck63.ts(36,62): error TS2345: Argument of type '(state: State) => Generator<State, number, any>' is not assignable to parameter of type '(a: State) => IterableIterator<State | undefined, void>'.

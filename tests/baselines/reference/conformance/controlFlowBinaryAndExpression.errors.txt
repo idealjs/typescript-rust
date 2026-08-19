@@ -1,0 +1,1 @@
+controlFlowBinaryAndExpression.ts(8,1): error TS2454: Variable 'cond' is used before being assigned.

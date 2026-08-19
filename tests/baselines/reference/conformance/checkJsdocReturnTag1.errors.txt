@@ -1,0 +1,1 @@
+returns.js(20,12): error TS2872: This kind of expression is always truthy.

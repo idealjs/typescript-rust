@@ -1,0 +1,3 @@
+parserForStatement4.ts(1,6): error TS2304: Cannot find name 'a'.
+parserForStatement4.ts(1,6): error TS2405: The left-hand side of a 'for...in' statement must be of type 'string' or 'any'.
+parserForStatement4.ts(1,15): error TS2304: Cannot find name 'b'.

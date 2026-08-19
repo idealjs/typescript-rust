@@ -1,0 +1,3 @@
+file.tsx(26,28): error TS2551: Property 'NAme' does not exist on type 'IUser'. Did you mean 'Name'?
+file.tsx(38,15): error TS2322: Type '(user: IUser) => Element' is not assignable to type 'boolean | any[] | ReactChild'.
+file.tsx(41,15): error TS2322: Type '(user: IUser) => Element' is not assignable to type 'boolean | any[] | ReactChild'.

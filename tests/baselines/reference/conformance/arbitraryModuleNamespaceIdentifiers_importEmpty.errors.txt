@@ -1,0 +1,3 @@
+arbitraryModuleNamespaceIdentifiers_importEmpty.ts(4,3): error TS2305: Module '"./arbitraryModuleNamespaceIdentifiers_importEmpty"' has no exported member '"missing"'.
+arbitraryModuleNamespaceIdentifiers_importEmpty.ts(5,3): error TS2305: Module '"./arbitraryModuleNamespaceIdentifiers_importEmpty"' has no exported member '"(missing)"'.
+arbitraryModuleNamespaceIdentifiers_importEmpty.ts(6,3): error TS2305: Module '"./arbitraryModuleNamespaceIdentifiers_importEmpty"' has no exported member '""'.

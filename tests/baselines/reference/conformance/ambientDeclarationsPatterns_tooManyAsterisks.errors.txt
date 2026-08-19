@@ -1,0 +1,1 @@
+ambientDeclarationsPatterns_tooManyAsterisks.ts(1,16): error TS5061: Pattern 'too*many*asterisks' can have at most one '*' character.

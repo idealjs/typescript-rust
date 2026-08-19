@@ -1,0 +1,3 @@
+objectTypeHidingMembersOfObject.ts(8,16): error TS2454: Variable 'c' is used before being assigned.
+objectTypeHidingMembersOfObject.ts(15,16): error TS2454: Variable 'i' is used before being assigned.
+objectTypeHidingMembersOfObject.ts(27,16): error TS2454: Variable 'b' is used before being assigned.

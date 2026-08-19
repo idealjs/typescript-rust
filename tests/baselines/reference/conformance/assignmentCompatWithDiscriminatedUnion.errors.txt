@@ -1,0 +1,4 @@
+assignmentCompatWithDiscriminatedUnion.ts(44,5): error TS2322: Type 'S' is not assignable to type 'T'.
+assignmentCompatWithDiscriminatedUnion.ts(58,5): error TS2322: Type 'S' is not assignable to type 'T'.
+assignmentCompatWithDiscriminatedUnion.ts(82,5): error TS2322: Type 'S' is not assignable to type 'T'.
+assignmentCompatWithDiscriminatedUnion.ts(140,27): error TS2322: Type 'undefined' is not assignable to type '"categorical" | "linear"'.

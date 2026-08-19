@@ -1,0 +1,2 @@
+privateStaticNotAccessibleInClodule.ts(4,13): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
+privateStaticNotAccessibleInClodule.ts(9,22): error TS2341: Property 'bar' is private and only accessible within class 'C'.

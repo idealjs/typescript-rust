@@ -1,0 +1,2 @@
+parserIndexMemberDeclaration5.ts(2,24): error TS1005: ';' expected.
+parserIndexMemberDeclaration5.ts(2,31): error TS2564: Property 'v' has no initializer and is not definitely assigned in the constructor.

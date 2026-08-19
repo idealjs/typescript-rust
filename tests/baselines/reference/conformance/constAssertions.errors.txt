@@ -1,0 +1,5 @@
+constAssertions.ts(44,32): error TS2540: Cannot assign to 'x' because it is a read-only property.
+constAssertions.ts(61,10): error TS1355: A 'const' assertion can only be applied to references to enum members, or string, number, boolean, array, or object literals.
+constAssertions.ts(62,10): error TS1355: A 'const' assertion can only be applied to references to enum members, or string, number, boolean, array, or object literals.
+constAssertions.ts(63,10): error TS1355: A 'const' assertion can only be applied to references to enum members, or string, number, boolean, array, or object literals.
+constAssertions.ts(118,3): error TS2322: Type '3' is not assignable to type '2'.

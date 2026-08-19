@@ -1,0 +1,2 @@
+constructSignaturesWithOverloads2.ts(27,11): error TS2428: All declarations of 'I' must have identical type parameters.
+constructSignaturesWithOverloads2.ts(32,11): error TS2428: All declarations of 'I' must have identical type parameters.

@@ -1,0 +1,3 @@
+parserComputedPropertyName27.ts(3,6): error TS2304: Cannot find name 'e'.
+parserComputedPropertyName27.ts(4,6): error TS2304: Cannot find name 'e2'.
+parserComputedPropertyName27.ts(4,9): error TS1005: ';' expected.

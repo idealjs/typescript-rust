@@ -1,0 +1,5 @@
+looseThisTypeInFunctions.ts(21,1): error TS2322: Type '(this: C, m: number) => number' is not assignable to type '(this: void, m: number) => number'.
+looseThisTypeInFunctions.ts(25,27): error TS2339: Property 'length' does not exist on type 'number'.
+looseThisTypeInFunctions.ts(33,28): error TS2339: Property 'length' does not exist on type 'number'.
+looseThisTypeInFunctions.ts(37,9): error TS2684: The 'this' context of type 'void' is not assignable to method's 'this' of type 'I'.
+looseThisTypeInFunctions.ts(46,20): error TS2339: Property 'length' does not exist on type 'number'.

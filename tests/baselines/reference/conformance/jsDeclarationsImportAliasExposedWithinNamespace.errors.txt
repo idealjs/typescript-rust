@@ -1,0 +1,1 @@
+file2.js(1,9): error TS18042: 'myTypes' is a type and cannot be imported in JavaScript files. Use 'import("./file.js").myTypes' in a JSDoc type annotation.

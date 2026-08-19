@@ -1,0 +1,5 @@
+instanceofOperatorWithLHSIsObject.ts(11,10): error TS2454: Variable 'a' is used before being assigned.
+instanceofOperatorWithLHSIsObject.ts(12,10): error TS2454: Variable 'b' is used before being assigned.
+instanceofOperatorWithLHSIsObject.ts(12,23): error TS2454: Variable 'x2' is used before being assigned.
+instanceofOperatorWithLHSIsObject.ts(13,10): error TS2454: Variable 'c' is used before being assigned.
+instanceofOperatorWithLHSIsObject.ts(14,10): error TS2454: Variable 'd' is used before being assigned.

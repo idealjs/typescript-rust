@@ -1,0 +1,6 @@
+parserForStatement3.ts(1,5): error TS2304: Cannot find name 'd'.
+parserForStatement3.ts(1,10): error TS2304: Cannot find name '_'.
+parserForStatement3.ts(1,15): error TS2304: Cannot find name 'a'.
+parserForStatement3.ts(1,18): error TS2304: Cannot find name '_'.
+parserForStatement3.ts(1,23): error TS2304: Cannot find name 'a'.
+parserForStatement3.ts(1,30): error TS2304: Cannot find name 'b'.

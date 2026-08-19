@@ -1,0 +1,4 @@
+genericClassExpressionInFunction.ts(2,5): error TS2564: Property 'genericVar' has no initializer and is not definitely assigned in the constructor.
+genericClassExpressionInFunction.ts(16,5): error TS2564: Property 'namae' has no initializer and is not definitely assigned in the constructor.
+genericClassExpressionInFunction.ts(19,5): error TS2564: Property 'name' has no initializer and is not definitely assigned in the constructor.
+genericClassExpressionInFunction.ts(23,5): error TS2564: Property 'nom' has no initializer and is not definitely assigned in the constructor.

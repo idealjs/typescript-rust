@@ -1,0 +1,2 @@
+index3.js(2,20): error TS2352: Conversion of type 'null' to type 'Foo' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+index4.js(3,20): error TS2352: Conversion of type 'null' to type 'Bar' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.

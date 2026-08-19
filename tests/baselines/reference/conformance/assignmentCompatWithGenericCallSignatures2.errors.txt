@@ -1,0 +1,2 @@
+assignmentCompatWithGenericCallSignatures2.ts(15,1): error TS2322: Type 'B' is not assignable to type 'A'.
+assignmentCompatWithGenericCallSignatures2.ts(16,1): error TS2322: Type 'A' is not assignable to type 'B'.

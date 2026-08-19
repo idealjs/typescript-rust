@@ -1,0 +1,7 @@
+m1.ts(1,22): error TS2323: Cannot redeclare exported variable 'default'.
+m1.ts(1,22): error TS2528: A module cannot have multiple default exports.
+m1.ts(1,22): error TS2813: Class declaration cannot implement overload list for 'default'.
+m1.ts(5,25): error TS2323: Cannot redeclare exported variable 'default'.
+m1.ts(5,25): error TS2528: A module cannot have multiple default exports.
+m1.ts(5,25): error TS2814: Function with bodies can only merge with classes that are ambient.
+m1.ts(10,16): error TS2528: A module cannot have multiple default exports.

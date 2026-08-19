@@ -1,0 +1,1 @@
+typeSatisfaction_optionalMemberConformance.ts(7,11): error TS2339: Property 'y' does not exist on type '{ x: number; }'.

@@ -1,0 +1,16 @@
+additionOperatorWithTypeParameter.ts(15,14): error TS2365: Operator '+' cannot be applied to types 'T' and 'boolean'.
+additionOperatorWithTypeParameter.ts(16,14): error TS2365: Operator '+' cannot be applied to types 'T' and 'number'.
+additionOperatorWithTypeParameter.ts(18,14): error TS2365: Operator '+' cannot be applied to types 'T' and 'Object'.
+additionOperatorWithTypeParameter.ts(19,14): error TS2365: Operator '+' cannot be applied to types 'T' and 'E'.
+additionOperatorWithTypeParameter.ts(20,14): error TS2365: Operator '+' cannot be applied to types 'T' and 'void'.
+additionOperatorWithTypeParameter.ts(24,14): error TS2365: Operator '+' cannot be applied to types 'boolean' and 'T'.
+additionOperatorWithTypeParameter.ts(25,15): error TS2365: Operator '+' cannot be applied to types 'number' and 'T'.
+additionOperatorWithTypeParameter.ts(27,15): error TS2365: Operator '+' cannot be applied to types 'Object' and 'T'.
+additionOperatorWithTypeParameter.ts(28,15): error TS2365: Operator '+' cannot be applied to types 'E' and 'T'.
+additionOperatorWithTypeParameter.ts(29,15): error TS2365: Operator '+' cannot be applied to types 'void' and 'T'.
+additionOperatorWithTypeParameter.ts(32,19): error TS18050: The value 'null' cannot be used here.
+additionOperatorWithTypeParameter.ts(33,19): error TS18050: The value 'undefined' cannot be used here.
+additionOperatorWithTypeParameter.ts(34,15): error TS2365: Operator '+' cannot be applied to types 'T' and 'T'.
+additionOperatorWithTypeParameter.ts(35,15): error TS2365: Operator '+' cannot be applied to types 'T' and 'U'.
+additionOperatorWithTypeParameter.ts(36,15): error TS2365: Operator '+' cannot be applied to types 'T' and '() => void'.
+additionOperatorWithTypeParameter.ts(37,15): error TS2365: Operator '+' cannot be applied to types 'T' and 'never[]'.

@@ -1,0 +1,2 @@
+app.tsx(2,13): error TS7005: Variable 'Foo' implicitly has an 'any' type.
+app.tsx(2,18): error TS7005: Variable 'React' implicitly has an 'any' type.

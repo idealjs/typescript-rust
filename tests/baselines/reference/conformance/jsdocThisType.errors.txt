@@ -1,0 +1,6 @@
+/a.js(3,10): error TS2339: Property 'test' does not exist on type 'Foo'.
+/a.js(8,10): error TS2339: Property 'test' does not exist on type 'Foo'.
+/a.js(13,10): error TS2339: Property 'test' does not exist on type 'Foo'.
+/a.js(18,10): error TS2339: Property 'test' does not exist on type 'Foo'.
+/a.js(23,10): error TS2339: Property 'test' does not exist on type 'Foo'.
+/a.js(28,10): error TS2339: Property 'test' does not exist on type 'Foo'.

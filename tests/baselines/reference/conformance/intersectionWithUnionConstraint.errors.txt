@@ -1,0 +1,5 @@
+intersectionWithUnionConstraint.ts(7,9): error TS2322: Type 'string | undefined' is not assignable to type 'string | number'.
+intersectionWithUnionConstraint.ts(8,9): error TS2322: Type 'string | undefined' is not assignable to type 'string | null'.
+intersectionWithUnionConstraint.ts(10,9): error TS2322: Type 'string | undefined' is not assignable to type 'number | null'.
+intersectionWithUnionConstraint.ts(11,9): error TS2322: Type 'string | undefined' is not assignable to type 'number | undefined'.
+intersectionWithUnionConstraint.ts(12,9): error TS2322: Type 'string | undefined' is not assignable to type 'null | undefined'.

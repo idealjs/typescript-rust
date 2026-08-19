@@ -1,0 +1,2 @@
+uniqueSymbols.ts(212,5): error TS2564: Property '[s]' has no initializer and is not definitely assigned in the constructor.
+uniqueSymbols.ts(213,5): error TS2564: Property '[N.s]' has no initializer and is not definitely assigned in the constructor.

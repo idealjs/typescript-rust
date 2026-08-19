@@ -1,0 +1,5 @@
+genericCallWithFunctionTypedArguments4.ts(3,11): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
+genericCallWithFunctionTypedArguments4.ts(4,11): error TS2564: Property 'bar' has no initializer and is not definitely assigned in the constructor.
+genericCallWithFunctionTypedArguments4.ts(12,12): error TS2454: Variable 'u' is used before being assigned.
+genericCallWithFunctionTypedArguments4.ts(15,14): error TS2454: Variable 'a' is used before being assigned.
+genericCallWithFunctionTypedArguments4.ts(22,15): error TS2454: Variable 'b' is used before being assigned.

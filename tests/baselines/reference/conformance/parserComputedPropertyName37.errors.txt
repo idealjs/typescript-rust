@@ -1,0 +1,2 @@
+parserComputedPropertyName37.ts(2,6): error TS1212: Identifier expected. 'public' is a reserved word in strict mode.
+parserComputedPropertyName37.ts(2,6): error TS2304: Cannot find name 'public'.

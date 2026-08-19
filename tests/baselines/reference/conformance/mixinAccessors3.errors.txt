@@ -1,0 +1,1 @@
+mixinAccessors3.ts(15,7): error TS2611: 'name' is defined as a property in class 'mixin<typeof BaseClass>.(Anonymous class) & BaseClass', but is overridden here in 'MyClass' as an accessor.

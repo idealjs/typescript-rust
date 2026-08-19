@@ -1,0 +1,1 @@
+privateNameNotAllowedOutsideClass.ts(1,7): error TS18029: Private identifiers are not allowed in variable declarations.

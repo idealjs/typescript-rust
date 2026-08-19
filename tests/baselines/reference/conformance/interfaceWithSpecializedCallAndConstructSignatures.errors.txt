@@ -1,0 +1,4 @@
+interfaceWithSpecializedCallAndConstructSignatures.ts(10,9): error TS2454: Variable 'f' is used before being assigned.
+interfaceWithSpecializedCallAndConstructSignatures.ts(11,10): error TS2454: Variable 'f' is used before being assigned.
+interfaceWithSpecializedCallAndConstructSignatures.ts(12,14): error TS2454: Variable 'f' is used before being assigned.
+interfaceWithSpecializedCallAndConstructSignatures.ts(13,14): error TS2454: Variable 'f' is used before being assigned.

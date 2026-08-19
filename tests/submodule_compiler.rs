@@ -56,8 +56,32 @@ use tsox::vfs::InMemoryFS;
 use common::baseline::{self, KnownDiffs, NO_CONTENT};
 use common::case_parser::{extract_settings, split_units};
 
-const SUBMODULE_DIR: &str = "_submodules/TypeScript/tests/cases/compiler";
-const SUBFOLDER: &str = "compiler";
+/// Which suite under `_submodules/TypeScript/tests/cases/` this binary runs:
+/// `compiler` (regression, default) or `conformance`. Selected via
+/// `TSOX_SUBMODULE_SUITE` — mirroring Go's `CompilerTestType` (regression vs
+/// conformance share one runner; only the cases dir and baseline subfolder
+/// differ). The worker subprocess inherits the env var, so the same test
+/// function serves both.
+fn suite() -> &'static str {
+    match std::env::var("TSOX_SUBMODULE_SUITE")
+        .unwrap_or_default()
+        .to_ascii_lowercase()
+        .as_str()
+    {
+        "conformance" => "conformance",
+        _ => "compiler",
+    }
+}
+
+fn submodule_dir() -> String {
+    format!("_submodules/TypeScript/tests/cases/{}", suite())
+}
+
+/// Baseline subfolder (also the triaged.txt key prefix) — Go's
+/// `CompilerTestType.String()`.
+fn subfolder() -> &'static str {
+    suite()
+}
 
 /// Default cap on the number of cases run, to keep CI tractable during
 /// bring-up (~1s/case, run via per-case subprocess isolation). Override with
@@ -573,7 +597,7 @@ fn run_case(
             overall = StepOutcome::Failed;
             continue;
         };
-        match baseline::compare(SUBFOLDER, &name, ext, actual) {
+        match baseline::compare(subfolder(), &name, ext, actual) {
             baseline::Outcome::Passed => {
                 notes.push(format!("{label}: pass"));
                 if !matches!(overall, StepOutcome::Failed | StepOutcome::AcceptedDiff) {
@@ -581,7 +605,7 @@ fn run_case(
                 }
             }
             baseline::Outcome::Failed { .. } => {
-                if known_diffs.contains(SUBFOLDER, &name, ext) {
+                if known_diffs.contains(subfolder(), &name, ext) {
                     notes.push(format!("{label}: known diff (triaged/accepted)"));
                     if !matches!(overall, StepOutcome::Failed) {
                         overall = StepOutcome::AcceptedDiff;
@@ -685,10 +709,11 @@ fn submodule_compiler_cases() {
         return;
     }
 
-    let root = std::path::Path::new(SUBMODULE_DIR);
+    let dir = submodule_dir();
+    let root = std::path::Path::new(&dir);
     if !root.is_dir() {
         eprintln!(
-            "[submodule_compiler] {SUBMODULE_DIR} not found — \
+            "[submodule_compiler] {dir} not found — \
              run `git submodule update --init` to fetch official test cases. Skipping."
         );
         return;
@@ -732,7 +757,13 @@ fn submodule_compiler_cases() {
             }
         }
     }
-    let log_path = Path::new(baseline::LOCAL_ROOT).join("submodule_run.log");
+    // Per-suite run log so compiler/conformance sweeps don't clobber each other.
+    let log_name = if suite() == "compiler" {
+        "submodule_run.log".to_string()
+    } else {
+        format!("submodule_{}_run.log", suite())
+    };
+    let log_path = Path::new(baseline::LOCAL_ROOT).join(log_name);
     let log = RunLog::new(
         log_path.clone(),
         std::env::var("TSOX_SUBMODULE_QUIET")
@@ -994,9 +1025,10 @@ fn submodule_compiler_cases() {
             log.line(&format!("[submodule_compiler] FAILED: {name}"));
         }
         log.line(&format!(
-            "run log: {}; actual outputs under {}/{SUBFOLDER}/",
+            "run log: {}; actual outputs under {}/{}/",
             log_path.display(),
             baseline::LOCAL_ROOT,
+            subfolder(),
         ));
         panic!(
             "{failed} baseline mismatch(es):\n  {}\n\

@@ -41,6 +41,7 @@ pub mod sourcemap;
 pub mod stringutil;
 pub mod symlinks;
 pub mod testutil;
+pub mod transpile;
 pub mod tracing;
 pub mod tsoptions;
 pub mod tspath;

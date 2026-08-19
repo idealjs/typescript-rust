@@ -1,0 +1,4 @@
+memberFunctionsWithPrivateOverloads.ts(43,11): error TS2341: Property 'foo' is private and only accessible within class 'C'.
+memberFunctionsWithPrivateOverloads.ts(46,12): error TS2341: Property 'foo' is private and only accessible within class 'D<T>'.
+memberFunctionsWithPrivateOverloads.ts(48,12): error TS2341: Property 'foo' is private and only accessible within class 'C'.
+memberFunctionsWithPrivateOverloads.ts(49,12): error TS2341: Property 'bar' is private and only accessible within class 'D<T>'.

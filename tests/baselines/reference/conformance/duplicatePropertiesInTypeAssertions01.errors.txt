@@ -1,0 +1,2 @@
+duplicatePropertiesInTypeAssertions01.ts(1,11): error TS2300: Duplicate identifier 'a'.
+duplicatePropertiesInTypeAssertions01.ts(1,22): error TS2300: Duplicate identifier 'a'.

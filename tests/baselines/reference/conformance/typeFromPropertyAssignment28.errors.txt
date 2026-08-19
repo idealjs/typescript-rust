@@ -1,0 +1,2 @@
+a.js(7,17): error TS2353: Object literal may only specify known properties, and 'q' does not exist in type 'C'.
+a.js(11,3): error TS2339: Property 'q' does not exist on type 'C'.

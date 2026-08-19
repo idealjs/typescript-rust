@@ -1,0 +1,5 @@
+exponentiationOperatorWithAnyAndNumber.ts(6,15): error TS2454: Variable 'b' is used before being assigned.
+exponentiationOperatorWithAnyAndNumber.ts(10,10): error TS2454: Variable 'b' is used before being assigned.
+exponentiationOperatorWithAnyAndNumber.ts(11,15): error TS2454: Variable 'b' is used before being assigned.
+exponentiationOperatorWithAnyAndNumber.ts(12,10): error TS2454: Variable 'b' is used before being assigned.
+exponentiationOperatorWithAnyAndNumber.ts(12,15): error TS2454: Variable 'b' is used before being assigned.

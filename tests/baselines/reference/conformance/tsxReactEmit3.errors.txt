@@ -1,0 +1,3 @@
+test.tsx(4,13): error TS7005: Variable 'Foo' implicitly has an 'any' type.
+test.tsx(4,18): error TS7005: Variable 'Bar' implicitly has an 'any' type.
+test.tsx(4,23): error TS7005: Variable 'baz' implicitly has an 'any' type.

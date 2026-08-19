@@ -1,0 +1,16 @@
+typeGuardOfFormIsTypeOnInterfaces.ts(36,1): error TS2322: Type 'string | false' is not assignable to type 'string'.
+typeGuardOfFormIsTypeOnInterfaces.ts(36,12): error TS2454: Variable 'c1Orc2' is used before being assigned.
+typeGuardOfFormIsTypeOnInterfaces.ts(37,1): error TS2322: Type 'number | false' is not assignable to type 'number'.
+typeGuardOfFormIsTypeOnInterfaces.ts(37,12): error TS2454: Variable 'c1Orc2' is used before being assigned.
+typeGuardOfFormIsTypeOnInterfaces.ts(38,1): error TS2322: Type 'string | false' is not assignable to type 'string'.
+typeGuardOfFormIsTypeOnInterfaces.ts(38,12): error TS2454: Variable 'c1Orc2' is used before being assigned.
+typeGuardOfFormIsTypeOnInterfaces.ts(39,1): error TS2322: Type 'number | false' is not assignable to type 'number'.
+typeGuardOfFormIsTypeOnInterfaces.ts(39,12): error TS2454: Variable 'c1Orc2' is used before being assigned.
+typeGuardOfFormIsTypeOnInterfaces.ts(42,1): error TS2322: Type 'number | false' is not assignable to type 'number'.
+typeGuardOfFormIsTypeOnInterfaces.ts(42,12): error TS2454: Variable 'c2Ord1' is used before being assigned.
+typeGuardOfFormIsTypeOnInterfaces.ts(43,1): error TS2322: Type 'number | false' is not assignable to type 'number'.
+typeGuardOfFormIsTypeOnInterfaces.ts(43,12): error TS2454: Variable 'c2Ord1' is used before being assigned.
+typeGuardOfFormIsTypeOnInterfaces.ts(44,1): error TS2322: Type 'string | false' is not assignable to type 'string'.
+typeGuardOfFormIsTypeOnInterfaces.ts(44,12): error TS2454: Variable 'c2Ord1' is used before being assigned.
+typeGuardOfFormIsTypeOnInterfaces.ts(45,5): error TS2322: Type 'false | D1' is not assignable to type 'C2 | D1'.
+typeGuardOfFormIsTypeOnInterfaces.ts(45,24): error TS2454: Variable 'c2Ord1' is used before being assigned.

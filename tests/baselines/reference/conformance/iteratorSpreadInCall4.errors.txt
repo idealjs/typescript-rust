@@ -1,0 +1,1 @@
+iteratorSpreadInCall4.ts(15,5): error TS2556: A spread argument must either have a tuple type or be passed to a rest parameter.

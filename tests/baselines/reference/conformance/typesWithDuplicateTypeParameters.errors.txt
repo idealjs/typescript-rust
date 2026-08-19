@@ -1,0 +1,6 @@
+typesWithDuplicateTypeParameters.ts(1,12): error TS2300: Duplicate identifier 'T'.
+typesWithDuplicateTypeParameters.ts(2,16): error TS2300: Duplicate identifier 'T'.
+typesWithDuplicateTypeParameters.ts(4,16): error TS2300: Duplicate identifier 'T'.
+typesWithDuplicateTypeParameters.ts(5,20): error TS2300: Duplicate identifier 'T'.
+typesWithDuplicateTypeParameters.ts(7,15): error TS2300: Duplicate identifier 'T'.
+typesWithDuplicateTypeParameters.ts(8,19): error TS2300: Duplicate identifier 'T'.

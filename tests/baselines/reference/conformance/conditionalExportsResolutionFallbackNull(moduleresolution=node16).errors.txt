@@ -1,0 +1,1 @@
+/index.mts(1,16): error TS2307: Cannot find module 'dep' or its corresponding type declarations.

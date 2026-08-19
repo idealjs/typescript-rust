@@ -1,0 +1,1 @@
+templateLiteralTypes7.ts(16,7): error TS2322: Type '<T extends 1 | 2 | 3>(x: `${T}`) => NMap[T]' is not assignable to type 'G2'.

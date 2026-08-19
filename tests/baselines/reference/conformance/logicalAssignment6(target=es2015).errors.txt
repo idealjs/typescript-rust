@@ -1,0 +1,2 @@
+logicalAssignment6.ts(10,5): error TS2532: Object is possibly 'undefined'.
+logicalAssignment6.ts(10,42): error TS2345: Argument of type '100' is not assignable to parameter of type 'never'.

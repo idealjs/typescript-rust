@@ -1,0 +1,10 @@
+initializerReferencingConstructorLocals.ts(4,9): error TS2304: Cannot find name 'z'.
+initializerReferencingConstructorLocals.ts(5,15): error TS2304: Cannot find name 'z'.
+initializerReferencingConstructorLocals.ts(6,14): error TS2339: Property 'z' does not exist on type 'C'.
+initializerReferencingConstructorLocals.ts(7,20): error TS2339: Property 'z' does not exist on type 'C'.
+initializerReferencingConstructorLocals.ts(9,9): error TS2304: Cannot find name 'z'.
+initializerReferencingConstructorLocals.ts(14,9): error TS2304: Cannot find name 'z'.
+initializerReferencingConstructorLocals.ts(15,15): error TS2304: Cannot find name 'z'.
+initializerReferencingConstructorLocals.ts(16,14): error TS2339: Property 'z' does not exist on type 'D<T>'.
+initializerReferencingConstructorLocals.ts(17,20): error TS2339: Property 'z' does not exist on type 'D<T>'.
+initializerReferencingConstructorLocals.ts(19,9): error TS2304: Cannot find name 'z'.

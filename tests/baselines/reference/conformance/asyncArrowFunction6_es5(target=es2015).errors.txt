@@ -1,0 +1,2 @@
+asyncArrowFunction6_es5.ts(1,22): error TS2524: 'await' expressions cannot be used in a parameter initializer.
+asyncArrowFunction6_es5.ts(1,27): error TS1109: Expression expected.

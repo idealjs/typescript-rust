@@ -1,0 +1,1 @@
+templateStringWithEmbeddedArrowFunction.ts(1,16): error TS7006: Parameter 'x' implicitly has an 'any' type.

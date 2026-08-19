@@ -1,0 +1,6 @@
+unionTypeCallSignatures6.ts(11,1): error TS2684: The 'this' context of type 'void' is not assignable to method's 'this' of type 'A & B'.
+unionTypeCallSignatures6.ts(13,1): error TS2684: The 'this' context of type 'void' is not assignable to method's 'this' of type 'A'.
+unionTypeCallSignatures6.ts(38,4): error TS2349: This expression is not callable.
+unionTypeCallSignatures6.ts(39,1): error TS2684: The 'this' context of type 'A & C & { f0: F0 | F3; f1: F1 | F3; f2: F1 | F4; f3: F3 | F4; f4: F3 | F5; }' is not assignable to method's 'this' of type 'B'.
+unionTypeCallSignatures6.ts(48,1): error TS2684: The 'this' context of type 'void' is not assignable to method's 'this' of type 'A & B'.
+unionTypeCallSignatures6.ts(55,1): error TS2684: The 'this' context of type 'void' is not assignable to method's 'this' of type 'A & B'.

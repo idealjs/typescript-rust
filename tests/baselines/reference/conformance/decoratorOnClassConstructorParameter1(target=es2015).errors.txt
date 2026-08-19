@@ -1,0 +1,1 @@
+decoratorOnClassConstructorParameter1.ts(4,18): error TS1239: Unable to resolve signature of parameter decorator when called as an expression.

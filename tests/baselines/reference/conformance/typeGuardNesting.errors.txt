@@ -1,0 +1,12 @@
+typeGuardNesting.ts(2,13): error TS2454: Variable 'strOrBool' is used before being assigned.
+typeGuardNesting.ts(2,62): error TS2454: Variable 'strOrBool' is used before being assigned.
+typeGuardNesting.ts(9,13): error TS2454: Variable 'strOrBool' is used before being assigned.
+typeGuardNesting.ts(9,40): error TS2454: Variable 'strOrBool' is used before being assigned.
+typeGuardNesting.ts(10,30): error TS2454: Variable 'strOrBool' is used before being assigned.
+typeGuardNesting.ts(11,30): error TS2454: Variable 'strOrBool' is used before being assigned.
+typeGuardNesting.ts(12,6): error TS2322: Type 'string | boolean' is not assignable to type 'string'.
+typeGuardNesting.ts(12,31): error TS2454: Variable 'strOrBool' is used before being assigned.
+typeGuardNesting.ts(12,58): error TS2454: Variable 'strOrBool' is used before being assigned.
+typeGuardNesting.ts(13,6): error TS2322: Type 'string | boolean' is not assignable to type 'boolean'.
+typeGuardNesting.ts(13,31): error TS2454: Variable 'strOrBool' is used before being assigned.
+typeGuardNesting.ts(13,57): error TS2454: Variable 'strOrBool' is used before being assigned.

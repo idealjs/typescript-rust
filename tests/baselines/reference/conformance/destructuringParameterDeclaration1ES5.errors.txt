@@ -1,0 +1,60 @@
+destructuringParameterDeclaration1ES5.ts(12,4): error TS2345: Argument of type '[number, number, string[][], number]' is not assignable to parameter of type '[number, number, string[][]]'.
+destructuringParameterDeclaration1ES5.ts(23,5): error TS7010: 'b5', which lacks return-type annotation, implicitly has an 'any' return type.
+destructuringParameterDeclaration1ES5.ts(23,8): error TS7006: Parameter 'z' implicitly has an 'any' type.
+destructuringParameterDeclaration1ES5.ts(23,11): error TS7006: Parameter 'y' implicitly has an 'any' type.
+destructuringParameterDeclaration1ES5.ts(23,17): error TS7031: Binding element 'a' implicitly has an 'any' type.
+destructuringParameterDeclaration1ES5.ts(23,20): error TS7031: Binding element 'b' implicitly has an 'any' type.
+destructuringParameterDeclaration1ES5.ts(23,25): error TS7031: Binding element 'p' implicitly has an 'any' type.
+destructuringParameterDeclaration1ES5.ts(23,33): error TS7031: Binding element 'q' implicitly has an 'any' type.
+destructuringParameterDeclaration1ES5.ts(23,36): error TS7031: Binding element 'r' implicitly has an 'any' type.
+destructuringParameterDeclaration1ES5.ts(29,5): error TS2322: Type 'number' is not assignable to type 'null | undefined'.
+destructuringParameterDeclaration1ES5.ts(29,8): error TS2322: Type 'number' is not assignable to type 'null | undefined'.
+destructuringParameterDeclaration1ES5.ts(29,11): error TS2322: Type 'number' is not assignable to type 'null | undefined'.
+destructuringParameterDeclaration1ES5.ts(30,4): error TS2345: Argument of type '"string"' is not assignable to parameter of type 'null | undefined'.
+destructuringParameterDeclaration1ES5.ts(31,4): error TS2345: Argument of type '"string"' is not assignable to parameter of type 'null | undefined'.
+destructuringParameterDeclaration1ES5.ts(32,5): error TS2322: Type 'string' is not assignable to type 'undefined'.
+destructuringParameterDeclaration1ES5.ts(32,15): error TS2322: Type 'number' is not assignable to type 'null'.
+destructuringParameterDeclaration1ES5.ts(32,18): error TS2322: Type 'number' is not assignable to type 'undefined'.
+destructuringParameterDeclaration1ES5.ts(33,6): error TS2322: Type 'string' is not assignable to type 'undefined'.
+destructuringParameterDeclaration1ES5.ts(33,17): error TS2322: Type 'number' is not assignable to type 'undefined'.
+destructuringParameterDeclaration1ES5.ts(33,22): error TS2322: Type 'true' is not assignable to type 'undefined'.
+destructuringParameterDeclaration1ES5.ts(33,28): error TS2322: Type 'false' is not assignable to type 'undefined'.
+destructuringParameterDeclaration1ES5.ts(38,18): error TS7031: Binding element 'x' implicitly has an 'any' type.
+destructuringParameterDeclaration1ES5.ts(38,25): error TS7031: Binding element 'j' implicitly has an 'any' type.
+destructuringParameterDeclaration1ES5.ts(42,14): error TS7031: Binding element 'a' implicitly has an 'any' type.
+destructuringParameterDeclaration1ES5.ts(42,17): error TS7031: Binding element 'b' implicitly has an 'any' type.
+destructuringParameterDeclaration1ES5.ts(42,22): error TS7031: Binding element 'c' implicitly has an 'any' type.
+destructuringParameterDeclaration1ES5.ts(43,14): error TS7031: Binding element 'a' implicitly has an 'any' type.
+destructuringParameterDeclaration1ES5.ts(43,17): error TS7031: Binding element 'b' implicitly has an 'any' type.
+destructuringParameterDeclaration1ES5.ts(57,4): error TS2345: Argument of type '[number, number, [[string]], boolean, boolean]' is not assignable to parameter of type '[any, any, [[any]]]'.
+destructuringParameterDeclaration1ES5.ts(62,10): error TS2393: Duplicate function implementation.
+destructuringParameterDeclaration1ES5.ts(62,13): error TS7006: Parameter 'x' implicitly has an 'any' type.
+destructuringParameterDeclaration1ES5.ts(63,10): error TS2393: Duplicate function implementation.
+destructuringParameterDeclaration1ES5.ts(66,5): error TS7010: 'd3', which lacks return-type annotation, implicitly has an 'any' return type.
+destructuringParameterDeclaration1ES5.ts(66,9): error TS7031: Binding element 'a' implicitly has an 'any' type.
+destructuringParameterDeclaration1ES5.ts(66,12): error TS7031: Binding element 'b' implicitly has an 'any' type.
+destructuringParameterDeclaration1ES5.ts(66,15): error TS7031: Binding element 'c' implicitly has an 'any' type.
+destructuringParameterDeclaration1ES5.ts(67,5): error TS7010: 'd4', which lacks return-type annotation, implicitly has an 'any' return type.
+destructuringParameterDeclaration1ES5.ts(67,9): error TS7031: Binding element 'x' implicitly has an 'any' type.
+destructuringParameterDeclaration1ES5.ts(67,12): error TS7031: Binding element 'y' implicitly has an 'any' type.
+destructuringParameterDeclaration1ES5.ts(67,15): error TS7031: Binding element 'z' implicitly has an 'any' type.
+destructuringParameterDeclaration1ES5.ts(68,5): error TS7010: 'e0', which lacks return-type annotation, implicitly has an 'any' return type.
+destructuringParameterDeclaration1ES5.ts(68,9): error TS7031: Binding element 'a' implicitly has an 'any' type.
+destructuringParameterDeclaration1ES5.ts(68,12): error TS7031: Binding element 'b' implicitly has an 'any' type.
+destructuringParameterDeclaration1ES5.ts(68,15): error TS7031: Binding element 'c' implicitly has an 'any' type.
+destructuringParameterDeclaration1ES5.ts(75,9): error TS7031: Binding element 'a' implicitly has an 'any' type.
+destructuringParameterDeclaration1ES5.ts(75,12): error TS7031: Binding element 'b' implicitly has an 'any' type.
+destructuringParameterDeclaration1ES5.ts(75,15): error TS7031: Binding element 'c' implicitly has an 'any' type.
+destructuringParameterDeclaration1ES5.ts(79,9): error TS7031: Binding element 'a' implicitly has an 'any' type.
+destructuringParameterDeclaration1ES5.ts(79,12): error TS7031: Binding element 'b' implicitly has an 'any' type.
+destructuringParameterDeclaration1ES5.ts(79,15): error TS7031: Binding element 'c' implicitly has an 'any' type.
+destructuringParameterDeclaration1ES5.ts(80,9): error TS7031: Binding element 'x' implicitly has an 'any' type.
+destructuringParameterDeclaration1ES5.ts(80,12): error TS7031: Binding element 'y' implicitly has an 'any' type.
+destructuringParameterDeclaration1ES5.ts(80,15): error TS7031: Binding element 'z' implicitly has an 'any' type.
+destructuringParameterDeclaration1ES5.ts(81,9): error TS7031: Binding element 'a' implicitly has an 'any' type.
+destructuringParameterDeclaration1ES5.ts(81,12): error TS7031: Binding element 'b' implicitly has an 'any' type.
+destructuringParameterDeclaration1ES5.ts(81,15): error TS7031: Binding element 'c' implicitly has an 'any' type.
+destructuringParameterDeclaration1ES5.ts(92,17): error TS7031: Binding element 'number' implicitly has an 'any' type.
+destructuringParameterDeclaration1ES5.ts(95,18): error TS7031: Binding element 'number' implicitly has an 'any' type.
+destructuringParameterDeclaration1ES5.ts(95,25): error TS7031: Binding element 'string' implicitly has an 'any' type.
+destructuringParameterDeclaration1ES5.ts(95,32): error TS7031: Binding element 'any' implicitly has an 'any' type.

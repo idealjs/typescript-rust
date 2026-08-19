@@ -1,0 +1,1 @@
+privateNamesNotAllowedAsParameters.ts(2,12): error TS18009: Private identifiers cannot be used as parameters.

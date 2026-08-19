@@ -1,0 +1,1 @@
+testB.ts(1,22): error TS2305: Module '"*.foo"' has no exported member 'onlyInA'.

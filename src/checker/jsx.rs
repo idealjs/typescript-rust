@@ -150,13 +150,18 @@ impl Checker {
     /// Look up a type within the JSX namespace by name (e.g. `Element`,
     /// `IntrinsicElements`).
     ///
-    /// Mirrors Go's `getJsxType`.
+    /// Mirrors Go's `getJsxType`. Ambient `declare namespace JSX` bodies
+    /// (react.d.ts fixtures) bind their members into the namespace node's
+    /// LOCALS rather than the symbol tables — the same fallback
+    /// `resolve_qualified_symbol_traced` applies for `JSX.Element` type
+    /// references (`ambient_namespace_local`).
     pub fn get_jsx_type(&self, name: &str) -> Option<Arc<crate::ast::Symbol>> {
         let ns = self.get_jsx_namespace()?;
         ns.members
             .get(name)
             .or_else(|| ns.exports.get(name))
             .cloned()
+            .or_else(|| self.ambient_namespace_local(&ns, name))
     }
 
     /// Look up the `JSX.Element` symbol.

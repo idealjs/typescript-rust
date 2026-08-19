@@ -1,0 +1,2 @@
+/a.js(29,16): error TS2344: Type '{ a: string; b: string; }' does not satisfy the constraint 'Foo'.
+/a.js(42,16): error TS2344: Type '{ a: string; b: string; }' does not satisfy the constraint 'Foo'.

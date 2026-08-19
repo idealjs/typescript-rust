@@ -1,0 +1,6 @@
+interfaceWithMultipleBaseTypes.ts(21,11): error TS2430: Interface 'Derived2' incorrectly extends interface 'Base2'.
+interfaceWithMultipleBaseTypes.ts(52,15): error TS2320: Interface 'Derived3<T>' cannot simultaneously extend types 'Base1<number>' and 'Base2<number>'.
+interfaceWithMultipleBaseTypes.ts(54,15): error TS2430: Interface 'Derived4<T>' incorrectly extends interface 'Base1<number>'.
+interfaceWithMultipleBaseTypes.ts(54,15): error TS2430: Interface 'Derived4<T>' incorrectly extends interface 'Base2<number>'.
+interfaceWithMultipleBaseTypes.ts(60,15): error TS2430: Interface 'Derived5<T>' incorrectly extends interface 'Base1<T>'.
+interfaceWithMultipleBaseTypes.ts(60,15): error TS2430: Interface 'Derived5<T>' incorrectly extends interface 'Base2<T>'.

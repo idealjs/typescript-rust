@@ -1,0 +1,2 @@
+parserClassDeclaration14.ts(2,4): error TS2391: Function implementation is missing or not immediately following the declaration.
+parserClassDeclaration14.ts(3,4): error TS2390: Constructor implementation is missing.

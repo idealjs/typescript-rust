@@ -1,0 +1,3 @@
+parserForStatement6.ts(1,6): error TS2304: Cannot find name 'foo'.
+parserForStatement6.ts(1,6): error TS2406: The left-hand side of a 'for...in' statement must be a variable or a property access.
+parserForStatement6.ts(1,15): error TS2304: Cannot find name 'b'.

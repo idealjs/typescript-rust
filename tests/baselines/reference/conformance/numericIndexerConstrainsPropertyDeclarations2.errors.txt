@@ -1,0 +1,4 @@
+numericIndexerConstrainsPropertyDeclarations2.ts(16,5): error TS2411: Property '3.0' of type 'number' is not assignable to 'number' index type 'A'.
+numericIndexerConstrainsPropertyDeclarations2.ts(25,5): error TS2411: Property '3.0' of type 'number' is not assignable to 'number' index type 'A'.
+numericIndexerConstrainsPropertyDeclarations2.ts(34,5): error TS2411: Property '3.0' of type 'number' is not assignable to 'number' index type 'A'.
+numericIndexerConstrainsPropertyDeclarations2.ts(43,5): error TS2322: Type 'number' is not assignable to type 'A'.

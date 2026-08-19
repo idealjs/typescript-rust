@@ -1,0 +1,7 @@
+taggedTemplateStringsWithIncompatibleTypedTags.ts(14,9): error TS2345: Argument of type 'number' is not assignable to parameter of type 'boolean'.
+taggedTemplateStringsWithIncompatibleTypedTags.ts(18,9): error TS2345: Argument of type 'number' is not assignable to parameter of type 'boolean'.
+taggedTemplateStringsWithIncompatibleTypedTags.ts(22,9): error TS2345: Argument of type 'number' is not assignable to parameter of type 'boolean'.
+taggedTemplateStringsWithIncompatibleTypedTags.ts(24,25): error TS2345: Argument of type 'number' is not assignable to parameter of type 'boolean'.
+taggedTemplateStringsWithIncompatibleTypedTags.ts(26,9): error TS2345: Argument of type 'number' is not assignable to parameter of type 'boolean'.
+taggedTemplateStringsWithIncompatibleTypedTags.ts(26,46): error TS2345: Argument of type 'number' is not assignable to parameter of type 'boolean'.
+taggedTemplateStringsWithIncompatibleTypedTags.ts(28,57): error TS2345: Argument of type 'number' is not assignable to parameter of type 'boolean'.

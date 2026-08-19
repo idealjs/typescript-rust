@@ -1,0 +1,3 @@
+preacty-no-fragment.tsx(5,12): error TS6133: 'Fragment' is declared but its value is never read.
+preacty-only-fragment-no-jsx.tsx(6,1): error TS2874: This JSX tag requires 'h' to be in scope, but it could not be found.
+snabbdomy-only-fragment-no-jsx.tsx(4,1): error TS2874: This JSX tag requires 'jsx' to be in scope, but it could not be found.

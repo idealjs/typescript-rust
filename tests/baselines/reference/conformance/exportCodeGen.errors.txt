@@ -1,0 +1,2 @@
+exportCodeGen.ts(37,22): error TS2564: Property 'name' has no initializer and is not definitely assigned in the constructor.
+exportCodeGen.ts(49,15): error TS2564: Property 'name' has no initializer and is not definitely assigned in the constructor.

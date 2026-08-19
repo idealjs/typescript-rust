@@ -1,0 +1,8 @@
+assignmentCompatWithConstructSignatures5.ts(3,14): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
+assignmentCompatWithConstructSignatures5.ts(4,30): error TS2564: Property 'bar' has no initializer and is not definitely assigned in the constructor.
+assignmentCompatWithConstructSignatures5.ts(5,34): error TS2564: Property 'baz' has no initializer and is not definitely assigned in the constructor.
+assignmentCompatWithConstructSignatures5.ts(6,35): error TS2564: Property 'bing' has no initializer and is not definitely assigned in the constructor.
+assignmentCompatWithConstructSignatures5.ts(40,1): error TS2322: Type 'new <T>(x: T) => void' is not assignable to type 'new <T>(x: T) => T'.
+assignmentCompatWithConstructSignatures5.ts(52,1): error TS2322: Type 'new <T>(x: { foo: T; }, y: { foo: T; bar: T; }) => Base' is not assignable to type 'new <T, U>(x: { foo: T; }, y: { foo: U; bar: U; }) => Base'.
+assignmentCompatWithConstructSignatures5.ts(55,1): error TS2322: Type 'new <T>(x: { a: T; b: T; }) => T[]' is not assignable to type 'new <U, V>(x: { a: U; b: V; }) => U[]'.
+assignmentCompatWithConstructSignatures5.ts(58,1): error TS2322: Type 'new <T extends Base>(x: { a: T; b: T; }) => T[]' is not assignable to type 'new <U, V>(x: { a: U; b: V; }) => U[]'.

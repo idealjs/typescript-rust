@@ -1,0 +1,2 @@
+derivedClassTransitivity4.ts(18,1): error TS2322: Type 'E' is not assignable to type 'C'.
+derivedClassTransitivity4.ts(19,11): error TS2445: Property 'foo' is protected and only accessible within class 'C' and its subclasses.

@@ -1,0 +1,1 @@
+d.ts(2,7): error TS2339: Property 'A' does not exist on type 'typeof import("b")'.

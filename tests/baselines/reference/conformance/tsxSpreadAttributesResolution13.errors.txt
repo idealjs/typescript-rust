@@ -1,0 +1,1 @@
+file.tsx(12,9): error TS2454: Variable 'condition1' is used before being assigned.

@@ -1,0 +1,1 @@
+index.ts(2,24): error TS7016: Could not find a declaration file for module 'foo/other'. 'node_modules/foo/other.js' implicitly has an 'any' type.

@@ -1,0 +1,7 @@
+switchCaseWithUnionTypes01.ts(7,9): error TS2454: Variable 'strOrNum' is used before being assigned.
+switchCaseWithUnionTypes01.ts(9,10): error TS2454: Variable 'strOrNum' is used before being assigned.
+switchCaseWithUnionTypes01.ts(13,10): error TS2454: Variable 'str' is used before being assigned.
+switchCaseWithUnionTypes01.ts(14,10): error TS2454: Variable 'num' is used before being assigned.
+switchCaseWithUnionTypes01.ts(18,10): error TS2454: Variable 'numOrBool' is used before being assigned.
+switchCaseWithUnionTypes01.ts(22,10): error TS2454: Variable 'bool' is used before being assigned.
+switchCaseWithUnionTypes01.ts(22,10): error TS2678: Type 'boolean' is not comparable to type 'string | number'.

@@ -1,0 +1,2 @@
+for-of16.ts(8,11): error TS2488: Type 'MyStringIterator' must have a '[Symbol.iterator]()' method that returns an iterator.
+for-of16.ts(10,11): error TS2488: Type 'MyStringIterator' must have a '[Symbol.iterator]()' method that returns an iterator.

@@ -1,0 +1,1 @@
+destructuringArrayBindingPatternAndAssignment4.ts(5,7): error TS2548: Type 'number[] | null' is not an array type or does not have a '[Symbol.iterator]()' method that returns an iterator.

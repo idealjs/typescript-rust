@@ -1,0 +1,10 @@
+exponentiationOperatorWithEnum.ts(13,10): error TS2454: Variable 'c' is used before being assigned.
+exponentiationOperatorWithEnum.ts(14,10): error TS2454: Variable 'c' is used before being assigned.
+exponentiationOperatorWithEnum.ts(14,15): error TS2454: Variable 'b' is used before being assigned.
+exponentiationOperatorWithEnum.ts(15,10): error TS2454: Variable 'c' is used before being assigned.
+exponentiationOperatorWithEnum.ts(15,15): error TS2454: Variable 'c' is used before being assigned.
+exponentiationOperatorWithEnum.ts(16,15): error TS2454: Variable 'c' is used before being assigned.
+exponentiationOperatorWithEnum.ts(17,10): error TS2454: Variable 'b' is used before being assigned.
+exponentiationOperatorWithEnum.ts(17,15): error TS2454: Variable 'c' is used before being assigned.
+exponentiationOperatorWithEnum.ts(19,17): error TS2454: Variable 'b' is used before being assigned.
+exponentiationOperatorWithEnum.ts(23,11): error TS2454: Variable 'b' is used before being assigned.

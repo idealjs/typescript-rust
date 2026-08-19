@@ -1,0 +1,1 @@
+file.tsx(14,54): error TS2322: Type '(a: { x: string; }) => string' is not assignable to type '((a: { x: string; }) => string) & ((cur: { x: string; }) => { x: string; })'.

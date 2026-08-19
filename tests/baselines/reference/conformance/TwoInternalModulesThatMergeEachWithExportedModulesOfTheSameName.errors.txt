@@ -1,0 +1,2 @@
+TwoInternalModulesThatMergeEachWithExportedModulesOfTheSameName.ts(17,9): error TS2564: Property 'length' has no initializer and is not definitely assigned in the constructor.
+TwoInternalModulesThatMergeEachWithExportedModulesOfTheSameName.ts(25,17): error TS2564: Property 'name' has no initializer and is not definitely assigned in the constructor.

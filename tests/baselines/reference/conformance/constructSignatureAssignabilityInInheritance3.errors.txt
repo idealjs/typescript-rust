@@ -1,0 +1,12 @@
+constructSignatureAssignabilityInInheritance3.ts(5,18): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
+constructSignatureAssignabilityInInheritance3.ts(6,34): error TS2564: Property 'bar' has no initializer and is not definitely assigned in the constructor.
+constructSignatureAssignabilityInInheritance3.ts(7,38): error TS2564: Property 'baz' has no initializer and is not definitely assigned in the constructor.
+constructSignatureAssignabilityInInheritance3.ts(8,39): error TS2564: Property 'bing' has no initializer and is not definitely assigned in the constructor.
+constructSignatureAssignabilityInInheritance3.ts(41,19): error TS2430: Interface 'I2<T, U>' incorrectly extends interface 'A'.
+constructSignatureAssignabilityInInheritance3.ts(50,19): error TS2430: Interface 'I4' incorrectly extends interface 'A'.
+constructSignatureAssignabilityInInheritance3.ts(54,19): error TS2430: Interface 'I4B' incorrectly extends interface 'A'.
+constructSignatureAssignabilityInInheritance3.ts(58,19): error TS2430: Interface 'I4C' incorrectly extends interface 'A'.
+constructSignatureAssignabilityInInheritance3.ts(66,19): error TS2430: Interface 'I6' incorrectly extends interface 'A'.
+constructSignatureAssignabilityInInheritance3.ts(70,19): error TS2430: Interface 'I7' incorrectly extends interface 'A'.
+constructSignatureAssignabilityInInheritance3.ts(86,19): error TS2430: Interface 'I6' incorrectly extends interface 'B'.
+constructSignatureAssignabilityInInheritance3.ts(95,19): error TS2430: Interface 'I7' incorrectly extends interface 'C'.

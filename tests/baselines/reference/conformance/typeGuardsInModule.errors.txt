@@ -1,0 +1,20 @@
+typeGuardsInModule.ts(11,5): error TS2322: Type 'number | false' is not assignable to type 'number'.
+typeGuardsInModule.ts(15,16): error TS2454: Variable 'var2' is used before being assigned.
+typeGuardsInModule.ts(19,9): error TS2322: Type 'string | number' is not assignable to type 'number'.
+typeGuardsInModule.ts(19,15): error TS2454: Variable 'var2' is used before being assigned.
+typeGuardsInModule.ts(24,16): error TS2454: Variable 'var3' is used before being assigned.
+typeGuardsInModule.ts(28,20): error TS2454: Variable 'var3' is used before being assigned.
+typeGuardsInModule.ts(37,9): error TS2322: Type 'number | false' is not assignable to type 'number'.
+typeGuardsInModule.ts(40,9): error TS2322: Type 'number | false' is not assignable to type 'number'.
+typeGuardsInModule.ts(43,9): error TS2322: Type 'string | false' is not assignable to type 'string | number'.
+typeGuardsInModule.ts(47,20): error TS2454: Variable 'var4' is used before being assigned.
+typeGuardsInModule.ts(51,13): error TS2322: Type 'string | number' is not assignable to type 'number'.
+typeGuardsInModule.ts(51,19): error TS2454: Variable 'var4' is used before being assigned.
+typeGuardsInModule.ts(56,20): error TS2454: Variable 'var5' is used before being assigned.
+typeGuardsInModule.ts(60,24): error TS2454: Variable 'var5' is used before being assigned.
+typeGuardsInModule.ts(67,5): error TS2322: Type 'number | false' is not assignable to type 'number'.
+typeGuardsInModule.ts(71,16): error TS2454: Variable 'var2' is used before being assigned.
+typeGuardsInModule.ts(75,9): error TS2322: Type 'string | number' is not assignable to type 'number'.
+typeGuardsInModule.ts(75,15): error TS2454: Variable 'var2' is used before being assigned.
+typeGuardsInModule.ts(80,16): error TS2454: Variable 'var3' is used before being assigned.
+typeGuardsInModule.ts(84,20): error TS2454: Variable 'var3' is used before being assigned.
