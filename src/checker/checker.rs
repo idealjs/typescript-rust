@@ -4650,14 +4650,33 @@ impl Checker {
                     // into the return type. (Class constructors don't carry
                     // their own type parameters, so this is a no-op for the
                     // common `new Foo()` case.)
-                    if !sig.type_parameters.is_empty() {
+                    let rt = if !sig.type_parameters.is_empty() {
                         let arg_vec: Vec<Arc<Node>> = args.iter().cloned().collect();
                         let inferred = self.infer_call_type_arguments(node, sig, &arg_vec);
-                        return self.substitute_infer_type_parameters(
+                        self.substitute_infer_type_parameters(
                             &rt,
                             &sig.type_parameters,
                             &inferred,
-                        );
+                        )
+                    } else {
+                        rt
+                    };
+                    // Explicit type arguments on `new C<T>(...)` instantiate
+                    // the class's own type parameters: attach them to the
+                    // instance type (member reads substitute through them —
+                    // see `substituted_member_type_of`).
+                    if let crate::ast::NodeData::NewExpression(d) = &node.data
+                        && let Some(type_args) = &d.type_arguments
+                        && let Some(class_sym) = rt.symbol.clone()
+                    {
+                        let tps = self.declared_type_parameter_types(&class_sym);
+                        let arg_types: Vec<Arc<Type>> = type_args
+                            .iter()
+                            .map(|t| self.get_type_from_type_node(t))
+                            .collect();
+                        if !tps.is_empty() && tps.len() == arg_types.len() {
+                            return attach_explicit_type_arguments(&rt, arg_types);
+                        }
                     }
                     return rt;
                 }
@@ -4810,6 +4829,16 @@ impl Checker {
             // member's type here (Go resolves members through the
             // instantiation mapper).
             if let Some(substituted) = self.instantiate_array_member_type(&obj_type, &sym) {
+                return self.flow_type_of_access_expression(node, Some(&sym), substituted);
+            }
+            // Instantiated generic interfaces/classes (type arguments
+            // attached, e.g. from `new C<number>()`): member types read
+            // through the instantiation.
+            if obj_type
+                .as_object()
+                .is_some_and(|o| !o.type_arguments.is_empty())
+            {
+                let substituted = self.substituted_member_type_of(&obj_type, &sym);
                 return self.flow_type_of_access_expression(node, Some(&sym), substituted);
             }
             let prop_type = self.get_type_of_symbol(&sym);
@@ -6134,14 +6163,15 @@ impl Checker {
             // type (element-substituted Array members like
             // `push(...items: T[])`). Fall back to unwrapping the declared
             // symbol's array type.
-            match self.try_get_type_at_position(&sig, rest_index) {
+            let ret = match self.try_get_type_at_position(&sig, rest_index) {
                 Some(t) => Some(t),
                 None => {
                     let rest_param_type =
                         self.get_type_of_symbol(&sig.parameters[rest_index]);
                     Some(self.get_array_element_type(&rest_param_type))
                 }
-            }
+            };
+            ret
         } else {
             None
         };
@@ -6153,7 +6183,25 @@ impl Checker {
         // type-parameter count (Go's getArityError for type arguments).
         if !sig.type_parameters.is_empty() || Self::has_explicit_type_arguments(node) {
             let provided = Self::explicit_type_argument_count(node);
-            if provided != 0 && provided != sig.type_parameters.len() {
+            // A `new C<T>()` counts type arguments against the CLASS's
+            // declared type parameters (the constructor signature carries
+            // none of its own).
+            let expected = if is_new {
+                self.get_return_type_of_signature(&sig)
+                    .and_then(|rt| rt.symbol.clone())
+                    .map(|class_sym| {
+                        let tps = self.declared_type_parameter_types(&class_sym);
+                        if tps.is_empty() {
+                            sig.type_parameters.len()
+                        } else {
+                            tps.len()
+                        }
+                    })
+                    .unwrap_or_else(|| sig.type_parameters.len())
+            } else {
+                sig.type_parameters.len()
+            };
+            if provided != 0 && provided != expected {
                 let loc = match &node.data {
                     crate::ast::NodeData::CallExpression(d) => d
                         .type_arguments
@@ -6174,10 +6222,7 @@ impl Checker {
                     file,
                     loc,
                     crate::diagnostics::messages_generated::EXPECTED_0_TYPE_ARGUMENTS_BUT_GOT_1,
-                    vec![
-                        sig.type_parameters.len().to_string(),
-                        provided.to_string(),
-                    ],
+                    vec![expected.to_string(), provided.to_string()],
                 ));
             }
         }
@@ -7550,6 +7595,41 @@ impl Checker {
                         f.file_name.starts_with("bundled://")
                     }) {
                         let _ = self.get_type_from_type_node(&d.type_node);
+                    }
+                }
+                // TS2823 (Go `checkImportAttributes`): import attributes
+                // (`with { type: "json" }`) require an ESM-ish module
+                // setting — esnext, node18, node20, nodenext, preserve.
+                {
+                    use crate::core::compiler_options::ModuleKind;
+                    let module_ok = matches!(
+                        self.compiler_options.module,
+                        ModuleKind::ESNext
+                            | ModuleKind::Node18
+                            | ModuleKind::Node20
+                            | ModuleKind::NodeNext
+                            | ModuleKind::Preserve
+                    );
+                    if !module_ok {
+                        let attributes = match &node.data {
+                            crate::ast::NodeData::ImportDeclaration(d) => {
+                                d.attributes.clone()
+                            }
+                            crate::ast::NodeData::ExportDeclaration(d) => {
+                                d.attributes.clone()
+                            }
+                            _ => None,
+                        };
+                        if let Some(attrs) = attributes {
+                            let file = self.current_file.clone();
+                            self.diagnostics.add(crate::ast::Diagnostic::new(
+                                file,
+                                attrs.loc,
+                                crate::diagnostics::messages_generated::
+                                    IMPORT_ATTRIBUTES_ARE_ONLY_SUPPORTED_WHEN_THE_MODULE_OPTION_IS_SET_TO_ESNEXT_NODE18_NODE20_NODENEXT_OR_PRESERVE,
+                                Vec::new(),
+                            ));
+                        }
                     }
                 }
                 // TS2354 (Go `checkExternalEmitHelpers` →
@@ -17416,6 +17496,34 @@ impl std::fmt::Debug for Checker {
             .field("files", &self.files.len())
             .finish()
     }
+}
+
+/// Rebuild an object type with explicit type arguments attached (used by
+/// `new C<T>(...)` to carry the instantiation onto the class instance type;
+/// member reads substitute through them via `substituted_member_type_of`).
+pub(crate) fn attach_explicit_type_arguments(t: &Arc<Type>, args: Vec<Arc<Type>>) -> Arc<Type> {
+    if let TypeData::Object(o) = &t.data {
+        let mut rebuilt = Type::new(
+            t.flags,
+            TypeData::Object(ObjectTypeData {
+                structured: StructuredTypeData {
+                    members: o.structured.members.clone(),
+                    properties: o.structured.properties.clone(),
+                    signatures: o.structured.signatures.clone(),
+                    call_signature_count: o.structured.call_signature_count,
+                    index_infos: o.structured.index_infos.clone(),
+                    ..Default::default()
+                },
+                target: o.target.clone(),
+                mapper: o.mapper.clone(),
+                type_arguments: args,
+            }),
+        );
+        rebuilt.object_flags = t.object_flags;
+        rebuilt.symbol = t.symbol.clone();
+        return Arc::new(rebuilt);
+    }
+    Arc::clone(t)
 }
 
 #[cfg(test)]

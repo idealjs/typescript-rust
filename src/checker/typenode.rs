@@ -567,6 +567,24 @@ impl Checker {
                 self.type_alias_links.get_or_default(&symbol).declared_type =
                     Some(Arc::clone(&instance_type));
             }
+            // A generic class referenced WITH type arguments (`B<number>`)
+            // carries the instantiation on the instance type — member reads
+            // substitute through them (`substituted_member_type_of`).
+            let arg_types: Option<Vec<Arc<Type>>> = type_arguments.map(|nodes| {
+                nodes
+                    .iter()
+                    .map(|a| self.get_type_from_type_node(a))
+                    .collect()
+            });
+            if let Some(arg_types) = arg_types {
+                let tps = self.declared_type_parameter_types(&symbol);
+                if !tps.is_empty() && tps.len() == arg_types.len() {
+                    return crate::checker::checker::attach_explicit_type_arguments(
+                        &instance_type,
+                        arg_types,
+                    );
+                }
+            }
             return instance_type;
         }
         if !symbol.flags.contains(SymbolFlags::TypeAlias) {
@@ -3536,7 +3554,8 @@ impl Checker {
         if decl_tps.len() == args.len() && !decl_tps.is_empty() {
             let raw = self.get_type_of_symbol(prop);
             let substitutions = args.to_vec();
-            self.substitute_infer_type_parameters(&raw, &decl_tps, &substitutions)
+            let r = self.substitute_infer_type_parameters(&raw, &decl_tps, &substitutions);
+            r
         } else {
             self.get_type_of_symbol(prop)
         }
@@ -3570,7 +3589,7 @@ impl Checker {
         };
         tp_syms
             .iter()
-            .map(|tp_sym| self.get_type_of_symbol(tp_sym))
+            .map(|tp_sym| self.get_type_parameter_from_symbol(tp_sym))
             .collect()
     }
 

@@ -3973,16 +3973,25 @@ impl Parser {
         // its callee becomes the `new` target, and its arguments become the
         // `new` arguments. This matches Go tsc's behavior where the
         // argument list belongs to the `new`, not to a call on the target.
-        let (expression, extracted_args) = if expression.kind == SyntaxKind::CallExpression {
-            if let NodeData::CallExpression(data) = &expression.data {
-                (Arc::clone(&data.expression), Some(data.arguments.clone()))
+        // The unwrapped call's type arguments (`new C<number>()` parsed as
+        // a call first) belong to the `new` target — carry them over.
+        let (expression, extracted_args, extracted_type_args) =
+            if expression.kind == SyntaxKind::CallExpression {
+                if let NodeData::CallExpression(data) = &expression.data {
+                    (
+                        Arc::clone(&data.expression),
+                        Some(data.arguments.clone()),
+                        data.type_arguments.clone(),
+                    )
+                } else {
+                    (expression, None, None)
+                }
             } else {
-                (expression, None)
-            }
-        } else {
-            (expression, None)
-        };
-        let type_arguments = self.parse_optional_type_arguments();
+                (expression, None, None)
+            };
+        let type_arguments = self
+            .parse_optional_type_arguments()
+            .or(extracted_type_args);
         let arguments = extracted_args.or_else(|| {
             if self.token == SyntaxKind::OpenParenToken {
                 Some(self.parse_argument_list())
