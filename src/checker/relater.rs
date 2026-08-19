@@ -1200,21 +1200,36 @@ impl Checker {
 
         // Check properties: target properties must exist in source with compatible types
         let mut missing_props: Vec<String> = Vec::new();
+        // Bare array sources carry no member table of their own — their
+        // properties live on the declared `Array<T>` interface,
+        // element-substituted at access time (`string[]` must satisfy
+        // `ConcatArray<string>`'s length/join/slice/concat structurally).
+        // Evolving array literals (`["x"]` as a call argument) share the
+        // same shape: no members of their own until finalized.
+        let source_is_bare_array = (self.is_array_type(source)
+            || source.object_flags.contains(ObjectFlags::EvolvingArray))
+            && source_struct.members.is_empty();
         for target_prop in &target_struct.properties {
             // Check that source has a matching property by name.
             let source_prop = match source_struct.members.get(&target_prop.name) {
-                Some(p) => p,
+                Some(p) => Arc::clone(p),
                 None => {
-                    // Missing property: allowed only when the target
-                    // property is optional (`x?: T`). The target property's
-                    // type is already `T | undefined` (see
-                    // `build_interface_type_from_members`), so a missing
-                    // source property is treated as `undefined`.
-                    if target_prop.flags.contains(SymbolFlags::Optional) {
+                    if source_is_bare_array
+                        && let Some(p) = self.declared_array_member_symbol(&target_prop.name)
+                    {
+                        p
+                    } else {
+                        // Missing property: allowed only when the target
+                        // property is optional (`x?: T`). The target property's
+                        // type is already `T | undefined` (see
+                        // `build_interface_type_from_members`), so a missing
+                        // source property is treated as `undefined`.
+                        if target_prop.flags.contains(SymbolFlags::Optional) {
+                            continue;
+                        }
+                        missing_props.push(target_prop.name.clone());
                         continue;
                     }
-                    missing_props.push(target_prop.name.clone());
-                    continue;
                 }
             };
             // Private/protected member accessibility (Go propertyRelatedTo,
@@ -1225,7 +1240,7 @@ impl Checker {
             // message; protected-source vs public-target → protected error.
             {
                 let src_mod =
-                    crate::checker::exports::get_declaration_modifier_flags_from_symbol(source_prop);
+                    crate::checker::exports::get_declaration_modifier_flags_from_symbol(&source_prop);
                 let tgt_mod =
                     crate::checker::exports::get_declaration_modifier_flags_from_symbol(target_prop);
                 if src_mod.intersects(ModifierFlags::Private)
@@ -1288,8 +1303,13 @@ impl Checker {
             // Go's `propertiesRelatedTo` recurses with the incoming
             // relation, so the comparable relation widens literal property
             // types (number ~ 1).
-            let source_type = self.get_type_of_symbol(source_prop);
-            let target_type = self.get_type_of_symbol(target_prop);
+            let source_type = if source_is_bare_array {
+                self.instantiate_array_member_type(source, &source_prop)
+                    .unwrap_or_else(|| self.get_type_of_symbol(&source_prop))
+            } else {
+                self.substituted_member_type_of(source, &source_prop)
+            };
+            let target_type = self.substituted_member_type_of(target, target_prop);
             if !self.is_type_related_to(&source_type, &target_type, relation) {
                 // Chain (Go propertiesRelatedTo → reportError, relater.go
                 // ~L4353): the nested failure's entries are already on the
@@ -2686,7 +2706,7 @@ impl Checker {
     }
 
     /// Element type of an array-shaped override type, if array-like.
-    fn get_array_element_type_of(&self, t: &Arc<Type>) -> Option<Arc<Type>> {
+    pub(crate) fn get_array_element_type_of(&self, t: &Arc<Type>) -> Option<Arc<Type>> {
         if self.is_array_type(t) {
             return Some(self.get_array_element_type(t));
         }
@@ -4566,8 +4586,21 @@ impl Checker {
             return Arc::clone(t);
         }
         // Fast path: direct pointer match — return the substitution.
+        // Type parameters also match by SYMBOL identity: the same type
+        // parameter's type may be instantiated more than once (no global
+        // interning), but the underlying symbol is shared.
         for (i, p) in params.iter().enumerate() {
-            if Arc::ptr_eq(p, t) {
+            if Arc::ptr_eq(p, t)
+                || (p.is_type_parameter()
+                    && t.is_type_parameter()
+                    && (p.symbol.as_ref().zip(t.symbol.as_ref()).is_some_and(
+                        |(ps, ts)| Arc::ptr_eq(ps, ts),
+                    ) || p
+                        .symbol
+                        .as_ref()
+                        .zip(t.symbol.as_ref())
+                        .is_some_and(|(ps, ts)| ps.name == ts.name)))
+            {
                 return Arc::clone(&substitutions[i.min(substitutions.len() - 1)]);
             }
         }

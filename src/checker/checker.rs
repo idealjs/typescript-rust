@@ -607,6 +607,11 @@ pub struct Checker {
     /// (element type ptr, member symbol ptr).
     pub array_member_type_cache: std::collections::HashMap<(usize, usize), Arc<Type>>,
 
+    /// Memoized member types of instantiated generic interfaces/classes
+    /// (type arguments substituted through the declaration's parameters),
+    /// keyed by (owner type ptr, member symbol ptr).
+    pub instantiated_member_type_cache: std::collections::HashMap<(usize, usize), Arc<Type>>,
+
     // Signatures
     pub any_signature: OnceLock<Arc<Signature>>,
     pub unknown_signature: OnceLock<Arc<Signature>>,
@@ -979,6 +984,7 @@ impl Checker {
             interface_instantiation_cache: std::collections::HashMap::new(),
             array_type_parameter_symbols: None,
             array_member_type_cache: std::collections::HashMap::new(),
+            instantiated_member_type_cache: std::collections::HashMap::new(),
 
             any_signature: OnceLock::new(),
             unknown_signature: OnceLock::new(),
@@ -5992,6 +5998,28 @@ impl Checker {
                 ));
                 return;
             };
+        // With explicit type arguments, only overloads with a matching
+        // type-parameter count are candidates (Go `chooseOverload`'s
+        // `hasCorrectTypeArgumentArity` filter) — `a.reduce<number>(cb, init)`
+        // must select the generic overload, not an earlier non-generic one.
+        let type_arg_filtered: Vec<Arc<Signature>>;
+        let signatures: &[Arc<Signature>] = {
+            let provided = Self::explicit_type_argument_count(node);
+            if provided != 0 && signatures.len() > 1 {
+                type_arg_filtered = signatures
+                    .iter()
+                    .filter(|s| s.type_parameters.len() == provided)
+                    .cloned()
+                    .collect();
+                if !type_arg_filtered.is_empty() {
+                    &type_arg_filtered
+                } else {
+                    signatures
+                }
+            } else {
+                signatures
+            }
+        };
         if signatures.is_empty() {
             if !is_new {
                 // TS2348: a type with construct signatures but no call
@@ -6373,20 +6401,48 @@ impl Checker {
         sig: &Arc<Signature>,
         arguments: &Arc<NodeList>,
     ) -> bool {
+        // Rest-parameter positions check against the rest ELEMENT type
+        // (Go `getTypeAtPosition`), and instantiated signatures carry
+        // substituted parameter types in the override table — read both
+        // through `try_get_type_at_position` instead of the parameter
+        // symbols' raw declaration types (element-substituted array
+        // members like `concat(...items: T[])`).
+        let has_rest = sig.has_rest_parameter();
+        let rest_index = if has_rest {
+            sig.parameters.len().saturating_sub(1)
+        } else {
+            usize::MAX
+        };
         for (i, arg) in arguments.iter().enumerate() {
-            if i < sig.parameters.len() {
-                let param_type = self.get_type_of_symbol(&sig.parameters[i]);
-                // `any` parameter → always assignable.
-                if param_type.flags.contains(TypeFlags::Any) {
-                    continue;
+            let param_type = if has_rest && i >= rest_index {
+                match self.try_get_type_at_position(sig, i) {
+                    Some(t) => t,
+                    None => {
+                        let rt = self.get_type_of_symbol(&sig.parameters[rest_index]);
+                        match self.get_array_element_type_of(&rt) {
+                            Some(e) => e,
+                            None => rt,
+                        }
+                    }
                 }
-                let arg_type = self.get_type_of_node(arg);
-                if !self.is_type_assignable_to(&arg_type, &param_type) {
-                    return false;
+            } else if i < sig.parameters.len() {
+                match self.try_get_type_at_position(sig, i) {
+                    Some(t) => t,
+                    // Unresolved parameter (no link, no override) — treat
+                    // as `any` rather than rejecting the overload.
+                    None => continue,
                 }
             } else {
                 // More arguments than parameters (without rest) — not
-                // applicable. (Rest-parameter handling is deferred.)
+                // applicable.
+                return false;
+            };
+            // `any` parameter → always assignable.
+            if param_type.flags.contains(TypeFlags::Any) {
+                continue;
+            }
+            let arg_type = self.get_type_of_node(arg);
+            if !self.is_type_assignable_to(&arg_type, &param_type) {
                 return false;
             }
         }
@@ -17359,6 +17415,127 @@ impl std::fmt::Debug for Checker {
             .field("symbol_count", &self.symbol_count)
             .field("files", &self.files.len())
             .finish()
+    }
+}
+
+#[cfg(test)]
+mod array_member_tests {
+    use super::*;
+    use crate::bundled::lib_path;
+    use crate::compiler::{CompilerHost, CompilerHostImpl, Program, ProgramOptions};
+    use crate::tsoptions::ParsedCommandLine;
+    use crate::vfs::InMemoryFS;
+
+    /// Build a checker over `source` with the bundled default lib (the
+    /// Array interface machinery these tests exercise).
+    fn build_checker_with_lib(source: &str) -> Checker {
+        use crate::bundled::BundledFS;
+        let inner = Arc::new(InMemoryFS::new());
+        inner.insert_file("/proj/entry.ts", source);
+        inner.insert_file(
+            "/proj/tsconfig.json",
+            "{ \"compilerOptions\": {}, \"files\": [\"entry.ts\"] }",
+        );
+        let fs = Arc::new(BundledFS::new(inner));
+        let parsed = ParsedCommandLine {
+            file_names: vec!["/proj/entry.ts".to_string()],
+            ..Default::default()
+        };
+        let host: Arc<dyn CompilerHost> =
+            Arc::new(CompilerHostImpl::new(fs, "/proj".to_string(), lib_path()));
+        let program = Arc::new(Program::new(ProgramOptions { config: parsed, host }));
+        program.build_checker()
+    }
+
+    fn error_codes(checker: &Checker) -> Vec<i32> {
+        let codes: Vec<i32> = checker
+            .diagnostics
+            .get_all()
+            .iter()
+            .filter(|d| !d.file.as_ref().is_some_and(|f| f.file_name.starts_with("bundled://")))
+            .map(|d| d.code)
+            .collect();
+        codes
+    }
+
+    /// Array method callback parameters are typed by the ELEMENT type
+    /// (`every`'s predicate sees `string`, not the interface's raw `T`).
+    #[test]
+    fn array_every_callback_param_typed_by_element() {
+        let ok = build_checker_with_lib(
+            "declare const ss: string[]; ss.every((x: string) => true);",
+        );
+        assert_eq!(error_codes(&ok), Vec::<i32>::new(), "matching callback must pass");
+
+        let bad = build_checker_with_lib(
+            "declare const ss: string[]; ss.every((x: number) => true);",
+        );
+        assert_eq!(error_codes(&bad), vec![2345], "mismatched callback param must fail");
+    }
+
+    /// Element-substituted Array members keep the METHOD's own type
+    /// parameters free (`flat(depth: number)` binds `D` by inference).
+    #[test]
+    fn array_flat_own_type_params_stay_free() {
+        let ok = build_checker_with_lib(
+            "function foo<T>(arr: T[], depth: number) { return arr.flat(depth); }",
+        );
+        assert_eq!(error_codes(&ok), Vec::<i32>::new());
+    }
+
+    /// The substituted callback signature displays element types, not the
+    /// raw interface parameter (error-text parity with official).
+    #[test]
+    fn array_method_signature_display_substituted() {
+        let checker = build_checker_with_lib("declare const ss: string[]; ss.every(42);");
+        let codes = error_codes(&checker);
+        assert_eq!(codes, vec![2345]);
+        let diag = checker
+            .diagnostics
+            .get_all()
+            .iter()
+            .find(|d| d.code == 2345)
+            .cloned()
+            .unwrap();
+        let template = diag.message.as_ref().map(|m| m.text).unwrap_or("");
+        let mut msg = template.to_string();
+        for (i, a) in diag.message_args.iter().enumerate() {
+            msg = msg.replace(&format!("{{{i}}}"), a);
+        }
+        assert!(
+            msg.contains("(value: string, index: number, array: string[])"),
+            "message should show the element-substituted signature: {msg}"
+        );
+    }
+
+    /// Explicit type arguments select the arity-matching overload
+    /// (`reduce<number>` picks the generic overload, no TS2558).
+    #[test]
+    fn explicit_type_arguments_select_generic_overload() {
+        let ok = build_checker_with_lib(
+            "declare const a: string[]; const r = a.reduce<number>((c, d) => c + d, \" \");",
+        );
+        assert_eq!(error_codes(&ok), Vec::<i32>::new());
+    }
+
+    /// A bare array satisfies a structural interface over Array members
+    /// (`string[]` -> `ConcatArray<string>`: length/join/slice/concat).
+    #[test]
+    fn bare_array_assignable_to_concat_array() {
+        let ok = build_checker_with_lib(
+            "declare const a: string[]; const c: ConcatArray<string> = a; const r = a.concat(\"x\");",
+        );
+        assert_eq!(error_codes(&ok), Vec::<i32>::new());
+    }
+
+    /// Instantiated interface member types read through the instance's
+    /// type arguments (`ConcatArray<number>.slice` returns `number[]`).
+    #[test]
+    fn concat_on_number_array_with_array_arg() {
+        let ok = build_checker_with_lib(
+            "declare const fa: number[]; var x = fa.concat(fa);",
+        );
+        assert_eq!(error_codes(&ok), Vec::<i32>::new());
     }
 }
 

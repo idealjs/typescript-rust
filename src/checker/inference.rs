@@ -1577,7 +1577,13 @@ impl Checker {
         if arg_index >= sig.parameters.len() {
             return None;
         }
-        let base_param_type = self.get_type_of_symbol(&sig.parameters[arg_index]);
+        // Instantiated signatures (element-substituted array members,
+        // contextually instantiated callbacks) carry substituted parameter
+        // types in the override table — prefer those over the parameter
+        // symbols' raw declaration types.
+        let base_param_type = self
+            .signature_instantiated_param_type(&sig, arg_index)
+            .unwrap_or_else(|| self.get_type_of_symbol(&sig.parameters[arg_index]));
 
         // Generic signature: infer type arguments from the NON-context-
         // sensitive sibling arguments (Go's first inference phase; function

@@ -972,6 +972,37 @@ impl Checker {
                                     .get(base_prop)
                                     .and_then(|l| l.resolved_type.clone());
                                 if let (Some(dt), Some(bt)) = (derived_type, base_type) {
+                                    // A RAW generic base member (referenced
+                                    // without type arguments, e.g.
+                                    // `writable: WritableStream` in
+                                    // `interface GenericTransformStream`)
+                                    // behaves like an any-arg instantiation
+                                    // (official implicit-any args) —
+                                    // substitute its declaration's type
+                                    // parameters with `any` before the check.
+                                    let bt = match bt.symbol.as_ref() {
+                                        Some(bsym) => {
+                                            let tps = self.declared_type_parameter_types(bsym);
+                                            if !tps.is_empty()
+                                                && bt.as_object().is_none_or(|o| {
+                                                    o.type_arguments.is_empty()
+                                                })
+                                            {
+                                                let anys: Vec<Arc<Type>> = std::iter::repeat(
+                                                    self.get_any_type(),
+                                                )
+                                                .take(tps.len())
+                                                .collect();
+                                                self.resolve_interface_type_ex(
+                                                    bsym,
+                                                    Some(anys),
+                                                )
+                                            } else {
+                                                bt
+                                            }
+                                        }
+                                        None => bt,
+                                    };
                                     if !self.is_type_assignable_to(&dt, &bt) {
                                         self.interface_extends_reported.insert(dedup_key);
                                         let base_name = base
@@ -2663,7 +2694,14 @@ impl Checker {
                     let mut t = None;
                     if let Some(ctx_sig) = contextual_signature {
                         if i < ctx_sig.parameters.len() {
-                            t = Some(self.get_type_of_symbol(&ctx_sig.parameters[i]));
+                            // Instantiated contextual signatures carry
+                            // substituted parameter types in the override
+                            // table (element-substituted array members).
+                            t = self
+                                .signature_instantiated_param_type(ctx_sig, i)
+                                .or_else(|| {
+                                    Some(self.get_type_of_symbol(&ctx_sig.parameters[i]))
+                                });
                         }
                     }
                     t.unwrap_or_else(|| self.get_any_type())
@@ -3305,8 +3343,13 @@ impl Checker {
         obj_type: &Arc<Type>,
         member: &Arc<Symbol>,
     ) -> Option<Arc<Type>> {
-        // Only the bare array shape (no structured members of its own).
-        if !self.is_array_type(obj_type) {
+        // Only the bare array shape (no structured members of its own);
+        // evolving array literals (`const x = []` … `x.push(v)`) resolve
+        // through the same table with their EVOLVED element union.
+        let is_evolving = obj_type
+            .object_flags
+            .contains(ObjectFlags::EvolvingArray);
+        if !self.is_array_type(obj_type) && !is_evolving {
             return None;
         }
         if let Some(structured) = obj_type.as_structured()
@@ -3316,12 +3359,16 @@ impl Checker {
             // fallback — nothing to substitute.
             return None;
         }
-        let TypeData::Object(o) = &obj_type.data else {
-            return None;
-        };
-        let element = match o.type_arguments.first() {
-            Some(e) => Arc::clone(e),
-            None => return None,
+        let element = match &obj_type.data {
+            TypeData::Object(o) => match o.type_arguments.first() {
+                Some(e) => Arc::clone(e),
+                None => return None,
+            },
+            TypeData::EvolvingArray(e) => e
+                .element_type
+                .clone()
+                .unwrap_or_else(|| self.never_type()),
+            _ => return None,
         };
         // Type the member through the DECLARED `Array<T>` type's structured
         // member table: those synthetic symbols were resolved IN the
@@ -3354,11 +3401,11 @@ impl Checker {
         if let Some(cached) = self.array_member_type_cache.get(&key) {
             return Some(Arc::clone(cached));
         }
-        // Collect the FREE type parameters straight from the member's own
-        // parameter/return types and substitute each with the element type.
-        // Collecting from the member type itself sidesteps type-parameter
-        // symbol divergence across Array's merged lib declarations
-        // (same-named `T`s are distinct symbols per declaration).
+        // Collect the FREE type parameters from the member's own
+        // parameter/return types, recursing into function-type signatures
+        // (a method like `map` keeps its type parameters inside the
+        // CALLBACK's signature, which the shallow collector misses — the
+        // raw member then leaks the interface's `T` into call targets).
         let mut free_tps: Vec<Arc<Type>> = Vec::new();
         for sig in self.get_signatures_of_type(&raw, SignatureKind::Call) {
             // Read parameter types from the parameter SYMBOLS directly
@@ -3366,23 +3413,224 @@ impl Checker {
             // parameters outside the override table).
             for param in &sig.parameters {
                 let pt = self.get_type_of_symbol(param);
-                crate::checker::relater::collect_free_type_parameters(&pt, &mut free_tps);
+                self.collect_free_type_parameters_deep(&pt, &mut free_tps);
             }
             if let Some(rt) = self.get_return_type_of_signature(&sig) {
-                crate::checker::relater::collect_free_type_parameters(&rt, &mut free_tps);
+                self.collect_free_type_parameters_deep(&rt, &mut free_tps);
             }
         }
-        if free_tps.is_empty() {
-            // Non-generic member (`length: number`) — return its type as-is.
+        // Substitute ONLY the interface's own type parameters with the
+        // element type; the member's own type parameters (`map`'s `U`,
+        // `flat`'s `A`/`D`) stay free so call-site inference can bind
+        // them (Go resolves members through the instantiation mapper,
+        // which maps the interface's parameters only).
+        let array_tps = self.array_type_parameter_symbols();
+        let subst_tps: Vec<Arc<Type>> = free_tps
+            .iter()
+            .filter(|tp| {
+                tp.symbol
+                    .as_ref()
+                    .is_some_and(|s| array_tps.iter().any(|a| Arc::ptr_eq(a, s)))
+            })
+            .cloned()
+            .collect();
+        if subst_tps.is_empty() {
+            // Non-generic member (`length: number`) or one that only
+            // mentions its own type parameters — return its type as-is.
             return Some(raw);
         }
-        let substitutions: Vec<Arc<Type>> =
-            std::iter::repeat(Arc::clone(&element)).take(free_tps.len()).collect();
+        let substitutions: Vec<Arc<Type>> = std::iter::repeat(Arc::clone(&element))
+            .take(subst_tps.len())
+            .collect();
         let substituted =
-            self.substitute_infer_type_parameters(&raw, &free_tps, &substitutions);
+            self.substitute_infer_type_parameters(&raw, &subst_tps, &substitutions);
         self.array_member_type_cache
             .insert(key, Arc::clone(&substituted));
         Some(substituted)
+    }
+
+    /// A synthetic member symbol from the DECLARED `Array<T>` interface's
+    /// structured member table, by name (`length`, `concat`, `join`, …).
+    /// Bare array types resolve their properties through this table.
+    pub(crate) fn declared_array_member_symbol(&mut self, name: &str) -> Option<Arc<Symbol>> {
+        let array_sym = self.globals.get("Array").cloned();
+        let declared = array_sym
+            .as_ref()
+            .and_then(|sym| {
+                self.type_alias_links
+                    .get(sym)
+                    .and_then(|l| l.declared_type.clone())
+            })
+            .or_else(|| {
+                array_sym
+                    .as_ref()
+                    .map(|sym| self.resolve_interface_type(&sym, None))
+            })?;
+        declared
+            .as_structured()
+            .and_then(|s| s.members.get(name).cloned())
+    }
+
+    /// The type of `prop` as a member of the (possibly instantiated) type
+    /// `owner`. Instantiated generic interfaces/classes carry their type
+    /// arguments on the instance (`ConcatArray<number>`), but the synthetic
+    /// member symbols' cached types keep the DECLARED type parameters —
+    /// substitute them with the instance's arguments (Go reads member types
+    /// through the instantiation mapper). Memoized per (owner, prop).
+    pub(crate) fn substituted_member_type_of(
+        &mut self,
+        owner: &Arc<Type>,
+        prop: &Arc<Symbol>,
+    ) -> Arc<Type> {
+        let Some(obj) = owner.as_object() else {
+            return self.get_type_of_symbol(prop);
+        };
+        if obj.type_arguments.is_empty() {
+            return self.get_type_of_symbol(prop);
+        }
+        let Some(owner_sym) = owner.symbol.clone() else {
+            return self.get_type_of_symbol(prop);
+        };
+        let key = (
+            Arc::as_ptr(owner) as *const crate::checker::types::Type as usize,
+            Arc::as_ptr(prop) as *const crate::ast::Symbol as usize,
+        );
+        if let Some(cached) = self.instantiated_member_type_cache.get(&key) {
+            return Arc::clone(cached);
+        }
+        // Interfaces: read the member from a PROPERLY instantiated
+        // instance (resolve_interface_type_ex substitutes member types at
+        // construction through the type-argument stack) — substitution-
+        // rebuilt references (e.g. the element-substituted Array members'
+        // rest types) carry the declared member table with raw type
+        // parameters. Classes have no such instantiation entry point and
+        // fall back to substituting the raw member type.
+        let result = if owner_sym.flags.contains(SymbolFlags::Interface) {
+            let proper =
+                self.resolve_interface_type_ex(&owner_sym, Some(obj.type_arguments.clone()));
+            let prop_sym = proper
+                .as_structured()
+                .and_then(|s| s.members.get(&prop.name).cloned());
+            match prop_sym {
+                Some(ps) => self.get_type_of_symbol(&ps),
+                None => self.get_type_of_symbol(prop),
+            }
+        } else {
+            self.substitute_member_type_fallback(&owner_sym, prop, &obj.type_arguments)
+        };
+        self.instantiated_member_type_cache
+            .insert(key, Arc::clone(&result));
+        result
+    }
+
+    /// Fallback for non-interface owners (classes): substitute the raw
+    /// member type's declaration type parameters with the instance's
+    /// arguments.
+    fn substitute_member_type_fallback(
+        &mut self,
+        owner_sym: &Arc<Symbol>,
+        prop: &Arc<Symbol>,
+        args: &[Arc<Type>],
+    ) -> Arc<Type> {
+        let decl_tps = self.declared_type_parameter_types(owner_sym);
+        if decl_tps.len() == args.len() && !decl_tps.is_empty() {
+            let raw = self.get_type_of_symbol(prop);
+            let substitutions = args.to_vec();
+            self.substitute_infer_type_parameters(&raw, &decl_tps, &substitutions)
+        } else {
+            self.get_type_of_symbol(prop)
+        }
+    }
+
+    /// The type-parameter TYPES of a generic interface/class declaration
+    /// (the first declaration's list — merged declarations must agree).
+    pub(crate) fn declared_type_parameter_types(&mut self, symbol: &Arc<Symbol>) -> Vec<Arc<Type>> {
+        let decl = symbol.declarations.iter().find(|d| {
+            matches!(
+                d.data,
+                NodeData::InterfaceDeclaration(_) | NodeData::ClassDeclaration(_)
+            )
+        });
+        let Some(decl) = decl else {
+            return Vec::new();
+        };
+        let tps = match &decl.data {
+            NodeData::InterfaceDeclaration(d) => d.type_parameters.as_ref(),
+            NodeData::ClassDeclaration(d) => d.type_parameters.as_ref(),
+            _ => None,
+        };
+        let Some(tps) = tps else {
+            return Vec::new();
+        };
+        let tp_syms: Vec<Arc<Symbol>> = {
+            let sym_map = self.program.symbol_map();
+            tps.iter()
+                .filter_map(|tp| sym_map.symbol_of(tp).map(Arc::clone))
+                .collect()
+        };
+        tp_syms
+            .iter()
+            .map(|tp_sym| self.get_type_of_symbol(tp_sym))
+            .collect()
+    }
+
+    /// Deep free-type-parameter collection: like
+    /// `relater::collect_free_type_parameters`, but also recurses into
+    /// structured types' call/construct signatures (parameter and return
+    /// types), indexed accesses, and the object member tables that array
+    /// method members are built from.
+    fn collect_free_type_parameters_deep(&mut self, t: &Arc<Type>, out: &mut Vec<Arc<Type>>) {
+        match &t.data {
+            TypeData::TypeParameter(_) => {
+                if !out.iter().any(|p| Arc::ptr_eq(p, t)) {
+                    out.push(Arc::clone(t));
+                }
+            }
+            TypeData::Union(u) => {
+                for ty in &u.union_or_intersection.types {
+                    self.collect_free_type_parameters_deep(ty, out);
+                }
+            }
+            TypeData::Intersection(i) => {
+                for ty in &i.union_or_intersection.types {
+                    self.collect_free_type_parameters_deep(ty, out);
+                }
+            }
+            TypeData::Object(o) => {
+                for ty in &o.type_arguments {
+                    self.collect_free_type_parameters_deep(ty, out);
+                }
+                // Function types: walk the signatures' parameter and return
+                // types (the callback parameter of `map`/`forEach` keeps
+                // the interface parameter inside its own signature).
+                for sig in o.structured.signatures.clone() {
+                    for param in sig.parameters.iter() {
+                        let pt = self.get_type_of_symbol(param);
+                        self.collect_free_type_parameters_deep(&pt, out);
+                    }
+                    if let Some(rt) = sig.resolved_return_type.get() {
+                        let rt = Arc::clone(rt);
+                        self.collect_free_type_parameters_deep(&rt, out);
+                    }
+                }
+            }
+            TypeData::Tuple(tu) => {
+                for ei in &tu.element_infos {
+                    if let Some(ty) = &ei.type_ {
+                        self.collect_free_type_parameters_deep(ty, out);
+                    }
+                }
+            }
+            TypeData::IndexedAccess(ia) => {
+                if let Some(obj) = &ia.object_type {
+                    self.collect_free_type_parameters_deep(obj, out);
+                }
+                if let Some(idx) = &ia.index_type {
+                    self.collect_free_type_parameters_deep(idx, out);
+                }
+            }
+            _ => {}
+        }
     }
 
     pub fn create_tuple_type(&mut self, element_types: Vec<Arc<Type>>) -> Arc<Type> {

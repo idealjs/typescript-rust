@@ -630,6 +630,27 @@ impl Checker {
     }
 
     /// Format a function type: `(a: T, b: U) => V`.
+    /// The substituted type of signature parameter `i`, when the signature
+    /// is an instantiated one carrying `instantiated_parameter_types`.
+    pub(crate) fn signature_instantiated_param_type(
+        &self,
+        sig: &Signature,
+        i: usize,
+    ) -> Option<Arc<Type>> {
+        let overrides = sig.instantiated_parameter_types.as_ref()?;
+        let rest_offset = usize::from(sig.has_rest_parameter());
+        let fixed = overrides.len().saturating_sub(rest_offset);
+        if i < fixed {
+            return Some(Arc::clone(&overrides[i]));
+        }
+        // Rest parameter: the override at `fixed` holds the (substituted)
+        // array type.
+        if rest_offset == 1 && i == fixed {
+            return Some(Arc::clone(&overrides[fixed]));
+        }
+        None
+    }
+
     fn function_type_to_string(
         &mut self,
         _t: &Arc<Type>,
@@ -645,9 +666,16 @@ impl Checker {
         let params: Vec<String> = sig
             .parameters
             .iter()
-            .map(|param| {
+            .enumerate()
+            .map(|(i, param)| {
                 let name = param.name.clone();
-                let param_type = self.get_type_of_symbol(param);
+                // Instantiated signatures (element-substituted array
+                // members, contextually instantiated callbacks) carry the
+                // substituted parameter types in the override table —
+                // the parameter symbols keep the raw declaration types.
+                let param_type = self
+                    .signature_instantiated_param_type(sig, i)
+                    .unwrap_or_else(|| self.get_type_of_symbol(param));
                 let type_str = self.type_to_string_ex(&param_type, flags);
                 if param.flags.contains(crate::ast::SymbolFlags::Optional) {
                     format!("{}?: {}", name, type_str)
