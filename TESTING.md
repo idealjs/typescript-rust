@@ -67,7 +67,23 @@ diff "tests/baselines/reference/compiler/<stem>.errors.txt" \
 
 # 当前批次
 
-## 修复十三（2026-08-20 午后，r7 后 fix-only；r8 验证进行中）
+## 全量跑 r8（2026-08-20 午后，修复十三验证）——compiler 2 FAIL（新低）
+
+**命令**：`bash run_full_sweep_r8_20260820.sh`（日志 `submodule_full_run_r8_20260820.log`）。
+
+| 套件 | PASS | accepted-diff | SKIP | FAIL | 对比 r7 |
+| --- | --- | --- | --- | --- | --- |
+| compiler | 2,862 | 2,618 | 1,054 | **2** | FAIL 3→2（importHelpers.2 转绿） |
+| conformance | 2,012 | 2,651 | 1,227 | **17** | importAssertion3 转绿；nodeModules 子集漂移（超时导致每轮构成微变） |
+| transpile | 0 | 22 | 0 | **0** | 持平 |
+
+**compiler 剩余 2**：concatError（relater 试探期诊断泄漏）、
+inferentialTypingWithFunctionType2（泛型函数作回调比较）——均为已定位深层项。
+**conformance 剩余 17**：nodeModules×11（D6 族：TS2883/exports 子形态/
+importMeta/decl-emit 模式）、jsxJsxs×3（D1：lib heritage 环丢失）、
+importAssertion5/importAttributes5、logicalAssignment5、genericClassWith。
+
+## 修复十三（2026-08-20 午后，r7 后 fix-only；r8 验证完成）
 
 TS2857（type-only 子句不能带 import attributes）——修复十二中该块被
 误嵌进 `!module_ok` 成死代码，重构为 2823/2857 正确分岔。CLI 双配置
