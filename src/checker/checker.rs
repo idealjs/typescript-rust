@@ -7610,18 +7610,14 @@ impl Checker {
                             | ModuleKind::NodeNext
                             | ModuleKind::Preserve
                     );
-                    if !module_ok {
-                        let attributes = match &node.data {
-                            crate::ast::NodeData::ImportDeclaration(d) => {
-                                d.attributes.clone()
-                            }
-                            crate::ast::NodeData::ExportDeclaration(d) => {
-                                d.attributes.clone()
-                            }
-                            _ => None,
-                        };
-                        if let Some(attrs) = attributes {
-                            let file = self.current_file.clone();
+                    let attributes = match &node.data {
+                        crate::ast::NodeData::ImportDeclaration(d) => d.attributes.clone(),
+                        crate::ast::NodeData::ExportDeclaration(d) => d.attributes.clone(),
+                        _ => None,
+                    };
+                    if let Some(attrs) = attributes {
+                        let file = self.current_file.clone();
+                        if !module_ok {
                             self.diagnostics.add(crate::ast::Diagnostic::new(
                                 file,
                                 attrs.loc,
@@ -7629,6 +7625,35 @@ impl Checker {
                                     IMPORT_ATTRIBUTES_ARE_ONLY_SUPPORTED_WHEN_THE_MODULE_OPTION_IS_SET_TO_ESNEXT_NODE18_NODE20_NODENEXT_OR_PRESERVE,
                                 Vec::new(),
                             ));
+                        } else {
+                            // Type-only clauses cannot carry attributes
+                            // (Go `checkImportAttributes` TS2857).
+                            let is_type_only = match &node.data {
+                                crate::ast::NodeData::ImportDeclaration(d) => d
+                                    .import_clause
+                                    .as_ref()
+                                    .is_some_and(|c| {
+                                        matches!(
+                                            &c.data,
+                                            crate::ast::NodeData::ImportClause(ic)
+                                                if ic.phase_modifier
+                                                    == Some(SyntaxKind::TypeKeyword)
+                                        )
+                                    }),
+                                crate::ast::NodeData::ExportDeclaration(d) => {
+                                    d.is_type_only
+                                }
+                                _ => false,
+                            };
+                            if is_type_only {
+                                self.diagnostics.add(crate::ast::Diagnostic::new(
+                                    file,
+                                    attrs.loc,
+                                    crate::diagnostics::messages_generated::
+                                        IMPORT_ATTRIBUTES_CANNOT_BE_USED_WITH_TYPE_ONLY_IMPORTS_OR_EXPORTS,
+                                    Vec::new(),
+                                ));
+                            }
                         }
                     }
                 }
