@@ -5871,6 +5871,20 @@ impl Parser {
         if self.token == SyntaxKind::WithKeyword
             || (self.token == SyntaxKind::AssertKeyword && !self.has_preceding_line_break())
         {
+            // A dangling `with`/`assert` not followed by `{` is a syntax
+            // error, not an attributes clause (official consumes the
+            // keyword, reports TS1005 `'{' expected`, and produces NO
+            // attributes node — no TS2823 follows).
+            let mut probe = self.scanner.clone();
+            probe.scan();
+            if probe.token() != SyntaxKind::OpenBraceToken {
+                self.next_token(); // consume 'with'/'assert'
+                self.parse_error_at_current_token(
+                    crate::diagnostics::X_0_EXPECTED,
+                    &["{"],
+                );
+                return None;
+            }
             Some(self.parse_import_attributes(self.token))
         } else {
             None

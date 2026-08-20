@@ -1309,7 +1309,14 @@ impl Checker {
             } else {
                 self.substituted_member_type_of(source, &source_prop)
             };
+            // A BARE generic reference (no type arguments — `C` where the
+            // declaration is `class C<T>`) behaves like an any-arg
+            // instantiation on BOTH sides (official implicit-any args):
+            // substitute its own type parameters with `any` so bare and
+            // instantiated references stay mutually assignable.
+            let source_type = self.erase_bare_generic_params(source, &source_type);
             let target_type = self.substituted_member_type_of(target, target_prop);
+            let target_type = self.erase_bare_generic_params(target, &target_type);
             if !self.is_type_related_to(&source_type, &target_type, relation) {
                 // Chain (Go propertiesRelatedTo → reportError, relater.go
                 // ~L4353): the nested failure's entries are already on the
@@ -1664,6 +1671,30 @@ impl Checker {
     /// values are computed via `get_enum_member_value`, which uses a no-op
     /// entity resolver — members whose initializers reference other enum
     /// members resolve to `None` and are treated as opaque/assumed-numeric.
+    /// When `owner` is a bare generic reference (a generic class/interface
+    /// referenced WITHOUT type arguments), erase its own type parameters
+    /// from a member type with `any` (official implicit-any args make
+    /// `C` and `C<X>` mutually assignable in these positions).
+    fn erase_bare_generic_params(&mut self, owner: &Arc<Type>, member_type: &Arc<Type>) -> Arc<Type> {
+        let Some(sym) = owner.symbol.as_ref() else {
+            return Arc::clone(member_type);
+        };
+        if owner
+            .as_object()
+            .is_some_and(|o| !o.type_arguments.is_empty())
+        {
+            return Arc::clone(member_type);
+        }
+        let tps = self.declared_type_parameter_types(sym);
+        if tps.is_empty() {
+            return Arc::clone(member_type);
+        }
+        let anys: Vec<Arc<Type>> = std::iter::repeat(self.get_any_type())
+            .take(tps.len())
+            .collect();
+        self.substitute_infer_type_parameters(member_type, &tps, &anys)
+    }
+
     fn is_enum_type_related_to(&mut self, source: &Arc<Type>, target: &Arc<Type>) -> bool {
         let Some(source_symbol) = source.symbol.as_ref() else {
             return false;

@@ -3587,10 +3587,18 @@ impl Checker {
                 .filter_map(|tp| sym_map.symbol_of(tp).map(Arc::clone))
                 .collect()
         };
-        tp_syms
+        // Constraint resolution inside runs in the CALLER's scope — a
+        // parameter's constraint may reference later-declared parameters
+        // (`class Field<T extends TR, TR>`) whose symbols only resolve in
+        // the declaration's own scope. Suppress TS2304 for the lookups;
+        // constraints still resolve lazily through the symbol links.
+        self.push_ts2304_suppression();
+        let types = tp_syms
             .iter()
             .map(|tp_sym| self.get_type_parameter_from_symbol(tp_sym))
-            .collect()
+            .collect();
+        self.pop_ts2304_suppression();
+        types
     }
 
     /// Deep free-type-parameter collection: like
