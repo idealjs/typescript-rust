@@ -829,6 +829,10 @@ impl Checker {
             .filter(|d| matches!(d.data, NodeData::InterfaceDeclaration(_)))
             .cloned()
             .collect();
+        // Set when a heritage base resolved to the error type through the
+        // cycle guard — the merged result is incomplete and must not be
+        // cached (see the declared-type write below).
+        let mut heritage_degraded = false;
         let result = match interface_decls.first() {
             Some(first) => {
                 let data = match &first.data {
@@ -915,6 +919,17 @@ impl Checker {
                                 {
                                     for type_ref in hc.types.iter() {
                                         let bt = self.get_type_from_type_node(type_ref);
+                                        // A base that resolved to the error
+                                        // type through the cycle guard (the
+                                        // base's own resolution is mid-flight
+                                        // and needed THIS interface) leaves
+                                        // the merged result incomplete —
+                                        // remember that so the degraded form
+                                        // is NOT cached (a later resolution
+                                        // retries with the complete base).
+                                        if bt.flags.contains(TypeFlags::Any) {
+                                            heritage_degraded = true;
+                                        }
                                         base_types.push((Arc::clone(type_ref), bt));
                                     }
                                 }
@@ -1065,7 +1080,11 @@ impl Checker {
             None => self.error_type(),
         };
         self.pop_type_resolution();
-        if !has_type_args {
+        // A heritage-degraded resolution (a base hit the cycle guard's
+        // error type because the base needed THIS interface mid-flight)
+        // must not poison the declared-type cache — skip caching so a
+        // later reference re-resolves against the now-complete base.
+        if !has_type_args && !heritage_degraded {
             self.type_alias_links.get_or_default(symbol).declared_type = Some(result.clone());
         }
         if let Some(key) = instantiation_key {
