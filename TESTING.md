@@ -67,6 +67,23 @@ diff "tests/baselines/reference/compiler/<stem>.errors.txt" \
 
 # 当前批次
 
+## 修复十三（2026-08-20 午后，r7 后 fix-only；r8 验证进行中）
+
+TS2857（type-only 子句不能带 import attributes）——修复十二中该块被
+误嵌进 `!module_ok` 成死代码，重构为 2823/2857 正确分岔。CLI 双配置
+验证与官方完全一致（esnext: 4×TS2857 同位置；es2015: 4×TS2823）。
+预期 importAssertion3 双配置全绿。1313 单测绿。
+
+**r7 后剩余 FAIL 分层**（下轮优先级）：
+1. nodeModules×10（TS2883 + exports 子形态 + importMeta + decl-emit 模式）
+2. D1 lib heritage 环丢失（jsxJsxsSubstitutesNames±Fragment）
+3. concatError（relater 试探期诊断泄漏——`fa.concat([0])` 幻影 2322，
+   需链卫生修复：试探失败不落盘）
+4. inferentialTypingWithFunctionType2（泛型函数作回调比较）
+5. importHelpers.2（配置矩阵）、genericClassWith（结构推断角落）、
+   logicalAssignment5、recursiveTypes TS2564（检查未实现）
+6. TS2769 重载失败链（F3b，未动）
+
 ## 全量跑 r7（2026-08-20 午，修复十二验证）——compiler 3 FAIL（历史最佳）
 
 **命令**：`bash run_full_sweep_r7_20260820.sh`（日志 `submodule_full_run_r7_20260820.log`）。
