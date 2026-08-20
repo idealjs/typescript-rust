@@ -67,6 +67,25 @@ diff "tests/baselines/reference/compiler/<stem>.errors.txt" \
 
 # 当前批次
 
+## D1 部分修复（2026-08-20 下午，commit d1a9969）+ 会话交接
+
+**已完成**：heritage 降级结果不再写入符号 declared-type 缓存（方向正确、
+无回归、1313 单测绿），但**单独不够**——per-node 类型 memo
+（get_type_from_type_node，node-id+栈哈希键）仍持有降级结果。
+**D1 下一步**：把降级标记传播到 node-memo 层（跳过缓存或失效重算），
+验收用例：`declare const h: HTMLElement; h.id`（当前仍 2339）+
+react16.d.ts 0 错误 + jsxJsxs 族转绿。
+
+**会话总账**（r4→r8 五轮全量 + 修复十~十三 + D1 部分）：
+- compiler：13 F → **2 F**（concatError relater 探针泄漏、
+  inferentialTypingWithFunctionType2 泛型回调——均已定位待深修）
+- conformance：13 F → 17 F（构成变化：早期 9 个回归类全清，浮现
+  nodeModules 族 ×11（多数原为超时 SKIP 未暴露）+ jsxJsxs×3（D1））
+- transpile：全程 0 F
+- 单测：1305→**1313** 全绿（新增 array_member_tests 6 个）
+- 遗留根因与修复路径全部在案：`_scripts/FIXPLAN_20260820_r4.md`（D1-D6）
+  + 本文件各轮记录（TS2769 链、TS2564、TS2883、evolving push 前类型等）
+
 ## 全量跑 r8（2026-08-20 午后，修复十三验证）——compiler 2 FAIL（新低）
 
 **命令**：`bash run_full_sweep_r8_20260820.sh`（日志 `submodule_full_run_r8_20260820.log`）。
