@@ -67,6 +67,34 @@ diff "tests/baselines/reference/compiler/<stem>.errors.txt" \
 
 # 当前批次
 
+## 全量跑 r7（2026-08-20 午，修复十二验证）——compiler 3 FAIL（历史最佳）
+
+**命令**：`bash run_full_sweep_r7_20260820.sh`（日志 `submodule_full_run_r7_20260820.log`）。
+
+| 套件 | PASS | accepted-diff | SKIP | FAIL | 对比 r6 |
+| --- | --- | --- | --- | --- | --- |
+| compiler | **2,865** | 2,615 | 1,053 | **3** | PASS +8、FAIL 11→3（回归全清） |
+| conformance | 2,004 | 2,643 | 1,244 | **16** | FAIL 持平（构成变化） |
+| transpile | 0 | 22 | 0 | **0** | 持平 |
+
+修复十二验证：r6 的 8 个 compiler 泛型回归全绿；TS2823 过触发组
+（importAssertion4/importAttributes4）转绿；logicalAssignment5/
+genericClassWith 仍 FAIL（推断角落）。注意 importAssertion3 本轮**回退**
+（r6 曾绿）——修复十二的 parser 残缺-with 探针（scanner 预扫 `{`）对
+importAssertion3 的合法 `with {` 路径产生了干扰，需查。
+
+**剩余 19 FAIL 按根因**：
+- nodeModules×10（D6 继续：TS2883、exports 子形态、importMeta、
+  ImportAttributes/Mode 系列 decl-emit）
+- jsxJsxsCjsTransformSubstitutesNames(+Fragment)（D1：lib heritage 环丢失）
+- importAssertion3（回退，parser 探针干扰）/ importAssertion5 /
+  importAttributes5（残缺-with 恢复路径的对齐细节）
+- concatError（relater 探针期诊断泄漏：`fa.concat([0])` 幻影 2322）
+- inferentialTypingWithFunctionType2（泛型函数作回调比较）
+- importHelpersWithImportOrExportDefaultNoTslib.2（配置矩阵）
+- genericClassWithObjectTypeArgsAndConstraints（结构推断角落）
+- logicalAssignment5
+
 ## 全量跑 r6（2026-08-20 上午，修复十一验证）——**净负，需校正轮（修复十二）**
 
 **命令**：`bash run_full_sweep_r6_20260820.sh`（日志 `submodule_full_run_r6_20260820.log`）。
