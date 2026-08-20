@@ -67,6 +67,36 @@ diff "tests/baselines/reference/compiler/<stem>.errors.txt" \
 
 # 当前批次
 
+## 全量跑 r6（2026-08-20 上午，修复十一验证）——**净负，需校正轮（修复十二）**
+
+**命令**：`bash run_full_sweep_r6_20260820.sh`（日志 `submodule_full_run_r6_20260820.log`）。
+
+| 套件 | PASS | accepted-diff | SKIP | FAIL | 对比 r5 |
+| --- | --- | --- | --- | --- | --- |
+| compiler | 2,857 | 2,614 | 1,054 | **11** | PASS +13、FAIL 4→11（**8 个新回归**） |
+| conformance | 2,000 | 2,645 | 1,246 | **16** | FAIL 12→16（**4 个 TS2823 过触发** + 4 泛型） |
+| transpile | 0 | 22 | 0 | **0** | 持平 |
+
+**修复十一生效项**：assignmentCompatability9 ✓、importAssertion3 ✓（TS2823
+门控对 es2015/esnext 正确）、自引用解析（nodeModulesExportsSourceTs 的
+TS2307 半边）。
+
+**修复十一回归项（修复十二目标）**：
+1. **TS2823 过触发**：importAssertion4/5、importAttributes4/5——官方零错误
+   （module 允许或 assert 旧式形态门控不同），我们对某些配置多报
+2. **泛型族 8+4**：compiler（generics3、genericClasses4、genericInherited
+   DefaultConstructors、functionOverloadsRecursiveGenericReturnType、
+   conditionalTypeSubclassExtendsTypeParam、enumLiteralUnionNotWidened、
+   overloadGenericFunctionWithRestArgs、overloadOnGenericClassAnd
+   NonGenericClass）+ conformance（genericCall/ClassWithObjectTypeArgsAnd
+   Constraints、objectTypesIdentityWithPrivates2、recursiveTypesUsedAs
+   FunctionParameters）——类引用/属性访问实例化替换在泛型上下文的边界
+3. importHelpersWithImportOrExportDefaultNoTslib.2：CLI 单配置 MATCH 但
+   harness 多配置仍 FAIL
+4. 既有遗留：concatError（relater 探针泄漏）、inferentialTypingWith
+   FunctionType2（泛型回调）、jsxJsxsSubstitutesNames(+Fragment)（D1）、
+   nodeModules 其余（TS2883 + exports 子形态 + importMeta）
+
 ## 全量跑 r5（2026-08-20 晨，修复十验证；干净机器无并发）
 
 **命令**：`bash run_full_sweep_r5_20260820.sh`（日志 `submodule_full_run_r5_20260820.log`）。
