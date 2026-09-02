@@ -10314,7 +10314,16 @@ impl Checker {
                             self.program.symbol_map().symbol_of(node).cloned()
                         {
                             let target = self.resolve_alias_base(Arc::clone(&alias_sym));
-                            if target.flags.intersects(SymbolFlags::TYPE) {
+                            // Go gates the target-meaning checks on
+                            // `target != unknownSymbol` — an UNRESOLVED
+                            // entity (`globals.toString.Blah` missing
+                            // `toString`, TS2694 already reported) falls
+                            // back to the alias symbol itself here, whose
+                            // merged flags must not drive TS2438/TS2440
+                            // (importEqualsError45874).
+                            let target_resolved = !Arc::ptr_eq(&target, &alias_sym)
+                                || !target.flags.intersects(SymbolFlags::Alias);
+                            if target_resolved && target.flags.intersects(SymbolFlags::TYPE) {
                                 self.check_reserved_type_name(
                                     &d.name,
                                     &crate::diagnostics::messages_generated::IMPORT_NAME_CANNOT_BE_0,
@@ -10326,10 +10335,11 @@ impl Checker {
                             // conflicts.
                             let non_alias_flags =
                                 alias_sym.flags.difference(SymbolFlags::Alias);
-                            let has_local_conflict = alias_sym
-                                .declarations
-                                .iter()
-                                .any(|dd| dd.id() != node.id())
+                            let has_local_conflict = target_resolved
+                                && alias_sym
+                                    .declarations
+                                    .iter()
+                                    .any(|dd| dd.id() != node.id())
                                 && !non_alias_flags.is_empty()
                                 && {
                                     let value_side =
