@@ -66,7 +66,7 @@ diff "tests/baselines/reference/compiler/<stem>.errors.txt" \
 ```
 
 # 当前批次
-## Page-4 轮续（页 15-，compiler#1501 起）：页15 一次过（59P/11S/30ad/**0F**）；页16 一次过（62P/12S/26ad/**0F**）；页17 起点 2 例超时挂死→修复→终态 60P/10S/30ad/**0F**；页18 起点 1 FAIL→修复→终态 37P/24S/39ad/**0F**；页19 起点 3 FAIL→修复→终态 54P/8S/38ad/**0F**（连带清台账 1 组），四套门全绿
+## Page-4 轮续（页 15-，compiler#1501 起）：页15 一次过（59P/11S/30ad/**0F**）；页16 一次过（62P/12S/26ad/**0F**）；页17 起点 2 例超时挂死→修复→终态 60P/10S/30ad/**0F**；页18 起点 1 FAIL→修复→终态 37P/24S/39ad/**0F**；页19 起点 3 FAIL→修复→终态 54P/8S/38ad/**0F**（连带清台账 1 组）；页20 一次过（49P/15S/36ad/**0F**），四套门全绿
 
 - **页19 三连修**：①**流走查跟复数前驱**——`antecedent_type_at` 只读单数 `antecedent` 字段，而标签语句的 break 累积节点边存复数 `antecedents`（`antecedent=None`）→ 单前驱时走查死路返回查询种子 `T|undefined`（doWhileUnreachableCode 等**带标签循环跳转出口**的 2454 假阳；两前驱走 junction 分支不中招，故 t8 形状侥幸）；**连带根治并删除台账「闭包-循环捕获 2454 假阳」组**（blockScopedBindingsReassignedInLoop3 转绿）。②**属性真值判别窄化**——`opts.objectRef || opts.getObjectRef()` 的假分支按成员属性类型过滤联合（恒真属性成员删除；空接口 A|B 恒真），narrow_by_expression 补 `discriminant_property_name_on_target` + `narrow_by_property_truthiness`（discriminatingUnionWithUnionPropertyAgainstUndefinedWithoutStrictNullChecks，SNC 默认开场景）。③**TS2874 的实体名**＝jsxFactory 首标识符/reactNamespace（Go resolveJsxEntityName），显式 factory 时不再硬找 React（doubleUnderscoreReactNamespace，`__jsxFactory: __make` + 全局声明 __make 满足门）。
 
