@@ -2054,13 +2054,22 @@ impl Checker {
                 if src_mod.intersects(ModifierFlags::Private)
                     || tgt_mod.intersects(ModifierFlags::Private)
                 {
-                    let same_decl = match (
-                        &source_prop.value_declaration,
-                        &target_prop.value_declaration,
-                    ) {
-                        (Some(a), Some(b)) => Arc::ptr_eq(a, b),
-                        _ => false,
+                    // Go propertyRelatedTo compares the properties'
+                    // DECLARATION nodes (getDeclarationOfSymbol): private
+                    // members match only when they originate from the same
+                    // declaration — instance types of one class rebuilt in
+                    // two contexts carry fresh symbols over the SAME member
+                    // nodes, and identical symbols trivially agree.
+                    let decl_of = |s: &Arc<crate::ast::Symbol>| {
+                        s.value_declaration
+                            .clone()
+                            .or_else(|| s.declarations.first().cloned())
                     };
+                    let same_decl = Arc::ptr_eq(&source_prop, target_prop)
+                        || match (decl_of(&source_prop), decl_of(target_prop)) {
+                            (Some(a), Some(b)) => Arc::ptr_eq(&a, &b),
+                            _ => false,
+                        };
                     if !same_decl {
                         if src_mod.intersects(ModifierFlags::Private)
                             && tgt_mod.intersects(ModifierFlags::Private)
