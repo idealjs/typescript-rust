@@ -325,7 +325,11 @@ impl Checker {
                 self.flow_analysis_disabled = true;
                 self.report_flow_control_error(target);
             }
-            Arc::clone(initial)
+            // Go returns the ERROR type here (flow.go ~L122), NOT the
+            // query's `T | undefined` seed — a definite-assignment query
+            // whose walk trips the depth limit must not surface `undefined`
+            // and report a phantom TS2454 (largeControlFlowGraph).
+            self.error_type()
         } else {
             self.compute_type_at_flow_node(declared, initial, flow, target, depth, query)
         };

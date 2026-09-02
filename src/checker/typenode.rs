@@ -5353,12 +5353,15 @@ impl Checker {
         }
         // Mapped object `{ [P in K]: T }[X]` (Go getIndexedAccessType's
         // mapped branch): an index within the mapped constraint's
-        // (constraint-reduced) domain resolves to the template type —
-        // `TypeMap<E>[string]` is the template union regardless of which
-        // key matched. The domain of a generic constraint reduces through
-        // the object parameter's own constraint chain.
+        // (constraint-reduced) domain resolves to the TEMPLATE instantiated
+        // with `P := X` — the raw template still carries the mapped type
+        // parameter as a free variable (`keyRemappingKeyofResult2`:
+        // `Values<{[K in keyof T as K & string]: {src: K; …}}>` must yield
+        // `{src: string; …}`, not `{src: K; …}`). The domain of a generic
+        // constraint reduces through the object parameter's own constraint
+        // chain.
         if let TypeData::Mapped(m) = &object_type.data
-            && let (Some(constraint), Some(template)) = (&m.constraint_type, &m.template_type)
+            && let Some(constraint) = &m.constraint_type
         {
             let generic = constraint.flags.intersects(
                 TypeFlags::TypeParameter | TypeFlags::IndexedAccess | TypeFlags::Index,
@@ -5372,7 +5375,46 @@ impl Checker {
                 Arc::clone(constraint)
             };
             if self.is_type_assignable_to(index_type, &domain) {
-                return Arc::clone(template);
+                // Re-resolve the template's type node with the mapping
+                // `P → index` pushed, the same substitution discipline the
+                // conditional distribution path uses. Falls back to the
+                // cached template when the declaration is unavailable.
+                let substituted = m
+                    .declaration
+                    .as_ref()
+                    .and_then(|decl| match &decl.data {
+                        crate::ast::NodeData::MappedTypeNode(d) => d.type_node.as_ref().map(
+                            |tn| {
+                                (
+                                    Arc::clone(&d.type_parameter),
+                                    Arc::clone(tn),
+                                    Arc::clone(decl),
+                                )
+                            },
+                        ),
+                        _ => None,
+                    })
+                    .and_then(|(tp_node, template_node, decl)| {
+                        let tp_sym = self
+                            .program
+                            .symbol_map()
+                            .symbol_of(&tp_node)
+                            .cloned()?;
+                        let mut mapping = std::collections::HashMap::new();
+                        mapping.insert(
+                            Arc::as_ptr(&tp_sym) as *const crate::ast::Symbol,
+                            Arc::clone(index_type),
+                        );
+                        self.push_scope(&decl);
+                        self.type_argument_stack.push(mapping);
+                        let t = self.get_type_from_type_node(&template_node);
+                        self.type_argument_stack.pop();
+                        self.pop_scope();
+                        Some(t)
+                    });
+                return substituted.unwrap_or_else(|| {
+                    Arc::clone(m.template_type.as_ref().expect("template present"))
+                });
             }
         }
         // String-literal index: `T["prop"]`.
