@@ -6669,6 +6669,18 @@ impl Checker {
             return true;
         }
 
+        // Deferred conditional (Go keeps generic check types deferred): a
+        // property query consults the conditional's constraint — for a
+        // distributive root that is the union of the per-constituent
+        // resolved branches over the check type's base constraint.
+        if t.flags.contains(TypeFlags::Conditional) {
+            if let Some(constraint) = self.constraint_of_conditional_type(t) {
+                return self.has_property_of_type(&constraint, name);
+            }
+            // Unresolvable generic conditional — permissive.
+            return true;
+        }
+
         // Deferred indexed access `A[B]` (Go keeps it deferred when either
         // side is generic). Resolve through the base constraints; if either
         // side remains generic the access can't decide — treat it as

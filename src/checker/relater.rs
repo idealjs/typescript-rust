@@ -890,11 +890,123 @@ impl Checker {
         ) {
             return None;
         }
-        let resolved = self.get_indexed_access_type(&obj_constraint, index);
+        // Reduce a generic index through its own constraint chain before
+        // resolving (Go computeBaseConstraint's IndexedAccess branch applies
+        // getNextBaseConstraint to BOTH sides): `M[K]` with
+        // `K extends E[keyof E]` needs K collapsed to the record's key
+        // domain before the access against M's constraint can resolve.
+        let effective_index = if index.flags.intersects(
+            TypeFlags::TypeParameter | TypeFlags::IndexedAccess | TypeFlags::Index,
+        ) || matches!(&index.data, TypeData::IndexedAccess(_))
+        {
+            match self.reduce_type_for_constraint(index, 8) {
+                Some(reduced) => reduced,
+                None => return None,
+            }
+        } else {
+            Arc::clone(index)
+        };
+        let resolved = self.get_indexed_access_type(&obj_constraint, &effective_index);
         if matches!(resolved.intrinsic_name(), Some("any") | Some("error")) {
             return None;
         }
         Some(resolved)
+    }
+
+    /// Reduce a (possibly generic) type through its constraint chain so an
+    /// indexed access can resolve — Go `getNextBaseConstraint`. Type
+    /// parameters reduce to their constraint (recursively); deferred indexed
+    /// accesses resolve through `constraint_of_indexed_access`; `keyof X`
+    /// reduces to the keys of X's own reduction. Bounded by depth like Go's
+    /// 10/50-level exploration stop.
+    fn reduce_type_for_constraint(&mut self, t: &Arc<Type>, depth: usize) -> Option<Arc<Type>> {
+        if depth == 0 {
+            return None;
+        }
+        if t.flags.contains(TypeFlags::TypeParameter) {
+            if t.flags.contains(TypeFlags::Union) {
+                return Some(Arc::clone(t));
+            }
+            let constraint = self.get_constraint_of_type_parameter(t)?;
+            return self.reduce_type_for_constraint(&constraint, depth - 1);
+        }
+        if t.flags.contains(TypeFlags::IndexedAccess) || matches!(&t.data, TypeData::IndexedAccess(_))
+        {
+            return self.constraint_of_indexed_access(t);
+        }
+        if t.flags.contains(TypeFlags::Index) {
+            if let TypeData::Index(it) = &t.data
+                && let Some(target) = &it.target
+            {
+                let reduced = self.reduce_type_for_constraint(target, depth - 1)?;
+                return Some(self.get_index_type(&reduced));
+            }
+            return None;
+        }
+        if t.flags.contains(TypeFlags::Union) {
+            if let TypeData::Union(u) = &t.data {
+                let mut reduced_all = Vec::with_capacity(u.union_or_intersection.types.len());
+                for c in &u.union_or_intersection.types {
+                    reduced_all.push(self.reduce_type_for_constraint(c, depth - 1)?);
+                }
+                return Some(self.get_union_type(reduced_all));
+            }
+        }
+        Some(Arc::clone(t))
+    }
+
+    /// The constraint of a DEFERRED conditional (Go
+    /// `getConstraintFromConditionalType`): a distributive conditional over
+    /// a deferred check type distributes over the check type's base
+    /// constraint — the result is the union of the per-constituent resolved
+    /// branches. `Extract<M[K], ArrayLike<any>>` with
+    /// `M[K] ⊃ number|boolean|string|number[]` constrains to `number[]`,
+    /// so property access on a parameter of the deferred type works.
+    pub(crate) fn constraint_of_conditional_type(&mut self, t: &Arc<Type>) -> Option<Arc<Type>> {
+        let ct = match &t.data {
+            TypeData::Conditional(ct) => ct,
+            _ => return None,
+        };
+        // Already resolved conditionals expose their result directly.
+        if let Some(rt) = ct.resolved_true_type.get() {
+            return Some(Arc::clone(rt));
+        }
+        if let Some(rt) = ct.resolved_false_type.get() {
+            return Some(Arc::clone(rt));
+        }
+        let check_type = ct.check_type.clone()?;
+        let tp_symbol = ct
+            .root
+            .as_ref()
+            .filter(|r| r.is_distributive)
+            .and_then(|r| r.check_type_parameter_symbol.clone())?;
+        // The distribution domain: the check type itself when already a
+        // union, otherwise its base-constraint union.
+        let constituents: Vec<Arc<Type>> = if check_type.flags.contains(TypeFlags::Union) {
+            check_type.types()?.to_vec()
+        } else if check_type.flags.contains(TypeFlags::IndexedAccess)
+            || matches!(&check_type.data, TypeData::IndexedAccess(_))
+        {
+            let reduced = self.constraint_of_indexed_access(&check_type)?;
+            if reduced.flags.contains(TypeFlags::Union) {
+                reduced.types()?.to_vec()
+            } else {
+                vec![reduced]
+            }
+        } else {
+            return None;
+        };
+        let key = Arc::as_ptr(&tp_symbol);
+        let mut results: Vec<Arc<Type>> = Vec::with_capacity(constituents.len());
+        for constituent in constituents {
+            let mut mapping = std::collections::HashMap::new();
+            mapping.insert(key, Arc::clone(&constituent));
+            self.type_argument_stack.push(mapping);
+            let r = self.resolve_conditional_type_with_check(t, Some(constituent));
+            self.type_argument_stack.pop();
+            results.push(r?);
+        }
+        Some(self.get_union_type(results))
     }
 
     fn is_type_related_to_inner(
@@ -6631,6 +6743,22 @@ pub(crate) fn type_contains_type_parameter(t: &Arc<Type>) -> bool {    if t.flag
                     .unwrap_or(false)
         }
         TypeData::TypeParameter(_) => true,
+        TypeData::IndexedAccess(ia) => {
+            ia.object_type
+                .as_ref()
+                .map(type_contains_type_parameter)
+                .unwrap_or(false)
+                || ia
+                    .index_type
+                    .as_ref()
+                    .map(type_contains_type_parameter)
+                    .unwrap_or(false)
+        }
+        TypeData::Index(it) => it
+            .target
+            .as_ref()
+            .map(type_contains_type_parameter)
+            .unwrap_or(false),
         _ => false,
     }
 }

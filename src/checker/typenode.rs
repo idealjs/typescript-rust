@@ -5244,6 +5244,32 @@ impl Checker {
             // approximated as `string`.
             return self.string_type();
         }
+        // Mapped `{ [P in K]: T }`: `keyof` is the (constraint-reduced)
+        // domain K — `keyof { [P in E[keyof E]]: X }` with
+        // `E extends Record<string, …>` reduces through E's constraint to
+        // `string | number`. A `string` domain also admits number-like keys
+        // (numeric keys coerce to strings), matching the structured branch
+        // below.
+        if let TypeData::Mapped(m) = &t.data
+            && let Some(constraint) = &m.constraint_type
+        {
+            let generic = constraint.flags.intersects(
+                TypeFlags::TypeParameter | TypeFlags::IndexedAccess | TypeFlags::Index,
+            ) || matches!(&constraint.data, TypeData::IndexedAccess(_));
+            let domain = if generic {
+                match self.constraint_of_indexed_access(constraint) {
+                    Some(reduced) => reduced,
+                    None => Arc::clone(constraint),
+                }
+            } else {
+                Arc::clone(constraint)
+            };
+            if domain.flags.contains(TypeFlags::String) {
+                let mut keys = vec![domain, self.number_type()];
+                return self.get_union_type(keys);
+            }
+            return domain;
+        }
         // Object-like types: collect property names as string-literal types,
         // unioned with the key types of any index signatures
         // (`keyof Record<string, X>` is `string | number`, not `never`).
@@ -5324,6 +5350,30 @@ impl Checker {
                 return self.get_indexed_access_type(&constraint, index_type);
             }
             return self.any_type();
+        }
+        // Mapped object `{ [P in K]: T }[X]` (Go getIndexedAccessType's
+        // mapped branch): an index within the mapped constraint's
+        // (constraint-reduced) domain resolves to the template type —
+        // `TypeMap<E>[string]` is the template union regardless of which
+        // key matched. The domain of a generic constraint reduces through
+        // the object parameter's own constraint chain.
+        if let TypeData::Mapped(m) = &object_type.data
+            && let (Some(constraint), Some(template)) = (&m.constraint_type, &m.template_type)
+        {
+            let generic = constraint.flags.intersects(
+                TypeFlags::TypeParameter | TypeFlags::IndexedAccess | TypeFlags::Index,
+            ) || matches!(&constraint.data, TypeData::IndexedAccess(_));
+            let domain = if generic {
+                match self.constraint_of_indexed_access(constraint) {
+                    Some(reduced) => reduced,
+                    None => Arc::clone(constraint),
+                }
+            } else {
+                Arc::clone(constraint)
+            };
+            if self.is_type_assignable_to(index_type, &domain) {
+                return Arc::clone(template);
+            }
         }
         // String-literal index: `T["prop"]`.
         if index_type.flags.contains(TypeFlags::StringLiteral) {
