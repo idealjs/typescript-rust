@@ -66,7 +66,10 @@ diff "tests/baselines/reference/compiler/<stem>.errors.txt" \
 ```
 
 # 当前批次
-## Page-4 轮续（页 15-，compiler#1501 起）：页15 一次过（59P/11S/30ad/**0F**）；页16 一次过（62P/12S/26ad/**0F**）；页17 起点 2 例超时挂死→修复→终态 60P/10S/30ad/**0F**，四套门全绿（1353/1010/2/15）
+## Page-4 轮续（页 15-，compiler#1501 起）：页15 一次过（59P/11S/30ad/**0F**）；页16 一次过（62P/12S/26ad/**0F**）；页17 起点 2 例超时挂死→修复→终态 60P/10S/30ad/**0F**；页18 起点 1 FAIL（deeplyNestedConstraints，旧轮 Page19 携带）→修复→终态 37P/24S/39ad/**0F**，四套门全绿
+
+- **延迟索引访问/条件类型的多级约束链（deeplyNestedConstraints 根治，#41931 形状）**：`M[K]`（M extends TypeMap<E>，K extends E[keyof E]）四缺口齐修——①`type_contains_type_parameter` 无 IndexedAccess/Index 分支→`Extract<M[K],…>` 的 check 被误判非泛型、条件急切判 false→参数塌缩 never（补递归后条件正确保持延迟，Go isDeferredType 语义）；②`constraint_of_indexed_access` 只归约对象侧——补 index 侧 `reduce_type_for_constraint`（Go getNextBaseConstraint：TypeParameter→约束、IndexedAccess→constraint_of_indexed_access、keyof X→归约后目标的 get_index_type，深度 8 截止）；③mapped 对象解析：`get_index_type`（keyof＝约束域归约，string 域补 number）与 `get_indexed_access_type`（index 可赋值归约域→模板类型）各补 Mapped 分支——`TypeMap<E>[string|number]`→模板联合 `number|boolean|string|number[]`；④`has_property_of_type` 补 Conditional 分支——延迟分发条件经 `constraint_of_conditional_type`（Go getConstraintFromConditionalType：按 check 的 base-constraint 联合逐成分 resolve 取联合）→`number[]`→`.length` 成立。
+- **推断同目标捷径（Go inferFromTypes/inferFromObjectTypes 三条短路移植）**：declarationEmitUsingAlternativeContainingModules1/2（tanstack/vue-query 真实形状）55s 挂死（30s 超时 SKIP 伪装通过）——探针实锤 76M 次 infer_from_types 仅 725 个不同指针对，热点全为**指针相等自反对**（`[number,unknown]→自身` x3.3M 每次全量走查 ReadonlyArray 30+ 方法 = DAG 路径爆炸）。修复：①指针相等且带 type arguments 的对象类型→参数自 zip 即返（本端口结构化元组/数组无 Reference/target 旗标，Go 的 same-Target 规则按指针相等落地）；②Reference 旗标+同 target/双数组→仅 zip 参数即返；③指针相等 Union/Intersection→成分各自自推断。55s→2.8s，输出逐字节不变；两例转入正常 accepted-diff（既分诊族）。
 
 - **推断同目标捷径（Go inferFromTypes/inferFromObjectTypes 三条短路移植）**：declarationEmitUsingAlternativeContainingModules1/2（tanstack/vue-query 真实形状）55s 挂死（30s 超时 SKIP 伪装通过）——探针实锤 76M 次 infer_from_types 仅 725 个不同指针对，热点全为**指针相等自反对**（`[number,unknown]→自身` x3.3M 每次全量走查 ReadonlyArray 30+ 方法 = DAG 路径爆炸）。修复：①指针相等且带 type arguments 的对象类型→参数自 zip 即返（本端口结构化元组/数组无 Reference/target 旗标，Go 的 same-Target 规则按指针相等落地）；②Reference 旗标+同 target/双数组→仅 zip 参数即返；③指针相等 Union/Intersection→成分各自自推断。55s→2.8s，输出逐字节不变；两例转入正常 accepted-diff（既分诊族）。
 
