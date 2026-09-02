@@ -612,8 +612,13 @@ impl Checker {
         self.antecedent_type_at(declared, initial, flow, target, depth, query)
     }
 
-    /// The type at `flow`'s single antecedent, or the declared type when the
-    /// node has no antecedent.
+    /// The type at `flow`'s single antecedent, or the initial type when the
+    /// node has no antecedent. Accumulator nodes (labeled-statement
+    /// break/continue targets) store their edges in the plural
+    /// `antecedents` vec with `antecedent` unset — a single accumulated
+    /// edge must be followed there too, or the walk dead-ends into the
+    /// query seed (`l: do { …; continue l; } while (c)` leaked
+    /// `T | undefined` into every post-label read, TS2454 false positives).
     fn antecedent_type_at(
         &mut self,
         declared: &Arc<Type>,
@@ -623,7 +628,11 @@ impl Checker {
         depth: u32,
         query: &mut FlowQuery,
     ) -> Arc<Type> {
-        match &flow.antecedent {
+        let antecedent = flow
+            .antecedent
+            .as_ref()
+            .or_else(|| flow.antecedents.first());
+        match antecedent {
             Some(antecedent) => {
                 self.type_at_flow_node(declared, initial, antecedent, target, depth + 1, query)
             }
@@ -816,10 +825,113 @@ impl Checker {
             }
         }
 
+        // Truthiness of a property access ON the target
+        // (`opts.objectRef || opts.getObjectRef()`): a falsy discriminant
+        // filters the parent union — a member is kept only if its property
+        // type is possibly falsy (`{ objectRef: A | B }` with always-truthy
+        // A|B drops out of the falsy branch, leaving the
+        // `{ objectRef?: undefined }` member).
+        if let Some(name) = self.discriminant_property_name_on_target(expr, target) {
+            return self.narrow_by_property_truthiness(type_, &name, kind);
+        }
+
         // `typeof x === "string"` is a BinaryExpression, handled above.
         // `x instanceof Foo` is also a BinaryExpression.
 
         Arc::clone(type_)
+    }
+
+    /// The property name when `expr` is a property/element access whose
+    /// RECEIVER is the flow target itself (`opts.objectRef` narrowing
+    /// `opts`), else `None`.
+    fn discriminant_property_name_on_target(
+        &self,
+        expr: &Arc<Node>,
+        target: &FlowRef,
+    ) -> Option<String> {
+        match &expr.data {
+            NodeData::PropertyAccessExpression(pa) => {
+                if self.expr_matches_target(&pa.expression, target) {
+                    Some(pa.name.text().to_string())
+                } else {
+                    None
+                }
+            }
+            NodeData::ElementAccessExpression(ea) => {
+                if self.expr_matches_target(&ea.expression, target) {
+                    match &ea.argument_expression.data {
+                        NodeData::StringLiteral(s) => Some(s.text.clone()),
+                        NodeData::NumericLiteral(n) => Some(n.text.clone()),
+                        _ => None,
+                    }
+                } else {
+                    None
+                }
+            }
+            _ => None,
+        }
+    }
+
+    /// Filter a union by the truthiness of member property `name`
+    /// (Go/TS discriminant narrowing by truthiness of a property
+    /// reference): the false branch removes members whose property type is
+    /// definitely truthy; the true branch removes members whose property
+    /// type is definitely falsy. Members without the property (and
+    /// undecidable property types) are kept.
+    fn narrow_by_property_truthiness(
+        &mut self,
+        type_: &Arc<Type>,
+        name: &str,
+        kind: NarrowKind,
+    ) -> Arc<Type> {
+        let constituents = match type_.flags.contains(TypeFlags::Union) {
+            true => match &type_.data {
+                TypeData::Union(u) => u.union_or_intersection.types.clone(),
+                _ => return Arc::clone(type_),
+            },
+            false => return Arc::clone(type_),
+        };
+        let mut kept: Vec<Arc<Type>> = Vec::with_capacity(constituents.len());
+        for c in &constituents {
+            let prop_type = match self.get_constituent_property(c, name) {
+                Some(sym) => self.get_type_of_symbol(&sym),
+                None => {
+                    kept.push(Arc::clone(c));
+                    continue;
+                }
+            };
+            let undecidable = prop_type.flags.intersects(
+                TypeFlags::Any
+                    | TypeFlags::Unknown
+                    | TypeFlags::TypeParameter
+                    | TypeFlags::Conditional
+                    | TypeFlags::IndexedAccess,
+            );
+            if undecidable {
+                kept.push(Arc::clone(c));
+                continue;
+            }
+            let parts: Vec<Arc<Type>> = if prop_type.flags.contains(TypeFlags::Union) {
+                prop_type.types().unwrap_or(&[]).to_vec()
+            } else {
+                vec![Arc::clone(&prop_type)]
+            };
+            let any_falsy = parts.iter().any(|p| self.constituent_is_definitely_falsy(p));
+            let all_falsy = parts.iter().all(|p| self.constituent_is_definitely_falsy(p));
+            match kind {
+                // Property falsy: keep only members whose property could be
+                // falsy (has a falsy constituent).
+                NarrowKind::FalseBranch if any_falsy => kept.push(Arc::clone(c)),
+                // Property truthy: keep only members whose property could be
+                // truthy (not every constituent falsy).
+                NarrowKind::TrueBranch if !all_falsy => kept.push(Arc::clone(c)),
+                _ => {}
+            }
+        }
+        if kept.is_empty() || kept.len() == constituents.len() {
+            return Arc::clone(type_);
+        }
+        self.flow_union_of(&kept)
     }
 
     /// Narrow based on a binary expression (comparison, typeof, instanceof, in).

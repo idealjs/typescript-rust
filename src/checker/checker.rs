@@ -12806,7 +12806,7 @@ impl Checker {
 
     /// Go `getConstituentProperty`: first apparent-type constituent that has
     /// the property.
-    fn get_constituent_property(
+    pub(crate) fn get_constituent_property(
         &mut self,
         object_type: &Arc<Type>,
         name: &str,

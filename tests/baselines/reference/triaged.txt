@@ -59,9 +59,6 @@ compiler/acceptSymbolAsWeakType.errors.txt
 compiler/declFileTypeAnnotationUnionType(target=es2015).errors.txt
 compiler/controlFlowWithIncompleteTypes.errors.txt
 
-## 2026-09-02 Page-5: 闭包-循环捕获的 TS2454 流假阳（blockScopedBindingsReassignedInLoop3：`for (let x = 1, ...) { let a = () => x++ + y++; ... }` 初始化过的循环头 let 在嵌套 break/continue 标签流中被判「未定赋值」——2454 流引擎对闭包内捕获写（x++）与标签循环汇合的交互处理；官方零错。与 mixed-2454/missing-2454 族同属流分析 U7 面） ##
-compiler/blockScopedBindingsReassignedInLoop3.errors.txt
-
 ## 2026-09-02 Page-0: 实例化表达式类型的显示保真（语义已修：typeof Cls<T>/typeof value<T> 结构实例化 + 交集签名比较使 TS2352/TS2322 于正确位置触发；残余=显示——别名保留显示 Wat<number>（我们现在打印展开的交集结构）、实例带参显示 ErrImpl<number>/Class<number>（我们打印裸符号名或匿名结构 {x:number}）、构造签名冒号形式 new ():（我们 new () =>）、TS2352 的 3-4 行 comparability elaboration 链未收集——需要 deferred-instantiation 引用形实例（target+type_arguments+mapper）+ nodebuilder 别名链显示子系统） ##
 compiler/aliasInstantiationExpressionGenericIntersectionNoCrash1.errors.txt
 compiler/aliasInstantiationExpressionGenericIntersectionNoCrash2.errors.txt

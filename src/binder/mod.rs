@@ -2592,7 +2592,7 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
                 }
                 found
             };
-            if let Some(target) = continue_target {
+            if let Some(ref target) = continue_target {
                 if let Some(current_flow) = &self.current_flow {
                     self.add_antecedent_to_flow(&target, current_flow);
                 }

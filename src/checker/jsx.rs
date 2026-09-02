@@ -517,13 +517,32 @@ impl Checker {
                 crate::core::compiler_options::JsxEmit::React
             )
             && let Some(tag) = jsx_tag_name(opening)
-            && !self.jsx_factory_namespace_in_scope("React")
         {
-            self.grammar_error_on_node_with_args(
-                &tag,
-                &THIS_JSX_TAG_REQUIRES_0_TO_BE_IN_SCOPE_BUT_IT_COULD_NOT_BE_FOUND,
-                &["React".to_string()],
-            );
+            // The required entity is the JSX factory's first identifier —
+            // `React` by default (or `--reactNamespace`), the first
+            // component of `--jsxFactory a.b.c` when set (Go
+            // resolveJsxEntityName). With an explicit factory the React
+            // namespace is never referenced, so a declared `__make`
+            // satisfies the gate (TS2874 must not fire).
+            let default_name = self
+                .compiler_options
+                .react_namespace
+                .as_str();
+            let default_name = if default_name.is_empty() { "React" } else { default_name };
+            let factory_name = self
+                .compiler_options
+                .jsx_factory
+                .split('.')
+                .next()
+                .filter(|s| !s.is_empty())
+                .unwrap_or(default_name);
+            if !self.jsx_factory_namespace_in_scope(factory_name) {
+                self.grammar_error_on_node_with_args(
+                    &tag,
+                    &THIS_JSX_TAG_REQUIRES_0_TO_BE_IN_SCOPE_BUT_IT_COULD_NOT_BE_FOUND,
+                    &[factory_name.to_string()],
+                );
+            }
         }
         if !is_opening_like {
             return;
