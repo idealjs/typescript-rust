@@ -66,7 +66,9 @@ diff "tests/baselines/reference/compiler/<stem>.errors.txt" \
 ```
 
 # 当前批次
-## Page-4 轮续（页 15-，compiler#1501 起）：页15 一次过（59P/11S/30ad/**0F**）——declarationEmit 窗口，30 diff 均台账既有 declFile 族；页16 一次过（62P/12S/26ad/**0F**）
+## Page-4 轮续（页 15-，compiler#1501 起）：页15 一次过（59P/11S/30ad/**0F**）；页16 一次过（62P/12S/26ad/**0F**）；页17 起点 2 例超时挂死→修复→终态 60P/10S/30ad/**0F**，四套门全绿（1353/1010/2/15）
+
+- **推断同目标捷径（Go inferFromTypes/inferFromObjectTypes 三条短路移植）**：declarationEmitUsingAlternativeContainingModules1/2（tanstack/vue-query 真实形状）55s 挂死（30s 超时 SKIP 伪装通过）——探针实锤 76M 次 infer_from_types 仅 725 个不同指针对，热点全为**指针相等自反对**（`[number,unknown]→自身` x3.3M 每次全量走查 ReadonlyArray 30+ 方法 = DAG 路径爆炸）。修复：①指针相等且带 type arguments 的对象类型→参数自 zip 即返（本端口结构化元组/数组无 Reference/target 旗标，Go 的 same-Target 规则按指针相等落地）；②Reference 旗标+同 target/双数组→仅 zip 参数即返；③指针相等 Union/Intersection→成分各自自推断。55s→2.8s，输出逐字节不变；两例转入正常 accepted-diff（既分诊族）。
 
 ## Page-3 轮续（页 12-14，compiler#1201-1500）：页12 一次过（63P/0S/37ad/0F）；页13 起点 3 FAIL→终态 59P/10S/31ad/**0F**；页14 起点 1 FAIL→终态 81P/6S/13ad/**0F**；四套门全绿
 
