@@ -66,7 +66,7 @@ diff "tests/baselines/reference/compiler/<stem>.errors.txt" \
 ```
 
 # 当前批次
-## Page-4 轮续（页 15-，compiler#1501 起）：页15/16/20 一次过；页17 修推断爆炸；页18 修多级约束链；页19 三连修＋清台账 1 组；页21 起点 1 FAIL（enumLiteralUnionNotWidened）→修复→终态 56P/9S/35ad/**0F**，四套门全绿
+## Page-4 轮续（页 15-，compiler#1501 起）：页15/16/20/22 一次过；页17 修推断爆炸；页18 修多级约束链；页19 三连修＋清台账 1 组；页21 修 private 同声明；各页终态均 **0 FAIL**，四套门全绿
 
 - **页21**：**private 同声明判定按成员声明节点**（Go propertyRelatedTo/getDeclarationOfSymbol）——类实例类型每上下文重建、属性符号是新的但成员节点同一个；原检查只读 value_declaration（我们合成符号从不挂该字段）→恒 false→`new L()` 对 `L<T>` 误报 separate declarations（泛型/非泛型皆中）。补 declarations 首声明回退+符号同一性捷径。另：emitHelpersWithLocalCollisions（module=* 12 配置矩阵）8 并发下挤爆 30s 预算计超时 SKIP——单跑 20s PASS 已核实（有限慢非挂死，harness 预算忠实 tsgo 不动）。
 
