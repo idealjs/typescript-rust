@@ -1351,7 +1351,7 @@ fn render_errors_baseline(diags: &[Diagnostic]) -> String {
     if diags.is_empty() {
         return NO_CONTENT.to_string();
     }
-    let mut keyed: Vec<(String, usize, usize, &Diagnostic)> = diags
+    let mut keyed: Vec<(String, usize, usize, i32, &Diagnostic)> = diags
         .iter()
         .map(|d| {
             let (file_name, line, col) = if let Some(f) = &d.file {
@@ -1360,24 +1360,25 @@ fn render_errors_baseline(diags: &[Diagnostic]) -> String {
             } else {
                 (String::new(), 0, 0)
             };
-            (file_name, line, col, d)
+            (file_name, line, col, d.code, d)
         })
         .collect();
     keyed.sort_by(|a, b| {
         a.0.cmp(&b.0)
             .then(a.1.cmp(&b.1))
             .then(a.2.cmp(&b.2))
-            // TS `sortAndDuplicateDiagnostics` tiebreaks by span length
-            // (a zero-length scanner report like TS1490@(0,0) precedes a
-            // same-position parser diagnostic; TransportStream's
-            // [1490, 1434] order). NO code tiebreak: official keeps
-            // EMISSION order for same-position pairs (7026 before 2875,
-            // commentsOnJSXExpressionsArePreserved).
-            .then(a.3.loc.end.cmp(&b.3.loc.end))
+            // TS `sortAndDuplicateDiagnostics` tiebreaks: span length,
+            // then code (a zero-length scanner report like TS1490@(0,0)
+            // precedes a same-position parser diagnostic; TransportStream's
+            // [1490, 1434] order; same-position same-span pairs order by
+            // ascending code — classWithDuplicateIdentifier's
+            // [2300, 2564, 2717]). The pre-sort is a stable sort.
+            .then(a.4.loc.end.cmp(&b.4.loc.end))
+            .then(a.3.cmp(&b.3))
     });
 
     let mut out = String::new();
-    for (_, _, _, d) in keyed {
+    for (_, _, _, _, d) in keyed {
         let mut line = format_diagnostic_compact(d, None);
         // Strip the `/proj/` test-path prefix from file names in the output.
         line = line.replace("/proj/", "");

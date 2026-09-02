@@ -266,10 +266,23 @@ impl Checker {
                             // position — the runtime-module failure is
                             // buffered and flushed at the opening-like
                             // element check's tail.
-                            self.pending_jsx_2875 = Some((
-                                error_node.loc,
-                                module_ref,
-                            ));
+                            // Span note: official's TS2875 sorts AFTER the
+                            // element's own 7026 at the same start — give it
+                            // the ENCLOSING JSX element's (longer) span when
+                            // available.
+                            let span = error_node
+                                .parent
+                                .as_ref()
+                                .filter(|p| {
+                                    matches!(
+                                        p.kind,
+                                        crate::ast::SyntaxKind::JsxElement
+                                            | crate::ast::SyntaxKind::JsxSelfClosingElement
+                                    )
+                                })
+                                .map(|p| p.loc)
+                                .unwrap_or(error_node.loc);
+                            self.pending_jsx_2875 = Some((span, module_ref));
                             None
                         }
                     }
@@ -444,7 +457,21 @@ impl Checker {
         use crate::ast::SymbolFlags;
         let symbol_map = self.program.symbol_map();
         let value = |sym: &std::sync::Arc<crate::ast::Symbol>| {
-            sym.flags.intersects(SymbolFlags::VALUE)
+            // An import (`import React from "react"`) binds an ALIAS — no
+            // VALUE flag of its own; resolve through the alias chain (Go
+            // getSymbolFlags).
+            if sym.flags.intersects(SymbolFlags::Alias) {
+                match self.follow_alias(sym) {
+                    // An unresolved/cyclic alias returns itself — the name
+                    // IS declared (TS2307 already reports the failed
+                    // import); don't add TS2874 on top.
+                    Some(t) if std::sync::Arc::ptr_eq(&t, sym) => true,
+                    Some(t) => t.flags.intersects(SymbolFlags::VALUE),
+                    None => true,
+                }
+            } else {
+                sym.flags.intersects(SymbolFlags::VALUE)
+            }
         };
         for &container_id in self.scope_stack.iter().rev() {
             if let Some(locals) = symbol_map.locals.get(&container_id)

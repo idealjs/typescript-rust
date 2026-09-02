@@ -9682,16 +9682,19 @@ impl Checker {
                     for member in data.members.iter() {
                         self.check_class_member(member);
                     }
-                    // TS2564: Check property initialization under
-                    // strictPropertyInitialization.
-                    self.check_property_initialization(node);
-                    self.check_class_heritage_members(node);
-                    // TS2411: properties (incl. computed-name members) must
-                    // be assignable to the class's index signatures (Go
-                    // checkIndexConstraints on the instance type).
+                    // TS2411 FIRST (official emission order — a property
+                    // with both errors reports the index-compat line before
+                    // the TS2564 line, classIndexer2): properties (incl.
+                    // computed-name members) must be assignable to the
+                    // class's index signatures (Go checkIndexConstraints on
+                    // the instance type).
                     if let Some(this_type) = self.this_type_stack.last().cloned() {
                         self.check_index_constraints(&this_type, node);
                     }
+                    self.check_class_heritage_members(node);
+                    // TS2564: Check property initialization under
+                    // strictPropertyInitialization.
+                    self.check_property_initialization(node);
                 }
                 self.pop_scope();
                 self.this_type_stack.pop();

@@ -66,6 +66,13 @@ diff "tests/baselines/reference/compiler/<stem>.errors.txt" \
 ```
 
 # 当前批次
+## Page-3 轮记录（2026-09-02，参考已同步 TS7）：页 0-11（compiler#1-1200）复跑完成，终态均 **0 FAIL**，各页 passed/adiff 与 Page-2 轮一致；新增根治 3 例同位诊断排序（classIndexer2/3、classWithDuplicateIdentifier 由 ad→PASS 稳定固化）
+
+- **同位诊断排序的最终形态**：官方＝start → span-end → code 升序（classWithDuplicateIdentifier 的 [2300,2564,2717] 与 classIndexer2 的 [2411,2564] 均码升序佐证；此前「稳定发射序」假设被这两例否决）。harness render_errors_baseline 恢复 span-end+code 决胜；配合两处发射顺序对齐：类检查先 2411（索引约束）后 2564（属性初始化）；TS2875 缓冲后挂**整元素 span**（起位相同、end 更大 → 排在 7026 后，无需破坏决胜链）。TS2874 的域走查补别名解析（`import React from "react"` 绑定 Alias 无 VALUE 位——follow_alias 至目标；未解析/环回别名按已声明处理，不与 TS2307 双报）。
+- 该轮证实参考同步未引入套件侧变化（子模块未动），页 2 的 1 FAIL 仍为 D1 在案携带。
+
+## Page-2 收官记录（2026-09-02）：compiler#1-1200（页 0-11）全部完成，终态均 0 FAIL——详见下方各页记录；该轮累计 11 项 FAIL 修复＋三缓存 ABA 钉住；在案携带：D1 node-memo 污染（arrayToLocaleStringES2020）、2454 闭包-循环假阳（blockScopedBindingsReassignedInLoop3）、NoCrash1/2 显示保真
+
 ## 2026-09-02 参考仓同步：typescript-go 参考分支已重置到微软 TypeScript main（TS7，11b6dbfab89）
 
 - fork 源（旧独立 microsoft/typescript-go）与微软 main 无共同祖先，全量历史包 >2GB 推不上 GitHub——origin/main 改存**快照提交**（98571845610，树＝微软 main，提交信息记录同步点），完整上游历史在本地 `m/main` 远端跟踪引用；后续同步流程见记忆 go-port-reference-location。
