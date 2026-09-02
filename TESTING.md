@@ -66,6 +66,12 @@ diff "tests/baselines/reference/compiler/<stem>.errors.txt" \
 ```
 
 # 当前批次
+## Page-3 轮续（页 12-14，compiler#1201-1500）：页12 一次过（63P/0S/37ad/0F）；页13 起点 3 FAIL→终态 59P/10S/31ad/**0F**；页14 起点 1 FAIL→终态 81P/6S/13ad/**0F**；四套门全绿
+
+- **判别式窄化的删除/保留语义**（controlFlowNullTypeAndLiteral + controlFlowArrays 转绿）：`obj.prop !== V` 删除分支原用「重叠」判定（`{val:number|null}` 与 null 重叠→整形成分误删→obj 塌缩 never，`.val` 报 TS2339）——改为「属性类型**含于**被删值」（`{kind:"c"}` vs `!=="c"` 才删）；`===` 保留分支原 overlap 过严（`{length:number}` vs `===0` 误删）——改为双向可赋值「可能相等」判定。单体臂与联合臂同修。
+- **attach_explicit_type_arguments 记忆化**（declFile 用例部分收敛）：键 [base ptr, arg ptrs]，值钉住防 ABA；根治重复文本 `g<string>` 的实例分裂。
+- **残余登记 2 组（带根因日期头）**：①declFileTypeAnnotationUnionType——注解路径与 new 表达式路径的类实例 BASE 来自两次独立构建（symbol type_alias_links vs 类声明节点缓存），需类实例符号级单一化（D 系列 interning 同根）；②controlFlowWithIncompleteTypes——官方对 incomplete-union（循环自引用窄化进行中）的成员访问静默 any（tsgo-ref 零错实证），incomplete-types 语义未移植。
+
 ## Page-3 轮记录（2026-09-02，参考已同步 TS7）：页 0-11（compiler#1-1200）复跑完成，终态均 **0 FAIL**，各页 passed/adiff 与 Page-2 轮一致；新增根治 3 例同位诊断排序（classIndexer2/3、classWithDuplicateIdentifier 由 ad→PASS 稳定固化）
 
 - **同位诊断排序的最终形态**：官方＝start → span-end → code 升序（classWithDuplicateIdentifier 的 [2300,2564,2717] 与 classIndexer2 的 [2411,2564] 均码升序佐证；此前「稳定发射序」假设被这两例否决）。harness render_errors_baseline 恢复 span-end+code 决胜；配合两处发射顺序对齐：类检查先 2411（索引约束）后 2564（属性初始化）；TS2875 缓冲后挂**整元素 span**（起位相同、end 更大 → 排在 7026 后，无需破坏决胜链）。TS2874 的域走查补别名解析（`import React from "react"` 绑定 Alias 无 VALUE 位——follow_alias 至目标；未解析/环回别名按已声明处理，不与 TS2307 双报）。

@@ -719,6 +719,14 @@ pub struct Checker {
     /// `array_type_cache`, and re-resolves the whole member tree —
     /// exponential on lib scale. Mirrors Go's instantiation cache.
     pub interface_instantiation_cache: std::collections::HashMap<Vec<usize>, (Vec<Arc<Type>>, Arc<Type>)>,
+    /// Memoized `attach_explicit_type_arguments` results, keyed by
+    /// [base type ptr, arg ptrs…]. Without this, two textual mentions of
+    /// `g<string>` build DISTINCT instances and union-constituent matching
+    /// between them fails with bogus "separate declarations" errors
+    /// (declFileTypeAnnotationUnionType). Base + args are PINNED in the
+    /// value (pointer-key ABA protection).
+    pub attached_type_args_cache:
+        std::collections::HashMap<Vec<usize>, (Arc<Type>, Vec<Arc<Type>>, Arc<Type>)>,
     /// Memoized `typeof Cls<Args...>` constructor-object instantiations
     /// (Go: `instantiationExpressionTypes`), keyed by class-declaration node
     /// id + argument type pointers.
@@ -1156,6 +1164,7 @@ impl Checker {
             array_type_cache: std::collections::HashMap::new(),
             interface_instantiation_cache: std::collections::HashMap::new(),
             typequery_instantiation_cache: std::collections::HashMap::new(),
+            attached_type_args_cache: std::collections::HashMap::new(),
             array_type_parameter_symbols: None,
             array_member_type_cache: std::collections::HashMap::new(),
             instantiated_member_type_cache: std::collections::HashMap::new(),
@@ -5563,7 +5572,7 @@ impl Checker {
                             .map(|t| self.get_type_from_type_node(t))
                             .collect();
                         if !tps.is_empty() && tps.len() == arg_types.len() {
-                            return attach_explicit_type_arguments(&rt, arg_types);
+                            return self.attach_explicit_type_arguments_cached(&rt, arg_types);
                         }
                     }
                     return rt;
@@ -24155,6 +24164,27 @@ impl std::fmt::Debug for Checker {
 /// Rebuild an object type with explicit type arguments attached (used by
 /// `new C<T>(...)` to carry the instantiation onto the class instance type;
 /// member reads substitute through them via `substituted_member_type_of`).
+impl Checker {
+    /// Memoizing wrapper around [`attach_explicit_type_arguments`] — see
+    /// `attached_type_args_cache`.
+    pub(crate) fn attach_explicit_type_arguments_cached(
+        &mut self,
+        t: &Arc<Type>,
+        args: Vec<Arc<Type>>,
+    ) -> Arc<Type> {
+        let mut key = Vec::with_capacity(args.len() + 1);
+        key.push(Arc::as_ptr(t) as *const Type as usize);
+        key.extend(args.iter().map(|a| Arc::as_ptr(a) as *const Type as usize));
+        if let Some(cached) = self.attached_type_args_cache.get(&key) {
+            return Arc::clone(&cached.2);
+        }
+        let rebuilt = attach_explicit_type_arguments(t, args.clone());
+        self.attached_type_args_cache
+            .insert(key, (Arc::clone(t), args, Arc::clone(&rebuilt)));
+        rebuilt
+    }
+}
+
 pub(crate) fn attach_explicit_type_arguments(t: &Arc<Type>, args: Vec<Arc<Type>>) -> Arc<Type> {
     if let TypeData::Object(o) = &t.data {
         let mut rebuilt = Type::new(

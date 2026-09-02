@@ -1371,15 +1371,27 @@ impl Checker {
             if prop_type.flags.contains(TypeFlags::Any) {
                 return Some(Arc::clone(type_));
             };
-            let matches = self.types_overlap(&prop_type, &value_type);
+            // Keep-matching test: the property COULD EQUAL the value —
+            // either direction of assignability (`x.length === 0` keeps
+            // `{length: number}`: 0 ⊆ number; `x.kind === "d"` drops
+            // `{kind:"c"}`: neither direction relates them).
+            let could_equal = self.is_type_assignable_to(&prop_type, &value_type)
+                || self.is_type_assignable_to(&value_type, &prop_type);
             if keep_matching {
-                return Some(if matches {
+                return Some(if could_equal {
                     Arc::clone(type_)
                 } else {
                     self.never_type()
                 });
             }
-            if value_type.flags.intersects(TYPE_FLAGS_UNIT) && matches {
+            // Removal branch: a constituent is dropped only when its
+            // discriminant property is CONTAINED IN the removed value
+            // (`{kind:"c"}` vs `!== "c"`); a merely-OVERLAPPING property
+            // (`{val: number | null}` vs `!== null`) keeps the constituent
+            // (controlFlowNullTypeAndLiteral).
+            if value_type.flags.intersects(TYPE_FLAGS_UNIT)
+                && self.is_type_assignable_to(&prop_type, &value_type)
+            {
                 return Some(self.never_type());
             }
             return Some(Arc::clone(type_));
@@ -1389,10 +1401,24 @@ impl Checker {
             .into_iter()
             .filter(|t| {
                 let prop_type = self.get_property_type_of_type(t, &prop_name);
-                let matches = prop_type
-                    .map(|pt| self.types_overlap(&pt, &value_type))
-                    .unwrap_or(false);
-                if keep_matching { matches } else { !matches }
+                if keep_matching {
+                    // Keep constituents whose property COULD EQUAL the
+                    // value (either assignability direction — see the
+                    // non-union arm).
+                    prop_type
+                        .map(|pt| {
+                            self.is_type_assignable_to(&pt, &value_type)
+                                || self.is_type_assignable_to(&value_type, &pt)
+                        })
+                        .unwrap_or(false)
+                } else {
+                    // Drop only constituents whose property is CONTAINED IN
+                    // the removed value — overlap alone must survive (see
+                    // the non-union arm).
+                    prop_type
+                        .map(|pt| !self.is_type_assignable_to(&pt, &value_type))
+                        .unwrap_or(true)
+                }
             })
             .collect();
         Some(self.rebuild_union_or_never(type_, filtered))

@@ -750,10 +750,7 @@ impl Checker {
             if let Some(arg_types) = arg_types {
                 let tps = self.declared_type_parameter_types(&symbol);
                 if !tps.is_empty() && tps.len() == arg_types.len() {
-                    return crate::checker::checker::attach_explicit_type_arguments(
-                        &instance_type,
-                        arg_types,
-                    );
+                    return self.attach_explicit_type_arguments_cached(&instance_type, arg_types);
                 }
             }
             return instance_type;

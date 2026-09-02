@@ -55,6 +55,10 @@ compiler/acceptSymbolAsWeakType.errors.txt
 
 ## for `import x = a.b.c`) not ported ##
 
+## 2026-09-02 Page-13/14: ①类实例类型未 Intern 化（declFileTypeAnnotationUnionType：`c | m.c` 注解实例与 `new c()` 构造签名返回实例是两次独立构建（annotation 走 symbol type_alias_links、new 表达式走类声明节点缓存），指针异→联合成分匹配失败→误报 TS2322 separate declarations；attach_explicit_type_arguments 已加记忆化缓存但两条构建路径的 BASE 本身不同——需要类实例符号级单一化（与 D 系列 interning 同根））②incomplete-union 成员错误抑制（controlFlowWithIncompleteTypes：while 循环内 typeof 窄化的 else 分支 `x.slice()` on `string|boolean`，官方对「不完整联合」（循环自引用窄化进行中）的成员访问静默 any——tsgo-ref 零错实证；未移植 incomplete-types 语义） ##
+compiler/declFileTypeAnnotationUnionType(target=es2015).errors.txt
+compiler/controlFlowWithIncompleteTypes.errors.txt
+
 ## 2026-09-02 Page-5: 闭包-循环捕获的 TS2454 流假阳（blockScopedBindingsReassignedInLoop3：`for (let x = 1, ...) { let a = () => x++ + y++; ... }` 初始化过的循环头 let 在嵌套 break/continue 标签流中被判「未定赋值」——2454 流引擎对闭包内捕获写（x++）与标签循环汇合的交互处理；官方零错。与 mixed-2454/missing-2454 族同属流分析 U7 面） ##
 compiler/blockScopedBindingsReassignedInLoop3.errors.txt
 
