@@ -2056,10 +2056,17 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
         // Switch expression
         self.bind(&expression);
 
-        // Save break target
+        // Save break target. Breaks accumulate into a mutable accumulator
+        // node folded into the post-switch label before it finishes — a
+        // label finished up front snapshots ZERO antecedents, and break
+        // edges added afterwards land in an orphaned node, silently
+        // dropping every `break` exit from the post-switch merge (the
+        // default-clause fall-through alone survives, so a narrowing
+        // switch leaks its default-branch types past the statement —
+        // narrowByClauseExpressionInSwitchTrue2).
         let prev_break = self.current_break_target.take();
-        self.current_break_target =
-            Some(post_switch_label.finish(self.unreachable_flow.as_ref().unwrap()));
+        let break_acc = Self::new_flow_accumulator();
+        self.current_break_target = Some(Arc::clone(&break_acc));
 
         // Get clauses from case block
         let clauses = match &case_block.data {
@@ -2145,6 +2152,10 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
         // Add final flow to post-switch label
         if let Some(current) = &self.current_flow {
             post_switch_label.add_antecedent(Arc::clone(current));
+        }
+        // Fold the accumulated `break` exits in.
+        for ant in &break_acc.antecedents {
+            post_switch_label.add_antecedent(Arc::clone(ant));
         }
         // A default-less switch has an implicit BYPASS branch (no case
         // matched) that flows to the post-switch label (Go
