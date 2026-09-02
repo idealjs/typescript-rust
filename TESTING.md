@@ -66,6 +66,13 @@ diff "tests/baselines/reference/compiler/<stem>.errors.txt" \
 ```
 
 # 当前批次
+## 2026-09-02 参考仓同步：typescript-go 参考分支已重置到微软 TypeScript main（TS7，11b6dbfab89）
+
+- fork 源（旧独立 microsoft/typescript-go）与微软 main 无共同祖先，全量历史包 >2GB 推不上 GitHub——origin/main 改存**快照提交**（98571845610，树＝微软 main，提交信息记录同步点），完整上游历史在本地 `m/main` 远端跟踪引用；后续同步流程见记忆 go-port-reference-location。
+- **参考代码路径变化**：Go 代码 `internal/…` → `tsc/internal/…`（relater.go/flow.go/inference.go 都在 tsc/internal/checker/ 下）；testrunner 语义出处 `tsc/internal/testrunner/`。TESTING.md 早期记录中的 `internal/checker/checker.go ~L…` 行号属旧快照，对照新树时以符号名检索为准。
+- tsgo-ref 探针已按新布局重建（`cd tsc && go build -o /tmp/tsgo-ref ./cmd/tsc`，Version 7.1.0-dev）。
+- 测试套件子模块 `_submodules/TypeScript` 追踪微软 **tsgo-port** 分支，已核对其 pin（5848bc5157）＝分支最新，无需 bump（tests/cases 布局在该分支保留；微软 main 的测试已迁 packages/typescript/test/，勿直接跟 main）；子模块补配了 `m` 远端便于后续更新。
+
 ## Page-2（2026-09-02 起）——第二轮全量分页：从分页 0（compiler#1-100）重新开始，页内 FAIL+accepted-diff 全部向 Go 行为修复（不允许新增无根因分诊；既有条目能修则修，真子系统缺口以带根因日期组登记并在后续页推进），不回归只向前
 
 工具：`bash /tmp/page.sh compiler|conformance <start> <end>`（页日志存 /tmp/pages/）；
