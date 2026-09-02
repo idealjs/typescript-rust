@@ -1,3 +1,5 @@
 file.tsx(22,10): error TS2322: Type '{ x: string; y: number; }' is not assignable to type 'PoisonedProp'.
+  Types of property 'y' are incompatible.
+    Type 'number' is not assignable to type '2'.
 file.tsx(28,5): error TS2564: Property 'greeting' has no initializer and is not definitely assigned in the constructor.
 file.tsx(35,10): error TS2559: Type '{ prop1: boolean; }' has no properties in common with type 'IntrinsicAttributes & IntrinsicClassAttributes<EmptyProp> & { children?: ReactNode | undefined; }'.

@@ -1,4 +1,5 @@
 destructuringParameterDeclaration1ES5.ts(12,4): error TS2345: Argument of type '[number, number, string[][], number]' is not assignable to parameter of type '[number, number, string[][]]'.
+  Source has 4 element(s) but target allows only 3.
 destructuringParameterDeclaration1ES5.ts(23,5): error TS7010: 'b5', which lacks return-type annotation, implicitly has an 'any' return type.
 destructuringParameterDeclaration1ES5.ts(23,8): error TS7006: Parameter 'z' implicitly has an 'any' type.
 destructuringParameterDeclaration1ES5.ts(23,11): error TS7006: Parameter 'y' implicitly has an 'any' type.
@@ -27,6 +28,7 @@ destructuringParameterDeclaration1ES5.ts(42,22): error TS7031: Binding element '
 destructuringParameterDeclaration1ES5.ts(43,14): error TS7031: Binding element 'a' implicitly has an 'any' type.
 destructuringParameterDeclaration1ES5.ts(43,17): error TS7031: Binding element 'b' implicitly has an 'any' type.
 destructuringParameterDeclaration1ES5.ts(57,4): error TS2345: Argument of type '[number, number, [[string]], boolean, boolean]' is not assignable to parameter of type '[any, any, [[any]]]'.
+  Source has 5 element(s) but target allows only 3.
 destructuringParameterDeclaration1ES5.ts(62,10): error TS2393: Duplicate function implementation.
 destructuringParameterDeclaration1ES5.ts(62,13): error TS7006: Parameter 'x' implicitly has an 'any' type.
 destructuringParameterDeclaration1ES5.ts(63,10): error TS2393: Duplicate function implementation.

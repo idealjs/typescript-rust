@@ -165,6 +165,28 @@ impl Parser {
         // drain catches stragglers from the last EOF scan.
         parser.drain_scanner_errors();
 
+        // A binary (non-text) marker terminated the scan: the parser saw the
+        // marker token where a statement was expected (Go's
+        // `NonTextFileMarkerTrivia` → TS1128 "Declaration or statement
+        // expected" at the marker position, TransportStream).
+        // The 1128 fires only when the parser had already consumed real
+        // statements before the marker (Go's NonTextFileMarkerTrivia in
+        // token position); a marker in leading trivia emits only TS1490.
+        let has_statements = !statements.is_empty();
+        if let Some(p) = parser.scanner.binary_marker_pos().filter(|_| has_statements) {
+            let len = parser
+                .scanner
+                .text()
+                .get(p..)
+                .and_then(|rest| rest.chars().next())
+                .map_or(1, |c| c.len_utf8());
+            parser.diagnostics.push(ParserDiagnostic {
+                message: diagnostics::DECLARATION_OR_STATEMENT_EXPECTED,
+                message_args: Vec::new(),
+                range: TextRange::new(p, p + len),
+            });
+        }
+
         // Set NodeFlags for JS/JSON files, mirroring Go's initializeState.
         let mut context_flags = crate::ast::node_flags::NodeFlags::empty();
         if matches!(script_kind, ScriptKind::Js | ScriptKind::Jsx) {
@@ -198,6 +220,11 @@ impl Parser {
             imports: Vec::new(),
             module_augmentations: Vec::new(),
             ambient_module_names: Vec::new(),
+            parse_error_spans: parser
+                .diagnostics
+                .iter()
+                .map(|d| d.range)
+                .collect(),
             external_module_indicator: None,
             common_js_module_indicator: None,
             uses_uri_style_node_core_modules: crate::core::tristate::Tristate::Unknown,
@@ -797,6 +824,7 @@ impl Parser {
         let mut nodes = Vec::new();
         loop {
             if self.is_list_element(context, false) {
+                let element_start = self.token_pos();
                 let element = parse_element(self);
                 nodes.push(element);
                 if self.parse_optional(SyntaxKind::CommaToken) {
@@ -807,6 +835,15 @@ impl Parser {
                 }
                 // Expected comma but didn't find one
                 self.expect(SyntaxKind::CommaToken);
+                // Zero-progress guard (Go parseDelimitedList): an element
+                // that consumed no tokens (a fallback identifier on an
+                // unparseable token like `@` after error recovery derailed
+                // the enclosing construct) plus the failed comma
+                // expectation would loop forever — consume one token to
+                // guarantee progress.
+                if element_start == self.token_pos() {
+                    self.next_token();
+                }
                 continue;
             }
             if self.is_list_terminator(context) {
@@ -1206,10 +1243,12 @@ impl Parser {
     }
 
     fn is_binding_identifier_token(token: SyntaxKind) -> bool {
-        matches!(
-            token,
-            SyntaxKind::Identifier | SyntaxKind::YieldKeyword | SyntaxKind::AwaitKeyword
-        )
+        // Go `isBindingIdentifier`: Identifier, or any contextual keyword
+        // (token > LastReservedWord) — so `let module`, `let namespace`,
+        // `let static` … parse as lexical declarations with keyword-identifier
+        // binding names. `let await`/`let yield` are allowed here and
+        // disallowed later in the binder, exactly as in Go.
+        token == SyntaxKind::Identifier || (token as i16) > (SyntaxKind::WithKeyword as i16)
     }
 
     /// Snapshot the parser state for lookahead. Mirrors Go's `lookAhead`,
@@ -1280,6 +1319,14 @@ impl Parser {
                     return self.token == SyntaxKind::OpenBraceToken
                         || self.token == SyntaxKind::Identifier
                         || self.token == SyntaxKind::ExportKeyword;
+                }
+                // Go's `scanStartOfDeclaration` has a separate `static` arm
+                // (`nextToken(); continue` — no ASI check): `static var x`
+                // inside a namespace parses as a declaration whose modifiers
+                // the checker then rejects with TS1044.
+                SyntaxKind::StaticKeyword => {
+                    self.next_token();
+                    continue;
                 }
                 SyntaxKind::ImportKeyword => {
                     self.next_token();
@@ -1505,7 +1552,9 @@ impl Parser {
 
     fn parse_variable_declaration_worker(&mut self, allow_exclamation: bool) -> Arc<Node> {
         let pos = self.token_pos();
-        let name = self.parse_identifier_or_pattern();
+        let name = self.parse_identifier_or_pattern_with_diagnostic(Some(
+            &diagnostics::PRIVATE_IDENTIFIERS_ARE_NOT_ALLOWED_IN_VARIABLE_DECLARATIONS,
+        ));
         // `!` definite assignment assertion — simple identifier names only,
         // same line, never in a `for` initializer.
         let exclamation_token = if allow_exclamation
@@ -1553,12 +1602,22 @@ impl Parser {
     }
 
     fn parse_identifier_or_pattern(&mut self) -> Arc<Node> {
+        self.parse_identifier_or_pattern_with_diagnostic(None)
+    }
+
+    /// Go `parseIdentifierOrPatternWithDiagnostic` — the message is reported
+    /// when the binding name is a private identifier (TS18029 for variable
+    /// declarations, TS18009 for parameters).
+    fn parse_identifier_or_pattern_with_diagnostic(
+        &mut self,
+        private_msg: Option<&'static crate::diagnostics::Message>,
+    ) -> Arc<Node> {
         if self.token == SyntaxKind::OpenBracketToken {
             self.parse_array_binding_pattern()
         } else if self.token == SyntaxKind::OpenBraceToken {
             self.parse_object_binding_pattern()
         } else {
-            self.parse_identifier()
+            self.parse_identifier_with_private_diagnostic(private_msg)
         }
     }
 
@@ -2064,13 +2123,37 @@ impl Parser {
     }
 
     fn parse_import_type(&mut self) -> Arc<Node> {
-        // Go: parseImportType -> `import("x").T` or `typeof import("x").T`
+        // Go: parseImportType -> `import("x").T`, `typeof import("x").T`,
+        // and the attribute form `import("x", { with: { ... } }).T`
+        // (parser.go: second argument wraps the attributes clause).
         let pos = self.token_pos();
         let is_type_of = self.parse_optional(SyntaxKind::TypeOfKeyword);
         self.expect(SyntaxKind::ImportKeyword);
         self.expect(SyntaxKind::OpenParenToken);
         // argument is a string literal (parsed as a type)
         let argument = self.parse_type();
+        let attributes = if self.parse_optional(SyntaxKind::CommaToken) {
+            self.expect(SyntaxKind::OpenBraceToken);
+            let token = self.token;
+            if matches!(token, SyntaxKind::WithKeyword | SyntaxKind::AssertKeyword) {
+                self.next_token();
+            } else {
+                // Go reports X_0_expected with 'with'.
+                let with_str =
+                    crate::scanner::token_to_string(SyntaxKind::WithKeyword).to_string();
+                self.parse_error_at_current_token(
+                    crate::diagnostics::messages_generated::X_0_EXPECTED,
+                    &[&with_str],
+                );
+            }
+            self.expect(SyntaxKind::ColonToken);
+            let attrs = self.parse_import_attributes(token, true);
+            self.parse_optional(SyntaxKind::CommaToken);
+            self.expect(SyntaxKind::CloseBraceToken);
+            Some(attrs)
+        } else {
+            None
+        };
         self.expect(SyntaxKind::CloseParenToken);
         // optional qualifier after `.`
         let qualifier = if self.parse_optional(SyntaxKind::DotToken) {
@@ -2080,7 +2163,12 @@ impl Parser {
         };
         let type_arguments = self.parse_optional_type_arguments();
         let end = type_arguments.as_ref().map_or_else(
-            || qualifier.as_ref().map_or(argument.end(), |q| q.end()),
+            || {
+                qualifier.as_ref().map_or_else(
+                    || argument.end(),
+                    |q| q.end(),
+                )
+            },
             |a: &Arc<NodeList>| a.end(),
         );
         Arc::new(Node::with_loc(
@@ -2088,7 +2176,7 @@ impl Parser {
             NodeData::ImportTypeNode(ImportTypeNodeData {
                 is_type_of,
                 argument,
-                attributes: None,
+                attributes,
                 qualifier,
                 type_arguments,
             }),
@@ -3020,7 +3108,12 @@ impl Parser {
     }
 
     fn is_binding_identifier_or_pattern(&self) -> bool {
+        // Go `isBindingIdentifierOrPrivateIdentifierOrPattern` — a private
+        // identifier can START a binding (so `const #x` routes to the
+        // variable-declaration parser, which reports TS18029) instead of
+        // falling through to an expression statement.
         self.is_identifier()
+            || self.token == SyntaxKind::PrivateIdentifier
             || self.token == SyntaxKind::OpenBracketToken
             || self.token == SyntaxKind::OpenBraceToken
     }
@@ -3085,8 +3178,26 @@ impl Parser {
     }
 
     fn parse_identifier(&mut self) -> Arc<Node> {
+        self.parse_identifier_with_private_diagnostic(None)
+    }
+
+    /// Go `createIdentifierWithDiagnostic`: a PrivateIdentifier token in a
+    /// binding position reports the caller's message (TS18029 for variable
+    /// declarations, TS18009 for parameters; default TS18016), then the
+    /// token is CONSUMED and an ordinary Identifier node built — so parsing
+    /// recovers instead of cascading "declaration expected" errors.
+    fn parse_identifier_with_private_diagnostic(
+        &mut self,
+        private_msg: Option<&'static crate::diagnostics::Message>,
+    ) -> Arc<Node> {
         if !self.is_identifier() {
-            self.parse_error_at_current_token(diagnostics::IDENTIFIER_EXPECTED, &[]);
+            if self.token == SyntaxKind::PrivateIdentifier {
+                let msg = private_msg
+                    .unwrap_or(&diagnostics::PRIVATE_IDENTIFIERS_ARE_NOT_ALLOWED_OUTSIDE_CLASS_BODIES);
+                self.parse_error_at_current_token(*msg, &[]);
+            } else {
+                self.parse_error_at_current_token(diagnostics::IDENTIFIER_EXPECTED, &[]);
+            }
         }
         let text = self.scanner.token_text().to_string();
         let pos = self.token_pos();
@@ -3941,7 +4052,16 @@ impl Parser {
         } else {
             self.parse_primary_expression()
         };
-        self.parse_call_and_member_chain(expr)
+        self.parse_call_and_member_chain(expr, false)
+    }
+
+    /// Member-only continuation of a chain: `.`/`?.`/`[]`/`!` access
+    /// without CALL argument lists. Used for `new` targets (Go
+    /// parseMemberExpressionRest — the target of `new` is a MemberExpression,
+    /// never a call: `new X().m()` is `(new X()).m()`, not
+    /// `new (X().m())`).
+    fn parse_member_chain(&mut self, expr: Arc<Node>) -> Arc<Node> {
+        self.parse_call_and_member_chain(expr, true)
     }
 
     fn parse_new_expression(&mut self) -> Arc<Node> {
@@ -3965,40 +4085,26 @@ impl Parser {
                 TextRange::new(pos, end),
             ))
         } else {
-            self.parse_left_hand_side_expression()
-        };
-        // `parse_left_hand_side_expression` may have consumed a trailing
-        // argument list as a CallExpression (e.g. `new Foo('hi')` was parsed
-        // as `new (Foo('hi'))`). In that case, unwrap the CallExpression:
-        // its callee becomes the `new` target, and its arguments become the
-        // `new` arguments. This matches Go tsc's behavior where the
-        // argument list belongs to the `new`, not to a call on the target.
-        // The unwrapped call's type arguments (`new C<number>()` parsed as
-        // a call first) belong to the `new` target — carry them over.
-        let (expression, extracted_args, extracted_type_args) =
-            if expression.kind == SyntaxKind::CallExpression {
-                if let NodeData::CallExpression(data) = &expression.data {
-                    (
-                        Arc::clone(&data.expression),
-                        Some(data.arguments.clone()),
-                        data.type_arguments.clone(),
-                    )
-                } else {
-                    (expression, None, None)
-                }
+            // The `new` target is a MEMBER expression chain, never a call
+            // (Go parseNewExpression → parseMemberExpressionRest): `new X().m()`
+            // is `(new X()).m()`. A full left-hand-side parse here made
+            // `X().m("hi")` the target, and the call-unwrap below mis-split
+            // it into `new (X().m)("hi")` — checking `X()` as a plain call
+            // (TS2348). Nested `new new X()` recurses through the grammar's
+            // `new MemberExpression Arguments` production.
+            let primary = if self.token == SyntaxKind::NewKeyword {
+                self.parse_new_expression()
             } else {
-                (expression, None, None)
+                self.parse_primary_expression()
             };
-        let type_arguments = self
-            .parse_optional_type_arguments()
-            .or(extracted_type_args);
-        let arguments = extracted_args.or_else(|| {
-            if self.token == SyntaxKind::OpenParenToken {
-                Some(self.parse_argument_list())
-            } else {
-                None
-            }
-        });
+            self.parse_member_chain(primary)
+        };
+        let type_arguments = self.parse_optional_type_arguments();
+        let arguments = if self.token == SyntaxKind::OpenParenToken {
+            Some(self.parse_argument_list())
+        } else {
+            None
+        };
         let end = arguments.as_ref().map_or(expression.end(), |a| a.end());
         Arc::new(Node::with_loc(
             SyntaxKind::NewExpression,
@@ -4011,9 +4117,20 @@ impl Parser {
         ))
     }
 
-    fn parse_call_and_member_chain(&mut self, expr: Arc<Node>) -> Arc<Node> {
+    fn parse_call_and_member_chain(&mut self, expr: Arc<Node>, member_only: bool) -> Arc<Node> {
         let mut expr = expr;
         loop {
+            // Member-only mode (new-expression targets): stop before CALL
+            // continuations — the argument list belongs to the `new`, and
+            // generic-call `<...>` belongs to the new's own type arguments.
+            if member_only
+                && matches!(
+                    self.token,
+                    SyntaxKind::OpenParenToken | SyntaxKind::LessThanToken
+                )
+            {
+                break;
+            }
             match self.token {
                 SyntaxKind::DotToken => {
                     let pos = expr.pos();
@@ -4345,6 +4462,25 @@ impl Parser {
                 self.parse_async_function_expression()
             }
             SyntaxKind::TemplateHead => self.parse_template_expression(),
+            // A private identifier in EXPRESSION position (Go
+            // parsePrimaryExpression's KindPrivateIdentifier case →
+            // parsePrivateIdentifier): consume the token and build the
+            // node. Without this arm a stray `#` (privateNameHashCharName:
+            // `#` with an empty name still scans as PrivateIdentifier)
+            // fell to the fallback-identifier path, consumed ZERO tokens,
+            // and looped the enclosing statement list forever, allocating
+            // a node + diagnostic per iteration (30GB OOM worker).
+            SyntaxKind::PrivateIdentifier => {
+                let text = self.scanner.token_text().to_string();
+                let pos = self.token_pos();
+                let end = self.token_end();
+                self.next_token();
+                Arc::new(Node::with_loc(
+                    SyntaxKind::PrivateIdentifier,
+                    NodeData::PrivateIdentifier(PrivateIdentifierData { text }),
+                    TextRange::new(pos, end),
+                ))
+            }
             SyntaxKind::SlashToken | SyntaxKind::SlashEqualsToken => {
                 self.re_scan_slash_token();
                 let text = self.scanner.token_text().to_string();
@@ -5885,15 +6021,21 @@ impl Parser {
                 );
                 return None;
             }
-            Some(self.parse_import_attributes(self.token))
+            Some(self.parse_import_attributes(self.token, false))
         } else {
             None
         }
     }
 
-    fn parse_import_attributes(&mut self, token: SyntaxKind) -> Arc<Node> {
+    /// `skip_keyword`: the import-type path (`import("x", { with: {...} })`)
+    /// consumes `with`/`assert` itself before calling; the import-statement
+    /// path arrives ON the keyword and consumes it here (Go's
+    /// `parseImportAttributes(token, skipKeyword)`, parser.go ~L3134).
+    fn parse_import_attributes(&mut self, token: SyntaxKind, skip_keyword: bool) -> Arc<Node> {
         let pos = self.token_pos();
-        self.next_token(); // consume 'with' or 'assert'
+        if !skip_keyword {
+            self.next_token(); // consume 'with' or 'assert'
+        }
         self.expect(SyntaxKind::OpenBraceToken);
         let multi_line = self.has_preceding_line_break();
         let attributes = self.parse_delimited_list(
@@ -6013,13 +6155,22 @@ impl Parser {
 
     fn parse_import_specifier(&mut self) -> Arc<Node> {
         let pos = self.token_pos();
-        let is_type_only = self.parse_optional(SyntaxKind::TypeKeyword);
-        let first = self.parse_identifier_name_or_keyword();
-        let (property_name, name) = if self.parse_optional(SyntaxKind::AsKeyword) {
-            let local = self.parse_identifier_name_or_keyword();
-            (Some(first), local)
+        let (is_type_only, property_name, name) = self.parse_import_or_export_specifier(true);
+        // Go parseImportSpecifier: the binding name must be an identifier —
+        // string module-export names are only legal in export specifiers.
+        let name = if name.kind == SyntaxKind::Identifier {
+            name
         } else {
-            (None, first)
+            self.parse_error_at_range(
+                TextRange::new(name.pos(), name.end()),
+                diagnostics::IDENTIFIER_EXPECTED,
+                &[],
+            );
+            Arc::new(Node::with_loc(
+                SyntaxKind::Identifier,
+                NodeData::Identifier(IdentifierData { text: String::new() }),
+                TextRange::new(name.pos(), name.pos()),
+            ))
         };
         // optional comma
         self.parse_optional(SyntaxKind::CommaToken);
@@ -6033,6 +6184,106 @@ impl Parser {
             }),
             TextRange::new(pos, end),
         ))
+    }
+
+    /// Parse the shared shape of import/export specifiers.
+    ///
+    /// Mirrors Go `parseImportOrExportSpecifier` (parser.go ~L2457): a
+    /// leading `type` token may be the type-only modifier OR the member
+    /// name itself, decided by what follows — `}`/`,` means `type` is the
+    /// name (`export { type }`, the nodeModules package-pattern fixtures),
+    /// an identifier/string means modifier, and the `as` chains follow the
+    /// four documented shapes:
+    ///   `{ type as }` → type-only, name `as`
+    ///   `{ type as as }` → name `as`, property `type`
+    ///   `{ type as as as }` → type-only, name/property `as`
+    fn parse_import_or_export_specifier(
+        &mut self,
+        is_import: bool,
+    ) -> (bool, Option<Arc<Node>>, Arc<Node>) {
+        let mut can_parse_as_keyword = true;
+        let disallow_keywords = is_import;
+        let (mut name, mut name_ok) = self.parse_module_export_name(disallow_keywords);
+        let mut is_type_only = false;
+        let mut property_name: Option<Arc<Node>> = None;
+        if name.kind == SyntaxKind::Identifier && name.text() == "type" {
+            if self.token == SyntaxKind::AsKeyword {
+                // { type as ...? }
+                let first_as = self.parse_identifier_name_or_keyword();
+                if self.token == SyntaxKind::AsKeyword {
+                    // { type as as ...? }
+                    let second_as = self.parse_identifier_name_or_keyword();
+                    if self.can_parse_module_export_name() {
+                        // { type as as something } — type-only, renamed
+                        is_type_only = true;
+                        property_name = Some(first_as);
+                        let (n, ok) = self.parse_module_export_name(disallow_keywords);
+                        name = n;
+                        name_ok = ok;
+                        can_parse_as_keyword = false;
+                    } else {
+                        // { type as as } — name `as`, property `type`
+                        property_name = Some(name);
+                        name = second_as;
+                        can_parse_as_keyword = false;
+                    }
+                } else if self.can_parse_module_export_name() {
+                    // { type as something } — rename of `type`
+                    property_name = Some(name);
+                    let (n, ok) = self.parse_module_export_name(disallow_keywords);
+                    name = n;
+                    name_ok = ok;
+                    can_parse_as_keyword = false;
+                } else {
+                    // { type as } — type-only, name `as`
+                    is_type_only = true;
+                    name = first_as;
+                }
+            } else if self.can_parse_module_export_name() {
+                // { type something } — type-only
+                is_type_only = true;
+                let (n, ok) = self.parse_module_export_name(disallow_keywords);
+                name = n;
+                name_ok = ok;
+            }
+            // otherwise: { type } — `type` stays the member name
+        }
+        if can_parse_as_keyword && self.token == SyntaxKind::AsKeyword {
+            property_name = Some(name);
+            self.expect(SyntaxKind::AsKeyword);
+            let (n, ok) = self.parse_module_export_name(disallow_keywords);
+            name = n;
+            name_ok = ok;
+        }
+        if !name_ok {
+            // Go reports at the name's trivia-skipped range.
+            self.parse_error_at_range(
+                TextRange::new(name.pos(), name.end()),
+                diagnostics::IDENTIFIER_EXPECTED,
+                &[],
+            );
+        }
+        (is_type_only, property_name, name)
+    }
+
+    /// Whether the current token can begin a module export name (any
+    /// identifier or keyword token, or a string literal). Mirrors Go
+    /// `canParseModuleExportName`.
+    fn can_parse_module_export_name(&self) -> bool {
+        is_identifier_or_keyword(self.token) || self.token == SyntaxKind::StringLiteral
+    }
+
+    /// Parse a module export name — identifier-name or string literal.
+    /// The flag marks reserved-word names that cannot bind (import
+    /// specifiers). Mirrors Go `parseModuleExportName`.
+    fn parse_module_export_name(&mut self, disallow_keywords: bool) -> (Arc<Node>, bool) {
+        if self.token == SyntaxKind::StringLiteral {
+            return (self.parse_string_literal_node(), true);
+        }
+        let name_ok = !(disallow_keywords
+            && is_keyword(self.token)
+            && is_reserved_word_kind(self.token));
+        (self.parse_identifier_name_or_keyword(), name_ok)
     }
 
     fn parse_identifier_name_or_keyword(&mut self) -> Arc<Node> {
@@ -6267,7 +6518,11 @@ impl Parser {
         let export_clause = if self.parse_optional(SyntaxKind::AsteriskToken) {
             // export * [as name] from '...'
             if self.parse_optional(SyntaxKind::AsKeyword) {
-                let name = self.parse_identifier_name_or_keyword();
+                // Module export name: identifier/keyword OR string literal
+                // (`export * as "<Z>" from ...` — arbitrary module namespace
+                // identifiers, ES2022). Go parseNamespaceExport →
+                // parseModuleExportName(false).
+                let (name, _) = self.parse_module_export_name(false);
                 let end = name.end();
                 Some(Arc::new(Node::with_loc(
                     SyntaxKind::NamespaceExport,
@@ -6323,14 +6578,7 @@ impl Parser {
 
     fn parse_export_specifier(&mut self) -> Arc<Node> {
         let pos = self.token_pos();
-        let is_type_only = self.parse_optional(SyntaxKind::TypeKeyword);
-        let first = self.parse_identifier_name_or_keyword();
-        let (property_name, name) = if self.parse_optional(SyntaxKind::AsKeyword) {
-            let local = self.parse_identifier_name_or_keyword();
-            (Some(first), local)
-        } else {
-            (None, first)
-        };
+        let (is_type_only, property_name, name) = self.parse_import_or_export_specifier(false);
         self.parse_optional(SyntaxKind::CommaToken);
         let end = name.end();
         Arc::new(Node::with_loc(
@@ -6421,6 +6669,15 @@ impl Parser {
             self.parse_delimited_list(ParsingContext::TypeParameters, Parser::parse_type_parameter);
         // Re-scan `>>` as `>` so nested generics close correctly.
         self.re_scan_greater_than();
+        // TS1098: `class C<>` — an empty type-parameter list.
+        if params.nodes.is_empty() {
+            // Go reports at the `<` position (typeParameters.Pos()).
+            self.parse_error_at_range(
+                crate::core::text::TextRange::new(pos, pos + 1),
+                crate::diagnostics::messages_generated::TYPE_PARAMETER_LIST_CANNOT_BE_EMPTY,
+                &[],
+            );
+        }
         self.expect(SyntaxKind::GreaterThanToken);
         let end = self.token_pos();
         Some(Arc::new(NodeList {
@@ -6619,7 +6876,9 @@ impl Parser {
 
         let dot_dot_dot_token = self.parse_optional_token(SyntaxKind::DotDotDotToken);
 
-        let name = self.parse_identifier_or_pattern();
+        let name = self.parse_identifier_or_pattern_with_diagnostic(Some(
+            &diagnostics::PRIVATE_IDENTIFIERS_CANNOT_BE_USED_AS_PARAMETERS,
+        ));
         let question_token = self.parse_optional_token(SyntaxKind::QuestionToken);
         let type_node = self.parse_optional_type_annotation();
         let initializer = if self.token == SyntaxKind::EqualsToken {
@@ -7144,6 +7403,9 @@ impl Parser {
                     // property name followed by a missing-semicolon error.
                     | SyntaxKind::ExportKeyword
                     | SyntaxKind::DefaultKeyword
+                    // `declare` members (`declare prop: T` — Go's
+                    // IsModifierKind includes DeclareKeyword).
+                    | SyntaxKind::DeclareKeyword
             ) {
                 break;
             }
@@ -7444,6 +7706,78 @@ impl Parser {
                 if self.token == SyntaxKind::Unknown {
                     return;
                 }
+                // TS1435: a misspelled/missing-space keyword suggests the
+                // intended one (Go parseErrorForMissingSemicolonAfter's
+                // spelling + space suggestions).
+                let expression_text = if node.kind == SyntaxKind::Identifier {
+                    node.text().to_string()
+                } else {
+                    String::new()
+                };
+                let followed_by_identifier = {
+                    let text = self.scanner.text();
+                    let mut i = node.end();
+                    let bytes = text.as_bytes();
+                    while i < bytes.len() && (bytes[i] == b' ' || bytes[i] == b'\t') {
+                        i += 1;
+                    }
+                    i < bytes.len()
+                        && (bytes[i].is_ascii_alphabetic()
+                            || bytes[i] == b'_'
+                            || bytes[i] == b'$')
+                };
+                if !expression_text.is_empty() && followed_by_identifier {
+                    let lower = expression_text.to_ascii_lowercase();
+                    let mut best: Option<(usize, String)> = None;
+                    for kw in KEYWORD_SUGGESTIONS {
+                        if kw.len() <= 2 {
+                            continue;
+                        }
+                        let d = crate::checker::edit_distance(
+                            &lower,
+                            &kw.to_ascii_lowercase(),
+                        );
+                        let budget = (expression_text.len() as f64 * 0.4).floor() + 0.9;
+                        if d as f64 > budget {
+                            continue;
+                        }
+                        if best.as_ref().is_none_or(|(bd, _)| d < *bd) {
+                            best = Some((d, kw.to_string()));
+                        }
+                    }
+                    // Space suggestion: the text starts with a keyword and
+                    // trails 3+ chars (`asynd` → none; `asyncf` →
+                    // `async f`).
+                    let space_sugg = best.is_none().then(|| {
+                        KEYWORD_SUGGESTIONS
+                            .iter()
+                            .find(|kw| {
+                                kw.len() > 2
+                                    && expression_text.len() > kw.len() + 2
+                                    && expression_text.starts_with(*kw)
+                            })
+                            .map(|kw| format!("{kw} {}", &expression_text[kw.len()..]))
+                    })
+                            .flatten();
+                    if let Some((_, sugg)) = best {
+                        self.parse_error_at(
+                            pos,
+                            node.end(),
+                            diagnostics::UNKNOWN_KEYWORD_OR_IDENTIFIER_DID_YOU_MEAN_0,
+                            &[&sugg],
+                        );
+                        return;
+                    }
+                    if let Some(sugg) = space_sugg {
+                        self.parse_error_at(
+                            pos,
+                            node.end(),
+                            diagnostics::UNKNOWN_KEYWORD_OR_IDENTIFIER_DID_YOU_MEAN_0,
+                            &[&sugg],
+                        );
+                        return;
+                    }
+                }
                 self.parse_error_at(
                     pos,
                     node.end(),
@@ -7601,7 +7935,58 @@ fn is_keyword(token: SyntaxKind) -> bool {
 }
 
 fn is_identifier_or_keyword(token: SyntaxKind) -> bool {
-    token == SyntaxKind::Identifier || is_keyword(token)
+    // Go's `tokenIsIdentifierOrKeyword` is `token >= KindIdentifier`, and
+    // KindPrivateIdentifier sits directly after KindIdentifier — so `#name`
+    // counts wherever an identifier-or-keyword can (`static #m()`, `set #x`).
+    token == SyntaxKind::Identifier
+        || token == SyntaxKind::PrivateIdentifier
+        || is_keyword(token)
+}
+
+/// Whether a keyword token is a RESERVED word and therefore cannot be used
+/// as a binding name (Go's `parser.isIdentifier` excludes these while
+/// accepting contextual keywords). Used only to flag illegal names — the
+/// contextual keywords (`type`, `as`, `async`, …) parse as identifiers.
+fn is_reserved_word_kind(token: SyntaxKind) -> bool {
+    matches!(
+        token,
+        SyntaxKind::BreakKeyword
+            | SyntaxKind::CaseKeyword
+            | SyntaxKind::CatchKeyword
+            | SyntaxKind::ClassKeyword
+            | SyntaxKind::ConstKeyword
+            | SyntaxKind::ContinueKeyword
+            | SyntaxKind::DebuggerKeyword
+            | SyntaxKind::DefaultKeyword
+            | SyntaxKind::DeleteKeyword
+            | SyntaxKind::DoKeyword
+            | SyntaxKind::ElseKeyword
+            | SyntaxKind::EnumKeyword
+            | SyntaxKind::ExportKeyword
+            | SyntaxKind::ExtendsKeyword
+            | SyntaxKind::FalseKeyword
+            | SyntaxKind::FinallyKeyword
+            | SyntaxKind::ForKeyword
+            | SyntaxKind::FunctionKeyword
+            | SyntaxKind::IfKeyword
+            | SyntaxKind::ImportKeyword
+            | SyntaxKind::InKeyword
+            | SyntaxKind::InstanceOfKeyword
+            | SyntaxKind::NewKeyword
+            | SyntaxKind::NullKeyword
+            | SyntaxKind::ReturnKeyword
+            | SyntaxKind::SuperKeyword
+            | SyntaxKind::SwitchKeyword
+            | SyntaxKind::ThisKeyword
+            | SyntaxKind::ThrowKeyword
+            | SyntaxKind::TrueKeyword
+            | SyntaxKind::TryKeyword
+            | SyntaxKind::TypeOfKeyword
+            | SyntaxKind::VarKeyword
+            | SyntaxKind::VoidKeyword
+            | SyntaxKind::WhileKeyword
+            | SyntaxKind::WithKeyword
+    )
 }
 
 #[cfg(test)]
@@ -8007,6 +8392,86 @@ mod tests {
         assert_eq!(named_bindings.kind, SyntaxKind::NamespaceImport);
     }
 
+    /// Parse an import declaration and return its first named-import
+    /// specifier as (is_type_only, property_name text, name text).
+    fn first_import_specifier(source: &str) -> (bool, Option<String>, String) {
+        let (_file, diags) =
+            Parser::parse_source_file_text_with_diagnostics("a.ts", source.to_string());
+        assert!(diags.is_empty(), "{source}: {diags:?}");
+        let file = &_file;
+        let stmt = match &file.node.data {
+            NodeData::SourceFile(d) => d.statements.nodes[0].clone(),
+            other => panic!("expected source file, got {other:?}"),
+        };
+        let import = match &stmt.data {
+            NodeData::ImportDeclaration(d) => d,
+            other => panic!("expected import declaration, got {other:?}"),
+        };
+        let clause = match &import.import_clause.as_ref().unwrap().data {
+            NodeData::ImportClause(d) => d,
+            other => panic!("expected import clause, got {other:?}"),
+        };
+        let named = match &clause.named_bindings.as_ref().unwrap().data {
+            NodeData::NamedImports(d) => d,
+            other => panic!("expected named imports, got {other:?}"),
+        };
+        match &named.elements.nodes[0].data {
+            NodeData::ImportSpecifier(d) => (
+                d.is_type_only,
+                d.property_name.as_ref().map(|p| p.text().to_string()),
+                d.name.text().to_string(),
+            ),
+            other => panic!("expected import specifier, got {other:?}"),
+        }
+    }
+
+    /// A bare `type` in an import/export specifier is the MEMBER NAME, not
+    /// the type-only modifier (Go parseImportOrExportSpecifier: decided by
+    /// what follows — `}`/`,` keeps `type` as the name). The
+    /// nodeModulesPackagePatternExports fixture's `export { type };`.
+    #[test]
+    fn specifier_bare_type_is_the_name() {
+        assert_eq!(
+            first_import_specifier("import { type } from \"mod\";"),
+            (false, None, "type".to_string())
+        );
+        let (_file, diags) = Parser::parse_source_file_text_with_diagnostics(
+            "a.ts",
+            "export { type };\nexport {};\n".to_string(),
+        );
+        assert!(diags.is_empty(), "{diags:?}");
+    }
+
+    /// The four `type as` shapes from Go parseImportOrExportSpecifier.
+    #[test]
+    fn specifier_type_as_shapes() {
+        // { type as } — type-only, name `as`
+        assert_eq!(
+            first_import_specifier("import { type as } from \"mod\";"),
+            (true, None, "as".to_string())
+        );
+        // { type as as } — name `as`, property `type`
+        assert_eq!(
+            first_import_specifier("import { type as as } from \"mod\";"),
+            (false, Some("type".to_string()), "as".to_string())
+        );
+        // { type as as as } — type-only, name/property `as`
+        assert_eq!(
+            first_import_specifier("import { type as as as } from \"mod\";"),
+            (true, Some("as".to_string()), "as".to_string())
+        );
+        // { type x } — type-only, name `x`
+        assert_eq!(
+            first_import_specifier("import { type x } from \"mod\";"),
+            (true, None, "x".to_string())
+        );
+        // { type x as y } — type-only rename
+        assert_eq!(
+            first_import_specifier("import { type x as y } from \"mod\";"),
+            (true, Some("x".to_string()), "y".to_string())
+        );
+    }
+
     #[test]
     fn import_type_named_imports_use_phase_modifier() {
         let mut p = Parser::new("import type { A, B as C } from \"mod\";");
@@ -8290,6 +8755,56 @@ mod tests {
             other => panic!("expected type alias, got {other:?}"),
         };
         assert_eq!(alias.type_node.kind, SyntaxKind::ImportType);
+    }
+
+    #[test]
+    fn parse_import_type_with_attributes() {
+        // `import("pkg", { with: { "resolution-mode": "import" } }).T` —
+        // the attribute-carrying second argument (Go parseImportType's
+        // comma branch).
+        let mut p = Parser::new(
+            "type T = import(\"pkg\", { with: { \"resolution-mode\": \"import\" } }).Foo;",
+        );
+        let node = p.parse_statement();
+        assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics());
+        let alias = match &node.data {
+            NodeData::TypeAliasDeclaration(data) => data,
+            other => panic!("expected type alias, got {other:?}"),
+        };
+        assert_eq!(alias.type_node.kind, SyntaxKind::ImportType);
+        let import_type = match &alias.type_node.data {
+            NodeData::ImportTypeNode(data) => data,
+            other => panic!("expected import type, got {other:?}"),
+        };
+        let attrs = import_type
+            .attributes
+            .as_ref()
+            .expect("attributes clause present");
+        match &attrs.data {
+            NodeData::ImportAttributes(d) => {
+                assert_eq!(d.token, SyntaxKind::WithKeyword);
+                assert_eq!(d.attributes.len(), 1);
+            }
+            other => panic!("expected import attributes, got {other:?}"),
+        }
+    }
+
+    #[test]
+    fn parse_import_type_missing_with_reports_1005() {
+        // `import("pkg", {"resolution-mode": "require"})` — the object
+        // without the `with:` key reports TS1005 ('with' expected), the
+        // same code official reports (nodeModulesImportAttributes
+        // TypeModeDeclarationEmitErrors /other.ts).
+        let mut p = Parser::new(
+            "type T = import(\"pkg\", {\"resolution-mode\": \"require\"}).Foo;",
+        );
+        let node = p.parse_statement();
+        let diags = p.diagnostics();
+        assert!(
+            diags.iter().any(|d| d.message.code == 1005),
+            "expected TS1005 'with' expected: {diags:?}"
+        );
+        assert_eq!(node.kind, SyntaxKind::TypeAliasDeclaration);
     }
 
     #[test]
@@ -9322,3 +9837,20 @@ mod batch1100_tests {
         let _ = p.parse_expression();
     }
 }
+
+/// Keyword texts (>2 chars) for TS1435 suggestions (Go
+/// `scanner.GetViableKeywordSuggestions` — every keyword in the scanner's
+/// text table).
+const KEYWORD_SUGGESTIONS: &[&str] = &[
+    "abstract", "accessor", "any", "as", "asserts", "bigint", "boolean", "break", "case",
+    "catch", "class", "continue", "const", "constenum", "constructor", "debugger", "declare",
+    "default", "delete", "do", "else", "enum", "export", "extends", "false", "finally",
+    "for", "from", "function", "get", "global", "if", "implements", "import", "in",
+    "infer", "instanceof", "interface", "intrinsic", "is", "keyof", "let", "module",
+    "namespace", "never", "new", "null", "number", "object", "package", "private",
+    "protected", "public", "override", "out", "readonly", "return", "satisfies", "set",
+    "static", "string", "super", "switch", "symbol", "this", "throw", "true", "try",
+    "type", "typeof", "undefined", "unique", "unknown", "var", "void", "while", "with",
+    "yield", "async", "await", "of",
+];
+

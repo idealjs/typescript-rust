@@ -4,3 +4,4 @@ recursiveIntersectionTypes.ts(14,9): error TS2454: Variable 'entityList' is used
 recursiveIntersectionTypes.ts(15,9): error TS2454: Variable 'entityList' is used before being assigned.
 recursiveIntersectionTypes.ts(18,14): error TS2454: Variable 'productList' is used before being assigned.
 recursiveIntersectionTypes.ts(19,1): error TS2322: Type 'LinkedList<Entity>' is not assignable to type 'LinkedList<Product>'.
+  Property 'price' is missing in type 'LinkedList<Entity>' but required in type 'Product'.

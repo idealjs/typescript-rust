@@ -1,6 +1,21 @@
 subtypingWithObjectMembers3.ts(17,15): error TS2430: Interface 'B' incorrectly extends interface 'A'.
+  Types of property 'bar' are incompatible.
+    Property 'bar' is missing in type 'Base' but required in type 'Derived'.
 subtypingWithObjectMembers3.ts(27,15): error TS2430: Interface 'B2' incorrectly extends interface 'A2'.
+  Types of property '2.0' are incompatible.
+    Property 'bar' is missing in type 'Base' but required in type 'Derived'.
 subtypingWithObjectMembers3.ts(37,15): error TS2430: Interface 'B3' incorrectly extends interface 'A3'.
+  Types of property ''2.0'' are incompatible.
+    Property 'bar' is missing in type 'Base' but required in type 'Derived'.
 subtypingWithObjectMembers3.ts(49,15): error TS2430: Interface 'B' incorrectly extends interface 'A'.
+  Types of property 'bar' are incompatible.
+    Type 'Base | undefined' is not assignable to type 'Derived | undefined'.
+      Property 'bar' is missing in type 'Base' but required in type 'Derived'.
 subtypingWithObjectMembers3.ts(59,15): error TS2430: Interface 'B2' incorrectly extends interface 'A2'.
+  Types of property '2.0' are incompatible.
+    Type 'Base | undefined' is not assignable to type 'Derived | undefined'.
+      Property 'bar' is missing in type 'Base' but required in type 'Derived'.
 subtypingWithObjectMembers3.ts(69,15): error TS2430: Interface 'B3' incorrectly extends interface 'A3'.
+  Types of property ''2.0'' are incompatible.
+    Type 'Base | undefined' is not assignable to type 'Derived | undefined'.
+      Property 'bar' is missing in type 'Base' but required in type 'Derived'.

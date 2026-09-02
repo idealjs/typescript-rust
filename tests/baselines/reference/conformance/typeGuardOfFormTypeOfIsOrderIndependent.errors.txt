@@ -1,12 +1,16 @@
 typeGuardOfFormTypeOfIsOrderIndependent.ts(10,25): error TS2454: Variable 'strOrNum' is used before being assigned.
 typeGuardOfFormTypeOfIsOrderIndependent.ts(14,5): error TS2322: Type 'string | number' is not assignable to type 'number'.
+  Type 'string' is not assignable to type 'number'.
 typeGuardOfFormTypeOfIsOrderIndependent.ts(14,11): error TS2454: Variable 'strOrNum' is used before being assigned.
 typeGuardOfFormTypeOfIsOrderIndependent.ts(16,27): error TS2454: Variable 'strOrFunc' is used before being assigned.
 typeGuardOfFormTypeOfIsOrderIndependent.ts(20,5): error TS2322: Type 'string | (() => void)' is not assignable to type 'string'.
+  Type '() => void' is not assignable to type 'string'.
 typeGuardOfFormTypeOfIsOrderIndependent.ts(20,11): error TS2454: Variable 'strOrFunc' is used before being assigned.
 typeGuardOfFormTypeOfIsOrderIndependent.ts(22,25): error TS2454: Variable 'numOrBool' is used before being assigned.
 typeGuardOfFormTypeOfIsOrderIndependent.ts(26,5): error TS2322: Type 'number | boolean' is not assignable to type 'boolean'.
+  Type 'number' is not assignable to type 'boolean'.
 typeGuardOfFormTypeOfIsOrderIndependent.ts(26,12): error TS2454: Variable 'numOrBool' is used before being assigned.
 typeGuardOfFormTypeOfIsOrderIndependent.ts(28,26): error TS2454: Variable 'strOrBool' is used before being assigned.
 typeGuardOfFormTypeOfIsOrderIndependent.ts(32,5): error TS2322: Type 'string | boolean' is not assignable to type 'string'.
+  Type 'boolean' is not assignable to type 'string'.
 typeGuardOfFormTypeOfIsOrderIndependent.ts(32,11): error TS2454: Variable 'strOrBool' is used before being assigned.

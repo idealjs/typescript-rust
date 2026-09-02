@@ -207,6 +207,7 @@ mod tests {
             imports: Vec::new(),
             module_augmentations: Vec::new(),
             ambient_module_names: Vec::new(),
+            parse_error_spans: Vec::new(),
             external_module_indicator: None,
             common_js_module_indicator: None,
             uses_uri_style_node_core_modules: crate::core::tristate::Tristate::Unknown,

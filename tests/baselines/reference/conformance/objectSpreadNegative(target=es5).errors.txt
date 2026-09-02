@@ -1,5 +1,9 @@
+error TS5107: Option 'target=ES5' is deprecated and will stop functioning in TypeScript 7.0. Specify compilerOption '"ignoreDeprecations": "6.0"' to silence this error.
 objectSpreadNegative.ts(13,21): error TS2339: Property 'x' does not exist on type '{}'.
 objectSpreadNegative.ts(16,5): error TS2322: Type '{ sn?: string | number | undefined; }' is not assignable to type '{ sn: string | number; }'.
+  Types of property 'sn' are incompatible.
+    Type 'string | number | undefined' is not assignable to type 'string | number'.
+      Type 'undefined' is not assignable to type 'string | number'.
 objectSpreadNegative.ts(23,1): error TS2741: Property 'b' is missing in type '{ s: string; }' but required in type '{ b: boolean; s: string; }'.
 objectSpreadNegative.ts(25,1): error TS2741: Property 's' is missing in type '{ b: boolean; }' but required in type '{ b: boolean; s: string; }'.
 objectSpreadNegative.ts(28,20): error TS2783: 'b' is specified more than once, so this usage will be overwritten.
@@ -17,6 +21,10 @@ objectSpreadNegative.ts(50,20): error TS2698: Spread types may only be created f
 objectSpreadNegative.ts(52,20): error TS2698: Spread types may only be created from object types.
 objectSpreadNegative.ts(54,19): error TS2698: Spread types may only be created from object types.
 objectSpreadNegative.ts(59,1): error TS2349: This expression is not callable.
+  Type '{}' has no call signatures.
 objectSpreadNegative.ts(63,1): error TS2322: Type '12' is not assignable to type 'undefined'.
 objectSpreadNegative.ts(69,9): error TS2339: Property 'm' does not exist on type '{ p: number; }'.
 objectSpreadNegative.ts(74,11): error TS2339: Property 'a' does not exist on type '{}'.
+
+
+!!! error TS5107: Option 'target=ES5' is deprecated and will stop functioning in TypeScript 7.0. Specify compilerOption '"ignoreDeprecations": "6.0"' to silence this error.

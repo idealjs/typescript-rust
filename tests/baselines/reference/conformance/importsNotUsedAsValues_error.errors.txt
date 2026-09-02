@@ -1,1 +1,7 @@
+error TS5102: Option 'importsNotUsedAsValues' has been removed. Please remove it from your configuration.
+  Use 'verbatimModuleSyntax' instead.
 /e.ts(1,1): error TS6192: All imports in import declaration are unused.
+
+
+!!! error TS5102: Option 'importsNotUsedAsValues' has been removed. Please remove it from your configuration.
+!!! error TS5102:   Use 'verbatimModuleSyntax' instead.

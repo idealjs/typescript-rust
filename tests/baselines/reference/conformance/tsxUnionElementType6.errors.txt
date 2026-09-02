@@ -1,4 +1,5 @@
 file.tsx(20,23): error TS2322: Type '{ x: true; }' is not assignable to type 'IntrinsicAttributes'.
+  Property 'x' does not exist on type 'IntrinsicAttributes'.
 file.tsx(21,27): error TS2322: Type 'string' is not assignable to type 'boolean'.
 file.tsx(22,10): error TS2741: Property 'x' is missing in type '{}' but required in type '{ x: boolean; }'.
 file.tsx(23,10): error TS2741: Property 'x' is missing in type '{ "data-prop": true; }' but required in type '{ x: boolean; }'.

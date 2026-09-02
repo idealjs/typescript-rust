@@ -375,11 +375,21 @@ impl Resolver {
             }
         }
 
+        // Default resolution mode under node1x comes from the referencing
+        // FILE's implied node format (Go `getDefaultResolutionModeForFile`)
+        // — a CJS-format file resolves through `require` conditions, an
+        // ESM-format file through `import`.
+        let effective_mode = default_resolution_mode(
+            resolution_mode,
+            &self.compiler_options,
+            containing_file,
+            self.host.fs(),
+        );
         let state = ResolutionState::new(
             module_name,
             &containing_directory,
             false, // is_type_reference_directive
-            resolution_mode,
+            effective_mode,
             &self.compiler_options,
             self.host.fs(),
             self.host.get_current_directory(),
@@ -426,7 +436,12 @@ impl Resolver {
             type_reference_directive_name,
             &containing_directory,
             true, // is_type_reference_directive
-            resolution_mode,
+            default_resolution_mode(
+                resolution_mode,
+                &self.compiler_options,
+                containing_file,
+                fs,
+            ),
             &self.compiler_options,
             fs,
             current_dir,
@@ -445,11 +460,39 @@ impl Resolver {
 
 // ── Effective type roots ────────────────────────────────────────────
 
+/// Resolve the default resolution mode for a reference (Go
+/// `getDefaultResolutionModeForFile` + the mode-override chain): an
+/// explicit override (from a `resolution-mode` import attribute) wins;
+/// under node16/nodenext a None mode defaults to the referencing file's
+/// implied node format (CJS files resolve through `require`, ESM files
+/// through `import`).
+fn default_resolution_mode(
+    resolution_mode: ResolutionMode,
+    options: &CompilerOptions,
+    containing_file: &str,
+    fs: &dyn FS,
+) -> ResolutionMode {
+    if resolution_mode != ResolutionMode::None {
+        return resolution_mode;
+    }
+    match options.get_module_resolution_kind() {
+        ModuleResolutionKind::Node16 | ModuleResolutionKind::NodeNext => {
+            crate::compiler::implied_node_format_of_file(containing_file, &|p| fs.read_file(p))
+        }
+        _ => ResolutionMode::None,
+    }
+}
+
 /// Compute effective type roots for type reference directive resolution.
 /// Mirrors Go's `CompilerOptions.GetEffectiveTypeRoots`.
 ///
 /// When `typeRoots` is explicitly set in compiler options, returns it directly.
-/// Otherwise, computes `[cwd]/node_modules/@types` as the default.
+/// Otherwise, every ancestor of the base directory contributes
+/// `<dir>/node_modules/@types`; the base is the tsconfig's directory when a
+/// config file is in play (Go reads `GetDirectoryPath(ConfigFilePath)`), and
+/// only falls back to the host's current directory otherwise
+/// (typeRootsFromMultipleNodeModulesDirectories: cwd /src with the project at
+/// /foo/bar must still collect /foo/node_modules/@types).
 pub fn get_effective_type_roots(
     options: &CompilerOptions,
     current_directory: &str,
@@ -457,9 +500,22 @@ pub fn get_effective_type_roots(
     if !options.type_roots.is_empty() {
         return (options.type_roots.clone(), true);
     }
-    // Default: <cwd>/node_modules/@types
-    let default_type_root = tspath::combine_paths(current_directory, &["node_modules", "@types"]);
-    (vec![default_type_root], false)
+    let base_dir = if !options.config_file_path.is_empty() {
+        tspath::get_directory_path(&options.config_file_path)
+    } else {
+        current_directory.to_string()
+    };
+    let mut type_roots = Vec::new();
+    let mut dir = base_dir;
+    loop {
+        type_roots.push(tspath::combine_paths(&dir, &["node_modules", "@types"]));
+        let parent = tspath::get_directory_path(&dir);
+        if parent == dir {
+            break;
+        }
+        dir = parent;
+    }
+    (type_roots, false)
 }
 
 // ── ResolutionState ─────────────────────────────────────────────────
@@ -483,6 +539,13 @@ pub(crate) struct ResolutionState<'a> {
     current_directory: &'a str,
     resolved_package_directory: bool,
     candidate_ending_is_from_config: bool,
+    /// Recursion depth of `load_module_from_target_export_or_import`.
+    /// Conditional-exports objects and arrays nest arbitrarily deep in a
+    /// hostile package.json; normal file targets terminate, but the
+    /// recursion itself has no structural bound — cap it defensively
+    /// (Go bounds the same walk by the JSON structure it already trusts;
+    /// a symlinked self-referential exports table could otherwise loop).
+    export_target_depth: u32,
 }
 
 impl<'a> ResolutionState<'a> {
@@ -492,7 +555,7 @@ impl<'a> ResolutionState<'a> {
         name: &str,
         containing_directory: &str,
         is_type_reference_directive: bool,
-        _resolution_mode: ResolutionMode,
+        resolution_mode: ResolutionMode,
         compiler_options: &'a CompilerOptions,
         fs: &'a dyn FS,
         current_directory: &'a str,
@@ -515,21 +578,37 @@ impl<'a> ResolutionState<'a> {
             };
 
         // Compute features, esmMode, conditions from module resolution kind.
+        // The resolution mode selects the `import` vs `require` condition
+        // (Go `GetConditions`, resolver.go ~L1923): a CJS-mode resolution
+        // must NOT see `import` targets and vice versa — the previous
+        // "add both" approximation made condition selection depend on
+        // package.json key order (nodeModules declaration-emit family).
         let (features, esm_mode, conditions) = match compiler_options.get_module_resolution_kind() {
+            // esmMode follows the per-reference resolution mode (Go
+            // `esmMode = resolutionMode == ModuleKindESNext`): a CJS-format
+            // referencing file keeps extensionless `./mod` + directory
+            // resolution; only ESM(import)-mode references are strict.
             ModuleResolutionKind::Node16 => (
                 NodeResolutionFeatures::NODE16_DEFAULT,
-                true,
-                get_conditions(compiler_options, ModuleKind::Node16),
+                resolution_mode == ModuleKind::ESNext,
+                get_conditions(compiler_options, resolution_mode),
             ),
             ModuleResolutionKind::NodeNext => (
                 NodeResolutionFeatures::NODE_NEXT_DEFAULT,
-                true,
-                get_conditions(compiler_options, ModuleKind::NodeNext),
+                resolution_mode == ModuleKind::ESNext,
+                get_conditions(compiler_options, resolution_mode),
             ),
             ModuleResolutionKind::Bundler => (
                 NodeResolutionFeatures::BUNDLER_DEFAULT,
                 false,
-                get_conditions(compiler_options, ModuleKind::ESNext),
+                get_conditions(
+                    compiler_options,
+                    if resolution_mode == ResolutionMode::None {
+                        ModuleKind::ESNext
+                    } else {
+                        resolution_mode
+                    },
+                ),
             ),
             _ => (NodeResolutionFeatures::NONE, false, Vec::new()),
         };
@@ -548,6 +627,7 @@ impl<'a> ResolutionState<'a> {
             current_directory,
             resolved_package_directory: false,
             candidate_ending_is_from_config: false,
+            export_target_depth: 0,
         }
     }
 
@@ -1772,6 +1852,12 @@ impl<'a> ResolutionState<'a> {
         subpath: &str,
         is_pattern: bool,
     ) -> Option<Resolved> {
+        // Defensive recursion cap for nested conditional objects/arrays
+        // (see `export_target_depth`). String targets terminate through
+        // file lookup, so legitimate exports trees stay far below this.
+        if self.export_target_depth >= 16 {
+            return CONTINUE_SEARCHING;
+        }
         match target.value_type {
             packagejson::JsonValueType::String => {
                 let target_string = target.as_string();
@@ -1821,7 +1907,8 @@ impl<'a> ResolutionState<'a> {
                 // Conditional exports: iterate keys in insertion order.
                 for (condition, sub_target) in target.as_object() {
                     if self.condition_matches(condition) {
-                        if let Some(result) = self.load_module_from_target_export_or_import(
+                        self.export_target_depth += 1;
+                        let result = self.load_module_from_target_export_or_import(
                             ext,
                             module_name,
                             package_directory,
@@ -1829,7 +1916,9 @@ impl<'a> ResolutionState<'a> {
                             sub_target,
                             subpath,
                             is_pattern,
-                        ) {
+                        );
+                        self.export_target_depth -= 1;
+                        if let Some(result) = result {
                             return Some(result);
                         }
                     }
@@ -1840,7 +1929,8 @@ impl<'a> ResolutionState<'a> {
             packagejson::JsonValueType::Array => {
                 // Try each element in order.
                 for elem in target.as_array() {
-                    if let Some(result) = self.load_module_from_target_export_or_import(
+                    self.export_target_depth += 1;
+                    let result = self.load_module_from_target_export_or_import(
                         ext,
                         module_name,
                         package_directory,
@@ -1848,7 +1938,9 @@ impl<'a> ResolutionState<'a> {
                         elem,
                         subpath,
                         is_pattern,
-                    ) {
+                    );
+                    self.export_target_depth -= 1;
+                    if let Some(result) = result {
                         return Some(result);
                     }
                 }
@@ -1884,21 +1976,21 @@ impl<'a> ResolutionState<'a> {
 
 /// Derive the conditions array for conditional exports/imports resolution.
 /// Mirrors Go's `GetConditions`.
-fn get_conditions(options: &CompilerOptions, module_kind: ModuleKind) -> Vec<String> {
+fn get_conditions(options: &CompilerOptions, resolution_mode: ModuleKind) -> Vec<String> {
+    // Go `GetConditions` (module/resolver.go ~L1923): the resolution mode
+    // picks `import` vs `require` (None defaults to `require` for node
+    // resolution); `types` unless noDtsResolution; `node` unless Bundler.
     let mut conditions = Vec::new();
-    match module_kind {
-        ModuleKind::Node16 | ModuleKind::NodeNext => {
-            conditions.push("node".to_string());
-            // Resolution mode determines import vs require.
-            // For now, add both.
-            conditions.push("import".to_string());
-            conditions.push("require".to_string());
-            conditions.push("types".to_string());
-        }
-        _ => {
-            conditions.push("import".to_string());
-            conditions.push("types".to_string());
-        }
+    if resolution_mode == ModuleKind::ESNext {
+        conditions.push("import".to_string());
+    } else {
+        conditions.push("require".to_string());
+    }
+    if !options.no_dts_resolution.is_true() {
+        conditions.push("types".to_string());
+    }
+    if options.get_module_resolution_kind() != ModuleResolutionKind::Bundler {
+        conditions.push("node".to_string());
     }
     // Add custom conditions.
     for custom in &options.custom_conditions {
@@ -1995,10 +2087,16 @@ mod tests {
     #[test]
     fn effective_type_roots_default() {
         let opts = CompilerOptions::default();
-        let (roots, from_config) = get_effective_type_roots(&opts, "/project");
+        let (roots, from_config) = get_effective_type_roots(&opts, "/project/sub");
         assert!(!from_config);
-        assert_eq!(roots.len(), 1);
-        assert!(roots[0].contains("node_modules/@types"));
+        // Every ancestor of the base dir contributes a @types root (Go
+        // GetEffectiveTypeRoots walks ancestors, down to "/"):
+        // /project/sub, /project, /.
+        assert_eq!(roots.len(), 3);
+        assert!(roots[0].contains("sub/node_modules/@types"));
+        assert!(roots[1].contains("project/node_modules/@types"));
+        // The final ancestor is "/" itself — its root is "/node_modules/@types".
+        assert_eq!(roots[2], "/node_modules/@types");
     }
 
     #[test]
@@ -2008,6 +2106,22 @@ mod tests {
         let (roots, from_config) = get_effective_type_roots(&opts, "/project");
         assert!(from_config);
         assert_eq!(roots, vec!["./custom-types".to_string()]);
+    }
+
+    #[test]
+    fn effective_type_roots_base_on_config_file() {
+        // Go GetEffectiveTypeRoots: with a ConfigFilePath the ancestor chain
+        // starts at the config's directory, NOT the host cwd — cwd /src with
+        // the project at /foo/bar still collects /foo/node_modules/@types
+        // (typeRootsFromMultipleNodeModulesDirectories).
+        let mut opts = CompilerOptions::default();
+        opts.config_file_path = "/foo/bar/tsconfig.json".to_string();
+        let (roots, from_config) = get_effective_type_roots(&opts, "/src");
+        assert!(!from_config);
+        assert_eq!(roots.len(), 3);
+        assert_eq!(roots[0], "/foo/bar/node_modules/@types");
+        assert_eq!(roots[1], "/foo/node_modules/@types");
+        assert_eq!(roots[2], "/node_modules/@types");
     }
 
     // ── Relative path resolution tests ─────────────────────────────
@@ -2109,6 +2223,50 @@ mod tests {
         let candidate = ResolutionState::normalize_path_for_cjs_resolution("/src", "./missing");
         let result = state.node_load_module_by_relative_name(REL_EXTS, &candidate, true);
         assert!(result.is_none());
+    }
+
+    // ── Exports-target recursion bound (ISSUES_RISK_ANALYSIS Issue 4) ──
+
+    #[test]
+    fn exports_target_nesting_bounded() {
+        use crate::vfs::InMemoryFS;
+        let fs = InMemoryFS::new();
+        fs.insert_dir("/node_modules/pkg");
+        fs.write_file("/node_modules/pkg/index.ts", "export const x = 1;")
+            .unwrap();
+
+        let opts = CompilerOptions::default();
+
+        // A shallow conditional-exports tree resolves normally (the
+        // `default` condition always matches).
+        let shallow = r#"{"name": "pkg", "exports": {"default": {"default": "./index.ts"}}}"#;
+        let fields = packagejson::parse(shallow).unwrap();
+        let mut state = make_state("pkg", "/src", &opts, &fs);
+        let resolved = state.load_module_from_exports(
+            REL_EXTS,
+            ".",
+            "/node_modules/pkg",
+            &fields.path_fields.exports,
+        );
+        assert_eq!(resolved.unwrap().path, "/node_modules/pkg/index.ts");
+
+        // A pathological nesting depth (30 levels of conditional objects,
+        // far beyond any real package.json) gives up at the cap instead
+        // of recursing without bound.
+        let mut target = r#""./index.ts""#.to_string();
+        for _ in 0..30 {
+            target = format!(r#"{{"default": {target}}}"#);
+        }
+        let deep = format!(r#"{{"name": "pkg", "exports": {target}}}"#);
+        let fields = packagejson::parse(&deep).unwrap();
+        let mut state = make_state("pkg", "/src", &opts, &fs);
+        let result = state.load_module_from_exports(
+            REL_EXTS,
+            ".",
+            "/node_modules/pkg",
+            &fields.path_fields.exports,
+        );
+        assert!(result.is_none(), "deeply nested exports must stop at the cap");
     }
 
     #[test]
@@ -2243,6 +2401,127 @@ mod tests {
         let result = state.resolve_node_like();
         assert!(!result.is_resolved());
         assert!(result.resolved_file_name.is_empty());
+    }
+
+    /// node16 conditions select require OR import by resolution mode —
+    /// never both (Go GetConditions; the both-conditions approximation
+    /// made exports key order decide, breaking mode-specific resolution).
+    #[test]
+    fn node16_conditions_follow_resolution_mode() {
+        // NOTE: with CompilerOptions::default() the effective resolution
+        // kind is Bundler (module unset → inferred, Go GetModuleResolution
+        // L223), and Bundler carries NO "node" condition — configure
+        // node16 explicitly for the node-condition assertions.
+        let mut opts = CompilerOptions::default();
+        opts.module_resolution = ModuleResolutionKind::Node16;
+        let require = get_conditions(&opts, ModuleKind::CommonJS);
+        assert!(require.contains(&"require".to_string()));
+        assert!(!require.contains(&"import".to_string()));
+        let import = get_conditions(&opts, ModuleKind::ESNext);
+        assert!(import.contains(&"import".to_string()));
+        assert!(!import.contains(&"require".to_string()));
+        // Both carry node + types.
+        for c in [&require, &import] {
+            assert!(c.contains(&"node".to_string()));
+            assert!(c.contains(&"types".to_string()));
+        }
+    }
+
+    /// A node16 package whose exports split import/require resolves
+    /// through the FILE's implied format: a CJS-format file (nearest
+    /// package.json "type": "commonjs") gets require.js, an ESM-format
+    /// file gets import.js.
+    #[test]
+    fn node16_exports_condition_by_file_format() {
+        use crate::vfs::InMemoryFS;
+        let fs = InMemoryFS::new();
+        for d in ["/proj", "/proj/sub", "/proj/node_modules/pkg"] {
+            fs.insert_dir(d);
+        }
+        fs.insert_file(
+            "/proj/package.json",
+            r#"{"name": "root", "type": "module"}"#,
+        );
+        fs.insert_file("/proj/sub/package.json", r#"{"type": "commonjs"}"#);
+        fs.insert_file(
+            "/proj/node_modules/pkg/package.json",
+            r#"{"name": "pkg", "exports": {"import": "./import.js", "require": "./require.js"}}"#,
+        );
+        fs.insert_file("/proj/node_modules/pkg/import.d.ts", "export {};\n");
+        fs.insert_file("/proj/node_modules/pkg/require.d.ts", "export {};\n");
+        fs.insert_file("/proj/index.ts", "import \"pkg\";\n");
+        fs.insert_file("/proj/sub/index.ts", "import \"pkg\";\n");
+
+        let mut opts = CompilerOptions::default();
+        opts.module_resolution = ModuleResolutionKind::Node16;
+        // The default mode derives from the referencing FILE's implied
+        // format (root package.json "module" → ESM here).
+        assert_eq!(
+            default_resolution_mode(ModuleKind::None, &opts, "/proj/index.ts", &fs),
+            ModuleKind::ESNext
+        );
+        assert_eq!(
+            default_resolution_mode(ModuleKind::None, &opts, "/proj/sub/index.ts", &fs),
+            ModuleKind::CommonJS
+        );
+        // ESM-format file (root package.json "module").
+        let esm = ResolutionState::new(
+            "pkg",
+            "/proj",
+            false,
+            ModuleKind::ESNext,
+            &opts,
+            &fs,
+            "/proj",
+        );
+        let r = esm.resolve_node_like();
+        assert!(r.is_resolved(), "esm resolve");
+        assert!(r.resolved_file_name.ends_with("import.d.ts"), "{}", r.resolved_file_name);
+        // CJS-format file (sub/package.json "commonjs").
+        let cjs = ResolutionState::new(
+            "pkg",
+            "/proj/sub",
+            false,
+            ModuleKind::CommonJS,
+            &opts,
+            &fs,
+            "/proj",
+        );
+        let r = cjs.resolve_node_like();
+        assert!(r.is_resolved(), "cjs resolve");
+        assert!(r.resolved_file_name.ends_with("require.d.ts"), "{}", r.resolved_file_name);
+    }
+
+    /// The implied node format walks ancestor package.json files
+    /// (extension first, then nearest "type" field).
+    #[test]
+    fn implied_format_from_package_json_chain() {
+        use crate::core::compiler_options::ModuleKind;
+        use crate::vfs::InMemoryFS;
+        let fs = InMemoryFS::new();
+        for d in ["/a/b", "/a/node_modules"] {
+            fs.insert_dir(d);
+        }
+        fs.insert_file("/a/package.json", r#"{"type": "module"}"#);
+        let read = |p: &str| fs.read_file(p);
+        assert_eq!(
+            crate::compiler::implied_node_format_of_file("/a/b/x.ts", &read),
+            ModuleKind::ESNext
+        );
+        assert_eq!(
+            crate::compiler::implied_node_format_of_file("/a/b/x.mts", &read),
+            ModuleKind::ESNext
+        );
+        assert_eq!(
+            crate::compiler::implied_node_format_of_file("/a/b/x.cts", &read),
+            ModuleKind::CommonJS
+        );
+        // node_modules directories never contribute a package.json scope
+        // for the walk — /a/node_modules/x.ts still sees /a's "module".
+        assert_eq!(
+            crate::compiler::implied_node_format_of_file("/a/node_modules/x.ts", &read),
+            ModuleKind::ESNext
+        );
     }
 
     #[test]

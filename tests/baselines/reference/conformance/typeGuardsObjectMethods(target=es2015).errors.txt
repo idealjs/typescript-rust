@@ -1,15 +1,25 @@
 typeGuardsObjectMethods.ts(12,9): error TS2322: Type 'number | false' is not assignable to type 'number'.
+  Type 'boolean' is not assignable to type 'number'.
 typeGuardsObjectMethods.ts(16,9): error TS2322: Type 'number | false' is not assignable to type 'number'.
+  Type 'boolean' is not assignable to type 'number'.
 typeGuardsObjectMethods.ts(16,22): error TS2454: Variable 'var2' is used before being assigned.
 typeGuardsObjectMethods.ts(19,9): error TS2322: Type 'number | false' is not assignable to type 'number'.
+  Type 'boolean' is not assignable to type 'number'.
 typeGuardsObjectMethods.ts(25,9): error TS2322: Type 'number | false' is not assignable to type 'number'.
+  Type 'boolean' is not assignable to type 'number'.
 typeGuardsObjectMethods.ts(29,9): error TS2322: Type 'number | false' is not assignable to type 'number'.
+  Type 'boolean' is not assignable to type 'number'.
 typeGuardsObjectMethods.ts(29,22): error TS2454: Variable 'var2' is used before being assigned.
 typeGuardsObjectMethods.ts(35,9): error TS2322: Type 'number | false' is not assignable to type 'number'.
+  Type 'boolean' is not assignable to type 'number'.
 typeGuardsObjectMethods.ts(39,9): error TS2322: Type 'number | false' is not assignable to type 'number'.
+  Type 'boolean' is not assignable to type 'number'.
 typeGuardsObjectMethods.ts(39,22): error TS2454: Variable 'var2' is used before being assigned.
 typeGuardsObjectMethods.ts(42,9): error TS2322: Type 'number | false' is not assignable to type 'number'.
+  Type 'boolean' is not assignable to type 'number'.
 typeGuardsObjectMethods.ts(46,1): error TS2322: Type 'string | number | false' is not assignable to type 'string | number'.
+  Type 'boolean' is not assignable to type 'string | number'.
 typeGuardsObjectMethods.ts(46,31): error TS2454: Variable 'strOrNum' is used before being assigned.
 typeGuardsObjectMethods.ts(46,69): error TS2454: Variable 'strOrNum' is used before being assigned.
 typeGuardsObjectMethods.ts(49,1): error TS2322: Type 'string | false' is not assignable to type 'string | number'.
+  Type 'boolean' is not assignable to type 'string | number'.

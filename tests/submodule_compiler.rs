@@ -425,6 +425,10 @@ fn process_case(content: &str, basename: &str) -> Vec<ConfigOutcome> {
     }
 
     let parsed = split_units(content, basename);
+    // A tsconfig.json/jsconfig.json unit configures the compilation (Go
+    // test_case_parser: the config's options are the BASE that directive
+    // settings override, and its enumerated file names pick the roots).
+    let tsconfig = detect_tsconfig(&parsed.units);
     match compute_configurations(&settings) {
         Err(reason) => vec![ConfigOutcome {
             suffix: String::new(),
@@ -433,12 +437,61 @@ fn process_case(content: &str, basename: &str) -> Vec<ConfigOutcome> {
         Ok(configs) => configs
             .into_iter()
             .map(|(suffix, config_settings)| {
-                let (compiler_options, unrecognized) = apply_test_settings(&config_settings);
+                let (compiler_options, unrecognized) = match &tsconfig {
+                    Some((parsed_config, config_path)) => {
+                        let (mut opts, unrec) = tsox::tsoptions::apply_test_settings_with_base(
+                            &config_settings,
+                            parsed_config.compiler_options.clone(),
+                        );
+                        // Go's ParsedCommandLine carries the config file's
+                        // own path (ConfigFilePath) — effective type roots
+                        // walk the CONFIG directory's ancestor chain
+                        // (GetEffectiveTypeRoots), not the host cwd. Without
+                        // this, `@types: *` picks up only the cwd-rooted
+                        // @types directories (typeRootsFromMultipleNode
+                        // ModulesDirectories resolves pdq/abc from
+                        // /foo/node_modules/@types only via this path).
+                        if opts.config_file_path.is_empty() {
+                            opts.config_file_path = config_path.clone();
+                        }
+                        (opts, unrec)
+                    }
+                    None => apply_test_settings(&config_settings),
+                };
+                if std::env::var_os("TSOX_DEBUG_OPTIONS").is_some() {
+                    eprintln!(
+                        "[opts] module={:?} modres={:?} target={:?} decl={} out={} jsxisrc={:?} nia={:?} strict={:?}",
+                        compiler_options.module,
+                        compiler_options.module_resolution,
+                        compiler_options.target,
+                        compiler_options.declaration.is_true(),
+                        compiler_options.out_dir,
+                        compiler_options.jsx_import_source,
+                        compiler_options.no_implicit_any,
+                        compiler_options.strict,
+                    );
+                }
                 let outcome = if let Some(reason) = should_skip(&compiler_options, &unrecognized) {
                     CaseOutcome::Skip(reason)
                 } else {
+                    // Harness-level directive (excluded from `settings` by
+                    // the case parser's HARNESS_DIRECTIVES list — Go keeps
+                    // it in harnessConfig): scan the raw case text.
+                    let no_implicit_refs = content.lines().any(|l| {
+                        let t = l.trim_start();
+                        t.starts_with("//")
+                            && t
+                                .to_ascii_lowercase()
+                                .starts_with("// @noimplicitreferences:")
+                            && t.contains("true")
+                    });
                     match catch_unwind(|| {
-                        let diags = build_and_check(&compiler_options, &parsed.units);
+                        let diags = build_and_check(
+                            &compiler_options,
+                            &parsed.units,
+                            no_implicit_refs,
+                            tsconfig.as_ref().map(|(c, _)| c.file_names.as_slice()),
+                        );
                         render_errors_baseline(&diags)
                     }) {
                         Ok(actual) => CaseOutcome::Output(actual),
@@ -1085,10 +1138,73 @@ fn mount_test_lib_fixtures(fs: &Arc<InMemoryFS>) {
     walk(fs, &root, "/.lib");
 }
 
+/// Absolute VFS path of a test unit (rooted unit names mount as-is, bare
+/// names live under /proj — the convention of [`build_and_check`]).
+fn unit_abs_path(unit_name: &str) -> String {
+    if tsox::tspath::is_rooted_disk_path(unit_name) {
+        unit_name.to_string()
+    } else {
+        format!("/proj/{}", unit_name)
+    }
+}
+
+/// Whether a unit's basename marks it as a project configuration file
+/// (Go `harnessutil.GetConfigNameFromFileName`).
+fn is_config_unit(unit_name: &str) -> bool {
+    let base = unit_name.rsplit(['/', '\\']).next().unwrap_or(unit_name);
+    let lower = base.to_ascii_lowercase();
+    lower == "tsconfig.json" || lower == "jsconfig.json"
+}
+
+/// Parse a case's `tsconfig.json`/`jsconfig.json` unit as the project
+/// configuration (Go test_case_parser.go ~L71: config options become the
+/// base the @-directive settings override; its enumerated file names pick
+/// the compile roots). Returns `(base options, config file names)`.
+fn detect_tsconfig(
+    units: &[common::case_parser::TestUnit],
+) -> Option<(tsox::tsoptions::ParsedCommandLine, String)> {
+    let config_unit = units.iter().find(|u| is_config_unit(&u.name))?;
+    let fs = Arc::new(InMemoryFS::new());
+    fs.insert_dir("/proj");
+    for unit in units {
+        let abs = unit_abs_path(&unit.name);
+        let mut parent = tsox::tspath::get_directory_path(&abs);
+        while !parent.is_empty() {
+            fs.insert_dir(&parent);
+            let next = tsox::tspath::get_directory_path(&parent);
+            if next == parent {
+                break;
+            }
+            parent = next;
+        }
+        fs.insert_file(&abs, &unit.content);
+    }
+    // Config paths in these cases are absolute (rooted unit names); the
+    // current dir only normalizes relative specs, where Go's default is
+    // the /.src source folder.
+    let cwd = if units.iter().any(|u| tsox::tspath::is_rooted_disk_path(&u.name)) {
+        "/.src"
+    } else {
+        "/proj"
+    };
+    let config_path = unit_abs_path(&config_unit.name);
+    Some((
+        tsox::tsoptions::get_parsed_command_line_of_config_file(
+            &config_path,
+            &CompilerOptions::default(),
+            cwd,
+            fs.as_ref(),
+        ),
+        config_path,
+    ))
+}
+
 /// Build a Program over the virtual files and return semantic diagnostics.
 fn build_and_check(
     options: &CompilerOptions,
     units: &[common::case_parser::TestUnit],
+    no_implicit_references: bool,
+    tsconfig_file_names: Option<&[String]>,
 ) -> Vec<Diagnostic> {
     let fs = Arc::new(InMemoryFS::new());
     fs.insert_dir("/proj");
@@ -1097,6 +1213,31 @@ fn build_and_check(
     // runner's virtual filesystem: cases reference them via absolute
     // triple-slash paths like `/// <reference path="/.lib/react.d.ts" />`.
     mount_test_lib_fixtures(&fs);
+
+    // Go compiler_runner root selection (compiler_runner.go ~L321): when
+    // the case sets `noImplicitReferences`, or the LAST unit contains
+    // `require(`/`reference path`, ONLY that unit is a compile root — the
+    // rest live on the FS and are brought in via imports/references (the
+    // resolution-mode-conditioned entrypoints of the nodeModules family
+    // must NOT be root-loaded, or both `declare global` augmentations
+    // merge and condition-excluded names wrongly resolve). A tsconfig
+    // unit REPLACES the heuristic entirely (compiler_runner.go ~L306):
+    // units the config enumerated are roots, everything else is FS-only.
+    let config_roots: Option<Vec<String>> =
+        tsconfig_file_names.map(|names| names.to_vec());
+    let refs_only = config_roots.is_none()
+        && (no_implicit_references
+            || units.last().is_some_and(|u| {
+                u.content.contains("require(") || u.content.contains("reference path")
+            }));
+    let rooted: Vec<&common::case_parser::TestUnit> = match &config_roots {
+        Some(names) => units
+            .iter()
+            .filter(|u| names.iter().any(|n| n == &unit_abs_path(&u.name)))
+            .collect(),
+        None if refs_only => units.last().into_iter().collect(),
+        None => units.iter().collect(),
+    };
 
     let mut file_names: Vec<String> = Vec::new();
     for unit in units {
@@ -1110,21 +1251,34 @@ fn build_and_check(
         } else {
             format!("/proj/{}", unit.name)
         };
-        // Ensure parent dirs exist.
-        let parent = tsox::tspath::get_directory_path(&abs);
-        if !parent.is_empty() {
+        // Ensure parent dirs exist — including ALL ancestors: the VFS only
+        // knows directories that were explicitly inserted, and the resolver
+        // gates the node_modules walk on `directory_exists("/node_modules")`
+        // (Go's test-runner VFS implicitly has every path prefix). Without
+        // the ancestor chain, `/node_modules/pkg/package.json` mounts but
+        // `/node_modules` "doesn't exist" and every node_modules lookup
+        // fails with TS2307 (the r8/r9 nodeModules family).
+        let mut parent = tsox::tspath::get_directory_path(&abs);
+        while !parent.is_empty() {
             fs.insert_dir(&parent);
+            let next = tsox::tspath::get_directory_path(&parent);
+            if next == parent {
+                break;
+            }
+            parent = next;
         }
         fs.insert_file(&abs, &unit.content);
         // Only TypeScript units are compile roots (Go's makeUnitsFromTest
         // hands every unit to the compiler host, but .json/.md units exist
         // on the FS only — compiling them as TS produces parse errors the
-        // official baselines don't have).
+        // official baselines don't have) — and only ROOTED units under the
+        // refs_only rule above.
         let lower = abs.to_ascii_lowercase();
-        if lower.ends_with(".ts")
-            || lower.ends_with(".tsx")
-            || lower.ends_with(".mts")
-            || lower.ends_with(".cts")
+        if rooted.iter().any(|r| std::ptr::eq(*r, unit))
+            && (lower.ends_with(".ts")
+                || lower.ends_with(".tsx")
+                || lower.ends_with(".mts")
+                || lower.ends_with(".cts"))
         {
             file_names.push(abs);
         }
@@ -1132,13 +1286,47 @@ fn build_and_check(
 
     // Wrap with BundledFS so lib.d.ts files resolve (unless the case set --noLib).
     let bf = Arc::new(BundledFS::new(fs.clone()));
-    let host = Arc::new(CompilerHostImpl::new(bf, "/proj".to_string(), lib_path()));
+    // Host current directory: the official runner's default is "/.src"
+    // (Go `srcFolder`); our bare-unit convention mounts at /proj. Pick by
+    // layout — rooted-unit cases resolve typeRoots/relative paths against
+    // "/.src" like Go (referenceTypesPreferedToPathIfPossible's
+    // /.src/node_modules/@types).
+    let all_rooted = units.iter().any(|u| {
+        tsox::tspath::is_rooted_disk_path(&u.name)
+    });
+    let cwd = if all_rooted && !units.is_empty() {
+        "/.src"
+    } else {
+        "/proj"
+    };
+    let host = Arc::new(CompilerHostImpl::new(bf, cwd.to_string(), lib_path()));
 
     let mut config = tsox::tsoptions::ParsedCommandLine::default();
     config.compiler_options = options.clone();
     config.file_names = file_names;
 
     let program = Arc::new(Program::new(ProgramOptions { config, host }));
+    if std::env::var_os("TSOX_DEBUG_FILES").is_some() {
+        eprintln!(
+            "[files] refs_only={} roots={}",
+            refs_only,
+            units
+                .iter()
+                .filter(|u| rooted.iter().any(|r| std::ptr::eq(*r, *u)))
+                .map(|u| u.name.as_str())
+                .collect::<Vec<_>>()
+                .join(",")
+        );
+        eprintln!(
+            "[files] {}",
+            program
+                .source_files()
+                .iter()
+                .map(|f| f.file_name.as_str())
+                .collect::<Vec<_>>()
+                .join(", ")
+        );
+    }
     // Collect the FULL diagnostic set the Go oracle would report: program
     // construction diagnostics (TS2307 "Cannot find module", TS6053 config
     // errors, etc. — these are syntactic/global-layer) PLUS the checker's
@@ -1153,14 +1341,17 @@ fn build_and_check(
 
 /// Render diagnostics into the errors-baseline text format.
 ///
-/// Diagnostics are sorted by (file_name, line, col, code) for determinism,
+/// Diagnostics are sorted by (file_name, line, col) for determinism — ties
+/// keep EMISSION order (official tsc emits in visit order; a numeric-code
+/// tiebreak would reorder same-position pairs like 7026-before-2875 in
+/// commentsOnJSXExpressionsArePreserved). The pre-sort is a stable sort.
 /// then each rendered on one line via `format_diagnostic_compact`. Test-path
 /// prefixes (`/proj/`) are stripped. No diagnostics → `NO_CONTENT`.
 fn render_errors_baseline(diags: &[Diagnostic]) -> String {
     if diags.is_empty() {
         return NO_CONTENT.to_string();
     }
-    let mut keyed: Vec<(String, usize, usize, i32, &Diagnostic)> = diags
+    let mut keyed: Vec<(String, usize, usize, &Diagnostic)> = diags
         .iter()
         .map(|d| {
             let (file_name, line, col) = if let Some(f) = &d.file {
@@ -1169,20 +1360,24 @@ fn render_errors_baseline(diags: &[Diagnostic]) -> String {
             } else {
                 (String::new(), 0, 0)
             };
-            (file_name, line, col, d.code, d)
+            (file_name, line, col, d)
         })
         .collect();
     keyed.sort_by(|a, b| {
         a.0.cmp(&b.0)
             .then(a.1.cmp(&b.1))
             .then(a.2.cmp(&b.2))
-        // NOTE: no code tiebreak — same-position diagnostics keep EMISSION
-        // order, which is what the official baselines record (Go's checker
-        // emits in evaluation order).
+            // TS `sortAndDuplicateDiagnostics` tiebreaks by span length
+            // (a zero-length scanner report like TS1490@(0,0) precedes a
+            // same-position parser diagnostic; TransportStream's
+            // [1490, 1434] order). NO code tiebreak: official keeps
+            // EMISSION order for same-position pairs (7026 before 2875,
+            // commentsOnJSXExpressionsArePreserved).
+            .then(a.3.loc.end.cmp(&b.3.loc.end))
     });
 
     let mut out = String::new();
-    for (_, _, _, _, d) in keyed {
+    for (_, _, _, d) in keyed {
         let mut line = format_diagnostic_compact(d, None);
         // Strip the `/proj/` test-path prefix from file names in the output.
         line = line.replace("/proj/", "");
@@ -1221,11 +1416,11 @@ fn should_skip(options: &CompilerOptions, unrecognized: &[String]) -> Option<Str
         }
         _ => {}
     }
-    // Module resolution modes not yet supported.
-    if matches!(
-        options.module_resolution,
-        ModuleResolutionKind::Node10 | ModuleResolutionKind::Classic
-    ) {
+    // Module resolution modes not yet supported. (Node10 now runs for
+    // real: `get_module_resolution_kind` keeps an explicit node10
+    // un-remapped, and the NONE-features resolution state implements the
+    // classic types/main + index lookup — node10AlternateResult*.)
+    if matches!(options.module_resolution, ModuleResolutionKind::Classic) {
         return Some(format!(
             "moduleResolution={:?} not supported",
             options.module_resolution

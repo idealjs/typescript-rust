@@ -78,7 +78,14 @@ impl FS for OsFS {
     }
 
     fn read_file(&self, path: &str) -> Option<String> {
-        std::fs::read_to_string(path).ok()
+        // Strip a UTF-8 BOM like the in-memory FS's `decode_with_bom` —
+        // the scanner has no U+FEFF skip, so a BOM left in place derails
+        // the parser (the harness path always strips it).
+        std::fs::read_to_string(path).ok().map(|s| {
+            s.strip_prefix('\u{FEFF}')
+                .map(|t| t.to_string())
+                .unwrap_or(s)
+        })
     }
 
     fn write_file(&self, path: &str, data: &str) -> std::io::Result<()> {
@@ -196,17 +203,31 @@ impl InMemoryFS {
 
     pub fn insert_dir(&self, path: &str) {
         let mut dirs = self.dirs.write().unwrap();
-        if !self.case_sensitive {
-            let target = path.to_ascii_lowercase();
-            if let Some(existing) = dirs
-                .iter()
-                .find(|d| d.to_ascii_lowercase() == target)
-                .cloned()
-            {
-                dirs.remove(&existing);
+        // Register the full ancestor chain, mirroring a real FS where
+        // creating `/a/b/c` implies `/a/b` and `/a` exist. The resolver
+        // gates its node_modules walk on `directory_exists` of each
+        // prefix; without ancestors, mounting `/node_modules/pkg` leaves
+        // `/node_modules` nonexistent and every package lookup fails
+        // (the r8/r9 nodeModules TS2307 family).
+        let mut current = path.to_string();
+        loop {
+            if !self.case_sensitive {
+                let target = current.to_ascii_lowercase();
+                if let Some(existing) = dirs
+                    .iter()
+                    .find(|d| d.to_ascii_lowercase() == target)
+                    .cloned()
+                {
+                    dirs.remove(&existing);
+                }
             }
+            dirs.insert(current.clone());
+            let parent = crate::tspath::get_directory_path(&current);
+            if parent == current || parent.is_empty() {
+                break;
+            }
+            current = parent;
         }
-        dirs.insert(path.to_string());
     }
 
     /// Finds the stored file key matching `path`, performing a case-insensitive
@@ -576,7 +597,11 @@ impl FS for InMemoryFS {
 
         for key in self.files.read().unwrap().keys() {
             if let Some(rest) = strip_path_prefix(key, &prefix, self.case_sensitive) {
-                if !rest.contains('/') {
+                // An empty rest is the queried path itself — the root "/"
+                // must not list itself as an entry (its "" name re-combines
+                // to "/" and directory walks recurse into themselves —
+                // tslibMissingHelper-family stack overflow).
+                if !rest.is_empty() && !rest.contains('/') {
                     entries.files.push(rest.to_string());
                 }
             }
@@ -584,7 +609,7 @@ impl FS for InMemoryFS {
 
         for dir in self.dirs.read().unwrap().iter() {
             if let Some(rest) = strip_path_prefix(dir, &prefix, self.case_sensitive) {
-                if !rest.contains('/') {
+                if !rest.is_empty() && !rest.contains('/') {
                     entries.directories.push(rest.to_string());
                 }
             }

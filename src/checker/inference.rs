@@ -226,6 +226,47 @@ impl Checker {
         source: &Arc<Type>,
         target: &Arc<Type>,
     ) {
+        // Same-origin deferred conditionals (Go inference.go ~L79, the
+        // same-generic-type-alias fast path): when source and target are
+        // instantiations of the SAME conditional body — identical root
+        // node, which in this port is what "instantiations of one generic
+        // type alias declaration" amounts to — infer directly between their
+        // recorded check and extends types instead of trying to walk the
+        // (deferred, opaque) conditional structures. Without this, calling
+        // `<Y>(c: C<Y>)` with an argument of type `C<X>` yields NO
+        // candidates, the call-site fallback fills `unknown`, and the
+        // parameter collapses to its false branch (`recursiveReverseMapped
+        // Type` family). Roots carrying `infer` positions are skipped: their
+        // per-instance mappings already reshape check/extends arbitrarily.
+        if let (
+            TypeData::Conditional(sc),
+            TypeData::Conditional(tc),
+        ) = (&source.data, &target.data)
+        {
+            let same_root = match (
+                sc.root.as_ref().and_then(|r| r.node.as_ref()),
+                tc.root.as_ref().and_then(|r| r.node.as_ref()),
+            ) {
+                (Some(sn), Some(tn)) => sn.id() == tn.id(),
+                _ => false,
+            };
+            let no_infers = |c: &crate::checker::types::ConditionalTypeData| {
+                c.root
+                    .as_ref()
+                    .map(|r| r.infer_type_parameters.is_empty())
+                    .unwrap_or(true)
+            };
+            if same_root && no_infers(sc) && no_infers(tc) {
+                if let (Some(scheck), Some(tcheck)) = (&sc.check_type, &tc.check_type) {
+                    self.infer_from_types(state, scheck, tcheck);
+                }
+                if let (Some(sextends), Some(textends)) = (&sc.extends_type, &tc.extends_type) {
+                    self.infer_from_types(state, sextends, textends);
+                }
+                return;
+            }
+        }
+
         // Handle union types in target
         if target.flags.contains(TypeFlags::Union) {
             let source_types = if source.flags.contains(TypeFlags::Union) {
@@ -338,7 +379,9 @@ impl Checker {
         let inference_idx = state
             .inferences
             .iter()
-            .position(|info| info.type_parameter.id == target.id);
+            .position(|info| {
+                crate::checker::utilities::type_parameters_match(&info.type_parameter, target)
+            });
         let Some(idx) = inference_idx else { return };
 
         // Capture state values before mutable borrow
@@ -370,6 +413,15 @@ impl Checker {
                         .iter()
                         .any(|c| Arc::ptr_eq(c, &candidate))
                     {
+                        if std::env::var_os("TSOX_DEBUG_INFER").is_some() {
+                            eprintln!(
+                                "[contra-rec] depth={} biv={} tp={} cand={}",
+                                depth,
+                                bivariant,
+                                self.type_to_string(&inference.type_parameter),
+                                self.type_to_string(&candidate)
+                            );
+                        }
                         inference.contra_candidates.push(candidate);
                         cleared = true;
                     }
@@ -499,7 +551,20 @@ impl Checker {
             source.resolved_return_type.get().cloned(),
             target.resolved_return_type.get().cloned(),
         ) {
+            if std::env::var_os("TSOX_DEBUG_INFER").is_some() {
+                eprintln!(
+                    "[infer-sig] ret {} -> {}",
+                    self.type_to_string(&st),
+                    self.type_to_string(&tt)
+                );
+            }
             self.infer_from_types(state, &st, &tt);
+        } else if std::env::var_os("TSOX_DEBUG_INFER").is_some() {
+            eprintln!(
+                "[infer-sig] ret MISSING src={} tgt={}",
+                source.resolved_return_type.get().is_some(),
+                target.resolved_return_type.get().is_some()
+            );
         }
     }
 
@@ -704,6 +769,24 @@ impl Checker {
     /// Go: `getInferredType` (inference.go:1283)
     pub fn get_inferred_type(&mut self, context: &InferenceContext, index: usize) -> Arc<Type> {
         let inference = &context.inferences[index];
+        if std::env::var_os("TSOX_DEBUG_INFER").is_some() {
+            eprintln!(
+                "[get-inferred] tp={} cands={} contra={}",
+                self.type_to_string(&inference.type_parameter),
+                inference
+                    .candidates
+                    .iter()
+                    .map(|c| self.type_to_string(c))
+                    .collect::<Vec<_>>()
+                    .join(","),
+                inference
+                    .contra_candidates
+                    .iter()
+                    .map(|c| self.type_to_string(c))
+                    .collect::<Vec<_>>()
+                    .join(",")
+            );
+        }
         if let Some(ref inferred) = inference.inferred_type {
             return Arc::clone(inferred);
         }
@@ -754,7 +837,13 @@ impl Checker {
                                     c_cons
                                         .types
                                         .iter()
-                                        .any(|ct| ct.id == inference.type_parameter.id)
+                                        .any(|ct| {
+                                            crate::checker::utilities::
+                                                type_parameters_match(
+                                                    ct,
+                                                    &inference.type_parameter,
+                                                )
+                                        })
                                 } else {
                                     false
                                 }
@@ -1057,6 +1146,19 @@ impl Checker {
             SyntaxKind::CallExpression | SyntaxKind::NewExpression => {
                 self.get_contextual_type_for_argument(&parent, node)
             }
+            // `x satisfies T` — the operand's contextual type is the
+            // satisfies TARGET (Go getContextualType's
+            // KindSatisfiesExpression: `return c.getTypeFromTypeNode(
+            // parent.Type())`). Literal freshness flows into the operand:
+            // `{xyz:"foo"} satisfies {xyz:"foo"|"bar"}` keeps `"foo"` fresh
+            // (typeSatisfaction_vacuousIntersectionOfContextualTypes).
+            SyntaxKind::SatisfiesExpression => {
+                if let crate::ast::NodeData::SatisfiesExpression(d) = &parent.data {
+                    Some(self.get_type_from_type_node(&d.type_node))
+                } else {
+                    None
+                }
+            }
             SyntaxKind::BinaryExpression => {
                 self.get_contextual_type_for_binary_operand(node, _context_flags)
             }
@@ -1065,6 +1167,15 @@ impl Checker {
             }
             SyntaxKind::ArrayLiteralExpression => {
                 self.get_contextual_type_for_array_literal_element(node, &parent, _context_flags)
+            }
+            // A node wrapped in `( … )` or `…!` inherits the contextual
+            // type of the WRAPPER (Go's `KindParenthesizedExpression` /
+            // `KindNonNullExpression` cases): recursing on the wrapper node
+            // keeps operand-identity checks (`node == binary.right`) intact —
+            // `f ??= (a => a)` reaches the assignment arm with the paren as
+            // the right operand.
+            SyntaxKind::ParenthesizedExpression | SyntaxKind::NonNullExpression => {
+                self.get_contextual_type(&parent, _context_flags)
             }
             _ => None,
         }
@@ -1586,21 +1697,26 @@ impl Checker {
             .unwrap_or_else(|| self.get_type_of_symbol(&sig.parameters[arg_index]));
 
         // Generic signature: infer type arguments from the NON-context-
-        // sensitive sibling arguments (Go's first inference phase; function
-        // literal arguments are context-sensitive and contribute only after
-        // the mapper is fixed), then substitute them into the parameter type.
+        // sensitive arguments (Go's first inference phase; function literal
+        // arguments are context-sensitive and contribute only after the
+        // mapper is fixed), then substitute them into the parameter type.
+        // Object literal arguments DO participate (Go's filter excludes only
+        // arrow/function expressions — vueLike: the literal's props/data
+        // members are the sole source for the signature's type parameters).
+        // The resolving_contextual_calls guard keeps the re-entrant typing
+        // pass (the literal's own members asking for their contextual type)
+        // terminating — it sees the declared parameter type instead.
         if !sig.type_parameters.is_empty() {
             let key = call_node.id();
             if self.resolving_contextual_calls.insert(key) {
                 let sibling_args: Vec<Arc<crate::ast::Node>> = args
                     .iter()
                     .enumerate()
-                    .filter(|(i, a)| {
-                        *i != arg_index
-                            && !matches!(
-                                a.kind,
-                                SyntaxKind::ArrowFunction | SyntaxKind::FunctionExpression
-                            )
+                    .filter(|(_, a)| {
+                        !matches!(
+                            a.kind,
+                            SyntaxKind::ArrowFunction | SyntaxKind::FunctionExpression
+                        )
                     })
                     .map(|(_, a)| Arc::clone(a))
                     .collect();
@@ -1648,16 +1764,31 @@ impl Checker {
             | SyntaxKind::AmpersandAmpersandEqualsToken
             | SyntaxKind::BarBarEqualsToken
             | SyntaxKind::QuestionQuestionEqualsToken => {
-                // Assignment: right operand is contextually typed by left operand
-                Some(self.get_type_of_node(&binary.left))
+                // Assignment: the right operand is contextually typed by
+                // the target's WRITE (declared) type — via
+                // `assignment_target_type`, NOT `get_type_of_node(left)`:
+                // references inside the RHS region are shaded by the
+                // RHS-narrowing frame (`f ??= (a => a)` narrows f to
+                // nullish inside the RHS, but the arrow stays contextually
+                // typed by f's declared function type).
+                self.assignment_target_type(&binary.left)
+                    .or_else(|| Some(self.get_type_of_node(&binary.left)))
             }
             SyntaxKind::BarBarToken | SyntaxKind::QuestionQuestionToken => {
-                // || and ?? : right operand is contextually typed by left operand
-                Some(self.get_type_of_node(&binary.left))
+                // Go: the binary expression's OWN contextual type applies to
+                // both operands; only when it has none does the right
+                // operand fall back to the left operand's type.
+                let binary_ctx = self.get_contextual_type(&parent, _context_flags);
+                if Arc::ptr_eq(node, &binary.right) && binary_ctx.is_none() {
+                    return Some(self.get_type_of_node(&binary.left));
+                }
+                binary_ctx
             }
             SyntaxKind::AmpersandAmpersandToken | SyntaxKind::CommaToken => {
-                // && and comma: right operand is contextually typed by the parent expression
-                Some(self.get_type_of_node(&binary.left))
+                // Go: both operands take the binary expression's own
+                // contextual type (`f ??= (sideEffect(), (a => a))` — the
+                // comma's right operand inherits the assignment context).
+                self.get_contextual_type(&parent, _context_flags)
             }
             _ => None,
         }
@@ -1853,7 +1984,7 @@ impl Checker {
 
     /// Check if a type parameter is at the top level in a type.
     fn is_type_parameter_at_top_level(&self, t: &Type, tp: &Type, depth: i32) -> bool {
-        if t.id == tp.id {
+        if crate::checker::utilities::type_parameters_match(t, tp) {
             return true;
         }
         if t.flags.contains(TypeFlags::Union | TypeFlags::Intersection) {

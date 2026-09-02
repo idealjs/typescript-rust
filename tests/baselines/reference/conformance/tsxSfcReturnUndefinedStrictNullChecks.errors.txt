@@ -1,2 +1,4 @@
 file.tsx(11,14): error TS2786: 'Foo' cannot be used as a JSX component.
+  Its return type 'undefined' is not a valid JSX element.
 file.tsx(12,12): error TS2786: 'Greet' cannot be used as a JSX component.
+  Its return type 'undefined' is not a valid JSX element.

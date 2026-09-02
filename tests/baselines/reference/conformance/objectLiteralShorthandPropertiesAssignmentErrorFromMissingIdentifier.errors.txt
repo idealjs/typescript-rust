@@ -4,3 +4,5 @@ objectLiteralShorthandPropertiesAssignmentErrorFromMissingIdentifier.ts(5,87): e
 objectLiteralShorthandPropertiesAssignmentErrorFromMissingIdentifier.ts(7,16): error TS7008: Member 'name' implicitly has an 'any' type.
 objectLiteralShorthandPropertiesAssignmentErrorFromMissingIdentifier.ts(7,22): error TS7008: Member 'id' implicitly has an 'any' type.
 objectLiteralShorthandPropertiesAssignmentErrorFromMissingIdentifier.ts(8,5): error TS2322: Type '{ name: number; id: string; }' is not assignable to type '{ name: string; id: number; }'.
+  Types of property 'name' are incompatible.
+    Type 'number' is not assignable to type 'string'.

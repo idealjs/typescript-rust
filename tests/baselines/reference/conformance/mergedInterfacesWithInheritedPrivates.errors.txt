@@ -1,3 +1,5 @@
 mergedInterfacesWithInheritedPrivates.ts(13,7): error TS2420: Class 'D' incorrectly implements interface 'A'.
+  Types have separate declarations of a private property 'x'.
 mergedInterfacesWithInheritedPrivates.ts(19,7): error TS2420: Class 'E' incorrectly implements interface 'A'.
+  Property 'x' is private in type 'A' but not in type 'E'.
 mergedInterfacesWithInheritedPrivates.ts(26,11): error TS2341: Property 'x' is private and only accessible within class 'C'.

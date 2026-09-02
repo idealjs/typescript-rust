@@ -1,1 +1,2 @@
 bug39372.js(25,7): error TS2322: Type '{}' is not assignable to type 'XMLObject<{ foo: string; }>'.
+  Type '{}' is missing the following properties from type '{ $A: { foo?: XMLObject<string>[] | undefined; }; $O: { foo?: ({ $$?: Record<string, string> | undefined; } & { $: string; }) | undefined; }; $$?: Record<string, string> | undefined; }': $A, $O

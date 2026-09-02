@@ -142,8 +142,18 @@ pub fn is_jsx_opening_like_element(node: &Arc<Node>) -> bool {
 impl Checker {
     /// Look up the `JSX` namespace symbol in the global scope.
     ///
-    /// Mirrors Go's `getJsxNamespaceAt`.
+    /// Mirrors Go's `getJsxNamespaceAt`: under `react-jsx`/`react-jsxdev`
+    /// the runtime container's `JSX` export wins (computed lazily by
+    /// `ensure_jsx_implicit_container` via `check_jsx_preconditions`);
+    /// otherwise — and as fallback when the container yields nothing —
+    /// the global `JSX` namespace.
     pub fn get_jsx_namespace(&self) -> Option<Arc<crate::ast::Symbol>> {
+        let file_id = self.current_file_id as usize;
+        if let Some(cached) = self.jsx_implicit_namespace.get(&file_id)
+            && let Some(ns) = cached
+        {
+            return Some(Arc::clone(ns));
+        }
         self.globals.get(JsxNames::JSX).cloned()
     }
 
@@ -188,16 +198,110 @@ impl Checker {
     /// Mirrors Go's `checkJsxPreconditions`:
     /// - TS17004 if `--jsx` is not provided.
     /// - TS2602 if `noImplicitAny` and `JSX.Element` doesn't exist.
+    ///
+    /// Also the lazy hook for the implicit JSX runtime import (Go
+    /// `getJsxNamespaceContainerForImplicitImport`): under
+    /// `react-jsx`/`react-jsxdev` the `<importSource>/jsx-runtime`
+    /// (or `/jsx-dev-runtime`) module must resolve — TS2875 at the first
+    /// JSX tag when it doesn't — and the JSX namespace is then looked up
+    /// in the container's exports before the global fallback.
     pub fn check_jsx_preconditions(&mut self, error_node: &Arc<Node>) {
         if !self.is_jsx_enabled() {
             self.grammar_error_on_node(error_node, &CANNOT_USE_JSX_UNLESS_THE_JSX_FLAG_IS_PROVIDED);
         }
-        if self.no_implicit_any && self.get_jsx_element_type().is_none() {
+        // TS2602 fires when there is no JSX NAMESPACE at all (no React
+        // types in scope). A namespace that exists but lacks `Element`
+        // (the inline-jsx-factory fixtures declare only
+        // IntrinsicElements) types the element as `any` silently —
+        // official baselines report nothing there.
+        if self.no_implicit_any && self.get_jsx_namespace().is_none() {
             self.grammar_error_on_node(
                 error_node,
                 &JSX_ELEMENT_IMPLICITLY_HAS_TYPE_ANY_BECAUSE_THE_GLOBAL_TYPE_JSX_ELEMENT_DOES_NOT_EXIST,
             );
         }
+    }
+
+    /// Resolve (once per checker) the implicit JSX runtime import container
+    /// for `react-jsx`/`react-jsxdev` modes and cache the resulting JSX
+    /// namespace. Mirrors Go `getJsxNamespaceContainerForImplicitImport` +
+    /// the container-then-global lookup of `getJsxNamespaceAt`: when the
+    /// runtime module resolves, its `JSX` export wins; otherwise (module
+    /// unresolvable — TS2875 — or no `JSX` export inside it) the global
+    /// `JSX` namespace is the fallback.
+    fn ensure_jsx_implicit_container(&mut self, error_node: &Arc<Node>) {
+        use crate::core::compiler_options::JsxEmit;
+        let file_id = self.current_file_id as usize;
+        if self.jsx_implicit_namespace.contains_key(&file_id) {
+            return;
+        }
+        let resolved: Option<std::sync::Arc<crate::ast::Symbol>> =
+            match self.compiler_options.jsx {
+                JsxEmit::ReactJSX | JsxEmit::ReactJSXDev => {
+                    let source = if self.compiler_options.jsx_import_source.is_empty() {
+                        "react"
+                    } else {
+                        self.compiler_options.jsx_import_source.as_str()
+                    };
+                    let module_ref = if self.compiler_options.jsx == JsxEmit::ReactJSXDev {
+                        format!("{source}/jsx-dev-runtime")
+                    } else {
+                        format!("{source}/jsx-runtime")
+                    };
+                    match self
+                        .resolve_module_file_symbol(&module_ref)
+                        .or_else(|| self.resolve_jsx_runtime_by_path(&module_ref))
+                    {
+                        Some(module_sym) => {
+                            let ns = module_sym
+                                .exports
+                                .get(JsxNames::JSX)
+                                .or_else(|| module_sym.members.get(JsxNames::JSX))
+                                .cloned();
+                            ns
+                        }
+                        None => {
+                            // DEFERRED: official orders the element's own
+                            // diagnostics (7026) before TS2875 at the same
+                            // position — the runtime-module failure is
+                            // buffered and flushed at the opening-like
+                            // element check's tail.
+                            self.pending_jsx_2875 = Some((
+                                error_node.loc,
+                                module_ref,
+                            ));
+                            None
+                        }
+                    }
+                }
+                // Classic/preserve modes never consult a runtime module.
+                _ => None,
+            };
+        self.jsx_implicit_namespace.insert(file_id, resolved);
+    }
+
+    /// Resolve the implicit JSX runtime module through the program's REAL
+    /// resolver (node_modules walks, @types mangling) and return the LOADED
+    /// file's symbol. The runtime file must already be in the program —
+    /// the compiler's loading loop preloads it for JSX files (Go's
+    /// `GetJSXRuntimeImportSpecifier` feeding the file loader).
+    fn resolve_jsx_runtime_by_path(&self, module_ref: &str) -> Option<Arc<crate::ast::Symbol>> {
+        let containing = self
+            .current_file
+            .as_ref()
+            .map(|f| f.file_name.clone())
+            .unwrap_or_default();
+        // The file's implied node format (ESNext/CommonJS carriers) picks
+        // the import/require condition under node1x — the EMIT format's
+        // ES2020 value would wrongly select `require`.
+        let mode = crate::compiler::implied_node_format_of_file(&containing, &|p| {
+            self.program.read_file(p)
+        });
+        let path = self
+            .program
+            .resolve_external_module_path(module_ref, &containing, mode)?;
+        let sf = self.program.get_source_file(&path)?;
+        self.program.symbol_map().symbol_of(&sf.node).cloned()
     }
 
     // ─────────────────────────────────────────────────────────────────────
@@ -240,16 +344,23 @@ impl Checker {
             .or_else(|| intrinsic_elements.exports.get(&tag_text));
 
         if member.is_none() {
-            // No named member; check for a string index signature on the
-            // intrinsic elements type. We don't yet model the type
-            // thoroughly enough to look up index signatures here, so emit
-            // TS7026 only when there are zero members (i.e. the interface
-            // is empty).
-            //
-            // TODO: once type/index-signature resolution is in place, look
-            // up the string index signature and treat the element as
-            // valid if one exists.
-            if intrinsic_elements.members.is_empty() && intrinsic_elements.exports.is_empty() {
+            // No named member; accept any tag when the interface declares
+            // an index signature (`[e: string]: any` — the inline-jsx
+            // fixtures' catch-all IntrinsicElements), scanned directly on
+            // the declarations (the ambient symbol may not resolve a type
+            // from this lookup context). TS7026 only fires when the
+            // interface is genuinely empty (no members AND no index
+            // signatures).
+            let has_index_signature = intrinsic_elements.declarations.iter().any(|d| {
+                matches!(&d.data, crate::ast::NodeData::InterfaceDeclaration(id) if id
+                    .members
+                    .iter()
+                    .any(|m| m.kind == SyntaxKind::IndexSignature))
+            });
+            if intrinsic_elements.members.is_empty()
+                && intrinsic_elements.exports.is_empty()
+                && !has_index_signature
+            {
                 if self.no_implicit_any {
                     self.grammar_error_on_node_with_args(
                         opening,
@@ -324,12 +435,69 @@ impl Checker {
     /// - For intrinsic elements: check `JSX.IntrinsicElements` membership
     /// - For component elements: check tag name has call/construct
     ///   signatures (TS2604)
+
+    /// Whether the JSX factory namespace name (`React`) resolves with
+    /// VALUE meaning from the current scope stack (locals, member tables,
+    /// module exports, then globals) — the TS2874 gate. Node-free variant
+    /// of the scope walk in `resolve_identifier_with_meaning_inner`.
+    fn jsx_factory_namespace_in_scope(&self, name: &str) -> bool {
+        use crate::ast::SymbolFlags;
+        let symbol_map = self.program.symbol_map();
+        let value = |sym: &std::sync::Arc<crate::ast::Symbol>| {
+            sym.flags.intersects(SymbolFlags::VALUE)
+        };
+        for &container_id in self.scope_stack.iter().rev() {
+            if let Some(locals) = symbol_map.locals.get(&container_id)
+                && let Some(sym) = locals.get(name)
+                && value(sym)
+            {
+                return true;
+            }
+            if let Some(cs) = symbol_map.symbols.get(&container_id)
+                && (!cs.flags.intersects(SymbolFlags::Class)
+                    || cs.flags.intersects(SymbolFlags::Function))
+                && let Some(sym) = cs.members.get(name)
+                && value(sym)
+            {
+                return true;
+            }
+            if let Some(cs) = symbol_map.symbols.get(&container_id)
+                && cs.flags.intersects(SymbolFlags::MODULE)
+                && !cs.flags.intersects(SymbolFlags::Class)
+                && let Some(sym) = cs.exports.get(name)
+                && value(sym)
+            {
+                return true;
+            }
+        }
+        self.globals
+            .get(name)
+            .is_some_and(|g| g.flags.intersects(SymbolFlags::VALUE))
+    }
+
     pub fn check_jsx_opening_like_element(&mut self, opening: &Arc<Node>) {
         let is_opening_like = is_jsx_opening_like_element(opening);
         if is_opening_like {
             self.check_grammar_jsx_element(opening);
         }
         self.check_jsx_preconditions(opening);
+        // TS2874 (Go markJsxAliasReferenced): classic `jsx: react` requires
+        // the JSX factory namespace (`React`) resolvable as a VALUE at each
+        // opening-like tag — reported at the tag NAME.
+        if is_opening_like
+            && matches!(
+                self.compiler_options.jsx,
+                crate::core::compiler_options::JsxEmit::React
+            )
+            && let Some(tag) = jsx_tag_name(opening)
+            && !self.jsx_factory_namespace_in_scope("React")
+        {
+            self.grammar_error_on_node_with_args(
+                &tag,
+                &THIS_JSX_TAG_REQUIRES_0_TO_BE_IN_SCOPE_BUT_IT_COULD_NOT_BE_FOUND,
+                &["React".to_string()],
+            );
+        }
         if !is_opening_like {
             return;
         }
@@ -341,6 +509,20 @@ impl Checker {
             self.check_jsx_intrinsic_element(opening);
         } else {
             self.check_jsx_component(opening);
+        }
+        // The implicit JSX runtime import (TS2875) resolves AFTER the
+        // element's own resolution in Go — at the same position, official
+        // orders 7026 before 2875 (commentsOnJSXExpressionsArePreserved).
+        // The buffered failure (if any) flushes here, after the element's
+        // own diagnostics.
+        self.ensure_jsx_implicit_container(opening);
+        if let Some((loc, module_ref)) = self.pending_jsx_2875.take() {
+            self.diagnostics.add(crate::ast::Diagnostic::new(
+                self.current_file.clone(),
+                loc,
+                THIS_JSX_TAG_REQUIRES_THE_MODULE_PATH_0_TO_EXIST_BUT_NONE_COULD_BE_FOUND_MAKE_SURE_YOU_HAVE_TYPES_FOR_THE_APPROPRIATE_PACKAGE_INSTALLED,
+                vec![module_ref],
+            ));
         }
     }
 

@@ -1,5 +1,9 @@
 /importer-cjs.cjs(2,5): error TS2351: This expression is not constructable.
+  Type 'String' has no construct signatures.
 /importer-cts.cts(2,5): error TS2351: This expression is not constructable.
+  Type 'String' has no construct signatures.
 /importer-cts.cts(5,5): error TS2351: This expression is not constructable.
+  Type 'String' has no construct signatures.
 /importer-cts.cts(8,5): error TS2351: This expression is not constructable.
+  Type 'String' has no construct signatures.
 /importer-cts.cts(10,10): error TS2614: Module '"./exporter.mjs"' has no exported member 'Oops'. Did you mean to use 'import Oops from "./exporter.mjs"' instead?

@@ -961,6 +961,27 @@ pub fn compare_type_lists(s1: &[Arc<Type>], s2: &[Arc<Type>]) -> std::cmp::Order
     std::cmp::Ordering::Equal
 }
 
+/// Identity comparison for type-parameter types. Hand-built types in this
+/// port carry `id: 0`, so `Type::id` equality cannot distinguish two type
+/// parameters — a type parameter's identity is its SYMBOL (one cached
+/// `Arc<Type>` per symbol, including the circular-constraint placeholder).
+/// Non-type-parameter operands never match (callers may pass arbitrary
+/// types; only the type-parameter pair is meaningful).
+pub fn type_parameters_match(a: &Type, b: &Type) -> bool {
+    if !a.flags.contains(TypeFlags::TypeParameter)
+        || !b.flags.contains(TypeFlags::TypeParameter)
+    {
+        return false;
+    }
+    if std::ptr::eq(a as *const Type, b as *const Type) {
+        return true;
+    }
+    match (&a.symbol, &b.symbol) {
+        (Some(x), Some(y)) => Arc::ptr_eq(x, y),
+        _ => false,
+    }
+}
+
 pub fn compare_types(t1: &Type, t2: &Type) -> std::cmp::Ordering {
     if t1.id == t2.id {
         return std::cmp::Ordering::Equal;

@@ -3,3 +3,4 @@ c.ts(2,1): error TS1362: 'A' cannot be used as a value because it was exported u
 c.ts(3,1): error TS1362: 'A' cannot be used as a value because it was exported using 'export type'.
 c.ts(4,1): error TS1362: 'A' cannot be used as a value because it was exported using 'export type'.
 c.ts(4,1): error TS2349: This expression is not callable.
+  Type 'typeof A' has no call signatures.

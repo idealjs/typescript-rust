@@ -1096,6 +1096,15 @@ pub struct ConditionalRoot {
     pub infer_type_parameters: Vec<Arc<Type>>,
     pub outer_type_parameters: Vec<Arc<Type>>,
     pub alias: Option<Box<TypeAlias>>,
+    /// Clone of the checker's scope-stack CONTAINER IDS captured when this
+    /// root was built. Deferred conditionals created mid-alias-instantiation
+    /// live lexically inside the alias declaration; when their branches are
+    /// finally resolved from a distant context (call-checking fallback
+    /// instantiations), that lexical chain is gone and identifier resolution
+    /// in the branch nodes would fail. Resolution temporarily re-pushes the
+    /// non-common suffix of this chain (identifiers resolve by container id
+    /// lookup in the symbol map; no node handles are needed).
+    pub creation_scopes: Vec<u64>,
 }
 
 #[derive(Debug)]
@@ -1111,6 +1120,19 @@ pub struct ConditionalTypeData {
     pub resolved_constraint_of_distributive: OnceLock<Arc<Type>>,
     pub mapper: Option<Arc<TypeMapper>>,
     pub combined_mapper: Option<Arc<TypeMapper>>,
+    /// Snapshot of the checker's `type_argument_stack` at the moment this
+    /// conditional INSTANCE was created (e.g. mid-alias-instantiation, while
+    /// the alias's own type parameters shadowed their arguments), keyed by
+    /// the raw symbol-pointer value (`&Symbol as *const _ as usize`) that
+    /// `type_argument_stack` itself keys on. A generic alias body stays
+    /// deferred at creation; when a *later* substitution makes its check
+    /// type concrete and the branches must finally be resolved, those
+    /// branch NODES still reference the alias-local type-parameter symbols
+    /// — resolving them without this snapshot loses the bindings entirely
+    /// and produces garbage (`keyof <unresolved>`). Go carries an
+    /// equivalent `mapper` on every deferred conditional
+    /// (`newConditionalType(root, mapper, combinedMapper)`).
+    pub creation_type_argument_stack: Vec<HashMap<usize, Arc<Type>>>,
 }
 
 // ────────────────────────────────────────────────────────────────────────────

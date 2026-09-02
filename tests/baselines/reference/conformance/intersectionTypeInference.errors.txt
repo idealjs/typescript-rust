@@ -1,3 +1,7 @@
 intersectionTypeInference.ts(5,5): error TS2322: Type 'T' is not assignable to type 'T & U'.
+  Type 'T' is not assignable to type 'U'.
+    'U' could be instantiated with an arbitrary type which could be unrelated to 'T'.
 intersectionTypeInference.ts(6,5): error TS2322: Type 'U' is not assignable to type 'T & U'.
+  Type 'U' is not assignable to type 'T'.
+    'T' could be instantiated with an arbitrary type which could be unrelated to 'U'.
 intersectionTypeInference.ts(23,5): error TS2322: Type 'undefined' is not assignable to type 'T | U'.

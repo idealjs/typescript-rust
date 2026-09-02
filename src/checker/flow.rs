@@ -75,6 +75,14 @@ struct FlowQuery {
     /// branch-label node to the reduced antecedent set to use instead of
     /// its full one while the walk is inside that reduce label.
     reduce_labels: Vec<(std::sync::Arc<FlowNode>, Vec<std::sync::Arc<FlowNode>>)>,
+    /// In-progress loop-label analyses (Go `flowLoopStack`): (loop-label
+    /// node key, antecedent types computed so far). A back-edge walk that
+    /// re-enters its own loop label resolves to the union of the types
+    /// computed so far instead of the declared-type seed — the first
+    /// antecedent (loop entry) is always evaluated first, so a re-entry
+    /// sees at least the entry narrowing (nestedLoopTypeGuards: the outer
+    /// loop's `string` narrowing survives the back-edge unrolling).
+    loop_stack: Vec<(usize, Vec<Arc<Type>>)>,
 }
 
 /// The kind of narrowing to apply for a condition.
@@ -98,13 +106,30 @@ impl Checker {
         symbol: &Arc<Symbol>,
         flow: Option<&Arc<FlowNode>>,
     ) -> Arc<Type> {
+
+        // Logical-assignment RHS frame (Go's preRightLabel condition edge):
+        // while checking the RHS of `f ??= rhs` / `f ||= rhs` / `f &&= rhs`,
+        // references to the target resolve against the condition-narrowed
+        // type. Applied as the declared-type override BEFORE the flow walk —
+        // the RHS region has no further assignments for the target, so the
+        // walk simply returns it.
+        let frame_type = self
+            .logical_rhs_narrowing_frames
+            .iter()
+            .rev()
+            .find(|(s, _)| Arc::ptr_eq(s, symbol))
+            .map(|(_, t)| Arc::clone(t));
         let declared = self.get_type_of_symbol(symbol);
         let Some(flow) = flow else {
-            return declared;
+            return frame_type.unwrap_or(declared);
         };
         if self.flow_analysis_disabled {
-            return declared;
+            return frame_type.unwrap_or(declared);
         }
+        let declared = match frame_type {
+            Some(t) => t,
+            None => declared,
+        };
         let target = FlowRef::Symbol(Arc::clone(symbol));
         let key = self.flow_cache_key(&target, flow, &declared);
         if let Some(cached) = self.flow_type_cache.get(&key) {
@@ -270,8 +295,21 @@ impl Checker {
             return Arc::clone(t);
         }
         if !query.on_path.insert(key) {
-            // Cycle: stop walking this path (one-unrolling semantics). The
-            // seeded entry is overwritten once the in-flight node completes.
+            // Revisit of an in-progress node: every cycle in a reducible
+            // flow graph passes through a loop label. Resolve to the
+            // nearest enclosing in-progress loop's union-so-far (Go's
+            // restart analysis reaches the same loop-label cut; seeding
+            // `initial` here instead would pollute definite-assignment
+            // queries with `undefined` through sibling branches —
+            // nestedLoopTypeGuards). Non-loop cycles keep the seed.
+            for (_, types) in query.loop_stack.iter().rev() {
+                if !types.is_empty() {
+                    if types.len() == 1 {
+                        return Arc::clone(&types[0]);
+                    }
+                    return self.get_union_type(types.clone());
+                }
+            }
             query.memo.insert(key, Arc::clone(initial));
             return Arc::clone(initial);
         }
@@ -421,12 +459,14 @@ impl Checker {
             return self.antecedent_type_at(declared, initial, flow, target, depth, query);
         }
 
-        // SWITCH_CLAUSE → narrow based on the switch case expression.
-        // Mirrors Go's `getTypeAtSwitchClause` (flow.go ~L1046). We first
-        // recurse into the antecedent to get the narrowed type at this flow
-        // point, then apply switch-specific narrowing on top.
+        // SWITCH_CLAUSE → narrow based on the switch case expression group.
+        // Mirrors Go's `getTypeAtSwitchClause` (flow.go ~L1046): the node's
+        // single antecedent is the switch-ENTRY flow (the binder anchors
+        // every clause group at the entry), so the base type is the entry
+        // type and the group's own narrowing is applied on top.
         if flow.flags.contains(FlowFlags::SWITCH_CLAUSE) {
-            let antecedent_type = self.antecedent_type_at(declared, initial, flow, target, depth, query);
+            let antecedent_type =
+                self.antecedent_type_at(declared, initial, flow, target, depth, query);
             return self.narrow_by_switch_clause(&antecedent_type, flow, target);
         }
 
@@ -483,6 +523,46 @@ impl Checker {
                 return t;
             }
             return self.antecedent_type_at(declared, initial, flow, target, depth, query);
+        }
+
+        // LOOP_LABEL with multiple antecedents (Go getTypeAtFlowLoopLabel,
+        // flow.go ~L1325): the FIRST antecedent is the loop entry; back-edge
+        // antecedents are walked with the loop on an in-process stack — a
+        // re-entry of the same loop label resolves to the union of the
+        // antecedent types computed so far (NOT the declared-type seed).
+        // An antecedent that yields the declared type short-circuits the
+        // rest (the union can only add subtypes that reduction removes).
+        if flow.flags.contains(FlowFlags::LOOP_LABEL) && flow.antecedents.len() > 1 {
+            let key = Arc::as_ptr(flow) as usize;
+            if let Some((_, types)) = query.loop_stack.iter().rev().find(|(k, _)| *k == key) {
+                if !types.is_empty() {
+                    let distinct: Vec<Arc<Type>> = types.clone();
+                    if distinct.len() == 1 {
+                        return distinct.into_iter().next().expect("exactly one");
+                    }
+                    return self.get_union_type(distinct);
+                }
+            }
+            let mut ant_types: Vec<Arc<Type>> = Vec::new();
+            for ant in &flow.antecedents {
+                query.loop_stack.push((key, ant_types.clone()));
+                let t =
+                    self.type_at_flow_node(declared, initial, ant, target, depth + 1, query);
+                query.loop_stack.pop();
+                if !ant_types.iter().any(|u| Arc::ptr_eq(u, &t)) {
+                    ant_types.push(t.clone());
+                }
+                if Arc::ptr_eq(&t, declared) {
+                    break;
+                }
+            }
+            if ant_types.len() == 1 {
+                return ant_types.into_iter().next().expect("exactly one");
+            }
+            if ant_types.is_empty() {
+                return Arc::clone(initial);
+            }
+            return self.get_union_type(ant_types);
         }
 
         // Junction (multiple antecedents): the union of the antecedent
@@ -578,16 +658,38 @@ impl Checker {
                         return self
                             .narrow_by_expression(&narrowed, &bin.right, target, kind, depth);
                     }
-                    // False branch of `a && b`: either `a` is false OR
-                    // (`a` is true AND `b` is false). We can't narrow
-                    // precisely, so just check the left side.
-                    return self.narrow_by_expression(
-                        type_,
-                        &bin.left,
-                        target,
-                        NarrowKind::FalseBranch,
-                        depth,
-                    );
+                    // False branch of `a && b`: `a` is false OR (`a` is
+                    // true AND `b` is false) — the union of both narrowed
+                    // states (Go `narrowsTypeByExpression`).
+                    if kind == NarrowKind::FalseBranch {
+                        let a_false = self.narrow_by_expression(
+                            type_,
+                            &bin.left,
+                            target,
+                            NarrowKind::FalseBranch,
+                            depth,
+                        );
+                        let a_true = self.narrow_by_expression(
+                            type_,
+                            &bin.left,
+                            target,
+                            NarrowKind::TrueBranch,
+                            depth,
+                        );
+                        let b_false = self.narrow_by_expression(
+                            &a_true,
+                            &bin.right,
+                            target,
+                            NarrowKind::FalseBranch,
+                            depth,
+                        );
+                        return self.flow_union_of(&[a_false, b_false]);
+                    }
+                    // True branch of `a && b`: both narrow, sequentially.
+                    let narrowed =
+                        self.narrow_by_expression(type_, &bin.left, target, kind, depth);
+                    return self
+                        .narrow_by_expression(&narrowed, &bin.right, target, kind, depth);
                 }
                 if bin.operator_token.kind == SyntaxKind::BarBarToken {
                     if kind == NarrowKind::FalseBranch {
@@ -597,14 +699,33 @@ impl Checker {
                         return self
                             .narrow_by_expression(&narrowed, &bin.right, target, kind, depth);
                     }
-                    // True branch of `a || b`: at least one is true. Check left.
-                    return self.narrow_by_expression(
+                    // True branch of `a || b`: `a` is true OR (`a` is false
+                    // AND `b` is true) — the union of both narrowed states
+                    // (Go `narrowsTypeByExpression`; `!isNode(x) ||
+                    // !isBar(x)` narrows to `Document | FooNode`, not just
+                    // the left side).
+                    let a_true = self.narrow_by_expression(
                         type_,
                         &bin.left,
                         target,
                         NarrowKind::TrueBranch,
                         depth,
                     );
+                    let a_false = self.narrow_by_expression(
+                        type_,
+                        &bin.left,
+                        target,
+                        NarrowKind::FalseBranch,
+                        depth,
+                    );
+                    let b_true = self.narrow_by_expression(
+                        &a_false,
+                        &bin.right,
+                        target,
+                        NarrowKind::TrueBranch,
+                        depth,
+                    );
+                    return self.flow_union_of(&[a_true, b_true]);
                 }
                 if bin.operator_token.kind == SyntaxKind::QuestionQuestionToken {
                     // Nullish coalescing: `a ?? b`. Mirrors Go's
@@ -723,6 +844,44 @@ impl Checker {
         // `in`: `"prop" in x` — narrow `x` by property presence.
         if op == SyntaxKind::InKeyword {
             return self.narrow_by_in_keyword(type_, &bin.left, &bin.right, target, kind);
+        }
+
+        // Logical composition (Go narrowsTypeByExpression recursing into
+        // the operands): `X && Y` true-branch narrows by BOTH operands
+        // true; false-branch is the UNION of X-false and Y-false. `X || Y`
+        // is the dual. Applied on top of the branch-merge union produced
+        // by the binder's logical-operator labels.
+        if matches!(
+            op,
+            SyntaxKind::AmpersandAmpersandToken | SyntaxKind::BarBarToken
+        ) {
+            let is_and = op == SyntaxKind::AmpersandAmpersandToken;
+            return match kind {
+                NarrowKind::TrueBranch if is_and => {
+                    let t =
+                        self.narrow_by_binary(type_, &bin.left, target, NarrowKind::TrueBranch);
+                    self.narrow_by_binary(&t, &bin.right, target, NarrowKind::TrueBranch)
+                }
+                NarrowKind::FalseBranch if is_and => {
+                    let a =
+                        self.narrow_by_binary(type_, &bin.left, target, NarrowKind::FalseBranch);
+                    let b =
+                        self.narrow_by_binary(type_, &bin.right, target, NarrowKind::FalseBranch);
+                    self.flow_union_of(&[a, b])
+                }
+                NarrowKind::TrueBranch => {
+                    let a =
+                        self.narrow_by_binary(type_, &bin.left, target, NarrowKind::TrueBranch);
+                    let b =
+                        self.narrow_by_binary(type_, &bin.right, target, NarrowKind::TrueBranch);
+                    self.flow_union_of(&[a, b])
+                }
+                NarrowKind::FalseBranch => {
+                    let t =
+                        self.narrow_by_binary(type_, &bin.left, target, NarrowKind::FalseBranch);
+                    self.narrow_by_binary(&t, &bin.right, target, NarrowKind::FalseBranch)
+                }
+            };
         }
 
         // Equality/inequality: `===`, `!==`, `==`, `!=`
@@ -1106,6 +1265,11 @@ impl Checker {
         target: &FlowRef,
         kind: NarrowKind,
     ) -> Arc<Type> {
+        // `any` is not narrowed by `in` checks (its property presence is
+        // unknown — filtering would collapse it to `never`).
+        if type_.flags.contains(TypeFlags::Any) {
+            return Arc::clone(type_);
+        }
         if !self.expr_matches_target(right, target) {
             return Arc::clone(type_);
         }
@@ -1186,10 +1350,6 @@ impl Checker {
             return None;
         };
         let prop_name = Self::get_accessed_property_name_from_node(&access_node)?;
-        // For non-union types, narrowing by discriminant is a no-op.
-        if !type_.is_union() {
-            return Some(Arc::clone(type_));
-        }
         let value_type = self.get_type_of_node(value_node);
         let is_equality = op == SyntaxKind::EqualsEqualsEqualsToken;
         let keep_matching = if is_equality {
@@ -1197,6 +1357,33 @@ impl Checker {
         } else {
             kind == NarrowKind::FalseBranch
         };
+        // For non-union types the discriminant still narrows: Go's
+        // `narrowTypeByDiscriminant` maps the (single) constituent through
+        // the property predicate — `x.kind !== "c"` on `{ kind: "c" }` is
+        // `never`. A constituent WITHOUT the property is kept as-is, and
+        // removal only applies for unit values (`narrowTypeByEquality`'s
+        // false-branch guard), so non-literal discriminants and `any` are
+        // untouched.
+        if !type_.is_union() {
+            let Some(prop_type) = self.get_property_type_of_type(type_, &prop_name) else {
+                return Some(Arc::clone(type_));
+            };
+            if prop_type.flags.contains(TypeFlags::Any) {
+                return Some(Arc::clone(type_));
+            };
+            let matches = self.types_overlap(&prop_type, &value_type);
+            if keep_matching {
+                return Some(if matches {
+                    Arc::clone(type_)
+                } else {
+                    self.never_type()
+                });
+            }
+            if value_type.flags.intersects(TYPE_FLAGS_UNIT) && matches {
+                return Some(self.never_type());
+            }
+            return Some(Arc::clone(type_));
+        }
         let constituents = self.constituent_types(type_);
         let filtered: Vec<Arc<Type>> = constituents
             .into_iter()
@@ -1329,14 +1516,36 @@ impl Checker {
             return Arc::clone(type_);
         };
         let discriminant = &switch_data.expression;
-        let Some(clause) = &flow.node else {
-            return Arc::clone(type_);
+        // The clause-group range [start, end) this flow narrows by
+        // (Go `FlowSwitchClauseData.ClauseStart/ClauseEnd`); `[0, 0)` is
+        // the bypass branch of a default-less switch.
+        let (clause_start, clause_end) = match flow.clause_range {
+            Some(r) => r,
+            None => {
+                // Fallback for a node without a range: treat the flow's
+                // clause (if any) as a single-clause group.
+                match (&flow.node, switch_stmt) {
+                    (Some(clause), _)
+                        if let NodeData::SwitchStatement(sd) = &switch_stmt.data
+                            && let NodeData::CaseBlock(cb) = &sd.case_block.data
+                            && let Some(idx) = cb
+                                .clauses
+                                .nodes
+                                .iter()
+                                .position(|c| Arc::ptr_eq(c, clause)) =>
+                    {
+                        (idx, idx + 1)
+                    }
+                    _ => (0, 0),
+                }
+            }
         };
+        let range = (clause_start, clause_end);
 
         // Case 1: discriminant is the narrowed target → `switch (x) { ... }` /
         // `switch (obj.val) { ... }`
         if self.expr_matches_target(discriminant, target) {
-            return self.narrow_by_switch_on_discriminant(type_, clause, switch_stmt);
+            return self.narrow_by_switch_on_discriminant(type_, switch_stmt, range);
         }
 
         // Case 2: discriminant is a property access on the symbol —
@@ -1352,8 +1561,8 @@ impl Checker {
         {
             return self.narrow_by_switch_on_discriminant_property(
                 type_,
-                clause,
                 switch_stmt,
+                range,
                 &access,
             );
         }
@@ -1364,16 +1573,16 @@ impl Checker {
         if discriminant.kind == SyntaxKind::TypeOfExpression {
             if let NodeData::TypeOfExpression(typeof_data) = &discriminant.data {
                 if self.expr_matches_target(&typeof_data.expression, target) {
-                    return self.narrow_by_switch_on_typeof(type_, clause, switch_stmt);
+                    return self.narrow_by_switch_on_typeof(type_, switch_stmt, range);
                 }
             }
         }
 
         // Case 4: discriminant is `true` → `switch (true) { case cond: ... }`.
         // Each case clause's expression is a boolean condition that narrows
-        // the symbol. Mirrors Go's `narrowTypeBySwitchOnTrue` (flow.go ~L1166).
+        // the symbol. Mirrors Go's `narrowTypeBySwitchOnTrue` (flow.go ~L1187).
         if discriminant.kind == SyntaxKind::TrueKeyword {
-            return self.narrow_by_switch_on_true(type_, clause, switch_stmt, target);
+            return self.narrow_by_switch_on_true(type_, switch_stmt, range, target);
         }
 
         Arc::clone(type_)
@@ -1382,26 +1591,24 @@ impl Checker {
     /// Narrow for `switch (true) { case cond: ... }` where the discriminant
     /// is the literal `true`.
     ///
-    /// Mirrors Go's `narrowTypeBySwitchOnTrue` (flow.go ~L1166). Each case
-    /// clause's expression is a boolean condition (e.g. `x === "foo"`,
-    /// `isString(x)`). The narrowing works as follows:
+    /// Mirrors Go's `narrowTypeBySwitchOnTrue` (flow.go ~L1187) over the
+    /// clause GROUP `[clause_start, clause_end)`:
     ///
-    /// - For all case clauses *preceding* the current one, the condition was
-    ///   false (otherwise we'd have entered that case). Narrow with the
-    ///   false branch.
-    /// - For the current `CaseClause`, the condition is true. Narrow with
-    ///   the true branch.
-    /// - For the `DefaultClause`, all case conditions are false. Narrow with
-    ///   the false branch for all cases.
-    ///
-    /// Fallthrough (multiple cases without `break`) is not yet handled; each
-    /// clause is treated independently. This matches the common case where
-    /// each case has a `break`.
+    /// - All case clauses *before* the group were false (otherwise an
+    ///   earlier group's statements would have been entered) — narrow each
+    ///   with the false branch.
+    /// - A group containing `default` (or the empty `[0, 0)` bypass group)
+    ///   additionally narrows away every case clause *after* the group —
+    ///   control can only be here when no case matched.
+    /// - Otherwise the group is a union: each `case` in the group narrows
+    ///   with the true branch and the results are unioned (this is the
+    ///   `case x === "A": case x === "B":` fall-through form — the body
+    ///   sees `A | B`).
     fn narrow_by_switch_on_true(
         &mut self,
         type_: &Arc<Type>,
-        clause: &Arc<Node>,
         switch_stmt: &Arc<Node>,
+        (clause_start, clause_end): (usize, usize),
         target: &FlowRef,
     ) -> Arc<Type> {
         let NodeData::SwitchStatement(switch_data) = &switch_stmt.data else {
@@ -1412,20 +1619,18 @@ impl Checker {
         };
         let clauses = &case_block.clauses.nodes;
 
-        // Find the current clause index.
-        let current_idx = match clauses.iter().position(|c| Arc::ptr_eq(c, clause)) {
-            Some(i) => i,
-            None => return Arc::clone(type_),
-        };
+        let has_default = clause_start == clause_end
+            || clauses[clause_start..clause_end]
+                .iter()
+                .any(|c| c.kind == SyntaxKind::DefaultClause);
 
-        let is_default = clause.kind == SyntaxKind::DefaultClause;
-        let mut t = Arc::clone(type_);
-
-        // Narrow away all preceding case clauses (they didn't match).
-        for i in 0..current_idx {
-            if clauses[i].kind == SyntaxKind::CaseClause {
-                if let NodeData::CaseOrDefaultClause(cd) = &clauses[i].data {
-                    t = self.narrow_by_expression(
+        let narrow_away = |checker: &mut Self, t: &Arc<Type>, clauses: &[Arc<Node>]| {
+            let mut t = Arc::clone(t);
+            for clause in clauses {
+                if clause.kind == SyntaxKind::CaseClause
+                    && let NodeData::CaseOrDefaultClause(cd) = &clause.data
+                {
+                    t = checker.narrow_by_expression(
                         &t,
                         &cd.expression,
                         target,
@@ -1434,31 +1639,47 @@ impl Checker {
                     );
                 }
             }
-        }
+            t
+        };
 
-        if is_default {
-            // Default clause: also narrow away all subsequent case clauses.
-            for i in (current_idx + 1)..clauses.len() {
-                if clauses[i].kind == SyntaxKind::CaseClause {
-                    if let NodeData::CaseOrDefaultClause(cd) = &clauses[i].data {
-                        t = self.narrow_by_expression(
-                            &t,
-                            &cd.expression,
-                            target,
-                            NarrowKind::FalseBranch,
-                            0,
-                        );
-                    }
-                }
+        // First, narrow away all the cases that preceded this group.
+        let mut t = narrow_away(self, type_, &clauses[..clause_start.min(clauses.len())]);
+
+        // A group containing `default` is only reached when no other case
+        // matched — narrow away the remaining cases too.
+        if has_default {
+            let end = clause_end.min(clauses.len());
+            if end < clauses.len() {
+                t = narrow_away(self, &t, &clauses[end..]);
             }
             return t;
         }
 
-        // CaseClause: narrow with the condition being true.
-        if let NodeData::CaseOrDefaultClause(cd) = &clause.data {
-            t = self.narrow_by_expression(&t, &cd.expression, target, NarrowKind::TrueBranch, 0);
+        // Non-default group: the union of each member case's true-narrowing.
+        let mut parts: Vec<Arc<Type>> = Vec::new();
+        for clause in &clauses[clause_start..clause_end.min(clauses.len())] {
+            if clause.kind == SyntaxKind::CaseClause
+                && let NodeData::CaseOrDefaultClause(cd) = &clause.data
+            {
+                let narrowed = self.narrow_by_expression(
+                    &t,
+                    &cd.expression,
+                    target,
+                    NarrowKind::TrueBranch,
+                    0,
+                );
+                if !parts.iter().any(|p| Arc::ptr_eq(p, &narrowed)) {
+                    parts.push(narrowed);
+                }
+            }
         }
-        t
+        if parts.is_empty() {
+            return t;
+        }
+        if parts.len() == 1 {
+            return parts.into_iter().next().expect("exactly one");
+        }
+        self.get_union_type(parts)
     }
 
     /// Narrow for `switch (typeof x) { case "string": ... }` where `typeof x`
@@ -1480,72 +1701,102 @@ impl Checker {
     /// - `"object"` → `object | null` (typeof null === "object")
     /// - `"function"` → `Function`
     /// - other/unknown → `object` (host object)
+    /// Mirrors Go's `narrowTypeBySwitchOnTypeOf` (flow.go ~L1157) over the
+    /// clause group `[clause_start, clause_end)`:
+    ///
+    /// - A default-bearing group (or the empty `[0, 0)` bypass branch)
+    ///   keeps the constituents that don't match ANY case witness OUTSIDE
+    ///   the group (Go `getNotEqualFactsFromTypeofSwitch`) — the cases that
+    ///   didn't run must have been typeof-≠.
+    /// - A pure case group unions the type implied by each member witness
+    ///   (`case "string": case "number":` → `string | number`).
     fn narrow_by_switch_on_typeof(
         &mut self,
         type_: &Arc<Type>,
-        clause: &Arc<Node>,
         switch_stmt: &Arc<Node>,
+        (clause_start, clause_end): (usize, usize),
     ) -> Arc<Type> {
         let witnesses = self.get_switch_clause_typeof_witnesses(switch_stmt);
         let Some(witnesses) = witnesses else {
             return Arc::clone(type_);
         };
-        // Pre-compute the implied types for all witnesses (avoids mutable
-        // borrows inside closures).
-        let implied_types: Vec<Arc<Type>> = witnesses
-            .iter()
-            .map(|w| self.typeof_string_to_type(w))
-            .collect();
-        if clause.kind == SyntaxKind::DefaultClause {
-            // Default clause: keep constituents that don't match any case's
-            // typeof string.
+        let start = clause_start.min(witnesses.len());
+        let end = clause_end.min(witnesses.len());
+        let has_default = clause_start == clause_end
+            || clauses_of_range(switch_stmt, clause_start, clause_end)
+                .iter()
+                .any(|c| c.kind == SyntaxKind::DefaultClause);
+        if has_default {
+            // Default/bypass: keep constituents that don't match any case
+            // witness OUTSIDE the group.
+            let mut outside_implied: Vec<Arc<Type>> = Vec::new();
+            for (i, w) in witnesses.iter().enumerate() {
+                if (i < start || i >= end) && !w.is_empty() {
+                    outside_implied.push(self.typeof_string_to_type(w));
+                }
+            }
             let constituents = self.constituent_types(type_);
             let remaining: Vec<Arc<Type>> = constituents
                 .into_iter()
-                .filter(|t| !implied_types.iter().any(|it| self.types_overlap(t, it)))
+                .filter(|t| {
+                    !outside_implied.iter().any(|it| self.types_overlap(t, it))
+                })
                 .collect();
             return self.rebuild_union_or_never(type_, remaining);
         }
-        // CaseClause: narrow to the type implied by the case's typeof string.
-        let NodeData::CaseOrDefaultClause(clause_data) = &clause.data else {
+        // Case group: union of the types implied by the group's witnesses.
+        let group_witnesses: Vec<(String, Arc<Type>)> = witnesses[start..end]
+            .iter()
+            .filter(|w| !w.is_empty())
+            .map(|w| (w.clone(), self.typeof_string_to_type(w)))
+            .collect();
+        if group_witnesses.is_empty() {
             return Arc::clone(type_);
-        };
-        let case_text = self.literal_text_of(&clause_data.expression);
-        let Some(case_text) = case_text else {
-            return Arc::clone(type_);
-        };
-        let implied = self.typeof_string_to_type(&case_text);
-        // Intersect: keep the part of `type_` that is assignable to `implied`.
-        // For unions, filter to constituents that overlap `implied`.
+        }
+        // Intersect: keep the part of `type_` that matches any group
+        // witness. For unions, filter to the overlapping constituents.
         if type_.is_union() {
             let constituents = self.constituent_types(type_);
             let matching: Vec<Arc<Type>> = constituents
                 .into_iter()
                 .filter(|t| {
-                    // `case "function"` keeps only CALLABLE constituents (a
-                    // plain `object` constituent is excluded — `typeof {} ===
-                    // "object"`); other names keep overlapping constituents.
-                    if case_text == "function" {
-                        return self.types_overlap(t, &implied)
-                            && !self
-                                .get_signatures_of_type(t, SignatureKind::Call)
-                                .is_empty();
-                    }
-                    self.types_overlap(t, &implied)
+                    group_witnesses.iter().any(|(text, implied)| {
+                        // `case "function"` keeps only CALLABLE constituents
+                        // (a plain `object` constituent is excluded —
+                        // `typeof {} === "object"`); other names keep
+                        // overlapping constituents.
+                        if text == "function" {
+                            return self.types_overlap(t, implied)
+                                && !self
+                                    .get_signatures_of_type(t, SignatureKind::Call)
+                                    .is_empty();
+                        }
+                        self.types_overlap(t, implied)
+                    })
                 })
                 .collect();
             return self.rebuild_union_or_never(type_, matching);
         }
-        // Non-union: if the type overlaps the implied type, narrow to the
-        // implied type.
-        if self.types_overlap(type_, &implied) {
+        // Non-union: if the type overlaps any implied type, narrow to the
+        // union of the overlapped implied types.
+        let overlapped: Vec<Arc<Type>> = group_witnesses
+            .iter()
+            .filter(|(_, implied)| self.types_overlap(type_, implied))
+            .map(|(_, implied)| Arc::clone(implied))
+            .collect();
+        if overlapped.is_empty() {
+            // No overlap → never (this case group is unreachable for this
+            // symbol).
+            return self.never_type();
+        }
+        if overlapped.len() == 1 {
+            let implied = overlapped.into_iter().next().expect("exactly one");
             if self.is_type_assignable_to(type_, &implied) {
                 return Arc::clone(type_);
             }
             return implied;
         }
-        // No overlap → never (this case is unreachable for this symbol).
-        self.never_type()
+        self.get_union_type(overlapped)
     }
 
     /// Get the typeof string witnesses for each case clause in a switch.
@@ -1648,13 +1899,27 @@ impl Checker {
     fn narrow_by_switch_on_discriminant(
         &mut self,
         type_: &Arc<Type>,
-        clause: &Arc<Node>,
         switch_stmt: &Arc<Node>,
+        (clause_start, clause_end): (usize, usize),
     ) -> Arc<Type> {
         let case_types = self.get_switch_clause_types(switch_stmt);
-        if clause.kind == SyntaxKind::DefaultClause {
-            // Default clause: narrow to types not covered by any case.
-            // Keep constituents that don't overlap with any case type.
+        let group_clauses = clauses_of_range(switch_stmt, clause_start, clause_end);
+
+        // The group's case types (`case a: case b:` → both). An EMPTY case
+        // set — a pure `default` group or the `[0, 0)` bypass branch of a
+        // default-less switch — narrows to the part of `type_` not covered
+        // by any case in the whole switch.
+        let group_case_types: Vec<Arc<Type>> = group_clauses
+            .iter()
+            .filter(|c| c.kind == SyntaxKind::CaseClause)
+            .filter_map(|c| match &c.data {
+                NodeData::CaseOrDefaultClause(cd) => {
+                    Some(self.get_type_of_node(&cd.expression))
+                }
+                _ => None,
+            })
+            .collect();
+        if group_case_types.is_empty() {
             let constituents = self.constituent_types(type_);
             let remaining: Vec<Arc<Type>> = constituents
                 .into_iter()
@@ -1662,12 +1927,29 @@ impl Checker {
                 .collect();
             return self.rebuild_union_or_never(type_, remaining);
         }
-        // CaseClause: narrow to the case expression's type.
-        let NodeData::CaseOrDefaultClause(clause_data) = &clause.data else {
-            return Arc::clone(type_);
+        let group_union = if group_case_types.len() == 1 {
+            group_case_types.into_iter().next().expect("exactly one")
+        } else {
+            self.get_union_type(group_case_types)
         };
-        let case_type = self.get_type_of_node(&clause_data.expression);
-        self.intersect_or_narrow(type_, &case_type)
+
+        let case_part = self.intersect_or_narrow(type_, &group_union);
+        // A group that also contains `default` is reachable when none of
+        // the group's cases matched (Go unions the case type with the
+        // default branch of the discriminant type).
+        let has_default_in_group = group_clauses
+            .iter()
+            .any(|c| c.kind == SyntaxKind::DefaultClause);
+        if has_default_in_group {
+            let constituents = self.constituent_types(type_);
+            let remaining: Vec<Arc<Type>> = constituents
+                .into_iter()
+                .filter(|t| !case_types.iter().any(|ct| self.types_overlap(t, ct)))
+                .collect();
+            let default_part = self.rebuild_union_or_never(type_, remaining);
+            return self.get_union_type(vec![case_part, default_part]);
+        }
+        case_part
     }
 
     /// Narrow for `switch (obj.kind) { case "value": ... }` where `obj.kind`
@@ -1681,29 +1963,56 @@ impl Checker {
     fn narrow_by_switch_on_discriminant_property(
         &mut self,
         type_: &Arc<Type>,
-        clause: &Arc<Node>,
         switch_stmt: &Arc<Node>,
+        (clause_start, clause_end): (usize, usize),
         access: &Arc<Node>,
     ) -> Arc<Type> {
         let Some(prop_name) = Self::get_accessed_property_name_from_node(access) else {
             return Arc::clone(type_);
         };
-        // Only narrow unions.
+        let group_clauses = clauses_of_range(switch_stmt, clause_start, clause_end);
+        let is_default = group_clauses.is_empty()
+            || group_clauses
+                .iter()
+                .all(|c| c.kind == SyntaxKind::DefaultClause);
+        // Only narrow unions — except the mismatch case: a non-union type
+        // whose discriminant property can't overlap ANY of the group's case
+        // expressions narrows to `never` (`case "bar"` under
+        // `{ kind: "foo" }`).
         if !type_.is_union() {
+            let mut any_overlap = is_default;
+            for clause in &group_clauses {
+                if clause.kind == SyntaxKind::DefaultClause {
+                    continue;
+                }
+                if let NodeData::CaseOrDefaultClause(cd) = &clause.data {
+                    let case_type = self.get_type_of_node(&cd.expression);
+                    if let Some(prop_type) = self.get_property_type_of_type(type_, &prop_name)
+                        && self.types_overlap(&prop_type, &case_type)
+                    {
+                        any_overlap = true;
+                    }
+                }
+            }
+            if !any_overlap {
+                return self.never_type();
+            }
             return Arc::clone(type_);
         }
-        let is_default = clause.kind == SyntaxKind::DefaultClause;
         // For `case "foo":`, narrow to constituents whose discriminant
-        // property matches the *current* clause's type. For `default:`,
-        // keep constituents whose discriminant property doesn't match any
-        // case type.
-        let current_case_type = if is_default {
-            None
-        } else if let NodeData::CaseOrDefaultClause(cd) = &clause.data {
-            Some(self.get_type_of_node(&cd.expression))
-        } else {
-            None
-        };
+        // property matches ANY of the group's case types (the group is a
+        // union). For `default:`, keep constituents whose discriminant
+        // property doesn't match any case type.
+        let group_case_types: Vec<Arc<Type>> = group_clauses
+            .iter()
+            .filter(|c| c.kind == SyntaxKind::CaseClause)
+            .filter_map(|c| match &c.data {
+                NodeData::CaseOrDefaultClause(cd) => {
+                    Some(self.get_type_of_node(&cd.expression))
+                }
+                _ => None,
+            })
+            .collect();
         let all_case_types = if is_default {
             self.get_switch_clause_types(switch_stmt)
         } else {
@@ -1725,12 +2034,11 @@ impl Checker {
                         .iter()
                         .any(|ct| self.types_overlap(&prop_type, ct))
                 } else {
-                    // Case: keep constituents whose property matches the
-                    // current clause's case type.
-                    current_case_type
-                        .as_ref()
-                        .map(|ct| self.types_overlap(&prop_type, ct))
-                        .unwrap_or(false)
+                    // Case group: keep constituents whose property matches
+                    // any of the group's case types.
+                    group_case_types
+                        .iter()
+                        .any(|ct| self.types_overlap(&prop_type, ct))
                 }
             })
             .collect();
@@ -2063,6 +2371,15 @@ impl Checker {
             };
             // The argument must be the target being narrowed.
             if !self.expr_matches_target(arg, target) {
+                // `assert(x !== undefined)` — the asserted comparison HOLDS
+                // after the call, narrowing the compared target (Go
+                // getTypeAtFlowCall narrows through the argument
+                // expression's truthiness).
+                if let Some(narrowed) =
+                    self.narrow_by_asserted_comparison(type_, arg, target)
+                {
+                    return narrowed;
+                }
                 continue;
             }
             if let Some(pred_type) = &predicate.t {
@@ -2073,6 +2390,45 @@ impl Checker {
             return self.remove_flags_from_union(type_, TYPE_FLAGS_NULLABLE);
         }
         Arc::clone(type_)
+    }
+
+    /// `assert(<target> <cmp> literal)` narrows the target as the
+    /// comparison being true: `!==` removes the literal's type, `===`
+    /// intersects with it. Both operand orders accepted; non-comparison or
+    /// non-matching arguments return `None`.
+    fn narrow_by_asserted_comparison(
+        &mut self,
+        type_: &Arc<Type>,
+        arg: &Arc<Node>,
+        target: &FlowRef,
+    ) -> Option<Arc<Type>> {
+        let NodeData::BinaryExpression(bin) = &arg.data else {
+            return None;
+        };
+        use crate::ast::SyntaxKind::*;
+        let (cmp, target_side, literal_side) = match bin.operator_token.kind {
+            ExclamationEqualsEqualsToken | ExclamationEqualsToken
+            | EqualsEqualsEqualsToken | EqualsEqualsToken => {
+                let l_matches = self.expr_matches_target(&bin.left, target);
+                let r_matches = self.expr_matches_target(&bin.right, target);
+                if l_matches {
+                    (bin.operator_token.kind, &bin.left, &bin.right)
+                } else if r_matches {
+                    (bin.operator_token.kind, &bin.right, &bin.left)
+                } else {
+                    return None;
+                }
+            }
+            _ => return None,
+        };
+        let _ = target_side;
+        let lt = self.get_type_of_node(literal_side);
+        let is_eq = matches!(cmp, EqualsEqualsEqualsToken | EqualsEqualsToken);
+        if is_eq {
+            Some(self.intersect_or_narrow(type_, &lt))
+        } else {
+            Some(self.remove_type_from_union(type_, &lt))
+        }
     }
 
     /// Narrow `type_` to (or away from) the predicate type.
@@ -2086,10 +2442,24 @@ impl Checker {
         pred_type: &Arc<Type>,
         assume_true: bool,
     ) -> Arc<Type> {
+        // `any` is not narrowed by type predicates.
+        if type_.flags.contains(TypeFlags::Any) {
+            return Arc::clone(type_);
+        }
         if assume_true {
             self.intersect_or_narrow(type_, pred_type)
         } else {
-            self.remove_type_from_union(type_, pred_type)
+            // False branch of `x is T`: remove the constituents ASSIGNABLE
+            // to T (Go's filterType with a subtype check). An OVERLAP check
+            // would also remove structurally-unrelated constituents that
+            // happen to share property shapes (`!isNode(node)` on
+            // `Document | Node` collapsed to never instead of `Document`).
+            let constituents = self.constituent_types(type_);
+            let remaining: Vec<Arc<Type>> = constituents
+                .into_iter()
+                .filter(|t| !self.is_type_assignable_to(t, pred_type))
+                .collect();
+            return self.rebuild_union_or_never(type_, remaining);
         }
     }
 
@@ -2116,6 +2486,22 @@ impl Checker {
             NodeData::StringLiteral(data) => data.text.as_str(),
             _ => return Arc::clone(type_),
         };
+        // A MIXED intersection (`string & { __hash: true }`) has
+        // TypeFactsAllForAny (Go `getTypeFacts`: an intersection with any
+        // non-primitive constituent can't be discriminated by typeof) —
+        // narrowing is a no-op. Constituent-level filtering would drop the
+        // object part and collapse the type to `never`
+        // (taggedPrimitiveNarrowing).
+        if let TypeData::Intersection(i) = &type_.data {
+            let all_primitive = i
+                .union_or_intersection
+                .types
+                .iter()
+                .all(|t| t.flags.intersects(TYPE_FLAGS_PRIMITIVE));
+            if !all_primitive {
+                return Arc::clone(type_);
+            }
+        }
         let matching_flags = match type_name {
             "string" => TYPE_FLAGS_STRING_LIKE,
             "number" => TYPE_FLAGS_NUMBER_LIKE,
@@ -2212,7 +2598,7 @@ impl Checker {
 
     /// Get the constituent types of a union, or `[type_]` for non-unions.
     /// Returns empty for `never`.
-    fn constituent_types(&self, type_: &Arc<Type>) -> Vec<Arc<Type>> {
+    pub(super) fn constituent_types(&self, type_: &Arc<Type>) -> Vec<Arc<Type>> {
         if type_.is_union() {
             if let TypeData::Union(u) = &type_.data {
                 return u.union_or_intersection.types.clone();
@@ -2222,6 +2608,100 @@ impl Checker {
             return Vec::new();
         }
         vec![Arc::clone(type_)]
+    }
+
+    /// Whether a type is DEFINITELY falsy — `undefined`, `null`, the boolean
+    /// `false`, the empty string literal, the number literal `0` (Go's
+    /// `TypeFactsIsFalsy` per-constituent view).
+    fn constituent_is_definitely_falsy(&self, t: &Arc<Type>) -> bool {
+        if t.flags.intersects(TypeFlags::Undefined | TypeFlags::Null) {
+            return true;
+        }
+        if t.flags.contains(TypeFlags::BooleanLiteral) {
+            return !t.intrinsic_name().is_some_and(|n| n == "true");
+        }
+        if t.flags.contains(TypeFlags::StringLiteral) {
+            return t.intrinsic_name().is_some_and(|n| n == "\"\"" || n.is_empty());
+        }
+        if t.flags.contains(TypeFlags::NumberLiteral) {
+            return t.intrinsic_name().is_some_and(|n| n == "0");
+        }
+        false
+    }
+
+    /// `constituent_types` for sibling modules (the RHS-frame derivation in
+    /// checker.rs).
+    pub(super) fn flow_constituents_public(&self, t: &Arc<Type>) -> Vec<Arc<Type>> {
+        self.constituent_types(t)
+    }
+
+    /// `constituent_is_definitely_falsy` for sibling modules.
+    pub(super) fn flow_constituent_definitely_falsy(&self, t: &Arc<Type>) -> bool {
+        self.constituent_is_definitely_falsy(t)
+    }
+
+    /// The definitely-falsy constituents of a type (`undefined`, `null`,
+    /// falsy literals) — Go `extractDefinitelyFalsyTypes`.
+    fn extract_definitely_falsy_constituents(&mut self, t: &Arc<Type>) -> Arc<Type> {
+        let falsy: Vec<Arc<Type>> = self
+            .constituent_types(t)
+            .into_iter()
+            .filter(|c| self.constituent_is_definitely_falsy(c))
+            .collect();
+        self.rebuild_union_or_never(t, falsy)
+    }
+
+    /// The type minus its definitely-falsy constituents — Go
+    /// `removeDefinitelyFalsyTypes`. Never returns an empty union: a type
+    /// that is ENTIRELY definitely-falsy keeps its falsy constituents (the
+    /// falsy branch is then also the only branch).
+    fn remove_definitely_falsy_constituents(&mut self, t: &Arc<Type>) -> Arc<Type> {
+        let kept: Vec<Arc<Type>> = self
+            .constituent_types(t)
+            .into_iter()
+            .filter(|c| !self.constituent_is_definitely_falsy(c))
+            .collect();
+        if kept.is_empty() {
+            return Arc::clone(t);
+        }
+        self.rebuild_union_or_never(t, kept)
+    }
+
+    /// Union two flow types (single-element fast path). Constituent
+    /// dedup mirrors Go's `getUnionType` — a merge point that unions the
+    /// pre-narrowing type (`number | null`) with the narrowed one
+    /// (`number`) must collapse the shared `number` constituent, or the
+    /// display and every downstream comparison see `number | null |
+    /// number` (destructuringTypeGuardFlow's chain-condition re-read).
+    fn flow_union_of(&self, types: &[Arc<Type>]) -> Arc<Type> {
+        let mut all: Vec<Arc<Type>> = Vec::new();
+        for t in types {
+            for c in self.constituent_types(t) {
+                if !all.iter().any(|s| Arc::ptr_eq(s, &c)) {
+                    all.push(c);
+                }
+            }
+        }
+        if all.is_empty() {
+            return self.never_type();
+        }
+        if all.len() == 1 {
+            return all.into_iter().next().expect("exactly one");
+        }
+        Arc::new(Type::new(
+            TypeFlags::Union,
+            TypeData::Union(UnionTypeData {
+                union_or_intersection: UnionOrIntersectionTypeData {
+                    structured: StructuredTypeData::default(),
+                    types: all,
+                },
+                resolved_reduced_type: std::sync::OnceLock::new(),
+                regular_type: std::sync::OnceLock::new(),
+                origin: None,
+                key_property_name: None,
+                constituent_map: std::collections::HashMap::new(),
+            }),
+        ))
     }
 
     /// Remove all types from `type_` that match `value_type`.
@@ -2707,6 +3187,22 @@ impl Checker {
             _ => {}
         }
         match source.kind {
+            SyntaxKind::BinaryExpression => {
+                // The narrowed reference itself sits behind a comma or
+                // assignment wrapper (`(sideEffect(), value).inner` —
+                // matching unwraps to the right operand, like the flow-side
+                // unwrapping above; Go's isMatchingReference treats both
+                // sides symmetrically).
+                if let NodeData::BinaryExpression(bin) = &source.data {
+                    if bin.operator_token.kind == SyntaxKind::CommaToken {
+                        return self.is_matching_reference(&bin.right, target);
+                    }
+                    if is_assignment_operator(bin.operator_token.kind) {
+                        return self.is_matching_reference(&bin.left, target);
+                    }
+                }
+                return false;
+            }
             SyntaxKind::Identifier | SyntaxKind::PrivateIdentifier => {
                 if target.kind == SyntaxKind::Identifier {
                     return match (
@@ -3181,11 +3677,65 @@ impl Checker {
                 // Compound assignments (`x += v`) recompute from the
                 // antecedent type in Go (getBaseTypeOfLiteralType); the
                 // caller's antecedent walk approximates that.
-                if bin.operator_token.kind != SyntaxKind::EqualsToken {
-                    return None;
+                if bin.operator_token.kind == SyntaxKind::EqualsToken {
+                    // An empty-array-literal RHS starts/restarts evolution
+                    // (`x = []` after any declared type incl. null).
+                    let assigned = if matches!(
+                        &bin.right.data,
+                        NodeData::ArrayLiteralExpression(d) if d.elements.is_empty()
+                    ) {
+                        self.auto_array_type()
+                    } else {
+                        self.get_type_of_node(&bin.right)
+                    };
+                    return Some(self.reduced_assignment_type(declared, &assigned, evolving));
                 }
+                // Logical assignments (Go checkBinaryLikeExpression result
+                // types, checker.go ~L12547): the post-assignment type is
+                // the union of the NOT-taken branch's narrowing of the
+                // declared type and the assigned RHS type — the assignment
+                // flow node sits on the taken branch only. When the taken
+                // branch is impossible (the guard Go models with
+                // `hasTypeFacts`), the declared type passes through.
                 let assigned = self.get_type_of_node(&bin.right);
-                Some(self.reduced_assignment_type(declared, &assigned, evolving))
+                let possibly_nullish = self
+                    .constituent_types(declared)
+                    .iter()
+                    .any(|c| c.flags.intersects(TypeFlags::Undefined | TypeFlags::Null));
+                let possibly_falsy = self
+                    .constituent_types(declared)
+                    .iter()
+                    .any(|c| self.constituent_is_definitely_falsy(c));
+                let possibly_truthy = self
+                    .constituent_types(declared)
+                    .iter()
+                    .any(|c| !self.constituent_is_definitely_falsy(c));
+                match bin.operator_token.kind {
+                    SyntaxKind::QuestionQuestionEqualsToken if possibly_nullish => {
+                        // `f ??= r`: keep-branch has f non-nullish.
+                        let non_null = self.get_non_nullable_type_of(declared);
+                        Some(self.flow_union_of(&[non_null, assigned]))
+                    }
+                    SyntaxKind::BarBarEqualsToken if possibly_falsy => {
+                        // `f ||= r`: keep-branch has f truthy (definitely
+                        // falsy constituents removed).
+                        let truthy = self.remove_definitely_falsy_constituents(declared);
+                        Some(self.flow_union_of(&[truthy, assigned]))
+                    }
+                    SyntaxKind::AmpersandAmpersandEqualsToken if possibly_truthy => {
+                        // `f &&= r`: keep-branch has f definitely falsy
+                        // (undefined/null/other falsy literals survive —
+                        // that is what makes a later `f(42)` report 2722).
+                        let falsy = self.extract_definitely_falsy_constituents(declared);
+                        Some(self.flow_union_of(&[falsy, assigned]))
+                    }
+                    SyntaxKind::QuestionQuestionEqualsToken
+                    | SyntaxKind::BarBarEqualsToken
+                    | SyntaxKind::AmpersandAmpersandEqualsToken => {
+                        Some(Arc::clone(declared))
+                    }
+                    _ => None,
+                }
             }
             // `x++`, `x--` — numeric after the update.
             NodeData::PostfixUnaryExpression(unary) => {
@@ -3283,6 +3833,16 @@ impl Checker {
         if evolving {
             return Arc::clone(assigned);
         }
+        // A null-declared variable assigned an empty-array literal starts
+        // evolving (`let x = null; x = []; x.push(1)` — Go's
+        // getAssignmentReducedType hands the autoArrayType through when
+        // the assigned value is an array literal and declared includes
+        // null).
+        if declared.flags.contains(TypeFlags::Null)
+            && (self.is_auto_array_type(assigned) || assigned.object_flags.contains(ObjectFlags::EvolvingArray))
+        {
+            return Arc::clone(assigned);
+        }
         if !declared.is_union() {
             return Arc::clone(declared);
         }
@@ -3339,10 +3899,29 @@ impl Checker {
     /// for for-of); a BindingElement destructures from its parent pattern's
     /// type, applying any default initializer
     /// (`getTypeWithDefault`: non-undefined part ∪ default).
-    fn initial_type_of_declaration(&mut self, expr: &Arc<Node>) -> Option<Arc<Type>> {
+    pub(super) fn initial_type_of_declaration(&mut self, expr: &Arc<Node>) -> Option<Arc<Type>> {
         match &expr.data {
             NodeData::VariableDeclaration(vd) => {
                 if let Some(init) = &vd.initializer {
+                    // An empty-array-literal initializer seeds the flow
+                    // with the AUTO marker (the literal's own type is
+                    // `never[]`) — `let x = []; x.push(1)` then evolves
+                    // the element through the ARRAY_MUTATION flow. A
+                    // null/undefined initializer seeds the plain AUTO type
+                    // (`let x = null; x = []; x.push(1)` — the declared
+                    // type is implicit-any, not null).
+                    if matches!(
+                        &init.data,
+                        NodeData::ArrayLiteralExpression(d) if d.elements.is_empty()
+                    ) {
+                        return Some(self.auto_array_type());
+                    }
+                    if matches!(
+                        init.kind,
+                        crate::ast::SyntaxKind::NullKeyword | crate::ast::SyntaxKind::UndefinedKeyword
+                    ) {
+                        return Some(self.auto_type());
+                    }
                     return Some(self.get_type_of_node(init));
                 }
                 let for_stmt = Self::for_in_or_of_statement_of(expr)?;
@@ -3446,6 +4025,23 @@ impl Checker {
     /// (`checkRightHandSideOfForOf`): arrays/tuples yield their element
     /// type, strings yield `string`, anything else `any`.
     fn iterated_element_type(&mut self, rhs: &Arc<Type>) -> Arc<Type> {
+        // A union iterable (`x.arr` with `x: IA | IAB` → `{A}[] | {A;B}[]`)
+        // iterates the UNION of the per-constituent element types.
+        if rhs.is_union() {
+            let parts: Vec<Arc<Type>> = self
+                .constituent_types(rhs)
+                .into_iter()
+                .map(|c| self.iterated_element_type(&c))
+                .filter(|t| !t.flags.contains(TypeFlags::Never))
+                .collect();
+            if parts.is_empty() {
+                return self.get_any_type();
+            }
+            if parts.len() == 1 {
+                return parts.into_iter().next().expect("exactly one");
+            }
+            return self.get_union_type(parts);
+        }
         if self.is_array_type(rhs) {
             return self.get_array_element_type(rhs);
         }
@@ -3799,12 +4395,25 @@ impl Checker {
             return Arc::clone(candidate);
         }
         if type_.is_union() {
+            // Go narrowTypeByInstanceof's mapType: a constituent that is a
+            // SUBTYPE of the candidate stays; a SUPERTYPE (e.g. the base
+            // class `Base` when narrowing `Base | B2` by `instanceof A2` —
+            // loop-carried merges routinely produce this shape) narrows
+            // DOWN to the candidate; unrelated constituents drop to never.
             let constituents = self.constituent_types(type_);
-            let matching: Vec<Arc<Type>> = constituents
+            let mapped: Vec<Arc<Type>> = constituents
                 .into_iter()
-                .filter(|t| self.is_type_assignable_to(t, candidate))
+                .map(|t| {
+                    if self.is_type_assignable_to(&t, candidate) {
+                        t
+                    } else if self.is_type_assignable_to(candidate, &t) {
+                        Arc::clone(candidate)
+                    } else {
+                        self.never_type()
+                    }
+                })
                 .collect();
-            return self.rebuild_union_or_never(type_, matching);
+            return self.rebuild_union_or_never(type_, mapped);
         }
         // Non-union: narrow to candidate if it's a subtype of the current
         // type; otherwise leave unchanged.
@@ -3909,4 +4518,20 @@ fn is_assignment_operator(kind: SyntaxKind) -> bool {
             | SyntaxKind::AmpersandAmpersandEqualsToken
             | SyntaxKind::QuestionQuestionEqualsToken
     )
+}
+
+/// The case/default clauses in the half-open range `[start, end)` of a
+/// switch statement's clause list (clamped). The empty slice for an empty
+/// range such as the `[0, 0)` bypass branch.
+fn clauses_of_range(switch_stmt: &Arc<Node>, start: usize, end: usize) -> Vec<Arc<Node>> {
+    let NodeData::SwitchStatement(sd) = &switch_stmt.data else {
+        return Vec::new();
+    };
+    let NodeData::CaseBlock(cb) = &sd.case_block.data else {
+        return Vec::new();
+    };
+    let clauses = &cb.clauses.nodes;
+    let start = start.min(clauses.len());
+    let end = end.max(start).min(clauses.len());
+    clauses[start..end].to_vec()
 }

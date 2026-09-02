@@ -336,16 +336,21 @@ impl CompilerOptions {
     }
 
     pub fn get_module_resolution_kind(&self) -> ModuleResolutionKind {
+        // Go maps only Unknown/Classic through the module-kind default;
+        // an EXPLICIT node10 stays node10 (exports ignored, types/main +
+        // index fallbacks only) — lumping it into the remap made node10
+        // layouts resolve through `exports` (node10AlternateResult
+        // _noResolution must NOT resolve).
         match self.module_resolution {
-            ModuleResolutionKind::Unknown
-            | ModuleResolutionKind::Classic
-            | ModuleResolutionKind::Node10 => match self.get_emit_module_kind() {
-                ModuleKind::Node16 | ModuleKind::Node18 | ModuleKind::Node20 => {
-                    ModuleResolutionKind::Node16
+            ModuleResolutionKind::Unknown | ModuleResolutionKind::Classic => {
+                match self.get_emit_module_kind() {
+                    ModuleKind::Node16 | ModuleKind::Node18 | ModuleKind::Node20 => {
+                        ModuleResolutionKind::Node16
+                    }
+                    ModuleKind::NodeNext => ModuleResolutionKind::NodeNext,
+                    _ => ModuleResolutionKind::Bundler,
                 }
-                ModuleKind::NodeNext => ModuleResolutionKind::NodeNext,
-                _ => ModuleResolutionKind::Bundler,
-            },
+            }
             other => other,
         }
     }

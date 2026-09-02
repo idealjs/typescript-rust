@@ -1889,6 +1889,20 @@ fn set_bool(options: &mut CompilerOptions, name: &str, b: bool) {
 /// the comma-separated value is split into a list; everything else is treated
 /// as a plain string.
 pub fn apply_test_settings(settings: &HashMap<String, String>) -> (CompilerOptions, Vec<String>) {
+    apply_test_settings_with_base(settings, CompilerOptions::default())
+}
+
+/// The tsconfig-unit variant: directive settings apply ON TOP of a base
+/// (the parsed `tsconfig.json` unit's compilerOptions — Go
+/// `CompileFiles` clones the config options then runs
+/// `SetOptionsFromTestConfig` over them, so directives win conflicts).
+/// The calibrated `noImplicitAny`-defaults-true rule still applies, but an
+/// explicitly-set base value (`"noImplicitAny": false` in the config) is
+/// respected.
+pub fn apply_test_settings_with_base(
+    settings: &HashMap<String, String>,
+    base: CompilerOptions,
+) -> (CompilerOptions, Vec<String>) {
     // Names of directives this function understands. Anything else is reported
     // as unrecognized so the test runner can skip those cases rather than run
     // them with silently-defaulted options.
@@ -1983,21 +1997,22 @@ pub fn apply_test_settings(settings: &HashMap<String, String>) -> (CompilerOptio
     ];
     const KNOWN_LIST_OPTIONS: &[&str] = &["lib", "types", "typeroots", "rootdirs"];
 
-    let mut options = CompilerOptions::default();
+    let mut options = base;
     let mut unrecognized: Vec<String> = Vec::new();
 
     // tsgo defaults `noImplicitAny` to TRUE when the case specifies neither
     // `strict` nor `noImplicitAny` (verified against the Go oracle CLI and
     // the official baselines: `function foo();` reports TS7010 with no
-    // directives). An explicit directive always wins, and `strict: false`
-    // keeps it off via the strict-option fallback.
+    // directives). An explicit directive always wins, `strict: false`
+    // keeps it off via the strict-option fallback, and a tsconfig base
+    // that explicitly set it is respected.
     let has_strict_directive = settings
         .keys()
         .any(|k| k.eq_ignore_ascii_case("strict"));
     let has_nia_directive = settings
         .keys()
         .any(|k| k.eq_ignore_ascii_case("noimplicitany"));
-    if !has_strict_directive && !has_nia_directive {
+    if !has_strict_directive && !has_nia_directive && options.no_implicit_any.is_unknown() {
         options.no_implicit_any = crate::core::tristate::Tristate::True;
     }
 
@@ -2017,6 +2032,16 @@ pub fn apply_test_settings(settings: &HashMap<String, String>) -> (CompilerOptio
         // Classify the value and apply it.
         let is_bool_val = matches!(trimmed.as_str(), "true" | "false")
             && KNOWN_BOOL_OPTIONS.contains(&lower.as_str());
+        // Canonicalize the key through the (case-insensitive) option
+        // declarations: `apply_options` matches arms EXACTLY, and the
+        // camelCase arms ("jsxImportSource", "moduleResolution", …) never
+        // fired for the lowercased directive keys — the values silently
+        // dropped (jsxJsxsCjsTransformCustomImport lost its
+        // `@jsxImportSource: preact`, node10 layouts lost
+        // `@moduleResolution: node10`).
+        let canonical = find_option(&lower)
+            .map(|o| o.name.to_string())
+            .unwrap_or_else(|| lower.clone());
         if is_bool_val {
             set_bool(&mut options, &lower, trimmed.eq_ignore_ascii_case("true"));
         } else if KNOWN_LIST_OPTIONS.contains(&lower.as_str()) {
@@ -2026,11 +2051,11 @@ pub fn apply_test_settings(settings: &HashMap<String, String>) -> (CompilerOptio
                 .filter(|s| !s.is_empty())
                 .collect();
             let mut map = HashMap::new();
-            map.insert(lower.clone(), OptValue::List(list));
+            map.insert(canonical, OptValue::List(list));
             apply_options(&map, &mut options);
         } else {
             let mut map = HashMap::new();
-            map.insert(lower.clone(), OptValue::Str(trimmed.clone()));
+            map.insert(canonical, OptValue::Str(trimmed.clone()));
             apply_options(&map, &mut options);
         }
     }

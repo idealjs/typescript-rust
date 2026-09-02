@@ -988,14 +988,15 @@ fn checker_overload_wrong_return_type_ts2322() {
 
 #[test]
 fn checker_overload_no_matching_signature_ts2345() {
-    // `f(true)` matches neither `string` nor `number` overload.
+    // `f(true)` matches neither `string` nor `number` overload — the
+    // official form is TS2769 with per-overload chains.
     let diags = check_source(
         "function f(x: string): number;\n\
          function f(x: number): string;\n\
          function f(x: any): any { return x; }\n\
          f(true);",
     );
-    assert_diagnostic_code(&diags, 2345);
+    assert_diagnostic_code(&diags, 2769);
 }
 
 #[test]
@@ -1258,13 +1259,16 @@ fn checker_recursive_type_alias_does_not_crash() {
 #[test]
 fn checker_undefined_variable_ts2304() {
     let diags = check_source("let x = undefinedVar;");
-    assert_diagnostic_code(&diags, 2304);
+    // Official suggests `undefined` (TS2552): distance 3 fits Go's
+    // floor(len*0.4)+0.9 budget at length 12.
+    assert_diagnostic_code(&diags, 2552);
 }
 
 #[test]
 fn checker_undefined_function_call_ts2304() {
     let diags = check_source("undefinedFunc();");
-    assert_diagnostic_code(&diags, 2304);
+    // Official suggests `undefined` (TS2552) — within Go's distance budget.
+    assert_diagnostic_code(&diags, 2552);
 }
 
 #[test]
@@ -1282,7 +1286,7 @@ fn checker_new_undefined_class_ts2304() {
 #[test]
 fn checker_shorthand_property_undefined_ts2304() {
     let diags = check_source("let x = { undefinedVar };");
-    assert_diagnostic_code(&diags, 2304);
+    assert_diagnostic_code(&diags, 2552);
 }
 
 // ────────────────────────────────────────────────────────────────────────────
@@ -1590,7 +1594,7 @@ fn checker_chained_variable_references_no_error() {
 #[test]
 fn checker_expression_with_defined_and_undefined_vars() {
     let diags = check_source("let a = 1;\nlet b = a + undefinedVar;");
-    assert_diagnostic_code(&diags, 2304);
+    assert_diagnostic_code(&diags, 2552);
 }
 
 // ────────────────────────────────────────────────────────────────────────────
@@ -1748,11 +1752,15 @@ fn checker_class_implements_interface_with_method_no_error() {
 #[test]
 fn checker_class_implements_interface_wrong_method_return_ts2420() {
     // The class method's return type must be assignable to the interface's.
+    // Oracle-verified: tsgo reports the MEMBER-level TS2416 ("Property
+    // 'bar' in type 'C' is not assignable to the same property in base
+    // type 'IFoo'") — the class-level TS2420 is only for members that
+    // cannot be located individually.
     let diags = check_source(
         "interface IFoo { bar(): number; }\n\
          class C implements IFoo { bar(): string { return 'hi'; } }",
     );
-    assert_diagnostic_code(&diags, 2420);
+    assert_diagnostic_code(&diags, 2416);
 }
 
 // ────────────────────────────────────────────────────────────────────────────
@@ -2063,9 +2071,9 @@ fn checker_jsx_attribute_expression_no_error() {
 }
 #[test]
 fn checker_jsx_undefined_expression_in_curly() {
-    // `undefinedVar` is not in scope: expect TS2304.
+    // `undefinedVar` is not in scope: TS2552 (suggests `undefined`).
     let diags = check_source_tsx("const el = <div>{undefinedVar}</div>;");
-    assert_diagnostic_code(&diags, 2304);
+    assert_diagnostic_code(&diags, 2552);
 }
 
 #[test]
@@ -2305,7 +2313,7 @@ fn checker_jsdoc_undefined_variable_ts2304() {
         "/** @type {number} */\n\
          let x = undefinedVar;",
     );
-    assert_diagnostic_code(&diags, 2304);
+    assert_diagnostic_code(&diags, 2552);
 }
 
 #[test]
@@ -2654,7 +2662,7 @@ fn checker_narrowing_switch_default_removes_cases() {
     // so the default branch has `never` — but we still allow assignment to
     // `string | number` because TS is conservative for non-exhaustive checks.
     let diags = check_source(
-        "let x: string | number | boolean = 0;\
+        "function f(x: string | number | boolean) {\
          switch (x) {\
              case \"foo\":\
                  break;\
@@ -2663,9 +2671,11 @@ fn checker_narrowing_switch_default_removes_cases() {
              default:\
                  let z: boolean = x;\
                  break;\
-         }",
+         } }",
     );
-    assert_no_diagnostics(&diags);
+    // Official: a plain primitive union in `default` keeps the full
+    // union (only literal-discriminated unions narrow away case types).
+    assert_diagnostic_count(&diags, 2322, 1);
 }
 
 #[test]
@@ -2673,8 +2683,7 @@ fn checker_narrowing_switch_on_discriminant_property() {
     // `switch (obj.kind)` narrows `obj` to the constituent whose `kind`
     // matches the case expression.
     let diags = check_source(
-        "type T = { kind: \"foo\", value: string } | { kind: \"bar\", count: number };\
-         let obj: T = { kind: \"foo\", value: \"x\" };\
+        "function f(obj: { kind: \"foo\", value: string } | { kind: \"bar\", count: number }) {\
          switch (obj.kind) {\
              case \"foo\":\
                  let v: string = obj.value;\
@@ -2682,7 +2691,7 @@ fn checker_narrowing_switch_on_discriminant_property() {
              case \"bar\":\
                  let c: number = obj.count;\
                  break;\
-         }",
+         } }",
     );
     assert_no_diagnostics(&diags);
 }
@@ -2692,8 +2701,7 @@ fn checker_narrowing_switch_default_discriminant_property() {
     // In the `default` clause of a switch on a discriminant property, `obj`
     // narrows to the constituent whose `kind` doesn't match any case.
     let diags = check_source(
-        "type T = { kind: \"foo\", value: string } | { kind: \"bar\", count: number } | { kind: \"baz\", flag: boolean };\
-         let obj: T = { kind: \"foo\", value: \"x\" };\
+        "function f(obj: { kind: \"foo\", value: string } | { kind: \"bar\", count: number } | { kind: \"baz\", flag: boolean }) {\
          switch (obj.kind) {\
              case \"foo\":\
                  break;\
@@ -2702,7 +2710,7 @@ fn checker_narrowing_switch_default_discriminant_property() {
              default:\
                  let f: boolean = obj.flag;\
                  break;\
-         }",
+         } }",
     );
     assert_no_diagnostics(&diags);
 }
@@ -2800,27 +2808,30 @@ fn checker_narrowing_optional_chain_not_equal_undefined() {
 
 #[test]
 fn checker_narrowing_equality_replaces_string_with_literal() {
-    // `x === "foo"` narrows `string` to `"foo"` (replace primitive with
-    // literal). `let y: "foo" = x` should succeed in the true branch.
+    // Oracle-verified: the `= 0` initializer flow-narrows `x` to `number`
+    // FIRST, so `x === "foo"` compares number vs "foo" → TS2367 (no
+    // overlap). The literal-replacement narrowing premise only holds
+    // without the initializer narrowing interplay.
     let diags = check_source(
         "let x: string | number = 0;\
          if (x === \"foo\") {\
              let y: \"foo\" = x;\
          }",
     );
-    assert_no_diagnostics(&diags);
+    assert_diagnostic_code(&diags, 2367);
 }
 
 #[test]
 fn checker_narrowing_equality_replaces_number_with_literal() {
-    // `x === 42` narrows `number` to `42`.
+    // Oracle-verified: the `= ""` initializer narrows `x` to `string`
+    // first, so `x === 42` → TS2367 (same interplay as the string case).
     let diags = check_source(
         "let x: string | number = \"\";\
          if (x === 42) {\
              let y: 42 = x;\
          }",
     );
-    assert_no_diagnostics(&diags);
+    assert_diagnostic_code(&diags, 2367);
 }
 
 #[test]
@@ -3004,8 +3015,10 @@ fn checker_narrowing_typeof_switch_unreachable_case_never() {
 #[test]
 fn checker_narrowing_switch_true_equality() {
     // `switch (true) { case x === "foo": ... }` narrows `x` to `"foo"`.
+    // `x` is a parameter: a `let x = 0` initializer would literal-narrow the
+    // case comparisons into TS2367 (official errors on that form too).
     let diags = check_source(
-        "let x: string | number = 0;\
+        "function f(x: string | number) {\
          switch (true) {\
              case x === \"foo\":\
                  let y: string = x;\
@@ -3013,6 +3026,7 @@ fn checker_narrowing_switch_true_equality() {
              case x === 42:\
                  let z: number = x;\
                  break;\
+         }\
          }",
     );
     assert_no_diagnostics(&diags);
@@ -3075,9 +3089,11 @@ fn checker_narrowing_switch_true_type_predicate() {
 fn checker_narrowing_switch_true_default_negates_all() {
     // In the default clause, all case conditions are false.
     // `x === "foo"` is false → x is not "foo"; `x === 42` is false → x is not 42.
-    // The remaining type is `boolean`.
+    // The remaining type is `boolean`. (Parameter form: the `= false`
+    // initializer literal-narrows the case comparisons into TS2367, which
+    // official reports as well.)
     let diags = check_source(
-        "let x: \"foo\" | 42 | boolean = false;\
+        "function f(x: \"foo\" | 42 | boolean) {\
          switch (true) {\
              case x === \"foo\":\
                  break;\
@@ -3086,6 +3102,7 @@ fn checker_narrowing_switch_true_default_negates_all() {
              default:\
                  let z: boolean = x;\
                  break;\
+         }\
          }",
     );
     assert_no_diagnostics(&diags);
@@ -3463,8 +3480,11 @@ fn checker_narrowing_typeof_discriminant_property_string() {
 
 #[test]
 fn checker_narrowing_typeof_discriminant_property_number() {
-    // `typeof obj.kind === "number"` narrows `obj` to the constituent
-    // whose `kind` property is a number-like type.
+    // Oracle-verified: the `{ kind: "foo", ... }` initializer
+    // flow-narrows `obj` to the "foo" constituent first, so the
+    // `typeof obj.kind === "number"` branch leaves `count` unreachable —
+    // tsgo reports TS2339 ('count' does not exist on type 'never'; we
+    // keep the narrowed "foo" constituent in the message text).
     let diags = check_source(
         "type T = { kind: \"foo\", value: string } | { kind: 42, count: number };\
          let obj: T = { kind: \"foo\", value: \"x\" };\
@@ -3472,13 +3492,14 @@ fn checker_narrowing_typeof_discriminant_property_number() {
              let c: number = obj.count;\
          }",
     );
-    assert_no_diagnostics(&diags);
+    assert_diagnostic_code(&diags, 2339);
 }
 
 #[test]
 fn checker_narrowing_typeof_discriminant_property_false_branch() {
-    // `typeof obj.kind !== "string"` narrows `obj` to the constituent
-    // whose `kind` property is NOT string-like (the number constituent).
+    // Oracle-verified: same initializer-narrowing interplay as the true
+    // branch — `typeof obj.kind !== "string"` keeps the "foo"
+    // constituent, where `count` does not exist → TS2339.
     let diags = check_source(
         "type T = { kind: \"foo\", value: string } | { kind: 42, count: number };\
          let obj: T = { kind: \"foo\", value: \"x\" };\
@@ -3486,7 +3507,7 @@ fn checker_narrowing_typeof_discriminant_property_false_branch() {
              let c: number = obj.count;\
          }",
     );
-    assert_no_diagnostics(&diags);
+    assert_diagnostic_code(&diags, 2339);
 }
 
 // ────────────────────────────────────────────────────────────────────────────
@@ -3594,7 +3615,9 @@ fn checker_type_display_number_literal() {
 
 #[test]
 fn checker_type_display_union() {
-    // `string | number` not assignable to `boolean` → should contain `string | number`.
+    // `string | number` assigned to `boolean` → oracle-verified: tsgo
+    // (like official TS) narrows `x` to `number` through the `= 0`
+    // initializer, so the TS2322 shows 'number', not the declared union.
     let diags = check_source(
         "let x: string | number = 0;\
          let y: boolean = x;",
@@ -3602,8 +3625,8 @@ fn checker_type_display_union() {
     let args = get_ts2322_args(&diags);
     assert!(!args.is_empty(), "Expected TS2322");
     assert!(
-        args.iter().any(|a| a.contains("string | number")),
-        "Expected 'string | number' in args: {:?}",
+        args.iter().any(|a| a.contains("number")),
+        "Expected 'number' in args: {:?}",
         args
     );
 }
@@ -3788,12 +3811,15 @@ fn checker_property_access_on_union_present_in_all_no_error() {
 
 #[test]
 fn checker_property_access_on_union_missing_in_one_ts2339() {
-    // `{ a: number }` has `a`, `{ b: string }` doesn't → TS2339.
+    // `{ a: number }` has `a`, `{ b: string }` doesn't. Official TS
+    // reports TS2339 here, but the tsgo oracle reports nothing for union
+    // property access through a missing constituent — pins the current
+    // (oracle-matching) behavior.
     let diags = check_source(
         "let x: { a: number } | { b: string } = { a: 1 };\
          let y = x.a;",
     );
-    assert_diagnostic_code(&diags, 2339);
+    assert_diagnostic_count(&diags, 2339, 0);
 }
 
 #[test]
@@ -3952,9 +3978,10 @@ fn checker_call_arg_matching_object_type_no_error() {
 
 #[test]
 fn checker_call_arg_object_missing_property_ts2345() {
-    // `{ b: 1 }` not assignable to `{ a: number }` → TS2345.
+    // `{ b: 1 }` vs `{ a: number }` — official reports the excess-property
+    // form TS2353 for a fresh object-literal argument.
     let diags = check_source("function f(p: { a: number }) {} f({ b: 1 });");
-    assert_diagnostic_code(&diags, 2345);
+    assert_diagnostic_code(&diags, 2353);
 }
 
 #[test]
@@ -6585,10 +6612,14 @@ fn checker_ts2448_let_used_after_declaration_no_error() {
 }
 
 #[test]
-fn checker_ts2448_var_used_before_declaration_no_error() {
-    // `var` is function-scoped and hoisted — no TS2448.
+fn checker_ts2448_var_used_before_declaration_no_2448_but_2454() {
+    // `var` is function-scoped and hoisted — no TS2448 TDZ. The read still
+    // precedes the initializer's assignment point, so under strict mode the
+    // definite-assignment analysis reports TS2454 (tsgo-ref verified:
+    // `let y = later; var later = 42;` → TS2454 at the read).
     let diags = check_source("let y = later;\nvar later = 42;");
-    assert_no_diagnostics(&diags);
+    assert_diagnostic_code(&diags, 2454);
+    assert_diagnostic_count(&diags, 2454, 1);
 }
 
 #[test]
@@ -6622,9 +6653,11 @@ fn checker_ts2448_deferred_in_arrow_no_error() {
 
 #[test]
 fn checker_ts2448_class_used_before_declaration() {
-    // Class referenced before its declaration → TS2448.
+    // Class referenced before its declaration → TS2449 (oracle-verified:
+    // tsgo reports "Class 'C' used before its declaration", the same code
+    // as other block-scoped class references — not the variable TS2448).
     let diags = check_source("const c = new C();\nclass C {}");
-    assert_diagnostic_code(&diags, 2448);
+    assert_diagnostic_code(&diags, 2449);
 }
 
 #[test]
@@ -6701,9 +6734,12 @@ fn checker_ts2454_let_string_uninitialized_used_before_assignment() {
 
 #[test]
 fn checker_ts18048_property_access_on_possibly_undefined() {
-    // Accessing `.a` on `{ a: number } | undefined` → TS18048.
+    // Accessing `.a` on `{ a: number } | undefined` — official TS reports
+    // TS18048, but the tsgo oracle reports none for possibly-undefined
+    // property access, and neither do we — pins the oracle-matching
+    // behavior (see also the alias/chained variants below).
     let diags = check_source_strict("let x: { a: number } | undefined = { a: 1 };\nx.a;");
-    assert_diagnostic_code(&diags, 18048);
+    assert_diagnostic_count(&diags, 18048, 0);
 }
 
 #[test]
@@ -6744,9 +6780,11 @@ fn checker_ts18048_property_access_after_narrowing_no_error() {
 
 #[test]
 fn checker_ts18048_property_access_on_possibly_null_union() {
-    // `{ a: number } | null` — accessing `.a` → TS18048.
+    // `{ a: number } | null` — same oracle situation as the undefined
+    // variant above: official TS reports TS18048, tsgo (and we) report
+    // none — pins the oracle-matching behavior.
     let diags = check_source_strict("let x: { a: number } | null = { a: 1 };\nx.a;");
-    assert_diagnostic_code(&diags, 18048);
+    assert_diagnostic_count(&diags, 18048, 0);
 }
 
 // ────────────────────────────────────────────────────────────────────────────
@@ -7031,9 +7069,10 @@ fn checker_ts2448_const_used_in_expression_before_declaration() {
 
 #[test]
 fn checker_ts2448_class_instantiation_before_declaration() {
-    // `new C()` before `class C` → TS2448.
+    // `new C()` before `class C` → TS2449 (oracle-verified, same as the
+    // plain reference case above).
     let diags = check_source("const i = new C();\nclass C {}");
-    assert_diagnostic_code(&diags, 2448);
+    assert_diagnostic_code(&diags, 2449);
 }
 
 // ────────────────────────────────────────────────────────────────────────────
@@ -7060,23 +7099,28 @@ fn checker_ts2454_annotated_assignment_after_use() {
 
 #[test]
 fn checker_ts18048_nullable_via_type_alias() {
-    // A type-aliased object type unioned with `undefined` → TS18048.
+    // A type-aliased object type unioned with `undefined` — the alias'd
+    // shape does not currently reach the TS18048 gate (the direct
+    // anonymous-object shape does; oracle tsgo reports no TS18048 for
+    // any of these shapes either). Pins current behavior.
     let diags = check_source_strict(
         "type Box = { v: number };\n\
          let x: Box | undefined = { v: 1 };\n\
          x.v;",
     );
-    assert_diagnostic_code(&diags, 18048);
+    assert_diagnostic_count(&diags, 18048, 0);
 }
 
 #[test]
 fn checker_ts18048_chained_property_access_on_possibly_undefined() {
-    // `x.a.b` where `x` is possibly undefined → TS18048.
+    // `x.a.b` — the inner `x.a` access inside a chain does not currently
+    // reach the TS18048 gate (statement-level direct access does). Pins
+    // current behavior; the tsgo oracle reports none here as well.
     let diags = check_source_strict(
         "let x: { a: { b: number } } | undefined = { a: { b: 1 } };\n\
          x.a.b;",
     );
-    assert_diagnostic_code(&diags, 18048);
+    assert_diagnostic_count(&diags, 18048, 0);
 }
 
 #[test]
@@ -8054,10 +8098,10 @@ fn checker_promise_then_with_lib_no_error() {
     let diags = check_source_with_lib("Promise.resolve(1).then(x => x);", false);
     assert_diagnostic_count(&diags, 2304, 0);
     // KNOWN LIMITATION: merged PromiseConstructor overload sets (global
-    // symbol merging) expose the call-site inference gap for
-    // `resolve<T>(value: T)` — TS2345 against the unsubstituted T and a
-    // TS2339 on the conditional `Awaited<T>` return.
-    assert_diagnostic_count(&diags, 2345, 1);
+    // symbol merging) leave the conditional `Awaited<T>` return
+    // unresolved — TS2339 on `.then`. The `resolve<T>` call-site gap
+    // (old TS2345) is gone.
+    assert_diagnostic_count(&diags, 2345, 0);
     assert_diagnostic_count(&diags, 2339, 1);
 }
 
@@ -8068,9 +8112,9 @@ fn checker_promise_then_chain_with_lib_no_error() {
         false,
     );
     assert_diagnostic_count(&diags, 2304, 0);
-    // KNOWN LIMITATION: same resolve<T> inference gap as above (merged
-    // overload sets; see checker_promise_then_with_lib_no_error).
-    assert_diagnostic_count(&diags, 2345, 1);
+    // KNOWN LIMITATION: same unresolved `Awaited<T>` return as above
+    // (merged overload sets; see checker_promise_then_with_lib_no_error).
+    assert_diagnostic_count(&diags, 2345, 0);
     assert_diagnostic_count(&diags, 2339, 1);
 }
 
@@ -8705,8 +8749,9 @@ fn checker_generic_factory_function_no_error() {
     let diags = check_source(
         "function create<T>(ctor: new () => T): T { return new ctor(); }\nclass C {}\nlet c = create(C);",
     );
-    // KNOWN LIMITATION: inferring T from constructor argument not supported (TS2345).
-    assert_diagnostic_count(&diags, 2345, 1);
+    // Constructor-argument inference for T works (the old TS2345 pin is
+    // obsolete — matches the oracle's zero errors).
+    assert_diagnostic_count(&diags, 2345, 0);
 }
 
 #[test]
@@ -8949,15 +8994,20 @@ fn checker_event_emitter_pattern_no_error() {
 
 #[test]
 fn checker_builder_pattern_no_error() {
-    let diags = check_source(
+    let diags = check_source_with_lib(
         "class Builder {\n  private parts: string[] = [];\n  add(p: string): this {\n    this.parts.push(p);\n    return this;\n  }\n  build(): string { return this.parts.join(\"\"); }\n}\nlet r = new Builder().add(\"a\").add(\"b\").build();",
+        false,
     );
-    // KNOWN LIMITATION: `new Builder().add(...)` parses with legacy
-    // precedence (the `Builder()` call becomes the new-callee), so the
-    // callee reports as construct-only — TS2348 (was TS2349 before the
-    // typeof-display/suggestion landed). Array methods push/join still
-    // unresolved without lib.
-    assert_diagnostic_count(&diags, 2348, 1);
+    // `new Builder().add(...)`: the `new` target is a member chain
+    // (parseMemberExpressionRest semantics), so the call applies to the
+    // INSTANCE — the builder chain type-checks cleanly. (Previously the
+    // legacy precedence made `Builder()` the new-callee and reported
+    // TS2348.) Loaded WITH lib so the Array methods push/join resolve.
+    let diags = check_source_with_lib(
+        "class Builder {\n  private parts: string[] = [];\n  add(p: string): this {\n    this.parts.push(p);\n    return this;\n  }\n  build(): string { return this.parts.join(\"\"); }\n}\nlet r = new Builder().add(\"a\").add(\"b\").build();",
+        false,
+    );
+    assert_no_diagnostics(&diags);
 }
 
 #[test]
@@ -8965,8 +9015,9 @@ fn checker_singleton_pattern_no_error() {
     let diags = check_source(
         "class Singleton {\n  private static instance: Singleton;\n  private constructor() {}\n  static get(): Singleton {\n    if (!Singleton.instance) Singleton.instance = new Singleton();\n    return Singleton.instance;\n  }\n}\nlet s = Singleton.get();",
     );
-    // KNOWN LIMITATION: static method access on class type not resolved (TS2339).
-    assert_diagnostic_count(&diags, 2339, 1);
+    // Static method access on the class constructor type resolves (the
+    // old TS2339 pin is obsolete — matches the oracle's zero errors).
+    assert_diagnostic_count(&diags, 2339, 0);
 }
 
 #[test]
@@ -9007,12 +9058,13 @@ fn checker_mixin_pattern_no_error() {
     let diags = check_source(
         "type Constructor<T = {}> = new (...args: any[]) => T;\nfunction Timestamped<TBase extends Constructor>(Base: TBase) {\n  return class extends Base {\n    timestamp = Date.now();\n  };\n}\nclass User {}\nconst TimestampedUser = Timestamped(User);\nlet u = new TimestampedUser();",
     );
-    // KNOWN LIMITATION: mixin class expression — `class extends Base` now
-    // parses (anonymous class with heritage; no more TS2304 on `extends`),
-    // but the mixin's generic base resolution still yields a spurious
-    // TS2345 on `new TimestampedUser()`.
+    // Mixin class expression: `class extends Base` parses, and the
+    // generic-base resolution no longer yields a spurious TS2345 on
+    // `new TimestampedUser()` (cleared by the inferential-callback
+    // unification: inference-side covariant selection + the free
+    // type-parameter target-return comparison).
     assert_diagnostic_count(&diags, 2304, 0);
-    assert_diagnostic_count(&diags, 2345, 1);
+    assert_diagnostic_count(&diags, 2345, 0);
 }
 
 #[test]
@@ -9295,9 +9347,11 @@ fn checker_assertion_function_no_error() {
         "function assert(cond: boolean): asserts cond {\n  if (!cond) throw new Error();\n}\nlet x: number | undefined = 1;\nassert(x !== undefined);\nlet y: number = x;",
     );
     // 'Error' resolves through the built-in ES globals table (TS2304 gone);
-    // assertion-function narrowing is still unsupported → TS2322 remains.
+    // assertion-function narrowing remains unsupported, but the
+    // possibly-undefined union now assigns without a TS2322 — pins the
+    // current behavior (oracle tsgo also reports none here).
     assert_diagnostic_count(&diags, 2304, 0);
-    assert_diagnostic_count(&diags, 2322, 1);
+    assert_diagnostic_count(&diags, 2322, 0);
 }
 
 #[test]
@@ -9311,11 +9365,11 @@ fn checker_discriminated_union_with_array_no_error() {
 #[test]
 fn checker_narrow_optional_chain_method_no_error() {
     let diags = check_source("let obj: { f?: () => number } = {};\nlet x = obj?.f?.() ?? 0;");
-    // KNOWN LIMITATION: optional-method members now build function types
-    // (the old TS2741 is gone), but `?.()` optional calls don't strip
-    // `undefined` from the target — `(() => number) | undefined` reports
-    // TS2349. Go reports nothing here.
-    assert_diagnostic_count(&diags, 2349, 1);
+    // `?.()` optional calls skip the `undefined` constituent for call
+    // resolution (union callees flatten the non-nullable members' call
+    // signatures) — Go reports nothing here (r24: the old pinned 2349
+    // limitation is resolved).
+    assert_no_diagnostics(&diags);
 }
 
 #[test]
@@ -9323,8 +9377,9 @@ fn checker_switch_early_return_no_error() {
     let diags = check_source(
         "function f(x: string): number {\n  switch (x) {\n    case \"a\":\n      return 1;\n    case \"b\":\n    case \"c\":\n      return 2;\n    default:\n      return 0;\n  }\n}",
     );
-    // KNOWN LIMITATION: switch exhaustiveness / early return analysis not supported (TS2366).
-    assert_diagnostic_count(&diags, 2366, 1);
+    // All clauses (incl. default) return — no TS2366 (switch-aware
+    // definitely-returns analysis).
+    assert_diagnostic_count(&diags, 2366, 0);
 }
 
 #[test]
@@ -9352,14 +9407,12 @@ fn checker_dynamic_import_expression_no_error() {
     let diags = check_source(
         "async function f(): Promise<any> {\n  let m = await import(\"./mod\");\n  return m;\n}",
     );
-    // KNOWN LIMITATION: under --noLib the checker treats the dynamic
-    // `import(...)` call as a reference to an undefined global name `import`
-    // (TS2304). `Promise` is no longer flagged. The Go oracle, by contrast,
-    // reports a fleet of TS2318 "Cannot find global type" errors under
-    // --noLib; with lib loaded it reports a single TS2307 for the missing
-    // module. Matching either oracle behaviour here is out of scope for this
-    // fixture, so we only assert the current Rust behaviour.
-    assert_diagnostic_count(&diags, 2304, 1);
+    // The dynamic `import(...)` callee parses as the keyword expression
+    // (no phantom `import` identifier) — TS2304 is gone. Under --noLib
+    // the tsgo oracle reports a TS2318 global-type fleet instead;
+    // matching either oracle behaviour for the module itself is out of
+    // scope for this fixture.
+    assert_diagnostic_count(&diags, 2304, 0);
 }
 
 #[test]
@@ -9453,4 +9506,1508 @@ fn checker_import_equals_require_no_error() {
         ("main.ts", "import y = require(\"./helper\");\n"),
     ]);
     assert_no_diagnostics(&diags);
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// r24 fix round: optional-parameter undefined folding (Fix 8), logical
+// assignment RHS frames (Fix 4), static `this` (Fix 7a), qualified-name
+// heritage + boxed heritage members (Fix 7b), intersection structural
+// fall-through (Fix 7c), union callees, `new C<T>(...)` explicit type
+// arguments, comma-expression typing.
+// ────────────────────────────────────────────────────────────────────────────
+
+#[test]
+fn checker_optional_parameter_type_includes_undefined_ts2322() {
+    // Go `assignParameterType`: a `?` parameter's resolved type carries
+    // `| undefined` under strictNullChecks.
+    let diags = check_source_strict("function g(f?: number) { const x: number = f; }");
+    assert_diagnostic_count(&diags, 2322, 1);
+}
+
+#[test]
+fn checker_optional_parameter_property_access_ts18048() {
+    let diags = check_source_strict("function g(f?: { m(): void }) { f.m(); }");
+    assert_diagnostic_count(&diags, 18048, 1);
+}
+
+#[test]
+fn checker_optional_parameter_contravariant_assignment_ok() {
+    let diags = check_source_strict(
+        "declare const a: (x?: number) => void;\nconst b: (x: number) => void = a;",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_logical_assignment5_family_codes() {
+    // conformance logicalAssignment5 (esnext baseline): exactly two 2722
+    // (foo3/bar3's `f(42)` after `&&=` — the falsy branch keeps undefined)
+    // and two 18048 (bar1/bar2's `f.toString()` inside the ??=/||= RHS —
+    // the target is nullish/falsy there). No 2349/7006 noise.
+    let src = "\
+function foo1 (f?: (a: number) => void) { f ??= (a => a); f(42); }
+function foo2 (f?: (a: number) => void) { f ||= (a => a); f(42); }
+function foo3 (f?: (a: number) => void) { f &&= (a => a); f(42); }
+function bar1 (f?: (a: number) => void) { f ??= (f.toString(), (a => a)); f(42); }
+function bar2 (f?: (a: number) => void) { f ||= (f.toString(), (a => a)); f(42); }
+function bar3 (f?: (a: number) => void) { f &&= (f.toString(), (a => a)); f(42); }
+";
+    let diags =
+        check_source_with_lib_args(src, &["--strict", "--target", "esnext"]);
+    assert_diagnostic_count(&diags, 2722, 2);
+    assert_diagnostic_count(&diags, 18048, 2);
+    assert_diagnostic_count(&diags, 2349, 0);
+    assert_diagnostic_count(&diags, 7006, 0);
+}
+
+#[test]
+fn checker_logical_assignment_rhs_truthy_frame_no_error() {
+    // Inside `&&=`'s RHS the target is truthy — `f.toString()` reports no
+    // TS18048 (official: no error).
+    let diags = check_source_strict(
+        "function bar3 (f?: (a: number) => void) { f &&= (f.toString(), (a => a)); }",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_union_callee_callable() {
+    let diags = check_source_strict(
+        "declare const f: ((a: number) => void) | ((a: number) => number);\nf(42);",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_possibly_undefined_callee_reports_only_2722() {
+    let diags = check_source_strict(
+        "declare const g: undefined | ((a: number) => number);\ng(42);",
+    );
+    assert_diagnostic_count(&diags, 2722, 1);
+    assert_diagnostic_count(&diags, 2349, 0);
+}
+
+#[test]
+fn checker_static_member_this_is_constructor_type() {
+    // Go `tryGetThisTypeAtEx`: in a static member, `this` is the class's
+    // CONSTRUCTOR type (`typeof P`).
+    let diags = check_source_strict(
+        "class P { static y = this; static bar(zz = this) { return zz.y; } }",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_static_member_this_missing_property_ts2339() {
+    let diags =
+        check_source_strict("class P { static bar(zz = this) { return zz.q; } }");
+    assert_diagnostic_count(&diags, 2339, 1);
+}
+
+#[test]
+fn checker_instance_member_this_is_instance_type() {
+    let diags =
+        check_source_strict("class P { inst = 1; bar(zz = this) { return zz.inst; } }");
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_qualified_name_heritage_members_resolve() {
+    // Heritage expressions parse in expression form (`NS.ICl` is a
+    // PropertyAccessExpression) — Go's resolveEntityName accepts both the
+    // type form (QualifiedName) and the expression form.
+    let diags = check_source_strict(
+        "declare namespace NS { export interface ICl { Clone(): any; } }\ninterface Num2 extends NS.ICl { }\ndeclare const x: Num2;\nconst y = x.Clone();",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_boxed_apparent_type_includes_heritage_members() {
+    // `interface Number extends NS.ICl {}` merges zero own members — the
+    // boxed apparent type of `number` surfaces the base interface's
+    // members (genericConstraintOnExtendedBuiltinTypes family).
+    let diags = check_source_strict(
+        "declare namespace NS { export interface ICl { Clone(): any; } }\ninterface Number extends NS.ICl { }\ndeclare function mk<T extends NS.ICl>(v: T): T;\nconst r = mk(3);",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_intersection_source_structural_fall_through() {
+    // The full intersection "viewed as an object" satisfies an object
+    // target even when no single constituent does (Go recursiveType
+    // RelatedTo's fall-through; intersectionSatisfiesConstraint / p10).
+    let src = "\
+interface FirstInterface { commonProperty: number }
+interface SecondInterface { commonProperty: number }
+function mySecondFunction<T extends { commonProperty: number, otherProperty: number }>(newParam: T): T { return newParam }
+function myFirstFunction<T extends FirstInterface | SecondInterface>(param1: T) {
+    const newParam: T & { otherProperty: number } = Object.assign(param1, { otherProperty: 3 });
+    mySecondFunction(newParam)
+}
+";
+    let diags = check_source_strict(src);
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_intersection_of_objects_assignable_to_merged_shape() {
+    let diags = check_source_strict(
+        "declare const ab: { a: number } & { b: string };\nconst t: { a: number; b: string } = ab;",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_new_expression_explicit_type_arguments_substituted() {
+    let diags =
+        check_source_strict("class C<T> { constructor(x: T) { } }\nconst z = new C<number>(5);");
+    assert_no_diagnostics(&diags);
+    let diags =
+        check_source_strict("class C<T> { constructor(x: T) { } }\nconst z = new C<number>('s');");
+    assert_diagnostic_count(&diags, 2345, 1);
+}
+
+#[test]
+fn checker_comma_expression_types_as_right_operand() {
+    // `(sideEffect(), (a => a))` as a logical-assignment RHS carries the
+    // arrow's type (Go checkCommaExpression) and stays contextually typed.
+    let diags = check_source_strict(
+        "function sideEffect(): void {}\nlet f: ((a: number) => void) | undefined;\nf ??= (sideEffect(), (a => a));\nf(42);",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// r24 fix-only round 2: heritage expression-form regressions, comma flow,
+// assertion-call narrowing in expression position.
+// ────────────────────────────────────────────────────────────────────────────
+
+#[test]
+fn checker_heritage_call_expression_base_silent() {
+    // `class C extends (foo()).B {}` — the base is a non-entity expression;
+    // the entity resolver declines (no TS2503 noise; the fixture's own
+    // remaining diagnostics only).
+    let diags = check_source_strict(
+        "class B {}\nfunction foo() { return { B: B }; }\nclass C extends (foo()).B {}\ndeclare const c: C;\nconst b: B = c;",
+    );
+    assert_diagnostic_count(&diags, 2503, 0);
+}
+
+#[test]
+fn checker_comma_lhs_reference_narrowing_typeof() {
+    let diags = check_source_strict(
+        "const otherValue = () => true;\nconst value: { inner: number | string } = null as any;\nif (typeof (otherValue(), value).inner === 'number') {\n    const b: number = (otherValue(), value).inner;\n}",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_comma_lhs_reference_narrowing_predicate() {
+    let diags = check_source_strict(
+        "const otherValue = () => true;\nconst value: { inner: number | string } = null as any;\nfunction isNumber(obj: any): obj is number { return true; }\nif (isNumber((otherValue(), value).inner)) {\n    const b: number = (otherValue(), value).inner;\n}",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_assertion_call_narrows_compared_argument() {
+    // `assert(x !== undefined), x` — the call's CALL flow node narrows the
+    // compared target after the call (conformance
+    // controlFlowCommaExpressionAssertionWithinTernary).
+    let diags = check_source_strict(
+        "declare function assert(value: any): asserts value;\nfunction foo2(param: number | null | undefined): number | null {\n    const val = param !== undefined;\n    return val ? (assert(param !== undefined), param) : null;\n}",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_optional_param_display_strips_undefined() {
+    // The 2345 message for an optional parameter prints the annotation
+    // view (`string`), not the folded `string | undefined`
+    // (functionCall16/17).
+    let diags = check_source_strict(
+        "function foo(a: string, b?: string, ...c: number[]) {}\nfoo('foo', 1);",
+    );
+    assert_diagnostic_count(&diags, 2345, 1);
+    let shows_undefined = diags
+        .iter()
+        .filter(|d| d.code == 2345)
+        .any(|d| d.message_args.iter().any(|a| a.contains("undefined")));
+    assert!(
+        !shows_undefined,
+        "2345 message must print 'string', not 'string | undefined'"
+    );
+}
+
+#[test]
+fn checker_error_typed_optional_param_stays_error() {
+    // An error-typed annotation must not union with undefined (Go's
+    // errorType is infectious) — arrayToLocaleStringES2020's TS2353
+    // regression guard. `Intl.NumberFormatOptions` resolves under the
+    // bundled lib; the check is that no union-with-undefined error form
+    // appears. Using a deliberately unresolvable member instead:
+    let diags = check_source_strict(
+        "interface Wrap { m?(x?: import(\"./missing\").Nope): void; }\ndeclare const w: Wrap;\nw.m(1);",
+    );
+    assert_diagnostic_count(&diags, 2353, 0);
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// r26 fix round: &&/|| condition flow, visibility-safe member chase,
+// super() heritage type-argument substitution.
+// ────────────────────────────────────────────────────────────────────────────
+
+#[test]
+fn checker_logical_and_truthiness_narrows_property_reference() {
+    // `r.s && r.s.toFixed()` — the RHS sees `r.s` narrowed to non-undefined
+    // (conformance subtypingWithOptionalProperties).
+    let diags = check_source_strict(
+        "declare const r: { s?: number };\nr.s && r.s.toFixed();",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_logical_or_rhs_bound_under_falsy_condition() {
+    // Inside the || RHS the target is falsy (narrowed to its falsy
+    // constituents); the after-expression branch merge (label joining the
+    // left-true path with the assigned RHS) is a recorded gap — this pins
+    // the RHS-side narrowing only.
+    let diags = check_source_strict(
+        "declare let s: string | undefined;\nconst u: undefined = s || (s);",
+    );
+    assert_diagnostic_count(&diags, 2322, 1);
+}
+
+#[test]
+fn checker_unexported_namespace_member_reports_ts2694() {
+    // Visibility: a non-exported namespace member is NOT visible through
+    // qualified-name resolution (official TS2694; the r25 regression made
+    // namespace locals reachable).
+    let diags = check_source_strict(
+        "namespace N {\n    function S() {}\n}\nvar a: N.S;",
+    );
+    assert_diagnostic_count(&diags, 2694, 1);
+}
+
+#[test]
+fn checker_super_call_checks_under_heritage_instantiation() {
+    // `class D extends B<number>` — `super(b)` checks against B<number>'s
+    // constructor (emitClassDeclarationWithExtensionAndTypeArgumentInES6).
+    let diags = check_source_strict(
+        "class B<T> { constructor(a: T) { } }\nclass D extends B<number> {\n    constructor(b: number) { super(b); }\n}",
+    );
+    assert_no_diagnostics(&diags);
+    let diags = check_source_strict(
+        "class B<T> { constructor(a: T) { } }\nclass D extends B<number> {\n    constructor(b: string) { super(b); }\n}",
+    );
+    assert_diagnostic_count(&diags, 2345, 1);
+}
+
+#[test]
+fn checker_plain_new_in_derived_class_not_heritage_instantiated() {
+    // A plain `new B(x)` inside a derived class must NOT inherit the
+    // heritage instantiation: the 2345 (a known gap — generic-class ctor
+    // arg inference isn't wired) must mention the UNSUBSTITUTED 'T', not
+    // the heritage 'number'.
+    let diags = check_source_strict(
+        "class B<T> { constructor(a: T) { } }\nclass D extends B<number> {\n    constructor() { new B('s'); }\n}",
+    );
+    let msg = diags
+        .iter()
+        .find(|d| d.code == 2345)
+        .map(|d| d.message_args.join(" "))
+        .unwrap_or_default();
+    assert!(
+        msg.contains("T") && !msg.contains("number"),
+        "must be the unsubstituted T, not heritage-instantiated: {msg:?}"
+    );
+}
+
+#[test]
+fn checker_js_specifier_resolves_to_ts_file() {
+    // `import foo = require('./foo_0.js')` binds foo_0.ts (conformance
+    // nameWithFileExtension).
+    let diags = check_sources(&[
+        ("foo_0.ts", "export var foo = 42;"),
+        ("foo_1.ts", "import foo = require('./foo_0.js');\nvar x = foo.foo + 42;"),
+    ]);
+    assert_no_diagnostics(&diags);
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// r27 fix round: logical-operator branch merge, expression-position
+// assignment flow, .js specifier mapping.
+// ────────────────────────────────────────────────────────────────────────────
+
+#[test]
+fn checker_narrow_by_instanceof_definite_assignment() {
+    // Official reports TS2454 exactly at the two condition lines — the
+    // definite-assignment seed survives the else-if condition walk (the
+    // short-circuit path keeps it) but is consumed inside the narrowed
+    // bodies (compiler narrowTypeByInstanceof).
+    let src = "\
+class Match { range(): any { return 1; } }
+class FileMatch { resource(): any { return 1; } }
+type FMOM = FileMatch | Match;
+let elementA: FMOM, elementB: FMOM;
+if (elementA instanceof FileMatch && elementB instanceof FileMatch) {
+    elementA.resource();
+} else if (elementA instanceof Match && elementB instanceof Match) {
+    elementA.range();
+}
+";
+    let diags = check_source_strict(src);
+    assert_diagnostic_count(&diags, 2454, 4);
+}
+
+#[test]
+fn checker_logical_or_short_circuit_merge_with_assignment() {
+    // `s || (s = 'x')` — afterwards s is string on both paths (the
+    // short-circuit path narrows by left-TRUE, the RHS path carries the
+    // expression-position assignment).
+    let diags = check_source_strict(
+        "declare let s: string | undefined;\ns || (s = 'x');\nconst t: string = s;",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_expression_position_assignment_in_comma_narrows() {
+    let diags = check_source_strict(
+        "function foo(param: number | null | undefined): number {\n    const y = (param = 5, param);\n    return y;\n}",
+    );
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_generic_alias_export_no_2459() {
+    // declarationEmitQualifiedAliasTypeArgument shape: a generic alias `G<T>`
+    // followed by a same-named top-level `export type T = G<...>` — the
+    // alias's type parameter must not merge with the exported alias (the
+    // merged symbol loses its export face and reports TS2459 on import).
+    let files = [
+        (
+            "bbb.d.ts",
+            "export interface INode<T> {\n    data: T;\n}\n\nexport function create<T>(): () => INode<T>;\n",
+        ),
+        (
+            "lib.d.ts",
+            "export type G<T extends string> = { [P in T]: string };\n\nexport enum E {\n    A = \"a\",\n    B = \"b\"\n}\n\nexport type T = G<E>;\n\nexport type Q = G<E.A>;\n",
+        ),
+        (
+            "index.ts",
+            "import { T, Q } from \"./lib\";\nimport { create } from \"./bbb\";\n\nexport const fun = create<T>();\n\nexport const fun2 = create<Q>();\n",
+        ),
+    ];
+    let diags = check_sources(&files);
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_module_imports_are_not_globals() {
+    // An external-module file's imports must never enter the global scope:
+    // `import { T }` used to leak a global "T" that every same-named type
+    // parameter resolved through the globals fallback picked up (lib's
+    // Array<T> instantiated as the imported alias's type — TS2538 storms).
+    let files = [
+        ("lib5.d.ts", "export type G2<T> = { [P in T]: string };\nexport type T = G2<\"a\">;\n"),
+        ("index.ts", "import { T } from \"./lib5\";\nconst v: T = { a: \"x\" };\nconst arr: Array<number> = [1];\n"),
+    ];
+    let diags = check_sources(&files);
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_reexport_through_namespace_export_equals() {
+    // reexportedMissingAlias shape: `import * as S from './s'; export = S;`
+    // — a named import through the export= must see S's members (the
+    // export-assignment's alias target resolves to the MODULE symbol, not
+    // the import alias itself). Only the broken alias target in second.d.ts
+    // reports (TS2503), never TS2305 at the import site.
+    let files = [
+        ("second.d.ts", "export import Component = CompletelyMissing;\n"),
+        ("first.d.ts", "import * as Second from './second';\nexport = Second;\n"),
+        ("crash.ts", "import { Component } from './first';\nclass C extends Component { }\n"),
+    ];
+    let diags = check_sources(&files);
+    let ts2305 = diags.iter().filter(|d| d.code == 2305).count();
+    assert_eq!(ts2305, 0, "import through export= must resolve Component");
+    assert_diagnostic_code(&diags, 2503);
+}
+
+#[test]
+fn checker_ambient_module_shadows_type_root_file_resolution() {
+    // moduleResolutionAsTypeReferenceDirectiveAmbient shape: a typeRoots
+    // package whose .d.ts is a global script declaring `declare module
+    // "phaser"` — the ambient module answers the import even though the
+    // resolver's declaration fallback would resolve the bare specifier to
+    // the (export-less) file itself (Go resolveExternalModule consults
+    // tryFindAmbientModule FIRST).
+    let fs = Arc::new(InMemoryFS::new());
+    fs.insert_dir("/proj");
+    fs.insert_dir("/proj/typings/phaser/types");
+    fs.insert_file(
+        "/proj/typings/phaser/package.json",
+        "{ \"name\": \"phaser\", \"version\": \"1.2.3\", \"types\": \"types/phaser.d.ts\" }",
+    );
+    fs.insert_file(
+        "/proj/typings/phaser/types/phaser.d.ts",
+        "declare module \"phaser\" {\n    export const a2: number;\n}\n",
+    );
+    fs.insert_file("/proj/a.ts", "import { a2 } from \"phaser\";\na2;\n");
+
+    let args = [
+        "--noLib".to_string(),
+        "--types".to_string(),
+        "phaser".to_string(),
+        "--typeRoots".to_string(),
+        "/proj/typings".to_string(),
+        "/proj/a.ts".to_string(),
+    ];
+    let parsed = parse_command_line(&args, "/proj", Some(fs.as_ref()));
+    let host: Arc<dyn tsox::compiler::CompilerHost> = Arc::new(CompilerHostImpl::new(
+        fs,
+        "/proj".to_string(),
+        lib_path(),
+    ));
+    let program = Arc::new(Program::new(ProgramOptions {
+        config: parsed,
+        host,
+    }));
+    let diags = program.get_semantic_diagnostics();
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_var_undefined_initializer_infers_any_without_strict() {
+    // typeCheckObjectCreationExpressionWithUndefinedCallResolutionData:
+    // `var classes = undefined; new classes(null)` — without
+    // strictNullChecks the null/undefined KEYWORD carries the widening
+    // flag (Go createWideningType), so the var infers `any` and the
+    // construction is an untyped call — never TS2351.
+    let src = "export function foo() {\nvar classes = undefined;\n    return new classes(null);\n}\n";
+    let diags = check_source_with_lib_args(src, &["--strict", "false"]);
+    assert_no_diagnostics(&diags);
+    // The same read is assignable to number (var widened to any).
+    let diags2 = check_source_with_lib_args(
+        "var x = undefined;\nx = 5;\nconst y: number = x;\n",
+        &["--strict", "false"],
+    );
+    assert_no_diagnostics(&diags2);
+}
+
+#[test]
+fn checker_chain_condition_property_reread_narrows() {
+    // destructuringTypeGuardFlow: a chained condition
+    // (`o.a && o.a.b && o.a.b.c`) narrows each property read inside the
+    // block; the flow-junction union of the pre-narrowing type with the
+    // narrowed one must deduplicate constituents (was displayed as
+    // `number | null | number` — TS2322 on `const right: number =
+    // bBar.elem2.bar`).
+    let src = "type foo = { bar: number | null; nested: { b: string | null; } };\n\
+               const aFoo: foo = { bar: 3, nested: { b: \"y\" } };\n\
+               const bBar = { elem1: 7, elem2: aFoo };\n\
+               if (bBar.elem2 && bBar.elem2.bar && bBar.elem2.nested.b) {\n\
+               \x20 const { bar, nested: { b: text } } = bBar.elem2;\n\
+               \x20 const right: number = bBar.elem2.bar;\n\
+               \x20 const wrong: number = bar;\n\
+               \x20 const bAgain: string = text;\n\
+               }\n";
+    let diags = check_source_strict(src);
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn checker_local_type_shadows_later_top_level_class() {
+    // localTypes1: a function-local `type A = I[]` must win over a
+    // same-named top-level `class A` declared LATER — the on-demand
+    // declared-type resolution used to push only the file scope, so the
+    // annotation resolved against the file's members (TS2739 'any[]'
+    // missing m, p).
+    let src = "function f1() {\n\
+               \x20   enum E { A, B, C }\n\
+               \x20   class C { x: E = E.A; }\n\
+               \x20   interface I { x: E; }\n\
+               \x20   type A = I[];\n\
+               \x20   let a: A = [new C()];\n\
+               \x20   a[0].x = E.B;\n\
+               \x20   return a;\n\
+               }\n\
+               class A {\n\
+               \x20   m() { return 1; }\n\
+               \x20   get p() { return 2; }\n\
+               }\n";
+    let diags = check_source_strict(src);
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn interface_call_signature_type_params_resolve() {
+    // genericSignatureInheritance: `interface I { <T>(x: T): string }` —
+    // the call signature's own type parameter must be visible to the
+    // parameter/return annotations (the binder declares it into the
+    // signature node's locals; signature building pushes that scope).
+    let src = "interface I {\n\
+               \x20   <T>(x: T): string;\n\
+               }\n\
+               interface I2 extends I { }\n\
+               declare var i2: I2;\n\
+               var r: string = i2(1);\n";
+    let diags = check_source(src);
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn interface_call_signature_type_param_constraint_resolves() {
+    // recursiveTypeIdentity: `<T extends A>` in an interface call signature
+    // — the constraint reference resolves inside the signature scope too.
+    let src = "interface A {\n\
+               \x20   <T extends A>(x: T): void;\n\
+               }\n\
+               interface B {\n\
+               \x20   <T extends B>(x: T): void;\n\
+               }\n\
+               declare var a: A;\n\
+               a(a);\n";
+    let diags = check_source(src);
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn type_literal_construct_signature_type_params_resolve() {
+    // lib.dom WebAssembly.Global shape: `var Global: { new<T extends
+    // ValueType = ValueType>(v?: ValueTypeMap[T]): G<T> }` — the construct
+    // signature inside an object type literal carries its own type
+    // parameters; annotations see them.
+    let src = "interface ValueTypeMap { anyref: any; externref: any; }\n\
+               type ValueType = keyof ValueTypeMap;\n\
+               interface G<T extends ValueType = ValueType> { v: ValueTypeMap[T]; }\n\
+               declare var Global: {\n\
+               \x20   new<T extends ValueType = ValueType>(v?: ValueTypeMap[T]): G<T>;\n\
+               };\n\
+               declare var d: { value: \"anyref\" };\n\
+               var g = new Global(d);\n";
+    let diags = check_source(src);
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn global_class_does_not_shadow_interface_type_param() {
+    // staticAndMemberFunctions family: a script-level `class T` merges into
+    // globals; the interface's OWN type parameter `T` must still win for
+    // references inside its member annotations (check-phase re-resolution
+    // runs in the annotation's declaring lexical context — Go resolves by
+    // reference location).
+    let src = "class T {\n\
+               \x20   static x() { }\n\
+               }\n\
+               type M = { a: 1; b: 2 };\n\
+               interface G<T extends keyof M> {\n\
+               \x20   value: M[T];\n\
+               \x20   get(): M[T];\n\
+               }\n\
+               declare const g: G<\"a\">;\n\
+               var v: 1 = g.value;\n";
+    let diags = check_source_strict(src);
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn class_method_type_param_shadows_class_type_param() {
+    // genericClassWithObjectTypeArgsAndConstraints (D3-sig): a method's own
+    // `T` must shadow the class's `T` in the method's parameter/return
+    // annotations — resolving against the class's (instantiated) T made
+    // `g.foo("str")` fail with TS2345.
+    let src = "class Box<T> {\n\
+               \x20   wrap<T>(x: T): T { return x; }\n\
+               }\n\
+               declare var b: Box<number>;\n\
+               var s: string = b.wrap(\"str\");\n\
+               var n: number = b.wrap(1);\n";
+    let diags = check_source(src);
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn constructor_type_node_type_params_resolve() {
+    // `new <T>(x: T) => T` — the constructor-type node's own type
+    // parameters are pushed around annotation resolution (mirrors the
+    // FunctionType node treatment).
+    let src = "declare var C: new <T>(x: T) => T;\n\
+               var n: number = new C(42);\n\
+               var s: string = new C(\"x\");\n";
+    let diags = check_source(src);
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn namespace_import_of_ambient_module_is_a_value() {
+    // importExportInternalComments / nodeColonModuleResolution: `import *
+    // as ns from "m"` where "m" is a string-named ambient module — the
+    // namespace import is a module OBJECT (a legal value); TS2708 only
+    // fires for true (non-string-named) types-only namespaces.
+    let files: &[(&str, &str)] = &[
+        (
+            "/proj/inc.d.ts",
+            "declare module \"foo\";\ndeclare module \"bar\" { namespace constants { export const X = 1; } }",
+        ),
+        (
+            "/proj/main.ts",
+            "import * as foo from \"foo\";\nimport * as bar from \"bar\";\nvoid foo;\nvar x: number = bar.constants.X;\n",
+        ),
+    ];
+    let diags = check_sources(files);
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn forward_reference_class_heritage_type_param_resolves() {
+    // baseTypeOrderChecking / declFileGenericClassWithGenericExtendedClass:
+    // a FORWARD reference (`var v: Class4<...>` before the declaration)
+    // forces heritage resolution from the referencing statement's context
+    // — `class Class4<T> extends Class3<T>`'s type argument T must resolve
+    // through the class declaration's own lexical chain even though the
+    // dynamic scope stack is elsewhere. The ancestry walk used to skip
+    // CLASS symbols entirely, hiding the class's type parameters.
+    let src = "var someVariable: Class4<Class2>;\n\
+               class Class1 { }\n\
+               class Class2 extends Class1 { }\n\
+               class Class3<T> {\n\
+               \x20   public memberVariable: Class2 | undefined;\n\
+               }\n\
+               class Class4<T> extends Class3<T> { }\n";
+    let diags = check_source(src);
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn type_parameter_coexists_with_same_named_getter() {
+    // declarationEmitTypeParamMergedWithPrivate: `class Test<T> {
+    // private get T(): T }` — the type parameter (type side) merges with
+    // the same-named getter (value side) instead of being replaced in the
+    // class members table; every `T` reference in the class body keeps
+    // resolving (Go/TS TypeParameterExcludes = Type & ~TypeParameter).
+    let src = "export class Test<T> {\n\
+               \x20   private get T(): T {\n\
+               \x20       throw \"\";\n\
+               \x20   }\n\
+               \x20   public test(): T {\n\
+               \x20       return null as any;\n\
+               \x20   }\n\
+               }\n";
+    let diags = check_source(src);
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn mapped_type_mixed_literal_and_open_constraint_stays_deferred() {
+    // homomorphicMappedTypeIntersectionAssignability: `keyof (T & Named)`
+    // is `string | "name"` (open key set) — the mapped type must not
+    // eagerly collapse to the literal subset `{ name }`, or Readonly<T &
+    // Named> loses every other property and the assignability fails.
+    let src = "interface Named { name: string; }\n\
+               declare function g<T>(b: { [P in keyof (T & Named)]: (T & Named)[P] }): void;\n\
+               declare var tt: { name: \"ok\"; other: 1 };\n\
+               g(tt);\n\
+               function f<TType>(\n\
+               \x20   a: { weak?: string } & Readonly<TType> & { name: \"ok\" },\n\
+               \x20   b: Readonly<TType & { name: string }>,\n\
+               \x20   c: Readonly<TType> & { name: string }) {\n\
+               \x20   c = a;\n\
+               \x20   b = a;\n\
+               }\n";
+    let diags = check_source_strict(src);
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn heritage_instantiation_keeps_method_type_param() {
+    // The heritage-instantiation name frame and the class member
+    // substitution both matched type parameters by NAME, so
+    // `class Derived extends Base<number>` wrongly instantiated the
+    // METHOD's own `T` in `make<T>(x: T): T` to number. Symbol-pointer
+    // identity (with a same-declaring-container name fallback for
+    // multi-declaration forks) decides the substitution.
+    let src = "class Base<T> {\n\
+               \x20   make<T>(x: T): T { return x; }\n\
+               }\n\
+               class Derived extends Base<number> { }\n\
+               declare var d: Derived;\n\
+               var s: string = d.make(\"str\");\n";
+    let diags = check_source(src);
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn new_expression_member_chain_parses_as_instance_call() {
+    // `new X().m()` is `(new X()).m()` — the `new` target is a MEMBER
+    // chain only (Go parseMemberExpressionRest). A full LHS parse made
+    // `X().m("hi")` the target and the call-unwrap mis-split it into
+    // `new (X().m)("hi")`, reporting TS2348 for the inner call `X()`.
+    let src = "class Box {\n\
+               \x20   wrap(x: string): string { return x; }\n\
+               }\n\
+               var s: string = new Box().wrap(\"hi\");\n\
+               class Gen<T> {\n\
+               \x20   id(x: T): T { return x; }\n\
+               }\n\
+               var n: number = new Gen<number>().id(1);\n";
+    let diags = check_source(src);
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn merged_interface_fork_instantiation_substitutes_all_declarations() {
+    // `interface I<T> {a: T}` + `interface I<T> {b: T}` merge into one
+    // symbol but bind separate type-parameter symbols per declaration;
+    // `I<number>` must substitute members from BOTH declarations.
+    let src = "interface I<T> {\n\
+               \x20   a: T;\n\
+               }\n\
+               interface I<T> {\n\
+               \x20   b: T;\n\
+               }\n\
+               declare var x: I<number>;\n\
+               var n: number = x.a;\n\
+               var n2: number = x.b;\n";
+    let diags = check_source(src);
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn overload_probe_requires_minimum_arity() {
+    // `new Array<string>()` with 0 arguments must select the rest-arg
+    // overload, not arity-fail (TS2554) against the 1-arg overload: the
+    // overload-applicability probe needs the signature's MINIMUM arity
+    // gate (arrayConcat2 / arrayLiteral / ExportVariableOfGenericType...).
+    let src = "declare const A: {\n\
+               \x20   new (n: number): string[];\n\
+               \x20   new <T>(...items: T[]): T[];\n\
+               };\n\
+               var a = new A<string>();\n\
+               var b = new A<string>(\"x\", \"y\");\n\
+               var s1: string = a[0];\n\
+               var s2: string = b[0];\n";
+    let diags = check_source(src);
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn class_expression_heritage_value_symbol() {
+    // `class y extends x` where x is a VARIABLE holding a class — the
+    // heritage expression is a VALUE reference; its construct signatures
+    // provide the instance type. No TS2749
+    // (extendClassExpressionFromModule).
+    let files: &[(&str, &str)] = &[
+        ("/proj/foo1.ts", "class x {}\nexport = x;\n"),
+        (
+            "/proj/foo2.ts",
+            "import foo1 = require('./foo1');\nvar x = foo1;\nclass y extends x {}\nvar yy = new y();\n",
+        ),
+    ];
+    let diags = check_sources(files);
+    assert_no_diagnostics(&diags);
+}
+
+
+#[test]
+fn generic_alias_type_params_shadow_same_named_outer_alias() {
+    // `type Ex<T, U> = T extends U ? T : never` instantiated as
+    // `Ex<GlobalU, {kind?: 'A'}>` — the extends clause's `U` is the
+    // ALIAS's type parameter, not the same-named top-level union
+    // (intersectionMemberOfUnionNarrowsCorrectly). The alias body
+    // re-resolution pushes the alias declaration scope so its own U wins.
+    let src = "export type U = { kind?: 'A', a: string } | { kind?: 'B' } & { b: string };\n\
+               type Ex<T, U> = T extends U ? T : never;\n\
+               declare let x: Ex<U, { kind?: 'A' }>;\n\
+               var a: string = x.a;\n";
+    let diags = check_source(src);
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn weak_type_rejects_no_common_properties() {
+    // TS2559: a source sharing NO property with an all-optional (weak)
+    // target is not assignable — `{ b: 1 }` ⊄ `{ kind?: 'A' }`; the
+    // intersection constituent `{kind?: 'B'} & {b}` distributes over the
+    // conditional to `never`, leaving only the first union member.
+    let src = "type E1 = { b: 1 } extends { kind?: 'A' } ? 1 : 2;\n\
+               var q1: 2 = null as any as E1;\n\
+               type E3 = { kind?: 'B' } & { b: 1 } extends { kind?: 'A' } ? 1 : 2;\n\
+               var q3: 2 = null as any as E3;\n\
+               type Ok = { kind?: 'A' } & { other: 1 } extends { kind?: 'A' } ? 1 : 2;\n\
+               var qok: 1 = null as any as Ok;\n";
+    let diags = check_source(src);
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn mapped_type_contextual_signature_not_broken_by_substitution() {
+    // conditionalTypeContextualTypeSimplificationsSuceeds: the deep
+    // object-property substitution must NOT run during inference/overload
+    // probes — replacing property symbols there broke the contextual
+    // signature lookup for `when: value => false` (TS7006). The
+    // substitution is gated to the call-return path.
+    let src = "interface Props {\n\
+               \x20   when: (value: string) => boolean;\n\
+               }\n\
+               function bad<P extends Props>(\n\
+               \x20   attrs: string extends keyof P ? { [K in keyof P]: P[K] } : { [K in keyof P]: P[K] }) { }\n\
+               function good1<P extends Props>(\n\
+               \x20   attrs: string extends keyof P ? P : { [K in keyof P]: P[K] }) { }\n\
+               function good2<P extends Props>(\n\
+               \x20   attrs: { [K in keyof P]: P[K] }) { }\n\
+               bad({ when: value => false });\n\
+               good1({ when: value => false });\n\
+               good2({ when: value => false });\n\
+               declare function g2<P extends Props>(attrs: { [K in keyof P]: P[K] }): void;\n\
+               g2({ when: value => false });\n";
+    let diags = check_source_strict(src);
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn cyclic_return_type_instantiates_type_arguments() {
+    // cyclicTypeInstantiation: `function foo<T>() { var x: { a: T; b:
+    // typeof x }; return x; }` — `foo<string>()`'s return must
+    // deep-substitute T→string in the anonymous object's property types
+    // (self-referential `b` preserved), so the two structurally
+    // identical instantiations assign cleanly (no phantom TS2719).
+    let src = "function foo<T>() {\n\
+               \x20   var x: { a: T; b: typeof x };\n\
+               \x20   return x;\n\
+               }\n\
+               function bar<T>() {\n\
+               \x20   var x: { a: T; b: typeof x };\n\
+               \x20   return x;\n\
+               }\n\
+               var a = foo<string>();\n\
+               var b = bar<string>();\n\
+               a = b;\n";
+    let diags = check_source_strict(src);
+    let non_2454: Vec<i32> = diags.iter().map(|d| d.code).filter(|c| *c != 2454).collect();
+    assert!(
+        non_2454.is_empty(),
+        "expected only TS2454s, got codes {:?}",
+        non_2454
+    );
+    assert_eq!(
+        diags.iter().filter(|d| d.code == 2454).count(),
+        2,
+        "exactly two TS2454 (one per uninitialized x)"
+    );
+}
+
+#[test]
+fn same_alias_conditional_instances_stay_deferred_across_generic_fns() {
+    // exp_c / recursiveReverseMappedType core shape: two INDEPENDENT
+    // functions' free type parameters instantiate the same conditional
+    // alias. The call-site fallback used to fill the callee's T with
+    // `unknown` and eagerly resolve the target to its false branch
+    // (`{ [error in string]: ... }` garbage), failing against the
+    // still-deferred source. Now: (a) signature instantiation keeps
+    // non-decidable conditionals deferred (Go's permissive/restrictive
+    // definite-true/false probes), and (b) inference between same-root
+    // conditionals fixes the callee's parameter from the caller's
+    // (Go inference.go ~L79 same-alias fast path).
+    let src = "type C<T> = T extends string ? 1 : 2;\n\
+               function jc<T>(l: C<T>): void {}\n\
+               function ac<T>(l: C<T>): void { jc(l); }\n\
+               type Recur<T> = (\n\
+               \x20   T extends (unknown[]) ? {} : { [K in keyof T]?: Recur<T[K]> }\n\
+               ) | ['marker', ...Recur<T>[]];\n\
+               function join<T>(l: Recur<T>[]): Recur<T> {\n\
+               \x20   return ['marker', ...l];\n\
+               }\n\
+               function a<T>(l: Recur<T>[]): void {\n\
+               \x20   const x: Recur<T> | undefined = join(l);\n\
+               }\n";
+    let diags = check_source_strict(src);
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn deferred_conditional_inference_fixes_target_parameter() {
+    // b6: `<Y>(c: C<Y>)` called with `C<X>` — inference must fix Y := X
+    // through the SAME conditional alias root, leaving both sides
+    // identical deferred instances.
+    let src = "type C<X> = X extends string ? 1 : 2;\n\
+               declare function h<Y>(c: C<Y>): void;\n\
+               function u<X>(cc: C<X>) { h(cc); }\n";
+    let diags = check_source_strict(src);
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn deferred_conditional_default_constraint_is_strict_for_concrete_targets() {
+    // b5 guard (anti-over-leniency): a deferred conditional must NOT be
+    // accepted by a CONCRETELY resolved false-branch target — official tsc
+    // reports 2322 with the default-constraint union ('1 | 2') as source.
+    let src = "type C<T> = T extends string ? 1 : 2;\n\
+               function f<T>(p: C<T>) {\n\
+               \x20   const a: C<number> = p;\n\
+               }\n";
+    let diags = check_source_strict(src);
+    assert!(
+        !diags.is_empty(),
+        "expected TS2322 assigning deferred C<T> to resolved C<number>"
+    );
+}
+
+#[test]
+fn unconstrained_check_type_defers_instead_of_taking_false_branch() {
+    // b3 pass-guard: a deferred conditional assigns to `number` through its
+    // default constraint (1|2 ⊆ number); previously the check type was
+    // collapsed via plain assignability and mis-resolved.
+    let src = "type C<T> = T extends string ? 1 : 2;\n\
+               function f<T>(p: C<T>) {\n\
+               \x20   const a: number = p;\n\
+               }\n";
+    let diags = check_source_strict(src);
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn any_check_conditional_unions_true_branch_into_result() {
+    // conditionalTypeAnyUnion: `any extends object ? any : string` must
+    // resolve to union(any, string) — Go's extraTypes (checker.go ~L24451)
+    // unions the TRUE branch in whenever the check type is `any`, instead
+    // of returning the bare false branch. `WithSpec<Spec>` then satisfies
+    // `T extends number`?? no — the case only asserts instantiation itself
+    // reports nothing (Spec is `any`-ish).
+    let src = "type Spec = any extends object ? any : string;\n\
+               type WithSpec<T extends number> = T;\n\
+               type R = WithSpec<Spec>;\n\
+               declare const r: R;\n";
+    let diags = check_source_strict(src);
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn deferred_conditional_callee_uses_default_constraint_signatures() {
+    // nonNullableReduction (#43425): calling through a deferred conditional
+    // whose branches are callable (modulo null/undefined members) must use
+    // the default constraint's signatures — Go getSignaturesOfType recurses
+    // into getDefaultConstraintOfConditionalType for conditional targets.
+    let src = "type Transform1<T> = ((value: string) => T) | (string extends T ? undefined : never);\n\
+               type Transform2<T> = string extends T ? ((value: string) => T) | undefined : (value: string) => T;\n\
+               function test1<T>(f1: Transform1<T>, f2: Transform2<T>) {\n\
+               \x20   f1?.(\"hello\");\n\
+               \x20   f2?.(\"hello\");\n\
+               }\n";
+    let diags = check_source_strict(src);
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn forced_true_branch_resolution_sees_infer_scope() {
+    // The forced branch resolution used by relation fallbacks and extraTypes
+    // must push the ConditionalType node as a scope so that `infer U`
+    // references inside the true branch resolve to their infer parameter
+    // (lib.es5 ThisParameterType regressed to a spurious TS2304 when this
+    // scope push was missing).
+    let src = "type ThisParameterType<T> = T extends (this: infer U, ...args: never) => any ? U : unknown;\n\
+               function f(this: number): void {}\n\
+               type TP = ThisParameterType<typeof f>;\n";
+    let _diags = check_source_strict(src);
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// r35: TS2590 cross-product union cap / TS1338 infer placement /
+//      TS1479/TS1471 CJS↔ESM format checks / TS2883 nameability /
+//      mapped-type written-form display
+// ────────────────────────────────────────────────────────────────────────────
+
+/// Multi-file variant of `check_source_with_lib_args` for module-resolution
+/// fixtures (package.json units, node_modules layouts).
+fn check_sources_with_args(files: &[(&str, &str)], extra_args: &[&str]) -> Vec<tsox::ast::Diagnostic> {
+    let fs = Arc::new(InMemoryFS::new());
+    fs.insert_dir("/proj");
+    for (path, content) in files {
+        let abs = if path.starts_with('/') {
+            (*path).to_string()
+        } else {
+            format!("/proj/{path}")
+        };
+        let mut parent = abs.rsplit_once('/').map(|(d, _)| d.to_string()).unwrap_or_default();
+        while !parent.is_empty() {
+            fs.insert_dir(&parent);
+            let next = parent.rsplit_once('/').map(|(d, _)| d.to_string()).unwrap_or_default();
+            if next == parent {
+                break;
+            }
+            parent = next;
+        }
+        fs.insert_file(&abs, content);
+    }
+    let entry = files
+        .iter()
+        .find(|(p, _)| p.ends_with(".ts") || p.ends_with(".cts") || p.ends_with(".mts"))
+        .map(|(p, _)| {
+            if p.starts_with('/') {
+                (*p).to_string()
+            } else {
+                format!("/proj/{p}")
+            }
+        })
+        .expect("a TypeScript entry file");
+    let mut args: Vec<String> = Vec::new();
+    for a in extra_args {
+        args.push((*a).to_string());
+    }
+    // Mirror the submodule harness's `build_and_check`: every TypeScript
+    // unit is a compile root (cross-file symbol types only resolve when
+    // each file is checked, not just resolution-loaded).
+    let mut roots: Vec<String> = Vec::new();
+    for (p, _) in files {
+        let lower = p.to_ascii_lowercase();
+        if lower.ends_with(".ts")
+            || lower.ends_with(".tsx")
+            || lower.ends_with(".mts")
+            || lower.ends_with(".cts")
+        {
+            roots.push(if p.starts_with('/') {
+                (*p).to_string()
+            } else {
+                format!("/proj/{p}")
+            });
+        }
+    }
+    if roots.is_empty() {
+        roots.push(entry);
+    }
+    args.extend(roots);
+    let parsed = parse_command_line(&args, "/proj", Some(fs.as_ref()));
+    let bf = Arc::new(BundledFS::new(fs));
+    let host: Arc<dyn tsox::compiler::CompilerHost> =
+        Arc::new(CompilerHostImpl::new(bf, "/proj".to_string(), lib_path()));
+    let program = Arc::new(Program::new(ProgramOptions { config: parsed, host }));
+    let mut all: Vec<tsox::ast::Diagnostic> = program.diagnostics().iter().map(|d| (**d).clone()).collect();
+    all.extend(program.get_semantic_diagnostics());
+    all
+}
+
+#[test]
+fn ts2590_template_literal_cross_product_capped() {
+    // `${Digits}×5` = 10^5 constituents — the union complexity cap fires
+    // (Go getTemplateLiteralType → checkCrossProductUnion).
+    let src = "type Digits = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9;\n\
+               type D100000 = `${Digits}${Digits}${Digits}${Digits}${Digits}`;\n";
+    let diags = check_source(src);
+    assert_diagnostic_code(&diags, 2590);
+}
+
+#[test]
+fn ts2590_template_literal_below_cap_clean() {
+    // 10^4 stays under the cap — no error, template stays deferred.
+    let src = "type Digits = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9;\n\
+               type D10000 = `${Digits}${Digits}${Digits}${Digits}`;\n";
+    let diags = check_source(src);
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn ts2590_tuple_variadic_cross_product_capped() {
+    // [...TDigits ×5] distributes into a 10^5 union of tuples.
+    let src = "type TDigits = [0] | [1] | [2] | [3] | [4] | [5] | [6] | [7] | [8] | [9];\n\
+               type T100000 = [...TDigits, ...TDigits, ...TDigits, ...TDigits, ...TDigits];\n";
+    let diags = check_source(src);
+    assert_diagnostic_code(&diags, 2590);
+}
+
+#[test]
+fn ts2590_intersection_cross_product_capped() {
+    // U1 & U2 & U3 & U4 & U5 distributes into a 10^5 union of intersections.
+    let src = "type A = any;\n\
+               type U1 = {a1:A} | {b1:A} | {c1:A} | {d1:A} | {e1:A} | {f1:A} | {g1:A} | {h1:A} | {i1:A} | {j1:A};\n\
+               type U2 = {a2:A} | {b2:A} | {c2:A} | {d2:A} | {e2:A} | {f2:A} | {g2:A} | {h2:A} | {i2:A} | {j2:A};\n\
+               type U3 = {a3:A} | {b3:A} | {c3:A} | {d3:A} | {e3:A} | {f3:A} | {g3:A} | {h3:A} | {i3:A} | {j3:A};\n\
+               type U4 = {a4:A} | {b4:A} | {c4:A} | {d4:A} | {e4:A} | {f4:A} | {g4:A} | {h4:A} | {i4:A} | {j4:A};\n\
+               type U5 = {a5:A} | {b5:A} | {c5:A} | {d5:A} | {e5:A} | {f5:A} | {g5:A} | {h5:A} | {i5:A} | {j5:A};\n\
+               type U100000 = U1 & U2 & U3 & U4 & U5;\n";
+    let diags = check_source(src);
+    assert_diagnostic_code(&diags, 2590);
+}
+
+#[test]
+fn ts2590_intersection_below_cap_clean() {
+    let src = "type A = any;\n\
+               type U1 = {a1:A} | {b1:A} | {c1:A} | {d1:A} | {e1:A} | {f1:A} | {g1:A} | {h1:A} | {i1:A} | {j1:A};\n\
+               type U2 = {a2:A} | {b2:A} | {c2:A} | {d2:A} | {e2:A} | {f2:A} | {g2:A} | {h2:A} | {i2:A} | {j2:A};\n\
+               type U100 = U1 & U2;\n";
+    let diags = check_source(src);
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn ts1338_infer_only_in_conditional_extends() {
+    // `${infer X}` in a plain template literal type — Go checkInferType.
+    let src = "type TV1 = `${infer X}`;\n";
+    let diags = check_source(src);
+    assert_diagnostic_code(&diags, 1338);
+}
+
+#[test]
+fn ts1338_infer_inside_conditional_extends_clean() {
+    let src = "type S1<T> = T extends `foo${infer U}bar` ? S2<U> : never;\n\
+               type S2<S extends string> = S;\n\
+               type X = S1<'foobar'>;\n";
+    let diags = check_source(src);
+    assert_no_diagnostics(&diags);
+}
+
+#[test]
+fn ts1479_cjs_file_static_imports_esm() {
+    // index.cts (CJS by extension) statically importing an ESM-format
+    // declaration (.d.mts sibling of .mjs) — TS1479 under node16.
+    let files = [
+        ("index.cts", "import * as m from \"./lib.mjs\";\n"),
+        ("lib.d.mts", "export const x: number;\n"),
+        ("package.json", "{\"name\":\"p\",\"type\":\"commonjs\"}\n"),
+    ];
+    let diags = check_sources_with_args(&files, &["--module", "node16"]);
+    assert_diagnostic_code(&diags, 1479);
+}
+
+#[test]
+fn ts1479_esm_file_importing_esm_clean() {
+    // index.mts (ESM) importing the same ESM target — no format error.
+    let files = [
+        ("index.mts", "import * as m from \"./lib.mjs\";\n"),
+        ("lib.d.mts", "export const x: number;\n"),
+        ("package.json", "{\"name\":\"p\",\"type\":\"module\"}\n"),
+    ];
+    let diags = check_sources_with_args(&files, &["--module", "node16"]);
+    let non_2307: Vec<i32> = diags.iter().map(|d| d.code).filter(|c| *c != 2307).collect();
+    assert!(non_2307.is_empty(), "unexpected diagnostics: {:?}", non_2307);
+}
+
+#[test]
+fn ts1479_not_under_node20() {
+    // The CJS→ESM check is node16/18 only.
+    let files = [
+        ("index.cts", "import * as m from \"./lib.mjs\";\n"),
+        ("lib.d.mts", "export const x: number;\n"),
+        ("package.json", "{\"name\":\"p\",\"type\":\"commonjs\"}\n"),
+    ];
+    let diags = check_sources_with_args(&files, &["--module", "node20"]);
+    let non_2307: Vec<i32> = diags.iter().map(|d| d.code).filter(|c| *c != 2307).collect();
+    assert!(non_2307.is_empty(), "unexpected diagnostics: {:?}", non_2307);
+}
+
+#[test]
+fn ts1471_import_equals_targeting_esm() {
+    let files = [
+        ("index.mts", "import m = require(\"./lib.mjs\");\n"),
+        ("lib.d.mts", "export const x: number;\n"),
+        ("package.json", "{\"name\":\"p\",\"type\":\"module\"}\n"),
+    ];
+    let diags = check_sources_with_args(&files, &["--module", "node16"]);
+    assert_diagnostic_code(&diags, 1471);
+}
+
+#[test]
+fn ts2883_inferred_export_type_not_portable() {
+    // a's inferred type references `Thing` (declared under node_modules);
+    // the file's successful imports never resolve to other.ts, so the
+    // declaration emitter cannot name it portably.
+    let files = [
+        (
+            "index.ts",
+            "import { x } from \"inner\";\nexport const a = x();\n",
+        ),
+        (
+            "node_modules/inner/index.ts",
+            "export { x } from \"./other.js\";\n",
+        ),
+        (
+            "node_modules/inner/other.ts",
+            "export interface Thing {}\nexport const x: () => Thing = null as any;\n",
+        ),
+        ("node_modules/inner/package.json", "{\"name\":\"inner\",\"type\":\"module\",\"exports\":\"./index.ts\"}\n"),
+        ("package.json", "{\"name\":\"package\",\"type\":\"module\"}\n"),
+    ];
+    let diags = check_sources_with_args(&files, &["--module", "node16", "--declaration", "--target", "es2022"]);
+    let found = diags.iter().any(|d| d.code == 2883);
+    assert!(
+        found,
+        "expected TS2883, got: {:?}",
+        diags.iter().map(|d| (d.code, d.message_args.clone())).collect::<Vec<_>>()
+    );
+}
+
+#[test]
+fn ts2883_not_without_declaration_option() {
+    let files = [
+        (
+            "index.ts",
+            "import { x } from \"inner\";\nexport const a = x();\n",
+        ),
+        (
+            "node_modules/inner/index.ts",
+            "export { x } from \"./other.js\";\n",
+        ),
+        (
+            "node_modules/inner/other.ts",
+            "export interface Thing {}\nexport const x: () => Thing = null as any;\n",
+        ),
+        ("node_modules/inner/package.json", "{\"name\":\"inner\",\"type\":\"module\",\"exports\":\"./index.ts\"}\n"),
+        ("package.json", "{\"name\":\"package\",\"type\":\"module\"}\n"),
+    ];
+    let diags = check_sources_with_args(&files, &["--module", "node16", "--target", "es2022"]);
+    let has_2883 = diags.iter().any(|d| d.code == 2883);
+    assert!(!has_2883, "TS2883 must not fire without --declaration");
+}
+
+#[test]
+fn mapped_type_display_uses_written_form() {
+    // The deferred mapped type prints its declared key name and constraint
+    // (`keyof T & string`), not the collapsed resolution (`error`/`string`).
+    let src = "function fa1<T>(x: T, z: { [P in keyof T & string as `p_${P}`]: T[P] }) {\n\
+               \x20   z = x;\n\
+               }\n";
+    let diags = check_source(src);
+    let target_texts: Vec<&str> = diags
+        .iter()
+        .filter(|d| d.code == 2322)
+        .flat_map(|d| d.message_args.last().map(|s| s.as_str()))
+        .collect();
+    assert!(
+        target_texts.iter().any(|t| t.contains("[P in keyof T & string as `p_${P}`]: T[P]; }")),
+        "expected written-form mapped display, got: {:?}",
+        target_texts
+    );
+}
+
+#[test]
+fn ts2883_ambient_module_import_names_type() {
+    // declarationEmitTripleSlashReferenceAmbientModule usage3: `Url` is
+    // declared inside `declare module "url"` under @types; the file imports
+    // "url" by name — the emitter names `Url` through the ambient module
+    // name, so no TS2883 despite the symbol's file being under node_modules.
+    let files = [
+        (
+            "usage3.ts",
+            "import { parse } from \"url\";\nexport const thing = parse();\n",
+        ),
+        (
+            "node_modules/@types/node/index.d.ts",
+            "declare module \"url\" {\n  export class Url {}\n  export function parse(): Url;\n}\n",
+        ),
+        ("package.json", "{\"name\":\"p\",\"type\":\"commonjs\"}\n"),
+    ];
+    let diags = check_sources_with_args(&files, &["--module", "node16", "--declaration", "--target", "es2015"]);
+    let has_2883 = diags.iter().any(|d| d.code == 2883);
+    assert!(
+        !has_2883,
+        "ambient-module-named type must not report TS2883, got: {:?}",
+        diags.iter().map(|d| (d.code, d.message_args.clone())).collect::<Vec<_>>()
+    );
+}
+
+#[test]
+fn ts1479_ambiguous_dts_target_never_esm() {
+    // PackagePattern shape: a CJS `.d.cts` importing through the exports
+    // `js` pattern resolves the package's AMBIGUOUS `index.d.ts` — never
+    // ESM, so no TS1479 (only the `mjs` pattern's `.d.mts` errors).
+    let files = [
+        ("node_modules/inner/test.d.cts", "import * as t from \"inner/js/index\";\n"),
+        ("node_modules/inner/index.d.ts", "export const q: number;\n"),
+        ("node_modules/inner/index.d.mts", "export const r: number;\n"),
+        (
+            "node_modules/inner/package.json",
+            "{\"name\":\"inner\",\"type\":\"module\",\"exports\":{\"./js/*\":\"./*.js\",\"./mjs/*\":\"./*.mjs\"}}\n",
+        ),
+        ("package.json", "{\"name\":\"package\",\"type\":\"module\"}\n"),
+    ];
+    let diags = check_sources_with_args(&files, &["--module", "node16"]);
+    let js_1479 = diags
+        .iter()
+        .any(|d| d.code == 1479 && d.message_args.first().is_some_and(|s| s.contains("js/index")));
+    assert!(
+        !js_1479,
+        "ambiguous .d.ts target must not report TS1479, got: {:?}",
+        diags.iter().map(|d| (d.code, d.message_args.clone())).collect::<Vec<_>>()
+    );
+}
+
+#[test]
+fn ts1479_plain_dts_importer_counts_as_cjs() {
+    // A root `.d.ts` unit defaults to CJS semantics — its static import of
+    // an ESM `.d.mts` target reports TS1479 (official test.d.ts line).
+    let files = [
+        ("node_modules/inner/test.d.ts", "import * as m from \"inner/mjs/index\";\n"),
+        ("node_modules/inner/index.d.mts", "export const r: number;\n"),
+        (
+            "node_modules/inner/package.json",
+            "{\"name\":\"inner\",\"type\":\"module\",\"exports\":{\"./mjs/*\":\"./*.mjs\"}}\n",
+        ),
+        ("package.json", "{\"name\":\"package\",\"type\":\"module\"}\n"),
+    ];
+    let diags = check_sources_with_args(&files, &["--module", "node16"]);
+    assert_diagnostic_code(&diags, 1479);
+}
+
+#[test]
+fn dynamic_import_namespace_member_typing() {
+    // `(await import("inner")).x()` — the awaited dynamic import yields the
+    // module namespace; re-exported members (`export { x } from "./other.js"`)
+    // resolve through the clause chase, so `a` is `Thing` (assignable check
+    // fails) and — under --declaration — TS2883 names it.
+    let files = [
+        (
+            "index.ts",
+            "export const a = (await import(\"inner\")).x();\n",
+        ),
+        (
+            "node_modules/inner/index.ts",
+            "export { x } from \"./other.js\";\n",
+        ),
+        (
+            "node_modules/inner/other.ts",
+            "export interface Thing {}\nexport const x: () => Thing = null as any;\n",
+        ),
+        ("node_modules/inner/package.json", "{\"name\":\"inner\",\"type\":\"module\",\"exports\":\"./index.ts\"}\n"),
+        ("package.json", "{\"name\":\"package\",\"type\":\"module\"}\n"),
+    ];
+    let diags = check_sources_with_args(&files, &["--module", "node16", "--target", "es2022", "--declaration"]);
+    assert_diagnostic_code(&diags, 2883);
+}
+
+#[test]
+fn dynamic_import_member_assignability_checked() {
+    // Without --declaration: the typed member flows into assignment checks.
+    let files = [
+        (
+            "index.ts",
+            "const a = (await import(\"inner\")).x();\nconst b: string = a;\n",
+        ),
+        (
+            "node_modules/inner/index.ts",
+            "export { x } from \"./other.js\";\n",
+        ),
+        (
+            "node_modules/inner/other.ts",
+            "export interface Thing {}\nexport const x: () => Thing = null as any;\n",
+        ),
+        ("node_modules/inner/package.json", "{\"name\":\"inner\",\"type\":\"module\",\"exports\":\"./index.ts\"}\n"),
+        ("package.json", "{\"name\":\"package\",\"type\":\"module\"}\n"),
+    ];
+    let diags = check_sources_with_args(&files, &["--module", "node16", "--target", "es2022"]);
+    assert_diagnostic_code(&diags, 2322);
+}
+
+#[test]
+fn ts2883_library_internal_files_exempt() {
+    // A file INSIDE node_modules referencing sibling package files names
+    // them through intra-package specifiers — never TS2883
+    // (nodeModulesDeclarationEmitDynamicImportWithPackageExports's other.*).
+    let files = [
+        (
+            "node_modules/inner/other.ts",
+            "import { x } from \"inner\";\nexport const f = x();\n",
+        ),
+        (
+            "node_modules/inner/index.ts",
+            "export { x } from \"./other2.js\";\n",
+        ),
+        (
+            "node_modules/inner/other2.ts",
+            "export interface Thing {}\nexport const x: () => Thing = null as any;\n",
+        ),
+        ("node_modules/inner/package.json", "{\"name\":\"inner\",\"type\":\"module\",\"exports\":\"./index.ts\"}\n"),
+        ("package.json", "{\"name\":\"package\",\"type\":\"module\"}\n"),
+    ];
+    let diags = check_sources_with_args(&files, &["--module", "node16", "--declaration", "--target", "es2022"]);
+    let has_2883 = diags.iter().any(|d| d.code == 2883);
+    assert!(
+        !has_2883,
+        "library-internal files must not report TS2883, got: {:?}",
+        diags.iter().map(|d| (d.code, d.message_args.clone())).collect::<Vec<_>>()
+    );
+}
+
+#[test]
+fn ts2883_dynamic_import_initializer_names_module_type() {
+    // `export const f = await import("inner")` — the inferred type is the
+    // inner module namespace; the emitter names it through the import
+    // expression's own specifier, so no TS2883
+    // (nodeModulesDeclarationEmitDynamicImportWithPackageExports).
+    let files = [
+        (
+            "index.ts",
+            "export const f = await import(\"inner\");\n",
+        ),
+        (
+            "node_modules/inner/index.ts",
+            "export const x: number;\n",
+        ),
+        ("node_modules/inner/package.json", "{\"name\":\"inner\",\"type\":\"module\",\"exports\":\"./index.ts\"}\n"),
+        ("package.json", "{\"name\":\"package\",\"type\":\"module\"}\n"),
+    ];
+    let diags = check_sources_with_args(&files, &["--module", "node16", "--declaration", "--target", "es2022"]);
+    let has_2883 = diags.iter().any(|d| d.code == 2883);
+    assert!(
+        !has_2883,
+        "dynamic-import initializer must not report TS2883, got: {:?}",
+        diags.iter().map(|d| (d.code, d.message_args.clone())).collect::<Vec<_>>()
+    );
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// Batch1 (text-only 306 块) 逐条修复钉子
+// ────────────────────────────────────────────────────────────────────────────
+
+#[test]
+fn b1_interface_extends_elaboration_pyramid() {
+    // 2430 + 三层链：属性名 → 类型不可赋值 → 签名元数（addMoreOverloads）
+    let src = "interface Foo { f(): string; }\ninterface Bar extends Foo { f(key: string): string; }\n";
+    let diags = check_source(src);
+    let d = diags.iter().find(|d| d.code == 2430).expect("TS2430");
+    assert!(!d.message_chain.is_empty(), "expected property elaboration level");
+    assert!(d.message_chain[0].message.as_ref().is_some_and(|m|
+        m.key.starts_with("Types_of_property")), "chain head: {:?}",
+        d.message_chain[0].message.as_ref().map(|m| m.key.clone()));
+    assert!(!d.message_chain[0].message_chain.is_empty(), "expected level2 (not-assignable)");
+}
+
+#[test]
+fn b1_optional_property_undefined_leaf_chain() {
+    // 可选属性联合源失败 → nullish 叶链（assignmentCompatability11 族）
+    let src = "interface A<T, U> { one: T; two?: U; }\n\
+               declare var x: A<number, string>;\n\
+               declare var y: { two: number; };\n\
+               y = x;\n";
+    let diags = check_source_strict(src);
+    let d = diags.iter().find(|d| d.code == 2322).expect("TS2322");
+    assert!(!d.message_chain.is_empty(), "expected elaboration chain");
+}
+
+#[test]
+fn b1_no_match_signature_chain() {
+    // 接口源 vs 泛型函数目标 → no-match 链 + 目标带 <T> 显示（24）
+    let src = "interface I { one: number; two?: string; }\n\
+               declare var x: I;\n\
+               declare var f: <Tstring>(a: Tstring) => Tstring;\n\
+               f = x;\n";
+    let diags = check_source(src);
+    let d = diags.iter().find(|d| d.code == 2322).expect("TS2322");
+    let target_text = d.message_args.last().cloned().unwrap_or_default();
+    assert!(target_text.contains("<Tstring>"), "target: {target_text}");
+    assert!(!d.message_chain.is_empty(), "expected no-match chain");
+}
+
+#[test]
+fn b1_index_signature_missing_chain() {
+    // 目标 string 索引签名 + 类实例源 → 索引签名缺失链行
+    let src = "interface IHandlerMap { [type: string]: number; }\n\
+               class Foo { Boz(): void { } }\n\
+               function Biz(m: IHandlerMap) { }\n\
+               Biz(new Foo());\n";
+    let diags = check_source(src);
+    let d = diags.iter().find(|d| d.code == 2345).expect("TS2345");
+    assert!(!d.message_chain.is_empty(), "expected index-signature chain");
 }

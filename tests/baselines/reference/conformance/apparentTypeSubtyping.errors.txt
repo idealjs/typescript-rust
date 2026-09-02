@@ -1,5 +1,7 @@
 apparentTypeSubtyping.ts(5,5): error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
 apparentTypeSubtyping.ts(10,5): error TS2416: Property 'x' in type 'Derived<U>' is not assignable to the same property in base type 'Base<string>'.
+  Type 'String' is not assignable to type 'string'.
+    'string' is a primitive, but 'String' is a wrapper object. Prefer using 'string' when possible.
 apparentTypeSubtyping.ts(10,5): error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
 apparentTypeSubtyping.ts(14,5): error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
 apparentTypeSubtyping.ts(20,5): error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.

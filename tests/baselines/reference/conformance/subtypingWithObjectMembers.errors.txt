@@ -5,13 +5,19 @@ subtypingWithObjectMembers.ts(8,5): error TS2564: Property 'foo' has no initiali
 subtypingWithObjectMembers.ts(9,5): error TS2564: Property 'bar' has no initializer and is not definitely assigned in the constructor.
 subtypingWithObjectMembers.ts(13,5): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
 subtypingWithObjectMembers.ts(14,5): error TS2416: Property 'bar' in type 'B' is not assignable to the same property in base type 'A'.
+  Type 'string' is not assignable to type 'Base'.
 subtypingWithObjectMembers.ts(14,5): error TS2564: Property 'bar' has no initializer and is not definitely assigned in the constructor.
 subtypingWithObjectMembers.ts(24,5): error TS2416: Property '2' in type 'B2' is not assignable to the same property in base type 'A2'.
+  Type 'string' is not assignable to type 'Base'.
 subtypingWithObjectMembers.ts(34,5): error TS2416: Property ''2.0'' in type 'B3' is not assignable to the same property in base type 'A3'.
+  Type 'string' is not assignable to type 'Base'.
 subtypingWithObjectMembers.ts(39,9): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
 subtypingWithObjectMembers.ts(40,9): error TS2564: Property 'bar' has no initializer and is not definitely assigned in the constructor.
 subtypingWithObjectMembers.ts(44,9): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
 subtypingWithObjectMembers.ts(45,9): error TS2416: Property 'bar' in type 'B' is not assignable to the same property in base type 'A'.
+  Type 'string' is not assignable to type 'Base'.
 subtypingWithObjectMembers.ts(45,9): error TS2564: Property 'bar' has no initializer and is not definitely assigned in the constructor.
 subtypingWithObjectMembers.ts(55,9): error TS2416: Property '2' in type 'B2' is not assignable to the same property in base type 'A2'.
+  Type 'string' is not assignable to type 'Base'.
 subtypingWithObjectMembers.ts(65,9): error TS2416: Property ''2.0'' in type 'B3' is not assignable to the same property in base type 'A3'.
+  Type 'string' is not assignable to type 'Base'.

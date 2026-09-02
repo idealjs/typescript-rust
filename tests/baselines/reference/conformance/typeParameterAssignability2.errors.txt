@@ -1,22 +1,44 @@
 typeParameterAssignability2.ts(5,5): error TS2322: Type 'T' is not assignable to type 'U'.
+  'U' could be instantiated with an arbitrary type which could be unrelated to 'T'.
 typeParameterAssignability2.ts(9,5): error TS2322: Type 'U' is not assignable to type 'T'.
+  'T' could be instantiated with an arbitrary type which could be unrelated to 'U'.
 typeParameterAssignability2.ts(14,5): error TS2322: Type 'U' is not assignable to type 'T'.
+  'T' could be instantiated with an arbitrary type which could be unrelated to 'U'.
 typeParameterAssignability2.ts(17,5): error TS2322: Type 'V' is not assignable to type 'T'.
+  'T' could be instantiated with an arbitrary type which could be unrelated to 'V'.
 typeParameterAssignability2.ts(20,5): error TS2322: Type 'V' is not assignable to type 'U'.
+  'U' could be instantiated with an arbitrary type which could be unrelated to 'V'.
 typeParameterAssignability2.ts(25,5): error TS2322: Type 'U' is not assignable to type 'T'.
+  'U' is assignable to the constraint of type 'T', but 'T' could be instantiated with a different subtype of constraint 'Date'.
 typeParameterAssignability2.ts(26,5): error TS2322: Type 'V' is not assignable to type 'T'.
+  'V' is assignable to the constraint of type 'T', but 'T' could be instantiated with a different subtype of constraint 'Date'.
 typeParameterAssignability2.ts(27,5): error TS2322: Type 'Date' is not assignable to type 'T'.
+  'Date' is assignable to the constraint of type 'T', but 'T' could be instantiated with a different subtype of constraint 'Date'.
 typeParameterAssignability2.ts(30,5): error TS2322: Type 'V' is not assignable to type 'U'.
+  'V' is assignable to the constraint of type 'U', but 'U' could be instantiated with a different subtype of constraint 'Date'.
 typeParameterAssignability2.ts(31,5): error TS2322: Type 'Date' is not assignable to type 'U'.
+  'Date' is assignable to the constraint of type 'U', but 'U' could be instantiated with a different subtype of constraint 'Date'.
 typeParameterAssignability2.ts(35,5): error TS2322: Type 'Date' is not assignable to type 'V'.
+  'Date' is assignable to the constraint of type 'V', but 'V' could be instantiated with a different subtype of constraint 'Date'.
 typeParameterAssignability2.ts(45,5): error TS2322: Type 'U' is not assignable to type 'T'.
+  'U' is assignable to the constraint of type 'T', but 'T' could be instantiated with a different subtype of constraint 'Date'.
 typeParameterAssignability2.ts(46,5): error TS2322: Type 'V' is not assignable to type 'T'.
+  'V' is assignable to the constraint of type 'T', but 'T' could be instantiated with a different subtype of constraint 'Date'.
 typeParameterAssignability2.ts(47,5): error TS2322: Type 'Date' is not assignable to type 'T'.
+  'Date' is assignable to the constraint of type 'T', but 'T' could be instantiated with a different subtype of constraint 'Date'.
 typeParameterAssignability2.ts(50,5): error TS2322: Type 'V' is not assignable to type 'U'.
+  'V' is assignable to the constraint of type 'U', but 'U' could be instantiated with a different subtype of constraint 'Date'.
 typeParameterAssignability2.ts(51,5): error TS2322: Type 'Date' is not assignable to type 'U'.
+  'Date' is assignable to the constraint of type 'U', but 'U' could be instantiated with a different subtype of constraint 'Date'.
 typeParameterAssignability2.ts(55,5): error TS2322: Type 'Date' is not assignable to type 'V'.
+  'Date' is assignable to the constraint of type 'V', but 'V' could be instantiated with a different subtype of constraint 'Date'.
 typeParameterAssignability2.ts(64,5): error TS2322: Type 'U' is not assignable to type 'T'.
+  'T' could be instantiated with an arbitrary type which could be unrelated to 'U'.
 typeParameterAssignability2.ts(65,5): error TS2322: Type 'V' is not assignable to type 'T'.
+  'T' could be instantiated with an arbitrary type which could be unrelated to 'V'.
 typeParameterAssignability2.ts(68,5): error TS2322: Type 'V' is not assignable to type 'U'.
+  'U' could be instantiated with an arbitrary type which could be unrelated to 'V'.
 typeParameterAssignability2.ts(70,5): error TS2322: Type 'T' is not assignable to type 'V'.
+  'V' could be instantiated with an arbitrary type which could be unrelated to 'T'.
 typeParameterAssignability2.ts(71,5): error TS2322: Type 'U' is not assignable to type 'V'.
+  'V' could be instantiated with an arbitrary type which could be unrelated to 'U'.

@@ -7,4 +7,6 @@ noUncheckedIndexedAccessDestructuring.ts(34,5): error TS18048: 'z' is possibly '
 noUncheckedIndexedAccessDestructuring.ts(41,5): error TS18048: 'q.z' is possibly 'undefined'.
 noUncheckedIndexedAccessDestructuring.ts(52,5): error TS18048: 'q.z' is possibly 'undefined'.
 noUncheckedIndexedAccessDestructuring.ts(62,2): error TS2322: Type 'string | undefined' is not assignable to type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
 noUncheckedIndexedAccessDestructuring.ts(71,8): error TS2322: Type 'number | undefined' is not assignable to type 'number'.
+  Type 'undefined' is not assignable to type 'number'.

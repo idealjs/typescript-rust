@@ -4,18 +4,27 @@ subtypesOfTypeParameterWithConstraints4.ts(37,5): error TS2564: Property 'foo' h
 subtypesOfTypeParameterWithConstraints4.ts(42,5): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
 subtypesOfTypeParameterWithConstraints4.ts(47,5): error TS2411: Property 'foo' of type 'V' is not assignable to 'string' index type 'Foo'.
 subtypesOfTypeParameterWithConstraints4.ts(47,5): error TS2416: Property 'foo' in type 'D3<T, U, V>' is not assignable to the same property in base type 'B1<Foo>'.
+  Type 'V' is not assignable to type 'Foo'.
 subtypesOfTypeParameterWithConstraints4.ts(47,5): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
 subtypesOfTypeParameterWithConstraints4.ts(52,5): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
 subtypesOfTypeParameterWithConstraints4.ts(57,5): error TS2411: Property 'foo' of type 'U' is not assignable to 'string' index type 'T'.
 subtypesOfTypeParameterWithConstraints4.ts(57,5): error TS2416: Property 'foo' in type 'D5<T, U, V>' is not assignable to the same property in base type 'B1<T>'.
+  Type 'U' is not assignable to type 'T'.
+    'U' is assignable to the constraint of type 'T', but 'T' could be instantiated with a different subtype of constraint 'Foo'.
 subtypesOfTypeParameterWithConstraints4.ts(57,5): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
 subtypesOfTypeParameterWithConstraints4.ts(62,5): error TS2411: Property 'foo' of type 'V' is not assignable to 'string' index type 'T'.
 subtypesOfTypeParameterWithConstraints4.ts(62,5): error TS2416: Property 'foo' in type 'D6<T, U, V>' is not assignable to the same property in base type 'B1<T>'.
+  Type 'V' is not assignable to type 'T'.
+    'T' could be instantiated with an arbitrary type which could be unrelated to 'V'.
 subtypesOfTypeParameterWithConstraints4.ts(62,5): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
 subtypesOfTypeParameterWithConstraints4.ts(67,5): error TS2411: Property 'foo' of type 'T' is not assignable to 'string' index type 'U'.
 subtypesOfTypeParameterWithConstraints4.ts(67,5): error TS2416: Property 'foo' in type 'D7<T, U, V>' is not assignable to the same property in base type 'B1<U>'.
+  Type 'T' is not assignable to type 'U'.
+    'T' is assignable to the constraint of type 'U', but 'U' could be instantiated with a different subtype of constraint 'Foo'.
 subtypesOfTypeParameterWithConstraints4.ts(67,5): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
 subtypesOfTypeParameterWithConstraints4.ts(72,5): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
 subtypesOfTypeParameterWithConstraints4.ts(77,5): error TS2411: Property 'foo' of type 'V' is not assignable to 'string' index type 'U'.
 subtypesOfTypeParameterWithConstraints4.ts(77,5): error TS2416: Property 'foo' in type 'D9<T, U, V>' is not assignable to the same property in base type 'B1<U>'.
+  Type 'V' is not assignable to type 'U'.
+    'U' could be instantiated with an arbitrary type which could be unrelated to 'V'.
 subtypesOfTypeParameterWithConstraints4.ts(77,5): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.

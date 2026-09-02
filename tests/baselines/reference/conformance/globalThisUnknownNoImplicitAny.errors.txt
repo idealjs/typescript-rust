@@ -3,4 +3,6 @@ globalThisUnknownNoImplicitAny.ts(5,6): error TS7017: Element implicitly has an 
 globalThisUnknownNoImplicitAny.ts(6,12): error TS7017: Element implicitly has an 'any' type because type 'typeof globalThis' has no index signature.
 globalThisUnknownNoImplicitAny.ts(8,5): error TS7015: Element implicitly has an 'any' type because index expression is not of type 'number'.
 globalThisUnknownNoImplicitAny.ts(9,1): error TS7053: Element implicitly has an 'any' type because expression of type '"hi"' can't be used to index type 'typeof globalThis'.
+  Property 'hi' does not exist on type 'typeof globalThis'.
 globalThisUnknownNoImplicitAny.ts(10,1): error TS7053: Element implicitly has an 'any' type because expression of type '"hi"' can't be used to index type 'typeof globalThis'.
+  Property 'hi' does not exist on type 'typeof globalThis'.

@@ -1,1 +1,2 @@
 symbolProperty25.ts(5,7): error TS2420: Class 'C' incorrectly implements interface 'I'.
+  Property '[Symbol.toPrimitive]' is missing in type 'C' but required in type 'I'.

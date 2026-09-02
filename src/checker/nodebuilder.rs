@@ -116,6 +116,21 @@ impl SymbolDisplayPart {
     }
 }
 
+/// The import-type specifier shown for a FILE module symbol: the file's
+/// base name minus its TypeScript/JavaScript extension
+/// (`/proj/foo.d.ts` → `foo`, flat-harness names pass through as-is).
+fn module_specifier_of_name(name: &str) -> String {
+    let base = name.rsplit(['/', '\\']).next().unwrap_or(name);
+    for ext in [
+        ".d.ts", ".d.mts", ".d.cts", ".ts", ".tsx", ".mts", ".cts", ".js", ".jsx", ".mjs", ".cjs",
+    ] {
+        if let Some(stem) = base.strip_suffix(ext) {
+            return stem.to_string();
+        }
+    }
+    base.to_string()
+}
+
 /// Whether an intrinsic type name should be classified as a keyword part.
 fn is_keyword_type_name(name: &str) -> bool {
     matches!(
@@ -198,10 +213,29 @@ impl Checker {
     /// This is the main worker. It dispatches on the type's flags and data
     /// variant, recursing into constituent types as needed.
     pub fn type_to_string_ex(&mut self, t: &Arc<Type>, flags: TypeFormatFlags) -> String {
-        // Guard against infinite recursion on recursive types.
+        // Circular-type guard (official prints "..." for a type that
+        // recurses into itself, e.g. a conditional whose branch resolution
+        // yields the same conditional; Go's nodebuilder truncation). A
+        // type whose pointer is already on the active print stack is a
+        // genuine ancestor cycle — printing it re-enters the same
+        // recursion forever (checker_parity's ReturnType<typeof f>
+        // overflowed even a 256MB stack). Sibling repetition is unaffected
+        // (each subtree pops before the next prints). Depth cap as a
+        // backstop for non-pointer-repeating chains.
+        let key = Arc::as_ptr(t) as usize;
+        if self.type_print_stack.len() >= 300 || self.type_print_stack.contains(&key) {
+            return "...".to_string();
+        }
         if self.serialization_level >= MAX_SERIALIZATION_LEVEL {
             return "?".to_string();
         }
+        self.type_print_stack.push(key);
+        let result = self.type_to_string_ex_worker(t, flags);
+        self.type_print_stack.pop();
+        result
+    }
+
+    fn type_to_string_ex_worker(&mut self, t: &Arc<Type>, flags: TypeFormatFlags) -> String {
 
         // Intrinsic types (any, string, number, etc.)
         if let Some(name) = t.intrinsic_name() {
@@ -297,16 +331,40 @@ impl Checker {
                 }
                 return format!("{}<{}>", sym.name, args.join(", "));
             }
-            let tp = m
-                .type_parameter
-                .as_ref()
-                .map(|tp| self.type_to_string_ex(tp, flags))
+            // Deferred mapped types keep their declaration node. Official
+            // prints the declared key name and constraint (`keyof T & string`)
+            // — resolving the type-parameter declaration node itself yields
+            // the error type, and our `keyof T` collapses to `string`, so
+            // both the key name and the constraint come from the written
+            // form when the declaration is available.
+            let mut decl_tp_name: Option<String> = None;
+            let mut decl_constraint: Option<String> = None;
+            if let Some(decl) = m.declaration.as_ref()
+                && let crate::ast::NodeData::MappedTypeNode(md) = &decl.data
+                && let crate::ast::NodeData::TypeParameterDeclaration(tpd) =
+                    &md.type_parameter.data
+            {
+                decl_tp_name = Some(tpd.name.text().to_string());
+                if let Some(c) = &tpd.constraint {
+                    decl_constraint = self.node_source_text(c);
+                }
+            }
+            let tp = decl_tp_name
+                .filter(|n| !n.is_empty())
+                .or_else(|| {
+                    m.type_parameter
+                        .as_ref()
+                        .and_then(|tp| tp.symbol.as_ref().map(|s| s.name.clone()))
+                })
                 .unwrap_or_else(|| "K".to_string());
-            let constraint = m
-                .constraint_type
-                .as_ref()
-                .map(|c| self.type_to_string_ex(c, flags))
-                .unwrap_or_else(|| "keyof any".to_string());
+            let constraint = decl_constraint
+                .filter(|c| !c.is_empty())
+                .unwrap_or_else(|| {
+                    m.constraint_type
+                        .as_ref()
+                        .map(|c| self.type_to_string_ex(c, flags))
+                        .unwrap_or_else(|| "keyof any".to_string())
+                });
             let as_clause = m
                 .name_type
                 .as_ref()
@@ -317,7 +375,7 @@ impl Checker {
                 .as_ref()
                 .map(|tt| self.type_to_string_ex(tt, flags))
                 .unwrap_or_else(|| "any".to_string());
-            return format!("{{ [{tp} in {constraint}{as_clause}]: {template} }}");
+            return format!("{{ [{tp} in {constraint}{as_clause}]: {template}; }}");
         }
         if let TypeData::Substitution(sub) = &t.data {
             if let Some(base) = &sub.base_type {
@@ -356,15 +414,29 @@ impl Checker {
                 .unwrap_or_else(|| "unknown".to_string());
             // Print the branches AS WRITTEN (official serializes the
             // conditional's source node): when the evaluated branch types
-            // haven't been computed, resolve the branch type nodes.
-            let (true_node, false_node) = root.and_then(|r| r.node.as_ref()).map(|n| {
-                match &n.data {
-                    crate::ast::NodeData::ConditionalTypeNode(d) => {
-                        (Some(Arc::clone(&d.true_type)), Some(Arc::clone(&d.false_type)))
+            // haven't been computed, resolve the branch type nodes. The
+            // conditional's scope must be pushed for that resolution —
+            // the branches reference `infer R` parameters declared as the
+            // CONDITIONAL's locals (binder's get_infer_type_container);
+            // without the scope the reference reports TS2304 from the
+            // DISPLAY path (lib's InstanceType/Awaited — official's
+            // typeToString never emits diagnostics).
+            let (cond_node, true_node, false_node) = root
+                .and_then(|r| r.node.as_ref())
+                .map(|n| {
+                    match &n.data {
+                        crate::ast::NodeData::ConditionalTypeNode(d) => (
+                            Some(Arc::clone(n)),
+                            Some(Arc::clone(&d.true_type)),
+                            Some(Arc::clone(&d.false_type)),
+                        ),
+                        _ => (None, None, None),
                     }
-                    _ => (None, None),
-                }
-            }).unwrap_or((None, None));
+                })
+                .unwrap_or((None, None, None));
+            if let Some(cn) = &cond_node {
+                self.push_scope(cn);
+            }
             let true_t = c
                 .resolved_true_type
                 .get()
@@ -387,6 +459,9 @@ impl Checker {
                     })
                 })
                 .unwrap_or_else(|| "...".to_string());
+            if cond_node.is_some() {
+                self.pop_scope();
+            }
             return format!("{check} extends {extends} ? {true_t} : {false_t}");
         }
 
@@ -415,7 +490,11 @@ impl Checker {
         // Anonymous object literal types (including the empty literal `{}`,
         // which renders as `{}` rather than falling through to "object").
         if let Some(structured) = t.as_structured() {
-            if !structured.properties.is_empty() || !structured.call_signatures().is_empty() {
+            if !structured.properties.is_empty()
+                || !structured.call_signatures().is_empty()
+                || !structured.construct_signatures().is_empty()
+                || !structured.index_infos.is_empty()
+            {
                 return self.object_literal_to_string(t, structured, flags);
             }
             if t.object_flags.contains(ObjectFlags::ObjectLiteral) && t.symbol.is_none() {
@@ -452,8 +531,25 @@ impl Checker {
     /// parenthesized to avoid ambiguity.
     fn union_to_string(&mut self, t: &Arc<Type>, flags: TypeFormatFlags) -> String {
         let types = t.types().unwrap_or(&[]);
-        let parts: Vec<String> = types
-            .iter()
+        // Official DISPLAY order puts nullish members LAST — `null`
+        // before `undefined` (`number | null | undefined`) — regardless
+        // of the internal bit-value storage order.
+        let mut ordered: Vec<&Arc<Type>> = Vec::with_capacity(types.len());
+        let mut nulls: Vec<&Arc<Type>> = Vec::new();
+        let mut undefs: Vec<&Arc<Type>> = Vec::new();
+        for ty in types.iter() {
+            if ty.flags.contains(TypeFlags::Undefined) {
+                undefs.push(ty);
+            } else if ty.flags.contains(TypeFlags::Null) {
+                nulls.push(ty);
+            } else {
+                ordered.push(ty);
+            }
+        }
+        ordered.extend(nulls);
+        ordered.extend(undefs);
+        let parts: Vec<String> = ordered
+            .into_iter()
             .map(|ty| {
                 let s = self.type_to_string_ex(ty, flags);
                 // Parenthesize function types and unions in union members.
@@ -690,7 +786,27 @@ impl Checker {
             .cloned()
             .unwrap_or_else(|| self.any_type());
         let ret_str = self.type_to_string_ex(&ret_type, flags);
-        format!("({}) => {}", params.join(", "), ret_str)
+        // Generic signatures display their type-parameter list
+        // (`<T>(a: T) => T`); Go's signature printer always spells it out.
+        let tp_prefix = self.signature_type_param_prefix(sig);
+        format!("{tp_prefix}({}) => {}", params.join(", "), ret_str)
+    }
+
+    /// The `<T, U>` prefix for a generic signature's display.
+    fn signature_type_param_prefix(&self, sig: &Arc<Signature>) -> String {
+        if sig.type_parameters.is_empty() {
+            return String::new();
+        }
+        let names: Vec<String> = sig
+            .type_parameters
+            .iter()
+            .filter_map(|tp| tp.symbol.as_ref().map(|s| s.name.clone()))
+            .collect();
+        if names.is_empty() {
+            String::new()
+        } else {
+            format!("<{}>", names.join(", "))
+        }
     }
 
     /// Format an object literal type: `{ a: T; b: U }`.
@@ -702,14 +818,18 @@ impl Checker {
     ) -> String {
         let mut parts: Vec<String> = Vec::new();
 
-        // Call signatures
+        // Call signatures (generic signatures display their
+        // type-parameter list, `<T>(a: T) => T`).
         for sig in structured.call_signatures() {
             let params: Vec<String> = sig
                 .parameters
                 .iter()
-                .map(|param| {
+                .enumerate()
+                .map(|(i, param)| {
                     let name = param.name.clone();
-                    let param_type = self.get_type_of_symbol(param);
+                    let param_type = self
+                        .signature_instantiated_param_type(sig, i)
+                        .unwrap_or_else(|| self.get_type_of_symbol(param));
                     let type_str = self.type_to_string_ex(&param_type, flags);
                     if param.flags.contains(crate::ast::SymbolFlags::Optional) {
                         format!("{}?: {}", name, type_str)
@@ -724,23 +844,112 @@ impl Checker {
                 .cloned()
                 .unwrap_or_else(|| self.any_type());
             let ret_str = self.type_to_string_ex(&ret_type, flags);
-            parts.push(format!("({}) => {}", params.join(", "), ret_str));
+            let tp = self.signature_type_param_prefix(sig);
+            parts.push(format!("{tp}({}) => {}", params.join(", "), ret_str));
+        }
+        // Construct signatures (`new <T>(p: T) => R`).
+        for sig in structured.construct_signatures() {
+            let params: Vec<String> = sig
+                .parameters
+                .iter()
+                .enumerate()
+                .map(|(i, param)| {
+                    let param_type = self
+                        .signature_instantiated_param_type(sig, i)
+                        .unwrap_or_else(|| self.get_type_of_symbol(param));
+                    format!("{}: {}", param.name, self.type_to_string_ex(&param_type, flags))
+                })
+                .collect();
+            let ret_type = sig
+                .resolved_return_type
+                .get()
+                .cloned()
+                .unwrap_or_else(|| self.any_type());
+            let ret_str = self.type_to_string_ex(&ret_type, flags);
+            let tp = self.signature_type_param_prefix(sig);
+            parts.push(format!("new {tp}({}) => {}", params.join(", "), ret_str));
         }
 
         // Properties
         for prop in &structured.properties {
             let name = prop.name.clone();
+            // A numeric-literal declared key displays QUOTED in type
+            // displays (`{ 0: 1 }` → `{ "0": number; }`,
+            // assignmentIndexedToPrimitives). Chain property-arg names are
+            // a different site and stay raw (Page-124).
+            // A STRING-literal declared key displays QUOTED (`{ "0": 1 }`
+            // → `{ "0": number; }`); a NUMERIC key stays raw (`{ 0: 1 }` →
+            // `{ 0: number; }`) — assignmentIndexedToPrimitives.
+            let name = if prop.declarations.iter().any(|d| {
+                d.name().is_some_and(|n| n.kind == SyntaxKind::StringLiteral)
+            }) {
+                format!("\"{name}\"")
+            } else {
+                name
+            };
             let prop_type = self.get_type_of_symbol(prop);
             let type_str = self.type_to_string_ex(&prop_type, flags);
+            let readonly = prop
+                .check_flags
+                .contains(crate::ast::CheckFlags::Readonly);
             if prop.flags.contains(SymbolFlags::Optional) {
-                parts.push(format!("{}?: {}", name, type_str));
+                // Only a genuinely readonly member prints the modifier —
+                // optionality alone must not (`{ s?: number }`,
+                // subtypingWithOptionalProperties).
+                let ro = if readonly { "readonly " } else { "" };
+                parts.push(format!("{ro}{}?: {}", name, type_str));
+            } else if readonly {
+                parts.push(format!("readonly {}: {}", name, type_str));
             } else {
                 parts.push(format!("{}: {}", name, type_str));
             }
         }
 
+        // Index signatures (`[x: string]: any`) — displayed members of
+        // anonymous types.
+        for info in &structured.index_infos {
+            let key_str = info
+                .key_type
+                .as_ref()
+                .map(|k| self.type_to_string_ex(k, flags))
+                .unwrap_or_else(|| "string".to_string());
+            let val_str = info
+                .value_type
+                .as_ref()
+                .map(|v| self.type_to_string_ex(v, flags))
+                .unwrap_or_else(|| "any".to_string());
+            // The declared parameter name (`[index: string]`), recovered
+            // from the signature's first parameter.
+            let key_name = info
+                .declaration
+                .as_ref()
+                .and_then(|d| {
+                    let NodeData::IndexSignatureDeclaration(sd) = &d.data else {
+                        return None;
+                    };
+                    sd.parameters.iter().next().and_then(|p| {
+                        match &p.data {
+                            NodeData::ParameterDeclaration(pd) => {
+                                Some(pd.name.text().to_string())
+                            }
+                            _ => None,
+                        }
+                    })
+                })
+                .unwrap_or_else(|| "x".to_string());
+            let readonly = if info.is_readonly { "readonly " } else { "" };
+            parts.push(format!("{readonly}[{key_name}: {key_str}]: {val_str}"));
+        }
+
         if parts.is_empty() {
             "{}".to_string()
+        } else if structured.properties.is_empty()
+            && structured.call_signatures().is_empty()
+            && structured.construct_signatures().len() == 1
+        {
+            // A lone construct signature prints bare, without the object
+            // literal braces (`new <T>(p: T) => R`).
+            parts.join("")
         } else {
             // Go's printer terminates each member with ';' inside the braces
             // (`{ x: number; }`).
@@ -793,8 +1002,29 @@ impl Checker {
 
         // Namespace value types print as `typeof N` (Go's TypeReference
         // display for ValueModule symbols, e.g. TS2339 on `N.x` reads
-        // "Property 'x' does not exist on type 'typeof N'").
+        // "Property 'x' does not exist on type 'typeof N'"). FILE modules
+        // and string-named ambient modules print through an import type —
+        // `typeof import("./m")` (Go symbolToTypeNode's
+        // hasNonGlobalAugmentationExternalModuleSymbol branch); the harness
+        // layout is flat, so the specifier is the file stem.
         if sym.flags.contains(SymbolFlags::ValueModule) {
+            if sym
+                .declarations
+                .iter()
+                .any(|d| d.kind == SyntaxKind::SourceFile)
+            {
+                return format!("typeof import(\"{}\")", module_specifier_of_name(&sym.name));
+            }
+            for d in &sym.declarations {
+                if let NodeData::ModuleDeclaration(md) = &d.data
+                    && md.name.kind == SyntaxKind::StringLiteral
+                {
+                    return format!(
+                        "typeof import(\"{}\")",
+                        md.name.text().trim_matches(['"', '\''])
+                    );
+                }
+            }
             return format!("typeof {}", sym.name);
         }
 
@@ -1033,8 +1263,24 @@ impl Checker {
         if types.len() == 1 {
             return self.type_to_type_node(&types[0]);
         }
-        let nodes: Vec<Arc<Node>> = types
-            .iter()
+        // Same nullish-last display partition as `union_to_string`
+        // (`string | null`, never `null | string`).
+        let mut ordered: Vec<&Arc<Type>> = Vec::with_capacity(types.len());
+        let mut nulls: Vec<&Arc<Type>> = Vec::new();
+        let mut undefs: Vec<&Arc<Type>> = Vec::new();
+        for ty in types.iter() {
+            if ty.flags.contains(TypeFlags::Undefined) {
+                undefs.push(ty);
+            } else if ty.flags.contains(TypeFlags::Null) {
+                nulls.push(ty);
+            } else {
+                ordered.push(ty);
+            }
+        }
+        ordered.extend(nulls);
+        ordered.extend(undefs);
+        let nodes: Vec<Arc<Node>> = ordered
+            .into_iter()
             .map(|ty| {
                 let node = self.type_to_type_node(ty);
                 if self.needs_parens_in_union(ty) {

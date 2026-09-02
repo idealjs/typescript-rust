@@ -20,7 +20,9 @@ parserharness.ts(128,33): error TS7006: Parameter 'result' implicitly has an 'an
 parserharness.ts(145,32): error TS7006: Parameter 'text1' implicitly has an 'any' type.
 parserharness.ts(145,39): error TS7006: Parameter 'text2' implicitly has an 'any' type.
 parserharness.ts(261,24): error TS7053: Element implicitly has an 'any' type because expression of type 'string' can't be used to index type 'ILogger'.
+  No index signature with a parameter of type 'string' was found on type 'ILogger'.
 parserharness.ts(262,17): error TS7053: Element implicitly has an 'any' type because expression of type 'string' can't be used to index type 'ILogger'.
+  No index signature with a parameter of type 'string' was found on type 'ILogger'.
 parserharness.ts(278,16): error TS2322: Type 'null' is not assignable to type 'Error'.
 parserharness.ts(335,37): error TS7006: Parameter 'done' implicitly has an 'any' type.
 parserharness.ts(341,13): error TS2662: Cannot find name 'errorHandlerStack'. Did you mean the static member 'Runnable.errorHandlerStack'?
@@ -50,18 +52,25 @@ parserharness.ts(532,20): error TS7008: Member 'startTime' implicitly has an 'an
 parserharness.ts(633,42): error TS7006: Parameter 'name' implicitly has an 'any' type.
 parserharness.ts(633,48): error TS7006: Parameter 'f' implicitly has an 'any' type.
 parserharness.ts(637,31): error TS2345: Argument of type '(name: any, f: any) => void' is not assignable to parameter of type '() => void'.
+  Target signature provides too few arguments. Expected 2 or more, but got 0.
 parserharness.ts(691,50): error TS2304: Cannot find name 'ITextWriter'.
 parserharness.ts(695,26): error TS7006: Parameter 'str' implicitly has an 'any' type.
 parserharness.ts(699,30): error TS7006: Parameter 'str' implicitly has an 'any' type.
 parserharness.ts(716,47): error TS2503: Cannot find namespace 'TypeScript'.
 parserharness.ts(721,62): error TS2304: Cannot find name 'ITextWriter'.
 parserharness.ts(723,21): error TS7053: Element implicitly has an 'any' type because expression of type 'string' can't be used to index type '{}'.
+  No index signature with a parameter of type 'string' was found on type '{}'.
 parserharness.ts(724,29): error TS2304: Cannot find name 'ITextWriter'.
 parserharness.ts(724,41): error TS7053: Element implicitly has an 'any' type because expression of type 'string' can't be used to index type '{}'.
+  No index signature with a parameter of type 'string' was found on type '{}'.
 parserharness.ts(728,17): error TS7053: Element implicitly has an 'any' type because expression of type 'string' can't be used to index type '{}'.
+  No index signature with a parameter of type 'string' was found on type '{}'.
 parserharness.ts(733,58): error TS7053: Element implicitly has an 'any' type because expression of type 'string' can't be used to index type '{}'.
+  No index signature with a parameter of type 'string' was found on type '{}'.
 parserharness.ts(743,74): error TS7053: Element implicitly has an 'any' type because expression of type 'string' can't be used to index type '{}'.
+  No index signature with a parameter of type 'string' was found on type '{}'.
 parserharness.ts(746,62): error TS7053: Element implicitly has an 'any' type because expression of type 'string' can't be used to index type '{}'.
+  No index signature with a parameter of type 'string' was found on type '{}'.
 parserharness.ts(754,53): error TS2552: Cannot find name 'TypeScript'. Did you mean 'TypeScriptLS'?
 parserharness.ts(764,56): error TS2503: Cannot find namespace 'TypeScript'.
 parserharness.ts(765,37): error TS2304: Cannot find name 'TypeScript'.
@@ -113,9 +122,12 @@ parserharness.ts(1080,35): error TS2503: Cannot find namespace 'TypeScript'.
 parserharness.ts(1080,74): error TS2503: Cannot find namespace 'TypeScript'.
 parserharness.ts(1107,173): error TS2503: Cannot find namespace 'TypeScript'.
 parserharness.ts(1127,29): error TS7053: Element implicitly has an 'any' type because expression of type 'string' can't be used to index type '{}'.
+  No index signature with a parameter of type 'string' was found on type '{}'.
 parserharness.ts(1128,36): error TS7053: Element implicitly has an 'any' type because expression of type 'string' can't be used to index type '{}'.
+  No index signature with a parameter of type 'string' was found on type '{}'.
 parserharness.ts(1136,21): error TS2322: Type 'null' is not assignable to type 'string'.
 parserharness.ts(1139,73): error TS7053: Element implicitly has an 'any' type because expression of type 'string' can't be used to index type '{}'.
+  No index signature with a parameter of type 'string' was found on type '{}'.
 parserharness.ts(1176,132): error TS2503: Cannot find namespace 'TypeScript'.
 parserharness.ts(1177,21): error TS7034: Variable 'lines' implicitly has type 'any[]' in some locations where its type cannot be determined.
 parserharness.ts(1178,50): error TS7005: Variable 'lines' implicitly has an 'any[]' type.
@@ -186,8 +198,10 @@ parserharness.ts(1892,26): error TS2345: Argument of type 'null' is not assignab
 parserharness.ts(2030,32): error TS2304: Cannot find name 'Diff'.
 parserharness.ts(2050,26): error TS2352: Conversion of type 'undefined' to type 'string' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
 parserharness.ts(2055,78): error TS2345: Argument of type 'BaselineOptions | undefined' is not assignable to parameter of type 'BaselineOptions'.
+  Type 'undefined' is not assignable to type 'BaselineOptions'.
 parserharness.ts(2056,33): error TS18048: 'comparison' is possibly 'undefined'.
 parserharness.ts(2056,54): error TS18048: 'comparison' is possibly 'undefined'.
 parserharness.ts(2066,86): error TS2345: Argument of type 'BaselineOptions | undefined' is not assignable to parameter of type 'BaselineOptions'.
+  Type 'undefined' is not assignable to type 'BaselineOptions'.
 parserharness.ts(2067,41): error TS18048: 'comparison' is possibly 'undefined'.
 parserharness.ts(2067,62): error TS18048: 'comparison' is possibly 'undefined'.

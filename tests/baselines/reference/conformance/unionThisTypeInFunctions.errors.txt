@@ -1,1 +1,9 @@
 unionThisTypeInFunctions.ts(10,5): error TS2684: The 'this' context of type 'Fake | Real' is not assignable to method's 'this' of type 'Real & Fake'.
+  Type 'Fake' is not assignable to type 'Real & Fake'.
+    Type 'Fake' is not assignable to type 'Real'.
+      Types of property 'method' are incompatible.
+        Type '(this: Fake, n: number) => void' is not assignable to type '(this: Real, n: number) => void'.
+          The 'this' types of each signature are incompatible.
+            Type 'Real' is not assignable to type 'Fake'.
+              Types of property 'data' are incompatible.
+                Type 'string' is not assignable to type 'number'.

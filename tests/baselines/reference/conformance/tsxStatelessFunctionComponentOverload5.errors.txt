@@ -1,6 +1,35 @@
 file.tsx(43,16): error TS2683: 'this' implicitly has type 'any' because it does not have a type annotation.
 file.tsx(46,12): error TS2683: 'this' implicitly has type 'any' because it does not have a type annotation.
 file.tsx(50,13): error TS2769: No overload matches this call.
+  Overload 1 of 3, '(buttonProps: ButtonProps): Element', gave the following error.
+    Type '{ to: string; onClick: (e: MouseEvent<any>) => void; children: string; }' is not assignable to type 'IntrinsicAttributes & ButtonProps'.
+      Property 'to' does not exist on type 'IntrinsicAttributes & ButtonProps'.
+  Overload 2 of 3, '(linkProps: LinkProps): Element', gave the following error.
+    Type '{ to: string; onClick: (e: MouseEvent<any>) => void; children: string; }' is not assignable to type 'IntrinsicAttributes & LinkProps'.
+      Property 'onClick' does not exist on type 'IntrinsicAttributes & LinkProps'.
+  Overload 3 of 3, '(hyphenProps: HyphenProps): Element', gave the following error.
+    Type '{ to: string; onClick: (e: MouseEvent<any>) => void; children: string; }' is not assignable to type 'IntrinsicAttributes & HyphenProps'.
+      Property 'to' does not exist on type 'IntrinsicAttributes & HyphenProps'.
 file.tsx(56,51): error TS2769: No overload matches this call.
+  Overload 1 of 3, '(buttonProps: ButtonProps): Element', gave the following error.
+    Type 'number' is not assignable to type 'string'.
+  Overload 2 of 3, '(linkProps: LinkProps): Element', gave the following error.
+    Type 'number' is not assignable to type 'string'.
+  Overload 3 of 3, '(hyphenProps: HyphenProps): Element', gave the following error.
+    Type 'number' is not assignable to type 'string'.
 file.tsx(57,68): error TS2769: No overload matches this call.
+  Overload 1 of 3, '(buttonProps: ButtonProps): Element', gave the following error.
+    Type 'boolean' is not assignable to type 'string'.
+  Overload 2 of 3, '(linkProps: LinkProps): Element', gave the following error.
+    Type 'boolean' is not assignable to type 'string'.
+  Overload 3 of 3, '(hyphenProps: HyphenProps): Element', gave the following error.
+    Type 'boolean' is not assignable to type 'string'.
 file.tsx(58,13): error TS2769: No overload matches this call.
+  Overload 1 of 3, '(buttonProps: ButtonProps): Element', gave the following error.
+    Property 'onClick' is missing in type '{ "data-format": true; }' but required in type 'ButtonProps'.
+  Overload 2 of 3, '(linkProps: LinkProps): Element', gave the following error.
+    Property 'to' is missing in type '{ "data-format": true; }' but required in type 'LinkProps'.
+  Overload 3 of 3, '(hyphenProps: HyphenProps): Element', gave the following error.
+    Type '{ "data-format": true; }' is not assignable to type 'HyphenProps'.
+      Types of property '"data-format"' are incompatible.
+        Type 'boolean' is not assignable to type 'string'.

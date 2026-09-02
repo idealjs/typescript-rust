@@ -1,1 +1,2 @@
 controlFlowTypeofObject.ts(66,13): error TS2345: Argument of type 'object | null' is not assignable to parameter of type 'object'.
+  Type 'null' is not assignable to type 'object'.

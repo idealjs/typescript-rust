@@ -1,12 +1,20 @@
 numericLiteralTypes3.ts(8,5): error TS2322: Type 'B' is not assignable to type '1'.
+  Type '2' is not assignable to type '1'.
 numericLiteralTypes3.ts(9,5): error TS2322: Type 'C' is not assignable to type '1'.
+  Type '2' is not assignable to type '1'.
 numericLiteralTypes3.ts(10,5): error TS2322: Type 'D' is not assignable to type '1'.
+  Type '0' is not assignable to type '1'.
 numericLiteralTypes3.ts(14,5): error TS2322: Type '1' is not assignable to type 'B'.
 numericLiteralTypes3.ts(16,5): error TS2322: Type 'C' is not assignable to type 'B'.
+  Type '1' is not assignable to type 'B'.
 numericLiteralTypes3.ts(17,5): error TS2322: Type 'D' is not assignable to type 'B'.
+  Type '0' is not assignable to type 'B'.
 numericLiteralTypes3.ts(24,5): error TS2322: Type 'D' is not assignable to type 'C'.
+  Type '0' is not assignable to type 'C'.
 numericLiteralTypes3.ts(29,5): error TS2322: Type 'B' is not assignable to type 'D'.
+  Type '3' is not assignable to type 'D'.
 numericLiteralTypes3.ts(30,5): error TS2322: Type 'C' is not assignable to type 'D'.
+  Type '3' is not assignable to type 'D'.
 numericLiteralTypes3.ts(35,5): error TS2322: Type '0' is not assignable to type '1'.
 numericLiteralTypes3.ts(37,5): error TS2322: Type '2' is not assignable to type '1'.
 numericLiteralTypes3.ts(38,5): error TS2322: Type '3' is not assignable to type '1'.

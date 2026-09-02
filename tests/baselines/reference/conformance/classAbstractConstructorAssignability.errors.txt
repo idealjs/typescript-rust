@@ -1,3 +1,5 @@
 classAbstractConstructorAssignability.ts(7,5): error TS2322: Type 'typeof B' is not assignable to type 'typeof A'.
+  Cannot assign an abstract constructor type to a non-abstract constructor type.
 classAbstractConstructorAssignability.ts(9,5): error TS2322: Type 'typeof B' is not assignable to type 'typeof C'.
+  Cannot assign an abstract constructor type to a non-abstract constructor type.
 classAbstractConstructorAssignability.ts(12,1): error TS2511: Cannot create an instance of an abstract class.

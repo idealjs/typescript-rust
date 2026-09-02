@@ -13,9 +13,18 @@ everyTypeWithAnnotationAndInvalidInitializer.ts(41,5): error TS2741: Property 'i
 everyTypeWithAnnotationAndInvalidInitializer.ts(42,5): error TS2739: Type 'C' is missing the following properties from type 'D<string>': source, recurse, wrapped
 everyTypeWithAnnotationAndInvalidInitializer.ts(43,28): error TS2322: Type 'string' is not assignable to type 'number'.
 everyTypeWithAnnotationAndInvalidInitializer.ts(44,5): error TS2322: Type 'C' is not assignable to type '{ id: string; }'.
+  Types of property 'id' are incompatible.
+    Type 'number' is not assignable to type 'string'.
 everyTypeWithAnnotationAndInvalidInitializer.ts(46,5): error TS2322: Type '(x: number) => boolean' is not assignable to type '(x: string) => number'.
+  Types of parameters 'x' and 'x' are incompatible.
+    Type 'string' is not assignable to type 'number'.
 everyTypeWithAnnotationAndInvalidInitializer.ts(47,5): error TS2322: Type '(x: number) => boolean' is not assignable to type '(x: string) => number'.
+  Types of parameters 'x' and 'x' are incompatible.
+    Type 'string' is not assignable to type 'number'.
 everyTypeWithAnnotationAndInvalidInitializer.ts(48,32): error TS2322: Type 'string' is not assignable to type 'number'.
 everyTypeWithAnnotationAndInvalidInitializer.ts(50,5): error TS2322: Type 'typeof N' is not assignable to type 'typeof M'.
+  The types returned by 'new A()' are incompatible between these types.
+    Property 'name' is missing in type 'N.A' but required in type 'M.A'.
 everyTypeWithAnnotationAndInvalidInitializer.ts(51,5): error TS2741: Property 'name' is missing in type 'N.A' but required in type 'M.A'.
 everyTypeWithAnnotationAndInvalidInitializer.ts(52,5): error TS2322: Type '(x: number) => boolean' is not assignable to type '(x: number) => string'.
+  Type 'boolean' is not assignable to type 'string'.

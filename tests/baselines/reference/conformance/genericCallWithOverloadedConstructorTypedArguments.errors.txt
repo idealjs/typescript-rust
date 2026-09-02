@@ -1,4 +1,8 @@
 genericCallWithOverloadedConstructorTypedArguments.ts(11,23): error TS2769: No overload matches this call.
+  Overload 1 of 2, '(x: boolean): boolean', gave the following error.
+    Argument of type 'null' is not assignable to parameter of type 'boolean'.
+  Overload 2 of 2, '(x: string): string', gave the following error.
+    Argument of type 'null' is not assignable to parameter of type 'string'.
 genericCallWithOverloadedConstructorTypedArguments.ts(14,18): error TS2454: Variable 'a' is used before being assigned.
 genericCallWithOverloadedConstructorTypedArguments.ts(16,19): error TS2454: Variable 'b' is used before being assigned.
 genericCallWithOverloadedConstructorTypedArguments.ts(28,19): error TS2454: Variable 'a' is used before being assigned.

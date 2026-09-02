@@ -1,15 +1,36 @@
 mappedTypes6.ts(23,5): error TS2322: Type 'T' is not assignable to type 'Required<T>'.
 mappedTypes6.ts(24,5): error TS2322: Type 'Partial<T>' is not assignable to type 'Required<T>'.
 mappedTypes6.ts(27,5): error TS2322: Type 'Partial<T>' is not assignable to type 'T'.
+  'T' could be instantiated with an arbitrary type which could be unrelated to 'Partial<T>'.
 mappedTypes6.ts(37,5): error TS2322: Type 'Required<T>' is not assignable to type 'Denullified<T>'.
+  Type 'T[P]' is not assignable to type 'NonNullable<T[P]>'.
+    Type 'T[keyof T]' is not assignable to type 'NonNullable<T[P]>'.
+      Type 'T[string] | T[number] | T[symbol]' is not assignable to type 'NonNullable<T[P]>'.
+        Type 'T[string]' is not assignable to type 'NonNullable<T[P]>'.
+          Type 'T[string]' is not assignable to type 'T[P]'.
+            Type 'string' is not assignable to type 'P'.
+              'string' is assignable to the constraint of type 'P', but 'P' could be instantiated with a different subtype of constraint 'string | number | symbol'.
+                Type 'T[keyof T]' is not assignable to type 'T[P]'.
+                  Type 'keyof T' is not assignable to type 'P'.
+                    'keyof T' is assignable to the constraint of type 'P', but 'P' could be instantiated with a different subtype of constraint 'string | number | symbol'.
+                      Type 'string | number | symbol' is not assignable to type 'P'.
+                        'string | number | symbol' is assignable to the constraint of type 'P', but 'P' could be instantiated with a different subtype of constraint 'string | number | symbol'.
+                          Type 'string' is not assignable to type 'P'.
+                            'string' is assignable to the constraint of type 'P', but 'P' could be instantiated with a different subtype of constraint 'string | number | symbol'.
+                              Type 'T[P]' is not assignable to type '{}'.
+                                Type 'T[keyof T]' is not assignable to type '{}'.
+                                  Type 'T[string] | T[number] | T[symbol]' is not assignable to type '{}'.
+                                    Type 'T[string]' is not assignable to type '{}'.
 mappedTypes6.ts(38,5): error TS2322: Type 'T' is not assignable to type 'Denullified<T>'.
 mappedTypes6.ts(39,5): error TS2322: Type 'Partial<T>' is not assignable to type 'Denullified<T>'.
 mappedTypes6.ts(42,5): error TS2322: Type 'T' is not assignable to type 'Required<T>'.
 mappedTypes6.ts(43,5): error TS2322: Type 'Partial<T>' is not assignable to type 'Required<T>'.
 mappedTypes6.ts(47,5): error TS2322: Type 'Partial<T>' is not assignable to type 'T'.
+  'T' could be instantiated with an arbitrary type which could be unrelated to 'Partial<T>'.
 mappedTypes6.ts(56,5): error TS2322: Type '{}' is not assignable to type 'Denullified<T>'.
 mappedTypes6.ts(57,5): error TS2322: Type '{}' is not assignable to type 'Required<T>'.
 mappedTypes6.ts(58,5): error TS2322: Type '{}' is not assignable to type 'T'.
+  'T' could be instantiated with an arbitrary type which could be unrelated to '{}'.
 mappedTypes6.ts(92,1): error TS2741: Property 'b' is missing in type '{ a: number; }' but required in type 'Foo'.
 mappedTypes6.ts(104,1): error TS2739: Type '{ a: number; }' is missing the following properties from type 'Required<Foo>': b, c, d
 mappedTypes6.ts(105,1): error TS2739: Type '{ a: number; b: number; }' is missing the following properties from type 'Required<Foo>': c, d

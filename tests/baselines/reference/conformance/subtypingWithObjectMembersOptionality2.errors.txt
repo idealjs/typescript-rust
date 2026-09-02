@@ -1,3 +1,12 @@
 subtypingWithObjectMembersOptionality2.ts(10,11): error TS2430: Interface 'S' incorrectly extends interface 'T'.
+  Types of property 'Foo' are incompatible.
+    Type 'Derived | undefined' is not assignable to type 'Base'.
+      Type 'undefined' is not assignable to type 'Base'.
 subtypingWithObjectMembersOptionality2.ts(18,11): error TS2430: Interface 'S2' incorrectly extends interface 'T2'.
+  Types of property '1' are incompatible.
+    Type 'Derived | undefined' is not assignable to type 'Base'.
+      Type 'undefined' is not assignable to type 'Base'.
 subtypingWithObjectMembersOptionality2.ts(26,11): error TS2430: Interface 'S3' incorrectly extends interface 'T3'.
+  Types of property ''1'' are incompatible.
+    Type 'Derived | undefined' is not assignable to type 'Base'.
+      Type 'undefined' is not assignable to type 'Base'.

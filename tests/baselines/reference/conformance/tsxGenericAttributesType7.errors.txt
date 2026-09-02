@@ -1,1 +1,2 @@
 file.tsx(7,13): error TS2322: Type 'U' is not assignable to type 'IntrinsicAttributes & U'.
+  Type 'U' is not assignable to type 'IntrinsicAttributes'.

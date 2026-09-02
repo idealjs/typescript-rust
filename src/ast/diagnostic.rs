@@ -59,7 +59,7 @@ pub struct DiagnosticsCollection {
 }
 
 #[derive(Debug, Default)]
-struct DiagnosticsCollectionInner {
+pub(crate) struct DiagnosticsCollectionInner {
     count: usize,
     file_diagnostics: std::collections::HashMap<String, Vec<Diagnostic>>,
     file_diagnostics_sorted: std::collections::HashSet<String>,
@@ -91,6 +91,16 @@ impl DiagnosticsCollection {
 
     pub fn count(&self) -> usize {
         self.inner.lock().unwrap().count
+    }
+
+    /// Swap the entire contents out (probe isolation): callers run
+    /// speculative work on an empty collection, then inspect/restore.
+    pub(crate) fn take_inner(&self) -> DiagnosticsCollectionInner {
+        std::mem::take(&mut *self.inner.lock().unwrap())
+    }
+
+    pub(crate) fn set_inner(&self, inner: DiagnosticsCollectionInner) {
+        *self.inner.lock().unwrap() = inner;
     }
 
     pub fn is_empty(&self) -> bool {

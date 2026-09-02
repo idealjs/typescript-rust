@@ -3,11 +3,19 @@ castingTuple.ts(4,24): error TS7008: Member 'd' implicitly has an 'any' type.
 castingTuple.ts(5,21): error TS7008: Member 'e' implicitly has an 'any' type.
 castingTuple.ts(6,21): error TS7008: Member 'f' implicitly has an 'any' type.
 castingTuple.ts(13,23): error TS2352: Conversion of type '[number, string]' to type '[number, string, boolean]' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+  Source has 2 element(s) but target requires 3.
 castingTuple.ts(14,15): error TS2352: Conversion of type '[number, string, boolean]' to type '[number, string]' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+  Source has 3 element(s) but target allows only 2.
 castingTuple.ts(15,14): error TS2352: Conversion of type '[number, string]' to type '[number, string, boolean]' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+  Source has 2 element(s) but target requires 3.
 castingTuple.ts(18,21): error TS2352: Conversion of type '[C, D]' to type '[C, D, A]' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+  Source has 2 element(s) but target requires 3.
 castingTuple.ts(20,33): error TS2493: Tuple type '[C, D, A]' of length '3' has no element at index '5'.
 castingTuple.ts(30,10): error TS2352: Conversion of type '[number, string]' to type '[number, number]' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+  Type at position 1 in source is not compatible with type at position 1 in target.
+    Type 'string' is not comparable to type 'number'.
 castingTuple.ts(31,10): error TS2352: Conversion of type '[C, D]' to type '[A, I]' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+  Type at position 0 in source is not compatible with type at position 0 in target.
+    Property 'a' is missing in type 'C' but required in type 'A'.
 castingTuple.ts(32,5): error TS2403: Subsequent variable declarations must have the same type.  Variable 'array1' must be of type '{}[]', but here has type 'number[]'.
 castingTuple.ts(33,1): error TS2304: Cannot find name 't4'.

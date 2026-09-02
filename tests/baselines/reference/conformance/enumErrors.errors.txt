@@ -3,6 +3,7 @@ enumErrors.ts(3,6): error TS2431: Enum name cannot be 'number'.
 enumErrors.ts(4,6): error TS2431: Enum name cannot be 'string'.
 enumErrors.ts(5,6): error TS2431: Enum name cannot be 'boolean'.
 enumErrors.ts(9,9): error TS18033: Type 'Number' is not assignable to type 'number' as required for computed enum member values.
+  'number' is a primitive, but 'Number' is a wrapper object. Prefer using 'number' when possible.
 enumErrors.ts(26,9): error TS18033: Type 'boolean' is not assignable to type 'number' as required for computed enum member values.
 enumErrors.ts(27,9): error TS18033: Type 'Date' is not assignable to type 'number' as required for computed enum member values.
 enumErrors.ts(28,9): error TS18033: Type 'Window & typeof globalThis' is not assignable to type 'number' as required for computed enum member values.

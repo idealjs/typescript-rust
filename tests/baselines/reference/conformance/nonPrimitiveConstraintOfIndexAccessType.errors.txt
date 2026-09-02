@@ -1,10 +1,20 @@
 nonPrimitiveConstraintOfIndexAccessType.ts(3,5): error TS2322: Type 'string' is not assignable to type 'T[P]'.
+  'T[P]' could be instantiated with an arbitrary type which could be unrelated to 'string'.
 nonPrimitiveConstraintOfIndexAccessType.ts(6,5): error TS2322: Type 'string' is not assignable to type 'T[P]'.
+  'T[P]' could be instantiated with an arbitrary type which could be unrelated to 'string'.
 nonPrimitiveConstraintOfIndexAccessType.ts(9,5): error TS2322: Type 'string' is not assignable to type 'T[P]'.
+  'T[P]' could be instantiated with an arbitrary type which could be unrelated to 'string'.
 nonPrimitiveConstraintOfIndexAccessType.ts(12,5): error TS2322: Type 'string' is not assignable to type 'T[P]'.
+  'T[P]' could be instantiated with an arbitrary type which could be unrelated to 'string'.
 nonPrimitiveConstraintOfIndexAccessType.ts(15,5): error TS2322: Type 'string' is not assignable to type 'T[P]'.
+  'T[P]' could be instantiated with an arbitrary type which could be unrelated to 'string'.
 nonPrimitiveConstraintOfIndexAccessType.ts(18,5): error TS2322: Type 'string' is not assignable to type 'T[P]'.
+  'T[P]' could be instantiated with an arbitrary type which could be unrelated to 'string'.
 nonPrimitiveConstraintOfIndexAccessType.ts(21,5): error TS2322: Type 'string' is not assignable to type 'T[P]'.
+  'T[P]' could be instantiated with an arbitrary type which could be unrelated to 'string'.
 nonPrimitiveConstraintOfIndexAccessType.ts(24,5): error TS2322: Type 'string' is not assignable to type 'T[P]'.
+  'T[P]' could be instantiated with an arbitrary type which could be unrelated to 'string'.
 nonPrimitiveConstraintOfIndexAccessType.ts(27,5): error TS2322: Type 'string' is not assignable to type 'T[P]'.
+  'T[P]' could be instantiated with an arbitrary type which could be unrelated to 'string'.
 nonPrimitiveConstraintOfIndexAccessType.ts(30,5): error TS2322: Type 'string' is not assignable to type 'T[P]'.
+  'T[P]' could be instantiated with an arbitrary type which could be unrelated to 'string'.

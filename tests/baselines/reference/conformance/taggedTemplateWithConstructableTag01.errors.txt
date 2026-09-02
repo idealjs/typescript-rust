@@ -1,1 +1,2 @@
 taggedTemplateWithConstructableTag01.ts(3,1): error TS2349: This expression is not callable.
+  Type 'typeof CtorTag' has no call signatures.

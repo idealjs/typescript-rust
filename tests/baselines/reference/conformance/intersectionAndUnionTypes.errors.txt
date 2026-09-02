@@ -1,19 +1,47 @@
 intersectionAndUnionTypes.ts(17,5): error TS2454: Variable 'anb' is used before being assigned.
 intersectionAndUnionTypes.ts(18,5): error TS2454: Variable 'anb' is used before being assigned.
 intersectionAndUnionTypes.ts(19,1): error TS2322: Type 'A' is not assignable to type 'A & B'.
+  Property 'b' is missing in type 'A' but required in type 'B'.
 intersectionAndUnionTypes.ts(20,1): error TS2322: Type 'B' is not assignable to type 'A & B'.
+  Property 'a' is missing in type 'B' but required in type 'A'.
 intersectionAndUnionTypes.ts(23,1): error TS2322: Type 'A | B' is not assignable to type '(A & B) | (C & D)'.
+  Type 'A' is not assignable to type '(A & B) | (C & D)'.
+    Type 'A' is not assignable to type 'A & B'.
+      Property 'b' is missing in type 'A' but required in type 'B'.
 intersectionAndUnionTypes.ts(23,5): error TS2454: Variable 'aob' is used before being assigned.
 intersectionAndUnionTypes.ts(24,5): error TS2454: Variable 'cnd' is used before being assigned.
 intersectionAndUnionTypes.ts(25,1): error TS2322: Type 'C | D' is not assignable to type '(A & B) | (C & D)'.
+  Type 'C' is not assignable to type '(A & B) | (C & D)'.
+    Type 'C' is not assignable to type 'C & D'.
+      Property 'd' is missing in type 'C' but required in type 'D'.
 intersectionAndUnionTypes.ts(25,5): error TS2454: Variable 'cod' is used before being assigned.
 intersectionAndUnionTypes.ts(26,1): error TS2322: Type '(A & B) | (C & D)' is not assignable to type 'A & B'.
+  Type 'C & D' is not assignable to type 'A & B'.
+    Property 'a' is missing in type 'C & D' but required in type 'A'.
 intersectionAndUnionTypes.ts(27,1): error TS2322: Type '(A & B) | (C & D)' is not assignable to type 'A | B'.
+  Type 'C & D' is not assignable to type 'A | B'.
 intersectionAndUnionTypes.ts(28,1): error TS2322: Type '(A & B) | (C & D)' is not assignable to type 'C & D'.
+  Type 'A & B' is not assignable to type 'C & D'.
+    Property 'c' is missing in type 'A & B' but required in type 'C'.
 intersectionAndUnionTypes.ts(29,1): error TS2322: Type '(A & B) | (C & D)' is not assignable to type 'C | D'.
+  Type 'A & B' is not assignable to type 'C | D'.
 intersectionAndUnionTypes.ts(31,1): error TS2322: Type 'A & B' is not assignable to type '(A | B) & (C | D)'.
+  Type 'A & B' is not assignable to type 'B & D'.
+    Property 'd' is missing in type 'A & B' but required in type 'D'.
 intersectionAndUnionTypes.ts(32,1): error TS2322: Type 'A | B' is not assignable to type '(A | B) & (C | D)'.
+  Type 'A' is not assignable to type '(A | B) & (C | D)'.
+    Type 'A' is not assignable to type 'A & D'.
+      Property 'd' is missing in type 'A' but required in type 'D'.
 intersectionAndUnionTypes.ts(33,1): error TS2322: Type 'C & D' is not assignable to type '(A | B) & (C | D)'.
+  Type 'C & D' is not assignable to type 'B & D'.
+    Property 'b' is missing in type 'C & D' but required in type 'B'.
 intersectionAndUnionTypes.ts(34,1): error TS2322: Type 'C | D' is not assignable to type '(A | B) & (C | D)'.
+  Type 'C' is not assignable to type '(A | B) & (C | D)'.
+    Type 'C' is not assignable to type 'B & C'.
+      Property 'b' is missing in type 'C' but required in type 'B'.
 intersectionAndUnionTypes.ts(35,1): error TS2322: Type '(A | B) & (C | D)' is not assignable to type 'A & B'.
+  Type 'A & C' is not assignable to type 'A & B'.
+    Property 'b' is missing in type 'A & C' but required in type 'B'.
 intersectionAndUnionTypes.ts(37,1): error TS2322: Type '(A | B) & (C | D)' is not assignable to type 'C & D'.
+  Type 'A & C' is not assignable to type 'C & D'.
+    Property 'd' is missing in type 'A & C' but required in type 'D'.

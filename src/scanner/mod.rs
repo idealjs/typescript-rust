@@ -363,6 +363,10 @@ pub struct Scanner {
     full_start_pos: usize,
     preceding_line_break: bool,
     has_preceding_line_break: bool,
+    /// Byte offset of the non-text (binary) marker character when the scan
+    /// terminated on one (Go's `NonTextFileMarkerTrivia`); the parser
+    /// reports TS1128 there.
+    binary_marker_pos: Option<usize>,
     /// Bitset of `TOKEN_FLAGS_*` for the current token, mirroring Go's
     /// `Scanner.tokenFlags` (`scanner.go:198`). Accumulated during `scan()`
     /// and exposed via `token_flags()`. `has_preceding_line_break` is kept
@@ -432,6 +436,7 @@ impl Scanner {
             full_start_pos: 0,
             preceding_line_break: false,
             has_preceding_line_break: false,
+            binary_marker_pos: None,
             token_flags: TOKEN_FLAGS_NONE,
             skip_jsdoc_leading_asterisks: 0,
             error_callback: None,
@@ -866,15 +871,20 @@ impl Scanner {
     }
 
     fn scan_whitespace(&mut self) {
+        // Decode FULL UTF-8 codepoints: non-ASCII whitespace (NBSP, BOM,
+        // ideographic space, …) is multi-byte — a byte-wise `as char` reads
+        // the lead byte as a Latin-1 char, matches nothing, and leaves pos
+        // untouched while scan()'s `is_whitespace` keeps returning true →
+        // infinite trivia loop (typeGuardFunctionErrors' U+00A0).
         while self.pos < self.end {
-            let c = self.text.as_bytes()[self.pos] as char;
+            let c = self.text[self.pos..].chars().next().unwrap();
             if !is_whitespace(c) {
                 break;
             }
             if c == '\n' || c == '\r' {
                 self.preceding_line_break = true;
             }
-            self.pos += 1;
+            self.pos += c.len_utf8();
         }
     }
 
@@ -973,14 +983,11 @@ impl Scanner {
                     self.pos += c.len_utf8();
                 }
             } else {
-                // `#` not followed by an identifier start — report and yield a
-                // minimal `#` private identifier, matching Go
-                // (`scanner.go:922-923`).
-                self.report_error(
-                    DiagnosticKind::InvalidCharacter,
-                    self.pos,
-                    next_c.len_utf8(),
-                );
+                // `#` not followed by an identifier start — report AT the
+                // `#` itself with width 1 (Go scanner.go:922
+                // `s.errorAt(Invalid_character, s.pos-1, 1)`) and yield a
+                // minimal `#` private identifier.
+                self.report_error(DiagnosticKind::InvalidCharacter, self.pos - 1, 1);
             }
         }
         self.token_end = self.pos;
@@ -1527,6 +1534,9 @@ impl Scanner {
             // diagnostic per invalid byte (which explodes for binary inputs).
             if c == '\u{fffd}' {
                 self.report_error(DiagnosticKind::FileAppearsToBeBinary, 0, 0);
+                if self.binary_marker_pos.is_none() {
+                    self.binary_marker_pos = Some(start);
+                }
                 self.pos = self.text.len();
                 self.token_end = self.pos;
                 self.token = SyntaxKind::EndOfFile;
@@ -1539,6 +1549,11 @@ impl Scanner {
             self.report_error(DiagnosticKind::InvalidCharacter, start, len);
             SyntaxKind::Unknown
         }
+    }
+
+    /// Byte offset of the binary (non-text) marker, if the scan hit one.
+    pub fn binary_marker_pos(&self) -> Option<usize> {
+        self.binary_marker_pos
     }
 
     /// Revert to the position before the last scan.
@@ -2080,9 +2095,35 @@ fn is_keyword(token: SyntaxKind) -> bool {
 // ────────────────────────────────────────────────────────────────────────────
 
 fn is_whitespace(c: char) -> bool {
+    // Go `stringutil.IsWhiteSpaceSingleLine` list, plus \n/\r (Go handles
+    // those as line breaks in its scan loop; our scan_whitespace folds the
+    // line-break flag in here).
     matches!(
         c,
-        ' ' | '\t' | '\n' | '\r' | '\x0B' | '\x0C' | '\u{A0}' | '\u{FEFF}'
+        ' ' | '\t'
+            | '\n'
+            | '\r'
+            | '\x0B'
+            | '\x0C'
+            | '\u{85}'    // nextLine
+            | '\u{A0}'    // nonBreakingSpace
+            | '\u{1680}'  // ogham
+            | '\u{2000}'
+            | '\u{2001}'
+            | '\u{2002}'
+            | '\u{2003}'
+            | '\u{2004}'
+            | '\u{2005}'
+            | '\u{2006}'
+            | '\u{2007}'
+            | '\u{2008}'
+            | '\u{2009}'
+            | '\u{200A}'
+            | '\u{200B}'  // zeroWidthSpace
+            | '\u{202F}'  // narrowNoBreakSpace
+            | '\u{205F}'  // mathematicalSpace
+            | '\u{3000}'  // ideographicSpace
+            | '\u{FEFF}'  // byteOrderMark
     )
 }
 

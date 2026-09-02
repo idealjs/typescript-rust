@@ -1,15 +1,28 @@
 implementingAnInterfaceExtendingClassWithPrivates2.ts(13,7): error TS2415: Class 'Bar2' incorrectly extends base class 'Foo'.
+  Property 'x' is private in type 'Foo' but not in type 'Bar2'.
 implementingAnInterfaceExtendingClassWithPrivates2.ts(13,7): error TS2420: Class 'Bar2' incorrectly implements interface 'I'.
+  Property 'x' is private in type 'I' but not in type 'Bar2'.
 implementingAnInterfaceExtendingClassWithPrivates2.ts(18,7): error TS2415: Class 'Bar3' incorrectly extends base class 'Foo'.
+  Types have separate declarations of a private property 'x'.
 implementingAnInterfaceExtendingClassWithPrivates2.ts(18,7): error TS2420: Class 'Bar3' incorrectly implements interface 'I'.
+  Types have separate declarations of a private property 'x'.
 implementingAnInterfaceExtendingClassWithPrivates2.ts(42,11): error TS2415: Class 'Bar2' incorrectly extends base class 'Foo'.
+  Property 'x' is private in type 'Foo' but not in type 'Bar2'.
 implementingAnInterfaceExtendingClassWithPrivates2.ts(42,11): error TS2420: Class 'Bar2' incorrectly implements interface 'I'.
+  Property 'z' is missing in type 'Bar2' but required in type 'I'.
 implementingAnInterfaceExtendingClassWithPrivates2.ts(47,11): error TS2415: Class 'Bar3' incorrectly extends base class 'Foo'.
+  Types have separate declarations of a private property 'x'.
 implementingAnInterfaceExtendingClassWithPrivates2.ts(47,11): error TS2420: Class 'Bar3' incorrectly implements interface 'I'.
+  Property 'z' is missing in type 'Bar3' but required in type 'I'.
 implementingAnInterfaceExtendingClassWithPrivates2.ts(67,11): error TS2420: Class 'Bar' incorrectly implements interface 'I'.
+  Property 'y' is missing in type 'Bar' but required in type 'I'.
 implementingAnInterfaceExtendingClassWithPrivates2.ts(73,16): error TS2341: Property 'x' is private and only accessible within class 'Foo'.
 implementingAnInterfaceExtendingClassWithPrivates2.ts(74,16): error TS2339: Property 'y' does not exist on type 'Bar'.
 implementingAnInterfaceExtendingClassWithPrivates2.ts(76,11): error TS2415: Class 'Bar2' incorrectly extends base class 'Foo'.
+  Property 'x' is private in type 'Foo' but not in type 'Bar2'.
 implementingAnInterfaceExtendingClassWithPrivates2.ts(76,11): error TS2420: Class 'Bar2' incorrectly implements interface 'I'.
+  Property 'y' is missing in type 'Bar2' but required in type 'I'.
 implementingAnInterfaceExtendingClassWithPrivates2.ts(81,11): error TS2415: Class 'Bar3' incorrectly extends base class 'Foo'.
+  Types have separate declarations of a private property 'x'.
 implementingAnInterfaceExtendingClassWithPrivates2.ts(81,11): error TS2420: Class 'Bar3' incorrectly implements interface 'I'.
+  Property 'y' is missing in type 'Bar3' but required in type 'I'.

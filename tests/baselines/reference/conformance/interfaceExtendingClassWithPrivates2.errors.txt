@@ -1,5 +1,8 @@
 interfaceExtendingClassWithPrivates2.ts(9,11): error TS2320: Interface 'I3' cannot simultaneously extend types 'Foo' and 'Bar'.
+  Named property 'x' of types 'Foo' and 'Bar' are not identical.
 interfaceExtendingClassWithPrivates2.ts(12,11): error TS2430: Interface 'I4' incorrectly extends interface 'Bar'.
+  Property 'x' is private in type 'Bar' but not in type 'I4'.
 interfaceExtendingClassWithPrivates2.ts(12,11): error TS2430: Interface 'I4' incorrectly extends interface 'Foo'.
+  Property 'x' is private in type 'Foo' but not in type 'I4'.
 interfaceExtendingClassWithPrivates2.ts(26,12): error TS2341: Property 'x' is private and only accessible within class 'Foo'.
 interfaceExtendingClassWithPrivates2.ts(27,12): error TS2341: Property 'y' is private and only accessible within class 'Baz'.

@@ -1,4 +1,5 @@
 stringLiteralsWithSwitchStatements03.ts(10,10): error TS2678: Type '"bar" | "baz"' is not comparable to type '"foo"'.
+  Type '"baz"' is not comparable to type '"foo"'.
 stringLiteralsWithSwitchStatements03.ts(10,34): error TS2872: This kind of expression is always truthy.
 stringLiteralsWithSwitchStatements03.ts(12,10): error TS2678: Type '"bar"' is not comparable to type '"foo"'.
 stringLiteralsWithSwitchStatements03.ts(14,10): error TS2678: Type '"baz"' is not comparable to type '"foo"'.

@@ -1,17 +1,54 @@
 assignmentCompatWithCallSignaturesWithOptionalParameters.ts(16,5): error TS2322: Type '(x: number) => number' is not assignable to type '() => number'.
+  Target signature provides too few arguments. Expected 1 or more, but got 0.
 assignmentCompatWithCallSignaturesWithOptionalParameters.ts(19,5): error TS2322: Type '(x: number) => number' is not assignable to type '() => number'.
+  Target signature provides too few arguments. Expected 1 or more, but got 0.
 assignmentCompatWithCallSignaturesWithOptionalParameters.ts(20,5): error TS2322: Type '(x: number, y?: number | undefined) => number' is not assignable to type '() => number'.
+  Target signature provides too few arguments. Expected 1 or more, but got 0.
 assignmentCompatWithCallSignaturesWithOptionalParameters.ts(22,5): error TS2322: Type '(x: number, y: number) => number' is not assignable to type '() => number'.
+  Target signature provides too few arguments. Expected 2 or more, but got 0.
 assignmentCompatWithCallSignaturesWithOptionalParameters.ts(27,5): error TS2322: Type '(x: number) => number' is not assignable to type '(x?: number | undefined) => number'.
+  Types of parameters 'x' and 'x' are incompatible.
+    Type 'number | undefined' is not assignable to type 'number'.
+      Type 'undefined' is not assignable to type 'number'.
 assignmentCompatWithCallSignaturesWithOptionalParameters.ts(30,5): error TS2322: Type '(x: number) => number' is not assignable to type '(x?: number | undefined) => number'.
+  Types of parameters 'x' and 'x' are incompatible.
+    Type 'number | undefined' is not assignable to type 'number'.
+      Type 'undefined' is not assignable to type 'number'.
 assignmentCompatWithCallSignaturesWithOptionalParameters.ts(31,5): error TS2322: Type '(x: number, y?: number | undefined) => number' is not assignable to type '(x?: number | undefined) => number'.
+  Types of parameters 'x' and 'x' are incompatible.
+    Type 'number | undefined' is not assignable to type 'number'.
+      Type 'undefined' is not assignable to type 'number'.
 assignmentCompatWithCallSignaturesWithOptionalParameters.ts(33,5): error TS2322: Type '(x: number, y: number) => number' is not assignable to type '(x?: number | undefined) => number'.
+  Target signature provides too few arguments. Expected 2 or more, but got 1.
 assignmentCompatWithCallSignaturesWithOptionalParameters.ts(39,5): error TS2322: Type '(x: number, y: number) => number' is not assignable to type '(x: number) => number'.
+  Target signature provides too few arguments. Expected 2 or more, but got 1.
 assignmentCompatWithCallSignaturesWithOptionalParameters.ts(45,5): error TS2322: Type '(x: number, y: number) => number' is not assignable to type '(x: number) => number'.
+  Target signature provides too few arguments. Expected 2 or more, but got 1.
 assignmentCompatWithCallSignaturesWithOptionalParameters.ts(51,5): error TS2322: Type '(x: number, y: number) => number' is not assignable to type '(x: number, y?: number | undefined) => number'.
+  Types of parameters 'y' and 'y' are incompatible.
+    Type 'number | undefined' is not assignable to type 'number'.
+      Type 'undefined' is not assignable to type 'number'.
 assignmentCompatWithCallSignaturesWithOptionalParameters.ts(57,5): error TS2322: Type '(x: number, y: number) => number' is not assignable to type '(x: number, y?: number | undefined) => number'.
+  Types of parameters 'y' and 'y' are incompatible.
+    Type 'number | undefined' is not assignable to type 'number'.
+      Type 'undefined' is not assignable to type 'number'.
 assignmentCompatWithCallSignaturesWithOptionalParameters.ts(62,5): error TS2322: Type '(x: number) => number' is not assignable to type '(x?: number | undefined, y?: number | undefined) => number'.
+  Types of parameters 'x' and 'x' are incompatible.
+    Type 'number | undefined' is not assignable to type 'number'.
+      Type 'undefined' is not assignable to type 'number'.
 assignmentCompatWithCallSignaturesWithOptionalParameters.ts(63,5): error TS2322: Type '(x: number, y: number) => number' is not assignable to type '(x?: number | undefined, y?: number | undefined) => number'.
+  Types of parameters 'x' and 'x' are incompatible.
+    Type 'number | undefined' is not assignable to type 'number'.
+      Type 'undefined' is not assignable to type 'number'.
 assignmentCompatWithCallSignaturesWithOptionalParameters.ts(66,5): error TS2322: Type '(x: number) => number' is not assignable to type '(x?: number | undefined, y?: number | undefined) => number'.
+  Types of parameters 'x' and 'x' are incompatible.
+    Type 'number | undefined' is not assignable to type 'number'.
+      Type 'undefined' is not assignable to type 'number'.
 assignmentCompatWithCallSignaturesWithOptionalParameters.ts(67,5): error TS2322: Type '(x: number, y?: number | undefined) => number' is not assignable to type '(x?: number | undefined, y?: number | undefined) => number'.
+  Types of parameters 'x' and 'x' are incompatible.
+    Type 'number | undefined' is not assignable to type 'number'.
+      Type 'undefined' is not assignable to type 'number'.
 assignmentCompatWithCallSignaturesWithOptionalParameters.ts(69,5): error TS2322: Type '(x: number, y: number) => number' is not assignable to type '(x?: number | undefined, y?: number | undefined) => number'.
+  Types of parameters 'x' and 'x' are incompatible.
+    Type 'number | undefined' is not assignable to type 'number'.
+      Type 'undefined' is not assignable to type 'number'.

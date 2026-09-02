@@ -5,13 +5,21 @@ typeArgumentInferenceWithConstraints.ts(33,21): error TS2322: Type 'string' is n
 typeArgumentInferenceWithConstraints.ts(34,29): error TS2322: Type 'undefined' is not assignable to type 'Window'.
 typeArgumentInferenceWithConstraints.ts(35,15): error TS2344: Type 'number' does not satisfy the constraint 'Window'.
 typeArgumentInferenceWithConstraints.ts(41,35): error TS2345: Argument of type '(x: string) => string' is not assignable to parameter of type '(x: number) => void'.
+  Types of parameters 'x' and 'x' are incompatible.
+    Type 'number' is not assignable to type 'string'.
 typeArgumentInferenceWithConstraints.ts(42,31): error TS2345: Argument of type 'null' is not assignable to parameter of type 'string'.
 typeArgumentInferenceWithConstraints.ts(48,35): error TS2345: Argument of type '(x: string) => string' is not assignable to parameter of type '(x: number) => void'.
+  Types of parameters 'x' and 'x' are incompatible.
+    Type 'number' is not assignable to type 'string'.
 typeArgumentInferenceWithConstraints.ts(49,15): error TS2344: Type 'string' does not satisfy the constraint 'number'.
 typeArgumentInferenceWithConstraints.ts(55,41): error TS2345: Argument of type '(n: string) => string' is not assignable to parameter of type '(b: number) => number'.
+  Types of parameters 'n' and 'b' are incompatible.
+    Type 'number' is not assignable to type 'string'.
 typeArgumentInferenceWithConstraints.ts(66,31): error TS2345: Argument of type '<A, B extends string, C>(a: (a: A) => A, b: (b: B) => B, c: (c: C) => C) => void' is not assignable to parameter of type 'string'.
 typeArgumentInferenceWithConstraints.ts(67,1): error TS2349: This expression is not callable.
+  Type 'String' has no call signatures.
 typeArgumentInferenceWithConstraints.ts(71,5): error TS2322: Type 'null' is not assignable to type 'T'.
+  'null' is assignable to the constraint of type 'T', but 'T' could be instantiated with a different subtype of constraint 'unknown'.
 typeArgumentInferenceWithConstraints.ts(73,29): error TS2345: Argument of type '0' is not assignable to parameter of type '""'.
 typeArgumentInferenceWithConstraints.ts(74,5): error TS2403: Subsequent variable declarations must have the same type.  Variable 'a9a' must be of type 'string', but here has type '{}'.
 typeArgumentInferenceWithConstraints.ts(75,75): error TS2345: Argument of type 'null' is not assignable to parameter of type '{ a?: number | undefined; b?: string | undefined; }'.

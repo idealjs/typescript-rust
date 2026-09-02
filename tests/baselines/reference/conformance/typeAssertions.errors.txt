@@ -1,8 +1,12 @@
 typeAssertions.ts(5,9): error TS2558: Expected 0 type arguments, but got 1.
 typeAssertions.ts(31,12): error TS2352: Conversion of type 'SomeOther' to type 'SomeBase' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+  Property 'p' is missing in type 'SomeOther' but required in type 'SomeBase'.
 typeAssertions.ts(35,15): error TS2352: Conversion of type 'SomeOther' to type 'SomeDerived' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+  Type 'SomeOther' is missing the following properties from type 'SomeDerived': x, p
 typeAssertions.ts(37,13): error TS2352: Conversion of type 'SomeDerived' to type 'SomeOther' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+  Property 'q' is missing in type 'SomeDerived' but required in type 'SomeOther'.
 typeAssertions.ts(38,13): error TS2352: Conversion of type 'SomeBase' to type 'SomeOther' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+  Property 'q' is missing in type 'SomeBase' but required in type 'SomeOther'.
 typeAssertions.ts(44,5): error TS2749: 'numOrStr' refers to a value, but is being used as a type here. Did you mean 'typeof numOrStr'?
 typeAssertions.ts(44,14): error TS1005: '>' expected.
 typeAssertions.ts(44,14): error TS2304: Cannot find name 'is'.
@@ -10,6 +14,7 @@ typeAssertions.ts(44,17): error TS1005: ')' expected.
 typeAssertions.ts(44,17): error TS2693: 'string' only refers to a type, but is being used as a value here.
 typeAssertions.ts(44,48): error TS1005: ';' expected.
 typeAssertions.ts(45,2): error TS2322: Type 'string | number' is not assignable to type 'string'.
+  Type 'number' is not assignable to type 'string'.
 typeAssertions.ts(48,32): error TS2749: 'numOrStr' refers to a value, but is being used as a type here. Did you mean 'typeof numOrStr'?
 typeAssertions.ts(48,41): error TS1005: ')' expected.
 typeAssertions.ts(48,41): error TS2304: Cannot find name 'is'.

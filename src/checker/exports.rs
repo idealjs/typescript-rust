@@ -22,7 +22,8 @@
 
 use std::sync::Arc;
 
-use crate::ast::{ModifierFlags, Node, Symbol, SymbolFlags};
+use crate::ast::utilities::get_combined_modifier_flags;
+use crate::ast::{CheckFlags, ModifierFlags, Node, Symbol, SymbolFlags, SyntaxKind};
 use crate::core::compiler_options::ResolutionMode;
 use crate::diagnostics::Message;
 
@@ -50,10 +51,76 @@ pub enum UnionReduction {
 
 /// Returns the declaration modifier flags for a symbol.
 ///
-/// Go: `GetDeclarationModifierFlagsFromSymbol` (exports.go).
-/// TODO: Full implementation not yet ported.
+/// Go: `GetDeclarationModifierFlagsFromSymbol` (utilities.go) — read
+/// access: prefer the get-accessor declaration's modifiers.
 pub fn get_declaration_modifier_flags_from_symbol(s: &Symbol) -> ModifierFlags {
-    // TODO: Port from Go's getDeclarationModifierFlagsFromSymbol
+    get_declaration_modifier_flags_from_symbol_ex(s, false /*is_write*/)
+}
+
+/// Go: `getDeclarationModifierFlagsFromSymbol` (utilities.go). The
+/// declaration consulted depends on access direction: a write picks the
+/// set accessor, a read picks the get accessor (so a public getter with a
+/// private setter stays readable and vice versa); anything else falls
+/// back to the value declaration. Accessibility modifiers only apply to
+/// class members — other parents strip them.
+pub fn get_declaration_modifier_flags_from_symbol_ex(s: &Symbol, is_write: bool) -> ModifierFlags {
+    // Go gates on `s.ValueDeclaration != nil`; our binder only assigns
+    // value_declaration when the flags intersect the VALUE mask, which
+    // excludes plain `Property` members — fall back to the first
+    // declaration (Go's ValueDeclaration is the first value-meaning
+    // declaration; for property/method/accessor symbols that's the same
+    // node).
+    let base_decl = s
+        .value_declaration
+        .as_ref()
+        .or_else(|| s.declarations.first());
+    if let Some(value_declaration) = base_decl {
+        let mut declaration: Option<&Arc<Node>> = None;
+        if is_write {
+            declaration = s
+                .declarations
+                .iter()
+                .find(|d| d.kind == SyntaxKind::SetAccessor);
+        }
+        if declaration.is_none() && s.flags.contains(SymbolFlags::GetAccessor) {
+            declaration = s
+                .declarations
+                .iter()
+                .find(|d| d.kind == SyntaxKind::GetAccessor);
+        }
+        let declaration = declaration
+            .map(Arc::clone)
+            .unwrap_or_else(|| Arc::clone(value_declaration));
+        let flags = get_combined_modifier_flags(&declaration);
+        // Go strips accessibility modifiers unless the parent is a class.
+        // Our binder only assigns `parent` on the exports path — class
+        // MEMBERS frequently carry no parent — so absence of a parent must
+        // KEEP the modifiers (only a present, non-class parent strips).
+        if let Some(parent) = &s.parent {
+            if !parent.flags.contains(SymbolFlags::Class) {
+                return flags.difference(ModifierFlags::AccessibilityModifier);
+            }
+        }
+        return flags;
+    }
+    if s.check_flags.contains(CheckFlags::SYNTHETIC) {
+        let access_modifier = if s.check_flags.contains(CheckFlags::ContainsPrivate) {
+            ModifierFlags::Private
+        } else if s.check_flags.contains(CheckFlags::ContainsPublic) {
+            ModifierFlags::Public
+        } else {
+            ModifierFlags::Protected
+        };
+        let static_modifier = if s.check_flags.contains(CheckFlags::ContainsStatic) {
+            ModifierFlags::Static
+        } else {
+            ModifierFlags::empty()
+        };
+        return access_modifier.union(static_modifier);
+    }
+    if s.flags.contains(SymbolFlags::Prototype) {
+        return ModifierFlags::Public.union(ModifierFlags::Static);
+    }
     ModifierFlags::empty()
 }
 
@@ -217,16 +284,85 @@ impl Checker {
     // Resolution mode
     // ────────────────────────────────────────────────────────────────────────
 
-    /// Go: `GetResolutionModeOverride`.
-    ///
-    /// TODO: Full `getResolutionModeOverride` implementation not yet ported.
+    /// Go: `GetResolutionModeOverride` (checker.go ~L3339). A clause with
+    /// exactly one `"resolution-mode": "import"|"require"` attribute
+    /// resolves through that mode. Malformed clauses report TS2839/TS2862/
+    /// TS1453 — but only when `report_errors` (Go passes `isTypeOnly`:
+    /// non-type-only clauses get TS2881 from the grammar check instead).
     pub fn get_resolution_mode_override(
-        &self,
-        node: &Arc<Node>,
+        &mut self,
+        attrs: &Arc<Node>,
         report_errors: bool,
-    ) -> ResolutionMode {
-        // TODO: call self.get_resolution_mode_override_internal(node, report_errors)
-        ResolutionMode::default()
+    ) -> Option<ResolutionMode> {
+        use crate::ast::SyntaxKind;
+        let data = match &attrs.data {
+            crate::ast::NodeData::ImportAttributes(d) => d,
+            _ => return None,
+        };
+        let is_assertions = data.token == SyntaxKind::AssertKeyword;
+        if data.attributes.len() != 1 {
+            if report_errors {
+                let msg = if is_assertions {
+                    crate::diagnostics::messages_generated::
+                        TYPE_IMPORT_ASSERTIONS_SHOULD_HAVE_EXACTLY_ONE_KEY_RESOLUTION_MODE_WITH_VALUE_IMPORT_OR_REQUIRE
+                } else {
+                    crate::diagnostics::messages_generated::
+                        TYPE_IMPORT_ATTRIBUTES_SHOULD_HAVE_EXACTLY_ONE_KEY_RESOLUTION_MODE_WITH_VALUE_IMPORT_OR_REQUIRE
+                };
+                self.diagnostics.add(crate::ast::Diagnostic::new(
+                    self.current_file.clone(),
+                    attrs.loc,
+                    msg,
+                    Vec::new(),
+                ));
+            }
+            return None;
+        }
+        let elem = &data.attributes.nodes[0];
+        let (name, value) = match &elem.data {
+            crate::ast::NodeData::ImportAttribute(d) => (d.name.clone(), d.value.clone()),
+            _ => return None,
+        };
+        if !matches!(name.kind, SyntaxKind::StringLiteral) {
+            return None;
+        }
+        if name.text() != "resolution-mode" {
+            if report_errors {
+                let msg = if is_assertions {
+                    crate::diagnostics::messages_generated::
+                        X_RESOLUTION_MODE_IS_THE_ONLY_VALID_KEY_FOR_TYPE_IMPORT_ASSERTIONS
+                } else {
+                    crate::diagnostics::messages_generated::
+                        X_RESOLUTION_MODE_IS_THE_ONLY_VALID_KEY_FOR_TYPE_IMPORT_ATTRIBUTES
+                };
+                self.diagnostics.add(crate::ast::Diagnostic::new(
+                    self.current_file.clone(),
+                    name.loc,
+                    msg,
+                    Vec::new(),
+                ));
+            }
+            return None;
+        }
+        if !matches!(value.kind, SyntaxKind::StringLiteral) {
+            return None;
+        }
+        match value.text() {
+            "import" => Some(ResolutionMode::ESNext),
+            "require" => Some(ResolutionMode::CommonJS),
+            _ => {
+                if report_errors {
+                    self.diagnostics.add(crate::ast::Diagnostic::new(
+                        self.current_file.clone(),
+                        value.loc,
+                        crate::diagnostics::messages_generated::
+                            X_RESOLUTION_MODE_SHOULD_BE_EITHER_REQUIRE_OR_IMPORT,
+                        Vec::new(),
+                    ));
+                }
+                None
+            }
+        }
     }
 
     // ────────────────────────────────────────────────────────────────────────

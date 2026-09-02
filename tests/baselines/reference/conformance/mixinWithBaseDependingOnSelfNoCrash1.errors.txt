@@ -1,1 +1,2 @@
 mixinWithBaseDependingOnSelfNoCrash1.ts(11,48): error TS2345: Argument of type 'typeof BaseItem' is not assignable to parameter of type 'new (...args: any[]) => any'.
+  Type 'typeof BaseItem' provides no match for the signature 'new (...args: any[]): any'.

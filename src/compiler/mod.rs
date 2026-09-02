@@ -12,8 +12,9 @@ use crate::ast::NodeSymbolMap;
 use crate::ast::ScriptKind;
 use crate::ast::SourceFile;
 use crate::ast::diagnostic::Diagnostic;
+use crate::ast::{self};
 use crate::binder::Binder;
-use crate::core::compiler_options::{CompilerOptions, ScriptTarget};
+use crate::core::compiler_options::{CompilerOptions, ModuleKind, ScriptTarget};
 use crate::core::text::TextRange;
 use crate::core::tristate::Tristate;
 use crate::diagnostics::Category;
@@ -208,10 +209,35 @@ impl Program {
             );
 
             let mut visited: std::collections::HashSet<String> = by_name.keys().cloned().collect();
-            let mut queue: Vec<Arc<SourceFile>> = source_files.clone();
+            let mut stack: Vec<Arc<SourceFile>> = Vec::new();
+            // Worklist over `source_files` itself (index-driven): files
+            // pulled in MID-LOOP via `load_source_file_with_references`
+            // (import/type-ref targets whose OWN triple-slash path
+            // references load transitively) are appended to the vec and
+            // get their imports/type-refs processed on later iterations —
+            // a plain queue missed the transitive ones (privacy*DeclFile:
+            // the exporter loaded via import, its `/// <reference path=
+            // 'GlobalWidgets.ts'/>` followed, but the referenced file's
+            // own imports never processed).
 
             // Resolve tsconfig `types` option — auto-include @types packages.
-            for type_name in &options.types {
+            // `"*"` (Go `typesOption` wildcard): include EVERY package under
+            // each effective type root (moduleResolution_automaticType
+            // DirectiveNames).
+            let expanded_types: Vec<String> = if options.types.iter().any(|t| t == "*") {
+                let (type_roots, _from_config) =
+                    module::resolver::get_effective_type_roots(&options, host.current_directory());
+                let mut names: Vec<String> = Vec::new();
+                for root in &type_roots {
+                    for entry in host.fs().get_accessible_entries(root).directories {
+                        names.push(entry);
+                    }
+                }
+                names
+            } else {
+                options.types.clone()
+            };
+            for type_name in &expanded_types {
                 let (resolved, _traces) = resolver.resolve_type_reference_directive(
                     type_name,
                     &config_file_name,
@@ -222,45 +248,84 @@ impl Program {
                     if resolved_tr.is_resolved() {
                         let resolved_path = resolved_tr.resolved_file_name.as_str();
                         if visited.insert(resolved_path.to_string()) {
-                            if let Some(sf) = load_source_file(
+                            let pre = source_files.len();
+                            load_source_file_with_references(
                                 resolved_path,
                                 host.as_ref(),
                                 &mut source_files,
                                 &mut by_name,
                                 &mut diagnostics,
                                 allow_js,
-                            ) {
-                                queue.push(sf);
-                            }
+                            );
+                            stack.extend(source_files[pre..].iter().cloned());
                         }
                     }
                 }
             }
 
-            while let Some(file) = queue.pop() {
+            // LIFO worklist seeded with every loaded file (libs,
+            // roots, and types-option packages). Loading is via the
+            // REFERENCE-RECURSIVE loader; the files it appends (target +
+            // its path-reference closure) are drained onto the stack so
+            // their OWN imports/type-refs are processed too — the plain
+            // queue missed those (privacy*DeclFile).
+            stack.extend(source_files.iter().cloned());
+            while let Some(file) = stack.pop() {
                 // 3a. Resolve `/// <reference types="..." />` directives.
                 let type_refs = extract_reference_types_directives(&file.text);
                 for type_ref in &type_refs {
+                    // A `resolution-mode` attribute on the directive
+                    // overrides the default mode (the referencing file's
+                    // implied format under node16/nodenext) —
+                    // `/// <reference types="pkg" resolution-mode="import" />`
+                    // resolves through the `import` condition even from a
+                    // CJS-format file (TripleSlashReferenceModeOverride*).
+                    // A value other than import/require reports TS1453 and
+                    // resolves arbitrarily (Go: "resolves is arbitrary").
+                    let mut mode = crate::core::compiler_options::ModuleKind::None;
+                    let mut bad_mode_value = false;
+                    match type_ref.mode_value.as_deref() {
+                        Some("import") => mode = ModuleKind::ESNext,
+                        Some("require") => mode = ModuleKind::CommonJS,
+                        Some(_) => bad_mode_value = true,
+                        None => {}
+                    }
+                    if bad_mode_value {
+                        diagnostics.push(Arc::new(crate::ast::Diagnostic::new(
+                            Some(Arc::clone(&file)),
+                            // Official position: the types-value string
+                            // literal, NOT the mode attribute's value
+                            // (nodeModulesTripleSlashReferenceMode
+                            // OverrideModeError baseline (1,23)).
+                            TextRange::new(
+                                type_ref.types_value_range.0,
+                                type_ref.types_value_range.1,
+                            ),
+                            crate::diagnostics::messages_generated::
+                                X_RESOLUTION_MODE_SHOULD_BE_EITHER_REQUIRE_OR_IMPORT,
+                            Vec::new(),
+                        )));
+                    }
                     let (resolved, _traces) = resolver.resolve_type_reference_directive(
-                        type_ref,
+                        &type_ref.name,
                         &file.file_name,
-                        crate::core::compiler_options::ModuleKind::None,
+                        mode,
                         None, // redirected_reference
                     );
                     if let Some(resolved_tr) = resolved {
                         if resolved_tr.is_resolved() {
                             let resolved_path = resolved_tr.resolved_file_name.as_str();
                             if visited.insert(resolved_path.to_string()) {
-                                if let Some(sf) = load_source_file(
+                                let pre = source_files.len();
+                                load_source_file_with_references(
                                     resolved_path,
                                     host.as_ref(),
                                     &mut source_files,
                                     &mut by_name,
                                     &mut diagnostics,
                                     allow_js,
-                                ) {
-                                    queue.push(sf);
-                                }
+                                );
+                                stack.extend(source_files[pre..].iter().cloned());
                             }
                         }
                     }
@@ -271,11 +336,10 @@ impl Program {
                     let module_spec = import_node.text();
                     if module_spec.is_empty() {
                         continue;
-                    }
-                    let (resolved, _traces) = resolver.resolve_module_name(
+                    }                    let (resolved, _traces) = resolver.resolve_module_name(
                         module_spec,
                         &file.file_name,
-                        crate::core::compiler_options::ModuleKind::None,
+                        import_resolution_mode_override(import_node),
                         None,
                     );
                     let is_resolved = resolved.as_ref().map(|m| m.is_resolved()).unwrap_or(false);
@@ -283,16 +347,16 @@ impl Program {
                         let resolved_module = resolved.unwrap();
                         let resolved_path = resolved_module.resolved_file_name.as_str();
                         if visited.insert(resolved_path.to_string()) {
-                            if let Some(sf) = load_source_file(
+                            let pre = source_files.len();
+                            load_source_file_with_references(
                                 resolved_path,
                                 host.as_ref(),
                                 &mut source_files,
                                 &mut by_name,
                                 &mut diagnostics,
                                 allow_js,
-                            ) {
-                                queue.push(sf);
-                            }
+                            );
+                            stack.extend(source_files[pre..].iter().cloned());
                         }
                     } else if module_spec.starts_with('.')
                         || !ambient_module_exists(&source_files, module_spec)
@@ -312,6 +376,51 @@ impl Program {
                             crate::diagnostics::CANNOT_FIND_MODULE_0_OR_ITS_CORRESPONDING_TYPE_DECLARATIONS,
                             vec![module_spec.to_string()],
                         )));
+                    }
+                }
+
+                // 3c. Preload the implicit JSX runtime module for
+                // react-jsx/react-jsxdev files (Go's file loader consumes
+                // `GetJSXRuntimeImportSpecifier` like an import): the
+                // runtime's `JSX` export is the JSX namespace container,
+                // and TS2875 fires when this resolution fails.
+                use crate::core::compiler_options::JsxEmit;
+                if matches!(options.jsx, JsxEmit::ReactJSX | JsxEmit::ReactJSXDev)
+                    && (file.file_name.ends_with(".tsx")
+                        || file.file_name.ends_with(".jsx"))
+                {
+                    let source = if options.jsx_import_source.is_empty() {
+                        "react"
+                    } else {
+                        options.jsx_import_source.as_str()
+                    };
+                    let module_ref = if options.jsx == JsxEmit::ReactJSXDev {
+                        format!("{source}/jsx-dev-runtime")
+                    } else {
+                        format!("{source}/jsx-runtime")
+                    };
+                    let mode = implied_node_format_of_file(&file.file_name, &|p| {
+                        host.fs().read_file(p)
+                    });
+                    let (resolved, _traces) = resolver.resolve_module_name(
+                        &module_ref,
+                        &file.file_name,
+                        mode,
+                        None,
+                    );
+                    if resolved.as_ref().is_some_and(|m| m.is_resolved()) {
+                        let resolved_path =
+                            resolved.as_ref().unwrap().resolved_file_name.as_str();
+                        if visited.insert(resolved_path.to_string()) {
+                            load_source_file_with_references(
+                                resolved_path,
+                                host.as_ref(),
+                                &mut source_files,
+                                &mut by_name,
+                                &mut diagnostics,
+                                allow_js,
+                            );
+                        }
                     }
                 }
             }
@@ -590,6 +699,30 @@ impl crate::checker::Program for Program {
     fn is_source_file_default_library(&self, path: &str) -> bool {
         Program::is_source_file_default_library(self, path)
     }
+    fn resolve_external_module_path(
+        &self,
+        specifier: &str,
+        containing_file: &str,
+        resolution_mode: crate::core::compiler_options::ModuleKind,
+    ) -> Option<String> {
+        // The same resolver construction the file-loading loop uses; the
+        // checker consumes it for module lookpaths its ambient/relative
+        // simplification can't see (e.g. the implicit `<importSource>/
+        // jsx-runtime` at node_modules/@types/...).
+        let resolution_host: Arc<dyn module::ResolutionHost + Send + Sync> =
+            Arc::new(ResolutionHostAdapter::new(self.host.as_ref()));
+        let resolver = module::Resolver::new(
+            resolution_host,
+            Arc::new(self.options.clone()),
+            String::new(),
+            String::new(),
+        );
+        let (resolved, _traces) =
+            resolver.resolve_module_name(specifier, containing_file, resolution_mode, None);
+        resolved
+            .filter(|m| m.is_resolved())
+            .map(|m| m.resolved_file_name)
+    }
     fn symbol_map(&self) -> &NodeSymbolMap {
         Program::symbol_map(self)
     }
@@ -610,6 +743,131 @@ impl crate::checker::Program for Program {
             .cloned()
             .collect();
         crate::emitter::compute_program_common_source_directory(&source_files, &self.options)
+    }
+    fn read_file(&self, file_name: &str) -> Option<String> {
+        self.host.fs().read_file(file_name)
+    }
+    fn get_emit_module_format_of_file(
+        &self,
+        file_name: &str,
+    ) -> crate::core::compiler_options::ModuleKind {
+        // Go `GetEmitModuleFormatOfFileWorker`: node16/node18/node20/nodenext
+        // emit per-file — a file whose implied node format is ESM emits as
+        // ES2020+ modules, a CJS-format file emits CommonJS requires. An
+        // UNSET module kind first resolves through the target (Go
+        // `GetEmitModuleKind`: ES2015+ targets emit native ES modules;
+        // below that CommonJS) — the resolved format feeds every
+        // format-sensitive check (reserved-name collisions' ES2015 gate,
+        // `es6UseOfTopLevelRequire` expects zero TS2441 at target ES6).
+        use crate::core::compiler_options::ModuleKind;
+        match self.options.module {
+            ModuleKind::Node16 | ModuleKind::Node18 | ModuleKind::Node20 | ModuleKind::NodeNext => {
+                if implied_node_format_of_file(file_name, &|p| self.host.fs().read_file(p))
+                    == ModuleKind::ESNext
+                {
+                    ModuleKind::ES2020
+                } else {
+                    ModuleKind::CommonJS
+                }
+            }
+            ModuleKind::None => {
+                if self.options.get_emit_script_target() >= crate::core::compiler_options::ScriptTarget::ES2015
+                {
+                    ModuleKind::ES2015
+                } else {
+                    ModuleKind::CommonJS
+                }
+            }
+            other => other,
+        }
+    }
+}
+
+/// The implied node format of a file (Go `SourceFileMetaData.ImpliedNodeFormat`
+/// computed from the extension plus the nearest package.json `"type"` field):
+/// `.mts`/`.mjs` → ESM, `.cts`/`.cjs` → CommonJS, otherwise the nearest
+/// ancestor package.json decides (`"module"` → ESM, anything else → CJS).
+/// Returns `ModuleKind::ESNext` for ESM and `ModuleKind::CommonJS` for CJS
+/// (the same carriers Go's `ResolutionMode` uses).
+pub fn implied_node_format_of_file(
+    file_name: &str,
+    read_file: &dyn Fn(&str) -> Option<String>,
+) -> crate::core::compiler_options::ModuleKind {
+    use crate::core::compiler_options::ModuleKind;
+    let lower = file_name.to_ascii_lowercase();
+    if lower.ends_with(".mts") || lower.ends_with(".mjs") || lower.ends_with(".mjsx") {
+        return ModuleKind::ESNext;
+    }
+    if lower.ends_with(".cts") || lower.ends_with(".cjs") || lower.ends_with(".cjsx") {
+        return ModuleKind::CommonJS;
+    }
+    // Walk ancestor directories for the nearest package.json with a "type".
+    let mut dir = tspath::get_directory_path(file_name);
+    loop {
+        let pkg = tspath::combine_paths(&dir, &["package.json"]);
+        if let Some(text) = read_file(&pkg)
+            && let Ok(fields) = crate::packagejson::parse(&text)
+            && let Some(ty) = fields.header_fields.r#type.get_value()
+        {
+            return if ty == "module" {
+                ModuleKind::ESNext
+            } else {
+                ModuleKind::CommonJS
+            };
+        }        let parent = tspath::get_directory_path(&dir);
+        if parent == dir {
+            return ModuleKind::CommonJS;
+        }
+        dir = parent;
+    }
+}
+
+/// The resolution-mode override carried by an import/export statement's
+/// `with { "resolution-mode": "import"|"require" }` attribute clause (Go
+/// `getModeForUsageLocation`): only exclusively type-only clauses honor
+/// the override (others get TS2881 from the checker and resolve through
+/// the file's default mode). `import_node` is the module specifier; its
+/// parent is the declaration carrying the attributes.
+fn import_resolution_mode_override(
+    import_node: &Arc<ast::Node>,
+) -> crate::core::compiler_options::ModuleKind {
+    use crate::core::compiler_options::ModuleKind;
+    let Some(decl) = import_node.parent.as_ref() else {
+        return ModuleKind::None;
+    };
+    let (attributes, type_only) = match &decl.data {
+        ast::NodeData::ImportDeclaration(d) => {
+            let type_only = d.import_clause.as_ref().is_some_and(|c| {
+                matches!(&c.data, ast::NodeData::ImportClause(ic)
+                    if ic.phase_modifier == Some(ast::SyntaxKind::TypeKeyword))
+            });
+            (d.attributes.as_ref(), type_only)
+        }
+        ast::NodeData::ExportDeclaration(d) => (d.attributes.as_ref(), d.is_type_only),
+        _ => return ModuleKind::None,
+    };
+    let Some(attrs) = attributes else {
+        return ModuleKind::None;
+    };
+    if !type_only {
+        return ModuleKind::None;
+    }
+    let ast::NodeData::ImportAttributes(data) = &attrs.data else {
+        return ModuleKind::None;
+    };
+    if data.attributes.len() != 1 {
+        return ModuleKind::None;
+    }
+    let ast::NodeData::ImportAttribute(attr) = &data.attributes.nodes[0].data else {
+        return ModuleKind::None;
+    };
+    if attr.name.text() != "resolution-mode" {
+        return ModuleKind::None;
+    }
+    match attr.value.text() {
+        "import" => ModuleKind::ESNext,
+        "require" => ModuleKind::CommonJS,
+        _ => ModuleKind::None,
     }
 }
 
@@ -922,11 +1180,32 @@ fn extract_reference_path_directives(text: &str, containing_file: &str) -> Vec<S
 ///
 /// Returns the raw package names (e.g. "node", "express") — not resolved
 /// paths. The caller resolves these via `resolve_type_reference_directive`.
-fn extract_reference_types_directives(text: &str) -> Vec<String> {
+/// A `/// <reference types="..." />` directive: the target name plus the
+/// optional `resolution-mode` attribute's VALUE (raw text) and source
+/// range (for the TS1453 diagnostic when the value is neither `import`
+/// nor `require`).
+struct ReferenceTypesDirective {
+    name: String,
+    mode_value: Option<String>,
+    mode_value_range: (usize, usize),
+    /// Source range of the `types="..."` VALUE string literal (with
+    /// quotes) — Go reports the directive's TS1453 here, not at the
+    /// resolution-mode attribute value.
+    types_value_range: (usize, usize),
+}
+
+/// Extract `/// <reference types="..." />` directives together with their
+/// optional `resolution-mode="import|require"` attribute (Go's
+/// `getTypeReferenceModeOverride`: the attribute overrides the default
+/// mode the referencing file's implied format would pick).
+fn extract_reference_types_directives(text: &str) -> Vec<ReferenceTypesDirective> {
     let mut types = Vec::new();
+    let mut line_start = 0usize;
     for line in text.lines() {
         let trimmed = line.trim_start();
+        let leading = line.len() - trimmed.len();
         let Some(rest) = trimmed.strip_prefix("///") else {
+            line_start += line.len() + 1;
             continue;
         };
         // Match types="..." or types='...'
@@ -936,12 +1215,45 @@ fn extract_reference_types_directives(text: &str) -> Vec<String> {
                 let after = &rest[start + marker.len()..];
                 if let Some(end) = after.find(quote) {
                     let name = &after[..end];
-                    if !name.is_empty() {
-                        types.push(name.to_string());
+                    if name.is_empty() {
+                        continue;
                     }
+                    // The resolution-mode attribute rides on the same
+                    // directive line; capture its raw value and absolute
+                    // range for the TS1453 check.
+                    let mut mode_value = None;
+                    let mut mode_value_range = (0usize, 0usize);
+                    let attr_marker = "resolution-mode=";
+                    if let Some(attr_pos) = rest.find(attr_marker) {
+                        let val_area = &rest[attr_pos + attr_marker.len()..];
+                        if let Some(q) = val_area.chars().next()
+                            && (q == '"' || q == '\'')
+                            && let Some(rel_end) = val_area[1..].find(q)
+                        {
+                            let val = &val_area[1..1 + rel_end];
+                            mode_value = Some(val.to_string());
+                            mode_value_range = (
+                                line_start + leading + attr_pos + attr_marker.len() + 1,
+                                line_start + leading + attr_pos + attr_marker.len() + 1 + rel_end,
+                            );
+                        }
+                    }
+                    types.push(ReferenceTypesDirective {
+                        name: name.to_string(),
+                        mode_value,
+                        mode_value_range,
+                        // The types VALUE text (no quotes) in absolute
+                        // coordinates: `rest` starts after `///`, so add
+                        // its 3 columns back.
+                        types_value_range: (
+                            line_start + leading + 3 + start + marker.len(),
+                            line_start + leading + 3 + start + marker.len() + end,
+                        ),
+                    });
                 }
             }
         }
+        line_start += line.len() + 1;
     }
     types
 }

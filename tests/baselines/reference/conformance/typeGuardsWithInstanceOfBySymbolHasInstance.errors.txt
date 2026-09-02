@@ -5,14 +5,20 @@ typeGuardsWithInstanceOfBySymbolHasInstance.ts(36,10): error TS2339: Property 'b
 typeGuardsWithInstanceOfBySymbolHasInstance.ts(43,10): error TS2339: Property 'bar' does not exist on type 'B<any>'.
 typeGuardsWithInstanceOfBySymbolHasInstance.ts(69,10): error TS2339: Property 'bar2' does not exist on type 'C1'.
 typeGuardsWithInstanceOfBySymbolHasInstance.ts(75,10): error TS2339: Property 'bar1' does not exist on type 'C1 | C2'.
+  Property 'bar1' does not exist on type 'C2'.
 typeGuardsWithInstanceOfBySymbolHasInstance.ts(76,10): error TS2339: Property 'bar2' does not exist on type 'C1 | C2'.
+  Property 'bar2' does not exist on type 'C1'.
 typeGuardsWithInstanceOfBySymbolHasInstance.ts(91,10): error TS2339: Property 'bar' does not exist on type 'D'.
 typeGuardsWithInstanceOfBySymbolHasInstance.ts(97,10): error TS2339: Property 'bar' does not exist on type 'D'.
 typeGuardsWithInstanceOfBySymbolHasInstance.ts(119,10): error TS2339: Property 'bar2' does not exist on type 'E1'.
 typeGuardsWithInstanceOfBySymbolHasInstance.ts(125,11): error TS2339: Property 'bar1' does not exist on type 'E1 | E2'.
+  Property 'bar1' does not exist on type 'E2'.
 typeGuardsWithInstanceOfBySymbolHasInstance.ts(126,11): error TS2339: Property 'bar2' does not exist on type 'E1 | E2'.
+  Property 'bar2' does not exist on type 'E1'.
 typeGuardsWithInstanceOfBySymbolHasInstance.ts(142,11): error TS2339: Property 'foo' does not exist on type 'string | F'.
+  Property 'foo' does not exist on type 'string'.
 typeGuardsWithInstanceOfBySymbolHasInstance.ts(143,11): error TS2339: Property 'bar' does not exist on type 'string | F'.
+  Property 'bar' does not exist on type 'string'.
 typeGuardsWithInstanceOfBySymbolHasInstance.ts(169,11): error TS2339: Property 'foo2' does not exist on type 'G1'.
 typeGuardsWithInstanceOfBySymbolHasInstance.ts(175,11): error TS2339: Property 'foo2' does not exist on type 'G1'.
 typeGuardsWithInstanceOfBySymbolHasInstance.ts(192,11): error TS2339: Property 'bar' does not exist on type 'H'.

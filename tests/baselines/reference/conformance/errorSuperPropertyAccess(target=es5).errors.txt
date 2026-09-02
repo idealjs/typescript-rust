@@ -1,3 +1,4 @@
+error TS5107: Option 'target=ES5' is deprecated and will stop functioning in TypeScript 7.0. Specify compilerOption '"ignoreDeprecations": "6.0"' to silence this error.
 errorSuperPropertyAccess.ts(6,17): error TS2335: 'super' can only be referenced in a derived class.
 errorSuperPropertyAccess.ts(7,17): error TS2335: 'super' can only be referenced in a derived class.
 errorSuperPropertyAccess.ts(11,17): error TS2335: 'super' can only be referenced in a derived class.
@@ -28,3 +29,6 @@ errorSuperPropertyAccess.ts(121,15): error TS2340: Only public and protected met
 errorSuperPropertyAccess.ts(122,15): error TS2341: Property 'privateStaticFunc' is private and only accessible within class 'SomeBase'.
 errorSuperPropertyAccess.ts(127,16): error TS2660: 'super' can only be referenced in members of derived classes or object literal expressions.
 errorSuperPropertyAccess.ts(127,30): error TS2660: 'super' can only be referenced in members of derived classes or object literal expressions.
+
+
+!!! error TS5107: Option 'target=ES5' is deprecated and will stop functioning in TypeScript 7.0. Specify compilerOption '"ignoreDeprecations": "6.0"' to silence this error.

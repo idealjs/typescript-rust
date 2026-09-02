@@ -1,2 +1,5 @@
 /a.js(9,5): error TS2416: Property 'mNumber' in type 'B2' is not assignable to the same property in base type 'A'.
+  Type '() => string' is not assignable to type '() => number'.
+    Type 'string' is not assignable to type 'number'.
 /a.js(14,7): error TS2420: Class 'B3' incorrectly implements interface 'A'.
+  Property 'mNumber' is missing in type 'B3' but required in type 'A'.

@@ -56,6 +56,41 @@ impl FlowLabel {
     }
 
     /// Finish the label, returning the resulting flow node.
+    /// A junction node even for a single antecedent (loop heads gain
+    /// back edges after the body binds — `finish` would snapshot the
+    /// pre-body single-antecedent form).
+    fn finish_multi(&self, unreachable: &Arc<FlowNode>) -> Arc<FlowNode> {
+        if self.node.antecedents.is_empty() {
+            return Arc::clone(unreachable);
+        }
+        Arc::new(FlowNode {
+            flags: self.node.flags,
+            node: None,
+            antecedent: None,
+            antecedents: self.node.antecedents.clone(),
+            switch_statement: None,
+            clause_range: None,
+            reduce_target: None,
+        })
+    }
+
+    /// Append an antecedent to a finished junction (dedup, skip
+    /// unreachable) — the loop back-edge wiring.
+    fn push_antecedent(node: &Arc<FlowNode>, ant: Arc<FlowNode>) {
+        if ant.flags.contains(FlowFlags::UNREACHABLE) {
+            return;
+        }
+        let ptr = Arc::as_ptr(node) as *mut FlowNode;
+        unsafe {
+            for existing in &(*ptr).antecedents {
+                if Arc::ptr_eq(existing, &ant) {
+                    return;
+                }
+            }
+            (*ptr).antecedents.push(ant);
+        }
+    }
+
     fn finish(&self, unreachable: &Arc<FlowNode>) -> Arc<FlowNode> {
         if self.node.antecedents.is_empty() {
             return Arc::clone(unreachable);
@@ -69,6 +104,7 @@ impl FlowLabel {
             antecedent: None,
             antecedents: self.node.antecedents.clone(),
             switch_statement: None,
+            clause_range: None,
             reduce_target: None,
         })
     }
@@ -110,6 +146,12 @@ pub struct Binder {
     current_flow: Option<Arc<FlowNode>>,
     /// Symbol count (for diagnostics/stats).
     symbol_count: usize,
+    /// Deferred expando assignments (`x.prop = v` / `x[key] = v` where the
+    /// base is an entity name), processed at the end of the file so the
+    /// base's symbol exists regardless of declaration order. Mirrors Go's
+    /// `binder.expandoAssignments` (`binder.go:45`) — (assignment node,
+    /// block-scope container at collection time).
+    expando_assignments: Vec<(Arc<Node>, Option<Arc<Node>>)>,
     /// Unreachable flow node.
     unreachable_flow: Option<Arc<FlowNode>>,
     /// Current break target flow label.
@@ -162,6 +204,7 @@ impl Binder {
             parent_symbol: None,
             current_flow: None,
             symbol_count: 0,
+            expando_assignments: Vec::new(),
             unreachable_flow: None,
             current_break_target: None,
             current_continue_target: None,
@@ -191,11 +234,23 @@ impl Binder {
         self.symbol_map
             .set_flow_node(&file.node, Arc::clone(&start_flow));
 
-        // Create a symbol for the source file itself
+        // Create a symbol for the source file itself. Go's
+        // bindSourceFileAsExternalModule routes through
+        // addDeclarationToSymbol, so the module symbol carries the
+        // SourceFile as its (value) declaration — downstream consumers
+        // (checker module-member queries) recover the statement list from
+        // the symbol. Mutate before any sharing (single-threaded bind).
         let file_symbol = Arc::new(Symbol::new(
             SymbolFlags::ValueModule,
             file.file_name.clone(),
         ));
+        {
+            let file_symbol_mut = Arc::as_ptr(&file_symbol) as *mut Symbol;
+            unsafe {
+                (*file_symbol_mut).declarations.push(Arc::clone(&file.node));
+                (*file_symbol_mut).value_declaration = Some(Arc::clone(&file.node));
+            }
+        }
         self.symbol_map
             .set_symbol(&file.node, Arc::clone(&file_symbol));
         self.symbol_count += 1;
@@ -211,6 +266,11 @@ impl Binder {
 
         // Bind children
         self.bind_children(&file.node);
+
+        // Deferred expando assignments (Go bindDeferredExpandoAssignments):
+        // attach `fn.prop = v` property declarations to the function's
+        // symbol now that all locals exist.
+        self.process_expando_assignments();
 
         self.container = prev_container;
         self.block_scope_container = prev_block;
@@ -286,27 +346,70 @@ impl Binder {
         // Look up an existing symbol with the same name in the target scope.
         // If it exists and the kinds are mergeable, fold this declaration
         // into the existing symbol instead of creating a new one.
-        let existing: Option<Arc<Symbol>> = if let Some(parent_sym) = &self.parent_symbol {
+        //
+        // Go `declareModuleMember` picks ONE table by export status: a
+        // non-exported module member lives only in THIS declaration's
+        // locals, an exported one in the module symbol's exports (plus a
+        // local face in locals). The lookup must respect the split — an
+        // exported member from one declaration of a merged namespace must
+        // NOT conflict with a non-exported same-name member of another
+        // declaration (`namespace A { export class Point } namespace A {
+        // class Point }` is legal; each block is its own scope).
+        let is_module_member_container = self
+            .container
+            .as_ref()
+            .is_some_and(|c| c.kind == SyntaxKind::ModuleDeclaration);
+        // Go `declareModuleMember`'s alias branch: an ExportSpecifier is
+        // ALWAYS an export (`export { x }` names the export face directly);
+        // an `import X = …` alias exports only with an explicit `export`
+        // modifier (`export import X = …`).
+        let module_member_is_exported = |b: &Self, node: &Arc<Node>| -> bool {
+            node.kind == SyntaxKind::ExportSpecifier
+                || b.get_combined_modifier_flags(node)
+                    .contains(ModifierFlags::Export)
+        };
+        let existing: Option<Arc<Symbol>> = if is_module_member_container
+            && let Some(parent_sym) = &self.parent_symbol
+        {
+            let has_export = module_member_is_exported(self, node);
+            let container_id = self.container.as_ref().unwrap().id();
+            let locals_hit = || {
+                self.symbol_map
+                    .locals
+                    .get(&container_id)
+                    .and_then(|l| l.get(&name).cloned())
+            };
+            if includes.contains(SymbolFlags::Alias) {
+                // Go's declareModuleMember alias branch: an exported alias
+                // (`export { x }` specifier or `export import X = …`) lives
+                // ONLY in exports — it must not merge with a same-name LOCAL
+                // (the local `const x` behind `export { x }` stays its own
+                // symbol); a plain `import X = …` lives only in locals.
+                if has_export {
+                    parent_sym.exports.get(&name).cloned()
+                } else {
+                    locals_hit()
+                }
+            } else if has_export {
+                // Exported: Go declares a local face (ExportValue) in locals
+                // and the export symbol in exports — conflicts in either
+                // table are real (locals+exports of one name in one
+                // container are mutually exclusive).
+                parent_sym
+                    .exports
+                    .get(&name)
+                    .cloned()
+                    .or_else(locals_hit)
+            } else {
+                // Non-exported: locals of THIS module declaration only.
+                locals_hit()
+            }
+        } else if let Some(parent_sym) = &self.parent_symbol {
             parent_sym
                 .members
                 .get(&name)
                 .cloned()
                 .or_else(|| parent_sym.exports.get(&name).cloned())
-                // Non-exported module children live in the module node's
-                // LOCALS — check there too so `namespace B` + `interface B`
-                // merge (mirrors the insertion routing below).
-                .or_else(|| {
-                    if self.container.as_ref().is_some_and(|c| {
-                        c.kind == SyntaxKind::ModuleDeclaration
-                    }) {
-                        self.symbol_map
-                            .locals
-                            .get(&self.container.as_ref().unwrap().id())
-                            .and_then(|l| l.get(&name).cloned())
-                    } else {
-                        None
-                    }
-                })
         } else if let Some(hoist) = &var_hoist_container {
             match hoist.kind {
                 SyntaxKind::SourceFile | SyntaxKind::ModuleDeclaration => self
@@ -344,7 +447,48 @@ impl Binder {
             let var_var_merge = Self::declaration_is_var(node)
                 && existing.flags == SymbolFlags::BlockScopedVariable
                 && existing.declarations.iter().all(|d| Self::declaration_is_var(d));
-            if self.can_merge_symbols(existing.flags, includes) || var_var_merge {
+            // var + non-instantiated namespace: merge (type-only ns side
+            // coexists with the variable — `namespace m1c { interface I }
+            // + var m1c`). An INSTANTIATED ns + var stays a conflict.
+            let ns_var_merge = Self::declaration_is_var(node)
+                && existing.flags.contains(SymbolFlags::ValueModule)
+                && existing
+                    .declarations
+                    .iter()
+                    .filter(|d| d.kind == SyntaxKind::ModuleDeclaration)
+                    .all(|ns| !Self::ns_is_instantiated_static(ns));
+            // mirror: namespace arriving AFTER an existing var
+            let var_ns_merge = node.kind == SyntaxKind::ModuleDeclaration
+                && !Self::ns_is_instantiated_static(node)
+                && existing.flags == SymbolFlags::BlockScopedVariable;
+            // An IMPORT-side alias (import specifier / `import X =`) and an
+            // EXPORT-specifier alias of the same name are TWO symbols in Go
+            // (locals vs exports tables). Our file-level routing puts both
+            // in the members table — fold them instead of reporting the
+            // alias+alias TS2300 (`import type { R } from "pkg"` +
+            // `export type { R } from "pkg"` is legal). Two specifiers of
+            // the SAME side still conflict below.
+            let import_export_alias_merge = includes.contains(SymbolFlags::Alias)
+                && existing.flags.contains(SymbolFlags::Alias)
+                && {
+                    let node_is_spec = node.kind == SyntaxKind::ExportSpecifier;
+                    let existing_all_spec = existing.declarations.iter().all(|d| {
+                        d.kind == SyntaxKind::ExportSpecifier
+                    });
+                    node_is_spec != existing_all_spec
+                };
+            if self.can_merge_symbols(existing.flags, includes)
+                || var_var_merge
+                || ns_var_merge
+                || var_ns_merge
+                || import_export_alias_merge
+            {
+                // TS2434: an INSTANTIATED namespace declaration merging
+                // with a function/class must come AFTER it. The new
+                // declaration is a namespace that precedes every existing
+                // function/class declaration of the symbol, and the
+                // namespace body holds values (var/let/const/function/
+                // class/enum — Go `isInstantiatedNamespace`).
                 // Merge: add this declaration to the existing symbol, union
                 // the flags, and map the node to the existing symbol.
                 let existing_mut = Arc::as_ptr(&existing) as *mut Symbol;
@@ -360,7 +504,141 @@ impl Binder {
                         (*existing_mut).value_declaration = Some(Arc::clone(node));
                     }
                 }
-                self.symbol_map.set_symbol(node, Arc::clone(&existing));
+                                // A namespace merging with a class/function that declares
+                // `var prototype` collides with the binder's automatic
+                // `prototype` member (TS2300) — either declaration order.
+                let ns_proto_loc: Option<crate::core::text::TextRange> = (|| {
+                    let scan = |n: &Arc<Node>| -> Option<crate::core::text::TextRange> {
+                        if n.kind != SyntaxKind::ModuleDeclaration {
+                            return None;
+                        }
+                        let NodeData::ModuleDeclaration(md) = &n.data else {
+                            return None;
+                        };
+                        let body = md.body.as_ref()?;
+                        let mut hit: Option<crate::core::text::TextRange> = None;
+                        crate::ast::node_data_generated::for_each_child(body, |stmt| {
+                            if stmt.kind == SyntaxKind::VariableStatement {
+                                if let NodeData::VariableStatement(vs) = &stmt.data {
+                                    let NodeData::VariableDeclarationList(vdl) =
+                                        &vs.declaration_list.data
+                                    else {
+                                        return false;
+                                    };
+                                    for decl in vdl.declarations.iter() {
+                                        if decl
+                                            .name()
+                                            .is_some_and(|n| n.text() == "prototype")
+                                        {
+                                            hit = decl.name().map(|n| n.loc);
+                                        }
+                                    }
+                                }
+                            }
+                            false
+                        });
+                        hit
+                    };
+                    if node.kind == SyntaxKind::ModuleDeclaration
+                        && existing
+                            .flags
+                            .intersects(SymbolFlags::Class | SymbolFlags::Function)
+                    {
+                        return scan(node);
+                    }
+                    if matches!(node.kind, SyntaxKind::ClassDeclaration | SyntaxKind::FunctionDeclaration)
+                        && existing.flags.contains(SymbolFlags::ValueModule)
+                    {
+                        for d in &existing.declarations {
+                            if let Some(loc) = scan(d) {
+                                return Some(loc);
+                            }
+                        }
+                    }
+                    None
+                })();
+                if let Some(loc) = ns_proto_loc {
+                    let already = self
+                        .symbol_map
+                        .binder_diagnostics
+                        .iter()
+                        .any(|dd| dd.code == 2300 && dd.loc == loc);
+                    if !already {
+                        self.symbol_map.binder_diagnostics.push(Diagnostic::new(
+                            self.current_source_file.clone(),
+                            loc,
+                            DUPLICATE_IDENTIFIER_0,
+                            vec!["prototype".to_string()],
+                        ));
+                    }
+                }
+                // enum+enum merge with an overlapping MEMBER name:
+                // TS2300 on both declarations' member names.
+                if node.kind == SyntaxKind::EnumDeclaration
+                    && existing.flags.intersects(SymbolFlags::ENUM)
+                {
+                    let NodeData::EnumDeclaration(new_ed) = &node.data else {
+                        unreachable!()
+                    };
+                    let mut new_names: Vec<(String, crate::core::text::TextRange)> =
+                        Vec::new();
+                    for m in new_ed.members.iter() {
+                        if let Some(n) = m.name() {
+                            new_names.push((n.text().to_string(), n.loc));
+                        }
+                    }
+                    for d in &existing.declarations {
+                        if d.kind != SyntaxKind::EnumDeclaration || Arc::ptr_eq(d, node) {
+                            continue;
+                        }
+                        let NodeData::EnumDeclaration(ed) = &d.data else {
+                            continue;
+                        };
+                        for m in ed.members.iter() {
+                            let Some(n) = m.name() else { continue };
+                            if let Some((_, new_loc)) =
+                                new_names.iter().find(|(name, _)| *name == n.text())
+                            {
+                                for loc in [*new_loc, n.loc] {
+                                    let already = self
+                                        .symbol_map
+                                        .binder_diagnostics
+                                        .iter()
+                                        .any(|dd| dd.code == 2300 && dd.loc == loc);
+                                    if !already {
+                                        self.symbol_map.binder_diagnostics.push(
+                                            Diagnostic::new(
+                                                self.current_source_file.clone(),
+                                                loc,
+                                                DUPLICATE_IDENTIFIER_0,
+                                                vec![n.text().to_string()],
+                                            ),
+                                        );
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+self.symbol_map.set_symbol(node, Arc::clone(&existing));
+                // A merged-in EXPORTED declaration establishes the export
+                // face even when the first declaration didn't (the late
+                // `export_symbol` block below is skipped by this early
+                // return).
+                if let Some(container) = &self.container {
+                    let is_module_container = container.kind == SyntaxKind::SourceFile
+                        || container.kind == SyntaxKind::ModuleDeclaration;
+                    if is_module_container
+                        && self
+                            .get_combined_modifier_flags(node)
+                            .contains(ModifierFlags::Export)
+                    {
+                        let existing_mut = Arc::as_ptr(&existing) as *mut Symbol;
+                        unsafe {
+                            (*existing_mut).export_symbol = Some(Arc::clone(&existing));
+                        }
+                    }
+                }
                 return existing;
             }
             // Non-mergeable redeclaration: fall through to create a new
@@ -488,6 +766,21 @@ impl Binder {
                     {
                         // Member-level collision or UMD global alias — not a
                         // scope-level duplicate.
+                    } else if existing.flags.intersects(SymbolFlags::ENUM)
+                        != includes.intersects(SymbolFlags::ENUM)
+                        && (existing.flags
+                            .intersects(SymbolFlags::ENUM | SymbolFlags::Class)
+                            || includes
+                                .intersects(SymbolFlags::ENUM | SymbolFlags::Class))
+                    {
+                        // class + enum: TS2567 (enum merge restriction),
+                        // reported on EVERY declaration like the 2300 path.
+                        report_all(
+                            self,
+                            &crate::diagnostics::messages_generated::
+                                ENUM_DECLARATIONS_CAN_ONLY_MERGE_WITH_NAMESPACE_OR_OTHER_ENUM_DECLARATIONS,
+                        );
+                        conflicted = true;
                     } else {
                         // Current Go semantics: `var x` + `function x` /
                         // `class x` CONFLICT (TS2300 on every declaration —
@@ -551,10 +844,16 @@ impl Binder {
                 // A nested `namespace A.B` declares B inside A — the PARSER
                 // synthesizes an export modifier on every dotted segment
                 // (Go's parseModuleDeclaration behavior), so the plain
-                // modifier check covers it.
-                let has_export = self
-                    .get_combined_modifier_flags(node)
-                    .contains(ModifierFlags::Export);
+                // modifier check covers it. ExportSpecifiers are always
+                // exports (Go's declareModuleMember alias branch).
+                let has_export = module_member_is_exported(self, node);
+                // Exported ALIASES have no local face (Go's alias branch
+                // declares straight into exports).
+                let alias_no_local = has_export
+                    && matches!(
+                        node.kind,
+                        SyntaxKind::ExportSpecifier | SyntaxKind::ImportEqualsDeclaration
+                    );
                 if has_export {
                     if let Some(parent_sym) = &self.parent_symbol {
                         let parent_sym_mut = Arc::as_ptr(parent_sym) as *mut Symbol;
@@ -566,7 +865,7 @@ impl Binder {
                     }
                     // Also add to locals so the member is visible inside
                     // the namespace body by its local name.
-                    if has_locals(container.kind) {
+                    if has_locals(container.kind) && !alias_no_local {
                         let locals = self
                             .symbol_map
                             .locals
@@ -763,7 +1062,41 @@ impl Binder {
     ///
     /// Non-mergeable: TypeAlias (redefinition error), Class + Class
     /// (duplicate), block-scoped variable redeclarations.
+
+
+    /// Static form of Go `isInstantiatedNamespace` for merge decisions.
+    fn ns_is_instantiated_static(ns: &Arc<Node>) -> bool {
+        let NodeData::ModuleDeclaration(md) = &ns.data else {
+            return false;
+        };
+        let Some(body) = &md.body else {
+            return false;
+        };
+        let mut found = false;
+        crate::ast::node_data_generated::for_each_child(body, |stmt| {
+            match stmt.kind {
+                SyntaxKind::InterfaceDeclaration
+                | SyntaxKind::TypeAliasDeclaration
+                | SyntaxKind::ImportDeclaration
+                | SyntaxKind::ImportEqualsDeclaration
+                | SyntaxKind::ExportDeclaration => {}
+                _ => found = true,
+            }
+            false
+        });
+        found
+    }
     fn can_merge_symbols(&self, existing_flags: SymbolFlags, new_flags: SymbolFlags) -> bool {
+        // Go `AliasExcludes = Alias`: an alias merges with EVERY other kind
+        // (no other excludes table contains Alias) — only alias+alias
+        // conflicts. `export import A = a.A` + `export namespace A {}` is
+        // one symbol; `import Y = X.Y` + `var Y` merges and the checker
+        // reports the meaning collision as TS2440 (checkAliasSymbol).
+        let existing_alias = existing_flags.contains(SymbolFlags::Alias);
+        let new_alias = new_flags.contains(SymbolFlags::Alias);
+        if existing_alias || new_alias {
+            return !(existing_alias && new_alias);
+        }
         // Interface + Interface (and interface + class, which is allowed in
         // TS but not yet fully handled by the checker — still merge so the
         // interface members are visible).
@@ -788,6 +1121,15 @@ impl Binder {
         let existing_type_alias = existing_flags.contains(SymbolFlags::TypeAlias);
         let new_type_alias = new_flags.contains(SymbolFlags::TypeAlias);
         let class_side = SymbolFlags::Class;
+        // An interface never coexists with an ENUM (TS2567 in the conflict
+        // path below) — exclude it from the type+value coexistence rule.
+        let enum_side =
+            SymbolFlags::ENUM;
+        if (existing_flags.intersects(enum_side) && new_interface)
+            || (new_flags.intersects(enum_side) && existing_interface)
+        {
+            return false;
+        }
         if (existing_interface && !new_interface && !new_type_alias)
             || (new_interface && !existing_interface && !existing_type_alias)
             || (existing_type_alias && !new_type_alias && !new_flags.intersects(class_side) && !new_interface)
@@ -822,9 +1164,15 @@ impl Binder {
             } else {
                 new_flags
             };
-            // The non-namespace side must be one of: ValueModule, Function,
-            // Class, RegularEnum, ConstEnum, Interface (`namespace B` +
-            // `interface B` merge into one symbol, like Go's binder).
+            // The non-namespace side must be one of: ValueModule,
+            // Function, Class, RegularEnum, ConstEnum, Interface
+            // (`namespace B` + `interface B` merge into one symbol, like
+            // Go's binder). A non-instantiated (type-only) namespace ALSO
+            // merges with a variable (Go: `namespace m1c { interface I }`
+            // + `var m1c`); an instantiated one conflicts (TS2300).
+            // The var side of THIS merge is checked by the caller via
+            // `ns_var_merge_ok` — the value-side declaration must see the
+            // namespace's declarations to test instantiation.
             let can_merge_with_ns = other_existing.contains(SymbolFlags::ValueModule)
                 || other_existing.contains(SymbolFlags::Function)
                 || other_existing.contains(SymbolFlags::Class)
@@ -846,6 +1194,22 @@ impl Binder {
             || existing_flags.contains(SymbolFlags::ConstEnum))
             && (new_flags.contains(SymbolFlags::RegularEnum)
                 || new_flags.contains(SymbolFlags::ConstEnum))
+        {
+            return true;
+        }
+        // Type parameter + value-side coexistence: a class/interface type
+        // parameter is a TYPE-side symbol (Go/TS `TypeParameterExcludes =
+        // Type & ~TypeParameter` — it only excludes other TYPE symbols), so
+        // it merges with VALUE-side members of the same name
+        // (`class Test<T> { private get T(): T }` — declarationEmitType
+        // ParamMergedWithPrivate). Without the merge the getter REPLACED
+        // the type parameter in the container's members and every `T`
+        // reference in the class body stopped resolving (TS2304).
+        let type_param_existing =
+            existing_flags.contains(SymbolFlags::TypeParameter);
+        let type_param_new = new_flags.contains(SymbolFlags::TypeParameter);
+        if (type_param_existing && !new_flags.intersects(SymbolFlags::TYPE))
+            || (type_param_new && !existing_flags.intersects(SymbolFlags::TYPE))
         {
             return true;
         }
@@ -1039,6 +1403,10 @@ impl Binder {
             // under its own name (Go's getDeclarationName reads Name()).
             NodeData::ImportEqualsDeclaration(data) => self.node_text(&data.name),
             NodeData::NamespaceImport(data) => self.node_text(&data.name),
+            // `export { local as exported }` — the exports-table symbol is
+            // keyed by the EXPORTED name; `property_name` (the local
+            // target) is resolved separately by the checker.
+            NodeData::ExportSpecifier(data) => self.node_text(&data.name),
             NodeData::Identifier(data) => data.text.clone(),
             // `export default <expr>` → "default"; `export = <expr>` → "export=".
             // Mirrors Go's `getDeclarationName` for `KindExportAssignment`.
@@ -1065,6 +1433,13 @@ impl Binder {
     fn node_text(&self, node: &Arc<Node>) -> String {
         match &node.data {
             NodeData::Identifier(data) => data.text.clone(),
+            // Private element names (`#a`) key the class members table by
+            // the full text INCLUDING the `#` (Go getDeclarationName routes
+            // private identifiers to a per-class mangled key; the raw text
+            // plays that role here since each class owns its table).
+            // Without this arm every private member bound under "" and
+            // collided (TS18013 for in-class `this.#a` access).
+            NodeData::PrivateIdentifier(data) => data.text.clone(),
             NodeData::StringLiteral(data) => data.text.clone(),
             NodeData::NumericLiteral(data) => data.text.clone(),
             NodeData::NoSubstitutionTemplateLiteral(data) => data.text.clone(),
@@ -1104,6 +1479,7 @@ impl Binder {
             antecedent: Some(Arc::clone(antecedent)),
             antecedents: Vec::new(),
             switch_statement: None,
+            clause_range: None,
             reduce_target: None,
         })
     }
@@ -1124,6 +1500,7 @@ impl Binder {
             antecedent: Some(Arc::clone(antecedent)),
             antecedents: Vec::new(),
             switch_statement: None,
+            clause_range: None,
             reduce_target: None,
         })
     }
@@ -1140,6 +1517,7 @@ impl Binder {
             antecedent: Some(Arc::clone(antecedent)),
             antecedents: Vec::new(),
             switch_statement: None,
+            clause_range: None,
             reduce_target: None,
         })
     }
@@ -1161,6 +1539,7 @@ impl Binder {
             antecedent: Some(Arc::clone(antecedent)),
             antecedents: Vec::new(),
             switch_statement: None,
+            clause_range: None,
             reduce_target: None,
         });
         // Add to exception target if we're inside a try block
@@ -1200,6 +1579,7 @@ impl Binder {
             antecedent: Some(Arc::clone(antecedent)),
             antecedents: antecedents.to_vec(),
             switch_statement: None,
+            clause_range: None,
             reduce_target: Some(Arc::clone(target)),
         })
     }
@@ -1219,6 +1599,7 @@ impl Binder {
             antecedent: None,
             antecedents: Vec::new(),
             switch_statement: None,
+            clause_range: None,
             reduce_target: None,
         })
     }
@@ -1242,27 +1623,33 @@ impl Binder {
         self.set_flow_node_referenced(antecedent);
     }
 
-    /// Create a flow switch clause node.
+    /// Create a flow switch clause node for a clause group
+    /// `[clause_start, clause_end)` (Go `createFlowSwitchClause`).
     ///
     /// `switch_statement` is the enclosing `SwitchStatement` node, used by
-    /// the checker to resolve the discriminant expression for narrowing.
-    /// `clause` is the `CaseClause` or `DefaultClause` node, used to
-    /// resolve the case expression(s) being matched.
+    /// the checker to resolve the discriminant expression and the full
+    /// clause list. `clause` is the statement-bearing clause that ends the
+    /// group (Go's `FlowSwitchClauseData` carries only the range; we keep
+    /// the clause for the non-grouped fallbacks). The `[0, 0)` range marks
+    /// the bypass branch of a default-less switch.
     fn create_flow_switch_clause(
         &mut self,
         antecedent: &Arc<FlowNode>,
-        clause: &Arc<Node>,
+        clause: Option<&Arc<Node>>,
         switch_statement: &Arc<Node>,
+        clause_start: usize,
+        clause_end: usize,
     ) -> Arc<FlowNode> {
         if antecedent.flags.contains(FlowFlags::UNREACHABLE) {
             return Arc::clone(antecedent);
         }
         Arc::new(FlowNode {
             flags: FlowFlags::SWITCH_CLAUSE,
-            node: Some(Arc::clone(clause)),
+            node: clause.map(Arc::clone),
             antecedent: Some(Arc::clone(antecedent)),
             antecedents: Vec::new(),
             switch_statement: Some(Arc::clone(switch_statement)),
+            clause_range: Some((clause_start, clause_end)),
             reduce_target: None,
         })
     }
@@ -1330,7 +1717,14 @@ impl Binder {
         if let Some(current) = &self.current_flow {
             pre_while_label.add_antecedent(Arc::clone(current));
         }
-        self.current_flow = Some(pre_while_label.finish(self.unreachable_flow.as_ref().unwrap()));
+        // The loop head must be a JUNCTION node even before the body's
+        // back-edge exists — `finish` snapshots antecedents, so finishing
+        // now would drop the back edge (loop narrowing degraded to the
+        // entry type only: `while (c) { if (typeof x === "string")
+        // x.slice() }` narrowed `number`). Create the mutable junction up
+        // front; the back edge is appended after the body binds.
+        let loop_head = pre_while_label.finish_multi(self.unreachable_flow.as_ref().unwrap());
+        self.current_flow = Some(Arc::clone(&loop_head));
 
         // Condition
         self.bind(&expr);
@@ -1360,11 +1754,11 @@ impl Binder {
         self.current_flow = Some(pre_body_label.finish(self.unreachable_flow.as_ref().unwrap()));
         self.bind(&stmt);
         if let Some(current) = &self.current_flow {
-            pre_while_label.add_antecedent(Arc::clone(current));
+            FlowLabel::push_antecedent(&loop_head, Arc::clone(current));
         }
         // Fold `continue;` edges into the condition label.
         for ant in &continue_acc.antecedents {
-            pre_while_label.add_antecedent(Arc::clone(ant));
+            FlowLabel::push_antecedent(&loop_head, Arc::clone(ant));
         }
         // Fold `break;` edges into the post-loop label.
         for ant in &break_acc.antecedents {
@@ -1691,31 +2085,78 @@ impl Binder {
             .entry(case_block.id())
             .or_insert_with(SymbolTable::new);
 
-        // Process each clause
-        for clause in &clauses.nodes {
-            // Create switch clause flow
-            if let Some(current) = self.current_flow.take() {
-                let clause_flow = self.create_flow_switch_clause(&current, clause, node);
-                self.current_flow = Some(clause_flow);
+        // Process clause groups (Go `bindCaseBlock`): a group is a maximal
+        // run of statement-less clauses plus the clause that owns the
+        // statements they label (`case a: case b: stmts`). Each group gets
+        // ONE SwitchClause flow anchored at the switch ENTRY carrying the
+        // group's clause range; the statements start from a branch label
+        // that unions the group's SwitchClause flow with the FALL-THROUGH
+        // flow (the previous group's statement end) — that union is what
+        // makes `case x === "A": case x === "B":` see `A | B` inside the
+        // body. Anchoring every clause flow at the entry (rather than
+        // chaining through previous clauses) keeps each group's narrowing
+        // independent of its predecessors' assumptions.
+        let entry_flow = self.current_flow.clone();
+        let is_narrowing_switch = expression.kind == SyntaxKind::TrueKeyword
+            || self.is_narrowing_expression(&expression);
+        let mut fallthrough_flow: Option<Arc<FlowNode>> = None;
+        let mut has_default = false;
+        let clause_nodes = &clauses.nodes;
+        let mut i = 0;
+        while i < clause_nodes.len() {
+            let clause_start = i;
+            // Skip over (and bind) the statement-less clauses above the
+            // statement-bearing one.
+            while clause_statements_empty(&clause_nodes[i]) && i + 1 < clause_nodes.len() {
+                self.bind_case_clause(&clause_nodes[i], &entry_flow);
+                i += 1;
             }
-
-            // Bind clause (expression + statements)
-            match &clause.data {
-                NodeData::CaseOrDefaultClause(data) => {
-                    // For CaseClause, bind the expression; for DefaultClause, expression is just a placeholder
-                    self.bind(&data.expression);
-                    // Bind statements
-                    for stmt in &data.statements.nodes {
-                        self.bind(stmt);
-                    }
-                }
-                _ => {}
+            let mut pre_case_label = FlowLabel::new(FlowFlags::BRANCH_LABEL);
+            let pre_case_flow = if is_narrowing_switch {
+                entry_flow.as_ref().map(|entry| {
+                    self.create_flow_switch_clause(
+                        entry,
+                        Some(&clause_nodes[i]),
+                        node,
+                        clause_start,
+                        i + 1,
+                    )
+                })
+            } else {
+                entry_flow.clone()
+            };
+            if let Some(f) = &pre_case_flow {
+                pre_case_label.add_antecedent(Arc::clone(f));
             }
+            if let Some(f) = &fallthrough_flow {
+                pre_case_label.add_antecedent(Arc::clone(f));
+            }
+            self.current_flow =
+                Some(pre_case_label.finish(self.unreachable_flow.as_ref().unwrap()));
+            let clause = &clause_nodes[i];
+            if clause.kind == SyntaxKind::DefaultClause {
+                has_default = true;
+            }
+            self.bind_case_clause(clause, &entry_flow);
+            fallthrough_flow = self.current_flow.clone();
+            i += 1;
         }
 
         // Add final flow to post-switch label
         if let Some(current) = &self.current_flow {
             post_switch_label.add_antecedent(Arc::clone(current));
+        }
+        // A default-less switch has an implicit BYPASS branch (no case
+        // matched) that flows to the post-switch label (Go
+        // `bindSwitchStatement`'s trailing `createFlowSwitchClause(..., 0,
+        // 0)`). For an exhaustive switch the bypass narrows to `never` and
+        // absorbs into the union; for a non-exhaustive one it contributes
+        // the unmatched constituents.
+        if !has_default {
+            if let Some(entry) = &entry_flow {
+                let bypass = self.create_flow_switch_clause(entry, None, node, 0, 0);
+                post_switch_label.add_antecedent(bypass);
+            }
         }
 
         self.current_flow = Some(post_switch_label.finish(self.unreachable_flow.as_ref().unwrap()));
@@ -1726,6 +2167,187 @@ impl Binder {
 
         // Restore break target
         self.current_break_target = prev_break;
+    }
+
+    /// Bind one case/default clause (Go `bindCaseOrDefaultClause`): the
+    /// case expression is evaluated in the switch-ENTRY flow context (its
+    /// own sub-flow — e.g. an assertion call inside a case expression —
+    /// must not observe the previous clause's narrowing), the statements
+    /// in the current flow.
+    fn bind_case_clause(&mut self, clause: &Arc<Node>, entry_flow: &Option<Arc<FlowNode>>) {
+        let NodeData::CaseOrDefaultClause(data) = &clause.data else {
+            return;
+        };
+        if clause.kind == SyntaxKind::CaseClause {
+            let saved = self.current_flow.take();
+            self.current_flow = entry_flow.clone();
+            self.bind(&data.expression);
+            self.current_flow = saved;
+        }
+        for stmt in &data.statements.nodes {
+            self.bind(stmt);
+        }
+    }
+
+    /// Mirrors Go `isNarrowingExpression` (binder.go ~L2595): is the switch
+    /// discriminant an expression the flow checker can narrow by? Switches
+    /// with such a discriminant get SwitchClause flow nodes; all others
+    /// keep the plain entry flow (no narrowing through the switch).
+    fn is_narrowing_expression(&self, expr: &Arc<Node>) -> bool {
+        match expr.kind {
+            SyntaxKind::Identifier | SyntaxKind::ThisKeyword => true,
+            SyntaxKind::PropertyAccessExpression | SyntaxKind::ElementAccessExpression => {
+                self.contains_narrowable_reference(expr)
+            }
+            SyntaxKind::CallExpression => self.has_narrowable_argument(expr),
+            SyntaxKind::ParenthesizedExpression
+            | SyntaxKind::NonNullExpression
+            | SyntaxKind::TypeOfExpression => expr
+                .expression()
+                .map(|inner| self.is_narrowing_expression(inner))
+                .unwrap_or(false),
+            SyntaxKind::BinaryExpression => {
+                let NodeData::BinaryExpression(bin) = &expr.data else {
+                    return false;
+                };
+                self.is_narrowing_binary_expression(&bin.left, &bin.operator_token, &bin.right)
+            }
+            SyntaxKind::PrefixUnaryExpression => {
+                let NodeData::PrefixUnaryExpression(un) = &expr.data else {
+                    return false;
+                };
+                un.operator == SyntaxKind::ExclamationToken
+                    && self.is_narrowing_expression(&un.operand)
+            }
+            _ => false,
+        }
+    }
+
+    fn is_narrowing_binary_expression(
+        &self,
+        left: &Arc<Node>,
+        operator: &Arc<Node>,
+        right: &Arc<Node>,
+    ) -> bool {
+        match operator.kind {
+            SyntaxKind::EqualsToken
+            | SyntaxKind::BarBarEqualsToken
+            | SyntaxKind::AmpersandAmpersandEqualsToken
+            | SyntaxKind::QuestionQuestionEqualsToken => self.contains_narrowable_reference(left),
+            SyntaxKind::EqualsEqualsToken
+            | SyntaxKind::ExclamationEqualsToken
+            | SyntaxKind::EqualsEqualsEqualsToken
+            | SyntaxKind::ExclamationEqualsEqualsToken => {
+                self.is_narrowable_operand(left)
+                    || self.is_narrowable_operand(right)
+                    || self.is_narrowing_typeof_operands(right, left)
+                    || self.is_narrowing_typeof_operands(left, right)
+                    || (Self::is_boolean_literal(right) && self.is_narrowing_expression(left))
+                    || (Self::is_boolean_literal(left) && self.is_narrowing_expression(right))
+            }
+            SyntaxKind::InstanceOfKeyword => self.is_narrowable_operand(left),
+            SyntaxKind::InKeyword => self.is_narrowing_expression(right),
+            SyntaxKind::CommaToken => self.is_narrowing_expression(right),
+            _ => false,
+        }
+    }
+
+    fn is_boolean_literal(node: &Arc<Node>) -> bool {
+        matches!(node.kind, SyntaxKind::TrueKeyword | SyntaxKind::FalseKeyword)
+    }
+
+    fn is_narrowable_operand(&self, expr: &Arc<Node>) -> bool {
+        match expr.kind {
+            SyntaxKind::ParenthesizedExpression => {
+                expr.expression().map(|e| self.is_narrowable_operand(e)).unwrap_or(false)
+            }
+            SyntaxKind::BinaryExpression => {
+                let NodeData::BinaryExpression(bin) = &expr.data else {
+                    return false;
+                };
+                match bin.operator_token.kind {
+                    SyntaxKind::EqualsToken => self.is_narrowable_operand(&bin.left),
+                    SyntaxKind::CommaToken => self.is_narrowable_operand(&bin.right),
+                    _ => self.contains_narrowable_reference(expr),
+                }
+            }
+            _ => self.contains_narrowable_reference(expr),
+        }
+    }
+
+    fn is_narrowing_typeof_operands(&self, expr1: &Arc<Node>, expr2: &Arc<Node>) -> bool {
+        expr1.kind == SyntaxKind::TypeOfExpression
+            && expr1
+                .expression()
+                .map(|e| self.is_narrowable_operand(e))
+                .unwrap_or(false)
+            && matches!(
+                expr2.kind,
+                SyntaxKind::StringLiteral | SyntaxKind::NoSubstitutionTemplateLiteral
+            )
+    }
+
+    /// Mirrors Go `containsNarrowableReference` (binder.go ~L2615).
+    fn contains_narrowable_reference(&self, expr: &Arc<Node>) -> bool {
+        if self.is_narrowable_reference(expr) {
+            return true;
+        }
+        if expr.flags.contains(NodeFlags::OptionalChain) {
+            if let Some(inner) = expr.expression() {
+                if matches!(
+                    expr.kind,
+                    SyntaxKind::PropertyAccessExpression
+                        | SyntaxKind::ElementAccessExpression
+                        | SyntaxKind::CallExpression
+                        | SyntaxKind::NonNullExpression
+                ) {
+                    return self.contains_narrowable_reference(inner);
+                }
+            }
+        }
+        false
+    }
+
+    /// Mirrors Go `isNarrowableReference` (binder.go ~L2628).
+    fn is_narrowable_reference(&self, node: &Arc<Node>) -> bool {
+        match node.kind {
+            SyntaxKind::Identifier
+            | SyntaxKind::ThisKeyword
+            | SyntaxKind::SuperKeyword
+            | SyntaxKind::MetaProperty => true,
+            SyntaxKind::PropertyAccessExpression | SyntaxKind::ParenthesizedExpression
+            | SyntaxKind::NonNullExpression => {
+                node.expression().map(|e| self.is_narrowable_reference(e)).unwrap_or(false)
+            }
+            SyntaxKind::ElementAccessExpression => {
+                let NodeData::ElementAccessExpression(el) = &node.data else {
+                    return false;
+                };
+                self.is_string_or_numeric_literal_like(&el.argument_expression)
+                    || (self.is_entity_name_expression(&el.argument_expression)
+                        && self.is_narrowable_reference(&el.expression))
+            }
+            SyntaxKind::BinaryExpression => {
+                let NodeData::BinaryExpression(bin) = &node.data else {
+                    return false;
+                };
+                (bin.operator_token.kind == SyntaxKind::CommaToken
+                    && self.is_narrowable_reference(&bin.right))
+                    || (is_assignment_operator(bin.operator_token.kind)
+                        && crate::ast::utilities::is_left_hand_side_expression(&bin.left))
+            }
+            _ => false,
+        }
+    }
+
+    fn has_narrowable_argument(&self, expr: &Arc<Node>) -> bool {
+        let NodeData::CallExpression(call) = &expr.data else {
+            return false;
+        };
+        call.arguments
+            .nodes
+            .iter()
+            .any(|arg| self.contains_narrowable_reference(arg))
     }
 
     /// Bind a return statement.
@@ -2096,12 +2718,14 @@ impl Binder {
         name == "push" || name == "unshift"
     }
 
-    /// Check if an expression is a narrowable operand (identifier, property
-    /// access chain, parenthesized, etc.). Mirrors Go's `isNarrowableOperand` +
-    /// `containsNarrowableReference`. Used to gate ARRAY_MUTATION flow nodes
-    /// so that `arr.push(x)` (where `arr` is an identifier) is tracked but
-    /// `getFoo().push(x)` is not.
-    fn is_narrowable_operand(&self, expr: &Arc<Node>) -> bool {
+    /// Check if an expression is a mutation-trackable reference (identifier,
+    /// property access chain, parenthesized, etc.) — a merge of Go's
+    /// `isNarrowableOperand` + `containsNarrowableReference` shapes. Used to
+    /// gate ARRAY_MUTATION flow nodes so that `arr.push(x)` (where `arr` is
+    /// an identifier) is tracked but `getFoo().push(x)` is not. (The
+    /// faithful Go `isNarrowableOperand` port lives next to the
+    /// switch-narrowing helpers.)
+    fn is_mutation_tracked_reference(&self, expr: &Arc<Node>) -> bool {
         match expr.kind {
             SyntaxKind::Identifier
             | SyntaxKind::ThisKeyword
@@ -2111,7 +2735,7 @@ impl Binder {
             | SyntaxKind::ParenthesizedExpression
             | SyntaxKind::NonNullExpression => {
                 if let Some(inner) = expr.expression() {
-                    self.is_narrowable_operand(&inner)
+                    self.is_mutation_tracked_reference(&inner)
                 } else {
                     false
                 }
@@ -2125,7 +2749,7 @@ impl Binder {
                         return true;
                     }
                     return self.is_entity_name_expression(&ea.argument_expression)
-                        && self.is_narrowable_operand(&ea.expression);
+                        && self.is_mutation_tracked_reference(&ea.expression);
                 }
                 false
             }
@@ -2166,7 +2790,7 @@ impl Binder {
             if let NodeData::PropertyAccessExpression(prop) = &expr.data {
                 let name = self.node_text(&prop.name);
                 if self.is_push_or_unshift_identifier(&name)
-                    && self.is_narrowable_operand(&prop.expression)
+                    && self.is_mutation_tracked_reference(&prop.expression)
                 {
                     // This is an array mutation call: create a flow mutation node
                     let current = self.current_flow.clone();
@@ -2207,6 +2831,204 @@ impl Binder {
         // Deferred until JS file support is prioritized.
     }
 
+    /// Go `bindExpandoPropertyAssignment`: an `=` assignment whose LHS is
+    /// a property/element access on an entity name (`x.prop = v`,
+    /// `x[key] = v`) is deferred to the end of the file; if the base then
+    /// resolves to a function declaration, the assignment becomes an
+    /// expando property of that function's symbol. Collection side — the
+    /// resolution happens in `process_expando_assignments`.
+    fn collect_expando_assignment(&mut self, node: &Arc<Node>) {
+        let NodeData::BinaryExpression(bin) = &node.data else {
+            return;
+        };
+        if bin.operator_token.kind != SyntaxKind::EqualsToken {
+            return;
+        }
+        let base = match &bin.left.data {
+            NodeData::PropertyAccessExpression(pae)
+                if pae.expression.kind == SyntaxKind::Identifier
+                    && pae.name.kind == SyntaxKind::Identifier =>
+            {
+                &pae.expression
+            }
+            NodeData::ElementAccessExpression(eae)
+                if eae.expression.kind == SyntaxKind::Identifier =>
+            {
+                &eae.expression
+            }
+            _ => return,
+        };
+        // CJS/global forms are not expandos (Go's module-exports/exports
+        // kinds take precedence).
+        let base_name = base.text();
+        if matches!(base_name, "exports" | "module" | "globalThis") {
+            return;
+        }
+        self.expando_assignments
+            .push((Arc::clone(node), self.block_scope_container.clone()));
+    }
+
+    /// Go `bindDeferredExpandoAssignments` + `getInitializerSymbol`
+    /// (TS-file subset): for each deferred assignment, resolve the base
+    /// identifier through the collection-time block scope (walking up the
+    /// parent chain); when it names a FUNCTION DECLARATION, declare the
+    /// expando property on that function's symbol. Static names become
+    /// Property symbols in the function's exports; dynamic names
+    /// (`x[key] = v`) accumulate on the `\u{FE}assignment` pseudo symbol
+    /// for the checker to late-bind.
+    fn process_expando_assignments(&mut self) {
+        let assignments = std::mem::take(&mut self.expando_assignments);
+        for (node, scope_start) in assignments {
+            let NodeData::BinaryExpression(bin) = &node.data else {
+                continue;
+            };
+            let base = match &bin.left.data {
+                NodeData::PropertyAccessExpression(pae) => &pae.expression,
+                NodeData::ElementAccessExpression(eae) => &eae.expression,
+                _ => continue,
+            };
+            let base_name = base.text();
+            let mut target: Option<Arc<Symbol>> = None;
+            let mut scope = scope_start;
+            while let Some(sc) = scope {
+                if let Some(sym) = self
+                    .symbol_map
+                    .locals
+                    .get(&sc.id())
+                    .and_then(|l| l.get(base_name))
+                {
+                    target = Some(Arc::clone(sym));
+                    break;
+                }
+                // Symbol-ful containers (SourceFile / ModuleDeclaration)
+                // keep top-level declarations on their SYMBOL's member
+                // tables, not in node locals.
+                if matches!(
+                    sc.kind,
+                    SyntaxKind::SourceFile | SyntaxKind::ModuleDeclaration
+                ) && let Some(sym) = self.symbol_map.symbol_of(&sc)
+                {
+                    let hit = sym
+                        .members
+                        .get(base_name)
+                        .or_else(|| sym.exports.get(base_name))
+                        .cloned();
+                    if let Some(h) = hit {
+                        target = Some(h);
+                        break;
+                    }
+                }
+                scope = sc.parent.clone();
+            }
+            let Some(sym) = target else { continue };
+            // Go getInitializerSymbol (TS files): only function
+            // declarations gain expando members.
+            if !sym
+                .value_declaration
+                .as_ref()
+                .is_some_and(|d| d.kind == SyntaxKind::FunctionDeclaration)
+            {
+                continue;
+            }
+            let member_name: Option<String> = match &bin.left.data {
+                NodeData::PropertyAccessExpression(pae) => Some(pae.name.text().to_string()),
+                NodeData::ElementAccessExpression(eae) => {
+                    match &eae.argument_expression.data {
+                        NodeData::StringLiteral(s) => Some(s.text.clone()),
+                        NodeData::NumericLiteral(n) => Some(n.text.clone()),
+                        _ => None,
+                    }
+                }
+                _ => None,
+            };
+            match member_name {
+                Some(mname) => {
+                    // Only when no non-expando declaration exists for the
+                    // name (Go: existing is absent or itself an
+                    // assignment). Namespace members live in EITHER the
+                    // members or the exports table — or, for non-exported
+                    // namespace vars, the ModuleDeclaration's LOCALS — a
+                    // merged `namespace Foo { var bla }` must NOT be
+                    // shadowed by an expando `Foo.bla = ...`.
+                    let existing = sym
+                        .exports
+                        .get(&mname)
+                        .or_else(|| sym.members.get(&mname))
+                        .cloned()
+                        .or_else(|| {
+                            sym.declarations
+                                .iter()
+                                .filter(|d| d.kind == SyntaxKind::ModuleDeclaration)
+                                .find_map(|md| {
+                                    self.symbol_map
+                                        .locals
+                                        .get(&md.id())
+                                        .and_then(|l| l.get(&mname))
+                                        .cloned()
+                                })
+                        });
+                    let eligible = existing.as_ref().map_or(true, |e| {
+                        e.declarations
+                            .iter()
+                            .all(|d| d.kind == SyntaxKind::BinaryExpression)
+                    });
+                    if !eligible {
+                        continue;
+                    }
+                    match existing {
+                        Some(e) => {
+                            let e_mut = Arc::as_ptr(&e) as *mut Symbol;
+                            unsafe { (*e_mut).declarations.push(Arc::clone(&node)) };
+                        }
+                        None => {
+                            let prop = self.new_symbol(SymbolFlags::Property, mname.clone());
+                            let prop_mut = Arc::as_ptr(&prop) as *mut Symbol;
+                            unsafe {
+                                (*prop_mut).declarations.push(Arc::clone(&node));
+                                (*prop_mut).parent = Some(Arc::clone(&sym));
+                            }
+                            let sym_mut = Arc::as_ptr(&sym) as *mut Symbol;
+                            unsafe {
+                                (*sym_mut).exports.insert(mname, prop);
+                            }
+                        }
+                    }
+                }
+                None => {
+                    // Dynamic name: accumulate on the assignment pseudo
+                    // symbol (Go addLateBoundAssignmentDeclarationToSymbol).
+                    let pseudo = sym
+                        .exports
+                        .get(crate::ast::INTERNAL_SYMBOL_NAME_ASSIGNMENT)
+                        .cloned();
+                    match pseudo {
+                        Some(p) => {
+                            let p_mut = Arc::as_ptr(&p) as *mut Symbol;
+                            unsafe { (*p_mut).declarations.push(Arc::clone(&node)) };
+                        }
+                        None => {
+                            let p = self.new_symbol(
+                                SymbolFlags::empty(),
+                                crate::ast::INTERNAL_SYMBOL_NAME_ASSIGNMENT.to_string(),
+                            );
+                            let p_mut = Arc::as_ptr(&p) as *mut Symbol;
+                            unsafe {
+                                (*p_mut).declarations.push(Arc::clone(&node));
+                                (*p_mut).parent = Some(Arc::clone(&sym));
+                            }
+                            let sym_mut = Arc::as_ptr(&sym) as *mut Symbol;
+                            unsafe {
+                                (*sym_mut)
+                                    .exports
+                                    .insert(crate::ast::INTERNAL_SYMBOL_NAME_ASSIGNMENT.to_string(), p);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     /// Bind an expression statement (with assignment flow tracking).
     fn bind_expression_statement(&mut self, node: &Arc<Node>) {
         if let NodeData::ExpressionStatement(data) = &node.data {
@@ -2227,7 +3049,7 @@ impl Binder {
                     // operand — the checker's `evolve_array_at_mutation`
                     // extracts the receiver from it.
                     if let NodeData::ElementAccessExpression(ea) = &bin_data.left.data {
-                        if self.is_narrowable_operand(&ea.expression) {
+                        if self.is_mutation_tracked_reference(&ea.expression) {
                             let current = self.current_flow.clone();
                             if let Some(current) = current {
                                 self.current_flow =
@@ -2306,7 +3128,7 @@ impl Binder {
                 }
             }
             _ => {
-                if self.is_narrowable_operand(node)
+                if self.is_mutation_tracked_reference(node)
                     && matches!(
                         node.kind,
                         SyntaxKind::Identifier
@@ -2530,11 +3352,28 @@ impl Binder {
                 }
             }
             SyntaxKind::ClassExpression => {
-                self.bind_anonymous_declaration(
-                    node,
-                    SymbolFlags::Class,
-                    INTERNAL_SYMBOL_NAME_CLASS,
+                let has_name = matches!(
+                    &node.data,
+                    NodeData::ClassExpression(data) if data.name.is_some()
                 );
+                if has_name {
+                    // A NAMED class expression: the container-flags pass
+                    // below (re)creates locals AFTER this arm, so the
+                    // self-name insertion happens there (see bind_container
+                    // hook). The anonymous symbol is created here for
+                    // typeof/instance typing.
+                    self.bind_anonymous_declaration(
+                        node,
+                        SymbolFlags::Class,
+                        INTERNAL_SYMBOL_NAME_CLASS,
+                    );
+                } else {
+                    self.bind_anonymous_declaration(
+                        node,
+                        SymbolFlags::Class,
+                        INTERNAL_SYMBOL_NAME_CLASS,
+                    );
+                }
             }
             SyntaxKind::InterfaceDeclaration => {
                 self.declare_symbol(node, SymbolFlags::Interface, SymbolFlags::TYPE);
@@ -2902,6 +3741,10 @@ impl Binder {
                 // `Class.prototype.method = fn` in JS files. Mirrors Go's
                 // `bindThisPropertyAssignment` (`binder.go:1121-1141`).
                 self.bind_this_property_assignment(node);
+                // Expando assignment deferral (Go bindExpandoPropertyAssignment):
+                // `x.prop = v` / `x[key] = v` on a later-resolved function
+                // declaration gains a property symbol at end of file.
+                self.collect_expando_assignment(node);
                 // Destructuring assignment (`({ a: b = 1 } = expr)`,
                 // `[x, y] = arr`): after the regular child walk, create
                 // ASSIGNMENT flow nodes for every target reference in the
@@ -2920,16 +3763,120 @@ impl Binder {
                         self.bind_assignment_target_flow(&left);
                     }
                 }
+                // Logical operators (`a && b`, `a || b`): the right operand
+                // is only evaluated when the left's truthiness is known —
+                // the RHS's flow is wrapped in a condition node (`b` in
+                // `r.s && r.s.toFixed()` sees `r.s` narrowed to
+                // non-undefined). `??` needs a nullish-specific condition
+                // kind (plain truthiness would over-narrow) — the checker's
+                // logical-assignment RHS frames cover its main use.
+                if let NodeData::BinaryExpression(bin) = &node.data {
+                    let op = bin.operator_token.kind;
+                    // Assignments in EXPRESSION position also produce
+                    // ASSIGNMENT flow nodes (Go bindAssignmentExpressionFlow
+                    // runs wherever the assignment sits — `(s = 'x')` inside
+                    // an `||` RHS records the write; the statement-level
+                    // handler covers only the outermost form).
+                    let parent_is_expr_stmt = node
+                        .parent
+                        .as_ref()
+                        .is_some_and(|p| p.kind == SyntaxKind::ExpressionStatement);
+                    if is_assignment_operator(op)
+                        && matches!(bin.left.kind, SyntaxKind::Identifier)
+                        && !parent_is_expr_stmt
+                    {
+                        let left = Arc::clone(&bin.left);
+                        let right = Arc::clone(&bin.right);
+                        self.bind(&left);
+                        self.bind(&right);
+                        if let Some(current) = self.current_flow.take() {
+                            self.current_flow =
+                                Some(self.create_flow_assignment(&current, node));
+                        }
+                        return;
+                    }
+                    if matches!(op, SyntaxKind::AmpersandAmpersandToken | SyntaxKind::BarBarToken)
+                    {
+                        let left = Arc::clone(&bin.left);
+                        let right = Arc::clone(&bin.right);
+                        self.bind(&left);
+                        if let Some(current) = self.current_flow.take() {
+                            let is_and = op == SyntaxKind::AmpersandAmpersandToken;
+                            // The RHS runs only under the operator's
+                            // "evaluate right" condition (`&&` → left true,
+                            // `||` → left false); the SHORT-CIRCUIT path
+                            // takes the opposite condition (Go
+                            // bindLogicalOperator's keep/else labels).
+                            let rhs_flags = if is_and {
+                                FlowFlags::TRUE_CONDITION
+                            } else {
+                                FlowFlags::FALSE_CONDITION
+                            };
+                            let keep_flags = if is_and {
+                                FlowFlags::FALSE_CONDITION
+                            } else {
+                                FlowFlags::TRUE_CONDITION
+                            };
+                            let keep =
+                                self.create_flow_condition(keep_flags, &current, &left);
+                            let cond = self.create_flow_condition(rhs_flags, &current, &left);
+                            self.current_flow = Some(cond);
+                            self.bind(&right);
+                            // Merge the short-circuit (keep) path with the
+                            // post-RHS path — the walk unions them
+                            // (`s || (s = 'x')` afterwards: string either
+                            // way; a definite-assignment seed survives on
+                            // the keep path).
+                            let after_right = self.current_flow.take();
+                            let mut label = FlowLabel::new(FlowFlags::BRANCH_LABEL);
+                            label.add_antecedent(keep);
+                            if let Some(ar) = after_right {
+                                label.add_antecedent(ar);
+                            }
+                            self.current_flow = Some(
+                                label.finish(self.unreachable_flow.as_ref().unwrap()),
+                            );
+                        } else {
+                            self.bind(&right);
+                        }
+                        return;
+                    }
+                }
             }
             _ => {}
         }
 
         // Recurse into children
         let container_flags = get_container_flags(node.kind);
-        if container_flags != ContainerFlags::NONE {
+        if node.kind == SyntaxKind::PropertyDeclaration
+            && matches!(&node.data, NodeData::PropertyDeclaration(d) if d.initializer.is_some())
+        {
+            // Go `GetContainerFlags`: a PropertyDeclaration WITH an
+            // initializer is a control-flow container — bindContainer gives
+            // it a FRESH flow start, so references in the initializer never
+            // see enclosing assignment narrowing (`const D: AB = 'A';
+            // class C { m = D; }` infers AB, not the narrowed 'A' — GH#62264).
+            // Handled here rather than in bind_container to keep the
+            // container/parent-symbol switches (Go doesn't advance them for
+            // non-IsContainer kinds) untouched.
+            let prev_flow = self.current_flow.take();
+            self.current_flow = Some(Arc::new(FlowNode::new(FlowFlags::START)));
+            self.bind_children(node);
+            self.current_flow = prev_flow;
+        } else if container_flags != ContainerFlags::NONE {
             self.bind_container(node, container_flags);
         } else {
             self.bind_children(node);
+            // Calls in expression positions also produce CALL flow nodes
+            // (Go `bindCallExpressionFlow` runs for every call expression,
+            // not just expression statements) — `(assert(x !== undefined),
+            // x)` narrows x through the left operand's call flow.
+            if node.kind == SyntaxKind::CallExpression {
+                if let Some(current) = self.current_flow.take() {
+                    let call_flow = self.create_flow_call(&current, node);
+                    self.current_flow = Some(call_flow);
+                }
+            }
         }
     }
 
@@ -3065,7 +4012,37 @@ impl Binder {
                 );
             }
             Some(clause) if clause.kind == SyntaxKind::NamespaceExport => {
-                // `export * as ns from "mod"`.
+                // `export * as ns from "mod"`. Module FILES keep exported
+                // declarations in the symbol's MEMBERS table while this
+                // alias lands in EXPORTS — when both carry the same name
+                // (`export type Drink` + `export * as Drink from …`),
+                // Go merges them into ONE exports symbol (the import sees
+                // both meanings). Fold the alias flag into the members
+                // symbol and surface it in exports (single-symbol
+                // two-table pattern) so type-position resolution keeps the
+                // TypeAlias meaning (typeAndNamespaceExportMerge).
+                let name = self.get_declaration_name(clause);
+                let merged_with_members = parent_sym
+                    .members
+                    .get(&name)
+                    .cloned()
+                    .filter(|existing| self.can_merge_symbols(existing.flags, SymbolFlags::Alias))
+                    .map(|existing| {
+                        let existing_mut = Arc::as_ptr(&existing) as *mut Symbol;
+                        unsafe {
+                            (*existing_mut).declarations.push(Arc::clone(clause));
+                            (*existing_mut).flags |= SymbolFlags::Alias;
+                        }
+                        existing
+                    });
+                if let Some(merged) = merged_with_members {
+                    let parent_mut = Arc::as_ptr(&parent_sym) as *mut Symbol;
+                    unsafe {
+                        (*parent_mut).exports.insert(name, merged.clone());
+                    }
+                    self.symbol_map.set_symbol(clause, merged.clone());
+                    return;
+                }
                 self.declare_symbol_into(
                     clause,
                     SymbolFlags::Alias,
@@ -3154,6 +4131,26 @@ impl Binder {
         // Create locals for this container if it has them
         if has_locals(node.kind) {
             self.symbol_map.locals.insert(node.id(), SymbolTable::new());
+            // A NAMED class expression declares its own name into its
+            // fresh locals (Go binder semantics — `static c = C.a` inside
+            // `var v = class C {...}` resolves).
+            if node.kind == SyntaxKind::ClassExpression
+                && let NodeData::ClassExpression(data) = &node.data
+                && let Some(name_node) = data.name.as_ref()
+            {
+                let name = name_node.text().to_string();
+                let sym = self.new_symbol(SymbolFlags::Class, name.clone());
+                let sym_mut = Arc::as_ptr(&sym) as *mut Symbol;
+                unsafe {
+                    (*sym_mut).declarations.push(Arc::clone(node));
+                    (*sym_mut).value_declaration = Some(Arc::clone(node));
+                }
+                self.symbol_map
+                    .locals
+                    .entry(node.id())
+                    .or_insert_with(SymbolTable::new)
+                    .insert(name, Arc::clone(&sym));
+            }
         }
 
         // Set parent_symbol to the container's symbol (if it has one).
@@ -3386,6 +4383,17 @@ fn get_container_flags(kind: SyntaxKind) -> ContainerFlags {
         SyntaxKind::IndexSignature => {
             ContainerFlags::IS_CONTAINER | ContainerFlags::HAS_LOCALS
         }
+        // Go GetContainerFlags groups ModuleDeclaration with
+        // TypeAliasDeclaration/JSTypeAliasDeclaration/MappedType as
+        // IsContainer|HasLocals: a generic alias's type parameters
+        // (`export type G<T> = …`) are declared in the ALIAS's own scope —
+        // without this they leak into the file symbol's members and can
+        // merge with a same-named top-level export
+        // (`export type T = G<…>` reports TS2459 —
+        // declarationEmitQualifiedAliasTypeArgument).
+        SyntaxKind::TypeAliasDeclaration | SyntaxKind::JSTypeAliasDeclaration | SyntaxKind::MappedType => {
+            ContainerFlags::IS_CONTAINER | ContainerFlags::HAS_LOCALS
+        }
         SyntaxKind::Block | SyntaxKind::ModuleDeclaration | SyntaxKind::SourceFile => {
             ContainerFlags::IS_CONTAINER
                 | ContainerFlags::IS_BLOCK_SCOPED_CONTAINER
@@ -3516,6 +4524,9 @@ fn has_locals(kind: SyntaxKind) -> bool {
             | SyntaxKind::MethodSignature
             | SyntaxKind::FunctionType
             | SyntaxKind::ConstructorType
+            | SyntaxKind::TypeAliasDeclaration
+            | SyntaxKind::JSTypeAliasDeclaration
+            | SyntaxKind::MappedType
     )
 }
 
@@ -3524,6 +4535,13 @@ pub fn bind_source_file(file: &Arc<SourceFile>) -> NodeSymbolMap {
     let mut binder = Binder::new();
     binder.bind_source_file(file);
     std::mem::take(&mut binder.symbol_map)
+}
+
+/// Whether a case/default clause carries no statements (it only labels the
+/// next clause's statements — the fall-through group form
+/// `case a: case b:`).
+fn clause_statements_empty(clause: &Arc<Node>) -> bool {
+    matches!(&clause.data, NodeData::CaseOrDefaultClause(d) if d.statements.nodes.is_empty())
 }
 
 /// Whether a syntax kind is an assignment operator token.
@@ -3827,6 +4845,21 @@ mod tests {
         found
     }
 
+    /// Depth-first search for a descendant of the given kind.
+    fn find_descendant(node: &Arc<Node>, kind: SyntaxKind) -> Option<Arc<Node>> {
+        if node.kind == kind {
+            return Some(Arc::clone(node));
+        }
+        let mut found: Option<Arc<Node>> = None;
+        crate::ast::node_data_generated::for_each_child(node, |child| {
+            if found.is_none() {
+                found = find_descendant(child, kind);
+            }
+            found.is_some()
+        });
+        found
+    }
+
     #[test]
     fn bind_export_default_expression_creates_default_export_symbol() {
         // `export default 42` → a Property symbol named "default" in the
@@ -4039,5 +5072,67 @@ mod tests {
             "exported top-level member should have export_symbol set"
         );
         assert!(Arc::ptr_eq(sym.export_symbol.as_ref().unwrap(), sym));
+    }
+
+    #[test]
+    fn bind_generic_alias_type_params_do_not_leak_into_file_members() {
+        // `export type G<T> = …; export type T = G<"a">;` — G's type
+        // parameter T is declared in the ALIAS's own scope (Go:
+        // TypeAliasDeclaration is IsContainer|HasLocals), NOT the file
+        // symbol's members. A leaked T would merge with the same-named
+        // top-level export and lose its export face (TS2459 —
+        // declarationEmitQualifiedAliasTypeArgument).
+        let (file, map) = parse_and_bind(
+            "export type G<T> = { [P in T]: string };\nexport type T = G<\"a\">;\nexport const q = 1;",
+        );
+        let fsym = file_symbol(&file, &map);
+        let t_in_file = fsym.members.get("T").or_else(|| fsym.exports.get("T"));
+        let Some(t_sym) = t_in_file else {
+            panic!("exported alias T should be reachable in the file symbol tables");
+        };
+        // The file-table T must be the exported ALIAS (declaration is a
+        // TypeAliasDeclaration), never the type parameter of G.
+        assert!(
+            t_sym
+                .declarations
+                .iter()
+                .all(|d| d.kind == SyntaxKind::TypeAliasDeclaration),
+            "file-table T merged with a type parameter: flags={:?}",
+            t_sym.flags
+        );
+        assert!(
+            !t_sym.flags.intersects(SymbolFlags::TypeParameter),
+            "exported alias T must not carry TypeParameter flags (got {:?})",
+            t_sym.flags
+        );
+        // The alias symbol's own members carry G's type parameter.
+        let g_stmt = find_statement(&file, SyntaxKind::TypeAliasDeclaration).unwrap();
+        let g_sym = map.symbol_of(&g_stmt).expect("symbol for G");
+        assert!(
+            g_sym.members.get("T").is_some(),
+            "G's type parameter should live in the alias symbol's members"
+        );
+    }
+
+    #[test]
+    fn bind_mapped_type_param_in_node_locals() {
+        // `{ [P in K]: V }` — the mapped type node is a HasLocals
+        // container; P lives in the NODE's locals, never in the file
+        // symbol's tables.
+        let (file, map) = parse_and_bind("type M<K extends string> = { [P in K]: number };");
+        let fsym = file_symbol(&file, &map);
+        assert!(
+            fsym.members.get("P").is_none() && fsym.exports.get("P").is_none(),
+            "mapped-type P must not leak into the file symbol tables"
+        );
+        let mapped = find_descendant(&file.node, SyntaxKind::MappedType).expect("mapped type node");
+        let locals = map
+            .locals
+            .get(&mapped.id())
+            .expect("mapped type node should have locals");
+        assert!(
+            locals.get("P").is_some(),
+            "P should be in the mapped node's locals"
+        );
     }
 }

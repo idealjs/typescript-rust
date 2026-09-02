@@ -1,1 +1,3 @@
 assignSharedArrayBufferToArrayBuffer.ts(1,5): error TS2322: Type 'SharedArrayBuffer' is not assignable to type 'ArrayBuffer'.
+  Types of property '[Symbol.toStringTag]' are incompatible.
+    Type '"SharedArrayBuffer"' is not assignable to type '"ArrayBuffer"'.

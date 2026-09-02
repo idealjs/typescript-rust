@@ -2,6 +2,9 @@ derivedClassOverridesProtectedMembers2.ts(5,15): error TS2564: Property 'a' has 
 derivedClassOverridesProtectedMembers2.ts(9,15): error TS2564: Property 'd' has no initializer and is not definitely assigned in the constructor.
 derivedClassOverridesProtectedMembers2.ts(22,5): error TS2564: Property 'a' has no initializer and is not definitely assigned in the constructor.
 derivedClassOverridesProtectedMembers2.ts(26,5): error TS2416: Property 'd' in type 'Derived' is not assignable to the same property in base type 'Base'.
+  Type '(a: { foo: string; bar: string; }) => void' is not assignable to type '(a: { foo: string; }) => void'.
+    Types of parameters 'a' and 'a' are incompatible.
+      Property 'bar' is missing in type '{ foo: string; }' but required in type '{ foo: string; bar: string; }'.
 derivedClassOverridesProtectedMembers2.ts(26,5): error TS2564: Property 'd' has no initializer and is not definitely assigned in the constructor.
 derivedClassOverridesProtectedMembers2.ts(37,30): error TS2454: Variable 'y' is used before being assigned.
 derivedClassOverridesProtectedMembers2.ts(39,14): error TS2454: Variable 'y' is used before being assigned.

@@ -1,2 +1,3 @@
 decoratorOnClassMethod8.ts(4,6): error TS1241: Unable to resolve signature of method decorator when called as an expression.
+  The runtime will invoke the decorator with 3 arguments, but the decorator expects 1.
 decoratorOnClassMethod8.ts(4,6): error TS1270: Decorator function return type 'C' is not assignable to type 'void | TypedPropertyDescriptor<() => void>'.

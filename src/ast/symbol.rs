@@ -381,6 +381,14 @@ pub struct FlowNode {
     /// expression. `None` for all other flow kinds. Mirrors the
     /// `FlowSwitchClauseData.SwitchStatement` field in Go.
     pub switch_statement: Option<Arc<Node>>,
+    /// For SWITCH_CLAUSE flows: the half-open clause-group range
+    /// `[start, end)` this flow node narrows by (Go
+    /// `FlowSwitchClauseData.ClauseStart/ClauseEnd`). A group is a run of
+    /// statement-less clauses followed by the clause that owns the
+    /// statements; `[0, 0)` marks the implicit bypass branch of a
+    /// default-less switch (no case matched). `None` for all other flow
+    /// kinds.
+    pub clause_range: Option<(usize, usize)>,
     /// For REDUCE_LABEL flows: the branch label whose antecedent set is
     /// reduced to `antecedents` while the walk is inside this reduce label
     /// (Go `FlowReduceLabelData.Target`). `None` for all other flow kinds.
@@ -395,6 +403,7 @@ impl FlowNode {
             antecedent: None,
             antecedents: Vec::new(),
             switch_statement: None,
+            clause_range: None,
             reduce_target: None,
         }
     }

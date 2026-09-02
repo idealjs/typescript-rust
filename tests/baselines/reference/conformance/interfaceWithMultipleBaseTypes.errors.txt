@@ -1,6 +1,17 @@
 interfaceWithMultipleBaseTypes.ts(21,11): error TS2430: Interface 'Derived2' incorrectly extends interface 'Base2'.
+  The types of 'x.b' are incompatible between these types.
+    Type 'number' is not assignable to type 'string'.
 interfaceWithMultipleBaseTypes.ts(52,15): error TS2320: Interface 'Derived3<T>' cannot simultaneously extend types 'Base1<number>' and 'Base2<number>'.
+  Named property 'x' of types 'Base1<number>' and 'Base2<number>' are not identical.
 interfaceWithMultipleBaseTypes.ts(54,15): error TS2430: Interface 'Derived4<T>' incorrectly extends interface 'Base1<number>'.
+  The types of 'x.a' are incompatible between these types.
+    Type 'T' is not assignable to type 'number'.
 interfaceWithMultipleBaseTypes.ts(54,15): error TS2430: Interface 'Derived4<T>' incorrectly extends interface 'Base2<number>'.
+  The types of 'x.b' are incompatible between these types.
+    Type 'T' is not assignable to type 'number'.
 interfaceWithMultipleBaseTypes.ts(60,15): error TS2430: Interface 'Derived5<T>' incorrectly extends interface 'Base1<T>'.
+  Types of property 'x' are incompatible.
+    Type 'T' is not assignable to type '{ a: T; }'.
 interfaceWithMultipleBaseTypes.ts(60,15): error TS2430: Interface 'Derived5<T>' incorrectly extends interface 'Base2<T>'.
+  Types of property 'x' are incompatible.
+    Type 'T' is not assignable to type '{ b: T; }'.

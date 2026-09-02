@@ -5,3 +5,4 @@ parserMissingLambdaOpenBrace1.ts(3,16): error TS2304: Cannot find name 'fromDoWh
 parserMissingLambdaOpenBrace1.ts(4,13): error TS1005: '{' expected.
 parserMissingLambdaOpenBrace1.ts(5,25): error TS2339: Property 'doWhile' does not exist on type 'C'.
 parserMissingLambdaOpenBrace1.ts(5,46): error TS2349: This expression is not callable.
+  Type 'Iterator<T, boolean, any>' has no call signatures.

@@ -1,1 +1,3 @@
 stringLiteralTypesOverloadAssignability05.ts(15,1): error TS2322: Type '(x: "foo") => number' is not assignable to type '{ (x: "foo"): number; (x: string): number; }'.
+  Types of parameters 'x' and 'x' are incompatible.
+    Type 'string' is not assignable to type '"foo"'.

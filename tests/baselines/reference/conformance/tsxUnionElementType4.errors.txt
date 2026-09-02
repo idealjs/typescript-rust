@@ -1,2 +1,3 @@
 file.tsx(34,17): error TS2322: Type 'boolean' is not assignable to type 'number'.
 file.tsx(36,22): error TS2322: Type '{ prop: true; }' is not assignable to type 'IntrinsicAttributes & IntrinsicClassAttributes<RC3> & { children?: ReactNode | undefined; }'.
+  Property 'prop' does not exist on type 'IntrinsicAttributes & IntrinsicClassAttributes<RC3> & { children?: ReactNode | undefined; }'.

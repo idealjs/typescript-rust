@@ -1,5 +1,6 @@
 typeGuardsInExternalModule.ts(7,12): error TS2454: Variable 'var1' is used before being assigned.
 typeGuardsInExternalModule.ts(11,5): error TS2322: Type 'string | number' is not assignable to type 'number'.
+  Type 'string' is not assignable to type 'number'.
 typeGuardsInExternalModule.ts(11,11): error TS2454: Variable 'var1' is used before being assigned.
 typeGuardsInExternalModule.ts(17,12): error TS2454: Variable 'var2' is used before being assigned.
 typeGuardsInExternalModule.ts(22,16): error TS2454: Variable 'var2' is used before being assigned.

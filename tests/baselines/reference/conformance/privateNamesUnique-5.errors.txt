@@ -1,1 +1,2 @@
 privateNamesUnique-5.ts(12,7): error TS2322: Type 'B' is not assignable to type 'A2'.
+  Property '#foo' in type 'B' refers to a different member that cannot be accessed from within type 'A'.

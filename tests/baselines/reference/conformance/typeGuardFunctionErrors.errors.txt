@@ -17,8 +17,11 @@ typeGuardFunctionErrors.ts(31,1): error TS1128: Declaration or statement expecte
 typeGuardFunctionErrors.ts(33,34): error TS7006: Parameter 'y' implicitly has an 'any' type.
 typeGuardFunctionErrors.ts(33,38): error TS1225: Cannot find parameter 'x'.
 typeGuardFunctionErrors.ts(37,51): error TS2677: A type predicate's type must be assignable to its parameter's type.
+  Property 'propA' is missing in type 'B' but required in type 'A'.
 typeGuardFunctionErrors.ts(41,56): error TS2677: A type predicate's type must be assignable to its parameter's type.
+  Type 'number' is not assignable to type 'string'.
 typeGuardFunctionErrors.ts(45,56): error TS2677: A type predicate's type must be assignable to its parameter's type.
+  Type 'T[]' is not assignable to type 'string'.
 typeGuardFunctionErrors.ts(52,22): error TS7006: Parameter 'p1' implicitly has an 'any' type.
 typeGuardFunctionErrors.ts(53,22): error TS7006: Parameter 'p1' implicitly has an 'any' type.
 typeGuardFunctionErrors.ts(55,18): error TS7010: 'hasNoTypeGuard', which lacks return-type annotation, implicitly has an 'any' return type.
@@ -29,15 +32,21 @@ typeGuardFunctionErrors.ts(69,7): error TS2551: Property 'propB' does not exist 
 typeGuardFunctionErrors.ts(73,18): error TS7010: 'acceptingDifferentSignatureTypeGuardFunction', which lacks return-type annotation, implicitly has an 'any' return type.
 typeGuardFunctionErrors.ts(73,68): error TS7006: Parameter 'p1' implicitly has an 'any' type.
 typeGuardFunctionErrors.ts(74,46): error TS2345: Argument of type '(p1: any) => p1 is C' is not assignable to parameter of type '(p1: any) => p1 is B'.
+  Type predicate 'p1 is C' is not assignable to 'p1 is B'.
+    Property 'propB' is missing in type 'C' but required in type 'B'.
 typeGuardFunctionErrors.ts(77,15): error TS7006: Parameter 'p1' implicitly has an 'any' type.
 typeGuardFunctionErrors.ts(77,19): error TS7006: Parameter 'p2' implicitly has an 'any' type.
 typeGuardFunctionErrors.ts(78,1): error TS2322: Type '(p1: any, p2: any) => boolean' is not assignable to type '(p1: any, p2: any) => p1 is A'.
+  Signature '(p1: any, p2: any): boolean' must be a type predicate.
 typeGuardFunctionErrors.ts(83,15): error TS7006: Parameter 'p1' implicitly has an 'any' type.
 typeGuardFunctionErrors.ts(83,19): error TS7006: Parameter 'p2' implicitly has an 'any' type.
 typeGuardFunctionErrors.ts(84,1): error TS2322: Type '(p1: any, p2: any) => p2 is A' is not assignable to type '(p1: any, p2: any) => p1 is A'.
+  Type predicate 'p2 is A' is not assignable to 'p1 is A'.
+    Parameter 'p2' is not in the same position as parameter 'p1'.
 typeGuardFunctionErrors.ts(89,15): error TS7006: Parameter 'p1' implicitly has an 'any' type.
 typeGuardFunctionErrors.ts(89,19): error TS7006: Parameter 'p2' implicitly has an 'any' type.
 typeGuardFunctionErrors.ts(90,1): error TS2322: Type '(p1: any, p2: any, p3: any) => p1 is A' is not assignable to type '(p1: any, p2: any) => p1 is A'.
+  Target signature provides too few arguments. Expected 3 or more, but got 2.
 typeGuardFunctionErrors.ts(90,20): error TS7006: Parameter 'p1' implicitly has an 'any' type.
 typeGuardFunctionErrors.ts(90,24): error TS7006: Parameter 'p2' implicitly has an 'any' type.
 typeGuardFunctionErrors.ts(90,28): error TS7006: Parameter 'p3' implicitly has an 'any' type.
@@ -84,10 +93,18 @@ typeGuardFunctionErrors.ts(136,30): error TS7006: Parameter 'p2' implicitly has 
 typeGuardFunctionErrors.ts(136,34): error TS7006: Parameter 'p3' implicitly has an 'any' type.
 typeGuardFunctionErrors.ts(136,39): error TS1230: A type predicate cannot reference element 'p1' in a binding pattern.
 typeGuardFunctionErrors.ts(152,68): error TS2344: Type '"d" | T' does not satisfy the constraint 'Keys'.
+  Type '"d"' is not assignable to type 'Keys'.
 typeGuardFunctionErrors.ts(159,31): error TS2344: Type 'Bar' does not satisfy the constraint 'Foo'.
+  Types of property ''a'' are incompatible.
+    Type 'number' is not assignable to type 'string'.
 typeGuardFunctionErrors.ts(162,31): error TS2344: Type 'Bar' does not satisfy the constraint 'Foo'.
+  Types of property ''a'' are incompatible.
+    Type 'number' is not assignable to type 'string'.
 typeGuardFunctionErrors.ts(163,35): error TS2344: Type 'number' does not satisfy the constraint 'Foo'.
 typeGuardFunctionErrors.ts(164,51): error TS2344: Type 'Bar' does not satisfy the constraint 'Foo'.
+  Types of property ''a'' are incompatible.
+    Type 'number' is not assignable to type 'string'.
 typeGuardFunctionErrors.ts(165,51): error TS2344: Type 'number' does not satisfy the constraint 'Foo'.
 typeGuardFunctionErrors.ts(166,45): error TS2677: A type predicate's type must be assignable to its parameter's type.
+  Type 'NeedsFoo<number>' is not assignable to type 'number'.
 typeGuardFunctionErrors.ts(166,54): error TS2344: Type 'number' does not satisfy the constraint 'Foo'.

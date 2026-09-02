@@ -1,4 +1,5 @@
 parenthesizedContexualTyping2.ts(12,5): error TS2322: Type 'undefined' is not assignable to type 'T'.
+  'T' could be instantiated with an arbitrary type which could be unrelated to 'undefined'.
 parenthesizedContexualTyping2.ts(15,30): error TS2345: Argument of type 'undefined' is not assignable to parameter of type 'number'.
 parenthesizedContexualTyping2.ts(16,31): error TS2345: Argument of type 'undefined' is not assignable to parameter of type 'number'.
 parenthesizedContexualTyping2.ts(17,32): error TS2345: Argument of type 'undefined' is not assignable to parameter of type 'number'.
@@ -12,14 +13,22 @@ parenthesizedContexualTyping2.ts(22,77): error TS2345: Argument of type 'undefin
 parenthesizedContexualTyping2.ts(23,33): error TS2345: Argument of type 'undefined' is not assignable to parameter of type 'number'.
 parenthesizedContexualTyping2.ts(23,79): error TS2345: Argument of type 'undefined' is not assignable to parameter of type 'number'.
 parenthesizedContexualTyping2.ts(26,14): error TS2345: Argument of type '((x: <T>(p: T) => T) => <T>(p: T) => T) | ((x: <T>(p: T) => T) => undefined)' is not assignable to parameter of type 'FuncType'.
+  Type '(x: <T>(p: T) => T) => undefined' is not assignable to type 'FuncType'.
+    Type 'undefined' is not assignable to type '<T>(p: T) => T'.
 parenthesizedContexualTyping2.ts(26,53): error TS2345: Argument of type 'undefined' is not assignable to parameter of type 'number'.
 parenthesizedContexualTyping2.ts(27,14): error TS2345: Argument of type '((x: <T>(p: T) => T) => <T>(p: T) => T) | ((x: <T>(p: T) => T) => undefined)' is not assignable to parameter of type 'FuncType'.
+  Type '(x: <T>(p: T) => T) => undefined' is not assignable to type 'FuncType'.
+    Type 'undefined' is not assignable to type '<T>(p: T) => T'.
 parenthesizedContexualTyping2.ts(27,54): error TS2345: Argument of type 'undefined' is not assignable to parameter of type 'number'.
 parenthesizedContexualTyping2.ts(28,14): error TS2345: Argument of type '((x: <T>(p: T) => T) => <T>(p: T) => T) | ((x: <T>(p: T) => T) => undefined)' is not assignable to parameter of type 'FuncType'.
+  Type '(x: <T>(p: T) => T) => undefined' is not assignable to type 'FuncType'.
+    Type 'undefined' is not assignable to type '<T>(p: T) => T'.
 parenthesizedContexualTyping2.ts(28,54): error TS2345: Argument of type 'undefined' is not assignable to parameter of type 'number'.
 parenthesizedContexualTyping2.ts(28,100): error TS7006: Parameter 'x' implicitly has an 'any' type.
 parenthesizedContexualTyping2.ts(28,107): error TS2347: Untyped function calls may not accept type arguments.
 parenthesizedContexualTyping2.ts(29,15): error TS2345: Argument of type '((x: <T>(p: T) => T) => <T>(p: T) => T) | ((x: <T>(p: T) => T) => undefined)' is not assignable to parameter of type 'FuncType'.
+  Type '(x: <T>(p: T) => T) => undefined' is not assignable to type 'FuncType'.
+    Type 'undefined' is not assignable to type '<T>(p: T) => T'.
 parenthesizedContexualTyping2.ts(29,56): error TS2345: Argument of type 'undefined' is not assignable to parameter of type 'number'.
 parenthesizedContexualTyping2.ts(29,107): error TS7006: Parameter 'x' implicitly has an 'any' type.
 parenthesizedContexualTyping2.ts(29,114): error TS2347: Untyped function calls may not accept type arguments.

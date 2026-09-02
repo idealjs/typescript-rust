@@ -1,4 +1,6 @@
 contextualTypeTupleEnd.ts(8,1): error TS2345: Argument of type '[]' is not assignable to parameter of type '[...((arg: number) => void)[], (arg: string) => void]'.
+  Source has 0 element(s) but target requires 1.
 contextualTypeTupleEnd.ts(13,7): error TS2322: Type '[]' is not assignable to type 'Funcs'.
+  Source has 0 element(s) but target requires 1.
 contextualTypeTupleEnd.ts(43,12): error TS2339: Property 'foo' does not exist on type 'number'.
 contextualTypeTupleEnd.ts(44,12): error TS2339: Property 'bar' does not exist on type 'number'.

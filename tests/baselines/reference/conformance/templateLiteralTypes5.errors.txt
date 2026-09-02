@@ -1,3 +1,14 @@
 templateLiteralTypes5.ts(10,7): error TS2322: Type '<T0 extends "a" | "b">(x: `${T0}`) => TypeMap[T0]' is not assignable to type 'F2'.
+  Type 'TypeMap[T2]' is not assignable to type 'TypeMap[`${T2}`]'.
+    Type 'T2' is not assignable to type '`${T2}`'.
+      Type '"a" | "b"' is not assignable to type '`${T2}`'.
+        Type '"a"' is not assignable to type '`${T2}`'.
 templateLiteralTypes5.ts(13,11): error TS2322: Type 'T3' is not assignable to type '`${T3}`'.
+  Type '"a" | "b"' is not assignable to type '`${T3}`'.
+    Type '"a"' is not assignable to type '`${T3}`'.
 templateLiteralTypes5.ts(14,11): error TS2322: Type '`${T3}`' is not assignable to type 'T3'.
+  '`${T3}`' is assignable to the constraint of type 'T3', but 'T3' could be instantiated with a different subtype of constraint '"a" | "b"'.
+    Type '"a" | "b"' is not assignable to type 'T3'.
+      '"a" | "b"' is assignable to the constraint of type 'T3', but 'T3' could be instantiated with a different subtype of constraint '"a" | "b"'.
+        Type '"a"' is not assignable to type 'T3'.
+          '"a"' is assignable to the constraint of type 'T3', but 'T3' could be instantiated with a different subtype of constraint '"a" | "b"'.

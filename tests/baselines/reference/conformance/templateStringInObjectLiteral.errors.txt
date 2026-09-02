@@ -1,4 +1,5 @@
 templateStringInObjectLiteral.ts(1,9): error TS2349: This expression is not callable.
+  Type '{ a: string; }' has no call signatures.
 templateStringInObjectLiteral.ts(3,5): error TS1136: Property assignment expected.
 templateStringInObjectLiteral.ts(3,8): error TS1005: ',' expected.
 templateStringInObjectLiteral.ts(3,10): error TS1134: Variable declaration expected.

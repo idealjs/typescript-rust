@@ -2,7 +2,7 @@
   "compilerOptions": {
     "outDir": "dist",
     "strict": true,
-    "jsx": "react-jsx",
+    "jsx": "preserve",
     "noEmitOnError": true
   },
   "include": ["src"]

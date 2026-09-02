@@ -332,6 +332,11 @@ pub struct SourceFile {
     /// Ambient module names from `declare module "name"` in non-module files.
     /// Mirrors Go's `SourceFile.AmbientModuleNames`.
     pub ambient_module_names: Vec<String>,
+    /// Ranges of parser diagnostics (error recovery points). Identifier
+    /// references inside them skip name-resolution diagnostics — the
+    /// checker never sees a clean reference there (official: parse
+    /// recovery drops the statement from name checking).
+    pub parse_error_spans: Vec<crate::core::text::TextRange>,
     /// The node that marks this file as an external module (first
     /// import/export statement). `None` for scripts. Mirrors Go's
     /// `SourceFile.ExternalModuleIndicator`.

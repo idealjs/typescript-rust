@@ -1,2 +1,6 @@
 b.ts(7,27): error TS2322: Type '{ type: "not-json"; }' is not assignable to type 'ImportAttributes'.
+  Types of property 'type' are incompatible.
+    Type '"not-json"' is not assignable to type '"json"'.
 b.ts(11,25): error TS2322: Type '{ with: { type: "not-json"; }; }' is not assignable to type 'ImportCallOptions'.
+  The types of 'with.type' are incompatible between these types.
+    Type '"not-json"' is not assignable to type '"json"'.

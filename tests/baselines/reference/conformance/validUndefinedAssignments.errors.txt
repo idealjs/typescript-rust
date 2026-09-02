@@ -6,3 +6,4 @@ validUndefinedAssignments.ts(13,1): error TS2322: Type 'undefined' is not assign
 validUndefinedAssignments.ts(17,1): error TS2322: Type 'undefined' is not assignable to type 'I'.
 validUndefinedAssignments.ts(19,5): error TS2322: Type 'undefined' is not assignable to type '{ f(): void; }'.
 validUndefinedAssignments.ts(22,5): error TS2322: Type 'undefined' is not assignable to type 'T'.
+  'T' could be instantiated with an arbitrary type which could be unrelated to 'undefined'.

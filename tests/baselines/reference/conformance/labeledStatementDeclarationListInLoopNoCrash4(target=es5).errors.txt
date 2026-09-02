@@ -1,3 +1,4 @@
+error TS5107: Option 'target=ES5' is deprecated and will stop functioning in TypeScript 7.0. Specify compilerOption '"ignoreDeprecations": "6.0"' to silence this error.
 labeledStatementDeclarationListInLoopNoCrash4.ts(7,12): error TS2339: Property 'classFormat' does not exist on type 'ParseThemeData'.
 labeledStatementDeclarationListInLoopNoCrash4.ts(13,12): error TS1005: ',' expected.
 labeledStatementDeclarationListInLoopNoCrash4.ts(13,12): error TS2304: Cannot find name 'font'.
@@ -12,3 +13,6 @@ labeledStatementDeclarationListInLoopNoCrash4.ts(14,12): error TS1005: ';' expec
 labeledStatementDeclarationListInLoopNoCrash4.ts(14,27): error TS1005: ',' expected.
 labeledStatementDeclarationListInLoopNoCrash4.ts(20,1): error TS1005: '}' expected.
 labeledStatementDeclarationListInLoopNoCrash4.ts(20,1): error TS1160: Unterminated template literal.
+
+
+!!! error TS5107: Option 'target=ES5' is deprecated and will stop functioning in TypeScript 7.0. Specify compilerOption '"ignoreDeprecations": "6.0"' to silence this error.

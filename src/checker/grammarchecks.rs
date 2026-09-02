@@ -307,6 +307,21 @@ impl Checker {
                                 &[text.to_string(), "abstract".to_string()],
                             );
                         }
+                    } else if node.name().is_some_and(|n| n.kind == SyntaxKind::PrivateIdentifier)
+                        && matches!(
+                            node.kind,
+                            SyntaxKind::PropertyDeclaration
+                                | SyntaxKind::MethodDeclaration
+                                | SyntaxKind::GetAccessor
+                                | SyntaxKind::SetAccessor
+                        )
+                    {
+                        // Go `IsPrivateIdentifierClassElementDeclaration` —
+                        // `public #x` / `private #x`: TS18010 at the modifier.
+                        return self.grammar_error_on_node(
+                            modifier,
+                            &AN_ACCESSIBILITY_MODIFIER_CANNOT_BE_USED_WITH_A_PRIVATE_IDENTIFIER,
+                        );
                     }
                     flags |= modifier_to_flag(modifier.kind);
                 }

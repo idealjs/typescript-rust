@@ -7,5 +7,10 @@ argumentExpressionContextualTyping.ts(3,19): error TS7031: Binding element 'a' i
 argumentExpressionContextualTyping.ts(3,35): error TS7031: Binding element 'c' implicitly has an 'any' type.
 argumentExpressionContextualTyping.ts(3,38): error TS7031: Binding element 'd' implicitly has an 'any' type.
 argumentExpressionContextualTyping.ts(16,5): error TS2345: Argument of type '(string | number | boolean)[]' is not assignable to parameter of type '[string, number, boolean]'.
+  Target requires 3 element(s) but source may have fewer.
 argumentExpressionContextualTyping.ts(17,5): error TS2345: Argument of type '[string, number, true, ...(string | number | boolean)[]]' is not assignable to parameter of type '[string, number, boolean]'.
+  Target allows only 3 element(s) but source may have more.
 argumentExpressionContextualTyping.ts(18,5): error TS2345: Argument of type '{ x: (string | number)[]; y: { c: boolean; d: string; e: number; }; }' is not assignable to parameter of type '{ x: [any, any]; y: { c: any; d: any; e: any; }; }'.
+  Types of property 'x' are incompatible.
+    Type '(string | number)[]' is not assignable to type '[any, any]'.
+      Target requires 2 element(s) but source may have fewer.

@@ -1,3 +1,6 @@
 apparentTypeSupertype.ts(5,5): error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
 apparentTypeSupertype.ts(10,5): error TS2416: Property 'x' in type 'Derived<U>' is not assignable to the same property in base type 'Base'.
+  Type 'U' is not assignable to type 'string'.
+    Type 'String' is not assignable to type 'string'.
+      'string' is a primitive, but 'String' is a wrapper object. Prefer using 'string' when possible.
 apparentTypeSupertype.ts(10,5): error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.

@@ -1,1 +1,2 @@
 /a.js(2,7): error TS2420: Class 'B' incorrectly implements interface 'Sig'.
+  Index signature for type 'string' is missing in type 'B'.

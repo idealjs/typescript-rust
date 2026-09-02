@@ -1,1 +1,2 @@
 /a.js(5,21): error TS1360: Type '{}' does not satisfy the expected type 'Foo'.
+  Property 'a' is missing in type '{}' but required in type 'Foo'.

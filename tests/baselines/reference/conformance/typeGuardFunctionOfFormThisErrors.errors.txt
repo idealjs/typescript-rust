@@ -1,6 +1,14 @@
 typeGuardFunctionOfFormThisErrors.ts(23,1): error TS2322: Type '() => this is LeadGuard' is not assignable to type '() => this is FollowerGuard'.
+  Type predicate 'this is LeadGuard' is not assignable to 'this is FollowerGuard'.
+    Property 'follow' is missing in type 'LeadGuard' but required in type 'FollowerGuard'.
 typeGuardFunctionOfFormThisErrors.ts(24,1): error TS2322: Type '() => this is FollowerGuard' is not assignable to type '() => this is LeadGuard'.
+  Type predicate 'this is FollowerGuard' is not assignable to 'this is LeadGuard'.
+    Property 'lead' is missing in type 'FollowerGuard' but required in type 'LeadGuard'.
 typeGuardFunctionOfFormThisErrors.ts(26,1): error TS2322: Type '() => this is LeadGuard' is not assignable to type '() => this is FollowerGuard'.
+  Type predicate 'this is LeadGuard' is not assignable to 'this is FollowerGuard'.
+    Property 'follow' is missing in type 'LeadGuard' but required in type 'FollowerGuard'.
 typeGuardFunctionOfFormThisErrors.ts(27,1): error TS2322: Type '() => this is FollowerGuard' is not assignable to type '() => this is LeadGuard'.
+  Type predicate 'this is FollowerGuard' is not assignable to 'this is LeadGuard'.
+    Property 'lead' is missing in type 'FollowerGuard' but required in type 'LeadGuard'.
 typeGuardFunctionOfFormThisErrors.ts(55,7): error TS2339: Property 'follow' does not exist on type 'RoyalGuard'.
 typeGuardFunctionOfFormThisErrors.ts(58,7): error TS2339: Property 'lead' does not exist on type 'RoyalGuard'.

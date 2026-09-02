@@ -1,20 +1,35 @@
 typeGuardsInClassMethods.ts(10,9): error TS2322: Type 'number | false' is not assignable to type 'number'.
+  Type 'boolean' is not assignable to type 'number'.
 typeGuardsInClassMethods.ts(14,9): error TS2322: Type 'number | false' is not assignable to type 'number'.
+  Type 'boolean' is not assignable to type 'number'.
 typeGuardsInClassMethods.ts(14,22): error TS2454: Variable 'var2' is used before being assigned.
 typeGuardsInClassMethods.ts(17,9): error TS2322: Type 'number | false' is not assignable to type 'number'.
+  Type 'boolean' is not assignable to type 'number'.
 typeGuardsInClassMethods.ts(22,9): error TS2322: Type 'number | false' is not assignable to type 'number'.
+  Type 'boolean' is not assignable to type 'number'.
 typeGuardsInClassMethods.ts(26,9): error TS2322: Type 'number | false' is not assignable to type 'number'.
+  Type 'boolean' is not assignable to type 'number'.
 typeGuardsInClassMethods.ts(26,22): error TS2454: Variable 'var2' is used before being assigned.
 typeGuardsInClassMethods.ts(29,9): error TS2322: Type 'number | false' is not assignable to type 'number'.
+  Type 'boolean' is not assignable to type 'number'.
 typeGuardsInClassMethods.ts(34,9): error TS2322: Type 'number | false' is not assignable to type 'number'.
+  Type 'boolean' is not assignable to type 'number'.
 typeGuardsInClassMethods.ts(38,9): error TS2322: Type 'number | false' is not assignable to type 'number'.
+  Type 'boolean' is not assignable to type 'number'.
 typeGuardsInClassMethods.ts(38,22): error TS2454: Variable 'var2' is used before being assigned.
 typeGuardsInClassMethods.ts(41,9): error TS2322: Type 'number | false' is not assignable to type 'number'.
+  Type 'boolean' is not assignable to type 'number'.
 typeGuardsInClassMethods.ts(46,9): error TS2322: Type 'number | false' is not assignable to type 'number'.
+  Type 'boolean' is not assignable to type 'number'.
 typeGuardsInClassMethods.ts(50,9): error TS2322: Type 'number | false' is not assignable to type 'number'.
+  Type 'boolean' is not assignable to type 'number'.
 typeGuardsInClassMethods.ts(50,22): error TS2454: Variable 'var2' is used before being assigned.
 typeGuardsInClassMethods.ts(53,9): error TS2322: Type 'number | false' is not assignable to type 'number'.
+  Type 'boolean' is not assignable to type 'number'.
 typeGuardsInClassMethods.ts(58,9): error TS2322: Type 'number | false' is not assignable to type 'number'.
+  Type 'boolean' is not assignable to type 'number'.
 typeGuardsInClassMethods.ts(62,9): error TS2322: Type 'number | false' is not assignable to type 'number'.
+  Type 'boolean' is not assignable to type 'number'.
 typeGuardsInClassMethods.ts(62,22): error TS2454: Variable 'var2' is used before being assigned.
 typeGuardsInClassMethods.ts(65,9): error TS2322: Type 'number | false' is not assignable to type 'number'.
+  Type 'boolean' is not assignable to type 'number'.

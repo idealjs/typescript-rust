@@ -3,6 +3,13 @@ unionAndIntersectionInference1.ts(13,44): error TS2352: Conversion of type 'unde
 unionAndIntersectionInference1.ts(20,5): error TS2322: Type 'undefined' is not assignable to type 'boolean'.
 unionAndIntersectionInference1.ts(24,5): error TS2322: Type 'undefined' is not assignable to type 'boolean'.
 unionAndIntersectionInference1.ts(48,4): error TS2322: Type 'null' is not assignable to type 'U'.
+  'U' could be instantiated with an arbitrary type which could be unrelated to 'null'.
 unionAndIntersectionInference1.ts(52,5): error TS2454: Variable 'foo' is used before being assigned.
 unionAndIntersectionInference1.ts(95,52): error TS2769: No overload matches this call.
+  Overload 1 of 4, '(target: {}, source: U): {} & U', gave the following error.
+    Argument of type 'T' is not assignable to parameter of type '{}'.
+  Overload 2 of 4, '(target: object, ...sources: any[]): any', gave the following error.
+    Argument of type 'T' is not assignable to parameter of type 'object'.
 unionAndIntersectionInference1.ts(96,7): error TS2322: Type '{ func: <T>() => void; }' is not assignable to type '(() => void) & { func: any; }'.
+  Type '{ func: <T>() => void; }' is not assignable to type '() => void'.
+    Type '{ func: <T>() => void; }' provides no match for the signature '(): void'.

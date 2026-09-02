@@ -1,2 +1,4 @@
 file.tsx(11,5): error TS2416: Property 'props' in type 'B<U>' is not assignable to the same property in base type 'Component<U, {}>'.
+  Type 'U' is not assignable to type 'U & { children?: ReactNode | undefined; }'.
+    Type 'U' is not assignable to type '{ children?: ReactNode | undefined; }'.
 file.tsx(11,5): error TS2564: Property 'props' has no initializer and is not definitely assigned in the constructor.

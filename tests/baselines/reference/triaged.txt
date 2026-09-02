@@ -1,3 +1,16 @@
+## 2026-09-02 Page-123 附带: 多基 heritage 链中可选属性的类型视图（interfaceWithMultipleBaseTypes2：`extends Base, Base2` 下 'x.a' 链嵌套头官方 `Type 'number' is not assignable to type 'string'.`，我们 `string | undefined`——Go 链内用 getTypeOfSymbol 的声明视图（可选性不加 undefined），我们在成员解析处急切并入 undefined；单行显示差） ##
+conformance/interfaceWithMultipleBaseTypes2.errors.txt
+
+## 2026-09-02 Page-123: rest 参数嵌套头的数组层级与泛型元素显示（assignmentCompatWithGenericCallSignatures2：`<T>(x: T, ...y: T[][])` vs `<S>(x: S, ...y: S[])` 官方嵌套头 `Type 'T[]' is not assignable to type 'T'.`+TP 注记，我们两侧各多一层数组（T[][] vs T[]）——Go compareSignaturesRelated 的 getRestTypeAtPosition 元素级比较语义待移植；其余链形态（marker/参数名行/TP 注记）已对齐） ##
+conformance/assignmentCompatWithGenericCallSignatures2.errors.txt
+
+## 2026-09-02 Page-105 附带（compiler#201-300 背窗复跑暴露，Page 3 后首跑）: arrayDestructuringInSwitch2 — default 分支判别窄化后 `const [n] = a` 的 TS2488 欠报（解构绑定符号声明类型 `[] | [1]` → never 链未解析，Page 3 既知缺口）；另高并发全量跑下该用例偶发 TS2366 假阳形态（负载相关非确定性，单跑/窗口跑为零输出，待查） ##
+compiler/arrayDestructuringInSwitch2.errors.txt
+
+## 2026-08-30 compiler#4001-4100（+Page-121 附带）: homomorphic 映射作用于数组/元组的实例化子系统（Go instantiateMappedArrayType/instantiateMappedTupleType + getApparentTypeOfMappedType 未移植——{[K in keyof T as K]: T[K]} 作用于 number[] 应具数组成员面，我们停在延迟映射无属性；Page 121 的 partiallyNamedTuples 同根因：参数 `[...{[K in keyof T]: {type: T[K]}}]` 的映射元组实例化缺失→映射被当数组回退→TS2345 假阳） ##
+compiler/mappedTypeWithNameClauseAppliedToArrayType.errors.txt
+conformance/partiallyNamedTuples.errors.txt
+
 ## constructor (definite-super-call analysis not ported) ##
 compiler/classExtendsNull.errors.txt
 compiler/classExtendsNull2.errors.txt
@@ -10,7 +23,6 @@ compiler/classExpressionTest2.errors.txt
 compiler/classExpressions.errors.txt
 
 ## TS2628 assign-to-enum / TS2540 readonly-property assignment checks ##
-compiler/assignToEnum.errors.txt
 
 ## (strictPropertyInitialization TS2564, strictNullChecks TS2322/TS2741) ##
 compiler/chainedAssignment3.errors.txt
@@ -23,9 +35,7 @@ compiler/baseConstraintOfDecorator.errors.txt
 compiler/baseTypeWrappingInstantiationChain.errors.txt
 
 ## implements-primitive, overload sets with literal widening ##
-compiler/abstractPropertyInConstructor.errors.txt
 compiler/assigningFromObjectToAnythingElse.errors.txt
-compiler/assignmentCompatability45.errors.txt
 compiler/classExpressionPropertyModifiers.errors.txt
 compiler/classImplementsPrimitive.errors.txt
 compiler/classUpdateTests.errors.txt
@@ -35,29 +45,26 @@ compiler/cloduleTest2.errors.txt
 compiler/abstractClassUnionInstantiation.errors.txt
 
 ## (parseErrorForMissingSemicolonAfter recovery path partially ported) ##
-compiler/TransportStream.errors.txt
 
 ## TS2300 'Iterator' duplicate under @lib esnext (lib dedup gap) ##
 compiler/acceptSymbolAsWeakType.errors.txt
 
 ## analysis) ##
-compiler/accessorInferredReturnTypeErrorInReturnStatement.errors.txt
 
 ## for unassigned `var a: Bar; a()` also missing) ##
-compiler/addMoreOverloadsToBaseSignature.errors.txt
 
 ## for `import x = a.b.c`) not ported ##
-compiler/aliasAssignments.errors.txt
 
-## not ported ##
+## 2026-09-02 Page-5: 闭包-循环捕获的 TS2454 流假阳（blockScopedBindingsReassignedInLoop3：`for (let x = 1, ...) { let a = () => x++ + y++; ... }` 初始化过的循环头 let 在嵌套 break/continue 标签流中被判「未定赋值」——2454 流引擎对闭包内捕获写（x++）与标签循环汇合的交互处理；官方零错。与 mixed-2454/missing-2454 族同属流分析 U7 面） ##
+compiler/blockScopedBindingsReassignedInLoop3.errors.txt
+
+## 2026-09-02 Page-0: 实例化表达式类型的显示保真（语义已修：typeof Cls<T>/typeof value<T> 结构实例化 + 交集签名比较使 TS2352/TS2322 于正确位置触发；残余=显示——别名保留显示 Wat<number>（我们现在打印展开的交集结构）、实例带参显示 ErrImpl<number>/Class<number>（我们打印裸符号名或匿名结构 {x:number}）、构造签名冒号形式 new ():（我们 new () =>）、TS2352 的 3-4 行 comparability elaboration 链未收集——需要 deferred-instantiation 引用形实例（target+type_arguments+mapper）+ nodebuilder 别名链显示子系统） ##
 compiler/aliasInstantiationExpressionGenericIntersectionNoCrash1.errors.txt
 compiler/aliasInstantiationExpressionGenericIntersectionNoCrash2.errors.txt
 
 ## `export default interface` / `export { x as default }` chains) ##
-compiler/allowImportClausesToMergeWithTypes.errors.txt
 
 ## (we emit TS2741 with { x: any } instead) ##
-compiler/aliasUsageInOrExpression.errors.txt
 
 ## (Property 'default' does not exist on typeof import) ##
 compiler/allowSyntheticDefaultImports10.errors.txt
@@ -70,28 +77,19 @@ compiler/alwaysStrictModule2.errors.txt
 compiler/constDeclarations-useBeforeDefinition2.errors.txt
 
 ## identifier — we emit only the TS1437 half) ##
-compiler/anonymousModules.errors.txt
 
 ## reports TS1109/TS2304/TS1005 recovery chain — parser speculation work) ##
 compiler/ambiguousGenericAssertion1.errors.txt
 
 ##      diagnostic suppression ordering
-compiler/arrayAssignmentTest1.errors.txt
-compiler/arrayAssignmentTest2.errors.txt
-compiler/arrayAssignmentTest4.errors.txt
-compiler/arrayAssignmentTest5.errors.txt
-compiler/arrayBestCommonTypes.errors.txt
 compiler/arrayCast.errors.txt
-compiler/arrayConcatMap.errors.txt
 compiler/arrayDestructuringInSwitch1.errors.txt
-compiler/arrayDestructuringInSwitch2.errors.txt
 compiler/arrayEvery.errors.txt
 compiler/arrayFakeFlatNoCrashInferenceDeclarations.errors.txt
 compiler/arrayFind.errors.txt
 compiler/arrayFlatMap.errors.txt
 compiler/arrayFrom.errors.txt
 compiler/arrayFromAsync.errors.txt
-compiler/arrayIndexWithArrayFails.errors.txt
 compiler/arrayIterationLibES5TargetDifferent.errors.txt
 compiler/arrayLiteralAndArrayConstructorEquivalence1.errors.txt
 compiler/arrayOfSubtypeIsAssignableToReadonlyArray.errors.txt
@@ -107,7 +105,6 @@ compiler/arrowFunctionsMissingTokens.errors.txt
 ## JS-file arguments references; spread-of-iterables under JSX ##
 compiler/argumentsReferenceInFunction1_Js.errors.txt
 compiler/argumentsSpreadRestIterables.errors.txt
-compiler/argumentsUsedInClassFieldInitializerOrStaticInitializationBlock.errors.txt
 
 ## (asserts predicates + wildcard import combination) ##
 compiler/assertionFunctionWildcardImport2.errors.txt
@@ -122,7 +119,6 @@ compiler/arrayConstructors1.errors.txt
 ## compatibility, elaborated error chains ##
 compiler/assignToFn.errors.txt
 compiler/assignToInvalidLHS.errors.txt
-compiler/assignmentCompat1.errors.txt
 compiler/assignmentCompatBug2.errors.txt
 compiler/assignmentCompatBug5.errors.txt
 compiler/assignmentCompatFunctionsWithOptionalArgs.errors.txt
@@ -161,25 +157,19 @@ compiler/assignmentCompatability40.errors.txt
 compiler/assignmentCompatability41.errors.txt
 compiler/assignmentCompatability42.errors.txt
 compiler/assignmentCompatability43.errors.txt
-compiler/assignmentCompatability44.errors.txt
 compiler/assignmentCompatability46.errors.txt
 compiler/assignmentCompatability8.errors.txt
 compiler/assignmentCompatability_checking-apply-member-off-of-function-interface.errors.txt
 compiler/assignmentCompatability_checking-call-member-off-of-function-interface.errors.txt
-compiler/assignmentIndexedToPrimitives.errors.txt
-compiler/assignmentRestElementWithErrorSourceType.errors.txt
 compiler/assignmentStricterConstraints.errors.txt
 compiler/assignmentToAnyArrayRestParameters.errors.txt
-compiler/assignmentToFunction.errors.txt
 compiler/assignmentToInstantiationExpression.errors.txt
 compiler/assignmentToObject.errors.txt
 compiler/assignmentToObjectAndFunction.errors.txt
-compiler/assignmentToParenthesizedExpression1.errors.txt
 compiler/assignmentToReferenceTypes.errors.txt
 
 ## contextual types, async return-type inference ##
 compiler/asyncFunctionContextuallyTypedReturns.errors.txt
-compiler/asyncFunctionReturnExpressionErrorSpans.errors.txt
 compiler/asyncFunctionReturnType.errors.txt
 compiler/asyncImportNestedYield.errors.txt
 compiler/asyncIteratorExtraParameters.errors.txt
@@ -195,17 +185,8 @@ compiler/augmentExportEquals4.errors.txt
 compiler/augmentExportEquals5.errors.txt
 compiler/augmentExportEquals6.errors.txt
 compiler/augmentExportEquals7.errors.txt
-compiler/augmentedClassWithPrototypePropertyOnModule.errors.txt
 compiler/augmentedTypesClass.errors.txt
-compiler/augmentedTypesClass2.errors.txt
-compiler/augmentedTypesEnum.errors.txt
-compiler/augmentedTypesEnum2.errors.txt
-compiler/augmentedTypesEnum3.errors.txt
 compiler/augmentedTypesFunction.errors.txt
-compiler/augmentedTypesInterface.errors.txt
-compiler/augmentedTypesModules.errors.txt
-compiler/augmentedTypesModules2.errors.txt
-compiler/augmentedTypesModules3.errors.txt
 compiler/augmentedTypesVar.errors.txt
 
 ## and await-specific operand typing ##
@@ -1849,6 +1830,7 @@ compiler/moduleAugmentationDoesInterfaceMergeOfReexport.errors.txt
 compiler/moduleAugmentationDoesNamespaceEnumMergeOfReexport.errors.txt
 compiler/moduleAugmentationDoesNamespaceMergeOfReexport.errors.txt
 compiler/moduleAugmentationDuringSyntheticDefaultCheck.errors.txt
+compiler/moduleAugmentationOfAlias.errors.txt
 compiler/moduleAugmentationEnumClassMergeOfReexportIsError.errors.txt
 compiler/moduleAugmentationExtendAmbientModule1.errors.txt
 compiler/moduleAugmentationExtendAmbientModule2.errors.txt
@@ -2004,8 +1986,6 @@ compiler/promisesWithConstraints.errors.txt
 compiler/propagationOfPromiseInitialization.errors.txt
 
 ## narrowing, evolving-array containment ##
-compiler/narrowByClauseExpressionInSwitchTrue1.errors.txt
-compiler/narrowByClauseExpressionInSwitchTrue3.errors.txt
 compiler/narrowByClauseExpressionInSwitchTrue6.errors.txt
 compiler/narrowByClauseExpressionInSwitchTrue7.errors.txt
 compiler/narrowByEquality.errors.txt
@@ -3037,14 +3017,11 @@ compiler/wideningWithTopLevelTypeParameter.errors.txt
 ## 2026-08-19 三套件首轮(conformance/transpile): conformance 套件分诊总段 ##
 ### text-diff: 码全同、文本/顺序不同：elaborated error chain 与类型显示（与 compiler 套件文本差异族同根） (189 例) ###
 conformance/ExportClassWithInaccessibleTypeInTypeParameterConstraint.errors.txt
-conformance/FunctionDeclaration8_es6.errors.txt
-conformance/InvalidNonInstantiatedModule.errors.txt
 conformance/additionOperatorWithInvalidOperands.errors.txt
 conformance/additionOperatorWithTypeParameter.errors.txt
 conformance/apparentTypeSupertype.errors.txt
 conformance/arithmeticOperatorWithInvalidOperands.errors.txt
 conformance/arrayTypeOfFunctionTypes2.errors.txt
-conformance/asOperatorAmbiguity.errors.txt
 conformance/assignEveryTypeToAny.errors.txt
 conformance/assignFromBooleanInterface2.errors.txt
 conformance/assignmentCompatWithCallSignaturesWithOptionalParameters.errors.txt
@@ -3080,7 +3057,6 @@ conformance/constructSignatureWithAccessibilityModifiersOnParameters.errors.txt
 conformance/contextualSignatureInstantiation.errors.txt
 conformance/contextualTypeWithUnionTypeCallSignatures.errors.txt
 conformance/declaredClassMergedwithSelf.errors.txt
-conformance/deleteChain.errors.txt
 conformance/deleteOperatorWithBooleanType.errors.txt
 conformance/deleteOperatorWithNumberType.errors.txt
 conformance/deleteOperatorWithStringType.errors.txt
@@ -3159,11 +3135,9 @@ conformance/parserTypeQuery3.errors.txt
 conformance/parserTypeQuery4.errors.txt
 conformance/parserVariableDeclaration8.errors.txt
 conformance/partiallyAnnotatedFunctionInferenceError.errors.txt
-conformance/privateNameMethod.errors.txt
 conformance/privateNamesUnique-4.errors.txt
 conformance/propertyAccessNumericLiterals.errors.txt
 conformance/propertyAccessOnTypeParameterWithConstraints4.errors.txt
-conformance/propertyAndFunctionWithSameName.errors.txt
 conformance/resolutionModeTripleSlash1.errors.txt
 conformance/resolutionModeTripleSlash3.errors.txt
 conformance/scannerNumericLiteral8(target=es2015).errors.txt
@@ -3188,7 +3162,6 @@ conformance/subtypingWithGenericConstructSignaturesWithOptionalParameters.errors
 conformance/subtypingWithObjectMembers.errors.txt
 conformance/subtypingWithObjectMembers2.errors.txt
 conformance/subtypingWithObjectMembers3.errors.txt
-conformance/symbolProperty21.errors.txt
 conformance/symbolType9.errors.txt
 conformance/templateLiteralTypes2.errors.txt
 conformance/templateLiteralTypes4.errors.txt
@@ -3204,8 +3177,6 @@ conformance/templateStringUnterminated4_ES6.errors.txt
 conformance/templateStringUnterminated5.errors.txt
 conformance/templateStringUnterminated5_ES6.errors.txt
 conformance/ts-ignore.errors.txt
-conformance/twoInterfacesDifferentRootModule.errors.txt
-conformance/twoInterfacesDifferentRootModule2.errors.txt
 conformance/typeArgumentInferenceErrors.errors.txt
 conformance/typeGuardOfFormInstanceOf.errors.txt
 conformance/typeGuardRedundancy.errors.txt
@@ -3232,10 +3203,7 @@ conformance/FunctionDeclaration6_es6.errors.txt
 conformance/FunctionDeclaration7_es6.errors.txt
 conformance/MemberFunctionDeclaration4_es6.errors.txt
 conformance/MemberFunctionDeclaration5_es6.errors.txt
-conformance/VariableDeclaration11_es6.errors.txt
-conformance/VariableDeclaration6_es6.errors.txt
 conformance/ambientDeclarationsPatterns_tooManyAsterisks.errors.txt
-conformance/anonymousClassAccessorsDeclarationEmit1.errors.txt
 conformance/awaitUsingDeclarations.1(target=es2015).errors.txt
 conformance/awaitUsingDeclarations.10.errors.txt
 conformance/awaitUsingDeclarations.11.errors.txt
@@ -3310,16 +3278,12 @@ conformance/esDecorators-classDeclaration-missingEmitHelpers-staticPrivateField.
 conformance/esDecorators-classDeclaration-missingEmitHelpers-staticPrivateGetter.errors.txt
 conformance/esDecorators-classDeclaration-missingEmitHelpers-staticPrivateMethod.errors.txt
 conformance/esDecorators-classDeclaration-missingEmitHelpers-staticPrivateSetter.errors.txt
-conformance/esDecorators-classDeclaration-sourceMap(target=es2015).errors.txt
-conformance/esDecorators-classDeclaration-sourceMap(target=es2022).errors.txt
-conformance/esDecorators-classDeclaration-sourceMap(target=esnext).errors.txt
 conformance/exportDeclaration(isolatedmodules=false).errors.txt
 conformance/exportDeclaration(isolatedmodules=true).errors.txt
 conformance/exportDeclaration_missingBraces.errors.txt
 conformance/exportDeclaration_moduleSpecifier.errors.txt
 conformance/exportNonLocalDeclarations.errors.txt
 conformance/for-of-excess-declarations.errors.txt
-conformance/importDeferDeclaration.errors.txt
 conformance/importEqualsDeclaration.errors.txt
 conformance/inlineJsxFactoryDeclarationsLocalTypes.errors.txt
 conformance/labeledStatementDeclarationListInLoopNoCrash1(target=es2015).errors.txt
@@ -3386,16 +3350,12 @@ conformance/parserVariableDeclaration4.d.errors.txt
 conformance/parserVariableDeclaration4.errors.txt
 conformance/parserVariableDeclaration5.errors.txt
 conformance/privateNameBadDeclaration(target=es2015).errors.txt
-conformance/privateNamesNotAllowedInVariableDeclarations.errors.txt
 conformance/relativePathToDeclarationFile.errors.txt
 conformance/stringIndexerConstrainsPropertyDeclarations.errors.txt
 conformance/stringIndexerConstrainsPropertyDeclarations2.errors.txt
 conformance/symbolDeclarationEmit12.errors.txt
-conformance/topLevelModuleDeclarationAndFile.errors.txt
 conformance/typePredicateOnVariableDeclaration01.errors.txt
-conformance/typesVersionsDeclarationEmit.multiFile.errors.txt
 conformance/typesVersionsDeclarationEmit.multiFileBackReferenceToSelf.errors.txt
-conformance/typesVersionsDeclarationEmit.multiFileBackReferenceToUnmapped.errors.txt
 conformance/usingDeclarations.10.errors.txt
 conformance/usingDeclarations.13.errors.txt
 conformance/usingDeclarations.14.errors.txt
@@ -3428,7 +3388,6 @@ conformance/bundlerConditionsExcludesNode(module=esnext).errors.txt
 conformance/bundlerConditionsExcludesNode(module=preserve).errors.txt
 conformance/bundlerNodeModules1(module=esnext).errors.txt
 conformance/bundlerNodeModules1(module=preserve).errors.txt
-conformance/cjsImportInES2015.errors.txt
 conformance/dynamicImportDefer(module=commonjs).errors.txt
 conformance/dynamicImportDefer(module=es2015).errors.txt
 conformance/dynamicImportDefer(module=es2020).errors.txt
@@ -3464,8 +3423,6 @@ conformance/importNonExternalModule.errors.txt
 conformance/importSpecifiers1.errors.txt
 conformance/importTypeAmbientMissing.errors.txt
 conformance/importTypeLocalMissing.errors.txt
-conformance/invalidModuleWithStatementsOfEveryKind.errors.txt
-conformance/invalidModuleWithVarStatements.errors.txt
 conformance/jsxJsxsCjsTransformKeyPropCustomImport(jsx=react-jsx).errors.txt
 conformance/jsxJsxsCjsTransformKeyPropCustomImport(jsx=react-jsxdev).errors.txt
 conformance/legacyNodeModulesExportsSpecifierGenerationConditions.errors.txt
@@ -3658,7 +3615,6 @@ conformance/parserUnfinishedTypeNameBeforeKeyword1.errors.txt
 conformance/parserWithStatement1.d.errors.txt
 conformance/parserX_TypeArgumentList1.errors.txt
 conformance/parserharness.errors.txt
-conformance/privateNameInObjectLiteral-3(target=es2015).errors.txt
 conformance/propertyAccessChain.3.errors.txt
 conformance/restTupleElements1.errors.txt
 conformance/scannerUnicodeEscapeInKeyword2.errors.txt
@@ -3688,7 +3644,6 @@ conformance/unicodeEscapesInJsxtags.errors.txt
 conformance/varianceAnnotations.errors.txt
 conformance/withStatements.errors.txt
 ### missing-2322: TS2322 欠报族（检查缺失或延迟类型未求值） (86 例) ###
-conformance/arbitraryModuleNamespaceIdentifiers_exportEmpty.errors.txt
 conformance/arrayLiteralExpressionContextualTyping.errors.txt
 conformance/assignSharedArrayBufferToArrayBuffer(target=es2015).errors.txt
 conformance/assignmentCompatBetweenTupleAndArray.errors.txt
@@ -3706,7 +3661,6 @@ conformance/computedPropertyNamesContextualType10_ES5(target=es2015).errors.txt
 conformance/computedPropertyNamesContextualType10_ES6.errors.txt
 conformance/constEnumPropertyAccess1.errors.txt
 conformance/constructorImplementationWithDefaultValues2.errors.txt
-conformance/constructorParameterShadowsOuterScopes.errors.txt
 conformance/contextuallyTypedBindingInitializerNegative.errors.txt
 conformance/contextuallyTypedStringLiteralsInJsxAttributes01.errors.txt
 conformance/controlFlowBindingPatternOrder.errors.txt
@@ -3752,7 +3706,6 @@ conformance/tsxStatelessFunctionComponents1.errors.txt
 conformance/tupleElementTypes1.errors.txt
 conformance/typeArgumentsWithStringLiteralTypes01.errors.txt
 conformance/typeGuardFunctionOfFormThisErrors.errors.txt
-conformance/typeGuardInClass.errors.txt
 conformance/typeGuardNesting.errors.txt
 conformance/typeGuardOfFormNotExpr.errors.txt
 conformance/typeGuardOfFormTypeOfBoolean.errors.txt
@@ -3778,7 +3731,6 @@ conformance/wideningTuples4.errors.txt
 conformance/AmbientModuleAndAmbientWithSameNameAndCommonRoot.errors.txt
 conformance/AmbientModuleAndNonAmbientClassWithSameNameAndCommonRoot.errors.txt
 conformance/ES5SymbolType1(target=es2015).errors.txt
-conformance/TypeGuardWithArrayUnion.errors.txt
 conformance/booleanPropertyAccess.errors.txt
 conformance/classAppearsToHaveMembersOfObject.errors.txt
 conformance/classStaticBlockUseBeforeDef1(target=es2022).errors.txt
@@ -3792,8 +3744,6 @@ conformance/controlFlowInstanceofExtendsFunction.errors.txt
 conformance/controlFlowOptionalChain2.errors.txt
 conformance/dependentDestructuredVariablesFromNestedPatterns.errors.txt
 conformance/esDecorators-contextualTypes.2.errors.txt
-conformance/exportDefaultNamespace.errors.txt
-conformance/functionExpressionContextualTyping1.errors.txt
 conformance/genericClassExpressionInFunction.errors.txt
 conformance/importCallExpression3ES2020.errors.txt
 conformance/importCallExpressionInCJS4.errors.txt
@@ -3810,8 +3760,6 @@ conformance/mappedTypesGenericTuples2.errors.txt
 conformance/mergedInheritedClassInterface.errors.txt
 conformance/mixinAbstractClasses.errors.txt
 conformance/mixinClassesAnonymous.errors.txt
-conformance/newTargetNarrowing.errors.txt
-conformance/nullPropertyName.errors.txt
 conformance/numberPropertyAccess.errors.txt
 conformance/objectSpreadRepeatedNullCheckPerf.errors.txt
 conformance/objectTypePropertyAccess.errors.txt
@@ -3923,7 +3871,6 @@ conformance/tsxUnionElementType3.errors.txt
 conformance/tsxUnionElementType4.errors.txt
 conformance/tsxUnionElementType6.errors.txt
 ### extra-2322: TS2322 多报族（推断/上下文/延迟类型连锁或检查边界） (65 例) ###
-conformance/accessorsOverrideProperty9.errors.txt
 conformance/assignmentCompatWithGenericCallSignatures3.errors.txt
 conformance/asyncGeneratorGenericNonWrappedReturn.errors.txt
 conformance/booleanLiteralTypes1.errors.txt
@@ -3942,9 +3889,6 @@ conformance/es2018IntlAPIs.errors.txt
 conformance/functionLiteralForOverloads.errors.txt
 conformance/generatorReturnTypeIndirectReferenceToGlobalType.errors.txt
 conformance/generatorTypeCheck10.errors.txt
-conformance/generatorTypeCheck11.errors.txt
-conformance/generatorTypeCheck12.errors.txt
-conformance/generatorTypeCheck13.errors.txt
 conformance/generatorTypeCheck26.errors.txt
 conformance/generatorYieldContextualType.errors.txt
 conformance/genericContextualTypes1.errors.txt
@@ -3970,16 +3914,12 @@ conformance/restTuplesFromContextualTypes.errors.txt
 conformance/stringLiteralTypesWithTemplateStrings01.errors.txt
 conformance/templateLiteralTypes8.errors.txt
 conformance/thisTypeInFunctions.errors.txt
-conformance/typeGuardFunctionGenerics.errors.txt
 conformance/typeGuardIntersectionTypes.errors.txt
-conformance/typeGuardOfFormExpr1AndExpr2.errors.txt
 conformance/typeGuardsInConditionalExpression.errors.txt
-conformance/typeGuardsInRightOperandOfAndAndOperator.errors.txt
 conformance/typeGuardsInRightOperandOfOrOrOperator.errors.txt
 conformance/typeGuardsTypeParameters.errors.txt
 conformance/typeParameterAsTypeParameterConstraint.errors.txt
 conformance/typeParameterConstModifiersReturnsAndYields.errors.txt
-conformance/typeParameterExtendsUnionConstraintDistributed.errors.txt
 conformance/types.asyncGenerators.es2018.1.errors.txt
 conformance/typesVersions.ambientModules.errors.txt
 conformance/unionAndIntersectionInference3.errors.txt
@@ -4003,18 +3943,14 @@ conformance/privateNameAndAny.errors.txt
 conformance/privateNameAndObjectRestSpread.errors.txt
 conformance/privateNameDuplicateField.errors.txt
 conformance/privateNameEmitHelpers.errors.txt
-conformance/privateNameNestedClassAccessorsShadowing.errors.txt
 conformance/privateNameNestedMethodAccess.errors.txt
-conformance/privateNameSetterNoGetter.errors.txt
 conformance/privateNameStaticAccessors.errors.txt
 conformance/privateNameStaticAccessorsAccess.errors.txt
 conformance/privateNameStaticAccessorssDerivedClasses.errors.txt
 conformance/privateNameStaticEmitHelpers.errors.txt
-conformance/privateNameStaticFieldAccess.errors.txt
 conformance/privateNameStaticFieldDerivedClasses.errors.txt
 conformance/privateNameStaticMethod.errors.txt
 conformance/privateNameStaticMethodAssignment.errors.txt
-conformance/privateNameStaticMethodAsync.errors.txt
 conformance/privateNameStaticMethodClassExpression.errors.txt
 conformance/privateNamesAndStaticFields.errors.txt
 conformance/privateNamesConstructorChain-1.errors.txt
@@ -4022,8 +3958,6 @@ conformance/privateNamesConstructorChain-2.errors.txt
 conformance/privateNamesInGenericClasses.errors.txt
 conformance/privateNamesInNestedClasses-2.errors.txt
 conformance/privateNamesIncompatibleModifiers.errors.txt
-conformance/privateNamesUnique-3.errors.txt
-conformance/privateNamesUseBeforeDef.errors.txt
 conformance/privateWriteOnlyAccessorRead.errors.txt
 conformance/taggedTemplateContextualTyping1.errors.txt
 conformance/taggedTemplateContextualTyping2.errors.txt
@@ -4037,7 +3971,6 @@ conformance/classStaticBlock4(target=esnext).errors.txt
 conformance/classStaticBlockUseBeforeDef2(target=es2022).errors.txt
 conformance/classStaticBlockUseBeforeDef2(target=esnext).errors.txt
 conformance/classStaticBlockUseBeforeDef5.errors.txt
-conformance/controlFlowForStatement.errors.txt
 conformance/dependentDestructuredVariables.errors.txt
 conformance/derivedClassSuperProperties(target=es2015).errors.txt
 conformance/errorSuperPropertyAccess(target=es2015).errors.txt
@@ -4111,10 +4044,6 @@ conformance/callWithMissingVoid.errors.txt
 conformance/classExtendingClass.errors.txt
 conformance/classWithBaseClassButNoConstructor.errors.txt
 conformance/classWithConstructors.errors.txt
-conformance/computedPropertyNamesContextualType6_ES5(target=es2015).errors.txt
-conformance/computedPropertyNamesContextualType6_ES6.errors.txt
-conformance/computedPropertyNamesContextualType7_ES5(target=es2015).errors.txt
-conformance/computedPropertyNamesContextualType7_ES6.errors.txt
 conformance/constructSignaturesWithIdenticalOverloads.errors.txt
 conformance/constructSignaturesWithOverloads.errors.txt
 conformance/derivedClassTransitivity3.errors.txt
@@ -4137,8 +4066,6 @@ conformance/propertyAccessOnTypeParameterWithConstraints3.errors.txt
 conformance/stringLiteralTypesAsTypeParameterConstraint02.errors.txt
 conformance/superCallParameterContextualTyping1.errors.txt
 conformance/templateLiteralTypes6.errors.txt
-conformance/twoMergedInterfacesWithDifferingOverloads.errors.txt
-conformance/twoMergedInterfacesWithDifferingOverloads2.errors.txt
 ### extra-1005: TS1005 多报族（推断/上下文/延迟类型连锁或检查边界） (30 例) ###
 conformance/FunctionPropertyAssignments2_es6.errors.txt
 conformance/FunctionPropertyAssignments3_es6.errors.txt
@@ -4189,7 +4116,6 @@ conformance/parser618973.errors.txt
 conformance/parserEnum4.errors.txt
 conformance/parserX_ArrowFunction1.errors.txt
 conformance/privateNamesAndIndexedAccess.errors.txt
-conformance/privateNamesNotAllowedAsParameters.errors.txt
 conformance/taggedTemplateChain.errors.txt
 conformance/taggedTemplateStringsWithIncompatibleTypedTags.errors.txt
 conformance/taggedTemplateStringsWithIncompatibleTypedTagsES6.errors.txt
@@ -4255,25 +4181,13 @@ conformance/umd1.errors.txt
 conformance/umd5.errors.txt
 conformance/umd8.errors.txt
 ### extra-1434: TS1434 多报族（推断/上下文/延迟类型连锁或检查边界） (25 例) ###
-conformance/autoAccessor2(target=es2015).errors.txt
-conformance/autoAccessor2(target=es2022).errors.txt
-conformance/autoAccessor2(target=esnext).errors.txt
-conformance/autoAccessorAllowedModifiers.errors.txt
 conformance/classAbstractManyKeywords.errors.txt
-conformance/esDecorators-contextualTypes.errors.txt
 conformance/privateNameClassExpressionLoop.errors.txt
 conformance/privateNameComputedPropertyName1(target=es2015).errors.txt
 conformance/privateNameComputedPropertyName1(target=es2022).errors.txt
 conformance/privateNameComputedPropertyName1(target=esnext).errors.txt
 conformance/privateNameES5Ban(target=es2015).errors.txt
-conformance/privateNameMethodAsync.errors.txt
-conformance/privateNameSetterExprReturnValue.errors.txt
-conformance/privateNameStaticFieldAssignment.errors.txt
-conformance/privateNameStaticFieldClassExpression.errors.txt
-conformance/privateNameStaticFieldUnaryMutation.errors.txt
-conformance/privateNameStaticMethodInStaticFieldInit.errors.txt
 conformance/privateNamesAndkeyof.errors.txt
-conformance/privateStaticNameShadowing.errors.txt
 conformance/taggedTemplateStringsPlainCharactersThatArePartsOfEscapes01.errors.txt
 conformance/taggedTemplateStringsPlainCharactersThatArePartsOfEscapes01_ES6.errors.txt
 conformance/taggedTemplateStringsPlainCharactersThatArePartsOfEscapes02_ES6.errors.txt
@@ -4281,7 +4195,6 @@ conformance/taggedTemplateStringsWithTypeErrorInFunctionExpressionsInSubstitutio
 conformance/taggedTemplateStringsWithTypeErrorInFunctionExpressionsInSubstitutionExpressionES6.errors.txt
 conformance/taggedTemplateUntypedTagCall01.errors.txt
 ### missing-2339: TS2339 欠报族（检查缺失或延迟类型未求值） (23 例) ###
-conformance/ModuleWithExportedAndNonExportedFunctions.errors.txt
 conformance/destructuringSpread.errors.txt
 conformance/emitArrowFunctionThisCapturing(target=es2015).errors.txt
 conformance/emitArrowFunctionThisCapturingES6.errors.txt
@@ -4317,10 +4230,6 @@ conformance/contextualThisType.errors.txt
 conformance/contextualTypeWithUnionTypeIndexSignatures.errors.txt
 conformance/contextualTypeWithUnionTypeObjectLiteral.errors.txt
 conformance/contextuallyTypeLogicalAnd02.errors.txt
-conformance/functionExpressionContextualTyping2.errors.txt
-conformance/iterableContextualTyping1.errors.txt
-conformance/logicalOrExpressionIsNotContextuallyTyped.errors.txt
-conformance/nullishCoalescingOperator9.errors.txt
 conformance/stringLiteralTypesAsTypeParameterConstraint01.errors.txt
 conformance/superCallParameterContextualTyping3.errors.txt
 conformance/symbolProperty20.errors.txt
@@ -4329,11 +4238,8 @@ conformance/thisTypeInFunctions2.errors.txt
 conformance/typeSatisfaction_contextualTyping1.errors.txt
 conformance/typeSatisfaction_ensureInterfaceImpl.errors.txt
 ### extra-2300: TS2300 多报族（推断/上下文/延迟类型连锁或检查边界） (21 例) ###
-conformance/TwoInternalModulesThatMergeEachWithExportedAndNonExportedClassesOfTheSameName.errors.txt
-conformance/TwoInternalModulesThatMergeEachWithExportedModulesOfTheSameName.errors.txt
 conformance/classPropertyAsPrivate.errors.txt
 conformance/classPropertyIsPublicByDefault.errors.txt
-conformance/decoratorInAmbientContext.errors.txt
 conformance/memberFunctionsWithPrivateOverloads.errors.txt
 conformance/memberFunctionsWithPublicOverloads.errors.txt
 conformance/mergedWithLocalValue.errors.txt
@@ -4366,7 +4272,6 @@ conformance/override7.errors.txt
 conformance/override9.errors.txt
 conformance/propertyNamedPrototype.errors.txt
 conformance/protectedClassPropertyAccessibleWithinNestedSubclass(target=es2015).errors.txt
-conformance/shadowedInternalModule.errors.txt
 conformance/typeAliasesDoNotMerge.errors.txt
 conformance/typeOnlyMerge2.errors.txt
 conformance/typeOnlyMerge3.errors.txt
@@ -4395,8 +4300,6 @@ conformance/generatorTypeCheck64.errors.txt
 ### extra-2349: TS2349 多报族（推断/上下文/延迟类型连锁或检查边界） (19 例) ###
 conformance/builtinIteratorReturn(strictbuiltiniteratorreturn=false).errors.txt
 conformance/builtinIteratorReturn(strictbuiltiniteratorreturn=true).errors.txt
-conformance/callChain.2.errors.txt
-conformance/callChain.errors.txt
 conformance/callWithSpread.errors.txt
 conformance/callWithSpreadES6.errors.txt
 conformance/conditionalTypes2.errors.txt
@@ -4404,7 +4307,6 @@ conformance/enumLiteralTypes1.errors.txt
 conformance/enumLiteralTypes2.errors.txt
 conformance/intersectionTypeMembers.errors.txt
 conformance/intersectionTypeOverloading.errors.txt
-conformance/intlDurationFormat.errors.txt
 conformance/parserindenter.errors.txt
 conformance/stringEnumLiteralTypes1.errors.txt
 conformance/stringEnumLiteralTypes2.errors.txt
@@ -4415,12 +4317,9 @@ conformance/unionTypeReduction.errors.txt
 ### extra-2403: TS2403 多报族（推断/上下文/延迟类型连锁或检查边界） (18 例) ###
 conformance/EnumAndModuleWithSameNameAndCommonRoot.errors.txt
 conformance/ModuleAndEnumWithSameNameAndCommonRoot.errors.txt
-conformance/ModuleWithExportedAndNonExportedImportAlias.errors.txt
-conformance/TypeGuardWithEnumUnion.errors.txt
 conformance/anyAssignabilityInInheritance.errors.txt
 conformance/arrowFunctionExpressions.errors.txt
 conformance/enumBasics.errors.txt
-conformance/exportImportAlias.errors.txt
 conformance/genericCallWithConstraintsTypeArgumentInference.errors.txt
 conformance/instantiatedModule.errors.txt
 conformance/literals(target=es2015).errors.txt
@@ -4432,24 +4331,11 @@ conformance/spreadUnion.errors.txt
 conformance/superCalls.errors.txt
 conformance/templateLiteralTypesPatterns.errors.txt
 ### missing-2695: TS2695 欠报族（检查缺失或延迟类型未求值） (18 例) ###
-conformance/logicalNotOperatorWithBooleanType.errors.txt
-conformance/logicalNotOperatorWithEnumType.errors.txt
-conformance/logicalNotOperatorWithNumberType.errors.txt
-conformance/logicalNotOperatorWithStringType.errors.txt
-conformance/negateOperatorWithBooleanType.errors.txt
-conformance/negateOperatorWithEnumType.errors.txt
-conformance/negateOperatorWithNumberType.errors.txt
-conformance/negateOperatorWithStringType.errors.txt
 conformance/parserArrowFunctionExpression4.errors.txt
 conformance/parserCastVersusArrowFunction1.errors.txt
 conformance/parserErrorRecoveryArrayLiteralExpression3.errors.txt
 conformance/parserTernaryAndCommaOperators1.errors.txt
 conformance/plusOperatorWithAnyOtherType.errors.txt
-conformance/plusOperatorWithBooleanType.errors.txt
-conformance/plusOperatorWithEnumType.errors.txt
-conformance/plusOperatorWithNumberType.errors.txt
-conformance/plusOperatorWithStringType.errors.txt
-conformance/typeofOperatorWithStringType.errors.txt
 ### extra-2304: TS2304 多报族（推断/上下文/延迟类型连锁或检查边界） (17 例) ###
 conformance/assignmentCompatWithConstructSignatures4.errors.txt
 conformance/assignmentCompatWithConstructSignatures5.errors.txt
@@ -4469,7 +4355,6 @@ conformance/templateLiteralTypes5.errors.txt
 conformance/tsxReactEmit8(jsx=react-jsx).errors.txt
 conformance/tsxReactEmit8(jsx=react-jsxdev).errors.txt
 ### mixed-1012: 混合差异族 (17 例) ###
-conformance/bitwiseNotOperatorInvalidOperations.errors.txt
 conformance/checkJsxNamespaceNamesQuestionableForms.errors.txt
 conformance/classStaticBlock6(target=es2015).errors.txt
 conformance/decoratorOnArrowFunction.errors.txt
@@ -4477,7 +4362,6 @@ conformance/decoratorOnFunctionExpression.errors.txt
 conformance/deleteOperatorInvalidOperations.errors.txt
 conformance/invalidTypeOfTarget.errors.txt
 conformance/jsxInvalidEsprimaTestSuite.errors.txt
-conformance/logicalNotOperatorInvalidOperations.errors.txt
 conformance/negateOperatorInvalidOperations.errors.txt
 conformance/objectSpreadNegativeParse.errors.txt
 conformance/parserSkippedTokens16.errors.txt
@@ -4581,9 +4465,6 @@ conformance/exportNamespace11.errors.txt
 conformance/filterNamespace_import.errors.txt
 conformance/globalThisAmbientModules.errors.txt
 conformance/importClause_namespaceImport.errors.txt
-conformance/invalidInstantiatedModule.errors.txt
-conformance/umd3.errors.txt
-conformance/umd4.errors.txt
 ### extra-2353: TS2353 多报族（推断/上下文/延迟类型连锁或检查边界） (14 例) ###
 conformance/classWithEmptyBody.errors.txt
 conformance/constructBigint.errors.txt
@@ -4614,12 +4495,16 @@ conformance/parserES5ComputedPropertyName4(target=es2015).errors.txt
 conformance/parserSuperExpression3.errors.txt
 conformance/templateInsideCallback.errors.txt
 conformance/typeParameterAsBaseType.errors.txt
-### missing-2300: TS2300 欠报族（检查缺失或延迟类型未求值） (13 例) ###
+### missing-2300: TS2300 欠报族（检查缺失或延迟类型未求值） (17 例) ###
 conformance/ClassAndModuleThatMergeWithModulesExportedGenericFunctionAndGenericClassStaticFunctionOfTheSameName.errors.txt
 conformance/ClassAndModuleThatMergeWithModulesExportedGenericFunctionAndNonGenericClassStaticFunctionOfTheSameName.errors.txt
 conformance/ClassAndModuleThatMergeWithStaticFunctionAndExportedFunctionThatShareAName.errors.txt
 conformance/ClassAndModuleThatMergeWithStaticVariableAndExportedVarThatShareAName.errors.txt
 conformance/callSignaturesWithDuplicateParameters.errors.txt
+conformance/computedPropertyNames49_ES5.errors.txt
+conformance/computedPropertyNames49_ES6.errors.txt
+conformance/computedPropertyNames50_ES5.errors.txt
+conformance/computedPropertyNames50_ES6.errors.txt
 conformance/constructSignatureWithAccessibilityModifiersOnParameters2.errors.txt
 conformance/constructorParameterProperties2.errors.txt
 conformance/duplicateExportAssignments.errors.txt
@@ -4708,7 +4593,6 @@ conformance/assignmentCompatWithObjectMembersNumericNames.errors.txt
 conformance/compoundAdditionAssignmentLHSCannotBeAssigned.errors.txt
 conformance/defaultExportInAwaitExpression02.errors.txt
 conformance/symbolProperty52.errors.txt
-conformance/typeGuardNarrowsPrimitiveIntersection.errors.txt
 conformance/typeParameterAsTypeParameterConstraint2.errors.txt
 conformance/typesWithOptionalProperty.errors.txt
 conformance/typesWithSpecializedConstructSignatures.errors.txt
@@ -4786,7 +4670,6 @@ conformance/genericCallWithGenericSignatureArguments3.errors.txt
 conformance/objectTypeWithCallSignatureHidingMembersOfFunctionAssignmentCompat.errors.txt
 conformance/objectTypeWithConstructSignatureHidingMembersOfFunctionAssignmentCompat.errors.txt
 conformance/parserAutomaticSemicolonInsertion1.errors.txt
-conformance/typeGuardOfFormFunctionEquality.errors.txt
 ### extra-2719: TS2719 多报族（推断/上下文/延迟类型连锁或检查边界） (9 例) ###
 conformance/assignmentCompatWithCallSignatures3.errors.txt
 conformance/assignmentCompatWithCallSignatures4.errors.txt
@@ -4818,21 +4701,15 @@ conformance/decoratorOnClassMethodParameter1.es6.errors.txt
 conformance/decoratorOnClassMethodParameter2(target=es2015).errors.txt
 conformance/parserMissingLambdaOpenBrace1.errors.txt
 ### missing-2872: TS2872 欠报族（检查缺失或延迟类型未求值） (9 例) ###
-conformance/conditionalOperatorConditionIsNumberType.errors.txt
 conformance/conditionalOperatorConditoinIsAnyType.errors.txt
-conformance/constEnum4.errors.txt
 conformance/contextuallyTypeLogicalAnd03.errors.txt
 conformance/logicalOrExpressionIsContextuallyTyped.errors.txt
 conformance/parserArrowFunctionExpression3.errors.txt
 conformance/parserRegularExpression3.errors.txt
-conformance/symbolType11.errors.txt
 conformance/typeGuardsInIfStatement.errors.txt
 ### missing-1163: TS1163 欠报族（检查缺失或延迟类型未求值） (8 例) ###
-conformance/YieldExpression16_es6.errors.txt
-conformance/YieldExpression20_es6.errors.txt
 conformance/awaitAndYield.errors.txt
 conformance/awaitAndYieldInProperty.errors.txt
-conformance/generatorTypeCheck32.errors.txt
 conformance/generatorTypeCheck39.errors.txt
 conformance/generatorTypeCheck57.errors.txt
 conformance/generatorTypeCheck58.errors.txt
@@ -4917,15 +4794,12 @@ conformance/templateStringInDeleteExpressionES6.errors.txt
 ### extra-1117: TS1117 多报族（推断/上下文/延迟类型连锁或检查边界） (7 例) ###
 conformance/binaryIntegerLiteralError.errors.txt
 conformance/callSignaturesWithParameterInitializers2.errors.txt
-conformance/destructuringSameNames.errors.txt
 conformance/numericNamedPropertyDuplicates.errors.txt
 conformance/octalIntegerLiteralError.errors.txt
 conformance/stringNamedPropertyDuplicates.errors.txt
 conformance/symbolProperty2.errors.txt
 ### mixed-2552: 混合差异族 (7 例) ###
 conformance/castingTuple.errors.txt
-conformance/exportNonInitializedVariablesCommonJS.errors.txt
-conformance/exportNonInitializedVariablesES6.errors.txt
 conformance/jsxAndTypeAssertion.errors.txt
 conformance/parserExportAssignment9.errors.txt
 conformance/parserFuzz1.errors.txt
@@ -4946,29 +4820,12 @@ conformance/parserModifierOnStatementInBlock1.errors.txt
 conformance/parserModifierOnStatementInBlock2.errors.txt
 conformance/parserModifierOnStatementInBlock3.errors.txt
 conformance/parserModifierOnStatementInBlock4.errors.txt
-### missing-2378: TS2378 欠报族（检查缺失或延迟类型未求值） (7 例) ###
-conformance/computedPropertyNames2_ES5(target=es2015).errors.txt
-conformance/computedPropertyNames2_ES6.errors.txt
-conformance/parserAccessors1(target=es2015).errors.txt
-conformance/parserAccessors3(target=es2015).errors.txt
-conformance/parserES3Accessors1.errors.txt
-conformance/parserES3Accessors3.errors.txt
-conformance/parserMemberAccessor1(target=es2015).errors.txt
-### missing-1049: TS1049 欠报族（检查缺失或延迟类型未求值） (7 例) ###
-conformance/computedPropertyNames49_ES5.errors.txt
-conformance/computedPropertyNames49_ES6.errors.txt
-conformance/computedPropertyNames50_ES5.errors.txt
-conformance/computedPropertyNames50_ES6.errors.txt
-conformance/parserAccessors8(target=es2015).errors.txt
-conformance/parserAccessors9(target=es2015).errors.txt
-conformance/parserErrantSemicolonInClass1.errors.txt
 ### missing-2741: TS2741 欠报族（检查缺失或延迟类型未求值） (7 例) ###
 conformance/contextualTypeWithTuple.errors.txt
 conformance/genericCallWithObjectTypeArgsAndConstraints3.errors.txt
 conformance/inlineJsxFactoryLocalTypeGlobalFallback.errors.txt
 conformance/nonIterableRestElement3.errors.txt
 conformance/nonPrimitiveAssignError.errors.txt
-conformance/renamed.errors.txt
 conformance/typesOnlyExternalModuleStillHasInstance.errors.txt
 ### missing-2353: TS2353 欠报族（检查缺失或延迟类型未求值） (7 例) ###
 conformance/discriminatedUnionTypes2.errors.txt
@@ -5033,8 +4890,6 @@ conformance/classAbstractUsingAbstractMethods2.errors.txt
 conformance/classStaticBlock16.errors.txt
 conformance/privateNameFieldDerivedClasses.errors.txt
 conformance/privateNameMethodClassExpression.errors.txt
-conformance/privateNameMethodsDerivedClasses.errors.txt
-conformance/privateNamesInterfaceExtendingClass.errors.txt
 conformance/privateNamesUnique-2.errors.txt
 ### missing-2729: TS2729 欠报族（检查缺失或延迟类型未求值） (6 例) ###
 conformance/classStaticBlock3(target=es2022).errors.txt
@@ -5059,9 +4914,6 @@ conformance/protectedStaticClassPropertyAccessibleWithinSubclass.errors.txt
 conformance/protectedStaticNotAccessibleInClodule.errors.txt
 ### mixed-2348: 混合差异族 (6 例) ###
 conformance/mergedInheritedMembersSatisfyAbstractBase.errors.txt
-conformance/privateNameMethodAccess.errors.txt
-conformance/privateNameNotAccessibleOutsideDefiningClass.errors.txt
-conformance/privateNamesInNestedClasses-1.errors.txt
 conformance/readonlyInConstructorParameters.errors.txt
 conformance/witness.errors.txt
 ### missing-2323: TS2323 欠报族（检查缺失或延迟类型未求值） (6 例) ###
@@ -5137,10 +4989,6 @@ conformance/typeOfThisInStaticMembers8(target=es2022).errors.txt
 conformance/typeOfThisInStaticMembers8(target=es6).errors.txt
 conformance/typeOfThisInStaticMembers8(target=esnext).errors.txt
 ### missing-2873: TS2873 欠报族（检查缺失或延迟类型未求值） (5 例) ###
-conformance/computedPropertyNames46_ES5(target=es2015).errors.txt
-conformance/computedPropertyNames46_ES6.errors.txt
-conformance/computedPropertyNames48_ES5(target=es2015).errors.txt
-conformance/computedPropertyNames48_ES6.errors.txt
 conformance/initializersWidened.errors.txt
 ### mixed-2352: 混合差异族 (5 例) ###
 conformance/conditionalTypes1.errors.txt
@@ -5213,7 +5061,6 @@ conformance/newOperatorConformance.errors.txt
 conformance/newWithSpread.errors.txt
 conformance/newWithSpreadES5(target=es2015).errors.txt
 conformance/newWithSpreadES6.errors.txt
-conformance/staticFactory1.errors.txt
 ### missing-2783: TS2783 欠报族（检查缺失或延迟类型未求值） (5 例) ###
 conformance/objectSpreadSetonlyAccessor.errors.txt
 conformance/spreadDuplicate.errors.txt
@@ -5281,10 +5128,6 @@ conformance/parserReturnStatement1.d.errors.txt
 conformance/parserWithStatement2.errors.txt
 conformance/thisTypeInFunctionsNegative.errors.txt
 ### extra-2367: TS2367 多报族（推断/上下文/延迟类型连锁或检查边界） (4 例) ###
-conformance/comparisonOperatorWithNoRelationshipObjectsOnInstantiatedCallSignature.errors.txt
-conformance/comparisonOperatorWithNoRelationshipObjectsOnInstantiatedConstructorSignature.errors.txt
-conformance/comparisonOperatorWithSubtypeObjectOnInstantiatedCallSignature.errors.txt
-conformance/comparisonOperatorWithSubtypeObjectOnInstantiatedConstructorSignature.errors.txt
 ### missing-2465: TS2465 欠报族（检查缺失或延迟类型未求值） (4 例) ###
 conformance/computedPropertyNames21_ES5(target=es2015).errors.txt
 conformance/computedPropertyNames21_ES6.errors.txt
@@ -5328,7 +5171,6 @@ conformance/exponentiationOperatorSyntaxError1(target=es2015).errors.txt
 ### extra-2694: TS2694 多报族（推断/上下文/延迟类型连锁或检查边界） (4 例) ###
 conformance/exportAsNamespace5.errors.txt
 conformance/exportTypeMergedWithExportStarAsNamespace.errors.txt
-conformance/reExportAliasMakesInstantiated.errors.txt
 conformance/tsxGenericAttributesType9.errors.txt
 ### missing-7022: TS7022 欠报族（检查缺失或延迟类型未求值） (4 例) ###
 conformance/for-of32.errors.txt
@@ -5353,7 +5195,6 @@ conformance/nodeModulesTopLevelAwait(module=nodenext).errors.txt
 ### mixed-18048: 混合差异族 (4 例) ###
 conformance/nonPrimitiveNarrow.errors.txt
 conformance/nullishCoalescingOperator11.errors.txt
-conformance/nullishCoalescingOperator4.errors.txt
 conformance/spreadObjectOrFalsy.errors.txt
 ### mixed-1117: 混合差异族 (4 例) ###
 conformance/objectLiteralShorthandPropertiesErrorFromNotUsingIdentifier.errors.txt
@@ -5384,7 +5225,6 @@ conformance/superSymbolIndexedAccess4.errors.txt
 conformance/privateNameAndPropertySignature.errors.txt
 conformance/privateNameBadAssignment.errors.txt
 conformance/privateNameInObjectLiteral-1.errors.txt
-conformance/privateNameInObjectLiteral-2.errors.txt
 ### missing-1124: TS1124 欠报族（检查缺失或延迟类型未求值） (4 例) ###
 conformance/scannerES3NumericLiteral4.errors.txt
 conformance/scannerES3NumericLiteral6.errors.txt
@@ -5399,12 +5239,8 @@ conformance/YieldExpression18_es6.errors.txt
 conformance/YieldExpression8_es6.errors.txt
 conformance/YieldStarExpression1_es6.errors.txt
 ### extra-2749: TS2749 多报族（推断/上下文/延迟类型连锁或检查边界） (3 例) ###
-conformance/accessorsOverrideProperty8.errors.txt
 conformance/exportAssignTypes.errors.txt
-conformance/mixinAbstractClassesReturnTypeInference.errors.txt
 ### extra-1440: TS1440 多报族（推断/上下文/延迟类型连锁或检查边界） (3 例) ###
-conformance/asiPreventsParsingAsNamespace04.errors.txt
-conformance/asiPreventsParsingAsNamespace05.errors.txt
 conformance/exportsAndImportsWithContextualKeywordNames01(target=es2015).errors.txt
 ### mixed-2344: 混合差异族 (3 例) ###
 conformance/assignmentCompatWithEnumIndexer.errors.txt
@@ -5414,9 +5250,8 @@ conformance/multiline.errors.txt
 conformance/assignmentLHSIsValue.errors.txt
 conformance/parserErrorRecovery_ClassElement3.errors.txt
 conformance/parserSkippedTokens19.errors.txt
-### missing-2454: TS2454 欠报族（检查缺失或延迟类型未求值） (3 例) ###
+### missing-2454: TS2454 欠报族（检查缺失或延迟类型未求值） (2 例) ###
 conformance/classDoesNotDependOnBaseTypes.errors.txt
-conformance/classStaticBlockUseBeforeDef3.errors.txt
 conformance/exportBinding.errors.txt
 ### missing-1169: TS1169 欠报族（检查缺失或延迟类型未求值） (3 例) ###
 conformance/computedPropertyNames35_ES5(target=es2015).errors.txt
@@ -5478,9 +5313,6 @@ conformance/parserRegularExpressionDivideAmbiguity2.errors.txt
 conformance/stringLiteralsAssertionsInEqualityComparisons01.errors.txt
 conformance/stringLiteralsWithTypeAssertions01.errors.txt
 conformance/typeParametersAvailableInNestedScope.errors.txt
-### extra-2454: TS2454 多报族（推断/上下文/延迟类型连锁或检查边界） (2 例) ###
-conformance/asiPreventsParsingAsInterface03.errors.txt
-conformance/for-of46.errors.txt
 ### mixed-2719: 混合差异族 (2 例) ###
 conformance/assignmentCompatWithConstructSignaturesWithOptionalParameters.errors.txt
 conformance/stringLiteralTypesOverloadAssignability05.errors.txt
@@ -5491,7 +5323,6 @@ conformance/subtypingWithObjectMembers5.errors.txt
 conformance/asyncImportedPromise_es5(target=es2015).errors.txt
 conformance/asyncImportedPromise_es6.errors.txt
 ### extra-1012: TS1012 多报族（推断/上下文/延迟类型连锁或检查边界） (2 例) ###
-conformance/autoAccessor10.errors.txt
 conformance/parser509669.errors.txt
 ### missing-5097: TS5097 欠报族（检查缺失或延迟类型未求值） (2 例) ###
 conformance/bundlerRelative1(module=esnext).errors.txt
@@ -5572,8 +5403,6 @@ conformance/symbolProperty39.errors.txt
 conformance/emitArrowFunctionWhenUsingArguments12(target=es2015).errors.txt
 conformance/emitArrowFunctionWhenUsingArguments12_ES6.errors.txt
 ### extra-2555: TS2555 多报族（推断/上下文/延迟类型连锁或检查边界） (2 例) ###
-conformance/emitDefaultParametersFunctionExpression(target=es2015).errors.txt
-conformance/emitDefaultParametersFunctionExpressionES6.errors.txt
 ### missing-18033: TS18033 欠报族（检查缺失或延迟类型未求值） (2 例) ###
 conformance/enumErrorOnConstantBindingWithInitializer.errors.txt
 conformance/enumShadowedInfinityNaN.errors.txt
@@ -5584,8 +5413,6 @@ conformance/esnextmodulekindWithES5Target10(target=es2015).errors.txt
 conformance/exponentiationOperatorSyntaxError2(target=es2015).errors.txt
 conformance/exponentiationOperatorWithInvalidSimpleUnaryExpressionOperands.errors.txt
 ### missing-2725: TS2725 欠报族（检查缺失或延迟类型未求值） (2 例) ###
-conformance/exportClassNameWithObjectCommonJS(target=es2015).errors.txt
-conformance/exportDefaultClassNameWithObject(target=es2015).errors.txt
 ### missing-2481: TS2481 欠报族（检查缺失或延迟类型未求值） (2 例) ###
 conformance/for-of53.errors.txt
 conformance/for-of54.errors.txt
@@ -5658,9 +5485,6 @@ conformance/parserForOfStatement4.errors.txt
 ### missing-2483: TS2483 欠报族（检查缺失或延迟类型未求值） (2 例) ###
 conformance/parserES5ForOfStatement5(target=es2015).errors.txt
 conformance/parserForOfStatement5.errors.txt
-### missing-1094: TS1094 欠报族（检查缺失或延迟类型未求值） (2 例) ###
-conformance/parserGetAccessorWithTypeParameters1(target=es2015).errors.txt
-conformance/parserSetAccessorWithTypeParameters1(target=es2015).errors.txt
 ### missing-1021: TS1021 欠报族（检查缺失或延迟类型未求值） (2 例) ###
 conformance/parserIndexSignature11.errors.txt
 conformance/parserIndexSignature7.errors.txt
@@ -5689,8 +5513,6 @@ conformance/parser_duplicateLabel2.errors.txt
 conformance/privateNameConstructorSignature.errors.txt
 conformance/privateNameFieldParenthesisLeftAssignment.errors.txt
 ### missing-18014: TS18014 欠报族（检查缺失或延迟类型未求值） (2 例) ###
-conformance/privateNameNestedClassFieldShadowing.errors.txt
-conformance/privateNameNestedClassMethodShadowing.errors.txt
 ### missing-1186: TS1186 欠报族（检查缺失或延迟类型未求值） (2 例) ###
 conformance/restElementWithInitializer1.errors.txt
 conformance/restElementWithInitializer2.errors.txt
@@ -5730,13 +5552,11 @@ conformance/useSharedArrayBuffer3.errors.txt
 ### missing-2433: TS2433 欠报族（检查缺失或延迟类型未求值） (1 例) ###
 conformance/ModuleAndFunctionWithSameNameAndCommonRoot.errors.txt
 ### mixed-2551: 混合差异族 (1 例) ###
-conformance/ModuleWithExportedAndNonExportedClasses.errors.txt
 ### missing-1044: TS1044 欠报族（检查缺失或延迟类型未求值） (1 例) ###
 conformance/Protected2.errors.txt
 ### mixed-2663: 混合差异族 (1 例) ###
 conformance/YieldExpression14_es6.errors.txt
 ### missing-1267: TS1267 欠报族（检查缺失或延迟类型未求值） (1 例) ###
-conformance/abstractPropertyInitializer.errors.txt
 ### missing-2309: TS2309 欠报族（检查缺失或延迟类型未求值） (1 例) ###
 conformance/ambientErrors.errors.txt
 ### missing-2435: TS2435 欠报族（检查缺失或延迟类型未求值） (1 例) ###
@@ -5864,9 +5684,7 @@ conformance/importDeferInvalidNamed.errors.txt
 ### mixed-2503: 混合差异族 (1 例) ###
 conformance/importEquals3.errors.txt
 ### missing-2708: TS2708 欠报族（检查缺失或延迟类型未求值） (1 例) ###
-conformance/importStatementsInterfaces.errors.txt
 ### mixed-1039: 混合差异族 (1 例) ###
-conformance/importTsBeforeDTs.errors.txt
 ### missing-1338: TS1338 欠报族（检查缺失或延迟类型未求值） (1 例) ###
 conformance/inferTypes1.errors.txt
 ### missing-17017: TS17017 欠报族（检查缺失或延迟类型未求值） (1 例) ###
@@ -5888,7 +5706,6 @@ conformance/intraExpressionInferences.errors.txt
 ### mixed-1440: 混合差异族 (1 例) ###
 conformance/intrinsicKeyword.errors.txt
 ### missing-2702: TS2702 欠报族（检查缺失或延迟类型未求值） (1 例) ###
-conformance/invalidImportAliasIdentifiers.errors.txt
 ### missing-2434: TS2434 欠报族（检查缺失或延迟类型未求值） (1 例) ###
 conformance/invalidNestedModules.errors.txt
 ### mixed-7027: 混合差异族 (1 例) ###
@@ -5900,7 +5717,6 @@ conformance/jsxEsprimaFbTestSuite.errors.txt
 ### mixed-2536: 混合差异族 (1 例) ###
 conformance/keyofAndIndexedAccess2.errors.txt
 ### extra-2503: TS2503 多报族（推断/上下文/延迟类型连锁或检查边界） (1 例) ###
-conformance/leaveOptionalParameterAsWritten.errors.txt
 ### mixed-2416: 混合差异族 (1 例) ###
 conformance/mergedInterfacesWithMultipleBases4.errors.txt
 ### missing-2386: TS2386 欠报族（检查缺失或延迟类型未求值） (1 例) ###
@@ -5912,7 +5728,6 @@ conformance/moduleExportDuplicateAlias.errors.txt
 ### missing-2551: TS2551 欠报族（检查缺失或延迟类型未求值） (1 例) ###
 conformance/narrowExceptionVariableInCatchClause.errors.txt
 ### mixed-2558: 混合差异族 (1 例) ###
-conformance/newOperatorErrorCases.errors.txt
 ### missing-7009: TS7009 欠报族（检查缺失或延迟类型未求值） (1 例) ###
 conformance/newOperatorErrorCases_noImplicitAny.errors.txt
 ### missing-5076: TS5076 欠报族（检查缺失或延迟类型未求值） (1 例) ###
@@ -5937,8 +5752,6 @@ conformance/parser.forAwait.es2018.errors.txt
 conformance/parser509668.errors.txt
 ### mixed-1138: 混合差异族 (1 例) ###
 conformance/parser512325.errors.txt
-### missing-1054: TS1054 欠报族（检查缺失或延迟类型未求值） (1 例) ###
-conformance/parserAccessors7(target=es2015).errors.txt
 ### mixed-1105: 混合差异族 (1 例) ###
 conformance/parserBreakStatement1.d.errors.txt
 ### mixed-1442: 混合差异族 (1 例) ###
@@ -5973,8 +5786,6 @@ conformance/parserParameterList10.errors.txt
 conformance/parserParameterList2.errors.txt
 ### missing-1016: TS1016 欠报族（检查缺失或延迟类型未求值） (1 例) ###
 conformance/parserParameterList3.errors.txt
-### missing-1095: TS1095 欠报族（检查缺失或延迟类型未求值） (1 例) ###
-conformance/parserSetAccessorWithTypeAnnotation1(target=es2015).errors.txt
 ### extra-1135: TS1135 多报族（推断/上下文/延迟类型连锁或检查边界） (1 例) ###
 conformance/parserSkippedTokens17.errors.txt
 ### missing-1136: TS1136 欠报族（检查缺失或延迟类型未求值） (1 例) ###
@@ -5988,7 +5799,6 @@ conformance/privateNameEnum.errors.txt
 ### missing-2803: TS2803 欠报族（检查缺失或延迟类型未求值） (1 例) ###
 conformance/privateNameMethodAssignment.errors.txt
 ### mixed-1134: 混合差异族 (1 例) ###
-conformance/privateNameNotAllowedOutsideClass.errors.txt
 ### missing-18011: TS18011 欠报族（检查缺失或延迟类型未求值） (1 例) ###
 conformance/privateNamesNoDelete.errors.txt
 ### mixed-2564: 混合差异族 (1 例) ###
@@ -6110,13 +5920,11 @@ transpile/declarationSingleFileHasErrorsReported.d.ts
 ## 2026-08-19 三套件验证跑后补登: 修复暴露的新差异与首轮排除过宽族（JSX 底层 2339/for-of 位置/parser 行数差等，下轮按类修） ##
 conformance/MemberFunctionDeclaration8_es6.errors.txt
 conformance/TemplateExpression1.errors.txt
-conformance/TwoInternalModulesThatMergeEachWithExportedLocalVarsOfTheSameName.errors.txt
 conformance/YieldStarExpression2_es6.errors.txt
 conformance/additionOperatorWithStringAndEveryType.errors.txt
 conformance/arrayLiteralWidened.errors.txt
 conformance/asOperator3.errors.txt
 conformance/asiPreventsParsingAsAmbientExternalModule02.errors.txt
-conformance/asiPreventsParsingAsNamespace03.errors.txt
 conformance/awaitUsingDeclarationsInForOf.2.errors.txt
 conformance/await_unaryExpression_es2017_3.errors.txt
 conformance/await_unaryExpression_es6_3.errors.txt
@@ -6134,19 +5942,12 @@ conformance/checkJsxIntersectionElementPropsType.errors.txt
 conformance/comparisonOperatorWithOneOperandIsAny.errors.txt
 conformance/compoundExponentiationAssignmentLHSIsReference.errors.txt
 conformance/computedPropertyNames40_ES6.errors.txt
-conformance/computedPropertyNames9_ES6.errors.txt
 conformance/conditionalOperatorConditionIsBooleanType.errors.txt
-conformance/contextuallyTypedIife.errors.txt
-conformance/controlFlowBinaryAndExpression.errors.txt
-conformance/controlFlowBinaryOrExpression.errors.txt
-conformance/controlFlowConditionalExpression.errors.txt
 conformance/decoratedDefaultExportsGetExportedCommonjs.errors.txt
 conformance/derivedInterfaceIncompatibleWithBaseIndexer.errors.txt
-conformance/destructuringWithLiteralInitializers.errors.txt
 conformance/dynamicImportDeferInvalidStandalone.errors.txt
 conformance/emitClassDeclarationWithExtensionInES6.errors.txt
 conformance/enumIsNotASubtypeOfAnythingButNumber.errors.txt
-conformance/es2017DateAPIs.errors.txt
 conformance/for-inStatementsAsyncIdentifier.errors.txt
 conformance/for-of13.errors.txt
 conformance/for-of18.errors.txt
@@ -6161,7 +5962,6 @@ conformance/importAttributes11.errors.txt
 conformance/importAttributes9.errors.txt
 conformance/importCallExpressionIncorrect2.errors.txt
 conformance/indexersInClassType.errors.txt
-conformance/interfaceExtendingClass.errors.txt
 conformance/iterableArrayPattern25.errors.txt
 conformance/keyofAndForIn.errors.txt
 conformance/library-reference-15.errors.txt
@@ -6262,9 +6062,7 @@ conformance/tsxReactEmit6.errors.txt
 conformance/tsxReactEmitWhitespace.errors.txt
 conformance/tsxReactEmitWhitespace2.errors.txt
 conformance/tsxTypeArgumentsJsxPreserveOutput.errors.txt
-conformance/typeGuardTautologicalConsistiency.errors.txt
 conformance/typeQueryWithReservedWords.errors.txt
-conformance/typeSatisfaction_contextualTyping3.errors.txt
 conformance/typedefScope1.errors.txt
 conformance/typeofOperatorInvalidOperations.errors.txt
 conformance/typeofThisWithImplicitThis.errors.txt
@@ -6381,7 +6179,6 @@ conformance/classWithStaticFieldInParameterBindingPattern(target=esnext).errors.
 conformance/classWithStaticFieldInParameterInitializer(target=es2015).errors.txt
 conformance/classWithStaticFieldInParameterInitializer(target=esnext).errors.txt
 conformance/computedPropertyNames40_ES5(target=es2015).errors.txt
-conformance/computedPropertyNames9_ES5(target=es2015).errors.txt
 conformance/decoratorOnClass3(target=es2015).errors.txt
 conformance/emitCompoundExponentiationOperator1(target=es2015).errors.txt
 conformance/emitCompoundExponentiationOperator2(target=es2015).errors.txt
@@ -6394,14 +6191,8 @@ conformance/exportAsNamespace2(module=es2015).errors.txt
 conformance/exportAsNamespace2(module=esnext).errors.txt
 conformance/importAssertion1(module=commonjs).errors.txt
 conformance/importAssertion1(module=es2015).errors.txt
-conformance/importAssertion2(module=commonjs).errors.txt
-conformance/importAssertion2(module=es2015).errors.txt
 conformance/importAttributes1(module=commonjs).errors.txt
 conformance/importAttributes1(module=es2015).errors.txt
-conformance/importAttributes2(module=commonjs).errors.txt
-conformance/importAttributes2(module=es2015).errors.txt
-conformance/importAttributes3(module=es2015).errors.txt
-conformance/importAttributes3(module=esnext).errors.txt
 conformance/importAttributes6(module=node18).errors.txt
 conformance/importAttributes6(module=node20).errors.txt
 conformance/importAttributes6(module=nodenext).errors.txt
@@ -6482,26 +6273,15 @@ conformance/nodePackageSelfName(module=node18).errors.txt
 conformance/nodePackageSelfName(module=node20).errors.txt
 conformance/nodePackageSelfName(module=nodenext).errors.txt
 conformance/nullishCoalescingOperatorInParameterBindingPattern.2(target=esnext).errors.txt
-conformance/nullishCoalescingOperatorInParameterBindingPattern(target=es2015).errors.txt
-conformance/nullishCoalescingOperatorInParameterBindingPattern(target=esnext).errors.txt
 conformance/nullishCoalescingOperatorInParameterInitializer.2(target=esnext).errors.txt
-conformance/nullishCoalescingOperatorInParameterInitializer(target=es2015).errors.txt
-conformance/nullishCoalescingOperatorInParameterInitializer(target=esnext).errors.txt
 conformance/objectRestParameterES5(target=es2015).errors.txt
 conformance/optionalChainingInParameterBindingPattern.2(target=esnext).errors.txt
-conformance/optionalChainingInParameterBindingPattern(target=es2015).errors.txt
-conformance/optionalChainingInParameterBindingPattern(target=esnext).errors.txt
 conformance/optionalChainingInParameterInitializer.2(target=esnext).errors.txt
-conformance/optionalChainingInParameterInitializer(target=es2015).errors.txt
-conformance/optionalChainingInParameterInitializer(target=esnext).errors.txt
 conformance/parserES5ComputedPropertyName5(target=es2015).errors.txt
 conformance/parserES5ComputedPropertyName8(target=es2015).errors.txt
 conformance/privateNameComputedPropertyName3(target=es2015).errors.txt
 conformance/privateNameComputedPropertyName3(target=es2022).errors.txt
 conformance/privateNameComputedPropertyName3(target=esnext).errors.txt
-conformance/privateNameStaticFieldNoInitializer(target=es2015).errors.txt
-conformance/privateNameStaticFieldNoInitializer(target=es2022).errors.txt
-conformance/privateNameStaticFieldNoInitializer(target=esnext).errors.txt
 conformance/resolutionModeImportType1(moduleresolution=bundler).errors.txt
 conformance/resolutionModeImportType1(moduleresolution=classic).errors.txt
 conformance/topLevelAwait.3(module=es2022).errors.txt
@@ -6527,3 +6307,18 @@ conformance/usingDeclarationsInForOf.1(target=es2017).errors.txt
 conformance/usingDeclarationsInForOf.1(target=es2022).errors.txt
 conformance/usingDeclarationsInForOf.1(target=esnext).errors.txt
 conformance/yieldStatementNoAsiAfterTransform(target=esnext).errors.txt
+
+## 2026-08-30 compiler#5101-5200: ramdaTools 深层延迟条件族（Iteration/Pos 元组机械的 {1:…;0:…}[k] 泛型别名索引延迟实例化未解析 → TS2536/2344 链；且 ambient 模块内 `import {Key} from "Any/Key"` 的目标解析在 commonjs 下被文件内另一模块的同名泛型别名 Key<I> 污染 → TS2314 假阳×6——改名即消，双根因在案） ##
+compiler/ramdaToolsNoInfinite2.errors.txt
+
+## 2026-08-30 compiler#5701-5800: 自引用联合别名子系统（type Node = FooNode | BarNode + FooNode.children: Node[]——Go 惰性对象成员架构：别名/联合构建期不触碰属性类型；我们急切解析使别名环守卫的 error 冻结进联合成分（显示 'error | {kind:"bar"}'）→ 谓词窄化删光成 never。试探过成员惰性化（条件/全量两版）：条件版联合成分位置仍冻结 error、全量版引发 lib.dom ViewTransitionTypeSet 2430 假阳（惰性在实例化上下文外解析）——需完整的 Go 式 deferred members 移植，随案在册。同页已修：谓词假分支改用可赋值性删除（overlap 误删无关成分）+ ||/&& 完整分支分解） ##
+compiler/subtypeReductionUnionConstraints.errors.txt
+
+## 2026-09-01 conformance#2401-2500: 畸形类型谓词恢复+谓词检查族（typeGuardFunctionErrors 自带 U+00A0 触发 scanner 字节级 scan_whitespace 死循环——多轮 30s 超时 SKIP 掩盖真实差异；死循环已修（char 解码+全 Unicode 空白表），修后暴露三块未移植：1) 坏谓词 `x is {` 的 parser 恢复锚点（官方 TS2749+TS1144+TS1131/TS1128 vs 我们 TS1005/TS2391/TS2389/TS1108 级联）2) TS1225 谓词参数索引检查与 TS2677 谓词类型可赋值检查缺失 3) 错误形状下守卫调用定型塌缩（TS2349+never vs 官方 TS2551 保留 A）——三块均需按 Go 逐一对齐，随案在册） ##
+conformance/typeGuardFunctionErrors.errors.txt
+
+## 2026-09-01 Page-104: import() 类型属性文法+解析恢复子系统未移植（Go parser.go parseImportType ~L3075 权威路径在案：parseType → optional ',' → parseExpected(OpenBrace) → 非 with 时 parseErrorAtCurrentToken(X_0_expected,"with") → parseExpected(Colon) 报 ';' expected 位 → parseImportAttributes 恢复 → parseExpected(CloseBrace)+related info → parseExpected(CloseParen)；checker 侧坏属性 import type 回退值语义 → TS1340/2353/2339 级联。四形态矩阵：missing-with / wrong-key / array-form / indirected（nodeModulesImportAttributesTypeModeDeclarationEmitErrors，r36 起在案的旧账，×4 配置） ##
+conformance/nodeModulesImportAttributesTypeModeDeclarationEmitErrors(module=node16).errors.txt
+conformance/nodeModulesImportAttributesTypeModeDeclarationEmitErrors(module=node18).errors.txt
+conformance/nodeModulesImportAttributesTypeModeDeclarationEmitErrors(module=node20).errors.txt
+conformance/nodeModulesImportAttributesTypeModeDeclarationEmitErrors(module=nodenext).errors.txt

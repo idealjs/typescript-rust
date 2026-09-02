@@ -1,1 +1,2 @@
 file.tsx(12,7): error TS2322: Type '{ w: string; }' is not assignable to type '{ n: string; }'.
+  Property 'w' does not exist on type '{ n: string; }'.

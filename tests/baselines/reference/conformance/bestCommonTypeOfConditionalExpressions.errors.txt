@@ -4,6 +4,9 @@ bestCommonTypeOfConditionalExpressions.ts(9,31): error TS2564: Property 'baz' ha
 bestCommonTypeOfConditionalExpressions.ts(16,17): error TS2454: Variable 'a' is used before being assigned.
 bestCommonTypeOfConditionalExpressions.ts(17,17): error TS2454: Variable 'b' is used before being assigned.
 bestCommonTypeOfConditionalExpressions.ts(19,5): error TS2322: Type '((x: number) => void) | ((x: Object) => void)' is not assignable to type '(x: Object) => void'.
+  Type '(x: number) => void' is not assignable to type '(x: Object) => void'.
+    Types of parameters 'x' and 'x' are incompatible.
+      Type 'Object' is not assignable to type 'number'.
 bestCommonTypeOfConditionalExpressions.ts(21,24): error TS2454: Variable 'derived' is used before being assigned.
 bestCommonTypeOfConditionalExpressions.ts(22,18): error TS2454: Variable 'base' is used before being assigned.
 bestCommonTypeOfConditionalExpressions.ts(25,19): error TS2322: Type 'T' is not assignable to type 'Object'.

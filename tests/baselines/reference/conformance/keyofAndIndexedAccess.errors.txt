@@ -1,5 +1,15 @@
 keyofAndIndexedAccess.ts(205,24): error TS2322: Type 'T[keyof T]' is not assignable to type 'object'.
+  Type 'T[string] | T[number] | T[symbol]' is not assignable to type 'object'.
+    Type 'T[string]' is not assignable to type 'object'.
 keyofAndIndexedAccess.ts(211,24): error TS2322: Type 'T[K]' is not assignable to type 'object'.
+  Type 'T[keyof T]' is not assignable to type 'object'.
+    Type 'T[string] | T[number] | T[symbol]' is not assignable to type 'object'.
+      Type 'T[string]' is not assignable to type 'object'.
 keyofAndIndexedAccess.ts(316,5): error TS2322: Type 'T' is not assignable to type '{}'.
 keyofAndIndexedAccess.ts(317,5): error TS2322: Type 'T[keyof T]' is not assignable to type '{}'.
+  Type 'T[string] | T[number] | T[symbol]' is not assignable to type '{}'.
+    Type 'T[string]' is not assignable to type '{}'.
 keyofAndIndexedAccess.ts(318,5): error TS2322: Type 'T[K]' is not assignable to type '{}'.
+  Type 'T[keyof T]' is not assignable to type '{}'.
+    Type 'T[string] | T[number] | T[symbol]' is not assignable to type '{}'.
+      Type 'T[string]' is not assignable to type '{}'.
