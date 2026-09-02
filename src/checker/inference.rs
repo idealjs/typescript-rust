@@ -267,6 +267,20 @@ impl Checker {
             }
         }
 
+        // Go inferFromTypes: when source and target are the *same* union or
+        // intersection type, relate each constituent to itself instead of
+        // running cross-product matching between the constituents.
+        if Arc::ptr_eq(source, target)
+            && source
+                .flags
+                .intersects(TypeFlags::Union | TypeFlags::Intersection)
+        {
+            for t in source.types().unwrap_or_default() {
+                self.infer_from_types(state, t, t);
+            }
+            return;
+        }
+
         // Handle union types in target
         if target.flags.contains(TypeFlags::Union) {
             let source_types = if source.flags.contains(TypeFlags::Union) {
@@ -466,6 +480,34 @@ impl Checker {
     ) {
         let source_args = self.get_type_arguments(source);
         let target_args = self.get_type_arguments(target);
+        // Pointer-equal object types carrying type arguments (tuples, arrays,
+        // generic references in this port's structured representation): the
+        // only inferable content is the type arguments against themselves —
+        // the port of Go's same-Target reference rule. The member walk below
+        // would instead re-traverse every method of e.g. ReadonlyArray on
+        // every visit, which is path-exponential for nested generics
+        // (declarationEmitUsingAlternativeContainingModules blow-up).
+        if Arc::ptr_eq(source, target) && !target_args.is_empty() {
+            self.infer_from_type_arguments(state, &target_args, &target_args, &[]);
+            return;
+        }
+        // Go inferFromObjectTypes: references to the same generic target (or
+        // two array types) carry no additional inferable information in their
+        // members — infer between type arguments only and return. Without
+        // this, inferring e.g. `[number, unknown]` against itself walks every
+        // ReadonlyArray method signature recursively (the tanstack/vue-query
+        // declarationEmitUsingAlternativeContainingModules blow-up).
+        let same_target = match (source.target(), target.target()) {
+            (Some(st), Some(tt)) => Arc::ptr_eq(st, tt),
+            _ => false,
+        };
+        if source.object_flags.contains(ObjectFlags::Reference)
+            && target.object_flags.contains(ObjectFlags::Reference)
+            && (same_target || self.is_array_type(source) && self.is_array_type(target))
+        {
+            self.infer_from_type_arguments(state, &source_args, &target_args, &[]);
+            return;
+        }
         if !source_args.is_empty() && !target_args.is_empty() {
             self.infer_from_type_arguments(state, &source_args, &target_args, &[]);
         }

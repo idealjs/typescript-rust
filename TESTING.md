@@ -66,6 +66,8 @@ diff "tests/baselines/reference/compiler/<stem>.errors.txt" \
 ```
 
 # 当前批次
+## Page-4 轮续（页 15-，compiler#1501 起）：页15 一次过（59P/11S/30ad/**0F**）——declarationEmit 窗口，30 diff 均台账既有 declFile 族；页16 一次过（62P/12S/26ad/**0F**）
+
 ## Page-3 轮续（页 12-14，compiler#1201-1500）：页12 一次过（63P/0S/37ad/0F）；页13 起点 3 FAIL→终态 59P/10S/31ad/**0F**；页14 起点 1 FAIL→终态 81P/6S/13ad/**0F**；四套门全绿
 
 - **判别式窄化的删除/保留语义**（controlFlowNullTypeAndLiteral + controlFlowArrays 转绿）：`obj.prop !== V` 删除分支原用「重叠」判定（`{val:number|null}` 与 null 重叠→整形成分误删→obj 塌缩 never，`.val` 报 TS2339）——改为「属性类型**含于**被删值」（`{kind:"c"}` vs `!=="c"` 才删）；`===` 保留分支原 overlap 过严（`{length:number}` vs `===0` 误删）——改为双向可赋值「可能相等」判定。单体臂与联合臂同修。
