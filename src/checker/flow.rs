@@ -1431,11 +1431,14 @@ impl Checker {
         kind: NarrowKind,
     ) -> Option<Arc<Type>> {
         // Discriminant narrowing selects the union constituent that owns a
-        // matching `kind` property; it only applies when the narrowed target
-        // is the *receiver* (`obj` of `obj.kind`), never a property-access
-        // reference (whose own type the plain equality path narrows).
-        let FlowRef::Symbol(symbol) = target else {
-            return None;
+        // matching `kind` property; it applies when the narrowed target is
+        // the *receiver* (`obj` of `obj.kind`) — either a plain symbol or a
+        // narrowed SUB-REFERENCE (`t.thing!` of `t.thing!.name !== "C"`,
+        // Go narrows the inner union by the trailing discriminant —
+        // narrowingUnionWithBang).
+        let (symbol, node_reference): (Option<Arc<Symbol>>, Option<Arc<Node>>) = match target {
+            FlowRef::Symbol(symbol) => (Some(Arc::clone(symbol)), None),
+            FlowRef::Node(reference) => (None, Some(Arc::clone(reference))),
         };
         let NodeData::BinaryExpression(bin) = &expr.data else {
             return None;
@@ -1452,18 +1455,28 @@ impl Checker {
         // `const { kind: k } = obj`). Mirrors Go's
         // `getCandidateDiscriminantPropertyAccess` identifier case
         // (flow.go ~L1460).
-        let (access_node, value_node) = if let Some(alias) =
-            self.discriminant_alias_access(&bin.left, symbol)
-        {
-            (alias, &bin.right)
-        } else if let Some(alias) = self.discriminant_alias_access(&bin.right, symbol) {
-            (alias, &bin.left)
-        } else if self.is_property_access_on_symbol(&bin.left, symbol) {
-            (Arc::clone(&bin.left), &bin.right)
-        } else if self.is_property_access_on_symbol(&bin.right, symbol) {
-            (Arc::clone(&bin.right), &bin.left)
+        let (access_node, value_node) = if let Some(symbol) = &symbol {
+            if let Some(alias) = self.discriminant_alias_access(&bin.left, symbol) {
+                (alias, &bin.right)
+            } else if let Some(alias) = self.discriminant_alias_access(&bin.right, symbol) {
+                (alias, &bin.left)
+            } else if self.is_property_access_on_symbol(&bin.left, symbol) {
+                (Arc::clone(&bin.left), &bin.right)
+            } else if self.is_property_access_on_symbol(&bin.right, symbol) {
+                (Arc::clone(&bin.right), &bin.left)
+            } else {
+                return None;
+            }
+        } else if let Some(reference) = node_reference.as_ref() {
+            if self.is_property_access_on_reference(&bin.left, reference) {
+                (Arc::clone(&bin.left), &bin.right)
+            } else if self.is_property_access_on_reference(&bin.right, reference) {
+                (Arc::clone(&bin.right), &bin.left)
+            } else {
+                return None;
+            }
         } else {
-            return None;
+            unreachable!()
         };
         let prop_name = Self::get_accessed_property_name_from_node(&access_node)?;
         let value_type = self.get_type_of_node(value_node);
@@ -1517,6 +1530,16 @@ impl Checker {
             .into_iter()
             .filter(|t| {
                 let prop_type = self.get_property_type_of_type(t, &prop_name);
+                // Go narrowTypeByDiscriminant's filter drops a constituent
+                // whose discriminant property is `never` in BOTH branches
+                // (`discriminantType.flags&TypeFlagsNever == 0`) —
+                // `{ kind: never }` is removed by `kind === "a"` AND by
+                // `kind !== "a"` (neverAsDiscriminantType).
+                if prop_type.as_ref().is_some_and(|pt| {
+                    pt.flags.intersects(TypeFlags::Never | TypeFlags::Undefined)
+                }) {
+                    return false;
+                }
                 if keep_matching {
                     // Keep constituents whose property COULD EQUAL the
                     // value (either assignability direction — see the
@@ -2760,7 +2783,12 @@ impl Checker {
             return true;
         }
         if t.flags.contains(TypeFlags::BooleanLiteral) {
-            return !t.intrinsic_name().is_some_and(|n| n == "true");
+            // Boolean literals live in TypeData::Literal (intrinsic_name is
+            // None for them) — read the literal value: only `false` is
+            // definitely falsy (the old intrinsic-name check made `true`
+            // falsy too, so `if (x.kind)` over `{kind: true} | {kind:
+            // false}` kept/dropped BOTH members — narrowingByDiscriminantInLoop).
+            return matches!(t.literal_value(), Some(crate::checker::types::LiteralValue::Boolean(false)));
         }
         if t.flags.contains(TypeFlags::StringLiteral) {
             return t.intrinsic_name().is_some_and(|n| n == "\"\"" || n.is_empty());
@@ -3306,11 +3334,20 @@ impl Checker {
     /// property/element accesses by accessed property name plus recursively
     /// matching receivers.
     fn is_matching_reference(&self, source: &Arc<Node>, target: &Arc<Node>) -> bool {
-        match target.kind {
-            SyntaxKind::ParenthesizedExpression | SyntaxKind::NonNullExpression => {
-                let inner = Self::skip_parentheses(target);
-                return self.is_matching_reference(source, &inner);
+        match &target.data {
+            // Unwrap the wrapper's OWN expression — `skip_parentheses`
+            // only strips ParenthesizedExpression, so a NonNullExpression
+            // target returned the node itself and recursed forever
+            // (`t.thing!` as a narrowed reference, narrowingUnionWithBang).
+            NodeData::ParenthesizedExpression(p) => {
+                return self.is_matching_reference(source, &p.expression);
             }
+            NodeData::NonNullExpression(n) => {
+                return self.is_matching_reference(source, &n.expression);
+            }
+            _ => {}
+        }
+        match target.kind {
             SyntaxKind::BinaryExpression => {
                 if let NodeData::BinaryExpression(bin) = &target.data {
                     if is_assignment_operator(bin.operator_token.kind)
@@ -4512,6 +4549,35 @@ impl Checker {
 
     /// Whether `node` is a property access on `symbol`, e.g.
     /// `symbol.kind` or `symbol["kind"]`.
+    /// A property/element access whose RECEIVER structurally matches a
+    /// narrowed sub-reference node (`t.thing!` receiver of
+    /// `t.thing!.name`). Optional-chain accesses (`t.thing?.name`) also
+    /// qualify — Go's `getDiscriminantPropertyAccess` accepts optional
+    /// chains and strips the nullable from the union in the filter; here a
+    /// chain's `undefined` constituent has no discriminant property, so the
+    /// keep arm drops it and the removal arm keeps it, which matches. The
+    /// reference side is unwrapped of paren/non-null wrappers first
+    /// (`t.thing!` matches receiver `t.thing`).
+    fn is_property_access_on_reference(&self, node: &Arc<Node>, reference: &Arc<Node>) -> bool {
+        let mut r = reference;
+        loop {
+            match &r.data {
+                NodeData::ParenthesizedExpression(p) => r = &p.expression,
+                NodeData::NonNullExpression(n) => r = &n.expression,
+                _ => break,
+            }
+        }
+        match &node.data {
+            NodeData::PropertyAccessExpression(pa) => {
+                self.is_matching_reference(r, &pa.expression)
+            }
+            NodeData::ElementAccessExpression(ea) => {
+                self.is_matching_reference(r, &ea.expression)
+            }
+            _ => false,
+        }
+    }
+
     fn is_property_access_on_symbol(&self, node: &Arc<Node>, symbol: &Arc<Symbol>) -> bool {
         match &node.data {
             NodeData::PropertyAccessExpression(pa) => {
