@@ -1807,11 +1807,16 @@ impl Checker {
         relation: RelationKind,
     ) -> bool {
         if let Some(ui) = source.as_union_or_intersection() {
+            let save_len = self.relater_error_chain.len();
             let mut any_failed = false;
             let mut failed_nullish: Option<Arc<Type>> = None;
+            let mut first_failed: Option<Arc<Type>> = None;
             for t in &ui.types {
                 if !self.is_type_related_to(t, target, relation) {
                     any_failed = true;
+                    if first_failed.is_none() {
+                        first_failed = Some(Arc::clone(t));
+                    }
                     if t.flags.contains(TypeFlags::Undefined) {
                         // `undefined` wins the leaf spot over `null` when
                         // both fail (official chains spell `undefined`
@@ -1830,21 +1835,84 @@ impl Checker {
                 }
             }
             if any_failed {
-                // Elaboration leaf (assignmentCompatability11 family): an
-                // optional property's union source failing on its nullish
-                // constituent — official spells that member out as the
-                // chain's deepest entry (non-nullish member failures stay
-                // folded into the head line).
-                if let Some(t) = failed_nullish
-                    && self.relater_chain_active
-                {
-                    let member_str = self.type_to_string(&t);
-                    let target_str = self.type_to_string(target);
-                    self.relater_report_error(
-                        crate::diagnostics::messages_generated::
-                            TYPE_0_IS_NOT_ASSIGNABLE_TO_TYPE_1,
-                        vec![member_str, target_str],
-                    );
+                // Go `eachTypeRelatedToType` reports through the failing
+                // constituent's own comparison. Reference-verified shape
+                // (tsgo probes): a failing NULLISH constituent wins the
+                // leaf line over earlier failing non-nullish members
+                // (`number | undefined` → boolean spells `undefined`); with
+                // no nullish failure the FIRST failing member's chain is
+                // kept — deep entries from re-running its comparison plus
+                // its generalized head line (`string | number` → string
+                // spells `number`; `{x:1}|{y:2}` → `{x:1;y:2}` keeps only
+                // the missing-property entry, the member head suppressed).
+                if self.relater_chain_active && self.speculation_depth == 0 {
+                    self.relater_error_chain.truncate(save_len);
+                    if let Some(t) = failed_nullish {
+                        let member_str = self.type_to_string(&t);
+                        let target_str = self.type_to_string(target);
+                        self.relater_report_error(
+                            crate::diagnostics::messages_generated::
+                                TYPE_0_IS_NOT_ASSIGNABLE_TO_TYPE_1,
+                            vec![member_str, target_str],
+                        );
+                    } else if let Some(t) = first_failed {
+                        self.is_type_related_to(&t, target, relation);
+                        let target_str = self.type_to_string(target);
+                        // Member head (Go reportRelationError): fresh
+                        // literals display their base primitive when the
+                        // target can't hold singletons (`1 | 2` → string
+                        // shows `number` on both levels).
+                        let head_source =
+                            if !self.type_could_have_top_level_singleton_types(target)
+                                && (crate::checker::is_fresh_literal_type(&t)
+                                    || t.flags.intersects(TYPE_FLAGS_LITERAL))
+                            {
+                                let base = self.get_base_type_of_literal_type_for_display(&t);
+                                self.type_to_string(&base)
+                            } else {
+                                self.type_to_string(&t)
+                            };
+                        // Head suppression (Go reportRelationError's
+                        // chain-top check): a matching missing-property or
+                        // readonly entry at the chain top replaces the
+                        // member head line.
+                        let mut suppress = false;
+                        if let Some(entry) = self.relater_error_chain.last() {
+                            let m = entry.message;
+                            let a = &entry.args;
+                            suppress = if m
+                                == crate::diagnostics::messages_generated::
+                                    PROPERTY_0_IS_MISSING_IN_TYPE_1_BUT_REQUIRED_IN_TYPE_2
+                            {
+                                a.len() == 3 && a[1] == head_source && a[2] == target_str
+                            } else if m
+                                == crate::diagnostics::messages_generated::
+                                    TYPE_0_IS_MISSING_THE_FOLLOWING_PROPERTIES_FROM_TYPE_1_COLON_2
+                                || m
+                                    == crate::diagnostics::messages_generated::
+                                        TYPE_0_IS_MISSING_THE_FOLLOWING_PROPERTIES_FROM_TYPE_1_COLON_2_AND_3_MORE
+                            {
+                                a.len() >= 2 && a[0] == head_source && a[1] == target_str
+                            } else if m
+                                == crate::diagnostics::messages_generated::
+                                    THE_TYPE_0_IS_READONLY_AND_CANNOT_BE_ASSIGNED_TO_THE_MUTABLE_TYPE_1
+                            {
+                                a.len() == 2 && a[0] == head_source && a[1] == target_str
+                            } else {
+                                false
+                            };
+                        }
+                        if !suppress {
+                            let msg = if head_source == target_str {
+                                crate::diagnostics::messages_generated::
+                                    TYPE_0_IS_NOT_ASSIGNABLE_TO_TYPE_1_TWO_DIFFERENT_TYPES_WITH_THIS_NAME_EXIST_BUT_THEY_ARE_UNRELATED
+                            } else {
+                                crate::diagnostics::messages_generated::
+                                    TYPE_0_IS_NOT_ASSIGNABLE_TO_TYPE_1
+                            };
+                            self.relater_report_error(msg, vec![head_source, target_str]);
+                        }
+                    }
                 }
                 return false;
             }
