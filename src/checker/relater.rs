@@ -1892,8 +1892,113 @@ impl Checker {
             if let Some(b) = best {
                 self.relater_error_chain = b;
             }
+            // Go `typeRelatedToSomeType`'s reporting tail (relater.go
+            // ~L3045): once the whole union fails under error reporting,
+            // re-run the comparison against the best-matching constituent
+            // and push its generalized head between the outer head and the
+            // constituent's elaboration lines —
+            //   Type 'S' is not assignable to type 'A | B'.
+            //     Type 'S' is not assignable to type 'A'.
+            //       Type 'boolean' is not assignable to type 'number'.
+            if self.relater_chain_active
+                && self.speculation_depth == 0
+                && let Some(best_t) = self.get_best_matching_type_for_error(source, target)
+            {
+                self.relater_error_chain.truncate(save_len);
+                self.is_type_related_to(source, &best_t, relation);
+                let source_str = self.type_to_string(source);
+                let target_str = self.type_to_string(&best_t);
+                let msg = if source_str == target_str {
+                    crate::diagnostics::messages_generated::
+                        TYPE_0_IS_NOT_ASSIGNABLE_TO_TYPE_1_TWO_DIFFERENT_TYPES_WITH_THIS_NAME_EXIST_BUT_THEY_ARE_UNRELATED
+                } else {
+                    crate::diagnostics::messages_generated::TYPE_0_IS_NOT_ASSIGNABLE_TO_TYPE_1
+                };
+                self.relater_report_error(msg, vec![source_str, target_str]);
+            }
         }
         false
+    }
+
+    /// Go `getBestMatchingType` (relater.go ~L872) restricted to the
+    /// strategies that drive union-failure elaboration: matching
+    /// type-reference target / alias symbol, object-literal-vs-array
+    /// disambiguation, and invokable-signature preference. The discriminant
+    /// and index-overlap strategies aren't ported — `None` there merely
+    /// suppresses the intermediate chain line (detail omitted, nothing
+    /// misreported).
+    fn get_best_matching_type_for_error(
+        &self,
+        source: &Arc<Type>,
+        target: &Arc<Type>,
+    ) -> Option<Arc<Type>> {
+        let ui = target.as_union_or_intersection()?;
+        // findMatchingTypeReferenceOrTypeAliasReference (relater.go ~L890)
+        if source
+            .object_flags
+            .intersects(ObjectFlags::Reference | ObjectFlags::Anonymous)
+        {
+            for t in &ui.types {
+                if !t.flags.contains(TypeFlags::Object) {
+                    continue;
+                }
+                let overlap = source.object_flags & t.object_flags;
+                if overlap.contains(ObjectFlags::Reference)
+                    && source
+                        .target()
+                        .zip(t.target())
+                        .is_some_and(|(a, b)| Arc::ptr_eq(a, b))
+                {
+                    return Some(Arc::clone(t));
+                }
+                if overlap.contains(ObjectFlags::Anonymous)
+                    && source
+                        .alias
+                        .as_ref()
+                        .and_then(|a| a.symbol.as_ref())
+                        .zip(t.alias.as_ref().and_then(|a| a.symbol.as_ref()))
+                        .is_some_and(|(a, b)| Arc::ptr_eq(a, b))
+                {
+                    return Some(Arc::clone(t));
+                }
+            }
+        }
+        // findBestTypeForObjectLiteral (relater.go ~L945)
+        if source.object_flags.contains(ObjectFlags::ObjectLiteral)
+            && ui.types.iter().any(|t| self.is_array_like_type(t))
+        {
+            if let Some(t) = ui
+                .types
+                .iter()
+                .find(|t| !self.is_array_like_type(t))
+            {
+                return Some(Arc::clone(t));
+            }
+        }
+        // findBestTypeForInvokable (relater.go ~L931), call then construct
+        if let Some(s) = source.as_structured() {
+            for kind in [false /*call*/, true /*construct*/] {
+                let has = if kind {
+                    !s.construct_signatures().is_empty()
+                } else {
+                    !s.call_signatures().is_empty()
+                };
+                if has
+                    && let Some(t) = ui.types.iter().find(|t| {
+                        t.as_structured().is_some_and(|ts| {
+                            if kind {
+                                !ts.construct_signatures().is_empty()
+                            } else {
+                                !ts.call_signatures().is_empty()
+                            }
+                        })
+                    })
+                {
+                    return Some(Arc::clone(t));
+                }
+            }
+        }
+        None
     }
 
     /// Target is an intersection: check if source is related to ALL constituents.
