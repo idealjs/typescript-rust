@@ -4059,6 +4059,21 @@ impl Checker {
                 self.get_any_type()
             }
             SyntaxKind::ThisKeyword | SyntaxKind::SuperKeyword => {
+                // Computed property NAMES of a class (expression) live
+                // OUTSIDE that class's container (Go getContainerFlags):
+                // `super.foo()` in `[super.foo()](){}` of a nested class
+                // expression binds to the ENCLOSING class's base, not the
+                // anonymous expression itself
+                // (superPropertyAccessInComputedPropertiesOfNestedType).
+                if node.kind == SyntaxKind::SuperKeyword
+                    && self.super_in_computed_name_of_innermost_class(node)
+                    && self.enclosing_class_stack.len() >= 2
+                {
+                    return self.this_type_stack
+                        .get(self.this_type_stack.len() - 2)
+                        .cloned()
+                        .unwrap_or_else(|| self.get_any_type());
+                }
                 // `this` / `super` → the enclosing class's instance type.
                 // Mirrors Go's `getThisType` / `getThisTypeOfObjectLiteral`.
                 // In a STATIC member, `this` is the class's CONSTRUCTOR type
@@ -6414,6 +6429,32 @@ impl Checker {
         self.enclosing_class_stack
             .iter()
             .any(|c| Arc::ptr_eq(c, class_node))
+    }
+
+    /// Whether `node` sits inside a computed property NAME of the innermost
+    /// class on the enclosing-class stack (its nearest class-like ancestor,
+    /// reached through a ComputedPropertyName within that class's members).
+    fn super_in_computed_name_of_innermost_class(&self, node: &Arc<Node>) -> bool {
+        let Some(innermost) = self.enclosing_class_stack.last() else {
+            return false;
+        };
+        let mut in_computed_name = false;
+        let mut cur = node.parent.as_ref();
+        while let Some(c) = cur {
+            if Arc::ptr_eq(c, innermost) {
+                return in_computed_name;
+            }
+            if c.kind == SyntaxKind::ComputedPropertyName {
+                in_computed_name = true;
+            }
+            if matches!(c.kind, SyntaxKind::ClassDeclaration | SyntaxKind::ClassExpression) {
+                // A nearer class-like blocks the innermost from being the
+                // relevant container.
+                return false;
+            }
+            cur = c.parent.as_ref();
+        }
+        false
     }
 
     /// Whether a function body unconditionally returns (or throws) on every
