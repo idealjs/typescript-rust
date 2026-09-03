@@ -14,7 +14,9 @@ use crate::ast::SourceFile;
 use crate::ast::diagnostic::Diagnostic;
 use crate::ast::{self};
 use crate::binder::Binder;
-use crate::core::compiler_options::{CompilerOptions, ModuleKind, ScriptTarget};
+use crate::core::compiler_options::{
+    CompilerOptions, ModuleKind, ModuleResolutionKind, ScriptTarget,
+};
 use crate::core::text::TextRange;
 use crate::core::tristate::Tristate;
 use crate::diagnostics::Category;
@@ -158,6 +160,36 @@ impl Program {
         let mut default_lib_names: std::collections::HashSet<String> =
             std::collections::HashSet::new();
         let mut diagnostics: Vec<Arc<Diagnostic>> = Vec::new();
+
+        // TS5107 deprecation notice (node10AlternateResult family): an
+        // explicit `moduleResolution=node10` configuration carries a
+        // file-less option error with the aka.ms/ts6 migration note as a
+        // nested line. Only ever emitted when the option was set —
+        // ModuleResolutionKind::Unknown is the untouched default. (The
+        // `ignoreDeprecations` suppressant is not a recognized option in
+        // this port, so tests using it skip before reaching here.)
+        if options.module_resolution == ModuleResolutionKind::Node10 {
+            let mut deprecation = Diagnostic::new(
+                None,
+                TextRange::default(),
+                crate::diagnostics::messages_generated::
+                    OPTION_0_1_IS_DEPRECATED_AND_WILL_STOP_FUNCTIONING_IN_TYPESCRIPT_2_SPECIFY_COMPILEROPTION_IGNOREDEPRECATIONS_COLON_3_TO_SILENCE_THIS_ERROR,
+                vec![
+                    "moduleResolution".to_string(),
+                    "node10".to_string(),
+                    "7.0".to_string(),
+                    "6.0".to_string(),
+                ],
+            );
+            deprecation.message_chain = vec![Diagnostic::new(
+                None,
+                TextRange::default(),
+                crate::diagnostics::messages_generated::
+                    VISIT_HTTPS_COLON_SLASH_SLASHAKA_MS_SLASHTS6_FOR_MIGRATION_INFORMATION,
+                Vec::new(),
+            )];
+            diagnostics.push(Arc::new(deprecation));
+        }
 
         // 1. Load default library files (unless --noLib).
         // Go's program construction only loads default libs when there is at
@@ -370,12 +402,32 @@ impl Program {
                         // "x"` names are collected separately), so every entry
                         // here is a genuine import worth reporting. Mirrors
                         // Go's `fileLoader` recording unresolved imports.
-                        diagnostics.push(Arc::new(crate::ast::Diagnostic::new(
+                        let mut module_not_found = Diagnostic::new(
                             Some(file.clone()),
                             import_node.loc,
                             crate::diagnostics::CANNOT_FIND_MODULE_0_OR_ITS_CORRESPONDING_TYPE_DECLARATIONS,
                             vec![module_spec.to_string()],
-                        )));
+                        );
+                        // Alternate-result elaboration (TS 5.x semantics,
+                        // node10AlternateResult_noResolution): a bare
+                        // specifier that only resolves through package.json
+                        // `exports` under modern features carries the
+                        // "There are types at '...' but this result could
+                        // not be resolved under your current
+                        // 'moduleResolution' setting" chain line.
+                        if let Some(alt) = resolved
+                            .as_ref()
+                            .and_then(|m| m.alternate_result.clone())
+                        {
+                            module_not_found.message_chain = vec![Diagnostic::new(
+                                Some(file.clone()),
+                                import_node.loc,
+                                crate::diagnostics::messages_generated::
+                                    THERE_ARE_TYPES_AT_0_BUT_THIS_RESULT_COULD_NOT_BE_RESOLVED_UNDER_YOUR_CURRENT_MODULERESOLUTION_SETTING_CONSIDER_UPDATING_TO_NODE16_NODENEXT_OR_BUNDLER,
+                                vec![alt],
+                            )];
+                        }
+                        diagnostics.push(Arc::new(module_not_found));
                     }
                 }
 

@@ -1377,6 +1377,18 @@ fn render_errors_baseline(diags: &[Diagnostic]) -> String {
             .then(a.3.cmp(&b.3))
     });
 
+    // Global (file-less) diagnostics are re-listed in `!!!` form after the
+    // summary and two blank lines — Go GetErrorBaseline's no-location
+    // section, preserved by the flattened-segment baselines
+    // (node10AlternateResult_noResolution). One `!!!` line per LINE of the
+    // diagnostic's message text; chain lines keep their indentation under
+    // the head's code.
+    let globals: Vec<&Diagnostic> = keyed
+        .iter()
+        .filter(|(_, _, _, _, d)| d.file.is_none())
+        .map(|(_, _, _, _, d)| *d)
+        .collect();
+
     let mut out = String::new();
     for (_, _, _, _, d) in keyed {
         let mut line = format_diagnostic_compact(d, None);
@@ -1384,6 +1396,21 @@ fn render_errors_baseline(diags: &[Diagnostic]) -> String {
         line = line.replace("/proj/", "");
         out.push_str(&line);
         out.push('\n');
+    }
+    if !globals.is_empty() {
+        out.push('\n');
+        out.push('\n');
+        for d in globals {
+            let msg = tsox::diagnosticwriter::message_text(d, None);
+            for line in msg.lines() {
+                if line.is_empty() {
+                    continue;
+                }
+                let line = line.replace("/proj/", "");
+                out.push_str(&format!("!!! {} TS{}: {}", d.category.name(), d.code, line));
+                out.push('\n');
+            }
+        }
     }
     out
 }

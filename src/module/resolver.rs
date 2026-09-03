@@ -1055,6 +1055,30 @@ impl<'a> ResolutionState<'a> {
     /// now — those are P5.5 features).
     pub(crate) fn resolve_node_like(mut self) -> ResolvedModule {
         let result = self.resolve_node_like_worker();
+        if result.is_none() {
+            // TS 5.x alternate-result probe (the 6280 "There are types at
+            // '...'" elaboration on TS2307): when a node10-style
+            // (exports-less) resolution fails on a bare specifier, retry
+            // with modern features — a candidate found only through
+            // package.json `exports` is kept as `alternate_result` while
+            // the primary stays unresolved
+            // (node10AlternateResult_noResolution).
+            if !tspath::is_external_module_name_relative(&self.name)
+                && !self.features.contains(NodeResolutionFeatures::Exports)
+                && self
+                    .extensions
+                    .intersects(Extensions::TYPESCRIPT | Extensions::DECLARATION)
+            {
+                self.features |= NodeResolutionFeatures::ALL;
+                if let Some(alt) = self.resolve_node_like_worker() {
+                    return ResolvedModule {
+                        alternate_result: Some(alt.path),
+                        ..Default::default()
+                    };
+                }
+            }
+            return self.create_resolved_module(None);
+        }
         self.create_resolved_module(result)
     }
 
