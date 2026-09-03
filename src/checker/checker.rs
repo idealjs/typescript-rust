@@ -34,6 +34,14 @@ use crate::diagnostics::messages_generated::{
     PROPERTY_0_IS_PRIVATE_AND_ONLY_ACCESSIBLE_WITHIN_CLASS_1,
     THIS_COMPARISON_APPEARS_TO_BE_UNINTENTIONAL_BECAUSE_THE_TYPES_0_AND_1_HAVE_NO_OVERLAP,
     THIS_EXPRESSION_IS_NOT_CALLABLE, THIS_EXPRESSION_IS_NOT_CONSTRUCTABLE,
+    EACH_MEMBER_OF_THE_UNION_TYPE_0_HAS_CONSTRUCT_SIGNATURES_BUT_NONE_OF_THOSE_SIGNATURES_ARE_COMPATIBLE_WITH_EACH_OTHER,
+    EACH_MEMBER_OF_THE_UNION_TYPE_0_HAS_SIGNATURES_BUT_NONE_OF_THOSE_SIGNATURES_ARE_COMPATIBLE_WITH_EACH_OTHER,
+    NOT_ALL_CONSTITUENTS_OF_TYPE_0_ARE_CALLABLE,
+    NOT_ALL_CONSTITUENTS_OF_TYPE_0_ARE_CONSTRUCTABLE,
+    NO_CONSTITUENT_OF_TYPE_0_IS_CALLABLE,
+    NO_CONSTITUENT_OF_TYPE_0_IS_CONSTRUCTABLE,
+    TYPE_0_HAS_NO_CALL_SIGNATURES,
+    TYPE_0_HAS_NO_CONSTRUCT_SIGNATURES,
     TYPE_0_IS_MISSING_THE_FOLLOWING_PROPERTIES_FROM_TYPE_1_COLON_2,
     TYPE_0_IS_NOT_ASSIGNABLE_TO_TYPE_1, UNREACHABLE_CODE_DETECTED,
     VARIABLE_0_IS_USED_BEFORE_BEING_ASSIGNED, X_0_IS_POSSIBLY_UNDEFINED,
@@ -7505,6 +7513,150 @@ impl Checker {
         self.check_call_arguments_against(node, &callee_type, &arguments, callee_expr, is_new);
     }
 
+    /// Go `invocationError`/`invocationErrorDetails` (checker.go ~L10115): the
+    /// head "This expression is not callable/constructable" is never bare — it
+    /// always carries a nested chain entry naming the callee's apparent type.
+    /// A primitive callee's apparent type is its global wrapper interface
+    /// (`string` → `String`), rendering "  Type 'String' has no call
+    /// signatures."; a union callee instead nests "No constituent of type
+    /// 'A | B' is callable." or "Not all constituents ... are callable." over
+    /// the first signature-less constituent.
+    fn report_invocation_error(
+        &mut self,
+        callee_expr: &Arc<Node>,
+        callee_type: &Arc<Type>,
+        is_new: bool,
+    ) {
+        let head = if is_new {
+            THIS_EXPRESSION_IS_NOT_CONSTRUCTABLE
+        } else {
+            THIS_EXPRESSION_IS_NOT_CALLABLE
+        };
+        let no_sigs = if is_new {
+            TYPE_0_HAS_NO_CONSTRUCT_SIGNATURES
+        } else {
+            TYPE_0_HAS_NO_CALL_SIGNATURES
+        };
+        let chain = if let Some(u) = callee_type.as_union_or_intersection() {
+            // Go iterates every constituent of the union: when none carries
+            // signatures the nested entry is "No constituent of type 'A | B'
+            // is callable"; otherwise "Not all constituents ... are
+            // callable" wraps the first signature-less constituent one level
+            // deeper; when all have signatures the sets are incompatible.
+            let union_str = self.type_to_string(callee_type);
+            let mut has_signatures = false;
+            let mut first_without: Option<String> = None;
+            for c in u.types.iter() {
+                let n = if is_new {
+                    c.as_structured()
+                        .map(|s| s.construct_signatures().len())
+                        .unwrap_or(0)
+                } else {
+                    c.as_structured()
+                        .map(|s| s.call_signatures().len())
+                        .unwrap_or(0)
+                };
+                if n != 0 {
+                    has_signatures = true;
+                    if first_without.is_some() {
+                        break;
+                    }
+                } else if first_without.is_none() {
+                    first_without = Some(self.type_to_string(c));
+                }
+            }
+            let msg = if !has_signatures {
+                if is_new {
+                    NO_CONSTITUENT_OF_TYPE_0_IS_CONSTRUCTABLE
+                } else {
+                    NO_CONSTITUENT_OF_TYPE_0_IS_CALLABLE
+                }
+            } else if first_without.is_some() {
+                if is_new {
+                    NOT_ALL_CONSTITUENTS_OF_TYPE_0_ARE_CONSTRUCTABLE
+                } else {
+                    NOT_ALL_CONSTITUENTS_OF_TYPE_0_ARE_CALLABLE
+                }
+            } else if is_new {
+                EACH_MEMBER_OF_THE_UNION_TYPE_0_HAS_CONSTRUCT_SIGNATURES_BUT_NONE_OF_THOSE_SIGNATURES_ARE_COMPATIBLE_WITH_EACH_OTHER
+            } else {
+                EACH_MEMBER_OF_THE_UNION_TYPE_0_HAS_SIGNATURES_BUT_NONE_OF_THOSE_SIGNATURES_ARE_COMPATIBLE_WITH_EACH_OTHER
+            };
+            let mut outer = crate::ast::Diagnostic::new(
+                self.current_file.clone(),
+                callee_expr.loc,
+                msg,
+                vec![union_str],
+            );
+            if let Some(first) = first_without.filter(|_| has_signatures) {
+                outer.message_chain = vec![crate::ast::Diagnostic::new(
+                    self.current_file.clone(),
+                    callee_expr.loc,
+                    no_sigs,
+                    vec![first],
+                )];
+            }
+            vec![outer]
+        } else {
+            // Apparent type of a primitive is its global wrapper interface;
+            // `type_to_string` of that interface is just its name ("String").
+            // Non-wrapped primitives (void/null/undefined) and object types
+            // pass through unchanged (Go `getApparentType` tail `return t`).
+            let apparent_str = match self.primitive_apparent_name(callee_type) {
+                Some(name) => name.to_string(),
+                None => self.type_to_string(callee_type),
+            };
+            vec![crate::ast::Diagnostic::new(
+                self.current_file.clone(),
+                callee_expr.loc,
+                no_sigs,
+                vec![apparent_str],
+            )]
+        };
+        let mut diag = crate::ast::Diagnostic::new(
+            self.current_file.clone(),
+            callee_expr.loc,
+            head,
+            vec![],
+        );
+        diag.message_chain = chain;
+        self.diagnostics.add(diag);
+    }
+
+    /// Name of the global wrapper interface that is a primitive's apparent
+    /// type (Go `getApparentType`'s StringLike/NumberLike/... cases), or
+    /// `None` when `t` has no wrapper global (void/null/undefined/objects).
+    fn primitive_apparent_name(&self, t: &Arc<Type>) -> Option<&'static str> {
+        let name = if t.flags.intersects(
+            TypeFlags::String
+                | TypeFlags::StringLiteral
+                | TypeFlags::TemplateLiteral
+                | TypeFlags::StringMapping,
+        ) {
+            "String"
+        } else if t
+            .flags
+            .intersects(TypeFlags::Number | TypeFlags::NumberLiteral)
+        {
+            "Number"
+        } else if t
+            .flags
+            .intersects(TypeFlags::Boolean | TypeFlags::BooleanLiteral)
+        {
+            "Boolean"
+        } else if t.flags.intersects(TypeFlags::ESSymbol | TypeFlags::UniqueESSymbol) {
+            "Symbol"
+        } else if t
+            .flags
+            .intersects(TypeFlags::BigInt | TypeFlags::BigIntLiteral)
+        {
+            "BigInt"
+        } else {
+            return None;
+        };
+        self.globals.get(name).map(|_| name)
+    }
+
     /// Argument-checking core shared by direct calls/constructs and `super()`
     /// calls: select a signature from `callee_type`, check arity and each
     /// argument's assignability. `callee_expr` is the diagnostic anchor.
@@ -7572,17 +7724,7 @@ impl Checker {
                         &union_signatures
                     } else {
                         // Some member isn't constructable.
-                        let file = self.current_file.clone();
-                        self.diagnostics.add(crate::ast::Diagnostic::new(
-                            file,
-                            callee_expr.loc,
-                            if is_new {
-                                THIS_EXPRESSION_IS_NOT_CONSTRUCTABLE
-                            } else {
-                                THIS_EXPRESSION_IS_NOT_CALLABLE
-                            },
-                            vec![],
-                        ));
+                        self.report_invocation_error(callee_expr, callee_type, is_new);
                         return;
                     }
                 } else {
@@ -7641,13 +7783,7 @@ impl Checker {
                         // Some non-nullable member isn't callable (or the
                         // union is entirely nullable — `undefined` alone
                         // falls into the non-structured path above).
-                        let file = self.current_file.clone();
-                        self.diagnostics.add(crate::ast::Diagnostic::new(
-                            file,
-                            callee_expr.loc,
-                            THIS_EXPRESSION_IS_NOT_CALLABLE,
-                            vec![],
-                        ));
+                        self.report_invocation_error(callee_expr, callee_type, is_new);
                         return;
                     }
                 }
@@ -7664,17 +7800,7 @@ impl Checker {
                 if !is_new && self.report_get_accessor_call(callee_expr) {
                     return;
                 }
-                let file = self.current_file.clone();
-                self.diagnostics.add(crate::ast::Diagnostic::new(
-                    file,
-                    callee_expr.loc,
-                    if is_new {
-                        THIS_EXPRESSION_IS_NOT_CONSTRUCTABLE
-                    } else {
-                        THIS_EXPRESSION_IS_NOT_CALLABLE
-                    },
-                    vec![],
-                ));
+                self.report_invocation_error(callee_expr, callee_type, is_new);
                 return;
             };
         // With explicit type arguments, only overloads with a matching
@@ -7761,21 +7887,12 @@ impl Checker {
             // Structured type but no call/construct signatures — e.g.
             // calling a plain object literal or a number. Mirrors Go's
             // `invocationError` head message ("This expression is not
-            // callable" / "This expression is not constructable").
+            // callable" / "This expression is not constructable") with the
+            // nested "Type '{...}' has no call signatures." chain entry.
             if !is_new && self.report_get_accessor_call(callee_expr) {
                 return;
             }
-            let file = self.current_file.clone();
-            self.diagnostics.add(crate::ast::Diagnostic::new(
-                file,
-                callee_expr.loc,
-                if is_new {
-                    THIS_EXPRESSION_IS_NOT_CONSTRUCTABLE
-                } else {
-                    THIS_EXPRESSION_IS_NOT_CALLABLE
-                },
-                vec![],
-            ));
+            self.report_invocation_error(callee_expr, callee_type, is_new);
             return;
         }
         // Overload resolution: if multiple signatures exist, find the first
