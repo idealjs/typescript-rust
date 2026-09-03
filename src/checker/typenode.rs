@@ -4618,9 +4618,18 @@ impl Checker {
     }
 
     /// Build the optional type `T | undefined` for a property `x?: T`.
-    /// Mirrors Go's `getOptionalType`.
+    /// Mirrors Go's `getOptionalType` feeding `addOptionality`: the
+    /// `| undefined` is added ONLY under strictNullChecks — without it,
+    /// `undefined` is assignable to everything anyway and the property
+    /// type stays `T` (neverAsDiscriminantType strict=false: `{kind?:
+    /// never}` must keep its `never` discriminant, not become
+    /// `undefined`).
     pub fn get_optional_type(&mut self, t: Arc<Type>) -> Arc<Type> {
-        self.get_union_type(vec![t, self.undefined_type()])
+        if self.strict_null_checks {
+            self.get_union_type(vec![t, self.undefined_type()])
+        } else {
+            t
+        }
     }
 
     pub fn get_union_type(&mut self, types: Vec<Arc<Type>>) -> Arc<Type> {
@@ -5314,6 +5323,24 @@ impl Checker {
     ///   - index signature match → index signature value type
     ///   - type parameter object → resolve through constraint
     ///   - otherwise → `any` (no error node here, so callers see `any`)
+    /// Whether a type node references an identifier named `name` — used to
+    /// decide whether re-resolving a mapped-type template under a
+    /// `P → index` mapping can change the outcome. Name-based (the symbol
+    /// map doesn't populate type-position identifier bindings); a shadowed
+    /// same-name identifier merely triggers a redundant re-resolution,
+    /// matching the pre-check behavior.
+    fn type_node_references_name(node: &Arc<Node>, name: &str) -> bool {
+        if node.kind == SyntaxKind::Identifier && node.text() == name {
+            return true;
+        }
+        let mut found = false;
+        crate::ast::node_data_generated::for_each_child(node, |c| {
+            found = found || Self::type_node_references_name(c, name);
+            found
+        });
+        found
+    }
+
     pub fn get_indexed_access_type(
         &mut self,
         object_type: &Arc<Type>,
@@ -5400,6 +5427,22 @@ impl Checker {
                             .symbol_map()
                             .symbol_of(&tp_node)
                             .cloned()?;
+                        // Re-resolution only carries the `P → index`
+                        // mapping — the mapped type's OWN instantiation
+                        // (e.g. `Record<K, T>`'s `T := object`) lives only
+                        // in the eagerly-substituted `template_type`. When
+                        // the template doesn't reference the mapped
+                        // parameter at all, re-resolving would leave the
+                        // alias's type parameters as FREE variables
+                        // (classInConvertedLoopES5: `classesByRow[row]`
+                        // typed as bare `T`) — use the pre-substituted
+                        // template instead.
+                        if !Self::type_node_references_name(
+                            &template_node,
+                            &tp_sym.name,
+                        ) {
+                            return None;
+                        }
                         let mut mapping = std::collections::HashMap::new();
                         mapping.insert(
                             Arc::as_ptr(&tp_sym) as *const crate::ast::Symbol,

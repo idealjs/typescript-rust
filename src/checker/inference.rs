@@ -589,10 +589,15 @@ impl Checker {
             state.contravariant = save_contra;
             state.bivariant = save_biv;
         }
-        if let (Some(st), Some(tt)) = (
-            source.resolved_return_type.get().cloned(),
-            target.resolved_return_type.get().cloned(),
-        ) {
+        // Resolve returns on demand — nested generic callbacks (Array's
+        // `flatMap` member) arrive with lazily-unresolved return types;
+        // skipping return-position inference there leaves the signature's
+        // own type parameter unmapped, and the subsequent structural
+        // comparison of two identical-looking `<U, This>` signatures fails
+        // (arrayToLocaleStringES2020).
+        let st = self.get_return_type_of_signature(source);
+        let tt = self.get_return_type_of_signature(target);
+        if let (Some(st), Some(tt)) = (st, tt) {
             if std::env::var_os("TSOX_DEBUG_INFER").is_some() {
                 eprintln!(
                     "[infer-sig] ret {} -> {}",
