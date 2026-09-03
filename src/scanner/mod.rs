@@ -1700,7 +1700,13 @@ impl Scanner {
             // gated availability is checked (TS1501).
             let mut seen_flags: u16 = 0;
             while p < self.end {
-                let c = self.text.as_bytes()[p] as char;
+                // Decode the FULL character — flag positions must advance by
+                // the char's UTF-8 length, else a non-BMP identifier-part
+                // character ('𝘨', 4 bytes) gets consumed byte-wise and
+                // token_end lands mid-char (slice panic in token_text;
+                // regularExpressionWithNonBMPFlags).
+                let c = self.text[p..].chars().next().unwrap_or('\0');
+                let c_len = c.len_utf8();
                 if !is_identifier_part(c) {
                     break;
                 }
@@ -1720,9 +1726,9 @@ impl Scanner {
                     }
                 } else {
                     // Unknown flag — report at this char.
-                    self.report_error(DiagnosticKind::UnknownRegularExpressionFlag, p, 1);
+                    self.report_error(DiagnosticKind::UnknownRegularExpressionFlag, p, c_len);
                 }
-                p += 1;
+                p += c_len;
             }
             self.pos = p;
 

@@ -6323,3 +6323,6 @@ conformance/nodeModulesImportAttributesTypeModeDeclarationEmitErrors(module=node
 conformance/nodeModulesImportAttributesTypeModeDeclarationEmitErrors(module=node18).errors.txt
 conformance/nodeModulesImportAttributesTypeModeDeclarationEmitErrors(module=node20).errors.txt
 conformance/nodeModulesImportAttributesTypeModeDeclarationEmitErrors(module=nodenext).errors.txt
+
+## 2026-09-03 Page-52: 默认导出再导出链的 TYPE 意义传播缺口（reexportDefaultIsCallable：`export { default } from "./schema"` 后 `import Base from "./reexporter"` 的类型位解析停在 reexporter 的 ExportSpecifier 别名——resolve_import_alias_target_symbol 的跟随循环只认 ExportAssignment；hop 进 schema 后 resolve_module_member_symbol/file_module_exported_member 对该模块符号均取不到 default 成员（模块符号实例的 exports 面未挂）。需跨模块别名意义传播机制（typenode.rs 2749 臂自注 "resolving the alias target is future work"）。官方零错） ##
+compiler/reexportDefaultIsCallable.errors.txt
