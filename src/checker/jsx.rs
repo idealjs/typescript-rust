@@ -266,22 +266,26 @@ impl Checker {
                             // position — the runtime-module failure is
                             // buffered and flushed at the opening-like
                             // element check's tail.
-                            // Span note: official's TS2875 sorts AFTER the
-                            // element's own 7026 at the same start — give it
-                            // the ENCLOSING JSX element's (longer) span when
-                            // available.
-                            let span = error_node
-                                .parent
-                                .as_ref()
-                                .filter(|p| {
-                                    matches!(
-                                        p.kind,
-                                        crate::ast::SyntaxKind::JsxElement
-                                            | crate::ast::SyntaxKind::JsxSelfClosingElement
-                                    )
-                                })
-                                .map(|p| p.loc)
-                                .unwrap_or(error_node.loc);
+                            // Span note: official anchors TS2875 at the
+                            // OUTERMOST JSX expression containing the first
+                            // runtime consult — a fragment `<>...</>` reports
+                            // at the FRAGMENT (jsxJsxsCjsTransformCustomImport
+                            // (2,11)), element nesting at the outer element
+                            // (the longer span also sorts after the element's
+                            // own 7026 at the same start).
+                            let mut span = error_node.loc;
+                            let mut node: &Arc<Node> = error_node;
+                            while let Some(parent) = node.parent.as_ref() {
+                                match parent.kind {
+                                    crate::ast::SyntaxKind::JsxElement
+                                    | crate::ast::SyntaxKind::JsxSelfClosingElement
+                                    | crate::ast::SyntaxKind::JsxFragment => {
+                                        span = parent.loc;
+                                        node = parent;
+                                    }
+                                    _ => break,
+                                }
+                            }
                             self.pending_jsx_2875 = Some((span, module_ref));
                             None
                         }
@@ -502,6 +506,48 @@ impl Checker {
             .is_some_and(|g| g.flags.intersects(SymbolFlags::VALUE))
     }
 
+    /// Go `getLocalJsxNamespace` via `GetPragmaFromSourceFile(file, "jsx")`
+    /// (parser.go `getCommentPragmas`): the LAST `@jsx`/`@jsxfrag`/
+    /// `@jsximportsource`/`@jsxruntime` pragma in the file's leading
+    /// multi-line comments overrides the compiler-option factory —
+    /// `/** @jsx dom */` makes `dom` the required entity for that file
+    /// even under `--jsxFactory p`. Returns the pragma's factory argument.
+    fn local_jsx_pragma_factory(&self, pragma: &str) -> Option<String> {
+        let file = self.current_file.as_ref()?;
+        let ranges = crate::scanner::get_leading_comment_ranges(&file.text, 0);
+        let mut result = None;
+        for r in ranges {
+            if r.kind != crate::scanner::CommentRangeKind::MultiLine {
+                continue;
+            }
+            let comment = &file.text[r.pos..r.end];
+            let comment = comment.strip_suffix("*/").unwrap_or(comment);
+            for line in comment.split('\n') {
+                // Only the FIRST '@'-token on a line can open a pragma (an
+                // earlier unrelated '@token' — e.g. an email — blocks it).
+                let Some(at) = line.find('@') else {
+                    continue;
+                };
+                let after = &line[at + 1..];
+                let name_end = after
+                    .find(char::is_whitespace)
+                    .unwrap_or(after.len());
+                let name = &after[..name_end];
+                if !name.eq_ignore_ascii_case(pragma) {
+                    continue;
+                }
+                let args = after[name_end..].trim_start();
+                let arg_end = args
+                    .find(char::is_whitespace)
+                    .unwrap_or(args.len());
+                if arg_end > 0 {
+                    result = Some(args[..arg_end].to_string());
+                }
+            }
+        }
+        result
+    }
+
     pub fn check_jsx_opening_like_element(&mut self, opening: &Arc<Node>) {
         let is_opening_like = is_jsx_opening_like_element(opening);
         if is_opening_like {
@@ -521,7 +567,9 @@ impl Checker {
             // The required entity is the JSX factory's first identifier —
             // `React` by default (or `--reactNamespace`), the first
             // component of `--jsxFactory a.b.c` when set (Go
-            // resolveJsxEntityName). With an explicit factory the React
+            // resolveJsxEntityName). A per-file `/** @jsx dom */` pragma
+            // OVERRIDES the option factory for that file (Go
+            // getLocalJsxNamespace). With an explicit factory the React
             // namespace is never referenced, so a declared `__make`
             // satisfies the gate (TS2874 must not fire).
             let default_name = self
@@ -529,14 +577,20 @@ impl Checker {
                 .react_namespace
                 .as_str();
             let default_name = if default_name.is_empty() { "React" } else { default_name };
-            let factory_name = self
+            let option_factory = self
                 .compiler_options
                 .jsx_factory
                 .split('.')
                 .next()
                 .filter(|s| !s.is_empty())
-                .unwrap_or(default_name);
-            if !self.jsx_factory_namespace_in_scope(factory_name) {
+                .unwrap_or(default_name)
+                .to_string();
+            let factory_name = self
+                .local_jsx_pragma_factory("jsx")
+                .and_then(|f| f.split('.').next().map(str::to_string))
+                .filter(|s| !s.is_empty())
+                .unwrap_or(option_factory);
+            if !self.jsx_factory_namespace_in_scope(&factory_name) {
                 self.grammar_error_on_node_with_args(
                     &tag,
                     &THIS_JSX_TAG_REQUIRES_0_TO_BE_IN_SCOPE_BUT_IT_COULD_NOT_BE_FOUND,
