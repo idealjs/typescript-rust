@@ -628,6 +628,51 @@ impl Checker {
     /// (marker entries 2202-2205 collapse into "The types returned by
     /// 'x()' ..."), dotted property-name chaining ('x' → 'x.y'), and
     /// excess-property suppression.
+    /// Go `tryElaborateErrorsForPrimitivesAndObjects` (relater.go ~L4440):
+    /// source is the GLOBAL wrapper interface (String/Number/Boolean/
+    /// Symbol) and target the like-named primitive — reports TS2692 into
+    /// the error chain (rendered as the nested elaboration line).
+    fn try_elaborate_primitive_and_object(&mut self, source: &Arc<Type>, target: &Arc<Type>) {
+        use crate::diagnostics::messages_generated as msg;
+        if !source.flags.contains(TypeFlags::Object)
+            || !target.flags.intersects(
+                TypeFlags::String
+                    | TypeFlags::Number
+                    | TypeFlags::Boolean
+                    | TypeFlags::ESSymbol,
+            )
+        {
+            return;
+        }
+        let Some(sym) = source.symbol.as_ref() else {
+            return;
+        };
+        let name = match sym.name.as_str() {
+            "String" | "Number" | "Boolean" | "Symbol" => sym.name.as_str(),
+            _ => return,
+        };
+        // Only the GLOBAL interface instance (declared in lib), not a
+        // same-named local interface.
+        if self.globals.get(name).is_none() {
+            return;
+        }
+        let matches = match name {
+            "String" => target.flags.contains(TypeFlags::String),
+            "Number" => target.flags.contains(TypeFlags::Number),
+            "Boolean" => target.flags.contains(TypeFlags::Boolean),
+            _ => target.flags.contains(TypeFlags::ESSymbol),
+        };
+        if !matches {
+            return;
+        }
+        let target_str = self.type_to_string(target);
+        let source_str = self.type_to_string(source);
+        self.relater_report_error(
+            msg::X_0_IS_A_PRIMITIVE_BUT_1_IS_A_WRAPPER_OBJECT_PREFER_USING_0_WHEN_POSSIBLE,
+            vec![target_str, source_str],
+        );
+    }
+
     pub(crate) fn relater_report_error(
         &mut self,
         message: crate::diagnostics::Message,
@@ -7326,6 +7371,13 @@ impl Checker {
             self.relater_error_chain = saved_chain;
             return false;
         }
+        // Go reportErrorResults (relater.go ~L4749): a wrapper-object
+        // source failing against its like-named PRIMITIVE target gets the
+        // TS2692 elaboration pushed BEFORE the generalized head — it
+        // renders as the single nested line under `Type 'X' is not
+        // assignable to type 'Y'` (symbolType15:
+        // `sym = symObj` with `symObj: Symbol` vs `symbol`).
+        self.try_elaborate_primitive_and_object(source, target);
         // Head message (Go `reportRelationError`, relater.go ~L4792):
         // fresh literals display their base primitive when the target can't
         // hold singletons (`5` vs `{}` shows `number`).
