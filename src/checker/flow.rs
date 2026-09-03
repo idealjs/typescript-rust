@@ -1534,10 +1534,13 @@ impl Checker {
                 // whose discriminant property is `never` in BOTH branches
                 // (`discriminantType.flags&TypeFlagsNever == 0`) —
                 // `{ kind: never }` is removed by `kind === "a"` AND by
-                // `kind !== "a"` (neverAsDiscriminantType).
-                if prop_type.as_ref().is_some_and(|pt| {
-                    pt.flags.intersects(TypeFlags::Never | TypeFlags::Undefined)
-                }) {
+                // `kind !== "a"` (neverAsDiscriminantType). `undefined`
+                // discriminants stay in play: `err === undefined` KEEPS the
+                // `err: undefined` constituent (discriminatedUnionTypes3).
+                if prop_type
+                    .as_ref()
+                    .is_some_and(|pt| pt.flags.contains(TypeFlags::Never))
+                {
                     return false;
                 }
                 if keep_matching {
