@@ -547,6 +547,9 @@ pub struct Checker {
     /// structural types such as `type Box<T> = { next: Box<T> | null }`.
     /// Mirrors `Checker.relationStackDepth` in Go (relater.go).
     pub relater_depth: u32,
+    /// Nesting depth of the deferred-conditional default-constraint
+    /// fallback in `is_type_related_to` (see the comment there).
+    pub deferred_constraint_depth: u32,
     /// Complexity budget for type relation comparisons. Decremented on
     /// each failed sub-comparison. When it reaches zero, the relater
     /// reports overflow and stops. Mirrors Go's `relationCount`
@@ -1092,6 +1095,7 @@ impl Checker {
             relater_error_chain: Vec::new(),
             relater_chain_active: false,
             relater_depth: 0,
+            deferred_constraint_depth: 0,
             relation_count: 0,
             relater_overflow: false,
             relater_intersection_target_depth: 0,

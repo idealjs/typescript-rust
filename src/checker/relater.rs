@@ -475,10 +475,20 @@ impl Checker {
                 }
                 _ => false,
             };
-            if truly_deferred && let Some(constraint) =
-                self.deferred_default_constraint_of_conditional(&source)
+            // The fallback re-relates against freshly-built branch unions;
+            // a recursive alias (`Compute<A>` whose branches instantiate the
+            // same conditional) mints NEW conditional types each level, so
+            // pointer-keyed cycle guards never fire and the chain grows
+            // without bound (ramdaToolsNoInfinite2 stack overflow). Go
+            // bounds this via the relationCount/overflow budget; this port
+            // caps the fallback nesting directly.
+            if truly_deferred && self.deferred_constraint_depth < 100
+                && let Some(constraint) = self.deferred_default_constraint_of_conditional(&source)
             {
-                if self.is_type_related_to(&constraint, &target, relation) {
+                self.deferred_constraint_depth += 1;
+                let r = self.is_type_related_to(&constraint, &target, relation);
+                self.deferred_constraint_depth -= 1;
+                if r {
                     result = true;
                 }
             }
