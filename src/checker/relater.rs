@@ -777,7 +777,25 @@ impl Checker {
         head_args: Vec<String>,
     ) {
         use crate::diagnostics::messages_generated as msg;
-        if target.flags.contains(TypeFlags::TypeParameter) {
+        // Go reportRelationError's target-flags view (relater.go ~L4796): an
+        // IndexedAccess target is judged by its OBJECT type's flags (a
+        // `T[P]` over a type-parameter T takes the type-parameter note) —
+        // unless the source is itself an IndexedAccess.
+        let target_flags_view = if target.flags.contains(TypeFlags::IndexedAccess)
+            && !source.flags.contains(TypeFlags::IndexedAccess)
+        {
+            match &target.data {
+                crate::checker::types::TypeData::IndexedAccess(d) => d
+                    .object_type
+                    .as_ref()
+                    .map(|o| o.flags)
+                    .unwrap_or(target.flags),
+                _ => target.flags,
+            }
+        } else {
+            target.flags
+        };
+        if target_flags_view.contains(TypeFlags::TypeParameter) {
             let constraint = self.get_base_constraint_of_type(target);
             let constraint_ok = constraint
                 .as_ref()

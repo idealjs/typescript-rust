@@ -7537,7 +7537,9 @@ impl Checker {
         } else {
             TYPE_0_HAS_NO_CALL_SIGNATURES
         };
-        let chain = if let Some(u) = callee_type.as_union_or_intersection() {
+        let chain = if callee_type.flags.contains(TypeFlags::Union)
+            && let Some(u) = callee_type.as_union_or_intersection()
+        {
             // Go iterates every constituent of the union: when none carries
             // signatures the nested entry is "No constituent of type 'A | B'
             // is callable"; otherwise "Not all constituents ... are
@@ -7602,9 +7604,18 @@ impl Checker {
             // `type_to_string` of that interface is just its name ("String").
             // Non-wrapped primitives (void/null/undefined) and object types
             // pass through unchanged (Go `getApparentType` tail `return t`).
-            let apparent_str = match self.primitive_apparent_name(callee_type) {
-                Some(name) => name.to_string(),
-                None => self.type_to_string(callee_type),
+            // An intersection whose same-named properties are mutually
+            // exclusive reduces to `never` (Go `getReducedType`'s
+            // IsNeverIntersection — neverIntersectionNotCallable).
+            let apparent_str = if callee_type.flags.contains(TypeFlags::Intersection)
+                && self.is_never_intersection(callee_type)
+            {
+                "never".to_string()
+            } else {
+                match self.primitive_apparent_name(callee_type) {
+                    Some(name) => name.to_string(),
+                    None => self.type_to_string(callee_type),
+                }
             };
             vec![crate::ast::Diagnostic::new(
                 self.current_file.clone(),
@@ -7655,6 +7666,88 @@ impl Checker {
             return None;
         };
         self.globals.get(name).map(|_| name)
+    }
+
+    /// Go `getReducedType`'s IsNeverIntersection (checker.go ~L22160): an
+    /// intersection reduces to `never` when the same-named property of two
+    /// constituents is mutually exclusive — the property's own intersection
+    /// is never (`a: ""` ∩ `a: number`). Approximated by primitive-domain
+    /// disjointness plus distinct same-domain literals.
+    fn is_never_intersection(&mut self, t: &Arc<Type>) -> bool {
+        let Some(ui) = t.as_union_or_intersection() else {
+            return false;
+        };
+        let domain = |t: &Arc<Type>| -> u8 {
+            if t.flags.intersects(
+                TypeFlags::String
+                    | TypeFlags::StringLiteral
+                    | TypeFlags::TemplateLiteral
+                    | TypeFlags::StringMapping,
+            ) {
+                1
+            } else if t.flags.intersects(TypeFlags::Number | TypeFlags::NumberLiteral) {
+                2
+            } else if t
+                .flags
+                .intersects(TypeFlags::Boolean | TypeFlags::BooleanLiteral)
+            {
+                3
+            } else if t
+                .flags
+                .intersects(TypeFlags::BigInt | TypeFlags::BigIntLiteral)
+            {
+                4
+            } else if t.flags.intersects(TypeFlags::ESSymbol | TypeFlags::UniqueESSymbol) {
+                5
+            } else if t.flags.contains(TypeFlags::Undefined) {
+                6
+            } else if t.flags.contains(TypeFlags::Null) {
+                7
+            } else {
+                0
+            }
+        };
+        let disjoint = |a: &Arc<Type>, b: &Arc<Type>| -> bool {
+            let (da, db) = (domain(a), domain(b));
+            if da == 0 || db == 0 {
+                return false;
+            }
+            if da != db {
+                return true;
+            }
+            match (a.literal_value(), b.literal_value()) {
+                (Some(x), Some(y)) => x != y,
+                _ => false,
+            }
+        };
+        for (i, c) in ui.types.iter().enumerate() {
+            let Some(cs) = c.as_structured() else {
+                continue;
+            };
+            for prop in &cs.properties {
+                for (j, other) in ui.types.iter().enumerate() {
+                    if i == j {
+                        continue;
+                    }
+                    let Some(os) = other.as_structured() else {
+                        continue;
+                    };
+                    if let Some(other_prop) = os
+                        .properties
+                        .iter()
+                        .find(|p| p.name == prop.name)
+                        .cloned()
+                    {
+                        let pt = self.get_type_of_symbol(prop);
+                        let ot = self.get_type_of_symbol(&other_prop);
+                        if disjoint(&pt, &ot) {
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+        false
     }
 
     /// Argument-checking core shared by direct calls/constructs and `super()`
