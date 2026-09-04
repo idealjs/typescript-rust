@@ -1,0 +1,4 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -1 +0,0 @@
+-main.ts(1,10): error TS2305: Module '"ext"' has no exported member 'fa'.

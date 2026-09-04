@@ -1,0 +1,8 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,5 @@
++generatorYieldContextualType.ts(2,13): error TS2345: Argument of type '() => number' is not assignable to parameter of type '() => Generator<unknown, unknown, unknown>'.
++  Type 'number' is not assignable to type 'Generator<unknown, unknown, unknown>'.
++generatorYieldContextualType.ts(8,13): error TS2345: Argument of type '() => number' is not assignable to parameter of type '() => Generator<unknown, unknown, unknown> | AsyncGenerator<unknown, unknown, unknown>'.
++  Type 'number' is not assignable to type 'Generator<unknown, unknown, unknown> | AsyncGenerator<unknown, unknown, unknown>'.
++

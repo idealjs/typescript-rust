@@ -1,0 +1,8 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,5 @@
++reverseMappedIntersectionInference2.ts(22,17): error TS7006: Parameter 'dataArg' implicitly has an 'any' type.
++reverseMappedIntersectionInference2.ts(26,15): error TS7006: Parameter 'errorArg' implicitly has an 'any' type.
++reverseMappedIntersectionInference2.ts(32,17): error TS7006: Parameter 'dataArg' implicitly has an 'any' type.
++reverseMappedIntersectionInference2.ts(36,15): error TS7006: Parameter 'errorArg' implicitly has an 'any' type.
++

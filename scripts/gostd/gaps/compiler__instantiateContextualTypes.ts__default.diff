@@ -1,0 +1,23 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,20 @@
++instantiateContextualTypes.ts(25,55): error TS7006: Parameter 'val' implicitly has an 'any' type.
++instantiateContextualTypes.ts(81,11): error TS7006: Parameter 'a' implicitly has an 'any' type.
++instantiateContextualTypes.ts(114,15): error TS2345: Argument of type 'typeof InferFunctionTypes' is not assignable to parameter of type 'ComponentClass<object>'.
++  Types of parameters 'props' and 'props' are incompatible.
++    Type 'P' is not assignable to type 'P'.
++      'P' could be instantiated with an arbitrary type which could be unrelated to 'P'.
++instantiateContextualTypes.ts(114,36): error TS7006: Parameter 'foo' implicitly has an 'any' type.
++instantiateContextualTypes.ts(116,16): error TS2345: Argument of type 'typeof InferFunctionTypes' is not assignable to parameter of type 'ComponentClass<object>'.
++  Types of parameters 'props' and 'props' are incompatible.
++    Type 'P' is not assignable to type 'P'.
++      'P' could be instantiated with an arbitrary type which could be unrelated to 'P'.
++instantiateContextualTypes.ts(116,38): error TS7006: Parameter 'foo' implicitly has an 'any' type.
++instantiateContextualTypes.ts(139,38): error TS7006: Parameter 'box' implicitly has an 'any' type.
++instantiateContextualTypes.ts(139,38): error TS2345: Argument of type '(box: any) => any' is not assignable to parameter of type 'never'.
++instantiateContextualTypes.ts(147,28): error TS2339: Property 'then' does not exist on type 'Promise<void>'.
++instantiateContextualTypes.ts(155,28): error TS2339: Property 'then' does not exist on type 'Promise<void>'.
++instantiateContextualTypes.ts(160,28): error TS2339: Property 'then' does not exist on type 'Promise<void>'.
++instantiateContextualTypes.ts(173,5): error TS2322: Type 'number' is not assignable to type '0 | 1 | 2'.
++instantiateContextualTypes.ts(183,26): error TS7019: Rest parameter 'args' implicitly has an 'any[]' type.
++

@@ -1,0 +1,6 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,3 @@
++inferenceDoesNotAddUndefinedOrNull.ts(12,23): error TS7006: Parameter 'child' implicitly has an 'any' type.
++inferenceDoesNotAddUndefinedOrNull.ts(23,23): error TS7006: Parameter 'child' implicitly has an 'any' type.
++

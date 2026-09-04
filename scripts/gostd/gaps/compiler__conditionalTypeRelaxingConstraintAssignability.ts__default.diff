@@ -1,0 +1,10 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,7 @@
++conditionalTypeRelaxingConstraintAssignability.ts(20,10): error TS2345: Argument of type 'undefined' is not assignable to parameter of type 'C extends string ? string : C'.
++conditionalTypeRelaxingConstraintAssignability.ts(21,10): error TS2345: Argument of type 'string' is not assignable to parameter of type 'C extends string ? string : C'.
++conditionalTypeRelaxingConstraintAssignability.ts(22,10): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'C extends string ? string : C'.
++  Type 'undefined' is not assignable to type 'C extends string ? string : C'.
++conditionalTypeRelaxingConstraintAssignability.ts(23,10): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'C extends string ? string : C'.
++  Type 'undefined' is not assignable to type 'C extends string ? string : C'.
++

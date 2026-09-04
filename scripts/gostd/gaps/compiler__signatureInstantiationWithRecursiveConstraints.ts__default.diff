@@ -1,0 +1,9 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,6 @@
++signatureInstantiationWithRecursiveConstraints.ts(11,7): error TS2322: Type 'Bar' is not assignable to type 'Foo'.
++  Types of property 'myFunc' are incompatible.
++    Type '<T>(arg: T) => any' is not assignable to type '<T>(arg: T) => any'.
++      Types of parameters 'arg' and 'arg' are incompatible.
++        Type 'T' is not assignable to type 'Bar'.
++

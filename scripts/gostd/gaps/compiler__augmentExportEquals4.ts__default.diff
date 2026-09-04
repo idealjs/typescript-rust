@@ -1,0 +1,6 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,3 @@
++file2.ts(2,3): error TS2339: Property 'b' does not exist on type 'typeof foo'.
++file3.ts(3,10): error TS2694: Namespace 'file1.ts' has no exported member 'A'.
++

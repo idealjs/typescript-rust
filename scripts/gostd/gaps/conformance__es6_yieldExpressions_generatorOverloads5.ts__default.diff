@@ -1,0 +1,5 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,2 @@
++generatorOverloads5.ts(4,26): error TS2355: A function whose declared type is neither 'undefined', 'void', nor 'any' must return a value.
++

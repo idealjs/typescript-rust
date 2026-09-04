@@ -1,0 +1,7 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,4 @@
++user.ts(2,24): error TS2307: Cannot find module 'foobarbaz' or its corresponding type declarations.
++user.ts(5,20): error TS2307: Cannot find module 'foosball' or its corresponding type declarations.
++user.ts(9,22): error TS2307: Cannot find module './file!text' or its corresponding type declarations.
++

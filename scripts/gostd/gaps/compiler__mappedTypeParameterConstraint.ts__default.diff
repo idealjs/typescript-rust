@@ -1,0 +1,5 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,2 @@
++mappedTypeParameterConstraint.ts(5,5): error TS2322: Type 'U' is not assignable to type '{ [P in keyof T]: U[string]; }'.
++

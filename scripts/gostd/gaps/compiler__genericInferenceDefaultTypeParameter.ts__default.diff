@@ -1,0 +1,7 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,4 @@
++genericInferenceDefaultTypeParameter.ts(10,4): error TS7006: Parameter 'event' implicitly has an 'any' type.
++genericInferenceDefaultTypeParameter.ts(11,9): error TS7006: Parameter 'event' implicitly has an 'any' type.
++genericInferenceDefaultTypeParameter.ts(12,9): error TS7006: Parameter 'event' implicitly has an 'any' type.
++

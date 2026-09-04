@@ -1,0 +1,7 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -1,4 +0,0 @@
+-error TS5091: Option 'preserveConstEnums' cannot be disabled when 'isolatedModules' is enabled.
+-
+-
+-!!! error TS5091: Option 'preserveConstEnums' cannot be disabled when 'isolatedModules' is enabled.

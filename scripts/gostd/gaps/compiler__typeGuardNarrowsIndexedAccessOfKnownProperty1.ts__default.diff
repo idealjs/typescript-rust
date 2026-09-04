@@ -1,0 +1,12 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,9 @@
++typeGuardNarrowsIndexedAccessOfKnownProperty1.ts(24,26): error TS2366: Function lacks ending return statement and return type does not include 'undefined'.
++typeGuardNarrowsIndexedAccessOfKnownProperty1.ts(27,36): error TS2339: Property 'width' does not exist on type 'never'.
++typeGuardNarrowsIndexedAccessOfKnownProperty1.ts(28,57): error TS2339: Property 'radius' does not exist on type 'never'.
++typeGuardNarrowsIndexedAccessOfKnownProperty1.ts(31,32): error TS2366: Function lacks ending return statement and return type does not include 'undefined'.
++typeGuardNarrowsIndexedAccessOfKnownProperty1.ts(34,105): error TS2339: Property 'height' does not exist on type 'Square | Rectangle | Circle'.
++typeGuardNarrowsIndexedAccessOfKnownProperty1.ts(35,65): error TS2339: Property 'radius' does not exist on type 'Square | Rectangle | Circle'.
++typeGuardNarrowsIndexedAccessOfKnownProperty1.ts(78,5): error TS2322: Type 'string | undefined' is not assignable to type 'string'.
++  Type 'undefined' is not assignable to type 'string'.
++

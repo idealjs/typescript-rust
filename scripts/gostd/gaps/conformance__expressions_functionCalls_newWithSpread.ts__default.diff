@@ -1,0 +1,10 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,7 @@
++newWithSpread.ts(94,5): error TS2351: This expression is not constructable.
++  Type 'C' has no construct signatures.
++newWithSpread.ts(95,5): error TS2351: This expression is not constructable.
++  Type 'C' has no construct signatures.
++newWithSpread.ts(96,5): error TS2351: This expression is not constructable.
++  Type 'C' has no construct signatures.
++

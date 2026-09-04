@@ -1,0 +1,5 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,2 @@
++test.ts(2,41): error TS2694: Namespace 'translation.ts' has no exported member 'TranslationKeyEnum'.
++

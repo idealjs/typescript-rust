@@ -1,0 +1,25 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,22 @@
++intlNumberFormatES2023.ts(8,34): error TS2353: Object literal may only specify known properties, and 'roundingPriority' does not exist in type 'NumberFormatOptions | undefined'.
++intlNumberFormatES2023.ts(11,58): error TS2353: Object literal may only specify known properties, and 'signDisplay' does not exist in type 'NumberFormatOptions | undefined'.
++intlNumberFormatES2023.ts(15,32): error TS2345: Argument of type '{ useGrouping: string; }' is not assignable to parameter of type 'NumberFormatOptions'.
++  Types of property 'useGrouping' are incompatible.
++    Type '"true"' is not assignable to type 'boolean | undefined'.
++intlNumberFormatES2023.ts(16,32): error TS2345: Argument of type '{ useGrouping: string; }' is not assignable to parameter of type 'NumberFormatOptions'.
++  Types of property 'useGrouping' are incompatible.
++    Type '"always"' is not assignable to type 'boolean | undefined'.
++intlNumberFormatES2023.ts(19,32): error TS2339: Property 'formatRange' does not exist on type 'NumberFormat'.
++intlNumberFormatES2023.ts(20,32): error TS2339: Property 'formatRange' does not exist on type 'NumberFormat'.
++intlNumberFormatES2023.ts(21,32): error TS2339: Property 'formatRangeToParts' does not exist on type 'NumberFormat'.
++intlNumberFormatES2023.ts(22,32): error TS2339: Property 'formatRangeToParts' does not exist on type 'NumberFormat'.
++intlNumberFormatES2023.ts(25,39): error TS2345: Argument of type 'string' is not assignable to parameter of type 'number'.
++intlNumberFormatES2023.ts(26,32): error TS2339: Property 'formatRange' does not exist on type 'NumberFormat'.
++intlNumberFormatES2023.ts(27,32): error TS2339: Property 'formatRangeToParts' does not exist on type 'NumberFormat'.
++intlNumberFormatES2023.ts(28,39): error TS2345: Argument of type 'string' is not assignable to parameter of type 'number'.
++intlNumberFormatES2023.ts(29,39): error TS2345: Argument of type 'string' is not assignable to parameter of type 'number'.
++intlNumberFormatES2023.ts(30,39): error TS2345: Argument of type 'string' is not assignable to parameter of type 'number'.
++intlNumberFormatES2023.ts(40,4): error TS2339: Property 'formatRangeToParts' does not exist on type 'NumberFormat'.
++intlNumberFormatES2023.ts(41,12): error TS7006: Parameter 'part' implicitly has an 'any' type.
++intlNumberFormatES2023.ts(42,9): error TS7006: Parameter 'part' implicitly has an 'any' type.
++

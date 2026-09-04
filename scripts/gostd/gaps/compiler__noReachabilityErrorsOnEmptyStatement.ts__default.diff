@@ -1,0 +1,5 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,2 @@
++noReachabilityErrorsOnEmptyStatement.ts(2,14): error TS7027: Unreachable code detected.
++

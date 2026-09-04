@@ -1,0 +1,9 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,6 @@
++error TS6053: File 'node_modules/tslib/index.d.ts' not found.
++foo.ts(5,26): error TS1005: ',' expected.
++
++
++!!! error TS6053: File 'node_modules/tslib/index.d.ts' not found.
++

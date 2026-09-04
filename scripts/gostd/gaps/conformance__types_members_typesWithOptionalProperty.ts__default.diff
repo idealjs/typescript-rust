@@ -1,0 +1,8 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,5 @@
++typesWithOptionalProperty.ts(21,1): error TS2741: Property 'baz' is missing in type '{ foo: string; }' but required in type 'I'.
++typesWithOptionalProperty.ts(22,1): error TS2741: Property 'baz' is missing in type '{ foo: string; bar: number; }' but required in type 'I'.
++typesWithOptionalProperty.ts(25,1): error TS2741: Property 'baz' is missing in type '{ foo: string; }' but required in type '{ foo: string; bar?: number; baz: () => string; }'.
++typesWithOptionalProperty.ts(26,1): error TS2741: Property 'baz' is missing in type '{ foo: string; bar: number; }' but required in type '{ foo: string; bar?: number; baz: () => string; }'.
++

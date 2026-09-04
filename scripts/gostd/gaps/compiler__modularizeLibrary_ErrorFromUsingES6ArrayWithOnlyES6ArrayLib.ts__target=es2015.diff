@@ -1,0 +1,21 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -1,15 +1,4 @@
+-error TS2318: Cannot find global type 'Boolean'.
+-error TS2318: Cannot find global type 'CallableFunction'.
+-error TS2318: Cannot find global type 'IArguments'.
+-error TS2318: Cannot find global type 'NewableFunction'.
+-error TS2318: Cannot find global type 'Number'.
+-error TS2318: Cannot find global type 'Object'.
+-modularizeLibrary_ErrorFromUsingES6ArrayWithOnlyES6ArrayLib.ts(3,12): error TS2693: 'Array' only refers to a type, but is being used as a value here.
++bundled:///libs/lib.es2015.core.d.ts(70,24): error TS2304: Cannot find name 'ArrayLike'.
++bundled:///libs/lib.es2015.core.d.ts(78,27): error TS2304: Cannot find name 'ArrayLike'.
++bundled:///libs/lib.es2015.core.d.ts(558,46): error TS2304: Cannot find name 'ArrayLike'.
+ 
+-
+-!!! error TS2318: Cannot find global type 'Boolean'.
+-!!! error TS2318: Cannot find global type 'CallableFunction'.
+-!!! error TS2318: Cannot find global type 'IArguments'.
+-!!! error TS2318: Cannot find global type 'NewableFunction'.
+-!!! error TS2318: Cannot find global type 'Number'.
+-!!! error TS2318: Cannot find global type 'Object'.

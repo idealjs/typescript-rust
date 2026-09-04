@@ -1,0 +1,18 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,15 @@
++discriminatedUnionTypes4.ts(23,7): error TS2367: This comparison appears to be unintentional because the types '`${error}` | `${error}`' and '"cat"' have no overlap.
++discriminatedUnionTypes4.ts(24,24): error TS2339: Property 'meow' does not exist on type 'never'.
++discriminatedUnionTypes4.ts(25,14): error TS2367: This comparison appears to be unintentional because the types '`${error}` | `${error}`' and '"dog"' have no overlap.
++discriminatedUnionTypes4.ts(26,24): error TS2339: Property 'bark' does not exist on type 'never'.
++discriminatedUnionTypes4.ts(28,11): error TS2345: Argument of type '{ type: `${error}`; meow: string; } | { type: `${error}`; bark: string; }' is not assignable to parameter of type 'never'.
++  Type '{ type: `${error}`; meow: string; }' is not assignable to type 'never'.
++discriminatedUnionTypes4.ts(35,26): error TS2339: Property 'meow' does not exist on type 'never'.
++discriminatedUnionTypes4.ts(38,26): error TS2339: Property 'bark' does not exist on type 'never'.
++discriminatedUnionTypes4.ts(41,13): error TS2345: Argument of type '{ type: `${error}`; meow: string; } | { type: `${error}`; bark: string; }' is not assignable to parameter of type 'never'.
++  Type '{ type: `${error}`; meow: string; }' is not assignable to type 'never'.
++discriminatedUnionTypes4.ts(48,26): error TS2339: Property 'meow' does not exist on type 'never'.
++discriminatedUnionTypes4.ts(51,26): error TS2339: Property 'bark' does not exist on type 'never'.
++discriminatedUnionTypes4.ts(54,13): error TS2345: Argument of type '{ type: `${error}`; meow: string; } | { type: `${error}`; bark: string; }' is not assignable to parameter of type 'never'.
++  Type '{ type: `${error}`; meow: string; }' is not assignable to type 'never'.
++

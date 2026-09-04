@@ -1,0 +1,52 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,49 @@
++sourceMapValidationDestructuringForObjectBindingPatternDefaultValues2.ts(64,13): error TS1005: ',' expected.
++sourceMapValidationDestructuringForObjectBindingPatternDefaultValues2.ts(64,15): error TS1005: ',' expected.
++sourceMapValidationDestructuringForObjectBindingPatternDefaultValues2.ts(67,13): error TS1005: ',' expected.
++sourceMapValidationDestructuringForObjectBindingPatternDefaultValues2.ts(67,15): error TS1005: ',' expected.
++sourceMapValidationDestructuringForObjectBindingPatternDefaultValues2.ts(70,13): error TS1005: ',' expected.
++sourceMapValidationDestructuringForObjectBindingPatternDefaultValues2.ts(70,15): error TS1005: ',' expected.
++sourceMapValidationDestructuringForObjectBindingPatternDefaultValues2.ts(75,17): error TS1005: ',' expected.
++sourceMapValidationDestructuringForObjectBindingPatternDefaultValues2.ts(75,19): error TS1005: ',' expected.
++sourceMapValidationDestructuringForObjectBindingPatternDefaultValues2.ts(76,19): error TS1005: ',' expected.
++sourceMapValidationDestructuringForObjectBindingPatternDefaultValues2.ts(76,21): error TS1005: ',' expected.
++sourceMapValidationDestructuringForObjectBindingPatternDefaultValues2.ts(83,17): error TS1005: ',' expected.
++sourceMapValidationDestructuringForObjectBindingPatternDefaultValues2.ts(83,19): error TS1005: ',' expected.
++sourceMapValidationDestructuringForObjectBindingPatternDefaultValues2.ts(84,19): error TS1005: ',' expected.
++sourceMapValidationDestructuringForObjectBindingPatternDefaultValues2.ts(84,21): error TS1005: ',' expected.
++sourceMapValidationDestructuringForObjectBindingPatternDefaultValues2.ts(91,17): error TS1005: ',' expected.
++sourceMapValidationDestructuringForObjectBindingPatternDefaultValues2.ts(91,19): error TS1005: ',' expected.
++sourceMapValidationDestructuringForObjectBindingPatternDefaultValues2.ts(92,19): error TS1005: ',' expected.
++sourceMapValidationDestructuringForObjectBindingPatternDefaultValues2.ts(92,21): error TS1005: ',' expected.
++sourceMapValidationDestructuringForObjectBindingPatternDefaultValues2.ts(138,13): error TS1005: ',' expected.
++sourceMapValidationDestructuringForObjectBindingPatternDefaultValues2.ts(138,15): error TS1005: ',' expected.
++sourceMapValidationDestructuringForObjectBindingPatternDefaultValues2.ts(138,31): error TS1005: ',' expected.
++sourceMapValidationDestructuringForObjectBindingPatternDefaultValues2.ts(138,33): error TS1005: ',' expected.
++sourceMapValidationDestructuringForObjectBindingPatternDefaultValues2.ts(141,13): error TS1005: ',' expected.
++sourceMapValidationDestructuringForObjectBindingPatternDefaultValues2.ts(141,15): error TS1005: ',' expected.
++sourceMapValidationDestructuringForObjectBindingPatternDefaultValues2.ts(141,31): error TS1005: ',' expected.
++sourceMapValidationDestructuringForObjectBindingPatternDefaultValues2.ts(141,33): error TS1005: ',' expected.
++sourceMapValidationDestructuringForObjectBindingPatternDefaultValues2.ts(144,13): error TS1005: ',' expected.
++sourceMapValidationDestructuringForObjectBindingPatternDefaultValues2.ts(144,15): error TS1005: ',' expected.
++sourceMapValidationDestructuringForObjectBindingPatternDefaultValues2.ts(144,31): error TS1005: ',' expected.
++sourceMapValidationDestructuringForObjectBindingPatternDefaultValues2.ts(144,33): error TS1005: ',' expected.
++sourceMapValidationDestructuringForObjectBindingPatternDefaultValues2.ts(148,10): error TS1005: ',' expected.
++sourceMapValidationDestructuringForObjectBindingPatternDefaultValues2.ts(148,12): error TS1005: ',' expected.
++sourceMapValidationDestructuringForObjectBindingPatternDefaultValues2.ts(150,17): error TS1005: ',' expected.
++sourceMapValidationDestructuringForObjectBindingPatternDefaultValues2.ts(150,19): error TS1005: ',' expected.
++sourceMapValidationDestructuringForObjectBindingPatternDefaultValues2.ts(151,19): error TS1005: ',' expected.
++sourceMapValidationDestructuringForObjectBindingPatternDefaultValues2.ts(151,21): error TS1005: ',' expected.
++sourceMapValidationDestructuringForObjectBindingPatternDefaultValues2.ts(157,10): error TS1005: ',' expected.
++sourceMapValidationDestructuringForObjectBindingPatternDefaultValues2.ts(157,12): error TS1005: ',' expected.
++sourceMapValidationDestructuringForObjectBindingPatternDefaultValues2.ts(159,17): error TS1005: ',' expected.
++sourceMapValidationDestructuringForObjectBindingPatternDefaultValues2.ts(159,19): error TS1005: ',' expected.
++sourceMapValidationDestructuringForObjectBindingPatternDefaultValues2.ts(160,19): error TS1005: ',' expected.
++sourceMapValidationDestructuringForObjectBindingPatternDefaultValues2.ts(160,21): error TS1005: ',' expected.
++sourceMapValidationDestructuringForObjectBindingPatternDefaultValues2.ts(166,10): error TS1005: ',' expected.
++sourceMapValidationDestructuringForObjectBindingPatternDefaultValues2.ts(166,12): error TS1005: ',' expected.
++sourceMapValidationDestructuringForObjectBindingPatternDefaultValues2.ts(168,17): error TS1005: ',' expected.
++sourceMapValidationDestructuringForObjectBindingPatternDefaultValues2.ts(168,19): error TS1005: ',' expected.
++sourceMapValidationDestructuringForObjectBindingPatternDefaultValues2.ts(169,19): error TS1005: ',' expected.
++sourceMapValidationDestructuringForObjectBindingPatternDefaultValues2.ts(169,21): error TS1005: ',' expected.
++

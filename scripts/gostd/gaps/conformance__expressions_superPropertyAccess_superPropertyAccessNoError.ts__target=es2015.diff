@@ -1,0 +1,11 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,8 @@
++superPropertyAccessNoError.ts(27,13): error TS2403: Subsequent variable declarations must have the same type.  Variable 'x' must be of type 'any', but here has type 'string'.
++superPropertyAccessNoError.ts(32,13): error TS2403: Subsequent variable declarations must have the same type.  Variable 'x' must be of type 'any', but here has type 'string'.
++superPropertyAccessNoError.ts(38,13): error TS2403: Subsequent variable declarations must have the same type.  Variable 'x' must be of type 'any', but here has type 'string'.
++superPropertyAccessNoError.ts(44,13): error TS2403: Subsequent variable declarations must have the same type.  Variable 'x' must be of type 'any', but here has type 'string'.
++superPropertyAccessNoError.ts(49,13): error TS2403: Subsequent variable declarations must have the same type.  Variable 'x' must be of type 'any', but here has type 'number'.
++superPropertyAccessNoError.ts(54,13): error TS2403: Subsequent variable declarations must have the same type.  Variable 'x' must be of type 'any', but here has type 'number'.
++superPropertyAccessNoError.ts(60,13): error TS2403: Subsequent variable declarations must have the same type.  Variable 'x' must be of type 'any', but here has type 'number'.
++

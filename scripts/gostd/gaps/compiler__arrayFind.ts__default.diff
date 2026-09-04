@@ -1,0 +1,8 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,5 @@
++arrayFind.ts(7,7): error TS2322: Type 'string | undefined' is not assignable to type 'number | undefined'.
++  Type 'string' is not assignable to type 'number | undefined'.
++arrayFind.ts(10,7): error TS2322: Type 'string | undefined' is not assignable to type 'number | undefined'.
++  Type 'string' is not assignable to type 'number | undefined'.
++

@@ -1,0 +1,5 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,2 @@
++controlFlowForOfStatement.ts(7,15): error TS2339: Property 'toExponential' does not exist on type 'string | number | boolean | RegExp'.
++

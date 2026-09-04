@@ -1,0 +1,5 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,2 @@
++/node_modules/A/index.d.ts(1,16): error TS2664: Invalid module name in augmentation, module 'ext' cannot be found.
++

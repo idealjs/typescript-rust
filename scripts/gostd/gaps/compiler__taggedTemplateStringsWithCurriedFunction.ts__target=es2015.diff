@@ -1,0 +1,9 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,6 @@
++taggedTemplateStringsWithCurriedFunction.ts(5,19): error TS1005: ';' expected.
++taggedTemplateStringsWithCurriedFunction.ts(6,19): error TS1005: ';' expected.
++taggedTemplateStringsWithCurriedFunction.ts(7,19): error TS1005: ';' expected.
++taggedTemplateStringsWithCurriedFunction.ts(8,35): error TS1005: ';' expected.
++taggedTemplateStringsWithCurriedFunction.ts(9,35): error TS1005: ';' expected.
++

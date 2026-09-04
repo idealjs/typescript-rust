@@ -1,0 +1,13 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,10 @@
++genericCallWithConstraintsTypeArgumentInference.ts(98,5): error TS2403: Subsequent variable declarations must have the same type.  Variable 'r4' must be of type 'any', but here has type 'Base'.
++genericCallWithConstraintsTypeArgumentInference.ts(99,5): error TS2403: Subsequent variable declarations must have the same type.  Variable 'r5' must be of type 'any', but here has type 'Derived'.
++genericCallWithConstraintsTypeArgumentInference.ts(100,5): error TS2403: Subsequent variable declarations must have the same type.  Variable 'r6' must be of type 'any', but here has type 'Derived'.
++genericCallWithConstraintsTypeArgumentInference.ts(101,5): error TS2403: Subsequent variable declarations must have the same type.  Variable 'r7' must be of type 'any', but here has type 'Base'.
++genericCallWithConstraintsTypeArgumentInference.ts(102,5): error TS2403: Subsequent variable declarations must have the same type.  Variable 'r8' must be of type 'any', but here has type 'Derived'.
++genericCallWithConstraintsTypeArgumentInference.ts(103,5): error TS2403: Subsequent variable declarations must have the same type.  Variable 'r8b' must be of type 'any', but here has type 'Derived2'.
++genericCallWithConstraintsTypeArgumentInference.ts(104,5): error TS2403: Subsequent variable declarations must have the same type.  Variable 'r9' must be of type 'any', but here has type 'Derived'.
++genericCallWithConstraintsTypeArgumentInference.ts(105,5): error TS2403: Subsequent variable declarations must have the same type.  Variable 'r10' must be of type 'any', but here has type 'Base'.
++genericCallWithConstraintsTypeArgumentInference.ts(106,5): error TS2403: Subsequent variable declarations must have the same type.  Variable 'r11' must be of type 'any', but here has type 'Base'.
++

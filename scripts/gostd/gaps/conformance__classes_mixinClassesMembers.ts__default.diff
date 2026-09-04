@@ -1,0 +1,11 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,8 @@
++mixinClassesMembers.ts(12,12): error TS2300: Duplicate identifier 'p'.
++mixinClassesMembers.ts(82,14): error TS2339: Property 'a' does not exist on type 'C2'.
++mixinClassesMembers.ts(83,14): error TS2339: Property 'b' does not exist on type 'C2'.
++mixinClassesMembers.ts(84,14): error TS2339: Property 'p' does not exist on type 'C2'.
++mixinClassesMembers.ts(91,14): error TS2339: Property 'a' does not exist on type 'C3'.
++mixinClassesMembers.ts(92,14): error TS2339: Property 'b' does not exist on type 'C3'.
++mixinClassesMembers.ts(93,14): error TS2339: Property 'p' does not exist on type 'C3'.
++

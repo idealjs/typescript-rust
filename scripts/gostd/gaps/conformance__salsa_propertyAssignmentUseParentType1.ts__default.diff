@@ -1,0 +1,7 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,4 @@
++propertyAssignmentUseParentType1.ts(5,14): error TS2741: Property 'num' is missing in type '() => boolean' but required in type 'N'.
++propertyAssignmentUseParentType1.ts(8,14): error TS2741: Property 'nun' is missing in type '() => boolean' but required in type '() => boolean'.
++propertyAssignmentUseParentType1.ts(13,13): error TS2339: Property 'extra' does not exist on type '() => boolean'.
++

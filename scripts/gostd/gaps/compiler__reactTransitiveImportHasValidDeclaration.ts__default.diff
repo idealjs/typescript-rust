@@ -1,0 +1,6 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,3 @@
++node_modules/create-emotion-styled/types/react/index.d.ts(2,16): error TS2664: Invalid module name in augmentation, module 'react' cannot be found.
++node_modules/create-emotion-styled/types/react/index.d.ts(8,12): error TS2503: Cannot find namespace 'React'.
++

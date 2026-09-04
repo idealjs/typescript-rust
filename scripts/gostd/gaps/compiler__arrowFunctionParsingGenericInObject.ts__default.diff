@@ -1,0 +1,8 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,5 @@
++arrowFunctionParsingGenericInObject.ts(7,58): error TS2322: Type 'T' is not assignable to type 'Promise<T>'.
++arrowFunctionParsingGenericInObject.ts(17,46): error TS2322: Type 'T' is not assignable to type 'Promise<T>'.
++arrowFunctionParsingGenericInObject.ts(28,58): error TS2322: Type 'T' is not assignable to type 'Promise<T>'.
++arrowFunctionParsingGenericInObject.ts(38,58): error TS2322: Type 'T' is not assignable to type 'Promise<T>'.
++

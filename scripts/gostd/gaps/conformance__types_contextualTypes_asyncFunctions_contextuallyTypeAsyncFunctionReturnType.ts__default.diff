@@ -1,0 +1,13 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,10 @@
++contextuallyTypeAsyncFunctionReturnType.ts(8,5): error TS2741: Property 'key' is missing in type 'Promise<T>' but required in type 'Obj'.
++contextuallyTypeAsyncFunctionReturnType.ts(9,19): error TS2353: Object literal may only specify known properties, and 'key' does not exist in type 'unknown | PromiseLike<unknown>'.
++contextuallyTypeAsyncFunctionReturnType.ts(18,5): error TS2322: Type 'T' is not assignable to type 'Obj'.
++contextuallyTypeAsyncFunctionReturnType.ts(19,19): error TS2353: Object literal may only specify known properties, and 'key' does not exist in type 'unknown | PromiseLike<unknown>'.
++contextuallyTypeAsyncFunctionReturnType.ts(54,26): error TS7006: Parameter 'tree' implicitly has an 'any' type.
++contextuallyTypeAsyncFunctionReturnType.ts(56,9): error TS2554: Expected 1 arguments, but got 0.
++contextuallyTypeAsyncFunctionReturnType.ts(78,9): error TS2740: Type '{ [P in keyof T]: T[P] extends null | undefined ? T : T extends object & { then: (onfulfilled: F, args: _) => any; } ? F extends (value: V, args: _) => any ? V extends null | undefined ? T : ... : never : T; }' is missing the following properties from type '[ILocalExtension, { updated: boolean; } | undefined][]': length, pop, push, concat, and 35 more.
++contextuallyTypeAsyncFunctionReturnType.ts(82,50): error TS2345: Argument of type '[number, number] | undefined' is not assignable to parameter of type 'ILocalExtension'.
++  Type '[number, number]' is missing the following properties from type 'ILocalExtension': isApplicationScoped, publisherId
++

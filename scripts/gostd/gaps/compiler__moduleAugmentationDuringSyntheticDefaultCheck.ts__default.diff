@@ -1,0 +1,9 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,6 @@
++error TS6053: File 'idx' not found.
++node_modules/moment-timezone/index.d.ts(3,16): error TS2664: Invalid module name in augmentation, module 'moment' cannot be found.
++
++
++!!! error TS6053: File 'idx' not found.
++

@@ -1,0 +1,5 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,2 @@
++emitClassDeclarationWithExtensionInES6.ts(20,19): error TS2554: Expected 0 arguments, but got 2.
++

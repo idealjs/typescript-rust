@@ -1,0 +1,5 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,2 @@
++contextuallyTypeLogicalAnd01.ts(4,1): error TS2322: Type 'boolean' is not assignable to type '(a: string) => string'.
++

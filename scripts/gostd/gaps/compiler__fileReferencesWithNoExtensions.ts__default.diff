@@ -1,0 +1,12 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,9 @@
++error TS6053: File 'a' not found.
++error TS6053: File 'b' not found.
++error TS6053: File 'c' not found.
++
++
++!!! error TS6053: File 'a' not found.
++!!! error TS6053: File 'b' not found.
++!!! error TS6053: File 'c' not found.
++

@@ -1,0 +1,5 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,2 @@
++conditionalTypeClassMembers.ts(2,13): error TS7010: 'a', which lacks return-type annotation, implicitly has an 'any' return type.
++

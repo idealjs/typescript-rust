@@ -1,0 +1,11 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,8 @@
++returnTypeInferenceContextualParameterTypesInGenerator1.ts(50,3): error TS2345: Argument of type 'Effect<unknown>' is not assignable to parameter of type 'Effect<{ [Current in Rpc as Current["_tag"]]: (payload: Current extends R ? _Payload : never) => Current extends R ? _Success : never; }>'.
++  Types of property '_A' are incompatible.
++    Type 'unknown' is not assignable to type '{ [Current in Rpc as Current["_tag"]]: (payload: Current extends R ? _Payload : never) => Current extends R ? _Success : never; }'.
++returnTypeInferenceContextualParameterTypesInGenerator1.ts(50,7): error TS2345: Argument of type '() => { Register: (id: any) => string; }' is not assignable to parameter of type '() => Generator<Effect<any>, unknown>'.
++  Type '{ Register: (id: any) => string; }' is not assignable to type 'Generator<Effect<any>, unknown>'.
++    Type '{ Register: (id: any) => string; }' is missing the following properties from type 'Generator<Effect<any>, unknown>': next, return, throw, [Symbol.iterator], and 13 more.
++returnTypeInferenceContextualParameterTypesInGenerator1.ts(52,18): error TS7006: Parameter 'id' implicitly has an 'any' type.
++

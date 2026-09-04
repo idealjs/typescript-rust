@@ -1,0 +1,29 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,26 @@
++v1.ts(1,20): error TS1109: Expression expected.
++v1.ts(1,23): error TS1155: 'const' declarations must be initialized.
++v1.ts(1,23): error TS2451: Cannot redeclare block-scoped variable 'a'.
++v1.ts(1,42): error TS1005: ',' expected.
++v1.ts(1,43): error TS1134: Variable declaration expected.
++v1.ts(1,45): error TS1155: 'const' declarations must be initialized.
++v1.ts(3,15): error TS1005: ',' expected.
++v1.ts(3,15): error TS2451: Cannot redeclare block-scoped variable 'a'.
++v1.ts(4,3): error TS1005: ';' expected.
++v1.ts(5,5): error TS1108: A 'return' statement can only be used within a function body.
++v2.ts(1,7): error TS2451: Cannot redeclare block-scoped variable 'n'.
++v2.ts(2,20): error TS1109: Expression expected.
++v2.ts(2,23): error TS1155: 'const' declarations must be initialized.
++v2.ts(2,23): error TS2451: Cannot redeclare block-scoped variable 'a'.
++v2.ts(2,42): error TS1005: ',' expected.
++v2.ts(2,43): error TS1134: Variable declaration expected.
++v2.ts(2,45): error TS1155: 'const' declarations must be initialized.
++v2.ts(4,8): error TS2451: Cannot redeclare block-scoped variable 'typeof'.
++v2.ts(4,15): error TS1005: ',' expected.
++v2.ts(4,15): error TS2451: Cannot redeclare block-scoped variable 'a'.
++v2.ts(6,8): error TS2451: Cannot redeclare block-scoped variable 'typeof'.
++v2.ts(6,15): error TS1005: ',' expected.
++v2.ts(6,15): error TS2451: Cannot redeclare block-scoped variable 'n'.
++v2.ts(7,3): error TS1005: ';' expected.
++v2.ts(8,5): error TS1108: A 'return' statement can only be used within a function body.
++

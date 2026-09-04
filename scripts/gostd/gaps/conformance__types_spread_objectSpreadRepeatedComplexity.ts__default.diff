@@ -1,0 +1,5 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,2 @@
++objectSpreadRepeatedComplexity.ts(1,24): error TS2344: Type 'number' does not satisfy the constraint 'string'.
++

@@ -1,0 +1,6 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,3 @@
++contextualTypingReturnStatementWithReturnTypeAnnotation.ts(14,3): error TS2322: Type '"not-array" | "no-prop" | unknown[]' is not assignable to type '"not-array" | "no-prop" | string[]'.
++  Type 'unknown[]' is not assignable to type '"not-array" | "no-prop" | string[]'.
++

@@ -1,0 +1,10 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,7 @@
++typePredicateFreshLiteralWidening.ts(22,7): error TS2322: Type '(string | null)[]' is not assignable to type 'Array<"1" | "2" | null>'.
++  The types returned by 'pop()' are incompatible between these types.
++    Type 'string | null | undefined' is not assignable to type '"1" | "2" | null | undefined'.
++      Type 'string' is not assignable to type '"1" | "2" | null | undefined'.
++typePredicateFreshLiteralWidening.ts(25,51): error TS18047: 'item' is possibly 'null'.
++typePredicateFreshLiteralWidening.ts(25,56): error TS2339: Property 'value' does not exist on type '"1" | "2"'.
++

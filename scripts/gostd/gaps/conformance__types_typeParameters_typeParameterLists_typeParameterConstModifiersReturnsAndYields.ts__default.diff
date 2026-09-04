@@ -1,0 +1,13 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,10 @@
++typeParameterConstModifiersReturnsAndYields.ts(28,30): error TS2345: Argument of type '() => string' is not assignable to parameter of type '() => Promise<unknown>'.
++  Type 'string' is not assignable to type 'Promise<unknown>'.
++typeParameterConstModifiersReturnsAndYields.ts(29,30): error TS2345: Argument of type '() => string' is not assignable to parameter of type '() => Promise<unknown>'.
++  Type 'string' is not assignable to type 'Promise<unknown>'.
++typeParameterConstModifiersReturnsAndYields.ts(33,24): error TS2345: Argument of type '() => string' is not assignable to parameter of type '() => Generator<unknown, unknown>'.
++  Type 'string' is not assignable to type 'Generator<unknown, unknown>'.
++typeParameterConstModifiersReturnsAndYields.ts(40,24): error TS2345: Argument of type '() => string' is not assignable to parameter of type '() => AsyncGenerator<unknown, unknown>'.
++  Type 'string' is not assignable to type 'AsyncGenerator<unknown, unknown>'.
++typeParameterConstModifiersReturnsAndYields.ts(57,13): error TS2322: Type 'ValidRoutes[Route]' is not assignable to type '"someValue"'.
++

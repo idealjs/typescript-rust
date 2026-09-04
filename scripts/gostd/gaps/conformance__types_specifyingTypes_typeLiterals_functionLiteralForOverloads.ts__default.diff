@@ -1,0 +1,15 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,12 @@
++functionLiteralForOverloads.ts(3,5): error TS2719: Type '(x: string) => string' is not assignable to type '(x: string) => string'. Two different types with this name exist, but they are unrelated.
++  Types of parameters 'x' and 'x' are incompatible.
++    Type 'number' is not assignable to type 'string'.
++functionLiteralForOverloads.ts(8,5): error TS2322: Type '(x: string) => string' is not assignable to type '<T>(x: string) => string'.
++  Types of parameters 'x' and 'x' are incompatible.
++    Type 'number' is not assignable to type 'string'.
++functionLiteralForOverloads.ts(13,5): error TS2322: Type '(x: T) => T' is not assignable to type '<T>(x: T) => string'.
++  Type 'T' is not assignable to type 'string'.
++functionLiteralForOverloads.ts(18,5): error TS2322: Type '(x: string) => string' is not assignable to type '<T>(x: string) => T'.
++  Types of parameters 'x' and 'x' are incompatible.
++    Type 'number' is not assignable to type 'string'.
++

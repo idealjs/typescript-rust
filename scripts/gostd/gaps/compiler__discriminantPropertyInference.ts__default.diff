@@ -1,0 +1,7 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,4 @@
++discriminantPropertyInference.ts(26,16): error TS2339: Property 'toFixed' does not exist on type 'string'.
++discriminantPropertyInference.ts(32,16): error TS2339: Property 'toFixed' does not exist on type 'string'.
++discriminantPropertyInference.ts(37,16): error TS2339: Property 'toFixed' does not exist on type 'string'.
++

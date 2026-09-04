@@ -1,0 +1,92 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,89 @@
++commentsTypeParameters.ts(1,8): error TS1005: '{' expected.
++commentsTypeParameters.ts(1,10): error TS1068: Unexpected token. A constructor, method, accessor, or property was expected.
++commentsTypeParameters.ts(1,12): error TS1434: Unexpected keyword or identifier.
++commentsTypeParameters.ts(1,23): error TS1068: Unexpected token. A constructor, method, accessor, or property was expected.
++commentsTypeParameters.ts(1,27): error TS1005: '(' expected.
++commentsTypeParameters.ts(1,27): error TS2304: Cannot find name 'type'.
++commentsTypeParameters.ts(1,32): error TS1005: ';' expected.
++commentsTypeParameters.ts(1,42): error TS1161: Unterminated regular expression literal.
++commentsTypeParameters.ts(2,5): error TS1005: ';' expected.
++commentsTypeParameters.ts(2,5): error TS2304: Cannot find name 'method'.
++commentsTypeParameters.ts(2,11): error TS1005: ')' expected.
++commentsTypeParameters.ts(2,13): error TS1128: Declaration or statement expected.
++commentsTypeParameters.ts(2,15): error TS1434: Unexpected keyword or identifier.
++commentsTypeParameters.ts(2,15): error TS2552: Cannot find name 'docComment'. Did you mean 'Comment'?
++commentsTypeParameters.ts(2,26): error TS1434: Unexpected keyword or identifier.
++commentsTypeParameters.ts(2,26): error TS2304: Cannot find name 'of'.
++commentsTypeParameters.ts(2,29): error TS1434: Unexpected keyword or identifier.
++commentsTypeParameters.ts(2,29): error TS2304: Cannot find name 'method'.
++commentsTypeParameters.ts(2,41): error TS2300: Duplicate identifier 'parameter'.
++commentsTypeParameters.ts(2,51): error TS1005: '=' expected.
++commentsTypeParameters.ts(2,51): error TS2304: Cannot find name '*'.
++commentsTypeParameters.ts(2,52): error TS1005: ';' expected.
++commentsTypeParameters.ts(3,5): error TS1128: Declaration or statement expected.
++commentsTypeParameters.ts(4,5): error TS1435: Unknown keyword or identifier. Did you mean 'static'?
++commentsTypeParameters.ts(4,5): error TS2304: Cannot find name 'static'.
++commentsTypeParameters.ts(4,12): error TS1434: Unexpected keyword or identifier.
++commentsTypeParameters.ts(4,12): error TS2304: Cannot find name 'staticmethod'.
++commentsTypeParameters.ts(4,24): error TS1128: Declaration or statement expected.
++commentsTypeParameters.ts(4,26): error TS1128: Declaration or statement expected.
++commentsTypeParameters.ts(4,28): error TS1434: Unexpected keyword or identifier.
++commentsTypeParameters.ts(4,28): error TS2552: Cannot find name 'docComment'. Did you mean 'Comment'?
++commentsTypeParameters.ts(4,39): error TS1434: Unexpected keyword or identifier.
++commentsTypeParameters.ts(4,39): error TS2304: Cannot find name 'of'.
++commentsTypeParameters.ts(4,42): error TS1434: Unexpected keyword or identifier.
++commentsTypeParameters.ts(4,42): error TS2304: Cannot find name 'method'.
++commentsTypeParameters.ts(4,54): error TS2300: Duplicate identifier 'parameter'.
++commentsTypeParameters.ts(4,64): error TS1005: '=' expected.
++commentsTypeParameters.ts(4,64): error TS2304: Cannot find name '*'.
++commentsTypeParameters.ts(4,65): error TS1005: ';' expected.
++commentsTypeParameters.ts(5,5): error TS1128: Declaration or statement expected.
++commentsTypeParameters.ts(7,5): error TS1435: Unknown keyword or identifier. Did you mean 'private'?
++commentsTypeParameters.ts(7,5): error TS2304: Cannot find name 'private'.
++commentsTypeParameters.ts(7,13): error TS1434: Unexpected keyword or identifier.
++commentsTypeParameters.ts(7,13): error TS2304: Cannot find name 'privatemethod'.
++commentsTypeParameters.ts(7,26): error TS1128: Declaration or statement expected.
++commentsTypeParameters.ts(7,28): error TS1128: Declaration or statement expected.
++commentsTypeParameters.ts(7,30): error TS1434: Unexpected keyword or identifier.
++commentsTypeParameters.ts(7,30): error TS2552: Cannot find name 'docComment'. Did you mean 'Comment'?
++commentsTypeParameters.ts(7,41): error TS1434: Unexpected keyword or identifier.
++commentsTypeParameters.ts(7,41): error TS2304: Cannot find name 'of'.
++commentsTypeParameters.ts(7,44): error TS1434: Unexpected keyword or identifier.
++commentsTypeParameters.ts(7,44): error TS2304: Cannot find name 'method'.
++commentsTypeParameters.ts(7,56): error TS2300: Duplicate identifier 'parameter'.
++commentsTypeParameters.ts(7,66): error TS1005: '=' expected.
++commentsTypeParameters.ts(7,66): error TS2304: Cannot find name '*'.
++commentsTypeParameters.ts(7,67): error TS1005: ';' expected.
++commentsTypeParameters.ts(8,5): error TS1128: Declaration or statement expected.
++commentsTypeParameters.ts(9,5): error TS1435: Unknown keyword or identifier. Did you mean 'private'?
++commentsTypeParameters.ts(9,5): error TS2304: Cannot find name 'private'.
++commentsTypeParameters.ts(9,13): error TS1435: Unknown keyword or identifier. Did you mean 'static'?
++commentsTypeParameters.ts(9,13): error TS2304: Cannot find name 'static'.
++commentsTypeParameters.ts(9,20): error TS1434: Unexpected keyword or identifier.
++commentsTypeParameters.ts(9,20): error TS2304: Cannot find name 'privatestaticmethod'.
++commentsTypeParameters.ts(9,39): error TS1128: Declaration or statement expected.
++commentsTypeParameters.ts(9,41): error TS1128: Declaration or statement expected.
++commentsTypeParameters.ts(9,43): error TS1434: Unexpected keyword or identifier.
++commentsTypeParameters.ts(9,43): error TS2552: Cannot find name 'docComment'. Did you mean 'Comment'?
++commentsTypeParameters.ts(9,54): error TS1434: Unexpected keyword or identifier.
++commentsTypeParameters.ts(9,54): error TS2304: Cannot find name 'of'.
++commentsTypeParameters.ts(9,57): error TS1434: Unexpected keyword or identifier.
++commentsTypeParameters.ts(9,57): error TS2304: Cannot find name 'method'.
++commentsTypeParameters.ts(9,69): error TS2300: Duplicate identifier 'parameter'.
++commentsTypeParameters.ts(9,79): error TS1005: '=' expected.
++commentsTypeParameters.ts(9,79): error TS2304: Cannot find name '*'.
++commentsTypeParameters.ts(9,80): error TS1005: ';' expected.
++commentsTypeParameters.ts(10,5): error TS1128: Declaration or statement expected.
++commentsTypeParameters.ts(11,1): error TS1128: Declaration or statement expected.
++commentsTypeParameters.ts(13,10): error TS2391: Function implementation is missing or not immediately following the declaration.
++commentsTypeParameters.ts(13,10): error TS7010: 'compare', which lacks return-type annotation, implicitly has an 'any' return type.
++commentsTypeParameters.ts(13,17): error TS1005: '(' expected.
++commentsTypeParameters.ts(13,19): error TS1138: Parameter declaration expected.
++commentsTypeParameters.ts(13,21): error TS7006: Parameter 'type' implicitly has an 'any' type.
++commentsTypeParameters.ts(13,25): error TS1005: ',' expected.
++commentsTypeParameters.ts(13,26): error TS1138: Parameter declaration expected.
++commentsTypeParameters.ts(14,5): error TS1108: A 'return' statement can only be used within a function body.
++commentsTypeParameters.ts(14,12): error TS2304: Cannot find name 'a'.
++commentsTypeParameters.ts(14,18): error TS2304: Cannot find name 'b'.
++commentsTypeParameters.ts(15,1): error TS1128: Declaration or statement expected.
++

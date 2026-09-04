@@ -1,0 +1,8 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,5 @@
++typeInferenceLiteralUnion.ts(35,1): error TS2322: Type '[string | number | boolean | Numeric | Date, string | number | boolean | Numeric | Date] | [undefined, undefined]' is not assignable to type '[string | number | boolean | Date | NumCoercible, string | number | boolean | Date | NumCoercible] | [undefined, undefined]'.
++  Type '[string | number | boolean | Numeric | Date, string | number | boolean | Numeric | Date]' is not assignable to type '[string | number | boolean | Date | NumCoercible, string | number | boolean | Date | NumCoercible] | [undefined, undefined]'.
++    Type 'Numeric' is not assignable to type 'string | number | boolean | Date | NumCoercible'.
++      Type 'Numeric' is missing the following properties from type 'Date': toString, toDateString, toTimeString, toLocaleString, and 40 more.
++

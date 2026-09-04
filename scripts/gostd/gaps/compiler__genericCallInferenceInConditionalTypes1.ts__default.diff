@@ -1,0 +1,7 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,4 @@
++genericCallInferenceInConditionalTypes1.ts(26,3): error TS2345: Argument of type '(props: T extends (props: P) => unknown ? P : object extends any ? { [P in K]: P[P]; } : P, ref: { current: HTMLElement; }) => null' is not assignable to parameter of type '(props: unknown, ref: { current: T; }) => unknown'.
++  Types of parameters 'props' and 'props' are incompatible.
++    Type 'unknown' is not assignable to type 'T extends (props: P) => unknown ? P : object extends any ? { [P in K]: P[P]; } : P'.
++

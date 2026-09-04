@@ -1,0 +1,23 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,20 @@
++taggedTemplatesWithTypeArguments1.ts(11,7): error TS7006: Parameter 'stuff' implicitly has an 'any' type.
++taggedTemplatesWithTypeArguments1.ts(13,7): error TS7006: Parameter 'stuff' implicitly has an 'any' type.
++taggedTemplatesWithTypeArguments1.ts(15,7): error TS7006: Parameter 'stuff' implicitly has an 'any' type.
++taggedTemplatesWithTypeArguments1.ts(22,27): error TS1155: 'const' declarations must be initialized.
++taggedTemplatesWithTypeArguments1.ts(22,35): error TS1155: 'const' declarations must be initialized.
++taggedTemplatesWithTypeArguments1.ts(22,43): error TS1155: 'const' declarations must be initialized.
++taggedTemplatesWithTypeArguments1.ts(22,50): error TS1005: ',' expected.
++taggedTemplatesWithTypeArguments1.ts(22,52): error TS1134: Variable declaration expected.
++taggedTemplatesWithTypeArguments1.ts(24,7): error TS7006: Parameter 'stuff' implicitly has an 'any' type.
++taggedTemplatesWithTypeArguments1.ts(26,7): error TS7006: Parameter 'stuff' implicitly has an 'any' type.
++taggedTemplatesWithTypeArguments1.ts(28,7): error TS7006: Parameter 'stuff' implicitly has an 'any' type.
++taggedTemplatesWithTypeArguments1.ts(37,39): error TS7006: Parameter 'input' implicitly has an 'any' type.
++taggedTemplatesWithTypeArguments1.ts(38,3): error TS2339: Property 'returnedObjProp' does not exist on type 'boolean'.
++taggedTemplatesWithTypeArguments1.ts(39,3): error TS2339: Property 'returnedObjProp' does not exist on type 'boolean'.
++taggedTemplatesWithTypeArguments1.ts(40,3): error TS2339: Property 'returnedObjProp' does not exist on type 'boolean'.
++taggedTemplatesWithTypeArguments1.ts(42,25): error TS7006: Parameter 'input' implicitly has an 'any' type.
++taggedTemplatesWithTypeArguments1.ts(43,3): error TS2339: Property 'returnedObjProp' does not exist on type 'boolean'.
++taggedTemplatesWithTypeArguments1.ts(44,3): error TS2339: Property 'returnedObjProp' does not exist on type 'boolean'.
++taggedTemplatesWithTypeArguments1.ts(45,3): error TS2339: Property 'returnedObjProp' does not exist on type 'boolean'.
++

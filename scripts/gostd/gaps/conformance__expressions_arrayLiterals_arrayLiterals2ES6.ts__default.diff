@@ -1,0 +1,12 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,9 @@
++arrayLiterals2ES6.ts(10,11): error TS1109: Expression expected.
++arrayLiterals2ES6.ts(10,13): error TS1109: Expression expected.
++arrayLiterals2ES6.ts(12,11): error TS1109: Expression expected.
++arrayLiterals2ES6.ts(12,13): error TS1109: Expression expected.
++arrayLiterals2ES6.ts(12,15): error TS1109: Expression expected.
++arrayLiterals2ES6.ts(13,11): error TS1109: Expression expected.
++arrayLiterals2ES6.ts(13,13): error TS1109: Expression expected.
++arrayLiterals2ES6.ts(15,18): error TS1109: Expression expected.
++

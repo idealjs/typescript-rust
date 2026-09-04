@@ -1,0 +1,5 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,2 @@
++partiallyNamedTuples3.ts(3,18): error TS7019: Rest parameter 'args' implicitly has an 'any[]' type.
++

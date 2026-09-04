@@ -1,0 +1,5 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,2 @@
++usage.ts(3,22): error TS2503: Cannot find namespace 'Something'.
++

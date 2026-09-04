@@ -1,0 +1,8 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,5 @@
++contextualTypingOfLambdaWithMultipleSignatures2.ts(6,1): error TS2322: Type '(a: string) => any' is not assignable to type '(x: string) => string'.
++  Types of parameters 'a' and 'x' are incompatible.
++    Type 'number' is not assignable to type 'string'.
++contextualTypingOfLambdaWithMultipleSignatures2.ts(6,23): error TS2339: Property 'asdf' does not exist on type 'string'.
++

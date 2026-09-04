@@ -1,0 +1,5 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,2 @@
++genericCallWithinOwnBodyCastTypeParameterIdentity.ts(21,18): error TS7006: Parameter 'onFulfilled' implicitly has an 'any' type.
++

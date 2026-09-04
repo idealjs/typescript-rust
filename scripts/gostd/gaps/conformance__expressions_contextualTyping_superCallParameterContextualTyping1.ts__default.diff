@@ -1,0 +1,5 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,2 @@
++superCallParameterContextualTyping1.ts(9,27): error TS7006: Parameter 'value' implicitly has an 'any' type.
++

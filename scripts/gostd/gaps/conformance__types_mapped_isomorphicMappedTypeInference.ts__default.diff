@@ -1,0 +1,9 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,6 @@
++isomorphicMappedTypeInference.ts(74,5): error TS2739: Type '{ [P in keyof T]: { value: T[P]; }; }' is missing the following properties from type '{ a: { value: number; }; b: { value: string; }; c: { value: boolean; }; }': a, b, c
++isomorphicMappedTypeInference.ts(75,5): error TS2322: Type 'object' is not assignable to type '{ a: { value: number; }; b: { value: string; }; c: { value: boolean; }; }'.
++isomorphicMappedTypeInference.ts(97,28): error TS2345: Argument of type '{ a: { value: number; }; b: { value: string; }; c: { value: boolean; }; }' is not assignable to parameter of type '{ [x: string]: T; }'.
++  Index signature for type 'string' is missing in type '{ a: { value: number; }; b: { value: string; }; c: { value: boolean; }; }'.
++isomorphicMappedTypeInference.ts(178,7): error TS2739: Type '{ [P in K]: T[P]; }' is missing the following properties from type '{ foo: any; bar: any; }': foo, bar
++

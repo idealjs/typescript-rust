@@ -1,0 +1,12 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,9 @@
++inlineConditionalHasSimilarAssignability.ts(5,3): error TS2322: Type 'any[] extends T ? T : never' is not assignable to type 'T'.
++  'T' could be instantiated with an arbitrary type which could be unrelated to 'any[] extends T ? T : never'.
++inlineConditionalHasSimilarAssignability.ts(8,3): error TS2322: Type 'any[] extends T ? any[] : never' is not assignable to type 'T'.
++  'T' could be instantiated with an arbitrary type which could be unrelated to 'any[] extends T ? any[] : never'.
++inlineConditionalHasSimilarAssignability.ts(11,3): error TS2322: Type 'any[] extends T ? T : never' is not assignable to type 'T'.
++  'T' could be instantiated with an arbitrary type which could be unrelated to 'any[] extends T ? T : never'.
++inlineConditionalHasSimilarAssignability.ts(15,3): error TS2322: Type 'any[] extends T ? any[] : never' is not assignable to type 'T'.
++  'T' could be instantiated with an arbitrary type which could be unrelated to 'any[] extends T ? any[] : never'.
++

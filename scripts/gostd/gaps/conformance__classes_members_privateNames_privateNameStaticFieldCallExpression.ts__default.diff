@@ -1,0 +1,6 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,3 @@
++privateNameStaticFieldCallExpression.ts(15,34): error TS1005: ',' expected.
++privateNameStaticFieldCallExpression.ts(16,36): error TS1005: ';' expected.
++

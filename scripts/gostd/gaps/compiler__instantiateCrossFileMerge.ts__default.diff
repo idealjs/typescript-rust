@@ -1,0 +1,5 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,2 @@
++second.ts(2,15): error TS7006: Parameter 'r' implicitly has an 'any' type.
++

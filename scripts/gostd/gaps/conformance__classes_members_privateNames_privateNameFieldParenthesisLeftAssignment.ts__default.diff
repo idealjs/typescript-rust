@@ -1,0 +1,6 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,3 @@
++privateNameFieldParenthesisLeftAssignment.ts(9,9): error TS2364: The left-hand side of an assignment expression must be a variable or a property access.
++privateNameFieldParenthesisLeftAssignment.ts(13,9): error TS2364: The left-hand side of an assignment expression must be a variable or a property access.
++

@@ -1,0 +1,17 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,14 @@
++inferenceOfNullableObjectTypesWithCommonBase.ts(11,27): error TS2345: Argument of type '{ foo: string; }' is not assignable to parameter of type '{ foo: string; bar: number; } | undefined | undefined'.
++  Property 'bar' is missing in type '{ foo: string; }' but required in type '{ foo: string; bar: number; }'.
++inferenceOfNullableObjectTypesWithCommonBase.ts(14,42): error TS2345: Argument of type '{ foo: string; }' is not assignable to parameter of type '{ foo: string; bar: number; } | undefined | undefined'.
++  Property 'bar' is missing in type '{ foo: string; }' but required in type '{ foo: string; bar: number; }'.
++inferenceOfNullableObjectTypesWithCommonBase.ts(17,23): error TS2345: Argument of type '{ foo: string; }' is not assignable to parameter of type 'undefined | undefined'.
++inferenceOfNullableObjectTypesWithCommonBase.ts(25,29): error TS2345: Argument of type '"b"' is not assignable to parameter of type '"a" | undefined | undefined'.
++inferenceOfNullableObjectTypesWithCommonBase.ts(26,17): error TS2345: Argument of type '"b" | undefined' is not assignable to parameter of type '"a" | undefined'.
++  Type '"b"' is not assignable to type '"a" | undefined'.
++inferenceOfNullableObjectTypesWithCommonBase.ts(28,29): error TS2345: Argument of type '"b" | null' is not assignable to parameter of type '"a" | undefined | null | undefined'.
++  Type '"b"' is not assignable to type '"a" | undefined | null | undefined'.
++inferenceOfNullableObjectTypesWithCommonBase.ts(29,24): error TS2345: Argument of type '"b" | undefined' is not assignable to parameter of type '"a" | null | null | undefined'.
++  Type '"b"' is not assignable to type '"a" | null | null | undefined'.
++inferenceOfNullableObjectTypesWithCommonBase.ts(32,49): error TS2345: Argument of type 'string' is not assignable to parameter of type 'string & { tag: "foo"; } | undefined | undefined'.
++

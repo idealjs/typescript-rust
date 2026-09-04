@@ -1,0 +1,8 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,5 @@
++asyncFunctionContextuallyTypedReturns.ts(11,13): error TS7006: Parameter 'abc' implicitly has an 'any' type.
++asyncFunctionContextuallyTypedReturns.ts(12,19): error TS7006: Parameter 'def' implicitly has an 'any' type.
++asyncFunctionContextuallyTypedReturns.ts(19,10): error TS7006: Parameter 'a' implicitly has an 'any' type.
++asyncFunctionContextuallyTypedReturns.ts(28,10): error TS7006: Parameter 'a' implicitly has an 'any' type.
++

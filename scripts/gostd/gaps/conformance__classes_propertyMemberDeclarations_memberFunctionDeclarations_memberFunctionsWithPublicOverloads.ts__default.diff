@@ -1,0 +1,8 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,5 @@
++memberFunctionsWithPublicOverloads.ts(4,12): error TS2391: Function implementation is missing or not immediately following the declaration.
++memberFunctionsWithPublicOverloads.ts(9,12): error TS2391: Function implementation is missing or not immediately following the declaration.
++memberFunctionsWithPublicOverloads.ts(24,12): error TS2391: Function implementation is missing or not immediately following the declaration.
++memberFunctionsWithPublicOverloads.ts(29,12): error TS2391: Function implementation is missing or not immediately following the declaration.
++

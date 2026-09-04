@@ -1,0 +1,10 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,7 @@
++arrayFromAsync.ts(28,40): error TS2345: Argument of type 'void' is not assignable to parameter of type 'AsyncIterable<unknown> | Iterable<unknown | PromiseLike<unknown>> | ArrayLike<unknown | PromiseLike<unknown>>'.
++arrayFromAsync.ts(29,40): error TS2345: Argument of type 'void' is not assignable to parameter of type 'AsyncIterable<unknown> | Iterable<unknown | PromiseLike<unknown>> | ArrayLike<unknown | PromiseLike<unknown>>'.
++arrayFromAsync.ts(35,39): error TS2345: Argument of type 'void' is not assignable to parameter of type 'AsyncIterable<unknown> | Iterable<unknown> | ArrayLike<unknown>'.
++arrayFromAsync.ts(35,57): error TS2362: The left-hand side of an arithmetic operation must be of type 'any', 'number', 'bigint' or an enum type.
++arrayFromAsync.ts(36,71): error TS2362: The left-hand side of an arithmetic operation must be of type 'any', 'number', 'bigint' or an enum type.
++arrayFromAsync.ts(37,55): error TS2362: The left-hand side of an arithmetic operation must be of type 'any', 'number', 'bigint' or an enum type.
++

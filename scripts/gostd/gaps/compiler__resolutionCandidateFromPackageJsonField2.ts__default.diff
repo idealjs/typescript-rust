@@ -1,0 +1,4 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -1 +0,0 @@
+-test.ts(1,19): error TS5097: An import path can only end with a '.ts' extension when 'allowImportingTsExtensions' is enabled.

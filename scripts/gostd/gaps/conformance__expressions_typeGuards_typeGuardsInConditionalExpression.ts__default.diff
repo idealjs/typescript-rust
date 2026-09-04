@@ -1,0 +1,10 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,7 @@
++typeGuardsInConditionalExpression.ts(10,13): error TS2339: Property 'length' does not exist on type 'string | number'.
++typeGuardsInConditionalExpression.ts(50,13): error TS2322: Type 'string | number | boolean' is not assignable to type 'number | boolean'.
++  Type 'string' is not assignable to type 'number | boolean'.
++typeGuardsInConditionalExpression.ts(59,19): error TS2339: Property 'length' does not exist on type 'string | number'.
++typeGuardsInConditionalExpression.ts(67,13): error TS2322: Type 'string | number | boolean' is not assignable to type 'number | boolean'.
++  Type 'string' is not assignable to type 'number | boolean'.
++

@@ -1,0 +1,9 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,6 @@
++optionalChainWithInstantiationExpression2.ts(10,4): error TS1003: Identifier expected.
++optionalChainWithInstantiationExpression2.ts(10,4): error TS2339: Property '<' does not exist on type 'A | undefined'.
++optionalChainWithInstantiationExpression2.ts(10,5): error TS1005: ';' expected.
++optionalChainWithInstantiationExpression2.ts(10,8): error TS1109: Expression expected.
++optionalChainWithInstantiationExpression2.ts(12,5): error TS1109: Expression expected.
++

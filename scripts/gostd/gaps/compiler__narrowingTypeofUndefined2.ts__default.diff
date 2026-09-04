@@ -1,0 +1,8 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,5 @@
++narrowingTypeofUndefined2.ts(5,19): error TS2345: Argument of type 'T' is not assignable to parameter of type 'Array<unknown>'.
++  Type 'undefined' is not assignable to type 'Array<unknown>'.
++narrowingTypeofUndefined2.ts(6,15): error TS2322: Type 'T' is not assignable to type 'Array<unknown>'.
++  Type 'undefined' is not assignable to type 'Array<unknown>'.
++

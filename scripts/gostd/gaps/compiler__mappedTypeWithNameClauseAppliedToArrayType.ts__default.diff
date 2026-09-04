@@ -1,0 +1,6 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,3 @@
++mappedTypeWithNameClauseAppliedToArrayType.ts(6,14): error TS2345: Argument of type '{ [K in keyof T as K]: number[][K]; }' is not assignable to parameter of type 'unknown[]'.
++  Type '{ [K in keyof T as K]: number[][K]; }' is missing the following properties from type 'unknown[]': length, pop, push, concat, and 25 more.
++

@@ -1,0 +1,5 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,2 @@
++a.ts(8,10): error TS2708: Cannot use namespace 'C' as a value.
++

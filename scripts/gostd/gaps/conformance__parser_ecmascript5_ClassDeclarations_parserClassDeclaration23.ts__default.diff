@@ -1,0 +1,7 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,4 @@
++parserClassDeclaration23.ts(1,8): error TS1127: Invalid character.
++parserClassDeclaration23.ts(1,9): error TS1434: Unexpected keyword or identifier.
++parserClassDeclaration23.ts(1,15): error TS1068: Unexpected token. A constructor, method, accessor, or property was expected.
++

@@ -1,0 +1,5 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,2 @@
++privateNameComputedPropertyName1.ts(12,14): error TS2540: Cannot assign to '#d' because it is a read-only property.
++

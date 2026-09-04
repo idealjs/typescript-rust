@@ -1,0 +1,7 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,4 @@
++/a.ts(2,19): error TS2307: Cannot find module 'kquery' or its corresponding type declarations.
++/a.ts(3,19): error TS2307: Cannot find module 'lquery' or its corresponding type declarations.
++/a.ts(4,19): error TS2307: Cannot find module 'mquery' or its corresponding type declarations.
++

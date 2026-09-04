@@ -1,0 +1,7 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,4 @@
++file.ts(5,4): error TS2339: Property 'readFile' does not exist on type 'typeof import("fs")'.
++index.ts(3,4): error TS2339: Property 'readFile' does not exist on type 'typeof import("fs")'.
++subfolder/index.ts(3,4): error TS2339: Property 'readFile' does not exist on type 'typeof import("fs")'.
++

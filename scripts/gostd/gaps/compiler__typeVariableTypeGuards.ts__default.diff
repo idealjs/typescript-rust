@@ -1,0 +1,14 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,11 @@
++typeVariableTypeGuards.ts(10,27): error TS2349: This expression is not callable.
++  Type 'P["foo"]' has no call signatures.
++typeVariableTypeGuards.ts(51,9): error TS2349: This expression is not callable.
++  Type 'T' has no call signatures.
++typeVariableTypeGuards.ts(59,9): error TS2349: This expression is not callable.
++  Type 'T' has no call signatures.
++typeVariableTypeGuards.ts(67,9): error TS2349: This expression is not callable.
++  Type 'T' has no call signatures.
++typeVariableTypeGuards.ts(87,9): error TS2351: This expression is not constructable.
++  Type 'T' has no construct signatures.
++

@@ -1,0 +1,8 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,5 @@
++narrowingDestructuring.ts(5,15): error TS2339: Property 'a' does not exist on type 'T'.
++narrowingDestructuring.ts(8,15): error TS2339: Property 'b' does not exist on type 'T'.
++narrowingDestructuring.ts(20,15): error TS2339: Property 'f' does not exist on type 'T'.
++narrowingDestructuring.ts(23,15): error TS2339: Property 'g' does not exist on type 'T'.
++

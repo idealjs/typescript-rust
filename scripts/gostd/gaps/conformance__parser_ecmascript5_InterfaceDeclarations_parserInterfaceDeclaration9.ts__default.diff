@@ -1,0 +1,8 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,5 @@
++parserInterfaceDeclaration9.ts(2,22): error TS1005: ';' expected.
++parserInterfaceDeclaration9.ts(2,22): error TS2300: Duplicate identifier ','.
++parserInterfaceDeclaration9.ts(3,27): error TS1005: ';' expected.
++parserInterfaceDeclaration9.ts(3,27): error TS2300: Duplicate identifier ','.
++

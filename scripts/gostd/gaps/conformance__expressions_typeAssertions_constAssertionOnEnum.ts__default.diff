@@ -1,0 +1,7 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,4 @@
++more.ts(2,1): error TS1355: A 'const' assertion can only be applied to references to enum members, or string, number, boolean, array, or object literals.
++ns.ts(3,5): error TS1355: A 'const' assertion can only be applied to references to enum members, or string, number, boolean, array, or object literals.
++test.ts(7,11): error TS1355: A 'const' assertion can only be applied to references to enum members, or string, number, boolean, array, or object literals.
++

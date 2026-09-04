@@ -1,0 +1,9 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,6 @@
++conditionalTypesASI.ts(5,10): error TS1003: Identifier expected.
++conditionalTypesASI.ts(5,10): error TS2304: Cannot find name '?'.
++conditionalTypesASI.ts(5,11): error TS1005: '?' expected.
++conditionalTypesASI.ts(5,11): error TS2304: Cannot find name ':'.
++conditionalTypesASI.ts(5,13): error TS1005: ':' expected.
++

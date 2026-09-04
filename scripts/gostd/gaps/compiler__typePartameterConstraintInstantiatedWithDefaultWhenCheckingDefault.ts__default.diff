@@ -1,0 +1,5 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,2 @@
++typePartameterConstraintInstantiatedWithDefaultWhenCheckingDefault.ts(10,14): error TS2540: Cannot assign to 'item' because it is a read-only property.
++

@@ -1,0 +1,27 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,24 @@
++three.ts(31,18): error TS2345: Argument of type '(error: null, result: T[]) => void' is not assignable to parameter of type 'Callback<T>'.
++  Types of parameters 'error' and 'error' are incompatible.
++    Type 'Error' is not assignable to type 'null'.
++three.ts(37,34): error TS2345: Argument of type 'T[]' is not assignable to parameter of type 'T'.
++  'T' could be instantiated with an arbitrary type which could be unrelated to 'T[]'.
++three.ts(47,37): error TS2769: No overload matches this call.
++  Overload 1 of 2, '(error: null, result: T[]): unknown', gave the following error.
++    Argument of type 'number' is not assignable to parameter of type 'T[]'.
++  Overload 2 of 2, '(error: Error, result: null): unknown', gave the following error.
++    Argument of type 'null' is not assignable to parameter of type 'Error'.
++three.ts(48,37): error TS2769: No overload matches this call.
++  Overload 1 of 2, '(error: null, result: T[]): unknown', gave the following error.
++    Argument of type 'number' is not assignable to parameter of type 'T[]'.
++  Overload 2 of 2, '(error: Error, result: null): unknown', gave the following error.
++    Argument of type 'null' is not assignable to parameter of type 'Error'.
++three.ts(49,37): error TS2769: No overload matches this call.
++  Overload 1 of 2, '(error: null, result: T[]): unknown', gave the following error.
++    Argument of type 'number' is not assignable to parameter of type 'T[]'.
++  Overload 2 of 2, '(error: Error, result: null): unknown', gave the following error.
++    Argument of type 'null' is not assignable to parameter of type 'Error'.
++three.ts(50,4): error TS2345: Argument of type '(error: null, results: T[]) => void' is not assignable to parameter of type 'Callback<unknown[]>'.
++  Types of parameters 'error' and 'error' are incompatible.
++    Type 'Error' is not assignable to type 'null'.
++

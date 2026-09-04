@@ -1,0 +1,7 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,4 @@
++contextuallyTypedBooleanLiterals.ts(26,7): error TS2719: Type 'Observable<boolean>' is not assignable to type 'Observable<boolean>'. Two different types with this name exist, but they are unrelated.
++  Target signature provides too few arguments. Expected 1 or more, but got 0.
++    Type 'T' is not assignable to type 'boolean'.
++

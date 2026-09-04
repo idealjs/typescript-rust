@@ -1,0 +1,8 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,5 @@
++es2018IntlAPIs.ts(5,58): error TS2345: Argument of type '{ localeMatcher: string; }' is not assignable to parameter of type '{ localeMatcher?: "lookup" | "best fit"; }'.
++  Types of property 'localeMatcher' are incompatible.
++    Type 'string' is not assignable to type '"lookup" | "best fit"'.
++es2018IntlAPIs.ts(7,42): error TS2339: Property 'formatToParts' does not exist on type 'NumberFormat'.
++

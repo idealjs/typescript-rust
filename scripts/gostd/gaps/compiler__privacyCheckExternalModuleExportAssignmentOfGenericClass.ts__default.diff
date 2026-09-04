@@ -1,0 +1,5 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,2 @@
++privacyCheckExternalModuleExportAssignmentOfGenericClass_0.ts(1,10): error TS2449: Class 'Foo' used before its declaration.
++

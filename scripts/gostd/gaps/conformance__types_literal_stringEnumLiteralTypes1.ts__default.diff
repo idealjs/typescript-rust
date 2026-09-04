@@ -1,0 +1,11 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,8 @@
++stringEnumLiteralTypes1.ts(61,24): error TS2345: Argument of type 'error' is not assignable to parameter of type 'never'.
++stringEnumLiteralTypes1.ts(88,35): error TS2339: Property 'a' does not exist on type 'never'.
++stringEnumLiteralTypes1.ts(89,34): error TS2339: Property 'b' does not exist on type 'never'.
++stringEnumLiteralTypes1.ts(95,35): error TS2339: Property 'a' does not exist on type 'never'.
++stringEnumLiteralTypes1.ts(96,34): error TS2339: Property 'b' does not exist on type 'never'.
++stringEnumLiteralTypes1.ts(98,24): error TS2345: Argument of type '{ kind: error; a: string; } | { kind: error; b: string; }' is not assignable to parameter of type 'never'.
++  Type '{ kind: error; a: string; }' is not assignable to type 'never'.
++

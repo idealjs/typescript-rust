@@ -1,0 +1,5 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,2 @@
++taggedTemplateStringsHexadecimalEscapesES6.ts(4,1): error TS1434: Unexpected keyword or identifier.
++

@@ -1,0 +1,7 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,4 @@
++trailingCommasES5.ts(10,14): error TS1109: Expression expected.
++trailingCommasES5.ts(11,11): error TS1109: Expression expected.
++trailingCommasES5.ts(11,13): error TS1109: Expression expected.
++

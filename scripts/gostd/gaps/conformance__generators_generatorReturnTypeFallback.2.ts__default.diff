@@ -1,0 +1,7 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -1,4 +0,0 @@
+-error TS2318: Cannot find global type 'IterableIterator'.
+-
+-
+-!!! error TS2318: Cannot find global type 'IterableIterator'.

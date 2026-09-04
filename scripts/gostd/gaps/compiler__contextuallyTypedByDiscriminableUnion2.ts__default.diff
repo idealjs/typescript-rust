@@ -1,0 +1,10 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,7 @@
++contextuallyTypedByDiscriminableUnion2.ts(44,13): error TS2345: Argument of type '{ enableD: boolean; value: string | null; setItem: (item: I) => void; }' is not assignable to parameter of type 'EnableA | DisableA & EnableB | DisableB & DisableD<I> | EnableD<I>'.
++  Types of property 'setItem' are incompatible.
++    Type '(item: I) => void' is not assignable to type '(item: I | null) => void'.
++      Types of parameters 'item' and 'item' are incompatible.
++        Type 'I | null' is not assignable to type 'I'.
++          'I' could be instantiated with an arbitrary type which could be unrelated to 'I | null'.
++

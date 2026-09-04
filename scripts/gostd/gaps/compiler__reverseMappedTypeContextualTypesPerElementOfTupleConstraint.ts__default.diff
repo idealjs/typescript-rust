@@ -1,0 +1,6 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,3 @@
++reverseMappedTypeContextualTypesPerElementOfTupleConstraint.ts(21,16): error TS7006: Parameter 'event' implicitly has an 'any' type.
++reverseMappedTypeContextualTypesPerElementOfTupleConstraint.ts(25,16): error TS7006: Parameter 'event' implicitly has an 'any' type.
++

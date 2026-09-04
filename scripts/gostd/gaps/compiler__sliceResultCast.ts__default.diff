@@ -1,0 +1,5 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,2 @@
++sliceResultCast.ts(3,3): error TS2339: Property 'slice' does not exist on type '[number, string] | [number, string, string]'.
++

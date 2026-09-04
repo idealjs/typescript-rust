@@ -1,0 +1,5 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,2 @@
++cachedContextualTypes.ts(19,13): error TS7006: Parameter 'bar' implicitly has an 'any' type.
++

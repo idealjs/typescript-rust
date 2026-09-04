@@ -1,0 +1,5 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,2 @@
++augment.ts(11,21): error TS2694: Namespace 'reexport.ts' has no exported member 'Root'.
++

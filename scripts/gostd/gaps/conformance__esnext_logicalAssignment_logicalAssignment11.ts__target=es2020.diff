@@ -1,0 +1,6 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,3 @@
++logicalAssignment11.ts(5,1): error TS18048: 'd' is possibly 'undefined'.
++logicalAssignment11.ts(9,1): error TS18048: 'e' is possibly 'undefined'.
++

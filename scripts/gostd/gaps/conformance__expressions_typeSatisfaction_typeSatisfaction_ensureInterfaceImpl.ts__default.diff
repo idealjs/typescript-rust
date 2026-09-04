@@ -1,0 +1,5 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,2 @@
++typeSatisfaction_ensureInterfaceImpl.ts(7,10): error TS7006: Parameter 'd' implicitly has an 'any' type.
++

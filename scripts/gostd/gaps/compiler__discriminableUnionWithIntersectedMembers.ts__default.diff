@@ -1,0 +1,12 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,9 @@
++discriminableUnionWithIntersectedMembers.ts(7,7): error TS2322: Type '{ x: "x" | "y"; y: number; }' is not assignable to type '{ x: "x"; y: number; } & { y: number; } | { x: "y"; y: number; z?: boolean; } & { y: number; }'.
++  Types of property 'x' are incompatible.
++    Type '"x" | "y"' is not assignable to type '"x"'.
++      Type '"y"' is not assignable to type '"x"'.
++discriminableUnionWithIntersectedMembers.ts(14,7): error TS2322: Type '{ x: "x" | "y"; y: number; }' is not assignable to type '{ x: "x"; y: number; } | { x: "y"; y: number; z?: boolean; }'.
++  Types of property 'x' are incompatible.
++    Type '"x" | "y"' is not assignable to type '"x"'.
++      Type '"y"' is not assignable to type '"x"'.
++

@@ -1,0 +1,28 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,25 @@
++narrowingByTypeofInSwitch.ts(138,56): error TS2366: Function lacks ending return statement and return type does not include 'undefined'.
++narrowingByTypeofInSwitch.ts(143,33): error TS2339: Property 'x' does not exist on type 'never'.
++narrowingByTypeofInSwitch.ts(147,77): error TS2366: Function lacks ending return statement and return type does not include 'undefined'.
++narrowingByTypeofInSwitch.ts(149,33): error TS2339: Property 'toString' does not exist on type 'never'.
++narrowingByTypeofInSwitch.ts(158,38): error TS2349: This expression is not callable.
++  Type 'never' has no call signatures.
++narrowingByTypeofInSwitch.ts(159,39): error TS2339: Property 'y' does not exist on type 'never'.
++narrowingByTypeofInSwitch.ts(160,37): error TS2345: Argument of type 'X | Y' is not assignable to parameter of type 'never'.
++  Type 'X' is not assignable to type 'never'.
++narrowingByTypeofInSwitch.ts(164,86): error TS2366: Function lacks ending return statement and return type does not include 'undefined'.
++narrowingByTypeofInSwitch.ts(172,74): error TS2366: Function lacks ending return statement and return type does not include 'undefined'.
++narrowingByTypeofInSwitch.ts(174,39): error TS2339: Property 'y' does not exist on type 'never'.
++narrowingByTypeofInSwitch.ts(175,38): error TS2349: This expression is not callable.
++  Type 'never' has no call signatures.
++narrowingByTypeofInSwitch.ts(184,43): error TS2345: Argument of type 'number' is not assignable to parameter of type 'never'.
++narrowingByTypeofInSwitch.ts(196,43): error TS2345: Argument of type 'string' is not assignable to parameter of type 'never'.
++narrowingByTypeofInSwitch.ts(197,43): error TS2345: Argument of type 'number' is not assignable to parameter of type 'never'.
++narrowingByTypeofInSwitch.ts(212,35): error TS2345: Argument of type 'number | boolean | object' is not assignable to parameter of type 'boolean | object'.
++  Type 'number' is not assignable to type 'boolean | object'.
++narrowingByTypeofInSwitch.ts(262,45): error TS2345: Argument of type '"hello" | 3 | true' is not assignable to parameter of type 'never'.
++  Type 'string' is not assignable to type 'never'.
++narrowingByTypeofInSwitch.ts(292,35): error TS2345: Argument of type 'number | boolean | object' is not assignable to parameter of type 'boolean | object'.
++  Type 'number' is not assignable to type 'boolean | object'.
++narrowingByTypeofInSwitch.ts(308,94): error TS2366: Function lacks ending return statement and return type does not include 'undefined'.
++

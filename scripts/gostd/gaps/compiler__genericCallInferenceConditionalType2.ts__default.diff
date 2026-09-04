@@ -1,0 +1,10 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,7 @@
++genericCallInferenceConditionalType2.ts(10,3): error TS2345: Argument of type '(props: { as?: T | undefined; className?: string | undefined; }) => null' is not assignable to parameter of type '(props: unknown) => unknown'.
++  Types of parameters 'props' and 'props' are incompatible.
++    Type 'unknown' is not assignable to type '{ as?: T | undefined; className?: string | undefined; }'.
++genericCallInferenceConditionalType2.ts(23,13): error TS2345: Argument of type '<T>(x: { foo: T; }) => unknown' is not assignable to parameter of type '(x: unknown) => unknown'.
++  Types of parameters 'x' and 'x' are incompatible.
++    Type 'unknown' is not assignable to type '{ foo: T; }'.
++

@@ -1,0 +1,116 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,113 @@
++controlFlowManyCallExpressionStatementsPerf.ts(6,21): error TS1005: ',' expected.
++controlFlowManyCallExpressionStatementsPerf.ts(6,24): error TS2554: Expected 1 arguments, but got 2.
++controlFlowManyCallExpressionStatementsPerf.ts(7,21): error TS1005: ',' expected.
++controlFlowManyCallExpressionStatementsPerf.ts(7,24): error TS2554: Expected 1 arguments, but got 2.
++controlFlowManyCallExpressionStatementsPerf.ts(8,21): error TS1005: ',' expected.
++controlFlowManyCallExpressionStatementsPerf.ts(8,24): error TS2554: Expected 1 arguments, but got 2.
++controlFlowManyCallExpressionStatementsPerf.ts(9,21): error TS1005: ',' expected.
++controlFlowManyCallExpressionStatementsPerf.ts(9,24): error TS2554: Expected 1 arguments, but got 2.
++controlFlowManyCallExpressionStatementsPerf.ts(10,21): error TS1005: ',' expected.
++controlFlowManyCallExpressionStatementsPerf.ts(10,24): error TS2554: Expected 1 arguments, but got 2.
++controlFlowManyCallExpressionStatementsPerf.ts(11,21): error TS1005: ',' expected.
++controlFlowManyCallExpressionStatementsPerf.ts(11,24): error TS2554: Expected 1 arguments, but got 2.
++controlFlowManyCallExpressionStatementsPerf.ts(12,21): error TS1005: ',' expected.
++controlFlowManyCallExpressionStatementsPerf.ts(12,24): error TS2554: Expected 1 arguments, but got 2.
++controlFlowManyCallExpressionStatementsPerf.ts(13,21): error TS1005: ',' expected.
++controlFlowManyCallExpressionStatementsPerf.ts(13,24): error TS2554: Expected 1 arguments, but got 2.
++controlFlowManyCallExpressionStatementsPerf.ts(14,21): error TS1005: ',' expected.
++controlFlowManyCallExpressionStatementsPerf.ts(14,24): error TS2554: Expected 1 arguments, but got 2.
++controlFlowManyCallExpressionStatementsPerf.ts(15,21): error TS1005: ',' expected.
++controlFlowManyCallExpressionStatementsPerf.ts(15,24): error TS2554: Expected 1 arguments, but got 2.
++controlFlowManyCallExpressionStatementsPerf.ts(16,21): error TS1005: ',' expected.
++controlFlowManyCallExpressionStatementsPerf.ts(16,24): error TS2554: Expected 1 arguments, but got 2.
++controlFlowManyCallExpressionStatementsPerf.ts(17,21): error TS1005: ',' expected.
++controlFlowManyCallExpressionStatementsPerf.ts(17,24): error TS2554: Expected 1 arguments, but got 2.
++controlFlowManyCallExpressionStatementsPerf.ts(18,21): error TS1005: ',' expected.
++controlFlowManyCallExpressionStatementsPerf.ts(18,24): error TS2554: Expected 1 arguments, but got 2.
++controlFlowManyCallExpressionStatementsPerf.ts(19,21): error TS1005: ',' expected.
++controlFlowManyCallExpressionStatementsPerf.ts(19,24): error TS2554: Expected 1 arguments, but got 2.
++controlFlowManyCallExpressionStatementsPerf.ts(20,21): error TS1005: ',' expected.
++controlFlowManyCallExpressionStatementsPerf.ts(20,24): error TS2554: Expected 1 arguments, but got 2.
++controlFlowManyCallExpressionStatementsPerf.ts(21,21): error TS1005: ',' expected.
++controlFlowManyCallExpressionStatementsPerf.ts(21,24): error TS2554: Expected 1 arguments, but got 2.
++controlFlowManyCallExpressionStatementsPerf.ts(22,21): error TS1005: ',' expected.
++controlFlowManyCallExpressionStatementsPerf.ts(22,24): error TS2554: Expected 1 arguments, but got 2.
++controlFlowManyCallExpressionStatementsPerf.ts(23,21): error TS1005: ',' expected.
++controlFlowManyCallExpressionStatementsPerf.ts(23,24): error TS2554: Expected 1 arguments, but got 2.
++controlFlowManyCallExpressionStatementsPerf.ts(24,21): error TS1005: ',' expected.
++controlFlowManyCallExpressionStatementsPerf.ts(24,24): error TS2554: Expected 1 arguments, but got 2.
++controlFlowManyCallExpressionStatementsPerf.ts(25,21): error TS1005: ',' expected.
++controlFlowManyCallExpressionStatementsPerf.ts(25,24): error TS2554: Expected 1 arguments, but got 2.
++controlFlowManyCallExpressionStatementsPerf.ts(26,21): error TS1005: ',' expected.
++controlFlowManyCallExpressionStatementsPerf.ts(26,24): error TS2554: Expected 1 arguments, but got 2.
++controlFlowManyCallExpressionStatementsPerf.ts(27,21): error TS1005: ',' expected.
++controlFlowManyCallExpressionStatementsPerf.ts(27,24): error TS2554: Expected 1 arguments, but got 2.
++controlFlowManyCallExpressionStatementsPerf.ts(28,21): error TS1005: ',' expected.
++controlFlowManyCallExpressionStatementsPerf.ts(28,24): error TS2554: Expected 1 arguments, but got 2.
++controlFlowManyCallExpressionStatementsPerf.ts(29,21): error TS1005: ',' expected.
++controlFlowManyCallExpressionStatementsPerf.ts(29,24): error TS2554: Expected 1 arguments, but got 2.
++controlFlowManyCallExpressionStatementsPerf.ts(30,21): error TS1005: ',' expected.
++controlFlowManyCallExpressionStatementsPerf.ts(30,24): error TS2554: Expected 1 arguments, but got 2.
++controlFlowManyCallExpressionStatementsPerf.ts(31,21): error TS1005: ',' expected.
++controlFlowManyCallExpressionStatementsPerf.ts(31,24): error TS2554: Expected 1 arguments, but got 2.
++controlFlowManyCallExpressionStatementsPerf.ts(32,21): error TS1005: ',' expected.
++controlFlowManyCallExpressionStatementsPerf.ts(32,24): error TS2554: Expected 1 arguments, but got 2.
++controlFlowManyCallExpressionStatementsPerf.ts(33,21): error TS1005: ',' expected.
++controlFlowManyCallExpressionStatementsPerf.ts(33,24): error TS2554: Expected 1 arguments, but got 2.
++controlFlowManyCallExpressionStatementsPerf.ts(34,21): error TS1005: ',' expected.
++controlFlowManyCallExpressionStatementsPerf.ts(34,24): error TS2554: Expected 1 arguments, but got 2.
++controlFlowManyCallExpressionStatementsPerf.ts(35,21): error TS1005: ',' expected.
++controlFlowManyCallExpressionStatementsPerf.ts(35,24): error TS2554: Expected 1 arguments, but got 2.
++controlFlowManyCallExpressionStatementsPerf.ts(36,21): error TS1005: ',' expected.
++controlFlowManyCallExpressionStatementsPerf.ts(36,24): error TS2554: Expected 1 arguments, but got 2.
++controlFlowManyCallExpressionStatementsPerf.ts(37,21): error TS1005: ',' expected.
++controlFlowManyCallExpressionStatementsPerf.ts(37,24): error TS2554: Expected 1 arguments, but got 2.
++controlFlowManyCallExpressionStatementsPerf.ts(38,21): error TS1005: ',' expected.
++controlFlowManyCallExpressionStatementsPerf.ts(38,24): error TS2554: Expected 1 arguments, but got 2.
++controlFlowManyCallExpressionStatementsPerf.ts(39,21): error TS1005: ',' expected.
++controlFlowManyCallExpressionStatementsPerf.ts(39,24): error TS2554: Expected 1 arguments, but got 2.
++controlFlowManyCallExpressionStatementsPerf.ts(40,21): error TS1005: ',' expected.
++controlFlowManyCallExpressionStatementsPerf.ts(40,24): error TS2554: Expected 1 arguments, but got 2.
++controlFlowManyCallExpressionStatementsPerf.ts(41,21): error TS1005: ',' expected.
++controlFlowManyCallExpressionStatementsPerf.ts(41,24): error TS2554: Expected 1 arguments, but got 2.
++controlFlowManyCallExpressionStatementsPerf.ts(42,21): error TS1005: ',' expected.
++controlFlowManyCallExpressionStatementsPerf.ts(42,24): error TS2554: Expected 1 arguments, but got 2.
++controlFlowManyCallExpressionStatementsPerf.ts(43,21): error TS1005: ',' expected.
++controlFlowManyCallExpressionStatementsPerf.ts(43,24): error TS2554: Expected 1 arguments, but got 2.
++controlFlowManyCallExpressionStatementsPerf.ts(44,21): error TS1005: ',' expected.
++controlFlowManyCallExpressionStatementsPerf.ts(44,24): error TS2554: Expected 1 arguments, but got 2.
++controlFlowManyCallExpressionStatementsPerf.ts(45,21): error TS1005: ',' expected.
++controlFlowManyCallExpressionStatementsPerf.ts(45,24): error TS2554: Expected 1 arguments, but got 2.
++controlFlowManyCallExpressionStatementsPerf.ts(46,21): error TS1005: ',' expected.
++controlFlowManyCallExpressionStatementsPerf.ts(46,24): error TS2554: Expected 1 arguments, but got 2.
++controlFlowManyCallExpressionStatementsPerf.ts(47,21): error TS1005: ',' expected.
++controlFlowManyCallExpressionStatementsPerf.ts(47,24): error TS2554: Expected 1 arguments, but got 2.
++controlFlowManyCallExpressionStatementsPerf.ts(48,21): error TS1005: ',' expected.
++controlFlowManyCallExpressionStatementsPerf.ts(48,24): error TS2554: Expected 1 arguments, but got 2.
++controlFlowManyCallExpressionStatementsPerf.ts(49,21): error TS1005: ',' expected.
++controlFlowManyCallExpressionStatementsPerf.ts(49,24): error TS2554: Expected 1 arguments, but got 2.
++controlFlowManyCallExpressionStatementsPerf.ts(50,21): error TS1005: ',' expected.
++controlFlowManyCallExpressionStatementsPerf.ts(50,24): error TS2554: Expected 1 arguments, but got 2.
++controlFlowManyCallExpressionStatementsPerf.ts(51,21): error TS1005: ',' expected.
++controlFlowManyCallExpressionStatementsPerf.ts(51,24): error TS2554: Expected 1 arguments, but got 2.
++controlFlowManyCallExpressionStatementsPerf.ts(52,21): error TS1005: ',' expected.
++controlFlowManyCallExpressionStatementsPerf.ts(52,24): error TS2554: Expected 1 arguments, but got 2.
++controlFlowManyCallExpressionStatementsPerf.ts(53,21): error TS1005: ',' expected.
++controlFlowManyCallExpressionStatementsPerf.ts(53,24): error TS2554: Expected 1 arguments, but got 2.
++controlFlowManyCallExpressionStatementsPerf.ts(54,21): error TS1005: ',' expected.
++controlFlowManyCallExpressionStatementsPerf.ts(54,24): error TS2554: Expected 1 arguments, but got 2.
++controlFlowManyCallExpressionStatementsPerf.ts(55,21): error TS1005: ',' expected.
++controlFlowManyCallExpressionStatementsPerf.ts(55,24): error TS2554: Expected 1 arguments, but got 2.
++controlFlowManyCallExpressionStatementsPerf.ts(56,21): error TS1005: ',' expected.
++controlFlowManyCallExpressionStatementsPerf.ts(56,24): error TS2554: Expected 1 arguments, but got 2.
++controlFlowManyCallExpressionStatementsPerf.ts(57,21): error TS1005: ',' expected.
++controlFlowManyCallExpressionStatementsPerf.ts(57,24): error TS2554: Expected 1 arguments, but got 2.
++controlFlowManyCallExpressionStatementsPerf.ts(58,21): error TS1005: ',' expected.
++controlFlowManyCallExpressionStatementsPerf.ts(58,24): error TS2554: Expected 1 arguments, but got 2.
++controlFlowManyCallExpressionStatementsPerf.ts(59,21): error TS1005: ',' expected.
++controlFlowManyCallExpressionStatementsPerf.ts(59,24): error TS2554: Expected 1 arguments, but got 2.
++controlFlowManyCallExpressionStatementsPerf.ts(60,21): error TS1005: ',' expected.
++controlFlowManyCallExpressionStatementsPerf.ts(60,24): error TS2554: Expected 1 arguments, but got 2.
++controlFlowManyCallExpressionStatementsPerf.ts(61,21): error TS1005: ',' expected.
++controlFlowManyCallExpressionStatementsPerf.ts(61,24): error TS2554: Expected 1 arguments, but got 2.
++

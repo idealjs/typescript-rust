@@ -1,0 +1,6 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,3 @@
++typeGuardsNestedAssignments.ts(44,20): error TS18047: 'match' is possibly 'null'.
++typeGuardsNestedAssignments.ts(44,38): error TS18047: 'match' is possibly 'null'.
++

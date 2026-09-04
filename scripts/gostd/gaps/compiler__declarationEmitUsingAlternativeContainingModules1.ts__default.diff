@@ -1,0 +1,11 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,8 @@
++src/index.mts(18,26): error TS2339: Property 'json' does not exist on type 'IEntry[]'.
++src/index.mts(19,14): error TS7006: Parameter 'data' implicitly has an 'any' type.
++src/index.mts(20,15): error TS7006: Parameter 'err' implicitly has an 'any' type.
++src/index.mts(30,19): error TS2345: Argument of type '{ queryKey: [any, "list"]; queryFn: () => Promise<IEntry[]>; select: (data: TQueryFnData) => any; }' is not assignable to parameter of type '{ enabled: boolean | undefined; refetchInterval: number | undefined; select: ((data: TQueryFnData) => TData) | undefined; retry: number | boolean | ((failureCount: number, error: TError) => boolean) | undefined; queryFn: ((context: { queryKey: TQueryKey; pageParam: TPageParam; }) => TQueryFnData | Promise<TQueryFnData>) | undefined; queryKey: TQueryKey | undefined; initialData: TQueryFnData | undefined; initialDataUpdatedAt: number | (() => number | undefined) | undefined; } & { initialData?: undefined; }'.
++  Types of property 'queryKey' are incompatible.
++    Type '[any, "list"]' is not assignable to type 'TQueryKey | undefined'.
++      Type '[any, "list"]' is missing the following properties from type 'ReadonlyArray<unknown>': length, toString, toLocaleString, concat, and 28 more.
++

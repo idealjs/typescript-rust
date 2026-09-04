@@ -1,0 +1,5 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,2 @@
++wideningTuples1.ts(4,6): error TS2322: Type 'string' is not assignable to type 'undefined'.
++

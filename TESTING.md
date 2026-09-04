@@ -17,8 +17,13 @@
 - **oracle 切换**：默认基线改为 **tsgo 自有基线**（`typescript-go/tsc/testdata/baselines/reference` 镜像至 `tests/baselines/reference-go/`，7,200 份 errors.txt；比对时裁扁平段 + CRLF 归一）。旧 upstream 基线树保留，`TSOX_BASELINE_FLAVOR=upstream` 可切回。台账按口径分家：go 口径用 `triaged-go.txt`（初始为空），upstream 口径沿用 `triaged.txt`。
 - **用例集对齐**：应用 tsgo `compiler_runner.go` 的 `skippedTests`（47 项，removed-options/API samples）；配置级跳过"tsgo 树无该 (suffix) 基线"的配置（其运行器不产出即不判定）。
 - **逐用例双跑对拍**（非仅数字对齐——每个用例每个配置两侧各跑一遍，字节比对同一 tsgo 基线；14,274 Go 配置 / 14,912 Rust 配置条目）：
-  - 双侧通过 3,709；双侧 diff 4,030（其基线树落后于其 main，双侧都不匹配其陈旧基线）；我们通过/Go diff 2,201（其树陈旧而我们的输出恰与其历史接受态一致）；**我们 diff/Go 通过 802 配置（715 用例）= 真实剩余差距**
+  - 双侧通过 3,709；双侧 diff 4,030（其基线树落后于其 main）；我们通过/Go diff 2,201（我们匹配其历史接受态而其当前二进制漂移）；**我们 diff/Go 通过 802 配置（715 用例）= 真实剩余差距**
   - 用例级完全对齐 **9,603/12,399（77.5%）**；worklist：`scripts/gostd/mismatch_worklist.csv`（715 用例中 652 为默认配置、40 为 target=es2015）
+- **715 例差距聚类**（`scripts/gostd/gap_clusters.json` + `gaps/*.diff` 逐例语料）：
+  - **664 = tsgo 基线空而我们多报**（长尾检查器缺口族：上下文类型回调漏推 → TS7006/7019、find+谓词收窄 → TS2322、TS7010 类）——tsgo 默认 `strict: true`（declscompiler.go DefaultValueDescription）下这些程序本应干净，是我们的收窄/推断缺口，逐例修复
+  - **44 = tsgo 报而我们漏**（TS2318 全局类型未找到 ×9、TS5069/TS5053/TS5055/TS2209/TS5009/5056/5074/5091/18035/5067/6379 等选项与声明文件诊断族）
+  - **11 = 我们多报 TS5107**（其基线为 node10 移除前时代）+ **8 = 我们多报 TS6053**（@types 自动发现缺失）+ **9 同码文本/位置差**
+- 过程记录：曾假设"strict 族 Unknown 应默认关"并翻转 `get_strict_option_value`——tsgo CLI 实测（TS2454/TS7010 空旗标即报）与 decls DefaultValueDescription:true 证明翻转错误，已完整回滚（src 仅余注释措辞差异）；判定以 tsgo CLI+自有基线双重实证为准。
 - 测量工具入库 `scripts/gostd/`（godecls 解析 Go 选项声明得 72 项 vary-by / diffrun 逐配置双跑 / rust_diff / pair_analyze 配对）；全程修正三个测量伪影：指令行剥离的行号语义、`<no content>` 哨兵、CRLF 书写器编码（用例源码 9,247 个 CRLF 文件原样不动作被测内容）。
 - 四门禁 1362/2/1010/15 绿；本次仅动 tests/ 与 scripts/，src/ 无改动。
 

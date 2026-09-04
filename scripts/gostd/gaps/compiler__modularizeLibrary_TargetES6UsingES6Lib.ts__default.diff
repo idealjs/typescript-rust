@@ -1,0 +1,5 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,2 @@
++modularizeLibrary_TargetES6UsingES6Lib.ts(32,22): error TS2739: Type '{}' is missing the following properties from type 'ProxyHandler<{}>': apply, construct, defineProperty, deleteProperty, get, getOwnPropertyDescriptor, getPrototypeOf, has, isExtensible, ownKeys, preventExtensions, set, setPrototypeOf
++

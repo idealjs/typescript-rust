@@ -1,0 +1,9 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,6 @@
++privateNameMethodCallExpression.ts(9,9): error TS2350: Only a void function can be called with the 'new' keyword.
++privateNameMethodCallExpression.ts(14,19): error TS2350: Only a void function can be called with the 'new' keyword.
++privateNameMethodCallExpression.ts(15,34): error TS1005: ',' expected.
++privateNameMethodCallExpression.ts(16,36): error TS1005: ';' expected.
++privateNameMethodCallExpression.ts(20,49): error TS1005: ',' expected.
++

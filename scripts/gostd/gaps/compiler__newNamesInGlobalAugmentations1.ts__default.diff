@@ -1,0 +1,5 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,2 @@
++f1.d.ts(11,9): error TS1182: A destructuring declaration must have an initializer.
++

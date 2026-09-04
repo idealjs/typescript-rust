@@ -1,0 +1,13 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,10 @@
++typeGuardFunctionOfFormThis.ts(20,7): error TS2339: Property 'lead' does not exist on type 'RoyalGuard'.
++typeGuardFunctionOfFormThis.ts(23,7): error TS2339: Property 'follow' does not exist on type 'RoyalGuard'.
++typeGuardFunctionOfFormThis.ts(30,7): error TS2339: Property 'lead' does not exist on type 'GuardInterface'.
++typeGuardFunctionOfFormThis.ts(33,7): error TS2339: Property 'follow' does not exist on type 'GuardInterface'.
++typeGuardFunctionOfFormThis.ts(78,11): error TS2339: Property 'defend' does not exist on type 'ArrowGuard'.
++typeGuardFunctionOfFormThis.ts(81,11): error TS2339: Property 'heal' does not exist on type 'ArrowGuard'.
++typeGuardFunctionOfFormThis.ts(102,20): error TS2339: Property 'broken' does not exist on type 'object'.
++typeGuardFunctionOfFormThis.ts(105,20): error TS2339: Property 'spoiled' does not exist on type 'object'.
++typeGuardFunctionOfFormThis.ts(132,11): error TS2339: Property 'follow' does not exist on type 'MimicGuard'.
++

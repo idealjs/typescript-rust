@@ -1,0 +1,8 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,5 @@
++jsxLibraryManagedAttributesUnusedGeneric.tsx(2,19): error TS2307: Cannot find module 'react' or its corresponding type declarations.
++jsxLibraryManagedAttributesUnusedGeneric.tsx(4,15): error TS2300: Duplicate identifier 'jsx'.
++jsxLibraryManagedAttributesUnusedGeneric.tsx(4,27): error TS2304: Cannot find name ''.
++jsxLibraryManagedAttributesUnusedGeneric.tsx(5,11): error TS2300: Duplicate identifier 'jsx'.
++

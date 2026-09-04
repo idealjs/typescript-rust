@@ -1,0 +1,5 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -1,2 +0,0 @@
+-/a.ts(1,23): error TS2688: Cannot find type definition file for 'JqUeRy'.
+-/tsconfig.json(1,12): error TS5024: Compiler option 'files' requires a value of type Array.

@@ -1,0 +1,44 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,41 @@
++thisTypeInObjectLiterals2.ts(15,9): error TS7023: 'd' implicitly has return type 'any' because it does not have a return type annotation and is referenced directly or indirectly in one of its return expressions.
++thisTypeInObjectLiterals2.ts(39,12): error TS7006: Parameter 'dx' implicitly has an 'any' type.
++thisTypeInObjectLiterals2.ts(39,16): error TS7006: Parameter 'dy' implicitly has an 'any' type.
++thisTypeInObjectLiterals2.ts(39,20): error TS7006: Parameter 'dz' implicitly has an 'any' type.
++thisTypeInObjectLiterals2.ts(42,18): error TS2339: Property 'z' does not exist on type '{ x: number; y: number; moveBy: (dx: any, dy: any, dz: any) => any; }'.
++thisTypeInObjectLiterals2.ts(43,18): error TS2339: Property 'z' does not exist on type '{ x: number; y: number; moveBy: (dx: any, dy: any, dz: any) => any; }'.
++thisTypeInObjectLiterals2.ts(51,12): error TS7006: Parameter 'dx' implicitly has an 'any' type.
++thisTypeInObjectLiterals2.ts(51,16): error TS7006: Parameter 'dy' implicitly has an 'any' type.
++thisTypeInObjectLiterals2.ts(51,20): error TS7006: Parameter 'dz' implicitly has an 'any' type.
++thisTypeInObjectLiterals2.ts(54,18): error TS2339: Property 'z' does not exist on type '{ x: number; y: number; moveBy: (dx: any, dy: any, dz: any) => any; }'.
++thisTypeInObjectLiterals2.ts(55,18): error TS2339: Property 'z' does not exist on type '{ x: number; y: number; moveBy: (dx: any, dy: any, dz: any) => any; }'.
++thisTypeInObjectLiterals2.ts(63,12): error TS7006: Parameter 'dx' implicitly has an 'any' type.
++thisTypeInObjectLiterals2.ts(63,16): error TS7006: Parameter 'dy' implicitly has an 'any' type.
++thisTypeInObjectLiterals2.ts(63,20): error TS7006: Parameter 'dz' implicitly has an 'any' type.
++thisTypeInObjectLiterals2.ts(66,18): error TS2339: Property 'z' does not exist on type '{ x: number; y: number; moveBy: (dx: any, dy: any, dz: any) => any; }'.
++thisTypeInObjectLiterals2.ts(67,18): error TS2339: Property 'z' does not exist on type '{ x: number; y: number; moveBy: (dx: any, dy: any, dz: any) => any; }'.
++thisTypeInObjectLiterals2.ts(75,12): error TS7006: Parameter 'dx' implicitly has an 'any' type.
++thisTypeInObjectLiterals2.ts(75,16): error TS7006: Parameter 'dy' implicitly has an 'any' type.
++thisTypeInObjectLiterals2.ts(75,20): error TS7006: Parameter 'dz' implicitly has an 'any' type.
++thisTypeInObjectLiterals2.ts(78,18): error TS2339: Property 'z' does not exist on type '{ x: number; y: number; moveBy: (dx: any, dy: any, dz: any) => any; }'.
++thisTypeInObjectLiterals2.ts(79,18): error TS2339: Property 'z' does not exist on type '{ x: number; y: number; moveBy: (dx: any, dy: any, dz: any) => any; }'.
++thisTypeInObjectLiterals2.ts(89,12): error TS7006: Parameter 'dx' implicitly has an 'any' type.
++thisTypeInObjectLiterals2.ts(89,16): error TS7006: Parameter 'dy' implicitly has an 'any' type.
++thisTypeInObjectLiterals2.ts(89,20): error TS7006: Parameter 'dz' implicitly has an 'any' type.
++thisTypeInObjectLiterals2.ts(92,18): error TS2339: Property 'z' does not exist on type '{ x: number; y: number; moveBy: (dx: any, dy: any, dz: any) => any; }'.
++thisTypeInObjectLiterals2.ts(93,18): error TS2339: Property 'z' does not exist on type '{ x: number; y: number; moveBy: (dx: any, dy: any, dz: any) => any; }'.
++thisTypeInObjectLiterals2.ts(103,12): error TS7006: Parameter 'dx' implicitly has an 'any' type.
++thisTypeInObjectLiterals2.ts(103,16): error TS7006: Parameter 'dy' implicitly has an 'any' type.
++thisTypeInObjectLiterals2.ts(103,20): error TS7006: Parameter 'dz' implicitly has an 'any' type.
++thisTypeInObjectLiterals2.ts(106,18): error TS2339: Property 'z' does not exist on type '{ x: number; y: number; moveBy: (dx: any, dy: any, dz: any) => any; }'.
++thisTypeInObjectLiterals2.ts(107,18): error TS2339: Property 'z' does not exist on type '{ x: number; y: number; moveBy: (dx: any, dy: any, dz: any) => any; }'.
++thisTypeInObjectLiterals2.ts(122,21): error TS2345: Argument of type '{ data: { x: number; y: number; }; methods: any; }' is not assignable to parameter of type '{ data?: D | undefined; methods?: M & ThisType<D & M> | undefined; }'.
++  Types of property 'data' are incompatible.
++    Type '{ x: 0; y: 0; }' is not assignable to type 'D | undefined'.
++thisTypeInObjectLiterals2.ts(142,22): error TS2345: Argument of type '{ data: { x: number; y: number; }; methods: any; }' is not assignable to parameter of type '{ data?: D | undefined; methods?: M & ThisType<D & M> | undefined; }'.
++  Types of property 'data' are incompatible.
++    Type '{ x: 0; y: 0; }' is not assignable to type 'D | undefined'.
++thisTypeInObjectLiterals2.ts(168,33): error TS2345: Argument of type '{ value: number; }' is not assignable to parameter of type '{ value?: U | undefined; get: () => U; set: (value: U[K]) => void; } & ThisType<{ x: number; y: number; z?: number | undefined; moveBy: (dx: number, dy: number, dz: number | undefined) => void; }>'.
++  Types of property 'value' are incompatible.
++    Type '42' is not assignable to type 'U | undefined'.
++

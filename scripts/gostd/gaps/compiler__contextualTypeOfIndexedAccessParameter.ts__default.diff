@@ -1,0 +1,6 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,3 @@
++contextualTypeOfIndexedAccessParameter.ts(8,9): error TS7006: Parameter 'p' implicitly has an 'any' type.
++contextualTypeOfIndexedAccessParameter.ts(13,5): error TS2322: Type 'string' is not assignable to type '{ a: string; } & { b: string; }[K]'.
++

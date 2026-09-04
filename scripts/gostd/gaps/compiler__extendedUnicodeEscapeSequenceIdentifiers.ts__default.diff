@@ -1,0 +1,24 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,21 @@
++extendedUnicodeEscapeSequenceIdentifiers.ts(1,7): error TS1127: Invalid character.
++extendedUnicodeEscapeSequenceIdentifiers.ts(1,8): error TS1155: 'const' declarations must be initialized.
++extendedUnicodeEscapeSequenceIdentifiers.ts(1,8): error TS2451: Cannot redeclare block-scoped variable 'u'.
++extendedUnicodeEscapeSequenceIdentifiers.ts(1,9): error TS1005: ',' expected.
++extendedUnicodeEscapeSequenceIdentifiers.ts(1,9): error TS1155: 'const' declarations must be initialized.
++extendedUnicodeEscapeSequenceIdentifiers.ts(1,10): error TS1121: Octal literals are not allowed. Use the syntax '0o061'.
++extendedUnicodeEscapeSequenceIdentifiers.ts(1,14): error TS1005: ':' expected.
++extendedUnicodeEscapeSequenceIdentifiers.ts(1,14): error TS2451: Cannot redeclare block-scoped variable '}'.
++extendedUnicodeEscapeSequenceIdentifiers.ts(1,20): error TS1005: ',' expected.
++extendedUnicodeEscapeSequenceIdentifiers.ts(2,7): error TS1155: 'const' declarations must be initialized.
++extendedUnicodeEscapeSequenceIdentifiers.ts(2,8): error TS1127: Invalid character.
++extendedUnicodeEscapeSequenceIdentifiers.ts(2,9): error TS1155: 'const' declarations must be initialized.
++extendedUnicodeEscapeSequenceIdentifiers.ts(2,9): error TS2451: Cannot redeclare block-scoped variable 'u'.
++extendedUnicodeEscapeSequenceIdentifiers.ts(2,10): error TS1005: ',' expected.
++extendedUnicodeEscapeSequenceIdentifiers.ts(2,10): error TS1155: 'const' declarations must be initialized.
++extendedUnicodeEscapeSequenceIdentifiers.ts(2,11): error TS1121: Octal literals are not allowed. Use the syntax '0o061'.
++extendedUnicodeEscapeSequenceIdentifiers.ts(2,15): error TS1005: ':' expected.
++extendedUnicodeEscapeSequenceIdentifiers.ts(2,15): error TS2451: Cannot redeclare block-scoped variable '}'.
++extendedUnicodeEscapeSequenceIdentifiers.ts(2,21): error TS1005: ',' expected.
++extendedUnicodeEscapeSequenceIdentifiers.ts(4,17): error TS2304: Cannot find name 'aa'.
++

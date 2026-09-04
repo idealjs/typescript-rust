@@ -1,0 +1,7 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,4 @@
++genericFunctionsAndConditionalInference.ts(9,14): error TS2345: Argument of type '{ u: { value: number; }; v: { value: string; }; }' is not assignable to parameter of type '{ u: { value: U; }; v: { value: V; }; }'.
++  The types of 'u.value' are incompatible between these types.
++    Type 'number' is not assignable to type 'U'.
++

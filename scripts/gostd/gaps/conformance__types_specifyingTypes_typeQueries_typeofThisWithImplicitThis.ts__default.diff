@@ -1,0 +1,5 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,2 @@
++typeofThisWithImplicitThis.ts(2,19): error TS2304: Cannot find name ''.
++

@@ -1,0 +1,5 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,2 @@
++genericTemplateOverloadResolution.ts(10,14): error TS2693: 'number' only refers to a type, but is being used as a value here.
++

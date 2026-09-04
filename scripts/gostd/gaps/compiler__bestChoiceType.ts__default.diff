@@ -1,0 +1,7 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,4 @@
++bestChoiceType.ts(3,27): error TS7006: Parameter 's' implicitly has an 'any' type.
++bestChoiceType.ts(10,19): error TS7006: Parameter 's' implicitly has an 'any' type.
++bestChoiceType.ts(16,26): error TS2339: Property 'toLowerCase' does not exist on type 'never'.
++

@@ -1,0 +1,36 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,33 @@
++correlatedUnions.ts(17,15): error TS2345: Argument of type '{ kind: "n"; v: number; f: (v: number) => void; }' is not assignable to parameter of type '({ [P in K]: { kind: P; v: { n: number; s: string; b: boolean; }[P]; f: (v: number) => void; }; })["n" | "s" | "b"]'.
++correlatedUnions.ts(19,38): error TS7006: Parameter 'v' implicitly has an 'any' type.
++correlatedUnions.ts(40,5): error TS2322: Type '(props: { value: string; }) => void' is not assignable to type '(props: { options: string[]; selectedValue: string; }) => void'.
++  Types of parameters 'props' and 'props' are incompatible.
++    Type '{ options: string[]; selectedValue: string; }' is not assignable to type '{ value: string; }'.
++      Property 'value' is missing in type '{ options: string[]; selectedValue: string; }' but required in type '{ value: string; }'.
++correlatedUnions.ts(61,17): error TS2339: Property 'length' does not exist on type 'number'.
++correlatedUnions.ts(71,5): error TS2322: Type '{ type: "foo"; data: "abc"; }' is not assignable to type '({ [P in K]: { type: P; data: { foo: string; bar: number; }[P]; }; })[K]'.
++correlatedUnions.ts(72,5): error TS2322: Type '{ type: "foo"; data: "def"; }' is not assignable to type '({ [P in K]: { type: P; data: { foo: string; bar: number; }[P]; }; })[K]'.
++correlatedUnions.ts(73,5): error TS2322: Type '{ type: "bar"; data: 42; }' is not assignable to type '({ [P in K]: { type: P; data: { foo: string; bar: number; }[P]; }; })[K]'.
++correlatedUnions.ts(85,9): error TS2345: Argument of type '{ type: string; data: string; }[]' is not assignable to parameter of type '({ [P in K]: { type: P; data: { foo: string; bar: number; }[P]; }; })["foo" | "bar"][]'.
++correlatedUnions.ts(103,6): error TS2345: Argument of type '{ letter: { A: string; }; caller: (a: { A: string; }) => void; } | { letter: { B: number; }; caller: (b: { B: number; }) => void; }' is not assignable to parameter of type '({ [P in K]: { letter: { [P in K]: { A: string; B: number; }[P]; }; caller: (x: { [P in K]: { A: string; B: number; }[P]; }) => void; }; })["A" | "B"]'.
++  Type '{ letter: { A: string; }; caller: (a: { A: string; }) => void; }' is not assignable to type '({ [P in K]: { letter: { [P in K]: { A: string; B: number; }[P]; }; caller: (x: { [P in K]: { A: string; B: number; }[P]; }) => void; }; })["A" | "B"]'.
++correlatedUnions.ts(115,48): error TS7006: Parameter 'ev' implicitly has an 'any' type.
++correlatedUnions.ts(120,5): error TS2322: Type '{ name: any; once: any; callback: any; }' is not assignable to type '({ [P in K]: { readonly name: P; readonly once?: boolean | undefined; readonly callback: (ev: DocumentEventMap[P]) => void; }; })[K]'.
++correlatedUnions.ts(125,15): error TS7006: Parameter 'ev' implicitly has an 'any' type.
++correlatedUnions.ts(130,15): error TS7006: Parameter 'ev' implicitly has an 'any' type.
++correlatedUnions.ts(136,32): error TS7006: Parameter 'ev' implicitly has an 'any' type.
++correlatedUnions.ts(137,33): error TS7006: Parameter 'ev' implicitly has an 'any' type.
++correlatedUnions.ts(149,9): error TS2322: Type '(a: [string, string, string], b: any) => any' is not assignable to type '(args: [string, string, string]) => void'.
++  Types of parameters 'a' and 'args' are incompatible.
++    Type 'string' is not assignable to type '[string, string, string]'.
++correlatedUnions.ts(149,18): error TS7006: Parameter 'b' implicitly has an 'any' type.
++correlatedUnions.ts(150,9): error TS2322: Type '(a: [string, string, string], b: any, c: any) => any' is not assignable to type '(args: [string, string, string]) => void'.
++  Types of parameters 'a' and 'args' are incompatible.
++    Type 'string' is not assignable to type '[string, string, string]'.
++correlatedUnions.ts(150,21): error TS7006: Parameter 'b' implicitly has an 'any' type.
++correlatedUnions.ts(150,24): error TS7006: Parameter 'c' implicitly has an 'any' type.
++correlatedUnions.ts(207,7): error TS2322: Type 'string | number' is not assignable to type 'MyObj[K]["name"] | undefined'.
++  Type 'string' is not assignable to type 'MyObj[K]["name"] | undefined'.
++correlatedUnions.ts(231,46): error TS2345: Argument of type '[{ name: "a"; }, { name: "b"; }]' is not assignable to parameter of type 'ReadonlyArray<any>'.
++  Type '[{ name: "a"; }, { name: "b"; }]' is missing the following properties from type 'ReadonlyArray<any>': length, toString, toLocaleString, concat, and 18 more.
++

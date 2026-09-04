@@ -1,0 +1,7 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,4 @@
++index.ts(3,19): error TS2694: Namespace 'fooBar' has no exported member 'X'.
++index.ts(6,11): error TS2749: 'X2' refers to a value, but is being used as a type here. Did you mean 'typeof X2'?
++index.ts(9,10): error TS2749: 'B' refers to a value, but is being used as a type here. Did you mean 'typeof B'?
++

@@ -1,0 +1,10 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,7 @@
++spreadOfObjectLiteralAssignableToIndexSignature.ts(5,17): error TS2339: Property 'propA' does not exist on type 'RecordOfRecords'.
++spreadOfObjectLiteralAssignableToIndexSignature.ts(6,17): error TS2339: Property 'propB' does not exist on type 'RecordOfRecords'.
++spreadOfObjectLiteralAssignableToIndexSignature.ts(7,17): error TS2339: Property 'propC' does not exist on type 'RecordOfRecords'.
++spreadOfObjectLiteralAssignableToIndexSignature.ts(11,25): error TS2339: Property 'propA' does not exist on type 'RecordOfRecordsOrEmpty'.
++spreadOfObjectLiteralAssignableToIndexSignature.ts(12,25): error TS2339: Property 'propB' does not exist on type 'RecordOfRecordsOrEmpty'.
++spreadOfObjectLiteralAssignableToIndexSignature.ts(13,25): error TS2339: Property 'propC' does not exist on type 'RecordOfRecordsOrEmpty'.
++

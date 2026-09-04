@@ -1,0 +1,22 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,19 @@
++conditionalTypesSimplifyWhenTrivial.ts(3,14): error TS2322: Type '{ [P in K]: Params[P]; }' is not assignable to type 'Params'.
++conditionalTypesSimplifyWhenTrivial.ts(6,9): error TS2322: Type 'T extends never ? never : T' is not assignable to type 'T'.
++  'T' could be instantiated with an arbitrary type which could be unrelated to 'T extends never ? never : T'.
++conditionalTypesSimplifyWhenTrivial.ts(7,5): error TS2322: Type 'T' is not assignable to type 'T extends never ? never : T'.
++conditionalTypesSimplifyWhenTrivial.ts(12,14): error TS2322: Type '{ [P in K]: Params[P]; }' is not assignable to type 'Params'.
++conditionalTypesSimplifyWhenTrivial.ts(15,9): error TS2322: Type 'T extends T ? T : never' is not assignable to type 'T'.
++  'T' could be instantiated with an arbitrary type which could be unrelated to 'T extends T ? T : never'.
++conditionalTypesSimplifyWhenTrivial.ts(16,5): error TS2322: Type 'T' is not assignable to type 'T extends T ? T : never'.
++conditionalTypesSimplifyWhenTrivial.ts(27,14): error TS2322: Type '{ [P in K]: Params[P]; }' is not assignable to type 'Params'.
++conditionalTypesSimplifyWhenTrivial.ts(30,9): error TS2322: Type 'T extends never ? D : T' is not assignable to type 'T'.
++  'T' could be instantiated with an arbitrary type which could be unrelated to 'T extends never ? D : T'.
++conditionalTypesSimplifyWhenTrivial.ts(31,5): error TS2322: Type 'T' is not assignable to type 'T extends never ? D : T'.
++conditionalTypesSimplifyWhenTrivial.ts(36,14): error TS2322: Type '{ [P in K]: Params[P]; }' is not assignable to type 'Params'.
++conditionalTypesSimplifyWhenTrivial.ts(39,9): error TS2322: Type 'T extends T ? T : D' is not assignable to type 'T'.
++  'T' could be instantiated with an arbitrary type which could be unrelated to 'T extends T ? T : D'.
++conditionalTypesSimplifyWhenTrivial.ts(40,5): error TS2322: Type 'T' is not assignable to type 'T extends T ? T : D'.
++conditionalTypesSimplifyWhenTrivial.ts(47,14): error TS2322: Type '{ [P in K]: Params[P]; }' is not assignable to type 'Params'.
++conditionalTypesSimplifyWhenTrivial.ts(56,14): error TS2322: Type '{ [P in K]: Params[P]; }' is not assignable to type 'Params'.
++

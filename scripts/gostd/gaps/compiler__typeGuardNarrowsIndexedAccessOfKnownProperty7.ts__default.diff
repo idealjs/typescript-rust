@@ -1,0 +1,5 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,2 @@
++typeGuardNarrowsIndexedAccessOfKnownProperty7.ts(6,5): error TS2564: Property '[Foo.key]' has no initializer and is not definitely assigned in the constructor.
++

@@ -1,0 +1,8 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,5 @@
++overrideBaseIntersectionMethod.ts(8,18): error TS2339: Property 'x' does not exist on type 'þclass'.
++overrideBaseIntersectionMethod.ts(8,30): error TS2339: Property 'y' does not exist on type 'þclass'.
++overrideBaseIntersectionMethod.ts(21,17): error TS2339: Property 'x' does not exist on type 'Foo'.
++overrideBaseIntersectionMethod.ts(21,26): error TS2339: Property 'y' does not exist on type 'Foo'.
++

@@ -1,0 +1,7 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,4 @@
++operatorsAndIntersectionTypes.ts(22,12): error TS2365: Operator '+' cannot be applied to types 'string & { $Guid: error; }' and 'string & { $Guid: error; }'.
++operatorsAndIntersectionTypes.ts(23,12): error TS2365: Operator '+' cannot be applied to types 'string & { $Guid: error; }' and 'number & { $SerialNo: error; }'.
++operatorsAndIntersectionTypes.ts(26,12): error TS2365: Operator '+' cannot be applied to types 'number & { $SerialNo: error; }' and 'number & { $SerialNo: error; }'.
++

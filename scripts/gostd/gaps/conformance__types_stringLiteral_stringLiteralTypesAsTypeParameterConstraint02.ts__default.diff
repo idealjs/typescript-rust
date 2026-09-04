@@ -1,0 +1,8 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,5 @@
++stringLiteralTypesAsTypeParameterConstraint02.ts(5,13): error TS2345: Argument of type '(y: "foo" | "bar") => string | "foo" | "bar"' is not assignable to parameter of type '(x: "foo") => "foo"'.
++  Type 'string | "foo" | "bar"' is not assignable to type '"foo"'.
++    Type 'string' is not assignable to type '"foo"'.
++      Type '"bar"' is not assignable to type '"foo"'.
++

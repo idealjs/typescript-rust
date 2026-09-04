@@ -1,0 +1,9 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,6 @@
++nullishCoalescingOperator_es2020.ts(23,29): error TS2451: Cannot redeclare block-scoped variable 'c'.
++nullishCoalescingOperator_es2020.ts(29,26): error TS1005: ',' expected.
++nullishCoalescingOperator_es2020.ts(29,29): error TS2451: Cannot redeclare block-scoped variable 'c'.
++nullishCoalescingOperator_es2020.ts(36,26): error TS1005: ',' expected.
++nullishCoalescingOperator_es2020.ts(36,29): error TS2451: Cannot redeclare block-scoped variable 'c'.
++

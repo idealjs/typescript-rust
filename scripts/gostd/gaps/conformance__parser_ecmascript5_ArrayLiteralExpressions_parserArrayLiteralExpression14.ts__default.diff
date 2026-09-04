@@ -1,0 +1,9 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,6 @@
++parserArrayLiteralExpression14.ts(1,10): error TS1109: Expression expected.
++parserArrayLiteralExpression14.ts(1,11): error TS1109: Expression expected.
++parserArrayLiteralExpression14.ts(1,16): error TS1109: Expression expected.
++parserArrayLiteralExpression14.ts(1,19): error TS1109: Expression expected.
++parserArrayLiteralExpression14.ts(1,24): error TS1109: Expression expected.
++

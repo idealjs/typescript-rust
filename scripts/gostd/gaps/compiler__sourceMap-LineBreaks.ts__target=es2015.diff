@@ -1,0 +1,8 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,5 @@
++sourceMap-LineBreaks.ts(1,33): error TS1127: Invalid character.
++sourceMap-LineBreaks.ts(2,38): error TS1127: Invalid character.
++sourceMap-LineBreaks.ts(18,9): error TS1127: Invalid character.
++sourceMap-LineBreaks.ts(20,9): error TS1127: Invalid character.
++

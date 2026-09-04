@@ -1,0 +1,5 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,2 @@
++data1.ts(1,26): error TS2307: Cannot find module './' or its corresponding type declarations.
++

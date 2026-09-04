@@ -1,0 +1,5 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,2 @@
++booleanPropertyAccess.ts(3,11): error TS2339: Property 'toString' does not exist on type 'boolean'.
++

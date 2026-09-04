@@ -1,0 +1,20 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,17 @@
++index.ts(6,5): error TS2391: Function implementation is missing or not immediately following the declaration.
++index.ts(6,5): error TS7010: 'foo', which lacks return-type annotation, implicitly has an 'any' return type.
++index.ts(7,9): error TS1138: Parameter declaration expected.
++index.ts(7,19): error TS2564: Property 'arg1' has no initializer and is not definitely assigned in the constructor.
++index.ts(7,31): error TS1442: Expected '=' for property initializer.
++index.ts(8,19): error TS2564: Property 'arg2' has no initializer and is not definitely assigned in the constructor.
++index.ts(9,5): error TS1068: Unexpected token. A constructor, method, accessor, or property was expected.
++index.ts(9,6): error TS1068: Unexpected token. A constructor, method, accessor, or property was expected.
++index.ts(9,8): error TS2391: Function implementation is missing or not immediately following the declaration.
++index.ts(9,8): error TS7010: 'Observable', which lacks return-type annotation, implicitly has an 'any' return type.
++index.ts(9,27): error TS1005: '(' expected.
++index.ts(10,16): error TS1005: ',' expected.
++index.ts(10,20): error TS1005: ',' expected.
++index.ts(10,21): error TS1109: Expression expected.
++index.ts(11,5): error TS1128: Declaration or statement expected.
++index.ts(12,1): error TS1128: Declaration or statement expected.
++

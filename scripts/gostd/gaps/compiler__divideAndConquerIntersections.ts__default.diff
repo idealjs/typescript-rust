@@ -1,0 +1,23 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,20 @@
++divideAndConquerIntersections.ts(2,5): error TS2590: Expression produces a union type that is too complex to represent.
++divideAndConquerIntersections.ts(52,4): error TS2366: Function lacks ending return statement and return type does not include 'undefined'.
++divideAndConquerIntersections.ts(55,13): error TS2304: Cannot find name 'up'.
++divideAndConquerIntersections.ts(55,15): error TS1005: ')' expected.
++divideAndConquerIntersections.ts(55,17): error TS1434: Unexpected keyword or identifier.
++divideAndConquerIntersections.ts(55,17): error TS7027: Unreachable code detected.
++divideAndConquerIntersections.ts(55,18): error TS1128: Declaration or statement expected.
++divideAndConquerIntersections.ts(55,19): error TS1128: Declaration or statement expected.
++divideAndConquerIntersections.ts(55,21): error TS1434: Unexpected keyword or identifier.
++divideAndConquerIntersections.ts(55,21): error TS2304: Cannot find name 'up'.
++divideAndConquerIntersections.ts(55,21): error TS7027: Unreachable code detected.
++divideAndConquerIntersections.ts(55,24): error TS2304: Cannot find name 'is'.
++divideAndConquerIntersections.ts(55,24): error TS1228: A type predicate is only allowed in return type position for functions and methods.
++divideAndConquerIntersections.ts(55,24): error TS7027: Unreachable code detected.
++divideAndConquerIntersections.ts(55,27): error TS2695: Left side of comma operator is unused and has no side effects.
++divideAndConquerIntersections.ts(55,27): error TS7027: Unreachable code detected.
++divideAndConquerIntersections.ts(55,40): error TS1109: Expression expected.
++divideAndConquerIntersections.ts(55,43): error TS7027: Unreachable code detected.
++divideAndConquerIntersections.ts(55,45): error TS2304: Cannot find name 'up'.
++

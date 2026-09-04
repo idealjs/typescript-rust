@@ -1,0 +1,8 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,5 @@
++inferredReturnTypeIncorrectReuse1.ts(2,23): error TS2749: 't' refers to a value, but is being used as a type here. Did you mean 'typeof t'?
++inferredReturnTypeIncorrectReuse1.ts(11,41): error TS2345: Argument of type 't' is not assignable to parameter of type 'string'.
++inferredReturnTypeIncorrectReuse1.ts(14,20): error TS2749: 't' refers to a value, but is being used as a type here. Did you mean 'typeof t'?
++inferredReturnTypeIncorrectReuse1.ts(28,43): error TS2345: Argument of type 't' is not assignable to parameter of type 'string'.
++

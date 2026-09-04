@@ -1,0 +1,12 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,9 @@
++contextualTypeWithUnionTypeIndexSignatures.ts(40,72): error TS7006: Parameter 'a' implicitly has an 'any' type.
++contextualTypeWithUnionTypeIndexSignatures.ts(41,74): error TS7006: Parameter 'a' implicitly has an 'any' type.
++contextualTypeWithUnionTypeIndexSignatures.ts(43,72): error TS7006: Parameter 'a' implicitly has an 'any' type.
++contextualTypeWithUnionTypeIndexSignatures.ts(44,72): error TS7006: Parameter 'a' implicitly has an 'any' type.
++contextualTypeWithUnionTypeIndexSignatures.ts(50,73): error TS7006: Parameter 'a' implicitly has an 'any' type.
++contextualTypeWithUnionTypeIndexSignatures.ts(51,73): error TS7006: Parameter 'a' implicitly has an 'any' type.
++contextualTypeWithUnionTypeIndexSignatures.ts(53,72): error TS7006: Parameter 'a' implicitly has an 'any' type.
++contextualTypeWithUnionTypeIndexSignatures.ts(54,72): error TS7006: Parameter 'a' implicitly has an 'any' type.
++

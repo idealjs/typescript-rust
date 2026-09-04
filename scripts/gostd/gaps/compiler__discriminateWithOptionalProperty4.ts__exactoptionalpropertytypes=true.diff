@@ -1,0 +1,18 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,15 @@
++discriminateWithOptionalProperty4.ts(6,5): error TS2339: Property 'a' does not exist on type '{ a: string[] | undefined; } | { b: string[]; }'.
++discriminateWithOptionalProperty4.ts(7,7): error TS18048: 'z.a' is possibly 'undefined'.
++discriminateWithOptionalProperty4.ts(7,9): error TS2339: Property 'a' does not exist on type '{ a: string[] | undefined; } | { b: string[]; }'.
++discriminateWithOptionalProperty4.ts(8,9): error TS2339: Property 'b' does not exist on type '{ a: string[] | undefined; } | { b: string[]; }'.
++discriminateWithOptionalProperty4.ts(10,9): error TS2322: Type '{ a: string[] | undefined; } | { b: string[]; }' is not assignable to type '{ a: string[]; b?: undefined; } | { b: string[]; a?: undefined; }'.
++  Type '{ a: string[] | undefined; }' is not assignable to type '{ a: string[]; b?: undefined; } | { b: string[]; a?: undefined; }'.
++    Types of property 'a' are incompatible.
++      Type 'string[] | undefined' is not assignable to type 'string[]'.
++        Type 'undefined' is not assignable to type 'string[]'.
++discriminateWithOptionalProperty4.ts(14,19): error TS18048: 'zWorkAround.a' is possibly 'undefined'.
++discriminateWithOptionalProperty4.ts(14,46): error TS18048: 'zWorkAround.b' is possibly 'undefined'.
++discriminateWithOptionalProperty4.ts(16,14): error TS18048: 'z.a' is possibly 'undefined'.
++discriminateWithOptionalProperty4.ts(16,16): error TS2339: Property 'a' does not exist on type '{ a: string[] | undefined; } | { b: string[]; }'.
++discriminateWithOptionalProperty4.ts(16,33): error TS2339: Property 'b' does not exist on type '{ a: string[] | undefined; } | { b: string[]; }'.
++

@@ -1,0 +1,8 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,5 @@
++sourceMapValidationForIn.ts(4,17): error TS1005: ';' expected.
++sourceMapValidationForIn.ts(9,13): error TS2339: Property 'Echo' does not exist on type 'never'.
++sourceMapValidationForIn.ts(11,17): error TS1005: ';' expected.
++sourceMapValidationForIn.ts(13,13): error TS2339: Property 'Echo' does not exist on type 'never'.
++

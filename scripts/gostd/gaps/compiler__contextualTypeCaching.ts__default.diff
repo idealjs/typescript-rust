@@ -1,0 +1,7 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,4 @@
++contextualTypeCaching.ts(18,16): error TS7006: Parameter 'r' implicitly has an 'any' type.
++contextualTypeCaching.ts(20,26): error TS7006: Parameter 'r' implicitly has an 'any' type.
++contextualTypeCaching.ts(43,15): error TS7006: Parameter 'compiler' implicitly has an 'any' type.
++

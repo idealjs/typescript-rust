@@ -1,0 +1,9 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,6 @@
++index.tsx(11,14): error TS7006: Parameter 'value' implicitly has an 'any' type.
++index.tsx(16,3): error TS2353: Object literal may only specify known properties, and 'callback' does not exist in type '{ as?: C; } & Elements["foo" | "bar"]'.
++index.tsx(16,14): error TS7006: Parameter 'value' implicitly has an 'any' type.
++index.tsx(21,14): error TS7006: Parameter 'value' implicitly has an 'any' type.
++index.tsx(23,1): error TS1005: '</' expected.
++

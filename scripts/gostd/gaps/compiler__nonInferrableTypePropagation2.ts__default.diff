@@ -1,0 +1,17 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,14 @@
++nonInferrableTypePropagation2.ts(31,27): error TS2769: No overload matches this call.
++  Overload 1 of 3, '<A, B>(refinement: Refinement<A, B>): (as: ReadonlyArray<A>) => ReadonlyArray<B>', gave the following error.
++    Argument of type '<E>(ma: Left<E> | Right<A>) => boolean' is not assignable to parameter of type 'Refinement<unknown, A>'.
++      Types of parameters 'ma' and 'a' are incompatible.
++        Type 'A' is not assignable to type 'Left<unknown> | Right<A>'.
++  Overload 2 of 3, '<A>(predicate: Predicate<A>): <B>(bs: ReadonlyArray<B>) => ReadonlyArray<B>', gave the following error.
++    Argument of type '<E>(ma: Left<E> | Right<A>) => boolean' is not assignable to parameter of type 'Predicate<unknown>'.
++      Types of parameters 'ma' and 'a' are incompatible.
++        Type 'A' is not assignable to type 'Left<unknown> | Right<A>'.
++  Overload 3 of 3, '<A>(predicate: Predicate<A>): (as: ReadonlyArray<A>) => ReadonlyArray<A>', gave the following error.
++    Argument of type '<E>(ma: Left<E> | Right<A>) => boolean' is not assignable to parameter of type 'Predicate<unknown>'.
++      Types of parameters 'ma' and 'a' are incompatible.
++        Type 'A' is not assignable to type 'Left<unknown> | Right<A>'.
++

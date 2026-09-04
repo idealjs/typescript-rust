@@ -1,0 +1,5 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,2 @@
++verbatim-declarations-parameters.ts(19,5): error TS1016: A required parameter cannot follow an optional parameter.
++

@@ -1,0 +1,8 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,5 @@
++contextualTypeBasedOnIntersectionWithAnyInTheMix3.ts(10,22): error TS2345: Argument of type '{ num: number[]; str: string[]; bool: boolean[]; }' is not assignable to parameter of type '{ str: ("a" | "b" | "c")[]; num: (1 | 2 | 3)[]; } & { [k: string]: any[]; }'.
++  Types of property 'str' are incompatible.
++    Type 'string[]' is not assignable to type '("a" | "b" | "c")[]'.
++contextualTypeBasedOnIntersectionWithAnyInTheMix3.ts(24,7): error TS2322: Type 'number[]' is not assignable to type 'any[] & 1[]'.
++

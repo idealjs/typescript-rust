@@ -1,0 +1,5 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,2 @@
++a.ts(2,17): error TS2304: Cannot find name 'Foo'.
++

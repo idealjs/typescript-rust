@@ -1,0 +1,9 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,6 @@
++a.ts(3,13): error TS2552: Cannot find name 'Math2d'. Did you mean 'Math'?
++a.ts(4,17): error TS2552: Cannot find name 'Math2d'. Did you mean 'Math'?
++a.ts(5,8): error TS2503: Cannot find namespace 'Math2d'.
++math2d-augment.d.ts(3,16): error TS2664: Invalid module name in augmentation, module 'math2d' cannot be found.
++math2d-augment.d.ts(6,14): error TS2503: Cannot find namespace 'Math2d'.
++

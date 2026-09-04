@@ -1,0 +1,5 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,2 @@
++index.ts(2,38): error TS2694: Namespace 'things.ts' has no exported member 'ThingB'.
++

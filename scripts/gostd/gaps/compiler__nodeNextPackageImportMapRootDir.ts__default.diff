@@ -1,0 +1,5 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,2 @@
++index.ts(1,21): error TS2307: Cannot find module '#dep' or its corresponding type declarations.
++

@@ -1,0 +1,8 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,5 @@
++relatedViaDiscriminatedTypeNoError2.ts(9,1): error TS2322: Type '{ name: "A" | "B"; }' is not assignable to type '{ name: "A"; } | { name: "B"; }'.
++  Types of property 'name' are incompatible.
++    Type '"A" | "B"' is not assignable to type '"A"'.
++      Type '"B"' is not assignable to type '"A"'.
++

@@ -1,0 +1,5 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,2 @@
++1.ts(3,9): error TS7006: Parameter 'zero' implicitly has an 'any' type.
++

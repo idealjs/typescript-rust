@@ -1,0 +1,10 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,7 @@
++discriminantPropertyCheck.ts(90,22): error TS2339: Property 'value' does not exist on type 'never'.
++discriminantPropertyCheck.ts(94,22): error TS2339: Property 'value' does not exist on type 'never'.
++discriminantPropertyCheck.ts(166,23): error TS2339: Property 'type' does not exist on type 'never'.
++discriminantPropertyCheck.ts(172,23): error TS2345: Argument of type 'any' is not assignable to parameter of type 'never'.
++discriminantPropertyCheck.ts(172,29): error TS2339: Property 'type' does not exist on type 'never'.
++discriminantPropertyCheck.ts(232,34): error TS2339: Property 'bananas' does not exist on type 'never'.
++

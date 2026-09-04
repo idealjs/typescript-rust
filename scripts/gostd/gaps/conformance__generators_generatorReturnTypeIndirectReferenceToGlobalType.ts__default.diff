@@ -1,0 +1,5 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,2 @@
++generatorReturnTypeIndirectReferenceToGlobalType.ts(5,3): error TS2322: Type 'number' is not assignable to type 'I1'.
++

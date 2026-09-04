@@ -1,0 +1,8 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,5 @@
++underscoreMapFirst.ts(45,9): error TS2322: Type 'T[]' is not assignable to type 'ISeries[]'.
++underscoreMapFirst.ts(45,33): error TS2345: Argument of type '<T>(array: List<T>) => T' is not assignable to parameter of type 'ListIterator<ISeries[], T>'.
++  Types of parameters 'array' and 'value' are incompatible.
++    Type 'T' is not assignable to type 'List<TResult>'.
++

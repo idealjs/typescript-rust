@@ -1,0 +1,7 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,4 @@
++classStaticBlock17.ts(16,12): error TS7006: Parameter 'obj' implicitly has an 'any' type.
++classStaticBlock17.ts(17,12): error TS7006: Parameter 'obj' implicitly has an 'any' type.
++classStaticBlock17.ts(17,17): error TS7006: Parameter 'value' implicitly has an 'any' type.
++

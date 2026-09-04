@@ -1,0 +1,10 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,7 @@
++sourceMapValidationDestructuringForOfArrayBindingPattern2.ts(26,7): error TS1109: Expression expected.
++sourceMapValidationDestructuringForOfArrayBindingPattern2.ts(29,7): error TS1109: Expression expected.
++sourceMapValidationDestructuringForOfArrayBindingPattern2.ts(32,7): error TS1109: Expression expected.
++sourceMapValidationDestructuringForOfArrayBindingPattern2.ts(35,7): error TS1109: Expression expected.
++sourceMapValidationDestructuringForOfArrayBindingPattern2.ts(38,7): error TS1109: Expression expected.
++sourceMapValidationDestructuringForOfArrayBindingPattern2.ts(41,7): error TS1109: Expression expected.
++

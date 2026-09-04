@@ -1,0 +1,16 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,13 @@
++external.ts(8,5): error TS2391: Function implementation is missing or not immediately following the declaration.
++external.ts(8,5): error TS7010: 'method', which lacks return-type annotation, implicitly has an 'any' return type.
++external.ts(8,12): error TS1138: Parameter declaration expected.
++external.ts(8,26): error TS1442: Expected '=' for property initializer.
++external.ts(8,28): error TS1068: Unexpected token. A constructor, method, accessor, or property was expected.
++external.ts(10,1): error TS1128: Declaration or statement expected.
++script.ts(8,5): error TS2391: Function implementation is missing or not immediately following the declaration.
++script.ts(8,5): error TS7010: 'method', which lacks return-type annotation, implicitly has an 'any' return type.
++script.ts(8,12): error TS1138: Parameter declaration expected.
++script.ts(8,26): error TS1442: Expected '=' for property initializer.
++script.ts(8,28): error TS1068: Unexpected token. A constructor, method, accessor, or property was expected.
++script.ts(10,1): error TS1128: Declaration or statement expected.
++

@@ -1,0 +1,45 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,42 @@
++genericContextualTypes1.ts(25,7): error TS2322: Type '(a: unknown) => T[]' is not assignable to type '<A>(x: A) => A[]'.
++  Type 'T[]' is not assignable to type 'A[]'.
++genericContextualTypes1.ts(25,36): error TS2345: Argument of type '<T>(a: T) => T[]' is not assignable to parameter of type '(a: unknown) => T[]'.
++  Type 'unknown[]' is not assignable to type 'T[]'.
++genericContextualTypes1.ts(26,7): error TS2322: Type '(a: unknown) => unknown[]' is not assignable to type '<A>(x: A) => A[]'.
++  Type 'unknown[]' is not assignable to type 'A[]'.
++genericContextualTypes1.ts(28,7): error TS2322: Type '(a: unknown) => { value: unknown; }' is not assignable to type '<T>(x: T) => { value: T[]; }'.
++  Type '{ value: unknown; }' is not assignable to type '{ value: T[]; }'.
++    Types of property 'value' are incompatible.
++      Type 'unknown' is not assignable to type 'T[]'.
++genericContextualTypes1.ts(29,7): error TS2322: Type '(a: unknown) => { value: V; }' is not assignable to type '<T>(x: T) => { value: T[]; }'.
++  Type '{ value: V; }' is not assignable to type '{ value: T[]; }'.
++    Types of property 'value' are incompatible.
++      Type 'V' is not assignable to type 'T[]'.
++genericContextualTypes1.ts(29,44): error TS2345: Argument of type '<T>(a: T) => T[]' is not assignable to parameter of type '(a: unknown) => T[]'.
++  Type 'unknown[]' is not assignable to type 'T[]'.
++genericContextualTypes1.ts(30,7): error TS2322: Type '(a: unknown) => unknown' is not assignable to type '<T>(x: { value: T[]; }) => T'.
++  Type 'unknown' is not assignable to type 'T'.
++    'T' could be instantiated with an arbitrary type which could be unrelated to 'unknown'.
++genericContextualTypes1.ts(30,55): error TS2345: Argument of type 'unknown' is not assignable to parameter of type '{ value: W; }'.
++genericContextualTypes1.ts(30,71): error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'unknown[]'.
++genericContextualTypes1.ts(31,7): error TS2322: Type '(a: unknown) => T' is not assignable to type '<T>(x: { value: T[]; }) => T'.
++  Type 'T' is not assignable to type 'T'.
++    'T' could be instantiated with an arbitrary type which could be unrelated to 'T'.
++genericContextualTypes1.ts(31,44): error TS2345: Argument of type '<W>(x: { value: W; }) => W' is not assignable to parameter of type '(a: unknown) => W'.
++  Types of parameters 'x' and 'a' are incompatible.
++    Type 'unknown' is not assignable to type '{ value: W; }'.
++genericContextualTypes1.ts(37,7): error TS2322: Type '(a: unknown[]) => unknown[][]' is not assignable to type '<A>(a: A[]) => A[][]'.
++  Type 'unknown[][]' is not assignable to type 'A[][]'.
++genericContextualTypes1.ts(38,7): error TS2322: Type '(a: unknown[]) => T[]' is not assignable to type '<A>(a: A[]) => A[]'.
++  Type 'T[]' is not assignable to type 'A[]'.
++genericContextualTypes1.ts(39,7): error TS2322: Type '(a: unknown[]) => { value: unknown; }[]' is not assignable to type '<A>(a: A[]) => { value: A; }[]'.
++  Type '{ value: unknown; }[]' is not assignable to type '{ value: A; }[]'.
++    Types of property 'value' are incompatible.
++      Type 'unknown' is not assignable to type 'A'.
++genericContextualTypes1.ts(42,7): error TS2322: Type '(a: unknown[]) => string[]' is not assignable to type '<T>(a: T[]) => T[]'.
++  Type 'string[]' is not assignable to type 'T[]'.
++genericContextualTypes1.ts(44,7): error TS2322: Type '(y: unknown, x: unknown) => [A, B]' is not assignable to type '<A, B>(b: B, a: A) => [A, B]'.
++  Type '[A, B]' is not assignable to type '[A, B]'.
++genericContextualTypes1.ts(44,48): error TS2345: Argument of type '<A, B>(a: A, b: B) => [A, B]' is not assignable to parameter of type '(x: unknown, y: unknown) => [A, B]'.
++  Type '[unknown, unknown]' is not assignable to type '[A, B]'.
++

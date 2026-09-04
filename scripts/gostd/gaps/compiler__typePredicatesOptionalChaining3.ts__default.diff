@@ -1,0 +1,5 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,2 @@
++typePredicatesOptionalChaining3.ts(20,12): error TS18048: 'animal.breed' is possibly 'undefined'.
++

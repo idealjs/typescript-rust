@@ -1,0 +1,5 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,2 @@
++src/thing.ts(8,21): error TS2307: Cannot find module '@this/package' or its corresponding type declarations.
++

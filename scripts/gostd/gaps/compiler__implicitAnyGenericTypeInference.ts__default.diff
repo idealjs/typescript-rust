@@ -1,0 +1,12 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,9 @@
++implicitAnyGenericTypeInference.ts(16,4): error TS2345: Argument of type '() => void' is not assignable to parameter of type '() => Generator<unknown>'.
++  Type 'void' is not assignable to type 'Generator<unknown>'.
++implicitAnyGenericTypeInference.ts(22,4): error TS2345: Argument of type '() => void' is not assignable to parameter of type '() => AsyncGenerator<unknown>'.
++  Type 'void' is not assignable to type 'AsyncGenerator<unknown>'.
++implicitAnyGenericTypeInference.ts(28,19): error TS2339: Property 'catch' does not exist on type 'Promise<void>'.
++implicitAnyGenericTypeInference.ts(28,25): error TS7006: Parameter 'e' implicitly has an 'any' type.
++implicitAnyGenericTypeInference.ts(29,19): error TS2339: Property 'then' does not exist on type 'Promise<void>'.
++implicitAnyGenericTypeInference.ts(29,24): error TS7006: Parameter 'v' implicitly has an 'any' type.
++

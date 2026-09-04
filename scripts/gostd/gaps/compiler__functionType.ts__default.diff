@@ -1,0 +1,6 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,3 @@
++functionType.ts(3,1): error TS2349: This expression is not callable.
++  Type 'Function' has no call signatures.
++

@@ -1,0 +1,7 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,4 @@
++identicalGenericConditionalsWithInferRelated.ts(7,5): error TS2719: Type 'X extends [A] ? A : never' is not assignable to type 'X extends [A] ? A : never'. Two different types with this name exist, but they are unrelated.
++identicalGenericConditionalsWithInferRelated.ts(8,5): error TS2719: Type 'X extends [A] ? A : never' is not assignable to type 'X extends [A] ? A : never'. Two different types with this name exist, but they are unrelated.
++identicalGenericConditionalsWithInferRelated.ts(25,5): error TS2416: Property 'decode' in type 'Y' is not assignable to the same property in base type 'X'.
++

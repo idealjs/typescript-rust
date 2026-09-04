@@ -1,0 +1,26 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,23 @@
++parenthesizedContexualTyping3.ts(7,10): error TS2394: This overload signature is not compatible with its implementation signature.
++parenthesizedContexualTyping3.ts(12,17): error TS1005: ',' expected.
++parenthesizedContexualTyping3.ts(12,21): error TS7006: Parameter 'x' implicitly has an 'any' type.
++parenthesizedContexualTyping3.ts(13,17): error TS1005: ',' expected.
++parenthesizedContexualTyping3.ts(13,22): error TS7006: Parameter 'x' implicitly has an 'any' type.
++parenthesizedContexualTyping3.ts(14,17): error TS1005: ',' expected.
++parenthesizedContexualTyping3.ts(14,23): error TS7006: Parameter 'x' implicitly has an 'any' type.
++parenthesizedContexualTyping3.ts(15,17): error TS1005: ',' expected.
++parenthesizedContexualTyping3.ts(15,21): error TS7006: Parameter 'x' implicitly has an 'any' type.
++parenthesizedContexualTyping3.ts(15,33): error TS7006: Parameter 'x' implicitly has an 'any' type.
++parenthesizedContexualTyping3.ts(16,17): error TS1005: ',' expected.
++parenthesizedContexualTyping3.ts(16,21): error TS7006: Parameter 'x' implicitly has an 'any' type.
++parenthesizedContexualTyping3.ts(16,34): error TS7006: Parameter 'x' implicitly has an 'any' type.
++parenthesizedContexualTyping3.ts(17,17): error TS1005: ',' expected.
++parenthesizedContexualTyping3.ts(17,21): error TS7006: Parameter 'x' implicitly has an 'any' type.
++parenthesizedContexualTyping3.ts(17,35): error TS7006: Parameter 'x' implicitly has an 'any' type.
++parenthesizedContexualTyping3.ts(18,17): error TS1005: ',' expected.
++parenthesizedContexualTyping3.ts(18,22): error TS7006: Parameter 'x' implicitly has an 'any' type.
++parenthesizedContexualTyping3.ts(18,38): error TS7006: Parameter 'x' implicitly has an 'any' type.
++parenthesizedContexualTyping3.ts(19,17): error TS1005: ',' expected.
++parenthesizedContexualTyping3.ts(19,22): error TS7006: Parameter 'x' implicitly has an 'any' type.
++parenthesizedContexualTyping3.ts(19,38): error TS7006: Parameter 'x' implicitly has an 'any' type.
++

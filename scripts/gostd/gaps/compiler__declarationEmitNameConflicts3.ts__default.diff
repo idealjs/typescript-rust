@@ -1,0 +1,5 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,2 @@
++declarationEmitNameConflicts3.ts(23,24): error TS2339: Property 'f' does not exist on type 'typeof D'.
++

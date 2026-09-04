@@ -1,0 +1,10 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,7 @@
++decoratorOnClassMethod19.ts(14,5): error TS2391: Function implementation is missing or not immediately following the declaration.
++decoratorOnClassMethod19.ts(14,7): error TS1138: Parameter declaration expected.
++decoratorOnClassMethod19.ts(14,35): error TS1434: Unexpected keyword or identifier.
++decoratorOnClassMethod19.ts(14,36): error TS1068: Unexpected token. A constructor, method, accessor, or property was expected.
++decoratorOnClassMethod19.ts(14,38): error TS1068: Unexpected token. A constructor, method, accessor, or property was expected.
++decoratorOnClassMethod19.ts(15,1): error TS1128: Declaration or statement expected.
++

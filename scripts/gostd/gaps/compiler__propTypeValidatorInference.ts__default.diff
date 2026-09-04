@@ -1,0 +1,7 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,4 @@
++file.ts(17,21): error TS2503: Cannot find namespace 'PropTypes'.
++file.ts(48,23): error TS2503: Cannot find namespace 'PropTypes'.
++file.ts(50,40): error TS2503: Cannot find namespace 'PropTypes'.
++

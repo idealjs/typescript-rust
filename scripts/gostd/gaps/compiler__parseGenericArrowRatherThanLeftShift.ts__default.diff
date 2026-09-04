@@ -1,0 +1,14 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,11 @@
++parseGenericArrowRatherThanLeftShift.ts(1,12): error TS2314: Generic type 'ReturnType<T>' requires 1 type argument(s).
++parseGenericArrowRatherThanLeftShift.ts(1,22): error TS1005: ';' expected.
++parseGenericArrowRatherThanLeftShift.ts(1,24): error TS2304: Cannot find name 'T'.
++parseGenericArrowRatherThanLeftShift.ts(1,30): error TS2304: Cannot find name 'T'.
++parseGenericArrowRatherThanLeftShift.ts(1,36): error TS2693: 'number' only refers to a type, but is being used as a value here.
++parseGenericArrowRatherThanLeftShift.ts(1,43): error TS1109: Expression expected.
++parseGenericArrowRatherThanLeftShift.ts(5,11): error TS2362: The left-hand side of an arithmetic operation must be of type 'any', 'number', 'bigint' or an enum type.
++parseGenericArrowRatherThanLeftShift.ts(5,16): error TS2304: Cannot find name 'T'.
++parseGenericArrowRatherThanLeftShift.ts(5,22): error TS2304: Cannot find name 'T'.
++parseGenericArrowRatherThanLeftShift.ts(5,28): error TS2693: 'number' only refers to a type, but is being used as a value here.
++

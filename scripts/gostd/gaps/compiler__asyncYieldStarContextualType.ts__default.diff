@@ -1,0 +1,16 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,13 @@
++asyncYieldStarContextualType.ts(17,44): error TS2345: Argument of type '<T>(result: Result<T, "NOT_FOUND_AUTHOR">) => Result<T, "NOT_FOUND_AUTHOR">' is not assignable to parameter of type '((value: IteratorYieldResult<"NOT_FOUND_AUTHOR" | "NOT_FOUND_BOOK"> | IteratorReturnResult<{ id: string; title: string; authorId: string; } & { author: { id: string; name: string; }; }>) => T | PromiseLike<T>) | null'.
++  Type '<T>(result: Result<T, "NOT_FOUND_AUTHOR">) => Result<T, "NOT_FOUND_AUTHOR">' is not assignable to type '(value: IteratorYieldResult<"NOT_FOUND_AUTHOR" | "NOT_FOUND_BOOK"> | IteratorReturnResult<{ id: string; title: string; authorId: string; } & { author: { id: string; name: string; }; }>) => T | PromiseLike<T>'.
++    Types of parameters 'result' and 'value' are incompatible.
++      Type 'IteratorYieldResult<"NOT_FOUND_AUTHOR" | "NOT_FOUND_BOOK"> | IteratorReturnResult<{ id: string; title: string; authorId: string; } & { author: { id: string; name: string; }; }>' is not assignable to type 'Result<unknown, "NOT_FOUND_AUTHOR">'.
++        Property '[Symbol.iterator]' is missing in type 'IteratorYieldResult<"NOT_FOUND_AUTHOR" | "NOT_FOUND_BOOK">' but required in type 'Result<unknown, "NOT_FOUND_AUTHOR">'.
++          Property 'value' is missing in type 'Result<unknown, "NOT_FOUND_AUTHOR">' but required in type 'IteratorYieldResult<"NOT_FOUND_AUTHOR" | "NOT_FOUND_BOOK">'.
++asyncYieldStarContextualType.ts(22,51): error TS2345: Argument of type '<T>(result: Result<T, "NOT_FOUND_AUTHOR">) => Result<T, "NOT_FOUND_AUTHOR">' is not assignable to parameter of type '((value: IteratorYieldResult<"NOT_FOUND_AUTHOR" | "NOT_FOUND_BOOK"> | IteratorReturnResult<{ id: string; title: string; authorId: string; } & { author: { id: string; name: string; }; }>) => T | PromiseLike<T>) | null'.
++  Type '<T>(result: Result<T, "NOT_FOUND_AUTHOR">) => Result<T, "NOT_FOUND_AUTHOR">' is not assignable to type '(value: IteratorYieldResult<"NOT_FOUND_AUTHOR" | "NOT_FOUND_BOOK"> | IteratorReturnResult<{ id: string; title: string; authorId: string; } & { author: { id: string; name: string; }; }>) => T | PromiseLike<T>'.
++    Types of parameters 'result' and 'value' are incompatible.
++      Type 'IteratorYieldResult<"NOT_FOUND_AUTHOR" | "NOT_FOUND_BOOK"> | IteratorReturnResult<{ id: string; title: string; authorId: string; } & { author: { id: string; name: string; }; }>' is not assignable to type 'Result<unknown, "NOT_FOUND_AUTHOR">'.
++        Property '[Symbol.iterator]' is missing in type 'IteratorYieldResult<"NOT_FOUND_AUTHOR" | "NOT_FOUND_BOOK">' but required in type 'Result<unknown, "NOT_FOUND_AUTHOR">'.
++          Property 'value' is missing in type 'Result<unknown, "NOT_FOUND_AUTHOR">' but required in type 'IteratorYieldResult<"NOT_FOUND_AUTHOR" | "NOT_FOUND_BOOK">'.
++

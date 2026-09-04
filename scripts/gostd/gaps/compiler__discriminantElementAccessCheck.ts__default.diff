@@ -1,0 +1,10 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,7 @@
++discriminantElementAccessCheck.ts(37,20): error TS2339: Property 'b' does not exist on type 'TypeA | TypeB'.
++discriminantElementAccessCheck.ts(39,20): error TS2339: Property 'a' does not exist on type 'TypeA | TypeB'.
++discriminantElementAccessCheck.ts(46,24): error TS2339: Property 'a' does not exist on type 'TypeA | TypeB'.
++discriminantElementAccessCheck.ts(48,24): error TS2339: Property 'b' does not exist on type 'TypeA | TypeB'.
++discriminantElementAccessCheck.ts(50,32): error TS2345: Argument of type 'TypeA | TypeB' is not assignable to parameter of type 'never'.
++  Type 'TypeA' is not assignable to type 'never'.
++

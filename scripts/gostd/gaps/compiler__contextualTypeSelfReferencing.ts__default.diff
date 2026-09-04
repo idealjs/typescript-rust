@@ -1,0 +1,5 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,2 @@
++contextualTypeSelfReferencing.ts(13,22): error TS2345: Argument of type '{ a: string; }[]' is not assignable to parameter of type 'def extends [unknown, unknown[][]] ? def : { [k in keyof def]: def[k] extends string ? def : def extends [unknown, unknown[][]] ? def : ...; }'.
++

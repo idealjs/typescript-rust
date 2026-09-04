@@ -1,0 +1,11 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,8 @@
++literalTypeWidening.ts(16,11): error TS2322: Type 'string' is not assignable to type '"foo" | "bar"'.
++literalTypeWidening.ts(19,11): error TS2322: Type 'string | "foo" | "bar"' is not assignable to type '"foo" | "bar" | "baz"'.
++  Type 'string' is not assignable to type '"foo" | "bar" | "baz"'.
++literalTypeWidening.ts(40,11): error TS2322: Type 'number' is not assignable to type '123 | 456'.
++literalTypeWidening.ts(43,11): error TS2322: Type 'number | 123 | 456' is not assignable to type '123 | 456 | 789'.
++  Type 'number' is not assignable to type '123 | 456 | 789'.
++literalTypeWidening.ts(100,13): error TS2345: Argument of type 'T' is not assignable to parameter of type 'number'.
++

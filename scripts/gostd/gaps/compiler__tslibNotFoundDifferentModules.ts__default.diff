@@ -1,0 +1,4 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -1 +0,0 @@
+-/package2/index.ts(2,16): error TS2354: This syntax requires an imported helper but module 'tslib' cannot be found.

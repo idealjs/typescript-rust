@@ -1,0 +1,8 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,5 @@
++findLast.ts(1,7): error TS2322: Type '[number, number] | undefined' is not assignable to type 'number | undefined'.
++  Type '[number, number]' is not assignable to type 'number | undefined'.
++findLast.ts(2,7): error TS2322: Type '[number, number] | undefined' is not assignable to type 'string | undefined'.
++  Type '[number, number]' is not assignable to type 'string | undefined'.
++

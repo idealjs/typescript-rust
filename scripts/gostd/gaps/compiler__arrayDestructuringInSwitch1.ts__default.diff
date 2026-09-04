@@ -1,0 +1,5 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,2 @@
++arrayDestructuringInSwitch1.ts(9,32): error TS7006: Parameter 'child' implicitly has an 'any' type.
++

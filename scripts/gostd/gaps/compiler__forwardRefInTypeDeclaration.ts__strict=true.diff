@@ -1,0 +1,5 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,2 @@
++forwardRefInTypeDeclaration.ts(18,23): error TS2448: Block-scoped variable 's5' used before its declaration.
++

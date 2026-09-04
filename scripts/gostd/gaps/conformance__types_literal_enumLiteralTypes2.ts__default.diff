@@ -1,0 +1,20 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,17 @@
++enumLiteralTypes2.ts(22,9): error TS2403: Subsequent variable declarations must have the same type.  Variable 'x' must be of type 'any', but here has type 'number'.
++enumLiteralTypes2.ts(23,9): error TS2403: Subsequent variable declarations must have the same type.  Variable 'x' must be of type 'any', but here has type 'number'.
++enumLiteralTypes2.ts(24,9): error TS2403: Subsequent variable declarations must have the same type.  Variable 'x' must be of type 'any', but here has type 'number'.
++enumLiteralTypes2.ts(25,9): error TS2403: Subsequent variable declarations must have the same type.  Variable 'x' must be of type 'any', but here has type 'number'.
++enumLiteralTypes2.ts(26,9): error TS2403: Subsequent variable declarations must have the same type.  Variable 'x' must be of type 'any', but here has type 'number'.
++enumLiteralTypes2.ts(27,9): error TS2403: Subsequent variable declarations must have the same type.  Variable 'x' must be of type 'any', but here has type 'number'.
++enumLiteralTypes2.ts(28,9): error TS2403: Subsequent variable declarations must have the same type.  Variable 'x' must be of type 'any', but here has type 'number'.
++enumLiteralTypes2.ts(29,9): error TS2403: Subsequent variable declarations must have the same type.  Variable 'x' must be of type 'any', but here has type 'number'.
++enumLiteralTypes2.ts(30,9): error TS2403: Subsequent variable declarations must have the same type.  Variable 'x' must be of type 'any', but here has type 'number'.
++enumLiteralTypes2.ts(75,24): error TS2345: Argument of type 'error' is not assignable to parameter of type 'never'.
++enumLiteralTypes2.ts(102,35): error TS2339: Property 'a' does not exist on type 'never'.
++enumLiteralTypes2.ts(103,34): error TS2339: Property 'b' does not exist on type 'never'.
++enumLiteralTypes2.ts(109,35): error TS2339: Property 'a' does not exist on type 'never'.
++enumLiteralTypes2.ts(110,34): error TS2339: Property 'b' does not exist on type 'never'.
++enumLiteralTypes2.ts(112,24): error TS2345: Argument of type '{ kind: error; a: string; } | { kind: error; b: string; }' is not assignable to parameter of type 'never'.
++  Type '{ kind: error; a: string; }' is not assignable to type 'never'.
++

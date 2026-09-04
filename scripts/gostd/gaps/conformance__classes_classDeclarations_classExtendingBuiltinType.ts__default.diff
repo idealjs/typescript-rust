@@ -1,0 +1,5 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,2 @@
++classExtendingBuiltinType.ts(9,18): error TS2314: Generic type 'Array<T>' requires 1 type argument(s).
++

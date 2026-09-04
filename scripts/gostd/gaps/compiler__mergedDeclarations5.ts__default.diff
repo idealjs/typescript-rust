@@ -1,0 +1,5 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,2 @@
++b.ts(3,17): error TS2689: Cannot extend an interface 'A'. Did you mean 'implements'?
++

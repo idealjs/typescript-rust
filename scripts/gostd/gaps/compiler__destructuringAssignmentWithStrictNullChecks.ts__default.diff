@@ -1,0 +1,5 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,2 @@
++destructuringAssignmentWithStrictNullChecks.ts(2,7): error TS2454: Variable 'bar' is used before being assigned.
++

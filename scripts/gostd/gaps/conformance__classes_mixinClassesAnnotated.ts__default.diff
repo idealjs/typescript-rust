@@ -1,0 +1,10 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,7 @@
++mixinClassesAnnotated.ts(21,33): error TS2339: Property 'x' does not exist on type 'þclass'.
++mixinClassesAnnotated.ts(21,48): error TS2339: Property 'y' does not exist on type 'þclass'.
++mixinClassesAnnotated.ts(51,23): error TS2351: This expression is not constructable.
++  Type 'new (args: any[]) => Tagged & new (args: any[]) => Printable & { message: string; } & typeof Derived' has no construct signatures.
++mixinClassesAnnotated.ts(60,14): error TS2339: Property '_tag' does not exist on type 'Thing3'.
++mixinClassesAnnotated.ts(63,14): error TS2339: Property 'print' does not exist on type 'Thing3'.
++

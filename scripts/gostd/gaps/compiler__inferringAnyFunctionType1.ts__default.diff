@@ -1,0 +1,5 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,2 @@
++inferringAnyFunctionType1.ts(5,12): error TS7006: Parameter 'x' implicitly has an 'any' type.
++

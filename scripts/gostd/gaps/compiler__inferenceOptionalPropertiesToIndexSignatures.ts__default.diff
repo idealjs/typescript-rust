@@ -1,0 +1,12 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,9 @@
++inferenceOptionalPropertiesToIndexSignatures.ts(8,14): error TS2345: Argument of type '{ a: string; b: number; }' is not assignable to parameter of type '{ [x: string]: T; }'.
++  Index signature for type 'string' is missing in type '{ a: string; b: number; }'.
++inferenceOptionalPropertiesToIndexSignatures.ts(9,14): error TS2345: Argument of type '{ a: string; b: number | undefined; }' is not assignable to parameter of type '{ [x: string]: T; }'.
++  Index signature for type 'string' is missing in type '{ a: string; b: number | undefined; }'.
++inferenceOptionalPropertiesToIndexSignatures.ts(10,14): error TS2345: Argument of type '{ a: string; b?: number | undefined; }' is not assignable to parameter of type '{ [x: string]: T; }'.
++  Index signature for type 'string' is missing in type '{ a: string; b?: number | undefined; }'.
++inferenceOptionalPropertiesToIndexSignatures.ts(11,14): error TS2345: Argument of type '{ a: string; b?: number | undefined; }' is not assignable to parameter of type '{ [x: string]: T; }'.
++  Index signature for type 'string' is missing in type '{ a: string; b?: number | undefined; }'.
++

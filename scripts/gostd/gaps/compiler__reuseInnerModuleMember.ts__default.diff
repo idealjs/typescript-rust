@@ -1,0 +1,5 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,2 @@
++reuseInnerModuleMember_1.ts(8,12): error TS2304: Cannot find name 'alpha'.
++

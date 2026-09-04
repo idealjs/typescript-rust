@@ -1,0 +1,5 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,2 @@
++tsxDynamicTagName4.tsx(10,2): error TS2604: JSX element type 'CustomTag' does not have any construct or call signatures.
++

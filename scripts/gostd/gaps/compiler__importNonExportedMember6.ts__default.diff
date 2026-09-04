@@ -1,0 +1,5 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,2 @@
++b.ts(1,10): error TS2305: Module '"./a"' has no exported member 'Foo'.
++

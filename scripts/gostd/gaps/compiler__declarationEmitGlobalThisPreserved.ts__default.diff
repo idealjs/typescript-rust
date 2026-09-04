@@ -1,0 +1,61 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,58 @@
++declarationEmitGlobalThisPreserved.ts(10,34): error TS2304: Cannot find name ''.
++declarationEmitGlobalThisPreserved.ts(10,60): error TS2304: Cannot find name ''.
++declarationEmitGlobalThisPreserved.ts(11,34): error TS2304: Cannot find name ''.
++declarationEmitGlobalThisPreserved.ts(11,65): error TS2304: Cannot find name ''.
++declarationEmitGlobalThisPreserved.ts(11,91): error TS2304: Cannot find name ''.
++declarationEmitGlobalThisPreserved.ts(12,47): error TS2304: Cannot find name ''.
++declarationEmitGlobalThisPreserved.ts(12,73): error TS2304: Cannot find name ''.
++declarationEmitGlobalThisPreserved.ts(13,43): error TS2304: Cannot find name ''.
++declarationEmitGlobalThisPreserved.ts(13,74): error TS2339: Property 'isNaN' does not exist on type 'typeof globalThis'.
++declarationEmitGlobalThisPreserved.ts(16,24): error TS2304: Cannot find name ''.
++declarationEmitGlobalThisPreserved.ts(16,50): error TS2304: Cannot find name ''.
++declarationEmitGlobalThisPreserved.ts(17,24): error TS2304: Cannot find name ''.
++declarationEmitGlobalThisPreserved.ts(17,55): error TS2304: Cannot find name ''.
++declarationEmitGlobalThisPreserved.ts(17,81): error TS2304: Cannot find name ''.
++declarationEmitGlobalThisPreserved.ts(18,37): error TS2304: Cannot find name ''.
++declarationEmitGlobalThisPreserved.ts(18,63): error TS2304: Cannot find name ''.
++declarationEmitGlobalThisPreserved.ts(19,33): error TS2304: Cannot find name ''.
++declarationEmitGlobalThisPreserved.ts(19,64): error TS2339: Property 'isNaN' does not exist on type 'typeof globalThis'.
++declarationEmitGlobalThisPreserved.ts(25,34): error TS2304: Cannot find name ''.
++declarationEmitGlobalThisPreserved.ts(26,34): error TS2304: Cannot find name ''.
++declarationEmitGlobalThisPreserved.ts(26,65): error TS2304: Cannot find name ''.
++declarationEmitGlobalThisPreserved.ts(27,47): error TS2304: Cannot find name ''.
++declarationEmitGlobalThisPreserved.ts(28,49): error TS2339: Property 'isNaN' does not exist on type 'typeof globalThis'.
++declarationEmitGlobalThisPreserved.ts(31,24): error TS2304: Cannot find name ''.
++declarationEmitGlobalThisPreserved.ts(32,24): error TS2304: Cannot find name ''.
++declarationEmitGlobalThisPreserved.ts(32,55): error TS2304: Cannot find name ''.
++declarationEmitGlobalThisPreserved.ts(33,37): error TS2304: Cannot find name ''.
++declarationEmitGlobalThisPreserved.ts(34,39): error TS2339: Property 'isNaN' does not exist on type 'typeof globalThis'.
++declarationEmitGlobalThisPreserved.ts(40,34): error TS2304: Cannot find name ''.
++declarationEmitGlobalThisPreserved.ts(41,34): error TS2304: Cannot find name ''.
++declarationEmitGlobalThisPreserved.ts(41,65): error TS2304: Cannot find name ''.
++declarationEmitGlobalThisPreserved.ts(42,47): error TS2304: Cannot find name ''.
++declarationEmitGlobalThisPreserved.ts(43,55): error TS2339: Property 'isNaN' does not exist on type 'typeof globalThis'.
++declarationEmitGlobalThisPreserved.ts(49,43): error TS2339: Property 'isNaN' does not exist on type 'typeof globalThis'.
++declarationEmitGlobalThisPreserved.ts(56,31): error TS2304: Cannot find name ''.
++declarationEmitGlobalThisPreserved.ts(56,57): error TS2304: Cannot find name ''.
++declarationEmitGlobalThisPreserved.ts(61,31): error TS2304: Cannot find name ''.
++declarationEmitGlobalThisPreserved.ts(61,62): error TS2304: Cannot find name ''.
++declarationEmitGlobalThisPreserved.ts(61,88): error TS2304: Cannot find name ''.
++declarationEmitGlobalThisPreserved.ts(66,44): error TS2304: Cannot find name ''.
++declarationEmitGlobalThisPreserved.ts(66,70): error TS2304: Cannot find name ''.
++declarationEmitGlobalThisPreserved.ts(71,40): error TS2304: Cannot find name ''.
++declarationEmitGlobalThisPreserved.ts(71,71): error TS2339: Property 'isNaN' does not exist on type 'typeof globalThis'.
++declarationEmitGlobalThisPreserved.ts(78,27): error TS2304: Cannot find name ''.
++declarationEmitGlobalThisPreserved.ts(79,27): error TS2304: Cannot find name ''.
++declarationEmitGlobalThisPreserved.ts(79,58): error TS2304: Cannot find name ''.
++declarationEmitGlobalThisPreserved.ts(80,40): error TS2304: Cannot find name ''.
++declarationEmitGlobalThisPreserved.ts(81,48): error TS2339: Property 'isNaN' does not exist on type 'typeof globalThis'.
++declarationEmitGlobalThisPreserved.ts(84,58): error TS2304: Cannot find name ''.
++declarationEmitGlobalThisPreserved.ts(90,54): error TS2304: Cannot find name ''.
++declarationEmitGlobalThisPreserved.ts(90,82): error TS2304: Cannot find name ''.
++declarationEmitGlobalThisPreserved.ts(92,55): error TS2304: Cannot find name ''.
++declarationEmitGlobalThisPreserved.ts(92,81): error TS2304: Cannot find name ''.
++declarationEmitGlobalThisPreserved.ts(97,19): error TS2304: Cannot find name ''.
++declarationEmitGlobalThisPreserved.ts(101,20): error TS2304: Cannot find name ''.
++declarationEmitGlobalThisPreserved.ts(104,45): error TS2304: Cannot find name ''.
++declarationEmitGlobalThisPreserved.ts(104,73): error TS2304: Cannot find name ''.
++

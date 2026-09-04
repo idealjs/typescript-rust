@@ -1,0 +1,5 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,2 @@
++symbolProperty22.ts(7,33): error TS7006: Parameter 's' implicitly has an 'any' type.
++

@@ -1,0 +1,9 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,6 @@
++symbolProperty61.ts(7,26): error TS2304: Cannot find name ''.
++symbolProperty61.ts(29,6): error TS2345: Argument of type 'MyObservable' is not assignable to parameter of type '{ [Symbol.obs]: () => { subscribe: (next: (val: T) => void) => void; }; }'.
++  Property '[Symbol.obs]' is missing in type 'MyObservable' but required in type '{ [Symbol.obs]: () => { subscribe: (next: (val: T) => void) => void; }; }'.
++symbolProperty61.ts(29,23): error TS2345: Argument of type '42' is not assignable to parameter of type 'T'.
++  'T' could be instantiated with an arbitrary type which could be unrelated to '42'.
++

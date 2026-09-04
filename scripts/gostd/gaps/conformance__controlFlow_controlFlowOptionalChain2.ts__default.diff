@@ -1,0 +1,6 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,3 @@
++controlFlowOptionalChain2.ts(17,8): error TS2339: Property 'name' does not exist on type '{ type: "A"; name: string; } | { type: "B"; } | undefined'.
++controlFlowOptionalChain2.ts(27,8): error TS2339: Property 'name' does not exist on type '{ type: "A"; name: string; } | { type: "B"; } | null'.
++

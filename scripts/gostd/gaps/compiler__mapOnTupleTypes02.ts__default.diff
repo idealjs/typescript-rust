@@ -1,0 +1,6 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,3 @@
++mapOnTupleTypes02.ts(4,16): error TS2339: Property 'map' does not exist on type '[number, number]'.
++mapOnTupleTypes02.ts(4,20): error TS7006: Parameter 'd' implicitly has an 'any' type.
++

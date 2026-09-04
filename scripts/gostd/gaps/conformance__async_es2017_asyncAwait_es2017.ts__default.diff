@@ -1,0 +1,8 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,5 @@
++asyncAwait_es2017.ts(19,40): error TS2322: Type 'Promise<number>' is not assignable to type 'number'.
++asyncAwait_es2017.ts(20,42): error TS2322: Type 'Promise<number>' is not assignable to type 'number'.
++asyncAwait_es2017.ts(24,14): error TS2355: A function whose declared type is neither 'undefined', 'void', nor 'any' must return a value.
++asyncAwait_es2017.ts(25,14): error TS2355: A function whose declared type is neither 'undefined', 'void', nor 'any' must return a value.
++

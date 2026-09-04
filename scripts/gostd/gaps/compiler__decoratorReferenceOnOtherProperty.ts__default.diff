@@ -1,0 +1,21 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,18 @@
++index.ts(6,3): error TS2391: Function implementation is missing or not immediately following the declaration.
++index.ts(6,8): error TS1138: Parameter declaration expected.
++index.ts(6,13): error TS1434: Unexpected keyword or identifier.
++index.ts(6,13): error TS2300: Duplicate identifier 'yoha'.
++index.ts(6,17): error TS1068: Unexpected token. A constructor, method, accessor, or property was expected.
++index.ts(6,28): error TS1442: Expected '=' for property initializer.
++index.ts(6,30): error TS1068: Unexpected token. A constructor, method, accessor, or property was expected.
++index.ts(8,1): error TS1128: Declaration or statement expected.
++index2.ts(6,3): error TS2391: Function implementation is missing or not immediately following the declaration.
++index2.ts(6,8): error TS1138: Parameter declaration expected.
++index2.ts(6,13): error TS1434: Unexpected keyword or identifier.
++index2.ts(6,13): error TS2300: Duplicate identifier 'yoha'.
++index2.ts(6,17): error TS1068: Unexpected token. A constructor, method, accessor, or property was expected.
++index2.ts(6,19): error TS1068: Unexpected token. A constructor, method, accessor, or property was expected.
++index2.ts(6,33): error TS1442: Expected '=' for property initializer.
++index2.ts(6,35): error TS1068: Unexpected token. A constructor, method, accessor, or property was expected.
++index2.ts(8,1): error TS1128: Declaration or statement expected.
++

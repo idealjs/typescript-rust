@@ -1,0 +1,6 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,3 @@
++withStatementInternalComments.ts(2,7): error TS2304: Cannot find name 'with'.
++withStatementInternalComments.ts(2,46): error TS1005: ';' expected.
++

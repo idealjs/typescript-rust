@@ -1,0 +1,12 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,9 @@
++inferenceDoesntCompareAgainstUninstantiatedTypeParameter.ts(17,40): error TS2345: Argument of type 'ConcreteClass' is not assignable to parameter of type 'TEntityClass'.
++  'TEntityClass' could be instantiated with an arbitrary type which could be unrelated to 'ConcreteClass'.
++inferenceDoesntCompareAgainstUninstantiatedTypeParameter.ts(26,63): error TS2345: Argument of type '{ values: (o: TClass) => { value: any; func: (x: TClass) => string; }[]; }' is not assignable to parameter of type 'SettingsInterface<ConcreteClass>'.
++  Types of property 'values' are incompatible.
++    Type '(o: TClass) => { value: any; func: (x: TClass) => string; }[]' is not assignable to type '(row: ConcreteClass) => ValueInterface<ConcreteClass>[]'.
++      Types of parameters 'o' and 'row' are incompatible.
++        Type 'ConcreteClass' is not assignable to type 'TClass'.
++          'TClass' could be instantiated with an arbitrary type which could be unrelated to 'ConcreteClass'.
++

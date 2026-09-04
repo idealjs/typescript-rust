@@ -1,0 +1,7 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -1,4 +0,0 @@
+-error TS6379: Composite projects may not disable incremental compilation.
+-
+-
+-!!! error TS6379: Composite projects may not disable incremental compilation.

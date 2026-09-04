@@ -1,0 +1,5 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,2 @@
++declarationEmitFunctionDuplicateNamespace.ts(7,3): error TS2339: Property 'x' does not exist on type '(a: 0) => 0'.
++

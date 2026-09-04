@@ -1,0 +1,16 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,13 @@
++inferTypesWithExtends1.ts(95,49): error TS1005: ')' expected.
++inferTypesWithExtends1.ts(95,56): error TS1005: ';' expected.
++inferTypesWithExtends1.ts(95,58): error TS1128: Declaration or statement expected.
++inferTypesWithExtends1.ts(95,62): error TS1005: ';' expected.
++inferTypesWithExtends1.ts(103,25): error TS7039: Mapped object type implicitly has an 'any' template type.
++inferTypesWithExtends1.ts(103,57): error TS1005: ']' expected.
++inferTypesWithExtends1.ts(103,59): error TS1005: ';' expected.
++inferTypesWithExtends1.ts(103,64): error TS1003: Identifier expected.
++inferTypesWithExtends1.ts(105,25): error TS7039: Mapped object type implicitly has an 'any' template type.
++inferTypesWithExtends1.ts(105,62): error TS1005: ']' expected.
++inferTypesWithExtends1.ts(105,64): error TS1005: ';' expected.
++inferTypesWithExtends1.ts(105,69): error TS1003: Identifier expected.
++

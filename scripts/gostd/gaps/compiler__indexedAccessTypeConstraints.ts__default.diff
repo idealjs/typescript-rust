@@ -1,0 +1,6 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,3 @@
++indexedAccessTypeConstraints.ts(20,9): error TS2322: Type 'IData<C>["content"]' is not assignable to type 'C'.
++  'C' could be instantiated with an arbitrary type which could be unrelated to 'IData<C>["content"]'.
++

@@ -1,0 +1,7 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,4 @@
++mixinAbstractClasses.ts(25,13): error TS2339: Property 'baseMethod' does not exist on type 'DerivedFromConcrete'.
++mixinAbstractClasses.ts(26,13): error TS2339: Property 'mixinMethod' does not exist on type 'DerivedFromConcrete'.
++mixinAbstractClasses.ts(34,13): error TS2339: Property 'mixinMethod' does not exist on type 'DerivedFromAbstract'.
++

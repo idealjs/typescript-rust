@@ -1,0 +1,6 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,3 @@
++stringLiteralsAssertionsInEqualityComparisons01.ts(1,9): error TS2367: This comparison appears to be unintentional because the types '"foo"' and '"bar"' have no overlap.
++stringLiteralsAssertionsInEqualityComparisons01.ts(1,9): error TS2352: Conversion of type 'boolean' to type 'string' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
++

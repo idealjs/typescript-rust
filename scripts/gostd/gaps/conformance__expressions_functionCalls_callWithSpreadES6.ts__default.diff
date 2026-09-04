@@ -1,0 +1,8 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,5 @@
++callWithSpreadES6.ts(29,1): error TS2349: This expression is not callable.
++  Type 'Function' has no call signatures.
++callWithSpreadES6.ts(46,19): error TS2554: Expected 0 arguments, but got 2.
++callWithSpreadES6.ts(47,28): error TS2556: A spread argument must either have a tuple type or be passed to a rest parameter.
++

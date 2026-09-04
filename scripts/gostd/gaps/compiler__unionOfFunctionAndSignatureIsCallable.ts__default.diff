@@ -1,0 +1,12 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,9 @@
++unionOfFunctionAndSignatureIsCallable.ts(2,15): error TS2349: This expression is not callable.
++  Type 'Function' has no call signatures.
++unionOfFunctionAndSignatureIsCallable.ts(4,15): error TS2349: This expression is not callable.
++  Not all constituents of type 'Function | (() => object)' are callable.
++    Type 'Function' has no call signatures.
++unionOfFunctionAndSignatureIsCallable.ts(9,11): error TS2349: This expression is not callable.
++  Not all constituents of type 'object | (() => object)' are callable.
++    Type 'object' has no call signatures.
++

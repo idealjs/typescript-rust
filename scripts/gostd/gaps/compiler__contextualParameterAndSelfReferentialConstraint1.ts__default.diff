@@ -1,0 +1,9 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,6 @@
++contextualParameterAndSelfReferentialConstraint1.ts(25,10): error TS2345: Argument of type '{ until: (x: A) => A; }' is not assignable to parameter of type 'RepeatOptions<A> & { [K in Exclude<keyof U, keyof T>]: never; }'.
++  Types of property 'until' are incompatible.
++    Type '(x: A) => A' is not assignable to type '((_: A) => boolean) | undefined'.
++      Type '(x: A) => A' is not assignable to type '(_: A) => boolean'.
++        Type 'A' is not assignable to type 'boolean'.
++

@@ -1,0 +1,7 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -1,4 +0,0 @@
+-error TS5009: Cannot find the common subdirectory path for the input files.
+-
+-
+-!!! error TS5009: Cannot find the common subdirectory path for the input files.

@@ -1,0 +1,42 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,39 @@
++convertClassExpressionToFunctionFromObjectProperty2.ts(157,10): error TS1003: Identifier expected.
++convertClassExpressionToFunctionFromObjectProperty2.ts(157,10): error TS7010: ':', which lacks return-type annotation, implicitly has an 'any' return type.
++convertClassExpressionToFunctionFromObjectProperty2.ts(157,12): error TS1005: '(' expected.
++convertClassExpressionToFunctionFromObjectProperty2.ts(157,12): error TS7006: Parameter 'class' implicitly has an 'any' type.
++convertClassExpressionToFunctionFromObjectProperty2.ts(157,18): error TS1005: ',' expected.
++convertClassExpressionToFunctionFromObjectProperty2.ts(158,20): error TS1005: ',' expected.
++convertClassExpressionToFunctionFromObjectProperty2.ts(158,21): error TS1005: ',' expected.
++convertClassExpressionToFunctionFromObjectProperty2.ts(158,23): error TS1005: ',' expected.
++convertClassExpressionToFunctionFromObjectProperty2.ts(159,5): error TS1005: ')' expected.
++convertClassExpressionToFunctionFromObjectProperty2.ts(159,6): error TS1128: Declaration or statement expected.
++convertClassExpressionToFunctionFromObjectProperty2.ts(162,6): error TS1128: Declaration or statement expected.
++convertClassExpressionToFunctionFromObjectProperty2.ts(165,6): error TS1128: Declaration or statement expected.
++convertClassExpressionToFunctionFromObjectProperty2.ts(168,6): error TS1128: Declaration or statement expected.
++convertClassExpressionToFunctionFromObjectProperty2.ts(171,6): error TS1128: Declaration or statement expected.
++convertClassExpressionToFunctionFromObjectProperty2.ts(174,6): error TS1128: Declaration or statement expected.
++convertClassExpressionToFunctionFromObjectProperty2.ts(177,6): error TS1128: Declaration or statement expected.
++convertClassExpressionToFunctionFromObjectProperty2.ts(180,6): error TS1128: Declaration or statement expected.
++convertClassExpressionToFunctionFromObjectProperty2.ts(183,6): error TS1128: Declaration or statement expected.
++convertClassExpressionToFunctionFromObjectProperty2.ts(186,6): error TS1128: Declaration or statement expected.
++convertClassExpressionToFunctionFromObjectProperty2.ts(189,6): error TS1128: Declaration or statement expected.
++convertClassExpressionToFunctionFromObjectProperty2.ts(192,6): error TS1128: Declaration or statement expected.
++convertClassExpressionToFunctionFromObjectProperty2.ts(195,6): error TS1128: Declaration or statement expected.
++convertClassExpressionToFunctionFromObjectProperty2.ts(198,6): error TS1128: Declaration or statement expected.
++convertClassExpressionToFunctionFromObjectProperty2.ts(201,6): error TS1128: Declaration or statement expected.
++convertClassExpressionToFunctionFromObjectProperty2.ts(204,6): error TS1128: Declaration or statement expected.
++convertClassExpressionToFunctionFromObjectProperty2.ts(207,6): error TS1128: Declaration or statement expected.
++convertClassExpressionToFunctionFromObjectProperty2.ts(210,6): error TS1128: Declaration or statement expected.
++convertClassExpressionToFunctionFromObjectProperty2.ts(213,6): error TS1128: Declaration or statement expected.
++convertClassExpressionToFunctionFromObjectProperty2.ts(216,6): error TS1128: Declaration or statement expected.
++convertClassExpressionToFunctionFromObjectProperty2.ts(217,14): error TS1005: ';' expected.
++convertClassExpressionToFunctionFromObjectProperty2.ts(219,6): error TS1128: Declaration or statement expected.
++convertClassExpressionToFunctionFromObjectProperty2.ts(222,6): error TS1128: Declaration or statement expected.
++convertClassExpressionToFunctionFromObjectProperty2.ts(225,6): error TS1128: Declaration or statement expected.
++convertClassExpressionToFunctionFromObjectProperty2.ts(228,6): error TS1128: Declaration or statement expected.
++convertClassExpressionToFunctionFromObjectProperty2.ts(231,6): error TS1128: Declaration or statement expected.
++convertClassExpressionToFunctionFromObjectProperty2.ts(234,6): error TS1128: Declaration or statement expected.
++convertClassExpressionToFunctionFromObjectProperty2.ts(238,1): error TS1128: Declaration or statement expected.
++convertClassExpressionToFunctionFromObjectProperty2.ts(238,2): error TS1128: Declaration or statement expected.
++

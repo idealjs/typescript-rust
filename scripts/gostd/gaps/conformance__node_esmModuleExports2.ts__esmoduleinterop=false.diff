@@ -1,0 +1,7 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,4 @@
++/importer-cts.cts(2,5): error TS2351: This expression is not constructable.
++  Type 'typeof import("exporter")' has no construct signatures.
++/importer-cts.cts(10,10): error TS2305: Module '"./exporter.mjs"' has no exported member 'Oops'.
++

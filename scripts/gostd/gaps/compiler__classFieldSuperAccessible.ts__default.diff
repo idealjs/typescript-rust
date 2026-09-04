@@ -1,0 +1,8 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,5 @@
++classFieldSuperAccessible.ts(3,27): error TS2339: Property 'name' does not exist on type 'typeof A'.
++classFieldSuperAccessible.ts(8,27): error TS2339: Property 'EPSILON' does not exist on type 'typeof B'.
++classFieldSuperAccessible.ts(11,17): error TS2314: Generic type 'Array<T>' requires 1 type argument(s).
++classFieldSuperAccessible.ts(13,27): error TS2339: Property 'length' does not exist on type 'C'.
++

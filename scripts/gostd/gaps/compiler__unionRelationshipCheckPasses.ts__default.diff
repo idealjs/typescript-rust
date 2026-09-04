@@ -1,0 +1,8 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,5 @@
++unionRelationshipCheckPasses.ts(1,7): error TS2322: Type '{ foo?: number | undefined; }' is not assignable to type '{ foo?: undefined; } | { foo: number; }'.
++  Types of property 'foo' are incompatible.
++    Type 'number | undefined' is not assignable to type 'undefined'.
++      Type 'number' is not assignable to type 'undefined'.
++

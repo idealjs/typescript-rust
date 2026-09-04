@@ -1,0 +1,5 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,2 @@
++index.ts(5,38): error TS2503: Cannot find namespace 'Backbone'.
++

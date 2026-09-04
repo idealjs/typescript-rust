@@ -1,0 +1,9 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,6 @@
++declarationEmitMappedTypePreservesTypeParameterConstraint.ts(57,20): error TS2769: No overload matches this call.
++  Overload 1 of 2, '<T>(o: { [s: string]: T; } | ArrayLike<T>): [string, T][]', gave the following error.
++    Argument of type 'o' is not assignable to parameter of type '{ [s: string]: T; } | ArrayLike<unknown>'.
++  Overload 2 of 2, '(o: object): [string, any][]', gave the following error.
++    Argument of type 'o' is not assignable to parameter of type 'object'.
++

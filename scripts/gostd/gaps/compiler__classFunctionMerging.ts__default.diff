@@ -1,0 +1,7 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,4 @@
++classFunctionMerging.ts(11,15): error TS2708: Cannot use namespace 'Foo' as a value.
++classFunctionMerging.ts(12,11): error TS2348: Value of type 'typeof Foo' is not callable. Did you mean to include 'new'?
++classFunctionMerging.ts(12,11): error TS2708: Cannot use namespace 'Foo' as a value.
++

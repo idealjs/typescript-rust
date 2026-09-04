@@ -1,0 +1,13 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,10 @@
++intersectionTypeNormalization.ts(12,5): error TS2403: Subsequent variable declarations must have the same type.  Variable 'x' must be of type 'A | B & C | D', but here has type 'A & C | D | B & C | D'.
++intersectionTypeNormalization.ts(13,5): error TS2403: Subsequent variable declarations must have the same type.  Variable 'x' must be of type 'A | B & C | D', but here has type 'A & C | A & D | B & C | B & D'.
++intersectionTypeNormalization.ts(24,5): error TS2403: Subsequent variable declarations must have the same type.  Variable 'y' must be of type 'A | X & Y & C | D', but here has type 'A & C | D | X & Y & C | D'.
++intersectionTypeNormalization.ts(25,5): error TS2403: Subsequent variable declarations must have the same type.  Variable 'y' must be of type 'A | X & Y & C | D', but here has type 'A & C | A & D | X & Y & C | X & Y & D'.
++intersectionTypeNormalization.ts(37,5): error TS2403: Subsequent variable declarations must have the same type.  Variable 'z' must be of type 'A | X & M | N & C | D', but here has type 'A & C | D | X & M | N & C | D'.
++intersectionTypeNormalization.ts(38,5): error TS2403: Subsequent variable declarations must have the same type.  Variable 'z' must be of type 'A | X & M | N & C | D', but here has type 'A & C | A & D | X & M | N & C | X & M | N & D'.
++intersectionTypeNormalization.ts(39,5): error TS2403: Subsequent variable declarations must have the same type.  Variable 'z' must be of type 'A | X & M | N & C | D', but here has type 'A & C | A & D | X & M & C | X & N & C | X & M & D | X & N & D'.
++intersectionTypeNormalization.ts(57,27): error TS2339: Property 'num' does not exist on type '{ kind: "int"; num: number; } | { kind: "string"; str: string; } & { toString: () => string; }'.
++intersectionTypeNormalization.ts(59,18): error TS2339: Property 'str' does not exist on type '{ kind: "int"; num: number; } | { kind: "string"; str: string; } & { toString: () => string; }'.
++

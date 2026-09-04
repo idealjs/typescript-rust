@@ -1,0 +1,16 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,13 @@
++privacyFunctionReturnTypeDeclFile_consumer.ts(7,49): error TS7027: Unreachable code detected.
++privacyFunctionReturnTypeDeclFile_consumer.ts(10,49): error TS7027: Unreachable code detected.
++privacyFunctionReturnTypeDeclFile_consumer.ts(13,49): error TS7027: Unreachable code detected.
++privacyFunctionReturnTypeDeclFile_consumer.ts(19,49): error TS7027: Unreachable code detected.
++privacyFunctionReturnTypeDeclFile_consumer.ts(22,49): error TS7027: Unreachable code detected.
++privacyFunctionReturnTypeDeclFile_consumer.ts(25,49): error TS7027: Unreachable code detected.
++privacyFunctionReturnTypeDeclFile_consumer.ts(34,49): error TS7027: Unreachable code detected.
++privacyFunctionReturnTypeDeclFile_consumer.ts(37,49): error TS7027: Unreachable code detected.
++privacyFunctionReturnTypeDeclFile_consumer.ts(40,49): error TS7027: Unreachable code detected.
++privacyFunctionReturnTypeDeclFile_consumer.ts(46,49): error TS7027: Unreachable code detected.
++privacyFunctionReturnTypeDeclFile_consumer.ts(49,49): error TS7027: Unreachable code detected.
++privacyFunctionReturnTypeDeclFile_consumer.ts(52,49): error TS7027: Unreachable code detected.
++

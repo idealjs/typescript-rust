@@ -1,0 +1,5 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,2 @@
++privateNameField.ts(2,5): error TS2564: Property '#name' has no initializer and is not definitely assigned in the constructor.
++

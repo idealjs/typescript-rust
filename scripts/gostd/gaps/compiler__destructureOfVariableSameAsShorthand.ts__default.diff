@@ -1,0 +1,5 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,2 @@
++destructureOfVariableSameAsShorthand.ts(21,32): error TS2558: Expected 2 type arguments, but got 1.
++

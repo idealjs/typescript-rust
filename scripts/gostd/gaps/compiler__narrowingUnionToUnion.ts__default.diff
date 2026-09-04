@@ -1,0 +1,8 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,5 @@
++narrowingUnionToUnion.ts(261,5): error TS2322: Type '{ type: "a"; variant: 1; } | { type: "a"; variant: 2; }' is not assignable to type '{ type: "a"; variant: 2; } | null'.
++  Type '{ type: "a"; variant: 1; }' is not assignable to type '{ type: "a"; variant: 2; } | null'.
++    Types of property 'variant' are incompatible.
++      Type '1' is not assignable to type '2'.
++

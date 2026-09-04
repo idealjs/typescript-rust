@@ -1,0 +1,22 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,19 @@
++genericCallTypeArgumentInference.ts(61,15): error TS2345: Argument of type '""' is not assignable to parameter of type 'T'.
++  'T' could be instantiated with an arbitrary type which could be unrelated to '""'.
++genericCallTypeArgumentInference.ts(62,16): error TS2345: Argument of type '""' is not assignable to parameter of type 'T'.
++  'T' could be instantiated with an arbitrary type which could be unrelated to '""'.
++genericCallTypeArgumentInference.ts(63,17): error TS2345: Argument of type '""' is not assignable to parameter of type 'T'.
++  'T' could be instantiated with an arbitrary type which could be unrelated to '""'.
++genericCallTypeArgumentInference.ts(64,23): error TS2345: Argument of type '1' is not assignable to parameter of type 'U'.
++  'U' could be instantiated with an arbitrary type which could be unrelated to '1'.
++genericCallTypeArgumentInference.ts(65,17): error TS2345: Argument of type '""' is not assignable to parameter of type 'T'.
++  'T' could be instantiated with an arbitrary type which could be unrelated to '""'.
++genericCallTypeArgumentInference.ts(84,5): error TS2403: Subsequent variable declarations must have the same type.  Variable 'r4' must be of type 'any', but here has type 'string'.
++genericCallTypeArgumentInference.ts(85,5): error TS2403: Subsequent variable declarations must have the same type.  Variable 'r5' must be of type 'any', but here has type 'number'.
++genericCallTypeArgumentInference.ts(86,5): error TS2403: Subsequent variable declarations must have the same type.  Variable 'r6' must be of type 'any', but here has type 'boolean'.
++genericCallTypeArgumentInference.ts(87,5): error TS2403: Subsequent variable declarations must have the same type.  Variable 'r7' must be of type 'any', but here has type 'string'.
++genericCallTypeArgumentInference.ts(88,5): error TS2403: Subsequent variable declarations must have the same type.  Variable 'r8' must be of type 'any', but here has type 'boolean'.
++genericCallTypeArgumentInference.ts(89,5): error TS2403: Subsequent variable declarations must have the same type.  Variable 'r9' must be of type 'any', but here has type 'unknown'.
++genericCallTypeArgumentInference.ts(90,5): error TS2403: Subsequent variable declarations must have the same type.  Variable 'r10' must be of type 'any', but here has type 'unknown'.
++genericCallTypeArgumentInference.ts(91,5): error TS2403: Subsequent variable declarations must have the same type.  Variable 'r11' must be of type 'any', but here has type 'unknown'.
++

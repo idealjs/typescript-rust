@@ -1,0 +1,5 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,2 @@
++contextualTypeOnYield2.ts(3,13): error TS7006: Parameter 'num' implicitly has an 'any' type.
++

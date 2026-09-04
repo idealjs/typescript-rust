@@ -1,0 +1,5 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,2 @@
++internalImportUnInstantiatedModuleNotReferencingInstanceNoConflict.ts(7,16): error TS2437: Module 'A' is hidden by a local declaration with the same name.
++

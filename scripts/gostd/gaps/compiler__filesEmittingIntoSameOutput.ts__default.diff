@@ -1,0 +1,7 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -1,4 +0,0 @@
+-error TS5056: Cannot write file 'a.js' because it would be overwritten by multiple input files.
+-
+-
+-!!! error TS5056: Cannot write file 'a.js' because it would be overwritten by multiple input files.

@@ -1,0 +1,7 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,4 @@
++mappedTypeRecursiveInference2.ts(15,37): error TS7006: Parameter 'x' implicitly has an 'any' type.
++mappedTypeRecursiveInference2.ts(16,48): error TS7006: Parameter 'x' implicitly has an 'any' type.
++mappedTypeRecursiveInference2.ts(17,42): error TS7006: Parameter 'x' implicitly has an 'any' type.
++

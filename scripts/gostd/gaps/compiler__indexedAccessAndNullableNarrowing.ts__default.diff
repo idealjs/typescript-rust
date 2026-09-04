@@ -1,0 +1,12 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,9 @@
++indexedAccessAndNullableNarrowing.ts(16,5): error TS2322: Type '({ [P in keyof T]: T[P]; })[K] & object' is not assignable to type 'T[K]'.
++  'T[K]' could be instantiated with an arbitrary type which could be unrelated to '({ [P in keyof T]: T[P]; })[K] & object'.
++indexedAccessAndNullableNarrowing.ts(17,5): error TS2322: Type '({ [P in keyof T]: T[P]; })[K] & object | null' is not assignable to type 'T[K]'.
++  'T[K]' could be instantiated with an arbitrary type which could be unrelated to '({ [P in keyof T]: T[P]; })[K] & object | null'.
++indexedAccessAndNullableNarrowing.ts(41,20): error TS2345: Argument of type 'K' is not assignable to parameter of type 'string'.
++  Type 'number' is not assignable to type 'string'.
++indexedAccessAndNullableNarrowing.ts(43,20): error TS2345: Argument of type 'K' is not assignable to parameter of type 'string'.
++  Type 'number' is not assignable to type 'string'.
++

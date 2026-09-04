@@ -1,0 +1,5 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,2 @@
++controlFlowWithIncompleteTypes.ts(24,19): error TS2339: Property 'slice' does not exist on type 'string | boolean'.
++

@@ -1,0 +1,5 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,2 @@
++overloadedConstructorFixesInferencesAppropriately.ts(26,15): error TS7006: Parameter 'result' implicitly has an 'any' type.
++

@@ -1,0 +1,5 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,2 @@
++es6ImportNamedImportInIndirectExportAssignment_1.ts(2,12): error TS2503: Cannot find namespace 'a'.
++

@@ -1,0 +1,7 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,4 @@
++a.tsx(3,23): error TS2304: Cannot find name 'Num'.
++a.tsx(6,10): error TS2304: Cannot find name 'Num'.
++a.tsx(6,53): error TS1005: '</' expected.
++

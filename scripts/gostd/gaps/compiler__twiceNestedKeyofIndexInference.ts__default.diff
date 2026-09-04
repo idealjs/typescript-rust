@@ -1,0 +1,5 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,2 @@
++twiceNestedKeyofIndexInference.ts(32,7): error TS2739: Type '{ [P in K]: T[P]; } & ({ [SK1 in K1]: { [P in keyof T]: ({ [P in K]: T[P]; })[P]; }; })[K1]' is missing the following properties from type 'State': a, d
++

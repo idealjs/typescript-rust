@@ -1,0 +1,11 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,8 @@
++contextualParamTypeVsNestedReturnTypeInference2.ts(80,3): error TS2345: Argument of type 'typeof Foo' is not assignable to parameter of type 'Tag<unknown, unknown>'.
++  Type 'typeof Foo' is missing the following properties from type 'Tag<unknown, unknown>': _op, Service, Identifier
++contextualParamTypeVsNestedReturnTypeInference2.ts(81,13): error TS2345: Argument of type '() => { fn: (args: Array<any>) => Effect<unknown, never, never>; }' is not assignable to parameter of type '() => Generator<Effect<any, any, any>, unknown, never>'.
++  Type '{ fn: (args: Array<any>) => Effect<unknown, never, never>; }' is not assignable to type 'Generator<Effect<any, any, any>, unknown, never>'.
++    Type '{ fn: (args: Array<any>) => Effect<unknown, never, never>; }' is missing the following properties from type 'Generator<Effect<any, any, any>, unknown, never>': next, return, throw, [Symbol.iterator], and 13 more.
++contextualParamTypeVsNestedReturnTypeInference2.ts(83,20): error TS2345: Argument of type '(a: Array<any>) => void' is not assignable to parameter of type '(args: Array<any>) => Generator<Effect<any, any, any>, unknown, never>'.
++  Type 'void' is not assignable to type 'Generator<Effect<any, any, any>, unknown, never>'.
++

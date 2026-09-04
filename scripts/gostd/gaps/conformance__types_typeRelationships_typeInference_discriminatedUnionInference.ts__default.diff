@@ -1,0 +1,10 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,7 @@
++discriminatedUnionInference.ts(18,14): error TS2345: Argument of type '{ kind: string; data: number; }' is not assignable to parameter of type '{ kind: "a"; data: T; } | { kind: "b"; data: T[]; }'.
++  Types of property 'data' are incompatible.
++    Type '42' is not assignable to type 'T'.
++discriminatedUnionInference.ts(19,14): error TS2345: Argument of type '{ kind: string; data: number[]; }' is not assignable to parameter of type '{ kind: "a"; data: T; } | { kind: "b"; data: T[]; }'.
++  Types of property 'kind' are incompatible.
++    Type '"b"' is not assignable to type '"a"'.
++

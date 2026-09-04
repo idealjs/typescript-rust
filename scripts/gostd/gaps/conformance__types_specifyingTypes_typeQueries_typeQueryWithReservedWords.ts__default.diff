@@ -1,0 +1,7 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,4 @@
++typeQueryWithReservedWords.ts(11,20): error TS2304: Cannot find name ''.
++typeQueryWithReservedWords.ts(12,20): error TS2304: Cannot find name ''.
++typeQueryWithReservedWords.ts(13,17): error TS2304: Cannot find name ''.
++

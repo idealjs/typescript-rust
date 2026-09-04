@@ -1,0 +1,16 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,13 @@
++decl.d.ts(4,5): error TS2300: Duplicate identifier 'name'.
++decl.d.ts(4,5): error TS2717: Subsequent property declarations must have the same type.  Property 'name' must be of type 'number', but here has type 'string'.
++decl.d.ts(15,5): error TS2300: Duplicate identifier 'length'.
++decl.d.ts(15,5): error TS2717: Subsequent property declarations must have the same type.  Property 'length' must be of type 'number', but here has type 'string'.
++decl.d.ts(26,5): error TS2300: Duplicate identifier 'prototype'.
++decl.d.ts(26,5): error TS2717: Subsequent property declarations must have the same type.  Property 'prototype' must be of type 'number', but here has type 'string'.
++decl.d.ts(30,12): error TS2300: Duplicate identifier 'prototype'.
++decl.d.ts(31,5): error TS2300: Duplicate identifier 'prototype'.
++decl.d.ts(37,5): error TS2300: Duplicate identifier 'caller'.
++decl.d.ts(37,5): error TS2717: Subsequent property declarations must have the same type.  Property 'caller' must be of type 'number', but here has type 'string'.
++decl.d.ts(48,5): error TS2300: Duplicate identifier 'arguments'.
++decl.d.ts(48,5): error TS2717: Subsequent property declarations must have the same type.  Property 'arguments' must be of type 'number', but here has type 'string'.
++

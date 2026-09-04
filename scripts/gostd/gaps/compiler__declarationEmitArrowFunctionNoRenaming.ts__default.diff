@@ -1,0 +1,13 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,10 @@
++declarationEmitArrowFunctionNoRenaming.ts(18,5): error TS2304: Cannot find name 'n'.
++declarationEmitArrowFunctionNoRenaming.ts(18,6): error TS1005: ')' expected.
++declarationEmitArrowFunctionNoRenaming.ts(18,8): error TS1155: 'const' declarations must be initialized.
++declarationEmitArrowFunctionNoRenaming.ts(19,3): error TS1128: Declaration or statement expected.
++declarationEmitArrowFunctionNoRenaming.ts(19,4): error TS1128: Declaration or statement expected.
++declarationEmitArrowFunctionNoRenaming.ts(19,6): error TS2695: Left side of comma operator is unused and has no side effects.
++declarationEmitArrowFunctionNoRenaming.ts(19,21): error TS2304: Cannot find name 'LowerBound'.
++declarationEmitArrowFunctionNoRenaming.ts(19,33): error TS2304: Cannot find name 'UpperBound'.
++declarationEmitArrowFunctionNoRenaming.ts(19,45): error TS1109: Expression expected.
++

@@ -1,0 +1,7 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,4 @@
++thisTypeInTuples.ts(6,11): error TS2339: Property 'slice' does not exist on type '[number, string]'.
++thisTypeInTuples.ts(7,11): error TS2339: Property 'slice' does not exist on type '[number, string]'.
++thisTypeInTuples.ts(8,11): error TS2339: Property 'slice' does not exist on type '[number, string]'.
++

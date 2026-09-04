@@ -1,0 +1,9 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,6 @@
++index.ts(2,10): error TS2305: Module '"foobar"' has no exported member 'X'.
++index.ts(8,18): error TS2351: This expression is not constructable.
++  Type 'typeof import("a")' has no construct signatures.
++index.ts(8,22): error TS2339: Property 'b' does not exist on type 'typeof import("a")'.
++index.ts(11,1): error TS2365: Operator '+' cannot be applied to types 'typeof import("b")' and '1'.
++

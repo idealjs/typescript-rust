@@ -1,0 +1,9 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,6 @@
++intersectionTypeInference1.ts(7,37): error TS2345: Argument of type '(props: { store: string; }) => void' is not assignable to parameter of type '(p: { dispatch: number; } & unknown) => void'.
++  Types of parameters 'props' and 'p' are incompatible.
++    Type '{ dispatch: number; } & unknown' is not assignable to type '{ store: string; }'.
++      Property 'store' is missing in type '{ dispatch: number; } & unknown' but required in type '{ store: string; }'.
++        Property 'dispatch' is missing in type '{ store: string; }' but required in type '{ dispatch: number; }'.
++

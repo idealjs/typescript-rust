@@ -1,0 +1,7 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,4 @@
++index.cts(2,23): error TS2307: Cannot find module '#type' or its corresponding type declarations.
++index.mts(2,23): error TS2307: Cannot find module '#type' or its corresponding type declarations.
++index.ts(2,23): error TS2307: Cannot find module '#type' or its corresponding type declarations.
++

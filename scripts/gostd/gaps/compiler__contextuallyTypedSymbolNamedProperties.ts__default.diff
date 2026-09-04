@@ -1,0 +1,7 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,4 @@
++contextuallyTypedSymbolNamedProperties.ts(15,10): error TS7006: Parameter 'ap' implicitly has an 'any' type.
++contextuallyTypedSymbolNamedProperties.ts(16,10): error TS7006: Parameter 'bp' implicitly has an 'any' type.
++contextuallyTypedSymbolNamedProperties.ts(19,58): error TS7006: Parameter 's' implicitly has an 'any' type.
++

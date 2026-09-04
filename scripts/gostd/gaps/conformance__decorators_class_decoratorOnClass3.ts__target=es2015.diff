@@ -1,0 +1,5 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,2 @@
++decoratorOnClass3.ts(4,1): error TS1005: '{' expected.
++

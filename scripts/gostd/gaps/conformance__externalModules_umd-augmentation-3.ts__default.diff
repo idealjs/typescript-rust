@@ -1,0 +1,7 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,4 @@
++b.ts(5,8): error TS2503: Cannot find namespace 'm'.
++math2d-augment.d.ts(3,16): error TS2664: Invalid module name in augmentation, module 'math2d' cannot be found.
++math2d-augment.d.ts(6,14): error TS2503: Cannot find namespace 'Math2d'.
++

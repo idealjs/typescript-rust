@@ -1,0 +1,49 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,46 @@
++types.asyncGenerators.es2018.1.ts(28,7): error TS2322: Type '() => void' is not assignable to type '() => AsyncIterableIterator<number>'.
++  Type 'void' is not assignable to type 'AsyncIterableIterator<number>'.
++types.asyncGenerators.es2018.1.ts(31,7): error TS2322: Type '() => void' is not assignable to type '() => AsyncIterableIterator<number>'.
++  Type 'void' is not assignable to type 'AsyncIterableIterator<number>'.
++types.asyncGenerators.es2018.1.ts(34,7): error TS2322: Type '() => void' is not assignable to type '() => AsyncIterableIterator<number>'.
++  Type 'void' is not assignable to type 'AsyncIterableIterator<number>'.
++types.asyncGenerators.es2018.1.ts(37,7): error TS2322: Type '() => void' is not assignable to type '() => AsyncIterableIterator<number>'.
++  Type 'void' is not assignable to type 'AsyncIterableIterator<number>'.
++types.asyncGenerators.es2018.1.ts(40,7): error TS2322: Type '() => void' is not assignable to type '() => AsyncIterable<number>'.
++  Type 'void' is not assignable to type 'AsyncIterable<number>'.
++types.asyncGenerators.es2018.1.ts(43,7): error TS2322: Type '() => void' is not assignable to type '() => AsyncIterable<number>'.
++  Type 'void' is not assignable to type 'AsyncIterable<number>'.
++types.asyncGenerators.es2018.1.ts(46,7): error TS2322: Type '() => void' is not assignable to type '() => AsyncIterable<number>'.
++  Type 'void' is not assignable to type 'AsyncIterable<number>'.
++types.asyncGenerators.es2018.1.ts(49,7): error TS2322: Type '() => void' is not assignable to type '() => AsyncIterable<number>'.
++  Type 'void' is not assignable to type 'AsyncIterable<number>'.
++types.asyncGenerators.es2018.1.ts(52,7): error TS2322: Type '() => void' is not assignable to type '() => AsyncIterable<number>'.
++  Type 'void' is not assignable to type 'AsyncIterable<number>'.
++types.asyncGenerators.es2018.1.ts(55,7): error TS2322: Type '() => void' is not assignable to type '() => AsyncIterator<number>'.
++  Type 'void' is not assignable to type 'AsyncIterator<number>'.
++types.asyncGenerators.es2018.1.ts(58,7): error TS2322: Type '() => void' is not assignable to type '() => AsyncIterator<number>'.
++  Type 'void' is not assignable to type 'AsyncIterator<number>'.
++types.asyncGenerators.es2018.1.ts(61,7): error TS2322: Type '() => void' is not assignable to type '() => AsyncIterator<number>'.
++  Type 'void' is not assignable to type 'AsyncIterator<number>'.
++types.asyncGenerators.es2018.1.ts(64,7): error TS2322: Type '() => void' is not assignable to type '() => AsyncIterator<number>'.
++  Type 'void' is not assignable to type 'AsyncIterator<number>'.
++types.asyncGenerators.es2018.1.ts(67,7): error TS2322: Type '() => void' is not assignable to type '() => AsyncIterator<number>'.
++  Type 'void' is not assignable to type 'AsyncIterator<number>'.
++types.asyncGenerators.es2018.1.ts(70,41): error TS2355: A function whose declared type is neither 'undefined', 'void', nor 'any' must return a value.
++types.asyncGenerators.es2018.1.ts(73,41): error TS2355: A function whose declared type is neither 'undefined', 'void', nor 'any' must return a value.
++types.asyncGenerators.es2018.1.ts(76,41): error TS2355: A function whose declared type is neither 'undefined', 'void', nor 'any' must return a value.
++types.asyncGenerators.es2018.1.ts(79,41): error TS2355: A function whose declared type is neither 'undefined', 'void', nor 'any' must return a value.
++types.asyncGenerators.es2018.1.ts(82,41): error TS2355: A function whose declared type is neither 'undefined', 'void', nor 'any' must return a value.
++types.asyncGenerators.es2018.1.ts(85,41): error TS2355: A function whose declared type is neither 'undefined', 'void', nor 'any' must return a value.
++types.asyncGenerators.es2018.1.ts(88,41): error TS2355: A function whose declared type is neither 'undefined', 'void', nor 'any' must return a value.
++types.asyncGenerators.es2018.1.ts(91,41): error TS2355: A function whose declared type is neither 'undefined', 'void', nor 'any' must return a value.
++types.asyncGenerators.es2018.1.ts(94,41): error TS2355: A function whose declared type is neither 'undefined', 'void', nor 'any' must return a value.
++types.asyncGenerators.es2018.1.ts(97,42): error TS2355: A function whose declared type is neither 'undefined', 'void', nor 'any' must return a value.
++types.asyncGenerators.es2018.1.ts(100,42): error TS2355: A function whose declared type is neither 'undefined', 'void', nor 'any' must return a value.
++types.asyncGenerators.es2018.1.ts(103,42): error TS2355: A function whose declared type is neither 'undefined', 'void', nor 'any' must return a value.
++types.asyncGenerators.es2018.1.ts(106,42): error TS2355: A function whose declared type is neither 'undefined', 'void', nor 'any' must return a value.
++types.asyncGenerators.es2018.1.ts(109,42): error TS2355: A function whose declared type is neither 'undefined', 'void', nor 'any' must return a value.
++types.asyncGenerators.es2018.1.ts(112,42): error TS2355: A function whose declared type is neither 'undefined', 'void', nor 'any' must return a value.
++types.asyncGenerators.es2018.1.ts(115,42): error TS2355: A function whose declared type is neither 'undefined', 'void', nor 'any' must return a value.
++types.asyncGenerators.es2018.1.ts(124,31): error TS2355: A function whose declared type is neither 'undefined', 'void', nor 'any' must return a value.
++

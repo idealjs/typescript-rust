@@ -1,0 +1,6 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,3 @@
++partiallyNamedTuples.ts(58,21): error TS2345: Argument of type '[{ type: number; }, { type: string; }]' is not assignable to parameter of type '[{ [K in keyof T]: { type: T[K]; }; }[]]'.
++  Type '{ type: number; }' is missing the following properties from type '{ [K in keyof T]: { type: T[K]; }; }[]': length, pop, push, concat, and 25 more.
++

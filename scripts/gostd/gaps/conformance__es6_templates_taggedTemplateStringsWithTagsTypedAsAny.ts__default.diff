@@ -1,0 +1,18 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,15 @@
++taggedTemplateStringsWithTagsTypedAsAny.ts(3,1): error TS1434: Unexpected keyword or identifier.
++taggedTemplateStringsWithTagsTypedAsAny.ts(5,1): error TS1434: Unexpected keyword or identifier.
++taggedTemplateStringsWithTagsTypedAsAny.ts(7,7): error TS1005: ';' expected.
++taggedTemplateStringsWithTagsTypedAsAny.ts(9,7): error TS1005: ';' expected.
++taggedTemplateStringsWithTagsTypedAsAny.ts(11,1): error TS1434: Unexpected keyword or identifier.
++taggedTemplateStringsWithTagsTypedAsAny.ts(11,9): error TS2339: Property 'member' does not exist on type 'string'.
++taggedTemplateStringsWithTagsTypedAsAny.ts(13,1): error TS1434: Unexpected keyword or identifier.
++taggedTemplateStringsWithTagsTypedAsAny.ts(13,23): error TS2339: Property 'member' does not exist on type 'string'.
++taggedTemplateStringsWithTagsTypedAsAny.ts(15,1): error TS1434: Unexpected keyword or identifier.
++taggedTemplateStringsWithTagsTypedAsAny.ts(17,1): error TS1434: Unexpected keyword or identifier.
++taggedTemplateStringsWithTagsTypedAsAny.ts(19,1): error TS1434: Unexpected keyword or identifier.
++taggedTemplateStringsWithTagsTypedAsAny.ts(19,32): error TS1005: ';' expected.
++taggedTemplateStringsWithTagsTypedAsAny.ts(21,1): error TS1434: Unexpected keyword or identifier.
++taggedTemplateStringsWithTagsTypedAsAny.ts(21,46): error TS1005: ';' expected.
++

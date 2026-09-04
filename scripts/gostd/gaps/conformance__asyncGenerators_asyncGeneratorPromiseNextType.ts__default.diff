@@ -1,0 +1,6 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,3 @@
++asyncGeneratorPromiseNextType.ts(35,32): error TS2345: Argument of type '{ [P in keyof T]: T[P] extends null | undefined ? T : T extends object & { then: (onfulfilled: F, args: _) => any; } ? F extends (value: V, args: _) => any ? V extends null | undefined ? T : ... : never : T; }' is not assignable to parameter of type '{ message: string; }[]'.
++  Type '{ [P in keyof T]: T[P] extends null | undefined ? T : T extends object & { then: (onfulfilled: F, args: _) => any; } ? F extends (value: V, args: _) => any ? V extends null | undefined ? T : ... : never : T; }' is missing the following properties from type '{ message: string; }[]': length, pop, push, concat, and 35 more.
++

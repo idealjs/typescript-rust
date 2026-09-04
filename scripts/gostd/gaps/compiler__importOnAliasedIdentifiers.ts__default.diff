@@ -1,0 +1,5 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,2 @@
++importOnAliasedIdentifiers.ts(8,18): error TS2694: Namespace 'A' has no exported member 'X'.
++

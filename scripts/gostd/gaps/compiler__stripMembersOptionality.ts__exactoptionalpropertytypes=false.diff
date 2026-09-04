@@ -1,0 +1,5 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,2 @@
++stripMembersOptionality.ts(11,1): error TS2722: Cannot invoke an object which is possibly 'undefined'.
++

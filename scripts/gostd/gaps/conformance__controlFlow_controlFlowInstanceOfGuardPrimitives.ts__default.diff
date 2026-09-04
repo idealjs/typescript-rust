@@ -1,0 +1,7 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,4 @@
++controlFlowInstanceOfGuardPrimitives.ts(3,53): error TS2339: Property 'getFullYear' does not exist on type 'string | number | Date'.
++controlFlowInstanceOfGuardPrimitives.ts(5,62): error TS2339: Property 'length' does not exist on type 'never'.
++controlFlowInstanceOfGuardPrimitives.ts(7,54): error TS2339: Property 'toPrecision' does not exist on type 'never'.
++

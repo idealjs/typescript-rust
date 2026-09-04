@@ -1,0 +1,8 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,5 @@
++tsxDiscriminantPropertyInference.tsx(21,22): error TS7006: Parameter 's' implicitly has an 'any' type.
++tsxDiscriminantPropertyInference.tsx(24,30): error TS7006: Parameter 'n' implicitly has an 'any' type.
++tsxDiscriminantPropertyInference.tsx(27,34): error TS7006: Parameter 'n' implicitly has an 'any' type.
++tsxDiscriminantPropertyInference.tsx(30,17): error TS7006: Parameter 'n' implicitly has an 'any' type.
++

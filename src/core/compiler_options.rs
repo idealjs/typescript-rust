@@ -417,11 +417,9 @@ impl CompilerOptions {
         if value != Tristate::Unknown {
             return value == Tristate::True;
         }
-        // An unset `strict`-family option resolves ON (verified against the
-        // typescript-go CLI: `var n: number; let m = n` reports TS2454 with
-        // no flags; `--strict false` suppresses it). `var x: any` cases
-        // (anyPlusAny1) stay clean via the checker's any exemption, not the
-        // default.
+        // An unset `strict`-family option resolves ON: tsgo declares
+        // `strict` with DefaultValueDescription true and the CLI confirms
+        // TS2454/TS7010 fire with no flags.
         self.strict != Tristate::False
     }
 
@@ -512,6 +510,8 @@ mod tests {
     #[test]
     fn strict_option_value() {
         let mut opts = CompilerOptions::default();
+        // Unset strict + unset family option: ON (tsgo defaults strict true).
+        assert!(opts.get_strict_option_value(Tristate::Unknown));
         opts.strict = Tristate::True;
         assert!(opts.get_strict_option_value(Tristate::Unknown));
         opts.strict = Tristate::False;

@@ -1,0 +1,12 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,9 @@
++destructuringAssignmentWithDefault.ts(3,5): error TS1005: ',' expected.
++destructuringAssignmentWithDefault.ts(3,7): error TS1005: ',' expected.
++destructuringAssignmentWithDefault.ts(10,14): error TS2532: Object is possibly 'undefined'.
++destructuringAssignmentWithDefault.ts(11,14): error TS2532: Object is possibly 'undefined'.
++destructuringAssignmentWithDefault.ts(17,14): error TS2532: Object is possibly 'undefined'.
++destructuringAssignmentWithDefault.ts(23,14): error TS2532: Object is possibly 'undefined'.
++destructuringAssignmentWithDefault.ts(24,14): error TS2532: Object is possibly 'undefined'.
++destructuringAssignmentWithDefault.ts(30,14): error TS2532: Object is possibly 'undefined'.
++

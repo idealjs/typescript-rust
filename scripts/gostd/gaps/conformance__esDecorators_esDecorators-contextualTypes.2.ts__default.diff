@@ -1,0 +1,7 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,4 @@
++esDecorators-contextualTypes.2.ts(25,9): error TS2322: Type '(args: any) => any' is not assignable to type '(args: Args) => Return'.
++esDecorators-contextualTypes.2.ts(25,32): error TS7019: Rest parameter 'args' implicitly has an 'any[]' type.
++esDecorators-contextualTypes.2.ts(26,77): error TS2339: Property 'toString' does not exist on type 'string | symbol'.
++

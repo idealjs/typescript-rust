@@ -1,0 +1,16 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,13 @@
++inferenceContextualReturnTypeUnion3.ts(16,25): error TS2739: Type '{ set: (target: any, property: any, value: any, receiver: any) => boolean; defineProperty: (target: any, property: any, descriptor: any) => boolean; deleteProperty: (target: any, property: any) => boolean; setPrototypeOf: (target: any, proto: any) => boolean; }' is missing the following properties from type 'ProxyHandler<T>': apply, construct, get, getOwnPropertyDescriptor, getPrototypeOf, has, isExtensible, ownKeys, preventExtensions
++inferenceContextualReturnTypeUnion3.ts(18,8): error TS7006: Parameter 'target' implicitly has an 'any' type.
++inferenceContextualReturnTypeUnion3.ts(18,16): error TS7006: Parameter 'property' implicitly has an 'any' type.
++inferenceContextualReturnTypeUnion3.ts(18,26): error TS7006: Parameter 'value' implicitly has an 'any' type.
++inferenceContextualReturnTypeUnion3.ts(18,33): error TS7006: Parameter 'receiver' implicitly has an 'any' type.
++inferenceContextualReturnTypeUnion3.ts(24,8): error TS7006: Parameter 'target' implicitly has an 'any' type.
++inferenceContextualReturnTypeUnion3.ts(24,16): error TS7006: Parameter 'property' implicitly has an 'any' type.
++inferenceContextualReturnTypeUnion3.ts(24,26): error TS7006: Parameter 'descriptor' implicitly has an 'any' type.
++inferenceContextualReturnTypeUnion3.ts(30,8): error TS7006: Parameter 'target' implicitly has an 'any' type.
++inferenceContextualReturnTypeUnion3.ts(30,16): error TS7006: Parameter 'property' implicitly has an 'any' type.
++inferenceContextualReturnTypeUnion3.ts(35,8): error TS7006: Parameter 'target' implicitly has an 'any' type.
++inferenceContextualReturnTypeUnion3.ts(35,16): error TS7006: Parameter 'proto' implicitly has an 'any' type.
++

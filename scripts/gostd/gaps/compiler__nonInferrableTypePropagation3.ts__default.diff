@@ -1,0 +1,5 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,2 @@
++nonInferrableTypePropagation3.ts(9,24): error TS7006: Parameter 'user' implicitly has an 'any' type.
++

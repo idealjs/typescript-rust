@@ -1,0 +1,61 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,58 @@
++legacyDecorators-contextualTypes.ts(3,5): error TS2390: Constructor implementation is missing.
++legacyDecorators-contextualTypes.ts(3,17): error TS1138: Parameter declaration expected.
++legacyDecorators-contextualTypes.ts(3,42): error TS1442: Expected '=' for property initializer.
++legacyDecorators-contextualTypes.ts(3,44): error TS1068: Unexpected token. A constructor, method, accessor, or property was expected.
++legacyDecorators-contextualTypes.ts(6,12): error TS2304: Cannot find name 'f'.
++legacyDecorators-contextualTypes.ts(6,16): error TS1005: ';' expected.
++legacyDecorators-contextualTypes.ts(9,12): error TS1435: Unknown keyword or identifier. Did you mean 'get'?
++legacyDecorators-contextualTypes.ts(9,12): error TS2304: Cannot find name 'get'.
++legacyDecorators-contextualTypes.ts(9,16): error TS2304: Cannot find name 'x'.
++legacyDecorators-contextualTypes.ts(9,20): error TS1005: ';' expected.
++legacyDecorators-contextualTypes.ts(9,22): error TS1108: A 'return' statement can only be used within a function body.
++legacyDecorators-contextualTypes.ts(10,5): error TS1435: Unknown keyword or identifier. Did you mean 'static'?
++legacyDecorators-contextualTypes.ts(10,5): error TS2304: Cannot find name 'static'.
++legacyDecorators-contextualTypes.ts(10,12): error TS1435: Unknown keyword or identifier. Did you mean 'set'?
++legacyDecorators-contextualTypes.ts(10,12): error TS2552: Cannot find name 'set'. Did you mean 'Set'?
++legacyDecorators-contextualTypes.ts(10,16): error TS2304: Cannot find name 'x'.
++legacyDecorators-contextualTypes.ts(10,18): error TS2304: Cannot find name 'value'.
++legacyDecorators-contextualTypes.ts(10,25): error TS1005: ';' expected.
++legacyDecorators-contextualTypes.ts(13,21): error TS2304: Cannot find name 'y'.
++legacyDecorators-contextualTypes.ts(16,12): error TS2304: Cannot find name 'z'.
++legacyDecorators-contextualTypes.ts(19,5): error TS2304: Cannot find name 'g'.
++legacyDecorators-contextualTypes.ts(19,9): error TS1005: ';' expected.
++legacyDecorators-contextualTypes.ts(22,5): error TS1435: Unknown keyword or identifier. Did you mean 'get'?
++legacyDecorators-contextualTypes.ts(22,5): error TS2304: Cannot find name 'get'.
++legacyDecorators-contextualTypes.ts(22,9): error TS2304: Cannot find name 'a'.
++legacyDecorators-contextualTypes.ts(22,13): error TS1005: ';' expected.
++legacyDecorators-contextualTypes.ts(22,15): error TS1108: A 'return' statement can only be used within a function body.
++legacyDecorators-contextualTypes.ts(23,5): error TS1435: Unknown keyword or identifier. Did you mean 'set'?
++legacyDecorators-contextualTypes.ts(23,5): error TS2552: Cannot find name 'set'. Did you mean 'Set'?
++legacyDecorators-contextualTypes.ts(23,9): error TS2304: Cannot find name 'a'.
++legacyDecorators-contextualTypes.ts(23,11): error TS2304: Cannot find name 'value'.
++legacyDecorators-contextualTypes.ts(23,18): error TS1005: ';' expected.
++legacyDecorators-contextualTypes.ts(26,14): error TS2304: Cannot find name 'b'.
++legacyDecorators-contextualTypes.ts(29,5): error TS2552: Cannot find name 'c'. Did you mean 'C'?
++legacyDecorators-contextualTypes.ts(31,5): error TS1435: Unknown keyword or identifier. Did you mean 'static'?
++legacyDecorators-contextualTypes.ts(31,5): error TS2304: Cannot find name 'static'.
++legacyDecorators-contextualTypes.ts(31,12): error TS2304: Cannot find name 'h'.
++legacyDecorators-contextualTypes.ts(31,14): error TS1109: Expression expected.
++legacyDecorators-contextualTypes.ts(31,17): error TS7006: Parameter 't' implicitly has an 'any' type.
++legacyDecorators-contextualTypes.ts(31,20): error TS7006: Parameter 'k' implicitly has an 'any' type.
++legacyDecorators-contextualTypes.ts(31,23): error TS7006: Parameter 'i' implicitly has an 'any' type.
++legacyDecorators-contextualTypes.ts(31,33): error TS1005: ',' expected.
++legacyDecorators-contextualTypes.ts(31,33): error TS2304: Cannot find name 'p'.
++legacyDecorators-contextualTypes.ts(31,34): error TS1005: ',' expected.
++legacyDecorators-contextualTypes.ts(31,36): error TS2693: 'any' only refers to a type, but is being used as a value here.
++legacyDecorators-contextualTypes.ts(31,41): error TS1005: ';' expected.
++legacyDecorators-contextualTypes.ts(32,5): error TS2304: Cannot find name 'h'.
++legacyDecorators-contextualTypes.ts(32,7): error TS1109: Expression expected.
++legacyDecorators-contextualTypes.ts(32,10): error TS7006: Parameter 't' implicitly has an 'any' type.
++legacyDecorators-contextualTypes.ts(32,13): error TS7006: Parameter 'k' implicitly has an 'any' type.
++legacyDecorators-contextualTypes.ts(32,16): error TS7006: Parameter 'i' implicitly has an 'any' type.
++legacyDecorators-contextualTypes.ts(32,26): error TS1005: ',' expected.
++legacyDecorators-contextualTypes.ts(32,26): error TS2304: Cannot find name 'p'.
++legacyDecorators-contextualTypes.ts(32,27): error TS1005: ',' expected.
++legacyDecorators-contextualTypes.ts(32,29): error TS2693: 'any' only refers to a type, but is being used as a value here.
++legacyDecorators-contextualTypes.ts(32,34): error TS1005: ';' expected.
++legacyDecorators-contextualTypes.ts(33,1): error TS1128: Declaration or statement expected.
++

@@ -1,0 +1,10 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,7 @@
++/x.ts(8,9): error TS2322: Type 'number | undefined' is not assignable to type 'number'.
++  Type 'undefined' is not assignable to type 'number'.
++/x.ts(9,9): error TS2322: Type 'number | undefined' is not assignable to type 'number'.
++  Type 'undefined' is not assignable to type 'number'.
++/x.ts(11,9): error TS2322: Type 'number | undefined' is not assignable to type 'number'.
++  Type 'undefined' is not assignable to type 'number'.
++

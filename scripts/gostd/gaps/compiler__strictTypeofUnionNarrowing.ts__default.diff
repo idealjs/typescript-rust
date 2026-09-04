@@ -1,0 +1,11 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,8 @@
++strictTypeofUnionNarrowing.ts(2,43): error TS18048: 'anything' is possibly 'undefined'.
++strictTypeofUnionNarrowing.ts(2,52): error TS2339: Property 'toUpperCase' does not exist on type '{ toString: () => string; }'.
++strictTypeofUnionNarrowing.ts(6,43): error TS18048: 'anything' is possibly 'undefined'.
++strictTypeofUnionNarrowing.ts(6,52): error TS2339: Property 'toUpperCase' does not exist on type 'object'.
++strictTypeofUnionNarrowing.ts(10,43): error TS18048: 'anything' is possibly 'undefined'.
++strictTypeofUnionNarrowing.ts(14,43): error TS18048: 'anything' is possibly 'undefined'.
++strictTypeofUnionNarrowing.ts(14,52): error TS2339: Property 'toUpperCase' does not exist on type '{ toString: () => string; }'.
++

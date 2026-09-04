@@ -1,0 +1,5 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,2 @@
++enumBasics.ts(23,5): error TS2403: Subsequent variable declarations must have the same type.  Variable 's' must be of type 'any', but here has type 'string'.
++

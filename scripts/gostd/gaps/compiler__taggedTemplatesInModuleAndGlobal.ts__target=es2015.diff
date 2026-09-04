@@ -1,0 +1,8 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,5 @@
++global.ts(7,18): error TS1005: ';' expected.
++global.ts(7,18): error TS7027: Unreachable code detected.
++module.ts(7,14): error TS1005: ';' expected.
++module.ts(7,14): error TS7027: Unreachable code detected.
++

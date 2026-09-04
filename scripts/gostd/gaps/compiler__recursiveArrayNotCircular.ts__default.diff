@@ -1,0 +1,9 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,6 @@
++recursiveArrayNotCircular.ts(23,38): error TS2339: Property 'payload' does not exist on type 'never'.
++recursiveArrayNotCircular.ts(26,39): error TS2339: Property 'payload' does not exist on type 'never'.
++recursiveArrayNotCircular.ts(29,38): error TS2339: Property 'payload' does not exist on type 'never'.
++recursiveArrayNotCircular.ts(32,20): error TS2339: Property 'payload' does not exist on type 'never'.
++recursiveArrayNotCircular.ts(34,37): error TS2345: Argument of type 'error' is not assignable to parameter of type 'never'.
++

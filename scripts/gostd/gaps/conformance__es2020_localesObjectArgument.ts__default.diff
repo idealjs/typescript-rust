@@ -1,0 +1,11 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,8 @@
++localesObjectArgument.ts(33,22): error TS2345: Argument of type 'Locale[]' is not assignable to parameter of type 'string | string[]'.
++localesObjectArgument.ts(36,37): error TS2345: Argument of type 'Locale[]' is not assignable to parameter of type 'string | string[]'.
++localesObjectArgument.ts(47,19): error TS2345: Argument of type 'Locale[]' is not assignable to parameter of type 'string | string[]'.
++localesObjectArgument.ts(50,34): error TS2345: Argument of type 'Locale[]' is not assignable to parameter of type 'string | string[]'.
++localesObjectArgument.ts(53,25): error TS2345: Argument of type 'Locale[]' is not assignable to parameter of type 'string | string[]'.
++localesObjectArgument.ts(56,40): error TS2345: Argument of type 'Locale[]' is not assignable to parameter of type 'string | string[]'.
++localesObjectArgument.ts(60,23): error TS2345: Argument of type 'Locale[]' is not assignable to parameter of type 'string | string[]'.
++

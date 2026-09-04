@@ -1,0 +1,20 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,17 @@
++mapOnTupleTypes01.ts(6,25): error TS2339: Property 'map' does not exist on type '[number]'.
++mapOnTupleTypes01.ts(6,29): error TS7006: Parameter 'x' implicitly has an 'any' type.
++mapOnTupleTypes01.ts(14,23): error TS2339: Property 'map' does not exist on type '[number, number]'.
++mapOnTupleTypes01.ts(14,27): error TS7006: Parameter 'n' implicitly has an 'any' type.
++mapOnTupleTypes01.ts(15,23): error TS2339: Property 'map' does not exist on type '[string, string]'.
++mapOnTupleTypes01.ts(15,27): error TS7006: Parameter 's' implicitly has an 'any' type.
++mapOnTupleTypes01.ts(16,23): error TS2339: Property 'map' does not exist on type '[number, string]'.
++mapOnTupleTypes01.ts(16,27): error TS7006: Parameter 'x' implicitly has an 'any' type.
++mapOnTupleTypes01.ts(22,26): error TS2339: Property 'map' does not exist on type '[number, number, number]'.
++mapOnTupleTypes01.ts(22,30): error TS7006: Parameter 'n' implicitly has an 'any' type.
++mapOnTupleTypes01.ts(28,29): error TS2339: Property 'map' does not exist on type '[number, number, number, number]'.
++mapOnTupleTypes01.ts(28,33): error TS7006: Parameter 'n' implicitly has an 'any' type.
++mapOnTupleTypes01.ts(34,32): error TS2339: Property 'map' does not exist on type '[number, number, number, number, number]'.
++mapOnTupleTypes01.ts(34,36): error TS7006: Parameter 'n' implicitly has an 'any' type.
++mapOnTupleTypes01.ts(41,32): error TS2339: Property 'map' does not exist on type '[number, number, number, number, number]'.
++mapOnTupleTypes01.ts(41,36): error TS7006: Parameter 'n' implicitly has an 'any' type.
++

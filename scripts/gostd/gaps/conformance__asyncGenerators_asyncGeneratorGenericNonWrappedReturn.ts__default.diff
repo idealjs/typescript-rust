@@ -1,0 +1,5 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,2 @@
++asyncGeneratorGenericNonWrappedReturn.ts(4,3): error TS2322: Type 'T' is not assignable to type 'AsyncGenerator<T, T, T>'.
++

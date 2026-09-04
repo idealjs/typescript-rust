@@ -1,0 +1,15 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,12 @@
++/index.tsx(1,32): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
++/node_modules/preact/jsx-runtime/index.d.ts(1,26): error TS2307: Cannot find module '..' or its corresponding type declarations.
++/node_modules/preact/jsx-runtime/index.d.ts(8,8): error TS2307: Cannot find module '..' or its corresponding type declarations.
++/node_modules/preact/jsx-runtime/index.d.ts(9,29): error TS2307: Cannot find module '..' or its corresponding type declarations.
++/node_modules/preact/jsx-runtime/index.d.ts(13,12): error TS2503: Cannot find namespace 'JSXInternal'.
++/node_modules/preact/jsx-runtime/index.d.ts(14,9): error TS2503: Cannot find namespace 'JSXInternal'.
++/node_modules/preact/jsx-runtime/index.d.ts(27,12): error TS2503: Cannot find namespace 'JSXInternal'.
++/node_modules/preact/jsx-runtime/index.d.ts(28,9): error TS2503: Cannot find namespace 'JSXInternal'.
++/node_modules/preact/jsx-runtime/index.d.ts(41,12): error TS2503: Cannot find namespace 'JSXInternal'.
++/node_modules/preact/jsx-runtime/index.d.ts(42,9): error TS2503: Cannot find namespace 'JSXInternal'.
++/node_modules/preact/jsx-runtime/index.d.ts(52,21): error TS2503: Cannot find namespace 'JSXInternal'.
++

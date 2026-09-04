@@ -1,0 +1,5 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,2 @@
++/index.tsx(2,28): error TS2874: This JSX tag requires 'React' to be in scope, but it could not be found.
++

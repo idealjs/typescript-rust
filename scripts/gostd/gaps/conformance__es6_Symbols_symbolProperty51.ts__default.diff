@@ -1,0 +1,6 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,3 @@
++symbolProperty51.ts(5,10): error TS2708: Cannot use namespace 'Symbol' as a value.
++symbolProperty51.ts(5,17): error TS2339: Property 'iterator' does not exist on type 'typeof Symbol'.
++

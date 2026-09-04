@@ -1,0 +1,10 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,7 @@
++variance.ts(10,7): error TS2322: Type '{ prop: boolean; }' is not assignable to type 'Foo<1>'.
++  Types of property 'prop' are incompatible.
++    Type 'boolean' is not assignable to type 'true'.
++variance.ts(11,7): error TS2322: Type '{ prop: boolean; }' is not assignable to type 'Foo<number>'.
++  Types of property 'prop' are incompatible.
++    Type 'boolean' is not assignable to type 'true'.
++

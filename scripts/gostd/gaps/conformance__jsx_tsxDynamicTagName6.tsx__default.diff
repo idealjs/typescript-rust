@@ -1,0 +1,5 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,2 @@
++tsxDynamicTagName6.tsx(9,14): error TS2604: JSX element type '' does not have any construct or call signatures.
++

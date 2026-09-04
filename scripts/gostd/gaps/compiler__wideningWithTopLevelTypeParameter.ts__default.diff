@@ -1,0 +1,10 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,7 @@
++wideningWithTopLevelTypeParameter.ts(13,15): error TS2345: Argument of type '7' is not assignable to parameter of type 'T | undefined'.
++wideningWithTopLevelTypeParameter.ts(14,15): error TS2345: Argument of type '7' is not assignable to parameter of type 'T extends unknown ? T | undefined : never extends unknown ? T | undefined : never'.
++wideningWithTopLevelTypeParameter.ts(15,15): error TS2345: Argument of type '7' is not assignable to parameter of type 'T extends unknown ? T | undefined : never extends unknown ? T | undefined : never extends unknown ? T | undefined : never'.
++wideningWithTopLevelTypeParameter.ts(16,15): error TS2345: Argument of type '7' is not assignable to parameter of type 'T extends unknown ? T | undefined : never extends unknown ? T | undefined : never extends unknown ? T | undefined : never extends unknown ? T | undefined : never'.
++wideningWithTopLevelTypeParameter.ts(24,27): error TS2345: Argument of type '""' is not assignable to parameter of type 'T extends undefined ? never : T'.
++wideningWithTopLevelTypeParameter.ts(36,28): error TS2345: Argument of type '""' is not assignable to parameter of type 'T extends undefined ? never : string | T'.
++

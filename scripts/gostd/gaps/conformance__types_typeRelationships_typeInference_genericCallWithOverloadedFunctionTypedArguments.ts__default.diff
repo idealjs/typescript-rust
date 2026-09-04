@@ -1,0 +1,16 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,13 @@
++genericCallWithOverloadedFunctionTypedArguments.ts(15,19): error TS2345: Argument of type '(x: boolean) => boolean' is not assignable to parameter of type '(x: boolean) => boolean'.
++  Types of parameters 'x' and 'x' are incompatible.
++    Type 'string' is not assignable to type 'boolean'.
++genericCallWithOverloadedFunctionTypedArguments.ts(16,19): error TS2345: Argument of type '(x: boolean) => boolean' is not assignable to parameter of type '(x: boolean) => boolean'.
++  Types of parameters 'x' and 'x' are incompatible.
++    Type 'string' is not assignable to type 'boolean'.
++genericCallWithOverloadedFunctionTypedArguments.ts(24,19): error TS2345: Argument of type '(x: unknown) => unknown' is not assignable to parameter of type '(x: unknown) => string'.
++  Type 'unknown' is not assignable to type 'string'.
++genericCallWithOverloadedFunctionTypedArguments.ts(32,19): error TS2345: Argument of type '(x: unknown) => unknown' is not assignable to parameter of type '(x: unknown) => string'.
++  Type 'unknown' is not assignable to type 'string'.
++genericCallWithOverloadedFunctionTypedArguments.ts(40,23): error TS2345: Argument of type '(x: number) => number' is not assignable to parameter of type '(x: number) => string'.
++  Type 'number' is not assignable to type 'string'.
++

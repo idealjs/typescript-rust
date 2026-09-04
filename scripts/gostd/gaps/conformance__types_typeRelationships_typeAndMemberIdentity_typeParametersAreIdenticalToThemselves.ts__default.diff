@@ -1,0 +1,12 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,9 @@
++typeParametersAreIdenticalToThemselves.ts(26,5): error TS2394: This overload signature is not compatible with its implementation signature.
++typeParametersAreIdenticalToThemselves.ts(27,5): error TS2394: This overload signature is not compatible with its implementation signature.
++typeParametersAreIdenticalToThemselves.ts(30,5): error TS2394: This overload signature is not compatible with its implementation signature.
++typeParametersAreIdenticalToThemselves.ts(31,5): error TS2394: This overload signature is not compatible with its implementation signature.
++typeParametersAreIdenticalToThemselves.ts(44,5): error TS2394: This overload signature is not compatible with its implementation signature.
++typeParametersAreIdenticalToThemselves.ts(45,5): error TS2394: This overload signature is not compatible with its implementation signature.
++typeParametersAreIdenticalToThemselves.ts(48,5): error TS2394: This overload signature is not compatible with its implementation signature.
++typeParametersAreIdenticalToThemselves.ts(49,5): error TS2394: This overload signature is not compatible with its implementation signature.
++

@@ -1,0 +1,12 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,9 @@
++intlNumberFormatES2020.ts(8,34): error TS2353: Object literal may only specify known properties, and 'numberingSystem' does not exist in type 'NumberFormatOptions | undefined'.
++intlNumberFormatES2020.ts(11,105): error TS2353: Object literal may only specify known properties, and 'currencySign' does not exist in type 'NumberFormatOptions | undefined'.
++intlNumberFormatES2020.ts(14,79): error TS2353: Object literal may only specify known properties, and 'unit' does not exist in type 'NumberFormatOptions | undefined'.
++intlNumberFormatES2020.ts(17,61): error TS2353: Object literal may only specify known properties, and 'notation' does not exist in type 'NumberFormatOptions | undefined'.
++intlNumberFormatES2020.ts(20,34): error TS2353: Object literal may only specify known properties, and 'signDisplay' does not exist in type 'NumberFormatOptions | undefined'.
++intlNumberFormatES2020.ts(23,47): error TS2322: Type 'string' is not assignable to type '"literal" | "nan" | "infinity" | "percent" | "integer" | "group" | "decimal" | "fraction" | "plusSign" | "minusSign" | "percentSign" | "currency"'.
++intlNumberFormatES2020.ts(23,58): error TS2322: Type 'string' is not assignable to type '"literal" | "nan" | "infinity" | "percent" | "integer" | "group" | "decimal" | "fraction" | "plusSign" | "minusSign" | "percentSign" | "currency"'.
++intlNumberFormatES2020.ts(23,66): error TS2322: Type 'string' is not assignable to type '"literal" | "nan" | "infinity" | "percent" | "integer" | "group" | "decimal" | "fraction" | "plusSign" | "minusSign" | "percentSign" | "currency"'.
++

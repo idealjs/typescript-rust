@@ -1,0 +1,10 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,7 @@
++circularWithUses.ts(12,29): error TS2694: Namespace 'NS2' has no exported member 'B'.
++circularWithUses.ts(13,29): error TS2694: Namespace 'NS1' has no exported member 'A'.
++circularWithUses.ts(14,29): error TS2694: Namespace 'NS2' has no exported member 'NS1'.
++circularWithUses.ts(15,29): error TS2694: Namespace 'NS1' has no exported member 'NS2'.
++constAndNS.ts(10,26): error TS2694: Namespace 'Q' has no exported member 'A'.
++constAndNS.ts(18,32): error TS2694: Namespace 'default' has no exported member 'A'.
++

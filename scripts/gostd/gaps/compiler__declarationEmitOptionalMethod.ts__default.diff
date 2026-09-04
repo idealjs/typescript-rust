@@ -1,0 +1,26 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,23 @@
++declarationEmitOptionalMethod.ts(1,21): error TS2304: Cannot find name 'opts'.
++declarationEmitOptionalMethod.ts(1,25): error TS1005: ')' expected.
++declarationEmitOptionalMethod.ts(1,27): error TS1155: 'const' declarations must be initialized.
++declarationEmitOptionalMethod.ts(2,6): error TS1005: ',' expected.
++declarationEmitOptionalMethod.ts(2,7): error TS1180: Property destructuring pattern expected.
++declarationEmitOptionalMethod.ts(2,8): error TS1109: Expression expected.
++declarationEmitOptionalMethod.ts(2,9): error TS1005: ';' expected.
++declarationEmitOptionalMethod.ts(2,15): error TS1109: Expression expected.
++declarationEmitOptionalMethod.ts(3,5): error TS2304: Cannot find name 'b'.
++declarationEmitOptionalMethod.ts(3,7): error TS1109: Expression expected.
++declarationEmitOptionalMethod.ts(3,19): error TS1109: Expression expected.
++declarationEmitOptionalMethod.ts(4,1): error TS1109: Expression expected.
++declarationEmitOptionalMethod.ts(4,2): error TS1128: Declaration or statement expected.
++declarationEmitOptionalMethod.ts(4,3): error TS1128: Declaration or statement expected.
++declarationEmitOptionalMethod.ts(5,5): error TS2304: Cannot find name 'c'.
++declarationEmitOptionalMethod.ts(5,8): error TS1109: Expression expected.
++declarationEmitOptionalMethod.ts(5,15): error TS1109: Expression expected.
++declarationEmitOptionalMethod.ts(6,5): error TS2304: Cannot find name 'd'.
++declarationEmitOptionalMethod.ts(6,7): error TS1109: Expression expected.
++declarationEmitOptionalMethod.ts(6,19): error TS1109: Expression expected.
++declarationEmitOptionalMethod.ts(7,1): error TS1109: Expression expected.
++declarationEmitOptionalMethod.ts(7,3): error TS1128: Declaration or statement expected.
++

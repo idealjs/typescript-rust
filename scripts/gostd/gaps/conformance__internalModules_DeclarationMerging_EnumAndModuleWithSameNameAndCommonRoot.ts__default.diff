@@ -1,0 +1,5 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,2 @@
++EnumAndModuleWithSameNameAndCommonRoot.ts(13,5): error TS2403: Subsequent variable declarations must have the same type.  Variable 'x' must be of type '0 | 1', but here has type 'number'.
++

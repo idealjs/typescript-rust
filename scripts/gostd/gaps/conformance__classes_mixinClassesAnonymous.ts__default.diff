@@ -1,0 +1,8 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,5 @@
++mixinClassesAnonymous.ts(16,29): error TS2339: Property 'x' does not exist on type 'þclass'.
++mixinClassesAnonymous.ts(16,44): error TS2339: Property 'y' does not exist on type 'þclass'.
++mixinClassesAnonymous.ts(51,14): error TS2339: Property '_tag' does not exist on type 'Thing3'.
++mixinClassesAnonymous.ts(54,14): error TS2339: Property 'print' does not exist on type 'Thing3'.
++

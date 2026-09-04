@@ -1,0 +1,7 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,4 @@
++typeVariableConstraintIntersections.ts(84,27): error TS2339: Property 's' does not exist on type '{ kind: "one"; s: string; } | { kind: "two"; x: number; y: number; } & { kind: K; }'.
++typeVariableConstraintIntersections.ts(85,27): error TS2339: Property 'x' does not exist on type '{ kind: "one"; s: string; } | { kind: "two"; x: number; y: number; } & { kind: K; }'.
++typeVariableConstraintIntersections.ts(85,44): error TS2339: Property 'y' does not exist on type '{ kind: "one"; s: string; } | { kind: "two"; x: number; y: number; } & { kind: K; }'.
++

@@ -1,0 +1,7 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,4 @@
++typePredicatesOptionalChaining1.ts(18,28): error TS18048: 'x.y' is possibly 'undefined'.
++typePredicatesOptionalChaining1.ts(18,28): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.
++  Type 'undefined' is not assignable to type 'string'.
++

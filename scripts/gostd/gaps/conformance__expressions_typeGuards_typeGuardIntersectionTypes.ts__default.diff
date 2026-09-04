@@ -1,0 +1,11 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,8 @@
++typeGuardIntersectionTypes.ts(45,5): error TS2322: Type 'B' is not assignable to type 'A & B | null'.
++  Property 'a' is missing in type 'B' but required in type 'A'.
++typeGuardIntersectionTypes.ts(61,43): error TS2322: Type 'Beast' is not assignable to type 'boolean'.
++typeGuardIntersectionTypes.ts(62,44): error TS2322: Type 'Beast' is not assignable to type 'boolean'.
++typeGuardIntersectionTypes.ts(72,23): error TS2339: Property 'legs' does not exist on type 'Winged'.
++typeGuardIntersectionTypes.ts(75,28): error TS2339: Property 'legs' does not exist on type 'Winged'.
++typeGuardIntersectionTypes.ts(79,40): error TS2339: Property 'legs' does not exist on type 'Winged'.
++

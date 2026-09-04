@@ -1,0 +1,8 @@
+--- tsgo-baseline
++++ rust-actual
+@@ -0,0 +1,5 @@
++genericTypeWithCallableMembers2.ts(2,12): error TS2349: This expression is not callable.
++  Type 'T' has no call signatures.
++genericTypeWithCallableMembers2.ts(6,16): error TS2351: This expression is not constructable.
++  Type 'T' has no construct signatures.
++
