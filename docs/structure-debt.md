@@ -7,6 +7,12 @@
 - 现状：**82 个非测试 .rs 文件超限**。最大：checker/checker.rs 26,517 行、
   diagnostics/messages_generated.rs 24,069（生成文件）、parser/mod.rs 9,851、
   checker/relater.rs 8,632、tsoptions/mod.rs 6,471、checker/typenode.rs 6,150。
+- **已完成（第一期，checker.rs 26,517 -> 12,992 + 10 个族文件）**：
+  `checker/checker/{calls,element_access,literals,statements,classes,enums,
+  operators,expressions,modules,resolve}.rs`（140–1,981 行/个），按 rustfmt
+  函数边界切分，跨族调用提升 pub(crate)，可见性自 HEAD 逐一恢复。
+  方法：利用格式约定（方法起始于 4 空格 `fn` 行、结束于恰好 `    }` 行），
+  不做括号匹配。
 - 说明：`messages_generated.rs` 与 `ast/node_data_generated.rs` 为**构建生成物**
   （build.rs 产出），按惯例不拆分。
 - 分期：
