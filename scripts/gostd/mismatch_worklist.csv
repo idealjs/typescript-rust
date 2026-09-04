@@ -262,8 +262,10 @@ compiler,checkSuperCallBeforeThisAccessing2.ts,[],go-diff,rust-pass
 compiler,checkSuperCallBeforeThisAccessing5.ts,[],go-diff,rust-pass
 compiler,checkSuperCallBeforeThisAccessing6.ts,[],go-diff,rust-pass
 compiler,checkSuperCallBeforeThisAccessing8.ts,[],go-diff,rust-pass
-compiler,circularObjectLiteralAccessors.ts,['target=es5'],go-pass,rust-missing-config
+compiler,circularGetAccessor.ts,['noimplicitany=false'],go-diff,rust-missing-config
+compiler,circularGetAccessor.ts,['noimplicitany=true'],go-diff,rust-missing-config
 compiler,circularObjectLiteralAccessors.ts,['target=es2015'],go-pass,rust-missing-config
+compiler,circularObjectLiteralAccessors.ts,['target=es5'],go-pass,rust-missing-config
 compiler,classCannotExtendVar.ts,[],go-diff,rust-pass
 compiler,classExpressionTest1.ts,[],go-diff,rust-pass
 compiler,classExpressionTest2.ts,[],go-diff,rust-pass
@@ -310,18 +312,18 @@ compiler,commentsAfterCaseClauses2.ts,[],go-diff,rust-pass
 compiler,commentsAfterCaseClauses3.ts,[],go-diff,rust-pass
 compiler,commentsClassMembers.ts,['target=es2015'],go-diff,rust-pass
 compiler,commentsInheritance.ts,['target=es2015'],go-diff,rust-pass
-compiler,commentsOnJSXExpressionsArePreserved.tsx,"['jsx=react', 'module=commonjs', 'moduledetection=force']",go-diff,rust-pass
-compiler,commentsOnJSXExpressionsArePreserved.tsx,"['jsx=react', 'module=commonjs', 'moduledetection=legacy']",go-diff,rust-pass
-compiler,commentsOnJSXExpressionsArePreserved.tsx,"['jsx=preserve', 'module=commonjs', 'moduledetection=legacy']",go-diff,rust-pass
-compiler,commentsOnJSXExpressionsArePreserved.tsx,"['jsx=react-jsxdev', 'module=commonjs', 'moduledetection=auto']",go-diff,rust-pass
-compiler,commentsOnJSXExpressionsArePreserved.tsx,"['jsx=react-jsx', 'module=commonjs', 'moduledetection=force']",go-diff,rust-pass
-compiler,commentsOnJSXExpressionsArePreserved.tsx,"['jsx=react-jsxdev', 'module=commonjs', 'moduledetection=legacy']",go-diff,rust-pass
 compiler,commentsOnJSXExpressionsArePreserved.tsx,"['jsx=preserve', 'module=commonjs', 'moduledetection=force']",go-diff,rust-pass
-compiler,commentsOnJSXExpressionsArePreserved.tsx,"['jsx=react-jsx', 'module=commonjs', 'moduledetection=legacy']",go-diff,rust-pass
-compiler,commentsOnJSXExpressionsArePreserved.tsx,"['jsx=react', 'module=commonjs', 'moduledetection=auto']",go-diff,rust-pass
-compiler,commentsOnJSXExpressionsArePreserved.tsx,"['jsx=react-jsxdev', 'module=commonjs', 'moduledetection=force']",go-diff,rust-pass
-compiler,commentsOnJSXExpressionsArePreserved.tsx,"['jsx=react-jsx', 'module=commonjs', 'moduledetection=auto']",go-diff,rust-pass
+compiler,commentsOnJSXExpressionsArePreserved.tsx,"['jsx=react-jsx', 'module=commonjs', 'moduledetection=force']",go-diff,rust-pass
+compiler,commentsOnJSXExpressionsArePreserved.tsx,"['jsx=react', 'module=commonjs', 'moduledetection=legacy']",go-diff,rust-pass
+compiler,commentsOnJSXExpressionsArePreserved.tsx,"['jsx=react-jsxdev', 'module=commonjs', 'moduledetection=legacy']",go-diff,rust-pass
 compiler,commentsOnJSXExpressionsArePreserved.tsx,"['jsx=preserve', 'module=commonjs', 'moduledetection=auto']",go-diff,rust-pass
+compiler,commentsOnJSXExpressionsArePreserved.tsx,"['jsx=preserve', 'module=commonjs', 'moduledetection=legacy']",go-diff,rust-pass
+compiler,commentsOnJSXExpressionsArePreserved.tsx,"['jsx=react', 'module=commonjs', 'moduledetection=force']",go-diff,rust-pass
+compiler,commentsOnJSXExpressionsArePreserved.tsx,"['jsx=react-jsx', 'module=commonjs', 'moduledetection=auto']",go-diff,rust-pass
+compiler,commentsOnJSXExpressionsArePreserved.tsx,"['jsx=react-jsx', 'module=commonjs', 'moduledetection=legacy']",go-diff,rust-pass
+compiler,commentsOnJSXExpressionsArePreserved.tsx,"['jsx=react-jsxdev', 'module=commonjs', 'moduledetection=force']",go-diff,rust-pass
+compiler,commentsOnJSXExpressionsArePreserved.tsx,"['jsx=react-jsxdev', 'module=commonjs', 'moduledetection=auto']",go-diff,rust-pass
+compiler,commentsOnJSXExpressionsArePreserved.tsx,"['jsx=react', 'module=commonjs', 'moduledetection=auto']",go-diff,rust-pass
 compiler,commentsOnObjectLiteral1.ts,[],go-diff,rust-pass
 compiler,commentsOnObjectLiteral2.ts,[],go-diff,rust-pass
 compiler,commentsOnRequireStatement.ts,[],go-pass,rust-missing-config
@@ -539,8 +541,8 @@ compiler,declarationMapsWithoutDeclaration.ts,[],go-pass,rust-diff
 compiler,declarationsWithRecursiveInternalTypesProduceUniqueTypeParams.ts,[],go-pass,rust-diff
 compiler,declareAlreadySeen.ts,[],go-diff,rust-pass
 compiler,decoratorMetadataConditionalType.ts,[],go-diff,rust-pass
-compiler,decoratorMetadataElidedImport.ts,['module=commonjs'],go-pass,rust-diff
 compiler,decoratorMetadataElidedImport.ts,['module=esnext'],go-pass,rust-diff
+compiler,decoratorMetadataElidedImport.ts,['module=commonjs'],go-pass,rust-diff
 compiler,decoratorMetadataNoLibIsolatedModulesTypes.ts,[],go-pass,rust-diff
 compiler,decoratorMetadataRestParameterWithImportedType.ts,['target=es2015'],go-diff,rust-pass
 compiler,decoratorMetadataTypeOnlyExport.ts,[],go-pass,rust-diff
@@ -590,6 +592,8 @@ compiler,downlevelLetConst1.ts,[],go-diff,rust-pass
 compiler,downlevelLetConst11.ts,[],go-diff,rust-pass
 compiler,downlevelLetConst4.ts,[],go-diff,rust-pass
 compiler,downlevelLetConst6.ts,[],go-diff,rust-pass
+compiler,duplicateIdentifierBindingElementInParameterDeclaration1.ts,[],go-diff,rust-missing-config
+compiler,duplicateIdentifierBindingElementInParameterDeclaration2.ts,[],go-diff,rust-missing-config
 compiler,duplicateInterfaceMembers1.ts,[],go-diff,rust-pass
 compiler,duplicateLocalVariable3.ts,[],go-diff,rust-pass
 compiler,duplicateObjectLiteralProperty_computedName1.ts,[],go-diff,rust-pass
@@ -605,17 +609,19 @@ compiler,elaborationForPossiblyCallableTypeStillReferencesArgumentAtTopLevel.ts,
 compiler,elidedEmbeddedStatementsReplacedWithSemicolon.ts,[],go-pass,rust-diff
 compiler,emitAccessExpressionOfCastedObjectLiteralExpressionInArrowFunctionES5.ts,['target=es2015'],go-diff,rust-pass
 compiler,emitAccessExpressionOfCastedObjectLiteralExpressionInArrowFunctionES6.ts,[],go-diff,rust-pass
+compiler,emitBundleWithShebang1.ts,[],go-diff,rust-missing-config
 compiler,emitClassExpressionInDeclarationFile.ts,[],go-pass,rust-diff
-compiler,emitHelpersWithLocalCollisions.ts,['module=es2022'],skip-config,rust-pass
-compiler,emitHelpersWithLocalCollisions.ts,['module=node16'],skip-config,rust-pass
-compiler,emitHelpersWithLocalCollisions.ts,['module=commonjs'],skip-config,rust-pass
-compiler,emitHelpersWithLocalCollisions.ts,['module=esnext'],skip-config,rust-pass
-compiler,emitHelpersWithLocalCollisions.ts,['module=nodenext'],skip-config,rust-pass
 compiler,emitHelpersWithLocalCollisions.ts,['module=preserve'],skip-config,rust-pass
-compiler,emitHelpersWithLocalCollisions.ts,['module=node20'],skip-config,rust-pass
-compiler,emitHelpersWithLocalCollisions.ts,['module=node18'],skip-config,rust-pass
-compiler,emitHelpersWithLocalCollisions.ts,['module=es6'],skip-config,rust-pass
+compiler,emitHelpersWithLocalCollisions.ts,['module=esnext'],skip-config,rust-pass
 compiler,emitHelpersWithLocalCollisions.ts,['module=es2020'],skip-config,rust-pass
+compiler,emitHelpersWithLocalCollisions.ts,['module=node18'],skip-config,rust-pass
+compiler,emitHelpersWithLocalCollisions.ts,['module=es2015'],skip-config,rust-missing-config
+compiler,emitHelpersWithLocalCollisions.ts,['module=nodenext'],skip-config,rust-pass
+compiler,emitHelpersWithLocalCollisions.ts,['module=es6'],skip-config,rust-pass
+compiler,emitHelpersWithLocalCollisions.ts,['module=es2022'],skip-config,rust-pass
+compiler,emitHelpersWithLocalCollisions.ts,['module=node20'],skip-config,rust-pass
+compiler,emitHelpersWithLocalCollisions.ts,['module=commonjs'],skip-config,rust-pass
+compiler,emitHelpersWithLocalCollisions.ts,['module=node16'],skip-config,rust-pass
 compiler,emptyAnonymousObjectNarrowing.ts,['strictnullchecks=false'],go-pass,rust-diff
 compiler,emptyAnonymousObjectNarrowing.ts,['strictnullchecks=true'],go-pass,rust-diff
 compiler,emptyIndexer.ts,[],go-diff,rust-pass
@@ -697,8 +703,8 @@ compiler,forInStatement6.ts,[],go-pass,rust-diff
 compiler,forInStrictNullChecksNoError.ts,[],go-diff,rust-pass
 compiler,forStatementInnerComments.ts,[],go-pass,rust-diff
 compiler,formatToPartsFractionalSecond.ts,[],go-pass,rust-diff
-compiler,forwardRefInTypeDeclaration.ts,['strict=false'],go-pass,rust-diff
 compiler,forwardRefInTypeDeclaration.ts,['strict=true'],go-pass,rust-diff
+compiler,forwardRefInTypeDeclaration.ts,['strict=false'],go-pass,rust-diff
 compiler,freshLiteralInference.ts,[],go-pass,rust-diff
 compiler,funClodule.ts,[],go-diff,rust-pass
 compiler,functionAndInterfaceWithSeparateErrors.ts,[],go-diff,rust-pass
@@ -825,24 +831,24 @@ compiler,importEqualsError45874.ts,[],go-diff,rust-pass
 compiler,importHelpers.ts,['target=es2015'],go-pass,rust-diff
 compiler,importHelpersInAmbientContext.ts,['target=es2015'],go-pass,rust-diff
 compiler,importHelpersInIsolatedModules.ts,['target=es2015'],go-pass,rust-diff
+compiler,importHelpersWithImportOrExportDefaultNoTslib.1.ts,"['esmoduleinterop=false', 'module=commonjs']",skip-config,rust-pass
 compiler,importHelpersWithImportOrExportDefaultNoTslib.1.ts,"['esmoduleinterop=true', 'module=es2020']",skip-config,rust-pass
 compiler,importHelpersWithImportOrExportDefaultNoTslib.1.ts,"['esmoduleinterop=true', 'module=es2015']",skip-config,rust-pass
-compiler,importHelpersWithImportOrExportDefaultNoTslib.1.ts,"['esmoduleinterop=false', 'module=es2015']",skip-config,rust-pass
-compiler,importHelpersWithImportOrExportDefaultNoTslib.1.ts,"['esmoduleinterop=false', 'module=es2020']",skip-config,rust-pass
 compiler,importHelpersWithImportOrExportDefaultNoTslib.1.ts,"['esmoduleinterop=true', 'module=commonjs']",skip-config,rust-pass
-compiler,importHelpersWithImportOrExportDefaultNoTslib.1.ts,"['esmoduleinterop=false', 'module=commonjs']",skip-config,rust-pass
+compiler,importHelpersWithImportOrExportDefaultNoTslib.1.ts,"['esmoduleinterop=false', 'module=es2020']",skip-config,rust-pass
+compiler,importHelpersWithImportOrExportDefaultNoTslib.1.ts,"['esmoduleinterop=false', 'module=es2015']",skip-config,rust-pass
+compiler,importHelpersWithImportOrExportDefaultNoTslib.2.ts,"['esmoduleinterop=false', 'module=commonjs']",skip-config,rust-pass
 compiler,importHelpersWithImportOrExportDefaultNoTslib.2.ts,"['esmoduleinterop=true', 'module=es2020']",skip-config,rust-pass
 compiler,importHelpersWithImportOrExportDefaultNoTslib.2.ts,"['esmoduleinterop=true', 'module=es2015']",skip-config,rust-pass
-compiler,importHelpersWithImportOrExportDefaultNoTslib.2.ts,"['esmoduleinterop=false', 'module=es2015']",skip-config,rust-pass
-compiler,importHelpersWithImportOrExportDefaultNoTslib.2.ts,"['esmoduleinterop=false', 'module=es2020']",skip-config,rust-pass
 compiler,importHelpersWithImportOrExportDefaultNoTslib.2.ts,"['esmoduleinterop=true', 'module=commonjs']",skip-config,rust-pass
-compiler,importHelpersWithImportOrExportDefaultNoTslib.2.ts,"['esmoduleinterop=false', 'module=commonjs']",skip-config,rust-pass
+compiler,importHelpersWithImportOrExportDefaultNoTslib.2.ts,"['esmoduleinterop=false', 'module=es2020']",skip-config,rust-pass
+compiler,importHelpersWithImportOrExportDefaultNoTslib.2.ts,"['esmoduleinterop=false', 'module=es2015']",skip-config,rust-pass
+compiler,importHelpersWithImportOrExportDefaultNoTslib.3.ts,"['esmoduleinterop=false', 'module=commonjs']",skip-config,rust-pass
 compiler,importHelpersWithImportOrExportDefaultNoTslib.3.ts,"['esmoduleinterop=true', 'module=es2020']",skip-config,rust-pass
 compiler,importHelpersWithImportOrExportDefaultNoTslib.3.ts,"['esmoduleinterop=true', 'module=es2015']",skip-config,rust-pass
-compiler,importHelpersWithImportOrExportDefaultNoTslib.3.ts,"['esmoduleinterop=false', 'module=es2015']",skip-config,rust-pass
-compiler,importHelpersWithImportOrExportDefaultNoTslib.3.ts,"['esmoduleinterop=false', 'module=es2020']",skip-config,rust-pass
 compiler,importHelpersWithImportOrExportDefaultNoTslib.3.ts,"['esmoduleinterop=true', 'module=commonjs']",skip-config,rust-pass
-compiler,importHelpersWithImportOrExportDefaultNoTslib.3.ts,"['esmoduleinterop=false', 'module=commonjs']",skip-config,rust-pass
+compiler,importHelpersWithImportOrExportDefaultNoTslib.3.ts,"['esmoduleinterop=false', 'module=es2020']",skip-config,rust-pass
+compiler,importHelpersWithImportOrExportDefaultNoTslib.3.ts,"['esmoduleinterop=false', 'module=es2015']",skip-config,rust-pass
 compiler,importHelpersWithLocalCollisions.ts,['module=commonjs'],skip-config,rust-pass
 compiler,importHelpersWithLocalCollisions.ts,['module=es2015'],skip-config,rust-pass
 compiler,importNonExportedMember1.ts,[],go-diff,rust-pass
@@ -953,8 +959,8 @@ compiler,iterableTReturnTNext.ts,['strictbuiltiniteratorreturn=false'],go-pass,r
 compiler,jsFileCompilationWithDeclarationEmitPathSameAsInput.ts,[],go-pass,rust-diff
 compiler,jsxChildrenSingleChildConfusableWithMultipleChildrenNoError.tsx,[],go-diff,rust-pass
 compiler,jsxEmptyExpressionNotCountedAsChild.tsx,['jsx=react-jsx'],go-diff,rust-pass
-compiler,jsxEmptyExpressionNotCountedAsChild.tsx,['jsx=react'],go-diff,rust-pass
 compiler,jsxEmptyExpressionNotCountedAsChild.tsx,['jsx=react-jsxdev'],go-diff,rust-pass
+compiler,jsxEmptyExpressionNotCountedAsChild.tsx,['jsx=react'],go-diff,rust-pass
 compiler,jsxFactoryAndJsxFragmentFactoryErrorNotIdentifier.tsx,[],go-pass,rust-diff
 compiler,jsxFactoryAndReactNamespace.ts,[],go-pass,rust-diff
 compiler,jsxFactoryMissingErrorInsideAClass.ts,[],go-diff,rust-pass
@@ -978,8 +984,8 @@ compiler,jsxPartialSpread.tsx,[],go-diff,rust-pass
 compiler,jsxRuntimePragma.ts,['jsx=react-jsx'],go-diff,rust-pass
 compiler,jsxRuntimePragma.ts,['jsx=react-jsxdev'],go-diff,rust-pass
 compiler,jsxRuntimePragma.ts,['jsx=preserve'],go-diff,rust-pass
-compiler,jsxSpreadTag.ts,['target=esnext'],go-diff,rust-pass
 compiler,jsxSpreadTag.ts,['target=es2015'],go-diff,rust-pass
+compiler,jsxSpreadTag.ts,['target=esnext'],go-diff,rust-pass
 compiler,keyofGenericExtendingClassDoubleLayer.ts,[],go-diff,rust-pass
 compiler,keywordExpressionInternalComments.ts,[],go-diff,rust-pass
 compiler,lambdaParameterWithTupleArgsHasCorrectAssignability.ts,[],go-pass,rust-diff
@@ -1068,8 +1074,8 @@ compiler,moduleResolutionPackageIdWithRelativeAndAbsolutePath.ts,[],skip-config,
 compiler,moduleResolutionWithExtensions_notSupported3.ts,[],go-diff,rust-pass
 compiler,moduleResolutionWithModule.ts,"['module=node16', 'moduleresolution=node16']",go-diff,rust-pass
 compiler,moduleResolutionWithModule.ts,"['module=node18', 'moduleresolution=node16']",go-diff,rust-pass
-compiler,moduleResolutionWithModule.ts,"['module=node16', 'moduleresolution=nodenext']",go-diff,rust-pass
 compiler,moduleResolutionWithModule.ts,"['module=node18', 'moduleresolution=nodenext']",go-diff,rust-pass
+compiler,moduleResolutionWithModule.ts,"['module=node16', 'moduleresolution=nodenext']",go-diff,rust-pass
 compiler,moduleResolutionWithSuffixes_empty.ts,[],go-pass,rust-diff
 compiler,moduleResolutionWithSuffixes_notSpecified.ts,[],go-pass,rust-diff
 compiler,moduleResolutionWithSuffixes_one.ts,[],go-pass,rust-diff
@@ -1182,8 +1188,8 @@ compiler,objectLiteralWithNumericPropertyName.ts,[],go-diff,rust-pass
 compiler,objectMembersOnTypes.ts,[],go-diff,rust-pass
 compiler,observableInferenceCanBeMade.ts,[],go-pass,rust-diff
 compiler,optionalAccessorsInInterface1.ts,[],go-pass,rust-diff
-compiler,optionalChainWithInstantiationExpression2.ts,['target=es2020'],go-pass,rust-diff
 compiler,optionalChainWithInstantiationExpression2.ts,['target=es2019'],go-pass,rust-diff
+compiler,optionalChainWithInstantiationExpression2.ts,['target=es2020'],go-pass,rust-diff
 compiler,optionalSetterParam.ts,[],go-diff,rust-pass
 compiler,optionsCompositeWithIncrementalFalse.ts,[],go-pass,rust-diff
 compiler,optionsInlineSourceMapMapRoot.ts,[],go-pass,rust-diff
@@ -1397,6 +1403,8 @@ compiler,targetTypeCastTest.ts,[],go-diff,rust-pass
 compiler,targetTypeObjectLiteralToAny.ts,[],go-diff,rust-pass
 compiler,targetTypeTest3.ts,[],go-diff,rust-pass
 compiler,targetTypeVoidFunc.ts,[],go-diff,rust-pass
+compiler,templateStringsArrayTypeDefinedInES5Mode.ts,[],go-diff,rust-missing-config
+compiler,templateStringsArrayTypeNotDefinedES5Mode.ts,[],go-diff,rust-missing-config
 compiler,thisBinding.ts,[],go-diff,rust-pass
 compiler,thisExpressionInCallExpressionWithTypeArguments.ts,[],go-diff,rust-pass
 compiler,thisExpressionOfGenericObject.ts,[],go-diff,rust-pass
@@ -1508,8 +1516,8 @@ compiler,unqualifiedCallToClassStatic1.ts,[],go-diff,rust-pass
 compiler,unresolvedTypeAssertionSymbol.ts,[],go-diff,rust-pass
 compiler,unterminatedRegexAtEndOfSource1.ts,[],go-diff,rust-pass
 compiler,unusedImportDeclaration.ts,[],go-diff,rust-pass
-compiler,useStrictLikePrologueString01.ts,['target=es5'],go-pass,rust-missing-config
 compiler,useStrictLikePrologueString01.ts,['target=es2015'],go-pass,rust-missing-config
+compiler,useStrictLikePrologueString01.ts,['target=es5'],go-pass,rust-missing-config
 compiler,validRegexp.ts,[],go-diff,rust-pass
 compiler,varAndFunctionShareName.ts,[],go-diff,rust-pass
 compiler,varBlock.ts,[],go-diff,rust-pass
@@ -1573,8 +1581,8 @@ conformance,classes/members/constructorFunctionTypes/classWithStaticMembers.ts,[
 conformance,classes/members/constructorFunctionTypes/constructorHasPrototypeProperty.ts,[],go-diff,rust-pass
 conformance,classes/members/inheritanceAndOverriding/derivedClassOverridesWithoutSubtype.ts,[],go-diff,rust-pass
 conformance,classes/members/inheritanceAndOverriding/derivedClassWithAny.ts,[],go-diff,rust-pass
-conformance,classes/members/instanceAndStaticMembers/superInStaticMembers1.ts,['target=esnext'],skip-config,rust-pass
 conformance,classes/members/instanceAndStaticMembers/superInStaticMembers1.ts,['target=es2022'],skip-config,rust-pass
+conformance,classes/members/instanceAndStaticMembers/superInStaticMembers1.ts,['target=esnext'],skip-config,rust-pass
 conformance,classes/members/instanceAndStaticMembers/typeOfThisInInstanceMember.ts,[],go-diff,rust-pass
 conformance,classes/members/instanceAndStaticMembers/typeOfThisInInstanceMember2.ts,[],go-diff,rust-pass
 conformance,classes/members/instanceAndStaticMembers/typeOfThisInstanceMemberNarrowedWithLoopAntecedent.ts,[],go-diff,rust-pass
@@ -1669,6 +1677,8 @@ conformance,declarationEmit/libReferenceNoLib.ts,[],go-pass,rust-diff
 conformance,declarationEmit/typesVersionsDeclarationEmit.multiFileBackReferenceToSelf.ts,[],go-pass,rust-diff
 conformance,decorators/class/accessor/decoratorOnClassAccessor3.ts,['target=es2015'],go-diff,rust-pass
 conformance,decorators/class/accessor/decoratorOnClassAccessor6.ts,['target=es2015'],go-diff,rust-pass
+conformance,decorators/class/constructor/decoratorOnClassConstructor2.ts,[],go-diff,rust-missing-config
+conformance,decorators/class/constructor/decoratorOnClassConstructor3.ts,[],go-diff,rust-missing-config
 conformance,decorators/class/constructor/decoratorOnClassConstructor4.ts,[],go-pass,rust-missing-config
 conformance,decorators/class/decoratedClassFromExternalModule.ts,[],go-diff,rust-pass
 conformance,decorators/class/decoratorOnClass3.ts,['target=es2015'],go-pass,rust-diff
@@ -1702,29 +1712,30 @@ conformance,enums/enumConstantMemberWithTemplateLiterals.ts,[],go-diff,rust-pass
 conformance,es2017/useObjectValuesAndEntries1.ts,['target=es2015'],go-pass,rust-diff
 conformance,es2018/es2018IntlAPIs.ts,[],go-pass,rust-diff
 conformance,es2018/usePromiseFinally.ts,['target=es2015'],go-pass,rust-diff
-conformance,es2019/importMeta/importMetaNarrowing.ts,['module=es2020'],go-pass,rust-diff
 conformance,es2019/importMeta/importMetaNarrowing.ts,['module=esnext'],go-pass,rust-diff
+conformance,es2019/importMeta/importMetaNarrowing.ts,['module=es2020'],go-pass,rust-diff
 conformance,es2020/intlNumberFormatES2020.ts,[],go-pass,rust-diff
 conformance,es2020/localesObjectArgument.ts,[],go-pass,rust-diff
 conformance,es2020/modules/exportAsNamespace5.ts,[],go-pass,rust-diff
 conformance,es2020/modules/exportAsNamespace_missingEmitHelpers.ts,[],skip-config,rust-pass
 conformance,es2020/modules/exportAsNamespace_nonExistent.ts,[],skip-config,rust-pass
 conformance,es2021/intlDateTimeFormatRangeES2021.ts,[],go-pass,rust-diff
+conformance,es2021/logicalAssignment/logicalAssignment5.ts,['target=es2020'],go-diff,rust-pass
 conformance,es2021/logicalAssignment/logicalAssignment5.ts,['target=es2015'],go-diff,rust-pass
 conformance,es2021/logicalAssignment/logicalAssignment5.ts,['target=esnext'],go-diff,rust-pass
 conformance,es2021/logicalAssignment/logicalAssignment5.ts,['target=es2021'],go-diff,rust-pass
-conformance,es2021/logicalAssignment/logicalAssignment5.ts,['target=es2020'],go-diff,rust-pass
 conformance,es2022/arbitraryModuleNamespaceIdentifiers/arbitraryModuleNamespaceIdentifiers_exportEmpty.ts,[],go-diff,rust-pass
-conformance,es2022/arbitraryModuleNamespaceIdentifiers/arbitraryModuleNamespaceIdentifiers_module.ts,['module=es2022'],go-diff,rust-pass
-conformance,es2022/arbitraryModuleNamespaceIdentifiers/arbitraryModuleNamespaceIdentifiers_module.ts,['module=node16'],go-diff,rust-pass
-conformance,es2022/arbitraryModuleNamespaceIdentifiers/arbitraryModuleNamespaceIdentifiers_module.ts,['module=commonjs'],go-diff,rust-pass
-conformance,es2022/arbitraryModuleNamespaceIdentifiers/arbitraryModuleNamespaceIdentifiers_module.ts,['module=esnext'],go-diff,rust-pass
-conformance,es2022/arbitraryModuleNamespaceIdentifiers/arbitraryModuleNamespaceIdentifiers_module.ts,['module=nodenext'],go-diff,rust-pass
 conformance,es2022/arbitraryModuleNamespaceIdentifiers/arbitraryModuleNamespaceIdentifiers_module.ts,['module=preserve'],go-diff,rust-pass
-conformance,es2022/arbitraryModuleNamespaceIdentifiers/arbitraryModuleNamespaceIdentifiers_module.ts,['module=node20'],go-diff,rust-pass
-conformance,es2022/arbitraryModuleNamespaceIdentifiers/arbitraryModuleNamespaceIdentifiers_module.ts,['module=node18'],go-diff,rust-pass
-conformance,es2022/arbitraryModuleNamespaceIdentifiers/arbitraryModuleNamespaceIdentifiers_module.ts,['module=es6'],go-diff,rust-pass
+conformance,es2022/arbitraryModuleNamespaceIdentifiers/arbitraryModuleNamespaceIdentifiers_module.ts,['module=esnext'],go-diff,rust-pass
 conformance,es2022/arbitraryModuleNamespaceIdentifiers/arbitraryModuleNamespaceIdentifiers_module.ts,['module=es2020'],go-diff,rust-pass
+conformance,es2022/arbitraryModuleNamespaceIdentifiers/arbitraryModuleNamespaceIdentifiers_module.ts,['module=node18'],go-diff,rust-pass
+conformance,es2022/arbitraryModuleNamespaceIdentifiers/arbitraryModuleNamespaceIdentifiers_module.ts,['module=es2015'],go-diff,rust-missing-config
+conformance,es2022/arbitraryModuleNamespaceIdentifiers/arbitraryModuleNamespaceIdentifiers_module.ts,['module=nodenext'],go-diff,rust-pass
+conformance,es2022/arbitraryModuleNamespaceIdentifiers/arbitraryModuleNamespaceIdentifiers_module.ts,['module=es6'],go-diff,rust-pass
+conformance,es2022/arbitraryModuleNamespaceIdentifiers/arbitraryModuleNamespaceIdentifiers_module.ts,['module=es2022'],go-diff,rust-pass
+conformance,es2022/arbitraryModuleNamespaceIdentifiers/arbitraryModuleNamespaceIdentifiers_module.ts,['module=node20'],go-diff,rust-pass
+conformance,es2022/arbitraryModuleNamespaceIdentifiers/arbitraryModuleNamespaceIdentifiers_module.ts,['module=commonjs'],go-diff,rust-pass
+conformance,es2022/arbitraryModuleNamespaceIdentifiers/arbitraryModuleNamespaceIdentifiers_module.ts,['module=node16'],go-diff,rust-pass
 conformance,es2023/intlNumberFormatES2023.ts,[],go-pass,rust-diff
 conformance,es2025/syncIteratorHelpers.ts,[],go-pass,rust-diff
 conformance,es6/Symbols/symbolDeclarationEmit1.ts,[],go-diff,rust-pass
@@ -1758,6 +1769,8 @@ conformance,es6/arrowFunction/emitArrowFunctionWhenUsingArguments09.ts,['target=
 conformance,es6/arrowFunction/emitArrowFunctionWhenUsingArguments09_ES6.ts,[],go-diff,rust-pass
 conformance,es6/arrowFunction/emitArrowFunctionsAsIs.ts,['target=es2015'],go-diff,rust-pass
 conformance,es6/arrowFunction/emitArrowFunctionsAsIsES6.ts,[],go-diff,rust-pass
+conformance,es6/binaryAndOctalIntegerLiteral/binaryIntegerLiteral.ts,[],go-diff,rust-missing-config
+conformance,es6/binaryAndOctalIntegerLiteral/octalIntegerLiteral.ts,[],go-diff,rust-missing-config
 conformance,es6/classDeclaration/emitClassDeclarationWithConstructorInES6.ts,[],go-diff,rust-pass
 conformance,es6/classDeclaration/emitClassDeclarationWithExtensionInES6.ts,[],go-pass,rust-diff
 conformance,es6/classDeclaration/emitClassDeclarationWithGetterSetterInES6.ts,[],go-diff,rust-pass
@@ -1906,43 +1919,63 @@ conformance,es6/unicodeExtendedEscapes/unicodeExtendedEscapesInRegularExpression
 conformance,es6/unicodeExtendedEscapes/unicodeExtendedEscapesInRegularExpressions04.ts,[],go-pass,rust-missing-config
 conformance,es6/unicodeExtendedEscapes/unicodeExtendedEscapesInRegularExpressions05.ts,[],go-pass,rust-missing-config
 conformance,es6/unicodeExtendedEscapes/unicodeExtendedEscapesInRegularExpressions06.ts,[],go-pass,rust-missing-config
+conformance,es6/unicodeExtendedEscapes/unicodeExtendedEscapesInRegularExpressions07.ts,[],go-diff,rust-missing-config
 conformance,es6/unicodeExtendedEscapes/unicodeExtendedEscapesInRegularExpressions08.ts,[],go-pass,rust-missing-config
 conformance,es6/unicodeExtendedEscapes/unicodeExtendedEscapesInRegularExpressions09.ts,[],go-pass,rust-missing-config
 conformance,es6/unicodeExtendedEscapes/unicodeExtendedEscapesInRegularExpressions10.ts,[],go-pass,rust-missing-config
 conformance,es6/unicodeExtendedEscapes/unicodeExtendedEscapesInRegularExpressions11.ts,[],go-pass,rust-missing-config
+conformance,es6/unicodeExtendedEscapes/unicodeExtendedEscapesInRegularExpressions12.ts,[],go-diff,rust-missing-config
 conformance,es6/unicodeExtendedEscapes/unicodeExtendedEscapesInRegularExpressions13.ts,[],go-pass,rust-missing-config
+conformance,es6/unicodeExtendedEscapes/unicodeExtendedEscapesInRegularExpressions14.ts,[],go-diff,rust-missing-config
 conformance,es6/unicodeExtendedEscapes/unicodeExtendedEscapesInRegularExpressions15.ts,[],go-pass,rust-missing-config
 conformance,es6/unicodeExtendedEscapes/unicodeExtendedEscapesInRegularExpressions16.ts,[],go-pass,rust-missing-config
+conformance,es6/unicodeExtendedEscapes/unicodeExtendedEscapesInRegularExpressions17.ts,[],go-diff,rust-missing-config
 conformance,es6/unicodeExtendedEscapes/unicodeExtendedEscapesInRegularExpressions18.ts,[],go-pass,rust-missing-config
+conformance,es6/unicodeExtendedEscapes/unicodeExtendedEscapesInRegularExpressions19.ts,[],go-diff,rust-missing-config
 conformance,es6/unicodeExtendedEscapes/unicodeExtendedEscapesInStrings01.ts,[],go-pass,rust-missing-config
 conformance,es6/unicodeExtendedEscapes/unicodeExtendedEscapesInStrings02.ts,[],go-pass,rust-missing-config
 conformance,es6/unicodeExtendedEscapes/unicodeExtendedEscapesInStrings03.ts,[],go-pass,rust-missing-config
 conformance,es6/unicodeExtendedEscapes/unicodeExtendedEscapesInStrings04.ts,[],go-pass,rust-missing-config
 conformance,es6/unicodeExtendedEscapes/unicodeExtendedEscapesInStrings05.ts,[],go-pass,rust-missing-config
 conformance,es6/unicodeExtendedEscapes/unicodeExtendedEscapesInStrings06.ts,[],go-pass,rust-missing-config
+conformance,es6/unicodeExtendedEscapes/unicodeExtendedEscapesInStrings07.ts,[],go-diff,rust-missing-config
 conformance,es6/unicodeExtendedEscapes/unicodeExtendedEscapesInStrings08.ts,[],go-pass,rust-missing-config
 conformance,es6/unicodeExtendedEscapes/unicodeExtendedEscapesInStrings09.ts,[],go-pass,rust-missing-config
 conformance,es6/unicodeExtendedEscapes/unicodeExtendedEscapesInStrings10.ts,[],go-pass,rust-missing-config
 conformance,es6/unicodeExtendedEscapes/unicodeExtendedEscapesInStrings11.ts,[],go-pass,rust-missing-config
+conformance,es6/unicodeExtendedEscapes/unicodeExtendedEscapesInStrings12.ts,[],go-diff,rust-missing-config
 conformance,es6/unicodeExtendedEscapes/unicodeExtendedEscapesInStrings13.ts,[],go-pass,rust-missing-config
+conformance,es6/unicodeExtendedEscapes/unicodeExtendedEscapesInStrings14.ts,[],go-diff,rust-missing-config
 conformance,es6/unicodeExtendedEscapes/unicodeExtendedEscapesInStrings15.ts,[],go-pass,rust-missing-config
 conformance,es6/unicodeExtendedEscapes/unicodeExtendedEscapesInStrings16.ts,[],go-pass,rust-missing-config
+conformance,es6/unicodeExtendedEscapes/unicodeExtendedEscapesInStrings17.ts,[],go-diff,rust-missing-config
 conformance,es6/unicodeExtendedEscapes/unicodeExtendedEscapesInStrings18.ts,[],go-pass,rust-missing-config
+conformance,es6/unicodeExtendedEscapes/unicodeExtendedEscapesInStrings19.ts,[],go-diff,rust-missing-config
+conformance,es6/unicodeExtendedEscapes/unicodeExtendedEscapesInStrings20.ts,[],go-diff,rust-missing-config
+conformance,es6/unicodeExtendedEscapes/unicodeExtendedEscapesInStrings21.ts,[],go-diff,rust-missing-config
+conformance,es6/unicodeExtendedEscapes/unicodeExtendedEscapesInStrings22.ts,[],go-diff,rust-missing-config
 conformance,es6/unicodeExtendedEscapes/unicodeExtendedEscapesInStrings23.ts,[],go-pass,rust-missing-config
+conformance,es6/unicodeExtendedEscapes/unicodeExtendedEscapesInStrings24.ts,[],go-diff,rust-missing-config
+conformance,es6/unicodeExtendedEscapes/unicodeExtendedEscapesInStrings25.ts,[],go-diff,rust-missing-config
 conformance,es6/unicodeExtendedEscapes/unicodeExtendedEscapesInTemplates01.ts,[],go-pass,rust-missing-config
 conformance,es6/unicodeExtendedEscapes/unicodeExtendedEscapesInTemplates02.ts,[],go-pass,rust-missing-config
 conformance,es6/unicodeExtendedEscapes/unicodeExtendedEscapesInTemplates03.ts,[],go-pass,rust-missing-config
 conformance,es6/unicodeExtendedEscapes/unicodeExtendedEscapesInTemplates04.ts,[],go-pass,rust-missing-config
 conformance,es6/unicodeExtendedEscapes/unicodeExtendedEscapesInTemplates05.ts,[],go-pass,rust-missing-config
 conformance,es6/unicodeExtendedEscapes/unicodeExtendedEscapesInTemplates06.ts,[],go-pass,rust-missing-config
+conformance,es6/unicodeExtendedEscapes/unicodeExtendedEscapesInTemplates07.ts,[],go-diff,rust-missing-config
 conformance,es6/unicodeExtendedEscapes/unicodeExtendedEscapesInTemplates08.ts,[],go-pass,rust-missing-config
 conformance,es6/unicodeExtendedEscapes/unicodeExtendedEscapesInTemplates09.ts,[],go-pass,rust-missing-config
 conformance,es6/unicodeExtendedEscapes/unicodeExtendedEscapesInTemplates10.ts,[],go-pass,rust-missing-config
 conformance,es6/unicodeExtendedEscapes/unicodeExtendedEscapesInTemplates11.ts,[],go-pass,rust-missing-config
+conformance,es6/unicodeExtendedEscapes/unicodeExtendedEscapesInTemplates12.ts,[],go-diff,rust-missing-config
 conformance,es6/unicodeExtendedEscapes/unicodeExtendedEscapesInTemplates13.ts,[],go-pass,rust-missing-config
+conformance,es6/unicodeExtendedEscapes/unicodeExtendedEscapesInTemplates14.ts,[],go-diff,rust-missing-config
 conformance,es6/unicodeExtendedEscapes/unicodeExtendedEscapesInTemplates15.ts,[],go-pass,rust-missing-config
 conformance,es6/unicodeExtendedEscapes/unicodeExtendedEscapesInTemplates16.ts,[],go-pass,rust-missing-config
+conformance,es6/unicodeExtendedEscapes/unicodeExtendedEscapesInTemplates17.ts,[],go-diff,rust-missing-config
 conformance,es6/unicodeExtendedEscapes/unicodeExtendedEscapesInTemplates18.ts,[],go-pass,rust-missing-config
+conformance,es6/unicodeExtendedEscapes/unicodeExtendedEscapesInTemplates19.ts,[],go-diff,rust-missing-config
 conformance,es6/unicodeExtendedEscapes/unicodeExtendedEscapesInTemplates20.ts,[],go-pass,rust-missing-config
 conformance,es6/variableDeclarations/VariableDeclaration11_es6.ts,[],go-diff,rust-pass
 conformance,es6/variableDeclarations/VariableDeclaration13_es6.ts,[],go-diff,rust-pass
@@ -1989,13 +2022,21 @@ conformance,es7/exponentiationOperator/emitCompoundExponentiationAssignmentWithI
 conformance,es7/exponentiationOperator/emitCompoundExponentiationAssignmentWithIndexingOnLHS3.ts,[],go-pass,rust-missing-config
 conformance,es7/exponentiationOperator/emitCompoundExponentiationAssignmentWithIndexingOnLHS4.ts,[],go-pass,rust-missing-config
 conformance,es7/exponentiationOperator/emitCompoundExponentiationAssignmentWithPropertyAccessingOnLHS1.ts,[],go-pass,rust-missing-config
+conformance,es7/exponentiationOperator/emitCompoundExponentiationOperator1.ts,[],go-diff,rust-missing-config
+conformance,es7/exponentiationOperator/emitCompoundExponentiationOperator2.ts,[],go-diff,rust-missing-config
 conformance,es7/exponentiationOperator/emitExponentiationOperator1.ts,[],go-pass,rust-missing-config
 conformance,es7/exponentiationOperator/emitExponentiationOperator2.ts,[],go-pass,rust-missing-config
 conformance,es7/exponentiationOperator/emitExponentiationOperator3.ts,[],go-pass,rust-missing-config
+conformance,es7/exponentiationOperator/emitExponentiationOperator4.ts,[],go-diff,rust-missing-config
 conformance,es7/exponentiationOperator/emitExponentiationOperatorInTempalteString4.ts,[],go-pass,rust-missing-config
 conformance,es7/exponentiationOperator/emitExponentiationOperatorInTemplateString1.ts,[],go-pass,rust-missing-config
 conformance,es7/exponentiationOperator/emitExponentiationOperatorInTemplateString2.ts,[],go-pass,rust-missing-config
 conformance,es7/exponentiationOperator/emitExponentiationOperatorInTemplateString3.ts,[],go-pass,rust-missing-config
+conformance,es7/exponentiationOperator/exponentiationOperatorInTemplateStringWithSyntaxError1.ts,[],go-diff,rust-missing-config
+conformance,es7/exponentiationOperator/exponentiationOperatorInTemplateStringWithSyntaxError2.ts,[],go-diff,rust-missing-config
+conformance,es7/exponentiationOperator/exponentiationOperatorInTemplateStringWithSyntaxError3.ts,[],go-diff,rust-missing-config
+conformance,es7/exponentiationOperator/exponentiationOperatorSyntaxError1.ts,[],go-diff,rust-missing-config
+conformance,es7/exponentiationOperator/exponentiationOperatorSyntaxError2.ts,[],go-diff,rust-missing-config
 conformance,es7/exponentiationOperator/exponentiationOperatorWithAnyAndNumber.ts,[],go-diff,rust-pass
 conformance,es7/exponentiationOperator/exponentiationOperatorWithEnum.ts,[],go-diff,rust-pass
 conformance,es7/exponentiationOperator/exponentiationOperatorWithEnumUnion.ts,[],go-diff,rust-pass
@@ -2003,23 +2044,24 @@ conformance,es7/exponentiationOperator/exponentiationOperatorWithNew.ts,[],go-di
 conformance,es7/exponentiationOperator/exponentiationOperatorWithNullValueAndInvalidOperands.ts,[],go-diff,rust-pass
 conformance,es7/exponentiationOperator/exponentiationOperatorWithNullValueAndValidOperands.ts,[],go-diff,rust-pass
 conformance,es7/exponentiationOperator/exponentiationOperatorWithOnlyNullValueOrUndefinedValue.ts,[],go-diff,rust-pass
+conformance,es7/exponentiationOperator/exponentiationOperatorWithTemplateStringInvalid.ts,[],go-diff,rust-missing-config
 conformance,es7/exponentiationOperator/exponentiationOperatorWithTemplateStringInvalidES6.ts,[],go-diff,rust-pass
 conformance,es7/exponentiationOperator/exponentiationOperatorWithTypeParameter.ts,[],go-diff,rust-pass
 conformance,es7/exponentiationOperator/exponentiationOperatorWithUndefinedValueAndInvalidOperands.ts,[],go-diff,rust-pass
 conformance,es7/exponentiationOperator/exponentiationOperatorWithUndefinedValueAndValidOperands.ts,[],go-diff,rust-pass
 conformance,es7/trailingCommasInGetter.ts,[],go-diff,rust-pass
 conformance,esDecorators/esDecorators-contextualTypes.2.ts,[],go-pass,rust-diff
-conformance,esDecorators/metadata/esDecoratorsMetadata1.ts,['target=es2022'],skip-config,rust-pass
 conformance,esDecorators/metadata/esDecoratorsMetadata1.ts,['target=es2015'],skip-config,rust-pass
-conformance,esDecorators/metadata/esDecoratorsMetadata2.ts,['target=es2022'],skip-config,rust-pass
+conformance,esDecorators/metadata/esDecoratorsMetadata1.ts,['target=es2022'],skip-config,rust-pass
 conformance,esDecorators/metadata/esDecoratorsMetadata2.ts,['target=es2015'],skip-config,rust-pass
-conformance,esDecorators/metadata/esDecoratorsMetadata3.ts,['target=es2022'],skip-config,rust-pass
+conformance,esDecorators/metadata/esDecoratorsMetadata2.ts,['target=es2022'],skip-config,rust-pass
 conformance,esDecorators/metadata/esDecoratorsMetadata3.ts,['target=es2015'],skip-config,rust-pass
-conformance,esDecorators/metadata/esDecoratorsMetadata4.ts,['target=es2022'],skip-config,rust-pass
+conformance,esDecorators/metadata/esDecoratorsMetadata3.ts,['target=es2022'],skip-config,rust-pass
 conformance,esDecorators/metadata/esDecoratorsMetadata4.ts,['target=es2015'],skip-config,rust-pass
+conformance,esDecorators/metadata/esDecoratorsMetadata4.ts,['target=es2022'],skip-config,rust-pass
 conformance,esDecorators/metadata/esDecoratorsMetadata5.ts,[],skip-config,rust-pass
-conformance,esnext/logicalAssignment/logicalAssignment11.ts,['target=esnext'],go-pass,rust-diff
 conformance,esnext/logicalAssignment/logicalAssignment11.ts,['target=es2020'],go-pass,rust-diff
+conformance,esnext/logicalAssignment/logicalAssignment11.ts,['target=esnext'],go-pass,rust-diff
 conformance,esnext/logicalAssignment/logicalAssignment11.ts,['target=es2015'],go-pass,rust-diff
 conformance,expressions/arrayLiterals/arrayLiterals.ts,[],go-diff,rust-pass
 conformance,expressions/arrayLiterals/arrayLiterals2ES6.ts,[],go-pass,rust-diff
@@ -2055,6 +2097,7 @@ conformance,expressions/binaryOperators/logicalOrOperator/logicalOrExpressionIsN
 conformance,expressions/conditonalOperator/conditionalOperatorConditionIsNumberType.ts,[],go-diff,rust-pass
 conformance,expressions/contextualTyping/functionExpressionContextualTyping1.ts,[],go-diff,rust-pass
 conformance,expressions/contextualTyping/functionExpressionContextualTyping2.ts,[],go-diff,rust-pass
+conformance,expressions/contextualTyping/getSetAccessorContextualTyping.ts,[],go-diff,rust-missing-config
 conformance,expressions/contextualTyping/parenthesizedContexualTyping3.ts,[],go-pass,rust-diff
 conformance,expressions/contextualTyping/superCallParameterContextualTyping1.ts,[],go-pass,rust-diff
 conformance,expressions/contextualTyping/superCallParameterContextualTyping3.ts,[],go-pass,rust-diff
@@ -2078,18 +2121,19 @@ conformance,expressions/nullishCoalescingOperator/nullishCoalescingOperatorInPar
 conformance,expressions/nullishCoalescingOperator/nullishCoalescingOperatorInParameterInitializer.ts,['target=es2015'],skip-config,rust-pass
 conformance,expressions/nullishCoalescingOperator/nullishCoalescingOperator_es2020.ts,[],go-pass,rust-diff
 conformance,expressions/objectLiterals/objectLiteralGettersAndSetters.ts,[],go-pass,rust-diff
-conformance,expressions/optionalChaining/callChain/callChainWithSuper.ts,['target=es2018'],skip-config,rust-pass
-conformance,expressions/optionalChaining/callChain/callChainWithSuper.ts,['target=es6'],skip-config,rust-pass
 conformance,expressions/optionalChaining/callChain/callChainWithSuper.ts,['target=es2019'],skip-config,rust-pass
-conformance,expressions/optionalChaining/callChain/callChainWithSuper.ts,['target=es2022'],skip-config,rust-pass
-conformance,expressions/optionalChaining/callChain/callChainWithSuper.ts,['target=es2021'],skip-config,rust-pass
-conformance,expressions/optionalChaining/callChain/callChainWithSuper.ts,['target=es2020'],skip-config,rust-pass
-conformance,expressions/optionalChaining/callChain/callChainWithSuper.ts,['target=es2025'],skip-config,rust-pass
+conformance,expressions/optionalChaining/callChain/callChainWithSuper.ts,['target=es2018'],skip-config,rust-pass
 conformance,expressions/optionalChaining/callChain/callChainWithSuper.ts,['target=es2017'],skip-config,rust-pass
-conformance,expressions/optionalChaining/callChain/callChainWithSuper.ts,['target=esnext'],skip-config,rust-pass
-conformance,expressions/optionalChaining/callChain/callChainWithSuper.ts,['target=es2016'],skip-config,rust-pass
+conformance,expressions/optionalChaining/callChain/callChainWithSuper.ts,['target=es2022'],skip-config,rust-pass
 conformance,expressions/optionalChaining/callChain/callChainWithSuper.ts,['target=es2023'],skip-config,rust-pass
+conformance,expressions/optionalChaining/callChain/callChainWithSuper.ts,['target=es2016'],skip-config,rust-pass
+conformance,expressions/optionalChaining/callChain/callChainWithSuper.ts,['target=es2021'],skip-config,rust-pass
+conformance,expressions/optionalChaining/callChain/callChainWithSuper.ts,['target=es2025'],skip-config,rust-pass
+conformance,expressions/optionalChaining/callChain/callChainWithSuper.ts,['target=es2020'],skip-config,rust-pass
+conformance,expressions/optionalChaining/callChain/callChainWithSuper.ts,['target=es2015'],skip-config,rust-missing-config
+conformance,expressions/optionalChaining/callChain/callChainWithSuper.ts,['target=es6'],skip-config,rust-pass
 conformance,expressions/optionalChaining/callChain/callChainWithSuper.ts,['target=es2024'],skip-config,rust-pass
+conformance,expressions/optionalChaining/callChain/callChainWithSuper.ts,['target=esnext'],skip-config,rust-pass
 conformance,expressions/optionalChaining/callChain/parentheses.ts,[],skip-config,rust-pass
 conformance,expressions/optionalChaining/delete/deleteChain.ts,[],go-diff,rust-pass
 conformance,expressions/optionalChaining/optionalChainingInArrow.ts,['target=es2015'],skip-config,rust-pass
@@ -2352,8 +2396,8 @@ conformance,jsx/tsxSpreadAttributesResolution9.tsx,[],go-diff,rust-pass
 conformance,jsx/tsxUnionElementType5.tsx,[],go-diff,rust-pass
 conformance,jsx/tsxUnionTypeComponent2.tsx,[],go-diff,rust-pass
 conformance,moduleResolution/bundler/bundlerDirectoryModule.ts,"['module=node20', 'moduleresolution=nodenext']",skip-config,rust-pass
-conformance,moduleResolution/bundler/bundlerDirectoryModule.ts,"['module=node18', 'moduleresolution=nodenext']",skip-config,rust-pass
 conformance,moduleResolution/bundler/bundlerDirectoryModule.ts,"['module=nodenext', 'moduleresolution=nodenext']",skip-config,rust-pass
+conformance,moduleResolution/bundler/bundlerDirectoryModule.ts,"['module=node18', 'moduleresolution=nodenext']",skip-config,rust-pass
 conformance,moduleResolution/nestedPackageJsonRedirect.ts,['moduleresolution=bundler'],skip-config,rust-pass
 conformance,moduleResolution/node10IsNode_node.ts,[],go-pass,rust-diff
 conformance,moduleResolution/packageJsonMain.ts,[],go-pass,rust-diff
@@ -2372,57 +2416,57 @@ conformance,node/nodeModulesDeclarationEmitWithPackageExports.ts,['module=node20
 conformance,node/nodeModulesDeclarationEmitWithPackageExports.ts,['module=nodenext'],go-pass,rust-diff
 conformance,node/nodeModulesDynamicImport.ts,['module=node16'],go-diff,rust-pass
 conformance,node/nodeModulesDynamicImport.ts,['module=node18'],go-diff,rust-pass
-conformance,node/nodeModulesExportsDoubleAsterisk.ts,['module=nodenext'],skip-config,rust-pass
 conformance,node/nodeModulesExportsDoubleAsterisk.ts,['module=node20'],skip-config,rust-pass
 conformance,node/nodeModulesExportsDoubleAsterisk.ts,['module=node18'],skip-config,rust-pass
+conformance,node/nodeModulesExportsDoubleAsterisk.ts,['module=nodenext'],skip-config,rust-pass
 conformance,node/nodeModulesExportsSourceTs.ts,['module=node20'],go-diff,rust-pass
 conformance,node/nodeModulesExportsSourceTs.ts,['module=node16'],go-diff,rust-pass
-conformance,node/nodeModulesExportsSourceTs.ts,['module=nodenext'],go-diff,rust-pass
 conformance,node/nodeModulesExportsSourceTs.ts,['module=node18'],go-diff,rust-pass
+conformance,node/nodeModulesExportsSourceTs.ts,['module=nodenext'],go-diff,rust-pass
 conformance,node/nodeModulesGeneratedNameCollisions.ts,['module=node20'],go-diff,rust-pass
 conformance,node/nodeModulesGeneratedNameCollisions.ts,['module=node16'],go-diff,rust-pass
-conformance,node/nodeModulesGeneratedNameCollisions.ts,['module=nodenext'],go-diff,rust-pass
 conformance,node/nodeModulesGeneratedNameCollisions.ts,['module=node18'],go-diff,rust-pass
+conformance,node/nodeModulesGeneratedNameCollisions.ts,['module=nodenext'],go-diff,rust-pass
 conformance,node/nodeModulesImportAssignments.ts,['module=node20'],go-pass,rust-diff
 conformance,node/nodeModulesImportAssignments.ts,['module=nodenext'],go-pass,rust-diff
 conformance,node/nodeModulesImportAttributesModeDeclarationEmit1.ts,['module=node20'],go-diff,rust-pass
 conformance,node/nodeModulesImportAttributesModeDeclarationEmit1.ts,['module=node16'],go-diff,rust-pass
-conformance,node/nodeModulesImportAttributesModeDeclarationEmit1.ts,['module=nodenext'],go-diff,rust-pass
 conformance,node/nodeModulesImportAttributesModeDeclarationEmit1.ts,['module=node18'],go-diff,rust-pass
+conformance,node/nodeModulesImportAttributesModeDeclarationEmit1.ts,['module=nodenext'],go-diff,rust-pass
 conformance,node/nodeModulesImportAttributesModeDeclarationEmit2.ts,['module=node20'],go-diff,rust-pass
 conformance,node/nodeModulesImportAttributesModeDeclarationEmit2.ts,['module=node16'],go-diff,rust-pass
-conformance,node/nodeModulesImportAttributesModeDeclarationEmit2.ts,['module=nodenext'],go-diff,rust-pass
 conformance,node/nodeModulesImportAttributesModeDeclarationEmit2.ts,['module=node18'],go-diff,rust-pass
+conformance,node/nodeModulesImportAttributesModeDeclarationEmit2.ts,['module=nodenext'],go-diff,rust-pass
 conformance,node/nodeModulesImportHelpersCollisions.ts,['module=node20'],go-diff,rust-pass
 conformance,node/nodeModulesImportHelpersCollisions.ts,['module=node16'],go-diff,rust-pass
-conformance,node/nodeModulesImportHelpersCollisions.ts,['module=nodenext'],go-diff,rust-pass
 conformance,node/nodeModulesImportHelpersCollisions.ts,['module=node18'],go-diff,rust-pass
+conformance,node/nodeModulesImportHelpersCollisions.ts,['module=nodenext'],go-diff,rust-pass
 conformance,node/nodeModulesImportHelpersCollisions2.ts,['module=node20'],go-diff,rust-pass
 conformance,node/nodeModulesImportHelpersCollisions2.ts,['module=node16'],go-diff,rust-pass
-conformance,node/nodeModulesImportHelpersCollisions2.ts,['module=nodenext'],go-diff,rust-pass
 conformance,node/nodeModulesImportHelpersCollisions2.ts,['module=node18'],go-diff,rust-pass
+conformance,node/nodeModulesImportHelpersCollisions2.ts,['module=nodenext'],go-diff,rust-pass
 conformance,node/nodeModulesImportHelpersCollisions3.ts,"['module=node16', 'target=es2015']",go-diff,rust-pass
 conformance,node/nodeModulesImportHelpersCollisions3.ts,"['module=node18', 'target=es2015']",go-diff,rust-pass
-conformance,node/nodeModulesImportHelpersCollisions3.ts,"['module=nodenext', 'target=es2015']",go-diff,rust-pass
 conformance,node/nodeModulesImportHelpersCollisions3.ts,"['module=node20', 'target=es2015']",go-diff,rust-pass
+conformance,node/nodeModulesImportHelpersCollisions3.ts,"['module=nodenext', 'target=es2015']",go-diff,rust-pass
 conformance,node/nodeModulesImportMeta.ts,['module=node20'],go-diff,rust-pass
 conformance,node/nodeModulesImportMeta.ts,['module=node16'],go-diff,rust-pass
-conformance,node/nodeModulesImportMeta.ts,['module=nodenext'],go-diff,rust-pass
 conformance,node/nodeModulesImportMeta.ts,['module=node18'],go-diff,rust-pass
+conformance,node/nodeModulesImportMeta.ts,['module=nodenext'],go-diff,rust-pass
 conformance,node/nodeModulesImportModeDeclarationEmit1.ts,['module=node20'],go-diff,rust-pass
 conformance,node/nodeModulesImportModeDeclarationEmit1.ts,['module=node16'],go-diff,rust-pass
-conformance,node/nodeModulesImportModeDeclarationEmit1.ts,['module=nodenext'],go-diff,rust-pass
 conformance,node/nodeModulesImportModeDeclarationEmit1.ts,['module=node18'],go-diff,rust-pass
+conformance,node/nodeModulesImportModeDeclarationEmit1.ts,['module=nodenext'],go-diff,rust-pass
 conformance,node/nodeModulesImportModeDeclarationEmit2.ts,['module=node20'],go-diff,rust-pass
 conformance,node/nodeModulesImportModeDeclarationEmit2.ts,['module=node16'],go-diff,rust-pass
-conformance,node/nodeModulesImportModeDeclarationEmit2.ts,['module=nodenext'],go-diff,rust-pass
 conformance,node/nodeModulesImportModeDeclarationEmit2.ts,['module=node18'],go-diff,rust-pass
+conformance,node/nodeModulesImportModeDeclarationEmit2.ts,['module=nodenext'],go-diff,rust-pass
 conformance,node/nodeModulesImportResolutionIntoExport.ts,['module=node20'],go-pass,rust-diff
 conformance,node/nodeModulesImportResolutionIntoExport.ts,['module=nodenext'],go-pass,rust-diff
 conformance,node/nodeModulesImportResolutionNoCycle.ts,['module=node20'],go-diff,rust-pass
 conformance,node/nodeModulesImportResolutionNoCycle.ts,['module=node16'],go-diff,rust-pass
-conformance,node/nodeModulesImportResolutionNoCycle.ts,['module=nodenext'],go-diff,rust-pass
 conformance,node/nodeModulesImportResolutionNoCycle.ts,['module=node18'],go-diff,rust-pass
+conformance,node/nodeModulesImportResolutionNoCycle.ts,['module=nodenext'],go-diff,rust-pass
 conformance,node/nodeModulesPackageExports.ts,['module=node16'],go-diff,rust-pass
 conformance,node/nodeModulesPackageExports.ts,['module=node18'],go-diff,rust-pass
 conformance,node/nodeModulesPackageImports.ts,['module=node16'],go-diff,rust-pass
@@ -2431,8 +2475,8 @@ conformance,node/nodeModulesPackagePatternExports.ts,['module=node16'],go-diff,r
 conformance,node/nodeModulesPackagePatternExports.ts,['module=node18'],go-diff,rust-pass
 conformance,node/nodeModulesPackagePatternExportsExclude.ts,['module=node20'],go-diff,rust-pass
 conformance,node/nodeModulesPackagePatternExportsExclude.ts,['module=node16'],go-diff,rust-pass
-conformance,node/nodeModulesPackagePatternExportsExclude.ts,['module=nodenext'],go-diff,rust-pass
 conformance,node/nodeModulesPackagePatternExportsExclude.ts,['module=node18'],go-diff,rust-pass
+conformance,node/nodeModulesPackagePatternExportsExclude.ts,['module=nodenext'],go-diff,rust-pass
 conformance,node/nodeModulesPackagePatternExportsTrailers.ts,['module=node16'],go-diff,rust-pass
 conformance,node/nodeModulesPackagePatternExportsTrailers.ts,['module=node18'],go-diff,rust-pass
 conformance,node/nodeModulesTripleSlashReferenceModeDeclarationEmit1.ts,['module=node16'],go-diff,rust-pass
@@ -2451,8 +2495,8 @@ conformance,node/nodeModulesTripleSlashReferenceModeOverride2.ts,['module=node16
 conformance,node/nodeModulesTripleSlashReferenceModeOverride2.ts,['module=node18'],go-diff,rust-pass
 conformance,node/nodeModulesTripleSlashReferenceModeOverride3.ts,['module=node20'],go-diff,rust-pass
 conformance,node/nodeModulesTripleSlashReferenceModeOverride3.ts,['module=node16'],go-diff,rust-pass
-conformance,node/nodeModulesTripleSlashReferenceModeOverride3.ts,['module=nodenext'],go-diff,rust-pass
 conformance,node/nodeModulesTripleSlashReferenceModeOverride3.ts,['module=node18'],go-diff,rust-pass
+conformance,node/nodeModulesTripleSlashReferenceModeOverride3.ts,['module=nodenext'],go-diff,rust-pass
 conformance,node/nodeModulesTripleSlashReferenceModeOverride4.ts,['module=node16'],go-diff,rust-pass
 conformance,node/nodeModulesTripleSlashReferenceModeOverride4.ts,['module=node18'],go-diff,rust-pass
 conformance,node/nodeModulesTypesVersionPackageExports.ts,['module=node16'],go-diff,rust-pass
@@ -2780,28 +2824,28 @@ conformance,scanner/ecmascript5/scannerNumericLiteral9.ts,['target=es2015'],go-d
 conformance,scanner/ecmascript5/scannerS7.2_A1.5_T2.ts,[],go-diff,rust-pass
 conformance,scanner/ecmascript5/scannerS7.3_A1.1_T2.ts,[],go-diff,rust-pass
 conformance,scanner/ecmascript5/scannerUnexpectedNullCharacter1.ts,[],go-diff,rust-pass
-conformance,statements/VariableStatements/usingDeclarations/awaitUsingDeclarations.1.ts,['target=esnext'],skip-config,rust-pass
-conformance,statements/VariableStatements/usingDeclarations/awaitUsingDeclarations.1.ts,['target=es2022'],skip-config,rust-pass
 conformance,statements/VariableStatements/usingDeclarations/awaitUsingDeclarations.1.ts,['target=es2017'],skip-config,rust-pass
-conformance,statements/VariableStatements/usingDeclarations/awaitUsingDeclarations.2.ts,['target=esnext'],skip-config,rust-pass
-conformance,statements/VariableStatements/usingDeclarations/awaitUsingDeclarations.2.ts,['target=es2022'],skip-config,rust-pass
+conformance,statements/VariableStatements/usingDeclarations/awaitUsingDeclarations.1.ts,['target=es2022'],skip-config,rust-pass
+conformance,statements/VariableStatements/usingDeclarations/awaitUsingDeclarations.1.ts,['target=esnext'],skip-config,rust-pass
 conformance,statements/VariableStatements/usingDeclarations/awaitUsingDeclarations.2.ts,['target=es2017'],skip-config,rust-pass
-conformance,statements/VariableStatements/usingDeclarations/awaitUsingDeclarations.3.ts,['target=esnext'],skip-config,rust-pass
-conformance,statements/VariableStatements/usingDeclarations/awaitUsingDeclarations.3.ts,['target=es2022'],skip-config,rust-pass
+conformance,statements/VariableStatements/usingDeclarations/awaitUsingDeclarations.2.ts,['target=es2022'],skip-config,rust-pass
+conformance,statements/VariableStatements/usingDeclarations/awaitUsingDeclarations.2.ts,['target=esnext'],skip-config,rust-pass
 conformance,statements/VariableStatements/usingDeclarations/awaitUsingDeclarations.3.ts,['target=es2017'],skip-config,rust-pass
-conformance,statements/VariableStatements/usingDeclarations/usingDeclarations.1.ts,['target=es2015'],skip-config,rust-pass
-conformance,statements/VariableStatements/usingDeclarations/usingDeclarations.1.ts,['target=esnext'],skip-config,rust-pass
-conformance,statements/VariableStatements/usingDeclarations/usingDeclarations.1.ts,['target=es2022'],skip-config,rust-pass
+conformance,statements/VariableStatements/usingDeclarations/awaitUsingDeclarations.3.ts,['target=es2022'],skip-config,rust-pass
+conformance,statements/VariableStatements/usingDeclarations/awaitUsingDeclarations.3.ts,['target=esnext'],skip-config,rust-pass
 conformance,statements/VariableStatements/usingDeclarations/usingDeclarations.1.ts,['target=es2017'],skip-config,rust-pass
+conformance,statements/VariableStatements/usingDeclarations/usingDeclarations.1.ts,['target=es2015'],skip-config,rust-pass
+conformance,statements/VariableStatements/usingDeclarations/usingDeclarations.1.ts,['target=es2022'],skip-config,rust-pass
+conformance,statements/VariableStatements/usingDeclarations/usingDeclarations.1.ts,['target=esnext'],skip-config,rust-pass
 conformance,statements/VariableStatements/usingDeclarations/usingDeclarations.11.ts,['target=es2015'],skip-config,rust-pass
-conformance,statements/VariableStatements/usingDeclarations/usingDeclarations.2.ts,['target=es2015'],skip-config,rust-pass
-conformance,statements/VariableStatements/usingDeclarations/usingDeclarations.2.ts,['target=esnext'],skip-config,rust-pass
-conformance,statements/VariableStatements/usingDeclarations/usingDeclarations.2.ts,['target=es2022'],skip-config,rust-pass
 conformance,statements/VariableStatements/usingDeclarations/usingDeclarations.2.ts,['target=es2017'],skip-config,rust-pass
-conformance,statements/VariableStatements/usingDeclarations/usingDeclarations.3.ts,['target=es2015'],skip-config,rust-pass
-conformance,statements/VariableStatements/usingDeclarations/usingDeclarations.3.ts,['target=esnext'],skip-config,rust-pass
-conformance,statements/VariableStatements/usingDeclarations/usingDeclarations.3.ts,['target=es2022'],skip-config,rust-pass
+conformance,statements/VariableStatements/usingDeclarations/usingDeclarations.2.ts,['target=es2015'],skip-config,rust-pass
+conformance,statements/VariableStatements/usingDeclarations/usingDeclarations.2.ts,['target=es2022'],skip-config,rust-pass
+conformance,statements/VariableStatements/usingDeclarations/usingDeclarations.2.ts,['target=esnext'],skip-config,rust-pass
 conformance,statements/VariableStatements/usingDeclarations/usingDeclarations.3.ts,['target=es2017'],skip-config,rust-pass
+conformance,statements/VariableStatements/usingDeclarations/usingDeclarations.3.ts,['target=es2015'],skip-config,rust-pass
+conformance,statements/VariableStatements/usingDeclarations/usingDeclarations.3.ts,['target=es2022'],skip-config,rust-pass
+conformance,statements/VariableStatements/usingDeclarations/usingDeclarations.3.ts,['target=esnext'],skip-config,rust-pass
 conformance,statements/VariableStatements/usingDeclarations/usingDeclarations.4.ts,[],skip-config,rust-pass
 conformance,statements/VariableStatements/usingDeclarations/usingDeclarationsDeclarationEmit.1.ts,[],skip-config,rust-pass
 conformance,statements/VariableStatements/usingDeclarations/usingDeclarationsDeclarationEmit.2.ts,[],skip-config,rust-pass

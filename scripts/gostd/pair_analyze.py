@@ -34,7 +34,14 @@ for k in all_keys:
     for cn in configs:
         gs = g.get(cn, ('go-missing-config', ''))[0]
         rs = r.get(cn, ('rust-missing-config', ''))[0]
-        gskip = gs.startswith('go-') and gs != 'go-pass' and gs != 'go-diff'
+        if gs == 'go-missing-config' or rs == 'rust-missing-config':
+            # coverage gap: one side's expansion didn't produce this config
+            who = 'rust' if rs == 'rust-missing-config' else 'go'
+            stat[f'coverage-gap({who}-did-not-run)'] += 1
+            if who == 'rust':
+                mismatch_rows.append((k[0], k[1], str(sorted(cn)), gs, rs))
+            continue
+        gskip = gs.startswith('go-') and gs not in ('go-pass', 'go-diff')
         rskip = rs.startswith('rust-skip')
         if gskip or rskip:
             stat['skipped-config'] += 1
@@ -42,12 +49,12 @@ for k in all_keys:
         gok = gs == 'go-pass'
         rok = rs == 'rust-pass'
         if gok and rok:
-            stat['aligned-pass'] += 1
+            stat['both-pass'] += 1
         elif not gok and not rok:
-            stat['aligned-diff'] += 1
+            stat['both-diff'] += 1
         else:
             case_aligned = False
-            key = 'rust-diff/go-pass' if gok else 'rust-pass/go-diff'
+            key = 'DISAGREE rust-diff/go-pass' if gok else 'DISAGREE rust-pass/go-diff'
             stat[key] += 1
             mismatch_rows.append((k[0], k[1], str(sorted(cn)), gs, rs))
     stat['cases-aligned'] += case_aligned
