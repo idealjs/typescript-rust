@@ -20,10 +20,49 @@ use std::path::{Path, PathBuf};
 /// Canonical "no baseline content" marker, matching tsgo's `baseline.NoContent`.
 pub const NO_CONTENT: &str = "<no content>";
 
-/// Root directory of committed reference baselines.
-pub const REFERENCE_ROOT: &str = "tests/baselines/reference";
+/// Baseline flavor: whose accepted output is the oracle.
+///
+/// - `go` (default): tsgo's own committed baselines
+///   (`typescript-go/tsc/testdata/baselines/reference`, mirrored at
+///   `tests/baselines/reference-go`) — the port's standard is "match what the
+///   Go implementation accepts".
+/// - `upstream`: the upstream JS-tsc baselines (`tests/baselines/reference`)
+///   — retained for cross-checks via `TSOX_BASELINE_FLAVOR=upstream`.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Flavor {
+    Go,
+    Upstream,
+}
+
+pub fn flavor() -> Flavor {
+    match std::env::var("TSOX_BASELINE_FLAVOR").as_deref() {
+        Ok("upstream") => Flavor::Upstream,
+        _ => Flavor::Go,
+    }
+}
+
+/// Root directory of committed reference baselines for the active flavor.
+pub fn reference_root() -> &'static str {
+    match flavor() {
+        Flavor::Go => "tests/baselines/reference-go",
+        Flavor::Upstream => "tests/baselines/reference",
+    }
+}
+
 /// Root directory of per-run actual output (gitignored).
 pub const LOCAL_ROOT: &str = "tests/baselines/local";
+
+/// Cut a baseline file to its flat summary segment: everything before the
+/// first `\n==== ` expanded-section marker. tsgo's committed baselines carry
+/// the full tsc format (summary + `==== file (N errors) ====` + squiggles);
+/// this harness renders the summary segment only, so the comparison consumes
+/// the flat prefix of both flavors.
+pub fn flat_segment(text: &str) -> &str {
+    match text.find("\n==== ") {
+        Some(i) => &text[..=i],
+        None => text,
+    }
+}
 
 /// Whether the runner is in "accept" mode (write actual over reference).
 pub fn accept_mode() -> bool {
@@ -56,7 +95,7 @@ pub enum Outcome {
 /// `REFERENCE_ROOT/<subfolder>/<name><ext>`; on mismatch the actual is written
 /// to `LOCAL_ROOT/<subfolder>/<name><ext>`.
 pub fn compare(subfolder: &str, name: &str, ext: &str, actual: &str) -> Outcome {
-    let reference_path = Path::new(REFERENCE_ROOT)
+    let reference_path = Path::new(reference_root())
         .join(subfolder)
         .join(format!("{name}{ext}"));
     let local_path = Path::new(LOCAL_ROOT)
@@ -70,14 +109,19 @@ pub fn compare(subfolder: &str, name: &str, ext: &str, actual: &str) -> Outcome 
             // Accepting a deletion: remove the reference file if present.
             fs::remove_file(&reference_path).ok();
         } else {
-            fs::write(&reference_path, actual).ok();
+            fs::write(&reference_path, &actual).ok();
         }
         return Outcome::Passed;
     }
 
-    // Normal compare mode.
-    let expected = fs::read_to_string(&reference_path).unwrap_or_else(|_| NO_CONTENT.to_string());
+    // Normal compare mode. Baselines are cut to the flat summary segment
+    // (see `flat_segment`) and trailing whitespace normalized.
+    let expected = fs::read_to_string(&reference_path)
+        .map(|t| flat_segment(&t).replace("\r\n", "\n").trim_end().to_string())
+        .unwrap_or_else(|_| NO_CONTENT.to_string());
     let reference_existed = reference_path.is_file();
+    let actual = actual.trim_end();
+    let actual = actual.to_string();
 
     if actual == expected {
         return Outcome::Passed;
@@ -96,7 +140,7 @@ pub fn compare(subfolder: &str, name: &str, ext: &str, actual: &str) -> Outcome 
         ));
         fs::write(&delete_marker, "").ok();
     } else {
-        fs::write(&local_path, actual).ok();
+        fs::write(&local_path, &actual).ok();
     }
 
     let kind = if !reference_existed {
@@ -155,8 +199,14 @@ impl KnownDiffs {
     /// Load from `accepted.txt` and `triaged.txt` under `REFERENCE_ROOT`.
     pub fn load() -> Self {
         let mut entries = HashSet::new();
-        for fname in ["accepted.txt", "triaged.txt"] {
-            let p = Path::new(REFERENCE_ROOT).join(fname);
+        // Ledger is per flavor: the go-flavor ledger starts empty (a diff
+        // against tsgo's accepted output is real work, not a known gap).
+        let ledger = match flavor() {
+            Flavor::Go => "triaged-go.txt",
+            Flavor::Upstream => "triaged.txt",
+        };
+        for fname in ["accepted.txt", ledger] {
+            let p = Path::new(reference_root()).join(fname);
             for e in load_list(&p) {
                 entries.insert(e);
             }

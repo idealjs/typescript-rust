@@ -405,6 +405,58 @@ fn compute_configurations(
 /// configuration (the worker runs in a child process, but a panic — as
 /// opposed to a stack overflow — is recoverable in-process and we avoid a
 /// needless process kill).
+
+/// tsgo `compiler_runner.go` `skippedTests` — cases the Go runner itself
+/// excludes (removed-option options and built-typescript API samples).
+/// Applied verbatim under the go baseline flavor.
+const TSGO_SKIPPED_TESTS: &[&str] = &[
+    "APILibCheck.ts",
+    "APISample_Watch.ts",
+    "APISample_WatchWithDefaults.ts",
+    "APISample_WatchWithOwnWatchHost.ts",
+    "APISample_compile.ts",
+    "APISample_jsdoc.ts",
+    "APISample_linter.ts",
+    "APISample_parseConfig.ts",
+    "APISample_transform.ts",
+    "APISample_watcher.ts",
+    "preserveUnusedImports.ts",
+    "noCrashWithVerbatimModuleSyntaxAndImportsNotUsedAsValues.ts",
+    "verbatimModuleSyntaxCompat.ts",
+    "verbatimModuleSyntaxCompat2.ts",
+    "verbatimModuleSyntaxCompat3.ts",
+    "verbatimModuleSyntaxCompat4.ts",
+    "preserveValueImports.ts",
+    "preserveValueImports_importsNotUsedAsValues.ts",
+    "preserveValueImports_errors.ts",
+    "preserveValueImports_mixedImports.ts",
+    "preserveValueImports_module.ts",
+    "importsNotUsedAsValues_error.ts",
+    "alwaysStrictNoImplicitUseStrict.ts",
+    "nonPrimitiveIndexingWithForInSupressError.ts",
+    "parameterInitializerBeforeDestructuringEmit.ts",
+    "mappedTypeUnionConstraintInferences.ts",
+    "lateBoundConstraintTypeChecksCorrectly.ts",
+    "keyofDoesntContainSymbols.ts",
+    "isolatedModulesOut.ts",
+    "noStrictGenericChecks.ts",
+    "noImplicitUseStrict_umd.ts",
+    "noImplicitUseStrict_system.ts",
+    "noImplicitUseStrict_es6.ts",
+    "noImplicitUseStrict_commonjs.ts",
+    "noImplicitUseStrict_amd.ts",
+    "noImplicitAnyIndexingSuppressed.ts",
+    "excessPropertyErrorsSuppressed.ts",
+    "moduleNoneDynamicImport.ts",
+    "moduleNoneErrors.ts",
+    "moduleNoneOutFile.ts",
+    "noErrorUsingImportExportModuleAugmentationInDeclarationFile1.ts",
+    "noErrorUsingImportExportModuleAugmentationInDeclarationFile2.ts",
+    "noErrorUsingImportExportModuleAugmentationInDeclarationFile3.ts",
+    "requireOfJsonFileWithModuleEmitNone.ts",
+    "requireOfJsonFileWithModuleNodeResolutionEmitNone.ts",
+];
+
 fn process_case(content: &str, basename: &str) -> Vec<ConfigOutcome> {
     let settings = extract_settings(content);
 
@@ -412,6 +464,15 @@ fn process_case(content: &str, basename: &str) -> Vec<ConfigOutcome> {
         return vec![ConfigOutcome {
             suffix: String::new(),
             outcome: CaseOutcome::Skip("in SKIPPED_CASES list".to_string()),
+        }];
+    }
+    // Go-standard alignment: tsgo's own runner skips these basenames
+    // (removed options / built-typescript API samples) — under the go
+    // baseline flavor we exclude them from the corpus identically.
+    if baseline::flavor() == baseline::Flavor::Go && TSGO_SKIPPED_TESTS.contains(&basename) {
+        return vec![ConfigOutcome {
+            suffix: String::new(),
+            outcome: CaseOutcome::Skip("in tsgo skippedTests".to_string()),
         }];
     }
     // Circular-type family — the checker lacks Go's recursion guards and these
@@ -640,6 +701,19 @@ fn run_case(
             format!("{stem}({suffix})")
         };
         let label = if suffix.is_empty() { "default" } else { suffix };
+        // Go-standard alignment: a config whose (suffix) baseline does not
+        // exist in tsgo's tree is a config tsgo does not accept/output — skip
+        // it rather than fabricating a mismatch.
+        if baseline::flavor() == baseline::Flavor::Go
+            && !suffix.is_empty()
+            && !std::path::Path::new(baseline::reference_root())
+                .join(subfolder())
+                .join(format!("{name}{ext}"))
+                .is_file()
+        {
+            notes.push(format!("{label}: skip (config baseline missing in tsgo tree)"));
+            continue;
+        }
         if let Some(reason) = entry["skip"].as_str() {
             notes.push(format!("{label}: skip ({reason})"));
             continue;

@@ -12,6 +12,18 @@
 - **四门禁**：1362 / 2 / 1010 / 15 全绿；三笔提交 1d515ab / 179b776 / 1b1ad10。
 - **12,466 条回归（6 并发，~2.5h）：0 FAIL**（5,665P / 2,305S / 4,474ad + transpile 22ad）；4 例超时 SKIP（jsxRuntimePragma / arbitraryModuleNamespaceIdentifiers_module / callChainWithSuper / tsxReactEmitSpreadAttribute）单跑核实为已知慢多配置族（真实输出或台账 DIFF，非挂死）。与上一验证轮结论一致，整理无回归。
 
+## Go 标准对齐轮（2026-09-04，按 tsgo 源码标准重建测试口径）
+
+- **oracle 切换**：默认基线改为 **tsgo 自有基线**（`typescript-go/tsc/testdata/baselines/reference` 镜像至 `tests/baselines/reference-go/`，7,200 份 errors.txt；比对时裁扁平段 + CRLF 归一）。旧 upstream 基线树保留，`TSOX_BASELINE_FLAVOR=upstream` 可切回。台账按口径分家：go 口径用 `triaged-go.txt`（初始为空），upstream 口径沿用 `triaged.txt`。
+- **用例集对齐**：应用 tsgo `compiler_runner.go` 的 `skippedTests`（47 项，removed-options/API samples）；配置级跳过"tsgo 树无该 (suffix) 基线"的配置（其运行器不产出即不判定）。
+- **逐用例双跑对拍**（非仅数字对齐——每个用例每个配置两侧各跑一遍，字节比对同一 tsgo 基线；14,274 Go 配置 / 14,912 Rust 配置条目）：
+  - 双侧通过 3,709；双侧 diff 4,030（其基线树落后于其 main，双侧都不匹配其陈旧基线）；我们通过/Go diff 2,201（其树陈旧而我们的输出恰与其历史接受态一致）；**我们 diff/Go 通过 802 配置（715 用例）= 真实剩余差距**
+  - 用例级完全对齐 **9,603/12,399（77.5%）**；worklist：`scripts/gostd/mismatch_worklist.csv`（715 用例中 652 为默认配置、40 为 target=es2015）
+- 测量工具入库 `scripts/gostd/`（godecls 解析 Go 选项声明得 72 项 vary-by / diffrun 逐配置双跑 / rust_diff / pair_analyze 配对）；全程修正三个测量伪影：指令行剥离的行号语义、`<no content>` 哨兵、CRLF 书写器编码（用例源码 9,247 个 CRLF 文件原样不动作被测内容）。
+- 四门禁 1362/2/1010/15 绿；本次仅动 tests/ 与 scripts/，src/ 无改动。
+
+# 测试流程
+
 # 测试流程
 
 # 测试流程」「# conformance 轮」与各页记录；旧 sweep 脚本在 `scripts/sweeps/`，过程性文档在 `docs/`。
