@@ -1,10 +1,3 @@
-//! Core language service (1:1 port of Go's `internal/ls/languageservice.go`).
-//!
-//! `LanguageService` is the central type that coordinates the compiler program,
-//! converters, and host to provide LSP features. Feature-provider methods are
-//! added via `impl LanguageService` blocks in sibling modules (hover.rs,
-//! definition.rs, etc.), mirroring Go's per-file method definitions.
-
 #![allow(dead_code)]
 
 use std::collections::HashMap;
@@ -20,19 +13,14 @@ use crate::tspath;
 
 use super::host::{AutoImportRegistry, EcmaLineInfo, Host};
 
-/// Stub for `*sourcemap.DocumentPositionMapper` (not yet ported).
 pub struct DocumentPositionMapper;
 
-/// A file name plus a text range, used for deduplication.
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct FileRange {
     pub file_name: String,
     pub file_range: TextRange,
 }
 
-/// The language service.
-///
-/// Mirrors Go's `ls.LanguageService` struct.
 pub struct LanguageService {
     pub(crate) project_path: tspath::Path,
     pub(crate) host: Box<dyn Host>,
@@ -43,9 +31,7 @@ pub struct LanguageService {
 }
 
 impl LanguageService {
-    /// Create a new language service.
-    ///
-    /// Mirrors `NewLanguageService`.
+
     pub fn new(
         project_path: tspath::Path,
         program: Arc<compiler::Program>,
@@ -67,7 +53,7 @@ impl LanguageService {
     pub fn to_path(&self, file_name: &str) -> tspath::Path {
         tspath::to_path(
             file_name,
-            "", // TODO: program.GetCurrentDirectory()
+            "",
             self.use_case_sensitive_file_names(),
         )
     }
@@ -84,9 +70,6 @@ impl LanguageService {
         &self.active_config.format_code_settings
     }
 
-    /// Returns `(program, Option<SourceFile>)`. The file is `None` if not found.
-    ///
-    /// Mirrors `tryGetProgramAndFile`.
     pub fn try_get_program_and_file(
         &self,
         file_name: &str,
@@ -96,9 +79,6 @@ impl LanguageService {
         (program, file)
     }
 
-    /// Returns `(program, SourceFile)`. Panics if the file is not found.
-    ///
-    /// Mirrors `getProgramAndFile`.
     pub fn get_program_and_file(
         &self,
         document_uri: &DocumentUri,
@@ -113,7 +93,7 @@ impl LanguageService {
         &self,
         _file_name: &str,
     ) -> Option<&DocumentPositionMapper> {
-        // TODO: implement source-map lookup
+
         None
     }
 
@@ -133,9 +113,6 @@ impl LanguageService {
         self.host.auto_import_registry()
     }
 
-    // ── Range / location helpers (used across feature providers) ───────────
-
-    /// Convert a text range to an LSP `Range` within `script`.
     pub fn create_lsp_range_from_bounds(
         &self,
         pos: usize,
@@ -145,7 +122,6 @@ impl LanguageService {
         self.converters.to_lsp_range(script, pos, end)
     }
 
-    /// Convert a text range to an LSP `Location` within `script`.
     pub fn create_lsp_location_from_bounds(
         &self,
         script: &dyn crate::ls::lsconv::converters::Script,
@@ -154,8 +130,6 @@ impl LanguageService {
     ) -> Location {
         self.converters.to_lsp_location(script, pos, end)
     }
-
-    // ── Module-specifier-completion host delegations ───────────────────────
 
     pub fn directory_exists(&self, path: &str) -> bool {
         self.host.directory_exists(path)
@@ -168,12 +142,12 @@ impl LanguageService {
         includes: &[String],
     ) -> Vec<String> {
         self.host.read_directory(
-            "", // current_dir — TODO: program.GetCurrentDirectory()
+            "",
             path,
             extensions,
             &[],
             includes,
-            -1, // unlimited depth
+            -1,
         )
     }
 
@@ -182,7 +156,6 @@ impl LanguageService {
     }
 }
 
-/// Simple `Script` implementation backed by a file name and text.
 pub struct ScriptInfo {
     pub file_name: String,
     pub text: String,

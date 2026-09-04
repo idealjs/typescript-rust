@@ -1,15 +1,8 @@
-//! JavaScript-like number handling, ported from `internal/jsnum/`.
-//!
-//! Provides a `Number` type that mirrors JavaScript's `number` behavior,
-//! including bitwise operations (which operate on 32-bit integers), and
-//! `PseudoBigInt` for BigInt literal evaluation.
-
 use std::fmt;
 
-pub const MAX_SAFE_INTEGER: Number = Number(9007199254740991.0); // 2^53 - 1
-pub const MIN_SAFE_INTEGER: Number = Number(-9007199254740991.0); // -(2^53 - 1)
+pub const MAX_SAFE_INTEGER: Number = Number(9007199254740991.0);
+pub const MIN_SAFE_INTEGER: Number = Number(-9007199254740991.0);
 
-/// A JavaScript-like number. All operations behave as they would in JavaScript.
 #[derive(Clone, Copy, PartialEq, PartialOrd)]
 pub struct Number(pub f64);
 
@@ -17,11 +10,11 @@ impl Eq for Number {}
 
 impl std::hash::Hash for Number {
     fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
-        // Normalize NaN and -0.0 for consistent hashing
+
         if self.0.is_nan() {
             f64::NAN.to_bits().hash(state);
         } else if self.0 == 0.0 {
-            // Both +0.0 and -0.0 hash the same
+
             0.0f64.to_bits().hash(state);
         } else {
             self.0.to_bits().hash(state);
@@ -50,21 +43,20 @@ impl Number {
         self.0.is_finite()
     }
 
-    /// Convert to int32 per ECMA262 ToInt32.
     pub fn to_int32(self) -> i32 {
         let x = self.0;
-        // Fast path: if the number is an SMI (fits in i32 and round-trips exactly)
+
         let smi = x as i32;
         if smi as f64 == x {
             return smi;
         }
-        // Non-finite or zero
+
         if is_non_finite(x) {
             return 0;
         }
         let x = x.trunc();
-        let x = x.rem_euclid(4294967296.0); // 2^32
-        // If int32bit >= 2^31, return int32bit - 2^32
+        let x = x.rem_euclid(4294967296.0);
+
         if x >= 2147483648.0 {
             (x - 4294967296.0) as i32
         } else {
@@ -72,7 +64,6 @@ impl Number {
         }
     }
 
-    /// Convert to uint32 per ECMA262 ToUint32.
     pub fn to_uint32(self) -> u32 {
         self.to_int32() as u32
     }
@@ -149,10 +140,7 @@ impl Number {
         if b == 1.0 && e.is_nan() {
             return Number::nan();
         }
-        // For integer base and non-negative integer exponent, use exact
-        // integer exponentiation then convert to f64. This matches Go's
-        // correctly-rounded result (Go uses big.Int). f64::powf diverges by
-        // 1 ULP for some cases (e.g. 5**210).
+
         if b.is_finite()
             && b.fract() == 0.0
             && b.abs() < (1u64 << 53) as f64
@@ -173,7 +161,6 @@ impl Number {
         Number(b.powf(e))
     }
 
-    /// Parse a string to a Number, following ECMA262 StringToNumber.
     pub fn from_string(s: &str) -> Number {
         let s = s.trim_matches(|c: char| {
             matches!(
@@ -189,14 +176,12 @@ impl Number {
             _ => {}
         }
 
-        // Check all runes are valid number characters
         for r in s.chars() {
             if !is_number_rune(r) {
                 return Number::nan();
             }
         }
 
-        // Try integer prefixes (0b, 0o, 0x)
         if s.len() > 2 {
             let prefix = &s[..2];
             let rest = &s[2..];
@@ -222,7 +207,7 @@ impl Number {
                         if let Ok(i) = i64::from_str_radix(rest, 16) {
                             return Number(i as f64);
                         }
-                        // Fall back to u128 for values >= 2^63 (Go uses big.Int).
+
                         if let Ok(n) = u128::from_str_radix(rest, 16) {
                             return Number(n as f64);
                         }
@@ -233,19 +218,17 @@ impl Number {
             }
         }
 
-        // Try decimal integer
         if s.chars().all(|c| c.is_ascii_digit()) {
             if let Ok(i) = s.parse::<i64>() {
                 return Number(i as f64);
             }
-            // Large integer
+
             if let Ok(f) = s.parse::<f64>() {
                 return Number(f);
             }
             return Number::nan();
         }
 
-        // Try float
         if let Ok(f) = s.parse::<f64>() {
             return Number(f);
         }
@@ -266,17 +249,14 @@ impl fmt::Display for Number {
                 write!(f, "Infinity")
             };
         }
-        // Fast path for safe integers
+
         if (MIN_SAFE_INTEGER.0..=MAX_SAFE_INTEGER.0).contains(&self.0) {
             let i = self.0 as i64;
             if i as f64 == self.0 {
                 return write!(f, "{}", i);
             }
         }
-        // Whole numbers in (MAX_SAFE_INTEGER, 1e21): format as full decimal.
-        // serde_json may use exponential notation for some of these; JS uses
-        // full digits (e.g. 1e20 → "100000000000000000000"). Rust's Display
-        // gives the shortest repr but may also use exponential, so we expand.
+
         if self.0.abs() < 1e21 && self.0.fract() == 0.0 {
             let s = format!("{}", self.0);
             if s.contains('e') || s.contains('E') {
@@ -284,7 +264,7 @@ impl fmt::Display for Number {
             }
             return write!(f, "{}", s);
         }
-        // Use serde_json for JS-compatible float formatting
+
         write!(
             f,
             "{}",
@@ -369,17 +349,6 @@ fn is_number_rune(r: char) -> bool {
     )
 }
 
-// ─────────────────────────────────────────────────────────────────────
-// Big-integer exponentiation helpers
-//
-// Used by `Number::exponentiate` to compute base^exp for integer base and
-// non-negative integer exponent with correct f64 rounding. Go uses big.Int
-// for the same purpose; Rust has no stdlib bigint, so we implement a minimal
-// version with Vec<u32> limbs.
-// ─────────────────────────────────────────────────────────────────────
-
-/// Expand an exponential-notation number string to full decimal notation.
-/// E.g. "1e20" → "100000000000000000000", "-2.1e16" → "-21000000000000000".
 fn expand_exponential(s: &str) -> String {
     let (negative, rest) = if let Some(r) = s.strip_prefix('-') {
         (true, r)
@@ -426,7 +395,6 @@ fn expand_exponential(s: &str) -> String {
     result
 }
 
-/// Multiply two big integers represented as little-endian u32 limbs.
 fn big_mul(a: &[u32], b: &[u32]) -> Vec<u32> {
     if a.iter().all(|&x| x == 0) || b.iter().all(|&x| x == 0) {
         return vec![0];
@@ -450,7 +418,6 @@ fn big_mul(a: &[u32], b: &[u32]) -> Vec<u32> {
     result
 }
 
-/// Convert a big integer (little-endian u32 limbs) to a correctly-rounded f64.
 fn big_to_f64(limbs: &[u32]) -> f64 {
     let n = limbs.iter().rposition(|&x| x != 0).map_or(0, |i| i + 1);
     if n == 0 {
@@ -458,10 +425,8 @@ fn big_to_f64(limbs: &[u32]) -> f64 {
     }
     let limbs = &limbs[..n];
 
-    // Position of the most significant 1-bit (0-indexed from LSB).
     let top = (n - 1) * 32 + (31 - limbs[n - 1].leading_zeros() as usize);
 
-    // Extract 52 mantissa bits: positions [top-1, top-2, ..., top-52].
     let mut mantissa: u64 = 0;
     for i in 0..52 {
         if i >= top {
@@ -473,12 +438,10 @@ fn big_to_f64(limbs: &[u32]) -> f64 {
 
     let mut exponent = top as u64 + 1023;
 
-    // Round-to-nearest-even if there are bits below the mantissa.
     if top >= 53 {
         let round_pos = top - 53;
         let round_bit = (limbs[round_pos / 32] >> (round_pos % 32)) & 1;
 
-        // Sticky: any bit set at positions strictly below round_pos.
         let sticky = if round_pos == 0 {
             false
         } else {
@@ -507,7 +470,6 @@ fn big_to_f64(limbs: &[u32]) -> f64 {
     f64::from_bits(exponent << 52 | mantissa)
 }
 
-/// Compute base^exp exactly as a big integer, then convert to correctly-rounded f64.
 fn pow_exact_f64(base: u64, exp: u32) -> f64 {
     if exp == 0 {
         return 1.0;
@@ -537,7 +499,6 @@ fn pow_exact_f64(base: u64, exp: u32) -> f64 {
     big_to_f64(&result)
 }
 
-/// A JS-like bigint, used for evaluating BigInt literals.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct PseudoBigInt {
     pub negative: bool,
@@ -567,7 +528,6 @@ impl PseudoBigInt {
         }
     }
 
-    /// Parse a BigInt literal (with trailing 'n') into a PseudoBigInt.
     pub fn parse(text: &str) -> PseudoBigInt {
         let (text, negative) = text
             .strip_prefix('-')
@@ -590,27 +550,26 @@ impl fmt::Display for PseudoBigInt {
     }
 }
 
-/// Parse a BigInt literal string (with trailing 'n') to base-10 string.
 fn parse_pseudo_big_int(string_value: &str) -> String {
     let s = string_value.strip_suffix('n').unwrap_or(string_value);
     if s.len() > 1 {
         match s.as_bytes()[1] {
             b'b' | b'B' => {
-                // Binary
+
                 let digits = s[2..].replace('_', "");
                 if let Ok(n) = u128::from_str_radix(&digits, 2) {
                     return n.to_string();
                 }
             }
             b'o' | b'O' => {
-                // Octal
+
                 let digits = s[2..].replace('_', "");
                 if let Ok(n) = u128::from_str_radix(&digits, 8) {
                     return n.to_string();
                 }
             }
             b'x' | b'X' => {
-                // Hex
+
                 let digits = s[2..].replace('_', "");
                 if let Ok(n) = u128::from_str_radix(&digits, 16) {
                     return n.to_string();
@@ -619,7 +578,7 @@ fn parse_pseudo_big_int(string_value: &str) -> String {
             _ => {}
         }
     }
-    // Decimal
+
     let s = s.trim_start_matches('0').replace('_', "");
     if s.is_empty() { "0".to_string() } else { s }
 }
@@ -630,20 +589,15 @@ mod tests {
 
     const MAX_MANTISSA: u64 = (1 << 53) - 1;
 
-    // ---- helpers (ported from Go test helpers) ----
-
     fn num_from_bits(b: u64) -> Number {
         Number(f64::from_bits(b))
     }
 
-    /// Construct a Number from IEEE 754 sign/exponent/mantissa parts.
-    /// Ported from ryu_test.go's `ieeeParts2Double`.
     fn ieee_parts_2_double(sign: bool, ieee_exponent: u32, ieee_mantissa: u64) -> Number {
         let sign_bit: u64 = if sign { 1 } else { 0 };
         num_from_bits((sign_bit << 63) | (u64::from(ieee_exponent) << 52) | ieee_mantissa)
     }
 
-    /// NaN-aware equality check, mirroring Go's `assertEqualNumber`.
     fn assert_equal_number(got: Number, want: Number) {
         if got.is_nan() || want.is_nan() {
             assert_eq!(got.is_nan(), want.is_nan(), "got: {}, want: {}", got, want);
@@ -652,18 +606,9 @@ mod tests {
         }
     }
 
-    // ---- test data tables (ported 1:1 from Go) ----
-
-    // `stringTests` from string_test.go concatenated with `ryuTests` from ryu_test.go.
-    //
-    // Rust's `Display` impl uses `serde_json::to_string` for numbers outside the
-    // safe-integer fast path. For whole numbers with magnitude in
-    // (MAX_SAFE_INTEGER, 1e21) this produces exponential notation (e.g. "1e+20")
-    // instead of full digits (e.g. "100000000000000000000"). Those cases are in
-    // `string_tests_display_divergent()`. `FromString` handles them all correctly.
     fn string_tests() -> Vec<(Number, &'static str)> {
         vec![
-            // ---- string_test.go ----
+
             (Number::nan(), "NaN"),
             (Number::inf(1), "Infinity"),
             (Number::inf(-1), "-Infinity"),
@@ -691,7 +636,7 @@ mod tests {
             (Number(444123.789123456789875436), "444123.7891234568"),
             (Number(-444123.78963636363636363636), "-444123.7896363636"),
             (Number(1e21), "1e+21"),
-            // ---- ryu_test.go ----
+
             (Number(2.2250738585072014e-308), "2.2250738585072014e-308"),
             (num_from_bits(0x7fefffffffffffff), "1.7976931348623157e+308"),
             (num_from_bits(1), "5e-324"),
@@ -823,10 +768,6 @@ mod tests {
         ]
     }
 
-    // String test cases where Rust's `Display` impl diverges from JS `toString`.
-    // These are whole numbers with magnitude in (MAX_SAFE_INTEGER, 1e21) where
-    // serde_json produces exponential notation instead of full digits.
-    // `FromString` parses them correctly; only `to_string()` diverges.
     fn string_tests_display_divergent() -> Vec<(Number, &'static str)> {
         vec![
             (Number(19686109595169230000.0), "19686109595169230000"),
@@ -844,9 +785,6 @@ mod tests {
         ]
     }
 
-    // `fromStringTests` from string_test.go.
-    // Two hex literals >= 2^63 that overflow the i64-based parser are tested
-    // separately in `test_from_string_hex_overflow`.
     fn from_string_tests() -> Vec<(Number, &'static str)> {
         vec![
             (Number::nan(), "    NaN"),
@@ -892,7 +830,7 @@ mod tests {
             (Number(0o12_i64 as f64), "0O12"),
             (Number(0x123456789abcdef0_i64 as f64), "0x123456789abcdef0"),
             (Number(0x123456789abcdef0_i64 as f64), "0X123456789ABCDEF0"),
-            // Skipped: hex literals >= 2^63 overflow i64-based parser
+
             (Number::nan(), "0B0.0"),
             (
                 Number(1.231235345083403e91),
@@ -952,13 +890,9 @@ mod tests {
         ]
     }
 
-    // ---- 15 Go test ports ----
-
-    // 1. TestParsePseudoBigInt (pseudobigint_test.go)
     #[test]
     fn test_parse_pseudo_bigint() {
-        // Subtest 1: strip base-10 strings (with leading zeros) for a range of
-        // safe integers, mirroring Go's "strip base-10 strings".
+
         let mut test_numbers: Vec<Number> = Vec::new();
         for i in 0..1000_i64 {
             test_numbers.push(Number(i as f64));
@@ -981,8 +915,6 @@ mod tests {
             }
         }
 
-        // Subtest 2: parse non-decimal bases (small numbers).
-        // Cases with underscore separators are in test_parse_pseudo_bigint_underscores.
         let non_decimal: &[(&str, &str)] = &[
             ("0b0n", "0"),
             ("0b1n", "1"),
@@ -1006,7 +938,6 @@ mod tests {
             );
         }
 
-        // Subtest 3: can parse large literals.
         assert_eq!(
             PseudoBigInt::parse("123456789012345678901234567890n").to_string(),
             "123456789012345678901234567890"
@@ -1025,7 +956,6 @@ mod tests {
         );
     }
 
-    // Underscore-separated BigInt literals from Go's TestParsePseudoBigInt.
     #[test]
     fn test_parse_pseudo_bigint_underscores() {
         let cases: &[(&str, &str)] = &[
@@ -1043,7 +973,6 @@ mod tests {
         }
     }
 
-    // 2. TestToInt32 (jsnum_test.go)
     #[test]
     fn test_to_int32() {
         let cases: &[(Number, i32)] = &[
@@ -1097,7 +1026,6 @@ mod tests {
         }
     }
 
-    // 3. TestBitwiseNOT (jsnum_test.go)
     #[test]
     fn test_bitwise_not() {
         let cases: &[(Number, Number)] = &[
@@ -1114,7 +1042,6 @@ mod tests {
         }
     }
 
-    // 4. TestBitwiseAND (jsnum_test.go)
     #[test]
     fn test_bitwise_and() {
         let cases: &[(Number, Number, Number)] = &[
@@ -1128,7 +1055,6 @@ mod tests {
         }
     }
 
-    // 5. TestBitwiseOR (jsnum_test.go)
     #[test]
     fn test_bitwise_or() {
         let cases: &[(Number, Number, Number)] = &[
@@ -1142,7 +1068,6 @@ mod tests {
         }
     }
 
-    // 6. TestBitwiseXOR (jsnum_test.go)
     #[test]
     fn test_bitwise_xor() {
         let cases: &[(Number, Number, Number)] = &[
@@ -1156,7 +1081,6 @@ mod tests {
         }
     }
 
-    // 7. TestSignedRightShift (jsnum_test.go)
     #[test]
     fn test_signed_right_shift() {
         let cases: &[(Number, Number, Number)] = &[
@@ -1179,7 +1103,6 @@ mod tests {
         }
     }
 
-    // 8. TestUnsignedRightShift (jsnum_test.go)
     #[test]
     fn test_unsigned_right_shift() {
         let cases: &[(Number, Number, Number)] = &[
@@ -1202,7 +1125,6 @@ mod tests {
         }
     }
 
-    // 9. TestLeftShift (jsnum_test.go)
     #[test]
     fn test_left_shift() {
         let cases: &[(Number, Number, Number)] = &[
@@ -1223,10 +1145,9 @@ mod tests {
         }
     }
 
-    // 10. TestRemainder (jsnum_test.go)
     #[test]
     fn test_remainder() {
-        // `f64 %` matches Go's `math.Mod` (IEEE 754 truncated remainder).
+
         let cases: &[(Number, Number, Number)] = &[
             (Number::nan(), Number(1.0), Number::nan()),
             (Number(1.0), Number::nan(), Number::nan()),
@@ -1258,7 +1179,6 @@ mod tests {
         }
     }
 
-    // 11. TestExponentiate (jsnum_test.go)
     #[test]
     fn test_exponentiate() {
         let cases: &[(Number, Number, Number)] = &[
@@ -1285,7 +1205,7 @@ mod tests {
             (Number(-1.0), Number::inf(1), Number::nan()),
             (Number(-1.0), Number::inf(-1), Number::nan()),
             (Number(1.0), Number::nan(), Number::nan()),
-            // Cases where Rust's `f64::powf` agrees with the correctly-rounded result
+
             (
                 Number(10.0),
                 Number(308.0),
@@ -1302,9 +1222,6 @@ mod tests {
         }
     }
 
-    // Exponentiate case where Rust's f64::powf diverges from the correctly-rounded
-    // result by 1 ULP. Go uses big.Int for integer base ** integer exponent where
-    // the result exceeds 53 bits; Rust uses f64::powf without that optimization.
     #[test]
     fn test_exponentiate_ulp_divergence() {
         assert_equal_number(
@@ -1313,7 +1230,6 @@ mod tests {
         );
     }
 
-    // 12. TestString (string_test.go)
     #[test]
     fn test_string() {
         for (number, s) in string_tests() {
@@ -1321,7 +1237,6 @@ mod tests {
         }
     }
 
-    // String test cases where Rust's Display diverges from JS toString.
     #[test]
     fn test_string_display_divergent() {
         for (number, s) in string_tests_display_divergent() {
@@ -1329,12 +1244,9 @@ mod tests {
         }
     }
 
-    // 13. TestFromString (string_test.go)
     #[test]
     fn test_from_string() {
-        // Part 1: each stringTest round-trips with optional surrounding whitespace.
-        // (FromString works correctly for ALL string tests, including those whose
-        // Display diverges.)
+
         for (number, s) in string_tests() {
             assert_equal_number(Number::from_string(s), number);
             assert_equal_number(Number::from_string(&format!("{} ", s)), number);
@@ -1346,14 +1258,11 @@ mod tests {
             assert_equal_number(Number::from_string(&format!(" {}", s)), number);
         }
 
-        // Part 2: the fromStringTests table.
         for (number, s) in from_string_tests() {
             assert_equal_number(Number::from_string(s), number);
         }
     }
 
-    // FromString cases for hex literals >= 2^63 that overflow the i64-based parser.
-    // Go's FromString uses big.Int as a fallback; Rust uses i64::from_str_radix.
     #[test]
     fn test_from_string_hex_overflow() {
         let cases: &[(Number, &str)] = &[
@@ -1365,7 +1274,6 @@ mod tests {
         }
     }
 
-    // 14. TestStringRoundtrip (string_test.go)
     #[test]
     fn test_string_roundtrip() {
         for (_, s) in string_tests() {
@@ -1373,29 +1281,22 @@ mod tests {
         }
     }
 
-    // 15. TestStringJS (string_test.go)
-    // Go's TestStringJS verifies that to_string() and from_string() produce
-    // results identical to JavaScript's Number.prototype.toString() by running
-    // the test cases through Node.js. Here we instead verify `Number`'s
-    // `Display` impl against the canonical IEEE 754 shortest representations
-    // that V8 emits, for known values — no Node.js runtime required.
     #[test]
     fn test_string_js() {
         let cases: &[(Number, &str)] = &[
             (Number(0.0), "0"),
-            // JS renders -0 as "0".
+
             (Number(-0.0), "0"),
             (Number(100.0), "100"),
             (Number(1.5), "1.5"),
             (Number(0.1 + 0.2), "0.30000000000000004"),
-            // Whole numbers < 1e21 render as full decimals.
+
             (Number(1e20), "100000000000000000000"),
-            // Values >= 1e21 render in exponential notation. (The float
-            // formatter emits a signed exponent "1e+21"; JS omits the "+".)
+
             (Number(1e21), "1e+21"),
-            // Small values render in exponential notation.
+
             (Number(1e-7), "1e-7"),
-            // Smallest positive denormal.
+
             (Number(5e-324), "5e-324"),
             (Number(f64::NAN), "NaN"),
             (Number(f64::INFINITY), "Infinity"),
@@ -1410,8 +1311,6 @@ mod tests {
             );
         }
 
-        // The stringTests table should round-trip through to_string() — i.e.
-        // our Display impl is self-consistent with from_string() parsing.
         for (number, s) in string_tests() {
             assert_eq!(number.to_string(), s, "stringTests roundtrip {s:?}");
         }

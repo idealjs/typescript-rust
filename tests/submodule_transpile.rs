@@ -1,38 +1,3 @@
-//! Transpile baseline test runner: executes TypeScript's official transpile
-//! test cases (from `_submodules/TypeScript/tests/cases/transpile/`) through
-//! the single-file transpile API and compares the assembled output sections
-//! against committed snapshots under `tests/baselines/reference/transpile/`.
-//!
-//! Ports tsgo's `TestTranspile` (`internal/testrunner/transpile_runner.go`):
-//! for each case, expand the transpile varyBy options
-//! (`declarationMap`/`sourceMap`/`inlineSourceMap`) into configurations, and
-//! for each configuration run JS emit and (when `declaration` is set)
-//! declaration emit per `// @filename` unit, assembling:
-//!
-//!   //// [input.ts] ////        — every unit's source, in order
-//!   //// [output.js] ////       — per-unit transpiled output (+ .map section
-//!                                when a source map was produced)
-//!   //// [Diagnostics reported] — per-unit diagnostics, when requested or
-//!                                produced during emit
-//!
-//! Baseline-format note (same convention as the errors baselines): official
-//! transpile baselines render the diagnostics section as a compact
-//! `file(l,c): error TSxxxx: …` line PLUS an `==== file (N errors) ====`
-//! source-excerpt block. The excerpt block is stripped when seeding
-//! references (and never emitted here), matching the one-diagnostic-per-line
-//! convention used across this repo's baselines. Line endings are
-//! normalized CRLF→LF on both sides before comparison: official baselines
-//! mix CRLF/LF (case files are CRLF, emitted content is LF); the Go oracle
-//! reconciles that difference via its own committed baselines and
-//! accepted-diff files rather than byte-matching official.
-//!
-//! Environment variables (mirroring the compiler runner):
-//! - `TSOX_TRANSPILE_START`/`TSOX_TRANSPILE_END`/`TSOX_TRANSPILE_LIMIT` —
-//!   1-based inclusive case window (default: all).
-//! - `TSOX_TRANSPILE_FILTER` — case-insensitive substring filter.
-//! - `TSOX_TRANSPILE_JOBS` — concurrent workers (default: all cores).
-//! - `TSOX_TRANSPILE_TIMEOUT_SECS` — per-case budget (default 30).
-
 mod common;
 
 use std::path::Path;
@@ -50,20 +15,14 @@ use common::case_parser::{extract_settings, split_units};
 const SUBMODULE_DIR: &str = "_submodules/TypeScript/tests/cases/transpile";
 const SUBFOLDER: &str = "transpile";
 
-/// Options whose multi-value directives expand into one configuration per
-/// value (Go `transpileVaryBy`).
 const VARY_BY: &[&str] = &["declarationmap", "sourcemap", "inlinesourcemap"];
 
-/// Baseline-name casing fixups (Go `formatTranspileConfigurationName`).
 fn format_config_name(name: &str) -> String {
     name.replace("declarationmap=", "declarationMap=")
         .replace("inlinesourcemap=", "inlineSourceMap=")
         .replace("sourcemap=", "sourceMap=")
 }
 
-/// Split a boolean option's `v1, v2` value into variation values (deduped,
-/// order preserved). All transpile varyBy options are boolean, so values
-/// canonicalize to `true`/`false`.
 fn split_bool_values(value: &str) -> Vec<String> {
     let mut seen: Vec<String> = Vec::new();
     let mut raws: Vec<String> = Vec::new();
@@ -85,8 +44,6 @@ fn split_bool_values(value: &str) -> Vec<String> {
     raws
 }
 
-/// Expand settings into per-value configurations (a faithful slice of Go's
-/// `GetFileBasedTestConfigurations` for the three boolean transpile options).
 fn compute_configurations(
     settings: &std::collections::HashMap<String, String>,
 ) -> Vec<(String, std::collections::HashMap<String, String>)> {
@@ -112,7 +69,7 @@ fn compute_configurations(
     if varying.is_empty() {
         return vec![(String::new(), base)];
     }
-    // Cartesian product (at most two boolean options vary in practice).
+
     let mut configs: Vec<std::collections::HashMap<String, String>> =
         vec![std::collections::HashMap::new()];
     for (key, values) in &varying {
@@ -128,7 +85,7 @@ fn compute_configurations(
     }
     let mut out = Vec::with_capacity(configs.len());
     for config in configs {
-        // Sorted `key=value` (lowercased), comma-joined — then CamelCased.
+
         let mut parts: Vec<String> = config
             .iter()
             .map(|(k, v)| format!("{}={}", k.to_ascii_lowercase(), v.to_ascii_lowercase()))
@@ -144,7 +101,6 @@ fn compute_configurations(
     out
 }
 
-/// `outputpaths.GetOutputExtension` for the JS kind.
 fn js_output_extension(file_name: &str, jsx: tsox::core::compiler_options::JsxEmit) -> &'static str {
     let lower = file_name.to_ascii_lowercase();
     if lower.ends_with(".mts") || lower.ends_with(".mjs") {
@@ -160,7 +116,6 @@ fn js_output_extension(file_name: &str, jsx: tsox::core::compiler_options::JsxEm
     }
 }
 
-/// `tspath.GetDeclarationEmitExtensionForPath`.
 fn declaration_output_extension(file_name: &str) -> &'static str {
     let lower = file_name.to_ascii_lowercase();
     if lower.ends_with(".mts") {
@@ -172,11 +127,10 @@ fn declaration_output_extension(file_name: &str) -> &'static str {
     }
 }
 
-/// One (configuration, kind, outcome) triple from the worker.
 struct ConfigOutcome {
-    /// Baseline name WITHOUT extension, e.g. `case` or `case(declarationMap=true)`.
+
     name: String,
-    /// Baseline extension: `.js` or `.d.ts`.
+
     ext: String,
     skip: Option<String>,
     text: Option<String>,
@@ -190,10 +144,6 @@ fn append_section(result: &mut String, file_name: &str, content: &str) {
     }
 }
 
-/// Compact one-line-per-diagnostic rendering of the diagnostics section
-/// (file names: the transpile program roots units at `/`; the leading slash
-/// is stripped so names match the unit name, mirroring Go's ReplaceAll of
-/// the diagnostic file name with the unit name).
 fn render_diagnostics_section(diags: &[Diagnostic]) -> String {
     let mut keyed: Vec<(String, usize, usize, i32, &Diagnostic)> = diags
         .iter()
@@ -220,8 +170,7 @@ fn render_diagnostics_section(diags: &[Diagnostic]) -> String {
     let mut out = String::new();
     for (_, _, _, _, d) in keyed {
         let mut line = format_diagnostic_compact(d, None);
-        // The synthesized program names the file `/<unit>.ts`; baselines use
-        // the bare unit name.
+
         if let Some(stripped) = line.strip_prefix('/') {
             line = stripped.to_string();
         }
@@ -231,12 +180,9 @@ fn render_diagnostics_section(diags: &[Diagnostic]) -> String {
     out
 }
 
-/// Process one case: expand configurations, run each kind per unit, assemble
-/// baseline text. Returns one entry per (configuration, kind).
 fn process_case(content: &str, basename: &str) -> Vec<ConfigOutcome> {
     let parsed = split_units(content, basename);
-    // `reportDiagnostics` is a harness directive (dropped from option
-    // settings); recover it from the raw directive map.
+
     let report_diagnostics = parsed
         .settings
         .get("reportdiagnostics")
@@ -270,7 +216,7 @@ fn process_case(content: &str, basename: &str) -> Vec<ConfigOutcome> {
                 }];
             }
 
-            let mut kinds: Vec<(String, bool)> = Vec::new(); // (ext, declaration)
+            let mut kinds: Vec<(String, bool)> = Vec::new();
             if !compiler_options.emit_declaration_only.is_true() {
                 kinds.push((".js".to_string(), false));
             }
@@ -302,9 +248,6 @@ fn process_case(content: &str, basename: &str) -> Vec<ConfigOutcome> {
         .collect()
 }
 
-/// Assemble the full baseline text for one (configuration, kind). Mirrors Go
-/// `TranspileBaselineRunner.runKind` (without the reportDiagnostics-only
-/// emit-notes channel this port logs instead of baselining).
 fn run_kind(
     options: &CompilerOptions,
     units: &[common::case_parser::TestUnit],
@@ -453,8 +396,7 @@ fn run_case(
             overall = StepOutcome::Failed;
             continue;
         };
-        // Normalize CRLF→LF: our section assembly follows Go (CRLF framing)
-        // while official baselines mix CRLF/LF; references are seeded LF.
+
         let actual = actual.replace("\r\n", "\n");
         let actual = actual.as_str();
         match baseline::compare(SUBFOLDER, &name, &ext, actual) {
@@ -499,7 +441,7 @@ fn run_case(
 
 #[test]
 fn submodule_transpile_cases() {
-    // ── Worker mode ────────────────────────────────────────────────────────
+
     if let (Ok(case_path), Ok(out_path)) = (
         std::env::var("TSOX_TRANSPILE_WORKER"),
         std::env::var("TSOX_TRANSPILE_OUT"),
@@ -557,7 +499,6 @@ fn submodule_transpile_cases() {
         return;
     }
 
-    // Enumerate cases (sorted for determinism).
     let mut cases: Vec<std::path::PathBuf> = Vec::new();
     collect_ts_files(root, &mut cases);
     cases.sort();
@@ -594,7 +535,6 @@ fn submodule_transpile_cases() {
             .unwrap_or(false),
     );
 
-    // Case selection (1-based inclusive window).
     let total = cases.len();
     let limit_spec = std::env::var("TSOX_TRANSPILE_LIMIT").unwrap_or_default();
     let start_spec = std::env::var("TSOX_TRANSPILE_START").unwrap_or_default();
@@ -767,7 +707,6 @@ fn submodule_transpile_cases() {
     }
 }
 
-/// Recursively collect `*.ts` / `*.tsx` / `.mts` / `.cts` files under `dir`.
 fn collect_ts_files(dir: &std::path::Path, out: &mut Vec<std::path::PathBuf>) {
     let Ok(entries) = std::fs::read_dir(dir) else {
         return;

@@ -1,19 +1,7 @@
-//! Minimal API server over stdio JSON-RPC 2.0.
-//!
-//! Provides a programmatic API for TypeScript compilation operations:
-//! - Create/update/delete projects
-//! - Get diagnostics
-//! - Emit output
-//! - Get quick info (hover)
-//!
-//! This is a simplified JSON-RPC variant of Go's MessagePack-based API server.
-//! The Go `--async` flag selects JSON-RPC; we always use JSON-RPC.
-
 use std::io::{self, BufRead, BufReader, Write};
 
 use serde_json::{Value, json};
 
-/// API server state.
 pub struct ApiServer {
     shutdown_requested: bool,
 }
@@ -25,7 +13,6 @@ impl ApiServer {
         }
     }
 
-    /// Run the API server loop over stdio.
     pub fn run(&mut self) -> i32 {
         let stdin = io::stdin();
         let stdout = io::stdout();
@@ -55,7 +42,6 @@ impl ApiServer {
         }
     }
 
-    /// Read a single JSON-RPC message with Content-Length framing.
     fn read_message<R: BufRead>(reader: &mut R) -> io::Result<Option<Value>> {
         let mut content_length: Option<usize> = None;
         loop {
@@ -82,7 +68,6 @@ impl ApiServer {
         Ok(Some(msg))
     }
 
-    /// Write a JSON-RPC message with Content-Length framing.
     fn write_message<W: Write>(writer: &mut W, msg: &Value) -> io::Result<()> {
         let body = serde_json::to_string(msg)?;
         write!(writer, "Content-Length: {}\r\n\r\n{}", body.len(), body)?;
@@ -96,26 +81,24 @@ impl ApiServer {
 
         match method {
             "configure" => {
-                // Accept configuration, return empty result
+
                 Some(make_response(id, json!({})))
             }
             "createProject" => {
-                // Create a compilation project. params: { projectRoot, compilerOptions }
-                // For now, return a project ID
+
                 Some(make_response(id, json!({ "projectId": "default" })))
             }
             "updateProject" => {
-                // Update files in a project. params: { projectId, files: [{ fileName, content }] }
+
                 Some(make_response(id, json!({})))
             }
             "getDiagnostics" => {
-                // Get diagnostics for a project. params: { projectId }
-                // For now, return empty diagnostics
+
                 Some(make_response(id, json!({ "diagnostics": [] })))
             }
             "closeProject" => Some(make_response(id, json!({}))),
             "getQuickInfo" => {
-                // Hover info. params: { projectId, fileName, position }
+
                 Some(make_response(id, Value::Null))
             }
             "shutdown" => {
@@ -157,7 +140,6 @@ fn make_error_response(id: Option<Value>, code: i32, message: &str) -> Value {
     })
 }
 
-/// Entry point for `--api` mode.
 pub fn run_api() -> i32 {
     let mut server = ApiServer::new();
     server.run()

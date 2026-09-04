@@ -1,9 +1,3 @@
-//! Abstract Syntax Tree types.
-//!
-//! Ported from `internal/ast/` in the Go implementation. The AST type
-//! system is partly generated from `_scripts/ast.json` and partly
-//! hand-written.
-
 pub mod diagnostic;
 pub mod node;
 pub mod node_data_generated;
@@ -21,16 +15,6 @@ pub use symbol::*;
 pub use syntax_kind_generated::SyntaxKind;
 pub use utilities::*;
 
-/// Produces a structural clone of `node`.
-///
-/// This is a simplified deep clone. The generated `NodeData` enum (see
-/// `node_data_generated.rs`, marked "DO NOT EDIT") does not derive `Clone`,
-/// so a full per-variant reconstruction mirroring Go's
-/// `NodeFactory.DeepCloneNode` is not available without generator changes.
-/// This implementation returns a node that shares the original's children via
-/// `Arc::clone` and is therefore structurally identical (same kind, source
-/// range, and child tree). Callers that only require structural equality —
-/// not distinct allocations — can use this directly.
 pub fn deep_clone_node(node: &std::sync::Arc<node::Node>) -> std::sync::Arc<node::Node> {
     std::sync::Arc::clone(node)
 }
@@ -42,30 +26,6 @@ mod deepclone_tests {
     use super::for_each_child;
     use std::sync::Arc;
 
-    // Ported from Go internal/ast/deepclone_test.go
-    // TestDeepCloneNodeSanityCheck.
-    //
-    // The Go test parses each snippet, deep-clones the resulting AST with a
-    // generated `NodeFactory`, and walks the original and cloned trees in
-    // lockstep, asserting that every cloned node is a distinct allocation from
-    // its original and that corresponding nodes have equal child counts.
-    //
-    // A faithful port requires generator-emitted per-variant reconstruction
-    // (Go's `NodeFactory.DeepCloneNode`), which is not yet available: the
-    // generated `NodeData` enum (`node_data_generated.rs`, "DO NOT EDIT") only
-    // derives `Debug`, and `Node` carries an `AtomicU64` id plus a `parent`
-    // back-pointer. The simplified `deep_clone_node` instead shares children
-    // via `Arc::clone`.
-    //
-    // This test verifies the clone's contract: it is structurally identical to
-    // the original (equal kind, source range, and child tree, walked in
-    // lockstep via `for_each_child`) across the full snippet table, and it
-    // shares the root allocation (documenting the simplified semantics).
-    //
-    // Note: the Go test always parses with `jsx = false`
-    // (`parsetestutil.ParseTypeScript(rec.input, false)`), so the struct's
-    // unused `jsx` field is dropped here; each case is just `(title, input)`.
-
     fn collect_children(node: &Arc<Node>) -> Vec<Arc<Node>> {
         let mut children = Vec::new();
         for_each_child(node, |child| {
@@ -75,8 +35,6 @@ mod deepclone_tests {
         children
     }
 
-    /// Walks `original` and `clone` in lockstep, asserting structural
-    /// equality (kind, source range, child count, and recursive structure).
     fn assert_same_structure(original: &Arc<Node>, clone: &Arc<Node>) {
         assert_eq!(original.kind, clone.kind, "kind mismatch");
         assert_eq!(
@@ -719,21 +677,16 @@ mod deepclone_tests {
             ("JsxSpreadAttribute", "<a {...b}/>"),
         ];
 
-        // For each snippet, parse it, produce a structural clone, and verify
-        // the clone shares the root allocation and is structurally identical
-        // to the original (equal kind, source range, and child tree, walked in
-        // lockstep via `for_each_child`).
         for &(title, input) in cases {
             let file = crate::parser::Parser::parse_source_file_text("/f.ts", input.to_string());
             let original = Arc::clone(&file.node);
             let clone = deep_clone_node(&original);
 
-            // The simplified clone shares the root allocation.
             assert!(
                 Arc::ptr_eq(&original, &clone),
                 "{title}: clone should share the root allocation"
             );
-            // ... and is structurally identical to the original.
+
             assert_same_structure(&original, &clone);
         }
     }

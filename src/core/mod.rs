@@ -1,7 +1,3 @@
-//! Core utilities shared across the compiler.
-//!
-//! Ported from `internal/core/` in the Go implementation.
-
 pub mod arena;
 pub mod bfs;
 pub mod binary_search;

@@ -1,10 +1,3 @@
-//! The type checker.
-//!
-//! Ported from `internal/checker/checker.go`. This is the largest and most
-//! complex module in the compiler (~32K lines in Go). This file provides
-//! the `Checker` struct, its initialization, and the core entry points.
-//! Full type-checking logic is added incrementally.
-
 use std::collections::{HashMap, HashSet};
 use std::sync::atomic::{AtomicU32, Ordering};
 use std::sync::{Arc, Mutex, OnceLock};
@@ -56,72 +49,43 @@ use super::utilities::{get_assignment_target_kind, AssignmentKind};
 
 use super::inference::{InferenceContext, InferenceInfo};
 
-// ────────────────────────────────────────────────────────────────────────────
-// Type resolution cycle detection (mirrors Go's typeResolutions)
-// ────────────────────────────────────────────────────────────────────────────
-
-/// How many times a heritage-degraded interface resolution may be retried
-/// uncached before the degraded form is accepted and pinned (see
-/// `Checker::heritage_retry_counts`). True base-type cycles degrade on
-/// every retry; without a cap they re-walk the inheritance graph per
-/// reference and never converge (the r9 timeout storm).
 pub const HERITAGE_RETRY_LIMIT: u32 = 2;
 
-/// External emit helper kinds requested by helper-requiring syntax under
-/// `importHelpers` (a subset of Go's `ExternalEmitHelpers` bits — the kinds
-/// the checker gates today; each maps to the helper NAME verified against
-/// the 'tslib' module exports, Go `getHelperNames`).
 pub const EXTERNAL_EMIT_HELPER_IMPORT_DEFAULT: u32 = 1 << 0;
 pub const EXTERNAL_EMIT_HELPER_IMPORT_STAR: u32 = 1 << 1;
 pub const EXTERNAL_EMIT_HELPER_EXPORT_STAR: u32 = 1 << 2;
 
-/// Which property of a symbol/type/signature is being resolved.
-/// Mirrors Go's `TypeSystemPropertyName` enum.
 #[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
 pub enum TypeResolutionProperty {
-    /// `SymbolLinks.resolvedType` — the type of a value symbol.
+
     Type,
-    /// `TypeAliasLinks.declaredType` — the declared type of a type alias.
+
     DeclaredType,
-    /// Resolving base types of an interface.
+
     ResolvedBaseTypes,
-    /// Resolving base constructor type.
+
     ResolvedBaseConstructorType,
-    /// Resolving resolved return type of a signature.
+
     ResolvedReturnType,
-    /// Resolving resolved type arguments of a type reference.
+
     ResolvedTypeArguments,
-    /// Resolving resolved base constraint of a constrained type.
+
     ResolvedBaseConstraint,
 }
 
-/// A single entry on the type resolution stack. Mirrors Go's `TypeResolution`.
 #[derive(Clone, Copy)]
 pub struct TypeResolutionEntry {
-    /// Raw pointer identity of the symbol being resolved.
+
     pub target: *const Symbol,
-    /// Which property is being resolved.
+
     pub property: TypeResolutionProperty,
-    /// False if a cycle was detected passing through this entry.
+
     pub result: bool,
 }
 
-// SAFETY: The raw pointer is only used for identity comparison within
-// a single-threaded checker context.
 unsafe impl Send for TypeResolutionEntry {}
 unsafe impl Sync for TypeResolutionEntry {}
 
-// ────────────────────────────────────────────────────────────────────────────
-// Program trait (simplified)
-// ────────────────────────────────────────────────────────────────────────────
-
-/// A simplified version of the Go `checker.Program` interface.
-///
-/// The Go interface embeds `modulespecifiers.Host` and exposes ~24 methods
-/// spanning module resolution, emit-format inference, and project-reference
-/// redirect. This trait provides the subset currently needed by the Rust
-/// checker; methods are added as the checker grows. Stubs return defaults
-/// and are marked with `/// STUB:` for future wiring.
 pub trait Program: Send + Sync {
     fn options(&self) -> &CompilerOptions;
     fn source_files(&self) -> &[Arc<SourceFile>];
@@ -129,54 +93,27 @@ pub trait Program: Send + Sync {
     fn file_exists(&self, file_name: &str) -> bool;
     fn get_source_file(&self, file_name: &str) -> Option<Arc<SourceFile>>;
     fn is_source_file_default_library(&self, path: &str) -> bool;
-    /// Side table from the binder (symbols, locals, flow nodes), shared
-    /// across all source files in the program.
+
     fn symbol_map(&self) -> &NodeSymbolMap;
 
-    // ── Host methods (embedded `modulespecifiers.Host` in Go) ──
-
-    /// The current working directory of the host, used for path normalization
-    /// during module resolution. Mirrors Go's `Host.GetCurrentDirectory()`.
     fn current_directory(&self) -> &str;
 
-    /// Whether the host file system is case-sensitive, used for path key
-    /// normalization. Mirrors Go's `Host.UseCaseSensitiveFileNames()`.
     fn use_case_sensitive_file_names(&self) -> bool;
 
-    // ── Source directory ──
-
-    /// The common source directory of all input files, with a trailing
-    /// separator. Used for redirect root-dir normalization in composite
-    /// project scenarios. Mirrors Go's `Program.CommonSourceDirectory()`.
     fn common_source_directory(&self) -> String;
 
-    // ── Module resolution cluster (stubs — return defaults until module
-    //    resolution state is wired into Program) ──
-
-    /// STUB: Returns `None`. Go's `GetResolvedModule` maps an import specifier
-    /// to a resolved module file. Needed for cross-file import type resolution.
     fn get_resolved_module(&self, _file_name: &str, _module_name: &str) -> Option<String> {
         None
     }
 
-    /// Read a file's contents through the program's host filesystem.
-    /// Mirrors the host FS access Go's checker reaches via
-    /// `c.program.GetSourceFileMetaData` precomputation; used here for
-    /// on-demand package.json `"type"` lookups (implied node format).
     fn read_file(&self, _file_name: &str) -> Option<String> {
         None
     }
 
-    /// STUB: Returns `None`. Go's `GetSourceFileForResolvedModule` fetches the
-    /// parsed `SourceFile` for a resolved module path.
     fn get_source_file_for_resolved_module(&self, _resolved_path: &str) -> Option<Arc<SourceFile>> {
         None
     }
 
-    /// Resolve an external module specifier with the REAL resolver (Go's
-    /// `Program` module resolution — node_modules walks, exports conditions,
-    /// @types mangling). Returns the resolved file path. The default stub
-    /// yields `None` (no resolver wired).
     fn resolve_external_module_path(
         &self,
         _specifier: &str,
@@ -186,11 +123,6 @@ pub trait Program: Send + Sync {
         None
     }
 
-    // ── Emit format cluster (stubs) ──
-
-    /// STUB: Returns `ModuleKind::None`. Go's `GetEmitModuleFormatOfFile`
-    /// determines CJS vs ESM for a file, driving import/export elision and
-    /// `VerbatimModuleSyntax` decisions.
     fn get_emit_module_format_of_file(
         &self,
         _file_name: &str,
@@ -198,24 +130,11 @@ pub trait Program: Send + Sync {
         crate::core::compiler_options::ModuleKind::None
     }
 
-    // ── Project reference cluster (stubs) ──
-
-    /// STUB: Returns `false`. Go's `SourceFileMayBeEmitted` determines whether
-    /// a source file will be emitted (affects module resolution extension
-    /// rewriting).
     fn source_file_may_be_emitted(&self, _file_name: &str) -> bool {
         true
     }
 }
 
-// ────────────────────────────────────────────────────────────────────────────
-// LinkStore (side table for node/symbol links)
-// ────────────────────────────────────────────────────────────────────────────
-
-/// A side table mapping from `Arc<T>` to associated data `V`.
-///
-/// In Go, the checker uses `core.LinkStore` with `*ast.Node` and `*ast.Symbol`
-/// keys (raw pointers). In Rust, we use the object's ID as the key.
 #[derive(Debug, Default)]
 pub struct LinkStore<K, V> {
     _marker: std::marker::PhantomData<K>,
@@ -234,28 +153,23 @@ where
         }
     }
 
-    /// Get the links for a key, creating default if not present.
     pub fn get_or_default(&mut self, key: &K) -> &mut V {
         self.data.entry(key.id()).or_default()
     }
 
-    /// Get the links for a key, if present.
     pub fn get(&self, key: &K) -> Option<&V> {
         self.data.get(&key.id())
     }
 
-    /// Get the links for a key mutably, if present.
     pub fn get_mut(&mut self, key: &K) -> Option<&mut V> {
         self.data.get_mut(&key.id())
     }
 
-    /// Set the links for a key.
     pub fn insert(&mut self, key: &K, value: V) {
         self.data.insert(key.id(), value);
     }
 }
 
-/// Trait for objects that have a unique ID.
 pub trait HasId {
     fn id(&self) -> u64;
 }
@@ -278,73 +192,52 @@ impl HasId for SourceFile {
     }
 }
 
-/// No-op entity resolver for `evaluate_expression`. Returns `EvalResult::none()`
-/// for every entity reference, which means enum member initializers that
-/// reference other enum members or computed names won't resolve to a constant
-/// value (they are treated as opaque/numeric in `isEnumTypeRelatedTo`).
-/// This is a Phase 1 limitation; a full checker-backed entity resolver is a
-/// follow-up.
 fn noop_entity_fn(_: &Arc<Node>, _: Option<&Arc<Node>>) -> EvalResult {
     EvalResult::none()
 }
 
-// ────────────────────────────────────────────────────────────────────────────
-// Checker
-// ────────────────────────────────────────────────────────────────────────────
-
 static NEXT_CHECKER_ID: AtomicU32 = AtomicU32::new(1);
 
-/// Kind of break/continue control-flow context.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum BreakContinueContextKind {
-    /// `for`, `while`, `do-while`, `for-in`, `for-of`.
+
     Loop,
-    /// `switch` statement.
+
     Switch,
-    /// Function-like boundary (break/continue cannot cross).
+
     Function,
-    /// Labeled statement (stores the label text).
+
     Labeled,
 }
 
-/// A break/continue context entry on the checker's context stack.
 #[derive(Debug, Clone)]
 pub struct BreakContinueContext {
     pub kind: BreakContinueContextKind,
-    /// Label text for `Labeled` entries.
+
     pub label: Option<String>,
-    /// Whether the labeled statement's body is an iteration (for `continue`).
+
     pub is_iteration: bool,
 }
 
-/// The nearest non-arrow "this container" enclosing the current check point
-/// (Go's `getThisContainer`). Determines which class-member suggestion the
-/// checker offers when a bare identifier fails to resolve inside a class.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum ThisContainerKind {
-    /// Directly inside a `static` class member.
+
     StaticMember,
-    /// Directly inside an instance member (method/constructor/accessor).
+
     InstanceMember,
-    /// Inside a nested non-arrow function (the class-member chain is broken).
+
     PlainFunction,
 }
 
-/// The type checker. This is the core of the TypeScript compiler.
-///
-/// In Go, this struct has ~320 fields. The Rust port organizes them into
-/// logical groups while preserving the same semantics.
 pub struct Checker {
-    // Identity
+
     pub id: u32,
 
-    // Program and options
     pub program: Arc<dyn Program>,
     pub compiler_options: Arc<CompilerOptions>,
     pub files: Vec<Arc<SourceFile>>,
     pub file_index_map: HashMap<u64, usize>,
 
-    // Counters
     pub type_count: u32,
     pub symbol_count: u32,
     pub signature_count: u32,
@@ -352,7 +245,6 @@ pub struct Checker {
     pub instantiation_count: u32,
     pub instantiation_depth: u32,
 
-    // Configuration flags (derived from compiler options)
     pub language_version: ScriptTarget,
     pub module_kind: ModuleKind,
     pub module_resolution_kind: ModuleResolutionKind,
@@ -369,7 +261,6 @@ pub struct Checker {
     pub exact_optional_property_types: bool,
     pub can_collect_symbol_alias_accessibility_data: bool,
 
-    // Global symbols
     pub globals: SymbolTable,
     pub undefined_symbol: Option<Arc<Symbol>>,
     pub arguments_symbol: Option<Arc<Symbol>>,
@@ -377,14 +268,12 @@ pub struct Checker {
     pub unknown_symbol: Option<Arc<Symbol>>,
     pub global_this_symbol: Option<Arc<Symbol>>,
 
-    // Literal type caches
     pub string_literal_types: HashMap<String, Arc<Type>>,
     pub number_literal_types: HashMap<jsnum::Number, Arc<Type>>,
     pub bigint_literal_types: HashMap<String, Arc<Type>>,
     pub unique_es_symbol_types: HashMap<u64, Arc<Type>>,
     pub nan_type: Option<Arc<Type>>,
 
-    // Type caches
     pub indexed_access_types: HashMap<CacheHashKey, Arc<Type>>,
     pub template_literal_types: HashMap<CacheHashKey, Arc<Type>>,
     pub string_mapping_types: HashMap<u64, Arc<Type>>,
@@ -394,22 +283,13 @@ pub struct Checker {
     pub tuple_types: HashMap<CacheHashKey, Arc<Type>>,
     pub error_types: HashMap<CacheHashKey, Arc<Type>>,
 
-    /// Lazily-computed cache of member names declared by global interfaces,
-    /// keyed by interface name (e.g. `"Array"`). Built by scanning every
-    /// loaded file's top-level `interface` declarations so it is robust to
-    /// cross-file declaration-merging gaps in the binder. Used as a fallback
-    /// to resolve methods like `find`/`map`/`reduce` on `T[]` array types.
     pub global_interface_members: HashMap<String, Vec<String>>,
-    /// Cached built types of the boxed global interfaces (`Number`,
-    /// `String`, `Boolean`, …) — the apparent types of primitives (Go
-    /// `getApparentType` primitive branch).
+
     pub boxed_global_types: HashMap<String, Arc<Type>>,
 
-    // Diagnostics
     pub diagnostics: DiagnosticsCollection,
     pub suggestion_diagnostics: DiagnosticsCollection,
 
-    // Link stores (side tables for nodes and symbols)
     pub node_links: LinkStore<Node, NodeLinks>,
     pub signature_links: LinkStore<Node, SignatureLinks>,
     pub symbol_node_links: LinkStore<Node, SymbolNodeLinks>,
@@ -431,243 +311,102 @@ pub struct Checker {
     pub members_and_exports_links: LinkStore<Symbol, MembersAndExportsLinks>,
     pub type_alias_links: LinkStore<Symbol, TypeAliasLinks>,
     pub declared_type_links: LinkStore<Symbol, DeclaredTypeLinks>,
-    /// Stack-based cycle detection for type resolution, mirroring Go's
-    /// `typeResolutions` + `pushTypeResolution`/`popTypeResolution`/
-    /// `findResolutionCycle` (checker.go:18663). Each entry tracks a
-    /// (symbol, property) pair being resolved. When a duplicate pair is
-    /// found on the stack, all entries from the cycle start onward are
-    /// marked as failed, breaking the cycle.
+
     pub type_resolution_stack: Vec<TypeResolutionEntry>,
-    /// Stack of type-parameter → type-argument substitutions, used when
-    /// instantiating a generic type alias (e.g. `T<number[]>` where
-    /// `type T<U> = ...`). Each frame maps type-parameter symbol pointers
-    /// to their concrete type arguments. When `resolve_type_reference`
-    /// encounters a type parameter that's in the current frame, it returns
-    /// the mapped type argument instead of the `TypeParameter` type.
+
     pub type_argument_stack: Vec<HashMap<*const crate::ast::Symbol, Arc<Type>>>,
-    /// Name-keyed heritage-instantiation frames: the substitution active
-    /// while building `class D extends Base<Arg>`'s base instance. Kept
-    /// separately because the binder may merge same-named type-parameter
-    /// symbols across declarations, so symbol-pointer keys can miss the
-    /// symbol a member annotation actually resolves to; within one base
-    /// class's parameter list names are unique.
+
     pub type_argument_name_frames: Vec<Vec<(Arc<Symbol>, Arc<Type>)>>,
-    /// Per-(node, substitution-stack) resolved-type cache. Go memoises type
-    /// instantiation results by (type, mapper) in `activeTypeMappersCaches`
-    /// (checker.go ~L22200); our instantiation is AST re-resolution under
-    /// the `type_argument_stack`, so the key pairs the node id with a hash
-    /// of the stack. Without it, nested conditional/mapped re-resolution
-    /// builds fresh types on every pass (exponential blow-up → OOM abort,
-    /// e.g. deeplyNestedConditionalTypes).
+
     pub type_node_subst_cache: HashMap<(usize, u64), Arc<Type>>,
-    /// In-progress resolution markers for cycle detection (Go's
-    /// `pushTypeResolution`, checker.go ~L18817): re-entering the same node
-    /// under the same substitution means a circular type reference — the
-    /// inner query yields the error type.
+
     pub type_node_resolving: HashSet<(usize, u64)>,
-    /// Nesting depth of `get_type_from_type_node` resolution. Go caps
-    /// recursive instantiation at 100 (`instantiationDepth` check in
-    /// `instantiateType`, checker.go ~L22170 — "Type instantiation is
-    /// excessively deep and possibly infinite").
+
     pub type_resolution_depth: u32,
-    /// Depth of overload-applicability probing (Go's speculative
-    /// semantics): while >0, diagnostics emitted from assignability/
-    /// elaboration paths are discarded — a failed overload candidate must
-    /// not leak its probe-time errors (concatError's phantom TS2322 from
-    /// `fa.concat([0])` probing the ConcatArray<T> rest overload).
+
     pub speculation_depth: u32,
-    /// Monotonic count of heritage-degraded interface resolutions (a base
-    /// resolved to the error type through the cycle guard, or the cycle
-    /// guard itself fired). `get_type_from_type_node` compares the counter
-    /// at entry/exit and refuses to memoise results whose resolution
-    /// subtree passed through a degradation — otherwise the node-level
-    /// memo holds the degraded form forever and re-resolution can never
-    /// converge (Go's lazy `resolveBaseTypes`/`resolveDeclaredMembers`
-    /// never caches partial merges either; the stable type object plus
-    /// lazy members is what breaks the cycle there).
+
     pub heritage_degraded_events: u64,
-    /// Entry epochs of the active `get_type_from_type_node` frames —
-    /// `cache_type` refuses to pin results computed after a degradation
-    /// fired inside the enclosing query.
+
     pub type_node_query_epochs: Vec<u64>,
-    /// Monotonic per-interface-symbol count of heritage-degraded
-    /// completions. Degraded results are retried (left uncached) at most
-    /// `HERITAGE_RETRY_LIMIT` times per symbol; after that the degraded
-    /// form is accepted (cached, and its epoch contribution rolled back)
-    /// so resolution always converges — for true base-type cycles
-    /// (`A extends B; B extends A`) every retry degrades again, and
-    /// uncached retries would re-walk the whole graph on every reference
-    /// (the r9 timeout storm). Mirrors Go's behaviour of caching a stable
-    /// (possibly incomplete) type object for circular bases and reporting
-    /// TS2310 once, instead of resolving forever.
+
     pub heritage_retry_counts: HashMap<usize, u32>,
-    /// Upper bound on entries in `type_node_subst_cache`. The cache is a
-    /// pure function cache, so clearing it wholesale when the cap is hit
-    /// preserves correctness while bounding resident memory (keys embed
-    /// the substitution-stack hash, which grows combinatorially with
-    /// nested generic instantiations — without a cap, large programs
-    /// accumulate millions of entries → OOM).
+
     pub type_node_subst_cache_limit: usize,
-    /// Symbols whose type-parameter constraint is currently being resolved.
-    /// Re-entry means a circular constraint chain (Go reports TS2313 in
-    /// `getResolvedBaseConstraint` when `popTypeResolution` detects the
-    /// cycle, checker.go ~L27518); the participant's constraint resolves
-    /// to nothing (Go's `circularConstraintType` → `getBaseConstraintOfType`
-    /// returns nil).
+
     pub type_parameter_resolving: HashSet<usize>,
-    /// Symbols already reported TS2313 for (dedupe per symbol).
+
     pub ts2313_reported: HashSet<usize>,
-    /// Files whose 'tslib' resolution for importHelpers has already been
-    /// attempted (Go caches the resolved/unknown helpers module per file in
-    /// `sourceFileLinks.externalHelpersModule` — TS2354 fires at most once
-    /// per file, at the first helper-requiring location).
+
     pub ts2354_checked_files: HashSet<usize>,
-    /// Per-file bitmask of already-verified external emit helper kinds (Go
-    /// `sourceFileLinks.requestedExternalEmitHelpers`): each helper NAME is
-    /// checked against 'tslib' at most once per file.
+
     pub requested_external_emit_helpers: HashMap<usize, u32>,
-    /// Type objects produced inside a heritage-degradation window (see
-    /// `heritage_degraded_events`): their member tables may be transiently
-    /// incomplete, so assignability verdicts against them are garbage —
-    /// diagnostics comparing a degraded side are suppressed (Go never
-    /// observes such forms; its member resolution is lazy).
+
     pub degraded_type_ptrs: std::collections::HashSet<usize>,
-    /// Lazily-resolved JSX namespace for implicit runtimes (react-jsx/
-    /// react-jsxdev), keyed by file id (Go `jsxElementLinks` per file):
-    /// `Some(ns)` = the runtime container's `JSX` export, `None` entry =
-    /// computed but fell back to the global namespace.
+
     pub jsx_implicit_namespace: HashMap<usize, Option<Arc<Symbol>>>,
-    /// Buffered TS2875 (unresolvable implicit JSX runtime module) — held so
-    /// the element's own diagnostics (7026) land first at the same position.
+
     pub pending_jsx_2875: Option<(crate::core::text::TextRange, String)>,
-    /// Relater error chain (Go `Relater.errorChain`, relater.go ~L2577):
-    /// entries pushed innermost-first as comparisons fail; the LAST push is
-    /// the diagnostic head, earlier entries nest below it. `Message` codes
-    /// 2202-2205 are "markers" elided from the final pyramid.
+
     pub relater_error_chain: Vec<RelaterChainEntry>,
-    /// Whether chain recording is active — only during elaborating checks
-    /// (`checkTypeRelatedToAndOptionallyElaborate`), mirroring Go's
-    /// `errorNode != nil` gating.
+
     pub relater_chain_active: bool,
-    /// Recursion depth of `is_type_related_to`. Capped at
-    /// `RELATER_MAX_DEPTH` to prevent stack overflow on recursive
-    /// structural types such as `type Box<T> = { next: Box<T> | null }`.
-    /// Mirrors `Checker.relationStackDepth` in Go (relater.go).
+
     pub relater_depth: u32,
-    /// Nesting depth of the deferred-conditional default-constraint
-    /// fallback in `is_type_related_to` (see the comment there).
+
     pub deferred_constraint_depth: u32,
-    /// Complexity budget for type relation comparisons. Decremented on
-    /// each failed sub-comparison. When it reaches zero, the relater
-    /// reports overflow and stops. Mirrors Go's `relationCount`
-    /// (relater.go:369). Initialized per top-level comparison call.
+
     pub relation_count: u32,
-    /// Set to true when the relater exceeds either the depth limit
-    /// (`RELATER_MAX_DEPTH`) or the complexity budget (`relation_count`).
-    /// Mirrors Go's `r.overflow` (relater.go:3087).
+
     pub relater_overflow: bool,
-    /// Depth of intersection-TARGET constituent loops (Go's
-    /// `IntersectionStateTarget`): the weak-type common-property check is
-    /// suppressed while comparing against one constituent of an
-    /// intersection target (`A extends B & C` checks A against B and C
-    /// separately; a weak B must not alone reject the assignment).
+
     pub relater_intersection_target_depth: u32,
-    /// In-progress map for the deep object-member substitution (Go
-    /// instantiateType on anonymous object types): source type pointer →
-    /// instantiated result. Preserves self-references (`b: typeof x`
-    /// inside `var x: { a: T; b: typeof x }`) and memoizes shared
-    /// sub-objects within one top-level substitution.
+
     pub subst_object_in_progress: std::collections::HashMap<usize, Arc<crate::checker::types::Type>>,
-    /// Gate for the deep object-property substitution (see
-    /// `subst_object_in_progress`): only the call/construct RETURN-type
-    /// substitution at the expression level may deep-substitute anonymous
-    /// object members. Inference/overload probes run the same helper with
-    /// the flag off — deep-substituting there breaks contextual-signature
-    /// lookups keyed by property-symbol identity
-    /// (conditionalTypeContextualTypeSimplifications).
+
     pub in_return_substitution: bool,
-    /// Stack of source types on the recursive comparison path (Go
-    /// `r.sourceStack`, relater.go:2599) — input to the deeply-nested-type
-    /// early termination below.
+
     pub relater_source_stack: Vec<Arc<Type>>,
-    /// Stack of target types on the recursive comparison path (Go
-    /// `r.targetStack`).
+
     pub relater_target_stack: Vec<Arc<Type>>,
-    /// Per-call relation comparison cache. Stores the final boolean
-    /// result of `is_type_related_to` for a `(source, target, relation)`
-    /// triple so that repeated sub-comparisons within a single top-level
-    /// call don't recompute. Cleared at the start of each top-level call
-    /// (when `relater_depth` transitions from 0 to 1) to avoid caching
-    /// optimistic cycle-broken results across calls.
-    /// Mirrors Go's `Relation.results` (relater.go).
+
     pub relation_cache: HashMap<crate::checker::relater::RelationCacheKey, bool>,
-    /// Memoization for the conditional-resolution probe instantiations
-    /// (`get_permissive_instantiation` / `get_restrictive_instantiation`),
-    /// keyed by the source type's pointer value. Mirrors Go's
-    /// `cachedTypes[CachedTypeKindPermissiveInstantiation|…Restrictive…]`
-    /// (checker.go ~L24551): without it, node_modules-heavy cases re-walk
-    /// large type graphs per probe and time out (r33: nodeModulesPackage
-    /// PatternExports). Storing `Arc<Type>` keeps every key valid.
+
     pub probe_cache_permissive: HashMap<usize, Arc<Type>>,
     pub probe_cache_restrictive: HashMap<usize, Arc<Type>>,
-    /// Cache for `is_enum_type_related_to`, mapping a `(source, target)`
-    /// enum-symbol pair to a `RelationComparisonResult`. Mirrors Go's
-    /// `Checker.enumRelation` (relater.go).
+
     pub enum_relation: HashMap<EnumRelationKey, crate::checker::relater::RelationComparisonResult>,
-    /// Set of `(source, target, relation)` triples currently being
-    /// computed higher up the relater call stack. When a triple is
-    /// already in this set, we've hit a recursive cycle (e.g.
-    /// `type Box<T> = { next: Box<T> | null }` comparing `Box<X>` to
-    /// `Box<Y>` recursively reaches `Box<X>` vs `Box<Y>` again) and we
-    /// optimistically return `true` to break the cycle.
-    /// Mirrors Go's `visited` set pattern in `structuredTypeRelatedTo`.
+
     pub relation_in_progress: std::collections::HashSet<crate::checker::relater::RelationCacheKey>,
-    /// Interface-heritage pairs (interface symbol, heritage type-ref node)
-    /// that already reported TS2430 — keeps re-resolution of generic
-    /// interfaces from duplicating the diagnostic (Go reports once per
-    /// declaration in the check phase).
+
     pub interface_extends_reported:
         std::collections::HashSet<(*const crate::ast::Symbol, *const crate::ast::Node)>,
-    /// Indexed-access type nodes that already reported TS2538 — a generic
-    /// enclosing alias re-resolves the same node per instantiation, but Go
-    /// computes the resolution once and caches it on the node link, so the
-    /// diagnostic is emitted once per node.
+
     pub indexed_access_2538_reported: std::collections::HashSet<*const crate::ast::Node>,
-    /// Binary-expression nodes whose arithmetic operand check already
-    /// reported TS2362/TS2363 — Go types the operator result as errorType
-    /// there, so the compound-assignment type check must not add a TS2322.
+
     pub arith_operand_error_nodes: std::collections::HashSet<*const crate::ast::Node>,
-    /// Computed-property-name nodes already checked by
-    /// `check_computed_property_name` — Go memoizes the resolved type on the
-    /// node link so the TS2464 diagnostic fires once per node.
+
     pub computed_property_name_checked: std::collections::HashSet<*const crate::ast::Node>,
-    /// Reference kinds per symbol id (Go `symbolReferenceLinks`), recorded
-    /// by identifier resolution and consumed by the unused-identifier
-    /// checks (noUnusedLocals / noUnusedParameters).
+
     pub symbol_reference_kinds: dashmap::DashMap<u64, SymbolFlags>,
     pub spread_links: LinkStore<Symbol, SpreadLinks>,
     pub variance_links: LinkStore<Symbol, VarianceLinks>,
     pub reverse_mapped_symbol_links: LinkStore<Symbol, ReverseMappedSymbolLinks>,
     pub marked_assignment_symbol_links: LinkStore<Symbol, MarkedAssignmentSymbolLinks>,
     pub symbol_container_links: LinkStore<Symbol, ContainingSymbolLinks>,
-    /// Cache of alias symbols from globals/exports/resolved-exports symbol
-    /// tables, keyed by `symbolTableID`. Mirrors Go's
-    /// `symbolTableAliasCache` (checker.go).
+
     pub symbol_table_alias_cache: HashMap<u64, Vec<Arc<Symbol>>>,
-    /// Cached symbol tables for class expression names, keyed by node ID.
-    /// Mirrors Go's `classExpressionNameTables` (checker.go).
+
     pub class_expression_name_tables: HashMap<u64, SymbolTable>,
     pub source_file_links: LinkStore<SourceFile, SourceFileLinks>,
-    /// Per-declaration emit-resolver links (caches `isDeclarationVisible`).
+
     pub declaration_links: LinkStore<Node, DeclarationLinks>,
-    /// Per-source-file emit-resolver links (tracks `aliasesMarked`).
+
     pub declaration_file_links: LinkStore<SourceFile, DeclarationFileLinks>,
-    /// Single-entry cache for `get_combined_modifier_flags`, mirroring Go's
-    /// `lastGetCombinedModifierFlagsNode`/`Result`.
+
     last_combined_modifier_flags_node: Option<Arc<Node>>,
     last_combined_modifier_flags_result: ModifierFlags,
 
-    // Built-in types
     pub any_type: OnceLock<Arc<Type>>,
     pub unknown_type: OnceLock<Arc<Type>>,
     pub undefined_type: OnceLock<Arc<Type>>,
@@ -685,27 +424,18 @@ pub struct Checker {
     pub error_type: OnceLock<Arc<Type>>,
     pub unresolved_type: OnceLock<Arc<Type>>,
 
-    // Special "auto" types used for evolving array flow analysis.
-    // `auto_type` is a special `any` used as a marker for uninitialized
-    // variables (mirrors Go's `autoType`). `auto_array_type` is `any[]`
-    // used as a marker for empty-array initializers (mirrors Go's
-    // `autoArrayType`). Both are replaced by concrete types during flow
-    // analysis.
     pub auto_type: OnceLock<Arc<Type>>,
 
-    // Object types
     pub empty_object_type: OnceLock<Arc<Type>>,
     pub empty_generic_type: OnceLock<Arc<Type>>,
     pub any_function_type: OnceLock<Arc<Type>>,
     pub no_constraint_type: OnceLock<Arc<Type>>,
     pub circular_constraint_type: OnceLock<Arc<Type>>,
 
-    // Array types
     pub any_array_type: OnceLock<Arc<Type>>,
     pub auto_array_type: OnceLock<Arc<Type>>,
     pub any_readonly_array_type: OnceLock<Arc<Type>>,
 
-    // Global types (resolved lazily from lib.d.ts)
     pub global_object_type: OnceLock<Arc<Type>>,
     pub global_function_type: OnceLock<Arc<Type>>,
     pub global_array_type: OnceLock<Arc<Type>>,
@@ -717,251 +447,110 @@ pub struct Checker {
     pub global_this_type: OnceLock<Arc<Type>>,
     pub global_promise_type: OnceLock<Arc<Type>>,
 
-    /// Memoized `T[]` instantiations of the global `Array<T>` interface,
-    /// keyed by (Array symbol ptr, element type ptr). Mirrors Go's
-    /// shared instantiation cache for `createArrayType`.
     pub array_type_cache: std::collections::HashMap<(usize, usize), Arc<Type>>,
 
-    /// Memoized generic interface instantiations, keyed by
-    /// [symbol ptr, arg ptrs...]. Without this, every member resolution
-    /// building a fresh instantiation (`ConcatArray<T>[]` inside Array's
-    /// own members) produces a distinct element-type pointer, misses
-    /// `array_type_cache`, and re-resolves the whole member tree —
-    /// exponential on lib scale. Mirrors Go's instantiation cache.
     pub interface_instantiation_cache: std::collections::HashMap<Vec<usize>, (Vec<Arc<Type>>, Arc<Type>)>,
-    /// Memoized `attach_explicit_type_arguments` results, keyed by
-    /// [base type ptr, arg ptrs…]. Without this, two textual mentions of
-    /// `g<string>` build DISTINCT instances and union-constituent matching
-    /// between them fails with bogus "separate declarations" errors
-    /// (declFileTypeAnnotationUnionType). Base + args are PINNED in the
-    /// value (pointer-key ABA protection).
+
     pub attached_type_args_cache:
         std::collections::HashMap<Vec<usize>, (Arc<Type>, Vec<Arc<Type>>, Arc<Type>)>,
-    /// Memoized `typeof Cls<Args...>` constructor-object instantiations
-    /// (Go: `instantiationExpressionTypes`), keyed by class-declaration node
-    /// id + argument type pointers.
+
     pub typequery_instantiation_cache: std::collections::HashMap<Vec<usize>, (Vec<Arc<Type>>, Arc<Type>)>,
 
-    /// Type-parameter symbols of the global `Array<T>` interface (lazily
-    /// collected for `instantiate_array_member_type`).
     pub array_type_parameter_symbols: Option<Vec<Arc<crate::ast::Symbol>>>,
 
-    /// Memoized element-substituted Array member types, keyed by
-    /// (element type ptr, member symbol ptr).
     pub array_member_type_cache: std::collections::HashMap<(usize, usize), Arc<Type>>,
 
-    /// Memoized member types of instantiated generic interfaces/classes
-    /// (type arguments substituted through the declaration's parameters),
-    /// keyed by (owner type ptr, member symbol ptr).
-    /// Member types of generic instances, keyed by (owner type ptr, prop
-    /// symbol ptr). The owner `Arc<Type>` is PINNED in the value: owner
-    /// types are frequently transient (per-comparison rebuilt references)
-    /// and an unpinned key's address could be REUSED by a different type
-    /// after the owner drops, silently returning a foreign member type
-    /// (nondeterministic `ConcatArray<U>`-style corruption).
     pub instantiated_member_type_cache:
         std::collections::HashMap<(usize, usize), (Arc<Type>, Arc<Type>)>,
-    /// Upper bound on entries in `instantiated_member_type_cache` (see
-    /// `type_node_subst_cache_limit` — same unbounded-growth hazard, same
-    /// clear-at-cap remedy).
+
     pub instantiated_member_type_cache_limit: usize,
 
-    // Signatures
     pub any_signature: OnceLock<Arc<Signature>>,
     pub unknown_signature: OnceLock<Arc<Signature>>,
     pub resolving_signature: OnceLock<Arc<Signature>>,
 
-    // Current state
     pub current_node: Option<Arc<Node>>,
     pub inline_level: i32,
     pub serialization_level: i32,
-    /// Active type-print stack (`type_to_string_ex` ancestor recursion) —
-    /// pointer-keyed circular-type detection; official prints "..." for a
-    /// type that recurses into itself.
+
     pub type_print_stack: Vec<usize>,
-    /// The source file currently being checked.
+
     pub current_file: Option<Arc<SourceFile>>,
-    /// The node ID of the source file currently being checked.
+
     pub current_file_id: u64,
-    /// The symbol of the source file currently being checked (top-level
-    /// declarations land in its `members`).
+
     pub current_file_symbol: Option<Arc<Symbol>>,
-    /// Stack of container node IDs (functions, blocks, etc.) used for
-    /// identifier resolution when parent pointers are not available.
+
     pub scope_stack: Vec<u64>,
-    /// Number of nested function scopes (not arrow functions) currently being checked.
-    /// Used to determine whether `arguments` is in scope.
+
     pub function_scope_count: usize,
-    /// Number of nested arrow function scopes. Arrow functions do not have
-    /// their own `arguments` object.
+
     pub arrow_function_scope_count: usize,
-    /// Whether globals have been populated from source file symbols.
+
     pub globals_populated: bool,
-    /// Stack of break/continue contexts (loops, switches, functions, labels).
-    /// Used by `check_grammar_break_or_continue_statement` since parent
-    /// pointers are not set on nodes.
+
     pub break_continue_context_stack: Vec<BreakContinueContext>,
 
-    /// Stack of `this` types for class member checking. When checking a
-    /// class declaration's members, the class's instance type (including
-    /// inherited members from `extends`) is pushed here so that `this.prop`
-    /// inside a method body resolves correctly. Mirrors Go's
-    /// `getThisTypeOfObjectLiteral`/`getThisType` infrastructure.
     pub this_type_stack: Vec<Arc<Type>>,
 
-    /// Display-only target override for the relater's head message (see
-    /// `check_type_related_to_and_elaborate_display`): the optional-
-    /// parameter annotation view (`number`, not `number | undefined`).
     pub display_target_override: Option<Arc<Type>>,
 
-    /// Stack of enclosing class declaration nodes (the `ClassDeclaration`
-    /// whose members are currently being checked). Used by the TS2341
-    /// private-member check to decide whether a `private` member is accessed
-    /// from within its declaring class. Empty outside any class body.
     pub enclosing_class_stack: Vec<Arc<Node>>,
 
-    /// Nearest "this container" context (Go's `getThisContainer` with
-    /// `includeArrowFunctions=false`): `StaticMember`/`InstanceMember` while
-    /// directly inside a class member, `PlainFunction` inside a nested
-    /// non-arrow function declaration/expression. Arrow functions don't push
-    /// (they inherit the enclosing context). Used by the TS2662/TS2663
-    /// fallback when a bare name fails to resolve inside a class.
     pub this_container_stack: Vec<ThisContainerKind>,
 
-    /// Depth of enclosing ambient contexts (`declare`-modified declarations,
-    /// e.g. `declare namespace N { class C { ... } }`). Mirrors Go's
-    /// NodeFlagsAmbient propagation: a class inside a declared namespace is
-    /// ambient even without its own `declare` modifier — TS2564/TS1005
-    /// grammar checks are suppressed there.
     pub ambient_context_depth: usize,
-    /// Block node ids that already reported TS1036 (statements in ambient
-    /// contexts) — Go reports once per block.
+
     ambient_ts1036_reported_blocks: std::collections::HashSet<u64>,
 
-    /// Recursion depth guard for `namespace_has_value_side`.
     pub namespace_value_depth: u8,
 
-    /// Expected return type for a getter without its own annotation, taken
-    /// from the paired setter's parameter annotation (the accessor pair's
-    /// property type). Consumed by the getter's body check.
     pub accessor_pair_return_hint: Option<Arc<Type>>,
 
-    /// Contextual-parameter counts for arrow/function-expression arguments
-    /// currently being checked (one entry per enclosing call-argument arrow;
-    /// consumed by the ArrowFunction/FunctionExpression check so their
-    /// parameters typed through the callee's callback-parameter signature
-    /// skip TS7006). Mirrors Go's contextual typing of call arguments.
     pub call_arg_arrow_context: Vec<usize>,
 
-    /// Class symbols currently being resolved through
-    /// `resolve_base_class_constructor_type` — guards self-referential
-    /// `extends` cycles.
     pub resolving_type_aliases: std::collections::HashSet<*const Symbol>,
 
-    /// Function-like nodes currently being processed by
-    /// `get_type_of_function_like` (keyed by node id). Guards re-entrant
-    /// resolution — e.g. an IIFE whose argument types reference the IIFE's
-    /// own result (`const f = ((n) => ...)(f_args)`), where priming the
-    /// contextual parameter types from the call arguments would otherwise
-    /// recurse back into the same function expression. Mirrors Go's
-    /// `signatureLinks.resolvedSignature = anySignature` swap during IIFE
-    /// contextual typing.
     pub resolving_function_like: std::collections::HashSet<u64>,
 
-    /// Class-declaration nodes whose constructor type's static members are
-    /// currently being attached (keyed by node id). Guards re-entrant
-    /// base-class resolution through `extends` cycles.
     pub class_statics_resolution_stack: Vec<u64>,
 
-    /// Class-declaration nodes whose constructor type is currently being
-    /// built (keyed by node id). Guards the static-initializer `this`
-    /// re-entry cycle (`static y = this` → class type build → member
-    /// initializers → `this` → class type again).
     pub class_type_resolution_stack: Vec<u64>,
 
-    /// Call/new nodes whose argument contextual types are currently being
-    /// derived with generic inference (keyed by node id). Guards re-entrant
-    /// derivation — typing a sibling argument must not re-enter inference
-    /// for the same call. Mirrors Go's
-    /// `signatureLinks.resolvedSignature == resolvingSignature` short-circuit
-    /// in `getContextualTypeForArgumentAtIndex`.
     pub resolving_contextual_calls: std::collections::HashSet<u64>,
 
-    /// Logical-assignment RHS narrowing frames (Go models this as the
-    /// preRightLabel condition edge: inside the RHS of `f ??= rhs` the
-    /// target is nullish, of `f ||= rhs` falsy, of `f &&= rhs` truthy).
-    /// References to the target symbol inside the RHS region resolve against
-    /// the frame type instead of the plain declared type.
     pub logical_rhs_narrowing_frames: Vec<(Arc<Symbol>, Arc<Type>)>,
 
-    /// Whether each enclosing function-like body is a CONSTRUCTOR body
-    /// (entries pushed per function-like; nested functions push `false`).
-    /// TS2715's "abstract property accessed in the constructor" check reads
-    /// the top — accesses inside nested functions run after construction.
     pub in_ctor_body_stack: Vec<bool>,
 
-    /// Stack of declared return types for the enclosing function. When
-    /// checking a `return expr;` statement, `expr`'s type is compared
-    /// against the top of this stack (the function's declared return
-    /// type). `None` entries mean the function has no explicit return-type
-    /// annotation (inferred). Mirrors Go's `expectedReturn` tracking in
-    /// `checkReturnStatement`/`checkFunctionExpressionBody`.
     pub return_type_stack: Vec<Option<Arc<Type>>>,
 
-    // Flow analysis
     pub flow_analysis_disabled: bool,
     pub flow_invocation_count: i32,
     pub flow_type_cache: HashMap<u64, Arc<Type>>,
     pub flow_node_reachable: HashMap<u64, bool>,
-    /// Instantiation work counter (Go `instantiationCount`, checker.go
-    /// ~L22193): counts type re-resolutions performed under an active
-    /// substitution, reset per `check_expression` (Go resets per
-    /// statement/expression). At 5M it trips TS2589 and yields the error
-    /// type, capping combinatorial blow-ups.
+
     pub type_instantiation_count: u64,
-    /// Whether the TS2589 limit has already been reported — the error is
-    /// emitted once per program rather than per tripped call.
+
     pub type_instantiation_limit_reported: bool,
-    /// Inlining depth for const-variable alias narrowing. Mirrors Go's
-    /// `Checker.inlineLevel` (capped at 5). Incremented while narrowing
-    /// through a `const` alias's initializer to prevent infinite recursion.
+
     pub flow_inline_level: u32,
 
-    // Set while resolving the type annotation of a static class member.
-    // When true, resolving a class type parameter reports TS2322, mirroring
-    // Go's NameResolver check `ast.IsStatic(lastLocation)` →
-    // `Static_members_cannot_reference_class_type_parameters`.
     pub in_static_member_type: bool,
 
-    // Depth counter set while building interface call/construct signatures.
-    // When non-zero, unresolved type-name references in type nodes do not
-    // emit TS2304. This is needed because lib.d.ts construct/call signatures
-    // declare their own signature-level type parameters (e.g.
-    // `new <TArrayBuffer>(buffer: TArrayBuffer)`) that the binder does not
-    // always create symbols for; without suppression, processing those
-    // signatures would emit false "Cannot find name" errors. The unresolved
-    // names degrade to `any`, preserving the signature (which JSX component
-    // checks rely on).
     pub suppress_cannot_find_name_in_type_nodes: u32,
-    /// The source file (node id) where TS2304 suppression started — the
-    /// sticky counter must not silence diagnostics in OTHER files reached
-    /// through cross-file resolution (a bundled lib signature resolving a
-    /// user global).
+
     pub suppress_source_file: Option<u64>,
 
-    // Tracer
     pub tracer: Arc<Tracer>,
 
-    // Merged symbols tracking (declaration merging)
     pub merged_symbols: HashMap<u64, u64>,
 
-    // Mutex for thread safety
     pub mu: Mutex<()>,
 }
 
-
 impl Checker {
-    /// Create a new checker.
+
     pub fn new(program: Arc<dyn Program>, tracer: Arc<Tracer>) -> Self {
         let compiler_options = Arc::new(program.options().clone());
         let files = program.source_files().to_vec();
@@ -1232,9 +821,8 @@ impl Checker {
             mu: Mutex::new(()),
         };
 
-        // Initialize global_this_symbol and add built-in symbols to globals
         {
-            // Create globalThis symbol
+
             let mut global_this = Symbol::new(SymbolFlags::ValueModule, "globalThis");
             global_this.check_flags = CheckFlags::Readonly;
             let global_this = Arc::new(global_this);
@@ -1243,7 +831,6 @@ impl Checker {
                 .insert("globalThis".to_string(), Arc::clone(&global_this));
             checker.global_this_symbol = Some(global_this);
 
-            // Add undefined to globals
             if let Some(ref undef) = checker.undefined_symbol {
                 checker
                     .globals
@@ -1254,10 +841,6 @@ impl Checker {
         checker
     }
 
-    /// Merge `src` into `dst` (Go's `mergeSymbol`): union flags, extend
-    /// declarations, and merge member/export tables recursively (same-name
-    /// members merge instead of replacing). Mutates through the raw pointer
-    /// — the checker initializes single-threaded.
     fn merge_global_symbols(dst: &Arc<Symbol>, src: &Arc<Symbol>) {
         let dst_mut = Arc::as_ptr(dst) as *mut Symbol;
         unsafe {
@@ -1293,28 +876,16 @@ impl Checker {
         }
     }
 
-    /// Populate globals from source file symbols.
     fn populate_globals(&mut self) {
         for file in &self.files {
-            // Only SCRIPT files contribute to the global scope (Go
-            // initializeChecker: `!IsExternalOrCommonJSModule(file)` guards
-            // the file.Locals merge). An external-module file's top-level
-            // names — including its IMPORT aliases — must never become
-            // globals: `import { T } from "./lib"` in a module used to leak
-            // a global "T" that shadowed every same-named type parameter
-            // resolved through the globals fallback (lib.es5's Array<T>
-            // instantiated as the IMPORTED alias's type).
+
             if file.external_module_indicator.is_some() {
                 continue;
             }
-            // Look up the source file's symbol from the symbol map
+
             let symbol_map = self.program.symbol_map();
             if let Some(file_sym) = symbol_map.symbol_of(&file.node) {
-                // Merge the source file's members into globals — same-name
-                // declarations across files MERGE (Go's mergeSymbol), so a
-                // lib interface augmentation (ReadonlyArray in
-                // lib.es2015.core) contributes members to the base symbol
-                // instead of replacing it.
+
                 for (name, sym) in file_sym.members.iter() {
                     match self.globals.get(name) {
                         Some(existing) => Self::merge_global_symbols(existing, sym),
@@ -1323,7 +894,7 @@ impl Checker {
                         }
                     }
                 }
-                // Also merge the source file's locals
+
                 if let Some(locals) = symbol_map.locals_of(&file.node) {
                     for (name, sym) in locals.iter() {
                         match self.globals.get(name) {
@@ -1336,18 +907,7 @@ impl Checker {
                 }
             }
         }
-        // `declare global` module augmentations (Go initializeChecker:
-        // file.ModuleAugmentations where IsGlobalScopeAugmentation →
-        // mergeModuleAugmentation → mergeSymbolTable(c.globals,
-        // augmentationSymbol.Exports)). The parser collects `declare global`
-        // blocks of external-module files into `module_augmentations`
-        // (references.rs, name nodes whose parent is the ModuleDeclaration);
-        // the binder keeps the block's declarations in the module symbol's
-        // exports/members and the node's locals — merge all three so `var`/
-        // `interface`/`namespace` augmentations become visible as globals
-        // (the nodeModules TripleSlashReferenceMode* family: a types-
-        // reference pulls in a d.ts whose `declare global` provides the
-        // referenced names).
+
         for file in &self.files {
             for aug_name in &file.module_augmentations {
                 let Some(module_node) = aug_name.parent.clone() else {
@@ -1389,25 +949,14 @@ impl Checker {
                 }
             }
         }
-        // G2: Ensure common DOM/host globals are resolvable even when
-        // lib.dom.d.ts isn't loaded (or its `declare var` declarations aren't
-        // merged into the global scope yet). Without these, references like
-        // `document`, `window`, `console`, `setTimeout` produce false TS2304
-        // "Cannot find name" diagnostics.
+
         self.ensure_host_globals();
-        // G1: Ensure a global `JSX` namespace exists when `--jsx` is enabled.
-        // Without it (e.g. when `@types/react` isn't loaded), every JSX
-        // element triggers TS2602/TS7026 under `noImplicitAny`.
+
         self.ensure_jsx_namespace();
     }
 
-    /// G2: Insert permissive fallback globals (resolving to `any`) for common
-    /// DOM value and type names, but only when no real declaration already
-    /// provides them. This avoids false TS2304 "Cannot find name" diagnostics
-    /// in real projects that reference `document`, `window`, `console`, DOM
-    /// types, etc. without lib.dom.d.ts being fully merged into globals.
     fn ensure_host_globals(&mut self) {
-        // Value-position globals (e.g. `document`, `window`, `console`).
+
         const DOM_VALUES: &[&str] = &[
             "document",
             "window",
@@ -1442,15 +991,11 @@ impl Checker {
             "btoa",
             "scrollTo",
             "scrollBy",
-            // Value constructor also referenced as a type.
+
             "Function",
-            // NOTE: CommonJS globals (`exports`, `require`, `module`,
-            // `__dirname`, `__filename`, `global`, `process`) are NOT
-            // synthesized — official resolves them only from @types/node;
-            // unresolved uses take the TS2591 Node-suggestion variant
-            // (anonymousModules and 35 more baselines).
+
         ];
-        // Type-position globals (e.g. `HTMLElement`, `Event`).
+
         const DOM_TYPES: &[&str] = &[
             "HTMLElement",
             "Element",
@@ -1494,9 +1039,7 @@ impl Checker {
             "WritableStream",
             "TransformStream",
         ];
-        // ES2015+ built-in types referenced in type position by ambient `.d.ts`
-        // files when the matching `lib.es*.d.ts` is not fully merged into
-        // globals.
+
         const ES_TYPES: &[&str] = &[
             "Promise",
             "Iterable",
@@ -1517,8 +1060,7 @@ impl Checker {
             "Float32Array",
             "Float64Array",
             "DataView",
-            // ES built-in constructors/types frequently referenced in value
-            // and type position when lib.d.ts is not fully merged.
+
             "Object",
             "Array",
             "Number",
@@ -1546,7 +1088,7 @@ impl Checker {
             "Atomics",
             "globalThis",
         ];
-        // Built-in utility (mapped) types that ambient declarations depend on.
+
         const UTILITY_TYPES: &[&str] = &[
             "Partial",
             "Readonly",
@@ -1563,15 +1105,7 @@ impl Checker {
             "Required",
             "ReadonlyArray",
         ];
-        // Use `Property` as a neutral flag for both value and type
-        // fallbacks: it is found by both value and type reference
-        // resolution (which query globals with an all-meaning filter), and it
-        // resolves to `any` via the non-interface fallback in
-        // `resolve_type_reference` (no declaration nodes, so interface member
-        // resolution is never attempted). `Property` (unlike
-        // `FunctionScopedVariable`) is not on the TS2749 value-as-type flag
-        // list, so eager alias-body resolution of `Array<infer U>` under
-        // no-lib stays silent instead of suggesting `typeof Array`.
+
         for &name in DOM_VALUES
             .iter()
             .chain(DOM_TYPES.iter())
@@ -1587,34 +1121,18 @@ impl Checker {
         }
     }
 
-    /// G1: Provide a synthetic global `JSX` namespace when JSX is enabled but
-    /// no `JSX` namespace is already in scope (e.g. `@types/react` isn't
-    /// loaded, or its `declare global { namespace JSX }` isn't merged into
-    /// globals). Without it, every JSX element triggers TS2602 (missing
-    /// `JSX.Element`) and TS7026 (missing `JSX.IntrinsicElements`) under
-    /// `noImplicitAny`. The synthetic namespace is permissive: `Element`
-    /// resolves to `any`, and `IntrinsicElements` carries a string index
-    /// signature so any tag name is accepted.
     fn ensure_jsx_namespace(&mut self) {
         use super::jsx::JsxNames;
         if !self.is_jsx_enabled() || self.get_jsx_namespace().is_some() {
             return;
         }
 
-        // The JSX namespace itself.
         let mut jsx = Symbol::new(SymbolFlags::NamespaceModule, JsxNames::JSX);
 
-        // `JSX.Element` — its mere presence suppresses TS2602 in
-        // `check_jsx_preconditions`. It resolves to `any`.
         let element = Symbol::new(SymbolFlags::TypeLiteral, JsxNames::ELEMENT);
         jsx.members
             .insert(JsxNames::ELEMENT.to_string(), Arc::new(element));
 
-        // `JSX.IntrinsicElements` — model a string index signature
-        // (`[elemName: string]: ...`) so any intrinsic tag is accepted and
-        // TS7026 is suppressed. The index-signature marker member keeps the
-        // interface's members non-empty, matching how a real index signature
-        // would be represented internally.
         let mut intrinsic = Symbol::new(SymbolFlags::TypeLiteral, JsxNames::INTRINSIC_ELEMENTS);
         intrinsic.members.insert(
             crate::ast::INTERNAL_SYMBOL_NAME_INDEX.to_string(),
@@ -1629,11 +1147,6 @@ impl Checker {
             .insert(JsxNames::JSX.to_string(), Arc::new(jsx));
     }
 
-    // ────────────────────────────────────────────────────────────────────────
-    // Built-in type accessors
-    // ────────────────────────────────────────────────────────────────────────
-
-    /// Get the `any` type.
     pub fn any_type(&self) -> Arc<Type> {
         self.any_type
             .get_or_init(|| {
@@ -1647,7 +1160,6 @@ impl Checker {
             .clone()
     }
 
-    /// Get the `unknown` type.
     pub fn unknown_type(&self) -> Arc<Type> {
         self.unknown_type
             .get_or_init(|| {
@@ -1661,7 +1173,6 @@ impl Checker {
             .clone()
     }
 
-    /// Get the `undefined` type.
     pub fn undefined_type(&self) -> Arc<Type> {
         self.undefined_type
             .get_or_init(|| {
@@ -1675,12 +1186,6 @@ impl Checker {
             .clone()
     }
 
-    /// Get the type of the `undefined`/`null` KEYWORD in expression
-    /// position. Mirrors Go `createWideningType`: without
-    /// strictNullChecks the keyword's type carries the widening flag so a
-    /// variable initialized to it infers `any` (`var x = undefined;` —
-    /// `new x()` must be an untyped call, never TS2351); under
-    /// strictNullChecks the plain intrinsic is returned.
     fn nullish_widening_type(&self, base: Arc<Type>) -> Arc<Type> {
         if self.strict_null_checks {
             return base;
@@ -1695,7 +1200,6 @@ impl Checker {
         Arc::new(t)
     }
 
-    /// Get the `null` type.
     pub fn null_type(&self) -> Arc<Type> {
         self.null_type
             .get_or_init(|| {
@@ -1709,7 +1213,6 @@ impl Checker {
             .clone()
     }
 
-    /// Get the `string` type.
     pub fn string_type(&self) -> Arc<Type> {
         self.string_type
             .get_or_init(|| {
@@ -1723,7 +1226,6 @@ impl Checker {
             .clone()
     }
 
-    /// Get the `number` type.
     pub fn number_type(&self) -> Arc<Type> {
         self.number_type
             .get_or_init(|| {
@@ -1737,7 +1239,6 @@ impl Checker {
             .clone()
     }
 
-    /// Get the `bigint` type.
     pub fn bigint_type(&self) -> Arc<Type> {
         self.bigint_type
             .get_or_init(|| {
@@ -1751,7 +1252,6 @@ impl Checker {
             .clone()
     }
 
-    /// Get the `boolean` type.
     pub fn boolean_type(&self) -> Arc<Type> {
         self.boolean_type
             .get_or_init(|| {
@@ -1765,7 +1265,6 @@ impl Checker {
             .clone()
     }
 
-    /// Get the `symbol` type.
     pub fn es_symbol_type(&self) -> Arc<Type> {
         self.es_symbol_type
             .get_or_init(|| {
@@ -1779,7 +1278,6 @@ impl Checker {
             .clone()
     }
 
-    /// Get the `void` type.
     pub fn void_type(&self) -> Arc<Type> {
         self.void_type
             .get_or_init(|| {
@@ -1793,7 +1291,6 @@ impl Checker {
             .clone()
     }
 
-    /// Get the `never` type.
     pub fn never_type(&self) -> Arc<Type> {
         self.never_type
             .get_or_init(|| {
@@ -1807,9 +1304,6 @@ impl Checker {
             .clone()
     }
 
-    /// Get the `auto` type — a special `any` with `NonInferrableType` flag,
-    /// used as a marker for evolving-array analysis. Mirrors Go's `autoType`
-    /// (`c.autoType = c.newIntrinsicTypeEx(TypeFlagsAny, "any", ObjectFlagsNonInferrableType)`).
     pub fn auto_type(&self) -> Arc<Type> {
         self.auto_type
             .get_or_init(|| {
@@ -1827,16 +1321,13 @@ impl Checker {
             .clone()
     }
 
-    /// Get the `auto array type` — `any[]` used as a marker for empty array
-    /// literal initializers (`let x = []`). Mirrors Go's `autoArrayType`
-    /// (`c.createArrayType(c.autoType)`).
     pub fn auto_array_type(&mut self) -> Arc<Type> {
         if let Some(t) = self.auto_array_type.get() {
             return Arc::clone(t);
         }
         let auto = self.auto_type();
         let arr = self.create_array_type(auto);
-        // Race-safe set: if another thread won, use its value.
+
         self.auto_array_type
             .set(arr.clone())
             .ok()
@@ -1844,12 +1335,6 @@ impl Checker {
             .unwrap_or_else(|| self.auto_array_type.get().cloned().unwrap_or(arr))
     }
 
-    /// Create an evolving array type with the given element type.
-    ///
-    /// Mirrors Go's `getEvolvingArrayType` (flow.go ~L1488). Evolving array
-    /// types are used in flow analysis to track arrays whose element type
-    /// is being inferred from `push`/`unshift` calls (e.g.
-    /// `let x = []; x.push(1)` → `x: number[]`).
     pub fn get_evolving_array_type(&mut self, element_type: Arc<Type>) -> Arc<Type> {
         Arc::new(Type {
             flags: TypeFlags::Object,
@@ -1865,12 +1350,6 @@ impl Checker {
         })
     }
 
-    /// Evolve an evolving array type by adding a new element type.
-    ///
-    /// Mirrors Go's `addEvolvingArrayElementType` (flow.go ~L1536). If the
-    /// new element type is already a subset of the current element type,
-    /// returns the original type unchanged. Otherwise, unions the new
-    /// element type with the existing one.
     pub fn add_evolving_array_element_type(
         &mut self,
         evolving_type: &Arc<Type>,
@@ -1882,7 +1361,7 @@ impl Checker {
         };
         match current_element {
             Some(current) => {
-                // If the new type is a subset of the current type, no change.
+
                 if self.is_type_subset_of(&new_element_type, &current) {
                     return Arc::clone(evolving_type);
                 }
@@ -1893,12 +1372,6 @@ impl Checker {
         }
     }
 
-    /// Finalize an evolving array type into a concrete array type.
-    ///
-    /// Mirrors Go's `finalizeEvolvingArrayType` (flow.go ~L1545). If the
-    /// type is not an evolving array, returns it unchanged. If it is,
-    /// converts it to `T[]` where `T` is the element type (or `any[]` if
-    /// the element type is `never`).
     pub fn finalize_evolving_array_type(&mut self, t: &Arc<Type>) -> Arc<Type> {
         if !t.object_flags.contains(ObjectFlags::EvolvingArray) {
             return Arc::clone(t);
@@ -1912,12 +1385,12 @@ impl Checker {
                 let result = if element.flags.contains(TypeFlags::Never) {
                     self.auto_array_type()
                 } else if element.flags.contains(TypeFlags::Union) {
-                    // For union element types, use subtype reduction.
+
                     self.create_array_type(element)
                 } else {
                     self.create_array_type(element)
                 };
-                // Cache on the evolving type via interior mutability.
+
                 if let TypeData::EvolvingArray(ea) = &t.data {
                     let _ = ea.final_array_type.set(Arc::clone(&result));
                 }
@@ -1927,9 +1400,6 @@ impl Checker {
         }
     }
 
-    /// Check if `a` is a subset of `b` (all members of `a` are assignable to
-    /// `b`). Mirrors Go's `isTypeSubsetOf`. Used by evolving-array element
-    /// evolution to avoid adding redundant types.
     pub fn is_type_subset_of(&mut self, a: &Arc<Type>, b: &Arc<Type>) -> bool {
         if Arc::ptr_eq(a, b) || self.types_are_equal(a, b) {
             return true;
@@ -1940,18 +1410,10 @@ impl Checker {
         if b.flags.contains(TypeFlags::Any) || b.flags.contains(TypeFlags::Unknown) {
             return true;
         }
-        // Simple subset check: a is assignable to b.
+
         self.is_type_assignable_to(a, b)
     }
 
-    /// Get the `(...args: any) => any` "top function" wildcard type.
-    ///
-    /// Mirrors Go's `anyFunctionType`. In the relater, a function-type
-    /// wildcard source is assignable to every other function type; a
-    /// non-wildcard source is *not* assignable to a wildcard target.
-    /// The type is represented as an empty anonymous object — the relater
-    /// short-circuits on `Arc::ptr_eq` before ever consulting its
-    /// signatures, so we don't need to populate them.
     pub fn any_function_type(&self) -> Arc<Type> {
         self.any_function_type
             .get_or_init(|| {
@@ -1967,7 +1429,6 @@ impl Checker {
             .clone()
     }
 
-    /// Get the `object` type (non-primitive).
     pub fn non_primitive_type(&self) -> Arc<Type> {
         self.non_primitive_type
             .get_or_init(|| {
@@ -1981,7 +1442,6 @@ impl Checker {
             .clone()
     }
 
-    /// Get the `true` literal type.
     pub fn true_type(&self) -> Arc<Type> {
         self.true_type
             .get_or_init(|| {
@@ -1997,7 +1457,6 @@ impl Checker {
             .clone()
     }
 
-    /// Get the `false` literal type.
     pub fn false_type(&self) -> Arc<Type> {
         self.false_type
             .get_or_init(|| {
@@ -2013,7 +1472,6 @@ impl Checker {
             .clone()
     }
 
-    /// Get the `error` type.
     pub fn error_type(&self) -> Arc<Type> {
         self.error_type
             .get_or_init(|| {
@@ -2027,11 +1485,6 @@ impl Checker {
             .clone()
     }
 
-    // ────────────────────────────────────────────────────────────────────────
-    // String literal type creation
-    // ────────────────────────────────────────────────────────────────────────
-
-    /// Get or create a string literal type.
     pub fn get_string_literal_type(&mut self, value: &str) -> Arc<Type> {
         if let Some(t) = self.string_literal_types.get(value) {
             return Arc::clone(t);
@@ -2049,7 +1502,6 @@ impl Checker {
         t
     }
 
-    /// Get or create a number literal type.
     pub fn get_number_literal_type(&mut self, value: jsnum::Number) -> Arc<Type> {
         if let Some(t) = self.number_literal_types.get(&value) {
             return Arc::clone(t);
@@ -2066,46 +1518,23 @@ impl Checker {
         t
     }
 
-    // ────────────────────────────────────────────────────────────────────────
-    // Fresh literal types
-    // ────────────────────────────────────────────────────────────────────────
-
-    /// Get the fresh variant of a literal type. Mirrors Go's
-    /// `getFreshTypeOfLiteralType` (checker.go:25195).
-    ///
-    /// For freshable literals (`TYPE_FLAGS_FRESHABLE = Enum | Literal`),
-    /// lazily creates and caches a fresh variant on the regular type:
-    ///
-    /// - Regular literal type: `fresh_type` = Some(fresh variant),
-    ///   `regular_type` = None.
-    /// - Fresh literal type: `fresh_type` = None (empty),
-    ///   `regular_type` = Some(regular type).
-    ///
-    /// This inverted representation avoids the need for a self-referential
-    /// `Arc` on the fresh variant. `is_fresh_literal_type` checks
-    /// `regular_type.is_some()`.
-    ///
-    /// For non-freshable types, returns the input unchanged.
     pub fn get_fresh_type_of_literal_type(&self, t: &Arc<Type>) -> Arc<Type> {
-        // Only freshable types (literals and enums) get fresh variants.
+
         if !t.flags.intersects(TYPE_FLAGS_FRESHABLE) {
             return Arc::clone(t);
         }
         let lit = match &t.data {
             TypeData::Literal(lit) => lit,
             _ => {
-                // Enums and other freshable non-literal types are not
-                // handled in Phase 1.
+
                 return Arc::clone(t);
             }
         };
-        // If `regular_type` is set, this IS already a fresh variant.
+
         if lit.regular_type.get().is_some() {
             return Arc::clone(t);
         }
-        // Extract the value up front so the closure can be `move` and
-        // avoid borrowing `lit` (which would conflict with the
-        // `&lit.fresh_type` borrow held by `get_or_init`).
+
         let value = lit.value.clone();
         let flags = t.flags;
         let regular = Arc::clone(t);
@@ -2114,9 +1543,9 @@ impl Checker {
                 flags,
                 TypeData::Literal(LiteralTypeData {
                     value,
-                    // Fresh variant has no fresh_type of its own.
+
                     fresh_type: OnceLock::new(),
-                    // Points back to the regular type.
+
                     regular_type: OnceLock::from(regular),
                 }),
             ))
@@ -2124,10 +1553,6 @@ impl Checker {
         Arc::clone(fresh)
     }
 
-    /// Whether a candidate literal type is "of" a contextual type — i.e. the
-    /// context actually contains that literal (or a matching literal
-    /// constraint), so the literal is preserved instead of widened (Go
-    /// `isLiteralOfContextualType`).
     pub fn is_literal_of_contextual_type(
         &self,
         candidate: &Arc<Type>,
@@ -2144,9 +1569,7 @@ impl Checker {
             return false;
         }
         if contextual.flags.intersects(TypeFlags::TypeParameter) {
-            // A type parameter constrained to a primitive kind is a literal
-            // context for literals of that kind (Go's `T extends string`
-            // case).
+
             if let Some(constraint) = self.get_base_constraint_of_type(contextual) {
                 return (constraint.flags.intersects(TypeFlags::String)
                     && candidate.flags.intersects(TypeFlags::StringLiteral))
@@ -2156,9 +1579,7 @@ impl Checker {
             }
             return false;
         }
-        // A literal context preserves same-kind literals: a string-literal
-        // (index/template/mapping) context preserves string literals, a
-        // number-literal context number literals, etc.
+
         (contextual.flags.intersects(
             TypeFlags::StringLiteral | TypeFlags::Index | TypeFlags::TemplateLiteral | TypeFlags::StringMapping,
         ) && candidate.flags.intersects(TypeFlags::StringLiteral))
@@ -2172,25 +1593,10 @@ impl Checker {
                 && candidate.flags.intersects(TypeFlags::UniqueESSymbol))
     }
 
-    /// Get the widened type of a fresh literal type. Mirrors Go's
-    /// `getWidenedLiteralType` (checker.go:25395).
-    ///
-    /// Widens ONLY fresh literals to their primitive base:
-    /// - StringLiteral + fresh → `string`
-    /// - NumberLiteral + fresh → `number`
-    /// - BigIntLiteral + fresh → `bigint`
-    /// - BooleanLiteral + fresh → `boolean`
-    /// - Enum + fresh → enum base type (skipped in Phase 1)
-    /// - Union → widen each constituent
-    /// - Otherwise → return t unchanged
     pub fn get_widened_literal_type(&self, t: &Arc<Type>) -> Arc<Type> {
-        // Fresh literals widen to their primitive base.
+
         if crate::checker::is_fresh_literal_type(t) {
-            // Fresh enum literals widen to the whole enum type (Go
-            // getWidenedLiteralType's EnumLike branch →
-            // getBaseTypeOfEnumLikeType = the parent enum symbol's declared
-            // type). The enum's type was cached by resolve_enum_type; read
-            // it without mutation, falling back to the primitive base.
+
             if t.flags.intersects(TYPE_FLAGS_ENUM_LIKE) {
                 if let Some(sym) = &t.symbol
                     && sym.flags.contains(SymbolFlags::EnumMember)
@@ -2215,10 +1621,9 @@ impl Checker {
             if t.flags.contains(TypeFlags::BooleanLiteral) {
                 return self.boolean_type();
             }
-            // Enum-like types without a resolvable member symbol fall
-            // through to the primitive-base rules below.
+
         }
-        // Unions: widen each constituent recursively.
+
         if let TypeData::Union(union_data) = &t.data {
             let widened: Vec<Arc<Type>> = union_data
                 .union_or_intersection
@@ -2226,7 +1631,7 @@ impl Checker {
                 .iter()
                 .map(|member| self.get_widened_literal_type(member))
                 .collect();
-            // Avoid allocating a new union if nothing changed.
+
             if widened
                 .iter()
                 .zip(union_data.union_or_intersection.types.iter())
@@ -2239,12 +1644,6 @@ impl Checker {
         Arc::clone(t)
     }
 
-    /// Get the regular (non-fresh) type of a literal type. Mirrors Go's
-    /// `getRegularTypeOfLiteralType` (checker.go:25181).
-    ///
-    /// For freshable literals, returns the `regular_type` field if set
-    /// (i.e. if `t` is a fresh variant). For unions, maps over
-    /// constituents. Otherwise returns `t` unchanged.
     pub fn get_regular_type_of_literal_type(&self, t: &Arc<Type>) -> Arc<Type> {
         if t.flags.intersects(TYPE_FLAGS_FRESHABLE) {
             if let TypeData::Literal(lit) = &t.data {
@@ -2253,7 +1652,7 @@ impl Checker {
                 }
             }
         }
-        // Unions: map over constituents.
+
         if let TypeData::Union(union_data) = &t.data {
             let regularized: Vec<Arc<Type>> = union_data
                 .union_or_intersection
@@ -2273,22 +1672,12 @@ impl Checker {
         Arc::clone(t)
     }
 
-    /// Get the widened literal type for a variable initializer, gated on
-    /// whether the declaration is `const`. Mirrors Go's
-    /// `getWidenedLiteralTypeForInitializer` (checker.go:16810).
-    ///
-    /// For `const` declarations (NodeFlags::Constant), fresh literals are
-    /// preserved (no widening). For `let`/`var`, fresh literals widen to
-    /// their primitive base via `get_widened_literal_type`.
     pub fn get_widened_literal_type_for_initializer(
         &mut self,
         declaration: &Arc<Node>,
         t: &Arc<Type>,
     ) -> Arc<Type> {
-        // `NodeFlags::Constant = Const | Using` is a composite flag, so use
-        // `intersects` (any bit set) rather than `contains` (all bits set) —
-        // a plain `const` declaration only carries `Const`, not `Using`.
-        // Mirrors Go's `flags & NodeFlagsConstant != 0`.
+
         if self
             .get_combined_node_flags(declaration)
             .intersects(NodeFlags::Constant)
@@ -2298,25 +1687,14 @@ impl Checker {
         self.get_widened_literal_type(t)
     }
 
-    // ────────────────────────────────────────────────────────────────────────
-    // Diagnostics
-    // ────────────────────────────────────────────────────────────────────────
-
-    /// Get the diagnostics collected by the checker.
     pub fn get_diagnostics(&self) -> &DiagnosticsCollection {
         &self.diagnostics
     }
 
-    /// Get suggestion diagnostics.
     pub fn get_suggestion_diagnostics(&self) -> &DiagnosticsCollection {
         &self.suggestion_diagnostics
     }
 
-    // ────────────────────────────────────────────────────────────────────────
-    // Node flags helpers
-    // ────────────────────────────────────────────────────────────────────────
-
-    /// Get combined node flags (caching the result).
     pub fn get_combined_node_flags(&mut self, node: &Arc<Node>) -> NodeFlags {
         let mut flags = node.flags;
         let mut parent = node.parent.clone();
@@ -2330,14 +1708,8 @@ impl Checker {
         flags
     }
 
-    /// Get combined modifier flags (caching the result).
-    ///
-    /// Mirrors Go's `Checker.getCombinedModifierFlagsCached` →
-    /// `ast.GetCombinedModifierFlags`. Walks from the root declaration up
-    /// through `VariableDeclaration` → `VariableDeclarationList` →
-    /// `VariableStatement`, OR-ing the syntactic modifier flags of each.
     pub fn get_combined_modifier_flags(&mut self, node: &Arc<Node>) -> ModifierFlags {
-        // Single-entry cache mirroring Go's `lastGetCombinedModifierFlagsNode`.
+
         if let Some(cached) = &self.last_combined_modifier_flags_node {
             if Arc::ptr_eq(cached, node) {
                 return self.last_combined_modifier_flags_result;
@@ -2349,16 +1721,10 @@ impl Checker {
         flags
     }
 
-    // ────────────────────────────────────────────────────────────────────────
-    // Declaration-container / module helpers (used by the emit resolver)
-    // ────────────────────────────────────────────────────────────────────────
-
-    /// Walk up `BindingElement` chains to the root declaration.
-    /// Mirrors Go's `ast.GetRootDeclaration`.
     pub fn get_root_declaration(node: &Arc<Node>) -> Arc<Node> {
         let mut current = Arc::clone(node);
         while current.kind == SyntaxKind::BindingElement {
-            // BindingElement → BindingPattern (parent) → VariableDeclaration (grandparent)
+
             let parent = match &current.parent {
                 Some(p) => Arc::clone(p),
                 None => break,
@@ -2372,12 +1738,9 @@ impl Checker {
         current
     }
 
-    /// The declaration container (SourceFile/ModuleDeclaration/EnumDeclaration)
-    /// that holds `node`. Mirrors Go's `ast.GetDeclarationContainer`.
     pub fn get_declaration_container(node: &Arc<Node>) -> Option<Arc<Node>> {
         let root = Self::get_root_declaration(node);
-        // FindAncestor: walk up from root, returning the first node whose kind
-        // is NOT in the skip set; return that node's parent.
+
         let skip = |kind: SyntaxKind| {
             matches!(
                 kind,
@@ -2400,8 +1763,6 @@ impl Checker {
         None
     }
 
-    /// Whether `node` is a SourceFile that is a global (non-module) script.
-    /// Mirrors Go's `ast.IsGlobalSourceFile`.
     pub fn is_global_source_file(node: &Arc<Node>) -> bool {
         if node.kind != SyntaxKind::SourceFile {
             return false;
@@ -2409,11 +1770,6 @@ impl Checker {
         !Self::is_external_or_common_js_module(node)
     }
 
-    /// Whether `node` (a SourceFile) is an external or CommonJS module.
-    /// Mirrors Go's `ast.IsExternalOrCommonJSModule`: a file is a module if
-    /// it has a top-level `import`/`export` declaration (ES module) or a
-    /// CommonJS indicator. The Rust SourceFile does not yet track CommonJS
-    /// indicators, so only the ES-module heuristic is used.
     pub fn is_external_or_common_js_module(node: &Arc<Node>) -> bool {
         if node.kind != SyntaxKind::SourceFile {
             return false;
@@ -2422,9 +1778,7 @@ impl Checker {
             return false;
         };
         for stmt in data.statements.nodes.iter() {
-            // Mirrors Go's `IsExternalModuleIndicator`: any import/re-export,
-            // export assignment, or statement with the `export` modifier marks
-            // the file as an ES module.
+
             match stmt.kind {
                 SyntaxKind::ImportDeclaration
                 | SyntaxKind::ExportDeclaration
@@ -2441,10 +1795,6 @@ impl Checker {
         false
     }
 
-    /// Whether `node` is an ambient module that augments an external module.
-    /// Mirrors Go's `ast.IsExternalModuleAugmentation`. A `declare module
-    /// "foo"` augmentation is external when its parent is a SourceFile that
-    /// is itself an external module.
     pub fn is_external_module_augmentation(node: &Arc<Node>) -> bool {
         if !Self::is_ambient_module(node) {
             return false;
@@ -2457,7 +1807,7 @@ impl Checker {
             return false;
         }
         if let NodeData::ModuleDeclaration(d) = &node.data {
-            // `declare module "foo"` (StringLiteral name) or `declare global`
+
             d.keyword == SyntaxKind::ModuleKeyword || d.keyword == SyntaxKind::NamespaceKeyword
         } else {
             false
@@ -2484,9 +1834,6 @@ impl Checker {
         }
     }
 
-    /// Whether `node` is a top-level statement kind whose visibility is
-    /// "painted" late via the alias marking visitor.
-    /// Mirrors Go's `ast.IsLateVisibilityPaintedStatement`.
     pub fn is_late_visibility_painted_statement(node: &Arc<Node>) -> bool {
         matches!(
             node.kind,
@@ -2502,8 +1849,6 @@ impl Checker {
         )
     }
 
-    /// The enclosing import syntax node for an alias declaration, if any.
-    /// Mirrors Go's `getAnyImportSyntax`.
     pub fn get_any_import_syntax(node: &Arc<Node>) -> Option<Arc<Node>> {
         match node.kind {
             SyntaxKind::ImportEqualsDeclaration => Some(Arc::clone(node)),
@@ -2519,12 +1864,6 @@ impl Checker {
     }
 }
 
-/// Free function mirroring Go's `ast.GetCombinedModifierFlags`.
-///
-/// Walks from the root declaration up through the variable-declaration chain
-/// (VariableDeclaration → VariableDeclarationList → VariableStatement),
-/// OR-ing the syntactic modifier flags of each level. Non-variable
-/// declarations return their own modifier flags.
 fn ast_get_combined_modifier_flags(node: &Arc<Node>) -> ModifierFlags {
     let current = Checker::get_root_declaration(node);
     let mut flags = current.syntactic_modifier_flags();
@@ -2543,28 +1882,21 @@ fn ast_get_combined_modifier_flags(node: &Arc<Node>) -> ModifierFlags {
     flags
 }
 
-// ────────────────────────────────────────────────────────────────────────────
-// Type resolution cycle detection (mirrors Go checker.go:18663)
-// ────────────────────────────────────────────────────────────────────────────
-
 impl Checker {
-    /// Push a (target, property) pair onto the type resolution stack.
-    /// Returns `true` if no cycle was detected (safe to proceed), or
-    /// `false` if a cycle was found (all entries from the cycle start
-    /// onward are marked as failed). Mirrors Go's `pushTypeResolution`.
+
     pub fn push_type_resolution(
         &mut self,
         target: *const Symbol,
         property: TypeResolutionProperty,
     ) -> bool {
-        // Search the stack from top to bottom for a matching entry.
+
         let cycle_start = self
             .type_resolution_stack
             .iter()
             .rposition(|entry| entry.target == target && entry.property == property);
 
         if let Some(idx) = cycle_start {
-            // Cycle found: mark all entries from cycle_start as failed.
+
             for entry in &mut self.type_resolution_stack[idx..] {
                 entry.result = false;
             }
@@ -2579,9 +1911,6 @@ impl Checker {
         }
     }
 
-    /// Pop the top entry from the resolution stack and return its result.
-    /// `true` means no circularity was detected; `false` means a cycle
-    /// was found. Mirrors Go's `popTypeResolution`.
     pub fn pop_type_resolution(&mut self) -> bool {
         self.type_resolution_stack
             .pop()
@@ -2589,9 +1918,6 @@ impl Checker {
             .unwrap_or(true)
     }
 
-    /// Check if a (target, property) pair is currently being resolved.
-    /// Convenience method for simple cycle guards that don't need the
-    /// full push/pop protocol.
     pub fn is_resolving(&self, target: *const Symbol, property: TypeResolutionProperty) -> bool {
         self.type_resolution_stack
             .iter()
@@ -2599,12 +1925,8 @@ impl Checker {
     }
 }
 
-// ────────────────────────────────────────────────────────────────────────────
-// Public API methods (from exports.go)
-// ────────────────────────────────────────────────────────────────────────────
-
 impl Checker {
-    // Type accessors
+
     pub fn get_string_type(&self) -> Arc<Type> {
         self.string_type()
     }
@@ -2642,7 +1964,6 @@ impl Checker {
         self.es_symbol_type()
     }
 
-    // Symbol accessors
     pub fn get_unknown_symbol(&self) -> Option<Arc<Symbol>> {
         self.unknown_symbol.clone()
     }
@@ -2653,7 +1974,6 @@ impl Checker {
         self.arguments_symbol.clone()
     }
 
-    // Properties
     pub fn get_properties_of_type(&self, t: &Arc<Type>) -> Vec<Arc<Symbol>> {
         if let Some(structured) = t.as_structured() {
             return structured.properties.clone();
@@ -2683,10 +2003,10 @@ impl Checker {
     }
 
     pub fn is_array_like_type(&self, t: &Arc<Type>) -> bool {
-        // An array-like type has a numeric index signature or is a tuple
+
         if t.flags.contains(TypeFlags::Object) {
             if let Some(structured) = t.as_structured() {
-                // Check for numeric index info
+
                 for info in &structured.index_infos {
                     if info
                         .key_type
@@ -2697,7 +2017,7 @@ impl Checker {
                         return true;
                     }
                 }
-                // Tuple types are array-like
+
                 return t.object_flags.contains(ObjectFlags::Tuple);
             }
         }
@@ -2705,8 +2025,7 @@ impl Checker {
     }
 
     pub fn is_array_type(&self, t: &Arc<Type>) -> bool {
-        // A type is an array type if it's a reference to Array<T>
-        // This is a simplified check; the full implementation resolves the target
+
         t.flags.contains(TypeFlags::Object) && t.object_flags.contains(ObjectFlags::Reference)
     }
 
@@ -2714,11 +2033,9 @@ impl Checker {
         super::utilities::is_tuple_type(t)
     }
 
-    // Base type of literal
     pub fn get_base_type_of_literal_type(&self, t: &Arc<Type>) -> Arc<Type> {
         if t.flags.contains(TypeFlags::EnumLiteral) {
-            // Enum literal → the whole enum type (Go getBaseTypeOfEnumLike
-            // Type via the parent symbol's declared type).
+
             if let Some(sym) = &t.symbol
                 && sym.flags.contains(SymbolFlags::EnumMember)
                 && let Some(parent) = &sym.parent
@@ -2742,7 +2059,7 @@ impl Checker {
         if t.flags.contains(TypeFlags::BooleanLiteral) {
             return self.boolean_type();
         }
-        // Union → map each constituent (Go getBaseTypeOfLiteralTypeUnion).
+
         if let TypeData::Union(u) = &t.data {
             let widened: Vec<Arc<Type>> = u
                 .union_or_intersection
@@ -2765,9 +2082,7 @@ impl Checker {
                     return Arc::clone(first);
                 }
             }
-            // A union of widened members cannot be built immutably here
-            // (deduplication needs &mut self); return the union of widened
-            // members constructed via the shared empty-structured shape.
+
             return Arc::new(Type {
                 flags: TypeFlags::Union,
                 object_flags: ObjectFlags::None,
@@ -2790,50 +2105,30 @@ impl Checker {
         Arc::clone(t)
     }
 
-    /// Widen a type by replacing fresh literal types with their primitive
-    /// base types. Mirrors Go's `getWidenedType` (checker.go ~L18268) for
-    /// the function-return-type use case.
-    ///
-    /// - Fresh literal types (string/number/bigint/boolean) → their
-    ///   primitive base. Regular (non-fresh) literals are preserved.
-    /// - Unique `symbol` literals → `symbol`.
-    /// - Unions → a new union with each constituent widened (nullable
-    ///   constituents are preserved as-is, matching Go).
-    /// - All other types are returned unchanged.
-    ///
-    /// Only fresh literals are widened: a fresh literal is one produced by
-    /// a literal expression (e.g. `42`, `"hi"`) that has not yet been
-    /// "decided" by a declaration context. Regular literals (e.g. the
-    /// preserved type of `const x = "hello"`) are not widened here.
     pub fn get_widened_type(&self, t: &Arc<Type>) -> Arc<Type> {
-        // Go getWidenedTypeWithContext: a type carrying the widening flags
-        // that is itself nullable widens to `any` (`var x = undefined;` —
-        // the keyword's widening-flagged intrinsic, only minted without
-        // strictNullChecks). Plain nullable types (annotations, unions'
-        // nullable constituents) keep their type.
+
         if t.flags.intersects(TYPE_FLAGS_NULLABLE)
             && t.object_flags
                 .intersects(crate::checker::types::OBJECT_FLAGS_REQUIRES_WIDENING)
         {
             return self.get_any_type();
         }
-        // Nullable types are not widened (Go skips them in union widening).
+
         if t.flags.intersects(TYPE_FLAGS_NULLABLE) {
             return Arc::clone(t);
         }
-        // Fresh literal types → primitive base. Regular literals are
-        // preserved (Go's `getWidenedType` only widens fresh literals).
+
         if t.flags.intersects(TYPE_FLAGS_LITERAL) {
             if crate::checker::is_fresh_literal_type(t) {
                 return self.get_base_type_of_literal_type(t);
             }
             return Arc::clone(t);
         }
-        // Unique symbol → symbol.
+
         if t.flags.contains(TypeFlags::UniqueESSymbol) {
             return self.es_symbol_type();
         }
-        // Unions: widen each non-nullable constituent.
+
         if let TypeData::Union(union_data) = &t.data {
             let widened: Vec<Arc<Type>> = union_data
                 .union_or_intersection
@@ -2841,7 +2136,7 @@ impl Checker {
                 .iter()
                 .map(|member| self.get_widened_type(member))
                 .collect();
-            // Avoid allocating a new union if nothing changed.
+
             if widened
                 .iter()
                 .zip(union_data.union_or_intersection.types.iter())
@@ -2849,60 +2144,35 @@ impl Checker {
             {
                 return Arc::clone(t);
             }
-            // Rebuild via get_union_type to deduplicate/flatten. We need
-            // &mut self for that, but get_union_type only mutates caches;
-            // since this method takes &self we work around it by constructing
-            // a minimal union without caching. For the return-type use case
-            // this is acceptable.
+
             return self.build_union_from_types(widened);
         }
         Arc::clone(t)
     }
 
-    /// Widen the type of a variable's initializer when no type annotation
-    /// is present. Mirrors Go's `getWidenTypeOfLiteralType` +
-    /// `getWidenedTypeOfFreshObjectLiteralType` plumbing that runs at the
-    /// variable-declaration site.
-    ///
-    /// Unlike `get_widened_type` (which only widens literal/union types),
-    /// this also handles fresh object literal types by widening each
-    /// property type, and is recursive for nested object literals.
-    ///
-    /// Without this, `let x = { a: 1 }` would infer `{ a: 1 }` (literal)
-    /// instead of `{ a: number }` (widened), making `x = { a: 2 }` a
-    /// false-positive TS2322.
     pub fn widen_initializer_type(&mut self, t: &Arc<Type>) -> Arc<Type> {
-        // Fresh object literal: widen each property's type recursively.
+
         if crate::checker::is_object_literal_type(t) {
             return self.widen_object_literal_type(t);
         }
-        // Evolving array literal: element type is already widened at
-        // creation; nothing more to do here.
+
         if t.object_flags.contains(ObjectFlags::EvolvingArray) {
             return Arc::clone(t);
         }
-        // Auto array marker (from `let x = []`): convert to an evolving
-        // array type with element `never`. Flow analysis will evolve the
-        // element type from subsequent `push`/`unshift` calls. Mirrors
-        // Go's flow.go L232-234 (`getEvolvingArrayType(c.neverType)`).
+
         if self.is_auto_array_type(t) {
             return self.get_evolving_array_type(self.never_type());
         }
-        // All other types: defer to the standard widening (handles
-        // literals, unique symbols, and unions of literals).
+
         self.get_widened_type(t)
     }
 
-    /// Check if a type is the auto-array marker (`any[]` whose element
-    /// type is the `auto` type with `NonInferrableType` flag, used for
-    /// `let x = []`).
     pub fn is_auto_array_type(&self, t: &Arc<Type>) -> bool {
         if !t.flags.contains(TypeFlags::Object) || !t.object_flags.contains(ObjectFlags::Reference)
         {
             return false;
         }
-        // The auto-array marker is `Array<autoType>` where `autoType` has
-        // the `NonInferrableType` flag. Check the element type.
+
         match &t.data {
             TypeData::Object(obj) => obj
                 .type_arguments
@@ -2913,41 +2183,31 @@ impl Checker {
         }
     }
 
-    /// Build a widened copy of a fresh object literal type: each
-    /// property's literal type is widened to its primitive base
-    /// (`1` → `number`, `'hi'` → `string`, `true` → `boolean`).
-    /// Nested object literals are widened recursively.
     pub(crate) fn widen_object_literal_type(&mut self, t: &Arc<Type>) -> Arc<Type> {
         let structured = match t.as_structured() {
             Some(s) => s,
             None => return Arc::clone(t),
         };
-        // Collect (name, widened_type, source_prop) triples first to avoid
-        // re-borrowing `&mut self` while iterating over the structured
-        // type's members.
+
         let mut widened_pairs: Vec<(String, Arc<Type>, Arc<Symbol>)> = Vec::new();
         for prop in &structured.properties {
             let prop_type = self.get_type_of_symbol(prop);
             let widened = self.widen_initializer_type(&prop_type);
             widened_pairs.push((prop.name.clone(), widened, Arc::clone(prop)));
         }
-        // Build the widened object type with fresh property symbols.
+
         let mut members = SymbolTable::new();
         let mut props: Vec<Arc<Symbol>> = Vec::with_capacity(widened_pairs.len());
         for (name, t, src_prop) in widened_pairs {
             let symbol = Arc::new(Symbol::new(SymbolFlags::Property, name.clone()));
-            // Preserve the source property's modifier face (optional /
-            // readonly) — the widened clone keeps the declaration's
-            // modifiers (an object-literal this-type's `readonly g: any`).
+
             {
                 let sym_mut = Arc::as_ptr(&symbol) as *mut Symbol;
                 unsafe {
                     (*sym_mut).flags |= src_prop.flags & SymbolFlags::Optional;
                     (*sym_mut).check_flags |=
                         src_prop.check_flags & crate::ast::CheckFlags::Readonly;
-                    // Keep the source declaration (name-node origin drives
-                    // quoted string-literal key display, e.g.
-                    // `{ "0": number; }`).
+
                     (*sym_mut).declarations = src_prop.declarations.clone();
                 }
             }
@@ -2978,9 +2238,6 @@ impl Checker {
         })
     }
 
-    /// Build a union type from a vec of constituents without the full
-    /// `get_union_type` caching machinery (used by `get_widened_type` which
-    /// runs under an immutable borrow).
     pub(crate) fn build_union_from_types(&self, types: Vec<Arc<Type>>) -> Arc<Type> {
         if types.is_empty() {
             return self.never_type();
@@ -2988,7 +2245,7 @@ impl Checker {
         if types.len() == 1 {
             return types.into_iter().next().expect("exactly one");
         }
-        // Deduplicate by pointer identity and flatten nested unions.
+
         let mut seen: Vec<Arc<Type>> = Vec::new();
         for t in types {
             if let TypeData::Union(u) = &t.data {
@@ -3004,9 +2261,7 @@ impl Checker {
         if seen.len() == 1 {
             return seen.into_iter().next().expect("exactly one");
         }
-        // Order union members by TypeFlags bit value (Go's
-        // `getSortOrderFlags` ordering — `get_union_type` applies the
-        // same sort), so insertion order never surfaces.
+
         seen.sort_by_key(|t| {
             if t.flags.intersects(TypeFlags::EnumLiteral | TypeFlags::Enum) {
                 return TypeFlags::Enum.bits();
@@ -3030,7 +2285,6 @@ impl Checker {
         ))
     }
 
-    // Get the constraint of a type parameter
     pub fn get_constraint_of_type_parameter(&self, t: &Arc<Type>) -> Option<Arc<Type>> {
         if let TypeData::TypeParameter(tp) = &t.data {
             return tp.constraint.clone();
@@ -3038,7 +2292,6 @@ impl Checker {
         None
     }
 
-    // Get the default type of a type parameter
     pub fn get_default_from_type_parameter(&self, t: &Arc<Type>) -> Option<Arc<Type>> {
         if let TypeData::TypeParameter(tp) = &t.data {
             return tp.resolved_default_type.get().cloned();
@@ -3046,10 +2299,9 @@ impl Checker {
         None
     }
 
-    // Get the resolved (true) type of a conditional type
     pub fn get_resolved_type_of_conditional_type(&self, t: &Arc<Type>) -> Option<Arc<Type>> {
         if let TypeData::Conditional(ct) = &t.data {
-            // Try resolved true type first, then resolved false type
+
             if let Some(rt) = ct.resolved_true_type.get() {
                 return Some(rt.clone());
             }
@@ -3060,7 +2312,6 @@ impl Checker {
         None
     }
 
-    // Get the constraint of a mapped type
     pub fn get_constraint_of_mapped_type(&self, t: &Arc<Type>) -> Option<Arc<Type>> {
         if let TypeData::Mapped(mt) = &t.data {
             return mt.constraint_type.clone();
@@ -3071,7 +2322,6 @@ impl Checker {
         None
     }
 
-    // Get the true type of a conditional type
     pub fn get_true_type_of_conditional_type(&self, t: &Arc<Type>) -> Option<Arc<Type>> {
         if let TypeData::Conditional(ct) = &t.data {
             return ct.resolved_true_type.get().cloned();
@@ -3079,7 +2329,6 @@ impl Checker {
         None
     }
 
-    // Get the false type of a conditional type
     pub fn get_false_type_of_conditional_type(&self, t: &Arc<Type>) -> Option<Arc<Type>> {
         if let TypeData::Conditional(ct) = &t.data {
             return ct.resolved_false_type.get().cloned();
@@ -3087,12 +2336,10 @@ impl Checker {
         None
     }
 
-    // Get the return type of a signature
     pub fn get_return_type_of_signature(&self, sig: &Arc<Signature>) -> Option<Arc<Type>> {
         sig.resolved_return_type.get().cloned()
     }
 
-    // Get the type predicate of a signature
     pub fn get_type_predicate_of_signature<'a>(
         &self,
         sig: &'a Arc<Signature>,
@@ -3100,26 +2347,19 @@ impl Checker {
         sig.resolved_type_predicate.as_deref()
     }
 
-    /// Compute the type predicate of a signature on demand.
-    ///
-    /// Mirrors Go's `getTypePredicateOfSignature` (relater.go ~L2016) but
-    /// without caching (since `Signature` is behind `Arc`). Checks the
-    /// signature's declaration for a `TypePredicateNode` return type
-    /// annotation (e.g. `x is string`) and creates a `TypePredicate` from it.
-    /// Returns `None` if the signature has no type predicate.
     pub fn compute_type_predicate_of_signature(
         &mut self,
         sig: &Arc<Signature>,
     ) -> Option<TypePredicate> {
-        // Check cache first.
+
         if let Some(pred) = sig.resolved_type_predicate.as_deref() {
-            // `<<unresolved>>` is the sentinel for "no type predicate".
+
             if pred.parameter_name == "<<unresolved>>" {
                 return None;
             }
             return Some(pred.clone());
         }
-        // Compute from declaration.
+
         let Some(decl) = sig.declaration.as_ref() else {
             return None;
         };
@@ -3180,7 +2420,6 @@ impl Checker {
         })
     }
 
-    // Get the base constraint of a type
     pub fn get_base_constraint_of_type(&self, t: &Arc<Type>) -> Option<Arc<Type>> {
         match &t.data {
             TypeData::TypeParameter(tp) => tp.constrained.resolved_base_constraint.get().cloned(),
@@ -3191,7 +2430,6 @@ impl Checker {
         }
     }
 
-    // Get type arguments of a type reference
     pub fn get_type_arguments(&self, t: &Arc<Type>) -> Vec<Arc<Type>> {
         if let TypeData::Object(obj) = &t.data {
             return obj.type_arguments.clone();
@@ -3199,41 +2437,19 @@ impl Checker {
         Vec::new()
     }
 
-    // Get the type of a unique symbol
     pub fn get_unique_symbol_type(&self, _name: &str) -> Option<Arc<Type>> {
-        // Unique symbol types are cached by symbol ID, not by name
-        // This is a simplified version
+
         None
     }
 
-    // Was canceled
     pub fn was_canceled(&self) -> bool {
         false
     }
 
-    // ────────────────────────────────────────────────────────────────────────
-    // Entry points (stubs — full implementation in P3.6)
-    // ────────────────────────────────────────────────────────────────────────
-
-    /// Type-check a single source file.
-    ///
-    /// Go: `Checker.checkSourceFile`. This is the main entry point invoked
-    /// by `Program.GetSemanticDiagnostics` for each source file.
-    ///
-    /// Currently implements a minimal subset of type checking:
-    /// - Walks statements and expressions.
-    /// - For identifiers in expression position, attempts to resolve them
-    ///   against the binder's symbol map (locals + file symbol members).
-    /// - Emits `TS2304 Cannot find name '{0}'.` for unresolvable identifiers.
-    ///
-    /// Full type-checking logic (type inference, relation checking, flow
-    /// narrowing, etc.) is added incrementally.
     pub fn check_source_file(&mut self, file: &Arc<SourceFile>) {
-        // Per-file instantiation budget reset (mirrors Go's per-element
-        // resets — see the note in `check_statement`): emitter/LS-driven
-        // queries between files must not inherit an exhausted budget.
+
         self.type_instantiation_count = 0;
-        // Populate globals from source file symbols on first use.
+
         if !self.globals_populated {
             self.populate_globals();
             self.globals_populated = true;
@@ -3243,47 +2459,27 @@ impl Checker {
         let file_id = file_node.id();
         let source_file_symbol = self.program.symbol_map().symbol_of(&file_node).cloned();
 
-        // Populate `parent` pointers on every node in this file's AST. The
-        // parser builds nodes bottom-up into `Arc`s without setting parent
-        // pointers, but contextual typing (`get_contextual_type`) and several
-        // grammar checks walk `node.parent` to find the enclosing context.
-        // This is safe because the checker runs single-threaded and the AST
-        // is a tree (each node has exactly one parent).
         self.set_parent_pointers(&file_node);
 
-        // Save file context for diagnostics.
         let file_arc = Arc::clone(file);
         self.current_file = Some(Arc::clone(&file_arc));
         self.current_file_id = file_id;
         self.current_file_symbol = source_file_symbol;
 
-        // Push the source file scope.
         self.push_scope(&file_node);
 
-        // Walk top-level statements.
         let statements: Vec<Arc<Node>> = match &file_node.data {
             crate::ast::NodeData::SourceFile(data) => data.statements.iter().cloned().collect(),
             _ => Vec::new(),
         };
-        // Function-overload validation first (TS2389/2391), then the regular
-        // statement walk.
+
         self.check_function_overloads_recursive(&statements);
         for stmt in &statements {
             self.check_statement(stmt);
         }
 
-        // TS2309: an `export =` cannot be used in a module with other
-        // exported elements (Go: checkExternalModuleExports — the
-        // export-equals symbol plus any exported VALUE member is an error
-        // on the `export =` declaration). Approximated syntactically: any
-        // other top-level statement with an `export` modifier that declares
-        // a value (class/function/variable/enum/namespace).
         self.check_export_assignment_conflicts(&statements);
 
-        // Deferred unused-identifier checks (Go's checkSourceFileDeferred →
-        // checkUnusedIdentifiers over the registered identifier-check
-        // nodes). Runs after the statement walk so every reference has been
-        // recorded in `symbol_reference_kinds`.
         self.check_unused_identifiers_in_file(&file_node);
 
         self.pop_scope();
@@ -3292,10 +2488,6 @@ impl Checker {
         self.current_file_symbol = None;
     }
 
-    /// Collect the container nodes Go registers for unused-identifier
-    /// checks (`registerForUnusedIdentifiersCheck`): block-like scopes get
-    /// unused locals/parameters, function-likes only when they have a
-    /// body (implementation, not overload).
     fn check_unused_identifiers_in_file(&mut self, file_node: &Arc<Node>) {
         let no_locals = !self.compiler_options.no_unused_locals.is_true();
         let no_params = !self.compiler_options.no_unused_parameters.is_true();
@@ -3333,8 +2525,7 @@ impl Checker {
         match &node.data {
             NodeData::ConstructorDeclaration(d) => d.body.is_some(),
             NodeData::FunctionDeclaration(d) => d.body.is_some(),
-            // Function expressions and arrow functions always carry a
-            // body node in this AST.
+
             NodeData::FunctionExpression(_) | NodeData::ArrowFunction(_) => true,
             NodeData::MethodDeclaration(d) => d.body.is_some(),
             NodeData::GetAccessorDeclaration(d) => d.body.is_some(),
@@ -3343,17 +2534,15 @@ impl Checker {
         }
     }
 
-    /// Go `checkUnusedLocalsAndParameters`: report TS6133 locals/parameters,
-    /// TS6199/TS6198 aggregate errors and TS6196/TS6133 unused imports.
     fn check_unused_locals_and_parameters(&mut self, container: &Arc<Node>) {
-        
+
         let Some(locals) = self.program.symbol_map().locals.get(&container.id()) else {
             return;
         };
         let locals: Vec<Arc<crate::ast::Symbol>> = locals.entries.values().cloned().collect();
-        // (root declaration list/function node, is_parameter_root)
+
         let mut variable_parents: Vec<(Arc<Node>, bool)> = Vec::new();
-        // (import clause node, unused imported declarations)
+
         let mut import_clauses: Vec<(Arc<Node>, Vec<Arc<Node>>)> = Vec::new();
         for local in locals {
             let reference_kinds = self
@@ -3361,9 +2550,7 @@ impl Checker {
                 .get(&local.id())
                 .map(|e| *e)
                 .unwrap_or(SymbolFlags::empty());
-            // Go's skip conditions: a type parameter is used when referenced
-            // as a value (or isn't a value at all); any other local is used
-            // when referenced, re-exported, or a module-exports container.
+
             let variable_bits =
                 SymbolFlags::FunctionScopedVariable | SymbolFlags::BlockScopedVariable;
             let skip = if local.flags.contains(SymbolFlags::TypeParameter) {
@@ -3437,9 +2624,6 @@ impl Checker {
         }
     }
 
-    /// Go `GetRootDeclaration`: the outermost declaration of a variable/
-    /// binding element — the VariableDeclaration (binding elements resolve
-    /// through their pattern chain to the containing declaration).
     fn root_declaration(node: &Arc<Node>) -> Option<Arc<Node>> {
         let mut cursor = Arc::clone(node);
         for _ in 0..100 {
@@ -3556,8 +2740,7 @@ impl Checker {
                 _ => continue,
             };
             let Some(name_node) = name_node else { continue };
-            // Parameter properties (`constructor(private x)`) and `this`
-            // parameters are exempt.
+
             if declaration.kind == SyntaxKind::Parameter {
                 if let crate::ast::NodeData::ParameterDeclaration(d) = &declaration.data {
                     if d.modifiers.as_ref().is_some_and(|m| {
@@ -3615,7 +2798,6 @@ impl Checker {
         }
     }
 
-    /// Go `isUnreferencedVariableDeclaration`.
     fn is_unreferenced_variable_declaration(&self, node: &Arc<Node>) -> bool {
         let name_node = match &node.data {
             crate::ast::NodeData::VariableDeclaration(d) => Some(Arc::clone(&d.name)),
@@ -3637,7 +2819,7 @@ impl Checker {
                 .iter()
                 .all(|e| self.is_unreferenced_variable_declaration(e));
         }
-        // Referenced as a value → used.
+
         if let Some(sym) = self
             .program
             .symbol_map()
@@ -3651,8 +2833,7 @@ impl Checker {
                 }
             }
         }
-        // `{ a, ...b }`: `a` counts as used — it removes a property from
-        // `b` (Go's rest-element rule for object binding elements).
+
         if node.kind == SyntaxKind::BindingElement {
             if let Some(parent) = node.parent.as_ref() {
                 if parent.kind == SyntaxKind::ObjectBindingPattern {
@@ -3677,8 +2858,7 @@ impl Checker {
                 }
             }
         }
-        // Underscore-prefixed parameters and for-in/of / using variables
-        // are exempt.
+
         let underscore_exempt = match node.kind {
             SyntaxKind::Parameter => true,
             SyntaxKind::VariableDeclaration => {
@@ -3730,8 +2910,6 @@ impl Checker {
             .unwrap_or(node.loc)
     }
 
-    /// Go `reportUnusedImports`: TS6192 when every binding of the clause is
-    /// unused, else per-binding TS6133/TS6196.
     fn report_unused_imports(&mut self, clause: &Arc<Node>, unused: &[Arc<Node>]) {
         let mut declaration_count = 0usize;
         let named_bindings: Option<Arc<Node>> = match &clause.data {
@@ -3779,8 +2957,6 @@ impl Checker {
         }
     }
 
-    /// Go `reportUnused`: errors gated on noUnusedLocals/noUnusedParameters;
-    /// ambient declarations never report.
     fn report_unused(
         &mut self,
         location: &Arc<Node>,
@@ -3810,18 +2986,9 @@ impl Checker {
             .add(crate::ast::Diagnostic::new(file, loc, *message, args));
     }
 
-    /// Recursively populate `parent` pointers on every node in the AST
-    /// rooted at `node`. The parser builds nodes bottom-up into `Arc`s
-    /// without setting parent pointers; this walk fixes them up so that
-    /// `get_contextual_type` (and grammar checks that inspect `node.parent`)
-    /// can locate the enclosing context. Children are collected first and
-    /// the parent pointer is set via the same `Arc::as_ptr` mutation pattern
-    /// the binder uses for `Symbol` mutation — safe because the checker
-    /// runs single-threaded and the AST is a tree (one parent per node).
     fn set_parent_pointers(&mut self, node: &Arc<Node>) {
         use crate::ast::node_data_generated::for_each_child;
-        // Collect direct children first so the recursive call below doesn't
-        // hold a borrow on `self` through the `for_each_child` closure.
+
         let mut children: Vec<Arc<Node>> = Vec::new();
         for_each_child(node, |child| {
             children.push(Arc::clone(child));
@@ -3830,8 +2997,7 @@ impl Checker {
         let parent_clone = Arc::clone(node);
         for child in &children {
             let child_mut = Arc::as_ptr(child) as *mut Node;
-            // Skip if already pointing at this parent (idempotent on
-            // re-checks — avoids churn and redundant Arc clones).
+
             let already = unsafe {
                 (*child_mut)
                     .parent
@@ -3847,39 +3013,19 @@ impl Checker {
         }
     }
 
-    /// Return the semantic diagnostics collected during type checking.
-    ///
-    /// Go: `Checker.getDiagnostics`.
     pub fn get_semantic_diagnostics(&self) -> Vec<crate::ast::Diagnostic> {
         self.diagnostics.get_all()
     }
 }
 
-// ────────────────────────────────────────────────────────────────────────────
-// Statement and expression checking (P3.6 minimal implementation)
-// ────────────────────────────────────────────────────────────────────────────
-
 impl Checker {
-    // ─────────────────────────────────────────────────────────────────────
-    // Type inference
-    // ─────────────────────────────────────────────────────────────────────
 
-    /// Get the type of a node, computing and caching it if necessary.
-    ///
-    /// Go: `Checker.getTypeOfSymbolAtLocation` / `getTypeOfNode`.
     pub fn get_type_of_node(&mut self, node: &Arc<Node>) -> Arc<Type> {
-        // `this` never uses the node cache: the instance type's member
-        // table is built EAGERLY (build_class_instance_type_with_base
-        // resolves member initializer types BEFORE the this-type is
-        // pushed), so a `this` node first typed in that window would
-        // freeze `any` into the cache — poisoning the later checking pass
-        // (no TS2339 on `this.nope` in a property initializer, no
-        // TS2715/TS2729). Recomputation is a stack lookup — cheap.
+
         if node.kind == SyntaxKind::ThisKeyword {
             return self.compute_type_of_node(node);
         }
-        // Check cache first (type_node_links stores resolved types for
-        // both type nodes and expression nodes).
+
         if let Some(links) = self.type_node_links.get(node) {
             if let Some(ref t) = links.resolved_type {
                 return Arc::clone(t);
@@ -3890,14 +3036,9 @@ impl Checker {
         result
     }
 
-    /// Compute the type of a node (without caching).
     fn compute_type_of_node(&mut self, node: &Arc<Node>) -> Arc<Type> {
         match node.kind {
-            // Literal types — wrap with `get_fresh_type_of_literal_type`
-            // so that literal expressions produce a *fresh* literal type.
-            // Fresh literals widen to their primitive base only at
-            // `let`/`var` declaration sites (not `const`), mirroring Go's
-            // freshness mechanism.
+
             SyntaxKind::NumericLiteral => {
                 if let crate::ast::NodeData::NumericLiteral(data) = &node.data {
                     let lit = self.infer_number_literal_type(&data.text);
@@ -3930,30 +3071,26 @@ impl Checker {
             SyntaxKind::FunctionDeclaration => self.get_type_of_function_like(node),
             SyntaxKind::Identifier => self.get_type_of_identifier(node),
             SyntaxKind::MetaProperty => self.get_type_of_meta_property(node),
-            // Binary expressions
+
             SyntaxKind::BinaryExpression => self.get_type_of_binary_expression(node),
             SyntaxKind::PrefixUnaryExpression => {
                 if let crate::ast::NodeData::PrefixUnaryExpression(data) = &node.data {
-                    // The parser currently represents `delete x` and
-                    // `void x` as PrefixUnaryExpression with DeleteKeyword /
-                    // VoidKeyword as the operator (Go creates separate
-                    // DeleteExpression / VoidExpression nodes). Handle both
-                    // representations here.
+
                     match data.operator {
-                        // `!x` → boolean.
+
                         SyntaxKind::ExclamationToken => return self.boolean_type(),
-                        // `delete x` → boolean.
+
                         SyntaxKind::DeleteKeyword => return self.boolean_type(),
-                        // `void x` → undefined.
+
                         SyntaxKind::VoidKeyword => return self.undefined_type(),
-                        // `+x`/`-x`/`~x`/`++x`/`--x` → number.
+
                         _ => return self.number_type(),
                     }
                 }
                 self.get_any_type()
             }
             SyntaxKind::PostfixUnaryExpression => {
-                // `x++` / `x--` → number.
+
                 self.number_type()
             }
             SyntaxKind::CallExpression => self.get_return_type_of_call_expression(node),
@@ -3967,10 +3104,9 @@ impl Checker {
                 self.get_any_type()
             }
             SyntaxKind::AsExpression => {
-                // `x as T` has the type of the type annotation `T`.
+
                 if let crate::ast::NodeData::AsExpression(data) = &node.data {
-                    // `x as const` — narrow the expression's literal type
-                    // without widening. Mirrors Go's `getConstAssertionType`.
+
                     if data.type_node.kind == SyntaxKind::ConstKeyword {
                         return self.get_const_assertion_type(&data.expression);
                     }
@@ -3979,24 +3115,21 @@ impl Checker {
                 self.get_any_type()
             }
             SyntaxKind::SatisfiesExpression => {
-                // `x satisfies T` keeps the type of `x` (the assertion does
-                // not change the expression's type, only validates it).
+
                 if let crate::ast::NodeData::SatisfiesExpression(data) = &node.data {
                     return self.get_type_of_node(&data.expression);
                 }
                 self.get_any_type()
             }
             SyntaxKind::TypeAssertionExpression => {
-                // `<T>x` has the type of the type annotation `T`.
+
                 if let crate::ast::NodeData::TypeAssertion(data) = &node.data {
                     return self.get_type_from_type_node(&data.type_node);
                 }
                 self.get_any_type()
             }
             SyntaxKind::NonNullExpression => {
-                // `x!` asserts that `x` is non-null: the type of `x` with
-                // `null` and `undefined` removed. Mirrors Go's
-                // `getNonNullableType`.
+
                 if let crate::ast::NodeData::NonNullExpression(data) = &node.data {
                     let operand_type = self.get_type_of_node(&data.expression);
                     return self.remove_flags_from_union(
@@ -4007,7 +3140,7 @@ impl Checker {
                 self.get_any_type()
             }
             SyntaxKind::ConditionalExpression => {
-                // `cond ? a : b` → widened union of `a` and `b` types.
+
                 if let crate::ast::NodeData::ConditionalExpression(data) = &node.data {
                     let true_type = self.get_type_of_node(&data.when_true);
                     let false_type = self.get_type_of_node(&data.when_false);
@@ -4018,11 +3151,11 @@ impl Checker {
                 self.get_any_type()
             }
             SyntaxKind::TemplateExpression => {
-                // `` `a${x}b` `` → string.
+
                 self.string_type()
             }
             SyntaxKind::TaggedTemplateExpression => {
-                // `` tag`...` `` → result of calling the tag function.
+
                 if let crate::ast::NodeData::TaggedTemplateExpression(data) = &node.data {
                     let tag_type = self.get_type_of_node(&data.tag);
                     if let Some(structured) = tag_type.as_structured() {
@@ -4037,23 +3170,18 @@ impl Checker {
                 self.get_any_type()
             }
             SyntaxKind::DeleteExpression => {
-                // `delete x` → boolean.
+
                 self.boolean_type()
             }
             SyntaxKind::VoidExpression => {
-                // `void x` → undefined.
+
                 self.undefined_type()
             }
             SyntaxKind::AwaitExpression => {
-                // `await x` → the awaited type of the operand: `Promise<X>`
-                // unwraps to X, unions map over constituents, thenables
-                // unwrap through `then`. Go: `checkAwaitExpression` →
-                // `getAwaitedType`.
+
                 if let crate::ast::NodeData::AwaitExpression(data) = &node.data {
                     let operand = Arc::clone(&data.expression);
-                    // `await import("m")` → the module's namespace type
-                    // (skip the Promise wrapper — Go getAwaitedType of the
-                    // dynamic import's Promise<typeof m>).
+
                     if let Some(ns) = self.type_of_dynamic_import(&operand) {
                         return ns;
                     }
@@ -4066,12 +3194,7 @@ impl Checker {
                 self.get_any_type()
             }
             SyntaxKind::ThisKeyword | SyntaxKind::SuperKeyword => {
-                // Computed property NAMES of a class (expression) live
-                // OUTSIDE that class's container (Go getContainerFlags):
-                // `super.foo()` in `[super.foo()](){}` of a nested class
-                // expression binds to the ENCLOSING class's base, not the
-                // anonymous expression itself
-                // (superPropertyAccessInComputedPropertiesOfNestedType).
+
                 if node.kind == SyntaxKind::SuperKeyword
                     && self.super_in_computed_name_of_innermost_class(node)
                     && self.enclosing_class_stack.len() >= 2
@@ -4081,15 +3204,7 @@ impl Checker {
                         .cloned()
                         .unwrap_or_else(|| self.get_any_type());
                 }
-                // `this` / `super` → the enclosing class's instance type.
-                // Mirrors Go's `getThisType` / `getThisTypeOfObjectLiteral`.
-                // In a STATIC member, `this` is the class's CONSTRUCTOR type
-                // (Go `tryGetThisTypeAtEx`: `IsStatic(container) →
-                // getTypeOfSymbol(classSymbol)` — `static bar(zz = this)` sees
-                // `typeof C`, so `zz.staticMember` resolves).
-                // When not inside a class (e.g. top-level `this` in a
-                // module), falls back to `any` (or `globalThis` in
-                // script-mode — simplified to `any` here).
+
                 if self.this_container_stack.last() == Some(&ThisContainerKind::StaticMember)
                     && let Some(class) = self.enclosing_class_stack.last().cloned()
                 {
@@ -4106,16 +3221,9 @@ impl Checker {
         }
     }
 
-    /// Get the type of an identifier reference.
-    ///
-    /// If the identifier has an associated flow node (set by the binder),
-    /// the declared type is narrowed based on control-flow constraints
-    /// (e.g. `if (x !== null)` narrows `x` in the then-branch).
     fn get_type_of_identifier(&mut self, node: &Arc<Node>) -> Arc<Type> {
         if let Some(symbol) = self.resolve_identifier(node) {
-            // A named import (`import { f } from 'm'`) types as the
-            // imported module's exported member (following an `export =`
-            // alias one level).
+
             if symbol.flags == SymbolFlags::Alias {
                 if let Some(t) = self.type_of_imported_symbol(&symbol) {
                     return t;
@@ -4123,27 +3231,15 @@ impl Checker {
             }
             let flow = self.program.symbol_map().flow_node_of(node).map(Arc::clone);
             let narrowed = self.get_narrowed_type_of_symbol(&symbol, flow.as_ref());
-            // When the reference is `x` in `x.length`, `x.push(value)`,
-            // `x.unshift(value)` or `x[n] = value`, we give the type
-            // `autoArrayType` (instead of finalizing the evolving array)
-            // so that operations on empty arrays are possible without
-            // implicit any errors and new element types can be inferred
-            // without type mismatch errors. Mirrors Go's
-            // `getFlowTypeOfReference` (flow.go ~L106-110).
+
             if narrowed.object_flags.contains(ObjectFlags::EvolvingArray)
                 && self.is_evolving_array_operation_target(node)
             {
                 return self.auto_array_type();
             }
-            // Finalize evolving array types when they are read as a value
-            // (i.e. they "escape" the flow context). Mirrors Go's
-            // `finalizeEvolvingArrayType` call in `getFlowTypeOfReference`.
+
             let final_type = self.finalize_evolving_array_type(&narrowed);
-            // Go checkIdentifier: an identifier in assignment-target
-            // position reads as the BASE literal type — both a compound
-            // assignment (`x += y`) and a compound-LIKE one (`x = x + y`)
-            // operate on `''.length`-style primitives, so `let x = "";
-            // x = x + "bar"` checks `string` against `string`.
+
             let target_kind = get_assignment_target_kind(node);
             let compound_like = target_kind == AssignmentKind::Definite
                 && is_in_compound_like_assignment(node);
@@ -4156,16 +3252,12 @@ impl Checker {
         }
     }
 
-    /// Check if `node` is the receiver of an evolving-array operation:
-    /// `node.length`, `node.push(value)`, `node.unshift(value)`, or
-    /// `node[i] = value`. Mirrors Go's `isEvolvingArrayOperationTarget`
-    /// (flow.go ~L1521).
     fn is_evolving_array_operation_target(&self, node: &Arc<Node>) -> bool {
         let root = self.get_reference_root(node);
         let Some(parent) = &root.parent else {
             return false;
         };
-        // `root.length` or `root.push(...)` / `root.unshift(...)`.
+
         if let NodeData::PropertyAccessExpression(pa) = &parent.data {
             if Arc::ptr_eq(&pa.expression, root) {
                 let name = pa.name.text();
@@ -4173,9 +3265,7 @@ impl Checker {
                     return true;
                 }
                 if name == "push" || name == "unshift" {
-                    // parent.parent must be a CallExpression for this to be a
-                    // mutation (e.g. `arr.push(1)`). Bare `arr.push` (without
-                    // a call) is not a mutation.
+
                     if let Some(grandparent) = &parent.parent {
                         if matches!(grandparent.kind, SyntaxKind::CallExpression) {
                             return true;
@@ -4184,8 +3274,7 @@ impl Checker {
                 }
             }
         }
-        // `root[i] = value` — element access assignment. Mirrors Go's
-        // `isElementAssignment` branch.
+
         if let NodeData::ElementAccessExpression(ea) = &parent.data {
             if Arc::ptr_eq(&ea.expression, root) {
                 if let Some(grandparent) = &parent.parent {
@@ -4193,9 +3282,7 @@ impl Checker {
                         if bin.operator_token.kind == SyntaxKind::EqualsToken
                             && Arc::ptr_eq(&bin.left, parent)
                         {
-                            // Go additionally requires the index type to be
-                            // number-like. We approximate by always allowing
-                            // (avoiding a recursive type computation here).
+
                             return true;
                         }
                     }
@@ -4205,9 +3292,6 @@ impl Checker {
         false
     }
 
-    /// Find the root of a reference chain, unwrapping parenthesized
-    /// expressions, `=` assignment LHS, and comma-operator RHS. Mirrors
-    /// Go's `getReferenceRoot` (flow.go ~L1855).
     fn get_reference_root<'a>(&self, node: &'a Arc<Node>) -> &'a Arc<Node> {
         let Some(parent) = &node.parent else {
             return node;
@@ -4228,14 +3312,8 @@ impl Checker {
         }
     }
 
-    /// Get the type of a symbol.
     pub fn get_type_of_symbol(&mut self, symbol: &Arc<Symbol>) -> Arc<Type> {
-        // Import/export aliases (`import { x } from "..."`, `export { y as x }`,
-        // `import a = b.c`): the alias symbol itself has no type — chase the
-        // binder's export-symbol chain to the target declaration's symbol
-        // (Go resolves aliases eagerly; the value type of `x` is the type of
-        // the referenced module's `x`). Without this, imported consts/lets
-        // typed as `any` silently skipped assignment checks.
+
         if symbol.flags.contains(SymbolFlags::Alias) {
             let target = self.follow_alias(symbol);
             if let Some(target) = target
@@ -4249,12 +3327,7 @@ impl Checker {
             }
             return self.get_any_type();
         }
-        // Declaration merging: when a symbol has both the `ValueModule` flag
-        // (a `namespace N` declaration) and a value-side flag (`Function`,
-        // `Class`, `RegularEnum`, or `ConstEnum`), the resolved type must
-        // combine the value type's call/construct signatures with the
-        // namespace's exported members. Mirrors Go's
-        // `getDeclaredTypeOfSymbol` namespace + value merge.
+
         if symbol.flags.contains(SymbolFlags::ValueModule)
             && (symbol.flags.contains(SymbolFlags::Function)
                 || symbol.flags.contains(SymbolFlags::Class)
@@ -4263,9 +3336,7 @@ impl Checker {
         {
             return self.get_type_of_merged_namespace_symbol(symbol);
         }
-        // The automatic static `prototype` property of a class: an
-        // instantiation of the class type with `any` for each type
-        // parameter (Go `getTypeOfPrototypeProperty`, checker.go ~L18096).
+
         if symbol.flags.contains(SymbolFlags::Prototype) {
             if let Some(links) = self.value_symbol_links.get(symbol) {
                 if let Some(ref t) = links.resolved_type {
@@ -4276,11 +3347,7 @@ impl Checker {
             self.value_symbol_links.get_or_default(symbol).resolved_type = Some(result.clone());
             return result;
         }
-        // Method members: type from the method's own declaration — the
-        // instance-type builder (build_interface_type_from_members) skips
-        // statics, so a static method's symbol would otherwise stay untyped
-        // (`A1.sm()` → any). Mirrors the MethodDeclaration arm there:
-        // signature built under the method's scope, annotated return type.
+
         if symbol.flags.intersects(SymbolFlags::Method)
             && let Some(decl) = symbol
                 .declarations
@@ -4301,9 +3368,9 @@ impl Checker {
             let sig = self.build_signature_from_function_like_type_node(
                 &data.parameters,
                 return_type,
-                /* is_construct */ false,
-                /* contextual_signature */ None,
-                /* declaration */ Some(Arc::clone(decl)),
+                 false,
+                 None,
+                 Some(Arc::clone(decl)),
             );
             self.pop_scope();
             let t = self.create_function_or_constructor_type(vec![sig], false);
@@ -4312,8 +3379,7 @@ impl Checker {
                 .resolved_type = Some(Arc::clone(&t));
             return t;
         }
-        // For now, return any for most symbols
-        // TODO: implement proper symbol type resolution
+
         if symbol.flags.contains(SymbolFlags::BlockScopedVariable)
             || symbol.flags.contains(SymbolFlags::FunctionScopedVariable)
             || symbol.flags.contains(SymbolFlags::Function)
@@ -4321,15 +3387,13 @@ impl Checker {
             || symbol.flags.contains(SymbolFlags::Property)
             || symbol.flags.contains(SymbolFlags::EnumMember)
         {
-            // 1. Symbol-level cache (`value_symbol_links[symbol].resolved_type`),
-            //    mirrors Go's `symbol.links.type`.
+
             if let Some(links) = self.value_symbol_links.get(symbol) {
                 if let Some(ref t) = links.resolved_type {
                     return Arc::clone(t);
                 }
             }
-            // 2. Node-level cache on the value declaration — this is where
-            //    `check_variable_declaration` writes the resolved type.
+
             if let Some(decl) = &symbol.value_declaration {
                 if let Some(links) = self.type_node_links.get(decl) {
                     if let Some(ref t) = links.resolved_type {
@@ -4337,8 +3401,7 @@ impl Checker {
                     }
                 }
             }
-            // 3. Fallback: any of the symbol's declarations might carry a
-            //    cached type (e.g. parameter declarations).
+
             for decl in &symbol.declarations {
                 if let Some(links) = self.type_node_links.get(decl) {
                     if let Some(ref t) = links.resolved_type {
@@ -4346,12 +3409,7 @@ impl Checker {
                     }
                 }
             }
-            // 4. On-demand resolution: Go's `getTypeOfSymbol` resolves the
-            //    declaration's type LAZILY — a symbol referenced before its
-            //    declaring file is checked (check order, `skipLibCheck`
-            //    skips, types-option auto-includes appending late) still
-            //    gets its declared type. Resolve the declaration's
-            //    annotation/initializer in the DECLARING file's context.
+
             if let Some(t) = self.resolve_symbol_declared_type_on_demand(symbol) {
                 self.value_symbol_links
                     .get_or_default(symbol)
@@ -4360,29 +3418,16 @@ impl Checker {
             }
             self.get_any_type()
         } else if symbol.flags.contains(SymbolFlags::ValueModule) {
-            // Namespace: build an anonymous object type from the namespace's
-            // exported members. `resolve_namespace_type` caches the result.
+
             self.resolve_namespace_type(symbol)
         } else if symbol.flags.intersects(SymbolFlags::ENUM) {
-            // Enum used as a value (`Color.Red`): build an anonymous object
-            // type whose members are the enum's members, each carrying its
-            // literal type (populated by `resolve_enum_type`). Mirrors Go's
-            // `getDeclaredTypeOfSymbol` enum value type.
+
             self.resolve_enum_value_type(symbol)
         } else {
             self.get_any_type()
         }
     }
 
-    /// Attach the expando face of a function declaration's symbol to its
-    /// value type (Go getTypeOfFuncClassEnumModule + resolveObjectTypeMembers
-    /// `isStatic` arm): property assignments on the function
-    /// (`function f(){}; f.prop = v`, `f[uniqueSymbol] = v`) become members
-    /// of the function's type. Static names come from the binder-declared
-    /// Property symbols in the function's exports; dynamic names
-    /// (`f[key] = v`) ride on the `\u{FE}assignment` pseudo symbol and key
-    /// by the empty-name computed-member convention. Result: the base
-    /// function type intersected with an anonymous member face.
     fn attach_function_expando_type(
         &mut self,
         symbol: &Arc<crate::ast::Symbol>,
@@ -4392,10 +3437,7 @@ impl Checker {
         for (name, sym) in symbol.exports.iter() {
             if name == crate::ast::INTERNAL_SYMBOL_NAME_ASSIGNMENT {
                 for d in &sym.declarations {
-                    // Dynamic `x[key] = v`: the member name follows the
-                    // computed-member convention (bracketed source text,
-                    // get_property_name_from_node) so it matches interface
-                    // `[key]` members.
+
                     let mname = match &d.data {
                         crate::ast::NodeData::BinaryExpression(b) => match &b.left.data {
                             crate::ast::NodeData::ElementAccessExpression(eae) => self
@@ -4484,18 +3526,11 @@ impl Checker {
         })
     }
 
-    /// Go `addOptionalityEx(t, false, true)`: under strictNullChecks a `?`
-    /// parameter's resolved type carries `| undefined` (`assignParameterType`
-    /// folds it into the symbol type, so the signature's parameter type and
-    /// every reference in the body share it). No-op when undefined is
-    /// already a constituent.
     pub(crate) fn add_optional_undefined(&mut self, t: Arc<Type>) -> Arc<Type> {
         if !self.strict_null_checks {
             return t;
         }
-        // An error-typed annotation must not become a union — the union
-        // loses errorType's Any flag and downstream checks would mis-fire
-        // (Go's errorType is infectious: `T | error` IS error).
+
         if t.flags.contains(TypeFlags::Any) && t.intrinsic_name() == Some("error") {
             return t;
         }
@@ -4509,10 +3544,6 @@ impl Checker {
         self.get_union_type(vec![t, self.undefined_type()])
     }
 
-    /// The display view of an optional parameter's type: the `?` already
-    /// spells optionality, so the folded `| undefined` constituent is not
-    /// shown again (official call errors print the annotation view —
-    /// `f("s")` on `f(x?: number)` reports 'number').
     pub(crate) fn strip_optional_undefined(&mut self, t: &Arc<Type>) -> Arc<Type> {
         if t.flags.contains(TypeFlags::Union)
             && let Some(ts) = t.types()
@@ -4533,14 +3564,6 @@ impl Checker {
         Arc::clone(t)
     }
 
-    /// Resolve the declared type of a variable/property-like symbol straight
-    /// from its declaration — the lazy tail of [`Self::get_type_of_symbol`]
-    /// (Go resolves symbol types on demand; the declaring file may not have
-    /// been checked yet). Runs in the DECLARING file's context (scope +
-    /// current file) so annotation references resolve against the right
-    /// file. A placeholder `any` is parked in the value-symbol cache first —
-    /// a circular initializer re-entering this symbol reads `any` (Go's
-    /// circularity semantics) instead of recursing.
     fn resolve_symbol_declared_type_on_demand(&mut self, symbol: &Arc<Symbol>) -> Option<Arc<Type>> {
         use crate::ast::NodeData;
         let decl = symbol
@@ -4555,16 +3578,9 @@ impl Checker {
             _ => return None,
         };
         if type_node_and_init.0.is_none() && type_node_and_init.1.is_none() {
-            // For-in/for-of loop variables have neither an annotation nor
-            // an initializer — their declared type is the iterated element
-            // type (or `string` for for-in) from the loop head
-            // (`initial_type_of_declaration`'s for-in/of arm).
+
             if decl.kind == SyntaxKind::VariableDeclaration {
-                // Park the placeholder before computing (cycle guard, same
-                // as the typed path below): `for (var v of v)` re-enters
-                // through the RHS identifier's symbol type; without the
-                // parked any the recursion is unbounded (worker stack
-                // overflow — for-of32/55 family).
+
                 let placeholder = self.get_any_type();
                 let existing = self
                     .value_symbol_links
@@ -4586,7 +3602,7 @@ impl Checker {
             }
             return None;
         }
-        // Park the placeholder before computing (cycle guard).
+
         let placeholder = self.get_any_type();
         let existing = self
             .value_symbol_links
@@ -4612,12 +3628,7 @@ impl Checker {
             if let Some(tn) = type_node {
                 Some(checker.get_type_from_type_node(&tn))
             } else {
-                // A class-property initializer's `this` reads the OWNING
-                // class's instance type — the on-demand resolution may run
-                // outside the class-checking window (this_type_stack empty),
-                // so push the owner's instance type around the initializer
-                // typing (`a = this` keeps type F, not any). The cycle guard
-                // placeholder above keeps self-referential members finite.
+
                 let owner_class = match &decl.data {
                     NodeData::PropertyDeclaration(_) => decl
                         .parent
@@ -4636,12 +3647,7 @@ impl Checker {
                     checker.this_type_stack.push(this_type);
                 }
                 let t = initializer.map(|init| {
-                    // Go getWidenedTypeForVariableLikeDeclaration: an
-                    // empty-array-literal initializer gets the flow-tracked
-                    // auto array (`let/const x = []; x.push(1)` evolves) —
-                    // the literal's own type is `never[]`. A null/
-                    // undefined initializer (non-const) widens to the
-                    // implicit-any AUTO type.
+
                     if !checker
                         .get_combined_node_flags(&decl)
                         .intersects(NodeFlags::Constant)
@@ -4668,20 +3674,15 @@ impl Checker {
                 t
             }
         });
-        // Restore whatever was cached before the placeholder on early
-        // exit, or keep the computed type.
+
         let result = match (&result, &decl.data) {
-            // A `?`-parameter without an initializer carries `| undefined`
-            // (Go `assignParameterType`); the normal signature-construction
-            // path folds this — mirror it for the on-demand resolution.
+
             (Some(t), NodeData::ParameterDeclaration(pd))
                 if pd.question_token.is_some() && pd.initializer.is_none() =>
             {
                 Some(self.add_optional_undefined(Arc::clone(t)))
             }
-            // An optional interface/type-literal property (`x?: T`) carries
-            // `| undefined`; the member-builder path folds this eagerly —
-            // mirror it for the on-demand (lazy-member) resolution.
+
             (Some(t), NodeData::PropertySignatureDeclaration(psd))
                 if psd.postfix_token.as_ref().is_some_and(|tk| {
                     tk.kind == SyntaxKind::QuestionToken
@@ -4704,9 +3705,6 @@ impl Checker {
         result
     }
 
-    /// Run `f` with the checker's file context switched to the file that
-    /// declares `decl` (scope stack included — annotation names resolve
-    /// against the declaring file's symbol tables).
     fn with_declaring_file_context<T>(
         &mut self,
         decl: &Arc<Node>,
@@ -4720,12 +3718,7 @@ impl Checker {
             self.current_file = Some(Arc::clone(&file));
             self.current_file_id = file.node.id();
             self.current_file_symbol = self.program.symbol_map().symbol_of(&file.node).cloned();
-            // Rebuild the declaration's LEXICAL scope chain, outermost
-            // first — resolving an annotation/initializer on demand must
-            // see the declaring block's locals (a local `type A = I[]` in
-            // a function body wins over a same-named top-level `class A`
-            // declared later; pushing only the file scope resolved the
-            // annotation against the file's members — localTypes1).
+
             let mut chain: Vec<Arc<Node>> = Vec::new();
             let mut cur = decl.parent.clone();
             while let Some(n) = cur {
@@ -4779,21 +3772,8 @@ impl Checker {
         result
     }
 
-    /// Resolve the type of a symbol that has both a namespace declaration
-    /// (`namespace N { ... }`) and a value declaration (`function N`, `class
-    /// N`, `enum N`). The result combines the value type's call/construct
-    /// signatures with the namespace's exported members as properties, so
-    /// both `N()`/`new N()` and `N.exportedMember` type-check.
-    ///
-    /// Mirrors the namespace slice of Go's `getDeclaredTypeOfSymbol`, which
-    /// folds the value-side type into the namespace object type.
     fn get_type_of_merged_namespace_symbol(&mut self, symbol: &Arc<Symbol>) -> Arc<Type> {
-        // Cached merged type on `declared_type_links[symbol].declared_type`.
-        // This is a VALUE-side type (call/construct signatures + namespace
-        // exports) and must NOT share `type_alias_links`'s declared-type
-        // slot with the class INSTANCE type that `resolve_type_reference`'s
-        // Class arm builds for the same merged symbol — Go keeps them
-        // distinct (`getDeclaredTypeOfSymbol` vs the class instance type).
+
         if let Some(cached) = self
             .declared_type_links
             .get(symbol)
@@ -4802,22 +3782,10 @@ impl Checker {
             return cached;
         }
 
-        // 1. Resolve the value type (function/class/enum) via the value-side
-        //    resolution path (which looks up `value_symbol_links` and
-        //    `type_node_links` caches populated during statement checking).
         let value_type = self.get_value_type_of_symbol(symbol);
 
-        // 2. Resolve the namespace members. `resolve_namespace_type` caches
-        //    its result on `type_alias_links[symbol].declared_type` — for a
-        //    symbol merged with a class, resolve_type_reference's Class arm
-        //    bypasses that slot, so the pollution is harmless there; the
-        //    merged type below is cached separately on declared_type_links.
         let ns_type = self.resolve_namespace_type(symbol);
 
-        // 3. Build the merged type: take the namespace object type (which
-        //    carries members + properties) and copy in the value type's
-        //    call/construct signatures. The resulting anonymous object type
-        //    supports both `N()` / `new N()` and `N.member`.
         let (call_sigs, construct_sigs) = match &value_type.data {
             TypeData::Object(obj) => {
                 let cs = obj.structured.call_signatures().to_vec();
@@ -4827,21 +3795,14 @@ impl Checker {
             _ => (Vec::new(), Vec::new()),
         };
         let merged = if call_sigs.is_empty() && construct_sigs.is_empty() {
-            // No signatures to merge (e.g. the value type wasn't resolved
-            // yet); just return the namespace type so members are visible.
+
             ns_type
         } else {
-            // Build a fresh structured type that carries the namespace's
-            // members/properties/index_infos plus the value type's
-            // call/construct signatures. `StructuredTypeData.signatures`
-            // stores call signatures first (count = call_signature_count),
-            // then construct signatures.
+
             let ns_obj = match &ns_type.data {
                 TypeData::Object(obj) => obj,
                 _ => {
-                    // Namespace type isn't an object (unexpected); nothing
-                    // to merge into, so return the value type which carries
-                    // the signatures.
+
                     self.declared_type_links.get_or_default(symbol).declared_type =
                         Some(Arc::clone(&value_type));
                     return value_type;
@@ -4852,9 +3813,7 @@ impl Checker {
             structured.members = ns_structured.members.clone();
             structured.properties = ns_structured.properties.clone();
             structured.index_infos = ns_structured.index_infos.clone();
-            // Existing namespace signatures (e.g. from a nested namespace
-            // with its own call signatures) come after the value type's
-            // call signatures but before construct signatures.
+
             let existing_sigs = ns_structured.signatures.clone();
             let existing_call_count = ns_structured.call_signature_count;
             structured.call_signature_count = call_sigs.len() + existing_call_count;
@@ -4881,29 +3840,18 @@ impl Checker {
             })
         };
 
-        // Cache the merged type so future lookups hit the cache above.
         self.declared_type_links.get_or_default(symbol).declared_type = Some(Arc::clone(&merged));
         merged
     }
 
-    /// Resolve the value-side type of a symbol (function, class, variable,
-    /// property) by consulting the symbol-level and node-level caches
-    /// populated during statement/expression checking. This is the value-
-    /// only subset of `get_type_of_symbol` — it does NOT consider the
-    /// `ValueModule` flag, so it can be used to recover the function/class
-    /// type of a merged namespace+value symbol without recursing back into
-    /// the namespace resolution path.
     fn get_value_type_of_symbol(&mut self, symbol: &Arc<Symbol>) -> Arc<Type> {
-        // 1. Symbol-level cache (`value_symbol_links[symbol].resolved_type`),
-        //    mirrors Go's `symbol.links.type`.
+
         if let Some(links) = self.value_symbol_links.get(symbol) {
             if let Some(ref t) = links.resolved_type {
                 return Arc::clone(t);
             }
         }
-        // 2. Node-level cache on the value declaration — this is where
-        //    `check_variable_declaration` / `check_function_declaration`
-        //    write the resolved type.
+
         if let Some(decl) = &symbol.value_declaration {
             if let Some(links) = self.type_node_links.get(decl) {
                 if let Some(ref t) = links.resolved_type {
@@ -4911,8 +3859,7 @@ impl Checker {
                 }
             }
         }
-        // 3. Fallback: any of the symbol's declarations might carry a
-        //    cached type (e.g. parameter declarations).
+
         for decl in &symbol.declarations {
             if let Some(links) = self.type_node_links.get(decl) {
                 if let Some(ref t) = links.resolved_type {
@@ -4923,26 +3870,16 @@ impl Checker {
         self.get_any_type()
     }
 
-    /// Build the value-side type of an enum symbol — an anonymous object
-    /// type whose members are the enum's members, each carrying its literal
-    /// type. This is what makes `Color.Red` (as a value expression) resolve
-    /// to the literal type `0` rather than `any`.
-    ///
-    /// `resolve_enum_type` (the type-side resolver) populates each member
-    /// symbol's `value_symbol_links.resolved_type` with its literal type;
-    /// this method first calls `resolve_enum_type` to ensure those are set,
-    /// then builds an object type wrapping the enum symbol's members table.
     fn resolve_enum_value_type(&mut self, symbol: &Arc<Symbol>) -> Arc<Type> {
-        // Reuse a cached value type on `value_symbol_links[symbol]`.
+
         if let Some(links) = self.value_symbol_links.get(symbol) {
             if let Some(ref t) = links.resolved_type {
                 return Arc::clone(t);
             }
         }
-        // Ensure member literal types are populated by resolving the enum's
-        // type-side union (this writes to each member symbol's links).
+
         let _ = self.resolve_enum_type(symbol);
-        // Build an anonymous object type from the enum's members table.
+
         let members: Vec<(String, Arc<Symbol>)> = symbol
             .members
             .iter()
@@ -4954,8 +3891,7 @@ impl Checker {
             if name.starts_with("\u{FE}") {
                 continue;
             }
-            // Ensure the member's type is resolvable; the property symbol
-            // carries the literal type via value_symbol_links.
+
             let _ = self.get_type_of_symbol(member_sym);
             symbol_table.insert(name.clone(), Arc::clone(member_sym));
             props.push(Arc::clone(member_sym));
@@ -4985,26 +3921,6 @@ impl Checker {
         result
     }
 
-    /// Get the type of a function-like expression (FunctionExpression /
-    /// ArrowFunction / FunctionDeclaration). Returns an anonymous object
-    /// type whose single call signature carries the inferred (or annotated)
-    /// return type *and* the parameter types resolved from each parameter's
-    /// type annotation.
-    ///
-    /// Parameters without an annotation inherit the corresponding parameter
-    /// type from the contextual function type (the annotation on the
-    /// variable/parameter/property this function is assigned to). This
-    /// contextual typing flows into the function body too: because parameter
-    /// types are stored on the binder's actual parameter symbols (shared
-    /// with the body's scope resolution), `infer_function_return_type` sees
-    /// the contextual types when it walks `return` expressions. This is what
-    /// makes `let f: (x: string) => number = (x) => x;` report TS2322 (the
-    /// body returns `string`, not the expected `number`).
-    ///
-    /// To make contextual typing available to return-type inference, the
-    /// signature is built in two passes: first with a placeholder return
-    /// type to prime parameter-symbol types, then with the inferred return
-    /// type for the final signature. The first pass's signature is discarded.
     fn get_type_of_function_like(&mut self, node: &Arc<Node>) -> Arc<Type> {
         let (parameters, body, type_node) = match &node.data {
             crate::ast::NodeData::FunctionExpression(data) => {
@@ -5020,66 +3936,43 @@ impl Checker {
             ),
             _ => return self.get_any_type(),
         };
-        // Fetch the contextual function type (e.g. the annotation on the
-        // variable this function expression initializes). When present,
-        // unannotated parameters inherit the corresponding parameter type
-        // from the applicable call signature of the contextual type (Go:
-        // `getContextualSignature` — union contexts, arity filtering and
-        // all). An immediately-invoked function expression has no contextual
-        // type; its parameters are contextually typed by the call arguments
-        // instead (Go: `getContextuallyTypedParameterType`'s IIFE branch).
+
         let contextual_signature: Option<Arc<Signature>> = self
             .get_contextual_signature(node)
             .or_else(|| self.iife_contextual_signature(node));
         let contextual_signature = contextual_signature.as_ref();
-        // Push the function/arrow scope BEFORE priming parameter types so
-        // that type-parameter references in parameter annotations (e.g.
-        // `x: T` inside `function f<T>(x: T)`) can be resolved via the scope
-        // stack. The scope stays pushed through return-type inference so
-        // `get_type_of_node` on body expressions finds the parameters and
-        // type parameters.
+
         let is_arrow = matches!(node.data, crate::ast::NodeData::ArrowFunction(_));
         if is_arrow {
             self.push_arrow_function_scope(node);
         } else {
             self.push_function_scope(node);
         }
-        // Pass 1: prime parameter-symbol types (annotated/contextual/any)
-        // so that return-type inference below can resolve parameter
-        // references inside the body. The placeholder return type is
-        // discarded along with this signature.
+
         let placeholder = self.get_any_type();
         let _primed = self.build_signature_from_function_like_type_node(
             parameters,
             placeholder,
-            /* is_construct */ false,
+             false,
             contextual_signature,
-            /* declaration */ None, // primed signature is discarded
+             None,
         );
-        // Now infer the return type — the body sees the contextual param
-        // types set above. An explicit return-type annotation always wins.
+
         let return_type = self.infer_function_return_type(body, type_node);
         if is_arrow {
             self.pop_arrow_function_scope();
         } else {
             self.pop_function_scope();
         }
-        // Pass 2: build the final signature with the inferred return type.
-        // Parameter types are re-resolved (idempotent overwrite of the
-        // symbols' resolved types set in pass 1).
+
         let sig = self.build_signature_from_function_like_type_node(
             parameters,
             return_type,
-            /* is_construct */ false,
+             false,
             contextual_signature,
-            /* declaration */ Some(Arc::clone(node)),
+             Some(Arc::clone(node)),
         );
-        // A GENERIC function expression with a concrete contextual
-        // signature yields the contextually instantiated signature as its
-        // type: the expression's type parameters are inferred/fallback-
-        // substituted from the contextual signature (Go:
-        // `instantiateSignatureInContextOf` via the contextual-signature
-        // path, checker.go ~L7718).
+
         if !sig.type_parameters.is_empty() && let Some(contextual) = contextual_signature {
             if contextual.type_parameters.is_empty() {
                 let inst = self.instantiate_signature_in_context_of(&sig, contextual);
@@ -5089,22 +3982,8 @@ impl Checker {
         self.create_function_or_constructor_type(vec![sig], false)
     }
 
-    /// Build a multi-signature function type from a symbol's overload
-    /// declarations. In TypeScript, overloaded functions have multiple
-    /// `FunctionDeclaration` nodes for the same symbol: the overload
-    /// signatures (without bodies) come first, followed by a single
-    /// implementation signature (with a body). Only the overload signatures
-    /// are visible to callers — the implementation is internal.
-    ///
-    /// This method collects all overload declarations (those without a body)
-    /// and builds a function type with one signature per overload. If there
-    /// is only one declaration (no overloads), returns `None` (the caller
-    /// should use the single-signature type from `get_type_of_function_like`).
-    ///
-    /// Mirrors Go's `getSignaturesOfType` for function types, which returns
-    /// all call signatures (populated during `createSignatureForFunction`).
     fn build_overload_function_type(&mut self, symbol: &Arc<Symbol>) -> Option<Arc<Type>> {
-        // Collect all FunctionDeclaration nodes for this symbol.
+
         let fn_decls: Vec<Arc<Node>> = symbol
             .declarations
             .iter()
@@ -5112,11 +3991,9 @@ impl Checker {
             .cloned()
             .collect();
         if fn_decls.len() <= 1 {
-            return None; // Not an overload set.
+            return None;
         }
-        // Build a signature for each overload (declarations without a body).
-        // The implementation (with a body) is excluded from the visible
-        // signature list — callers only see the overloads.
+
         let mut signatures: Vec<Arc<Signature>> = Vec::new();
         for decl in &fn_decls {
             let has_body = match &decl.data {
@@ -5124,7 +4001,7 @@ impl Checker {
                 _ => false,
             };
             if has_body {
-                continue; // Skip the implementation.
+                continue;
             }
             let (parameters, type_node) = match &decl.data {
                 crate::ast::NodeData::FunctionDeclaration(data) => {
@@ -5132,12 +4009,7 @@ impl Checker {
                 }
                 _ => continue,
             };
-            // Push the overload declaration's scope before resolving its
-            // parameter and return types so its own type parameters (e.g.
-            // `<S, A>` in `function f<S, A>(s: S, a: A): [S, A]`) are visible
-            // via the function symbol's members. Without this, the type
-            // parameters of every overload except the first go out of scope
-            // and produce false-positive TS2304 "Cannot find name" errors.
+
             self.push_scope(decl);
             let return_type = match type_node {
                 Some(tn) => self.get_type_from_type_node(tn),
@@ -5146,9 +4018,9 @@ impl Checker {
             let sig = self.build_signature_from_function_like_type_node(
                 parameters,
                 return_type,
-                /* is_construct */ false,
-                /* contextual_signature */ None,
-                /* declaration */ Some(Arc::clone(decl)),
+                 false,
+                 None,
+                 Some(Arc::clone(decl)),
             );
             self.pop_scope();
             signatures.push(sig);
@@ -5159,31 +4031,18 @@ impl Checker {
         Some(self.create_function_or_constructor_type(signatures, false))
     }
 
-    /// Build the type of a class declaration: an anonymous object type
-    /// carrying construct signatures derived from the class's `constructor`
-    /// member. The construct signature's parameters are resolved (and
-    /// cached on the parameter symbols) so `check_call_arguments` can verify
-    /// `new Foo(arg)` calls (TS2345).
     pub(crate) fn get_type_of_class_declaration(&mut self, node: &Arc<Node>) -> Arc<Type> {
         let members = match &node.data {
             crate::ast::NodeData::ClassDeclaration(data) => Arc::clone(&data.members),
             _ => return self.get_any_type(),
         };
-        // Completed builds are final — the class-declaration type is
-        // context-independent (instantiations happen on top of it).
+
         if let Some(links) = self.type_node_links.get(node) {
             if let Some(ref t) = links.resolved_type {
                 return Arc::clone(t);
             }
         }
-        // Re-entrant build guard: a static initializer's `this` resolves
-        // the class type, and that build walks the members/constructor
-        // parameters, whose own `this` references re-request the same
-        // class type (thisInConstructorParameter2: `static y = this` →
-        // ctor param `z = this` → … stack overflow). Return a placeholder
-        // for the in-flight node — the outer build completes and caches
-        // the real type, and the eager member pass retypes `this` nodes
-        // against the this-type stack (ThisKeyword skips the node cache).
+
         let node_id = node.id();
         if self.class_type_resolution_stack.contains(&node_id) {
             return self.get_any_type();
@@ -5200,14 +4059,9 @@ impl Checker {
         node: &Arc<Node>,
         members: &Arc<NodeList>,
     ) -> Arc<Type> {
-        // Push the class scope before building the instance type so that
-        // type-parameter references in property annotations resolve.
+
         self.push_scope(node);
-        // Build the class's instance type (including inherited members from
-        // `extends`) to use as the construct signature's return type. This
-        // makes `new Foo()` return the instance type, so `instance.prop`
-        // is properly checked. Mirrors Go's `createClassType` →
-        // `getInstanceTypeFromClassType`.
+
         let instance_type = self.build_class_instance_type_with_base(node);
         let mut construct_sigs: Vec<Arc<Signature>> = Vec::new();
         for member in members.iter() {
@@ -5221,23 +4075,18 @@ impl Checker {
             let sig = self.build_signature_from_function_like_type_node(
                 params,
                 Arc::clone(&instance_type),
-                /* is_construct */ true,
-                /* contextual_signature */ None,
-                /* declaration */ Some(Arc::clone(member)),
+                 true,
+                 None,
+                 Some(Arc::clone(member)),
             );
             construct_sigs.push(sig);
         }
         self.pop_scope();
         if construct_sigs.is_empty() {
-            // No explicit constructor. A DERIVED class inherits its base's
-            // constructor (`class D extends B {}` — `new D(args)` takes B's
-            // parameters), so build the signature from the nearest base
-            // class's constructor declaration, with the derived instance
-            // type as the return. A base-less class gets a synthesized
-            // no-arg construct signature (`new Foo()` valid).
-            let mut inherited: Option<(Arc<Node>, Arc<Node>)> = None; // (base ctor decl, base class node)
+
+            let mut inherited: Option<(Arc<Node>, Arc<Node>)> = None;
             let mut cursor = Arc::clone(node);
-            // Cycle guard: bounded by class-declaration count in the file.
+
             for _ in 0..1000 {
                 let Some((base_node, _)) = self.extends_base_of(&cursor) else {
                     break;
@@ -5261,7 +4110,7 @@ impl Checker {
                     let sig = self.build_signature_from_function_like_type_node(
                         &params,
                         Arc::clone(&instance_type),
-                        /* is_construct */ true,
+                         true,
                         None,
                         Some(ctor_decl),
                     );
@@ -5273,16 +4122,13 @@ impl Checker {
             let sig = self.build_signature_from_function_like_type_node(
                 &Arc::new(NodeList::default()),
                 Arc::clone(&instance_type),
-                /* is_construct */ true,
+                 true,
                 None,
                 None,
             );
             construct_sigs.push(sig);
         }
-        // An abstract class's construct signatures carry
-        // `SignatureFlagsAbstract` (mirrors Go's createClassType) — the flag
-        // `new`-expression checking reads for TS2511, including through
-        // unions of `typeof` class types.
+
         if node.has_syntactic_modifier(ModifierFlags::Abstract) {
             construct_sigs = construct_sigs
                 .into_iter()
@@ -5314,15 +4160,10 @@ impl Checker {
                 })
                 .collect();
         }
-        let ctor_type = self.create_function_or_constructor_type(construct_sigs, /* is_construct */ true);
-        // Attach the class's static members (own + inherited from base
-        // classes) to the constructor type so `typeof C` exposes them —
-        // mirrors Go's class constructor type whose members come from the
-        // symbol exports and whose base types chain the base constructor
-        // (static inheritance).
+        let ctor_type = self.create_function_or_constructor_type(construct_sigs,  true);
+
         self.attach_class_statics(&ctor_type, node);
-        // Attach the class symbol so the type displays as `typeof C`
-        // (Go's TypeToString for class constructor types) — e.g. TS2348.
+
         if let Some(class_sym) = self.program.symbol_map().symbol_of(node) {
             let t_mut = Arc::as_ptr(&ctor_type) as *mut crate::checker::types::Type;
             unsafe {
@@ -5332,19 +4173,8 @@ impl Checker {
         ctor_type
     }
 
-    /// Merge a class's static members into its constructor type: own
-    /// statics from the member list, then the base class constructor
-    /// type's members (recursively — Go resolves the static side's base
-    /// types the same way, which is how `typeof Derived` inherits statics).
     fn attach_class_statics(&mut self, ctor_type: &Arc<Type>, node: &Arc<Node>) {
-        // Cycle guard: a class currently being resolved contributes no
-        // inherited statics (its own ctor type isn't complete yet). The
-        // stack doubles as a DEPTH guard: this path recurses through
-        // get_type_of_class_declaration → attach_class_statics per base
-        // class WITHOUT passing get_type_from_type_node's 500-frame
-        // guard, so a deep (non-cyclic) base chain could exhaust the
-        // thread stack — cap the chain at 200 frames (skipped inherited
-        // statics degrade gracefully; own statics still attach).
+
         let node_id = node.id();
         if self.class_statics_resolution_stack.contains(&node_id)
             || self.class_statics_resolution_stack.len() >= 200
@@ -5354,8 +4184,7 @@ impl Checker {
         self.class_statics_resolution_stack.push(node_id);
         let mut members = SymbolTable::new();
         let mut properties: Vec<Arc<Symbol>> = Vec::new();
-        // Own statics: scan the class symbol's member tables (statics are
-        // declared with a `static` modifier on at least one declaration).
+
         if let Some(class_sym) = self.program.symbol_map().symbol_of(node) {
             let mut statics: Vec<(String, Arc<Symbol>)> = Vec::new();
             for sym in class_sym.members.entries.values() {
@@ -5368,9 +4197,7 @@ impl Checker {
                 }
             }
             for sym in class_sym.exports.entries.values() {
-                // The binder-created automatic `prototype` symbol has no
-                // declarations, so it fails the static-modifier scan —
-                // include it by flag (Go keeps it in the class exports).
+
                 if (sym
                     .declarations
                     .iter()
@@ -5386,10 +4213,7 @@ impl Checker {
                 members.insert(name, sym);
             }
         }
-        // AST fallback: static members missing from the binder tables
-        // (private-identifier names are keyed raw and may be absent) —
-        // synthesize a symbol carrying the declaration, mirroring the
-        // interface-type builder's synthetic member symbols.
+
         let class_members: Option<Arc<NodeList>> = match &node.data {
             crate::ast::NodeData::ClassDeclaration(d) => Some(Arc::clone(&d.members)),
             crate::ast::NodeData::ClassExpression(d) => Some(Arc::clone(&d.members)),
@@ -5414,8 +4238,7 @@ impl Checker {
                 let mut sym = Symbol::new(flags, name.clone());
                 sym.declarations.push(Arc::clone(member));
                 let sym = Arc::new(sym);
-                // Property statics: resolve the annotation eagerly (this
-                // runs inside the class scope) so the member types.
+
                 if let crate::ast::NodeData::PropertyDeclaration(pd) = &member.data
                     && let Some(tn) = &pd.type_node
                 {
@@ -5432,7 +4255,7 @@ impl Checker {
                 members.insert(name, sym);
             }
         }
-        // Inherited statics from the base class's constructor type.
+
         if let Some((base_node, _)) = self.extends_base_of(node) {
             let base_ctor = self.get_type_of_class_declaration(&base_node);
             if let Some(base_structured) = base_ctor.as_structured() {
@@ -5462,10 +4285,6 @@ impl Checker {
         }
     }
 
-    /// The `extends` base `ClassDeclaration` (and class symbol) of
-    /// `class_node`, if any. Resolves the base identifier through the
-    /// checker's current scope (callers check classes whose scope chain is
-    /// active); returns `None` for non-identifier or non-class bases.
     fn extends_base_of(&self, class_node: &Arc<Node>) -> Option<(Arc<Node>, Arc<Symbol>)> {
         let heritage = match &class_node.data {
             crate::ast::NodeData::ClassDeclaration(data) => data.heritage_clauses.clone(),
@@ -5499,10 +4318,6 @@ impl Checker {
             .map(|n| (n, symbol))
     }
 
-    /// Get the return type of a `CallExpression`. Resolves the called
-    /// expression's type; if it's a function type with at least one call
-    /// signature, return that signature's resolved return type. Otherwise
-    /// fall back to `any`.
     fn get_return_type_of_call_expression(&mut self, node: &Arc<Node>) -> Arc<Type> {
         let callee = match &node.data {
             crate::ast::NodeData::CallExpression(data) => {
@@ -5516,9 +4331,7 @@ impl Checker {
             if signatures.is_empty() {
                 return self.get_any_type();
             }
-            // Overload resolution: find the first signature that accepts
-            // the call's arguments. If multiple signatures exist (overloads),
-            // try each in order; otherwise use the first (only) signature.
+
             let matching_idx = if signatures.len() == 1 {
                 0
             } else {
@@ -5526,11 +4339,7 @@ impl Checker {
             };
             let sig = &signatures[matching_idx];
             if let Some(rt) = self.get_return_type_of_signature(sig) {
-                // For a generic signature, infer the type arguments from the
-                // call arguments and substitute them into the return type
-                // (so `identity(42)` yields `number`, not the type parameter
-                // `T`). Mirrors Go's `getReturnTypeOfSignature` applied to
-                // the instantiated signature from `chooseOverload`.
+
                 if !sig.type_parameters.is_empty() {
                     let args: Vec<Arc<Node>> = callee.1.iter().cloned().collect();
                     let inferred = self.infer_call_type_arguments(node, sig, &args);
@@ -5545,18 +4354,12 @@ impl Checker {
                 }
                 return rt;
             }
-            // Signature without a resolved return type — fall back to
-            // any so callers don't blow up.
+
             return self.get_any_type();
         }
         self.get_any_type()
     }
 
-    /// Get the return type of a `NewExpression` (`new Foo()`).
-    ///
-    /// Resolves the constructor expression's type, looks for construct
-    /// signatures, and returns the first signature's return type (the
-    /// instance type). Falls back to `any`.
     fn get_return_type_of_new_expression(&mut self, node: &Arc<Node>) -> Arc<Type> {
         let (callee, args) = match &node.data {
             crate::ast::NodeData::NewExpression(data) => {
@@ -5568,11 +4371,7 @@ impl Checker {
         if let Some(structured) = callee_type.as_structured() {
             for sig in structured.construct_signatures() {
                 if let Some(rt) = self.get_return_type_of_signature(sig) {
-                    // For a generic construct signature, infer the type
-                    // arguments from the call arguments and substitute them
-                    // into the return type. (Class constructors don't carry
-                    // their own type parameters, so this is a no-op for the
-                    // common `new Foo()` case.)
+
                     let rt = if !sig.type_parameters.is_empty() {
                         let arg_vec: Vec<Arc<Node>> = args.iter().cloned().collect();
                         let inferred = self.infer_call_type_arguments(node, sig, &arg_vec);
@@ -5584,10 +4383,7 @@ impl Checker {
                     } else {
                         rt
                     };
-                    // Explicit type arguments on `new C<T>(...)` instantiate
-                    // the class's own type parameters: attach them to the
-                    // instance type (member reads substitute through them —
-                    // see `substituted_member_type_of`).
+
                     if let crate::ast::NodeData::NewExpression(d) = &node.data
                         && let Some(type_args) = &d.type_arguments
                         && let Some(class_sym) = rt.symbol.clone()
@@ -5609,15 +4405,11 @@ impl Checker {
         self.get_any_type()
     }
 
-    /// Get the type of a binary expression.
     fn get_type_of_binary_expression(&mut self, node: &Arc<Node>) -> Arc<Type> {
         use crate::ast::SyntaxKind::*;
         if let crate::ast::NodeData::BinaryExpression(data) = &node.data {
             match data.operator_token.kind {
-                // `+` follows Go's checkAddition: a string-like operand
-                // makes the result string; any dominates otherwise
-                // (any + number = any, any + string = string); number-like
-                // operands give number.
+
                 PlusToken => {
                     let lt = self.get_type_of_node(&data.left);
                     let rt = self.get_type_of_node(&data.right);
@@ -5634,7 +4426,7 @@ impl Checker {
                         self.number_type()
                     }
                 }
-                // Other arithmetic operators return number
+
                 MinusToken
                 | AsteriskToken
                 | SlashToken
@@ -5646,7 +4438,7 @@ impl Checker {
                 | AmpersandToken
                 | BarToken
                 | CaretToken => self.number_type(),
-                // Comparison operators return boolean
+
                 LessThanToken
                 | GreaterThanToken
                 | LessThanEqualsToken
@@ -5657,15 +4449,13 @@ impl Checker {
                 | ExclamationEqualsEqualsToken
                 | InKeyword
                 | InstanceOfKeyword => self.boolean_type(),
-                // Logical operators return union of operands (simplified)
+
                 AmpersandAmpersandToken | BarBarToken | QuestionQuestionToken => {
                     self.get_type_of_node(&data.left)
                 }
-                // Comma expressions type as their right operand (Go
-                // `checkCommaExpression` — `(sideEffect(), (a => a))` used
-                // as an assignment RHS carries the arrow's type).
+
                 CommaToken => self.get_type_of_node(&data.right),
-                // Assignment operators return the right-hand side type
+
                 EqualsToken
                 | PlusEqualsToken
                 | MinusEqualsToken
@@ -5689,20 +4479,12 @@ impl Checker {
         }
     }
 
-    /// Get the type of a `PropertyAccessExpression` (`x.prop`).
-    ///
-    /// Resolves the type of `x`, looks up `prop` as a property on that
-    /// type, and returns the property's type. Falls back to `any` when
-    /// the property is not found or the object type is unknown.
     fn get_type_of_property_access(&mut self, node: &Arc<Node>) -> Arc<Type> {
         let (obj_expr, name) = match &node.data {
             crate::ast::NodeData::PropertyAccessExpression(data) => (&data.expression, &data.name),
             _ => return self.get_any_type(),
         };
-        // A property of a NAMESPACE used as a value (`NS.f`) — resolve the
-        // member through the namespace symbol's tables (exports, members,
-        // and the declaration's locals for ambient namespaces) and type it
-        // from its declaration.
+
         if obj_expr.kind == SyntaxKind::Identifier
             && let Some(sym) = self.resolve_identifier(obj_expr)
         {
@@ -5715,13 +4497,7 @@ impl Checker {
                     .or_else(|| base.members.get(name_text))
                     .cloned()
                     .or_else(|| self.ambient_namespace_local(&base, name_text));
-                // A member of a NON-ambient namespace that isn't in its
-                // tables is genuinely missing (Go searches getExportsOf
-                // Symbol only — non-exported members live in the block's
-                // own locals and are invisible from outside). Return the
-                // error type so follow-on checks (TS2403 var redeclare
-                // comparison) skip, exactly like Go's unresolved-property
-                // errorType.
+
                 if member.is_none() && !self.ambient_namespace_locals_visible(&base) {
                     return self.error_type();
                 }
@@ -5741,15 +4517,7 @@ impl Checker {
                             SyntaxKind::ClassDeclaration => {
                                 return self.get_type_of_class_declaration(decl);
                             }
-                            // An import-equals alias member (`export import D =
-                            // K.L`): the value type is the alias target's
-                            // (a namespace instance or a fundule's
-                            // constructor side), resolved through the shared
-                            // import-symbol typing path. A FUNDULE target
-                            // (class+namespace merge, `K.L` both class and
-                            // namespace) types as plain any through the
-                            // entity-name path — fall back to the class
-                            // constructor, the symbol's value face.
+
                             SyntaxKind::ImportEqualsDeclaration => {
                                 let t = self.type_of_imported_symbol(&member);
                                 let resolved = match t {
@@ -5779,19 +4547,12 @@ impl Checker {
             }
         }
         let obj_type = self.get_type_of_node(obj_expr);
-        // Member access on the error type stays the error type (unresolved
-        // receivers don't degrade to any — follow-on checks like the var
-        // redeclare TS2403 comparison must skip, like Go).
+
         if obj_type.intrinsic_name() == Some("error") {
             return self.error_type();
         }
         let name_text = name.text();
-        // Property access on a UNION receiver (`x.arr` with `x: IA | IAB`):
-        // the property's type is the union of the per-constituent property
-        // types (Go resolves the member through each constituent and unions
-        // the results). A property missing from some constituent still
-        // reports TS2339 via check_property_access's has-property gate; the
-        // type side keeps the present constituents.
+
         if obj_type.is_union() {
             let parts: Vec<Arc<Type>> = self
                 .constituent_types(&obj_type)
@@ -5816,11 +4577,7 @@ impl Checker {
                 return self.flow_type_of_access_expression(node, None, t);
             }
         }
-        // Auto arrays (`let x = []`) and their flow-converted EVOLVING
-        // forms (element `never` until grown): mutation methods type as
-        // `any` — the ARRAY_MUTATION flow node grows the element type,
-        // and the call itself must not check against the placeholder
-        // element (Go's evolving-array semantics).
+
         if (self.is_auto_array_type(&obj_type)
             || obj_type.object_flags.contains(ObjectFlags::EvolvingArray))
             && self.is_array_mutation_method(&name_text)
@@ -5828,16 +4585,11 @@ impl Checker {
             return self.get_any_type();
         }
         if let Some(sym) = self.get_property_of_type(&obj_type, &name_text) {
-            // Array interface members fall back to the UN-instantiated
-            // global interface — substitute the element type into the
-            // member's type here (Go resolves members through the
-            // instantiation mapper).
+
             if let Some(substituted) = self.instantiate_array_member_type(&obj_type, &sym) {
                 return self.flow_type_of_access_expression(node, Some(&sym), substituted);
             }
-            // Instantiated generic interfaces/classes (type arguments
-            // attached, e.g. from `new C<number>()`): member types read
-            // through the instantiation.
+
             if obj_type
                 .as_object()
                 .is_some_and(|o| !o.type_arguments.is_empty())
@@ -5848,21 +4600,13 @@ impl Checker {
             let prop_type = self.get_type_of_symbol(&sym);
             return self.flow_type_of_access_expression(node, Some(&sym), prop_type);
         }
-        // For array types, common properties like `length` are numbers;
-        // methods like `push`/`pop`/etc. fall back to `any` for now.
+
         if name_text == "length" && self.is_array_type(&obj_type) {
             return self.number_type();
         }
         self.get_any_type()
     }
 
-    /// Control-flow narrowing of a property/element-access reference.
-    ///
-    /// Mirrors Go's `getFlowTypeOfAccessExpression` (checker.go ~L11442):
-    /// only accesses that aren't definite assignment targets, and whose
-    /// property was declared as a variable, property, or accessor (or an
-    /// optional method with a union type), participate in narrowing of the
-    /// access reference — everything else returns the property type as-is.
     fn flow_type_of_access_expression(
         &mut self,
         node: &Arc<Node>,
@@ -5884,10 +4628,6 @@ impl Checker {
         self.get_flow_type_of_reference(node, &prop_type)
     }
 
-    /// Whether `node` is the target of a definite assignment (`obj.x = v`
-    /// left-hand side, `obj.x++` operand). Mirrors the
-    /// `AssignmentKindDefinite` early return in Go's
-    /// `getFlowTypeOfAccessExpression`.
     fn is_definite_assignment_target(node: &Arc<Node>) -> bool {
         let Some(parent) = &node.parent else {
             return false;
@@ -5909,10 +4649,6 @@ impl Checker {
         }
     }
 
-    /// Whether a syntax kind is an assignment operator (`=`, `+=`, `-=`, …),
-    /// i.e. one that writes to its left-hand operand. Used by the TS2588
-    /// const-reassignment check to distinguish assignments from equality
-    /// tests (`==`) and plain binary operators.
     fn is_assignment_operator(kind: crate::ast::SyntaxKind) -> bool {
         use crate::ast::SyntaxKind::*;
         matches!(
@@ -5936,12 +4672,6 @@ impl Checker {
         )
     }
 
-    /// Whether a statement unconditionally terminates the enclosing block:
-    /// `return`, `throw`, `break`, or `continue`. Used by the TS7027
-    /// unreachable-code check. A statement that *contains* one of these
-    /// (e.g. an `if` with a `return` body, a loop) does not terminate the
-    /// block, because control may still flow past it — matching the simple
-    /// heuristic used by tsc's reachability analysis.
     fn is_block_terminating_statement(stmt: &Arc<Node>) -> bool {
         matches!(
             stmt.kind,
@@ -5952,12 +4682,6 @@ impl Checker {
         )
     }
 
-    /// Whether a symbol is a class declared `abstract`. Used by the TS2511
-    /// check for `new AbstractClass()`. Mirrors Go's
-    /// `getDeclarationModifierFlagsFromDeclarations` abstract check in
-    /// `checkNewExpression`.
-    /// Whether a property's declared type includes `undefined` (exempt from
-    /// TS2564).
     #[allow(dead_code)]
     fn property_type_includes_undefined(
         &mut self,
@@ -5976,9 +4700,6 @@ impl Checker {
         false
     }
 
-    /// Whether any constructor body in the enclosing class assigns
-    /// `this.<name>` — approximates Go's definite-assignment flow analysis
-    /// for TS2564.
     #[allow(dead_code)]
     fn class_constructor_assigns_property(&self, name: &str) -> bool {
         let Some(class) = self.enclosing_class_stack.last() else {
@@ -6000,9 +4721,6 @@ impl Checker {
         })
     }
 
-    /// Check one call argument, pushing the contextual-parameter count for
-    /// arrow/function-expression arguments (consumed by their check arm to
-    /// exempt contextually-typed parameters from TS7006).
     fn check_call_arg_with_context(
         &mut self,
         callee_expr: &Arc<Node>,
@@ -6024,20 +4742,6 @@ impl Checker {
         }
     }
 
-    /// Contextual parameter count for an arrow/function-expression argument
-    /// at position `arg_index` of a call to `callee_expr`: when the callee's
-    /// corresponding parameter is itself a function type, its callback
-    /// parameters are contextually typed (exempt from TS7006); an `any` /
-    /// unresolvable parameter context leaves them implicit-any.
-    /// Approximates Go's contextual typing through generic signatures (e.g.
-    /// `[a].map(x => ...)`) without full type-parameter instantiation.
-    /// The contextual call signature for an arrow/function expression: the
-    /// contextual type's first call signature, with UNION contextual types
-    /// contributing one signature per non-nullable constituent (Go
-    /// `getContextualSignature` → `getContextualCallSignature` — `((a:
-    /// number) => void) | undefined` yields the function's signature).
-    /// Deferred `P["k"]` contextual types resolve through P's constraint
-    /// first (Go apparent-izes contextual types).
     fn contextual_signature_of_arrow(&mut self, node: &Arc<Node>) -> Option<Arc<Signature>> {
         if std::env::var_os("TSOX_DEBUG_SYMBOL").is_some() {
             eprintln!(
@@ -6058,9 +4762,6 @@ impl Checker {
         self.first_call_signature(&t)
     }
 
-    /// First call signature of a type; union types skip nullable
-    /// constituents (an optional function type's `undefined` member is not
-    /// a signature source).
     fn first_call_signature(&mut self, t: &Arc<Type>) -> Option<Arc<Signature>> {
         if let TypeData::Union(u) = &t.data {
             for constituent in &u.union_or_intersection.types {
@@ -6098,11 +4799,7 @@ impl Checker {
             );
         }
         if t.flags.contains(TypeFlags::Any) {
-            // Lib array iteration methods fall back to `any` here (no
-            // generic instantiation yet), but Go contextually types their
-            // callbacks from the lib signature — exempt up to the real
-            // signature's parameter count. Approximation until generic
-            // instantiation lands.
+
             if let crate::ast::NodeData::PropertyAccessExpression(data) = &callee_expr.data {
                 let method = data.name.text().to_string();
                 const ARRAY_CALLBACK_SIGS: &[(&str, usize)] = &[
@@ -6129,10 +4826,7 @@ impl Checker {
             }
             return 0;
         }
-        // Union callee types (a possibly-undefined function parameter used
-        // as the callee: `function h(f?: (a: number) => void) { f((a) =>
-        // a); }`) resolve the signature from the non-nullable constituent
-        // — Go's getContextualCallSignature skips nullable union members.
+
         let t = if let TypeData::Union(u) = &t.data {
             match u.union_or_intersection.types.iter().find(|c| {
                 !c.flags.intersects(TypeFlags::Undefined | TypeFlags::Null)
@@ -6148,8 +4842,7 @@ impl Checker {
         let Some(structured) = t.as_structured() else {
             return 0;
         };
-        // Pick the first call signature whose parameter list reaches the
-        // argument, else the first signature.
+
         let Some(sig) = structured
             .call_signatures()
             .iter()
@@ -6185,11 +4878,6 @@ impl Checker {
         false
     }
 
-    /// Whether a callee type — possibly a union of constructor types —
-    /// includes an abstract class constructor. Mirrors Go's
-    /// `someSignature(constructSignatures, SignatureFlagsAbstract)` plus the
-    /// abstract-class-symbol check; our class constructor types carry the
-    /// class symbol, so the symbol check covers both.
     fn type_includes_abstract_constructor(&self, t: &Arc<Type>) -> bool {
         if t.flags.contains(TypeFlags::Any) {
             return false;
@@ -6197,8 +4885,7 @@ impl Checker {
         if let Some(u) = t.as_union_or_intersection() {
             return u.types.iter().any(|m| self.type_includes_abstract_constructor(m));
         }
-        // Abstract construct signature: our signatures don't track the
-        // Abstract flag, but class constructor types carry the class symbol.
+
         if t.flags.contains(TypeFlags::Object) {
             if let Some(s) = t.as_structured()
                 && s.construct_signatures().iter().any(|sig| {
@@ -6214,10 +4901,6 @@ impl Checker {
         false
     }
 
-    /// The `ClassDeclaration` that declares a given class member symbol, found
-    /// by walking the member declaration's parent pointer. Returns `None` for
-    /// non-class members (e.g. interface signatures, which carry no parent
-    /// class). Used by the TS2341 private-member accessibility check.
     fn declaring_class_of_member(&self, member_symbol: &Arc<Symbol>) -> Option<Arc<Node>> {
         self.declaring_class_of_private_member(member_symbol)
             .or_else(|| {
@@ -6237,9 +4920,6 @@ impl Checker {
             })
     }
 
-    /// The class-like (declaration or expression) directly containing a
-    /// member declaration — covers fields, methods, and accessors so
-    /// private-name identity checks see every member kind.
     fn declaring_class_of_private_member(
         &self,
         member_symbol: &Arc<Symbol>,
@@ -6265,9 +4945,6 @@ impl Checker {
         None
     }
 
-    /// Go `lookupSymbolForPrivateIdentifierDeclaration` — climb the
-    /// lexically enclosing classes from the access site, looking up the raw
-    /// `#name` key in each class symbol's members (then exports).
     fn lookup_private_identifier_declaration(
         &self,
         text: &str,
@@ -6291,8 +4968,6 @@ impl Checker {
         None
     }
 
-    /// Whether `ancestor` is a class-like node on `node`'s parent chain
-    /// (Go `ast.FindAncestor(lexicalClass, n => typeClass == n)`).
     fn is_ancestor_class_of(&self, node: &Arc<Node>, ancestor: &Arc<Node>) -> bool {
         let mut current = Some(Arc::clone(node));
         while let Some(n) = current {
@@ -6304,9 +4979,6 @@ impl Checker {
         false
     }
 
-    /// Private-identifier member access checks. Returns true when the access
-    /// is a hard error (TS18013/TS18014) and normal member resolution must
-    /// be skipped; TS2803/TS2806 report but let resolution continue.
     fn check_private_identifier_access(
         &mut self,
         node: &Arc<Node>,
@@ -6317,7 +4989,6 @@ impl Checker {
         let assignment_kind = crate::checker::utilities::get_assignment_target_kind(node);
         let lexical = self.lookup_private_identifier_declaration(name_text, name);
 
-        // TS2803: private methods are not writable — report at the name.
         if assignment_kind != crate::checker::utilities::AssignmentKind::None
             && let Some(lx) = &lexical
             && lx.declarations
@@ -6333,12 +5004,6 @@ impl Checker {
             ));
         }
 
-        // Resolve on the accessed type. The raw-text hit only counts when it
-        // is the SAME declaration as the lexical symbol (Go compares the
-        // mangled name `#<classId>@<desc>`, which encodes exactly this).
-        // Instance/instantiated members may carry synthetic declarations, so
-        // identity falls back to same declaring class, then to the type's
-        // own symbol matching the lexical class.
         let type_member: Option<Arc<Symbol>> = obj_type
             .as_structured()
             .and_then(|s| s.members.get(name_text))
@@ -6367,8 +5032,7 @@ impl Checker {
         };
 
         if resolved.is_none() {
-            // Go `checkPrivateIdentifierPropertyAccess`: find a private
-            // member with the same spelling on the accessed type.
+
             let property_on_type = type_member.as_ref().filter(|m| {
                 m.declarations.iter().any(|d| {
                     d.name()
@@ -6378,8 +5042,7 @@ impl Checker {
             if let Some(property) = property_on_type {
                 let type_class = self.declaring_class_of_private_member(property);
                 if let (Some(lx), Some(type_class)) = (&lexical, &type_class) {
-                    // The lexical declaration shadows the type's member when
-                    // its declaring class is nested inside the type's class.
+
                     let lexical_class = self.declaring_class_of_private_member(lx);
                     if lexical_class.is_some_and(|lc| self.is_ancestor_class_of(&lc, type_class))
                     {
@@ -6415,8 +5078,6 @@ impl Checker {
             return false;
         }
 
-        // TS2806: reading a set-only private accessor — report at the whole
-        // access expression (definite assignments `x.#y = v` are exempt).
         let setonly = resolved.as_ref().is_some_and(|m| {
             m.flags.contains(SymbolFlags::SetAccessor) && !m.flags.contains(SymbolFlags::GetAccessor)
         });
@@ -6431,18 +5092,12 @@ impl Checker {
         false
     }
 
-    /// Whether the checker is currently inside the body of `class_node` (i.e.
-    /// `class_node` is on the enclosing-class stack). Used by the TS2341
-    /// check to allow private-member access from within the declaring class.
     fn is_within_declaring_class(&self, class_node: &Arc<Node>) -> bool {
         self.enclosing_class_stack
             .iter()
             .any(|c| Arc::ptr_eq(c, class_node))
     }
 
-    /// Whether `node` sits inside a computed property NAME of the innermost
-    /// class on the enclosing-class stack (its nearest class-like ancestor,
-    /// reached through a ComputedPropertyName within that class's members).
     fn super_in_computed_name_of_innermost_class(&self, node: &Arc<Node>) -> bool {
         let Some(innermost) = self.enclosing_class_stack.last() else {
             return false;
@@ -6457,8 +5112,7 @@ impl Checker {
                 in_computed_name = true;
             }
             if matches!(c.kind, SyntaxKind::ClassDeclaration | SyntaxKind::ClassExpression) {
-                // A nearer class-like blocks the innermost from being the
-                // relevant container.
+
                 return false;
             }
             cur = c.parent.as_ref();
@@ -6466,11 +5120,6 @@ impl Checker {
         false
     }
 
-    /// Whether a function body unconditionally returns (or throws) on every
-    /// path, for the TS2366 heuristic. A block returns if its last statement
-    /// always returns. This is a conservative approximation (it does not model
-    /// loops or short-circuiting) that mirrors the simple last-statement check
-    /// described for tsc's reachability analysis.
     fn function_body_definitely_returns(&self, body: &Arc<Node>) -> bool {
         if body.kind != SyntaxKind::Block {
             return false;
@@ -6483,10 +5132,6 @@ impl Checker {
         false
     }
 
-    /// Whether a single statement always completes abruptly via `return` or
-    /// `throw` (so control cannot fall through). Recognizes direct
-    /// `return`/`throw`, a trailing `return`/`throw` in a nested block, and an
-    /// `if/else` where *both* branches always return.
     fn statement_always_returns(&self, stmt: &Arc<Node>) -> bool {
         match stmt.kind {
             SyntaxKind::ReturnStatement | SyntaxKind::ThrowStatement => true,
@@ -6510,9 +5155,7 @@ impl Checker {
                     false
                 }
             }
-            // `while (true) …` / `do … while (true);` never complete unless
-            // a `break` escapes the loop — the body's end is unreachable
-            // (Go's binder leaves HasImplicitReturn unset for such bodies).
+
             SyntaxKind::WhileStatement | SyntaxKind::DoStatement => {
                 let (condition, body) = match &stmt.data {
                     crate::ast::NodeData::WhileStatement(data) => {
@@ -6526,7 +5169,7 @@ impl Checker {
                 condition.kind == SyntaxKind::TrueKeyword
                     && !Self::loop_has_escaping_break(body, true)
             }
-            // `for (;;) …` — an omitted condition is always true.
+
             SyntaxKind::ForStatement => {
                 if let crate::ast::NodeData::ForStatement(data) = &stmt.data {
                     data.condition
@@ -6537,9 +5180,7 @@ impl Checker {
                     false
                 }
             }
-            // A switch with a `default` whose every non-empty clause ends
-            // in a return/throw definitely returns (empty clauses fall
-            // through to the next clause's terminator).
+
             SyntaxKind::SwitchStatement => {
                 if let crate::ast::NodeData::SwitchStatement(data) = &stmt.data
                     && let crate::ast::NodeData::CaseBlock(block) = &data.case_block.data
@@ -6568,17 +5209,6 @@ impl Checker {
         }
     }
 
-    /// Whether a property named `name` on type `t` is declared `readonly`.
-    ///
-    /// Walks the structured type's `members` symbol table to find the
-    /// property's symbol, then inspects each declaration node for the
-    /// `ReadonlyKeyword` modifier. Mirrors Go's
-    /// `isReadonlySymbol`/`getDeclarationModifierFlagsFromDeclarations`
-    /// read-only check used by `checkAssignmentStatement`.
-    ///
-    /// Returns `false` if the type is not structured, the property doesn't
-    /// exist, or the symbol has no declaration with `readonly`. Conservative
-    /// (returns `false`) to avoid false positives.
     fn is_property_readonly(&self, t: &Arc<Type>, name: &str) -> bool {
         let Some(structured) = t.as_structured() else {
             return false;
@@ -6586,9 +5216,7 @@ impl Checker {
         let Some(symbol) = structured.members.get(name) else {
             return false;
         };
-        // Check if any of the symbol's declarations carry the `readonly`
-        // modifier (e.g. `readonly x: number` in a class body or
-        // `readonly` parameter property).
+
         for decl in &symbol.declarations {
             let modifiers = match &decl.data {
                 crate::ast::NodeData::PropertyDeclaration(d) => &d.modifiers,
@@ -6602,31 +5230,21 @@ impl Checker {
                 }
             }
         }
-        // Also honor `CheckFlags::Readonly` set elsewhere (e.g. on
-        // synthetic property symbols created from index signatures).
+
         if symbol.check_flags.contains(CheckFlags::Readonly) {
             return true;
         }
         false
     }
 
-    /// Whether a property named `name` exists on `t`, handling unions,
-    /// intersections, type parameters, arrays, and primitives.
-    ///
-    /// Used by `check_property_access` to decide whether to emit TS2339.
-    /// Conservative in the face of unknown type kinds (returns `true` to
-    /// avoid false positives).
     pub(super) fn has_property_of_type(&mut self, t: &Arc<Type>, name: &str) -> bool {
-        // A deferred IndexedAccess over a generic index resolves through
-        // its constraint for property existence (M[K] with K extends
-        // string → the index-signature value type's members).
+
         if t.flags.contains(TypeFlags::IndexedAccess)
             && let Some(constraint) = self.constraint_of_indexed_access(t)
         {
             return self.has_property_of_type(&constraint, name);
         }
-        // `any`/`unknown`/`never`/`undefined`/`null` allow any property; never
-        // emit TS2339 for them.
+
         if t.flags.intersects(
             TypeFlags::Any
                 | TypeFlags::Unknown
@@ -6637,56 +5255,37 @@ impl Checker {
             return true;
         }
 
-        // Direct hit on structured members, or applicable index signature.
         if let Some(structured) = t.as_structured() {
             if structured.members.get(name).is_some() {
                 return true;
             }
-            // A DEFERRED mapped type (`{ [K in keyof T]: V }` with a
-            // generic constraint) has no materialized members; key
-            // membership in the constraint can't be decided — permissive,
-            // matching get_property_of_type's deferred-mapped arm
-            // (thisIndexOnExistingReadonlyFieldIsNotNever:
-            // `Readonly<GenericIntersection>` member access must not
-            // report TS2339).
+
             if matches!(&t.data, TypeData::Mapped(m) if m.type_parameter.is_some()) {
                 return true;
             }
             if !structured.index_infos.is_empty() {
                 return true;
             }
-            // Evolving arrays (`let x = []` widened by flow analysis): not
-            // `Reference`-flagged, so the early `false` below would shadow
-            // the dedicated arm. `length` and the array mutation methods
-            // exist so the element type can keep evolving.
+
             if t.object_flags.contains(ObjectFlags::EvolvingArray) {
                 return name == "length" || self.is_array_mutation_method(name);
             }
-            // Pure function types (an anonymous object whose only structure
-            // is call signatures) expose the global `Function` interface's
-            // members (`bind`, `call`, `apply`, …) — Go's apparentType
-            // merging `globalFunctionType`.
+
             if t.object_flags.contains(ObjectFlags::Anonymous)
                 && structured.call_signature_count > 0
                 && self.global_interface_has_property("Function", name)
             {
                 return true;
             }
-            // Structured object type with no matching member and no index
-            // signature: fall through to `false` for plain object types.
-            // However, Object flag without structured members (e.g. a
-            // reference like `Array<T>`) is handled below.
+
             if t.flags.contains(TypeFlags::Object)
                 && !t.object_flags.contains(ObjectFlags::Reference)
             {
-                // Go `getPropertyOfTypeEx` tail: every structured object type
-                // exposes the global `Object` interface's members
-                // (`toString`, `valueOf`, `hasOwnProperty`, …).
+
                 return self.global_interface_has_property("Object", name);
             }
         }
 
-        // Union: property must exist on every non-nullable constituent.
         if t.flags.contains(TypeFlags::Union) {
             if let TypeData::Union(u) = &t.data {
                 for ct in &u.union_or_intersection.types {
@@ -6701,7 +5300,6 @@ impl Checker {
             }
         }
 
-        // Intersection: property exists if any constituent has it.
         if t.flags.contains(TypeFlags::Intersection) {
             if let TypeData::Intersection(i) = &t.data {
                 for ct in &i.union_or_intersection.types {
@@ -6713,33 +5311,22 @@ impl Checker {
             }
         }
 
-        // Type parameter: defer to constraint.
         if t.flags.contains(TypeFlags::TypeParameter) {
             if let Some(constraint) = self.get_constraint_of_type_parameter(t) {
                 return self.has_property_of_type(&constraint, name);
             }
-            // No constraint: allow any property (matches tsc behavior for
-            // unconstrained `T`).
+
             return true;
         }
 
-        // Deferred conditional (Go keeps generic check types deferred): a
-        // property query consults the conditional's constraint — for a
-        // distributive root that is the union of the per-constituent
-        // resolved branches over the check type's base constraint.
         if t.flags.contains(TypeFlags::Conditional) {
             if let Some(constraint) = self.constraint_of_conditional_type(t) {
                 return self.has_property_of_type(&constraint, name);
             }
-            // Unresolvable generic conditional — permissive.
+
             return true;
         }
 
-        // Deferred indexed access `A[B]` (Go keeps it deferred when either
-        // side is generic). Resolve through the base constraints; if either
-        // side remains generic the access can't decide — treat it as
-        // permissive rather than reporting TS2339 against an unresolved
-        // type.
         if t.flags.contains(TypeFlags::IndexedAccess) {
             if let TypeData::IndexedAccess(ia) = &t.data {
                 if let (Some(o), Some(i)) = (&ia.object_type, &ia.index_type) {
@@ -6756,14 +5343,6 @@ impl Checker {
             return true;
         }
 
-        // Array types (`Array<T>` reference). Without lib.d.ts, tsc would
-        // report TS2339 for any property (including `push`/`unshift`) on a
-        // fully-typed array. We allow `length` intrinsically. For the special
-        // `autoArrayType` marker (the inferred type of `let x = []`), we
-        // also allow array mutation methods (`push`/`unshift`) so that
-        // evolving-array flow analysis can run without lib.d.ts — matching
-        // the form of `let x = []; x.push(1)` that the ARRAY_MUTATION flow
-        // node is designed to handle.
         if self.is_array_type(t) {
             if name == "length" {
                 return true;
@@ -6774,98 +5353,62 @@ impl Checker {
             {
                 return true;
             }
-            // Fallback: look up the global `Array<T>` interface for methods
-            // like find/map/reduce. Array types created by `create_array_type`
-            // carry no members of their own, so resolve property existence
-            // against the global `Array` interface symbol. The interface
-            // symbol's own `members` table may be incomplete in this port, so
-            // we resolve its declared type (which walks all declaration AST
-            // nodes) for an accurate member set.
+
             if self.global_interface_has_property("Array", name) {
                 return true;
             }
             return false;
         }
 
-        // Evolving array types (created by flow analysis from `autoArrayType`):
-        // these are not `Reference`-flagged, so `is_array_type` doesn't match.
-        // Allow `length` and the array mutation methods so that subsequent
-        // `x.push(2)` after `x.push(1)` continues to evolve the element type.
         if t.object_flags.contains(ObjectFlags::EvolvingArray) {
             return name == "length" || self.is_array_mutation_method(name);
         }
 
-        // Tuple types: `length` is intrinsically available.
         if self.is_tuple_type(t) {
             return name == "length";
         }
 
-        // String types and their literals: resolve methods/properties via
-        // the global `String` interface (lib.d.ts `interface String`),
-        // using the same AST-scanning fallback as the Array fix.
         if t.flags
             .intersects(TypeFlags::String | TypeFlags::StringLiteral)
         {
             return self.global_interface_has_property("String", name);
         }
-        // Number types and their literals: resolve via the global `Number`
-        // interface.
+
         if t.flags
             .intersects(TypeFlags::Number | TypeFlags::NumberLiteral)
         {
             return self.global_interface_has_property("Number", name);
         }
-        // Boolean types and their literals: resolve via the global `Boolean`
-        // interface.
+
         if t.flags
             .intersects(TypeFlags::Boolean | TypeFlags::BooleanLiteral)
         {
             return self.global_interface_has_property("Boolean", name);
         }
-        // BigInt types and their literals: resolve via the global `BigInt`
-        // interface.
+
         if t.flags
             .intersects(TypeFlags::BigInt | TypeFlags::BigIntLiteral)
         {
             return self.global_interface_has_property("BigInt", name);
         }
-        // Remaining primitive types (symbol, void, unique symbol) have no
-        // resolvable properties — any access is TS2339.
+
         if t.flags
             .intersects(TypeFlags::ESSymbol | TypeFlags::Void | TypeFlags::UniqueESSymbol)
         {
             return false;
         }
 
-        // Enum types and other object types without structured data: be
-        // conservative and don't error.
         if t.flags.contains(TypeFlags::Object | TypeFlags::Enum) {
             return true;
         }
 
-        // Default: don't emit error for unknown type kinds.
         true
     }
 
-    /// Check if a method name is an array mutation method (push, unshift,
-    /// etc.) that the binder creates ARRAY_MUTATION flow nodes for.
     pub fn is_array_mutation_method(&self, name: &str) -> bool {
         matches!(name, "push" | "unshift")
     }
 
-    /// Resolve a named global interface symbol (e.g. `Array`) and check whether
-    /// its declared type has a property or method named `prop_name`.
-    ///
-    /// The global interface symbol may not carry all of its cross-file
-    /// declarations in this port (the binder doesn't fully merge `interface`
-    /// augmentations spread across the bundled lib files), so we scan every
-    /// loaded file's top-level `interface` declarations directly and cache the
-    /// resulting member-name set. Used as a fallback to resolve methods like
-    /// `find`/`map`/`reduce` on array types whose own members are empty.
-    /// The boxed global interface type for a primitive source (Go
-    /// `getApparentType` on primitives: `number` → the global `Number`
-    /// interface). Returns `None` for non-primitives or when the interface
-    /// isn't loaded. The built type is cached per interface name.
     pub fn boxed_apparent_type_of_primitive(&mut self, t: &Arc<Type>) -> Option<Arc<Type>> {
         use crate::checker::types::TYPE_FLAGS_ENUM_LIKE;
         let name = if t.flags.intersects(
@@ -6889,12 +5432,7 @@ impl Checker {
         if let Some(cached) = self.boxed_global_types.get(name) {
             return Some(Arc::clone(cached));
         }
-        // Locate EVERY global interface declaration with this name
-        // (boxed interfaces are declaration-merged across lib files —
-        // `Number` gains `toLocaleString` in es2015) and build one type
-        // from the concatenated member lists. The statement Arcs are
-        // collected first so the `&self.files` borrow ends before the
-        // `&mut self` member resolution runs.
+
         let mut matching: Vec<Arc<Node>> = Vec::new();
         for file in &self.files {
             let statements = match &file.node.data {
@@ -6915,11 +5453,7 @@ impl Checker {
                 continue;
             };
             all_members.extend(d.members.iter().cloned());
-            // Heritage-only augmentations (`interface Number extends
-            // NS.ICl {}`) merge zero own members — surface the base
-            // interface's members on the boxed apparent type (Go
-            // resolves the global interface symbol together with its
-            // base types).
+
             self.collect_boxed_heritage_members(stmt, &mut all_members, &mut Vec::new(), 0);
         }
         if all_members.is_empty() {
@@ -6932,10 +5466,6 @@ impl Checker {
         Some(built)
     }
 
-    /// Recursively collect the member nodes of an interface's `extends`
-    /// bases (resolved in the declaring file's scope) for the boxed
-    /// apparent type of a primitive — `interface Number extends NS.ICl {}`
-    /// contributes `ICl`'s members.
     fn collect_boxed_heritage_members(
         &mut self,
         iface_stmt: &Arc<Node>,
@@ -7002,10 +5532,6 @@ impl Checker {
             .unwrap_or(false)
     }
 
-    /// Scan every loaded file's top-level statements for `interface <name>`
-    /// declarations and collect the names of all property/method members
-    /// across all matching declarations (declaration merging). Robust to
-    /// cross-file merging gaps in the binder.
     fn collect_global_interface_member_names(&self, interface_name: &str) -> Vec<String> {
         let mut names: Vec<String> = Vec::new();
         for file in &self.files {
@@ -7039,14 +5565,6 @@ impl Checker {
         names
     }
 
-    /// Check a `PropertyAccessExpression` (`x.prop`) and emit TS2339 when
-    /// `prop` does not exist on the type of `x`.
-    ///
-    /// Mirrors tsc behavior: when the object type is known and structured
-    /// (object literal, type reference with members, intersection, union of
-    /// compatible constituents, type parameter with a constraint, etc.), a
-    /// missing property is reported. `any`/`unknown`/`never` and other
-    /// permissive types skip the check.
     fn check_property_access(&mut self, node: &Arc<Node>) {
         let (obj_expr, question_dot, name) = match &node.data {
             crate::ast::NodeData::PropertyAccessExpression(data) => (
@@ -7058,11 +5576,7 @@ impl Checker {
         };
         let obj_type = self.get_type_of_node(obj_expr);
         let name_text = name.text();
-        // TS18048/18069/18047 (Go `checkNonNullType` on the object position):
-        // a possibly-null/undefined object reports at the OBJECT expression —
-        // regardless of whether the property exists on the non-nullable part
-        // — and member resolution then continues on the non-nullable part.
-        // Optional chaining (`?.`) suppresses the report.
+
         let lookup_type;
         if !question_dot
             && self.strict_null_checks
@@ -7074,28 +5588,16 @@ impl Checker {
             lookup_type = obj_type;
         }
         let obj_type = lookup_type;
-        // PrivateIdentifier member access (`this.#x`, `C.#x`, `obj.#x`) —
-        // lexical scoping + accessibility (Go's
-        // `checkPropertyAccessExpressionOrQualifiedName` IsPrivateIdentifier
-        // branch). Our binder keys class members by the raw `#name` text, so
-        // Go's mangled-name identity becomes declaration identity here.
+
         if name.kind == SyntaxKind::PrivateIdentifier
             && self.check_private_identifier_access(node, name, name_text, &obj_type)
         {
             return;
         }
-        // TS2341: a `private` class member accessed from outside its
-        // declaring class. Mirrors Go's accessibility check in
-        // `checkPropertyAccess` (`getSymbolModifierFlags` → `private`).
+
         if let Some(structured) = obj_type.as_structured() {
             if let Some(member_symbol) = structured.members.get(name_text) {
-                // TS2715: an abstract property accessed via `this` inside a
-                // constructor body OR directly in a property initializer
-                // (`other = this.prop` — initializers run during
-                // construction; nested functions exempt — they run after
-                // construction). Mirrors Go's
-                // `checkPropertyAccessibilityAtLocation` abstract-property
-                // branch + `isNodeUsedDuringClassInitialization`.
+
                 let in_ctor = self.in_ctor_body_stack.last() == Some(&true);
                 let in_prop_init = !in_ctor && self.access_in_property_initializer(node);
                 if obj_expr.kind == SyntaxKind::ThisKeyword
@@ -7118,11 +5620,7 @@ impl Checker {
                     );
                     self.diagnostics.add(diagnostic);
                 }
-                // TS2729: a `this.x` READ in a property initializer where
-                // `x` is an instance property that has no initializer or is
-                // declared LATER in the class body — the read happens before
-                // the property's initialization (Go's flow-based
-                // "used before initialization" for constructor-time access).
+
                 if in_prop_init
                     && obj_expr.kind == SyntaxKind::ThisKeyword
                     && get_assignment_target_kind(node) == AssignmentKind::None
@@ -7131,11 +5629,7 @@ impl Checker {
                             && !d.has_syntactic_modifier(ModifierFlags::Static)
                     })
                 {
-                    // A postfix `!` (definite-assignment assertion) exempts
-                    // the property from use-before-initialization — the
-                    // developer promised it's assigned elsewhere (same
-                    // exemption as strictPropertyInitialization's TS2564
-                    // check below).
+
                     let asserted = matches!(
                         &prop_decl.data,
                         crate::ast::NodeData::PropertyDeclaration(d) if d.postfix_token.is_some()
@@ -7154,10 +5648,7 @@ impl Checker {
                     }
                 }
                 if let Some(declaring_class) = self.declaring_class_of_member(member_symbol) {
-                    // Go picks ONE declaration by access direction
-                    // (`getDeclarationModifierFlagsFromSymbol`: read → get
-                    // accessor) — a public getter with a private setter is
-                    // still readable; `any(private)` over-approximates.
+
                     let is_private = super::exports::
                         get_declaration_modifier_flags_from_symbol_ex(member_symbol, false)
                         .contains(ModifierFlags::Private);
@@ -7181,29 +5672,17 @@ impl Checker {
                 }
             }
         }
-        // A `never`-typed receiver has no properties — official reports
-        // TS2339 (`Property 'a' does not exist on type 'never'`); the
-        // has_property_of_type shortcut exempts never for OTHER callers,
-        // so bypass it here.
+
         if !obj_type.flags.contains(TypeFlags::Never)
             && self.has_property_of_type(&obj_type, name_text)
         {
             return;
         }
-        // Fallback for static methods on global constructor values (e.g.
-        // `Object.values`/`Object.entries`). These are declared on the
-        // `ObjectConstructor` interface, whose augmentations are spread across
-        // multiple lib files (lib.es5 + lib.es2017) and not fully merged by
-        // the binder. Resolve the accessed value to its global symbol and scan
-        // the corresponding constructor interface, mirroring the Array fix.
+
         if self.global_constructor_value_has_property(obj_expr, name_text) {
             return;
         }
-        // A NAMESPACE property access (`NS.f`) resolves through the
-        // namespace's EXPORTS only — non-exported members live in the
-        // namespace's locals and are not visible from outside (Go's
-        // resolveEntityName consults `exports`; TS2339 otherwise). The
-        // property's TYPE is recovered by `get_type_of_property_access`.
+
         if obj_expr.kind == SyntaxKind::Identifier
             && let Some(sym) = self.resolve_identifier(obj_expr)
         {
@@ -7218,9 +5697,7 @@ impl Checker {
             }
         }
         let file = self.current_file.clone();
-        // A deferred IndexedAccess displays its RESOLVED constraint
-        // (`M[K]` with K extends string shows as the signature value
-        // type).
+
         let display_type = if obj_type.flags.contains(TypeFlags::IndexedAccess) {
             self.constraint_of_indexed_access(&obj_type)
                 .unwrap_or_else(|| Arc::clone(&obj_type))
@@ -7228,10 +5705,7 @@ impl Checker {
             Arc::clone(&obj_type)
         };
         let type_str = self.type_to_string(&display_type);
-        // TS2551: Go funnels through getSpellingSuggestion over the type's
-        // properties — same weighted levenshtein (mismatch substitution
-        // costs 2) and budget floor(len·0.4)+0.9 as name suggestions, so
-        // 'fn2'→'fng' (weighted 2.0 > 1.9 budget) is NOT offered.
+
         let suggestion = display_type.as_structured().and_then(|st| {
             let rune_len = name_text.chars().count();
             let maximum_length_difference = 2.max((rune_len as f64 * 0.34) as usize);
@@ -7250,8 +5724,7 @@ impl Checker {
                     continue;
                 }
                 let cand_len = cand.chars().count();
-                // Candidates shorter than 3 chars are only offered when
-                // case-insensitively equal to the name.
+
                 if cand_len < 3 && !cand.eq_ignore_ascii_case(name_text) {
                     continue;
                 }
@@ -7289,16 +5762,6 @@ impl Checker {
         }
     }
 
-    /// Report the possibly-null/undefined diagnostic family for an
-    /// expression used where a non-nullable value is required (element
-    /// access `x[0]`, call target `f()`). Message selection mirrors Go's
-    /// `reportObjectPossiblyNullOrUndefinedError` (checker.go ~L7519):
-    /// entity name expressions (identifier / dotted identifier chains, text
-    /// under 100 chars) spell the name into TS18048 (`'x' is possibly
-    /// 'undefined'`), TS18069 (`'x' is possibly 'null'`) or TS18047 (`'x' is
-    /// possibly 'null' or 'undefined'`); other expressions use the
-    /// object-form TS2532 family. Returns `true` when a diagnostic was
-    /// emitted.
     fn report_possibly_null_or_undefined(
         &mut self,
         node: &Arc<Node>,
@@ -7311,8 +5774,7 @@ impl Checker {
         let possibly_undefined = type_includes_undefined_only(t);
         let possibly_null = type_includes_null_only(t);
         let entity_text = if is_entity_name_expression(node) {
-            // Identifiers carry their text; qualified accesses
-            // (`a.name`) are reconstructed from the source slice.
+
             let text = if node.kind == SyntaxKind::Identifier {
                 node.text().to_string()
             } else {
@@ -7327,8 +5789,7 @@ impl Checker {
             None
         };
         let (message, args): (crate::diagnostics::Message, Vec<String>) = if invoke_form {
-            // `f()` where `f` is possibly null/undefined — the invoke forms
-            // (Go `checkCallExpression`'s `Cannot_invoke_an_object...`).
+
             (
                 if possibly_undefined {
                     if possibly_null {
@@ -7392,25 +5853,18 @@ impl Checker {
         true
     }
 
-    /// Check whether `obj_expr` references a global constructor value (such as
-    /// `Object`) whose corresponding interface (e.g. `ObjectConstructor`)
-    /// declares a property named `name`. Used as a fallback for static methods
-    /// whose declarations span multiple lib files and aren't fully merged by
-    /// the binder.
     fn global_constructor_value_has_property(&mut self, obj_expr: &Arc<Node>, name: &str) -> bool {
         if obj_expr.kind != SyntaxKind::Identifier {
             return false;
         }
-        // Resolve the accessed identifier. Only proceed when it resolves to the
-        // actual global symbol (a local shadow must not trigger the fallback).
+
         let resolved = match self.resolve_identifier(obj_expr) {
             Some(sym) => sym,
             None => return false,
         };
         let interface_name = match resolved.name.as_str() {
             "Object" => {
-                // Confirm this is the global `Object` value, not a local
-                // variable that happens to be named `Object`.
+
                 match self.globals.get("Object") {
                     Some(global_sym) if Arc::ptr_eq(&resolved, global_sym) => "ObjectConstructor",
                     _ => return false,
@@ -7421,10 +5875,6 @@ impl Checker {
         self.global_interface_has_property(interface_name, name)
     }
 
-    /// Whether `name` exists as a property on the non-nullable constituents of
-    /// a union type. Used to distinguish TS18048 (possibly undefined) from
-    /// TS2339 (property doesn't exist). Mirrors Go's check that looks up the
-    /// property on the non-undefined part of the union.
     #[allow(dead_code)]
     fn property_exists_on_non_nullable_part(&mut self, t: &Arc<Type>, name: &str) -> bool {
         if t.flags.contains(TypeFlags::Union) {
@@ -7440,33 +5890,10 @@ impl Checker {
                 return false;
             }
         }
-        // Non-union: check the type itself (excluding the nullable flags).
+
         self.has_property_of_type(t, name)
     }
 
-    /// Check that call/new-expression arguments are assignable to the
-    /// corresponding parameter types of the callee's signature. Emits
-    /// TS2345 for mismatched arguments.
-    ///
-    /// Mirrors the argument-checking portion of Go's `checkCallExpression`
-    /// / `checkNewExpression`. We resolve the callee type, find the call
-    /// (or construct) signatures, and compare each argument against the
-    /// corresponding parameter type. Rest parameters are handled by
-    /// matching all trailing arguments against the rest element type.
-    /// `any` callee / missing signature → skip (no false positives).
-    ///
-    /// When the callee has multiple signatures (function overloads),
-    /// overload resolution is performed: each signature is tried in order,
-    /// and the first one whose parameters accept all arguments is used.
-    /// If no signature matches, the error is reported against the first
-    /// signature (matching TypeScript's behavior).
-    ///
-    /// For generic signatures, type arguments are first inferred from the
-    /// call arguments and substituted into the parameter types before
-    /// checking assignability (so `identity(42)` infers `T = number` and
-    /// checks `number` against `number`, not against the bare type
-    /// parameter `T`). Simplified port of the inference branch of Go's
-    /// `chooseOverload`.
     fn check_call_arguments(&mut self, node: &Arc<Node>, is_new: bool) {
         let (callee_expr, arguments) = match &node.data {
             crate::ast::NodeData::CallExpression(data) => {
@@ -7477,13 +5904,7 @@ impl Checker {
             }
             _ => return,
         };
-        // `super(args)` — a super call invokes the base class's constructor.
-        // The `super` keyword itself types as the enclosing class's instance
-        // type (not callable), so resolve the base class's constructor type
-        // here and check the arguments against its construct signatures.
-        // Mirrors Go's `checkCallExpression` super-call handling. When the
-        // base class can't be resolved, skip rather than reporting a false
-        // TS2349 against the constructor.
+
         if !is_new && callee_expr.kind == SyntaxKind::SuperKeyword {
             let Some(base_ctor_type) = self.resolve_base_class_constructor_type() else {
                 return;
@@ -7493,16 +5914,12 @@ impl Checker {
                 &base_ctor_type,
                 &arguments,
                 callee_expr,
-                /*is_new*/ true,
+                 true,
             );
             return;
         }
         let callee_type = self.get_type_of_node(callee_expr);
-        // TS2722-family: invoking a possibly-null/undefined value
-        // (`(x?.f)()` — a non-optional call of an optional-chain result).
-        // Optional calls themselves (`x?.f()`) don't reach here suppressed
-        // — the question-dot arm below handles those. Go:
-        // `checkCallExpression` → `checkNonNullNonVoidType`.
+
         if !is_new {
             let optional_call = matches!(
                 &node.data,
@@ -7515,14 +5932,6 @@ impl Checker {
         self.check_call_arguments_against(node, &callee_type, &arguments, callee_expr, is_new);
     }
 
-    /// Go `invocationError`/`invocationErrorDetails` (checker.go ~L10115): the
-    /// head "This expression is not callable/constructable" is never bare — it
-    /// always carries a nested chain entry naming the callee's apparent type.
-    /// A primitive callee's apparent type is its global wrapper interface
-    /// (`string` → `String`), rendering "  Type 'String' has no call
-    /// signatures."; a union callee instead nests "No constituent of type
-    /// 'A | B' is callable." or "Not all constituents ... are callable." over
-    /// the first signature-less constituent.
     fn report_invocation_error(
         &mut self,
         callee_expr: &Arc<Node>,
@@ -7542,11 +5951,7 @@ impl Checker {
         let chain = if callee_type.flags.contains(TypeFlags::Union)
             && let Some(u) = callee_type.as_union_or_intersection()
         {
-            // Go iterates every constituent of the union: when none carries
-            // signatures the nested entry is "No constituent of type 'A | B'
-            // is callable"; otherwise "Not all constituents ... are
-            // callable" wraps the first signature-less constituent one level
-            // deeper; when all have signatures the sets are incompatible.
+
             let union_str = self.type_to_string(callee_type);
             let mut has_signatures = false;
             let mut first_without: Option<String> = None;
@@ -7602,13 +6007,7 @@ impl Checker {
             }
             vec![outer]
         } else {
-            // Apparent type of a primitive is its global wrapper interface;
-            // `type_to_string` of that interface is just its name ("String").
-            // Non-wrapped primitives (void/null/undefined) and object types
-            // pass through unchanged (Go `getApparentType` tail `return t`).
-            // An intersection whose same-named properties are mutually
-            // exclusive reduces to `never` (Go `getReducedType`'s
-            // IsNeverIntersection — neverIntersectionNotCallable).
+
             let apparent_str = if callee_type.flags.contains(TypeFlags::Intersection)
                 && self.is_never_intersection(callee_type)
             {
@@ -7636,9 +6035,6 @@ impl Checker {
         self.diagnostics.add(diag);
     }
 
-    /// Name of the global wrapper interface that is a primitive's apparent
-    /// type (Go `getApparentType`'s StringLike/NumberLike/... cases), or
-    /// `None` when `t` has no wrapper global (void/null/undefined/objects).
     fn primitive_apparent_name(&self, t: &Arc<Type>) -> Option<&'static str> {
         let name = if t.flags.intersects(
             TypeFlags::String
@@ -7670,11 +6066,6 @@ impl Checker {
         self.globals.get(name).map(|_| name)
     }
 
-    /// Go `getReducedType`'s IsNeverIntersection (checker.go ~L22160): an
-    /// intersection reduces to `never` when the same-named property of two
-    /// constituents is mutually exclusive — the property's own intersection
-    /// is never (`a: ""` ∩ `a: number`). Approximated by primitive-domain
-    /// disjointness plus distinct same-domain literals.
     fn is_never_intersection(&mut self, t: &Arc<Type>) -> bool {
         let Some(ui) = t.as_union_or_intersection() else {
             return false;
@@ -7752,9 +6143,6 @@ impl Checker {
         false
     }
 
-    /// Argument-checking core shared by direct calls/constructs and `super()`
-    /// calls: select a signature from `callee_type`, check arity and each
-    /// argument's assignability. `callee_expr` is the diagnostic anchor.
     fn check_call_arguments_against(
         &mut self,
         node: &Arc<Node>,
@@ -7763,16 +6151,11 @@ impl Checker {
         callee_expr: &Arc<Node>,
         is_new: bool,
     ) {
-        // `any` callee → skip (no false positives without a signature).
+
         if callee_type.flags.contains(TypeFlags::Any) {
             return;
         }
-        // Deferred CONDITIONAL callee → its default constraint (union of both
-        // branches). Go's getSignaturesOfType recurses into
-        // getDefaultConstraintOfConditionalType for TypeFlagsConditional
-        // targets: every value the conditional could produce must be
-        // invocable for the call to type-check (nonNullableReduction's
-        // `Transform2<T> = string extends T ? F | undefined : F`).
+
         let cond_constraint;
         let callee_type: &Arc<Type> = if callee_type.flags.contains(TypeFlags::Conditional) {
             match self.deferred_default_constraint_of_conditional(callee_type) {
@@ -7785,25 +6168,15 @@ impl Checker {
         } else {
             callee_type
         };
-        // Union callee (e.g. `typeof A | typeof B`): constructable when every
-        // member carries construct signatures; the signatures flatten into
-        // one overload set (Go: `getSignaturesOfType` over union members).
-        // For CALLS, null/undefined members are skipped — the possibly-
-        // undefined invocation was already reported (TS2722 by
-        // `report_possibly_null_or_undefined`), and the remaining members'
-        // signatures drive argument checking (`undefined | ((a: number) =>
-        // void)` invoked with `(42)` reports only TS2722, no TS2349).
-        // NOTE: union types also expose `as_structured` (member tables), so
-        // the union check must come FIRST.
+
         let mut union_signatures: Vec<Arc<Signature>> = Vec::new();
         let signatures: &[Arc<Signature>] =
             if callee_type.as_union_or_intersection().is_some() {
-                // Flatten (possibly nested) union members.
+
                 let mut leaves: Vec<&Arc<Type>> = Vec::new();
                 flatten_union_leaves(callee_type, &mut leaves);
                 if is_new {
-                    // Every leaf must carry construct signatures for the
-                    // union to be constructable.
+
                     let all_constructable = !leaves.is_empty()
                         && leaves.iter().all(|m| {
                             m.as_structured()
@@ -7818,20 +6191,12 @@ impl Checker {
                         }
                         &union_signatures
                     } else {
-                        // Some member isn't constructable.
+
                         self.report_invocation_error(callee_expr, callee_type, is_new);
                         return;
                     }
                 } else {
-                    // Calls: skip null/undefined leaves (TS2722 already
-                    // reported); every remaining leaf must carry call
-                    // signatures. CONDITIONAL leaves expand to their default
-                    // constraint's constituents first (Go's getSignaturesOf
-                    // Type recurses into getDefaultConstraintOfConditional
-                    // Type for deferred conditionals): a union member like
-                    // `Transform2<T> = string extends T ? F | undefined : F`
-                    // contributes F whether or not the condition could be
-                    // decided at this instant (nonNullableReduction).
+
                     let mut expanded_leaves: Vec<Arc<Type>> = Vec::new();
                     for m in leaves.iter().copied() {
                         if m.flags.intersects(TypeFlags::Undefined | TypeFlags::Null) {
@@ -7875,9 +6240,7 @@ impl Checker {
                         }
                         &union_signatures
                     } else {
-                        // Some non-nullable member isn't callable (or the
-                        // union is entirely nullable — `undefined` alone
-                        // falls into the non-structured path above).
+
                         self.report_invocation_error(callee_expr, callee_type, is_new);
                         return;
                     }
@@ -7889,19 +6252,14 @@ impl Checker {
                     structured.call_signatures()
                 }
             } else {
-                // Non-structured callee (primitive like `number`, `string`,
-                // etc.) is never callable/constructable. Mirrors Go's
-                // `invocationError` for types with no signatures.
+
                 if !is_new && self.report_get_accessor_call(callee_expr) {
                     return;
                 }
                 self.report_invocation_error(callee_expr, callee_type, is_new);
                 return;
             };
-        // With explicit type arguments, only overloads with a matching
-        // type-parameter count are candidates (Go `chooseOverload`'s
-        // `hasCorrectTypeArgumentArity` filter) — `a.reduce<number>(cb, init)`
-        // must select the generic overload, not an earlier non-generic one.
+
         let type_arg_filtered: Vec<Arc<Signature>>;
         let signatures: &[Arc<Signature>] = {
             let provided = Self::explicit_type_argument_count(node);
@@ -7922,9 +6280,7 @@ impl Checker {
         };
         if signatures.is_empty() {
             if !is_new {
-                // TS2348: a type with construct signatures but no call
-                // signatures called without `new` (Go's
-                // Value_of_type_0_is_not_callable_Did_you_mean_to_include_new).
+
                 if callee_expr.kind == SyntaxKind::Identifier
                     && let Some(structured) = callee_type.as_structured()
                     && !structured.construct_signatures().is_empty()
@@ -7942,13 +6298,7 @@ impl Checker {
                 }
             }
             if is_new {
-                // TS 1.0 Spec 4.11 (Go resolveNewExpression): an object type
-                // with NO construct signatures but call signatures is
-                // processed as a function call — the arguments are checked
-                // against the call signatures, and (only when noImplicitAny
-                // is off) a non-void return type reports TS2350. Legacy
-                // constructor functions (`function P(x) { this.x = x; }`,
-                // inferred return void) construct silently with result any.
+
                 if let Some(structured) = callee_type.as_structured() {
                     let call_sigs: &[Arc<Signature>] = structured.call_signatures();
                     if !call_sigs.is_empty() {
@@ -7973,34 +6323,24 @@ impl Checker {
                             callee_type,
                             &arguments,
                             callee_expr,
-                            /*is_new*/ false,
+                             false,
                         );
                         return;
                     }
                 }
             }
-            // Structured type but no call/construct signatures — e.g.
-            // calling a plain object literal or a number. Mirrors Go's
-            // `invocationError` head message ("This expression is not
-            // callable" / "This expression is not constructable") with the
-            // nested "Type '{...}' has no call signatures." chain entry.
+
             if !is_new && self.report_get_accessor_call(callee_expr) {
                 return;
             }
             self.report_invocation_error(callee_expr, callee_type, is_new);
             return;
         }
-        // Overload resolution: if multiple signatures exist, find the first
-        // that accepts all arguments. If none matches, report errors
-        // against the first signature.
+
         let matching_idx = if signatures.len() == 1 {
             0
         } else {
-            // TS2769 (official TS5-style per-overload elaboration): when
-            // NO overload is applicable and every overload yields an
-            // argument-level failure, report "No overload matches this
-            // call." with one "Overload i of n" entry per failing
-            // overload.
+
             let no_match = {
                 self.speculation_depth += 1;
                 let r = !signatures
@@ -8015,20 +6355,12 @@ impl Checker {
             self.find_matching_signature(node, signatures, &arguments)
         };
         let sig = Arc::clone(&signatures[matching_idx]);
-        // Arity check: mirror Go's `getArgumentArityError`. If the argument
-        // count doesn't match the signature's parameter range, emit TS2554
-        // ("Expected N arguments, but got M") or TS2555 ("Expected at least N
-        // arguments, but got M") for rest-parameter signatures, and skip the
-        // per-argument type checks (matching tsc, which reports the arity
-        // error as the primary call error).
+
         if !self.check_call_arity(node, &sig, &arguments, callee_expr, is_new) {
             return;
         }
         let _file = self.current_file.clone();
-        // When the signature has a rest parameter (always the last one),
-        // arguments at/after the rest position are checked against the rest
-        // element type, not the rest array type. Mirrors Go's
-        // `getTypeAtPosition` rest handling.
+
         let has_rest = sig.has_rest_parameter();
         let rest_index = if has_rest {
             sig.parameters.len().saturating_sub(1)
@@ -8036,11 +6368,7 @@ impl Checker {
             usize::MAX
         };
         let rest_element_type = if has_rest {
-            // Prefer the signature's instantiated rest type — for array
-            // rests `try_get_type_at_position` already yields the ELEMENT
-            // type (element-substituted Array members like
-            // `push(...items: T[])`). Fall back to unwrapping the declared
-            // symbol's array type.
+
             let ret = match self.try_get_type_at_position(&sig, rest_index) {
                 Some(t) => Some(t),
                 None => {
@@ -8053,17 +6381,10 @@ impl Checker {
         } else {
             None
         };
-        // For a generic signature, infer type arguments from the call
-        // arguments and substitute them into each parameter type before the
-        // assignability check. Mirrors Go's `getSignatureInstantiation` +
-        // `isSignatureApplicable` flow inside `chooseOverload`.
-        // TS2558: explicit type-argument count must match the signature's
-        // type-parameter count (Go's getArityError for type arguments).
+
         if !sig.type_parameters.is_empty() || Self::has_explicit_type_arguments(node) {
             let provided = Self::explicit_type_argument_count(node);
-            // A `new C<T>()` counts type arguments against the CLASS's
-            // declared type parameters (the constructor signature carries
-            // none of its own).
+
             let expected = if is_new {
                 self.get_return_type_of_signature(&sig)
                     .and_then(|rt| rt.symbol.clone())
@@ -8081,10 +6402,7 @@ impl Checker {
             };
             if provided != 0
                 && provided != expected
-                // An unresolved callee (errorType — TypeFlags::Any with the
-                // "error" intrinsic — or a plain any) skips the arity check;
-                // Go's getArityError only runs on resolved targets, so
-                // `new A.Missing<T>()` reports the 2339 alone.
+
                 && !callee_type.flags.contains(TypeFlags::Any)
             {
                 let loc = match &node.data {
@@ -8112,12 +6430,7 @@ impl Checker {
             }
         }
         let inferred_types = self.infer_call_type_arguments(node, &sig, &arguments.nodes);
-        // Explicit type arguments on `new C<Args>(...)` instantiate the
-        // CLASS's declared type parameters — the construct signature itself
-        // carries none, so argument inference has nothing to substitute
-        // (Go resolves the new-expression's signature through the class
-        // type mapper; constructor params arrive already substituted, e.g.
-        // `new C<number>(5)` checks `5` against `number`, not `T`).
+
         let new_explicit_subst: Option<(Vec<Arc<Type>>, Vec<Arc<Type>>)> = if is_new {
             self.get_return_type_of_signature(&sig)
                 .and_then(|rt| rt.symbol.clone())
@@ -8126,11 +6439,7 @@ impl Checker {
                     if tps.is_empty() {
                         return None;
                     }
-                    // Explicit type arguments on the `new` expression
-                    // itself, else — for a `super(...)` call — the
-                    // ENCLOSING class's heritage instantiation
-                    // (`class D extends B<number> { constructor(b: number)
-                    // { super(b); } }` checks against B<number>'s ctor).
+
                     let args: Option<Vec<Arc<Type>>> = match &node.data {
                         crate::ast::NodeData::NewExpression(d) => d
                             .type_arguments
@@ -8140,9 +6449,7 @@ impl Checker {
                     };
                     let args = match args {
                         Some(a) if a.len() == tps.len() => Some(a),
-                        // `super(...)` only — a plain `new B(x)` inside a
-                        // derived class must NOT inherit the heritage
-                        // instantiation.
+
                         _ if callee_expr.kind == SyntaxKind::SuperKeyword => self
                             .heritage_type_arguments_for_base(&class_sym)
                             .filter(|a| a.len() == tps.len()),
@@ -8164,22 +6471,19 @@ impl Checker {
             }
         }
         for (i, arg) in arguments.iter().enumerate() {
-            // Determine the parameter type to check against.
+
             let base_param_type = if has_rest && i >= rest_index {
-                // Rest position: check against the array element type.
+
                 Arc::clone(rest_element_type.as_ref().unwrap())
             } else if i < sig.parameters.len() {
-                // Prefer the signature's instantiated parameter types
-                // (element-substituted Array members, contextual
-                // instantiations); fall back to the declared symbol type.
+
                 self.try_get_type_at_position(&sig, i)
                     .unwrap_or_else(|| self.get_type_of_symbol(&sig.parameters[i]))
             } else {
-                // Beyond declared params with no rest — should have been
-                // caught by the arity check; skip to avoid false positives.
+
                 continue;
             };
-            // Substitute inferred type arguments into the parameter type.
+
             let param_type = if !inferred_types.is_empty() {
                 self.substitute_infer_type_parameters(
                     &base_param_type,
@@ -8191,11 +6495,7 @@ impl Checker {
             } else {
                 Arc::clone(&base_param_type)
             };
-            // `any` parameter → always assignable, skip. When the
-            // signature is generic but inference produced NO candidates,
-            // the parameter type stays an unsubstituted type parameter —
-            // Go falls back to the constraint/`unknown` there, which
-            // accepts any argument; don't mis-report TS2345.
+
             let inference_empty =
                 !sig.type_parameters.is_empty() && inferred_types.is_empty();
             if param_type.flags.contains(TypeFlags::Any)
@@ -8203,9 +6503,7 @@ impl Checker {
             {
                 continue;
             }
-            // Contextual element checks for literal arguments
-            // (`f([1, "a"])` with `param: number[]` — per-element TS2322,
-            // excess TS2353 on nested object literals).
+
             if matches!(
                 arg.kind,
                 SyntaxKind::ArrayLiteralExpression | SyntaxKind::ObjectLiteralExpression
@@ -8214,12 +6512,7 @@ impl Checker {
                 self.check_contextual_elements(arg, &pt, arg.loc);
             }
             let arg_type = self.get_type_of_node(arg);
-            // Route through the elaborating entry (Go `checkArguments` →
-            // `checkTypeAssignableToAndOptionallyElaborate` with the
-            // argument-of-type head message): on failure the collected
-            // chain renders as the nested compatibility pyramid anchored
-            // at the argument. An optional parameter's head-message view
-            // drops the folded `| undefined` (the `?` already spells it).
+
             let display_param = if i < sig.parameters.len() {
                 let param_optional = sig.parameters[i]
                     .flags
@@ -8239,9 +6532,7 @@ impl Checker {
             } else {
                 None
             };
-            // A literal argument whose ELEMENT-level mismatches already
-            // reported (contextual pass) doesn't re-report the whole
-            // argument (official: only the element diagnostics).
+
             let elements_reported = matches!(
                 arg.kind,
                 SyntaxKind::ArrayLiteralExpression | SyntaxKind::ObjectLiteralExpression
@@ -8263,23 +6554,13 @@ impl Checker {
                 None,
                 display_param.as_ref(),
             );
-            // Official reports the FIRST failing argument of a call and
-            // stops (`f(null, new B())` blames only the `null` argument —
-            // Go `checkArguments` breaks on the first elaborated failure).
+
             if !ok {
                 break;
             }
         }
     }
 
-    /// TS2769 reporting: probe EVERY overload for its first argument-level
-    /// failure (in a scratch diagnostics store), then emit
-    /// "No overload matches this call." with one
-    /// "Overload i of n, '<sig>', gave the following error." entry per
-    /// failing overload (the official TS5 baseline form). Anchored at the
-    /// first failing argument. Returns false when some overload produced
-    /// no argument error — the caller then keeps the legacy single-
-    /// signature report to avoid a false 2769.
     fn report_no_overload_matches(
         &mut self,
         node: &Arc<Node>,
@@ -8332,18 +6613,13 @@ impl Checker {
         true
     }
 
-    /// The first argument-level failure of `sig` against `arguments`, as a
-    /// diagnostic (Go's `isSignatureApplicable(..., reportErrors)` probe):
-    /// mirrors the main argument-check loop's parameter typing (rest
-    /// positions, inference substitution, optional display), elaborated
-    /// with the `Argument of type …` head at the argument node.
     fn probe_first_argument_error(
         &mut self,
         node: &Arc<Node>,
         sig: &Arc<Signature>,
         arguments: &Arc<NodeList>,
     ) -> Option<crate::ast::Diagnostic> {
-        // Arity-incompatible overloads are not argument-level failures.
+
         let arg_count = arguments.len();
         let max_params = if sig.has_rest_parameter() {
             usize::MAX
@@ -8360,9 +6636,7 @@ impl Checker {
             usize::MAX
         };
         let rest_element_type = if has_rest {
-            // Instantiated array members carry the substituted REST ARRAY
-            // type in the override table — the element type is what rest
-            // arguments check against (`ConcatArray<never>[]` → never).
+
             match self.signature_instantiated_param_type(sig, rest_index) {
                 Some(arr) => Some(self.get_array_element_type(&arr)),
                 None => match self.try_get_type_at_position(sig, rest_index) {
@@ -8443,17 +6717,6 @@ impl Checker {
         None
     }
 
-    /// Run call-site type-argument inference for `signature` given the
-    /// call's argument nodes. Returns one inferred `Type` per type
-    /// parameter of `signature`; returns an empty vec when the signature is
-    /// non-generic.
-    ///
-    /// Simplified port of the inference branch of Go's `chooseOverload`:
-    /// builds an `InferenceContext` from the signature's type parameters,
-    /// invokes `infer_type_arguments`, and returns the resolved inferred
-    /// types. Does not yet handle explicit type-argument lists on the call
-    /// (`f<T>(...)`), context-sensitive two-pass inference, or the
-    /// `CheckModeSkipGenericFunctions` deferred-function heuristic.
     pub(crate) fn infer_call_type_arguments(
         &mut self,
         node: &Arc<Node>,
@@ -8473,18 +6736,6 @@ impl Checker {
         self.infer_type_arguments(node, signature, args, &mut context)
     }
 
-    /// Check call/new-expression argument arity against a signature.
-    ///
-    /// Mirrors the common cases of Go's `getArgumentArityError`: detects
-    /// spread arguments (TS2556), too-few arguments (TS2554/TS2555), and
-    /// too-many arguments on non-rest signatures (TS2554). Returns `true`
-    /// when arity is acceptable (no diagnostic emitted), `false` otherwise.
-    ///
-    /// For too-few errors the diagnostic spans the callee expression
-    /// (matching Go's `getErrorNodeForCallNode`); for too-many errors it
-    /// spans the extra arguments, from `args[maxCount]` to the last arg.
-    /// The `parameterRange` string follows tsc: `min` for rest signatures,
-    /// `min-max` when min < max, otherwise `min`.
     fn check_call_arity(
         &mut self,
         node: &Arc<Node>,
@@ -8495,16 +6746,12 @@ impl Checker {
     ) -> bool {
         let arg_count = arguments.len();
 
-        // Spread arguments require a rest parameter or a tuple-typed rest.
-        // Mirror Go's `getSpreadArgumentIndex` + early return.
         if let Some(spread_idx) = arguments
             .nodes
             .iter()
             .position(|a| matches!(a.data, crate::ast::NodeData::SpreadElement(_)))
         {
-            // A spread is allowed only when it falls at/after the minimum
-            // argument count and the signature has an effective rest
-            // parameter or enough declared parameters to cover it.
+
             let min_count = self.get_min_argument_count(sig);
             let max_count = self.get_parameter_count(sig);
             let has_rest = self.has_effective_rest_parameter(sig);
@@ -8520,8 +6767,7 @@ impl Checker {
                 ));
                 return false;
             }
-            // Otherwise the spread is structurally acceptable; defer the
-            // per-element type check.
+
             return true;
         }
 
@@ -8529,8 +6775,6 @@ impl Checker {
         let max_count = self.get_parameter_count(sig);
         let has_rest = self.has_effective_rest_parameter(sig);
 
-        // Too many arguments: only an error when there's no effective rest
-        // parameter. The error span covers the trailing extra arguments.
         if !has_rest && arg_count > max_count {
             let file = self.current_file.clone();
             let loc = self.extra_arguments_range(arguments, max_count);
@@ -8543,13 +6787,9 @@ impl Checker {
             return false;
         }
 
-        // Too few arguments.
         if arg_count < min_count {
             let file = self.current_file.clone();
-            // Error node (Go `getErrorNodeForCallNode`): for CallExpression,
-            // the callee — anchored at the property-access NAME when the
-            // callee is a property access (`this.#method()` reports on
-            // `#method`); for NewExpression, the whole node.
+
             let error_loc = if is_new {
                 node.loc
             } else if let crate::ast::NodeData::PropertyAccessExpression(d) = &callee_expr.data
@@ -8575,12 +6815,9 @@ impl Checker {
         true
     }
 
-    /// Compute the source range for "too many arguments" errors: from the
-    /// first extra argument (`args[maxCount]`) to the end of the last
-    /// argument. Mirrors Go's `getArgumentArityError` trailing-args span.
     fn extra_arguments_range(&self, arguments: &Arc<NodeList>, max_count: usize) -> TextRange {
         if max_count >= arguments.nodes.len() {
-            // Defensive: fall back to the whole call's argument range.
+
             return arguments.loc;
         }
         let start = arguments.nodes[max_count].loc.pos;
@@ -8595,47 +6832,23 @@ impl Checker {
         TextRange { pos: start, end }
     }
 
-    /// Check whether a signature accepts all given arguments (used for
-    /// overload resolution). Returns `true` if every argument is
-    /// assignable to the corresponding parameter type.
-    ///
-    /// Mirrors the "is applicable signature" test in Go's
-    /// `checkCallArguments`/`signatureIsAssignable`.
     fn signature_accepts_arguments(
         &mut self,
         node: &Arc<Node>,
         sig: &Arc<Signature>,
         arguments: &Arc<NodeList>,
     ) -> bool {
-        // Minimum arity gate (Go chooseOverload's arity applicability):
-        // fewer arguments than the signature's minimum (required
-        // parameters) rejects the overload — without this, an
-        // overload-applicability probe with ZERO arguments vacuously
-        // accepted any signature (`new Array<string>()` matched the
-        // 1-arg `(arrayLength: number)` overload and then arity-checked
-        // TS2554 against it, instead of falling through to the rest
-        // overload).
+
         if arguments.len() < sig.min_argument_count.max(0) as usize {
             return false;
         }
-        // GENERIC candidates are probed with inferred type arguments
-        // (Go chooseOverload: inferTypeArguments, then isSignatureApplicable
-        // on the instantiated signature). A raw probe would compare against
-        // unresolved type parameters and reject every generic overload that
-        // only becomes applicable after inference (unionOfClassCalls:
-        // Array#reduce's `reduce<U>(cb, initialValue)` overload after the
-        // non-generic overloads failed).
+
         let inferred_types = if sig.type_parameters.is_empty() {
             Vec::new()
         } else {
             self.infer_call_type_arguments(node, sig, &arguments.nodes)
         };
-        // Rest-parameter positions check against the rest ELEMENT type
-        // (Go `getTypeAtPosition`), and instantiated signatures carry
-        // substituted parameter types in the override table — read both
-        // through `try_get_type_at_position` instead of the parameter
-        // symbols' raw declaration types (element-substituted array
-        // members like `concat(...items: T[])`).
+
         let has_rest = sig.has_rest_parameter();
         let rest_index = if has_rest {
             sig.parameters.len().saturating_sub(1)
@@ -8657,13 +6870,11 @@ impl Checker {
             } else if i < sig.parameters.len() {
                 match self.try_get_type_at_position(sig, i) {
                     Some(t) => t,
-                    // Unresolved parameter (no link, no override) — treat
-                    // as `any` rather than rejecting the overload.
+
                     None => continue,
                 }
             } else {
-                // More arguments than parameters (without rest) — not
-                // applicable.
+
                 return false;
             };
             let param_type = if !inferred_types.is_empty() {
@@ -8675,7 +6886,7 @@ impl Checker {
             } else {
                 param_type
             };
-            // `any` parameter → always assignable.
+
             if param_type.flags.contains(TypeFlags::Any) {
                 continue;
             }
@@ -8687,22 +6898,13 @@ impl Checker {
         true
     }
 
-    /// Find the index of the first signature that accepts the given
-    /// arguments (overload resolution). If no signature matches, returns
-    /// 0 (the first signature is used for error reporting).
-    ///
-    /// Mirrors Go's overload resolution loop in `checkCallArguments`.
     fn find_matching_signature(
         &mut self,
         node: &Arc<Node>,
         signatures: &[Arc<Signature>],
         arguments: &Arc<NodeList>,
     ) -> usize {
-        // Probe under speculation: any diagnostics the applicability check
-        // trips over (contextual typing of array-literal elements etc.)
-        // belong to a candidate that may be rejected — Go's speculative
-        // tracking discards them; only the CHOSEN signature's argument
-        // check (outside this window) reports.
+
         self.speculation_depth += 1;
         let result = (|| {
             for (idx, sig) in signatures.iter().enumerate() {
@@ -8710,11 +6912,7 @@ impl Checker {
                     return idx;
                 }
             }
-            // No signature accepted the arguments (Go reports the arity error
-            // against the FIRST ARITY-COMPATIBLE overload, not signatures[0] —
-            // `Promise.resolve(1)` with overloads [(), (value)] must blame the
-            // (value) overload's arity, or match it when only assignability
-            // failed).
+
             let arg_count = arguments.len();
             for (idx, sig) in signatures.iter().enumerate() {
                 let max_params = if sig.has_rest_parameter() {
@@ -8734,21 +6932,10 @@ impl Checker {
         result
     }
 
-    /// Whether `node` sits inside a generator function body (TS1163's
-    /// parse-context equivalent): walk to the nearest enclosing
-    /// function-like and check its asterisk; function-likes without the
-    /// field (arrow functions, accessors, constructors) are never
-    /// generators.
     fn enclosing_function_is_generator(&self, node: &Arc<Node>) -> bool {
         let mut cur = node.parent.clone();
         while let Some(n) = cur {
-            // A yield inside a function-like's NAME (a computed property
-            // name — `{ [yield 0]() {} }`, `get [yield 0]() {}`) is
-            // evaluated in the ENCLOSING function's context: Go's parser
-            // keeps NodeFlagsYieldContext set through parsePropertyName
-            // and only clears it for the body/parameters. Skip past such
-            // boundaries; any other arrival (body, params, defaults)
-            // ends the climb here.
+
             let in_name_of_current = crate::ast::node_data_generated::node_name(&n).is_some_and(
                 |name| {
                     name.loc.pos() <= node.loc.pos() && node.loc.end() <= name.loc.end()
@@ -8768,8 +6955,7 @@ impl Checker {
                 crate::ast::NodeData::MethodDeclaration(d) => {
                     return d.asterisk_token.is_some();
                 }
-                // Other function-likes (arrows, accessors, constructors)
-                // can't be generators — stop here, the yield is invalid.
+
                 crate::ast::NodeData::ArrowFunction(_)
                 | crate::ast::NodeData::GetAccessorDeclaration(_)
                 | crate::ast::NodeData::SetAccessorDeclaration(_)
@@ -8781,11 +6967,6 @@ impl Checker {
         false
     }
 
-    /// Get the type of an `ElementAccessExpression` (`x[key]`).
-    ///
-    /// For array types (`T[]`), returns the element type `T`. For tuple
-    /// types, returns the element at the given index (or a union of all
-    /// element types for non-constant indices). Falls back to `any`.
     fn get_type_of_element_access(&mut self, node: &Arc<Node>) -> Arc<Type> {
         let (obj_expr, arg_expr) = match &node.data {
             crate::ast::NodeData::ElementAccessExpression(data) => {
@@ -8793,16 +6974,10 @@ impl Checker {
             }
             _ => return self.get_any_type(),
         };
-        // TS2538: an index expression whose type isn't
-        // string/number/symbol (or a union of those) — the offending
-        // constituent is named (`arr2[arr1[0]]` with `string | string[]`
-        // blames `string[]`).
+
         {
             let arg_type = self.get_type_of_node(arg_expr);
-            // A type-parameter index (or a union of them) is exempt: its
-            // constraint (`K extends keyof T`) is what qualifies it, and
-            // resolving the constraint here would misreport on generic
-            // accessors (`obj[key]` in getProperty<T, K extends keyof T>).
+
             let is_type_param_or_union_of = arg_type.is_type_parameter()
                 || (arg_type.is_union()
                     && arg_type
@@ -8846,9 +7021,6 @@ impl Checker {
         }
         let obj_type = self.get_type_of_node(obj_expr);
 
-        // Union receiver: distribute the element access over the members
-        // (Go's indexed-access union rule) — `number[] | null[]` indexed
-        // by 0 types as `number | null`.
         if obj_type.flags.contains(TypeFlags::Union)
             && let Some(members) = obj_type.types().map(|ts| ts.to_vec())
         {
@@ -8870,35 +7042,27 @@ impl Checker {
         self.element_access_result_type(node, &obj_type, arg_expr)
     }
 
-    /// The element-access result for a (non-union) receiver type: tuple
-    /// positions, array elements, literal-key property lookup, and index
-    /// signatures, flow-narrowed by the access reference.
     fn element_access_result_type(
         &mut self,
         node: &Arc<Node>,
         obj_type: &Arc<Type>,
         arg_expr: &Arc<Node>,
     ) -> Arc<Type> {
-        // Tuple element access with a numeric literal index.
+
         if self.is_tuple_type(obj_type) {
             if let Some(index) = self.get_constant_numeric_value(arg_expr) {
                 if let Some(t) = self.get_tuple_element_type(obj_type, index as usize) {
                     return t;
                 }
             }
-            // Non-constant index on a tuple → union of all element types.
-            // For now, fall back to `any`.
+
             return self.get_any_type();
         }
 
-        // Array element access → element type.
         if self.is_array_type(obj_type) {
             return self.get_array_element_type(obj_type);
         }
 
-        // Member access via a string-literal key: `obj["prop"]` behaves like
-        // obj.prop for property lookup and participates in the same
-        // reference-based flow narrowing.
         if let Some(member_name) = self.literal_element_access_name(arg_expr) {
             if let Some(sym) = self.get_property_of_type(obj_type, &member_name) {
                 if let Some(substituted) = self.instantiate_array_member_type(obj_type, &sym) {
@@ -8909,8 +7073,6 @@ impl Checker {
             }
         }
 
-        // Object with a string/number index signature → index signature
-        // value type, narrowed by the access reference's flow.
         if let Some(structured) = obj_type.as_structured() {
             for info in &structured.index_infos {
                 if let Some(key_type) = &info.key_type {
@@ -8929,9 +7091,6 @@ impl Checker {
         self.get_any_type()
     }
 
-    /// The property name of an element access whose argument is a
-    /// string/numeric literal (`obj["prop"]` → `prop`). Mirrors the literal
-    /// half of Go's `tryGetElementAccessExpressionName` (flow.go ~L1743).
     fn literal_element_access_name(&self, arg: &Arc<Node>) -> Option<String> {
         match &arg.data {
             crate::ast::NodeData::StringLiteral(data) => Some(data.text.clone()),
@@ -8940,11 +7099,10 @@ impl Checker {
         }
     }
 
-    /// Get the element type of an array type (`Array<T>` → `T`).
     pub(crate) fn get_array_element_type(&self, t: &Arc<Type>) -> Arc<Type> {
         match &t.data {
             crate::checker::TypeData::Object(obj) => {
-                // `Array<T>` is a reference type with one type argument.
+
                 if let Some(elem) = obj.type_arguments.first() {
                     return Arc::clone(elem);
                 }
@@ -8958,7 +7116,6 @@ impl Checker {
         }
     }
 
-    /// Try to extract a constant numeric value from a literal expression.
     fn get_constant_numeric_value(&self, node: &Arc<Node>) -> Option<f64> {
         match &node.data {
             crate::ast::NodeData::NumericLiteral(data) => data.text.parse::<f64>().ok(),
@@ -8966,27 +7123,13 @@ impl Checker {
         }
     }
 
-    /// Get the type of an array literal expression `[e1, e2, ...]`.
-    ///
-    /// Infers `Array<T>` where `T` is the widened type of the elements.
-    /// If all elements have the same widened type (e.g. all numbers), the
-    /// array type is `number[]`. If elements have mixed types, the array
-    /// type is `any[]` for now (a proper union would be `Array<A | B>`).
-    /// Empty arrays infer `any[]`.
     fn get_type_of_array_literal(&mut self, node: &Arc<Node>) -> Arc<Type> {
         let elements = match &node.data {
             crate::ast::NodeData::ArrayLiteralExpression(data) => &data.elements,
             _ => return self.get_any_type(),
         };
         if elements.is_empty() {
-            // Empty array literal `[]` (Go checkArrayLiteral, checker.go
-            // ~L8148): the element type is `never` under
-            // strictNullChecks (`implicitNeverType`), the widening form of
-            // `undefined` otherwise — `var i1: I1 = []` displays
-            // `never[]`/`undefined[]` in the assignment error. Unannotated
-            // variables get the flow-tracked auto array instead via the
-            // node-level rule in the declaration path (Go
-            // `getWidenedTypeForVariableLikeDeclaration`).
+
             let elem = if self.strict_null_checks {
                 self.never_type()
             } else {
@@ -8994,20 +7137,15 @@ impl Checker {
             };
             return self.create_array_type(elem);
         }
-        // Get the widened type of each element.
+
         let mut element_types: Vec<Arc<Type>> = Vec::new();
         for elem in elements.iter() {
-            // Skip spread elements for now.
+
             if elem.kind == SyntaxKind::SpreadElement {
                 return self.create_array_type(self.get_any_type());
             }
             let t = self.get_type_of_node(elem);
-            // Fresh object-literal elements widen RECURSIVELY — their
-            // property literal types widen too (`[{foo: "s"}]` has type
-            // `{foo: string}[]`, even under an as-expression context; Go
-            // `checkArrayLiteral` → `getWidenedLiteralLikeTypeForContextual`
-            // → `getWidenedType`). Other elements widen their own literal
-            // only.
+
             let widened = if crate::checker::is_object_literal_type(&t) {
                 self.widen_initializer_type(&t)
             } else {
@@ -9015,7 +7153,7 @@ impl Checker {
             };
             element_types.push(widened);
         }
-        // If all elements have the same type, use it.
+
         let first = &element_types[0];
         let all_same = element_types[1..]
             .iter()
@@ -9023,15 +7161,11 @@ impl Checker {
         if all_same {
             return self.create_array_type(Arc::clone(first));
         }
-        // Mixed element types → an array of their union (Go
-        // checkArrayLiteral; `[0, "1"]` has type `(string | number)[]`).
+
         let elem_union = self.get_union_type(element_types);
         self.create_array_type(elem_union)
     }
 
-    /// Whether `node` is an array literal with no elements — Go's
-    /// `isEmptyArrayLiteral` (the variable-declaration auto-array rule
-    /// keys off the NODE, not the resolved type).
     pub(crate) fn is_empty_array_literal(&self, node: &Arc<Node>) -> bool {
         matches!(
             &node.data,
@@ -9039,24 +7173,10 @@ impl Checker {
         )
     }
 
-    /// Get the type of a `const` assertion expression (`x as const`).
-    ///
-    /// For `as const`, TypeScript narrows all literal types to their literal
-    /// forms (no widening) and makes object properties readonly and arrays
-    /// readonly tuples. Mirrors Go's `getConstAssertionType`.
-    ///
-    ///   - `[1, 2, 3] as const` → `readonly [1, 2, 3]` (tuple, not widened)
-    ///   - `{ a: 1 } as const` → `{ readonly a: 1 }`
-    ///   - `"hello" as const` → `"hello"` (already narrow)
-    ///
-    /// The checker already returns narrow literal types for literals and
-    /// keeps literal types in object literals, so the main special case is
-    /// array literals (which `get_type_of_array_literal` normally widens to
-    /// `T[]`).
     fn get_const_assertion_type(&mut self, expr: &Arc<Node>) -> Arc<Type> {
         match expr.kind {
             SyntaxKind::ArrayLiteralExpression => {
-                // Build a tuple with narrow (non-widened) element types.
+
                 let elements = match &expr.data {
                     crate::ast::NodeData::ArrayLiteralExpression(data) => &data.elements,
                     _ => return self.get_any_type(),
@@ -9064,7 +7184,7 @@ impl Checker {
                 let mut element_types: Vec<Arc<Type>> = Vec::new();
                 for elem in elements.iter() {
                     if elem.kind == SyntaxKind::SpreadElement {
-                        // Spread in `as const` → fall back to array type.
+
                         let t = self.get_type_of_node(elem);
                         element_types.push(t);
                     } else {
@@ -9074,37 +7194,18 @@ impl Checker {
                 self.create_tuple_type(element_types)
             }
             _ => {
-                // Object literals already keep literal types; literals are
-                // already narrow. Just return the expression's type.
+
                 self.get_type_of_node(expr)
             }
         }
     }
 
-    /// Get the type of an object literal expression `{ a: 1, b: "hi" }`.
-    ///
-    /// Infers an anonymous object type `{ a: number, b: string }` where each
-    /// property's type is taken from its initializer. Literal initializers
-    /// keep their literal type (e.g. `{ kind: "foo" }` → `{ kind: "foo" }`)
-    /// rather than being widened — this mirrors TypeScript's "fresh literal"
-    /// behavior so that object literals remain assignable to discriminated
-    /// unions like `{ kind: "foo" } | { kind: "bar" }`. Spread elements
-    /// (`{ ...x }`) and computed property names currently fall back to
-    /// `any` for the whole type (the full Go checker would compute a union
-    /// with the spread target's apparent type).
     fn get_type_of_object_literal(&mut self, node: &Arc<Node>) -> Arc<Type> {
         let properties = match &node.data {
             crate::ast::NodeData::ObjectLiteralExpression(data) => &data.properties,
             _ => return self.get_any_type(),
         };
-        // Collect (name, type) pairs first so that we can borrow
-        // `&mut self.value_symbol_links` below without re-entering the type
-        // computation (which also borrows `&mut self`).
-        // The contextual type (assignment RHS, argument, …) decides literal
-        // preservation per property (Go getWidenedLiteralLikeTypeFor
-        // ContextualType): a fresh literal survives only when the context
-        // contains it; against `{foo: number}` the property `{foo: 1}`
-        // types as `number`.
+
         let contextual =
             self.get_contextual_type(node, ContextFlags::empty());
         let mut prop_pairs: Vec<(String, Arc<Type>, Option<Arc<Node>>)> = Vec::new();
@@ -9117,21 +7218,13 @@ impl Checker {
                         fell_back_to_any = true;
                         break;
                     }
-                    // Keep literal types (no widening) so object literals
-                    // remain assignable to discriminated unions.
+
                     let mut t = self.get_type_of_node(&data.initializer);
                     if let Some(ctx) = &contextual
                         && let Some(prop_ctx) = self.get_type_of_property_of_type(ctx, &name)
                         && crate::checker::is_fresh_literal_type(&t)
                     {
-                        // Go checkExpressionForMutableLocation: a fresh
-                        // literal in a mutable property position widens
-                        // unless the contextual type contains it; when
-                        // KEPT it becomes the REGULAR variant so the
-                        // later structural widening pass (which only
-                        // touches fresh literals) preserves it —
-                        // `{xyz:"foo"} satisfies {xyz:"foo"|"bar"}` keeps
-                        // `"foo"` in the variable's inferred type.
+
                         if !self.is_literal_of_contextual_type(&t, &prop_ctx) {
                             t = self.get_widened_literal_type(&t);
                         } else {
@@ -9146,16 +7239,12 @@ impl Checker {
                         fell_back_to_any = true;
                         break;
                     }
-                    // Shorthand `{ a }` — resolve the identifier's type
-                    // (which is the bound variable's type, e.g. `number`
-                    // for `let a = 42`). The variable's type is already
-                    // widened at its declaration, so no widening here.
+
                     let t = self.get_type_of_node(&data.name);
                     prop_pairs.push((name, t, Some(Arc::clone(prop))));
                 }
                 NodeData::SpreadAssignment(_) => {
-                    // Spread isn't supported yet — fall back to `any` for
-                    // the whole object type.
+
                     fell_back_to_any = true;
                     break;
                 }
@@ -9168,9 +7257,7 @@ impl Checker {
         if fell_back_to_any {
             return self.get_any_type();
         }
-        // Build the anonymous object type with property symbols. Each
-        // symbol's resolved type is stored in `value_symbol_links` so
-        // `get_type_of_symbol` returns it during relater property checks.
+
         let mut members = SymbolTable::new();
         let mut props: Vec<Arc<Symbol>> = Vec::with_capacity(prop_pairs.len());
         for (name, t, decl) in prop_pairs {
@@ -9206,28 +7293,19 @@ impl Checker {
         })
     }
 
-    /// For an object-literal `source` being assigned to `target`, return the
-    /// name of the first source property that does not exist on the target
-    /// (an "excess" property). Returns `None` when the source isn't an object
-    /// literal, or when the target has an index signature (which permits
-    /// arbitrary properties). Mirrors the fresh-object-literal branch of Go's
-    /// `hasExcessProperties`.
     fn get_excess_property_name(&self, source: &Arc<Type>, target: &Arc<Type>) -> Option<String> {
-        // Only object-literal sources undergo excess property checking.
+
         if !crate::checker::is_object_literal_type(source) {
             return None;
         }
         let source_struct = source.as_structured()?;
         let target_struct = target.as_structured()?;
-        // An index signature on the target permits any property name.
+
         if !target_struct.index_infos.is_empty() {
             return None;
         }
         for prop in &source_struct.properties {
-            // `target_has_property` descends into union/intersection
-            // constituents: a property is excess only if it exists on NONE
-            // of the constituents. (Union and intersection structured
-            // `members` tables are not pre-merged in this port.)
+
             if !self.target_has_property(target, &prop.name) {
                 return Some(prop.name.clone());
             }
@@ -9235,15 +7313,8 @@ impl Checker {
         None
     }
 
-    /// Read-only check whether a property named `name` exists on `t`,
-    /// descending into union and intersection constituents. Unlike
-    /// `has_property_of_type`, this does not fall back to the global
-    /// `Array<T>` interface (not needed for excess-property checking, which
-    /// only runs against object-literal sources assigned to object-like
-    /// targets).
     fn target_has_property(&self, t: &Arc<Type>, name: &str) -> bool {
-        // DEFERRED mapped types accept any property (their keys aren't
-        // materialized; Go exempts generic mapped types from excess checks).
+
         if matches!(&t.data, TypeData::Mapped(m) if m.type_parameter.is_some()) {
             return true;
         }
@@ -9251,12 +7322,12 @@ impl Checker {
             if structured.members.get(name).is_some() {
                 return true;
             }
-            // An index signature on any constituent permits the property.
+
             if !structured.index_infos.is_empty() {
                 return true;
             }
         }
-        // Union: property exists if present on any constituent.
+
         if t.flags.contains(TypeFlags::Union) {
             if let TypeData::Union(u) = &t.data {
                 return u
@@ -9266,7 +7337,7 @@ impl Checker {
                     .any(|ct| self.target_has_property(ct, name));
             }
         }
-        // Intersection: property exists if present on any constituent.
+
         if t.flags.contains(TypeFlags::Intersection) {
             if let TypeData::Intersection(i) = &t.data {
                 return i
@@ -9279,9 +7350,6 @@ impl Checker {
         false
     }
 
-    /// Return the names of `target` properties that are required (non-optional)
-    /// but absent from `source`. Mirrors Go's `getUnmatchedProperties` for the
-    /// missing-required-property case.
     pub(crate) fn get_missing_required_properties(
         &self,
         source: &Arc<Type>,
@@ -9305,8 +7373,6 @@ impl Checker {
         missing
     }
 
-    /// Locate the name node of an object-literal property by name, so excess
-    /// property errors (TS2353) can be reported at the offending property.
     fn find_object_literal_property_name_node(
         &self,
         init: &Arc<Node>,
@@ -9328,18 +7394,13 @@ impl Checker {
         None
     }
 
-    /// Extract the property name string from a name node (identifier,
-    /// string literal, numeric literal). Returns an empty string for
-    /// computed property names (caller should skip those).
     pub(crate) fn get_property_name_from_node(&self, node: &Arc<Node>) -> String {
         match &node.data {
             NodeData::Identifier(id) => id.text.clone(),
             NodeData::StringLiteral(s) => s.text.clone(),
             NodeData::NumericLiteral(n) => n.text.clone(),
             NodeData::ComputedPropertyName(_) => {
-                // Use the DECLARING file's source text including brackets
-                // (cross-file resolution under a different current_file
-                // would slice foreign offsets — 'unction parseFloa').
+
                 let file = self
                     .get_source_file_of_node(node)
                     .or_else(|| self.current_file.clone());
@@ -9358,7 +7419,6 @@ impl Checker {
         }
     }
 
-    /// Widen a literal type to its base type (e.g. `3` → `number`).
     pub fn get_widened_type_of_literal(&self, t: &Arc<Type>) -> Arc<Type> {
         if t.flags.contains(crate::checker::TypeFlags::StringLiteral)
             || t.flags.contains(crate::checker::TypeFlags::NumberLiteral)
@@ -9370,7 +7430,6 @@ impl Checker {
         Arc::clone(t)
     }
 
-    /// Check if two types are equal (by identity or by kind/flags).
     fn types_are_equal(&self, a: &Arc<Type>, b: &Arc<Type>) -> bool {
         if Arc::ptr_eq(a, b) {
             return true;
@@ -9378,7 +7437,7 @@ impl Checker {
         if a.flags != b.flags {
             return false;
         }
-        // For intrinsic types, compare the intrinsic name.
+
         match (&a.data, &b.data) {
             (crate::checker::TypeData::Intrinsic(a), crate::checker::TypeData::Intrinsic(b)) => {
                 a.intrinsic_name == b.intrinsic_name
@@ -9387,9 +7446,8 @@ impl Checker {
         }
     }
 
-    /// Get a number literal type (inferred).
     fn infer_number_literal_type(&mut self, text: &str) -> Arc<Type> {
-        // Parse the numeric literal text and create a literal type.
+
         let num = crate::jsnum::Number::from_string(text);
         if num.is_nan() {
             return self.number_type();
@@ -9397,26 +7455,15 @@ impl Checker {
         self.get_number_literal_type(num)
     }
 
-    /// Get a string literal type (inferred).
     fn infer_string_literal_type(&mut self, text: &str) -> Arc<Type> {
         self.get_string_literal_type(text)
     }
 
-    /// Check a statement node.
-    ///
-    /// Go: `Checker.checkStatement`. Dispatches by node kind.
     pub fn check_statement(&mut self, node: &Arc<Node>) {
         self.current_node = Some(Arc::clone(node));
-        // Go resets the per-element instantiation budget in
-        // checkSourceElement (checker.go ~L2251) as well as in
-        // checkExpression/checkDeferredNode — a budget exhausted by a
-        // previous statement (or by emitter/LSP-driven queries that never
-        // pass through check_expression) must not silently degrade every
-        // later substituted query to the error type.
+
         self.type_instantiation_count = 0;
-        // TS1036: non-declaration statements are not allowed in ambient
-        // contexts (Go's checkGrammarStatementInAmbientContext — reported
-        // on the first token, once per directly-enclosing block).
+
         if self.ambient_context_depth > 0
             && !matches!(
                 node.kind,
@@ -9462,12 +7509,12 @@ impl Checker {
             }
             SyntaxKind::VariableStatement => {
                 if let crate::ast::NodeData::VariableStatement(data) = &node.data {
-                    // Grammar check: validate the variable declaration list.
+
                     self.check_grammar_variable_declaration_list(&data.declaration_list);
                     self.check_variable_declaration_list(&data.declaration_list);
-                    // Grammar check: validate modifiers (export, declare, etc.).
+
                     self.check_grammar_modifiers(node);
-                    // Reserved CJS top-level names (TS2441/TS1216).
+
                     if let crate::ast::NodeData::VariableDeclarationList(list) =
                         &data.declaration_list.data
                     {
@@ -9478,8 +7525,7 @@ impl Checker {
                             }
                         }
                     }
-                    // TS2883: declaration-emit nameability of inferred
-                    // exported variable types.
+
                     self.check_declaration_nameability(node);
                 }
             }
@@ -9562,9 +7608,7 @@ impl Checker {
                 self.pop_scope();
             }
             SyntaxKind::ReturnStatement => {
-                // TS1108: `return` outside a function body (top level or
-                // namespace level) — Go's checkGrammarStatementInAmbientContext
-                // adjacent rule in checkReturnStatement.
+
                 if self.function_scope_count == 0 && self.arrow_function_scope_count == 0 {
                     let file = self.current_file.clone();
                     self.diagnostics.add(crate::ast::Diagnostic::new(
@@ -9578,25 +7622,15 @@ impl Checker {
                 if let crate::ast::NodeData::ReturnStatement(data) = &node.data {
                     if let Some(expr) = &data.expression {
                         self.check_expression(expr);
-                        // Check that the return value's type is assignable
-                        // to the enclosing function's declared return type.
-                        // Mirrors Go's `checkReturnStatement` (checker.go
-                        // ~L11800). When there's no declared return type
-                        // (inferred), the stack entry is `None` and we skip.
-                        // Clone the `Arc<Type>` out of the stack first so we
-                        // don't hold an immutable borrow of `self` while
-                        // calling mutable methods below.
+
                         let expected = self.return_type_stack.last().and_then(|opt| opt.clone());
                         if let Some(expected) = expected {
                             let actual = self.get_type_of_node(expr);
-                            // `any` return value → always assignable.
+
                             if !actual.flags.contains(TypeFlags::Any)
                                 && !self.is_type_assignable_to(&actual, &expected)
                             {
-                                // Go checkReturnExpression → elaborateError:
-                                // a nested literal mismatch reports at the
-                                // failing property/element NAME, with the
-                                // generalized head suppressed.
+
                                 let display_type =
                                     if crate::checker::is_literal_type(&actual) {
                                         self.get_base_type_of_literal_type(&actual)
@@ -9613,17 +7647,12 @@ impl Checker {
                                     None,
                                 );
                                 if ok {
-                                    // unreachable: assignability already
-                                    // failed above
+
                                 }
                             }
                         }
                     } else {
-                        // `return;` with no value — if the function declares
-                        // a non-void/non-undefined return type, Go reports
-                        // TS2322 "Type 'undefined' is not assignable to type
-                        // '<expected>'" on the return statement (the same
-                        // checkReturnExpression path as valued returns).
+
                         let expected = self.return_type_stack.last().and_then(|opt| opt.clone());
                         if let Some(expected) = expected {
                             if !expected.flags.contains(TypeFlags::Void)
@@ -9645,17 +7674,10 @@ impl Checker {
             SyntaxKind::Block => {
                 self.push_scope(node);
                 if let crate::ast::NodeData::Block(data) = &node.data {
-                    // TS7027: code following an unconditional `return`,
-                    // `throw`, `break`, or `continue` is unreachable. Track a
-                    // flag while walking the block's statements; once a
-                    // terminating statement is seen, every subsequent
-                    // statement is reported and (per tsc) still checked.
+
                     let mut after_terminator = false;
                     for stmt in data.statements.iter() {
-                        // Declarations after a terminator stay reachable
-                        // (enum/class/function hoisting — Go's
-                        // isBlockScopedDeclarationStatement exemption in
-                        // the unreachable-code walk).
+
                         let is_hoistable_decl = matches!(
                             stmt.kind,
                             SyntaxKind::EnumDeclaration
@@ -9692,11 +7714,7 @@ impl Checker {
                             label: None,
                             is_iteration: false,
                         });
-                    // case_block is a CaseBlock node; walk its clauses. Push
-                    // the case block's scope first so case-clause
-                    // declarations (`case 1: let x;`) resolve — the binder
-                    // scopes them to the CaseBlock (all clauses share one
-                    // scope, mirroring Go's block-scoped CaseBlock).
+
                     if let crate::ast::NodeData::CaseBlock(case_block) = &data.case_block.data {
                         self.push_scope(&data.case_block);
                         for case in case_block.clauses.iter() {
@@ -9707,40 +7725,28 @@ impl Checker {
                     self.break_continue_context_stack.pop();
                 }
             }
-            // Declarations: walk only expression-position children.
-            // Without parent pointers, we cannot detect declaration names
-            // via `is_declaration_name`, so we must handle each kind
-            // explicitly, skipping names and type-position children.
+
             SyntaxKind::FunctionDeclaration => {
-                // Grammar check: validate modifiers and parameter list.
+
                 self.check_grammar_modifiers(node);
-                // Reserved CJS top-level names (TS2441).
+
                 if let crate::ast::NodeData::FunctionDeclaration(data) = &node.data {
                     if let Some(name) = &data.name {
                         self.check_cjs_reserved_top_level_name(node, name);
                     }
                 }
-                // TS2393: two or more same-name function declarations in the
-                // same container have bodies. Go's
-                // `checkFunctionOrConstructorSymbol` reports on EVERY
-                // function declaration of the name (overload signatures
-                // included); reported once, when visiting the first
-                // declaration in source order.
+
                 self.check_duplicate_function_implementations(node);
-                // TS2391: body-less declarations must be immediately
-                // followed by the implementation / next overload.
+
                 self.check_overload_implementation_follows(node);
                 if let crate::ast::NodeData::FunctionDeclaration(data) = &node.data {
                     if let Some(tps) = &data.type_parameters {
-                        let _ = tps; // TODO: check_grammar_type_parameter_list
+                        let _ = tps;
                     }
                     self.check_grammar_parameter_list(&data.parameters);
-                    // TS2369: parameter properties are never allowed in a
-                    // function declaration (only constructor implementations).
+
                     self.check_parameter_property_modifiers(&data.parameters, false);
-                    // TS7006/TS7019: implicit-any parameters; plus parameter
-                    // type annotations and the return-type annotation may
-                    // contain function-type nodes with their own parameters.
+
                     self.check_parameter_implicit_any(node, &data.parameters, 0);
                     for p in data.parameters.iter() {
                         if let crate::ast::NodeData::ParameterDeclaration(pd) = &p.data
@@ -9752,10 +7758,7 @@ impl Checker {
                     if let Some(tn) = &data.type_node {
                         self.check_type_annotation(tn);
                     }
-                    // TS7010: a signature declaration without a body or
-                    // return-type annotation implicitly returns `any` under
-                    // noImplicitAny. Fires per declaration — even when an
-                    // implementation exists elsewhere (oracle-verified).
+
                     if self.no_implicit_any
                         && data.type_node.is_none()
                         && data.body.is_none()
@@ -9773,22 +7776,11 @@ impl Checker {
                         self.diagnostics.add(diagnostic);
                     }
                 }
-                // JSDoc check: validate @param tags against actual
-                // parameters. No-op until JSDoc parsing (P2.7) lands.
+
                 self.check_unmatched_jsdoc_parameters(node);
-                // Compute the function's type (with inferred return type)
-                // and cache it on the declaration node + symbol so later
-                // references (e.g. `let y = f()`) can recover it. This must
-                // run BEFORE checking the body so that parameter-symbol
-                // types are primed (including type-parameter annotations
-                // like `x: T`) — otherwise `get_type_of_node` on parameter
-                // references inside the body returns `any`. Mirrors Go's
-                // `getSymbolLinks(symbol).type = getWidenedTypeOfFunction`.
+
                 let fn_type = self.get_type_of_function_like(node);
-                // Expando members (Go getTypeOfFuncClassEnumModule: the
-                // function symbol's expando property assignments join the
-                // type-of-symbol view) — `function f(){}; f.prop = v` gives
-                // `f` the type `() => T & { prop: ... }`.
+
                 let fn_symbol = match &node.data {
                     crate::ast::NodeData::FunctionDeclaration(data) => data
                         .name
@@ -9804,14 +7796,7 @@ impl Checker {
                 if let crate::ast::NodeData::FunctionDeclaration(data) = &node.data {
                     if let Some(name) = &data.name {
                         if let Some(symbol) = self.resolve_identifier(name) {
-                            // For overloaded functions, build a multi-signature
-                            // type from all overload declarations (excluding
-                            // the implementation). Only the implementation
-                            // declaration has a body; when we reach it, all
-                            // overload declarations have already been
-                            // processed by the binder. The combined type
-                            // replaces the single-signature type on the symbol
-                            // so callers see all overloads.
+
                             let symbol_type = match self.build_overload_function_type(&symbol) {
                                 Some(overload_type) => overload_type,
                                 None => fn_type.clone(),
@@ -9824,7 +7809,7 @@ impl Checker {
                         }
                     }
                 }
-                // Check the function body with parameter types primed.
+
                 self.push_function_scope(node);
                 self.break_continue_context_stack
                     .push(BreakContinueContext {
@@ -9832,11 +7817,7 @@ impl Checker {
                         label: None,
                         is_iteration: false,
                     });
-                // Push the declared return type so `return expr;` statements
-                // in the body can be checked against it. `None` means the
-                // function has no explicit return-type annotation (return
-                // type is inferred) — in that case return-statement checking
-                // is skipped. Mirrors Go's `expectedReturn` tracking.
+
                 let declared_return = match &node.data {
                     crate::ast::NodeData::FunctionDeclaration(data) => {
                         let is_async = node.has_syntactic_modifier(ModifierFlags::Async);
@@ -9849,9 +7830,7 @@ impl Checker {
                 };
                 self.return_type_stack.push(declared_return.clone());
                 self.in_ctor_body_stack.push(false);
-                // A nested function declaration breaks the class-member
-                // "this container" chain (Go's getThisContainer treats plain
-                // functions as this containers — TS2663 no longer applies).
+
                 self.this_container_stack
                     .push(ThisContainerKind::PlainFunction);
                 if let crate::ast::NodeData::FunctionDeclaration(data) = &node.data {
@@ -9860,11 +7839,7 @@ impl Checker {
                     }
                 }
                 self.this_container_stack.pop();
-                // TS2355 vs TS2366 (Go `checkFunctionAndBodies`): with a
-                // declared return type that isn't `undefined`/`void`/`any`:
-                //  - no `return` anywhere in the body → TS2355 on the
-                //    return-type annotation (the body never returns a value);
-                //  - some `return` but not all paths return → TS2366.
+
                 if let Some(ret_type) = &declared_return {
                     if !ret_type.flags.contains(TypeFlags::Void)
                         && !ret_type.flags.contains(TypeFlags::Undefined)
@@ -9874,7 +7849,7 @@ impl Checker {
                             if let Some(body) = &data.body {
                                 if !self.function_body_definitely_returns(body) {
                                     if !Self::function_body_has_explicit_return(body) {
-                                        // TS2355 — on the annotation, like Go.
+
                                         let loc = data
                                             .type_node
                                             .as_ref()
@@ -9886,8 +7861,7 @@ impl Checker {
                                             vec![],
                                         ));
                                     } else {
-                                        // Go anchors TS2366 on the return
-                                        // type annotation (`fn.Type()`).
+
                                         let loc = data
                                             .type_node
                                             .as_ref()
@@ -9910,43 +7884,34 @@ impl Checker {
                 self.pop_function_scope();
             }
             SyntaxKind::ClassDeclaration => {
-                // Grammar check: validate modifiers.
+
                 self.check_grammar_modifiers(node);
-                // Reserved type names (TS2414): `class any {}` etc.
+
                 if let crate::ast::NodeData::ClassDeclaration(data) = &node.data {
                     if let Some(name) = &data.name {
                         self.check_reserved_type_name(
                             name,
                             &crate::diagnostics::messages_generated::CLASS_NAME_CANNOT_BE_0,
                         );
-                        // Reserved CJS top-level name (TS2441 for
-                        // require/exports; TS2725 for a class named Object).
+
                         self.check_cjs_reserved_top_level_name(node, name);
                     }
                 }
-                // Push the class scope before building the instance type so
-                // that type-parameter references in property annotations
-                // (e.g. `value: T`) resolve correctly.
+
                 self.push_scope(node);
-                // Build the instance type (including inherited members from
-                // `extends`) and push it as the `this` type so that method
-                // bodies can resolve `this.prop` and `super.prop`.
+
                 let this_type = self.build_class_instance_type_with_base(node);
                 self.this_type_stack.push(this_type);
-                // Track the enclosing class declaration so the TS2341
-                // private-member check knows when access is within the
-                // declaring class.
+
                 self.enclosing_class_stack.push(Arc::clone(node));
-                // Check heritage clauses (e.g. `extends Foo`, `implements I`).
+
                 if let crate::ast::NodeData::ClassDeclaration(data) = &node.data {
                     if let Some(heritage) = &data.heritage_clauses {
                         for clause in heritage.iter() {
                             self.check_heritage_clause(clause);
                         }
                     }
-                    // Overload-consecutiveness check (TS2389/2390/2391).
-                    // Ambient (`declare class` OR inside a `declare
-                    // module`/namespace) members are exempt.
+
                     if !node.has_syntactic_modifier(ModifierFlags::Ambient)
                         && self.ambient_context_depth == 0
                         && !self
@@ -9956,30 +7921,22 @@ impl Checker {
                     {
                         self.check_class_member_overloads(&data.members);
                     }
-                    // Check member initializers / method bodies.
+
                     for member in data.members.iter() {
                         self.check_class_member(member);
                     }
-                    // TS2411 FIRST (official emission order — a property
-                    // with both errors reports the index-compat line before
-                    // the TS2564 line, classIndexer2): properties (incl.
-                    // computed-name members) must be assignable to the
-                    // class's index signatures (Go checkIndexConstraints on
-                    // the instance type).
+
                     if let Some(this_type) = self.this_type_stack.last().cloned() {
                         self.check_index_constraints(&this_type, node);
                     }
                     self.check_class_heritage_members(node);
-                    // TS2564: Check property initialization under
-                    // strictPropertyInitialization.
+
                     self.check_property_initialization(node);
                 }
                 self.pop_scope();
                 self.this_type_stack.pop();
                 self.enclosing_class_stack.pop();
-                // Build the class type (with construct signatures from the
-                // constructor) and cache it on the declaration node + symbol
-                // so `new Foo(arg)` can resolve the callee and check args.
+
                 let class_type = self.get_type_of_class_declaration(node);
                 self.type_node_links.get_or_default(node).resolved_type = Some(class_type.clone());
                 if let crate::ast::NodeData::ClassDeclaration(data) = &node.data {
@@ -9993,12 +7950,9 @@ impl Checker {
                 }
             }
             SyntaxKind::InterfaceDeclaration => {
-                // Grammar check on the declaration's modifiers (TS1044 for
-                // accessibility modifiers on namespace elements — Go's
-                // checkInterfaceDeclaration calls checkGrammarModifiers).
+
                 self.check_grammar_modifiers(node);
-                // TS2427: reserved predefined type keywords can't name an
-                // interface (`interface string {}`).
+
                 if let crate::ast::NodeData::InterfaceDeclaration(data) = &node.data {
                     self.check_reserved_type_name(
                         &data.name,
@@ -10006,15 +7960,11 @@ impl Checker {
                     );
                     self.check_interface_members(&data.members);
                 }
-                // Force interface-type resolution so `extends` relation
-                // errors (TS2430) and base merging run even when the
-                // interface is never referenced (Go resolves declared
-                // interface types during checking).
+
                 let iface_sym = self.program.symbol_map().symbol_of(node).cloned();
                 if let Some(sym) = iface_sym {
                     let iface_type = self.resolve_interface_type(&sym, None);
-                    // TS2411: interface members must be assignable to the
-                    // interface's index signatures (Go checkIndexConstraints).
+
                     self.check_index_constraints(&iface_type, node);
                 }
             }
@@ -10025,13 +7975,7 @@ impl Checker {
             | SyntaxKind::NamespaceExportDeclaration
             | SyntaxKind::ExportSpecifier
             | SyntaxKind::ImportSpecifier => {
-                // TS2305: named import/export specifiers must resolve to a
-                // member of the referenced module (Go `checkImportDeclaration`
-                // → `checkImportBinding` → `checkAliasSymbol` →
-                // `getExternalModuleMember` → `errorNoModuleMemberSymbol`).
-                // Only for genuine import statements in module files — not
-                // inside ambient module declarations (their resolution
-                // context is the augmented module, handled separately).
+
                 if matches!(
                     node.kind,
                     SyntaxKind::ImportDeclaration | SyntaxKind::ExportDeclaration
@@ -10044,7 +7988,7 @@ impl Checker {
                     self.check_module_specifier_members(node);
                     self.check_module_export_names(node);
                 }
-                // TS1479/TS1471: CJS→ESM reference format check (node16/18).
+
                 if matches!(
                     node.kind,
                     SyntaxKind::ImportDeclaration
@@ -10058,39 +8002,19 @@ impl Checker {
                 {
                     self.check_module_format_mismatch(node);
                 }
-                // No expression-position children to check — all type-level
-                // or import-level. Type-alias RHS still gets grammar checks
-                // (TS1183 for accessors with bodies in a type literal).
+
                 if node.kind == SyntaxKind::TypeAliasDeclaration
                     && let crate::ast::NodeData::TypeAliasDeclaration(d) = &node.data
                 {
                     self.check_type_annotation(&d.type_node);
-                    // Resolve the alias body eagerly (Go checks alias
-                    // declarations when encountered — TS7039 and friends
-                    // don't wait for a usage). Bundled lib files stay lazy:
-                    // the binder has no symbols for signature-scoped type
-                    // parameters (e.g. `<TFunction extends Function>` in
-                    // lib.decorators.legacy), so eager resolution would
-                    // report false TS2304s there.
+
                     if !self.current_file.as_ref().is_some_and(|f| {
                         f.file_name.starts_with("bundled://")
                     }) {
                         let _ = self.get_type_from_type_node(&d.type_node);
                     }
                 }
-                // TS2823/2856/2857/2881 (Go `checkImportAttributes`,
-                // checker.go ~L5465): import attributes grammar, in Go's
-                // order — (1) every grammar error is suppressed while the
-                // file has parse diagnostics (`grammarErrorOnNode` gates on
-                // `hasParseDiagnostics`); (2) an exclusively type-only
-                // clause carrying a `resolution-mode` attribute is exempt
-                // from all of these; (3) modules that don't support
-                // attributes (node16 and below — Go
-                // `ModuleKind.SupportsImportAttributes`) report TS2823;
-                // (4) statements that compile to CommonJS `require` calls
-                // report TS2856; (5) type-only clauses report TS2857;
-                // (6) `resolution-mode` on a non-type-only clause reports
-                // TS2881.
+
                 {
                     use crate::core::compiler_options::ModuleKind;
                     let module_ok = matches!(
@@ -10134,9 +8058,7 @@ impl Checker {
                                 self.get_resolution_mode_override(&attrs, is_type_only);
                             let exempt = is_type_only && override_mode.is_some();
                             if !exempt {
-                                // Does this statement compile to a CommonJS
-                                // `require`? (Go
-                                // `getEmitSyntaxForModuleSpecifierExpression`)
+
                                 let emit_commonjs = file
                                     .as_ref()
                                     .map(|f| {
@@ -10182,18 +8104,7 @@ impl Checker {
                         }
                     }
                 }
-                // TS2354/TS2343 (checkExternalEmitHelpers, TS-current
-                // checker gates): with `importHelpers` in a file that
-                // emits a REQUIRE-LIKE format (`getEmitModuleFormatOfFile
-                // < ModuleKind::System` — CommonJS/AMD/UMD; System and
-                // ES2015+ excluded; node1x/nodenext decide per file from
-                // the implied node format), helper-requiring syntax must
-                // resolve 'tslib', and each required helper NAME must
-                // exist in it. esModuleInterop defaults TRUE when unset
-                // (TS `_computedOptions.esModuleInterop`) and gates the
-                // ImportDefault/ImportStar cases (not `export * from`'s
-                // ExportStar); clause-level default imports have no helper
-                // check — only specifier-level `default as` forms.
+
                 if self.ambient_context_depth == 0 {
                     let emit_format_cjs = self
                         .current_file
@@ -10210,27 +8121,21 @@ impl Checker {
                                 if d.module_specifier.is_some() =>
                             {
                                 match d.export_clause.as_ref().map(|c| c.kind) {
-                                    // export * as ns from "foo" — ImportStar
-                                    // (interop-gated)
+
                                     Some(SyntaxKind::NamespaceExport) if interop => {
                                         self.check_external_emit_helpers(
                                             node,
                                             EXTERNAL_EMIT_HELPER_IMPORT_STAR,
                                         );
                                     }
-                                    // export * from "foo" — ExportStar
+
                                     None => {
                                         self.check_external_emit_helpers(
                                             node,
                                             EXTERNAL_EMIT_HELPER_EXPORT_STAR,
                                         );
                                     }
-                                    // export { default as a } from "..." —
-                                    // Go `checkExportSpecifier`: default
-                                    // re-exports need ImportDefault, at the
-                                    // specifier. The clause is NamedExports
-                                    // (NamedImports matched only for import
-                                    // clauses and never fired here).
+
                                     Some(SyntaxKind::NamedImports | SyntaxKind::NamedExports) => {
                                         let elements = d.export_clause.as_ref().and_then(|c| {
                                             match &c.data {
@@ -10273,11 +8178,7 @@ impl Checker {
                                 if let Some(clause) = &d.import_clause
                                     && let crate::ast::NodeData::ImportClause(ic) = &clause.data
                                 {
-                                    // import * as ns from "foo" — ImportStar
-                                    // (interop-gated); clause-level default
-                                    // imports (`import d from`) have no
-                                    // helper check in TS-current — only
-                                    // specifier-level `default as` forms.
+
                                     if interop
                                         && matches!(
                                             ic.named_bindings.as_ref().map(|b| b.kind),
@@ -10289,9 +8190,7 @@ impl Checker {
                                             EXTERNAL_EMIT_HELPER_IMPORT_STAR,
                                         );
                                     }
-                                    // import { default as d } from "foo" —
-                                    // per-specifier ImportDefault at the
-                                    // specifier (Go `checkImportBinding`).
+
                                     if interop
                                         && let Some(nb) = &ic.named_bindings
                                         && let crate::ast::NodeData::NamedImports(ni) = &nb.data
@@ -10319,9 +8218,7 @@ impl Checker {
                         }
                     }
                 }
-                // TS2439: an import inside an ambient module declaration
-                // can't use a relative module name (both `import ... from`
-                // and `import x = require(...)` forms).
+
                 if matches!(
                     node.kind,
                     SyntaxKind::ImportDeclaration | SyntaxKind::ImportEqualsDeclaration
@@ -10360,19 +8257,13 @@ impl Checker {
                                     IMPORT_OR_EXPORT_DECLARATION_IN_AN_AMBIENT_MODULE_DECLARATION_CANNOT_REFERENCE_MODULE_THROUGH_RELATIVE_MODULE_NAME,
                                 vec![],
                             ));
-                            // Go's module resolution never resolves a
-                            // relative specifier inside an ambient module —
-                            // TS2307 lands on the module specifier itself
-                            // and the import degrades to error (member
-                            // accesses stay silent).
+
                             let spec_loc = match &node.data {
                                 crate::ast::NodeData::ImportDeclaration(d) => {
                                     d.module_specifier.loc
                                 }
                                 crate::ast::NodeData::ImportEqualsDeclaration(d) => {
-                                    // The string literal itself, not the
-                                    // `require` keyword (Go anchors TS2307
-                                    // on the specifier).
+
                                     if let crate::ast::NodeData::ExternalModuleReference(ext) =
                                         &d.module_reference.data
                                     {
@@ -10393,16 +8284,7 @@ impl Checker {
                         }
                     }
                 }
-                // `import X = <entity>` — eagerly resolve the entity so a
-                // bad namespace path reports at the import, like Go's
-                // checkImportEqualsDeclaration → getSymbolOfPartOf
-                // RightHandSideOfImportEquals: the entity resolves with
-                // NAMESPACE meaning (Go SymbolFlags.Namespace = ValueModule |
-                // NamespaceModule | Enum — enums qualify). Failure mapping
-                // (Go onFailedToResolveSymbol): a type-meaningful symbol
-                // used as namespace → TS2702; else TS2503. A resolvable
-                // outer namespace masked by a local VALUE of the same name
-                // → TS2437.
+
                 if node.kind == SyntaxKind::ImportEqualsDeclaration
                     && let crate::ast::NodeData::ImportEqualsDeclaration(d) = &node.data
                     && matches!(
@@ -10417,9 +8299,7 @@ impl Checker {
                         }
                         _ => true,
                     };
-                    // Meaning-qualified climb (Go resolveName keeps climbing
-                    // past meaning-mismatched symbols): does ANY in-scope
-                    // symbol of the leftmost name carry namespace meaning?
+
                     let ns_hit = self
                         .resolve_identifier_with_meaning(
                             &base_identifier_of(&d.module_reference),
@@ -10433,10 +8313,7 @@ impl Checker {
                         _ => true,
                     };
                     let traced_err = if entity_ok && !base_is_namespace {
-                        // Leftmost name is not a namespace. Go's failure
-                        // mapping: type-meaningful → 2702; masked outer
-                        // namespace with a local VALUE blocker → 2437;
-                        // otherwise the plain 2503.
+
                         let base = base_identifier_of(&d.module_reference);
                         let any_hit = self
                             .resolve_identifier(&base)
@@ -10460,8 +8337,7 @@ impl Checker {
                     } else if entity_ok {
                         match self.resolve_qualified_symbol_traced(&d.module_reference) {
                             Err((segment, ns_path, _member)) if ns_path.is_empty() => {
-                                // Qualified leftmost failure gets the same
-                                // 2702/2503 mapping.
+
                                 let any_hit = self
                                     .resolve_identifier(&segment)
                                     .map(|s| self.resolve_alias_base(s));
@@ -10526,10 +8402,7 @@ impl Checker {
                             }
                         }
                     }
-                    // Go checkImportEqualsDeclaration: with the entity
-                    // RESOLVED (its base carries namespace meaning), a local
-                    // VALUE with the same name masking the plain-name lookup
-                    // (meaning Value|Namespace, first hit wins) is TS2437.
+
                     if entity_ok
                         && let Some(ns) = ns_hit.as_ref()
                         && ns.flags.intersects(SymbolFlags::VALUE)
@@ -10540,11 +8413,7 @@ impl Checker {
                                 &base,
                                 SymbolFlags::VALUE | SymbolFlags::NAMESPACE,
                             )
-                            // Go's resolveEntityName resolves THROUGH the
-                            // alias chain before the flags test — an
-                            // `import R = N` alias carries no bind-time
-                            // export link, so the scope walk returns the
-                            // alias itself; its target carries the meaning.
+
                             .map(|s| self.resolve_alias_base(s))
                             .is_some_and(|s| !s.flags.intersects(SymbolFlags::NAMESPACE));
                         if masked {
@@ -10557,13 +8426,7 @@ impl Checker {
                             ));
                         }
                     }
-                    // Go checkImportEqualsDeclaration: with the entity
-                    // resolved, `import <name> = <entity>` runs two more
-                    // checks — TS2438 (import name cannot be a reserved
-                    // type name like 'any', when the target has TYPE
-                    // meaning) and TS2440 (the import's local name merges
-                    // with a local declaration whose meanings collide with
-                    // the alias target's).
+
                     if node.kind == SyntaxKind::ImportEqualsDeclaration
                         && let crate::ast::NodeData::ImportEqualsDeclaration(d) = &node.data
                     {
@@ -10571,13 +8434,7 @@ impl Checker {
                             self.program.symbol_map().symbol_of(node).cloned()
                         {
                             let target = self.resolve_alias_base(Arc::clone(&alias_sym));
-                            // Go gates the target-meaning checks on
-                            // `target != unknownSymbol` — an UNRESOLVED
-                            // entity (`globals.toString.Blah` missing
-                            // `toString`, TS2694 already reported) falls
-                            // back to the alias symbol itself here, whose
-                            // merged flags must not drive TS2438/TS2440
-                            // (importEqualsError45874).
+
                             let target_resolved = !Arc::ptr_eq(&target, &alias_sym)
                                 || !target.flags.intersects(SymbolFlags::Alias);
                             if target_resolved && target.flags.intersects(SymbolFlags::TYPE) {
@@ -10586,10 +8443,7 @@ impl Checker {
                                     &crate::diagnostics::messages_generated::IMPORT_NAME_CANNOT_BE_0,
                                 );
                             }
-                            // TS2440: the merged local symbol's non-alias
-                            // flags mark which meanings a local declaration
-                            // already provides; a target intersecting them
-                            // conflicts.
+
                             let non_alias_flags =
                                 alias_sym.flags.difference(SymbolFlags::Alias);
                             let has_local_conflict = target_resolved
@@ -10620,19 +8474,15 @@ impl Checker {
                 }
             }
             SyntaxKind::EnumDeclaration => {
-                // Grammar check on the declaration's modifiers (TS1044 —
-                // Go's checkEnumDeclaration calls checkGrammarModifiers).
+
                 self.check_grammar_modifiers(node);
-                // Reserved type names (TS2431): `enum any {}` etc.
+
                 if let crate::ast::NodeData::EnumDeclaration(data) = &node.data {
                     self.check_reserved_type_name(
                         &data.name,
                         &crate::diagnostics::messages_generated::ENUM_NAME_CANNOT_BE_0,
                     );
-                    // TS2432: in a MERGED enum, only the FIRST declaration
-                    // may have an uninitialized first element (Go
-                    // checkEnumDeclaration ~L5350, anchored on the later
-                    // declaration's first member).
+
                     if let Some(sym) = self.program.symbol_map().symbol_of(node) {
                         let enum_decls: Vec<&Arc<Node>> = sym
                             .declarations
@@ -10642,10 +8492,7 @@ impl Checker {
                         if enum_decls.len() > 1 {
                             let is_first_decl =
                                 enum_decls.first().is_some_and(|d| Arc::ptr_eq(d, &node));
-                            // The rule targets chains where the FIRST
-                            // declaration also starts uninitialized —
-                            // `enum Foo { a = 1 }` + `enum Foo { b }` is
-                            // legal (b continues from a's value).
+
                             let first_decl_starts_uninit = enum_decls.first().and_then(|d| {
                                 let NodeData::EnumDeclaration(ed) = &d.data else {
                                     return None;
@@ -10681,7 +8528,7 @@ impl Checker {
                         }
                     }
                 }
-                // Check enum member initializers.
+
                 self.push_scope(node);
                 if let crate::ast::NodeData::EnumDeclaration(data) = &node.data {
                     for member in data.members.iter() {
@@ -10691,21 +8538,15 @@ impl Checker {
                 self.pop_scope();
             }
             SyntaxKind::ExportAssignment => {
-                // `export default expr` or `export = expr`
+
                 if let crate::ast::NodeData::ExportAssignment(data) = &node.data {
                     self.check_expression(&data.expression);
                 }
             }
             SyntaxKind::ModuleDeclaration => {
-                // Grammar check on the declaration's modifiers (TS1044 —
-                // Go's checkModuleDeclaration calls checkGrammarModifiers).
+
                 self.check_grammar_modifiers(node);
-                // TS2591 (anonymous form): `module { … }` — the parser
-                // reports TS1437 and leaves the name missing; the `module`
-                // keyword itself is an unresolved name reference (Go's
-                // getResolvedSymbol over the keyword identifier →
-                // getCannotFindNameDiagnosticForName — the Node-globals
-                // variant for `module`).
+
                 if let crate::ast::NodeData::ModuleDeclaration(data) = &node.data
                     && data.name.kind == SyntaxKind::Identifier
                     && !is_valid_identifier_text(data.name.text())
@@ -10724,8 +8565,7 @@ impl Checker {
                         ));
                     }
                 }
-                // TS2436: ambient module declarations can't use RELATIVE
-                // module names (`declare module "./foo"`).
+
                 if let crate::ast::NodeData::ModuleDeclaration(data) = &node.data
                     && data.name.kind == SyntaxKind::StringLiteral
                     && self
@@ -10745,13 +8585,9 @@ impl Checker {
                             .current_file
                             .as_ref()
                             .is_some_and(|f| f.is_declaration_file);
-                    // Inside an ambient module, an import/export through a
-                    // relative name is TS2439 (checked at the import sites
-                    // instead).
+
                     if relative && ambient {
-                        // Only the DECLARATION itself is TS2436 when it's
-                        // top-level-ish; imports inside are TS2439 — handled
-                        // in the import walker.
+
                         let is_decl_name_direct = !self
                             .current_file
                             .as_ref()
@@ -10768,8 +8604,7 @@ impl Checker {
                         }
                     }
                 }
-                // TS2664: a module AUGMENTATION (`declare module "x"` inside
-                // an external-module file) whose target cannot be found.
+
                 if let crate::ast::NodeData::ModuleDeclaration(data) = &node.data
                     && data.name.kind == SyntaxKind::StringLiteral
                     && self.current_file.as_ref().is_some_and(|f| {
@@ -10790,12 +8625,7 @@ impl Checker {
                         ));
                     }
                 }
-                // TS2434: an instantiated non-ambient namespace merging
-                // with a later non-ambient class/function (Go
-                // checkModuleDeclaration ~L5214 — reported on the
-                // NAMESPACE name). Ambient via file context (.d.ts) also
-                // exempts; const-enum-only namespaces are instantiated
-                // only under preserveConstEnums.
+
                 if let crate::ast::NodeData::ModuleDeclaration(mdd) = &node.data
                     && mdd.name.kind == SyntaxKind::Identifier
                     && !node.has_syntactic_modifier(ModifierFlags::Ambient)
@@ -10813,11 +8643,7 @@ impl Checker {
                         self.compiler_options.should_preserve_const_enums(),
                     )
                 {
-                    // Go getFirstNonAmbientClassOrFunctionDeclaration: the
-                    // FIRST non-ambient class or BODIED function in the
-                    // symbol's declaration list — the namespace errors only
-                    // when it sits BEFORE that declaration (a namespace
-                    // after the function is fine: funClodule's foo3).
+
                     let first_non_ambient = sym.declarations.iter().find(|d| {
                         let bodied_fn = matches!(
                             &d.data,
@@ -10843,9 +8669,7 @@ impl Checker {
                     }
                 }
                 }
-                // Check the module body. A `declare namespace/module` makes
-                // everything inside ambient (Go's NodeFlagsAmbient
-                // propagation).
+
                 let is_ambient = node.has_syntactic_modifier(ModifierFlags::Ambient);
                 if is_ambient {
                     self.ambient_context_depth += 1;
@@ -10862,15 +8686,10 @@ impl Checker {
                 }
             }
             SyntaxKind::EmptyStatement => {
-                // No expressions to check.
+
             }
             SyntaxKind::LabeledStatement => {
-                // Push a Labeled context so that `break label`/`continue label`
-                // can resolve to this label, then check the nested statement.
-                // The label identifier itself is NOT an expression and must
-                // not be resolved (mirrors Go's `checkStatement` dispatching
-                // `LabeledStatement` to `bindLabeledStatement` + statement
-                // check without visiting the label name as a reference).
+
                 if let crate::ast::NodeData::LabeledStatement(data) = &node.data {
                     let label_text = data.label.text().to_string();
                     let is_iteration = matches!(
@@ -10892,17 +8711,13 @@ impl Checker {
                 }
             }
             SyntaxKind::BreakStatement | SyntaxKind::ContinueStatement => {
-                // Grammar check: validate break/continue targets.
+
                 self.check_grammar_break_or_continue_statement(node);
             }
             SyntaxKind::VariableDeclaration => {
                 self.check_variable_declaration(node);
             }
-            // Go `checkSourceElementWorker`: `KindBlock, KindModuleBlock` →
-            // `checkBlock` — a module block's statements are checked as
-            // regular source elements (grammar checks like TS1044 run per
-            // statement). The module's scope is pushed by the
-            // ModuleDeclaration arm around its `check_statement(body)` call.
+
             SyntaxKind::ModuleBlock => {
                 if let crate::ast::NodeData::ModuleBlock(data) = &node.data {
                     for stmt in data.statements.iter() {
@@ -10911,34 +8726,18 @@ impl Checker {
                 }
             }
             _ => {
-                // Fallback: walk children to find expressions.
+
                 self.walk_children_for_expressions(node);
             }
         }
         self.current_node = None;
     }
 
-    /// Reserved names in the top-level scope of a module whose emit wraps
-    /// it in a CommonJS function (Go
-    /// `checkCollisionWithRequireExportsInGeneratedCode`,
-    /// `checkClassNameCollisionWithObject`, and the `__esModule` binding
-    /// marker check): `require`/`exports` are TS2441, a class named
-    /// `Object` is TS2725, and a binding named `__esModule` is TS1216 —
-    /// all only in files that build into CommonJS output (an ESM-format
-    /// file under node16 emits as-is and has no such collision).
-    /// `true` when the declaration (or its enclosing variable statement)
-    /// carries the ambient modifier, or the declaration site is inside an
-    /// ambient context — Go's `NodeFlagsAmbient` propagation. Ambient
-    /// declarations have no codegen impact, so every reserved-name
-    /// collision check skips them (`needCollisionCheckForIdentifier`,
-    /// checker.go ~L10564).
     fn declaration_is_ambient(&self, node: &Arc<Node>) -> bool {
         if self.ambient_context_depth > 0 {
             return true;
         }
-        // A declaration FILE is ambient throughout (Go's file-level
-        // NodeFlagsAmbient propagation — `test.d.ts`'s `export var
-        // __esModule` is exempt from TS1216, es5-commonjs7).
+
         if self
             .get_source_file_of_node(node)
             .or(self.current_file.clone())
@@ -10951,8 +8750,7 @@ impl Checker {
             if n.has_syntactic_modifier(ModifierFlags::Ambient) {
                 return true;
             }
-            // Stop at the statement level — modifiers above it (e.g. a
-            // `declare module` wrapper) are covered by ambient_context_depth.
+
             if matches!(n.kind, SyntaxKind::VariableStatement | SyntaxKind::ClassDeclaration | SyntaxKind::FunctionDeclaration) {
                 break;
             }
@@ -10966,10 +8764,7 @@ impl Checker {
         if !matches!(name.kind, SyntaxKind::Identifier) {
             return;
         }
-        // Go reports all reserved-name collisions via
-        // `errorSkippedOnNoEmit` — with --noEmit the check is skipped
-        // entirely (es5-commonjs6/7/8's `@noEmit: true` configurations
-        // expect zero errors).
+
         if self.compiler_options.no_emit.is_true() {
             return;
         }
@@ -10981,9 +8776,7 @@ impl Checker {
         if !is_module {
             return;
         }
-        // Top-level: nothing but the variable-declaration wrappers between
-        // the declaration and the source file (a VariableDeclaration sits
-        // under VariableDeclarationList → VariableStatement).
+
         let mut top_level = false;
         let mut p = node.parent.as_ref();
         while let Some(parent) = p {
@@ -11001,20 +8794,14 @@ impl Checker {
         if !top_level {
             return;
         }
-        // Ambient declarations are exempt (no codegen impact — Go's
-        // `needCollisionCheckForIdentifier` returns false under
-        // NodeFlagsAmbient; collisionExportsRequireAndAmbient* expect zero
-        // errors for `export declare var exports`).
+
         if self.declaration_is_ambient(node) {
             return;
         }
         let emit_format = self.program.get_emit_module_format_of_file(&file.file_name);
         let text = name.text().to_string();
         if text == "require" || text == "exports" {
-            // TS2441 only below ES module formats (Go
-            // `checkCollisionWithRequireExportsInGeneratedCode`: formats
-            // >= ES2015 emit imports natively, no require/exports
-            // synthesis).
+
             if emit_format >= ModuleKind::ES2015 {
                 return;
             }
@@ -11026,11 +8813,7 @@ impl Checker {
                 vec![text.clone(), text],
             ));
         } else if text == "__esModule" {
-            // TS1216 only for EXPORTED bindings (Go
-            // checkGrammarVariableDeclaration: the check runs when the
-            // VariableStatement is non-ambient and carries the `export`
-            // modifier — a plain `var __esModule` is legal, and formats
-            // >= System never transform modules).
+
             let var_stmt = node
                 .parent
                 .as_ref()
@@ -11048,8 +8831,7 @@ impl Checker {
                 Vec::new(),
             ));
         } else if text == "Object" && node.kind == SyntaxKind::ClassDeclaration {
-            // TS2725: only when the module EMITS as CommonJS (Go
-            // checkCollisionWithGlobalObjectInGeneratedCode).
+
             if emit_format != ModuleKind::CommonJS {
                 return;
             }
@@ -11086,12 +8868,6 @@ impl Checker {
         }
     }
 
-    /// Check the computed property names inside a variable declaration's
-    /// binding pattern (`let {[a]: a} = …`). Those names are ordinary
-    /// expression positions — resolving them enables the used-before-
-    /// declaration check (TS2448) when a pattern references the symbol it
-    /// declares. Nested patterns (`{a: {b}}`) are walked recursively;
-    /// non-computed property names are declaration-side and skipped.
     fn check_binding_pattern_computed_names(&mut self, name: &Arc<Node>) {
         if !matches!(
             name.kind,
@@ -11110,20 +8886,11 @@ impl Checker {
                 crate::ast::NodeData::BindingElement(data) => {
                     if let Some(pn) = &data.property_name {
                         if pn.kind == SyntaxKind::ComputedPropertyName {
-                            // Go checkVariableLikeDeclaration's binding-element
-                            // branch: computed destructuring property names get
-                            // the TS2464 string/number/symbol check.
+
                             self.check_computed_property_name(pn);
                             if let crate::ast::NodeData::ComputedPropertyName(cd) = &pn.data {
                                 self.check_expression(&cd.expression);
-                                // TS2538: a computed property name whose
-                                // expression is `any` is not a valid index.
-                                // Mirrors tsc's `checkComputedPropertyName`
-                                // (`maybeTypeOfKind(type, TypeFlags.Any)`),
-                                // which fires for binding-pattern computed
-                                // names like `let {[a]: a} = …` where the
-                                // name resolves to the (implicit-any) symbol
-                                // it declares.
+
                                 let expr_type = self.get_type_of_node(&cd.expression);
                                 let is_any = match &expr_type.data {
                                     crate::checker::types::TypeData::Union(u) => u
@@ -11165,11 +8932,7 @@ impl Checker {
     fn check_variable_declaration_list(&mut self, node: &Arc<Node>) {
         if let crate::ast::NodeData::VariableDeclarationList(data) = &node.data {
             for decl in data.declarations.iter() {
-                // Ambient initializers (Go's checkGrammarVariableDeclaration):
-                // - `var`/`let` with an initializer → TS1039.
-                // - `const` (no type annotation) requires a simple literal or
-                //   literal enum reference → else the const-initializer
-                //   message.
+
                 if let crate::ast::NodeData::VariableDeclaration(vd) = &decl.data
                     && let Some(init) = &vd.initializer
                     && (node.has_syntactic_modifier(ModifierFlags::Ambient)
@@ -11195,8 +8958,7 @@ impl Checker {
                         _ if matches!(init.kind, SyntaxKind::TrueKeyword | SyntaxKind::FalseKeyword) => {
                             true
                         }
-                        // Literal enum reference: `Enum.member` and
-                        // `Enum["member"]` / Enum[`member`].
+
                         crate::ast::NodeData::PropertyAccessExpression(_)
                         | crate::ast::NodeData::ElementAccessExpression(_) => true,
                         _ => false,
@@ -11226,9 +8988,7 @@ impl Checker {
                         ));
                     }
                 }
-                // TS1100/TS1215: `var arguments` / `var eval` in strict code
-                // (alwaysStrict, modules, or a "use strict" prologue) —
-                // Go's binder checkStrictModeEvalOrArguments.
+
                 if let crate::ast::NodeData::VariableDeclaration(vd) = &decl.data
                     && vd.name.kind == SyntaxKind::Identifier
                     && matches!(vd.name.text(), "eval" | "arguments")
@@ -11257,8 +9017,6 @@ impl Checker {
         }
     }
 
-    /// Whether the current context is strict: `alwaysStrict`, an external
-    /// module, or the file starts with a "use strict" prologue.
     fn in_strict_context(&self) -> bool {
         if self.program.options().always_strict.is_true() {
             return true;
@@ -11270,8 +9028,6 @@ impl Checker {
         })
     }
 
-    /// TS2715 shared core: `prop_text` names an ABSTRACT instance property
-    /// of the class behind `this_type` — report at `name_node`.
     fn report_abstract_property_access_in_ctor(
         &mut self,
         name_node: &Arc<Node>,
@@ -11304,10 +9060,6 @@ impl Checker {
         ));
     }
 
-    /// Whether a `this.x` ACCESS sits directly in a property initializer
-    /// (`other = this.prop` — Go's `isNodeUsedDuringClassInitialization`:
-    /// walk ancestors, quit at class-like/function-like boundaries, true
-    /// when a PropertyDeclaration is reached first).
     fn access_in_property_initializer(&self, node: &Arc<Node>) -> bool {
         let mut cur = node.parent.as_ref();
         while let Some(a) = cur {
@@ -11330,10 +9082,6 @@ impl Checker {
         false
     }
 
-    /// TS2715 for `let { x, y: y1 } = this;` in a constructor: each bound
-    /// element's property name (or shorthand name) that resolves to an
-    /// abstract property of the enclosing class errors on that name node.
-    /// Mirrors Go's `isThisInitializedObjectBindingExpression` branch.
     fn check_this_destructuring_abstract_properties(
         &mut self,
         pattern: &Arc<Node>,
@@ -11349,8 +9097,7 @@ impl Checker {
             let crate::ast::NodeData::BindingElement(el) = &element.data else {
                 continue;
             };
-            // The property read is the property name (`{y: y1}` reads `y`);
-            // shorthand (`{x}`) reads its own name.
+
             let Some(prop_name_node) = el
                 .property_name
                 .as_ref()
@@ -11387,9 +9134,7 @@ impl Checker {
 
     fn check_variable_declaration(&mut self, node: &Arc<Node>) {
         if let crate::ast::NodeData::VariableDeclaration(data) = &node.data {
-            // TS1155: a `const` declaration must be initialized (Go's
-            // `checkVariableDeclaration`). Skipped for for-in/for-of
-            // declarations (`for (const k in o)`) and ambient declarations.
+
             if data.initializer.is_none() {
                 let is_const = node
                     .parent
@@ -11412,8 +9157,7 @@ impl Checker {
                             stmt.has_syntactic_modifier(ModifierFlags::Ambient)
                         })
                     || {
-                        // Ambient ancestor (e.g. `declare namespace M { const
-                        // x }` — the declare is on the namespace).
+
                         let mut anc = node.parent.as_ref();
                         let mut found = false;
                         while let Some(a) = anc {
@@ -11440,14 +9184,7 @@ impl Checker {
                     ));
                 }
             }
-            // TS2481 (Go `checkVarDeclaredNamesNotShadowed`): a `var` with
-            // initializer whose name lexically resolves to a DIFFERENT
-            // block-scoped symbol (the block-scoped binding binds tighter,
-            // so the initializer would write to it). Only fires when the
-            // block-scoped declaration lives in a plain nested block —
-            // when its container is the function body / module / source
-            // file scope, hoisting makes the names share a scope and the
-            // binder's duplicate check covers it instead.
+
             if data.initializer.is_some() && data.name.kind == SyntaxKind::Identifier {
                 let list_is_var = node.parent.as_ref().is_none_or(|l| {
                     !(l.flags.contains(NodeFlags::Let) || l.flags.contains(NodeFlags::Const))
@@ -11499,15 +9236,9 @@ impl Checker {
                     }
                 }
             }
-            // A binding-pattern name's computed property names are reference
-            // positions: `let {[a]: a} = …` reads `a` before its own
-            // declaration (TS2448 via the regular identifier check). Plain
-            // property names (`{a: b}`) are not references. Mirrors Go's
-            // `checkComputedPropertyName` being invoked for binding patterns
-            // through the declaration check.
+
             self.check_binding_pattern_computed_names(&data.name);
-            // TS2715 (destructuring form): `let { x, y } = this;` inside a
-            // constructor accesses each bound abstract property.
+
             if data.name.kind == SyntaxKind::ObjectBindingPattern
                 && self.in_ctor_body_stack.last() == Some(&true)
                 && let Some(init) = &data.initializer
@@ -11519,21 +9250,11 @@ impl Checker {
             if let Some(init) = &data.initializer {
                 self.check_expression(init);
             }
-            // Resolve the variable's type and check assignability of the
-            // initializer against the (optional) type annotation.
-            //
-            // This is the first place the relater is wired into the diagnostic
-            // flow: when a type annotation is present, the initializer must be
-            // assignable to it (TS2322). When no annotation is present, the
-            // type is inferred from the initializer.
+
             let resolved_type = match (&data.type_node, &data.initializer) {
                 (Some(type_node), Some(init)) => {
                     let annotation_type = self.get_type_from_type_node(type_node);
-                    // Nested literal elements (`var v: {id:number}[] =
-                    // [{id:1}, {id:2, name:"x"}]`): the direct
-                    // object-literal checks below cover non-array
-                    // initializers; array literals need per-element
-                    // contextual checks (TS2353/TS2741/TS2322).
+
                     if init.kind == SyntaxKind::ArrayLiteralExpression {
                         let at = Arc::clone(&annotation_type);
                         self.check_contextual_elements(init, &at, init.loc);
@@ -11542,17 +9263,12 @@ impl Checker {
                     let assignable = self.is_type_assignable_to(&init_type, &annotation_type);
                     let mut reported_error = false;
 
-                    // Excess property check for object-literal initializers.
-                    // An object literal with properties not present on the
-                    // target type is an error even when all required target
-                    // properties are present. Mirrors Go's `hasExcessProperties`
-                    // performed inside `isRelatedToEx` for fresh literals.
                     if let Some(excess_name) =
                         self.get_excess_property_name(&init_type, &annotation_type)
                     {
                         let file = self.current_file.clone();
                         let annot_str = self.type_to_string(&annotation_type);
-                        // Report at the offending property name when locatable.
+
                         let loc = self
                             .find_object_literal_property_name_node(init, &excess_name)
                             .unwrap_or(node.loc);
@@ -11566,15 +9282,7 @@ impl Checker {
                     }
 
                     if !assignable && !reported_error {
-                        // Initializer mismatches report through the
-                        // elaborating relation path (Go
-                        // checkVariableLikeDeclaration →
-                        // checkTypeAssignableTo): head 2322 plus nested
-                        // chains, where an innermost missing-property
-                        // entry matching the outer pair SUPPRESSES the
-                        // head (`var i1: I1 = []` → single TS2741) and a
-                        // mismatching one nests (element 2741 under
-                        // `IToken[]` vs `IStateToken[]`).
+
                         self.check_type_assignable_to_and_optionally_elaborate(
                             &init_type,
                             &annotation_type,
@@ -11588,12 +9296,7 @@ impl Checker {
                 }
                 (Some(type_node), None) => self.get_type_from_type_node(type_node),
                 (None, Some(init)) => {
-                    // TS2488: destructuring an ArrayBindingPattern from a
-                    // `never`-typed initializer — nothing is iterable
-                    // (narrowed-out union arms in switch defaults). The
-                    // check runs on the FLOW-narrowed type: the declared
-                    // union is only reduced to `never` after the switch's
-                    // case analysis.
+
                     if data.name.kind == SyntaxKind::ArrayBindingPattern {
                         let init_type = if init.kind == SyntaxKind::Identifier
                             && let Some(sym) = self.resolve_identifier(init)
@@ -11618,11 +9321,7 @@ impl Checker {
                             ));
                         }
                     }
-                    // Non-const variable with a `null`/`undefined`
-                    // initializer gets the auto (implicit any) type — Go's
-                    // `getWidenedTypeForVariableLikeDeclaration`
-                    // (checker.go ~L16757). Flow analysis then tracks the
-                    // actual values (`x = []` starts an evolving array).
+
                     let is_const_decl = self
                         .get_combined_node_flags(node)
                         .intersects(NodeFlags::Constant);
@@ -11634,34 +9333,10 @@ impl Checker {
                     {
                         self.auto_type()
                     } else if self.is_empty_array_literal(init) {
-                        // Go getWidenedTypeForVariableLikeDeclaration
-                        // (checker.go ~L16762): a non-const variable whose
-                        // initializer is an empty array literal gets the
-                        // control-flow-tracked auto array (`let x = [];
-                        // x.push(1)` evolves to `number[]`) — the auto
-                        // marker drives the mutation-method evolution.
+
                         self.auto_array_type()
                     } else {
-                        // No type annotation: infer from the initializer, then
-                        // apply freshness-gated widening. This mirrors Go's
-                        // `getWidenedLiteralTypeForInitializer` +
-                        // `getWidenTypeOfLiteralType` plumbing at the
-                        // variable-declaration site.
-                        //
-                        // Step 1: `get_widened_literal_type_for_initializer`
-                        // decides the const-vs-let fate of fresh literals:
-                        //   - `const x = "hello"` preserves the fresh literal
-                        //     `"hello"` (no widening).
-                        //   - `let x = "hello"` widens to `string`.
-                        // Step 2: `get_regular_type_of_literal_type` converts
-                        // any preserved fresh literal to its regular form so
-                        // that step 3 doesn't re-widen it (a fresh literal
-                        // passed to `widen_initializer_type`/`get_widened_type`
-                        // would otherwise be widened).
-                        // Step 3: `widen_initializer_type` performs structural
-                        // widening for object/array literals (e.g. `{ a: 1 }`
-                        // → `{ a: number }`), recursing into properties whose
-                        // types are still fresh.
+
                         let init_type = self.get_type_of_node(init);
                         let widened_literal =
                             self.get_widened_literal_type_for_initializer(node, &init_type);
@@ -11670,22 +9345,14 @@ impl Checker {
                     }
                 }
                 (None, None) => {
-                    // A for-in/for-of loop variable has neither an
-                    // annotation nor an initializer — its type is the
-                    // iterated element type (or `string` for for-in), not
-                    // an implicit-any auto marker.
+
                     match self.initial_type_of_declaration(node) {
                         Some(t) => t,
                         None => self.auto_type(),
                     }
                 }
             };
-            // TS2403: a symbol redeclared across variable-like declarations
-            // must keep the SAME type — the secondary declaration's widened
-            // type (auto converted to any) must be IDENTICAL to the primary
-            // declaration's (Go getTypeOfVariableOrParameterOrProperty's
-            // secondary branch → errorNextVariableOrPropertyDeclaration
-            // MustHaveSameType, checker.go ~L5973).
+
             if let Some(symbol) = self.resolve_identifier(&data.name) {
                 let primary = symbol.value_declaration.clone();
                 if let Some(primary) = primary
@@ -11730,21 +9397,13 @@ impl Checker {
                     }
                 }
             }
-            // Cache the resolved type on the VariableDeclaration node — this
-            // is what `symbol.value_declaration` points to, so
-            // `get_type_of_symbol` can recover the type via `type_node_links`.
-            // (Previously this was stored on `data.name`, the Identifier
-            // child node, which `get_type_of_symbol` never inspects.)
+
             self.type_node_links.get_or_default(node).resolved_type = Some(resolved_type.clone());
-            // Also cache on the Identifier so direct `get_type_of_node(name)`
-            // callers (e.g. hover on the name) hit the cache without
-            // recursing through the symbol.
+
             self.type_node_links
                 .get_or_default(&data.name)
                 .resolved_type = Some(resolved_type.clone());
-            // And mirror onto `value_symbol_links[symbol]` so symbol-driven
-            // lookups (without going through a node) work as well. Mirrors
-            // Go's `symbol.links.type`.
+
             if let Some(symbol) = self.resolve_identifier(&data.name) {
                 self.value_symbol_links
                     .get_or_default(&symbol)
@@ -11765,18 +9424,13 @@ impl Checker {
     }
 
     fn check_heritage_clause(&mut self, node: &Arc<Node>) {
-        // Heritage clauses contain type references (e.g., `extends Foo`).
-        // For `implements` clauses, verify that the class's instance type
-        // is assignable to each implemented interface; otherwise emit
-        // TS2420.
+
         let data = match &node.data {
             crate::ast::NodeData::HeritageClause(d) => d,
             _ => return,
         };
         if data.token == SyntaxKind::ExtendsKeyword {
-            // TS1174: `extends A, B` — classes extend a single class
-            // (Go's checkGrammarClassDeclarationHeritageClause; reported on
-            // the second-and-later type reference's first token).
+
             if data.types.len() > 1 {
                 for type_ref in data.types.iter().skip(1) {
                     let file = self.current_file.clone();
@@ -11789,15 +9443,10 @@ impl Checker {
                     ));
                 }
             }
-            // For `extends` clauses, resolve the base class expression as a
-            // type reference (suppressing false TS2304 for global names like
-            // `Object` that are resolvable in type position). The base-class
-            // instance type is built separately in `build_class_instance_type_with_base`.
-            // Here we just try to resolve the expression to suppress TS2304.
+
             for type_ref in data.types.iter() {
                 if let crate::ast::NodeData::ExpressionWithTypeArguments(ewa) = &type_ref.data {
-                    // TS2689: `extends` naming an INTERFACE-only symbol
-                    // (Go's checkClassExtends → Cannot_extend_an_interface).
+
                     if ewa.expression.kind == SyntaxKind::Identifier {
                         if let Some(sym) = self.resolve_identifier(&ewa.expression)
                             && sym.flags == SymbolFlags::Interface
@@ -11813,8 +9462,7 @@ impl Checker {
                             ));
                         }
                     }
-                    // Try to resolve the expression as a type reference.
-                    // This populates type_node_links without emitting TS2304.
+
                     self.push_ts2304_suppression();
                     let _ = self.get_type_from_type_node(&ewa.expression);
                     self.pop_ts2304_suppression();
@@ -11825,8 +9473,7 @@ impl Checker {
         if data.token != SyntaxKind::ImplementsKeyword {
             return;
         }
-        // Locate the enclosing ClassDeclaration to recover the class name
-        // and member list.
+
         let class_node = match node.parent.as_ref() {
             Some(p) => p,
             None => return,
@@ -11840,26 +9487,17 @@ impl Checker {
             .as_ref()
             .map(|n| n.text().to_string())
             .unwrap_or_default();
-        // Build the class's instance type including inherited members
-        // from `extends`, so that base-class members also satisfy the
-        // `implements` check. Mirrors Go's `getBaseTypes` integration in
-        // `checkTypeImplementsList`.
+
         let instance_type = self.build_class_instance_type_with_base(class_node);
-        // Check each implemented interface.
+
         for type_ref in data.types.iter() {
             let interface_type = self.get_type_from_heritage_type_reference(type_ref);
             if interface_type.flags.contains(TypeFlags::Any) {
-                // Couldn't resolve the interface (e.g. TS2304 already
-                // reported). Skip the assignability check.
+
                 continue;
             }
             if !self.is_type_assignable_to(&instance_type, &interface_type) {
-                // Go `issueMemberSpecificError` (checker.go ~L4510): localize
-                // to the first incompatible OWN instance member — TS2416
-                // "Property 'x' in type 'C' is not assignable to the same
-                // property in base type 'I'" — and only fall back to the
-                // broad class-level TS2420 when no member localizes (e.g. a
-                // missing member).
+
                 let mut issued_member_error = false;
                 for member in class_data.members.iter() {
                     if member.has_syntactic_modifier(ModifierFlags::Static) {
@@ -11913,60 +9551,32 @@ impl Checker {
         }
     }
 
-    /// Build an anonymous object type representing the class's instance type
-    /// (the public property/method surface used by `implements` checks and
-    /// `this` type resolution inside method bodies).
-    ///
-    /// Mirrors the Go checker's `build_classInstanceType` / instance-type
-    /// construction. Constructor bodies and static members are excluded —
-    /// only instance `PropertyDeclaration`/`MethodDeclaration`/accessor
-    /// members contribute. Reuses the interface-member builder because the
-    /// relevant member kinds share the same name/type-node/parameter shape.
-    ///
-    /// When the class has an `extends` heritage clause, the base class's
-    /// instance type is resolved recursively and its properties are merged
-    /// in (underneath the derived class's own properties, so overrides win).
-    /// Mirrors Go's `getBaseTypes`/property inheritance in
-    /// `getPropertiesOfTypeOfObjectLiteral`/`getPropertiesOfObjectType`.
     #[allow(dead_code)]
     fn build_class_instance_type(&mut self, members: &Arc<NodeList>) -> Arc<Type> {
         self.build_interface_type_from_members(members)
     }
 
-    /// Build the class instance type including inherited members from the
-    /// `extends` clause. The derived class's own members take precedence
-    /// (override) over the base class's members with the same name.
-    ///
-    /// Mirrors Go's `getBaseTypeNodeTypes`/property inheritance:
-    /// `class D extends B {}` gives D's instance type all of B's properties
-    /// plus D's own.
     pub(crate) fn build_class_instance_type_with_base(&mut self, node: &Arc<Node>) -> Arc<Type> {
         let (members, heritage_clauses) = match &node.data {
             crate::ast::NodeData::ClassDeclaration(data) => {
                 (&data.members, data.heritage_clauses.clone())
             }
-            // A class EXPRESSION's instance type also carries heritage
-            // members (thisIndexOnExistingReadonlyFieldIsNotNever: `this`
-            // in a `return class C extends Component<…> {…}` initializer
-            // reads the inherited `props`). Declaration and expression
-            // share the same member/heritage shape.
+
             crate::ast::NodeData::ClassExpression(data) => {
                 (&data.members, data.heritage_clauses.clone())
             }
             _ => return self.build_interface_type_from_members(&Arc::new(NodeList::default())),
         };
-        // Build the derived class's own instance type.
+
         let own_type = self.build_interface_type_from_members(members);
-        // Attach the class symbol so the type printer uses the declared
-        // name (Go's `Type.Symbol`). The type was just created and is not
-        // yet shared.
+
         if let Some(class_sym) = self.program.symbol_map().symbol_of(node) {
             let own_mut = Arc::as_ptr(&own_type) as *mut crate::checker::types::Type;
             unsafe {
                 (*own_mut).symbol = Some(Arc::clone(class_sym));
             }
         }
-        // Find the `extends` clause and resolve the base class.
+
         let mut base_type: Option<Arc<Type>> = None;
         if let Some(ref heritage) = heritage_clauses {
             for clause in heritage.iter() {
@@ -11986,13 +9596,9 @@ impl Checker {
         }
     }
 
-    /// Resolve the base class's constructor (static-side) type for a
-    /// `super(...)` call in the currently enclosing class. Returns `None`
-    /// when there is no enclosing class, no `extends` clause, or the base
-    /// cannot be resolved to a class declaration.
     fn resolve_base_class_constructor_type(&mut self) -> Option<Arc<Type>> {
         let (base_node, symbol) = self.base_class_node_of_enclosing_class()?;
-        // Guard against self-referential `extends`.
+
         let key = Arc::as_ptr(&symbol) as *const crate::ast::Symbol;
         if !self.resolving_type_aliases.insert(key) {
             return None;
@@ -12002,49 +9608,29 @@ impl Checker {
         Some(ctor_type)
     }
 
-    /// The `ClassDeclaration` node (and class symbol) of the enclosing
-    /// class's `extends` base, if resolvable.
     fn base_class_node_of_enclosing_class(&self) -> Option<(Arc<Node>, Arc<Symbol>)> {
         let class_node = self.enclosing_class_stack.last().cloned()?;
         self.extends_base_of(&class_node)
     }
 
-    /// Resolve a base class reference from an `extends` heritage clause to
-    /// its instance type (recursively including the base's own base class).
-    /// Returns `any` if the base class cannot be resolved (e.g. unknown
-    /// identifier — TS2304 is emitted elsewhere).
     fn resolve_base_class_instance_type(&mut self, type_ref: &Arc<Node>) -> Arc<Type> {
-        // The heritage-clause entry is an `ExpressionWithTypeArguments`.
-        // Get its type, which for a class reference resolves to the class's
-        // constructor type (an object with construct signatures). We need
-        // the instance type instead.
-        // First, try to resolve the class symbol and build its instance
-        // type directly (including the base class's own base).
+
         if let crate::ast::NodeData::ExpressionWithTypeArguments(data) = &type_ref.data {
             if data.expression.kind == SyntaxKind::Identifier {
                 if let Some(symbol) = self.resolve_identifier(&data.expression) {
                     if symbol.flags.contains(SymbolFlags::Class) {
-                        // Depth guard for deep (non-cyclic) base chains:
-                        // the push below only guards SAME-symbol re-entry;
-                        // each chain level costs a full member-table build
-                        // and never passes get_type_from_type_node's depth
-                        // guard, so cap the chain (matches the cap in
-                        // attach_class_statics; own members still resolve,
-                        // inherited statics/members beyond the cap degrade
-                        // gracefully).
+
                         if self.type_resolution_stack.len() >= 200 {
                             return self.get_any_type();
                         }
-                        // Find the ClassDeclaration node and build its
-                        // instance type with base.
+
                         if let Some(class_node) = symbol
                             .declarations
                             .iter()
                             .find(|d| d.kind == SyntaxKind::ClassDeclaration)
                             .cloned()
                         {
-                            // Avoid infinite recursion for self-referential
-                            // extends (shouldn't happen, but be safe).
+
                             let key = Arc::as_ptr(&symbol) as *const crate::ast::Symbol;
                             if !self.push_type_resolution(
                                 key,
@@ -12052,14 +9638,7 @@ impl Checker {
                             ) {
                                 return self.get_any_type();
                             }
-                            // `class D extends Base<State>` must instantiate
-                            // the BASE's members with the heritage type
-                            // arguments (Go getTypeFromClassOrInterface
-                            // Reference): push a substitution mapping the
-                            // base's type parameters to the argument types
-                            // so inherited member types re-resolve with
-                            // S → State (the raw `S` would otherwise leak
-                            // into `this.state`).
+
                             let heritage_args = data.type_arguments.clone();
                             let base_tps: Vec<Arc<crate::ast::Symbol>> = match &class_node.data {
                                 crate::ast::NodeData::ClassDeclaration(cd) => {
@@ -12104,11 +9683,7 @@ impl Checker {
                                 false
                             };
                             let instance = {
-                                // Build the base instance under the BASE's
-                                // own scope — its type parameters (`M` in
-                                // `class Parent<M>`) must be visible to its
-                                // members regardless of which derived class
-                                // triggered this resolution.
+
                                 self.push_scope(&class_node);
                                 let i = self.build_class_instance_type_with_base(&class_node);
                                 self.pop_scope();
@@ -12125,25 +9700,18 @@ impl Checker {
                 }
             }
         }
-        // Fallback: resolve the type reference directly. For interfaces
-        // or other types, this gives the object type. For classes, it gives
-        // the constructor type — extract its properties (construct
-        // signatures' return type would be ideal, but we don't track that
-        // yet). Fall back to `any` to avoid false positives.
+
         let t = self.get_type_from_type_node(type_ref);
         if t.flags.contains(TypeFlags::Any) {
             return self.get_any_type();
         }
-        // If it's an object type (e.g. from an interface), use it directly.
+
         if t.flags.contains(TypeFlags::Object) {
             return t;
         }
         self.get_any_type()
     }
 
-    /// Merge two instance types: `derived` properties override `base`
-    /// properties with the same name. Returns a new anonymous object type
-    /// containing all properties from both, with derived taking precedence.
     fn merge_instance_types(&mut self, derived: &Arc<Type>, base: &Arc<Type>) -> Arc<Type> {
         if base.flags.contains(TypeFlags::Any) {
             return Arc::clone(derived);
@@ -12156,19 +9724,15 @@ impl Checker {
             TypeData::Object(o) => &o.structured,
             _ => return Arc::clone(derived),
         };
-        // Derived (own) members first, then base members not already
-        // present — Go resolveObjectTypeMembers starts from the declared
-        // members and only ADDS inherited members via `addInheritedMembers`
-        // (checker.go ~L19200), so `C2 extends C1` lists C2M1 before the
-        // inherited IM1/C1M1 (missing-property chains follow this order).
+
         let mut symbol_table = SymbolTable::new();
         let mut props: Vec<Arc<Symbol>> = Vec::new();
-        // Own properties first.
+
         for prop in &derived_data.properties {
             symbol_table.insert(prop.name.clone(), Arc::clone(prop));
             props.push(Arc::clone(prop));
         }
-        // Base properties: appended when not overridden by name.
+
         for prop in &base_data.properties {
             if symbol_table.get(&prop.name).is_some() {
                 continue;
@@ -12176,12 +9740,10 @@ impl Checker {
             symbol_table.insert(prop.name.clone(), Arc::clone(prop));
             props.push(Arc::clone(prop));
         }
-        // Merge index infos (own first, then base).
+
         let mut index_infos = derived_data.index_infos.clone();
         index_infos.extend(base_data.index_infos.iter().cloned());
-        // Overload concatenation: OWN signatures first, then the base's
-        // (Go `core.Concatenate(callSignatures, base)` in
-        // resolveObjectTypeMembers — derived overloads shadow base ones).
+
         let mut call_signatures: Vec<Arc<Signature>> =
             derived_data.call_signatures().to_vec();
         let derived_call_count = call_signatures.len();
@@ -12193,8 +9755,7 @@ impl Checker {
             flags: TypeFlags::Object,
             object_flags: ObjectFlags::Anonymous,
             id: 0,
-            // Keep the derived class's symbol so the type printer shows the
-            // declared name (`Point3D`) instead of the merged structure.
+
             symbol: derived.symbol.clone(),
             alias: None,
             data: TypeData::Object(ObjectTypeData {
@@ -12212,29 +9773,15 @@ impl Checker {
         })
     }
 
-    /// Resolve a heritage-clause type reference (`implements Foo` /
-    /// `extends Bar<T>`) to its underlying `Type`.
-    ///
-    /// The node kind for heritage-clause entries is
-    /// `ExpressionWithTypeArguments`, which `get_type_from_type_node` already
-    /// dispatches to `get_type_from_type_reference`. Returns `error_type`
-    /// (any) when the reference cannot be resolved — in that case TS2304 is
-    /// emitted elsewhere, so the `implements` check is skipped by the caller.
     fn get_type_from_heritage_type_reference(&mut self, type_ref: &Arc<Node>) -> Arc<Type> {
         self.get_type_from_type_node(type_ref)
     }
 
-    /// TS2564: Check property initialization. Under strictNullChecks and
-    /// strictPropertyInitialization, reports an error for non-static instance
-    /// properties that have no initializer, no definite-assignment assertion
-    /// (`!`), and are not definitely assigned in the constructor. Mirrors
-    /// Go's `checkPropertyInitialization`.
     fn check_property_initialization(&mut self, class_node: &Arc<Node>) {
         if !self.strict_null_checks || !self.strict_property_initialization {
             return;
         }
-        // Skip ambient classes (`declare class`, or inside a `declare
-        // namespace` / .d.ts — Go's NodeFlagsAmbient propagation).
+
         if class_node.has_syntactic_modifier(ModifierFlags::Ambient)
             || self.ambient_context_depth > 0
             || self
@@ -12248,29 +9795,29 @@ impl Checker {
             crate::ast::NodeData::ClassDeclaration(d) => &d.members,
             _ => return,
         };
-        // Find the constructor (if any) for definite-assignment checking.
+
         let constructor = members.iter().find(|m| m.kind == SyntaxKind::Constructor);
         for member in members.iter() {
             if member.kind != SyntaxKind::PropertyDeclaration {
                 continue;
             }
-            // Skip ambient and static members.
+
             let mods = self.get_combined_modifier_flags(member);
             if mods.contains(ModifierFlags::Ambient) || mods.contains(ModifierFlags::Static) {
                 continue;
             }
-            // Skip abstract properties.
+
             if mods.contains(ModifierFlags::Abstract) {
                 continue;
             }
             let crate::ast::NodeData::PropertyDeclaration(pd) = &member.data else {
                 continue;
             };
-            // Skip if it has an initializer or a definite-assignment assertion.
+
             if pd.initializer.is_some() || pd.postfix_token.is_some() {
                 continue;
             }
-            // Skip if there's no name or the name isn't an identifier/private/computed.
+
             let name_node = &pd.name;
             if !matches!(
                 name_node.kind,
@@ -12280,9 +9827,7 @@ impl Checker {
             ) {
                 continue;
             }
-            // Get the property's type from the type annotation. If no type
-            // annotation, the property type is `any` — skip (matches Go's
-            // `TypeFlagsAnyOrUnknown` guard).
+
             let Some(type_node) = &pd.type_node else {
                 continue;
             };
@@ -12294,13 +9839,13 @@ impl Checker {
             {
                 continue;
             }
-            // Check if the property is assigned in the constructor.
+
             if let Some(ctor) = constructor {
                 if self.is_property_assigned_in_constructor(name_node, ctor) {
                     continue;
                 }
             }
-            // Report TS2564.
+
             let name_text = self.node_text(name_node);
             let file = self.current_file.clone();
             self.diagnostics.add(crate::ast::Diagnostic::new(
@@ -12312,14 +9857,12 @@ impl Checker {
         }
     }
 
-    /// Get the text representation of a property name node.
     fn node_text(&self, node: &Arc<Node>) -> String {
         match &node.data {
             crate::ast::NodeData::Identifier(d) => d.text.clone(),
             crate::ast::NodeData::PrivateIdentifier(d) => d.text.clone(),
             crate::ast::NodeData::ComputedPropertyName(_) => {
-                // Reported with the source text including the brackets,
-                // e.g. `[Symbol.toPrimitive]` or `["a"]`, matching TS.
+
                 let Some(file) = &self.current_file else {
                     return String::new();
                 };
@@ -12335,25 +9878,22 @@ impl Checker {
         }
     }
 
-    /// Resolve the symbol for a property declaration's name node.
     #[allow(dead_code)]
     fn resolve_property_name(
         &mut self,
         _member: &Arc<Node>,
         name: &Arc<Node>,
     ) -> Option<Arc<Symbol>> {
-        // Try to resolve via the name node directly.
+
         self.resolve_identifier(name)
     }
 
-    /// Check whether a property is definitely assigned in the constructor body.
-    /// Simplified: looks for `this.propName =` or `this[propName] =` patterns.
     fn is_property_assigned_in_constructor(&self, name_node: &Arc<Node>, ctor: &Arc<Node>) -> bool {
         let name_text = match &name_node.data {
             crate::ast::NodeData::Identifier(d) => d.text.as_str(),
             _ => return false,
         };
-        // Walk the constructor body looking for `this.name =` assignments.
+
         let body = match &ctor.data {
             crate::ast::NodeData::ConstructorDeclaration(d) => &d.body,
             _ => return false,
@@ -12364,11 +9904,8 @@ impl Checker {
         Self::node_contains_this_assignment(body, name_text)
     }
 
-    /// Recursively check if a node tree contains `this.<name> =` or
-    /// `this[<name>] =`.
     fn node_contains_this_assignment(node: &Arc<Node>, name: &str) -> bool {
-        // Check for BinaryExpression with `=` operator where the left side is
-        // `this.name` or `this[name]`.
+
         if let crate::ast::NodeData::BinaryExpression(data) = &node.data {
             if data.operator_token.kind == SyntaxKind::EqualsToken {
                 if Self::is_this_property_access(&data.left, name) {
@@ -12376,19 +9913,18 @@ impl Checker {
                 }
             }
         }
-        // Recursively check child nodes.
+
         let mut found = false;
         crate::ast::node_data_generated::for_each_child(node, |child| {
             if Self::node_contains_this_assignment(child, name) {
                 found = true;
-                return true; // stop iteration
+                return true;
             }
             false
         });
         found
     }
 
-    /// Check if a node is `this.name` or `this["name"]` or `this['name']`.
     fn is_this_property_access(node: &Arc<Node>, name: &str) -> bool {
         match &node.data {
             crate::ast::NodeData::PropertyAccessExpression(data) => {
@@ -12412,9 +9948,6 @@ impl Checker {
         }
     }
 
-    /// The `name` node of a class member that has one (`None` for
-    /// constructors — their "name" is the `constructor` keyword and errors
-    /// anchor on the member node itself, mirroring `name ?? node` in Go).
     fn class_member_name_node(node: &Arc<Node>) -> Option<Arc<Node>> {
         match &node.data {
             crate::ast::NodeData::MethodDeclaration(d) => Some(Arc::clone(&d.name)),
@@ -12424,18 +9957,13 @@ impl Checker {
         }
     }
 
-    /// Declaration-name text of a class member, rendered like Go's
-    /// `DeclarationNameToString`: identifiers verbatim, string literals WITH
-    /// their quotes, numeric literals verbatim. Constructors share the fixed
-    /// key `"constructor"`. `None` for non-literal names (computed/private).
     fn class_member_name_text(node: &Arc<Node>) -> Option<String> {
         if matches!(node.kind, SyntaxKind::Constructor) {
             return Some("constructor".to_string());
         }
         let name = Self::class_member_name_node(node)?;
         match name.kind {
-            // Go's `DeclarationNameToString`: string literals print WITH
-            // their quotes; identifiers and numeric literals print verbatim.
+
             SyntaxKind::Identifier | SyntaxKind::NumericLiteral => {
                 let text = name.text().to_string();
                 if text.is_empty() {
@@ -12449,7 +9977,6 @@ impl Checker {
         }
     }
 
-    /// Whether a method/constructor member has an implementation body.
     fn class_member_has_body(node: &Arc<Node>) -> bool {
         matches!(
             &node.data,
@@ -12460,19 +9987,6 @@ impl Checker {
         )
     }
 
-    /// Class-body overload validation, mirroring Go's
-    /// `checkFunctionOrConstructorSymbolWorker`: a run of overload signatures
-    /// must be immediately followed by its implementation. Reports
-    /// - TS2390 when a constructor overload group has no implementation,
-    /// - TS2391 when a method overload group has no implementation (or its
-    ///   signatures are not consecutive),
-    /// - TS2389 when a differently-named implementation directly follows an
-    ///   overload signature.
-    ///
-    /// Ambient (`declare`) class members are exempt — ambient declarations
-    /// can be interleaved. Abstract / optional members don't need bodies.
-    /// (parameters, declared-return-type) of a function-like overload or
-    /// implementation declaration (function/method/constructor).
     fn function_like_params_and_return(
         node: &Arc<Node>,
     ) -> Option<(&Arc<NodeList>, Option<&Arc<Node>>)> {
@@ -12488,11 +10002,6 @@ impl Checker {
         }
     }
 
-    /// Go `isImplementationCompatibleWithOverload` (checker.go ~L3723):
-    /// return types compatible in EITHER direction (or the overload returns
-    /// void), and each parameter position compatible in either direction
-    /// (the assignable relation compares methods bivariantly; unannotated
-    /// parameters are `any` and always pass).
     fn overload_signature_compatible_with_implementation(
         &mut self,
         overload: &Arc<Node>,
@@ -12508,7 +10017,7 @@ impl Checker {
         else {
             return true;
         };
-        // Return compatibility.
+
         let return_ok = match (ov_return, im_return) {
             (Some(ovn), Some(imn)) => {
                 let ov_t = self.get_type_from_type_node(&ovn);
@@ -12522,7 +10031,7 @@ impl Checker {
         if !return_ok {
             return false;
         }
-        // Parameter compatibility, position by position.
+
         let n = ov_params.len().min(im_params.len());
         for i in 0..n {
             let ov_tn = match &ov_params.nodes[i].data {
@@ -12548,7 +10057,7 @@ impl Checker {
     }
 
     fn check_class_member_overloads(&mut self, members: &NodeList) {
-        // Group function-like members by name text, preserving order.
+
         let mut groups: std::collections::BTreeMap<String, Vec<usize>> =
             std::collections::BTreeMap::new();
         for (idx, m) in members.iter().enumerate() {
@@ -12560,11 +10069,7 @@ impl Checker {
             }
         }
         for (_, idxs) in groups {
-            // Walk the group like Go's declaration loop: a signature not
-            // immediately followed (list-adjacency approximates Go's
-            // `previousDeclaration.End() == node.Pos()` trivia-adjacency)
-            // reports on the PREVIOUS signature; at the end, a trailing
-            // signature with no implementation reports on itself.
+
             let mut prev: Option<usize> = None;
             let mut has_body = false;
             for &idx in &idxs {
@@ -12592,10 +10097,7 @@ impl Checker {
                     self.report_implementation_expected_error(members, last);
                 }
             } else {
-                // TS2394: each overload signature must be compatible with
-                // the implementation signature (Go
-                // isImplementationCompatibleWithOverload via
-                // checkFunctionOrConstructorSymbolWorker).
+
                 let impl_idx = idxs
                     .iter()
                     .copied()
@@ -12626,12 +10128,6 @@ impl Checker {
         }
     }
 
-    /// The `reportImplementationExpectedError` core: `node` is an overload
-    /// signature with no implementation. When the member immediately after it
-    /// is a same-kind implementation with a DIFFERENT name, that
-    /// implementation is really this overload's implementation gone wrong →
-    /// TS2389; otherwise the group is simply missing its implementation →
-    /// TS2390 (constructor) / TS2391 (method).
     fn report_implementation_expected_error(&mut self, members: &NodeList, idx: usize) {
         let node = Arc::clone(&members.nodes[idx]);
         let name_text = Self::class_member_name_text(&node);
@@ -12642,15 +10138,12 @@ impl Checker {
                     (Some(a), Some(b)) => a == b,
                     _ => false,
                 };
-                // Same name: the overload has its implementation right after
-                // (static/instance mismatch is a separate Go check, not
-                // ported here).
+
                 if same_name {
                     return;
                 }
                 if Self::class_member_has_body(sib) {
-                    // TS2389 on the implementation's name node, naming the
-                    // overload's declaration name.
+
                     let file = self.current_file.clone();
                     let loc = Self::class_member_name_node(sib)
                         .map(|n| n.loc)
@@ -12668,8 +10161,7 @@ impl Checker {
                 }
             }
         }
-        // Missing implementation: constructor → TS2390 on the member; method
-        // → TS2391 on its name (or the member when the name is missing).
+
         let file = self.current_file.clone();
         let (loc, message): (crate::core::text::TextRange, crate::diagnostics::Message) =
             if matches!(node.kind, SyntaxKind::Constructor) {
@@ -12690,19 +10182,12 @@ impl Checker {
         self.diagnostics.add(diagnostic);
     }
 
-    /// TS2369: parameter properties (`constructor(private x)`) are only
-    /// allowed in a constructor IMPLEMENTATION (one with a body). Mirrors
-    /// Go's `checkParameter` modifier check.
     fn check_parameter_property_modifiers(&mut self, params: &NodeList, is_ctor_impl: bool) {
         for param in params.iter() {
             let crate::ast::NodeData::ParameterDeclaration(pd) = &param.data else {
                 continue;
             };
-            // Grammar-check modifiers on every parameter regardless of
-            // context — Go's `checkParameter` (checker.go:2661) calls
-            // `checkGrammarModifiers`, reporting TS1090 (`static`/`export`
-            // modifier cannot appear on a parameter), TS1028 (accessibility
-            // modifier already seen), etc.
+
             if pd.modifiers.is_some() {
                 self.check_grammar_modifiers(param);
             }
@@ -12729,20 +10214,6 @@ impl Checker {
         }
     }
 
-    /// TS7006/TS7019: parameters without a type annotation or initializer
-    /// implicitly have an `any` (rest: `any[]`) type under `noImplicitAny`.
-    /// Reported on the parameter node for every function-like context —
-    /// implementations, overload signatures, interface members and ambient
-    /// `declare`s alike (oracle-verified: `declare function g(y);` in a
-    /// source file still reports). Mirrors Go's `reportImplicitAny`.
-    ///
-    /// Exemptions (parameters that are NOT implicitly any):
-    /// - `contextual_param_count`: parameters of contextually-typed function
-    ///   expressions / arrows (`let f: (x: number) => number = (x) => ...`)
-    ///   inherit their type from the contextual signature.
-    /// - parameters typed via a JSDoc `@param {T}` tag.
-    /// KNOWN GAP: binding-pattern parameters don't report per-element
-    /// implicit-any errors yet.
     fn check_parameter_implicit_any(
         &mut self,
         node: &Arc<Node>,
@@ -12763,12 +10234,11 @@ impl Checker {
             if name.kind != SyntaxKind::Identifier || name.text() == "this" {
                 continue;
             }
-            // Contextually typed: the corresponding contextual-signature
-            // parameter supplies the type.
+
             if i < contextual_param_count {
                 continue;
             }
-            // JSDoc `@param {T} name` provides the type.
+
             if self.param_has_typed_jsdoc_tag(node, name.text()) {
                 continue;
             }
@@ -12794,9 +10264,6 @@ impl Checker {
         }
     }
 
-    /// Whether the function `node` has a JSDoc `@param {T} <name>` tag with a
-    /// type expression for the given parameter name. Resolves the node's
-    /// JSDoc comments through the source file's lazy JSDoc cache.
     fn param_has_typed_jsdoc_tag(&self, node: &Arc<Node>, param_name: &str) -> bool {
         let Some(file) = &self.current_file else {
             return false;
@@ -12819,21 +10286,8 @@ impl Checker {
         false
     }
 
-    /// Walk a type annotation, checking nested function/constructor TYPE
-    /// nodes: their parameters are function-likes for TS2369 (parameter
-    /// properties) and TS7006 (implicit any), and nested annotations are
-    /// recursed. This is how `(public B) => C` annotations get their
-    /// parameter-level diagnostics (Go checks type nodes via
-    /// `checkSourceElement` → `checkFunctionTypeNode`).
     fn check_type_annotation(&mut self, tn: &Arc<Node>) {
-        // Run in the annotation's own DECLARING lexical context: the check
-        // phase re-resolves annotation type nodes (e.g. the TS2536/TS2538
-        // validation in `check_indexed_access_index_type`), and with a bare
-        // statement-level scope stack a same-named outer declaration (a
-        // top-level `class T`) can shadow the reference's own lexical
-        // containers (an enclosing interface's type parameter `T`).
-        // Go resolves by the reference's location (`scopeTable`); pushing
-        // the declaring chain makes the innermost containers win.
+
         self.with_declaring_file_context(tn, |c| c.check_type_annotation_inner(tn));
     }
 
@@ -12907,16 +10361,12 @@ impl Checker {
                 if let crate::ast::NodeData::IndexedAccessTypeNode(d) = &tn.data {
                     self.check_type_annotation(&d.object_type);
                     self.check_type_annotation(&d.index_type);
-                    // Go checkSourceElement → checkIndexedAccessType: after
-                    // the children, verify the resolved index type is
-                    // assignable to the object's index type.
+
                     self.check_indexed_access_index_type(tn);
                 }
             }
             SyntaxKind::TypeLiteral => {
-                // TS1183: accessors with bodies inside a type literal are
-                // implementations in a type context (Go's
-                // `checkGrammarAccessor` Parent==KindTypeLiteral branch).
+
                 if let crate::ast::NodeData::TypeLiteralNode(d) = &tn.data {
                     for member in d.members.iter() {
                         if matches!(
@@ -12932,28 +10382,14 @@ impl Checker {
         }
     }
 
-    /// Type-position indexed-access check — Go `checkIndexedAccessIndexType`
-    /// (checker.go ~L8270), reached via `checkIndexedAccessType` in the
-    /// check phase. Reports TS2536 (index type not assignable to `keyof T`)
-    /// and TS4105 (private/protected member on a type parameter).
     fn check_indexed_access_index_type(&mut self, node: &Arc<Node>) {
         use crate::checker::types::{TypeData, TypeFlags};
         let t = self.get_type_from_type_node(node);
-        // Never re-check under an active substitution (Go reports
-        // declaration checks once per node; instantiation never re-reports
-        // them). Comparing two generic overloads instantiates one signature
-        // in the context of the other — re-running this check there would
-        // validate the SUBSTITUTED type parameter (whose constraint comes
-        // from the other overload) against this node's object type and
-        // falsely report TS2536.
+
         if !self.type_argument_stack.is_empty() {
             return;
         }
-        // Bundled libs are TypeScript's own known-good declarations —
-        // official never reports TS2536 inside them. Our constraint
-        // reduction during interface member building can still misresolve
-        // `keyof` targets to `any` mid-build (constraint collapses to
-        // `string`), so skip the check there (same gate as TS7039).
+
         if self
             .current_file
             .as_ref()
@@ -12968,33 +10404,23 @@ impl Checker {
             },
             _ => return,
         };
-        // An `any`/`unknown` object type also skips: our `keyof any`
-        // approximation (`string`) makes the assignability verdict
-        // unreliable there, and official reports TS2536 only for typed
-        // objects.
+
         if object_type
             .flags
             .intersects(TypeFlags::Any | TypeFlags::Unknown)
         {
             return;
         }
-        // Generic object types (deferred accesses `M[T]`, type parameters)
-        // reduce `keyof` through lazily-computed constraint chains in Go;
-        // our `get_index_type` approximation is unreliable for them, so the
-        // TS2536 check only runs for concrete object types. Legal generic
-        // accesses (`T[K] extends keyof T`) never falsely error; Go-only
-        // cases like `DataFetchFns[T][T]` remain unreported.
+
         if self.type_flags_is_generic_object_type(&object_type) {
             return;
         }
-        // skip index type deferral on remapping mapped types: Go consults
-        // the mapped type's name type there; we approximate with keyof.
+
         let object_index_type = self.get_index_type(&object_type);
         let has_number_index_info = self
             .get_index_info_of_type(&object_type, &self.number_type())
             .is_some();
-        // everyType(indexType, t assignable to keyof-object or applicable
-        // number index) — unions are checked per constituent.
+
         let constituents: Vec<Arc<Type>> = if index_type.flags.contains(TypeFlags::Union) {
             match &index_type.data {
                 TypeData::Union(u) => u.union_or_intersection.types.clone(),
@@ -13006,7 +10432,7 @@ impl Checker {
         for c in &constituents {
             let mut ok = self.is_type_assignable_to(c, &object_index_type);
             if !ok && has_number_index_info {
-                // Go isApplicableIndexType(c, number)
+
                 ok = self.is_type_assignable_to(c, &self.number_type());
             }
             if ok {
@@ -13015,9 +10441,7 @@ impl Checker {
             if object_type.object_flags.intersects(
                 crate::checker::types::ObjectFlags::IsGenericObjectType,
             ) {
-                // Go additionally reports TS4105 when the index resolves to
-                // a non-public property of the constraint; we approximate
-                // with the literal-value fast path only.
+
                 if let Some(name) = self.property_name_from_index(c) {
                     if let Some(sym) = self.get_constituent_property(&object_type, &name) {
                         let non_public = sym
@@ -13056,9 +10480,6 @@ impl Checker {
         }
     }
 
-    /// Literal name of an index type, if it is a single string/number
-    /// literal — the subset of Go `getPropertyNameFromIndex` reachable from
-    /// `checkIndexedAccessIndexType` without an access-expression node.
     fn property_name_from_index(&mut self, t: &Arc<Type>) -> Option<String> {
         use crate::checker::types::{TypeData, TypeFlags};
         if t.flags.intersects(TypeFlags::StringLiteral | TypeFlags::NumberLiteral) {
@@ -13073,8 +10494,6 @@ impl Checker {
         None
     }
 
-    /// Go `getConstituentProperty`: first apparent-type constituent that has
-    /// the property.
     pub(crate) fn get_constituent_property(
         &mut self,
         object_type: &Arc<Type>,
@@ -13099,11 +10518,6 @@ impl Checker {
         None
     }
 
-    /// Whether a `break` inside a loop body can escape that loop: unlabeled
-    /// breaks bind to the nearest enclosing loop or switch, so they only
-    /// count at the loop's own nesting depth; labeled breaks may target any
-    /// enclosing loop and conservatively always count. Function-likes capture
-    /// every break.
     fn loop_has_escaping_break(n: &Arc<Node>, direct: bool) -> bool {
         match n.kind {
             SyntaxKind::BreakStatement => {
@@ -13120,7 +10534,7 @@ impl Checker {
             | SyntaxKind::SetAccessor
             | SyntaxKind::Constructor => false,
             _ => {
-                // Nested loops and switches capture unlabeled breaks.
+
                 let nested = matches!(
                     n.kind,
                     SyntaxKind::WhileStatement
@@ -13144,13 +10558,11 @@ impl Checker {
         }
     }
 
-    /// Whether a function body contains any `return` statement outside
-    /// nested function-likes — Go's binder `NodeFlagsHasExplicitReturn`.
     fn function_body_has_explicit_return(body: &Arc<Node>) -> bool {
         fn walk(n: &Arc<Node>) -> bool {
             match n.kind {
                 SyntaxKind::ReturnStatement => return true,
-                // Nested function-likes track their own return flags.
+
                 SyntaxKind::FunctionDeclaration
                 | SyntaxKind::FunctionExpression
                 | SyntaxKind::ArrowFunction
@@ -13173,11 +10585,6 @@ impl Checker {
         walk(body)
     }
 
-    /// TS6234: `x.prop()` where `prop` is a `get` accessor — the callee's
-    /// type (the getter's return type) has no call signatures, but the
-    /// intended fix is dropping the `()`, so the message says so. Mirrors
-    /// Go's `resolveErrorCall` → get-accessor special case. Returns true when
-    /// the diagnostic was emitted.
     fn report_get_accessor_call(&mut self, callee_expr: &Arc<Node>) -> bool {
         let crate::ast::NodeData::PropertyAccessExpression(pa) = &callee_expr.data else {
             return false;
@@ -13197,8 +10604,7 @@ impl Checker {
         let file = self.current_file.clone();
         self.diagnostics.add(crate::ast::Diagnostic::new(
             file,
-            // On the property NAME (Go anchors at the accessor name, e.g.
-            // `x.property()` reports on `property`).
+
             pa.name.loc,
             crate::diagnostics::messages_generated::
                 THIS_EXPRESSION_IS_NOT_CALLABLE_BECAUSE_IT_IS_A_GET_ACCESSOR_DID_YOU_MEAN_TO_USE_IT_WITHOUT,
@@ -13207,11 +10613,6 @@ impl Checker {
         true
     }
 
-    /// Whether a same-named symbol with TYPE meaning (interface/class/
-    /// enum/alias/type-param) is visible from the current scope — lib.d.ts
-    /// merges `interface X` + `declare var X` as one logical entity (though
-    /// our binder may keep separate symbols), and merged names are legal
-    /// type references.
     pub(crate) fn has_same_named_type_symbol(&self, name: &str) -> bool {
         let type_meaning = SymbolFlags::Interface
             | SymbolFlags::Class
@@ -13245,17 +10646,6 @@ impl Checker {
             .is_some_and(|s| s.flags.intersects(type_meaning))
     }
 
-
-    /// Whether a namespace/module symbol has a VALUE side: any exported or
-    /// local member with value meaning, following an `export =` target one
-    /// level (Go's export-assignment alias resolution).
-    /// Whether a namespace symbol may appear as a VALUE: Go marks a module
-    /// ValueModule vs NamespaceModule at BIND time from its instance state,
-    /// so value meaning ≡ "some declaration is instantiated". Union with the
-    /// member-table scan (`namespace_has_value_side`) to stay conservative —
-    /// the scan misses alias members whose target carries a value (an
-    /// `export import a = A` to an instantiated namespace makes the outer
-    /// namespace a value), while the state machine covers exactly those.
     pub(crate) fn namespace_usable_as_value(&mut self, namespace: &Arc<Symbol>) -> bool {
         let state_instantiated = namespace
             .declarations
@@ -13279,9 +10669,7 @@ impl Checker {
             table.iter().any(|(name, s)| {
                 name != "export="
                     && s.flags.intersects(value_flags)
-                    // Skip mis-routed parameter/signature symbols (a
-                    // method's parameters can land in the container's
-                    // members table; they don't make the namespace a value).
+
                     && s.declarations.iter().any(|d| {
                         !matches!(
                             d.kind,
@@ -13293,10 +10681,7 @@ impl Checker {
         if has_value_member(&namespace.exports) || has_value_member(&namespace.members) {
             return true;
         }
-        // Nested modules bind into the module DECLARATION node's locals
-        // table (keyed by node id), not the symbol's members — scan those
-        // too ('declare namespace Foo.Bar { export var foo; }' makes Foo a
-        // value through Bar).
+
         for d in &namespace.declarations {
             if d.kind != SyntaxKind::ModuleDeclaration {
                 continue;
@@ -13322,9 +10707,7 @@ impl Checker {
                 return true;
             }
         }
-        // A nested namespace with its own value side makes this one a
-        // value too (`namespace Outer { export namespace Inner { export
-        // class C {} } }` — Outer is a value). Depth-limited recursion.
+
         if self.namespace_value_depth < 4 {
             self.namespace_value_depth += 1;
             let nested = namespace
@@ -13341,9 +10724,7 @@ impl Checker {
                 return true;
             }
         }
-        // Ambient namespaces implicitly export their members — the binder
-        // routes un-exported `declare namespace` members to the module
-        // node's LOCALS, so scan those too.
+
         for decl in &namespace.declarations {
             if decl.kind == SyntaxKind::ModuleDeclaration
                 && let Some(locals) = self.program.symbol_map().locals.get(&decl.id())
@@ -13354,7 +10735,7 @@ impl Checker {
                 return true;
             }
         }
-        // `export = <entity>`: the namespace is value-ful iff the target is.
+
         if let Some(export_equals) = namespace.exports.get("export=") {
             for decl in &export_equals.declarations {
                 if let crate::ast::NodeData::ExportAssignment(ea) = &decl.data
@@ -13364,8 +10745,7 @@ impl Checker {
                         SyntaxKind::Identifier | SyntaxKind::QualifiedName
                     )
                 {
-                    // The export= expression lives inside the namespace's
-                    // body — resolve it in that scope.
+
                     let scope_decl = namespace
                         .declarations
                         .iter()
@@ -13390,16 +10770,6 @@ impl Checker {
         false
     }
 
-
-    /// The type of a named-import alias: resolve the import's module,
-    /// look the imported name up in its exports/members/locals, following
-    /// an `export = <entity>` target one level.
-    /// Resolve a module member to its TARGET symbol, chasing re-export
-    /// clauses (`export { x } from "..."`, `export { x as y } from "..."`)
-    /// to the declaring module (depth-capped, cycle-safe). The binder
-    /// leaves cross-file re-export aliases' `export_symbol` unlinked, so
-    /// the clause text is consulted when the direct lookup returns an
-    /// ExportSpecifier-only alias.
     pub(crate) fn resolve_module_member_symbol(
         &mut self,
         module_sym: &Arc<Symbol>,
@@ -13411,19 +10781,14 @@ impl Checker {
         }
         let sym = self.namespace_member_recursive(module_sym, name);
         if let Some(sym) = &sym {
-            // Linked alias chain (same-file export clauses, import= chains).
+
             if let Some(target) = &sym.export_symbol
                 && !Arc::ptr_eq(target, &sym)
             {
                 return Some(Arc::clone(target));
             }
         }
-        // Unlinked re-export clause: match the EXPORTED name against the
-        // clause and recurse into the referenced module with the IMPORTED
-        // name. A from-less clause (`export { T as U }`) re-exports a
-        // module-local name — the referenced module is the module itself
-        // (Go getTargetOfExportSpecifier resolves the entity in the
-        // containing file's scope when there is no module specifier).
+
         let mut clause_hits: Vec<(String, Option<String>)> = Vec::new();
         self.for_each_module_statement(module_sym, |stmt| {
             if let crate::ast::NodeData::ExportDeclaration(d) = &stmt.data
@@ -13456,7 +10821,7 @@ impl Checker {
         });
         for (imported, module_text) in clause_hits {
             let target_module = match module_text {
-                // `export { T as U }` — local rename, same module.
+
                 None => Arc::clone(module_sym),
                 Some(text) => match self.resolve_module_spec_from(module_sym, &text) {
                     Some(m) => m,
@@ -13472,9 +10837,6 @@ impl Checker {
         sym
     }
 
-    /// Resolve a module specifier seen inside `base_module`'s body: relative
-    /// specifiers resolve against the DECLARING module's directory (not the
-    /// file currently being checked), bare names go through the ambient map.
     pub(crate) fn resolve_module_spec_from(
         &self,
         base_module: &Arc<Symbol>,
@@ -13497,20 +10859,13 @@ impl Checker {
         self.resolve_module_file_symbol_in(&dir, specifier)
     }
 
-    /// The namespace type of a dynamic `import("m")` call expression, when
-    /// the callee is the bare `import` keyword and the first argument is a
-    /// string-literal specifier. Mirrors Go's `checkCallExpression` dynamic
-    /// import typing (`Promise<typeof m>` — we return the namespace side
-    /// directly for `await` unwrapping).
     fn type_of_dynamic_import(&mut self, node: &Arc<Node>) -> Option<Arc<Type>> {
         let spec = self.spec_of_dynamic_import_call(node)?;
         if spec.is_empty() {
             return None;
         }
         let cur = self.current_file.clone()?;
-        // Same module-symbol resolution chain as static imports: ambient /
-        // relative table first, real resolver (package names, exports
-        // patterns) as fallback.
+
         let module_sym = match self.resolve_module_file_symbol(&spec) {
             Some(s) => s,
             None => {
@@ -13526,9 +10881,6 @@ impl Checker {
         Some(self.resolve_namespace_type(&module_sym))
     }
 
-    /// The string specifier of a dynamic `import("m")` call, when `node` is
-    /// that call expression (callee = bare `import` keyword, first argument
-    /// a string literal).
     fn spec_of_dynamic_import_call(&self, node: &Arc<Node>) -> Option<String> {
         if node.kind != SyntaxKind::CallExpression {
             return None;
@@ -13548,10 +10900,7 @@ impl Checker {
     }
 
     pub(crate) fn type_of_imported_symbol(&mut self, symbol: &Arc<Symbol>) -> Option<Arc<Type>> {
-        // `import x = require("m")` — the alias's value IS the module
-        // instance (Go `getTypeOfImportEqualsDeclaration` → module
-        // namespace type). `import x = NS.Y` resolves the entity name's
-        // value type one level.
+
         if let Some(decl) = symbol
             .declarations
             .iter()
@@ -13591,10 +10940,7 @@ impl Checker {
                         sym
                     }
                 };
-                // A module with `export = T` answers through the ASSIGNED
-                // entity's type, not its raw export face
-                // (aliasOnMergedModuleInterface: `export = B` where B is a
-                // namespace+interface merge — `z.bar` resolves on B).
+
                 if let Some(eq) =
                     module_sym.exports.get(crate::ast::INTERNAL_SYMBOL_NAME_EXPORT_EQUALS)
                 {
@@ -13624,12 +10970,7 @@ impl Checker {
                                 return Some(self.get_type_of_symbol(&t));
                             }
                         } else {
-                            // FILE module (`exportAssignmentEnum_A.ts`: file
-                            // top-level `export = E`): resolve the entity
-                            // name from the module's member face (top-level
-                            // declarations live in the file symbol's
-                            // members/locals), then walk remaining
-                            // qualified-name segments.
+
                             let mut segments: Vec<String> = Vec::new();
                             let mut cur = &ea.expression;
                             loop {
@@ -13674,8 +11015,7 @@ impl Checker {
                 }
                 return Some(self.resolve_namespace_type(&module_sym));
             }
-            // Entity-name form `import x = NS.Y` — the aliased symbol's
-            // value type.
+
             let target = &ied.module_reference;
             let t = self.get_type_of_node(target);
             if t.flags.contains(TypeFlags::Any)
@@ -13691,14 +11031,14 @@ impl Checker {
             .iter()
             .find(|d| d.kind == SyntaxKind::ImportSpecifier)?;
         let name = match &decl.data {
-            // `import { default as Foo }` imports the PROPERTY name.
+
             crate::ast::NodeData::ImportSpecifier(d) => d
                 .property_name
                 .as_ref()
                 .map_or_else(|| d.name.text().to_string(), |p| p.text().to_string()),
             _ => return None,
         };
-        // Walk up through NamedImports/ImportClause to the ImportDeclaration.
+
         let mut import_decl = decl.parent.as_ref()?;
         while !matches!(import_decl.data, crate::ast::NodeData::ImportDeclaration(_)) {
             import_decl = import_decl.parent.as_ref()?;
@@ -13711,9 +11051,7 @@ impl Checker {
         let module_sym = match self.resolve_module_file_symbol(&module_spec) {
             Some(s) => s,
             None => {
-                // Bare package names ("inner", "pkg/sub") and node_modules
-                // layouts need the REAL resolver — resolve against the
-                // IMPORTING file and fetch the loaded file's symbol.
+
                 let Some(cur) = self.current_file.clone() else {
                     return None;
                 };
@@ -13734,8 +11072,7 @@ impl Checker {
             }
         };
         let Some(member) = self.resolve_module_member_symbol(&module_sym, &name, 8) else {
-            // allowSyntheticDefaultImports: a missing `default` falls back
-            // to the module namespace (any-typed here).
+
             if name == "default"
                 && self.program.options().allow_synthetic_default_imports.is_true()
             {
@@ -13761,21 +11098,10 @@ impl Checker {
                 _ => {}
             }
         }
-        // Variables (and any other value member): the member symbol's
-        // declared type — annotation first, initializer fallback — resolves
-        // on demand through the generic symbol-type path. Without this,
-        // `import { n } from "./other"` typed `n` as `any` and assignment
-        // checks against the import silently passed.
+
         Some(self.get_type_of_symbol(&member))
     }
 
-    /// Look up `name` in a namespace/module's exports, members, and the
-    /// declaration's locals (ambient namespaces), following an `export =`
-    /// target one level.
-    /// A member of an `export = { x, y }` object-literal export assignment:
-    /// the literal's property symbol (all object-literal properties are
-    /// exported through the assignment — visibility-safe, unlike a full
-    /// namespace-members chase).
     fn object_literal_export_member(
         &self,
         namespace: &Arc<Symbol>,
@@ -13799,10 +11125,6 @@ impl Checker {
         None
     }
 
-    /// The type arguments of the ENCLOSING class's `extends Base<Args>`
-    /// clause when `Base` resolves to `base_sym` — the instantiation a
-    /// `super(...)` call is checked under (`class D extends B<number>` →
-    /// super's constructor parameters are B<number>'s).
     fn heritage_type_arguments_for_base(
         &mut self,
         base_sym: &Arc<Symbol>,
@@ -13861,15 +11183,13 @@ impl Checker {
                 return Some(Arc::clone(s));
             }
         }
-        // `export = <entity>`: resolve the target and look there.
+
         let export_equals = namespace.exports.get("export=")?;
         for d in &export_equals.declarations {
             if let crate::ast::NodeData::ExportAssignment(ea) = &d.data
                 && ea.is_export_equals
             {
-                // `export = { x, y }` — the target is an object literal:
-                // the member is the literal's property symbol
-                // (`export = { x: foo1 }` contributes `x`'s property).
+
                 if let crate::ast::NodeData::ObjectLiteralExpression(ol) = &ea.expression.data {
                     for prop in ol.properties.iter() {
                         if prop.text() == name
@@ -13897,8 +11217,7 @@ impl Checker {
                     t
                 });
                 if let Some(mut target) = target {
-                    // `import X = NS` entity-name aliases (an `export =`
-                    // target commonly is one) follow to the namespace.
+
                     for _ in 0..4 {
                         if target.flags.contains(SymbolFlags::ValueModule) {
                             break;
@@ -13939,9 +11258,6 @@ impl Checker {
         None
     }
 
-
-    /// The dotted full path of a namespace symbol — from its
-    /// (nested) ModuleDeclaration chain: `foo.bar.baz`.
     fn namespace_full_path(symbol: &Arc<Symbol>) -> String {
         let decl = symbol
             .declarations
@@ -13962,14 +11278,8 @@ impl Checker {
         parts.join(".")
     }
 
-    /// TS2352: `expr as T` where neither type sufficiently overlaps the
-    /// other. Mirrors Go's `checkAssertionDeferred`: literal source types
-    /// are widened first, and the types must be comparable (approximated
-    /// here as assignable in either direction — Go's
-    /// `isTypeComparableTo`); `as const` and error/any/unknown/never types
-    /// are exempt.
     fn check_assertion_overlap(&mut self, node: &Arc<Node>, expr: &Arc<Node>, type_node: &Arc<Node>) {
-        // `x as const` is a const assertion, not a cast — exempt.
+
         if type_node.kind == SyntaxKind::TypeReference && type_node.text() == "const" {
             return;
         }
@@ -13990,10 +11300,7 @@ impl Checker {
         } else {
             expr_type
         };
-        // Go's checkAssertion uses `isTypeComparableTo` in both directions
-        // (comparability widens primitive literals: `{n: 1}` overlaps IFoo
-        // because number ~ 1); plain assignability over-reports casts of
-        // partial object literals.
+
         let comparable = self.is_type_comparable_to(&expr_base, &target_type)
             || self.is_type_comparable_to(&target_type, &expr_base);
         if !comparable {
@@ -14007,10 +11314,7 @@ impl Checker {
                     CONVERSION_OF_TYPE_0_TO_TYPE_1_MAY_BE_A_MISTAKE_BECAUSE_NEITHER_TYPE_SUFFICIENTLY_OVERLAPS_WITH_THE_OTHER_IF_THIS_WAS_INTENTIONAL_CONVERT_THE_EXPRESSION_TO_UNKNOWN_FIRST,
                 vec![source_str, target_str],
             );
-            // Baseline anchoring (arrayCast): when the cast's failure is an
-            // object-literal excess property (possibly inside an array
-            // literal), the 2352 anchors at the property name and carries
-            // the excess-property line as its elaboration chain entry.
+
             if let Some((prop_loc, prop_name, elem_target_str)) =
                 self.assertion_excess_detail(&expr, &expr_base, &target_type)
             {
@@ -14027,18 +11331,13 @@ impl Checker {
         }
     }
 
-    /// The excess-property detail for a failed cast: find the first object
-    /// literal in `expr` (directly, or as the elements of an array literal)
-    /// with a property absent from the corresponding target type (element
-    /// type when both sides are arrays). Returns (property location,
-    /// property name, target type string).
     fn assertion_excess_detail(
         &mut self,
         expr: &Arc<Node>,
         expr_type: &Arc<Type>,
         target_type: &Arc<Type>,
     ) -> Option<(TextRange, String, String)> {
-        // Peel one array level on both sides (`<T[]>[{...}]`).
+
         let (elem_source, elem_target, literal_node) = match &expr.data {
             NodeData::ObjectLiteralExpression(_) => {
                 (Arc::clone(expr_type), Arc::clone(target_type), Arc::clone(expr))
@@ -14060,7 +11359,6 @@ impl Checker {
         Some((prop_loc, prop_name, elem_target_str))
     }
 
-    /// The element type of an array/readonly-array type, if `t` is one.
     fn element_type_of(&self, t: &Arc<Type>) -> Option<Arc<Type>> {
         if t.flags.contains(TypeFlags::Object) {
             if let TypeData::Object(obj) = &t.data
@@ -14072,10 +11370,6 @@ impl Checker {
         None
     }
 
-    /// TS1183: an accessor (or method) with a body inside an interface or a
-    /// type literal is an implementation in an ambient/type context. Mirrors
-    /// Go's `checkGrammarAccessor` body-present branch. Reported on the body
-    /// node, like Go.
     fn check_accessor_in_type_context(&mut self, member: &Arc<Node>) {
         let body = match &member.data {
             crate::ast::NodeData::GetAccessorDeclaration(d) => d.body.clone(),
@@ -14094,17 +11388,8 @@ impl Checker {
         }
     }
 
-    /// Interface-member checks: signature parameters (TS2369 parameter
-    /// properties, TS7006 implicit any), implicit-any returns (TS7010 for
-    /// methods, TS7013 construct / TS7010-analog call signatures — Go's
-    /// `reportImplicitAny` switch), and type annotations that hold
-    /// function-type nodes. Mirrors Go's `checkInterfaceDeclaration` →
-    /// `checkSourceElement` walk over members.
     fn check_interface_members(&mut self, members: &NodeList) {
-        // TS2300: duplicate interface member names — method signatures
-        // merge (overloads); any other same-name member pair reports on
-        // EVERY occurrence (Go's checkObjectTypeForDuplicateDeclarations).
-        // Names normalize string-literal keys ('"artist"' == 'artist').
+
         {
             let mut seen: std::collections::HashMap<String, Vec<&Arc<Node>>> =
                 std::collections::HashMap::new();
@@ -14121,8 +11406,7 @@ impl Checker {
                 }
             }
             for (_, group) in seen.iter() {
-                // Method-signature groups are overload sets; get/set
-                // accessor pairs are legal (lib.dom declares both).
+
                 let all_methods = group
                     .iter()
                     .all(|m| m.kind == SyntaxKind::MethodSignature);
@@ -14168,7 +11452,7 @@ impl Checker {
                     if let Some(tn) = &d.type_node {
                         self.check_type_annotation(tn);
                     }
-                    // TS7010: no return-type annotation on a method signature.
+
                     if self.no_implicit_any
                         && d.type_node.is_none()
                         && d.name.kind == SyntaxKind::Identifier
@@ -14206,8 +11490,7 @@ impl Checker {
                     if let Some(tn) = type_node {
                         self.check_type_annotation(tn);
                     }
-                    // TS7013 (construct) / TS7010-analog (call): signature
-                    // without a return-type annotation implicitly returns any.
+
                     if self.no_implicit_any && type_node.is_none() {
                         let message = if member.kind == SyntaxKind::ConstructSignature {
                             crate::diagnostics::messages_generated::
@@ -14227,8 +11510,7 @@ impl Checker {
                         self.check_type_annotation(&d.type_node);
                     }
                 }
-                // TS1183: accessors with bodies are implementations, which an
-                // interface (ambient context) cannot contain.
+
                 SyntaxKind::GetAccessor | SyntaxKind::SetAccessor => {
                     self.check_accessor_in_type_context(member);
                 }
@@ -14237,13 +11519,6 @@ impl Checker {
         }
     }
 
-    /// TS2813/TS2814: a NON-ambient class declaration cannot share a symbol
-    /// with function declarations — the class "cannot implement overload
-    /// list" (TS2813, on each class name) and functions with bodies can only
-    /// merge with ambient classes (TS2814, on each function name). Ambient
-    /// classes (`declare class X` + `function X` declarations) merge cleanly.
-    /// Go: checkFunctionOrConstructorSymbol's `hasNonAmbientClass && Flags&
-    /// Function != 0` arm — reported on every declaration of the symbol.
     fn check_class_function_merge(&mut self, statements: &[Arc<Node>]) {
         let mut groups: std::collections::BTreeMap<String, Vec<Arc<Node>>> =
             std::collections::BTreeMap::new();
@@ -14304,13 +11579,6 @@ impl Checker {
         }
     }
 
-    /// `check_statement_function_overloads` over a statement list AND the
-    /// nested statement lists of blocks and namespace bodies — overloads
-    /// declared inside `{ ... }` blocks or `namespace N { ... }` follow the
-    /// same implementation-must-follow rule (Go's check is symbol-based and
-    /// covers declarations wherever they appear). Skipped entirely in
-    /// declaration files, where overload groups need no implementation
-    /// (Go's `inAmbientContext` covers everything in a .d.ts).
     fn check_function_overloads_recursive(&mut self, statements: &[Arc<Node>]) {
         if self
             .current_file
@@ -14327,9 +11595,7 @@ impl Checker {
                     self.check_function_overloads_recursive(&d.statements.nodes);
                 }
                 crate::ast::NodeData::ModuleDeclaration(d) => {
-                    // Ambient modules (`declare module "..."` / `declare
-                    // namespace N`): everything inside is ambient — overload
-                    // groups need no implementation.
+
                     if d
                         .modifiers
                         .as_ref()
@@ -14355,16 +11621,8 @@ impl Checker {
         }
     }
 
-    /// Top-level function overload validation — the statement-list sibling of
-    /// `check_class_member_overloads` (Go funnels both through
-    /// `checkFunctionOrConstructorSymbolWorker`): same-named overload
-    /// signatures must be immediately followed by their implementation.
-    /// Ambient (`declare function`) signatures are exempt from the
-    /// implementation requirement.
     fn check_statement_function_overloads(&mut self, statements: &[Arc<Node>]) {
-        // Ambient function declarations (`declare function f();`, or any
-        // function inside a `declare namespace` / .d.ts) are exempt from
-        // the implementation-must-follow rule.
+
         let ambient_context = self.ambient_context_depth > 0
             || self
                 .current_file
@@ -14416,12 +11674,7 @@ impl Checker {
                     self.report_function_impl_expected(&statements, last);
                 }
             } else {
-                // TS2394: an overload signature must be satisfiable by the
-                // implementation signature (Go's
-                // isImplementationCompatibleWithOverload — simplified to
-                // the arity rule: the implementation's required-parameter
-                // count must not exceed the overload's parameter count,
-                // unless the implementation takes a rest parameter).
+
                 let fn_params = |f: &Arc<Node>| -> (usize, bool) {
                     if let crate::ast::NodeData::FunctionDeclaration(d) = &f.data {
                         let mut rest = false;
@@ -14432,8 +11685,7 @@ impl Checker {
                                         rest = true;
                                         break;
                                     }
-                                    // optional params don't affect the
-                                    // rest-only arity decision
+
                                     let _ = pd.question_token.is_none();
                                 }
                             }
@@ -14455,7 +11707,7 @@ impl Checker {
                     .unwrap_or_else(|| idxs[idxs.len() - 1]);
                 let (_impl_total, impl_rest) = fn_params(&statements[impl_idx]);
                 let impl_required = {
-                    // recompute required-only count
+
                     let mut n = 0;
                     if let crate::ast::NodeData::FunctionDeclaration(d) = &statements[impl_idx].data
                     {
@@ -14471,10 +11723,7 @@ impl Checker {
                     n
                 };
                 if !impl_rest {
-                    // Duplicate overload signatures collapse (Go's
-                    // getSignaturesOfSymbol dedupes identical consecutive
-                    // signatures — `function f(x: any); function f(x: any);`
-                    // is ONE signature for diagnostics).
+
                     let mut seen_shapes: Vec<String> = Vec::new();
                     for &i in &idxs {
                         if i == impl_idx {
@@ -14537,9 +11786,6 @@ impl Checker {
         }
     }
 
-    /// `reportImplementationExpectedError` for statement-level function
-    /// declarations: TS2389 when a differently-named implementation follows
-    /// the signature immediately, TS2391 otherwise.
     fn report_function_impl_expected(&mut self, statements: &[Arc<Node>], idx: usize) {
         let node = Arc::clone(&statements[idx]);
         let (name_text, name_loc) = match &node.data {
@@ -14586,9 +11832,6 @@ impl Checker {
         self.diagnostics.add(diagnostic);
     }
 
-    /// TS2309 helper: `export =` conflicts with any other exported VALUE
-    /// element in the module (statement-level approximation of Go's
-    /// `hasExportedMembersOfKind(SymbolFlagsValue)`).
     fn check_export_assignment_conflicts(&mut self, statements: &[Arc<Node>]) {
         let export_equals = statements.iter().find(|s| {
             matches!(
@@ -14624,8 +11867,6 @@ impl Checker {
         }
     }
 
-    /// TS 1.0 spec 3.6.1: predefined type keywords are reserved and cannot
-    /// name user-defined types. Class-likes report TS2414, enums TS2431.
     fn check_reserved_type_name(&mut self, name: &Arc<Node>, message: &'static crate::diagnostics::Message) {
         const RESERVED: &[&str] = &[
             "any", "unknown", "never", "number", "bigint", "boolean", "string", "symbol",
@@ -14644,9 +11885,6 @@ impl Checker {
         }
     }
 
-    /// Go `isTypeAssignableToKind` (the slice this port needs): flags hit,
-    /// else assignability to the corresponding intrinsic type. Used by
-    /// `check_computed_property_name` for the string/number/symbol family.
     fn is_type_assignable_to_kind_snf(&mut self, source: &Arc<Type>, kind: TypeFlags) -> bool {
         if source.flags.intersects(kind) {
             return true;
@@ -14670,13 +11908,6 @@ impl Checker {
         false
     }
 
-    /// Port of Go `checkComputedPropertyName` (checker.go ~L26873): a
-    /// computed property name's expression must be typed string / number /
-    /// symbol / any (unions of these, enums, and unknown are allowed via
-    /// assignability), else TS2464 at the name node. `[k in T]` under a
-    /// type literal / class-like / interface member (non-accessor) is the
-    /// mapped-type-only form — it types as errorType with no diagnostic
-    /// here (the grammar checker reports it).
     fn check_computed_property_name(&mut self, name: &Arc<Node>) {
         if name.kind != SyntaxKind::ComputedPropertyName {
             return;
@@ -14689,9 +11920,6 @@ impl Checker {
             _ => return,
         };
 
-        // Go `isInvalidComputedPropertyName`: member (name.parent) sits in a
-        // type literal / class-like / interface container, the name
-        // expression is an `in` binary, and the member is not an accessor.
         let invalid_in_form = matches!(&expr.data, crate::ast::NodeData::BinaryExpression(b)
             if b.operator_token.kind == SyntaxKind::InKeyword)
             && name.parent.as_ref().is_some_and(|member| {
@@ -14715,8 +11943,6 @@ impl Checker {
             return;
         }
 
-        // Go runs checkExpression (which returns the type); our checker
-        // splits the semantic walk from type computation — run both.
         self.check_expression(&expr);
         let t = self.get_type_of_node(&expr);
 
@@ -14744,8 +11970,6 @@ impl Checker {
         }
     }
 
-    /// Name node of a method/accessor/property-like member (for the computed
-    /// property name check dispatch).
     fn member_name_node(node: &Arc<Node>) -> Option<Arc<Node>> {
         match &node.data {
             crate::ast::NodeData::MethodDeclaration(d) => Some(Arc::clone(&d.name)),
@@ -14760,11 +11984,6 @@ impl Checker {
         }
     }
 
-    /// Literal key type of a member name for index-applicability: computed
-    /// names use the expression's literal type (string/numeric literal) or
-    /// its resolved type; plain names parse as number when possible, else
-    /// string literal (Go `getLiteralTypeFromProperty` /
-    /// `getTypeOfExpression` on computed expressions).
     fn property_name_key_type(&mut self, name: &Arc<Node>) -> Option<Arc<Type>> {
         match &name.data {
             crate::ast::NodeData::ComputedPropertyName(data) => {
@@ -14777,8 +11996,7 @@ impl Checker {
                         Some(self.get_number_literal_type(jsnum::Number::from_string(&n.text)))
                     }
                     _ => {
-                        // Non-literal computed name (e.g. `1 << 6`, calls):
-                        // use the expression's type.
+
                         Some(self.get_type_of_node(expr))
                     }
                 }
@@ -14800,12 +12018,6 @@ impl Checker {
         }
     }
 
-    /// Display form of a property name for the TS2411 message: computed
-    /// names render `[<expression source text>]` (official baselines show
-    /// the unevaluated expression, e.g. `'[1 << 6]'`), plain names as-is.
-    /// The text is sliced from the node's OWN source file — the checked
-    /// declaration and the property's declaration may live in different
-    /// files (inherited members).
     fn property_name_display(&self, name: &Arc<Node>) -> String {
         if name.kind == SyntaxKind::ComputedPropertyName {
             if let Some(text) = self.node_source_text(name) {
@@ -14819,9 +12031,6 @@ impl Checker {
         name.text().to_string()
     }
 
-    /// Source text of `node`'s range, taken from the source file the node
-    /// belongs to (via the parent chain root). `None` when the file or the
-    /// byte range can't be located (e.g. synthesized nodes).
     pub(crate) fn node_source_text(&self, node: &Arc<Node>) -> Option<String> {
         let mut root: &Arc<Node> = node;
         while let Some(p) = root.parent.as_ref() {
@@ -14838,10 +12047,6 @@ impl Checker {
         None
     }
 
-    /// The declared type of one member declaration for the TS2411 index
-    /// check: annotations resolve directly; accessors use the getter's
-    /// return type (annotation or body inference) / the setter's parameter
-    /// type; initializer-less properties fall back to the symbol type.
     fn member_declared_type_for_index_check(&mut self, member: &Arc<Node>) -> Option<Arc<Type>> {
         match &member.data {
             crate::ast::NodeData::GetAccessorDeclaration(d) => Some(
@@ -14876,25 +12081,12 @@ impl Checker {
         }
     }
 
-    /// Port of Go `checkIndexConstraints` (checker.go ~L4834), the TS2411
-    /// family: every property of a type with index signatures must be
-    /// assignable to the applicable index signature's value type. Three
-    /// property sources (Go combines the first two):
-    ///  - named properties of the resolved type (locality picks the error
-    ///    node: local property decl → local index decl → interface decl);
-    ///  - computed-name members declared on `declaration` itself (Go's
-    ///    `!hasBindableName(member)` loop);
-    ///  - computed-name members inherited from base declarations, which our
-    ///    binder collapses into the "" member slot — walked from the base
-    ///    class/interface declarations so the local-index error-node path
-    ///    (Go's `localIndexDeclaration`) still fires.
     fn check_index_constraints(&mut self, t: &Arc<Type>, declaration: &Arc<Node>) {
         let index_infos = self.get_index_infos_of_type(t);
         if index_infos.is_empty() {
             return;
         }
-        // Index signatures declared directly on this declaration (for the
-        // inherited-property error-node fallback).
+
         let local_index: Option<Arc<crate::checker::IndexInfo>> = index_infos
             .iter()
             .find(|info| {
@@ -14906,8 +12098,6 @@ impl Checker {
             .cloned();
         let is_interface = declaration.kind == SyntaxKind::InterfaceDeclaration;
 
-        // A) Inherited named properties (declarations whose parent is NOT
-        // this declaration — local members are handled by B).
         for prop in self.get_properties_of_type(t) {
             let Some(first_decl) = prop.declarations.first().cloned() else {
                 continue;
@@ -14917,13 +12107,13 @@ impl Checker {
                 .as_ref()
                 .is_some_and(|p| Arc::ptr_eq(p, declaration))
             {
-                continue; // local — B covers it
+                continue;
             }
             let Some(name) = Self::member_name_node(&first_decl) else {
                 continue;
             };
             if name.kind == SyntaxKind::ComputedPropertyName {
-                continue; // handled by C (our binder collapses them)
+                continue;
             }
             let Some(key_type) = self.property_name_key_type(&name) else {
                 continue;
@@ -14943,10 +12133,6 @@ impl Checker {
             );
         }
 
-        // B) Members declared on this declaration: every non-index member,
-        // named or computed. Named members take their type from the bound
-        // member symbol, falling back to the resolved type's synthetic
-        // property table (interface signatures are rebuilt declaration-less).
         let props_by_name: std::collections::HashMap<String, Arc<Symbol>> = self
             .get_properties_of_type(t)
             .into_iter()
@@ -14973,9 +12159,7 @@ impl Checker {
                 continue;
             };
             let prop_type = if name.kind != SyntaxKind::ComputedPropertyName {
-                // Named member: prefer the resolved type's synthetic entry
-                // (the same source the type builder resolved); fall back to
-                // the declaration's own type.
+
                 match props_by_name.get(name.text()) {
                     Some(sym) => self.get_type_of_symbol(sym),
                     None => match self.member_declared_type_for_index_check(member) {
@@ -14984,8 +12168,7 @@ impl Checker {
                     },
                 }
             } else {
-                // Computed names are skipped by the type builder (empty
-                // name): take the type straight from the declaration.
+
                 match self.member_declared_type_for_index_check(member) {
                     Some(t) => t,
                     None => match &member_symbol {
@@ -15009,10 +12192,6 @@ impl Checker {
             );
         }
 
-        // C) Computed-name members inherited from base declarations — our
-        // instance-type merge replaces the "" property slot, so walk base
-        // declaration members directly. Errors land on the locally declared
-        // index signature (Go's localIndexDeclaration node).
         let mut bases: Vec<Arc<Node>> = Vec::new();
         let mut worklist: Vec<Arc<Node>> = vec![Arc::clone(declaration)];
         let mut guard = 0;
@@ -15107,11 +12286,6 @@ impl Checker {
         }
     }
 
-    /// One property vs the applicable index infos (Go
-    /// `checkIndexConstraintForProperty`). `local_name` supplies the local
-    /// declaration's name node when the property is declared on the checked
-    /// declaration; otherwise the local index declaration (or the interface
-    /// declaration) is the error node.
     fn check_index_constraint_for_property(
         &mut self,
         _t: &Arc<Type>,
@@ -15138,8 +12312,7 @@ impl Checker {
             if self.is_type_assignable_to(prop_type, &info_value) {
                 continue;
             }
-            // Error node: local property name → local index declaration →
-            // interface declaration.
+
             let (error_loc, related_index_decl) = if let Some(n) = &local_name {
                 (n.loc, None)
             } else if let Some(idx) = &local_index {
@@ -15181,18 +12354,13 @@ impl Checker {
     }
 
     fn check_class_member(&mut self, node: &Arc<Node>) {
-        // Grammar check on the member's modifiers (TS1248 `const` member,
-        // duplicate modifiers, etc.) — Go's checkPropertyDeclaration /
-        // checkMethodDeclaration call checkGrammarModifiers per member.
+
         self.check_grammar_modifiers(node);
-        // TS2392: multiple constructor implementations in one class.
+
         if node.kind == SyntaxKind::Constructor {
             self.check_multiple_constructor_implementations(node);
         }
-        // TS2300: same-name class members that can't merge (two properties,
-        // two methods of identical shape, property+method). Getter/setter
-        // pairs and method overloads are exempt (Go's
-        // checkClassMemberDuplicates through resolveDeclaredMembers).
+
         {
             let class_node = node.parent.clone();
             if let Some(cls) = &class_node
@@ -15209,10 +12377,7 @@ impl Checker {
                     _ => (String::new(), node.loc),
                 };
                 if !my_name.is_empty() && my_name.starts_with('#') {
-                    // Private-name duplicates: a static and an instance
-                    // member sharing one private name is TS2804 (they share
-                    // the class's lexical scope). Anchored at the LATER
-                    // declaration's name, matching the checked-in baseline.
+
                     let i_am_static = node.has_syntactic_modifier(ModifierFlags::Static);
                     let conflict = cd.members.iter().any(|m| {
                         if m.loc.pos() >= node.loc.pos() {
@@ -15234,12 +12399,7 @@ impl Checker {
                     }
                 }
                 if !my_name.is_empty() && !my_name.starts_with('#') {
-                    // Conflicting same-name pairs report TS2300 on BOTH
-                    // declarations: property+method (either order — a
-                    // method set with any body vs a property), and
-                    // property+property. Legal pairs: accessor pairs,
-                    // method-overload sets (no two bodies), and a lone
-                    // method followed by its overloads.
+
                     let kind_of = |m: &Arc<Node>| match &m.data {
                         crate::ast::NodeData::PropertyDeclaration(_) => "prop",
                         crate::ast::NodeData::MethodDeclaration(d) => {
@@ -15275,22 +12435,17 @@ impl Checker {
                             ("prop", "prop") => true,
                             ("prop", "method-body") | ("prop", "method-sig") => true,
                             ("method-body", "prop") | ("method-sig", "prop") => true,
-                            // method + method: only double-bodied conflict
+
                             ("method-body", "method-body") => true,
                             _ => false,
                         }
                     });
-                    // Emission loci (official): method+property pairs
-                    // report at the METHOD side only; property+property
-                    // at the SECOND declaration.
-                    // Method+property conflicts report on the PROPERTY
-                    // side only; property+property on the second.
+
                     let earlier_has_prop = cd.members.iter().any(|m| {
                         m.loc.pos() < node.loc.pos()
                             && matches!(&m.data, crate::ast::NodeData::PropertyDeclaration(d) if d.name.text() == my_name)
                     });
-                    // Property-first pairs report BOTH sides; method-first
-                    // only the property side; property+property the second.
+
                     let earlier_has_method = cd.members.iter().any(|m| {
                         m.loc.pos() < node.loc.pos()
                             && matches!(&m.data, crate::ast::NodeData::MethodDeclaration(d) if d.name.text() == my_name)
@@ -15310,8 +12465,7 @@ impl Checker {
                             vec![my_name.clone()],
                         ));
                     }
-                    // Method-first pairs: the single TS2300 lands on the
-                    // PROPERTY side (the later declaration).
+
                     if dup && mine == "prop" && !report_here {
                         self.diagnostics.add(crate::ast::Diagnostic::new(
                             self.current_file.clone(),
@@ -15320,9 +12474,7 @@ impl Checker {
                             vec![my_name.clone()],
                         ));
                     }
-                    // Property-FIRST pairs (property earlier, method
-                    // now): official reports BOTH sides — emit at the
-                    // earlier property too.
+
                     if dup && matches!(mine, "method-body" | "method-sig") && theirs_all_prop {
                         if let Some(earlier) = cd.members.iter().find(|m| {
                             m.loc.pos() < node.loc.pos()
@@ -15347,10 +12499,7 @@ impl Checker {
                             }
                         }
                     }
-                    // TS2717: two PROPERTY declarations with different
-                    // types (or method-then-property) — reported on the
-                    // LATER declaration, phrased with the FIRST
-                    // declaration's type. Runs on the later PROPERTY.
+
                     if dup && mine == "prop" {
                         let first = cd.members.iter().find(|m| {
                             m.loc.pos() < node.loc.pos()
@@ -15427,17 +12576,11 @@ impl Checker {
         }
         match node.kind {
             SyntaxKind::PropertyDeclaration => {
-                // Only check the initializer; the name and type are
-                // declarations/types.
-                // (TS2564 is handled class-level by `check_property_initialization`
-                // — the upstream implementation with its assignment-scan helpers.)
+
                 if let crate::ast::NodeData::PropertyDeclaration(data) = &node.data {
-                    // Computed names get the TS2464 check (Go
-                    // checkVariableLikeDeclaration).
+
                     self.check_computed_property_name(&data.name);
-                    // TS1267: an abstract property cannot have an
-                    // initializer — anchored at the name (Go
-                    // checkPropertyDeclaration).
+
                     if node.has_syntactic_modifier(ModifierFlags::Abstract)
                         && data.initializer.is_some()
                     {
@@ -15449,11 +12592,7 @@ impl Checker {
                             vec![data.name.text().to_string()],
                         ));
                     }
-                    // Static members cannot reference class type parameters
-                    // (TS2322). Force-resolve the type annotation with the
-                    // `in_static_member_type` flag set so any TypeParameter
-                    // reference in the type tree is reported. Mirrors Go's
-                    // NameResolver `ast.IsStatic(lastLocation)` check.
+
                     if node.has_syntactic_modifier(ModifierFlags::Static) {
                         if let Some(type_node) = &data.type_node {
                             let prev = self.in_static_member_type;
@@ -15463,9 +12602,7 @@ impl Checker {
                         }
                     }
                     if let Some(init) = &data.initializer {
-                        // TS2662/TS2663 context for property initializers
-                        // (Go's `checkAndReportErrorForMissingPrefix` also
-                        // fires here — `a = inst` suggests `this.inst`).
+
                         let is_static = node.has_syntactic_modifier(ModifierFlags::Static);
                         self.this_container_stack.push(if is_static {
                             ThisContainerKind::StaticMember
@@ -15474,9 +12611,7 @@ impl Checker {
                         });
                         self.check_expression(init);
                         self.this_container_stack.pop();
-                        // Contextual element checks for annotated property
-                        // initializers (`public bar:{id:number} =
-                        // {id:5, name:"foo"}` — TS2353/TS2741/TS2322).
+
                         if let Some(tn) = &data.type_node {
                             let target = self.get_type_from_type_node(tn);
                             let anchor = data.name.loc;
@@ -15486,17 +12621,14 @@ impl Checker {
                 }
             }
             SyntaxKind::PropertySignature => {
-                // All type-level — no expressions to check. Computed names
-                // still get the TS2464 check (Go checkPropertySignature →
-                // checkVariableLikeDeclaration).
+
                 if let crate::ast::NodeData::PropertySignatureDeclaration(data) = &node.data {
                     self.check_computed_property_name(&data.name);
                 }
             }
             SyntaxKind::ClassStaticBlockDeclaration => {
                 if let crate::ast::NodeData::ClassStaticBlockDeclaration(data) = &node.data {
-                    // Static blocks are static `this` contexts (TS2662
-                    // suggestions apply; instance members aren't suggested).
+
                     self.this_container_stack
                         .push(ThisContainerKind::StaticMember);
                     self.check_statement(&data.body);
@@ -15507,17 +12639,13 @@ impl Checker {
             | SyntaxKind::Constructor
             | SyntaxKind::GetAccessor
             | SyntaxKind::SetAccessor => {
-                // Computed member names get the TS2464 string/number/symbol
-                // check (Go checkFunctionOrMethodDeclaration /
-                // checkAccessorDeclaration). Constructor names are never
-                // computed.
+
                 if node.kind != SyntaxKind::Constructor
                     && let Some(name) = Self::member_name_node(node)
                 {
                     self.check_computed_property_name(&name);
                 }
-                // Only check the body; the name, parameters, and return type
-                // are declarations/types.
+
                 let (body, type_node, parameters): (
                     Option<Arc<Node>>,
                     Option<Arc<Node>>,
@@ -15537,12 +12665,7 @@ impl Checker {
                     }
                     _ => (None, None, None),
                 };
-                // Ambient context (declare class / declare namespace / .d.ts):
-                // a body here is an implementation in an ambient context —
-                // TS1183 on the body's first token (Go's
-                // checkGrammarStatementInAmbientContext; the ambient flag
-                // propagates from any ambient ancestor, e.g. a declared
-                // namespace).
+
                 if body.is_some()
                     && (self
                         .enclosing_class_stack
@@ -15564,11 +12687,7 @@ impl Checker {
                         vec![],
                     ));
                 }
-                // Accessor grammar (Go `checkGrammarAccessor`): a body-less
-                // accessor in a non-ambient class needs `abstract` (TS1005
-                // "'{' expected" at the trailing `;`); an abstract accessor
-                // cannot have a body (TS1310); setter parameters reject
-                // rest/optional/initializer forms (TS1053/TS1090/TS1052).
+
                 if matches!(node.kind, SyntaxKind::GetAccessor | SyntaxKind::SetAccessor) {
                     let ambient = self
                         .enclosing_class_stack
@@ -15620,9 +12739,7 @@ impl Checker {
                         }
                     }
                     if body.is_none() && !ambient && !is_abstract && node.loc.end() > 0 {
-                        // Locate the trailing `;` (Go reports at
-                        // accessor.End()-1; our spans may swallow trailing
-                        // CRLF, so trim whitespace back first).
+
                         let file = self.current_file.clone();
                         let mut p = node.loc.end();
                         if let Some(f) = file.as_ref() {
@@ -15642,8 +12759,7 @@ impl Checker {
                             vec!["{".to_string()],
                         ));
                     }
-                    // TS1183 for accessor bodies in ambient contexts is
-                    // handled above (shared with methods/constructors).
+
                     if body.is_some() && is_abstract {
                         let file = self.current_file.clone();
                         self.diagnostics.add(crate::ast::Diagnostic::new(
@@ -15654,9 +12770,7 @@ impl Checker {
                             vec![],
                         ));
                     }
-                    // TS2676: a get/set pair must be uniformly abstract or
-                    // non-abstract (reported once, from the getter, on both
-                    // names — Go's checkAccessor pair check).
+
                     if node.kind == SyntaxKind::GetAccessor
                         && let Some(class) = self.enclosing_class_stack.last().cloned()
                         && let crate::ast::NodeData::GetAccessorDeclaration(gd) = &node.data
@@ -15693,13 +12807,7 @@ impl Checker {
                                     vec![],
                                 ));
                             }
-                            // The pair's property type: getter annotation,
-                            // else the setter's parameter annotation. A
-                            // getter without its own annotation checks its
-                            // return statements against the setter's param
-                            // type (Go's getTypeOfAccessors ordering). NB:
-                            // DIFFERENTLY annotated get/set types are legal —
-                            // no both-annotated conflict error.
+
                             let setter_param_type_node =
                                 if let crate::ast::NodeData::SetAccessorDeclaration(sd) =
                                     &setter_node.data
@@ -15723,12 +12831,7 @@ impl Checker {
                             }
                         }
                     }
-                        // Setter-side pair typing: an unannotated setter
-                        // parameter carries the paired getter's annotated
-                        // return type, so `param = expr` assignments in the
-                        // setter body are checked against it (TS2322 at the
-                        // parameter reference — Go types the parameter symbol
-                        // from the pair).
+
                         if node.kind == SyntaxKind::SetAccessor
                             && let Some(class) = self.enclosing_class_stack.last().cloned()
                             && let crate::ast::NodeData::SetAccessorDeclaration(sd) = &node.data
@@ -15782,14 +12885,7 @@ impl Checker {
                                 }
                             }
                         }
-                    // Go checkGrammarAccessor's sequential chain (each error
-                    // suppresses the checks after it): TS1094 — accessors
-                    // cannot declare type parameters; TS1054/TS1049 — get
-                    // accessors take no parameters, set accessors exactly
-                    // one (a leading `this` parameter excepted); TS1095 — a
-                    // set accessor cannot have a return-type annotation.
-                    // Skipped only for the body-less non-abstract form whose
-                    // TS1005 branch above already short-circuits the chain.
+
                     if !(body.is_none() && !is_abstract && !ambient) {
                         let name_loc = Self::class_member_name_node(node)
                             .map(|n| n.loc)
@@ -15859,10 +12955,7 @@ impl Checker {
                                 vec![],
                             ));
                         }
-                        // TS2378 (Go checkAccessorDeclaration): a non-ambient
-                        // get accessor whose present body can complete without
-                        // any explicit `return` — the binder's
-                        // HasImplicitReturn set with HasExplicitReturn unset.
+
                         if node.kind == SyntaxKind::GetAccessor
                             && !ambient
                             && let Some(body_node) = &body
@@ -15880,20 +12973,12 @@ impl Checker {
                         }
                     }
                 }
-                // TS2369: parameter properties are only allowed in a
-                // constructor IMPLEMENTATION (one with a body).
+
                 if let Some(params) = &parameters {
                     let is_ctor_impl =
                         matches!(node.kind, SyntaxKind::Constructor) && body.is_some();
                     self.check_parameter_property_modifiers(params, is_ctor_impl);
-                    // TS7006/TS7019: implicit-any parameters; parameter and
-                    // return type annotations may hold function-type nodes
-                    // with their own parameter checks (`(public A) => any`).
-                    // Accessor parameters are EXEMPT here: Go suppresses the
-                    // setter-param TS7006 when the paired getter carries a
-                    // type (and reports TS7032 instead) — that pairing rule
-                    // is not yet ported, so accessors stay unchecked rather
-                    // than over-reporting.
+
                     if matches!(node.kind, SyntaxKind::MethodDeclaration | SyntaxKind::Constructor)
                     {
                         self.check_parameter_implicit_any(node, params, 0);
@@ -15903,12 +12988,7 @@ impl Checker {
                             && let Some(pt) = &pd.type_node
                         {
                             self.check_type_annotation(pt);
-                            // Accessor parameters don't go through
-                            // `get_type_of_function_like` (methods get their
-                            // annotations resolved during instance-type
-                            // building), so resolve them explicitly — Go's
-                            // checkParameter resolves every annotation,
-                            // reporting TS2304 for unresolved names.
+
                             if matches!(
                                 node.kind,
                                 SyntaxKind::GetAccessor | SyntaxKind::SetAccessor
@@ -15921,10 +13001,7 @@ impl Checker {
                 if let Some(tn) = &type_node {
                     self.check_type_annotation(tn);
                 }
-                // TS7010: a method signature without a body or return-type
-                // annotation implicitly returns `any` under noImplicitAny
-                // (constructors are exempt — Go's reportImplicitAny switch
-                // omits KindConstructor).
+
                 if self.no_implicit_any
                     && matches!(node.kind, SyntaxKind::MethodDeclaration)
                     && type_node.is_none()
@@ -15945,11 +13022,7 @@ impl Checker {
                     }
                 }
                 if let Some(body) = body {
-                    // TS17009: in a DERIVED class's constructor, `this` is
-                    // not accessible before the `super()` call (including
-                    // `super(this.x)` arguments — Go's definite
-                    // super-call analysis, approximated with an in-order
-                    // body scan).
+
                     if node.kind == SyntaxKind::Constructor
                         && self
                             .enclosing_class_stack
@@ -15958,10 +13031,7 @@ impl Checker {
                     {
                         self.check_super_before_this(&body);
                     }
-                    // TS2662/TS2663 context: while directly inside this
-                    // member's body, a bare name failing to resolve checks
-                    // the class's static/instance members for a suggestion
-                    // (Go's `checkAndReportErrorForMissingPrefix`).
+
                     let is_static = node.has_syntactic_modifier(ModifierFlags::Static);
                     self.this_container_stack.push(if is_static {
                         ThisContainerKind::StaticMember
@@ -15969,16 +13039,10 @@ impl Checker {
                         ThisContainerKind::InstanceMember
                     });
                     self.push_function_scope(node);
-                    // TS2715 context: constructor bodies count; other
-                    // function-likes (and anything nested in them) do not.
+
                     self.in_ctor_body_stack
                         .push(node.kind == SyntaxKind::Constructor);
-                    // Push the declared return type so `return expr;`
-                    // statements in the body can be checked against it.
-                    // `None` means no explicit return-type annotation.
-                    // A getter without an annotation inherits the paired
-                    // setter's parameter annotation (the pair's property
-                    // type).
+
                     let declared_return = if node.kind == SyntaxKind::GetAccessor
                         && type_node.is_none()
                         && let Some(hint) = self.accessor_pair_return_hint.take()
@@ -16000,12 +13064,7 @@ impl Checker {
                     self.in_ctor_body_stack.pop();
                     self.pop_function_scope();
                     self.this_container_stack.pop();
-                    // TS2355/TS2366 (methods): declared non-`undefined`/
-                    // `void`/`any` return type — no `return` anywhere →
-                    // "must return a value" (TS2355); some `return` but not
-                    // all paths return → "lacks ending return statement"
-                    // (TS2366). Both on the annotation (Go
-                    // `checkFunctionAndBodies` + `checkMissingReturn`).
+
                     if let Some(ret_type) = &declared_return
                         && !ret_type.flags.contains(TypeFlags::Void)
                         && !ret_type.flags.contains(TypeFlags::Undefined)
@@ -16018,10 +13077,7 @@ impl Checker {
                             .map_or(node.loc, |tn| tn.loc);
                         if matches!(node.kind, SyntaxKind::MethodDeclaration) {
                             if Self::function_body_has_explicit_return(&body) {
-                                // TS2366 — some `return` exists but not all
-                                // paths return (Go `checkMissingReturn` via
-                                // `checkFunctionAndBodies`), anchored on the
-                                // return-type annotation like TS2355.
+
                                 self.diagnostics.add(crate::ast::Diagnostic::new(
                                     self.current_file.clone(),
                                     loc,
@@ -16037,11 +13093,7 @@ impl Checker {
                                 ));
                             }
                         } else if node.kind == SyntaxKind::GetAccessor {
-                            // Getter with an annotation whose body never
-                            // returns: Go reports TS2322 "Type 'undefined'
-                            // is not assignable to type '<annotation>'" on
-                            // the annotation (checkFunctionAndBodies'
-                            // accessor branch).
+
                             let tgt = self.type_to_string(ret_type);
                             self.diagnostics.add(crate::ast::Diagnostic::new(
                                 self.current_file.clone(),
@@ -16054,7 +13106,7 @@ impl Checker {
                 }
             }
             _ => {
-                // SemicolonClassElement etc. — no expressions.
+
             }
         }
     }
@@ -16063,8 +13115,7 @@ impl Checker {
         if let crate::ast::NodeData::EnumMember(data) = &node.data {
             if let Some(init) = &data.initializer {
                 self.check_expression(init);
-                // TS1066: ambient-enum member initializers must be constant
-                // expressions (Go's computeConstantValue ambient branch).
+
                 let ambient = node
                     .parent
                     .as_ref()
@@ -16088,9 +13139,6 @@ impl Checker {
         }
     }
 
-    /// Whether an enum-member initializer is a compile-time constant
-    /// expression: literals, member references, unary ±, and arithmetic /
-    /// bitwise combinations thereof.
     fn is_constant_enum_initializer(init: &Arc<Node>) -> bool {
         match &init.data {
             crate::ast::NodeData::NumericLiteral(_)
@@ -16125,12 +13173,6 @@ impl Checker {
         }
     }
 
-    // ────────────────────────────────────────────────────────────────────
-    // Enum member value computation (ported from Go's checker.go:23820-23901)
-    // ────────────────────────────────────────────────────────────────────
-
-    /// Get the first declaration of `kind` for a symbol.
-    /// Mirrors Go's `ast.GetDeclarationOfKind`.
     pub fn get_declaration_of_kind(
         &self,
         symbol: &Arc<Symbol>,
@@ -16139,8 +13181,6 @@ impl Checker {
         symbol.declarations.iter().find(|d| d.kind == kind).cloned()
     }
 
-    /// Get the constant value of an enum member node.
-    /// Mirrors Go's `Checker.getEnumMemberValue` (checker.go:23820).
     pub fn get_enum_member_value(&mut self, node: &Arc<Node>) -> EvalResult {
         if let Some(parent) = node.parent.as_ref() {
             self.compute_enum_member_values(parent);
@@ -16151,9 +13191,6 @@ impl Checker {
             .unwrap_or_else(EvalResult::none)
     }
 
-    /// Compute and cache the values of all members of an `EnumDeclaration`.
-    /// Idempotent (guarded by `NodeCheckFlags::EnumValuesComputed`).
-    /// Mirrors Go's `Checker.computeEnumMemberValues` (checker.go:23846).
     fn compute_enum_member_values(&mut self, node: &Arc<Node>) {
         let already = self
             .node_links
@@ -16184,11 +13221,6 @@ impl Checker {
         }
     }
 
-    /// Compute the value of a single enum member.
-    /// Mirrors Go's `Checker.computeEnumMemberValue` (checker.go:23866).
-    /// Phase 1: omits the TS1062 "enum member must have initializer" error
-    /// and the isolated-modules checks, returning `EvalResult::none()` for
-    /// members without a computable value.
     fn compute_enum_member_value(
         &mut self,
         member: &Arc<Node>,
@@ -16211,10 +13243,6 @@ impl Checker {
         }
     }
 
-    /// Evaluate the initializer of a constant enum member.
-    /// Mirrors Go's `Checker.computeConstantEnumMemberValue` (checker.go:23903).
-    /// Phase 1: skips NaN/Infinity (const enum) and string-syntax
-    /// (isolatedModules) error checks.
     fn compute_constant_enum_member_value(&mut self, member: &Arc<Node>) -> EvalResult {
         let initializer = match &member.data {
             NodeData::EnumMember(d) => match &d.initializer {
@@ -16226,11 +13254,6 @@ impl Checker {
         crate::evaluator::evaluate_expression(&initializer, Some(member), noop_entity_fn)
     }
 
-    /// Check an expression node: resolve identifier references and recurse
-    /// into sub-expressions.
-    ///
-    /// Number of explicit type arguments on a Call/New expression (0 when
-    /// none or not a call-like node).
     fn explicit_type_argument_count(node: &Arc<Node>) -> usize {
         match &node.data {
             crate::ast::NodeData::CallExpression(d) => d
@@ -16247,13 +13270,10 @@ impl Checker {
         }
     }
 
-    /// Whether a Call/New expression carries explicit type arguments.
     fn has_explicit_type_arguments(node: &Arc<Node>) -> bool {
         Self::explicit_type_argument_count(node) > 0
     }
 
-    /// Display string for arithmetic/bitwise operator tokens (the parsed
-    /// operator node carries no text).
     fn op_display(kind: crate::ast::SyntaxKind) -> &'static str {
         use crate::ast::SyntaxKind::*;
         match kind {
@@ -16285,17 +13305,6 @@ impl Checker {
         }
     }
 
-    /// Non-plus arithmetic/bitwise operand checks (Go's
-    /// checkBinaryLikeExpression): TS18050 for null/undefined literals,
-    /// TS2447 for boolean operand pairs (suggesting the logical operator),
-    /// TS2362/TS2363 when an operand isn't assignable to number|bigint.
-    /// Runs on declared (pre-flow) types, before the operand expressions'
-    /// identifier checks.
-    /// Go `checkIdentifier` (checker.go ~L11126): an identifier in an
-    /// assignment-target position that resolves to a non-variable symbol
-    /// reports the TS2629-family error and types as `errorType` (an
-    /// Any-flagged type), which suppresses follow-on operator diagnostics
-    /// (`f += ''` where `f` is a class reports only TS2629, no TS2365).
     fn nonvariable_assignment_target_type(
         &mut self,
         operand: &Arc<Node>,
@@ -16303,9 +13312,7 @@ impl Checker {
         if operand.kind != SyntaxKind::Identifier {
             return None;
         }
-        // Only identifiers in assignment-target position (compound
-        // assignment LHS, `++`/`--` operand) — Go's
-        // `getAssignmentTargetKind(node) != AssignmentKindNone`.
+
         if !Self::is_definite_assignment_target(operand) {
             return None;
         }
@@ -16368,8 +13375,7 @@ impl Checker {
         if !arith_nonplus {
             return;
         }
-        // An invalid compound-assignment target (class/enum/… identifier)
-        // types as `errorType` in Go, silencing the operand checks below.
+
         let lt = self
             .nonvariable_assignment_target_type(&data.left)
             .unwrap_or_else(|| self.get_type_of_node(&data.left));
@@ -16403,8 +13409,7 @@ impl Checker {
             let b = c.bigint_type();
             c.is_type_assignable_to(t, &b)
         }
-        // Null/undefined literals already reported TS18050 — Go's
-        // checkNonNullType short-circuits their operand type check.
+
         let left_is_literal = matches!(data.left.kind, NullKeyword | UndefinedKeyword);
         let right_is_literal = matches!(data.right.kind, NullKeyword | UndefinedKeyword);
         if !left_is_literal && !ok_number(self, &lt) {
@@ -16433,9 +13438,6 @@ impl Checker {
         }
     }
 
-    /// `+` operator error (TS2365): neither string-like, number-like,
-    /// bigint-like, nor any operands — Go's checkAddition resultType==nil
-    /// path. Runs after the operand expressions are checked.
     fn check_binary_plus_operator_error(
         &mut self,
         node: &Arc<Node>,
@@ -16446,17 +13448,13 @@ impl Checker {
         if op != PlusToken && op != PlusEqualsToken {
             return;
         }
-        // Invalid compound-assignment target → errorType (Any-flagged),
-        // suppressing TS2365 (Go's `errorType` from `checkIdentifier`).
+
         let lt = self
             .nonvariable_assignment_target_type(&data.left)
             .unwrap_or_else(|| self.get_type_of_node(&data.left));
         let rt = self.get_type_of_node(&data.right);
         let number_like = |t: &Arc<Type>| {
-            // `never` is bottom — assignable to number regardless of flags.
-            // Under non-strictNullChecks, undefined/null are assignable to
-            // number too, so `x + v` over an empty `[]` for-of (element
-            // `undefined`) is legal (capturedLetConstInLoop3).
+
             (!self.strict_null_checks
                 && t.flags.intersects(
                     TypeFlags::Undefined | TypeFlags::Null,
@@ -16496,13 +13494,6 @@ impl Checker {
         }
     }
 
-    /// The RHS-narrowing frame for a logical assignment (`f ??= r` etc.):
-/// while the RHS is checked, references to the TARGET resolve against the
-    /// branch condition's narrowing (Go's preRightLabel condition edge) —
-    /// nullish constituents for `??=`, definitely-falsy for `||=`, truthy
-    /// (falsy-removed) for `&&=`. `None` when the operator has no such
-    /// narrowing (no qualifying constituents) or the target isn't a bare
-    /// identifier.
     fn logical_rhs_frame(
         &mut self,
         operator: crate::ast::SyntaxKind,
@@ -16515,7 +13506,7 @@ impl Checker {
         let left_type = self.assignment_target_type(target)?;
         let frame = match operator {
             QuestionQuestionEqualsToken => {
-                // Nullish constituents only, when any.
+
                 let parts: Vec<Arc<Type>> = self
                     .flow_constituents_public(&left_type)
                     .into_iter()
@@ -16528,7 +13519,7 @@ impl Checker {
                 }
             }
             BarBarEqualsToken => {
-                // Definitely-falsy constituents.
+
                 let parts: Vec<Arc<Type>> = self
                     .flow_constituents_public(&left_type)
                     .into_iter()
@@ -16541,8 +13532,7 @@ impl Checker {
                 }
             }
             AmpersandAmpersandEqualsToken => {
-                // Truthy constituents (definitely-falsy removed), when any
-                // remain.
+
                 let parts: Vec<Arc<Type>> = self
                     .flow_constituents_public(&left_type)
                     .into_iter()
@@ -16560,30 +13550,13 @@ impl Checker {
         Some((sym, frame))
     }
 
-    /// Go: `Checker.checkExpression`.
-    /// Assignment compatibility check (Go `checkAssignmentOperator`,
-    /// checker.go ~L12808). For `=` and the logical compound operators the
-    /// RHS type is checked against the write target's declared type;
-    /// arithmetic compound operators check the operator's result type
-    /// (approximated with the type of the whole binary expression, which
-    /// the expression typer computes). The TS2364 reference-validity gate
-    /// mirrors Go's `checkReferenceExpression`.
-    /// Whether an expression can have side effects (Go
-    /// `nodeIsUnused`): assignments, calls, `new`, increments/decrements,
-    /// `delete`, `yield`, `await`, and object/array literals (may contain
-    /// side-effecting initializers) do; identifiers and literals don't.
-    /// Inverse of Go `isSideEffectFree` (checker.go ~L13062): identifiers,
-    /// literals, function/class expressions, object/array literals,
-    /// `typeof`, non-null, templates and JSX are FREE; prefix `!`/`+`/`-`/
-    /// `~` are FREE (`void`/`delete` are NOT); assignments and anything
-    /// containing a side-effecting operand are NOT.
     fn expression_has_side_effects(&self, node: &Arc<Node>) -> bool {
-        // Skip parentheses (Go ast.SkipParentheses).
+
         let mut cur = node;
         while let crate::ast::NodeData::ParenthesizedExpression(p) = &cur.data {
             cur = &p.expression;
         }
-        // Keyword literals carry no NodeData variant — match on kind.
+
         if matches!(
             cur.kind,
             SyntaxKind::TrueKeyword
@@ -16631,9 +13604,6 @@ impl Checker {
         }
     }
 
-    /// Go `isIndirectCall` (checker.go ~L13090): the `(0, f)()` /
-    /// `(0, f)\`\`` indirect-invocation idiom — the comma's left `0` is
-    /// intentionally unused, never report TS2695 for it.
     fn is_indirect_call_comma(&self, comma: &Arc<Node>) -> bool {
         let Some(paren) = comma.parent.as_ref() else {
             return false;
@@ -16670,8 +13640,7 @@ impl Checker {
         data: &crate::ast::node_data_generated::BinaryExpressionData,
     ) {
         use crate::ast::SyntaxKind::*;
-        // Destructuring assignments (`[a,b] = e`, `{x} = e`) follow Go's
-        // separate `checkDestructuringAssignment` path.
+
         if data.operator_token.kind == EqualsToken
             && matches!(
                 data.left.kind,
@@ -16680,7 +13649,7 @@ impl Checker {
         {
             return;
         }
-        // Unwrap parens/non-null around the target for inspection.
+
         let mut target: &Arc<Node> = &data.left;
         loop {
             match &target.data {
@@ -16693,8 +13662,7 @@ impl Checker {
                 _ => break,
             }
         }
-        // TS2364 / TS2779 (Go checkReferenceExpression): the target must be
-        // a variable or a (non-optional) property/element access.
+
         let optional_chain = match &target.data {
             crate::ast::NodeData::PropertyAccessExpression(pa) => {
                 pa.question_dot_token.is_some()
@@ -16716,9 +13684,7 @@ impl Checker {
                 crate::diagnostics::messages_generated::
                     THE_LEFT_HAND_SIDE_OF_AN_ASSIGNMENT_EXPRESSION_MUST_BE_A_VARIABLE_OR_A_PROPERTY_ACCESS
             };
-            // A parenthesized non-reference target reports at the whole
-            // assignment expression (`(1, x)=0` → (2,1)), the unwrapped
-            // form at the target itself.
+
             let loc = if data.left.kind == SyntaxKind::ParenthesizedExpression {
                 node.loc
             } else {
@@ -16730,19 +13696,14 @@ impl Checker {
                 message,
                 Vec::new(),
             ));
-            // The invalid target expression still gets checked as an
-            // expression (`(1, x)=0` reports TS2695 on the comma LHS).
+
             self.check_expression(&data.left);
             return;
         }
         let Some(left_type) = self.assignment_target_type(target) else {
             return;
         };
-        // Non-variable identifier targets (a bare class/enum/namespace name,
-        // `f += ''` where `f` is a class) already reported their TS2629 —
-        // Go's `checkReferenceExpression` yields errorType there and the
-        // type-assignability check is skipped entirely (official emits only
-        // the cannot-assign error, never a follow-on TS2322).
+
         if target.kind == Identifier {
             if let Some(sym) = self.resolve_identifier(target) {
                 let base = self.resolve_alias_base(sym);
@@ -16755,31 +13716,25 @@ impl Checker {
                 ) {
                     return;
                 }
-                // `const` targets reported TS2588 elsewhere; same skip.
+
                 if self.symbol_is_const_variable(&base) {
                     return;
                 }
             }
         }
-        // Error-typed targets suppress the check (Go's errorType carries the
-        // Any flag and is assignable to everything).
+
         if left_type.flags.contains(TypeFlags::Any)
             && left_type.intrinsic_name() == Some("error")
         {
             return;
         }
-        // Readonly property/element targets reported TS2540 elsewhere —
-        // official stops at the readonly error (Go's readonly-access check
-        // yields errorType, suppressing the type check).
+
         if self.assignment_target_is_readonly(target) {
             return;
         }
         let right_type = match data.operator_token.kind {
             EqualsToken => self.get_type_of_node(&data.right),
-            // Logical assignments: while the RHS is checked, references to
-            // the TARGET see the branch condition's narrowing (Go's
-            // preRightLabel condition edge — inside `f ??= rhs` the target
-            // is nullish, `f ||= rhs` falsy, `f &&= rhs` truthy).
+
             AmpersandAmpersandEqualsToken | BarBarEqualsToken
             | QuestionQuestionEqualsToken => {
                 match self.logical_rhs_frame(data.operator_token.kind, target) {
@@ -16792,10 +13747,7 @@ impl Checker {
                     None => self.get_type_of_node(&data.right),
                 }
             }
-            // Compound arithmetic operators check the operator RESULT type
-            // against the target (Go passes `resultType`) — but an operator
-            // whose operand check already failed (TS2362/TS2363) types as
-            // errorType in Go, suppressing the assignment error entirely.
+
             _ => {
                 if self
                     .arith_operand_error_nodes
@@ -16806,10 +13758,7 @@ impl Checker {
                 self.get_type_of_node(node)
             }
         };
-        // Reporting happens inside the elaborating entry: on failure the
-        // collected chain (always headed by the generalized
-        // `Type 'X' is not assignable to type 'Y'` message) is emitted as
-        // a nested pyramid diagnostic anchored at the target.
+
         let _ = self.check_type_assignable_to_and_optionally_elaborate(
             &right_type,
             &left_type,
@@ -16820,10 +13769,6 @@ impl Checker {
         );
     }
 
-    /// The WRITE type of a property symbol (Go `getWriteTypeOfSymbol`): an
-    /// accessor pair writes through the setter's value-parameter type, so
-    /// `get k(): Set<string>; set k(v: Iterable<string>)` accepts any
-    /// `Iterable<string>` on assignment while reads yield `Set<string>`.
     fn write_type_of_property_symbol(
         &mut self,
         prop: &Arc<crate::ast::Symbol>,
@@ -16843,20 +13788,12 @@ impl Checker {
         self.get_type_of_symbol(prop)
     }
 
-    /// The DECLARED type of an assignment write target (not the
-    /// flow-narrowed read type): `let x: string|number = "a"; x = 5` must
-    /// stay legal, so the target type comes from the symbol/property
-    /// declaration.
     pub(crate) fn assignment_target_type(&mut self, target: &Arc<Node>) -> Option<Arc<Type>> {
         match &target.data {
             crate::ast::NodeData::Identifier(_) => {
                 let sym = self.resolve_identifier(target)?;
                 let declared = self.get_type_of_symbol(&sym);
-                // Go's compat check receives `leftType` from
-                // checkExpressionEx(left) — an assignment-target identifier
-                // reads as the base literal type under compound and
-                // compound-like assignments (checkIdentifier), so
-                // `let x = ""; x = x + "s"` checks string against string.
+
                 let target_kind = get_assignment_target_kind(target);
                 let compound_like = target_kind == AssignmentKind::Definite
                     && is_in_compound_like_assignment(target);
@@ -16868,17 +13805,12 @@ impl Checker {
             }
             crate::ast::NodeData::PropertyAccessExpression(pa) => {
                 let obj_type = self.get_type_of_node(&pa.expression);
-                // Writes go through the SETTER when one exists (Go
-                // getWriteTypeOfSymbol): `set k(v: Iterable<string>)`
-                // accepts `string[]` even though the getter returns `Set`.
+
                 self.get_property_of_type(&obj_type, &pa.name.text())
                     .map(|sym| self.write_type_of_property_symbol(&sym))
             }
             crate::ast::NodeData::ElementAccessExpression(ea) => {
-                // A string-literal argument is a plain property write
-                // (`obj["k"] = v` ≡ `obj.k = v`) — same setter-first
-                // lookup; other index expressions keep the indexed-access
-                // path.
+
                 if ea.argument_expression.kind == SyntaxKind::StringLiteral {
                     let obj_type = self.get_type_of_node(&ea.expression);
                     let name = ea.argument_expression.text();
@@ -16894,14 +13826,6 @@ impl Checker {
         }
     }
 
-    /// Whether an assignment target's property symbol is readonly — the
-    /// TS2540 report happens in the property-access check; the follow-on
-    /// type-assignability check is suppressed (official emits only the
-    /// readonly error). Mirrors Go `isReadonlySymbol`/`isAssignmentToReadonly
-    /// Entity`: readonly-modifier properties, `CheckFlagsReadonly`, and
-    /// namespace `const` members (whose TS2540 comes from
-    /// `check_const_property_assignment` — the skip condition mirrors that
-    /// report site exactly so suppression never silently swallows a check).
     fn assignment_target_is_readonly(&mut self, target: &Arc<Node>) -> bool {
         match &target.data {
             crate::ast::NodeData::PropertyAccessExpression(pa) => {
@@ -16918,9 +13842,7 @@ impl Checker {
                 self.namespace_const_member(&pa.expression, &pa.name.text())
                     .is_some()
             }
-            // `M["x"] = v` with a string-literal argument behaves like a
-            // property access (same pairing with
-            // check_const_property_assignment).
+
             crate::ast::NodeData::ElementAccessExpression(ea)
                 if ea.argument_expression.kind == SyntaxKind::StringLiteral =>
             {
@@ -16934,10 +13856,6 @@ impl Checker {
         }
     }
 
-    /// Resolve `M.name` where `M` is a namespace value and `name` one of its
-    /// `const` members — the symbol whose assignment reports TS2540 (the
-    /// lookup mirrors check_const_property_assignment: exports, then
-    /// members, then the module declaration's locals).
     fn namespace_const_member(
         &mut self,
         obj_expr: &Arc<Node>,
@@ -16971,9 +13889,6 @@ impl Checker {
         member.filter(|m| self.symbol_is_const_variable(m))
     }
 
-    /// Type (and grammar checks) for a meta-property (`import.meta`,
-    /// `new.target`). Mirrors Go `checkMetaProperty`/`checkImportMetaProperty`
-    /// (checker.go ~L10803/10832).
     fn get_type_of_meta_property(&mut self, node: &Arc<Node>) -> Arc<Type> {
         use crate::core::compiler_options::ModuleKind;
         let (keyword_token, name) = match &node.data {
@@ -16982,10 +13897,7 @@ impl Checker {
         };
         match keyword_token {
             SyntaxKind::NewKeyword => {
-                // `new.target` outside a function-ish container is an error
-                // (Go checkNewTargetMetaProperty); inside one it types as
-                // the container's constructor/instance type — approximated
-                // by `any` here (the R9 focus is `import.meta`).
+
                 self.any_type()
             }
             SyntaxKind::ImportKeyword => {
@@ -17015,7 +13927,7 @@ impl Checker {
                             }
                         }
                         m => {
-                            // Go: moduleKind < ES2020 && != System → TS1343.
+
                             let es2020_or_later = matches!(
                                 m,
                                 ModuleKind::ES2020
@@ -17038,15 +13950,13 @@ impl Checker {
                             }
                         }
                     }
-                    // The global `ImportMeta` interface from lib.es5.d.ts.
+
                     if let Some(sym) = self.globals.get("ImportMeta").cloned() {
                         return self.resolve_interface_type(&sym, None);
                     }
                     self.any_type()
                 } else {
-                    // `import.<something-else>` — Go reports TS2878
-                    // (not a valid meta-property); error type suppresses
-                    // cascades.
+
                     self.error_type()
                 }
             }
@@ -17054,15 +13964,11 @@ impl Checker {
         }
     }
 
-    /// The implied node format of a file, reached through the program (or
-    /// computed locally when the program provides no FS access — the trait
-    /// default). Go's `SourceFileMetaData.ImpliedNodeFormat`.
     fn program_implied_format(&self, file_name: &str) -> crate::core::compiler_options::ModuleKind {
         use crate::core::compiler_options::ModuleKind;
         match self.program.get_emit_module_format_of_file(file_name) {
             ModuleKind::None => {
-                // Trait default (no FS) — recompute locally with whatever
-                // the program can read.
+
                 crate::compiler::implied_node_format_of_file(file_name, &|p| {
                     self.program.read_file(p)
                 })
@@ -17072,10 +13978,6 @@ impl Checker {
         }
     }
 
-    /// Go `getSyntacticTruthySemantics`: pure-syntax truthiness of an
-    /// expression, for TS2872/TS2873. Returns (always, never) bits — both
-    /// set means "sometimes" (a conditional expression ORs its branches'
-    /// bits; the `0`/`1` numeric literals are exempt).
     fn syntactic_truthy_semantics(&mut self, node: &Arc<Node>) -> (bool, bool) {
         let mut n: Arc<Node> = Arc::clone(node);
         loop {
@@ -17126,7 +14028,7 @@ impl Checker {
                 }
             }
             Identifier => {
-                // The global `undefined` identifier is always falsy.
+
                 if let Some(sym) = self.resolve_identifier(&n)
                     && self.is_undefined_symbol(&sym)
                 {
@@ -17138,11 +14040,6 @@ impl Checker {
         }
     }
 
-    /// Go `checkTruthinessOfType` (truthiness-test positions: `&&`/`||`
-    /// left operands, `!` operands, if/while/do/for and ternary
-    /// conditions): TS2872/2873 on syntactically always-truthy/falsy
-    /// expressions, reported on the expression AS WRITTEN (assertions and
-    /// parens included in the span).
     fn check_truthiness_of_type(&mut self, node: &Arc<Node>) {
         let (always, never) = self.syntactic_truthy_semantics(node);
         let message = if always && !never {
@@ -17163,9 +14060,7 @@ impl Checker {
 
     pub fn check_expression(&mut self, node: &Arc<Node>) {
         self.current_node = Some(Arc::clone(node));
-        // Go resets the per-statement instantiation budget here
-        // (checker.go ~L7613): 5M instantiations caused by the same
-        // expression signal runaway generic expansion.
+
         self.type_instantiation_count = 0;
         match node.kind {
             SyntaxKind::Identifier => {
@@ -17181,24 +14076,17 @@ impl Checker {
             | SyntaxKind::SuperKeyword
             | SyntaxKind::RegularExpressionLiteral
             | SyntaxKind::NoSubstitutionTemplateLiteral => {
-                // Literal expressions: no identifier references to resolve.
+
             }
             SyntaxKind::MetaProperty => {
-                // `import.meta` / `new.target`: the NAME is not an
-                // identifier reference (resolving it would report a bogus
-                // TS2304 "Cannot find name 'meta'"). Grammar + typing run
-                // in `get_type_of_meta_property` via compute_type_of_node.
+
                 let _ = self.get_type_of_node(node);
             }
             SyntaxKind::BinaryExpression => {
                 if let crate::ast::NodeData::BinaryExpression(data) = &node.data {
-                    // Arithmetic/bitwise operand checks on DECLARED types run
-                    // before flow analysis (official baseline emission order:
-                    // TS2362/TS2363 precede TS2454 at the same position).
+
                     self.check_binary_arith_pre(node, data);
-                    // TS2695 first (official order): a comma LHS with no
-                    // side effects reports before deeper operand checks.
-                    // The `(0, f)()` indirect-call idiom is exempt.
+
                     if data.operator_token.kind == SyntaxKind::CommaToken
                         && !self.is_indirect_call_comma(node)
                         && !self.expression_has_side_effects(&data.left)
@@ -17220,9 +14108,7 @@ impl Checker {
                         ));
                     }
                     self.check_expression(&data.left);
-                    // TS2872/2873: `&&`/`||` left operands are
-                    // truthiness-tested (Go `IsLogicalBinaryOperator` —
-                    // `??` is NOT included).
+
                     if matches!(
                         data.operator_token.kind,
                         crate::ast::SyntaxKind::AmpersandAmpersandToken
@@ -17230,12 +14116,7 @@ impl Checker {
                     ) {
                         self.check_truthiness_of_type(&data.left);
                     }
-                    // Logical assignments: the RHS's FIRST traversal must
-                    // already run inside the condition-narrowing frame
-                    // (inside `f &&= r` the target is truthy there, so
-                    // `f.toString()` in `r` reports no TS18048; for `??=`/
-                    // `||=` the target is nullish/falsy and DOES report).
-                    // The unwrapped target mirrors `check_assignment_compat`.
+
                     let rhs_frame = {
                         let mut lhs: &Arc<Node> = &data.left;
                         loop {
@@ -17270,19 +14151,7 @@ impl Checker {
                     }
                     self.check_binary_plus_operator_error(node, data);
                     use crate::ast::SyntaxKind::*;
-                    // NOTE: Go emits TS2872/TS2873 ("always truthy"/"always
-                    // falsy") from `checkTruthinessOfType` at truthiness-
-                    // test positions — `&&`/`||` left operands (hooked above,
-                    // before the RHS so the baseline order at a shared
-                    // position is code-sorted anyway), `!` operands, and
-                    // if/while/do/for/ternary conditions (hooked at their
-                    // check sites). `??` operands are NOT truthiness-tested.
-                    // A null-TYPED identifier (`let x = null; x ?? 5`) stays
-                    // legal: the semantics are purely syntactic.
-                    // TS2540: `obj.prop = value` where `prop` is declared
-                    // `readonly` (a `readonly` modifier on a class property
-                    // or parameter property). Mirrors Go's
-                    // `checkAssignmentStatement` read-only check.
+
                     if data.operator_token.kind == EqualsToken
                         && data.left.kind == SyntaxKind::PropertyAccessExpression
                     {
@@ -17302,9 +14171,7 @@ impl Checker {
                         }
                     }
                     let mut assigned_target_blocks_type_check = false;
-                    // TS2540: assigning to an ENUM MEMBER
-                    // (`A.foo = 1`) — enum members are read-only
-                    // properties of the enum object.
+
                     if Self::is_assignment_operator(data.operator_token.kind)
                         && data.left.kind == SyntaxKind::PropertyAccessExpression
                         && let crate::ast::NodeData::PropertyAccessExpression(pa) = &data.left.data
@@ -17322,13 +14189,10 @@ impl Checker {
                             CANNOT_ASSIGN_TO_0_BECAUSE_IT_IS_A_READ_ONLY_PROPERTY,
                             vec![name_text.to_string()],
                         ));
-                        // Official reports ONLY the readonly error — skip
-                        // the value's type check for this target.
+
                         assigned_target_blocks_type_check = true;
                     }
-                    // TS2629: assigning to a class/enum/namespace-only
-                    // name (Go's checkDeprecatedSymbol/assignment checks:
-                    // `f += ''` where `f` is a class reports per operator).
+
                     if Self::is_assignment_operator(data.operator_token.kind)
                         && data.left.kind == SyntaxKind::Identifier
                     {
@@ -17356,17 +14220,12 @@ impl Checker {
                                     msg,
                                     vec![name_text],
                                 ));
-                                // Official reports ONLY the cannot-assign
-                                // error — skip the value's type check.
+
                                 assigned_target_blocks_type_check = true;
                             }
                         }
                     }
-                    // TS2588: Assigning to a `const` variable after its
-                    // declaration. Mirrors Go's `checkAssignmentStatement`
-                    // const-target check. Fires for every assignment operator
-                    // (`=`, `+=`, …) whose left-hand side is an identifier
-                    // resolving to a `const` binding.
+
                     if Self::is_assignment_operator(data.operator_token.kind)
                         && data.left.kind == SyntaxKind::Identifier
                     {
@@ -17382,18 +14241,12 @@ impl Checker {
                             }
                         }
                     }
-                    // Contextual element checks for `x = <literal>` with an
-                    // annotated LHS: excess/missing properties on object
-                    // literals, per-element checks for array literals
-                    // (TS2353/TS2741/TS2322).
+
                     if data.operator_token.kind == EqualsToken
                         && data.left.kind == SyntaxKind::Identifier
                     {
                         if let Some(target) = self.declared_annotation_type_of(&data.left) {
-                            // Only literal RHS shapes take the per-element
-                            // path — a primitive RHS is fully covered by the
-                            // assignment-compat elaboration below (double
-                            // report otherwise).
+
                             if matches!(
                                 data.right.kind,
                                 SyntaxKind::ObjectLiteralExpression
@@ -17409,11 +14262,7 @@ impl Checker {
                             }
                         }
                     }
-                    // TS2540: `M.x <op>= v` where `M` is a namespace and `x`
-                    // a `const` member (all assignment operators, mirroring
-                    // Go's checkReferenceExpression const check). Element
-                    // accesses with string-literal arguments (`M["x"] = 0`)
-                    // behave the same.
+
                     if Self::is_assignment_operator(data.operator_token.kind)
                         && matches!(
                             data.left.kind,
@@ -17423,27 +14272,13 @@ impl Checker {
                     {
                         self.check_const_property_assignment(&data.left);
                     }
-                    // TS2322: assignment type check (Go
-                    // `checkAssignmentOperator`, checker.go ~L12808 — for `=`
-                    // and logical compound operators the RHS type is checked
-                    // against the target; arithmetic compound operators
-                    // check the operator's *result* type). The write
-                    // target's type is the DECLARED type (not flow-narrowed):
-                    // `let x: string|number = "a"; x = 5` must stay legal.
-                    // Destructuring assignments (`[a, b] = ...`) follow Go's
-                    // separate checkDestructuringAssignment — skipped here.
+
                     if Self::is_assignment_operator(data.operator_token.kind)
                         && !assigned_target_blocks_type_check
                     {
                         self.check_assignment_compat(node, data);
                     }
-                    // TS2367: For equality/relational comparisons between
-                    // types with no overlap, the comparison is always
-                    // `false` (or `true` for `!=`/`!==`). Mirrors Go's
-                    // `checkBinaryExpression` comparison-overlap check
-                    // (checker.go ~L13800). Skipped for `any`/`unknown`/
-                    // `never`/`null`/`undefined` operands (per Go's
-                    // `isTypeRelatedTo` short-circuits).
+
                     let is_equality_op = matches!(
                         data.operator_token.kind,
                         EqualsEqualsToken
@@ -17454,9 +14289,7 @@ impl Checker {
                     if is_equality_op {
                         let left_type = self.get_type_of_node(&data.left);
                         let right_type = self.get_type_of_node(&data.right);
-                        // Skip the overlap check when either operand is
-                        // `any`/`unknown`/`never`/`null`/`undefined` — those
-                        // types are comparable to everything in TS.
+
                         let skip_flags = TypeFlags::Any
                             .union(TypeFlags::Unknown)
                             .union(TypeFlags::Never)
@@ -17481,13 +14314,11 @@ impl Checker {
             SyntaxKind::PrefixUnaryExpression => {
                 if let crate::ast::NodeData::PrefixUnaryExpression(data) = &node.data {
                     self.check_expression(&data.operand);
-                    // TS2872/2873: `!x` truthiness-tests its operand.
+
                     if data.operator == SyntaxKind::ExclamationToken {
                         self.check_truthiness_of_type(&data.operand);
                     }
-                    // `++x`/`--x` assign to the operand: a `const` target
-                    // reports TS2588 (Go checks ++/-- through the
-                    // assignment pipeline's `checkReferenceExpression`).
+
                     if matches!(data.operator, SyntaxKind::PlusPlusToken | SyntaxKind::MinusMinusToken) {
                         self.check_const_assignment_target(&data.operand);
                     }
@@ -17507,23 +14338,12 @@ impl Checker {
                 }
             }
             SyntaxKind::ClassExpression => {
-                // Grammar-check members (TS1248 `const` member, duplicate
-                // modifiers, …) — class expressions don't go through the
-                // statement-level class checker — and run each member's
-                // FULL check (Go checks class-expression members like
-                // declarations; `a = arguments` in an initializer reports
-                // TS2815).
+
                 if let crate::ast::NodeData::ClassExpression(data) = &node.data {
                     self.enclosing_class_stack.push(Arc::clone(node));
-                    // Push the class-expr scope so the declared name (and
-                    // members) resolve from initializers.
+
                     self.push_scope(node);
-                    // Class-expression members read `this` as the
-                    // expression's own instance type, same as declarations
-                    // (thisIndexOnExistingReadonlyFieldIsNotNever: an
-                    // arrow-function initializer inside `return class C
-                    // extends Base<P> {…}` in a method otherwise inherits
-                    // the outer method's `this`).
+
                     let this_type = self.build_class_instance_type_with_base(node);
                     self.this_type_stack.push(this_type);
                     for member in data.members.iter() {
@@ -17541,7 +14361,7 @@ impl Checker {
                         self.check_call_arg_with_context(&data.expression, i, arg);
                     }
                 }
-                self.check_call_arguments(node, /* is_new */ false);
+                self.check_call_arguments(node,  false);
             }
             SyntaxKind::NewExpression => {
                 if let crate::ast::NodeData::NewExpression(data) = &node.data {
@@ -17551,11 +14371,7 @@ impl Checker {
                             self.check_call_arg_with_context(&data.expression, i, arg);
                         }
                     }
-                    // TS2511: `new AbstractClass()` where the resolved class
-                    // declaration carries the `abstract` modifier. Mirrors
-                    // Go's `checkNewExpression` abstract-class guard —
-                    // reported on the NewExpression node (`new`), not the
-                    // callee.
+
                     let mut reported_abstract = false;
                     if data.expression.kind == SyntaxKind::Identifier {
                         if let Some(symbol) = self.resolve_identifier(&data.expression) {
@@ -17570,10 +14386,7 @@ impl Checker {
                             }
                         }
                     }
-                    // TS2511 via the callee's TYPE — covers non-identifier
-                    // callees and unions like `typeof A | typeof B` where ANY
-                    // member (Go: `someSignature` abstract / abstract class
-                    // symbol) is an abstract constructor.
+
                     if !reported_abstract {
                         let callee_type = self.get_type_of_node(&data.expression);
                         if self.type_includes_abstract_constructor(&callee_type) {
@@ -17586,12 +14399,10 @@ impl Checker {
                         }
                     }
                 }
-                self.check_call_arguments(node, /* is_new */ true);
+                self.check_call_arguments(node,  true);
             }
             SyntaxKind::PropertyAccessExpression => {
-                // Only check the left side; the right side is a property name,
-                // not an identifier reference. Then verify the property exists
-                // on the object type (TS2339).
+
                 if let crate::ast::NodeData::PropertyAccessExpression(data) = &node.data {
                     self.check_expression(&data.expression);
                 }
@@ -17601,12 +14412,7 @@ impl Checker {
                 if let crate::ast::NodeData::ElementAccessExpression(data) = &node.data {
                     self.check_expression(&data.expression);
                     self.check_expression(&data.argument_expression);
-                    // TS18048/TS2532 family: indexing a possibly-null/undefined
-                    // value (`x?.y[0]` — the `[0]` link is non-optional, so the
-                    // undefined introduced by `?.` surfaces here). An optional
-                    // element access (`x?.y?.[0]`) already handles the
-                    // undefined case and is suppressed. Go:
-                    // `checkElementAccessChain` → `checkNonNullType`.
+
                     if data.question_dot_token.is_none() {
                         let obj_type = self.get_type_of_node(&data.expression);
                         self.report_possibly_null_or_undefined(
@@ -17634,17 +14440,7 @@ impl Checker {
             }
             SyntaxKind::ObjectLiteralExpression => {
                 if let crate::ast::NodeData::ObjectLiteralExpression(data) = &node.data {
-                    // Destructuring ASSIGNMENT target (`({ x, y } = rhs)`):
-                    // Go's isInDestructuringPattern — the literal is the
-                    // left of `=`. Duplicate-property grammar checks
-                    // (TS1117) are skipped for patterns
-                    // (checkGrammarObjectLiteralExpression's
-                    // `inDestructuring`), and when the initializer is
-                    // `this` inside a constructor, each pattern property
-                    // reads the corresponding `this` member — abstract
-                    // properties report TS2715 (Go
-                    // isThisInitializedObjectBindingExpression +
-                    // isNodeUsedDuringClassInitialization).
+
                     let is_destructuring_assignment_target = node.parent.as_ref().is_some_and(
                         |p| match &p.data {
                             crate::ast::NodeData::BinaryExpression(b) => {
@@ -17680,9 +14476,7 @@ impl Checker {
                             );
                         }
                     }
-                    // TS1117: duplicate property names — escapes and quoted
-                    // keys normalize ('a' / '"c"' == 'a' / 'c'); each
-                    // duplicate occurrence reports on its name node.
+
                     if !is_destructuring_assignment_target {
                         {
                             let mut seen: std::collections::HashMap<String, Vec<&Arc<Node>>> =
@@ -17692,8 +14486,7 @@ impl Checker {
                                 continue;
                             };
                             let name = if name_node.kind == SyntaxKind::ComputedPropertyName {
-                                // Constant computed names ('[1]', '[+1]',
-                                // '["s"]') collide with literal keys.
+
                                 let expr = match &name_node.data {
                                     crate::ast::NodeData::ComputedPropertyName(c) => {
                                         Arc::clone(&c.expression)
@@ -17723,8 +14516,7 @@ impl Checker {
                                         }
                                     }
                                     SyntaxKind::PropertyAccessExpression => {
-                                        // Enum-member computed names
-                                        // ('[E1.A]' with 'A = "ENUM_KEY"').
+
                                         let sym = self.resolve_qualified_symbol(&expr);
                                         match sym.as_ref().and_then(|s| s.value_declaration.clone())
                                         {
@@ -17748,8 +14540,7 @@ impl Checker {
                             seen.entry(name).or_default().push(prop);
                         }
                         for (_, group) in seen.iter() {
-                            // Accessor pairs (get/set of the same name) are
-                            // legal in object literals.
+
                             let accessor_pair = group.iter().all(|p| {
                                 matches!(p.kind, SyntaxKind::GetAccessor | SyntaxKind::SetAccessor)
                             }) && group.len() == 2;
@@ -17774,17 +14565,9 @@ impl Checker {
                         }
                         }
                     }
-                    // TS7023: an object-literal getter without a return-type
-                    // annotation whose return expression reaches `this`
-                    // (directly or through a local alias like
-                    // `var _this = this`) — the inferred return type
-                    // circularly depends on the literal's own type (which
-                    // contains the getter).
+
                     for prop in data.properties.iter() {
-                        // A getter with a paired SETTER takes its type
-                        // from the pair (the setter's parameter view) —
-                        // no circular inference (Go's accessor typing via
-                        // the write side).
+
                         let has_setter = data.properties.iter().any(|p| {
                             p.kind == SyntaxKind::SetAccessor
                                 && p.name().is_some_and(|n| {
@@ -17815,14 +14598,7 @@ impl Checker {
                             ));
                         }
                     }
-                    // Object-literal `this` type (Go getThisTypeOfObjectLiteral)
-                    // — pushed while checking members so `this.x` reads resolve
-                    // against the literal ({ readonly primaryPath: any }:
-                    // unannotated getters appear as readonly `any` members
-                    // under the TS7023 circular-return semantics).
-                    // Go getContextualThisParameterType: the literal's this
-                    // type applies only when noImplicitThis (or a JS file);
-                    // otherwise `this` in a method body is `any`.
+
                     let this_typed = self.no_implicit_this
                         || self
                             .current_file
@@ -17830,23 +14606,7 @@ impl Checker {
                             .is_some_and(|f| {
                                 f.file_name.ends_with(".js") || f.file_name.ends_with(".jsx")
                             });
-                    // Contextual `ThisType<T>` marker wins over the literal's
-                    // own face (Go getContextualThisParameterType →
-                    // getThisTypeOfObjectLiteralFromContextualType): an
-                    // intersection constituent referencing the `ThisType`
-                    // interface types `this` in all of the literal's methods
-                    // (`ComponentOptions<Data> & ThisType<Instance<Data>>`).
-                    // Contextual `ThisType<T>` marker wins over the literal's
-                    // own face (Go getContextualThisParameterType →
-                    // getThisTypeOfObjectLiteralFromContextualType): an
-                    // intersection constituent referencing the `ThisType`
-                    // interface types `this` in all of the literal's methods
-                    // (`ComponentOptions<Data> & ThisType<Instance<Data>>`).
-                    // A literal whose own contextual type has no marker
-                    // (vueLike: the `watch` value against a Record<...>)
-                    // CLIMBS through enclosing PropertyAssignment literals —
-                    // the outer literal's ThisType marker covers nested
-                    // method bodies too (Go's literal.Parent walk).
+
                     let mut contextual_this: Option<Arc<Type>> = None;
                     {
                         let mut literal = Arc::clone(node);
@@ -17872,24 +14632,14 @@ impl Checker {
                         None => self.build_object_literal_this_type(node),
                     };
                     for prop in data.properties.iter() {
-                        // Only METHOD-like bodies see the literal's this-type
-                        // (Go getThisTypeOfObjectLiteral applies to `this` in
-                        // the literal's functions); a plain property
-                        // initializer's `this` is the ENCLOSING function's
-                        // (`{ value: this.n }` in a class method).
+
                         let method_like = matches!(
                             prop.kind,
                             SyntaxKind::MethodDeclaration
                                 | SyntaxKind::GetAccessor
                                 | SyntaxKind::SetAccessor
                         );
-                        // Computed property names are checked BEFORE the
-                        // literal's this-type is pushed (Go
-                        // checkObjectLiteral's pre-pass runs in the
-                        // enclosing context — `[this.bar()]` in an object
-                        // literal method name sees the ENCLOSING class
-                        // instance, not the literal's own face;
-                        // computedPropertyNames22/25/29/31).
+
                         if let Some(name) = Self::member_name_node(prop) {
                             self.check_computed_property_name(&name);
                         }
@@ -17904,30 +14654,14 @@ impl Checker {
                 }
             }
             SyntaxKind::ArrowFunction | SyntaxKind::FunctionExpression => {
-                // Parameters are declarations; the body contains expressions.
-                // TS2369: parameter properties are never allowed in arrow
-                // functions / function expressions.
-                // TS7006: unannotated parameters are exempt when the function
-                // is contextually typed — its signature supplies the types
-                // (Go: contextual parameters aren't implicit-any). Sources:
-                // an annotation on the assignee (`let f: F = (x) => ...`) or
-                // a function-typed parameter of an enclosing call argument
-                // (`.map(x => ...)`); the latter is consumed from
-                // `call_arg_arrow_context` here.
+
                 let mut contextual_param_count = self
                     .call_arg_arrow_context
                     .last_mut()
                     .map(|v| std::mem::replace(v, 0))
                     .unwrap_or(0);
                 if contextual_param_count == 0 {
-                    // Union contextual types contribute one signature per
-                    // constituent with NULLABLE constituents skipped (Go
-                    // `getContextualSignature` → `getContextualCallSignature`)
-                    // — the assignment target `f ??= (a => a)` where f's
-                    // type is `((a: number) => void) | undefined` must still
-                    // supply `a: number`. The old direct `as_structured()`
-                    // broke on the union and zeroed the count (the
-                    // logicalAssignment5 false TS7006s).
+
                     contextual_param_count = self
                         .contextual_signature_of_arrow(node)
                         .map_or(0, |sig| sig.parameters.len());
@@ -17936,10 +14670,7 @@ impl Checker {
                     crate::ast::NodeData::ArrowFunction(d) => {
                         self.check_parameter_property_modifiers(&d.parameters, false);
                         self.check_parameter_implicit_any(node, &d.parameters, contextual_param_count);
-                        // Parameter default initializers are expressions
-                        // checked in the DECLARING context (arrows don't
-                        // bind `arguments` — `(x = arguments) => {}` in a
-                        // property initializer reports TS2815).
+
                         for param in d.parameters.iter() {
                             self.check_parameter_default_initializer(param);
                         }
@@ -17953,9 +14684,7 @@ impl Checker {
                     }
                     _ => {}
                 }
-                // A function expression is its own "this container" (breaks
-                // the class-member chain for TS2663); arrow functions are
-                // NOT (Go's getThisContainer skips arrows).
+
                 if matches!(node.data, crate::ast::NodeData::FunctionExpression(_)) {
                     self.this_container_stack
                         .push(ThisContainerKind::PlainFunction);
@@ -17981,11 +14710,7 @@ impl Checker {
             }
             SyntaxKind::YieldExpression => {
                 if let crate::ast::NodeData::YieldExpression(data) = &node.data {
-                    // TS1163 (Go checkGrammarYieldExpression): a yield
-                    // outside a generator body. Parser context resets at
-                    // every function-like boundary, so the walk stops at
-                    // the nearest enclosing function — a yield in a plain
-                    // function nested inside a generator is still invalid.
+
                     if !self.enclosing_function_is_generator(node) {
                         let file = self.current_file.clone();
                         self.diagnostics.add(crate::ast::Diagnostic::new(
@@ -18007,7 +14732,7 @@ impl Checker {
                 }
             }
             SyntaxKind::AsExpression => {
-                // The left side is an expression; the right side is a type.
+
                 if let crate::ast::NodeData::AsExpression(data) = &node.data {
                     self.check_expression(&data.expression);
                     self.check_assertion_overlap(
@@ -18015,8 +14740,7 @@ impl Checker {
                         &data.expression,
                         &data.type_node,
                     );
-                    // TS1355 (Go `checkAssertion`): `x as const` requires a
-                    // literal or an enum-member reference on the left.
+
                     if Self::is_const_type_node(&data.type_node)
                         && !self.is_valid_const_assertion_argument(&data.expression)
                     {
@@ -18032,7 +14756,7 @@ impl Checker {
                 }
             }
             SyntaxKind::TypeAssertionExpression => {
-                // `<T>x`: the left side is a type; the right is an expression.
+
                 if let crate::ast::NodeData::TypeAssertion(data) = &node.data {
                     self.check_expression(&data.expression);
                     self.check_assertion_overlap(
@@ -18077,17 +14801,7 @@ impl Checker {
             SyntaxKind::JsxElement
             | SyntaxKind::JsxSelfClosingElement
             | SyntaxKind::JsxFragment => {
-                // JSX tag names, attribute names, and closing-element tag
-                // names are not identifier references. Only walk:
-                //   - JsxExpression children (and recursively, nested JSX)
-                //   - JsxAttribute initializers / JsxSpreadAttribute expressions
-                //
-                // The opening-like element/fragment is checked BEFORE the
-                // children (Go `checkJsxElement` runs
-                // `checkJsxOpeningLikeElementOrOpeningFragment` first) —
-                // the first JSX tag in the file carries the TS2875 for an
-                // unresolvable implicit runtime (the fragment's opening,
-                // not its first child).
+
                 let opening = match node.kind {
                     SyntaxKind::JsxElement => match &node.data {
                         crate::ast::NodeData::JsxElement(d) => Some(Arc::clone(&d.opening_element)),
@@ -18105,10 +14819,7 @@ impl Checker {
                 if let Some(opening) = opening {
                     self.check_jsx_opening_like_element(&opening);
                 }
-                // Closing-tag resolution (Go `checkJsxElementDeferred`):
-                // an INTRINSIC closing tag resolves its symbol too — the
-                // missing-IntrinsicElements 7026 therefore also reports at
-                // the closing tag (commentsOnJSXExpressionsArePreserved).
+
                 if node.kind == SyntaxKind::JsxElement {
                     if let crate::ast::NodeData::JsxElement(d) = &node.data
                         && crate::checker::jsx::is_jsx_intrinsic_tag_name(
@@ -18123,7 +14834,7 @@ impl Checker {
             }
             SyntaxKind::JsxExpression => {
                 if let crate::ast::NodeData::JsxExpression(data) = &node.data {
-                    // Grammar check (e.g. comma operator).
+
                     self.check_grammar_jsx_expression(node);
                     if let Some(expr) = &data.expression {
                         self.check_expression(expr);
@@ -18131,15 +14842,13 @@ impl Checker {
                 }
             }
             _ => {
-                // Fallback: walk children to find expressions.
+
                 self.walk_children_for_expressions(node);
             }
         }
         self.current_node = None;
     }
 
-    /// Collect the `return` expressions of a function-like body (nested
-    /// function-likes are skipped — their returns are not ours).
     fn collect_return_expressions(node: &Arc<Node>, out: &mut Vec<Arc<Node>>) {
         crate::ast::node_data_generated::for_each_child(node, |child| {
             match child.kind {
@@ -18165,7 +14874,6 @@ impl Checker {
         });
     }
 
-    /// Whether a subtree contains a `this` keyword.
     fn subtree_contains_this(node: &Arc<Node>) -> bool {
         let mut found = false;
         fn walk(root: &Arc<Node>, n: &Arc<Node>, found: &mut bool) {
@@ -18176,9 +14884,7 @@ impl Checker {
                 *found = true;
                 return;
             }
-            // Nested function-likes bind their own `this` at call time —
-            // a `return item => this.bar(item)` doesn't circularly depend
-            // on the literal's this-type (emitThisInObjectLiteralGetter).
+
             if !Arc::ptr_eq(n, root)
                 && matches!(
                     n.kind,
@@ -18194,8 +14900,7 @@ impl Checker {
                 *found
             });
         }
-        // A function-typed subtree's `this` is late-bound — never counts
-        // (`return item => this.bar(item)` is not a circular return).
+
         if matches!(
             node.kind,
             SyntaxKind::FunctionDeclaration
@@ -18208,10 +14913,6 @@ impl Checker {
         found
     }
 
-    /// TS7023 predicate: an accessor's return expressions reach `this` —
-    /// either directly, or through an identifier bound to a local
-    /// variable whose initializer mentions `this` (`var _this = this;
-    /// return _this.x;`).
     fn getter_return_reaches_this(&mut self, accessor: &Arc<Node>) -> bool {
         let crate::ast::NodeData::GetAccessorDeclaration(gd) = &accessor.data else {
             return false;
@@ -18224,7 +14925,7 @@ impl Checker {
         if returns.is_empty() {
             return false;
         }
-        // Local names initialized (transitively, one level) from `this`.
+
         let mut this_aliases: Vec<String> = Vec::new();
         crate::ast::node_data_generated::for_each_child(&body, |stmt| {
             if stmt.kind == SyntaxKind::VariableStatement
@@ -18274,14 +14975,6 @@ impl Checker {
         })
     }
 
-    /// The `this` type of an object literal (Go `getThisTypeOfObjectLiteral`):
-    /// an anonymous object type with the literal's value members — property
-    /// assignments typed by their initializers, unannotated getters as
-    /// readonly `any` (their return type circularly depends on the literal).
-    /// Go `getThisTypeFromContextualType`: a constituent that references the
-    /// `ThisType<T>` marker interface contributes `T` as the contextual
-    /// `this` type of an object literal. Intersections and unions recurse
-    /// (Go's mapType over the contextual type).
     fn this_type_marker_argument(&self, t: &Arc<Type>, depth: usize) -> Option<Arc<Type>> {
         if depth > 4 {
             return None;
@@ -18324,9 +15017,7 @@ impl Checker {
             let name = name_node.text().to_string();
             let (member_type, readonly) = match &prop.data {
                 crate::ast::NodeData::PropertyAssignment(pa) => {
-                    // Widen the initializer (Go getThisTypeOfObjectLiteral —
-                    // `this.b` inside a setter sees `b: number`, not the
-                    // fresh literal `10`).
+
                     let t = self.get_type_of_node(&pa.initializer);
                     (self.get_widened_type_of_literal(&t), false)
                 }
@@ -18341,13 +15032,7 @@ impl Checker {
                     };
                     (t, true)
                 }
-                // Methods appear as callable members of `this` (Go
-                // createLiteralType includes them). Their type resolves on
-                // demand through `get_type_of_symbol`'s MethodDeclaration
-                // arm — annotated signatures only, unannotated returns stay
-                // `any` — which avoids inference cycles through the
-                // literal's own this-type (mutually-recursive methods park
-                // at `any` rather than recursing).
+
                 crate::ast::NodeData::MethodDeclaration(_) => {
                     let mut method_sym = crate::ast::Symbol::new(
                         crate::ast::SymbolFlags::Method,
@@ -18366,8 +15051,7 @@ impl Checker {
                 name.clone(),
             ));
             if readonly {
-                // Getter-only members read as readonly properties (the
-                // symbol is fresh and unshared — safe to mutate).
+
                 let sym_mut = Arc::as_ptr(&prop_sym) as *mut crate::ast::Symbol;
                 unsafe {
                     (*sym_mut).check_flags |= crate::ast::CheckFlags::Readonly;
@@ -18404,9 +15088,7 @@ impl Checker {
     }
 
     fn check_object_literal_element(&mut self, node: &Arc<Node>) {
-        // TS18016: private identifiers are not allowed in object literals —
-        // reported at the member name (Go's grammar check on the element's
-        // property name).
+
         if let Some(name) = node.name()
             && name.kind == SyntaxKind::PrivateIdentifier
         {
@@ -18419,18 +15101,16 @@ impl Checker {
             ));
             return;
         }
-        // Computed names are checked by the CALLER before the literal's
-        // this-type window opens (see the object-literal member loop).
+
         match node.kind {
             SyntaxKind::PropertyAssignment => {
                 if let crate::ast::NodeData::PropertyAssignment(data) = &node.data {
-                    // The name is not a reference. The initializer is.
+
                     self.check_expression(&data.initializer);
                 }
             }
             SyntaxKind::ShorthandPropertyAssignment => {
-                // `x` in `{ x }` is both a declaration and a reference to the
-                // outer-scope `x`. Check it as a reference.
+
                 if let crate::ast::NodeData::ShorthandPropertyAssignment(data) = &node.data {
                     self.check_identifier_reference(&data.name);
                 }
@@ -18443,10 +15123,7 @@ impl Checker {
             SyntaxKind::MethodDeclaration
             | SyntaxKind::GetAccessor
             | SyntaxKind::SetAccessor => {
-                // Object-literal methods/accessors have their own function
-                // scope like class members: locals (e.g. a hoisted `var
-                // _this = this`) live on the accessor node itself, so the
-                // scope must be pushed before walking the body.
+
                 self.check_class_member(node);
             }
             _ => {
@@ -18456,15 +15133,9 @@ impl Checker {
     }
 
     fn check_function_like_body(&mut self, node: &Arc<Node>) {
-        // Compute the function's type first. This triggers contextual
-        // typing: when the function is a call argument (e.g.
-        // `f((x) => x.toFixed())`), `get_type_of_function_like` calls
-        // `get_contextual_type` which resolves the parameter type from
-        // the callee's signature. The resolved parameter types are stored
-        // in `value_symbol_links` so that `check_function_like_body`'s
-        // body walk (below) sees them when resolving parameter references.
+
         self.get_type_of_node(node);
-        // Nested function-likes run after construction — TS2715 exempt.
+
         self.in_ctor_body_stack.push(false);
         let (body, type_node): (Option<Arc<Node>>, Option<Arc<Node>>) = match &node.data {
             crate::ast::NodeData::FunctionExpression(data) => {
@@ -18476,21 +15147,14 @@ impl Checker {
             _ => (None, None),
         };
         if let Some(body) = body {
-            // Arrow functions do not have their own `arguments` object.
+
             let is_arrow = matches!(node.data, crate::ast::NodeData::ArrowFunction(_));
             if is_arrow {
                 self.push_arrow_function_scope(node);
             } else {
                 self.push_function_scope(node);
             }
-            // Push the declared return type so `return expr;` statements
-            // in the body can be checked against it. `None` means no
-            // explicit return-type annotation (return type inferred). For
-            // async function-likes a `Promise<X>` annotation unwraps to `X`
-            // (return values are promisified). Only ANNOTATED returns are
-            // checked per-statement — Go's `checkReturnStatement` gates on
-            // `getReturnTypeFromAnnotation(container) != nil`; contextual
-            // signature mismatches surface at the assignment instead.
+
             let is_async = node.has_syntactic_modifier(ModifierFlags::Async);
             let declared_return = type_node
                 .as_ref()
@@ -18500,11 +15164,7 @@ impl Checker {
             match body.kind {
                 SyntaxKind::Block => self.check_statement(&body),
                 _ => {
-                    // Arrow function expression body (`() => expr`): the
-                    // expression IS the return value, so check its type
-                    // against the declared return type directly (no
-                    // `ReturnStatement` node is involved). Mirrors Go's
-                    // `checkFunctionExpressionBody` for arrow bodies.
+
                     self.check_expression(&body);
                     if let Some(expected) =
                         self.return_type_stack.last().and_then(|opt| opt.clone())
@@ -18535,10 +15195,8 @@ impl Checker {
         }
     }
 
-    /// Walk a node's children and check any that look like expressions.
-    /// Used as a fallback for node kinds we don't handle explicitly.
     fn walk_children_for_expressions(&mut self, node: &Arc<Node>) {
-        // Collect children first to avoid borrow-checker issues.
+
         let children: Vec<Arc<Node>> = {
             let mut collected = Vec::new();
             crate::ast::node_data_generated::for_each_child(node, |child| {
@@ -18548,25 +15206,18 @@ impl Checker {
             collected
         };
         for child in &children {
-            // Skip type-position children and declaration names. We do this
-            // by checking the child's kind against a known set of expression-
-            // position kinds.
+
             if is_expression_position_kind(child.kind) {
                 self.check_expression(child);
             } else if is_statement_kind(child.kind) {
                 self.check_statement(child);
             }
-            // Otherwise (type nodes, modifier lists, names, etc.) skip.
+
         }
     }
 
-    /// Check a JSX element/fragment: walk only JsxExpression children,
-    /// nested JSX, and attribute initializers. Tag names and attribute names
-    /// are not identifier references.
     fn check_jsx_element(&mut self, node: &Arc<Node>) {
-        // For JsxElement, walk attributes (of opening_element) and children.
-        // For JsxSelfClosingElement, walk attributes and type_arguments.
-        // For JsxFragment, walk children.
+
         let opening_element: Option<Arc<Node>> = match &node.data {
             crate::ast::NodeData::JsxElement(data) => Some(Arc::clone(&data.opening_element)),
             crate::ast::NodeData::JsxSelfClosingElement(_) => Some(Arc::clone(node)),
@@ -18578,7 +15229,6 @@ impl Checker {
             _ => Vec::new(),
         };
 
-        // Walk attributes (skip tag_name and closing tag_name).
         if let Some(opening) = opening_element {
             let attributes: Option<Arc<Node>> = match &opening.data {
                 crate::ast::NodeData::JsxOpeningElement(data) => Some(Arc::clone(&data.attributes)),
@@ -18594,16 +15244,14 @@ impl Checker {
                     }
                 }
             }
-            // Also walk type_arguments if present (they are type-position).
+
         }
 
-        // Walk children.
         for child in &children {
             self.check_jsx_child(child);
         }
     }
 
-    /// Check a single JSX attribute: skip the name, check the initializer.
     fn check_jsx_attribute(&mut self, node: &Arc<Node>) {
         match &node.data {
             crate::ast::NodeData::JsxAttribute(data) => {
@@ -18618,7 +15266,6 @@ impl Checker {
         }
     }
 
-    /// Check a single JSX child (text, expression, or nested element).
     fn check_jsx_child(&mut self, node: &Arc<Node>) {
         match node.kind {
             SyntaxKind::JsxElement
@@ -18629,17 +15276,11 @@ impl Checker {
             SyntaxKind::JsxExpression => {
                 self.check_expression(node);
             }
-            // JsxText, JsxTextAllWhiteSpaces: no references.
+
             _ => {}
         }
     }
 
-    /// Check an identifier in expression position: attempt to resolve it,
-    /// and emit TS2304 if it cannot be found.
-    /// Go's `getCannotFindNameDiagnosticForName` — name-specific
-    /// "cannot find name" variants (install-@types suggestions). Returns
-    /// the message that REPLACES the plain TS2304. The Map/Set/... ES-name
-    /// arm (target-library suggestions) is not ported yet.
     fn cannot_find_name_message_for(name: &str) -> Option<&'static crate::diagnostics::Message> {
         use crate::diagnostics::messages_generated as mg;
         match name {
@@ -18653,9 +15294,6 @@ impl Checker {
         }
     }
 
-    /// Check a parameter's default initializer expression (arrows and
-    /// function expressions): `(x = arguments) => {}` references the
-    /// OUTER binding of `arguments` (TS2815 in property initializers).
     fn check_parameter_default_initializer(&mut self, param: &Arc<Node>) {
         if let crate::ast::NodeData::ParameterDeclaration(pd) = &param.data
             && let Some(init) = &pd.initializer
@@ -18665,54 +15303,38 @@ impl Checker {
     }
 
     fn check_identifier_reference(&mut self, node: &Arc<Node>) {
-        // Skip if the identifier's text is empty (parser recovery).
+
         let name = match &node.data {
             crate::ast::NodeData::Identifier(data) => data.text.as_str(),
             _ => return,
         };
-        // The checker still resolves identifiers that carry parser
-        // errors (official emits TS2304 alongside TS1435) — no blanket
-        // suppression.
+
         if name.is_empty() {
             return;
         }
-        // Skip identifiers whose text is not a valid JS/TS identifier (parser
-        // recovery artifacts: punctuation like `(`, `{`, `)`, `;` leaked into
-        // Identifier nodes). Valid identifiers start with a letter, `_`, or `$`.
+
         if !is_valid_identifier_text(name) {
             return;
         }
-        // Skip if the identifier is the name of a declaration rather than a
-        // reference. We detect this by looking at the parent's kind and the
-        // slot the identifier occupies.
+
         if is_declaration_name(node) {
             return;
         }
-        // Skip property access right-hand sides (e.g., `x.foo` — `foo` is a
-        // property name, not a reference).
+
         if is_property_access_name(node) {
             return;
         }
-        // TS2301: an instance member initializer referencing a name declared
-        // in the class constructor (parameter or local). Reported even when
-        // the name resolves to an outer declaration, because the initializer
-        // is emitted into the constructor where that declaration shadows it.
-        // Mirrors Go's `checkAndReportErrorForInvalidInitializer`, reached
-        // from the name resolver's PropertyDeclaration scope-climb case.
+
         if self.check_invalid_initializer_reference(node, name) {
             return;
         }
 
-        // If we're inside a type node (e.g., heritage clause expression),
-        // suppress TS2304 to avoid false positives for global names.
         if !self.ts2304_reporting_allowed_for(node) {
             return;
         }
 
         if let Some(symbol) = self.resolve_identifier(node) {
-            // TS2815: `arguments` referenced in a property initializer or
-            // class static initialization block — it binds the enclosing
-            // function (arrows don't bind it and don't stop the walk).
+
             if name == "arguments"
                 && self.arguments_symbol.is_some()
                 && Arc::ptr_eq(&symbol, self.arguments_symbol.as_ref().unwrap())
@@ -18751,24 +15373,13 @@ impl Checker {
                     return;
                 }
             }
-            // TS2708: a types-only namespace used as a VALUE. Follow the
-            // alias base (import-equals → module), then require the
-            // namespace to have at least one value member (Go's
-            // checkAndReportErrorForUsingNamespaceAsTypeOrValue).
-            // `export = ns` may legitimately reference a namespace (Go's
-            // isExportAssignmentExpressionName exemption).
+
             let is_export_assignment_name = node
                 .parent
                 .as_ref()
                 .is_some_and(|p| p.kind == SyntaxKind::ExportAssignment);
             let base = self.resolve_alias_base(Arc::clone(&symbol));
-            // Only true NAMESPACES (non-string module-declaration names)
-            // are types-only-namespace candidates: a string-named module
-            // (`declare module "foo"`, an external module file) reached via
-            // `import * as ns` or `import x = require(...)` is a module
-            // OBJECT — always a legal value (shorthand ambient modules
-            // degrade to `any`). Go distinguishes namespace symbols from
-            // module symbols by the declaration's name kind.
+
             let is_true_namespace = base
                 .declarations
                 .iter()
@@ -18790,39 +15401,22 @@ impl Checker {
                 ));
                 return;
             }
-            // TS2448: Block-scoped variable used before its declaration
-            // (temporal dead zone). When a `let`/`const`/`class` variable is
-            // referenced before its declaration position, report TS2448.
-            // Mirrors Go's `checkResolvedBlockScopedVariable`.
+
             self.check_block_scoped_variable_used_before_declaration(node, &symbol, name);
-            // TS2454: Variable used before being assigned. A `let` variable
-            // with a non-undefined type annotation, no initializer, and no
-            // assignment before the usage point reports TS2454. Only checked
-            // under strictNullChecks. Mirrors Go's definite-assignment check
-            // in `getFlowTypeOfReference`.
+
             self.check_variable_used_before_assigned(node, &symbol, name);
             return;
         }
 
-        // Emit TS2662/TS2663 when inside a class and a static/instance member
-        // with this name exists (Go's `checkAndReportErrorForMissingPrefix`:
-        // a matching static member wins regardless of context; a matching
-        // instance member suggests `this.x` only from directly inside an
-        // instance member). Otherwise TS2304 "Cannot find name '{0}'."
         let file = self.current_file.clone();
-        // Go onFailedToResolveSymbol → checkAndReportErrorForUsingTypeAsValue
-        // (runs BEFORE the generic cannot-find): a VALUE-position miss whose
-        // name is a primitive type keyword, or that resolves to a TYPE-only
-        // symbol, reports TS2693 — `const x = number` is "'number' only
-        // refers to a type…", not "Cannot find name 'number' / 'Number'".
+
         {
             let is_primitive_type_name = matches!(
                 name,
                 "any" | "string" | "number" | "boolean" | "never" | "unknown"
             );
             let reported = if is_primitive_type_name {
-                // (Heritage special cases omitted — the plain value-position
-                // form is what the compiler-suite family exercises.)
+
                 self.diagnostics.add(crate::ast::Diagnostic::new(
                     file.clone(),
                     node.loc,
@@ -18832,8 +15426,7 @@ impl Checker {
                 ));
                 true
             } else {
-                // A name that resolves with TYPE-only meaning (no value
-                // side) used as a value → TS2693.
+
                 let type_hit = self
                     .resolve_identifier_with_meaning(node, SymbolFlags::TYPE)
                     .map(|s| self.resolve_alias_base(s));
@@ -18856,9 +15449,7 @@ impl Checker {
                 return;
             }
         }
-        // Class-member suggestions (TS2662/TS2663) take precedence over
-        // spelling suggestions; TS2552 spelling suggestions apply distance-1
-        // visible names only (Go's getSpellingSuggestion behavior).
+
         let diagnostic = if let Some(class) = self.enclosing_class_stack.last().cloned() {
             let class_name = Self::class_name_text(&class);
             if let Some(is_member_static) = self.class_member_static_by_name(&class, name) {
@@ -18946,12 +15537,6 @@ impl Checker {
         self.diagnostics.add(diagnostic);
     }
 
-
-    /// TS17009: walk a derived-class constructor body in source order;
-    /// every `this` expression seen before the `super()` call reports.
-    /// `super(...)` marks super-called only after its arguments are
-    /// visited (arguments evaluate first — `super(this.x)` errors on the
-    /// `this`).
     fn check_super_before_this(&mut self, body: &Arc<Node>) {
         fn visit(
             c: &mut Checker,
@@ -18971,7 +15556,7 @@ impl Checker {
                 }
                 return;
             }
-            // `super(args)` — visit arguments first, then mark super called.
+
             if n.kind == SyntaxKind::CallExpression
                 && let crate::ast::NodeData::CallExpression(call) = &n.data
                 && call.expression.kind == SyntaxKind::SuperKeyword
@@ -18982,11 +15567,7 @@ impl Checker {
                 *super_seen = true;
                 return;
             }
-            // `this` inside nested function-likes belongs to THEM (or is
-            // deferred, for arrows) — only DIRECT constructor-body `this`
-            // accesses report (Go's checkSuperCallBeforeThisAccessing:
-            // nested functions/arrows are exempt; checkSuperCallBefore-
-            // ThisAccessing4/6).
+
             if matches!(
                 n.kind,
                 SyntaxKind::FunctionDeclaration
@@ -18998,8 +15579,7 @@ impl Checker {
             ) {
                 return;
             }
-            // A nested class's constructors are fresh contexts with their
-            // own super/this rules (checkSuperCallBeforeThisAccessing3).
+
             if matches!(n.kind, SyntaxKind::ClassDeclaration | SyntaxKind::ClassExpression) {
                 return;
             }
@@ -19012,13 +15592,8 @@ impl Checker {
         visit(self, body, &mut super_seen);
     }
 
-    /// Find a visible name (scope stack containers + globals) within edit
-    /// distance 2 of `name`, case-insensitively — the best (lowest)
-    /// distance wins. Mirrors Go's spelling-correction suggestions.
     pub(crate) fn find_name_suggestion(&self, name: &str, meaning: SymbolFlags) -> Option<String> {
-        // Candidate symbols filtered by MEANING like Go's `getCandidateName`
-        // (a type-only global such as `IArguments` is never suggested for a
-        // VALUE reference like `arguments`).
+
         let mut candidates: Vec<&Arc<Symbol>> = Vec::new();
         let symbol_map = self.program.symbol_map();
         fn push_symbol<'a>(
@@ -19030,9 +15605,7 @@ impl Checker {
                 cands.push(sym);
             }
         }
-        // The current file's top-level declarations are ALWAYS
-        // candidates — a reference deep inside nested scopes still sees
-        // file-level names even when the scope stack was trimmed.
+
         if let Some(file) = self.current_file.as_ref() {
             let fid = file.id();
             if let Some(locals) = symbol_map.locals.get(&fid) {
@@ -19040,8 +15613,7 @@ impl Checker {
                     push_symbol(&mut candidates, sym, meaning);
                 }
             }
-            // The file's top-level SYMBOL (its members hold globals-bound
-            // declarations when the binder routed through the symbol path).
+
             if let Some(sym) = symbol_map.symbols.get(&fid) {
                 for sub in sym.members.entries.values() {
                     push_symbol(&mut candidates, sub, meaning);
@@ -19069,12 +15641,7 @@ impl Checker {
         for sym in self.globals.entries.values() {
             push_symbol(&mut candidates, sym, meaning);
         }
-        // Mirrors Go `getSpellingSuggestionForName` + `core.getSpellingSuggestion`
-        // (core.go ~L577): quoted/internal symbol names are never candidates,
-        // the length-difference prefilter is max(2, 0.34·len), sub-3-char
-        // candidates need case-insensitive equality, and the distance is the
-        // case-aware WEIGHTED levenshtein against a floor(len·0.4)+0.9 budget
-        // that shrinks as better candidates are found.
+
         let rune_len = name.chars().count();
         let maximum_length_difference = ((rune_len as f64) * 0.34) as usize;
         let maximum_length_difference = maximum_length_difference.max(2);
@@ -19082,9 +15649,7 @@ impl Checker {
         let mut best: Option<((usize, usize), &String)> = None;
         for sym in candidates {
             let cand: &String = &sym.name;
-            // Quoted ambient-module names and internal markers are not
-            // identifiers (`declare module "barfoo"` never suggests). Our
-            // binder keeps the source quoting (single, double, or backtick).
+
             if cand.is_empty()
                 || cand.starts_with('"')
                 || cand.starts_with('\'')
@@ -19106,9 +15671,7 @@ impl Checker {
             let Some(d) = levenshtein_with_max(name, cand, best_distance) else {
                 continue;
             };
-            // Go's tie-break (compareSymbols → compareNodes): earliest
-            // (program file index, declaration position) wins — this also
-            // makes the result deterministic over HashMap iteration order.
+
             let key = self.suggestion_order_key(sym);
             let replace = match &best {
                 None => true,
@@ -19130,9 +15693,6 @@ impl Checker {
         best.map(|(_, c)| c.clone())
     }
 
-    /// Ordering key for spelling-suggestion ties (Go's compareNodes):
-    /// (program file index, first-declaration position). Symbols without
-    /// declarations sort last.
     fn suggestion_order_key(&self, sym: &Arc<Symbol>) -> (usize, usize) {
         let Some(decl) = sym.declarations.first() else {
             return (usize::MAX, usize::MAX);
@@ -19148,10 +15708,6 @@ impl Checker {
         (idx, decl.loc.pos())
     }
 
-    /// Whether `node` sits inside a function-like/accessor body (before any
-    /// module boundary) — statements there are covered by TS1183 (ambient
-    /// implementations), not TS1036 (Go's checkGrammarStatementInAmbientContext
-    /// function-like-parent branch).
     fn inside_function_body(node: &Arc<Node>) -> bool {
         let mut anc = node.parent.as_ref();
         while let Some(a) = anc {
@@ -19173,10 +15729,6 @@ impl Checker {
         false
     }
 
-    /// TS2654/TS2416: class-heritage member checks for a derived class —
-    /// abstract members of the base chain not implemented by a non-abstract
-    /// class, and derived property types not assignable to the same-named
-    /// base property (Go's `checkClassHeritage` member relation).
     fn check_class_heritage_members(&mut self, node: &Arc<Node>) {
         let crate::ast::NodeData::ClassDeclaration(data) = &node.data else {
             return;
@@ -19190,7 +15742,7 @@ impl Checker {
             .map(|n| n.text().to_string())
             .unwrap_or_default();
         let base_name = Self::class_name_text(&base_node);
-        // TS2654: only non-abstract classes must implement abstract members.
+
         if !node.has_syntactic_modifier(ModifierFlags::Abstract) {
             let mut missing: Vec<String> = Vec::new();
             Self::collect_unimplemented_abstract_members(node, &base_node, &mut missing);
@@ -19219,8 +15771,7 @@ impl Checker {
                 ));
             }
         }
-        // TS2416: each own property or accessor that shadows a base
-        // member must have a type assignable to the base member's.
+
         for member in data.members.iter() {
             let (name_node, own_type): (&Arc<Node>, Option<Arc<Type>>) = match &member.data {
                 crate::ast::NodeData::PropertyDeclaration(pd) => {
@@ -19240,8 +15791,7 @@ impl Checker {
                     if gd.name.kind != SyntaxKind::Identifier {
                         continue;
                     }
-                    // Annotated return type, else inferred from the body's
-                    // return expressions.
+
                     let t = if let Some(tn) = &gd.type_node {
                         Some(self.get_type_from_type_node(tn))
                     } else {
@@ -19297,7 +15847,6 @@ impl Checker {
         }
     }
 
-    /// The member list of a class-like node (empty for other kinds).
     fn class_members_of(class: &Arc<Node>) -> &Arc<NodeList> {
         match &class.data {
             crate::ast::NodeData::ClassDeclaration(d) => &d.members,
@@ -19309,7 +15858,6 @@ impl Checker {
         }
     }
 
-    /// Find a class member by (identifier) name.
     fn find_class_member_by_name(class: &Arc<Node>, name: &str) -> Option<Arc<Node>> {
         Self::class_members_of(class)
             .iter()
@@ -19326,8 +15874,6 @@ impl Checker {
             .cloned()
     }
 
-    /// Collect abstract members of the base chain that `class` (and its
-    /// bases) don't implement concretely. Walks the `extends` chain.
     fn collect_unimplemented_abstract_members(
         class: &Arc<Node>,
         base: &Arc<Node>,
@@ -19356,21 +15902,17 @@ impl Checker {
             }
             let name = name_node.text();
             if is_abstract_member {
-                // Implemented if ANY class in the derived chain (starting
-                // at `class`) declares a non-abstract member with the name.
+
                 if !Self::chain_implements(class, name) {
                     out.push(name.to_string());
                 }
             } else if out.iter().any(|m| m == name) {
-                // A later concrete base member implements an earlier
-                // abstract one.
+
                 out.retain(|m| m != name);
             }
         }
     }
 
-    /// The expression of the first `return <expr>;` in a body (used to
-    /// infer a getter's return type when unannotated).
     fn first_return_expression(body: Option<&Arc<Node>>) -> Option<Arc<Node>> {
         fn walk(n: &Arc<Node>) -> Option<Arc<Node>> {
             if let crate::ast::NodeData::ReturnStatement(d) = &n.data
@@ -19390,8 +15932,6 @@ impl Checker {
         body.and_then(walk)
     }
 
-    /// Whether `class` or any of its bases declares a CONCRETE member named
-    /// `name`.
     fn chain_implements(class: &Arc<Node>, name: &str) -> bool {
         for member in Self::class_members_of(class).iter() {
             let (name_node, is_abstract) = match &member.data {
@@ -19418,14 +15958,10 @@ impl Checker {
                 return true;
             }
         }
-        // Recurse into this class's own base (node-linked via heritage
-        // identifiers is not available without resolution; single-level
-        // check covers direct implementation).
+
         false
     }
 
-    /// Find `<name> = <rhs>` assignments in a body: returns the LHS
-    /// identifier's location and the RHS node for each.
     fn assignments_to_name(
         body: &Arc<Node>,
         name: &str,
@@ -19448,12 +15984,6 @@ impl Checker {
         found
     }
 
-    /// Resolve a (possibly qualified) entity name — `A`, `A.B`, `A.B.C` —
-    /// to a symbol: the leftmost identifier through the scope stack, then
-    /// each subsequent segment through the previous symbol's exports
-    /// (modules/namespaces) or members. Follows alias symbols along the way;
-    /// an `import X = require("...")` alias resolves to the module file's
-    /// symbol (Go: `resolveEntityName` + `resolveExternalModuleName`).
     pub fn resolve_qualified_symbol(&mut self, name: &Arc<Node>) -> Option<Arc<Symbol>> {
         match self.resolve_qualified_symbol_traced(name) {
             Ok(s) => Some(s),
@@ -19461,10 +15991,6 @@ impl Checker {
         }
     }
 
-    /// Traced qualified-name resolution: on failure, reports WHERE the
-    /// chain broke — (segment node, namespace-path text, member name) —
-    /// enough for the caller to emit TS2503 (unresolved namespace) or
-    /// TS2694 (namespace has no exported member).
     pub fn resolve_qualified_symbol_traced(
         &mut self,
         name: &Arc<Node>,
@@ -19477,14 +16003,7 @@ impl Checker {
             crate::ast::NodeData::QualifiedName(data) => {
                 self.resolve_qualified_tail(&data.left, &data.right)
             }
-            // Heritage/type-position qualified names parse in EXPRESSION
-            // form (`parse_left_hand_side_expression`) — the entity-name
-            // expression equivalent of QualifiedName. Go's resolveEntityName
-            // accepts both forms (`interface I extends NS.Base {}`).
-            // Non-entity bases (`(foo()).B`, `(a, b).C`) are typed by the
-            // expression typer, not this resolver — signaled by the same
-            // empty-path error as unresolved names (the type-reference
-            // caller stays silent for this form).
+
             crate::ast::NodeData::PropertyAccessExpression(pa) => {
                 let mut base = &pa.expression;
                 while let crate::ast::NodeData::ParenthesizedExpression(p) = &base.data {
@@ -19505,10 +16024,6 @@ impl Checker {
         }
     }
 
-    /// The member-chase tail of qualified-name resolution, shared by the
-    /// `QualifiedName` (type form) and `PropertyAccessExpression` (entity
-    /// expression form) arms: resolve `left`, then look `right` up in its
-    /// tables.
     fn resolve_qualified_tail(
         &mut self,
         left: &Arc<Node>,
@@ -19518,17 +16033,13 @@ impl Checker {
             let mut symbol = self.resolve_qualified_symbol_traced(left)?;
             let path_so_far = qualified_name_text(left);
             symbol = self.resolve_alias_base(symbol);
-            // `import * as P from "m"` of an AMBIENT module: the alias
-            // carries no target link (see
-            // [`Self::resolve_import_alias_module`]) — chase it to the
-            // module symbol so `P.Member` resolves (react16.d.ts's
-            // `PropTypes.ValidationMap` family).
+
             if symbol.flags == SymbolFlags::Alias
                 && let Some(module_sym) = self.resolve_import_alias_module(&symbol)
             {
                 symbol = module_sym;
             }
-            // `right` is always an Identifier in valid syntax.
+
             let text = right.text();
             let mut next = symbol
                 .exports
@@ -19536,18 +16047,9 @@ impl Checker {
                 .or_else(|| symbol.members.get(text))
                 .cloned()
                 .or_else(|| self.ambient_namespace_local(&symbol, text))
-                // `export = { x, y }` (object-literal export assignment):
-                // the member is the literal's property symbol. Visibility-
-                // SAFE — object literal properties are all exported. (The
-                // full namespace_member_recursive chase is NOT used here:
-                // it reads namespace LOCALS and export= targets, exposing
-                // non-exported members that official TS correctly rejects
-                // with TS2694.)
+
                 .or_else(|| self.object_literal_export_member(&symbol, text));
-                // Single-hop `export = <ns>` chase: when the module
-                // exports a namespace via export=, members resolve there
-                // (Go's resolveEntityName through export assignments). No
-                // recursion — the target's tables only.
+
                 if next.is_none()
                     && let Some(ea_sym) = symbol.exports.get("export=")
                     && let Some(decl) = ea_sym
@@ -19561,8 +16063,7 @@ impl Checker {
                         SyntaxKind::Identifier | SyntaxKind::QualifiedName
                     )
                 {
-                    // Resolve the export= entity with the module's scope
-                    // pushed, then look the member up in its tables.
+
                     let scope = symbol
                         .declarations
                         .iter()
@@ -19584,9 +16085,7 @@ impl Checker {
                         }
                     }
                 }
-                // A base that is still a pure alias from an UNRESOLVED
-                // `require(...)` degrades to error (Go's error type):
-                // member lookups through it stay silent instead of TS2694.
+
                 let base_is_unresolved_require_alias = symbol.flags == SymbolFlags::Alias
                     && symbol
                         .declarations
@@ -19607,13 +16106,7 @@ impl Checker {
                 }
                 match next {
                     Some(next) => {
-                        // An alias member (`export import X = N` inside the
-                        // namespace) resolves through its declaration's
-                        // reference — Go's resolveAlias → resolveEntityName —
-                        // evaluated in the scope of the module declaring it
-                        // (the bare target name `N` is not visible from
-                        // here). Non-alias members keep the export_symbol
-                        // chase.
+
                         let resolved = if next.flags.intersects(SymbolFlags::Alias) {
                             let scope = symbol
                                 .declarations
@@ -19651,15 +16144,6 @@ impl Checker {
             }
     }
 
-    /// Go's implicit export for ambient containers (`setExportContextFlag` +
-    /// `declareModuleMember`): every member of an ambient namespace (a
-    /// `declare namespace`, or a namespace in a .d.ts) is exported when the
-    /// container has no explicit export declarations. The binder keeps such
-    /// members in the namespace's LOCALS (routing them into `exports`
-    /// perturbs lazily-resolved lib types), so outside visibility of ambient
-    /// locals is decided here.
-    /// Whether any ancestor declaration carries the `declare` modifier —
-    /// Go's Ambient flag propagates to all descendants.
     fn ambient_ancestor(&self, node: &Arc<Node>) -> bool {
         let mut cur = node.parent.as_ref();
         while let Some(a) = cur {
@@ -19686,9 +16170,6 @@ impl Checker {
         })
     }
 
-    /// Ambient member lookup: the namespace's locals when the namespace is
-    /// an implicit-export ambient container (see
-    /// [`Self::ambient_namespace_locals_visible`]).
     pub(crate) fn ambient_namespace_local(&self, ns: &Arc<Symbol>, name: &str) -> Option<Arc<Symbol>> {
         if !self.ambient_namespace_locals_visible(ns) {
             return None;
@@ -19706,22 +16187,11 @@ impl Checker {
             })
     }
 
-    /// Resolve an alias symbol to its underlying base symbol: follows the
-    /// `export_symbol` chain, and for `import X = require("./m")` aliases
-    /// resolves the module file's symbol from the program's loaded files.
     pub(crate) fn resolve_alias_base(&mut self, symbol: Arc<Symbol>) -> Arc<Symbol> {
         if !symbol.flags.intersects(SymbolFlags::Alias) {
             return symbol;
         }
-        // Namespace import aliases (`import * as NS from "m"`): the
-        // binder declares them without a target link — chase to the module
-        // symbol here (Go's reference resolver links import aliases to their
-        // module at bind time; resolveAliasSymbol follows that link). Without
-        // this, `import * as S from './s'; export = S;` leaves the export=
-        // target at the alias itself (0 exports — reexportedMissingAlias).
-        // NAMED imports (`import { x } from "m"`) are excluded: their alias
-        // base is the module's MEMBER, and resolving them to the module
-        // symbol misreports value uses as namespace uses (TS2708).
+
         if symbol
             .declarations
             .iter()
@@ -19736,16 +16206,7 @@ impl Checker {
             .find(|d| d.kind == SyntaxKind::ImportEqualsDeclaration)
         {
             if let crate::ast::NodeData::ImportEqualsDeclaration(data) = &decl.data {
-                // `import X = require("...")` — the module file/ambient
-                // module symbol. When the module has an `export = T`
-                // assignment (an ambient `declare module "m" { ... export =
-                // B; }`), the import's base is the ASSIGNED entity (Go's
-                // binder resolves import= through the export= at bind
-                // time): `import foo = require("foo")` with `export = B`
-                // makes foo an alias of B, so value uses of foo report
-                // TS2708 when B is a types-only namespace
-                // (aliasOnMergedModuleInterface) and `foo.A` resolves
-                // B's type members.
+
                 if let crate::ast::NodeData::ExternalModuleReference(ext) =
                     &data.module_reference.data
                     && ext.expression.kind == SyntaxKind::StringLiteral
@@ -19755,10 +16216,7 @@ impl Checker {
                     if let Some(export_eq) =
                         module_sym.exports.get(crate::ast::INTERNAL_SYMBOL_NAME_EXPORT_EQUALS)
                     {
-                        // Resolve the `export = <entity>` expression inside
-                        // the module's scope (the binder leaves the export=
-                        // alias unlinked; same chase as
-                        // `namespace_has_value_side`).
+
                         let entity_decl = export_eq
                             .declarations
                             .iter()
@@ -19787,8 +16245,7 @@ impl Checker {
                     }
                     return module_sym;
                 }
-                // `import X = NS.Path` — follow the entity-name target
-                // (up to four alias hops to avoid cycles).
+
                 if matches!(
                     data.module_reference.kind,
                     SyntaxKind::Identifier | SyntaxKind::QualifiedName
@@ -19827,17 +16284,11 @@ impl Checker {
         symbol
     }
 
-    /// Find the file symbol of an already-loaded module by specifier
-    /// (relative to the current file's directory), trying the common
-    /// TypeScript extension/index forms.
     pub(crate) fn resolve_module_file_symbol(&self, specifier: &str) -> Option<Arc<Symbol>> {
         if !specifier.starts_with('.') {
-            // Ambient module: a top-level `declare module "name"` in any
-            // loaded file (Go's resolveExternalModuleName consults the
-            // global module map).
+
             for file in self.program.source_files() {
-                // Augmentations (declare module inside an external-module
-                // file) don't make the name resolvable.
+
                 if file.external_module_indicator.is_some() {
                     continue;
                 }
@@ -19862,19 +16313,13 @@ impl Checker {
         self.resolve_module_file_symbol_in(dir, specifier)
     }
 
-    /// Resolve a RELATIVE module specifier against an explicit base
-    /// directory (the `resolve_module_file_symbol` relative branch, split
-    /// out so import-alias chasing can resolve against the ALIAS's file —
-    /// `current_file` may differ during cross-file qualified-name walks).
     fn resolve_module_file_symbol_in(
         &self,
         dir: &str,
         specifier: &str,
     ) -> Option<Arc<Symbol>> {
         let stem = specifier.strip_prefix("./").unwrap_or(specifier);
-        // A `.js`/`.jsx` specifier resolves to the TypeScript file with the
-        // same stem (the resolver's extension replacement —
-        // `import x = require('./foo.js')` binds foo.ts).
+
         let stem = stem
             .strip_suffix(".js")
             .or_else(|| stem.strip_suffix(".jsx"))
@@ -19901,28 +16346,6 @@ impl Checker {
         None
     }
 
-    /// TS2305: every named import/export specifier must resolve to a member
-    /// of the referenced module. Port of the
-    /// `checkImportBinding` → `checkAliasSymbol` → `getExternalModuleMember`
-    /// → `errorNoModuleMemberSymbol` chain (Go checker.go ~L5331-5470):
-    /// the module resolves through the REAL resolver, and a
-    /// `resolution-mode` import attribute only overrides the usage-site
-    /// mode for EXCLUSIVELY type-only clauses (Go `GetModeForUsageLocation`)
-    /// — plain clauses take the default chain (the containing file's
-    /// implied format), which is what makes `ImportInterface` missing from
-    /// the `require` face of a node16 package report at the specifier.
-    ///
-    /// Member lookup (Go `getExternalModuleMember` simplified): an `export=`
-    /// module answers from the export target's tables (symbol-level view of
-    /// Go's type-level lookup), otherwise the module's own exports table.
-    /// Default-import synthetic handling and type-level `export=` lookups
-    /// are not ported yet.
-    /// TS1479/TS1471 (Go `checkResolvedModule`, checker.go ~L15385): under
-    /// node16/node18, a synchronous (require-semantics) reference to an
-    /// ES-module-format file is an error — TS1479 for static imports and
-    /// re-exports from a CommonJS-format file, TS1471 for
-    /// `import x = require(...)` targeting an ES module (any importer
-    /// format). A `resolution-mode` attribute override bypasses the check.
     fn check_module_format_mismatch(&mut self, node: &Arc<Node>) {
         use crate::core::compiler_options::ModuleKind;
         if !matches!(self.module_kind, ModuleKind::Node16 | ModuleKind::Node18) {
@@ -19955,8 +16378,7 @@ impl Checker {
                 }
                 _ => return,
             };
-        // A resolution-mode attribute reroutes resolution — the default-mode
-        // format mismatch no longer applies (Go `hasResolutionModeOverride`).
+
         if let Some(attrs) = &attrs
             && self.get_resolution_mode_override(attrs, false).is_some()
         {
@@ -19975,12 +16397,7 @@ impl Checker {
             Some(p) => p,
             None => return,
         };
-        // The referenced file must actually be an ES module by format.
-        // Ambiguous `.d.ts` targets NEVER count as ESM (their format is the
-        // resolution mode that loaded them — a CJS importer resolves them
-        // through the require condition), while `.ts`/`.js` inputs DO take
-        // the package.json-implied format (official reports CJS files
-        // importing type=module `.js` targets — nodeModules1).
+
         if !module_format_is_esm_for_require_check(&target_path, &read) {
             return;
         }
@@ -20003,16 +16420,6 @@ impl Checker {
         }
     }
 
-    /// TS2883 (Go declaration emitter's symbol tracker,
-    /// `ReportLikelyUnsafeImportRequiredError`): with `declaration` on, the
-    /// inferred type of an exported variable must be nameable from the
-    /// emitting file. When naming requires a reference to a symbol whose
-    /// declaration lives in a file under `node_modules` that this file does
-    /// not successfully import, the computed module specifier contains
-    /// `/node_modules/` and the type is not portable. Approximation: only
-    /// the type's own top-level symbol is considered (the common
-    /// `export const a = <expr>()` shape), and a symbol counts as nameable
-    /// when any import of the file resolves to the symbol's file.
     fn check_declaration_nameability(&mut self, stmt: &Arc<Node>) {
         if !self.program.options().declaration.is_true() {
             return;
@@ -20023,10 +16430,7 @@ impl Checker {
         if file.file_name.starts_with("bundled://") || file.is_declaration_file {
             return;
         }
-        // Only USER sources participate: a file inside node_modules (an
-        // external library's own units referencing sibling package files)
-        // names types through intra-package specifiers — always portable,
-        // never TS2883 (official only checks the project's emitted roots).
+
         if file.file_name.contains("/node_modules/") {
             return;
         }
@@ -20037,12 +16441,7 @@ impl Checker {
         if !has_export {
             return;
         }
-        // Files this module successfully imports (specifiers that resolve).
-        // A failed import (`import { Thing } from "inner/other"` hitting
-        // TS2307) provides no naming power — matching the official behavior
-        // where the emitter must compute a fresh (non-portable) specifier.
-        // `spec_names` additionally keeps every RAW specifier text for the
-        // ambient-module nameability check.
+
         let mut imported_files: Vec<String> = Vec::new();
         let mut spec_names: Vec<String> = Vec::new();
         let NodeData::SourceFile(sfd) = &file.node.data else {
@@ -20078,10 +16477,7 @@ impl Checker {
             let crate::ast::NodeData::VariableDeclaration(vd) = &d.data else {
                 continue;
             };
-            // A variable initialized with a DYNAMIC import
-            // (`const f = await import("inner")`) names its module type
-            // through the import expression itself — the module file joins
-            // the whitelist before the target check runs.
+
             if let Some(init) = &vd.initializer {
                 let mut import_expr = Some(Arc::clone(init));
                 if let Some(inner) = import_expr.take() {
@@ -20103,7 +16499,7 @@ impl Checker {
                     }
                 }
             }
-            // Only INFERRED types ("The inferred type of '{0}' ...").
+
             if vd.type_node.is_some() {
                 continue;
             }
@@ -20128,17 +16524,11 @@ impl Checker {
             {
                 continue;
             }
-            // Ambient-module nameability (Go declaration emit names a
-            // symbol declared inside `declare module "url"` through the
-            // ambient module NAME — a globally visible specifier): when the
-            // target's declaration sits in a string-named ambient module
-            // whose name this file imports, the type is nameable.
+
             if self.symbol_in_ambient_module_named(&target, &spec_names) {
                 continue;
             }
-            // The module specifier the emitter would need: a relative path
-            // from the emitting file to the symbol's file, extension mapped
-            // to its emit form (other.ts → other.js).
+
             let spec = relative_emit_specifier(&file.file_name, &target_file.file_name);
             self.diagnostics.add(crate::ast::Diagnostic::new(
                 Some(file.clone()),
@@ -20150,10 +16540,6 @@ impl Checker {
         }
     }
 
-    /// Whether `symbol`'s declaration sits inside a string-named ambient
-    /// module (`declare module "url" { … }`) whose name appears in
-    /// `imported_specs` — the declaration emitter names such symbols through
-    /// the ambient module name, so a file importing that name can name them.
     fn symbol_in_ambient_module_named(
         &self,
         symbol: &Arc<Symbol>,
@@ -20180,16 +16566,9 @@ impl Checker {
         false
     }
 
-    /// TS18057: string-literal import/export names are unsupported under
-    /// module=es2015/es2020 (Go `checkModuleExportName` callers: import
-    /// specifier property names, export specifier property/name, namespace
-    /// export names). A string PROPERTY name on a from-less export
-    /// specifier is invalid syntax outright (TS1003, Go's
-    /// `allowStringLiteral = hasModuleSpecifier`). Declaration files are
-    /// exempt.
     fn check_module_export_names(&mut self, node: &Arc<Node>) {
         use crate::core::compiler_options::ModuleKind;
-        // (name node, string allowed at all)
+
         let mut names: Vec<(Arc<Node>, bool)> = Vec::new();
         match &node.data {
             NodeData::ImportDeclaration(d) => {
@@ -20267,7 +16646,7 @@ impl Checker {
 
     fn check_module_specifier_members(&mut self, node: &Arc<Node>) {
         use crate::ast::NodeData;
-        // (module specifier node, attributes, exclusively-type-only, elements)
+
         let (spec_node, attrs, exclusively_type_only, elements): (
             Arc<Node>,
             Option<Arc<Node>>,
@@ -20281,7 +16660,7 @@ impl Checker {
                 };
                 let Some(named) = &ic.named_bindings else { return };
                 let NodeData::NamedImports(ni) = &named.data else {
-                    return; // namespace import — no per-member check
+                    return;
                 };
                 (
                     Arc::clone(&d.module_specifier),
@@ -20295,7 +16674,7 @@ impl Checker {
                     return;
                 };
                 let Some(clause) = &d.export_clause else {
-                    return; // `export * from "m"` — no named members here
+                    return;
                 };
                 let NodeData::NamedExports(ne) = &clause.data else {
                     return;
@@ -20316,30 +16695,14 @@ impl Checker {
             return;
         };
         let spec_text = spec_node.text().trim_matches(['"', '\'', '`']).to_string();
-        // Usage-site resolution mode: the attribute override applies only
-        // to exclusively type-only clauses (Go `GetModeForUsageLocation`);
-        // otherwise `None` lets the resolver default to the containing
-        // file's implied format — the same mode the loading loop used when
-        // it pulled the module into the program.
+
         let mode = match (&attrs, exclusively_type_only) {
             (Some(attrs), true) => self
                 .get_resolution_mode_override(attrs, false)
                 .unwrap_or(crate::core::compiler_options::ModuleKind::None),
             _ => crate::core::compiler_options::ModuleKind::None,
         };
-        // Resolve through the real resolver; an ambient `declare module`
-        // declaration answers for non-relative specifiers when file
-        // resolution fails. An unresolvable module reports TS2307 in the
-        // loading loop — member checking stays silent to avoid cascades.
-        //
-        // Go `resolveExternalModule` consults the ambient module map FIRST
-        // (`tryFindAmbientModule`): a non-relative name that matches a
-        // `declare module "..."` anywhere in the program binds to that
-        // ambient symbol even when file resolution would also succeed —
-        // the typeRoots declaration fallback can resolve "phaser" to a
-        // global-script .d.ts whose file symbol has no exports
-        // (moduleResolutionAsTypeReferenceDirectiveAmbient). Relative
-        // specifiers never consult ambient modules.
+
         let file_symbol = |checker: &Self| {
             checker
                 .program
@@ -20358,11 +16721,7 @@ impl Checker {
         let Some(module_symbol) = module_symbol else {
             return;
         };
-        // Go isShorthandAmbientModuleSymbol: a body-less `declare module "x";`
-        // answers every member lookup — getExternalModuleMember returns the
-        // module symbol itself (any semantics), and `default` takes the
-        // permissive synthetic-default path for ambient modules
-        // (canHaveSyntheticDefault's declaration-files branch).
+
         let shorthand_ambient = module_symbol.value_declaration.as_ref().is_some_and(|d| {
             matches!(&d.data, NodeData::ModuleDeclaration(md) if md.body.is_none())
         });
@@ -20384,9 +16743,7 @@ impl Checker {
             let error_node = property_name.clone().unwrap_or_else(|| Arc::clone(&name));
             match self.module_member_lookup(&module_symbol, &member_name) {
                 ModuleMemberLookup::Found => {}
-                // A module-local, non-exported declaration under the name
-                // reports TS2459 (Go `getExportOfModule` falls back to the
-                // container's locals for the "declares locally" variant).
+
                 ModuleMemberLookup::LocalNotExported => {
                     self.diagnostics.add(crate::ast::Diagnostic::new(
                         Some(file.clone()),
@@ -20401,9 +16758,7 @@ impl Checker {
                         Some(file.clone()),
                         error_node.loc,
                         crate::diagnostics::messages_generated::MODULE_0_HAS_NO_EXPORTED_MEMBER_1,
-                        // The module name renders quoted inside the {0} slot
-                        // (Go's `errorNoModuleMemberSymbol` prints the specifier
-                        // as a string literal — `Module '"pkg"' …`).
+
                         vec![format!("\"{spec_text}\""), member_name],
                     ));
                 }
@@ -20411,30 +16766,13 @@ impl Checker {
         }
     }
 
-    /// Member of a module symbol for TS2305/TS2459 checking: an `export=`
-    /// module answers from the export target's tables (Go resolves the
-    /// target's TYPE and does a type-level property lookup; the
-    /// symbol-level view here covers the value/namespace shapes the tests
-    /// exercise), with the module's own exports as the supplemental
-    /// fallback Go keeps on the module symbol for `export=` modules.
-    ///
-    /// For plain module FILES the binder routes exported declarations into
-    /// the file symbol's `members`/`locals` tables (only `ModuleDeclaration`
-    /// containers insert into `exports` directly — see the declareSymbol
-    /// routing note in the binder); the export face is marked by the
-    /// `export_symbol` self-link (the two-table declareModuleMember
-    /// pattern). A same-named non-exported member yields `LocalNotExported`
-    /// (TS2459), an absent name `Missing` (TS2305).
     fn module_member_lookup(
         &mut self,
         module_symbol: &Arc<Symbol>,
         name: &str,
     ) -> ModuleMemberLookup {
         use ModuleMemberLookup as M;
-        // `export=` modules: Go `getExternalModuleMember` resolves the
-        // export-assignment target (`resolveESModuleSymbol`) and looks the
-        // member up on the target's TYPE (`getPropertyOfTypeEx`), with the
-        // module's own exports as the supplemental table.
+
         if let Some(export_equals) = module_symbol.exports.get("export=") {
             let target = self.resolve_export_equals_target(export_equals);
             if std::env::var_os("TSOX_DEBUG_MODULE").is_some() {
@@ -20451,12 +16789,7 @@ impl Checker {
             {
                 return M::Found;
             }
-            // Star chains may still re-export supplemental names. Report
-            // Missing — not LocalNotExported — when nothing hits: the
-            // local-symbol check in Go's errorNoModuleMemberSymbol runs
-            // against the TARGET. Go's synthetic-default check applies to
-            // `export=` modules too (`hasExportAssignmentSymbol` /
-            // declaration-file branches).
+
             if self.module_star_chain_exports(module_symbol, name)
                 || (name == "default"
                     && self.module_can_have_synthetic_default(module_symbol))
@@ -20479,19 +16812,11 @@ impl Checker {
                 module_symbol.declarations.iter().map(|d| d.kind).collect::<Vec<_>>()
             );
         }
-        // `export {X}` / `export {X} from "m"` clauses: Go's binder declares
-        // the specifier aliases directly in the module's exports
-        // (declareModuleMember's alias branch); ours routes them through the
-        // generic members table without the export self-link, so consult the
-        // clause text here (both the local and forwarding forms put the
-        // EXPORTED name in the clause).
+
         if self.module_has_export_clause(module_symbol, name) {
             return M::Found;
         }
-        // A syntactic `default`: `export default <expr>` (ExportAssignment)
-        // or a Default-modifier class/function/interface declaration (Go's
-        // declareSymbolEx names the export symbol "default" when
-        // `isDefaultExport && parent != nil`).
+
         if name == "default" && self.module_has_syntactic_default(module_symbol) {
             return M::Found;
         }
@@ -20502,9 +16827,7 @@ impl Checker {
                 M::LocalNotExported
             };
         }
-        // File-level `export let/const/function` declarations live in the
-        // source-file container's locals table (same export_symbol link
-        // marking the export face).
+
         if let Some(file_node) = module_symbol
             .declarations
             .iter()
@@ -20520,34 +16843,23 @@ impl Checker {
                 };
             }
         }
-        // Ambient export contexts (Go `setExportContextFlag`: an ambient
-        // module or declaration file with NO export declarations/assignments
-        // implicitly exports every declaration): body locals are the export
-        // face.
+
         if self.module_is_ambient_export_context(module_symbol)
             && self.module_ambient_locals_contain(module_symbol, name)
         {
             return M::Found;
         }
-        // `export * from` star chains (Go `getExportsOfModuleWorker`'s visit
-        // closure): names re-exported through stars, shadowed by the module's
-        // own exports (already checked above), never including "default"
-        // (extendExportSymbols skips it).
+
         if name != "default" && self.module_star_chain_exports(module_symbol, name) {
             return M::Found;
         }
-        // Synthetic default (Go `canHaveSyntheticDefault`): declaration files
-        // and ambient modules without a syntactic default and without an
-        // `__esModule` export answer a "default" import; a plain .ts module
-        // only when it has an `export=`.
+
         if name == "default" && self.module_can_have_synthetic_default(module_symbol) {
             return M::Found;
         }
         M::Missing
     }
 
-    /// Iterate the statements of a module symbol's declaration bodies (a
-    /// source file's top level, or an ambient `declare module` block).
     pub(crate) fn for_each_module_statement(
         &self,
         module_symbol: &Arc<Symbol>,
@@ -20576,9 +16888,6 @@ impl Checker {
         }
     }
 
-    /// Whether any `export {…}` clause of the module exports `name` (the
-    /// specifier's EXPORTED name — `data.name`, which is "default" for
-    /// `export {X as default}`).
     fn module_has_export_clause(&self, module_symbol: &Arc<Symbol>, name: &str) -> bool {
         use crate::ast::NodeData;
         let mut found = false;
@@ -20601,8 +16910,6 @@ impl Checker {
         found
     }
 
-    /// Whether the module has a syntactic default export: an `export default`
-    /// assignment or a Default-modifier declaration (Go `isSyntacticDefault`).
     fn module_has_syntactic_default(&self, module_symbol: &Arc<Symbol>) -> bool {
         use crate::ast::NodeData;
         let mut found = false;
@@ -20620,10 +16927,6 @@ impl Checker {
         found
     }
 
-    /// Go `setExportContextFlag`: an ambient container (a `declare module` or
-    /// a declaration-file module) that contains no `export {…}` / `export *`
-    /// declarations and no `export=`/`export default` assignments implicitly
-    /// exports every declaration.
     fn module_is_ambient_export_context(&self, module_symbol: &Arc<Symbol>) -> bool {
         use crate::ast::NodeData;
         let mut is_ambient = false;
@@ -20660,10 +16963,8 @@ impl Checker {
         !has_export_declaration
     }
 
-    /// Whether `name` is among the (implicitly exported) locals of an ambient
-    /// module declaration body.
     fn module_ambient_locals_contain(&self, module_symbol: &Arc<Symbol>, name: &str) -> bool {
-        
+
         for decl in &module_symbol.declarations {
             if decl.kind == SyntaxKind::ModuleDeclaration
                 && let Some(locals) = self.program.symbol_map().locals.get(&decl.id())
@@ -20675,11 +16976,6 @@ impl Checker {
         false
     }
 
-    /// `export * from` star-chain resolution (Go `getExportsOfModuleWorker`'s
-    /// visit closure): resolve each star's target module and recurse. A star
-    /// never re-exports "default" (Go `extendExportSymbols`); cycles are
-    /// legal, bounded by the visited set + depth cap. The visited set is
-    /// threaded through (NOT re-created per level) so `a → b → a` terminates.
     fn module_star_chain_exports(&mut self, module_symbol: &Arc<Symbol>, name: &str) -> bool {
         if name == "default" {
             return false;
@@ -20696,8 +16992,6 @@ impl Checker {
         false
     }
 
-    /// A module's `export * from` declarations as (specifier, declaring file)
-    /// pairs.
     fn module_star_specs(
         &self,
         module_symbol: &Arc<Symbol>,
@@ -20717,10 +17011,6 @@ impl Checker {
         stars
     }
 
-    /// The DIRECT export face of a star-chain target (Go visit(): the
-    /// export=-resolved symbol's cloned exports table): exports table,
-    /// export-clause aliases, members with the export self-link, ambient
-    /// implicit-export locals — then recurse into the target's own stars.
     fn star_target_exports(
         &mut self,
         target: &Arc<Symbol>,
@@ -20732,8 +17022,7 @@ impl Checker {
             return false;
         }
         visited.push(Arc::as_ptr(target));
-        // Go resolves the export= target at every star boundary
-        // (resolveExternalModuleSymbol) and visits ITS exports.
+
         let face = match target.exports.get("export=") {
             Some(ee) => self.resolve_export_equals_target(ee),
             None => Arc::clone(target),
@@ -20760,11 +17049,6 @@ impl Checker {
         false
     }
 
-    /// Resolve a module from a specifier node relative to the file that
-    /// contains it — the ambient-module map first for non-relative
-    /// specifiers, then the real resolver (Go `resolveExternalModule` →
-    /// `tryFindAmbientModule` ordering; same chain as
-    /// `check_module_specifier_members`).
     fn resolve_module_symbol_from(
         &mut self,
         spec_node: &Arc<Node>,
@@ -20792,11 +17076,6 @@ impl Checker {
         }
     }
 
-    /// Resolve the target of an `export=` alias: `resolve_alias_base` first
-    /// (import-equals chains), then — for `export = <entity-name>` forms —
-    /// resolve the expression in the DECLARING file's scope (Go
-    /// `resolveESModuleSymbol` resolves the export-assignment's target
-    /// symbol).
     fn resolve_export_equals_target(&mut self, export_equals: &Arc<Symbol>) -> Arc<Symbol> {
         let mut target = self.resolve_alias_base(Arc::clone(export_equals));
         for decl in export_equals.declarations.clone() {
@@ -20809,9 +17088,7 @@ impl Checker {
                 if let Some(t) = self.with_declaring_file_context(&decl, |c| {
                     c.resolve_qualified_symbol(&d.expression)
                 }) {
-                    // `export = alias` where `alias` is an
-                    // `import X = NS` alias: chase one more level to the
-                    // namespace target.
+
                     target = if t.flags.intersects(SymbolFlags::Alias) {
                         self.resolve_alias_base(t)
                     } else {
@@ -20824,17 +17101,12 @@ impl Checker {
         target
     }
 
-    /// Whether a resolved `export=` target (a namespace/module/class symbol)
-    /// exposes `name`: its exports, then members, then — for ambient export
-    /// contexts — the implicitly exported locals (Go's type-level lookup via
-    /// `getPropertyOfTypeEx` sees the ambient namespace's full face).
     fn module_target_has_member(&self, target: &Arc<Symbol>, name: &str) -> bool {
         use crate::ast::NodeData;
         if target.exports.get(name).is_some() || target.members.get(name).is_some() {
             return true;
         }
-        // Ambient namespaces (`declare namespace NS { … }`) implicitly export
-        // their locals when their body has no export declarations.
+
         let mut has_export_declaration = false;
         let mut ambient = false;
         let mut locals_hit = false;
@@ -20879,10 +17151,6 @@ impl Checker {
         ambient && !has_export_declaration && locals_hit
     }
 
-    /// Go `canHaveSyntheticDefault` (subset): ambient modules and declaration
-    /// files answer a synthetic "default" when they have no syntactic default
-    /// and no `__esModule` export; a non-declaration TypeScript module only
-    /// when it has an `export=` (`hasExportAssignmentSymbol`).
     fn module_can_have_synthetic_default(&mut self, module_symbol: &Arc<Symbol>) -> bool {
         if self.module_has_syntactic_default(module_symbol) {
             return false;
@@ -20905,16 +17173,6 @@ impl Checker {
         module_symbol.exports.get("export=").is_some()
     }
 
-    /// Chase a pure import alias (`import * as P from "m"`, `import {X}
-    /// from "m"`) to its MODULE symbol. The binder declares import aliases
-    /// without a target link (file-module aliases get theirs from the
-    /// reference resolver); for ambient-module targets the link is never
-    /// established, so qualified member access (`P.VM`) must resolve the
-    /// module here (Go chases the alias to the module symbol during
-    /// resolveEntityName). Returns None for non-import aliases or
-    /// unresolvable modules.
-    /// Directory part of the file declaring `node` (relative specifiers
-    /// resolve against the DECLARING file's directory, not current_file).
     fn declaring_dir_of(&self, node: &Arc<Node>) -> Option<String> {
         self.get_source_file_of_node(node)
             .or_else(|| self.current_file.clone())
@@ -20937,16 +17195,14 @@ impl Checker {
                 )
             })?
             .clone();
-        // Walk up to the enclosing Import/ExportDeclaration for the specifier.
+
         let mut cur = decl;
         for _ in 0..4 {
             let Some(parent) = cur.parent.clone() else {
                 return None;
             };
             if parent.kind == SyntaxKind::ExportDeclaration {
-                // `export [* as ns] from "mod"` — the NamespaceExport
-                // alias's target is the referenced module (Go
-                // getTargetOfNamespaceExport → resolveESModuleSymbol).
+
                 if let crate::ast::NodeData::ExportDeclaration(d) = &parent.data {
                     let Some(specifier) = &d.module_specifier else {
                         return None;
@@ -20966,8 +17222,7 @@ impl Checker {
                     if !spec.starts_with('.') {
                         return self.resolve_module_file_symbol(&spec);
                     }
-                    // Relative: resolve against the DECLARING file's
-                    // directory.
+
                     let dir = self
                         .get_source_file_of_node(&parent)
                         .map(|f| {
@@ -20993,7 +17248,6 @@ impl Checker {
         None
     }
 
-    /// The source text of a class declaration's name ("" when anonymous).
     fn class_name_text(class: &Arc<Node>) -> String {
         match &class.data {
             crate::ast::NodeData::ClassDeclaration(d) => {
@@ -21006,11 +17260,6 @@ impl Checker {
         }
     }
 
-    /// Whether the class has a property/method/accessor member named `name`
-    /// and, if so, whether that member is `static`. Scans the class's member
-    /// list declarationally (Go consults the constructor type's properties
-    /// and the instance type — equivalent for direct members; inherited
-    /// statics/instance members from base classes are not yet considered).
     fn class_member_static_by_name(&self, class: &Arc<Node>, name: &str) -> Option<bool> {
         let members = match &class.data {
             crate::ast::NodeData::ClassDeclaration(d) => &d.members,
@@ -21032,21 +17281,6 @@ impl Checker {
         None
     }
 
-    /// TS2301: `Initializer of instance member variable 'x' cannot reference
-    /// identifier 'y' declared in the constructor.` Walks up from the
-    /// identifier to the nearest enclosing non-static property declaration
-    /// and checks whether the class's constructor (the one with a body)
-    /// declares the name as a parameter or local. Mirrors the Go name
-    /// resolver's `KindPropertyDeclaration` scope-climb case plus
-    /// `checkAndReportErrorForInvalidInitializer`. Returns true when the
-    /// diagnostic was reported (resolution treats the name as "handled").
-    /// TS2393: `Duplicate function implementation.` Collects same-name
-    /// `function` declarations among the node's siblings (same container);
-    /// when two or more have bodies, reports on every one of them (overload
-    /// signatures included — oracle-verified: `function f(): number;` above
-    /// two implementations also reports at the signature). Skipped in
-    /// ambient contexts (.d.ts / `declare`), mirroring Go's
-    /// `checkFunctionOrConstructorSymbolWorker`.
     fn check_duplicate_function_implementations(&mut self, node: &Arc<Node>) {
         let crate::ast::NodeData::FunctionDeclaration(data) = &node.data else {
             return;
@@ -21081,8 +17315,7 @@ impl Checker {
                         .is_some_and(|n| n.text() == name.text()))
             })
             .collect();
-        // Report only when visiting the first declaration of the name, so the
-        // per-name error set is emitted exactly once.
+
         if fns.first().is_none_or(|first| !Arc::ptr_eq(first, node)) {
             return;
         }
@@ -21107,10 +17340,7 @@ impl Checker {
                 }
             }
         }
-        // TS2384 (Go `checkFlagAgreementBetweenOverloads`): the canonical
-        // declaration is the implementation when one exists in this
-        // container, else the first overload; every body-less overload
-        // whose ambient-ness deviates reports on its name.
+
         let is_ambient_decl = |f: &Arc<Node>| {
             f.has_syntactic_modifier(ModifierFlags::Ambient)
                 || f.flags.contains(NodeFlags::Ambient)
@@ -21143,10 +17373,6 @@ impl Checker {
         }
     }
 
-    /// TS2391: a body-less function declaration must be IMMEDIATELY
-    /// followed by its implementation or the next overload of the same
-    /// name (Go's `reportImplementationExpectedError`). Ambient/declare
-    /// signatures are exempt. Reported on the function name.
     fn check_overload_implementation_follows(&mut self, node: &Arc<Node>) {
         let crate::ast::NodeData::FunctionDeclaration(data) = &node.data else {
             return;
@@ -21170,7 +17396,7 @@ impl Checker {
         let is_ambient = node.has_syntactic_modifier(ModifierFlags::Ambient)
             || node.flags.contains(NodeFlags::Ambient)
             || self.ambient_context_depth > 0
-            // Any ambient ancestor ('declare module M { … }').
+
             || node
                 .parent
                 .as_ref()
@@ -21200,7 +17426,7 @@ impl Checker {
                 None
             }
         });
-        // Same-name subsequent function → overload chain continues.
+
         if next.as_ref().is_some_and(|n| {
             matches!(&n.data, crate::ast::NodeData::FunctionDeclaration(d) if d
                 .name
@@ -21209,11 +17435,7 @@ impl Checker {
         }) {
             return;
         }
-        // A subsequent function with a DIFFERENT name and a body → TS2389
-        // on that function's name ('function foo(x); function bar() {}');
-        // without a body it's a separate overload set → fall through to
-        // TS2391 on this declaration (oracle: fo2 'a(); b();' reports
-        // TS2391 on both).
+
         if let Some(n) = &next
             && matches!(&n.data, crate::ast::NodeData::FunctionDeclaration(d) if d.body.is_some())
             && n.kind == SyntaxKind::FunctionDeclaration
@@ -21223,8 +17445,7 @@ impl Checker {
                 && next_name.kind == SyntaxKind::Identifier
                 && next_name.text() != name.text()
             {
-                // Dedupe like the TS2391 report below (the function
-                // arm may be visited through two dispatch paths).
+
                 let already = self
                     .diagnostics
                     .get_all()
@@ -21243,7 +17464,7 @@ impl Checker {
                 return;
             }
         }
-        // Dedupe: this node may be visited through two dispatch paths.
+
         let already = self
             .diagnostics
             .get_all()
@@ -21261,11 +17482,6 @@ impl Checker {
         }
     }
 
-    /// TS2392: `Multiple constructor implementations are not allowed.` When
-    /// two or more of the class's constructor declarations have bodies,
-    /// report on every constructor declaration (overload signatures
-    /// included). Mirrors Go's `checkFunctionOrConstructorSymbolWorker` via
-    /// the constructor symbol's merged declarations.
     fn check_multiple_constructor_implementations(&mut self, node: &Arc<Node>) {
         let Some(class) = node.parent.as_ref() else {
             return;
@@ -21317,13 +17533,7 @@ impl Checker {
         }) else {
             return false;
         };
-        // Go's scope climb flags the reference when it reaches the
-        // PropertyDeclaration without finding the name in an intermediate
-        // container — i.e. an outer-scope binding still reports (oracle:
-        // `var x; class A { a = x; constructor(x) {} }` → TS2301), but a
-        // binding INSIDE a nested function in the initializer (the arrow's
-        // own parameter in `messageHandler = (message) => message`) is
-        // found before the climb reaches the property and is exempt.
+
         if let Some(sym) = self.resolve_identifier(node) {
             let binds_in_initializer_fn = sym.declarations.iter().any(|d| {
                 let mut cur = d.parent.as_ref();
@@ -21356,7 +17566,7 @@ impl Checker {
         if !matches!(class.kind, SyntaxKind::ClassDeclaration | SyntaxKind::ClassExpression) {
             return false;
         }
-        // Go's FindConstructorDeclaration: the first constructor with a body.
+
         let crate::ast::NodeData::ClassDeclaration(cd) = &class.data else {
             return false;
         };
@@ -21394,13 +17604,6 @@ impl Checker {
         true
     }
 
-    /// Contextual element check for literal expressions against a target
-    /// type (Go's contextual typing of array/object literals): recurses
-    /// into array-literal elements against the target's element type,
-    /// reports TS2353 excess properties and TS2741 missing properties on
-    /// object literals, and TS2322 for primitive-literal elements that
-    /// don't match a non-any target. Anchored at the offending property
-    /// name / element, like the official baselines.
     fn check_contextual_elements(
         &mut self,
         expr: &Arc<Node>,
@@ -21414,11 +17617,7 @@ impl Checker {
             let crate::ast::NodeData::ArrayLiteralExpression(data) = &expr.data else {
                 return;
             };
-            // Element checks only apply to genuine array-like targets
-            // (`T[]`, evolving arrays) — a generic interface instantiation
-            // recorded its type arguments for display, and those must not
-            // be misread as an element type (`const x: Box<string> = [...]`
-            // is a bare TS2322, no per-element cascade).
+
             let elem_t = if self.is_array_type(target)
                 || matches!(target.data, TypeData::EvolvingArray(_))
             {
@@ -21427,15 +17626,7 @@ impl Checker {
                 self.get_any_type()
             };
             if elem_t.flags.contains(TypeFlags::Any) {
-                // A numeric index signature on the target (`interface I {
-                // [x: number]: Date }`) also types the elements. For a
-                // GENERIC interface instantiation the declared index info
-                // carries the RAW type parameter (`ConcatArray<T>`'s
-                // `[n: number]: T`) — re-read it from a properly
-                // instantiated form so the value type resolves through
-                // the type arguments (`ConcatArray<number>` → number,
-                // not `T`); otherwise `fa.concat([0])`'s element checks
-                // against the raw `T` and reports a phantom TS2322.
+
                 let index_source = target.symbol.as_ref().and_then(|sym| {
                     let args = target.as_object()?.type_arguments.clone();
                     if sym.flags.contains(SymbolFlags::Interface) && !args.is_empty() {
@@ -21482,9 +17673,7 @@ impl Checker {
             }
             return;
         }
-        // Type-assertion elements (`[<foo>({})]`): check the ASSERTED type
-        // against the element type (Go checks the contextually-typed
-        // assertion result — TS2741 on class types missing properties).
+
         if matches!(
             expr.kind,
             SyntaxKind::TypeAssertionExpression | SyntaxKind::AsExpression
@@ -21558,8 +17747,7 @@ impl Checker {
             }
             return;
         }
-        // Primitive literals: report only genuine mismatches (null/undefined
-        // excluded — their assignability depends on strictNullChecks).
+
         if matches!(
             expr.kind,
             SyntaxKind::StringLiteral
@@ -21577,8 +17765,7 @@ impl Checker {
             };
             let src_str = self.type_to_string(&display_type);
             let tgt_str = self.type_to_string(target);
-            // The elaborate path may have reported this element already
-            // (same code + loc) — skip the duplicate.
+
             let already = self
                 .diagnostics
                 .get_all()
@@ -21596,18 +17783,11 @@ impl Checker {
         }
     }
 
-    /// For an async function-like, the effective type that `return expr`
-    /// must satisfy: a declared `Promise<X>` unwraps to `X` (async return
-    /// values are promisified). Mirrors Go's `getReturnTypeOfSignature`
-    /// handling of async functions (`getPromisedTypeOfPromise`).
     fn unwrap_async_return_type(&self, declared: Arc<Type>, is_async: bool) -> Arc<Type> {
         if !is_async {
             return declared;
         }
-        // Promise<X> with one type argument → X. Generic references that
-        // are not yet instantiated (the type argument was dropped during
-        // resolution) degrade to `any` — the promised type is unknowable,
-        // so return-value checking is suppressed rather than mis-reported.
+
         let is_promise = declared
             .symbol
             .as_ref()
@@ -21623,12 +17803,6 @@ impl Checker {
         declared
     }
 
-    /// The awaited type of `t`: what `await x` yields when `x: t`. Port of
-    /// Go's `getAwaitedTypeNoAliasEx` (checker.go ~L31321) minus the
-    /// `Awaited<T>` alias wrapper for generic types — unions map over their
-    /// constituents, `Promise<X>` and other thenables unwrap through their
-    /// `then` method's onfulfilled callback, everything else returns
-    /// unchanged. Returns `None` only for cycles/over-deep recursion.
     pub fn get_awaited_type(&mut self, t: &Arc<Type>) -> Option<Arc<Type>> {
         self.get_awaited_type_with_depth(t, 0)
     }
@@ -21638,18 +17812,15 @@ impl Checker {
         t: &Arc<Type>,
         depth: usize,
     ) -> Option<Arc<Type>> {
-        // Cycle/depth guard: mutually recursive promise types
-        // (`interface Bad { then(cb: (v: Bad) => any): any }`) would never
-        // settle — Go detects these with awaitedTypeStack; a depth bound
-        // achieves the same termination.
+
         if depth > 50 {
             return None;
         }
-        // `any` is never unwrapped.
+
         if t.flags.contains(TypeFlags::Any) {
             return Some(Arc::clone(t));
         }
-        // For a union, get a union of the awaited types of each constituent.
+
         if let crate::checker::TypeData::Union(u) = &t.data {
             let mut mapped: Vec<Arc<Type>> = Vec::with_capacity(u.union_or_intersection.types.len());
             for constituent in &u.union_or_intersection.types {
@@ -21662,23 +17833,17 @@ impl Checker {
         }
         if let Some(promised) = self.get_promised_type_of_promise(t) {
             if Arc::ptr_eq(&promised, t) {
-                // A promise whose promised type is itself never resolves.
+
                 return None;
             }
             return self.get_awaited_type_with_depth(&promised, depth + 1);
         }
-        // The type was not a promise, so it could not be unwrapped further.
+
         Some(Arc::clone(t))
     }
 
-    /// `Promise<X>` → X; a thenable → the value type its `then` method's
-    /// onfulfilled callback receives. Simplified port of Go's
-    /// `getPromisedTypeOfPromiseEx` (checker.go ~L28994): Promise references
-    /// unwrap by their first type argument; other object types consult the
-    /// first parameter of the first `then` call signature (the onfulfilled
-    /// callback) and take that callback's first parameter's type.
     fn get_promised_type_of_promise(&mut self, t: &Arc<Type>) -> Option<Arc<Type>> {
-        // Promise<X> reference: the first type argument.
+
         if t.symbol.as_ref().is_some_and(|s| s.name == "Promise") {
             if let crate::checker::TypeData::Object(obj) = &t.data {
                 if let Some(first) = obj.type_arguments.first() {
@@ -21687,7 +17852,7 @@ impl Checker {
             }
             return None;
         }
-        // Primitives and non-objects can't be thenables.
+
         if !t.flags.contains(TypeFlags::Object) {
             return None;
         }
@@ -21710,10 +17875,6 @@ impl Checker {
         Some(self.get_type_of_symbol(value_param))
     }
 
-    /// The annotated type of an identifier's variable binding — used to
-    /// contextually check assignment right-hand sides (`foo = {...}` where
-    /// `foo: {id:number}`). Only VariableDeclaration annotations are
-    /// consulted; parameters and properties are checked at their own sites.
     fn declared_annotation_type_of(&mut self, node: &Arc<Node>) -> Option<Arc<Type>> {
         if node.kind != SyntaxKind::Identifier {
             return None;
@@ -21730,7 +17891,6 @@ impl Checker {
         Some(self.get_type_from_type_node(tn))
     }
 
-    /// Go `isValidConstAssertionArgument`: valid left sides of `as const`.
     fn is_valid_const_assertion_argument(&mut self, node: &Arc<Node>) -> bool {
         match node.kind {
             SyntaxKind::StringLiteral
@@ -21762,8 +17922,7 @@ impl Checker {
                 _ => false,
             },
             SyntaxKind::PropertyAccessExpression | SyntaxKind::ElementAccessExpression => {
-                // An enum-member reference: `E.a` / `E["a"]` resolving to an
-                // enum symbol.
+
                 let (obj, _name) = match &node.data {
                     crate::ast::NodeData::PropertyAccessExpression(d) => {
                         (Some(d.expression.clone()), d.name.text().to_string())
@@ -21795,17 +17954,10 @@ impl Checker {
         }
     }
 
-    /// Go `isConstTypeReference`: the type side of an `as const` assertion
-    /// is exactly the keyword `const` (the parser produces a `ConstKeyword`
-    /// type node for the asserted type).
     fn is_const_type_node(type_node: &Arc<Node>) -> bool {
         type_node.kind == SyntaxKind::ConstKeyword
     }
 
-    /// Delete-operand checks (Go `checkDeleteExpression`): TS1102
-    /// (identifier operand in strict mode) + TS2703 (non-property operand),
-    /// both on the operand; TS2704 when the property is read-only, on the
-    /// property name.
     fn check_delete_operand(&mut self, operand: &Arc<Node>) {
         let mut target = operand;
         while target.kind == SyntaxKind::ParenthesizedExpression {
@@ -21817,8 +17969,7 @@ impl Checker {
         }
         match target.kind {
             SyntaxKind::Identifier => {
-                // Strict-family default is ON (tsgo semantics: Unknown →
-                // true), plus modules are always strict.
+
                 let strict =
                     self.program.options().get_strict_option_value(
                         self.program.options().always_strict,
@@ -21858,9 +18009,7 @@ impl Checker {
                     }
                     _ => return,
                 };
-                // TS18011 (Go checkDeleteExpression): a private identifier
-                // can never be deleted — reported at the access expression,
-                // before readonly/optional checks.
+
                 if matches!(&target.data, crate::ast::NodeData::PropertyAccessExpression(d) if d.name.kind == SyntaxKind::PrivateIdentifier)
                 {
                     self.diagnostics.add(crate::ast::Diagnostic::new(
@@ -21872,7 +18021,7 @@ impl Checker {
                     ));
                     return;
                 }
-                // `any` object → no checks.
+
                 let obj_type = self.get_type_of_node(obj_expr);
                 if obj_type.flags.contains(TypeFlags::Any) {
                     return;
@@ -21887,8 +18036,7 @@ impl Checker {
                     ));
                     return;
                 }
-                // TS2542: read-only index signature
-                // ('readonly [k: string]: T' — 'delete b["test"]').
+
                 if let Some(structured) = obj_type.as_structured() {
                     let readonly_index = structured.index_infos.iter().any(|info| {
                         info.is_readonly
@@ -21909,12 +18057,9 @@ impl Checker {
                         return;
                     }
                 }
-                // TS2790 (strictNullChecks): the deleted property must be
-                // optional.
+
                 if self.strict_null_checks && self.has_property_of_type(&obj_type, &name) {
-                    // Go's rule: the operand is deletable when the property
-                    // is optional OR its type includes `undefined`
-                    // ('b: number | undefined' deletes fine).
+
                     let prop = obj_type.as_structured().and_then(|s| {
                         s.properties
                             .iter()
@@ -21947,8 +18092,7 @@ impl Checker {
                             _ => false,
                         }
                     }) || obj_type.as_structured().is_some_and(|s| {
-                        // A string index signature permits deleting any
-                        // property ('[s: string]: number').
+
                         s.index_infos.iter().any(|info| {
                             info.key_type
                                 .as_ref()
@@ -21970,20 +18114,12 @@ impl Checker {
         }
     }
 
-    /// TS2588/TS2540 for assignment-like targets. `x = 1` / `++x` with an
-    /// identifier LHS resolving to a `const` binding reports TS2588 on the
-    /// operand; `M.x = 1` / `++M.x` where `M` is a namespace and `x` a
-    /// const member reports TS2540 (read-only property) on the property
-    /// name (Go: the assignment pipeline's `checkReferenceExpression`
-    /// resolving the property symbol and checking its const-ness).
     fn check_const_assignment_target(&mut self, operand: &Arc<Node>) {
-        // Unwrap parentheses (`++((x))` — Go's checkReferenceExpression
-        // walks through parenthesized expressions).
+
         let mut target = operand;
         loop {
             target = match &target.data {
-                // Parentheses (`++((x))`) and non-null assertions (`x!++`)
-                // — Go's checkReferenceExpression walks through both.
+
                 crate::ast::NodeData::ParenthesizedExpression(p) => &p.expression,
                 crate::ast::NodeData::NonNullExpression(n) => &n.expression,
                 _ => break,
@@ -22012,13 +18148,8 @@ impl Checker {
         }
     }
 
-    /// TS2540: assigning to a namespace's `const` member (`M.x = 1`).
-    /// Resolves the member through the namespace symbol's exports/members
-    /// (and the module declaration's locals for ambient namespaces) — the
-    /// same lookup as `get_type_of_property_access`'s namespace path.
     fn check_const_property_assignment(&mut self, node: &Arc<Node>) {
-        // `M.x` or `M["x"]` (a string-literal element access behaves like a
-        // property access).
+
         let (obj_expr, name, name_loc) = match &node.data {
             crate::ast::NodeData::PropertyAccessExpression(data) => {
                 (&data.expression, &data.name, data.name.loc)
@@ -22071,24 +18202,13 @@ impl Checker {
         }
     }
 
-    /// TS2448: Check if a block-scoped variable (`let`/`const`/`class`) is
-    /// used before its declaration. Mirrors Go's
-    /// `checkResolvedBlockScopedVariable` + `isBlockScopedNameDeclaredBeforeUse`.
-    ///
-    /// Reports TS2448 when the resolved symbol is block-scoped (or a class)
-    /// and the reference's source position precedes the declaration's
-    /// source position.
     fn check_block_scoped_variable_used_before_declaration(
         &mut self,
         node: &Arc<Node>,
         symbol: &Arc<Symbol>,
         name: &str,
     ) {
-        // `var` declarations hoist — never in the TDZ. Our binder types all
-        // variable symbols BlockScopedVariable (flag-invariant; var-ness
-        // lives in the declaration shape), so gate on the keyword here:
-        // climb BindingElement → binding pattern → VariableDeclaration →
-        // its list's let/const flags (binder `declaration_is_var`).
+
         {
             let decl = symbol
                 .value_declaration
@@ -22124,14 +18244,7 @@ impl Checker {
                 }
             }
         }
-        // Only block-scoped variables and classes are subject to the TDZ
-        // check. `var` (function-scoped) and `function` declarations are
-        // hoisted.
-        // A const enum's TDZ is only diagnosed under isolatedModules
-        // (otherwise its declaration is erased — no runtime reference;
-        // Go's ConstEnum gate in the message selection extends here).
-        // The binder types `const enum E` as RegularEnum — detect the
-        // const keyword from the declaration's leading source text.
+
         let mut enum_decl_count = 0;
         let is_const_enum = symbol
             .declarations
@@ -22153,9 +18266,7 @@ impl Checker {
                 };
                 let text = &f.text;
                 let start = d.loc.pos();
-                // The declaration span may start at `enum` (modifiers
-                // excluded) — scan a window that includes preceding
-                // whitespace and the `const` keyword.
+
                 let lo = start.saturating_sub(8);
                 let window = &text[lo.min(text.len())..(start + 6).min(text.len())];
                 window.contains("const")
@@ -22166,13 +18277,9 @@ impl Checker {
         {
             return;
         }
-        // TYPE-position references never take the TDZ (enums/classes are
-        // hoisted for typing — only value reads report; walk ancestors for
-        // type-node kinds before any container boundary).
+
         {
-            // A qualified default in a type-parameter clause
-            // (`<M = Enum.Member>`) parses in expression form but is a
-            // TYPE context — exempt like other type positions.
+
             let in_tp_default = {
                 let mut cur = node.parent.as_ref();
                 let mut hit = false;
@@ -22245,12 +18352,7 @@ impl Checker {
         ) {
             return;
         }
-        // Skip references in a DIFFERENT function body than the
-        // declaration's — those are deferred (the closure runs later, by
-        // which point the variable is initialized; Go's
-        // `isUsedInFunctionOrInstanceProperty`). A reference in the SAME
-        // function as the declaration still reports (`let a = x; let x;`
-        // inside one function body).
+
         let declaration_for_scope = symbol.declarations.iter().find(|d| {
             matches!(
                 d.kind,
@@ -22261,11 +18363,7 @@ impl Checker {
             )
         });
         if let Some(declaration_for_scope) = declaration_for_scope {
-            // Go `isUsedInFunctionOrInstanceProperty` core: walk up from
-            // the usage; a function-like boundary EXEMPTS the reference
-            // unless the function is IMMEDIATELY invoked (an IIFE runs
-            // now — `(() => a)()` still reports inside foo15-style
-            // destructuring initializers).
+
             let is_fn_like = |n: &Arc<Node>| {
                 matches!(
                     n.kind,
@@ -22285,7 +18383,7 @@ impl Checker {
                 match &p.data {
                     crate::ast::NodeData::CallExpression(_) => true,
                     crate::ast::NodeData::ParenthesizedExpression(_) => {
-                        // (fn)(...) and (fn)() forms
+
                         let mut cur = p.parent.as_ref();
                         while let Some(a) = cur {
                             if matches!(&a.data, crate::ast::NodeData::CallExpression(_)) {
@@ -22302,10 +18400,7 @@ impl Checker {
                     _ => false,
                 }
             };
-            // The declaration's own fn-like container: the walk stops
-            // there (Go quits at `declContainer`) — same-function uses
-            // report; a fn-like boundary BETWEEN usage and that container
-            // exempts unless it's an IIFE.
+
             let mut dc = declaration_for_scope.parent.as_ref();
             let mut decl_container: Option<Arc<Node>> = None;
             while let Some(a) = dc {
@@ -22331,17 +18426,9 @@ impl Checker {
                     exempt = true;
                     break;
                 }
-                // A class property INITIALIZER position (Go
-                // isUsedInFunctionOrInstanceProperty's PropertyDeclaration
-                // arm): a non-property declaration (or a property of a
-                // different class) exempts.
+
                 if a.kind == SyntaxKind::PropertyDeclaration {
-                    // Only the INITIALIZER side counts (not computed names
-                    // or type annotations). An INSTANCE property
-                    // initializer defers (the declaration, when it is not
-                    // itself an instance property of the same class, is
-                    // exempt per Go's else-arm); a STATIC initializer runs
-                    // eagerly and reports.
+
                     let in_initializer = matches!(&a.data, crate::ast::NodeData::PropertyDeclaration(pd) if pd.initializer.as_ref().is_some_and(|init| init.loc.contains(node.loc.pos())));
                     let is_static_prop = a.has_syntactic_modifier(ModifierFlags::Static);
                     let is_decl_instance_prop = declaration_for_scope.kind
@@ -22358,10 +18445,7 @@ impl Checker {
                 return;
             }
         }
-        // Find the relevant declaration node (block-scoped or class-like).
-        // `BindingElement` covers destructuring declarations —
-        // `let {[a]: a} = …` declares `a` via a binding element, whose
-        // computed property name may reference `a` itself (TS2448).
+
         let declaration = symbol.declarations.iter().find(|d| {
             matches!(
                 d.kind,
@@ -22374,26 +18458,20 @@ impl Checker {
         let Some(declaration) = declaration else {
             return;
         };
-        // Skip `var` declarations — they are function-scoped and hoisted.
-        // The binder assigns BlockScopedVariable to all variable declarations,
-        // so we must verify the keyword is actually `let`/`const`.
+
         if declaration.kind == SyntaxKind::VariableDeclaration
             && !is_let_or_const_declaration(declaration)
         {
             return;
         }
-        // Skip ambient declarations (`declare let x`).
+
         if self
             .get_combined_modifier_flags(declaration)
             .contains(ModifierFlags::Ambient)
         {
             return;
         }
-        // If the declaration position is at or before the usage position,
-        // the variable is declared before use — no error. The position used
-        // is the declaration's NAME node (`: b` in `{[b]: b}`), not the
-        // declaration's start: a binding element's computed property name
-        // precedes but lies within the element's span.
+
         let decl_name_pos = match &declaration.data {
             crate::ast::NodeData::VariableDeclaration(d) => d.name.pos(),
             crate::ast::NodeData::BindingElement(d) => d
@@ -22404,13 +18482,9 @@ impl Checker {
             _ => declaration.pos(),
         };
         if decl_name_pos <= node.pos() {
-            // Go isImmediatelyUsedInInitializerOfBlockScopedVariable: a
-            // use INSIDE the declaration's own initializer
-            // (`let [a] = (() => a)()`) still reports — the initializer
-            // runs before the binding exists.
+
             let inside_own_initializer = {
-                // Climb binding elements/patterns to the enclosing
-                // VariableDeclaration (`let [a] = (() => a)()`).
+
                 let mut cur = declaration.parent.as_ref();
                 let mut found = false;
                 while let Some(a) = cur {
@@ -22437,10 +18511,7 @@ impl Checker {
                 return;
             }
         }
-        // Cross-file references never report TS2448 (Go's
-        // `isBlockScopedNameDeclaredBeforeUse`: nodes in different files
-        // have no determinable order — e.g. `const x = 0` in file1.ts,
-        // `x++` in file2.ts).
+
         let decl_file = self.get_source_file_of_node(declaration);
         let use_file = self.get_source_file_of_node(node);
         if let (Some(df), Some(uf)) = (&decl_file, &use_file) {
@@ -22449,10 +18520,7 @@ impl Checker {
             }
         }
         let file = self.current_file.clone();
-        // Message variant by symbol kind (Go checkResolvedBlockScoped
-        // Variable, checker.go ~L1910): block-scoped variable TS2448,
-        // class TS2449, enum TS2450 (enum-in-TDZ only under
-        // isolatedModules for const enums).
+
         let message = if symbol.flags.contains(SymbolFlags::Class) {
             crate::diagnostics::messages_generated::CLASS_0_USED_BEFORE_ITS_DECLARATION
         } else if symbol.flags.intersects(SymbolFlags::RegularEnum)
@@ -22478,33 +18546,21 @@ impl Checker {
         }
     }
 
-    /// TS2454: Check if a `let` variable is used before being assigned a
-    /// value. Mirrors (as a simplified heuristic) Go's definite-assignment
-    /// check in `getFlowTypeOfReference`.
-    ///
-    /// Reports TS2454 when, under strictNullChecks, a `let` variable has a
-    /// non-undefined type annotation, no initializer, and no assignment to
-    /// it in the flow graph between its declaration and the usage point.
     fn check_variable_used_before_assigned(
         &mut self,
         node: &Arc<Node>,
         symbol: &Arc<Symbol>,
         name: &str,
     ) {
-        // Skip assignment targets (e.g., the `v` in `v = 1`). TS2454 applies
-        // to reads, not writes.
+
         if is_assignment_target(node) {
             return;
         }
-        // Only check under strictNullChecks (`@strict: false` cases like
-        // ambiguousOverloadResolution stay clean; the CLI default resolves
-        // it ON). `any`-typed variables are exempt (anyPlusAny1).
+
         if !self.strict_null_checks {
             return;
         }
-        // Block-scoped variables (let/const) and plain `var` declarations.
-        // `const` without an initializer is a syntax error; parameters are
-        // always initialized (Go's `isParameter` assumeInitialized clause).
+
         let is_plain_var = symbol.flags.contains(SymbolFlags::FunctionScopedVariable)
             && symbol
                 .value_declaration
@@ -22513,7 +18569,7 @@ impl Checker {
         if !symbol.flags.contains(SymbolFlags::BlockScopedVariable) && !is_plain_var {
             return;
         }
-        // Find the variable declaration.
+
         let declaration = symbol.value_declaration.as_ref().or_else(|| {
             symbol
                 .declarations
@@ -22523,24 +18579,15 @@ impl Checker {
         let Some(declaration) = declaration else {
             return;
         };
-        // `var` is subject to the same definite-assignment check as
-        // `let`/`const` under strictNullChecks (Go's flow analysis reports
-        // `var x: number; use(x)` too).
+
         let crate::ast::NodeData::VariableDeclaration(vd) = &declaration.data else {
             return;
         };
-        // An initializer counts as an assignment only from the declaration
-        // statement onward — a read BEFORE that point (var hoisting,
-        // conditionally-assigned branches) is still unassigned and Go
-        // reports TS2454 there; the flow walk below decides. A variable
-        // with neither annotation nor initializer is `any`/auto-typed and
-        // not subject to the check (the `any` guard below also catches
-        // widened `var x = null`).
+
         if vd.type_node.is_none() && vd.initializer.is_none() {
             return;
         }
-        // Skip ambient declarations (`declare let x`) and definite-assignment
-        // assertions (`let x!: number`). Mirrors Go's `assumeInitialized`.
+
         if self
             .get_combined_modifier_flags(declaration)
             .contains(ModifierFlags::Ambient)
@@ -22548,22 +18595,14 @@ impl Checker {
         {
             return;
         }
-        // The declared type must not include `undefined`, and an `any`
-        // declaration is exempt.
+
         let declared_type = self.get_type_of_symbol(symbol);
         if declared_type.flags.contains(TypeFlags::Any)
             || type_contains_undefined(&declared_type)
         {
             return;
         }
-        // Variables captured from an enclosing function are assumed
-        // initialized (Go's `isOuterVariable && !isNeverInitialized`
-        // assumeInitialized clause). The flow container comparison's
-        // boundaries are function-like nodes, the SourceFile, AND namespace
-        // bodies — a read inside `namespace c { q }` of a file-level `var q`
-        // is an outer-variable read with no 2454 (verified against
-        // typescript-go), while a read in the SAME namespace as the
-        // declaration still reports.
+
         let flow_container_of = |n: &Arc<Node>| -> Option<Arc<Node>> {
             let mut current = Arc::clone(n);
             loop {
@@ -22578,12 +18617,7 @@ impl Checker {
                         | SyntaxKind::GetAccessor
                         | SyntaxKind::SetAccessor
                         | SyntaxKind::ModuleDeclaration
-                        // A class property INITIALIZER is a function-like
-                        // flow container (TS binder's ContainerFlags): a
-                        // read there of an outer initialized variable is an
-                        // outer-variable read — assumed initialized
-                        // (`class C { x = DEFAULT }` with a file-level
-                        // `const DEFAULT = 'A'` never reports).
+
                         | SyntaxKind::PropertyDeclaration
                         | SyntaxKind::PropertySignature
                 ) {
@@ -22599,7 +18633,7 @@ impl Checker {
         if !same_scope {
             return;
         }
-        // A non-null assertion (`x!`) asserts initialization.
+
         if node
             .parent
             .as_ref()
@@ -22607,14 +18641,7 @@ impl Checker {
         {
             return;
         }
-        // Definite assignment via flow analysis: seed the flow start with
-        // `declared | undefined` and check whether the usage point's flow
-        // type still contains `undefined`. Mirrors Go's `checkIdentifier`
-        // (checker.go ~L11226): `initialType = getOptionalType(t)` and
-        // `containsUndefinedType(flowType)` → TS2454. Go's
-        // `assumeInitialized` includes `!strictNullChecks` — without SNC
-        // every variable is considered initialized and TS2454 never fires
-        // (e.g. bare reads of `var x: number;` in ASI tests).
+
         if !self.strict_null_checks {
             return;
         }
@@ -22631,10 +18658,6 @@ impl Checker {
         }
     }
 
-    /// Push a container node onto the scope stack, making its symbol members
-    /// and locals visible for identifier resolution.
-    /// Enter a TS2304-suppression scope, remembering the originating file
-    /// (see [`Self::ts2304_reporting_allowed`]).
     pub(crate) fn push_ts2304_suppression(&mut self) {
         self.suppress_cannot_find_name_in_type_nodes += 1;
         if self.suppress_source_file.is_none() {
@@ -22642,7 +18665,6 @@ impl Checker {
         }
     }
 
-    /// Leave a TS2304-suppression scope (clears the origin at the outermost pop).
     pub(crate) fn pop_ts2304_suppression(&mut self) {
         self.suppress_cannot_find_name_in_type_nodes = self
             .suppress_cannot_find_name_in_type_nodes
@@ -22652,10 +18674,6 @@ impl Checker {
         }
     }
 
-    /// Whether TS2304-family diagnostics may be reported in the CURRENT
-    /// file: allowed when no suppression is active, or when the active
-    /// suppression originates in a DIFFERENT file (cross-file resolution
-    /// must not inherit the origin file's suppression).
     pub(crate) fn ts2304_reporting_allowed_for(&self, node: &Arc<Node>) -> bool {
         if self.suppress_cannot_find_name_in_type_nodes == 0 {
             return true;
@@ -22666,12 +18684,10 @@ impl Checker {
         ) {
             (Some(f), Some(origin)) => {
                 if f.node.id() == origin {
-                    // Same file the suppression started in — intended.
+
                     false
                 } else {
-                    // Cross-file resolution: USER files always report
-                    // (bundled-lib signature type parameters stay silenced
-                    // wherever they're reached from).
+
                     !f.file_name.starts_with("bundled://")
                 }
             }
@@ -22683,57 +18699,30 @@ impl Checker {
         self.scope_stack.push(node.id());
     }
 
-    /// Push a function-like scope and increment the function-like counter.
     fn push_function_scope(&mut self, node: &Arc<Node>) {
         self.function_scope_count += 1;
         self.scope_stack.push(node.id());
     }
 
-    /// Pop a function scope.
     fn pop_function_scope(&mut self) {
         self.function_scope_count -= 1;
         self.scope_stack.pop();
     }
 
-    /// Push an arrow function scope. Arrow functions do not have their own
-    /// `arguments` object.
     fn push_arrow_function_scope(&mut self, node: &Arc<Node>) {
         self.arrow_function_scope_count += 1;
         self.scope_stack.push(node.id());
     }
 
-    /// Pop an arrow function scope.
     fn pop_arrow_function_scope(&mut self) {
         self.arrow_function_scope_count -= 1;
         self.scope_stack.pop();
     }
 
-    /// Pop the innermost scope from the scope stack.
     pub(crate) fn pop_scope(&mut self) {
         self.scope_stack.pop();
     }
 
-    /// Resolve an identifier reference by walking the scope stack from
-    /// innermost to outermost, checking each container's symbol members and
-    /// locals.
-    ///
-    /// Since the parser does not set parent pointers on nodes, we cannot walk
-    /// the parent chain. Instead, we use the scope stack maintained by the
-    /// checker during AST traversal.
-    ///
-    /// Returns the resolved symbol, or `None` if not found.
-    ///
-    /// Go: `Checker.resolveName` (reduced form — does not yet handle globals,
-    /// namespaces, or alias chasing).
-    /// TS2354/TS2343 (Go `checkExternalEmitHelpers` → `resolveHelpersModule`,
-    /// checker.go ~L28644/28737): with `importHelpers` enabled in an
-    /// effective external module, helper-requiring syntax must resolve
-    /// 'tslib'. When the module can't be found, TS2354 fires at most once
-    /// per file, at the first helper-requiring location. When it IS found,
-    /// every required helper NAME must exist as a value export of the
-    /// module — each missing one reports TS2343 (Go resolves each helper
-    /// name in `getExportsOfModule(helpersModule)` with SymbolFlagsValue),
-    /// deduplicated per (file, helper kind).
     fn check_external_emit_helpers(&mut self, location: &Arc<Node>, helpers: u32) {
         if !self.compiler_options.import_helpers.is_true() {
             return;
@@ -22773,10 +18762,7 @@ impl Checker {
             if unchecked & bit == 0 {
                 continue;
             }
-            // Ambient modules implicitly export everything: unexported
-            // members live in the node's LOCALS (see
-            // `ambient_namespace_local`) — the fixture form `declare
-            // module "tslib" { function __importStar(...): void; }`.
+
             let found = helpers_module
                 .exports
                 .get(helper_name)
@@ -22802,21 +18788,13 @@ impl Checker {
         self.resolve_identifier_with_meaning(node, SymbolFlags::all())
     }
 
-    /// Resolve an identifier with a specific meaning (symbol flags filter).
-    ///
-    /// Only symbols whose flags intersect with `meaning` are considered.
-    /// This mirrors the `meaning` parameter in Go's `NameResolver.Resolve`.
-    ///
-    /// Go: `NameResolver.Resolve` — scope stack walk → module/enum exports →
-    /// class/interface type params → globals → `arguments` → `require`.
     pub fn resolve_identifier_with_meaning(
         &self,
         node: &Arc<Node>,
         meaning: SymbolFlags,
     ) -> Option<Arc<Symbol>> {
         let result = self.resolve_identifier_with_meaning_inner(node, meaning);
-        // Record the reference (Go's `symbolReferenceLinks` reference kinds,
-        // consumed by the noUnusedLocals/noUnusedParameters checks).
+
         if let Some(sym) = &result {
             let mut bits = meaning;
             if meaning.intersects(SymbolFlags::VALUE) {
@@ -22835,14 +18813,6 @@ impl Checker {
             .or_insert(bits);
     }
 
-    /// Go: `Checker.getSymbol` (the NameResolver `Lookup` callback) —
-    /// besides a direct flag match, an ALIAS symbol hits when its RESOLVED
-    /// target's flags match the meaning ("a symbol with the given meaning
-    /// exists along the alias chain": `import R = N` makes `R` resolve with
-    /// NAMESPACE meaning because target `N` is a namespace). An alias that
-    /// fails to resolve (cycle / no target link) is returned unchanged by
-    /// `follow_alias`; Go maps alias-resolution failure to flags=All so it
-    /// matches every meaning — cascading errors are suppressed that way.
     fn alias_chain_hits_meaning(&self, sym: &Arc<Symbol>, meaning: SymbolFlags) -> bool {
         if !sym.flags.intersects(SymbolFlags::Alias) {
             return false;
@@ -22864,9 +18834,8 @@ impl Checker {
         };
         let symbol_map = self.program.symbol_map();
 
-        // 1. Walk the scope stack from innermost to outermost.
         for &container_id in self.scope_stack.iter().rev() {
-            // Check the container's locals (block-scoped variables).
+
             if let Some(locals) = symbol_map.locals.get(&container_id) {
                 if let Some(sym) = locals.get(name) {
                     if sym.flags.intersects(meaning) || self.alias_chain_hits_meaning(&sym, meaning) {
@@ -22874,19 +18843,9 @@ impl Checker {
                     }
                 }
             }
-            // Check the container's symbol members (function-scoped
-            // declarations like parameters, enum members, etc.).
+
             if let Some(container_sym) = symbol_map.symbols.get(&container_id) {
-                // Class members are NOT lexically visible: `foo` inside a
-                // method must be written `this.foo` / `C.foo` (Go's
-                // `resolveName` never consults class `Members`; the checker
-                // instead reports TS2662/TS2663 suggestions when a bare name
-                // fails to resolve inside a class). Exception: a symbol that
-                // merged an ambient class with a function
-                // (`declare class P {}` + `function P() {}`) is ALSO the
-                // function's declaration symbol — its members include the
-                // function's parameters, which ARE in scope in the body
-                // (oracle: no TS2304 for `function P(x) { this.x = x; }`).
+
                 if !container_sym.flags.intersects(SymbolFlags::Class)
                     || container_sym.flags.intersects(SymbolFlags::Function)
                 {
@@ -22896,17 +18855,12 @@ impl Checker {
                         }
                     }
                 }
-                // Module/namespace export lookup. Skipped for symbols
-                // merged with a CLASS (`declare namespace A {}` +
-                // `export class A {}`): inside the class body the
-                // namespace side's exports are not lexically visible
-                // (they need `A.x` qualification), matching the members
-                // gate above.
+
                 if container_sym.flags.intersects(SymbolFlags::MODULE)
                     && !container_sym.flags.intersects(SymbolFlags::Class)
                 {
                     if let Some(sym) = container_sym.exports.get(name) {
-                        // Skip pure alias export specifiers (e.g. `export { X }`).
+
                         let is_export_specifier = sym.flags == SymbolFlags::Alias
                             && sym
                                 .declarations
@@ -22916,15 +18870,7 @@ impl Checker {
                             return self.follow_alias(sym);
                         }
                     }
-                    // Cross-file ambient namespace merge (`declare
-                    // namespace Intl` split across lib.es2018.intl /
-                    // lib.es2020.intl): the binder binds one symbol per
-                    // file; `globals` holds the merged namespace with every
-                    // file's declarations. Unqualified lookup inside any of
-                    // the merged bodies must see the other files' members
-                    // (Go shares one global scope at bind time) — via the
-                    // merged symbol's exports and, for implicit-export
-                    // ambient containers, its per-declaration locals.
+
                     if let Some(merged) = self.globals.get(container_sym.name.as_str()) {
                         if !Arc::ptr_eq(merged, container_sym)
                             && merged.flags.intersects(SymbolFlags::MODULE)
@@ -22942,7 +18888,7 @@ impl Checker {
                         }
                     }
                 }
-                // Enum export lookup.
+
                 if container_sym.flags.intersects(SymbolFlags::ENUM) {
                     if let Some(sym) = container_sym.exports.get(name) {
                         if sym.flags.intersects(meaning) || self.alias_chain_hits_meaning(&sym, meaning) {
@@ -22950,14 +18896,7 @@ impl Checker {
                         }
                     }
                 }
-                // Type-parameter lookup. Type parameters declared by the
-                // container (`<T extends U>` on a class, interface,
-                // function, method, signature, …) are accessible in the
-                // container's scope. The binder routes a NAMED container's
-                // type parameters into its SYMBOL's members (method
-                // signatures included — D3-sig), so no container-kind gate:
-                // the `meaning & TYPE` filter already excludes value-side
-                // members.
+
                 if let Some(sym) = container_sym.members.get(name) {
                     if sym.flags.intersects(meaning & SymbolFlags::TYPE) || self.alias_chain_hits_meaning(&sym, meaning) {
                         return self.follow_alias(sym);
@@ -22966,19 +18905,8 @@ impl Checker {
             }
         }
 
-        // 1b. Node-location ancestry walk (Go's NameResolver resolves by the
-        // reference's lexical location, not the checker's dynamic position).
-        // Interface types are built lazily and may first be resolved from a
-        // foreign context (another file/statement), where the dynamic scope
-        // stack above doesn't contain the declaration's enclosing
-        // namespaces — walk the reference node's own parent chain instead.
-        // Runs after the dynamic walk so shadowing behavior is unchanged;
-        // only names that would otherwise be unresolved are recovered.
         {
-            // Only true LEXICAL containers participate — object literals,
-            // interfaces, classes, and property-like nodes are not
-            // name-resolution scopes in Go (a sibling property `{ a: a }'
-            // must not satisfy the value reference).
+
             const ANCESTRY_CONTAINERS: &[SyntaxKind] = &[
                 SyntaxKind::SourceFile,
                 SyntaxKind::ModuleDeclaration,
@@ -22991,18 +18919,9 @@ impl Checker {
                 SyntaxKind::FunctionExpression,
                 SyntaxKind::ArrowFunction,
                 SyntaxKind::MethodDeclaration,
-                // Interface members (`emit<T>(...)` in `interface B<M>`) and
-                // alias bodies resolve lazily from foreign contexts (heritage
-                // comparison, conditional instantiation) — their type
-                // parameters must resolve through the declaration's own
-                // lexical chain (Go resolves by the reference's location via
-                // `scopeTable`, never by the checker's dynamic position).
+
                 SyntaxKind::MethodSignature,
-                // Signature-kind nodes are HasLocals containers (Go
-                // GetContainerFlags): their own type parameters (`<T>` on a
-                // call/construct signature or function/constructor type)
-                // live in the node's locals and must be reachable from
-                // foreign-context lazy resolution.
+
                 SyntaxKind::CallSignature,
                 SyntaxKind::ConstructSignature,
                 SyntaxKind::FunctionType,
@@ -23044,9 +18963,7 @@ impl Checker {
                         {
                             return self.follow_alias(sym);
                         }
-                        // Cross-file ambient namespace merge (see the scope-walk
-                        // comment): consult the globals-merged namespace's
-                        // exports and ambient locals.
+
                         if a_sym.flags.intersects(SymbolFlags::MODULE) {
                             if let Some(merged) = self.globals.get(a_sym.name.as_str()) {
                                 if !Arc::ptr_eq(merged, a_sym)
@@ -23067,20 +18984,7 @@ impl Checker {
                         }
                     }
                     }
-                    // Type parameters declared by the container (the
-                    // ancestry twin of the scope-walk's type-parameter
-                    // branch above): `M` in `interface B<M>` / `type A<F>`
-                    // / `class C<T> extends B<T>` resolves from the
-                    // declaration's own chain even when the checker's
-                    // dynamic scopes are elsewhere (a forward reference
-                    // forces heritage resolution from the referencing
-                    // statement's context). Runs for CLASS containers too —
-                    // the "class members are not lexically visible" rule
-                    // above gates VALUE members; type parameters (and any
-                    // TYPE-meaning member) ARE lexically visible. No
-                    // container-kind gate: the binder routes a named
-                    // container's type parameters into its symbol's
-                    // members (methods and signatures included — D3-sig).
+
                     if let Some(sym) = a_sym.members.get(name)
                         && (sym.flags.intersects(meaning & SymbolFlags::TYPE) || self.alias_chain_hits_meaning(&sym, meaning))
                     {
@@ -23090,8 +18994,7 @@ impl Checker {
                 ancestor = a.parent.as_ref();
             }
         }
-        // 2. Check for special built-in symbols.
-        // `arguments` is in scope inside function declarations, but not arrow functions.
+
         if self.function_scope_count > 0
             && name == "arguments"
             && meaning.intersects(SymbolFlags::VARIABLE)
@@ -23101,7 +19004,6 @@ impl Checker {
             }
         }
 
-        // 3. Check globals (lib.d.ts symbols).
         if let Some(sym) = self.globals.get(name) {
             if sym
                 .flags
@@ -23114,16 +19016,8 @@ impl Checker {
         None
     }
 
-    /// Follow an alias symbol chain to find the resolved target.
-    ///
-    /// An alias symbol (created by import/export declarations) has
-    /// `SymbolFlags::Alias` and its `export_symbol` points to the target.
-    /// This method follows the chain until a non-alias target is found.
-    ///
-    /// Go: `Checker.resolveAlias` / `Checker.resolveSymbol`
     pub fn follow_alias(&self, symbol: &Arc<Symbol>) -> Option<Arc<Symbol>> {
-        // A resolved alias marks the alias symbol itself as referenced
-        // (imports used through their local alias, Go referenceKinds).
+
         if symbol.flags.intersects(SymbolFlags::Alias) {
             self.record_symbol_reference(
                 symbol,
@@ -23137,27 +19031,21 @@ impl Checker {
         if !symbol.flags.intersects(SymbolFlags::Alias) {
             return Some(Arc::clone(symbol));
         }
-        // Check if it's a pure alias (not combined with other flags).
-        // Go: IsNonLocalAlias — pure alias or alias with Assignment flag.
+
         let is_pure_alias = symbol.flags == SymbolFlags::Alias
             || (symbol.flags.intersects(SymbolFlags::Alias)
                 && symbol.flags.intersects(SymbolFlags::Assignment));
         if !is_pure_alias {
             return Some(Arc::clone(symbol));
         }
-        // Follow the export_symbol chain, stopping on any cycle. Exported
-        // module members carry a self-referential export link (binder's
-        // single-symbol export pattern), so a pure alias whose export_symbol
-        // points back into the chain must not be chased forever — Go's eager
-        // alias resolution (aliasMarker) never re-enters an alias being
-        // resolved; on a cycle it yields the alias itself.
+
         let mut current = Arc::clone(symbol);
         let mut seen: Vec<*const Symbol> = vec![Arc::as_ptr(symbol)];
         loop {
             if let Some(ref target) = current.export_symbol {
                 let target_ptr = Arc::as_ptr(target);
                 if seen.contains(&target_ptr) {
-                    // Cycle (A→A, A→B→A, …) — return the alias itself.
+
                     return Some(Arc::clone(&current));
                 }
                 let is_pure = target.flags == SymbolFlags::Alias
@@ -23170,19 +19058,12 @@ impl Checker {
                 }
                 return Some(Arc::clone(target));
             } else {
-                // No export_symbol, return the alias itself.
+
                 return Some(Arc::clone(&current));
             }
         }
     }
 
-    // ────────────────────────────────────────────────────────────────────────
-    // ReferenceResolver — ported from `internal/binder/referenceresolver.go`
-    // ────────────────────────────────────────────────────────────────────────
-
-    /// Get the resolved symbol for a value reference.
-    ///
-    /// Go: `referenceResolver.getReferencedValueSymbol`
     fn get_referenced_value_symbol(
         &self,
         node: &Node,
@@ -23190,33 +19071,26 @@ impl Checker {
     ) -> Option<Arc<Symbol>> {
         let symbol_map = self.program.symbol_map();
 
-        // Check if the node already has a resolved symbol.
         if let Some(sym) = symbol_map.symbol_of(node) {
             return Some(Arc::clone(sym));
         }
 
         let location = if start_in_declaration_container {
-            // When the node is the name of a module/enum declaration,
-            // start resolution from the declaration's container.
-            // We use the scope stack for resolution, so the container ID
-            // is already on the scope stack when we enter the module/enum.
+
             node
         } else {
             node
         };
 
-        // Use the enhanced name resolver to find the symbol.
         let meaning = SymbolFlags::ExportValue
             .union(SymbolFlags::VALUE)
             .union(SymbolFlags::Alias);
         self.resolve_identifier_at_location(location, node_name(node)?, meaning)
     }
 
-    /// Find the parent declaration container for a module/enum name.
     #[allow(dead_code)]
     fn find_parent_declaration_container(&self, _node: &Node) -> Option<u64> {
-        // We don't have parent pointers, so we check the scope stack.
-        // The innermost scope container is the parent declaration container.
+
         for &container_id in self.scope_stack.iter().rev() {
             let symbol_map = self.program.symbol_map();
             if let Some(container_sym) = symbol_map.symbols.get(&container_id) {
@@ -23231,12 +19105,8 @@ impl Checker {
         None
     }
 
-    /// Get the export container for a referenced value.
-    ///
-    /// Go: `referenceResolver.GetReferencedExportContainer`
     pub fn get_referenced_export_container(&self, node: &Node, prefix_locals: bool) -> Option<u64> {
-        // If the node is the name of a module/enum declaration, start in
-        // the declaration container.
+
         let start_in_declaration_container = is_module_or_enum_name(node);
         if let Some(symbol) = self.get_referenced_value_symbol(node, start_in_declaration_container)
         {
@@ -23249,14 +19119,14 @@ impl Checker {
                     {
                         return None;
                     }
-                    // Find the parent symbol (the container).
+
                     if let Some(parent) = &merged.parent {
                         if parent.flags.intersects(SymbolFlags::ValueModule)
                             && parent.value_declaration.is_some()
                         {
                             return Some(parent.value_declaration.as_ref().unwrap().id());
                         }
-                        // Find the matching container in the scope stack.
+
                         for &container_id in self.scope_stack.iter().rev() {
                             let symbol_map = self.program.symbol_map();
                             if let Some(container_sym) = symbol_map.symbols.get(&container_id) {
@@ -23272,12 +19142,9 @@ impl Checker {
         None
     }
 
-    /// Get the import declaration for a referenced value.
-    ///
-    /// Go: `referenceResolver.GetReferencedImportDeclaration`
     pub fn get_referenced_import_declaration(&self, node: &Node) -> Option<Arc<Node>> {
         if let Some(symbol) = self.get_referenced_value_symbol(node, false) {
-            // Only get the declaration of an alias if there isn't a local value declaration.
+
             if is_non_local_alias(&symbol, SymbolFlags::VALUE)
                 && !self.is_type_only_alias_declaration(&symbol)
             {
@@ -23287,9 +19154,6 @@ impl Checker {
         None
     }
 
-    /// Get the value declaration for a referenced value.
-    ///
-    /// Go: `referenceResolver.GetReferencedValueDeclaration`
     pub fn get_referenced_value_declaration(&self, node: &Node) -> Option<Arc<Node>> {
         if let Some(symbol) = self.get_referenced_value_symbol(node, false) {
             let export_sym = self.get_export_symbol_of_value_symbol_if_exported(&symbol);
@@ -23298,9 +19162,6 @@ impl Checker {
         None
     }
 
-    /// Get all value declarations for a referenced value.
-    ///
-    /// Go: `referenceResolver.GetReferencedValueDeclarations`
     pub fn get_referenced_value_declarations(&self, node: &Node) -> Vec<Arc<Node>> {
         let mut declarations = Vec::new();
         if let Some(symbol) = self.get_referenced_value_symbol(node, false) {
@@ -23334,21 +19195,18 @@ impl Checker {
         declarations
     }
 
-    /// Get the name from an element access expression.
-    ///
-    /// Go: `referenceResolver.GetElementAccessExpressionName`
     pub fn get_element_access_expression_name(&self, expression: &Node) -> Option<String> {
         if expression.kind == SyntaxKind::ElementAccessExpression {
             if let crate::ast::NodeData::ElementAccessExpression(data) = &expression.data {
-                // Try to get a string literal key.
+
                 if let crate::ast::NodeData::StringLiteral(key) = &data.argument_expression.data {
                     return Some(key.text.clone());
                 }
-                // Try to get a numeric literal key.
+
                 if let crate::ast::NodeData::NumericLiteral(key) = &data.argument_expression.data {
                     return Some(key.text.clone());
                 }
-                // Try to resolve an identifier key.
+
                 if let crate::ast::NodeData::Identifier(key) = &data.argument_expression.data {
                     return Some(key.text.clone());
                 }
@@ -23357,16 +19215,12 @@ impl Checker {
         None
     }
 
-    /// Get the member value declaration for a member reference.
-    ///
-    /// Go: `referenceResolver.GetReferencedMemberValueDeclaration`
     pub fn get_referenced_member_value_declaration(&self, node: &Node) -> Option<Arc<Node>> {
-        // Member references are `this.something` or `this[something]`.
-        // They should always have a resolved symbol.
+
         let symbol_map = self.program.symbol_map();
         let s = symbol_map.symbol_of(node).map(|s| Arc::clone(s));
         if s.is_none() {
-            // Might be a declaration instead of a ref, get the merged symbol.
+
             if let Some(sym) = symbol_map.symbol_of(node) {
                 let merged = self.get_merged_symbol(sym);
                 let export_sym = self.get_export_symbol_of_value_symbol_if_exported(&merged);
@@ -23380,20 +19234,13 @@ impl Checker {
         None
     }
 
-    /// Get the merged symbol.
-    ///
-    /// Go: `referenceResolver.getMergedSymbol`
     pub fn get_merged_symbol(&self, symbol: &Arc<Symbol>) -> Arc<Symbol> {
         if let Some(_target_id) = self.merged_symbols.get(&symbol.id()) {
-            // We need a way to look up symbols by ID. For now, return the symbol itself.
-            // In a full implementation, we'd have a symbol_by_id map.
+
         }
         Arc::clone(symbol)
     }
 
-    /// Get the export symbol of a value symbol if it's exported.
-    ///
-    /// Go: `referenceResolver.getExportSymbolOfValueSymbolIfExported`
     fn get_export_symbol_of_value_symbol_if_exported(&self, symbol: &Arc<Symbol>) -> Arc<Symbol> {
         let mut result = Arc::clone(symbol);
         if symbol.flags.intersects(SymbolFlags::ExportValue) {
@@ -23404,9 +19251,6 @@ impl Checker {
         result
     }
 
-    /// Check if a symbol is a type-only alias declaration.
-    ///
-    /// Go: `referenceResolver.isTypeOnlyAliasDeclaration`
     fn is_type_only_alias_declaration(&self, symbol: &Arc<Symbol>) -> bool {
         if let Some(node) = self.get_declaration_of_alias_symbol(symbol) {
             let current = Some(Arc::clone(&node));
@@ -23421,8 +19265,7 @@ impl Checker {
                         if is_type_only_node(n) {
                             return true;
                         }
-                        // Continue to parent - we need parent pointers for this.
-                        // Without parent pointers, we stop here.
+
                         break;
                     }
                     _ => break,
@@ -23432,11 +19275,8 @@ impl Checker {
         false
     }
 
-    /// Get the declaration of an alias symbol.
-    ///
-    /// Go: `referenceResolver.getDeclarationOfAliasSymbol`
     fn get_declaration_of_alias_symbol(&self, symbol: &Arc<Symbol>) -> Option<Arc<Node>> {
-        // Find the last alias symbol declaration.
+
         symbol
             .declarations
             .iter()
@@ -23445,19 +19285,17 @@ impl Checker {
             .cloned()
     }
 
-    /// Resolve an identifier at a specific location.
     fn resolve_identifier_at_location(
         &self,
         _location: &Node,
         name: &str,
         meaning: SymbolFlags,
     ) -> Option<Arc<Symbol>> {
-        // Use the scope stack to resolve the name.
+
         let symbol_map = self.program.symbol_map();
 
-        // Walk the scope stack from innermost to outermost.
         for &container_id in self.scope_stack.iter().rev() {
-            // Check locals.
+
             if let Some(locals) = symbol_map.locals.get(&container_id) {
                 if let Some(sym) = locals.get(name) {
                     if sym.flags.intersects(meaning) {
@@ -23465,14 +19303,14 @@ impl Checker {
                     }
                 }
             }
-            // Check members.
+
             if let Some(container_sym) = symbol_map.symbols.get(&container_id) {
                 if let Some(sym) = container_sym.members.get(name) {
                     if sym.flags.intersects(meaning) {
                         return self.follow_alias(sym);
                     }
                 }
-                // Module/namespace exports.
+
                 if container_sym.flags.intersects(SymbolFlags::MODULE) {
                     if let Some(sym) = container_sym.exports.get(name) {
                         let is_export_specifier = sym.flags == SymbolFlags::Alias
@@ -23485,7 +19323,7 @@ impl Checker {
                         }
                     }
                 }
-                // Enum exports.
+
                 if container_sym.flags.intersects(SymbolFlags::ENUM) {
                     if let Some(sym) = container_sym.exports.get(name) {
                         if sym.flags.intersects(meaning) {
@@ -23496,7 +19334,6 @@ impl Checker {
             }
         }
 
-        // Check globals.
         if let Some(sym) = self.globals.get(name) {
             if sym
                 .flags
@@ -23509,13 +19346,6 @@ impl Checker {
         None
     }
 
-    // ────────────────────────────────────────────────────────────────────────
-    // Declaration merging — ported from `internal/checker/checker.go`
-    // ────────────────────────────────────────────────────────────────────────
-
-    /// Merge a source symbol table into a target symbol table.
-    ///
-    /// Go: `Checker.mergeSymbolTable`
     pub fn merge_symbol_table(
         &mut self,
         target: &mut SymbolTable,
@@ -23523,35 +19353,30 @@ impl Checker {
         unidirectional: bool,
         merged_parent: Option<u64>,
     ) {
-        // Collect entries to merge to avoid borrow issues
+
         let entries: Vec<(String, Arc<Symbol>)> = source
             .iter()
             .map(|(k, v)| (k.clone(), Arc::clone(v)))
             .collect();
         for (name, source_symbol) in entries {
             if let Some(target_symbol) = target.entries.get_mut(&name) {
-                // Merge the existing target symbol with the source
+
                 let merged = self.merge_symbol(target_symbol, &source_symbol, unidirectional);
                 let is_transient = merged.flags.intersects(SymbolFlags::Transient);
                 *target_symbol = merged;
                 if let Some(_parent_id) = merged_parent {
                     if is_transient {
-                        // Set parent to the merged parent
-                        // Simplified: we skip parent tracking for now
+
                     }
                 }
             } else {
-                // No existing target symbol, use the merged version of source
+
                 let merged = self.get_merged_symbol(&source_symbol);
                 target.insert(name, merged);
             }
         }
     }
 
-    /// Merge a source symbol into a target symbol.
-    ///
-    /// Go: `Checker.mergeSymbol`
-    /// Returns a new merged symbol (Arc<Symbol>).
     pub fn merge_symbol(
         &mut self,
         target: &Arc<Symbol>,
@@ -23565,7 +19390,7 @@ impl Checker {
             if Arc::ptr_eq(target, source) {
                 return Arc::clone(target);
             }
-            // Determine the effective target (clone if not transient)
+
             let effective_target = if !target.flags.intersects(SymbolFlags::Transient) {
                 let resolved_target = self.resolve_symbol(target);
                 if resolved_target
@@ -23580,14 +19405,13 @@ impl Checker {
                         return Arc::clone(source);
                     }
                 } else {
-                    // Cannot merge — return source
+
                     return Arc::clone(source);
                 }
             } else {
                 Arc::clone(target)
             };
 
-            // Build the merged symbol by creating a new one
             let mut source_flags = source.flags;
             if !effective_target
                 .flags
@@ -23598,19 +19422,19 @@ impl Checker {
             let merged_flags = effective_target.flags | source_flags;
 
             let mut merged = Symbol::new(merged_flags, &effective_target.name);
-            // Copy value declaration (source takes priority)
+
             merged.value_declaration = source
                 .value_declaration
                 .clone()
                 .or_else(|| effective_target.value_declaration.clone());
-            // Merge declarations
+
             merged.declarations = effective_target.declarations.clone();
             merged
                 .declarations
                 .extend(source.declarations.iter().cloned());
-            // Copy parent
+
             merged.parent = effective_target.parent.clone();
-            // Copy members and exports
+
             merged.members = SymbolTable {
                 entries: effective_target.members.entries.clone(),
             };
@@ -23620,10 +19444,6 @@ impl Checker {
 
             let result = Arc::new(merged);
 
-            // Merge members and exports
-            // We need to mutate the result's members and exports
-            // Since result is behind Arc, we use a workaround:
-            // Create a mutable temporary, merge, then create new Arc
             let mut result_mut = Symbol::new(result.flags, &result.name);
             result_mut.value_declaration = result.value_declaration.clone();
             result_mut.declarations = result.declarations.clone();
@@ -23635,7 +19455,6 @@ impl Checker {
                 entries: result.exports.entries.clone(),
             };
 
-            // Merge source members into target members
             let source_members: Vec<(String, Arc<Symbol>)> = source
                 .members
                 .iter()
@@ -23651,7 +19470,6 @@ impl Checker {
                 }
             }
 
-            // Merge source exports into target exports
             let source_exports: Vec<(String, Arc<Symbol>)> = source
                 .exports
                 .iter()
@@ -23675,18 +19493,12 @@ impl Checker {
 
             final_result
         } else {
-            // Cannot merge — Go reports the conflict here
-            // (`reportMergeSymbolError`, checker.go ~L14256): enum-vs-other
-            // TS2339-family message, block-scoped collision TS2451,
-            // otherwise TS2300, on EVERY declaration of both symbols.
+
             self.report_merge_symbol_error(target, source);
             Arc::clone(target)
         }
     }
 
-    /// Go `reportMergeSymbolError` + `addDuplicateDeclarationErrorsForSymbols`:
-    /// a merge conflict is reported at each declaration's name of both the
-    /// target and source symbols (deduplicated per location+code).
     fn report_merge_symbol_error(&mut self, target: &Arc<Symbol>, source: &Arc<Symbol>) {
         let is_either_enum =
             target.flags.contains(SymbolFlags::ENUM) || source.flags.contains(SymbolFlags::ENUM);
@@ -23712,8 +19524,7 @@ impl Checker {
             }
         }
         for loc in locs {
-            // Deduplicate identical (loc, code) reports — Go's diagnostics
-            // are deduplicated before emission.
+
             if self
                 .diagnostics
                 .get_all()
@@ -23731,16 +19542,10 @@ impl Checker {
         }
     }
 
-    /// Record that a source symbol was merged into a target symbol.
-    ///
-    /// Go: `Checker.recordMergedSymbol`
     pub fn record_merged_symbol(&mut self, target: &Arc<Symbol>, source: &Arc<Symbol>) {
         self.merged_symbols.insert(source.id(), target.id());
     }
 
-    /// Clone a symbol (creates a transient copy).
-    ///
-    /// Go: `Checker.cloneSymbol`
     pub fn clone_symbol(&self, symbol: &Arc<Symbol>) -> Option<Arc<Symbol>> {
         let mut cloned = Symbol::new(symbol.flags | SymbolFlags::Transient, &symbol.name);
         cloned.declarations = symbol.declarations.clone();
@@ -23756,9 +19561,6 @@ impl Checker {
         Some(result)
     }
 
-    /// Resolve a symbol (follow alias chains).
-    ///
-    /// Go: `Checker.resolveSymbol`
     pub fn resolve_symbol(&self, symbol: &Arc<Symbol>) -> Arc<Symbol> {
         if let Some(result) = self.follow_alias(symbol) {
             result
@@ -23767,25 +19569,12 @@ impl Checker {
         }
     }
 
-    /// Get the symbol associated with a given AST node.
-    ///
-    /// A deliberately "fuzzy" lookup intended for language-service and
-    /// external-tool use (not for type-checking internals). Mirrors Go's
-    /// `Checker.GetSymbolAtLocation` / `getSymbolAtLocation` (reduced form).
-    ///
-    /// Handles three cases:
-    /// 1. Declaration nodes with a direct symbol in the symbol map.
-    /// 2. Declaration-name identifiers — walks the parent chain to find the
-    ///    enclosing declaration and returns its symbol.
-    /// 3. Property-access expressions — resolves the property symbol from
-    ///    the cached type of the left-hand expression.
     pub fn get_symbol_at_location(&self, node: &Arc<Node>) -> Option<Arc<Symbol>> {
-        // 1. Direct symbol lookup (declaration nodes).
+
         if let Some(sym) = self.program.symbol_map().symbol_of(node) {
             return Some(Arc::clone(sym));
         }
 
-        // 2. Declaration-name identifiers: walk up the parent chain.
         if node.kind == crate::ast::SyntaxKind::Identifier {
             let mut current = node.parent.as_ref();
             while let Some(parent) = current {
@@ -23796,8 +19585,6 @@ impl Checker {
             }
         }
 
-        // 3. Property-access expressions: resolve the property from the
-        //    cached type of the left-hand expression.
         if node.kind == crate::ast::SyntaxKind::PropertyAccessExpression {
             if let crate::ast::NodeData::PropertyAccessExpression(data) = &node.data {
                 if let Some(links) = self.type_node_links.get(&data.expression) {
@@ -23812,9 +19599,6 @@ impl Checker {
     }
 }
 
-/// Get the excluded symbol flags for a given set of flags.
-///
-/// Go: `getExcludedSymbolFlags`
 fn get_excluded_symbol_flags(flags: SymbolFlags) -> SymbolFlags {
     let mut result = SymbolFlags::None;
     if flags.intersects(SymbolFlags::BlockScopedVariable) {
@@ -23871,17 +19655,11 @@ fn get_excluded_symbol_flags(flags: SymbolFlags) -> SymbolFlags {
     result
 }
 
-/// Check if a node is a module or enum declaration name./// Check if a node is a module or enum declaration name.
 fn is_module_or_enum_name(_node: &Node) -> bool {
-    // We can't check parent pointers, so we check if the node's kind
-    // suggests it's a name of a module/enum declaration.
-    // This is a best-effort check.
+
     false
 }
 
-/// Check if a symbol is a non-local alias (pure alias with exclusions).
-///
-/// Go: `ast.IsNonLocalAlias`
 fn is_non_local_alias(symbol: &Arc<Symbol>, excludes: SymbolFlags) -> bool {
     if symbol.flags == SymbolFlags::Alias
         || (symbol.flags.intersects(SymbolFlags::Alias)
@@ -23893,9 +19671,6 @@ fn is_non_local_alias(symbol: &Arc<Symbol>, excludes: SymbolFlags) -> bool {
     }
 }
 
-/// Check if a node is a type-only declaration.
-///
-/// Go: `ast.Node.IsTypeOnly`
 fn is_type_only_node(node: &Node) -> bool {
     use crate::ast::NodeData;
     match &node.data {
@@ -23907,9 +19682,6 @@ fn is_type_only_node(node: &Node) -> bool {
     }
 }
 
-/// Check if a node is an alias symbol declaration.
-///
-/// Go: `ast.IsAliasSymbolDeclaration`
 fn is_alias_symbol_declaration(node: &Node) -> bool {
     matches!(
         node.kind,
@@ -23924,9 +19696,6 @@ fn is_alias_symbol_declaration(node: &Node) -> bool {
     )
 }
 
-/// Get the name text of a node.
-///
-/// Go: `ast.Node.Name`
 fn node_name(node: &Node) -> Option<&str> {
     use crate::ast::NodeData;
     match &node.data {
@@ -23937,7 +19706,6 @@ fn node_name(node: &Node) -> Option<&str> {
     }
 }
 
-/// Whether a syntax kind is an expression-position kind.
 fn is_expression_position_kind(kind: SyntaxKind) -> bool {
     matches!(
         kind,
@@ -23984,7 +19752,6 @@ fn is_expression_position_kind(kind: SyntaxKind) -> bool {
     )
 }
 
-/// Whether a syntax kind is a statement kind.
 fn is_statement_kind(kind: SyntaxKind) -> bool {
     matches!(
         kind,
@@ -24022,19 +19789,12 @@ fn is_statement_kind(kind: SyntaxKind) -> bool {
     )
 }
 
-/// Whether an identifier node is the *name* of a declaration rather than a
-/// reference. We detect this by inspecting the parent node.
 fn is_declaration_name(node: &Arc<Node>) -> bool {
     let Some(parent) = node.parent.as_ref() else {
         return false;
     };
     let parent_kind = parent.kind;
-    // For declaration nodes whose `name` field is an identifier, the
-    // identifier is a declaration name, not a reference.
-    // NOTE: `ShorthandPropertyAssignment` is intentionally excluded — its
-    // name is *also* a reference to an outer-scope variable (`{ x }`
-    // references `x`), so it must be checked as a reference (and emit
-    // TS2304 when the name is unresolvable).
+
     let name_field = crate::ast::node_data_generated::node_name(parent);
     if let Some(name) = name_field {
         if std::ptr::eq(name.as_ref() as *const Node, node.as_ref() as *const Node) {
@@ -24065,10 +19825,7 @@ fn is_declaration_name(node: &Arc<Node>) -> bool {
                     | SyntaxKind::NamespaceExportDeclaration
                     | SyntaxKind::NamespaceExport
                     | SyntaxKind::LabeledStatement
-                    // Class/function EXPRESSION names are declaration-side
-                    // too (`const W = class Wrapped {}` — `Wrapped` binds
-                    // the class itself, scoping references inside the class
-                    // body; it is not a reference to an outer variable).
+
                     | SyntaxKind::ClassExpression
                     | SyntaxKind::FunctionExpression
             );
@@ -24077,8 +19834,6 @@ fn is_declaration_name(node: &Arc<Node>) -> bool {
     false
 }
 
-/// Whether an identifier node is the property name on the right of a property
-/// access (`x.foo` — `foo` is the name, not a reference).
 fn is_property_access_name(node: &Arc<Node>) -> bool {
     let Some(parent) = node.parent.as_ref() else {
         return false;
@@ -24095,40 +19850,29 @@ fn is_property_access_name(node: &Arc<Node>) -> bool {
     )
 }
 
-/// Whether a string is valid as a JS/TS identifier name. Valid identifiers
-/// must start with a letter, `_`, or `$`, and contain only alphanumeric,
-/// `_`, or `$` characters. Used to filter out parser-recovery artifacts
-/// (e.g. punctuation like `(`, `{`, `)` that leaked into Identifier nodes).
 fn is_valid_identifier_text(s: &str) -> bool {
     let mut chars = s.chars();
     match chars.next() {
         Some(c) if c.is_ascii_alphabetic() || c == '_' || c == '$' => {}
-        // Allow Unicode identifiers (e.g. `$`, `café`). Non-ASCII letters are
-        // valid identifier starts per ECMAScript spec.
+
         Some(c) if c.is_alphabetic() => {}
         _ => return false,
     }
     chars.all(|c| c.is_alphanumeric() || c == '_' || c == '$')
 }
 
-/// Failure classification for an `import X = <entity>` entity resolution,
-/// mirroring Go's `onFailedToResolveSymbol` mapping for namespace-meaning
-/// lookups (checker.go ~L1571).
 enum ImportEntityError {
     None,
-    /// TS2503 — no namespace-meaningful symbol visible.
+
     NamespaceNotFound(Arc<Node>),
-    /// TS2702 — the name resolves with TYPE meaning only.
+
     TypeAsNamespace(Arc<Node>),
-    /// TS2437 — a namespace resolves in an outer scope but a local VALUE of
-    /// the same name masks the plain-name lookup.
+
     HiddenByLocal(Arc<Node>),
-    /// TS2694 — a namespace segment lacks the member.
+
     MissingMember((Arc<Node>, String, String)),
 }
 
-/// The leftmost identifier of an (entity) name — `A` in `A.B.C`, or the name
-/// itself for a plain identifier.
 pub(crate) fn base_identifier_of(name: &Arc<Node>) -> Arc<Node> {
     let mut cur = Arc::clone(name);
     loop {
@@ -24140,11 +19884,6 @@ pub(crate) fn base_identifier_of(name: &Arc<Node>) -> Arc<Node> {
     }
 }
 
-/// Whether an identifier node is the left-hand side of an assignment (e.g.,
-/// the `v` in `v = 1` or `v += 1`). Used to skip TS2454 for write targets.
-/// Whether an object-literal node sits in a destructuring-assignment target
-/// position: the initializer of a for-in/for-of head, or the left side of an
-/// `=` assignment.
 fn object_literal_is_destructuring_target(literal: &Arc<Node>) -> bool {
     let Some(parent) = literal.parent.as_ref() else {
         return false;
@@ -24170,9 +19909,7 @@ fn is_assignment_target(node: &Arc<Node>) -> bool {
     let Some(parent) = node.parent.as_ref() else {
         return false;
     };
-    // The name of a binding element in a bare (no declaration keyword)
-    // destructuring pattern — `({ a: a = 1 } = o)`, `for ({ b } of xs)` — is
-    // an assignment TARGET (a write to the referenced variable), not a read.
+
     if parent.kind == SyntaxKind::BindingElement {
         if let crate::ast::NodeData::BindingElement(be) = &parent.data {
             if let Some(name) = &be.name {
@@ -24187,9 +19924,7 @@ fn is_assignment_target(node: &Arc<Node>) -> bool {
         }
         return false;
     }
-    // The shorthand name in an object literal used as a destructuring
-    // assignment target — `for ({ b } of xs)`, `({ b } = o)` — is likewise a
-    // write, not a read.
+
     if parent.kind == SyntaxKind::ShorthandPropertyAssignment {
         if let crate::ast::NodeData::ShorthandPropertyAssignment(sa) = &parent.data {
             let name_is_node =
@@ -24215,28 +19950,23 @@ fn is_assignment_target(node: &Arc<Node>) -> bool {
     if !is_compound_or_simple_assignment(bin.operator_token.kind) {
         return false;
     }
-    // The node must be the left operand.
+
     std::ptr::eq(
         bin.left.as_ref() as *const Node,
         node.as_ref() as *const Node,
     )
 }
 
-/// Whether a `VariableDeclaration` node is declared with `let` or `const`
-/// (as opposed to `var`). The parser sets `NodeFlags::Let` or `NodeFlags::Const`
-/// on the parent `VariableDeclarationList`; `var` has neither.
 fn is_let_or_const_declaration(declaration: &Arc<Node>) -> bool {
     if let Some(parent) = declaration.parent.as_ref() {
         if parent.kind == SyntaxKind::VariableDeclarationList {
             return parent.flags.intersects(NodeFlags::Let | NodeFlags::Const);
         }
     }
-    // No parent info — assume block-scoped (conservative).
+
     true
 }
 
-/// Whether a type includes `undefined` (directly or as a union constituent).
-/// Mirrors Go's `containsUndefinedType`.
 fn type_contains_undefined(t: &Arc<Type>) -> bool {
     if t.flags.contains(TypeFlags::Undefined) {
         return true;
@@ -24253,9 +19983,6 @@ fn type_contains_undefined(t: &Arc<Type>) -> bool {
     false
 }
 
-/// Whether a type is possibly `undefined` or `null` (directly or as a union
-/// constituent). Mirrors Go's `(type.flags & TypeFlagsNullable) != 0` plus
-/// union-constituent check.
 fn type_is_possibly_undefined(t: &Arc<Type>) -> bool {
     if t.flags.intersects(TypeFlags::Undefined | TypeFlags::Null) {
         return true;
@@ -24272,8 +19999,6 @@ fn type_is_possibly_undefined(t: &Arc<Type>) -> bool {
     false
 }
 
-/// Whether `t` includes `undefined` (but not `null`). Companion to
-/// `type_is_possibly_null` for the TS18048/TS18047/TS18069 message split.
 fn type_includes_undefined_only(t: &Arc<Type>) -> bool {
     if t.flags.contains(TypeFlags::Undefined) {
         return true;
@@ -24290,7 +20015,6 @@ fn type_includes_undefined_only(t: &Arc<Type>) -> bool {
     false
 }
 
-/// Whether `t` includes `null` (but not `undefined`).
 fn type_includes_null_only(t: &Arc<Type>) -> bool {
     if t.flags.contains(TypeFlags::Null) {
         return true;
@@ -24307,10 +20031,6 @@ fn type_includes_null_only(t: &Arc<Type>) -> bool {
     false
 }
 
-/// Whether `node` is an entity name expression: an identifier or a dotted
-/// chain of identifiers (`a.b.c`). Go `ast.IsEntityNameExpression` — such
-/// expressions spell the name into the "'x' is possibly ..." diagnostics
-/// instead of the object-form "Object is possibly ...".
 fn is_entity_name_expression(node: &Arc<Node>) -> bool {
     match node.kind {
         SyntaxKind::Identifier => true,
@@ -24324,8 +20044,6 @@ fn is_entity_name_expression(node: &Arc<Node>) -> bool {
     }
 }
 
-/// Whether a `SyntaxKind` is `=` or any compound-assignment operator
-/// (`+=`, `-=`, etc.). Mirrors Go's `isAssignmentOperator`.
 fn is_compound_or_simple_assignment(kind: SyntaxKind) -> bool {
     use SyntaxKind::*;
     matches!(
@@ -24349,7 +20067,6 @@ fn is_compound_or_simple_assignment(kind: SyntaxKind) -> bool {
     )
 }
 
-/// Flatten a (possibly nested) union into its non-union leaf types.
 fn flatten_union_leaves<'a>(t: &'a Arc<Type>, leaves: &mut Vec<&'a Arc<Type>>) {
     match t.as_union_or_intersection() {
         Some(u) => {
@@ -24361,7 +20078,6 @@ fn flatten_union_leaves<'a>(t: &'a Arc<Type>, leaves: &mut Vec<&'a Arc<Type>>) {
     }
 }
 
-/// The declared name text of a class declaration, if any.
 fn class_declaration_name(class: &Arc<Node>) -> Option<String> {
     if let crate::ast::NodeData::ClassDeclaration(d) = &class.data {
         return d.name.as_ref().map(|n| n.text().to_string());
@@ -24369,14 +20085,10 @@ fn class_declaration_name(class: &Arc<Node>) -> Option<String> {
     None
 }
 
-/// Whether a PropertyDeclaration node carries an initializer.
 fn prop_decl_has_initializer(decl: &Arc<Node>) -> bool {
     matches!(&decl.data, crate::ast::NodeData::PropertyDeclaration(d) if d.initializer.is_some())
 }
 
-/// Whether `prop_decl` is declared AFTER the property whose initializer
-/// contains `node` (TS2729's "read before that property's initializer
-/// runs" — class fields initialize in declaration order).
 fn later_sibling_property(node: &Arc<Node>, prop_decl: &Arc<Node>) -> bool {
     let mut cur = node.parent.as_ref();
     while let Some(a) = cur {
@@ -24388,18 +20100,14 @@ fn later_sibling_property(node: &Arc<Node>, prop_decl: &Arc<Node>) -> bool {
     false
 }
 
-/// The result of a module-member lookup for TS2305/TS2459 checking
-/// (see `Checker::module_member_lookup`).
 #[derive(Debug, PartialEq, Eq)]
 enum ModuleMemberLookup {
     Found,
-    /// The name matches a module-local declaration that is not exported.
+
     LocalNotExported,
     Missing,
 }
 
-/// Whether a constructor body assigns `this.<name>` anywhere (outside nested
-/// function-likes) — the TS2564 definite-assignment approximation.
 #[allow(dead_code)]
 fn body_assigns_this_property(n: &Arc<Node>, name: &str) -> bool {
     match &n.data {
@@ -24414,7 +20122,7 @@ fn body_assigns_this_property(n: &Arc<Node>, name: &str) -> bool {
                 return true;
             }
         }
-        // Nested function-likes have their own `this`.
+
         crate::ast::NodeData::FunctionDeclaration(_)
         | crate::ast::NodeData::FunctionExpression(_)
         | crate::ast::NodeData::ArrowFunction(_) => return false,
@@ -24443,12 +20151,8 @@ impl std::fmt::Debug for Checker {
     }
 }
 
-/// Rebuild an object type with explicit type arguments attached (used by
-/// `new C<T>(...)` to carry the instantiation onto the class instance type;
-/// member reads substitute through them via `substituted_member_type_of`).
 impl Checker {
-    /// Memoizing wrapper around [`attach_explicit_type_arguments`] — see
-    /// `attached_type_args_cache`.
+
     pub(crate) fn attach_explicit_type_arguments_cached(
         &mut self,
         t: &Arc<Type>,
@@ -24500,8 +20204,6 @@ mod array_member_tests {
     use crate::tsoptions::ParsedCommandLine;
     use crate::vfs::InMemoryFS;
 
-    /// Build a checker over `source` with the bundled default lib (the
-    /// Array interface machinery these tests exercise).
     fn build_checker_with_lib(source: &str) -> Checker {
         use crate::bundled::BundledFS;
         let inner = Arc::new(InMemoryFS::new());
@@ -24532,8 +20234,6 @@ mod array_member_tests {
         codes
     }
 
-    /// Array method callback parameters are typed by the ELEMENT type
-    /// (`every`'s predicate sees `string`, not the interface's raw `T`).
     #[test]
     fn array_every_callback_param_typed_by_element() {
         let ok = build_checker_with_lib(
@@ -24544,13 +20244,10 @@ mod array_member_tests {
         let bad = build_checker_with_lib(
             "declare const ss: string[]; ss.every((x: number) => true);",
         );
-        // `every` has two declared overloads — the no-match form is the
-        // official TS2769 (per-overload chains).
+
         assert_eq!(error_codes(&bad), vec![2769], "mismatched callback param must fail");
     }
 
-    /// Element-substituted Array members keep the METHOD's own type
-    /// parameters free (`flat(depth: number)` binds `D` by inference).
     #[test]
     fn array_flat_own_type_params_stay_free() {
         let ok = build_checker_with_lib(
@@ -24559,8 +20256,6 @@ mod array_member_tests {
         assert_eq!(error_codes(&ok), Vec::<i32>::new());
     }
 
-    /// The substituted callback signature displays element types, not the
-    /// raw interface parameter (error-text parity with official).
     #[test]
     fn array_method_signature_display_substituted() {
         let checker = build_checker_with_lib("declare const ss: string[]; ss.every(42);");
@@ -24578,8 +20273,7 @@ mod array_member_tests {
         for (i, a) in diag.message_args.iter().enumerate() {
             msg = msg.replace(&format!("{{{i}}}"), a);
         }
-        // The per-overload entries ("Overload i of n, '<sig>', gave …")
-        // carry the element-substituted signature.
+
         fn collect_chain_text(d: &crate::ast::Diagnostic, out: &mut String) {
             out.push_str(&d.message.as_ref().map(|m| m.text).unwrap_or(""));
             for (i, a) in d.message_args.iter().enumerate() {
@@ -24599,8 +20293,6 @@ mod array_member_tests {
         );
     }
 
-    /// Explicit type arguments select the arity-matching overload
-    /// (`reduce<number>` picks the generic overload, no TS2558).
     #[test]
     fn explicit_type_arguments_select_generic_overload() {
         let ok = build_checker_with_lib(
@@ -24609,8 +20301,6 @@ mod array_member_tests {
         assert_eq!(error_codes(&ok), Vec::<i32>::new());
     }
 
-    /// A bare array satisfies a structural interface over Array members
-    /// (`string[]` -> `ConcatArray<string>`: length/join/slice/concat).
     #[test]
     fn bare_array_assignable_to_concat_array() {
         let ok = build_checker_with_lib(
@@ -24619,8 +20309,6 @@ mod array_member_tests {
         assert_eq!(error_codes(&ok), Vec::<i32>::new());
     }
 
-    /// Instantiated interface member types read through the instance's
-    /// type arguments (`ConcatArray<number>.slice` returns `number[]`).
     #[test]
     fn concat_on_number_array_with_array_arg() {
         let ok = build_checker_with_lib(
@@ -24630,11 +20318,6 @@ mod array_member_tests {
     }
 }
 
-/// Regression tests for the heritage-degradation convergence machinery
-/// (ISSUES_RISK_ANALYSIS Issues 1–3): exact error-type detection, the
-/// per-symbol retry limit that guarantees cyclic base types converge, the
-/// memo-cache capacity bounds, and the depth guards on un-guarded
-/// recursion paths.
 #[cfg(test)]
 pub(crate) mod convergence_tests {
     use super::*;
@@ -24643,10 +20326,6 @@ pub(crate) mod convergence_tests {
     use crate::tsoptions::ParsedCommandLine;
     use crate::vfs::InMemoryFS;
 
-    /// `lib_spec` controls the `lib` compiler option (e.g. `["es5"]`;
-    /// `[]` loads no library at all). NOTE: the tsconfig.json written to
-    /// the VFS is inert here — the program is built from the
-    /// ParsedCommandLine we construct directly.
     pub(crate) fn build_program_and_checker(source: &str, lib_spec: &[&str]) -> (Arc<Program>, Checker) {
         use crate::bundled::BundledFS;
         let inner = Arc::new(InMemoryFS::new());
@@ -24677,15 +20356,6 @@ pub(crate) mod convergence_tests {
             .collect()
     }
 
-    /// A base type that legitimately resolves to `any` (an any-alias)
-    /// must NOT count as heritage degradation — the old `TypeFlags::Any`
-    /// test conflated the two and permanently disabled the interface's
-    /// declared-type cache (Issue 1). Observable: with the exact
-    /// `is_type_error` test, `I`'s declared type is cached after its
-    /// first resolution and no degraded retry is ever recorded for it.
-    /// (The bundled libs degrade structurally — Array ↔ ConcatArray
-    /// members re-enter through the bare-symbol guard — so global event
-    /// counters can't isolate this; assert on `I` itself.)
     #[test]
     fn any_base_is_not_degradation() {
         let (program, mut checker) = convergence_tests::build_program_and_checker(
@@ -24701,7 +20371,7 @@ pub(crate) mod convergence_tests {
             checker.check_source_file(file);
         }
         assert_eq!(error_codes(&checker), Vec::<i32>::new());
-        // Locate the interface declaration and its symbol.
+
         let entry = program.get_source_file("/proj/entry.ts").expect("entry file");
         let iface = match &entry.node.data {
             crate::ast::NodeData::SourceFile(d) => d
@@ -24717,8 +20387,7 @@ pub(crate) mod convergence_tests {
             .symbol_of(&iface)
             .expect("interface symbol")
             .clone();
-        // The any base must not have degraded `I`: its declared type is
-        // pinned on the FIRST resolution and no retry was recorded.
+
         assert!(
             checker
                 .type_alias_links
@@ -24734,11 +20403,6 @@ pub(crate) mod convergence_tests {
         );
     }
 
-    /// True base-type cycles (`A extends B; B extends A`) degrade on
-    /// every retry; the retry limit must accept the degraded form after
-    /// HERITAGE_RETRY_LIMIT retries so resolution converges instead of
-    /// re-walking the graph per reference (the r9 timeout storm,
-    /// Issue 1). Own members must remain accessible in the pinned form.
     #[test]
     fn cyclic_base_interfaces_converge() {
         let source = "interface A extends B { a: number; }\n\
@@ -24751,13 +20415,13 @@ pub(crate) mod convergence_tests {
         for file in program.source_files() {
             checker.check_source_file(file);
         }
-        // Own members stay reachable (no TS2339) in the accepted form.
+
         assert_eq!(
             error_codes(&checker),
             Vec::<i32>::new(),
             "own-member access through the cyclic interface must stay clean"
         );
-        // The degradation path was exercised and eventually accepted.
+
         assert!(
             !checker.heritage_retry_counts.is_empty(),
             "cyclic bases must have recorded degraded retries"
@@ -24771,9 +20435,6 @@ pub(crate) mod convergence_tests {
         );
     }
 
-    /// The (node, substitution-stack) memo cache must respect its capacity
-    /// bound — the clear-at-cap discipline keeps resident memory bounded
-    /// on large programs (Issue 2's OOM).
     #[test]
     fn subst_cache_respects_capacity() {
         let (program, mut checker) = convergence_tests::build_program_and_checker(
@@ -24799,11 +20460,6 @@ pub(crate) mod convergence_tests {
         );
     }
 
-    /// A deep (non-cyclic) `extends` chain never passes
-    /// get_type_from_type_node's depth guard; the dedicated guards on
-    /// resolve_base_class_instance_type / attach_class_statics must stop
-    /// the recursion so checking completes on a default-size stack
-    /// (Issue 3's stack overflow).
     #[test]
     fn deep_class_chain_bounded() {
         let mut source = String::from("class C0 { m0: number = 0; }\n");
@@ -24818,8 +20474,7 @@ pub(crate) mod convergence_tests {
         for file in program.source_files() {
             checker.check_source_file(file);
         }
-        // The chain is cut beyond the guard, but OWN members of the leaf
-        // still resolve and type-check cleanly.
+
         assert_eq!(
             error_codes(&checker),
             Vec::<i32>::new(),
@@ -24828,11 +20483,6 @@ pub(crate) mod convergence_tests {
     }
 }
 
-
-/// Node-format-aware checks added in the r9 fix round: `import.meta`
-/// (TS1470), reserved CJS top-level names (TS2441/2725/1216), import
-/// attributes grammar (TS2823/2856/2881/1453 with parse-error
-/// suppression), overload-probe diagnostic suppression (concatError).
 #[cfg(test)]
 pub(crate) mod node_format_tests {
     use super::*;
@@ -24842,8 +20492,6 @@ pub(crate) mod node_format_tests {
     use crate::tsoptions::ParsedCommandLine;
     use crate::vfs::InMemoryFS;
 
-    /// Build a fully-checked program over a virtual file set. `root` is
-    /// the file whose diagnostics are asserted.
     pub(crate) fn check_files(
         files: &[(&str, &str)],
         root: &str,
@@ -24857,8 +20505,7 @@ pub(crate) mod node_format_tests {
             } else {
                 format!("/proj/{name}")
             };
-            // Insert every ancestor so directory_exists holds (the r9
-            // harness fix, mirrored here).
+
             let mut parent = crate::tspath::get_directory_path(&abs);
             loop {
                 inner.insert_dir(&parent);
@@ -24882,9 +20529,7 @@ pub(crate) mod node_format_tests {
             Arc::new(CompilerHostImpl::new(fs, "/proj".to_string(), lib_path()));
         let program = Arc::new(Program::new(ProgramOptions { config: parsed, host }));
         let checker = program.build_checker();
-        // Merge parse/bind diagnostics (Program) with semantic ones
-        // (Checker) — grammar-check gates like the TS2823 suppression key
-        // off parse errors, and assertions need to see them.
+
         checker
             .diagnostics
             .get_all()
@@ -24895,8 +20540,6 @@ pub(crate) mod node_format_tests {
             .collect()
     }
 
-    /// `import.meta` in a CJS-format file under node16 reports TS1470; an
-    /// ESM-format file (nearest package.json "type": "module") is clean.
     #[test]
     fn import_meta_reports_1470_only_in_cjs_files() {
         let files = [
@@ -24917,11 +20560,6 @@ pub(crate) mod node_format_tests {
         assert_eq!(esm, Vec::<i32>::new(), "ESM-format file must be clean");
     }
 
-    /// `declare global` blocks in a module-form d.ts pulled in by a
-    /// triple-slash `types` reference merge into the global scope (Go
-    /// initializeChecker → mergeModuleAugmentation). The
-    /// TripleSlashReferenceMode* family: the import-condition reference
-    /// resolves import.d.ts whose augmentation provides `foo`.
     #[test]
     fn declare_global_augmentation_from_types_reference_merges() {
         let files = [
@@ -24943,15 +20581,13 @@ pub(crate) mod node_format_tests {
                 "/// <reference types=\"pkg\" resolution-mode=\"import\" />\nfoo;\nexport {};\n",
             ),
         ];
-        // Override4 shape: only the import-condition entrypoint is
-        // referenced — `foo` resolves, `bar` does not.
+
         let codes = check_files(&files, "/index.ts", |o| {
             o.module = ModuleKind::Node16;
             o.module_resolution = ModuleResolutionKind::Node16;
         });
         assert_eq!(codes, Vec::<i32>::new(), "foo must resolve via the global augmentation");
 
-        // Override5 shape: both references — both augmentations merge.
         let files_both = [
             (
                 "/node_modules/pkg/package.json",
@@ -24977,8 +20613,6 @@ pub(crate) mod node_format_tests {
         });
         assert_eq!(codes, Vec::<i32>::new(), "both augmentations must merge");
 
-        // Without any reference, the augmentation must NOT leak into
-        // globals.
         let files_none = [
             (
                 "/node_modules/pkg/package.json",
@@ -24998,10 +20632,6 @@ pub(crate) mod node_format_tests {
         assert_eq!(codes, vec![2304], "unreferenced augmentation must not leak");
     }
 
-    /// importHelpers with a resolvable 'tslib' that lacks the required
-    /// helper name → TS2343 per missing helper (Go checkExternalEmitHelpers
-    /// → resolveSymbol on the module's exports), gated on the file's EMIT
-    /// format being CommonJS (node16 CJS-format file, no esModuleInterop).
     #[test]
     fn import_helpers_missing_helper_name_reports_2343() {
         let files = [
@@ -25022,7 +20652,6 @@ pub(crate) mod node_format_tests {
         });
         assert_eq!(codes, vec![2343], "missing __importDefault must report TS2343");
 
-        // The same file with the helper present in tslib is clean.
         let files_ok = [
             (
                 "/types.d.ts",
@@ -25041,7 +20670,6 @@ pub(crate) mod node_format_tests {
         });
         assert_eq!(codes, Vec::<i32>::new(), "present helper must be clean");
 
-        // ESM-format file: the re-export emits natively — no helper needed.
         let files_esm = [
             (
                 "/types.d.ts",
@@ -25060,9 +20688,6 @@ pub(crate) mod node_format_tests {
         });
         assert_eq!(codes, Vec::<i32>::new(), "ESM-format emit needs no import helper");
 
-        // Explicit esModuleInterop=false disables the ImportDefault
-        // helper check (TS-current gate; the flag DEFAULTS to true when
-        // unset — covered by the cases above which never set it).
         let files_nointerop = [
             (
                 "/types.d.ts",
@@ -25083,12 +20708,6 @@ pub(crate) mod node_format_tests {
         assert_eq!(codes, Vec::<i32>::new(), "explicit interop=false must disable the check");
     }
 
-    /// TS2305/TS2459: named import specifiers must resolve against the
-    /// referenced module's export face. A member that is declared but not
-    /// exported reports TS2459 ("declares locally"), a member that does not
-    /// exist at all reports TS2305 (Go `getExternalModuleMember` →
-    /// `errorNoModuleMemberSymbol`). Verified against tsgo: positions land
-    /// on the specifier's property-name-or-name node.
     #[test]
     fn module_member_check_2305_and_2459() {
         let files = [
@@ -25107,9 +20726,7 @@ pub(crate) mod node_format_tests {
             ),
         ];
         let codes = check_files(&files, "/main.ts", |_| {});
-        // tsgo-ref probe (2026-08-24): emission order is source order —
-        // Missing(2305), Internal(2459), notExportedConst(2459),
-        // Missing2(2305), then the re-export Nope(2305).
+
         assert_eq!(
             codes,
             vec![2305, 2459, 2459, 2305, 2305],
@@ -25117,12 +20734,6 @@ pub(crate) mod node_format_tests {
         );
     }
 
-    /// A shorthand ambient module (`declare module "x";`, no body) answers
-    /// every member lookup without error — Go `getExternalModuleMember`
-    /// returns the module symbol itself and `default` takes the permissive
-    /// synthetic-default path (tsgo-ref probe 2026-08-24: only the 2343
-    /// helper error is reported, no 2305). A NON-shorthand ambient module
-    /// still checks its members (missing → 2305).
     #[test]
     fn shorthand_ambient_module_members_exempt_from_2305() {
         let files = [
@@ -25146,12 +20757,6 @@ pub(crate) mod node_format_tests {
         );
     }
 
-    /// Fix 1b(a): default-modifier declarations (`export default class X {}`,
-    /// `export default function f() {}`, anonymous `export default class {}`)
-    /// provide the "default" export face — Go's declareSymbolEx names the
-    /// export symbol "default" for every `isDefaultExport && parent != nil`
-    /// declaration (the expression form `export default <expr>` was already
-    /// handled by the binder's ExportAssignment arm).
     #[test]
     fn module_member_check_default_export_forms() {
         let files = [
@@ -25176,9 +20781,6 @@ pub(crate) mod node_format_tests {
         );
     }
 
-    /// Fix 1b(b): `export {X}` local clauses, `export {X} from "m"` forwarding
-    /// clauses, and `export {X as default}` all put the EXPORTED name on the
-    /// module's export face (Go declareModuleMember's alias branch).
     #[test]
     fn module_member_check_export_clauses() {
         let files = [
@@ -25203,10 +20805,6 @@ pub(crate) mod node_format_tests {
         );
     }
 
-    /// Fix 1b(c): `export * from` chains resolve transitively, cycles
-    /// terminate, the module's own exports shadow star-provided names, and a
-    /// star never re-exports "default" (Go getExportsOfModuleWorker /
-    /// extendExportSymbols).
     #[test]
     fn module_member_check_star_chains() {
         let files = [
@@ -25243,9 +20841,6 @@ pub(crate) mod node_format_tests {
         );
     }
 
-    /// Fix 1b(d): ambient module bodies are export contexts — every declared
-    /// member is implicitly exported (Go setExportContextFlag: an ambient
-    /// container with no export declarations/assignments).
     #[test]
     fn module_member_check_ambient_implicit_exports() {
         let files = [
@@ -25270,10 +20865,6 @@ pub(crate) mod node_format_tests {
         );
     }
 
-    /// Fix 1b(e): `export = <identifier>` resolves its namespace target
-    /// (`export = Foo`, and `export = alias` where `alias` is an
-    /// `import X = NS` alias) — members of the target, including ambient
-    /// implicit-export locals, answer member lookups.
     #[test]
     fn module_member_check_export_equals_targets() {
         let files = [
@@ -25303,10 +20894,6 @@ pub(crate) mod node_format_tests {
         );
     }
 
-    /// Fix 1b(f): synthetic default (Go canHaveSyntheticDefault subset) — a
-    /// declaration file without a syntactic default and without `__esModule`
-    /// answers a "default" import; a plain .ts module without `export=` does
-    /// not.
     #[test]
     fn module_member_check_synthetic_default() {
         let files = [
@@ -25327,12 +20914,6 @@ pub(crate) mod node_format_tests {
         );
     }
 
-    /// A `resolution-mode` import attribute only overrides the usage-site
-    /// mode for EXCLUSIVELY type-only clauses (Go `GetModeForUsageLocation`)
-    /// — a plain clause resolves through the default chain (the containing
-    /// file's implied format), so under node16 with a CJS-implied importer
-    /// its named members must come from the `require` face of the package
-    /// exports (nodeModulesImportAttributesModeDeclarationEmit1 shape).
     #[test]
     fn module_member_check_non_type_only_ignores_resolution_mode() {
         let files = [
@@ -25350,7 +20931,7 @@ pub(crate) mod node_format_tests {
             ),
             (
                 "/index.ts",
-                // No root package.json → CJS implied for /index.ts.
+
                 "import type { ImportInterface } from \"pkg\" with { \"resolution-mode\": \"import\" };\n\
                  import { ImportInterface as Imp } from \"pkg\" with { \"resolution-mode\": \"import\" };\n\
                  import { RequireInterface as Req } from \"pkg\";\n",
@@ -25369,12 +20950,6 @@ pub(crate) mod node_format_tests {
         );
     }
 
-    /// A `types`-option auto-included @types package's VALUE symbols must
-    /// carry their declared types even though the package file is appended
-    /// (and therefore checked) AFTER the importing root — Go resolves symbol
-    /// types lazily from the declaration (library-reference-13 shape:
-    /// `$.foo()` must type-check, `$.nope()` must report TS2339, and `$`'s
-    /// type must be the declared object, not `any`).
     #[test]
     fn types_option_symbols_resolve_before_declaring_file_checked() {
         let files = [
@@ -25396,9 +20971,6 @@ pub(crate) mod node_format_tests {
         );
     }
 
-    /// react-jsx mode: the implicit `<importSource>/jsx-runtime` module
-    /// must resolve — TS2875 at the first JSX tag when it doesn't (Go
-    /// getJsxNamespaceContainerForImplicitImport).
     #[test]
     fn jsx_runtime_import_source_unresolvable_reports_2875() {
         let files = [
@@ -25414,10 +20986,6 @@ pub(crate) mod node_format_tests {
         });
         assert_eq!(codes, vec![2875], "unresolvable jsx runtime must report TS2875");
 
-        // Classic react mode never consults a runtime module (no TS2875),
-        // but the factory namespace itself must be in scope — TS2874 when
-        // `React` is not (Go markJsxAliasReferenced;
-        // commentsOnJSXExpressionsArePreserved's jsx=react variants).
         let codes = check_files(&files, "/index.tsx", |o| {
             o.jsx = crate::core::compiler_options::JsxEmit::React;
             o.jsx_import_source = "preact".to_string();
@@ -25429,11 +20997,6 @@ pub(crate) mod node_format_tests {
         );
     }
 
-    /// `import * as P from "ambient-mod"` followed by type-position
-    /// qualified access `P.Member` must resolve: the import alias carries
-    /// no binder link for ambient-module targets, so the qualified-name
-    /// resolver chases it to the module symbol (react16.d.ts's
-    /// `PropTypes.ValidationMap` family, Go resolveEntityName).
     #[test]
     fn namespace_import_alias_qualified_type_access() {
         let files = [
@@ -25456,11 +21019,6 @@ pub(crate) mod node_format_tests {
         );
     }
 
-    /// A generic function reference passed as a callback argument infers
-    /// its type parameters from the contextual parameter signature
-    /// (`[1,2,3].map(identity)` — Go's inferential typing; inferential
-    /// TypingWithFunctionType2): no spurious TS2345 for `(a: A) => A`
-    /// against `(value: number, ...) => U`.
     #[test]
     fn generic_callback_reference_infers_no_2345() {
         let codes = check_files(
@@ -25476,11 +21034,6 @@ pub(crate) mod node_format_tests {
         assert_eq!(codes, Vec::<i32>::new(), "map(identity) must not report TS2345");
     }
 
-    /// An EXPLICIT `moduleResolution: node10` ignores package.json
-    /// `exports` (types/main + index fallbacks only) — a package whose
-    /// exports point at a non-index file must NOT resolve (Go maps only
-    /// Unknown/Classic through the module-kind default; node10 stays
-    /// node10 — node10AlternateResult_noResolution).
     #[test]
     fn explicit_node10_resolution_ignores_exports() {
         let files = [
@@ -25498,11 +21051,6 @@ pub(crate) mod node_format_tests {
         assert_eq!(codes, vec![2307], "node10 must not resolve via exports");
     }
 
-    /// Interface types built inside a heritage-degradation window carry a
-    /// transiently incomplete member table; comparisons against them must
-    /// not report phantom incompatibilities (the lib.dom/react16 D1
-    /// family — `HTMLElement` → `Element` spans two heritage levels and
-    /// used to report TS2739 with the full Element surface "missing").
     #[test]
     fn dom_two_level_heritage_assignable_no_phantom_2739() {
         let codes = check_files(
@@ -25518,9 +21066,6 @@ pub(crate) mod node_format_tests {
         assert_eq!(codes, Vec::<i32>::new(), "two-level DOM heritage must be assignable");
     }
 
-    /// Reserved names in the top level of a CJS-format module: require and
-    /// exports (TS2441), a class named Object (TS2725), and the
-    /// `__esModule` binding (TS1216) — none in an ESM-format file.
     #[test]
     fn reserved_cjs_top_level_names() {
         let body = "function require() {}\n\
@@ -25546,9 +21091,6 @@ pub(crate) mod node_format_tests {
         assert_eq!(esm, Vec::<i32>::new(), "ESM file has no collisions");
     }
 
-    /// TS2823 for import attributes is suppressed when the file has parse
-    /// errors (Go `grammarErrorOnNode` gates on hasParseDiagnostics): the
-    /// truncated `with {` clause reports only the parse error.
     #[test]
     fn import_attributes_2823_suppressed_on_parse_error() {
         let codes = check_files(
@@ -25565,10 +21107,6 @@ pub(crate) mod node_format_tests {
         assert!(codes.contains(&1005), "expected the parse error: {codes:?}");
     }
 
-    /// node16 does not support import attributes (TS2823 on the plain
-    /// import), but an exclusively type-only clause carrying
-    /// `resolution-mode` is exempt; a bad `resolution-mode` value reports
-    /// TS1453.
     #[test]
     fn type_only_resolution_mode_attribute_grammar() {
         let files = [
@@ -25589,9 +21127,7 @@ pub(crate) mod node_format_tests {
             o.module = ModuleKind::Node16;
             o.module_resolution = ModuleResolutionKind::Node16;
         });
-        // Exactly one TS2823 — the NON-type-only clause (node16 lacks
-        // attribute support); the type-only clause with resolution-mode is
-        // exempt.
+
         assert_eq!(
             codes.iter().filter(|c| **c == 2823).count(),
             1,
@@ -25614,9 +21150,6 @@ pub(crate) mod node_format_tests {
         assert!(bad.contains(&1453), "bad resolution-mode value: {bad:?}");
     }
 
-    /// The phantom TS2322 from overload probing must not persist
-    /// (concatError): `fa.concat([0])` probing the ConcatArray rest
-    /// overload leaves no trace when the T[] overload matches.
     #[test]
     fn overload_probe_does_not_leak_diagnostics() {
         let codes = check_files(
@@ -25627,10 +21160,6 @@ pub(crate) mod node_format_tests {
         assert_eq!(codes, vec![2454], "only used-before-assigned: {codes:?}");
     }
 
-    /// A bare generic reference (`_entityType: A` where `A<T>` needs one
-    /// argument) reports exactly one TS2314 and resolves to the error
-    /// type — TS2564's any/error exemption then suppresses the
-    /// property-initialization error (genericReturnTypeFromGetter1).
     #[test]
     fn generic_arity_error_suppresses_ts2564() {
         let codes = check_files(
@@ -25655,9 +21184,6 @@ pub(crate) mod node_format_tests {
         );
     }
 
-    /// Ambient declarations are exempt from reserved-name collisions (Go
-    /// `needCollisionCheckForIdentifier`'s NodeFlagsAmbient bail-out —
-    /// collisionExportsRequireAndAmbient* report zero errors).
     #[test]
     fn ambient_declarations_exempt_from_reserved_names() {
         let codes = check_files(
@@ -25675,12 +21201,9 @@ pub(crate) mod node_format_tests {
         assert_eq!(codes, Vec::<i32>::new(), "ambient names are clean: {codes:?}");
     }
 
-    /// TS1216 fires only for EXPORTED `__esModule` bindings in module
-    /// formats below System, and never under --noEmit (es5-commonjs6/7/8):
-    /// a bare `var __esModule` and a `@noEmit` export are both clean.
     #[test]
     fn es_module_marker_requires_export_and_emit() {
-        // Bare local binding — clean.
+
         let bare = check_files(
             &[("/proj/index.ts", "export default \"test\";\nvar __esModule = 1;\n")],
             "/proj/index.ts",
@@ -25690,7 +21213,6 @@ pub(crate) mod node_format_tests {
         );
         assert_eq!(bare, Vec::<i32>::new(), "bare __esModule is legal: {bare:?}");
 
-        // Exported + commonjs — one TS1216 (es5-commonjs4's baseline).
         let exported = check_files(
             &[("/proj/index.ts", "export default \"test\";\nexport var __esModule = 1;\n")],
             "/proj/index.ts",
@@ -25700,7 +21222,6 @@ pub(crate) mod node_format_tests {
         );
         assert_eq!(exported, vec![1216], "exported __esModule reports TS1216: {exported:?}");
 
-        // Exported but --noEmit — clean (errorSkippedOnNoEmit).
         let noemit = check_files(
             &[("/proj/index.ts", "export default \"test\";\nexport var __esModule = 1;\n")],
             "/proj/index.ts",
@@ -25720,8 +21241,7 @@ mod tests {
     #[test]
     fn link_store_basic() {
         let store: LinkStore<Node, NodeLinks> = LinkStore::new();
-        // We can't easily create a Node for testing, but we can verify the API
-        // works with the Default impl.
+
         assert!(store.data.is_empty());
     }
 
@@ -25731,14 +21251,6 @@ mod tests {
         assert_eq!(Ternary::True.or(Ternary::False), Ternary::True);
     }
 
-    // ── Ports of Go checker tests ──────────────────────────────────────────
-
-    /// Port of Go's `TestGetSymbolAtLocation`.
-    ///
-    /// Go test sets up a program with an interface, a variable, and a property
-    /// access expression, builds a type checker, then asserts that
-    /// `checker.GetSymbolAtLocation` returns a non-nil symbol for the interface
-    /// name, the variable name, and the property access expression.
     #[test]
     fn get_symbol_at_location() {
         use crate::astnav::get_token_at_position;
@@ -25770,18 +21282,14 @@ mod tests {
         let file = program.get_source_file("/foo.ts").expect("foo.ts");
         checker.check_source_file(&file);
 
-        // Position 10 = 'F' in "interface Foo" (interface name identifier).
         let interface_name = get_token_at_position(&file.node, 10).expect("interface name");
         let sym = checker.get_symbol_at_location(&interface_name);
         assert!(sym.is_some(), "Expected symbol for interface name 'Foo'");
 
-        // Position 47 = 'f' in "declare const foo" (variable name identifier).
         let var_name = get_token_at_position(&file.node, 47).expect("variable name");
         let sym = checker.get_symbol_at_location(&var_name);
         assert!(sym.is_some(), "Expected symbol for variable name 'foo'");
 
-        // Position 60 = '.' in "foo.bar" (inside the PropertyAccessExpression,
-        // between its children, so get_token_at_position returns the PAE itself).
         let prop_access = get_token_at_position(&file.node, 60).expect("property access");
         let sym = checker.get_symbol_at_location(&prop_access);
         assert!(
@@ -25790,50 +21298,28 @@ mod tests {
         );
     }
 
-    /// Port of Go's `TestTracerPushPreservesEndArgMutations`.
-    ///
-    /// The Go test verifies that `Tracer.Push` preserves end-arg mutations
-    /// (the caller's `args` map can be mutated between push and pop, and the
-    /// end event captures the mutation). That shared-mutable-args pattern is
-    /// not representable under Rust ownership: `tracing::Tracer::push` takes
-    /// `args` by value and snapshots them at push time.
-    ///
-    /// Rust adaptation: instead of testing args mutation between push/pop, we
-    /// exercise the equivalent `tracing::Tracer` push/pop (begin/end) machinery
-    /// and verify the behaviour that *is* expressible:
-    /// 1. Push records a "B" (begin) phase event; drop (pop) records a matching
-    ///    "E" (end) event with the same phase name and args snapshot.
-    /// 2. The phase name and args snapshot captured at push time are correct.
-    /// 3. Multiple nested pushes/pops maintain correct ordering (LIFO) and each
-    ///    begin/end pair shares a thread id.
     #[test]
     fn tracer_push_preserves_end_arg_mutations() {
         use crate::tracing::{Phase, TraceArg, Tracer};
 
         let tr = Tracer::new();
 
-        // Outer span with a `checkerId` arg.
         let args = vec![
             ("checkerId".to_string(), TraceArg::Int(7)),
             ("id".to_string(), TraceArg::Int(1)),
         ];
         let outer = tr.push(Phase::CheckTypes, "getVariancesWorker", args.clone());
-        // The caller's `args` must remain untouched after `push` (it takes a
-        // value, not a reference, so there is no leakage into the caller's
-        // map — the Go invariant "Push does not leak checkerId").
+
         assert_eq!(args.len(), 2);
 
-        // Nested span sharing the same checkerId thread.
         let inner_args = vec![("checkerId".to_string(), TraceArg::Int(7))];
         let inner = tr.push(Phase::Check, "checkSourceFile", inner_args);
 
-        // Pop inner then outer (LIFO ordering).
         drop(inner);
         drop(outer);
 
         let events = tr.take_events();
 
-        // Find the begin/end pair for the outer span.
         let outer_begin = events
             .iter()
             .find(|e| e.ph == "B" && e.name == "getVariancesWorker")
@@ -25843,7 +21329,6 @@ mod tests {
             .find(|e| e.ph == "E" && e.name == "getVariancesWorker")
             .expect("outer end event");
 
-        // 1. The begin event carries the args snapshot captured at push time.
         assert_eq!(outer_begin.cat, "checkTypes");
         assert_eq!(
             outer_begin.args,
@@ -25853,23 +21338,16 @@ mod tests {
             ]
         );
 
-        // 2. The end (pop) event reproduces the same args snapshot as the
-        //    begin event (Rust replays the snapshot rather than a live map).
         assert_eq!(outer_end.args, outer_begin.args);
 
-        // 3. Begin and end of the same span share a thread id.
         assert_eq!(outer_begin.tid, outer_end.tid);
 
-        // The inner span must share the checkerId=7 thread with the outer span.
         let inner_begin = events
             .iter()
             .find(|e| e.ph == "B" && e.name == "checkSourceFile")
             .expect("inner begin event");
         assert_eq!(inner_begin.tid, outer_begin.tid);
 
-        // 3 (continued): nested pushes/pops maintain correct LIFO ordering —
-        // the inner begin comes after the outer begin, and the inner end comes
-        // before the outer end.
         let outer_begin_idx = events
             .iter()
             .position(|e| std::ptr::eq(e, outer_begin))
@@ -25892,8 +21370,6 @@ mod tests {
     }
 }
 
-
-/// The dotted source text of a (possibly qualified) entity name.
 fn qualified_name_text(name: &Arc<Node>) -> String {
     match &name.data {
         crate::ast::NodeData::QualifiedName(d) => {
@@ -25903,14 +21379,10 @@ fn qualified_name_text(name: &Arc<Node>) -> String {
     }
 }
 
-/// Levenshtein edit distance (bounded early-exit at 3).
 pub(crate) fn edit_distance(a: &str, b: &str) -> usize {
     let a: Vec<char> = a.chars().collect();
     let b: Vec<char> = b.chars().collect();
-    // Early exits are computed by the caller's budget; the plain
-    // Levenshtein here is always exact (a small sentinel used to make
-    // short candidates like `NaN` suggestable for every long
-    // misspelling).
+
     let mut prev: Vec<usize> = (0..=b.len()).collect();
     let mut curr = vec![0usize; b.len() + 1];
     for i in 1..=a.len() {
@@ -25924,13 +21396,6 @@ pub(crate) fn edit_distance(a: &str, b: &str) -> usize {
     prev[b.len()]
 }
 
-/// Go `levenshteinWithMax` (core.go ~L637): case-aware WEIGHTED edit
-/// distance — case-insensitive substitutions cost 0.1, true mismatches
-/// cost 2, insertions/deletions cost 1 — band-limited to `max` with an
-/// early give-up when a DP column's minimum exceeds it. Returns `None`
-/// when the distance exceeds `max`. (A plain 1-cost substitution makes
-/// `foobar`→`toolbar` cost 2 — official costs it 3 (substitute + insert)
-/// and rejects it against the floor(len·0.4)+0.9 budget.)
 pub(crate) fn levenshtein_with_max(s1: &str, s2: &str, max: f64) -> Option<f64> {
     let s1: Vec<char> = s1.chars().collect();
     let s2: Vec<char> = s2.chars().collect();
@@ -25978,11 +21443,6 @@ pub(crate) fn levenshtein_with_max(s1: &str, s2: &str, max: f64) -> Option<f64> 
     Some(res)
 }
 
-/// The module specifier declaration emit would compute for a symbol in
-/// `symbol_file` referenced from `from_file`: a POSIX-relative path with a
-/// leading `./`, extension mapped to its emit form (`.ts` → `.js`, `.mts` →
-/// `.mjs`, `.cts` → `.cjs`; `.d.ts` passes through). Used by the TS2883
-/// nameability approximation.
 fn relative_emit_specifier(from_file: &str, symbol_file: &str) -> String {
     let from_dir = {
         let dir = from_file
@@ -25996,7 +21456,7 @@ fn relative_emit_specifier(from_file: &str, symbol_file: &str) -> String {
         .split('/')
         .filter(|s| !s.is_empty())
         .collect();
-    // Longest common directory prefix.
+
     let mut common = 0;
     while common < from_segs.len()
         && common < to_segs.len().saturating_sub(1)
@@ -26035,12 +21495,6 @@ fn relative_emit_specifier(from_file: &str, symbol_file: &str) -> String {
     spec
 }
 
-/// Whether `path` names an ES-module-format file for the TS1479/TS1471
-/// require-vs-ESM check. Extension-decided forms (`.mts`/`.mjs`/`.d.mts` →
-/// ESM, `.cts`/`.cjs`/`.d.cts` → CJS) resolve by suffix; AMBIGUOUS `.d.ts`
-/// is never ESM (its format follows the resolution mode that loaded it — a
-/// CJS importer reaches `.d.ts` through the require condition); ambiguous
-/// input files (`.ts`/`.js`) take the package.json-implied format.
 fn module_format_is_esm_for_require_check(
     path: &str,
     read_file: &dyn Fn(&str) -> Option<String>,
@@ -26053,11 +21507,6 @@ fn module_format_is_esm_for_require_check(
     crate::compiler::implied_node_format_of_file(path, read_file) == ModuleKind::ESNext
 }
 
-/// Whether the IMPORTING file at `path` counts as CommonJS for the
-/// TS1479 check: extension-decided forms resolve by suffix; ambiguous
-/// `.d.ts` defaults to CJS (official reports a root `.d.ts` unit's
-/// static imports as CJS requires — nodeModulesPackagePatternExports's
-/// test.d.ts); ambiguous inputs take the package.json-implied format.
 fn importer_is_cjs_for_require_check(
     path: &str,
     read_file: &dyn Fn(&str) -> Option<String>,
@@ -26070,12 +21519,6 @@ fn importer_is_cjs_for_require_check(
     crate::compiler::implied_node_format_of_file(path, read_file) == ModuleKind::CommonJS
 }
 
-// ---- module instantiation state (Go ast.GetModuleInstanceState) ----
-// 0 = NonInstantiated, 1 = ConstEnumOnly, 2 = Instantiated; aggregation
-// takes the max over statements.
-
-/// Go `IsInstantiatedModule`: only Instantiated counts, plus ConstEnumOnly
-/// when preserveConstEnums (or isolatedModules) is on.
 fn module_is_instantiated(node: &Arc<Node>, preserve_const_enums: bool) -> bool {
     let state = module_instance_state(node, &mut Vec::new());
     state == 2 || (preserve_const_enums && state == 1)
@@ -26083,8 +21526,7 @@ fn module_is_instantiated(node: &Arc<Node>, preserve_const_enums: bool) -> bool 
 
 fn module_instance_state(node: &Arc<Node>, visited: &mut Vec<usize>) -> u8 {
     let id = Arc::as_ptr(node) as usize;
-    // Cycle guard (Go caches `Unknown` and resolves the revisit to
-    // NonInstantiated, e.g. `namespace A { export { A } }`).
+
     if visited.contains(&id) {
         return 0;
     }
@@ -26148,10 +21590,6 @@ fn module_instance_state_worker(node: &Arc<Node>, visited: &mut Vec<usize>) -> u
     }
 }
 
-/// Go `getModuleInstanceStateForAliasTarget`: `export { x }` (no module
-/// specifier) inherits the state of the local statement named `x` in the
-/// nearest enclosing block-ish ancestor; unresolved names and re-exported
-/// import aliases assume Instantiated.
 fn module_alias_target_state(
     spec: &Arc<Node>,
     export_decl: &Arc<Node>,
@@ -26186,8 +21624,7 @@ fn module_alias_target_state(
                         return 2;
                     }
                     if s.kind == SyntaxKind::ImportEqualsDeclaration {
-                        // Re-exports of import aliases are ambiguous — treat
-                        // as instantiated (Go does the same).
+
                         return 2;
                     }
                 }
@@ -26201,8 +21638,6 @@ fn module_alias_target_state(
     2
 }
 
-/// Go `NodeHasName` (statement-level): declarations exposing `name`, plus
-/// variable declarations (binding patterns included).
 fn statement_declares_name(stmt: &Arc<Node>, id_text: &str) -> bool {
     let name: Option<&Arc<Node>> = match &stmt.data {
         crate::ast::NodeData::FunctionDeclaration(f) => f.name.as_ref(),
@@ -26246,16 +21681,11 @@ fn binding_names_cover(decl: &Arc<Node>, id_text: &str) -> bool {
     }
 }
 
-// ── Regression unit tests for the recent fix families ──────────────────────
-// Each test pins one family from the sweep-fix history; the corpus sweep
-// covers breadth, these pin the exact kernel behavior.
-
 #[cfg(test)]
 mod regression_fix_tests {
     use super::*;
 
     use crate::diagnosticwriter::format_diagnostic_compact;
-
 
     fn rendered_with_chain(checker: &Checker) -> Vec<String> {
         checker
@@ -26280,9 +21710,7 @@ mod regression_fix_tests {
 
     #[test]
     fn invocation_error_chain_names_apparent_wrapper_type() {
-        // Page-17 family: tsc never emits a bare TS2349 — the head carries a
-        // nested "Type 'String' has no call signatures." (apparent type of the
-        // primitive).
+
         let (program, mut checker) = convergence_tests::build_program_and_checker(
             "declare const s: string;\ns();",
             &["es5"],
@@ -26302,8 +21730,7 @@ mod regression_fix_tests {
 
     #[test]
     fn never_intersection_callee_renders_never_in_chain() {
-        // neverIntersectionNotCallable: same-named props with disjoint primitive
-        // domains reduce the intersection to never; the chain spells `never`.
+
         let (program, mut checker) = convergence_tests::build_program_and_checker(
             "declare const f: { (x: string): number, a: \"\" } & { a: number };\nf();",
             &["es5"],
@@ -26321,9 +21748,7 @@ mod regression_fix_tests {
 
     #[test]
     fn union_target_failure_keeps_constituent_head_line() {
-        // functionExpressionContextualTyping2: failed assignment to a union
-        // target gains the intermediate "Type 'S' is not assignable to type
-        // 'A'." between the outer head and the leaf mismatch.
+
         let source = "var a0: (n: number, s: string) => number\n\
                       var a1: typeof a0 | ((n: number, s: string) => string);\n\
                       a1 = (foo, bar) => { return true; }";
@@ -26344,9 +21769,7 @@ mod regression_fix_tests {
 
     #[test]
     fn equality_discriminant_keeps_undefined_member_under_non_strict() {
-        // neverAsDiscriminantType (strict=false config): `{kind?: never}` keeps
-        // its never discriminant when strictNullChecks is off, so `err === 'a'`
-        // still drops it and `foo.a` stays accessible on the surviving member.
+
         let source = "type Foo2 = { kind?: 'a', a: number } | { kind?: 'b' } | { kind?: never };\n\
                       function f2(foo: Foo2) {\n\
                           if (foo.kind === 'a') {\n\
@@ -26355,8 +21778,7 @@ mod regression_fix_tests {
                       }";
         for strict in [false, true] {
             let (program, mut checker) = convergence_tests::build_program_and_checker(source, &["es5"]);
-            // build_program_and_checker pins default options; toggle via a fresh
-            // program through check_files for the strict variant.
+
             let _ = strict;
             for file in program.source_files() {
                 checker.check_source_file(file);
@@ -26368,8 +21790,7 @@ mod regression_fix_tests {
 
     #[test]
     fn optional_member_stays_t_when_strict_null_checks_off() {
-        // get_optional_type only adds `| undefined` under strictNullChecks
-        // (Go addOptionality). Non-strict optional property type is `string`.
+
         let lines: Vec<Vec<i32>> = [false, true]
             .iter()
             .map(|strict| {
@@ -26386,17 +21807,15 @@ mod regression_fix_tests {
                 diags
             })
             .collect();
-        // strict=false: `i.x` is just `string` — assigns cleanly.
+
         assert!(lines[0].is_empty(), "non-strict: {:?}", lines[0]);
-        // strict=true: `string | undefined` — TS2322.
+
         assert_eq!(lines[1], vec![2322], "strict: {:?}", lines[1]);
     }
 
     #[test]
     fn indexed_access_tp_target_carries_instantiation_note() {
-        // nonPrimitiveConstraintOfIndexAccessType: an IndexedAccess target over
-        // a type parameter takes the "'T[P]' could be instantiated..." chain
-        // note (Go reportRelationError's targetFlags view).
+
         let (program, mut checker) = convergence_tests::build_program_and_checker(
             "function f<T extends object, P extends keyof T>(s: string, tp: T[P]): void {\n    tp = s;\n}",
             &["es5"],
@@ -26415,8 +21834,7 @@ mod regression_fix_tests {
 
     #[test]
     fn record_element_access_assigns_object() {
-        // classInConvertedLoopES5: `Record<string, object>[string]` must resolve
-        // to `object`, not leak the alias's bare type parameter T.
+
         let (program, mut checker) = convergence_tests::build_program_and_checker(
             "declare const row: string;\n\
              const classesByRow: Record<string, object> = {};\n\
@@ -26432,10 +21850,7 @@ mod regression_fix_tests {
 
     #[test]
     fn node10_program_reports_deprecation_and_alternate_result() {
-        // node10AlternateResult family: explicit node10 carries the global TS5107
-        // deprecation, and a bare specifier that only resolves through
-        // package.json exports reports TS2307 with the 6280 "There are types at"
-        // chain line.
+
         use crate::bundled::BundledFS;
         use crate::compiler::{CompilerHost, CompilerHostImpl, Program, ProgramOptions};
         use crate::tsoptions::ParsedCommandLine;
@@ -26464,7 +21879,6 @@ mod regression_fix_tests {
             Arc::new(CompilerHostImpl::new(fs, "/proj".to_string(), crate::bundled::lib_path()));
         let program = Arc::new(Program::new(ProgramOptions { config: parsed, host }));
 
-        // TS5107: file-less program-construction diagnostic with the aka.ms note.
         let global_codes: Vec<i32> = program
             .diagnostics()
             .iter()
@@ -26473,8 +21887,6 @@ mod regression_fix_tests {
             .collect();
         assert!(global_codes.contains(&5107), "{global_codes:?}");
 
-        // TS2307 for a failed module load is a PROGRAM construction diagnostic
-        // (the file loader), not a checker semantic one.
         let lines: Vec<String> = program
             .diagnostics()
             .iter()
@@ -26493,9 +21905,7 @@ mod regression_fix_tests {
 
     #[test]
     fn per_file_jsx_pragma_overrides_option_factory_for_2874() {
-        // inlineJsxFactoryOverridesCompilerOption: `/** @jsx dom */` in a file
-        // makes `dom` the required entity; the option factory `p` must not be
-        // demanded there (TS2874 must not fire).
+
         let files: Vec<(&str, &str)> = vec![
             ("renderer.d.ts", "declare global {\n    namespace JSX {\n        interface IntrinsicElements {\n            [e: string]: any;\n        }\n    }\n}\nexport function dom(): void;\nexport { dom as p };"),
             ("reacty.tsx", "/** @jsx dom */\nimport { dom } from \"./renderer\";\n<h></h>"),

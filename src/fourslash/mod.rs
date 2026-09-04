@@ -1,24 +1,3 @@
-//! Minimal fourslash smoke-test harness.
-//!
-//! A lightweight, positioning-based test framework that drives the checker /
-//! language service *directly* (parse + bind + check), not over JSON-RPC. It
-//! is intentionally small — enough to run basic LSP-feature smoke tests
-//! (hover, completion, definition) — and is not a port of the full Go
-//! fourslash runner.
-//!
-//! Supported marker syntax:
-//!
-//! | Marker | Meaning |
-//! |--------|---------|
-//! | `/**/` | anonymous cursor position (offset recorded) |
-//! | `/*name*/` | named cursor position |
-//! | `[|...|]` | range marker (start/end offsets) |
-//! | `[|name|...|]` | named range marker |
-//! | `// @filename: path.ts` | begin a new source file |
-//!
-//! Offsets are byte offsets into the *cleaned* (marker-stripped) source text,
-//! which is exactly what the checker's AST node ranges use.
-
 use std::sync::Arc;
 
 use crate::ast::{Node, SourceFile};
@@ -29,28 +8,24 @@ use crate::vfs::InMemoryFS;
 
 use crate::bundled::lib_path;
 
-/// Default filename used when a test specifies no `// @filename:` directive.
 const DEFAULT_FILENAME: &str = "/proj/fourslash.ts";
 
-/// A cursor position marker (`/**/` or `/*name*/`).
 #[derive(Debug, Clone)]
 pub struct Marker {
     pub name: String,
-    /// Byte offset into the cleaned source text.
+
     pub position: usize,
 }
 
-/// A range marker (`[|...|]` or `[|name|...|]`).
 #[derive(Debug, Clone)]
 pub struct RangeMarker {
     pub name: String,
-    /// Byte offset of the range start in the cleaned source text.
+
     pub start: usize,
-    /// Byte offset of the range end in the cleaned source text.
+
     pub end: usize,
 }
 
-/// One parsed source file: cleaned text plus the markers found within it.
 #[derive(Debug, Clone)]
 pub struct ParsedFile {
     pub filename: String,
@@ -59,10 +34,6 @@ pub struct ParsedFile {
     pub ranges: Vec<RangeMarker>,
 }
 
-/// Parse fourslash test content into one or more files with markers stripped.
-///
-/// `// @filename:` directives split the content into separate files; all other
-/// lines (with markers removed) form each file's cleaned source text.
 pub fn parse_test_content(content: &str) -> Vec<ParsedFile> {
     let mut files: Vec<(String, String)> = Vec::new();
     let mut current_name = DEFAULT_FILENAME.to_string();
@@ -97,11 +68,10 @@ pub fn parse_test_content(content: &str) -> Vec<ParsedFile> {
         .collect()
 }
 
-/// If `line` is a `// @filename: path` directive, return the path.
 fn parse_filename_directive(line: &str) -> Option<&str> {
     let line = line.strip_prefix("//")?.trim_start();
     let line = line.strip_prefix("@")?;
-    // Match "filename" case-insensitively (TS uses `@Filename`).
+
     let split_at = 8.min(line.len());
     let (kw, rest) = line.split_at(split_at);
     if !kw.eq_ignore_ascii_case("filename") {
@@ -112,7 +82,6 @@ fn parse_filename_directive(line: &str) -> Option<&str> {
     Some(rest.trim())
 }
 
-/// Make a filename absolute, rooted under `/proj/` when relative.
 fn normalize_filename(name: &str) -> String {
     let name = name.trim();
     if name.starts_with('/') {
@@ -122,8 +91,6 @@ fn normalize_filename(name: &str) -> String {
     }
 }
 
-/// Strip fourslash markers from `raw`, returning the cleaned text plus the
-/// cursor [`Marker`]s and [`RangeMarker`]s with their byte offsets.
 fn strip_markers(raw: &str) -> (String, Vec<Marker>, Vec<RangeMarker>) {
     let mut cleaned = String::with_capacity(raw.len());
     let mut markers = Vec::new();
@@ -133,7 +100,6 @@ fn strip_markers(raw: &str) -> (String, Vec<Marker>, Vec<RangeMarker>) {
     while i < raw.len() {
         let rest = &raw[i..];
 
-        // Anonymous cursor marker: /**/
         if rest.starts_with("/**/") {
             markers.push(Marker {
                 name: String::new(),
@@ -143,7 +109,6 @@ fn strip_markers(raw: &str) -> (String, Vec<Marker>, Vec<RangeMarker>) {
             continue;
         }
 
-        // Named cursor marker: /*name*/
         if rest.starts_with("/*") {
             if let Some(close) = rest.find("*/") {
                 let inner = &rest[2..close];
@@ -156,13 +121,12 @@ fn strip_markers(raw: &str) -> (String, Vec<Marker>, Vec<RangeMarker>) {
                     continue;
                 }
             }
-            // A real block comment (e.g. `/* not a marker */`): emit literally.
+
             cleaned.push('/');
             i += 1;
             continue;
         }
 
-        // Range marker: [|...|] or [|name|...|]
         if let Some(inner_part) = rest.strip_prefix("[|") {
             if let Some(close) = inner_part.find("|]") {
                 let inner = &inner_part[..close];
@@ -174,17 +138,16 @@ fn strip_markers(raw: &str) -> (String, Vec<Marker>, Vec<RangeMarker>) {
                 cleaned.push_str(content);
                 let end = cleaned.len();
                 ranges.push(RangeMarker { name, start, end });
-                // Skip `[|` + inner + `|]`.
+
                 i += 2 + close + 2;
                 continue;
             }
-            // No closing `|]`: emit '[' literally.
+
             cleaned.push('[');
             i += 1;
             continue;
         }
 
-        // Regular character: copy one char (keeps `i` on a UTF-8 boundary).
         let ch = rest.chars().next().unwrap();
         cleaned.push(ch);
         i += ch.len_utf8();
@@ -193,27 +156,22 @@ fn strip_markers(raw: &str) -> (String, Vec<Marker>, Vec<RangeMarker>) {
     (cleaned, markers, ranges)
 }
 
-/// A cursor-marker name is non-empty and ASCII-alphanumeric/underscore, so that
-/// ordinary block comments (which contain spaces) are not mistaken for markers.
 fn is_marker_name(s: &str) -> bool {
     !s.is_empty() && s.bytes().all(|b| b.is_ascii_alphanumeric() || b == b'_')
 }
 
-/// A parsed fourslash test: its files and convenience accessors.
 pub struct FourslashTest {
     pub files: Vec<ParsedFile>,
 }
 
 impl FourslashTest {
-    /// Parse fourslash `content` into files with markers.
+
     pub fn new(content: &str) -> Self {
         Self {
             files: parse_test_content(content),
         }
     }
 
-    /// Byte offset of a named marker, or the first anonymous marker when
-    /// `name` is empty. Searches all files in order.
     pub fn get_marker(&self, name: &str) -> usize {
         for f in &self.files {
             for m in &f.markers {
@@ -229,7 +187,6 @@ impl FourslashTest {
         panic!("fourslash marker not found: {name:?}");
     }
 
-    /// Look up a file by exact name or basename (e.g. `"a.ts"`).
     pub fn get_file(&self, filename: &str) -> &ParsedFile {
         self.files
             .iter()
@@ -237,8 +194,6 @@ impl FourslashTest {
             .unwrap_or_else(|| panic!("fourslash file not found: {filename}"))
     }
 
-    /// Build a multi-file program (parse + bind) from the test files with
-    /// `--noLib` for speed. Ready for checker / language-service queries.
     pub fn build_program(&self) -> Arc<Program> {
         let fs = Arc::new(InMemoryFS::new());
         fs.insert_dir("/proj");
@@ -263,9 +218,6 @@ impl FourslashTest {
         Arc::new(Program::new(ProgramOptions { config, host }))
     }
 
-    /// Quick-info (hover) text for the node at `offset` in `file`. Returns the
-    /// structured display parts when available, falling back to plain text —
-    /// mirroring the LSP `textDocument/hover` handler.
     pub fn hover_at(&self, file: &ParsedFile, offset: usize) -> String {
         let program = self.build_program();
         let sf = program
@@ -281,9 +233,6 @@ impl FourslashTest {
         }
     }
 
-    /// Sorted completion labels (from the checker's global symbol table)
-    /// available at `offset` in `file`. Mirrors the LSP completion handler's
-    /// global-scope branch.
     pub fn completions_at(&self, file: &ParsedFile, _offset: usize) -> Vec<String> {
         let program = self.build_program();
         let _sf = program
@@ -300,10 +249,6 @@ impl FourslashTest {
         labels
     }
 
-    /// Definition of the symbol at `offset` in `file`: returns the owning
-    /// filename and byte offset of the symbol's value declaration, or `None`
-    /// when no symbol can be resolved. Mirrors the LSP `textDocument/definition`
-    /// handler.
     pub fn definition_at(&self, file: &ParsedFile, offset: usize) -> Option<(String, usize)> {
         let program = self.build_program();
         let sf = program
@@ -312,8 +257,6 @@ impl FourslashTest {
         let node = deepest_node_at(&sf, offset);
         let checker = program.build_checker();
 
-        // Resolve via the checker's scope walk first, then fall back to walking
-        // the AST parent chain consulting the binder's symbol map.
         let symbol = checker.resolve_identifier(&node).or_else(|| {
             let symbol_map = checker.program.symbol_map();
             let mut current: Option<&Arc<Node>> = Some(&node);
@@ -327,7 +270,7 @@ impl FourslashTest {
         })?;
 
         let decl = symbol.value_declaration.as_ref()?;
-        // Locate the source file whose text contains the declaration offset.
+
         for sf in program.source_files() {
             if decl.pos() < sf.text.len() {
                 return Some((sf.file_name.clone(), decl.pos()));
@@ -337,13 +280,10 @@ impl FourslashTest {
     }
 }
 
-/// Find the deepest AST node whose range covers `offset`, starting from the
-/// source-file root. Falls back to the root node when nothing deeper matches.
 fn deepest_node_at(sf: &Arc<SourceFile>, offset: usize) -> Arc<Node> {
     crate::astnav::get_token_at_position(&sf.node, offset).unwrap_or_else(|| Arc::clone(&sf.node))
 }
 
-/// Return the basename (last path component) of `path`.
 fn basename(path: &str) -> &str {
     match path.rsplit_once('/') {
         Some((_, base)) => base,
@@ -354,8 +294,6 @@ fn basename(path: &str) -> &str {
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    // ── Marker parsing ────────────────────────────────────────────────────
 
     #[test]
     fn test_parse_anonymous_marker() {
@@ -368,7 +306,7 @@ mod tests {
 
     #[test]
     fn test_parse_marker_offsets() {
-        // `/**/` sits before `foo`; after stripping it lands on 'f'.
+
         let t = FourslashTest::new("function /**/foo(): number { return 1; }");
         let f = &t.files[0];
         assert_eq!(f.content, "function foo(): number { return 1; }");
@@ -411,8 +349,6 @@ mod tests {
         assert!(b.content.contains("local"));
     }
 
-    // ── LSP-feature smoke tests ───────────────────────────────────────────
-
     #[test]
     fn test_hover_function() {
         let t = FourslashTest::new("function /**/foo(): number { return 1; }");
@@ -425,7 +361,7 @@ mod tests {
 
     #[test]
     fn test_hover_variable() {
-        // `const` infers a literal type, so hover shows `const x: 42`.
+
         let t = FourslashTest::new("const /**/x = 42;");
         let pos = t.get_marker("");
         let file = &t.files[0];
@@ -455,7 +391,7 @@ mod tests {
             .definition_at(file, pos)
             .expect("definition should resolve");
         assert_eq!(fname, file.filename);
-        // `function greet` is the first declaration, at offset 0.
+
         assert_eq!(offset, 0, "definition offset");
     }
 
@@ -465,7 +401,7 @@ mod tests {
             "// @filename: a.ts\nexport const shared = 1;\n// @filename: b.ts\nconst local = 2;";
         let t = FourslashTest::new(src);
         assert_eq!(t.files.len(), 2);
-        // Both files load into a single program.
+
         let program = t.build_program();
         assert_eq!(program.source_files().len(), 2);
         assert!(program.get_source_file("/proj/a.ts").is_some());

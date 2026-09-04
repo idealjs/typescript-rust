@@ -1,8 +1,3 @@
-//! Go-to-definition provider (1:1 port of Go's `internal/ls/definition.go`).
-//!
-//! Resolves the symbol at a cursor position and returns its declaration
-//! location(s) as LSP LocationLinks.
-
 #![allow(dead_code)]
 
 use std::sync::Arc;
@@ -17,14 +12,7 @@ use super::language_service::LanguageService;
 use super::types::LocationLink;
 
 impl LanguageService {
-    /// Provide go-to-definition for a position.
-    ///
-    /// Mirrors Go's `ProvideDefinition`:
-    /// 1. Get program + source file.
-    /// 2. Find deepest node at position.
-    /// 3. Resolve symbol via checker.
-    /// 4. Get declarations from symbol.
-    /// 5. Convert to LocationLinks.
+
     pub fn provide_definition(
         &self,
         document_uri: &DocumentUri,
@@ -33,13 +21,10 @@ impl LanguageService {
         let (program, source_file) = self.get_program_and_file(document_uri);
         let line_map = &source_file.line_map;
 
-        // Convert LSP position to byte offset.
         let offset = lsp_position_to_offset(line_map, &position);
 
-        // Find deepest node at position.
         let node = find_deepest_node(&source_file.node, offset);
 
-        // Resolve symbol and get declarations.
         let checker = program.build_checker();
         let declarations = get_declarations_from_location(&checker, &node);
 
@@ -47,10 +32,8 @@ impl LanguageService {
             return Vec::new();
         }
 
-        // Build the origin selection range (the hovered identifier).
         let origin_selection_range = node_range_to_lsp_range(line_map, &node);
 
-        // Convert each declaration to a LocationLink.
         declarations
             .iter()
             .filter_map(|decl| {
@@ -70,22 +53,18 @@ impl LanguageService {
             .collect()
     }
 
-    /// Provide go-to-type-definition for a position.
     pub fn provide_type_definition(
         &self,
         document_uri: &DocumentUri,
         position: Position,
     ) -> Vec<LocationLink> {
-        // Type definition requires resolving the *type* of the expression,
-        // then finding that type's declaration. This needs checker type
-        // introspection which is partially available.
+
         let (program, source_file) = self.get_program_and_file(document_uri);
         let line_map = &source_file.line_map;
         let offset = lsp_position_to_offset(line_map, &position);
         let node = find_deepest_node(&source_file.node, offset);
         let mut checker = program.build_checker();
 
-        // Get the type of the node, then find its declaration.
         let ty = checker.get_type_of_node(&node);
         let declarations = get_declarations_from_type(&ty);
         if !declarations.is_empty() {
@@ -113,9 +92,6 @@ impl LanguageService {
     }
 }
 
-/// Get declarations from a symbol at a location.
-///
-/// Mirrors Go's `getDeclarationsFromLocation`.
 pub fn get_declarations_from_location(checker: &Checker, node: &Arc<Node>) -> Vec<Arc<Node>> {
     if let Some(symbol) = checker.get_symbol_at_location(node) {
         return symbol.declarations.clone();
@@ -123,13 +99,11 @@ pub fn get_declarations_from_location(checker: &Checker, node: &Arc<Node>) -> Ve
     Vec::new()
 }
 
-/// Try to get the signature declaration for a call-like node.
 pub fn try_get_signature_declaration(_checker: &Checker, _node: &Arc<Node>) -> Option<Arc<Node>> {
-    // TODO: requires checker.GetResolvedSignature
+
     None
 }
 
-/// Get declarations from a type.
 pub fn get_declarations_from_type(ty: &crate::checker::Type) -> Vec<Arc<Node>> {
     if let Some(symbol) = ty.symbol.as_ref() {
         return symbol.declarations.clone();
@@ -137,9 +111,6 @@ pub fn get_declarations_from_type(ty: &crate::checker::Type) -> Vec<Arc<Node>> {
     Vec::new()
 }
 
-// ─── Helper functions ────────────────────────────────────────────────
-
-/// Find the deepest AST node covering `offset`.
 fn find_deepest_node(node: &Arc<Node>, offset: usize) -> Arc<Node> {
     let mut deepest = Arc::clone(node);
     loop {
@@ -161,15 +132,12 @@ fn find_deepest_node(node: &Arc<Node>, offset: usize) -> Arc<Node> {
     deepest
 }
 
-/// Get the source file that contains a node by walking up the parent chain.
 fn get_source_file_of_node(node: &Arc<Node>, fallback: &Arc<SourceFile>) -> Arc<SourceFile> {
-    // For now, we only support single-file scenarios. Multi-file definition
-    // would require looking up the node's source file in the program.
+
     let _ = node;
     Arc::clone(fallback)
 }
 
-/// Convert LSP Position to byte offset.
 fn lsp_position_to_offset(line_map: &LineMap, position: &Position) -> usize {
     let line = position.line as usize;
     let character = position.character as usize;
@@ -177,7 +145,6 @@ fn lsp_position_to_offset(line_map: &LineMap, position: &Position) -> usize {
     line_start + character
 }
 
-/// Convert a node's byte range to an LSP Range.
 fn node_range_to_lsp_range(line_map: &LineMap, node: &Arc<Node>) -> Range {
     Range {
         start: offset_to_position(line_map, node.pos()),
@@ -185,11 +152,9 @@ fn node_range_to_lsp_range(line_map: &LineMap, node: &Arc<Node>) -> Range {
     }
 }
 
-/// Get the name range of a declaration node as an LSP Range.
 fn name_range_to_lsp_range(line_map: &LineMap, node: &Arc<Node>, text: &str) -> Range {
     let node_start = scanner::skip_trivia(text, node.pos());
 
-    // Try to find the name sub-node.
     let name_node: Option<&Arc<Node>> = match &node.data {
         crate::ast::NodeData::ClassDeclaration(d) => d.name.as_ref(),
         crate::ast::NodeData::InterfaceDeclaration(d) => Some(&d.name),
@@ -219,7 +184,6 @@ fn name_range_to_lsp_range(line_map: &LineMap, node: &Arc<Node>, text: &str) -> 
         };
     }
 
-    // Fallback: use node start.
     let pos = offset_to_position(line_map, node_start);
     Range {
         start: pos.clone(),
@@ -227,7 +191,6 @@ fn name_range_to_lsp_range(line_map: &LineMap, node: &Arc<Node>, text: &str) -> 
     }
 }
 
-/// Convert byte offset to LSP Position.
 fn offset_to_position(line_map: &LineMap, offset: usize) -> Position {
     let line = line_of_offset(line_map, offset);
     let line_start = line_map.line_starts.get(line).copied().unwrap_or(0) as usize;
@@ -237,7 +200,6 @@ fn offset_to_position(line_map: &LineMap, offset: usize) -> Position {
     }
 }
 
-/// Binary search for the line number of a byte offset.
 fn line_of_offset(line_map: &LineMap, offset: usize) -> usize {
     match line_map.line_starts.binary_search(&(offset as u32)) {
         Ok(idx) => idx,

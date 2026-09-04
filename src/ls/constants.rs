@@ -1,5 +1,3 @@
-//! Language-service constants (1:1 port of Go's `internal/ls/constants.go`).
-
 #![allow(dead_code)]
 
 pub const MODULE_SPECIFIER_RESOLUTION_LIMIT: usize = 100;

@@ -1,5 +1,3 @@
-//! Server logger (1:1 port of Go's `internal/lsp/logger.go`).
-
 #![allow(dead_code)]
 
 use std::io::Write;
@@ -7,10 +5,6 @@ use std::sync::Mutex;
 
 use crate::lsp::lsproto;
 
-/// Returns the least-verbose log level at which messages of the given
-/// MessageType should still be sent.
-///
-/// Go: `func maxVerbosityForMessageType(...) lsproto.LogVerbosity`.
 pub fn max_verbosity_for_message_type(msg_type: lsproto::MessageType) -> lsproto::LogVerbosity {
     match msg_type {
         lsproto::MESSAGE_TYPE_ERROR => lsproto::LOG_VERBOSITY_ERROR,
@@ -21,14 +15,10 @@ pub fn max_verbosity_for_message_type(msg_type: lsproto::MessageType) -> lsproto
     }
 }
 
-/// Reports whether `v` is one of the defined LogVerbosity values.
 pub fn is_valid_log_verbosity(v: lsproto::LogVerbosity) -> bool {
     v >= lsproto::LOG_VERBOSITY_OFF && v <= lsproto::LOG_VERBOSITY_ERROR
 }
 
-/// Server logger implementing the `logging.Logger` trait.
-///
-/// Go: `type logger struct { ... }`.
 pub struct Logger {
     verbosity: Mutex<lsproto::LogVerbosity>,
     init_started: Mutex<bool>,
@@ -83,7 +73,7 @@ impl Logger {
         {
             return;
         }
-        // Write to stderr as a fallback.
+
         let _ = writeln!(std::io::stderr(), "{}", message);
     }
 
@@ -92,7 +82,7 @@ impl Logger {
     }
 
     pub fn logf(&self, format: &str, args: &[&str]) {
-        // Simple format: just join args
+
         let mut result = format.to_string();
         for arg in args {
             result = result.replacen("{}", arg, 1);

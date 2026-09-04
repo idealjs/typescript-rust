@@ -1,5 +1,3 @@
-//! Auto-import registry (1:1 port of Go's `internal/ls/autoimport/registry.go`).
-
 use std::collections::HashMap;
 use std::sync::Arc;
 
@@ -13,7 +11,6 @@ use super::export::Export;
 use super::index::Index;
 use super::{LogTree, RegistryCloneHost, ResolvedEntrypoint};
 
-/// The set of packages known to require recursive directory search.
 pub fn known_recursive_search_packages() -> Set<String> {
     let mut s = Set::new();
     for pkg in [
@@ -70,7 +67,6 @@ pub fn known_recursive_search_packages() -> Set<String> {
     s
 }
 
-/// Whether the new program has a different structure.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Default)]
 pub enum NewProgramStructure {
     #[default]
@@ -79,9 +75,6 @@ pub enum NewProgramStructure {
     DifferentFileNames,
 }
 
-/// User preferences that affect how a bucket is built.
-///
-/// Mirrors `autoimport.bucketBuildPreferences` in Go.
 #[derive(Debug, Clone, Default)]
 pub struct BucketBuildPreferences {
     pub file_exclude_patterns: Vec<String>,
@@ -90,7 +83,7 @@ pub struct BucketBuildPreferences {
 
 impl BucketBuildPreferences {
     pub fn from_user_preferences(_prefs: &UserPreferences) -> BucketBuildPreferences {
-        // Requires UserPreferences fields not yet ported — stubbed.
+
         BucketBuildPreferences::default()
     }
 
@@ -119,9 +112,6 @@ fn unordered_equal(a: &[String], b: &[String]) -> bool {
     a_sorted == b_sorted
 }
 
-/// The dirty state of a bucket.
-///
-/// Mirrors `autoimport.BucketState` in Go.
 #[derive(Debug, Clone, Default)]
 pub struct BucketState {
     pub dirty_file: tspath::Path,
@@ -178,9 +168,6 @@ impl BucketState {
     }
 }
 
-/// A bucket in the auto-import registry.
-///
-/// Mirrors `autoimport.RegistryBucket` in Go.
 #[derive(Debug, Clone, Default)]
 pub struct RegistryBucket {
     pub state: BucketState,
@@ -193,7 +180,7 @@ pub struct RegistryBucket {
 }
 
 impl RegistryBucket {
-    /// Creates a new registry bucket (initially dirty).
+
     pub fn new() -> RegistryBucket {
         RegistryBucket {
             state: BucketState {
@@ -205,7 +192,6 @@ impl RegistryBucket {
         }
     }
 
-    /// Marks a project file as dirty.
     pub fn mark_project_file_dirty(&mut self, file: tspath::Path) {
         if self.state.has_dirty_file_besides(&file) {
             self.state.multiple_files_dirty = true;
@@ -214,7 +200,6 @@ impl RegistryBucket {
         }
     }
 
-    /// Marks node_modules as dirty.
     pub fn mark_node_modules_dirty(&mut self, package_name: &str) {
         if self.state.multiple_files_dirty {
             return;
@@ -232,9 +217,6 @@ impl RegistryBucket {
     }
 }
 
-/// A directory entry in the registry.
-///
-/// Mirrors `autoimport.directory` in Go.
 #[derive(Debug, Clone, Default)]
 pub struct Directory {
     pub name: String,
@@ -242,7 +224,6 @@ pub struct Directory {
     pub has_node_modules: bool,
 }
 
-/// Stub for `packagejson.InfoCacheEntry`.
 #[derive(Debug, Clone, Default)]
 pub struct PackageJsonInfoStub {
     pub exists: bool,
@@ -255,9 +236,6 @@ impl PackageJsonInfoStub {
     }
 }
 
-/// The auto-import registry.
-///
-/// Mirrors `autoimport.Registry` in Go.
 pub struct Registry {
     pub to_path: Box<dyn Fn(&str) -> tspath::Path + Send + Sync>,
     pub user_preferences: UserPreferences,
@@ -270,9 +248,7 @@ pub struct Registry {
 }
 
 impl Registry {
-    /// Creates a new registry.
-    ///
-    /// Mirrors `NewRegistry` in Go.
+
     pub fn new(
         to_path: Box<dyn Fn(&str) -> tspath::Path + Send + Sync>,
         preferences: UserPreferences,
@@ -289,9 +265,6 @@ impl Registry {
         }
     }
 
-    /// Checks if the registry is prepared for importing a file.
-    ///
-    /// Mirrors `(r *Registry) IsPreparedForImportingFile` in Go.
     pub fn is_prepared_for_importing_file(
         &self,
         file_name: &str,
@@ -329,9 +302,6 @@ impl Registry {
         true
     }
 
-    /// Gets the node_modules directories.
-    ///
-    /// Mirrors `(r *Registry) NodeModulesDirectories` in Go.
     pub fn node_modules_directories(&self) -> HashMap<tspath::Path, String> {
         let mut dirs = HashMap::new();
         for (dir_path, dir) in &self.directories {
@@ -344,22 +314,16 @@ impl Registry {
         dirs
     }
 
-    /// Clones the registry with changes.
-    ///
-    /// Mirrors `(r *Registry) Clone` in Go.
     pub fn clone_registry(
         &self,
         _change: &RegistryChange,
         _host: &dyn RegistryCloneHost,
         _logger: Option<&LogTree>,
     ) -> Result<Registry, String> {
-        // Requires registryBuilder, dirty.Map, change processing — stubbed.
+
         todo!("Registry::clone_registry requires registryBuilder infrastructure")
     }
 
-    /// Gets cache statistics.
-    ///
-    /// Mirrors `(r *Registry) GetCacheStats` in Go.
     pub fn get_cache_stats(&self) -> CacheStats {
         let mut stats = CacheStats {
             unique_package_count: self.unique_package_count,
@@ -417,7 +381,6 @@ impl Registry {
     }
 }
 
-/// Statistics for a single bucket.
 #[derive(Debug, Clone, Default)]
 pub struct BucketStats {
     pub path: tspath::Path,
@@ -428,7 +391,6 @@ pub struct BucketStats {
     pub package_names: Option<Set<String>>,
 }
 
-/// Cache statistics.
 #[derive(Debug, Default)]
 pub struct CacheStats {
     pub project_buckets: Vec<BucketStats>,
@@ -436,9 +398,6 @@ pub struct CacheStats {
     pub unique_package_count: usize,
 }
 
-/// A change to apply during registry cloning.
-///
-/// Mirrors `autoimport.RegistryChange` in Go.
 #[derive(Debug, Default)]
 pub struct RegistryChange {
     pub requested_file: tspath::Path,

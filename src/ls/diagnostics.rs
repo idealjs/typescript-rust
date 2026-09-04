@@ -1,5 +1,3 @@
-//! Diagnostics provider (1:1 port of Go's `internal/ls/diagnostics.go`).
-
 #![allow(dead_code)]
 
 use std::sync::Arc;
@@ -14,18 +12,12 @@ use super::language_service::LanguageService;
 use super::types::{Diagnostic as LspDiagnostic, DiagnosticRelatedInformation};
 
 impl LanguageService {
-    /// Provide diagnostics for a document (pull diagnostics).
-    ///
-    /// Mirrors `ProvideDiagnostics`:
-    /// 1. Run the checker on the file.
-    /// 2. Convert checker diagnostics to LSP `Diagnostic` format.
-    /// 3. Return the list.
+
     pub fn provide_diagnostics(&self, document_uri: &DocumentUri) -> Vec<LspDiagnostic> {
         let (program, source_file) = self.get_program_and_file(document_uri);
         let line_map = &source_file.line_map;
         let file_name = &source_file.file_name;
 
-        // Collect syntactic (parse) diagnostics from the program.
         let mut all_diagnostics: Vec<Arc<AstDiagnostic>> = Vec::new();
         for diag in program.diagnostics() {
             if diag
@@ -38,7 +30,6 @@ impl LanguageService {
             }
         }
 
-        // Collect semantic diagnostics from the checker.
         let checker = program.build_checker();
         let semantic_diagnostics = checker.get_semantic_diagnostics();
         for diag in &semantic_diagnostics {
@@ -52,16 +43,12 @@ impl LanguageService {
             }
         }
 
-        // Convert all diagnostics to LSP format.
         all_diagnostics
             .iter()
             .map(|d| ast_diagnostic_to_lsp(line_map, d))
             .collect()
     }
 
-    /// Convert compiler diagnostics to LSP diagnostics.
-    ///
-    /// Mirrors `toLSPDiagnostics`.
     pub fn to_lsp_diagnostics(
         &self,
         diagnostics: &[Vec<Arc<AstDiagnostic>>],
@@ -80,9 +67,6 @@ impl LanguageService {
     }
 }
 
-/// Collect all diagnostics for a file: syntactic, semantic, suggestion.
-///
-/// Mirrors `getAllDiagnostics`.
 pub fn get_all_diagnostics(
     program: &Arc<compiler::Program>,
     file: &Arc<SourceFile>,
@@ -90,7 +74,6 @@ pub fn get_all_diagnostics(
     let mut result = Vec::new();
     let file_name = &file.file_name;
 
-    // Syntactic (parse) diagnostics.
     for diag in program.diagnostics() {
         if diag
             .file
@@ -102,7 +85,6 @@ pub fn get_all_diagnostics(
         }
     }
 
-    // Semantic diagnostics.
     let semantic = program.get_semantic_diagnostics();
     for diag in &semantic {
         if diag
@@ -118,13 +100,9 @@ pub fn get_all_diagnostics(
     result
 }
 
-// ─── Diagnostic conversion ───────────────────────────────────────────
-
-/// Convert a checker `Diagnostic` to an LSP `Diagnostic`.
 fn ast_diagnostic_to_lsp(line_map: &LineMap, diag: &AstDiagnostic) -> LspDiagnostic {
     let message = diagnostic_message(diag);
 
-    // Convert related information.
     let related_information = convert_related_information(diag);
 
     LspDiagnostic {
@@ -142,8 +120,6 @@ fn ast_diagnostic_to_lsp(line_map: &LineMap, diag: &AstDiagnostic) -> LspDiagnos
     }
 }
 
-/// Convert a checker `Diagnostic` to an LSP `Diagnostic` when the file/line map
-/// is not available (offsets are used as raw character positions on line 0).
 fn ast_diagnostic_to_lsp_no_file(diag: &AstDiagnostic) -> LspDiagnostic {
     let message = diagnostic_message(diag);
     let related_information = convert_related_information(diag);
@@ -169,7 +145,6 @@ fn ast_diagnostic_to_lsp_no_file(diag: &AstDiagnostic) -> LspDiagnostic {
     }
 }
 
-/// Format the message of a diagnostic.
 fn diagnostic_message(diag: &AstDiagnostic) -> String {
     if let Some(ref msg) = diag.message {
         let args: Vec<&str> = diag.message_args.iter().map(|s| s.as_str()).collect();
@@ -181,7 +156,6 @@ fn diagnostic_message(diag: &AstDiagnostic) -> String {
     format!("TS{}", diag.code)
 }
 
-/// Convert related-information entries.
 fn convert_related_information(diag: &AstDiagnostic) -> Option<Vec<DiagnosticRelatedInformation>> {
     if diag.related_information.is_empty() {
         return None;
@@ -234,7 +208,6 @@ fn convert_related_information(diag: &AstDiagnostic) -> Option<Vec<DiagnosticRel
     )
 }
 
-/// Map a checker `Category` to an LSP severity number.
 fn category_to_severity(category: Category) -> u32 {
     match category {
         Category::Error => 1,
@@ -244,9 +217,6 @@ fn category_to_severity(category: Category) -> u32 {
     }
 }
 
-// ─── Helper functions ────────────────────────────────────────────────
-
-/// Convert a byte offset to an LSP `Position`.
 fn offset_to_position(line_map: &LineMap, offset: usize) -> Position {
     let line = line_of_offset(line_map, offset);
     let line_start = line_map.line_starts.get(line).copied().unwrap_or(0) as usize;
@@ -256,7 +226,6 @@ fn offset_to_position(line_map: &LineMap, offset: usize) -> Position {
     }
 }
 
-/// Binary search for the line number of a byte offset.
 fn line_of_offset(line_map: &LineMap, offset: usize) -> usize {
     match line_map.line_starts.binary_search(&(offset as u32)) {
         Ok(idx) => idx,

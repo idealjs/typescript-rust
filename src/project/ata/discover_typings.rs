@@ -1,5 +1,3 @@
-//! Discover typings (1:1 port of Go's `internal/project/ata/discovertypings.go`).
-
 use std::collections::HashMap;
 
 use crate::collections::set::Set;
@@ -10,9 +8,6 @@ use crate::vfs::FS;
 
 use super::types_map::lookup_type_name;
 
-/// Information about type acquisition settings.
-///
-/// Mirrors `ata.TypingsInfo` in Go.
 #[derive(Debug, Clone, Default)]
 pub struct TypingsInfo {
     pub type_acquisition: Option<TypeAcquisition>,
@@ -20,7 +15,6 @@ pub struct TypingsInfo {
     pub unresolved_imports: Option<Set<String>>,
 }
 
-/// Type acquisition configuration (stub for `core.TypeAcquisition`).
 #[derive(Debug, Clone, Default)]
 pub struct TypeAcquisition {
     pub enable: bool,
@@ -35,28 +29,21 @@ impl TypeAcquisition {
     }
 }
 
-/// A cached typing with its location and version.
-///
-/// Mirrors `ata.CachedTyping` in Go.
 #[derive(Debug, Clone)]
 pub struct CachedTyping {
     pub typings_location: String,
     pub version: semver::Version,
 }
 
-/// A logger trait for ATA.
 pub trait AtaLogger: Send + Sync {
     fn log(&self, message: &str);
 }
 
-/// Checks if a cached typing is up to date.
-///
-/// Mirrors `ata.isTypingUpToDate` in Go.
 pub fn is_typing_up_to_date(
     cached_typing: &CachedTyping,
     available_typing_versions: &HashMap<String, String>,
 ) -> bool {
-    let _use_version = available_typing_versions.get("latest"); // Go uses "ts"+VersionMajorMinor
+    let _use_version = available_typing_versions.get("latest");
     let use_version = match available_typing_versions.get("latest") {
         Some(v) => v.as_str(),
         None => return true,
@@ -65,9 +52,6 @@ pub fn is_typing_up_to_date(
     available_version.compare(&cached_typing.version) <= std::cmp::Ordering::Equal
 }
 
-/// Discovers typings for a project.
-///
-/// Mirrors `ata.DiscoverTypings` in Go.
 pub fn discover_typings(
     _fs: &dyn FS,
     _logger: Option<&dyn AtaLogger>,
@@ -77,10 +61,9 @@ pub fn discover_typings(
     _package_name_to_typing_location: &HashMap<String, CachedTyping>,
     _types_registry: &HashMap<String, HashMap<String, String>>,
 ) -> (Vec<String>, Vec<String>, Vec<String>) {
-    // A typing name to typing file path mapping.
+
     let mut inferred_typings: HashMap<String, String> = HashMap::new();
 
-    // Only infer typings for .js and .jsx files.
     let js_file_names: Vec<&String> = file_names
         .iter()
         .filter(|f| tspath::has_js_file_extension(f))
@@ -88,7 +71,6 @@ pub fn discover_typings(
 
     let files_to_watch: Vec<String> = Vec::new();
 
-    // Add explicitly included types.
     if let Some(ref ta) = _typings_info.type_acquisition {
         if let Some(ref include) = ta.include {
             add_inferred_typings(&mut inferred_typings, include);
@@ -101,10 +83,6 @@ pub fn discover_typings(
         .map(|ta| ta.exclude.clone())
         .unwrap_or_default();
 
-    // Search for package.json and bower.json.
-    // (Full implementation requires FS and packagejson parsing — stubbed.)
-
-    // Get typing names from source file names.
     if _typings_info
         .type_acquisition
         .as_ref()
@@ -114,7 +92,6 @@ pub fn discover_typings(
         get_typing_names_from_source_file_names(&mut inferred_typings, &js_file_names);
     }
 
-    // Remove excluded typings.
     for exclude_typing_name in &exclude {
         inferred_typings.remove(exclude_typing_name);
     }
@@ -143,9 +120,6 @@ fn add_inferred_typings(inferred_typings: &mut HashMap<String, String>, typing_n
     }
 }
 
-/// Infers typing names from given file names.
-///
-/// Mirrors `ata.getTypingNamesFromSourceFileNames` in Go.
 fn get_typing_names_from_source_file_names(
     inferred_typings: &mut HashMap<String, String>,
     file_names: &[&String],
@@ -170,9 +144,6 @@ fn get_typing_names_from_source_file_names(
     }
 }
 
-/// Takes a string like "jquery-min.4.2.3" and returns "jquery".
-///
-/// Mirrors `ata.removeMinAndVersionNumbers` in Go.
 pub fn remove_min_and_version_numbers(file_name: &str) -> String {
     let bytes = file_name.as_bytes();
     let mut end = file_name.len();
@@ -181,7 +152,7 @@ pub fn remove_min_and_version_numbers(file_name: &str) -> String {
     while pos > 0 {
         let ch = bytes[pos - 1];
         if ch >= b'0' && ch <= b'9' {
-            // Match a digit segment.
+
             loop {
                 pos -= 1;
                 if pos == 0 || !(bytes[pos - 1] >= b'0' && bytes[pos - 1] <= b'9') {
@@ -189,7 +160,7 @@ pub fn remove_min_and_version_numbers(file_name: &str) -> String {
                 }
             }
         } else if pos > 4 && (ch == b'n' || ch == b'N') {
-            // Looking for "min" (case-insensitive).
+
             pos -= 1;
             if pos == 0 || (bytes[pos - 1] != b'i' && bytes[pos - 1] != b'I') {
                 break;

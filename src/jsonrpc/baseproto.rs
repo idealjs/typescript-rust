@@ -1,26 +1,17 @@
-//! Base protocol for JSON-RPC with Content-Length headers (as used by LSP).
-//!
-//! Ported from Go's `internal/jsonrpc/baseproto.go`.
-
 use std::io::{self, BufRead, BufReader, Read, Write};
 
-// !!! Errors
-// Mirrors Go's `ErrInvalidHeader`, `ErrInvalidContentLength`, `ErrNoContentLength`.
-
-/// Reader reads JSON-RPC messages with Content-Length framing.
 pub struct Reader<R: Read> {
     r: BufReader<R>,
 }
 
 impl<R: Read> Reader<R> {
-    /// Creates a new Reader.
+
     pub fn new(r: R) -> Self {
         Reader {
             r: BufReader::new(r),
         }
     }
 
-    /// Reads the next message payload.
     pub fn read(&mut self) -> io::Result<Vec<u8>> {
         let mut content_length: i64 = 0;
 
@@ -32,7 +23,6 @@ impl<R: Read> Reader<R> {
                 break;
             }
 
-            // Parse "Key: Value" header.
             let colon = match line.iter().position(|&b| b == b':') {
                 Some(idx) => idx,
                 None => {
@@ -81,18 +71,16 @@ impl<R: Read> Reader<R> {
     }
 }
 
-/// Writer writes JSON-RPC messages with Content-Length framing.
 pub struct Writer<W: Write> {
     w: W,
 }
 
 impl<W: Write> Writer<W> {
-    /// Creates a new Writer.
+
     pub fn new(w: W) -> Self {
         Writer { w }
     }
 
-    /// Writes a message payload with Content-Length header.
     pub fn write(&mut self, data: &[u8]) -> io::Result<()> {
         write!(self.w, "Content-Length: {}\r\n\r\n", data.len())?;
         self.w.write_all(data)?;

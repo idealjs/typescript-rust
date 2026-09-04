@@ -1,23 +1,13 @@
-//! Display-parts writer (1:1 port of Go's `internal/ls/displaypartswriter.go`).
-//!
-//! `DisplayPartsWriter` captures classified text runs for VS colorized labels
-//! while also building a plain string. When `vs_capability` is false, only the
-//! plain string is built; runs are skipped.
-
 #![allow(dead_code)]
 
 use crate::ast::Symbol;
 
-/// Classification type names for VS classified text runs.
-///
-/// Mirrors Go's `lsproto.ClassificationTypeName` string constants.
 #[derive(Debug, Clone)]
 pub struct VsClassifiedTextRun {
     pub classification_type_name: String,
     pub text: String,
 }
 
-/// Classification type name string aliases.
 pub mod classification_type_name {
     pub const TEXT: &str = "text";
     pub const KEYWORD: &str = "keyword";
@@ -38,7 +28,6 @@ pub mod classification_type_name {
     pub const IDENTIFIER: &str = "identifier";
 }
 
-/// Implements `printer.EmitTextWriter` and captures classified text runs.
 pub struct DisplayPartsWriter {
     builder: String,
     runs: Vec<VsClassifiedTextRun>,
@@ -46,7 +35,6 @@ pub struct DisplayPartsWriter {
     last_written: String,
 }
 
-/// Create a new `DisplayPartsWriter`.
 pub fn new_display_parts_writer(vs_capability: bool) -> DisplayPartsWriter {
     DisplayPartsWriter {
         builder: String::new(),
@@ -71,12 +59,10 @@ impl DisplayPartsWriter {
         self.builder.push_str(text);
     }
 
-    /// Writes text with an explicit classification type.
     pub fn write_classified(&mut self, text: &str, classification: &str) {
         self.add_run(classification, text);
     }
 
-    /// Copies accumulated content from another writer.
     pub fn write_from(&mut self, other: &DisplayPartsWriter) {
         self.builder.push_str(&other.builder);
         if self.vs_capability {
@@ -176,7 +162,6 @@ impl std::fmt::Display for DisplayPartsWriter {
     }
 }
 
-/// Determines the Roslyn classification type name based on a symbol's flags.
 pub fn classification_for_symbol(symbol: &Symbol) -> &'static str {
     use crate::ast::SymbolFlags;
     let flags = symbol.flags;
@@ -228,7 +213,6 @@ pub fn classification_for_symbol(symbol: &Symbol) -> &'static str {
     classification_type_name::TEXT
 }
 
-/// Checks if the symbol's first declaration is a parameter.
 pub fn is_first_declaration_of_symbol_parameter(symbol: &Symbol) -> bool {
     use crate::ast::SyntaxKind;
     symbol

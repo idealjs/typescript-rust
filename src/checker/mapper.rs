@@ -1,16 +1,7 @@
-//! Type mapper factory functions.
-//!
-//! Ported from `internal/checker/mapper.go`. The Go implementation uses
-//! an interface-based `TypeMapperData` pattern with several concrete
-//! implementations (SimpleTypeMapper, ArrayTypeMapper, MergedTypeMapper,
-//! etc.). In Rust, `TypeMapper` holds a closure (`MapFn`), and these
-//! factory functions create mappers with the appropriate behavior.
-
 use std::sync::Arc;
 
 use super::types::{Type, TypeMapper, TypeMapperKind};
 
-/// Create a mapper that maps a single source type to a single target type.
 pub fn new_simple_type_mapper(source: Arc<Type>, target: Arc<Type>) -> TypeMapper {
     let maps_this_only = is_this_type_parameter(&source);
     TypeMapper::new(
@@ -18,9 +9,7 @@ pub fn new_simple_type_mapper(source: Arc<Type>, target: Arc<Type>) -> TypeMappe
             if Arc::ptr_eq(t, &source) {
                 Arc::clone(&target)
             } else {
-                // No mapping applies: return the input type unchanged.
-                // This matches Go's `SimpleTypeMapper.map` returning `t` when
-                // `t != source`.
+
                 Arc::clone(t)
             }
         }),
@@ -29,7 +18,6 @@ pub fn new_simple_type_mapper(source: Arc<Type>, target: Arc<Type>) -> TypeMappe
     )
 }
 
-/// Create a mapper that maps multiple source types to corresponding targets.
 pub fn new_array_type_mapper(sources: Vec<Arc<Type>>, targets: Vec<Arc<Type>>) -> TypeMapper {
     let maps_this_only = sources.len() == 1 && is_this_type_parameter(&sources[0]);
     TypeMapper::new(
@@ -39,7 +27,7 @@ pub fn new_array_type_mapper(sources: Vec<Arc<Type>>, targets: Vec<Arc<Type>>) -
                     return Arc::clone(&targets[i]);
                 }
             }
-            // Type not in source list: return unchanged (Go returns `t`).
+
             Arc::clone(t)
         }),
         TypeMapperKind::Array,
@@ -47,7 +35,6 @@ pub fn new_array_type_mapper(sources: Vec<Arc<Type>>, targets: Vec<Arc<Type>>) -
     )
 }
 
-/// Create a mapper that maps all source types to a single target.
 pub fn new_array_to_single_type_mapper(sources: Vec<Arc<Type>>, target: Arc<Type>) -> TypeMapper {
     let maps_this_only = sources.len() == 1 && is_this_type_parameter(&sources[0]);
     TypeMapper::new(
@@ -57,7 +44,7 @@ pub fn new_array_to_single_type_mapper(sources: Vec<Arc<Type>>, target: Arc<Type
                     return Arc::clone(&target);
                 }
             }
-            // Type not in source list: return unchanged (Go returns `t`).
+
             Arc::clone(t)
         }),
         TypeMapperKind::Array,
@@ -65,14 +52,12 @@ pub fn new_array_to_single_type_mapper(sources: Vec<Arc<Type>>, target: Arc<Type
     )
 }
 
-/// Create a mapper from a function.
 pub fn new_function_type_mapper(
     map_fn: impl Fn(&Arc<Type>) -> Arc<Type> + Send + Sync + 'static,
 ) -> TypeMapper {
     TypeMapper::new(Arc::new(map_fn), TypeMapperKind::Unknown, false)
 }
 
-/// Merge two mappers (apply m1 first, then m2).
 pub fn merge_type_mappers(m1: Option<&TypeMapper>, m2: Option<&TypeMapper>) -> Option<TypeMapper> {
     match (m1, m2) {
         (Some(m1), Some(m2)) => {
@@ -93,7 +78,6 @@ pub fn merge_type_mappers(m1: Option<&TypeMapper>, m2: Option<&TypeMapper>) -> O
     }
 }
 
-/// Prepend a mapping to an existing mapper.
 pub fn prepend_type_mapping(
     source: Arc<Type>,
     target: Arc<Type>,
@@ -108,7 +92,6 @@ pub fn prepend_type_mapping(
     }
 }
 
-/// Append a mapping to an existing mapper.
 pub fn append_type_mapping(
     mapper: Option<&TypeMapper>,
     source: Arc<Type>,
@@ -123,7 +106,6 @@ pub fn append_type_mapping(
     }
 }
 
-/// Whether a type is a `this` type parameter.
 fn is_this_type_parameter(t: &Type) -> bool {
     if let super::types::TypeData::TypeParameter(tp) = &t.data {
         tp.is_this_type
@@ -232,9 +214,7 @@ mod tests {
 
     #[test]
     fn simple_mapper_returns_input_when_no_match() {
-        // Regression: previously the placeholder returned `target` for any
-        // non-matching input. The correct behavior (matching Go) is to
-        // return the input type unchanged.
+
         let source = Arc::new(Type::new(
             TypeFlags::TypeParameter,
             TypeData::TypeParameter(TypeParameterData {
@@ -260,10 +240,10 @@ mod tests {
         ));
 
         let mapper = new_simple_type_mapper(Arc::clone(&source), Arc::clone(&target));
-        // Matching input maps to target.
+
         let mapped = mapper.map(&source);
         assert!(Arc::ptr_eq(&mapped, &target));
-        // Non-matching input returns the input itself, NOT target.
+
         let passthrough = mapper.map(&other);
         assert!(Arc::ptr_eq(&passthrough, &other));
     }

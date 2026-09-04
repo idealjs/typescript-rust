@@ -1,10 +1,3 @@
-//! Printer module, ported from `internal/printer/`.
-//!
-//! Currently implements the `NameGenerator` for generating unique identifier
-//! names during emit (temp variables, loop variables, unique names, node-based
-//! generated names). The full printer (AST → text) is not yet ported; the
-//! existing `emitter` module handles emit via source-text slicing.
-
 use std::collections::{HashMap, HashSet};
 use std::sync::Arc;
 use std::sync::atomic::{AtomicU32, Ordering};
@@ -13,12 +6,6 @@ use crate::ast::{Node, SyntaxKind};
 use crate::scanner::{CommentRange, CommentRangeKind};
 use crate::stringutil;
 
-// ────────────────────────────────────────────────────────────────────────────
-// GeneratedIdentifierFlags
-// ────────────────────────────────────────────────────────────────────────────
-
-/// Flags controlling generated identifier name generation.
-/// Mirrors `printer.GeneratedIdentifierFlags` in Go.
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Hash)]
 pub struct GeneratedIdentifierFlags(pub i32);
 
@@ -88,12 +75,6 @@ impl std::ops::Not for GeneratedIdentifierFlags {
     }
 }
 
-// ────────────────────────────────────────────────────────────────────────────
-// AutoGenerateInfo
-// ────────────────────────────────────────────────────────────────────────────
-
-/// Options for creating a generated name.
-/// Mirrors `printer.AutoGenerateOptions` in Go.
 #[derive(Debug, Clone, Default)]
 pub struct AutoGenerateOptions {
     pub flags: GeneratedIdentifierFlags,
@@ -101,7 +82,6 @@ pub struct AutoGenerateOptions {
     pub suffix: String,
 }
 
-/// Unique ID for tracking auto-generated names.
 pub type AutoGenerateId = u32;
 
 #[allow(dead_code)]
@@ -112,8 +92,6 @@ fn next_auto_generate_id() -> AutoGenerateId {
     NEXT_AUTO_GENERATE_ID.fetch_add(1, Ordering::Relaxed) + 1
 }
 
-/// Information about how to generate a name for an identifier.
-/// Mirrors `printer.AutoGenerateInfo` in Go.
 #[derive(Debug, Clone)]
 pub struct AutoGenerateInfo {
     pub flags: GeneratedIdentifierFlags,
@@ -123,15 +101,6 @@ pub struct AutoGenerateInfo {
     pub node: Option<Arc<Node>>,
 }
 
-// ────────────────────────────────────────────────────────────────────────────
-// GeneratedName — stands in for Go's *ast.MemberName with autoGenerate info
-// ────────────────────────────────────────────────────────────────────────────
-
-/// A generated identifier name, carrying its text and auto-generation info.
-///
-/// In Go, this is an `*ast.IdentifierNode` or `*ast.PrivateIdentifierNode`
-/// with an entry in the `EmitContext.autoGenerate` map. In Rust, we bundle
-/// the text and auto-generate info together for simplicity.
 #[derive(Debug, Clone)]
 pub struct GeneratedName {
     pub text: String,
@@ -153,12 +122,6 @@ impl GeneratedName {
     }
 }
 
-// ────────────────────────────────────────────────────────────────────────────
-// EmitContext
-// ────────────────────────────────────────────────────────────────────────────
-
-/// The context for emit operations, tracking auto-generation state.
-/// Mirrors `printer.EmitContext` in Go (reduced form).
 #[derive(Default)]
 pub struct EmitContext {
     next_id: AtomicU32,
@@ -174,12 +137,6 @@ impl EmitContext {
     }
 }
 
-// ────────────────────────────────────────────────────────────────────────────
-// NodeFactory
-// ────────────────────────────────────────────────────────────────────────────
-
-/// Factory for creating generated names.
-/// Mirrors `printer.NodeFactory` (generated-name methods only) in Go.
 pub struct NodeFactory<'a> {
     emit_context: &'a EmitContext,
 }
@@ -320,10 +277,6 @@ impl<'a> NodeFactory<'a> {
     }
 }
 
-// ────────────────────────────────────────────────────────────────────────────
-// NameGenerator
-// ────────────────────────────────────────────────────────────────────────────
-
 const TEMP_FLAGS_AUTO: i32 = 0x0000_0000;
 const TEMP_FLAGS_COUNT_MASK: i32 = 0x0FFF_FFFF;
 const TEMP_FLAGS_I: i32 = 0x1000_0000;
@@ -346,8 +299,6 @@ impl NameGenerationScope {
     }
 }
 
-/// Generates unique identifier names during emit.
-/// Mirrors `printer.NameGenerator` in Go.
 pub struct NameGenerator {
     node_id_to_generated_name: HashMap<u64, String>,
     node_id_to_generated_private_name: HashMap<u64, String>,
@@ -504,7 +455,6 @@ impl NameGenerator {
         self.is_unique_name(name, private_name)
     }
 
-    /// Generate the text for a generated identifier.
     pub fn generate_name(&mut self, name: &GeneratedName) -> String {
         let auto_generate = &name.auto_generate;
         if auto_generate.flags.is_node() {
@@ -805,10 +755,6 @@ impl Default for NameGenerator {
     }
 }
 
-// ────────────────────────────────────────────────────────────────────────────
-// Helper functions
-// ────────────────────────────────────────────────────────────────────────────
-
 fn has_leading_hash(text: &str) -> bool {
     text.starts_with('#')
 }
@@ -875,7 +821,6 @@ fn is_ascii_word_character(ch: char) -> bool {
     ch.is_ascii_alphabetic() || ch.is_ascii_digit() || ch == '_'
 }
 
-/// Get the module specifier (string literal) from an import/export declaration.
 fn get_external_module_name(node: &Arc<Node>) -> Option<String> {
     match &node.data {
         crate::ast::node_data_generated::NodeData::ImportDeclaration(d) => {
@@ -888,12 +833,6 @@ fn get_external_module_name(node: &Arc<Node>) -> Option<String> {
     }
 }
 
-// ────────────────────────────────────────────────────────────────────────────
-// String escaping utilities (ported from printer/utilities.go)
-// ────────────────────────────────────────────────────────────────────────────
-
-/// Quote character used for string literal escaping.
-/// Mirrors Go's `printer.QuoteChar`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum QuoteChar {
     SingleQuote,
@@ -912,8 +851,7 @@ impl QuoteChar {
 }
 
 bitflags::bitflags! {
-    /// Flags controlling how literal text is escaped.
-    /// Mirrors Go's `printer.getLiteralTextFlags`.
+
     #[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
     pub struct GetLiteralTextFlags: u32 {
         const NONE = 0;
@@ -924,14 +862,12 @@ bitflags::bitflags! {
     }
 }
 
-/// Encode a character as an XML character entity (e.g. `&#x9;`).
 fn encode_jsx_character_entity(b: &mut String, ch: char) {
     b.push_str("&#x");
     b.push_str(&format!("{:X}", ch as u32));
     b.push(';');
 }
 
-/// Encode a character as a `\uXXXX` escape sequence.
 fn encode_utf16_escape_sequence_u32(b: &mut String, code: u32) {
     let hex = format!("{:X}", code);
     b.push_str("\\u");
@@ -945,7 +881,6 @@ fn encode_utf16_escape_sequence(b: &mut String, ch: char) {
     encode_utf16_escape_sequence_u32(b, ch as u32);
 }
 
-/// Lookup for JSX-escaped characters.
 fn jsx_escaped_chars_map(code: u32) -> Option<&'static str> {
     match code {
         0x22 => Some("&quot;"),
@@ -954,7 +889,6 @@ fn jsx_escaped_chars_map(code: u32) -> Option<&'static str> {
     }
 }
 
-/// Lookup for standard escaped characters.
 fn escaped_chars_map(code: u32) -> Option<&'static str> {
     match code {
         0x09 => Some("\\t"),
@@ -975,7 +909,6 @@ fn escaped_chars_map(code: u32) -> Option<&'static str> {
     }
 }
 
-/// Escape a string for output. Mirrors Go's `escapeStringWorker`.
 fn escape_string_worker(
     s: &str,
     quote_char: QuoteChar,
@@ -994,7 +927,6 @@ fn escape_string_worker(
         if (0xD800..=0xDFFF).contains(&code) {
             escape = true;
         }
-        // Rust strings are always valid UTF-8; no RuneError case needed.
 
         if !escape {
             if ch == '\\' {
@@ -1069,8 +1001,6 @@ fn escape_string_worker(
     }
 }
 
-/// Escape a string, always escaping non-ASCII characters.
-/// Mirrors Go's `printer.EscapeString`.
 pub fn escape_string(s: &str, quote_char: QuoteChar) -> String {
     let mut b = String::with_capacity(s.len() + 2);
     escape_string_worker(
@@ -1082,16 +1012,12 @@ pub fn escape_string(s: &str, quote_char: QuoteChar) -> String {
     b
 }
 
-/// Escape a string, preserving non-ASCII characters that don't need escaping.
-/// Mirrors Go's `printer.escapeNonAsciiString`.
 pub fn escape_non_ascii_string(s: &str, quote_char: QuoteChar) -> String {
     let mut b = String::with_capacity(s.len() + 2);
     escape_string_worker(s, quote_char, GetLiteralTextFlags::NONE, &mut b);
     b
 }
 
-/// Escape a string for use as a JSX attribute value.
-/// Mirrors Go's `printer.escapeJsxAttributeString`.
 pub fn escape_jsx_attribute_string(s: &str, quote_char: QuoteChar) -> String {
     let mut b = String::with_capacity(s.len() + 2);
     escape_string_worker(
@@ -1102,10 +1028,6 @@ pub fn escape_jsx_attribute_string(s: &str, quote_char: QuoteChar) -> String {
     );
     b
 }
-
-// ────────────────────────────────────────────────────────────────────────────
-// Triple-slash comment recognition (ported from printer/utilities.go)
-// ────────────────────────────────────────────────────────────────────────────
 
 fn decode_char_at(text: &str, pos: usize) -> (char, usize) {
     let c = text[pos..].chars().next().unwrap();
@@ -1170,8 +1092,6 @@ fn match_quoted_string(text: &str, pos: &mut usize) -> bool {
     false
 }
 
-/// Whether `text` at `comment_range` is a recognized triple-slash directive.
-/// Mirrors Go's `printer.IsRecognizedTripleSlashComment`.
 pub fn is_recognized_triple_slash_comment(text: &str, comment_range: &CommentRange) -> bool {
     if comment_range.kind == CommentRangeKind::SingleLine
         && comment_range.end - comment_range.pos > 2
@@ -1251,11 +1171,10 @@ mod tests {
         (file, symbol_map)
     }
 
-    /// Create an `is_unique_local_name` callback that checks the binder's locals.
     fn make_is_unique_local_name(symbol_map: Arc<NodeSymbolMap>) -> impl Fn(&str, &Node) -> bool {
         move |name: &str, node: &Node| -> bool {
             let mask = SymbolFlags::VALUE | SymbolFlags::ExportValue | SymbolFlags::Alias;
-            // Check the node's locals (block-scoped variables).
+
             if let Some(locals) = symbol_map.locals_of(node) {
                 if let Some(sym) = locals.get(name) {
                     if sym.flags & mask != SymbolFlags::empty() {
@@ -1263,8 +1182,7 @@ mod tests {
                     }
                 }
             }
-            // Check the node's symbol's members (function-scoped declarations
-            // like parameters, namespace members, etc.).
+
             if let Some(sym) = symbol_map.symbol_of(node) {
                 if let Some(member) = sym.members.get(name) {
                     if member.flags & mask != SymbolFlags::empty() {
@@ -1276,7 +1194,6 @@ mod tests {
         }
     }
 
-    /// Create a simple Identifier node with the given text.
     fn make_identifier(text: &str) -> Arc<Node> {
         Arc::new(Node::new(
             SyntaxKind::Identifier,
@@ -1285,8 +1202,6 @@ mod tests {
             }),
         ))
     }
-
-    // ── TempVariable tests ─────────────────────────────────────────────────
 
     #[test]
     fn temp_variable_1() {
@@ -1357,8 +1272,6 @@ mod tests {
         g.pop_scope(false);
     }
 
-    // ── LoopVariable tests ─────────────────────────────────────────────────
-
     #[test]
     fn loop_variable_1() {
         let ec = EmitContext::new();
@@ -1412,8 +1325,6 @@ mod tests {
         g.pop_scope(false);
     }
 
-    // ── UniqueName tests ───────────────────────────────────────────────────
-
     #[test]
     fn unique_name_1() {
         let ec = EmitContext::new();
@@ -1448,8 +1359,6 @@ mod tests {
         g.pop_scope(false);
     }
 
-    // ── UniquePrivateName tests ────────────────────────────────────────────
-
     #[test]
     fn unique_private_name_1() {
         let ec = EmitContext::new();
@@ -1483,8 +1392,6 @@ mod tests {
         assert_eq!(g.generate_name(&name2), "#foo_2");
         g.pop_scope(false);
     }
-
-    // ── GeneratedNameForIdentifier tests ───────────────────────────────────
 
     #[test]
     fn generated_name_for_identifier_1() {
@@ -1542,15 +1449,12 @@ mod tests {
                 ..Default::default()
             },
         );
-        // In Go, name2 is created from name1 (a generated Identifier node with text "afb").
-        // In Rust, GeneratedName is not a Node, so we create an Identifier node with text "afb".
+
         let afb_node = make_identifier("afb");
         let name2 = factory.new_generated_name_for_node(&afb_node);
         let mut g = NameGenerator::new();
         assert_eq!(g.generate_name(&name2), "afb_1");
     }
-
-    // ── GeneratedNameForNamespace tests ────────────────────────────────────
 
     #[test]
     fn generated_name_for_namespace_1() {
@@ -1660,8 +1564,6 @@ mod tests {
         assert_eq!(text2, "foo_2");
     }
 
-    // ── GeneratedNameForNodeCached ─────────────────────────────────────────
-
     #[test]
     fn generated_name_for_node_cached() {
         let ec = EmitContext::new();
@@ -1678,8 +1580,6 @@ mod tests {
         assert_eq!(g.generate_name(&name1), "foo_1");
         assert_eq!(g.generate_name(&name2), "foo_1");
     }
-
-    // ── GeneratedNameForImport/Export ──────────────────────────────────────
 
     #[test]
     fn generated_name_for_import() {
@@ -1709,8 +1609,6 @@ mod tests {
         assert_eq!(g.generate_name(&name1), "foo_1");
     }
 
-    // ── GeneratedNameForFunctionDeclaration ────────────────────────────────
-
     #[test]
     fn generated_name_for_function_declaration_1() {
         let ec = EmitContext::new();
@@ -1738,8 +1636,6 @@ mod tests {
         let mut g = NameGenerator::new();
         assert_eq!(g.generate_name(&name1), "default_1");
     }
-
-    // ── GeneratedNameForClassDeclaration ───────────────────────────────────
 
     #[test]
     fn generated_name_for_class_declaration_1() {
@@ -1769,8 +1665,6 @@ mod tests {
         assert_eq!(g.generate_name(&name1), "default_1");
     }
 
-    // ── GeneratedNameForExportAssignment ───────────────────────────────────
-
     #[test]
     fn generated_name_for_export_assignment() {
         let ec = EmitContext::new();
@@ -1784,8 +1678,6 @@ mod tests {
         let mut g = NameGenerator::new();
         assert_eq!(g.generate_name(&name1), "default_1");
     }
-
-    // ── GeneratedNameForClassExpression ────────────────────────────────────
 
     #[test]
     fn generated_name_for_class_expression() {
@@ -1802,8 +1694,6 @@ mod tests {
         let mut g = NameGenerator::new();
         assert_eq!(g.generate_name(&name1), "class_1");
     }
-
-    // ── GeneratedNameForMethod tests ───────────────────────────────────────
 
     #[test]
     fn generated_name_for_method_1() {
@@ -1845,8 +1735,6 @@ mod tests {
         assert_eq!(g.generate_name(&name1), "_a");
     }
 
-    // ── GeneratedPrivateNameForMethod ──────────────────────────────────────
-
     #[test]
     fn generated_private_name_for_method() {
         let ec = EmitContext::new();
@@ -1866,8 +1754,6 @@ mod tests {
         let mut g = NameGenerator::new();
         assert_eq!(g.generate_name(&name1), "#m_1");
     }
-
-    // ── GeneratedNameForComputedPropertyName ───────────────────────────────
 
     #[test]
     fn generated_name_for_computed_property_name() {
@@ -1890,14 +1776,12 @@ mod tests {
         assert_eq!(g.generate_name(&name1), "_a");
     }
 
-    // ── GeneratedNameForOther ──────────────────────────────────────────────
-
     #[test]
     fn generated_name_for_other() {
         let ec = EmitContext::new();
         let factory = NodeFactory::new(&ec);
         let (file, _) = parse_and_bind("class C { [x] }");
-        // Use a member node as a stand-in for a non-specific node
+
         let crate::ast::node_data_generated::NodeData::SourceFile(d) = &file.node.data else {
             panic!("expected SourceFile");
         };
@@ -1913,11 +1797,9 @@ mod tests {
         assert_eq!(g.generate_name(&name1), "_a");
     }
 
-    // ── Utility tests (ported from utilities_test.go) ─────────────────────
-
     #[test]
     fn escape_string_test() {
-        // Ported from Go TestEscapeString.
+
         let cases: &[(&str, QuoteChar, &str)] = &[
             ("", QuoteChar::DoubleQuote, ""),
             ("abc", QuoteChar::DoubleQuote, "abc"),
@@ -1938,7 +1820,7 @@ mod tests {
 
     #[test]
     fn escape_non_ascii_string_test() {
-        // Ported from Go TestEscapeNonAsciiString.
+
         let cases: &[(&str, QuoteChar, &str)] = &[
             ("", QuoteChar::DoubleQuote, ""),
             ("abc", QuoteChar::DoubleQuote, "abc"),
@@ -1967,7 +1849,7 @@ mod tests {
 
     #[test]
     fn escape_jsx_attribute_string_test() {
-        // Ported from Go TestEscapeJsxAttributeString.
+
         let cases: &[(&str, QuoteChar, &str)] = &[
             ("", QuoteChar::DoubleQuote, ""),
             ("abc", QuoteChar::DoubleQuote, "abc"),
@@ -1995,9 +1877,7 @@ mod tests {
 
     #[test]
     fn is_recognized_triple_slash_comment_test() {
-        // Ported from Go TestIsRecognizedTripleSlashComment.
-        // Each case: (text, optional explicit range, expected).
-        // When range is None, defaults to SingleLine with (0, text.len()).
+
         struct TsCase {
             text: &'static str,
             explicit: Option<(CommentRangeKind, usize, usize)>,
@@ -2227,16 +2107,6 @@ mod tests {
         }
     }
 
-    // ── Printer/parenthesization tests (ported from printer_test.go) ──────
-    //
-    // The full AST→text printer is not yet ported (emit happens via
-    // source-text slicing). The Go printer tests construct an AST and verify
-    // the printer adds parentheses in the right places. Since the Rust port
-    // has no printer, each case is ported as a parser+AST-shape test that
-    // parses the equivalent TypeScript source and verifies the node kinds
-    // and structure that drive parenthesization decisions.
-
-    /// Statements of a parsed source file.
     fn source_file_statements(file: &crate::ast::SourceFile) -> &[Arc<Node>] {
         let NodeData::SourceFile(d) = &file.node.data else {
             panic!("expected SourceFile");
@@ -2244,7 +2114,6 @@ mod tests {
         &d.statements.nodes
     }
 
-    /// Parse `source` and return the first top-level statement.
     fn first_statement(source: &str) -> Arc<Node> {
         let file = parse(source);
         let stmts = source_file_statements(&file);
@@ -2255,8 +2124,6 @@ mod tests {
         stmts[0].clone()
     }
 
-    /// Parse `source` as a single expression statement and return its
-    /// top-level expression node.
     fn first_expression(source: &str) -> Arc<Node> {
         let stmt = first_statement(source);
         stmt.expression()
@@ -2264,7 +2131,6 @@ mod tests {
             .clone()
     }
 
-    /// Parse `type _ = <type>;` and return the type alias's type node.
     fn first_type_alias_type(source: &str) -> Arc<Node> {
         let stmt = first_statement(source);
         let NodeData::TypeAliasDeclaration(d) = &stmt.data else {
@@ -2273,7 +2139,6 @@ mod tests {
         d.type_node.clone()
     }
 
-    /// `(condition, when_true, when_false)` of a ConditionalExpression.
     fn cond_parts(node: Arc<Node>) -> (Arc<Node>, Arc<Node>, Arc<Node>) {
         let NodeData::ConditionalExpression(d) = &node.data else {
             panic!("expected ConditionalExpression, got {:?}", node.kind);
@@ -2285,7 +2150,6 @@ mod tests {
         )
     }
 
-    /// `(check_type, extends_type)` of a ConditionalType.
     fn cond_type_parts(node: &Node) -> (&Arc<Node>, &Arc<Node>) {
         let NodeData::ConditionalTypeNode(d) = &node.data else {
             panic!("expected ConditionalTypeNode, got {:?}", node.kind);
@@ -2293,7 +2157,6 @@ mod tests {
         (&d.check_type, &d.extends_type)
     }
 
-    /// The operator kind of a BinaryExpression.
     fn binary_operator(node: &Node) -> SyntaxKind {
         let NodeData::BinaryExpression(d) = &node.data else {
             panic!("expected BinaryExpression, got {:?}", node.kind);
@@ -2315,7 +2178,6 @@ mod tests {
         &d.right
     }
 
-    /// `types` of a union/intersection type node.
     fn type_list(node: &Node) -> &[Arc<Node>] {
         match &node.data {
             NodeData::UnionTypeNode(d) => &d.types.nodes,
@@ -2331,8 +2193,6 @@ mod tests {
         d.operator
     }
 
-    /// Navigate to the expression of the first statement inside a function
-    /// body: `function f(...) { <stmt>; }` -> that statement's expression.
     fn fn_body_first_expression(stmt: &Arc<Node>) -> Arc<Node> {
         let NodeData::FunctionDeclaration(fd) = &stmt.data else {
             panic!("expected FunctionDeclaration, got {:?}", stmt.kind);
@@ -2343,13 +2203,9 @@ mod tests {
         bd.statements.nodes[0].expression().unwrap().clone()
     }
 
-    // ── Emit (parser node-kind coverage) ──────────────────────────────────
-
     #[test]
     fn emit() {
-        // Ported from Go TestEmit. The full printer (AST→text) is not yet
-        // ported; verify the parser builds the expected AST node kinds for a
-        // representative set of constructs the printer must emit.
+
         assert_eq!(
             first_expression(r#""test""#).kind,
             SyntaxKind::StringLiteral
@@ -2403,8 +2259,7 @@ mod tests {
 
     #[test]
     fn parenthesize_decorator() {
-        // @(a + b) decorates a class; the decorator operand is a
-        // parenthesized binary expression.
+
         let stmt = first_statement("@(a + b) class C {}");
         assert_eq!(stmt.kind, SyntaxKind::ClassDeclaration);
         let NodeData::ClassDeclaration(cd) = &stmt.data else {
@@ -2425,7 +2280,7 @@ mod tests {
 
     #[test]
     fn parenthesize_computed_property_name() {
-        // [(a, b)] is a computed property name wrapping a comma sequence.
+
         let stmt = first_statement("class C { [(a, b)]: any; }");
         let NodeData::ClassDeclaration(cd) = &stmt.data else {
             panic!("expected ClassDeclaration");
@@ -2441,7 +2296,7 @@ mod tests {
 
     #[test]
     fn parenthesize_array_literal() {
-        // [(a, b)] array literal with a parenthesized comma element.
+
         let expr = first_expression("[(a, b)]");
         let NodeData::ArrayLiteralExpression(d) = &expr.data else {
             panic!("expected ArrayLiteralExpression");
@@ -2592,8 +2447,7 @@ mod tests {
 
     #[test]
     fn parenthesize_tagged_template_1() {
-        // The printer wraps a tagged-template tag in parens; the parser
-        // represents that operand as a ParenthesizedExpression.
+
         let expr = first_expression("(a, b) ``");
         assert_eq!(expr.kind, SyntaxKind::ParenthesizedExpression);
     }
@@ -2606,7 +2460,7 @@ mod tests {
 
     #[test]
     fn parenthesize_type_assertion_1() {
-        // <T>(a + b) is a type assertion whose operand is a parenthesized sum.
+
         let expr = first_expression("<T>(a + b)");
         assert_eq!(expr.kind, SyntaxKind::TypeAssertionExpression);
         assert_eq!(
@@ -2686,33 +2540,31 @@ mod tests {
 
     #[test]
     fn parenthesize_binary() {
-        // Ported from Go TestParenthesizeBinary: operator precedence and
-        // associativity shape the BinaryExpression tree.
-        // a + b * c -> '+' over '*'
+
         let e = first_expression("a + b * c");
         assert_eq!(binary_operator(&e), SyntaxKind::PlusToken);
         assert_eq!(binary_right(&e).kind, SyntaxKind::BinaryExpression);
         assert_eq!(binary_operator(binary_right(&e)), SyntaxKind::AsteriskToken);
-        // a * b + c -> '*' binds tighter on the left
+
         let e = first_expression("a * b + c");
         assert_eq!(binary_operator(&e), SyntaxKind::PlusToken);
         assert_eq!(binary_left(&e).kind, SyntaxKind::BinaryExpression);
-        // a || b && c -> '||' over '&&'
+
         let e = first_expression("a || b && c");
         assert_eq!(binary_operator(&e), SyntaxKind::BarBarToken);
         assert_eq!(binary_right(&e).kind, SyntaxKind::BinaryExpression);
-        // a ** b ** c -> exponentiation nests as a BinaryExpression.
+
         let e = first_expression("a ** b ** c");
         assert_eq!(binary_operator(&e), SyntaxKind::AsteriskAsteriskToken);
         assert!(
             binary_left(&e).kind == SyntaxKind::BinaryExpression
                 || binary_right(&e).kind == SyntaxKind::BinaryExpression
         );
-        // (a + b) * c -> explicit parens on the left
+
         let e = first_expression("(a + b) * c");
         assert_eq!(binary_operator(&e), SyntaxKind::AsteriskToken);
         assert_eq!(binary_left(&e).kind, SyntaxKind::ParenthesizedExpression);
-        // a + b + c -> left associative
+
         let e = first_expression("a + b + c");
         assert_eq!(binary_operator(&e), SyntaxKind::PlusToken);
         assert_eq!(binary_left(&e).kind, SyntaxKind::BinaryExpression);
@@ -2738,7 +2590,7 @@ mod tests {
 
     #[test]
     fn parenthesize_conditional_4() {
-        // yield must appear in a generator.
+
         let expr = fn_body_first_expression(&first_statement("function* g() { (yield) ? a : b; }"));
         let (c, _, _) = cond_parts(expr);
         assert_eq!(c.kind, SyntaxKind::ParenthesizedExpression);
@@ -2809,8 +2661,7 @@ mod tests {
 
     #[test]
     fn parenthesize_expression_with_type_arguments() {
-        // (a, b)<D> as a heritage clause element is an
-        // ExpressionWithTypeArguments whose base is parenthesized.
+
         let stmt = first_statement("class C extends (a, b)<D> {}");
         let NodeData::ClassDeclaration(cd) = &stmt.data else {
             panic!("expected ClassDeclaration");
@@ -3051,9 +2902,7 @@ mod tests {
 
     #[test]
     fn name_generation() {
-        // Ported from Go TestNameGeneration. Verifies the AST for a file with
-        // a top-level variable and a function-scoped variable of the same
-        // name (the printer would emit distinct generated names per scope).
+
         let file = parse("var a;\nfunction f() { var a; }");
         let stmts = source_file_statements(&file);
         assert_eq!(stmts[0].kind, SyntaxKind::VariableStatement);
@@ -3069,8 +2918,7 @@ mod tests {
 
     #[test]
     fn no_trailing_comma_after_transform() {
-        // [a!] parses to an array literal whose single element is a non-null
-        // assertion, with no trailing comma.
+
         let expr = first_expression("[a!]");
         let NodeData::ArrayLiteralExpression(d) = &expr.data else {
             panic!("expected ArrayLiteralExpression");
@@ -3082,7 +2930,7 @@ mod tests {
 
     #[test]
     fn trailing_comma_after_transform() {
-        // [a!,] parses to an array literal with a trailing comma.
+
         let expr = first_expression("[a!,]");
         let NodeData::ArrayLiteralExpression(d) = &expr.data else {
             panic!("expected ArrayLiteralExpression");
@@ -3093,9 +2941,7 @@ mod tests {
 
     #[test]
     fn partially_emitted_expression() {
-        // Ported from Go test of PartiallyEmittedExpression (type erasure).
-        // That node is a synthetic emitter construct; verify the parser builds
-        // the equivalent chained property-access return.
+
         let stmt =
             first_statement("function f() { return container.parent.left.expression.expression; }");
         let NodeData::FunctionDeclaration(fd) = &stmt.data else {
@@ -3117,45 +2963,41 @@ mod tests {
 
     #[test]
     fn parenthesize_binary_expression_mixing_nullish_coalescing() {
-        // Ported from Go TestParenthesizeBinaryExpressionMixingNullishCoalescing.
-        // Mixing ?? with || and && requires parentheses; explicit parens in the
-        // source become ParenthesizedExpression nodes.
-        // (a ?? b) || c
+
         let e = first_expression("(a ?? b) || c");
         assert_eq!(binary_operator(&e), SyntaxKind::BarBarToken);
         assert_eq!(binary_left(&e).kind, SyntaxKind::ParenthesizedExpression);
-        // (a ?? b) && c
+
         let e = first_expression("(a ?? b) && c");
         assert_eq!(binary_operator(&e), SyntaxKind::AmpersandAmpersandToken);
         assert_eq!(binary_left(&e).kind, SyntaxKind::ParenthesizedExpression);
-        // a || (b ?? c)
+
         let e = first_expression("a || (b ?? c)");
         assert_eq!(binary_operator(&e), SyntaxKind::BarBarToken);
         assert_eq!(binary_right(&e).kind, SyntaxKind::ParenthesizedExpression);
-        // a && (b ?? c)
+
         let e = first_expression("a && (b ?? c)");
         assert_eq!(binary_operator(&e), SyntaxKind::AmpersandAmpersandToken);
         assert_eq!(binary_right(&e).kind, SyntaxKind::ParenthesizedExpression);
-        // (a || b) ?? c
+
         let e = first_expression("(a || b) ?? c");
         assert_eq!(binary_operator(&e), SyntaxKind::QuestionQuestionToken);
         assert_eq!(binary_left(&e).kind, SyntaxKind::ParenthesizedExpression);
-        // (a && b) ?? c
+
         let e = first_expression("(a && b) ?? c");
         assert_eq!(binary_operator(&e), SyntaxKind::QuestionQuestionToken);
         assert_eq!(binary_left(&e).kind, SyntaxKind::ParenthesizedExpression);
-        // a ?? (b || c)
+
         let e = first_expression("a ?? (b || c)");
         assert_eq!(binary_operator(&e), SyntaxKind::QuestionQuestionToken);
         assert_eq!(binary_right(&e).kind, SyntaxKind::ParenthesizedExpression);
-        // a ?? (b && c)
+
         let e = first_expression("a ?? (b && c)");
         assert_eq!(binary_operator(&e), SyntaxKind::QuestionQuestionToken);
         assert_eq!(binary_right(&e).kind, SyntaxKind::ParenthesizedExpression);
     }
 }
 
-/// Helper: get the statements from a ModuleBlock node.
 #[allow(dead_code)]
 fn get_module_block_statements(node: &Arc<Node>) -> Option<&[Arc<Node>]> {
     match &node.data {

@@ -1,27 +1,10 @@
-//! Debug assertions ported from `internal/debug/debug.go`.
-//!
-//! These helpers panic with descriptive messages when invariants are
-//! violated. They mirror the Go `debug` package so that panic messages
-//! match across the two implementations.
-
 use std::fmt::Display;
 
-/// Trait for types that can report their syntax kind as a string.
-///
-/// Mirrors Go's `interface{ KindString() string }`, used by
-/// [`fail_bad_syntax_kind`].
 pub trait KindString {
-    /// Returns the syntax kind string for this value.
+
     fn kind_string(&self) -> String;
 }
 
-/// Mirrors `debug.Fail` in Go.
-///
-/// Panics with `"Debug failure."` if `reason` is empty, or
-/// `"Debug failure. {reason}"` otherwise.
-///
-/// # Panics
-/// Always panics.
 pub fn fail(reason: &str) -> ! {
     let msg = if reason.is_empty() {
         "Debug failure.".to_string()
@@ -31,13 +14,6 @@ pub fn fail(reason: &str) -> ! {
     panic!("{}", msg)
 }
 
-/// Mirrors `debug.FailBadSyntaxKind` in Go.
-///
-/// Uses [`KindString::kind_string`] for the node description. The
-/// `message` defaults to `"Unexpected node."` when `None`.
-///
-/// # Panics
-/// Always panics.
 pub fn fail_bad_syntax_kind<T: KindString>(node: &T, message: Option<&str>) -> ! {
     let msg = message.unwrap_or("Unexpected node.");
     fail(&format!(
@@ -47,30 +23,11 @@ pub fn fail_bad_syntax_kind<T: KindString>(node: &T, message: Option<&str>) -> !
     ))
 }
 
-/// Mirrors `debug.AssertNever` in Go.
-///
-/// Uses the [`Display`] trait for the detail string. In Go the function
-/// tries `KindString` first, then `Stringer`, then `%v`; in Rust we
-/// consolidate on `Display`, and types with a `KindString` should
-/// implement `Display` by delegating to it.
-///
-/// The `message` defaults to `"Illegal value:"` when `None`.
-///
-/// # Panics
-/// Always panics.
 pub fn assert_never<T: Display>(member: &T, message: Option<&str>) -> ! {
     let msg = message.unwrap_or("Illegal value:");
     fail(&format!("{} {}", msg, member))
 }
 
-/// Mirrors `debug.Assert` in Go.
-///
-/// Does nothing if `value` is true. Otherwise panics with
-/// `"Debug failure. False expression."` (no message) or
-/// `"Debug failure. False expression: {message}"` (with message).
-///
-/// # Panics
-/// Panics if `value` is false.
 pub fn assert(value: bool, message: Option<&str>) {
     if value {
         return;
@@ -87,9 +44,6 @@ mod tests {
     use super::*;
     use std::fmt::Formatter;
 
-    // --- Mock types mirroring the Go test helpers ---
-
-    /// Mirrors Go's `mockNode` which implements `KindString()`.
     struct MockNode {
         kind: String,
     }
@@ -108,15 +62,12 @@ mod tests {
         }
     }
 
-    // `Display` delegates to `kind_string`, mirroring how Go's `AssertNever`
-    // picks `KindString` first for types that implement it.
     impl Display for MockNode {
         fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
             write!(f, "{}", self.kind_string())
         }
     }
 
-    /// Mirrors Go's `mockStringer` which implements `String()`.
     struct MockStringer {
         s: String,
     }
@@ -132,8 +83,6 @@ mod tests {
             write!(f, "{}", self.s)
         }
     }
-
-    // --- Tests ported from debug_test.go ---
 
     #[test]
     #[should_panic(expected = "Debug failure.")]

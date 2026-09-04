@@ -1,13 +1,7 @@
-//! Compiler options, ported from `internal/core/compileroptions.go`.
-//!
-//! Defines the `CompilerOptions` struct and related enums (ModuleKind,
-//! ModuleResolutionKind, JsxEmit, ScriptTarget, etc.).
-
 use crate::core::tristate::Tristate;
 use crate::tspath;
 use std::collections::HashMap;
 
-/// Script target (language version).
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[repr(i32)]
 pub enum ScriptTarget {
@@ -34,7 +28,6 @@ impl ScriptTarget {
     pub const LATEST_STANDARD: ScriptTarget = ScriptTarget::ES2025;
 }
 
-/// Module kind (output module format).
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[repr(i32)]
 pub enum ModuleKind {
@@ -67,7 +60,6 @@ impl ModuleKind {
     }
 }
 
-/// Module resolution kind.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Hash)]
 #[repr(i32)]
 pub enum ModuleResolutionKind {
@@ -93,10 +85,8 @@ impl std::fmt::Display for ModuleResolutionKind {
     }
 }
 
-/// Resolution mode (used for mode-aware module resolution).
 pub type ResolutionMode = ModuleKind;
 
-/// Module detection kind.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Hash)]
 #[repr(i32)]
 pub enum ModuleDetectionKind {
@@ -107,7 +97,6 @@ pub enum ModuleDetectionKind {
     Force = 3,
 }
 
-/// JSX emit kind.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Hash)]
 #[repr(i32)]
 pub enum JsxEmit {
@@ -133,7 +122,6 @@ impl std::fmt::Display for JsxEmit {
     }
 }
 
-/// New line kind.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Hash)]
 #[repr(i32)]
 pub enum NewLineKind {
@@ -160,10 +148,6 @@ impl NewLineKind {
     }
 }
 
-/// Compiler options.
-///
-/// Mirrors `core.CompilerOptions` in Go. Fields use `Tristate` for boolean
-/// options that can be true, false, or unspecified.
 #[derive(Clone, Debug, Default)]
 pub struct CompilerOptions {
     pub allow_js: Tristate,
@@ -267,7 +251,6 @@ pub struct CompilerOptions {
     pub verbatim_module_syntax: Tristate,
     pub max_node_module_js_depth: Option<i32>,
 
-    // Deprecated fields
     pub allow_synthetic_default_imports: Tristate,
     pub always_strict: Tristate,
     pub base_url: String,
@@ -275,7 +258,6 @@ pub struct CompilerOptions {
     pub es_module_interop: Tristate,
     pub out_file: String,
 
-    // Internal fields
     pub config_file_path: String,
     pub no_dts_resolution: Tristate,
     pub paths_base_path: String,
@@ -303,7 +285,6 @@ pub struct CompilerOptions {
     pub checkers: Option<i32>,
 }
 
-/// Empty compiler options (all defaults).
 pub fn empty_compiler_options() -> CompilerOptions {
     CompilerOptions::default()
 }
@@ -336,11 +317,7 @@ impl CompilerOptions {
     }
 
     pub fn get_module_resolution_kind(&self) -> ModuleResolutionKind {
-        // Go maps only Unknown/Classic through the module-kind default;
-        // an EXPLICIT node10 stays node10 (exports ignored, types/main +
-        // index fallbacks only) — lumping it into the remap made node10
-        // layouts resolve through `exports` (node10AlternateResult
-        // _noResolution must NOT resolve).
+
         match self.module_resolution {
             ModuleResolutionKind::Unknown | ModuleResolutionKind::Classic => {
                 match self.get_emit_module_kind() {
@@ -417,9 +394,7 @@ impl CompilerOptions {
         if value != Tristate::Unknown {
             return value == Tristate::True;
         }
-        // An unset `strict`-family option resolves ON: tsgo declares
-        // `strict` with DefaultValueDescription true and the CLI confirms
-        // TS2454/TS7010 fire with no flags.
+
         self.strict != Tristate::False
     }
 
@@ -510,7 +485,7 @@ mod tests {
     #[test]
     fn strict_option_value() {
         let mut opts = CompilerOptions::default();
-        // Unset strict + unset family option: ON (tsgo defaults strict true).
+
         assert!(opts.get_strict_option_value(Tristate::Unknown));
         opts.strict = Tristate::True;
         assert!(opts.get_strict_option_value(Tristate::Unknown));

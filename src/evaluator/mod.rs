@@ -1,14 +1,7 @@
-//! Constant expression evaluator, ported from `internal/evaluator/`.
-//!
-//! Evaluates constant expressions (numeric literals, string literals,
-//! template expressions, binary/unary operations on constants) for use
-//! in enum member initialization, const enum evaluation, etc.
-
 use crate::ast::*;
 use crate::jsnum::{Number, PseudoBigInt};
 use std::sync::Arc;
 
-/// The result of evaluating a constant expression.
 #[derive(Clone, Debug, Default)]
 pub struct EvalResult {
     pub value: Option<EvalValue>,
@@ -42,7 +35,6 @@ impl EvalResult {
     }
 }
 
-/// A evaluated constant value.
 #[derive(Clone, Debug, PartialEq)]
 pub enum EvalValue {
     Number(Number),
@@ -77,14 +69,8 @@ impl EvalValue {
     }
 }
 
-/// A function that evaluates an entity name expression (identifier or property access)
-/// to a constant value. This is provided by the caller (typically the checker).
 pub type EvaluateEntity = fn(&Arc<Node>, Option<&Arc<Node>>) -> EvalResult;
 
-/// Evaluate a constant expression.
-///
-/// `evaluate_entity` is called when an identifier or property access is encountered.
-/// It should resolve the entity to a constant value if possible.
 pub fn evaluate_expression(
     expr: &Arc<Node>,
     location: Option<&Arc<Node>>,
@@ -194,7 +180,6 @@ pub fn evaluate_expression(
                     }
                 }
 
-                // String concatenation
                 if operator == SyntaxKind::PlusToken {
                     let left_str = left.value.as_ref().map(|v| match v {
                         EvalValue::String(s) => Some(s.clone()),
@@ -264,7 +249,7 @@ pub fn evaluate_expression(
         }
         SyntaxKind::Identifier => evaluate_entity(expr, location),
         SyntaxKind::PropertyAccessExpression | SyntaxKind::ElementAccessExpression => {
-            // Check if the expression is an entity name expression
+
             let is_entity = match &expr.data {
                 NodeData::PropertyAccessExpression(data) => {
                     is_entity_name_expression(&data.expression)
@@ -312,7 +297,7 @@ fn evaluate_template_expression(
                 sb.push_str(&v.to_string());
             }
         }
-        // Append the literal part of the span
+
         match &span_data.literal.data {
             NodeData::TemplateMiddle(d) => sb.push_str(&d.text),
             NodeData::TemplateTail(d) => sb.push_str(&d.text),
@@ -330,7 +315,6 @@ fn evaluate_template_expression(
     )
 }
 
-/// Whether a node is an entity name expression (identifier or property access of entity names).
 fn is_entity_name_expression(node: &Arc<Node>) -> bool {
     match node.kind {
         SyntaxKind::Identifier => true,

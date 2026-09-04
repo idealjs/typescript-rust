@@ -1,17 +1,9 @@
-//! Indexing data structures (1:1 port of Go's `internal/ls/autoimport/index.go`).
-
 use std::collections::HashMap;
 
-/// A constraint for types that can provide their name.
 pub trait Named {
     fn name(&self) -> &str;
 }
 
-/// An index that maps uppercase letters to entries whose name starts with that
-/// letter, and lowercase letters to entries whose name contains a word starting
-/// with that letter.
-///
-/// Mirrors `autoimport.Index[T]` in Go.
 #[derive(Debug, Clone)]
 pub struct Index<T: Named + Clone> {
     pub entries: Vec<T>,
@@ -32,9 +24,6 @@ impl<T: Named + Clone> Index<T> {
         Self::default()
     }
 
-    /// Find entries whose name exactly matches `name`.
-    ///
-    /// Mirrors `Index.Find` in Go.
     pub fn find(&self, name: &str, case_sensitive: bool) -> Vec<T> {
         if self.entries.is_empty() || name.is_empty() {
             return Vec::new();
@@ -62,11 +51,6 @@ impl<T: Named + Clone> Index<T> {
         results
     }
 
-    /// Returns each entry whose name contains a word beginning with the first
-    /// character of `prefix`, and whose name contains all characters of `prefix`
-    /// in order (case-insensitive).
-    ///
-    /// Mirrors `Index.SearchWordPrefix` in Go.
     pub fn search_word_prefix(&self, prefix: &str) -> Vec<T> {
         if self.entries.is_empty() {
             return Vec::new();
@@ -113,9 +97,6 @@ impl<T: Named + Clone> Index<T> {
         results
     }
 
-    /// Adds a value to the index keyed by the first letter of each word in its name.
-    ///
-    /// Mirrors `Index.insertAsWords` in Go.
     pub fn insert_as_words(&mut self, value: T) {
         let name = value.name().to_string();
         if name.is_empty() {
@@ -147,9 +128,6 @@ impl<T: Named + Clone> Index<T> {
         }
     }
 
-    /// Creates a new `Index` containing only entries for which `filter` returns true.
-    ///
-    /// Mirrors `Index.Clone` in Go.
     pub fn clone_filtered(&self, filter: &dyn Fn(&T) -> bool) -> Index<T> {
         let mut new_idx = Index::<T>::new();
         new_idx.entries = Vec::with_capacity(self.entries.len());
@@ -180,9 +158,6 @@ impl<T: Named + Clone> Index<T> {
     }
 }
 
-/// Checks if `str` contains all characters from `pattern` in order (case-insensitive).
-///
-/// Mirrors `containsCharsInOrder` in Go.
 fn contains_chars_in_order(s: &str, pattern: &str) -> bool {
     let str_lower = s.to_ascii_lowercase();
     let pattern_lower = pattern.to_ascii_lowercase();
@@ -196,16 +171,10 @@ fn contains_chars_in_order(s: &str, pattern: &str) -> bool {
     pattern_chars.peek().is_none()
 }
 
-/// Case-insensitive string equality (ASCII).
 fn eq_ignore_ascii_case(a: &str, b: &str) -> bool {
     a.eq_ignore_ascii_case(b)
 }
 
-/// Splits an identifier into its constituent words based on camelCase and
-/// snake_case conventions by returning the starting byte indices of each word.
-/// The first index is always 0.
-///
-/// Mirrors `wordIndices` in Go (util.go).
 pub fn word_indices(s: &str) -> Vec<usize> {
     let mut indices = Vec::new();
     let bytes = s.as_bytes();

@@ -1,12 +1,6 @@
-//! Multimap (map from key to a list of values), ported from
-//! `internal/collections/multimap.go`.
-
 use std::collections::HashMap;
 use std::hash::Hash;
 
-/// A map where each key maps to a list of values.
-///
-/// Mirrors `collections.MultiMap[K, V]` in Go.
 #[derive(Debug, Clone, Default)]
 pub struct MultiMap<K: Eq + Hash + Clone, V: Clone + PartialEq> {
     inner: HashMap<K, Vec<V>>,
@@ -25,30 +19,22 @@ impl<K: Eq + Hash + Clone, V: Clone + PartialEq> MultiMap<K, V> {
         }
     }
 
-    /// True if `key` has at least one value.
     pub fn contains_key(&self, key: &K) -> bool {
         self.inner.contains_key(key)
     }
 
-    /// `has` is an alias for `contains_key`, mirroring the Go API name.
     pub fn has(&self, key: &K) -> bool {
         self.contains_key(key)
     }
 
-    /// Get the slice of values for `key` (empty if absent).
     pub fn get(&self, key: &K) -> &[V] {
         self.inner.get(key).map(|v| v.as_slice()).unwrap_or(&[])
     }
 
-    /// Add `value` to the list for `key`.
     pub fn add(&mut self, key: K, value: V) {
         self.inner.entry(key).or_default().push(value);
     }
 
-    /// Remove the first occurrence of `value` from the list for `key`.
-    /// If the list becomes empty, the key is removed entirely.
-    ///
-    /// Mirrors `MultiMap.Remove` in Go.
     pub fn remove(&mut self, key: &K, value: &V) {
         if let Some(values) = self.inner.get_mut(key) {
             if let Some(pos) = values.iter().position(|v| v == value) {
@@ -60,7 +46,6 @@ impl<K: Eq + Hash + Clone, V: Clone + PartialEq> MultiMap<K, V> {
         }
     }
 
-    /// Remove all values for `key`.
     pub fn remove_all(&mut self, key: &K) {
         self.inner.remove(key);
     }
@@ -90,9 +75,6 @@ impl<K: Eq + Hash + Clone, V: Clone + PartialEq> MultiMap<K, V> {
     }
 }
 
-/// Group items by a key function into a `MultiMap`.
-///
-/// Mirrors `collections.GroupBy` in Go.
 pub fn group_by<K, V, F>(items: &[V], group_id: F) -> MultiMap<K, V>
 where
     K: Eq + Hash + Clone,

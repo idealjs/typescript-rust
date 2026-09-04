@@ -1,21 +1,15 @@
-//! Language Service (1:1 port of Go's `internal/ls/`).
-//!
-//! LSP-agnostic layer between the LSP server and the compiler.
-
 pub mod change;
 pub mod lsconv;
 pub mod lsutil;
 
 pub mod autoimport;
 
-// Core infrastructure
 pub mod api;
 pub mod constants;
 pub mod cross_project;
 pub mod host;
 pub mod language_service;
 
-// Feature providers
 pub mod auto_insert;
 pub mod call_hierarchy;
 pub mod code_actions;

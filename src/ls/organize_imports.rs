@@ -1,5 +1,3 @@
-//! Organize imports provider (1:1 port of Go's `internal/ls/organizeimports.go`).
-
 #![allow(dead_code)]
 
 use std::sync::Arc;
@@ -14,12 +12,7 @@ use crate::scanner;
 use super::language_service::LanguageService;
 
 impl LanguageService {
-    /// Organize imports: remove unused, coalesce, and sort.
-    ///
-    /// Mirrors `OrganizeImports`:
-    /// 1. Walk import declarations in the source file.
-    /// 2. Sort them by module specifier (alphabetical).
-    /// 3. Return `TextEdits` for the reorganized import block.
+
     pub fn organize_imports(
         &self,
         source_file: &Arc<SourceFile>,
@@ -29,26 +22,22 @@ impl LanguageService {
         let line_map = &source_file.line_map;
         let text = &source_file.text;
 
-        // Collect all import declarations from the source file.
         let imports = collect_import_declarations(&source_file.node);
 
         if imports.is_empty() {
             return std::collections::HashMap::new();
         }
 
-        // Determine the range of the import block (from first to last import).
         let first = imports.first().unwrap();
         let last = imports.last().unwrap();
         let block_start = first.pos();
         let block_end = last.end();
 
-        // Build a list of (sort_key, import_text) for each import.
         let mut import_infos: Vec<ImportInfo> = Vec::new();
         for imp in &imports {
             let specifier = get_module_specifier(imp);
             let is_type_only = is_type_only_import(imp);
 
-            // Check if the import is used (via checker).
             let is_used = is_import_used(program, source_file, imp);
 
             let start = scanner::skip_trivia(text, imp.pos());
@@ -63,25 +52,23 @@ impl LanguageService {
             });
         }
 
-        // Sort: unused first (for removal), then type-only, then alphabetical.
         import_infos.sort_by(|a, b| {
-            // Unused imports go to the top (they'll be removed).
+
             match (a.is_used, b.is_used) {
                 (false, true) => return std::cmp::Ordering::Less,
                 (true, false) => return std::cmp::Ordering::Greater,
                 _ => {}
             }
-            // Type-only imports before value imports.
+
             match (a.is_type_only, b.is_type_only) {
                 (true, false) => return std::cmp::Ordering::Less,
                 (false, true) => return std::cmp::Ordering::Greater,
                 _ => {}
             }
-            // Alphabetical by module specifier.
+
             a.sort_key.cmp(&b.sort_key)
         });
 
-        // Build the new import block text, excluding unused imports.
         let new_text: String = import_infos
             .iter()
             .filter(|info| info.is_used)
@@ -90,7 +77,6 @@ impl LanguageService {
             .join("\n")
             + "\n";
 
-        // Create the TextEdit replacing the entire import block.
         let edit = TextEdit {
             range: Range {
                 start: offset_to_position(line_map, block_start),
@@ -105,7 +91,6 @@ impl LanguageService {
     }
 }
 
-/// Information about a single import declaration used for sorting.
 struct ImportInfo {
     sort_key: String,
     is_type_only: bool,
@@ -113,7 +98,6 @@ struct ImportInfo {
     text: String,
 }
 
-/// Collect all `ImportDeclaration` nodes from a source file's statements.
 fn collect_import_declarations(file_node: &Arc<Node>) -> Vec<Arc<Node>> {
     let mut imports = Vec::new();
     if let NodeData::SourceFile(data) = &file_node.data {
@@ -126,7 +110,6 @@ fn collect_import_declarations(file_node: &Arc<Node>) -> Vec<Arc<Node>> {
     imports
 }
 
-/// Extract the module specifier text from an import declaration.
 fn get_module_specifier(node: &Arc<Node>) -> String {
     if let NodeData::ImportDeclaration(data) = &node.data {
         return data.module_specifier.text().to_string();
@@ -134,10 +117,9 @@ fn get_module_specifier(node: &Arc<Node>) -> String {
     String::new()
 }
 
-/// Check if an import declaration is type-only.
 fn is_type_only_import(node: &Arc<Node>) -> bool {
     if let NodeData::ImportDeclaration(data) = &node.data {
-        // Check if the import clause is type-only.
+
         if let Some(ref clause) = data.import_clause {
             if let NodeData::ImportClause(ic) = &clause.data {
                 return ic.phase_modifier == Some(SyntaxKind::TypeKeyword);
@@ -147,15 +129,13 @@ fn is_type_only_import(node: &Arc<Node>) -> bool {
     false
 }
 
-/// Check if an import is used in the source file.
 fn is_import_used(program: &Arc<Program>, source_file: &Arc<SourceFile>, imp: &Arc<Node>) -> bool {
     let mut checker = program.build_checker();
 
-    // Get the imported identifiers and check if any are used.
     if let NodeData::ImportDeclaration(data) = &imp.data {
         if let Some(ref clause) = data.import_clause {
             let identifiers = collect_imported_identifiers(clause);
-            // If no named identifiers (e.g. side-effect import), keep it.
+
             if identifiers.is_empty() {
                 return true;
             }
@@ -165,7 +145,7 @@ fn is_import_used(program: &Arc<Program>, source_file: &Arc<SourceFile>, imp: &A
                 }
             }
         }
-        // Side-effect-only import (no import clause): `import "mod";`
+
         if data.import_clause.is_none() {
             return true;
         }
@@ -173,16 +153,15 @@ fn is_import_used(program: &Arc<Program>, source_file: &Arc<SourceFile>, imp: &A
     false
 }
 
-/// Collect all identifier nodes declared by an import clause.
 fn collect_imported_identifiers(clause: &Arc<Node>) -> Vec<Arc<Node>> {
     let mut result = Vec::new();
     match &clause.data {
         NodeData::ImportClause(data) => {
-            // Default import name.
+
             if let Some(ref name) = data.name {
                 result.push(Arc::clone(name));
             }
-            // Named bindings (named imports or namespace import).
+
             if let Some(ref bindings) = data.named_bindings {
                 match &bindings.data {
                     NodeData::NamedImports(ni) => {
@@ -204,9 +183,6 @@ fn collect_imported_identifiers(clause: &Arc<Node>) -> Vec<Arc<Node>> {
     result
 }
 
-/// Group contiguous import declarations by newline gaps.
-///
-/// Mirrors `groupByNewlineContiguous`.
 pub fn group_by_newline_contiguous(
     source_file: &Arc<SourceFile>,
     imports: &[Arc<Node>],
@@ -222,8 +198,6 @@ pub fn group_by_newline_contiguous(
             .unwrap_or(0);
         let curr_start = imp.pos();
 
-        // If there is a blank line between the previous import and this one,
-        // start a new group.
         if !groups.is_empty() && has_blank_line_between(text, prev_end, curr_start) {
             groups.push(Vec::new());
         } else if groups.is_empty() {
@@ -234,7 +208,6 @@ pub fn group_by_newline_contiguous(
     groups
 }
 
-/// Check whether there is a blank line between two offsets in the text.
 fn has_blank_line_between(text: &str, start: usize, end: usize) -> bool {
     if start >= end || end > text.len() {
         return false;
@@ -243,9 +216,6 @@ fn has_blank_line_between(text: &str, start: usize, end: usize) -> bool {
     between.lines().filter(|l| l.trim().is_empty()).count() > 1
 }
 
-// ─── Helper functions ────────────────────────────────────────────────
-
-/// Convert a byte offset to an LSP `Position`.
 fn offset_to_position(line_map: &LineMap, offset: usize) -> Position {
     let line = line_of_offset(line_map, offset);
     let line_start = line_map.line_starts.get(line).copied().unwrap_or(0) as usize;
@@ -255,7 +225,6 @@ fn offset_to_position(line_map: &LineMap, offset: usize) -> Position {
     }
 }
 
-/// Binary search for the line number of a byte offset.
 fn line_of_offset(line_map: &LineMap, offset: usize) -> usize {
     match line_map.line_starts.binary_search(&(offset as u32)) {
         Ok(idx) => idx,

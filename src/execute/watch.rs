@@ -1,8 +1,3 @@
-//! `--watch` mode: compile once, then watch the project directory for source
-//! changes and recompile. Mirrors the Go oracle's watch loop using the portable
-//! `notify::PollWatcher` (polling-based, so no platform-specific backend is
-//! required).
-
 use std::sync::mpsc::channel;
 use std::time::Duration;
 
@@ -13,16 +8,6 @@ use crate::core::compiler_options::CompilerOptions;
 use crate::locale::Locale;
 use crate::tsoptions::{ParsedCommandLine, get_parsed_command_line_of_config_file};
 
-/// Run the compiler in watch mode.
-///
-/// Performs an initial compilation, sets up a file watcher on the directory
-/// containing `tsconfig.json` (or the current directory when no config file is
-/// present), and recompiles whenever a source file changes. The config file is
-/// re-read on each recompilation so that edits to `tsconfig.json` take effect.
-///
-/// The loop runs until the process is interrupted (e.g. via Ctrl+C); there is
-/// no graceful in-process shutdown, matching the Go implementation, which also
-/// relies on process termination to exit watch mode.
 pub(crate) fn watch_mode(
     sys: &dyn System,
     config: ParsedCommandLine,
@@ -31,7 +16,7 @@ pub(crate) fn watch_mode(
     pretty: bool,
     locale: Option<Locale>,
 ) -> CommandLineResult {
-    // 1. Initial compilation + start banner.
+
     {
         let mut writer = sys.writer();
         let _ = writeln!(writer);
@@ -51,7 +36,6 @@ pub(crate) fn watch_mode(
     );
     print_watch_summary(sys, result.status);
 
-    // 2. Set up the file watcher on the project directory.
     let (tx, rx) = channel::<notify::Event>();
     let mut watcher = notify::PollWatcher::new(
         move |res: notify::Result<notify::Event>| {
@@ -71,11 +55,8 @@ pub(crate) fn watch_mode(
         .watch(watch_dir, RecursiveMode::Recursive)
         .expect("failed to watch project directory");
 
-    // Keep the watcher alive for the lifetime of the event loop. (Note: a bare
-    // `let _ = watcher;` would drop it immediately; a named binding does not.)
     let _watcher = watcher;
 
-    // 3. Event loop: recompile on source-file changes.
     loop {
         match rx.recv() {
             Ok(event) => {
@@ -84,9 +65,6 @@ pub(crate) fn watch_mode(
                     continue;
                 }
 
-                // Debounce: wait briefly for a burst of events, then drain the
-                // queue so a single save (which often triggers several events)
-                // only causes one recompilation.
                 std::thread::sleep(Duration::from_millis(100));
                 while rx.try_recv().is_ok() {}
 
@@ -116,12 +94,6 @@ pub(crate) fn watch_mode(
     result
 }
 
-/// Perform a single compilation.
-///
-/// When a config file is present it is re-read (and merged with the saved
-/// command-line `base_options`) so that edits to `tsconfig.json` are picked up.
-/// When there is no config file, the already-parsed command-line config is
-/// reused.
 pub(super) fn compile_once(
     sys: &dyn System,
     config: &ParsedCommandLine,
@@ -143,8 +115,6 @@ pub(super) fn compile_once(
     perform_compilation(sys, fresh, pretty, locale.as_ref())
 }
 
-/// Print the post-compilation summary line shown after each compile in watch
-/// mode.
 pub(super) fn print_watch_summary(sys: &dyn System, status: ExitStatus) {
     let mut writer = sys.writer();
     if status == ExitStatus::Success {
@@ -162,8 +132,6 @@ pub(super) fn print_watch_summary(sys: &dyn System, status: ExitStatus) {
     }
 }
 
-/// Whether a path refers to a TypeScript/JavaScript/JSON source file whose
-/// change should trigger a recompilation.
 pub(super) fn is_source_file(path: &str) -> bool {
     path.ends_with(".ts")
         || path.ends_with(".tsx")
@@ -174,7 +142,6 @@ pub(super) fn is_source_file(path: &str) -> bool {
         || path.ends_with(".cts")
 }
 
-/// A compact `HH:MM:SS` timestamp (UTC) for watch-mode log lines.
 pub(super) fn timestamp() -> String {
     let now = std::time::SystemTime::now()
         .duration_since(std::time::UNIX_EPOCH)

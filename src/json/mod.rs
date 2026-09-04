@@ -1,9 +1,3 @@
-//! JSON utilities, ported from `internal/json/`.
-//!
-//! In the Go version, this is a thin wrapper around `go-json-experiment`.
-//! In Rust, we use `serde_json` directly, re-exporting the key types and
-//! providing helper functions that mirror the Go API surface.
-
 pub use serde_json::{
     Deserializer, Map, Serializer, Value, from_slice, from_str, to_string, to_string_pretty,
     to_value, to_vec, to_vec_pretty,
@@ -11,7 +5,6 @@ pub use serde_json::{
 
 use std::io::Write;
 
-/// Serialize a value to a JSON string with indentation.
 pub fn marshal_indent<T: serde::Serialize>(
     value: &T,
     indent: &str,
@@ -20,29 +13,25 @@ pub fn marshal_indent<T: serde::Serialize>(
         return marshal(value);
     }
     let buf = serde_json::to_vec_pretty(value)?;
-    // serde_json already uses 2-space indentation; re-format with the given indent
+
     let s = String::from_utf8_lossy(&buf);
     Ok(reindent(&s, indent))
 }
 
-/// Serialize a value to a JSON string.
 pub fn marshal<T: serde::Serialize>(value: &T) -> Result<String, serde_json::Error> {
     serde_json::to_string(value)
 }
 
-/// Deserialize a JSON string into a value.
 pub fn unmarshal<'de, T: serde::Deserialize<'de>>(data: &'de str) -> Result<T, serde_json::Error> {
     serde_json::from_str(data)
 }
 
-/// Deserialize a JSON byte slice into a value.
 pub fn unmarshal_slice<'de, T: serde::Deserialize<'de>>(
     data: &'de [u8],
 ) -> Result<T, serde_json::Error> {
     serde_json::from_slice(data)
 }
 
-/// Serialize a value and write it to a writer.
 pub fn marshal_write<W: Write, T: serde::Serialize>(
     writer: &mut W,
     value: &T,
@@ -50,7 +39,6 @@ pub fn marshal_write<W: Write, T: serde::Serialize>(
     serde_json::to_writer(writer, value)
 }
 
-/// Serialize a value with indentation and write it to a writer.
 pub fn marshal_indent_write<W: Write, T: serde::Serialize>(
     writer: &mut W,
     value: &T,
@@ -65,7 +53,6 @@ pub fn marshal_indent_write<W: Write, T: serde::Serialize>(
         .map_err(|e| serde_json::Error::io(e))
 }
 
-/// Re-indent pretty-printed JSON, replacing 2-space indentation with the given indent string.
 fn reindent(s: &str, indent: &str) -> String {
     let mut result = String::with_capacity(s.len());
     for line in s.lines() {
@@ -78,7 +65,7 @@ fn reindent(s: &str, indent: &str) -> String {
         result.push_str(trimmed);
         result.push('\n');
     }
-    // Remove trailing newline
+
     if result.ends_with('\n') {
         result.pop();
     }

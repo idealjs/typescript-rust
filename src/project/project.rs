@@ -1,5 +1,3 @@
-//! Project struct (1:1 port of Go's `internal/project/project.go`).
-
 #![allow(dead_code)]
 
 use std::collections::HashSet;
@@ -9,18 +7,10 @@ use crate::compiler::Program;
 use crate::tsoptions::ParsedCommandLine;
 use crate::tspath::Path;
 
-
-/// The inferred project's config file path (a fixed sentinel).
-///
-/// Go: `const inferredProjectName = "/dev/null/inferred"`.
 pub const INFERRED_PROJECT_NAME: &str = "/dev/null/inferred";
 
-/// Horizontal rule for log output.
 pub const HR: &str = "-----------------------------------------------";
 
-/// The kind of a project: inferred (no tsconfig) or configured (has tsconfig).
-///
-/// Go: `type Kind int`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Kind {
     Inferred,
@@ -36,9 +26,6 @@ impl std::fmt::Display for Kind {
     }
 }
 
-/// Describes how the program was updated.
-///
-/// Go: `type ProgramUpdateKind int`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum ProgramUpdateKind {
     #[default]
@@ -48,18 +35,12 @@ pub enum ProgramUpdateKind {
     NewFiles,
 }
 
-/// The kind of project creation result.
-///
-/// Go: `type CreateProgramResult struct { ... }`.
 #[derive(Default)]
 pub struct CreateProgramResult {
     pub program: Option<Arc<Program>>,
     pub update_kind: ProgramUpdateKind,
 }
 
-/// Represents a TypeScript project (configured or inferred).
-///
-/// Go: `type Project struct { ... }`.
 pub struct Project {
     pub kind: Kind,
     pub current_directory: String,
@@ -109,14 +90,11 @@ impl Project {
         &self.config_file_name
     }
 
-    /// Returns a short, human-readable name relative to `cwd`.
-    ///
-    /// Go: `func (p *Project) DisplayName(cwd string) string`.
     pub fn display_name(&self, cwd: &str) -> String {
         if self.kind == Kind::Inferred {
             return crate::tspath::get_base_file_name(&self.current_directory);
         }
-        // Simplified: return the config file name as-is.
+
         let _ = cwd;
         self.config_file_name.clone()
     }
@@ -125,7 +103,6 @@ impl Project {
         &self.config_file_path
     }
 
-    /// Panics if kind is not Configured.
     pub fn config_file_name_str(&self) -> &str {
         if self.kind != Kind::Configured {
             panic!("ConfigFileName called on non-configured project");
@@ -133,7 +110,6 @@ impl Project {
         &self.config_file_name
     }
 
-    /// Panics if kind is not Configured.
     pub fn config_file_path(&self) -> &Path {
         if self.kind != Kind::Configured {
             panic!("ConfigFilePath called on non-configured project");
@@ -157,9 +133,6 @@ impl Project {
         false
     }
 
-    /// Creates a shallow clone of the project.
-    ///
-    /// Go: `func (p *Project) Clone() *Project`.
     pub fn clone_shallow(&self) -> Project {
         Project {
             kind: self.kind,
@@ -179,11 +152,10 @@ impl Project {
         }
     }
 
-    /// Reassigns the project's command line and resets derived state.
     pub fn set_command_line(&mut self, command_line: ParsedCommandLine) {
         self.command_line = Some(command_line);
         *self.command_line_with_typings_files.lock().unwrap() = None;
-        // Reset the OnceLock by replacing it
+
         self.command_line_with_typings_files_init = OnceLock::new();
         self.potential_project_references = None;
         self.dirty = true;

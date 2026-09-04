@@ -1,11 +1,3 @@
-//! Completions provider (1:1 port of Go's `internal/ls/completions.go`).
-//!
-//! This is a large file (~6K lines in Go). This port includes the main types
-//! (`CompletionItem`, `CompletionList`) and key entry points. Internal helpers
-//! that depend on checker/printer/scanner/nodebuilder are stubbed.
-//!
-//! Mirrors Go's `internal/ls/completions.go`.
-
 #![allow(dead_code)]
 
 use std::sync::Arc;
@@ -22,10 +14,8 @@ use super::types::{
     CompletionContext, CompletionItem, CompletionItemData, CompletionList,
 };
 
-/// Error indicating that completions need auto-imports to be prepared.
 pub const ERR_NEEDS_AUTO_IMPORTS: &str = "completion list needs auto imports";
 
-/// Completion kind.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum CompletionKind {
     None,
@@ -40,7 +30,6 @@ pub enum CompletionKind {
     JsDocParameterName,
 }
 
-/// A completion data wrapper (holds symbols, auto-imports, and metadata).
 pub struct CompletionDataData {
     pub symbols: Vec<Arc<Symbol>>,
     pub completion_kind: CompletionKind,
@@ -48,9 +37,7 @@ pub struct CompletionDataData {
 }
 
 impl LanguageService {
-    /// Provide completions for a position.
-    ///
-    /// Mirrors `ProvideCompletion`.
+
     pub fn provide_completion(
         &self,
         document_uri: &DocumentUri,
@@ -65,13 +52,6 @@ impl LanguageService {
         }
     }
 
-    /// Get completions at a position.
-    ///
-    /// Mirrors `GetCompletionsAtPosition`.
-    ///
-    /// This implementation focuses on **identifier completions** from scope:
-    /// variables, functions, classes, interfaces, types, and enums that are
-    /// visible at the cursor position.
     pub fn get_completions_at_position(
         &self,
         file: &Arc<SourceFile>,
@@ -79,31 +59,23 @@ impl LanguageService {
         _trigger_character: Option<&str>,
         _include_symbols: bool,
     ) -> Result<CompletionList, String> {
-        // Find the node at the cursor position.
+
         let node = find_deepest_node(&file.node, position);
 
         let checker = program_build_checker(&self.get_program());
 
-        // Gather symbols in scope. The meaning covers value, type, and
-        // namespace spaces so that identifiers, types, and modules all
-        // complete.
         let meaning = SymbolFlags::VALUE
             .union(SymbolFlags::TYPE)
             .union(SymbolFlags::NAMESPACE);
         let mut symbols = checker.get_symbols_in_scope(&node, meaning);
 
-        // Fallback: `get_symbols_in_scope` may be incomplete. Collect
-        // top-level and local declaration symbols by walking the AST and
-        // resolving declaration names via the checker's symbol map.
         if symbols.is_empty() {
             symbols = collect_scope_symbols_fallback(&checker, file, &node);
         }
 
-        // De-duplicate by symbol id, preserving first-seen order.
         let mut seen: std::collections::HashSet<u64> = std::collections::HashSet::new();
         symbols.retain(|s| seen.insert(s.id()));
 
-        // Convert each symbol into a completion item.
         let items: Vec<CompletionItem> = symbols
             .iter()
             .filter(|s| !s.name.is_empty() && !s.name.starts_with('\u{FE}'))
@@ -116,30 +88,23 @@ impl LanguageService {
         })
     }
 
-    /// Resolve a completion item's details.
-    ///
-    /// Mirrors `GetCompletionEntryDetails`.
     pub fn get_completion_entry_details(
         &self,
         _file: &Arc<SourceFile>,
         _position: usize,
         _name: &str,
     ) -> Option<CompletionItem> {
-        // TODO: requires checker symbol resolution for full detail
+
         None
     }
 }
 
-/// Build a checker from a program (helper to keep call sites readable).
 fn program_build_checker(program: &Arc<Program>) -> Checker {
     program.build_checker()
 }
 
-/// Map a `SymbolFlags` value to an LSP `CompletionItemKind`.
-///
-/// Mirrors the `completionKind` switch in Go's completions logic.
 fn symbol_to_completion_kind(flags: SymbolFlags) -> u32 {
-    // LSP CompletionItemKind values.
+
     const METHOD: u32 = 2;
     const FUNCTION: u32 = 3;
     const CONSTRUCTOR: u32 = 4;
@@ -196,7 +161,7 @@ fn symbol_to_completion_kind(flags: SymbolFlags) -> u32 {
         return VARIABLE;
     }
     if flags.contains(SymbolFlags::BlockScopedVariable) {
-        // Heuristic: `const`-flavored variables show as constants.
+
         if flags.contains(SymbolFlags::BlockScopedVariable) {
             return CONSTANT;
         }
@@ -210,7 +175,6 @@ fn symbol_to_completion_kind(flags: SymbolFlags) -> u32 {
     VARIABLE
 }
 
-/// Convert a scope symbol into a `CompletionItem`.
 fn symbol_to_completion_item(symbol: &Arc<Symbol>) -> CompletionItem {
     CompletionItem {
         label: symbol.name.clone(),
@@ -220,7 +184,7 @@ fn symbol_to_completion_item(symbol: &Arc<Symbol>) -> CompletionItem {
         sort_text: None,
         filter_text: None,
         insert_text: Some(symbol.name.clone()),
-        insert_text_format: Some(1), // PlainText
+        insert_text_format: Some(1),
         text_edit: None,
         additional_text_edits: None,
         commit_characters: None,
@@ -228,7 +192,6 @@ fn symbol_to_completion_item(symbol: &Arc<Symbol>) -> CompletionItem {
     }
 }
 
-/// Produce a short human-readable detail string from symbol flags.
 fn flags_to_detail(flags: &SymbolFlags) -> String {
     if flags.contains(SymbolFlags::Function) {
         "function".to_string()
@@ -253,9 +216,6 @@ fn flags_to_detail(flags: &SymbolFlags) -> String {
     }
 }
 
-/// Fallback scope-symbol collector: walks the source file AST collecting
-/// declaration symbols reachable from the cursor. Used when
-/// `get_symbols_in_scope` returns an empty result.
 fn collect_scope_symbols_fallback(
     checker: &Checker,
     file: &Arc<SourceFile>,
@@ -264,7 +224,6 @@ fn collect_scope_symbols_fallback(
     let mut result: Vec<Arc<Symbol>> = Vec::new();
     let mut seen: std::collections::HashSet<u64> = std::collections::HashSet::new();
 
-    // Source-file locals (top-level declarations).
     let symbol_map = checker.program.symbol_map();
     if let Some(locals) = symbol_map.locals_of(&file.node) {
         for sym in locals.entries.values() {
@@ -274,20 +233,18 @@ fn collect_scope_symbols_fallback(
         }
     }
 
-    // Walk the AST collecting declaration-name symbols.
     collect_declaration_symbols(checker, &file.node, &mut seen, &mut result);
 
     result
 }
 
-/// Recursively collect symbols from declaration nodes.
 fn collect_declaration_symbols(
     checker: &Checker,
     node: &Arc<Node>,
     seen: &mut std::collections::HashSet<u64>,
     result: &mut Vec<Arc<Symbol>>,
 ) {
-    // Declaration kinds whose name carries a symbol.
+
     if is_declaration_kind(node.kind) {
         if let Some(sym) = checker.get_symbol_at_location(node) {
             if seen.insert(sym.id()) {
@@ -302,7 +259,6 @@ fn collect_declaration_symbols(
     });
 }
 
-/// Whether a syntax kind is a declaration with an associated symbol.
 fn is_declaration_kind(kind: SyntaxKind) -> bool {
     matches!(
         kind,
@@ -327,7 +283,6 @@ fn is_declaration_kind(kind: SyntaxKind) -> bool {
     )
 }
 
-/// Find the deepest AST node whose source range covers `offset`.
 fn find_deepest_node(node: &Arc<Node>, offset: usize) -> Arc<Node> {
     let mut deepest = Arc::clone(node);
     loop {
@@ -349,7 +304,6 @@ fn find_deepest_node(node: &Arc<Node>, offset: usize) -> Arc<Node> {
     deepest
 }
 
-/// Convert an LSP `Position` to a byte offset within a line map.
 fn lsp_position_to_offset(line_map: &LineMap, position: &Position) -> usize {
     let line = position.line as usize;
     let character = position.character as usize;
@@ -357,9 +311,6 @@ fn lsp_position_to_offset(line_map: &LineMap, position: &Position) -> usize {
     line_start + character
 }
 
-/// Ensure each item in a completion list has `data` populated.
-///
-/// Mirrors `ensureItemData`.
 pub fn ensure_item_data(file_name: &str, pos: usize, mut list: CompletionList) -> CompletionList {
     for item in &mut list.items {
         if item.data.is_none() {

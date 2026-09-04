@@ -1,18 +1,10 @@
-//! Semaphores for concurrency limiting, ported from
-//! `internal/core/semaphore.go`.
-
 use std::sync::{Condvar, Mutex};
 
-/// A semaphore that can be acquired (potentially blocking) and released.
-///
-/// Mirrors `core.Semaphore` in Go. The Go API returns a `release func()`;
-/// in Rust we use a `SemaphoreGuard` that releases on drop.
 pub trait Semaphore: Send + Sync {
-    /// Acquire a permit, blocking until one is available.
+
     fn acquire(&self) -> SemaphoreGuard<'_>;
 }
 
-/// A guard that releases the semaphore permit when dropped.
 pub struct SemaphoreGuard<'a> {
     release: Option<Box<dyn FnOnce() + 'a>>,
 }
@@ -33,9 +25,6 @@ impl<'a> Drop for SemaphoreGuard<'a> {
     }
 }
 
-/// An unlimited semaphore that never blocks.
-///
-/// Mirrors `core.UnlimitedSemaphore` in Go.
 pub struct UnlimitedSemaphore;
 
 impl Semaphore for UnlimitedSemaphore {
@@ -48,10 +37,6 @@ struct Inner {
     available: usize,
 }
 
-/// A counting semaphore with a fixed maximum concurrency.
-///
-/// Mirrors `core.LimitedSemaphore` in Go. Uses `Mutex + Condvar` for
-/// blocking acquisition.
 pub struct LimitedSemaphore {
     inner: Mutex<Inner>,
     cvar: Condvar,
@@ -77,10 +62,7 @@ impl Semaphore for LimitedSemaphore {
         }
         guard.available -= 1;
         SemaphoreGuard::new(move || {
-            // We can't capture `self` here because the guard's lifetime is
-            // tied to `&self`. Instead, we use a raw pointer to self, which
-            // is safe because the guard cannot outlive the semaphore (the
-            // lifetime 'a ensures this).
+
             let this = unsafe { &*(self as *const Self) };
             let mut guard = this.inner.lock().unwrap();
             guard.available += 1;

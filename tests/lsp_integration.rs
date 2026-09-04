@@ -1,9 +1,3 @@
-//! LSP integration tests — verify LanguageService providers work end-to-end.
-//!
-//! These tests build a real Program (parse + bind + check) and exercise
-//! the LSP feature providers (hover, definition, folding, symbols, etc.)
-//! against actual TypeScript source code.
-
 use std::sync::Arc;
 
 use tsox::bundled::lib_path;
@@ -17,10 +11,6 @@ use tsox::lsp::lsproto::lsp::{DocumentUri, Position};
 use tsox::tsoptions::parse_command_line;
 use tsox::tspath::Path;
 use tsox::vfs::{FS, InMemoryFS};
-
-// ────────────────────────────────────────────────────────────────────────────
-// Test host — minimal Host implementation for in-memory testing
-// ────────────────────────────────────────────────────────────────────────────
 
 struct TestHost {
     fs: Arc<InMemoryFS>,
@@ -76,10 +66,6 @@ impl Host for TestHost {
     }
 }
 
-// ────────────────────────────────────────────────────────────────────────────
-// Helpers
-// ────────────────────────────────────────────────────────────────────────────
-
 fn make_language_service(source: &str) -> (LanguageService, DocumentUri) {
     make_language_service_named("/proj/test.ts", source)
 }
@@ -106,7 +92,6 @@ fn make_language_service_named(file_name: &str, source: &str) -> (LanguageServic
     let ls_host: Box<dyn Host> = Box::new(TestHost { fs });
     let ls = LanguageService::new(Path::from("/proj"), program, ls_host, file_name);
 
-    // DocumentUri requires a valid URI scheme
     let uri = DocumentUri(format!("file://{}", file_name));
     (ls, uri)
 }
@@ -115,19 +100,14 @@ fn pos(line: u32, character: u32) -> Position {
     Position { line, character }
 }
 
-// ────────────────────────────────────────────────────────────────────────────
-// Hover tests
-// ────────────────────────────────────────────────────────────────────────────
-
 #[test]
 fn lsp_hover_on_variable() {
-    //                0123456789...
+
     let source = "const x = 42;\n";
     let (ls, uri) = make_language_service(source);
 
     let hover = ls.provide_hover(&uri, pos(0, 7));
-    // Hover should return Some with content (or None if checker can't resolve).
-    // Either way, it should not panic.
+
     if let Some(h) = hover {
         assert!(
             h.contents.markup_content.is_some() || h.contents.string.is_some(),
@@ -141,9 +121,8 @@ fn lsp_hover_on_function() {
     let source = "function greet(name: string): string {\n  return 'hello ' + name;\n}\n";
     let (ls, uri) = make_language_service(source);
 
-    // Position on 'greet' identifier
     let _hover = ls.provide_hover(&uri, pos(0, 10));
-    // Should not panic regardless of result.
+
 }
 
 #[test]
@@ -151,14 +130,8 @@ fn lsp_hover_returns_none_for_empty_position() {
     let source = "const x = 1;\n";
     let (ls, uri) = make_language_service(source);
 
-    // Position far beyond the file content — should not crash.
-    // May return None or a fallback hover.
     let _hover = ls.provide_hover(&uri, pos(5, 0));
 }
-
-// ────────────────────────────────────────────────────────────────────────────
-// Folding range tests
-// ────────────────────────────────────────────────────────────────────────────
 
 #[test]
 fn lsp_folding_class_body() {
@@ -166,8 +139,7 @@ fn lsp_folding_class_body() {
     let (ls, uri) = make_language_service(source);
 
     let ranges: Vec<FoldingRange> = ls.provide_folding_range(&uri);
-    // Should have at least 2 folding ranges (class body + method body).
-    // (The exact count depends on how many multi-line nodes are detected.)
+
     assert!(
         !ranges.is_empty(),
         "multi-line class should have folding ranges, got {}",
@@ -203,10 +175,6 @@ fn lsp_folding_region_delimiters() {
     );
 }
 
-// ────────────────────────────────────────────────────────────────────────────
-// Selection range tests
-// ────────────────────────────────────────────────────────────────────────────
-
 #[test]
 fn lsp_selection_range_returns_hierarchy() {
     let source = "const x = 1 + 2;\n";
@@ -215,14 +183,9 @@ fn lsp_selection_range_returns_hierarchy() {
     let ranges = ls.provide_selection_ranges(&uri, &[pos(0, 10)]);
     assert_eq!(ranges.len(), 1, "should return one selection range");
 
-    // The selection range should be valid (no panic).
     let sr = &ranges[0];
     let _ = sr.range;
 }
-
-// ────────────────────────────────────────────────────────────────────────────
-// Document symbol tests
-// ────────────────────────────────────────────────────────────────────────────
 
 #[test]
 fn lsp_symbols_class_and_function() {
@@ -279,19 +242,13 @@ fn lsp_symbols_empty_file() {
     assert!(symbols.is_empty(), "empty file should have no symbols");
 }
 
-// ────────────────────────────────────────────────────────────────────────────
-// Definition tests
-// ────────────────────────────────────────────────────────────────────────────
-
 #[test]
 fn lsp_definition_finds_declaration() {
     let source = "const myVar = 42;\nconsole.log(myVar);\n";
     let (ls, uri) = make_language_service(source);
 
-    // Position on 'myVar' on line 1
     let links = ls.provide_definition(&uri, pos(1, 12));
-    // Should find the declaration. (May return 0 if symbol resolution
-    // is incomplete, but should not panic.)
+
     if !links.is_empty() {
         let link = &links[0];
         assert!(
@@ -300,10 +257,6 @@ fn lsp_definition_finds_declaration() {
         );
     }
 }
-
-// ────────────────────────────────────────────────────────────────────────────
-// Parse region delimiter tests
-// ────────────────────────────────────────────────────────────────────────────
 
 #[test]
 fn lsp_parse_region_start() {

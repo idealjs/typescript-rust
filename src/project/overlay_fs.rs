@@ -1,5 +1,3 @@
-//! Overlay file system (1:1 port of Go's `internal/project/overlayfs.go`).
-
 #![allow(dead_code)]
 
 use std::collections::HashMap;
@@ -11,24 +9,17 @@ use crate::vfs::FS;
 
 use super::file_change::{FileChange, FileChangeKind, FileChangeSummary};
 
-/// A 128-bit hash (two u64 halves).
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Hash)]
 pub struct Hash128 {
     pub lo: u64,
     pub hi: u64,
 }
 
-/// Content interface — content string and its hash.
-///
-/// Go: `type FileContent interface { Content() string; Hash() xxh3.Uint128 }`.
 pub trait FileContent: Send + Sync {
     fn content(&self) -> &str;
     fn hash(&self) -> Hash128;
 }
 
-/// A handle to a file, providing access to content, version, and metadata.
-///
-/// Go: `type FileHandle interface { ... }`.
 pub trait FileHandle: FileContent + Send + Sync {
     fn file_name(&self) -> &str;
     fn version(&self) -> i32;
@@ -37,9 +28,6 @@ pub trait FileHandle: FileContent + Send + Sync {
     fn kind(&self) -> i32;
 }
 
-/// Base fields shared by disk files and overlays.
-///
-/// Go: `type fileBase struct { ... }`.
 pub struct FileBase {
     file_name: String,
     content: String,
@@ -65,9 +53,6 @@ impl FileContent for FileBase {
     }
 }
 
-/// A file read from the backing virtual file system.
-///
-/// Go: `type diskFile struct { ... }`.
 pub struct DiskFile {
     base: FileBase,
     pub needs_reload: bool,
@@ -112,9 +97,6 @@ impl FileHandle for DiskFile {
     }
 }
 
-/// An overlay file provided by the editor (didOpen / didChange).
-///
-/// Go: `type Overlay struct { ... }`.
 pub struct Overlay {
     base: FileBase,
     version: i32,
@@ -165,10 +147,6 @@ impl FileHandle for Overlay {
     }
 }
 
-/// An overlay file system that layers editor-provided overlays on top of a
-/// backing VFS.
-///
-/// Go: `type overlayFS struct { ... }`.
 pub struct OverlayFS {
     pub fs: Arc<dyn FS>,
     pub position_encoding: lsproto::PositionEncodingKind,
@@ -209,11 +187,6 @@ impl OverlayFS {
         }
     }
 
-    /// Processes a batch of file changes, updating overlays.
-    ///
-    /// Returns the summary and the new overlay map.
-    ///
-    /// Go: `func (fs *overlayFS) processChanges(changes []FileChange) (FileChangeSummary, map[...])`.
     pub fn process_changes(
         &self,
         changes: &[FileChange],
@@ -264,19 +237,17 @@ impl OverlayFS {
             }
         }
 
-        // Apply the new overlays.
         *self.overlays.write().unwrap() = new_overlays.clone();
         (result, new_overlays)
     }
 }
 
-/// Computes a 128-bit hash of a string (simplified — uses xxh3 if available).
 pub fn hash_string_128(s: &str) -> Hash128 {
     use std::hash::Hasher;
     use xxhash_rust::xxh3::Xxh3;
     let mut hasher = Xxh3::new();
     hasher.write(s.as_bytes());
-    // xxh3 128-bit is not directly available in this crate version; use two 64-bit hashes.
+
     let lo = hasher.finish();
     let mut hasher2 = Xxh3::new();
     hasher2.write(s.as_bytes());
@@ -285,9 +256,6 @@ pub fn hash_string_128(s: &str) -> Hash128 {
     Hash128 { lo, hi }
 }
 
-/// Returns the script kind for a file name (TS=3, TSX=4, JS=1, JSX=2, Unknown=0).
-///
-/// Mirrors `core.GetScriptKindFromFileName`.
 pub fn script_kind_from_file_name(file_name: &str) -> i32 {
     let ext = file_name.rsplit('.').next().unwrap_or("");
     match ext {

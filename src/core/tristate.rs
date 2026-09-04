@@ -1,8 +1,3 @@
-//! Three-valued logic ported from `internal/core/tristate.go`.
-//!
-//! Used pervasively in the type checker where a result may be
-//! "unknown" (not yet computed, or not applicable).
-
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
@@ -65,7 +60,6 @@ impl<'de> Deserialize<'de> for Tristate {
     }
 }
 
-/// Convert a `bool` to a `Tristate`.
 pub fn bool_to_tristate(b: bool) -> Tristate {
     Tristate::from(b)
 }

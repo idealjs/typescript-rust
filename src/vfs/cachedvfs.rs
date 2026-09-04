@@ -1,19 +1,7 @@
-//! Caching file system wrapper, ported from `internal/vfs/cachedvfs/`.
-//!
-//! Wraps a shared [`FS`] and memoizes the results of the read-only lookup
-//! operations (`directory_exists`, `file_exists`, `get_accessible_entries`,
-//! `realpath`, `stat`). All other operations (`read_file`, `write_file`,
-//! `append_file`, `remove`, `use_case_sensitive_file_names`, `walk_dir`) are
-//! passed straight through to the inner file system without caching.
-//!
-//! Mirrors Go's `cachedvfs.FS`, including the `enable` /
-//! `disable_and_clear_cache` / `clear_cache` controls.
-
 use super::{Entries, FS, FileInfo};
 use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
 
-/// A caching wrapper around a shared file system.
 pub struct CachedFS {
     fs: Arc<dyn FS>,
     enabled: Mutex<bool>,
@@ -25,7 +13,7 @@ pub struct CachedFS {
 }
 
 impl CachedFS {
-    /// Wrap `fs` with caching enabled.
+
     pub fn new(fs: Arc<dyn FS>) -> Self {
         CachedFS {
             fs,
@@ -38,8 +26,6 @@ impl CachedFS {
         }
     }
 
-    /// Atomically disable caching and clear all cached entries. If caching was
-    /// already disabled this is a no-op (mirrors Go's `DisableAndClearCache`).
     pub fn disable_and_clear_cache(&self) {
         let mut enabled = self.enabled.lock().unwrap();
         if *enabled {
@@ -48,12 +34,10 @@ impl CachedFS {
         }
     }
 
-    /// Re-enable caching.
     pub fn enable(&self) {
         *self.enabled.lock().unwrap() = true;
     }
 
-    /// Clear every cache without changing the enabled state.
     pub fn clear_cache(&self) {
         self.clear_caches();
     }

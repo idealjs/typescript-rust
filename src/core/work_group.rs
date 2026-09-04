@@ -1,24 +1,14 @@
-//! Work groups for parallel execution, ported from
-//! `internal/core/workgroup.go`.
-
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Mutex};
 use std::thread;
 
-/// A work group allows queuing functions that run either in parallel (on a
-/// thread pool) or sequentially.
-///
-/// Mirrors `core.WorkGroup` in Go.
 pub trait WorkGroup: Send {
-    /// Queue a function to run. Panics if called after `run_and_wait`.
+
     fn queue(&self, f: Box<dyn FnOnce() + Send>);
 
-    /// Run all queued functions and block until they complete.
     fn run_and_wait(&self);
 }
 
-/// Create a new work group. If `single_threaded` is true, functions run
-/// sequentially on the calling thread; otherwise they run in parallel.
 pub fn new_work_group(single_threaded: bool) -> Box<dyn WorkGroup> {
     if single_threaded {
         Box::new(SingleThreadedWorkGroup::new())

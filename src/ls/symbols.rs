@@ -1,5 +1,3 @@
-//! Document / workspace symbols (1:1 port of Go's `internal/ls/symbols.go`).
-
 #![allow(dead_code)]
 
 use std::sync::Arc;
@@ -13,14 +11,13 @@ use super::language_service::LanguageService;
 use super::types::{DocumentSymbol, SymbolKind};
 
 impl LanguageService {
-    /// Provide document symbols for a file.
+
     pub fn provide_document_symbols(&self, document_uri: &DocumentUri) -> Vec<DocumentSymbol> {
         let (_program, source_file) = self.get_program_and_file(document_uri);
         get_document_symbols_for_children(&source_file.node, &source_file)
     }
 }
 
-/// Get document symbols for children of a node.
 pub fn get_document_symbols_for_children(
     node: &Arc<Node>,
     source_file: &Arc<SourceFile>,
@@ -37,7 +34,6 @@ pub fn get_document_symbols_for_children(
     symbols
 }
 
-/// Visit a node and collect document symbols.
 fn visit_for_symbols(
     node: &Arc<Node>,
     text: &str,
@@ -47,7 +43,7 @@ fn visit_for_symbols(
     let kind = node.kind;
 
     match kind {
-        // Class / Interface / Enum: collect with children
+
         SyntaxKind::ClassDeclaration
         | SyntaxKind::ClassExpression
         | SyntaxKind::InterfaceDeclaration
@@ -58,7 +54,6 @@ fn visit_for_symbols(
             }
         }
 
-        // Module declaration (namespace)
         SyntaxKind::ModuleDeclaration => {
             let children = get_children_symbols(node, text, line_map);
             if let Some(sym) = new_document_symbol(node, text, line_map, children) {
@@ -66,7 +61,6 @@ fn visit_for_symbols(
             }
         }
 
-        // Function / Method / Constructor
         SyntaxKind::FunctionDeclaration
         | SyntaxKind::FunctionExpression
         | SyntaxKind::ArrowFunction
@@ -80,28 +74,24 @@ fn visit_for_symbols(
             }
         }
 
-        // Variable declaration: `const x = ...`
         SyntaxKind::VariableDeclaration => {
             if let Some(sym) = new_document_symbol(node, text, line_map, Vec::new()) {
                 symbols.push(sym);
             }
         }
 
-        // Type alias
         SyntaxKind::TypeAliasDeclaration => {
             if let Some(sym) = new_document_symbol(node, text, line_map, Vec::new()) {
                 symbols.push(sym);
             }
         }
 
-        // Enum member
         SyntaxKind::EnumMember => {
             if let Some(sym) = new_document_symbol(node, text, line_map, Vec::new()) {
                 symbols.push(sym);
             }
         }
 
-        // Property / Method signatures (in interfaces)
         SyntaxKind::PropertySignature
         | SyntaxKind::MethodSignature
         | SyntaxKind::PropertyDeclaration
@@ -112,21 +102,18 @@ fn visit_for_symbols(
             }
         }
 
-        // Import specifiers
         SyntaxKind::ImportSpecifier | SyntaxKind::ImportClause => {
             if let Some(sym) = new_document_symbol(node, text, line_map, Vec::new()) {
                 symbols.push(sym);
             }
         }
 
-        // Export specifier
         SyntaxKind::ExportSpecifier => {
             if let Some(sym) = new_document_symbol(node, text, line_map, Vec::new()) {
                 symbols.push(sym);
             }
         }
 
-        // Variable statement: visit its declaration list children
         SyntaxKind::VariableStatement => {
             for_each_child(node, |child| {
                 visit_for_symbols(child, text, line_map, symbols);
@@ -134,7 +121,6 @@ fn visit_for_symbols(
             });
         }
 
-        // VariableDeclarationList: visit each declaration
         SyntaxKind::VariableDeclarationList => {
             for_each_child(node, |child| {
                 visit_for_symbols(child, text, line_map, symbols);
@@ -142,7 +128,6 @@ fn visit_for_symbols(
             });
         }
 
-        // Default: recurse into children
         _ => {
             for_each_child(node, |child| {
                 visit_for_symbols(child, text, line_map, symbols);
@@ -152,7 +137,6 @@ fn visit_for_symbols(
     }
 }
 
-/// Collect symbols from a node's children.
 fn get_children_symbols(node: &Arc<Node>, text: &str, line_map: &LineMap) -> Vec<DocumentSymbol> {
     let mut children = Vec::new();
     for_each_child(node, |child| {
@@ -162,7 +146,6 @@ fn get_children_symbols(node: &Arc<Node>, text: &str, line_map: &LineMap) -> Vec
     children
 }
 
-/// Create a DocumentSymbol for a node.
 fn new_document_symbol(
     node: &Arc<Node>,
     text: &str,
@@ -196,7 +179,6 @@ fn new_document_symbol(
     })
 }
 
-/// Get the text name of a declaration node.
 fn get_node_name(node: &Arc<Node>, text: &str) -> Option<String> {
     match &node.data {
         NodeData::ClassDeclaration(d) => d.name.as_ref().map(|n| identifier_text(n, text)),
@@ -226,7 +208,6 @@ fn get_node_name(node: &Arc<Node>, text: &str) -> Option<String> {
     }
 }
 
-/// Get the (start, end) byte offsets of a node's name.
 fn get_name_range(node: &Arc<Node>, text: &str, node_start: usize) -> (usize, usize) {
     let name_ref: Option<&Arc<Node>> = match &node.data {
         NodeData::ClassDeclaration(d) => d.name.as_ref(),
@@ -247,12 +228,10 @@ fn get_name_range(node: &Arc<Node>, text: &str, node_start: usize) -> (usize, us
     (node_start, node_start)
 }
 
-/// Get text from an Identifier node.
 fn identifier_text(node: &Arc<Node>, text: &str) -> String {
     text[node.pos()..node.end()].trim().to_string()
 }
 
-/// Get text from a PropertyName node.
 fn property_name_text(node: &Arc<Node>, text: &str) -> String {
     match &node.data {
         NodeData::Identifier(d) => d.text.clone(),
@@ -266,7 +245,6 @@ fn property_name_text(node: &Arc<Node>, text: &str) -> String {
     }
 }
 
-/// Get text from a BindingName node.
 fn binding_name_text(node: &Arc<Node>, text: &str) -> String {
     match &node.data {
         NodeData::Identifier(d) => d.text.clone(),
@@ -274,12 +252,10 @@ fn binding_name_text(node: &Arc<Node>, text: &str) -> String {
     }
 }
 
-/// Get text from a ModuleName node.
 fn module_name_text(node: &Arc<Node>, text: &str) -> String {
     text[node.pos()..node.end()].trim().to_string()
 }
 
-/// Map AST node kind to LSP SymbolKind.
 fn symbol_kind_from_node(kind: SyntaxKind) -> SymbolKind {
     match kind {
         SyntaxKind::ClassDeclaration | SyntaxKind::ClassExpression => SymbolKind::Class,

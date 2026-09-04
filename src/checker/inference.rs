@@ -1,10 +1,3 @@
-//! Type inference engine.
-//!
-//! Ported from `internal/checker/inference.go`. This module implements
-//! generic type inference for TypeScript's type checker. It handles
-//! inferring type arguments from function calls, contextual typing,
-//! return type inference, and mapped type inference.
-
 use std::collections::HashMap;
 use std::sync::Arc;
 
@@ -12,19 +5,11 @@ use super::checker::Checker;
 use super::types::*;
 use crate::ast::SyntaxKind;
 
-// ────────────────────────────────────────────────────────────────────────────
-// InferenceKey
-// ────────────────────────────────────────────────────────────────────────────
-
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct InferenceKey {
     pub source: TypeId,
     pub target: TypeId,
 }
-
-// ────────────────────────────────────────────────────────────────────────────
-// InferencePriority
-// ────────────────────────────────────────────────────────────────────────────
 
 bitflags::bitflags! {
     #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
@@ -50,10 +35,6 @@ bitflags::bitflags! {
     }
 }
 
-// ────────────────────────────────────────────────────────────────────────────
-// InferenceFlags
-// ────────────────────────────────────────────────────────────────────────────
-
 bitflags::bitflags! {
     #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
     pub struct InferenceFlags: u32 {
@@ -63,10 +44,6 @@ bitflags::bitflags! {
         const SkippedGenericFunction = 1 << 2;
     }
 }
-
-// ────────────────────────────────────────────────────────────────────────────
-// ExpandingFlags
-// ────────────────────────────────────────────────────────────────────────────
 
 bitflags::bitflags! {
     #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
@@ -78,11 +55,6 @@ bitflags::bitflags! {
     }
 }
 
-// ────────────────────────────────────────────────────────────────────────────
-// InferenceInfo
-// ────────────────────────────────────────────────────────────────────────────
-
-/// Tracks inference candidates for a single type parameter.
 #[derive(Debug, Clone)]
 pub struct InferenceInfo {
     pub type_parameter: Arc<Type>,
@@ -112,11 +84,6 @@ impl InferenceInfo {
     }
 }
 
-// ────────────────────────────────────────────────────────────────────────────
-// InferenceContext
-// ────────────────────────────────────────────────────────────────────────────
-
-/// The context for type inference of a generic function call.
 pub struct InferenceContext {
     pub inferences: Vec<InferenceInfo>,
     pub signature: Option<Arc<Signature>>,
@@ -139,15 +106,9 @@ impl InferenceContext {
     }
 }
 
-// ────────────────────────────────────────────────────────────────────────────
-// InferenceState
-// ────────────────────────────────────────────────────────────────────────────
-
-/// Recursive inference state used during `inferFromTypes`.
 struct InferenceState<'a> {
     inferences: &'a mut [InferenceInfo],
-    /// Saved originals (Go keeps these on the relater state); retained for
-    /// port parity even though the port reads them via locals today.
+
     #[allow(dead_code)]
     original_source: Option<Arc<Type>>,
     #[allow(dead_code)]
@@ -159,19 +120,13 @@ struct InferenceState<'a> {
     #[allow(dead_code)]
     expanding_flags: ExpandingFlags,
     propagation_type: Option<Arc<Type>>,
-    /// Source/target pointer pairs currently being inferred (cycle guard
-    /// for `infer_from_types`; see the comment there).
+
     visited: HashMap<(usize, usize), InferencePriority>,
     depth: i32,
 }
 
-// ────────────────────────────────────────────────────────────────────────────
-// Checker inference methods
-// ────────────────────────────────────────────────────────────────────────────
-
 impl Checker {
-    /// Entry point for type inference. Infers type arguments for a generic
-    /// function call by matching source types against target types.
+
     pub fn infer_types(
         &mut self,
         inferences: &mut [InferenceInfo],
@@ -198,24 +153,17 @@ impl Checker {
         }
     }
 
-    /// Main recursive inference function. Matches source type against target
-    /// type and records candidates for type parameters found in target.
     fn infer_from_types(
         &mut self,
         state: &mut InferenceState,
         source: &Arc<Type>,
         target: &Arc<Type>,
     ) {
-        // Quick bail-out: if target cannot contain type variables, nothing to infer
+
         if !self.could_contain_type_variables(target) || self.is_no_infer_type(target) {
             return;
         }
-        // Cycle guard (the `visited` map): a source/target pair re-entered
-        // while already being inferred higher up the stack carries no new
-        // information — without this, self-referential signatures
-        // (`ReadonlyArray<T>.flatMap`'s callback parameter is
-        // `ReadonlyArray<T>` again) recurse infer_types → signatures →
-        // properties → infer_types without bound (stack overflow).
+
         let key = (Arc::as_ptr(source) as usize, Arc::as_ptr(target) as usize);
         if state.visited.contains_key(&key) {
             return;
@@ -231,18 +179,7 @@ impl Checker {
         source: &Arc<Type>,
         target: &Arc<Type>,
     ) {
-        // Same-origin deferred conditionals (Go inference.go ~L79, the
-        // same-generic-type-alias fast path): when source and target are
-        // instantiations of the SAME conditional body — identical root
-        // node, which in this port is what "instantiations of one generic
-        // type alias declaration" amounts to — infer directly between their
-        // recorded check and extends types instead of trying to walk the
-        // (deferred, opaque) conditional structures. Without this, calling
-        // `<Y>(c: C<Y>)` with an argument of type `C<X>` yields NO
-        // candidates, the call-site fallback fills `unknown`, and the
-        // parameter collapses to its false branch (`recursiveReverseMapped
-        // Type` family). Roots carrying `infer` positions are skipped: their
-        // per-instance mappings already reshape check/extends arbitrarily.
+
         if let (
             TypeData::Conditional(sc),
             TypeData::Conditional(tc),
@@ -272,9 +209,6 @@ impl Checker {
             }
         }
 
-        // Go inferFromTypes: when source and target are the *same* union or
-        // intersection type, relate each constituent to itself instead of
-        // running cross-product matching between the constituents.
         if Arc::ptr_eq(source, target)
             && source
                 .flags
@@ -286,7 +220,6 @@ impl Checker {
             return;
         }
 
-        // Handle union types in target
         if target.flags.contains(TypeFlags::Union) {
             let source_types = if source.flags.contains(TypeFlags::Union) {
                 source.types().unwrap_or_default().to_vec()
@@ -314,19 +247,16 @@ impl Checker {
             return;
         }
 
-        // Handle intersection types in target
         if target.flags.contains(TypeFlags::Intersection) {
             self.infer_from_types_intersection(state, source, target);
             return;
         }
 
-        // Handle type variable targets (type parameters)
         if target.flags.contains(TypeFlags::TypeParameter) {
             self.infer_to_type_variable(state, source, target);
             return;
         }
 
-        // Handle object types (including arrays, tuples, etc.)
         if target.flags.contains(TypeFlags::Object) {
             self.infer_from_object_types(state, source, target);
             return;
@@ -394,7 +324,7 @@ impl Checker {
         if self.is_from_inference_blocked_source(source) {
             return;
         }
-        // Find the inference index first to avoid borrow conflicts
+
         let inference_idx = state
             .inferences
             .iter()
@@ -403,7 +333,6 @@ impl Checker {
             });
         let Some(idx) = inference_idx else { return };
 
-        // Capture state values before mutable borrow
         let priority = state.priority;
         let contravariant = state.contravariant;
         let bivariant = state.bivariant;
@@ -485,23 +414,12 @@ impl Checker {
     ) {
         let source_args = self.get_type_arguments(source);
         let target_args = self.get_type_arguments(target);
-        // Pointer-equal object types carrying type arguments (tuples, arrays,
-        // generic references in this port's structured representation): the
-        // only inferable content is the type arguments against themselves —
-        // the port of Go's same-Target reference rule. The member walk below
-        // would instead re-traverse every method of e.g. ReadonlyArray on
-        // every visit, which is path-exponential for nested generics
-        // (declarationEmitUsingAlternativeContainingModules blow-up).
+
         if Arc::ptr_eq(source, target) && !target_args.is_empty() {
             self.infer_from_type_arguments(state, &target_args, &target_args, &[]);
             return;
         }
-        // Go inferFromObjectTypes: references to the same generic target (or
-        // two array types) carry no additional inferable information in their
-        // members — infer between type arguments only and return. Without
-        // this, inferring e.g. `[number, unknown]` against itself walks every
-        // ReadonlyArray method signature recursively (the tanstack/vue-query
-        // declarationEmitUsingAlternativeContainingModules blow-up).
+
         let same_target = match (source.target(), target.target()) {
             (Some(st), Some(tt)) => Arc::ptr_eq(st, tt),
             _ => false,
@@ -594,12 +512,7 @@ impl Checker {
             state.contravariant = save_contra;
             state.bivariant = save_biv;
         }
-        // Resolve returns on demand — nested generic callbacks (Array's
-        // `flatMap` member) arrive with lazily-unresolved return types;
-        // skipping return-position inference there leaves the signature's
-        // own type parameter unmapped, and the subsequent structural
-        // comparison of two identical-looking `<U, This>` signatures fails
-        // (arrayToLocaleStringES2020).
+
         let st = self.get_return_type_of_signature(source);
         let tt = self.get_return_type_of_signature(target);
         if let (Some(st), Some(tt)) = (st, tt) {
@@ -721,8 +634,6 @@ impl Checker {
         false
     }
 
-    /// Infer type arguments for a generic function call.
-    /// Go: `inferTypeArguments` (checker.go:9366)
     pub fn infer_type_arguments(
         &mut self,
         node: &crate::ast::Node,
@@ -730,30 +641,12 @@ impl Checker {
         args: &[Arc<crate::ast::Node>],
         context: &mut InferenceContext,
     ) -> Vec<Arc<Type>> {
-        // Contextual typing from return type.
-        //
-        // If the call expression has a contextual type (e.g., from a variable
-        // annotation), infer from that contextual type to the return type of
-        // the signature. For example, given:
-        //   declare function wrap<T, U>(cb: (x: T) => U): (x: T) => U;
-        //   let f: (x: string) => number = wrap(s => s.length);
-        // we infer T=string, U=number from the declared type of `f`.
-        //
-        // This ports the non-JSX, non-decorator branch of Go's
-        // `inferTypeArguments`. The full Go implementation also handles
-        // binding-pattern inference and outer inference context cloning;
-        // those require additional infrastructure and are deferred.
+
         if matches!(
             node.kind,
             SyntaxKind::CallExpression | SyntaxKind::NewExpression
         ) {
-            // Only call/new expressions have a contextual return type path.
-            // (Go also handles binary expressions and decorators elsewhere.)
-            //
-            // We check the parent chain directly to find a contextual type
-            // (e.g., a variable declaration with a type annotation). The full
-            // Go path uses `getContextualType`; here we inline a subset that
-            // covers the common `let x: T = expr(...)` pattern.
+
             if let Some(contextual_type) = self.get_contextual_type_for_call_or_new(node) {
                 if let Some(return_type) = self.get_return_type_of_signature(signature) {
                     if self.could_contain_type_variables(&return_type) {
@@ -769,11 +662,6 @@ impl Checker {
             }
         }
 
-        // Infer types from each argument against the parameter types.
-        // Rest position mirrors Go's `getTypeAtPosition`: arguments at/after
-        // the rest parameter infer against the rest ELEMENT type (one array
-        // level stripped), so `new Array('hi', 'bye')` infers `T = string`
-        // from `...items: T[]` instead of failing `string → T[]`.
         let has_rest = signature.has_rest_parameter();
         let rest_index = if has_rest {
             signature.parameters.len().saturating_sub(1)
@@ -787,7 +675,7 @@ impl Checker {
             } else if i < signature.parameters.len() {
                 self.get_type_of_symbol(&signature.parameters[i])
             } else {
-                // Beyond declared params with no rest — arity check owns it.
+
                 continue;
             };
             if self.could_contain_type_variables(&param_type) {
@@ -802,12 +690,9 @@ impl Checker {
             }
         }
 
-        // Resolve inferred types
         self.get_inferred_types(context)
     }
 
-    /// Resolve all inferred types from an inference context.
-    /// Go: `getInferredTypes` (inference.go:1372)
     pub fn get_inferred_types(&mut self, context: &InferenceContext) -> Vec<Arc<Type>> {
         let count = context.inferences.len();
         let mut result = Vec::with_capacity(count);
@@ -817,8 +702,6 @@ impl Checker {
         result
     }
 
-    /// Resolve a single inferred type from an inference context.
-    /// Go: `getInferredType` (inference.go:1283)
     pub fn get_inferred_type(&mut self, context: &InferenceContext, index: usize) -> Arc<Type> {
         let inference = &context.inferences[index];
         if std::env::var_os("TSOX_DEBUG_INFER").is_some() {
@@ -843,7 +726,6 @@ impl Checker {
             return Arc::clone(inferred);
         }
 
-        // If the type parameter is error type, return it directly
         if inference.type_parameter.flags.contains(TypeFlags::Any)
             && inference.type_parameter.intrinsic_name() == Some("error")
         {
@@ -854,14 +736,13 @@ impl Checker {
         let mut fallback_type: Option<Arc<Type>> = None;
 
         if let Some(ref signature) = context.signature {
-            // Try covariant inference from candidates
+
             let inferred_covariant = if !inference.candidates.is_empty() {
                 self.get_covariant_inference(inference, signature)
             } else {
                 None
             };
 
-            // Try contravariant inference from contra-candidates
             let inferred_contravariant = if !inference.contra_candidates.is_empty() {
                 self.get_contravariant_inference(inference)
             } else {
@@ -869,8 +750,7 @@ impl Checker {
             };
 
             if inferred_covariant.is_some() || inferred_contravariant.is_some() {
-                // Prefer covariant if it's not never, it's assignable to some contravariant candidate,
-                // and no other type parameter is constrained to this one with conflicts.
+
                 let prefer_covariant = match (&inferred_covariant, &inferred_contravariant) {
                     (Some(_cov), None) => true,
                     (None, Some(_)) => false,
@@ -929,17 +809,16 @@ impl Checker {
                 }
             }
         } else {
-            // No signature: use union of candidates or intersection of contra-candidates
+
             inferred_type = self.get_type_from_inference(inference);
         }
 
-        // Apply constraint checking
         if inferred_type.is_some() {
             let constraint = self.get_constraint_of_type_parameter(&inference.type_parameter);
             if let Some(constraint) = constraint {
                 if !self.is_type_assignable_to(inferred_type.as_ref().unwrap(), &constraint) {
                     if inference.priority.contains(InferencePriority::ReturnType) {
-                        // For pure return type inference, filter constituents
+
                         let inferred = inferred_type.as_ref().unwrap();
                         let filtered = if inferred.flags.contains(TypeFlags::Union) {
                             if let Some(types) = inferred.types() {
@@ -975,7 +854,6 @@ impl Checker {
             }
         }
 
-        // Final fallback
         if inferred_type.is_none() {
             if let Some(fallback) = fallback_type {
                 let constraint = self.get_constraint_of_type_parameter(&inference.type_parameter);
@@ -994,7 +872,6 @@ impl Checker {
             }
         }
 
-        // Ensure we always have a result
         inferred_type.unwrap_or_else(|| {
             if context.flags.contains(InferenceFlags::AnyDefault) {
                 self.any_type()
@@ -1004,28 +881,18 @@ impl Checker {
         })
     }
 
-    /// The contextual type of a property `name` on contextual type `t`
-    /// (Go `getTypeOfPropertyOfContextualTypeEx`, checker.go ~L30623):
-    /// unions map over constituents, generic mapped types substitute the
-    /// property-name literal into the template (`{ [K in keyof P]: P[K] }`
-    /// yields `P["when"]` for property `when`), concrete properties read
-    /// their symbol's type.
     pub fn get_type_of_property_of_contextual_type(
         &mut self,
         t: &Arc<Type>,
         name: &str,
     ) -> Option<Arc<Type>> {
         use crate::checker::types::TypeData;
-        // A type-parameter contextual type resolves through its constraint
-        // (Go apparent-izes the contextual type before property lookup):
-        // `mapped1<T extends { [P in string]: TakeString }>` provides
-        // property types from the mapped constraint.
+
         if t.flags.contains(TypeFlags::TypeParameter) {
             let constraint = self.get_constraint_of_type_parameter(t)?;
             return self.get_type_of_property_of_contextual_type(&constraint, name);
         }
-        // Union contextual types: keep the constituents that provide the
-        // property (Go mapTypeEx).
+
         if t.flags.contains(TypeFlags::Union)
             && let TypeData::Union(u) = &t.data
         {
@@ -1048,10 +915,7 @@ impl Checker {
                 }
             };
         }
-        // Generic mapped type with plain (non-remapping) names: substitute
-        // the property-name literal for the mapped type parameter (Go
-        // getIndexedMappedTypeSubstitutedTypeOfContextualType +
-        // substituteIndexedMappedType).
+
         if matches!(&t.data, TypeData::Mapped(_))
             && let TypeData::Mapped(m) = &t.data
             && m.type_parameter.is_some()
@@ -1060,10 +924,7 @@ impl Checker {
         {
             let constraint = m.constraint_type.clone()?;
             let name_literal = self.get_string_literal_type(name);
-            // Gate (Go): the property name must be assignable to the
-            // constraint (or its base constraint). `keyof P` over a type
-            // parameter reduces through the parameter's constraint; an
-            // UNCONSTRAINED parameter's keyof is `unknown` (always passes).
+
             let gate_target = self.reduced_keyof_for_contextual_gate(&constraint);
             let gate_ok = match &gate_target {
                 Some(g) => self.is_type_assignable_to(&name_literal, g),
@@ -1089,8 +950,7 @@ impl Checker {
             let template = m.template_type.clone().unwrap();
             let substituted =
                 self.substitute_infer_type_parameters(&template, &[tp], &[name_literal]);
-            // A deferred `P["when"]` resolves through P's constraint for
-            // signature extraction (`(value: string) => boolean`).
+
             if let TypeData::IndexedAccess(ia) = &substituted.data
                 && let (Some(obj), Some(idx)) = (&ia.object_type, &ia.index_type)
             {
@@ -1101,10 +961,7 @@ impl Checker {
             }
             return Some(substituted);
         }
-        // Deferred CONDITIONAL contextual types distribute for property
-        // lookup (Go apparent-izes conditionals through both branches):
-        // `string extends keyof P ? A : B` provides property types from A
-        // and B union'd.
+
         if let TypeData::Conditional(c) = &t.data {
             let mut branches: Vec<Arc<Type>> = Vec::new();
             if let Some(root) = &c.root
@@ -1132,8 +989,7 @@ impl Checker {
                 }
             };
         }
-        // Intersection contextual types: try each object constituent (Go
-        // intersects the results; the common case has one provider).
+
         if t.flags.contains(TypeFlags::Intersection)
             && let TypeData::Intersection(i) = &t.data
         {
@@ -1144,11 +1000,11 @@ impl Checker {
             }
             return None;
         }
-        // Concrete property of the contextual type.
+
         if let Some(prop) = self.get_property_of_type(t, name) {
             return Some(self.get_type_of_symbol(&prop));
         }
-        // Index signatures contribute their value type.
+
         let name_literal = self.get_string_literal_type(name);
         if let Some(info) = self.get_applicable_index_info(t, &name_literal) {
             return info.value_type.clone();
@@ -1156,9 +1012,6 @@ impl Checker {
         None
     }
 
-    /// `keyof P` (an Index type over a type parameter) reduces through the
-    /// parameter's constraint for the contextual-gate check (Go
-    /// `getBaseConstraintOrType` on index types).
     fn reduced_keyof_for_contextual_gate(&mut self, constraint: &Arc<Type>) -> Option<Arc<Type>> {
         use crate::checker::types::TypeData;
         let TypeData::Index(idx) = &constraint.data else {
@@ -1172,8 +1025,6 @@ impl Checker {
         Some(self.get_index_type(&target_constraint))
     }
 
-    /// Get the contextual type for an expression node.
-    /// Go: `getContextualType` (checker.go:29100)
     pub fn get_contextual_type(
         &mut self,
         node: &Arc<crate::ast::Node>,
@@ -1198,12 +1049,7 @@ impl Checker {
             SyntaxKind::CallExpression | SyntaxKind::NewExpression => {
                 self.get_contextual_type_for_argument(&parent, node)
             }
-            // `x satisfies T` — the operand's contextual type is the
-            // satisfies TARGET (Go getContextualType's
-            // KindSatisfiesExpression: `return c.getTypeFromTypeNode(
-            // parent.Type())`). Literal freshness flows into the operand:
-            // `{xyz:"foo"} satisfies {xyz:"foo"|"bar"}` keeps `"foo"` fresh
-            // (typeSatisfaction_vacuousIntersectionOfContextualTypes).
+
             SyntaxKind::SatisfiesExpression => {
                 if let crate::ast::NodeData::SatisfiesExpression(d) = &parent.data {
                     Some(self.get_type_from_type_node(&d.type_node))
@@ -1220,12 +1066,7 @@ impl Checker {
             SyntaxKind::ArrayLiteralExpression => {
                 self.get_contextual_type_for_array_literal_element(node, &parent, _context_flags)
             }
-            // A node wrapped in `( … )` or `…!` inherits the contextual
-            // type of the WRAPPER (Go's `KindParenthesizedExpression` /
-            // `KindNonNullExpression` cases): recursing on the wrapper node
-            // keeps operand-identity checks (`node == binary.right`) intact —
-            // `f ??= (a => a)` reaches the assignment arm with the paren as
-            // the right operand.
+
             SyntaxKind::ParenthesizedExpression | SyntaxKind::NonNullExpression => {
                 self.get_contextual_type(&parent, _context_flags)
             }
@@ -1233,14 +1074,6 @@ impl Checker {
         }
     }
 
-    /// The contextual signature for a function-like declaration (function
-    /// expression, arrow function, or object-literal method): the call
-    /// signature of its contextual type that is applicable to the node's
-    /// parameter list. Direct port of Go's `getContextualSignature` +
-    /// `getContextualCallSignature` (checker.go ~L10314): union contextual
-    /// types contribute one signature per constituent (yielding none unless
-    /// they agree), and signatures with fewer parameters than the node's
-    /// required-parameter count are filtered out (`isAritySmaller`).
     pub fn get_contextual_signature(
         &mut self,
         node: &Arc<crate::ast::Node>,
@@ -1255,11 +1088,7 @@ impl Checker {
                 match &first {
                     None => first = Some(signature),
                     Some(f) => {
-                        // Go requires the collected signatures to be
-                        // identical (`compareSignaturesIdentical`) else no
-                        // contextual signature is used; parameter count is
-                        // the decisive component for contextual parameter
-                        // typing.
+
                         if f.parameters.len() != signature.parameters.len() {
                             return None;
                         }
@@ -1271,10 +1100,6 @@ impl Checker {
         self.get_contextual_call_signature(&t, node)
     }
 
-    /// If the given type has a call signature with at least as many
-    /// parameters as the given function, return that signature (Go
-    /// `getContextualCallSignature`; overload sets reduce to their first
-    /// arity-applicable signature).
     fn get_contextual_call_signature(
         &mut self,
         t: &Arc<Type>,
@@ -1286,12 +1111,6 @@ impl Checker {
             .find(|s| !self.is_arity_smaller(s, node))
     }
 
-    /// If the contextual signature has fewer parameters than the function
-    /// expression, do not use it. Port of Go's `isAritySmaller`
-    /// (checker.go ~L10357): counts the node's leading required parameters
-    /// (stopping at the first optional/initialized/rest one, excluding a
-    /// leading `this` parameter) and rejects signatures with a smaller
-    /// non-rest parameter count.
     fn is_arity_smaller(
         &self,
         signature: &Arc<Signature>,
@@ -1324,19 +1143,11 @@ impl Checker {
         !has_effective_rest && parameter_count < target_parameter_count
     }
 
-    /// Contextual parameter types for an immediately-invoked function
-    /// expression (`((x) => x)(1)`): a synthetic signature whose parameter
-    /// types are the corresponding call arguments' types. Port of the IIFE
-    /// branch of Go's `getContextuallyTypedParameterType` (checker.go
-    /// ~L29273); arguments past the parameter list are ignored, missing
-    /// ones contribute no entry (the parameter stays implicitly `any`).
     pub fn iife_contextual_signature(
         &mut self,
         node: &Arc<crate::ast::Node>,
     ) -> Option<Arc<Signature>> {
-        // The function expression must be the callee of an enclosing call
-        // (parentheses between them are skipped, Go
-        // `GetImmediatelyInvokedFunctionExpression`).
+
         let mut parent = node.parent.clone()?;
         while parent.kind == SyntaxKind::ParenthesizedExpression {
             parent = parent.parent.clone()?;
@@ -1351,10 +1162,7 @@ impl Checker {
         if arg_count == 0 {
             return None;
         }
-        // Recursion guard: an argument whose type depends on this very
-        // invocation (e.g. a self-referential recursive IIFE) must not
-        // re-enter. Go swaps in `anySignature` for the duration; we skip
-        // the argument and leave the parameter contextual slot empty.
+
         let key = node.id();
         if !self.resolving_function_like.insert(key) {
             return None;
@@ -1394,13 +1202,6 @@ impl Checker {
         }))
     }
 
-    /// Get the contextual type for an initializer expression.
-    ///
-    /// In a variable, parameter or property declaration with a type annotation,
-    /// the contextual type of an initializer expression is the type of the
-    /// variable, parameter or property.
-    ///
-    /// Go: `getContextualTypeForInitializerExpression` (checker.go:29180)
     fn get_contextual_type_for_initializer_expression(
         &mut self,
         node: &Arc<crate::ast::Node>,
@@ -1409,7 +1210,7 @@ impl Checker {
         use crate::ast::NodeData;
 
         let declaration = node.parent.as_ref()?;
-        // Check that node is indeed the initializer
+
         let is_initializer = match &declaration.data {
             NodeData::VariableDeclaration(data) => data
                 .initializer
@@ -1433,7 +1234,6 @@ impl Checker {
             return None;
         }
 
-        // Get type from the declaration's type annotation if present
         let type_node = match &declaration.data {
             NodeData::VariableDeclaration(data) => data.type_node.as_ref(),
             NodeData::ParameterDeclaration(data) => data.type_node.as_ref(),
@@ -1447,13 +1247,6 @@ impl Checker {
             return Some(self.get_type_from_type_node(type_node));
         }
 
-        // No type annotation. If the declaration is a BindingElement, attempt
-        // to derive a contextual type from the binding pattern's initializer.
-        // This ports the binding-pattern branch of Go's
-        // `getContextualTypeForInitializerExpression` (which calls
-        // `getTypeFromBindingPattern`). We implement a simplified version that
-        // walks up to the enclosing VariableDeclaration, evaluates the
-        // initializer's type, and indexes into it for array/object patterns.
         if let NodeData::BindingElement(_) = &declaration.data {
             if let Some(ctx) = self.get_contextual_type_from_binding_element(declaration) {
                 return Some(ctx);
@@ -1463,24 +1256,12 @@ impl Checker {
         None
     }
 
-    /// Derive a contextual type for a `BindingElement`'s initializer by
-    /// walking up to the enclosing `VariableDeclaration` and evaluating the
-    /// initializer expression's type, then indexing into it for array/object
-    /// binding patterns.
-    ///
-    /// Simplified port of Go's `getTypeFromBindingPattern` +
-    /// `getContextualTypeForBindingElement`. The full Go implementation
-    /// constructs an anonymous object type from the pattern; here we return
-    /// the element/property type for the specific binding element so that
-    /// initializers like `const [a = 42] = arr` get `arr`'s element type as
-    /// context.
     fn get_contextual_type_from_binding_element(
         &mut self,
         binding_element: &Arc<crate::ast::Node>,
     ) -> Option<Arc<Type>> {
         use crate::ast::NodeData;
 
-        // BindingElement → BindingPattern → VariableDeclaration
         let binding_pattern = binding_element.parent.as_ref()?;
         let var_declaration = binding_pattern.parent.as_ref()?;
 
@@ -1494,7 +1275,7 @@ impl Checker {
 
         match binding_pattern.kind {
             SyntaxKind::ArrayBindingPattern => {
-                // Find this element's index in the pattern.
+
                 let elements = match &binding_pattern.data {
                     NodeData::BindingPattern(d) => &d.elements,
                     _ => return None,
@@ -1503,11 +1284,11 @@ impl Checker {
                     .nodes
                     .iter()
                     .position(|e| Arc::ptr_eq(e, binding_element))?;
-                // Element type of the initializer (if array/tuple).
+
                 self.get_element_type_of_array(&init_type, idx)
             }
             SyntaxKind::ObjectBindingPattern => {
-                // Property name from the binding element.
+
                 let be_data = match &binding_element.data {
                     NodeData::BindingElement(d) => d,
                     _ => return None,
@@ -1525,9 +1306,8 @@ impl Checker {
         }
     }
 
-    /// Get the element type at `index` from an array or tuple type.
     fn get_element_type_of_array(&mut self, t: &Arc<Type>, index: usize) -> Option<Arc<Type>> {
-        // Tuple type: return the specific element type if in range.
+
         if let TypeData::Tuple(tuple) = &t.data {
             if index < tuple.element_infos.len() {
                 if let Some(ref elem) = tuple.element_infos[index].type_ {
@@ -1535,33 +1315,18 @@ impl Checker {
                 }
             }
         }
-        // Array<T>: return T (always succeeds, defaults to `any`). Only for
-        // genuine array-like types — a generic interface instantiation
-        // records type arguments for display, and those must not be
-        // misread as an element type.
+
         if self.is_array_type(t) || matches!(t.data, TypeData::EvolvingArray(_)) {
             return Some(self.get_array_element_type(t));
         }
         None
     }
 
-    /// Get the type of a named property of an object/interface type.
-    /// (Reuses `get_property_of_type` from flow.rs via `pub(super)`; defined
-    /// here under a different name to avoid clashing with flow.rs's
-    /// `get_property_type_of_type`.)
     fn property_type_of_type(&mut self, t: &Arc<Type>, name: &str) -> Option<Arc<Type>> {
         let prop = self.get_property_of_type(t, name)?;
         Some(self.get_type_of_symbol(&prop))
     }
 
-    /// Inline subset of `get_contextual_type` for call/new expressions.
-    ///
-    /// Returns the contextual type when a call/new expression is the
-    /// initializer of a variable/parameter/property declaration with a type
-    /// annotation, or the return value of a function with a return type
-    /// annotation. This covers the common pattern
-    /// `let x: T = genericFn(...)` where T should flow into inference of
-    /// genericFn's return type.
     fn get_contextual_type_for_call_or_new(
         &mut self,
         node: &crate::ast::Node,
@@ -1575,8 +1340,7 @@ impl Checker {
                 .as_ref()
                 .map(|tn| self.get_type_from_type_node(tn)),
             NodeData::ReturnStatement(_) => {
-                // return genericFn(...) — contextual type is the function's
-                // declared return type.
+
                 let fn_node = parent.parent.as_ref()?;
                 self.get_return_type_annotation_of_function(fn_node)
             }
@@ -1584,7 +1348,6 @@ impl Checker {
         }
     }
 
-    /// Get the declared return type annotation of a function-like node.
     fn get_return_type_annotation_of_function(
         &mut self,
         node: &crate::ast::Node,
@@ -1604,23 +1367,12 @@ impl Checker {
         type_node.map(|tn| self.get_type_from_type_node(tn))
     }
 
-    /// Get the contextual type for a return expression.
-    ///
-    /// The type `return expr;` is checked against in the containing
-    /// function: its declared return-type annotation if present, else the
-    /// return type of the function's contextual signature, else (for an
-    /// immediately-invoked function expression) the contextual type of the
-    /// invocation itself.
-    ///
-    /// Go: `getContextualTypeForReturnExpression` + `getContextualReturnType`
-    /// (checker.go ~L29332, ~L29370)
     fn get_contextual_type_for_return_expression(
         &mut self,
         _node: &Arc<crate::ast::Node>,
         _context_flags: ContextFlags,
     ) -> Option<Arc<Type>> {
-        // Walk up the parent chain to find the containing function (the
-        // first function-like ancestor — nested functions are boundaries).
+
         let mut current = _node.parent.as_ref()?.clone();
         loop {
             match current.kind {
@@ -1640,18 +1392,12 @@ impl Checker {
         self.contextual_return_type_of(&current)
     }
 
-    /// The type `return expr;` statements are checked against in `fn_node`'s
-    /// body: the declared return-type annotation, else the return type of
-    /// the contextual signature, else (for an IIFE) the contextual type of
-    /// the invocation. Port of Go's `getContextualReturnType` (checker.go
-    /// ~L29370) minus the generator/async constituent filtering (handled at
-    /// the await/yield subsystem instead).
     pub fn contextual_return_type_of(
         &mut self,
         fn_node: &Arc<crate::ast::Node>,
     ) -> Option<Arc<Type>> {
         use crate::ast::NodeData;
-        // 1. An explicit return-type annotation wins.
+
         let type_node = match &fn_node.data {
             NodeData::FunctionDeclaration(data) => data.type_node.clone(),
             NodeData::FunctionExpression(data) => data.type_node.clone(),
@@ -1665,16 +1411,13 @@ impl Checker {
         if let Some(type_node) = type_node {
             return Some(self.get_type_from_type_node(&type_node));
         }
-        // 2. Otherwise, if the function is contextually typed by a function
-        // type with a call signature, return statements are contextually
-        // typed by that signature's return type.
+
         if let Some(signature) = self.get_contextual_signature(fn_node) {
             if let Some(return_type) = self.get_return_type_of_signature(&signature) {
                 return Some(return_type);
             }
         }
-        // 3. An immediately-invoked function expression is contextually
-        // typed by its invocation's contextual type.
+
         let mut parent = fn_node.parent.clone()?;
         while parent.kind == SyntaxKind::ParenthesizedExpression {
             parent = parent.parent.clone()?;
@@ -1687,16 +1430,6 @@ impl Checker {
         None
     }
 
-    /// Get the contextual type for a function argument.
-    ///
-    /// In a typed function call, an argument is contextually typed by the
-    /// type of the corresponding parameter — for a GENERIC signature, the
-    /// parameter type of the RESOLVED signature, i.e. with type arguments
-    /// inferred from the (non-context-sensitive) sibling arguments already
-    /// substituted. Port of Go's `getContextualTypeForArgument` +
-    /// `getContextualTypeForArgumentAtIndex` (checker.go ~L29519): the
-    /// signature is the resolved one, so its parameter types carry the call's
-    /// inference results.
     fn get_contextual_type_for_argument(
         &mut self,
         call_node: &Arc<crate::ast::Node>,
@@ -1704,18 +1437,14 @@ impl Checker {
     ) -> Option<Arc<Type>> {
         use crate::ast::NodeData;
 
-        // Get the arguments list
         let args = match &call_node.data {
             NodeData::CallExpression(data) => Some(&data.arguments),
             NodeData::NewExpression(data) => data.arguments.as_ref(),
             _ => None,
         }?;
 
-        // Find the argument index
         let arg_index = args.iter().position(|a| Arc::ptr_eq(a, arg_node))?;
 
-        // Get the expression type to find call signatures. `new` expressions
-        // consult construct signatures; calls consult call signatures.
         let is_new = matches!(&call_node.data, NodeData::NewExpression(_));
         let expression_type = match &call_node.data {
             NodeData::CallExpression(data) => Some(self.get_type_of_node(&data.expression)),
@@ -1728,36 +1457,21 @@ impl Checker {
             SignatureKind::Call
         };
         let signatures = self.get_signatures_of_type(&expression_type, kind);
-        // Pick the first signature that reaches the argument position, else
-        // the first signature (approximates the resolved overload).
+
         let sig = signatures
             .iter()
             .find(|s| s.parameters.len() > arg_index)
             .or_else(|| signatures.first())?
             .clone();
 
-        // Get the parameter type at the argument index
         if arg_index >= sig.parameters.len() {
             return None;
         }
-        // Instantiated signatures (element-substituted array members,
-        // contextually instantiated callbacks) carry substituted parameter
-        // types in the override table — prefer those over the parameter
-        // symbols' raw declaration types.
+
         let base_param_type = self
             .signature_instantiated_param_type(&sig, arg_index)
             .unwrap_or_else(|| self.get_type_of_symbol(&sig.parameters[arg_index]));
 
-        // Generic signature: infer type arguments from the NON-context-
-        // sensitive arguments (Go's first inference phase; function literal
-        // arguments are context-sensitive and contribute only after the
-        // mapper is fixed), then substitute them into the parameter type.
-        // Object literal arguments DO participate (Go's filter excludes only
-        // arrow/function expressions — vueLike: the literal's props/data
-        // members are the sole source for the signature's type parameters).
-        // The resolving_contextual_calls guard keeps the re-entrant typing
-        // pass (the literal's own members asking for their contextual type)
-        // terminating — it sees the declared parameter type instead.
         if !sig.type_parameters.is_empty() {
             let key = call_node.id();
             if self.resolving_contextual_calls.insert(key) {
@@ -1787,12 +1501,6 @@ impl Checker {
         Some(base_param_type)
     }
 
-    /// Get the contextual type for a binary operand.
-    ///
-    /// In an assignment expression, the right operand is contextually typed
-    /// by the type of the left operand.
-    ///
-    /// Go: `getContextualTypeForBinaryOperand` (checker.go:29566)
     fn get_contextual_type_for_binary_operand(
         &mut self,
         node: &Arc<crate::ast::Node>,
@@ -1806,7 +1514,6 @@ impl Checker {
             _ => return None,
         };
 
-        // Only right operand gets contextual typing
         if !Arc::ptr_eq(node, &binary.right) {
             return None;
         }
@@ -1816,20 +1523,12 @@ impl Checker {
             | SyntaxKind::AmpersandAmpersandEqualsToken
             | SyntaxKind::BarBarEqualsToken
             | SyntaxKind::QuestionQuestionEqualsToken => {
-                // Assignment: the right operand is contextually typed by
-                // the target's WRITE (declared) type — via
-                // `assignment_target_type`, NOT `get_type_of_node(left)`:
-                // references inside the RHS region are shaded by the
-                // RHS-narrowing frame (`f ??= (a => a)` narrows f to
-                // nullish inside the RHS, but the arrow stays contextually
-                // typed by f's declared function type).
+
                 self.assignment_target_type(&binary.left)
                     .or_else(|| Some(self.get_type_of_node(&binary.left)))
             }
             SyntaxKind::BarBarToken | SyntaxKind::QuestionQuestionToken => {
-                // Go: the binary expression's OWN contextual type applies to
-                // both operands; only when it has none does the right
-                // operand fall back to the left operand's type.
+
                 let binary_ctx = self.get_contextual_type(&parent, _context_flags);
                 if Arc::ptr_eq(node, &binary.right) && binary_ctx.is_none() {
                     return Some(self.get_type_of_node(&binary.left));
@@ -1837,22 +1536,13 @@ impl Checker {
                 binary_ctx
             }
             SyntaxKind::AmpersandAmpersandToken | SyntaxKind::CommaToken => {
-                // Go: both operands take the binary expression's own
-                // contextual type (`f ??= (sideEffect(), (a => a))` — the
-                // comma's right operand inherits the assignment context).
+
                 self.get_contextual_type(&parent, _context_flags)
             }
             _ => None,
         }
     }
 
-    /// Get the contextual type for an object literal element.
-    ///
-    /// In an object literal contextually typed by a type T, the contextual
-    /// type of a property assignment is the type of the matching property
-    /// in T.
-    ///
-    /// Go: `getContextualTypeForObjectLiteralElement` (checker.go:29677)
     fn get_contextual_type_for_object_literal_element(
         &mut self,
         node: &Arc<crate::ast::Node>,
@@ -1860,13 +1550,10 @@ impl Checker {
     ) -> Option<Arc<Type>> {
         use crate::ast::NodeData;
 
-        // Get the parent object literal
         let object_literal = node.parent.as_ref()?;
 
-        // Get the contextual type of the object literal
         let contextual_type = self.get_contextual_type(object_literal, _context_flags)?;
 
-        // Get the property name from the element
         let name = match &node.data {
             NodeData::PropertyAssignment(data) => match &data.name.data {
                 NodeData::Identifier(id) => Some(id.text.clone()),
@@ -1880,34 +1567,23 @@ impl Checker {
             _ => None,
         }?;
 
-        // Contextual property type (Go getTypeOfPropertyOfContextualTypeEx):
-        // mapped/union/deferred contextual types contribute per-property
-        // types; falls back to None when the context provides nothing.
         self.get_type_of_property_of_contextual_type(&contextual_type, &name)
     }
 
-    /// Get the contextual type for an array literal element.
-    ///
-    /// Returns the element type of the contextual type of the parent array
-    /// literal.
-    ///
-    /// Go: `getContextualTypeForElementExpression` (checker.go:29729)
     fn get_contextual_type_for_array_literal_element(
         &mut self,
         _node: &crate::ast::Node,
         parent: &Arc<crate::ast::Node>,
         _context_flags: ContextFlags,
     ) -> Option<Arc<Type>> {
-        // Get the contextual type of the parent array literal
+
         let contextual_type = self.get_contextual_type(parent, _context_flags)?;
 
-        // For an array/object type with type arguments, return the element type
         let type_args = self.get_type_arguments(&contextual_type);
         if !type_args.is_empty() {
             return Some(Arc::clone(&type_args[0]));
         }
 
-        // Try to get the element type from index info
         if let Some(structured) = contextual_type.as_structured() {
             for index_info in &structured.index_infos {
                 if let Some(ref value_type) = index_info.value_type {
@@ -1919,11 +1595,6 @@ impl Checker {
         None
     }
 
-    // ────────────────────────────────────────────────────────────────────────
-    // getCovariantInference and related helpers
-    // ────────────────────────────────────────────────────────────────────────
-
-    /// Get the covariant inference from candidates.
     fn get_covariant_inference(
         &mut self,
         inference: &InferenceInfo,
@@ -1966,7 +1637,6 @@ impl Checker {
         Some(self.get_widened_type(&unwidened_type))
     }
 
-    /// Get the contravariant inference from contra-candidates.
     fn get_contravariant_inference(&mut self, inference: &InferenceInfo) -> Option<Arc<Type>> {
         if inference.contra_candidates.is_empty() {
             return None;
@@ -1981,7 +1651,6 @@ impl Checker {
         }
     }
 
-    /// Union object and array literal candidates.
     fn union_object_and_array_literal_candidates(
         &self,
         candidates: &[Arc<Type>],
@@ -2007,7 +1676,6 @@ impl Checker {
         candidates.to_vec()
     }
 
-    /// Check if a type parameter has a primitive constraint.
     fn has_primitive_constraint(&self, t: &Arc<Type>) -> bool {
         let constraint = self.get_constraint_of_type_parameter(t);
         if let Some(constraint) = constraint {
@@ -2034,7 +1702,6 @@ impl Checker {
         false
     }
 
-    /// Check if a type parameter is at the top level in a type.
     fn is_type_parameter_at_top_level(&self, t: &Type, tp: &Type, depth: i32) -> bool {
         if crate::checker::utilities::type_parameters_match(t, tp) {
             return true;
@@ -2049,7 +1716,6 @@ impl Checker {
         false
     }
 
-    /// Check if a type parameter is at the top level in the return type of a signature.
     fn is_type_parameter_at_top_level_in_return_type(
         &self,
         signature: &Arc<Signature>,
@@ -2061,7 +1727,6 @@ impl Checker {
         false
     }
 
-    /// Get the type from inference without a signature.
     fn get_type_from_inference(&self, inference: &InferenceInfo) -> Option<Arc<Type>> {
         if !inference.candidates.is_empty() {
             Some(self.create_union_type(inference.candidates.clone()))
@@ -2072,7 +1737,6 @@ impl Checker {
         }
     }
 
-    /// Get the common supertype of a list of types.
     fn get_common_supertype(&mut self, types: &[Arc<Type>]) -> Arc<Type> {
         if types.len() == 1 {
             return types[0].clone();
@@ -2090,17 +1754,16 @@ impl Checker {
         }
     }
 
-    /// Get a single common supertype from a list of types.
     fn get_single_common_supertype(&mut self, types: &[Arc<Type>]) -> Arc<Type> {
         let candidate = self.find_leftmost_type(types);
-        // Check if all types are subtypes of the candidate
+
         let all_are_strict_subtypes = types
             .iter()
             .all(|t| Arc::ptr_eq(t, &candidate) || self.is_type_strict_subtype_of(t, &candidate));
         if all_are_strict_subtypes {
             return candidate;
         }
-        // Find the leftmost type using subtype relation
+
         let mut candidate: Option<Arc<Type>> = None;
         for t in types {
             match &candidate {
@@ -2115,7 +1778,6 @@ impl Checker {
         candidate.unwrap_or_else(|| self.unknown_type())
     }
 
-    /// Find the leftmost type in a list according to a comparison function.
     fn find_leftmost_type(&mut self, types: &[Arc<Type>]) -> Arc<Type> {
         let mut candidate: Option<Arc<Type>> = None;
         for t in types {
@@ -2129,7 +1791,6 @@ impl Checker {
         candidate.unwrap_or_else(|| self.unknown_type())
     }
 
-    /// Get the common subtype (intersection-like) from a list of types.
     fn get_common_subtype(&mut self, types: &[Arc<Type>]) -> Arc<Type> {
         let mut subtype: Option<Arc<Type>> = None;
         for t in types {
@@ -2145,7 +1806,6 @@ impl Checker {
         subtype.unwrap_or_else(|| self.unknown_type())
     }
 
-    /// Get combined type flags from a list of types.
     fn get_combined_type_flags(&self, types: &[Arc<Type>]) -> TypeFlags {
         let mut flags = TypeFlags::None;
         for t in types {
@@ -2160,7 +1820,6 @@ impl Checker {
         flags
     }
 
-    /// Check if all types are literal types with the same base type.
     fn literal_types_with_same_base_type(&self, types: &[Arc<Type>]) -> bool {
         let mut common_base_type: Option<Arc<Type>> = None;
         for t in types {
@@ -2180,12 +1839,10 @@ impl Checker {
         true
     }
 
-    /// Check if a type is a const type variable.
     fn is_const_type_variable(&self, _t: &Type, _depth: i32) -> bool {
         false
     }
 
-    /// Get the default constraint of a conditional type.
     fn get_default_constraint_of_conditional_type(&self, t: &Arc<Type>) -> Option<Arc<Type>> {
         if let Some(constraint) = self.get_constraint_of_type_parameter(t) {
             return Some(constraint);
@@ -2193,12 +1850,10 @@ impl Checker {
         None
     }
 
-    /// Check if a type is of a kind specified by flags.
     fn maybe_type_of_kind(&self, t: &Type, flags: TypeFlags) -> bool {
         t.flags.intersects(flags)
     }
 
-    /// Create a union type (simplified wrapper).
     fn create_union_type(&self, types: Vec<Arc<Type>>) -> Arc<Type> {
         let filtered: Vec<Arc<Type>> = types
             .into_iter()
@@ -2226,7 +1881,6 @@ impl Checker {
         ))
     }
 
-    /// Create an intersection type (simplified wrapper).
     fn create_intersection_type(&self, types: Vec<Arc<Type>>) -> Arc<Type> {
         if types.is_empty() {
             return self.unknown_type();
@@ -2247,24 +1901,11 @@ impl Checker {
         ))
     }
 
-    // `get_widened_literal_type` and `get_regular_type_of_literal_type`
-    // are implemented in `checker.rs` (real implementations backed by the
-    // fresh-literal mechanism, not stubs).
-
-    // ────────────────────────────────────────────────────────────────────────
-    // Helper methods for inferTypeArguments
-    // ────────────────────────────────────────────────────────────────────────
-
-    // `get_this_type_of_signature` and `get_non_array_rest_type` are
-    // implemented in `relater.rs` (real implementations, not stubs).
-
-    /// Get the this argument type for a call node.
     #[allow(dead_code)]
     fn get_this_argument_type(&self, _node: &crate::ast::Node) -> Arc<Type> {
         self.undefined_type()
     }
 
-    /// Get the spread argument type for a list of arguments.
     #[allow(dead_code)]
     fn get_spread_argument_type(
         &self,
@@ -2275,7 +1916,6 @@ impl Checker {
         self.unknown_type()
     }
 
-    /// Check if a type is an object or array literal type.
     fn is_object_or_array_literal_type(&self, t: &Type) -> bool {
         t.flags.contains(TypeFlags::Object)
             && t.object_flags
@@ -2283,12 +1923,6 @@ impl Checker {
     }
 }
 
-// ────────────────────────────────────────────────────────────────────────────
-// Helper functions
-// ────────────────────────────────────────────────────────────────────────────
-
-/// Parameter list of a function-like node (function expression, arrow,
-/// method, accessor, function declaration). `None` for other nodes.
 pub(super) fn function_like_parameters(
     node: &Arc<crate::ast::Node>,
 ) -> Option<Arc<crate::ast::NodeList>> {
@@ -2305,7 +1939,6 @@ pub(super) fn function_like_parameters(
     }
 }
 
-/// Whether a parameter node is a `this` parameter (Go `ast.IsThisParameter`).
 fn is_this_parameter_node(param: &Arc<crate::ast::Node>) -> bool {
     if let crate::ast::NodeData::ParameterDeclaration(pd) = &param.data {
         return matches!(&pd.name.data, crate::ast::NodeData::Identifier(id) if id.text == "this");

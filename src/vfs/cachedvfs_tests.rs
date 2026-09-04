@@ -1,18 +1,7 @@
-//! Tests ported from `internal/vfs/cachedvfs/cachedvfs_test.go` (10 tests).
-//!
-//! Each test wraps a call-recording [`CountingFS`] in a [`CachedFS`] and
-//! verifies that:
-//! - repeated calls to a cached method hit the cache (underlying call count
-//!   stays the same),
-//! - `clear_cache` / `disable_and_clear_cache` / `enable` behave as in Go.
-
 use super::cachedvfs::CachedFS;
 use super::*;
 use std::sync::{Arc, Mutex};
 
-/// A call-recording wrapper around an [`InMemoryFS`], mirroring Go's
-/// `vfsmock.FSMock`. Every method records its arguments so the cachedvfs
-/// tests can assert on underlying call counts.
 struct CountingFS {
     inner: InMemoryFS,
     directory_exists_calls: Mutex<Vec<String>>,
@@ -157,8 +146,6 @@ impl FS for CountingFS {
     }
 }
 
-/// Build a `CountingFS` seeded with `"/some/path/file.txt"` (mirrors Go's
-/// `createMockFS`, which uses `vfstest.FromMap` and infers parent dirs).
 fn create_mock_fs() -> CountingFS {
     let inner = InMemoryFS::with_case_sensitivity(true);
     inner.insert_dir("/some");
@@ -167,16 +154,9 @@ fn create_mock_fs() -> CountingFS {
     CountingFS::new(inner)
 }
 
-// ---------------------------------------------------------------------------
-// Cached methods: directory_exists / file_exists / get_accessible_entries /
-// realpath / stat.
-// Expected underlying call sequence: 1, 1 (cached), clear -> 2, 3, disable ->
-// 4, 5 (not cached), enable -> 6, 6 (cached again).
-// ---------------------------------------------------------------------------
-
 #[test]
 fn test_cached_directory_exists() {
-    // Port of Go TestDirectoryExists.
+
     let underlying = Arc::new(create_mock_fs());
     let cached = CachedFS::new(underlying.clone());
 
@@ -210,7 +190,7 @@ fn test_cached_directory_exists() {
 
 #[test]
 fn test_cached_file_exists() {
-    // Port of Go TestFileExists.
+
     let underlying = Arc::new(create_mock_fs());
     let cached = CachedFS::new(underlying.clone());
 
@@ -244,7 +224,7 @@ fn test_cached_file_exists() {
 
 #[test]
 fn test_cached_get_accessible_entries() {
-    // Port of Go TestGetAccessibleEntries.
+
     let underlying = Arc::new(create_mock_fs());
     let cached = CachedFS::new(underlying.clone());
 
@@ -278,7 +258,7 @@ fn test_cached_get_accessible_entries() {
 
 #[test]
 fn test_cached_realpath() {
-    // Port of Go TestRealpath.
+
     let underlying = Arc::new(create_mock_fs());
     let cached = CachedFS::new(underlying.clone());
 
@@ -312,7 +292,7 @@ fn test_cached_realpath() {
 
 #[test]
 fn test_cached_stat() {
-    // Port of Go TestStat.
+
     let underlying = Arc::new(create_mock_fs());
     let cached = CachedFS::new(underlying.clone());
 
@@ -344,15 +324,9 @@ fn test_cached_stat() {
     assert_eq!(6, underlying.stat_calls());
 }
 
-// ---------------------------------------------------------------------------
-// Pass-through (never cached) methods.
-// Expected underlying call sequence: 1, 2, clear -> 3, disable -> 4, 5, enable
-// -> 6, 7 (every call reaches the underlying FS).
-// ---------------------------------------------------------------------------
-
 #[test]
 fn test_cached_read_file() {
-    // Port of Go TestReadFile.
+
     let underlying = Arc::new(create_mock_fs());
     let cached = CachedFS::new(underlying.clone());
 
@@ -383,7 +357,7 @@ fn test_cached_read_file() {
 
 #[test]
 fn test_cached_use_case_sensitive_file_names() {
-    // Port of Go TestUseCaseSensitiveFileNames.
+
     let underlying = Arc::new(create_mock_fs());
     let cached = CachedFS::new(underlying.clone());
 
@@ -414,7 +388,7 @@ fn test_cached_use_case_sensitive_file_names() {
 
 #[test]
 fn test_cached_walk_dir() {
-    // Port of Go TestWalkDir. WalkDir is not cached — always passed through.
+
     let underlying = Arc::new(create_mock_fs());
     let cached = CachedFS::new(underlying.clone());
 
@@ -447,7 +421,7 @@ fn test_cached_walk_dir() {
 
 #[test]
 fn test_cached_remove() {
-    // Port of Go TestRemove. Remove is not cached — always passed through.
+
     let underlying = Arc::new(create_mock_fs());
     let cached = CachedFS::new(underlying.clone());
 
@@ -478,8 +452,7 @@ fn test_cached_remove() {
 
 #[test]
 fn test_cached_write_file() {
-    // Port of Go TestWriteFile. WriteFile is not cached — always passed
-    // through, and call args are verifiable on the mock.
+
     let underlying = Arc::new(create_mock_fs());
     let cached = CachedFS::new(underlying.clone());
 

@@ -1,5 +1,3 @@
-//! Config file registry builder (1:1 port of Go's `internal/project/configfileregistrybuilder.go`).
-
 #![allow(dead_code)]
 
 use std::collections::HashSet;
@@ -9,9 +7,6 @@ use crate::tspath::Path;
 use super::config_file_registry::ConfigFileRegistry;
 use super::file_change::FileChangeSummary;
 
-/// Result of processing file changes for config file registry.
-///
-/// Go: `type changeFileResult struct { ... }`.
 #[derive(Default)]
 pub struct ChangeFileResult {
     pub affected_projects: HashSet<Path>,
@@ -24,10 +19,6 @@ impl ChangeFileResult {
     }
 }
 
-/// Tracks changes made on top of a previous `ConfigFileRegistry`, producing
-/// a new clone with `finalize()`.
-///
-/// Go: `type configFileRegistryBuilder struct { ... }`.
 pub struct ConfigFileRegistryBuilder {
     pub has_relative_pattern_capability: bool,
     pub snapshot_id: u64,
@@ -38,9 +29,7 @@ pub struct ConfigFileRegistryBuilder {
 }
 
 impl ConfigFileRegistryBuilder {
-    /// Creates a new builder.
-    ///
-    /// Go: `func newConfigFileRegistryBuilder(...) *configFileRegistryBuilder`.
+
     pub fn new(
         has_relative_pattern_capability: bool,
         old_config_file_registry: ConfigFileRegistry,
@@ -60,9 +49,6 @@ impl ConfigFileRegistryBuilder {
         }
     }
 
-    /// Finalizes the builder into a config file registry.
-    ///
-    /// Go: `func (c *configFileRegistryBuilder) Finalize() *ConfigFileRegistry`.
     pub fn finalize(&self) -> ConfigFileRegistry {
         if !self.custom_config_file_name_changed {
             return self.base.clone_shallow();
@@ -72,25 +58,19 @@ impl ConfigFileRegistryBuilder {
         registry
     }
 
-    /// Processes file changes.
-    ///
-    /// Go: `func (c *configFileRegistryBuilder) DidChangeFiles(...) changeFileResult`.
     pub fn did_change_files(&self, _summary: &FileChangeSummary) -> ChangeFileResult {
-        // Stub: full implementation tracks config file changes.
+
         ChangeFileResult::default()
     }
 
-    /// Handles custom config file name changes.
     pub fn did_change_custom_config_file_name(&self) -> bool {
         self.custom_config_file_name_changed
     }
 
-    /// Cleans up entries with no retainers.
     pub fn cleanup(&self) {
-        // Stub.
+
     }
 
-    /// Checks if a base file name is a config file.
     pub fn is_config_base_name(&self, base_name: &str) -> bool {
         base_name == "tsconfig.json"
             || base_name == "jsconfig.json"

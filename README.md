@@ -71,17 +71,19 @@ in the bench repo's `results/`.
 
 | doc | contents |
 |---|---|
-| [`TESTING.md`](./TESTING.md) | test methods, sweep history, current baseline — **start here for testing** |
-| [`TODO.md`](./TODO.md) | current TODO list |
-| [`docs/MIGRATION.md`](./docs/MIGRATION.md) | flow audits, behavior-diff by phase, build notes |
-| [`docs/ANALYSIS.md`](./docs/ANALYSIS.md) | Go vs Rust structure comparison, module mapping |
-| [`docs/RUST_ADAPTATIONS.md`](./docs/RUST_ADAPTATIONS.md) | where the Rust port deliberately diverges from Go |
+| [`TESTING.md`](./TESTING.md) | test methods, gates, current status — **start here for testing** |
+| [`roadmap/TODO.md`](./roadmap/TODO.md) | current TODO list |
+| [`docs/MIGRATION.md`](./docs/MIGRATION.md) | migration overview, commands, flow audits (see audit-*.md) |
+| [`docs/ANALYSIS.md`](./docs/ANALYSIS.md) | Go vs Rust structure comparison |
+| [`docs/RUST_ADAPTATIONS.md`](./docs/RUST_ADAPTATIONS.md) | deliberate divergences from Go |
+| [`docs/completed-inventory.md`](./docs/completed-inventory.md) | completed-work inventory & gaps |
+| [`docs/structure-debt.md`](./docs/structure-debt.md) | AGENTS.md rule 2/3 (file size / test layout) debt & plan |
 | [`docs/FIXING.md`](./docs/FIXING.md) | fixing workflow conventions |
 | [`docs/INTEGRATION_TEST.md`](./docs/INTEGRATION_TEST.md) | real-project integration results |
-| [`docs/LSP_MIGRATION_PLAN.md`](./docs/LSP_MIGRATION_PLAN.md) | LSP porting plan |
-| [`docs/PACKAGING.md`](./docs/PACKAGING.md) | packaging/distribution notes |
-| [`docs/ISSUES_RISK_ANALYSIS.md`](./docs/ISSUES_RISK_ANALYSIS.md) | known risks |
-| [`docs/triage-CLASSIFICATION.md`](./docs/triage-CLASSIFICATION.md) | triage taxonomy |
+| [`docs/PACKAGING.md`](./docs/PACKAGING.md) | packaging/distribution (see packaging-build-matrix.md) |
+| [`docs/test-history.md`](./docs/test-history.md) | append-only sweep/run history archive |
+| [`issues/known-issues.md`](./issues/known-issues.md) | known issues index (correctness / perf / risks) |
+| [`roadmap/`](./roadmap/) | future plans (TODO, LSP migration) |
 
 ## Parity tests against the Go oracle
 

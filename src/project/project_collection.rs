@@ -1,5 +1,3 @@
-//! Project collection (1:1 port of Go's `internal/project/projectcollection.go`).
-
 #![allow(dead_code)]
 
 use std::collections::{HashMap, HashSet};
@@ -11,9 +9,6 @@ use super::config_file_registry::ConfigFileRegistry;
 use super::overlay_fs::Overlay;
 use super::project::{INFERRED_PROJECT_NAME, Project};
 
-/// Tracks the projects and files that API clients have explicitly opened.
-///
-/// Go: `type APIState struct { ... }`.
 #[derive(Clone, Default)]
 pub struct APIState {
     pub open_projects: HashMap<Path, i32>,
@@ -33,18 +28,12 @@ impl APIState {
     }
 }
 
-/// Tracks a file kept open by API clients along with its ref count.
-///
-/// Go: `type apiOpenedFile struct { ... }`.
 #[derive(Clone, Debug, PartialEq)]
 pub struct ApiOpenedFile {
     pub file_name: String,
     pub ref_count: i32,
 }
 
-/// A collection of all loaded projects for a snapshot.
-///
-/// Go: `type ProjectCollection struct { ... }`.
 pub struct ProjectCollection {
     pub to_path: Box<dyn Fn(&str) -> Path + Send + Sync>,
     pub config_file_registry: Option<ConfigFileRegistry>,
@@ -86,7 +75,6 @@ impl ProjectCollection {
         None
     }
 
-    /// Returns all configured projects in a stable (sorted) order.
     pub fn configured_projects_vec(&self) -> Vec<&Project> {
         let mut projects: Vec<&Project> = self
             .configured_projects
@@ -97,7 +85,6 @@ impl ProjectCollection {
         projects
     }
 
-    /// Returns all projects including the inferred project.
     pub fn projects(&self) -> Vec<&Project> {
         let mut projects = self.configured_projects_vec();
         if let Some(inferred) = &self.inferred_project {
@@ -114,15 +101,11 @@ impl ProjectCollection {
         todo!("ProjectCollection::get_default_project requires full integration")
     }
 
-    /// Creates a shallow copy.
     pub fn clone_shallow(&self) -> ProjectCollection {
         todo!("ProjectCollection::clone_shallow requires Box<Project> Clone")
     }
 }
 
-/// Computes the set of open file paths from the overlay map.
-///
-/// Go: `func openFilePaths(overlays map[...]) collections.Set[...]`.
 pub fn open_file_paths(overlays: &HashMap<Path, Arc<Overlay>>) -> HashSet<Path> {
     overlays.keys().cloned().collect()
 }

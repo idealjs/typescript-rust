@@ -1,8 +1,3 @@
-//! Copy-on-write single-value container.
-//! Port of Go's `internal/project/dirty/box.go`.
-
-/// Copy-on-write box for a single value.
-/// Matches Go's `Box[T Cloneable[T]]`.
 pub struct DirtyBox<T: Clone> {
     original: T,
     value: T,

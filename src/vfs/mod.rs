@@ -1,13 +1,7 @@
-//! Virtual file system abstraction, ported from `internal/vfs/`.
-//!
-//! Provides a trait-based file system interface that can be backed by
-//! the real OS file system or an in-memory implementation for testing.
-
 use std::collections::{HashMap, HashSet};
 use std::path::Path;
 use std::sync::{Arc, RwLock};
 
-/// A file system entry listing.
 #[derive(Clone, Debug, Default)]
 pub struct Entries {
     pub files: Vec<String>,
@@ -15,7 +9,6 @@ pub struct Entries {
     pub symlinks: Vec<String>,
 }
 
-/// File system metadata.
 #[derive(Clone, Debug)]
 pub struct FileInfo {
     pub name: String,
@@ -37,7 +30,6 @@ impl Default for FileInfo {
     }
 }
 
-/// The file system trait.
 pub trait FS: Send + Sync {
     fn use_case_sensitive_file_names(&self) -> bool;
     fn file_exists(&self, path: &str) -> bool;
@@ -50,11 +42,6 @@ pub trait FS: Send + Sync {
     fn stat(&self, path: &str) -> Option<FileInfo>;
     fn realpath(&self, path: &str) -> String;
 
-    /// Walk the file tree rooted at `root`, invoking `walk_fn` once for each
-    /// file or directory entry. Mirrors Go's `WalkDir`.
-    ///
-    /// The default implementation is a no-op; concrete implementations may
-    /// override it. The callback receives `(path, info)` for every entry.
     fn walk_dir(
         &self,
         root: &str,
@@ -65,7 +52,6 @@ pub trait FS: Send + Sync {
     }
 }
 
-/// OS-backed file system implementation.
 pub struct OsFS;
 
 impl FS for OsFS {
@@ -78,9 +64,7 @@ impl FS for OsFS {
     }
 
     fn read_file(&self, path: &str) -> Option<String> {
-        // Strip a UTF-8 BOM like the in-memory FS's `decode_with_bom` —
-        // the scanner has no U+FEFF skip, so a BOM left in place derails
-        // the parser (the harness path always strips it).
+
         std::fs::read_to_string(path).ok().map(|s| {
             s.strip_prefix('\u{FEFF}')
                 .map(|t| t.to_string())
@@ -123,8 +107,7 @@ impl FS for OsFS {
                     entries.directories.push(name);
                 } else if file_type.as_ref().map(|t| t.is_symlink()).unwrap_or(false) {
                     entries.symlinks.push(name.clone());
-                    // Use std::fs::metadata (not entry.metadata()) to follow symlinks.
-                    // On macOS, DirEntry::metadata() does not follow symlinks.
+
                     if let Ok(meta) = std::fs::metadata(entry.path()) {
                         if meta.is_dir() {
                             entries.directories.push(name);
@@ -162,13 +145,11 @@ impl FS for OsFS {
     }
 }
 
-/// In-memory file system for testing.
 pub struct InMemoryFS {
     case_sensitive: bool,
     files: RwLock<HashMap<String, String>>,
     dirs: RwLock<std::collections::HashSet<String>>,
-    /// Maps a link path to its target path. Targets may be absolute or
-    /// relative (resolved against the link's parent directory).
+
     symlinks: RwLock<HashMap<String, String>>,
 }
 
@@ -203,12 +184,7 @@ impl InMemoryFS {
 
     pub fn insert_dir(&self, path: &str) {
         let mut dirs = self.dirs.write().unwrap();
-        // Register the full ancestor chain, mirroring a real FS where
-        // creating `/a/b/c` implies `/a/b` and `/a` exist. The resolver
-        // gates its node_modules walk on `directory_exists` of each
-        // prefix; without ancestors, mounting `/node_modules/pkg` leaves
-        // `/node_modules` nonexistent and every package lookup fails
-        // (the r8/r9 nodeModules TS2307 family).
+
         let mut current = path.to_string();
         loop {
             if !self.case_sensitive {
@@ -230,8 +206,6 @@ impl InMemoryFS {
         }
     }
 
-    /// Finds the stored file key matching `path`, performing a case-insensitive
-    /// match when the FS is not case-sensitive.
     fn lookup_file_key(&self, path: &str) -> Option<String> {
         let files = self.files.read().unwrap();
         if files.contains_key(path) {
@@ -247,8 +221,6 @@ impl InMemoryFS {
             .cloned()
     }
 
-    /// Finds the stored directory key matching `path`, performing a
-    /// case-insensitive match when the FS is not case-sensitive.
     fn lookup_dir_key(&self, path: &str) -> Option<String> {
         let dirs = self.dirs.read().unwrap();
         if dirs.contains(path) {
@@ -263,7 +235,6 @@ impl InMemoryFS {
             .cloned()
     }
 
-    /// Creates a symlink: `link` resolves to `target`.
     pub fn create_symlink(&self, link: &str, target: &str) {
         let mut symlinks = self.symlinks.write().unwrap();
         let key = if self.case_sensitive {
@@ -279,14 +250,10 @@ impl InMemoryFS {
         symlinks.insert(key, target.to_string());
     }
 
-    /// Reads the target of a symlink. Returns `None` if `path` is not a
-    /// symlink.
     pub fn read_symlink(&self, path: &str) -> Option<String> {
         self.lookup_symlink_key(path)
     }
 
-    /// Finds the stored symlink target for `link`, performing a
-    /// case-insensitive match when the FS is not case-sensitive.
     fn lookup_symlink_key(&self, link: &str) -> Option<String> {
         let symlinks = self.symlinks.read().unwrap();
         if let Some(t) = symlinks.get(link) {
@@ -302,8 +269,6 @@ impl InMemoryFS {
             .map(|(_, v)| v.clone())
     }
 
-    /// Finds the stored symlink *key* (the link path) matching `link`,
-    /// performing a case-insensitive match when the FS is not case-sensitive.
     fn lookup_symlink_stored_key(&self, link: &str) -> Option<String> {
         let symlinks = self.symlinks.read().unwrap();
         if symlinks.contains_key(link) {
@@ -319,8 +284,6 @@ impl InMemoryFS {
             .map(|(k, _)| k.clone())
     }
 
-    /// Returns `true` if `path` (or its case-insensitive equivalent) is a
-    /// stored file.
     fn is_file_path(&self, path: &str) -> bool {
         let files = self.files.read().unwrap();
         if files.contains_key(path) {
@@ -333,11 +296,6 @@ impl InMemoryFS {
         files.keys().any(|k| k.to_ascii_lowercase() == target)
     }
 
-    /// Resolves `path` by following symlinks at any path component.
-    ///
-    /// Symlink chains are followed (with a hop limit) and cycles are broken
-    /// (the last-resolvable path is returned). With no symlinks present this
-    /// is a cheap no-op returning the input verbatim.
     fn resolve_symlinks(&self, path: &str) -> String {
         if path.is_empty() {
             return String::new();
@@ -355,7 +313,7 @@ impl InMemoryFS {
         };
         let mut visited: HashSet<String> = HashSet::new();
         for part in &parts {
-            // Append the next component to the running resolved path.
+
             if resolved.is_empty() {
                 resolved.push_str(part);
             } else if resolved.ends_with('/') {
@@ -364,7 +322,7 @@ impl InMemoryFS {
                 resolved.push('/');
                 resolved.push_str(part);
             }
-            // Follow the symlink chain rooted at this prefix.
+
             let mut hops = 0;
             loop {
                 hops += 1;
@@ -378,7 +336,7 @@ impl InMemoryFS {
                 resolved = if is_absolute_path(&target) {
                     target
                 } else {
-                    // Relative target: resolve against the link's parent dir.
+
                     match parent_dir(&resolved) {
                         Some(p) if p.ends_with('/') => format!("{p}{target}"),
                         Some(p) => format!("{p}/{target}"),
@@ -386,14 +344,13 @@ impl InMemoryFS {
                     }
                 };
                 if !visited.insert(resolved.clone()) {
-                    break; // cycle detected
+                    break;
                 }
             }
         }
         resolved
     }
 
-    /// Looks up the symlink target for `path` within a borrowed symlink map.
     fn symlink_target<'a>(
         &self,
         symlinks: &'a HashMap<String, String>,
@@ -419,10 +376,8 @@ impl Default for InMemoryFS {
     }
 }
 
-/// Maximum number of symlink hops before giving up (cycle/loop protection).
 const MAX_SYMLINK_HOPS: usize = 40;
 
-/// Returns the parent directory of `path`, or `None` if `path` has no parent.
 fn parent_dir(path: &str) -> Option<String> {
     let trimmed = path.trim_end_matches('/');
     match trimmed.rfind('/') {
@@ -432,13 +387,11 @@ fn parent_dir(path: &str) -> Option<String> {
     }
 }
 
-/// Returns `true` for absolute paths (POSIX `/…` or Windows drive `c:/…`).
 fn is_absolute_path(path: &str) -> bool {
     path.starts_with('/')
         || (path.len() >= 3 && path.as_bytes()[1] == b':' && path.as_bytes()[2] == b'/')
 }
 
-/// Strips a UTF-8 BOM (`U+FEFF`) from the start of `content` if present.
 fn decode_with_bom(content: &str) -> String {
     content
         .strip_prefix('\u{FEFF}')
@@ -446,9 +399,6 @@ fn decode_with_bom(content: &str) -> String {
         .unwrap_or_else(|| content.to_string())
 }
 
-/// Returns the remainder of `haystack` after `prefix`, comparing
-/// case-insensitively when `case_sensitive` is false. Preserves the original
-/// casing of the remainder.
 fn strip_path_prefix<'a>(haystack: &'a str, prefix: &str, case_sensitive: bool) -> Option<&'a str> {
     if case_sensitive {
         haystack.strip_prefix(prefix)
@@ -492,7 +442,7 @@ impl FS for InMemoryFS {
 
     fn write_file(&self, path: &str, data: &str) -> std::io::Result<()> {
         let resolved = self.resolve_symlinks(path);
-        // Validate that the parent path is not an existing file.
+
         if let Some(parent) = parent_dir(&resolved) {
             if self.is_file_path(&parent) {
                 return Err(std::io::Error::new(
@@ -535,17 +485,17 @@ impl FS for InMemoryFS {
     }
 
     fn remove(&self, path: &str) -> std::io::Result<()> {
-        // A symlink is removed on its own (the target is untouched).
+
         if let Some(key) = self.lookup_symlink_stored_key(path) {
             self.symlinks.write().unwrap().remove(&key);
             return Ok(());
         }
-        // An exact file match is removed on its own.
+
         if let Some(key) = self.lookup_file_key(path) {
             self.files.write().unwrap().remove(&key);
             return Ok(());
         }
-        // A directory is removed recursively (all descendants are cleared).
+
         if let Some(key) = self.lookup_dir_key(path) {
             let prefix = format!("{key}/");
             let mut files = self.files.write().unwrap();
@@ -597,10 +547,7 @@ impl FS for InMemoryFS {
 
         for key in self.files.read().unwrap().keys() {
             if let Some(rest) = strip_path_prefix(key, &prefix, self.case_sensitive) {
-                // An empty rest is the queried path itself — the root "/"
-                // must not list itself as an entry (its "" name re-combines
-                // to "/" and directory walks recurse into themselves —
-                // tslibMissingHelper-family stack overflow).
+
                 if !rest.is_empty() && !rest.contains('/') {
                     entries.files.push(rest.to_string());
                 }
@@ -652,7 +599,7 @@ impl FS for InMemoryFS {
         if let Some(key) = self.lookup_dir_key(&resolved) {
             return key;
         }
-        // A (possibly broken) symlink resolves to its final target.
+
         if resolved != path {
             return resolved;
         }
@@ -660,7 +607,6 @@ impl FS for InMemoryFS {
     }
 }
 
-/// A shared file system handle.
 pub type SharedFS = Arc<dyn FS>;
 
 pub mod cachedvfs;
@@ -740,7 +686,7 @@ mod tests {
     #[test]
     fn in_memory_fs_remove_nonexistent() {
         let fs = InMemoryFS::new();
-        // Should not error when removing nonexistent paths
+
         assert!(fs.remove("/nonexistent").is_ok());
         assert!(fs.remove("/nonexistent/file.ts").is_ok());
     }
@@ -752,7 +698,7 @@ mod tests {
         let info = fs.stat("/test.ts").unwrap();
         assert!(!info.is_dir);
         assert!(!info.is_symlink);
-        assert_eq!(info.size, 19); // "export const x = 1;" is 19 bytes
+        assert_eq!(info.size, 19);
     }
 
     #[test]
@@ -821,7 +767,7 @@ mod tests {
     fn in_memory_fs_trailing_slash_dir() {
         let fs = InMemoryFS::new();
         fs.insert_dir("/src/");
-        // get_accessible_entries should handle trailing slash
+
         fs.insert_file("/src/a.ts", "a");
         let entries = fs.get_accessible_entries("/src/");
         assert_eq!(entries.files, vec!["a.ts"]);
@@ -830,7 +776,7 @@ mod tests {
     #[test]
     fn os_fs_basic_exists() {
         let fs = OsFS;
-        // Test that OsFS can check file existence
+
         assert!(!fs.file_exists("/nonexistent_file_12345.ts"));
     }
 
@@ -843,7 +789,7 @@ mod tests {
     #[test]
     fn os_fs_use_case_sensitive() {
         let fs = OsFS;
-        // On Linux/Mac, case sensitive; on Windows, not
+
         #[cfg(target_os = "windows")]
         assert!(!fs.use_case_sensitive_file_names());
         #[cfg(not(target_os = "windows"))]

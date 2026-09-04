@@ -1,5 +1,3 @@
-//! Semantic tokens provider (1:1 port of Go's `internal/ls/semantictokens.go`).
-
 #![allow(dead_code)]
 
 use std::sync::Arc;
@@ -14,7 +12,6 @@ use crate::lsp::lsproto::lsp::{DocumentUri, Range};
 use super::language_service::LanguageService;
 use super::types::SemanticTokens;
 
-/// Token type index constants.
 pub mod token_type {
     pub const NAMESPACE: u32 = 0;
     pub const CLASS: u32 = 1;
@@ -42,7 +39,6 @@ pub mod token_type {
     pub const INVALID: u32 = u32::MAX;
 }
 
-/// Token modifier bit flags.
 pub mod token_modifier {
     pub const DECLARATION: u32 = 1 << 0;
     pub const DEFINITION: u32 = 1 << 1;
@@ -57,7 +53,6 @@ pub mod token_modifier {
     pub const LOCAL: u32 = 1 << 10;
 }
 
-/// A collected semantic token.
 pub struct SemanticToken {
     pub token_type: u32,
     pub token_modifier: u32,
@@ -66,14 +61,7 @@ pub struct SemanticToken {
 }
 
 impl LanguageService {
-    /// Provide semantic tokens for a document.
-    ///
-    /// Mirrors `ProvideSemanticTokens`.
-    ///
-    /// 1. Walk the AST.
-    /// 2. Classify each node into a `SemanticTokenType` (keyword, variable,
-    ///    function, class, etc.).
-    /// 3. Return as a delta-encoded token array.
+
     pub fn provide_semantic_tokens(&self, document_uri: &DocumentUri) -> Option<SemanticTokens> {
         let (program, source_file) = self.get_program_and_file(document_uri);
         let checker = program.build_checker();
@@ -88,9 +76,6 @@ impl LanguageService {
         Some(SemanticTokens { data })
     }
 
-    /// Provide semantic tokens for a range.
-    ///
-    /// Mirrors `ProvideSemanticTokensRange`.
     pub fn provide_semantic_tokens_range(
         &self,
         document_uri: &DocumentUri,
@@ -107,9 +92,6 @@ impl LanguageService {
         Some(SemanticTokens { data })
     }
 
-    /// Collect semantic tokens in a range.
-    ///
-    /// Mirrors `collectSemanticTokensInRange`.
     pub fn collect_semantic_tokens_in_range(
         &self,
         checker: &Checker,
@@ -120,15 +102,12 @@ impl LanguageService {
     ) -> Vec<SemanticToken> {
         let mut tokens = Vec::new();
         collect_tokens(checker, &file.node, span_start, span_end, &mut tokens);
-        // Sort by position so delta encoding is correct.
+
         tokens.sort_by_key(|t| t.pos);
         tokens
     }
 }
 
-/// Classify a symbol into a token type and whether it is a declaration.
-///
-/// Mirrors `classifySymbol`.
 pub fn classify_symbol(symbol: &Symbol, _meaning: u32) -> (u32, bool) {
     let flags = symbol.flags;
     if flags.contains(SymbolFlags::TypeParameter) {
@@ -176,9 +155,6 @@ pub fn classify_symbol(symbol: &Symbol, _meaning: u32) -> (u32, bool) {
     (token_type::INVALID, false)
 }
 
-/// Map a declaration kind to a token type.
-///
-/// Mirrors `tokenFromDeclarationMapping`.
 pub fn token_from_declaration_mapping(kind: crate::ast::SyntaxKind) -> u32 {
     use crate::ast::SyntaxKind;
     match kind {
@@ -204,7 +180,6 @@ pub fn token_from_declaration_mapping(kind: crate::ast::SyntaxKind) -> u32 {
     }
 }
 
-/// Walk the AST and collect semantic tokens within `[span_start, span_end)`.
 fn collect_tokens(
     checker: &Checker,
     node: &Arc<Node>,
@@ -212,30 +187,26 @@ fn collect_tokens(
     span_end: usize,
     tokens: &mut Vec<SemanticToken>,
 ) {
-    // Skip nodes entirely outside the span.
+
     if node.end() <= span_start || node.pos() >= span_end {
         return;
     }
 
-    // Try to classify the current node.
     if let Some(token) = classify_node_token(checker, node) {
         if token.pos >= span_start && token.end <= span_end {
             tokens.push(token);
         }
     }
 
-    // Recurse into children.
     for_each_child(node, |child| {
         collect_tokens(checker, child, span_start, span_end, tokens);
         false
     });
 }
 
-/// Classify a single AST node into a semantic token, if applicable.
 fn classify_node_token(checker: &Checker, node: &Arc<Node>) -> Option<SemanticToken> {
     let kind = node.kind;
 
-    // Literal / punctuation tokens.
     match kind {
         SyntaxKind::NumericLiteral | SyntaxKind::BigIntLiteral => {
             return Some(SemanticToken {
@@ -268,7 +239,6 @@ fn classify_node_token(checker: &Checker, node: &Arc<Node>) -> Option<SemanticTo
         _ => {}
     }
 
-    // Keyword tokens.
     if is_keyword_kind(kind) {
         return Some(SemanticToken {
             token_type: token_type::KEYWORD,
@@ -278,14 +248,13 @@ fn classify_node_token(checker: &Checker, node: &Arc<Node>) -> Option<SemanticTo
         });
     }
 
-    // Identifier nodes: classify via the resolved symbol.
     if kind == SyntaxKind::Identifier {
-        // Declaration name tokens are classified by the declaration kind.
+
         if let Some(parent) = node.parent.as_ref() {
             let decl_type = token_from_declaration_mapping(parent.kind);
             if decl_type != token_type::INVALID {
                 let mut modifier = 0u32;
-                // Mark as a declaration if the identifier is the name child.
+
                 if is_name_of_declaration(node, parent) {
                     modifier |= token_modifier::DECLARATION | token_modifier::DEFINITION;
                 }
@@ -298,7 +267,6 @@ fn classify_node_token(checker: &Checker, node: &Arc<Node>) -> Option<SemanticTo
             }
         }
 
-        // Otherwise classify via the checker-resolved symbol.
         if let Some(symbol) = checker.get_symbol_at_location(node) {
             let (token_type_val, is_declaration) = classify_symbol(&symbol, 0);
             if token_type_val != token_type::INVALID {
@@ -315,7 +283,6 @@ fn classify_node_token(checker: &Checker, node: &Arc<Node>) -> Option<SemanticTo
             }
         }
 
-        // Unresolved identifier — treat as a plain variable.
         return Some(SemanticToken {
             token_type: token_type::VARIABLE,
             token_modifier: 0,
@@ -327,13 +294,11 @@ fn classify_node_token(checker: &Checker, node: &Arc<Node>) -> Option<SemanticTo
     None
 }
 
-/// Whether a syntax kind is a reserved keyword.
 fn is_keyword_kind(kind: SyntaxKind) -> bool {
     (kind as i16) >= (SyntaxKind::BreakKeyword as i16)
         && (kind as i16) <= (SyntaxKind::DeferKeyword as i16)
 }
 
-/// Whether `name` is the name child of a `declaration` node.
 fn is_name_of_declaration(name: &Arc<Node>, declaration: &Arc<Node>) -> bool {
     declaration
         .name()
@@ -341,10 +306,6 @@ fn is_name_of_declaration(name: &Arc<Node>, declaration: &Arc<Node>) -> bool {
         .unwrap_or(false)
 }
 
-/// Encode a sorted list of semantic tokens into the LSP delta-encoded array.
-///
-/// Each token contributes 5 u32s: `[deltaLine, deltaStart, length,
-/// tokenType, tokenModifiers]`.
 fn encode_tokens(tokens: &[SemanticToken], line_map: &LineMap) -> Vec<u32> {
     let mut data = Vec::with_capacity(tokens.len() * 5);
     let mut prev_line = 0u32;
@@ -376,7 +337,6 @@ fn encode_tokens(tokens: &[SemanticToken], line_map: &LineMap) -> Vec<u32> {
     data
 }
 
-/// Convert a byte offset to `(line, character)`.
 fn offset_to_line_char(line_map: &LineMap, offset: usize) -> (u32, u32) {
     let line = match line_map.line_starts.binary_search(&(offset as u32)) {
         Ok(idx) => idx,
@@ -386,7 +346,6 @@ fn offset_to_line_char(line_map: &LineMap, offset: usize) -> (u32, u32) {
     (line as u32, (offset.saturating_sub(line_start)) as u32)
 }
 
-/// Convert an LSP `Position` to a byte offset within a line map.
 fn lsp_position_to_offset(
     line_map: &LineMap,
     position: &crate::lsp::lsproto::lsp::Position,

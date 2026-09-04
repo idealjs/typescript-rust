@@ -1,8 +1,3 @@
-//! Minimal LSP server over stdio JSON-RPC 2.0.
-//!
-//! Implements initialize/shutdown lifecycle, text document synchronization,
-//! and basic diagnostics. Hover uses the checker's nodebuilder for type info.
-
 pub mod dynamic_queue;
 pub mod logger;
 pub mod lsproto;
@@ -17,9 +12,8 @@ use std::sync::Arc;
 
 use serde_json::{Value, json};
 
-/// LSP server state.
 pub struct LspServer {
-    documents: HashMap<String, String>, // uri -> content
+    documents: HashMap<String, String>,
     workspace_root: Option<String>,
     shutdown_requested: bool,
 }
@@ -33,7 +27,6 @@ impl LspServer {
         }
     }
 
-    /// Run the LSP server loop over stdio.
     pub fn run(&mut self) -> i32 {
         let stdin = io::stdin();
         let stdout = io::stdout();
@@ -57,7 +50,7 @@ impl LspServer {
                     }
                 }
                 Ok(None) => {
-                    // EOF
+
                     return if self.shutdown_requested { 0 } else { 1 };
                 }
                 Err(e) => {
@@ -68,19 +61,18 @@ impl LspServer {
         }
     }
 
-    /// Read a single JSON-RPC message with Content-Length framing.
     fn read_message<R: BufRead>(&self, reader: &mut R) -> io::Result<Option<Value>> {
-        // Read headers
+
         let mut content_length: Option<usize> = None;
         loop {
             let mut line = String::new();
             let n = reader.read_line(&mut line)?;
             if n == 0 {
-                return Ok(None); // EOF
+                return Ok(None);
             }
             let trimmed = line.trim_end_matches(|c| c == '\r' || c == '\n');
             if trimmed.is_empty() {
-                break; // End of headers
+                break;
             }
             if let Some(rest) = trimmed.strip_prefix("Content-Length: ") {
                 content_length = rest.parse::<usize>().ok();
@@ -92,22 +84,18 @@ impl LspServer {
             None => return Ok(None),
         };
 
-        // Read body
         let mut body = vec![0u8; length];
         reader.read_exact(&mut body)?;
         let msg: Value = serde_json::from_slice(&body)?;
         Ok(Some(msg))
     }
 
-    /// Write a JSON-RPC message with Content-Length framing.
     fn write_message<W: Write>(&self, writer: &mut W, msg: &Value) -> io::Result<()> {
         let body = serde_json::to_string(msg)?;
         write!(writer, "Content-Length: {}\r\n\r\n{}", body.len(), body)?;
         writer.flush()
     }
 
-    /// Handle a single message, returning an optional response and a list of
-    /// notifications to send back to the client (e.g. `publishDiagnostics`).
     fn handle_message(&mut self, msg: &Value) -> (Option<Value>, Vec<Value>) {
         let id = msg.get("id").cloned();
         let method = msg.get("method").and_then(|m| m.as_str()).unwrap_or("");
@@ -165,12 +153,11 @@ impl LspServer {
                 (Some(make_response(id, result)), Vec::new())
             }
             "textDocument/formatting" => {
-                // Register the capability so the client offers "Format
-                // Document"; no edits are produced.
+
                 (Some(make_response(id, json!([]))), Vec::new())
             }
             _ => {
-                // Unknown method — return method not found error for requests
+
                 if id.is_some() {
                     (
                         Some(make_error_response(
@@ -188,7 +175,7 @@ impl LspServer {
     }
 
     fn handle_initialize(&mut self, params: &Value) -> Value {
-        // Extract workspace root
+
         if let Some(root_uri) = params.get("rootUri").and_then(|v| v.as_str()) {
             if let Some(path) = root_uri.strip_prefix("file://") {
                 self.workspace_root = Some(path.to_string());
@@ -199,7 +186,7 @@ impl LspServer {
 
         json!({
             "capabilities": {
-                "textDocumentSync": 1, // Full sync
+                "textDocumentSync": 1,
                 "hoverProvider": true,
                 "definitionProvider": true,
                 "typeDefinitionProvider": true,
@@ -289,15 +276,14 @@ impl LspServer {
             let text = td.get("text").and_then(|v| v.as_str()).unwrap_or("");
             self.documents.insert(uri.to_string(), text.to_string());
         }
-        // Recompute diagnostics across ALL open documents so that opening one
-        // file can surface cross-file type errors in another.
+
         self.compute_all_diagnostics()
     }
 
     fn handle_did_change(&mut self, params: &Value) -> Vec<Value> {
         if let Some(td) = params.get("textDocument") {
             let uri = td.get("uri").and_then(|v| v.as_str()).unwrap_or("");
-            // Full sync: take the last change.
+
             if let Some(changes) = params.get("contentChanges").and_then(|v| v.as_array()) {
                 if let Some(last) = changes.last() {
                     if let Some(text) = last.get("text").and_then(|v| v.as_str()) {
@@ -306,8 +292,7 @@ impl LspServer {
                 }
             }
         }
-        // Recompute diagnostics across ALL open documents so that editing one
-        // file updates cross-file type errors in every other open file.
+
         self.compute_all_diagnostics()
     }
 
@@ -315,8 +300,7 @@ impl LspServer {
         if let Some(td) = params.get("textDocument") {
             let uri = td.get("uri").and_then(|v| v.as_str()).unwrap_or("");
             self.documents.remove(uri);
-            // Publish empty diagnostics to clear any previously reported
-            // errors for the now-closed document.
+
             return vec![json!({
                 "jsonrpc": "2.0",
                 "method": "textDocument/publishDiagnostics",
@@ -346,7 +330,6 @@ impl LspServer {
             return Value::Null;
         };
 
-        // Convert LSP 0-based (line, character) to a byte offset.
         let line = params
             .get("position")
             .and_then(|p| p.get("line"))
@@ -365,13 +348,9 @@ impl LspServer {
             .unwrap_or(0) as usize
             + character;
 
-        // Find the deepest AST node covering this offset and ask the checker
-        // for its quick-info (hover) text.
         let node = find_deepest_node(&source_file.node, offset);
         let mut checker = program.build_checker();
-        // Prefer structured `SymbolDisplayPart[]` (colorized hover) when a
-        // symbol is available; fall back to the plain-text quick-info path
-        // for nodes without a symbol (e.g. `this`, literals).
+
         let parts = checker.get_quick_info_display_parts(&node);
         let type_str = if parts.is_empty() {
             checker.get_quick_info_text(&node)
@@ -390,31 +369,18 @@ impl LspServer {
         })
     }
 
-    /// Run the compiler pipeline (parse + bind + check) over ALL open
-    /// documents and return one `textDocument/publishDiagnostics` notification
-    /// per open document. Building a single program from every open file
-    /// enables cross-file type checking: changing file A may surface or clear
-    /// diagnostics in file B. An empty diagnostic list is published for files
-    /// with no errors, which also clears previously reported errors.
     fn compute_all_diagnostics(&self) -> Vec<Value> {
         let program = match build_program_from_documents(&self.documents) {
             Some(p) => p,
             None => return Vec::new(),
         };
 
-        // Collect parse/bind diagnostics (from the program) plus semantic
-        // diagnostics (from the checker).
         let mut all_diags: Vec<crate::ast::diagnostic::Diagnostic> = Vec::new();
         for d in program.get_diagnostics_to_report() {
             all_diags.push((*d).clone());
         }
         all_diags.extend(program.get_semantic_diagnostics());
 
-        // Group diagnostics by the path of their attached source file.
-        // Diagnostics without an attached file (rare, program-level) are
-        // attributed to the sole open document when only one is open, which
-        // preserves the prior single-file reporting behavior; otherwise they
-        // are dropped to avoid duplication across files.
         let mut by_path: HashMap<&str, Vec<&crate::ast::diagnostic::Diagnostic>> = HashMap::new();
         let mut fileless: Vec<&crate::ast::diagnostic::Diagnostic> = Vec::new();
         for d in &all_diags {
@@ -457,10 +423,6 @@ impl LspServer {
         notifications
     }
 
-    /// Handle `workspace/didChangeWatchedFiles` — synchronize on-disk file
-    /// changes into the open-document set and recompute diagnostics across all
-    /// files. Change types follow the LSP `FileChangeType` enum: 1 = Created,
-    /// 2 = Changed, 3 = Deleted.
     fn handle_did_change_watched_files(&mut self, params: &Value) -> Vec<Value> {
         if let Some(changes) = params.get("changes").and_then(|v| v.as_array()) {
             for change in changes {
@@ -471,14 +433,14 @@ impl LspServer {
                 }
                 match typ {
                     1 | 2 => {
-                        // Created or Changed: read the file from disk.
+
                         let path = uri.strip_prefix("file://").unwrap_or(uri);
                         if let Ok(text) = std::fs::read_to_string(path) {
                             self.documents.insert(uri.to_string(), text);
                         }
                     }
                     3 => {
-                        // Deleted: drop from the open-document set.
+
                         self.documents.remove(uri);
                     }
                     _ => {}
@@ -488,8 +450,6 @@ impl LspServer {
         self.compute_all_diagnostics()
     }
 
-    /// Handle `textDocument/definition` — find the declaration of the symbol
-    /// under the cursor.
     fn handle_definition(&self, params: &Value) -> Value {
         let uri = params
             .get("textDocument")
@@ -525,7 +485,6 @@ impl LspServer {
         let node = find_deepest_node(&source_file.node, offset);
         let checker = program.build_checker();
 
-        // Resolve the symbol, then find its value declaration.
         let symbol = checker.resolve_identifier(&node).or_else(|| {
             let symbol_map = checker.program.symbol_map();
             let mut current: Option<&Arc<crate::ast::Node>> = Some(&node);
@@ -572,8 +531,6 @@ impl LspServer {
         json!([])
     }
 
-    /// Handle `textDocument/completion` — return completion items for the
-    /// identifier or member access under the cursor.
     fn handle_completion(&self, params: &Value) -> Value {
         let uri = params
             .get("textDocument")
@@ -609,10 +566,8 @@ impl LspServer {
         let _node = find_deepest_node(&source_file.node, offset);
         let checker = program.build_checker();
 
-        // Collect symbols in scope at the cursor position.
         let mut items: Vec<Value> = Vec::new();
 
-        // Add global symbols from the checker's globals table.
         for (name, sym) in checker.globals.iter() {
             if name.starts_with("__") {
                 continue;
@@ -624,7 +579,6 @@ impl LspServer {
             }));
         }
 
-        // Add keywords as completion items for empty/identifier contexts.
         if items.len() < 50 {
             for kw in &[
                 "const",
@@ -685,7 +639,7 @@ impl LspServer {
                 "get",
                 "set",
             ] {
-                items.push(json!({"label": kw, "kind": 14})); // 14 = Keyword
+                items.push(json!({"label": kw, "kind": 14}));
             }
         }
 
@@ -699,8 +653,6 @@ impl LspServer {
         }
     }
 
-    /// Handle `textDocument/references` — find all references to the symbol
-    /// under the cursor, across all open documents.
     fn handle_references(&self, params: &Value) -> Value {
         let uri = params
             .get("textDocument")
@@ -759,9 +711,6 @@ impl LspServer {
         json!(locations)
     }
 
-    /// Handle `textDocument/documentSymbol` — return all top-level
-    /// declarations in the document (functions, classes, interfaces,
-    /// variables, etc.) as a hierarchical symbol tree.
     fn handle_document_symbol(&self, params: &Value) -> Value {
         let uri = params
             .get("textDocument")
@@ -787,8 +736,6 @@ impl LspServer {
         json!(symbols_for_statements(statements, &source_file))
     }
 
-    /// Handle `textDocument/rename` — rename the symbol under the cursor and
-    /// all of its references, returning a `WorkspaceEdit` of text edits.
     fn handle_rename(&self, params: &Value) -> Value {
         let uri = params
             .get("textDocument")
@@ -850,9 +797,6 @@ impl LspServer {
     }
 }
 
-/// Stage `path`/`content` in an in-memory file system and build a program for
-/// it, with default lib loading disabled for speed. The returned program is
-/// ready for diagnostic and hover queries.
 fn build_program(path: &str, content: &str) -> Arc<crate::compiler::Program> {
     let fs = Arc::new(crate::vfs::InMemoryFS::new());
     let parent = std::path::Path::new(path)
@@ -874,14 +818,10 @@ fn build_program(path: &str, content: &str) -> Arc<crate::compiler::Program> {
     ))
 }
 
-/// Convert structured `SymbolDisplayPart[]` into a plain string.
 fn display_parts_to_string(parts: &[crate::checker::nodebuilder::SymbolDisplayPart]) -> String {
     parts.iter().map(|p| p.text.as_str()).collect()
 }
 
-/// Recursively descend into the deepest AST node whose source range covers
-/// `offset`, starting from `node`. Used to locate the token/identifier under
-/// the cursor for hover information.
 fn find_deepest_node(node: &Arc<crate::ast::Node>, offset: usize) -> Arc<crate::ast::Node> {
     let mut deepest = Arc::clone(node);
     loop {
@@ -890,7 +830,7 @@ fn find_deepest_node(node: &Arc<crate::ast::Node>, offset: usize) -> Arc<crate::
         crate::ast::for_each_child(&current, |child| {
             if child.loc.pos() <= offset && offset < child.loc.end() {
                 next = Some(Arc::clone(child));
-                true // stop at the first containing child (siblings don't overlap)
+                true
             } else {
                 false
             }
@@ -903,12 +843,6 @@ fn find_deepest_node(node: &Arc<crate::ast::Node>, offset: usize) -> Arc<crate::
     deepest
 }
 
-// ─────────────────────────────────────────────────────────────────────────
-// Helpers for references / documentSymbol / rename
-// ─────────────────────────────────────────────────────────────────────────
-
-/// Extract the LSP 0-based (line, character) from request `params` and
-/// convert it to a byte offset within `content`.
 fn position_to_offset(params: &Value, content: &str) -> usize {
     let line = params
         .get("position")
@@ -924,8 +858,6 @@ fn position_to_offset(params: &Value, content: &str) -> usize {
     line_map.line_starts.get(line).copied().unwrap_or(0) as usize + character
 }
 
-/// Build a program from all open documents so that cross-file reference
-/// resolution works. Returns `None` when no documents are open.
 fn build_program_from_documents(
     documents: &HashMap<String, String>,
 ) -> Option<Arc<crate::compiler::Program>> {
@@ -953,12 +885,6 @@ fn build_program_from_documents(
     )))
 }
 
-/// Resolve a reference identifier to its declared symbol by walking up the
-/// AST parent chain and consulting the binder's locals tables and container
-/// symbol member/export tables. Mirrors the scope-walk in the checker's
-/// `resolve_identifier_with_meaning`, but operates on the persistent AST
-/// structure (parent pointers are set by the binder) rather than the
-/// checker's transient scope stack. Only identifiers are resolved.
 fn resolve_identifier_symbol(
     symbol_map: &crate::ast::NodeSymbolMap,
     node: &Arc<crate::ast::Node>,
@@ -990,15 +916,11 @@ fn resolve_identifier_symbol(
     None
 }
 
-/// Resolve the symbol for an identifier node at the cursor, handling both
-/// declaration names (the identifier is the `.name` of its parent declaration)
-/// and references (resolved via scope walk).
 fn resolve_symbol_for_node(
     symbol_map: &crate::ast::NodeSymbolMap,
     node: &Arc<crate::ast::Node>,
 ) -> Option<Arc<crate::ast::Symbol>> {
-    // Declaration-name identifier: the node is the name of its parent and
-    // the parent has an associated symbol.
+
     if node.kind == crate::ast::SyntaxKind::Identifier {
         if let Some(parent) = node.parent.as_ref() {
             if let Some(name) = parent.name() {
@@ -1010,12 +932,10 @@ fn resolve_symbol_for_node(
             }
         }
     }
-    // Reference identifier: resolve via scope walk.
+
     resolve_identifier_symbol(symbol_map, node)
 }
 
-/// Whether `node` is the name identifier of a declaration whose parent has
-/// an associated symbol (i.e. the declaration site itself).
 fn is_declaration_name(
     symbol_map: &crate::ast::NodeSymbolMap,
     node: &Arc<crate::ast::Node>,
@@ -1033,10 +953,6 @@ fn is_declaration_name(
     false
 }
 
-/// Whether `node` is the property-name of a property-access expression
-/// (`a.b` — the `b`). Such identifiers are resolved via the left-hand type
-/// rather than by scope, so they are skipped during reference collection to
-/// avoid false matches against scope-resolved names.
 fn is_property_access_name(node: &Arc<crate::ast::Node>) -> bool {
     use crate::ast::NodeData;
     if node.kind != crate::ast::SyntaxKind::Identifier {
@@ -1050,7 +966,6 @@ fn is_property_access_name(node: &Arc<crate::ast::Node>) -> bool {
     false
 }
 
-/// Recursively visit every node in the subtree rooted at `node`.
 fn walk_all_nodes(node: &Arc<crate::ast::Node>, visitor: &mut impl FnMut(&Arc<crate::ast::Node>)) {
     visitor(node);
     let mut children = Vec::new();
@@ -1063,8 +978,6 @@ fn walk_all_nodes(node: &Arc<crate::ast::Node>, visitor: &mut impl FnMut(&Arc<cr
     }
 }
 
-/// Collect all identifier nodes that resolve to `target_symbol` across every
-/// source file in the program, returning each with its owning source file.
 fn find_all_references(
     program: &crate::compiler::Program,
     target_symbol: &Arc<crate::ast::Symbol>,
@@ -1088,7 +1001,6 @@ fn find_all_references(
     refs
 }
 
-/// Convert a filesystem path back into a `file://` URI.
 fn path_to_uri(path: &str) -> String {
     if path.starts_with('/') {
         format!("file://{path}")
@@ -1097,12 +1009,6 @@ fn path_to_uri(path: &str) -> String {
     }
 }
 
-// ─────────────────────────────────────────────────────────────────────────
-// documentSymbol helpers
-// ─────────────────────────────────────────────────────────────────────────
-
-/// Build `DocumentSymbol` JSON objects for a list of statements.
-/// `VariableStatement` is expanded into one symbol per declaration.
 fn symbols_for_statements(
     statements: &[Arc<crate::ast::Node>],
     sf: &Arc<crate::ast::SourceFile>,
@@ -1132,8 +1038,6 @@ fn symbols_for_statements(
     result
 }
 
-/// Build a single `DocumentSymbol` JSON object for a declaration node, or
-/// `None` if the node has no name.
 fn document_symbol_for_node(
     node: &Arc<crate::ast::Node>,
     sf: &Arc<crate::ast::SourceFile>,
@@ -1169,7 +1073,6 @@ fn document_symbol_for_node(
     Some(sym)
 }
 
-/// Get the text of a name node (identifier or literal).
 fn identifier_text(node: &Arc<crate::ast::Node>) -> Option<String> {
     use crate::ast::NodeData;
     match &node.data {
@@ -1180,39 +1083,36 @@ fn identifier_text(node: &Arc<crate::ast::Node>) -> Option<String> {
     }
 }
 
-/// Map a declaration node kind to an LSP `SymbolKind`.
 fn symbol_kind_for(node: &Arc<crate::ast::Node>) -> i32 {
     use crate::ast::{NodeFlags, SyntaxKind as K};
     match node.kind {
-        K::FunctionDeclaration => 12,  // Function
-        K::ClassDeclaration => 5,      // Class
-        K::InterfaceDeclaration => 11, // Interface
-        K::TypeAliasDeclaration => 23, // Struct (closest to "Type")
-        K::EnumDeclaration => 10,      // Enum
-        K::ModuleDeclaration => 3,     // Namespace
+        K::FunctionDeclaration => 12,
+        K::ClassDeclaration => 5,
+        K::InterfaceDeclaration => 11,
+        K::TypeAliasDeclaration => 23,
+        K::EnumDeclaration => 10,
+        K::ModuleDeclaration => 3,
         K::VariableDeclaration => {
-            // `const` declarations map to Constant; others to Variable.
+
             let is_const = node
                 .parent
                 .as_ref()
                 .map_or(false, |p| p.flags.contains(NodeFlags::Const));
             if is_const {
-                14 // Constant
+                14
             } else {
-                13 // Variable
+                13
             }
         }
-        K::MethodDeclaration | K::MethodSignature => 6, // Method
-        K::GetAccessor | K::SetAccessor => 6,           // Method
-        K::Constructor => 9,                            // Constructor
-        K::PropertyDeclaration | K::PropertySignature => 7, // Property
-        K::EnumMember => 22,                            // EnumMember
-        _ => 13,                                        // Variable
+        K::MethodDeclaration | K::MethodSignature => 6,
+        K::GetAccessor | K::SetAccessor => 6,
+        K::Constructor => 9,
+        K::PropertyDeclaration | K::PropertySignature => 7,
+        K::EnumMember => 22,
+        _ => 13,
     }
 }
 
-/// Collect child `DocumentSymbol` entries for container declarations
-/// (classes, interfaces, enums, namespaces).
 fn child_symbols(node: &Arc<crate::ast::Node>, sf: &Arc<crate::ast::SourceFile>) -> Vec<Value> {
     use crate::ast::NodeData;
     match &node.data {
@@ -1252,15 +1152,11 @@ fn child_symbols(node: &Arc<crate::ast::Node>, sf: &Arc<crate::ast::SourceFile>)
     }
 }
 
-/// Convert a compiler diagnostic into the LSP `Diagnostic` JSON object.
-/// `content` is the current document text, used to compute line/column for
-/// diagnostics that are not attached to a source file.
 fn diagnostic_to_lsp(diag: &crate::ast::diagnostic::Diagnostic, content: &str) -> Value {
     let (line, col) = if let Some(file) = &diag.file {
         crate::diagnosticwriter::line_and_character(&file.line_map, &file.text, diag.loc.pos())
     } else {
-        // Diagnostics without an attached file (e.g. file-not-found) fall back
-        // to the current document content for line/column computation.
+
         let line_map = crate::ast::LineMap::from_text(content);
         let pos = diag.loc.pos().min(content.len());
         crate::diagnosticwriter::line_and_character(&line_map, content, pos)
@@ -1306,36 +1202,34 @@ fn make_error_response(id: Option<Value>, code: i32, message: &str) -> Value {
     })
 }
 
-/// Entry point for `--lsp` mode.
 pub fn run_lsp() -> i32 {
     let mut server = LspServer::new();
     server.run()
 }
 
-/// Map TypeScript SymbolFlags to LSP CompletionItemKind.
 fn completion_item_kind(flags: &crate::ast::SymbolFlags) -> i32 {
     use crate::ast::SymbolFlags as F;
     if flags.contains(F::FunctionScopedVariable | F::BlockScopedVariable)
         || flags.contains(F::Function)
     {
-        3 // Function
+        3
     } else if flags.contains(F::Class) {
-        7 // Class
+        7
     } else if flags.contains(F::Interface) {
-        8 // Interface
+        8
     } else if flags.contains(F::RegularEnum | F::ConstEnum) {
-        13 // Enum
+        13
     } else if flags.contains(F::TypeAlias | F::TypeParameter) {
-        25 // TypeParameter
+        25
     } else if flags.contains(F::ValueModule | F::NamespaceModule) {
-        9 // Module
+        9
     } else if flags.contains(F::Property) {
-        5 // Field
+        5
     } else if flags.contains(F::Method) {
-        2 // Method
+        2
     } else if flags.contains(F::ConstEnum | F::RegularEnum | F::EnumMember) {
-        21 // EnumMember
+        21
     } else {
-        6 // Variable
+        6
     }
 }

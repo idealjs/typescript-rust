@@ -1,9 +1,3 @@
-//! Source map generation and decoding, ported from `internal/sourcemap/`.
-//!
-//! Implements the [Source Map Version 3](https://sourcemaps.info/spec.html)
-//! encoding: Base64 VLQ relative-delta mappings for generated ↔ source
-//! position associations.
-
 use std::collections::HashMap;
 
 use crate::tspath::{self, ComparePathsOptions};
@@ -21,7 +15,6 @@ pub const MISSING_NAME: NameIndex = -1;
 pub const MISSING_LINE_OR_COLUMN: i32 = -1;
 pub const MISSING_UTF16_COLUMN: i32 = -1;
 
-/// A decoded source map mapping entry.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Mapping {
     pub generated_line: i32,
@@ -40,7 +33,6 @@ impl Mapping {
     }
 }
 
-/// The raw source map JSON structure (version 3).
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize, PartialEq, Eq)]
 pub struct RawSourceMap {
     pub version: i32,
@@ -58,7 +50,6 @@ pub struct RawSourceMap {
     pub sources_content: Vec<Option<String>>,
 }
 
-/// Source map generator. Mirrors `sourcemap.Generator` in Go.
 pub struct Generator {
     path_options: ComparePathsOptions,
     file: String,
@@ -454,12 +445,6 @@ fn base64_format_decode(ch: u8) -> i32 {
     }
 }
 
-// ────────────────────────────────────────────────────────────────────────────
-// Decoder
-// ────────────────────────────────────────────────────────────────────────────
-
-/// Decodes source map VLQ mappings string into a sequence of `Mapping`s.
-/// Mirrors `sourcemap.MappingsDecoder` in Go.
 pub struct MappingsDecoder<'a> {
     mappings: &'a str,
     pos: usize,
@@ -568,7 +553,6 @@ impl<'a> MappingsDecoder<'a> {
         }
     }
 
-    /// Decode the next mapping. Returns `Some(mapping)` or `None` when done.
     pub fn next(&mut self) -> Option<Mapping> {
         while !self.done && self.pos < self.mappings.len() {
             let ch = self.mappings.as_bytes()[self.pos];
@@ -672,7 +656,6 @@ impl<'a> MappingsDecoder<'a> {
         None
     }
 
-    /// Collect all decoded mappings into a vector.
     pub fn collect_all(mut self) -> (Vec<Mapping>, Option<String>) {
         let mut result = Vec::new();
         while let Some(m) = self.next() {
@@ -682,12 +665,6 @@ impl<'a> MappingsDecoder<'a> {
     }
 }
 
-// ────────────────────────────────────────────────────────────────────────────
-// TryGetSourceMappingURL
-// ────────────────────────────────────────────────────────────────────────────
-
-/// Try to find the `//# sourceMappingURL=...` comment at the end of a file.
-/// Mirrors `sourcemap.TryGetSourceMappingURL` in Go.
 pub fn try_get_source_mapping_url(text: &str, line_starts: &[usize]) -> String {
     if line_starts.is_empty() {
         return String::new();
@@ -731,8 +708,6 @@ mod tests {
         g.raw_source_map()
     }
 
-    // ── Empty generator tests ──────────────────────────────────────────────
-
     #[test]
     fn empty() {
         let mut g = make_generator();
@@ -758,8 +733,6 @@ mod tests {
         let expected = r#"{"version":3,"file":"main.js","sourceRoot":"/","sources":[],"names":[],"mappings":""}"#;
         assert_eq!(actual, expected);
     }
-
-    // ── AddSource tests ────────────────────────────────────────────────────
 
     #[test]
     fn add_source() {
@@ -848,8 +821,6 @@ mod tests {
         assert_eq!(actual, expected);
     }
 
-    // ── AddName tests ──────────────────────────────────────────────────────
-
     #[test]
     fn add_name() {
         let mut g = make_generator();
@@ -870,8 +841,6 @@ mod tests {
         );
     }
 
-    // ── AddGeneratedMapping tests ──────────────────────────────────────────
-
     #[test]
     fn add_generated_mapping() {
         let mut g = make_generator();
@@ -887,8 +856,6 @@ mod tests {
         let map = raw_map(&mut g);
         assert_eq!(map.mappings, ";A");
     }
-
-    // ── AddSourceMapping tests ─────────────────────────────────────────────
 
     #[test]
     fn add_source_mapping() {
@@ -939,8 +906,6 @@ mod tests {
         assert_eq!(map.mappings, "AAAC,CAAD");
     }
 
-    // ── AddNamedSourceMapping tests ────────────────────────────────────────
-
     #[test]
     fn add_named_source_mapping() {
         let mut g = make_generator();
@@ -968,8 +933,6 @@ mod tests {
         assert_eq!(map.names, vec!["foo".to_string(), "bar".to_string()]);
     }
 
-    // ── Error cases: AddGeneratedMapping ──────────────────────────────────
-
     #[test]
     fn add_generated_mapping_generated_line_cannot_backtrack() {
         let mut g = make_generator();
@@ -989,8 +952,6 @@ mod tests {
             "generatedCharacter cannot be negative"
         );
     }
-
-    // ── Error cases: AddSourceMapping ─────────────────────────────────────
 
     #[test]
     fn add_source_mapping_generated_line_cannot_backtrack() {
@@ -1046,8 +1007,6 @@ mod tests {
             "sourceCharacter cannot be negative"
         );
     }
-
-    // ── Error cases: AddNamedSourceMapping ────────────────────────────────
 
     #[test]
     fn add_named_source_mapping_generated_line_cannot_backtrack() {
@@ -1133,8 +1092,6 @@ mod tests {
         );
     }
 
-    // ── Decoder round-trip tests ──────────────────────────────────────────
-
     #[test]
     fn decoder_empty() {
         let decoder = MappingsDecoder::new("");
@@ -1217,13 +1174,10 @@ mod tests {
         assert_eq!(mappings[2].name_index, 0);
     }
 
-    // ── try_get_source_mapping_url tests ──────────────────────────────────
-
     #[test]
     fn try_get_source_mapping_url_finds_comment() {
         let text = "var x = 1;\n//# sourceMappingURL=app.js.map\n";
-        // Line 0: "var x = 1;\n" (11 chars), line 1 starts at 11
-        // Line 1: "//# sourceMappingURL=app.js.map\n" (31 chars), line 2 starts at 42
+
         let line_starts = vec![0, 11, 42];
         assert_eq!(try_get_source_mapping_url(text, &line_starts), "app.js.map");
     }

@@ -1,11 +1,6 @@
-//! MapBuilder for snapshot cloning.
-//! Port of Go's `internal/project/dirty/mapbuilder.go`.
-
 use std::collections::{HashMap, HashSet};
 use std::hash::Hash;
 
-/// Builder for creating a new map from a base map with modifications.
-/// Matches Go's `MapBuilder[K, VBase, VBuilder]`.
 pub struct MapBuilder<K: Eq + Hash + Clone, VBase: Clone> {
     base: HashMap<K, VBase>,
     dirty: HashMap<K, VBase>,

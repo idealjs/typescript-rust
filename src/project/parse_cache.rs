@@ -1,5 +1,3 @@
-//! Parse cache for source files (1:1 port of Go's `internal/project/parsecache.go`).
-
 #![allow(dead_code)]
 
 use std::sync::Arc;
@@ -10,9 +8,6 @@ use crate::tspath::Path;
 use super::overlay_fs::FileHandle;
 use super::refcount_cache::{RefCountCache, RefCountCacheOptions};
 
-/// A key identifying a cached parsed source file.
-///
-/// Go: `type ParseCacheKey struct { ... }`.
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct ParseCacheKey {
     pub file_name: String,
@@ -40,11 +35,6 @@ impl ParseCacheKey {
     }
 }
 
-/// A ref-counted cache of parsed source files.
-///
-/// Go: `type ParseCache = RefCountCache[ParseCacheKey, *ast.SourceFile, FileHandle]`.
-///
-/// In Rust we store `Arc<SourceFile>` values keyed by `ParseCacheKey`.
 pub struct ParseCache {
     inner: RefCountCache<ParseCacheKey, Arc<SourceFile>>,
 }
@@ -56,7 +46,6 @@ impl ParseCache {
         }
     }
 
-    /// Acquire (or create) a source file for the given key and file handle.
     pub fn acquire<F>(&self, key: &ParseCacheKey, _fh: &dyn FileHandle, parse: F) -> Arc<SourceFile>
     where
         F: FnOnce(&ParseCacheKey) -> Arc<SourceFile>,

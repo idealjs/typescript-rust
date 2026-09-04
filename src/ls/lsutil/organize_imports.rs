@@ -1,11 +1,3 @@
-//! Organize-imports algorithm.
-//!
-//! Ported from `internal/ls/lsutil/organizeimports.go`. The string-comparison
-//! logic (ordinal / natural / unicode collators) is fully ported since it is
-//! self-contained. Functions that walk the AST to detect existing sort order
-//! are stubbed (`todo!()`) until the AST node accessors and scanner helpers
-//! they depend on are ported.
-
 use std::cmp::Ordering;
 use std::sync::Arc;
 
@@ -19,17 +11,10 @@ use super::user_preferences::{
     OrganizeImportsTypeOrder, UserPreferences,
 };
 
-/// A string comparer returning a Go-style `int` (`<0`, `0`, `>0`).
-///
-/// Shared via `Arc` so a detected comparer can be cloned out of a list.
 pub type StringComparer = Arc<dyn Fn(&str, &str) -> i32>;
 
-/// A statement node comparer returning a Go-style `int`.
 pub type StatementComparer = Box<dyn Fn(&Arc<Node>, &Arc<Node>) -> i32>;
 
-/// Filter out non-import declarations from a list of statements.
-///
-/// Mirrors `FilterImportDeclarations` in Go.
 pub fn filter_import_declarations(statements: &[Arc<Node>]) -> Vec<Arc<Node>> {
     statements
         .iter()
@@ -38,10 +23,6 @@ pub fn filter_import_declarations(statements: &[Arc<Node>]) -> Vec<Arc<Node>> {
         .collect()
 }
 
-/// Returns the lists of comparers and type orders to test for organize-imports
-/// detection.
-///
-/// Mirrors `GetDetectionLists` in Go.
 pub fn get_detection_lists(
     preferences: &UserPreferences,
 ) -> (Vec<StringComparer>, Vec<OrganizeImportsTypeOrder>) {
@@ -76,9 +57,6 @@ pub fn get_detection_lists(
     (comparers_to_test, type_orders_to_test)
 }
 
-/// Resolve the effective organize-imports sort preset.
-///
-/// Mirrors `ResolveOrganizeImportsSort` in Go.
 pub fn resolve_organize_imports_sort(preferences: &UserPreferences) -> OrganizeImportsSort {
     if preferences.organize_imports_sort != OrganizeImportsSort::Auto {
         return preferences.organize_imports_sort;
@@ -178,12 +156,6 @@ fn compare_organize_imports_unicode_strings(
     ord_to_i32(a.cmp(b))
 }
 
-/// Natural collation key: lowercased, diacritics removed.
-///
-/// Mirrors `naturalCollationKey` in Go. Go uses `golang.org/x/text/unicode/norm`
-/// for NFD decomposition to strip combining marks. That dependency is not
-/// available here, so diacritic removal is approximated by filtering the common
-/// combining-mark ranges; the lowercasing is exact.
 fn natural_collation_key(s: &str) -> String {
     s.to_ascii_lowercase()
         .chars()
@@ -191,11 +163,6 @@ fn natural_collation_key(s: &str) -> String {
         .collect()
 }
 
-/// Whether `c` is a Unicode combining mark (category Mn).
-///
-/// Mirrors Go's `unicode.Is(unicode.Mn, r)`. A full `char` property table is
-/// not available without an extra dependency; this covers the most common
-/// combining diacritical ranges.
 fn is_combining_mark(c: char) -> bool {
     let cp = c as u32;
     (0x0300..=0x036F).contains(&cp)
@@ -224,9 +191,6 @@ fn compare_organize_imports_unicode_keys(a: &str, b: &str, numeric: bool) -> i32
     }
 }
 
-/// Compare two strings with embedded numeric runs compared by numeric value.
-///
-/// Mirrors `compareStringsNumeric` in Go.
 fn compare_strings_numeric(a: &str, b: &str) -> i32 {
     let mut a = a;
     let mut b = b;
@@ -289,9 +253,6 @@ fn compare_organize_imports_case_upper_first(a: &str, b: &str) -> i32 {
     compare_organize_imports_case(a, b, OrganizeImportsCaseFirst::Upper)
 }
 
-/// Compare two strings by case (upper vs lower) ordering.
-///
-/// Mirrors `compareOrganizeImportsCase` in Go.
 fn compare_organize_imports_case(a: &str, b: &str, case_first: OrganizeImportsCaseFirst) -> i32 {
     let a_runes: Vec<char> = a.chars().collect();
     let b_runes: Vec<char> = b.chars().collect();
@@ -356,20 +317,12 @@ fn get_organize_imports_string_comparer(
     get_organize_imports_ordinal_string_comparer(ignore_case)
 }
 
-// --- Module specifier / import comparison ---
-
-/// Returns the module name from a module specifier expression.
-///
-/// Mirrors `GetExternalModuleName` in Go.
 pub fn get_external_module_name(specifier: Option<&Arc<Node>>) -> String {
-    // TODO: requires `ast.IsStringLiteralLike` + `Node.Text()` on the specifier.
+
     let _ = specifier;
     String::new()
 }
 
-/// Compare two module specifier expressions using `comparer`.
-///
-/// Mirrors `CompareModuleSpecifiers` in Go.
 pub fn compare_module_specifiers(
     m1: Option<&Arc<Node>>,
     m2: Option<&Arc<Node>>,
@@ -391,15 +344,12 @@ pub fn compare_module_specifiers(
     comparer(&name1, &name2)
 }
 
-/// Compare two import/require statements.
-///
-/// Mirrors `CompareImportsOrRequireStatements` in Go.
 pub fn compare_imports_or_require_statements(
     s1: &Arc<Node>,
     s2: &Arc<Node>,
     comparer: &StringComparer,
 ) -> i32 {
-    // getModuleSpecifierExpression requires unported AST accessors.
+
     let ord = compare_module_specifiers(None, None, comparer);
     if ord != 0 {
         return ord;
@@ -411,7 +361,6 @@ fn compare_import_kind(s1: &Arc<Node>, s2: &Arc<Node>) -> i32 {
     cmp_compare_i32(get_import_kind_order(s1), get_import_kind_order(s2))
 }
 
-// Sort orders for different import kinds.
 const IMPORT_KIND_ORDER_SIDE_EFFECT: i32 = 0;
 const IMPORT_KIND_ORDER_TYPE_ONLY: i32 = 1;
 const IMPORT_KIND_ORDER_NAMESPACE: i32 = 2;
@@ -424,18 +373,15 @@ const IMPORT_KIND_ORDER_UNKNOWN: i32 = 7;
 fn get_import_kind_order(s1: &Arc<Node>) -> i32 {
     match s1.kind {
         crate::ast::SyntaxKind::ImportDeclaration => {
-            // TODO: requires ImportClause accessor.
+
             IMPORT_KIND_ORDER_NAMED
         }
         crate::ast::SyntaxKind::ImportEqualsDeclaration => IMPORT_KIND_ORDER_IMPORT_EQUALS,
-        // KindVariableStatement (require) requires distinguishing require calls.
+
         _ => IMPORT_KIND_ORDER_UNKNOWN,
     }
 }
 
-/// Returns a specifier comparer for sorting import specifiers.
-///
-/// Mirrors `GetNamedImportSpecifierComparer` in Go.
 pub fn get_named_import_specifier_comparer(
     preferences: &UserPreferences,
     comparer: Option<StringComparer>,
@@ -463,7 +409,7 @@ fn compare_import_or_export_specifiers(
     comparer: &StringComparer,
     type_order: OrganizeImportsTypeOrder,
 ) -> i32 {
-    // s1Name/s2Name and IsTypeOnly require unported node accessors.
+
     let s1_name = String::new();
     let s2_name = String::new();
     let s1_type_only = false;
@@ -477,7 +423,7 @@ fn compare_import_or_export_specifiers(
             comparer(&s1_name, &s2_name)
         }
         OrganizeImportsTypeOrder::Inline => comparer(&s1_name, &s2_name),
-        // OrganizeImportsTypeOrder::Last / Auto(default-to-last)
+
         _ => {
             let ord = compare_booleans(s1_type_only, s2_type_only);
             if ord != 0 {
@@ -488,53 +434,40 @@ fn compare_import_or_export_specifiers(
     }
 }
 
-/// Returns the index at which to insert a new import specifier.
-///
-/// Mirrors `GetImportSpecifierInsertionIndex` in Go. Requires the binary-search
-/// helper and node comparers; stubbed until those land.
 pub fn get_import_specifier_insertion_index(
     _sorted_imports: &[Arc<Node>],
     _new_import: &Arc<Node>,
     _comparer: &StatementComparer,
 ) -> usize {
-    // TODO: requires core::BinarySearchUniqueFunc.
+
     0
 }
 
-/// Returns the index at which to insert a new import declaration.
-///
-/// Mirrors `GetImportDeclarationInsertIndex` in Go.
 pub fn get_import_declaration_insert_index(
     _sorted_imports: &[Arc<Node>],
     _new_import: &Arc<Node>,
     _comparer: &dyn Fn(&Arc<Node>, &Arc<Node>) -> i32,
 ) -> usize {
-    // TODO: requires core::BinarySearchUniqueFunc.
+
     0
 }
 
-// --- Detection (self-contained string-slice versions) ---
-
-/// A detected case-sensitivity result.
 struct CaseSensitivityDetectionResult {
     comparer: Option<StringComparer>,
     is_sorted: bool,
 }
 
-/// Detect the module-specifier case ordering by sort across groups.
-///
-/// Mirrors `DetectModuleSpecifierCaseBySort` in Go.
 pub fn detect_module_specifier_case_by_sort(
     import_decls_by_group: &[Vec<Arc<Node>>],
     comparers_to_test: &[StringComparer],
 ) -> (Option<StringComparer>, bool) {
-    // Build module-specifier name groups from import declarations.
+
     let module_specifiers_by_group: Vec<Vec<String>> = import_decls_by_group
         .iter()
         .map(|import_group| {
             import_group
                 .iter()
-                .map(|_decl| String::new()) // TODO: getModuleSpecifierExpression
+                .map(|_decl| String::new())
                 .collect()
         })
         .collect();
@@ -577,10 +510,6 @@ fn detect_case_sensitivity_by_sort(
     }
 }
 
-/// Count the number of out-of-order adjacent pairs.
-///
-/// Mirrors the generic `measureSortedness` in Go. Operates on string lists
-/// compared via a [`StringComparer`].
 fn measure_sortedness(arr: &[String], comparer: &StringComparer) -> i32 {
     let mut count = 0i32;
     for j in 0..arr.len().saturating_sub(1) {
@@ -591,15 +520,11 @@ fn measure_sortedness(arr: &[String], comparer: &StringComparer) -> i32 {
     count
 }
 
-/// Return a string comparer based on detecting the order of import statements.
-///
-/// Mirrors `GetOrganizeImportsStringComparerWithDetection` in Go.
 pub fn get_organize_imports_string_comparer_with_detection(
     _original_import_decls: &[Arc<Node>],
     preferences: &UserPreferences,
 ) -> (StringComparer, bool) {
-    // TODO: full detection requires walking import declarations; returns the
-    // configured comparer with `is_sorted = false`.
+
     let comparer = get_comparers(preferences)
         .into_iter()
         .next()
@@ -628,10 +553,6 @@ fn get_comparers(preferences: &UserPreferences) -> Vec<StringComparer> {
     }
 }
 
-/// Returns a specifier comparer based on detecting existing sort order within
-/// a single import statement.
-///
-/// Mirrors `GetNamedImportSpecifierComparerWithDetection` in Go.
 pub fn get_named_import_specifier_comparer_with_detection(
     _import_decl: &Arc<Node>,
     _source_file: Option<&SourceFile>,
@@ -640,19 +561,15 @@ pub fn get_named_import_specifier_comparer_with_detection(
     let (comparers_to_test, type_orders_to_test) = get_detection_lists(preferences);
     let specifier_comparer =
         get_named_import_specifier_comparer(preferences, comparers_to_test.into_iter().next());
-    // TODO: full detection requires detect_named_import_organization_by_sort.
+
     let _ = type_orders_to_test;
     (specifier_comparer, Tristate::Unknown)
 }
 
-// --- Small helpers ---
-
-/// Go-style three-way compare of two booleans (false < true).
 fn compare_booleans(a: bool, b: bool) -> i32 {
     cmp_compare_i32(a as i32, b as i32)
 }
 
-/// `cmp.Compare` from Go's stdlib: compare two orderable integers.
 fn cmp_compare_i32(a: i32, b: i32) -> i32 {
     if a < b {
         -1
@@ -663,7 +580,6 @@ fn cmp_compare_i32(a: i32, b: i32) -> i32 {
     }
 }
 
-/// Convert an `Ordering` to a Go-style `i32`.
 fn ord_to_i32(ord: Ordering) -> i32 {
     match ord {
         Ordering::Less => -1,
@@ -672,7 +588,6 @@ fn ord_to_i32(ord: Ordering) -> i32 {
     }
 }
 
-/// Decode the next UTF-8 rune from `s`, returning `(rune, byte_len)`.
 fn next_rune(s: &str) -> (char, usize) {
     match s.chars().next() {
         Some(c) => (c, c.len_utf8()),

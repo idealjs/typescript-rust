@@ -1,14 +1,4 @@
 #![allow(dead_code)]
-//! Grammar checks: syntactic-level diagnostics emitted during semantic
-//! checking.
-//!
-//! Ported from `internal/checker/grammarchecks.go` in the Go
-//! implementation. These checks validate modifier ordering, parameter
-//! lists, break/continue targets, variable declaration rules, etc.
-//!
-//! Unlike the Go version (2200+ lines), this module currently implements
-//! the most commonly-encountered subset. Additional checks are added
-//! incrementally.
 
 use std::sync::Arc;
 
@@ -22,23 +12,12 @@ use crate::scanner::token_to_string;
 
 use super::checker::Checker;
 
-// ────────────────────────────────────────────────────────────────────────────
-// Grammar error helpers
-// ────────────────────────────────────────────────────────────────────────────
-
 impl Checker {
-    /// Emit a grammar error on the given node.
-    ///
-    /// Mirrors Go's `grammarErrorOnNode`.
+
     pub(crate) fn grammar_error_on_node(&mut self, node: &Arc<Node>, message: &Message) -> bool {
         self.grammar_error_on_node_with_args(node, message, &[])
     }
 
-    /// Emit a grammar error on the given node with formatted arguments.
-    ///
-    /// Mirrors Go's `grammarErrorOnNode`: silently skipped (returns `false`)
-    /// when the containing source file has parse diagnostics — grammar
-    /// checks never cascade on top of parse errors.
     pub(crate) fn grammar_error_on_node_with_args(
         &mut self,
         node: &Arc<Node>,
@@ -54,10 +33,6 @@ impl Checker {
         true
     }
 
-    /// Emit a grammar error at a specific position range.
-    ///
-    /// Mirrors Go's `grammarErrorAtPos`: skipped when the containing source
-    /// file has parse diagnostics.
     fn grammar_error_at_pos(
         &mut self,
         _node_for_file: &Arc<Node>,
@@ -75,40 +50,16 @@ impl Checker {
         true
     }
 
-    /// Emit a grammar error on the first token of a node.
-    ///
-    /// Mirrors Go's `grammarErrorOnFirstToken`. Since we don't have a
-    /// `GetRangeOfTokenAtPosition` utility yet, this falls back to the
-    /// node's own location.
     fn grammar_error_on_first_token(&mut self, node: &Arc<Node>, message: &Message) -> bool {
         self.grammar_error_on_node(node, message)
     }
 
-    // ─────────────────────────────────────────────────────────────────────
-    // checkGrammarModifiers
-    // ─────────────────────────────────────────────────────────────────────
-
-    /// Check modifier ordering and validity on a declaration.
-    ///
-    /// Mirrors Go's `checkGrammarModifiers` (grammarchecks.go ~L213).
-    /// Validates that modifiers appear in the correct order and that
-    /// combinations are legal. Key rules:
-    ///
-    /// - Accessibility (`public`/`protected`/`private`) appears at most once
-    /// - `static` appears at most once
-    /// - `override` must precede `readonly`, `accessor`, `async`
-    /// - `accessor` only on property declarations
-    /// - `readonly` only on properties/index signatures/parameters
-    /// - `abstract` only on classes, methods, properties, accessors
-    /// - `declare` (ambient) cannot combine with `async`/`override`
-    /// - `export`/`default` ordering
     pub fn check_grammar_modifiers(&mut self, node: &Arc<Node>) -> bool {
         let modifiers = match node.modifiers() {
             Some(ml) => Arc::clone(ml),
             None => return false,
         };
 
-        // `this` parameter: no decorators or modifiers.
         if is_this_parameter(node) {
             return self.grammar_error_on_first_token(
                 node,
@@ -134,12 +85,11 @@ impl Checker {
 
         for modifier in &modifiers.list.nodes {
             if modifier.kind == SyntaxKind::Decorator {
-                // Decorators: skip for now (decorator validation is complex).
+
                 flags |= ModifierFlags::Decorator;
                 continue;
             }
 
-            // Check context restrictions for non-readonly modifiers.
             if modifier.kind != SyntaxKind::ReadonlyKeyword {
                 if node.kind == SyntaxKind::PropertySignature
                     || node.kind == SyntaxKind::MethodSignature
@@ -161,7 +111,6 @@ impl Checker {
                 }
             }
 
-            // Type parameter restrictions.
             if modifier.kind != SyntaxKind::InKeyword
                 && modifier.kind != SyntaxKind::OutKeyword
                 && modifier.kind != SyntaxKind::ConstKeyword
@@ -181,8 +130,7 @@ impl Checker {
                     if node.kind != SyntaxKind::EnumDeclaration
                         && node.kind != SyntaxKind::TypeParameter
                     {
-                        // Anchor on the member's name — the oracle reports
-                        // `static const H = 1;` at `H`, not at the modifiers.
+
                         let anchor = match &node.data {
                             NodeData::PropertyDeclaration(d) => Some(Arc::clone(&d.name)),
                             NodeData::MethodDeclaration(d) => Some(Arc::clone(&d.name)),
@@ -241,9 +189,7 @@ impl Checker {
                 | SyntaxKind::ProtectedKeyword
                 | SyntaxKind::PrivateKeyword => {
                     let text = visibility_to_string(modifier.kind);
-                    // Go: `flags&ModifierFlagsAccessibilityModifier != 0` —
-                    // intersects, not contains (the mask spans public/private/
-                    // protected).
+
                     if flags.intersects(ModifierFlags::AccessibilityModifier) {
                         return self
                             .grammar_error_on_node(modifier, &ACCESSIBILITY_MODIFIER_ALREADY_SEEN);
@@ -316,8 +262,7 @@ impl Checker {
                                 | SyntaxKind::SetAccessor
                         )
                     {
-                        // Go `IsPrivateIdentifierClassElementDeclaration` —
-                        // `public #x` / `private #x`: TS18010 at the modifier.
+
                         return self.grammar_error_on_node(
                             modifier,
                             &AN_ACCESSIBILITY_MODIFIER_CANNOT_BE_USED_WITH_A_PRIVATE_IDENTIFIER,
@@ -560,7 +505,7 @@ impl Checker {
                                 &X_ABSTRACT_MODIFIER_CAN_ONLY_APPEAR_ON_A_CLASS_METHOD_OR_PROPERTY_DECLARATION,
                             );
                         }
-                        // Must be within an abstract class.
+
                         let parent_is_abstract_class = node
                             .parent
                             .as_ref()
@@ -668,7 +613,6 @@ impl Checker {
             }
         }
 
-        // Post-loop checks for constructors.
         if node.kind == SyntaxKind::Constructor {
             if flags.contains(ModifierFlags::Static) {
                 if let Some(last_static) = &last_static {
@@ -700,7 +644,6 @@ impl Checker {
             return false;
         }
 
-        // `declare` on import declarations.
         if (node.kind == SyntaxKind::ImportDeclaration
             || node.kind == SyntaxKind::ImportEqualsDeclaration)
             && flags.contains(ModifierFlags::Ambient)
@@ -714,7 +657,6 @@ impl Checker {
             }
         }
 
-        // Async modifier on non-function-like nodes.
         if flags.contains(ModifierFlags::Async) {
             if let Some(last_async_node) = &last_async {
                 match node.kind {
@@ -736,22 +678,6 @@ impl Checker {
         false
     }
 
-    // ─────────────────────────────────────────────────────────────────────
-    // checkGrammarBreakOrContinueStatement
-    // ─────────────────────────────────────────────────────────────────────
-
-    /// Validate that `break`/`continue` targets are valid.
-    ///
-    /// Mirrors Go's `checkGrammarBreakOrContinueStatement`.
-    /// - `break` must be within an enclosing iteration or switch statement
-    ///   (or target a label).
-    /// - `continue` must be within an enclosing iteration statement
-    ///   (or target a label on an iteration statement).
-    ///
-    /// Since parent pointers are not set on nodes in the Rust port, this
-    /// uses the checker's `break_continue_context_stack` which is pushed/
-    /// popped as the checker enters loops, switches, functions, and labeled
-    /// statements.
     pub fn check_grammar_break_or_continue_statement(&mut self, node: &Arc<Node>) -> bool {
         let target_label = match &node.data {
             NodeData::BreakStatement(data) => data.label.as_ref(),
@@ -761,20 +687,19 @@ impl Checker {
         let target_label_text = target_label.map(|l| l.text().to_string());
         let is_break = node.kind == SyntaxKind::BreakStatement;
 
-        // Walk the context stack from innermost to outermost.
         for ctx in self.break_continue_context_stack.iter().rev() {
             match ctx.kind {
                 super::checker::BreakContinueContextKind::Function => {
-                    // Cannot cross function boundary.
+
                     return self
                         .grammar_error_on_node(node, &JUMP_TARGET_CANNOT_CROSS_FUNCTION_BOUNDARY);
                 }
                 super::checker::BreakContinueContextKind::Labeled => {
                     if let Some(label_text) = &target_label_text {
                         if ctx.label.as_deref() == Some(label_text.as_str()) {
-                            // Found matching label.
+
                             if !is_break && !ctx.is_iteration {
-                                // continue can only target iteration statements.
+
                                 return self.grammar_error_on_node(
                                     node,
                                     &A_CONTINUE_STATEMENT_CAN_ONLY_JUMP_TO_A_LABEL_OF_AN_ENCLOSING_ITERATION_STATEMENT,
@@ -786,20 +711,19 @@ impl Checker {
                 }
                 super::checker::BreakContinueContextKind::Loop => {
                     if target_label.is_none() {
-                        // Unlabeled break or continue within iteration — OK.
+
                         return false;
                     }
                 }
                 super::checker::BreakContinueContextKind::Switch => {
                     if is_break && target_label.is_none() {
-                        // Unlabeled break within switch — OK.
+
                         return false;
                     }
                 }
             }
         }
 
-        // No valid target found.
         let message = if target_label.is_some() {
             if is_break {
                 &A_BREAK_STATEMENT_CAN_ONLY_JUMP_TO_A_LABEL_OF_AN_ENCLOSING_STATEMENT
@@ -814,16 +738,6 @@ impl Checker {
         self.grammar_error_on_node(node, message)
     }
 
-    // ─────────────────────────────────────────────────────────────────────
-    // checkGrammarVariableDeclarationList
-    // ─────────────────────────────────────────────────────────────────────
-
-    /// Validate a variable declaration list.
-    ///
-    /// Mirrors Go's `checkGrammarVariableDeclarationList`. Checks:
-    /// - Non-empty declaration list.
-    /// - `using`/`await using` not in `for-in`.
-    /// - `using`/`await using` not in ambient context.
     pub fn check_grammar_variable_declaration_list(&mut self, node: &Arc<Node>) -> bool {
         let data = match &node.data {
             NodeData::VariableDeclarationList(data) => data,
@@ -842,7 +756,7 @@ impl Checker {
 
         let block_scope_flags = node.flags & NodeFlags::BlockScoped;
         if block_scope_flags == NodeFlags::Using || block_scope_flags == NodeFlags::AwaitUsing {
-            // `using` in `for-in` is not allowed.
+
             if let Some(parent) = &node.parent {
                 if parent.kind == SyntaxKind::ForInStatement {
                     let message = if block_scope_flags == NodeFlags::Using {
@@ -853,7 +767,7 @@ impl Checker {
                     return self.grammar_error_on_node(node, message);
                 }
             }
-            // `using` in ambient context.
+
             if node.flags.contains(NodeFlags::Ambient) {
                 let message = if block_scope_flags == NodeFlags::Using {
                     &X_USING_DECLARATIONS_ARE_NOT_ALLOWED_IN_AMBIENT_CONTEXTS
@@ -864,7 +778,6 @@ impl Checker {
             }
         }
 
-        // Check individual declarations.
         for decl in declarations.iter() {
             if self.check_grammar_variable_declaration(decl) {
                 return true;
@@ -874,9 +787,6 @@ impl Checker {
         false
     }
 
-    /// Validate a single variable declaration.
-    ///
-    /// Mirrors Go's `checkGrammarVariableDeclaration`.
     pub fn check_grammar_variable_declaration(&mut self, node: &Arc<Node>) -> bool {
         let data = match &node.data {
             NodeData::VariableDeclaration(data) => data,
@@ -886,7 +796,6 @@ impl Checker {
         let node_flags = node.flags;
         let block_scope_kind = node_flags & NodeFlags::BlockScoped;
 
-        // Destructuring with using/await using.
         if is_binding_pattern(&data.name) {
             match block_scope_kind {
                 NodeFlags::AwaitUsing => {
@@ -907,7 +816,6 @@ impl Checker {
             }
         }
 
-        // Check if we're in a for-in/for-of (skip initializer checks).
         let in_for_in_or_of = node
             .parent
             .as_ref()
@@ -920,7 +828,7 @@ impl Checker {
 
         if !in_for_in_or_of {
             if data.initializer.is_none() {
-                // Destructuring must have initializer (unless nested).
+
                 if is_binding_pattern(&data.name) {
                     let parent_is_binding_pattern = node
                         .parent
@@ -934,7 +842,7 @@ impl Checker {
                         );
                     }
                 }
-                // const/using must be initialized.
+
                 match block_scope_kind {
                     NodeFlags::AwaitUsing => {
                         return self.grammar_error_on_node_with_args(
@@ -962,7 +870,6 @@ impl Checker {
             }
         }
 
-        // Definite assignment assertion (`!`).
         if let Some(excl_token) = &data.exclamation_token {
             let parent_kind = node
                 .parent
@@ -989,16 +896,6 @@ impl Checker {
         false
     }
 
-    // ─────────────────────────────────────────────────────────────────────
-    // checkGrammarParameterList
-    // ─────────────────────────────────────────────────────────────────────
-
-    /// Validate a parameter list.
-    ///
-    /// Mirrors Go's `checkGrammarParameterList`. Checks:
-    /// - Rest parameter must be last.
-    /// - Required parameter cannot follow optional.
-    /// - Rest parameter cannot be optional or have an initializer.
     pub fn check_grammar_parameter_list(&mut self, parameters: &crate::ast::NodeList) -> bool {
         let mut seen_optional = false;
         let count = parameters.nodes.len();
@@ -1010,7 +907,7 @@ impl Checker {
             };
 
             if param.dot_dot_dot_token.is_some() {
-                // Rest parameter.
+
                 if i != count - 1 {
                     if let Some(rest_token) = &param.dot_dot_dot_token {
                         let _ = self.grammar_error_on_node(
@@ -1037,7 +934,7 @@ impl Checker {
                 }
             } else if is_optional_declaration(param_node) {
                 seen_optional = true;
-                // `?` + initializer is invalid.
+
                 if param.question_token.is_some()
                     && !param
                         .question_token
@@ -1069,11 +966,6 @@ impl Checker {
     }
 }
 
-// ────────────────────────────────────────────────────────────────────────────
-// Helper functions
-// ────────────────────────────────────────────────────────────────────────────
-
-/// Check if a node is a `this` parameter.
 fn is_this_parameter(node: &Arc<Node>) -> bool {
     if node.kind != SyntaxKind::Parameter {
         return false;
@@ -1086,12 +978,10 @@ fn is_this_parameter(node: &Arc<Node>) -> bool {
     }
 }
 
-/// Check if a node is a variable statement.
 fn is_variable_statement(node: &Arc<Node>) -> bool {
     node.kind == SyntaxKind::VariableStatement
 }
 
-/// Check if a node's parent is a module block or source file.
 fn is_parent_module_block_or_source_file(node: &Arc<Node>) -> bool {
     match &node.parent {
         Some(parent) => is_module_block(parent) || is_source_file(parent),
@@ -1099,7 +989,6 @@ fn is_parent_module_block_or_source_file(node: &Arc<Node>) -> bool {
     }
 }
 
-/// Check if a node's parent is a class-like declaration.
 fn is_parent_class_like(node: &Arc<Node>) -> bool {
     match &node.parent {
         Some(parent) => is_class_declaration(parent) || is_class_expression(parent),
@@ -1107,7 +996,6 @@ fn is_parent_class_like(node: &Arc<Node>) -> bool {
     }
 }
 
-/// Check if a node is an iteration statement (for/while/do-while/for-in/for-of).
 fn is_iteration_statement(node: &Arc<Node>, look_in_labeled: bool) -> bool {
     match node.kind {
         SyntaxKind::ForStatement
@@ -1126,7 +1014,6 @@ fn is_iteration_statement(node: &Arc<Node>, look_in_labeled: bool) -> bool {
     }
 }
 
-/// Check if a node is a function-like declaration or class static block.
 fn is_function_like_or_class_static_block(node: &Arc<Node>) -> bool {
     matches!(
         node.kind,
@@ -1141,7 +1028,6 @@ fn is_function_like_or_class_static_block(node: &Arc<Node>) -> bool {
     )
 }
 
-/// Check if a parameter declaration is optional (`?` token or initializer).
 fn is_optional_declaration(node: &Arc<Node>) -> bool {
     if node.kind != SyntaxKind::Parameter {
         return false;
@@ -1154,7 +1040,6 @@ fn is_optional_declaration(node: &Arc<Node>) -> bool {
     }
 }
 
-/// Check if a node is a binding pattern.
 fn is_binding_pattern(node: &Arc<Node>) -> bool {
     matches!(
         node.kind,
@@ -1162,7 +1047,6 @@ fn is_binding_pattern(node: &Arc<Node>) -> bool {
     )
 }
 
-/// Convert a modifier kind to its visibility string.
 fn visibility_to_string(kind: SyntaxKind) -> &'static str {
     match kind {
         SyntaxKind::PublicKeyword => "public",
@@ -1172,7 +1056,6 @@ fn visibility_to_string(kind: SyntaxKind) -> &'static str {
     }
 }
 
-/// Convert a modifier kind to its flag.
 fn modifier_to_flag(kind: SyntaxKind) -> ModifierFlags {
     match kind {
         SyntaxKind::PublicKeyword => ModifierFlags::Public,
@@ -1194,19 +1077,8 @@ fn modifier_to_flag(kind: SyntaxKind) -> ModifierFlags {
     }
 }
 
-// ────────────────────────────────────────────────────────────────────────────
-// JSX grammar checks
-// ────────────────────────────────────────────────────────────────────────────
-
 impl Checker {
-    /// Validate a JSX element's tag name and attribute list.
-    ///
-    /// Mirrors Go's `checkGrammarJsxElement`:
-    /// - Validate the tag name (namespace-name rules).
-    /// - Validate any explicit type arguments (JSX elements cannot have
-    ///   type arguments).
-    /// - Reject duplicate attribute names (TS17001).
-    /// - Reject empty JSX attribute expressions (TS17000).
+
     pub fn check_grammar_jsx_element(&mut self, node: &Arc<Node>) -> bool {
         let tag_name = match super::jsx::jsx_tag_name(node) {
             Some(t) => t,
@@ -1217,7 +1089,6 @@ impl Checker {
             return true;
         }
 
-        // Type arguments are not allowed on JSX elements.
         let type_args: Option<Vec<Arc<Node>>> = match &node.data {
             NodeData::JsxOpeningElement(data) => data
                 .type_arguments
@@ -1231,9 +1102,7 @@ impl Checker {
         };
         if let Some(args) = type_args {
             if !args.is_empty() {
-                // TS2558: Expected 0 type arguments, got N.
-                // Reuse the generic message; the Go implementation uses
-                // diagnostics.Expected_0_type_arguments_but_got_1.
+
                 let count = args.len().to_string();
                 return self.grammar_error_on_node_with_args(
                     node,
@@ -1243,7 +1112,6 @@ impl Checker {
             }
         }
 
-        // Check for duplicate attribute names and empty JSX expressions.
         let attrs = match super::jsx::jsx_attributes(node) {
             Some(a) => a,
             None => return false,
@@ -1286,17 +1154,8 @@ impl Checker {
         false
     }
 
-    /// Validate a JSX tag name expression.
-    ///
-    /// Mirrors Go's `checkGrammarJsxName`:
-    /// - TS2633: JSX property access expressions cannot include JSX
-    ///   namespace names.
-    /// - TS2639: React components cannot include JSX namespace names
-    ///   (when JSX transform is enabled and the namespace is not
-    ///   intrinsic).
     pub fn check_grammar_jsx_name(&mut self, node: &Arc<Node>) -> bool {
-        // Property access whose expression is a JSX namespaced name:
-        //   <foo:bar.baz />  — invalid.
+
         if node.kind == SyntaxKind::PropertyAccessExpression {
             if let NodeData::PropertyAccessExpression(data) = &node.data {
                 let expr = &data.expression;
@@ -1308,8 +1167,7 @@ impl Checker {
                 }
             }
         }
-        // JSX namespaced name used as a React component when JSX
-        // transform is enabled and the namespace isn't an intrinsic.
+
         if is_jsx_namespaced_name(node) && self.is_jsx_transform_enabled() {
             let namespace_text = match &node.data {
                 NodeData::JsxNamespacedName(data) => data.namespace.text().to_string(),
@@ -1325,17 +1183,13 @@ impl Checker {
         false
     }
 
-    /// Validate a JSX expression (`{...}`).
-    ///
-    /// Mirrors Go's `checkGrammarJsxExpression`:
-    /// - TS18007: JSX expressions may not use the comma operator.
     pub fn check_grammar_jsx_expression(&mut self, node: &Arc<Node>) -> bool {
         let expr = match &node.data {
             NodeData::JsxExpression(data) => &data.expression,
             _ => return false,
         };
         let Some(expr) = expr else { return false };
-        // A comma sequence is a BinaryExpression with a CommaToken.
+
         if is_comma_sequence(expr) {
             return self.grammar_error_on_node(
                 expr,
@@ -1345,46 +1199,41 @@ impl Checker {
         false
     }
 
-    /// Whether JSX emit/transform is enabled (i.e. `--jsx` is not `None`).
     fn is_jsx_transform_enabled(&self) -> bool {
         self.compiler_options.jsx != crate::core::compiler_options::JsxEmit::None
     }
-
-    // ────────────────────────────────────────────────────────────────────────
-    // Additional grammar checks (stubs — full implementations need AST accessors)
-    // ────────────────────────────────────────────────────────────────────────
 
     pub fn grammar_error_on_node_skipped_on_no_emit(
         &mut self,
         node: &Arc<Node>,
         message: &Message,
     ) -> bool {
-        // TODO: skip on noEmit
+
         self.grammar_error_on_node(node, message)
     }
 
     pub fn check_grammar_regular_expression_literal(&mut self, _node: &Arc<Node>) -> bool {
-        // TODO: full implementation
+
         false
     }
 
     pub fn check_grammar_private_identifier_expression(&mut self, _node: &Arc<Node>) -> bool {
-        // TODO: full implementation
+
         false
     }
 
     pub fn check_grammar_mapped_type(&mut self, _node: &Arc<Node>) -> bool {
-        // TODO: full implementation
+
         false
     }
 
     pub fn check_grammar_decorator(&mut self, _node: &Arc<Node>) -> bool {
-        // TODO: full implementation
+
         false
     }
 
     pub fn check_grammar_export_declaration(&mut self, _node: &Arc<Node>) -> bool {
-        // TODO: full implementation
+
         false
     }
 
@@ -1393,12 +1242,12 @@ impl Checker {
         _node: &Arc<Node>,
         _error_message: &Message,
     ) -> bool {
-        // TODO: full implementation
+
         false
     }
 
     pub fn report_obvious_modifier_errors(&mut self, _node: &Arc<Node>) -> bool {
-        // TODO: full implementation
+
         false
     }
 
@@ -1407,22 +1256,22 @@ impl Checker {
         _node: &Arc<Node>,
         _allowed_modifier: SyntaxKind,
     ) -> Option<Arc<Node>> {
-        // TODO: full implementation
+
         None
     }
 
     pub fn find_first_illegal_modifier(&self, _node: &Arc<Node>) -> Option<Arc<Node>> {
-        // TODO: full implementation
+
         None
     }
 
     pub fn report_obvious_decorator_errors(&mut self, _node: &Arc<Node>) -> bool {
-        // TODO: full implementation
+
         false
     }
 
     pub fn find_first_illegal_decorator(&self, _node: &Arc<Node>) -> Option<Arc<Node>> {
-        // TODO: full implementation
+
         None
     }
 
@@ -1431,7 +1280,7 @@ impl Checker {
         _node: &Arc<Node>,
         _async_modifier: &Arc<Node>,
     ) -> bool {
-        // TODO: full implementation
+
         false
     }
 
@@ -1440,7 +1289,7 @@ impl Checker {
         _list: &crate::ast::NodeList,
         _diag: &Message,
     ) -> bool {
-        // TODO: full implementation
+
         false
     }
 
@@ -1449,7 +1298,7 @@ impl Checker {
         _type_parameters: &crate::ast::NodeList,
         _file: &Arc<crate::ast::SourceFile>,
     ) -> bool {
-        // TODO: full implementation
+
         false
     }
 
@@ -1457,17 +1306,17 @@ impl Checker {
         &mut self,
         _node: &Arc<Node>,
     ) -> bool {
-        // TODO: full implementation
+
         false
     }
 
     pub fn check_grammar_function_like_declaration(&mut self, _node: &Arc<Node>) -> bool {
-        // TODO: full implementation
+
         false
     }
 
     pub fn check_grammar_class_like_declaration(&mut self, _node: &Arc<Node>) -> bool {
-        // TODO: full implementation
+
         false
     }
 
@@ -1476,17 +1325,17 @@ impl Checker {
         _node: &Arc<Node>,
         _file: &Arc<crate::ast::SourceFile>,
     ) -> bool {
-        // TODO: full implementation
+
         false
     }
 
     pub fn check_grammar_index_signature_parameters(&mut self, _node: &Arc<Node>) -> bool {
-        // TODO: full implementation
+
         false
     }
 
     pub fn check_grammar_index_signature(&mut self, _node: &Arc<Node>) -> bool {
-        // TODO: full implementation
+
         false
     }
 
@@ -1495,7 +1344,7 @@ impl Checker {
         _node: &Arc<Node>,
         _type_arguments: &crate::ast::NodeList,
     ) -> bool {
-        // TODO: full implementation
+
         false
     }
 
@@ -1504,22 +1353,22 @@ impl Checker {
         _node: &Arc<Node>,
         _type_arguments: &crate::ast::NodeList,
     ) -> bool {
-        // TODO: full implementation
+
         false
     }
 
     pub fn check_grammar_tagged_template_chain(&mut self, _node: &Arc<Node>) -> bool {
-        // TODO: full implementation
+
         false
     }
 
     pub fn check_grammar_heritage_clause(&mut self, _node: &Arc<Node>) -> bool {
-        // TODO: full implementation
+
         false
     }
 
     pub fn check_grammar_expression_with_type_arguments(&mut self, _node: &Arc<Node>) -> bool {
-        // TODO: full implementation
+
         false
     }
 
@@ -1528,22 +1377,22 @@ impl Checker {
         _node: &Arc<Node>,
         _file: &Arc<crate::ast::SourceFile>,
     ) -> bool {
-        // TODO: full implementation
+
         false
     }
 
     pub fn check_grammar_interface_declaration(&mut self, _node: &Arc<Node>) -> bool {
-        // TODO: full implementation
+
         false
     }
 
     pub fn check_grammar_computed_property_name(&mut self, _node: &Arc<Node>) -> bool {
-        // TODO: full implementation
+
         false
     }
 
     pub fn check_grammar_for_generator(&mut self, _node: &Arc<Node>) -> bool {
-        // TODO: full implementation
+
         false
     }
 
@@ -1552,7 +1401,7 @@ impl Checker {
         _postfix_token: &Arc<Node>,
         _message: &Message,
     ) -> bool {
-        // TODO: full implementation
+
         false
     }
 
@@ -1561,7 +1410,7 @@ impl Checker {
         _postfix_token: &Arc<Node>,
         _message: &Message,
     ) -> bool {
-        // TODO: full implementation
+
         false
     }
 
@@ -1570,27 +1419,27 @@ impl Checker {
         _node: &Arc<Node>,
         _in_destructuring: bool,
     ) -> bool {
-        // TODO: full implementation
+
         false
     }
 
     pub fn check_grammar_for_in_or_for_of_statement(&mut self, _node: &Arc<Node>) -> bool {
-        // TODO: full implementation
+
         false
     }
 
     pub fn check_grammar_accessor(&mut self, _node: &Arc<Node>) -> bool {
-        // TODO: full implementation
+
         false
     }
 
     pub fn does_accessor_have_correct_parameter_count(&mut self, _accessor: &Arc<Node>) -> bool {
-        // TODO: full implementation
+
         true
     }
 
     pub fn check_grammar_type_operator_node(&mut self, _node: &Arc<Node>) -> bool {
-        // TODO: full implementation
+
         false
     }
 
@@ -1599,22 +1448,22 @@ impl Checker {
         _node: &Arc<Node>,
         _message: &Message,
     ) -> bool {
-        // TODO: full implementation
+
         false
     }
 
     pub fn is_non_bindable_dynamic_name(&self, _node: &Arc<Node>) -> bool {
-        // TODO: full implementation
+
         false
     }
 
     pub fn check_grammar_method(&mut self, _node: &Arc<Node>) -> bool {
-        // TODO: full implementation
+
         false
     }
 
     pub fn check_grammar_binding_element(&mut self, _node: &Arc<Node>) -> bool {
-        // TODO: full implementation
+
         false
     }
 
@@ -1622,22 +1471,22 @@ impl Checker {
         &mut self,
         _name: &Arc<Node>,
     ) -> bool {
-        // TODO: full implementation
+
         false
     }
 
     pub fn check_grammar_name_in_let_or_const_declarations(&mut self, _name: &Arc<Node>) -> bool {
-        // TODO: full implementation
+
         false
     }
 
     pub fn check_grammar_await_or_await_using(&mut self, _node: &Arc<Node>) -> bool {
-        // TODO: full implementation
+
         false
     }
 
     pub fn check_grammar_yield_expression(&mut self, _node: &Arc<Node>) -> bool {
-        // TODO: full implementation
+
         false
     }
 
@@ -1645,42 +1494,42 @@ impl Checker {
         &mut self,
         _node: &Arc<Node>,
     ) -> bool {
-        // TODO: full implementation
+
         false
     }
 
     pub fn container_allows_block_scoped_variable(&self, _parent: &Arc<Node>) -> bool {
-        // TODO: full implementation
+
         false
     }
 
     pub fn check_grammar_meta_property(&mut self, _node: &Arc<Node>) -> bool {
-        // TODO: full implementation
+
         false
     }
 
     pub fn check_grammar_constructor_type_parameters(&mut self, _node: &Arc<Node>) -> bool {
-        // TODO: full implementation
+
         false
     }
 
     pub fn check_grammar_constructor_type_annotation(&mut self, _node: &Arc<Node>) -> bool {
-        // TODO: full implementation
+
         false
     }
 
     pub fn check_grammar_property(&mut self, _node: &Arc<Node>) -> bool {
-        // TODO: full implementation
+
         false
     }
 
     pub fn check_ambient_initializer(&mut self, _node: &Arc<Node>) -> bool {
-        // TODO: full implementation
+
         false
     }
 
     pub fn is_initializer_simple_literal_enum_reference(&mut self, _expr: &Arc<Node>) -> bool {
-        // TODO: full implementation
+
         false
     }
 
@@ -1688,7 +1537,7 @@ impl Checker {
         &mut self,
         _node: &Arc<Node>,
     ) -> bool {
-        // TODO: full implementation
+
         false
     }
 
@@ -1696,31 +1545,31 @@ impl Checker {
         &mut self,
         _file: &Arc<crate::ast::SourceFile>,
     ) -> bool {
-        // TODO: full implementation
+
         false
     }
 
     pub fn check_grammar_source_file(&mut self, _node: &Arc<crate::ast::SourceFile>) -> bool {
-        // TODO: full implementation
+
         false
     }
 
     pub fn check_grammar_statement_in_ambient_context(&mut self, _node: &Arc<Node>) -> bool {
-        // TODO: full implementation
+
         false
     }
 
     pub fn check_grammar_numeric_literal(&mut self, _node: &Arc<Node>) {
-        // TODO: full implementation
+
     }
 
     pub fn check_grammar_big_int_literal(&mut self, _node: &Arc<Node>) -> bool {
-        // TODO: full implementation
+
         false
     }
 
     pub fn check_grammar_import_clause(&mut self, _node: &Arc<Node>) -> bool {
-        // TODO: full implementation
+
         false
     }
 
@@ -1728,19 +1577,16 @@ impl Checker {
         &mut self,
         _named_bindings: &Arc<Node>,
     ) -> bool {
-        // TODO: full implementation
+
         false
     }
 
     pub fn check_grammar_import_call_expression(&mut self, _node: &Arc<Node>) -> bool {
-        // TODO: full implementation
+
         false
     }
 }
 
-/// Whether `node` is a comma-sequence expression (`a, b`).
-///
-/// Mirrors Go's `ast.IsCommaSequence`.
 fn is_comma_sequence(node: &Arc<Node>) -> bool {
     if node.kind != SyntaxKind::BinaryExpression {
         return false;
@@ -1751,23 +1597,17 @@ fn is_comma_sequence(node: &Arc<Node>) -> bool {
     }
 }
 
-/// Get the identifier from an entity name expression.
-///
-/// Mirrors Go's `getIdentifierFromEntityNameExpression`.
 fn get_identifier_from_entity_name_expression(node: &Arc<Node>) -> Option<Arc<Node>> {
     match node.kind {
         SyntaxKind::Identifier => Some(Arc::clone(node)),
         SyntaxKind::PropertyAccessExpression => {
-            // TODO: walk up property access chain
+
             None
         }
         _ => None,
     }
 }
 
-/// Whether an initializer is a string or number literal expression.
-///
-/// Mirrors Go's `isInitializerStringOrNumberLiteralExpression`.
 fn is_initializer_string_or_number_literal_expression(expr: &Arc<Node>) -> bool {
     matches!(
         expr.kind,
@@ -1775,13 +1615,10 @@ fn is_initializer_string_or_number_literal_expression(expr: &Arc<Node>) -> bool 
     )
 }
 
-/// Whether an initializer is a bigint literal expression.
-///
-/// Mirrors Go's `isInitializerBigIntLiteralExpression`.
 fn is_initializer_big_int_literal_expression(expr: &Arc<Node>) -> bool {
     if expr.kind == SyntaxKind::BigIntLiteral {
         return true;
     }
-    // TODO: handle negative bigint via prefix unary expression
+
     false
 }

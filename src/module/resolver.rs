@@ -1,10 +1,3 @@
-//! Module resolution infrastructure, ported from `internal/module/resolver.go`,
-//! `internal/module/types.go`, and `internal/module/cache.go`.
-//!
-//! This module provides the `Resolver` struct, `ResolutionHost` trait,
-//! cache types, and the `resolutionState` state machine for resolving
-//! module specifiers and type reference directives.
-
 use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
 
@@ -22,11 +15,8 @@ use super::{
     mangle_scoped_package_name, parse_package_name,
 };
 
-// ── Extensions bitfield ─────────────────────────────────────────────
-
 bitflags! {
-    /// Bitfield for extension sets used during module resolution.
-    /// Mirrors Go's `extensions` int32 type.
+
     #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
     pub struct Extensions: i32 {
         const TYPESCRIPT     = 1;
@@ -40,7 +30,6 @@ impl Extensions {
     pub const IMPLEMENTATION_FILES: Extensions =
         Extensions::TYPESCRIPT.union(Extensions::JAVASCRIPT);
 
-    /// Expand the bitfield into an ordered list of file extensions.
     pub fn array(&self) -> Vec<&'static str> {
         let mut result = Vec::new();
         if self.contains(Extensions::TYPESCRIPT) {
@@ -76,18 +65,11 @@ impl Extensions {
     }
 }
 
-// ── ResolutionHost trait ────────────────────────────────────────────
-
-/// Abstraction over the file system and environment needed for module
-/// resolution. Mirrors Go's `ResolutionHost` interface.
 pub trait ResolutionHost {
     fn fs(&self) -> &dyn FS;
     fn get_current_directory(&self) -> &str;
 }
 
-// ── Cache types ─────────────────────────────────────────────────────
-
-/// Key for module resolution cache entries.
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub struct ModuleResolutionCacheKey {
     containing_directory: String,
@@ -96,7 +78,6 @@ pub struct ModuleResolutionCacheKey {
     redirect_config_name: String,
 }
 
-/// Key for type reference directive cache entries.
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub struct TypeRefDirectiveCacheKey {
     containing_directory: String,
@@ -106,8 +87,6 @@ pub struct TypeRefDirectiveCacheKey {
     from_inferred_types_containing_file: bool,
 }
 
-/// Cache for module resolution results. Uses first-writer-wins semantics
-/// (mirrors Go's `moduleResolutionCache.Set` → `LoadOrStore`).
 pub struct ModuleResolutionCache {
     cache: Mutex<HashMap<ModuleResolutionCacheKey, Arc<ResolvedModule>>>,
 }
@@ -125,7 +104,7 @@ impl ModuleResolutionCache {
 
     pub fn set(&self, key: ModuleResolutionCacheKey, value: Arc<ResolvedModule>) {
         let mut cache = self.cache.lock().unwrap();
-        // First-writer-wins: don't overwrite existing entries.
+
         cache.entry(key).or_insert(value);
     }
 }
@@ -136,8 +115,6 @@ impl Default for ModuleResolutionCache {
     }
 }
 
-/// Cache for type reference directive results. Uses last-writer-wins
-/// semantics (mirrors Go's `typeRefDirectiveResolutionCache.Set` → `Store`).
 pub struct TypeRefDirectiveResolutionCache {
     cache: Mutex<HashMap<TypeRefDirectiveCacheKey, Arc<ResolvedTypeReferenceDirective>>>,
 }
@@ -168,9 +145,6 @@ impl Default for TypeRefDirectiveResolutionCache {
     }
 }
 
-// ── Resolved (internal) ─────────────────────────────────────────────
-
-/// Internal resolution result, lower-level than `ResolvedModule`.
 #[derive(Clone, Debug, Default)]
 pub(crate) struct Resolved {
     pub path: String,
@@ -187,16 +161,12 @@ impl Resolved {
     }
 }
 
-/// Sentinel for "continue searching" (Go returns nil pointer).
 pub(crate) const CONTINUE_SEARCHING: Option<Resolved> = None;
 
-// ── Pattern matching for `paths`/`typesVersions` ────────────────────
-
-/// A path pattern with optional `*` wildcard. Mirrors Go's `core.Pattern`.
 #[derive(Clone, Debug, Default)]
 struct Pattern {
     text: String,
-    star_index: i32, // -1 for exact match (no wildcard)
+    star_index: i32,
 }
 
 impl Pattern {
@@ -208,7 +178,7 @@ impl Pattern {
             },
             Some(idx) => {
                 if pattern[idx + 1..].contains('*') {
-                    Pattern::default() // more than one * → invalid
+                    Pattern::default()
                 } else {
                     Pattern {
                         text: pattern.to_string(),
@@ -245,14 +215,11 @@ impl Pattern {
     }
 }
 
-/// Parsed path mappings for `paths` or `typesVersions` resolution.
 struct ParsedPatterns {
     matchable_string_set: std::collections::HashSet<String>,
     patterns: Vec<Pattern>,
 }
 
-/// Parse a `paths`/`typesVersions` map into exact strings and wildcard
-/// patterns. Mirrors Go's `tryParsePatterns`.
 fn try_parse_patterns(
     path_mappings: &std::collections::HashMap<String, Vec<String>>,
 ) -> ParsedPatterns {
@@ -274,8 +241,6 @@ fn try_parse_patterns(
     }
 }
 
-/// Return the matching pattern for `candidate`, preferring exact matches
-/// and the longest wildcard prefix. Mirrors Go's `matchPatternOrExact`.
 fn match_pattern_or_exact(parsed: &ParsedPatterns, candidate: &str) -> Option<Pattern> {
     if parsed.matchable_string_set.contains(candidate) {
         return Some(Pattern {
@@ -286,7 +251,7 @@ fn match_pattern_or_exact(parsed: &ParsedPatterns, candidate: &str) -> Option<Pa
     if parsed.patterns.is_empty() {
         return None;
     }
-    // Find best match (longest prefix before *).
+
     let mut best: Option<Pattern> = None;
     let mut longest = -1i32;
     for pattern in &parsed.patterns {
@@ -299,29 +264,18 @@ fn match_pattern_or_exact(parsed: &ParsedPatterns, candidate: &str) -> Option<Pa
     best
 }
 
-// ── DiagAndArgs (for trace resolution) ──────────────────────────────
-
-/// A diagnostic message with arguments, used for `--traceResolution` output.
 #[derive(Clone, Debug)]
 pub struct DiagAndArgs {
     pub message: String,
     pub args: Vec<String>,
 }
 
-// ── Resolver ────────────────────────────────────────────────────────
-
-/// The module resolver. Mirrors Go's `Resolver` struct.
-///
-/// Holds caches, the resolution host, and compiler options. Entry points
-/// are `resolve_module_name` and `resolve_type_reference_directive`.
 pub struct Resolver {
     module_cache: ModuleResolutionCache,
     type_ref_cache: TypeRefDirectiveResolutionCache,
     host: Arc<dyn ResolutionHost + Send + Sync>,
     compiler_options: Arc<CompilerOptions>,
-    /// Go Resolver carries these for the auto-typings discovery pass
-    /// (`tryResolveFromTypingsLocation`); the port resolves typings through
-    /// the type-roots path instead, so they are kept only for parity.
+
     #[allow(dead_code)]
     typings_location: String,
     #[allow(dead_code)]
@@ -329,7 +283,7 @@ pub struct Resolver {
 }
 
 impl Resolver {
-    /// Create a new resolver.
+
     pub fn new(
         host: Arc<dyn ResolutionHost + Send + Sync>,
         compiler_options: Arc<CompilerOptions>,
@@ -354,10 +308,6 @@ impl Resolver {
         &self.compiler_options
     }
 
-    /// Resolve a module specifier (e.g., `"./foo"` or `"react"`).
-    ///
-    /// Returns `(resolved_module, traces)`. When `--traceResolution` is off,
-    /// `traces` is empty.
     pub fn resolve_module_name(
         &self,
         module_name: &str,
@@ -373,7 +323,6 @@ impl Resolver {
             redirect_config_name: String::new(),
         };
 
-        // Check cache (skip when tracing).
         let trace = self.compiler_options.trace_resolution.is_true();
         if !trace {
             if let Some(cached) = self.module_cache.get(&cache_key) {
@@ -381,10 +330,6 @@ impl Resolver {
             }
         }
 
-        // Default resolution mode under node1x comes from the referencing
-        // FILE's implied node format (Go `getDefaultResolutionModeForFile`)
-        // — a CJS-format file resolves through `require` conditions, an
-        // ESM-format file through `import`.
         let effective_mode = default_resolution_mode(
             resolution_mode,
             &self.compiler_options,
@@ -394,7 +339,7 @@ impl Resolver {
         let state = ResolutionState::new(
             module_name,
             &containing_directory,
-            false, // is_type_reference_directive
+            false,
             effective_mode,
             &self.compiler_options,
             self.host.fs(),
@@ -406,7 +351,6 @@ impl Resolver {
         (Some(result), Vec::new())
     }
 
-    /// Resolve a type reference directive (e.g., `"node"` or `"jest"`).
     pub fn resolve_type_reference_directive(
         &self,
         type_reference_directive_name: &str,
@@ -432,7 +376,6 @@ impl Resolver {
             }
         }
 
-        // TODO: Port the full type reference directive resolution.
         let fs = self.host.fs();
         let current_dir = self.host.get_current_directory();
         let (type_roots, from_config) =
@@ -441,7 +384,7 @@ impl Resolver {
         let mut state = ResolutionState::new(
             type_reference_directive_name,
             &containing_directory,
-            true, // is_type_reference_directive
+            true,
             default_resolution_mode(
                 resolution_mode,
                 &self.compiler_options,
@@ -464,14 +407,6 @@ impl Resolver {
     }
 }
 
-// ── Effective type roots ────────────────────────────────────────────
-
-/// Resolve the default resolution mode for a reference (Go
-/// `getDefaultResolutionModeForFile` + the mode-override chain): an
-/// explicit override (from a `resolution-mode` import attribute) wins;
-/// under node16/nodenext a None mode defaults to the referencing file's
-/// implied node format (CJS files resolve through `require`, ESM files
-/// through `import`).
 fn default_resolution_mode(
     resolution_mode: ResolutionMode,
     options: &CompilerOptions,
@@ -489,16 +424,6 @@ fn default_resolution_mode(
     }
 }
 
-/// Compute effective type roots for type reference directive resolution.
-/// Mirrors Go's `CompilerOptions.GetEffectiveTypeRoots`.
-///
-/// When `typeRoots` is explicitly set in compiler options, returns it directly.
-/// Otherwise, every ancestor of the base directory contributes
-/// `<dir>/node_modules/@types`; the base is the tsconfig's directory when a
-/// config file is in play (Go reads `GetDirectoryPath(ConfigFilePath)`), and
-/// only falls back to the host's current directory otherwise
-/// (typeRootsFromMultipleNodeModulesDirectories: cwd /src with the project at
-/// /foo/bar must still collect /foo/node_modules/@types).
 pub fn get_effective_type_roots(
     options: &CompilerOptions,
     current_directory: &str,
@@ -524,13 +449,6 @@ pub fn get_effective_type_roots(
     (type_roots, false)
 }
 
-// ── ResolutionState ─────────────────────────────────────────────────
-
-/// Per-resolution mutable state. Mirrors Go's `resolutionState`.
-///
-/// This is the workhorse of the resolver — it carries the request parameters
-/// (module name, containing directory, features, extensions, conditions)
-/// and accumulates diagnostics as resolution proceeds.
 pub(crate) struct ResolutionState<'a> {
     name: String,
     containing_directory: String,
@@ -546,18 +464,12 @@ pub(crate) struct ResolutionState<'a> {
     current_directory: &'a str,
     resolved_package_directory: bool,
     candidate_ending_is_from_config: bool,
-    /// Recursion depth of `load_module_from_target_export_or_import`.
-    /// Conditional-exports objects and arrays nest arbitrarily deep in a
-    /// hostile package.json; normal file targets terminate, but the
-    /// recursion itself has no structural bound — cap it defensively
-    /// (Go bounds the same walk by the JSON structure it already trusts;
-    /// a symlinked self-referential exports table could otherwise loop).
+
     export_target_depth: u32,
 }
 
 impl<'a> ResolutionState<'a> {
-    /// Create a new resolution state, deriving features/esmMode/conditions
-    /// from the module resolution kind.
+
     pub(crate) fn new(
         name: &str,
         containing_directory: &str,
@@ -567,7 +479,7 @@ impl<'a> ResolutionState<'a> {
         fs: &'a dyn FS,
         current_directory: &'a str,
     ) -> Self {
-        // Compute extensions.
+
         let extensions = if is_type_reference_directive {
             Extensions::DECLARATION
         } else if compiler_options.no_dts_resolution.is_true() {
@@ -584,17 +496,8 @@ impl<'a> ResolutionState<'a> {
                 extensions
             };
 
-        // Compute features, esmMode, conditions from module resolution kind.
-        // The resolution mode selects the `import` vs `require` condition
-        // (Go `GetConditions`, resolver.go ~L1923): a CJS-mode resolution
-        // must NOT see `import` targets and vice versa — the previous
-        // "add both" approximation made condition selection depend on
-        // package.json key order (nodeModules declaration-emit family).
         let (features, esm_mode, conditions) = match compiler_options.get_module_resolution_kind() {
-            // esmMode follows the per-reference resolution mode (Go
-            // `esmMode = resolutionMode == ModuleKindESNext`): a CJS-format
-            // referencing file keeps extensionless `./mod` + directory
-            // resolution; only ESM(import)-mode references are strict.
+
             ModuleResolutionKind::Node16 => (
                 NodeResolutionFeatures::NODE16_DEFAULT,
                 resolution_mode == ModuleKind::ESNext,
@@ -638,14 +541,9 @@ impl<'a> ResolutionState<'a> {
         }
     }
 
-    // ── Relative path resolution ────────────────────────────────────
-
-    /// Normalize a path for CJS resolution. If the last path component is
-    /// `.` or `..`, append a trailing directory separator.
     fn normalize_path_for_cjs_resolution(directory: &str, name: &str) -> String {
         let combined = tspath::combine_paths(directory, &[name]);
-        // Check the last component BEFORE normalization, since normalize
-        // would strip `.` and `..` components.
+
         let last_component = tspath::get_base_file_name(&combined);
         let combined = tspath::normalize_path(&combined);
         if last_component == "." || last_component == ".." {
@@ -655,9 +553,6 @@ impl<'a> ResolutionState<'a> {
         }
     }
 
-    /// Try to load a module by relative name. First tries file resolution
-    /// (with extension swapping), then directory resolution (package.json
-    /// + index.js). Mirrors Go's `nodeLoadModuleByRelativeName`.
     fn node_load_module_by_relative_name(
         &mut self,
         extensions: Extensions,
@@ -676,32 +571,27 @@ impl<'a> ResolutionState<'a> {
         if !self.fs.directory_exists(candidate) {
             return CONTINUE_SEARCHING;
         }
-        // In ESM mode, directory lookups (package.json redirection and
-        // implicit index.js) are skipped — only file resolution applies.
+
         if self.esm_mode {
             return CONTINUE_SEARCHING;
         }
         self.load_node_module_from_directory(extensions, candidate, true)
     }
 
-    /// Try to load a module from a file, first by replacing the extension,
-    /// then by appending extensions. Mirrors Go's `loadModuleFromFile`.
     fn load_module_from_file(&self, extensions: Extensions, candidate: &str) -> Option<Resolved> {
-        // ./foo.js → ./foo.ts (extension replacement)
+
         if let Some(resolved) =
             self.load_module_from_file_no_implicit_extensions(extensions, candidate)
         {
             return Some(resolved);
         }
-        // ./foo → ./foo.ts (extension appending, CJS only)
+
         if !self.esm_mode {
             return self.try_adding_extensions(candidate, extensions, "");
         }
         CONTINUE_SEARCHING
     }
 
-    /// Strip the candidate's extension and try replacing it with TS/DTS/JS
-    /// extensions. Mirrors Go's `loadModuleFromFileNoImplicitExtensions`.
     fn load_module_from_file_no_implicit_extensions(
         &self,
         extensions: Extensions,
@@ -719,9 +609,6 @@ impl<'a> ResolutionState<'a> {
         self.try_adding_extensions(&extensionless, extensions, extension)
     }
 
-    /// The core extension-priority table. Given an extensionless path and
-    /// the original extension, tries TS/DTS/JS extensions in priority order.
-    /// Mirrors Go's `tryAddingExtensions`.
     fn try_adding_extensions(
         &self,
         extensionless: &str,
@@ -807,7 +694,7 @@ impl<'a> ResolutionState<'a> {
                 }
                 CONTINUE_SEARCHING
             }
-            // .ts, .d.ts, .js, or "" (extensionless)
+
             ".ts" | ".d.ts" | ".js" | "" => {
                 if extensions.contains(Extensions::TYPESCRIPT) {
                     if let Some(r) = self.try_extension(".ts", extensionless) {
@@ -838,7 +725,7 @@ impl<'a> ResolutionState<'a> {
                 CONTINUE_SEARCHING
             }
             _ => {
-                // Arbitrary extensions: try .d.<ext>.ts for declaration mapping
+
                 if extensions.contains(Extensions::DECLARATION)
                     && !tspath::is_declaration_file_name(&format!(
                         "{extensionless}{original_extension}"
@@ -854,8 +741,6 @@ impl<'a> ResolutionState<'a> {
         }
     }
 
-    /// Try a single extension on an extensionless path. Returns the resolved
-    /// path if the file exists. Mirrors Go's `tryExtension`.
     fn try_extension(&self, extension: &str, extensionless: &str) -> Option<Resolved> {
         let file_name = format!("{extensionless}{extension}");
         if let Some(path) = self.try_file(&file_name) {
@@ -869,8 +754,6 @@ impl<'a> ResolutionState<'a> {
         CONTINUE_SEARCHING
     }
 
-    /// Check if a file exists, applying moduleSuffixes if configured.
-    /// Returns the matched path if found. Mirrors Go's `tryFile`.
     fn try_file(&self, file_name: &str) -> Option<String> {
         if self.compiler_options.module_suffixes.is_empty() {
             if self.fs.file_exists(file_name) {
@@ -889,12 +772,6 @@ impl<'a> ResolutionState<'a> {
         None
     }
 
-    // ── Optional resolution settings (paths, rootDirs) ─────────────
-
-    /// Compute the base directory used to resolve `paths` substitutions.
-    /// Prefers `pathsBasePath`, then `baseUrl`, then the config file's
-    /// directory, finally the current directory. Mirrors Go's
-    /// `getPathsBasePath`.
     fn get_paths_base_path(&self) -> String {
         if !self.compiler_options.paths_base_path.is_empty() {
             return self.compiler_options.paths_base_path.clone();
@@ -908,17 +785,12 @@ impl<'a> ResolutionState<'a> {
         self.current_directory.to_string()
     }
 
-    /// First step of `resolveNodeLikeWorker`: try `paths` mappings (for
-    /// non-relative names) and `rootDirs` (for relative names). Mirrors
-    /// Go's `tryLoadModuleUsingOptionalResolutionSettings`.
     fn try_load_module_using_optional_resolution_settings(&mut self) -> Option<Resolved> {
         if let Some(r) = self.try_load_module_using_paths_if_eligible() {
             return Some(r);
         }
         if !tspath::is_external_module_name_relative(&self.name) {
-            // Non-relative name. If paths didn't match, try baseUrl resolution
-            // (when baseUrl is set). Mirrors Go's behavior of resolving bare
-            // specifiers relative to baseUrl.
+
             if !self.compiler_options.base_url.is_empty() {
                 let candidate = tspath::normalize_path(&tspath::combine_paths(
                     &self.compiler_options.base_url,
@@ -930,15 +802,13 @@ impl<'a> ResolutionState<'a> {
                     return Some(r);
                 }
             }
-            // Non-relative and paths/baseUrl didn't match → continue to node_modules.
+
             return CONTINUE_SEARCHING;
         }
-        // Relative name → try rootDirs.
+
         self.try_load_module_using_root_dirs()
     }
 
-    /// Try `paths` resolution when the name is non-relative and `paths`
-    /// is configured. Mirrors Go's `tryLoadModuleUsingPathsIfEligible`.
     fn try_load_module_using_paths_if_eligible(&mut self) -> Option<Resolved> {
         let paths = match &self.compiler_options.paths {
             Some(p) if !p.is_empty() && !tspath::path_is_relative(&self.name) => p,
@@ -956,8 +826,6 @@ impl<'a> ResolutionState<'a> {
         )
     }
 
-    /// Substitute the matched pattern with each configured target and
-    /// resolve the resulting path. Mirrors Go's `tryLoadModuleUsingPaths`.
     fn try_load_module_using_paths(
         &mut self,
         extensions: Extensions,
@@ -1003,9 +871,6 @@ impl<'a> ResolutionState<'a> {
         CONTINUE_SEARCHING
     }
 
-    /// Resolve a relative name using `rootDirs`: find the longest matching
-    /// rootDir prefix and try the relative path in each other rootDir.
-    /// Mirrors Go's `tryLoadModuleUsingRootDirs`.
     fn try_load_module_using_root_dirs(&mut self) -> Option<Resolved> {
         if self.compiler_options.root_dirs.is_empty() {
             return CONTINUE_SEARCHING;
@@ -1014,7 +879,7 @@ impl<'a> ResolutionState<'a> {
             &self.containing_directory,
             &[&self.name],
         ));
-        // Find longest matching rootDir prefix.
+
         let mut matched_normalized_prefix = String::new();
         for root_dir in &self.compiler_options.root_dirs {
             let mut normalized_root = tspath::normalize_path(root_dir);
@@ -1031,11 +896,11 @@ impl<'a> ResolutionState<'a> {
             return CONTINUE_SEARCHING;
         }
         let suffix = &candidate[matched_normalized_prefix.len()..];
-        // First try original location.
+
         if let Some(r) = self.node_load_module_by_relative_name(self.extensions, &candidate, true) {
             return Some(r);
         }
-        // Then try each other rootDir.
+
         let matched_root_normalized = tspath::normalize_path(
             &matched_normalized_prefix[..matched_normalized_prefix.len().saturating_sub(1)],
         );
@@ -1054,22 +919,10 @@ impl<'a> ResolutionState<'a> {
         CONTINUE_SEARCHING
     }
 
-    // ── Node-like resolution entry point ───────────────────────────
-
-    /// Entry point for node-like module resolution. Runs the worker, then
-    /// converts the internal `Resolved` into a `ResolvedModule`. Mirrors
-    /// Go's `resolveNodeLike` (AlternateResult/exports re-run skipped for
-    /// now — those are P5.5 features).
     pub(crate) fn resolve_node_like(mut self) -> ResolvedModule {
         let result = self.resolve_node_like_worker();
         if result.is_none() {
-            // TS 5.x alternate-result probe (the 6280 "There are types at
-            // '...'" elaboration on TS2307): when a node10-style
-            // (exports-less) resolution fails on a bare specifier, retry
-            // with modern features — a candidate found only through
-            // package.json `exports` is kept as `alternate_result` while
-            // the primary stays unresolved
-            // (node10AlternateResult_noResolution).
+
             if !tspath::is_external_module_name_relative(&self.name)
                 && !self.features.contains(NodeResolutionFeatures::Exports)
                 && self
@@ -1089,16 +942,12 @@ impl<'a> ResolutionState<'a> {
         self.create_resolved_module(result)
     }
 
-    /// Main dispatch. Mirrors Go's `resolveNodeLikeWorker`.
-    /// For relative names: normalize + relative-name load.
-    /// For bare names: node_modules walk + typeRoot fallback.
     fn resolve_node_like_worker(&mut self) -> Option<Resolved> {
-        // Step 1: Try optional resolution settings (paths, rootDirs).
+
         if let Some(resolved) = self.try_load_module_using_optional_resolution_settings() {
             return Some(resolved);
         }
-        // Step 2: Package imports ("#"-prefixed specifiers). Mirrors Go's
-        // `loadModuleFromImports` dispatch in `resolveNodeLikeWorker`.
+
         if !tspath::is_external_module_name_relative(&self.name)
             && self.name.starts_with('#')
             && self.features.contains(NodeResolutionFeatures::Imports)
@@ -1107,9 +956,7 @@ impl<'a> ResolutionState<'a> {
                 return Some(resolved);
             }
         }
-        // Self-name reference: a bare specifier that matches the enclosing
-        // package.json's `name` resolves through that package's own
-        // `exports` (Go `loadModuleFromSelfNameReference`).
+
         if !tspath::is_external_module_name_relative(&self.name)
             && self.features.contains(NodeResolutionFeatures::SelfName)
         {
@@ -1118,18 +965,16 @@ impl<'a> ResolutionState<'a> {
             }
         }
         if tspath::is_external_module_name_relative(&self.name) {
-            // Relative path: normalize then load by relative name.
+
             let candidate =
                 Self::normalize_path_for_cjs_resolution(&self.containing_directory, &self.name);
             return self.node_load_module_by_relative_name(self.extensions, &candidate, true);
         }
 
-        // Non-relative (bare) specifier: search node_modules.
         if let Some(resolved) = self.load_module_from_nearest_node_modules_directory(false) {
             return Some(resolved);
         }
 
-        // Declaration fallback via typeRoots.
         if self.extensions.contains(Extensions::DECLARATION) {
             if let Some(resolved) = self.resolve_from_type_root() {
                 return Some(resolved);
@@ -1138,9 +983,6 @@ impl<'a> ResolutionState<'a> {
         CONTINUE_SEARCHING
     }
 
-    /// Resolve a bare specifier from configured type roots. Mirrors the
-    /// Go `resolveFromTypeRoot` path used when a node_modules search fails
-    /// and declaration extensions are in play.
     fn resolve_from_type_root(&mut self) -> Option<Resolved> {
         let (type_roots, _) =
             get_effective_type_roots(self.compiler_options, self.current_directory);
@@ -1163,15 +1005,13 @@ impl<'a> ResolutionState<'a> {
         CONTINUE_SEARCHING
     }
 
-    /// Resolve a type reference directive via typeRoots then node_modules.
-    /// Mirrors Go's `resolveTypeReferenceDirective` (resolver.go:400-449).
     fn resolve_type_reference_directive(
         &mut self,
         type_roots: &[String],
         from_config: bool,
         from_inferred_types_containing_file: bool,
     ) -> ResolvedTypeReferenceDirective {
-        // Primary lookup: typeRoots.
+
         if !type_roots.is_empty() {
             for type_root in type_roots {
                 if !self.fs.directory_exists(type_root) {
@@ -1179,7 +1019,7 @@ impl<'a> ResolutionState<'a> {
                 }
                 let candidate = self.get_candidate_from_type_root(type_root);
                 if from_config {
-                    // Custom typeRoots resolve as file or directory.
+
                     if let Some(resolved) =
                         self.load_module_from_file(Extensions::DECLARATION, &candidate)
                     {
@@ -1194,7 +1034,6 @@ impl<'a> ResolutionState<'a> {
             }
         }
 
-        // Secondary lookup: node_modules.
         if !from_config || !from_inferred_types_containing_file {
             let resolved = if tspath::is_external_module_name_relative(&self.name) {
                 let candidate =
@@ -1209,8 +1048,6 @@ impl<'a> ResolutionState<'a> {
         ResolvedTypeReferenceDirective::default()
     }
 
-    /// Build the candidate path for a typeRoot, applying scoped package
-    /// mangling for `@types` roots. Mirrors Go's `getCandidateFromTypeRoot`.
     fn get_candidate_from_type_root(&self, type_root: &str) -> String {
         let name_for_lookup = if type_root.ends_with("/node_modules/@types")
             || type_root.ends_with("/node_modules/@types/")
@@ -1222,7 +1059,6 @@ impl<'a> ResolutionState<'a> {
         tspath::combine_paths(type_root, &[&name_for_lookup])
     }
 
-    /// Create a `ResolvedTypeReferenceDirective` from a `Resolved`.
     fn create_resolved_type_ref(
         &self,
         resolved: Option<Resolved>,
@@ -1243,16 +1079,11 @@ impl<'a> ResolutionState<'a> {
         }
     }
 
-    // ── node_modules walk ──────────────────────────────────────────
-
-    /// Two-pass ancestor walk. Mirrors Go's
-    /// `loadModuleFromNearestNodeModulesDirectory`.
-    /// Pass 1: TS/DTS extensions, Pass 2: JS extensions.
     fn load_module_from_nearest_node_modules_directory(
         &mut self,
         types_scope_only: bool,
     ) -> Option<Resolved> {
-        // Pass 1: TypeScript + Declaration extensions.
+
         let ts_ext = self
             .extensions
             .intersection(Extensions::TYPESCRIPT | Extensions::DECLARATION);
@@ -1263,7 +1094,7 @@ impl<'a> ResolutionState<'a> {
                 return Some(resolved);
             }
         }
-        // Pass 2: remaining (JavaScript/JSON) extensions.
+
         let js_ext = self
             .extensions
             .difference(Extensions::TYPESCRIPT | Extensions::DECLARATION);
@@ -1277,13 +1108,6 @@ impl<'a> ResolutionState<'a> {
         CONTINUE_SEARCHING
     }
 
-    /// Walk up the directory tree from `containing_directory`, invoking
-    /// `load_module_from_immediate_node_modules_directory` on every
-    /// directory whose base name is not `node_modules`. Mirrors Go's
-    /// `loadModuleFromNearestNodeModulesDirectoryWorker`.
-    ///
-    /// Inlined (rather than using `for_each_ancestor_directory`) to satisfy
-    /// the borrow checker: each iteration needs `&mut self`.
     fn load_module_from_nearest_node_modules_directory_worker(
         &mut self,
         ext: Extensions,
@@ -1309,8 +1133,6 @@ impl<'a> ResolutionState<'a> {
         CONTINUE_SEARCHING
     }
 
-    /// Look in a single `node_modules` directory for the module. Mirrors
-    /// Go's `loadModuleFromImmediateNodeModulesDirectory`.
     fn load_module_from_immediate_node_modules_directory(
         &mut self,
         ext: Extensions,
@@ -1331,7 +1153,7 @@ impl<'a> ResolutionState<'a> {
                 return Some(resolved);
             }
         }
-        // @types fallback for declaration resolution.
+
         if ext.contains(Extensions::DECLARATION) {
             let node_modules_at_types = tspath::combine_paths(&node_modules_folder, &["@types"]);
             if self.fs.directory_exists(&node_modules_at_types) {
@@ -1348,8 +1170,6 @@ impl<'a> ResolutionState<'a> {
         CONTINUE_SEARCHING
     }
 
-    /// Look in a specific node_modules directory for a package.
-    /// Mirrors Go's `loadModuleFromSpecificNodeModulesDirectory`.
     fn load_module_from_specific_node_modules_directory(
         &mut self,
         ext: Extensions,
@@ -1363,14 +1183,12 @@ impl<'a> ResolutionState<'a> {
         let (package_name, rest) = parse_package_name(module_name);
         let package_directory = tspath::combine_paths(node_modules_directory, &[&package_name]);
 
-        // Record whether the package.json exists for this package directory.
         let pkg_json_path = tspath::combine_paths(&package_directory, &["package.json"]);
         let package_info_exists = self.fs.file_exists(&pkg_json_path);
         if package_info_exists {
             self.resolved_package_directory = true;
         }
 
-        // Check the package.json "exports" field (Node16/NodeNext/Bundler).
         if self.features.contains(NodeResolutionFeatures::Exports) && package_info_exists {
             if let Some(content) = self.fs.read_file(&pkg_json_path) {
                 if let Ok(fields) = packagejson::parse(&content) {
@@ -1394,8 +1212,6 @@ impl<'a> ResolutionState<'a> {
             }
         }
 
-        // Sub-path (e.g. `foo/bar`): try file then directory resolution on
-        // the full candidate before consulting the package.json.
         if !rest.is_empty() {
             if let Some(resolved) = self.load_module_from_file(ext, &candidate) {
                 return Some(resolved);
@@ -1408,18 +1224,16 @@ impl<'a> ResolutionState<'a> {
             .map(|(_, f)| f.path_fields.exports.json_value.is_present())
             .unwrap_or(false);
 
-        // loader(ext, candidate):
-        // File resolution applies in CJS mode (rest is empty here).
         if !self.esm_mode {
             if let Some(resolved) = self.load_module_from_file(ext, &candidate) {
                 return Some(resolved);
             }
         }
-        // Directory resolution (package.json types/main + index lookup).
+
         if let Some(resolved) = self.load_node_module_from_directory(ext, &candidate, true) {
             return Some(resolved);
         }
-        // ESM index.js fallback when the package has no exports field.
+
         if package_info_exists && !has_exports && self.esm_mode {
             let index = tspath::combine_paths(&candidate, &["index.js"]);
             if let Some(resolved) = self.load_module_from_file(ext, &index) {
@@ -1429,10 +1243,6 @@ impl<'a> ResolutionState<'a> {
         CONTINUE_SEARCHING
     }
 
-    // ── Directory + package.json resolution ────────────────────────
-
-    /// Read the package.json for `candidate` (if present) and delegate to
-    /// the worker. Mirrors Go's `loadNodeModuleFromDirectory`.
     fn load_node_module_from_directory(
         &mut self,
         ext: Extensions,
@@ -1442,9 +1252,6 @@ impl<'a> ResolutionState<'a> {
         self.load_node_module_from_directory_worker(ext, candidate, consider_package_dir)
     }
 
-    /// Worker for directory resolution. Reads package.json typings/types/main,
-    /// falling back to an `index` file in CJS mode. Mirrors Go's
-    /// `loadNodeModuleFromDirectoryWorker`.
     fn load_node_module_from_directory_worker(
         &mut self,
         ext: Extensions,
@@ -1455,9 +1262,7 @@ impl<'a> ResolutionState<'a> {
         let package_info_exists = self.fs.file_exists(&pkg_json_path);
 
         if package_info_exists {
-            // typesVersions takes priority over the package.json typings/
-            // types/main field selection. Mirrors the typesVersions portion
-            // of Go's `loadNodeModuleFromDirectoryWorker`.
+
             if let Some(resolved) =
                 self.try_load_module_using_package_json_type_versions(ext, candidate)
             {
@@ -1471,7 +1276,7 @@ impl<'a> ResolutionState<'a> {
                 }
             }
         }
-        // CJS index-file fallback.
+
         if !self.esm_mode {
             let index = tspath::combine_paths(candidate, &["index"]);
             if let Some(resolved) = self.load_module_from_file(ext, &index) {
@@ -1481,13 +1286,6 @@ impl<'a> ResolutionState<'a> {
         CONTINUE_SEARCHING
     }
 
-    /// Resolve using the package.json `typesVersions` field. Mirrors the
-    /// typesVersions portion of Go's `loadNodeModuleFromDirectoryWorker`.
-    ///
-    /// Simplified: compiler-version matching is not performed — the first
-    /// version entry is used (version range keys like ">=4.0" are ignored).
-    /// The subpath after the package name is matched against the version's
-    /// path mappings via `try_load_module_using_paths`.
     fn try_load_module_using_package_json_type_versions(
         &mut self,
         ext: Extensions,
@@ -1500,12 +1298,12 @@ impl<'a> ResolutionState<'a> {
         if !tv.is_present() || tv.value_type != packagejson::JsonValueType::Object {
             return CONTINUE_SEARCHING;
         }
-        // Use the first version entry (version matching is simplified).
+
         let (_, version_mapping) = tv.as_object().first()?;
         if version_mapping.value_type != packagejson::JsonValueType::Object {
             return CONTINUE_SEARCHING;
         }
-        // Build a paths-style map: pattern -> [targets].
+
         let mut paths_map: HashMap<String, Vec<String>> = HashMap::new();
         for (pattern, targets) in version_mapping.as_object() {
             if targets.value_type == packagejson::JsonValueType::Array {
@@ -1524,16 +1322,11 @@ impl<'a> ResolutionState<'a> {
             return CONTINUE_SEARCHING;
         }
         let parsed = try_parse_patterns(&paths_map);
-        // The match name is the subpath within the package (the part after
-        // the package name). For a bare package import this is empty.
+
         let (_, rest) = parse_package_name(&self.name);
         self.try_load_module_using_paths(ext, &rest, candidate, &paths_map, &parsed)
     }
 
-    /// Read package.json from `candidate/package.json` and select the
-    /// relevant path field (typings/types/main) based on the extension set.
-    /// Returns the resolved field path and the parsed fields. Mirrors the
-    /// field-selection portion of Go's `getPackageFile`.
     fn get_package_file(
         &self,
         ext: Extensions,
@@ -1568,10 +1361,6 @@ impl<'a> ResolutionState<'a> {
         None
     }
 
-    /// Resolve a candidate path obtained from a package.json field.
-    /// If it already has a TypeScript extension and TS extensions are in
-    /// play, try the file directly; otherwise run extension swapping.
-    /// Mirrors Go's `loadFileNameFromPackageJsonField`.
     fn load_file_name_from_package_json_field(
         &self,
         ext: Extensions,
@@ -1594,24 +1383,17 @@ impl<'a> ResolutionState<'a> {
         self.load_module_from_file_no_implicit_extensions(ext, package_file)
     }
 
-    // ── Exports/Imports resolution ─────────────────────────────────
-
-    /// Check whether a condition name is active for this resolution.
-    /// Mirrors Go's `conditionMatches`.
     fn condition_matches(&self, condition: &str) -> bool {
         if condition == "default" || self.conditions.iter().any(|c| c == condition) {
             return true;
         }
-        // Versioned types conditions (e.g. types@<version>) — not yet implemented.
-        // Only relevant when "types" is among the active conditions.
+
         if !self.conditions.iter().any(|c| c == "types") {
             return false;
         }
         false
     }
 
-    /// Resolve a module via the package.json `exports` field.
-    /// Mirrors Go's `loadModuleFromExports`.
     fn load_module_from_exports(
         &mut self,
         ext: Extensions,
@@ -1624,7 +1406,7 @@ impl<'a> ResolutionState<'a> {
         }
 
         if subpath == "." {
-            // Main export.
+
             match exports.json_value.value_type {
                 packagejson::JsonValueType::String | packagejson::JsonValueType::Array => {
                     return self.load_module_from_target_export_or_import(
@@ -1666,7 +1448,7 @@ impl<'a> ResolutionState<'a> {
         } else if exports.json_value.value_type == packagejson::JsonValueType::Object
             && exports.is_subpaths()
         {
-            // Subpath matching.
+
             return self.load_module_from_exports_or_imports(
                 ext,
                 subpath,
@@ -1678,14 +1460,12 @@ impl<'a> ResolutionState<'a> {
         CONTINUE_SEARCHING
     }
 
-    /// Resolve a `#`-prefixed package imports specifier. Mirrors Go's
-    /// `loadModuleFromImports`.
     fn load_module_from_imports(&mut self) -> Option<Resolved> {
-        // "#" alone is invalid.
+
         if self.name == "#" {
             return CONTINUE_SEARCHING;
         }
-        // "#/foo"-style patterns require the imports-pattern-root feature.
+
         if self.name.starts_with("#/")
             && !self
                 .features
@@ -1694,8 +1474,6 @@ impl<'a> ResolutionState<'a> {
             return CONTINUE_SEARCHING;
         }
 
-        // Find the nearest enclosing package scope (a directory with a
-        // package.json) by walking ancestor directories.
         let directory_path = tspath::get_normalized_absolute_path(
             &self.containing_directory,
             self.current_directory,
@@ -1718,13 +1496,10 @@ impl<'a> ResolutionState<'a> {
             &name,
             &imports.json_value,
             &package_directory,
-            true, // is_imports
+            true,
         )
     }
 
-    /// Resolve a self-name reference (`import x from "mypkg/..."` from
-    /// inside package `mypkg` itself) through the enclosing package.json's
-    /// `exports`. Mirrors Go's `loadModuleFromSelfNameReference`.
     fn load_module_from_self_name_reference(&mut self) -> Option<Resolved> {
         let directory_path = tspath::get_normalized_absolute_path(
             &self.containing_directory,
@@ -1738,8 +1513,7 @@ impl<'a> ResolutionState<'a> {
         let Some(package_name) = fields.header_fields.name.get_value() else {
             return CONTINUE_SEARCHING;
         };
-        // The specifier must begin with the package name (whole path
-        // components); the remainder is the exports subpath.
+
         let parts: Vec<&str> = self.name.split('/').filter(|p| !p.is_empty()).collect();
         let name_parts: Vec<&str> = package_name
             .split('/')
@@ -1757,9 +1531,6 @@ impl<'a> ResolutionState<'a> {
         self.load_module_from_exports(self.extensions, &subpath, &package_directory, exports)
     }
 
-    /// Walk ancestor directories from `directory` upwards to find the
-    /// nearest one containing a `package.json`, returning its directory
-    /// and parsed fields. Mirrors Go's `getPackageScopeForPath`.
     fn get_package_scope_for_path(&self, directory: &str) -> Option<(String, packagejson::Fields)> {
         let mut dir = directory.to_string();
         loop {
@@ -1780,8 +1551,6 @@ impl<'a> ResolutionState<'a> {
         None
     }
 
-    /// Match a subpath against the exports/imports key table.
-    /// Mirrors Go's `loadModuleFromExportsOrImports`.
     fn load_module_from_exports_or_imports(
         &mut self,
         ext: Extensions,
@@ -1792,7 +1561,6 @@ impl<'a> ResolutionState<'a> {
     ) -> Option<Resolved> {
         let entries = lookup_table.as_object();
 
-        // Exact match (no trailing '/', no '*').
         if !module_name.ends_with('/') && !module_name.contains('*') {
             for (key, value) in entries {
                 if key == module_name {
@@ -1809,7 +1577,6 @@ impl<'a> ResolutionState<'a> {
             }
         }
 
-        // Pattern and prefix matching: collect expanding keys.
         let mut expanding_keys: Vec<(&String, &packagejson::JsonValue)> = entries
             .iter()
             .filter(|(k, _)| k.matches('*').count() == 1 || k.ends_with('/'))
@@ -1823,7 +1590,7 @@ impl<'a> ResolutionState<'a> {
                 let prefix = &potential_target[..star_pos];
                 let suffix = &potential_target[star_pos + 1..];
                 if !suffix.is_empty() {
-                    // Pattern with trailer: prefix*suffix
+
                     if module_name.starts_with(prefix)
                         && module_name.ends_with(suffix)
                         && module_name.len() >= prefix.len() + suffix.len()
@@ -1840,7 +1607,7 @@ impl<'a> ResolutionState<'a> {
                         );
                     }
                 } else if module_name.starts_with(prefix) {
-                    // Pattern with * at end: prefix*
+
                     let subpath = &module_name[prefix.len()..];
                     return self.load_module_from_target_export_or_import(
                         ext,
@@ -1855,7 +1622,7 @@ impl<'a> ResolutionState<'a> {
             } else if potential_target.ends_with('/')
                 && module_name.starts_with(potential_target.as_str())
             {
-                // Prefix match (trailing '/').
+
                 let subpath = &module_name[potential_target.len()..];
                 return self.load_module_from_target_export_or_import(
                     ext,
@@ -1871,8 +1638,6 @@ impl<'a> ResolutionState<'a> {
         CONTINUE_SEARCHING
     }
 
-    /// Recursively evaluate a conditional exports/imports target.
-    /// Mirrors Go's `loadModuleFromTargetExportOrImport`.
     fn load_module_from_target_export_or_import(
         &mut self,
         ext: Extensions,
@@ -1883,9 +1648,7 @@ impl<'a> ResolutionState<'a> {
         subpath: &str,
         is_pattern: bool,
     ) -> Option<Resolved> {
-        // Defensive recursion cap for nested conditional objects/arrays
-        // (see `export_target_depth`). String targets terminate through
-        // file lookup, so legitimate exports trees stay far below this.
+
         if self.export_target_depth >= 16 {
             return CONTINUE_SEARCHING;
         }
@@ -1893,17 +1656,14 @@ impl<'a> ResolutionState<'a> {
             packagejson::JsonValueType::String => {
                 let target_string = target.as_string();
 
-                // Non-pattern with subpath requires the target to end with '/'.
                 if !is_pattern && !subpath.is_empty() && !target_string.ends_with('/') {
                     return CONTINUE_SEARCHING;
                 }
 
-                // Exports targets must be relative (./).
                 if !is_imports && !target_string.starts_with("./") {
                     return CONTINUE_SEARCHING;
                 }
 
-                // Reject targets containing ../ or node_modules segments.
                 let parts: Vec<&str> = target_string.split('/').collect();
                 if parts
                     .iter()
@@ -1913,7 +1673,6 @@ impl<'a> ResolutionState<'a> {
                     return CONTINUE_SEARCHING;
                 }
 
-                // Build the resolved path.
                 let final_path = if is_pattern {
                     let resolved_target = target_string.replacen('*', subpath, 1);
                     let combined = tspath::combine_paths(package_directory, &[&resolved_target]);
@@ -1927,15 +1686,11 @@ impl<'a> ResolutionState<'a> {
                     tspath::normalize_path(&combined)
                 };
 
-                // Delegate to extension-aware lookup — do NOT try_file the raw
-                // target, which would match .js files even in TS/DTS-only pass
-                // and prevent the @types fallback from being reached. Mirrors
-                // Go's loadFileNameFromPackageJSONField (resolver.go:1708).
                 self.load_file_name_from_package_json_field(ext, &final_path)
             }
 
             packagejson::JsonValueType::Object => {
-                // Conditional exports: iterate keys in insertion order.
+
                 for (condition, sub_target) in target.as_object() {
                     if self.condition_matches(condition) {
                         self.export_target_depth += 1;
@@ -1958,7 +1713,7 @@ impl<'a> ResolutionState<'a> {
             }
 
             packagejson::JsonValueType::Array => {
-                // Try each element in order.
+
                 for elem in target.as_array() {
                     self.export_target_depth += 1;
                     let result = self.load_module_from_target_export_or_import(
@@ -1982,10 +1737,6 @@ impl<'a> ResolutionState<'a> {
         }
     }
 
-    // ── Result conversion ──────────────────────────────────────────
-
-    /// Convert the internal `Resolved` into a `ResolvedModule`. Mirrors
-    /// Go's `createResolvedModule`.
     fn create_resolved_module(&self, resolved: Option<Resolved>) -> ResolvedModule {
         match resolved {
             Some(r) => {
@@ -2005,12 +1756,8 @@ impl<'a> ResolutionState<'a> {
     }
 }
 
-/// Derive the conditions array for conditional exports/imports resolution.
-/// Mirrors Go's `GetConditions`.
 fn get_conditions(options: &CompilerOptions, resolution_mode: ModuleKind) -> Vec<String> {
-    // Go `GetConditions` (module/resolver.go ~L1923): the resolution mode
-    // picks `import` vs `require` (None defaults to `require` for node
-    // resolution); `types` unless noDtsResolution; `node` unless Bundler.
+
     let mut conditions = Vec::new();
     if resolution_mode == ModuleKind::ESNext {
         conditions.push("import".to_string());
@@ -2023,7 +1770,7 @@ fn get_conditions(options: &CompilerOptions, resolution_mode: ModuleKind) -> Vec
     if options.get_module_resolution_kind() != ModuleResolutionKind::Bundler {
         conditions.push("node".to_string());
     }
-    // Add custom conditions.
+
     for custom in &options.custom_conditions {
         conditions.push(custom.clone());
     }
@@ -2086,7 +1833,7 @@ mod tests {
             ..Default::default()
         });
         cache.set(key.clone(), mod1);
-        cache.set(key.clone(), mod2); // should NOT overwrite
+        cache.set(key.clone(), mod2);
         let result = cache.get(&key).unwrap();
         assert_eq!(result.resolved_file_name, "/foo/bar1.ts");
     }
@@ -2110,7 +1857,7 @@ mod tests {
             ..Default::default()
         });
         cache.set(key.clone(), dir1);
-        cache.set(key.clone(), dir2); // SHOULD overwrite
+        cache.set(key.clone(), dir2);
         let result = cache.get(&key).unwrap();
         assert_eq!(result.resolved_file_name, "/foo/node2.d.ts");
     }
@@ -2120,13 +1867,11 @@ mod tests {
         let opts = CompilerOptions::default();
         let (roots, from_config) = get_effective_type_roots(&opts, "/project/sub");
         assert!(!from_config);
-        // Every ancestor of the base dir contributes a @types root (Go
-        // GetEffectiveTypeRoots walks ancestors, down to "/"):
-        // /project/sub, /project, /.
+
         assert_eq!(roots.len(), 3);
         assert!(roots[0].contains("sub/node_modules/@types"));
         assert!(roots[1].contains("project/node_modules/@types"));
-        // The final ancestor is "/" itself — its root is "/node_modules/@types".
+
         assert_eq!(roots[2], "/node_modules/@types");
     }
 
@@ -2141,10 +1886,7 @@ mod tests {
 
     #[test]
     fn effective_type_roots_base_on_config_file() {
-        // Go GetEffectiveTypeRoots: with a ConfigFilePath the ancestor chain
-        // starts at the config's directory, NOT the host cwd — cwd /src with
-        // the project at /foo/bar still collects /foo/node_modules/@types
-        // (typeRootsFromMultipleNodeModulesDirectories).
+
         let mut opts = CompilerOptions::default();
         opts.config_file_path = "/foo/bar/tsconfig.json".to_string();
         let (roots, from_config) = get_effective_type_roots(&opts, "/src");
@@ -2155,8 +1897,6 @@ mod tests {
         assert_eq!(roots[2], "/node_modules/@types");
     }
 
-    // ── Relative path resolution tests ─────────────────────────────
-
     fn make_state<'a>(
         name: &str,
         containing_dir: &str,
@@ -2166,7 +1906,7 @@ mod tests {
         ResolutionState::new(
             name,
             containing_dir,
-            false, // is_type_reference_directive
+            false,
             ModuleKind::None,
             opts,
             fs,
@@ -2216,7 +1956,7 @@ mod tests {
         use crate::vfs::InMemoryFS;
         let fs = InMemoryFS::new();
         fs.insert_dir("/src");
-        // Import "./foo.js" but only foo.ts exists → should resolve to foo.ts
+
         fs.write_file("/src/foo.ts", "export const x = 1;").unwrap();
 
         let opts = CompilerOptions::default();
@@ -2256,8 +1996,6 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // ── Exports-target recursion bound (ISSUES_RISK_ANALYSIS Issue 4) ──
-
     #[test]
     fn exports_target_nesting_bounded() {
         use crate::vfs::InMemoryFS;
@@ -2268,8 +2006,6 @@ mod tests {
 
         let opts = CompilerOptions::default();
 
-        // A shallow conditional-exports tree resolves normally (the
-        // `default` condition always matches).
         let shallow = r#"{"name": "pkg", "exports": {"default": {"default": "./index.ts"}}}"#;
         let fields = packagejson::parse(shallow).unwrap();
         let mut state = make_state("pkg", "/src", &opts, &fs);
@@ -2281,9 +2017,6 @@ mod tests {
         );
         assert_eq!(resolved.unwrap().path, "/node_modules/pkg/index.ts");
 
-        // A pathological nesting depth (30 levels of conditional objects,
-        // far beyond any real package.json) gives up at the cap instead
-        // of recursing without bound.
         let mut target = r#""./index.ts""#.to_string();
         for _ in 0..30 {
             target = format!(r#"{{"default": {target}}}"#);
@@ -2304,7 +2037,6 @@ mod tests {
     fn resolve_relative_parent_dir_not_exists() {
         use crate::vfs::InMemoryFS;
         let fs = InMemoryFS::new();
-        // No directory created at all.
 
         let opts = CompilerOptions::default();
         let mut state = make_state("./foo", "/nonexistent", &opts, &fs);
@@ -2326,8 +2058,6 @@ mod tests {
         let result = ResolutionState::normalize_path_for_cjs_resolution("/src", "..");
         assert!(tspath::has_trailing_directory_separator(&result));
     }
-
-    // ── Bare specifier (node_modules) resolution tests ─────────────
 
     #[test]
     fn resolve_bare_specifier_node_modules() {
@@ -2434,15 +2164,9 @@ mod tests {
         assert!(result.resolved_file_name.is_empty());
     }
 
-    /// node16 conditions select require OR import by resolution mode —
-    /// never both (Go GetConditions; the both-conditions approximation
-    /// made exports key order decide, breaking mode-specific resolution).
     #[test]
     fn node16_conditions_follow_resolution_mode() {
-        // NOTE: with CompilerOptions::default() the effective resolution
-        // kind is Bundler (module unset → inferred, Go GetModuleResolution
-        // L223), and Bundler carries NO "node" condition — configure
-        // node16 explicitly for the node-condition assertions.
+
         let mut opts = CompilerOptions::default();
         opts.module_resolution = ModuleResolutionKind::Node16;
         let require = get_conditions(&opts, ModuleKind::CommonJS);
@@ -2451,17 +2175,13 @@ mod tests {
         let import = get_conditions(&opts, ModuleKind::ESNext);
         assert!(import.contains(&"import".to_string()));
         assert!(!import.contains(&"require".to_string()));
-        // Both carry node + types.
+
         for c in [&require, &import] {
             assert!(c.contains(&"node".to_string()));
             assert!(c.contains(&"types".to_string()));
         }
     }
 
-    /// A node16 package whose exports split import/require resolves
-    /// through the FILE's implied format: a CJS-format file (nearest
-    /// package.json "type": "commonjs") gets require.js, an ESM-format
-    /// file gets import.js.
     #[test]
     fn node16_exports_condition_by_file_format() {
         use crate::vfs::InMemoryFS;
@@ -2485,8 +2205,7 @@ mod tests {
 
         let mut opts = CompilerOptions::default();
         opts.module_resolution = ModuleResolutionKind::Node16;
-        // The default mode derives from the referencing FILE's implied
-        // format (root package.json "module" → ESM here).
+
         assert_eq!(
             default_resolution_mode(ModuleKind::None, &opts, "/proj/index.ts", &fs),
             ModuleKind::ESNext
@@ -2495,7 +2214,7 @@ mod tests {
             default_resolution_mode(ModuleKind::None, &opts, "/proj/sub/index.ts", &fs),
             ModuleKind::CommonJS
         );
-        // ESM-format file (root package.json "module").
+
         let esm = ResolutionState::new(
             "pkg",
             "/proj",
@@ -2508,7 +2227,7 @@ mod tests {
         let r = esm.resolve_node_like();
         assert!(r.is_resolved(), "esm resolve");
         assert!(r.resolved_file_name.ends_with("import.d.ts"), "{}", r.resolved_file_name);
-        // CJS-format file (sub/package.json "commonjs").
+
         let cjs = ResolutionState::new(
             "pkg",
             "/proj/sub",
@@ -2523,8 +2242,6 @@ mod tests {
         assert!(r.resolved_file_name.ends_with("require.d.ts"), "{}", r.resolved_file_name);
     }
 
-    /// The implied node format walks ancestor package.json files
-    /// (extension first, then nearest "type" field).
     #[test]
     fn implied_format_from_package_json_chain() {
         use crate::core::compiler_options::ModuleKind;
@@ -2547,8 +2264,7 @@ mod tests {
             crate::compiler::implied_node_format_of_file("/a/b/x.cts", &read),
             ModuleKind::CommonJS
         );
-        // node_modules directories never contribute a package.json scope
-        // for the walk — /a/node_modules/x.ts still sees /a's "module".
+
         assert_eq!(
             crate::compiler::implied_node_format_of_file("/a/node_modules/x.ts", &read),
             ModuleKind::ESNext
@@ -2578,8 +2294,6 @@ mod tests {
             "/src/node_modules/@types/foo/index.d.ts"
         );
     }
-
-    // ── paths / rootDirs resolution tests ──────────────────────────
 
     #[test]
     fn resolve_paths_exact_match() {
@@ -2668,8 +2382,6 @@ mod tests {
         let mut opts = CompilerOptions::default();
         opts.root_dirs = vec!["/src/generated".to_string(), "/src/manual".to_string()];
 
-        // Import "./shared" from a file in /src/generated — should find
-        // /src/manual/shared.ts via rootDirs.
         let state = ResolutionState::new(
             "./shared",
             "/src/generated",
@@ -2700,12 +2412,9 @@ mod tests {
         let p = Pattern::try_parse("*");
         assert!(p.is_valid());
 
-        // Two stars → invalid
         let p = Pattern::try_parse("foo*bar*baz");
         assert!(!p.is_valid());
     }
-
-    // ── Exports field resolution tests ────────────────────────────
 
     #[test]
     fn resolve_exports_string_main() {
@@ -2769,7 +2478,7 @@ mod tests {
         let state =
             ResolutionState::new("mypkg", "/src", false, ModuleKind::None, &opts, &fs, "/src");
         let result = state.resolve_node_like();
-        // With default conditions (which include "types"), should resolve to .d.ts
+
         assert!(
             result.is_resolved(),
             "expected resolved, got {:?}",
@@ -2821,8 +2530,6 @@ mod tests {
             "/src/node_modules/mypkg/dist/feature.js"
         );
     }
-
-    // ── Package imports ("#"-prefixed) resolution tests ───────────
 
     #[test]
     fn resolve_package_imports_exact() {
@@ -2927,8 +2634,7 @@ mod tests {
             .unwrap();
 
         let opts = CompilerOptions::default();
-        // Resolving from a subdirectory should still find the package scope
-        // at /src by walking up the ancestor directories.
+
         let state = ResolutionState::new(
             "#utils",
             "/src/sub",
@@ -2946,8 +2652,6 @@ mod tests {
         );
         assert_eq!(result.resolved_file_name, "/src/lib/utils.js");
     }
-
-    // ── typesVersions resolution tests ────────────────────────────
 
     #[test]
     fn resolve_types_versions_redirect() {
@@ -2977,8 +2681,7 @@ mod tests {
             "expected resolved, got {:?}",
             result.resolved_file_name
         );
-        // typesVersions must redirect to ./new/index.d.ts, NOT the
-        // package.json "types" entry (./old/index.d.ts).
+
         assert_eq!(
             result.resolved_file_name,
             "/src/node_modules/foo/new/index.d.ts"
@@ -2994,8 +2697,7 @@ mod tests {
         fs.insert_dir("/src/node_modules/foo");
         fs.write_file(
             "/src/node_modules/foo/package.json",
-            // The single version entry maps "bar" only; the root import
-            // does not match "bar", so the "types" entry should win.
+
             r#"{"name":"foo","types":"./index.d.ts","typesVersions":{"*":{"bar":["./other/bar.d.ts"]}}}"#,
         )
         .unwrap();

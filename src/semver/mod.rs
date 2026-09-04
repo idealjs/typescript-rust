@@ -1,13 +1,6 @@
-//! Semantic versioning, ported from `internal/semver/`.
-//!
-//! Implements semver parsing, comparison, and version range matching
-//! following the [semver.org](https://semver.org) specification and
-//! [npm node-semver](https://github.com/npm/node-semver#range-grammar) range grammar.
-
 use std::cmp::Ordering;
 use std::fmt;
 
-/// A semantic version.
 #[derive(Clone, Debug, Default, PartialEq, Eq)]
 pub struct Version {
     pub major: u32,
@@ -40,7 +33,6 @@ impl Version {
         Version::new(self.major, self.minor, self.patch + 1)
     }
 
-    /// Compare two versions according to semver precedence rules.
     pub fn compare(&self, other: &Version) -> Ordering {
         match self.major.cmp(&other.major) {
             Ordering::Equal => {}
@@ -120,7 +112,7 @@ fn compare_prerelease_identifier(left: &str, right: &str) -> Ordering {
         }
         return match (left.parse::<u64>(), right.parse::<u64>()) {
             (Ok(left_num), Ok(right_num)) => left_num.cmp(&right_num),
-            // On overflow, compare by length, then fall back to string comparison.
+
             _ => match left.len().cmp(&right.len()) {
                 Ordering::Equal => string_cmp,
                 len_cmp => len_cmp,
@@ -135,7 +127,6 @@ fn is_numeric_identifier(s: &str) -> bool {
     !s.is_empty() && s.chars().all(|c| c.is_ascii_digit()) && (s == "0" || !s.starts_with('0'))
 }
 
-/// Error returned when version parsing fails.
 #[derive(Debug, Clone)]
 pub struct SemverParseError {
     pub input: String,
@@ -149,12 +140,10 @@ impl fmt::Display for SemverParseError {
 
 impl std::error::Error for SemverParseError {}
 
-/// Try to parse a version string.
 pub fn try_parse_version(text: &str) -> Result<Version, SemverParseError> {
     parse_version(text)
 }
 
-/// Parse a version string, panicking on failure.
 pub fn must_parse(text: &str) -> Version {
     try_parse_version(text).unwrap_or_else(|e| panic!("{}", e))
 }
@@ -162,7 +151,6 @@ pub fn must_parse(text: &str) -> Version {
 fn parse_version(text: &str) -> Result<Version, SemverParseError> {
     let input: &str = text;
 
-    // Parse major
     let (major_str, rest) = match input.find(|c: char| !c.is_ascii_digit()) {
         Some(0) => {
             return Err(SemverParseError {
@@ -300,11 +288,6 @@ fn is_valid_build(s: &str) -> bool {
         .all(|part| !part.is_empty() && part.chars().all(|c| c.is_ascii_alphanumeric() || c == '-'))
 }
 
-// ─────────────────────────────────────────────────────────────────────
-// Version ranges
-// ─────────────────────────────────────────────────────────────────────
-
-/// A version range, following npm's node-semver range grammar.
 #[derive(Clone, Debug, Default)]
 pub struct VersionRange {
     alternatives: Vec<Vec<VersionComparator>>,
@@ -326,7 +309,7 @@ enum ComparatorOperator {
 }
 
 impl VersionRange {
-    /// Test whether a version satisfies this range.
+
     pub fn test(&self, version: &Version) -> bool {
         if self.alternatives.is_empty() {
             return true;
@@ -375,7 +358,6 @@ impl fmt::Display for VersionRange {
     }
 }
 
-/// Try to parse a version range string.
 pub fn try_parse_version_range(text: &str) -> Option<VersionRange> {
     parse_alternatives(text).map(|alts| VersionRange { alternatives: alts })
 }
@@ -393,7 +375,6 @@ fn parse_alternatives(text: &str) -> Option<Vec<Vec<VersionComparator>>> {
             continue;
         }
 
-        // Check for hyphen range: "partial - partial"
         if let Some((left, right)) = parse_hyphen(range) {
             let (left_p, right_p) = (parse_partial(&left)?, parse_partial(&right)?);
             alternatives.push(parse_hyphen_comparators(&left_p, &right_p)?);
@@ -412,7 +393,7 @@ fn parse_alternatives(text: &str) -> Option<Vec<Vec<VersionComparator>>> {
 }
 
 fn parse_hyphen(text: &str) -> Option<(String, String)> {
-    // Match "partial - partial"
+
     let parts: Vec<&str> = text.splitn(3, ' ').collect();
     if parts.len() == 3 && parts[1] == "-" {
         return Some((parts[0].to_string(), parts[2].to_string()));
@@ -534,7 +515,7 @@ fn parse_partial(text: &str) -> Option<PartialVersion> {
 }
 
 fn split_partial(text: &str) -> (String, String, String) {
-    // Split "major.minor.patch-pre+build" into (core, prerelease, build).
+
     let (before_build, build) = match text.find('+') {
         Some(pos) => (text[..pos].to_string(), text[pos + 1..].to_string()),
         None => (text.to_string(), String::new()),
@@ -831,18 +812,12 @@ mod tests {
         assert!(!range.test(&try_parse_version("2.0.0").unwrap()));
     }
 
-    // ─────────────────────────────────────────────────────────────────
-    // Ported from Go internal/semver/version_test.go & version_range_test.go
-    // ─────────────────────────────────────────────────────────────────
-
     use std::cmp::Ordering;
 
-    // Mirrors Go's comparisonLessThan / comparisonEqualTo / comparisonGreaterThan.
     const LT: Ordering = Ordering::Less;
     const EQ: Ordering = Ordering::Equal;
     const GT: Ordering = Ordering::Greater;
 
-    // Ported from TestTryParseSemver
     #[test]
     fn test_try_parse_semver() {
         let tests: &[(&str, Version)] = &[
@@ -898,7 +873,6 @@ mod tests {
         }
     }
 
-    // Ported from TestVersionString
     #[test]
     fn test_version_string() {
         let tests: &[(Version, &str)] = &[
@@ -968,11 +942,10 @@ mod tests {
         }
     }
 
-    // Ported from TestVersionCompare
     #[test]
     fn test_version_compare() {
         let tests: &[(&str, &str, Ordering)] = &[
-            // Major, minor, patch compared numerically
+
             ("1.0.0", "2.0.0", LT),
             ("1.0.0", "1.1.0", LT),
             ("1.0.0", "1.0.1", LT),
@@ -980,41 +953,41 @@ mod tests {
             ("1.1.0", "1.0.0", GT),
             ("1.0.1", "1.0.0", GT),
             ("1.0.0", "1.0.0", EQ),
-            // Pre-release has lower precedence than normal
+
             ("1.0.0", "1.0.0-pre", GT),
             ("1.0.1-pre", "1.0.0", GT),
             ("1.0.0-pre", "1.0.0", LT),
-            // Numeric identifiers compared numerically
+
             ("1.0.0-0", "1.0.0-1", LT),
             ("1.0.0-1", "1.0.0-0", GT),
             ("1.0.0-2", "1.0.0-10", LT),
             ("1.0.0-10", "1.0.0-2", GT),
             ("1.0.0-0", "1.0.0-0", EQ),
-            // Letters/hyphens compared lexically in ASCII sort order
+
             ("1.0.0-a", "1.0.0-b", LT),
             ("1.0.0-a-2", "1.0.0-a-10", GT),
             ("1.0.0-b", "1.0.0-a", GT),
             ("1.0.0-a", "1.0.0-a", EQ),
             ("1.0.0-A", "1.0.0-a", LT),
-            // Numeric always lower precedence than non-numeric
+
             ("1.0.0-0", "1.0.0-alpha", LT),
             ("1.0.0-alpha", "1.0.0-0", GT),
             ("1.0.0-0", "1.0.0-0", EQ),
             ("1.0.0-alpha", "1.0.0-alpha", EQ),
-            // Larger set of pre-release fields has higher precedence
+
             ("1.0.0-alpha", "1.0.0-alpha.0", LT),
             ("1.0.0-alpha.0", "1.0.0-alpha", GT),
-            // Compare dot-separated identifiers left to right
+
             ("1.0.0-a.0.b.1", "1.0.0-a.0.b.2", LT),
             ("1.0.0-a.0.b.1", "1.0.0-b.0.a.1", LT),
             ("1.0.0-a.0.b.2", "1.0.0-a.0.b.1", GT),
             ("1.0.0-b.0.a.1", "1.0.0-a.0.b.1", GT),
-            // Build metadata does not figure into precedence
+
             ("1.0.0+build", "1.0.0", EQ),
             ("1.0.0+build.stuff", "1.0.0", EQ),
             ("1.0.0", "1.0.0+build", EQ),
             ("1.0.0+build", "1.0.0+stuff", EQ),
-            // Edge cases for numeric and lexical comparison
+
             ("1.0.0-alpha.99999", "1.0.0-alpha.100000", LT),
             ("1.0.0-alpha.beta", "1.0.0-alpha.alpha", GT),
         ];
@@ -1025,7 +998,6 @@ mod tests {
         }
     }
 
-    // Helper for TestVersionRanges
     fn assert_ranges_good_bad(version_range_string: &str, good: &[&str], bad: &[&str]) {
         let version_range = try_parse_version_range(version_range_string)
             .unwrap_or_else(|| panic!("TryParseVersionRange({:?}) failed", version_range_string));
@@ -1049,7 +1021,6 @@ mod tests {
         }
     }
 
-    // Helper for comparator/conjunction/disjunction/hyphen/tilde/caret tests
     fn assert_range_test(name: &str, range_text: &str, version_text: &str, in_range: bool) {
         let version_range = try_parse_version_range(range_text)
             .unwrap_or_else(|| panic!("TryParseVersionRange({:?}) failed", range_text));
@@ -1066,7 +1037,6 @@ mod tests {
         );
     }
 
-    // Ported from TestWildcardsHaveSameString
     #[test]
     fn test_wildcards_have_same_string() {
         fn assert_all_identical(name: &str, strs: &[&str]) {
@@ -1092,7 +1062,6 @@ mod tests {
         assert_all_identical("mixedCaseWildcardStrings", &mixed);
     }
 
-    // Ported from TestVersionRanges
     #[test]
     fn test_version_ranges() {
         assert_ranges_good_bad(
@@ -1130,7 +1099,6 @@ mod tests {
         assert_ranges_good_bad("<3.8.0-0", &["3.6", "3.7"], &["3.8", "3.9", "4.0"]);
         assert_ranges_good_bad("<=3.8.0-0", &["3.6", "3.7"], &["3.8", "3.9", "4.0"]);
 
-        // Big numbers in prerelease strings.
         let lotsa_ones = "1".repeat(320);
         let range_str = format!(">=1.2.3-1{}", lotsa_ones);
         let g0 = format!("1.2.3-1{}", lotsa_ones);
@@ -1140,11 +1108,10 @@ mod tests {
         assert_ranges_good_bad(&range_str, &[&g0, &g1, &g2], &[&b0]);
     }
 
-    // Ported from TestComparatorsOfVersionRanges
     #[test]
     fn test_comparators_of_version_ranges() {
         let tests: &[(&str, &str, bool)] = &[
-            // empty (matches everything)
+
             ("", "2.0.0", true),
             ("", "2.0.0-0", true),
             ("", "1.1.0", true),
@@ -1155,7 +1122,7 @@ mod tests {
             ("", "1.0.0-0", true),
             ("", "0.0.0", true),
             ("", "0.0.0-0", true),
-            // wildcard major (matches everything)
+
             ("*", "2.0.0", true),
             ("*", "2.0.0-0", true),
             ("*", "1.1.0", true),
@@ -1166,7 +1133,7 @@ mod tests {
             ("*", "1.0.0-0", true),
             ("*", "0.0.0", true),
             ("*", "0.0.0-0", true),
-            // wildcard minor
+
             ("1", "2.0.0", false),
             ("1", "2.0.0-0", false),
             ("1", "1.1.0", true),
@@ -1177,7 +1144,7 @@ mod tests {
             ("1", "1.0.0-0", true),
             ("1", "0.0.0", false),
             ("1", "0.0.0-0", false),
-            // wildcard patch
+
             ("1.1", "2.0.0", false),
             ("1.1", "2.0.0-0", false),
             ("1.1", "1.1.0", true),
@@ -1198,7 +1165,7 @@ mod tests {
             ("1.0", "1.0.0-0", true),
             ("1.0", "0.0.0", false),
             ("1.0", "0.0.0-0", false),
-            // exact
+
             ("1.1.0", "2.0.0", false),
             ("1.1.0", "2.0.0-0", false),
             ("1.1.0", "1.1.0", true),
@@ -1257,7 +1224,7 @@ mod tests {
             ("1.0.0-0", "1.0.1-0", false),
             ("1.0.0-0", "1.0.0", false),
             ("1.0.0-0", "1.0.0-0", true),
-            // = wildcard major (matches everything)
+
             ("=*", "2.0.0", true),
             ("=*", "2.0.0-0", true),
             ("=*", "1.1.0", true),
@@ -1268,7 +1235,7 @@ mod tests {
             ("=*", "1.0.0-0", true),
             ("=*", "0.0.0", true),
             ("=*", "0.0.0-0", true),
-            // = wildcard minor
+
             ("=1", "2.0.0", false),
             ("=1", "2.0.0-0", false),
             ("=1", "1.1.0", true),
@@ -1279,7 +1246,7 @@ mod tests {
             ("=1", "1.0.0-0", true),
             ("=1", "0.0.0", false),
             ("=1", "0.0.0-0", false),
-            // = wildcard patch
+
             ("=1.1", "2.0.0", false),
             ("=1.1", "2.0.0-0", false),
             ("=1.1", "1.1.0", true),
@@ -1300,7 +1267,7 @@ mod tests {
             ("=1.0", "1.0.0-0", true),
             ("=1.0", "0.0.0", false),
             ("=1.0", "0.0.0-0", false),
-            // = exact
+
             ("=1.1.0", "2.0.0", false),
             ("=1.1.0", "2.0.0-0", false),
             ("=1.1.0", "1.1.0", true),
@@ -1359,7 +1326,7 @@ mod tests {
             ("=1.0.0-0", "1.0.1-0", false),
             ("=1.0.0-0", "1.0.0", false),
             ("=1.0.0-0", "1.0.0-0", true),
-            // > wildcard major (matches nothing)
+
             (">*", "2.0.0", false),
             (">*", "2.0.0-0", false),
             (">*", "1.1.0", false),
@@ -1370,7 +1337,7 @@ mod tests {
             (">*", "1.0.0-0", false),
             (">*", "0.0.0", false),
             (">*", "0.0.0-0", false),
-            // > wildcard minor
+
             (">1", "2.0.0", true),
             (">1", "2.0.0-0", true),
             (">1", "1.1.0", false),
@@ -1381,7 +1348,7 @@ mod tests {
             (">1", "1.0.0-0", false),
             (">1", "0.0.0", false),
             (">1", "0.0.0-0", false),
-            // > wildcard patch
+
             (">1.1", "2.0.0", true),
             (">1.1", "2.0.0-0", true),
             (">1.1", "1.1.0", false),
@@ -1402,7 +1369,7 @@ mod tests {
             (">1.0", "1.0.0-0", false),
             (">1.0", "0.0.0", false),
             (">1.0", "0.0.0-0", false),
-            // > exact
+
             (">1.1.0", "2.0.0", true),
             (">1.1.0", "2.0.0-0", true),
             (">1.1.0", "1.1.0", false),
@@ -1463,7 +1430,7 @@ mod tests {
             (">1.0.0-0", "1.0.0-0", false),
             (">1.0.0-0", "0.0.0", false),
             (">1.0.0-0", "0.0.0-0", false),
-            // >= wildcard major (matches everything)
+
             (">=*", "2.0.0", true),
             (">=*", "2.0.0-0", true),
             (">=*", "1.1.0", true),
@@ -1474,7 +1441,7 @@ mod tests {
             (">=*", "1.0.0-0", true),
             (">=*", "0.0.0", true),
             (">=*", "0.0.0-0", true),
-            // >= wildcard minor
+
             (">=1", "2.0.0", true),
             (">=1", "2.0.0-0", true),
             (">=1", "1.1.0", true),
@@ -1485,7 +1452,7 @@ mod tests {
             (">=1", "1.0.0-0", true),
             (">=1", "0.0.0", false),
             (">=1", "0.0.0-0", false),
-            // >= wildcard patch
+
             (">=1.1", "2.0.0", true),
             (">=1.1", "2.0.0-0", true),
             (">=1.1", "1.1.0", true),
@@ -1506,7 +1473,7 @@ mod tests {
             (">=1.0", "1.0.0-0", true),
             (">=1.0", "0.0.0", false),
             (">=1.0", "0.0.0-0", false),
-            // >= exact
+
             (">=1.1.0", "2.0.0", true),
             (">=1.1.0", "2.0.0-0", true),
             (">=1.1.0", "1.1.0", true),
@@ -1567,7 +1534,7 @@ mod tests {
             (">=1.0.0-0", "1.0.0-0", true),
             (">=1.0.0-0", "0.0.0", false),
             (">=1.0.0-0", "0.0.0-0", false),
-            // < wildcard major (matches nothing)
+
             ("<*", "2.0.0", false),
             ("<*", "2.0.0-0", false),
             ("<*", "1.1.0", false),
@@ -1578,7 +1545,7 @@ mod tests {
             ("<*", "1.0.0-0", false),
             ("<*", "0.0.0", false),
             ("<*", "0.0.0-0", false),
-            // < wildcard minor
+
             ("<1", "2.0.0", false),
             ("<1", "2.0.0-0", false),
             ("<1", "1.1.0", false),
@@ -1589,7 +1556,7 @@ mod tests {
             ("<1", "1.0.0-0", false),
             ("<1", "0.0.0", true),
             ("<1", "0.0.0-0", true),
-            // < wildcard patch
+
             ("<1.1", "2.0.0", false),
             ("<1.1", "2.0.0-0", false),
             ("<1.1", "1.1.0", false),
@@ -1610,7 +1577,7 @@ mod tests {
             ("<1.0", "1.0.0-0", false),
             ("<1.0", "0.0.0", true),
             ("<1.0", "0.0.0-0", true),
-            // < exact
+
             ("<1.1.0", "2.0.0", false),
             ("<1.1.0", "2.0.0-0", false),
             ("<1.1.0", "1.1.0", false),
@@ -1671,7 +1638,7 @@ mod tests {
             ("<1.0.0-0", "1.0.0-0", false),
             ("<1.0.0-0", "0.0.0", true),
             ("<1.0.0-0", "0.0.0-0", true),
-            // <= wildcard major (matches everything)
+
             ("<=*", "2.0.0", true),
             ("<=*", "2.0.0-0", true),
             ("<=*", "1.1.0", true),
@@ -1682,7 +1649,7 @@ mod tests {
             ("<=*", "1.0.0-0", true),
             ("<=*", "0.0.0", true),
             ("<=*", "0.0.0-0", true),
-            // <= wildcard minor
+
             ("<=1", "2.0.0", false),
             ("<=1", "2.0.0-0", false),
             ("<=1", "1.1.0", true),
@@ -1693,7 +1660,7 @@ mod tests {
             ("<=1", "1.0.0-0", true),
             ("<=1", "0.0.0", true),
             ("<=1", "0.0.0-0", true),
-            // <= wildcard patch
+
             ("<=1.1", "2.0.0", false),
             ("<=1.1", "2.0.0-0", false),
             ("<=1.1", "1.1.0", true),
@@ -1714,7 +1681,7 @@ mod tests {
             ("<=1.0", "1.0.0-0", true),
             ("<=1.0", "0.0.0", true),
             ("<=1.0", "0.0.0-0", true),
-            // <= exact
+
             ("<=1.1.0", "2.0.0", false),
             ("<=1.1.0", "2.0.0-0", false),
             ("<=1.1.0", "1.1.0", true),
@@ -1775,7 +1742,7 @@ mod tests {
             ("<=1.0.0-0", "1.0.0-0", true),
             ("<=1.0.0-0", "0.0.0", true),
             ("<=1.0.0-0", "0.0.0-0", true),
-            // https://github.com/microsoft/TypeScript/issues/50909
+
             (">4.8", "4.9.0-beta", true),
             (">=4.9", "4.9.0-beta", true),
             ("<4.9", "4.9.0-beta", false),
@@ -1786,7 +1753,6 @@ mod tests {
         }
     }
 
-    // Ported from TestConjunctionsOfVersionRanges
     #[test]
     fn test_conjunctions_of_version_ranges() {
         let tests: &[(&str, &str, bool)] = &[
@@ -1800,7 +1766,6 @@ mod tests {
         }
     }
 
-    // Ported from TestDisjunctionsOfVersionRanges
     #[test]
     fn test_disjunctions_of_version_ranges() {
         let tests: &[(&str, &str, bool)] = &[
@@ -1817,7 +1782,6 @@ mod tests {
         }
     }
 
-    // Ported from TestHyphensOfVersionRanges
     #[test]
     fn test_hyphens_of_version_ranges() {
         let tests: &[(&str, &str, bool)] = &[
@@ -1833,7 +1797,6 @@ mod tests {
         }
     }
 
-    // Ported from TestTildesOfVersionRanges
     #[test]
     fn test_tildes_of_version_ranges() {
         let tests: &[(&str, &str, bool)] = &[
@@ -1870,7 +1833,6 @@ mod tests {
         }
     }
 
-    // Ported from TestCaretsOfVersionRanges
     #[test]
     fn test_carets_of_version_ranges() {
         let tests: &[(&str, &str, bool)] = &[

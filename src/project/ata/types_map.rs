@@ -1,8 +1,3 @@
-//! Type-safe file name to type name mapping (1:1 port of Go's `internal/project/ata/typesmap.go`).
-
-/// A map from safe file names to their corresponding type package names.
-///
-/// Mirrors `ata.safeFileNameToTypeName` in Go.
 pub fn safe_file_name_to_type_name() -> &'static [(&'static str, &'static str)] {
     &[
         ("accounting", "accounting"),
@@ -467,7 +462,6 @@ pub fn safe_file_name_to_type_name() -> &'static [(&'static str, &'static str)] 
     ]
 }
 
-/// Looks up the type name for a given file name.
 pub fn lookup_type_name(file_name: &str) -> Option<&'static str> {
     safe_file_name_to_type_name()
         .iter()

@@ -1,48 +1,35 @@
-//! LSP-compliant glob pattern matching, ported from `internal/glob/glob.go`.
-//!
-//! Supports:
-//! - `*` to match one or more characters in a path segment
-//! - `?` to match on one character in a path segment
-//! - `**` to match any number of path segments, including none
-//! - `{}` to group sub patterns into an OR expression
-//! - `[]` to declare a range of characters to match in a path segment
-//! - `[!...]` to negate a range of characters
-
 use std::fmt;
 
-/// A parsed glob pattern.
 #[derive(Clone, Debug)]
 pub struct Glob {
     elems: Vec<Element>,
 }
 
-/// Glob pattern element types.
 #[derive(Clone, Debug)]
 enum Element {
-    /// One or more `/` separators
+
     Slash,
-    /// String literal
+
     Literal(String),
-    /// `*` - match within a segment
+
     Star,
-    /// `?` - match one character
+
     AnyChar,
-    /// `**` - match any number of path segments
+
     StarStar,
-    /// `{foo,bar,...}` grouping
+
     Group(Vec<Glob>),
-    /// `[a-z]` character range
+
     CharRange { negate: bool, low: char, high: char },
 }
 
 impl Glob {
-    /// Parse a glob pattern. Returns an error if the pattern is invalid.
+
     pub fn parse(pattern: &str) -> Result<Glob, String> {
         let (g, _rest) = parse_inner(pattern, false)?;
         Ok(g)
     }
 
-    /// Check whether the input string matches the glob pattern.
     pub fn is_match(&self, input: &str) -> bool {
         match_elements(&self.elems, input)
     }
@@ -95,7 +82,7 @@ fn parse_inner(pattern: &str, nested: bool) -> Result<(Glob, &str), String> {
             '*' => {
                 chars.next();
                 if chars.peek().map(|&(_, c)| c) == Some('*') {
-                    // Check adjacency to '/'
+
                     let last_is_slash = elems.last().map_or(false, |e| matches!(e, Element::Slash));
                     let next_after_starstar = pattern.as_bytes().get(idx + 2).copied();
                     if !last_is_slash
@@ -141,10 +128,10 @@ fn parse_inner(pattern: &str, nested: bool) -> Result<(Glob, &str), String> {
                         return Err("unmatched '{'".to_string());
                     }
                 }
-                // Continue parsing from the remaining text after the group.
-                let _ = bytes; // suppress unused warning
+
+                let _ = bytes;
                 elems.push(Element::Group(group));
-                // Re-parse from rest
+
                 let (inner, remaining) = parse_inner(rest, nested)?;
                 elems.extend(inner.elems);
                 return Ok((Glob { elems }, remaining));
@@ -180,12 +167,12 @@ fn parse_inner(pattern: &str, nested: bool) -> Result<(Glob, &str), String> {
                 }
                 let remaining = &after_high[1..];
                 elems.push(Element::CharRange { negate, low, high });
-                // Reset chars iterator
+
                 let consumed = pattern.len() - remaining.len();
                 chars = pattern[consumed..].char_indices().peekable();
             }
             _ => {
-                // Parse literal until we hit a special character
+
                 let special: &[char] = if nested {
                     &['*', '?', '{', '[', '/', '}', ',']
                 } else {
@@ -203,7 +190,7 @@ fn parse_inner(pattern: &str, nested: bool) -> Result<(Glob, &str), String> {
                 if end > start {
                     elems.push(Element::Literal(pattern[start..end].to_string()));
                 } else {
-                    // Shouldn't happen, but advance to avoid infinite loop
+
                     chars.next();
                 }
             }
@@ -229,15 +216,15 @@ fn match_elements(elems: &[Element], input: &str) -> bool {
                 }
             }
             Element::StarStar => {
-                // ** followed by anything must be '/' (enforced by parse)
+
                 if !elems.is_empty() {
                     elems.remove(0);
                 }
-                // Trailing ** matches anything
+
                 if elems.is_empty() {
                     return true;
                 }
-                // Backtracking: advance input segments until remaining pattern matches
+
                 while !input.is_empty() {
                     if match_elements(&elems, &input) {
                         return true;
@@ -258,7 +245,7 @@ fn match_elements(elems: &[Element], input: &str) -> bool {
             }
             Element::Star => {
                 let (seg_input, rest) = split(&input);
-                // Find the end of this segment's pattern elements (up to next Slash)
+
                 let mut elem_end = elems.len();
                 for (i, e) in elems.iter().enumerate() {
                     if matches!(e, Element::Slash) {
@@ -268,13 +255,11 @@ fn match_elements(elems: &[Element], input: &str) -> bool {
                 }
                 let seg_elems: Vec<Element> = elems.drain(..elem_end).collect();
 
-                // Trailing * matches the entire segment
                 if seg_elems.is_empty() {
                     input = rest.to_string();
                     continue;
                 }
 
-                // Backtracking: advance characters until remaining subpattern matches
                 let mut matched = false;
                 for i in 0..=seg_input.len() {
                     if match_elements(&seg_elems, &seg_input[i..]) {
@@ -294,7 +279,7 @@ fn match_elements(elems: &[Element], input: &str) -> bool {
                 input = input[1..].to_string();
             }
             Element::Group(gs) => {
-                // Append remaining elements to each group member
+
                 for g in gs {
                     let mut branch = g.elems.clone();
                     branch.extend(elems.clone());
@@ -321,15 +306,13 @@ fn match_elements(elems: &[Element], input: &str) -> bool {
     input.is_empty()
 }
 
-/// Split input at the first `/`, returning (before, after).
-/// If no slash, returns (input, "").
 fn split(input: &str) -> (&str, &str) {
     match input.find('/') {
         None => (input, ""),
         Some(i) => {
             let first = &input[..i];
             let after = &input[i..];
-            // Skip consecutive slashes
+
             let rest_start = after.bytes().position(|b| b != b'/').unwrap_or(after.len());
             (first, &after[rest_start..])
         }

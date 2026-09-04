@@ -1,16 +1,6 @@
-//! Unicode property data for regex `\p{...}` / `\P{...}` validation.
-//!
-//! Ported from `internal/scanner/unicodeproperties.go`. Contains:
-//! - `NON_BINARY_UNICODE_PROPERTIES`: aliases → canonical names (Table 66)
-//! - `BINARY_UNICODE_PROPERTIES`: set of binary property names (Table 67)
-//! - `BINARY_UNICODE_PROPERTIES_OF_STRINGS`: set of strings-of-strings (Table 68)
-//! - `VALUES_OF_NON_BINARY_UNICODE_PROPERTIES`: property name → valid values
-
 use std::collections::HashSet;
 use std::sync::LazyLock;
 
-/// Table 66: Non-binary Unicode property aliases and their canonical names.
-/// <https://tc39.es/ecma262/#table-nonbinary-unicode-properties>
 pub static NON_BINARY_UNICODE_PROPERTIES: LazyLock<Vec<(&'static str, &'static str)>> =
     LazyLock::new(|| {
         vec![
@@ -23,8 +13,6 @@ pub static NON_BINARY_UNICODE_PROPERTIES: LazyLock<Vec<(&'static str, &'static s
         ]
     });
 
-/// Table 67: Binary Unicode property names (including aliases).
-/// <https://tc39.es/ecma262/#table-binary-unicode-properties>
 pub static BINARY_UNICODE_PROPERTIES: LazyLock<HashSet<&'static str>> = LazyLock::new(|| {
     HashSet::from([
         "ASCII",
@@ -128,8 +116,6 @@ pub static BINARY_UNICODE_PROPERTIES: LazyLock<HashSet<&'static str>> = LazyLock
     ])
 });
 
-/// Table 68: Binary Unicode properties of strings.
-/// <https://tc39.es/ecma262/#table-binary-unicode-properties-of-strings>
 pub static BINARY_UNICODE_PROPERTIES_OF_STRINGS: LazyLock<HashSet<&'static str>> =
     LazyLock::new(|| {
         HashSet::from([
@@ -143,7 +129,6 @@ pub static BINARY_UNICODE_PROPERTIES_OF_STRINGS: LazyLock<HashSet<&'static str>>
         ])
     });
 
-/// Script values (Unicode 15.1). Used for `Script` and `Script_Extensions`.
 pub static SCRIPT_VALUES: LazyLock<HashSet<&'static str>> = LazyLock::new(|| {
     HashSet::from([
         "Adlm",
@@ -473,7 +458,6 @@ pub static SCRIPT_VALUES: LazyLock<HashSet<&'static str>> = LazyLock::new(|| {
     ])
 });
 
-/// General_Category values.
 pub static GENERAL_CATEGORY_VALUES: LazyLock<HashSet<&'static str>> = LazyLock::new(|| {
     HashSet::from([
         "C",
@@ -559,8 +543,6 @@ pub static GENERAL_CATEGORY_VALUES: LazyLock<HashSet<&'static str>> = LazyLock::
     ])
 });
 
-/// Look up the canonical name for a non-binary Unicode property alias.
-/// Returns `Some(canonical_name)` if found, `None` otherwise.
 pub fn non_binary_property_canonical(name: &str) -> Option<&'static str> {
     NON_BINARY_UNICODE_PROPERTIES
         .iter()
@@ -568,19 +550,14 @@ pub fn non_binary_property_canonical(name: &str) -> Option<&'static str> {
         .map(|(_, canonical)| *canonical)
 }
 
-/// Check if a name is a valid binary Unicode property (including aliases).
 pub fn is_binary_unicode_property(name: &str) -> bool {
     BINARY_UNICODE_PROPERTIES.contains(name)
 }
 
-/// Check if a name is a binary Unicode property of strings.
 pub fn is_binary_unicode_property_of_strings(name: &str) -> bool {
     BINARY_UNICODE_PROPERTIES_OF_STRINGS.contains(name)
 }
 
-/// Check if a value is valid for the given non-binary Unicode property.
-/// `General_Category` → `GENERAL_CATEGORY_VALUES`,
-/// `Script` / `Script_Extensions` → `SCRIPT_VALUES`.
 pub fn is_valid_unicode_property_value(property: &str, value: &str) -> bool {
     match property {
         "General_Category" => GENERAL_CATEGORY_VALUES.contains(value),

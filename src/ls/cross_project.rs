@@ -1,13 +1,3 @@
-//! Cross-project orchestration (1:1 port of Go's `internal/ls/crossproject.go`).
-//!
-//! Defines the `Project` and `CrossProjectOrchestrator` traits used to dispatch
-//! find-all-references / rename / implementation requests across multiple
-//! projects. Also provides combine-result helpers.
-//!
-//! This is a skeleton port: traits and public functions are declared in full,
-//! while bodies that depend on not-yet-ported infrastructure (concurrent
-//! work-groups, iterators over projects) are stubbed.
-
 #![allow(dead_code)]
 
 use std::sync::Arc;
@@ -18,17 +8,12 @@ use crate::tspath;
 
 use super::language_service::LanguageService;
 
-/// LS-side project interface.
-///
-/// Mirrors Go's `ls.Project` interface.
 pub trait Project: Send + Sync {
     fn id(&self) -> tspath::Path;
     fn get_program(&self) -> Option<Arc<compiler::Program>>;
     fn has_file(&self, file_name: &str) -> bool;
 }
 
-/// A project plus a text-document position, used internally for cross-project
-/// reference resolution.
 pub(crate) struct ProjectAndTextDocumentPosition {
     pub project: Arc<dyn Project>,
     pub ls: Option<Arc<LanguageService>>,
@@ -37,16 +22,12 @@ pub(crate) struct ProjectAndTextDocumentPosition {
     pub for_original_location: bool,
 }
 
-/// Generic response wrapper for cross-project results.
 pub(crate) struct Response<Resp> {
     pub complete: bool,
     pub result: Resp,
     pub for_original_location: bool,
 }
 
-/// Orchestrates cross-project language-service requests.
-///
-/// Mirrors Go's `ls.CrossProjectOrchestrator` interface.
 pub trait CrossProjectOrchestrator: Send + Sync {
     fn get_default_project(&self) -> Arc<dyn Project>;
     fn get_all_projects_for_initial_request(&self) -> Vec<Arc<dyn Project>>;
@@ -62,9 +43,6 @@ pub trait CrossProjectOrchestrator: Send + Sync {
     ) -> Vec<Arc<dyn Project>>;
 }
 
-// ── Combine-result helpers ────────────────────────────────────────────────
-
-/// Deduplicate `locations` into `combined`, using `seen` to avoid repeats.
 pub fn combine_location_array<T: HasLocation>(
     combined: &mut Vec<T>,
     locations: &[T],
@@ -82,12 +60,10 @@ pub fn combine_location_array<T: HasLocation>(
     }
 }
 
-/// Trait for types that expose a single `Location`.
 pub trait HasLocation: Clone {
     fn get_location(&self) -> &Location;
 }
 
-/// Trait for types that expose a list of `Location`s.
 pub trait HasLocations {
     fn get_locations(&self) -> Option<&Vec<Location>>;
 }
@@ -98,7 +74,6 @@ impl HasLocation for Location {
     }
 }
 
-/// Combine multiple location responses into a single `Vec<Location>`.
 pub fn combine_response_locations<T: HasLocations>(results: &[T]) -> Option<Vec<Location>> {
     let mut combined: Vec<Location> = Vec::new();
     let mut seen: std::collections::HashSet<String> = std::collections::HashSet::new();
@@ -122,7 +97,6 @@ pub fn combine_response_locations<T: HasLocations>(results: &[T]) -> Option<Vec<
     }
 }
 
-/// Combine multiple rename responses by merging edits.
 pub fn combine_rename_edits(
     edits: &[std::collections::HashMap<DocumentUri, Vec<crate::lsp::lsproto::lsp::TextEdit>>],
 ) -> std::collections::HashMap<DocumentUri, Vec<crate::lsp::lsproto::lsp::TextEdit>> {

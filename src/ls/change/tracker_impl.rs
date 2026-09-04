@@ -1,11 +1,3 @@
-//! Change tracker implementation — text-change computation and range
-//! adjustment.
-//!
-//! Ported from `internal/ls/change/trackerimpl.go`. All functions depend on the
-//! printer (`EmitContext`, `NodeFactory`, `ChangeTrackerWriter`), the format
-//! engine, the scanner, and `lsconv::Converters`, none of which are ported yet;
-//! bodies are stubbed (`todo!()`).
-
 #![allow(dead_code)]
 
 use std::sync::Arc;
@@ -19,21 +11,14 @@ use crate::ls::lsutil::utilities::probably_uses_semicolons;
 use super::tracker::{LeadingTriviaOption, NodeOptions, Tracker, TrailingTriviaOption};
 
 impl Tracker {
-    /// Computes the final `TextEdit` map from the accumulated edits.
-    ///
-    /// Mirrors `Tracker.getTextChangesFromChanges` in Go. The edit list is
-    /// private to [`Tracker`]; this stub returns an empty map until the
-    /// formatting/printer pipeline is ported.
+
     pub(crate) fn get_text_changes_from_changes(
         &self,
     ) -> std::collections::HashMap<String, Vec<TextEdit>> {
-        // TODO: sort edits by range, verify no overlap, computeNewText per edit.
+
         std::collections::HashMap::new()
     }
 
-    /// Computes the replacement text for a single edit.
-    ///
-    /// Mirrors `Tracker.computeNewText` in Go.
     pub(crate) fn compute_new_text(
         &self,
         _change_kind: i32,
@@ -48,9 +33,6 @@ impl Tracker {
         todo!("computeNewText")
     }
 
-    /// Formats and returns the text of a node to be inserted.
-    ///
-    /// Mirrors `Tracker.getFormattedTextOfNode` in Go.
     pub(crate) fn get_formatted_text_of_node(
         &self,
         _node_in: &Arc<Node>,
@@ -62,9 +44,6 @@ impl Tracker {
         todo!("getFormattedTextOfNode")
     }
 
-    /// Prints a node to unformatted text.
-    ///
-    /// Mirrors `Tracker.getNonformattedText` in Go.
     pub(crate) fn get_nonformatted_text(
         &mut self,
         _node: &Arc<Node>,
@@ -73,9 +52,6 @@ impl Tracker {
         todo!("getNonformattedText")
     }
 
-    /// Computes the adjusted range for a node, accounting for trivia.
-    ///
-    /// Mirrors `Tracker.GetAdjustedRange` in Go.
     pub fn get_adjusted_range(
         &self,
         _source_file: &SourceFile,
@@ -87,9 +63,6 @@ impl Tracker {
         todo!("GetAdjustedRange")
     }
 
-    /// Computes the adjusted start position for trivia handling.
-    ///
-    /// Mirrors `Tracker.getAdjustedStartPosition` in Go.
     pub(crate) fn get_adjusted_start_position(
         &self,
         _source_file: &SourceFile,
@@ -100,9 +73,6 @@ impl Tracker {
         todo!("getAdjustedStartPosition")
     }
 
-    /// Returns the end position of a multiline trailing comment, if any.
-    ///
-    /// Mirrors `Tracker.getEndPositionOfMultilineTrailingComment` in Go.
     pub(crate) fn get_end_position_of_multiline_trailing_comment(
         &self,
         _source_file: &SourceFile,
@@ -112,9 +82,6 @@ impl Tracker {
         todo!("getEndPositionOfMultilineTrailingComment")
     }
 
-    /// Computes the adjusted end position for trivia handling.
-    ///
-    /// Mirrors `Tracker.getAdjustedEndPosition` in Go.
     pub(crate) fn get_adjusted_end_position(
         &self,
         _source_file: &SourceFile,
@@ -124,9 +91,6 @@ impl Tracker {
         todo!("getAdjustedEndPosition")
     }
 
-    /// Returns the position at which to insert nodes at the top of the file.
-    ///
-    /// Mirrors `Tracker.getInsertionPositionAtSourceFileTop` in Go.
     pub(crate) fn get_insertion_position_at_source_file_top(
         &self,
         _source_file: &SourceFile,
@@ -135,9 +99,6 @@ impl Tracker {
     }
 }
 
-/// Returns format settings adjusted for writing, auto-detecting semicolons.
-///
-/// Mirrors `getFormatCodeSettingsForWriting` in Go.
 pub fn get_format_code_settings_for_writing(
     mut options: FormatCodeSettings,
     source_file: &SourceFile,

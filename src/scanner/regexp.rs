@@ -1,12 +1,3 @@
-//! Regular-expression body validator, ported from
-//! `internal/scanner/regexp.go`.
-//!
-//! `RegExpParser` validates the body of a regex literal (the text between
-//! the opening `/` and the closing `/`) and reports the TS1501–TS1538
-//! diagnostics. It is constructed by the scanner after it has located the
-//! body boundaries and parsed the flag run; the parser then walks the body
-//! and collects `ScannerError`s tagged with `DiagnosticKind::RegexMessage`.
-
 use super::unicode_properties;
 use super::{DiagnosticKind, ScannerError};
 use crate::core::compiler_options::ScriptTarget;
@@ -14,14 +5,9 @@ use crate::diagnostics;
 use crate::scanner::is_identifier_part;
 use std::collections::HashSet;
 
-// Bitmask of the subpattern-modifier flags (`i` | `m` | `s`), mirroring Go's
-// `regularExpressionFlagsModifiers`. The individual flag constants are
-// defined in `super::mod.rs` and are accessible here as a descendant module.
 const REG_EXP_FLAG_MODIFIERS: u16 =
     super::REG_EXP_FLAG_I | super::REG_EXP_FLAG_M | super::REG_EXP_FLAG_S;
 
-/// Maps a flag character to its bitmask bit, or `0` if it isn't a known
-/// regular-expression flag. Mirrors Go's `charCodeToRegExpFlag`.
 fn char_to_reg_exp_flag(ch: char) -> u16 {
     match ch {
         'd' => super::REG_EXP_FLAG_D,
@@ -56,8 +42,6 @@ fn is_ascii_letter(c: char) -> bool {
     c.is_ascii_alphabetic()
 }
 
-/// Decode the first UTF-8 rune at `pos` in `text`. Returns `(char, size)`.
-/// Since `&str` is always valid UTF-8, this always succeeds for `pos < text.len()`.
 fn decode_rune_at(text: &str, pos: usize) -> (char, usize) {
     match text[pos..].chars().next() {
         Some(c) => (c, c.len_utf8()),
@@ -65,10 +49,6 @@ fn decode_rune_at(text: &str, pos: usize) -> (char, usize) {
     }
 }
 
-/// Decode the first rune of `s`, returning `Some((char, size))` only when `s`
-/// consists of exactly one rune (so it can be compared numerically as a class
-/// range bound). Mirrors the `len(s) == size` guard in Go's
-/// `stringutil.DecodeJSStringRune` usage. Surrogate pairing is skipped.
 fn decode_first_rune(s: &str) -> Option<(char, usize)> {
     let mut chars = s.chars();
     let c = chars.next()?;
@@ -78,8 +58,6 @@ fn decode_first_rune(s: &str) -> Option<(char, usize)> {
     Some((c, c.len_utf8()))
 }
 
-/// Compare two digit strings numerically (after trimming leading zeros),
-/// returning -1/0/1. Ported directly from Go's `compareDecimalStrings`.
 fn compare_decimal_strings(a: &str, b: &str) -> i32 {
     let a = a.trim_start_matches('0');
     let b = b.trim_start_matches('0');
@@ -96,8 +74,6 @@ fn compare_decimal_strings(a: &str, b: &str) -> i32 {
     }
 }
 
-/// The kind of class set expression currently being scanned, mirroring Go's
-/// `classSetExpressionType`.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 #[allow(dead_code)]
 pub enum ClassSetExpressionType {
@@ -107,8 +83,6 @@ pub enum ClassSetExpressionType {
     ClassSubtraction,
 }
 
-/// A reference to a named capturing group (`\k<name>`), recorded for
-/// post-parse validation. Mirrors Go's `groupNameReference`.
 #[derive(Clone, Debug)]
 pub struct GroupNameReference {
     pub pos: usize,
@@ -116,8 +90,6 @@ pub struct GroupNameReference {
     pub name: String,
 }
 
-/// A numeric backreference (`\1`..`\9`), recorded for post-parse validation.
-/// Mirrors Go's `decimalEscapeValue`.
 #[derive(Clone, Debug)]
 pub struct DecimalEscapeValue {
     pub pos: usize,
@@ -125,11 +97,6 @@ pub struct DecimalEscapeValue {
     pub value: i32,
 }
 
-/// Validator for the body of a regular-expression literal.
-///
-/// Borrows the full source `text` and walks the region `[body_start, body_end)`
-/// (the text between the opening and closing `/`). All positions reported in
-/// errors are absolute, in the same coordinate system as the scanner.
 pub struct RegExpParser<'a> {
     text: &'a str,
     pos: usize,
@@ -152,11 +119,7 @@ pub struct RegExpParser<'a> {
 }
 
 impl<'a> RegExpParser<'a> {
-    /// Construct a new parser over the body region `[body_start, body_end)`
-    /// of `text`. `flags` is the regex flag bitmask (using the `REG_EXP_FLAG_*`
-    /// constants from `super::mod.rs`). `named_capture_groups` indicates
-    /// whether the body contains a `(?<` named-capture group (pre-scanned by
-    /// the caller, mirroring Go's `reScanSlashToken`).
+
     pub fn new(
         text: &'a str,
         body_start: usize,
@@ -203,10 +166,6 @@ impl<'a> RegExpParser<'a> {
         std::mem::take(&mut self.errors)
     }
 
-    // ────────────────────────────────────────────────────────────────────
-    // Position helpers
-    // ────────────────────────────────────────────────────────────────────
-
     #[allow(dead_code)]
     pub fn pos(&self) -> usize {
         self.pos
@@ -216,8 +175,6 @@ impl<'a> RegExpParser<'a> {
         self.pos = v;
     }
 
-    /// Advance `pos` by `n` (may be negative). Saturates at 0 for negative
-    /// underflow, mirroring the safety of Go's signed `incPos`.
     fn inc_pos(&mut self, n: i32) {
         if n >= 0 {
             self.pos = self.pos.wrapping_add(n as usize);
@@ -226,9 +183,6 @@ impl<'a> RegExpParser<'a> {
         }
     }
 
-    /// Returns the byte at `pos` as a `char`, or `'\0'` when `pos >= body_end`.
-    /// This mirrors Go's `Scanner.char()` returning `-1` at EOF; `'\0'` is
-    /// used because Rust's `char` is unsigned.
     fn char(&self) -> char {
         if self.pos < self.body_end {
             self.text.as_bytes()[self.pos] as char
@@ -237,8 +191,6 @@ impl<'a> RegExpParser<'a> {
         }
     }
 
-    /// Returns the byte at `pos + offset` as a `char`, or `'\0'` if out of
-    /// range. Mirrors Go's `Scanner.charAt(offset)`.
     fn char_at(&self, offset: usize) -> char {
         match self.pos.checked_add(offset) {
             Some(p) if p < self.body_end => self.text.as_bytes()[p] as char,
@@ -251,9 +203,6 @@ impl<'a> RegExpParser<'a> {
         self.text
     }
 
-    /// Returns the 2 bytes at `pos` as a `[u8; 2]` when at least 2 bytes remain
-    /// before `body_end`, else `None`. Used to detect the `--`/`&&` operator
-    /// pairs without slicing the `&str` (which could split a multi-byte rune).
     fn two_chars_at(&self, pos: usize) -> Option<[u8; 2]> {
         if pos + 1 < self.body_end {
             let bytes = self.text.as_bytes();
@@ -267,14 +216,6 @@ impl<'a> RegExpParser<'a> {
         ch == ']' || self.pos >= self.body_end
     }
 
-    // ────────────────────────────────────────────────────────────────────
-    // Error reporting
-    // ────────────────────────────────────────────────────────────────────
-
-    /// Push a `RegexMessage` diagnostic. The Go signature takes formatting
-    /// args (e.g. the offending character), but here we store only the
-    /// `Message` key — formatting/args and spelling suggestions are deferred
-    /// to the diagnostic writer, per the porting spec.
     fn error(&mut self, msg: diagnostics::Message, pos: usize, length: usize) {
         self.errors.push(ScannerError {
             kind: DiagnosticKind::RegexMessage(msg),
@@ -291,8 +232,6 @@ impl<'a> RegExpParser<'a> {
         }
     }
 
-    /// Check target-gated availability of a regex flag (`d`→ES2022,
-    /// `s`→ES2018, `v`→ES2024). Mirrors Go's `checkRegularExpressionFlagAvailability`.
     fn check_regular_expression_flag_availability(&mut self, flag: u16, pos: usize, size: usize) {
         let available_from = match flag {
             super::REG_EXP_FLAG_D => Some(ScriptTarget::ES2022),
@@ -311,20 +250,12 @@ impl<'a> RegExpParser<'a> {
         }
     }
 
-    // ────────────────────────────────────────────────────────────────────
-    // Entry point
-    // ────────────────────────────────────────────────────────────────────
-
-    /// Run the validator over the body. Mirrors Go's `regExpParser.run`.
     pub fn run(&mut self) {
-        // Regular expressions are checked more strictly when either in 'u' or
-        // 'v' mode, or when not using the looser interpretation of the syntax
-        // from ECMA-262 Annex B.
+
         self.any_unicode_mode_or_non_annex_b = self.any_unicode_mode || !self.annex_b;
 
         self.scan_disjunction(false);
 
-        // Validate named group references.
         let group_name_references = self.group_name_references.clone();
         for reference in &group_name_references {
             if !self.group_specifiers.contains(&reference.name) {
@@ -333,17 +264,13 @@ impl<'a> RegExpParser<'a> {
                     reference.pos,
                     reference.end - reference.pos,
                 );
-                // Spelling suggestions are skipped per the porting spec.
+
             }
         }
 
-        // Validate numeric backreferences.
         let decimal_escapes = self.decimal_escapes.clone();
         for escape in &decimal_escapes {
-            // Although a DecimalEscape with a value greater than the number of
-            // capturing groups is treated as either a LegacyOctalEscapeSequence
-            // or an IdentityEscape in Annex B, an error is nevertheless
-            // reported since it's most likely a mistake.
+
             if escape.value > self.number_of_capturing_groups {
                 if self.number_of_capturing_groups > 0 {
                     self.error(
@@ -362,11 +289,6 @@ impl<'a> RegExpParser<'a> {
         }
     }
 
-    // ────────────────────────────────────────────────────────────────────
-    // Disjunction / Alternative
-    // ────────────────────────────────────────────────────────────────────
-
-    // Disjunction ::= Alternative ('|' Alternative)*
     fn scan_disjunction(&mut self, is_in_group: bool) {
         loop {
             self.named_capturing_groups.push(HashSet::new());
@@ -379,7 +301,6 @@ impl<'a> RegExpParser<'a> {
         }
     }
 
-    // Alternative ::= Term*
     fn scan_alternative(&mut self, is_in_group: bool) {
         let mut is_previous_term_quantifiable = false;
         while self.pos < self.body_end {
@@ -410,8 +331,7 @@ impl<'a> RegExpParser<'a> {
                         match self.char() {
                             '=' | '!' => {
                                 self.inc_pos(1);
-                                // In Annex B, `(?=Disjunction)` and `(?!Disjunction)`
-                                // are quantifiable.
+
                                 is_previous_term_quantifiable =
                                     !self.any_unicode_mode_or_non_annex_b;
                             }
@@ -521,11 +441,10 @@ impl<'a> RegExpParser<'a> {
                             continue;
                         }
                     }
-                    // Fallthrough to the quantifier handling (shared with
-                    // '*', '+', '?').
+
                     self.inc_pos(1);
                     if self.char() == '?' {
-                        // Non-greedy
+
                         self.inc_pos(1);
                     }
                     if !is_previous_term_quantifiable {
@@ -540,7 +459,7 @@ impl<'a> RegExpParser<'a> {
                 '*' | '+' | '?' => {
                     self.inc_pos(1);
                     if self.char() == '?' {
-                        // Non-greedy
+
                         self.inc_pos(1);
                     }
                     if !is_previous_term_quantifiable {
@@ -570,7 +489,7 @@ impl<'a> RegExpParser<'a> {
                     if is_in_group {
                         return;
                     }
-                    // Fallthrough: same handling as ']' / '}'.
+
                     if self.any_unicode_mode_or_non_annex_b || ch == ')' {
                         self.error(
                             diagnostics::UNEXPECTED_0_DID_YOU_MEAN_TO_ESCAPE_IT_WITH_BACKSLASH,
@@ -632,13 +551,6 @@ impl<'a> RegExpParser<'a> {
         curr
     }
 
-    // ────────────────────────────────────────────────────────────────────
-    // Digit / word scanning
-    // ────────────────────────────────────────────────────────────────────
-
-    /// Scan a run of decimal digits and return the matched text. Mirrors
-    /// Go's `scanDigits`, but returns the string instead of stashing it in
-    /// `scanner.tokenValue`.
     fn scan_digits(&mut self) -> String {
         let start = self.pos;
         while self.pos < self.body_end && is_digit(self.char()) {
@@ -647,8 +559,6 @@ impl<'a> RegExpParser<'a> {
         self.text[start..self.pos].to_string()
     }
 
-    /// Scan a run of word characters (`[A-Za-z0-9_]`) and return the matched
-    /// text. Mirrors Go's `scanWordCharacters`.
     fn scan_word_characters(&mut self) -> String {
         let start = self.pos;
         while self.pos < self.body_end && is_word_character(self.char()) {
@@ -657,17 +567,8 @@ impl<'a> RegExpParser<'a> {
         self.text[start..self.pos].to_string()
     }
 
-    // ────────────────────────────────────────────────────────────────────
-    // AtomEscape / DecimalEscape / CharacterEscape
-    // ────────────────────────────────────────────────────────────────────
-
-    // AtomEscape ::=
-    //   | DecimalEscape
-    //   | CharacterClassEscape
-    //   | CharacterEscape
-    //   | 'k<' RegExpIdentifierName '>'
     fn scan_atom_escape(&mut self) {
-        // Precondition: pos is at the char following a backslash.
+
         let ch = self.char();
         if ch == 'k' {
             self.inc_pos(1);
@@ -693,17 +594,15 @@ impl<'a> RegExpParser<'a> {
             );
             return;
         }
-        // default
+
         if !self.scan_character_class_escape() && !self.scan_decimal_escape() {
-            // Regex literals cannot contain line breaks here, so a character
-            // escape must consume something.
+
             let _ = self.scan_character_escape(true);
         }
     }
 
-    // DecimalEscape ::= [1-9] [0-9]*
     fn scan_decimal_escape(&mut self) -> bool {
-        // Precondition: pos is at the char following a backslash.
+
         let ch = self.char();
         if ('1'..='9').contains(&ch) {
             let start = self.pos;
@@ -719,12 +618,8 @@ impl<'a> RegExpParser<'a> {
         false
     }
 
-    // CharacterEscape ::=
-    //   | `c` ControlLetter
-    //   | IdentityEscape
-    //   | (Other sequences handled by `scan_escape_sequence`)
     fn scan_character_escape(&mut self, atom_escape: bool) -> String {
-        // Precondition: pos is at the char following a backslash.
+
         if self.pos >= self.body_end {
             self.error(diagnostics::UNDETERMINED_CHARACTER_ESCAPE, self.pos - 1, 1);
             return "\\".to_string();
@@ -759,45 +654,35 @@ impl<'a> RegExpParser<'a> {
                 ch.to_string()
             }
             _ => {
-                // Back up to include the backslash for scan_escape_sequence.
+
                 self.inc_pos(-1);
                 self.scan_escape_sequence(self.annex_b, self.any_unicode_mode, atom_escape)
             }
         }
     }
 
-    /// A simplified `scanEscapeSequence` for the regex parser. Starts at `\`,
-    /// advances past it, and returns the escaped character as a `String`.
-    ///
-    /// Handles `\0` (null when not followed by a digit), legacy octal escapes
-    /// (`\0`+digit, `\1`–`\7`), `\8`/`\9`, the named escapes
-    /// (`\b \t \n \v \f \r \' \""`), `\xHH`, `\uHHHH`, `\u{...}`, and the
-    /// default identity escape. `\cX` is handled by `scan_character_escape`.
-    /// Reports TS1535/TS1536/TS1537/TS1538 as appropriate. Surrogate pairing
-    /// is skipped (not needed for validation).
     fn scan_escape_sequence(
         &mut self,
         annex_b: bool,
         any_unicode_mode: bool,
         atom_escape: bool,
     ) -> String {
-        // Precondition: pos is at the backslash.
+
         let start = self.pos;
-        self.inc_pos(1); // skip backslash
+        self.inc_pos(1);
         if self.pos >= self.body_end {
             self.error(diagnostics::UNDETERMINED_CHARACTER_ESCAPE, start, 1);
             return "\\".to_string();
         }
         let ch = self.char();
-        self.inc_pos(1); // skip the escaped char's first byte
+        self.inc_pos(1);
         match ch {
             '0' => {
-                // '\0' not followed by a digit is the NUL character.
+
                 if !is_digit(self.char()) {
                     return "\0".to_string();
                 }
-                // '\0' + digit → legacy octal escape; consume up to 2 more
-                // octal digits (mirrors the '1'-'3' → '4'-'7' fallthrough chain).
+
                 if is_octal_digit(self.char()) {
                     self.inc_pos(1);
                 }
@@ -861,8 +746,8 @@ impl<'a> RegExpParser<'a> {
             }
             'u' => {
                 if self.char() == '{' {
-                    // Extended '\u{...}' escape.
-                    self.inc_pos(1); // skip '{'
+
+                    self.inc_pos(1);
                     let hex_start = self.pos;
                     while is_hex_digit(self.char()) {
                         self.inc_pos(1);
@@ -885,7 +770,7 @@ impl<'a> RegExpParser<'a> {
                     }
                     self.text[start..self.pos].to_string()
                 } else {
-                    // '\uHHHH'
+
                     let hex_start = self.pos;
                     for _ in 0..4 {
                         if is_hex_digit(self.char()) {
@@ -906,8 +791,7 @@ impl<'a> RegExpParser<'a> {
                 }
             }
             '\r' => {
-                // LineContinuation: backslash + line terminator is the empty
-                // code unit sequence.
+
                 if self.char() == '\n' {
                     self.inc_pos(1);
                 }
@@ -915,8 +799,7 @@ impl<'a> RegExpParser<'a> {
             }
             '\n' => String::new(),
             _ => {
-                // `ch` was read as a single byte; for multi-byte UTF-8 we must
-                // decode the full rune starting at the byte after the backslash.
+
                 let byte_pos = start + 1;
                 self.set_pos(byte_pos);
                 let (c, size) = decode_rune_at(self.text, byte_pos);
@@ -936,10 +819,6 @@ impl<'a> RegExpParser<'a> {
         }
     }
 
-    /// Report the TS1536 octal-in-character-class diagnostic for a legacy
-    /// octal escape. Mirrors the regex-context branch of Go's
-    /// `scanEscapeSequence` octal handling. The string-literal octal error
-    /// (TS1197) is out of scope for this simplified regex parser.
     fn report_octal_escape(&mut self, start: usize, ch: char, atom_escape: bool) {
         if !atom_escape && ch != '0' {
             self.error(
@@ -950,12 +829,8 @@ impl<'a> RegExpParser<'a> {
         }
     }
 
-    // ────────────────────────────────────────────────────────────────────
-    // Group names
-    // ────────────────────────────────────────────────────────────────────
-
     fn scan_group_name(&mut self, is_reference: bool) {
-        // Precondition: pos is at the char following '<'.
+
         let token_start = self.pos;
         let name = self.scan_identifier_name();
         if self.pos == token_start {
@@ -984,9 +859,6 @@ impl<'a> RegExpParser<'a> {
         self.named_capturing_groups.iter().any(|g| g.contains(name))
     }
 
-    /// A simplified identifier scan that reads `is_identifier_part` characters,
-    /// standing in for Go's `Scanner.scanIdentifier`. Unicode escape sequences
-    /// in identifiers are not handled (sufficient for group-name validation).
     fn scan_identifier_name(&mut self) -> String {
         let start = self.pos;
         while self.pos < self.body_end {
@@ -999,13 +871,8 @@ impl<'a> RegExpParser<'a> {
         self.text[start..self.pos].to_string()
     }
 
-    // ────────────────────────────────────────────────────────────────────
-    // Character classes (non-Unicode-Sets: ClassRanges)
-    // ────────────────────────────────────────────────────────────────────
-
-    // ClassRanges ::= '^'? (ClassAtom ('-' ClassAtom)?)*
     fn scan_class_ranges(&mut self) {
-        // Precondition: pos is at the char following '['.
+
         if self.char() == '^' {
             self.inc_pos(1);
         }
@@ -1061,13 +928,8 @@ impl<'a> RegExpParser<'a> {
         }
     }
 
-    // ────────────────────────────────────────────────────────────────────
-    // Character classes (Unicode-Sets: ClassSetExpression)
-    // ────────────────────────────────────────────────────────────────────
-
-    // ClassSetExpression ::= '^'? (ClassUnion | ClassIntersection | ClassSubtraction)
     fn scan_class_set_expression(&mut self) {
-        // Precondition: pos is at the char following '['.
+
         let mut is_character_complement = false;
         if self.char() == '^' {
             self.inc_pos(1);
@@ -1332,11 +1194,6 @@ impl<'a> RegExpParser<'a> {
         self.may_contain_strings = expression_may_contain_strings;
     }
 
-    // ClassSetOperand ::=
-    //   | '[' ClassSetExpression ']'
-    //   | '\' CharacterClassEscape
-    //   | '\q{' ClassStringDisjunctionContents '}'
-    //   | ClassSetCharacter
     fn scan_class_set_operand(&mut self) -> String {
         self.may_contain_strings = false;
         let ch = self.char();
@@ -1368,16 +1225,15 @@ impl<'a> RegExpParser<'a> {
                     }
                 }
                 self.inc_pos(-1);
-                // Fallthrough to ClassSetCharacter.
+
                 self.scan_class_set_character()
             }
             _ => self.scan_class_set_character(),
         }
     }
 
-    // ClassStringDisjunctionContents ::= ClassSetCharacter* ('|' ClassSetCharacter*)*
     fn scan_class_string_disjunction_contents(&mut self) {
-        // Precondition: pos is at the char following '{'.
+
         let mut character_count = 0;
         while self.pos < self.body_end {
             let ch = self.char();
@@ -1403,9 +1259,6 @@ impl<'a> RegExpParser<'a> {
         }
     }
 
-    // ClassSetCharacter ::=
-    //   | SourceCharacter -- ClassSetSyntaxCharacter -- ClassSetReservedDoublePunctuator
-    //   | '\' (CharacterEscape | ClassSetReservedPunctuator | 'b')
     fn scan_class_set_character(&mut self) -> String {
         let ch = self.char();
         if ch == '\\' {
@@ -1454,9 +1307,6 @@ impl<'a> RegExpParser<'a> {
         }
     }
 
-    // ClassAtom ::=
-    //   | SourceCharacter but not one of '\' or ']'
-    //   | '\' ClassEscape
     fn scan_class_atom(&mut self) -> String {
         let ch = self.char();
         if ch == '\\' {
@@ -1483,13 +1333,10 @@ impl<'a> RegExpParser<'a> {
         }
     }
 
-    // CharacterClassEscape ::=
-    //   | 'd' | 'D' | 's' | 'S' | 'w' | 'W'
-    //   | [+AnyUnicodeMode] ('P' | 'p') '{' UnicodePropertyValueExpression '}'
     fn scan_character_class_escape(&mut self) -> bool {
-        // Precondition: pos is at the char following a backslash.
+
         let mut is_character_complement = false;
-        let start = self.pos - 1; // backslash position
+        let start = self.pos - 1;
         let ch = self.char();
         match ch {
             'd' | 'D' | 's' | 'S' | 'w' | 'W' => {
@@ -1498,21 +1345,21 @@ impl<'a> RegExpParser<'a> {
             }
             'P' => {
                 is_character_complement = true;
-                // Fall through to the 'p' / 'P' handling below.
+
             }
             'p' => {
-                // Fall through to the 'p' / 'P' handling below.
+
             }
             _ => return false,
         }
 
-        self.inc_pos(1); // consume 'p' / 'P'
+        self.inc_pos(1);
         if self.char() == '{' {
-            self.inc_pos(1); // consume '{'
+            self.inc_pos(1);
             let property_name_or_value_start = self.pos;
             let property_name_or_value = self.scan_word_characters();
             if self.char() == '=' {
-                // `name=value` form.
+
                 let property_name =
                     unicode_properties::non_binary_property_canonical(&property_name_or_value)
                         .unwrap_or("");
@@ -1524,9 +1371,9 @@ impl<'a> RegExpParser<'a> {
                         property_name_or_value_start,
                         self.pos - property_name_or_value_start,
                     );
-                    // Spelling suggestion skipped.
+
                 }
-                self.inc_pos(1); // consume '='
+                self.inc_pos(1);
                 let property_value_start = self.pos;
                 let property_value = self.scan_word_characters();
                 if self.pos == property_value_start {
@@ -1541,11 +1388,11 @@ impl<'a> RegExpParser<'a> {
                             property_value_start,
                             self.pos - property_value_start,
                         );
-                        // Spelling suggestion skipped.
+
                     }
                 }
             } else {
-                // Lone property name or value.
+
                 if self.pos == property_name_or_value_start {
                     self.error(
                         diagnostics::EXPECTED_A_UNICODE_PROPERTY_NAME_OR_VALUE,
@@ -1581,7 +1428,7 @@ impl<'a> RegExpParser<'a> {
                         property_name_or_value_start,
                         self.pos - property_name_or_value_start,
                     );
-                    // Spelling suggestion skipped.
+
                 }
             }
             self.scan_expected_char('}');
@@ -1599,20 +1446,12 @@ impl<'a> RegExpParser<'a> {
                 2,
             );
         } else {
-            self.inc_pos(-1); // back up so the caller can re-scan 'p'/'P'
+            self.inc_pos(-1);
             return false;
         }
         true
     }
 
-    // ────────────────────────────────────────────────────────────────────
-    // Source characters
-    // ────────────────────────────────────────────────────────────────────
-
-    /// Decode one UTF-8 rune and advance. Simplified from Go's
-    /// `scanSourceCharacter`: the non-unicode-mode surrogate-splitting
-    /// bookkeeping (`pendingLowSurrogate`) is skipped, as it is not needed for
-    /// validation.
     fn scan_source_character(&mut self) -> String {
         if self.pos >= self.body_end {
             return String::new();

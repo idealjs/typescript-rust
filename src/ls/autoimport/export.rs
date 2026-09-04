@@ -1,5 +1,3 @@
-//! Export kind enum + helpers (1:1 port of Go's `internal/ls/autoimport/export.go`).
-
 use crate::ast::{Node, Symbol, SymbolFlags};
 use crate::checker::Checker;
 use crate::ls::lsutil::symbol_display::{ScriptElementKind, ScriptElementKindModifier};
@@ -7,41 +5,35 @@ use crate::tspath;
 
 use super::{INTERNAL_SYMBOL_NAME_DEFAULT, INTERNAL_SYMBOL_NAME_EXPORT_EQUALS};
 
-/// Uniquely identifies a module across multiple declarations.
-/// If the export is from an ambient module declaration, this is the module name.
-/// If the export is from a module augmentation, this is the `Path()` of the resolved module file.
-/// Otherwise this is the `Path()` of the exporting source file.
 pub type ModuleID = String;
 
-/// An export identifier: module ID + export name.
 #[derive(Debug, Clone, Default, PartialEq, Eq, Hash)]
 pub struct ExportID {
     pub module_id: ModuleID,
     pub export_name: String,
 }
 
-/// The syntax form used to export a symbol.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
 pub enum ExportSyntax {
     #[default]
     None,
-    /// `export const x = {}`
+
     Modifier,
-    /// `export { x }`
+
     Named,
-    /// `export default function f() {}`
+
     DefaultModifier,
-    /// `export default f`
+
     DefaultDeclaration,
-    /// `export = x`
+
     Equals,
-    /// `export as namespace x`
+
     UMD,
-    /// `export * from "module"`
+
     Star,
-    /// `module.exports = {}`
+
     CommonJSModuleExports,
-    /// `exports.x = {}`
+
     CommonJSExportsProperty,
 }
 
@@ -62,9 +54,6 @@ impl ExportSyntax {
     }
 }
 
-/// An export entry in the auto-import index.
-///
-/// Mirrors `autoimport.Export` in Go.
 #[derive(Debug, Clone)]
 pub struct Export {
     pub export_id: ExportID,
@@ -72,17 +61,14 @@ pub struct Export {
     pub syntax: ExportSyntax,
     pub flags: SymbolFlags,
     pub local_name: String,
-    /// The name of the module symbol's export that this export was found through,
-    /// either `export=`, `InternalSymbolNameExportStar`, or empty string.
+
     pub through: String,
 
-    // Checker-set fields
     pub target: ExportID,
     pub is_type_only: bool,
     pub script_element_kind: ScriptElementKind,
     pub script_element_kind_modifiers: ScriptElementKindModifier,
 
-    /// The file where the export was found.
     pub path: tspath::Path,
     pub package_name: String,
 }
@@ -141,17 +127,11 @@ impl super::index::Named for Export {
     }
 }
 
-/// Converts a symbol to an Export entry.
-///
-/// Mirrors `autoimport.SymbolToExport` in Go.
 pub fn symbol_to_export(_symbol: &Symbol, _ch: &Checker) -> Option<Export> {
-    // Requires checker, ast navigation, and module-symbol helpers not yet ported.
+
     todo!("symbol_to_export requires checker.IsExternalModuleSymbol and ast helpers")
 }
 
-/// Tries to get a module export matching the given target symbol.
-///
-/// Mirrors `autoimport.tryGetModuleExport` in Go.
 fn try_get_module_export(
     _export_name: &str,
     _target: &Symbol,
@@ -164,9 +144,6 @@ fn try_get_module_export(
     todo!("try_get_module_export requires checker.TryGetMemberInModuleExportsAndProperties")
 }
 
-/// Extracts the first export from a symbol.
-///
-/// Mirrors `autoimport.extractFirstExport` in Go.
 fn extract_first_export(
     _symbol: &Symbol,
     _ch: &Checker,

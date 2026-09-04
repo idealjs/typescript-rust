@@ -1,49 +1,23 @@
-//! Test case parser — ported from typescript-go's `testrunner/test_case_parser.go`.
-//!
-//! Parses multi-file TypeScript test cases that use `// @FileName` directives
-//! and `// @Option: value` metadata to configure compiler options per test.
-//!
-//! A typical test file looks like:
-//! ```text
-//! // @filename: file1.ts
-//! const x: number = 42;
-//!
-//! // @filename: file2.ts
-//! import { x } from "./file1";
-//!
-//! // @strict: true
-//! // @target: esnext
-//! ```
-
 use std::collections::HashMap;
 
 use regex::Regex;
 
-/// A single virtual file parsed from a multi-file test case.
 #[derive(Debug, Clone)]
 pub struct TestUnit {
     pub name: String,
     pub content: String,
 }
 
-/// The parsed content of a test case: virtual files + compiler settings.
 #[derive(Debug, Clone)]
 pub struct TestCaseContent {
     pub units: Vec<TestUnit>,
     pub tsconfig_content: Option<String>,
-    /// Raw compiler settings parsed from `// @Option: value` lines.
+
     pub settings: HashMap<String, String>,
-    /// The `currentDirectory` from `// @currentDirectory: ...`.
+
     pub current_directory: String,
 }
 
-/// Parses a multi-file test case from source text.
-///
-/// Handles:
-/// - `// @filename: path.ts` — starts a new virtual file
-/// - `// @OptionName: value` — compiler option or test config
-/// - `// @currentDirectory: /path` — sets the virtual cwd
-/// - Everything else — appended to the current file's content
 pub fn parse_test_files(content: &str, default_filename: &str) -> TestCaseContent {
     let option_re = Regex::new(r"(?m)^//\s*@(\w+)\s*:\s*([^\r\n]*)").unwrap();
 
@@ -61,7 +35,7 @@ pub fn parse_test_files(content: &str, default_filename: &str) -> TestCaseConten
             let value = caps[2].trim().to_string();
 
             if name == "filename" {
-                // Save the previous file if any.
+
                 if !current_name.is_empty() && has_content {
                     units.push(TestUnit {
                         name: current_name.clone(),
@@ -77,7 +51,7 @@ pub fn parse_test_files(content: &str, default_filename: &str) -> TestCaseConten
                 settings.insert(name, value);
             }
         } else {
-            // Content line.
+
             if !current_name.is_empty() {
                 if !current_content.is_empty() {
                     current_content.push('\n');
@@ -85,8 +59,7 @@ pub fn parse_test_files(content: &str, default_filename: &str) -> TestCaseConten
                 current_content.push_str(line);
                 has_content = true;
             } else {
-                // Content before first @filename — for single-file tests, use the
-                // default filename.
+
                 if !current_content.is_empty() {
                     current_content.push('\n');
                 }
@@ -97,7 +70,6 @@ pub fn parse_test_files(content: &str, default_filename: &str) -> TestCaseConten
         }
     }
 
-    // Save the last file.
     if has_content && !current_name.is_empty() {
         units.push(TestUnit {
             name: current_name.clone(),
@@ -105,7 +77,6 @@ pub fn parse_test_files(content: &str, default_filename: &str) -> TestCaseConten
         });
     }
 
-    // Extract tsconfig.json if present.
     let tsconfig_content = units
         .iter()
         .find(|u| u.name.ends_with("tsconfig.json"))
@@ -114,7 +85,6 @@ pub fn parse_test_files(content: &str, default_filename: &str) -> TestCaseConten
         units.retain(|u| !u.name.ends_with("tsconfig.json"));
     }
 
-    // Normalize current directory.
     if current_directory.is_empty() {
         current_directory = "/.src".to_string();
     }
@@ -127,15 +97,13 @@ pub fn parse_test_files(content: &str, default_filename: &str) -> TestCaseConten
     }
 }
 
-/// Extract compiler settings from `// @Option: value` lines at the top of a file.
-/// Returns a map of lowercase option name → raw value string.
 pub fn extract_compiler_settings(content: &str) -> HashMap<String, String> {
     let option_re = Regex::new(r"(?m)^//\s*@(\w+)\s*:\s*([^\r\n]*)").unwrap();
     let mut settings = HashMap::new();
     for caps in option_re.captures_iter(content) {
         let name = caps[1].to_lowercase();
         let value = caps[2].trim().to_string();
-        // Skip file-directive options that aren't compiler settings.
+
         if !matches!(name.as_str(), "filename" | "currentdirectory" | "symlink") {
             settings.insert(name, value);
         }

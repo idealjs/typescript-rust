@@ -1,6 +1,3 @@
-// Code generated from _scripts/ast.json. DO NOT EDIT.
-
-/// TypeScript syntax kind, mirroring Go's `ast.Kind`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default)]
 #[repr(i16)]
 pub enum SyntaxKind {

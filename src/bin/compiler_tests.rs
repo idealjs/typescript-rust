@@ -1,14 +1,3 @@
-//! Compiler baseline test runner — ported from typescript-go's
-//! `testrunner/compiler_runner.go`.
-//!
-//! Uses a subprocess-per-batch approach: the runner forks child processes
-//! for batches of tests, so a single hang/stack-overflow in one batch
-//! doesn't kill the entire run. Each child batch runs with `catch_unwind`.
-//!
-//! Usage:
-//!   cargo run --release --bin compiler_tests -- --suite submodule
-//!   cargo run --release --bin compiler_tests -- --suite submodule --no-write
-
 use std::io::Write;
 use std::panic::AssertUnwindSafe;
 use std::path::{Path, PathBuf};
@@ -32,24 +21,23 @@ use tsox::tsoptions::ParsedCommandLine;
 use tsox::vfs::{FS, InMemoryFS};
 
 const SRC_FOLDER: &str = "/.src";
-/// Number of tests per subprocess batch.
+
 const BATCH_SIZE: usize = 10;
-/// Timeout for a batch subprocess (seconds).
+
 const BATCH_TIMEOUT_SECS: u64 = 30;
 
-/// Tests known to hang or crash.
 const SKIPPED_TESTS: &[&str] = &[
     "typeGuardFunctionErrors.ts",
     "parserS7.2_A1.5_T2.ts",
     "scannerS7.2_A1.5_T2.ts",
     "ifDoWhileStatements.ts",
-    // Additional tests found to cause stack overflow in checker
+
     "controlFlowGraphStress01.ts",
 ];
 
 struct CompilationOutput {
     diagnostics: Vec<Diagnostic>,
-    input_files: Vec<(String, String)>, // (unit_name, content)
+    input_files: Vec<(String, String)>,
 }
 
 fn compile_test_case(content: &TestCaseContent) -> CompilationOutput {
@@ -57,14 +45,11 @@ fn compile_test_case(content: &TestCaseContent) -> CompilationOutput {
     let mut file_names: Vec<String> = Vec::new();
     let mut input_files: Vec<(String, String)> = Vec::new();
     for unit in &content.units {
-        // Single-file tests should be placed under /.src/ (matching TS harness
-        // convention) so that remove_test_path_prefixes strips the prefix and
-        // produces just "filename.ts" in baseline output.
-        // Multi-file tests (@filename: /a.ts) use absolute paths directly.
+
         let abs_path = if unit.name.starts_with('/') {
             unit.name.clone()
         } else {
-            // Strip any parent directory from the clean_name and place under /.src/
+
             let basename = Path::new(&unit.name)
                 .file_name()
                 .map(|f| f.to_string_lossy().to_string())
@@ -73,8 +58,7 @@ fn compile_test_case(content: &TestCaseContent) -> CompilationOutput {
         };
         let _ = fs.write_file(&abs_path, &unit.content);
         file_names.push(abs_path.clone());
-        // Store the baseline-facing name (what appears in error output after
-        // removeTestPathPrefixes strips /.src/).
+
         let baseline_name = abs_path.clone();
         input_files.push((baseline_name, unit.content.clone()));
     }
@@ -128,8 +112,6 @@ fn compile_test_case(content: &TestCaseContent) -> CompilationOutput {
     }
 }
 
-/// Remove `/.src/`, `/.ts/`, `/.lib/` path prefixes from text.
-/// Mirrors Go's `removeTestPathPrefixes`.
 fn remove_test_path_prefixes(text: &str) -> String {
     text.replace("/.src/", "")
         .replace("/.ts/", "")
@@ -138,14 +120,6 @@ fn remove_test_path_prefixes(text: &str) -> String {
 
 const CRLF: &str = "\r\n";
 
-/// Generate a TS-format error baseline string, mirroring Go's
-/// `GetErrorBaseline` / `iterateErrorBaseline` in error_baseline.go.
-///
-/// Structure:
-/// 1. Summary section: one line per diagnostic
-/// 2. Two blank lines
-/// 3. For each input file: `==== filename (N errors) ====`, source
-///    lines with 4-space indent, squiggle markers, `!!! error TSxxxx:`
 fn format_error_baseline(output: &CompilationOutput) -> String {
     if output.diagnostics.is_empty() {
         return String::new();
@@ -154,7 +128,6 @@ fn format_error_baseline(output: &CompilationOutput) -> String {
     let locale = None;
     let mut result = String::new();
 
-    // Part 1: Summary — one line per diagnostic, sorted by (file, pos, code)
     let mut diags = output.diagnostics.clone();
     diags.sort_by(|a, b| {
         let a_file = a.file.as_ref().map(|f| f.file_name.as_str()).unwrap_or("");
@@ -179,7 +152,6 @@ fn format_error_baseline(output: &CompilationOutput) -> String {
     result.push_str(CRLF);
     result.push_str(CRLF);
 
-    // Part 2: Global errors (no file)
     let mut first = true;
     for diag in &diags {
         if diag.file.is_none() {
@@ -203,11 +175,9 @@ fn format_error_baseline(output: &CompilationOutput) -> String {
         }
     }
 
-    // Part 3: Per-file interleaved source + squiggles
     for (unit_name, content) in &output.input_files {
         let normalized_name = remove_test_path_prefixes(unit_name);
 
-        // Filter diagnostics for this file
         let file_diags: Vec<&Diagnostic> = diags
             .iter()
             .filter(|d| {
@@ -227,10 +197,8 @@ fn format_error_baseline(output: &CompilationOutput) -> String {
         ));
         result.push_str(CRLF);
 
-        // Split content into lines
         let lines: Vec<&str> = content.split('\n').collect();
 
-        // Compute line starts
         let mut line_starts: Vec<usize> = vec![0];
         for (i, ch) in content.char_indices() {
             if ch == '\n' {
@@ -239,7 +207,7 @@ fn format_error_baseline(output: &CompilationOutput) -> String {
         }
 
         for (line_idx, line) in lines.iter().enumerate() {
-            // Strip trailing \r
+
             let line = line.strip_suffix('\r').unwrap_or(line);
 
             let this_line_start = *line_starts.get(line_idx).unwrap_or(&0);
@@ -249,17 +217,14 @@ fn format_error_baseline(output: &CompilationOutput) -> String {
                 *line_starts.get(line_idx + 1).unwrap_or(&content.len())
             };
 
-            // Emit the source line
             result.push_str("    ");
             result.push_str(line);
             result.push_str(CRLF);
 
-            // Emit squiggles for errors on this line
             for diag in &file_diags {
                 let err_start = diag.loc.pos();
                 let err_end = err_start + diag.loc.len();
 
-                // Does this error start or continue on this line?
                 if err_end >= this_line_start
                     && (err_start < next_line_start || line_idx == lines.len() - 1)
                 {
@@ -268,10 +233,9 @@ fn format_error_baseline(output: &CompilationOutput) -> String {
                         - (this_line_start as i64 - err_start as i64).max(0);
                     let squiggle_start = (relative_offset).max(0) as usize;
 
-                    // Build squiggle line
                     result.push_str("    ");
                     let prefix = &line[..squiggle_start.min(line.len())];
-                    // Replace non-whitespace with spaces
+
                     for ch in prefix.chars() {
                         result.push(if ch.is_whitespace() { ch } else { ' ' });
                     }
@@ -287,7 +251,6 @@ fn format_error_baseline(output: &CompilationOutput) -> String {
                     }
                     result.push_str(CRLF);
 
-                    // Emit error message if this is where the error ends
                     if line_idx == lines.len() - 1 || next_line_start > err_end {
                         let msg = tsox::diagnosticwriter::message_text(diag, locale);
                         for msg_line in msg.lines() {
@@ -302,7 +265,7 @@ fn format_error_baseline(output: &CompilationOutput) -> String {
                             ));
                             result.push_str(CRLF);
                         }
-                        // Related information
+
                         for info in &diag.related_information {
                             let info_loc = if let Some(info_file) = &info.file {
                                 let (l, c) = line_and_character(
@@ -486,8 +449,6 @@ fn print_flush(msg: &str) {
     let _ = std::io::stdout().flush();
 }
 
-/// Process a batch of tests in a single subprocess. This function is called
-/// both directly (when invoked with --batch mode) and via subprocess spawning.
 fn process_batch(
     files: &[String],
     test_dir: &Path,
@@ -505,8 +466,7 @@ fn process_batch(
 
     for rel_path in files {
         let full_path = test_dir.join(rel_path);
-        // Extract basename from the original rel_path (before clean_name
-        // transformation) for accurate skip-list matching.
+
         let basename = Path::new(rel_path)
             .file_name()
             .map(|f| f.to_string_lossy().to_string())
@@ -516,8 +476,7 @@ fn process_batch(
             continue;
         }
         let clean_name = if is_submodule {
-            // Take last 2 path components but preserve order.
-            // E.g. "expressions/typeAssertions/typeAssertions.ts" -> "typeAssertions/typeAssertions.ts"
+
             let components: Vec<&str> = rel_path.split('/').collect();
             let n = components.len();
             if n >= 2 {
@@ -549,11 +508,8 @@ fn process_batch(
             Ok(output) => {
                 let error_baseline = format_error_baseline(&output);
 
-                // If a TS reference baseline directory was provided, compare
-                // against it directly instead of using the local reference set.
                 if let Some(ref_dir) = ts_ref_dir {
-                    // TS baseline name: last path component without .ts extension.
-                    // E.g. "typeAssertions.ts" -> "typeAssertions.errors.txt"
+
                     let ts_name = basename
                         .strip_suffix(".ts")
                         .or_else(|| basename.strip_suffix(".tsx"))
@@ -569,7 +525,7 @@ fn process_batch(
                     };
 
                     if expected.is_empty() && actual == baseline::NO_CONTENT {
-                        // Both empty — match
+
                         pass += 1;
                     } else if expected.trim_end() == actual.trim_end() {
                         pass += 1;
@@ -577,7 +533,7 @@ fn process_batch(
                         fail += 1;
                         fails.push(format!("DIFF: {clean_name}"));
                     }
-                    // Also write local baseline for inspection.
+
                     let baseline_name = format!(
                         "{}.errors.txt",
                         Path::new(&clean_name).with_extension("").to_string_lossy()
@@ -660,7 +616,6 @@ fn run_compiler_baselines(
     let start = Instant::now();
     let exe = std::env::current_exe().unwrap();
 
-    // Process in batches using subprocesses.
     let batches: Vec<String> = files[..limit].to_vec();
 
     print_flush(&format!(
@@ -670,7 +625,6 @@ fn run_compiler_baselines(
     for chunk in batches.chunks(BATCH_SIZE) {
         let _chunk_start = Instant::now();
 
-        // Spawn subprocess for this batch.
         let mut cmd = Command::new(&exe);
         cmd.arg("--batch-mode")
             .arg("--suite")
@@ -704,18 +658,16 @@ fn run_compiler_baselines(
             }
         };
 
-        // Wait with timeout.
         let timeout = Duration::from_secs(BATCH_TIMEOUT_SECS);
         let result = child.wait_timeout(timeout);
 
         match result {
             Ok(Some(status)) => {
-                // Process completed normally.
+
                 let output = child.wait_with_output();
                 if let Ok(out) = output {
                     let stdout = String::from_utf8_lossy(&out.stdout);
 
-                    // Parse results from stdout: "RESULT pass=N fail=N new=N panic=N skip=N"
                     for line in stdout.lines() {
                         if let Some(rest) = line.strip_prefix("RESULT ") {
                             for part in rest.split_whitespace() {
@@ -742,13 +694,11 @@ fn run_compiler_baselines(
                 }
 
                 if !status.success() && status.code() != Some(134) {
-                    // Non-zero exit but not SIGABRT (stack overflow)
-                    // Treat as batch panic
-                    // Results already parsed from stdout
+
                 }
             }
             Ok(None) => {
-                // Timeout — kill the child.
+
                 let _ = child.kill();
                 let _ = child.wait();
                 let _elapsed = start.elapsed().as_secs();
@@ -765,7 +715,6 @@ fn run_compiler_baselines(
             }
         }
 
-        // Progress update.
         let processed = total_pass + total_fail + total_new + total_panic + total_skip;
         if processed % 200 < BATCH_SIZE {
             let elapsed = start.elapsed().as_secs();
@@ -801,8 +750,7 @@ fn run_compiler_baselines(
 }
 
 fn main() {
-    // Run on a thread with a large stack (256 MB) to handle deep recursion
-    // in the type checker, both in batch mode (child process) and normal mode.
+
     let handle = std::thread::Builder::new()
         .stack_size(256 * 1024 * 1024)
         .spawn(main_inner)
@@ -821,7 +769,6 @@ fn main_inner() {
     let mut no_write = false;
     let mut ts_ref_dir: Option<String> = None;
 
-    // Batch mode args.
     let mut batch_mode = false;
     let mut batch_files: Vec<String> = Vec::new();
     let mut batch_test_dir = String::new();
@@ -896,7 +843,6 @@ fn main_inner() {
         i += 1;
     }
 
-    // Batch mode: process a list of files and print results as parseable output.
     if batch_mode {
         let test_dir = Path::new(&batch_test_dir);
         let (pass, fail, new, panic, skip, fails) = process_batch(
@@ -915,7 +861,6 @@ fn main_inner() {
         return;
     }
 
-    // Normal mode: enumerate and dispatch batches.
     if run_local {
         let local_dir = manifest_dir.join("tests/cases/compiler");
         if local_dir.exists() {
@@ -936,7 +881,7 @@ fn main_inner() {
             manifest_dir.join("../typescript-go/_submodules/TypeScript/tests/cases/conformance");
         if submodule_dir.exists() {
             print_flush("\n=== Running submodule conformance tests ===\n");
-            // If --ts-ref-dir was not provided, default to the TS submodule baselines.
+
             let ts_ref: Option<String> = ts_ref_dir.clone().or_else(|| {
                 let default = manifest_dir
                     .join("../typescript-go/_submodules/TypeScript/tests/baselines/reference");
@@ -968,7 +913,6 @@ fn main_inner() {
     print_flush("\n=== DONE ===\n");
 }
 
-/// Extension trait for child process wait with timeout.
 trait ChildWaitTimeout {
     fn wait_timeout(
         &mut self,
@@ -981,7 +925,7 @@ impl ChildWaitTimeout for std::process::Child {
         &mut self,
         duration: Duration,
     ) -> std::io::Result<Option<std::process::ExitStatus>> {
-        // Poll-based approach: check every 100ms.
+
         let start = Instant::now();
         loop {
             match self.try_wait()? {

@@ -1,23 +1,15 @@
-//! Tracing infrastructure for the checker.
-//!
-//! Ported from `internal/checker/tracer.go`. Provides timing and type
-//! recording for `--generateTrace` support. This is a minimal port that
-//! provides the API surface; full tracing logic will be added later.
-
 use std::collections::HashMap;
 use std::sync::Mutex;
 use std::time::Instant;
 
-/// A traced event with a timestamp and optional data.
 #[derive(Debug, Clone)]
 pub struct TraceEvent {
     pub name: String,
-    pub timestamp: u64, // microseconds since tracer start
-    pub duration: u64,  // microseconds
+    pub timestamp: u64,
+    pub duration: u64,
     pub args: HashMap<String, String>,
 }
 
-/// A type recording entry for `--generateTrace`.
 #[derive(Debug, Clone)]
 pub struct TypeRecordingEntry {
     pub type_id: u32,
@@ -25,7 +17,6 @@ pub struct TypeRecordingEntry {
     pub constructor_name: String,
 }
 
-/// The tracer for checker events.
 pub struct Tracer {
     start: Instant,
     events: Mutex<Vec<TraceEvent>>,
@@ -56,7 +47,6 @@ impl Tracer {
         self.enabled
     }
 
-    /// Start a named span. Returns a guard that records the event when dropped.
     pub fn start(&self, name: &str) -> TraceSpan<'_> {
         if self.enabled {
             TraceSpan {
@@ -69,7 +59,6 @@ impl Tracer {
         }
     }
 
-    /// Record a type for `--generateTrace`.
     pub fn record_type(&self, type_id: u32, flag_names: Vec<String>, constructor_name: &str) {
         if !self.enabled {
             return;
@@ -84,17 +73,14 @@ impl Tracer {
             });
     }
 
-    /// Get elapsed time in microseconds since tracer start.
     fn elapsed_us(&self) -> u64 {
         self.start.elapsed().as_micros() as u64
     }
 
-    /// Get all recorded events.
     pub fn events(&self) -> Vec<TraceEvent> {
         self.events.lock().unwrap().clone()
     }
 
-    /// Get all type recordings.
     pub fn type_recordings(&self) -> Vec<TypeRecordingEntry> {
         self.type_recordings.lock().unwrap().clone()
     }
@@ -106,7 +92,6 @@ impl Default for Tracer {
     }
 }
 
-/// A traced span. Records its duration when dropped.
 pub struct TraceSpan<'a> {
     tracer: Option<&'a Tracer>,
     name: String,
@@ -156,7 +141,7 @@ mod tests {
         let events = tracer.events();
         assert_eq!(events.len(), 1);
         assert_eq!(events[0].name, "test");
-        assert!(events[0].duration >= 50); // at least some time passed
+        assert!(events[0].duration >= 50);
     }
 
     #[test]

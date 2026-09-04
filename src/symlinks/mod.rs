@@ -1,36 +1,22 @@
-//! Known symlinks cache ported from `internal/symlinks/knownsymlinks.go`.
-//!
-//! Tracks directory and file symlinks so that module resolution can map
-//! between real paths and symlink paths.
-
 use crate::collections::syncmap::SyncMap;
 use crate::tspath::{self, Path};
 use std::collections::HashSet;
 use std::sync::{Arc, Mutex};
 
-/// Concurrent string set, mirroring `collections.SyncSet[string]` in Go.
 pub type SyncStringSet = Arc<Mutex<HashSet<String>>>;
 
-/// Creates a new empty `SyncStringSet`.
 fn new_sync_string_set() -> SyncStringSet {
     Arc::new(Mutex::new(HashSet::new()))
 }
 
-/// A known directory symlink mapping.
-///
-/// Mirrors `symlinks.KnownDirectoryLink` in Go.
 #[derive(Clone, Debug)]
 pub struct KnownDirectoryLink {
-    /// Matches the casing returned by `realpath`. Always has trailing separator.
+
     pub real: String,
-    /// `to_path(real)`. Stored to avoid repeated recomputation.
-    /// Always has trailing separator.
+
     pub real_path: Path,
 }
 
-/// Cache of known symlinks (both directory and file).
-///
-/// Mirrors `symlinks.KnownSymlinks` in Go.
 pub struct KnownSymlinks {
     directories: SyncMap<Path, KnownDirectoryLink>,
     directories_by_realpath: SyncMap<Path, SyncStringSet>,
@@ -41,9 +27,7 @@ pub struct KnownSymlinks {
 }
 
 impl KnownSymlinks {
-    /// Creates a new `KnownSymlinks` cache.
-    ///
-    /// Mirrors `symlinks.NewKnownSymlink`.
+
     pub fn new(current_directory: &str, use_case_sensitive_file_names: bool) -> Self {
         Self {
             directories: SyncMap::new(),
@@ -55,35 +39,27 @@ impl KnownSymlinks {
         }
     }
 
-    /// Returns `true` if a directory symlink is known for `symlink_path`.
     pub fn has_directory(&self, symlink_path: &Path) -> bool {
         let p = symlink_path.ensure_trailing_directory_separator();
         self.directories.load(&p).is_some()
     }
 
-    /// Gets the map from symlink to realpath for directories.
     pub fn directories(&self) -> &SyncMap<Path, KnownDirectoryLink> {
         &self.directories
     }
 
-    /// Gets the map from realpath to set of symlinks for directories.
     pub fn directories_by_realpath(&self) -> &SyncMap<Path, SyncStringSet> {
         &self.directories_by_realpath
     }
 
-    /// Gets the map from symlink to realpath for files.
     pub fn files(&self) -> &SyncMap<Path, String> {
         &self.files
     }
 
-    /// Gets the map from realpath to set of symlinks for files.
     pub fn files_by_realpath(&self) -> &SyncMap<Path, SyncStringSet> {
         &self.files_by_realpath
     }
 
-    /// Records a directory symlink.
-    ///
-    /// Mirrors `KnownSymlinks.SetDirectory`.
     pub fn set_directory(
         &self,
         symlink: &str,
@@ -99,9 +75,6 @@ impl KnownSymlinks {
         self.directories.store(symlink_path, real_directory);
     }
 
-    /// Records a file symlink.
-    ///
-    /// Mirrors `KnownSymlinks.SetFile`.
     pub fn set_file(&self, symlink: &str, symlink_path: Path, realpath: &str) {
         if self.files.load(&symlink_path).is_none() {
             let realpath_path =
@@ -114,9 +87,6 @@ impl KnownSymlinks {
         self.files.store(symlink_path, realpath.to_string());
     }
 
-    /// Processes a resolution, recording file and directory symlinks.
-    ///
-    /// Mirrors `KnownSymlinks.ProcessResolution`.
     pub fn process_resolution(&self, original_path: &str, resolved_file_name: &str) {
         if original_path.is_empty() || resolved_file_name.is_empty() {
             return;
@@ -152,10 +122,6 @@ impl KnownSymlinks {
         }
     }
 
-    /// Guesses a directory symlink from two paths that resolve to the same
-    /// underlying file.
-    ///
-    /// Mirrors the unexported `KnownSymlinks.guessDirectorySymlink`.
     pub fn guess_directory_symlink(&self, a: &str, b: &str, cwd: &str) -> (String, String) {
         let mut a_parts =
             tspath::get_path_components(&tspath::get_normalized_absolute_path(a, cwd), "");
@@ -188,10 +154,6 @@ impl KnownSymlinks {
         }
     }
 
-    /// Returns `true` if the directory name is `node_modules` or a scoped
-    /// package (starts with `@`).
-    ///
-    /// Mirrors the unexported `KnownSymlinks.isNodeModulesOrScopedPackageDirectory`.
     pub fn is_node_modules_or_scoped_package_directory(&self, s: &str) -> bool {
         !s.is_empty()
             && (tspath::get_canonical_file_name(s, self.use_case_sensitive_file_names)
@@ -199,13 +161,6 @@ impl KnownSymlinks {
                 || s.starts_with('@'))
     }
 
-    /// Populates the cache from resolved module and type-reference resolutions.
-    ///
-    /// Each callback receives a closure that is called for every resolution.
-    /// The closure receives `(original_path, resolved_file_name)`.
-    ///
-    /// This is a simplified signature compared to the Go version, which passes
-    /// the full `ResolvedModule` / `ResolvedTypeReferenceDirective` structs.
     pub fn set_symlinks_from_resolutions(
         &self,
         for_each_resolved_module: impl Fn(&dyn Fn(&str, &str)),
@@ -223,8 +178,6 @@ impl KnownSymlinks {
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    // --- Tests ported from internal/symlinks/knownsymlinks_test.go ---
 
     #[test]
     fn test_new_known_symlink() {
@@ -287,12 +240,10 @@ mod tests {
     fn test_process_resolution() {
         let cache = KnownSymlinks::new("/test/dir", true);
 
-        // Test with empty paths
         cache.process_resolution("", "");
         cache.process_resolution("original", "");
         cache.process_resolution("", "resolved");
 
-        // Test with valid paths
         let original_path = "/test/original/file.ts";
         let resolved_path = "/test/resolved/file.ts";
         cache.process_resolution(original_path, resolved_path);
@@ -308,7 +259,7 @@ mod tests {
         let cache = KnownSymlinks::new("/test/dir", true);
 
         let cases: &[(&str, &str, &str, &str, &str, &str)] = &[
-            // (name, a, b, cwd, expected_common_resolved, expected_common_original)
+
             (
                 "identical paths",
                 "/test/path/file.ts",
@@ -390,7 +341,6 @@ mod tests {
     fn test_set_symlinks_from_resolutions() {
         let cache = KnownSymlinks::new("/test/dir", true);
 
-        // Mock resolution data matching Go test
         let resolved_modules: &[(&str, &str)] = &[
             ("/test/original/file1.ts", "/test/resolved/file1.ts"),
             ("/test/original/file2.ts", "/test/resolved/file2.ts"),

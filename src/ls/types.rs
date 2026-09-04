@@ -1,15 +1,8 @@
-//! Additional LSP protocol types used by the language service.
-//!
-//! These types complement the subset already defined in
-//! `crate::lsp::lsproto::lsp`. They mirror the corresponding Go
-//! `lsproto.*` structs used by the language-service feature providers.
-
 #![allow(dead_code)]
 
 use crate::lsp::lsproto::lsp::{DocumentUri, Position, Range, TextEdit};
 use serde::{Deserialize, Serialize};
 
-/// A folding range.
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct FoldingRange {
     pub start_line: u32,
@@ -20,21 +13,18 @@ pub struct FoldingRange {
     pub collapsed_text: Option<String>,
 }
 
-/// A selection range.
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct SelectionRange {
     pub range: Range,
     pub parent: Option<Box<SelectionRange>>,
 }
 
-/// A document highlight.
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct DocumentHighlight {
     pub range: Range,
     pub kind: Option<DocumentHighlightKind>,
 }
 
-/// Document highlight kind.
 #[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
 pub enum DocumentHighlightKind {
     #[default]
@@ -43,13 +33,11 @@ pub enum DocumentHighlightKind {
     Write,
 }
 
-/// Semantic tokens data.
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct SemanticTokens {
     pub data: Vec<u32>,
 }
 
-/// Semantic token type names.
 pub mod semantic_token_type {
     pub const NAMESPACE: &str = "namespace";
     pub const CLASS: &str = "class";
@@ -76,7 +64,6 @@ pub mod semantic_token_type {
     pub const OPERATOR: &str = "operator";
 }
 
-/// Semantic token modifier names.
 pub mod semantic_token_modifier {
     pub const DECLARATION: &str = "declaration";
     pub const DEFINITION: &str = "definition";
@@ -91,7 +78,6 @@ pub mod semantic_token_modifier {
     pub const LOCAL: &str = "local";
 }
 
-/// A LocationLink provides an origin and target range for navigation.
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct LocationLink {
     pub origin_selection_range: Option<Range>,
@@ -100,7 +86,6 @@ pub struct LocationLink {
     pub target_selection_range: Range,
 }
 
-/// Hover information.
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct Hover {
     pub contents: HoverContent,
@@ -108,14 +93,12 @@ pub struct Hover {
     pub can_increase_verbosity: Option<bool>,
 }
 
-/// Hover contents.
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct HoverContent {
     pub markup_content: Option<crate::lsp::lsproto::lsp::MarkupContent>,
     pub string: Option<String>,
 }
 
-/// A document symbol.
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct DocumentSymbol {
     pub name: String,
@@ -128,7 +111,6 @@ pub struct DocumentSymbol {
     pub deprecated: Option<bool>,
 }
 
-/// Symbol kind values (LSP).
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize)]
 pub enum SymbolKind {
     #[default]
@@ -166,7 +148,6 @@ impl SymbolKind {
     }
 }
 
-/// A symbol information.
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct SymbolInformation {
     pub name: String,
@@ -177,7 +158,6 @@ pub struct SymbolInformation {
     pub deprecated: Option<bool>,
 }
 
-/// An inlay hint.
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct InlayHint {
     pub position: Position,
@@ -188,13 +168,11 @@ pub struct InlayHint {
     pub padding_right: Option<bool>,
 }
 
-/// Inlay hint label.
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct InlayHintLabel {
     pub string: Option<String>,
 }
 
-/// A code lens.
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct CodeLens {
     pub range: Range,
@@ -202,27 +180,23 @@ pub struct CodeLens {
     pub data: Option<CodeLensData>,
 }
 
-/// Code lens command.
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct CodeLensCommand {
     pub title: String,
     pub command: String,
 }
 
-/// Code lens data.
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct CodeLensData {
     pub uri: DocumentUri,
     pub kind: String,
 }
 
-/// Code lens kind.
 pub mod code_lens_kind {
     pub const REFERENCES: &str = "references";
     pub const IMPLEMENTATIONS: &str = "implementations";
 }
 
-/// Signature help information.
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct SignatureHelp {
     pub signatures: Vec<SignatureInformation>,
@@ -230,7 +204,6 @@ pub struct SignatureHelp {
     pub active_parameter: Option<u32>,
 }
 
-/// Signature information.
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct SignatureInformation {
     pub label: String,
@@ -238,14 +211,12 @@ pub struct SignatureInformation {
     pub parameters: Vec<ParameterInformation>,
 }
 
-/// Parameter information.
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct ParameterInformation {
     pub label: String,
     pub documentation: Option<String>,
 }
 
-/// A completion item.
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct CompletionItem {
     pub label: String,
@@ -262,7 +233,6 @@ pub struct CompletionItem {
     pub data: Option<CompletionItemData>,
 }
 
-/// Completion item data.
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct CompletionItemData {
     pub file_name: String,
@@ -270,22 +240,18 @@ pub struct CompletionItemData {
     pub name: String,
 }
 
-/// A completion list.
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct CompletionList {
     pub is_incomplete: bool,
     pub items: Vec<CompletionItem>,
 }
 
-/// Completion item apply kind.
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct CompletionItemApplyKinds;
 
-/// Completion item defaults.
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct CompletionItemDefaults;
 
-/// A diagnostic.
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct Diagnostic {
     pub range: Range,
@@ -296,28 +262,24 @@ pub struct Diagnostic {
     pub related_information: Option<Vec<DiagnosticRelatedInformation>>,
 }
 
-/// Related diagnostic information.
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct DiagnosticRelatedInformation {
     pub location: crate::lsp::lsproto::lsp::Location,
     pub message: String,
 }
 
-/// Multi-document highlight.
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct MultiDocumentHighlight {
     pub uri: DocumentUri,
     pub highlights: Vec<DocumentHighlight>,
 }
 
-/// Workspace edit.
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct WorkspaceEdit {
     pub changes: Option<std::collections::HashMap<DocumentUri, Vec<TextEdit>>>,
     pub document_changes: Option<Vec<TextDocumentEdit>>,
 }
 
-/// A text-document edit or create/rename/delete file operation.
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct TextDocumentEdit {
     pub text_document: Option<TextDocumentIdentifier>,
@@ -325,7 +287,6 @@ pub struct TextDocumentEdit {
     pub kind: TextDocumentEditKind,
 }
 
-/// Text document edit kind.
 #[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
 pub enum TextDocumentEditKind {
     #[default]
@@ -335,20 +296,17 @@ pub enum TextDocumentEditKind {
     Delete,
 }
 
-/// A rename-file operation.
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct RenameFile {
     pub old_uri: DocumentUri,
     pub new_uri: DocumentUri,
 }
 
-/// Text document identifier (with version).
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct TextDocumentIdentifier {
     pub uri: DocumentUri,
 }
 
-/// Code action kind constants.
 pub mod code_action_kind {
     pub const SOURCE_SORT_IMPORTS: &str = "source.sortImports";
     pub const SOURCE_ORGANIZE_IMPORTS: &str = "source.organizeImports";
@@ -357,7 +315,6 @@ pub mod code_action_kind {
     pub const REFACTOR: &str = "refactor";
 }
 
-/// A code action.
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct CodeAction {
     pub title: String,
@@ -366,14 +323,12 @@ pub struct CodeAction {
     pub diagnostic: Option<Diagnostic>,
 }
 
-/// Linked editing ranges.
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct LinkedEditingRanges {
     pub ranges: Vec<Range>,
     pub word_pattern: Option<String>,
 }
 
-/// A comment range (for folding / formatting).
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct CommentRange {
     pub kind: crate::ast::SyntaxKind,
@@ -393,14 +348,12 @@ impl CommentRange {
     }
 }
 
-/// Client capabilities (stub — Go's lsproto.ClientCapabilities is very large).
 #[derive(Debug, Clone, Default)]
 pub struct ClientCapabilities {
     pub text_document: TextDocumentClientCapabilities,
     pub experimental: ExperimentalCapabilities,
 }
 
-/// Text-document client capabilities.
 #[derive(Debug, Clone, Default)]
 pub struct TextDocumentClientCapabilities {
     pub hover: HoverCapability,
@@ -443,7 +396,6 @@ pub struct ExperimentalCapabilities {
     pub hover_verbosity_level: bool,
 }
 
-/// Code action params.
 #[derive(Debug, Clone, Default)]
 pub struct CodeActionParams {
     pub text_document: TextDocumentIdentifier,
@@ -451,21 +403,18 @@ pub struct CodeActionParams {
     pub context: CodeActionContext,
 }
 
-/// Code action context.
 #[derive(Debug, Clone, Default)]
 pub struct CodeActionContext {
     pub diagnostics: Vec<Diagnostic>,
     pub only: Vec<String>,
 }
 
-/// Completion context.
 #[derive(Debug, Clone, Default)]
 pub struct CompletionContext {
     pub trigger_kind: u32,
     pub trigger_character: Option<String>,
 }
 
-/// Signature help context.
 #[derive(Debug, Clone, Default)]
 pub struct SignatureHelpContext {
     pub trigger_kind: u32,
@@ -473,7 +422,6 @@ pub struct SignatureHelpContext {
     pub is_retrigger: bool,
 }
 
-/// Rename params.
 #[derive(Debug, Clone, Default)]
 pub struct RenameParams {
     pub text_document: TextDocumentIdentifier,
@@ -481,28 +429,24 @@ pub struct RenameParams {
     pub new_name: String,
 }
 
-/// Inlay hint params.
 #[derive(Debug, Clone, Default)]
 pub struct InlayHintParams {
     pub text_document: TextDocumentIdentifier,
     pub range: Range,
 }
 
-/// Selection range params.
 #[derive(Debug, Clone, Default)]
 pub struct SelectionRangeParams {
     pub text_document: TextDocumentIdentifier,
     pub positions: Vec<Position>,
 }
 
-/// Linked editing range params.
 #[derive(Debug, Clone, Default)]
 pub struct LinkedEditingRangeParams {
     pub text_document: TextDocumentIdentifier,
     pub position: Position,
 }
 
-/// VS OnAutoInsert params.
 #[derive(Debug, Clone, Default)]
 pub struct VsOnAutoInsertParams {
     pub text_document: TextDocumentIdentifier,

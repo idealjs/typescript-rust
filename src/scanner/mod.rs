@@ -1,10 +1,3 @@
-//! Lexical scanner, ported from `internal/scanner/scanner.go`.
-//!
-//! The scanner tokenizes TypeScript source text into `SyntaxKind` tokens.
-//! This is a simplified initial port covering identifiers, keywords,
-//! numbers, strings, and punctuation. Full escape-sequence and regex
-//! scanning will be added incrementally.
-
 use crate::ast::SyntaxKind;
 use crate::core::compiler_options::ScriptTarget;
 use std::collections::HashMap;
@@ -13,54 +6,31 @@ use std::sync::OnceLock;
 mod regexp;
 mod unicode_properties;
 
-/// Callback for reporting scan errors.
 pub type ErrorCallback = fn(kind: DiagnosticKind, start: usize, length: usize);
 
-/// Simplified diagnostic kinds for the scanner.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum DiagnosticKind {
     InvalidCharacter,
-    /// File appears to be binary (TS1490). Emitted once when the scanner hits
-    /// a UTF-8 replacement character (U+FFFD, the Rust `chars()` decode failure
-    /// sentinel) — mirrors Go's `File_appears_to_be_binary` at scanner.go:937.
-    /// After emitting, the scanner jumps to end-of-file.
+
     FileAppearsToBeBinary,
     UnterminatedStringLiteral,
     UnterminatedTemplateLiteral,
     UnterminatedRegularExpression,
-    /// Unknown regular expression flag (TS1499).
+
     UnknownRegularExpressionFlag,
-    /// Duplicate regular expression flag (TS1500).
+
     DuplicateRegularExpressionFlag,
-    /// The `u` and `v` flags cannot be set simultaneously (TS1502).
+
     UnicodeUAndVFlagsMutuallyExclusive,
-    /// Octal literals are not allowed. Use the syntax '0o...' (TS1121).
+
     OctalLiteralNotAllowed,
-    /// Decimals with leading zeros are not allowed (TS1489).
+
     DecimalWithLeadingZero,
-    /// Numeric separators are not allowed here (TS6188).
+
     NumericSeparatorNotAllowed,
-    /// A regex body validation diagnostic carrying the specific `Message`.
-    /// Used for the ~30 TS1501–TS1534 regex body diagnostics produced by
-    /// `RegExpParser`. Avoids adding 30+ individual enum variants.
+
     RegexMessage(crate::diagnostics::Message),
 }
-
-// ────────────────────────────────────────────────────────────────────────────
-// TokenFlags
-//
-// Mirrors Go's `ast.TokenFlags` bitset (`internal/ast/tokenflags.go`). The
-// scanner accumulates these during `scan()` and exposes them via
-// `Scanner::token_flags()`. Callers (parser/binder) can test individual bits
-// with the `contains` helper. Currently the scanner sets:
-//   - `PRECEDING_LINE_BREAK` (during trivia skipping)
-//   - `UNTERMINATED` (string/template/regex)
-//   - `SINGLE_QUOTE` (string literals with `'`)
-//   - `HEX_SPECIFIER` / `BINARY_SPECIFIER` / `OCTAL_SPECIFIER` (numeric literals)
-//   - `SCIENTIFIC` / `OCTAL` / `CONTAINS_LEADING_ZERO` (numeric literals)
-// JSDoc-related flags and escape-sequence flags are deferred until those
-// scanner paths are migrated.
-// ────────────────────────────────────────────────────────────────────────────
 
 pub type TokenFlags = u32;
 
@@ -112,24 +82,16 @@ pub const TOKEN_FLAGS_IS_INVALID: TokenFlags = TOKEN_FLAGS_OCTAL
     | TOKEN_FLAGS_CONTAINS_INVALID_SEPARATOR
     | TOKEN_FLAGS_CONTAINS_INVALID_ESCAPE;
 
-/// Test whether `flags` contains all bits in `bit`. For single-flag checks
-/// this is equivalent to `(flags & bit) != 0`; for combined masks like
-/// `TOKEN_FLAGS_WITH_SPECIFIER` use `token_flags_intersects` if you want
-/// "any of these bits set".
 pub fn token_flags_contains(flags: TokenFlags, bit: TokenFlags) -> bool {
     (flags & bit) == bit
 }
 
-/// Test whether `flags` has *any* of the bits in `mask` set. Use this for
-/// combined masks like `TOKEN_FLAGS_WITH_SPECIFIER` (HEX | BINARY | OCTAL).
 pub fn token_flags_intersects(flags: TokenFlags, mask: TokenFlags) -> bool {
     (flags & mask) != 0
 }
 
-/// Keywords mapping (text → SyntaxKind).
 static TEXT_TO_KEYWORD: OnceLock<HashMap<&'static str, SyntaxKind>> = OnceLock::new();
 
-/// Punctuation mapping (text → SyntaxKind).
 static TEXT_TO_TOKEN: OnceLock<HashMap<&'static str, SyntaxKind>> = OnceLock::new();
 
 fn keywords() -> &'static HashMap<&'static str, SyntaxKind> {
@@ -293,23 +255,16 @@ fn punctuation() -> &'static HashMap<&'static str, SyntaxKind> {
     })
 }
 
-/// Look up a keyword by text. Returns `None` if not a keyword.
 pub fn string_to_keyword(text: &str) -> Option<SyntaxKind> {
     keywords().get(text).copied()
 }
 
-/// Look up a punctuation token by text.
 pub fn string_to_token(text: &str) -> Option<SyntaxKind> {
     punctuation().get(text).copied()
 }
 
 static TOKEN_TO_TEXT: OnceLock<HashMap<SyntaxKind, &'static str>> = OnceLock::new();
 
-/// Return the source-text representation of a token kind, matching Go's
-/// `scanner.TokenToString`. For punctuation this is the punctuation sequence
-/// (e.g., `CommaToken` → `","`); for keywords it is the keyword text (e.g.,
-/// `ClassKeyword` → `"class"`); for `Identifier` it returns `"identifier"`.
-/// Tokens not in the keyword/punctuation tables return `""`.
 pub fn token_to_string(token: SyntaxKind) -> &'static str {
     TOKEN_TO_TEXT
         .get_or_init(|| {
@@ -344,9 +299,6 @@ pub fn token_to_string(token: SyntaxKind) -> &'static str {
         .unwrap_or("")
 }
 
-/// The lexical scanner.
-///
-/// Mirrors `scanner.Scanner` in Go.
 #[derive(Clone)]
 pub struct Scanner {
     text: String,
@@ -355,42 +307,25 @@ pub struct Scanner {
     token: SyntaxKind,
     token_pos: usize,
     token_end: usize,
-    /// Start of the current token *including* any leading trivia, preserved
-    /// across trivia-skipping iterations. Mirrors Go's `fullStartPos`
-    /// (`scanner.go:195,469`): set once at the top of `scan()` and not reset
-    /// while trivia is skipped, so callers can reconstruct leading
-    /// comments/whitespace via `get_leading_comment_ranges`.
+
     full_start_pos: usize,
     preceding_line_break: bool,
     has_preceding_line_break: bool,
-    /// Byte offset of the non-text (binary) marker character when the scan
-    /// terminated on one (Go's `NonTextFileMarkerTrivia`); the parser
-    /// reports TS1128 there.
+
     binary_marker_pos: Option<usize>,
-    /// Bitset of `TOKEN_FLAGS_*` for the current token, mirroring Go's
-    /// `Scanner.tokenFlags` (`scanner.go:198`). Accumulated during `scan()`
-    /// and exposed via `token_flags()`. `has_preceding_line_break` is kept
-    /// in sync with `TOKEN_FLAGS_PRECEDING_LINE_BREAK` for backwards
-    /// compatibility with existing parser call sites.
+
     token_flags: TokenFlags,
-    /// Leading-asterisk skip depth for JSDoc type scanning. When non-zero,
-    /// a single `*` at line start is consumed as trivia and sets
-    /// `TOKEN_FLAGS_PRECEDING_JSDOC_LEADING_ASTERISKS`. Mirrors Go's
-    /// `Scanner.skipJSDocLeadingAsterisks` (`scanner.go:200`), which is a
-    /// counter to support nested JSDoc contexts.
+
     skip_jsdoc_leading_asterisks: i32,
     error_callback: Option<ErrorCallback>,
-    /// Errors collected when no `error_callback` is set (or always, for
-    /// retrieval via `take_errors`).
+
     errors: Vec<ScannerError>,
-    /// `@ts-expect-error` / `@ts-ignore` directives collected from comments.
+
     comment_directives: Vec<CommentDirective>,
-    /// Script target for regex flag availability checks (TS1501). Defaults to
-    /// `ESNext` (no restrictions). Mirrors Go's `Scanner.scriptTarget`.
+
     script_target: crate::core::compiler_options::ScriptTarget,
 }
 
-/// A scanner error: kind + position + length.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct ScannerError {
     pub kind: DiagnosticKind,
@@ -398,16 +333,14 @@ pub struct ScannerError {
     pub length: usize,
 }
 
-/// Kind of comment directive (`@ts-*` pragma in comments).
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum CommentDirectiveKind {
-    /// `@ts-expect-error`
+
     ExpectError,
-    /// `@ts-ignore`
+
     Ignore,
 }
 
-/// A comment directive collected from comments.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct CommentDirective {
     pub pos: usize,
@@ -415,7 +348,6 @@ pub struct CommentDirective {
     pub kind: CommentDirectiveKind,
 }
 
-/// Scanner options.
 #[derive(Debug, Clone, Default)]
 pub struct ScannerOptions {
     pub language_variant: crate::ast::LanguageVariant,
@@ -451,13 +383,10 @@ impl Scanner {
         self
     }
 
-    /// Set the script target for regex flag availability checks (TS1501).
     pub fn set_script_target(&mut self, target: crate::core::compiler_options::ScriptTarget) {
         self.script_target = target;
     }
 
-    /// Report a scanner error. Calls the error callback if set, and always
-    /// stores the error for later retrieval via `take_errors`.
     fn report_error(&mut self, kind: DiagnosticKind, pos: usize, length: usize) {
         if let Some(cb) = self.error_callback {
             cb(kind, pos, length);
@@ -465,43 +394,39 @@ impl Scanner {
         self.errors.push(ScannerError { kind, pos, length });
     }
 
-    /// Drain and return all collected scanner errors.
     pub fn take_errors(&mut self) -> Vec<ScannerError> {
         std::mem::take(&mut self.errors)
     }
 
-    /// All collected comment directives (`@ts-expect-error` / `@ts-ignore`).
     pub fn comment_directives(&self) -> &[CommentDirective] {
         &self.comment_directives
     }
 
-    /// Process a comment for `@ts-*` directives.
-    /// Mirrors Go's `Scanner.processCommentDirective`.
     fn process_comment_directive(&mut self, start: usize, end: usize, multiline: bool) {
         let text = self.text.as_bytes();
         let mut pos = start;
         if multiline {
-            // Skip whitespace
+
             while pos < end && (text[pos] == b' ' || text[pos] == b'\t') {
                 pos += 1;
             }
-            // Skip combinations of / and *
+
             while pos < end && (text[pos] == b'/' || text[pos] == b'*') {
                 pos += 1;
             }
         } else {
-            // Skip opening //
+
             pos += 2;
-            // Skip another / if present (for /// triple-slash)
+
             while pos < end && text[pos] == b'/' {
                 pos += 1;
             }
         }
-        // Skip whitespace
+
         while pos < end && (text[pos] == b' ' || text[pos] == b'\t') {
             pos += 1;
         }
-        // Directive must start with '@'
+
         if !(pos < end && text[pos] == b'@') {
             return;
         }
@@ -521,34 +446,26 @@ impl Scanner {
         });
     }
 
-    /// The current token's kind.
     pub fn token(&self) -> SyntaxKind {
         self.token
     }
 
-    /// The start position of the current token.
     pub fn token_pos(&self) -> usize {
         self.token_pos
     }
 
-    /// The start position of the current token *including* any leading
-    /// trivia (whitespace/comments). Mirrors Go's `TokenFullStart`.
     pub fn full_start_pos(&self) -> usize {
         self.full_start_pos
     }
 
-    /// The end position of the current token.
     pub fn token_end(&self) -> usize {
         self.token_end
     }
 
-    /// The text of the current token.
     pub fn token_text(&self) -> &str {
         &self.text[self.token_pos..self.token_end]
     }
 
-    /// The value of the current token (for string/template literals, this is
-    /// the unquoted, unescaped value; for other tokens, same as `token_text`).
     pub fn token_value(&self) -> String {
         let text = self.token_text();
         if text.len() >= 2 {
@@ -564,26 +481,18 @@ impl Scanner {
         text.to_string()
     }
 
-    /// Whether the current token is preceded by a line break.
     pub fn has_preceding_line_break(&self) -> bool {
         self.has_preceding_line_break
     }
 
-    /// Bitset of `TOKEN_FLAGS_*` for the current token, mirroring Go's
-    /// `Scanner.TokenFlags()`. Use `token_flags_contains(flags, bit)` to test
-    /// individual bits, or compare with the `TOKEN_FLAGS_*` constants directly.
     pub fn token_flags(&self) -> TokenFlags {
         self.token_flags
     }
 
-    /// Whether the current token is preceded by a JSDoc comment (`/** ... */`).
-    /// Mirrors Go's `Scanner.HasPrecedingJSDocComment`.
     pub fn has_preceding_jsdoc_comment(&self) -> bool {
         token_flags_contains(self.token_flags, TOKEN_FLAGS_PRECEDING_JSDOC_COMMENT)
     }
 
-    /// Whether the current token is preceded by a consumed JSDoc leading
-    /// asterisk. Mirrors Go's `Scanner.HasPrecedingJSDocLeadingAsterisks`.
     pub fn has_preceding_jsdoc_leading_asterisks(&self) -> bool {
         token_flags_contains(
             self.token_flags,
@@ -591,8 +500,6 @@ impl Scanner {
         )
     }
 
-    /// Whether the preceding JSDoc comment contains a `@deprecated` tag.
-    /// Mirrors Go's `Scanner.HasPrecedingJSDocWithDeprecatedTag`.
     pub fn has_preceding_jsdoc_with_deprecated_tag(&self) -> bool {
         token_flags_contains(
             self.token_flags,
@@ -600,8 +507,6 @@ impl Scanner {
         )
     }
 
-    /// Whether the preceding JSDoc comment contains a `@see` or `@link` tag.
-    /// Mirrors Go's `Scanner.HasPrecedingJSDocWithSeeOrLink`.
     pub fn has_preceding_jsdoc_with_see_or_link(&self) -> bool {
         token_flags_contains(
             self.token_flags,
@@ -609,11 +514,6 @@ impl Scanner {
         )
     }
 
-    /// Enable/disable skipping JSDoc leading asterisks. When enabled, a
-    /// single `*` at line start is consumed as trivia (setting
-    /// `TOKEN_FLAGS_PRECEDING_JSDOC_LEADING_ASTERISKS`) instead of producing
-    /// an `AsteriskToken`. This is a counter to support nested JSDoc
-    /// contexts. Mirrors Go's `Scanner.SetSkipJSDocLeadingAsterisks`.
     pub fn set_skip_jsdoc_leading_asterisks(&mut self, skip: bool) {
         if skip {
             self.skip_jsdoc_leading_asterisks += 1;
@@ -622,41 +522,26 @@ impl Scanner {
         }
     }
 
-    /// Current scan position.
     pub fn pos(&self) -> usize {
         self.pos
     }
 
-    /// The end of the scanner's current text range. When the scanner is
-    /// re-pointed via `set_range`, this is the end of the sub-range.
-    /// Mirrors Go's `scanner.end`. Used by the JSDoc parser to know where
-    /// the comment body ends.
     pub fn end(&self) -> usize {
         self.end
     }
 
-    /// The current value of the `skip_jsdoc_leading_asterisks` counter.
-    /// Mirrors Go's `scanner.skipJsdocLeadingAsterisks` field access.
     pub fn skip_jsdoc_leading_asterisks_raw(&self) -> i32 {
         self.skip_jsdoc_leading_asterisks
     }
 
-    /// Directly set the `skip_jsdoc_leading_asterisks` counter. Used by
-    /// the JSDoc type expression parser to save/restore the skip state.
     pub fn set_skip_jsdoc_leading_asterisks_raw(&mut self, value: i32) {
         self.skip_jsdoc_leading_asterisks = value;
     }
 
-    /// The full source text.
     pub fn text(&self) -> &str {
         &self.text
     }
 
-    /// Re-point the scanner at a range within the current text, resetting
-    /// token state. Used by the JSDoc parser to scan within a comment body
-    /// (between `/**` and `*/`) without creating a new scanner. Mirrors
-    /// Go's `scanner.SetText` + `scanner.ResetPos` pattern in
-    /// `parseJSDocComment` (`jsdoc.go:163-166`).
     pub fn set_range(&mut self, pos: usize, end: usize) {
         self.pos = pos;
         self.end = end;
@@ -669,22 +554,11 @@ impl Scanner {
         self.has_preceding_line_break = false;
     }
 
-    /// Scan the next token and return its kind.
     pub fn scan(&mut self) -> SyntaxKind {
-        // Reset the line-break accumulator and the token flags; both are set
-        // during trivia skipping / token scanning below. `has_preceding_line_break`
-        // and `token_flags` are snapshotted *after* the loop exits (mirrors
-        // Go's `tokenFlags` accumulation in `scanner.go:469-491`), so line
-        // breaks encountered while skipping trivia are correctly reflected on
-        // the returned token.
+
         self.preceding_line_break = false;
         self.token_flags = TOKEN_FLAGS_NONE;
 
-        // `full_start_pos` marks where the current token's leading trivia
-        // began. It is set once on entry and preserved across trivia-skipping
-        // iterations (mirrors Go's `fullStartPos`, `scanner.go:469`). The
-        // post-trivia `token_pos` is reset each iteration below (mirrors Go's
-        // `tokenStart`, `scanner.go:473`).
         self.full_start_pos = self.pos;
 
         let token = loop {
@@ -696,15 +570,8 @@ impl Scanner {
                 break self.token;
             }
 
-            // Decode the actual UTF-8 character at the current position.
-            // For ASCII bytes, this is equivalent to `as_bytes()[pos] as char`,
-            // but for multi-byte characters (e.g., CJK), it correctly decodes
-            // the full codepoint instead of just the first byte.
             let c = self.text[self.pos..].chars().next().unwrap();
 
-            // Skip trivia (whitespace, comments) by `continue`-ing the loop so
-            // `full_start_pos` is preserved while `token_pos` advances past
-            // the trivia on the next iteration.
             if is_whitespace(c) {
                 self.scan_whitespace();
                 continue;
@@ -726,12 +593,10 @@ impl Scanner {
                 }
             }
 
-            // Identifier or keyword
             if is_identifier_start(c) {
                 break self.scan_identifier();
             }
 
-            // Number
             if is_digit(c)
                 || (c == '.'
                     && self.pos + 1 < self.end
@@ -740,23 +605,14 @@ impl Scanner {
                 break self.scan_number();
             }
 
-            // String
             if c == '"' || c == '\'' {
                 break self.scan_string(c);
             }
 
-            // Template literal start
             if c == '`' {
                 break self.scan_template();
             }
 
-            // JSDoc leading asterisk: when `skip_jsdoc_leading_asterisks` is
-            // active, consume a single `*` at line start as trivia (mirrors
-            // Go `scanner.go:569-575`). Only applies to `*` NOT followed by
-            // `*` or `=` (those form `**` / `*=` tokens). The flag is set
-            // once per token so only the first leading `*` is consumed; the
-            // `continue` preserves `full_start_pos` while `token_pos`
-            // advances past the asterisk on the next iteration.
             if c == '*'
                 && self.skip_jsdoc_leading_asterisks != 0
                 && self.preceding_line_break
@@ -777,9 +633,6 @@ impl Scanner {
                 }
             }
 
-            // Shebang: `#!` at the very start of the file is trivia spanning the
-            // rest of the line. Mirrors Go's `#` case (`scanner.go:898-910`).
-            // Must be the first non-trivia byte (no leading whitespace).
             if c == '#'
                 && self.pos == 0
                 && self.pos + 1 < self.end
@@ -796,22 +649,13 @@ impl Scanner {
                 continue;
             }
 
-            // Private identifier: `#name`. Mirrors Go's `#` case
-            // (`scanner.go:911-925`) — `#` followed by identifier characters
-            // scans as a single `PrivateIdentifier` token whose text includes
-            // the leading `#` (invalid `#` reports InvalidCharacter, matching
-            // Go).
             if c == '#' {
                 break self.scan_private_identifier();
             }
 
-            // Punctuation
             break self.scan_punctuation();
         };
-        // Snapshot the accumulated state into the per-token fields. Keep
-        // `has_preceding_line_break` and `token_flags` in sync so existing
-        // parser call sites can keep using `has_preceding_line_break()` while
-        // new call sites use `token_flags()` directly.
+
         self.has_preceding_line_break = self.preceding_line_break;
         if self.preceding_line_break {
             self.token_flags |= TOKEN_FLAGS_PRECEDING_LINE_BREAK;
@@ -819,17 +663,11 @@ impl Scanner {
         token
     }
 
-    /// Continue scanning a template literal after a `${...}` expression.
-    ///
-    /// This mirrors the Go scanner's template rescanning path at a small scale:
-    /// the parser consumes the `}` for the embedded expression, then asks the
-    /// scanner for the following template chunk without skipping trivia.
     pub fn scan_template_continuation(&mut self) -> SyntaxKind {
         self.preceding_line_break = false;
         self.token_flags = TOKEN_FLAGS_NONE;
         self.token_pos = self.pos;
-        // Template continuation does not skip trivia, so the full start equals
-        // the token start.
+
         self.full_start_pos = self.pos;
 
         let mut has_substitution = false;
@@ -871,11 +709,7 @@ impl Scanner {
     }
 
     fn scan_whitespace(&mut self) {
-        // Decode FULL UTF-8 codepoints: non-ASCII whitespace (NBSP, BOM,
-        // ideographic space, …) is multi-byte — a byte-wise `as char` reads
-        // the lead byte as a Latin-1 char, matches nothing, and leaves pos
-        // untouched while scan()'s `is_whitespace` keeps returning true →
-        // infinite trivia loop (typeGuardFunctionErrors' U+00A0).
+
         while self.pos < self.end {
             let c = self.text[self.pos..].chars().next().unwrap();
             if !is_whitespace(c) {
@@ -889,7 +723,7 @@ impl Scanner {
     }
 
     fn scan_single_line_comment(&mut self) {
-        // Skip //
+
         self.pos += 2;
         while self.pos < self.end {
             let c = self.text.as_bytes()[self.pos] as char;
@@ -901,13 +735,9 @@ impl Scanner {
     }
 
     fn scan_multi_line_comment(&mut self) {
-        // Skip /*
+
         self.pos += 2;
-        // Detect JSDoc: `/**` but not `/**/` (empty comment). Mirrors Go's
-        // `isJSDoc := s.char() == '*' && s.charAt(1) != '/'`
-        // (`scanner.go:642`). `token_pos` points at the opening `/` of the
-        // comment, used later to extract the full comment text for tag
-        // scanning (mirrors Go's `s.text[s.tokenStart:s.pos]`).
+
         let is_jsdoc = self.pos < self.end
             && self.text.as_bytes()[self.pos] as char == '*'
             && (self.pos + 1 >= self.end || self.text.as_bytes()[self.pos + 1] as char != '/');
@@ -931,10 +761,7 @@ impl Scanner {
             }
             self.pos += 1;
         }
-        // Unterminated comment: reached end of file without `*/`. Go reports
-        // `Asterisk_Slash_expected` here; the Rust scanner does not currently
-        // surface that diagnostic (a pre-existing gap). JSDoc flags are still
-        // set so callers can detect the preceding JSDoc comment.
+
         if is_jsdoc {
             self.token_flags |= TOKEN_FLAGS_PRECEDING_JSDOC_COMMENT;
             let comment_text = &self.text[comment_start..self.pos];
@@ -944,8 +771,7 @@ impl Scanner {
 
     fn scan_identifier(&mut self) -> SyntaxKind {
         let start = self.pos;
-        // Advance past the first character (already validated as identifier start).
-        // Use len_utf8() to correctly handle multi-byte characters (e.g., CJK).
+
         let first_c = self.text[self.pos..].chars().next().unwrap();
         self.pos += first_c.len_utf8();
         while self.pos < self.end {
@@ -961,16 +787,10 @@ impl Scanner {
         self.token
     }
 
-    /// Scan a private identifier (`#name`). Mirrors Go's `#` case
-    /// (`scanner.go:921-925`): `self.pos` is at the `#`. We advance past it,
-    /// then consume the following identifier characters. The token text
-    /// (accessed via `token_text()`) includes the leading `#`. If `#` is not
-    /// followed by an identifier-start character, Go reports an error and
-    /// yields a `PrivateIdentifier` whose value is just `"#"`.
     fn scan_private_identifier(&mut self) -> SyntaxKind {
-        // Consume the leading `#`.
+
         self.pos += 1;
-        // Scan the identifier part following `#`.
+
         if self.pos < self.end {
             let next_c = self.text[self.pos..].chars().next().unwrap();
             if is_identifier_start(next_c) {
@@ -983,10 +803,7 @@ impl Scanner {
                     self.pos += c.len_utf8();
                 }
             } else {
-                // `#` not followed by an identifier start — report AT the
-                // `#` itself with width 1 (Go scanner.go:922
-                // `s.errorAt(Invalid_character, s.pos-1, 1)`) and yield a
-                // minimal `#` private identifier.
+
                 self.report_error(DiagnosticKind::InvalidCharacter, self.pos - 1, 1);
             }
         }
@@ -1000,7 +817,7 @@ impl Scanner {
         if self.text.as_bytes()[self.pos] as char == '0' && self.pos + 1 < self.end {
             let next = self.text.as_bytes()[self.pos + 1] as char;
             if next == 'x' || next == 'X' {
-                // Hex
+
                 self.pos += 2;
                 self.scan_number_fragment_with_sep(true, true);
                 self.token_end = self.pos;
@@ -1009,7 +826,7 @@ impl Scanner {
                 return self.token;
             }
             if next == 'b' || next == 'B' {
-                // Binary
+
                 self.pos += 2;
                 self.scan_binary_fragment_with_sep();
                 self.token_end = self.pos;
@@ -1018,7 +835,7 @@ impl Scanner {
                 return self.token;
             }
             if next == 'o' || next == 'O' {
-                // Octal
+
                 self.pos += 2;
                 self.scan_octal_specifier_fragment_with_sep();
                 self.token_end = self.pos;
@@ -1028,31 +845,17 @@ impl Scanner {
             }
         }
 
-        // Decimal / legacy octal / leading-zero handling. Mirrors Go's
-        // `scanNumber` (`scanner.go:1944-2042`): when the literal starts with
-        // `0` (without an `x`/`b`/`o` specifier), scan the following digits to
-        // distinguish three cases:
-        //   1. `0_...` — separator not allowed after leading zero; report
-        //      error, reset, re-scan as plain fragment.
-        //   2. `0` + all-octal digits (e.g. `0777`) — legacy octal literal;
-        //      set `OCTAL` flag, report TS1121, return early.
-        //   3. `0` + non-octal digits (e.g. `0888`) — invalid leading zero;
-        //      set `CONTAINS_LEADING_ZERO`, report TS1489 after full scan.
         if self.text.as_bytes()[self.pos] as char == '0' {
-            self.pos += 1; // skip the leading `0`
+            self.pos += 1;
             if self.pos < self.end && self.text.as_bytes()[self.pos] as char == '_' {
-                // `0_...` — separator not allowed here. Mirrors Go
-                // `scanner.go:1949-1953`: set both separator flags, report
-                // TS6188, reset to start, re-scan as plain number fragment.
+
                 self.token_flags |=
                     TOKEN_FLAGS_CONTAINS_SEPARATOR | TOKEN_FLAGS_CONTAINS_INVALID_SEPARATOR;
                 self.report_error(DiagnosticKind::NumericSeparatorNotAllowed, self.pos, 1);
                 self.pos = start;
                 self.scan_number_fragment_with_sep(false, false);
             } else {
-                // Scan following digits (no separators) to determine octal vs
-                // leading-zero. Mirrors Go's `scanDigits`
-                // (`scanner.go:2090-2100`).
+
                 let digits_start = self.pos;
                 let mut is_octal = true;
                 while self.pos < self.end {
@@ -1067,10 +870,7 @@ impl Scanner {
                     }
                 }
                 if self.pos > digits_start && is_octal {
-                    // Legacy octal literal (e.g. `0777`). Set `OCTAL` flag and
-                    // report TS1121. Mirrors Go `scanner.go:1961-1971`. The
-                    // error range includes the `-` sign if the previous token
-                    // was a minus (so `-0777` points at the full `-0777`).
+
                     self.token_flags |= TOKEN_FLAGS_OCTAL;
                     let with_minus = self.token == SyntaxKind::MinusToken;
                     let err_start = if with_minus { start - 1 } else { start };
@@ -1083,22 +883,21 @@ impl Scanner {
                     self.token = SyntaxKind::NumericLiteral;
                     return self.token;
                 } else if self.pos > digits_start {
-                    // Leading zero with non-octal digits (e.g. `0888`).
+
                     self.token_flags |= TOKEN_FLAGS_CONTAINS_LEADING_ZERO;
                 }
-                // else: just `0` with no following digits — fall through to
-                // fractional/exponent handling.
+
             }
         } else {
-            // Non-zero start (1-9): scan the integer part.
+
             self.scan_number_fragment_with_sep(false, false);
         }
-        // Fractional part
+
         if self.pos < self.end && self.text.as_bytes()[self.pos] as char == '.' {
             self.pos += 1;
             self.scan_number_fragment_with_sep(false, false);
         }
-        // Exponent
+
         if self.pos < self.end {
             let c = self.text.as_bytes()[self.pos] as char;
             if c == 'e' || c == 'E' {
@@ -1114,8 +913,6 @@ impl Scanner {
             }
         }
 
-        // Report leading-zero error after the full literal is scanned.
-        // Mirrors Go `scanner.go:2012-2016`.
         if token_flags_contains(self.token_flags, TOKEN_FLAGS_CONTAINS_LEADING_ZERO) {
             self.report_error(
                 DiagnosticKind::DecimalWithLeadingZero,
@@ -1124,7 +921,6 @@ impl Scanner {
             );
         }
 
-        // BigInt suffix
         if self.pos < self.end && self.text.as_bytes()[self.pos] as char == 'n' {
             self.pos += 1;
             self.token_end = self.pos;
@@ -1138,18 +934,12 @@ impl Scanner {
         self.token
     }
 
-    /// Scan a decimal number fragment (digits and optional `_` separators),
-    /// setting `CONTAINS_SEPARATOR` for valid `_` and `CONTAINS_INVALID_SEPARATOR`
-    /// for invalid `_` (at start, end, or consecutive). Mirrors Go's
-    /// `scanNumberFragment` (`scanner.go:2044-2088`). `is_hex` controls whether
-    /// hex digits (A-F) are accepted; `can_have_sep` is always true for numeric
-    /// literals in Go (separators are allowed in all numeric forms).
     fn scan_number_fragment_with_sep(&mut self, is_hex: bool, _can_have_sep: bool) {
         let mut allow_separator = false;
         let mut is_prev_separator = false;
         loop {
             let before = self.pos;
-            // Scan consecutive digits
+
             while self.pos < self.end {
                 let c = self.text.as_bytes()[self.pos] as char;
                 if is_digit(c) || (is_hex && c.is_ascii_hexdigit()) {
@@ -1162,7 +952,7 @@ impl Scanner {
                 allow_separator = true;
                 is_prev_separator = false;
             }
-            // Check for separator
+
             if self.pos < self.end && self.text.as_bytes()[self.pos] as char == '_' {
                 self.token_flags |= TOKEN_FLAGS_CONTAINS_SEPARATOR;
                 if allow_separator {
@@ -1181,8 +971,6 @@ impl Scanner {
         }
     }
 
-    /// Scan a binary number fragment (`0`/`1` with `_` separators), setting
-    /// separator flags. Mirrors Go's `scanNumberFragment` for binary.
     fn scan_binary_fragment_with_sep(&mut self) {
         let mut allow_separator = false;
         let mut is_prev_separator = false;
@@ -1218,9 +1006,6 @@ impl Scanner {
         }
     }
 
-    /// Scan an octal-specifier fragment (`0o` prefix, digits 0-7 with `_`
-    /// separators), setting separator flags. Mirrors Go's `scanNumberFragment`
-    /// for octal specifier form.
     fn scan_octal_specifier_fragment_with_sep(&mut self) {
         let mut allow_separator = false;
         let mut is_prev_separator = false;
@@ -1260,7 +1045,7 @@ impl Scanner {
         if quote == '\'' {
             self.token_flags |= TOKEN_FLAGS_SINGLE_QUOTE;
         }
-        self.pos += 1; // skip opening quote
+        self.pos += 1;
         let mut terminated = false;
         while self.pos < self.end {
             let c = self.text.as_bytes()[self.pos] as char;
@@ -1274,7 +1059,7 @@ impl Scanner {
                 continue;
             }
             if c == '\n' || c == '\r' {
-                // Unterminated string (hit newline before closing quote)
+
                 break;
             }
             self.pos += 1;
@@ -1292,31 +1077,20 @@ impl Scanner {
         self.token
     }
 
-    /// Advance `pos` past a `\`-escape sequence. Called when `self.pos` is at
-    /// the backslash. Handles `\xHH`, `\uHHHH`, `\u{...}`, octal escapes, line
-    /// continuations, and single-character escapes. Sets the appropriate
-    /// `TokenFlags` bits mirroring Go's `scanEscapeSequence`
-    /// (`scanner.go:1690-1851`): `HEX_ESCAPE` for valid `\xHH`,
-    /// `UNICODE_ESCAPE` for valid `\uHHHH`, `EXTENDED_UNICODE_ESCAPE` for
-    /// valid `\u{...}`, `CONTAINS_INVALID_ESCAPE` for octal/`\8`/`\9`/invalid
-    /// `\x`/invalid `\u`.
     fn scan_escape_sequence(&mut self) {
-        // pos is at '\'
-        self.pos += 1; // skip backslash
+
+        self.pos += 1;
         if self.pos >= self.end {
             return;
         }
         let c = self.text.as_bytes()[self.pos] as char;
-        self.pos += 1; // skip the escaped char
+        self.pos += 1;
         match c {
             '0' => {
-                // '\0' is valid (NUL), but '\0' followed by a digit is a legacy
-                // octal escape ('\01', '\011'). Go falls through to the octal
-                // path for `\0` + digit. Set `CONTAINS_INVALID_ESCAPE` for the
-                // octal case (mirrors Go scanner.go:1721).
+
                 if self.pos < self.end && is_digit(self.text.as_bytes()[self.pos] as char) {
                     self.token_flags |= TOKEN_FLAGS_CONTAINS_INVALID_ESCAPE;
-                    // Consume up to 2 more octal digits
+
                     for _ in 0..2 {
                         if self.pos < self.end
                             && is_octal_digit(self.text.as_bytes()[self.pos] as char)
@@ -1329,7 +1103,7 @@ impl Scanner {
                 }
             }
             '1'..='3' => {
-                // Legacy octal escape: up to 2 more octal digits
+
                 self.token_flags |= TOKEN_FLAGS_CONTAINS_INVALID_ESCAPE;
                 for _ in 0..2 {
                     if self.pos < self.end && is_octal_digit(self.text.as_bytes()[self.pos] as char)
@@ -1341,20 +1115,18 @@ impl Scanner {
                 }
             }
             '4'..='7' => {
-                // Legacy octal escape: up to 1 more octal digit
+
                 self.token_flags |= TOKEN_FLAGS_CONTAINS_INVALID_ESCAPE;
                 if self.pos < self.end && is_octal_digit(self.text.as_bytes()[self.pos] as char) {
                     self.pos += 1;
                 }
             }
             '8' | '9' => {
-                // Invalid escape `\8` / `\9`
+
                 self.token_flags |= TOKEN_FLAGS_CONTAINS_INVALID_ESCAPE;
             }
             'x' => {
-                // \xHH — skip up to 2 hex digits. Set HEX_ESCAPE if both digits
-                // are present, CONTAINS_INVALID_ESCAPE otherwise (mirrors Go
-                // scanner.go:1811-1822).
+
                 let mut digit_count = 0;
                 for _ in 0..2 {
                     if self.pos < self.end && is_hex_digit(self.text.as_bytes()[self.pos] as char) {
@@ -1372,10 +1144,8 @@ impl Scanner {
             }
             'u' => {
                 if self.pos < self.end && self.text.as_bytes()[self.pos] as char == '{' {
-                    // \u{...} — extended unicode escape. Set
-                    // EXTENDED_UNICODE_ESCAPE if valid, CONTAINS_INVALID_ESCAPE
-                    // otherwise (mirrors Go scanner.go:1860-1900).
-                    self.pos += 1; // skip '{'
+
+                    self.pos += 1;
                     let hex_start = self.pos;
                     while self.pos < self.end
                         && is_hex_digit(self.text.as_bytes()[self.pos] as char)
@@ -1386,7 +1156,7 @@ impl Scanner {
                     let closed =
                         self.pos < self.end && self.text.as_bytes()[self.pos] as char == '}';
                     if closed {
-                        self.pos += 1; // skip '}'
+                        self.pos += 1;
                     }
                     if has_hex && closed {
                         self.token_flags |= TOKEN_FLAGS_EXTENDED_UNICODE_ESCAPE;
@@ -1394,9 +1164,7 @@ impl Scanner {
                         self.token_flags |= TOKEN_FLAGS_CONTAINS_INVALID_ESCAPE;
                     }
                 } else {
-                    // \uHHHH — skip up to 4 hex digits. Set UNICODE_ESCAPE if
-                    // all 4 digits present, CONTAINS_INVALID_ESCAPE otherwise
-                    // (mirrors Go scanner.go:1864-1868).
+
                     let mut digit_count = 0;
                     for _ in 0..4 {
                         if self.pos < self.end
@@ -1416,21 +1184,19 @@ impl Scanner {
                 }
             }
             '\r' => {
-                // Line continuation: \<CR> or \<CRLF>
+
                 if self.pos < self.end && self.text.as_bytes()[self.pos] as char == '\n' {
                     self.pos += 1;
                 }
             }
-            // Single-char escapes (\n, \t, \b, \f, \v, \\, \', \", \`, and
-            // any non-recognized char) need no extra advancement — we already
-            // skipped the char after the backslash.
+
             _ => {}
         }
     }
 
     fn scan_template(&mut self) -> SyntaxKind {
-        // Simplified: scan until ` or ${
-        self.pos += 1; // skip opening `
+
+        self.pos += 1;
         let mut has_substitution = false;
         let mut terminated = false;
         while self.pos < self.end {
@@ -1446,7 +1212,7 @@ impl Scanner {
             {
                 self.pos += 2;
                 has_substitution = true;
-                terminated = true; // `${` opens a substitution; not unterminated.
+                terminated = true;
                 break;
             }
             if c == '\\' {
@@ -1474,12 +1240,11 @@ impl Scanner {
 
     fn scan_punctuation(&mut self) -> SyntaxKind {
         let start = self.pos;
-        // Try to match the longest punctuation token
+
         let remaining = &self.text[start..];
         let mut best_match: Option<SyntaxKind> = None;
         let mut best_len = 0;
 
-        // Check 4-char tokens (`>>>=`). `get(..4)` for UTF-8 safety.
         if remaining.len() >= 4 {
             if let Some(slice) = remaining.get(..4) {
                 if let Some(kind) = string_to_token(slice) {
@@ -1488,8 +1253,7 @@ impl Scanner {
                 }
             }
         }
-        // Check 3-char tokens. Use `get(..3)` for safety: if byte 3 falls
-        // inside a multi-byte UTF-8 character, `get` returns `None`.
+
         if best_len == 0 && remaining.len() >= 3 {
             if let Some(slice) = remaining.get(..3) {
                 if let Some(kind) = string_to_token(slice) {
@@ -1498,7 +1262,7 @@ impl Scanner {
                 }
             }
         }
-        // Check 2-char tokens
+
         if best_len == 0 && remaining.len() >= 2 {
             if let Some(slice) = remaining.get(..2) {
                 if let Some(kind) = string_to_token(slice) {
@@ -1507,8 +1271,7 @@ impl Scanner {
                 }
             }
         }
-        // Check 1-char tokens. `remaining` may start with a multi-byte UTF-8
-        // character, so slice by the first char's byte length instead of `..1`.
+
         if best_len == 0 {
             let first_len = remaining.chars().next().map(char::len_utf8).unwrap_or(0);
             if first_len == 1 {
@@ -1525,13 +1288,9 @@ impl Scanner {
             self.token = kind;
             kind
         } else {
-            // Unknown character — advance by the full UTF-8 character length
-            // to avoid leaving pos in the middle of a multi-byte character.
+
             let c = self.text[start..].chars().next().unwrap();
-            // Mirrors Go scanner.go:935-940: a UTF-8 RuneError (Rust surfaces
-            // invalid bytes as U+FFFD) means the file is likely binary. Report
-            // TS1490 once and skip to end-of-file instead of emitting one
-            // diagnostic per invalid byte (which explodes for binary inputs).
+
             if c == '\u{fffd}' {
                 self.report_error(DiagnosticKind::FileAppearsToBeBinary, 0, 0);
                 if self.binary_marker_pos.is_none() {
@@ -1551,28 +1310,20 @@ impl Scanner {
         }
     }
 
-    /// Byte offset of the binary (non-text) marker, if the scan hit one.
     pub fn binary_marker_pos(&self) -> Option<usize> {
         self.binary_marker_pos
     }
 
-    /// Revert to the position before the last scan.
     pub fn rewind(&mut self) {
         self.pos = self.token_pos;
     }
 
-    /// Re-scan a `>>` (or `>>>`) token as one (or two) `>` tokens, leaving
-    /// the remainder for the next scan.
-    ///
-    /// Go: `reScanGreaterThanToken`. Used after parsing type arguments so that
-    /// `Array<Array<T>>` works: the scanner produces `>>` as a single token,
-    /// but the parser needs two `>` tokens to close two levels of generics.
     pub fn re_scan_greater_than(&mut self) -> SyntaxKind {
         let token = self.token;
         if token == SyntaxKind::GreaterThanToken {
             return token;
         }
-        // Only rescan `>>`-family tokens
+
         match token {
             SyntaxKind::GreaterThanGreaterThanToken
             | SyntaxKind::GreaterThanGreaterThanGreaterThanToken
@@ -1581,18 +1332,13 @@ impl Scanner {
             | SyntaxKind::GreaterThanGreaterThanGreaterThanEqualsToken => {}
             _ => return token,
         }
-        // Move back one character (the second `>`)
+
         self.pos = self.token_pos + 1;
         self.token_end = self.pos;
         self.token = SyntaxKind::GreaterThanToken;
         SyntaxKind::GreaterThanToken
     }
 
-    /// Get the token that would remain after a `re_scan_greater_than` call.
-    ///
-    /// Go: after `reScanGreaterThanToken`, the next `scan()` produces the
-    /// "remainder" token (e.g. `>` from `>>`, `=` from `>=`, etc.).
-    /// This method returns what that remainder would be, without consuming it.
     pub fn re_scan_greater_than_remainder(&self) -> Option<SyntaxKind> {
         match self.token {
             SyntaxKind::GreaterThanGreaterThanToken => Some(SyntaxKind::GreaterThanToken),
@@ -1610,35 +1356,17 @@ impl Scanner {
         }
     }
 
-    /// Re-scan the current `/` or `/=` token as a regular expression literal.
-    ///
-    /// Mirrors Go's `Scanner.ReScanSlashToken`. The parser calls this when it
-    /// is in a primary-expression position and the scanner has produced a
-    /// `SlashToken` or `SlashEqualsToken`. The `=` of `/=` becomes the first
-    /// character of the regex pattern (e.g. `/=/` is a regex matching `=`).
-    ///
-    /// This implementation scans the pattern body (handling `[...]` character
-    /// classes and `\` escapes), consumes the closing `/`, then consumes and
-    /// validates flags (identifier-part characters). It reports
-    /// `UnterminatedRegularExpression` on EOF/newline before a closing `/`.
-    /// Flag validation mirrors Go's `ReScanSlashToken` flag scan
-    /// (`scanner.go:1171-1191`): unknown flags (TS1499), duplicate flags
-    /// (TS1500), simultaneous `u`+`v` (TS1502), and target-gated availability
-    /// (TS1501). Full regex body validation (TS1503–TS1538) is performed by
-    /// `RegExpParser` (`scanner/regexp.rs`), mirroring Go's `regexp.go`.
     pub fn re_scan_slash_token(&mut self) -> SyntaxKind {
         if self.token != SyntaxKind::SlashToken && self.token != SyntaxKind::SlashEqualsToken {
             return self.token;
         }
 
-        let start_of_regex_body = self.token_pos + 1; // right after the `/`
+        let start_of_regex_body = self.token_pos + 1;
         let mut p = start_of_regex_body;
         let mut in_escape = false;
         let mut in_character_class = false;
         let mut unterminated = false;
-        // Detect `(?<` named-capture groups during the first pass, mirroring
-        // Go's `reScanSlashToken` (`scanner.go:1112-1116`). Used to gate the
-        // `\k<name>` reference diagnostic in `RegExpParser`.
+
         let mut named_capture_groups = false;
 
         while p < self.end {
@@ -1657,7 +1385,7 @@ impl Scanner {
                     in_escape = true;
                 }
                 '/' if !in_character_class => {
-                    break; // end of regex body
+                    break;
                 }
                 '[' => {
                     in_character_class = true;
@@ -1682,7 +1410,7 @@ impl Scanner {
         let end_of_regex_body = p;
 
         if unterminated || p >= self.end {
-            // Unterminated regex — report error and consume what we have
+
             self.token_flags |= TOKEN_FLAGS_UNTERMINATED;
             self.report_error(
                 DiagnosticKind::UnterminatedRegularExpression,
@@ -1691,20 +1419,12 @@ impl Scanner {
             );
             self.pos = p;
         } else {
-            // Consume the closing `/`
+
             p += 1;
-            // Consume and validate flags (identifier-part characters).
-            // Mirrors Go's `ReScanSlashToken` flag scan (`scanner.go:1171-1191`):
-            // each flag must be a known flag (`d g i m s u v y`), must not
-            // repeat, `u` + `v` are mutually exclusive (TS1502), and target-
-            // gated availability is checked (TS1501).
+
             let mut seen_flags: u16 = 0;
             while p < self.end {
-                // Decode the FULL character — flag positions must advance by
-                // the char's UTF-8 length, else a non-BMP identifier-part
-                // character ('𝘨', 4 bytes) gets consumed byte-wise and
-                // token_end lands mid-char (slice panic in token_text;
-                // regularExpressionWithNonBMPFlags).
+
                 let c = self.text[p..].chars().next().unwrap_or('\0');
                 let c_len = c.len_utf8();
                 if !is_identifier_part(c) {
@@ -1712,29 +1432,26 @@ impl Scanner {
                 }
                 if let Some(bit) = reg_exp_flag_bit(c) {
                     if seen_flags & bit != 0 {
-                        // Duplicate flag — report at this char.
+
                         self.report_error(DiagnosticKind::DuplicateRegularExpressionFlag, p, 1);
                     } else if (seen_flags | bit) & (REG_EXP_FLAG_U | REG_EXP_FLAG_V)
                         == (REG_EXP_FLAG_U | REG_EXP_FLAG_V)
                     {
-                        // `u` and `v` are mutually exclusive (TS1502).
+
                         self.report_error(DiagnosticKind::UnicodeUAndVFlagsMutuallyExclusive, p, 1);
                     } else {
                         seen_flags |= bit;
-                        // Target-gated flag availability (TS1501).
+
                         self.check_reg_exp_flag_availability(bit, p);
                     }
                 } else {
-                    // Unknown flag — report at this char.
+
                     self.report_error(DiagnosticKind::UnknownRegularExpressionFlag, p, c_len);
                 }
                 p += c_len;
             }
             self.pos = p;
 
-            // Run the full regex body validator. Mirrors Go's
-            // `reScanSlashToken` (`scanner.go:1192-1210`): construct a
-            // `regExpParser` over the body region and call `run()`.
             let mut parser = regexp::RegExpParser::new(
                 &self.text,
                 start_of_regex_body,
@@ -1754,9 +1471,6 @@ impl Scanner {
         self.token
     }
 
-    /// Check target-gated regex flag availability (TS1501). Mirrors Go's
-    /// `checkRegularExpressionFlagAvailability` (`scanner.go:50-54`):
-    /// `d` → ES2022, `s` → ES2018, `v` → ES2024.
     fn check_reg_exp_flag_availability(&mut self, flag: u16, pos: usize) {
         let available_from = match flag {
             REG_EXP_FLAG_D => Some(ScriptTarget::ES2022),
@@ -1777,17 +1491,10 @@ impl Scanner {
         }
     }
 
-    /// Scan a JSX token. Mirrors Go's `ScanJsxToken`/`ScanJsxTokenEx`.
-    ///
-    /// Produces `LessThanToken`, `LessThanSlashToken`, `OpenBraceToken`,
-    /// `JsxText`, `JsxTextAllWhiteSpaces`, or `EndOfFile`.
     pub fn scan_jsx_token(&mut self) -> SyntaxKind {
         self.scan_jsx_token_ex(true)
     }
 
-    /// Scan a JSX token with optional multiline text control.
-    /// When `allow_multiline_jsx_text` is false, JSX text stops at each line
-    /// (used by the formatter for correct indentation).
     pub fn scan_jsx_token_ex(&mut self, allow_multiline_jsx_text: bool) -> SyntaxKind {
         self.has_preceding_line_break = self.preceding_line_break;
         self.preceding_line_break = false;
@@ -1826,7 +1533,6 @@ impl Scanner {
             return self.token;
         }
 
-        // JSX text: scan until '<', '{', or EOF
         let mut first_non_whitespace = 0usize;
         let start = self.pos;
 
@@ -1839,7 +1545,7 @@ impl Scanner {
             }
 
             if is_jsx_line_break(ch) && first_non_whitespace == 0 {
-                first_non_whitespace = usize::MAX; // -1 sentinel
+                first_non_whitespace = usize::MAX;
             } else if !allow_multiline_jsx_text
                 && is_jsx_line_break(ch)
                 && first_non_whitespace > 0
@@ -1859,13 +1565,10 @@ impl Scanner {
         } else {
             SyntaxKind::JsxText
         };
-        let _ = start; // token_text uses token_pos..token_end
+        let _ = start;
         self.token
     }
 
-    /// Extend the current identifier/keyword token with JSX identifier parts
-    /// (dashes, colons, and continuation identifier characters).
-    /// Mirrors Go's `ScanJsxIdentifier`.
     pub fn scan_jsx_identifier(&mut self) -> SyntaxKind {
         if is_identifier_or_keyword_token(self.token) {
             loop {
@@ -1877,7 +1580,7 @@ impl Scanner {
                     self.pos += 1;
                     continue;
                 }
-                // Try to scan identifier parts (unicode escapes, identifier chars)
+
                 let old_pos = self.pos;
                 if is_identifier_part(c) {
                     self.pos += c.len_utf8();
@@ -1895,17 +1598,15 @@ impl Scanner {
                 }
             }
             self.token_end = self.pos;
-            // Re-classify the token: if it's a keyword, keep it; otherwise Identifier
+
             let text = self.token_text();
             self.token = string_to_keyword(text).unwrap_or(SyntaxKind::Identifier);
         }
         self.token
     }
 
-    /// Scan a JSX attribute value (a quoted string or fall through to regular
-    /// scan for `{`). Mirrors Go's `ScanJsxAttributeValue`.
     pub fn scan_jsx_attribute_value(&mut self) -> SyntaxKind {
-        // Skip whitespace between '=' and the value
+
         while self.pos < self.end {
             let c = self.text[self.pos..].chars().next().unwrap();
             if !is_jsx_whitespace_like(c) {
@@ -1925,24 +1626,10 @@ impl Scanner {
         if c == '"' || c == '\'' {
             return self.scan_string(c);
         }
-        // Fall back to regular scan for `{` or anything else
+
         self.scan()
     }
 
-    // ────────────────────────────────────────────────────────────────────
-    // JSDoc interior scanning
-    //
-    // Mirrors Go's `ScanJSDocToken` / `ScanJSDocCommentTextToken` /
-    // `CanFollowJSDocAt` (`scanner.go:1374-1525`). These operate on the
-    // scanner's `text` bounded by `end`; the JSDoc parser temporarily
-    // re-points the scanner at the comment body before calling them.
-    // ────────────────────────────────────────────────────────────────────
-
-    /// Peek at the character at the current position (expected to be right
-    /// after `@`) and return `true` if a JSDoc tag can follow. Identifier
-    /// starts indicate a tag name; whitespace, newlines, and EOF are also
-    /// accepted to support incomplete tags for code completion. Mirrors Go's
-    /// `CanFollowJSDocAt` (`scanner.go:1410-1416`).
     pub fn can_follow_jsdoc_at(&self) -> bool {
         if self.pos >= self.end {
             return true;
@@ -1951,12 +1638,6 @@ impl Scanner {
         is_identifier_start(ch) || is_whitespace_single_line(ch) || is_line_break(ch)
     }
 
-    /// Scan a single JSDoc interior token. Produces `WhitespaceTrivia`,
-    /// `NewLineTrivia`, `AtToken`, `AsteriskToken`, braces, brackets, parens,
-    /// angle brackets, `=`, `,`, `.`, `` ` ``, `#`, identifiers (including
-    /// `-`), or `Unknown`. Mirrors Go's `ScanJSDocToken`
-    /// (`scanner.go:1418-1525`). Unicode-escape identifier handling is
-    /// deferred (rare in JSDoc; can be added when needed).
     pub fn scan_jsdoc_token(&mut self) -> SyntaxKind {
         self.full_start_pos = self.pos;
         self.token_flags = TOKEN_FLAGS_NONE;
@@ -2022,12 +1703,6 @@ impl Scanner {
         self.token
     }
 
-    /// Scan a JSDoc comment text token — a run of prose until a line break,
-    /// `` ` ``, `{`, or a valid `@tag` boundary. When `in_backticks` is true
-    /// (inside a fenced code block), only line breaks and `` ` `` terminate
-    /// the run. If the run is empty (immediately at a special char), falls
-    /// through to `scan_jsdoc_token`. Mirrors Go's
-    /// `ScanJSDocCommentTextToken` (`scanner.go:1374-1405`).
     pub fn scan_jsdoc_comment_text_token(&mut self, in_backticks: bool) -> SyntaxKind {
         self.full_start_pos = self.pos;
         self.token_flags = TOKEN_FLAGS_NONE;
@@ -2074,17 +1749,12 @@ impl Scanner {
     }
 }
 
-// ────────────────────────────────────────────────────────────────────────────
-// JSX helper functions
-// ────────────────────────────────────────────────────────────────────────────
-
 fn is_jsx_line_break(c: char) -> bool {
     matches!(c, '\n' | '\r' | '\u{2028}' | '\u{2029}')
 }
 
 fn is_jsx_whitespace_like(c: char) -> bool {
-    // TypeScript's isWhiteSpaceLike: tab, vtab, formFeed, space, non-breaking space,
-    // BOM, and any Unicode "White_Space" property character.
+
     matches!(c, '\t' | '\x0B' | '\x0C' | ' ' | '\u{A0}' | '\u{FEFF}') || c.is_whitespace()
 }
 
@@ -2096,14 +1766,8 @@ fn is_keyword(token: SyntaxKind) -> bool {
     crate::ast::node_data_generated::is_keyword_kind(token)
 }
 
-// ────────────────────────────────────────────────────────────────────────────
-// Character classification helpers
-// ────────────────────────────────────────────────────────────────────────────
-
 fn is_whitespace(c: char) -> bool {
-    // Go `stringutil.IsWhiteSpaceSingleLine` list, plus \n/\r (Go handles
-    // those as line breaks in its scan loop; our scan_whitespace folds the
-    // line-break flag in here).
+
     matches!(
         c,
         ' ' | '\t'
@@ -2111,9 +1775,9 @@ fn is_whitespace(c: char) -> bool {
             | '\r'
             | '\x0B'
             | '\x0C'
-            | '\u{85}'    // nextLine
-            | '\u{A0}'    // nonBreakingSpace
-            | '\u{1680}'  // ogham
+            | '\u{85}'
+            | '\u{A0}'
+            | '\u{1680}'
             | '\u{2000}'
             | '\u{2001}'
             | '\u{2002}'
@@ -2125,11 +1789,11 @@ fn is_whitespace(c: char) -> bool {
             | '\u{2008}'
             | '\u{2009}'
             | '\u{200A}'
-            | '\u{200B}'  // zeroWidthSpace
-            | '\u{202F}'  // narrowNoBreakSpace
-            | '\u{205F}'  // mathematicalSpace
-            | '\u{3000}'  // ideographicSpace
-            | '\u{FEFF}'  // byteOrderMark
+            | '\u{200B}'
+            | '\u{202F}'
+            | '\u{205F}'
+            | '\u{3000}'
+            | '\u{FEFF}'
     )
 }
 
@@ -2137,13 +1801,6 @@ fn is_line_break(c: char) -> bool {
     c == '\n' || c == '\r'
 }
 
-// ─────────────────────────────────────────────────────────────────────
-// Regular-expression flag bits
-//
-// Mirrors Go's `regularExpressionFlags` bitmask (`regexp.go:17-28`). Used by
-// `re_scan_slash_token` to detect duplicate flags and the `u`/`v` mutual
-// exclusion (TS1500/TS1502). Target-gated availability (TS1501) is deferred
-// until `script_target` is plumbed into the scanner.
 const REG_EXP_FLAG_G: u16 = 1 << 0;
 const REG_EXP_FLAG_I: u16 = 1 << 1;
 const REG_EXP_FLAG_M: u16 = 1 << 2;
@@ -2153,9 +1810,6 @@ const REG_EXP_FLAG_Y: u16 = 1 << 5;
 const REG_EXP_FLAG_D: u16 = 1 << 6;
 const REG_EXP_FLAG_V: u16 = 1 << 7;
 
-/// Map a flag character to its bitmask bit, or `None` if it isn't a known
-/// regular-expression flag. Mirrors Go's `charCodeToRegExpFlag`
-/// (`regexp.go:33-42`).
 fn reg_exp_flag_bit(c: char) -> Option<u16> {
     match c {
         'g' => Some(REG_EXP_FLAG_G),
@@ -2197,19 +1851,15 @@ pub fn is_identifier_part(c: char) -> bool {
 }
 
 fn is_unicode_identifier_start(c: char) -> bool {
-    // XID_Start matches ECMAScript's ID_Start (both derive from Unicode TR31
-    // with NFKC normalization). The unicode-ident crate provides precise
-    // tables generated from the Unicode Character Database.
+
     unicode_ident::is_xid_start(c)
 }
 
 fn is_unicode_identifier_part(c: char) -> bool {
-    // XID_Continue matches ECMAScript's ID_Continue. ZWNJ (U+200C) and ZWJ
-    // (U+200D) are additionally allowed in ECMAScript identifiers.
+
     unicode_ident::is_xid_continue(c) || c == '\u{200C}' || c == '\u{200D}'
 }
 
-/// Unescape a string value (handle common escape sequences).
 fn unescape_string(s: &str) -> String {
     let mut result = String::with_capacity(s.len());
     let mut chars = s.chars().peekable();
@@ -2247,7 +1897,7 @@ fn unescape_string(s: &str) -> String {
                 Some('\'') => result.push('\''),
                 Some('"') => result.push('"'),
                 Some('`') => result.push('`'),
-                Some('\n') => {} // line continuation
+                Some('\n') => {}
                 Some(other) => {
                     result.push('\\');
                     result.push(other);
@@ -2261,26 +1911,12 @@ fn unescape_string(s: &str) -> String {
     result
 }
 
-// ────────────────────────────────────────────────────────────────────────────
-// Trivia helpers (free functions over source text)
-//
-// Mirror Go's `scanner.SkipTrivia` / `GetLeadingCommentRanges` /
-// `GetTrailingCommentRanges` / `iterateCommentRanges` / shebang helpers
-// (`scanner.go:2307-2504, 2800-2917`). These reconstruct comment ranges and
-// advance past trivia from raw source text without holding a `Scanner`.
-// ────────────────────────────────────────────────────────────────────────────
-
-/// Kind of comment range, mirroring Go's `ast.KindSingleLineCommentTrivia` /
-/// `ast.KindMultiLineCommentTrivia`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum CommentRangeKind {
     SingleLine,
     MultiLine,
 }
 
-/// A comment range reconstructed from source text. Mirrors Go's
-/// `ast.CommentRange` (`ast.go:2979-2983`): a text range plus the comment
-/// kind and whether a line break follows it.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct CommentRange {
     pub pos: usize,
@@ -2289,29 +1925,19 @@ pub struct CommentRange {
     pub has_trailing_new_line: bool,
 }
 
-/// Decode the UTF-8 rune at `pos` in `text`, returning `(char, byte_size)`.
-/// Mirrors Go's `utf8.DecodeRuneInString`. Assumes `pos < text.len()`.
 fn decode_char(text: &str, pos: usize) -> (char, usize) {
     let c = text[pos..].chars().next().unwrap();
     (c, c.len_utf8())
 }
 
-/// Whether `c` is "whitespace-like" (tab, vtab, formFeed, space, non-breaking
-/// space, BOM, or any Unicode `White_Space` property character). Mirrors Go's
-/// `stringutil.IsWhiteSpaceLike`.
 fn is_whitespace_like(c: char) -> bool {
     matches!(c, '\t' | '\x0B' | '\x0C' | ' ' | '\u{A0}' | '\u{FEFF}') || c.is_whitespace()
 }
 
-/// Whether `c` is single-line whitespace (not a line break). Mirrors Go's
-/// `stringutil.IsWhiteSpaceSingleLine`.
 fn is_whitespace_single_line(c: char) -> bool {
     matches!(c, '\t' | '\x0B' | '\x0C' | ' ' | '\u{A0}' | '\u{FEFF}')
 }
 
-/// Whether `text` starts with one of the given JSDoc tag `names` followed by
-/// a valid tag terminator (whitespace, `}`, `*`, or end-of-string). Mirrors
-/// Go's `hasJSDocTag` (`scanner.go:372-386`).
 fn has_jsdoc_tag(text: &str, names: &[&str]) -> bool {
     for &name in names {
         if !text.starts_with(name) {
@@ -2328,15 +1954,6 @@ fn has_jsdoc_tag(text: &str, names: &[&str]) -> bool {
     false
 }
 
-/// Scan a JSDoc comment's text for `@deprecated`, `@see`, and `@link` tags
-/// and return the OR'd token flags to set. Mirrors Go's
-/// `Scanner.scanJSDocCommentForTags` (`scanner.go:350-368`).
-///
-/// Iterates over `@` occurrences in `comment_text`, checking each one against
-/// the tag name sets. Stops early once both flags are set. Returns
-/// `TOKEN_FLAGS_PRECEDING_JSDOC_WITH_DEPRECATED` and/or
-/// `TOKEN_FLAGS_PRECEDING_JSDOC_WITH_SEE_OR_LINK` as appropriate (or
-/// `TOKEN_FLAGS_NONE` if no matching tags were found).
 fn scan_jsdoc_comment_for_tags(comment_text: &str) -> TokenFlags {
     let mut flags = TOKEN_FLAGS_NONE;
     let mut rest = comment_text;
@@ -2366,8 +1983,6 @@ fn scan_jsdoc_comment_for_tags(comment_text: &str) -> TokenFlags {
     }
 }
 
-/// Whether `text` starts with a shebang (`#!`) at `pos == 0`. Mirrors Go's
-/// `isShebangTrivia` (`scanner.go:2475-2483`).
 fn is_shebang_trivia(text: &str, pos: usize) -> bool {
     if text.len() < 2 {
         return false;
@@ -2379,8 +1994,6 @@ fn is_shebang_trivia(text: &str, pos: usize) -> bool {
     text.as_bytes()[0] == b'#' && text.as_bytes()[1] == b'!'
 }
 
-/// Advance past a shebang at `pos == 0`, returning the new position. Mirrors
-/// Go's `scanShebangTrivia` (`scanner.go:2485-2495`).
 fn scan_shebang_trivia(text: &str, pos: usize) -> usize {
     let text_len = text.len();
     let mut pos = pos + 2;
@@ -2394,8 +2007,6 @@ fn scan_shebang_trivia(text: &str, pos: usize) -> usize {
     pos
 }
 
-/// Return the shebang text (including `#!`) if the file starts with one, else
-/// empty string. Mirrors Go's `GetShebang` (`scanner.go:2497-2504`).
 pub fn get_shebang(text: &str) -> &str {
     if !is_shebang_trivia(text, 0) {
         return "";
@@ -2404,40 +2015,28 @@ pub fn get_shebang(text: &str) -> &str {
     &text[..end]
 }
 
-/// Options controlling how `skip_trivia_ex` consumes trivia. Mirrors Go's
-/// `SkipTriviaOptions` (`scanner.go:2301-2305`).
 #[derive(Debug, Clone, Copy, Default)]
 pub struct SkipTriviaOptions {
-    /// If true, stop (return the position of the line break) after the first
-    /// line break is consumed.
+
     pub stop_after_line_break: bool,
-    /// If true, do not consume comments (return the position of the `/`).
+
     pub stop_at_comments: bool,
-    /// If true, consume a leading `*` after a line break (JSDoc leading
-    /// asterisk handling).
+
     pub in_jsdoc: bool,
 }
 
-/// Length of a Git merge-conflict marker (`<<<<<<<`, `=======`, `>>>>>>>`,
-/// `|||||||`), all 7 bytes. Mirrors Go's `mergeConflictMarkerLength`.
 const MERGE_CONFLICT_MARKER_LENGTH: usize = 7;
 
-/// Whether `text[pos..]` starts with a Git merge-conflict marker. Mirrors
-/// Go's `isConflictMarkerTrivia` (`scanner.go:2409-2442`). A conflict marker
-/// is the same byte repeated seven times at the start of a line; `<<<<<<<`
-/// and `>>>>>>>` must additionally be followed by a space, while `=======`
-/// and `|||||||` do not require a trailing space.
 fn is_conflict_marker_trivia(text: &str, pos: usize) -> bool {
     let bytes = text.as_bytes();
     let text_len = bytes.len();
     if pos + 1 >= text_len || bytes[pos + 1] != bytes[pos] {
         return false;
     }
-    // Conflict markers must be at the start of a line.
+
     let mut at_line_start = pos == 0 || is_line_break(bytes[pos - 1] as char);
     if !at_line_start && pos >= 2 {
-        // Go also allows a single trailing whitespace byte before the marker
-        // (e.g. `\r` from a CRLF). Check the byte two positions back.
+
         at_line_start = is_line_break(bytes[pos - 2] as char);
     }
     if at_line_start && pos + MERGE_CONFLICT_MARKER_LENGTH < text_len {
@@ -2447,17 +2046,12 @@ fn is_conflict_marker_trivia(text: &str, pos: usize) -> bool {
                 return false;
             }
         }
-        // `=======` (and `|||||||`) don't need a trailing space; `<<<<<<<`
-        // and `>>>>>>>` do.
+
         return ch == b'=' || bytes[pos + MERGE_CONFLICT_MARKER_LENGTH] == b' ';
     }
     false
 }
 
-/// Advance past a conflict marker at `pos`, returning the new position.
-/// Mirrors Go's `scanConflictMarkerTrivia` (`scanner.go:2444-2473`). The
-/// `report_error` callback (if set) is invoked once at the marker start with
-/// `MERGE_CONFLICT_MARKER_LENGTH` as the length.
 fn scan_conflict_marker_trivia(
     text: &str,
     pos: usize,
@@ -2471,13 +2065,12 @@ fn scan_conflict_marker_trivia(
     let (ch, _size) = decode_char(text, pos);
     let mut pos = pos;
     if ch == '<' || ch == '>' {
-        // Consume to end of line.
+
         while pos < text_len && !is_line_break(bytes[pos] as char) {
             pos += 1;
         }
     } else {
-        // `|` or `=`: consume until the start of the next `=======` or
-        // `>>>>>>>` marker (which begins a new conflict section).
+
         while pos < text_len {
             let current = bytes[pos];
             if (current == b'=' || current == b'>')
@@ -2492,18 +2085,10 @@ fn scan_conflict_marker_trivia(
     pos
 }
 
-/// Advance `pos` past trivia (whitespace and comments) in `text`, returning
-/// the position of the next non-trivia character. Mirrors Go's `SkipTrivia`
-/// (`scanner.go:2307-2400`, without options). Conflict-marker trivia and
-/// JSDoc `*` consumption are handled by `skip_trivia_ex` with options.
 pub fn skip_trivia(text: &str, pos: usize) -> usize {
     skip_trivia_ex(text, pos, &SkipTriviaOptions::default(), None)
 }
 
-/// Extended `skip_trivia` with options. Mirrors Go's `SkipTriviaEx`
-/// (`scanner.go:2311-2400`). The `report_error` callback is invoked for
-/// conflict-marker trivia (mirroring Go's `reportError` parameter to
-/// `scanConflictMarkerTrivia`); pass `None` to suppress.
 pub fn skip_trivia_ex(
     text: &str,
     pos: usize,
@@ -2513,8 +2098,7 @@ pub fn skip_trivia_ex(
     let bytes = text.as_bytes();
     let text_len = bytes.len();
     let mut pos = pos;
-    // Tracks whether the next `*` (after a line break) should be consumed as
-    // a JSDoc leading asterisk. Only meaningful when `options.in_jsdoc` is set.
+
     let mut can_consume_star = false;
     loop {
         if pos >= text_len {
@@ -2613,31 +2197,20 @@ pub fn skip_trivia_ex(
     }
 }
 
-/// Reconstruct leading comment ranges preceding `pos` in `text`. Mirrors Go's
-/// `GetLeadingCommentRanges` (`scanner.go:2800-2802`).
 pub fn get_leading_comment_ranges(text: &str, pos: usize) -> Vec<CommentRange> {
     iterate_comment_ranges(text, pos, false)
 }
 
-/// Reconstruct trailing comment ranges following `pos` in `text` (up to the
-/// next line break). Mirrors Go's `GetTrailingCommentRanges`
-/// (`scanner.go:2804-2806`).
 pub fn get_trailing_comment_ranges(text: &str, pos: usize) -> Vec<CommentRange> {
     iterate_comment_ranges(text, pos, true)
 }
 
-/// Shared implementation for leading/trailing comment-range reconstruction.
-/// Mirrors Go's `iterateCommentRanges` (`scanner.go:2814-2917`). `trailing`
-/// means "stop at the first line break"; otherwise collect comments that
-/// follow the position, including those separated by line breaks.
 fn iterate_comment_ranges(text: &str, pos: usize, trailing: bool) -> Vec<CommentRange> {
     let bytes = text.as_bytes();
     let text_len = bytes.len();
     let mut pos = pos;
     let mut result: Vec<CommentRange> = Vec::new();
 
-    // Pending comment range (emitted when the next range arrives, so trailing
-    // new-line info is known). Mirrors Go's pending* locals.
     let mut pending_pos: usize = 0;
     let mut pending_end: usize = 0;
     let mut pending_kind: CommentRangeKind = CommentRangeKind::SingleLine;
@@ -2646,7 +2219,7 @@ fn iterate_comment_ranges(text: &str, pos: usize, trailing: bool) -> Vec<Comment
 
     let mut collecting = trailing;
     if pos == 0 {
-        // At file start, leading comment collection starts immediately.
+
         collecting = true;
         if is_shebang_trivia(text, pos) {
             pos = scan_shebang_trivia(text, pos);
@@ -2709,7 +2282,7 @@ fn iterate_comment_ranges(text: &str, pos: usize, trailing: bool) -> Vec<Comment
                             pos += s;
                         }
                     } else {
-                        // Multi-line: search for `*/`.
+
                         if let Some(i) = text[pos..].find("*/") {
                             pos += i + 2;
                         } else {
@@ -2758,10 +2331,6 @@ fn iterate_comment_ranges(text: &str, pos: usize, trailing: bool) -> Vec<Comment
     result
 }
 
-// ────────────────────────────────────────────────────────────────────────────
-// Tests
-// ────────────────────────────────────────────────────────────────────────────
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -2794,8 +2363,7 @@ mod tests {
 
     #[test]
     fn scan_private_identifier() {
-        // `#name` scans as a single PrivateIdentifier token whose text includes
-        // the leading `#`. Mirrors Go scanner.go:897-925.
+
         let mut s = Scanner::new("#name = 1");
         assert_eq!(s.scan(), SyntaxKind::PrivateIdentifier);
         assert_eq!(s.token_text(), "#name");
@@ -2806,8 +2374,7 @@ mod tests {
 
     #[test]
     fn scan_shebang_at_file_start_is_trivia() {
-        // `#!` at the very start of the file is shebang trivia (consumed), so
-        // the first real token is the following identifier.
+
         let mut s = Scanner::new("#!/usr/bin/env node\nlet x = 1;");
         assert_eq!(s.scan(), SyntaxKind::LetKeyword);
         assert_eq!(s.scan(), SyntaxKind::Identifier);
@@ -2842,28 +2409,24 @@ mod tests {
 
     #[test]
     fn scan_string_escape_sequences() {
-        // \x22 is the hex escape for " — must not prematurely end the string
+
         let mut s = Scanner::new(r#""\x22""#);
         assert_eq!(s.scan(), SyntaxKind::StringLiteral);
         assert_eq!(s.token_text(), r#""\x22""#);
         assert_eq!(s.token_value(), "\"");
 
-        // \u{1F600} extended unicode escape
         let mut s = Scanner::new(r#""\u{1F600}""#);
         assert_eq!(s.scan(), SyntaxKind::StringLiteral);
         assert_eq!(s.token_value(), "\u{1F600}");
 
-        // \u0041 4-digit unicode escape
         let mut s = Scanner::new(r#""\u0041""#);
         assert_eq!(s.scan(), SyntaxKind::StringLiteral);
         assert_eq!(s.token_value(), "A");
 
-        // line continuation: backslash + newline is skipped
         let mut s = Scanner::new("\"hello\\\nworld\"");
         assert_eq!(s.scan(), SyntaxKind::StringLiteral);
         assert_eq!(s.token_value(), "helloworld");
 
-        // escaped backslash followed by quote char
         let mut s = Scanner::new(r#""\\\"""#);
         assert_eq!(s.scan(), SyntaxKind::StringLiteral);
         assert_eq!(s.token_value(), "\\\"");
@@ -2933,7 +2496,7 @@ mod tests {
     #[test]
     fn re_scan_slash_token_basic_regex() {
         let mut s = Scanner::new("/foo/g");
-        s.scan(); // SlashToken
+        s.scan();
         assert_eq!(s.token(), SyntaxKind::SlashToken);
         s.re_scan_slash_token();
         assert_eq!(s.token(), SyntaxKind::RegularExpressionLiteral);
@@ -2951,7 +2514,7 @@ mod tests {
 
     #[test]
     fn re_scan_slash_token_regex_with_char_class() {
-        // `/` inside `[...]` should not end the regex
+
         let mut s = Scanner::new(r"/[\/]/");
         s.scan();
         s.re_scan_slash_token();
@@ -2961,7 +2524,7 @@ mod tests {
 
     #[test]
     fn re_scan_slash_token_regex_with_escape() {
-        // Escaped `/` should not end the regex
+
         let mut s = Scanner::new(r"/a\/b/");
         s.scan();
         s.re_scan_slash_token();
@@ -2971,7 +2534,7 @@ mod tests {
 
     #[test]
     fn re_scan_slash_token_slash_equals() {
-        // `/=` should be rescanned: `=` is the first char of the pattern
+
         let mut s = Scanner::new("/=/");
         s.scan();
         assert_eq!(s.token(), SyntaxKind::SlashEqualsToken);
@@ -3010,8 +2573,7 @@ mod tests {
 
     #[test]
     fn re_scan_slash_token_valid_flags_no_errors() {
-        // Known flags without the `u`+`v` conflict (`d g i m s y`) — no
-        // diagnostics.
+
         let mut s = Scanner::new("/pattern/dgimsy");
         s.scan();
         s.re_scan_slash_token();
@@ -3022,7 +2584,7 @@ mod tests {
 
     #[test]
     fn re_scan_slash_token_unknown_flag_reports_ts1499() {
-        // `z` is not a valid regex flag → TS1499 at each `z` position.
+
         let mut s = Scanner::new("/foo/zz");
         s.scan();
         s.re_scan_slash_token();
@@ -3031,15 +2593,15 @@ mod tests {
         let errors = s.take_errors();
         assert_eq!(errors.len(), 2, "expected two TS1499 errors for 'zz'");
         assert_eq!(errors[0].kind, DiagnosticKind::UnknownRegularExpressionFlag);
-        assert_eq!(errors[0].pos, "/foo/".len()); // first z
+        assert_eq!(errors[0].pos, "/foo/".len());
         assert_eq!(errors[0].length, 1);
         assert_eq!(errors[1].kind, DiagnosticKind::UnknownRegularExpressionFlag);
-        assert_eq!(errors[1].pos, "/foo/z".len()); // second z
+        assert_eq!(errors[1].pos, "/foo/z".len());
     }
 
     #[test]
     fn re_scan_slash_token_duplicate_flag_reports_ts1500() {
-        // `gg` → TS1500 at the second `g`.
+
         let mut s = Scanner::new("/foo/gg");
         s.scan();
         s.re_scan_slash_token();
@@ -3051,13 +2613,13 @@ mod tests {
             errors[0].kind,
             DiagnosticKind::DuplicateRegularExpressionFlag
         );
-        assert_eq!(errors[0].pos, "/foo/g".len()); // second g
+        assert_eq!(errors[0].pos, "/foo/g".len());
         assert_eq!(errors[0].length, 1);
     }
 
     #[test]
     fn re_scan_slash_token_u_and_v_mutually_exclusive_reports_ts1502() {
-        // `uv` and `vu` both → TS1502 at the second flag.
+
         let mut s = Scanner::new("/foo/uv");
         s.scan();
         s.re_scan_slash_token();
@@ -3068,10 +2630,9 @@ mod tests {
             errors[0].kind,
             DiagnosticKind::UnicodeUAndVFlagsMutuallyExclusive
         );
-        assert_eq!(errors[0].pos, "/foo/u".len()); // the v
+        assert_eq!(errors[0].pos, "/foo/u".len());
         assert_eq!(errors[0].length, 1);
 
-        // Reverse order: `vu` → TS1502 at the `u`.
         let mut s = Scanner::new("/foo/vu");
         s.scan();
         s.re_scan_slash_token();
@@ -3081,19 +2642,19 @@ mod tests {
             errors[0].kind,
             DiagnosticKind::UnicodeUAndVFlagsMutuallyExclusive
         );
-        assert_eq!(errors[0].pos, "/foo/v".len()); // the u
+        assert_eq!(errors[0].pos, "/foo/v".len());
     }
 
     #[test]
     fn re_scan_slash_token_mixed_flag_errors() {
-        // `guz`: `g` ok, `u` ok, `z` unknown → one TS1499.
+
         let mut s = Scanner::new("/foo/guz");
         s.scan();
         s.re_scan_slash_token();
         let errors = s.take_errors();
         assert_eq!(errors.len(), 1);
         assert_eq!(errors[0].kind, DiagnosticKind::UnknownRegularExpressionFlag);
-        assert_eq!(errors[0].pos, "/foo/gu".len()); // the z
+        assert_eq!(errors[0].pos, "/foo/gu".len());
     }
 
     #[test]
@@ -3104,7 +2665,7 @@ mod tests {
         assert_eq!(directives.len(), 1);
         assert_eq!(directives[0].kind, CommentDirectiveKind::ExpectError);
         assert_eq!(directives[0].pos, 0);
-        assert_eq!(directives[0].end, 19); // before the \n
+        assert_eq!(directives[0].end, 19);
     }
 
     #[test]
@@ -3155,42 +2716,38 @@ mod tests {
         assert_eq!(directives[1].kind, CommentDirectiveKind::ExpectError);
     }
 
-    // ────────────────────────────────────────────────────────────────────
-    // Trivia helpers (P2.1)
-    // ────────────────────────────────────────────────────────────────────
-
     #[test]
     fn skip_trivia_whitespace_and_newlines() {
-        // Spaces, tabs, newlines should all be skipped.
+
         assert_eq!(skip_trivia("  \t\n  x", 0), 6);
         assert_eq!(skip_trivia("\n\n\nx", 0), 3);
         assert_eq!(skip_trivia("x", 0), 0);
-        // Empty string -> pos 0.
+
         assert_eq!(skip_trivia("", 0), 0);
     }
 
     #[test]
     fn skip_trivia_single_line_comment() {
-        // `//` consumes up to (but not including) the line break.
+
         assert_eq!(skip_trivia("// comment\nx", 0), 11);
-        // `//` at EOF.
+
         assert_eq!(skip_trivia("// eof", 0), 6);
     }
 
     #[test]
     fn skip_trivia_multi_line_comment() {
-        // `/* comment */` is 13 bytes; `x` is at pos 13.
+
         assert_eq!(skip_trivia("/* comment */x", 0), 13);
-        // Unterminated multi-line comment consumes to EOF.
+
         assert_eq!(skip_trivia("/* unterminated", 0), 15);
-        // Multi-line comment that doesn't start at `/` should not be skipped.
+
         assert_eq!(skip_trivia("abc", 0), 0);
     }
 
     #[test]
     fn skip_trivia_shebang_at_start() {
         assert_eq!(skip_trivia("#!/usr/bin/env node\nlet x;", 0), 20);
-        // `#!` not at start of file should not be treated as trivia.
+
         assert_eq!(skip_trivia(" #!/foo", 1), 1);
     }
 
@@ -3214,22 +2771,18 @@ mod tests {
 
     #[test]
     fn full_start_pos_tracks_leading_trivia() {
-        // `let x = 1;`: `let`=0-2, ` `=3, `x`=4, ` `=5, `=`=6, ` `=7, `1`=8, `;`=9.
+
         let mut s = Scanner::new("let x = 1;");
         s.scan();
         assert_eq!(s.full_start_pos(), 0);
         assert_eq!(s.token_pos(), 0);
         assert_eq!(s.token(), SyntaxKind::LetKeyword);
 
-        // After `let`, scanner skips trivia (` `) before `x`. The full start
-        // of `x` should be 3 (start of the space), while token_pos is 4 (the `x`).
         s.scan();
         assert_eq!(s.full_start_pos(), 3);
         assert_eq!(s.token_pos(), 4);
         assert_eq!(s.token(), SyntaxKind::Identifier);
 
-        // After `x`, scanner skips ` ` (trivia) before `=`. full_start_pos
-        // should be 5 (after `x`), token_pos 6 (the `=`).
         s.scan();
         assert_eq!(s.full_start_pos(), 5);
         assert_eq!(s.token_pos(), 6);
@@ -3238,30 +2791,27 @@ mod tests {
 
     #[test]
     fn full_start_pos_preserved_across_comments() {
-        // Leading single-line comment, then `let`. full_start_pos should be 0
-        // (where the comment starts), token_pos should be 11 (after `\n`).
+
         let mut s = Scanner::new("// hi\nlet x;");
         s.scan();
         assert_eq!(s.token(), SyntaxKind::LetKeyword);
         assert_eq!(s.full_start_pos(), 0);
         assert_eq!(s.token_pos(), 6);
 
-        // Multi-line comment between two tokens.
         let mut s = Scanner::new("a /* c */ b");
-        s.scan(); // a
+        s.scan();
         assert_eq!(s.token(), SyntaxKind::Identifier);
         assert_eq!(s.token_pos(), 0);
-        s.scan(); // b
+        s.scan();
         assert_eq!(s.token(), SyntaxKind::Identifier);
-        // full_start_pos should be 1 (start of the space/comment trivia).
+
         assert_eq!(s.full_start_pos(), 1);
         assert_eq!(s.token_pos(), 10);
     }
 
     #[test]
     fn get_leading_comment_ranges_basic() {
-        // Two leading single-line comments, then code.
-        // `// first` = 8 bytes (0-7), `\n` = 1 (8), `// second` = 9 bytes (9-17), end=18.
+
         let text = "// first\n// second\nlet x;";
         let ranges = get_leading_comment_ranges(text, 0);
         assert_eq!(ranges.len(), 2);
@@ -3287,12 +2837,9 @@ mod tests {
 
     #[test]
     fn get_leading_comment_ranges_from_middle() {
-        // `let x; // trailing\n// leading for next\nlet y;`
-        //  pos: 0-5=`let x;`, 6=` `, 7-17=`// trailing`, 18=`\n`,
-        //  19-37=`// leading for next` (19 bytes), 38=`\n`, 39+=`let y;`
+
         let text = "let x; // trailing\n// leading for next\nlet y;";
-        // Start at pos 18 (the `\n` after the trailing comment). Leading mode
-        // treats this newline as a separator and collects the next comment.
+
         let ranges = get_leading_comment_ranges(text, 18);
         assert_eq!(ranges.len(), 1);
         assert_eq!(ranges[0].kind, CommentRangeKind::SingleLine);
@@ -3309,9 +2856,7 @@ mod tests {
 
     #[test]
     fn get_trailing_comment_ranges_basic() {
-        // `let x; // trailing\nlet y;`
-        //  pos: 0-5=`let x;`, 6=` `, 7-17=`// trailing`, 18=`\n`
-        // Trailing comment starts at pos 7 (after the space).
+
         let text = "let x; // trailing\nlet y;";
         let ranges = get_trailing_comment_ranges(text, 6);
         assert_eq!(ranges.len(), 1);
@@ -3323,7 +2868,7 @@ mod tests {
 
     #[test]
     fn get_trailing_comment_ranges_stops_at_line_break() {
-        // When `pos` is on a line with no trailing comment, return nothing.
+
         let text = "let x;\nlet y; // c\n";
         let ranges = get_trailing_comment_ranges(text, 0);
         assert!(ranges.is_empty());
@@ -3331,8 +2876,7 @@ mod tests {
 
     #[test]
     fn get_trailing_comment_ranges_multi_line() {
-        // `let x; /* c */ let y;`
-        //  pos: 0-5=`let x;`, 6=` `, 7-13=`/* c */`, 14=` `, 15+=`let y;`
+
         let text = "let x; /* c */ let y;";
         let ranges = get_trailing_comment_ranges(text, 6);
         assert_eq!(ranges.len(), 1);
@@ -3344,8 +2888,7 @@ mod tests {
 
     #[test]
     fn get_leading_comment_ranges_shebang_skipped() {
-        // `#!/usr/bin/env node` = 19 bytes (0-18), `\n` = 1 (19),
-        // `// real comment` = 15 bytes (20-34), end=35.
+
         let text = "#!/usr/bin/env node\n// real comment\nlet x;";
         let ranges = get_leading_comment_ranges(text, 0);
         assert_eq!(ranges.len(), 1);
@@ -3355,24 +2898,20 @@ mod tests {
         assert!(ranges[0].has_trailing_new_line);
     }
 
-    // ────────────────────────────────────────────────────────────────────
-    // TokenFlags (P2.1)
-    // ────────────────────────────────────────────────────────────────────
-
     #[test]
     fn token_flags_preceding_line_break_set() {
         let mut s = Scanner::new("foo\nbar");
-        s.scan(); // foo
+        s.scan();
         assert!(!token_flags_contains(
             s.token_flags(),
             TOKEN_FLAGS_PRECEDING_LINE_BREAK
         ));
-        s.scan(); // bar (preceded by \n)
+        s.scan();
         assert!(token_flags_contains(
             s.token_flags(),
             TOKEN_FLAGS_PRECEDING_LINE_BREAK
         ));
-        assert!(s.has_preceding_line_break()); // kept in sync
+        assert!(s.has_preceding_line_break());
     }
 
     #[test]
@@ -3384,7 +2923,7 @@ mod tests {
             s.token_flags(),
             TOKEN_FLAGS_SINGLE_QUOTE
         ));
-        // Double-quoted strings do NOT set SINGLE_QUOTE.
+
         let mut s = Scanner::new("\"abc\"");
         s.scan();
         assert_eq!(s.token(), SyntaxKind::StringLiteral);
@@ -3396,7 +2935,7 @@ mod tests {
 
     #[test]
     fn token_flags_unterminated_string() {
-        // Unterminated string (hits newline before closing quote).
+
         let mut s = Scanner::new("'abc\ndef'");
         s.scan();
         assert_eq!(s.token(), SyntaxKind::StringLiteral);
@@ -3425,8 +2964,7 @@ mod tests {
             s.token_flags(),
             TOKEN_FLAGS_HEX_SPECIFIER
         ));
-        // `WITH_SPECIFIER` is a combined mask (HEX | BINARY | OCTAL); use
-        // `intersects` to check any-of.
+
         assert!(token_flags_intersects(
             s.token_flags(),
             TOKEN_FLAGS_WITH_SPECIFIER
@@ -3468,8 +3006,7 @@ mod tests {
 
     #[test]
     fn token_flags_contains_leading_zero() {
-        // `0888` has a leading zero followed by another digit (legacy octal
-        // detection). `0x1F` does NOT set CONTAINS_LEADING_ZERO.
+
         let mut s = Scanner::new("0888");
         s.scan();
         assert!(token_flags_contains(
@@ -3486,8 +3023,7 @@ mod tests {
 
     #[test]
     fn token_flags_plain_decimal_none() {
-        // A plain decimal like `123` should not set any specifier/scientific/
-        // leading-zero flags.
+
         let mut s = Scanner::new("123");
         s.scan();
         let flags = s.token_flags();
@@ -3496,14 +3032,14 @@ mod tests {
 
     #[test]
     fn token_flags_reset_between_tokens() {
-        // `0x1F 'str'`: hex specifier should not leak to the string token.
+
         let mut s = Scanner::new("0x1F 'str'");
-        s.scan(); // 0x1F
+        s.scan();
         assert!(token_flags_contains(
             s.token_flags(),
             TOKEN_FLAGS_HEX_SPECIFIER
         ));
-        s.scan(); // 'str'
+        s.scan();
         assert_eq!(s.token(), SyntaxKind::StringLiteral);
         assert!(!token_flags_contains(
             s.token_flags(),
@@ -3517,7 +3053,7 @@ mod tests {
 
     #[test]
     fn token_flags_unterminated_template() {
-        // Unterminated template literal (no closing backtick).
+
         let mut s = Scanner::new("`abc");
         s.scan();
         assert!(token_flags_contains(
@@ -3526,96 +3062,83 @@ mod tests {
         ));
     }
 
-    // ────────────────────────────────────────────────────────────────────
-    // SkipTriviaEx options + conflict-marker trivia (P2.1)
-    // ────────────────────────────────────────────────────────────────────
-
     #[test]
     fn skip_trivia_ex_stop_after_line_break() {
-        // With `stop_after_line_break`, skip_trivia should return the position
-        // right after the first line break (not skip subsequent trivia).
-        // Input: `  \n  x` → `\n` at pos 2, after consuming it pos=3, stop.
+
         let text = "  \n  x";
         let opts = SkipTriviaOptions {
             stop_after_line_break: true,
             ..Default::default()
         };
         assert_eq!(skip_trivia_ex(text, 0, &opts, None), 3);
-        // Without the option: skip all trivia, `x` is at pos 5.
+
         assert_eq!(skip_trivia(text, 0), 5);
     }
 
     #[test]
     fn skip_trivia_ex_stop_at_comments() {
-        // With `stop_at_comments`, return the position of the `/` instead of
-        // consuming the comment.
+
         let text = "  // c\nx";
         let opts = SkipTriviaOptions {
             stop_at_comments: true,
             ..Default::default()
         };
-        // `/` is at pos 2.
+
         assert_eq!(skip_trivia_ex(text, 0, &opts, None), 2);
-        // Without the option: `  ` (2) + `// c` (4) + `\n` (1) = 7, `x` at 7.
+
         assert_eq!(skip_trivia(text, 0), 7);
     }
 
     #[test]
     fn skip_trivia_ex_in_jsdoc_consumes_leading_asterisk() {
-        // JSDoc-style `*` after a line break should be consumed as trivia.
-        // Input: `\n * @param` → `\n`=0, ` `=1, `*`=2, ` `=3, `@`=4.
-        // With in_jsdoc: consume `\n`(→1), ` `(→2), `*`(→3), ` `(→4), stop at `@`.
+
         let text = "\n * @param";
         let opts = SkipTriviaOptions {
             in_jsdoc: true,
             ..Default::default()
         };
         assert_eq!(skip_trivia_ex(text, 0, &opts, None), 4);
-        // Without in_jsdoc: consume `\n`(→1), ` `(→2), stop at `*` (pos 2).
+
         assert_eq!(skip_trivia(text, 0), 2);
     }
 
     #[test]
     fn skip_trivia_ex_jsdoc_star_only_after_line_break() {
-        // `*` not preceded by a line break should NOT be consumed even in JSDoc.
+
         let text = " * foo";
         let opts = SkipTriviaOptions {
             in_jsdoc: true,
             ..Default::default()
         };
-        // No leading line break → `*` is not consumed; stop at pos 1 (the `*`).
+
         assert_eq!(skip_trivia_ex(text, 0, &opts, None), 1);
     }
 
     #[test]
     fn is_conflict_marker_trivia_detects_markers() {
-        // `<<<<<<<` at start of file, followed by space → marker.
+
         assert!(is_conflict_marker_trivia("<<<<<<< head\n", 0));
-        // `>>>>>>>` at start of line, followed by space → marker.
+
         assert!(is_conflict_marker_trivia("x\n>>>>>>> branch\n", 2));
-        // `=======` at start of line (no trailing space needed) → marker.
+
         assert!(is_conflict_marker_trivia("x\n=======\n", 2));
-        // `|||||||` at start of line, followed by space (diff3 style) → marker.
+
         assert!(is_conflict_marker_trivia("x\n||||||| base\n", 2));
-        // Only 6 `<` (not 7) → not a marker.
+
         assert!(!is_conflict_marker_trivia("<<<<<< \n", 0));
-        // `<<<<<<<` not followed by space → not a marker (Go requires space for `<`/`>`/`|`).
+
         assert!(!is_conflict_marker_trivia("<<<<<<<x\n", 0));
-        // `|||||||` not followed by space → not a marker.
+
         assert!(!is_conflict_marker_trivia("x\n|||||||\n", 2));
-        // Not at start of line → not a marker.
+
         assert!(!is_conflict_marker_trivia("a <<<<<<< \n", 2));
-        // Second byte differs → fast reject.
+
         assert!(!is_conflict_marker_trivia("<x\n", 0));
     }
 
     #[test]
     fn skip_trivia_ex_consumes_conflict_marker() {
-        // `<<<<<<< a\n` is a conflict marker line; skip_trivia_ex consumes
-        // the marker line and the trailing newline, then stops at the next
-        // non-trivia character (the `s` of `shared`). The content between
-        // markers is *not* consumed as trivia (mirrors Go's behavior: only
-        // the marker lines themselves are trivia).
+
         let text = "<<<<<<< a\nshared\n=======\n>>>>>>> b\nx";
         let pos = skip_trivia_ex(text, 0, &SkipTriviaOptions::default(), None);
         assert_eq!(&text[pos..], "shared\n=======\n>>>>>>> b\nx");
@@ -3623,7 +3146,7 @@ mod tests {
 
     #[test]
     fn skip_trivia_ex_reports_conflict_marker_error() {
-        // The report_error callback should be invoked for conflict markers.
+
         use std::cell::RefCell;
         let text = "<<<<<<< a\nx";
         let reported: RefCell<Vec<(usize, usize)>> = RefCell::new(Vec::new());
@@ -3642,10 +3165,7 @@ mod tests {
 
     #[test]
     fn skip_trivia_ex_pipe_divider_marker() {
-        // `<<<<<<< a\n` is consumed as a conflict marker; the following
-        // `local` line is non-trivia and stops skip_trivia_ex (mirrors Go:
-        // only marker lines are trivia, content between them is parsed as
-        // code, which then produces its own diagnostics).
+
         let text = "<<<<<<< a\nlocal\n||||||| base\nshared\n=======\nremote\n>>>>>>> b\nx";
         let pos = skip_trivia_ex(text, 0, &SkipTriviaOptions::default(), None);
         assert_eq!(
@@ -3654,14 +3174,9 @@ mod tests {
         );
     }
 
-    // ────────────────────────────────────────────────────────────────────
-    // JSDoc TokenFlags (P2.1)
-    // ────────────────────────────────────────────────────────────────────
-
     #[test]
     fn token_flags_preceding_jsdoc_comment() {
-        // `/** ... */` is a JSDoc comment; the following token should have
-        // `PRECEDING_JSDOC_COMMENT` set.
+
         let mut s = Scanner::new("/** doc */\nlet x");
         s.scan();
         assert_eq!(s.token(), SyntaxKind::LetKeyword);
@@ -3674,7 +3189,7 @@ mod tests {
 
     #[test]
     fn token_flags_non_jsdoc_multi_line_comment() {
-        // `/* ... */` (single asterisk) is NOT a JSDoc comment.
+
         let mut s = Scanner::new("/* not jsdoc */\nlet x");
         s.scan();
         assert_eq!(s.token(), SyntaxKind::LetKeyword);
@@ -3683,8 +3198,7 @@ mod tests {
 
     #[test]
     fn token_flags_empty_jsdoc_comment_not_flagged() {
-        // `/**/` is an empty multi-line comment, NOT a JSDoc comment (Go:
-        // `isJSDoc := s.char() == '*' && s.charAt(1) != '/'`).
+
         let mut s = Scanner::new("/**/\nlet x");
         s.scan();
         assert_eq!(s.token(), SyntaxKind::LetKeyword);
@@ -3693,7 +3207,7 @@ mod tests {
 
     #[test]
     fn token_flags_jsdoc_deprecated_tag() {
-        // `@deprecated` tag sets `PRECEDING_JSDOC_WITH_DEPRECATED`.
+
         let mut s = Scanner::new("/**\n * @deprecated\n */\nlet x");
         s.scan();
         assert_eq!(s.token(), SyntaxKind::LetKeyword);
@@ -3704,7 +3218,7 @@ mod tests {
 
     #[test]
     fn token_flags_jsdoc_see_tag() {
-        // `@see` tag sets `PRECEDING_JSDOC_WITH_SEE_OR_LINK`.
+
         let mut s = Scanner::new("/**\n * @see foo\n */\nlet x");
         s.scan();
         assert_eq!(s.token(), SyntaxKind::LetKeyword);
@@ -3714,7 +3228,7 @@ mod tests {
 
     #[test]
     fn token_flags_jsdoc_link_tag() {
-        // `@link` tag also sets `PRECEDING_JSDOC_WITH_SEE_OR_LINK`.
+
         let mut s = Scanner::new("/**\n * {@link foo}\n */\nlet x");
         s.scan();
         assert_eq!(s.token(), SyntaxKind::LetKeyword);
@@ -3723,7 +3237,7 @@ mod tests {
 
     #[test]
     fn token_flags_jsdoc_both_tags() {
-        // Both `@deprecated` and `@see` tags set both flags.
+
         let mut s = Scanner::new("/**\n * @deprecated\n * @see foo\n */\nlet x");
         s.scan();
         assert_eq!(s.token(), SyntaxKind::LetKeyword);
@@ -3733,7 +3247,7 @@ mod tests {
 
     #[test]
     fn token_flags_jsdoc_tag_invalid_terminator() {
-        // `@deprecatedX` (tag followed by non-terminator) should NOT match.
+
         let mut s = Scanner::new("/**\n * @deprecatedX\n */\nlet x");
         s.scan();
         assert_eq!(s.token(), SyntaxKind::LetKeyword);
@@ -3742,7 +3256,7 @@ mod tests {
 
     #[test]
     fn token_flags_jsdoc_tag_at_end_of_string() {
-        // `@deprecated` at end of comment text (no terminator char) matches.
+
         let mut s = Scanner::new("/**@deprecated*/\nlet x");
         s.scan();
         assert_eq!(s.token(), SyntaxKind::LetKeyword);
@@ -3751,25 +3265,23 @@ mod tests {
 
     #[test]
     fn token_flags_jsdoc_flags_reset_between_tokens() {
-        // JSDoc flags should NOT leak from one token to the next.
+
         let mut s = Scanner::new("/** @deprecated */\nlet x\nlet y");
-        s.scan(); // let x
+        s.scan();
         assert!(s.has_preceding_jsdoc_with_deprecated_tag());
-        s.scan(); // x
-        s.scan(); // let y — no preceding JSDoc
+        s.scan();
+        s.scan();
         assert!(!s.has_preceding_jsdoc_comment());
         assert!(!s.has_preceding_jsdoc_with_deprecated_tag());
     }
 
     #[test]
     fn token_flags_jsdoc_leading_asterisk_consumed() {
-        // When `skip_jsdoc_leading_asterisks` is active, a `*` at line start
-        // is consumed as trivia and sets `PRECEDING_JSDOC_LEADING_ASTERISKS`.
-        // The `*` must be preceded by a line break.
+
         let mut s = Scanner::new("\n* x");
         s.set_skip_jsdoc_leading_asterisks(true);
         s.scan();
-        // The `*` is consumed; next token is `x` (Identifier).
+
         assert_eq!(s.token(), SyntaxKind::Identifier);
         assert_eq!(s.token_text(), "x");
         assert!(s.has_preceding_jsdoc_leading_asterisks());
@@ -3777,8 +3289,7 @@ mod tests {
 
     #[test]
     fn token_flags_jsdoc_leading_asterisk_no_line_break() {
-        // Without a preceding line break, `*` is NOT consumed as JSDoc
-        // asterisk — it produces a normal `AsteriskToken`.
+
         let mut s = Scanner::new("* x");
         s.set_skip_jsdoc_leading_asterisks(true);
         s.scan();
@@ -3788,8 +3299,7 @@ mod tests {
 
     #[test]
     fn token_flags_jsdoc_leading_asterisk_not_active() {
-        // When `skip_jsdoc_leading_asterisks` is NOT active, `*` at line
-        // start produces a normal `AsteriskToken`.
+
         let mut s = Scanner::new("\n* x");
         s.scan();
         assert_eq!(s.token(), SyntaxKind::AsteriskToken);
@@ -3798,8 +3308,7 @@ mod tests {
 
     #[test]
     fn token_flags_jsdoc_leading_asterisk_double_star_not_consumed() {
-        // `**` is NOT consumed as JSDoc asterisk (it would form
-        // `AsteriskAsteriskToken`).
+
         let mut s = Scanner::new("\n** x");
         s.set_skip_jsdoc_leading_asterisks(true);
         s.scan();
@@ -3809,8 +3318,7 @@ mod tests {
 
     #[test]
     fn token_flags_jsdoc_leading_asterisk_star_equals_not_consumed() {
-        // `*=` is NOT consumed as JSDoc asterisk (it forms
-        // `AsteriskEqualsToken`).
+
         let mut s = Scanner::new("\n*= x");
         s.set_skip_jsdoc_leading_asterisks(true);
         s.scan();
@@ -3820,19 +3328,17 @@ mod tests {
 
     #[test]
     fn token_flags_jsdoc_leading_asterisk_only_first_consumed() {
-        // Only the FIRST `*` at line start is consumed; subsequent `*` on
-        // the same line produce `AsteriskToken`.
+
         let mut s = Scanner::new("\n* * x");
         s.set_skip_jsdoc_leading_asterisks(true);
-        s.scan(); // first `*` consumed, second `*` is AsteriskToken
+        s.scan();
         assert_eq!(s.token(), SyntaxKind::AsteriskToken);
         assert!(s.has_preceding_jsdoc_leading_asterisks());
     }
 
     #[test]
     fn token_flags_jsdoc_leading_asterisk_counter_nesting() {
-        // `set_skip_jsdoc_leading_asterisks(false)` decrements the counter;
-        // after balanced enable/disable, `*` is no longer consumed.
+
         let mut s = Scanner::new("\n* x");
         s.set_skip_jsdoc_leading_asterisks(true);
         s.set_skip_jsdoc_leading_asterisks(false);
@@ -3843,7 +3349,7 @@ mod tests {
 
     #[test]
     fn has_jsdoc_tag_helper() {
-        // Direct unit tests for the `has_jsdoc_tag` helper.
+
         assert!(has_jsdoc_tag("deprecated", &["deprecated"]));
         assert!(has_jsdoc_tag("deprecated foo", &["deprecated"]));
         assert!(has_jsdoc_tag("deprecated\tfoo", &["deprecated"]));
@@ -3856,7 +3362,7 @@ mod tests {
             "linkcode foo",
             &["see", "link", "linkcode", "linkplain"]
         ));
-        // Non-matching
+
         assert!(!has_jsdoc_tag("deprecatedX", &["deprecated"]));
         assert!(!has_jsdoc_tag("dep", &["deprecated"]));
         assert!(!has_jsdoc_tag("foo", &["deprecated"]));
@@ -3864,7 +3370,7 @@ mod tests {
 
     #[test]
     fn scan_jsdoc_comment_for_tags_helper() {
-        // Direct unit tests for the `scan_jsdoc_comment_for_tags` helper.
+
         assert_eq!(
             scan_jsdoc_comment_for_tags("/** @deprecated */"),
             TOKEN_FLAGS_PRECEDING_JSDOC_WITH_DEPRECATED
@@ -3882,20 +3388,16 @@ mod tests {
             scan_jsdoc_comment_for_tags("/** no tags */"),
             TOKEN_FLAGS_NONE
         );
-        // `@link` inside `{...}` also matches.
+
         assert!(token_flags_contains(
             scan_jsdoc_comment_for_tags("/** {@link foo} */"),
             TOKEN_FLAGS_PRECEDING_JSDOC_WITH_SEE_OR_LINK
         ));
     }
 
-    // ────────────────────────────────────────────────────────────────────
-    // Escape-sequence & numeric-separator TokenFlags (P2.1)
-    // ────────────────────────────────────────────────────────────────────
-
     #[test]
     fn token_flags_unicode_escape() {
-        // `\u00a0` sets UNICODE_ESCAPE.
+
         let mut s = Scanner::new("\"\\u00a0\"");
         s.scan();
         assert!(token_flags_contains(
@@ -3910,7 +3412,7 @@ mod tests {
 
     #[test]
     fn token_flags_extended_unicode_escape() {
-        // `\u{10ffff}` sets EXTENDED_UNICODE_ESCAPE.
+
         let mut s = Scanner::new("\"\\u{10ffff}\"");
         s.scan();
         assert!(token_flags_contains(
@@ -3925,7 +3427,7 @@ mod tests {
 
     #[test]
     fn token_flags_hex_escape() {
-        // `\xa0` sets HEX_ESCAPE.
+
         let mut s = Scanner::new("\"\\xa0\"");
         s.scan();
         assert!(token_flags_contains(
@@ -3940,7 +3442,7 @@ mod tests {
 
     #[test]
     fn token_flags_invalid_hex_escape() {
-        // `\xz` (no hex digits) sets CONTAINS_INVALID_ESCAPE.
+
         let mut s = Scanner::new("\"\\xz\"");
         s.scan();
         assert!(token_flags_contains(
@@ -3955,7 +3457,7 @@ mod tests {
 
     #[test]
     fn token_flags_invalid_unicode_escape() {
-        // `\u00` (only 2 hex digits) sets CONTAINS_INVALID_ESCAPE.
+
         let mut s = Scanner::new("\"\\u00\"");
         s.scan();
         assert!(token_flags_contains(
@@ -3970,7 +3472,7 @@ mod tests {
 
     #[test]
     fn token_flags_invalid_extended_unicode_escape() {
-        // `\u{}` (empty) sets CONTAINS_INVALID_ESCAPE.
+
         let mut s = Scanner::new("\"\\u{}\"");
         s.scan();
         assert!(token_flags_contains(
@@ -3985,7 +3487,7 @@ mod tests {
 
     #[test]
     fn token_flags_octal_escape_invalid() {
-        // `\01` (legacy octal) sets CONTAINS_INVALID_ESCAPE.
+
         let mut s = Scanner::new("\"\\01\"");
         s.scan();
         assert!(token_flags_contains(
@@ -3996,7 +3498,7 @@ mod tests {
 
     #[test]
     fn token_flags_escape_eight_nine_invalid() {
-        // `\8` and `\9` set CONTAINS_INVALID_ESCAPE.
+
         let mut s = Scanner::new("\"\\8\"");
         s.scan();
         assert!(token_flags_contains(
@@ -4007,8 +3509,7 @@ mod tests {
 
     #[test]
     fn token_flags_nul_escape_not_invalid() {
-        // `\0` (NUL, not followed by digit) does NOT set
-        // CONTAINS_INVALID_ESCAPE.
+
         let mut s = Scanner::new("\"\\0\"");
         s.scan();
         assert!(!token_flags_contains(
@@ -4019,7 +3520,7 @@ mod tests {
 
     #[test]
     fn token_flags_contains_separator_decimal() {
-        // `1_000` sets CONTAINS_SEPARATOR (valid separator).
+
         let mut s = Scanner::new("1_000");
         s.scan();
         assert!(token_flags_contains(
@@ -4034,7 +3535,7 @@ mod tests {
 
     #[test]
     fn token_flags_contains_separator_hex() {
-        // `0xFF_FF` sets CONTAINS_SEPARATOR (valid separator in hex).
+
         let mut s = Scanner::new("0xFF_FF");
         s.scan();
         assert!(token_flags_contains(
@@ -4049,7 +3550,7 @@ mod tests {
 
     #[test]
     fn token_flags_contains_separator_binary() {
-        // `0b1010_0101` sets CONTAINS_SEPARATOR (valid separator in binary).
+
         let mut s = Scanner::new("0b1010_0101");
         s.scan();
         assert!(token_flags_contains(
@@ -4060,8 +3561,7 @@ mod tests {
 
     #[test]
     fn token_flags_invalid_separator_consecutive() {
-        // `1__000` (consecutive separators) sets both
-        // CONTAINS_SEPARATOR and CONTAINS_INVALID_SEPARATOR.
+
         let mut s = Scanner::new("1__000");
         s.scan();
         assert!(token_flags_contains(
@@ -4076,7 +3576,7 @@ mod tests {
 
     #[test]
     fn token_flags_invalid_separator_trailing() {
-        // `1000_` (trailing separator) sets both flags.
+
         let mut s = Scanner::new("1000_");
         s.scan();
         assert!(token_flags_contains(
@@ -4091,7 +3591,7 @@ mod tests {
 
     #[test]
     fn token_flags_no_separator_plain_number() {
-        // `12345` sets no separator flags.
+
         let mut s = Scanner::new("12345");
         s.scan();
         assert!(!token_flags_contains(
@@ -4106,15 +3606,14 @@ mod tests {
 
     #[test]
     fn token_flags_string_literal_flags_mask() {
-        // A string with `\x41\u0041'` should have all three flags set:
-        // HEX_ESCAPE + UNICODE_ESCAPE + SINGLE_QUOTE.
+
         let mut s = Scanner::new("'\\x41\\u0041'");
         s.scan();
         let flags = s.token_flags();
         assert!(token_flags_contains(flags, TOKEN_FLAGS_HEX_ESCAPE));
         assert!(token_flags_contains(flags, TOKEN_FLAGS_UNICODE_ESCAPE));
         assert!(token_flags_contains(flags, TOKEN_FLAGS_SINGLE_QUOTE));
-        // STRING_LITERAL_FLAGS mask should intersect.
+
         assert!(token_flags_intersects(
             flags,
             TOKEN_FLAGS_STRING_LITERAL_FLAGS
@@ -4123,25 +3622,22 @@ mod tests {
 
     #[test]
     fn token_flags_numeric_literal_flags_mask() {
-        // `0xFF_FF` should have HEX_SPECIFIER + CONTAINS_SEPARATOR.
+
         let mut s = Scanner::new("0xFF_FF");
         s.scan();
         let flags = s.token_flags();
         assert!(token_flags_contains(flags, TOKEN_FLAGS_HEX_SPECIFIER));
         assert!(token_flags_contains(flags, TOKEN_FLAGS_CONTAINS_SEPARATOR));
-        // NUMERIC_LITERAL_FLAGS mask should intersect.
+
         assert!(token_flags_intersects(
             flags,
             TOKEN_FLAGS_NUMERIC_LITERAL_FLAGS
         ));
     }
 
-    // ── Legacy octal (OCTAL flag) tests ──
-
     #[test]
     fn legacy_octal_literal_sets_octal_flag() {
-        // `0777` is a legacy octal literal — should set OCTAL flag and report
-        // TS1121. Mirrors Go `scanner.go:1961-1971`.
+
         let mut s = Scanner::new("0777");
         s.scan();
         assert_eq!(s.token(), SyntaxKind::NumericLiteral);
@@ -4155,7 +3651,7 @@ mod tests {
 
     #[test]
     fn legacy_octal_literal_single_digit() {
-        // `00` — `0` followed by octal digit `0` → legacy octal.
+
         let mut s = Scanner::new("00");
         s.scan();
         assert!(token_flags_contains(s.token_flags(), TOKEN_FLAGS_OCTAL));
@@ -4166,8 +3662,7 @@ mod tests {
 
     #[test]
     fn leading_zero_non_octal_sets_leading_zero_flag() {
-        // `0888` has a leading zero with non-octal digits — should set
-        // CONTAINS_LEADING_ZERO and report TS1489, NOT OCTAL.
+
         let mut s = Scanner::new("0888");
         s.scan();
         assert!(token_flags_contains(
@@ -4184,7 +3679,7 @@ mod tests {
 
     #[test]
     fn plain_zero_no_flags() {
-        // `0` alone — no OCTAL, no CONTAINS_LEADING_ZERO, no error.
+
         let mut s = Scanner::new("0");
         s.scan();
         assert!(!token_flags_contains(s.token_flags(), TOKEN_FLAGS_OCTAL));
@@ -4197,7 +3692,7 @@ mod tests {
 
     #[test]
     fn zero_with_fraction_no_flags() {
-        // `0.5` — no leading-zero flag (no digit after `0`).
+
         let mut s = Scanner::new("0.5");
         s.scan();
         assert!(!token_flags_contains(s.token_flags(), TOKEN_FLAGS_OCTAL));
@@ -4210,7 +3705,7 @@ mod tests {
 
     #[test]
     fn zero_with_exponent_no_flags() {
-        // `0e5` — no leading-zero flag (no digit after `0`).
+
         let mut s = Scanner::new("0e5");
         s.scan();
         assert!(!token_flags_contains(s.token_flags(), TOKEN_FLAGS_OCTAL));
@@ -4223,7 +3718,7 @@ mod tests {
 
     #[test]
     fn zero_bigint_no_flags() {
-        // `0n` — BigInt, no leading-zero flag.
+
         let mut s = Scanner::new("0n");
         s.scan();
         assert_eq!(s.token(), SyntaxKind::BigIntLiteral);
@@ -4233,9 +3728,7 @@ mod tests {
 
     #[test]
     fn zero_separator_after_leading_zero() {
-        // `0_123` — separator not allowed after leading `0`. Mirrors Go
-        // `scanner.go:1949-1953`: set both separator flags, report TS6188,
-        // reset, re-scan as plain fragment.
+
         let mut s = Scanner::new("0_123");
         s.scan();
         assert!(token_flags_contains(
@@ -4249,30 +3742,24 @@ mod tests {
         let errors = s.take_errors();
         assert_eq!(errors.len(), 1);
         assert_eq!(errors[0].kind, DiagnosticKind::NumericSeparatorNotAllowed);
-        assert_eq!(errors[0].pos, 1); // at the `_`
+        assert_eq!(errors[0].pos, 1);
     }
 
     #[test]
     fn legacy_octal_with_minus_prefix() {
-        // `-0777` — the error range should include the minus sign.
-        // Scanner sees `0777` as the numeric token; `self.token` is
-        // `MinusToken` at that point.
+
         let mut s = Scanner::new("-0777");
-        s.scan(); // `-`
+        s.scan();
         assert_eq!(s.token(), SyntaxKind::MinusToken);
-        s.scan(); // `0777`
+        s.scan();
         assert!(token_flags_contains(s.token_flags(), TOKEN_FLAGS_OCTAL));
         let errors = s.take_errors();
         assert_eq!(errors.len(), 1);
         assert_eq!(errors[0].kind, DiagnosticKind::OctalLiteralNotAllowed);
-        // Error should start at `-` (pos 0) with length 5.
+
         assert_eq!(errors[0].pos, 0);
         assert_eq!(errors[0].length, 5);
     }
-
-    // ────────────────────────────────────────────────────────────────
-    // JSDoc scanner tests
-    // ────────────────────────────────────────────────────────────────
 
     #[test]
     fn jsdoc_token_at_sign() {
@@ -4296,7 +3783,7 @@ mod tests {
 
     #[test]
     fn jsdoc_token_identifier_with_dash() {
-        // JSDoc tag names may contain `-` (e.g. `@custom-tag`).
+
         let mut s = Scanner::new("custom-tag");
         assert_eq!(s.scan_jsdoc_token(), SyntaxKind::Identifier);
         assert_eq!(s.token_text(), "custom-tag");
@@ -4394,7 +3881,7 @@ mod tests {
             SyntaxKind::JSDocCommentTextToken
         );
         assert_eq!(s.token_text(), "before ");
-        // Next token should be the brace.
+
         assert_eq!(s.scan_jsdoc_token(), SyntaxKind::OpenBraceToken);
     }
 
@@ -4410,7 +3897,7 @@ mod tests {
 
     #[test]
     fn jsdoc_comment_text_token_at_tag_boundary() {
-        // ` @param` — the `@` after whitespace starts a new tag.
+
         let mut s = Scanner::new("text @param");
         assert_eq!(
             s.scan_jsdoc_comment_text_token(false),
@@ -4426,13 +3913,13 @@ mod tests {
             s.scan_jsdoc_comment_text_token(true),
             SyntaxKind::JSDocCommentTextToken
         );
-        // In backticks mode, `{` does not terminate; only `` ` `` or newline.
+
         assert_eq!(s.token_text(), "code {@code x} more");
     }
 
     #[test]
     fn jsdoc_comment_text_token_empty_falls_through() {
-        // Immediately at `{` — text run is empty, falls through to scan_jsdoc_token.
+
         let mut s = Scanner::new("{");
         assert_eq!(
             s.scan_jsdoc_comment_text_token(false),
@@ -4440,39 +3927,17 @@ mod tests {
         );
     }
 
-    // ────────────────────────────────────────────────────────────────────
-    // Ported from Go internal/scanner/scanner_test.go
-    // ────────────────────────────────────────────────────────────────────
-
     #[test]
     fn scan_string_preserves_lone_surrogates() {
-        // Ported from Go TestScanStringPreservesLoneSurrogates.
-        //
-        // The Go scanner preserves lone surrogates from `\uXXXX` escapes as
-        // WTF-8 (3-byte encoding of surrogate code points), and combines
-        // adjacent high+low surrogate pairs into the supplementary code point.
-        // Standard Rust `String` cannot hold surrogate code points, so the
-        // Rust scanner's `unescape_string` replaces lone surrogates
-        // (U+D800–U+DFFF) with the Unicode replacement character (U+FFFD).
-        // This is the expected behavior for a Rust implementation.
-        //
-        // Input: `"🦀\ud7ff\ud800\ud801\uD83E\uDD80"`
-        //   🦀         → preserved (valid supplementary plane char)
-        //   \ud7ff     → preserved (U+D7FF is below the surrogate range, valid)
-        //   \ud800     → U+FFFD (lone high surrogate, replaced)
-        //   \ud801     → U+FFFD (lone high surrogate, replaced)
-        //   \uD83E     → U+FFFD (Go combines with \uDD80 into 🦀; Rust replaces)
-        //   \uDD80     → U+FFFD (lone low surrogate, replaced)
+
         let input = r#""🦀\ud7ff\ud800\ud801\uD83E\uDD80""#;
         let mut s = Scanner::new(input);
         assert_eq!(s.scan(), SyntaxKind::StringLiteral);
-        // Verify the scanner does not panic and produces a value. Lone
-        // surrogates become U+FFFD; valid chars (🦀, U+D7FF) are preserved.
+
         let value = s.token_value();
         assert!(value.contains('🦀'));
         assert!(value.contains('\u{D7FF}'));
-        // Lone surrogates are replaced with U+FFFD (4 of them: \ud800, \ud801,
-        // \uD83E, \uDD80).
+
         let fffd_count = value.chars().filter(|&c| c == '\u{FFFD}').count();
         assert_eq!(fffd_count, 4);
     }

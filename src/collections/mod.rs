@@ -1,5 +1,3 @@
-//! Collection types ported from `internal/collections/`.
-
 pub mod cow;
 pub mod multimap;
 pub mod ordered_map;

@@ -1,16 +1,6 @@
-//! Format code options and editor settings.
-//!
-//! Ported from `internal/ls/lsutil/formatcodeoptions.go`. The Go file defines
-//! `IndentStyle`, `SemicolonPreference`, `EditorSettings`, `FormatCodeSettings`,
-//! and the conversion helpers to/from LSP `FormattingOptions`, plus the default
-//! settings used by the language service.
-
 use crate::core::tristate::{Tristate, bool_to_tristate};
 use crate::lsp::lsproto::lsp::FormattingOptions;
 
-/// Indentation style for formatted output.
-///
-/// Mirrors `lsutil.IndentStyle` in Go.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 #[repr(i32)]
 pub enum IndentStyle {
@@ -21,9 +11,7 @@ pub enum IndentStyle {
 }
 
 impl IndentStyle {
-    /// Parse an indent style from a loosely-typed config value.
-    ///
-    /// Mirrors `parseIndentStyle` in Go.
+
     pub fn parse(value: &serde_json::Value) -> IndentStyle {
         match value {
             serde_json::Value::String(s) => match s.to_ascii_lowercase().as_str() {
@@ -43,9 +31,6 @@ impl IndentStyle {
     }
 }
 
-/// Preference for how semicolons are emitted by the formatter.
-///
-/// Mirrors `lsutil.SemicolonPreference` in Go.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum SemicolonPreference {
     #[default]
@@ -59,9 +44,6 @@ impl SemicolonPreference {
     pub const INSERT: &'static str = "insert";
     pub const REMOVE: &'static str = "remove";
 
-    /// Parse a semicolon preference from a loosely-typed config value.
-    ///
-    /// Mirrors `parseSemicolonPreference` in Go.
     pub fn parse(value: &serde_json::Value) -> SemicolonPreference {
         if let serde_json::Value::String(s) = value {
             match s.to_ascii_lowercase().as_str() {
@@ -83,9 +65,6 @@ impl SemicolonPreference {
     }
 }
 
-/// Editor-level formatting settings (indent sizes, newlines, etc.).
-///
-/// Mirrors `lsutil.EditorSettings` in Go.
 #[derive(Debug, Clone, Default)]
 pub struct EditorSettings {
     pub base_indent_size: i32,
@@ -97,9 +76,6 @@ pub struct EditorSettings {
     pub trim_trailing_whitespace: Tristate,
 }
 
-/// The full set of format code settings.
-///
-/// Mirrors `lsutil.FormatCodeSettings` in Go. Embeds [`EditorSettings`].
 #[derive(Debug, Clone, Default)]
 pub struct FormatCodeSettings {
     pub base_indent_size: i32,
@@ -133,7 +109,7 @@ pub struct FormatCodeSettings {
 }
 
 impl FormatCodeSettings {
-    /// Returns the [`EditorSettings`] view of these settings.
+
     pub fn editor_settings(&self) -> EditorSettings {
         EditorSettings {
             base_indent_size: self.base_indent_size,
@@ -147,9 +123,6 @@ impl FormatCodeSettings {
     }
 }
 
-/// Returns the default format-code settings.
-///
-/// Mirrors `GetDefaultFormatCodeSettings` in Go.
 pub fn get_default_format_code_settings() -> FormatCodeSettings {
     FormatCodeSettings {
         base_indent_size: 0,
@@ -180,16 +153,10 @@ pub fn get_default_format_code_settings() -> FormatCodeSettings {
     }
 }
 
-/// The default indent size used by the printer.
-///
-/// Mirrors `printer.GetDefaultIndentSize()` in Go.
 fn default_indent_size() -> i32 {
     4
 }
 
-/// Overlay LSP formatting options onto existing format-code settings.
-///
-/// Mirrors `FromLSFormatOptions` in Go.
 pub fn from_ls_format_options(
     f: &FormatCodeSettings,
     opt: &FormattingOptions,
@@ -204,9 +171,6 @@ pub fn from_ls_format_options(
     updated
 }
 
-/// Convert format-code settings to LSP formatting options.
-///
-/// Mirrors `FormatCodeSettings.ToLSFormatOptions` in Go.
 pub fn to_ls_format_options(settings: &FormatCodeSettings) -> FormattingOptions {
     FormattingOptions {
         tab_size: settings.tab_size as u32,

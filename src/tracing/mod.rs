@@ -1,20 +1,3 @@
-//! Compiler tracing, ported from Go `internal/tracing` (`tracing.go`).
-//!
-//! Records Chrome trace-event ("B"/"E"/"I"/"M") duration events for
-//! parse/bind/check/emit phases. Each duration event is assigned a thread id
-//! derived from its args, mirroring Go's `Tracing`:
-//! - a `checkerId` arg maps to a `checker:<id>` thread
-//!   (`firstSyntheticThreadID + id`),
-//! - a file-path arg (`path`/`fileName`/…) maps to a stable `file:<path>`
-//!   thread via an xxh3 hash (`firstFileThreadID + hash % range`), so ids are
-//!   deterministic regardless of first-seen order,
-//! - events with no recognized arg use the main thread.
-//!
-//! This is a minimal in-memory tracer: events are buffered in a [`Tracer`] and
-//! retrieved via [`Tracer::take_events`]. (The full Go implementation also
-//! serializes JSON to a VFS and supports sampled events / type dumps; those are
-//! out of scope here.)
-
 use std::collections::HashMap;
 use std::sync::Mutex;
 
@@ -25,8 +8,6 @@ const FIRST_SYNTHETIC_THREAD_ID: usize = 2;
 const FIRST_FILE_THREAD_ID: usize = 1_000_000;
 const FILE_THREAD_ID_HASH_RANGE: usize = 1_000_000_000;
 
-/// Arg keys that identify a file thread (order matters: the first present key
-/// wins). Mirrors Go's `traceThreadArgKeys`.
 const FILE_THREAD_ARG_KEYS: &[&str] = &[
     "path",
     "fileName",
@@ -35,7 +16,6 @@ const FILE_THREAD_ARG_KEYS: &[&str] = &[
     "declarationFilePath",
 ];
 
-/// A tracing phase, mirroring Go's `tracing.Phase`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Phase {
     Parse,
@@ -61,18 +41,16 @@ impl Phase {
     }
 }
 
-/// A typed trace argument value.
 #[derive(Debug, Clone, PartialEq)]
 pub enum TraceArg {
     Int(i64),
     Str(String),
 }
 
-/// A single recorded trace event.
 #[derive(Debug, Clone)]
 pub struct TraceEvent {
     pub tid: usize,
-    /// Event phase: "B" (begin), "E" (end), "I" (instant), "M" (metadata).
+
     pub ph: &'static str,
     pub cat: &'static str,
     pub name: String,
@@ -86,7 +64,7 @@ enum ThreadKey {
 }
 
 impl ThreadKey {
-    /// Mirrors Go's `traceThreadKey.displayName`.
+
     fn display_name(&self) -> String {
         match self {
             ThreadKey::Checker { index } => format!("checker:{index}"),
@@ -94,18 +72,15 @@ impl ThreadKey {
         }
     }
 
-    /// Mirrors Go's `traceThreadKey.defaultThreadID`.
     fn default_thread_id(&self) -> usize {
         match self {
-            // checkerId is always >= 0 in Go; usize is always >= 0.
+
             ThreadKey::Checker { index } => FIRST_SYNTHETIC_THREAD_ID + index,
             ThreadKey::File { .. } => stable_trace_thread_id(self),
         }
     }
 }
 
-/// Mirrors Go's `stableTraceThreadID`: `firstFileThreadID + hash % range`.
-/// The hash input is `"<kind>:<text-or-index>"`.
 fn stable_trace_thread_id(key: &ThreadKey) -> usize {
     let input = match key {
         ThreadKey::Checker { index } => format!("checker:{index}"),
@@ -115,13 +90,11 @@ fn stable_trace_thread_id(key: &ThreadKey) -> usize {
     FIRST_FILE_THREAD_ID + (hash as usize % FILE_THREAD_ID_HASH_RANGE)
 }
 
-/// Extract a thread key from event args, mirroring Go's
-/// `traceThreadKeyFromArgs`. `checkerId` takes priority over file-path keys.
 fn thread_key_from_args(args: &[(String, TraceArg)]) -> Option<ThreadKey> {
     if args.is_empty() {
         return None;
     }
-    // checkerId takes priority.
+
     for (key, value) in args {
         if key == "checkerId" {
             if let TraceArg::Int(id) = value {
@@ -131,7 +104,7 @@ fn thread_key_from_args(args: &[(String, TraceArg)]) -> Option<ThreadKey> {
             }
         }
     }
-    // First file-path key (in declared order) with a non-empty value wins.
+
     for arg_key in FILE_THREAD_ARG_KEYS {
         for (key, value) in args {
             if key == *arg_key {
@@ -151,14 +124,6 @@ struct Inner {
     thread_ids: HashMap<ThreadKey, usize>,
 }
 
-/// A minimal tracer that records Chrome trace events in memory.
-///
-/// Thread-id allocation mirrors Go's `tracing.Tracing`. Durations are recorded
-/// with [`Tracer::push`], which returns an [`EventGuard`] whose `Drop`
-/// (the "pop") records the matching end event. Because the thread id and args
-/// are captured at begin time, interleaved begin/end pairs — as in Go's
-/// `separateBeginAndEnd` mode — are handled correctly and are safe to use
-/// across independent scopes.
 pub struct Tracer {
     inner: Mutex<Inner>,
 }
@@ -173,9 +138,6 @@ impl Tracer {
         }
     }
 
-    /// Resolve (allocating if necessary) the thread id for the given args.
-    /// When a new thread id is allocated, a `thread_name` metadata event is
-    /// recorded. Mirrors Go's `threadIDLocked`.
     fn resolve_thread_id(inner: &mut Inner, args: &[(String, TraceArg)]) -> usize {
         let key = match thread_key_from_args(args) {
             Some(k) => k,
@@ -184,8 +146,7 @@ impl Tracer {
         if let Some(&tid) = inner.thread_ids.get(&key) {
             return tid;
         }
-        // Allocate, avoiding collisions with already-assigned ids (mirrors
-        // Go's increment-until-free loop).
+
         let mut tid = key.default_thread_id();
         while inner.thread_ids.values().any(|&existing| existing == tid) {
             tid += 1;
@@ -201,10 +162,6 @@ impl Tracer {
         tid
     }
 
-    /// Begin a duration ("B") event. The returned guard records the matching
-    /// "E" (end) event when dropped — this is the Rust equivalent of Go's
-    /// `Tracing.Push(..., separateBeginAndEnd=true)`, and serves as the
-    /// push/pop pair (push = create guard, pop = drop guard).
     pub fn push(&self, phase: Phase, name: &str, args: Vec<(String, TraceArg)>) -> EventGuard<'_> {
         let mut inner = self.inner.lock().unwrap();
         let tid = Self::resolve_thread_id(&mut inner, &args);
@@ -224,7 +181,6 @@ impl Tracer {
         }
     }
 
-    /// Remove and return all recorded events (for inspection / serialization).
     pub fn take_events(&self) -> Vec<TraceEvent> {
         std::mem::take(&mut self.inner.lock().unwrap().events)
     }
@@ -236,8 +192,6 @@ impl Default for Tracer {
     }
 }
 
-/// RAII guard returned by [`Tracer::push`]. Dropping it records the matching
-/// "E" (end) event on the same thread id as the begin event.
 pub struct EventGuard<'a> {
     tracer: &'a Tracer,
     tid: usize,
@@ -263,19 +217,6 @@ impl Drop for EventGuard<'_> {
 mod tests {
     use super::*;
 
-    /// Port of Go's `TestConcurrentDurationEventsUseSeparateThreadIDs`.
-    ///
-    /// Pushes two interleaved `createSourceFile` parse events with `path`
-    /// `/a.ts` and `/b.ts`, then a nested `checkSourceFile` (checkerId=0,
-    /// path `/a.ts`) containing a `getVariancesWorker` (checkerId=0, id=1).
-    ///
-    /// Assertions:
-    /// - `/a.ts` begin/end share a tid; `/b.ts` begin/end share a tid; the two
-    ///   tids differ.
-    /// - thread_name for `/a.ts` == "file:/a.ts", for `/b.ts` == "file:/b.ts".
-    /// - `checkSourceFile` and `getVariancesWorker` share a tid named
-    ///   "checker:0".
-    /// - all duration (B/E) events are well-nested per thread.
     #[test]
     fn concurrent_duration_events_use_separate_thread_ids() {
         let tr = Tracer::new();
@@ -363,12 +304,6 @@ mod tests {
         assert_duration_events_are_well_nested_by_thread(&events);
     }
 
-    /// Port of Go's `TestThreadIDsAreStableAcrossFirstSeenOrder`.
-    ///
-    /// Runs the same two-file parse trace twice with the paths in opposite
-    /// order and asserts the resulting `{path -> tid}` maps are identical,
-    /// verifying that file thread ids are derived from a stable hash of the
-    /// path rather than from first-seen allocation order.
     #[test]
     fn thread_ids_are_stable_across_first_seen_order() {
         let first = trace_thread_ids_for_paths(&["/a.ts", "/b.ts"]);

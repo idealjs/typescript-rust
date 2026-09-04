@@ -1,5 +1,3 @@
-//! Snapshot file system (1:1 port of Go's `internal/project/snapshotfs.go`).
-
 #![allow(dead_code)]
 
 use std::collections::HashMap;
@@ -10,9 +8,6 @@ use crate::vfs::FS;
 
 use super::overlay_fs::{DiskFile, FileHandle, Overlay};
 
-/// A file source trait providing access to file handles and directory info.
-///
-/// Go: `type FileSource interface { ... }`.
 pub trait FileSource: Send + Sync {
     fn fs(&self) -> &dyn FS;
     fn get_file(&self, file_name: &str) -> Option<Arc<dyn FileHandle>>;
@@ -21,10 +16,6 @@ pub trait FileSource: Send + Sync {
     fn get_accessible_entries(&self, path: &str) -> crate::vfs::Entries;
 }
 
-/// An immutable snapshot of the file system state, including overlays and
-/// cached disk files.
-///
-/// Go: `type SnapshotFS struct { ... }`.
 pub struct SnapshotFS {
     pub fs: Arc<dyn FS>,
     pub overlays: HashMap<Path, Arc<Overlay>>,

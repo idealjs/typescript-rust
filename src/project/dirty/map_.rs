@@ -1,10 +1,6 @@
-//! Dirty-tracking map for snapshot cloning.
-//! Port of Go's `internal/project/dirty/map.go`.
-
 use std::collections::HashMap;
 use std::hash::Hash;
 
-/// An entry in a dirty Map, tracking original and current values.
 pub struct MapEntry<K: Clone + Eq + Hash, V: Clone> {
     pub key: K,
     pub original: V,
@@ -24,7 +20,7 @@ impl<K: Clone + Eq + Hash, V: Clone> MapEntry<K, V> {
 
     pub fn value(&self) -> V {
         if self.delete {
-            // Return a clone of original (Go returns zero value; we return original)
+
             self.original.clone()
         } else {
             self.value.clone()
@@ -36,8 +32,6 @@ impl<K: Clone + Eq + Hash, V: Clone> MapEntry<K, V> {
     }
 }
 
-/// Dirty-tracking map. Tracks changes from a base map for copy-on-write semantics.
-/// Matches Go's `Map[K, V]`.
 pub struct DirtyMap<K: Clone + Eq + Hash, V: Clone> {
     base: HashMap<K, V>,
     dirty: HashMap<K, MapEntry<K, V>>,
@@ -51,7 +45,6 @@ impl<K: Clone + Eq + Hash, V: Clone> DirtyMap<K, V> {
         }
     }
 
-    /// Get an entry by key. Returns a clone of the entry.
     pub fn get(&self, key: &K) -> Option<MapEntry<K, V>> {
         if let Some(entry) = self.dirty.get(key) {
             if entry.delete {
@@ -69,7 +62,6 @@ impl<K: Clone + Eq + Hash, V: Clone> DirtyMap<K, V> {
         })
     }
 
-    /// Add a new entry (mark as dirty without checking base).
     pub fn add(&mut self, key: K, value: V) {
         self.dirty.insert(
             key.clone(),
@@ -83,7 +75,6 @@ impl<K: Clone + Eq + Hash, V: Clone> DirtyMap<K, V> {
         );
     }
 
-    /// Change a value, panicking if it doesn't exist.
     pub fn change<F>(&mut self, key: &K, apply: F)
     where
         F: FnOnce(&mut V),
@@ -122,7 +113,6 @@ impl<K: Clone + Eq + Hash, V: Clone> DirtyMap<K, V> {
         }
     }
 
-    /// Try to delete an entry. Returns false if not found.
     pub fn try_delete(&mut self, key: &K) -> bool {
         if self.get(key).is_none() {
             return false;
@@ -142,7 +132,6 @@ impl<K: Clone + Eq + Hash, V: Clone> DirtyMap<K, V> {
         true
     }
 
-    /// Iterate over all entries (dirty + base).
     pub fn range<F>(&self, mut f: F)
     where
         F: FnMut(&MapEntry<K, V>) -> bool,
@@ -171,13 +160,11 @@ impl<K: Clone + Eq + Hash, V: Clone> DirtyMap<K, V> {
         }
     }
 
-    /// Clear all entries.
     pub fn clear(&mut self) {
         self.dirty.clear();
         self.base.clear();
     }
 
-    /// Finalize: produce the merged map and whether anything changed.
     pub fn finalize(&self) -> (HashMap<K, V>, bool) {
         if self.dirty.is_empty() {
             return (self.base.clone(), false);

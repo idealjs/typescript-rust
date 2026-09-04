@@ -1,7 +1,3 @@
-//! LSP protocol core types: Method, DocumentUri, RequestInfo, UnmarshalParams.
-//!
-//! Ported from Go's `internal/lsp/lsproto/lsp.go`.
-
 use std::fmt;
 
 use serde::{Deserialize, Serialize};
@@ -10,32 +6,30 @@ use serde_json::Value;
 use crate::jsonrpc::jsonrpc::Id as JsonrpcId;
 use crate::tspath;
 
-/// A document URI (typically `file://...`).
 #[derive(Debug, Clone, Default, PartialEq, Eq, Hash, Serialize, Deserialize)]
 #[serde(transparent)]
 pub struct DocumentUri(pub String);
 
 impl DocumentUri {
-    /// Converts a document URI to a file name (file path).
+
     pub fn file_name(&self) -> String {
         let uri = &self.0;
 
-        // Bundled files are returned as-is.
         if crate::bundled::is_bundled(uri) {
             return uri.clone();
         }
 
         if let Some(rest) = uri.strip_prefix("file://") {
-            // Simple parsing: strip "file://" prefix and handle host.
+
             if let Some(stripped) = rest.strip_prefix("//") {
-                // Has authority: //host/path
+
                 if let Some(slash_idx) = stripped.find('/') {
                     let (_host, path) = stripped.split_at(slash_idx);
                     return path.to_string();
                 }
                 return stripped.to_string();
             }
-            // Check for Windows drive letter (file:///C:/...)
+
             if let Some(rest2) = rest.strip_prefix('/') {
                 if rest2.len() >= 2 && rest2.as_bytes()[1] == b':' {
                     return rest2.to_string();
@@ -44,7 +38,6 @@ impl DocumentUri {
             return rest.to_string();
         }
 
-        // Leave all other URIs as-is.
         let (scheme, path, ok) = split_once(uri, ':');
         if !ok {
             panic!("invalid URI: {uri}");
@@ -62,7 +55,6 @@ impl DocumentUri {
         format!("^/{scheme}/{authority}/{file_path}")
     }
 
-    /// Converts a document URI to a tspath::Path.
     pub fn path(&self, use_case_sensitive_file_names: bool) -> tspath::Path {
         let file_name = self.file_name();
         tspath::to_path(&file_name, "", use_case_sensitive_file_names)
@@ -75,17 +67,10 @@ impl fmt::Display for DocumentUri {
     }
 }
 
-/// A generic URI string.
 pub type Uri = String;
 
-/// An LSP method name (e.g. "textDocument/hover").
 pub type Method = String;
 
-/// A generic URI type alias.
-// !!! Go has `type URI string`; we use String directly.
-
-/// Splits at the first occurrence of `sep`, returning (before, after, true) or
-/// (original, "", false).
 fn split_once(s: &str, sep: char) -> (&str, &str, bool) {
     match s.find(sep) {
         Some(idx) => (&s[..idx], &s[idx + sep.len_utf8()..], true),
@@ -93,7 +78,6 @@ fn split_once(s: &str, sep: char) -> (&str, &str, bool) {
     }
 }
 
-// !!! Trait for types that have a text document URI.
 pub trait HasTextDocumentUri {
     fn text_document_uri(&self) -> &DocumentUri;
 }
@@ -110,10 +94,6 @@ pub trait HasLocation {
     fn get_location(&self) -> &Location;
 }
 
-// !!! RequestInfo / NotificationInfo are compile-time typed in Go via generics.
-// In Rust, we use them as simple structs carrying the Method string.
-
-/// Information about an LSP request method.
 #[derive(Debug, Clone)]
 pub struct RequestInfo {
     pub method: Method,
@@ -130,7 +110,6 @@ impl RequestInfo {
     }
 }
 
-/// Information about an LSP notification method.
 #[derive(Debug, Clone)]
 pub struct NotificationInfo {
     pub method: Method,
@@ -147,17 +126,14 @@ impl NotificationInfo {
     }
 }
 
-/// Error codes for LSP (extends JSON-RPC error codes).
 pub const ERR_CODE_REQUEST_CANCELLED: i32 = -32800;
 pub const ERR_CODE_SERVER_CANCELLED: i32 = -32802;
 pub const ERR_CODE_CONTENT_MODIFIED: i32 = -32801;
 pub const ERR_CODE_REQUEST_FAILED: i32 = -32803;
 
-// !!! Custom error types
 pub const ERR_CODE_INVALID_REQUEST: i32 = crate::jsonrpc::jsonrpc::CODE_INVALID_REQUEST;
 pub const ERR_CODE_INVALID_PARAMS: i32 = crate::jsonrpc::jsonrpc::CODE_INVALID_PARAMS;
 
-/// NoParams sentinel type for methods that carry no parameters.
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct NoParams;
 
@@ -167,11 +143,9 @@ impl NoParams {
     }
 }
 
-/// Null sentinel type.
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct Null;
 
-/// Preferred markup kind helper.
 pub fn preferred_markup_kind(formats: &[MarkupKind]) -> MarkupKind {
     if !formats.is_empty() {
         formats[0].clone()
@@ -180,48 +154,33 @@ pub fn preferred_markup_kind(formats: &[MarkupKind]) -> MarkupKind {
     }
 }
 
-// !!! Code action kinds
 pub const CODE_ACTION_KIND_SOURCE_REMOVE_UNUSED_IMPORTS: &str = "source.removeUnusedImports";
 pub const CODE_ACTION_KIND_SOURCE_SORT_IMPORTS: &str = "source.sortImports";
 
-// ============================================================================
-// Core LSP types (from lsp_generated.go — hand-selected most important)
-// ============================================================================
-
-/// A position in a text document expressed as zero-based line and character offset.
 #[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Position {
     pub line: u32,
     pub character: u32,
 }
 
-/// A range in a text document expressed as (zero-based, inclusive) start and
-/// (zero-based, exclusive) end positions.
 #[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Range {
     pub start: Position,
     pub end: Position,
 }
 
-/// Represents a location inside a resource, such as a line inside a text file.
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct Location {
     pub uri: DocumentUri,
     pub range: Range,
 }
 
-/// A textual edit applicable to a text document.
-///
-/// Mirrors `lsproto.TextEdit` in Go.
 #[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
 pub struct TextEdit {
     pub new_text: String,
     pub range: Range,
 }
 
-/// Value-object describing what options formatting should use.
-///
-/// Mirrors `lsproto.FormattingOptions` in Go.
 #[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
 pub struct FormattingOptions {
     pub tab_size: u32,
@@ -229,7 +188,6 @@ pub struct FormattingOptions {
     pub trim_trailing_whitespace: Option<bool>,
 }
 
-/// Markup kind enum.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
 pub enum MarkupKind {
@@ -243,7 +201,6 @@ impl Default for MarkupKind {
     }
 }
 
-/// Describes the content type that a client supports in various result literals.
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct StringOrMarkupContent {
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -264,15 +221,12 @@ impl StringOrMarkupContent {
     }
 }
 
-/// A `MarkupContent` literal represents a string content which is interpreted
-/// based on its kind flag.
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct MarkupContent {
     pub kind: MarkupKind,
     pub value: String,
 }
 
-/// LSP request message.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct RequestMessage {
     #[serde(default)]
@@ -298,7 +252,6 @@ impl RequestMessage {
     }
 }
 
-/// LSP response message.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ResponseMessage {
     #[serde(default)]
@@ -319,14 +272,12 @@ impl ResponseMessage {
     }
 }
 
-/// Enum representing which type of message an [`Message`] is.
 #[derive(Debug)]
 pub enum MessageData {
     Request(RequestMessage),
     Response(ResponseMessage),
 }
 
-/// An LSP message (request, notification, or response).
 #[derive(Debug)]
 pub struct Message {
     pub kind: crate::jsonrpc::jsonrpc::MessageKind,
@@ -386,7 +337,7 @@ impl<'de> Deserialize<'de> for Message {
         let raw = RawMessage::deserialize(deserializer)?;
 
         if raw.id.is_some() && raw.method.is_empty() {
-            // Response
+
             return Ok(Message {
                 kind: crate::jsonrpc::jsonrpc::MessageKind::Response,
                 msg: MessageData::Response(ResponseMessage {
@@ -398,7 +349,6 @@ impl<'de> Deserialize<'de> for Message {
             });
         }
 
-        // Request or notification
         let kind = if raw.id.is_none() {
             crate::jsonrpc::jsonrpc::MessageKind::Notification
         } else {
@@ -417,13 +367,11 @@ impl<'de> Deserialize<'de> for Message {
     }
 }
 
-/// Text document identifier.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct TextDocumentIdentifier {
     pub uri: DocumentUri,
 }
 
-/// Text document position parameters.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct TextDocumentPositionParams {
     pub text_document: TextDocumentIdentifier,
@@ -442,36 +390,23 @@ impl HasTextDocumentPosition for TextDocumentPositionParams {
     }
 }
 
-// ────────────────────────────────────────────────────────────────────────────
-// Types needed by the project package (stubs matching Go lsproto shapes).
-// ────────────────────────────────────────────────────────────────────────────
-
-/// A bit-flag for the kind of changes a file watcher monitors.
-/// Go: `type WatchKind = uint32`
 pub type WatchKind = u32;
 pub const WATCH_KIND_CREATE: WatchKind = 1;
 pub const WATCH_KIND_CHANGE: WatchKind = 2;
 pub const WATCH_KIND_DELETE: WatchKind = 4;
 
-/// A language identifier string (e.g. "typescript").
-/// Go: `type LanguageKind = string`
 pub type LanguageKind = String;
 
-/// File change type for workspace/didChangeWatchedFiles.
-/// Go: `type FileChangeType = uint32`
 pub type FileChangeType = u32;
 pub const FILE_CHANGE_TYPE_CREATED: FileChangeType = 1;
 pub const FILE_CHANGE_TYPE_CHANGED: FileChangeType = 2;
 pub const FILE_CHANGE_TYPE_DELETED: FileChangeType = 3;
 
-/// Position encoding kind.
-/// Go: `type PositionEncodingKind = string`
 pub type PositionEncodingKind = String;
 pub const POSITION_ENCODING_UTF16: &str = "utf-16";
 pub const POSITION_ENCODING_UTF8: &str = "utf-8";
 pub const POSITION_ENCODING_UTF32: &str = "utf-32";
 
-/// Log verbosity level.
 pub type LogVerbosity = i32;
 pub const LOG_VERBOSITY_OFF: LogVerbosity = 0;
 pub const LOG_VERBOSITY_ERROR: LogVerbosity = 1;
@@ -480,14 +415,12 @@ pub const LOG_VERBOSITY_INFO: LogVerbosity = 3;
 pub const LOG_VERBOSITY_DEBUG: LogVerbosity = 4;
 pub const LOG_VERBOSITY_TRACE: LogVerbosity = 5;
 
-/// Message type for window/logMessage.
 pub type MessageType = i32;
 pub const MESSAGE_TYPE_ERROR: MessageType = 1;
 pub const MESSAGE_TYPE_WARNING: MessageType = 2;
 pub const MESSAGE_TYPE_INFO: MessageType = 3;
 pub const MESSAGE_TYPE_DEBUG: MessageType = 4;
 
-/// A glob pattern: either a plain string or a relative pattern.
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct PatternOrRelativePattern {
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -496,14 +429,12 @@ pub struct PatternOrRelativePattern {
     pub relative_pattern: Option<RelativePattern>,
 }
 
-/// A relative pattern with a base URI.
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct RelativePattern {
     pub base_uri: WorkspaceFolderOrURI,
     pub pattern: String,
 }
 
-/// A workspace folder or a plain URI.
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct WorkspaceFolderOrURI {
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -512,14 +443,12 @@ pub struct WorkspaceFolderOrURI {
     pub workspace_folder: Option<WorkspaceFolder>,
 }
 
-/// A workspace folder.
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct WorkspaceFolder {
     pub uri: DocumentUri,
     pub name: String,
 }
 
-/// A file system watcher registration.
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct FileSystemWatcher {
     pub glob_pattern: PatternOrRelativePattern,
@@ -527,7 +456,6 @@ pub struct FileSystemWatcher {
     pub kind: Option<WatchKind>,
 }
 
-/// A file event in a `workspace/didChangeWatchedFiles` notification.
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct FileEvent {
     pub uri: DocumentUri,
@@ -535,7 +463,6 @@ pub struct FileEvent {
     pub change_type: FileChangeType,
 }
 
-/// Parameters for `textDocument/publishDiagnostics`.
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct PublishDiagnosticsParams {
     pub uri: DocumentUri,
@@ -544,7 +471,6 @@ pub struct PublishDiagnosticsParams {
     pub diagnostics: Vec<Diagnostic>,
 }
 
-/// An LSP Diagnostic.
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct Diagnostic {
     pub range: Range,
@@ -557,7 +483,6 @@ pub struct Diagnostic {
     pub message: String,
 }
 
-/// A text document content change — either partial (range-based) or whole.
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct TextDocumentContentChangePartialOrWholeDocument {
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -566,20 +491,17 @@ pub struct TextDocumentContentChangePartialOrWholeDocument {
     pub whole_document: Option<TextDocumentContentChangeWholeDocument>,
 }
 
-/// A partial (range-based) text change.
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct TextDocumentContentChangePartial {
     pub range: Range,
     pub text: String,
 }
 
-/// A whole-document text change.
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct TextDocumentContentChangeWholeDocument {
     pub text: String,
 }
 
-/// Work done progress begin/report/end union.
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct WorkDoneProgressBeginOrReportOrEnd {
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -590,7 +512,6 @@ pub struct WorkDoneProgressBeginOrReportOrEnd {
     pub end: Option<WorkDoneProgressEnd>,
 }
 
-/// WorkDoneProgressBegin.
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct WorkDoneProgressBegin {
     pub title: String,
@@ -598,27 +519,23 @@ pub struct WorkDoneProgressBegin {
     pub message: Option<String>,
 }
 
-/// WorkDoneProgressReport.
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct WorkDoneProgressReport {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub message: Option<String>,
 }
 
-/// WorkDoneProgressEnd.
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct WorkDoneProgressEnd {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub message: Option<String>,
 }
 
-/// WorkDoneProgressCreateParams.
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct WorkDoneProgressCreateParams {
     pub token: IntegerOrString,
 }
 
-/// An integer-or-string union for progress tokens.
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct IntegerOrString {
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -627,14 +544,12 @@ pub struct IntegerOrString {
     pub string: Option<String>,
 }
 
-/// ProgressParams for $/progress notification.
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct ProgressParams {
     pub token: IntegerOrString,
     pub value: WorkDoneProgressBeginOrReportOrEnd,
 }
 
-/// TelemetryEvent (stub — full shape in Go has many variants).
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct TelemetryEvent {
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -643,13 +558,11 @@ pub struct TelemetryEvent {
     pub project_info_telemetry_event: Option<ProjectInfoTelemetryEvent>,
 }
 
-/// Performance stats telemetry.
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct PerformanceStatsTelemetryEvent {
     pub measurements: PerformanceStatsTelemetryMeasurements,
 }
 
-/// Performance stats measurements.
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct PerformanceStatsTelemetryMeasurements {
     pub open_file_count: f64,
@@ -684,7 +597,6 @@ pub struct PerformanceStatsTelemetryMeasurements {
     pub auto_import_node_modules_unfiltered_bucket_count: f64,
 }
 
-/// Project info telemetry event.
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct ProjectInfoTelemetryEvent {
     pub properties: std::collections::HashMap<String, String>,
@@ -692,7 +604,6 @@ pub struct ProjectInfoTelemetryEvent {
     pub measurements: Option<ProjectInfoTelemetryMeasurements>,
 }
 
-/// Project info telemetry measurements.
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct ProjectInfoTelemetryMeasurements {
     pub ts_file_count: f64,
@@ -707,25 +618,21 @@ pub struct ProjectInfoTelemetryMeasurements {
     pub dts_file_size: f64,
 }
 
-/// Client capabilities (minimal stub).
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct ClientCapabilities {
     pub workspace: WorkspaceClientCapabilities,
 }
 
-/// Workspace client capabilities.
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct WorkspaceClientCapabilities {
     pub did_change_watched_files: DidChangeWatchedFilesClientCapabilities,
 }
 
-/// DidChangeWatchedFiles client capabilities.
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct DidChangeWatchedFilesClientCapabilities {
     pub relative_pattern_support: bool,
 }
 
-/// Log message params.
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct LogMessageParams {
     #[serde(rename = "type")]

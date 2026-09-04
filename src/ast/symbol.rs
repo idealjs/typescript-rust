@@ -1,27 +1,11 @@
-//! Symbol and flow types for semantic analysis.
-//!
-//! Ported from `internal/ast/symbol.go`, `internal/ast/symbolflags.go`,
-//! `internal/ast/checkflags.go`, and `internal/ast/flow.go`.
-//!
-//! In the Go implementation, symbols and flow nodes are stored directly on
-//! AST nodes via the `nodeData` interface (`DeclarationBase`, `FlowNodeBase`,
-//! `LocalsContainerBase`). In Rust, we use side tables keyed by node ID
-//! because our `Node` struct is immutable (`Arc<Node>`).
-
 use std::collections::HashMap;
 use std::sync::Arc;
 use std::sync::atomic::{AtomicU64, Ordering};
 
 use super::node::Node;
 
-// ────────────────────────────────────────────────────────────────────────────
-// SymbolFlags
-// ────────────────────────────────────────────────────────────────────────────
-
 bitflags::bitflags! {
-    /// Flags describing what kind of entity a `Symbol` represents.
-    ///
-    /// Mirrors `ast.SymbolFlags` in Go.
+
     #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Hash)]
     #[allow(non_camel_case_types)]
     pub struct SymbolFlags: u32 {
@@ -62,7 +46,7 @@ bitflags::bitflags! {
 
 #[allow(non_upper_case_globals)]
 impl SymbolFlags {
-    // Composite flag groups (matching Go constants)
+
     pub const ENUM: Self = Self::RegularEnum.union(Self::ConstEnum);
     pub const VARIABLE: Self = Self::FunctionScopedVariable.union(Self::BlockScopedVariable);
     pub const VALUE: Self = Self::VARIABLE
@@ -106,8 +90,6 @@ impl SymbolFlags {
         .union(Self::ENUM)
         .union(Self::ValueModule);
 
-    // Excludes flags — which flags cannot merge with a symbol of a given kind.
-    // Ported from `internal/ast/symbolflags.go`.
     pub const FunctionScopedVariableExcludes: Self =
         Self::VALUE.difference(Self::FunctionScopedVariable);
     pub const BlockScopedVariableExcludes: Self = Self::VALUE;
@@ -143,14 +125,8 @@ impl SymbolFlags {
     pub const AliasExcludes: Self = Self::Alias;
 }
 
-// ────────────────────────────────────────────────────────────────────────────
-// CheckFlags
-// ────────────────────────────────────────────────────────────────────────────
-
 bitflags::bitflags! {
-    /// Flags set by the checker on transient symbols.
-    ///
-    /// Mirrors `ast.CheckFlags` in Go.
+
     #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Hash)]
     pub struct CheckFlags: u32 {
         const None                   = 0;
@@ -185,14 +161,6 @@ impl CheckFlags {
     pub const SYNTHETIC: Self = Self::SyntheticProperty.union(Self::SyntheticMethod);
 }
 
-// ────────────────────────────────────────────────────────────────────────────
-// Symbol
-// ────────────────────────────────────────────────────────────────────────────
-
-/// A symbol represents a named entity in the program: a variable, function,
-/// class, interface, etc.
-///
-/// Mirrors `ast.Symbol` in Go.
 #[derive(Debug)]
 pub struct Symbol {
     pub flags: SymbolFlags,
@@ -223,7 +191,6 @@ impl Symbol {
         }
     }
 
-    /// A unique numeric ID for this symbol (lazily assigned).
     pub fn id(&self) -> u64 {
         let mut id = self.id.load(Ordering::Relaxed);
         if id == 0 {
@@ -233,18 +200,15 @@ impl Symbol {
         id
     }
 
-    /// Whether this symbol represents an external module.
     pub fn is_external_module(&self) -> bool {
         self.flags.contains(SymbolFlags::ValueModule) && self.name.starts_with('"')
     }
 
-    /// Whether this symbol's value declaration has the `static` modifier.
     pub fn is_static(&self) -> bool {
-        // TODO: implement modifier flags extraction from the node
+
         false
     }
 
-    /// Combined flags of this symbol and its export symbol.
     pub fn combined_local_and_export_symbol_flags(&self) -> SymbolFlags {
         if let Some(export) = &self.export_symbol {
             self.flags | export.flags
@@ -256,13 +220,6 @@ impl Symbol {
 
 static NEXT_SYMBOL_ID: AtomicU64 = AtomicU64::new(1);
 
-// ────────────────────────────────────────────────────────────────────────────
-// SymbolTable
-// ────────────────────────────────────────────────────────────────────────────
-
-/// A map from name to symbol.
-///
-/// Mirrors `ast.SymbolTable` in Go.
 #[derive(Debug, Default, Clone)]
 pub struct SymbolTable {
     pub entries: HashMap<String, Arc<Symbol>>,
@@ -294,8 +251,6 @@ impl SymbolTable {
     }
 }
 
-/// Internal symbol name prefix (invalid UTF-8 sentinel in Go, we use a
-/// unlikely-to-collide prefix).
 pub const INTERNAL_SYMBOL_NAME_PREFIX: &str = "\u{FE}";
 
 pub const INTERNAL_SYMBOL_NAME_CALL: &str = "\u{FE}call";
@@ -319,13 +274,6 @@ pub const INTERNAL_SYMBOL_NAME_DEFAULT: &str = "default";
 pub const INTERNAL_SYMBOL_NAME_THIS: &str = "this";
 pub const INTERNAL_SYMBOL_NAME_MODULE_EXPORTS: &str = "module.exports";
 
-// ────────────────────────────────────────────────────────────────────────────
-// FlowNode and FlowFlags
-// ────────────────────────────────────────────────────────────────────────────
-
-/// Flags describing the kind of control flow node.
-///
-/// Mirrors `ast.FlowFlags` in Go.
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Hash)]
 pub struct FlowFlags(u32);
 
@@ -355,8 +303,6 @@ impl FlowFlags {
         (self.0 & other.0) == other.0
     }
 
-    /// Returns true if any bit of `other` is set in `self`.
-    /// Mirrors Go's `flags&mask != 0` idiom.
     pub const fn intersects(self, other: Self) -> bool {
         (self.0 & other.0) != 0
     }
@@ -369,31 +315,17 @@ impl std::ops::BitOr for FlowFlags {
     }
 }
 
-/// A node in the control flow graph.
-///
-/// Mirrors `ast.FlowNode` in Go.
 #[derive(Debug)]
 pub struct FlowNode {
     pub flags: FlowFlags,
     pub node: Option<Arc<Node>>,
     pub antecedent: Option<Arc<FlowNode>>,
     pub antecedents: Vec<Arc<FlowNode>>,
-    /// Auxiliary node for SWITCH_CLAUSE flows: stores the enclosing
-    /// `SwitchStatement` so the checker can resolve the discriminant
-    /// expression. `None` for all other flow kinds. Mirrors the
-    /// `FlowSwitchClauseData.SwitchStatement` field in Go.
+
     pub switch_statement: Option<Arc<Node>>,
-    /// For SWITCH_CLAUSE flows: the half-open clause-group range
-    /// `[start, end)` this flow node narrows by (Go
-    /// `FlowSwitchClauseData.ClauseStart/ClauseEnd`). A group is a run of
-    /// statement-less clauses followed by the clause that owns the
-    /// statements; `[0, 0)` marks the implicit bypass branch of a
-    /// default-less switch (no case matched). `None` for all other flow
-    /// kinds.
+
     pub clause_range: Option<(usize, usize)>,
-    /// For REDUCE_LABEL flows: the branch label whose antecedent set is
-    /// reduced to `antecedents` while the walk is inside this reduce label
-    /// (Go `FlowReduceLabelData.Target`). `None` for all other flow kinds.
+
     pub reduce_target: Option<Arc<FlowNode>>,
 }
 
@@ -411,28 +343,17 @@ impl FlowNode {
     }
 }
 
-/// A flow label is a flow node that serves as a junction point.
 pub type FlowLabel = FlowNode;
 
-// ────────────────────────────────────────────────────────────────────────────
-// NodeSymbolMap — side table mapping nodes to symbols and flow data
-// ────────────────────────────────────────────────────────────────────────────
-
-/// Side table that maps node IDs to symbols, locals, and flow nodes.
-///
-/// In Go, these are stored directly on AST nodes via the `nodeData` interface.
-/// In Rust, we use side tables because `Node` is immutable (`Arc<Node>`).
 #[derive(Debug, Default)]
 pub struct NodeSymbolMap {
-    /// Maps declaration nodes to their symbols.
+
     pub symbols: HashMap<u64, Arc<Symbol>>,
-    /// Maps container nodes to their local symbol tables.
+
     pub locals: HashMap<u64, SymbolTable>,
-    /// Maps expression nodes to their flow nodes.
+
     pub flow_nodes: HashMap<u64, Arc<FlowNode>>,
-    /// Diagnostics recorded by the binder (e.g. TS2451 block-scoped
-    /// redeclarations). Surfaced through the program's semantic
-    /// diagnostics.
+
     pub binder_diagnostics: Vec<super::diagnostic::Diagnostic>,
 }
 
@@ -441,44 +362,31 @@ impl NodeSymbolMap {
         Self::default()
     }
 
-    /// Get the symbol for a node, if any.
     pub fn symbol_of(&self, node: &Node) -> Option<&Arc<Symbol>> {
         self.symbols.get(&node.id())
     }
 
-    /// Get the locals (symbol table) for a container node, if any.
     pub fn locals_of(&self, node: &Node) -> Option<&SymbolTable> {
         self.locals.get(&node.id())
     }
 
-    /// Get the flow node for an expression node, if any.
     pub fn flow_node_of(&self, node: &Node) -> Option<&Arc<FlowNode>> {
         self.flow_nodes.get(&node.id())
     }
 
-    /// Set the symbol for a node.
     pub fn set_symbol(&mut self, node: &Node, symbol: Arc<Symbol>) {
         self.symbols.insert(node.id(), symbol);
     }
 
-    /// Set the locals for a container node.
     pub fn set_locals(&mut self, node: &Node, locals: SymbolTable) {
         self.locals.insert(node.id(), locals);
     }
 
-    /// Set the flow node for an expression node.
     pub fn set_flow_node(&mut self, node: &Node, flow: Arc<FlowNode>) {
         self.flow_nodes.insert(node.id(), flow);
     }
 }
 
-// ────────────────────────────────────────────────────────────────────────────
-// ContainerFlags
-// ────────────────────────────────────────────────────────────────────────────
-
-/// Flags describing the container properties of a node.
-///
-/// Mirrors `binder.ContainerFlags` in Go.
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Hash)]
 pub struct ContainerFlags(u32);
 
@@ -524,7 +432,7 @@ mod tests {
         let sym = Symbol::new(SymbolFlags::Function, "foo");
         assert_eq!(sym.name, "foo");
         assert!(sym.flags.contains(SymbolFlags::Function));
-        assert_eq!(sym.id(), sym.id()); // ID is stable
+        assert_eq!(sym.id(), sym.id());
     }
 
     #[test]

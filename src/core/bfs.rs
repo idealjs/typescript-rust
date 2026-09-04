@@ -1,19 +1,9 @@
-//! Parallel breadth-first search, ported from `internal/core/bfs.go`.
-//!
-//! The Go implementation uses goroutines and atomics for parallelism.
-//! This Rust port uses `std::thread` and `Arc` for shared state. The
-//! algorithm is otherwise identical.
-
 use std::collections::HashSet;
 use std::hash::Hash;
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::{Arc, Mutex};
 use std::thread;
 
-/// A thread-safe set, mirroring `collections.SyncSet[K]` in Go.
-///
-/// Used by `bfs_parallel_ex` to expose the set of visited nodes so callers can
-/// inspect which nodes were reached after a search completes.
 #[derive(Debug, Default)]
 pub struct SyncSet<K: Eq + Hash + Clone> {
     inner: Mutex<HashSet<K>>,
@@ -26,23 +16,20 @@ impl<K: Eq + Hash + Clone> SyncSet<K> {
         }
     }
 
-    /// Insert `key`; returns true if it was not already present.
     pub fn add_if_absent(&self, key: &K) -> bool {
         self.inner.lock().unwrap().insert(key.clone())
     }
 
-    /// True if `key` is in the set.
     pub fn has(&self, key: &K) -> bool {
         self.inner.lock().unwrap().contains(key)
     }
 }
 
-/// Result of a breadth-first search.
 #[derive(Debug, Clone)]
 pub struct BfsResult<N> {
-    /// True if the search was stopped early (a `visit` returned `stop: true`).
+
     pub stopped: bool,
-    /// The path from the result node back to the start node.
+
     pub path: Vec<N>,
 }
 
@@ -51,7 +38,6 @@ struct Job<N> {
     parent: Option<Arc<Job<N>>>,
 }
 
-/// A level in the BFS, exposed to the preprocessing callback.
 pub struct BfsLevel<N> {
     pub nodes: Vec<N>,
 }
@@ -62,14 +48,6 @@ struct LevelResult<N> {
     next: Vec<Arc<Job<N>>>,
 }
 
-/// Perform a parallel breadth-first search starting from `start`.
-///
-/// - `neighbors`: returns the neighbors of a node.
-/// - `visit`: called for each node; returns `(is_result, stop)`.
-///   - If `is_result` is true, this node is a candidate result.
-///   - If `stop` is true, the search stops immediately.
-///
-/// Mirrors `core.BreadthFirstSearchParallel` in Go.
 pub fn bfs_parallel<N>(
     start: N,
     neighbors: impl Fn(&N) -> Vec<N> + Send + Sync + 'static,
@@ -82,13 +60,6 @@ where
     bfs_parallel_ex(start, neighbors, visit, |_| (), visited, |n| n.clone())
 }
 
-/// Extended BFS with a pre-seeded visited set and a preprocessing hook.
-///
-/// `visited` is the external set of already-visited nodes (mirrors
-/// `BreadthFirstSearchOptions.Visited` in Go); callers may inspect it after the
-/// search to see which nodes were reached.
-///
-/// Mirrors `core.BreadthFirstSearchParallelEx` in Go.
 pub fn bfs_parallel_ex<N, K>(
     start: N,
     neighbors: impl Fn(&N) -> Vec<N> + Send + Sync + 'static,
@@ -228,8 +199,6 @@ where
         *fallback = Some(level[fallback_idx].clone());
     }
 
-    // Try to unwrap the Arc; if that fails (because there are other refs),
-    // just lock and clone.
     let next_jobs = match Arc::try_unwrap(next) {
         Ok(mutex) => mutex.into_inner().unwrap(),
         Err(arc) => std::mem::take(&mut *arc.lock().unwrap()),
@@ -284,7 +253,7 @@ mod tests {
 
     #[test]
     fn simple_bfs() {
-        // Graph: 1 -> 2 -> 3 -> 4 (linear chain)
+
         let result = bfs_parallel(
             1i32,
             |n| if *n < 4 { vec![n + 1] } else { vec![] },
@@ -304,8 +273,6 @@ mod tests {
         assert!(!result.stopped);
         assert!(result.path.is_empty());
     }
-
-    // ── Ported from Go internal/core/bfs_test.go ──
 
     fn diamond_graph() -> std::collections::HashMap<String, Vec<String>> {
         let mut g = std::collections::HashMap::new();
@@ -342,16 +309,16 @@ mod tests {
             move |n| graph.get(n).cloned().unwrap_or_default(),
             move |n| {
                 visited_clone.lock().unwrap().push(n.clone());
-                (false, false) // Never stop early
+                (false, false)
             },
         );
-        // Should return stopped=false since we never return true
+
         assert!(!result.stopped, "Expected search to not stop early");
         assert!(
             result.path.is_empty(),
             "Expected empty path when visit function never returns true"
         );
-        // Should visit all nodes exactly once
+
         let mut visited = visited.lock().unwrap().clone();
         visited.sort();
         assert_eq!(
@@ -367,14 +334,14 @@ mod tests {
 
     #[test]
     fn bfs_parallel_returns_stop_over_fallback() {
-        // Test that a stop result is preferred over a fallback
+
         let graph = diamond_graph();
         let result = bfs_parallel(
             "A".to_string(),
             move |n| graph.get(n).cloned().unwrap_or_default(),
             |n| match n.as_str() {
-                "A" => (true, false), // Record fallback
-                "D" => (true, true),  // Stop at D
+                "A" => (true, false),
+                "D" => (true, true),
                 _ => (false, false),
             },
         );
@@ -387,10 +354,7 @@ mod tests {
 
     #[test]
     fn bfs_parallel_early_termination() {
-        // Ported from TestBreadthFirstSearchParallel "early termination".
-        // Graph: Root -> L1A/L1B -> L2A/L2B/L2C -> L3A.
-        // Stopping at L2B (level 2) must visit Root, L1A, L1B, L2A, L2B but
-        // never reach L3A. Whether L2C is visited is non-deterministic.
+
         let mut graph = std::collections::HashMap::new();
         graph.insert(
             "Root".to_string(),
@@ -422,7 +386,7 @@ mod tests {
         assert!(visited.has(&"L1B".to_string()), "Expected to visit L1B");
         assert!(visited.has(&"L2A".to_string()), "Expected to visit L2A");
         assert!(visited.has(&"L2B".to_string()), "Expected to visit L2B");
-        // L2C is non-deterministic, so it is not asserted.
+
         assert!(
             !visited.has(&"L3A".to_string()),
             "Expected not to visit L3A"
@@ -431,9 +395,7 @@ mod tests {
 
     #[test]
     fn bfs_parallel_returns_fallback() {
-        // Ported from TestBreadthFirstSearchParallel "returns fallback when no
-        // other result found". A records as a fallback (is_result, not stop), so
-        // the search continues; B/C/D are visited and the fallback path is ["A"].
+
         let graph = diamond_graph();
         let visited: Arc<SyncSet<String>> = Arc::new(SyncSet::new());
         let visited_for_search = visited.clone();

@@ -1,5 +1,3 @@
-//! Diagnostic types, ported from `internal/ast/diagnostic.go`.
-
 use std::sync::Mutex;
 
 use crate::core::text::TextRange;
@@ -7,7 +5,6 @@ use crate::diagnostics::{self, Category, Message};
 
 use super::SourceFile;
 
-/// A diagnostic message attached to a source location.
 #[derive(Debug, Clone)]
 pub struct Diagnostic {
     pub file: Option<std::sync::Arc<SourceFile>>,
@@ -52,7 +49,6 @@ impl Diagnostic {
     }
 }
 
-/// A thread-safe collection of diagnostics, organized by file.
 #[derive(Debug, Default)]
 pub struct DiagnosticsCollection {
     inner: Mutex<DiagnosticsCollectionInner>,
@@ -93,8 +89,6 @@ impl DiagnosticsCollection {
         self.inner.lock().unwrap().count
     }
 
-    /// Swap the entire contents out (probe isolation): callers run
-    /// speculative work on an empty collection, then inspect/restore.
     pub(crate) fn take_inner(&self) -> DiagnosticsCollectionInner {
         std::mem::take(&mut *self.inner.lock().unwrap())
     }
@@ -107,7 +101,6 @@ impl DiagnosticsCollection {
         self.count() == 0
     }
 
-    /// Get all diagnostics as a flat list.
     pub fn get_all(&self) -> Vec<Diagnostic> {
         let inner = self.inner.lock().unwrap();
         let mut result = Vec::with_capacity(inner.count);
@@ -118,7 +111,6 @@ impl DiagnosticsCollection {
         result
     }
 
-    /// Get diagnostics for a specific file.
     pub fn get_for_file(&self, file_name: &str) -> Vec<Diagnostic> {
         let inner = self.inner.lock().unwrap();
         inner

@@ -1,5 +1,3 @@
-//! Document highlights provider (1:1 port of Go's `internal/ls/documenthighlights.go`).
-
 #![allow(dead_code)]
 
 use std::sync::Arc;
@@ -14,15 +12,7 @@ use super::language_service::LanguageService;
 use super::types::{DocumentHighlight, DocumentHighlightKind, MultiDocumentHighlight};
 
 impl LanguageService {
-    /// Provide document highlights for a position in a document.
-    ///
-    /// Mirrors `ProvideDocumentHighlights`.
-    ///
-    /// 1. Find the node at the cursor and resolve its symbol.
-    /// 2. Walk the source file AST looking for same-symbol references.
-    /// 3. Return `DocumentHighlight` ranges (all classified as `Text` for
-    ///    the initial implementation; read/write classification would
-    ///    require flow analysis).
+
     pub fn provide_document_highlights(
         &self,
         document_uri: &DocumentUri,
@@ -32,24 +22,19 @@ impl LanguageService {
         let line_map = &source_file.line_map;
         let offset = lsp_position_to_offset(line_map, &document_position);
 
-        // Find the node at the cursor position.
         let node = find_deepest_node(&source_file.node, offset);
 
         let mut checker = program.build_checker();
 
-        // Resolve the symbol at the location.
         let symbol = match checker.get_symbol_at_location(&node) {
             Some(s) => s,
             None => return Vec::new(),
         };
 
-        // Follow aliases so that references to the underlying symbol are found.
         let target = checker.skip_alias(&symbol);
 
-        // Collect all references to the symbol within the source file.
         let references = checker.get_references_to_symbol_in_file(&source_file, &target);
 
-        // Convert each reference node to a DocumentHighlight.
         references
             .iter()
             .map(|ref_node| DocumentHighlight {
@@ -59,16 +44,13 @@ impl LanguageService {
             .collect()
     }
 
-    /// Provide multi-document highlights.
-    ///
-    /// Mirrors `ProvideMultiDocumentHighlights`.
     pub fn provide_multi_document_highlights(
         &self,
         document_uri: &DocumentUri,
         document_position: Position,
         files_to_search: &[DocumentUri],
     ) -> Vec<MultiDocumentHighlight> {
-        // Highlight in the primary document.
+
         let highlights = self.provide_document_highlights(document_uri, document_position.clone());
         let primary = MultiDocumentHighlight {
             uri: DocumentUri(document_uri.0.clone()),
@@ -77,7 +59,6 @@ impl LanguageService {
 
         let mut result = vec![primary];
 
-        // Highlight in the other requested documents.
         for uri in files_to_search {
             if uri.0 == document_uri.0 {
                 continue;
@@ -94,9 +75,6 @@ impl LanguageService {
         result
     }
 
-    /// Get semantic document highlights.
-    ///
-    /// Mirrors `getSemanticDocumentHighlights`.
     pub fn get_semantic_document_highlights(
         &self,
         _position: usize,
@@ -134,16 +112,12 @@ impl LanguageService {
             .collect()
     }
 
-    /// Get syntactic document highlights (keyword-based).
-    ///
-    /// Mirrors `getSyntacticDocumentHighlights`.
     pub fn get_syntactic_document_highlights(
         &self,
         node: &Arc<Node>,
         source_file: &Arc<SourceFile>,
     ) -> Vec<DocumentHighlight> {
-        // Highlight matching keywords/labels by text. This is a simplified
-        // version that finds identifiers with the same text.
+
         let text = node.text();
         if text.is_empty() {
             return Vec::new();
@@ -160,9 +134,6 @@ impl LanguageService {
     }
 }
 
-// ─── Helper functions ────────────────────────────────────────────────
-
-/// Find the deepest AST node whose source range covers `offset`.
 fn find_deepest_node(node: &Arc<Node>, offset: usize) -> Arc<Node> {
     let mut deepest = Arc::clone(node);
     loop {
@@ -184,7 +155,6 @@ fn find_deepest_node(node: &Arc<Node>, offset: usize) -> Arc<Node> {
     deepest
 }
 
-/// Recursively collect identifier nodes whose text matches `name`.
 fn collect_matching_identifiers(node: &Arc<Node>, name: &str, cb: &mut impl FnMut(&Arc<Node>)) {
     use crate::ast::SyntaxKind;
     if node.kind == SyntaxKind::Identifier && node.text() == name {
@@ -196,7 +166,6 @@ fn collect_matching_identifiers(node: &Arc<Node>, name: &str, cb: &mut impl FnMu
     });
 }
 
-/// Convert an LSP `Position` to a byte offset within a line map.
 fn lsp_position_to_offset(line_map: &LineMap, position: &Position) -> usize {
     let line = position.line as usize;
     let character = position.character as usize;
@@ -204,7 +173,6 @@ fn lsp_position_to_offset(line_map: &LineMap, position: &Position) -> usize {
     line_start + character
 }
 
-/// Convert a node's byte range to an LSP `Range`.
 fn node_range_to_lsp_range(line_map: &LineMap, node: &Arc<Node>) -> Range {
     Range {
         start: offset_to_position(line_map, node.pos()),
@@ -212,7 +180,6 @@ fn node_range_to_lsp_range(line_map: &LineMap, node: &Arc<Node>) -> Range {
     }
 }
 
-/// Convert a byte offset to an LSP `Position`.
 fn offset_to_position(line_map: &LineMap, offset: usize) -> Position {
     let line = line_of_offset(line_map, offset);
     let line_start = line_map.line_starts.get(line).copied().unwrap_or(0) as usize;
@@ -222,7 +189,6 @@ fn offset_to_position(line_map: &LineMap, offset: usize) -> Position {
     }
 }
 
-/// Binary search for the line number of a byte offset.
 fn line_of_offset(line_map: &LineMap, offset: usize) -> usize {
     match line_map.line_starts.binary_search(&(offset as u32)) {
         Ok(idx) => idx,

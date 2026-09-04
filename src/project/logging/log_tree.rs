@@ -1,6 +1,3 @@
-//! LogTree: hierarchical log buffer for snapshot build logs.
-//! Port of Go's `internal/project/logging/logtree.go`.
-
 use std::fmt;
 use std::sync::Mutex;
 use std::sync::atomic::{AtomicI32, AtomicU64, Ordering};
@@ -31,21 +28,17 @@ fn format_time_now() -> String {
     "[time]".to_string()
 }
 
-/// Hierarchical log collector matching Go's `LogTree`.
 pub struct LogTree {
     name: String,
     logs: Mutex<Vec<LogEntry>>,
-    root: *const LogTree, // raw pointer to root (not owned)
+    root: *const LogTree,
     level: usize,
     verbose: Mutex<bool>,
 
-    // Only set on root
     count: AtomicI32,
     string_length: AtomicI32,
 }
 
-// SAFETY: LogTree uses Mutex for all mutable state and raw pointer only for
-// reading the root's atomic counters.
 unsafe impl Send for LogTree {}
 unsafe impl Sync for LogTree {}
 
@@ -61,9 +54,9 @@ impl LogTree {
             string_length: AtomicI32::new(0),
         });
         let raw = Box::into_raw(lc);
-        // Set root to self
+
         unsafe { (*raw).root = raw };
-        // Re-box
+
         unsafe { Box::from_raw(raw) }
     }
 
@@ -116,10 +109,7 @@ impl LogTree {
         });
         let entry = LogEntry::new(Some(child), message.to_string());
         self.add(entry);
-        // Return a new child — the entry's child is consumed by add.
-        // In practice, callers use the returned tree to log into.
-        // We need to return the actual child, but it's been moved into the entry.
-        // So we create a proxy instead.
+
         let new_child = Box::new(LogTree {
             name: String::new(),
             logs: Mutex::new(Vec::new()),
@@ -129,7 +119,7 @@ impl LogTree {
             count: AtomicI32::new(0),
             string_length: AtomicI32::new(0),
         });
-        let _ = child; // child was moved into entry
+        let _ = child;
         new_child
     }
 
@@ -143,12 +133,12 @@ impl LogTree {
         root.string_length
             .fetch_add(sl + count * self.level as i32, Ordering::SeqCst);
         root.count.fetch_add(count, Ordering::SeqCst);
-        // We can't move the logs tree, so we clone the messages.
+
         let entry = LogEntry {
             seq: SEQ.fetch_add(1, Ordering::SeqCst),
             time: format_time_now(),
             message: logs.name.clone(),
-            child: None, // Can't move ownership in Rust; would need Arc
+            child: None,
         };
         self.add(entry);
     }
@@ -176,7 +166,7 @@ impl LogTree {
             f.write_str(" ")?;
             f.write_str(&log.message)?;
             f.write_str("\n")?;
-            // Children not traversed in simplified version
+
         }
         Ok(())
     }
@@ -190,7 +180,6 @@ fn format_string(format: &str, args: &[&dyn std::fmt::Display]) -> String {
     result
 }
 
-/// Convenience constructor.
 pub fn new_log_tree(name: &str) -> Box<LogTree> {
     LogTree::new(name)
 }

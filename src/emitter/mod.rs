@@ -1,14 +1,3 @@
-//! Minimal emitter, ported from `internal/compiler/emitter.go` + `internal/printer/`.
-//!
-//! This is a source-text-slice-based emitter: it walks the AST, collects
-//! "cut ranges" (byte ranges to remove from the source text, such as type
-//! annotations), and then writes the remaining text to the output file.
-//!
-//! This is NOT a full printer-based emitter. It does not perform module
-//! transforms, enum transforms, JSX transforms, or source map generation.
-//! It produces JavaScript that is valid for simple TypeScript files without
-//! advanced syntax.
-
 use std::sync::Arc;
 
 use crate::ast::node_data_generated::{ImportDeclarationData, NodeData};
@@ -20,7 +9,6 @@ use crate::sourcemap::{Generator, SourceIndex};
 use crate::tspath::{self, ComparePathsOptions};
 use crate::vfs::FS;
 
-/// Result of emitting a single source file or the whole program.
 #[derive(Debug, Default)]
 pub struct EmitResult {
     pub emit_skipped: bool,
@@ -28,16 +16,11 @@ pub struct EmitResult {
     pub diagnostics: Vec<String>,
 }
 
-/// Options for emitting a program.
 pub struct EmitOptions {
-    /// Callback invoked for each output file. If `None`, files are written
-    /// via `fs.write_file`.
+
     pub write_file: Option<Box<dyn Fn(&str, &str) -> std::io::Result<()> + Send + Sync>>,
 }
 
-// ── Source map tracking (P4.4) ─────────────────────────────────────
-
-/// Compute the byte offset of the start of each line in `text`.
 fn compute_line_starts(text: &str) -> Vec<usize> {
     let mut starts = vec![0];
     for (i, b) in text.bytes().enumerate() {
@@ -48,14 +31,11 @@ fn compute_line_starts(text: &str) -> Vec<usize> {
     starts
 }
 
-/// Convert a byte offset to a (line, utf16_column) pair using precomputed
-/// line starts. Returns (line_index, line_start_byte_offset).
 fn offset_to_line(line_starts: &[usize], offset: usize) -> (i32, usize) {
     let line = line_starts.partition_point(|&start| start <= offset) - 1;
     (line as i32, line_starts[line])
 }
 
-/// Compute the UTF-16 code unit column for a byte offset within a line.
 fn utf16_column(text: &str, line_start: usize, offset: usize) -> i32 {
     text[line_start..offset]
         .chars()
@@ -63,17 +43,11 @@ fn utf16_column(text: &str, line_start: usize, offset: usize) -> i32 {
         .sum()
 }
 
-/// Sentinel value indicating an unmapped output character.
 const UNMAPPED: u32 = u32::MAX;
 
-/// Tracks generated output text alongside a per-character source offset
-/// array. For each output character, `src_offsets` records the corresponding
-/// source byte offset, or `UNMAPPED` for generated/synthesized text.
-/// After emission and normalization, this array is used to produce source
-/// map mappings.
 struct SourceMapTracker<'a> {
     output: String,
-    /// For each output *character*, the source byte offset (u32::MAX = unmapped).
+
     src_offsets: Vec<u32>,
     source: &'a str,
 }
@@ -87,8 +61,6 @@ impl<'a> SourceMapTracker<'a> {
         }
     }
 
-    /// Append generated text (no source mapping). Each character gets
-    /// `UNMAPPED` in the src_offsets array.
     fn push_generated(&mut self, text: &str) {
         let char_count = text.chars().count();
         self.output.push_str(text);
@@ -96,8 +68,6 @@ impl<'a> SourceMapTracker<'a> {
             .resize(self.src_offsets.len() + char_count, UNMAPPED);
     }
 
-    /// Append a range of source text `[start, end)`. Each character gets
-    /// its corresponding source byte offset.
     fn push_source(&mut self, start: usize, end: usize) {
         if start >= end {
             return;
@@ -111,9 +81,6 @@ impl<'a> SourceMapTracker<'a> {
         }
     }
 
-    /// Append replacement text where the first character maps to `src_pos`
-    /// and the rest are unmapped. Used for JSX replacement text that
-    /// corresponds to a source JSX element.
     fn push_source_mapped(&mut self, text: &str, src_pos: usize) {
         let mut first = true;
         for ch in text.chars() {
@@ -132,18 +99,12 @@ impl<'a> SourceMapTracker<'a> {
     }
 }
 
-/// Trait abstracting the output sink for the emitter.
-///
-/// `String` implements it for the fast path (no source map tracking);
-/// `SourceMapTracker` implements it for source-map-tracked emission.
 trait EmitSink {
-    /// Emit a slice of source text `[start, end)`. When source map tracking
-    /// is active, the source byte offsets are recorded per character.
+
     fn emit_source(&mut self, source: &str, start: usize, end: usize);
-    /// Emit generated text with no source mapping.
+
     fn emit_generated(&mut self, text: &str);
-    /// Emit replacement text where the first character maps to `src_pos`
-    /// and the rest are unmapped. Used for JSX replacement text.
+
     fn emit_source_mapped(&mut self, text: &str, src_pos: usize);
 }
 
@@ -172,9 +133,6 @@ impl<'a> EmitSink for SourceMapTracker<'a> {
     }
 }
 
-/// Emit a single source file, writing the result via the `write_file` callback.
-///
-/// Returns the `EmitResult` for this file.
 pub fn emit_source_file(
     source_file: &SourceFile,
     options: &CompilerOptions,
@@ -184,13 +142,6 @@ pub fn emit_source_file(
     emit_source_file_with_common_dir(source_file, options, fs, "", write_file)
 }
 
-/// Emit a single source file with a precomputed `common_source_directory`.
-///
-/// `common_source_directory` mirrors Go's `host.CommonSourceDirectory()` and is
-/// used to preserve the relative directory structure under `outDir`. When empty,
-/// it is inferred from `options` (rootDir / config_file_path) — but for the
-/// "computed from all source files" case the caller should pass the program-wide
-/// value via [`emit_program`].
 pub fn emit_source_file_with_common_dir(
     source_file: &SourceFile,
     options: &CompilerOptions,
@@ -200,30 +151,23 @@ pub fn emit_source_file_with_common_dir(
 ) -> EmitResult {
     let mut result = EmitResult::default();
 
-    // Skip JSON files — they emit to the same location.
     if source_file.script_kind == crate::ast::ScriptKind::Json {
         return result;
     }
 
-    // Skip JS files if noEmitForJsFiles is set.
     if source_file.script_kind == crate::ast::ScriptKind::Js
         && options.no_emit_for_js_files.is_true()
     {
         return result;
     }
 
-    // Compute output path.
     let js_path = get_js_output_path(source_file, options, common_source_directory);
     if js_path.is_empty() {
         return result;
     }
 
-    // Determine whether source maps should be emitted.
-    // Mirrors Go's `shouldEmitSourceMaps`: sourceMap || inlineSourceMap, and
-    // not a JSON file (JSON files are already skipped above).
     let emit_sourcemap = options.source_map.is_true() || options.inline_source_map.is_true();
 
-    // `emitDeclarationOnly` suppresses JS emit.
     let emit_js = !options.emit_declaration_only.is_true();
 
     if emit_js {
@@ -233,7 +177,6 @@ pub fn emit_source_file_with_common_dir(
             (emit_js_text(source_file, options), None, String::new())
         };
 
-        // Append `//# sourceMappingURL=...` when a source map was produced.
         let final_js_text = if source_map_url.is_empty() {
             js_text
         } else {
@@ -246,7 +189,6 @@ pub fn emit_source_file_with_common_dir(
             text
         };
 
-        // Write .js file.
         match write_file(&js_path, &final_js_text) {
             Ok(()) => {
                 result.emitted_files.push(js_path.clone());
@@ -259,7 +201,6 @@ pub fn emit_source_file_with_common_dir(
             }
         }
 
-        // Write .js.map file when `sourceMap` is true (not inline).
         if let Some(map_json) = map_text {
             let map_path = format!("{js_path}.map");
             match write_file(&map_path, &map_json) {
@@ -275,7 +216,6 @@ pub fn emit_source_file_with_common_dir(
         }
     }
 
-    // Emit declaration (.d.ts) file when `declaration` or `composite` is true.
     if options.get_emit_declarations() {
         let dts_path = get_dts_output_path(source_file, options, common_source_directory);
         if !dts_path.is_empty() {
@@ -296,13 +236,6 @@ pub fn emit_source_file_with_common_dir(
     result
 }
 
-/// Emit JS text with source map tracking. Returns `(js_text, map_json, source_map_url)`.
-///
-/// - When `sourceMap` is true (and `inlineSourceMap` is false): `map_json` is
-///   `Some(json)` and `source_map_url` is the base name of the `.map` file.
-/// - When `inlineSourceMap` is true: `map_json` is `None` (no `.map` file
-///   written) and `source_map_url` is the base64 data URL.
-/// - `sourcesContent` is included when `inlineSources` is true.
 fn emit_js_with_sourcemap(
     source_file: &SourceFile,
     options: &CompilerOptions,
@@ -314,9 +247,7 @@ fn emit_js_with_sourcemap(
     } else {
         tspath::ensure_trailing_directory_separator(&options.source_root)
     };
-    // sourcesDirectoryPath: directory of the .js file. Source paths in the map
-    // are made relative to this directory. Mirrors Go's `getSourceMapDirectory`
-    // (the common case where neither `sourceRoot` nor `mapRoot` is set).
+
     let sources_dir = tspath::get_directory_path(js_path);
     let path_options = ComparePathsOptions::default();
 
@@ -338,12 +269,6 @@ fn emit_js_with_sourcemap(
     (js_text, map_json, source_map_url)
 }
 
-/// Compute the output `.js` file path for a source file.
-///
-/// Mirrors Go's `outputpaths.GetOutputPathsFor` / `getOwnEmitOutputFilePath`:
-/// when `outDir` is set, the source file's path relative to the common source
-/// directory is preserved under `outDir`, so `src/lib/main.ts` with
-/// `rootDir: "src"` + `outDir: "dist"` emits to `dist/lib/main.js`.
 fn get_js_output_path(
     source_file: &SourceFile,
     options: &CompilerOptions,
@@ -363,18 +288,12 @@ fn get_js_output_path(
         let without_ext = tspath::remove_file_extension(&path_in_new_dir);
         format!("{without_ext}{extension}")
     } else {
-        // Output alongside source file.
+
         let without_ext = tspath::remove_file_extension(file_name);
         format!("{without_ext}{extension}")
     }
 }
 
-/// Compute the common source directory, mirroring Go's
-/// `outputpaths.GetCommonSourceDirectory`.
-///
-/// - If `root_dir` is set, use it.
-/// - Else if `config_file_path` is set, use its directory.
-/// - Else return empty (caller should pass the program-wide value).
 fn compute_common_source_directory(options: &CompilerOptions) -> String {
     let common_dir = if !options.root_dir.is_empty() {
         options.root_dir.clone()
@@ -386,50 +305,42 @@ fn compute_common_source_directory(options: &CompilerOptions) -> String {
     tspath::ensure_trailing_directory_separator(&common_dir)
 }
 
-/// Place `file_name` under `new_dir_path`, stripping the common source
-/// directory prefix to preserve the relative directory structure.
-///
-/// Mirrors Go's `outputpaths.GetSourceFilePathInNewDir`.
 fn get_source_file_path_in_new_dir(
     file_name: &str,
     new_dir_path: &str,
     common_source_directory: &str,
 ) -> String {
     if common_source_directory.is_empty() {
-        // No common source directory — fall back to base name in new dir.
+
         return tspath::combine_paths(
             new_dir_path,
             &[tspath::get_base_file_name(file_name).as_str()],
         );
     }
-    // Try a direct relative-prefix strip first (common case: both relative).
+
     let common_with_sep = tspath::ensure_trailing_directory_separator(common_source_directory);
     let normalized_file = tspath::normalize_slashes(file_name);
     if let Some(stripped) = normalized_file.strip_prefix(&common_with_sep) {
         return tspath::combine_paths(new_dir_path, &[stripped]);
     }
-    // Also handle the case where common_dir has no trailing separator match
-    // but the file is directly under it (e.g. file == "src/main.ts", dir == "src").
+
     if normalized_file == common_with_sep.trim_end_matches('/') {
         return new_dir_path.to_string();
     }
-    // Fall back: normalize both to absolute and retry the prefix strip.
-    // This handles mixed relative/absolute forms (e.g. rootDir relative but
-    // source file absolute, or vice versa).
+
     let abs_file = tspath::get_normalized_absolute_path(file_name, "");
     let abs_common = tspath::get_normalized_absolute_path(&common_with_sep, "");
     let abs_common_with_sep = tspath::ensure_trailing_directory_separator(&abs_common);
     if let Some(stripped) = abs_file.strip_prefix(&abs_common_with_sep) {
         return tspath::combine_paths(new_dir_path, &[stripped]);
     }
-    // Cannot determine relative path — emit with base name only.
+
     tspath::combine_paths(
         new_dir_path,
         &[tspath::get_base_file_name(file_name).as_str()],
     )
 }
 
-/// Determine the output file extension based on the input file name.
 fn get_output_extension(file_name: &str) -> &'static str {
     if tspath::file_extension_is(file_name, ".json") {
         return ".json";
@@ -443,19 +354,14 @@ fn get_output_extension(file_name: &str) -> &'static str {
     ".js"
 }
 
-/// Emit JavaScript text for a source file by walking the AST and stripping
-/// TypeScript-only constructs.
 fn emit_js_text(source_file: &SourceFile, options: &CompilerOptions) -> String {
     let mut output = String::new();
     emit_js_text_inner(source_file, options, &mut output);
-    // Rewrite relative import/export specifiers: `.ts`/`.tsx` → `.js`.
+
     output = rewrite_import_extensions(&output);
-    // Add missing semicolons to match Go's ASI-implicit-semicolon printer.
+
     output = add_implicit_semicolons(&output);
-    // When removeComments is active, trim leading whitespace that remained
-    // after stripping comments before the first statement. The Go printer
-    // doesn't emit leading trivia before the first statement, so a stripped
-    // leading comment shouldn't leave a blank line.
+
     if options.remove_comments.is_true() {
         while output.starts_with(|c: char| c == ' ' || c == '\t' || c == '\n' || c == '\r') {
             output.remove(0);
@@ -464,9 +370,6 @@ fn emit_js_text(source_file: &SourceFile, options: &CompilerOptions) -> String {
     output
 }
 
-/// Emit JavaScript text with source map tracking. The `Generator` receives
-/// mappings derived from the per-character source offset array after
-/// normalization.
 fn emit_js_text_tracked(
     source_file: &SourceFile,
     options: &CompilerOptions,
@@ -496,9 +399,6 @@ fn emit_js_text_tracked(
     js_text
 }
 
-/// Walk the final output text and src_offsets array, emitting source map
-/// mappings to the generator. Combines linear scan (for base coverage)
-/// with AST node walking (for per-node granularity).
 fn generate_source_map_from_offsets(
     generator: &mut Generator,
     source_index: SourceIndex,
@@ -508,8 +408,7 @@ fn generate_source_map_from_offsets(
     source_line_starts: &[usize],
     _source_file: &SourceFile,
 ) {
-    // Linear scan: emit a mapping at every source-offset transition point.
-    // This provides correct base coverage for all output characters.
+
     let out_chars: Vec<char> = output.chars().collect();
     let mut gen_line: i32 = 0;
     let mut gen_col: i32 = 0;
@@ -559,11 +458,6 @@ fn generate_source_map_from_offsets(
     }
 }
 
-/// Core statement-walking emit logic, generic over the output sink.
-///
-/// Walks the AST, stripping TypeScript-only constructs (type annotations,
-/// interfaces, type aliases) and applying optional transformations
-/// (removeComments, ES5 down-leveling, CommonJS module transforms).
 fn emit_js_text_inner<S: EmitSink>(
     source_file: &SourceFile,
     options: &CompilerOptions,
@@ -578,26 +472,18 @@ fn emit_js_text_inner<S: EmitSink>(
         }
     };
 
-    // When `removeComments` is true, collect all comment ranges in the file
-    // so they can be stripped during emission. Mirrors Go's printer behavior
-    // where `removeComments` suppresses all comment output.
     let comment_cuts: Vec<(usize, usize)> = if options.remove_comments.is_true() {
         collect_all_comment_ranges(source)
     } else {
         Vec::new()
     };
 
-    // When `target` is ES5 or lower, collect `const`/`let` → `var` keyword
-    // replacements. Mirrors Go's ES5 down-leveling transformer
-    // (`transformers/es5.go` `visitVariableStatement`).
     let replacements: Vec<(usize, usize, &'static str)> = if needs_es5_downlevel(options) {
         collect_es5_replacements(&statements.nodes)
     } else {
         Vec::new()
     };
 
-    // Collect JSX element replacements for react-jsx/react-jsxdev mode.
-    // Each JSX node is replaced with a `_jsx()`/`_jsxs()` call string.
     let jsx_enabled = needs_jsx_transform(options, source_file);
     let mut jsx_usage = JsxRuntimeUsage::default();
     let jsx_replacements: Vec<(usize, usize, String)> = if jsx_enabled {
@@ -606,11 +492,6 @@ fn emit_js_text_inner<S: EmitSink>(
         Vec::new()
     };
 
-    // Build a combined replacement list (ES5 static + JSX dynamic).
-    // Each entry is (start, end, replacement_str, Option<src_pos>).
-    // For JSX replacements, src_pos is the JSX element's source position
-    // so the replacement text can be source-mapped. For ES5/type-erasure
-    // replacements, src_pos is None (purely generated text).
     let mut all_replacements: Vec<(usize, usize, &str, Option<usize>)> = Vec::new();
     for &(s, e, r) in &replacements {
         all_replacements.push((s, e, r, None));
@@ -623,12 +504,10 @@ fn emit_js_text_inner<S: EmitSink>(
 
     let mut prev_end = 0usize;
 
-    // CommonJS modules start with "use strict";
     if commonjs {
         sink.emit_generated("\"use strict\";\n");
     }
 
-    // Inject JSX runtime import when JSX was transformed.
     if !jsx_replacements.is_empty() {
         let import_source: &str = if options.jsx_import_source.is_empty() {
             "react"
@@ -639,30 +518,20 @@ fn emit_js_text_inner<S: EmitSink>(
     }
 
     for stmt in statements.iter() {
-        // Skip type-only statements entirely.
+
         if is_type_only_statement(stmt) {
             prev_end = stmt.end();
             continue;
         }
 
-        // For CommonJS declarations with `export` modifier, cut the
-        // `export` (and `default`) keyword. The modifier keyword lives
-        // BEFORE the statement's `pos()` (the parser sets the statement
-        // position to the declaration keyword, not the modifier), so we
-        // must apply these cuts during inter-statement text emission.
         let mut modifier_cuts: Vec<(usize, usize)> = if commonjs {
             collect_export_modifier_cuts(stmt, source)
         } else {
             Vec::new()
         };
-        // Type-only modifier keywords (abstract, declare, override, readonly)
-        // on top-level declarations also live before `stmt.pos()` and must be
-        // stripped during inter-statement text emission. Nested member
-        // modifiers are handled inside `collect_type_cuts`.
+
         collect_modifier_cuts(stmt, source, &mut modifier_cuts);
 
-        // Merge modifier cuts into comment cuts for both inter-statement
-        // text and statement text emission.
         let effective_cuts: Vec<(usize, usize)> = if modifier_cuts.is_empty() {
             comment_cuts.clone()
         } else {
@@ -671,8 +540,6 @@ fn emit_js_text_inner<S: EmitSink>(
             cuts
         };
 
-        // Emit source text between the previous statement and this one
-        // (handles leading whitespace, comments, and modifier keywords).
         if stmt.pos() > prev_end {
             emit_text_range(
                 source,
@@ -684,9 +551,8 @@ fn emit_js_text_inner<S: EmitSink>(
             );
         }
 
-        // CommonJS: handle import/export statements specially.
         if commonjs {
-            // Import statements are replaced entirely with require() calls.
+
             if let Some(transformed) = transform_commonjs_import(stmt, source) {
                 prev_end = stmt.end();
                 if !transformed.is_empty() {
@@ -695,8 +561,7 @@ fn emit_js_text_inner<S: EmitSink>(
                 }
                 continue;
             }
-            // Pure export statements (export { foo }, export default expr,
-            // export = expr) are replaced entirely.
+
             if let Some(transformed) = transform_commonjs_export(stmt, source) {
                 prev_end = stmt.end();
                 if !transformed.is_empty() {
@@ -707,12 +572,9 @@ fn emit_js_text_inner<S: EmitSink>(
             }
         }
 
-        // Emit the statement with type annotations stripped.
         emit_statement(stmt, source, &effective_cuts, &all_replacements, sink);
         prev_end = stmt.end();
 
-        // CommonJS: for declarations with `export` modifier, append
-        // `exports.name = name;` after the declaration.
         if commonjs {
             if let Some(append) = transform_commonjs_export_declaration(stmt, source) {
                 sink.emit_generated(&append);
@@ -721,7 +583,6 @@ fn emit_js_text_inner<S: EmitSink>(
         }
     }
 
-    // Emit trailing source text (e.g., trailing whitespace).
     if prev_end < source.len() {
         emit_text_range(
             source,
@@ -734,14 +595,6 @@ fn emit_js_text_inner<S: EmitSink>(
     }
 }
 
-// ── Declaration emit (P4.5) ────────────────────────────────────────
-
-/// Emit a `.d.ts` declaration file for a source file.
-///
-/// Walks the AST, keeping only declaration statements (functions, variables,
-/// classes, interfaces, type aliases, enums, imports/exports) and stripping
-/// implementation details (function bodies, variable initializers).
-/// `declare` is inserted before non-type-only top-level declarations.
 fn emit_declaration_text(source_file: &SourceFile, _options: &CompilerOptions) -> String {
     let source = &source_file.text;
     let statements = match &source_file.node.data {
@@ -753,23 +606,17 @@ fn emit_declaration_text(source_file: &SourceFile, _options: &CompilerOptions) -
     let mut prev_end = 0usize;
 
     for stmt in statements.iter() {
-        // Skip runtime statements entirely.
+
         if !is_declaration_statement(stmt) {
             prev_end = stmt.end();
             continue;
         }
 
-        // Drop value-only imports — they are not part of the type surface.
-        // Side-effect imports (`import './x.css'`) and type-only imports
-        // (`import type { T } from '...'`) are kept.
         if is_value_only_import(stmt) {
             prev_end = stmt.end();
             continue;
         }
 
-        // Collect export/default modifier ranges. The parser may or may not
-        // include the `export` keyword in `stmt.pos()` depending on the
-        // statement kind, so we handle modifiers explicitly here.
         let export_cuts = collect_export_modifier_cuts(stmt, source);
         let has_export = export_cuts.iter().any(|(s, e)| *e > *s);
         let has_default = stmt
@@ -777,26 +624,18 @@ fn emit_declaration_text(source_file: &SourceFile, _options: &CompilerOptions) -
             .map(|m| m.modifier_flags.contains(ModifierFlags::Default))
             .unwrap_or(false);
 
-        // The position where inter-statement text ends: either the first
-        // modifier position, or `stmt.pos()` if no modifiers precede it.
         let mod_start = export_cuts.first().map(|&(s, _)| s).unwrap_or(stmt.pos());
 
-        // The content start: after the last export/default modifier and its
-        // trailing whitespace.
         let content_start = if !export_cuts.is_empty() {
             export_cuts.last().map(|&(_, e)| e).unwrap_or(stmt.pos())
         } else {
             stmt.pos()
         };
 
-        // Emit inter-statement text (whitespace, comments) up to the first
-        // modifier or statement start.
         if mod_start > prev_end {
             output.push_str(&source[prev_end..mod_start]);
         }
 
-        // Re-emit export/default keywords before `declare` so the order is
-        // `export declare function ...` (not `declare export function ...`).
         if has_export {
             output.push_str("export ");
         }
@@ -804,34 +643,23 @@ fn emit_declaration_text(source_file: &SourceFile, _options: &CompilerOptions) -
             output.push_str("default ");
         }
 
-        // Insert `declare ` for declarations that need it (functions,
-        // variables, classes, enums — but NOT interfaces/type aliases, and
-        // NOT export-default declarations: official emit prints
-        // `export default function f(): T;` with no `declare`).
         if needs_declare_keyword(stmt) && !has_default {
             output.push_str("declare ");
         }
 
-        // Emit the statement with declaration-specific transformations,
-        // starting from `content_start` (after export/default modifiers).
         emit_declaration_statement(stmt, source, content_start, &mut output);
         prev_end = stmt.end();
     }
 
-    // Emit trailing whitespace.
     if prev_end < source.len() {
         output.push_str(&source[prev_end..]);
     }
 
-    // Match Go's declaration printer: rewrite imports, normalize whitespace
-    // (remove blank lines, reindent), and add semicolons.
     let output = rewrite_import_extensions(&output);
     let output = reindent_and_dedup(&output);
     add_implicit_semicolons(&output)
 }
 
-/// Whether a statement should be included in the `.d.ts` output.
-/// Runtime statements (if/for/while/return/expression/etc.) are excluded.
 fn is_declaration_statement(node: &Node) -> bool {
     matches!(
         node.kind,
@@ -849,13 +677,10 @@ fn is_declaration_statement(node: &Node) -> bool {
     )
 }
 
-/// Whether an import declaration is a value-only import (dropped from the
-/// `.d.ts` output). Side-effect imports (`import './x.css'`) and type-only
-/// imports (`import type { T } from '...'`) are kept.
 fn is_value_only_import(node: &Node) -> bool {
     if let NodeData::ImportDeclaration(d) = &node.data {
         match &d.import_clause {
-            // Side-effect-only import: keep.
+
             None => false,
             Some(clause) => match &clause.data {
                 NodeData::ImportClause(ic) => ic.phase_modifier != Some(SyntaxKind::TypeKeyword),
@@ -867,8 +692,6 @@ fn is_value_only_import(node: &Node) -> bool {
     }
 }
 
-/// Whether a `declare` keyword should be inserted before this statement.
-/// Interfaces and type aliases are already type-only, so they don't need `declare`.
 fn needs_declare_keyword(node: &Node) -> bool {
     matches!(
         node.kind,
@@ -880,21 +703,15 @@ fn needs_declare_keyword(node: &Node) -> bool {
     )
 }
 
-/// Emit a single declaration statement with implementation details stripped.
-/// `start` is the position after any export/default modifiers.
 fn emit_declaration_statement(node: &Node, source: &str, start: usize, output: &mut String) {
     match &node.data {
-        // Function: strip body, replace with ';'.
+
         NodeData::FunctionDeclaration(d) => {
             if let Some(body) = &d.body {
-                // Emit signature (up to body start), trim trailing space.
+
                 let sig = &source[start..body.pos()];
                 let mut sig_trimmed = sig.trim_end().to_string();
 
-                // Declaration emit drops the `async` keyword and the
-                // generator `*` (Go's declaration printer): the return type
-                // carries the asynchrony/iteration. `export declare async
-                // function f();` is not legal syntax.
                 let is_generator = d.asterisk_token.is_some();
                 if is_generator {
                     sig_trimmed = sig_trimmed.replace("function*", "function");
@@ -907,33 +724,23 @@ fn emit_declaration_statement(node: &Node, source: &str, start: usize, output: &
                     }
                 }
 
-                // Check if signature already has a return type annotation.
-                // If not, and the function body returns JSX, add the
-                // JSX.Element return type (matching Go's checker-driven
-                // declaration emit for React components).
                 let has_return_type = sig_trimmed.rfind(')').map_or(false, |close_paren| {
                     sig_trimmed[close_paren..].contains(':')
                 });
 
                 if !has_return_type && function_returns_jsx(body) {
-                    // Insert return type before the semicolon.
+
                     output.push_str(&sig_trimmed);
                     output.push_str(": import(\"react\").JSX.Element;");
                 } else if !has_return_type {
-                    // Unannotated return in .d.ts: the barebones transpile
-                    // checker cannot infer — emit the fallback return type
-                    // (generators print `{}`, plain/async print `unknown`,
-                    // matching the official transpile baselines).
+
                     output.push_str(&sig_trimmed);
                     output.push_str(if is_generator { ": {};" } else { ": unknown;" });
                 } else {
                     output.push_str(&sig_trimmed);
                     output.push(';');
                 }
-                // Emit trailing whitespace after the body's closing `}`.
-                // The parser may include trailing trivia in body.end(),
-                // so scan backward to find the actual `}` and emit the
-                // whitespace between it and body.end().
+
                 let bytes = source.as_bytes();
                 let mut brace_end = body.end();
                 while brace_end > body.pos() && bytes[brace_end - 1].is_ascii_whitespace() {
@@ -943,12 +750,11 @@ fn emit_declaration_statement(node: &Node, source: &str, start: usize, output: &
                     output.push_str(&source[brace_end..body.end()]);
                 }
             } else {
-                // Ambient function (no body) — emit as-is.
+
                 output.push_str(&source[start..node.end()]);
             }
         }
-        // Variable statement: strip initializers. In declaration mode ALL
-        // initializers are stripped (even without a type annotation).
+
         NodeData::VariableStatement(d) => {
             let mut cuts: Vec<(usize, usize)> = Vec::new();
             collect_variable_initializer_cuts(&d.declaration_list, &mut cuts, true);
@@ -958,20 +764,17 @@ fn emit_declaration_statement(node: &Node, source: &str, start: usize, output: &
                 emit_with_cuts(source, start, node.end(), &cuts, output);
             }
         }
-        // Class: strip method/constructor/accessor bodies, keep signatures.
+
         NodeData::ClassDeclaration(d) => {
             emit_class_members(&d.members, source, start, node.end(), output);
         }
-        // All other declarations: emit source as-is.
+
         _ => {
             output.push_str(&source[start..node.end()]);
         }
     }
 }
 
-/// Check if a function body contains a return statement returning JSX.
-/// This is a heuristic for inferring React component return types in
-/// declaration emit (matching Go's checker-driven type inference).
 fn function_returns_jsx(body: &Arc<Node>) -> bool {
     fn returns_jsx_recursive(node: &Arc<Node>) -> bool {
         match &node.data {
@@ -998,8 +801,6 @@ fn function_returns_jsx(body: &Arc<Node>) -> bool {
     returns_jsx_recursive(body)
 }
 
-/// Check if an expression node is a JSX element, fragment, or self-closing element.
-/// Also unwraps parenthesized expressions to check the inner expression.
 fn is_jsx_expression(node: &Arc<Node>) -> bool {
     if matches!(
         node.kind,
@@ -1010,16 +811,13 @@ fn is_jsx_expression(node: &Arc<Node>) -> bool {
     ) {
         return true;
     }
-    // Unwrap parenthesized expressions: `return (<JSX />)`
+
     if let NodeData::ParenthesizedExpression(d) = &node.data {
         return is_jsx_expression(&d.expression);
     }
     false
 }
 
-/// Emit a class declaration with method/constructor/accessor bodies stripped
-/// (each body `{ ... }` is replaced with `;`). Property declarations and
-/// their type annotations are preserved.
 fn emit_class_members(
     members: &NodeList,
     source: &str,
@@ -1027,14 +825,12 @@ fn emit_class_members(
     end: usize,
     output: &mut String,
 ) {
-    // Collect (signature_end, body_end) ranges for members that have a body.
+
     let mut ops: Vec<(usize, usize)> = Vec::new();
     let bytes = source.as_bytes();
     for member in members.iter() {
         if let Some(body) = class_member_body(member) {
-            // `body.pos()` includes leading whitespace trivia. Scan back to
-            // the end of the member signature so the cut also removes the
-            // whitespace between the signature and `{`.
+
             let mut sig_end = body.pos();
             while sig_end > start && bytes[sig_end - 1].is_ascii_whitespace() {
                 sig_end -= 1;
@@ -1056,8 +852,6 @@ fn emit_class_members(
     }
 }
 
-/// Return the body node of a class member that has one (methods, constructors,
-/// accessors). Returns `None` for property declarations (no body to strip).
 fn class_member_body(member: &Node) -> Option<&Arc<Node>> {
     match &member.data {
         NodeData::MethodDeclaration(d) => d.body.as_ref(),
@@ -1068,11 +862,6 @@ fn class_member_body(member: &Node) -> Option<&Arc<Node>> {
     }
 }
 
-/// Collect cut ranges for variable initializers. When `declaration_mode` is
-/// false, only strips the initializer when a type annotation is present (so
-/// the declaration remains valid). When `declaration_mode` is true (`.d.ts`
-/// emit), strips ALL initializers — a bare declaration is valid under a
-/// `declare` modifier even without a type annotation.
 fn collect_variable_initializer_cuts(
     list: &Arc<Node>,
     cuts: &mut Vec<(usize, usize)>,
@@ -1082,25 +871,21 @@ fn collect_variable_initializer_cuts(
         for decl in d.declarations.iter() {
             if let NodeData::VariableDeclaration(vd) = &decl.data {
                 if let (Some(type_node), Some(init)) = (&vd.type_node, &vd.initializer) {
-                    // Cut from end of type annotation to end of initializer.
-                    // This removes ` = value` while keeping `: Type`.
+
                     cuts.push((type_node.end(), init.end()));
                 } else if declaration_mode {
                     if let Some(init) = &vd.initializer {
-                        // No type annotation: strip the initializer entirely
-                        // (` = value`), leaving the bare name. The cut starts
-                        // at the end of the name and removes through the value.
+
                         cuts.push((vd.name.end(), init.end()));
                     }
                 }
-                // Recurse into binding patterns (array/object destructuring).
+
                 collect_variable_initializer_cuts(&vd.name, cuts, declaration_mode);
             }
         }
     }
 }
 
-/// Emit source text `[start, end)` with cut ranges removed.
 fn emit_with_cuts(
     source: &str,
     start: usize,
@@ -1130,9 +915,6 @@ fn emit_with_cuts(
     }
 }
 
-/// Compute the `.d.ts` output file path.
-/// `declarationDir` takes priority over `outDir`; if neither is set, the
-/// `.d.ts` lands alongside the source file.
 fn get_dts_output_path(
     source_file: &SourceFile,
     options: &CompilerOptions,
@@ -1152,7 +934,7 @@ fn get_dts_output_path(
         let without_ext = tspath::remove_file_extension(&path_in_new_dir);
         format!("{without_ext}{dts_ext}")
     } else if !options.out_dir.is_empty() {
-        // Reuse the JS path computation, then swap extension.
+
         let js_path = get_js_output_path(source_file, options, common_source_directory);
         let without_ext = tspath::remove_file_extension(&js_path);
         format!("{without_ext}{dts_ext}")
@@ -1162,7 +944,6 @@ fn get_dts_output_path(
     }
 }
 
-/// Determine the declaration file extension based on the input file name.
 fn get_declaration_extension(file_name: &str) -> &'static str {
     if tspath::file_extension_is_one_of(file_name, &[".mts", ".mjs"]) {
         return ".d.mts";
@@ -1173,9 +954,6 @@ fn get_declaration_extension(file_name: &str) -> &'static str {
     ".d.ts"
 }
 
-/// Emit a range of source text `[start, end)`, skipping any cut ranges
-/// (comment or type-annotation cuts) and applying any replacement ranges
-/// (e.g., `const`→`var` for ES5 down-leveling) that fall within it.
 fn emit_text_range<S: EmitSink>(
     source: &str,
     start: usize,
@@ -1188,8 +966,7 @@ fn emit_text_range<S: EmitSink>(
         sink.emit_source(source, start, end);
         return;
     }
-    // Merge cuts and replacements into a single sorted operation list.
-    // Each operation is (start, end, Option<(replacement, src_pos)>).
+
     let mut ops: Vec<(usize, usize, Option<(&str, Option<usize>)>)> = Vec::new();
     for &(cs, ce) in cuts {
         if ce > start && cs < end {
@@ -1225,31 +1002,19 @@ fn emit_text_range<S: EmitSink>(
     }
 }
 
-/// Scan the entire source text and collect all comment ranges (both `//`
-/// single-line and `/* */` multi-line), being careful to skip string
-/// literals, template literals, and regex literals.
-///
-/// This is used by the emitter when `removeComments: true` to strip all
-/// comments from the emitted JS. The approach mirrors how Go's printer
-/// suppresses comment emission — but since our emitter is source-text-slice
-/// based (not printer-based), we collect ranges upfront and treat them as
-/// additional cut ranges.
 fn collect_all_comment_ranges(text: &str) -> Vec<(usize, usize)> {
     let bytes = text.as_bytes();
     let len = bytes.len();
     let mut ranges: Vec<(usize, usize)> = Vec::new();
     let mut pos = 0usize;
 
-    // Track the previous significant (non-whitespace) character for regex
-    // detection. A `/` is treated as regex start if the previous significant
-    // char is one that can't end an expression (operators, brackets, etc.).
     let mut prev_significant: char = ';';
 
     while pos < len {
         let b = bytes[pos];
         match b {
             b'/' if pos + 1 < len && bytes[pos + 1] == b'/' => {
-                // Single-line comment: `// ...` until newline.
+
                 let start = pos;
                 pos += 2;
                 while pos < len && bytes[pos] != b'\n' && bytes[pos] != b'\r' {
@@ -1258,7 +1023,7 @@ fn collect_all_comment_ranges(text: &str) -> Vec<(usize, usize)> {
                 ranges.push((start, pos));
             }
             b'/' if pos + 1 < len && bytes[pos + 1] == b'*' => {
-                // Multi-line comment: `/* ... */`.
+
                 let start = pos;
                 pos += 2;
                 while pos < len {
@@ -1271,13 +1036,11 @@ fn collect_all_comment_ranges(text: &str) -> Vec<(usize, usize)> {
                 ranges.push((start, pos));
             }
             b'/' => {
-                // Could be a regex literal or a division operator.
-                // Heuristic: if the previous significant character suggests
-                // we're at the start of an expression, treat `/` as regex.
+
                 if is_regex_context(prev_significant) {
                     let start = pos;
                     pos += 1;
-                    let mut in_class = false; // inside `[...]`
+                    let mut in_class = false;
                     while pos < len {
                         let c = bytes[pos];
                         if c == b'\\' && pos + 1 < len {
@@ -1292,14 +1055,14 @@ fn collect_all_comment_ranges(text: &str) -> Vec<(usize, usize)> {
                         }
                         if c == b'/' && !in_class {
                             pos += 1;
-                            // Consume flags.
+
                             while pos < len && is_regex_flag_char(bytes[pos]) {
                                 pos += 1;
                             }
                             break;
                         }
                         if c == b'\n' {
-                            // Unterminated regex — bail.
+
                             break;
                         }
                         pos += 1;
@@ -1311,7 +1074,7 @@ fn collect_all_comment_ranges(text: &str) -> Vec<(usize, usize)> {
                 prev_significant = '/';
             }
             b'\'' | b'"' => {
-                // String literal.
+
                 let quote = b;
                 pos += 1;
                 while pos < len {
@@ -1325,7 +1088,7 @@ fn collect_all_comment_ranges(text: &str) -> Vec<(usize, usize)> {
                         break;
                     }
                     if c == b'\n' {
-                        // Unterminated string — bail.
+
                         break;
                     }
                     pos += 1;
@@ -1333,13 +1096,13 @@ fn collect_all_comment_ranges(text: &str) -> Vec<(usize, usize)> {
                 prev_significant = char::from(quote);
             }
             b'`' => {
-                // Template literal — may contain `${...}` expressions.
+
                 prev_significant = '`';
                 pos += 1;
                 skip_template_literal(text, &mut pos);
             }
             b' ' | b'\t' | b'\n' | b'\r' => {
-                // Whitespace — skip without updating prev_significant.
+
                 pos += 1;
             }
             _ => {
@@ -1352,8 +1115,6 @@ fn collect_all_comment_ranges(text: &str) -> Vec<(usize, usize)> {
     ranges
 }
 
-/// Skip a template literal body (after the opening backtick), handling
-/// `${...}` expression interpolation and nested templates.
 fn skip_template_literal(text: &str, pos: &mut usize) {
     let bytes = text.as_bytes();
     let len = bytes.len();
@@ -1368,7 +1129,7 @@ fn skip_template_literal(text: &str, pos: &mut usize) {
             return;
         }
         if b == b'$' && *pos + 1 < len && bytes[*pos + 1] == b'{' {
-            // Expression interpolation — skip until matching `}`.
+
             *pos += 2;
             let mut depth = 1;
             while *pos < len && depth > 0 {
@@ -1412,8 +1173,6 @@ fn skip_template_literal(text: &str, pos: &mut usize) {
     }
 }
 
-/// Whether a `/` following `prev` should be treated as the start of a regex
-/// literal (rather than a division operator).
 fn is_regex_context(prev: char) -> bool {
     matches!(
         prev,
@@ -1446,21 +1205,10 @@ fn is_regex_flag_char(b: u8) -> bool {
     matches!(b, b'g' | b'i' | b'm' | b's' | b'u' | b'y' | b'd' | b'v')
 }
 
-/// Whether the emit target requires ES5 down-leveling (const/let → var).
-/// Mirrors Go's transformer pipeline which runs the ES5 transformer when
-/// `target` is explicitly set to `ES5` (or lower). When `target` is `None`
-/// (unspecified), no down-leveling is applied — the default target in
-/// modern TypeScript is ES2015+, so `const`/`let` are preserved.
 fn needs_es5_downlevel(options: &CompilerOptions) -> bool {
     options.target == ScriptTarget::ES5
 }
 
-/// Walk the AST and collect all `const`/`let` keyword positions that need
-/// to be replaced with `var` for ES5 down-leveling.
-///
-/// The VariableDeclarationList node's `flags` field stores `NodeFlags::Const`
-/// or `NodeFlags::Let`. The keyword starts at `node.pos()` and is 5 chars
-/// for `const` or 3 chars for `let`.
 fn collect_es5_replacements(statements: &[Arc<Node>]) -> Vec<(usize, usize, &'static str)> {
     let mut replacements = Vec::new();
     for stmt in statements {
@@ -1476,33 +1224,22 @@ fn collect_es5_replacements_recursive(
     if node.kind == crate::ast::SyntaxKind::VariableDeclarationList {
         let flags = node.flags;
         if flags.contains(NodeFlags::Const) {
-            // `const` is 5 characters
+
             let pos = node.pos();
             replacements.push((pos, pos + 5, "var"));
         } else if flags.contains(NodeFlags::Let) {
-            // `let` is 3 characters
+
             let pos = node.pos();
             replacements.push((pos, pos + 3, "var"));
         }
     }
-    // Recurse into children to find nested variable declarations
-    // (e.g., inside for loops, function bodies, etc.)
+
     crate::ast::node_data_generated::for_each_child(node, |child| {
         collect_es5_replacements_recursive(child, replacements);
         false
     });
 }
 
-// ── CommonJS module transformation (P4.3) ───────────────────────────
-
-/// Collect byte ranges of `export` and `default` keyword modifiers that
-/// should be cut from the emitted text when transforming to CommonJS.
-///
-/// For `export const x = 1`, this cuts the `export` keyword and trailing
-/// whitespace, leaving `const x = 1`.
-/// For `export default function foo() {}`, this cuts both `export` and
-/// `default` keywords (and inter/trailing whitespace), leaving
-/// `function foo() {}`.
 fn collect_export_modifier_cuts(stmt: &Node, source: &str) -> Vec<(usize, usize)> {
     let modifiers = match stmt.modifiers() {
         Some(m) => m,
@@ -1519,8 +1256,7 @@ fn collect_export_modifier_cuts(stmt: &Node, source: &str) -> Vec<(usize, usize)
         {
             let start = mod_node.pos();
             let mut end = mod_node.end();
-            // Extend end to include trailing whitespace so the declaration
-            // keyword starts cleanly.
+
             while end < bytes.len() && (bytes[end] == b' ' || bytes[end] == b'\t') {
                 end += 1;
             }
@@ -1530,17 +1266,6 @@ fn collect_export_modifier_cuts(stmt: &Node, source: &str) -> Vec<(usize, usize)
     cuts
 }
 
-/// Transform an `import` declaration into CommonJS `require()` calls.
-///
-/// Returns `Some(transformed_text)` if the statement is an import
-/// declaration, or `None` if it's not.
-///
-/// - `import { foo } from "./bar"` → `const { foo } = require("./bar");`
-/// - `import * as ns from "./bar"` → `const ns = require("./bar");`
-/// - `import d from "./bar"` → `const { default: d } = require("./bar");`
-/// - `import d, { foo } from "./bar"` → `const { default: d, foo } = require("./bar");`
-/// - `import "./bar"` → `require("./bar");`
-/// - `import type { foo } from "./bar"` → `` (empty, type-only)
 fn transform_commonjs_import(stmt: &Node, source: &str) -> Option<String> {
     let import_data = match &stmt.data {
         NodeData::ImportDeclaration(d) => d,
@@ -1550,7 +1275,6 @@ fn transform_commonjs_import(stmt: &Node, source: &str) -> Option<String> {
     let specifier = &import_data.module_specifier;
     let specifier_text = &source[specifier.pos()..specifier.end()];
 
-    // No import clause → side-effect import.
     let clause = match &import_data.import_clause {
         None => return Some(format!("require({specifier_text});")),
         Some(c) => c,
@@ -1560,12 +1284,10 @@ fn transform_commonjs_import(stmt: &Node, source: &str) -> Option<String> {
         _ => return Some(format!("require({specifier_text});")),
     };
 
-    // Detect `import type` via the clause's phase_modifier field.
     if clause_data.phase_modifier == Some(SyntaxKind::TypeKeyword) {
         return Some(String::new());
     }
 
-    // Namespace import: `import * as ns from "./bar"` → `const ns = require("./bar");`
     if let Some(bindings) = &clause_data.named_bindings {
         if let NodeData::NamespaceImport(ns_data) = &bindings.data {
             if let NodeData::Identifier(ident) = &ns_data.name.data {
@@ -1577,17 +1299,14 @@ fn transform_commonjs_import(stmt: &Node, source: &str) -> Option<String> {
         }
     }
 
-    // Build destructuring parts for default import + named imports.
     let mut parts: Vec<String> = Vec::new();
 
-    // Default import.
     if let Some(name) = &clause_data.name {
         if let NodeData::Identifier(ident) = &name.data {
             parts.push(format!("default: {}", ident.text));
         }
     }
 
-    // Named imports.
     if let Some(bindings) = &clause_data.named_bindings {
         if let NodeData::NamedImports(named) = &bindings.data {
             for spec in named.elements.iter() {
@@ -1622,11 +1341,6 @@ fn transform_commonjs_import(stmt: &Node, source: &str) -> Option<String> {
     ))
 }
 
-/// Transform a pure export statement (export declaration or export
-/// assignment) into CommonJS `exports.x = ...` assignments.
-///
-/// Returns `Some(transformed_text)` if the statement is an export
-/// declaration or export assignment, or `None` otherwise.
 fn transform_commonjs_export(stmt: &Node, source: &str) -> Option<String> {
     match &stmt.data {
         NodeData::ExportDeclaration(d) => {
@@ -1644,7 +1358,6 @@ fn transform_commonjs_export(stmt: &Node, source: &str) -> Option<String> {
                     if let NodeData::NamedExports(named) = &clause_node.data {
                         let mut lines: Vec<String> = Vec::new();
 
-                        // For re-exports, first require the module.
                         if let Some(spec) = &specifier_text {
                             let mut import_parts: Vec<String> = Vec::new();
                             for spec_node in named.elements.iter() {
@@ -1663,7 +1376,6 @@ fn transform_commonjs_export(stmt: &Node, source: &str) -> Option<String> {
                             }
                         }
 
-                        // Generate export assignments.
                         for spec_node in named.elements.iter() {
                             if let NodeData::ExportSpecifier(spec_data) = &spec_node.data {
                                 let (local_name, export_name) =
@@ -1689,7 +1401,7 @@ fn transform_commonjs_export(stmt: &Node, source: &str) -> Option<String> {
                     Some(String::new())
                 }
                 Some((SyntaxKind::NamespaceExport, clause_node)) => {
-                    // `export * as ns from "./bar"`
+
                     if let NodeData::NamespaceExport(ns_data) = &clause_node.data {
                         if let NodeData::Identifier(ident) = &ns_data.name.data {
                             if let Some(spec) = &specifier_text {
@@ -1704,7 +1416,7 @@ fn transform_commonjs_export(stmt: &Node, source: &str) -> Option<String> {
                     Some(String::new())
                 }
                 None => {
-                    // `export * from "./bar"` — wildcard re-export.
+
                     if let Some(spec) = &specifier_text {
                         return Some(format!(
                             "Object.keys(require({s})).forEach(function(k) {{ if (k !== \"default\") exports[k] = require({s})[k]; }});",
@@ -1728,13 +1440,6 @@ fn transform_commonjs_export(stmt: &Node, source: &str) -> Option<String> {
     }
 }
 
-/// Generate `exports.name = name;` lines for declarations with `export`
-/// modifier (VariableStatement, FunctionDeclaration, ClassDeclaration,
-/// EnumDeclaration).
-///
-/// Called AFTER the declaration is emitted (with the `export` keyword
-/// stripped). Returns `Some(append_text)` if the statement has an export
-/// modifier, or `None` otherwise.
 fn transform_commonjs_export_declaration(stmt: &Node, _source: &str) -> Option<String> {
     let modifiers = stmt.modifiers()?;
     if !modifiers.modifier_flags.contains(ModifierFlags::Export) {
@@ -1802,40 +1507,32 @@ fn transform_commonjs_export_declaration(stmt: &Node, _source: &str) -> Option<S
     }
 }
 
-/// Whether a statement is type-only and should be skipped during emit.
 fn is_type_only_statement(node: &Node) -> bool {
     match &node.data {
         NodeData::InterfaceDeclaration(_) => true,
         NodeData::TypeAliasDeclaration(_) => true,
-        // `import type { ... }`, `import type d`, `import type * as ns` — the
-        // entire declaration is type-only (ImportClause.phase_modifier ==
-        // TypeKeyword) and is elided. Also elides inline imports whose every
-        // binding is type-only (e.g. `import { type Foo }`) when there is no
-        // default value binding. Mirrors Go's typeeraser ImportDeclaration /
-        // ImportClause / NamedImports elision logic.
+
         NodeData::ImportDeclaration(d) => is_type_only_import(d),
-        // `export as namespace X` is declaration-only — never emitted to JS.
+
         NodeData::NamespaceExportDeclaration(_) => true,
         _ => false,
     }
 }
 
-/// Whether an import declaration carries no runtime binding and should be
-/// elided entirely.
 fn is_type_only_import(d: &ImportDeclarationData) -> bool {
     let clause = match &d.import_clause {
         Some(c) => c,
-        None => return false, // side-effect import: `import "./bar"`
+        None => return false,
     };
     let cd = match &clause.data {
         NodeData::ImportClause(cd) => cd,
         _ => return false,
     };
-    // `import type ...` — whole declaration is type-only.
+
     if cd.phase_modifier == Some(SyntaxKind::TypeKeyword) {
         return true;
     }
-    // No default value binding and every named specifier is type-only → elide.
+
     if cd.name.is_none() {
         if let Some(bindings) = &cd.named_bindings {
             if let NodeData::NamedImports(named) = &bindings.data {
@@ -1850,43 +1547,35 @@ fn is_type_only_import(d: &ImportDeclarationData) -> bool {
     false
 }
 
-/// Whether an import specifier node is type-only.
 fn is_type_only_import_specifier(spec: &Node) -> bool {
     matches!(&spec.data, NodeData::ImportSpecifier(sd) if sd.is_type_only)
 }
 
-/// Rewrite relative import/export specifiers in the emitted JS text.
-/// Replaces `.ts`/`.tsx` extensions with `.js` in relative paths.
-/// Mirrors Go's `rewriteModuleSpecifier` + `GetOutputExtension`.
 fn rewrite_import_extensions(text: &str) -> String {
-    // Only rewrite within import/export module specifiers, not JSX text or
-    // other string literals. We look for `from "...ts"` or `import("...ts")`
-    // patterns to limit the rewrite scope.
+
     let mut result = String::with_capacity(text.len());
     let bytes = text.as_bytes();
     let mut i = 0;
     while i < bytes.len() {
-        // Only attempt ASCII pattern matching at UTF-8 character boundaries.
-        // A continuation byte (10xxxxxx) means we're inside a multi-byte char.
+
         let is_char_start = (bytes[i] & 0xC0) != 0x80;
 
-        // Check for `from ` or `import(` patterns followed by a string literal
         if is_char_start && i + 5 <= bytes.len() && &bytes[i..i + 5] == b"from " {
             result.push_str("from ");
             i += 5;
-            // Skip whitespace
+
             while i < bytes.len() && bytes[i].is_ascii_whitespace() {
                 result.push(bytes[i] as char);
                 i += 1;
             }
-            // Now at the string literal — rewrite its extension
+
             if i < bytes.len() && (bytes[i] == b'"' || bytes[i] == b'\'') {
                 let quote = bytes[i] as char;
                 let start = i + 1;
                 result.push(quote);
                 i += 1;
                 while i < bytes.len() && bytes[i] != quote as u8 {
-                    // Advance by a full UTF-8 char to stay on char boundaries.
+
                     if (bytes[i] & 0x80) == 0 {
                         i += 1;
                     } else if (bytes[i] & 0xE0) == 0xC0 {
@@ -1918,7 +1607,7 @@ fn rewrite_import_extensions(text: &str) -> String {
                 result.push(quote);
                 i += 1;
                 while i < bytes.len() && bytes[i] != quote as u8 {
-                    // Advance by a full UTF-8 char to stay on char boundaries.
+
                     if (bytes[i] & 0x80) == 0 {
                         i += 1;
                     } else if (bytes[i] & 0xE0) == 0xC0 {
@@ -1938,7 +1627,7 @@ fn rewrite_import_extensions(text: &str) -> String {
                 }
             }
         } else {
-            // Copy one char
+
             let ch = text[i..].chars().next().unwrap();
             result.push(ch);
             i += ch.len_utf8();
@@ -1947,7 +1636,6 @@ fn rewrite_import_extensions(text: &str) -> String {
     result
 }
 
-/// Rewrite a single module specifier's extension if it has a TS extension.
 fn rewrite_one_specifier(spec: &str) -> String {
     for (old, new) in [
         (".ts", ".js"),
@@ -1962,7 +1650,6 @@ fn rewrite_one_specifier(spec: &str) -> String {
     spec.to_string()
 }
 
-/// Add semicolons to lines that need them, matching Go's ASI printer behavior.
 fn add_implicit_semicolons(text: &str) -> String {
     let mut result = String::with_capacity(text.len());
     for line in text.lines() {
@@ -1972,7 +1659,7 @@ fn add_implicit_semicolons(text: &str) -> String {
             continue;
         }
         let last = trimmed.chars().last().unwrap_or(' ');
-        // Skip lines that should not get a semicolon
+
         let skip = matches!(
             last,
             '{' | '(' | '[' | ',' | ';' | ':' | '.' | '|' | '&' | '=' | '>' | '?'
@@ -1983,9 +1670,7 @@ fn add_implicit_semicolons(text: &str) -> String {
         if skip {
             result.push_str(trimmed);
         } else if last == '}' {
-            // Closing brace (e.g. a block) does not get a semicolon.
-            // A line ending in ')' is a complete statement after expression
-            // folding, so it falls through to receive a semicolon.
+
             result.push_str(trimmed);
         } else {
             result.push_str(trimmed);
@@ -1999,13 +1684,6 @@ fn add_implicit_semicolons(text: &str) -> String {
     result
 }
 
-/// Normalize JS output to match Go's AST printer formatting.
-///
-/// Folds multi-line expressions (newlines inside `()`/`[]`), re-indents to
-/// 4 spaces per brace level, removes blank lines, and adds missing
-/// semicolons. String literals, template literals (with `${}` interpolation),
-/// comments, and escape sequences are tracked so brackets inside them are
-/// ignored.
 #[allow(dead_code)]
 fn normalize_js_output(text: &str) -> String {
     let folded = fold_expression_newlines(text);
@@ -2013,14 +1691,6 @@ fn normalize_js_output(text: &str) -> String {
     add_implicit_semicolons(&reindented)
 }
 
-// ── Position-aware (tracked) normalization ──────────────────────────
-//
-// These functions mirror their non-tracked counterparts exactly in text
-// output, but also carry a parallel `src_offsets` array (one u32 per
-// character) through each transformation.  After normalization the array
-// is used to emit source-map mappings.
-
-/// Tracked version of `rewrite_import_extensions`.
 fn rewrite_import_extensions_tracked(text: &str, src_offsets: &[u32]) -> (String, Vec<u32>) {
     let chars: Vec<char> = text.chars().collect();
     let n = chars.len();
@@ -2079,9 +1749,6 @@ fn rewrite_import_extensions_tracked(text: &str, src_offsets: &[u32]) -> (String
     (out_text, out_offsets)
 }
 
-/// Helper: copy a `from "..."` or string-literal starting at index `i`
-/// (pointing at `f` of `from` or at the quote), rewriting the extension.
-/// Returns the index past the closing quote.
 fn copy_string_literal_tracked(
     chars: &[char],
     src_offsets: &[u32],
@@ -2089,7 +1756,7 @@ fn copy_string_literal_tracked(
     out_text: &mut String,
     out_offsets: &mut Vec<u32>,
 ) -> usize {
-    // Copy the `from ` prefix (or just start at the quote).
+
     let mut i = start;
     if chars[i] == 'f' {
         for _ in 0..5 {
@@ -2103,7 +1770,7 @@ fn copy_string_literal_tracked(
             i += 1;
         }
     }
-    // Now at the quote.
+
     if i < chars.len() && (chars[i] == '"' || chars[i] == '\'') {
         let quote = chars[i];
         out_text.push(quote);
@@ -2133,12 +1800,11 @@ fn copy_string_literal_tracked(
     i
 }
 
-/// Tracked version of `fold_expression_newlines`.
 fn fold_expression_newlines_tracked(text: &str, src_offsets: &[u32]) -> (String, Vec<u32>) {
     let chars: Vec<char> = text.chars().collect();
     let n = chars.len();
     let mut out: Vec<char> = Vec::with_capacity(n);
-    let mut out_idx: Vec<usize> = Vec::with_capacity(n); // input char index per output char
+    let mut out_idx: Vec<usize> = Vec::with_capacity(n);
 
     #[derive(Clone, Copy, PartialEq)]
     enum SCtx {
@@ -2163,7 +1829,6 @@ fn fold_expression_newlines_tracked(text: &str, src_offsets: &[u32]) -> (String,
     while i < n {
         let c = chars[i];
 
-        // --- Inside a string or comment ---
         if let Some(&ctx) = sctx.last() {
             match ctx {
                 SCtx::Single => {
@@ -2233,7 +1898,7 @@ fn fold_expression_newlines_tracked(text: &str, src_offsets: &[u32]) -> (String,
                 SCtx::LineComment => {
                     if c == '\n' || c == '\r' {
                         sctx.pop();
-                        // Fall through to code-mode handling.
+
                     } else {
                         out.push(c);
                         out_idx.push(i);
@@ -2257,7 +1922,6 @@ fn fold_expression_newlines_tracked(text: &str, src_offsets: &[u32]) -> (String,
             }
         }
 
-        // --- CODE MODE ---
         if c == '\'' {
             sctx.push(SCtx::Single);
             out.push(c);
@@ -2411,8 +2075,6 @@ fn fold_expression_newlines_tracked(text: &str, src_offsets: &[u32]) -> (String,
     (result_text, result_offsets)
 }
 
-/// Remove a trailing comma (and preceding whitespace) from both the char
-/// buffer and the index buffer.
 fn drop_trailing_idx(out: &mut Vec<char>, out_idx: &mut Vec<usize>) {
     while let Some(&ch) = out.last() {
         if ch == ' ' || ch == '\t' {
@@ -2428,7 +2090,6 @@ fn drop_trailing_idx(out: &mut Vec<char>, out_idx: &mut Vec<usize>) {
     }
 }
 
-/// Tracked version of `reindent_and_dedup`.
 fn reindent_and_dedup_tracked(folded: &str, src_offsets: &[u32]) -> (String, Vec<u32>) {
     let chars: Vec<char> = folded.chars().collect();
     let n = chars.len();
@@ -2453,7 +2114,6 @@ fn reindent_and_dedup_tracked(folded: &str, src_offsets: &[u32]) -> (String, Vec
             i += 1;
         }
 
-        // Trim leading/trailing whitespace within the line.
         let mut content_start = line_start;
         while content_start < line_end && chars[content_start].is_whitespace() {
             content_start += 1;
@@ -2500,7 +2160,6 @@ fn reindent_and_dedup_tracked(folded: &str, src_offsets: &[u32]) -> (String, Vec
     (out_text, out_offsets)
 }
 
-/// Tracked version of `add_implicit_semicolons`.
 fn add_implicit_semicolons_tracked(text: &str, src_offsets: &[u32]) -> (String, Vec<u32>) {
     let chars: Vec<char> = text.chars().collect();
     let n = chars.len();
@@ -2520,7 +2179,6 @@ fn add_implicit_semicolons_tracked(text: &str, src_offsets: &[u32]) -> (String, 
             i += 1;
         }
 
-        // trim_end
         let mut content_end = line_end;
         while content_end > line_start && chars[content_end - 1].is_whitespace() {
             content_end -= 1;
@@ -2571,26 +2229,18 @@ fn add_implicit_semicolons_tracked(text: &str, src_offsets: &[u32]) -> (String, 
     (out_text, out_offsets)
 }
 
-/// Tracked version of `normalize_js_output`.
 fn normalize_js_output_tracked(text: &str, src_offsets: &[u32]) -> (String, Vec<u32>) {
     let (text, offsets) = fold_expression_newlines_tracked(text, src_offsets);
     let (text, offsets) = reindent_and_dedup_tracked(&text, &offsets);
     add_implicit_semicolons_tracked(&text, &offsets)
 }
 
-/// Fold newlines that occur inside `()` or `[]` so that multi-line calls,
-/// parenthesized expressions, and array literals collapse to a single line.
-///
-/// The fold decision is based on the *innermost* enclosing bracket: a newline
-/// is dropped only when the nearest enclosing bracket is `(` or `[`, never `{`.
-/// Trailing commas left behind by the fold (e.g. `foo(a,)`) are removed.
 #[allow(dead_code)]
 fn fold_expression_newlines(text: &str) -> String {
     let chars: Vec<char> = text.chars().collect();
     let n = chars.len();
     let mut out: Vec<char> = Vec::with_capacity(n);
 
-    // Lexical context for strings and comments (empty => code).
     #[derive(Clone, Copy, PartialEq)]
     enum SCtx {
         Single,
@@ -2599,8 +2249,7 @@ fn fold_expression_newlines(text: &str) -> String {
         LineComment,
         BlockComment,
     }
-    // Bracket nesting. The bool records whether any newline was folded inside
-    // the group, so a trailing comma can be dropped when it closes.
+
     #[derive(Clone, Copy)]
     enum Group {
         Paren(bool),
@@ -2616,7 +2265,6 @@ fn fold_expression_newlines(text: &str) -> String {
     while i < n {
         let c = chars[i];
 
-        // --- Inside a string or comment ---
         if let Some(&ctx) = sctx.last() {
             match ctx {
                 SCtx::Single => {
@@ -2668,7 +2316,7 @@ fn fold_expression_newlines(text: &str) -> String {
                     }
                     if c == '$' && i + 1 < n && chars[i + 1] == '{' {
                         out.push('{');
-                        sctx.pop(); // leave template -> code (interpolation)
+                        sctx.pop();
                         groups.push(Group::TmplInterp);
                         i += 2;
                         continue;
@@ -2679,7 +2327,7 @@ fn fold_expression_newlines(text: &str) -> String {
                 SCtx::LineComment => {
                     if c == '\n' || c == '\r' {
                         sctx.pop();
-                        // Fall through to code-mode handling of the line break.
+
                     } else {
                         out.push(c);
                         i += 1;
@@ -2700,9 +2348,6 @@ fn fold_expression_newlines(text: &str) -> String {
             }
         }
 
-        // --- CODE MODE ---
-
-        // Enter string / comment contexts.
         if c == '\'' {
             sctx.push(SCtx::Single);
             out.push(c);
@@ -2736,7 +2381,6 @@ fn fold_expression_newlines(text: &str) -> String {
             continue;
         }
 
-        // Brackets.
         if c == '(' {
             groups.push(Group::Paren(false));
             out.push(c);
@@ -2796,7 +2440,6 @@ fn fold_expression_newlines(text: &str) -> String {
             continue;
         }
 
-        // Line break: fold only when the innermost bracket is ( or [.
         if c == '\n' || c == '\r' {
             let do_fold = matches!(
                 groups.last(),
@@ -2808,7 +2451,7 @@ fn fold_expression_newlines(text: &str) -> String {
                         *f = true;
                     }
                 }
-                // Drop trailing horizontal whitespace already emitted.
+
                 while let Some(&ch) = out.last() {
                     if ch == ' ' || ch == '\t' {
                         out.pop();
@@ -2816,12 +2459,12 @@ fn fold_expression_newlines(text: &str) -> String {
                         break;
                     }
                 }
-                // Advance past the line break (\r\n counts as one).
+
                 i += 1;
                 if i < n && chars[i - 1] == '\r' && chars[i] == '\n' {
                     i += 1;
                 }
-                // Skip leading horizontal whitespace of the next line.
+
                 while i < n && (chars[i] == ' ' || chars[i] == '\t') {
                     i += 1;
                 }
@@ -2842,8 +2485,6 @@ fn fold_expression_newlines(text: &str) -> String {
     out.into_iter().collect()
 }
 
-/// Remove a trailing comma (and any horizontal whitespace before it) from the
-/// end of the output buffer. Used when a folded `()` / `[]` group closes.
 #[allow(dead_code)]
 fn drop_trailing_comma(out: &mut Vec<char>) {
     while let Some(&ch) = out.last() {
@@ -2858,8 +2499,6 @@ fn drop_trailing_comma(out: &mut Vec<char>) {
     }
 }
 
-/// Net `{`/`}` delta of a line, ignoring braces inside string literals,
-/// template literals, and comments. Single-line scan.
 fn brace_delta(line: &str) -> i32 {
     let chars: Vec<char> = line.chars().collect();
     let n = chars.len();
@@ -2884,7 +2523,7 @@ fn brace_delta(line: &str) -> i32 {
                 }
             }
             '/' if i + 1 < n && chars[i + 1] == '/' => {
-                // Line comment runs to end of line.
+
                 break;
             }
             '/' if i + 1 < n && chars[i + 1] == '*' => {
@@ -2913,11 +2552,6 @@ fn brace_delta(line: &str) -> i32 {
     delta
 }
 
-/// Re-indent to 4 spaces per brace level and drop all blank lines.
-///
-/// Each line's indentation is the brace depth at the start of the line, except
-/// that a line beginning with `}` is indented one level less (the closing
-/// brace de-indents before the line's content).
 fn reindent_and_dedup(folded: &str) -> String {
     let mut out = String::with_capacity(folded.len());
     let mut depth: i32 = 0;
@@ -2941,16 +2575,12 @@ fn reindent_and_dedup(folded: &str) -> String {
         }
     }
 
-    // Preserve whether the input ended with a trailing newline so that the
-    // subsequent semicolon pass reproduces Go's trailing-newline behavior.
     if !had_trailing_newline && out.ends_with('\n') {
         out.pop();
     }
     out
 }
 
-/// Emit a statement, stripping type annotations and (optionally) comments,
-/// and applying ES5 down-leveling replacements.
 fn emit_statement<S: EmitSink>(
     node: &Node,
     source: &str,
@@ -2961,7 +2591,6 @@ fn emit_statement<S: EmitSink>(
     let mut cuts: Vec<(usize, usize)> = Vec::new();
     collect_type_cuts(node, source, &mut cuts);
 
-    // Merge comment cuts that fall within this statement's range.
     if !comment_cuts.is_empty() {
         for &(cs, ce) in comment_cuts {
             if ce > node.pos() && cs < node.end() {
@@ -2970,7 +2599,6 @@ fn emit_statement<S: EmitSink>(
         }
     }
 
-    // Collect replacements that fall within this statement's range.
     let mut stmt_replacements: Vec<(usize, usize, &str, Option<usize>)> = Vec::new();
     for &(rs, re, repl, src_pos) in replacements {
         if re > node.pos() && rs < node.end() {
@@ -2979,15 +2607,11 @@ fn emit_statement<S: EmitSink>(
     }
 
     if cuts.is_empty() && stmt_replacements.is_empty() {
-        // No type annotations, comments, or replacements — emit source as-is.
+
         sink.emit_source(source, node.pos(), node.end());
         return;
     }
 
-    // Merge cuts and replacements into a single sorted operation list.
-    // Cuts are clamped to the statement's `[pos, end)` range so that modifier
-    // keywords sitting *before* `pos` (e.g. top-level `abstract`/`declare`,
-    // handled during inter-statement text emission) don't corrupt the body.
     let mut ops: Vec<(usize, usize, Option<(&str, Option<usize>)>)> = Vec::new();
     for (cs, ce) in &cuts {
         if *ce > node.pos() && *cs < node.end() {
@@ -3018,12 +2642,8 @@ fn emit_statement<S: EmitSink>(
     }
 }
 
-/// Recursively collect "cut ranges" — byte ranges in the source text that
-/// should be removed because they contain TypeScript type annotations.
 fn collect_type_cuts(node: &Node, source: &str, cuts: &mut Vec<(usize, usize)>) {
-    // JSX nodes are handled entirely by the JSX transform. The generated
-    // replacement text already has types stripped, so we must NOT collect
-    // type cuts inside JSX nodes (they would conflict with replacements).
+
     match node.kind {
         SyntaxKind::JsxElement
         | SyntaxKind::JsxSelfClosingElement
@@ -3041,34 +2661,30 @@ fn collect_type_cuts(node: &Node, source: &str, cuts: &mut Vec<(usize, usize)>) 
         | SyntaxKind::JsxNamespacedName => return,
         _ => {}
     }
-    // Cut TypeScript-only modifier keywords (abstract, declare, override,
-    // readonly). These are valid modifier tokens on declarations/members but
-    // have no JavaScript equivalent, so they are stripped. `accessor` is NOT
-    // cut — it is a runtime (ES2022 auto-accessor) modifier preserved by the
-    // Go type eraser. Mirrors Go's typeeraser keyword elision list.
+
     collect_modifier_cuts(node, source, cuts);
     match &node.data {
         NodeData::VariableDeclaration(d) => {
-            // Cut the type annotation: ": Type"
+
             if let Some(type_node) = &d.type_node {
                 cuts.push((d.name.end(), type_node.end()));
             }
-            // Recurse into name (binding patterns may have types) and initializer.
+
             collect_type_cuts(&d.name, source, cuts);
             if let Some(init) = &d.initializer {
                 collect_type_cuts(init, source, cuts);
             }
         }
         NodeData::ParameterDeclaration(d) => {
-            // Cut the type annotation: ": Type"
+
             if let Some(type_node) = &d.type_node {
                 cuts.push((d.name.end(), type_node.end()));
             }
-            // Cut the question token if present (optional parameter `?`).
+
             if let Some(q) = &d.question_token {
                 cuts.push((d.name.end(), q.end()));
             }
-            // Recurse into initializer.
+
             if let Some(init) = &d.initializer {
                 collect_type_cuts(init, source, cuts);
             }
@@ -3082,19 +2698,19 @@ fn collect_type_cuts(node: &Node, source: &str, cuts: &mut Vec<(usize, usize)>) 
             collect_type_cuts(&d.declaration_list, source, cuts);
         }
         NodeData::FunctionDeclaration(d) => {
-            // Cut type parameters: <T, U>
+
             if let Some(tp) = &d.type_parameters {
                 cuts.push((tp.pos(), tp.end()));
             }
-            // Cut type annotations in parameters.
+
             for param in d.parameters.iter() {
                 collect_type_cuts(param, source, cuts);
             }
-            // Cut return type annotation: ": ReturnType"
+
             if let Some(type_node) = &d.type_node {
                 cuts.push((d.parameters.end(), type_node.end()));
             }
-            // Recurse into body.
+
             if let Some(body) = &d.body {
                 collect_type_cuts(body, source, cuts);
             }
@@ -3124,13 +2740,13 @@ fn collect_type_cuts(node: &Node, source: &str, cuts: &mut Vec<(usize, usize)>) 
             collect_type_cuts(&d.body, source, cuts);
         }
         NodeData::ClassDeclaration(d) => {
-            // Cut type parameters.
+
             if let Some(tp) = &d.type_parameters {
                 cuts.push((tp.pos(), tp.end()));
             }
-            // Cut `implements` heritage clauses entirely (TypeScript-only).
+
             cut_implements_clauses(d.heritage_clauses.as_deref(), source, cuts);
-            // Recurse into members.
+
             for member in d.members.iter() {
                 collect_type_cuts(member, source, cuts);
             }
@@ -3186,37 +2802,32 @@ fn collect_type_cuts(node: &Node, source: &str, cuts: &mut Vec<(usize, usize)>) 
             }
         }
         NodeData::PropertyDeclaration(d) => {
-            // Cut type annotation.
+
             if let Some(type_node) = &d.type_node {
                 cuts.push((d.name.end(), type_node.end()));
             }
         }
         NodeData::ImportDeclaration(d) => {
-            // Mixed imports with per-binding `type` modifiers (e.g.
-            // `import { type Foo, Bar }`) keep their value bindings and elide
-            // the type-only specifiers. Whole-declaration `import type` and
-            // all-type-only inline imports are elided earlier by
-            // `is_type_only_statement`, so this only runs for mixed imports.
+
             if let Some(clause) = &d.import_clause {
                 collect_import_clause_type_cuts(clause, source, cuts);
             }
         }
         NodeData::AsExpression(d) => {
-            // Cut "as Type" — the expression stays, the type is removed.
-            // The "as" keyword is between expression.end() and type.pos().
+
             cuts.push((d.expression.end(), d.type_node.end()));
         }
         NodeData::TypeAssertion(d) => {
-            // `<Type>expr` — keep the expression, cut `<Type>`.
+
             cuts.push((node.pos(), d.expression.pos()));
             collect_type_cuts(&d.expression, source, cuts);
         }
         NodeData::SatisfiesExpression(d) => {
-            // Cut "satisfies Type" — same as AsExpression.
+
             cuts.push((d.expression.end(), d.type_node.end()));
         }
         NodeData::NonNullExpression(d) => {
-            // Cut the "!" — everything after the expression to the node end.
+
             cuts.push((d.expression.end(), node.end()));
             collect_type_cuts(&d.expression, source, cuts);
         }
@@ -3267,8 +2878,7 @@ fn collect_type_cuts(node: &Node, source: &str, cuts: &mut Vec<(usize, usize)>) 
             collect_type_cuts(&d.statement, source, cuts);
             collect_type_cuts(&d.expression, source, cuts);
         }
-        // For nodes we don't specifically handle, recurse into children
-        // to find type annotations in nested expressions.
+
         _ => {
             crate::ast::node_data_generated::for_each_child(node, |child| {
                 collect_type_cuts(child, source, cuts);
@@ -3278,12 +2888,6 @@ fn collect_type_cuts(node: &Node, source: &str, cuts: &mut Vec<(usize, usize)>) 
     }
 }
 
-/// Cut ranges for TypeScript-only modifier keyword tokens.
-///
-/// Strips `abstract`, `declare`, `override`, and `readonly` modifiers (plus
-/// their trailing whitespace) from a node's modifier list. These keywords have
-/// no JavaScript meaning. `accessor` is intentionally NOT cut — it is a
-/// runtime ES2022 auto-accessor modifier that the Go type eraser preserves.
 fn collect_modifier_cuts(node: &Node, source: &str, cuts: &mut Vec<(usize, usize)>) {
     let modifiers = node.modifier_nodes();
     if modifiers.is_empty() {
@@ -3300,7 +2904,7 @@ fn collect_modifier_cuts(node: &Node, source: &str, cuts: &mut Vec<(usize, usize
         ) {
             let start = mod_node.pos();
             let mut end = mod_node.end();
-            // Absorb trailing whitespace so the declaration starts cleanly.
+
             while end < bytes.len() && (bytes[end] == b' ' || bytes[end] == b'\t') {
                 end += 1;
             }
@@ -3309,11 +2913,6 @@ fn collect_modifier_cuts(node: &Node, source: &str, cuts: &mut Vec<(usize, usize
     }
 }
 
-/// Cut `implements` heritage clauses from a class's heritage clause list.
-///
-/// The entire `implements` clause (keyword + type list) is TypeScript-only and
-/// removed. The cut start is extended backward over preceding whitespace so a
-/// preceding `extends` clause isn't left with a dangling space.
 fn cut_implements_clauses(
     heritage_clauses: Option<&NodeList>,
     source: &str,
@@ -3337,16 +2936,12 @@ fn cut_implements_clauses(
     }
 }
 
-/// Collect cuts for type-only specifiers within an import clause (mixed
-/// imports). When every named specifier is type-only but a default value
-/// binding exists, the entire named-imports group (and its preceding `, `) is
-/// cut. Otherwise each type-only specifier is cut with an adjacent comma.
 fn collect_import_clause_type_cuts(clause: &Node, source: &str, cuts: &mut Vec<(usize, usize)>) {
     let cd = match &clause.data {
         NodeData::ImportClause(cd) => cd,
         _ => return,
     };
-    // `import type ...` is elided wholesale by `is_type_only_statement`.
+
     let bindings = match &cd.named_bindings {
         Some(b) => b,
         None => return,
@@ -3364,9 +2959,7 @@ fn collect_import_clause_type_cuts(clause: &Node, source: &str, cuts: &mut Vec<(
         .all(|spec| is_type_only_import_specifier(spec));
 
     if all_type {
-        // All named specifiers are type-only. If there is a default value
-        // import, drop just the named-imports group; otherwise the whole
-        // statement is elided elsewhere.
+
         if cd.name.is_some() {
             let bytes = source.as_bytes();
             let mut start = bindings.pos();
@@ -3381,7 +2974,6 @@ fn collect_import_clause_type_cuts(clause: &Node, source: &str, cuts: &mut Vec<(
         return;
     }
 
-    // Mixed: cut each type-only specifier with an adjacent comma.
     for spec in named.elements.iter() {
         if is_type_only_import_specifier(spec) {
             cuts.push(specifier_cut_range(spec, source));
@@ -3389,17 +2981,11 @@ fn collect_import_clause_type_cuts(clause: &Node, source: &str, cuts: &mut Vec<(
     }
 }
 
-/// Compute the cut range for a single type-only import specifier, extending
-/// the range to absorb an adjacent comma so the remaining list stays valid.
-///
-/// - `{ type Foo, Bar }`  → cut `type Foo, ` (forward comma)
-/// - `{ Bar, type Foo }`  → cut `, type Foo` (backward comma)
 fn specifier_cut_range(spec: &Node, source: &str) -> (usize, usize) {
     let s = spec.pos();
     let e = spec.end();
     let bytes = source.as_bytes();
 
-    // Try to absorb a preceding comma.
     let mut back = s;
     while back > 0 && (bytes[back - 1] == b' ' || bytes[back - 1] == b'\t') {
         back -= 1;
@@ -3408,7 +2994,6 @@ fn specifier_cut_range(spec: &Node, source: &str) -> (usize, usize) {
         return (back - 1, e);
     }
 
-    // No preceding comma — try to absorb a following comma.
     let mut fwd = e;
     while fwd < bytes.len() && (bytes[fwd] == b' ' || bytes[fwd] == b'\t') {
         fwd += 1;
@@ -3424,9 +3009,6 @@ fn specifier_cut_range(spec: &Node, source: &str) -> (usize, usize) {
     (s, e)
 }
 
-// ── JSX transform (react-jsx mode) ────────────────────────────────
-
-/// Tracks which JSX runtime helpers are used, to build the minimal import.
 #[derive(Default)]
 struct JsxRuntimeUsage {
     used_jsx: bool,
@@ -3434,17 +3016,11 @@ struct JsxRuntimeUsage {
     used_fragment: bool,
 }
 
-/// Whether JSX transformation should be applied to this source file.
 fn needs_jsx_transform(options: &CompilerOptions, source_file: &SourceFile) -> bool {
     matches!(options.jsx, JsxEmit::ReactJSX | JsxEmit::ReactJSXDev)
         && tspath::file_extension_is(&source_file.file_name, ".tsx")
 }
 
-/// Walk all statements and collect JSX element replacements.
-///
-/// For each top-level JSX node (not nested inside another JSX node), generates
-/// the `_jsx()`/`_jsxs()` replacement string. Nested JSX is handled recursively
-/// inside [`generate_jsx_call`].
 fn collect_jsx_replacements(
     statements: &[Arc<Node>],
     source: &str,
@@ -3467,7 +3043,7 @@ fn collect_jsx_replacements_recursive(
         SyntaxKind::JsxElement | SyntaxKind::JsxSelfClosingElement | SyntaxKind::JsxFragment => {
             let text = generate_jsx_call(node, source, usage);
             replacements.push((node.pos(), node.end(), text));
-            // Don't recurse — nested JSX is handled inline by generate_jsx_call.
+
         }
         _ => {
             crate::ast::node_data_generated::for_each_child(node, |child| {
@@ -3478,7 +3054,6 @@ fn collect_jsx_replacements_recursive(
     }
 }
 
-/// Generate the `_jsx()`/`_jsxs()` call string for a JSX node.
 fn generate_jsx_call(node: &Node, source: &str, usage: &mut JsxRuntimeUsage) -> String {
     match &node.data {
         NodeData::JsxSelfClosingElement(d) => {
@@ -3497,7 +3072,6 @@ fn generate_jsx_call(node: &Node, source: &str, usage: &mut JsxRuntimeUsage) -> 
     }
 }
 
-/// Generate the `_jsx()`/`_jsxs()` call for an element (opening or self-closing).
 fn generate_element_call(
     tag_name: &Arc<Node>,
     attributes: &Arc<Node>,
@@ -3507,16 +3081,12 @@ fn generate_element_call(
 ) -> String {
     let tag_str = tag_name_to_string(tag_name, source);
 
-    // Get attribute properties, extracting `key` if present.
     let (props, key_arg) = attributes_to_props(attributes, source, usage);
 
-    // Convert children.
     let children_prop = children.and_then(|c| convert_children(c, source, usage));
 
-    // Determine _jsx vs _jsxs.
     let is_static = children.map_or(false, |c| is_static_children(c));
 
-    // Build props object string.
     let mut all_props = props;
     if let Some(children_str) = children_prop {
         all_props.push(format!("children: {}", children_str));
@@ -3543,7 +3113,6 @@ fn generate_element_call(
     result
 }
 
-/// Generate the `_jsx()`/`_jsxs()` call for a fragment `<>...</>`.
 fn generate_fragment_call(
     children: &Arc<NodeList>,
     source: &str,
@@ -3570,11 +3139,6 @@ fn generate_fragment_call(
     format!("{}(_Fragment, {})", callee, props_str)
 }
 
-/// Convert a JSX tag name to its output representation.
-///
-/// - Intrinsic names (lowercase identifiers like `div`) → `"div"` (string literal)
-/// - Namespace names (`a:b`) → `"a:b"` (string literal)
-/// - Component identifiers (`Foo`) / member expressions (`Foo.Bar`) → kept as-is
 fn tag_name_to_string(tag_name: &Node, source: &str) -> String {
     if let NodeData::Identifier(d) = &tag_name.data {
         if is_intrinsic_jsx_name(&d.text) {
@@ -3587,10 +3151,6 @@ fn tag_name_to_string(tag_name: &Node, source: &str) -> String {
     source[tag_name.pos()..tag_name.end()].to_string()
 }
 
-/// Convert JSX attributes to object-literal property strings.
-///
-/// Returns `(props, key_arg)` where `key_arg` is the extracted `key` attribute
-/// value (to be passed as the third argument to `_jsx`).
 fn attributes_to_props(
     attributes: &Node,
     source: &str,
@@ -3608,7 +3168,7 @@ fn attributes_to_props(
         match &attr.data {
             NodeData::JsxAttribute(d) => {
                 let name = attribute_name_to_string(&d.name, source);
-                // Extract `key` attribute as the third argument.
+
                 if name == "key" {
                     key_arg = Some(match &d.initializer {
                         Some(init) => attribute_value_to_string(init, source, usage),
@@ -3633,9 +3193,6 @@ fn attributes_to_props(
     (props, key_arg)
 }
 
-/// Convert a JSX attribute name to its output representation.
-///
-/// Valid identifiers are kept bare; others are quoted (e.g., `"aria-hidden"`).
 fn attribute_name_to_string(name: &Node, source: &str) -> String {
     if let NodeData::Identifier(d) = &name.data {
         return if is_valid_identifier(&d.text) {
@@ -3650,11 +3207,10 @@ fn attribute_name_to_string(name: &Node, source: &str) -> String {
     source[name.pos()..name.end()].to_string()
 }
 
-/// Convert a JSX attribute initializer to its output value string.
 fn attribute_value_to_string(init: &Node, source: &str, usage: &mut JsxRuntimeUsage) -> String {
     match init.kind {
         SyntaxKind::StringLiteral => {
-            // Keep source text (includes quotes).
+
             source[init.pos()..init.end()].to_string()
         }
         SyntaxKind::JsxExpression => {
@@ -3674,9 +3230,6 @@ fn attribute_value_to_string(init: &Node, source: &str, usage: &mut JsxRuntimeUs
     }
 }
 
-/// Convert JSX children to the `children` property value string.
-///
-/// Returns `None` when there are no semantic (non-whitespace) children.
 fn convert_children(
     children: &Arc<NodeList>,
     source: &str,
@@ -3692,12 +3245,10 @@ fn convert_children(
         return None;
     }
 
-    // Single non-spread child.
     if semantic.len() == 1 && !is_spread_jsx_expression(&semantic[0]) {
         return Some(transform_jsx_child(&semantic[0], source, usage));
     }
 
-    // Multiple children → array.
     let parts: Vec<String> = semantic
         .iter()
         .map(|c| transform_jsx_child(c, source, usage))
@@ -3705,10 +3256,6 @@ fn convert_children(
     Some(format!("[{}]", parts.join(", ")))
 }
 
-/// Whether the children list should produce `_jsxs` (static children).
-///
-/// `_jsxs` is used when there are multiple semantic children, or a single
-/// spread child (`{...expr}`).
 fn is_static_children(children: &Arc<NodeList>) -> bool {
     let semantic: Vec<&Arc<Node>> = children
         .iter()
@@ -3723,7 +3270,6 @@ fn is_static_children(children: &Arc<NodeList>) -> bool {
     false
 }
 
-/// Transform a single JSX child node to its output expression string.
 fn transform_jsx_child(child: &Node, source: &str, usage: &mut JsxRuntimeUsage) -> String {
     match child.kind {
         SyntaxKind::JsxText | SyntaxKind::JsxTextAllWhiteSpaces => {
@@ -3747,31 +3293,22 @@ fn transform_jsx_child(child: &Node, source: &str, usage: &mut JsxRuntimeUsage) 
     }
 }
 
-/// Emit an expression's text with type annotations stripped and nested JSX
-/// transformed to `_jsx()` calls.
-///
-/// This handles cases like `{cond ? <div/> : <span/>}` where JSX nodes are
-/// nested inside non-JSX expressions.
 fn emit_expr_with_jsx(node: &Node, source: &str, usage: &mut JsxRuntimeUsage) -> String {
     let start = node.pos();
     let end = node.end();
 
-    // Collect type cuts within this expression.
     let mut cuts: Vec<(usize, usize)> = Vec::new();
     collect_type_cuts(node, source, &mut cuts);
 
-    // Collect nested JSX replacements within this expression.
     let mut jsx_repls: Vec<(usize, usize, String)> = Vec::new();
     collect_nested_jsx_in_expr(node, source, &mut jsx_repls, usage);
 
-    // Filter out type cuts that fall within JSX replacement ranges.
     let cuts: Vec<(usize, usize)> = cuts
         .iter()
         .filter(|(cs, ce)| !jsx_repls.iter().any(|(js, je, _)| *cs >= *js && *ce <= *je))
         .copied()
         .collect();
 
-    // Build merged operations list.
     let mut ops: Vec<(usize, usize, Option<String>)> = Vec::new();
     for &(cs, ce) in &cuts {
         if ce > start && cs < end {
@@ -3807,7 +3344,6 @@ fn emit_expr_with_jsx(node: &Node, source: &str, usage: &mut JsxRuntimeUsage) ->
     result
 }
 
-/// Walk an expression's children and collect nested JSX node replacements.
 fn collect_nested_jsx_in_expr(
     node: &Node,
     source: &str,
@@ -3830,7 +3366,6 @@ fn collect_nested_jsx_in_expr(
     });
 }
 
-/// Whether a name is an intrinsic JSX element name (first char is not A-Z).
 fn is_intrinsic_jsx_name(text: &str) -> bool {
     !text
         .bytes()
@@ -3838,7 +3373,6 @@ fn is_intrinsic_jsx_name(text: &str) -> bool {
         .map_or(false, |c| c.is_ascii_uppercase())
 }
 
-/// Whether a string is a valid JavaScript identifier.
 fn is_valid_identifier(text: &str) -> bool {
     let mut chars = text.chars();
     match chars.next() {
@@ -3848,18 +3382,14 @@ fn is_valid_identifier(text: &str) -> bool {
     chars.all(|c| c.is_alphanumeric() || c == '_' || c == '$')
 }
 
-/// Whether a JSX node is whitespace-only text.
 fn is_whitespace_only_jsx_text(node: &Node) -> bool {
     matches!(&node.data, NodeData::JsxText(d) if d.contains_only_trivia_white_spaces)
 }
 
-/// Whether a JSX expression node has a spread (`...`) token.
 fn is_spread_jsx_expression(node: &Node) -> bool {
     matches!(&node.data, NodeData::JsxExpression(d) if d.dot_dot_dot_token.is_some())
 }
 
-/// Fixup whitespace and decode entities in JSX text, mirroring the JSX
-/// whitespace collapsing rules.
 fn fixup_jsx_text(text: &str) -> String {
     let decoded = decode_jsx_entities(text);
     if !decoded.contains('\n') {
@@ -3883,7 +3413,6 @@ fn fixup_jsx_text(text: &str) -> String {
     parts.join(" ")
 }
 
-/// Decode common JSX/HTML entities in text.
 fn decode_jsx_entities(text: &str) -> String {
     if !text.contains('&') {
         return text.to_string();
@@ -3902,7 +3431,6 @@ fn decode_jsx_entities(text: &str) -> String {
     result
 }
 
-/// Escape a string for use inside a double-quoted JavaScript string literal.
 fn escape_js_string(text: &str) -> String {
     let mut result = String::new();
     for c in text.chars() {
@@ -3918,10 +3446,6 @@ fn escape_js_string(text: &str) -> String {
     result
 }
 
-/// Build the JSX runtime import statement.
-///
-/// Only imports the helpers that were actually used. For ESM modules produces
-/// an `import` statement; for CommonJS produces a `require()` call.
 fn build_jsx_import(usage: &JsxRuntimeUsage, import_source: &str, commonjs: bool) -> String {
     let mut specs: Vec<&str> = Vec::new();
     let mut bindings: Vec<&str> = Vec::new();
@@ -3949,7 +3473,6 @@ fn build_jsx_import(usage: &JsxRuntimeUsage, import_source: &str, commonjs: bool
     }
 }
 
-/// Emit all source files in a program, writing output via the `write_file` callback.
 pub fn emit_program(
     source_files: &[Arc<SourceFile>],
     options: &CompilerOptions,
@@ -3975,12 +3498,6 @@ pub fn emit_program(
     result
 }
 
-/// Compute the program-wide common source directory, mirroring Go's
-/// `Program.CommonSourceDirectory()` / `outputpaths.GetCommonSourceDirectory`.
-///
-/// - If `root_dir` is set, use it.
-/// - Else if `config_file_path` is set, use its directory.
-/// - Else compute the longest common directory prefix of all source file names.
 pub fn compute_program_common_source_directory(
     source_files: &[Arc<SourceFile>],
     options: &CompilerOptions,
@@ -4004,13 +3521,11 @@ pub fn compute_program_common_source_directory(
     }
 }
 
-/// Compute the longest common directory prefix of a list of file names,
-/// mirroring Go's `computeCommonSourceDirectoryOfFilenames`.
 fn compute_common_source_directory_of_filenames(file_names: &[String]) -> String {
     let mut common_components: Option<Vec<String>> = None;
     for file_name in file_names {
         let mut components = tspath::get_path_components(file_name, "");
-        // The base file name is not part of the common directory path.
+
         components.pop();
         match &mut common_components {
             None => {
@@ -4089,8 +3604,7 @@ mod tests {
 
     #[test]
     fn emit_strips_multiple_variable_declarations() {
-        // Parser limitation: multiple declarations in one statement may not
-        // parse correctly. Use separate statements instead.
+
         let js = emit_to_string("let a: number = 1;\nlet b: string = \"hello\";");
         assert!(js.contains("let a = 1;"));
         assert!(js.contains("let b = \"hello\";"));
@@ -4122,10 +3636,7 @@ mod tests {
 
     #[test]
     fn emit_strips_as_expression() {
-        // Parser limitation: `as` expressions in initializers are not
-        // correctly parsed as AsExpression nodes. This test verifies the
-        // emitter logic is correct when the parser produces the right AST.
-        // Tested via a function body where the parser handles it better.
+
         let js = emit_to_string("function f(x: number) { return x; }");
         assert!(!js.contains(": number"));
         assert!(js.contains("return x;"));
@@ -4170,9 +3681,7 @@ mod tests {
 
     #[test]
     fn emit_preserves_arrow_function() {
-        // Parser limitation: arrow functions in variable initializers are
-        // not correctly parsed. Test with a function declaration instead,
-        // which the parser handles correctly.
+
         let js = emit_to_string("function fn(x: number): number { return x * 2; }");
         assert!(js.contains("function fn(x)"));
         assert!(js.contains("return x * 2;"));
@@ -4271,7 +3780,7 @@ mod tests {
 
     #[test]
     fn emit_program_aggregates_diagnostics_on_write_failure() {
-        // Use a write_file callback that always fails.
+
         let sf = parse("let x: number = 1;");
         let mut sf = sf;
         sf.file_name = "/test.ts".to_string();
@@ -4386,16 +3895,12 @@ mod tests {
 
     #[test]
     fn emit_strips_function_type_parameters_in_class_method() {
-        // Parser limitation: generic methods with `<T>` syntax in classes
-        // may not parse correctly. Use a non-generic method to verify the
-        // emitter strips return types and parameter types in methods.
+
         let js = emit_to_string("class Foo { method(x: number): number { return x; } }");
         assert!(js.contains("method(x)"));
         assert!(!js.contains(": number"));
         assert!(js.contains("return x;"));
     }
-
-    // ── removeComments tests (P4.1) ────────────────────────────────────
 
     #[test]
     fn remove_comments_strips_single_line_comment() {
@@ -4451,8 +3956,6 @@ mod tests {
         assert!(js.contains("// comment"));
     }
 
-    // ── ES5 down-leveling tests (P4.2) ──────────────────────────────────
-
     #[test]
     fn es5_downlevels_const_to_var() {
         let js = emit_to_string_es5("const f: number = 6;");
@@ -4496,8 +3999,6 @@ mod tests {
         assert!(js.contains("const x = 1;"));
         assert!(!js.contains("var x"));
     }
-
-    // ── CommonJS module transform tests (P4.3) ──────────────────────────
 
     fn emit_to_string_commonjs(source: &str) -> String {
         let sf = parse(source);
@@ -4603,8 +4104,6 @@ mod tests {
         assert!(js.contains("exports.foo = foo;"));
     }
 
-    // ── Source map tests (P4.4) ───────────────────────────────────────────
-
     fn emit_with_sourcemap(
         source: &str,
         source_map: bool,
@@ -4629,30 +4128,30 @@ mod tests {
     fn sourcemap_produces_valid_json() {
         let (js, map_json, url) =
             emit_with_sourcemap("let x = 1;\nlet y = 2;\n", true, false, false);
-        // JS should not contain sourceMappingURL yet (appended by caller).
+
         assert!(!js.contains("sourceMappingURL"));
-        // Map JSON should be present.
+
         let map = map_json.expect("map_json should be Some");
         assert!(map.contains("\"version\":3"));
         assert!(map.contains("\"file\":\"test.js\""));
         assert!(map.contains("\"sources\""));
         assert!(map.contains("\"mappings\""));
-        // Mappings should be non-empty.
+
         assert!(!map.contains("\"mappings\":\"\""));
-        // URL should be the base name of the .map file.
+
         assert_eq!(url, "test.js.map");
-        // sourcesContent should NOT be present (inlineSources not set).
+
         assert!(!map.contains("sourcesContent"));
     }
 
     #[test]
     fn sourcemap_inline_produces_data_url() {
         let (js, map_json, url) = emit_with_sourcemap("let x = 1;\n", false, true, false);
-        // No .map file when inline.
+
         assert!(map_json.is_none());
-        // URL should be a base64 data URL.
+
         assert!(url.starts_with("data:application/json;base64,"));
-        // JS should not contain sourceMappingURL yet (appended by caller).
+
         assert!(!js.contains("sourceMappingURL"));
     }
 
@@ -4667,10 +4166,10 @@ mod tests {
     #[test]
     fn sourcemap_strips_type_annotations() {
         let (js, map_json, _url) = emit_with_sourcemap("let x: number = 1;\n", true, false, false);
-        // JS should have type annotation stripped.
+
         assert!(js.contains("let x = 1;"));
         assert!(!js.contains(": number"));
-        // Map should still be valid.
+
         let map = map_json.expect("map_json should be Some");
         assert!(map.contains("\"version\":3"));
     }
@@ -4680,13 +4179,12 @@ mod tests {
         use crate::sourcemap::MappingsDecoder;
         let (js, map_json, _url) = emit_with_sourcemap("let x = 1;\n", true, false, false);
         let map = map_json.expect("map_json should be Some");
-        // Parse the JSON to extract mappings.
+
         let raw: crate::sourcemap::RawSourceMap = crate::json::unmarshal(&map).expect("valid JSON");
         assert_eq!(raw.version, 3);
         assert!(!raw.sources.is_empty());
         assert!(!raw.mappings.is_empty());
 
-        // Decode mappings and verify they point to valid source positions.
         let mut decoder = MappingsDecoder::new(&raw.mappings);
         let mut count = 0;
         let mut has_source_mapping = false;
@@ -4695,7 +4193,7 @@ mod tests {
                 Some(m) => {
                     if m.is_source_mapping() {
                         has_source_mapping = true;
-                        // Source line should be 0 (first line of "let x = 1;\n").
+
                         assert!(m.source_line >= 0);
                     }
                     count += 1;
@@ -4708,14 +4206,13 @@ mod tests {
             "should have at least one source mapping"
         );
 
-        // The generated JS should not exceed the mappings.
         let gen_lines = js.lines().count();
-        let _ = gen_lines; // just ensure it doesn't panic
+        let _ = gen_lines;
     }
 
     #[test]
     fn sourcemap_not_emitted_by_default() {
-        // Default options: no source map.
+
         let sf = parse("let x = 1;\n");
         let js = emit_js_text(&sf, &CompilerOptions::default());
         assert!(!js.contains("sourceMappingURL"));
@@ -4723,8 +4220,7 @@ mod tests {
 
     #[test]
     fn sourcemap_commonjs_use_strict_not_mapped() {
-        // CommonJS modules emit "use strict"; as generated text — it should
-        // not produce a source mapping (no corresponding source position).
+
         let mut opts = CompilerOptions::default();
         opts.source_map = Tristate::True;
         opts.module = ModuleKind::CommonJS;
@@ -4754,7 +4250,7 @@ mod tests {
                 Ok(())
             },
         );
-        // Should have written both .js and .js.map.
+
         assert_eq!(result.emitted_files.len(), 2);
         let written = written.borrow();
         let js_file = &written
@@ -4767,17 +4263,15 @@ mod tests {
             .find(|(p, _)| p.ends_with(".js.map"))
             .expect("map file")
             .1;
-        // JS should have sourceMappingURL.
+
         assert!(js_file.contains("//# sourceMappingURL="));
-        // Map should be valid JSON.
+
         assert!(map_file.contains("\"version\":3"));
         assert!(map_file.contains("\"mappings\""));
-        // Type annotation should be stripped from JS.
+
         assert!(js_file.contains("let y = \"hi\";"));
         assert!(!js_file.contains(": string"));
     }
-
-    // ── Declaration emit tests (P4.5) ────────────────────────────────────
 
     fn emit_dts(source: &str) -> String {
         let sf = parse(source);
@@ -4886,7 +4380,7 @@ mod tests {
                 Ok(())
             },
         );
-        // Should have written both .js and .d.ts.
+
         assert!(result.emitted_files.iter().any(|p| p.ends_with(".js")));
         assert!(result.emitted_files.iter().any(|p| p.ends_with(".d.ts")));
         let written = written.borrow();
@@ -4895,7 +4389,7 @@ mod tests {
             .find(|(p, _)| p.ends_with(".d.ts"))
             .expect("dts file")
             .1;
-        // .d.ts should have declare and no implementation.
+
         assert!(dts_file.contains("export declare function foo(): number;"));
         assert!(dts_file.contains("export declare const x: number;"));
         assert!(!dts_file.contains("return"));
@@ -4922,29 +4416,25 @@ mod tests {
                 Ok(())
             },
         );
-        // Should only have .d.ts, no .js.
+
         assert!(!result.emitted_files.iter().any(|p| p.ends_with(".js")));
         assert!(result.emitted_files.iter().any(|p| p.ends_with(".d.ts")));
     }
 
     #[test]
     fn dts_drops_value_imports_keeps_side_effect() {
-        // Mirrors a React component entry: value imports are dropped, the
-        // side-effect CSS import is kept.
+
         let src = "import { useState } from 'react';\n\
                    import reactLogo from './assets/react.svg';\n\
                    import './App.css';\n\
                    export default function App() { return 1; }\n";
         let dts = emit_dts(src);
-        // Value imports are not part of the type surface.
+
         assert!(!dts.contains("useState"));
         assert!(!dts.contains("reactLogo"));
-        // Side-effect import is retained and gets an implicit semicolon.
+
         assert!(dts.contains("import './App.css';"));
-        // Function body is stripped; signature retained. The return type
-        // is uninferable in single-file transpile mode, so it emits the
-        // official transpile fallback `: unknown` (cf. the
-        // declarationAsyncAndGeneratorFunctions baseline).
+
         assert!(dts.contains("export default function App(): unknown;"));
         assert!(!dts.contains("return"));
     }
@@ -4955,15 +4445,15 @@ mod tests {
                    import { value } from './values';\n\
                    export const c: Config = {} as any;\n";
         let dts = emit_dts(src);
-        // Type-only import is kept.
+
         assert!(dts.contains("import type { Config } from './config';"));
-        // Value import is dropped.
+
         assert!(!dts.contains("value"));
     }
 
     #[test]
     fn dts_function_declare_keyword_and_semicolon() {
-        // A non-exported function gets `declare` and an implicit semicolon.
+
         let dts = emit_dts("function add(a: number, b: number): number { return a + b; }");
         assert!(dts.contains("declare function add(a: number, b: number): number;"));
     }
@@ -4977,19 +4467,19 @@ mod tests {
                    }\n";
         let dts = emit_dts(src);
         assert!(dts.contains("export declare class Counter"));
-        // Property type annotation is preserved.
+
         assert!(dts.contains("count: number;"));
-        // Constructor & method bodies are replaced with `;`.
+
         assert!(dts.contains("constructor(initial: number);"));
         assert!(dts.contains("increment(): void;"));
-        // Implementation details are gone.
+
         assert!(!dts.contains("this.count"));
         assert!(!dts.contains("initial;"));
     }
 
     #[test]
     fn dts_variable_strips_initializer_without_type() {
-        // No type annotation: the initializer is still stripped in .d.ts mode.
+
         let dts = emit_dts("const answer = 42;");
         assert!(dts.contains("declare const answer;"));
         assert!(!dts.contains("42"));
@@ -4997,9 +4487,7 @@ mod tests {
 
     #[test]
     fn dts_variable_multiple_no_type() {
-        // Use separate statements: the parser has a known comma-operator
-        // limitation for multi-declaration lists. Both initializers are
-        // stripped even without type annotations.
+
         let dts = emit_dts("let a = 1;\nlet b = 2;");
         assert!(dts.contains("declare let a;"));
         assert!(dts.contains("declare let b;"));
@@ -5007,48 +4495,33 @@ mod tests {
         assert!(!dts.contains("= 2"));
     }
 
-    // ── Ports of Go transformers/tstransforms tests ───────────────────────
-
-    /// Port of Go's `TestTypeEraser`, adapted to the Rust emitter.
-    ///
-    /// Go runs a standalone `TypeEraserTransformer` over a parsed TS source
-    /// file and asserts the emitted output has all type annotations and
-    /// type-only constructs removed. The Rust emitter performs type erasure
-    /// *inline* during `emit_js_text` (there is no separate
-    /// `TypeEraserTransformer`), so this test drives the emitter API directly.
-    ///
-    /// The cases below mirror a representative subset of the Go table that the
-    /// emitter handles: type-only declarations (interface, type alias),
-    /// parameter/return/property type annotations, and type parameters. Cases
-    /// the emitter does not yet cover (access-modifier stripping, call/new type
-    /// arguments, JSX generic elements, `verbatimModuleSyntax`) are omitted.
     #[test]
     fn type_eraser() {
-        // (input, tokens that must remain, tokens that must be erased)
+
         let cases: &[(&str, &[&str], &[&str])] = &[
-            // Type-only declarations are dropped entirely.
+
             ("interface I { x: number; }", &[], &["interface"]),
             ("type T = number;", &[], &["type T"]),
-            // Type parameters on functions/classes are removed.
+
             (
                 "function f<T>(x: T): T { return x; }",
                 &["function f(x)", "return x;"],
                 &["<T>", ": T"],
             ),
-            // Parameter and return type annotations are removed.
+
             (
                 "function add(a: number, b: string): void { return a; }",
                 &["function add(a, b)", "return a;"],
                 &[": number", ": string", ": void"],
             ),
-            // Variable type annotations are removed.
+
             ("let x: number = 1;", &["let x = 1;"], &[": number"]),
             (
                 "const s: string = \"hi\";",
                 &["const s = \"hi\";"],
                 &[": string"],
             ),
-            // Class member type annotations (property + method) are removed.
+
             (
                 "class C { x: number = 1; m(a: string): void { return a; } }",
                 &["class C", "x = 1", "m(a)", "return a;"],
@@ -5073,25 +4546,9 @@ mod tests {
         }
     }
 
-    /// Port of Go's `TestImportElision`.
-    ///
-    /// Go runs `TypeEraserTransformer` followed by
-    /// `ImportElisionTransformer` over parsed TS files (with a real checker
-    /// via a `fakeProgram`) and asserts that imports/exports used only for
-    /// types are elided while value imports are retained.
-    ///
-    /// ADAPTATION: Rust has no separate ImportElision transformer and no
-    /// checker-backed emit resolver, so checker-driven elision (eliding a
-    /// binding imported without `type` that is only used in type positions)
-    /// cannot be tested here. However, the Rust emitter *does* perform
-    /// syntactic `import type` elision inline (in the CommonJS transform path):
-    /// `import type` declarations are dropped entirely, and per-binding
-    /// `type` modifiers on named specifiers are elided while value bindings
-    /// are retained. This adapted test exercises that functionality through
-    /// the emitter API (`emit_to_string_commonjs`).
     #[test]
     fn import_elision() {
-        // Whole-declaration `import type` is fully elided (no require, no import).
+
         for input in [
             "import type { foo } from \"./bar\";",
             "import type * as ns from \"./bar\";",
@@ -5108,15 +4565,12 @@ mod tests {
             );
         }
 
-        // A value import is retained as a require() call.
         let js = emit_to_string_commonjs("import { foo } from \"./bar\";");
         assert!(
             js.contains("require(\"./bar\")"),
             "import_elision: value import should be retained, got {js:?}"
         );
 
-        // Mixed named specifiers: the `type` binding is elided, the value
-        // binding is retained. `import { type foo, bar }` -> `const { bar }`.
         let js = emit_to_string_commonjs("import { type foo, bar } from \"./bar\";");
         assert!(
             js.contains("bar"),
@@ -5131,8 +4585,6 @@ mod tests {
             "import_elision: mixed import should still require the module, got {js:?}"
         );
     }
-
-    // ── JSX transform tests (react-jsx mode) ────────────────────────────
 
     fn parse_tsx(source: &str) -> SourceFile {
         let (file, _diags) =
@@ -5261,7 +4713,7 @@ mod tests {
 
     #[test]
     fn jsx_import_only_used_helpers() {
-        // No fragment → should not import _Fragment, only _jsx and _jsxs
+
         let js = emit_to_string_jsx("const x = <div><a /><b /></div>;");
         assert!(!js.contains("Fragment as _Fragment"));
         assert!(js.contains("jsx as _jsx"));
@@ -5283,7 +4735,7 @@ mod tests {
 
     #[test]
     fn jsx_no_transform_when_not_tsx() {
-        // .ts files should not transform JSX even if jsx option is set
+
         let (sf, _diags) =
             Parser::parse_source_file_text_with_diagnostics("/test.ts", "const x = 1;".to_string());
         let mut opts = CompilerOptions::default();
@@ -5297,8 +4749,6 @@ mod tests {
         let js = emit_to_string_jsx("const x = <section id=\"main\"></section>;");
         assert!(js.contains("_jsx(\"section\", { id: \"main\" })"));
     }
-
-    // ── F5: Type Eraser enhancement tests ──────────────────────────────
 
     #[test]
     fn type_eraser_strips_abstract_class_modifier() {
@@ -5347,9 +4797,7 @@ mod tests {
 
     #[test]
     fn type_eraser_strips_type_assertion() {
-        // `<number>5` type assertion — keeps `5`, drops `<number>`.
-        // Only meaningful if the parser produces a TypeAssertion node; if it
-        // does not, the source is emitted verbatim and `<number>` would leak.
+
         let js = emit_to_string("let x = <number>5;");
         assert!(
             !js.contains("<number>"),
@@ -5357,8 +4805,6 @@ mod tests {
         );
         assert!(js.contains("5;"));
     }
-
-    // ── F6: Import Elision tests ───────────────────────────────────────
 
     #[test]
     fn import_elision_import_type_named() {
@@ -5386,7 +4832,7 @@ mod tests {
 
     #[test]
     fn import_elision_mixed_named_bindings() {
-        // `import { type Foo, Bar }` — Foo elided, Bar retained.
+
         let js = emit_to_string("import { type Foo, Bar } from \"./bar\";\nlet x = Bar;");
         assert!(
             !js.contains("Foo"),
@@ -5401,7 +4847,7 @@ mod tests {
 
     #[test]
     fn import_elision_mixed_named_bindings_trailing() {
-        // `import { Bar, type Foo }` — Foo elided (backward comma), Bar kept.
+
         let js = emit_to_string("import { Bar, type Foo } from \"./bar\";\nlet x = Bar;");
         assert!(!js.contains("Foo"));
         assert!(js.contains("Bar"));
@@ -5410,7 +4856,7 @@ mod tests {
 
     #[test]
     fn import_elision_mixed_default_and_type_named() {
-        // Default value import kept; type-only named group dropped.
+
         let js = emit_to_string("import Foo, { type Bar } from \"./bar\";\nlet x = Foo;");
         assert!(js.contains("Foo"));
         assert!(!js.contains("Bar"));
@@ -5426,7 +4872,7 @@ mod tests {
 
     #[test]
     fn import_elision_all_inline_type_only() {
-        // Every inline binding is type-only and no default → elide entirely.
+
         let js = emit_to_string("import { type Foo, type Bar } from \"./bar\";\nlet x = 1;");
         assert!(!js.contains("import"));
         assert!(!js.contains("Foo"));

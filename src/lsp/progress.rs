@@ -1,5 +1,3 @@
-//! Work-done progress reporting (1:1 port of Go's `internal/lsp/progress.go`).
-
 #![allow(dead_code)]
 
 use std::collections::HashMap;
@@ -11,18 +9,12 @@ use std::time::Duration;
 use crate::diagnostics::Message;
 use crate::lsp::lsproto;
 
-/// A single start or finish progress event.
-///
-/// Go: `type progressEvent struct { ... }`.
 struct ProgressEvent {
     message: Message,
     text: String,
     finish: bool,
 }
 
-/// Abstracts the LSP transport operations needed by progress reporting.
-///
-/// Go: `type progressReporter interface { ... }`.
 pub trait ProgressReporter: Send + Sync {
     fn is_done(&self) -> bool;
     fn localize(&self, msg: &Message, args: &[String]) -> String;
@@ -30,9 +22,6 @@ pub trait ProgressReporter: Send + Sync {
     fn send_progress(&self, token: &str, value: lsproto::WorkDoneProgressBeginOrReportOrEnd);
 }
 
-/// Manages LSP WorkDoneProgress indicators for long-running operations.
-///
-/// Go: `type projectLoadingProgress struct { ... }`.
 pub struct ProjectLoadingProgress {
     reporter: Arc<dyn ProgressReporter>,
     tx: mpsc::Sender<ProgressEvent>,
@@ -99,8 +88,7 @@ impl ProjectLoadingProgress {
                         reporter.create_work_done_progress(&token);
                     } else {
                         delay_fired = false;
-                        // Simplified: no timer, just set fired after first event
-                        // In a full port we'd use a timer channel.
+
                     }
                 }
                 if delay_fired {

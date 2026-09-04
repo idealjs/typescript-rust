@@ -1,12 +1,3 @@
-//! Symbol binding, ported from `internal/binder/binder.go`.
-//!
-//! The binder walks the AST and creates symbols for declarations, builds
-//! scopes (symbol tables), and associates identifiers with their declarations.
-//! It also builds the control flow graph for use by the checker.
-//!
-//! In Go, symbols and flow nodes are stored directly on AST nodes. In Rust,
-//! we use side tables (`NodeSymbolMap`) keyed by node ID.
-
 pub mod nameresolver;
 pub mod referenceresolver;
 
@@ -22,13 +13,6 @@ use crate::diagnostics::messages_generated::{
 };
 use std::sync::Arc;
 
-/// The binder.
-///
-/// Mirrors `binder.Binder` in Go.
-/// A flow label (junction point in the control flow graph).
-///
-/// Mirrors `ast.FlowLabel` in Go. Labels are used to collect antecedents
-/// from multiple control flow paths (e.g. the merge point after an if/else).
 #[derive(Debug)]
 struct FlowLabel {
     node: FlowNode,
@@ -41,12 +25,11 @@ impl FlowLabel {
         }
     }
 
-    /// Add an antecedent to this label.
     fn add_antecedent(&mut self, antecedent: Arc<FlowNode>) {
         if antecedent.flags.contains(FlowFlags::UNREACHABLE) {
             return;
         }
-        // Check if already present
+
         for ant in &self.node.antecedents {
             if Arc::ptr_eq(ant, &antecedent) {
                 return;
@@ -55,10 +38,6 @@ impl FlowLabel {
         self.node.antecedents.push(antecedent);
     }
 
-    /// Finish the label, returning the resulting flow node.
-    /// A junction node even for a single antecedent (loop heads gain
-    /// back edges after the body binds — `finish` would snapshot the
-    /// pre-body single-antecedent form).
     fn finish_multi(&self, unreachable: &Arc<FlowNode>) -> Arc<FlowNode> {
         if self.node.antecedents.is_empty() {
             return Arc::clone(unreachable);
@@ -74,8 +53,6 @@ impl FlowLabel {
         })
     }
 
-    /// Append an antecedent to a finished junction (dedup, skip
-    /// unreachable) — the loop back-edge wiring.
     fn push_antecedent(node: &Arc<FlowNode>, ant: Arc<FlowNode>) {
         if ant.flags.contains(FlowFlags::UNREACHABLE) {
             return;
@@ -110,7 +87,6 @@ impl FlowLabel {
     }
 }
 
-/// Active label tracking for labeled statements.
 #[derive(Debug)]
 struct ActiveLabel {
     name: String,
@@ -120,53 +96,40 @@ struct ActiveLabel {
     next: Option<Box<ActiveLabel>>,
 }
 
-/// The binder.
-///
-/// Mirrors `binder.Binder` in Go.
 pub struct Binder {
-    /// Side table mapping nodes to symbols, locals, and flow nodes.
+
     pub symbol_map: NodeSymbolMap,
-    /// The file currently being bound — attached to binder diagnostics
-    /// (TS2300/TS2451 …) so they render with file/position like Go's
-    /// `binder.createDiagnosticForNode`.
+
     current_source_file: Option<Arc<SourceFile>>,
-    /// The current container node (where members/exports go).
+
     container: Option<Arc<Node>>,
-    /// The current block-scoped container (where block-scoped locals go).
+
     block_scope_container: Option<Arc<Node>>,
-    /// The current `this` container — the nearest function-like container
-    /// that can serve as the target of `this.property` assignments in JS
-    /// files. Mirrors Go's `binder.thisContainer`. Used by
-    /// `bind_this_property_assignment` for JS expando binding
-    /// (`this.prop = value` and `Class.prototype.method = fn`).
+
     this_container: Option<Arc<Node>>,
-    /// The current container's parent symbol.
+
     parent_symbol: Option<Arc<Symbol>>,
-    /// The current flow node.
+
     current_flow: Option<Arc<FlowNode>>,
-    /// Symbol count (for diagnostics/stats).
+
     symbol_count: usize,
-    /// Deferred expando assignments (`x.prop = v` / `x[key] = v` where the
-    /// base is an entity name), processed at the end of the file so the
-    /// base's symbol exists regardless of declaration order. Mirrors Go's
-    /// `binder.expandoAssignments` (`binder.go:45`) — (assignment node,
-    /// block-scope container at collection time).
+
     expando_assignments: Vec<(Arc<Node>, Option<Arc<Node>>)>,
-    /// Unreachable flow node.
+
     unreachable_flow: Option<Arc<FlowNode>>,
-    /// Current break target flow label.
+
     current_break_target: Option<Arc<FlowNode>>,
-    /// Current continue target flow label.
+
     current_continue_target: Option<Arc<FlowNode>>,
-    /// Current exception target flow label (for try-catch-finally).
+
     current_exception_target: Option<Arc<FlowNode>>,
-    /// Current return target flow label (for try-finally with IIFE).
+
     current_return_target: Option<Arc<FlowNode>>,
-    /// Active label list (for labeled statements with break/continue).
+
     active_label_list: Option<Box<ActiveLabel>>,
-    /// Whether the current function has explicit return statements.
+
     has_explicit_return: bool,
-    /// Whether there are flow effects (assignments, calls, etc.).
+
     has_flow_effects: bool,
 }
 
@@ -176,24 +139,15 @@ impl Default for Binder {
     }
 }
 
-/// Target symbol table for [`Binder::declare_symbol_into`].
-///
-/// Mirrors the explicit `table` argument Go passes to
-/// `b.declareSymbol(table, parent, node, ...)` in the export/import bind
-/// arms (`bindImportClause`, `bindExportAssignment`,
-/// `bindExportDeclaration`, `bindNamespaceExportDeclaration`).
 enum DeclareTarget {
-    /// `container.Symbol().exports` — holds an owned clone of the container
-    /// symbol so we can mutate its `exports` field through the raw pointer
-    /// without borrowing `self`.
+
     Exports(Arc<Symbol>),
-    /// `ast.GetLocals(container)` — the container node whose
-    /// `symbol_map.locals` entry should receive the symbol.
+
     Locals(Arc<Node>),
 }
 
 impl Binder {
-    /// Create a new binder.
+
     pub fn new() -> Self {
         Self {
             symbol_map: NodeSymbolMap::new(),
@@ -216,30 +170,18 @@ impl Binder {
         }
     }
 
-    /// Bind a source file: walk the AST and create symbols.
-    ///
-    /// Mirrors `binder.BindSourceFile` in Go.
     pub fn bind_source_file(&mut self, file: &Arc<SourceFile>) -> &NodeSymbolMap {
         self.current_source_file = Some(Arc::clone(file));
-        // Populate parent pointers before binding so the binder can locate
-        // enclosing containers (e.g. the `ConditionalType` that owns an
-        // `infer R` type parameter). Mirrors Go's parser, which sets
-        // `Node.Parent` during parsing.
+
         self.set_parent_pointers(&file.node);
 
         let start_flow = Arc::new(FlowNode::new(FlowFlags::START));
         self.current_flow = Some(Arc::clone(&start_flow));
         self.unreachable_flow = Some(Arc::new(FlowNode::new(FlowFlags::UNREACHABLE)));
-        // Set the start flow node on the source file node itself
+
         self.symbol_map
             .set_flow_node(&file.node, Arc::clone(&start_flow));
 
-        // Create a symbol for the source file itself. Go's
-        // bindSourceFileAsExternalModule routes through
-        // addDeclarationToSymbol, so the module symbol carries the
-        // SourceFile as its (value) declaration — downstream consumers
-        // (checker module-member queries) recover the statement list from
-        // the symbol. Mutate before any sharing (single-threaded bind).
         let file_symbol = Arc::new(Symbol::new(
             SymbolFlags::ValueModule,
             file.file_name.clone(),
@@ -255,7 +197,6 @@ impl Binder {
             .set_symbol(&file.node, Arc::clone(&file_symbol));
         self.symbol_count += 1;
 
-        // Set up container context
         let prev_container = self.container.take();
         let prev_block = self.block_scope_container.take();
         let prev_parent = self.parent_symbol.take();
@@ -264,12 +205,8 @@ impl Binder {
         self.block_scope_container = Some(Arc::clone(&file.node));
         self.parent_symbol = Some(file_symbol);
 
-        // Bind children
         self.bind_children(&file.node);
 
-        // Deferred expando assignments (Go bindDeferredExpandoAssignments):
-        // attach `fn.prop = v` property declarations to the function's
-        // symbol now that all locals exist.
         self.process_expando_assignments();
 
         self.container = prev_container;
@@ -279,9 +216,6 @@ impl Binder {
         &self.symbol_map
     }
 
-    /// Walk the AST and set `parent` pointers on every child node.
-    /// Mirrors the parent-pointer population done by Go's parser. Safe
-    /// because the binder runs single-threaded and the AST is a tree.
     fn set_parent_pointers(&mut self, node: &Arc<Node>) {
         use crate::ast::node_data_generated::for_each_child;
         let mut children: Vec<Arc<Node>> = Vec::new();
@@ -299,20 +233,11 @@ impl Binder {
         }
     }
 
-    /// Create a new symbol.
     fn new_symbol(&mut self, flags: SymbolFlags, name: impl Into<String>) -> Arc<Symbol> {
         self.symbol_count += 1;
         Arc::new(Symbol::new(flags, name))
     }
 
-    /// Declare a symbol for a node, adding it to the appropriate symbol table.
-    ///
-    /// Mirrors `binder.declareSymbol` in Go, including declaration merging
-    /// for mergeable kinds (interface+interface, namespace+namespace,
-    /// namespace+function/class, function+function overloads, enum+enum).
-    /// Non-mergeable kinds (TypeAlias, Class, block-scoped variables)
-    /// overwrite the previous symbol on redeclaration — matching the
-    /// previous behavior.
     fn declare_symbol(
         &mut self,
         node: &Arc<Node>,
@@ -321,18 +246,6 @@ impl Binder {
     ) -> Arc<Symbol> {
         let name = self.get_declaration_name(node);
 
-        // `var` hoisting: a function-scoped `var` declared inside a block
-        // (or loop initializer) must be declared in the nearest symbol
-        // container's table — the enclosing function's locals, or the
-        // file/module symbol's members at top level — NOT the block scope
-        // container. Block-scoped routing would hide the variable after the
-        // block (`function f() { { var x = 1; } use(x); }` → TS2304) and
-        // break `var`-`var` merging across sibling blocks. Mirrors Go's
-        // routing of FunctionScopedVariable declarations through
-        // `declareSymbolAndAddToSymbolTable` (which targets `b.container`,
-        // never `b.blockScopeContainer`). When `parent_symbol` is set (a
-        // declaration directly inside a symbol-ful container) the existing
-        // parent-member path below already lands in the right table.
         let var_hoist_container: Option<Arc<Node>> =
             if Self::declaration_is_var(node) && self.parent_symbol.is_none() {
                 self.container
@@ -343,26 +256,11 @@ impl Binder {
                 None
             };
 
-        // Look up an existing symbol with the same name in the target scope.
-        // If it exists and the kinds are mergeable, fold this declaration
-        // into the existing symbol instead of creating a new one.
-        //
-        // Go `declareModuleMember` picks ONE table by export status: a
-        // non-exported module member lives only in THIS declaration's
-        // locals, an exported one in the module symbol's exports (plus a
-        // local face in locals). The lookup must respect the split — an
-        // exported member from one declaration of a merged namespace must
-        // NOT conflict with a non-exported same-name member of another
-        // declaration (`namespace A { export class Point } namespace A {
-        // class Point }` is legal; each block is its own scope).
         let is_module_member_container = self
             .container
             .as_ref()
             .is_some_and(|c| c.kind == SyntaxKind::ModuleDeclaration);
-        // Go `declareModuleMember`'s alias branch: an ExportSpecifier is
-        // ALWAYS an export (`export { x }` names the export face directly);
-        // an `import X = …` alias exports only with an explicit `export`
-        // modifier (`export import X = …`).
+
         let module_member_is_exported = |b: &Self, node: &Arc<Node>| -> bool {
             node.kind == SyntaxKind::ExportSpecifier
                 || b.get_combined_modifier_flags(node)
@@ -380,28 +278,21 @@ impl Binder {
                     .and_then(|l| l.get(&name).cloned())
             };
             if includes.contains(SymbolFlags::Alias) {
-                // Go's declareModuleMember alias branch: an exported alias
-                // (`export { x }` specifier or `export import X = …`) lives
-                // ONLY in exports — it must not merge with a same-name LOCAL
-                // (the local `const x` behind `export { x }` stays its own
-                // symbol); a plain `import X = …` lives only in locals.
+
                 if has_export {
                     parent_sym.exports.get(&name).cloned()
                 } else {
                     locals_hit()
                 }
             } else if has_export {
-                // Exported: Go declares a local face (ExportValue) in locals
-                // and the export symbol in exports — conflicts in either
-                // table are real (locals+exports of one name in one
-                // container are mutually exclusive).
+
                 parent_sym
                     .exports
                     .get(&name)
                     .cloned()
                     .or_else(locals_hit)
             } else {
-                // Non-exported: locals of THIS module declaration only.
+
                 locals_hit()
             }
         } else if let Some(parent_sym) = &self.parent_symbol {
@@ -416,7 +307,7 @@ impl Binder {
                     .symbol_map
                     .symbol_of(hoist)
                     .and_then(|sym| sym.members.get(&name).cloned()),
-                // Function-like containers: hoist into the function's locals.
+
                 _ => {
                     let container_id = hoist.id();
                     self.symbol_map
@@ -435,21 +326,14 @@ impl Binder {
             None
         };
 
-        // Set when `existing` was found but is non-mergeable with this
-        // declaration (see the conflict comment below).
         let mut conflicted = false;
 
         if let Some(existing) = existing {
-            // `var` + `var` merge like Go (a plain `var` redeclaration is
-            // legal and folds into the hoisted symbol). The Rust binder
-            // assigns BlockScopedVariable to every variable, so the generic
-            // merge check would treat this as a conflict.
+
             let var_var_merge = Self::declaration_is_var(node)
                 && existing.flags == SymbolFlags::BlockScopedVariable
                 && existing.declarations.iter().all(|d| Self::declaration_is_var(d));
-            // var + non-instantiated namespace: merge (type-only ns side
-            // coexists with the variable — `namespace m1c { interface I }
-            // + var m1c`). An INSTANTIATED ns + var stays a conflict.
+
             let ns_var_merge = Self::declaration_is_var(node)
                 && existing.flags.contains(SymbolFlags::ValueModule)
                 && existing
@@ -457,17 +341,11 @@ impl Binder {
                     .iter()
                     .filter(|d| d.kind == SyntaxKind::ModuleDeclaration)
                     .all(|ns| !Self::ns_is_instantiated_static(ns));
-            // mirror: namespace arriving AFTER an existing var
+
             let var_ns_merge = node.kind == SyntaxKind::ModuleDeclaration
                 && !Self::ns_is_instantiated_static(node)
                 && existing.flags == SymbolFlags::BlockScopedVariable;
-            // An IMPORT-side alias (import specifier / `import X =`) and an
-            // EXPORT-specifier alias of the same name are TWO symbols in Go
-            // (locals vs exports tables). Our file-level routing puts both
-            // in the members table — fold them instead of reporting the
-            // alias+alias TS2300 (`import type { R } from "pkg"` +
-            // `export type { R } from "pkg"` is legal). Two specifiers of
-            // the SAME side still conflict below.
+
             let import_export_alias_merge = includes.contains(SymbolFlags::Alias)
                 && existing.flags.contains(SymbolFlags::Alias)
                 && {
@@ -483,30 +361,19 @@ impl Binder {
                 || var_ns_merge
                 || import_export_alias_merge
             {
-                // TS2434: an INSTANTIATED namespace declaration merging
-                // with a function/class must come AFTER it. The new
-                // declaration is a namespace that precedes every existing
-                // function/class declaration of the symbol, and the
-                // namespace body holds values (var/let/const/function/
-                // class/enum — Go `isInstantiatedNamespace`).
-                // Merge: add this declaration to the existing symbol, union
-                // the flags, and map the node to the existing symbol.
+
                 let existing_mut = Arc::as_ptr(&existing) as *mut Symbol;
                 unsafe {
                     (*existing_mut).declarations.push(Arc::clone(node));
                     (*existing_mut).flags |= includes;
-                    // For function overloads, only the first declaration
-                    // carries the VALUE flag (already set). For other
-                    // merges (interface/namespace), VALUE isn't involved.
+
                     if (*existing_mut).value_declaration.is_none()
                         && includes.intersects(SymbolFlags::VALUE)
                     {
                         (*existing_mut).value_declaration = Some(Arc::clone(node));
                     }
                 }
-                                // A namespace merging with a class/function that declares
-                // `var prototype` collides with the binder's automatic
-                // `prototype` member (TS2300) — either declaration order.
+
                 let ns_proto_loc: Option<crate::core::text::TextRange> = (|| {
                     let scan = |n: &Arc<Node>| -> Option<crate::core::text::TextRange> {
                         if n.kind != SyntaxKind::ModuleDeclaration {
@@ -572,8 +439,7 @@ impl Binder {
                         ));
                     }
                 }
-                // enum+enum merge with an overlapping MEMBER name:
-                // TS2300 on both declarations' member names.
+
                 if node.kind == SyntaxKind::EnumDeclaration
                     && existing.flags.intersects(SymbolFlags::ENUM)
                 {
@@ -621,10 +487,7 @@ impl Binder {
                     }
                 }
 self.symbol_map.set_symbol(node, Arc::clone(&existing));
-                // A merged-in EXPORTED declaration establishes the export
-                // face even when the first declaration didn't (the late
-                // `export_symbol` block below is skipped by this early
-                // return).
+
                 if let Some(container) = &self.container {
                     let is_module_container = container.kind == SyntaxKind::SourceFile
                         || container.kind == SyntaxKind::ModuleDeclaration;
@@ -641,50 +504,13 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
                 }
                 return existing;
             }
-            // Non-mergeable redeclaration: fall through to create a new
-            // symbol for this declaration. Go's `declareSymbolEx` does NOT
-            // write the replacement back into the symbol table on conflict,
-            // so a later same-name declaration re-conflicts with the
-            // ORIGINAL symbol and reports again (e.g. `var foo; function
-            // foo(){} function foo(){}` reports TS2300 on the third
-            // declaration too) — mirrored by the `conflicted` flag set in
-            // the report paths below. Quiet fall-throughs (Rust models
-            // `var` + `var` as non-mergeable where Go merges them) still
-            // replace the table entry.
-            // Determine the kind of conflict and report the appropriate
-            // diagnostic.
-            //
-            // Skip anonymous (empty-name) declarations: they are internal
-            // symbols (e.g. interface/object members whose names are resolved
-            // structurally by the checker) and must not trigger duplicate
-            // diagnostics. Mirrors Go, whose `getDeclarationName` always
-            // produces a real name for user-named declarations.
-            //
-            // TS2451 "Cannot redeclare block-scoped variable" fires when a
-            // block-scoped variable (let/const) collides with another
-            // block-scoped variable. The binder assigns `BlockScopedVariable`
-            // to every variable declaration (including `var`), so we
-            // additionally verify the new declaration's keyword is `let`/`const`
-            // to avoid a false positive on `var x; var x;`. A plain `var`
-            // redeclaration is legal (function-scoped, may be redeclared).
-            //
-            // TS2300 "Duplicate identifier" fires for any other non-mergeable
-            // redeclaration: e.g. two imports of the same name, a class and a
-            // function with the same name, two classes, two type aliases, etc.
-            // A function-scoped `var` may coexist with a function or class
-            // declaration (e.g. `var x; function x() {}` is allowed), so
-            // TS2300 is suppressed in that case. Mirrors Go's `declareSymbol`.
+
             let both_block_scoped_var = existing.flags.contains(SymbolFlags::BlockScopedVariable)
                 && includes.contains(SymbolFlags::BlockScopedVariable);
             if !name.is_empty() {
-                // Go reports the conflict on EVERY declaration of the
-                // existing symbol (name node, falling back to the node) and
-                // then on the new declaration's name — so `class C{} class
-                // C{}` yields two TS2300s, one per declaration.
+
                 let report_all = |b: &mut Self, message: &'static crate::diagnostics::Message| {
-                    // Identical duplicates (the middle declarations of a
-                    // triple `let x` redeclare) collapse — Go's diagnostics
-                    // are deduplicated before reporting.
+
                     let push = |b: &mut Self, loc: crate::core::text::TextRange| {
                         if b
                             .symbol_map
@@ -716,23 +542,12 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
                             self,
                             &CANNOT_REDECLARE_BLOCK_SCOPED_VARIABLE_0,
                         );
-                        // A real Go conflict (block-scoped redeclare): keep
-                        // the original table entry so later same-name
-                        // declarations re-conflict (see `conflicted`).
+
                         conflicted = true;
                     }
-                    // else: `var` + `var` — redeclaration is legal, no error.
-                    // (Rust models var+var as non-mergeable; Go merges them,
-                    // so the table replacement below must still happen.)
+
                 } else {
-                    // TS2300 is a *scope-level* duplicate-identifier check.
-                    // Member-level declarations (parameters, properties,
-                    // accessors, enum members, type parameters) live in their
-                    // container's symbol table and — for merged declarations
-                    // such as function overloads — legitimately reuse a name
-                    // across distinct declarations. Exclude those kinds so we
-                    // only report genuine scope-level duplicates (two imports,
-                    // a class and a function, two classes, etc.).
+
                     let member_flags = SymbolFlags::Property
                         .union(SymbolFlags::Method)
                         .union(SymbolFlags::GetAccessor)
@@ -742,18 +557,7 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
                         .union(SymbolFlags::TypeParameter)
                         .union(SymbolFlags::Constructor)
                         .union(SymbolFlags::Signature);
-                    // `export as namespace Foo` (NamespaceExportDeclaration)
-                    // declares a UMD global alias that intentionally coexists
-                    // with a same-named `declare namespace Foo`. Go's binder
-                    // stores such aliases in a separate `GlobalExports` table,
-                    // so they never participate in the duplicate-identifier
-                    // check; since we lack that table and store the alias in
-                    // the container's exports, suppress the false-positive
-                    // TS2300 when either side is a namespace export
-                    // declaration (the common `@types/react` pattern:
-                    //   export as namespace React;
-                    //   declare namespace React { ... }
-                    // ).
+
                     let involves_namespace_export = node.kind
                         == SyntaxKind::NamespaceExportDeclaration
                         || existing
@@ -764,8 +568,7 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
                         || existing.flags.intersects(member_flags)
                         || includes.intersects(member_flags)
                     {
-                        // Member-level collision or UMD global alias — not a
-                        // scope-level duplicate.
+
                     } else if existing.flags.intersects(SymbolFlags::ENUM)
                         != includes.intersects(SymbolFlags::ENUM)
                         && (existing.flags
@@ -773,8 +576,7 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
                             || includes
                                 .intersects(SymbolFlags::ENUM | SymbolFlags::Class))
                     {
-                        // class + enum: TS2567 (enum merge restriction),
-                        // reported on EVERY declaration like the 2300 path.
+
                         report_all(
                             self,
                             &crate::diagnostics::messages_generated::
@@ -782,10 +584,7 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
                         );
                         conflicted = true;
                     } else {
-                        // Current Go semantics: `var x` + `function x` /
-                        // `class x` CONFLICT (TS2300 on every declaration —
-                        // verified against typescript-go; the old TS5
-                        // coexistence no longer holds).
+
                         report_all(self, &DUPLICATE_IDENTIFIER_0);
                         conflicted = true;
                     }
@@ -795,16 +594,11 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
 
         let symbol = self.new_symbol(includes, name.clone());
 
-        // Record this declaration node on the symbol. `Symbol` is behind an
-        // `Arc`; the binder runs single-threaded before any checker access, so
-        // we mutate through the raw pointer (same pattern used for `members`
-        // below). This lets the checker recover the AST declaration from a
-        // symbol (e.g. resolving a type alias's declared type).
         {
             let symbol_mut = Arc::as_ptr(&symbol) as *mut Symbol;
             unsafe {
                 (*symbol_mut).declarations.push(Arc::clone(node));
-                // The first declaration is also the value declaration.
+
                 if (*symbol_mut).value_declaration.is_none()
                     && includes.intersects(SymbolFlags::VALUE)
                 {
@@ -813,42 +607,11 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
             }
         }
 
-        // Add to appropriate symbol table based on container kind.
-        // Mirrors Go's `declareSymbolAndAddToSymbolTable`:
-        // - ModuleDeclaration: exported members go to `exports`, non-exported
-        //   to `locals` (so they're visible inside the namespace but not via
-        //   `N.x` from outside).
-        // - ClassDeclaration/InterfaceDeclaration/etc.: members go to
-        // `members`.
-        // - Block-scoped containers: locals.
-        //
-        // Skipped entirely on conflict (see `conflicted` above): Go leaves
-        // the original symbol in the table so later redeclarations of the
-        // same name re-conflict against it.
         if !conflicted && let Some(container) = &self.container {
             if container.kind == SyntaxKind::ModuleDeclaration {
-                // Namespace member: exported → exports, non-exported → locals.
-                // Use combined modifier flags to handle `export const x`
-                // where the `Export` modifier is on the parent
-                // VariableStatement, not the VariableDeclaration itself.
-                //
-                // NOTE Go's implicit export (`setExportContextFlag`: an
-                // ambient container with no explicit export declarations
-                // exports everything) is NOT applied when routing here —
-                // routing ambient members into `exports` perturbs the
-                // checker's lazily-resolved lib types. Ambient visibility
-                // from outside is handled by the checker consulting the
-                // namespace's locals for ambient containers (see
-                // `ambient_namespace_locals_visible`).
-                //
-                // A nested `namespace A.B` declares B inside A — the PARSER
-                // synthesizes an export modifier on every dotted segment
-                // (Go's parseModuleDeclaration behavior), so the plain
-                // modifier check covers it. ExportSpecifiers are always
-                // exports (Go's declareModuleMember alias branch).
+
                 let has_export = module_member_is_exported(self, node);
-                // Exported ALIASES have no local face (Go's alias branch
-                // declares straight into exports).
+
                 let alias_no_local = has_export
                     && matches!(
                         node.kind,
@@ -863,8 +626,7 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
                                 .insert(name.clone(), Arc::clone(&symbol));
                         }
                     }
-                    // Also add to locals so the member is visible inside
-                    // the namespace body by its local name.
+
                     if has_locals(container.kind) && !alias_no_local {
                         let locals = self
                             .symbol_map
@@ -882,7 +644,7 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
                     locals.insert(name.clone(), Arc::clone(&symbol));
                 }
             } else if let Some(parent_sym) = &self.parent_symbol {
-                // Class/Interface/Object members.
+
                 let parent_sym_mut = Arc::as_ptr(parent_sym) as *mut Symbol;
                 unsafe {
                     (*parent_sym_mut)
@@ -890,10 +652,7 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
                         .insert(name.clone(), Arc::clone(&symbol));
                 }
             } else if let Some(hoist) = &var_hoist_container {
-                // `var` hoisting (see `var_hoist_container` above): declare in
-                // the nearest symbol container's table — the enclosing
-                // function's locals, or the file/module symbol's members at
-                // top level — instead of the block scope container.
+
                 match hoist.kind {
                     SyntaxKind::SourceFile | SyntaxKind::ModuleDeclaration => {
                         if let Some(sym) = self.symbol_map.symbol_of(hoist) {
@@ -915,7 +674,7 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
                     }
                 }
             } else if let Some(block_container) = &self.block_scope_container {
-                // Add to locals of the block-scoped container
+
                 let container_id = block_container.id();
                 let locals = self
                     .symbol_map
@@ -926,16 +685,6 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
             }
         }
 
-        // Exported module/namespace members get an `export_symbol` link so
-        // the checker's `follow_alias` / `get_export_symbol_of_value_symbol_if_exported`
-        // can recover the export face of the symbol. Mirrors Go's
-        // `declareModuleMember` two-symbol pattern, using the safer
-        // self-reference approach: the same symbol is registered in both
-        // the locals/members and exports tables, and `export_symbol` points
-        // back to itself. (The full Go pattern uses two distinct symbols —
-        // a local with `ExportValue` and an export with full flags — but
-        // that risks breaking existing tests, so we keep a single symbol
-        // and just establish the link.)
         if let Some(container) = &self.container {
             let is_module_container = container.kind == SyntaxKind::SourceFile
                 || container.kind == SyntaxKind::ModuleDeclaration;
@@ -951,23 +700,11 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
             }
         }
 
-        // Associate the symbol with the node
         self.symbol_map.set_symbol(node, Arc::clone(&symbol));
-
-        // Set the value declaration if this is a value declaration
-        // (in the full Go implementation, this is more nuanced)
 
         symbol
     }
 
-    /// Declare a symbol and add it to an explicit target symbol table,
-    /// applying the same merge semantics as [`Binder::declare_symbol`].
-    ///
-    /// Used by the export/import bind arms that must target a specific table
-    /// (the container's `exports` or `locals`) rather than the table
-    /// [`Binder::declare_symbol`] routes to based on container kind.
-    ///
-    /// Mirrors Go's `b.declareSymbol(table, parent, node, flags, excludes)`.
     fn declare_symbol_into(
         &mut self,
         node: &Arc<Node>,
@@ -977,7 +714,6 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
     ) -> Arc<Symbol> {
         let name = self.get_declaration_name(node);
 
-        // Look up an existing symbol with the same name in the target table.
         let existing: Option<Arc<Symbol>> = match &target {
             DeclareTarget::Exports(parent_sym) => parent_sym.exports.get(&name).cloned(),
             DeclareTarget::Locals(container) => self
@@ -1002,8 +738,7 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
                 self.symbol_map.set_symbol(node, Arc::clone(&existing));
                 return existing;
             }
-            // Non-mergeable redeclaration: fall through to create a new
-            // symbol (overwrites the previous entry).
+
         }
 
         let symbol = self.new_symbol(includes, name.clone());
@@ -1026,9 +761,7 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
                     (*parent_mut)
                         .exports
                         .insert(name.clone(), Arc::clone(&symbol));
-                    // Set the export symbol's parent to the container symbol,
-                    // mirroring Go which passes `container.Symbol()` as the
-                    // parent argument to `declareSymbol`.
+
                     let symbol_mut = Arc::as_ptr(&symbol) as *mut Symbol;
                     (*symbol_mut).parent = Some(Arc::clone(parent_sym));
                 }
@@ -1047,24 +780,6 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
         symbol
     }
 
-    /// Whether a new declaration with `new_flags` can be merged into an
-    /// existing symbol with `existing_flags`. Mirrors the merge rules in
-    /// Go's `binder.declareSymbol` (`canMergeSymbol`).
-    ///
-    /// Mergeable combinations:
-    /// - interface + interface
-    /// - namespace + namespace (ValueModule + ValueModule)
-    /// - namespace + function/class (ValueModule + Function/Class) and vice
-    ///   versa
-    /// - function + function (overloads)
-    /// - enum + enum
-    /// - namespace + enum (ValueModule + RegularEnum/ConstEnum)
-    ///
-    /// Non-mergeable: TypeAlias (redefinition error), Class + Class
-    /// (duplicate), block-scoped variable redeclarations.
-
-
-    /// Static form of Go `isInstantiatedNamespace` for merge decisions.
     fn ns_is_instantiated_static(ns: &Arc<Node>) -> bool {
         let NodeData::ModuleDeclaration(md) = &ns.data else {
             return false;
@@ -1087,42 +802,25 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
         found
     }
     fn can_merge_symbols(&self, existing_flags: SymbolFlags, new_flags: SymbolFlags) -> bool {
-        // Go `AliasExcludes = Alias`: an alias merges with EVERY other kind
-        // (no other excludes table contains Alias) — only alias+alias
-        // conflicts. `export import A = a.A` + `export namespace A {}` is
-        // one symbol; `import Y = X.Y` + `var Y` merges and the checker
-        // reports the meaning collision as TS2440 (checkAliasSymbol).
+
         let existing_alias = existing_flags.contains(SymbolFlags::Alias);
         let new_alias = new_flags.contains(SymbolFlags::Alias);
         if existing_alias || new_alias {
             return !(existing_alias && new_alias);
         }
-        // Interface + Interface (and interface + class, which is allowed in
-        // TS but not yet fully handled by the checker — still merge so the
-        // interface members are visible).
+
         if existing_flags.contains(SymbolFlags::Interface)
             && new_flags.contains(SymbolFlags::Interface)
         {
             return true;
         }
-        // Type + Value coexistence: an interface or type alias (type-only)
-        // can coexist with a variable/function (value-only) of the same
-        // name. This is how lib files declare `interface Object` alongside
-        // `declare var Object: ObjectConstructor;`, or `type NodeFilter`
-        // alongside `declare var NodeFilter: { ... }`.
-        // Go's excludes table: InterfaceExcludes = Type & ^(Interface |
-        // Class) — an interface coexists with ANY value-side symbol
-        // including classes (`declare class X` + `interface X`).
-        // TypeAliasExcludes = Type — a type alias coexists with
-        // value-side symbols EXCEPT classes (`class X` + `type X` is
-        // TS2300, but `type T` + `var T` / `function T` merge).
+
         let existing_interface = existing_flags.contains(SymbolFlags::Interface);
         let new_interface = new_flags.contains(SymbolFlags::Interface);
         let existing_type_alias = existing_flags.contains(SymbolFlags::TypeAlias);
         let new_type_alias = new_flags.contains(SymbolFlags::TypeAlias);
         let class_side = SymbolFlags::Class;
-        // An interface never coexists with an ENUM (TS2567 in the conflict
-        // path below) — exclude it from the type+value coexistence rule.
+
         let enum_side =
             SymbolFlags::ENUM;
         if (existing_flags.intersects(enum_side) && new_interface)
@@ -1137,11 +835,7 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
         {
             return true;
         }
-        // Class + Function merge (`declare class X` + `function X`) — Go's
-        // ClassExcludes/FunctionExcludes re-enable Function/Class. Cross-kind
-        // only: Class + Class is TS2300 (Class stays excluded), and the
-        // checker reports TS2813/TS2814 when a non-ambient class meets
-        // function declarations.
+
         let existing_class = existing_flags.contains(SymbolFlags::Class);
         let new_class = new_flags.contains(SymbolFlags::Class);
         let existing_fn = existing_flags.contains(SymbolFlags::Function);
@@ -1149,8 +843,7 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
         if (existing_class && new_fn) || (existing_fn && new_class) {
             return true;
         }
-        // Namespace merging: a ValueModule can merge with another ValueModule,
-        // a Function, a Class, or an Enum.
+
         let existing_ns = existing_flags.contains(SymbolFlags::ValueModule);
         let new_ns = new_flags.contains(SymbolFlags::ValueModule);
         if existing_ns || new_ns {
@@ -1164,15 +857,7 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
             } else {
                 new_flags
             };
-            // The non-namespace side must be one of: ValueModule,
-            // Function, Class, RegularEnum, ConstEnum, Interface
-            // (`namespace B` + `interface B` merge into one symbol, like
-            // Go's binder). A non-instantiated (type-only) namespace ALSO
-            // merges with a variable (Go: `namespace m1c { interface I }`
-            // + `var m1c`); an instantiated one conflicts (TS2300).
-            // The var side of THIS merge is checked by the caller via
-            // `ns_var_merge_ok` — the value-side declaration must see the
-            // namespace's declarations to test instantiation.
+
             let can_merge_with_ns = other_existing.contains(SymbolFlags::ValueModule)
                 || other_existing.contains(SymbolFlags::Function)
                 || other_existing.contains(SymbolFlags::Class)
@@ -1183,13 +868,13 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
                 return true;
             }
         }
-        // Function overloads: Function + Function.
+
         if existing_flags.contains(SymbolFlags::Function)
             && new_flags.contains(SymbolFlags::Function)
         {
             return true;
         }
-        // Enum + Enum.
+
         if (existing_flags.contains(SymbolFlags::RegularEnum)
             || existing_flags.contains(SymbolFlags::ConstEnum))
             && (new_flags.contains(SymbolFlags::RegularEnum)
@@ -1197,14 +882,7 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
         {
             return true;
         }
-        // Type parameter + value-side coexistence: a class/interface type
-        // parameter is a TYPE-side symbol (Go/TS `TypeParameterExcludes =
-        // Type & ~TypeParameter` — it only excludes other TYPE symbols), so
-        // it merges with VALUE-side members of the same name
-        // (`class Test<T> { private get T(): T }` — declarationEmitType
-        // ParamMergedWithPrivate). Without the merge the getter REPLACED
-        // the type parameter in the container's members and every `T`
-        // reference in the class body stopped resolving (TS2304).
+
         let type_param_existing =
             existing_flags.contains(SymbolFlags::TypeParameter);
         let type_param_new = new_flags.contains(SymbolFlags::TypeParameter);
@@ -1216,12 +894,6 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
         false
     }
 
-    /// Whether `node` is a `let`/`const` (block-scoped) variable declaration,
-    /// as opposed to a function-scoped `var`. Used by the TS2451 redeclaration
-    /// check: the binder assigns `BlockScopedVariable` to every variable
-    /// declaration, so the keyword must be inspected explicitly. Non-variable
-    /// declarations (e.g. binding elements) are conservatively treated as
-    /// block-scoped. Mirrors the checker's `is_let_or_const_declaration`.
     fn is_let_or_const_declaration(node: &Arc<Node>) -> bool {
         if node.kind == SyntaxKind::VariableDeclaration {
             if let Some(parent) = node.parent.as_ref() {
@@ -1233,10 +905,6 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
         true
     }
 
-    /// Whether a container (SourceFile / ModuleDeclaration) has any explicit
-    /// export statements (`export ...` / `export = ...`). Go's
-    /// `hasExportDeclarations`: an ambient container WITHOUT such statements
-    /// is an implicit-export context (everything inside is exported).
     pub(crate) fn has_export_declarations(container: &Arc<Node>) -> bool {
         let statements: &[Arc<Node>] = match &container.data {
             crate::ast::NodeData::SourceFile(sf) => &sf.statements.nodes,
@@ -1257,11 +925,6 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
         })
     }
 
-    /// Whether `node` is a function-scoped `var` declaration (as opposed to a
-    /// block-scoped `let`/`const`). The inverse of
-    /// [`Self::is_let_or_const_declaration`] for actual variable declarations;
-    /// returns `false` for non-variable nodes. Used by the TS2300 check to
-    /// allow a `var` to coexist with a function/class declaration.
     #[allow(dead_code)]
     fn is_var_declaration(node: &Arc<Node>) -> bool {
         if node.kind == SyntaxKind::VariableDeclaration {
@@ -1274,14 +937,6 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
         false
     }
 
-    /// Whether `node` is a function-scoped (`var`) variable declaration or a
-    /// binding element inside one (`var [{x, y:z}] = …`). Walks binding
-    /// elements up through their binding pattern to the enclosing
-    /// `VariableDeclaration`'s list keyword. Binding elements under other
-    /// declarations (e.g. `catch ({e})` parameters) bottom out at a
-    /// non-variable ancestor and count as block-scoped. Mirrors Go's
-    /// `ast.IsBlockOrCatchScoped` (inverted, for variable contexts) which
-    /// routes `var` bindings through `declareSymbolAndAddToSymbolTable`.
     fn declaration_is_var(node: &Arc<Node>) -> bool {
         let mut current = node;
         loop {
@@ -1307,9 +962,6 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
         }
     }
 
-    /// Whether an existing symbol was declared as a function-scoped `var`.
-    /// Inspects the symbol's value declaration (falling back to its first
-    /// declaration) to recover the variable keyword.
     #[allow(dead_code)]
     fn symbol_is_var_declaration(symbol: &Arc<Symbol>) -> bool {
         let decl: Option<&Arc<Node>> = symbol
@@ -1322,12 +974,6 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
         }
     }
 
-    /// Get the combined modifier flags for a node, walking up the
-    /// variable-declaration chain (VariableDeclaration →
-    /// VariableDeclarationList → VariableStatement) to collect `export`
-    /// and other modifiers from parent nodes. Mirrors Go's
-    /// `ast.GetCombinedModifierFlags`. Requires parent pointers to be
-    /// populated (see `set_parent_pointers`).
     fn get_combined_modifier_flags(&self, node: &Arc<Node>) -> ModifierFlags {
         let mut flags = node.syntactic_modifier_flags();
         if node.kind == SyntaxKind::VariableDeclaration {
@@ -1345,7 +991,6 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
         flags
     }
 
-    /// Get the name of a declaration node.
     fn get_declaration_name(&self, node: &Arc<Node>) -> String {
         match &node.data {
             NodeData::VariableDeclaration(data) => self.node_text(&data.name),
@@ -1381,9 +1026,7 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
                 .as_ref()
                 .map(|n| self.node_text(n))
                 .unwrap_or_default(),
-            // `import { default as Foo }` binds the LOCAL name (`Foo`);
-            // the property name (`default`) is what's imported from the
-            // module.
+
             NodeData::ImportSpecifier(data) => self.node_text(&data.name),
             NodeData::ImportClause(data) => data.name.as_ref().map_or_else(
                 || {
@@ -1401,17 +1044,13 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
             NodeData::GetAccessorDeclaration(data) => self.node_text(&data.name),
             NodeData::SetAccessorDeclaration(data) => self.node_text(&data.name),
             NodeData::TypeParameterDeclaration(data) => self.node_text(&data.name),
-            // `import X = ...` / `import * as X from ...` — the alias binds
-            // under its own name (Go's getDeclarationName reads Name()).
+
             NodeData::ImportEqualsDeclaration(data) => self.node_text(&data.name),
             NodeData::NamespaceImport(data) => self.node_text(&data.name),
-            // `export { local as exported }` — the exports-table symbol is
-            // keyed by the EXPORTED name; `property_name` (the local
-            // target) is resolved separately by the checker.
+
             NodeData::ExportSpecifier(data) => self.node_text(&data.name),
             NodeData::Identifier(data) => data.text.clone(),
-            // `export default <expr>` → "default"; `export = <expr>` → "export=".
-            // Mirrors Go's `getDeclarationName` for `KindExportAssignment`.
+
             NodeData::ExportAssignment(data) => {
                 if data.is_export_equals {
                     INTERNAL_SYMBOL_NAME_EXPORT_EQUALS.to_string()
@@ -1419,28 +1058,19 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
                     INTERNAL_SYMBOL_NAME_DEFAULT.to_string()
                 }
             }
-            // `export * from "mod"` — the export star declaration node is
-            // named with the internal `export-star` marker.
+
             NodeData::ExportDeclaration(_) => INTERNAL_SYMBOL_NAME_EXPORT_STAR.to_string(),
-            // `export * as ns from "mod"` — the `* as ns` clause (and the
-            // standalone `NamespaceExportDeclaration` form) are named after
-            // their identifier.
+
             NodeData::NamespaceExport(data) => self.node_text(&data.name),
             NodeData::NamespaceExportDeclaration(data) => self.node_text(&data.name),
             _ => String::new(),
         }
     }
 
-    /// Get the text of a node (for name extraction).
     fn node_text(&self, node: &Arc<Node>) -> String {
         match &node.data {
             NodeData::Identifier(data) => data.text.clone(),
-            // Private element names (`#a`) key the class members table by
-            // the full text INCLUDING the `#` (Go getDeclarationName routes
-            // private identifiers to a per-class mangled key; the raw text
-            // plays that role here since each class owns its table).
-            // Without this arm every private member bound under "" and
-            // collided (TS18013 for in-class `this.#a` access).
+
             NodeData::PrivateIdentifier(data) => data.text.clone(),
             NodeData::StringLiteral(data) => data.text.clone(),
             NodeData::NumericLiteral(data) => data.text.clone(),
@@ -1450,22 +1080,15 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
         }
     }
 
-    // ─────────────────────────────────────────────────────────────────────
-    // Flow graph helper methods
-    // ─────────────────────────────────────────────────────────────────────
-
-    /// Get the unreachable flow node.
     fn unreachable_flow(&self) -> Arc<FlowNode> {
         Arc::clone(self.unreachable_flow.as_ref().unwrap())
     }
 
-    /// Create a new flow node with the given flags.
     #[allow(dead_code)]
     fn new_flow_node(&self, flags: FlowFlags) -> FlowNode {
         FlowNode::new(flags)
     }
 
-    /// Create a flow condition node (true or false branch).
     fn create_flow_condition(
         &mut self,
         flags: FlowFlags,
@@ -1487,7 +1110,6 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
         })
     }
 
-    /// Create a flow assignment node.
     fn create_flow_assignment(
         &mut self,
         antecedent: &Arc<FlowNode>,
@@ -1508,7 +1130,6 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
         })
     }
 
-    /// Create a flow call node.
     fn create_flow_call(&mut self, antecedent: &Arc<FlowNode>, node: &Arc<Node>) -> Arc<FlowNode> {
         if antecedent.flags.contains(FlowFlags::UNREACHABLE) {
             return Arc::clone(antecedent);
@@ -1525,7 +1146,6 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
         })
     }
 
-    /// Create a flow mutation node (for array mutations like push, unshift, idx assignment).
     fn create_flow_mutation(
         &mut self,
         antecedent: &Arc<FlowNode>,
@@ -1545,17 +1165,15 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
             clause_range: None,
             reduce_target: None,
         });
-        // Add to exception target if we're inside a try block
+
         if let Some(target) = &self.current_exception_target {
             self.add_antecedent_to_flow(target, &result);
         }
         result
     }
 
-    /// Mark a flow node as referenced (sets Referenced flag, then Shared on subsequent calls).
     fn set_flow_node_referenced(&self, flow: &FlowNode) {
-        // We need interior mutability for this. Since FlowNode is behind Arc,
-        // we use a raw pointer cast. This is safe because we only modify flags.
+
         let ptr = flow as *const FlowNode as *mut FlowNode;
         unsafe {
             if (*ptr).flags.contains(FlowFlags::REFERENCED) {
@@ -1566,10 +1184,6 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
         }
     }
 
-    /// Create a reduce label node (for try-finally flow graph). While a
-    /// flow walk is inside this node (i.e. between here and `target`), the
-    /// `target` branch label's antecedent set is replaced by `antecedents`.
-    /// Mirrors Go's `createReduceLabel(target, antecedents, antecedent)`.
     fn create_reduce_label(
         &self,
         target: &Arc<FlowNode>,
@@ -1587,14 +1201,6 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
         })
     }
 
-    /// Create a branch-label flow node used as an accumulation point for
-    /// jump edges (`break`/`continue` targets, labeled-statement break
-    /// targets). Unlike `FlowLabel::finish`, this node never collapses to
-    /// its single antecedent (or to the shared UNREACHABLE node when empty),
-    /// so edges added in place via `add_antecedent_to_flow` are never pushed
-    /// into — and never corrupt — an arbitrary unrelated node. The
-    /// accumulated antecedents are folded into the owning loop's post/pre
-    /// label when the loop finishes binding.
     fn new_flow_accumulator() -> Arc<FlowNode> {
         Arc::new(FlowNode {
             flags: FlowFlags::BRANCH_LABEL,
@@ -1607,7 +1213,6 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
         })
     }
 
-    /// Add an antecedent to a flow label (checking for duplicates).
     fn add_antecedent_to_flow(&self, label: &Arc<FlowNode>, antecedent: &Arc<FlowNode>) {
         if antecedent.flags.contains(FlowFlags::UNREACHABLE) {
             return;
@@ -1621,20 +1226,10 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
         unsafe {
             (*ptr).antecedents.push(Arc::clone(antecedent));
         }
-        // Mark the antecedent as referenced (or shared if already referenced).
-        // Mirrors Go's `setFlowNodeReferenced` called from `addAntecedent`.
+
         self.set_flow_node_referenced(antecedent);
     }
 
-    /// Create a flow switch clause node for a clause group
-    /// `[clause_start, clause_end)` (Go `createFlowSwitchClause`).
-    ///
-    /// `switch_statement` is the enclosing `SwitchStatement` node, used by
-    /// the checker to resolve the discriminant expression and the full
-    /// clause list. `clause` is the statement-bearing clause that ends the
-    /// group (Go's `FlowSwitchClauseData` carries only the range; we keep
-    /// the clause for the non-grouped fallbacks). The `[0, 0)` range marks
-    /// the bypass branch of a default-less switch.
     fn create_flow_switch_clause(
         &mut self,
         antecedent: &Arc<FlowNode>,
@@ -1657,11 +1252,6 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
         })
     }
 
-    // ─────────────────────────────────────────────────────────────────────
-    // Control flow statement binding
-    // ─────────────────────────────────────────────────────────────────────
-
-    /// Bind an if statement with proper control flow.
     fn bind_if_statement(&mut self, node: &Arc<Node>) {
         let mut then_label = FlowLabel::new(FlowFlags::BRANCH_LABEL);
         let mut else_label = FlowLabel::new(FlowFlags::BRANCH_LABEL);
@@ -1676,7 +1266,6 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
             _ => return,
         };
 
-        // Bind condition and split flow
         self.bind(&expr);
         if let Some(current) = self.current_flow.take() {
             let true_flow = self.create_flow_condition(FlowFlags::TRUE_CONDITION, &current, &expr);
@@ -1686,14 +1275,12 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
             else_label.add_antecedent(false_flow);
         }
 
-        // Then branch
         self.current_flow = Some(then_label.finish(self.unreachable_flow.as_ref().unwrap()));
         self.bind(&then_stmt);
         if let Some(current) = &self.current_flow {
             post_if_label.add_antecedent(Arc::clone(current));
         }
 
-        // Else branch
         self.current_flow = Some(else_label.finish(self.unreachable_flow.as_ref().unwrap()));
         if let Some(else_s) = else_stmt {
             self.bind(&else_s);
@@ -1702,11 +1289,9 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
             post_if_label.add_antecedent(Arc::clone(current));
         }
 
-        // Merge after if/else
         self.current_flow = Some(post_if_label.finish(self.unreachable_flow.as_ref().unwrap()));
     }
 
-    /// Bind a while statement with proper control flow.
     fn bind_while_statement(&mut self, node: &Arc<Node>) {
         let mut pre_while_label = FlowLabel::new(FlowFlags::LOOP_LABEL);
         let mut pre_body_label = FlowLabel::new(FlowFlags::BRANCH_LABEL);
@@ -1720,16 +1305,10 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
         if let Some(current) = &self.current_flow {
             pre_while_label.add_antecedent(Arc::clone(current));
         }
-        // The loop head must be a JUNCTION node even before the body's
-        // back-edge exists — `finish` snapshots antecedents, so finishing
-        // now would drop the back edge (loop narrowing degraded to the
-        // entry type only: `while (c) { if (typeof x === "string")
-        // x.slice() }` narrowed `number`). Create the mutable junction up
-        // front; the back edge is appended after the body binds.
+
         let loop_head = pre_while_label.finish_multi(self.unreachable_flow.as_ref().unwrap());
         self.current_flow = Some(Arc::clone(&loop_head));
 
-        // Condition
         self.bind(&expr);
         if let Some(current) = self.current_flow.take() {
             let true_flow = self.create_flow_condition(FlowFlags::TRUE_CONDITION, &current, &expr);
@@ -1739,43 +1318,35 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
             post_while_label.add_antecedent(false_flow);
         }
 
-        // Save break/continue targets. Jump targets are accumulation nodes
-        // (never collapsed snapshots) so in-place edge additions from
-        // `break;`/`continue;` can't corrupt unrelated flow nodes; the
-        // accumulated edges are folded into the loop's labels below.
         let prev_break = self.current_break_target.take();
         let prev_continue = self.current_continue_target.take();
         let break_acc = Self::new_flow_accumulator();
         let continue_acc = Self::new_flow_accumulator();
         self.current_break_target = Some(Arc::clone(&break_acc));
         self.current_continue_target = Some(Arc::clone(&continue_acc));
-        // Back-fill enclosing labels (`l: while (…)`) so `continue l;`
-        // targets THIS loop. Mirrors Go's `setContinueTarget`.
+
         self.set_continue_target(node, &continue_acc);
 
-        // Body
         self.current_flow = Some(pre_body_label.finish(self.unreachable_flow.as_ref().unwrap()));
         self.bind(&stmt);
         if let Some(current) = &self.current_flow {
             FlowLabel::push_antecedent(&loop_head, Arc::clone(current));
         }
-        // Fold `continue;` edges into the condition label.
+
         for ant in &continue_acc.antecedents {
             FlowLabel::push_antecedent(&loop_head, Arc::clone(ant));
         }
-        // Fold `break;` edges into the post-loop label.
+
         for ant in &break_acc.antecedents {
             post_while_label.add_antecedent(Arc::clone(ant));
         }
 
-        // Restore break/continue targets
         self.current_break_target = prev_break;
         self.current_continue_target = prev_continue;
 
         self.current_flow = Some(post_while_label.finish(self.unreachable_flow.as_ref().unwrap()));
     }
 
-    /// Bind a do-while statement with proper control flow.
     fn bind_do_statement(&mut self, node: &Arc<Node>) {
         let mut pre_do_label = FlowLabel::new(FlowFlags::LOOP_LABEL);
         let mut pre_condition_label = FlowLabel::new(FlowFlags::BRANCH_LABEL);
@@ -1791,35 +1362,27 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
         }
         self.current_flow = Some(pre_do_label.finish(self.unreachable_flow.as_ref().unwrap()));
 
-        // Save break/continue targets. Jump targets are accumulation nodes
-        // (never collapsed snapshots) so in-place edge additions from
-        // `break;`/`continue;` can't corrupt unrelated flow nodes; the
-        // accumulated edges are folded into the loop's labels below.
         let prev_break = self.current_break_target.take();
         let prev_continue = self.current_continue_target.take();
         let break_acc = Self::new_flow_accumulator();
         let continue_acc = Self::new_flow_accumulator();
         self.current_break_target = Some(Arc::clone(&break_acc));
         self.current_continue_target = Some(Arc::clone(&continue_acc));
-        // Back-fill enclosing labels (`l: do (…)`) so `continue l;`
-        // targets THIS loop. Mirrors Go's `setContinueTarget`.
+
         self.set_continue_target(node, &continue_acc);
 
-        // Body
         self.bind(&stmt);
         if let Some(current) = &self.current_flow {
             pre_condition_label.add_antecedent(Arc::clone(current));
         }
-        // Fold `continue;` edges into the condition label.
+
         for ant in &continue_acc.antecedents {
             pre_condition_label.add_antecedent(Arc::clone(ant));
         }
 
-        // Restore break/continue targets
         self.current_break_target = prev_break;
         self.current_continue_target = prev_continue;
 
-        // Condition
         self.current_flow =
             Some(pre_condition_label.finish(self.unreachable_flow.as_ref().unwrap()));
         self.bind(&expr);
@@ -1830,7 +1393,7 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
             pre_do_label.add_antecedent(true_flow);
             post_do_label.add_antecedent(false_flow);
         }
-        // Fold `break;` edges into the post-loop label.
+
         for ant in &break_acc.antecedents {
             post_do_label.add_antecedent(Arc::clone(ant));
         }
@@ -1838,7 +1401,6 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
         self.current_flow = Some(post_do_label.finish(self.unreachable_flow.as_ref().unwrap()));
     }
 
-    /// Bind a for statement with proper control flow.
     fn bind_for_statement(&mut self, node: &Arc<Node>) {
         let mut pre_loop_label = FlowLabel::new(FlowFlags::LOOP_LABEL);
         let mut pre_body_label = FlowLabel::new(FlowFlags::BRANCH_LABEL);
@@ -1855,18 +1417,6 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
             _ => return,
         };
 
-        // Activate the ForStatement as the block-scoped container so its
-        // initializer variables (`for (let x = 1, y = 2; …)`) are scoped to
-        // THIS loop rather than the enclosing scope. Without this, two loops
-        // in the same block both declaring `let x` collide (TS2451) and the
-        // body sees the init as used-before-declaration (TS2448). This
-        // early-dispatch path otherwise skips `bind_container`.
-        //
-        // Mirrors Go's `bindContainer` for ForStatement (an
-        // `IsBlockScopedContainer`-only node): ONLY `block_scope_container`
-        // is advanced. `container` keeps pointing at the enclosing
-        // function-like container so `for (var i = 0; …)` still declares `i`
-        // in the function scope (var hoisting, see `declare_symbol`).
         let prev_block = self.block_scope_container.take();
         let prev_parent = self.parent_symbol.take();
         self.block_scope_container = Some(Arc::clone(node));
@@ -1874,10 +1424,7 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
             .locals
             .entry(node.id())
             .or_insert_with(SymbolTable::new);
-        // parent_symbol stays None (ForStatement has no symbol) so declares
-        // route to this loop's locals.
 
-        // Initializer
         if let Some(init) = initializer {
             self.bind(&init);
         }
@@ -1887,7 +1434,6 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
         }
         self.current_flow = Some(pre_loop_label.finish(self.unreachable_flow.as_ref().unwrap()));
 
-        // Condition
         if let Some(cond) = condition {
             self.bind(&cond);
             if let Some(current) = self.current_flow.take() {
@@ -1899,42 +1445,34 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
                 post_loop_label.add_antecedent(false_flow);
             }
         } else {
-            // No condition = always true
+
             if let Some(current) = &self.current_flow {
                 pre_body_label.add_antecedent(Arc::clone(current));
             }
         }
 
-        // Save break/continue targets. Jump targets are accumulation nodes
-        // (never collapsed snapshots) so in-place edge additions from
-        // `break;`/`continue;` can't corrupt unrelated flow nodes; the
-        // accumulated edges are folded into the loop's labels below.
         let prev_break = self.current_break_target.take();
         let prev_continue = self.current_continue_target.take();
         let break_acc = Self::new_flow_accumulator();
         let continue_acc = Self::new_flow_accumulator();
         self.current_break_target = Some(Arc::clone(&break_acc));
         self.current_continue_target = Some(Arc::clone(&continue_acc));
-        // Back-fill enclosing labels (`l: for (…)`) so `continue l;`
-        // targets THIS loop. Mirrors Go's `setContinueTarget`.
+
         self.set_continue_target(node, &continue_acc);
 
-        // Body
         self.current_flow = Some(pre_body_label.finish(self.unreachable_flow.as_ref().unwrap()));
         self.bind(&statement);
         if let Some(current) = &self.current_flow {
             pre_incr_label.add_antecedent(Arc::clone(current));
         }
-        // Fold `continue;` edges into the incrementor label.
+
         for ant in &continue_acc.antecedents {
             pre_incr_label.add_antecedent(Arc::clone(ant));
         }
 
-        // Restore break/continue targets
         self.current_break_target = prev_break;
         self.current_continue_target = prev_continue;
 
-        // Incrementor
         self.current_flow = Some(pre_incr_label.finish(self.unreachable_flow.as_ref().unwrap()));
         if let Some(inc) = incrementor {
             self.bind(&inc);
@@ -1942,19 +1480,17 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
         if let Some(current) = &self.current_flow {
             pre_loop_label.add_antecedent(Arc::clone(current));
         }
-        // Fold `break;` edges into the post-loop label.
+
         for ant in &break_acc.antecedents {
             post_loop_label.add_antecedent(Arc::clone(ant));
         }
 
         self.current_flow = Some(post_loop_label.finish(self.unreachable_flow.as_ref().unwrap()));
 
-        // Restore the enclosing block scope / parent symbol.
         self.block_scope_container = prev_block;
         self.parent_symbol = prev_parent;
     }
 
-    /// Bind a for-in or for-of statement with proper control flow.
     fn bind_for_in_or_of_statement(&mut self, node: &Arc<Node>) {
         let mut pre_loop_label = FlowLabel::new(FlowFlags::LOOP_LABEL);
         let mut post_loop_label = FlowLabel::new(FlowFlags::BRANCH_LABEL);
@@ -1968,13 +1504,6 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
             _ => return,
         };
 
-        // Activate the ForIn/ForOf statement as the block-scoped container so
-        // its loop variable (`for (let b of …)`) is scoped to THIS loop.
-        // Without this, two sibling `for (let b of …)` loops in the same
-        // function collide (TS2451). Mirrors Go's `bindContainer`, which sets
-        // `blockScopeContainer = node` before the children are bound. Like
-        // `bind_for_statement`, only `block_scope_container` is advanced so
-        // `for (var k in o)` still hoists `k` to the function scope.
         let prev_block = self.block_scope_container.take();
         let prev_parent = self.parent_symbol.take();
         self.block_scope_container = Some(Arc::clone(node));
@@ -1982,10 +1511,7 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
             .locals
             .entry(node.id())
             .or_insert_with(SymbolTable::new);
-        // parent_symbol stays None (loop statements have no symbol) so
-        // block-scoped declares route to this loop's locals.
 
-        // Expression
         self.bind(&expression);
 
         if let Some(current) = &self.current_flow {
@@ -1995,59 +1521,43 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
 
         post_loop_label.add_antecedent(Arc::clone(self.current_flow.as_ref().unwrap()));
 
-        // Initializer
         self.bind(&initializer);
 
-        // A bare (no declaration keyword) for-in/of head destructures into
-        // its targets each iteration — an object/array literal there is a
-        // destructuring ASSIGNMENT pattern (Go
-        // bindForInOrOfStatement's `bindAssignmentTargetFlow`), creating
-        // ASSIGNMENT flow nodes for every target identifier (including
-        // `= default` initializers via bindDestructuringTargetFlow).
         if initializer.kind != SyntaxKind::VariableDeclarationList {
             self.bind_assignment_target_flow(&initializer);
         }
 
-        // Save break/continue targets. Jump targets are accumulation nodes
-        // (never collapsed snapshots) so in-place edge additions from
-        // `break;`/`continue;` can't corrupt unrelated flow nodes; the
-        // accumulated edges are folded into the loop's labels below.
         let prev_break = self.current_break_target.take();
         let prev_continue = self.current_continue_target.take();
         let break_acc = Self::new_flow_accumulator();
         let continue_acc = Self::new_flow_accumulator();
         self.current_break_target = Some(Arc::clone(&break_acc));
         self.current_continue_target = Some(Arc::clone(&continue_acc));
-        // Back-fill enclosing labels (`l: for (… of …)`) so `continue l;`
-        // targets THIS loop. Mirrors Go's `setContinueTarget`.
+
         self.set_continue_target(node, &continue_acc);
 
-        // Body
         self.bind(&statement);
         if let Some(current) = &self.current_flow {
             pre_loop_label.add_antecedent(Arc::clone(current));
         }
-        // Fold `continue;` edges into the pre-loop label (the next iteration).
+
         for ant in &continue_acc.antecedents {
             pre_loop_label.add_antecedent(Arc::clone(ant));
         }
-        // Fold `break;` edges into the post-loop label.
+
         for ant in &break_acc.antecedents {
             post_loop_label.add_antecedent(Arc::clone(ant));
         }
 
-        // Restore break/continue targets
         self.current_break_target = prev_break;
         self.current_continue_target = prev_continue;
 
         self.current_flow = Some(post_loop_label.finish(self.unreachable_flow.as_ref().unwrap()));
 
-        // Restore the enclosing block scope / parent symbol.
         self.block_scope_container = prev_block;
         self.parent_symbol = prev_parent;
     }
 
-    /// Bind a switch statement with proper control flow.
     fn bind_switch_statement(&mut self, node: &Arc<Node>) {
         let mut post_switch_label = FlowLabel::new(FlowFlags::BRANCH_LABEL);
 
@@ -2056,22 +1566,12 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
             _ => return,
         };
 
-        // Switch expression
         self.bind(&expression);
 
-        // Save break target. Breaks accumulate into a mutable accumulator
-        // node folded into the post-switch label before it finishes — a
-        // label finished up front snapshots ZERO antecedents, and break
-        // edges added afterwards land in an orphaned node, silently
-        // dropping every `break` exit from the post-switch merge (the
-        // default-clause fall-through alone survives, so a narrowing
-        // switch leaks its default-branch types past the statement —
-        // narrowByClauseExpressionInSwitchTrue2).
         let prev_break = self.current_break_target.take();
         let break_acc = Self::new_flow_accumulator();
         self.current_break_target = Some(Arc::clone(&break_acc));
 
-        // Get clauses from case block
         let clauses = match &case_block.data {
             NodeData::CaseBlock(data) => data.clauses.clone(),
             _ => {
@@ -2080,13 +1580,6 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
             }
         };
 
-        // Activate the CaseBlock as the block-scoped container so
-        // case-clause declarations (`case 1: let x;`) are scoped to the
-        // switch rather than colliding with the enclosing block. Mirrors
-        // Go's `GetContainerFlags`: `KindCaseBlock` is an
-        // `IsBlockScopedContainer`-only node (all clauses share one scope).
-        // Like the loop binders, only `block_scope_container` is advanced so
-        // `case 1: var x;` still hoists to the function scope.
         let prev_block = self.block_scope_container.take();
         let prev_parent = self.parent_symbol.take();
         self.block_scope_container = Some(Arc::clone(&case_block));
@@ -2095,17 +1588,6 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
             .entry(case_block.id())
             .or_insert_with(SymbolTable::new);
 
-        // Process clause groups (Go `bindCaseBlock`): a group is a maximal
-        // run of statement-less clauses plus the clause that owns the
-        // statements they label (`case a: case b: stmts`). Each group gets
-        // ONE SwitchClause flow anchored at the switch ENTRY carrying the
-        // group's clause range; the statements start from a branch label
-        // that unions the group's SwitchClause flow with the FALL-THROUGH
-        // flow (the previous group's statement end) — that union is what
-        // makes `case x === "A": case x === "B":` see `A | B` inside the
-        // body. Anchoring every clause flow at the entry (rather than
-        // chaining through previous clauses) keeps each group's narrowing
-        // independent of its predecessors' assumptions.
         let entry_flow = self.current_flow.clone();
         let is_narrowing_switch = expression.kind == SyntaxKind::TrueKeyword
             || self.is_narrowing_expression(&expression);
@@ -2115,8 +1597,7 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
         let mut i = 0;
         while i < clause_nodes.len() {
             let clause_start = i;
-            // Skip over (and bind) the statement-less clauses above the
-            // statement-bearing one.
+
             while clause_statements_empty(&clause_nodes[i]) && i + 1 < clause_nodes.len() {
                 self.bind_case_clause(&clause_nodes[i], &entry_flow);
                 i += 1;
@@ -2152,20 +1633,14 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
             i += 1;
         }
 
-        // Add final flow to post-switch label
         if let Some(current) = &self.current_flow {
             post_switch_label.add_antecedent(Arc::clone(current));
         }
-        // Fold the accumulated `break` exits in.
+
         for ant in &break_acc.antecedents {
             post_switch_label.add_antecedent(Arc::clone(ant));
         }
-        // A default-less switch has an implicit BYPASS branch (no case
-        // matched) that flows to the post-switch label (Go
-        // `bindSwitchStatement`'s trailing `createFlowSwitchClause(..., 0,
-        // 0)`). For an exhaustive switch the bypass narrows to `never` and
-        // absorbs into the union; for a non-exhaustive one it contributes
-        // the unmatched constituents.
+
         if !has_default {
             if let Some(entry) = &entry_flow {
                 let bypass = self.create_flow_switch_clause(entry, None, node, 0, 0);
@@ -2175,19 +1650,12 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
 
         self.current_flow = Some(post_switch_label.finish(self.unreachable_flow.as_ref().unwrap()));
 
-        // Restore the enclosing block scope / parent symbol.
         self.block_scope_container = prev_block;
         self.parent_symbol = prev_parent;
 
-        // Restore break target
         self.current_break_target = prev_break;
     }
 
-    /// Bind one case/default clause (Go `bindCaseOrDefaultClause`): the
-    /// case expression is evaluated in the switch-ENTRY flow context (its
-    /// own sub-flow — e.g. an assertion call inside a case expression —
-    /// must not observe the previous clause's narrowing), the statements
-    /// in the current flow.
     fn bind_case_clause(&mut self, clause: &Arc<Node>, entry_flow: &Option<Arc<FlowNode>>) {
         let NodeData::CaseOrDefaultClause(data) = &clause.data else {
             return;
@@ -2203,10 +1671,6 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
         }
     }
 
-    /// Mirrors Go `isNarrowingExpression` (binder.go ~L2595): is the switch
-    /// discriminant an expression the flow checker can narrow by? Switches
-    /// with such a discriminant get SwitchClause flow nodes; all others
-    /// keep the plain entry flow (no narrowing through the switch).
     fn is_narrowing_expression(&self, expr: &Arc<Node>) -> bool {
         match expr.kind {
             SyntaxKind::Identifier | SyntaxKind::ThisKeyword => true,
@@ -2301,7 +1765,6 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
             )
     }
 
-    /// Mirrors Go `containsNarrowableReference` (binder.go ~L2615).
     fn contains_narrowable_reference(&self, expr: &Arc<Node>) -> bool {
         if self.is_narrowable_reference(expr) {
             return true;
@@ -2322,7 +1785,6 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
         false
     }
 
-    /// Mirrors Go `isNarrowableReference` (binder.go ~L2628).
     fn is_narrowable_reference(&self, node: &Arc<Node>) -> bool {
         match node.kind {
             SyntaxKind::Identifier
@@ -2364,7 +1826,6 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
             .any(|arg| self.contains_narrowable_reference(arg))
     }
 
-    /// Bind a return statement.
     fn bind_return_statement(&mut self, node: &Arc<Node>) {
         if let NodeData::ReturnStatement(data) = &node.data {
             if let Some(expr) = &data.expression {
@@ -2376,7 +1837,6 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
         self.has_flow_effects = true;
     }
 
-    /// Bind a throw statement.
     fn bind_throw_statement(&mut self, node: &Arc<Node>) {
         if let NodeData::ThrowStatement(data) = &node.data {
             self.bind(&data.expression);
@@ -2385,12 +1845,6 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
         self.has_flow_effects = true;
     }
 
-    /// Bind a try/catch/finally statement with proper control flow.
-    ///
-    /// Mirrors `binder.bindTryStatement` in Go. Labels are dedicated
-    /// accumulator nodes (never collapsed early), so antecedents added
-    /// while binding the try/catch blocks (exception targets, mutation
-    /// flows) are never lost and never pushed into unrelated nodes.
     fn bind_try_statement(&mut self, node: &Arc<Node>) {
         let stmt = match &node.data {
             NodeData::TryStatement(data) => data,
@@ -2408,21 +1862,16 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
             self.current_return_target = Some(Arc::clone(&return_label));
         }
 
-        // Add current flow as possible exception source.
         if let Some(current) = &self.current_flow {
             self.add_antecedent_to_flow(&exception_label, current);
         }
         self.current_exception_target = Some(Arc::clone(&exception_label));
 
-        // Bind try block; its normal completion feeds normal_exit_label.
         self.bind(&stmt.try_block);
         if let Some(current) = &self.current_flow {
             self.add_antecedent_to_flow(&normal_exit_label, current);
         }
 
-        // Bind catch clause if present. The start of the catch clause is
-        // the target of exceptions from the try block; a fresh exception
-        // label collects exceptions raised inside the catch clause itself.
         if let Some(catch_clause) = &stmt.catch_clause {
             self.current_flow = Some(Self::finish_flow_node(
                 &exception_label,
@@ -2443,10 +1892,8 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
         self.current_return_target = save_return_target;
         self.current_exception_target = save_exception_target;
 
-        // Bind finally block if present.
         if let Some(finally_block) = &stmt.finally_block {
-            // Possible ways control can reach the finally block: normal
-            // completion of try or catch, returns, and exceptions.
+
             let finally_label = Self::new_flow_accumulator();
             for ant in normal_exit_label
                 .antecedents
@@ -2465,13 +1912,11 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
                 .as_ref()
                 .is_some_and(|f| f.flags.contains(FlowFlags::UNREACHABLE))
             {
-                // If the end of the finally block is unreachable, the end
-                // of the entire try statement is unreachable.
+
                 self.current_flow = Some(self.unreachable_flow());
             } else {
                 let current_flow = self.current_flow.clone().expect("reachable flow");
-                // Return paths from try/catch go back through the finally
-                // block and only the return-statement flows.
+
                 if self.current_return_target.is_some()
                     && !return_label.antecedents.is_empty()
                     && let Some(rt) = &self.current_return_target
@@ -2483,8 +1928,7 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
                     );
                     self.add_antecedent_to_flow(rt, &reduce);
                 }
-                // Exception paths from try/catch go back through the
-                // finally block and each possible exception source.
+
                 if self.current_exception_target.is_some()
                     && !exception_label.antecedents.is_empty()
                     && let Some(et) = &self.current_exception_target
@@ -2496,8 +1940,7 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
                     );
                     self.add_antecedent_to_flow(et, &reduce);
                 }
-                // Past the finally block, only the normal-completion flows
-                // of try/catch continue (reduced antecedent set).
+
                 if !normal_exit_label.antecedents.is_empty() {
                     self.current_flow = Some(self.create_reduce_label(
                         &finally_node,
@@ -2516,9 +1959,6 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
         }
     }
 
-    /// Collapse an accumulated label node: empty → the shared unreachable
-    /// flow, a single antecedent → that antecedent, otherwise the label
-    /// node itself (Go `finishFlowLabel`).
     fn finish_flow_node(
         node: &Arc<FlowNode>,
         unreachable: &Arc<FlowNode>,
@@ -2532,9 +1972,8 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
         Arc::clone(node)
     }
 
-    /// Bind a break statement.
     fn bind_break_statement(&mut self, node: &Arc<Node>) {
-        // Check for labeled break first
+
         let label_name = if let NodeData::BreakStatement(data) = &node.data {
             data.label.as_ref().map(|l| self.node_text(l))
         } else {
@@ -2542,10 +1981,7 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
         };
 
         if let Some(name) = label_name {
-            // Two-pass lookup: first find the matching label's break target
-            // (immutable borrow), then mark it referenced (mutable borrow).
-            // Mirrors Go's `activeLabel.referenced = true` in
-            // `bindBreakOrContinueStatement`.
+
             let break_target = {
                 let mut current = &self.active_label_list;
                 let mut found = None;
@@ -2562,7 +1998,7 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
                 if let Some(current_flow) = &self.current_flow {
                     self.add_antecedent_to_flow(&target, current_flow);
                 }
-                // Mark the matching label as referenced.
+
                 let mut current = &mut self.active_label_list;
                 while let Some(label) = current {
                     if label.name == name {
@@ -2573,7 +2009,7 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
                 }
             }
         } else if let Some(target) = &self.current_break_target {
-            // Unlabeled break to the innermost break target
+
             if let Some(current) = &self.current_flow {
                 self.add_antecedent_to_flow(target, current);
             }
@@ -2581,9 +2017,8 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
         self.current_flow = Some(self.unreachable_flow());
     }
 
-    /// Bind a continue statement.
     fn bind_continue_statement(&mut self, node: &Arc<Node>) {
-        // Check for labeled continue first
+
         let label_name = if let NodeData::ContinueStatement(data) = &node.data {
             data.label.as_ref().map(|l| self.node_text(l))
         } else {
@@ -2591,9 +2026,7 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
         };
 
         if let Some(name) = label_name {
-            // Two-pass lookup: first find the matching label's continue target
-            // (immutable borrow), then mark it referenced (mutable borrow).
-            // Mirrors Go's `activeLabel.referenced = true`.
+
             let continue_target = {
                 let mut current = &self.active_label_list;
                 let mut found = None;
@@ -2610,7 +2043,7 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
                 if let Some(current_flow) = &self.current_flow {
                     self.add_antecedent_to_flow(&target, current_flow);
                 }
-                // Mark the matching label as referenced.
+
                 let mut current = &mut self.active_label_list;
                 while let Some(label) = current {
                     if label.name == name {
@@ -2628,13 +2061,6 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
         self.current_flow = Some(self.unreachable_flow());
     }
 
-    /// Propagate a loop's continue target to enclosing labels while the loop
-    /// is directly labeled (`l: for (…)`, `a: b: while (…)`). Mirrors Go's
-    /// `setContinueTarget` (binder.go:1779): walks the loop node's parent
-    /// chain of `LabeledStatement`s in lockstep with the active label list
-    /// (innermost first), assigning the loop's own continue target so
-    /// `continue label;` routes to the correct loop rather than the
-    /// enclosing one.
     fn set_continue_target(&mut self, loop_node: &Arc<Node>, target: &Arc<FlowNode>) {
         let mut node = Arc::clone(loop_node);
         let mut cursor = &mut self.active_label_list;
@@ -2650,9 +2076,6 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
         }
     }
 
-    /// Bind a labeled statement.
-    ///
-    /// Mirrors `binder.bindLabeledStatement` in Go.
     fn bind_labeled_statement(&mut self, node: &Arc<Node>) {
         let stmt = match &node.data {
             NodeData::LabeledStatement(data) => data,
@@ -2660,20 +2083,9 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
         };
 
         let label_name = self.node_text(&stmt.label);
-        // Break target: a branch-label accumulation node. It must NOT be
-        // created by `FlowLabel::finish` before the statement is bound —
-        // an empty label collapses to the (shared) UNREACHABLE node, which
-        // would poison `current_flow` for everything after the labeled
-        // statement (all subsequent references narrow to `never`).
-        // `break label;` adds antecedents in place; the fallthrough
-        // antecedent is added after the statement is bound below.
+
         let break_target = Self::new_flow_accumulator();
 
-        // The continue target starts as `None` and is back-filled by the
-        // labeled iteration statement itself (see `set_continue_target`,
-        // called from the loop binders) — NOT from the enclosing loop, which
-        // would route `continue label;` to the wrong place. Mirrors Go's
-        // `bindLabeledStatement` (`continueTarget: nil`) + `setContinueTarget`.
         let continue_target: Option<Arc<FlowNode>> = None;
 
         let active_label = Box::new(ActiveLabel {
@@ -2686,36 +2098,23 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
 
         self.active_label_list = Some(active_label);
 
-        // Bind the statement (the loop body, etc.)
         self.bind(&stmt.statement);
 
-        // Check if the label was referenced by a break/continue statement.
-        // Mirrors Go's `if !b.activeLabelList.referenced { ... }` — an
-        // unreferenced label is marked `NodeFlags::Unreachable` so the
-        // checker can report it (TS7028 unused label).
         let was_referenced = self
             .active_label_list
             .as_ref()
             .map_or(false, |l| l.referenced);
 
-        // Restore active label list
         self.active_label_list = self.active_label_list.take().and_then(|l| l.next);
 
         if !was_referenced {
-            // Mark the label node as unreachable (unused label). The checker
-            // will decide whether to report TS7028 based on the enclosing
-            // context (e.g., `allowUnusedLabels`).
+
             let label_ptr = Arc::as_ptr(&stmt.label) as *mut Node;
             unsafe {
                 (*label_ptr).flags |= NodeFlags::Unreachable;
             }
         }
 
-        // Finish break target: add the fallthrough antecedent (skipped when
-        // unreachable), mirroring Go's `b.addAntecedent(postStatementLabel,
-        // b.currentFlow); b.currentFlow = b.finishFlowLabel(...)`. A label
-        // that accumulated no antecedents (body always breaks/returns)
-        // finishes to the UNREACHABLE node, like Go's `finishFlowLabel`.
         if let Some(current) = &self.current_flow {
             self.add_antecedent_to_flow(&break_target, current);
         }
@@ -2726,19 +2125,10 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
         };
     }
 
-    /// Check if an identifier is push or unshift (for array mutation tracking).
-    /// Mirrors Go's `ast.IsPushOrUnshiftIdentifier`.
     fn is_push_or_unshift_identifier(&self, name: &str) -> bool {
         name == "push" || name == "unshift"
     }
 
-    /// Check if an expression is a mutation-trackable reference (identifier,
-    /// property access chain, parenthesized, etc.) — a merge of Go's
-    /// `isNarrowableOperand` + `containsNarrowableReference` shapes. Used to
-    /// gate ARRAY_MUTATION flow nodes so that `arr.push(x)` (where `arr` is
-    /// an identifier) is tracked but `getFoo().push(x)` is not. (The
-    /// faithful Go `isNarrowableOperand` port lives next to the
-    /// switch-narrowing helpers.)
     fn is_mutation_tracked_reference(&self, expr: &Arc<Node>) -> bool {
         match expr.kind {
             SyntaxKind::Identifier
@@ -2755,9 +2145,7 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
                 }
             }
             SyntaxKind::ElementAccessExpression => {
-                // Element access is narrowable if the argument is a
-                // string/numeric literal or an entity-name expression whose
-                // receiver is narrowable.
+
                 if let NodeData::ElementAccessExpression(ea) = &expr.data {
                     if self.is_string_or_numeric_literal_like(&ea.argument_expression) {
                         return true;
@@ -2771,7 +2159,6 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
         }
     }
 
-    /// Mirrors Go's `ast.IsStringOrNumericLiteralLike`.
     fn is_string_or_numeric_literal_like(&self, node: &Arc<Node>) -> bool {
         matches!(
             node.kind,
@@ -2781,8 +2168,6 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
         )
     }
 
-    /// Mirrors Go's `ast.IsEntityNameExpression` (identifier or qualified
-    /// name).
     fn is_entity_name_expression(&self, node: &Arc<Node>) -> bool {
         matches!(
             node.kind,
@@ -2790,23 +2175,16 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
         )
     }
 
-    /// Bind a call expression for flow tracking (array mutation detection).
-    ///
-    /// Mirrors `binder.bindCallExpressionFlow` in Go. Handles:
-    /// - Optional chains (delegates to `bind_optional_chain_flow`)
-    /// - IIFE (function/arrow expression): bind args then callee
-    /// - `super()`: create a CALL flow node
-    /// - `arr.push(x)` / `arr.unshift(x)`: create an ARRAY_MUTATION flow node
     fn bind_call_expression_flow(&mut self, node: &Arc<Node>) {
         if let NodeData::CallExpression(data) = &node.data {
             let expr = &data.expression;
-            // Check for property access expression like arr.push()
+
             if let NodeData::PropertyAccessExpression(prop) = &expr.data {
                 let name = self.node_text(&prop.name);
                 if self.is_push_or_unshift_identifier(&name)
                     && self.is_mutation_tracked_reference(&prop.expression)
                 {
-                    // This is an array mutation call: create a flow mutation node
+
                     let current = self.current_flow.clone();
                     if let Some(current) = current {
                         self.current_flow = Some(self.create_flow_mutation(&current, node));
@@ -2816,41 +2194,10 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
         }
     }
 
-    /// Handle `this.property = value` assignments in JS files for expando
-    /// binding. Mirrors Go's `bindThisPropertyAssignment`
-    /// (`binder.go:1121-1141`).
-    ///
-    /// When a `this.prop = value` assignment is found inside a function-like
-    /// container (the `this_container`), the property is declared on the
-    /// container's symbol. For class members (`this.prop = value` inside a
-    /// constructor/method), the property goes to the class symbol's members
-    /// or exports (depending on static/instance).
-    ///
-    /// This is a no-op for TS files (Go checks `IsInJSFile`).
-    /// Currently a skeleton: full expando binding requires `declareSymbolEx`
-    /// with `isReplaceableByMethod` / `isComputedName` flags and
-    /// `addLateBoundAssignmentDeclarationToSymbol` for dynamic names —
-    /// deferred to the JS support phase. The `this_container` tracking
-    /// infrastructure (field + save/restore + `IS_THIS_CONTAINER` flag) is
-    /// in place so that expando binding can be wired in later.
     fn bind_this_property_assignment(&mut self, _node: &Arc<Node>) {
-        // TODO(JS): Implement full `this.prop = value` expando binding.
-        // The `this_container` field is now tracked but not yet used to
-        // declare properties. This requires:
-        // 1. `is_in_js_file(node)` guard (Go: `ast.IsInJSFile(node)`)
-        // 2. `get_this_class_and_symbol_table()` — resolve `this_container`
-        //    to a class symbol + members/exports table
-        // 3. `declareSymbolEx` with `isReplaceableByMethod = true`
-        // 4. `addLateBoundAssignmentDeclarationToSymbol` for dynamic names
-        // Deferred until JS file support is prioritized.
+
     }
 
-    /// Go `bindExpandoPropertyAssignment`: an `=` assignment whose LHS is
-    /// a property/element access on an entity name (`x.prop = v`,
-    /// `x[key] = v`) is deferred to the end of the file; if the base then
-    /// resolves to a function declaration, the assignment becomes an
-    /// expando property of that function's symbol. Collection side — the
-    /// resolution happens in `process_expando_assignments`.
     fn collect_expando_assignment(&mut self, node: &Arc<Node>) {
         let NodeData::BinaryExpression(bin) = &node.data else {
             return;
@@ -2872,8 +2219,7 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
             }
             _ => return,
         };
-        // CJS/global forms are not expandos (Go's module-exports/exports
-        // kinds take precedence).
+
         let base_name = base.text();
         if matches!(base_name, "exports" | "module" | "globalThis") {
             return;
@@ -2882,14 +2228,6 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
             .push((Arc::clone(node), self.block_scope_container.clone()));
     }
 
-    /// Go `bindDeferredExpandoAssignments` + `getInitializerSymbol`
-    /// (TS-file subset): for each deferred assignment, resolve the base
-    /// identifier through the collection-time block scope (walking up the
-    /// parent chain); when it names a FUNCTION DECLARATION, declare the
-    /// expando property on that function's symbol. Static names become
-    /// Property symbols in the function's exports; dynamic names
-    /// (`x[key] = v`) accumulate on the `\u{FE}assignment` pseudo symbol
-    /// for the checker to late-bind.
     fn process_expando_assignments(&mut self) {
         let assignments = std::mem::take(&mut self.expando_assignments);
         for (node, scope_start) in assignments {
@@ -2914,9 +2252,7 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
                     target = Some(Arc::clone(sym));
                     break;
                 }
-                // Symbol-ful containers (SourceFile / ModuleDeclaration)
-                // keep top-level declarations on their SYMBOL's member
-                // tables, not in node locals.
+
                 if matches!(
                     sc.kind,
                     SyntaxKind::SourceFile | SyntaxKind::ModuleDeclaration
@@ -2935,8 +2271,7 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
                 scope = sc.parent.clone();
             }
             let Some(sym) = target else { continue };
-            // Go getInitializerSymbol (TS files): only function
-            // declarations gain expando members.
+
             if !sym
                 .value_declaration
                 .as_ref()
@@ -2957,13 +2292,7 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
             };
             match member_name {
                 Some(mname) => {
-                    // Only when no non-expando declaration exists for the
-                    // name (Go: existing is absent or itself an
-                    // assignment). Namespace members live in EITHER the
-                    // members or the exports table — or, for non-exported
-                    // namespace vars, the ModuleDeclaration's LOCALS — a
-                    // merged `namespace Foo { var bla }` must NOT be
-                    // shadowed by an expando `Foo.bla = ...`.
+
                     let existing = sym
                         .exports
                         .get(&mname)
@@ -3009,8 +2338,7 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
                     }
                 }
                 None => {
-                    // Dynamic name: accumulate on the assignment pseudo
-                    // symbol (Go addLateBoundAssignmentDeclarationToSymbol).
+
                     let pseudo = sym
                         .exports
                         .get(crate::ast::INTERNAL_SYMBOL_NAME_ASSIGNMENT)
@@ -3043,11 +2371,10 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
         }
     }
 
-    /// Bind an expression statement (with assignment flow tracking).
     fn bind_expression_statement(&mut self, node: &Arc<Node>) {
         if let NodeData::ExpressionStatement(data) = &node.data {
             self.bind(&data.expression);
-            // Check for assignment
+
             if let NodeData::BinaryExpression(bin_data) = &data.expression.data {
                 if is_assignment_operator(bin_data.operator_token.kind) {
                     if let Some(current) = self.current_flow.take() {
@@ -3056,12 +2383,7 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
                             .set_flow_node(&data.expression, Arc::clone(&assign_flow));
                         self.current_flow = Some(assign_flow);
                     }
-                    // Check for element access assignment (array mutation:
-                    // `arr[i] = val`). Go `bindBinaryExpressionFlow`
-                    // (binder.go ~L2242) attaches the *binary expression*
-                    // node and gates on the receiver being a narrowable
-                    // operand — the checker's `evolve_array_at_mutation`
-                    // extracts the receiver from it.
+
                     if let NodeData::ElementAccessExpression(ea) = &bin_data.left.data {
                         if self.is_mutation_tracked_reference(&ea.expression) {
                             let current = self.current_flow.clone();
@@ -3073,7 +2395,7 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
                     }
                 }
             }
-            // Check for call expression
+
             if let NodeData::CallExpression(_) = &data.expression.data {
                 if let Some(current) = self.current_flow.take() {
                     let call_flow = self.create_flow_call(&current, &data.expression);
@@ -3087,10 +2409,6 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
         }
     }
 
-    /// Whether `node`'s grandparent chain marks it as the loop variable of
-    /// a for-in/for-of head (`node.Parent.Parent` in Go). Mirrors the
-    /// `ast.IsForInOrOfStatement(node.Parent.Parent)` condition in Go's
-    /// `bindVariableDeclarationFlow`.
     fn is_in_for_in_or_of_head(node: &Arc<Node>) -> bool {
         let Some(parent) = &node.parent else {
             return false;
@@ -3104,14 +2422,6 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
         )
     }
 
-    /// Add ASSIGNMENT flow nodes for a declaration with an initializer (or a
-    /// for-in/for-of loop variable). Binding-pattern names recurse so every
-    /// element gets its own assignment node. Mirrors Go's
-    /// `bindInitializedVariableFlow` (binder.go ~L2317).
-    /// Walk a destructuring ASSIGNMENT target creating ASSIGNMENT flow nodes
-    /// for each assigned reference (Go `bindAssignmentTargetFlow`,
-    /// binder.go ~L1815). Used by bare for-in/of heads and destructuring
-    /// assignments (`({...} = expr)`).
     fn bind_assignment_target_flow(&mut self, node: &Arc<Node>) {
         match &node.data {
             NodeData::ArrayLiteralExpression(arr) => {
@@ -3164,9 +2474,6 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
         }
     }
 
-    /// A destructuring element with a default (`{ a: b = 1 }` parsed as a
-    /// property with `b = 1` CoverInitializedName): the default's LEFT side
-    /// is the assignment target (Go `bindDestructuringTargetFlow`).
     fn bind_destructuring_target_flow(&mut self, node: &Arc<Node>) {
         if let NodeData::BinaryExpression(bin) = &node.data {
             if bin.operator_token.kind == SyntaxKind::EqualsToken {
@@ -3202,20 +2509,6 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
         }
     }
 
-    // ─────────────────────────────────────────────────────────────────────
-    // Binding dispatch
-    // ─────────────────────────────────────────────────────────────────────
-
-    /// Bind a single node: create symbols, set flow nodes, then recurse.
-    /// Go binder.go:1301 `checkContextualIdentifier` — an identifier whose
-    /// text is a future-reserved word (implements/interface/let/package/
-    /// private/protected/public/static/yield) in strict mode reports
-    /// TS1213 (inside a class), TS1214 (module), or TS1100 (plain strict).
-    /// `await`/`yield` misuse reports TS1262/TS1359 in the matching
-    /// contexts. Skipped when the file has parse errors (Go reports only
-    /// on clean parses), in ambient contexts, for JSDoc-synthesized
-    /// identifiers, and in identifier-name positions (`a.static`,
-    /// `{ static: 1 }`, member names) where keywords are legal.
     fn check_contextual_identifier(&mut self, node: &Arc<Node>) {
         let Some(file) = self.current_source_file.clone() else {
             return;
@@ -3228,9 +2521,7 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
         {
             return;
         }
-        // Ambient ancestors: `declare namespace M { … }` / `declare function`
-        // etc. exempt all nested identifiers (Go's Ambient flag propagates
-        // to descendants; we walk instead).
+
         {
             let mut anc = node.parent.as_ref();
             while let Some(a) = anc {
@@ -3287,7 +2578,7 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
     }
 
     fn bind(&mut self, node: &Arc<Node>) {
-        // Set flow node for expressions
+
         match node.kind {
             SyntaxKind::Identifier => {
                 if let Some(flow) = &self.current_flow {
@@ -3308,24 +2599,18 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
             _ => {}
         }
 
-        // Create symbols for declarations
         match node.kind {
             SyntaxKind::VariableDeclaration => {
                 self.declare_symbol(node, SymbolFlags::BlockScopedVariable, SymbolFlags::VALUE);
             }
             SyntaxKind::VariableStatement => {
-                // The statement itself doesn't get a symbol; its declarations do
+
             }
             SyntaxKind::FunctionDeclaration => {
                 self.declare_symbol(node, SymbolFlags::Function, SymbolFlags::VALUE);
             }
             SyntaxKind::FunctionExpression => {
-                // Use the actual name for named function expressions so the
-                // name is self-referenceable inside the body. Mirrors Go's
-                // `bindFunctionExpression` which uses `node.Name().Text()`
-                // when a name is present. The symbol is added to the
-                // function expression's own locals in `bind_container` so it
-                // is visible inside the body but not in the enclosing scope.
+
                 let name = match &node.data {
                     NodeData::FunctionExpression(data) => {
                         data.name.as_ref().map(|n| self.node_text(n))
@@ -3348,12 +2633,7 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
                     SymbolFlags::Class,
                     SymbolFlags::VALUE | SymbolFlags::TYPE,
                 );
-                // TS 1.0 spec (April 2014) 8.4: every class automatically
-                // contains a static property member named 'prototype', typed
-                // as an instantiation of the class type with `any` for each
-                // type parameter. The checker resolves that type when the
-                // symbol is accessed (Go binder.go ~L962 +
-                // getTypeOfPrototypeProperty checker.go ~L18096).
+
                 let prototype = Arc::new(Symbol::new(
                     SymbolFlags::Property | SymbolFlags::Prototype,
                     "prototype",
@@ -3371,11 +2651,7 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
                     NodeData::ClassExpression(data) if data.name.is_some()
                 );
                 if has_name {
-                    // A NAMED class expression: the container-flags pass
-                    // below (re)creates locals AFTER this arm, so the
-                    // self-name insertion happens there (see bind_container
-                    // hook). The anonymous symbol is created here for
-                    // typeof/instance typing.
+
                     self.bind_anonymous_declaration(
                         node,
                         SymbolFlags::Class,
@@ -3403,12 +2679,7 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
                 );
             }
             SyntaxKind::ModuleDeclaration => {
-                // A DOTTED module name (`declare namespace Foo.Bar`) declares
-                // nested module symbols (Go's declareModuleSymbol): `Foo` in
-                // the enclosing scope, `Bar` in `Foo`'s exports — so
-                // `Foo.Bar.x` resolves from outside.
-                // A dotted name parses as a QualifiedName (A.B.C) — flatten
-                // it; plain names are Identifiers.
+
                 let dotted_name = match &node.data {
                     crate::ast::NodeData::ModuleDeclaration(md) => match md.name.kind {
                         SyntaxKind::Identifier => md.name.text().to_string(),
@@ -3429,9 +2700,7 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
                 };
                 if dotted_name.contains('.') {
                     let parts: Vec<&str> = dotted_name.split('.').collect();
-                    // Locate the container's symbol table like declare_symbol
-                    // does (parent symbol members/exports for symbol-ful
-                    // containers, else the container's locals).
+
                     let container = self.container.clone();
                     let parent_sym = self.parent_symbol.clone();
                     let mut table: Option<Arc<Symbol>> = None;
@@ -3484,8 +2753,7 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
                         };
                         current = Some(sym);
                     }
-                    // Declare the LAST segment into the innermost parent's
-                    // exports and register the node on it.
+
                     let last = parts[parts.len() - 1];
                     let symbol = Arc::new(Symbol::new(SymbolFlags::ValueModule, last.to_string()));
                     {
@@ -3522,13 +2790,7 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
                 }
             }
             SyntaxKind::Parameter => {
-                // TS2371: parameter initializers are only allowed on
-                // function/constructor IMPLEMENTATIONS (Go's
-                // checkGrammarParameters via checkSignatureDeclaration) —
-                // overload signatures, method signatures, and type-level
-                // function types have no body and reject initializers.
-                // Parent pointers are populated before binding, so the
-                // enclosing function-like's body presence is checkable here.
+
                 let report_2371 = |b: &mut Self, loc: crate::core::text::TextRange| {
                     b.symbol_map.binder_diagnostics.push(Diagnostic::new(
                         b.current_source_file.clone(),
@@ -3544,8 +2806,7 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
                     if pd.initializer.is_some() {
                         report_2371(self, node.loc);
                     } else {
-                        // Binding-pattern parameters: initializers live on
-                        // the binding elements ('({ first = 0 }: …)').
+
                         let mut elements: Vec<&Arc<Node>> = Vec::new();
                         collect_binding_elements(&pd.name, &mut elements);
                         for el in elements {
@@ -3592,25 +2853,19 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
             | SyntaxKind::ExportSpecifier => {
                 self.declare_symbol(node, SymbolFlags::Alias, SymbolFlags::Alias);
             }
-            // `import D from "mod"` — the default import `D` is an alias
-            // declared in the container's locals. Mirrors Go's
-            // `bindImportClause`.
+
             SyntaxKind::ImportClause => {
                 self.bind_import_clause(node);
             }
-            // `export default <expr>` / `export = <expr>`. Mirrors Go's
-            // `bindExportAssignment`.
+
             SyntaxKind::ExportAssignment => {
                 self.bind_export_assignment(node);
             }
-            // `export * from "mod"` / `export * as ns from "mod"` /
-            // `export { a, b }`. Mirrors Go's `bindExportDeclaration`.
+
             SyntaxKind::ExportDeclaration => {
                 self.bind_export_declaration(node);
             }
-            // Standalone `export * as ns from "mod"` (the
-            // `NamespaceExportDeclaration` form used in global declaration
-            // files). Mirrors Go's `bindNamespaceExportDeclaration`.
+
             SyntaxKind::NamespaceExportDeclaration => {
                 self.bind_namespace_export_declaration(node);
             }
@@ -3618,9 +2873,7 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
                 self.declare_symbol(node, SymbolFlags::BlockScopedVariable, SymbolFlags::VALUE);
             }
             SyntaxKind::TypeParameter => {
-                // TS2300: duplicate names in one type-parameter list (Go's
-                // checkTypeParameters). The parameter's parent is the list
-                // node; earlier same-name siblings make this one a dupe.
+
                 if let Some(list) = node.parent.as_ref()
                     && let Some(name) = node.name()
                     && name.kind == SyntaxKind::Identifier
@@ -3628,7 +2881,7 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
                     let mut dup = false;
                     crate::ast::node_data_generated::for_each_child(list, |sibling| {
                         if Arc::ptr_eq(sibling, node) {
-                            return true; // stop at self — only EARLIER entries count
+                            return true;
                         }
                         if sibling.kind == SyntaxKind::TypeParameter
                             && sibling
@@ -3667,7 +2920,6 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
             _ => {}
         }
 
-        // Control flow statement dispatch
         match node.kind {
             SyntaxKind::IfStatement => {
                 self.bind_if_statement(node);
@@ -3714,19 +2966,12 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
                 return;
             }
             SyntaxKind::VariableStatement => {
-                // Plain child binding: per-declaration assignment flow nodes
-                // come from the `VariableDeclaration` arm below (Go's
-                // `bindVariableDeclarationFlow`).
+
                 self.bind_children(node);
                 return;
             }
             SyntaxKind::VariableDeclaration | SyntaxKind::BindingElement => {
-                // Bind children first (the initializer's flow becomes the
-                // assignment node's antecedent), then add an ASSIGNMENT flow
-                // node when the declaration has an initializer or sits in a
-                // for-in/for-of head. Binding-pattern names recurse per
-                // element. Mirrors Go's `bindVariableDeclarationFlow` /
-                // `bindInitializedVariableFlow` (binder.go ~L2307).
+
                 self.bind_children(node);
                 let has_initializer = match &node.data {
                     NodeData::VariableDeclaration(d) => d.initializer.is_some(),
@@ -3748,22 +2993,14 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
             }
             SyntaxKind::CallExpression => {
                 self.bind_call_expression_flow(node);
-                // Don't return - also check for children after call expression flow
+
             }
             SyntaxKind::BinaryExpression => {
-                // JS expando binding: `this.prop = value` or
-                // `Class.prototype.method = fn` in JS files. Mirrors Go's
-                // `bindThisPropertyAssignment` (`binder.go:1121-1141`).
+
                 self.bind_this_property_assignment(node);
-                // Expando assignment deferral (Go bindExpandoPropertyAssignment):
-                // `x.prop = v` / `x[key] = v` on a later-resolved function
-                // declaration gains a property symbol at end of file.
+
                 self.collect_expando_assignment(node);
-                // Destructuring assignment (`({ a: b = 1 } = expr)`,
-                // `[x, y] = arr`): after the regular child walk, create
-                // ASSIGNMENT flow nodes for every target reference in the
-                // pattern (Go `bindDestructuringAssignmentFlow`,
-                // binder.go ~L2192).
+
                 if matches!(&node.data, NodeData::BinaryExpression(bin)
                     if bin.operator_token.kind == SyntaxKind::EqualsToken
                         && matches!(
@@ -3777,20 +3014,10 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
                         self.bind_assignment_target_flow(&left);
                     }
                 }
-                // Logical operators (`a && b`, `a || b`): the right operand
-                // is only evaluated when the left's truthiness is known —
-                // the RHS's flow is wrapped in a condition node (`b` in
-                // `r.s && r.s.toFixed()` sees `r.s` narrowed to
-                // non-undefined). `??` needs a nullish-specific condition
-                // kind (plain truthiness would over-narrow) — the checker's
-                // logical-assignment RHS frames cover its main use.
+
                 if let NodeData::BinaryExpression(bin) = &node.data {
                     let op = bin.operator_token.kind;
-                    // Assignments in EXPRESSION position also produce
-                    // ASSIGNMENT flow nodes (Go bindAssignmentExpressionFlow
-                    // runs wherever the assignment sits — `(s = 'x')` inside
-                    // an `||` RHS records the write; the statement-level
-                    // handler covers only the outermost form).
+
                     let parent_is_expr_stmt = node
                         .parent
                         .as_ref()
@@ -3816,11 +3043,7 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
                         self.bind(&left);
                         if let Some(current) = self.current_flow.take() {
                             let is_and = op == SyntaxKind::AmpersandAmpersandToken;
-                            // The RHS runs only under the operator's
-                            // "evaluate right" condition (`&&` → left true,
-                            // `||` → left false); the SHORT-CIRCUIT path
-                            // takes the opposite condition (Go
-                            // bindLogicalOperator's keep/else labels).
+
                             let rhs_flags = if is_and {
                                 FlowFlags::TRUE_CONDITION
                             } else {
@@ -3836,11 +3059,7 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
                             let cond = self.create_flow_condition(rhs_flags, &current, &left);
                             self.current_flow = Some(cond);
                             self.bind(&right);
-                            // Merge the short-circuit (keep) path with the
-                            // post-RHS path — the walk unions them
-                            // (`s || (s = 'x')` afterwards: string either
-                            // way; a definite-assignment seed survives on
-                            // the keep path).
+
                             let after_right = self.current_flow.take();
                             let mut label = FlowLabel::new(FlowFlags::BRANCH_LABEL);
                             label.add_antecedent(keep);
@@ -3860,19 +3079,11 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
             _ => {}
         }
 
-        // Recurse into children
         let container_flags = get_container_flags(node.kind);
         if node.kind == SyntaxKind::PropertyDeclaration
             && matches!(&node.data, NodeData::PropertyDeclaration(d) if d.initializer.is_some())
         {
-            // Go `GetContainerFlags`: a PropertyDeclaration WITH an
-            // initializer is a control-flow container — bindContainer gives
-            // it a FRESH flow start, so references in the initializer never
-            // see enclosing assignment narrowing (`const D: AB = 'A';
-            // class C { m = D; }` infers AB, not the narrowed 'A' — GH#62264).
-            // Handled here rather than in bind_container to keep the
-            // container/parent-symbol switches (Go doesn't advance them for
-            // non-IsContainer kinds) untouched.
+
             let prev_flow = self.current_flow.take();
             self.current_flow = Some(Arc::new(FlowNode::new(FlowFlags::START)));
             self.bind_children(node);
@@ -3881,10 +3092,7 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
             self.bind_container(node, container_flags);
         } else {
             self.bind_children(node);
-            // Calls in expression positions also produce CALL flow nodes
-            // (Go `bindCallExpressionFlow` runs for every call expression,
-            // not just expression statements) — `(assert(x !== undefined),
-            // x)` narrows x through the left operand's call flow.
+
             if node.kind == SyntaxKind::CallExpression {
                 if let Some(current) = self.current_flow.take() {
                     let call_flow = self.create_flow_call(&current, node);
@@ -3894,27 +3102,11 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
         }
     }
 
-    /// Create an anonymous symbol (for function expressions, class expressions,
-    /// object literals, type literals).
     fn bind_anonymous_declaration(&mut self, node: &Arc<Node>, flags: SymbolFlags, name: &str) {
         let symbol = self.new_symbol(flags, name.to_string());
         self.symbol_map.set_symbol(node, symbol);
     }
 
-    // ─────────────────────────────────────────────────────────────────────
-    // Import / export binding — ported from `internal/binder/binder.go`
-    // ─────────────────────────────────────────────────────────────────────
-
-    /// Bind an `ImportClause` (`import D from "mod"`). Only the default
-    /// import name `D` is declared here; named bindings and namespace
-    /// imports are handled by their own dispatch arms (`ImportSpecifier`,
-    /// `NamespaceImport`).
-    ///
-    /// The default import alias goes to the container's locals (not
-    /// exports), matching Go's `declareModuleMember` alias branch which
-    /// calls `declareSymbol(GetLocals(container), nil, node, Alias, ...)`.
-    ///
-    /// Mirrors Go's `binder.bindImportClause`.
     fn bind_import_clause(&mut self, node: &Arc<Node>) {
         let has_name = matches!(&node.data, NodeData::ImportClause(data) if data.name.is_some());
         if !has_name {
@@ -3930,15 +3122,6 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
         }
     }
 
-    /// Bind an `ExportAssignment` (`export default <expr>` /
-    /// `export = <expr>`).
-    ///
-    /// The symbol is declared in the container's exports, named "default"
-    /// (for `export default`) or "export=" (for `export =`). If the
-    /// expression is an entity name or a class expression the symbol is an
-    /// `Alias`; otherwise (e.g. `export default 42`) it is a `Property`.
-    ///
-    /// Mirrors Go's `binder.bindExportAssignment`.
     fn bind_export_assignment(&mut self, node: &Arc<Node>) {
         let (is_export_equals, expr_kind) = match &node.data {
             NodeData::ExportAssignment(data) => (data.is_export_equals, data.expression.kind),
@@ -3947,9 +3130,7 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
         let parent_sym = match self.parent_symbol.clone() {
             Some(s) => s,
             None => {
-                // Export assignment inside a block construct without a
-                // container symbol — emit an anonymous declaration so the
-                // node still gets a symbol. Mirrors Go's fallback branch.
+
                 self.bind_anonymous_declaration(
                     node,
                     SymbolFlags::VALUE,
@@ -3958,7 +3139,7 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
                 return;
             }
         };
-        // `ExpressionIsAlias(expr)` = `IsEntityNameExpression || IsClassExpression`.
+
         let is_alias = matches!(
             expr_kind,
             SyntaxKind::Identifier | SyntaxKind::QualifiedName | SyntaxKind::ClassExpression
@@ -3975,8 +3156,7 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
             DeclareTarget::Exports(parent_sym),
         );
         if is_export_equals {
-            // Ensure export assignments have a ValueDeclaration set.
-            // Mirrors Go's `SetValueDeclaration(symbol, node)`.
+
             let symbol_mut = Arc::as_ptr(&symbol) as *mut Symbol;
             unsafe {
                 (*symbol_mut).value_declaration = Some(Arc::clone(node));
@@ -3984,19 +3164,6 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
         }
     }
 
-    /// Bind an `ExportDeclaration` (`export * from "mod"` /
-    /// `export * as ns from "mod"` / `export { a, b }`).
-    ///
-    /// - `export * from "mod"`: record an `ExportStar` symbol in the
-    ///   container's exports.
-    /// - `export * as ns from "mod"`: declare an `Alias` for `ns` in the
-    ///   container's exports (the aliased node is the `NamespaceExport`
-    ///   clause, so its name `ns` is used).
-    /// - `export { a, b }`: nothing to do here — the individual
-    ///   `ExportSpecifier`s already declare their own alias symbols via
-    ///   the shared dispatch arm.
-    ///
-    /// Mirrors Go's `binder.bindExportDeclaration`.
     fn bind_export_declaration(&mut self, node: &Arc<Node>) {
         let export_clause: Option<Arc<Node>> = match &node.data {
             NodeData::ExportDeclaration(data) => data.export_clause.clone(),
@@ -4005,8 +3172,7 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
         let parent_sym = match self.parent_symbol.clone() {
             Some(s) => s,
             None => {
-                // `export *` in a block construct without a container
-                // symbol — anonymous declaration. Mirrors Go's fallback.
+
                 self.bind_anonymous_declaration(
                     node,
                     SymbolFlags::ExportStar,
@@ -4017,7 +3183,7 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
         };
         match &export_clause {
             None => {
-                // `export * from "mod"`.
+
                 self.declare_symbol_into(
                     node,
                     SymbolFlags::ExportStar,
@@ -4026,15 +3192,7 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
                 );
             }
             Some(clause) if clause.kind == SyntaxKind::NamespaceExport => {
-                // `export * as ns from "mod"`. Module FILES keep exported
-                // declarations in the symbol's MEMBERS table while this
-                // alias lands in EXPORTS — when both carry the same name
-                // (`export type Drink` + `export * as Drink from …`),
-                // Go merges them into ONE exports symbol (the import sees
-                // both meanings). Fold the alias flag into the members
-                // symbol and surface it in exports (single-symbol
-                // two-table pattern) so type-position resolution keeps the
-                // TypeAlias meaning (typeAndNamespaceExportMerge).
+
                 let name = self.get_declaration_name(clause);
                 let merged_with_members = parent_sym
                     .members
@@ -4065,20 +3223,11 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
                 );
             }
             _ => {
-                // `export { a, b }` — handled by ExportSpecifier arms.
+
             }
         }
     }
 
-    /// Bind a standalone `NamespaceExportDeclaration` (`export * as ns from
-    /// "mod"` in global declaration files).
-    ///
-    /// Go places this in the file's `GlobalExports` table. The Rust
-    /// `NodeSymbolMap` has no separate global-exports table, so the symbol
-    /// is declared in the container symbol's `exports`, which is where
-    /// downstream lookups search.
-    ///
-    /// Mirrors Go's `binder.bindNamespaceExportDeclaration`.
     fn bind_namespace_export_declaration(&mut self, node: &Arc<Node>) {
         let parent_sym = match self.parent_symbol.clone() {
             Some(s) => s,
@@ -4092,62 +3241,31 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
         );
     }
 
-    // ─────────────────────────────────────────────────────────────────────
-    // Container binding
-    // ─────────────────────────────────────────────────────────────────────
-
-    /// Bind a container node: save/restore container context, then bind children.
     fn bind_container(&mut self, node: &Arc<Node>, flags: ContainerFlags) {
-        // Save (clone, not take): block-only containers below leave
-        // `container` pointing at the enclosing function-like container, so
-        // `var` declarations inside them hoist correctly.
+
         let prev_container = self.container.clone();
         let prev_block = self.block_scope_container.take();
-        // Save the current `this_container`. If this node is a
-        // `IS_THIS_CONTAINER` (function-like), it becomes the new
-        // `this_container` for its children. Mirrors Go's
-        // `saveThisContainer := b.thisContainer` + conditional set
-        // (`binder.go:1482,1513-1514`).
+
         let prev_this_container = self.this_container.take();
-        // Save the current parent_symbol. For container nodes that have a
-        // symbol (e.g. FunctionDeclaration), we'll replace it with the
-        // container's symbol so children are added to its members. For
-        // block-scoped containers without a symbol (e.g. Block), we clear
-        // it so children go into the block's locals.
+
         let prev_parent_symbol = self.parent_symbol.take();
 
-        // Mirrors Go's `bindContainer` (binder.go:1501-1510):
-        // - `IsContainer` nodes (functions, classes, source files, modules…)
-        //   advance BOTH `container` and `block_scope_container`.
-        // - Block-scoped-only containers (Block, For*, CatchClause, …) advance
-        //   ONLY `block_scope_container`.
-        // Keeping `container` at the nearest function-like container is what
-        // lets `var` declarations in nested blocks hoist to the function
-        // scope (see `declare_symbol`). Note: our `get_container_flags` marks
-        // `Block` as IS_CONTAINER (a deviation from Go), so block-only kinds
-        // are filtered out explicitly here.
         let block_only = is_block_only_container(node.kind);
         if flags.contains(ContainerFlags::IS_CONTAINER) && !block_only {
             self.container = Some(Arc::clone(node));
             self.block_scope_container = Some(Arc::clone(node));
         } else {
-            // Block-scoped container (no symbol of its own for locals).
+
             self.block_scope_container = Some(Arc::clone(node));
         }
 
-        // `IS_THIS_CONTAINER` containers (FunctionDeclaration,
-        // FunctionExpression, MethodDeclaration, Constructor, etc.)
-        // become the new `this_container`.
         if flags.contains(ContainerFlags::IS_THIS_CONTAINER) {
             self.this_container = Some(Arc::clone(node));
         }
 
-        // Create locals for this container if it has them
         if has_locals(node.kind) {
             self.symbol_map.locals.insert(node.id(), SymbolTable::new());
-            // A NAMED class expression declares its own name into its
-            // fresh locals (Go binder semantics — `static c = C.a` inside
-            // `var v = class C {...}` resolves).
+
             if node.kind == SyntaxKind::ClassExpression
                 && let NodeData::ClassExpression(data) = &node.data
                 && let Some(name_node) = data.name.as_ref()
@@ -4167,21 +3285,10 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
             }
         }
 
-        // Set parent_symbol to the container's symbol (if it has one).
-        // This ensures children (parameters, class members, etc.) are added
-        // to the container's symbol members rather than the outer scope.
         if let Some(sym) = self.symbol_map.symbol_of(node) {
             self.parent_symbol = Some(Arc::clone(sym));
         }
-        // If the node has no symbol (e.g. Block), parent_symbol remains None,
-        // so declare_symbol falls through to the block_scope_container.locals.
 
-        // Function-like containers get their own fresh control flow graph:
-        // a new START flow node, with the outer flow saved and restored.
-        // This prevents flow effects inside the function body (e.g. a
-        // `return` marking the flow UNREACHABLE) from leaking into the
-        // enclosing scope. Mirrors Go's `bindChildren` flow handling for
-        // `ContainerFlagsIsFunctionLike` containers.
         let is_function_like = flags.contains(ContainerFlags::IS_FUNCTION_LIKE);
         let prev_flow = if is_function_like {
             self.current_flow.take()
@@ -4192,11 +3299,6 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
             self.current_flow = Some(Arc::new(FlowNode::new(FlowFlags::START)));
         }
 
-        // Named function expressions can reference their own name inside the
-        // body. Add the function's symbol to its own locals table so the
-        // name is visible during binding/checking of the body. Mirrors Go's
-        // NameResolver special case for `KindFunctionExpression` which
-        // returns `location.Symbol()` when the name matches.
         if node.kind == SyntaxKind::FunctionExpression {
             let sym_and_name = self
                 .symbol_map
@@ -4213,7 +3315,6 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
 
         self.bind_children(node);
 
-        // Restore the outer flow for function-like containers.
         if is_function_like {
             self.current_flow = prev_flow;
         }
@@ -4224,15 +3325,8 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
         self.parent_symbol = prev_parent_symbol;
     }
 
-    // ─────────────────────────────────────────────────────────────────────
-    // Child binding
-    // ─────────────────────────────────────────────────────────────────────
-
-    /// Bind all children of a node.
     fn bind_children(&mut self, node: &Arc<Node>) {
-        // Use a raw pointer to work around the borrow checker: `bind` needs
-        // `&mut self` but `for_each_child` gives us shared references to children.
-        // This is safe because we don't alias the node itself.
+
         let this = self as *mut Self;
         crate::ast::node_data_generated::for_each_child(node, |child| {
             unsafe {
@@ -4242,19 +3336,10 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
         });
     }
 
-    /// Get the number of symbols created.
     pub fn symbol_count(&self) -> usize {
         self.symbol_count
     }
 
-    /// Bind a `TypeParameter` node. Mirrors Go's `bindTypeParameter`.
-    ///
-    /// When the type parameter is the child of an `InferType` (i.e.
-    /// `infer R`), it is declared as a local of the enclosing
-    /// `ConditionalType` (found via `get_infer_type_container`), so that
-    /// `getInferTypeParameters` can later collect the infer type
-    /// parameters. Otherwise it falls through to the normal
-    /// `declare_symbol` path.
     fn bind_type_parameter(&mut self, node: &Arc<Node>) {
         let parent_is_infer = node
             .parent
@@ -4274,7 +3359,7 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
                 );
                 return;
             }
-            // No enclosing ConditionalType — fall back to anonymous declaration.
+
             let name = self.get_declaration_name(node);
             self.bind_anonymous_declaration(node, SymbolFlags::TypeParameter, &name);
             return;
@@ -4282,9 +3367,6 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
         self.declare_symbol(node, SymbolFlags::TypeParameter, SymbolFlags::TYPE);
     }
 
-    /// Find the `ConditionalType` node whose `extends_type` clause contains
-    /// the given `InferType` node. Mirrors Go's `getInferTypeContainer`.
-    /// Requires parent pointers to be populated (see `set_parent_pointers`).
     fn get_infer_type_container(&self, infer_node: &Arc<Node>) -> Option<Arc<Node>> {
         let mut current = Arc::clone(infer_node);
         loop {
@@ -4293,7 +3375,7 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
                 None => return None,
             };
             if parent.kind == SyntaxKind::ConditionalType {
-                // Check that `current` is the extends_type of the conditional.
+
                 let is_extends = match &parent.data {
                     NodeData::ConditionalTypeNode(data) => {
                         Arc::ptr_eq(&data.extends_type, &current)
@@ -4309,10 +3391,6 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
         }
     }
 
-    /// Declare a symbol as a local of a specific container node, bypassing
-    /// the normal `container`/`block_scope_container` state. Used for
-    /// `infer R` type parameters which belong to the `ConditionalType`
-    /// even though it is not the active container.
     fn declare_local_symbol(
         &mut self,
         container: &Arc<Node>,
@@ -4344,7 +3422,6 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
     }
 }
 
-/// Get container flags for a node kind.
 fn get_container_flags(kind: SyntaxKind) -> ContainerFlags {
     match kind {
         SyntaxKind::ClassDeclaration | SyntaxKind::ClassExpression => {
@@ -4374,16 +3451,7 @@ fn get_container_flags(kind: SyntaxKind) -> ContainerFlags {
                 | ContainerFlags::HAS_LOCALS
                 | ContainerFlags::IS_THIS_CONTAINER
         }
-        // Signature kinds (Go GetContainerFlags: `KindMethodSignature,
-        // KindCallSignature, KindFunctionType, KindConstructSignature,
-        // KindConstructorType` → IsContainer | IsControlFlowContainer |
-        // HasLocals | IsFunctionLike; they propagate the outer `this`
-        // rather than introducing one, so no IS_THIS_CONTAINER). Being
-        // HasLocals containers means each signature's type parameters are
-        // declared into the SIGNATURE's own locals — different methods of
-        // one interface declaring `K` must not merge into a single symbol
-        // (the merged symbol's constraint would come from whichever
-        // declaration was seen first).
+
         SyntaxKind::MethodSignature
         | SyntaxKind::CallSignature
         | SyntaxKind::ConstructSignature
@@ -4397,14 +3465,7 @@ fn get_container_flags(kind: SyntaxKind) -> ContainerFlags {
         SyntaxKind::IndexSignature => {
             ContainerFlags::IS_CONTAINER | ContainerFlags::HAS_LOCALS
         }
-        // Go GetContainerFlags groups ModuleDeclaration with
-        // TypeAliasDeclaration/JSTypeAliasDeclaration/MappedType as
-        // IsContainer|HasLocals: a generic alias's type parameters
-        // (`export type G<T> = …`) are declared in the ALIAS's own scope —
-        // without this they leak into the file symbol's members and can
-        // merge with a same-named top-level export
-        // (`export type T = G<…>` reports TS2459 —
-        // declarationEmitQualifiedAliasTypeArgument).
+
         SyntaxKind::TypeAliasDeclaration | SyntaxKind::JSTypeAliasDeclaration | SyntaxKind::MappedType => {
             ContainerFlags::IS_CONTAINER | ContainerFlags::HAS_LOCALS
         }
@@ -4424,7 +3485,6 @@ fn get_container_flags(kind: SyntaxKind) -> ContainerFlags {
     }
 }
 
-/// Whether a node kind is a block-scoped container.
 #[allow(dead_code)]
 fn is_block_scoped_container(kind: SyntaxKind) -> bool {
     matches!(
@@ -4440,14 +3500,6 @@ fn is_block_scoped_container(kind: SyntaxKind) -> bool {
     )
 }
 
-/// Node kinds that are block-scoped containers but NOT symbol containers —
-/// `Block`, the loop statements, `CatchClause`, and `CaseBlock`. These mirror
-/// the `ContainerFlagsIsBlockScopedContainer`-only kinds in Go's
-/// `GetContainerFlags`. Our `get_container_flags` additionally marks `Block`
-/// as IS_CONTAINER (a deviation), so `bind_container` filters these kinds out
-/// explicitly when deciding whether to advance `container`: `container` must
-/// keep pointing at the nearest function-like container so `var` declarations
-/// in nested blocks hoist to the function scope.
 fn is_block_only_container(kind: SyntaxKind) -> bool {
     matches!(
         kind,
@@ -4460,10 +3512,6 @@ fn is_block_only_container(kind: SyntaxKind) -> bool {
     )
 }
 
-/// Whether `kind` is a function-like (or module/file) container that `var`
-/// declarations hoist into. Mirrors the locals-bearing container kinds of Go's
-/// `declareSymbolAndAddToSymbolTable` (functions declare into their locals;
-/// source files / modules route through their symbol's member tables).
 fn is_var_container_kind(kind: SyntaxKind) -> bool {
     matches!(
         kind,
@@ -4479,9 +3527,6 @@ fn is_var_container_kind(kind: SyntaxKind) -> bool {
     )
 }
 
-/// Whether a node kind has locals (a local symbol table).
-/// Collect BindingElement nodes from a binding pattern (recursively —
-/// patterns nest).
 fn collect_binding_elements<'a>(node: &'a Arc<Node>, out: &mut Vec<&'a Arc<Node>>) {
     if let NodeData::BindingPattern(pattern) = &node.data {
         for el in pattern.elements.iter() {
@@ -4499,9 +3544,6 @@ fn collect_binding_elements<'a>(node: &'a Arc<Node>, out: &mut Vec<&'a Arc<Node>
     }
 }
 
-/// Whether a function-like node has an implementation body (arrow and
-/// function expressions always do; declarations may be overload
-/// signatures; method/type signatures never do).
 fn fn_like_body_present(parent: &Arc<Node>) -> bool {
     match &parent.data {
         NodeData::FunctionDeclaration(d) => d.body.is_some(),
@@ -4545,21 +3587,16 @@ fn has_locals(kind: SyntaxKind) -> bool {
     )
 }
 
-/// Bind a source file using a fresh binder.
 pub fn bind_source_file(file: &Arc<SourceFile>) -> NodeSymbolMap {
     let mut binder = Binder::new();
     binder.bind_source_file(file);
     std::mem::take(&mut binder.symbol_map)
 }
 
-/// Whether a case/default clause carries no statements (it only labels the
-/// next clause's statements — the fall-through group form
-/// `case a: case b:`).
 fn clause_statements_empty(clause: &Arc<Node>) -> bool {
     matches!(&clause.data, NodeData::CaseOrDefaultClause(d) if d.statements.nodes.is_empty())
 }
 
-/// Whether a syntax kind is an assignment operator token.
 fn is_assignment_operator(kind: SyntaxKind) -> bool {
     matches!(
         kind,
@@ -4601,10 +3638,10 @@ mod tests {
             _ => unreachable!(),
         };
         assert!(!statements.nodes.is_empty());
-        // The variable statement contains a declaration list with declarations
+
         let var_stmt = &statements.nodes[0];
         assert_eq!(var_stmt.kind, SyntaxKind::VariableStatement);
-        // Symbol count should be > 0 (file symbol + variable symbol)
+
         let mut binder = Binder::new();
         binder.bind_source_file(&Arc::clone(&file));
         assert!(binder.symbol_count() >= 2);
@@ -4624,7 +3661,7 @@ mod tests {
         let (file, _map) = parse_and_bind("class Foo { bar() {} }");
         let mut binder = Binder::new();
         binder.bind_source_file(&Arc::clone(&file));
-        assert!(binder.symbol_count() >= 3); // file + class + method
+        assert!(binder.symbol_count() >= 3);
     }
 
     #[test]
@@ -4632,7 +3669,7 @@ mod tests {
         let (file, _map) = parse_and_bind("interface Foo { bar: number; }");
         let mut binder = Binder::new();
         binder.bind_source_file(&file);
-        assert!(binder.symbol_count() >= 3); // file + interface + property
+        assert!(binder.symbol_count() >= 3);
     }
 
     #[test]
@@ -4640,7 +3677,7 @@ mod tests {
         let (file, _map) = parse_and_bind("import { foo } from 'mod';");
         let mut binder = Binder::new();
         binder.bind_source_file(&file);
-        // Import is not yet parsed by our parser, but binding shouldn't crash
+
         let _ = binder.symbol_count();
     }
 
@@ -4649,7 +3686,7 @@ mod tests {
         let (file, _map) = parse_and_bind("let x = 1; let y = 2; let z = 3;");
         let mut binder = Binder::new();
         binder.bind_source_file(&file);
-        assert!(binder.symbol_count() >= 4); // file + 3 variables
+        assert!(binder.symbol_count() >= 4);
     }
 
     #[test]
@@ -4657,18 +3694,14 @@ mod tests {
         let (file, _map) = parse_and_bind("function foo() { let x = 1; }");
         let mut binder = Binder::new();
         binder.bind_source_file(&file);
-        // file + function + variable
+
         assert!(binder.symbol_count() >= 3);
     }
-
-    // ───────────────────────────────────────────────────────────────
-    // Flow graph tests
-    // ───────────────────────────────────────────────────────────────
 
     #[test]
     fn flow_start_node_exists() {
         let (file, map) = parse_and_bind("let x = 1;");
-        // File should have a start flow node
+
         let flow = map.flow_node_of(&file.node);
         assert!(flow.is_some());
         let flow = flow.unwrap();
@@ -4678,25 +3711,25 @@ mod tests {
     #[test]
     fn flow_identifier_has_flow_node() {
         let (file, map) = parse_and_bind("let x = 1; x;");
-        // Find the identifier x (the second statement's expression)
+
         let statements = match &file.node.data {
             NodeData::SourceFile(data) => &data.statements,
             _ => unreachable!(),
         };
-        // Second statement is ExpressionStatement containing Identifier
+
         let expr_stmt = &statements.nodes[1];
         let expr = match &expr_stmt.data {
             NodeData::ExpressionStatement(data) => &data.expression,
             _ => unreachable!(),
         };
         assert_eq!(expr.kind, SyntaxKind::Identifier);
-        // The identifier should have a flow node
+
         assert!(map.flow_node_of(expr).is_some());
     }
 
     #[test]
     fn flow_if_statement_merges() {
-        // Just make sure binding an if statement doesn't crash
+
         let (file, _map) = parse_and_bind("let x = 1; if (x > 0) { x = 2; } else { x = 3; }");
         let mut binder = Binder::new();
         binder.bind_source_file(&file);
@@ -4763,7 +3796,7 @@ mod tests {
 
     #[test]
     fn flow_try_catch_finally_does_not_crash() {
-        // `try/catch/finally` must build a flow graph without panicking.
+
         let (file, _map) =
             parse_and_bind("try { let x = 1; } catch (e) { let y = 2; } finally { let z = 3; }");
         let mut binder = Binder::new();
@@ -4773,7 +3806,7 @@ mod tests {
 
     #[test]
     fn flow_try_with_throw_in_catch() {
-        // Throw inside try should route through catch, not fall through.
+
         let (file, _map) = parse_and_bind(
             "function f() {\
              try { throw new Error(); }\
@@ -4788,7 +3821,7 @@ mod tests {
 
     #[test]
     fn flow_labeled_break_to_outer_loop() {
-        // Labeled break must route the inner loop's exit to the outer label.
+
         let (file, _map) = parse_and_bind(
             "outer: for (let i = 0; i < 3; i++) {\
              for (let j = 0; j < 3; j++) {\
@@ -4803,7 +3836,7 @@ mod tests {
 
     #[test]
     fn flow_labeled_continue_to_outer_loop() {
-        // Labeled continue must route the inner loop's continue to the outer label.
+
         let (file, _map) = parse_and_bind(
             "outer: for (let i = 0; i < 3; i++) {\
              for (let j = 0; j < 3; j++) {\
@@ -4818,17 +3851,12 @@ mod tests {
 
     #[test]
     fn flow_array_mutation_call_has_effects() {
-        // `arr.push(x)` is an ARRAY_MUTATION flow node — has_flow_effects
-        // must be true and binding must not crash.
+
         let (file, _map) = parse_and_bind("let arr = []; arr.push(1);");
         let mut binder = Binder::new();
         binder.bind_source_file(&file);
         assert!(binder.has_flow_effects);
     }
-
-    // ───────────────────────────────────────────────────────────────
-    // Import / export binding — P3.4
-    // ───────────────────────────────────────────────────────────────
 
     fn file_symbol<'a>(file: &'a SourceFile, map: &'a NodeSymbolMap) -> &'a Arc<Symbol> {
         map.symbols
@@ -4860,7 +3888,6 @@ mod tests {
         found
     }
 
-    /// Depth-first search for a descendant of the given kind.
     fn find_descendant(node: &Arc<Node>, kind: SyntaxKind) -> Option<Arc<Node>> {
         if node.kind == kind {
             return Some(Arc::clone(node));
@@ -4877,8 +3904,7 @@ mod tests {
 
     #[test]
     fn bind_export_default_expression_creates_default_export_symbol() {
-        // `export default 42` → a Property symbol named "default" in the
-        // file's exports (the expression is a literal, not an alias).
+
         let (file, map) = parse_and_bind("export default 42;");
         let export_assignment =
             find_statement(&file, SyntaxKind::ExportAssignment).expect("export assignment");
@@ -4899,8 +3925,7 @@ mod tests {
 
     #[test]
     fn bind_export_default_identifier_creates_alias() {
-        // `export default foo` → an Alias symbol named "default" (the
-        // expression is an entity name).
+
         let (file, map) = parse_and_bind("const foo = 1; export default foo;");
         let export_assignment =
             find_statement(&file, SyntaxKind::ExportAssignment).expect("export assignment");
@@ -4915,8 +3940,7 @@ mod tests {
 
     #[test]
     fn bind_export_equals_creates_export_equals_symbol() {
-        // `export = x` → an Alias symbol named "export=" with a value
-        // declaration set.
+
         let (file, map) = parse_and_bind("function x() {} export = x;");
         let export_assignment =
             find_statement(&file, SyntaxKind::ExportAssignment).expect("export assignment");
@@ -4938,7 +3962,7 @@ mod tests {
 
     #[test]
     fn bind_export_star_creates_export_star_symbol() {
-        // `export * from "mod"` → an ExportStar symbol in the file's exports.
+
         let (file, map) = parse_and_bind("export * from \"mod\";");
         let export_decl =
             find_statement(&file, SyntaxKind::ExportDeclaration).expect("export declaration");
@@ -4960,8 +3984,7 @@ mod tests {
 
     #[test]
     fn bind_export_star_as_ns_creates_alias() {
-        // `export * as ns from "mod"` → an Alias symbol named "ns" in the
-        // file's exports, attached to the NamespaceExport clause node.
+
         let (file, map) = parse_and_bind("export * as ns from \"mod\";");
         let export_decl =
             find_statement(&file, SyntaxKind::ExportDeclaration).expect("export declaration");
@@ -4979,13 +4002,11 @@ mod tests {
 
     #[test]
     fn bind_export_named_specifiers_does_not_duplicate() {
-        // `export { a, b }` is handled by the ExportSpecifier arms; the
-        // ExportDeclaration itself should not declare an extra symbol.
+
         let (file, map) = parse_and_bind("const a = 1; const b = 2; export { a, b };");
         let export_decl =
             find_statement(&file, SyntaxKind::ExportDeclaration).expect("export declaration");
-        // No symbol should be created directly on the ExportDeclaration for
-        // `export { ... }` (only on the individual ExportSpecifiers).
+
         assert!(
             map.symbol_of(&export_decl).is_none(),
             "export {{ a, b }} should not create a symbol on the ExportDeclaration"
@@ -4994,8 +4015,7 @@ mod tests {
 
     #[test]
     fn bind_import_clause_default_import_creates_local_alias() {
-        // `import D from "mod"` → an Alias symbol named "D" in the file's
-        // locals (not exports).
+
         let (file, map) = parse_and_bind("import D from \"mod\";");
         let import_decl =
             find_statement(&file, SyntaxKind::ImportDeclaration).expect("import declaration");
@@ -5015,8 +4035,7 @@ mod tests {
 
     #[test]
     fn bind_import_clause_without_name_is_noop() {
-        // `import { x } from "mod"` has no default import name; the
-        // ImportClause should declare no symbol itself.
+
         let (file, map) = parse_and_bind("import { x } from \"mod\";");
         let import_decl =
             find_statement(&file, SyntaxKind::ImportDeclaration).expect("import declaration");
@@ -5029,10 +4048,9 @@ mod tests {
 
     #[test]
     fn bind_exported_namespace_member_has_export_symbol_link() {
-        // `namespace N { export const x = 1; }` — the exported member `x`
-        // should have its `export_symbol` link set (self-reference).
+
         let (file, map) = parse_and_bind("namespace N { export const x = 1; }");
-        // Find the ModuleDeclaration N, then its symbol's exports.
+
         let ns = find_statement(&file, SyntaxKind::ModuleDeclaration).expect("namespace N");
         let ns_sym = map.symbol_of(&ns).expect("namespace symbol");
         let x_export = ns_sym.exports.get("x").expect("x in N's exports");
@@ -5048,9 +4066,7 @@ mod tests {
 
     #[test]
     fn bind_non_exported_namespace_member_has_no_export_symbol() {
-        // `namespace N { const x = 1; }` — non-exported member `x` should
-        // NOT have an `export_symbol` link and should be in locals, not
-        // exports.
+
         let (file, map) = parse_and_bind("namespace N { const x = 1; }");
         let ns = find_statement(&file, SyntaxKind::ModuleDeclaration).expect("namespace N");
         let ns_sym = map.symbol_of(&ns).expect("namespace symbol");
@@ -5058,9 +4074,7 @@ mod tests {
             ns_sym.exports.get("x").is_none(),
             "non-exported member should not be in exports"
         );
-        // Non-exported namespace members live in the ModuleDeclaration
-        // container's locals (the binder keys locals on the container node,
-        // which is the ModuleDeclaration, not the ModuleBlock).
+
         let locals = map.locals.get(&ns.id()).expect("namespace locals table");
         let x_local = locals.get("x").expect("x in locals");
         assert!(
@@ -5071,12 +4085,11 @@ mod tests {
 
     #[test]
     fn bind_exported_top_level_member_has_export_symbol_link() {
-        // `export const x = 1;` at the top level — `x` should have its
-        // `export_symbol` link set (self-reference).
+
         let (file, map) = parse_and_bind("export const x = 1;");
         let var_stmt =
             find_statement(&file, SyntaxKind::VariableStatement).expect("variable statement");
-        // The VariableDeclaration is the first child of the declaration list.
+
         let decl_list =
             find_child(&var_stmt, SyntaxKind::VariableDeclarationList).expect("declaration list");
         let var_decl =
@@ -5091,12 +4104,7 @@ mod tests {
 
     #[test]
     fn bind_generic_alias_type_params_do_not_leak_into_file_members() {
-        // `export type G<T> = …; export type T = G<"a">;` — G's type
-        // parameter T is declared in the ALIAS's own scope (Go:
-        // TypeAliasDeclaration is IsContainer|HasLocals), NOT the file
-        // symbol's members. A leaked T would merge with the same-named
-        // top-level export and lose its export face (TS2459 —
-        // declarationEmitQualifiedAliasTypeArgument).
+
         let (file, map) = parse_and_bind(
             "export type G<T> = { [P in T]: string };\nexport type T = G<\"a\">;\nexport const q = 1;",
         );
@@ -5105,8 +4113,7 @@ mod tests {
         let Some(t_sym) = t_in_file else {
             panic!("exported alias T should be reachable in the file symbol tables");
         };
-        // The file-table T must be the exported ALIAS (declaration is a
-        // TypeAliasDeclaration), never the type parameter of G.
+
         assert!(
             t_sym
                 .declarations
@@ -5120,7 +4127,7 @@ mod tests {
             "exported alias T must not carry TypeParameter flags (got {:?})",
             t_sym.flags
         );
-        // The alias symbol's own members carry G's type parameter.
+
         let g_stmt = find_statement(&file, SyntaxKind::TypeAliasDeclaration).unwrap();
         let g_sym = map.symbol_of(&g_stmt).expect("symbol for G");
         assert!(
@@ -5131,9 +4138,7 @@ mod tests {
 
     #[test]
     fn bind_mapped_type_param_in_node_locals() {
-        // `{ [P in K]: V }` — the mapped type node is a HasLocals
-        // container; P lives in the NODE's locals, never in the file
-        // symbol's tables.
+
         let (file, map) = parse_and_bind("type M<K extends string> = { [P in K]: number };");
         let fsym = file_symbol(&file, &map);
         assert!(

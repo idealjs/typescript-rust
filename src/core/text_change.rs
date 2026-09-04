@@ -1,8 +1,5 @@
-//! Text change (edit) types, ported from `internal/core/textchange.go`.
-
 use super::text::TextRange;
 
-/// A text edit: replace the range `[pos, end)` with `new_text`.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct TextChange {
     pub range: TextRange,
@@ -17,7 +14,6 @@ impl TextChange {
         }
     }
 
-    /// Apply this edit to `text`, returning the new string.
     pub fn apply_to(&self, text: &str) -> String {
         let pos = self.range.pos();
         let end = self.range.end();
@@ -29,9 +25,6 @@ impl TextChange {
     }
 }
 
-/// Apply a sequence of non-overlapping edits (sorted by position) to `text`.
-///
-/// Mirrors `core.ApplyBulkEdits` in Go.
 pub fn apply_bulk_edits(text: &str, edits: &[TextChange]) -> String {
     let mut result = String::with_capacity(text.len());
     let mut last_end = 0;
@@ -66,7 +59,7 @@ mod tests {
             TextChange::new(TextRange::new(2, 3), "C"),
             TextChange::new(TextRange::new(5, 6), "F"),
         ];
-        // a->A at 0, b kept, c->C at 2, d kept, e kept, f->F at 5
+
         assert_eq!(apply_bulk_edits(text, &edits), "AbCdeF");
     }
 }

@@ -1,13 +1,5 @@
-//! Tests ported from `internal/vfs/osvfs/` (3 tests).
-//!
-//! Tests for the OS-backed file system (`OsFS`). These exercise real file
-//! system operations using temporary directories.
-
 use super::*;
 
-/// Create a unique temporary directory for testing.
-/// The path is canonicalized to avoid macOS `/var` → `/private/var` symlink
-/// resolution issues when creating nested symlinks inside the temp dir.
 fn test_temp_dir(label: &str) -> std::path::PathBuf {
     let dir = std::env::temp_dir().join(format!(
         "tsox_vfs_test_{}_{}_{}",
@@ -22,10 +14,6 @@ fn test_temp_dir(label: &str) -> std::path::PathBuf {
     std::fs::canonicalize(&dir).unwrap_or(dir)
 }
 
-// ---------------------------------------------------------------------------
-// TestOS — adapted: reads Cargo.toml instead of go.mod
-// ---------------------------------------------------------------------------
-
 #[test]
 fn test_os_read_file() {
     let fs = OsFS;
@@ -38,10 +26,10 @@ fn test_os_read_file() {
 #[test]
 fn test_os_realpath() {
     let fs = OsFS;
-    // Realpath of home directory should resolve successfully.
+
     if let Ok(home) = std::env::var("HOME") {
         let realpath = fs.realpath(&home);
-        // canonicalize should produce an absolute path
+
         assert!(realpath.starts_with('/'));
     }
 }
@@ -54,10 +42,6 @@ fn test_os_use_case_sensitive_file_names() {
     #[cfg(not(target_os = "windows"))]
     assert!(fs.use_case_sensitive_file_names());
 }
-
-// ---------------------------------------------------------------------------
-// TestSymlinkRealpath — verifies OsFS::realpath resolves symlinks
-// ---------------------------------------------------------------------------
 
 #[cfg(unix)]
 #[test]
@@ -76,7 +60,6 @@ fn test_symlink_realpath() {
 
     let link_file = link.join("file");
 
-    // Verify the symlinked file is readable.
     let contents = std::fs::read_to_string(&link_file).unwrap();
     assert_eq!(contents, "hello");
 
@@ -84,16 +67,10 @@ fn test_symlink_realpath() {
     let target_realpath = fs.realpath(target_file.to_str().unwrap());
     let link_realpath = fs.realpath(link_file.to_str().unwrap());
 
-    // realpath of link/file should equal realpath of target/file.
     assert_eq!(link_realpath, target_realpath);
 
-    // Clean up.
     let _ = std::fs::remove_dir_all(&tmp);
 }
-
-// ---------------------------------------------------------------------------
-// TestGetAccessibleEntries — verifies OsFS reports files, dirs, and symlinks
-// ---------------------------------------------------------------------------
 
 #[cfg(unix)]
 #[test]
@@ -117,7 +94,6 @@ fn test_get_accessible_entries() {
     std::fs::create_dir_all(&target_dir1).unwrap();
     std::fs::create_dir_all(&target_dir2).unwrap();
 
-    // Create symlinks inside link/ pointing to target's entries.
     symlink(&target_file1, link.join("file1")).unwrap();
     symlink(&target_file2, link.join("file2")).unwrap();
     symlink(&target_dir1, link.join("dir1")).unwrap();
@@ -128,7 +104,7 @@ fn test_get_accessible_entries() {
 
     assert_eq!(entries.directories, vec!["dir1", "dir2"]);
     assert_eq!(entries.files, vec!["file1", "file2"]);
-    // All four entries are symlinks.
+
     assert_eq!(entries.symlinks.len(), 4);
     for name in &["file1", "file2", "dir1", "dir2"] {
         assert!(
@@ -138,12 +114,10 @@ fn test_get_accessible_entries() {
         );
     }
 
-    // Non-symlink directory should have empty symlinks.
     let entries2 = fs.get_accessible_entries(target.to_str().unwrap());
     assert_eq!(entries2.directories, vec!["dir1", "dir2"]);
     assert_eq!(entries2.files, vec!["file1", "file2"]);
     assert!(entries2.symlinks.is_empty());
 
-    // Clean up.
     let _ = std::fs::remove_dir_all(&tmp);
 }

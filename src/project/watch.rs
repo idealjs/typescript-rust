@@ -1,5 +1,3 @@
-//! File watch registry and WatchedFiles (1:1 port of Go's `internal/project/watch.go`).
-
 #![allow(dead_code)]
 
 use std::collections::{HashMap, HashSet};
@@ -10,16 +8,10 @@ use crate::lsp::lsproto;
 
 const MIN_WATCH_LOCATION_DEPTH: usize = 2;
 
-/// A unique identifier for a registered file watcher.
-///
-/// Go: `type WatcherID string`.
 pub type WatcherID = String;
 
 static WATCHER_ID: AtomicU64 = AtomicU64::new(0);
 
-/// Glob patterns for watching, split by workspace membership.
-///
-/// Go: `type PatternsAndIgnored struct { ... }`.
 #[derive(Debug, Clone, Default)]
 pub struct PatternsAndIgnored {
     pub directories_outside_workspace: Vec<String>,
@@ -27,24 +19,18 @@ pub struct PatternsAndIgnored {
     pub ignored: HashSet<String>,
 }
 
-/// Key for deduplicating file system watchers.
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 struct FileSystemWatcherKey {
     pattern: String,
     kind: lsproto::WatchKind,
 }
 
-/// Value tracking ref count and watcher ID.
 #[derive(Debug)]
 struct FileSystemWatcherValue {
     count: i32,
     id: WatcherID,
 }
 
-/// Tracks the current watch globs and how many individual `WatchedFiles`
-/// reference each glob. All methods are safe for concurrent use.
-///
-/// Go: `type watchRegistry struct { ... }`.
 pub struct WatchRegistry {
     entries: Mutex<HashMap<FileSystemWatcherKey, FileSystemWatcherValue>>,
     pending: Mutex<HashSet<WatcherID>>,
@@ -58,8 +44,6 @@ impl WatchRegistry {
         }
     }
 
-    /// Increments the ref count for a watcher. Returns `true` if this is the
-    /// first reference (i.e., the watcher is new).
     pub fn acquire(&self, watcher: &lsproto::FileSystemWatcher, id: WatcherID) -> bool {
         let key = to_file_system_watcher_key(watcher);
         let mut entries = self.entries.lock().unwrap();
@@ -73,7 +57,6 @@ impl WatchRegistry {
         value.count == 1
     }
 
-    /// Decrements the ref count. Returns `(id, true)` if the entry was removed.
     pub fn release(&self, watcher: &lsproto::FileSystemWatcher) -> (WatcherID, bool) {
         let key = to_file_system_watcher_key(watcher);
         let mut entries = self.entries.lock().unwrap();
@@ -92,17 +75,14 @@ impl WatchRegistry {
         }
     }
 
-    /// Records that a watcher's registration failed and needs retry.
     pub fn mark_pending(&self, id: &WatcherID) {
         self.pending.lock().unwrap().insert(id.clone());
     }
 
-    /// Removes a watcher from the pending set after successful registration.
     pub fn clear_pending(&self, id: &WatcherID) {
         self.pending.lock().unwrap().remove(id);
     }
 
-    /// Returns true if the watcher needs retry due to a previous failure.
     pub fn is_pending(&self, id: &WatcherID) -> bool {
         self.pending.lock().unwrap().contains(id)
     }
@@ -122,9 +102,6 @@ fn to_file_system_watcher_key(w: &lsproto::FileSystemWatcher) -> FileSystemWatch
     FileSystemWatcherKey { pattern, kind }
 }
 
-/// Returns the string form of a FileSystemWatcher's glob pattern.
-///
-/// Go: `func fileSystemWatcherGlobString(w *lsproto.FileSystemWatcher) string`.
 pub fn file_system_watcher_glob_string(w: &lsproto::FileSystemWatcher) -> String {
     if let Some(pattern) = &w.glob_pattern.pattern {
         return pattern.clone();
@@ -139,9 +116,6 @@ pub fn file_system_watcher_glob_string(w: &lsproto::FileSystemWatcher) -> String
     String::new()
 }
 
-/// A set of watchers computed from input data of type `T`.
-///
-/// Go: `type WatchedFiles[T any] struct { ... }`.
 pub struct WatchedFiles<T: Clone + Send + Sync> {
     name: String,
     watch_kind: lsproto::WatchKind,
@@ -160,9 +134,6 @@ struct WatchedFilesInner<T> {
     current_id: u64,
 }
 
-/// The computed set of watchers for a `WatchedFiles`.
-///
-/// Go: `type Watchers struct { ... }`.
 #[derive(Debug, Clone)]
 pub struct Watchers {
     pub watcher_id: WatcherID,
@@ -239,17 +210,11 @@ impl<T: Clone + Send + Sync + Default> WatchedFiles<T> {
     }
 }
 
-/// Builds a recursive glob pattern for a directory: `<dir>/**/*`.
-///
-/// Go: `func getRecursiveGlobPattern(directory string) string`.
 pub fn get_recursive_glob_pattern(directory: &str) -> String {
     let dir = crate::tspath::remove_trailing_directory_separator(directory);
     format!("{}/**/*", dir)
 }
 
-/// Returns the string form of a recursive watcher for a directory.
-///
-/// Go: `func recursiveDirectoryGlobPattern(directory string, useRelativePattern bool) string`.
 pub fn recursive_directory_glob_pattern(directory: &str, use_relative_pattern: bool) -> String {
     if use_relative_pattern {
         format!("file://{directory}/**/*")

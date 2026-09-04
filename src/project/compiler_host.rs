@@ -1,5 +1,3 @@
-//! Compiler host for the project package (1:1 port of Go's `internal/project/compilerhost.go`).
-
 #![allow(dead_code)]
 
 use std::sync::Arc;
@@ -8,9 +6,6 @@ use crate::compiler::CompilerHost;
 use crate::tspath::Path;
 use crate::vfs::FS;
 
-/// Session options (immutable for the server lifetime).
-///
-/// Go: `type SessionOptions struct { ... }`.
 #[derive(Clone)]
 pub struct SessionOptions {
     pub current_directory: String,
@@ -42,17 +37,11 @@ impl Default for SessionOptions {
     }
 }
 
-/// Session initialization parameters.
-///
-/// Go: `type SessionInit struct { ... }`.
 pub struct SessionInit {
     pub options: SessionOptions,
     pub fs: Arc<dyn FS>,
 }
 
-/// A compiler host backed by the project's source FS and config registry.
-///
-/// Go: `type compilerHost struct { ... }`.
 pub struct CompilerHostImpl {
     config_file_path: Path,
     current_directory: String,

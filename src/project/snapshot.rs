@@ -1,5 +1,3 @@
-//! Immutable snapshot (1:1 port of Go's `internal/project/snapshot.go`).
-
 #![allow(dead_code)]
 
 use std::collections::HashSet;
@@ -15,9 +13,6 @@ use super::file_change::FileChangeSummary;
 use super::project::Project;
 use super::project_collection::ProjectCollection;
 
-/// Why the snapshot is being updated.
-///
-/// Go: `type UpdateReason int`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum UpdateReason {
     #[default]
@@ -34,9 +29,6 @@ pub enum UpdateReason {
     IdleCleanDiskCache,
 }
 
-/// A request for specific resources to be loaded into a snapshot.
-///
-/// Go: `type ResourceRequest struct { ... }`.
 #[derive(Default, Clone)]
 pub struct ResourceRequest {
     pub documents: Vec<lsproto::DocumentUri>,
@@ -46,9 +38,6 @@ pub struct ResourceRequest {
     pub auto_imports: lsproto::DocumentUri,
 }
 
-/// A request to load a specific project tree.
-///
-/// Go: `type ProjectTreeRequest struct { ... }`.
 #[derive(Clone)]
 pub struct ProjectTreeRequest {
     pub referenced_projects: Option<HashSet<Path>>,
@@ -74,9 +63,6 @@ impl ProjectTreeRequest {
     }
 }
 
-/// Describes what changed for a snapshot clone.
-///
-/// Go: `type SnapshotChange struct { ... }`.
 #[derive(Default, Clone)]
 pub struct SnapshotChange {
     pub resource_request: ResourceRequest,
@@ -86,9 +72,6 @@ pub struct SnapshotChange {
     pub clean_disk_cache: bool,
 }
 
-/// An immutable snapshot of all project state.
-///
-/// Go: `type Snapshot struct { ... }`.
 pub struct Snapshot {
     pub id: u64,
     pub parent_id: u64,
@@ -101,7 +84,7 @@ pub struct Snapshot {
 }
 
 impl Snapshot {
-    /// Initializes a snapshot with refCount 1.
+
     pub fn new(id: u64) -> Self {
         let s = Snapshot {
             id,
@@ -132,7 +115,6 @@ impl Snapshot {
         todo!("Snapshot::read_file requires fs integration")
     }
 
-    /// Increments the ref count. Panics on disposed snapshot.
     pub fn r#ref(&self) {
         let prev = self.ref_count.fetch_add(1, Ordering::SeqCst);
         if prev <= 0 {
@@ -143,7 +125,6 @@ impl Snapshot {
         }
     }
 
-    /// Attempts to increment the ref count. Returns false if disposed.
     pub fn try_ref(&self) -> bool {
         loop {
             let rc = self.ref_count.load(Ordering::SeqCst);
@@ -160,7 +141,6 @@ impl Snapshot {
         }
     }
 
-    /// Decrements the ref count. When zero, disposes resources.
     pub fn deref_snapshot(&self) {
         let rc = self.ref_count.fetch_sub(1, Ordering::SeqCst) - 1;
         if rc < 0 {
@@ -175,14 +155,10 @@ impl Snapshot {
     }
 
     fn dispose(&self) {
-        // Release parse cache refs, extended config cache refs, etc.
-        // Stub: full disposal requires session integration.
+
     }
 }
 
-/// API snapshot request for open/close operations.
-///
-/// Go: `type APISnapshotRequest struct { ... }`.
 #[derive(Default, Clone)]
 pub struct APISnapshotRequest {
     pub open_projects: Option<HashSet<String>>,
@@ -191,9 +167,6 @@ pub struct APISnapshotRequest {
     pub close_files: Option<HashSet<Path>>,
 }
 
-/// ATA state change.
-///
-/// Go: `type ATAStateChange struct { ... }`.
 #[derive(Clone)]
 pub struct ATAStateChange {
     pub project_id: Path,

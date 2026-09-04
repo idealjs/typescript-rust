@@ -1,9 +1,6 @@
-//! Logger trait and implementation (1:1 port of Go's `internal/project/logging/logger.go`).
-
 use std::io::Write;
 use std::sync::Mutex;
 
-/// Logger interface matching Go's `logging.Logger`.
 pub trait Logger: Send + Sync {
     fn error(&self, msg: &str);
     fn errorf(&self, format: &str, args: &[&dyn std::fmt::Display]);
@@ -19,7 +16,6 @@ pub trait Logger: Send + Sync {
     fn set_verbose(&self, verbose: bool);
 }
 
-/// Concrete logger writing to a writer (Go's `*logger`).
 pub struct LoggerImpl {
     inner: Mutex<LoggerInner>,
 }
@@ -81,8 +77,7 @@ impl Logger for LoggerImpl {
     fn verbose(&self) -> Option<&dyn Logger> {
         let inner = self.inner.lock().unwrap();
         if inner.verbose {
-            // Can't return &dyn Logger from behind Mutex safely.
-            // In practice, callers check is_verbose() then call directly.
+
             None
         } else {
             None
@@ -98,7 +93,6 @@ impl Logger for LoggerImpl {
     }
 }
 
-/// No-op logger that discards all messages (Go's `NewNopLogger`).
 pub struct NopLogger;
 
 impl Logger for NopLogger {
@@ -128,13 +122,12 @@ pub fn new_nop_logger() -> NopLogger {
 }
 
 fn format_time_now() -> String {
-    // Simplified time formatting matching Go's "15:04:05.000" format.
+
     "[time]".to_string()
 }
 
 fn format_args_string(format: &str, args: &[&dyn std::fmt::Display]) -> String {
-    // Simple substitution — Go uses fmt.Sprintf, we do manual substitution.
-    // For now, just concatenate args.
+
     let mut result = format.to_string();
     for arg in args {
         result = result.replacen("{}", &arg.to_string(), 1);

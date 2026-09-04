@@ -1,12 +1,3 @@
-//! Baseline accept tool — copies `testdata/baselines/local/` to
-//! `testdata/baselines/reference/`, accepting all current test outputs
-//! as the new golden files.
-//!
-//! Usage:
-//! ```sh
-//! cargo run --bin baseline-accept --features accept
-//! ```
-
 use std::fs;
 use std::path::PathBuf;
 

@@ -1,8 +1,3 @@
-//! TypeScript compiler ported from Go to Rust.
-//!
-//! This is a port of microsoft/typescript-go (codename "Corsa") to Rust.
-//! Module layout mirrors the Go `internal/` package structure.
-
 pub mod api;
 pub mod ast;
 pub mod astnav;

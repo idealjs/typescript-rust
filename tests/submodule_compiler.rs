@@ -1,43 +1,3 @@
-//! Baseline test runner: executes TypeScript's official compiler test cases
-//! (from the `_submodules/TypeScript` git submodule) and compares the
-//! resulting diagnostics against committed snapshots under
-//! `tests/baselines/reference/compiler/`.
-//!
-//! Ports a focused slice of tsgo's `TestSubmodule` (errors baseline only):
-//! for each `.ts` case under
-//! `_submodules/TypeScript/tests/cases/compiler/`:
-//!   1. parse `// @filename`/`// @module`/... directives;
-//!   2. build a `Program` over the virtual files + bundled libs;
-//!   3. collect semantic diagnostics, sort, render to baseline text;
-//!   4. compare against the reference baseline (or accept/write it).
-//!
-//! Cases are skipped (not failed) when they exercise options the Rust port
-//! doesn't yet support (see `should_skip`), or when their baseline diff is
-//! listed in `accepted.txt`/`triaged.txt`. A checker panic converts to a
-//! triaged skip rather than aborting the whole run.
-//!
-//! Environment variables (all optional):
-//! - `TSOX_SUBMODULE_START=N` — first case to run, 1-based (default 1).
-//! - `TSOX_SUBMODULE_END=N` — last case to run, 1-based inclusive (default:
-//!   last case). START/END pick an explicit window, e.g. `START=1000
-//!   END=2000` runs #1000..#2000. Either may be omitted. Takes precedence
-//!   over `TSOX_SUBMODULE_LIMIT` when set.
-//! - `TSOX_SUBMODULE_LIMIT=N` — alternative selector: first N cases
-//!   (default 1000), or `0` for all (~6500). Ignored when START/END is set.
-//! - `TSOX_SUBMODULE_FILTER` — case-insensitive substring; run only matching
-//!   case file names (applied after the selection above).
-//! - `TSOX_SUBMODULE_JOBS=N` — concurrent workers. Defaults to
-//!   `available_parallelism()`, which honors `taskset` CPU affinity
-//!   (`taskset -c 0-3 …` → 4 workers, ≤400% CPU).
-//! - `TSOX_SUBMODULE_TIMEOUT_SECS=N` — per-case wall-clock budget (default 30).
-//! - `TSOX_SUBMODULE_QUIET=1` — suppress per-case console lines (the run-log
-//!   file still records everything).
-//!
-//! Progress visibility: every case logs a START line when a worker picks it
-//! up and an END line with the outcome (`[wID] #i/total VERB name (secs)`)
-//! to stderr and to `tests/baselines/local/submodule_run.log`; a heartbeat
-//! with counts + ETA prints every 100 completions.
-
 mod common;
 
 use std::panic::catch_unwind;
@@ -56,12 +16,6 @@ use tsox::vfs::InMemoryFS;
 use common::baseline::{self, KnownDiffs, NO_CONTENT};
 use common::case_parser::{extract_settings, split_units};
 
-/// Which suite under `_submodules/TypeScript/tests/cases/` this binary runs:
-/// `compiler` (regression, default) or `conformance`. Selected via
-/// `TSOX_SUBMODULE_SUITE` — mirroring Go's `CompilerTestType` (regression vs
-/// conformance share one runner; only the cases dir and baseline subfolder
-/// differ). The worker subprocess inherits the env var, so the same test
-/// function serves both.
 fn suite() -> &'static str {
     match std::env::var("TSOX_SUBMODULE_SUITE")
         .unwrap_or_default()
@@ -77,48 +31,17 @@ fn submodule_dir() -> String {
     format!("_submodules/TypeScript/tests/cases/{}", suite())
 }
 
-/// Baseline subfolder (also the triaged.txt key prefix) — Go's
-/// `CompilerTestType.String()`.
 fn subfolder() -> &'static str {
     suite()
 }
 
-/// Default cap on the number of cases run, to keep CI tractable during
-/// bring-up (~1s/case, run via per-case subprocess isolation). Override with
-/// `TSOX_SUBMODULE_LIMIT` (set to `0` to run all ~6400 cases). As the checker
-/// matures this default will be raised.
-///
-/// History: 50 → 300 (private identifiers, object-literal accessors/methods,
-/// parameter modifiers, class index signatures) → 600 (`<`-disambiguation,
-/// set_bool case bug, generic arrow functions, diagnostic clamp, catch_unwind
-/// render, skip stress + non-UTF-8) → 1000 (per-case **subprocess isolation**
-/// so checker stack overflows kill only the child; circular-type family skip).
-/// The 1000-case slice is green (errors baseline only).
 const DEFAULT_LIMIT: usize = 1000;
 
-/// Per-case wall-clock budget for the worker subprocess. Cases normally
-/// finish in well under a second; a case exceeding this is almost certainly
-/// stuck (checker infinite loop or combinatorial blow-up) and is killed and
-/// recorded as a skip rather than hanging the whole sweep. Override with
-/// `TSOX_SUBMODULE_TIMEOUT_SECS`.
 const CASE_TIMEOUT_DEFAULT_SECS: u64 = 30;
 
-/// Cases skipped because they reference inputs the port can't provide (e.g.
-/// the old `typescript.d.ts` API surface) or exercise removed compiler options.
-/// Mirrors tsgo's `skippedTests` (`internal/testrunner/compiler_runner.go`).
 const SKIPPED_CASES: &[&str] = &[
     "alwaysStrictNoImplicitUseStrict.ts",
-    // ClassDeclaration26.ts (garbage-input stress: `public const var export
-    // foo = 10;` + `var constructor() { }`) was previously skipped — it now
-    // passes via the ported recovery path: scanClassMemberStart gating +
-    // parsingContext stack (TS1068), parseSemicolonAfterPropertyName's
-    // const/let/var special case (TS1440), export-as-member-modifier, and
-    // `() {` arrow speculation ('=>' expected).
-    // ~5000-line deeply-nested binary-expression stress test (TS issue #35633)
-    // that exercises the binder/emitter trampoline for arbitrarily-deep trees.
-    // The Rust port lacks the iterative/trampoline handling, so it recurses and
-    // overflows the stack (which catch_unwind cannot trap). Skip until iterative
-    // binary-expression handling lands.
+
     "binderBinaryExpressionStress.ts",
     "binderBinaryExpressionStressJs.ts",
     "APILibCheck.ts",
@@ -167,36 +90,23 @@ const SKIPPED_CASES: &[&str] = &[
     "verbatimModuleSyntaxCompat4.ts",
 ];
 
-/// Outcome of processing a single case in the worker subprocess.
 enum CaseOutcome {
-    /// Case was skipped (unsupported option, KNOWN gap, panic) — `reason` is logged.
+
     Skip(String),
-    /// Rendered errors-baseline text (may be `NO_CONTENT`).
+
     Output(String),
 }
 
-/// One (configuration, outcome) pair. A case with no multi-value `varyBy`
-/// directive has exactly one configuration whose suffix is empty (baseline
-/// name = plain `<stem>.errors.txt`); a case like `// @target: ES5, ES2015`
-/// gets one per value, each comparing against
-/// `<stem>(target=es5).errors.txt` etc.
 struct ConfigOutcome {
-    /// Baseline-name suffix, e.g. `target=es2015` (empty for the default
-    /// configuration). Keys sorted, comma-joined, all lowercased — mirrors
-    /// Go's `getFileBasedTestConfigurationDescription`.
+
     suffix: String,
     outcome: CaseOutcome,
 }
 
-/// Options whose multi-value `// @opt: v1, v2` directives expand into one
-/// configuration per value. Mirrors Go's `compilerVaryBy`: boolean/enum
-/// options that affect diagnostics, emit, or program structure, plus explicit
-/// `noEmit`/`isolatedModules`. List options (`lib`, `types`, ...) are NOT
-/// varyBy — their commas are list values, not variations.
 const VARY_BY: &[&str] = &[
-    // enum options
+
     "jsx", "module", "moduledetection", "moduleresolution", "newline", "target",
-    // boolean options
+
     "allowarbitraryextensions", "allowimportingtsextensions", "allowjs",
     "allowsyntheticdefaultimports", "allowumdglobalaccess", "allowunreachablecode",
     "allowunusedlabels", "alwaysstrict", "assumechangesonlyaffectdirectdependencies",
@@ -219,9 +129,6 @@ const VARY_BY: &[&str] = &[
     "useunknownincatchvariables", "verbatimmodulesyntax",
 ];
 
-/// All declared values of an enum option, in declaration order (Go
-/// `getAllValuesForOption` via the option's `EnumMap`) — used when a
-/// directive value is `*`. Booleans yield `["true", "false"]`.
 fn all_enum_values(option: &str) -> &'static [&'static str] {
     match option {
         "target" => &[
@@ -242,8 +149,6 @@ fn all_enum_values(option: &str) -> &'static [&'static str] {
     }
 }
 
-/// Canonical comparison key for a raw option value, so `es6` and `es2015`
-/// dedupe to one variation (Go compares parsed `CompilerOptionsValue`s).
 fn canonical_value(option: &str, raw: &str) -> String {
     let lower = raw.trim().to_ascii_lowercase();
     match option {
@@ -259,7 +164,7 @@ fn canonical_value(option: &str, raw: &str) -> String {
             "node" => "node10".to_string(),
             other => other.to_string(),
         },
-        // Boolean options: truthiness spelling collapses to true/false.
+
         _ if VARY_BY.contains(&option) && !all_enum_values(option).is_empty() => lower,
         _ if VARY_BY.contains(&option) => match lower.as_str() {
             "true" => "true".to_string(),
@@ -269,10 +174,6 @@ fn canonical_value(option: &str, raw: &str) -> String {
     }
 }
 
-/// Split a multi-value directive into variation values (raw strings, first
-/// occurrence kept on dedupe). Handles `*` (all values) and `-`/`!`
-/// exclusions. Returns `None` when the value has no variation content.
-/// Mirrors Go's `splitOptionValues`.
 fn split_option_values(value: &str, option: &str) -> Option<Vec<String>> {
     let mut star = false;
     let mut includes: Vec<String> = Vec::new();
@@ -301,8 +202,7 @@ fn split_option_values(value: &str, option: &str) -> Option<Vec<String>> {
             includes.extend(all_enum_values(option).iter().map(|s| s.to_string()));
         }
     }
-    // Dedupe by canonical value, keeping the first raw spelling (it names the
-    // baseline, e.g. `target=es6` for `// @target: ES6, ES2015`).
+
     let mut seen: Vec<String> = Vec::new();
     let mut raws: Vec<String> = Vec::new();
     for raw in includes {
@@ -322,10 +222,6 @@ fn split_option_values(value: &str, option: &str) -> Option<Vec<String>> {
     Some(raws)
 }
 
-/// Expand `settings` into per-value configurations. Returns one entry per
-/// configuration — `(suffix, merged-settings)` — or a skip reason when the
-/// variations exceed Go's cap of 25 (Go `t.Fatal`s there; we skip honestly).
-/// Mirrors Go's `GetFileBasedTestConfigurations` + cartesian product.
 fn compute_configurations(
     settings: &std::collections::HashMap<String, String>,
 ) -> Result<Vec<(String, std::collections::HashMap<String, String>)>, String> {
@@ -337,8 +233,7 @@ fn compute_configurations(
         }
         let value = &settings[key];
         if !value.contains(',') && value.trim() != "*" {
-            // Single value (no `,`): nothing to vary — Go keeps it as a
-            // non-varying option with the raw value.
+
             continue;
         }
         let Some(values) = split_option_values(value, key) else {
@@ -357,7 +252,6 @@ fn compute_configurations(
         return Ok(vec![(String::new(), base)]);
     }
 
-    // Cartesian product, capped at 25 like Go.
     let mut count = 1usize;
     for (_, values) in &varying {
         count *= values.len();
@@ -382,7 +276,7 @@ fn compute_configurations(
 
     let mut out = Vec::with_capacity(configs.len());
     for config in configs {
-        // Suffix: sorted `key=value` (both lowercased), comma-joined.
+
         let mut parts: Vec<String> = config
             .iter()
             .map(|(k, v)| format!("{}={}", k.to_ascii_lowercase(), v.to_ascii_lowercase()))
@@ -398,17 +292,6 @@ fn compute_configurations(
     Ok(out)
 }
 
-/// Process one case end-to-end: parse directives, expand multi-value `varyBy`
-/// directives into configurations, apply per-config skip rules, build the
-/// Program, collect + render diagnostics. Shared by the worker subprocess. A
-/// checker/parse panic is caught and converted to `Skip` for that
-/// configuration (the worker runs in a child process, but a panic — as
-/// opposed to a stack overflow — is recoverable in-process and we avoid a
-/// needless process kill).
-
-/// tsgo `compiler_runner.go` `skippedTests` — cases the Go runner itself
-/// excludes (removed-option options and built-typescript API samples).
-/// Applied verbatim under the go baseline flavor.
 const TSGO_SKIPPED_TESTS: &[&str] = &[
     "APILibCheck.ts",
     "APISample_Watch.ts",
@@ -466,18 +349,14 @@ fn process_case(content: &str, basename: &str) -> Vec<ConfigOutcome> {
             outcome: CaseOutcome::Skip("in SKIPPED_CASES list".to_string()),
         }];
     }
-    // Go-standard alignment: tsgo's own runner skips these basenames
-    // (removed options / built-typescript API samples) — under the go
-    // baseline flavor we exclude them from the corpus identically.
+
     if baseline::flavor() == baseline::Flavor::Go && TSGO_SKIPPED_TESTS.contains(&basename) {
         return vec![ConfigOutcome {
             suffix: String::new(),
             outcome: CaseOutcome::Skip("in tsgo skippedTests".to_string()),
         }];
     }
-    // Circular-type family — the checker lacks Go's recursion guards and these
-    // overflow the stack. (Also enforced by the parent skipping the worker's
-    // crash, but skipping here avoids spawning a doomed process.)
+
     if basename.to_ascii_lowercase().starts_with("circular") {
         return vec![ConfigOutcome {
             suffix: String::new(),
@@ -486,9 +365,7 @@ fn process_case(content: &str, basename: &str) -> Vec<ConfigOutcome> {
     }
 
     let parsed = split_units(content, basename);
-    // A tsconfig.json/jsconfig.json unit configures the compilation (Go
-    // test_case_parser: the config's options are the BASE that directive
-    // settings override, and its enumerated file names pick the roots).
+
     let tsconfig = detect_tsconfig(&parsed.units);
     match compute_configurations(&settings) {
         Err(reason) => vec![ConfigOutcome {
@@ -504,14 +381,7 @@ fn process_case(content: &str, basename: &str) -> Vec<ConfigOutcome> {
                             &config_settings,
                             parsed_config.compiler_options.clone(),
                         );
-                        // Go's ParsedCommandLine carries the config file's
-                        // own path (ConfigFilePath) — effective type roots
-                        // walk the CONFIG directory's ancestor chain
-                        // (GetEffectiveTypeRoots), not the host cwd. Without
-                        // this, `@types: *` picks up only the cwd-rooted
-                        // @types directories (typeRootsFromMultipleNode
-                        // ModulesDirectories resolves pdq/abc from
-                        // /foo/node_modules/@types only via this path).
+
                         if opts.config_file_path.is_empty() {
                             opts.config_file_path = config_path.clone();
                         }
@@ -535,9 +405,7 @@ fn process_case(content: &str, basename: &str) -> Vec<ConfigOutcome> {
                 let outcome = if let Some(reason) = should_skip(&compiler_options, &unrecognized) {
                     CaseOutcome::Skip(reason)
                 } else {
-                    // Harness-level directive (excluded from `settings` by
-                    // the case parser's HARNESS_DIRECTIVES list — Go keeps
-                    // it in harnessConfig): scan the raw case text.
+
                     let no_implicit_refs = content.lines().any(|l| {
                         let t = l.trim_start();
                         t.starts_with("//")
@@ -572,8 +440,6 @@ fn process_case(content: &str, basename: &str) -> Vec<ConfigOutcome> {
     }
 }
 
-/// Outcome of scheduling + comparing one case in the parent (vs.
-/// `CaseOutcome`, which is the worker subprocess's result).
 enum StepOutcome {
     Passed,
     AcceptedDiff,
@@ -581,10 +447,6 @@ enum StepOutcome {
     Skipped,
 }
 
-/// Run one case end-to-end from the parent side: spawn the worker subprocess
-/// (with timeout), read its payload, compare each configuration against the
-/// reference baseline. Returns the aggregated outcome, the display names of
-/// failing configurations, and a human-readable detail line for logging.
 fn run_case(
     case_path: &Path,
     idx: usize,
@@ -601,13 +463,6 @@ fn run_case(
     let stem = basename.trim_end_matches(".ts").trim_end_matches(".tsx");
     let ext = ".errors.txt";
 
-    // Run the case in a child process so a checker stack overflow (e.g.
-    // circular-type recursion — uncatchable via catch_unwind) kills only the
-    // child, not the whole run. The child re-invokes this test binary in
-    // worker mode (see TSOX_SUBMODULE_WORKER above). A case that runs longer
-    // than `timeout` (e.g. a checker infinite loop or combinatorial blow-up)
-    // is killed and recorded as a skip — mirroring tsgo's per-case timeout —
-    // instead of hanging the whole sweep.
     let out_path = std::env::temp_dir().join(format!("tsox_submodule_{idx}_{stem}.out"));
     let _ = std::fs::remove_file(&out_path);
     let worker = Command::new(exe)
@@ -645,8 +500,7 @@ fn run_case(
     }
 
     if !matches!(&status, Ok(s) if s.success()) {
-        // Worker was killed (e.g. stack overflow → signal), timed out, or
-        // exited non-zero. Report the raw status to aid diagnosis.
+
         use std::os::unix::process::ExitStatusExt;
         let raw = match &status {
             Ok(s) => s
@@ -661,9 +515,7 @@ fn run_case(
             format!("worker crashed ({raw})"),
         );
     }
-    // Parse the worker's JSON payload: one entry per configuration with
-    // `suffix` (baseline-name infix), and either `skip` (reason) or `text`
-    // (rendered baseline).
+
     let entries: Vec<serde_json::Value> = match serde_json::from_str(&payload) {
         Ok(v) => v,
         Err(_) => {
@@ -682,9 +534,6 @@ fn run_case(
         );
     }
 
-    // Compare each configuration against its (possibly suffixed) baseline;
-    // aggregate: any fail → Failed, else any triaged diff → AcceptedDiff,
-    // else any pass → Passed, all skipped → Skipped.
     let mut overall = StepOutcome::Skipped;
     let mut failed_names = Vec::new();
     let mut notes: Vec<String> = Vec::new();
@@ -701,9 +550,7 @@ fn run_case(
             format!("{stem}({suffix})")
         };
         let label = if suffix.is_empty() { "default" } else { suffix };
-        // Go-standard alignment: a config whose (suffix) baseline does not
-        // exist in tsgo's tree is a config tsgo does not accept/output — skip
-        // it rather than fabricating a mismatch.
+
         if baseline::flavor() == baseline::Flavor::Go
             && !suffix.is_empty()
             && !std::path::Path::new(baseline::reference_root())
@@ -738,8 +585,7 @@ fn run_case(
                         overall = StepOutcome::AcceptedDiff;
                     }
                 } else if accept {
-                    // shouldn't happen (compare returns Passed in accept
-                    // mode), but be defensive.
+
                     notes.push(format!("{label}: pass"));
                     if !matches!(overall, StepOutcome::Failed | StepOutcome::AcceptedDiff) {
                         overall = StepOutcome::Passed;
@@ -752,9 +598,7 @@ fn run_case(
             }
         }
     }
-    // Single-configuration cases keep the historical compact detail format
-    // (bare skip reason / empty for pass); only multi-config cases spell out
-    // per-configuration results.
+
     let detail = if entries.len() == 1 {
         notes
             .into_iter()
@@ -772,21 +616,12 @@ fn run_case(
 
 #[test]
 fn submodule_compiler_cases() {
-    // ── Worker mode ────────────────────────────────────────────────────────
-    // When invoked (by the parent, below) with TSOX_SUBMODULE_WORKER=<case>
-    // and TSOX_SUBMODULE_OUT=<path>, process exactly that one case and write a
-    // one-line status (`O` = output, `S` = skip) plus the payload to OUT, then
-    // exit. Running each case in its own process means a checker stack overflow
-    // (uncatchable via catch_unwind) kills only this child — the parent records
-    // it as a skip instead of aborting the whole multi-thousand-case sweep.
+
     if let (Ok(case_path), Ok(out_path)) = (
         std::env::var("TSOX_SUBMODULE_WORKER"),
         std::env::var("TSOX_SUBMODULE_OUT"),
     ) {
-        // libtest runs test functions on threads whose stack is smaller
-        // than the CLI's main-thread stack; deep checker recursion that
-        // survives the CLI (Go relies on growable goroutine stacks) would
-        // overflow here. Compile on a dedicated large-stack thread.
+
         let case_path = case_path.clone();
         let payload = std::thread::Builder::new()
             .stack_size(256 * 1024 * 1024)
@@ -796,10 +631,7 @@ fn submodule_compiler_cases() {
                     .and_then(|n| n.to_str())
                     .unwrap_or("")
                     .to_string();
-                // Payload: one JSON array entry per configuration —
-                // `{"suffix": "...", "skip": null, "text": "..."}` for output,
-                // `{"suffix": "...", "skip": "reason", "text": null}` for a skip.
-                // (JSON framing keeps multi-line baseline text unambiguous.)
+
                 match std::fs::read_to_string(&case_path) {
                     Ok(content) => {
                         let configs = process_case(&content, &basename);
@@ -846,16 +678,10 @@ fn submodule_compiler_cases() {
         return;
     }
 
-    // Enumerate cases (sorted for determinism).
     let mut cases: Vec<std::path::PathBuf> = Vec::new();
     collect_ts_files(root, &mut cases);
     cases.sort();
 
-    // ── Run log ────────────────────────────────────────────────────────────
-    // Every banner/START/END/heartbeat/summary line goes to the real stderr
-    // (unless quiet) and is appended to a per-run log under the gitignored
-    // local/ dir. Created before case selection so selection notes are
-    // visible too.
     struct RunLog {
         file: Option<std::sync::Mutex<std::fs::File>>,
         quiet: bool,
@@ -871,10 +697,7 @@ fn submodule_compiler_cases() {
         fn line(&self, msg: &str) {
             if !self.quiet {
                 use std::io::Write;
-                // Write straight to fd 2 via the stderr handle: libtest's
-                // output capture (propagated into threads spawned by the
-                // test) swallows `eprintln!` and discards it when the test
-                // passes, hiding the live progress these lines exist for.
+
                 let mut err = std::io::stderr().lock();
                 let _ = writeln!(err, "{msg}");
             }
@@ -884,7 +707,7 @@ fn submodule_compiler_cases() {
             }
         }
     }
-    // Per-suite run log so compiler/conformance sweeps don't clobber each other.
+
     let log_name = if suite() == "compiler" {
         "submodule_run.log".to_string()
     } else {
@@ -901,14 +724,6 @@ fn submodule_compiler_cases() {
         eprintln!("[submodule_compiler] note: cannot write run log {}", log_path.display());
     }
 
-    // ── Case selection ─────────────────────────────────────────────────────
-    // Two ways to pick which cases run (1-based, inclusive):
-    //   `TSOX_SUBMODULE_START` / `TSOX_SUBMODULE_END` — explicit window; each
-    //     optional (START defaults to 1, END to the last case). Precedence
-    //     over LIMIT when either is set.
-    //   `TSOX_SUBMODULE_LIMIT` — `N` = first N (default 1000), `0` = all.
-    // `TSOX_SUBMODULE_FILTER=<substr>` (optional) narrows the selection
-    // further by case-name substring, case-insensitive.
     let total = cases.len();
     let limit_spec = std::env::var("TSOX_SUBMODULE_LIMIT").unwrap_or_default();
     let start_spec = std::env::var("TSOX_SUBMODULE_START").unwrap_or_default();
@@ -922,7 +737,7 @@ fn submodule_compiler_cases() {
                 .trim()
                 .parse::<usize>()
                 .unwrap_or_else(|_| panic!("{usage}: got START='{start_spec}'"))
-                .max(1) // lenient: a 0 start is treated as 1
+                .max(1)
         };
         let b = if end_spec.is_empty() {
             total
@@ -999,18 +814,9 @@ fn submodule_compiler_cases() {
             .and_then(|s| s.parse::<u64>().ok())
             .unwrap_or(CASE_TIMEOUT_DEFAULT_SECS),
     );
-    // This test binary re-invokes itself (in worker mode) per case — see the
-    // TSOX_SUBMODULE_WORKER block at the top of this function.
+
     let exe = std::env::current_exe().expect("current_exe");
 
-    // ── Parallelism ────────────────────────────────────────────────────────
-    // Cases are independent one-shot subprocesses, so the parent can run
-    // many at once. Concurrency defaults to `available_parallelism()`, which
-    // honors CPU affinity on Linux — `taskset -c 0-3 cargo test …` yields 4
-    // concurrent workers (≤400% CPU) without any extra flags, while an
-    // un-pinned run uses every core. Override with `TSOX_SUBMODULE_JOBS=N`.
-    // (cargo's own `--test-threads` does not apply: this is a single test
-    // function doing its own scheduling.)
     let jobs = std::env::var("TSOX_SUBMODULE_JOBS")
         .ok()
         .and_then(|s| s.parse::<usize>().ok())
@@ -1032,7 +838,6 @@ fn submodule_compiler_cases() {
     let failed_non_crash: std::sync::Mutex<Vec<String>> = std::sync::Mutex::new(Vec::new());
     const HEARTBEAT_EVERY: usize = 100;
 
-    // 1-based case numbers of the selection bounds (for the banner below).
     let first_no = start + 1;
     let last_no = end;
     log.line(&format!(
@@ -1044,9 +849,7 @@ fn submodule_compiler_cases() {
     ));
 
     let run_start = std::time::Instant::now();
-    // Worker ids are claimed lazily from this counter: a `move` closure in the
-    // spawn loop would move the shared state into the first worker only, so
-    // the closures borrow instead (ids may interleave; they're for logging).
+
     let worker_seq = AtomicUsize::new(0);
     std::thread::scope(|scope| {
         for _ in 0..jobs {
@@ -1106,7 +909,7 @@ fn submodule_compiler_cases() {
                     "[w{wid}] #{}/{selected_total} {verb}{name} ({secs:.2}s){note}",
                     i + 1,
                 ));
-                // Heartbeat every HEARTBEAT_EVERY completions (and at the end).
+
                 let d = done.fetch_add(1, Ordering::Relaxed) + 1;
                 if d % HEARTBEAT_EVERY == 0 || d == selected_total {
                     let (p, s, f, a) = (
@@ -1166,7 +969,6 @@ fn submodule_compiler_cases() {
     }
 }
 
-/// Recursively collect `*.ts` / `*.tsx` files under `dir`.
 fn collect_ts_files(dir: &std::path::Path, out: &mut Vec<std::path::PathBuf>) {
     let Ok(entries) = std::fs::read_dir(dir) else {
         return;
@@ -1183,10 +985,6 @@ fn collect_ts_files(dir: &std::path::Path, out: &mut Vec<std::path::PathBuf>) {
     }
 }
 
-/// Copy `_submodules/TypeScript/tests/lib/**` into the in-memory VFS under
-/// `/.lib/**`. The official runner mounts this directory at the virtual FS
-/// root so `/// <reference path="/.lib/react.d.ts" />` resolves; missing
-/// files are skipped (the fixture set only exists with the submodule).
 fn mount_test_lib_fixtures(fs: &Arc<InMemoryFS>) {
     fn walk(fs: &Arc<InMemoryFS>, src: &Path, mount: &str) {
         let Ok(entries) = std::fs::read_dir(src) else {
@@ -1212,8 +1010,6 @@ fn mount_test_lib_fixtures(fs: &Arc<InMemoryFS>) {
     walk(fs, &root, "/.lib");
 }
 
-/// Absolute VFS path of a test unit (rooted unit names mount as-is, bare
-/// names live under /proj — the convention of [`build_and_check`]).
 fn unit_abs_path(unit_name: &str) -> String {
     if tsox::tspath::is_rooted_disk_path(unit_name) {
         unit_name.to_string()
@@ -1222,18 +1018,12 @@ fn unit_abs_path(unit_name: &str) -> String {
     }
 }
 
-/// Whether a unit's basename marks it as a project configuration file
-/// (Go `harnessutil.GetConfigNameFromFileName`).
 fn is_config_unit(unit_name: &str) -> bool {
     let base = unit_name.rsplit(['/', '\\']).next().unwrap_or(unit_name);
     let lower = base.to_ascii_lowercase();
     lower == "tsconfig.json" || lower == "jsconfig.json"
 }
 
-/// Parse a case's `tsconfig.json`/`jsconfig.json` unit as the project
-/// configuration (Go test_case_parser.go ~L71: config options become the
-/// base the @-directive settings override; its enumerated file names pick
-/// the compile roots). Returns `(base options, config file names)`.
 fn detect_tsconfig(
     units: &[common::case_parser::TestUnit],
 ) -> Option<(tsox::tsoptions::ParsedCommandLine, String)> {
@@ -1253,9 +1043,7 @@ fn detect_tsconfig(
         }
         fs.insert_file(&abs, &unit.content);
     }
-    // Config paths in these cases are absolute (rooted unit names); the
-    // current dir only normalizes relative specs, where Go's default is
-    // the /.src source folder.
+
     let cwd = if units.iter().any(|u| tsox::tspath::is_rooted_disk_path(&u.name)) {
         "/.src"
     } else {
@@ -1273,7 +1061,6 @@ fn detect_tsconfig(
     ))
 }
 
-/// Build a Program over the virtual files and return semantic diagnostics.
 fn build_and_check(
     options: &CompilerOptions,
     units: &[common::case_parser::TestUnit],
@@ -1282,21 +1069,9 @@ fn build_and_check(
 ) -> Vec<Diagnostic> {
     let fs = Arc::new(InMemoryFS::new());
     fs.insert_dir("/proj");
-    // Mount the official test-runner fixture libs (react.d.ts,
-    // react16.d.ts, react18/, …) at `/.lib/`, matching the Go test
-    // runner's virtual filesystem: cases reference them via absolute
-    // triple-slash paths like `/// <reference path="/.lib/react.d.ts" />`.
+
     mount_test_lib_fixtures(&fs);
 
-    // Go compiler_runner root selection (compiler_runner.go ~L321): when
-    // the case sets `noImplicitReferences`, or the LAST unit contains
-    // `require(`/`reference path`, ONLY that unit is a compile root — the
-    // rest live on the FS and are brought in via imports/references (the
-    // resolution-mode-conditioned entrypoints of the nodeModules family
-    // must NOT be root-loaded, or both `declare global` augmentations
-    // merge and condition-excluded names wrongly resolve). A tsconfig
-    // unit REPLACES the heuristic entirely (compiler_runner.go ~L306):
-    // units the config enumerated are roots, everything else is FS-only.
     let config_roots: Option<Vec<String>> =
         tsconfig_file_names.map(|names| names.to_vec());
     let refs_only = config_roots.is_none()
@@ -1315,23 +1090,13 @@ fn build_and_check(
 
     let mut file_names: Vec<String> = Vec::new();
     for unit in units {
-        // Rooted unit names (`// @Filename: A:/bar.ts` — Windows-volume-style
-        // virtual paths, or plain `/abs` names) mount as-is, like the
-        // official runner's VFS; cross-volume specifiers (`import "B:/baz"`)
-        // then resolve by rooted-path replacement. Bare names live under
-        // /proj as before.
+
         let abs = if tsox::tspath::is_rooted_disk_path(&unit.name) {
             unit.name.clone()
         } else {
             format!("/proj/{}", unit.name)
         };
-        // Ensure parent dirs exist — including ALL ancestors: the VFS only
-        // knows directories that were explicitly inserted, and the resolver
-        // gates the node_modules walk on `directory_exists("/node_modules")`
-        // (Go's test-runner VFS implicitly has every path prefix). Without
-        // the ancestor chain, `/node_modules/pkg/package.json` mounts but
-        // `/node_modules` "doesn't exist" and every node_modules lookup
-        // fails with TS2307 (the r8/r9 nodeModules family).
+
         let mut parent = tsox::tspath::get_directory_path(&abs);
         while !parent.is_empty() {
             fs.insert_dir(&parent);
@@ -1342,11 +1107,7 @@ fn build_and_check(
             parent = next;
         }
         fs.insert_file(&abs, &unit.content);
-        // Only TypeScript units are compile roots (Go's makeUnitsFromTest
-        // hands every unit to the compiler host, but .json/.md units exist
-        // on the FS only — compiling them as TS produces parse errors the
-        // official baselines don't have) — and only ROOTED units under the
-        // refs_only rule above.
+
         let lower = abs.to_ascii_lowercase();
         if rooted.iter().any(|r| std::ptr::eq(*r, unit))
             && (lower.ends_with(".ts")
@@ -1358,13 +1119,8 @@ fn build_and_check(
         }
     }
 
-    // Wrap with BundledFS so lib.d.ts files resolve (unless the case set --noLib).
     let bf = Arc::new(BundledFS::new(fs.clone()));
-    // Host current directory: the official runner's default is "/.src"
-    // (Go `srcFolder`); our bare-unit convention mounts at /proj. Pick by
-    // layout — rooted-unit cases resolve typeRoots/relative paths against
-    // "/.src" like Go (referenceTypesPreferedToPathIfPossible's
-    // /.src/node_modules/@types).
+
     let all_rooted = units.iter().any(|u| {
         tsox::tspath::is_rooted_disk_path(&u.name)
     });
@@ -1401,10 +1157,7 @@ fn build_and_check(
                 .join(", ")
         );
     }
-    // Collect the FULL diagnostic set the Go oracle would report: program
-    // construction diagnostics (TS2307 "Cannot find module", TS6053 config
-    // errors, etc. — these are syntactic/global-layer) PLUS the checker's
-    // semantic diagnostics. `get_semantic_diagnostics` alone misses TS2307.
+
     let mut all = Vec::new();
     for d in program.diagnostics() {
         all.push((**d).clone());
@@ -1413,14 +1166,6 @@ fn build_and_check(
     all
 }
 
-/// Render diagnostics into the errors-baseline text format.
-///
-/// Diagnostics are sorted by (file_name, line, col) for determinism — ties
-/// keep EMISSION order (official tsc emits in visit order; a numeric-code
-/// tiebreak would reorder same-position pairs like 7026-before-2875 in
-/// commentsOnJSXExpressionsArePreserved). The pre-sort is a stable sort.
-/// then each rendered on one line via `format_diagnostic_compact`. Test-path
-/// prefixes (`/proj/`) are stripped. No diagnostics → `NO_CONTENT`.
 fn render_errors_baseline(diags: &[Diagnostic]) -> String {
     if diags.is_empty() {
         return NO_CONTENT.to_string();
@@ -1441,22 +1186,11 @@ fn render_errors_baseline(diags: &[Diagnostic]) -> String {
         a.0.cmp(&b.0)
             .then(a.1.cmp(&b.1))
             .then(a.2.cmp(&b.2))
-            // TS `sortAndDuplicateDiagnostics` tiebreaks: span length,
-            // then code (a zero-length scanner report like TS1490@(0,0)
-            // precedes a same-position parser diagnostic; TransportStream's
-            // [1490, 1434] order; same-position same-span pairs order by
-            // ascending code — classWithDuplicateIdentifier's
-            // [2300, 2564, 2717]). The pre-sort is a stable sort.
+
             .then(a.4.loc.end.cmp(&b.4.loc.end))
             .then(a.3.cmp(&b.3))
     });
 
-    // Global (file-less) diagnostics are re-listed in `!!!` form after the
-    // summary and two blank lines — Go GetErrorBaseline's no-location
-    // section, preserved by the flattened-segment baselines
-    // (node10AlternateResult_noResolution). One `!!!` line per LINE of the
-    // diagnostic's message text; chain lines keep their indentation under
-    // the head's code.
     let globals: Vec<&Diagnostic> = keyed
         .iter()
         .filter(|(_, _, _, _, d)| d.file.is_none())
@@ -1466,7 +1200,7 @@ fn render_errors_baseline(diags: &[Diagnostic]) -> String {
     let mut out = String::new();
     for (_, _, _, _, d) in keyed {
         let mut line = format_diagnostic_compact(d, None);
-        // Strip the `/proj/` test-path prefix from file names in the output.
+
         line = line.replace("/proj/", "");
         out.push_str(&line);
         out.push('\n');
@@ -1497,13 +1231,9 @@ fn crate_line_col(d: &Diagnostic) -> (usize, usize) {
     }
 }
 
-/// Decide whether a case should be skipped because it exercises options the
-/// Rust port doesn't yet support. Mirrors tsgo's `SkipUnsupportedCompilerOptions`
-/// at a coarse granularity.
 fn should_skip(options: &CompilerOptions, unrecognized: &[String]) -> Option<String> {
     use tsox::core::compiler_options::{ModuleKind, ModuleResolutionKind, ScriptTarget};
 
-    // Unknown directive → we can't faithfully set up the case.
     if !unrecognized.is_empty() {
         return Some(format!(
             "unrecognized option(s): {}",
@@ -1511,38 +1241,34 @@ fn should_skip(options: &CompilerOptions, unrecognized: &[String]) -> Option<Str
         ));
     }
 
-    // Module kinds not yet supported.
     match options.module {
         ModuleKind::AMD | ModuleKind::UMD | ModuleKind::System => {
             return Some(format!("module={:?} not supported", options.module));
         }
         _ => {}
     }
-    // Module resolution modes not yet supported. (Node10 now runs for
-    // real: `get_module_resolution_kind` keeps an explicit node10
-    // un-remapped, and the NONE-features resolution state implements the
-    // classic types/main + index lookup — node10AlternateResult*.)
+
     if matches!(options.module_resolution, ModuleResolutionKind::Classic) {
         return Some(format!(
             "moduleResolution={:?} not supported",
             options.module_resolution
         ));
     }
-    // baseUrl / outFile scenarios.
+
     if !options.base_url.is_empty() {
         return Some("baseUrl not supported".to_string());
     }
     if !options.out_file.is_empty() {
         return Some("outFile not supported".to_string());
     }
-    // ES5 down-leveling (Rust emitter doesn't down-level yet).
+
     if matches!(options.target, ScriptTarget::ES5) {
         return Some(format!(
             "target={:?} (ES5 down-level) not supported",
             options.target
         ));
     }
-    // `allowJs`/`checkJs` — the checker path differs for JS files.
+
     if options.allow_js.is_true() {
         return Some("allowJs not supported".to_string());
     }

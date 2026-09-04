@@ -1,4 +1,3 @@
-//! Smoke test: parse all bundled lib files and report diagnostic counts.
 use tsox::bundled::{lib_contents, lib_names};
 use tsox::parser::Parser;
 

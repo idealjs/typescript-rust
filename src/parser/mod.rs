@@ -1,8 +1,3 @@
-//! Syntax parser, ported from `internal/parser/parser.go`.
-//!
-//! This port covers statements, declarations, and expressions.
-//! The full parser (6800+ lines in Go) is being ported incrementally.
-
 mod jsdoc;
 mod references;
 mod reparser;
@@ -17,9 +12,6 @@ use crate::diagnostics::{self, Message};
 use crate::scanner::{Scanner, token_to_string};
 use std::sync::Arc;
 
-/// Parsing context, tracking what kind of list we're currently parsing.
-///
-/// Mirrors `parser.ParsingContext` in Go.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum ParsingContext {
     SourceElements,
@@ -50,33 +42,21 @@ pub enum ParsingContext {
     JSDocComment,
 }
 
-/// The parser.
-///
-/// Mirrors `parser.Parser` in Go.
 pub struct Parser {
     scanner: Scanner,
     token: SyntaxKind,
     diagnostics: Vec<ParserDiagnostic>,
     language_variant: LanguageVariant,
-    /// Tracks whether the most recent template literal fragment was a
-    /// `TemplateMiddle` (vs `TemplateTail`). Used by `parse_template_type_spans`
-    /// to decide whether to continue parsing another span.
+
     last_template_literal_was_middle: bool,
-    /// True while parsing the body of a generator function (`function*`).
-    /// Mirrors Go's `NodeFlagsYieldContext`.
+
     yield_context: bool,
-    /// True while parsing the body of an `async` function.
-    /// Mirrors Go's `NodeFlagsAwaitContext`.
+
     await_context: bool,
-    /// Bitmask of the `ParsingContext`s currently being parsed (one bit per
-    /// list, innermost lists included). Mirrors Go's `parsingContexts` —
-    /// used by `is_in_some_parsing_context` for list-abort error recovery.
+
     parsing_contexts: u32,
 }
 
-/// A parser diagnostic, carrying a proper `Message` (with code/category) and
-/// interpolation args, matching Go's `ast.Diagnostic` created by
-/// `parseErrorAtRange`.
 #[derive(Debug, Clone)]
 pub struct ParserDiagnostic {
     pub message: Message,
@@ -84,9 +64,6 @@ pub struct ParserDiagnostic {
     pub range: TextRange,
 }
 
-/// Determine the `ScriptKind` from a file name's extension.
-///
-/// Mirrors `core.GetScriptKindFromFileName` in Go.
 pub fn script_kind_from_file_name(file_name: &str) -> ScriptKind {
     let ext = file_name.rfind('.').map(|i| &file_name[i..]).unwrap_or("");
     match ext {
@@ -114,8 +91,7 @@ impl Parser {
             await_context: false,
             parsing_contexts: 0,
         };
-        // Surface errors from the very first scan before the parser reacts
-        // to the token (mirrors Go's setOnError firing during Scan).
+
         parser.drain_scanner_errors();
         parser
     }
@@ -129,20 +105,16 @@ impl Parser {
         parser
     }
 
-    /// Parse a full source file.
     pub fn parse_source_file(file_name: impl Into<String>) -> SourceFile {
         let file_name = file_name.into();
         let text = std::fs::read_to_string(&file_name).unwrap_or_default();
         Self::parse_source_file_text(&file_name, text)
     }
 
-    /// Parse source text into a source file (for testing and API use).
     pub fn parse_source_file_text(file_name: &str, text: String) -> SourceFile {
         Self::parse_source_file_text_with_diagnostics(file_name, text).0
     }
 
-    /// Parse source text into a source file, returning the file and any
-    /// diagnostics produced during parsing.
     pub fn parse_source_file_text_with_diagnostics(
         file_name: &str,
         text: String,
@@ -159,19 +131,8 @@ impl Parser {
         let pos = 0usize;
         let end = end_of_file.end();
 
-        // Flush any scanner errors recorded after the last token advance.
-        // Scanner errors stream into the parser diagnostics at each advance
-        // (Go's setOnError wiring — see `drain_scanner_errors`); this final
-        // drain catches stragglers from the last EOF scan.
         parser.drain_scanner_errors();
 
-        // A binary (non-text) marker terminated the scan: the parser saw the
-        // marker token where a statement was expected (Go's
-        // `NonTextFileMarkerTrivia` → TS1128 "Declaration or statement
-        // expected" at the marker position, TransportStream).
-        // The 1128 fires only when the parser had already consumed real
-        // statements before the marker (Go's NonTextFileMarkerTrivia in
-        // token position); a marker in leading trivia emits only TS1490.
         let has_statements = !statements.is_empty();
         if let Some(p) = parser.scanner.binary_marker_pos().filter(|_| has_statements) {
             let len = parser
@@ -187,7 +148,6 @@ impl Parser {
             });
         }
 
-        // Set NodeFlags for JS/JSON files, mirroring Go's initializeState.
         let mut context_flags = crate::ast::node_flags::NodeFlags::empty();
         if matches!(script_kind, ScriptKind::Js | ScriptKind::Jsx) {
             context_flags |= crate::ast::node_flags::NodeFlags::JavaScriptFile;
@@ -230,29 +190,14 @@ impl Parser {
             uses_uri_style_node_core_modules: crate::core::tristate::Tristate::Unknown,
             has_parse_diagnostics: !parser.diagnostics.is_empty(),
         };
-        // Detect external module indicator and collect module references,
-        // mirroring Go's `finishSourceFile` + `collectExternalModuleReferences`.
+
         references::set_external_module_indicator(&mut file);
         references::collect_external_module_references(&mut file);
-        // Apply JSDoc reparser: convert unhosted JSDoc tags (@typedef,
-        // @callback, @import, @overload) into regular AST declaration nodes
-        // inserted before the host statement. Mirrors Go's `processJSDoc` +
-        // `reparseTags` integration in `parseList`.
+
         Self::apply_jsdoc_reparser(&mut file);
         (file, parser.diagnostics)
     }
 
-    /// Post-processing step that applies the JSDoc reparser to each statement.
-    ///
-    /// For each statement with preceding JSDoc comments, resolves the JSDoc
-    /// and calls `reparse_tags` to convert unhosted tags (@typedef, @callback,
-    /// @import, @overload) into new declaration nodes. The new nodes are
-    /// inserted before the host statement in the source file's statement list.
-    ///
-    /// Mirrors Go's `processJSDoc` called from `parseList` after each
-    /// statement is parsed (`parser.go: parseList`). In Rust, since the AST
-    /// is immutable, this is done as a post-processing step that rebuilds
-    /// the statement list and SourceFile node when reparsed nodes are found.
     fn apply_jsdoc_reparser(file: &mut SourceFile) {
         let statements = match &file.node.data {
             NodeData::SourceFile(d) => &d.statements.nodes,
@@ -263,7 +208,7 @@ impl Parser {
         let mut has_reparsed = false;
 
         for stmt in statements {
-            // Resolve JSDoc for this statement (lazy, cached)
+
             let js_docs = file.resolve_jsdoc(stmt);
             if !js_docs.is_empty() {
                 let reparsed = reparse_tags(stmt, &js_docs);
@@ -279,7 +224,6 @@ impl Parser {
             return;
         }
 
-        // Rebuild the SourceFile node with the new statement list
         let (end_of_file_token, old_loc) = match &file.node.data {
             NodeData::SourceFile(d) => (d.end_of_file_token.clone(), file.node.loc),
             _ => return,
@@ -305,32 +249,18 @@ impl Parser {
         file.node = new_node;
     }
 
-    // ─────────────────────────────────────────────────────────────────────
-    // Token helpers
-    // ─────────────────────────────────────────────────────────────────────
-
-    /// Advance to the next token.
     fn next_token(&mut self) -> SyntaxKind {
         self.token = self.scanner.scan();
         self.drain_scanner_errors();
         self.token
     }
 
-    /// Route scanner errors recorded since the last advance into the parser's
-    /// diagnostic stream. Go wires `scanner.setOnError(scanError)` so scanner
-    /// errors interleave with parse errors in emission order and share
-    /// `parse_error_at_range`'s same-position dedupe — a parse error at the
-    /// exact position of a just-reported scanner error (e.g. TS1127 invalid
-    /// character, then the parser's reaction to that Unknown token) is
-    /// suppressed, leaving only the scanner's diagnostic.
     fn drain_scanner_errors(&mut self) {
         for err in self.scanner.take_errors() {
             self.push_scanner_error(err);
         }
     }
 
-    /// Convert one scanner error to a parser diagnostic (shared with the
-    /// final flush in `parse_source_file_text_with_diagnostics`).
     fn push_scanner_error(&mut self, err: crate::scanner::ScannerError) {
         let message = match err.kind {
             crate::scanner::DiagnosticKind::InvalidCharacter => diagnostics::INVALID_CHARACTER,
@@ -368,8 +298,7 @@ impl Parser {
         };
         let args: Vec<String> = match err.kind {
             crate::scanner::DiagnosticKind::OctalLiteralNotAllowed => {
-                // Build the replacement syntax: `0o` + octal digits
-                // extracted from the source text.
+
                 let token_text =
                     &self.scanner.text()[err.pos..(err.pos + err.length).min(self.scanner.text().len())];
                 let octal_digits = token_text.strip_prefix('-').unwrap_or(token_text);
@@ -387,14 +316,12 @@ impl Parser {
         scanner.scan()
     }
 
-    /// Scan two tokens ahead (the token after the next one).
     fn look_ahead_2_tokens(&self) -> SyntaxKind {
         let mut scanner = self.scanner.clone();
         scanner.scan();
         scanner.scan()
     }
 
-    /// Scan three tokens ahead.
     fn look_ahead_3_tokens(&self) -> SyntaxKind {
         let mut scanner = self.scanner.clone();
         scanner.scan();
@@ -408,50 +335,41 @@ impl Parser {
         self.token
     }
 
-    /// The current token position.
     fn token_pos(&self) -> usize {
         self.scanner.token_pos()
     }
 
-    /// The current token end.
     fn token_end(&self) -> usize {
         self.scanner.token_end()
     }
 
-    /// Whether the current token is preceded by a line break.
     fn has_preceding_line_break(&self) -> bool {
         self.scanner.has_preceding_line_break()
     }
 
-    /// Re-scan `>>` (or `>>>`) as `>` so nested generics close correctly.
-    /// Go: `reScanGreaterThanToken`.
     fn re_scan_greater_than(&mut self) {
         self.token = self.scanner.re_scan_greater_than();
         self.drain_scanner_errors();
     }
 
-    /// Re-scan the current `/` or `/=` as a regular expression literal.
     fn re_scan_slash_token(&mut self) -> SyntaxKind {
         self.token = self.scanner.re_scan_slash_token();
         self.drain_scanner_errors();
         self.token
     }
 
-    /// Scan a JSX token (text, `<`, `</`, `{`). Used after `>` in JSX content.
     fn scan_jsx_text(&mut self) -> SyntaxKind {
         self.token = self.scanner.scan_jsx_token();
         self.drain_scanner_errors();
         self.token
     }
 
-    /// Extend the current identifier with JSX identifier parts (dashes).
     fn scan_jsx_identifier(&mut self) -> SyntaxKind {
         self.token = self.scanner.scan_jsx_identifier();
         self.drain_scanner_errors();
         self.token
     }
 
-    /// Scan a JSX attribute value (quoted string or fall through to `{`).
     #[allow(dead_code)]
     fn scan_jsx_attribute_value(&mut self) -> SyntaxKind {
         self.token = self.scanner.scan_jsx_attribute_value();
@@ -459,14 +377,10 @@ impl Parser {
         self.token
     }
 
-    /// The current token's text range.
     fn token_range(&self) -> TextRange {
         TextRange::new(self.token_pos(), self.token_end())
     }
 
-    /// Report a parse error at the given range, with message interpolation
-    /// args. Mirrors Go's `parseErrorAtRange`. Suppresses duplicates at the
-    /// same position as the last error.
     fn parse_error_at_range(&mut self, range: TextRange, message: Message, args: &[&str]) {
         if let Some(last) = self.diagnostics.last() {
             if last.range.pos() == range.pos() {
@@ -480,19 +394,14 @@ impl Parser {
         });
     }
 
-    /// Report a parse error at `[pos, end)`. Mirrors Go's `parseErrorAt`.
     fn parse_error_at(&mut self, pos: usize, end: usize, message: Message, args: &[&str]) {
         self.parse_error_at_range(TextRange::new(pos, end), message, args);
     }
 
-    /// Report a parse error at the current token. Mirrors Go's
-    /// `parseErrorAtCurrentToken`.
     fn parse_error_at_current_token(&mut self, message: Message, args: &[&str]) {
         self.parse_error_at_range(self.token_range(), message, args);
     }
 
-    /// Expect a specific token, advancing past it. Reports an error if
-    /// the current token doesn't match.
     fn expect(&mut self, expected: SyntaxKind) {
         if self.token == expected {
             self.next_token();
@@ -504,10 +413,6 @@ impl Parser {
         }
     }
 
-    /// Check that the current token matches `expected`, reporting an error if
-    /// not, but do NOT advance past it. The caller is responsible for
-    /// advancing (e.g., via `scan_jsx_text()`). Mirrors Go's
-    /// `parseExpectedWithoutAdvancing`.
     fn expect_without_advancing(&mut self, expected: SyntaxKind) -> bool {
         if self.token == expected {
             true
@@ -520,7 +425,6 @@ impl Parser {
         }
     }
 
-    /// If the current token matches, consume it and return true.
     fn parse_optional(&mut self, kind: SyntaxKind) -> bool {
         if self.token == kind {
             self.next_token();
@@ -530,7 +434,6 @@ impl Parser {
         }
     }
 
-    /// If the current token matches, consume and return a token node.
     fn parse_optional_token(&mut self, kind: SyntaxKind) -> Option<Arc<Node>> {
         if self.token == kind {
             let node = self.create_token_node();
@@ -541,7 +444,6 @@ impl Parser {
         }
     }
 
-    /// Create a token node for the current token.
     fn create_token_node(&self) -> Arc<Node> {
         Arc::new(Node::with_loc(
             self.token,
@@ -550,27 +452,21 @@ impl Parser {
         ))
     }
 
-    /// Create a template token node (`TemplateHead`, `TemplateMiddle`,
-    /// `TemplateTail`) with the cooked text extracted from the scanner's
-    /// raw token text. The scanner stores the raw form (e.g. `` `a-${ ``);
-    /// we strip the leading/trailing delimiters to get the cooked content
-    /// (e.g. "a"). Mirrors Go's scanner which stores the cooked value
-    /// separately.
     fn create_template_token_node(&self) -> Arc<Node> {
         let raw = self.scanner.token_text();
         let cooked = match self.token {
             SyntaxKind::TemplateHead => {
-                // Strip leading ` and trailing ${
+
                 let s = raw.strip_prefix('`').unwrap_or(raw);
                 s.strip_suffix("${").unwrap_or(s).to_string()
             }
             SyntaxKind::TemplateMiddle => {
-                // Strip leading } and trailing ${
+
                 let s = raw.strip_prefix('}').unwrap_or(raw);
                 s.strip_suffix("${").unwrap_or(s).to_string()
             }
             SyntaxKind::TemplateTail => {
-                // Strip leading } and trailing `
+
                 let s = raw.strip_prefix('}').unwrap_or(raw);
                 s.strip_suffix('`').unwrap_or(s).to_string()
             }
@@ -609,11 +505,6 @@ impl Parser {
         ))
     }
 
-    // ─────────────────────────────────────────────────────────────────────
-    // Semicolon handling (ASI support)
-    // ─────────────────────────────────────────────────────────────────────
-
-    /// Whether a semicolon can be parsed (explicit or via ASI).
     fn can_parse_semicolon(&self) -> bool {
         self.token == SyntaxKind::SemicolonToken
             || self.token == SyntaxKind::CloseBraceToken
@@ -621,7 +512,6 @@ impl Parser {
             || self.has_preceding_line_break()
     }
 
-    /// Try to parse a semicolon (explicit or ASI). Returns true if consumed.
     fn try_parse_semicolon(&mut self) -> bool {
         if !self.can_parse_semicolon() {
             return false;
@@ -632,7 +522,6 @@ impl Parser {
         true
     }
 
-    /// Parse a semicolon, reporting an error if missing.
     fn parse_semicolon(&mut self) -> bool {
         self.try_parse_semicolon() || {
             self.expect(SyntaxKind::SemicolonToken);
@@ -640,12 +529,6 @@ impl Parser {
         }
     }
 
-    // ─────────────────────────────────────────────────────────────────────
-    // List parsing
-    // ─────────────────────────────────────────────────────────────────────
-
-    /// Report a context-specific parse error for an unexpected token in the
-    /// given parsing context. Mirrors Go's `parsingContextErrors`.
     fn parsing_context_errors(&mut self, context: ParsingContext) {
         match context {
             ParsingContext::SourceElements => {
@@ -771,9 +654,6 @@ impl Parser {
         }
     }
 
-    /// Report a context error and either abort the list or skip the current
-    /// token. Mirrors Go's `abortParsingListOrMoveToNextToken`. Returns `true`
-    /// to abort (break), `false` to continue.
     fn abort_parsing_list_or_move_to_next_token(&mut self, context: ParsingContext) -> bool {
         self.parsing_context_errors(context);
         if self.is_in_some_parsing_context() {
@@ -784,16 +664,13 @@ impl Parser {
         }
     }
 
-    /// Parse a list of elements until a terminator for the given context.
     fn parse_list(
         &mut self,
         context: ParsingContext,
         parse_element: fn(&mut Self) -> Arc<Node>,
     ) -> NodeList {
         let pos = self.token_pos();
-        // Track the active parsing context (mirrors Go's parseList) so
-        // `is_in_some_parsing_context` can consult enclosing lists during
-        // error recovery.
+
         let save_contexts = self.parsing_contexts;
         self.parsing_contexts |= 1 << (context as u32);
         let mut nodes = Vec::new();
@@ -813,7 +690,6 @@ impl Parser {
         }
     }
 
-    /// Parse a comma-delimited list of elements.
     fn parse_delimited_list(
         &mut self,
         context: ParsingContext,
@@ -834,14 +710,9 @@ impl Parser {
                 if self.is_list_terminator(context) {
                     break;
                 }
-                // Expected comma but didn't find one
+
                 self.expect(SyntaxKind::CommaToken);
-                // Zero-progress guard (Go parseDelimitedList): an element
-                // that consumed no tokens (a fallback identifier on an
-                // unparseable token like `@` after error recovery derailed
-                // the enclosing construct) plus the failed comma
-                // expectation would loop forever — consume one token to
-                // guarantee progress.
+
                 if element_start == self.token_pos() {
                     self.next_token();
                 }
@@ -850,7 +721,7 @@ impl Parser {
             if self.is_list_terminator(context) {
                 break;
             }
-            // Error recovery
+
             if self.abort_parsing_list_or_move_to_next_token(context) {
                 break;
             }
@@ -863,7 +734,6 @@ impl Parser {
         }
     }
 
-    /// Parse a bracket-enclosed delimited list.
     #[allow(non_snake_case)]
     fn parse_bracketedList(
         &mut self,
@@ -881,7 +751,6 @@ impl Parser {
         }
     }
 
-    /// Check if the current token is a terminator for the given context.
     fn is_list_terminator(&self, context: ParsingContext) -> bool {
         if self.token == SyntaxKind::EndOfFile {
             return true;
@@ -907,10 +776,7 @@ impl Parser {
                     || self.token == SyntaxKind::ImplementsKeyword
             }
             ParsingContext::VariableDeclarations => {
-                // If we can consume a semicolon (either explicitly, or with ASI), then
-                // consider us done with parsing the list of variable declarators.
-                // In a for-in/of, 'in'/'of' also terminates the list.
-                // '=>' is for error recovery (arrow function).
+
                 self.can_parse_semicolon()
                     || self.token == SyntaxKind::InKeyword
                     || self.token == SyntaxKind::OfKeyword
@@ -923,10 +789,7 @@ impl Parser {
                     || self.token == SyntaxKind::ExtendsKeyword
                     || self.token == SyntaxKind::ImplementsKeyword
             }
-            // All other tokens should cause the type-argument list to terminate
-            // except comma. This allows `>>` (which the scanner produces as a
-            // single token) to terminate the list; `re_scan_greater_than` then
-            // splits it into `>` before `expect(GreaterThanToken)`.
+
             ParsingContext::TypeArguments => self.token != SyntaxKind::CommaToken,
             ParsingContext::ArgumentExpressions => {
                 self.token == SyntaxKind::CloseParenToken
@@ -953,10 +816,6 @@ impl Parser {
         }
     }
 
-    /// Check if the current token starts an element in the given context.
-    /// Mirrors Go's `isListElement`; `in_error_recovery` tightens the check
-    /// (e.g. `;` no longer starts a statement/class member, so recovery
-    /// doesn't bail out of the enclosing construct on a stray semicolon).
     fn is_list_element(&self, context: ParsingContext, in_error_recovery: bool) -> bool {
         match context {
             ParsingContext::SourceElements
@@ -970,12 +829,7 @@ impl Parser {
             }
             ParsingContext::TypeMembers => !self.is_list_terminator(context),
             ParsingContext::ClassMembers => {
-                // Go: lookAhead(scanClassMemberStart) || (token==';' && !inErrorRecovery).
-                // Semicolons are valid (empty) class elements outside error
-                // recovery. NOTE: EnumMembers/ObjectLiteralMembers keep the
-                // legacy `!is_list_terminator` gate (Go uses literal-property
-                // gates there) — ClassMembers is gated first to fix keyword
-                // recovery (e.g. `var` at class-member level, TS1068).
+
                 self.look_ahead_class_member_start()
                     || (self.token == SyntaxKind::SemicolonToken && !in_error_recovery)
             }
@@ -1003,7 +857,7 @@ impl Parser {
                 self.token == SyntaxKind::DotDotDotToken || self.is_start_of_expression()
             }
             ParsingContext::ArrayLiteralMembers => {
-                // Not an array literal member, but don't want to close the array.
+
                 if self.token == SyntaxKind::CommaToken || self.token == SyntaxKind::DotToken {
                     return true;
                 }
@@ -1015,7 +869,7 @@ impl Parser {
                 self.token == SyntaxKind::CommaToken || self.is_start_of_type()
             }
             ParsingContext::HeritageClauseElement => {
-                // Go: isStartOfLeftHandSideExpression && !isHeritageClauseExtendsOrImplementsKeyword.
+
                 self.is_start_of_left_hand_side_expression()
             }
             ParsingContext::HeritageClauses => {
@@ -1023,16 +877,14 @@ impl Parser {
                     || self.token == SyntaxKind::ImplementsKeyword
             }
             ParsingContext::ImportOrExportSpecifiers => {
-                // Bail out if the next token is [FromKeyword StringLiteral].
-                // That means we're in something like `import { from "mod"`.
-                // Stop here to give a better error message.
+
                 if self.token == SyntaxKind::FromKeyword
                     && self.look_ahead_token() == SyntaxKind::StringLiteral
                 {
                     return false;
                 }
                 if self.token == SyntaxKind::StringLiteral {
-                    return true; // For "arbitrary module namespace identifiers"
+                    return true;
                 }
                 is_identifier_or_keyword(self.token)
             }
@@ -1047,10 +899,6 @@ impl Parser {
         }
     }
 
-    /// True if positioned at element or terminator of the current list or any
-    /// enclosing list. Mirrors Go's `isInSomeParsingContext`: used to decide
-    /// whether a list abort should stop WITHOUT consuming the offending token
-    /// (an enclosing context will handle it) or skip it and keep going.
     fn is_in_some_parsing_context(&self) -> bool {
         const CONTEXTS: [ParsingContext; 26] = [
             ParsingContext::SourceElements,
@@ -1090,11 +938,6 @@ impl Parser {
         false
     }
 
-    // ─────────────────────────────────────────────────────────────────────
-    // Statement parsing
-    // ─────────────────────────────────────────────────────────────────────
-
-    /// Check if the current token starts a statement.
     fn is_start_of_statement(&self) -> bool {
         match self.token {
             SyntaxKind::AtToken
@@ -1141,7 +984,6 @@ impl Parser {
         }
     }
 
-    /// Whether the current token starts an expression.
     fn is_start_of_expression(&self) -> bool {
         if self.is_start_of_left_hand_side_expression() {
             return true;
@@ -1165,7 +1007,6 @@ impl Parser {
         ) || self.is_identifier()
     }
 
-    /// Whether the current token starts a left-hand-side expression.
     fn is_start_of_left_hand_side_expression(&self) -> bool {
         matches!(
             self.token,
@@ -1191,7 +1032,6 @@ impl Parser {
         ) || self.token == SyntaxKind::ImportKeyword
     }
 
-    /// Whether the current token is a literal.
     #[allow(dead_code)]
     fn is_literal(&self) -> bool {
         matches!(
@@ -1204,40 +1044,32 @@ impl Parser {
         )
     }
 
-    /// Check if `let` is followed by a binding identifier or destructuring
-    /// pattern. Go: `isLetDeclaration` → `nextTokenIsBindingIdentifierOrStartOfDestructuring`.
-    /// In ES6, `let` starts a lexical declaration only if followed by an
-    /// identifier, `{`, or `[`; otherwise it's treated as an identifier.
     fn is_let_declaration(&self) -> bool {
         let mut s = self.scanner.clone();
-        s.scan(); // skip 'let'
+        s.scan();
         let t = s.token();
         Self::is_binding_identifier_token(t)
             || t == SyntaxKind::OpenBraceToken
             || t == SyntaxKind::OpenBracketToken
     }
 
-    /// Check if `using` is followed by a binding identifier or `{` on the same line.
-    /// Go: `isUsingDeclaration`.
     fn is_using_declaration(&self) -> bool {
         let mut scanner = self.scanner.clone();
-        scanner.scan(); // skip 'using'
+        scanner.scan();
         let next = scanner.token();
         let no_line_break = !scanner.has_preceding_line_break();
         (Self::is_binding_identifier_token(next) || next == SyntaxKind::OpenBraceToken)
             && no_line_break
     }
 
-    /// Check if `await` is followed by `using` then a binding identifier or `{` on the same line.
-    /// Go: `isAwaitUsingDeclaration`.
     fn is_await_using_declaration(&self) -> bool {
         let mut scanner = self.scanner.clone();
-        scanner.scan(); // skip 'await'
+        scanner.scan();
         if scanner.token() != SyntaxKind::UsingKeyword {
             return false;
         }
         let no_line_break = !scanner.has_preceding_line_break();
-        scanner.scan(); // skip 'using'
+        scanner.scan();
         let next = scanner.token();
         let no_line_break_2 = !scanner.has_preceding_line_break();
         (Self::is_binding_identifier_token(next) || next == SyntaxKind::OpenBraceToken)
@@ -1246,19 +1078,10 @@ impl Parser {
     }
 
     fn is_binding_identifier_token(token: SyntaxKind) -> bool {
-        // Go `isBindingIdentifier`: Identifier, or any contextual keyword
-        // (token > LastReservedWord) — so `let module`, `let namespace`,
-        // `let static` … parse as lexical declarations with keyword-identifier
-        // binding names. `let await`/`let yield` are allowed here and
-        // disallowed later in the binder, exactly as in Go.
+
         token == SyntaxKind::Identifier || (token as i16) > (SyntaxKind::WithKeyword as i16)
     }
 
-    /// Snapshot the parser state for lookahead. Mirrors Go's `lookAhead`,
-    /// which reuses the scanner's `Mark`/`Rewind` plus a saved token. We clone
-    /// the scanner (cheap: it's a `String` + a few ints) and discard any
-    /// diagnostics produced during the lookahead — only the boolean result
-    /// matters to the caller.
     fn clone_state(&self) -> Parser {
         Parser {
             scanner: self.scanner.clone(),
@@ -1272,15 +1095,11 @@ impl Parser {
         }
     }
 
-    /// Check whether the current token sequence starts a declaration.
-    /// Mirrors Go's `isStartOfDeclaration` → `lookAhead(scanStartOfDeclaration)`.
     fn is_start_of_declaration(&self) -> bool {
         let mut p = self.clone_state();
         p.scan_start_of_declaration()
     }
 
-    /// Scanner callback for `is_start_of_declaration`.
-    /// Mirrors Go's `scanStartOfDeclaration`.
     fn scan_start_of_declaration(&mut self) -> bool {
         loop {
             match self.token {
@@ -1306,7 +1125,7 @@ impl Parser {
                 | SyntaxKind::ReadonlyKeyword => {
                     let previous_token = self.token;
                     self.next_token();
-                    // ASI takes effect for this modifier.
+
                     if self.has_preceding_line_break() {
                         return false;
                     }
@@ -1323,10 +1142,7 @@ impl Parser {
                         || self.token == SyntaxKind::Identifier
                         || self.token == SyntaxKind::ExportKeyword;
                 }
-                // Go's `scanStartOfDeclaration` has a separate `static` arm
-                // (`nextToken(); continue` — no ASI check): `static var x`
-                // inside a namespace parses as a declaration whose modifiers
-                // the checker then rejects with TS1044.
+
                 SyntaxKind::StaticKeyword => {
                     self.next_token();
                     continue;
@@ -1362,14 +1178,12 @@ impl Parser {
         }
     }
 
-    /// Check if the next token is an identifier on the same line.
     fn next_token_is_identifier_on_same_line(&self) -> bool {
         let mut s = self.scanner.clone();
         s.scan();
         !s.has_preceding_line_break() && is_identifier_or_keyword(s.token())
     }
 
-    /// Check if the next token is an identifier or string literal on the same line.
     fn next_token_is_identifier_or_string_literal_on_same_line(&self) -> bool {
         let mut s = self.scanner.clone();
         s.scan();
@@ -1377,7 +1191,6 @@ impl Parser {
             && (is_identifier_or_keyword(s.token()) || s.token() == SyntaxKind::StringLiteral)
     }
 
-    /// Parse a statement.
     pub fn parse_statement(&mut self) -> Arc<Node> {
         match self.token {
             SyntaxKind::SemicolonToken => self.parse_empty_statement(),
@@ -1402,12 +1215,7 @@ impl Parser {
             SyntaxKind::TryKeyword => self.parse_try_statement(),
             SyntaxKind::FunctionKeyword => self.parse_function_declaration(),
             SyntaxKind::ClassKeyword => self.parse_class_declaration(),
-            // Contextual keywords: Go's `parseStatement` gates these behind
-            // `isStartOfDeclaration()` before parsing them as declarations;
-            // otherwise they fall through to
-            // `parseExpressionOrLabeledStatement()` — so `module.exports = {}`,
-            // `type = 1`, or `import("./x")` parse as expression statements
-            // (the words are legal JS identifiers).
+
             SyntaxKind::InterfaceKeyword if self.is_start_of_declaration() => {
                 self.parse_interface_declaration()
             }
@@ -1429,12 +1237,7 @@ impl Parser {
             }
             SyntaxKind::ExportKeyword => self.parse_export_declaration(),
             SyntaxKind::DebuggerKeyword => self.parse_debugger_statement(),
-            // Modifier keywords that may start a declaration. Go groups these
-            // in one case arm and gates on `isStartOfDeclaration()` before
-            // dispatching to `parseDeclaration()`. `const` is included here
-            // (not with `var`/`let`) because `const enum E {}` needs to route
-            // through modifier collection so that `const` is attached as a
-            // modifier to the enum declaration.
+
             SyntaxKind::AsyncKeyword
             | SyntaxKind::ConstKeyword
             | SyntaxKind::AbstractKeyword
@@ -1455,7 +1258,7 @@ impl Parser {
 
     fn parse_empty_statement(&mut self) -> Arc<Node> {
         let pos = self.token_pos();
-        self.next_token(); // consume ';'
+        self.next_token();
         Arc::new(Node::with_loc(
             SyntaxKind::EmptyStatement,
             NodeData::EmptyStatement,
@@ -1510,18 +1313,18 @@ impl Parser {
             SyntaxKind::ConstKeyword => NodeFlags::Const,
             SyntaxKind::UsingKeyword => NodeFlags::Using,
             SyntaxKind::AwaitKeyword => {
-                // `await using x = ...` — consume `await`, then fall through to `using`
+
                 NodeFlags::AwaitUsing
             }
             _ => NodeFlags::empty(),
         };
         if self.token == SyntaxKind::AwaitKeyword {
-            self.next_token(); // consume 'await'
+            self.next_token();
         }
         if self.token == SyntaxKind::UsingKeyword {
-            self.next_token(); // consume 'using'
+            self.next_token();
         } else {
-            self.next_token(); // consume var/let/const
+            self.next_token();
         }
         let declarations = self.parse_delimited_list(
             ParsingContext::VariableDeclarations,
@@ -1547,8 +1350,6 @@ impl Parser {
         self.parse_variable_declaration_worker(false)
     }
 
-    /// Definite-assignment form (`let v!: number;`) for non-`for` initializer
-    /// positions. Mirrors Go's `parseVariableDeclarationAllowExclamation`.
     fn parse_variable_declaration_allow_exclamation(&mut self) -> Arc<Node> {
         self.parse_variable_declaration_worker(true)
     }
@@ -1558,8 +1359,7 @@ impl Parser {
         let name = self.parse_identifier_or_pattern_with_diagnostic(Some(
             &diagnostics::PRIVATE_IDENTIFIERS_ARE_NOT_ALLOWED_IN_VARIABLE_DECLARATIONS,
         ));
-        // `!` definite assignment assertion — simple identifier names only,
-        // same line, never in a `for` initializer.
+
         let exclamation_token = if allow_exclamation
             && name.kind == SyntaxKind::Identifier
             && self.token == SyntaxKind::ExclamationToken
@@ -1574,10 +1374,7 @@ impl Parser {
         let type_node = self.parse_optional_type_annotation();
         let initializer = if self.token == SyntaxKind::EqualsToken {
             self.next_token();
-            // Use assignment-expression (NOT parse_expression) so the comma
-            // separates declarators (`let a = 1, b = 2`) rather than being
-            // swallowed as a comma/sequence operator. Mirrors Go's
-            // `parseAssignmentExpressionOrHigher` for variable initializers.
+
             Some(self.parse_assignment_expression())
         } else {
             None
@@ -1608,9 +1405,6 @@ impl Parser {
         self.parse_identifier_or_pattern_with_diagnostic(None)
     }
 
-    /// Go `parseIdentifierOrPatternWithDiagnostic` — the message is reported
-    /// when the binding name is a private identifier (TS18029 for variable
-    /// declarations, TS18009 for parameters).
     fn parse_identifier_or_pattern_with_diagnostic(
         &mut self,
         private_msg: Option<&'static crate::diagnostics::Message>,
@@ -1652,7 +1446,7 @@ impl Parser {
         };
         let initializer = if self.token == SyntaxKind::EqualsToken {
             self.next_token();
-            // Assignment expression only (see the object-binding variant).
+
             Some(self.parse_assignment_expression())
         } else {
             None
@@ -1706,8 +1500,7 @@ impl Parser {
         };
         let initializer = if self.token == SyntaxKind::EqualsToken {
             self.next_token();
-            // Assignment expression only — a comma-sequence initializer
-            // would eat the following binding elements (`{x = 10, y: z}`).
+
             Some(self.parse_assignment_expression())
         } else {
             None
@@ -1727,7 +1520,6 @@ impl Parser {
         ))
     }
 
-    /// Parse an optional type annotation (`: Type`).
     fn parse_optional_type_annotation(&mut self) -> Option<Arc<Node>> {
         if self.token == SyntaxKind::ColonToken {
             self.next_token();
@@ -1737,8 +1529,6 @@ impl Parser {
         }
     }
 
-    /// Parse an optional return type annotation (`: T` or `: x is T`).
-    /// Uses `parse_type_or_type_predicate` to allow type predicates in return position.
     fn parse_optional_return_type(&mut self) -> Option<Arc<Node>> {
         if self.token == SyntaxKind::ColonToken {
             self.next_token();
@@ -1748,7 +1538,6 @@ impl Parser {
         }
     }
 
-    /// Parse a TypeScript type node.
     fn parse_type(&mut self) -> Arc<Node> {
         let pos = self.token_pos();
         let mut type_node = self.parse_union_type_or_higher();
@@ -1773,20 +1562,14 @@ impl Parser {
         type_node
     }
 
-    /// Parse a type or a type predicate (`identifier is T`) for return types.
-    /// Go: `parseTypeOrTypePredicate`.
     fn parse_type_or_type_predicate(&mut self) -> Arc<Node> {
-        // Type predicate: `identifier is Type` or `this is Type`.
-        // `object` is a keyword that can also be a type predicate parameter name
-        // (e.g. `object is ReactElement<P>`), so we check for both Identifier and
-        // ObjectKeyword. Mirrors Go's parseTypeOrTypePredicate which calls
-        // isIdentifier() (includes keyword-as-identifier cases).
+
         if self.token == SyntaxKind::Identifier
             || self.token == SyntaxKind::ObjectKeyword
             || self.token == SyntaxKind::ThisKeyword
         {
             let mut scanner = self.scanner.clone();
-            scanner.scan(); // skip identifier
+            scanner.scan();
             if scanner.token() == SyntaxKind::IsKeyword && !scanner.has_preceding_line_break() {
                 let pos = self.token_pos();
                 let parameter_name = self.parse_identifier();
@@ -1920,10 +1703,7 @@ impl Parser {
             | SyntaxKind::UndefinedKeyword
             | SyntaxKind::NeverKeyword
             | SyntaxKind::ObjectKeyword => {
-                // primitive keyword type nodes (e.g. `string`, `number`, `any`).
-                // Go: parseKeywordTypeNode -> NewKeywordTypeNode(token); the node's
-                // SyntaxKind equals the keyword kind itself.
-                // If followed by '.', treat as dotted type reference (e.g. `String.fromCharCode`).
+
                 if self.look_ahead_token() == SyntaxKind::DotToken {
                     return self.parse_type_reference();
                 }
@@ -1955,7 +1735,7 @@ impl Parser {
             | SyntaxKind::StringLiteral
             | SyntaxKind::NoSubstitutionTemplateLiteral => self.parse_literal_type_node(),
             SyntaxKind::MinusToken => {
-                // negative numeric literal type (e.g. `-1`)
+
                 self.parse_literal_type_node_with_negative(true)
             }
             SyntaxKind::ThisKeyword => {
@@ -1967,14 +1747,14 @@ impl Parser {
                     NodeData::ThisTypeNode,
                     TextRange::new(pos, end),
                 ));
-                // `this is T` -> type predicate
+
                 if self.token == SyntaxKind::IsKeyword && !self.has_preceding_line_break() {
                     return self.parse_this_type_predicate(this_keyword);
                 }
                 this_keyword
             }
             SyntaxKind::TypeOfKeyword => {
-                // Go: if nextIsStartOfTypeOfImportType -> parseImportType
+
                 if self.look_ahead_token() == SyntaxKind::ImportKeyword {
                     self.parse_import_type()
                 } else {
@@ -1983,7 +1763,7 @@ impl Parser {
             }
             SyntaxKind::ImportKeyword => self.parse_import_type(),
             SyntaxKind::AssertsKeyword => {
-                // `asserts x` -> asserts type predicate; otherwise type reference
+
                 if is_identifier_or_keyword(self.look_ahead_token()) {
                     self.parse_asserts_type_predicate()
                 } else {
@@ -1993,7 +1773,7 @@ impl Parser {
             SyntaxKind::InferKeyword => self.parse_infer_type(),
             SyntaxKind::TemplateHead => self.parse_template_type(),
             SyntaxKind::OpenBraceToken => {
-                // Go: if lookAhead(nextIsStartOfMappedType) -> parseMappedType
+
                 if self.next_is_start_of_mapped_type() {
                     self.parse_mapped_type()
                 } else {
@@ -2015,7 +1795,7 @@ impl Parser {
     fn parse_literal_type_node_with_negative(&mut self, negative: bool) -> Arc<Node> {
         let pos = self.token_pos();
         if negative {
-            // consume the leading `-`
+
             self.next_token();
         }
         let literal = match self.token {
@@ -2050,7 +1830,7 @@ impl Parser {
     }
 
     fn parse_this_type_predicate(&mut self, lhs: Arc<Node>) -> Arc<Node> {
-        // Go: parseThisTypePredicate
+
         let pos = lhs.pos();
         self.expect(SyntaxKind::IsKeyword);
         let type_node = self.parse_type();
@@ -2067,9 +1847,9 @@ impl Parser {
     }
 
     fn parse_asserts_type_predicate(&mut self) -> Arc<Node> {
-        // Go: parseAssertsTypePredicate
+
         let pos = self.token_pos();
-        // consume `asserts`
+
         let asserts_node = self.create_token_node();
         self.next_token();
         let parameter_name = self.parse_identifier();
@@ -2090,7 +1870,6 @@ impl Parser {
         ))
     }
 
-    /// Go: parseInferType -> `infer R`
     fn parse_infer_type(&mut self) -> Arc<Node> {
         let pos = self.token_pos();
         self.expect(SyntaxKind::InferKeyword);
@@ -2104,11 +1883,11 @@ impl Parser {
     }
 
     fn parse_type_query(&mut self) -> Arc<Node> {
-        // Go: parseTypeQuery -> `typeof X`
+
         let pos = self.token_pos();
         self.expect(SyntaxKind::TypeOfKeyword);
         let expr_name = self.parse_entity_name();
-        // ASI: don't consume type arguments if preceded by line break
+
         let type_arguments = if !self.has_preceding_line_break() {
             self.parse_optional_type_arguments()
         } else {
@@ -2126,14 +1905,12 @@ impl Parser {
     }
 
     fn parse_import_type(&mut self) -> Arc<Node> {
-        // Go: parseImportType -> `import("x").T`, `typeof import("x").T`,
-        // and the attribute form `import("x", { with: { ... } }).T`
-        // (parser.go: second argument wraps the attributes clause).
+
         let pos = self.token_pos();
         let is_type_of = self.parse_optional(SyntaxKind::TypeOfKeyword);
         self.expect(SyntaxKind::ImportKeyword);
         self.expect(SyntaxKind::OpenParenToken);
-        // argument is a string literal (parsed as a type)
+
         let argument = self.parse_type();
         let attributes = if self.parse_optional(SyntaxKind::CommaToken) {
             self.expect(SyntaxKind::OpenBraceToken);
@@ -2141,7 +1918,7 @@ impl Parser {
             if matches!(token, SyntaxKind::WithKeyword | SyntaxKind::AssertKeyword) {
                 self.next_token();
             } else {
-                // Go reports X_0_expected with 'with'.
+
                 let with_str =
                     crate::scanner::token_to_string(SyntaxKind::WithKeyword).to_string();
                 self.parse_error_at_current_token(
@@ -2158,7 +1935,7 @@ impl Parser {
             None
         };
         self.expect(SyntaxKind::CloseParenToken);
-        // optional qualifier after `.`
+
         let qualifier = if self.parse_optional(SyntaxKind::DotToken) {
             Some(self.parse_entity_name())
         } else {
@@ -2188,8 +1965,7 @@ impl Parser {
     }
 
     fn parse_template_type(&mut self) -> Arc<Node> {
-        // Go: parseTemplateType
-        // Current token is TemplateHead; create the head node.
+
         let pos = self.token_pos();
         let head = self.create_template_token_node();
         self.next_token();
@@ -2206,13 +1982,12 @@ impl Parser {
     }
 
     fn parse_template_type_spans(&mut self) -> Arc<NodeList> {
-        // Go: parseTemplateTypeSpans
+
         let pos = self.token_pos();
         let mut spans = Vec::new();
         loop {
             let span = self.parse_template_type_span();
-            // Continue only if the literal following the type is TemplateMiddle.
-            // TemplateTail terminates the spans.
+
             let is_middle = self.last_template_literal_was_middle;
             spans.push(span);
             if !is_middle {
@@ -2227,10 +2002,10 @@ impl Parser {
     }
 
     fn parse_template_type_span(&mut self) -> Arc<Node> {
-        // Go: parseTemplateTypeSpan
+
         let pos = self.token_pos();
         let type_node = self.parse_type();
-        // After the type, expect `}` then reScan template token
+
         let literal = if self.token == SyntaxKind::CloseBraceToken {
             self.next_template_token();
             self.last_template_literal_was_middle = self.token == SyntaxKind::TemplateMiddle;
@@ -2238,7 +2013,7 @@ impl Parser {
             self.next_token();
             lit
         } else {
-            // Error recovery: missing `}`
+
             self.last_template_literal_was_middle = false;
             self.missing_node(self.token_pos())
         };
@@ -2252,10 +2027,7 @@ impl Parser {
 
     fn parse_entity_name(&mut self) -> Arc<Node> {
         let pos = self.token_pos();
-        // Entity-name positions reject literals and reserved words with
-        // dedicated errors (Go's parseEntityName → parseIdentifierName
-        // error reporting): `import q = null;` → TS1359, `import n = 5;`
-        // → TS1003.
+
         match self.token {
             SyntaxKind::NullKeyword
             | SyntaxKind::TrueKeyword
@@ -2291,22 +2063,21 @@ impl Parser {
         left
     }
 
-    /// Go: nextIsStartOfMappedType — scans ahead to detect `{ [K in T]: V }` pattern.
     fn next_is_start_of_mapped_type(&self) -> bool {
         let mut scanner = self.scanner.clone();
-        // First scan returns the token AFTER `{` (the current token).
+
         let t1 = scanner.scan();
-        // `+readonly` or `-readonly`
+
         if t1 == SyntaxKind::PlusToken || t1 == SyntaxKind::MinusToken {
             return scanner.scan() == SyntaxKind::ReadonlyKeyword;
         }
-        // `readonly` — skip it
+
         let t2 = if t1 == SyntaxKind::ReadonlyKeyword {
             scanner.scan()
         } else {
             t1
         };
-        // `[ identifier in`
+
         if t2 != SyntaxKind::OpenBracketToken {
             return false;
         }
@@ -2317,12 +2088,10 @@ impl Parser {
         scanner.scan() == SyntaxKind::InKeyword
     }
 
-    /// Go: parseMappedType
     fn parse_mapped_type(&mut self) -> Arc<Node> {
         let pos = self.token_pos();
         self.expect(SyntaxKind::OpenBraceToken);
 
-        // readonly modifier: `readonly`, `+readonly`, `-readonly`
         let readonly_token = match self.token {
             SyntaxKind::ReadonlyKeyword | SyntaxKind::PlusToken | SyntaxKind::MinusToken => {
                 let token = self.create_token_node();
@@ -2344,7 +2113,6 @@ impl Parser {
         };
         self.expect(SyntaxKind::CloseBracketToken);
 
-        // optional modifier: `?`, `+?`, `-?`
         let question_token = match self.token {
             SyntaxKind::QuestionToken | SyntaxKind::PlusToken | SyntaxKind::MinusToken => {
                 let token = self.create_token_node();
@@ -2377,7 +2145,6 @@ impl Parser {
         ))
     }
 
-    /// Go: parseMappedTypeParameter — `K in T`
     fn parse_mapped_type_parameter(&mut self) -> Arc<Node> {
         let pos = self.token_pos();
         let name = self.parse_identifier();
@@ -2431,12 +2198,11 @@ impl Parser {
     }
 
     fn parse_tuple_element_type(&mut self) -> Arc<Node> {
-        // Go: parseTupleElementNameOrTupleElementType
-        // Named tuple member: `name: T`, `...name: T`, `name?: T`
+
         if self.is_start_of_named_tuple_element() {
             return self.parse_named_tuple_member();
         }
-        // Unnamed: `T`, `...T`, `T?`
+
         let pos = self.token_pos();
         if self.parse_optional(SyntaxKind::DotDotDotToken) {
             let type_node = self.parse_type();
@@ -2448,7 +2214,7 @@ impl Parser {
             ));
         }
         let type_node = self.parse_type();
-        // Optional tuple element: `T?`
+
         if self.parse_optional(SyntaxKind::QuestionToken) {
             let end = self.token_pos();
             return Arc::new(Node::with_loc(
@@ -2460,16 +2226,14 @@ impl Parser {
         type_node
     }
 
-    /// Check if the current position starts a named tuple element.
-    /// Go: scanStartOfNamedTupleElement — checks `name:`, `name?:`, `...name:`
     fn is_start_of_named_tuple_element(&self) -> bool {
         if self.token == SyntaxKind::DotDotDotToken {
-            // `... identifier :` or `... identifier ? :`
+
             let next = self.look_ahead_token();
             if !is_identifier_or_keyword(next) {
                 return false;
             }
-            // check token after identifier is `:` or `?`
+
             let after = self.look_ahead_2_tokens();
             return after == SyntaxKind::ColonToken
                 || (after == SyntaxKind::QuestionToken
@@ -2477,11 +2241,11 @@ impl Parser {
         }
         if is_identifier_or_keyword(self.token) {
             let next = self.look_ahead_token();
-            // `identifier :`
+
             if next == SyntaxKind::ColonToken {
                 return true;
             }
-            // `identifier ? :` — need 2-step lookahead
+
             if next == SyntaxKind::QuestionToken {
                 return self.look_ahead_2_tokens() == SyntaxKind::ColonToken;
             }
@@ -2490,7 +2254,7 @@ impl Parser {
     }
 
     fn parse_named_tuple_member(&mut self) -> Arc<Node> {
-        // Go: parseTupleElementNameOrTupleElementType (named branch)
+
         let pos = self.token_pos();
         let dot_dot_dot_token = self.parse_optional_token(SyntaxKind::DotDotDotToken);
         let name = self.parse_identifier();
@@ -2511,11 +2275,10 @@ impl Parser {
     }
 
     fn parse_parenthesized_or_function_type(&mut self) -> Arc<Node> {
-        // Go: `(` dispatches to parseParenthesizedType (just `( type )`)
-        // unless isStartOfFunctionTypeOrConstructorType detects `(` + function-type lookahead.
+
         let pos = self.token_pos();
         if self.is_start_of_function_type_with_open_paren() {
-            // Function type: `(params) => T`
+
             let parameters = self.parse_parameter_list();
             self.expect(SyntaxKind::EqualsGreaterThanToken);
             let type_node = if self.is_start_of_type() {
@@ -2534,7 +2297,7 @@ impl Parser {
                 TextRange::new(pos, end),
             ));
         }
-        // Parenthesized type: `( type )`
+
         self.expect(SyntaxKind::OpenParenToken);
         let type_node = self.parse_type();
         self.expect(SyntaxKind::CloseParenToken);
@@ -2546,22 +2309,15 @@ impl Parser {
         ))
     }
 
-    /// Go: nextIsUnambiguouslyStartOfFunctionType — checks if `(` starts a function type.
     fn is_start_of_function_type_with_open_paren(&self) -> bool {
-        // Scan ahead from `(` to check for function-type patterns:
-        // `()`, `(...`, or a parameter start (modifiers + identifier /
-        // binding pattern, Go `skipParameterStart`) followed by `:`, `,`,
-        // `?`, `=`, or `) =>`.
+
         let mut scanner = self.scanner.clone();
-        let t1 = scanner.scan(); // returns token after `(`
-        // `()` or `(...`
+        let t1 = scanner.scan();
+
         if t1 == SyntaxKind::CloseParenToken || t1 == SyntaxKind::DotDotDotToken {
             return true;
         }
-        // Go's `skipParameterStart` first skips parameter modifiers — so
-        // `(public x) => T` parses as a function type whose parameter is a
-        // parameter property (TS2369 from the checker), not a parenthesized
-        // type referencing a name `public`.
+
         let mut t = t1;
         while is_modifier_kind(t) {
             let mut probe = scanner.clone();
@@ -2574,9 +2330,7 @@ impl Parser {
         if t == SyntaxKind::DotDotDotToken {
             t = scanner.scan();
         }
-        // Binding-pattern parameter (`({ name: alias }: N) => void` — Go's
-        // `skipParameterStart` accepts patterns): skip the balanced
-        // `{ … }` / `[ … ]`, then the same continuation check applies.
+
         if t == SyntaxKind::OpenBraceToken || t == SyntaxKind::OpenBracketToken {
             let mut depth = 1usize;
             loop {
@@ -2606,7 +2360,7 @@ impl Parser {
             ) || (t2 == SyntaxKind::CloseParenToken
                 && scanner.scan() == SyntaxKind::EqualsGreaterThanToken);
         }
-        // Try to skip a parameter start (identifier/binding pattern)
+
         if !is_identifier_or_keyword(t) {
             return false;
         }
@@ -2746,7 +2500,7 @@ impl Parser {
     fn parse_for_statement(&mut self) -> Arc<Node> {
         let pos = self.token_pos();
         self.expect(SyntaxKind::ForKeyword);
-        // Go: `for await (const x of ys)` — `await` modifier before `(`.
+
         let await_modifier = if self.token == SyntaxKind::AwaitKeyword {
             let node = self.create_token_node();
             self.next_token();
@@ -2768,7 +2522,6 @@ impl Parser {
             None
         };
 
-        // for-in / for-of
         if self.token == SyntaxKind::InKeyword {
             self.next_token();
             let expression = self.parse_expression();
@@ -2804,7 +2557,6 @@ impl Parser {
             ));
         }
 
-        // Regular for loop
         self.expect(SyntaxKind::SemicolonToken);
         let condition = if self.token != SyntaxKind::SemicolonToken
             && self.token != SyntaxKind::CloseParenToken
@@ -2970,7 +2722,7 @@ impl Parser {
         let expression = if !self.has_preceding_line_break() {
             self.parse_expression()
         } else {
-            // ASI prevented expression on same line
+
             Arc::new(Node::with_loc(
                 SyntaxKind::Identifier,
                 NodeData::Identifier(IdentifierData {
@@ -2979,9 +2731,7 @@ impl Parser {
                 TextRange::new(self.token_pos(), self.token_pos()),
             ))
         };
-        // Go: `!tryParseSemicolon() → parseErrorForMissingSemicolonAfter
-        // (expression)` — same tailored missing-semicolon errors as
-        // expression statements.
+
         if !self.try_parse_semicolon() {
             self.parse_error_for_missing_semicolon_after(&expression);
         }
@@ -3070,11 +2820,9 @@ impl Parser {
     fn parse_expression_statement(&mut self) -> Arc<Node> {
         let pos = self.token_pos();
         let expression = self.parse_expression();
-        // Labeled statement: `label: statement`. Mirrors Go's
-        // `parseExpressionStatement` which calls `parseLabeledStatement`
-        // when the token following the optional expression is `:`.
+
         if self.token == SyntaxKind::ColonToken && expression.kind == SyntaxKind::Identifier {
-            self.next_token(); // consume ':'
+            self.next_token();
             let statement = self.parse_statement();
             let end = self.token_pos();
             return Arc::new(Node::with_loc(
@@ -3086,11 +2834,7 @@ impl Parser {
                 TextRange::new(pos, end),
             ));
         }
-        // Go: `!tryParseSemicolon() → parseErrorForMissingSemicolonAfter
-        // (expression)` — tailors the missing-semicolon error to the
-        // expression (e.g. a `var`-like identifier yields TS1440, an
-        // unknown identifier yields TS1434 rather than a bare
-        // "';' expected").
+
         if !self.try_parse_semicolon() {
             self.parse_error_for_missing_semicolon_after(&expression);
         }
@@ -3102,19 +2846,12 @@ impl Parser {
         ))
     }
 
-    // ─────────────────────────────────────────────────────────────────────
-    // Identifier and property name parsing
-    // ─────────────────────────────────────────────────────────────────────
-
     fn is_identifier(&self) -> bool {
         self.token == SyntaxKind::Identifier || is_keyword(self.token)
     }
 
     fn is_binding_identifier_or_pattern(&self) -> bool {
-        // Go `isBindingIdentifierOrPrivateIdentifierOrPattern` — a private
-        // identifier can START a binding (so `const #x` routes to the
-        // variable-declaration parser, which reports TS18029) instead of
-        // falling through to an expression statement.
+
         self.is_identifier()
             || self.token == SyntaxKind::PrivateIdentifier
             || self.token == SyntaxKind::OpenBracketToken
@@ -3184,11 +2921,6 @@ impl Parser {
         self.parse_identifier_with_private_diagnostic(None)
     }
 
-    /// Go `createIdentifierWithDiagnostic`: a PrivateIdentifier token in a
-    /// binding position reports the caller's message (TS18029 for variable
-    /// declarations, TS18009 for parameters; default TS18016), then the
-    /// token is CONSUMED and an ordinary Identifier node built — so parsing
-    /// recovers instead of cascading "declaration expected" errors.
     fn parse_identifier_with_private_diagnostic(
         &mut self,
         private_msg: Option<&'static crate::diagnostics::Message>,
@@ -3270,7 +3002,7 @@ impl Parser {
             }
             SyntaxKind::OpenBracketToken => {
                 let pos = self.token_pos();
-                self.next_token(); // consume '['
+                self.next_token();
                 let expression = self.parse_assignment_expression();
                 self.expect(SyntaxKind::CloseBracketToken);
                 let end = self.token_pos();
@@ -3284,14 +3016,9 @@ impl Parser {
         }
     }
 
-    // ─────────────────────────────────────────────────────────────────────
-    // Expression parsing
-    // ─────────────────────────────────────────────────────────────────────
-
-    /// Parse an expression (entry point).
     pub fn parse_expression(&mut self) -> Arc<Node> {
         let expr = self.parse_assignment_expression();
-        // Comma operator
+
         if self.token == SyntaxKind::CommaToken {
             let pos = expr.pos();
             let mut left = expr;
@@ -3325,15 +3052,11 @@ impl Parser {
     }
 
     fn parse_assignment_expression(&mut self) -> Arc<Node> {
-        // Go: parseAssignmentExpressionOrHigher — check yield first.
+
         if self.is_yield_expression() {
             return self.parse_yield_expression();
         }
-        // Generic arrow function: `[async] <T, U>(params) => body`.
-        // Speculative — backtracks if the leading `<` is actually a comparison
-        // or `async` isn't followed by `<`. Disabled in JSX. Mirrors Go's
-        // `tryParseParenthesizedArrowFunction` `<` path. Tried before the
-        // plain async/parenthesized-arrow checks so `async <T>() =>` works.
+
         if self.token == SyntaxKind::LessThanToken
             || (self.token == SyntaxKind::AsyncKeyword
                 && self.look_ahead_token() == SyntaxKind::LessThanToken)
@@ -3343,7 +3066,7 @@ impl Parser {
             }
         }
         if self.token == SyntaxKind::AsyncKeyword && self.is_async_arrow_function() {
-            // Capture the async modifier before consuming it.
+
             let async_modifier = self.create_token_node();
             self.next_token();
             if self.token == SyntaxKind::OpenParenToken {
@@ -3366,9 +3089,7 @@ impl Parser {
             let pos = expr.pos();
             let kind = self.token;
             self.next_token();
-            // `as const` — produce a `ConstKeyword` type node instead of
-            // parsing `const` as a type reference. Mirrors Go's
-            // `parseAssertedType` which checks `token == ConstKeyword`.
+
             let type_node = if kind == SyntaxKind::AsKeyword
                 && self.token == SyntaxKind::ConstKeyword
                 && !self.has_preceding_line_break()
@@ -3448,10 +3169,6 @@ impl Parser {
         expr
     }
 
-    /// Go: `isYieldExpression`. In yield context, `yield` is always a yield
-    /// expression. Outside yield context, `yield` is treated as an identifier
-    /// unless the user clearly intended a yield expression (e.g., `yield *x`
-    /// where `*` cannot continue an identifier expression).
     fn is_yield_expression(&self) -> bool {
         if self.token != SyntaxKind::YieldKeyword {
             return false;
@@ -3459,19 +3176,15 @@ impl Parser {
         if self.yield_context {
             return true;
         }
-        // Outside a generator, `yield` is an identifier unless the next token
-        // clearly indicates a yield expression: `yield*` or `yield <expr>`
-        // where the next token starts an expression on the same line.
+
         let mut p = self.clone_state();
-        p.next_token(); // skip 'yield'
+        p.next_token();
         if p.token == SyntaxKind::AsteriskToken {
             return true;
         }
         !p.has_preceding_line_break() && p.is_start_of_expression()
     }
 
-    /// Check whether `await` should be parsed as an AwaitExpression.
-    /// Mirrors Go's `isAwaitExpression`.
     fn is_await_expression(&self) -> bool {
         if self.token != SyntaxKind::AwaitKeyword {
             return false;
@@ -3479,17 +3192,15 @@ impl Parser {
         if self.await_context {
             return true;
         }
-        // Outside an async context, `await` is an identifier unless the next
-        // token clearly indicates an await expression on the same line.
+
         let mut p = self.clone_state();
-        p.next_token(); // skip 'await'
+        p.next_token();
         !p.has_preceding_line_break() && p.is_start_of_expression()
     }
 
-    /// Go: `parseYieldExpression`.
     fn parse_yield_expression(&mut self) -> Arc<Node> {
         let pos = self.token_pos();
-        self.next_token(); // consume 'yield'
+        self.next_token();
         let (asterisk_token, expression) = if !self.has_preceding_line_break()
             && (self.token == SyntaxKind::AsteriskToken || self.is_start_of_expression())
         {
@@ -3538,13 +3249,7 @@ impl Parser {
                         if next == SyntaxKind::ColonToken {
                             return Self::scanner_reaches_arrow_before_line_end(&mut scanner);
                         }
-                        // Go's simple case "() {": empty parens followed by `{`
-                        // is parsed as an arrow function missing its `=>`
-                        // ("not actually an arrow function, but this is
-                        // probably what the user intended") — the `=>`-missing
-                        // error then lands on the `{`. Only for EMPTY parens;
-                        // `(x) {` stays a parenthesized expression (Go returns
-                        // Unknown there and its speculation rejects the arrow).
+
                         if next == SyntaxKind::OpenBraceToken && scanned_tokens == 1 {
                             return true;
                         }
@@ -3560,11 +3265,7 @@ impl Parser {
     }
 
     fn scanner_reaches_arrow_before_line_end(scanner: &mut Scanner) -> bool {
-        // The return-type annotation may itself contain braces/brackets/
-        // parens (object/tuple/function types: '): { r: 1 } =>'); track
-        // nesting so those don't terminate the scan. An '=>' at nesting
-        // depth 0 (or appearing inside a nested function type, which still
-        // implies an arrow) completes the arrow lookahead.
+
         let mut depth = 0usize;
         loop {
             let token = scanner.scan();
@@ -3614,12 +3315,7 @@ impl Parser {
                                 return true;
                             }
                             if next == SyntaxKind::ColonToken {
-                                // Return-type annotation: `async (): T => …`.
-                                // A `:` after the closing paren is only
-                                // valid as an arrow return type; the
-                                // matching `=>` follows the annotation
-                                // (inner `=>`s belong to function-type
-                                // annotations — still an arrow either way).
+
                                 loop {
                                     match scanner.scan() {
                                         SyntaxKind::EqualsGreaterThanToken => return true,
@@ -3645,7 +3341,6 @@ impl Parser {
         false
     }
 
-    /// Build a modifier list containing a single `async` keyword node.
     fn make_async_modifier_list(&self, async_modifier: Arc<Node>) -> Option<Arc<ModifierList>> {
         Some(Arc::new(ModifierList::new(
             vec![async_modifier],
@@ -3687,14 +3382,6 @@ impl Parser {
         ))
     }
 
-    /// Speculatively parse a (possibly `async`) generic arrow function
-    /// `[async] <T, U>(params) => body`. The leading `<` is ambiguous with a
-    /// comparison (`a < b`), so this snapshots the scanner/token/diagnostics
-    /// and commits only when the whole `[async] <TypeParams> ( Params ) : RetType? =>`
-    /// prefix is matched with no parse errors; otherwise it backtracks, leaving
-    /// the tokens for the binary-expression / async-arrow paths. Mirrors Go's
-    /// `tryParseParenthesizedArrowFunction` `<` branch. Disabled in JSX/TSX
-    /// (where `<T>` is a JSX element).
     fn try_parse_generic_arrow_function(&mut self) -> Option<Arc<Node>> {
         let starts_with_async = self.token == SyntaxKind::AsyncKeyword;
         if !starts_with_async
@@ -3703,9 +3390,7 @@ impl Parser {
         {
             return None;
         }
-        // Quick reject: there must be `[async] <` then an identifier/`const`
-        // (a type-parameter name), `async` on the same line as `<`. Mirrors
-        // Go's `nextIsParenthesizedArrowFunction`.
+
         {
             let mut s = self.scanner.clone();
             if starts_with_async {
@@ -3729,11 +3414,11 @@ impl Parser {
         let pos = self.token_pos();
 
         if starts_with_async {
-            self.next_token(); // consume `async`
+            self.next_token();
         }
-        // Current token is now `<`.
+
         let type_parameters = self.parse_optional_type_parameters();
-        // Commit requires clean type params + a following parameter list.
+
         if type_parameters.is_none()
             || self.token != SyntaxKind::OpenParenToken
             || self.diagnostics.len() != diag_len
@@ -3745,14 +3430,14 @@ impl Parser {
         }
         let parameters = self.parse_parameter_list();
         let type_node = self.parse_optional_return_type();
-        // The arrow itself must follow with no errors during the attempt.
+
         if self.token != SyntaxKind::EqualsGreaterThanToken || self.diagnostics.len() != diag_len {
             self.scanner = saved_scanner;
             self.token = saved_token;
             self.diagnostics.truncate(diag_len);
             return None;
         }
-        // Committed — parse the arrow token and body (no further backtracking).
+
         let equals_greater_than_token = self.create_token_node();
         self.next_token();
         let body = if self.token == SyntaxKind::OpenBraceToken {
@@ -3944,9 +3629,7 @@ impl Parser {
                 ))
             }
             SyntaxKind::TypeOfKeyword => {
-                // `typeof x` → TypeOfExpression (distinct from PrefixUnaryExpression
-                // for `!x`, `-x`, etc.). The flow analyzer uses this node kind to
-                // detect `switch (typeof x)` patterns.
+
                 let pos = self.token_pos();
                 self.next_token();
                 let expression = self.parse_unary_expression();
@@ -3989,19 +3672,16 @@ impl Parser {
                 ))
             }
             SyntaxKind::LessThanToken if self.language_variant != LanguageVariant::Jsx => {
-                // Type assertion: `<T>expr` (only in non-JSX files).
+
                 self.parse_type_assertion()
             }
             _ => self.parse_postfix_expression(),
         }
     }
 
-    /// Parse a type assertion expression: `<T>expr`.
-    ///
-    /// Only called in non-JSX files (`.ts`, not `.tsx`).
     fn parse_type_assertion(&mut self) -> Arc<Node> {
         let pos = self.token_pos();
-        self.next_token(); // consume `<`
+        self.next_token();
         let type_node = self.parse_type();
         self.expect(SyntaxKind::GreaterThanToken);
         let expression = self.parse_unary_expression();
@@ -4018,7 +3698,7 @@ impl Parser {
 
     fn parse_postfix_expression(&mut self) -> Arc<Node> {
         let operand = self.parse_left_hand_side_expression();
-        // Postfix ++/--
+
         if !self.has_preceding_line_break()
             && (self.token == SyntaxKind::PlusPlusToken
                 || self.token == SyntaxKind::MinusMinusToken)
@@ -4045,18 +3725,13 @@ impl Parser {
         self.parse_call_and_member_chain(expr, false)
     }
 
-    /// Member-only continuation of a chain: `.`/`?.`/`[]`/`!` access
-    /// without CALL argument lists. Used for `new` targets (Go
-    /// parseMemberExpressionRest — the target of `new` is a MemberExpression,
-    /// never a call: `new X().m()` is `(new X()).m()`, not
-    /// `new (X().m())`).
     fn parse_member_chain(&mut self, expr: Arc<Node>) -> Arc<Node> {
         self.parse_call_and_member_chain(expr, true)
     }
 
     fn parse_new_expression(&mut self) -> Arc<Node> {
         let pos = self.token_pos();
-        self.next_token(); // consume 'new'
+        self.next_token();
         let expression = if self.token == SyntaxKind::DotToken {
             self.next_token();
             let name = self.parse_identifier();
@@ -4075,13 +3750,7 @@ impl Parser {
                 TextRange::new(pos, end),
             ))
         } else {
-            // The `new` target is a MEMBER expression chain, never a call
-            // (Go parseNewExpression → parseMemberExpressionRest): `new X().m()`
-            // is `(new X()).m()`. A full left-hand-side parse here made
-            // `X().m("hi")` the target, and the call-unwrap below mis-split
-            // it into `new (X().m)("hi")` — checking `X()` as a plain call
-            // (TS2348). Nested `new new X()` recurses through the grammar's
-            // `new MemberExpression Arguments` production.
+
             let primary = if self.token == SyntaxKind::NewKeyword {
                 self.parse_new_expression()
             } else {
@@ -4110,9 +3779,7 @@ impl Parser {
     fn parse_call_and_member_chain(&mut self, expr: Arc<Node>, member_only: bool) -> Arc<Node> {
         let mut expr = expr;
         loop {
-            // Member-only mode (new-expression targets): stop before CALL
-            // continuations — the argument list belongs to the `new`, and
-            // generic-call `<...>` belongs to the new's own type arguments.
+
             if member_only
                 && matches!(
                     self.token,
@@ -4155,7 +3822,7 @@ impl Parser {
                             TextRange::new(pos, end),
                         ));
                     } else if self.token == SyntaxKind::OpenBracketToken {
-                        // Optional element access: `a?.[0]`
+
                         self.next_token();
                         let argument = self.parse_expression();
                         self.expect(SyntaxKind::CloseBracketToken);
@@ -4216,12 +3883,7 @@ impl Parser {
                 }
                 SyntaxKind::LessThanToken => {
                     let pos = expr.pos();
-                    // `<` is ambiguous in expression context: type arguments
-                    // `f<T>(…)` vs a less-than comparison `a < b`. Speculatively
-                    // parse type arguments and commit only if they close cleanly
-                    // AND are followed by `(`; otherwise backtrack so `<` is
-                    // handled as a binary operator. Mirrors Go's
-                    // `tryParseTypeArguments`.
+
                     let type_arguments = match self.try_parse_type_arguments(true) {
                         Some(ta) => ta,
                         None => break,
@@ -4240,7 +3902,7 @@ impl Parser {
                     ));
                 }
                 SyntaxKind::ExclamationToken if !self.has_preceding_line_break() => {
-                    // Non-null assertion: `expr!`
+
                     let pos = expr.pos();
                     self.next_token();
                     let end = self.token_pos();
@@ -4290,7 +3952,7 @@ impl Parser {
         let pos = self.token_pos();
         self.next_token();
         let args = self.parse_delimited_list(ParsingContext::TypeArguments, Parser::parse_type);
-        // Re-scan `>>` as `>` so nested generics like `Array<Array<T>>` work.
+
         self.re_scan_greater_than();
         self.expect(SyntaxKind::GreaterThanToken);
         let end = self.token_pos();
@@ -4300,16 +3962,6 @@ impl Parser {
         }))
     }
 
-    /// Speculatively parse a type-argument list `<T, U, …>` used in expression
-    /// context, where `<` is ambiguous between type arguments (`f<T>(…)`) and a
-    /// less-than comparison (`a < b`). Mirrors Go's `tryParseTypeArguments`.
-    ///
-    /// Snapshots the scanner, current token, and diagnostics; if the list does
-    /// not close cleanly with `>` (no diagnostics emitted during the attempt),
-    /// or — when `require_following_paren` — is not followed by `(`, everything
-    /// is rolled back and `None` is returned, leaving `<` as the current token
-    /// so the caller treats it as a binary operator. The `(` requirement
-    /// disambiguates `f<T>(x)` (a generic call) from `a < b > c` (comparisons).
     fn try_parse_type_arguments(&mut self, require_following_paren: bool) -> Option<Arc<NodeList>> {
         if self.token != SyntaxKind::LessThanToken {
             return None;
@@ -4318,7 +3970,7 @@ impl Parser {
         let saved_token = self.token;
         let diag_len = self.diagnostics.len();
         let pos = self.token_pos();
-        self.next_token(); // consume `<`
+        self.next_token();
         let args = self.parse_delimited_list(ParsingContext::TypeArguments, Parser::parse_type);
         self.re_scan_greater_than();
         let closed_cleanly =
@@ -4329,7 +3981,7 @@ impl Parser {
             self.diagnostics.truncate(diag_len);
             return None;
         }
-        self.next_token(); // consume `>`
+        self.next_token();
         if require_following_paren && self.token != SyntaxKind::OpenParenToken {
             self.scanner = saved_scanner;
             self.token = saved_token;
@@ -4428,11 +4080,7 @@ impl Parser {
             }
             SyntaxKind::FunctionKeyword => self.parse_function_expression(),
             SyntaxKind::ClassKeyword => self.parse_class_expression(),
-            // `import.meta` — parse as MetaProperty when `import` is followed
-            // by `.` on the same line. `import(...)` / `import<T>(...)` —
-            // dynamic import call: `import` is a keyword-expression callee
-            // when followed by `(` or `<` (Go parseCallExpressionRest's
-            // KindImportKeyword branch, parser.go ~L5229).
+
             SyntaxKind::ImportKeyword => {
                 if matches!(
                     self.look_ahead_token(),
@@ -4445,21 +4093,12 @@ impl Parser {
                     self.parse_fallback_identifier_or_error()
                 }
             }
-            // `async function` expression: when `async` is followed by `function`
-            // on the same line, parse as an async function expression.
-            // Mirrors Go's parsePrimaryExpression AsyncKeyword case (line 5581).
+
             SyntaxKind::AsyncKeyword if self.is_async_function_expression() => {
                 self.parse_async_function_expression()
             }
             SyntaxKind::TemplateHead => self.parse_template_expression(),
-            // A private identifier in EXPRESSION position (Go
-            // parsePrimaryExpression's KindPrivateIdentifier case →
-            // parsePrivateIdentifier): consume the token and build the
-            // node. Without this arm a stray `#` (privateNameHashCharName:
-            // `#` with an empty name still scans as PrivateIdentifier)
-            // fell to the fallback-identifier path, consumed ZERO tokens,
-            // and looped the enclosing statement list forever, allocating
-            // a node + diagnostic per iteration (30GB OOM worker).
+
             SyntaxKind::PrivateIdentifier => {
                 let text = self.scanner.token_text().to_string();
                 let pos = self.token_pos();
@@ -4487,20 +4126,12 @@ impl Parser {
                 ))
             }
             _ => {
-                // Contextual keywords (e.g. `assert`, `type`, `keyof`) can be
-                // used as identifiers in expression context (Go's
-                // parseIdentifierName fallback); anything else is the TS1109
-                // missing-expression path.
+
                 self.parse_fallback_identifier_or_error()
             }
         }
     }
 
-    /// The parsePrimaryExpression default case: contextual-keyword identifiers
-    /// are taken as identifier references; anything else reports TS1109 at
-    /// the current token and yields a MISSING identifier WITHOUT consuming
-    /// it, so the caller's parseExpected/list-recovery machinery keeps the
-    /// token stream balanced (Go parseIdentifierWithDiagnostic).
     fn parse_fallback_identifier_or_error(&mut self) -> Arc<Node> {
         if is_identifier_or_keyword(self.token)
             && self.token != SyntaxKind::InKeyword
@@ -4546,13 +4177,12 @@ impl Parser {
         }
 
         let pos = self.token_pos();
-        self.next_token(); // consume '('
-        // Simplified: parse as parenthesized expression
+        self.next_token();
+
         let expr = self.parse_expression();
         self.expect(SyntaxKind::CloseParenToken);
         let end = self.token_pos();
 
-        // Arrow function: (params) => body
         if self.token == SyntaxKind::EqualsGreaterThanToken {
             let arrow_token = self.create_token_node();
             self.next_token();
@@ -4649,33 +4279,24 @@ impl Parser {
             ));
         }
 
-        // `get`/`set` accessor: `{ get foo() {} }` / `{ set foo(v) {} }`.
-        // `get`/`set` is an accessor only when followed by a property name (or
-        // `[`), NOT by `(`/`:`/`;` (so `{ get: 1 }`, `{ get() {} }` remain
-        // ordinary members named `get`). Mirrors Go's
-        // `parseObjectLiteralElement` accessor handling.
         if self.token == SyntaxKind::GetKeyword || self.token == SyntaxKind::SetKeyword {
             let mut s = self.scanner.clone();
             s.scan();
             if Self::token_can_follow_get_or_set(s.token()) {
                 let accessor_kind = self.token;
-                self.next_token(); // consume `get`/`set`
+                self.next_token();
                 let name = self.parse_property_name();
                 let type_parameters = self.parse_optional_type_parameters();
                 let parameters = self.parse_parameter_list();
                 let type_node = self.parse_optional_return_type();
-                // Body-less object-literal accessors: no parser error —
-                // Go's parseFunctionBlockOrSemicolon silently ASIs on `}`/
-                // `;` and leaves the TS1005 to the checker's accessor
-                // grammar check (anchored at End()-1).
+
                 let body = if self.token == SyntaxKind::OpenBraceToken {
                     Some(self.parse_block())
                 } else {
                     self.parse_semicolon();
                     None
                 };
-                // Go's finishNode ends at the current token's FULL start
-                // (leading trivia included).
+
                 let end = body
                     .as_ref()
                     .map_or(self.scanner.full_start_pos(), |b| b.end());
@@ -4711,13 +4332,11 @@ impl Parser {
             }
         }
 
-        // `async` method prefix: `{ async name() {} }`.
         let is_async = self.token == SyntaxKind::AsyncKeyword;
         if is_async {
             self.next_token();
         }
 
-        // Generator method: `{ *foo() {} }`.
         let asterisk_token = self.parse_optional_token(SyntaxKind::AsteriskToken);
 
         let name = self.parse_property_name();
@@ -4726,11 +4345,11 @@ impl Parser {
             || asterisk_token.is_some()
             || is_async
         {
-            // Method: `{ foo() {} }` / `{ foo<T>(x: T): void {} }`.
+
             let type_parameters = self.parse_optional_type_parameters();
             let parameters = self.parse_parameter_list();
             let type_node = self.parse_optional_return_type();
-            // Object-literal methods must have a body.
+
             let body = if self.token == SyntaxKind::OpenBraceToken {
                 Some(self.parse_block())
             } else {
@@ -4775,7 +4394,7 @@ impl Parser {
                 TextRange::new(pos, end),
             ))
         } else {
-            // Shorthand property
+
             let end = name.end();
             Arc::new(Node::with_loc(
                 SyntaxKind::ShorthandPropertyAssignment,
@@ -4796,13 +4415,11 @@ impl Parser {
         }
     }
 
-    /// Check if `get`/`set` keyword is followed by a property name (accessor)
-    /// rather than being the property name itself.
     #[allow(dead_code)]
     fn is_get_or_set_accessor(&self) -> bool {
         let mut scanner = self.scanner.clone();
         let next = scanner.scan();
-        // If the next token is a valid property name start, it's an accessor.
+
         matches!(
             next,
             SyntaxKind::Identifier
@@ -4813,10 +4430,9 @@ impl Parser {
         )
     }
 
-    /// Parse a `get`/`set` accessor in an object literal.
     #[allow(dead_code)]
     fn parse_object_accessor(&mut self, pos: usize, is_get: bool) -> Arc<Node> {
-        self.next_token(); // consume `get`/`set`
+        self.next_token();
         let name = self.parse_property_name();
         let body = self.parse_block();
         let end = body.end();
@@ -4849,8 +4465,6 @@ impl Parser {
         Arc::new(Node::with_loc(kind, data, TextRange::new(pos, end)))
     }
 
-    /// Parse a `get`/`set` accessor in a class body (with modifiers).
-    /// Mirrors Go's parseAccessorDeclaration (parser.go:1886-1937).
     #[allow(dead_code)]
     fn parse_class_accessor(
         &mut self,
@@ -4858,7 +4472,7 @@ impl Parser {
         modifiers: Option<Arc<ModifierList>>,
         is_get: bool,
     ) -> Arc<Node> {
-        self.next_token(); // consume `get`/`set`
+        self.next_token();
         let name = self.parse_property_name();
         let type_parameters = self.parse_optional_type_parameters();
         let parameters = self.parse_parameter_list();
@@ -4909,8 +4523,7 @@ impl Parser {
                 NodeData::JsxOpeningFragment,
                 TextRange::new(pos, self.token_end()),
             ));
-            // scan_jsx_text replaces next_token here: it starts from pos
-            // (already past '>') and scans JSX text, switching to JSX mode.
+
             self.scan_jsx_text();
             let children = self.parse_jsx_children();
             let closing_pos = self.token_pos();
@@ -4943,7 +4556,7 @@ impl Parser {
         if self.parse_optional(SyntaxKind::SlashToken) {
             let end = self.token_end();
             self.expect_without_advancing(SyntaxKind::GreaterThanToken);
-            // After self-closing >, switch back to JSX token mode for parent
+
             if in_expression_context {
                 self.next_token();
             } else {
@@ -4962,7 +4575,7 @@ impl Parser {
 
         let opening_end = self.token_end();
         self.expect_without_advancing(SyntaxKind::GreaterThanToken);
-        // After opening >, switch to JSX token mode for children
+
         self.scan_jsx_text();
         let opening = Arc::new(Node::with_loc(
             SyntaxKind::JsxOpeningElement,
@@ -4988,8 +4601,7 @@ impl Parser {
 
     fn parse_jsx_name(&mut self) -> Arc<Node> {
         let pos = self.token_pos();
-        // Extend the current identifier/keyword token with JSX identifier parts
-        // (dashes, etc.) BEFORE consuming it. Mirrors Go's parseJsxTagName.
+
         self.scan_jsx_identifier();
         let mut name = self.parse_identifier_name_or_keyword();
         while self.parse_optional(SyntaxKind::DotToken) {
@@ -5033,7 +4645,7 @@ impl Parser {
     fn parse_jsx_attribute(&mut self) -> Arc<Node> {
         let pos = self.token_pos();
         if self.token == SyntaxKind::OpenBraceToken {
-            // Spread attribute: {...expression}
+
             self.next_token();
             self.expect(SyntaxKind::DotDotDotToken);
             let expression = self.parse_expression();
@@ -5045,7 +4657,6 @@ impl Parser {
             ));
         }
 
-        // Attribute name (may contain dashes, e.g. data-foo)
         self.scan_jsx_identifier();
         let name = self.parse_identifier_name_or_keyword();
         let initializer = if self.parse_optional(SyntaxKind::EqualsToken) {
@@ -5153,8 +4764,7 @@ impl Parser {
         let tag_name = self.parse_jsx_name();
         let end = self.token_end();
         self.expect_without_advancing(SyntaxKind::GreaterThanToken);
-        // After >, switch back to JSX token mode for siblings (or regular mode
-        // if in expression context)
+
         if in_expression_context {
             self.next_token();
         } else {
@@ -5167,7 +4777,6 @@ impl Parser {
         ))
     }
 
-    /// Check if current `import` keyword is followed by `.` (i.e. `import.meta`).
     fn is_import_meta(&self) -> bool {
         if self.token != SyntaxKind::ImportKeyword {
             return false;
@@ -5176,11 +4785,10 @@ impl Parser {
         scanner.scan() == SyntaxKind::DotToken && !scanner.has_preceding_line_break()
     }
 
-    /// Parse `import.meta` as a MetaProperty node.
     fn parse_import_meta(&mut self) -> Arc<Node> {
         let pos = self.token_pos();
-        self.next_token(); // consume 'import'
-        self.next_token(); // consume '.'
+        self.next_token();
+        self.next_token();
         let name = self.parse_identifier_name_or_keyword();
         let end = name.end();
         Arc::new(Node::with_loc(
@@ -5193,8 +4801,6 @@ impl Parser {
         ))
     }
 
-    /// Check if the current `async` keyword is followed by `function` on the same line.
-    /// Mirrors Go's `nextTokenIsFunctionKeywordOnSameLine`.
     fn is_async_function_expression(&self) -> bool {
         if self.token != SyntaxKind::AsyncKeyword {
             return false;
@@ -5203,13 +4809,12 @@ impl Parser {
         scanner.scan() == SyntaxKind::FunctionKeyword && !scanner.has_preceding_line_break()
     }
 
-    /// Parse `async function() {}` as a function expression with async modifier.
     fn parse_async_function_expression(&mut self) -> Arc<Node> {
         let async_modifier = self.create_token_node();
-        self.next_token(); // consume 'async'
+        self.next_token();
         let pos = async_modifier.pos();
-        // Now at `function` keyword.
-        self.next_token(); // consume 'function'
+
+        self.next_token();
         let asterisk_token = self.parse_optional_token(SyntaxKind::AsteriskToken);
         let name = if self.is_identifier() {
             Some(self.parse_identifier())
@@ -5241,7 +4846,7 @@ impl Parser {
 
     fn parse_function_expression(&mut self) -> Arc<Node> {
         let pos = self.token_pos();
-        self.next_token(); // consume 'function'
+        self.next_token();
         let asterisk_token = self.parse_optional_token(SyntaxKind::AsteriskToken);
         let name = if self.is_identifier() {
             Some(self.parse_identifier())
@@ -5271,11 +4876,8 @@ impl Parser {
 
     fn parse_class_expression(&mut self) -> Arc<Node> {
         let pos = self.token_pos();
-        self.next_token(); // consume 'class'
-        // The optional name is a binding identifier: a reserved word here
-        // starts a clause instead (`class extends Base {}` — anonymous class
-        // expression with heritage). Mirrors tsc's `isBindingIdentifier`
-        // check in `parseClassExpression`.
+        self.next_token();
+
         let name = if self.is_identifier()
             && !matches!(self.token, SyntaxKind::ExtendsKeyword | SyntaxKind::ImplementsKeyword)
         {
@@ -5299,10 +4901,6 @@ impl Parser {
             TextRange::new(pos, end),
         ))
     }
-
-    // ─────────────────────────────────────────────────────────────────────
-    // Declaration parsing
-    // ─────────────────────────────────────────────────────────────────────
 
     fn modifier_flag(kind: SyntaxKind) -> ModifierFlags {
         match kind {
@@ -5338,7 +4936,6 @@ impl Parser {
         Arc::new(ModifierList::new(nodes, flags))
     }
 
-    /// Build a `ModifierList` from token modifiers plus decorator nodes.
     fn make_modifier_list_with_decorators(
         &self,
         modifiers: Vec<(SyntaxKind, usize, usize)>,
@@ -5361,7 +4958,6 @@ impl Parser {
         Arc::new(ModifierList::new(nodes, flags))
     }
 
-    /// Parse a single decorator: `@expression`
     fn parse_decorator(&mut self) -> Arc<Node> {
         let pos = self.token_pos();
         self.expect(SyntaxKind::AtToken);
@@ -5402,16 +4998,11 @@ impl Parser {
             ) {
                 break;
             }
-            // Go: tryParseModifier → parseAnyContextualModifier →
-            // nextTokenCanFollowModifier. `const` is special: it's only a
-            // modifier when followed by `enum` (so `const enum E {}` parses as
-            // a const enum, not a broken `const` variable statement). All other
-            // modifiers require the next token to be able to follow a modifier
-            // on the same line.
+
             let mut s = self.scanner.clone();
             s.scan();
             let can_follow = if self.token == SyntaxKind::ConstKeyword {
-                // `const` is only a modifier if followed by `enum`.
+
                 s.token() == SyntaxKind::EnumKeyword
             } else {
                 !s.has_preceding_line_break() && Self::token_can_follow_modifier(s.token())
@@ -5445,30 +5036,26 @@ impl Parser {
                 self.parse_namespace_declaration_with_modifiers(modifiers)
             }
             SyntaxKind::GlobalKeyword => {
-                // `declare global { ... }` — global augmentation
+
                 self.parse_namespace_declaration_with_modifiers(modifiers)
             }
             SyntaxKind::VarKeyword | SyntaxKind::LetKeyword | SyntaxKind::ConstKeyword => {
                 self.parse_variable_statement_with_modifiers(modifiers)
             }
             SyntaxKind::ImportKeyword => {
-                // `export import X = ...` — an exported import-alias
-                // declaration (Go's parseDeclaration routes KindImportKeyword
-                // to parseImportEqualsDeclaration with the modifiers).
+
                 self.parse_import_equals_declaration_with_modifiers(modifiers)
             }
             _ => self.parse_expression_statement(),
         }
     }
 
-    /// `import X = <entity | require(...)>` with leading modifiers
-    /// (e.g. `export import X = N;` inside a namespace).
     fn parse_import_equals_declaration_with_modifiers(
         &mut self,
         modifiers: Option<Arc<ModifierList>>,
     ) -> Arc<Node> {
         let pos = self.token_pos();
-        self.next_token(); // consume 'import'
+        self.next_token();
         let name = self.parse_identifier();
         self.parse_import_equals_tail(pos, modifiers, name, false)
     }
@@ -5482,7 +5069,7 @@ impl Parser {
         modifiers: Option<Arc<ModifierList>>,
     ) -> Arc<Node> {
         let pos = self.token_pos();
-        self.next_token(); // consume 'function'
+        self.next_token();
         let asterisk_token = self.parse_optional_token(SyntaxKind::AsteriskToken);
         let is_generator = asterisk_token.is_some();
         let is_async = modifiers
@@ -5520,8 +5107,6 @@ impl Parser {
         ))
     }
 
-    /// Parse a function body block, saving/restoring yield and await context
-    /// flags. Mirrors Go's `parseFunctionBlock`.
     fn parse_function_block(&mut self, is_generator: bool, is_async: bool) -> Arc<Node> {
         let saved_yield = self.yield_context;
         let saved_await = self.await_context;
@@ -5542,7 +5127,7 @@ impl Parser {
         modifiers: Option<Arc<ModifierList>>,
     ) -> Arc<Node> {
         let pos = self.token_pos();
-        self.next_token(); // consume 'class'
+        self.next_token();
         let name = if self.is_identifier() {
             Some(self.parse_identifier())
         } else {
@@ -5574,7 +5159,7 @@ impl Parser {
         modifiers: Option<Arc<ModifierList>>,
     ) -> Arc<Node> {
         let pos = self.token_pos();
-        self.next_token(); // consume 'interface'
+        self.next_token();
         let name = self.parse_identifier();
         let type_parameters = self.parse_optional_type_parameters();
         let heritage_clauses = self.parse_heritage_clauses();
@@ -5604,7 +5189,7 @@ impl Parser {
         modifiers: Option<Arc<ModifierList>>,
     ) -> Arc<Node> {
         let pos = self.token_pos();
-        self.next_token(); // consume 'type'
+        self.next_token();
         let name = self.parse_identifier();
         let type_parameters = self.parse_optional_type_parameters();
         self.expect(SyntaxKind::EqualsToken);
@@ -5632,7 +5217,7 @@ impl Parser {
         modifiers: Option<Arc<ModifierList>>,
     ) -> Arc<Node> {
         let pos = self.token_pos();
-        self.next_token(); // consume 'enum'
+        self.next_token();
         let name = self.parse_identifier();
         self.expect(SyntaxKind::OpenBraceToken);
         let members =
@@ -5658,34 +5243,28 @@ impl Parser {
         &mut self,
         modifiers: Option<Arc<ModifierList>>,
     ) -> Arc<Node> {
-        // Go: parseModuleDeclaration
+
         let pos = self.token_pos();
         let keyword = self.token;
-        // `declare global { ... }` — global augmentation
+
         if self.token == SyntaxKind::GlobalKeyword {
             return self.parse_ambient_external_module_declaration(pos, modifiers);
         }
-        // consume 'namespace' or 'module'
+
         self.next_token();
-        // `declare module "name"` — ambient external module with string literal name
+
         if self.token == SyntaxKind::StringLiteral {
             return self.parse_ambient_external_module_declaration(pos, modifiers);
         }
-        // `declare namespace A.B.C { ... }` or `declare module A.B.C { ... }`
-        // `declare namespace A.B.C { }` or `declare module A.B.C { }`.
-        // Dotted names synthesize NESTED module declarations (Go's
-        // `parseModuleDeclaration` builds one ModuleDeclaration per dot
-        // segment so each namespace level is its own scope): the
-        // outermost declaration carries the modifiers and each inner
-        // segment nests as the previous level's body.
+
         let mut segments: Vec<Arc<Node>> = vec![self.parse_identifier()];
         while self.token == SyntaxKind::DotToken {
-            self.next_token(); // consume '.'
+            self.next_token();
             segments.push(self.parse_identifier());
         }
         let body = if self.token == SyntaxKind::OpenBraceToken {
             let body_pos = self.token_pos();
-            self.next_token(); // consume '{'
+            self.next_token();
             let statements =
                 self.parse_list(ParsingContext::BlockStatements, Parser::parse_statement);
             self.expect(SyntaxKind::CloseBraceToken);
@@ -5702,15 +5281,10 @@ impl Parser {
             None
         };
         let end = body.as_ref().map_or(self.token_pos(), |b| b.end());
-        // Build from the innermost segment outwards; the outermost
-        // declaration receives the user modifiers. Synthesized INNER
-        // segments get an ExportKeyword modifier (dotted-name segments are
-        // exported in Go's parseModuleDeclaration semantics), using the
-        // outer keyword's span for the token location.
+
         let mut name = segments.pop().expect("at least one segment");
         let mut inner_body = body;
-        // User modifiers (declare/export) belong to the OUTER declaration;
-        // inner segments get only the synthesized export.
+
         let user_modifiers = modifiers;
         let mut mods = if segments.is_empty() {
             user_modifiers.clone()
@@ -5718,8 +5292,7 @@ impl Parser {
             None
         };
         let outermost = segments.is_empty();
-        // Dotted-name inner segments are implicitly exported — synthesize
-        // the modifier up front (it applies from the first inner decl).
+
         let export_only: Option<Arc<ModifierList>> = if segments.is_empty() {
             None
         } else {
@@ -5751,8 +5324,7 @@ impl Parser {
                     mods = None;
                 }
                 None => {
-                    // The outermost declaration gets the user modifiers
-                    // back (declare/export on 'namespace A.B' belong to A).
+
                     if !outermost {
                         let decl_mut = Arc::as_ptr(&decl) as *mut Node;
                         unsafe {
@@ -5767,25 +5339,23 @@ impl Parser {
         }
     }
 
-    /// Go: parseAmbientExternalModuleDeclaration — handles `declare module "name"` and `declare global`.
     fn parse_ambient_external_module_declaration(
         &mut self,
         pos: usize,
         modifiers: Option<Arc<ModifierList>>,
     ) -> Arc<Node> {
-        // Go: keyword = ModuleKeyword, or GlobalKeyword for `declare global`
+
         let keyword = self.token;
         let name = if self.token == SyntaxKind::GlobalKeyword {
-            // `declare global` — parse 'global' as identifier name
+
             self.parse_identifier()
         } else {
-            // `declare module "name"` — parse string literal
-            // The 'module' keyword was already consumed by the caller.
+
             self.parse_string_literal_name()
         };
         let body = if self.token == SyntaxKind::OpenBraceToken {
             let body_pos = self.token_pos();
-            self.next_token(); // consume '{'
+            self.next_token();
             let statements =
                 self.parse_list(ParsingContext::BlockStatements, Parser::parse_statement);
             self.expect(SyntaxKind::CloseBraceToken);
@@ -5814,7 +5384,6 @@ impl Parser {
         ))
     }
 
-    /// Parse a string literal as a name node (for `declare module "name"`).
     fn parse_string_literal_name(&mut self) -> Arc<Node> {
         let text = self.scanner.token_text().to_string();
         let pos = self.token_pos();
@@ -5833,12 +5402,12 @@ impl Parser {
     #[allow(dead_code)]
     fn parse_namespace_name(&mut self) -> Arc<Node> {
         let name = self.parse_identifier();
-        // Handle dotted namespace names: namespace A.B.C { }
+
         if self.token == SyntaxKind::DotToken {
             let pos = name.pos();
             let mut left = name;
             while self.token == SyntaxKind::DotToken {
-                self.next_token(); // consume '.'
+                self.next_token();
                 let right = self.parse_identifier();
                 let end = right.end();
                 left = Arc::new(Node::with_loc(
@@ -5854,7 +5423,7 @@ impl Parser {
 
     fn parse_import_declaration(&mut self) -> Arc<Node> {
         let pos = self.token_pos();
-        self.next_token(); // consume 'import'
+        self.next_token();
 
         let after_import_pos = self.token_pos();
         let mut identifier = if self.is_identifier() {
@@ -5942,7 +5511,6 @@ impl Parser {
         self.parse_import_equals_tail(pos, None, name, is_type_only)
     }
 
-    /// Shared tail of import-alias parsing: `= <module-reference> ;`.
     fn parse_import_equals_tail(
         &mut self,
         pos: usize,
@@ -5996,19 +5564,15 @@ impl Parser {
         self.parse_expression()
     }
 
-    /// Try to parse `with { ... }` (or deprecated `assert { ... }`) import attributes.
     fn try_parse_import_attributes(&mut self) -> Option<Arc<Node>> {
         if self.token == SyntaxKind::WithKeyword
             || (self.token == SyntaxKind::AssertKeyword && !self.has_preceding_line_break())
         {
-            // A dangling `with`/`assert` not followed by `{` is a syntax
-            // error, not an attributes clause (official consumes the
-            // keyword, reports TS1005 `'{' expected`, and produces NO
-            // attributes node — no TS2823 follows).
+
             let mut probe = self.scanner.clone();
             probe.scan();
             if probe.token() != SyntaxKind::OpenBraceToken {
-                self.next_token(); // consume 'with'/'assert'
+                self.next_token();
                 self.parse_error_at_current_token(
                     crate::diagnostics::X_0_EXPECTED,
                     &["{"],
@@ -6021,14 +5585,10 @@ impl Parser {
         }
     }
 
-    /// `skip_keyword`: the import-type path (`import("x", { with: {...} })`)
-    /// consumes `with`/`assert` itself before calling; the import-statement
-    /// path arrives ON the keyword and consumes it here (Go's
-    /// `parseImportAttributes(token, skipKeyword)`, parser.go ~L3134).
     fn parse_import_attributes(&mut self, token: SyntaxKind, skip_keyword: bool) -> Arc<Node> {
         let pos = self.token_pos();
         if !skip_keyword {
-            self.next_token(); // consume 'with' or 'assert'
+            self.next_token();
         }
         self.expect(SyntaxKind::OpenBraceToken);
         let multi_line = self.has_preceding_line_break();
@@ -6118,7 +5678,7 @@ impl Parser {
 
     fn parse_namespace_import(&mut self) -> Arc<Node> {
         let pos = self.token_pos();
-        self.next_token(); // consume '*'
+        self.next_token();
         self.expect(SyntaxKind::AsKeyword);
         let name = self.parse_identifier();
         let end = name.end();
@@ -6150,8 +5710,7 @@ impl Parser {
     fn parse_import_specifier(&mut self) -> Arc<Node> {
         let pos = self.token_pos();
         let (is_type_only, property_name, name) = self.parse_import_or_export_specifier(true);
-        // Go parseImportSpecifier: the binding name must be an identifier —
-        // string module-export names are only legal in export specifiers.
+
         let name = if name.kind == SyntaxKind::Identifier {
             name
         } else {
@@ -6166,7 +5725,7 @@ impl Parser {
                 TextRange::new(name.pos(), name.pos()),
             ))
         };
-        // optional comma
+
         self.parse_optional(SyntaxKind::CommaToken);
         let end = name.end();
         Arc::new(Node::with_loc(
@@ -6180,17 +5739,6 @@ impl Parser {
         ))
     }
 
-    /// Parse the shared shape of import/export specifiers.
-    ///
-    /// Mirrors Go `parseImportOrExportSpecifier` (parser.go ~L2457): a
-    /// leading `type` token may be the type-only modifier OR the member
-    /// name itself, decided by what follows — `}`/`,` means `type` is the
-    /// name (`export { type }`, the nodeModules package-pattern fixtures),
-    /// an identifier/string means modifier, and the `as` chains follow the
-    /// four documented shapes:
-    ///   `{ type as }` → type-only, name `as`
-    ///   `{ type as as }` → name `as`, property `type`
-    ///   `{ type as as as }` → type-only, name/property `as`
     fn parse_import_or_export_specifier(
         &mut self,
         is_import: bool,
@@ -6202,13 +5750,13 @@ impl Parser {
         let mut property_name: Option<Arc<Node>> = None;
         if name.kind == SyntaxKind::Identifier && name.text() == "type" {
             if self.token == SyntaxKind::AsKeyword {
-                // { type as ...? }
+
                 let first_as = self.parse_identifier_name_or_keyword();
                 if self.token == SyntaxKind::AsKeyword {
-                    // { type as as ...? }
+
                     let second_as = self.parse_identifier_name_or_keyword();
                     if self.can_parse_module_export_name() {
-                        // { type as as something } — type-only, renamed
+
                         is_type_only = true;
                         property_name = Some(first_as);
                         let (n, ok) = self.parse_module_export_name(disallow_keywords);
@@ -6216,31 +5764,31 @@ impl Parser {
                         name_ok = ok;
                         can_parse_as_keyword = false;
                     } else {
-                        // { type as as } — name `as`, property `type`
+
                         property_name = Some(name);
                         name = second_as;
                         can_parse_as_keyword = false;
                     }
                 } else if self.can_parse_module_export_name() {
-                    // { type as something } — rename of `type`
+
                     property_name = Some(name);
                     let (n, ok) = self.parse_module_export_name(disallow_keywords);
                     name = n;
                     name_ok = ok;
                     can_parse_as_keyword = false;
                 } else {
-                    // { type as } — type-only, name `as`
+
                     is_type_only = true;
                     name = first_as;
                 }
             } else if self.can_parse_module_export_name() {
-                // { type something } — type-only
+
                 is_type_only = true;
                 let (n, ok) = self.parse_module_export_name(disallow_keywords);
                 name = n;
                 name_ok = ok;
             }
-            // otherwise: { type } — `type` stays the member name
+
         }
         if can_parse_as_keyword && self.token == SyntaxKind::AsKeyword {
             property_name = Some(name);
@@ -6250,7 +5798,7 @@ impl Parser {
             name_ok = ok;
         }
         if !name_ok {
-            // Go reports at the name's trivia-skipped range.
+
             self.parse_error_at_range(
                 TextRange::new(name.pos(), name.end()),
                 diagnostics::IDENTIFIER_EXPECTED,
@@ -6260,16 +5808,10 @@ impl Parser {
         (is_type_only, property_name, name)
     }
 
-    /// Whether the current token can begin a module export name (any
-    /// identifier or keyword token, or a string literal). Mirrors Go
-    /// `canParseModuleExportName`.
     fn can_parse_module_export_name(&self) -> bool {
         is_identifier_or_keyword(self.token) || self.token == SyntaxKind::StringLiteral
     }
 
-    /// Parse a module export name — identifier-name or string literal.
-    /// The flag marks reserved-word names that cannot bind (import
-    /// specifiers). Mirrors Go `parseModuleExportName`.
     fn parse_module_export_name(&mut self, disallow_keywords: bool) -> (Arc<Node>, bool) {
         if self.token == SyntaxKind::StringLiteral {
             return (self.parse_string_literal_node(), true);
@@ -6284,7 +5826,7 @@ impl Parser {
         if self.is_identifier() {
             self.parse_identifier()
         } else {
-            // keyword used as identifier
+
             let text = format!("{:?}", self.token)
                 .trim_end_matches("Keyword")
                 .to_lowercase();
@@ -6314,8 +5856,6 @@ impl Parser {
         ))
     }
 
-    /// Create a `ModifierList` containing a single `ExportKeyword` token,
-    /// used for `export const/let/var` statements.
     fn make_export_modifier(&self, pos: usize, end: usize) -> ModifierList {
         let export_token = Arc::new(Node::with_loc(
             SyntaxKind::ExportKeyword,
@@ -6328,7 +5868,7 @@ impl Parser {
     fn parse_export_declaration(&mut self) -> Arc<Node> {
         let pos = self.token_pos();
         let export_end = self.token_end();
-        self.next_token(); // consume 'export'
+        self.next_token();
 
         if matches!(
             self.token,
@@ -6348,16 +5888,12 @@ impl Parser {
             )]);
         }
 
-        // export default ...
         if self.token == SyntaxKind::DefaultKeyword {
             let default_pos = self.token_pos();
             let default_end = self.token_end();
-            self.next_token(); // consume 'default'
+            self.next_token();
             if self.token == SyntaxKind::FunctionKeyword {
-                // Go's parser attaches the export/default modifiers to the
-                // function declaration (parseDeclaration with modifiers);
-                // dropping them starves the binder's export path, the CJS
-                // transform, and declaration emit's `declare`-elision rule.
+
                 let modifiers = self.make_modifier_list(vec![
                     (SyntaxKind::ExportKeyword, pos, export_end),
                     (SyntaxKind::DefaultKeyword, default_pos, default_end),
@@ -6371,16 +5907,14 @@ impl Parser {
                 ]);
                 return self.parse_class_declaration_with_modifiers(Some(modifiers));
             }
-            // `export default interface I {}` — a default-exported
-            // interface declaration (Go routes KindInterfaceKeyword through
-            // parseDeclaration with the export/default modifiers).
+
             if self.token == SyntaxKind::InterfaceKeyword {
                 return self.parse_declaration_with_modifiers(vec![
                     (SyntaxKind::ExportKeyword, pos, export_end),
                     (SyntaxKind::DefaultKeyword, default_pos, default_end),
                 ]);
             }
-            // export default <expression>
+
             let expr = self.parse_assignment_expression();
             self.parse_semicolon();
             let end = self.token_pos();
@@ -6396,9 +5930,8 @@ impl Parser {
             ));
         }
 
-        // export = ...
         if self.token == SyntaxKind::EqualsToken {
-            self.next_token(); // consume '='
+            self.next_token();
             let expr = self.parse_assignment_expression();
             self.parse_semicolon();
             let end = self.token_pos();
@@ -6414,11 +5947,10 @@ impl Parser {
             ));
         }
 
-        // export as namespace X
         if self.token == SyntaxKind::AsKeyword {
-            self.next_token(); // consume 'as'
+            self.next_token();
             if self.token == SyntaxKind::NamespaceKeyword {
-                self.next_token(); // consume 'namespace'
+                self.next_token();
                 let name = self.parse_identifier_name_or_keyword();
                 self.parse_semicolon();
                 let end = self.token_pos();
@@ -6433,9 +5965,6 @@ impl Parser {
             }
         }
 
-        // export function/class/interface/type/enum/namespace declarations
-        // Route through `parse_declaration_with_modifiers` so the `export`
-        // keyword is attached as a modifier (mirrors Go's `parseDeclaration`).
         match self.token {
             SyntaxKind::FunctionKeyword
             | SyntaxKind::ClassKeyword
@@ -6451,14 +5980,9 @@ impl Parser {
                 )]);
             }
             SyntaxKind::TypeKeyword => {
-                // `export type X = ...` (identifier follows on the same line)
-                // is an exported type alias; otherwise `export type { ... }
-                // [from "..."]` / `export type * [as ns] [from "..."]` is a
-                // type-only export declaration. Mirrors Go's
-                // `parseExportDeclaration` (`isTypeOnly = parseOptional(type)`),
-                // gated by `scanStartOfDeclaration`'s export-type rule.
+
                 let mut s = self.scanner.clone();
-                s.scan(); // skip 'type'
+                s.scan();
                 if !s.has_preceding_line_break() && Self::token_is_identifier(&s) {
                     return self.parse_declaration_with_modifiers(vec![(
                         SyntaxKind::ExportKeyword,
@@ -6466,13 +5990,11 @@ impl Parser {
                         export_end,
                     )]);
                 }
-                self.next_token(); // consume 'type' — type-only export
+                self.next_token();
                 return self.parse_export_declaration_tail(pos, true);
             }
             SyntaxKind::ConstKeyword | SyntaxKind::LetKeyword | SyntaxKind::VarKeyword => {
-                // `export const enum E { ... }` is an exported const enum
-                // (Go: `const` is a modifier only when followed by `enum`);
-                // route through the modifier-collecting declaration parser.
+
                 if self.token == SyntaxKind::ConstKeyword {
                     let mut s = self.scanner.clone();
                     if s.scan() == SyntaxKind::EnumKeyword {
@@ -6483,7 +6005,7 @@ impl Parser {
                         )]);
                     }
                 }
-                // export const/let/var x = ...
+
                 let export_mod = self.make_export_modifier(pos, export_end);
                 let declaration_list = self.parse_variable_declaration_list(false);
                 self.parse_semicolon();
@@ -6500,22 +6022,14 @@ impl Parser {
             _ => {}
         }
 
-        // export * as foo from '...' | export * from '...' | export { ... } from '...' | export { ... }
         self.parse_export_declaration_tail(pos, false)
     }
 
-    /// The export-clause tail shared by `export { ... }` / `export * ...` and
-    /// their `export type` (type-only) forms: clause, optional `from <string>`
-    /// module specifier, import attributes, terminating semicolon. Mirrors the
-    /// body of Go's `parseExportDeclaration` after `isTypeOnly`.
     fn parse_export_declaration_tail(&mut self, pos: usize, is_type_only: bool) -> Arc<Node> {
         let export_clause = if self.parse_optional(SyntaxKind::AsteriskToken) {
-            // export * [as name] from '...'
+
             if self.parse_optional(SyntaxKind::AsKeyword) {
-                // Module export name: identifier/keyword OR string literal
-                // (`export * as "<Z>" from ...` — arbitrary module namespace
-                // identifiers, ES2022). Go parseNamespaceExport →
-                // parseModuleExportName(false).
+
                 let (name, _) = self.parse_module_export_name(false);
                 let end = name.end();
                 Some(Arc::new(Node::with_loc(
@@ -6524,10 +6038,10 @@ impl Parser {
                     TextRange::new(pos, end),
                 )))
             } else {
-                None // export * from '...' — will be handled via NamedExports with a star
+                None
             }
         } else {
-            // export { ... }
+
             Some(self.parse_named_exports())
         };
 
@@ -6595,7 +6109,7 @@ impl Parser {
         } else {
             None
         };
-        // Go: no parseSemicolon — comma separator handled by parseDelimitedList.
+
         let end = initializer.as_ref().map_or(name.end(), |i| i.end());
         Arc::new(Node::with_loc(
             SyntaxKind::EnumMember,
@@ -6607,7 +6121,7 @@ impl Parser {
     fn parse_template_expression(&mut self) -> Arc<Node> {
         let pos = self.token_pos();
         let head = self.create_token_node();
-        self.next_token(); // consume template head
+        self.next_token();
         let mut spans = Vec::new();
         loop {
             let expression = self.parse_expression();
@@ -6649,10 +6163,6 @@ impl Parser {
         ))
     }
 
-    // ─────────────────────────────────────────────────────────────────────
-    // Type parameter and parameter parsing
-    // ─────────────────────────────────────────────────────────────────────
-
     fn parse_optional_type_parameters(&mut self) -> Option<Arc<NodeList>> {
         if self.token != SyntaxKind::LessThanToken {
             return None;
@@ -6661,11 +6171,11 @@ impl Parser {
         self.next_token();
         let params =
             self.parse_delimited_list(ParsingContext::TypeParameters, Parser::parse_type_parameter);
-        // Re-scan `>>` as `>` so nested generics close correctly.
+
         self.re_scan_greater_than();
-        // TS1098: `class C<>` — an empty type-parameter list.
+
         if params.nodes.is_empty() {
-            // Go reports at the `<` position (typeParameters.Pos()).
+
             self.parse_error_at_range(
                 crate::core::text::TextRange::new(pos, pos + 1),
                 crate::diagnostics::messages_generated::TYPE_PARAMETER_LIST_CANNOT_BE_EMPTY,
@@ -6680,8 +6190,6 @@ impl Parser {
         }))
     }
 
-    /// Collect variance modifiers (`in`, `out`, `const`) for type parameters.
-    /// Go: `parseModifiersEx(false, true, false)` with `permitConstAsModifier=true`.
     fn parse_type_parameter_modifiers(&mut self) -> Option<Arc<ModifierList>> {
         let mut modifiers: Vec<(SyntaxKind, usize, usize)> = Vec::new();
         loop {
@@ -6691,10 +6199,7 @@ impl Parser {
             ) {
                 break;
             }
-            // Go: tryParseModifier with permitConstAsModifier=true →
-            // nextTokenIsOnSameLineAndCanFollowModifier. The next token must
-            // be on the same line and be able to follow a modifier (identifier,
-            // keyword, literal, `[`, `{`, `*`, `...`).
+
             let mut s = self.scanner.clone();
             s.scan();
             if s.has_preceding_line_break() || !Self::token_can_follow_modifier(s.token()) {
@@ -6715,8 +6220,7 @@ impl Parser {
 
     fn parse_type_parameter(&mut self) -> Arc<Node> {
         let pos = self.token_pos();
-        // Go: parseModifiersEx(false, true, false) — collect variance modifiers
-        // (`in`, `out`) and `const` (with permitConstAsModifier=true).
+
         let modifiers = self.parse_type_parameter_modifiers();
         let name = self.parse_identifier();
         let constraint = if self.parse_optional(SyntaxKind::ExtendsKeyword) {
@@ -6758,16 +6262,12 @@ impl Parser {
         })
     }
 
-    /// Go `nextTokenCanFollowModifier` (parser.go:4009): whether the token
-    /// after the current modifier keyword can legally follow it. Scanner-clone
-    /// lookahead instead of Go's mark/rewind. `s` must be positioned on the
-    /// token following the modifier.
     fn token_after_modifier_can_follow(
         &self,
         s: &mut crate::scanner::Scanner,
     ) -> bool {
         match self.token {
-            // 'const' is only a modifier if followed by 'enum'.
+
             SyntaxKind::ConstKeyword => s.token() == SyntaxKind::EnumKeyword,
             SyntaxKind::ExportKeyword => {
                 match s.token() {
@@ -6783,19 +6283,12 @@ impl Parser {
                 }
             }
             SyntaxKind::DefaultKeyword => Self::token_can_follow_default_keyword(s.token(), s),
-            // Note: like Go, `static` has no same-line requirement here.
+
             SyntaxKind::StaticKeyword => Self::token_can_follow_modifier(s.token()),
             _ => !s.has_preceding_line_break() && Self::token_can_follow_modifier(s.token()),
         }
     }
 
-    /// Go `parseModifiersEx(allowDecorators=true, permitConstAsModifier=false,
-    /// stopOnStartOfClassStaticBlock=false)` as used by `parseParameterEx`
-    /// (parser.go:3374): full modifier parsing in parameter position. All
-    /// modifier kinds are accepted (export/declare/static/const/…); the
-    /// checker's grammar checks report the invalid ones (TS1090, TS1028, …).
-    /// A modifier is still only consumed when the next token can follow it,
-    /// so `(public)` keeps `public` as the parameter name.
     fn parse_parameter_modifiers(&mut self) -> Option<Arc<ModifierList>> {
         enum Entry {
             Mod(SyntaxKind, usize, usize),
@@ -6817,8 +6310,7 @@ impl Parser {
                 entries.push(Entry::Dec(dec));
                 continue;
             }
-            // tryParseModifier: a second `static` stops modifier collection so
-            // it can become the parameter name (`constructor(static static)`).
+
             if has_static_modifier && self.token == SyntaxKind::StaticKeyword {
                 break;
             }
@@ -6864,8 +6356,7 @@ impl Parser {
 
     fn parse_parameter(&mut self) -> Arc<Node> {
         let pos = self.token_pos();
-        // Parameter modifiers (a.k.a. parameter properties). Full
-        // `parseModifiersEx` port — see `parse_parameter_modifiers`.
+
         let modifiers = self.parse_parameter_modifiers();
 
         let dot_dot_dot_token = self.parse_optional_token(SyntaxKind::DotDotDotToken);
@@ -6966,8 +6457,7 @@ impl Parser {
         if self.token == SyntaxKind::OpenParenToken || self.token == SyntaxKind::LessThanToken {
             return self.parse_signature_member(SyntaxKind::CallSignature);
         }
-        // Go: `new` starts a construct signature only when followed by
-        // `(`/`<`; otherwise it's a property named `new`.
+
         if self.token == SyntaxKind::NewKeyword && {
             let mut s = self.scanner.clone();
             let t = s.scan();
@@ -6978,11 +6468,7 @@ impl Parser {
 
         let pos = self.token_pos();
         let modifiers = self.parse_type_member_modifiers();
-        // get/set accessor signatures (`get x(): T;` / `set x(v);`) —
-        // mirrors Go parseTypeMember's parseContextualModifier branches.
-        // `get`/`set` is an accessor only when a property name (or `[`
-        // computed) follows — NOT `(`, `:`, `;` (so `get(): T`, `get: number`,
-        // `get;` remain ordinary members named `get`).
+
         if self.token == SyntaxKind::GetKeyword || self.token == SyntaxKind::SetKeyword {
             let mut s = self.scanner.clone();
             s.scan();
@@ -7042,10 +6528,7 @@ impl Parser {
 
     fn parse_type_member_modifiers(&mut self) -> Option<Arc<ModifierList>> {
         let mut modifiers = Vec::new();
-        // Go: parseModifiersEx → tryParseModifier → parseAnyContextualModifier.
-        // A modifier keyword is only consumed if the next token (on the same line)
-        // can follow a modifier. This prevents `readonly static: boolean` from
-        // greedily eating `static` as a modifier when it's actually a property name.
+
         while matches!(
             self.token,
             SyntaxKind::ReadonlyKeyword
@@ -7072,8 +6555,6 @@ impl Parser {
         }
     }
 
-    /// Go: canFollowModifier — true if the current token can legally follow a
-    /// modifier keyword (i.e. start a property name or parameter list).
     fn token_can_follow_modifier(token: SyntaxKind) -> bool {
         token == SyntaxKind::OpenBracketToken
             || token == SyntaxKind::OpenBraceToken
@@ -7085,10 +6566,6 @@ impl Parser {
             || token == SyntaxKind::BigIntLiteral
     }
 
-    /// Mirrors Go's `canFollowGetOrSetKeyword` (parser.go:4042): a property
-    /// name start (identifier/keyword or string/numeric/bigint literal) or `[`
-    /// (computed). Narrower than `token_can_follow_modifier` — excludes `{`,
-    /// `*`, `...` so that `get *()`, `get {...}`, `get ...` are NOT accessors.
     fn token_can_follow_get_or_set(token: SyntaxKind) -> bool {
         token == SyntaxKind::OpenBracketToken
             || is_identifier_or_keyword(token)
@@ -7097,10 +6574,6 @@ impl Parser {
             || token == SyntaxKind::BigIntLiteral
     }
 
-    /// Go `canFollowExportModifier` (parser.go:4034): `@`, or anything a
-    /// modifier can be followed by except `*`, `as`, and `{` (so
-    /// `export * ...` / `export as namespace ...` / `export { ... }` are not
-    /// treated as member modifiers).
     fn can_follow_export_modifier(token: SyntaxKind) -> bool {
         token == SyntaxKind::AtToken
             || (token != SyntaxKind::AsteriskToken
@@ -7109,10 +6582,6 @@ impl Parser {
                 && Self::token_can_follow_modifier(token))
     }
 
-    /// Go `nextTokenCanFollowDefaultKeyword` (parser.go:3992): the token
-    /// after `default` must start a decoratable declaration. `s` must be
-    /// positioned at `t` (the token after `default`) for the
-    /// `abstract class` / `async function` sub-scans.
     fn token_can_follow_default_keyword(
         t: SyntaxKind,
         s: &mut crate::scanner::Scanner,
@@ -7132,8 +6601,6 @@ impl Parser {
         }
     }
 
-    /// Go `IsClassMemberModifier`: parameter-property modifiers
-    /// (public/private/protected/readonly) + static + override + accessor.
     fn is_class_member_modifier(token: SyntaxKind) -> bool {
         matches!(
             token,
@@ -7147,15 +6614,6 @@ impl Parser {
         )
     }
 
-    /// Whether the current token plausibly starts a class member, checked
-    /// speculatively on a scanner clone. Mirrors Go's `scanClassMemberStart`
-    /// (parser.go:5983): walk past modifier keywords (bailing out early on
-    /// definite class modifiers), then require a property-name-ish token
-    /// followed by member punctuation (`(`, `<`, `!`, `:`, `=`, `?`), a
-    /// semicolon/`}`/EOF (declaration termination), or a line break (ASI).
-    /// This gates `parse_list(ClassMembers)` so a keyword like `var` (which
-    /// starts a *statement*) trips the list-abort recovery (TS1068) instead
-    /// of being mis-parsed as a property name.
     fn look_ahead_class_member_start(&self) -> bool {
         if self.token == SyntaxKind::AtToken {
             return true;
@@ -7163,10 +6621,7 @@ impl Parser {
         let mut id_token = SyntaxKind::Unknown;
         let mut s = self.scanner.clone();
         let mut t = self.token;
-        // Eat up all modifiers, but hold on to the last one in case it is
-        // actually an identifier. A definite class modifier (public, private,
-        // protected, static, ...) means we certainly start a class member —
-        // this allows better error recovery.
+
         while is_modifier_kind(t) {
             id_token = t;
             if Self::is_class_member_modifier(id_token) {
@@ -7177,10 +6632,7 @@ impl Parser {
         if t == SyntaxKind::AsteriskToken {
             return true;
         }
-        // First property-like token following all modifiers: an identifier
-        // (Go's `tokenIsIdentifierOrKeyword` is `token >= KindIdentifier`,
-        // which also covers PrivateIdentifier — `#name: string`), the
-        // `get`/`set` keywords, or a literal name.
+
         if is_identifier_or_keyword(t)
             || t == SyntaxKind::PrivateIdentifier
             || t == SyntaxKind::StringLiteral
@@ -7190,21 +6642,20 @@ impl Parser {
             id_token = t;
             t = s.scan();
         }
-        // Index signatures and computed properties are class members.
+
         if t == SyntaxKind::OpenBracketToken {
             return true;
         }
-        // If we were able to get any potential identifier...
+
         if id_token != SyntaxKind::Unknown {
-            // A non-keyword identifier, or an accessor keyword, is safe to parse.
+
             if !is_keyword_kind(id_token)
                 || id_token == SyntaxKind::SetKeyword
                 || id_token == SyntaxKind::GetKeyword
             {
                 return true;
             }
-            // A keyword name: parse as a member only when member-ish
-            // punctuation follows (`var(`, `let<T>`, `foo: T`, `x = 1`, ...).
+
             match t {
                 SyntaxKind::OpenParenToken
                 | SyntaxKind::LessThanToken
@@ -7214,8 +6665,7 @@ impl Parser {
                 | SyntaxKind::QuestionToken => return true,
                 _ => {}
             }
-            // Otherwise only when the declaration can end here: `;`, `}`,
-            // EOF, or a line break (ASI).
+
             return t == SyntaxKind::SemicolonToken
                 || t == SyntaxKind::CloseBraceToken
                 || t == SyntaxKind::EndOfFile
@@ -7225,34 +6675,34 @@ impl Parser {
     }
 
     fn is_index_signature_start(&self) -> bool {
-        // Go: isIndexSignature — token is `[` and lookahead nextIsUnambiguouslyIndexSignature.
+
         if self.token != SyntaxKind::OpenBracketToken {
             return false;
         }
         let mut s = self.scanner.clone();
-        s.scan(); // skip `[`
+        s.scan();
         let t1 = s.token();
-        // `[...` or `[]` → index signature
+
         if t1 == SyntaxKind::DotDotDotToken || t1 == SyntaxKind::CloseBracketToken {
             return true;
         }
-        // `[public id` / `[private id` / `[protected id` → index signature
+
         if is_modifier_kind(t1) {
             s.scan();
             return Self::token_is_identifier(&s);
         }
-        // `[` followed by a non-identifier (e.g. `[Symbol`, `[0`, `["key"`) → computed property
+
         if !Self::token_is_identifier(&s) {
             return false;
         }
-        // Skip the identifier
+
         s.scan();
-        // `[id:` or `[id,` → index signature
+
         let t2 = s.token();
         if t2 == SyntaxKind::ColonToken || t2 == SyntaxKind::CommaToken {
             return true;
         }
-        // `[id?` → need one more token to disambiguate from conditional expression
+
         if t2 != SyntaxKind::QuestionToken {
             return false;
         }
@@ -7263,15 +6713,12 @@ impl Parser {
         )
     }
 
-    /// Go: isIdentifier — Identifier or contextual keyword (token > LastReservedWord).
-    /// Used for index-signature and modifier disambiguation. Reserved words
-    /// (`break`..`with`) are NOT identifiers.
     fn token_is_identifier(scanner: &crate::scanner::Scanner) -> bool {
         let t = scanner.token();
         if t == SyntaxKind::Identifier {
             return true;
         }
-        // Contextual keywords have IDs greater than WithKeyword (LastReservedWord).
+
         (t as i16) > (SyntaxKind::WithKeyword as i16)
     }
 
@@ -7355,9 +6802,7 @@ impl Parser {
 
     fn parse_class_member(&mut self) -> Arc<Node> {
         let pos = self.token_pos();
-        // A lone `;` is a valid (empty) class element — mirrors Go's
-        // `parseClassElement` SemicolonToken branch. Without this the `;`
-        // flows into `parse_property_name` → spurious TS1003.
+
         if self.token == SyntaxKind::SemicolonToken {
             let end = self.token_end();
             self.next_token();
@@ -7367,7 +6812,7 @@ impl Parser {
                 TextRange::new(pos, end),
             ));
         }
-        // Collect decorators and modifiers
+
         let mut decorators: Vec<Arc<Node>> = Vec::new();
         let mut modifiers: Vec<(SyntaxKind, usize, usize)> = Vec::new();
         loop {
@@ -7386,27 +6831,17 @@ impl Parser {
                     | SyntaxKind::AsyncKeyword
                     | SyntaxKind::OverrideKeyword
                     | SyntaxKind::AccessorKeyword
-                    // `const` is collected as a modifier so the checker can
-                    // report TS1248 (`static const H = 1;`) — mirrors Go's
-                    // modifier collection feeding checkGrammarModifiers.
+
                     | SyntaxKind::ConstKeyword
-                    // `export` / `default` are modifier kinds in Go
-                    // (`IsModifierKind`); e.g. `export foo = 10;` inside a
-                    // class body parses as one property with an `export`
-                    // modifier (grammar-flagged later), NOT `export` as a
-                    // property name followed by a missing-semicolon error.
+
                     | SyntaxKind::ExportKeyword
                     | SyntaxKind::DefaultKeyword
-                    // `declare` members (`declare prop: T` — Go's
-                    // IsModifierKind includes DeclareKeyword).
+
                     | SyntaxKind::DeclareKeyword
             ) {
                 break;
             }
-            // Go: tryParseModifier — only consume as modifier if the next token
-            // (on the same line) can follow a modifier. This prevents `static:
-            // number` from greedily eating `static` when it's a property name.
-            // `static {` starts a static block, not a static modifier.
+
             let mut s = self.scanner.clone();
             s.scan();
             if s.has_preceding_line_break() {
@@ -7415,10 +6850,7 @@ impl Parser {
             if self.token == SyntaxKind::StaticKeyword && s.token() == SyntaxKind::OpenBraceToken {
                 break;
             }
-            // `export`/`default` have their own follow conditions in Go's
-            // `nextTokenCanFollowModifier` (export: `export default <decl>`,
-            // `export type ...`, or a general modifier-follower; default:
-            // class/function/interface/@/abstract class/async function).
+
             let can_follow = match self.token {
                 SyntaxKind::ExportKeyword => {
                     let next = s.token();
@@ -7456,14 +6888,13 @@ impl Parser {
             Some(self.make_modifier_list_with_decorators(modifiers, decorators))
         };
 
-        // Handle `static { ... }` class static block (ES2022).
         if self.token == SyntaxKind::StaticKeyword {
-            // Check if next token is `{` on the same line.
+
             let mut s = self.scanner.clone();
             s.scan();
             if !s.has_preceding_line_break() && s.token() == SyntaxKind::OpenBraceToken {
                 let pos = self.token_pos();
-                self.next_token(); // consume `static`
+                self.next_token();
                 let body = self.parse_block();
                 let end = body.end();
                 return Arc::new(Node::with_loc(
@@ -7477,19 +6908,10 @@ impl Parser {
             }
         }
 
-        // Index signature: `[key: string]: T`. Classes (like interfaces/type
-        // literals) may declare index signatures. Without this check `[idx:`
-        // is mis-parsed as a computed property name, cascading into TS1005.
-        // Mirrors Go's `parseClassElement` index-signature handling.
         if self.is_index_signature_start() {
             return self.parse_index_signature(pos, modifiers);
         }
 
-        // get/set accessor: `get name() {}` / `set name(v) {}`.
-        // Mirrors Go `parseClassElement` lines 1862-1867. `get`/`set` is an
-        // accessor only when followed by a property name (or `[` computed) —
-        // NOT by `(` / `:` / `;` (so `get() {}`, `get: number`, `get;` remain
-        // ordinary members named `get`). Speculative scan via scanner clone.
         if self.token == SyntaxKind::GetKeyword || self.token == SyntaxKind::SetKeyword {
             let mut s = self.scanner.clone();
             s.scan();
@@ -7501,7 +6923,6 @@ impl Parser {
             }
         }
 
-        // Generator method: `*name() {}` or `async *name() {}`.
         let asterisk_token = self.parse_optional_token(SyntaxKind::AsteriskToken);
         let name = self.parse_property_name();
         let postfix_token = self
@@ -7512,12 +6933,11 @@ impl Parser {
             || self.token == SyntaxKind::LessThanToken
             || asterisk_token.is_some()
         {
-            // Check if this is a constructor (`constructor(...) {}`).
+
             let is_constructor =
                 name.kind == SyntaxKind::Identifier && name.text() == "constructor";
             let type_parameters = self.parse_optional_type_parameters();
 
-            // Set yield/await context for generator/async methods.
             let prev_yield = self.yield_context;
             let prev_await = self.await_context;
             if asterisk_token.is_some() {
@@ -7567,7 +6987,6 @@ impl Parser {
             ));
         }
 
-        // Property
         let type_node = self.parse_optional_type_annotation();
         let initializer = if self.token == SyntaxKind::EqualsToken {
             self.next_token();
@@ -7590,9 +7009,6 @@ impl Parser {
         ))
     }
 
-    /// Parse (or ASI-insert) the semicolon that terminates a property
-    /// declaration, with tailored diagnostics for what actually went wrong.
-    /// Mirrors Go's `parseSemicolonAfterPropertyName` (parser.go:1976).
     fn parse_semicolon_after_property_name(
         &mut self,
         name: &Arc<Node>,
@@ -7635,16 +7051,8 @@ impl Parser {
         self.parse_error_for_missing_semicolon_after(name);
     }
 
-    /// Special-cased "missing semicolon" diagnostics keyed on the property
-    /// name's text, for when a declaration keyword was used where a property
-    /// name was expected. Mirrors Go's `parseErrorForMissingSemicolonAfter`
-    /// (parser.go:2000). KNOWN GAP: the keyword spelling-suggestion fallback
-    /// (Go `GetSpellingSuggestionForStrings` + `getSpaceSuggestion`,
-    /// TS1435) is not yet ported — unknown names fall through to
-    /// TS1434 `Unexpected keyword or identifier`.
     fn parse_error_for_missing_semicolon_after(&mut self, node: &Arc<Node>) {
-        // (TaggedTemplateExpression names can't occur for class properties —
-        // Go's module-literal special case doesn't apply here.)
+
         let expression_text = if node.kind == SyntaxKind::Identifier {
             node.text().to_string()
         } else {
@@ -7654,8 +7062,7 @@ impl Parser {
             self.parse_error_at_current_token(diagnostics::X_0_EXPECTED, &[";"]);
             return;
         }
-        // Node positions start after leading trivia (scanner token start),
-        // matching Go's `scanner.SkipTrivia(p.sourceText, node.Pos())`.
+
         let pos = node.loc.pos();
         match expression_text.as_str() {
             "const" | "let" | "var" => {
@@ -7666,8 +7073,7 @@ impl Parser {
                     &[],
                 );
             }
-            // If a declared node failed to parse, it would have emitted a
-            // diagnostic already.
+
             "declare" => {}
             "interface" => {
                 self.parse_error_for_invalid_name(
@@ -7696,13 +7102,11 @@ impl Parser {
                 );
             }
             _ => {
-                // Unknown tokens get their own errors from the scanner.
+
                 if self.token == SyntaxKind::Unknown {
                     return;
                 }
-                // TS1435: a misspelled/missing-space keyword suggests the
-                // intended one (Go parseErrorForMissingSemicolonAfter's
-                // spelling + space suggestions).
+
                 let expression_text = if node.kind == SyntaxKind::Identifier {
                     node.text().to_string()
                 } else {
@@ -7739,9 +7143,7 @@ impl Parser {
                             best = Some((d, kw.to_string()));
                         }
                     }
-                    // Space suggestion: the text starts with a keyword and
-                    // trails 3+ chars (`asynd` → none; `asyncf` →
-                    // `async f`).
+
                     let space_sugg = best.is_none().then(|| {
                         KEYWORD_SUGGESTIONS
                             .iter()
@@ -7782,10 +7184,6 @@ impl Parser {
         }
     }
 
-    /// Mirrors Go's `parseErrorForInvalidName`: when a keyword-named
-    /// declaration is missing its name, report either the "name cannot be
-    /// '<text>'" error (at the current token, which would be the bogus name)
-    /// or the "must be given a name" error when only `{` follows.
     fn parse_error_for_invalid_name(
         &mut self,
         name_diagnostic: Message,
@@ -7799,18 +7197,13 @@ impl Parser {
         }
     }
 
-    /// Parse a `get`/`set` accessor declaration. Mirrors Go's
-    /// `parseAccessorDeclaration` (parser.go:3432-3450). `accessor_kind` is
-    /// `GetKeyword` or `SetKeyword` (already recognized by the caller); we
-    /// consume it, then parse the property name + type parameters + parameter
-    /// list + optional return type + body (or `;` for ambient).
     fn parse_accessor_declaration(
         &mut self,
         pos: usize,
         modifiers: Option<Arc<ModifierList>>,
         accessor_kind: SyntaxKind,
     ) -> Arc<Node> {
-        // Consume the `get`/`set` keyword.
+
         self.next_token();
         let name = self.parse_property_name();
         let type_parameters = self.parse_optional_type_parameters();
@@ -7822,10 +7215,7 @@ impl Parser {
             self.parse_semicolon();
             None
         };
-        // Go's finishNode ends at the current token's FULL start (leading
-        // trivia included): after a consumed `;` that's just past it; after
-        // an ASI'd `}` it's right after `)`. The checker's TS1005 anchor
-        // (End()-1) depends on this.
+
         let end = body
             .as_ref()
             .map_or(self.scanner.full_start_pos(), |b| b.end());
@@ -7860,21 +7250,11 @@ impl Parser {
         }
     }
 
-    // ─────────────────────────────────────────────────────────────────────
-    // Diagnostics
-    // ─────────────────────────────────────────────────────────────────────
-
-    /// Get the parser diagnostics.
     pub fn diagnostics(&self) -> &[ParserDiagnostic] {
         &self.diagnostics
     }
 }
 
-// ─────────────────────────────────────────────────────────────────────
-// Helper functions
-// ─────────────────────────────────────────────────────────────────────
-
-/// Binary operator precedence (higher = binds tighter).
 fn binary_precedence(token: SyntaxKind) -> u8 {
     match token {
         SyntaxKind::BarBarToken | SyntaxKind::QuestionQuestionToken => 1,
@@ -7929,18 +7309,12 @@ fn is_keyword(token: SyntaxKind) -> bool {
 }
 
 fn is_identifier_or_keyword(token: SyntaxKind) -> bool {
-    // Go's `tokenIsIdentifierOrKeyword` is `token >= KindIdentifier`, and
-    // KindPrivateIdentifier sits directly after KindIdentifier — so `#name`
-    // counts wherever an identifier-or-keyword can (`static #m()`, `set #x`).
+
     token == SyntaxKind::Identifier
         || token == SyntaxKind::PrivateIdentifier
         || is_keyword(token)
 }
 
-/// Whether a keyword token is a RESERVED word and therefore cannot be used
-/// as a binding name (Go's `parser.isIdentifier` excludes these while
-/// accepting contextual keywords). Used only to flag illegal names — the
-/// contextual keywords (`type`, `as`, `async`, …) parse as identifiers.
 fn is_reserved_word_kind(token: SyntaxKind) -> bool {
     matches!(
         token,
@@ -8013,9 +7387,7 @@ mod tests {
 
     #[test]
     fn parse_private_identifier_class_field() {
-        // `#name: string` — private class field. The scanner yields a single
-        // PrivateIdentifier token; parse_property_name should produce a
-        // PrivateIdentifier name node, so the field parses with no diagnostics.
+
         let (_, diags) = Parser::parse_source_file_text_with_diagnostics(
             "a.ts",
             "class C { #name: string; }".to_string(),
@@ -8029,8 +7401,7 @@ mod tests {
 
     #[test]
     fn parse_private_identifier_member_access() {
-        // `this.#name` — private member access. The name after `.` is a
-        // PrivateIdentifier and should parse cleanly.
+
         let mut p = Parser::new("this.#name");
         let node = p.parse_expression();
         assert_eq!(node.kind, SyntaxKind::PropertyAccessExpression);
@@ -8043,9 +7414,7 @@ mod tests {
 
     #[test]
     fn parse_less_than_is_comparison_not_type_args() {
-        // `x < 10` is a comparison, not type arguments `x<10>`. The parser must
-        // backtrack and leave no `>`-expected diagnostic. Mirrors Go's
-        // `tryParseTypeArguments`.
+
         let mut p = Parser::new("if (x < 10) { }");
         let _ = p.parse_expression();
         assert!(
@@ -8060,8 +7429,7 @@ mod tests {
 
     #[test]
     fn parse_generic_call_keeps_type_arguments() {
-        // `f<T>(x)` — a generic call. `<T>` must still be parsed as type
-        // arguments (not backtracked as a comparison).
+
         let mut p = Parser::new("f<string>(x)");
         let node = p.parse_expression();
         assert_eq!(node.kind, SyntaxKind::CallExpression);
@@ -8074,8 +7442,7 @@ mod tests {
 
     #[test]
     fn parse_generic_arrow_function() {
-        // `<T>(x: T): T => x` — a generic arrow function. The leading `<T>`
-        // must be parsed as type parameters, not backtracked as a comparison.
+
         let mut p = Parser::new("<T>(x: T): T => x");
         let node = p.parse_expression();
         assert_eq!(node.kind, SyntaxKind::ArrowFunction);
@@ -8088,7 +7455,7 @@ mod tests {
 
     #[test]
     fn parse_async_generic_arrow_function() {
-        // `async <T>(value: T): Promise<T> => value` — an async generic arrow.
+
         let mut p = Parser::new("async <T>(value: T): T => value");
         let node = p.parse_expression();
         assert_eq!(node.kind, SyntaxKind::ArrowFunction);
@@ -8101,9 +7468,7 @@ mod tests {
 
     #[test]
     fn parse_generic_arrow_not_confused_with_comparison() {
-        // `a < b` must still parse as a comparison even though `<` could start
-        // a generic arrow. The generic-arrow speculative parse backtracks when
-        // no `=>` follows.
+
         let mut p = Parser::new("let r = a < b;");
         let _ = p.parse_expression();
         assert!(
@@ -8118,8 +7483,7 @@ mod tests {
 
     #[test]
     fn parse_for_loop_condition_less_than() {
-        // `for (let i = 0; i < n; i++)` — the `i < n` condition must not be
-        // mis-parsed as type arguments.
+
         let (_, diags) = Parser::parse_source_file_text_with_diagnostics(
             "a.ts",
             "function f() { for (let i = 0; i < n; i++) { } }".to_string(),
@@ -8136,9 +7500,7 @@ mod tests {
 
     #[test]
     fn parse_multi_declarator_variable_list() {
-        // `let a = 1, b = 2, c = 3;` — three declarators. The initializer must
-        // use assignment-expression so the comma separates declarators rather
-        // than being swallowed as a sequence (comma) operator.
+
         let (_, diags) = Parser::parse_source_file_text_with_diagnostics(
             "a.ts",
             "let a = 1, b = 2, c = 3;\na; b; c;".to_string(),
@@ -8386,8 +7748,6 @@ mod tests {
         assert_eq!(named_bindings.kind, SyntaxKind::NamespaceImport);
     }
 
-    /// Parse an import declaration and return its first named-import
-    /// specifier as (is_type_only, property_name text, name text).
     fn first_import_specifier(source: &str) -> (bool, Option<String>, String) {
         let (_file, diags) =
             Parser::parse_source_file_text_with_diagnostics("a.ts", source.to_string());
@@ -8419,10 +7779,6 @@ mod tests {
         }
     }
 
-    /// A bare `type` in an import/export specifier is the MEMBER NAME, not
-    /// the type-only modifier (Go parseImportOrExportSpecifier: decided by
-    /// what follows — `}`/`,` keeps `type` as the name). The
-    /// nodeModulesPackagePatternExports fixture's `export { type };`.
     #[test]
     fn specifier_bare_type_is_the_name() {
         assert_eq!(
@@ -8436,30 +7792,29 @@ mod tests {
         assert!(diags.is_empty(), "{diags:?}");
     }
 
-    /// The four `type as` shapes from Go parseImportOrExportSpecifier.
     #[test]
     fn specifier_type_as_shapes() {
-        // { type as } — type-only, name `as`
+
         assert_eq!(
             first_import_specifier("import { type as } from \"mod\";"),
             (true, None, "as".to_string())
         );
-        // { type as as } — name `as`, property `type`
+
         assert_eq!(
             first_import_specifier("import { type as as } from \"mod\";"),
             (false, Some("type".to_string()), "as".to_string())
         );
-        // { type as as as } — type-only, name/property `as`
+
         assert_eq!(
             first_import_specifier("import { type as as as } from \"mod\";"),
             (true, Some("as".to_string()), "as".to_string())
         );
-        // { type x } — type-only, name `x`
+
         assert_eq!(
             first_import_specifier("import { type x } from \"mod\";"),
             (true, None, "x".to_string())
         );
-        // { type x as y } — type-only rename
+
         assert_eq!(
             first_import_specifier("import { type x as y } from \"mod\";"),
             (true, Some("x".to_string()), "y".to_string())
@@ -8685,8 +8040,7 @@ mod tests {
 
     #[test]
     fn parse_primitive_keyword_type_nodes() {
-        // Go: parseKeywordTypeNode produces a KeywordTypeNode whose kind equals
-        // the keyword kind (not TypeReference).
+
         for (src, expected_kind) in [
             ("type T = any;", SyntaxKind::AnyKeyword),
             ("type T = unknown;", SyntaxKind::UnknownKeyword),
@@ -8717,7 +8071,7 @@ mod tests {
 
     #[test]
     fn parse_keyword_type_followed_by_dot_is_type_reference() {
-        // `String.fromCharCode` should be a TypeReference, not a KeywordTypeNode.
+
         let mut p = Parser::new("type T = String.fromCharCode;");
         let node = p.parse_statement();
         let alias = match &node.data {
@@ -8753,9 +8107,7 @@ mod tests {
 
     #[test]
     fn parse_import_type_with_attributes() {
-        // `import("pkg", { with: { "resolution-mode": "import" } }).T` —
-        // the attribute-carrying second argument (Go parseImportType's
-        // comma branch).
+
         let mut p = Parser::new(
             "type T = import(\"pkg\", { with: { \"resolution-mode\": \"import\" } }).Foo;",
         );
@@ -8785,10 +8137,7 @@ mod tests {
 
     #[test]
     fn parse_import_type_missing_with_reports_1005() {
-        // `import("pkg", {"resolution-mode": "require"})` — the object
-        // without the `with:` key reports TS1005 ('with' expected), the
-        // same code official reports (nodeModulesImportAttributes
-        // TypeModeDeclarationEmitErrors /other.ts).
+
         let mut p = Parser::new(
             "type T = import(\"pkg\", {\"resolution-mode\": \"require\"}).Foo;",
         );
@@ -8844,7 +8193,7 @@ mod tests {
 
     #[test]
     fn parse_tuple_types() {
-        // basic tuple
+
         let mut p = Parser::new("type T = [string, number];");
         let node = p.parse_statement();
         assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics());
@@ -8854,7 +8203,6 @@ mod tests {
         };
         assert_eq!(alias.type_node.kind, SyntaxKind::TupleType);
 
-        // readonly tuple
         let mut p = Parser::new("type T = readonly [string, number];");
         let node = p.parse_statement();
         assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics());
@@ -8864,12 +8212,10 @@ mod tests {
         };
         assert_eq!(alias.type_node.kind, SyntaxKind::TypeOperator);
 
-        // rest element
         let mut p = Parser::new("type T = [string, ...number[]];");
         let _node = p.parse_statement();
         assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics());
 
-        // named tuple member
         let mut p = Parser::new("type T = [name: string, age: number];");
         let node = p.parse_statement();
         assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics());
@@ -8879,7 +8225,6 @@ mod tests {
         };
         assert_eq!(alias.type_node.kind, SyntaxKind::TupleType);
 
-        // optional tuple element
         let mut p = Parser::new("type T = [string?, number?];");
         let _node = p.parse_statement();
         assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics());
@@ -8887,7 +8232,7 @@ mod tests {
 
     #[test]
     fn parse_union_intersection_precedence() {
-        // `A | B & C` should parse as `A | (B & C)` — intersection binds tighter
+
         let mut p = Parser::new("type T = A | B & C;");
         let node = p.parse_statement();
         assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics());
@@ -8895,22 +8240,20 @@ mod tests {
             NodeData::TypeAliasDeclaration(data) => data,
             other => panic!("expected type alias, got {other:?}"),
         };
-        // top level should be UnionType
+
         assert_eq!(alias.type_node.kind, SyntaxKind::UnionType);
         let union = match &alias.type_node.data {
             NodeData::UnionTypeNode(d) => d,
             other => panic!("expected union, got {other:?}"),
         };
         assert_eq!(union.types.nodes.len(), 2);
-        // second element should be IntersectionType
+
         assert_eq!(union.types.nodes[1].kind, SyntaxKind::IntersectionType);
 
-        // leading `|` union
         let mut p = Parser::new("type T = | A | B;");
         let _node = p.parse_statement();
         assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics());
 
-        // leading `&` intersection
         let mut p = Parser::new("type T = & A & B;");
         let _node = p.parse_statement();
         assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics());
@@ -8918,7 +8261,7 @@ mod tests {
 
     #[test]
     fn parse_generic_type_params_and_references() {
-        // type alias with type parameters: `type T<A, B extends string = "x"> = A | B;`
+
         let mut p = Parser::new("type T<A, B extends string = \"x\"> = A | B;");
         let node = p.parse_statement();
         assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics());
@@ -8932,7 +8275,6 @@ mod tests {
         assert_eq!(tps.nodes[0].kind, SyntaxKind::TypeParameter);
         assert_eq!(tps.nodes[1].kind, SyntaxKind::TypeParameter);
 
-        // type reference with type arguments: `type T = Foo<string, number>;`
         let mut p = Parser::new("type T = Foo<string, number>;");
         let node = p.parse_statement();
         assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics());
@@ -8948,13 +8290,10 @@ mod tests {
         assert!(tr.type_arguments.is_some());
         assert_eq!(tr.type_arguments.as_ref().unwrap().nodes.len(), 2);
 
-        // qualified type reference: `type T = A.B.C<T>;`
         let mut p = Parser::new("type T = A.B.C<T>;");
         let _node = p.parse_statement();
         assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics());
 
-        // nested type arguments: `type T = Map<string, Array<number>>;`
-        // This requires `>>` to be treated as two `>` tokens.
         let mut p = Parser::new("type T = Map<string, Array<number>>;");
         let _node = p.parse_statement();
         assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics());
@@ -8962,7 +8301,7 @@ mod tests {
 
     #[test]
     fn parse_mapped_types() {
-        // basic mapped type: `{ [K in keyof T]: V }`
+
         let mut p = Parser::new("type M<T> = { [K in keyof T]: string };");
         let node = p.parse_statement();
         assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics());
@@ -8972,22 +8311,18 @@ mod tests {
         };
         assert_eq!(alias.type_node.kind, SyntaxKind::MappedType);
 
-        // readonly mapped type
         let mut p = Parser::new("type M<T> = { readonly [K in keyof T]: string };");
         let _node = p.parse_statement();
         assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics());
 
-        // -readonly (removes readonly)
         let mut p = Parser::new("type M<T> = { -readonly [K in keyof T]: string };");
         let _node = p.parse_statement();
         assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics());
 
-        // optional mapped type with -?
         let mut p = Parser::new("type M<T> = { [K in keyof T]-?: string };");
         let _node = p.parse_statement();
         assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics());
 
-        // `as` clause (key remapping)
         let mut p = Parser::new("type M<T> = { [K in keyof T as `${K}`]: string };");
         let _node = p.parse_statement();
         assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics());
@@ -8995,7 +8330,7 @@ mod tests {
 
     #[test]
     fn parse_conditional_types() {
-        // `T extends U ? X : Y`
+
         let mut p = Parser::new("type R<T> = T extends string ? number : boolean;");
         let node = p.parse_statement();
         assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics());
@@ -9005,12 +8340,10 @@ mod tests {
         };
         assert_eq!(alias.type_node.kind, SyntaxKind::ConditionalType);
 
-        // nested conditional types
         let mut p = Parser::new("type R<T> = T extends A ? X : T extends B ? Y : Z;");
         let _node = p.parse_statement();
         assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics());
 
-        // `infer R` in extends clause
         let mut p = Parser::new("type R<T> = T extends (infer U)[] ? U : never;");
         let _node = p.parse_statement();
         assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics());
@@ -9018,22 +8351,19 @@ mod tests {
 
     #[test]
     fn parse_call_and_construct_signatures() {
-        // call signature: `{ (): T }` or `{ (x: A): B }`
+
         let mut p = Parser::new("type T = { (): string };");
         let _node = p.parse_statement();
         assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics());
 
-        // construct signature: `{ new (): T }`
         let mut p = Parser::new("type T = { new (): Foo };");
         let _node = p.parse_statement();
         assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics());
 
-        // abstract construct signature
         let mut p = Parser::new("type T = { abstract new (): Foo };");
         let _node = p.parse_statement();
         assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics());
 
-        // function type: `() => T`
         let mut p = Parser::new("type T = () => string;");
         let node = p.parse_statement();
         assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics());
@@ -9043,7 +8373,6 @@ mod tests {
         };
         assert_eq!(alias.type_node.kind, SyntaxKind::FunctionType);
 
-        // constructor type: `new () => T`
         let mut p = Parser::new("type T = new () => Foo;");
         let node = p.parse_statement();
         assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics());
@@ -9056,17 +8385,15 @@ mod tests {
 
     #[test]
     fn parse_index_signatures() {
-        // index signature: `{ [key: string]: T }`
+
         let mut p = Parser::new("type T = { [key: string]: number };");
         let _node = p.parse_statement();
         assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics());
 
-        // numeric index signature
         let mut p = Parser::new("type T = { [index: number]: string };");
         let _node = p.parse_statement();
         assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics());
 
-        // readonly index signature
         let mut p = Parser::new("type T = { readonly [key: string]: number };");
         let _node = p.parse_statement();
         assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics());
@@ -9074,17 +8401,15 @@ mod tests {
 
     #[test]
     fn parse_satisfies_and_as_const() {
-        // `as const` expression
+
         let mut p = Parser::new("const x = { a: 1 } as const;");
         let _node = p.parse_statement();
         assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics());
 
-        // `satisfies T` expression
         let mut p = Parser::new("const x = { a: 1 } satisfies Foo;");
         let _node = p.parse_statement();
         assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics());
 
-        // non-null assertion
         let mut p = Parser::new("const x = foo!.bar;");
         let _node = p.parse_statement();
         assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics());
@@ -9092,7 +8417,7 @@ mod tests {
 
     #[test]
     fn parse_declare_module_string_literal() {
-        // `declare module "name";`
+
         let mut p = Parser::new("declare module \"foo\";");
         let node = p.parse_statement();
         assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics);
@@ -9103,7 +8428,6 @@ mod tests {
         };
         assert_eq!(mod_decl.name.kind, SyntaxKind::StringLiteral);
 
-        // `declare module "name" { ... }`
         let mut p = Parser::new("declare module \"foo\" { export const x: number; }");
         let node = p.parse_statement();
         assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics);
@@ -9118,7 +8442,7 @@ mod tests {
 
     #[test]
     fn parse_declare_namespace_dotted() {
-        // `declare namespace A.B.C { ... }`
+
         let mut p = Parser::new("declare namespace A.B.C { export const x: number; }");
         let node = p.parse_statement();
         assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics);
@@ -9127,7 +8451,7 @@ mod tests {
 
     #[test]
     fn parse_declare_global() {
-        // `declare global { ... }`
+
         let mut p = Parser::new("declare global { const x: number; }");
         let node = p.parse_statement();
         assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics);
@@ -9143,7 +8467,7 @@ mod tests {
 
     #[test]
     fn parse_declare_class_full_body() {
-        // `declare class C { ... }` — full class body without implementation
+
         let mut p =
             Parser::new("declare class C extends Base { constructor(x: number); foo(): void; }");
         let node = p.parse_statement();
@@ -9153,19 +8477,17 @@ mod tests {
 
     #[test]
     fn parse_declare_var_and_function() {
-        // `declare var x: number;`
+
         let mut p = Parser::new("declare var x: number;");
         let node = p.parse_statement();
         assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics);
         assert_eq!(node.kind, SyntaxKind::VariableStatement);
 
-        // `declare const y: string;`
         let mut p = Parser::new("declare const y: string;");
         let node = p.parse_statement();
         assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics);
         assert_eq!(node.kind, SyntaxKind::VariableStatement);
 
-        // `declare function f(): void;` — no body
         let mut p = Parser::new("declare function f(): void;");
         let node = p.parse_statement();
         assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics);
@@ -9182,19 +8504,17 @@ mod tests {
 
     #[test]
     fn parse_declare_enum_and_interface() {
-        // `declare enum E { A, B }`
+
         let mut p = Parser::new("declare enum E { A, B }");
         let node = p.parse_statement();
         assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics);
         assert_eq!(node.kind, SyntaxKind::EnumDeclaration);
 
-        // `declare interface I { foo(): void; }`
         let mut p = Parser::new("declare interface I { foo(): void; }");
         let node = p.parse_statement();
         assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics);
         assert_eq!(node.kind, SyntaxKind::InterfaceDeclaration);
 
-        // `declare type T = string;`
         let mut p = Parser::new("declare type T = string;");
         let node = p.parse_statement();
         assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics);
@@ -9203,13 +8523,12 @@ mod tests {
 
     #[test]
     fn parse_asi_basic() {
-        // ASI: no semicolon needed before close brace
+
         let mut p = Parser::new("let x = 1");
         let node = p.parse_statement();
         assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics);
         assert_eq!(node.kind, SyntaxKind::VariableStatement);
 
-        // ASI: line break acts as semicolon
         let mut p = Parser::new("let x = 1\nlet y = 2");
         let s1 = p.parse_statement();
         assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics);
@@ -9218,7 +8537,6 @@ mod tests {
         assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics);
         assert_eq!(s2.kind, SyntaxKind::VariableStatement);
 
-        // ASI: explicit semicolon also works
         let mut p = Parser::new("let x = 1;\nlet y = 2;");
         let s1 = p.parse_statement();
         assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics);
@@ -9230,21 +8548,19 @@ mod tests {
 
     #[test]
     fn parse_asi_postfix_no_line_break() {
-        // Postfix ++ must be on same line as operand (ASI prevents across line break)
+
         let mut p = Parser::new("let x = 1\n++y");
         let s1 = p.parse_statement();
         assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics);
         assert_eq!(s1.kind, SyntaxKind::VariableStatement);
-        // Second statement should be `++y` (prefix), not `x++` + `y`
+
         let s2 = p.parse_statement();
         assert_eq!(s2.kind, SyntaxKind::ExpressionStatement);
     }
 
     #[test]
     fn parse_asi_throw_needs_expression() {
-        // `throw` followed by line break: ASI prevents expression on next line.
-        // Per Go reference, the parser creates a missing identifier (no parser
-        // diagnostic); the actual grammar error is reported by the checker.
+
         let mut p = Parser::new("throw\nnew Error()");
         let node = p.parse_statement();
         assert_eq!(node.kind, SyntaxKind::ThrowStatement);
@@ -9252,7 +8568,7 @@ mod tests {
             NodeData::ThrowStatement(d) => d,
             other => panic!("expected throw, got {other:?}"),
         };
-        // Expression should be a missing (empty) identifier, not `new Error()`
+
         assert_eq!(throw.expression.kind, SyntaxKind::Identifier);
         let id = match &throw.expression.data {
             NodeData::Identifier(d) => d,
@@ -9267,8 +8583,7 @@ mod tests {
 
     #[test]
     fn parse_scanner_errors_reach_parser_diagnostics() {
-        // Invalid character `·` should produce a parser diagnostic via the
-        // scanner error collection pipeline.
+
         let (file, diags) =
             Parser::parse_source_file_text_with_diagnostics("test.ts", "·".to_string());
         assert!(
@@ -9277,7 +8592,6 @@ mod tests {
         );
         assert_eq!(file.node.kind, SyntaxKind::SourceFile);
 
-        // Unterminated string literal should also be reported.
         let (_file, diags) = Parser::parse_source_file_text_with_diagnostics(
             "test.ts",
             "\"unterminated".to_string(),
@@ -9290,7 +8604,7 @@ mod tests {
 
     #[test]
     fn parse_regex_flag_diagnostics_reach_parser() {
-        // Unknown flag `z` → TS1499.
+
         let (_file, diags) = Parser::parse_source_file_text_with_diagnostics(
             "test.ts",
             "let x = /foo/z;".to_string(),
@@ -9300,7 +8614,6 @@ mod tests {
             "expected TS1499 for unknown regex flag, got: {diags:?}"
         );
 
-        // Duplicate flag `gg` → TS1500.
         let (_file, diags) = Parser::parse_source_file_text_with_diagnostics(
             "test.ts",
             "let x = /foo/gg;".to_string(),
@@ -9310,7 +8623,6 @@ mod tests {
             "expected TS1500 for duplicate regex flag, got: {diags:?}"
         );
 
-        // `u` and `v` together → TS1502.
         let (_file, diags) = Parser::parse_source_file_text_with_diagnostics(
             "test.ts",
             "let x = /foo/uv;".to_string(),
@@ -9320,7 +8632,6 @@ mod tests {
             "expected TS1502 for u+v flags, got: {diags:?}"
         );
 
-        // Valid flags → no regex diagnostics.
         let (_file, diags) = Parser::parse_source_file_text_with_diagnostics(
             "test.ts",
             "let x = /foo/gim;".to_string(),
@@ -9335,7 +8646,7 @@ mod tests {
 
     #[test]
     fn parse_import_attributes_with() {
-        // import x from "y" with { type: "json" }
+
         let mut p = Parser::new(r#"import x from "y" with { type: "json" }"#);
         let node = p.parse_statement();
         assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics);
@@ -9354,7 +8665,6 @@ mod tests {
         assert_eq!(attr_data.token, SyntaxKind::WithKeyword);
         assert_eq!(attr_data.attributes.nodes.len(), 1);
 
-        // import { foo } from "y" with { type: "json", other: 42 }
         let mut p = Parser::new(r#"import { foo } from "y" with { type: "json", other: 42 }"#);
         let node = p.parse_statement();
         assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics);
@@ -9370,7 +8680,6 @@ mod tests {
         };
         assert_eq!(attr_data.attributes.nodes.len(), 2);
 
-        // export { foo } from "y" with { type: "json" }
         let mut p = Parser::new(r#"export { foo } from "y" with { type: "json" }"#);
         let node = p.parse_statement();
         assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics);
@@ -9384,7 +8693,7 @@ mod tests {
 
     #[test]
     fn parse_decorators() {
-        // @decorator class Foo {}
+
         let mut p = Parser::new("@decorator\nclass Foo {}");
         let node = p.parse_statement();
         assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics);
@@ -9404,7 +8713,6 @@ mod tests {
             .collect();
         assert_eq!(decorators.len(), 1);
 
-        // @decorator on class method
         let mut p = Parser::new("class Foo { @decorator bar() {} }");
         let node = p.parse_statement();
         assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics);
@@ -9427,7 +8735,6 @@ mod tests {
             .expect("method should have decorator modifiers");
         assert!(mods.modifier_flags.contains(ModifierFlags::Decorator));
 
-        // @decorator on class property
         let mut p = Parser::new("class Foo { @decorator x: number = 1; }");
         let node = p.parse_statement();
         assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics);
@@ -9438,13 +8745,11 @@ mod tests {
         let prop = &class.members.nodes[0];
         assert_eq!(prop.kind, SyntaxKind::PropertyDeclaration);
 
-        // @decorator with arguments: @Dec({ option: true })
         let mut p = Parser::new("@Dec({ option: true })\nclass Foo {}");
         let node = p.parse_statement();
         assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics);
         assert_eq!(node.kind, SyntaxKind::ClassDeclaration);
 
-        // Multiple decorators: @A @B class Foo {}
         let mut p = Parser::new("@A @B\nclass Foo {}");
         let node = p.parse_statement();
         assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics);
@@ -9459,7 +8764,6 @@ mod tests {
             .collect();
         assert_eq!(decorators.len(), 2);
 
-        // Decorator with member expression: @Namespace.Dec class Foo {}
         let mut p = Parser::new("@Namespace.Dec\nclass Foo {}");
         let node = p.parse_statement();
         assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics);
@@ -9468,35 +8772,30 @@ mod tests {
 
     #[test]
     fn parse_regex_literal() {
-        // Basic regex literal as a statement expression
+
         let mut p = Parser::new("let x = /foo/g;");
         let node = p.parse_statement();
         assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics);
         assert_eq!(node.kind, SyntaxKind::VariableStatement);
 
-        // Regex in expression statement
         let mut p = Parser::new("/foo/g.test(str);");
         let node = p.parse_statement();
         assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics);
         assert_eq!(node.kind, SyntaxKind::ExpressionStatement);
 
-        // Regex after `return` keyword
         let mut p = Parser::new("function f() { return /pattern/; }");
         let node = p.parse_statement();
         assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics);
         assert_eq!(node.kind, SyntaxKind::FunctionDeclaration);
 
-        // Regex with escaped slash
         let mut p = Parser::new(r"let x = /a\/b/;");
         let _node = p.parse_statement();
         assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics);
 
-        // Regex with character class containing slash
         let mut p = Parser::new(r"let x = /[\/]/;");
         let _node = p.parse_statement();
         assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics);
 
-        // Division after identifier should NOT be regex
         let mut p = Parser::new("let x = a / b;");
         let _node = p.parse_statement();
         assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics);
@@ -9534,19 +8833,17 @@ mod tests {
         let node = p.parse_statement();
         assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics);
         assert_eq!(node.kind, SyntaxKind::VariableStatement);
-        // Verify the declaration list has Using flag
+
         let stmt = match &node.data {
             NodeData::VariableStatement(d) => d,
             other => panic!("expected variable statement, got {other:?}"),
         };
         assert!(stmt.declaration_list.flags.contains(NodeFlags::Using));
 
-        // `using` as an identifier (not a declaration) should NOT be a variable statement
         let mut p = Parser::new("using = 1;");
         let node = p.parse_statement();
         assert_eq!(node.kind, SyntaxKind::ExpressionStatement);
 
-        // `using` followed by line break should NOT be a using declaration
         let mut p = Parser::new("using\nx = 1;");
         let node = p.parse_statement();
         assert_ne!(node.kind, SyntaxKind::VariableStatement);
@@ -9620,23 +8917,20 @@ mod tests {
 
     #[test]
     fn parse_computed_property_name_in_type_member() {
-        // `[Symbol.iterator]()` should be a method signature, not an index signature.
+
         let mut p = Parser::new("interface I { [Symbol.iterator](): Iterator<T>; }");
         let node = p.parse_statement();
         assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics);
         assert_eq!(node.kind, SyntaxKind::InterfaceDeclaration);
 
-        // `[Symbol.toPrimitive]` as a property signature (no parens).
         let mut p = Parser::new("interface Symbol { [Symbol.toPrimitive](hint: string): symbol; }");
         let _node = p.parse_statement();
         assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics);
 
-        // `readonly [Symbol.toStringTag]: string` — computed property with modifier.
         let mut p = Parser::new("interface X { readonly [Symbol.toStringTag]: string; }");
         let _node = p.parse_statement();
         assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics);
 
-        // Index signature `[key: string]: T` should still be recognized.
         let mut p = Parser::new("interface X { [key: string]: number; }");
         let node = p.parse_statement();
         assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics);
@@ -9649,23 +8943,20 @@ mod tests {
 
     #[test]
     fn parse_contextual_keyword_as_property_name_in_type_member() {
-        // `readonly static: boolean` — `static` is a property name, not a modifier.
+
         let mut p = Parser::new("interface X { readonly static: boolean; }");
         let _node = p.parse_statement();
         assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics);
 
-        // `readonly private: boolean` — `private` is a property name.
         let mut p = Parser::new("interface X { readonly private: boolean; }");
         let _node = p.parse_statement();
         assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics);
 
-        // `public: CryptoKey` — `public` is a property name (no preceding modifier).
         let mut p =
             Parser::new("interface EcdhKeyDeriveParams extends Algorithm { public: CryptoKey; }");
         let _node = p.parse_statement();
         assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics);
 
-        // Normal modifier usage should still work: `readonly x: boolean`.
         let mut p = Parser::new("interface X { readonly x: boolean; }");
         let _node = p.parse_statement();
         assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics);
@@ -9673,23 +8964,20 @@ mod tests {
 
     #[test]
     fn parse_heritage_clause_with_tuple_type_arguments() {
-        // `extends Array<[number, number] | undefined>` — tuple type in type args.
+
         let mut p = Parser::new("interface X extends Array<[number, number] | undefined> {}");
         let node = p.parse_statement();
         assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics);
         assert_eq!(node.kind, SyntaxKind::InterfaceDeclaration);
 
-        // Simple tuple type argument.
         let mut p = Parser::new("interface X extends Foo<[number]> {}");
         let _node = p.parse_statement();
         assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics);
 
-        // Multiple heritage clauses with tuple type args.
         let mut p = Parser::new("interface X extends A, Foo<[number, number]> {}");
         let _node = p.parse_statement();
         assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics);
 
-        // Class heritage clause with tuple type args.
         let mut p = Parser::new("class X extends Foo<[number, number]> {}");
         let _node = p.parse_statement();
         assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics);
@@ -9697,22 +8985,19 @@ mod tests {
 
     #[test]
     fn parse_contextual_keyword_as_class_member_name() {
-        // `static: number` — `static` is a property name, not a modifier.
+
         let mut p = Parser::new("class C { static: number = 1; }");
         let _node = p.parse_statement();
         assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics);
 
-        // `public: number` — `public` is a property name.
         let mut p = Parser::new("class C { public: number = 1; }");
         let _node = p.parse_statement();
         assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics);
 
-        // `readonly static: boolean` — `static` is a property name.
         let mut p = Parser::new("class C { readonly static: boolean; }");
         let _node = p.parse_statement();
         assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics);
 
-        // Normal modifier usage should still work: `static x: number`.
         let mut p = Parser::new("class C { static x: number = 1; }");
         let _node = p.parse_statement();
         assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics);
@@ -9832,9 +9117,6 @@ mod batch1100_tests {
     }
 }
 
-/// Keyword texts (>2 chars) for TS1435 suggestions (Go
-/// `scanner.GetViableKeywordSuggestions` — every keyword in the scanner's
-/// text table).
 const KEYWORD_SUGGESTIONS: &[&str] = &[
     "abstract", "accessor", "any", "as", "asserts", "bigint", "boolean", "break", "case",
     "catch", "class", "continue", "const", "constenum", "constructor", "debugger", "declare",
@@ -9847,4 +9129,3 @@ const KEYWORD_SUGGESTIONS: &[&str] = &[
     "type", "typeof", "undefined", "unique", "unknown", "var", "void", "while", "with",
     "yield", "async", "await", "of",
 ];
-

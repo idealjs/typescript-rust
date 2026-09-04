@@ -8,15 +8,13 @@ use std::time::{SystemTime, UNIX_EPOCH};
 struct Case {
     name: &'static str,
     args: &'static [&'static str],
-    /// Whether the command is expected to exit with code 0.
+
     expect_success: bool,
-    /// Expected emitted files (relative path → expected content).
+
     expected_files: &'static [(&'static str, &'static str)],
-    /// Substrings that stdout must contain (checked when non-empty).
+
     stdout_contains: &'static [&'static str],
-    /// When true, skip the Go oracle comparison for this case (known parity
-    /// gap in a feature not yet migrated, e.g. `removeComments` or ES5
-    /// down-leveling). The Rust smoke check still runs.
+
     skip_oracle: bool,
 }
 
@@ -25,8 +23,7 @@ const CASES: &[Case] = &[
         name: "simple_emit",
         args: &[],
         expect_success: true,
-        // No rootDir: the config file's directory is the common source dir,
-        // so src/main.ts emits to dist/src/main.js (mirrors Go oracle).
+
         expected_files: &[("dist/src/main.js", "let answer = 42;\n")],
         stdout_contains: &[],
         skip_oracle: false,
@@ -43,8 +40,7 @@ const CASES: &[Case] = &[
         name: "nested_out_dir",
         args: &[],
         expect_success: true,
-        // rootDir: "src" + outDir: "dist" preserves the relative directory
-        // structure, so src/lib/main.ts emits to dist/lib/main.js.
+
         expected_files: &[(
             "dist/lib/main.js",
             "export function square(x) { return x * x; }\n",
@@ -54,8 +50,7 @@ const CASES: &[Case] = &[
     },
     Case {
         name: "single_file",
-        // No tsconfig: compile a single .ts file directly.
-        // Without outDir, output is emitted alongside the source.
+
         args: &["main.ts"],
         expect_success: true,
         expected_files: &[(
@@ -67,7 +62,7 @@ const CASES: &[Case] = &[
     },
     Case {
         name: "project_dir",
-        // -p . points to a directory containing tsconfig.json.
+
         args: &["-p", "."],
         expect_success: true,
         expected_files: &[(
@@ -79,7 +74,7 @@ const CASES: &[Case] = &[
     },
     Case {
         name: "project_file",
-        // -p tsconfig.json points to the config file directly.
+
         args: &["-p", "tsconfig.json"],
         expect_success: true,
         expected_files: &[("dist/src/main.js", "const x = 42;\nexport { x };\n")],
@@ -88,7 +83,7 @@ const CASES: &[Case] = &[
     },
     Case {
         name: "jsonc_config",
-        // tsconfig.json with JSONC comments should be parsed correctly.
+
         args: &[],
         expect_success: true,
         expected_files: &[("dist/src/main.js", "const y = 99;\nexport { y };\n")],
@@ -97,7 +92,7 @@ const CASES: &[Case] = &[
     },
     Case {
         name: "show_config",
-        // --showConfig outputs the resolved config as JSON; no files emitted.
+
         args: &["--showConfig"],
         expect_success: true,
         expected_files: &[],
@@ -106,19 +101,17 @@ const CASES: &[Case] = &[
     },
     Case {
         name: "invalid_json",
-        // Invalid JSON in tsconfig should report an error and exit non-zero.
+
         args: &[],
         expect_success: false,
         expected_files: &[],
         stdout_contains: &[],
         skip_oracle: false,
     },
-    // ── New CLI/tsconfig parity smoke cases ──────────────────────────────
+
     Case {
         name: "config_dir",
-        // ${configDir} template substitution (TS 5.5+): outDir and rootDir
-        // resolve relative to the config file's directory. With
-        // rootDir = ${configDir}/src, src/main.ts emits to dist/main.js.
+
         args: &[],
         expect_success: true,
         expected_files: &[("dist/main.js", "const w = 123;\nexport { w };\n")],
@@ -127,8 +120,7 @@ const CASES: &[Case] = &[
     },
     Case {
         name: "extends_relative",
-        // `extends: "./base.json"` resolves a relative base config and
-        // inherits its compilerOptions (strict + target ES2020).
+
         args: &[],
         expect_success: true,
         expected_files: &[("dist/src/main.js", "const x = 42;\nexport { x };\n")],
@@ -137,8 +129,7 @@ const CASES: &[Case] = &[
     },
     Case {
         name: "extends_array",
-        // `extends: ["./base1.json", "./base2.json"]` merges all targets
-        // (strict from base1, target ES2020 from base2).
+
         args: &[],
         expect_success: true,
         expected_files: &[("dist/src/main.js", "const y = 99;\nexport { y };\n")],
@@ -147,9 +138,7 @@ const CASES: &[Case] = &[
     },
     Case {
         name: "extends_bare_specifier",
-        // `extends: "shared-tsconfig"` is a bare specifier. With no
-        // node_modules entry it is silently dropped; own outDir still
-        // applies (mirrors Go's getExtendsConfigPath module branch).
+
         args: &[],
         expect_success: true,
         expected_files: &[("dist/src/main.js", "const z = 7;\nexport { z };\n")],
@@ -158,7 +147,7 @@ const CASES: &[Case] = &[
     },
     Case {
         name: "include_pattern",
-        // `include: ["src/**/*"]` picks up src/main.ts.
+
         args: &[],
         expect_success: true,
         expected_files: &[("dist/src/main.js", "const c = 3;\nexport { c };\n")],
@@ -167,8 +156,7 @@ const CASES: &[Case] = &[
     },
     Case {
         name: "exclude_pattern",
-        // `exclude: ["src/excluded/**"]` skips src/excluded/skip.ts; only
-        // src/main.ts is emitted.
+
         args: &[],
         expect_success: true,
         expected_files: &[("dist/src/main.js", "const b = 2;\nexport { b };\n")],
@@ -177,7 +165,7 @@ const CASES: &[Case] = &[
     },
     Case {
         name: "multiple_files",
-        // Two source files: helper.ts + main.ts (imports helper). Both emit.
+
         args: &[],
         expect_success: true,
         expected_files: &[
@@ -195,7 +183,7 @@ const CASES: &[Case] = &[
     },
     Case {
         name: "no_emit",
-        // `noEmit: true` suppresses all file output.
+
         args: &[],
         expect_success: true,
         expected_files: &[],
@@ -204,7 +192,7 @@ const CASES: &[Case] = &[
     },
     Case {
         name: "strict_mode",
-        // `strict: true` with a clean source emits without diagnostics.
+
         args: &[],
         expect_success: true,
         expected_files: &[("dist/src/main.js", "const d = 4;\nexport { d };\n")],
@@ -213,7 +201,7 @@ const CASES: &[Case] = &[
     },
     Case {
         name: "comments_stripped",
-        // `removeComments: true` — comments are stripped from emitted JS.
+
         args: &[],
         expect_success: true,
         expected_files: &[("dist/src/main.js", "const e = 5;\nexport { e };\n")],
@@ -222,7 +210,7 @@ const CASES: &[Case] = &[
     },
     Case {
         name: "target_es5",
-        // `target: "ES5"` — const/let are down-leveled to var.
+
         args: &[],
         expect_success: true,
         expected_files: &[("dist/src/main.js", "var f = 6;\nexport { f };\n")],
@@ -231,10 +219,7 @@ const CASES: &[Case] = &[
     },
     Case {
         name: "module_commonjs",
-        // `module: "CommonJS"` — import/export → require/exports.
-        // Export declarations (export const/function/class) use a
-        // text-slice approach that differs from the Go oracle's full
-        // transformer, so oracle comparison is skipped.
+
         args: &[],
         expect_success: true,
         expected_files: &[(
@@ -246,10 +231,7 @@ const CASES: &[Case] = &[
     },
     Case {
         name: "source_map",
-        // `sourceMap: true` — generates .js.map file and appends
-        // `//# sourceMappingURL=main.js.map` to the .js output.
-        // Oracle comparison skipped: our text-slice emitter produces
-        // different VLQ mapping points than Go's printer-based emitter.
+
         args: &[],
         expect_success: true,
         expected_files: &[(
@@ -261,9 +243,7 @@ const CASES: &[Case] = &[
     },
     Case {
         name: "declaration_emit",
-        // `declaration: true` — generates .d.ts alongside .js.
-        // Oracle comparison skipped: our text-slice declaration emitter
-        // produces different formatting than Go's printer-based emitter.
+
         args: &[],
         expect_success: true,
         expected_files: &[
@@ -284,9 +264,7 @@ const CASES: &[Case] = &[
     },
     Case {
         name: "declaration_dir",
-        // `declaration: true` + `declarationDir: "dist/types"` — .d.ts files
-        // go to a separate directory from .js files.
-        // Oracle comparison skipped: text-slice declaration emitter differs.
+
         args: &[],
         expect_success: true,
         expected_files: &[
@@ -305,7 +283,7 @@ const CASES: &[Case] = &[
     },
     Case {
         name: "enum_emit",
-        // Numeric, string enums emitted as-is (ESNext target, no transform).
+
         args: &[],
         expect_success: true,
         expected_files: &[(
@@ -320,7 +298,7 @@ const CASES: &[Case] = &[
     },
     Case {
         name: "namespace_emit",
-        // Namespace with exported function and const — emitted as-is.
+
         args: &[],
         expect_success: true,
         expected_files: &[(
@@ -336,8 +314,7 @@ const CASES: &[Case] = &[
     },
     Case {
         name: "mixed_js_ts",
-        // `allowJs: true` — both .ts and .js files emit to .js with
-        // correct output paths preserving the relative directory structure.
+
         args: &[],
         expect_success: true,
         expected_files: &[
@@ -355,8 +332,7 @@ const CASES: &[Case] = &[
     },
     Case {
         name: "es_modules",
-        // `module: "ES2015"` — import/export preserved as-is (no CommonJS
-        // transform). Both files emit to .js.
+
         args: &[],
         expect_success: true,
         expected_files: &[
@@ -374,8 +350,7 @@ const CASES: &[Case] = &[
     },
     Case {
         name: "class_emit",
-        // Class with properties, constructor, and methods — type annotations
-        // stripped, class structure preserved.
+
         args: &[],
         expect_success: true,
         expected_files: &[(
@@ -392,7 +367,7 @@ const CASES: &[Case] = &[
     },
     Case {
         name: "decorators_emit",
-        // Decorator syntax preserved as-is (ESNext target, no down-leveling).
+
         args: &[],
         expect_success: true,
         expected_files: &[(
@@ -407,11 +382,10 @@ const CASES: &[Case] = &[
         stdout_contains: &[],
         skip_oracle: false,
     },
-    // ── Parser parity smoke cases ───────────────────────────────────────
+
     Case {
         name: "parser_syntax_error",
-        // Various syntax errors (TS1003/TS1005/TS1109/TS1136). No files
-        // should be emitted (noEmitOnError: true). Exit code non-zero.
+
         args: &[],
         expect_success: false,
         expected_files: &[],
@@ -420,10 +394,7 @@ const CASES: &[Case] = &[
     },
     Case {
         name: "parser_tsx",
-        // TSX JSX parsing: fragments, components, expressions in JSX.
-        // FIXED: binder now merges type+value declarations correctly,
-        // and the synthetic JSX namespace resolves JSX.Element /
-        // JSX.IntrinsicElements. Parser + checker both pass.
+
         args: &[],
         expect_success: true,
         expected_files: &[],
@@ -432,8 +403,7 @@ const CASES: &[Case] = &[
     },
     Case {
         name: "parser_generics",
-        // Generic functions, classes, interfaces, constraints, conditional
-        // types with infer.
+
         args: &[],
         expect_success: true,
         expected_files: &[],
@@ -442,9 +412,7 @@ const CASES: &[Case] = &[
     },
     Case {
         name: "parser_decorators",
-        // Decorator syntax (method + accessor decorators).
-        // TS18048: PropertyDescriptor.value is optional, so descriptor.value
-        // is possibly undefined — checker correctly flags this under strict.
+
         args: &[],
         expect_success: false,
         expected_files: &[],
@@ -453,7 +421,7 @@ const CASES: &[Case] = &[
     },
     Case {
         name: "parser_enums",
-        // Numeric, string, const enums with computed values.
+
         args: &[],
         expect_success: true,
         expected_files: &[],
@@ -462,8 +430,7 @@ const CASES: &[Case] = &[
     },
     Case {
         name: "parser_conditional_types",
-        // Conditional types, mapped types, template literal types, indexed
-        // access, keyof, typeof.
+
         args: &[],
         expect_success: true,
         expected_files: &[],
@@ -472,11 +439,7 @@ const CASES: &[Case] = &[
     },
     Case {
         name: "parser_js",
-        // JavaScript parsing: function declarations, var/let/const, object
-        // literals, prototype chains, template literals. allowJs:true,
-        // checkJs:false — JS files are excluded from bind-and-check
-        // diagnostics (Go: SkipTypeChecking), so the `Animal.prototype`
-        // TS2339s are suppressed and compilation succeeds.
+
         args: &[],
         expect_success: true,
         expected_files: &[],
@@ -485,10 +448,7 @@ const CASES: &[Case] = &[
     },
     Case {
         name: "parser_jsx",
-        // JSX in .jsx with checkJs:false — semantic errors (unresolved
-        // `require`/Node globals) are suppressed, so compilation succeeds.
-        // Oracle comparison skipped: tsgo reports TS5011 (rootDir must be
-        // explicit in TS6) on this tsconfig, which tsox does not implement.
+
         args: &[],
         expect_success: true,
         expected_files: &[],
@@ -524,7 +484,6 @@ fn rust_smoke_cases_emit_expected_outputs() {
             );
         }
 
-        // Check stdout contains expected substrings.
         let stdout = String::from_utf8_lossy(&output.stdout);
         for needle in case.stdout_contains {
             assert!(
@@ -536,7 +495,6 @@ fn rust_smoke_cases_emit_expected_outputs() {
             );
         }
 
-        // Check emitted files.
         for (path, expected) in case.expected_files {
             let actual_path = work_dir.join(path);
             let actual = fs::read_to_string(&actual_path).unwrap_or_else(|e| {
@@ -564,9 +522,6 @@ fn compare_with_go_oracle_when_available() {
         return;
     };
 
-    // Sanity-check the oracle: compile a file that references global types
-    // (like `let x: number`). If the oracle can't resolve these (TS2318),
-    // it lacks its default lib files and the comparison would be meaningless.
     let sanity_dir = std::env::temp_dir().join(format!(
         "tsox-oracle-sanity-{}",
         SystemTime::now()

@@ -1,12 +1,7 @@
-//! Glob-based file matching, ported from `internal/vfs/vfsmatch/vfsmatch.go`.
-//!
-//! Implements the glob matching algorithm specified in MATCHING_ALGORITHM.md.
-
 use crate::tspath;
 use crate::vfs::FS;
 use std::collections::HashSet;
 
-/// Unlimited depth — no traversal depth limit.
 pub const UNLIMITED_DEPTH: i32 = i32::MAX;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -16,7 +11,6 @@ pub enum Usage {
     Exclude,
 }
 
-/// Reads directory entries matching the given include/exclude glob patterns.
 pub fn read_directory(
     host: &dyn FS,
     current_dir: &str,
@@ -38,9 +32,6 @@ pub fn read_directory(
     )
 }
 
-/// Checks if a path component is implicitly a glob.
-/// An "includes" path "foo" is implicitly a glob "foo/** /*" if its last
-/// component has no extension and does not contain any glob characters.
 pub fn is_implicit_glob(last_path_component: &str) -> bool {
     !last_path_component.contains('.')
         && !last_path_component.contains('*')
@@ -53,7 +44,7 @@ fn get_include_base_path(absolute: &str) -> String {
     let wildcard_offset = absolute.find(|c: char| WILDCARD_CHARS.contains(&c));
     match wildcard_offset {
         None => {
-            // No "*" or "?" in the path
+
             if !tspath::has_extension(absolute) {
                 absolute.to_string()
             } else {
@@ -68,7 +59,6 @@ fn get_include_base_path(absolute: &str) -> String {
     }
 }
 
-/// Computes the unique non-wildcard base paths amongst the provided include patterns.
 pub fn get_base_paths(
     path: &str,
     includes: &[&str],
@@ -82,7 +72,6 @@ pub fn get_base_paths(
             use_case_sensitive_file_names,
         };
 
-        // Compute literal base paths amongst the include patterns.
         let mut include_base_paths: Vec<String> = Vec::new();
         for include in includes {
             let absolute = if tspath::is_rooted_disk_path(include) {
@@ -93,7 +82,6 @@ pub fn get_base_paths(
             include_base_paths.push(get_include_base_path(&absolute));
         }
 
-        // Sort using the path comparer.
         let case_sensitive = use_case_sensitive_file_names;
         include_base_paths.sort_by(|a, b| {
             if case_sensitive {
@@ -103,7 +91,6 @@ pub fn get_base_paths(
             }
         });
 
-        // Include unique base paths that are not a subpath of an existing base path.
         for include_base_path in &include_base_paths {
             let is_new = base_paths
                 .iter()
@@ -135,7 +122,7 @@ fn contains_path(parent: &str, child: &str, options: &tspath::ComparePathsOption
     for (i, pc) in parent_components.iter().enumerate() {
         let cc = &child_components[i];
         if i == 0 {
-            // Root comparison is always case-insensitive.
+
             if !pc.eq_ignore_ascii_case(cc) {
                 return false;
             }
@@ -149,8 +136,6 @@ fn contains_path(parent: &str, child: &str, options: &tspath::ComparePathsOption
     }
     true
 }
-
-// ── Glob pattern compilation ──────────────────────────────────────
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum ComponentKind {
@@ -180,7 +165,6 @@ struct Component {
     skip_package_folders: bool,
 }
 
-/// A compiled glob pattern for matching file paths.
 #[derive(Debug, Clone)]
 pub struct GlobPattern {
     components: Vec<Component>,
@@ -189,8 +173,6 @@ pub struct GlobPattern {
     exclude_min_js: bool,
 }
 
-/// Compiles a glob spec (e.g., "src/**/*.ts") into a pattern.
-/// Returns `None` if the pattern would match nothing.
 pub fn compile_glob_pattern(
     spec: &str,
     base_path: &str,
@@ -199,7 +181,6 @@ pub fn compile_glob_pattern(
 ) -> Option<GlobPattern> {
     let mut parts = get_normalized_path_components(spec, base_path);
 
-    // "src/**" without a filename matches nothing (for non-exclude patterns)
     if usage != Usage::Exclude {
         if let Some(last) = parts.last() {
             if last == "**" {
@@ -208,12 +189,10 @@ pub fn compile_glob_pattern(
         }
     }
 
-    // Normalize root: "/home/" -> "/home"
     if let Some(first) = parts.first_mut() {
         *first = tspath::remove_trailing_directory_separator(first);
     }
 
-    // Directories implicitly match all files: "src" -> "src/**/*"
     if let Some(last) = parts.last() {
         if is_implicit_glob(last) {
             parts.push("**".to_string());
@@ -302,17 +281,15 @@ fn parse_segments(s: &str) -> Vec<Segment> {
 }
 
 impl GlobPattern {
-    /// Returns true if `path` matches this pattern.
+
     pub fn matches(&self, path: &str) -> bool {
         self.match_path_parts(path, "", 0, 0, false)
     }
 
-    /// Returns true if `prefix`+`suffix` matches this pattern.
     pub fn matches_parts(&self, prefix: &str, suffix: &str) -> bool {
         self.match_path_parts(prefix, suffix, 0, 0, false)
     }
 
-    /// Returns true if files under `prefix`+`suffix` could match.
     pub fn matches_prefix_parts(&self, prefix: &str, suffix: &str) -> bool {
         self.match_path_parts(prefix, suffix, 0, 0, true)
     }
@@ -386,7 +363,7 @@ impl GlobPattern {
     }
 
     fn match_wildcard(&self, segs: &[Segment], s: &str) -> bool {
-        // Include patterns: wildcards at start cannot match hidden files
+
         if !self.is_exclude
             && !segs.is_empty()
             && is_hidden_path(s)
@@ -395,7 +372,6 @@ impl GlobPattern {
             return false;
         }
 
-        // Fast path: single * followed by literal suffix (e.g., "*.ts")
         if segs.len() == 2
             && segs[0].kind == SegmentKind::Star
             && segs[1].kind == SegmentKind::Literal
@@ -413,7 +389,6 @@ impl GlobPattern {
         self.match_segments(segs, s) && self.should_include_min_js(s, segs)
     }
 
-    /// Iterative segment matching — O(n*m), avoids exponential backtracking.
     fn match_segments(&self, segs: &[Segment], s: &str) -> bool {
         let mut seg_idx: i32 = 0;
         let mut s_idx: usize = 0;
@@ -434,7 +409,7 @@ impl GlobPattern {
                         }
                     }
                     SegmentKind::Question => {
-                        // ? matches one rune (not '/')
+
                         if s.as_bytes()[s_idx] != b'/' {
                             let size = next_rune_size(s, s_idx);
                             s_idx += size;
@@ -451,7 +426,6 @@ impl GlobPattern {
                 }
             }
 
-            // Backtrack to last star if possible.
             if star_seg_idx >= 0 && star_s_idx < s.len() && s.as_bytes()[star_s_idx] != b'/' {
                 let size = next_rune_size(s, star_s_idx);
                 star_s_idx += size;
@@ -463,7 +437,6 @@ impl GlobPattern {
             return false;
         }
 
-        // Consume any trailing stars.
         while (seg_idx as usize) < segs.len() && segs[seg_idx as usize].kind == SegmentKind::Star {
             seg_idx += 1;
         }
@@ -477,7 +450,7 @@ impl GlobPattern {
         if !self.has_min_js_suffix(filename) {
             return true;
         }
-        // Allow when the user's pattern explicitly references the .min. suffix.
+
         if self.pattern_mentions_min_suffix(segs) {
             return true;
         }
@@ -502,8 +475,7 @@ impl GlobPattern {
             let lit = if self.case_sensitive {
                 seg.literal.as_str()
             } else {
-                // case-insensitive: compare lowercase
-                // We can't borrow the lowercase, so check directly
+
                 if seg.literal.to_ascii_lowercase().contains(".min.js")
                     || seg.literal.to_ascii_lowercase().contains(".min.")
                 {
@@ -535,7 +507,6 @@ impl GlobPattern {
     }
 }
 
-/// Returns the byte length of the next UTF-8 rune at `idx`.
 fn next_rune_size(s: &str, idx: usize) -> usize {
     s[idx..].chars().next().map_or(0, |c| c.len_utf8())
 }
@@ -563,9 +534,8 @@ fn next_path_part_single(s: &str, offset: usize) -> (String, usize, bool) {
     }
 }
 
-/// Extracts the next path component from a virtual path prefix+suffix.
 pub fn next_path_part_parts(prefix: &str, suffix: &str, offset: usize) -> (String, usize, bool) {
-    // Fast paths
+
     if suffix.is_empty() {
         return next_path_part_single(prefix, offset);
     }
@@ -578,12 +548,10 @@ pub fn next_path_part_parts(prefix: &str, suffix: &str, offset: usize) -> (Strin
         return (String::new(), offset, false);
     }
 
-    // Handle leading slash (root of absolute path)
     if offset == 0 && !prefix.is_empty() && prefix.as_bytes()[0] == b'/' {
         return (String::new(), 1, true);
     }
 
-    // Scan within prefix.
     if offset < prefix.len() {
         let mut o = offset;
         while o < prefix.len() && prefix.as_bytes()[o] == b'/' {
@@ -594,10 +562,9 @@ pub fn next_path_part_parts(prefix: &str, suffix: &str, offset: usize) -> (Strin
             let idx = rest.find('/').unwrap_or(rest.len());
             return (rest[..idx].to_string(), o + idx, true);
         }
-        // Fall through into suffix region.
+
     }
 
-    // Scan suffix: it's a single component.
     let s_off = offset.saturating_sub(prefix.len());
     if s_off >= suffix.len() {
         return (String::new(), offset, false);
@@ -622,8 +589,6 @@ pub fn ensure_trailing_slash(s: &str) -> String {
         s.to_string()
     }
 }
-
-// ── Glob matcher (include + exclude patterns) ─────────────────────
 
 struct GlobMatcher {
     includes: Vec<GlobPattern>,
@@ -658,7 +623,7 @@ fn new_glob_matcher(
 }
 
 impl GlobMatcher {
-    /// Returns `(index, true)` if prefix+suffix matches; `(0, false)` otherwise.
+
     fn matches_file_parts(&self, prefix: &str, suffix: &str) -> (usize, bool) {
         for ex in &self.excludes {
             if ex.matches_parts(prefix, suffix) {
@@ -697,8 +662,6 @@ impl GlobMatcher {
     }
 }
 
-// ── Glob visitor (directory traversal) ────────────────────────────
-
 struct GlobVisitor<'a> {
     host: &'a dyn FS,
     file_matcher: GlobMatcher,
@@ -711,7 +674,7 @@ struct GlobVisitor<'a> {
 
 impl<'a> GlobVisitor<'a> {
     fn visit(&mut self, path: &str, absolute_path: &str, depth: i32, resolved_real_path: &str) {
-        // Detect symlink cycles via canonical path.
+
         let real_path = if !resolved_real_path.is_empty() {
             resolved_real_path.to_string()
         } else {
@@ -759,7 +722,7 @@ impl<'a> GlobVisitor<'a> {
                 continue;
             }
             let abs_dir = format!("{abs_prefix}{dir}");
-            // Non-symlink directory: compute realpath incrementally.
+
             let is_symlink = entries.symlinks.iter().any(|s| s == dir);
             let child_real_path = if !is_symlink {
                 tspath::combine_paths(&real_path, &[dir])
@@ -821,7 +784,6 @@ pub fn match_files(
         visitor.visit(&base_path, &abs, depth, "");
     }
 
-    // Fast path: single bucket doesn't need flattening.
     if visitor.results.len() == 1 {
         visitor.results.into_iter().next().unwrap()
     } else {
@@ -829,16 +791,12 @@ pub fn match_files(
     }
 }
 
-// ── SpecMatcher ───────────────────────────────────────────────────
-
-/// Wraps multiple glob patterns for matching paths.
 pub struct SpecMatcher {
     patterns: Vec<GlobPattern>,
 }
 
 impl SpecMatcher {
-    /// Creates a matcher for one or more glob specs.
-    /// Returns `None` if no specs or no patterns compile.
+
     pub fn new(
         specs: &[&str],
         base_path: &str,
@@ -862,12 +820,10 @@ impl SpecMatcher {
         Some(SpecMatcher { patterns })
     }
 
-    /// Returns true if any pattern matches the path.
     pub fn matches(&self, path: &str) -> bool {
         self.patterns.iter().any(|p| p.matches(path))
     }
 
-    /// Returns the index of the first matching pattern, or -1.
     pub fn match_index(&self, path: &str) -> i32 {
         for (i, p) in self.patterns.iter().enumerate() {
             if p.matches(path) {

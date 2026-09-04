@@ -1,24 +1,3 @@
-//! CLI execution pipeline, ported from `internal/execute/`.
-//!
-//! This module wires together the pieces ported in `tsoptions`, `compiler`,
-//! and `diagnosticwriter` into a working command-line entry point. It mirrors
-//! the control flow of `execute.CommandLine` in the Go implementation:
-//!
-//! ```text
-//! CommandLine(args)
-//!   ├─ -b / --build  → build mode (project references, incremental)
-//!   └─ tsc_compilation(args)
-//!        ├─ report parse errors
-//!        ├─ --version / --help / --all
-//!        ├─ --project <dir|file>
-//!        ├─ find tsconfig.json up the tree
-//!        ├─ read tsconfig.json (extends, include, exclude, …)
-//!        └─ perform_compilation()
-//!             ├─ create CompilerHost + Program
-//!             ├─ report diagnostics
-//!             └─ return ExitStatus
-//! ```
-
 use std::collections::HashSet;
 use std::io::{IsTerminal, Write};
 use std::sync::Arc;
@@ -54,16 +33,8 @@ use crate::vfs::{FS, OsFS};
 
 mod watch;
 
-/// Compiler version string, matching Go's `core.Version()`.
 pub const VERSION: &str = "7.1.0-dev";
 
-// ────────────────────────────────────────────────────────────────────────────
-// ExitStatus
-// ────────────────────────────────────────────────────────────────────────────
-
-/// The process exit status returned by `command_line`.
-///
-/// Mirrors `tsc.ExitStatus` in Go.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 #[repr(i32)]
 #[allow(non_camel_case_types)]
@@ -82,23 +53,13 @@ impl ExitStatus {
     }
 }
 
-/// The result of running `command_line`.
 #[derive(Debug)]
 pub struct CommandLineResult {
     pub status: ExitStatus,
 }
 
-// ────────────────────────────────────────────────────────────────────────────
-// System
-// ────────────────────────────────────────────────────────────────────────────
-
-/// Abstraction over the host environment, mirroring `tsc.System` in Go.
-///
-/// A `System` provides the writer for output, the file system, the current
-/// working directory, and a few environment / terminal helpers.
 pub trait System: Send + Sync {
-    /// Return a boxed writer. Each call produces a fresh handle; callers should
-    /// flush before dropping.
+
     fn writer(&self) -> Box<dyn Write + Send>;
     fn fs(&self) -> Arc<dyn FS>;
     fn default_library_path(&self) -> &str;
@@ -108,8 +69,6 @@ pub trait System: Send + Sync {
     fn environment_variable(&self, name: &str) -> Option<String>;
 }
 
-/// OS-backed `System` implementation using real stdout, the real file system,
-/// and the real environment.
 pub struct OsSystem {
     fs: Arc<BundledFS>,
     default_library_path: String,
@@ -162,19 +121,10 @@ impl System for OsSystem {
     }
 }
 
-// ────────────────────────────────────────────────────────────────────────────
-// CommandLine entry point
-// ────────────────────────────────────────────────────────────────────────────
-
-/// Build a compiler-level diagnostic (no source file) from a `Message`
-/// constant and its arguments, mirroring `ast.NewCompilerDiagnostic` in Go.
 fn compiler_diagnostic(message: crate::diagnostics::Message, args: Vec<String>) -> Diagnostic {
     Diagnostic::new(None, TextRange::undefined(), message, args)
 }
 
-/// Resolve the effective locale from compiler options, returning `None` when no
-/// `--locale`/`"locale"` was specified (English fallback). Used to localize
-/// emitted diagnostics.
 fn locale_of(options: &CompilerOptions) -> Option<Locale> {
     if options.locale.is_empty() {
         None
@@ -183,10 +133,6 @@ fn locale_of(options: &CompilerOptions) -> Option<Locale> {
     }
 }
 
-/// The main entry point for the `tsc` command line.
-///
-/// Mirrors `execute.CommandLine` in Go. Dispatches build mode (`-b`) or runs a
-/// regular compilation.
 pub fn command_line(sys: &dyn System, args: &[String]) -> CommandLineResult {
     if let Some(first) = args.first() {
         if is_build_mode_arg(first) {
@@ -245,9 +191,7 @@ fn tsc_build_compilation(
 
     let mut status = ExitStatus::Success;
     let mut seen_projects = HashSet::new();
-    // Projects currently on the build path (gray/in-progress), used to detect
-    // project reference cycles. `cycle_stack` records the ordered path for the
-    // TS6202 message, mirroring Go's `circularityStack`.
+
     let mut building = HashSet::new();
     let mut cycle_stack: Vec<String> = Vec::new();
     for project in projects {
@@ -268,13 +212,6 @@ fn tsc_build_compilation(
     CommandLineResult { status }
 }
 
-/// Compute a hash over the compiler options that affect output, mirroring (in a
-/// simplified form) the option-signature portion of Go's .tsbuildinfo.
-///
-/// `CompilerOptions` does not implement `Serialize`, so we hash the key fields
-/// that influence emitted output: target/module/moduleResolution/jsx, the path
-/// options (outDir/rootDir/declarationDir), and the strict/emit booleans. A
-/// change in any of these invalidates the cached build info.
 fn compute_options_signature(options: &CompilerOptions) -> String {
     let mut parts: Vec<String> = Vec::new();
     parts.push(format!("target={:?}", options.target));
@@ -435,17 +372,12 @@ fn build_project(
 
     let normalized_config = tspath::normalize_path(&config_file_name);
 
-    // Already fully built earlier in this run — skip (no re-build).
     if seen_projects.contains(&normalized_config) {
         return CommandLineResult {
             status: ExitStatus::Success,
         };
     }
 
-    // This project is already on the current build path — a project reference
-    // cycle has been detected. Report TS6202 with the cycle path and abort this
-    // branch without recursing further, mirroring `Orchestrator.setupBuildTask`
-    // in Go (the `analyzing` set detects the back edge).
     if building.contains(&normalized_config) {
         let mut writer = sys.writer();
         let diag = compiler_diagnostic(
@@ -458,7 +390,6 @@ fn build_project(
         };
     }
 
-    // Mark this project as in-progress and record it on the cycle path.
     building.insert(normalized_config.clone());
     cycle_stack.push(normalized_config.clone());
 
@@ -497,11 +428,8 @@ fn build_project(
         status = status.max(result.status);
     }
 
-    // A cycle detected while traversing references aborts all building — match
-    // Go's `buildOrClean`, which skips every project when circularity errors
-    // are present. Otherwise build this project normally.
     if status < ExitStatus::ProjectReferenceCycle_OutputsSkipped && !config.file_names.is_empty() {
-        // Check if project is up-to-date via .tsbuildinfo.
+
         let ts_build_info_file = BuildInfo::get_ts_build_info_file_path(
             &normalized_config,
             &config.compiler_options.out_dir,
@@ -510,8 +438,6 @@ fn build_project(
 
         let fs = sys.fs();
 
-        // Read all file contents for hash comparison (before perform_compilation
-        // takes ownership of config).
         let files_with_content: Vec<(String, String)> = config
             .file_names
             .iter()
@@ -520,7 +446,6 @@ fn build_project(
 
         let options_hash = compute_options_signature(&config.compiler_options);
 
-        // Skip the up-to-date check when --clean or --force is requested.
         let force = build_options.force.is_true();
         if !build_options.clean.is_true() && !force {
             if let Some(json) = fs.read_file(&ts_build_info_file) {
@@ -547,7 +472,6 @@ fn build_project(
             let _ = writeln!(writer, "Project '{}' is being built.", normalized_config);
         }
 
-        // --dry: report what would be built without actually compiling.
         if build_options.dry.is_true() {
             cycle_stack.pop();
             building.remove(&normalized_config);
@@ -560,12 +484,11 @@ fn build_project(
         let result = perform_compilation(sys, config, pretty, locale);
         status = status.max(result.status);
 
-        // Write .tsbuildinfo on successful build (not --clean).
         if result.status == ExitStatus::Success && !build_options.clean.is_true() {
             let build_info =
                 BuildInfo::new(&files_with_content, &normalized_config, &options_hash, &[]);
             if let Ok(json) = serde_json::to_string(&build_info) {
-                // Ensure parent directory exists for real FS (mirrors emit logic).
+
                 if let Some(parent) = std::path::Path::new(&ts_build_info_file).parent() {
                     if !parent.as_os_str().is_empty() {
                         let _ = std::fs::create_dir_all(parent);
@@ -576,7 +499,6 @@ fn build_project(
         }
     }
 
-    // Done with this project: move it from the in-progress set to the built set.
     cycle_stack.pop();
     building.remove(&normalized_config);
     seen_projects.insert(normalized_config);
@@ -624,15 +546,10 @@ fn resolve_config_file_name_of_project_reference(config_dir: &str, path: &str) -
     }
 }
 
-// ────────────────────────────────────────────────────────────────────────────
-// tsc_compilation
-// ────────────────────────────────────────────────────────────────────────────
-
 fn tsc_compilation(sys: &dyn System, command_line: ParsedCommandLine) -> CommandLineResult {
     let pretty = should_be_pretty(sys, &command_line.compiler_options);
     let locale = locale_of(&command_line.compiler_options);
 
-    // Report parse errors from the command line itself.
     if !command_line.errors.is_empty() {
         let mut writer = sys.writer();
         for e in &command_line.errors {
@@ -645,12 +562,10 @@ fn tsc_compilation(sys: &dyn System, command_line: ParsedCommandLine) -> Command
 
     let options = &command_line.compiler_options;
 
-    // --init
     if options.init.is_true() {
         return write_config_file(sys, options);
     }
 
-    // --version
     if options.version.is_true() {
         let mut writer = sys.writer();
         let _ = writeln!(writer, "Version {}", VERSION);
@@ -659,7 +574,6 @@ fn tsc_compilation(sys: &dyn System, command_line: ParsedCommandLine) -> Command
         };
     }
 
-    // --help / --all
     if options.help.is_true() || options.all.is_true() {
         print_help(sys, options.all.is_true());
         return CommandLineResult {
@@ -667,7 +581,6 @@ fn tsc_compilation(sys: &dyn System, command_line: ParsedCommandLine) -> Command
         };
     }
 
-    // --watch + --listFilesOnly is invalid.
     if options.watch.is_true() && options.list_files_only.is_true() {
         let mut writer = sys.writer();
         let diag = compiler_diagnostic(
@@ -684,7 +597,6 @@ fn tsc_compilation(sys: &dyn System, command_line: ParsedCommandLine) -> Command
         };
     }
 
-    // Determine the config file name.
     let mut config_file_name = String::new();
 
     if !options.project.is_empty() {
@@ -781,14 +693,10 @@ fn tsc_compilation(sys: &dyn System, command_line: ParsedCommandLine) -> Command
         }
     }
 
-    // Save the show_config flag before command_line is moved into config_for_compilation.
     let show_config_requested = command_line.compiler_options.show_config.is_true();
 
-    // Save the command-line options before `command_line` is moved, so watch
-    // mode can re-read the config file (which may change) on each recompilation.
     let base_options = command_line.compiler_options.clone();
 
-    // Read the config file (if found) and merge with command-line options.
     let config_for_compilation: ParsedCommandLine = if !config_file_name.is_empty() {
         let config_parsed = get_parsed_command_line_of_config_file(
             &config_file_name,
@@ -810,7 +718,6 @@ fn tsc_compilation(sys: &dyn System, command_line: ParsedCommandLine) -> Command
         command_line
     };
 
-    // --showConfig: print the effective configuration as JSON and exit.
     if show_config_requested {
         show_config(sys, &config_for_compilation);
         return CommandLineResult {
@@ -818,8 +725,6 @@ fn tsc_compilation(sys: &dyn System, command_line: ParsedCommandLine) -> Command
         };
     }
 
-    // --watch mode: perform an initial compilation, then watch the project
-    // directory for source changes and recompile until interrupted.
     if config_for_compilation.compiler_options.watch.is_true() {
         return watch::watch_mode(
             sys,
@@ -834,16 +739,6 @@ fn tsc_compilation(sys: &dyn System, command_line: ParsedCommandLine) -> Command
     perform_compilation(sys, config_for_compilation, pretty, locale.as_ref())
 }
 
-// ────────────────────────────────────────────────────────────────────────────
-// --showConfig
-// ────────────────────────────────────────────────────────────────────────────
-
-/// Print the effective compiler configuration as indented JSON.
-///
-/// Mirrors `execute.showConfig` in Go, but uses a simplified serialization
-/// that covers the commonly-used options rather than reflecting over all
-/// fields. Enum values are converted to their string names; paths are
-/// emitted as-is (not relativized).
 fn show_config(sys: &dyn System, config: &ParsedCommandLine) {
     use crate::json::Value;
     use crate::tsoptions as opts;
@@ -851,7 +746,6 @@ fn show_config(sys: &dyn System, config: &ParsedCommandLine) {
     let options = &config.compiler_options;
     let mut map = crate::json::Map::new();
 
-    // Enum-valued options
     if let Some(s) = opts::script_target_name(options.target) {
         map.insert("target".to_string(), Value::String(s.to_string()));
     }
@@ -871,26 +765,21 @@ fn show_config(sys: &dyn System, config: &ParsedCommandLine) {
         map.insert("newLine".to_string(), Value::String(s.to_string()));
     }
 
-    // String-valued options
-    // `IsFilePath` options (outDir, rootDir, …) are stored as absolute paths
-    // internally (mirroring Go's `normalizeNonListOptionValue`); for
-    // `--showConfig` output we convert them back to paths relative to the
-    // config file directory, matching Go's `serializeCompilerOptions`.
     let config_dir = tspath::get_directory_path(&config.config_file_name);
     let to_relative = |val: &str| -> String {
         if val.is_empty() {
             return val.to_string();
         }
-        // If the value is already relative, keep it as-is (e.g. CLI-provided).
+
         if !tspath::path_is_absolute(val) {
             return val.to_string();
         }
-        // Convert absolute → relative from config dir.
+
         let abs_val = tspath::get_normalized_absolute_path(val, "");
         let abs_config_dir = tspath::get_normalized_absolute_path(&config_dir, "");
         let abs_config_dir_with_sep = tspath::ensure_trailing_directory_separator(&abs_config_dir);
         if abs_val == abs_config_dir {
-            // Value is the config directory itself.
+
             return ".".to_string();
         }
         if let Some(stripped) = abs_val.strip_prefix(&abs_config_dir_with_sep) {
@@ -922,7 +811,6 @@ fn show_config(sys: &dyn System, config: &ParsedCommandLine) {
         }
     }
 
-    // List-valued options
     if !options.lib.is_empty() {
         map.insert(
             "lib".to_string(),
@@ -996,7 +884,6 @@ fn show_config(sys: &dyn System, config: &ParsedCommandLine) {
         );
     }
 
-    // paths
     if let Some(paths) = &options.paths {
         let mut paths_map = crate::json::Map::new();
         for (k, v) in paths {
@@ -1008,7 +895,6 @@ fn show_config(sys: &dyn System, config: &ParsedCommandLine) {
         map.insert("paths".to_string(), Value::Object(paths_map));
     }
 
-    // Boolean (Tristate) options — emit true/false when explicitly set
     let bool_opts: &[(&str, Tristate)] = &[
         ("allowJs", options.allow_js),
         (
@@ -1122,7 +1008,6 @@ fn show_config(sys: &dyn System, config: &ParsedCommandLine) {
         }
     }
 
-    // Build the top-level TSConfig object
     let mut top = crate::json::Map::new();
     if !map.is_empty() {
         top.insert("compilerOptions".to_string(), Value::Object(map));
@@ -1188,10 +1073,6 @@ fn show_config(sys: &dyn System, config: &ParsedCommandLine) {
     let _ = writeln!(writer);
 }
 
-// ────────────────────────────────────────────────────────────────────────────
-// perform_compilation
-// ────────────────────────────────────────────────────────────────────────────
-
 fn perform_compilation(
     sys: &dyn System,
     config: ParsedCommandLine,
@@ -1213,7 +1094,6 @@ fn perform_compilation(
     let mut writer = sys.writer();
     let error_count = report_diagnostics(&mut writer, &diags, pretty, locale).unwrap_or(0);
 
-    // Run the type checker and merge semantic diagnostics.
     let semantic_diags: Vec<Arc<Diagnostic>> = program
         .get_semantic_diagnostics()
         .into_iter()
@@ -1229,7 +1109,6 @@ fn perform_compilation(
 
     let options = program.options();
 
-    // Determine whether to emit output files.
     let should_emit = !options.no_emit.is_true()
         && !options.list_files_only.is_true()
         && (error_count == 0 || !options.no_emit_on_error.is_true());
@@ -1238,7 +1117,7 @@ fn perform_compilation(
     if should_emit {
         let fs = sys.fs();
         let emit_result = program.emit(&|path, data| {
-            // Ensure parent directory exists for real FS.
+
             if let Some(parent) = std::path::Path::new(path).parent() {
                 if !parent.as_os_str().is_empty() {
                     let _ = std::fs::create_dir_all(parent);
@@ -1253,8 +1132,7 @@ fn perform_compilation(
     }
 
     let status = if error_count > 0 {
-        // Mirrors Go emit.go: exit 1 only when emit was explicitly skipped
-        // (noEmit or noEmitOnError); otherwise exit 2 even if 0 files emitted.
+
         if !should_emit {
             ExitStatus::DiagnosticsPresent_OutputsSkipped
         } else {
@@ -1264,7 +1142,6 @@ fn perform_compilation(
         ExitStatus::Success
     };
 
-    // --listFiles / --listFilesOnly
     if options.list_files.is_true() || options.list_files_only.is_true() {
         for file in program.source_files() {
             let _ = writeln!(writer, "{}", file.file_name);
@@ -1274,13 +1151,6 @@ fn perform_compilation(
     CommandLineResult { status }
 }
 
-// ────────────────────────────────────────────────────────────────────────────
-// Helpers
-// ────────────────────────────────────────────────────────────────────────────
-
-/// Search ancestor directories for a config file named `config_name`.
-///
-/// Mirrors `findConfigFile` / `tspath.ForEachAncestorDirectory` in Go.
 fn find_config_file(
     search_path: &str,
     file_exists: &dyn Fn(&str) -> bool,
@@ -1301,7 +1171,6 @@ fn find_config_file(
     String::new()
 }
 
-/// Whether diagnostics should be pretty (colored, with context).
 fn should_be_pretty(sys: &dyn System, options: &CompilerOptions) -> bool {
     match options.pretty {
         Tristate::True => true,
@@ -1320,16 +1189,6 @@ fn default_is_pretty(sys: &dyn System) -> bool {
     sys.write_output_is_tty()
 }
 
-/// Print the compiler help, dynamically generated from the `OptionDecl`
-/// tables. Mirrors Go's `PrintHelp` / `printEasyHelp` / `printAllHelp`
-/// (`internal/execute/tsc/help.go`).
-///
-/// When `show_all` is false (the default `--help` view), only options with
-/// `show_in_simplified_help == true` are listed, split into "COMMAND LINE
-/// FLAGS" and "COMMON COMPILER OPTIONS" sections. When `show_all` is true
-/// (the `--all` view), every option with a non-empty description is listed
-/// under "ALL COMPILER OPTIONS", "WATCH OPTIONS", and "BUILD OPTIONS"
-/// sections, sorted alphabetically within each section.
 fn print_help(sys: &dyn System, show_all: bool) {
     let mut writer = sys.writer();
     let _ = writeln!(writer, "tsc: The TypeScript Compiler - Version {}", VERSION);
@@ -1342,9 +1201,6 @@ fn print_help(sys: &dyn System, show_all: bool) {
     }
 }
 
-/// The simplified `--help` view: only `show_in_simplified_help` options,
-/// split into CLI-only flags and common compiler options. Mirrors Go's
-/// `printEasyHelp`.
 fn print_simplified_help(writer: &mut dyn Write) {
     let _ = writeln!(writer, "COMMON COMMANDS:");
     let _ = writeln!(writer);
@@ -1376,8 +1232,6 @@ fn print_simplified_help(writer: &mut dyn Write) {
         let _ = writeln!(writer);
     }
 
-    // Split simplified-help options into CLI-only vs the rest, mirroring Go's
-    // `cliCommands` / `configOpts` split in `printEasyHelp`.
     let mut cli_commands: Vec<&OptionDecl> = Vec::new();
     let mut config_opts: Vec<&OptionDecl> = Vec::new();
     for opt in OPTIONS.iter().filter(|o| o.show_in_simplified_help) {
@@ -1398,11 +1252,8 @@ fn print_simplified_help(writer: &mut dyn Write) {
     );
 }
 
-/// The `--all` view: every option with a description, grouped into compiler
-/// / watch / build sections. Mirrors Go's `printAllHelp`.
 fn print_all_options_section(writer: &mut dyn Write) {
-    // All compiler options with descriptions, sorted alphabetically by
-    // lowercased name (mirrors Go's `getOptionsForHelp` `--all` branch).
+
     let mut compiler_opts: Vec<&OptionDecl> = OPTIONS
         .iter()
         .filter(|o| !o.description.is_empty())
@@ -1430,18 +1281,13 @@ fn print_all_options_section(writer: &mut dyn Write) {
     print_option_section(writer, "BUILD OPTIONS:", &build_opts);
 }
 
-/// Render a section header followed by the option list in a two-column
-/// layout: `  --name, -short    description`. The name column is padded to
-/// the longest name in the section so descriptions align. Mirrors the
-/// column alignment in Go's `generateGroupOptionOutput` (without the
-/// terminal-width-aware wrapping or color).
 fn print_option_section(writer: &mut dyn Write, header: &str, opts: &[&OptionDecl]) {
     let _ = writeln!(writer, "{header}");
     let _ = writeln!(writer);
     if opts.is_empty() {
         return;
     }
-    // Compute the name column width (2-space left margin + longest name).
+
     let name_strings: Vec<String> = opts.iter().map(|o| display_name_of_option(o)).collect();
     let max_name = name_strings.iter().map(|s| s.len()).max().unwrap_or(0);
     let col_width = max_name + 2;
@@ -1454,8 +1300,6 @@ fn print_option_section(writer: &mut dyn Write, header: &str, opts: &[&OptionDec
     }
 }
 
-/// Build the display name for an option: `--name` or `--name, -short`.
-/// Mirrors Go's `getDisplayNameTextOfOption`.
 fn display_name_of_option(opt: &OptionDecl) -> String {
     match opt.short_name {
         Some(short) => format!("--{}, -{}", opt.name, short),
@@ -1559,10 +1403,6 @@ fn generate_tsconfig(options: &CompilerOptions) -> String {
     )
 }
 
-// ────────────────────────────────────────────────────────────────────────────
-// Tests
-// ────────────────────────────────────────────────────────────────────────────
-
 #[cfg(test)]
 mod tests {
     use super::watch;
@@ -1571,7 +1411,6 @@ mod tests {
     use crate::vfs::InMemoryFS;
     use std::sync::Mutex;
 
-    /// A test System backed by an in-memory FS and a captured output buffer.
     struct TestSystem {
         fs: Arc<BundledFS>,
         cwd: String,
@@ -1618,7 +1457,6 @@ mod tests {
         }
     }
 
-    /// A writer that appends to a shared, mutex-protected buffer.
     struct BufferWriter {
         buf: Arc<Mutex<Vec<u8>>>,
     }
@@ -1655,7 +1493,7 @@ mod tests {
             out.contains("tsc: The TypeScript Compiler"),
             "header missing:\n{out}"
         );
-        // Dynamic content from OptionDecl descriptions.
+
         assert!(
             out.contains("Print this message."),
             "help option desc missing:\n{out}"
@@ -1724,7 +1562,7 @@ mod tests {
             "/proj/a.ts".to_string(),
         ];
         let result = command_line(&sys, &args);
-        // No type checking yet, so parse-only → success.
+
         if result.status != ExitStatus::Success {
             panic!(
                 "Expected Success but got {:?}. Output:\n{}",
@@ -1749,10 +1587,6 @@ mod tests {
 
         let result = command_line(&sys, &args);
 
-        // The `·` (U+00B7) is an invalid character. Scanner errors are now
-        // wired into the parser diagnostics pipeline, so the CLI should report
-        // diagnostics present. This test primarily guards against the UTF-8
-        // slicing panic that `·` originally triggered.
         assert_eq!(result.status, ExitStatus::DiagnosticsPresent_OutputsSkipped);
     }
 
@@ -1790,7 +1624,7 @@ mod tests {
             "output:\n{}",
             sys.output_string()
         );
-        // The -b flag should produce a .js output file.
+
         assert!(sys.fs().file_exists("/proj/a.js"));
         let js = sys.fs().read_file("/proj/a.js").unwrap();
         assert_eq!(js.trim(), "let x = 1;");
@@ -1857,8 +1691,7 @@ mod tests {
 
     #[test]
     fn no_emit_on_error_skips_output_when_errors() {
-        // File with a syntax error: `interface` without a name triggers
-        // "Expected identifier" in parse_interface_declaration.
+
         let fs = Arc::new(InMemoryFS::new());
         fs.insert_dir("/proj");
         fs.insert_file("/proj/e.ts", "interface { x: number }\nlet y = 1;");
@@ -1870,7 +1703,7 @@ mod tests {
             "/proj/e.ts".to_string(),
         ];
         let result = command_line(&sys, &args);
-        // Errors present, no output emitted → DiagnosticsPresent_OutputsSkipped.
+
         if result.status != ExitStatus::DiagnosticsPresent_OutputsSkipped {
             panic!(
                 "Expected DiagnosticsPresent_OutputsSkipped but got {:?}. Output:\n{}",
@@ -1902,8 +1735,7 @@ mod tests {
 
     #[test]
     fn errors_without_no_emit_on_error_still_emits() {
-        // File with a syntax error (interface without name) but WITHOUT --noEmitOnError.
-        // The emitter should still produce output.
+
         let fs = Arc::new(InMemoryFS::new());
         fs.insert_dir("/proj");
         fs.insert_file("/proj/g.ts", "interface { x: number }\nlet y = 1;");
@@ -1914,7 +1746,7 @@ mod tests {
             "/proj/g.ts".to_string(),
         ];
         let result = command_line(&sys, &args);
-        // Errors present, but output was emitted → DiagnosticsPresent_OutputsGenerated.
+
         if result.status != ExitStatus::DiagnosticsPresent_OutputsGenerated {
             panic!(
                 "Expected DiagnosticsPresent_OutputsGenerated but got {:?}. Output:\n{}",
@@ -1940,13 +1772,13 @@ mod tests {
         let result = command_line(&sys, &args);
         assert_eq!(result.status, ExitStatus::Success);
         assert!(!sys.fs().file_exists("/proj/h.js"));
-        // --listFilesOnly should print the file name.
+
         assert!(sys.output_string().contains("/proj/h.ts"));
     }
 
     #[test]
     fn build_mode_with_out_dir() {
-        // Verify -b flag works in combination with --outDir.
+
         let fs = Arc::new(InMemoryFS::new());
         fs.insert_dir("/proj");
         fs.insert_dir("/proj/src");
@@ -1996,13 +1828,9 @@ mod tests {
         assert!(sys.fs().file_exists("/proj/dist/src/app.js"));
     }
 
-    // ───────────────────────────────────────────────────────────────────────
-    // Project reference cycle detection (build parity with Go's TS6202)
-    // ───────────────────────────────────────────────────────────────────────
-
     #[test]
     fn build_mode_detects_two_project_cycle() {
-        // A references B, B references A → cycle.
+
         let fs = Arc::new(InMemoryFS::new());
         fs.insert_dir("/cyc/a");
         fs.insert_dir("/cyc/b");
@@ -2030,17 +1858,17 @@ mod tests {
             out.contains("Project references may not form a circular graph"),
             "output:\n{out}"
         );
-        // Both projects in the cycle path should be named.
+
         assert!(out.contains("/cyc/a/tsconfig.json"), "output:\n{out}");
         assert!(out.contains("/cyc/b/tsconfig.json"), "output:\n{out}");
-        // A cycle aborts all building — no output files should be emitted.
+
         assert!(!sys.fs().file_exists("/cyc/a/a.js"));
         assert!(!sys.fs().file_exists("/cyc/b/b.js"));
     }
 
     #[test]
     fn build_mode_detects_three_project_cycle() {
-        // A → B → C → A → cycle.
+
         let fs = Arc::new(InMemoryFS::new());
         fs.insert_dir("/cyc3/a");
         fs.insert_dir("/cyc3/b");
@@ -2070,7 +1898,7 @@ mod tests {
             "output:\n{out}"
         );
         assert!(out.contains("TS6202"), "expected TS6202 in output:\n{out}");
-        // The full three-project cycle path should be reported.
+
         assert!(out.contains("/cyc3/a/tsconfig.json"), "output:\n{out}");
         assert!(out.contains("/cyc3/b/tsconfig.json"), "output:\n{out}");
         assert!(out.contains("/cyc3/c/tsconfig.json"), "output:\n{out}");
@@ -2081,7 +1909,7 @@ mod tests {
 
     #[test]
     fn build_mode_no_cycle_builds_in_dependency_order() {
-        // A → B → C with no cycle; all three should build successfully.
+
         let fs = Arc::new(InMemoryFS::new());
         fs.insert_dir("/chain/a");
         fs.insert_dir("/chain/b");
@@ -2110,20 +1938,16 @@ mod tests {
             ExitStatus::Success,
             "expected successful build, output:\n{out}"
         );
-        // No cycle diagnostic should be reported.
+
         assert!(
             !out.contains("TS6202"),
             "unexpected cycle diagnostic:\n{out}"
         );
-        // All projects build in dependency order (C, then B, then A).
+
         assert!(sys.fs().file_exists("/chain/c/c.js"), "output:\n{out}");
         assert!(sys.fs().file_exists("/chain/b/b.js"), "output:\n{out}");
         assert!(sys.fs().file_exists("/chain/a/a.js"), "output:\n{out}");
     }
-
-    // ───────────────────────────────────────────────────────────────────────
-    // --showConfig tests (simplified ports of tsctests/showconfig_test.go)
-    // ───────────────────────────────────────────────────────────────────────
 
     #[test]
     fn show_config_with_boolean_option() {
@@ -2301,10 +2125,6 @@ mod tests {
         assert!(out.contains("\"noErrorTruncation\": true"), "output: {out}");
     }
 
-    // ───────────────────────────────────────────────────────────────────────
-    // -p / --project tests (simplified ports of tsctests/tsc_test.go)
-    // ───────────────────────────────────────────────────────────────────────
-
     #[test]
     fn project_with_file_path() {
         let fs = Arc::new(InMemoryFS::new());
@@ -2416,10 +2236,6 @@ mod tests {
         }
     }
 
-    // ───────────────────────────────────────────────────────────────────────
-    // --watch + --listFilesOnly error
-    // ───────────────────────────────────────────────────────────────────────
-
     #[test]
     fn watch_and_list_files_only_errors() {
         let fs = Arc::new(InMemoryFS::new());
@@ -2438,10 +2254,6 @@ mod tests {
         assert!(sys.output_string().contains("cannot be combined"));
     }
 
-    // ───────────────────────────────────────────────────────────────────────
-    // --build not first argument
-    // ───────────────────────────────────────────────────────────────────────
-
     #[test]
     fn build_not_first_argument() {
         let fs = Arc::new(InMemoryFS::new());
@@ -2458,10 +2270,6 @@ mod tests {
         assert_eq!(result.status, ExitStatus::DiagnosticsPresent_OutputsSkipped);
         assert!(sys.output_string().contains("must be the first"));
     }
-
-    // ───────────────────────────────────────────────────────────────────────
-    // Multiple files compilation
-    // ───────────────────────────────────────────────────────────────────────
 
     #[test]
     fn compiles_multiple_files() {
@@ -2482,14 +2290,9 @@ mod tests {
         assert!(sys.fs().file_exists("/proj/b.js"));
     }
 
-    // ───────────────────────────────────────────────────────────────────────
-    // --declaration emit
-    // ───────────────────────────────────────────────────────────────────────
-
     #[test]
     fn declaration_option_compiles_with_flag() {
-        // --declaration is parsed and accepted; .d.ts emit is not yet implemented
-        // but the compilation should still succeed and produce .js output.
+
         let fs = Arc::new(InMemoryFS::new());
         fs.insert_dir("/proj");
         fs.insert_file(
@@ -2514,14 +2317,9 @@ mod tests {
         assert!(sys.fs().file_exists("/proj/a.js"));
     }
 
-    // ───────────────────────────────────────────────────────────────────────
-    // --sourceMap emit
-    // ───────────────────────────────────────────────────────────────────────
-
     #[test]
     fn source_map_option_compiles_with_flag() {
-        // --sourceMap is parsed and accepted; .map emit is not yet wired into
-        // the emitter, but the compilation should still succeed and produce .js.
+
         let fs = Arc::new(InMemoryFS::new());
         fs.insert_dir("/proj");
         fs.insert_file("/proj/a.ts", "let x: number = 1;");
@@ -2536,10 +2334,6 @@ mod tests {
         assert_eq!(result.status, ExitStatus::Success);
         assert!(sys.fs().file_exists("/proj/a.js"));
     }
-
-    // ───────────────────────────────────────────────────────────────────────
-    // Parse enum options
-    // ───────────────────────────────────────────────────────────────────────
 
     #[test]
     fn parse_enum_options_module_target() {
@@ -2582,11 +2376,6 @@ mod tests {
         assert!(out.contains("\"target\": \"esnext\""), "output: {out}");
     }
 
-    // ───────────────────────────────────────────────────────────────────────
-    // Color / environment variable tests
-    // ───────────────────────────────────────────────────────────────────────
-
-    /// A test system that allows setting environment variables.
     struct EnvTestSystem {
         fs: Arc<BundledFS>,
         cwd: String,
@@ -2652,13 +2441,13 @@ mod tests {
             "/proj/a.ts".to_string(),
         ];
         let result = command_line(&sys, &args);
-        // Should have errors but output should not contain color codes.
+
         let out = sys.output_string();
         assert!(
             !out.contains("\x1b["),
             "output should not contain ANSI codes: {out}"
         );
-        // Status indicates errors present.
+
         assert!(result.status != ExitStatus::Success);
     }
 
@@ -2667,9 +2456,7 @@ mod tests {
         let fs = Arc::new(InMemoryFS::new());
         fs.insert_dir("/proj");
         fs.insert_file("/proj/a.ts", "interface { x: number }");
-        // FORCE_COLOR only takes effect when write_output_is_tty returns true.
-        // Since our test system returns false, pretty is still disabled.
-        // We just verify the command runs without crashing.
+
         let sys = EnvTestSystem::new(fs, "/proj").with_env("FORCE_COLOR", "true");
         let args = vec![
             "--noLib".to_string(),
@@ -2677,12 +2464,8 @@ mod tests {
             "/proj/a.ts".to_string(),
         ];
         let _result = command_line(&sys, &args);
-        // Just verify it doesn't crash.
-    }
 
-    // ───────────────────────────────────────────────────────────────────────
-    // --listFiles
-    // ───────────────────────────────────────────────────────────────────────
+    }
 
     #[test]
     fn list_files_prints_source_files() {
@@ -2704,10 +2487,6 @@ mod tests {
         assert!(out.contains("/proj/a.ts"), "output: {out}");
         assert!(out.contains("/proj/b.ts"), "output: {out}");
     }
-
-    // ───────────────────────────────────────────────────────────────────────
-    // showConfig with compileOnSave
-    // ───────────────────────────────────────────────────────────────────────
 
     #[test]
     fn show_config_with_compile_on_save() {
@@ -2733,10 +2512,6 @@ mod tests {
         let out = sys.output_string();
         assert!(out.contains("\"compileOnSave\": true"), "output: {out}");
     }
-
-    // ───────────────────────────────────────────────────────────────────────
-    // showConfig with references
-    // ───────────────────────────────────────────────────────────────────────
 
     #[test]
     fn show_config_with_references() {
@@ -2764,10 +2539,6 @@ mod tests {
         assert!(out.contains("\"path\": \"./packages/a\""), "output: {out}");
     }
 
-    // ───────────────────────────────────────────────────────────────────────
-    // Missing file in tsconfig
-    // ───────────────────────────────────────────────────────────────────────
-
     #[test]
     fn missing_file_in_tsconfig_reports_error() {
         let fs = Arc::new(InMemoryFS::new());
@@ -2776,13 +2547,9 @@ mod tests {
         let sys = TestSystem::new(fs, "/proj");
         let args = vec!["-p".to_string(), "./tsconfig.json".to_string()];
         let result = command_line(&sys, &args);
-        // Missing files should result in diagnostics.
+
         assert_ne!(result.status, ExitStatus::Success);
     }
-
-    // ───────────────────────────────────────────────────────────────────────
-    // --all flag
-    // ───────────────────────────────────────────────────────────────────────
 
     #[test]
     fn all_flag_prints_help() {
@@ -2797,7 +2564,7 @@ mod tests {
             out.contains("tsc: The TypeScript Compiler"),
             "header missing:\n{out}"
         );
-        // --all lists every option with a description under "ALL COMPILER OPTIONS".
+
         assert!(
             out.contains("ALL COMPILER OPTIONS"),
             "section missing:\n{out}"
@@ -2810,23 +2577,12 @@ mod tests {
             out.contains("BUILD OPTIONS"),
             "build section missing:\n{out}"
         );
-        // A representative compiler option description must appear.
+
         assert!(
             out.contains("Do not emit outputs."),
             "noEmit desc missing:\n{out}"
         );
     }
-
-    // ───────────────────────────────────────────────────────────────────────
-    // --watch mode tests
-    //
-    // The watcher loop itself is inherently async and would require a
-    // timeout-based test (flaky), so the tests below cover the composable,
-    // deterministic pieces that watch mode is built from: the source-file
-    // filter, the timestamp format, the post-compile summary line, and the
-    // single-compilation helper that backs both the initial compile and each
-    // recompile.
-    // ───────────────────────────────────────────────────────────────────────
 
     #[test]
     fn watch_is_source_file_matches_known_extensions() {
@@ -2836,7 +2592,7 @@ mod tests {
             assert!(watch::is_source_file(&path), "expected {path} to match");
         }
         assert!(watch::is_source_file("a.ts"));
-        // Non-source extensions must not trigger a recompile.
+
         assert!(!watch::is_source_file("a.ts.map"));
         assert!(!watch::is_source_file("readme.md"));
         assert!(!watch::is_source_file("a.d.ts.bak"));
@@ -2884,8 +2640,7 @@ mod tests {
         fs.insert_dir("/proj");
         fs.insert_file("/proj/a.ts", "let x: number = 1;");
         let sys = TestSystem::new(fs, "/proj");
-        // Build the command-line config exactly as the CLI would for a one-off
-        // compile (`--noLib --ignoreConfig a.ts`), then mark it as watch mode.
+
         let mut config = parse_command_line(
             &[
                 "--noLib".to_string(),
@@ -2896,7 +2651,7 @@ mod tests {
             None,
         );
         config.compiler_options.watch = Tristate::True;
-        // No config file present → compile_once reuses the parsed config.
+
         let result = watch::compile_once(&sys, &config, &config.compiler_options, "", false, None);
         assert_eq!(
             result.status,

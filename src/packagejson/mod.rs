@@ -1,11 +1,5 @@
-//! package.json parsing, ported from `internal/packagejson/`.
-//!
-//! Parses package.json files with type-validated fields, tracking whether
-//! each field was present, null, or had the expected type.
-
 use std::collections::HashMap;
 
-/// A field from package.json that tracks whether it was present and valid.
 #[derive(Clone, Debug, Default)]
 pub struct Expected<T: Clone + Default> {
     pub value: T,
@@ -47,8 +41,6 @@ impl Expected<HashMap<String, String>> {
     }
 }
 
-/// A dynamically-typed JSON value, used for fields like `typesVersions`,
-/// `exports`, and `imports` that can have complex structures.
 #[derive(Clone, Debug, Default)]
 pub struct JsonValue {
     pub value_type: JsonValueType,
@@ -143,7 +135,6 @@ impl From<serde_json::Value> for JsonValue {
     }
 }
 
-/// The object kind of an exports/imports field.
 #[derive(Clone, Debug, Default, PartialEq, Eq)]
 pub enum ObjectKind {
     #[default]
@@ -154,7 +145,6 @@ pub enum ObjectKind {
     Invalid,
 }
 
-/// The exports or imports field from package.json.
 #[derive(Clone, Debug, Default)]
 pub struct ExportsOrImports {
     pub json_value: JsonValue,
@@ -174,7 +164,6 @@ impl ExportsOrImports {
         self.compute_object_kind() == ObjectKind::Conditions
     }
 
-    /// Compute and return the object kind. Called by `is_subpaths`, `is_conditions`, `is_imports`.
     pub fn compute_object_kind(&self) -> ObjectKind {
         if self.object_kind != ObjectKind::Unknown {
             return self.object_kind.clone();
@@ -215,7 +204,6 @@ impl ExportsOrImports {
     }
 }
 
-/// Header fields from package.json.
 #[derive(Clone, Debug, Default)]
 pub struct HeaderFields {
     pub name: Expected<String>,
@@ -223,7 +211,6 @@ pub struct HeaderFields {
     pub r#type: Expected<String>,
 }
 
-/// Path-related fields from package.json.
 #[derive(Clone, Debug, Default)]
 pub struct PathFields {
     pub tsconfig: Expected<String>,
@@ -235,7 +222,6 @@ pub struct PathFields {
     pub exports: ExportsOrImports,
 }
 
-/// Dependency fields from package.json.
 #[derive(Clone, Debug, Default)]
 pub struct DependencyFields {
     pub dependencies: Expected<HashMap<String, String>>,
@@ -309,7 +295,6 @@ impl DependencyFields {
     }
 }
 
-/// All parsed fields from package.json.
 #[derive(Clone, Debug, Default)]
 pub struct Fields {
     pub header_fields: HeaderFields,
@@ -317,7 +302,6 @@ pub struct Fields {
     pub dependency_fields: DependencyFields,
 }
 
-/// Parse a package.json JSON string.
 pub fn parse(data: &str) -> Result<Fields, serde_json::Error> {
     let value: serde_json::Value = serde_json::from_str(data)?;
     let obj = value
@@ -326,7 +310,6 @@ pub fn parse(data: &str) -> Result<Fields, serde_json::Error> {
 
     let mut fields = Fields::default();
 
-    // Header fields
     if let Some(v) = obj.get("name") {
         fields.header_fields.name = parse_expected_string(v);
     }
@@ -337,7 +320,6 @@ pub fn parse(data: &str) -> Result<Fields, serde_json::Error> {
         fields.header_fields.r#type = parse_expected_string(v);
     }
 
-    // Path fields
     if let Some(v) = obj.get("tsconfig") {
         fields.path_fields.tsconfig = parse_expected_string(v);
     }
@@ -366,7 +348,6 @@ pub fn parse(data: &str) -> Result<Fields, serde_json::Error> {
         };
     }
 
-    // Dependency fields
     if let Some(v) = obj.get("dependencies") {
         fields.dependency_fields.dependencies = parse_expected_string_map(v);
     }
@@ -547,7 +528,7 @@ mod tests {
 
     #[test]
     fn exports_classification_fixed() {
-        // Subpaths
+
         let e = ExportsOrImports {
             json_value: JsonValue {
                 value_type: JsonValueType::Object,
@@ -562,7 +543,6 @@ mod tests {
         assert!(e.is_subpaths());
         assert!(!e.is_conditions());
 
-        // Conditions
         let e = ExportsOrImports {
             json_value: JsonValue {
                 value_type: JsonValueType::Object,
@@ -578,7 +558,6 @@ mod tests {
         assert!(!e.is_subpaths());
     }
 
-    /// Ported from Go `TestParse`.
     #[test]
     fn parse_duplicate_names() {
         let content = r#"{
@@ -599,7 +578,6 @@ mod tests {
         assert!(fields.header_fields.version.is_valid());
     }
 
-    /// Ported from Go `TestExpected`.
     #[test]
     fn expected_field_tracking() {
         let json = r#"{
@@ -609,27 +587,22 @@ mod tests {
         }"#;
         let fields = parse(json).unwrap();
 
-        // name is a valid string
         assert!(fields.header_fields.name.is_valid());
         assert_eq!(fields.header_fields.name.value, "test");
 
-        // version is a number, not a valid string
         assert!(!fields.header_fields.version.is_valid());
         assert_eq!(fields.header_fields.version.value, "");
 
-        // exports is null
         assert_eq!(
             fields.path_fields.exports.json_value.value_type,
             JsonValueType::Null
         );
 
-        // main is absent: not valid, not null, empty value
         assert!(!fields.path_fields.main.is_valid());
         assert!(!fields.path_fields.main.null);
         assert_eq!(fields.path_fields.main.value, "");
     }
 
-    /// Ported from Go `TestExports`.
     #[test]
     fn exports_and_imports_navigation() {
         let json = r##"{
@@ -656,11 +629,9 @@ mod tests {
         let exports = &fields.path_fields.exports;
         let imports = &fields.path_fields.imports;
 
-        // exports is subpaths with 3 keys
         assert!(exports.is_subpaths());
         assert_eq!(exports.json_value.as_object().len(), 3);
 
-        // "." value is conditions
         let dot = exports.json_value.get(".").unwrap();
         let dot_eoi = ExportsOrImports {
             json_value: dot.clone(),
@@ -669,18 +640,15 @@ mod tests {
         assert!(dot_eoi.is_conditions());
         assert_eq!(dot.get("import").unwrap().value_type, JsonValueType::String);
 
-        // "./test" is an array; element [2] is null
         let test_arr = exports.json_value.get("./test").unwrap();
         assert_eq!(test_arr.value_type, JsonValueType::Array);
         assert_eq!(test_arr.as_array()[2].value_type, JsonValueType::Null);
 
-        // "./null" is null
         assert_eq!(
             exports.json_value.get("./null").unwrap().value_type,
             JsonValueType::Null
         );
 
-        // imports is imports with 1 key
         assert!(imports.is_imports());
         assert_eq!(imports.json_value.as_object().len(), 1);
         let foo = imports.json_value.get("#foo").unwrap();
@@ -692,7 +660,6 @@ mod tests {
         assert_eq!(foo.get("import").unwrap().value_type, JsonValueType::String);
     }
 
-    /// Ported from Go `TestJSONValue`.
     #[test]
     fn json_value_types() {
         let json = r#"{

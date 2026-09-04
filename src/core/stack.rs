@@ -1,8 +1,3 @@
-//! A simple stack, ported from `internal/core/stack.go`.
-
-/// A growable stack.
-///
-/// Mirrors `core.Stack[T]` in Go.
 #[derive(Debug, Clone, Default)]
 pub struct Stack<T> {
     data: Vec<T>,
@@ -23,17 +18,14 @@ impl<T> Stack<T> {
         self.data.push(item);
     }
 
-    /// Pop the top element. Panics if the stack is empty.
     pub fn pop(&mut self) -> T {
         self.data.pop().expect("stack is empty")
     }
 
-    /// Peek at the top element. Panics if the stack is empty.
     pub fn peek(&self) -> &T {
         self.data.last().expect("stack is empty")
     }
 
-    /// Peek at the top element mutably. Panics if the stack is empty.
     pub fn peek_mut(&mut self) -> &mut T {
         self.data.last_mut().expect("stack is empty")
     }

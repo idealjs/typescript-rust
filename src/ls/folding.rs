@@ -1,5 +1,3 @@
-//! Folding ranges provider (1:1 port of Go's `internal/ls/folding.go`).
-
 #![allow(dead_code)]
 
 use std::sync::Arc;
@@ -11,14 +9,13 @@ use crate::lsp::lsproto::lsp::DocumentUri;
 use super::language_service::LanguageService;
 use super::types::FoldingRange;
 
-/// Result of parsing a `//#region` / `//#endregion` delimiter.
 pub struct RegionDelimiterResult {
     pub is_start: bool,
     pub name: String,
 }
 
 impl LanguageService {
-    /// Provide folding ranges for a document.
+
     pub fn provide_folding_range(&self, document_uri: &DocumentUri) -> Vec<FoldingRange> {
         let (_program, source_file) = self.get_program_and_file(document_uri);
         let mut res = add_node_outlining_spans(&source_file);
@@ -34,7 +31,6 @@ impl LanguageService {
     }
 }
 
-/// Collect outlining spans from AST nodes.
 fn add_node_outlining_spans(source_file: &Arc<SourceFile>) -> Vec<FoldingRange> {
     let line_map = &source_file.line_map;
     let mut ranges = Vec::new();
@@ -47,7 +43,6 @@ fn add_node_outlining_spans(source_file: &Arc<SourceFile>) -> Vec<FoldingRange> 
     ranges
 }
 
-/// Collect outlining spans from `//#region` comments.
 fn add_region_outlining_spans(source_file: &Arc<SourceFile>) -> Vec<FoldingRange> {
     let text = &source_file.text;
     let line_map = &source_file.line_map;
@@ -87,7 +82,6 @@ fn add_region_outlining_spans(source_file: &Arc<SourceFile>) -> Vec<FoldingRange
     out
 }
 
-/// Recursively visit AST nodes and collect folding spans.
 fn visit_node_for_folding(
     node: &Arc<Node>,
     line_map: &LineMap,
@@ -106,7 +100,6 @@ fn visit_node_for_folding(
     });
 }
 
-/// Get the outlining span for a specific node kind.
 fn get_outlining_span_for_node(node: &Arc<Node>, line_map: &LineMap) -> Option<FoldingRange> {
     let pos = node.pos();
     let end = node.end();

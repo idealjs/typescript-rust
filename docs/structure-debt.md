@@ -1,0 +1,30 @@
+# 结构债务清单（AGENTS.md 规则 2/3 执行现状）
+
+> 参考数据（2026-09-05 全仓审计）。规则本身见根目录 [`AGENTS.md`](../AGENTS.md)。
+
+## 规则 2：单文件 ≤300 行
+
+- 现状：**82 个非测试 .rs 文件超限**。最大：checker/checker.rs 26,517 行、
+  diagnostics/messages_generated.rs 24,069（生成文件）、parser/mod.rs 9,851、
+  checker/relater.rs 8,632、tsoptions/mod.rs 6,471、checker/typenode.rs 6,150。
+- 说明：`messages_generated.rs` 与 `ast/node_data_generated.rs` 为**构建生成物**
+  （build.rs 产出），按惯例不拆分。
+- 分期：
+  1. 生成物豁免登记（已豁免）。
+  2. 中型文件（300–1,000 行，约 30 个）逐个按职责拆分为 `mod.rs` 子目录，
+     `pub use` 保持对外接口不变。
+  3. 巨型文件（checker.rs 等）按既有内聚区域（grammar checks / assertion /
+     assignment / narrowing / services …）先拆出叶子模块，再递归。
+- 每步验收：`cargo test` 全门禁 + 12,466 用例 sweep 抽样。
+
+## 规则 3：测试只在 tests/
+
+- 现状：**71 个 `#[cfg(test)]` 内联模块、1,306 个内联 `#[test]`**
+  （scanner 131、tsoptions 128、emitter 121、parser 111、printer 105…）。
+- 分期：
+  1. 被测私有逻辑改经 `#[doc(hidden)] pub` 暴露；测试逐模块迁移至
+     `tests/`（按被测模块一对一同名文件）。
+  2. 迁移顺序按模块体量从大到小：scanner → tsoptions → emitter → parser →
+     printer → execute → checker → …
+  3. 每迁移一个模块，删除对应内联模块并跑门禁。
+- 新增测试一律直接放 `tests/`。

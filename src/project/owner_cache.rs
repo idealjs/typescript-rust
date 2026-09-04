@@ -1,5 +1,3 @@
-//! Owner-tracked refcount cache (1:1 port of Go's `internal/project/ownercache.go`).
-
 #![allow(dead_code)]
 
 use std::collections::{HashMap, HashSet};
@@ -11,10 +9,6 @@ struct OwnerCacheEntry<V: Clone> {
     owners: HashSet<u64>,
 }
 
-/// Like [`RefCountCache`](super::refcount_cache::RefCountCache), but each entry
-/// tracks the set of its owners instead of a count.
-///
-/// Go: `type OwnerCache[K comparable, V any, LoadArgs any] struct`.
 pub struct OwnerCache<K: Eq + Hash + Clone, V: Clone> {
     entries: Mutex<HashMap<K, OwnerCacheEntry<V>>>,
 }
@@ -26,7 +20,6 @@ impl<K: Eq + Hash + Clone, V: Clone> OwnerCache<K, V> {
         }
     }
 
-    /// Loads or creates an entry and associates it with `owner`.
     pub fn load_and_acquire<F>(&self, identity: K, owner: u64, parse: F) -> V
     where
         F: FnOnce(&K) -> V,
@@ -43,7 +36,6 @@ impl<K: Eq + Hash + Clone, V: Clone> OwnerCache<K, V> {
         entry.value.clone()
     }
 
-    /// Associates an existing or new entry with `owner` and sets its value.
     pub fn acquire(&self, identity: K, owner: u64, value: V) {
         let mut entries = self.entries.lock().unwrap();
         let entry = entries.entry(identity).or_insert_with(|| OwnerCacheEntry {
@@ -53,8 +45,6 @@ impl<K: Eq + Hash + Clone, V: Clone> OwnerCache<K, V> {
         entry.owners.insert(owner);
     }
 
-    /// Adds an owner to an existing live entry. Panics if the entry does not
-    /// exist or has no current owners.
     pub fn add_owner(&self, identity: &K, owner: u64) {
         let mut entries = self.entries.lock().unwrap();
         match entries.get_mut(identity) {
@@ -72,8 +62,6 @@ impl<K: Eq + Hash + Clone, V: Clone> OwnerCache<K, V> {
         self.entries.lock().unwrap().contains_key(identity)
     }
 
-    /// Removes `owner` from the entry's owner set. When no owners remain, the
-    /// entry is removed.
     pub fn release(&self, identity: &K, owner: u64) {
         let mut entries = self.entries.lock().unwrap();
         if let Some(entry) = entries.get_mut(identity) {

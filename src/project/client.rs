@@ -1,19 +1,10 @@
-//! LSP client interface (1:1 port of Go's `internal/project/client.go`).
-//!
-//! The `Client` trait abstracts the LSP client connection so the session
-//! can send requests/notifications without depending on transport details.
-
 #![allow(dead_code)]
-
 
 use crate::diagnostics;
 use crate::lsp::lsproto;
 
 use super::watch::WatcherID;
 
-/// Client represents the LSP client the server communicates with.
-///
-/// Go: `type Client interface { ... }`
 pub trait Client: Send + Sync {
     fn watch_files(
         &self,
@@ -47,7 +38,6 @@ pub trait Client: Send + Sync {
     fn is_active(&self) -> bool;
 }
 
-/// A no-op Client implementation used when no real client is connected.
 pub struct NopClient;
 
 impl Client for NopClient {

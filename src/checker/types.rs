@@ -1,12 +1,3 @@
-//! Core type system definitions for the checker.
-//!
-//! Ported from `internal/checker/types.go`. The Go implementation uses a
-//! `TypeData` interface with embedded structs (TypeBase → ConstrainedType →
-//! StructuredType → ObjectType → TypeReference → InterfaceType → TupleType).
-//! In Rust we flatten the hierarchy into a `TypeData` enum with one variant
-//! per concrete type kind, and use pattern matching instead of interface
-//! downcasts.
-
 use std::collections::HashMap;
 use std::sync::{Arc, OnceLock};
 
@@ -17,16 +8,8 @@ use crate::core::tristate::Tristate;
 use crate::evaluator;
 use crate::jsnum;
 
-// ────────────────────────────────────────────────────────────────────────────
-// IDs
-// ────────────────────────────────────────────────────────────────────────────
-
 pub type TypeId = u32;
 pub type SignatureId = u32;
-
-// ────────────────────────────────────────────────────────────────────────────
-// ParseFlags
-// ────────────────────────────────────────────────────────────────────────────
 
 bitflags! {
     #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
@@ -40,20 +23,12 @@ bitflags! {
     }
 }
 
-// ────────────────────────────────────────────────────────────────────────────
-// SignatureKind
-// ────────────────────────────────────────────────────────────────────────────
-
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum SignatureKind {
     #[default]
     Call,
     Construct,
 }
-
-// ────────────────────────────────────────────────────────────────────────────
-// ContextFlags
-// ────────────────────────────────────────────────────────────────────────────
 
 bitflags! {
     #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
@@ -65,10 +40,6 @@ bitflags! {
         const SkipBindingPatterns  = 1 << 3;
     }
 }
-
-// ────────────────────────────────────────────────────────────────────────────
-// TypeFormatFlags
-// ────────────────────────────────────────────────────────────────────────────
 
 bitflags! {
     #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
@@ -123,10 +94,6 @@ pub const TYPE_FORMAT_FLAGS_NODE_BUILDER_MASK: TypeFormatFlags =
             | TypeFormatFlags::OmitThisParameter.bits(),
     );
 
-// ────────────────────────────────────────────────────────────────────────────
-// SymbolFormatFlags
-// ────────────────────────────────────────────────────────────────────────────
-
 bitflags! {
     #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
     pub struct SymbolFormatFlags: u32 {
@@ -139,10 +106,6 @@ bitflags! {
         const DoNotIncludeSymbolChain         = 1 << 5;
     }
 }
-
-// ────────────────────────────────────────────────────────────────────────────
-// ExternalEmitHelpers
-// ────────────────────────────────────────────────────────────────────────────
 
 bitflags! {
     #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
@@ -175,10 +138,6 @@ pub const EXTERNAL_EMIT_HELPERS_FIRST: ExternalEmitHelpers = ExternalEmitHelpers
 pub const EXTERNAL_EMIT_HELPERS_LAST: ExternalEmitHelpers =
     ExternalEmitHelpers::RewriteRelativeImportExtension;
 pub const EXTERNAL_HELPERS_MODULE_NAME_TEXT: &str = "tslib";
-
-// ────────────────────────────────────────────────────────────────────────────
-// TypeFlags
-// ────────────────────────────────────────────────────────────────────────────
 
 bitflags! {
     #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
@@ -219,7 +178,6 @@ bitflags! {
     }
 }
 
-// Composite TypeFlags constants
 pub const TYPE_FLAGS_ANY_OR_UNKNOWN: TypeFlags =
     TypeFlags::from_bits_truncate(TypeFlags::Any.bits() | TypeFlags::Unknown.bits());
 pub const TYPE_FLAGS_NULLABLE: TypeFlags =
@@ -384,10 +342,6 @@ pub const TYPE_FLAGS_NARROWABLE: TypeFlags = TypeFlags::from_bits_truncate(
         | TypeFlags::NonPrimitive.bits(),
 );
 
-// ────────────────────────────────────────────────────────────────────────────
-// ObjectFlags
-// ────────────────────────────────────────────────────────────────────────────
-
 bitflags! {
     #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
     pub struct ObjectFlags: u32 {
@@ -423,7 +377,7 @@ bitflags! {
         const IdenticalBaseTypeExists                    = 1 << 28;
         const UnresolvedMembers                          = 1 << 29;
         const FromTypeNode                                = 1 << 30;
-        const IsGenericTypeComputed                      = 1 << 22; // reuse for union/intersection
+        const IsGenericTypeComputed                      = 1 << 22;
         const IsGenericObjectType                        = 1 << 23;
         const IsGenericIndexType                         = 1 << 24;
         const ContainsIntersections                      = 1 << 25;
@@ -450,10 +404,6 @@ pub const OBJECT_FLAGS_INSTANTIATED_MAPPED: ObjectFlags =
 pub const OBJECT_FLAGS_IS_GENERIC_TYPE: ObjectFlags = ObjectFlags::from_bits_truncate(
     ObjectFlags::IsGenericObjectType.bits() | ObjectFlags::IsGenericIndexType.bits(),
 );
-
-// ────────────────────────────────────────────────────────────────────────────
-// VarianceFlags
-// ────────────────────────────────────────────────────────────────────────────
 
 bitflags! {
     #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
@@ -482,10 +432,6 @@ pub const VARIANCE_FLAGS_ALLOWS_STRUCTURAL_FALLBACK: VarianceFlags =
         VarianceFlags::Unmeasurable.bits() | VarianceFlags::Unreliable.bits(),
     );
 
-// ────────────────────────────────────────────────────────────────────────────
-// AccessFlags
-// ────────────────────────────────────────────────────────────────────────────
-
 bitflags! {
     #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
     pub struct AccessFlags: u32 {
@@ -504,10 +450,6 @@ bitflags! {
 
 pub const ACCESS_FLAGS_PERSISTENT: AccessFlags = AccessFlags::IncludeUndefined;
 
-// ────────────────────────────────────────────────────────────────────────────
-// NodeCheckFlags
-// ────────────────────────────────────────────────────────────────────────────
-
 bitflags! {
     #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
     pub struct NodeCheckFlags: u32 {
@@ -523,10 +465,6 @@ bitflags! {
         const InitializerIsUndefinedComputed           = 1 << 25;
     }
 }
-
-// ────────────────────────────────────────────────────────────────────────────
-// ElementFlags (for tuple types)
-// ────────────────────────────────────────────────────────────────────────────
 
 bitflags! {
     #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
@@ -549,10 +487,6 @@ pub const ELEMENT_FLAGS_NON_REQUIRED: ElementFlags = ElementFlags::from_bits_tru
 pub const ELEMENT_FLAGS_NON_REST: ElementFlags = ElementFlags::from_bits_truncate(
     ElementFlags::Required.bits() | ElementFlags::Optional.bits() | ElementFlags::Variadic.bits(),
 );
-
-// ────────────────────────────────────────────────────────────────────────────
-// SignatureFlags
-// ────────────────────────────────────────────────────────────────────────────
 
 bitflags! {
     #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
@@ -582,10 +516,6 @@ pub const SIGNATURE_FLAGS_CALL_CHAIN_FLAGS: SignatureFlags = SignatureFlags::fro
     SignatureFlags::IsInnerCallChain.bits() | SignatureFlags::IsOuterCallChain.bits(),
 );
 
-// ────────────────────────────────────────────────────────────────────────────
-// IndexFlags
-// ────────────────────────────────────────────────────────────────────────────
-
 bitflags! {
     #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
     pub struct IndexFlags: u32 {
@@ -596,13 +526,6 @@ bitflags! {
     }
 }
 
-// ────────────────────────────────────────────────────────────────────────────
-// Ternary (relation comparison result)
-// ────────────────────────────────────────────────────────────────────────────
-
-/// Three-valued relation result used in type comparison.
-///
-/// `False < Unknown < Maybe < True` for `&` (min) and `|` (max).
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(i8)]
 pub enum Ternary {
@@ -613,7 +536,7 @@ pub enum Ternary {
 }
 
 impl Ternary {
-    /// Semantic rank: False(0) < Unknown(1) < Maybe(2) < True(3).
+
     fn rank(self) -> u8 {
         match self {
             Ternary::False => 0,
@@ -703,11 +626,6 @@ impl std::ops::Not for Ternary {
 
 pub type TypeComparer = fn(&Type, &Type, bool) -> Ternary;
 
-// ────────────────────────────────────────────────────────────────────────────
-// TypeAlias
-// ────────────────────────────────────────────────────────────────────────────
-
-/// A type alias reference attached to a `Type`.
 #[derive(Debug)]
 pub struct TypeAlias {
     pub symbol: Option<Arc<Symbol>>,
@@ -723,16 +641,6 @@ impl TypeAlias {
     }
 }
 
-// ────────────────────────────────────────────────────────────────────────────
-// TypeMapper (forward declaration; full impl in mapper.rs)
-// ────────────────────────────────────────────────────────────────────────────
-
-/// Maps one type to another (e.g., type parameter → inferred type).
-///
-/// Takes `&Arc<Type>` (not `&Type`) so that mappers can return the input
-/// type unchanged via `Arc::clone` when no mapping applies — this matches
-/// Go's `Mapper.map` returning the input interface value directly and
-/// avoids the prior placeholder behavior of returning an unrelated target.
 pub type MapFn = Arc<dyn Fn(&Arc<Type>) -> Arc<Type> + Send + Sync>;
 
 pub struct TypeMapper {
@@ -787,15 +695,6 @@ impl TypeMapper {
     }
 }
 
-// ────────────────────────────────────────────────────────────────────────────
-// Type and TypeData
-// ────────────────────────────────────────────────────────────────────────────
-
-/// The core type representation. Equivalent to `*checker.Type` in Go.
-///
-/// Types are always shared via `Arc<Type>`. The `data` field is an enum
-/// that discriminates the kind of type (intrinsic, literal, object, union,
-/// etc.), replacing Go's `TypeData` interface and embedded-struct hierarchy.
 #[derive(Debug)]
 pub struct Type {
     pub flags: TypeFlags,
@@ -806,13 +705,6 @@ pub struct Type {
     pub data: TypeData,
 }
 
-/// Type-specific data, discriminated by enum variant.
-///
-/// In Go, this is the `TypeData` interface with implementations:
-/// `IntrinsicType`, `LiteralType`, `ObjectType`, `InterfaceType`, `TupleType`,
-/// `UnionType`, `IntersectionType`, `TypeParameter`, `IndexType`,
-/// `IndexedAccessType`, `TemplateLiteralType`, `StringMappingType`,
-/// `SubstitutionType`, `ConditionalType`, etc.
 #[derive(Debug)]
 pub enum TypeData {
     Intrinsic(IntrinsicTypeData),
@@ -836,13 +728,11 @@ pub enum TypeData {
     Conditional(ConditionalTypeData),
 }
 
-/// Data common to constrained types (types with a computed base constraint).
 #[derive(Debug, Default)]
 pub struct ConstrainedTypeData {
     pub resolved_base_constraint: OnceLock<Arc<Type>>,
 }
 
-/// Data common to structured types (types with members, properties, signatures).
 #[derive(Debug, Default)]
 pub struct StructuredTypeData {
     pub constrained: ConstrainedTypeData,
@@ -864,19 +754,14 @@ impl StructuredTypeData {
     }
 }
 
-/// Data common to object types (target + mapper for instantiated types).
 #[derive(Debug, Default)]
 pub struct ObjectTypeData {
     pub structured: StructuredTypeData,
     pub target: Option<Arc<Type>>,
     pub mapper: Option<Arc<TypeMapper>>,
-    /// Type arguments for type references (e.g., `T` in `Array<T>`).
+
     pub type_arguments: Vec<Arc<Type>>,
 }
-
-// ────────────────────────────────────────────────────────────────────────────
-// Concrete TypeData variants
-// ────────────────────────────────────────────────────────────────────────────
 
 #[derive(Debug)]
 pub struct IntrinsicTypeData {
@@ -890,14 +775,13 @@ pub struct LiteralTypeData {
     pub regular_type: OnceLock<Arc<Type>>,
 }
 
-/// A literal type value (string, number, boolean, bigint, or computed enum).
 #[derive(Debug, Clone, PartialEq)]
 pub enum LiteralValue {
     String(String),
     Number(jsnum::Number),
     BigInt(jsnum::PseudoBigInt),
     Boolean(bool),
-    /// Computed enum member (value not yet known).
+
     None,
 }
 
@@ -973,9 +857,7 @@ pub struct TupleTypeData {
 pub struct TupleElementInfo {
     pub flags: ElementFlags,
     pub labeled_declaration: Option<Arc<Node>>,
-    /// The element type. Stored alongside `flags` so that the relater can
-    /// compare tuple element types without re-resolving the structured
-    /// member symbols. Mirrors `TupleElementInfo.Type` in Go.
+
     pub type_: Option<Arc<Type>>,
 }
 
@@ -1087,23 +969,12 @@ pub struct ConditionalRoot {
     pub check_type: Option<Arc<Type>>,
     pub extends_type: Option<Arc<Type>>,
     pub is_distributive: bool,
-    /// When the root is distributive (the check type as written is a naked
-    /// type parameter), the symbol of that type parameter. Distribution
-    /// substitutes this symbol per union constituent while re-resolving the
-    /// extends/branch nodes (Go: `prependTypeMapping(checkType, t,
-    /// newMapper)` in `getConditionalTypeInstantiation`).
+
     pub check_type_parameter_symbol: Option<Arc<crate::ast::Symbol>>,
     pub infer_type_parameters: Vec<Arc<Type>>,
     pub outer_type_parameters: Vec<Arc<Type>>,
     pub alias: Option<Box<TypeAlias>>,
-    /// Clone of the checker's scope-stack CONTAINER IDS captured when this
-    /// root was built. Deferred conditionals created mid-alias-instantiation
-    /// live lexically inside the alias declaration; when their branches are
-    /// finally resolved from a distant context (call-checking fallback
-    /// instantiations), that lexical chain is gone and identifier resolution
-    /// in the branch nodes would fail. Resolution temporarily re-pushes the
-    /// non-common suffix of this chain (identifiers resolve by container id
-    /// lookup in the symbol map; no node handles are needed).
+
     pub creation_scopes: Vec<u64>,
 }
 
@@ -1120,24 +991,9 @@ pub struct ConditionalTypeData {
     pub resolved_constraint_of_distributive: OnceLock<Arc<Type>>,
     pub mapper: Option<Arc<TypeMapper>>,
     pub combined_mapper: Option<Arc<TypeMapper>>,
-    /// Snapshot of the checker's `type_argument_stack` at the moment this
-    /// conditional INSTANCE was created (e.g. mid-alias-instantiation, while
-    /// the alias's own type parameters shadowed their arguments), keyed by
-    /// the raw symbol-pointer value (`&Symbol as *const _ as usize`) that
-    /// `type_argument_stack` itself keys on. A generic alias body stays
-    /// deferred at creation; when a *later* substitution makes its check
-    /// type concrete and the branches must finally be resolved, those
-    /// branch NODES still reference the alias-local type-parameter symbols
-    /// — resolving them without this snapshot loses the bindings entirely
-    /// and produces garbage (`keyof <unresolved>`). Go carries an
-    /// equivalent `mapper` on every deferred conditional
-    /// (`newConditionalType(root, mapper, combinedMapper)`).
+
     pub creation_type_argument_stack: Vec<HashMap<usize, Arc<Type>>>,
 }
-
-// ────────────────────────────────────────────────────────────────────────────
-// Type accessors and helpers
-// ────────────────────────────────────────────────────────────────────────────
 
 impl Type {
     pub fn new(flags: TypeFlags, data: TypeData) -> Self {
@@ -1199,8 +1055,6 @@ impl Type {
         self.flags.contains(TypeFlags::Index)
     }
 
-    /// Returns the constituent types of a union, or `[self]` for non-unions.
-    /// Returns empty for `never`.
     pub fn distributed(&self) -> Vec<Arc<Type>> {
         if self.flags.contains(TypeFlags::Union) {
             if let TypeData::Union(u) = &self.data {
@@ -1210,11 +1064,10 @@ impl Type {
         if self.flags.contains(TypeFlags::Never) {
             return Vec::new();
         }
-        // Non-union types return themselves; caller must wrap in Arc
-        Vec::new() // placeholder — real impl needs Arc<Self>
+
+        Vec::new()
     }
 
-    /// Get target type (for references, type parameters, index types, etc.)
     pub fn target(&self) -> Option<&Arc<Type>> {
         match &self.data {
             TypeData::Object(o) => o.target.as_ref(),
@@ -1231,7 +1084,6 @@ impl Type {
         }
     }
 
-    /// Get mapper (for instantiated types)
     pub fn mapper(&self) -> Option<&Arc<TypeMapper>> {
         match &self.data {
             TypeData::Object(o) => o.mapper.as_ref(),
@@ -1247,7 +1099,6 @@ impl Type {
         }
     }
 
-    /// Get constituent types (for union/intersection/template literal)
     pub fn types(&self) -> Option<&[Arc<Type>]> {
         match &self.data {
             TypeData::Union(u) => Some(&u.union_or_intersection.types),
@@ -1257,7 +1108,6 @@ impl Type {
         }
     }
 
-    /// Get structured type data if this is a structured type.
     pub fn as_structured(&self) -> Option<&StructuredTypeData> {
         match &self.data {
             TypeData::Object(o) => Some(&o.structured),
@@ -1273,7 +1123,6 @@ impl Type {
         }
     }
 
-    /// Get object type data if this is an object type.
     pub fn as_object(&self) -> Option<&ObjectTypeData> {
         match &self.data {
             TypeData::Object(o) => Some(o),
@@ -1287,7 +1136,6 @@ impl Type {
         }
     }
 
-    /// Get interface type data if this is an interface type.
     pub fn as_interface(&self) -> Option<&InterfaceTypeData> {
         match &self.data {
             TypeData::Interface(i) => Some(i),
@@ -1296,7 +1144,6 @@ impl Type {
         }
     }
 
-    /// Get union or intersection type data.
     pub fn as_union_or_intersection(&self) -> Option<&UnionOrIntersectionTypeData> {
         match &self.data {
             TypeData::Union(u) => Some(&u.union_or_intersection),
@@ -1305,7 +1152,6 @@ impl Type {
         }
     }
 
-    /// Get intrinsic name (for intrinsic types).
     pub fn intrinsic_name(&self) -> Option<&str> {
         if let TypeData::Intrinsic(i) = &self.data {
             Some(&i.intrinsic_name)
@@ -1314,7 +1160,6 @@ impl Type {
         }
     }
 
-    /// Get literal value (for literal types).
     pub fn literal_value(&self) -> Option<&LiteralValue> {
         if let TypeData::Literal(l) = &self.data {
             Some(&l.value)
@@ -1324,11 +1169,6 @@ impl Type {
     }
 }
 
-// ────────────────────────────────────────────────────────────────────────────
-// Signature
-// ────────────────────────────────────────────────────────────────────────────
-
-/// A function or constructor signature.
 #[derive(Debug)]
 pub struct Signature {
     pub id: SignatureId,
@@ -1344,11 +1184,7 @@ pub struct Signature {
     pub target: Option<Arc<Signature>>,
     pub mapper: Option<Arc<TypeMapper>>,
     pub isolated_signature_type: OnceLock<Arc<Type>>,
-    /// Substituted parameter types for contextually instantiated
-    /// signatures (Go: `getSignatureInstantiation` /
-    /// `instantiateSignatureInContextOf`). Keyed by PARAMETER INDEX (the
-    /// rest parameter keeps its array type with the element substituted).
-    /// `None` resolves through the parameter symbols as usual.
+
     pub instantiated_parameter_types: Option<Vec<Arc<Type>>>,
 }
 
@@ -1387,16 +1223,11 @@ impl Default for Signature {
     }
 }
 
-/// Composite signature (union or intersection of signatures).
 #[derive(Debug)]
 pub struct CompositeSignature {
     pub is_union: bool,
     pub signatures: Vec<Arc<Signature>>,
 }
-
-// ────────────────────────────────────────────────────────────────────────────
-// TypePredicate
-// ────────────────────────────────────────────────────────────────────────────
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum TypePredicateKind {
@@ -1415,10 +1246,6 @@ pub struct TypePredicate {
     pub t: Option<Arc<Type>>,
 }
 
-// ────────────────────────────────────────────────────────────────────────────
-// IndexInfo
-// ────────────────────────────────────────────────────────────────────────────
-
 #[derive(Debug)]
 pub struct IndexInfo {
     pub key_type: Option<Arc<Type>>,
@@ -1429,17 +1256,11 @@ pub struct IndexInfo {
     pub components: Vec<Arc<Node>>,
 }
 
-// ────────────────────────────────────────────────────────────────────────────
-// Links types (side-table data for nodes and symbols)
-// ────────────────────────────────────────────────────────────────────────────
-
-/// Links for referenced symbols.
 #[derive(Debug, Default)]
 pub struct SymbolReferenceLinks {
     pub reference_kinds: crate::ast::SymbolFlags,
 }
 
-/// Links for value symbols.
 #[derive(Debug, Default)]
 pub struct ValueSymbolLinks {
     pub resolved_type: Option<Arc<Type>>,
@@ -1451,14 +1272,12 @@ pub struct ValueSymbolLinks {
     pub function_or_constructor_checked: bool,
 }
 
-/// Links for mapped symbols.
 #[derive(Debug, Default)]
 pub struct MappedSymbolLinks {
     pub key_type: Option<Arc<Type>>,
     pub synthetic_origin: Option<Arc<Symbol>>,
 }
 
-/// Links for deferred type symbols.
 #[derive(Debug, Default)]
 pub struct DeferredSymbolLinks {
     pub parent: Option<Arc<Type>>,
@@ -1466,7 +1285,6 @@ pub struct DeferredSymbolLinks {
     pub write_constituents: Vec<Arc<Type>>,
 }
 
-/// Links for alias symbols.
 #[derive(Debug, Default)]
 pub struct AliasSymbolLinks {
     pub immediate_target: Option<Arc<Symbol>>,
@@ -1475,7 +1293,6 @@ pub struct AliasSymbolLinks {
     pub type_only_declaration: Option<Arc<Node>>,
 }
 
-/// Links for module symbols.
 #[derive(Debug, Default)]
 pub struct ModuleSymbolLinks {
     pub resolved_exports: SymbolTable,
@@ -1572,7 +1389,6 @@ pub struct MarkedAssignmentSymbolLinks {
     pub has_definite_assignment: bool,
 }
 
-/// Node-level check links.
 #[derive(Debug, Default)]
 pub struct NodeLinks {
     pub flags: NodeCheckFlags,
@@ -1627,8 +1443,6 @@ pub struct JsxElementLinks {
     pub tag_name: Option<Arc<Symbol>>,
 }
 
-/// Key for the accessible-symbol-chain cache. Mirrors Go's
-/// `accessibleChainCacheKey` (types.go).
 #[derive(Debug, Clone)]
 pub struct AccessibleChainCacheKey {
     pub use_only_external_aliasing: bool,
@@ -1661,58 +1475,36 @@ impl std::hash::Hash for AccessibleChainCacheKey {
     }
 }
 
-/// Per-symbol links tracking accessible container relationships.
-///
-/// Mirrors Go's `ContainingSymbolLinks` (types.go).
 #[derive(Debug, Default)]
 pub struct ContainingSymbolLinks {
-    /// Symbols of nodes which logically contain this one, cached by file
-    /// the request is made within.
+
     pub extended_containers_by_file: HashMap<u64, Vec<Arc<Symbol>>>,
-    /// Containers (other than the parent) which this symbol is aliased in.
-    /// `None` means not yet computed; `Some(vec)` is the result (may be empty).
+
     pub extended_containers: Option<Vec<Arc<Symbol>>>,
-    /// Cache for `getAccessibleSymbolChainEx`.
+
     pub accessible_chain_cache: HashMap<AccessibleChainCacheKey, Vec<Arc<Symbol>>>,
 }
 
-/// Per-declaration links used by the emit resolver to track visibility.
-///
-/// Mirrors Go's `DeclarationLinks` (emitresolver.go). `is_visible` is a
-/// `Tristate` cached result of `isDeclarationVisible`.
 #[derive(Debug, Default)]
 pub struct DeclarationLinks {
     pub is_visible: Tristate,
 }
 
-/// Per-source-file links used by the emit resolver.
-///
-/// Mirrors Go's `DeclarationFileLinks` (emitresolver.go). `aliases_marked`
-/// records whether `PrecalculateDeclarationEmitVisibility` has already run
-/// the alias marking visitor over this file.
 #[derive(Debug, Default)]
 pub struct DeclarationFileLinks {
     pub aliases_marked: bool,
 }
 
-/// Result of a symbol accessibility / entity-name visibility query.
-///
-/// Mirrors Go's `printer.SymbolAccessibilityResult`. `PartialEq` is
-/// intentionally not derived because `Node` is not `Eq` (it carries
-/// interior-mutable state).
 #[derive(Debug, Clone, Default)]
 pub struct SymbolAccessibilityResult {
     pub accessibility: SymbolAccessibility,
-    /// Aliases that must be marked visible for the reference to serialize.
+
     pub aliases_to_make_visible: Vec<Arc<crate::ast::Node>>,
     pub error_symbol_name: String,
     pub error_module_name: String,
     pub error_node: Option<Arc<crate::ast::Node>>,
 }
 
-/// The accessibility of a symbol relative to an enclosing declaration.
-///
-/// Mirrors Go's `printer.SymbolAccessibility`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum SymbolAccessibility {
     #[default]
@@ -1721,10 +1513,6 @@ pub enum SymbolAccessibility {
     CannotBeNamed,
     NotResolved,
 }
-
-// ────────────────────────────────────────────────────────────────────────────
-// CheckMode
-// ────────────────────────────────────────────────────────────────────────────
 
 bitflags! {
     #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
@@ -1741,10 +1529,6 @@ bitflags! {
     }
 }
 
-// ────────────────────────────────────────────────────────────────────────────
-// WideningKind
-// ────────────────────────────────────────────────────────────────────────────
-
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum WideningKind {
     #[default]
@@ -1753,10 +1537,6 @@ pub enum WideningKind {
     GeneratorNext,
     GeneratorYield,
 }
-
-// ────────────────────────────────────────────────────────────────────────────
-// TypeSystemPropertyName
-// ────────────────────────────────────────────────────────────────────────────
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 #[repr(i32)]
@@ -1773,10 +1553,6 @@ pub enum TypeSystemPropertyName {
     InitializerIsUndefined,
     AliasTarget,
 }
-
-// ────────────────────────────────────────────────────────────────────────────
-// CachedTypeKind
-// ────────────────────────────────────────────────────────────────────────────
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default)]
 #[repr(i32)]
@@ -1812,25 +1588,14 @@ pub struct CachedTypeKey {
     pub type_id: TypeId,
 }
 
-// ────────────────────────────────────────────────────────────────────────────
-// RelationComparisonResult
-// ────────────────────────────────────────────────────────────────────────────
-
 pub type RelationComparisonResult = u32;
 
-/// Cache key for `isEnumTypeRelatedTo`, indexing a `(source, target)` enum
-/// symbol pair. Mirrors Go's `EnumRelationKey` (relater.go).
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct EnumRelationKey {
     pub source_id: u64,
     pub target_id: u64,
 }
 
-// ────────────────────────────────────────────────────────────────────────────
-// CacheHashKey
-// ────────────────────────────────────────────────────────────────────────────
-
-/// A 128-bit hash key used for type caching.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default)]
 pub struct CacheHashKey {
     pub hi: u64,
@@ -1911,8 +1676,7 @@ mod tests {
     fn structured_type_call_construct_signatures() {
         let mut structured = StructuredTypeData::default();
         structured.call_signature_count = 2;
-        // Add 3 signatures: 2 call + 1 construct
-        // (In real code these would be real signatures)
+
         structured.signatures = vec![
             Arc::new(Signature::new()),
             Arc::new(Signature::new()),

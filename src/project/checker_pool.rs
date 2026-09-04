@@ -1,5 +1,3 @@
-//! Checker pool (1:1 port of Go's `internal/project/checkerpool.go`).
-
 #![allow(dead_code)]
 
 use std::sync::Mutex;
@@ -10,9 +8,6 @@ use std::sync::Arc;
 
 const CHECKER_HELD_ANONYMOUS: &str = "<anonymous>";
 
-/// Options for the checker pool.
-///
-/// Go: `type CheckerPoolOptions struct { ... }`.
 #[derive(Clone, Debug)]
 pub struct CheckerPoolOptions {
     pub max_checkers: usize,
@@ -28,9 +23,6 @@ impl Default for CheckerPoolOptions {
     }
 }
 
-/// Manages type checkers for a project: diagnostics, temporary query, and API.
-///
-/// Go: `type checkerPool struct { ... }`.
 pub struct CheckerPool {
     opts: CheckerPoolOptions,
     program: Option<Arc<Program>>,
@@ -39,10 +31,10 @@ pub struct CheckerPool {
 
 struct CheckerPoolInner {
     discarded: bool,
-    /// `held_by[i]` is the requestID holding checker `i`, or empty.
+
     held_by: Vec<String>,
     last_released: Vec<Option<Instant>>,
-    global_diag_accumulated: Vec<usize>, // simplified: counts
+    global_diag_accumulated: Vec<usize>,
     global_diag_changed: bool,
 }
 
@@ -71,7 +63,6 @@ impl CheckerPool {
         }
     }
 
-    /// Signals that the pool's program has been replaced.
     pub fn discard(&self) {
         let mut inner = self.mu.lock().unwrap();
         if inner.discarded {
@@ -80,12 +71,10 @@ impl CheckerPool {
         inner.discarded = true;
     }
 
-    /// Returns accumulated global diagnostics count (simplified).
     pub fn get_global_diagnostics_count(&self) -> usize {
         self.mu.lock().unwrap().global_diag_accumulated.len()
     }
 
-    /// Reports whether new global diagnostics have been accumulated.
     pub fn take_new_global_diagnostics(&self) -> bool {
         let mut inner = self.mu.lock().unwrap();
         let changed = inner.global_diag_changed;

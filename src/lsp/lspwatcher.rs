@@ -1,8 +1,3 @@
-//! Builtin file watcher (1:1 port of Go's `internal/lsp/lspwatcher/lspwatcher.go`).
-//!
-//! An in-process file watcher used as a drop-in replacement for LSP-based
-//! file watching when the client does not support dynamic registration.
-
 #![allow(dead_code)]
 
 use std::collections::HashMap;
@@ -15,10 +10,8 @@ use crate::lsp::lsproto;
 use crate::tspath;
 use crate::vfs::FS;
 
-/// Throttle window mirroring VS Code's parcel watcher integration.
 const THROTTLE_WINDOW: Duration = Duration::from_millis(75);
 
-/// A single subscription within the watcher.
 struct Watch {
     requested_directory: String,
     kind: lsproto::WatchKind,
@@ -26,10 +19,6 @@ struct Watch {
     closed: bool,
 }
 
-/// Manages a set of file system subscriptions identified by WatcherID strings.
-/// Events are delivered to `on_changes` in batches as `FileEvent`.
-///
-/// Go: `type Watcher struct { ... }`.
 pub struct Watcher {
     fs: Arc<dyn FS>,
     on_changes: Box<dyn Fn(&[lsproto::FileEvent]) + Send + Sync>,
@@ -43,9 +32,7 @@ struct WatcherInner {
 }
 
 impl Watcher {
-    /// Constructs a Watcher backed by the platform-default notify watcher.
-    ///
-    /// Go: `func New(fs vfs.FS, ...) *Watcher`.
+
     pub fn new(
         fs: Arc<dyn FS>,
         on_changes: impl Fn(&[lsproto::FileEvent]) + Send + Sync + 'static,
@@ -61,9 +48,6 @@ impl Watcher {
         })
     }
 
-    /// Subscribes to each FileSystemWatcher under the given id.
-    ///
-    /// Go: `func (w *Watcher) WatchFiles(id string, ...) error`.
     pub fn watch_files(
         &self,
         id: &str,
@@ -96,9 +80,6 @@ impl Watcher {
         Ok(())
     }
 
-    /// Tears down all subscriptions associated with `id`.
-    ///
-    /// Go: `func (w *Watcher) UnwatchFiles(id string) error`.
     pub fn unwatch_files(&self, id: &str) -> Result<(), String> {
         let mut inner = self.inner.lock().unwrap();
         match inner.watches.remove(id) {
@@ -112,9 +93,6 @@ impl Watcher {
         }
     }
 
-    /// Removes every subscription. Safe to call multiple times.
-    ///
-    /// Go: `func (w *Watcher) Close()`.
     pub fn close(&self) {
         let mut inner = self.inner.lock().unwrap();
         if inner.closed {
@@ -131,7 +109,6 @@ impl Watcher {
         }
     }
 
-    /// Enqueues file events for the next debounced flush.
     fn forward_events(&self, kind: lsproto::WatchKind, events: &[notify::Event]) {
         let mut inner = self.inner.lock().unwrap();
         if inner.closed {
@@ -166,7 +143,6 @@ impl Watcher {
             }
         }
 
-        // Flush immediately for the stub. In a full port, this is debounced.
         let pending = std::mem::take(&mut inner.pending);
         drop(inner);
         if !pending.is_empty() {
@@ -176,10 +152,6 @@ impl Watcher {
     }
 }
 
-/// Extracts the directory the subscription should be rooted at from a
-/// FileSystemWatcher.
-///
-/// Go: `func watchRoot(fileSystemWatcher *lsproto.FileSystemWatcher) (string, bool)`.
 fn watch_root(file_system_watcher: &lsproto::FileSystemWatcher) -> Option<String> {
     if let Some(pattern) = &file_system_watcher.glob_pattern.pattern {
         return Some(root_from_glob(pattern));
@@ -194,9 +166,6 @@ fn watch_root(file_system_watcher: &lsproto::FileSystemWatcher) -> Option<String
     None
 }
 
-/// Extracts the root directory from a glob pattern string.
-///
-/// Go: `func rootFromGlob(pattern string) string`.
 fn root_from_glob(pattern: &str) -> String {
     let pattern = tspath::normalize_slashes(pattern);
     let meta_index = pattern
@@ -220,9 +189,6 @@ fn root_from_glob(pattern: &str) -> String {
     }
 }
 
-/// Returns the pattern string of a FileSystemWatcher for logging.
-///
-/// Go: `func watchPatternString(fileSystemWatcher *lsproto.FileSystemWatcher) string`.
 fn watch_pattern_string(file_system_watcher: &lsproto::FileSystemWatcher) -> String {
     if let Some(pattern) = &file_system_watcher.glob_pattern.pattern {
         return pattern.clone();
@@ -239,16 +205,10 @@ fn watch_pattern_string(file_system_watcher: &lsproto::FileSystemWatcher) -> Str
     String::new()
 }
 
-/// Reports whether a FileSystemWatcher's pattern requests recursive watching.
-///
-/// Go: `func isRecursiveGlob(fileSystemWatcher *lsproto.FileSystemWatcher) bool`.
 fn is_recursive_glob(file_system_watcher: &lsproto::FileSystemWatcher) -> bool {
     watch_pattern_string(file_system_watcher).contains("**")
 }
 
-/// Returns the effective watch kind (defaults to create|change|delete).
-///
-/// Go: `func effectiveKind(fileSystemWatcher *lsproto.FileSystemWatcher) lsproto.WatchKind`.
 fn effective_kind(file_system_watcher: &lsproto::FileSystemWatcher) -> lsproto::WatchKind {
     file_system_watcher.kind.unwrap_or(
         lsproto::WATCH_KIND_CREATE | lsproto::WATCH_KIND_CHANGE | lsproto::WATCH_KIND_DELETE,

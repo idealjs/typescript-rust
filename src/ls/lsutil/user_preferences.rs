@@ -1,11 +1,3 @@
-//! User preferences for the TypeScript language service.
-//!
-//! Ported from `internal/ls/lsutil/userpreferences.go`. The Go file uses
-//! `reflect`-based struct-tag walking to map raw names / VS Code config paths
-//! onto preference fields. Rust has no equivalent without proc macros, so the
-//! config application is implemented with an explicit, data-driven dispatch
-//! (the same field/name mapping, written out by hand).
-
 use serde_json::{Map, Value};
 
 use crate::core::tristate::Tristate;
@@ -15,9 +7,6 @@ use super::format_code_options::{
     FormatCodeSettings, IndentStyle, SemicolonPreference, get_default_format_code_settings,
 };
 
-/// Returns the default user preferences.
-///
-/// Mirrors `NewDefaultUserPreferences` in Go.
 pub fn new_default_user_preferences() -> UserPreferences {
     UserPreferences {
         format_code_settings: get_default_format_code_settings(),
@@ -80,131 +69,99 @@ pub fn new_default_user_preferences() -> UserPreferences {
     }
 }
 
-/// TypeScript language service preferences.
-///
-/// Mirrors `UserPreferences` in Go. The Go struct tags (`raw:"..."`,
-/// `config:"..."`) are recorded in the doc comments of each field group;
-/// the actual tag→field mapping lives in [`with_config`].
 #[derive(Debug, Clone)]
 pub struct UserPreferences {
     pub format_code_settings: FormatCodeSettings,
 
-    // raw:"quotePreference" config:"preferences.quoteStyle"
     pub quote_preference: QuotePreference,
-    // raw:"lazyConfiguredProjectsFromExternalProject"
+
     pub lazy_configured_projects_from_external_project: Tristate,
-    // raw:"maximumHoverLength"
+
     pub maximum_hover_length: i32,
 
-    // ------- Completions -------
-    // raw:"includeCompletionsForModuleExports" config:"suggest.autoImports"
     pub include_completions_for_module_exports: Tristate,
-    // raw:"includeCompletionsForImportStatements"
+
     pub include_completions_for_import_statements: Tristate,
-    // raw:"includeAutomaticOptionalChainCompletions"
+
     pub include_automatic_optional_chain_completions: Tristate,
-    // raw:"includeCompletionsWithClassMemberSnippets"
+
     pub include_completions_with_class_member_snippets: Tristate,
-    // raw:"includeCompletionsWithObjectLiteralMethodSnippets"
+
     pub include_completions_with_object_literal_method_snippets: Tristate,
-    // raw:"jsxAttributeCompletionStyle"
+
     pub jsx_attribute_completion_style: JsxAttributeCompletionStyle,
-    // raw:"autoClosingTags" config:"autoClosingTags.enabled"
+
     pub enable_auto_closing_tags: Tristate,
-    // raw:"completeJSDocs" config:"suggest.jsdoc.enabled"
+
     pub enable_jsdoc_completions: Tristate,
-    // raw:"generateReturnInDocTemplate"
+
     pub generate_return_in_doc_template: Tristate,
 
-    // ------- AutoImports --------
-    // raw:"importModuleSpecifierPreference"
     pub import_module_specifier_preference: modulespecifiers::ImportModuleSpecifierPreference,
-    // raw:"importModuleSpecifierEnding"
+
     pub import_module_specifier_ending: modulespecifiers::ImportModuleSpecifierEndingPreference,
-    // raw:"autoImportSpecifierExcludeRegexes"
+
     pub auto_import_specifier_exclude_regexes: Vec<String>,
-    // raw:"autoImportFileExcludePatterns"
+
     pub auto_import_file_exclude_patterns: Vec<String>,
-    // raw:"autoImportEntrypointDirectorySearch"
+
     pub auto_import_entrypoint_directory_search: Tristate,
-    // raw:"preferTypeOnlyAutoImports"
+
     pub prefer_type_only_auto_imports: Tristate,
 
-    // ------- OrganizeImports -------
-    // raw:"organizeImportsSort"
     pub organize_imports_sort: OrganizeImportsSort,
-    // raw:"organizeImportsIgnoreCase"
+
     pub organize_imports_ignore_case: Tristate,
-    // raw:"organizeImportsCollation"
+
     pub organize_imports_collation: OrganizeImportsCollation,
-    // raw:"organizeImportsLocale"
+
     pub organize_imports_locale: String,
-    // raw:"organizeImportsNumericCollation"
+
     pub organize_imports_numeric_collation: Tristate,
-    // raw:"organizeImportsAccentCollation"
+
     pub organize_imports_accent_collation: Tristate,
-    // raw:"organizeImportsCaseFirst"
+
     pub organize_imports_case_first: OrganizeImportsCaseFirst,
-    // raw:"organizeImportsTypeOrder"
+
     pub organize_imports_type_order: OrganizeImportsTypeOrder,
 
-    // ------- MoveToFile -------
-    // raw:"allowTextChangesInNewFiles"
     pub allow_text_changes_in_new_files: Tristate,
 
-    // ------- Rename -------
-    // raw:"providePrefixAndSuffixTextForRename"
     pub use_aliases_for_rename: Tristate,
-    // raw:"allowRenameOfImportPath"
+
     pub allow_rename_of_import_path: Tristate,
 
-    // ------- CodeFixes/Refactors -------
-    // raw:"provideRefactorNotApplicableReason"
     pub provide_refactor_not_applicable_reason: Tristate,
 
-    // ------- InlayHints -------
     pub inlay_hints: InlayHintsPreferences,
 
-    // ------- CodeLens -------
     pub code_lens: CodeLensUserPreferences,
 
-    // ------- Definition -------
-    // raw:"preferGoToSourceDefinition"
     pub prefer_go_to_source_definition: bool,
 
-    // ------- Symbols -------
-    // raw:"excludeLibrarySymbolsInNavTo"
     pub exclude_library_symbols_in_nav_to: Tristate,
 
-    // ------- Misc -------
-    // raw:"formatEnabled"
     pub enable_formatting: Tristate,
-    // raw:"validateEnabled"
+
     pub enable_validation: Tristate,
-    // raw:"disableSuggestions"
+
     pub disable_suggestions: Tristate,
-    // raw:"disableLineTextInReferences"
+
     pub disable_line_text_in_references: Tristate,
-    // raw:"displayPartsForJSDoc"
+
     pub display_parts_for_jsdoc: Tristate,
-    // raw:"reportStyleChecksAsWarnings"
+
     pub report_style_checks_as_warnings: Tristate,
 
-    // ------- ATA -------
-    // raw:"disableAutomaticTypeAcquisition"
     pub disable_automatic_type_acquisition: Tristate,
-    // raw:"automaticTypeAcquisitionEnabled"
+
     pub automatic_type_acquisition_enabled: Tristate,
 
-    // ------- Project Configuration -------
-    // raw:"customConfigFileName"
     pub custom_config_file_name: String,
 }
 
 impl UserPreferences {
-    /// Returns whether Automatic Type Acquisition is disabled.
-    ///
-    /// Mirrors `UserPreferences.IsATADisabled` in Go.
+
     pub fn is_ata_disabled(&self) -> bool {
         if !self.automatic_type_acquisition_enabled.is_unknown() {
             return !self.automatic_type_acquisition_enabled.is_true();
@@ -212,9 +169,6 @@ impl UserPreferences {
         self.disable_automatic_type_acquisition.is_true()
     }
 
-    /// Returns the module-specifier preferences subset.
-    ///
-    /// Mirrors `UserPreferences.ModuleSpecifierPreferences` in Go.
     pub fn module_specifier_preferences(&self) -> modulespecifiers::UserPreferences {
         modulespecifiers::UserPreferences {
             import_module_specifier_preference: self.import_module_specifier_preference.clone(),
@@ -225,9 +179,6 @@ impl UserPreferences {
         }
     }
 
-    /// Returns whether `module_specifier` is excluded by the configured regexes.
-    ///
-    /// Mirrors `UserPreferences.IsModuleSpecifierExcluded` in Go.
     pub fn is_module_specifier_excluded(&self, module_specifier: &str) -> bool {
         modulespecifiers::is_excluded_by_regex(
             module_specifier,
@@ -235,26 +186,17 @@ impl UserPreferences {
         )
     }
 
-    /// Apply a config map onto these preferences and return the result.
-    ///
-    /// Mirrors `UserPreferences.withConfig` in Go. The Go implementation uses
-    /// reflection to walk struct tags; here the same name→field mapping is
-    /// applied explicitly via [`apply_raw_field`] / [`apply_config_field`].
     pub fn with_config(&self, config: &Map<String, Value>) -> UserPreferences {
         let mut prefs = self.clone();
 
-        // Raw preferences can be provided directly at the top level.
         apply_raw_fields(&mut prefs, config);
 
-        // Process "unstable" section first.
         if let Some(Value::Object(unstable)) = config.get("unstable") {
             apply_raw_fields(&mut prefs, unstable);
         }
 
-        // Process path-based config (VS Code style nested paths).
         apply_config_fields(&mut prefs, config);
 
-        // Validate CustomConfigFileName for path traversal.
         if !prefs.custom_config_file_name.is_empty() {
             let name = prefs.custom_config_file_name.trim();
             if name.contains('/') || name.contains('\\') || name == ".." || name == "." {
@@ -268,9 +210,6 @@ impl UserPreferences {
     }
 }
 
-/// Inlay-hints preferences.
-///
-/// Mirrors `InlayHintsPreferences` in Go.
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
 pub struct InlayHintsPreferences {
     pub include_inlay_parameter_name_hints: IncludeInlayParameterNameHints,
@@ -283,9 +222,6 @@ pub struct InlayHintsPreferences {
     pub include_inlay_enum_member_value_hints: Tristate,
 }
 
-/// Code-lens preferences.
-///
-/// Mirrors `CodeLensUserPreferences` in Go.
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
 pub struct CodeLensUserPreferences {
     pub references_code_lens_enabled: Tristate,
@@ -295,11 +231,6 @@ pub struct CodeLensUserPreferences {
     pub implementations_code_lens_show_on_all_class_methods: Tristate,
 }
 
-// ============================================================================
-// Enum types (mirroring Go's typed string/int enums)
-// ============================================================================
-
-/// Quote style preference.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum QuotePreference {
     #[default]
@@ -332,7 +263,6 @@ impl QuotePreference {
     }
 }
 
-/// JSX attribute completion style.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum JsxAttributeCompletionStyle {
     #[default]
@@ -355,7 +285,6 @@ impl JsxAttributeCompletionStyle {
     }
 }
 
-/// Inlay parameter-name hint mode.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum IncludeInlayParameterNameHints {
     #[default]
@@ -377,7 +306,6 @@ impl IncludeInlayParameterNameHints {
     }
 }
 
-/// Which deterministic preset should be used to sort imports.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 #[repr(i32)]
 pub enum OrganizeImportsSort {
@@ -404,12 +332,11 @@ impl OrganizeImportsSort {
     }
 }
 
-/// Whether organize-imports uses ordinal or unicode collation.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum OrganizeImportsCollation {
     #[default]
-    Ordinal, // false
-    Unicode, // true
+    Ordinal,
+    Unicode,
 }
 
 impl OrganizeImportsCollation {
@@ -423,7 +350,6 @@ impl OrganizeImportsCollation {
     }
 }
 
-/// Which case should sort first under unicode collation.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 #[repr(i32)]
 pub enum OrganizeImportsCaseFirst {
@@ -446,7 +372,6 @@ impl OrganizeImportsCaseFirst {
     }
 }
 
-/// Where named type-only imports should sort.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 #[repr(i32)]
 pub enum OrganizeImportsTypeOrder {
@@ -471,11 +396,6 @@ impl OrganizeImportsTypeOrder {
     }
 }
 
-// ============================================================================
-// Config application (the reflect-based mapping, written out explicitly)
-// ============================================================================
-
-/// Get a nested value from a config object by dotted path.
 fn get_nested_value<'a>(config: &'a Map<String, Value>, path: &str) -> Option<&'a Value> {
     let mut parts = path.split('.');
     let first = parts.next()?;
@@ -489,13 +409,9 @@ fn get_nested_value<'a>(config: &'a Map<String, Value>, path: &str) -> Option<&'
     Some(current)
 }
 
-/// Set a single preference field identified by its raw name.
-///
-/// Mirrors the per-field dispatch of Go's `setFieldFromValue` +
-/// `typeParsers`. The raw-name→field mapping is written out explicitly.
 #[allow(clippy::too_many_lines)]
 fn apply_raw_field(prefs: &mut UserPreferences, raw_name: &str, value: &Value) {
-    // Helper to invert a bool value (for ",invert" tagged fields).
+
     let invert_bool = |v: &Value| -> Value {
         if let Value::Bool(b) = v {
             Value::Bool(!b)
@@ -653,7 +569,7 @@ fn apply_raw_field(prefs: &mut UserPreferences, raw_name: &str, value: &Value) {
             prefs.automatic_type_acquisition_enabled = parse_tristate(value)
         }
         "customConfigFileName" => prefs.custom_config_file_name = parse_string(value),
-        // Editor settings (raw names).
+
         "baseIndentSize" => prefs.format_code_settings.base_indent_size = parse_i32(value),
         "indentSize" => prefs.format_code_settings.indent_size = parse_i32(value),
         "tabSize" => prefs.format_code_settings.tab_size = parse_i32(value),
@@ -665,7 +581,7 @@ fn apply_raw_field(prefs: &mut UserPreferences, raw_name: &str, value: &Value) {
         "trimTrailingWhitespace" => {
             prefs.format_code_settings.trim_trailing_whitespace = parse_tristate(value)
         }
-        // Format options (raw names) — Tristate unless noted.
+
         "insertSpaceAfterCommaDelimiter" => {
             prefs
                 .format_code_settings
@@ -763,20 +679,14 @@ fn apply_raw_field(prefs: &mut UserPreferences, raw_name: &str, value: &Value) {
     }
 }
 
-/// Apply all raw-name fields present in `config` onto `prefs`.
 fn apply_raw_fields(prefs: &mut UserPreferences, config: &Map<String, Value>) {
     for (name, value) in config {
         apply_raw_field(prefs, name, value);
     }
 }
 
-/// Apply config-path (nested) fields onto `prefs`.
-///
-/// Mirrors the config-path branch of Go's `withConfig`. Each preference has a
-/// dotted VS Code config path; this looks up the nested value and dispatches via
-/// the raw-name setter (the field semantics are identical).
 fn apply_config_fields(prefs: &mut UserPreferences, config: &Map<String, Value>) {
-    // (config_path, raw_name_equivalent) pairs.
+
     let mappings: &[(&str, &str)] = &[
         ("preferences.quoteStyle", "quotePreference"),
         ("suggest.autoImports", "includeCompletionsForModuleExports"),
@@ -869,7 +779,7 @@ fn apply_config_fields(prefs: &mut UserPreferences, config: &Map<String, Value>)
             "automaticTypeAcquisitionEnabled",
         ),
         ("customConfigFileName", "customConfigFileName"),
-        // Format options (config paths).
+
         ("format.baseIndentSize", "baseIndentSize"),
         ("format.indentSize", "indentSize"),
         ("format.tabSize", "tabSize"),
@@ -951,7 +861,7 @@ fn apply_config_fields(prefs: &mut UserPreferences, config: &Map<String, Value>)
         ),
         ("format.semicolons", "semicolons"),
         ("format.indentSwitchCase", "indentSwitchCase"),
-        // Code lens config paths.
+
         ("referencesCodeLens.enabled", "referencesCodeLensEnabled"),
         (
             "implementationsCodeLens.enabled",
@@ -969,7 +879,7 @@ fn apply_config_fields(prefs: &mut UserPreferences, config: &Map<String, Value>)
             "implementationsCodeLens.showOnAllClassMethods",
             "implementationsCodeLensShowOnAllClassMethods",
         ),
-        // Inlay hints config paths.
+
         (
             "inlayHints.parameterNames.enabled",
             "includeInlayParameterNameHints",
@@ -1002,9 +912,9 @@ fn apply_config_fields(prefs: &mut UserPreferences, config: &Map<String, Value>)
             "inlayHints.enumMemberValues.enabled",
             "includeInlayEnumMemberValueHints",
         ),
-        // Auto-closing tags fallback config.
+
         ("autoClosingTags.enabled", "autoClosingTags"),
-        // JSDoc completions fallback config.
+
         ("suggest.jsdoc.enabled", "completeJSDocs"),
         (
             "suggest.jsdoc.generateReturns",
@@ -1014,8 +924,7 @@ fn apply_config_fields(prefs: &mut UserPreferences, config: &Map<String, Value>)
 
     for (path, raw_name) in mappings {
         if let Some(value) = get_nested_value(config, path) {
-            // Special-case: organizeImports.caseSensitivity is a string but maps
-            // to a Tristate.
+
             if *path == "preferences.organizeImports.caseSensitivity" {
                 prefs.organize_imports_ignore_case = parse_case_sensitivity(value);
                 continue;
@@ -1024,10 +933,6 @@ fn apply_config_fields(prefs: &mut UserPreferences, config: &Map<String, Value>)
         }
     }
 }
-
-// ============================================================================
-// Primitive value parsers (mirroring Go's setFieldFromValue / typeParsers)
-// ============================================================================
 
 fn parse_tristate(value: &Value) -> Tristate {
     match value {
@@ -1109,7 +1014,6 @@ fn parse_module_specifier_ending(
     }
 }
 
-/// VS Code sends `caseSensitivity` as a string; parse to a Tristate.
 fn parse_case_sensitivity(value: &Value) -> Tristate {
     if let Value::String(s) = value {
         return match s.to_ascii_lowercase().as_str() {
@@ -1121,11 +1025,6 @@ fn parse_case_sensitivity(value: &Value) -> Tristate {
     parse_tristate(value)
 }
 
-/// Parse user preferences from a map of editor/language config sections.
-///
-/// Mirrors `ParseUserPreferences` in Go. Applies editor settings first, then
-/// overlays `javascript`, `typescript`, and `js/ts` sections with increasing
-/// precedence.
 pub fn parse_user_preferences(items: &Map<String, Value>) -> UserPreferences {
     let mut prefs = new_default_user_preferences();
 

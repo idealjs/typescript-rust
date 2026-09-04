@@ -1,14 +1,3 @@
-//! Language-service shared utilities (1:1 port of Go's `internal/ls/lsutil/`).
-//!
-//! This module groups the helper types and functions used across the language
-//! service: user preferences, format-code options, organize-imports logic, ASI
-//! helpers, child-node iteration, completed-node detection, and symbol display.
-//!
-//! These are skeleton ports: type definitions and self-contained logic are
-//! ported in full, while bodies that depend on not-yet-ported infrastructure
-//! (scanner, printer, checker, AST node accessors) are stubbed with `todo!()` /
-//! conservative defaults and marked `// TODO`.
-
 #![allow(dead_code)]
 
 pub mod asi;

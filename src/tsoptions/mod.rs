@@ -1,11 +1,3 @@
-//! Command-line and `tsconfig.json` option parsing, ported from
-//! `internal/tsoptions/`.
-//!
-//! This is a pragmatic port: it handles the common compiler options, file
-//! arguments, response files, and `tsconfig.json` reading (including JSONC
-//! comments, `extends`, `files`/`include`/`exclude` glob expansion). It does
-//! not yet mirror the full `NameMap`/did-you-mean machinery of the Go port.
-
 use std::collections::{HashMap, HashSet};
 
 use crate::ast::diagnostic::Diagnostic;
@@ -35,10 +27,6 @@ use crate::glob::Glob;
 use crate::tspath;
 use crate::vfs::FS;
 
-// ────────────────────────────────────────────────────────────────────────────
-// Option declarations
-// ────────────────────────────────────────────────────────────────────────────
-
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum OptionKind {
     Boolean,
@@ -48,13 +36,11 @@ pub enum OptionKind {
     Enum,
 }
 
-/// Extra validation that `parse_option_value` / `validate_json_option_value`
-/// should perform beyond the basic kind check. Mirrors Go's `extraValidation`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum ExtraValidation {
     None,
     Locale,
-    /// Numeric option must satisfy `min_value`.
+
     MinValue,
 }
 
@@ -64,30 +50,22 @@ pub struct OptionDecl {
     pub short_name: Option<&'static str>,
     pub kind: OptionKind,
     pub is_file_path: bool,
-    /// Option can only be used in `tsconfig.json`, not on the command line
-    /// (e.g. `composite`, `paths`).
+
     pub is_tsconfig_only: bool,
-    /// Option can only be used on the command line, not in `tsconfig.json`.
+
     pub is_command_line_only: bool,
-    /// Special validation category (locale, min-value, etc.).
+
     pub extra_validation: ExtraValidation,
-    /// Minimum numeric value (for `builders`, `checkers`).
+
     pub min_value: Option<i64>,
-    /// Valid enum values (for `target`, `module`, `moduleResolution`, `jsx`,
-    /// `newLine`, `moduleDetection`).
+
     pub enum_values: Option<&'static [&'static str]>,
-    /// Help text for the option, shown by `--help` / `--all`. Empty string
-    /// means the option is omitted from the simplified help view.
+
     pub description: &'static str,
-    /// Whether the option appears in the simplified `--help` view (mirrors
-    /// Go's `ShowInSimplifiedHelpView`). When false, the option only appears
-    /// under `--all`.
+
     pub show_in_simplified_help: bool,
 }
 
-/// Const default used to fill in the declaration-driven fields via struct
-/// update syntax (`..DEFAULT_DECL`) so that each `OptionDecl` literal only
-/// needs to set the fields it cares about.
 const DEFAULT_DECL: OptionDecl = OptionDecl {
     name: "",
     short_name: None,
@@ -102,12 +80,6 @@ const DEFAULT_DECL: OptionDecl = OptionDecl {
     show_in_simplified_help: false,
 };
 
-/// The set of compiler options accepted on the command line.
-///
-/// Mirrors a subset of `tsoptions.CommandLineCompilerOptions`.
-
-// Valid enum values for the declaration-driven enum options. These mirror the
-// keys of Go's `commandLineOptionEnumMap` (see `internal/tsoptions/enummaps.go`).
 static TARGET_ENUM_VALUES: &[&str] = &[
     "es3", "es5", "es6", "es2015", "es2016", "es2017", "es2018", "es2019", "es2020", "es2021",
     "es2022", "es2023", "es2024", "es2025", "esnext",
@@ -856,17 +828,12 @@ pub const BUILD_OPTIONS: &[OptionDecl] = &[
     },
 ];
 
-/// Distinguishes compiler-mode parsing from build-mode parsing, mirroring
-/// Go's `AlternateModeDiagnostics` selection.
 #[derive(Clone, Copy, PartialEq, Eq)]
 enum ParseMode {
     Compiler,
     Build,
 }
 
-// Valid enum values for the watch-option declarations. These mirror the keys
-// of Go's `watchFileEnumMap` / `watchDirectoryEnumMap` / `fallbackEnumMap`
-// (`internal/tsoptions/enummaps.go:234-255`).
 static WATCH_FILE_ENUM_VALUES: &[&str] = &[
     "fixedpollinginterval",
     "prioritypollinginterval",
@@ -888,14 +855,6 @@ static FALLBACK_POLLING_ENUM_VALUES: &[&str] = &[
     "fixedchunksize",
 ];
 
-/// The set of watch options, mirroring Go's `OptionsForWatch`
-/// (`internal/tsoptions/declswatch.go:8-88`).
-///
-/// These are modeled as an independent axis from `OPTIONS` (compiler) and
-/// `BUILD_OPTIONS` (build): a separate declarations list, a separate name
-/// map (`find_watch_option`), and a separate parser pass (`apply_watch_options`).
-/// On the CLI, watch flags are accepted as a fallback when the compiler/build
-/// map misses, mirroring Go's `WatchNameMap` fallback in `parseStrings`.
 pub const OPTIONS_FOR_WATCH: &[OptionDecl] = &[
     OptionDecl {
         name: "watchInterval",
@@ -953,8 +912,6 @@ pub const OPTIONS_FOR_WATCH: &[OptionDecl] = &[
     },
 ];
 
-/// Case-insensitive match on an option's name or short name. Mirrors Go's
-/// `NameMap.GetOptionDeclarationFromName`, which lowercases the lookup key.
 fn decl_matches(o: &OptionDecl, name: &str) -> bool {
     o.name.eq_ignore_ascii_case(name)
         || o.short_name
@@ -962,20 +919,14 @@ fn decl_matches(o: &OptionDecl, name: &str) -> bool {
             .unwrap_or(false)
 }
 
-/// Case-insensitive lookup over the compiler option declarations (the
-/// `NameMap` for compiler mode). Replaces the previous case-sensitive scan.
 fn find_option(name: &str) -> Option<&'static OptionDecl> {
     OPTIONS.iter().find(|o| decl_matches(o, name))
 }
 
-/// Case-insensitive lookup over build-only declarations (used for
-/// alternate-mode detection in compiler mode).
 fn find_build_only_option(name: &str) -> Option<&'static OptionDecl> {
     BUILD_OPTIONS.iter().find(|o| decl_matches(o, name))
 }
 
-/// Case-insensitive lookup over the build option declarations, chaining the
-/// compiler declarations so that shared options (e.g. `watch`) resolve.
 fn find_build_option(name: &str) -> Option<&'static OptionDecl> {
     BUILD_OPTIONS
         .iter()
@@ -983,15 +934,13 @@ fn find_build_option(name: &str) -> Option<&'static OptionDecl> {
         .find(|o| decl_matches(o, name))
 }
 
-/// Find the closest matching build option name for did-you-mean suggestions.
-/// Uses Levenshtein-like distance heuristic (same as Go's `getSpellingSuggestion`).
 fn did_you_mean_build_option(input: &str) -> Option<String> {
     let input_lower = input.to_lowercase();
     let mut best: Option<(usize, &str)> = None;
     for opt in BUILD_OPTIONS.iter().chain(OPTIONS.iter()) {
         let name = opt.name.to_lowercase();
         let dist = levenshtein(&input_lower, &name);
-        // Only suggest if distance is small (Go uses threshold of 2-3)
+
         if dist <= 3 && best.map_or(true, |(d, _)| dist < d) {
             best = Some((dist, opt.name));
         }
@@ -999,7 +948,6 @@ fn did_you_mean_build_option(input: &str) -> Option<String> {
     best.map(|(_, name)| name.to_string())
 }
 
-/// Simple Levenshtein distance for did-you-mean suggestions.
 fn levenshtein(a: &str, b: &str) -> usize {
     let a: Vec<char> = a.chars().collect();
     let b: Vec<char> = b.chars().collect();
@@ -1024,18 +972,9 @@ fn levenshtein(a: &str, b: &str) -> usize {
     prev[n]
 }
 
-/// Case-insensitive lookup over the watch option declarations, mirroring Go's
-/// `WatchNameMap` (`internal/tsoptions/namemap.go:12`). Used as a fallback in
-/// `parse_command_line_worker` when the compiler/build map misses, so that
-/// `--watchFile usefsevents` etc. are accepted on the CLI alongside compiler
-/// flags but routed into a separate `WatchOptions` value.
 fn find_watch_option(name: &str) -> Option<&'static OptionDecl> {
     OPTIONS_FOR_WATCH.iter().find(|o| decl_matches(o, name))
 }
-
-// ────────────────────────────────────────────────────────────────────────────
-// Parsed value
-// ────────────────────────────────────────────────────────────────────────────
 
 #[derive(Debug, Clone)]
 pub enum OptValue {
@@ -1067,20 +1006,15 @@ impl OptValue {
     }
 }
 
-// ────────────────────────────────────────────────────────────────────────────
-// ParsedCommandLine
-// ────────────────────────────────────────────────────────────────────────────
-
-/// A parsed command line or tsconfig, mirroring `tsoptions.ParsedCommandLine`.
 #[derive(Debug, Clone, Default)]
 pub struct ParsedCommandLine {
     pub compiler_options: CompilerOptions,
     pub file_names: Vec<String>,
     pub errors: Vec<Diagnostic>,
     pub config_file_name: String,
-    /// Raw `compilerOptions` value from tsconfig.json (if any), for `--showConfig`.
+
     pub raw_options: Option<crate::json::Value>,
-    /// `files`/`include`/`exclude` specs from tsconfig.json.
+
     pub include: Vec<String>,
     pub exclude: Vec<String>,
     pub files_spec: Vec<String>,
@@ -1090,20 +1024,10 @@ pub struct ParsedCommandLine {
     pub references: Vec<crate::core::project_reference::ProjectReference>,
     pub compile_on_save: Option<bool>,
     pub watch: bool,
-    /// Watch options parsed from the command line, mirroring Go's
-    /// `ParsedOptions.WatchOptions`. Modeled independently from
-    /// `compiler_options` (separate declarations, name map, and parser pass).
-    /// A `watchOptions` key inside `tsconfig.json` is not yet parsed, matching
-    /// the current Go state.
+
     pub watch_options: WatchOptions,
 }
 
-/// Cache for parsed extended tsconfig files, mirroring Go's
-/// `ExtendedConfigCache` (`tsconfigparsing.go:154`). In diamond inheritance
-/// scenarios (A extends B and C; both B and C extend D), D is parsed once and
-/// reused. The cache is keyed by the normalized absolute path of the config
-/// file. Cycle entries are bypassed (not cached) to avoid incorrect results
-/// across different branches of the extends graph.
 #[derive(Default)]
 pub struct ExtendedConfigCache {
     entries: HashMap<String, ParsedCommandLine>,
@@ -1114,19 +1038,14 @@ impl ExtendedConfigCache {
         Self::default()
     }
 
-    /// Returns the number of cached entries (for testing/diagnostics).
     pub fn len(&self) -> usize {
         self.entries.len()
     }
 
-    /// Whether the cache is empty.
     pub fn is_empty(&self) -> bool {
         self.entries.is_empty()
     }
 
-    /// Get a cached extended config or parse and cache it. Bypasses the cache
-    /// when the config is in the resolution stack (cycle), mirroring Go's
-    /// `getExtendedConfig` cycle-bypass logic (`tsconfigparsing.go:988`).
     fn get_or_parse(
         &mut self,
         resolved_path: &str,
@@ -1135,10 +1054,7 @@ impl ExtendedConfigCache {
         fs: &dyn FS,
         resolution_stack: &[String],
     ) -> ParsedCommandLine {
-        // Bypass cache when in a cycle — the recursive call will detect the
-        // cycle and return a circularity error. Caching cycle results would
-        // be incorrect since the same config might be valid in a different
-        // branch of the extends graph.
+
         if resolution_stack.iter().any(|p| p == resolved_path) {
             return get_parsed_command_line_of_config_file_with_stack(
                 config_file_name,
@@ -1182,8 +1098,7 @@ pub struct ParsedBuildCommandLine {
     pub compiler_options: CompilerOptions,
     pub projects: Vec<String>,
     pub errors: Vec<Diagnostic>,
-    /// Watch options parsed from the command line, mirroring Go's
-    /// `ParsedBuildCommandLine.WatchOptions`.
+
     pub watch_options: WatchOptions,
     current_dir: String,
 }
@@ -1197,7 +1112,6 @@ impl ParsedBuildCommandLine {
     }
 }
 
-/// Helper extension to build a compiler diagnostic with custom text.
 impl Diagnostic {
     pub fn with_text(self, text: impl Into<String>) -> Diagnostic {
         Diagnostic {
@@ -1221,14 +1135,6 @@ fn err(text: impl Into<String>) -> Diagnostic {
     Diagnostic::new(None, TextRange::undefined(), new_ad_hoc_message(""), vec![]).with_text(text)
 }
 
-// ────────────────────────────────────────────────────────────────────────────
-// Command-line parsing
-// ────────────────────────────────────────────────────────────────────────────
-
-/// Parse command-line arguments into a `ParsedCommandLine`.
-///
-/// `current_dir` is used to resolve relative file paths and response files.
-/// `fs` is used to read response files.
 pub fn parse_command_line(
     args: &[String],
     current_dir: &str,
@@ -1242,7 +1148,7 @@ pub fn parse_command_line(
     let watch = compiler_options.watch.is_true();
     let mut watch_options = WatchOptions::default();
     apply_watch_options(&watch_options_map, &mut watch_options);
-    // Resolve relative file names to absolute paths.
+
     let file_names = file_names
         .iter()
         .map(|f| tspath::get_normalized_absolute_path(f, current_dir))
@@ -1358,7 +1264,7 @@ fn parse_command_line_worker(
         let first = s.chars().next().unwrap();
         match first {
             '@' => {
-                // Response file
+
                 let response_path = &s[1..];
                 let abs = tspath::get_normalized_absolute_path(response_path, current_dir);
                 if let Some(fs) = fs {
@@ -1399,9 +1305,9 @@ fn parse_command_line_worker(
                 }
             }
             '-' => {
-                // Strip up to two leading dashes.
+
                 let name_part = s.trim_start_matches('-');
-                // Support `--name=value`.
+
                 let (name, inline_value) = match name_part.split_once('=') {
                     Some((n, v)) => (n, Some(v.to_string())),
                     None => (name_part, None),
@@ -1419,10 +1325,7 @@ fn parse_command_line_worker(
                         );
                     }
                     None => {
-                        // Watch-option fallback: if the option exists in the
-                        // watch name map, route it into the separate
-                        // `watch_options` map. Mirrors Go's `WatchNameMap`
-                        // fallback in `parseStrings` (`commandlineparser.go:150`).
+
                         if let Some(opt) = find_watch_option(name) {
                             i = parse_option_value(
                                 args,
@@ -1435,10 +1338,7 @@ fn parse_command_line_worker(
                             );
                             continue;
                         }
-                        // Alternate-mode: if the option exists in the *other*
-                        // name map, emit the appropriate diagnostic instead of
-                        // the generic "unknown" error. Mirrors Go's
-                        // `createUnknownOptionError` / `AlternateModeDiagnostics`.
+
                         if mode == ParseMode::Compiler && find_build_only_option(name).is_some() {
                             errors.push(Diagnostic::new(
                                 None,
@@ -1448,10 +1348,9 @@ fn parse_command_line_worker(
                             ));
                             continue;
                         }
-                        // Build mode: check if it's a compiler option used with
-                        // build (TS5094), then try did-you-mean for build options.
+
                         if mode == ParseMode::Build {
-                            // Check if it's a known compiler option
+
                             if find_option(name).is_some() {
                                 errors.push(Diagnostic::new(
                                     None,
@@ -1461,7 +1360,7 @@ fn parse_command_line_worker(
                                 ));
                                 continue;
                             }
-                            // Unknown build option — try did-you-mean
+
                             let suggestion = did_you_mean_build_option(name);
                             if let Some(s) = suggestion {
                                 errors.push(Diagnostic::new(
@@ -1507,10 +1406,7 @@ fn parse_option_value(
     errors: &mut Vec<Diagnostic>,
     watch: bool,
 ) -> usize {
-    // For watch options, type-mismatch / missing-value diagnostics use
-    // `Watch_option_0_requires_a_value_of_type_1` (TS5080) instead of the
-    // generic ad-hoc message, mirroring Go's `watchOptionsDidYouMeanDiagnostics.
-    // OptionTypeMismatchDiagnostic` (`tsoptions/diagnostics.go:46-54`).
+
     let type_name = |kind: OptionKind| -> &'static str {
         match kind {
             OptionKind::Boolean => "boolean",
@@ -1532,9 +1428,7 @@ fn parse_option_value(
             errors.push(err(format!("Option '{}' requires a value.", opt.name)));
         }
     };
-    // TSConfigOnly options can only appear in tsconfig.json; on the command
-    // line only `false`/`null` (booleans) or `null` (others) are accepted.
-    // Mirrors Go's `parseOptionValue` `IsTSConfigOnly` branch.
+
     if opt.is_tsconfig_only {
         let (opt_value, from_args) = match &inline_value {
             Some(v) => (v.clone(), false),
@@ -1637,11 +1531,7 @@ fn parse_option_value(
                     options.insert(opt.name.to_string(), OptValue::Null);
                 }
                 Some(v) => {
-                    // Declaration-driven enum validation: if the option declares
-                    // `enum_values`, the (case-insensitive) value must be in that
-                    // list, otherwise emit `ARGUMENT_FOR_0_OPTION_MUST_BE_COLON_1`
-                    // listing the valid values. Mirrors Go's
-                    // `convertJsonOptionOfEnumType` / `createDiagnosticForInvalidEnumType`.
+
                     if let Some(enum_vals) = opt.enum_values {
                         if enum_vals.iter().any(|e| e.eq_ignore_ascii_case(&v)) {
                             options.insert(opt.name.to_string(), OptValue::Str(v));
@@ -1680,9 +1570,7 @@ fn parse_option_value(
             match val {
                 Some(v) => match v.parse::<i64>() {
                     Ok(n) => {
-                        // Declaration-driven min-value validation (e.g.
-                        // `builders` must be >= 1). Mirrors Go's
-                        // `parseOptionValue` number branch.
+
                         if let Some(min) = opt.min_value {
                             if n < min {
                                 errors.push(Diagnostic::new(
@@ -1736,12 +1624,6 @@ fn parse_option_value(
     i
 }
 
-/// Tokenize a response file's contents into arguments, mirroring Go's
-/// `parseResponseFile` (`commandlineparser.go:183-213`). Whitespace separates
-/// arguments; double-quoted spans are captured literally (without the quotes).
-/// An unterminated quoted string emits a TS6045 diagnostic and consumes the
-/// remainder of the file as the argument (matching Go's behavior of still
-/// pushing `text[start+1:pos]` before reporting the error).
 fn split_response_file(content: &str, file_name: &str) -> (Vec<String>, Vec<Diagnostic>) {
     let mut args = Vec::new();
     let mut errors: Vec<Diagnostic> = Vec::new();
@@ -1764,8 +1646,7 @@ fn split_response_file(content: &str, file_name: &str) -> (Vec<String>, Vec<Diag
             if pos < chars.len() {
                 pos += 1;
             } else {
-                // Reached end of file inside a quoted string: emit TS6045,
-                // aligned with Go's `Unterminated_quoted_string_in_response_file_0`.
+
                 errors.push(Diagnostic::new(
                     None,
                     TextRange::undefined(),
@@ -1784,15 +1665,9 @@ fn split_response_file(content: &str, file_name: &str) -> (Vec<String>, Vec<Diag
     (args, errors)
 }
 
-// ────────────────────────────────────────────────────────────────────────────
-// Applying parsed options to CompilerOptions
-// ────────────────────────────────────────────────────────────────────────────
-
 fn set_bool(options: &mut CompilerOptions, name: &str, b: bool) {
     let t = Tristate::from(b);
-    // Case-insensitive: `apply_test_settings` lowercases directive names
-    // (`// @allowjs: true` → `"allowjs"`) while tsconfig parsing keeps the
-    // camelCase JSON keys (`"allowJs"`). Normalize so both paths apply.
+
     let name = name.to_ascii_lowercase();
     match name.as_str() {
         "noemit" => options.no_emit = t,
@@ -1859,7 +1734,7 @@ fn set_bool(options: &mut CompilerOptions, name: &str, b: bool) {
         "quiet" => options.quiet = t,
         "strict" => {
             options.strict = t;
-            // `--strict` enables the full strict family.
+
             options.strict_null_checks = t;
             options.strict_function_types = t;
             options.strict_bind_call_apply = t;
@@ -1874,38 +1749,15 @@ fn set_bool(options: &mut CompilerOptions, name: &str, b: bool) {
     }
 }
 
-/// Apply a map of TypeScript test-directive settings (as written in official
-/// test cases, e.g. `// @module: commonjs`, `// @strict: true`, `// @lib: es2020,dom`)
-/// onto a fresh [`CompilerOptions`].
-///
-/// This is the public entry point used by the baseline test runner; it reuses
-/// the same string→enum/tristate mapping as `apply_options`/`set_bool`. Returns
-/// the resulting options plus the list of directive names that were **not**
-/// recognized (callers like `SkipUnsupportedCompilerOptions` use that to skip
-/// tests exercising options the port doesn't yet support).
-///
-/// Each value is classified as: `true`/`false` (case-insensitive) → boolean;
-/// for known list-valued options (`lib`, `types`, `typeRoots`, `rootDirs`)
-/// the comma-separated value is split into a list; everything else is treated
-/// as a plain string.
 pub fn apply_test_settings(settings: &HashMap<String, String>) -> (CompilerOptions, Vec<String>) {
     apply_test_settings_with_base(settings, CompilerOptions::default())
 }
 
-/// The tsconfig-unit variant: directive settings apply ON TOP of a base
-/// (the parsed `tsconfig.json` unit's compilerOptions — Go
-/// `CompileFiles` clones the config options then runs
-/// `SetOptionsFromTestConfig` over them, so directives win conflicts).
-/// The calibrated `noImplicitAny`-defaults-true rule still applies, but an
-/// explicitly-set base value (`"noImplicitAny": false` in the config) is
-/// respected.
 pub fn apply_test_settings_with_base(
     settings: &HashMap<String, String>,
     base: CompilerOptions,
 ) -> (CompilerOptions, Vec<String>) {
-    // Names of directives this function understands. Anything else is reported
-    // as unrecognized so the test runner can skip those cases rather than run
-    // them with silently-defaulted options.
+
     const KNOWN_BOOL_OPTIONS: &[&str] = &[
         "noemit",
         "nocheck",
@@ -2000,12 +1852,6 @@ pub fn apply_test_settings_with_base(
     let mut options = base;
     let mut unrecognized: Vec<String> = Vec::new();
 
-    // tsgo defaults `noImplicitAny` to TRUE when the case specifies neither
-    // `strict` nor `noImplicitAny` (verified against the Go oracle CLI and
-    // the official baselines: `function foo();` reports TS7010 with no
-    // directives). An explicit directive always wins, `strict: false`
-    // keeps it off via the strict-option fallback, and a tsconfig base
-    // that explicitly set it is respected.
     let has_strict_directive = settings
         .keys()
         .any(|k| k.eq_ignore_ascii_case("strict"));
@@ -2029,16 +1875,9 @@ pub fn apply_test_settings_with_base(
             continue;
         }
 
-        // Classify the value and apply it.
         let is_bool_val = matches!(trimmed.as_str(), "true" | "false")
             && KNOWN_BOOL_OPTIONS.contains(&lower.as_str());
-        // Canonicalize the key through the (case-insensitive) option
-        // declarations: `apply_options` matches arms EXACTLY, and the
-        // camelCase arms ("jsxImportSource", "moduleResolution", …) never
-        // fired for the lowercased directive keys — the values silently
-        // dropped (jsxJsxsCjsTransformCustomImport lost its
-        // `@jsxImportSource: preact`, node10 layouts lost
-        // `@moduleResolution: node10`).
+
         let canonical = find_option(&lower)
             .map(|o| o.name.to_string())
             .unwrap_or_else(|| lower.clone());
@@ -2247,13 +2086,6 @@ fn apply_build_options(options: &HashMap<String, OptValue>, out: &mut BuildOptio
     }
 }
 
-/// Apply parsed watch-option values to a `WatchOptions`, mirroring Go's
-/// `ParseWatchOptions` (`internal/tsoptions/parsinghelpers.go:489-516`).
-///
-/// Enum values are validated case-insensitively against the declaration's
-/// `enum_values` during CLI extraction, so here we just convert the accepted
-/// string to the typed enum. `Null` clears the field (mirrors Go's JSON
-/// `null` semantics).
 fn apply_watch_options(options: &HashMap<String, OptValue>, out: &mut WatchOptions) {
     for (name, value) in options {
         match name.as_str() {
@@ -2372,8 +2204,6 @@ fn parse_jsx_emit(s: &str) -> JsxEmit {
     }
 }
 
-/// Reverse mapping: `ScriptTarget` value → canonical string name used in
-/// tsconfig.json. Returns `None` for `ScriptTarget::None` (unset).
 pub fn script_target_name(t: ScriptTarget) -> Option<&'static str> {
     match t {
         ScriptTarget::ES5 => Some("es5"),
@@ -2394,7 +2224,6 @@ pub fn script_target_name(t: ScriptTarget) -> Option<&'static str> {
     }
 }
 
-/// Reverse mapping: `ModuleKind` value → canonical string name.
 pub fn module_kind_name(m: ModuleKind) -> Option<&'static str> {
     match m {
         ModuleKind::CommonJS => Some("commonjs"),
@@ -2414,7 +2243,6 @@ pub fn module_kind_name(m: ModuleKind) -> Option<&'static str> {
     }
 }
 
-/// Reverse mapping: `ModuleResolutionKind` value → canonical string name.
 pub fn module_resolution_name(r: ModuleResolutionKind) -> Option<&'static str> {
     match r {
         ModuleResolutionKind::Classic => Some("classic"),
@@ -2426,7 +2254,6 @@ pub fn module_resolution_name(r: ModuleResolutionKind) -> Option<&'static str> {
     }
 }
 
-/// Reverse mapping: `JsxEmit` value → canonical string name.
 pub fn jsx_emit_name(j: JsxEmit) -> Option<&'static str> {
     match j {
         JsxEmit::Preserve => Some("preserve"),
@@ -2438,7 +2265,6 @@ pub fn jsx_emit_name(j: JsxEmit) -> Option<&'static str> {
     }
 }
 
-/// Reverse mapping: `ModuleDetectionKind` value → canonical string name.
 pub fn module_detection_name(d: ModuleDetectionKind) -> Option<&'static str> {
     match d {
         ModuleDetectionKind::Auto => Some("auto"),
@@ -2448,7 +2274,6 @@ pub fn module_detection_name(d: ModuleDetectionKind) -> Option<&'static str> {
     }
 }
 
-/// Reverse mapping: `NewLineKind` value → canonical string name.
 pub fn new_line_name(n: NewLineKind) -> Option<&'static str> {
     match n {
         NewLineKind::CRLF => Some("crlf"),
@@ -2457,16 +2282,6 @@ pub fn new_line_name(n: NewLineKind) -> Option<&'static str> {
     }
 }
 
-// ────────────────────────────────────────────────────────────────────────────
-// tsconfig.json parsing
-// ────────────────────────────────────────────────────────────────────────────
-
-/// Parse a `tsconfig.json` file into a `ParsedCommandLine`, merging `base_options`
-/// (from the command line) and expanding `files`/`include`/`exclude`.
-///
-/// This is the public entry point; it begins `extends` resolution with an empty
-/// resolution stack. Cycle detection and `extends`-as-array handling are
-/// implemented in the internal worker.
 pub fn get_parsed_command_line_of_config_file(
     config_file_name: &str,
     base_options: &CompilerOptions,
@@ -2496,9 +2311,6 @@ fn get_parsed_command_line_of_config_file_with_stack(
     result.compiler_options = base_options.clone();
     result.config_file_name = config_file_name.to_string();
 
-    // Cycle detection: normalize the config path and check the resolution
-    // stack. A repeat means an `extends` cycle (a -> b -> a); emit the
-    // circularity diagnostic and bail out to avoid infinite recursion.
     let resolved_path = tspath::get_normalized_absolute_path(config_file_name, current_dir);
     if resolution_stack.iter().any(|p| p == &resolved_path) {
         result.errors.push(Diagnostic::new(
@@ -2521,7 +2333,7 @@ fn get_parsed_command_line_of_config_file_with_stack(
     };
 
     let jsonc = strip_jsonc(&config_text);
-    // An empty tsconfig.json is treated as {} (no options).
+
     let root: crate::json::Value = if jsonc.trim().is_empty() {
         crate::json::Value::Object(crate::json::Map::new())
     } else {
@@ -2544,54 +2356,26 @@ fn get_parsed_command_line_of_config_file_with_stack(
         }
     };
 
-    // `extends` — may be a single string or an array of strings. Each target
-    // is resolved and merged in order; later targets have higher priority
-    // among extended configs (Go: last-entry-wins for options, via
-    // `mergeCompilerOptions` source-wins semantics in `applyExtendedConfig`).
-    // The own config (parsed below) overrides extended options; command-line
-    // base options override own. Effective precedence:
-    //   command-line > own > last-extended > ... > first-extended > defaults.
-    //
-    // `include`/`exclude`/`files` specs follow a different rule: the first
-    // extended config that declares a spec wins (later extended configs do
-    // not override it), and the own config overrides inherited specs.
-    //
-    // The current config's path is pushed onto the resolution stack before
-    // recursing so cycles are detected.
     let mut extended_opts = CompilerOptions::default();
     if let Some(extends) = root_obj.get("extends") {
         let extends_paths = extends_as_paths(extends, config_file_name, current_dir, fs);
         if !extends_paths.is_empty() {
             let mut new_stack: Vec<String> = resolution_stack.to_vec();
             new_stack.push(resolved_path.clone());
-            // Parse all extended configs first so we can merge options in
-            // reverse order (last wins) while inheriting include/exclude/files
-            // in forward order (first wins).
+
             let mut extended_configs: Vec<(String, ParsedCommandLine)> = Vec::new();
             for ext_path in &extends_paths {
-                // Use the extended config cache to avoid re-parsing the same
-                // config in diamond inheritance scenarios (A extends B and C;
-                // both B and C extend D → D parsed once, reused). Mirrors
-                // Go's `getExtendedConfig` (`tsconfigparsing.go:972`).
+
                 let ext_resolved = tspath::get_normalized_absolute_path(ext_path, current_dir);
                 let parent =
                     cache.get_or_parse(&ext_resolved, ext_path, current_dir, fs, &new_stack);
                 extended_configs.push((ext_path.clone(), parent));
             }
-            // Options: merge in reverse so the last extends entry wins
-            // (dst-wins merge: last iterated first sets fields, earlier
-            // entries only fill gaps the last didn't set).
+
             for (_, parent) in extended_configs.iter().rev() {
                 merge_compiler_options(&mut extended_opts, &parent.compiler_options);
             }
-            // include/exclude/files: first extended config that declares a
-            // spec wins (only inherit if result doesn't already have it).
-            // Relative paths in inherited specs are rewritten to be relative
-            // to the OWN config's directory (not the extended config's
-            // directory), mirroring Go's `applyExtendedConfig` which calls
-            // `tspath.ConvertToRelativePath(GetDirectoryPath(extendedConfigPath), …)`
-            // and prefixes each relative spec with the result. Absolute paths
-            // and `${configDir}`-prefixed paths are passed through as-is.
+
             let own_config_dir = tspath::get_directory_path(config_file_name);
             let compare_opts = tspath::ComparePathsOptions {
                 use_case_sensitive_file_names: fs.use_case_sensitive_file_names(),
@@ -2643,7 +2427,6 @@ fn get_parsed_command_line_of_config_file_with_stack(
             .collect();
     }
 
-    // `files`
     if let Some(files) = root_obj.get("files").and_then(|v| v.as_array()) {
         result.has_files_spec = true;
         result.files_spec.clear();
@@ -2653,7 +2436,7 @@ fn get_parsed_command_line_of_config_file_with_stack(
             }
         }
     }
-    // `include`
+
     if let Some(include) = root_obj.get("include").and_then(|v| v.as_array()) {
         result.has_include_spec = true;
         result.include.clear();
@@ -2663,7 +2446,7 @@ fn get_parsed_command_line_of_config_file_with_stack(
             }
         }
     }
-    // `exclude`
+
     if let Some(exclude) = root_obj.get("exclude").and_then(|v| v.as_array()) {
         result.has_exclude_spec = true;
         result.exclude.clear();
@@ -2674,12 +2457,6 @@ fn get_parsed_command_line_of_config_file_with_stack(
         }
     }
 
-    // Collect explicit-`null` field names from the own config's
-    // `compilerOptions`. In TS 5.5+, `"strict": null` means "do not inherit
-    // this field from extended configs" — the field is cleared to its default
-    // rather than receiving the extended value. Mirrors Go's
-    // `mergeCompilerOptions` collecting `explicitNullFields` from the raw
-    // `compilerOptions` map (`parsinghelpers.go:575-590`).
     let mut explicit_null_fields: HashSet<String> = HashSet::new();
     if let Some(co) = root_obj.get("compilerOptions").and_then(|v| v.as_object()) {
         for (key, value) in co {
@@ -2689,15 +2466,14 @@ fn get_parsed_command_line_of_config_file_with_stack(
         }
     }
 
-    // `compilerOptions`
     if let Some(co) = root_obj.get("compilerOptions").and_then(|v| v.as_object()) {
         result.raw_options = Some(crate::json::Value::Object(co.clone()));
         let (opts, opts_errors) = json_object_to_options(co);
         result.errors.extend(opts_errors);
-        // Build the own config's compiler options in isolation.
+
         let mut config_opts = CompilerOptions::default();
         apply_options(&opts, &mut config_opts);
-        // Handle `paths` specially — it's an object map, not handled by apply_options.
+
         if let Some(paths_val) = co.get("paths").and_then(|v| v.as_object()) {
             let mut paths_map = HashMap::new();
             for (key, val) in paths_val {
@@ -2711,19 +2487,10 @@ fn get_parsed_command_line_of_config_file_with_stack(
             }
             config_opts.paths = Some(paths_map);
         }
-        // Resolve `IsFilePath` options (rootDir, outDir, declarationDir, …) to
-        // absolute paths relative to the config file directory, mirroring Go's
-        // `normalizeNonListOptionValue`.
+
         let config_dir_for_opts = tspath::get_directory_path(config_file_name);
         resolve_file_path_options(&mut config_opts, &config_dir_for_opts);
-        // Apply precedence: command-line (base) > own (config_opts) > extended.
-        // `result.compiler_options` currently holds base_options (command-line).
-        // merge_compiler_options is dst-wins (src fills gaps), so:
-        //   1. merge own into base → own fills gaps of command-line (cmd wins)
-        //   2. merge extended into result → extended fills gaps of own (own wins)
-        // For step 2, pass `explicit_null_fields` as the skip set so that
-        // fields the own config explicitly set to `null` are NOT filled from
-        // extended configs (they stay at their default/cleared value).
+
         merge_compiler_options(&mut result.compiler_options, &config_opts);
         merge_compiler_options_with_skip(
             &mut result.compiler_options,
@@ -2731,32 +2498,13 @@ fn get_parsed_command_line_of_config_file_with_stack(
             &explicit_null_fields,
         );
     } else {
-        // No own compilerOptions; merge extended into base (command-line
-        // wins, extended fills gaps). No-op when no extends was present.
+
         merge_compiler_options(&mut result.compiler_options, &extended_opts);
     }
 
-    // Apply `${configDir}` template substitution to the merged compiler
-    // options. This must happen AFTER the merge so that `${configDir}`-prefixed
-    // values from the own config (which survived `resolve_file_path_options`
-    // because they were skipped) are resolved against this config's directory.
-    // Extended config `${configDir}` values were already substituted during
-    // their recursive parse, so only own-config values remain. Mirrors Go's
-    // `handleOptionConfigDirTemplateSubstitution` (tsconfigparsing.go:1210).
     let config_dir = tspath::get_directory_path(config_file_name);
     handle_config_dir_template_substitution(&mut result.compiler_options, &config_dir);
 
-    // Apply `${configDir}` substitution to include/exclude/files specs.
-    // Mirrors Go's `getSubstitutedStringArrayWithConfigDirTemplate` calls at
-    // tsconfigparsing.go:1290/1298/1309.
-    //
-    // IMPORTANT: Only apply this substitution for the OWN config (when
-    // `resolution_stack` is empty). For extended configs, the `${configDir}`
-    // prefixes must be preserved so they can be passed through during
-    // inheritance and resolved against the OWN config's directory later.
-    // This matches Go's behavior where `applyExtendedConfig` reads the RAW
-    // extended config's include/exclude/files (not the substituted ones) and
-    // passes `${configDir}`-prefixed paths through as-is.
     if resolution_stack.is_empty() {
         if let Some(substituted) =
             get_substituted_string_array_with_config_dir_template(&result.include, &config_dir)
@@ -2775,7 +2523,6 @@ fn get_parsed_command_line_of_config_file_with_stack(
         }
     }
 
-    // Resolve file names from specs.
     result.file_names = expand_file_names(
         &result.files_spec,
         result.has_files_spec,
@@ -2788,10 +2535,6 @@ fn get_parsed_command_line_of_config_file_with_stack(
         fs,
     );
 
-    // TS18003: report when a config yields no input files, unless the config
-    // explicitly opts out by declaring `files` or `references`, or this config
-    // is being parsed as part of an `extends` chain (resolution_stack non-empty).
-    // Mirrors Go's `shouldReportNoInputFiles` + `canJsonReportNoInputFiles`.
     if result.file_names.is_empty() && resolution_stack.is_empty() {
         let can_report = !root_obj.contains_key("files") && !root_obj.contains_key("references");
         if can_report {
@@ -2811,18 +2554,13 @@ fn get_parsed_command_line_of_config_file_with_stack(
     result
 }
 
-/// Resolve the `extends` field of a tsconfig into a list of concrete config
-/// file paths. `extends` may be a single string or an array of strings (TS 5.0+);
-/// each entry is resolved relative to the extending config's directory, then
-/// relative to `current_dir`. Non-string entries are ignored. Returns an empty
-/// vec when no valid extends target can be produced.
 fn extends_as_paths(
     extends: &crate::json::Value,
     config_file_name: &str,
     current_dir: &str,
     fs: &dyn FS,
 ) -> Vec<String> {
-    // Accept either a single string or an array of strings.
+
     let specs: Vec<String> = match extends {
         crate::json::Value::String(s) => vec![s.clone()],
         crate::json::Value::Array(arr) => arr
@@ -2837,14 +2575,6 @@ fn extends_as_paths(
         .collect()
 }
 
-/// Resolve a single `extends` spec to an absolute config file path.
-///
-/// Mirrors Go's `getExtendsConfigPath` (`tsconfigparsing.go:547`):
-/// - If the spec is rooted or starts with `./` / `../` → resolve as a
-///   relative/absolute path with `.json` suffix fallback.
-/// - Otherwise (bare specifier like `tsconfig-base` or `@scope/base`) →
-///   resolve via Node-style `node_modules` walk using
-///   `module.ResolveConfig` semantics (`resolver.go:371`).
 fn resolve_single_extends_path(
     s: &str,
     config_file_name: &str,
@@ -2860,37 +2590,31 @@ fn resolve_single_extends_path(
     }
 }
 
-/// Resolve a relative or rooted `extends` spec (mirrors Go's
-/// `getExtendsConfigPath` relative-path branch, `tsconfigparsing.go:560`).
 fn resolve_relative_extends_path(
     s: &str,
     config_dir: &str,
     current_dir: &str,
     fs: &dyn FS,
 ) -> Option<String> {
-    // Combine and normalize so that `./base` doesn't leave a stray `./` in
-    // the path (which would cause `.json` suffix checks to miss the file).
+
     let base = tspath::normalize_path(&tspath::combine_paths(&config_dir, &[s]));
-    // Try as-is first (mirrors Go's `fs.FileExists(extendedConfigPath)`).
+
     if fs.file_exists(&base) {
         return Some(base);
     }
-    // If the spec doesn't already end in `.json`, try appending `.json`
-    // (mirrors Go's `extendedConfigPath + ".json"` fallback for relative specs).
+
     if !base.ends_with(".json") {
         let with_json = format!("{base}.json");
         if fs.file_exists(&with_json) {
             return Some(with_json);
         }
     }
-    // Try the directory form (`spec/tsconfig.json`). Go only does this via
-    // Node-style resolution for module specs, but the TS docs document
-    // directory extends and this form is widely used in monorepos.
+
     let dir_form = tspath::combine_paths(&base, &["tsconfig.json"]);
     if fs.file_exists(&dir_form) {
         return Some(dir_form);
     }
-    // Fall back to the raw string resolved against current_dir.
+
     let abs = tspath::get_normalized_absolute_path(s, current_dir);
     if fs.file_exists(&abs) {
         Some(abs)
@@ -2899,18 +2623,6 @@ fn resolve_relative_extends_path(
     }
 }
 
-/// Resolve a bare module specifier (e.g. `tsconfig-base`, `@scope/base`)
-/// via Node-style `node_modules` directory walk.
-///
-/// Mirrors Go's `module.ResolveConfig` → `resolveNodeLike` →
-/// `loadModuleFromNearestNodeModulesDirectory` pipeline (`resolver.go:371`,
-/// `resolver.go:569`, `resolver.go:981`) with `isConfigLookup = true` and
-/// `extensions = extensionsJson`:
-///
-/// 1. Walk ancestor directories from `containing_directory` upward.
-/// 2. At each ancestor `D` (whose basename isn't `node_modules`), check
-///    `D/node_modules/<spec>`.
-/// 3. Return the first match; if none found, return `None`.
 fn resolve_config_via_node_modules(
     module_name: &str,
     containing_directory: &str,
@@ -2918,10 +2630,7 @@ fn resolve_config_via_node_modules(
 ) -> Option<String> {
     let mut result: Option<String> = None;
     tspath::for_each_ancestor_directory(containing_directory, |ancestor| {
-        // Skip `node_modules` directories themselves — we look *inside*
-        // them, not at them (mirrors Go's check in
-        // `loadModuleFromNearestNodeModulesDirectoryWorker`,
-        // `resolver.go:1018`).
+
         if tspath::get_base_file_name(ancestor) == "node_modules" {
             return false;
         }
@@ -2931,35 +2640,24 @@ fn resolve_config_via_node_modules(
         }
         if let Some(resolved) = load_config_from_node_modules(module_name, &node_modules, fs) {
             result = Some(resolved);
-            return true; // stop walking
+            return true;
         }
         false
     });
     result
 }
 
-/// Try to load a config file from a specific `node_modules` directory.
-///
-/// Mirrors Go's `loadModuleFromImmediateNodeModulesDirectory` →
-/// `loadModuleFromSpecificNodeModulesDirectory` →
-/// `loadModuleFromFile` + `loadNodeModuleFromDirectoryWorker` pipeline
-/// (`resolver.go:1028`, `resolver.go:1057`) for the `isConfigLookup` case
-/// with `extensionsJson`.
 fn load_config_from_node_modules(
     module_name: &str,
     node_modules_dir: &str,
     fs: &dyn FS,
 ) -> Option<String> {
-    // Parse the package name: `@scope/pkg/sub` → (`@scope/pkg`, `sub`).
-    // The package name determines which directory contains `package.json`.
+
     let (package_name, _rest) = crate::module::parse_package_name(module_name);
 
     let candidate =
         tspath::normalize_path(&tspath::combine_paths(node_modules_dir, &[module_name]));
 
-    // 1. File form: try `<candidate>.json` (or `<candidate>` if it already
-    //    ends in `.json`). Mirrors Go's `loadModuleFromFile` with
-    //    `extensionsJson`.
     if candidate.ends_with(".json") {
         if fs.file_exists(&candidate) {
             return Some(candidate);
@@ -2971,20 +2669,11 @@ fn load_config_from_node_modules(
         }
     }
 
-    // 2. Directory form: try `<candidate>/tsconfig.json`. Mirrors Go's
-    //    `loadNodeModuleFromDirectoryWorker` with `isConfigLookup = true`
-    //    where `indexPath = <candidate>/tsconfig` and
-    //    `loadModuleFromFile(extensionsJson, indexPath)` tries
-    //    `<candidate>/tsconfig.json` (`resolver.go:1659-1700`).
     let tsconfig_in_dir = tspath::combine_paths(&candidate, &["tsconfig.json"]);
     if fs.file_exists(&tsconfig_in_dir) {
         return Some(tsconfig_in_dir);
     }
 
-    // 3. package.json `tsconfig` field: read the package's `package.json`
-    //    and check for a `"tsconfig"` string field. If present, resolve it
-    //    relative to the package directory. Mirrors Go's `getPackageFile`
-    //    with `isConfigLookup` (`resolver.go:1744`).
     let package_dir = tspath::combine_paths(node_modules_dir, &[&package_name]);
     let package_json_path = tspath::combine_paths(&package_dir, &["package.json"]);
     if fs.file_exists(&package_json_path) {
@@ -3010,10 +2699,7 @@ fn json_object_to_options(
     let mut out = HashMap::new();
     let mut errors = Vec::new();
     for (k, v) in obj {
-        // Declaration-driven case-mismatch detection: look up the key
-        // case-insensitively; if a declaration exists but its canonical name
-        // does not exactly match the key, emit a "did you mean" diagnostic and
-        // skip the key (mirrors Go's `convertOptionsFromJson`).
+
         if let Some(opt) = find_option(k) {
             if opt.name != k {
                 errors.push(Diagnostic::new(
@@ -3054,36 +2740,19 @@ fn json_to_opt_value(v: &crate::json::Value) -> OptValue {
     }
 }
 
-// ────────────────────────────────────────────────────────────────────────────
-// `${configDir}` template substitution (TS 5.5+)
-// ────────────────────────────────────────────────────────────────────────────
-
-/// The `${configDir}` template variable (TS 5.5+). When a tsconfig.json value
-/// starts with this prefix, it is resolved relative to the config file's
-/// directory rather than the usual basePath. Mirrors Go's
-/// `configDirTemplate` (`tsconfigparsing.go:428`).
 const CONFIG_DIR_TEMPLATE: &str = "${configDir}";
 
-/// Whether `value` starts with the `${configDir}` template prefix
-/// (case-insensitive). Mirrors Go's `startsWithConfigDirTemplate`.
 fn starts_with_config_dir_template(value: &str) -> bool {
     value
         .to_ascii_lowercase()
         .starts_with(&CONFIG_DIR_TEMPLATE.to_ascii_lowercase())
 }
 
-/// Replace the first `${configDir}` in `value` with `./` and resolve the
-/// result as a normalized absolute path against `base_path`. Mirrors Go's
-/// `getSubstitutedPathWithConfigDirTemplate`.
 fn get_substituted_path_with_config_dir_template(value: &str, base_path: &str) -> String {
     let replaced = value.replacen(CONFIG_DIR_TEMPLATE, "./", 1);
     tspath::get_normalized_absolute_path(&replaced, base_path)
 }
 
-/// Apply `${configDir}` substitution to a string array. Returns `Some(new_vec)`
-/// if any element was substituted, or `None` if no element needed substitution
-/// (mirrors Go's nil-return convention so callers can skip clone).
-/// Mirrors Go's `getSubstitutedStringArrayWithConfigDirTemplate`.
 fn get_substituted_string_array_with_config_dir_template(
     list: &[String],
     base_path: &str,
@@ -3098,14 +2767,8 @@ fn get_substituted_string_array_with_config_dir_template(
     result
 }
 
-/// Apply `${configDir}` substitution to all relevant compiler options after
-/// the merge step. Mirrors Go's `handleOptionConfigDirTemplateSubstitution`.
-///
-/// Affected options: `paths` (each target), `rootDirs`, `typeRoots`,
-/// `generateCpuProfile`, `generateTrace`, `outFile`, `outDir`, `rootDir`,
-/// `tsBuildInfoFile`, `baseUrl`, `declarationDir`.
 fn handle_config_dir_template_substitution(options: &mut CompilerOptions, base_path: &str) {
-    // `paths` — substitute each target list, keyed by pattern.
+
     if let Some(paths) = options.paths.as_mut() {
         let mut changed = false;
         for (_, targets) in paths.iter_mut() {
@@ -3117,25 +2780,22 @@ fn handle_config_dir_template_substitution(options: &mut CompilerOptions, base_p
             }
         }
         if !changed {
-            // No substitution needed; nothing to do.
+
         }
     }
 
-    // `rootDirs`
     if let Some(root_dirs) =
         get_substituted_string_array_with_config_dir_template(&options.root_dirs, base_path)
     {
         options.root_dirs = root_dirs;
     }
 
-    // `typeRoots`
     if let Some(type_roots) =
         get_substituted_string_array_with_config_dir_template(&options.type_roots, base_path)
     {
         options.type_roots = type_roots;
     }
 
-    // String-valued file-path options.
     if starts_with_config_dir_template(&options.generate_cpu_profile) {
         options.generate_cpu_profile =
             get_substituted_path_with_config_dir_template(&options.generate_cpu_profile, base_path);
@@ -3170,28 +2830,12 @@ fn handle_config_dir_template_substitution(options: &mut CompilerOptions, base_p
     }
 }
 
-/// Resolve `IsFilePath` compiler options to absolute paths relative to
-/// `base_path`, mirroring Go's `normalizeNonListOptionValue`.
-///
-/// Options with `IsFilePath: true` (rootDir, outDir, declarationDir, outFile,
-/// baseUrl, tsBuildInfoFile, sourceRoot, mapRoot, project, …) are stored as
-/// written in the tsconfig (often relative). Go resolves them to absolute
-/// paths during JSON option parsing so that downstream code (emitter, program)
-/// can compare them against absolute source file paths without needing to
-/// track the config directory separately.
-///
-/// `${configDir}`-prefixed values are skipped here and substituted later via
-/// `handle_config_dir_template_substitution` (mirrors Go's
-/// `normalizeNonListOptionValue` which also skips `${configDir}` values).
 fn resolve_file_path_options(options: &mut CompilerOptions, base_path: &str) {
     let resolve = |s: &str| -> String {
         if s.is_empty() {
             return s.to_string();
         }
-        // `${configDir}` templates are substituted after the merge step via
-        // `handle_config_dir_template_substitution`; skip them here to avoid
-        // resolving against the wrong base_path (mirrors Go's
-        // `normalizeNonListOptionValue` which checks `startsWithConfigDirTemplate`).
+
         if starts_with_config_dir_template(s) {
             return s.to_string();
         }
@@ -3213,25 +2857,17 @@ fn resolve_file_path_options(options: &mut CompilerOptions, base_path: &str) {
     }
 }
 
-/// Merge `src` into `dst`, where `dst` values take precedence (already set).
 fn merge_compiler_options(dst: &mut CompilerOptions, src: &CompilerOptions) {
     let empty = HashSet::new();
     merge_compiler_options_with_skip(dst, src, &empty);
 }
 
-/// Merge `src` into `dst`, applying dst-wins semantics (src fills gaps).
-/// Fields whose JSON name appears in `skip_fields` are never filled from
-/// `src` — this implements the explicit-`null` clearing behavior (TS 5.5+):
-/// when the own config sets a field to `null`, the inherited extended value
-/// must not fill in. Mirrors Go's `mergeCompilerOptions` with its
-/// `explicitNullFields` set (`parsinghelpers.go:570`).
 fn merge_compiler_options_with_skip(
     dst: &mut CompilerOptions,
     src: &CompilerOptions,
     skip_fields: &HashSet<String>,
 ) {
-    // Apply src fields only where dst is at its default/unset AND the field
-    // is not in the skip set (explicit null).
+
     macro_rules! merge_tri {
         ($field:ident, $json_name:literal) => {
             if dst.$field.is_unknown() && !skip_fields.contains($json_name) {
@@ -3350,7 +2986,6 @@ fn merge_compiler_options_with_skip(
     }
 }
 
-/// Resolve the set of input file names from `files`/`include`/`exclude` specs.
 fn expand_file_names(
     files: &[String],
     has_files_spec: bool,
@@ -3398,12 +3033,10 @@ fn expand_file_names(
         }
     };
 
-    // Explicit `files`.
     for f in files {
         add(f, &mut result, &mut seen);
     }
 
-    // `include` glob expansion.
     let include_specs: Vec<String> = if !has_include_spec && !has_files_spec {
         vec!["**/*".to_string()]
     } else {
@@ -3443,9 +3076,6 @@ fn is_supported_source_file(path: &str) -> bool {
     is_supported_source_file_ex(path, false)
 }
 
-/// Mirrors Go's `isSupportedSourceFile` with `allowJs`/`checkJs` plumbing.
-/// When `allow_js` is true, `.js`/`.jsx`/`.mjs`/`.cjs` files are included.
-/// When `allow_js` is false, only TypeScript extensions are matched.
 fn is_supported_source_file_ex(path: &str, allow_js: bool) -> bool {
     let ext = path.rfind('.').map(|i| &path[i..]).unwrap_or("");
     if matches!(
@@ -3460,10 +3090,9 @@ fn is_supported_source_file_ex(path: &str, allow_js: bool) -> bool {
     false
 }
 
-/// Match an include glob spec against the filesystem, returning matching file paths.
 fn match_glob_spec(spec: &str, base_dir: &str, fs: &dyn FS) -> Vec<String> {
     let mut results = Vec::new();
-    // The spec may be relative to base_dir. Walk the directory tree and match.
+
     let abs_spec = if tspath::path_is_absolute(spec) {
         spec.to_string()
     } else {
@@ -3479,7 +3108,7 @@ fn match_glob_spec(spec: &str, base_dir: &str, fs: &dyn FS) -> Vec<String> {
             return results;
         }
     }
-    // Walk starting from the longest non-glob directory prefix of the spec.
+
     let walk_root = glob_base_dir(&abs_spec);
     walk_and_match(&abs_spec, &walk_root, fs, &mut results);
     results
@@ -3490,8 +3119,6 @@ fn contains_glob_char(spec: &str) -> bool {
         .any(|c| c == '*' || c == '?' || c == '{' || c == '[')
 }
 
-/// Return the longest directory prefix of `spec` that contains no glob
-/// metacharacters (`*`, `?`, `{`, `[`).
 fn glob_base_dir(spec: &str) -> String {
     let first_meta = spec
         .chars()
@@ -3500,7 +3127,7 @@ fn glob_base_dir(spec: &str) -> String {
         Some(idx) => &spec[..idx],
         None => spec,
     };
-    // Trim to the last directory separator.
+
     match prefix.rfind('/') {
         Some(0) => "/".to_string(),
         Some(idx) => prefix[..idx].to_string(),
@@ -3528,7 +3155,7 @@ fn walk_and_match(root_spec: &str, dir: &str, fs: &dyn FS, results: &mut Vec<Str
         }
     }
     for d in &entries.directories {
-        // Wildcard include walks skip common package folders like Go's vfsmatch.
+
         if d.eq_ignore_ascii_case("node_modules")
             || d.eq_ignore_ascii_case("bower_components")
             || d.eq_ignore_ascii_case("jspm_packages")
@@ -3548,12 +3175,6 @@ fn glob_matches(spec: &str, path: &str) -> bool {
     }
 }
 
-// ────────────────────────────────────────────────────────────────────────────
-// JSONC preprocessing
-// ────────────────────────────────────────────────────────────────────────────
-
-/// Strip `//` line comments, `/* */` block comments, and trailing commas from
-/// JSONC text so it can be parsed by a strict JSON parser.
 fn strip_jsonc(input: &str) -> String {
     let mut out = String::with_capacity(input.len());
     let chars: Vec<char> = input.chars().collect();
@@ -3581,13 +3202,13 @@ fn strip_jsonc(input: &str) -> String {
                 i += 1;
             }
             '/' if i + 1 < chars.len() && chars[i + 1] == '/' => {
-                // Line comment: skip to end of line.
+
                 while i < chars.len() && chars[i] != '\n' {
                     i += 1;
                 }
             }
             '/' if i + 1 < chars.len() && chars[i + 1] == '*' => {
-                // Block comment: skip to `*/`.
+
                 i += 2;
                 while i + 1 < chars.len() && !(chars[i] == '*' && chars[i + 1] == '/') {
                     i += 1;
@@ -3595,13 +3216,13 @@ fn strip_jsonc(input: &str) -> String {
                 i += 2;
             }
             ',' if i + 1 < chars.len() => {
-                // Trailing comma: peek ahead for `}` or `]` (skipping whitespace).
+
                 let mut j = i + 1;
                 while j < chars.len() && chars[j].is_whitespace() {
                     j += 1;
                 }
                 if j < chars.len() && (chars[j] == '}' || chars[j] == ']') {
-                    // Drop the comma.
+
                     i += 1;
                 } else {
                     out.push(c);
@@ -3719,14 +3340,6 @@ mod tests {
         assert!(!parsed.file_names.iter().any(|f| f.ends_with("ignore.txt")));
     }
 
-    // ──────────────────────────────────────────────────────────────────────
-    // Helpers for the ported tests.
-    // ──────────────────────────────────────────────────────────────────────
-
-    /// Returns true if any diagnostic on `parsed` carries a message argument
-    /// or message text containing `needle`. Ad-hoc errors store their text in
-    /// `Diagnostic.message_args[0]`; diagnostics built from a `Message`
-    /// constant store their template text in `Diagnostic.message`.
     fn has_error_containing(parsed: &ParsedCommandLine, needle: &str) -> bool {
         parsed.errors.iter().any(|e| {
             e.message_args.iter().any(|a| a.contains(needle))
@@ -3738,13 +3351,9 @@ mod tests {
         items.iter().map(|s| s.to_string()).collect()
     }
 
-    // ──────────────────────────────────────────────────────────────────────
-    // Command-line parser tests (ported from commandlineparser_test.go)
-    // ──────────────────────────────────────────────────────────────────────
-
     #[test]
     fn test_parse_command_line_version() {
-        // `--version` and `-v` both set the version flag.
+
         let parsed = parse_command_line(&args(&["--version"]), "/proj", None);
         assert!(parsed.compiler_options.version.is_true());
 
@@ -3824,7 +3433,7 @@ mod tests {
     fn test_parse_command_line_watch() {
         let parsed = parse_command_line(&args(&["--watch", "0.ts"]), "/proj", None);
         assert!(parsed.compiler_options.watch.is_true());
-        // The `watch` convenience flag on ParsedCommandLine mirrors the option.
+
         assert!(parsed.watch);
 
         let parsed_short = parse_command_line(&args(&["-w", "0.ts"]), "/proj", None);
@@ -3834,15 +3443,14 @@ mod tests {
 
     #[test]
     fn watch_options_empty_by_default() {
-        // No watch flags → default WatchOptions (all None/empty).
+
         let parsed = parse_command_line(&args(&["--noEmit", "0.ts"]), "/proj", None);
         assert!(parsed.watch_options.is_empty());
     }
 
     #[test]
     fn watch_options_parse_enum_flags() {
-        // `--watchFile usefsevents` etc. are routed into the separate
-        // watch_options map via the WatchNameMap fallback.
+
         let parsed = parse_command_line(
             &args(&[
                 "--watchFile",
@@ -3903,21 +3511,19 @@ mod tests {
 
     #[test]
     fn watch_options_invalid_enum_reports_ts6046() {
-        // Invalid enum value emits ARGUMENT_FOR_0_OPTION_MUST_BE_COLON_1 (TS6046)
-        // listing the valid values, mirroring compiler-option enum validation.
+
         let parsed = parse_command_line(&args(&["--watchFile", "bogus", "0.ts"]), "/proj", None);
         assert!(parsed
             .errors
             .iter()
             .any(|d| d.code == 6046 && d.message_args.iter().any(|a| a.contains("--watchFile"))));
-        // The invalid value is not stored.
+
         assert_eq!(parsed.watch_options.file_kind, WatchFileKind::None);
     }
 
     #[test]
     fn watch_options_missing_number_value_reports_ts5080() {
-        // `--watchInterval` with no value emits TS5080
-        // "Watch option 'watchInterval' requires a value of type number."
+
         let parsed = parse_command_line(&args(&["--watchInterval"]), "/proj", None);
         assert!(parsed.errors.iter().any(|d| d.code == 5080
             && d.message_args.first().map(|s| s.as_str()) == Some("watchInterval")
@@ -3933,8 +3539,7 @@ mod tests {
 
     #[test]
     fn watch_options_build_mode_also_accepts_watch_flags() {
-        // In build mode, watch flags are accepted via the same WatchNameMap
-        // fallback and routed into ParsedBuildCommandLine.watch_options.
+
         let parsed = parse_build_command_line(
             &args(&["--build", "--watchFile", "usefsevents", "."]),
             "/proj",
@@ -3945,8 +3550,7 @@ mod tests {
 
     #[test]
     fn watch_options_case_insensitive_lookup() {
-        // Watch option names are matched case-insensitively, mirroring Go's
-        // `NameMap.GetOptionDeclarationFromName`.
+
         let parsed = parse_command_line(
             &args(&["--WATCHFILE", "usefsevents", "0.ts"]),
             "/proj",
@@ -3957,8 +3561,7 @@ mod tests {
 
     #[test]
     fn watch_options_do_not_leak_into_compiler_options() {
-        // `--watchFile` is a watch option, not a compiler option; it must not
-        // appear in the compiler_options map (which would trigger TS5023).
+
         let parsed = parse_command_line(
             &args(&["--watchFile", "usefsevents", "0.ts"]),
             "/proj",
@@ -3984,7 +3587,7 @@ mod tests {
 
     #[test]
     fn test_parse_command_line_lib_list() {
-        // `--lib es5,es2015.symbol.wellknown 0.ts` parses as a comma-separated list.
+
         let parsed = parse_command_line(
             &args(&["--lib", "es5,es2015.symbol.wellknown", "0.ts"]),
             "/proj",
@@ -3999,7 +3602,7 @@ mod tests {
 
     #[test]
     fn test_parse_command_line_lib_multiple_flags() {
-        // A second `--lib` on the command line overrides the first (last wins).
+
         let parsed = parse_command_line(
             &args(&[
                 "--module",
@@ -4017,7 +3620,7 @@ mod tests {
         );
         assert_eq!(parsed.compiler_options.module, ModuleKind::CommonJS);
         assert_eq!(parsed.compiler_options.target, ScriptTarget::ES5);
-        // List values are split on commas and trimmed.
+
         assert_eq!(
             parsed.compiler_options.lib,
             vec![
@@ -4030,9 +3633,7 @@ mod tests {
 
     #[test]
     fn test_parse_command_line_lib_empty_followed_by_option() {
-        // `0.ts --lib --sourceMap`: `--lib` does not consume `--sourceMap`.
-        // (The Rust parser is case-sensitive for option names, so the canonical
-        // camelCase spelling `--sourceMap` is required.)
+
         let parsed = parse_command_line(&args(&["0.ts", "--lib", "--sourceMap"]), "/proj", None);
         assert!(parsed.compiler_options.lib.is_empty());
         assert!(parsed.compiler_options.source_map.is_true());
@@ -4048,7 +3649,7 @@ mod tests {
 
     #[test]
     fn test_parse_command_line_explicit_boolean_false() {
-        // `--strictNullChecks false 0.ts` sets the option to false (not unknown).
+
         let parsed = parse_command_line(
             &args(&["--strictNullChecks", "false", "0.ts"]),
             "/proj",
@@ -4070,16 +3671,14 @@ mod tests {
 
     #[test]
     fn test_parse_command_line_implicit_boolean() {
-        // `--strictNullChecks` with no value defaults to true.
+
         let parsed = parse_command_line(&args(&["--strictNullChecks"]), "/proj", None);
         assert!(parsed.compiler_options.strict_null_checks.is_true());
     }
 
     #[test]
     fn test_parse_command_line_non_boolean_after_boolean_flag() {
-        // `--noImplicitAny t 0.ts`: boolean flags only consume `true`/`false`,
-        // so `t` is treated as an input file (matches tsgo behavior). File names
-        // are kept in insertion order (the command-line parser does not sort).
+
         let parsed = parse_command_line(&args(&["--noImplicitAny", "t", "0.ts"]), "/proj", None);
         assert!(parsed.compiler_options.no_implicit_any.is_true());
         assert_eq!(parsed.file_names, vec!["/proj/t", "/proj/0.ts"]);
@@ -4107,7 +3706,7 @@ mod tests {
 
     #[test]
     fn test_parse_command_line_ts_build_info_file_null() {
-        // `--tsBuildInfoFile null` is accepted (string options honor `null`).
+
         let parsed =
             parse_command_line(&args(&["--tsBuildInfoFile", "null", "0.ts"]), "/proj", None);
         assert!(parsed.errors.is_empty());
@@ -4116,9 +3715,7 @@ mod tests {
 
     #[test]
     fn test_parse_command_line_type_roots() {
-        // `--typeRoots t` parses as a single-element list.
-        // (Note: unlike tsgo, the Rust port does not resolve list entries to
-        // absolute paths on the command line, so we assert the parsed value.)
+
         let parsed = parse_command_line(
             &args(&["--typeRoots", "t", "bug.ts"]),
             "/home/project",
@@ -4130,7 +3727,7 @@ mod tests {
 
     #[test]
     fn test_parse_command_line_files_in_middle() {
-        // Input files may appear between flags.
+
         let parsed = parse_command_line(
             &args(&[
                 "--module",
@@ -4169,9 +3766,7 @@ mod tests {
 
     #[test]
     fn test_response_file_does_not_panic() {
-        // Passing `@` with an empty or non-existent filename should produce a
-        // diagnostic error rather than panicking (ported from
-        // TestResponseFileDoesNotPanic).
+
         let parsed = parse_command_line(&args(&["@"]), "/proj", None);
         assert!(!parsed.errors.is_empty());
         assert!(has_error_containing(&parsed, "Cannot read file"));
@@ -4184,7 +3779,7 @@ mod tests {
 
     #[test]
     fn test_response_file_missing_with_fs() {
-        // Even with an FS provided, a missing response file yields an error.
+
         let fs = InMemoryFS::new();
         fs.insert_dir("/proj");
         let parsed = parse_command_line(&args(&["@missing.rsp"]), "/proj", Some(&fs));
@@ -4194,30 +3789,24 @@ mod tests {
 
     #[test]
     fn test_response_file_propagates_file_names() {
-        // A response file that exists is expanded into arguments. The Rust port
-        // currently propagates file names (and errors) from response files but
-        // does not yet merge compiler options from them, so we assert only the
-        // file-name propagation here.
+
         let fs = InMemoryFS::new();
         fs.insert_dir("/proj");
         fs.insert_file("/proj/args.rsp", "--strict\n0.ts");
         let parsed = parse_command_line(&args(&["@args.rsp"]), "/proj", Some(&fs));
         assert_eq!(parsed.file_names, vec!["/proj/0.ts"]);
-        // No errors reading the response file.
+
         assert!(!has_error_containing(&parsed, "Cannot read file"));
     }
 
     #[test]
     fn test_response_file_unterminated_quoted_string() {
-        // An unterminated quoted string in a response file emits TS6045
-        // (`Unterminated quoted string in response file '{0}'.`), aligned with
-        // Go's `parseResponseFile`. The unterminated token is still captured
-        // as an argument (matching Go's behavior).
+
         let fs = InMemoryFS::new();
         fs.insert_dir("/proj");
         fs.insert_file("/proj/args.rsp", "--outDir \"unterminated path");
         let parsed = parse_command_line(&args(&["@args.rsp"]), "/proj", Some(&fs));
-        // TS6045 diagnostic should be present.
+
         let has_ts6045 = parsed.errors.iter().any(|e| e.code == 6045);
         assert!(
             has_ts6045,
@@ -4228,21 +3817,16 @@ mod tests {
                 .map(|e| (e.code, e.message_args.clone()))
                 .collect::<Vec<_>>()
         );
-        // The unterminated content is still captured as the --outDir value.
+
         assert_eq!(
             parsed.compiler_options.out_dir, "unterminated path",
             "unterminated token should still be captured as the option value"
         );
     }
 
-    // ──────────────────────────────────────────────────────────────────────
-    // JSONC preprocessing tests (ported from tsconfigparsing_test.go,
-    // TestParseConfigFileTextToJson scenarios)
-    // ──────────────────────────────────────────────────────────────────────
-
     #[test]
     fn test_strip_jsonc_whitespace_and_empty_object() {
-        // Whitespace-only and comment-only inputs strip to empty/whitespace.
+
         let stripped = strip_jsonc("   ");
         assert_eq!(stripped.trim(), "");
 
@@ -4252,7 +3836,6 @@ mod tests {
         let stripped = strip_jsonc("/* Comment */");
         assert_eq!(stripped.trim(), "");
 
-        // An empty object survives.
         let stripped = strip_jsonc("{}");
         let v: crate::json::Value = crate::json::from_str(&stripped).unwrap();
         assert!(v.as_object().is_some());
@@ -4270,7 +3853,6 @@ mod tests {
         let v: crate::json::Value = crate::json::from_str(&stripped).unwrap();
         assert_eq!(v["exclude"][0].as_str(), Some("file.d.ts"));
 
-        // Multiline block comments interspersed in a line are removed.
         let input = r#"{
             /* Excluded
                     Files
@@ -4286,7 +3868,7 @@ mod tests {
 
     #[test]
     fn test_strip_jsonc_keeps_string_content() {
-        // `//` and `/* */` inside string literals are preserved verbatim.
+
         let input = r#"{
             "exclude": [
                 "xx//file.d.ts"
@@ -4308,7 +3890,7 @@ mod tests {
 
     #[test]
     fn test_strip_jsonc_trailing_comma() {
-        // Trailing commas before `}` or `]` are dropped.
+
         let input = r#"{
             "compilerOptions": {
                 "target": "ES5",
@@ -4320,10 +3902,6 @@ mod tests {
         assert_eq!(v["compilerOptions"]["target"].as_str(), Some("ES5"));
         assert_eq!(v["compilerOptions"]["strict"].as_bool(), Some(true));
     }
-
-    // ──────────────────────────────────────────────────────────────────────
-    // tsconfig.json parsing tests (ported from tsconfigparsing_test.go)
-    // ──────────────────────────────────────────────────────────────────────
 
     #[test]
     fn test_parse_tsconfig_extends_merges_options() {
@@ -4348,12 +3926,12 @@ mod tests {
             "/proj",
             &fs,
         );
-        // Parent options are inherited.
+
         assert_eq!(parsed.compiler_options.target, ScriptTarget::ES2020);
         assert!(parsed.compiler_options.strict.is_true());
-        // Child option is applied (resolved to absolute, mirroring Go's IsFilePath).
+
         assert_eq!(parsed.compiler_options.out_dir, "/proj/dist");
-        // `strict` from the base enables the strict family.
+
         assert!(parsed.compiler_options.strict_null_checks.is_true());
     }
 
@@ -4392,8 +3970,7 @@ mod tests {
 
     #[test]
     fn test_parse_tsconfig_extends_circular_is_detected() {
-        // A circular `extends` chain (a -> b -> a) must terminate and emit the
-        // circularity diagnostic (code 18000) instead of stack-overflowing.
+
         let fs = InMemoryFS::new();
         fs.insert_dir("/proj");
         fs.insert_file(
@@ -4410,7 +3987,7 @@ mod tests {
             "/proj",
             &fs,
         );
-        // The circularity diagnostic must be present with code 18000.
+
         assert!(
             parsed
                 .errors
@@ -4419,15 +3996,13 @@ mod tests {
             "expected a circularity diagnostic, got errors: {:?}",
             parsed.errors.iter().map(|e| e.code).collect::<Vec<_>>()
         );
-        // Resolution terminated without stack overflow; own options still apply.
+
         assert_eq!(parsed.compiler_options.target, ScriptTarget::ES2020);
     }
 
     #[test]
     fn test_parse_tsconfig_extends_as_array_merges_all() {
-        // `extends` may be an array of strings (TS 5.0+); each target is merged
-        // in order, and the own config is applied on top. Here both bases
-        // contribute distinct options and the own config contributes its own.
+
         let fs = InMemoryFS::new();
         fs.insert_dir("/proj");
         fs.insert_file(
@@ -4457,21 +4032,19 @@ mod tests {
             "unexpected errors: {:?}",
             parsed.errors
         );
-        // From base1.
+
         assert_eq!(parsed.compiler_options.target, ScriptTarget::ES2020);
         assert!(parsed.compiler_options.strict.is_true());
-        // From base2.
+
         assert_eq!(parsed.compiler_options.module, ModuleKind::CommonJS);
         assert!(parsed.compiler_options.declaration.is_true());
-        // Own config contributes its own (non-conflicting) option.
+
         assert_eq!(parsed.compiler_options.out_dir, "/proj/dist");
     }
 
     #[test]
     fn test_parse_tsconfig_extends_own_overrides_extended() {
-        // Go precedence: own > extended. When both the own config and the
-        // extended base set the same option, the own config's value must win.
-        // Previously the Rust port had inverted precedence (extended won).
+
         let fs = InMemoryFS::new();
         fs.insert_dir("/proj");
         fs.insert_file(
@@ -4491,7 +4064,7 @@ mod tests {
             "/proj",
             &fs,
         );
-        // Own `strict: false` must override extended `strict: true`.
+
         assert!(
             parsed.compiler_options.strict.is_false(),
             "expected own strict=false to override extended strict=true, got {:?}",
@@ -4501,9 +4074,7 @@ mod tests {
 
     #[test]
     fn test_parse_tsconfig_extends_array_last_wins() {
-        // Go precedence for extends array: later entries override earlier
-        // entries for the same option (last-entry-wins, via source-wins
-        // `mergeCompilerOptions` in `applyExtendedConfig`).
+
         let fs = InMemoryFS::new();
         fs.insert_dir("/proj");
         fs.insert_file(
@@ -4524,7 +4095,7 @@ mod tests {
             "/proj",
             &fs,
         );
-        // base2 (last) wins.
+
         assert_eq!(
             parsed.compiler_options.target,
             ScriptTarget::ES2015,
@@ -4535,7 +4106,7 @@ mod tests {
 
     #[test]
     fn test_parse_tsconfig_extends_command_line_overrides_own() {
-        // Command-line base options must override own config options.
+
         let fs = InMemoryFS::new();
         fs.insert_dir("/proj");
         fs.insert_file(
@@ -4546,7 +4117,7 @@ mod tests {
         base.strict = Tristate::False;
         let parsed =
             get_parsed_command_line_of_config_file("/proj/tsconfig.json", &base, "/proj", &fs);
-        // Command-line `--strict false` overrides config `strict: true`.
+
         assert!(
             parsed.compiler_options.strict.is_false(),
             "expected command-line strict=false to override config strict=true, got {:?}",
@@ -4556,9 +4127,7 @@ mod tests {
 
     #[test]
     fn test_parse_tsconfig_extends_include_first_extended_wins() {
-        // For `include`/`exclude`/`files`, the first extended config that
-        // declares a spec wins (later extended configs do not override).
-        // The own config overrides inherited specs when present.
+
         let fs = InMemoryFS::new();
         fs.insert_dir("/proj");
         fs.insert_dir("/proj/src1");
@@ -4577,7 +4146,7 @@ mod tests {
             "/proj",
             &fs,
         );
-        // base1 (first) wins for include.
+
         assert!(
             parsed.file_names.contains(&"/proj/src1/a.ts".to_string()),
             "expected first extended include (src1) to win, got {:?}",
@@ -4592,9 +4161,7 @@ mod tests {
 
     #[test]
     fn test_parse_tsconfig_extends_resolves_json_suffix() {
-        // `extends: "./base"` (without `.json` extension) should resolve to
-        // `./base.json` when the file exists, mirroring Go's
-        // `getExtendsConfigPath` `.json` suffix fallback.
+
         let fs = InMemoryFS::new();
         fs.insert_dir("/proj");
         fs.insert_file(
@@ -4608,7 +4175,7 @@ mod tests {
             "/proj",
             &fs,
         );
-        // The extends resolved to base.json and strict was inherited.
+
         assert!(
             parsed.compiler_options.strict.is_true(),
             "expected extends ./base to resolve to ./base.json and inherit strict=true, got {:?}",
@@ -4618,7 +4185,7 @@ mod tests {
 
     #[test]
     fn test_parse_tsconfig_full_compiler_options() {
-        // Ported from "parses tsconfig with compilerOptions, files, include, and exclude".
+
         let fs = InMemoryFS::new();
         fs.insert_dir("/apath");
         fs.insert_dir("/apath/src");
@@ -4662,21 +4229,20 @@ mod tests {
         assert!(parsed.compiler_options.strict.is_true());
         assert!(parsed.compiler_options.no_implicit_any.is_true());
         assert_eq!(parsed.compiler_options.out_dir, "/apath/dist");
-        // Explicit `files` are included.
+
         assert!(
             parsed
                 .file_names
                 .contains(&"/apath/src/index.ts".to_string())
         );
         assert!(parsed.file_names.contains(&"/apath/src/app.ts".to_string()));
-        // node_modules is excluded during the include walk.
+
         assert!(!parsed.file_names.iter().any(|f| f.contains("node_modules")));
     }
 
     #[test]
     fn test_parse_tsconfig_null_enum_options() {
-        // Ported from TestParseNullEnumCompilerOptions: `target: null` and
-        // `module: null` should produce no errors.
+
         let fs = InMemoryFS::new();
         fs.insert_dir("/proj");
         fs.insert_file(
@@ -4700,7 +4266,7 @@ mod tests {
 
     #[test]
     fn test_parse_tsconfig_empty_types_array() {
-        // Ported from "handles empty types array".
+
         let fs = InMemoryFS::new();
         fs.insert_dir("/proj");
         fs.insert_file(
@@ -4745,9 +4311,7 @@ mod tests {
         );
         assert!(parsed.file_names.contains(&"/proj/src/a.ts".to_string()));
         assert!(parsed.file_names.contains(&"/proj/src/b.ts".to_string()));
-        // Excluded file is filtered out of the include expansion. The exclude
-        // glob must match the absolute paths produced by the include walk, so a
-        // `**/tests/**` pattern is used.
+
         assert!(
             !parsed
                 .file_names
@@ -4787,8 +4351,7 @@ mod tests {
 
     #[test]
     fn test_parse_tsconfig_skips_node_modules_directory() {
-        // Ported from "implicitly exclude common package folders": the include
-        // walk skips `node_modules` directories.
+
         let fs = InMemoryFS::new();
         fs.insert_dir("/proj");
         fs.insert_dir("/proj/node_modules");
@@ -4833,8 +4396,7 @@ mod tests {
 
     #[test]
     fn test_tsconfig_no_inputs_emits_ts18003() {
-        // A config with no `files`/`references` and no matched files reports
-        // TS18003 (mirrors Go `shouldReportNoInputFiles`).
+
         let fs = InMemoryFS::new();
         fs.insert_dir("/proj");
         fs.insert_file(
@@ -4857,7 +4419,7 @@ mod tests {
 
     #[test]
     fn test_tsconfig_no_inputs_suppressed_by_files_key() {
-        // `files: []` opts out of TS18003 even when no files match.
+
         let fs = InMemoryFS::new();
         fs.insert_dir("/proj");
         fs.insert_file("/proj/src/a.ts", "");
@@ -4878,7 +4440,7 @@ mod tests {
 
     #[test]
     fn test_tsconfig_no_inputs_suppressed_by_references_key() {
-        // `references` opts out of TS18003 even when no files match.
+
         let fs = InMemoryFS::new();
         fs.insert_dir("/proj");
         fs.insert_file(
@@ -4901,8 +4463,7 @@ mod tests {
 
     #[test]
     fn test_tsconfig_references_parsed_as_typed_project_reference() {
-        // `references` entries are parsed into typed `ProjectReference` structs
-        // with a normalized absolute `path` and the raw `original_path`.
+
         let fs = InMemoryFS::new();
         fs.insert_dir("/proj");
         fs.insert_dir("/proj/test");
@@ -5007,7 +4568,7 @@ mod tests {
 
     #[test]
     fn test_parse_tsconfig_skips_git_directory() {
-        // The include walk skips `.git` directories.
+
         let fs = InMemoryFS::new();
         fs.insert_dir("/proj");
         fs.insert_dir("/proj/.git");
@@ -5055,8 +4616,7 @@ mod tests {
 
     #[test]
     fn test_parse_tsconfig_command_line_overrides_config() {
-        // Options supplied on the command line (via `base_options`) take
-        // precedence over those in tsconfig.json.
+
         let fs = InMemoryFS::new();
         fs.insert_dir("/proj");
         fs.insert_file(
@@ -5070,24 +4630,14 @@ mod tests {
         base.target = ScriptTarget::ES2022;
         let parsed =
             get_parsed_command_line_of_config_file("/proj/tsconfig.json", &base, "/proj", &fs);
-        // Command-line target wins; config-file strict is still inherited.
+
         assert_eq!(parsed.compiler_options.target, ScriptTarget::ES2022);
         assert!(parsed.compiler_options.strict.is_true());
     }
 
-    // ──────────────────────────────────────────────────────────────────────
-    // ParsedCommandLine / wildcard-directory tests
-    // (ported from parsedcommandline_test.go and wildcarddirectories_test.go)
-    //
-    // The Rust port does not expose a `get_wildcard_directories` helper, so
-    // these tests exercise the equivalent include/exclude behavior through
-    // `get_parsed_command_line_of_config_file`.
-    // ──────────────────────────────────────────────────────────────────────
-
     #[test]
     fn test_parsed_command_line_literal_file_list_dedup() {
-        // Ported from "with literal file list" > "duplicates": duplicate entries
-        // in `files` are deduplicated.
+
         let fs = InMemoryFS::new();
         fs.insert_dir("/dev");
         fs.insert_file("/dev/a.ts", "");
@@ -5104,7 +4654,7 @@ mod tests {
             "/dev",
             &fs,
         );
-        // Each file appears exactly once, sorted.
+
         assert_eq!(
             parsed.file_names,
             vec!["/dev/a.ts".to_string(), "/dev/b.ts".to_string()]
@@ -5113,8 +4663,7 @@ mod tests {
 
     #[test]
     fn test_parsed_command_line_files_not_removed_by_exclude() {
-        // Ported from "are not removed due to excludes": explicit `files` are
-        // kept even when an `exclude` pattern matches them.
+
         let fs = InMemoryFS::new();
         fs.insert_dir("/dev");
         fs.insert_file("/dev/a.ts", "");
@@ -5138,8 +4687,7 @@ mod tests {
 
     #[test]
     fn test_parsed_command_line_literal_include_matches_files() {
-        // Ported from "with literal include list" > "without exclude": a literal
-        // (non-glob) include matches the named files.
+
         let fs = InMemoryFS::new();
         fs.insert_dir("/dev");
         fs.insert_file("/dev/a.ts", "");
@@ -5162,12 +4710,7 @@ mod tests {
 
     #[test]
     fn test_wildcard_include_dot_prefixed_with_dot_dir_exclude() {
-        // Ported from TestGetWildcardDirectories_DotPrefixedIncludeWithDotDirExclude.
-        // Include specs with a directory prefix must still match files even when
-        // a `**/.*/` exclude (dot-directory exclude) is present. The Rust port
-        // does not normalize a leading `./` in include specs, so the specs here
-        // use the plain `app/...` form; the exclude behavior under test is the
-        // same.
+
         let fs = InMemoryFS::new();
         fs.insert_dir("/home/projects/monorepo/apps/web");
         fs.insert_dir("/home/projects/monorepo/apps/web/app");
@@ -5200,9 +4743,7 @@ mod tests {
 
     #[test]
     fn test_wildcard_include_non_ascii_paths() {
-        // Ported from TestGetWildcardDirectories_NonASCIICharacters: parsing
-        // configs with non-ASCII paths must not panic and should still resolve
-        // include globs.
+
         let fs = InMemoryFS::new();
         fs.insert_dir("/Users/ユーザー/プロジェクト");
         fs.insert_dir("/Users/ユーザー/プロジェクト/src");
@@ -5223,19 +4764,14 @@ mod tests {
         assert!(parsed.file_names.iter().any(|f| f.ends_with("/src/a.ts")));
     }
 
-    // ──────────────────────────────────────────────────────────────────────
-    // Option-declaration sanity test (adapted from decls_test.go)
-    // ──────────────────────────────────────────────────────────────────────
-
     #[test]
     fn test_options_declarations_non_empty_and_named() {
-        // The OPTIONS table must be populated and every declaration must carry
-        // a non-empty name.
+
         assert!(!OPTIONS.is_empty());
         for o in OPTIONS {
             assert!(!o.name.is_empty(), "found an option with an empty name");
         }
-        // A few key options must be present.
+
         let names: std::collections::HashSet<&str> = OPTIONS.iter().map(|o| o.name).collect();
         for required in [
             "help",
@@ -5263,7 +4799,7 @@ mod tests {
 
     #[test]
     fn test_option_decls_short_names_unique_or_known() {
-        // The commonly-used short names map to the expected options.
+
         assert_eq!(find_option("h").map(|o| o.name), Some("help"));
         assert_eq!(find_option("v").map(|o| o.name), Some("version"));
         assert_eq!(find_option("b").map(|o| o.name), Some("build"));
@@ -5274,13 +4810,6 @@ mod tests {
         assert_eq!(find_option("d").map(|o| o.name), Some("declaration"));
     }
 
-    // ──────────────────────────────────────────────────────────────────────
-    // Declaration-driven option parser tests (NameMap, did-you-mean,
-    // alternate-mode, TSConfigOnly, enum/min-value validation).
-    // ──────────────────────────────────────────────────────────────────────
-
-    /// Like `has_error_containing` but operates on a slice of diagnostics, so
-    /// it can be used with `ParsedBuildCommandLine.errors` too.
     fn diag_contains(errors: &[Diagnostic], needle: &str) -> bool {
         errors.iter().any(|e| {
             e.message_args.iter().any(|a| a.contains(needle))
@@ -5290,13 +4819,11 @@ mod tests {
 
     #[test]
     fn test_case_insensitive_option_lookup_cli() {
-        // `--Target` (wrong case) resolves case-insensitively to `target`,
-        // matching Go's NameMap behaviour on the command line.
+
         let parsed = parse_command_line(&args(&["--Target", "ES2020", "0.ts"]), "/proj", None);
         assert_eq!(parsed.compiler_options.target, ScriptTarget::ES2020);
         assert!(!has_error_containing(&parsed, "Unknown compiler option"));
 
-        // `--Module` and `--Jsx` likewise.
         let parsed = parse_command_line(
             &args(&["--Module", "commonjs", "--Jsx", "react", "0.ts"]),
             "/proj",
@@ -5308,16 +4835,14 @@ mod tests {
 
     #[test]
     fn test_case_insensitive_short_name_lookup() {
-        // Short names are also matched case-insensitively.
+
         let parsed = parse_command_line(&args(&["-P", "tsconfig.json"]), "/proj", None);
         assert_eq!(parsed.compiler_options.project, "tsconfig.json");
     }
 
     #[test]
     fn test_alternate_mode_build_option_in_compiler_mode() {
-        // `--dry` is a build-only option; using it in compiler mode emits the
-        // "may only be used with --build" diagnostic (TS5093) instead of the
-        // generic unknown-option error.
+
         let parsed = parse_command_line(&args(&["--dry", "0.ts"]), "/proj", None);
         assert!(diag_contains(
             &parsed.errors,
@@ -5328,7 +4853,7 @@ mod tests {
 
     #[test]
     fn test_alternate_mode_verbose_in_compiler_mode() {
-        // `--verbose` is build-only; in compiler mode it triggers TS5093.
+
         let parsed = parse_command_line(&args(&["--verbose"]), "/proj", None);
         assert!(diag_contains(
             &parsed.errors,
@@ -5338,9 +4863,7 @@ mod tests {
 
     #[test]
     fn test_tsconfig_only_option_on_cli_emits_diagnostic() {
-        // `composite` is TSConfigOnly; on the CLI it must emit the
-        // "can only be specified in tsconfig.json ... set to false or null"
-        // diagnostic (TS6230) and must NOT enable composite.
+
         let parsed = parse_command_line(&args(&["--composite", "0.ts"]), "/proj", None);
         assert!(has_error_containing(&parsed, "tsconfig.json"));
         assert!(has_error_containing(&parsed, "composite"));
@@ -5349,7 +4872,7 @@ mod tests {
 
     #[test]
     fn test_tsconfig_only_boolean_accepts_false() {
-        // `--composite false` is allowed (no error) and sets composite to false.
+
         let parsed = parse_command_line(&args(&["--composite", "false", "0.ts"]), "/proj", None);
         assert!(!has_error_containing(&parsed, "tsconfig.json"));
         assert!(parsed.compiler_options.composite.is_false());
@@ -5357,16 +4880,14 @@ mod tests {
 
     #[test]
     fn test_tsconfig_only_boolean_accepts_null() {
-        // `--composite null` is allowed (no error).
+
         let parsed = parse_command_line(&args(&["--composite", "null", "0.ts"]), "/proj", None);
         assert!(!has_error_containing(&parsed, "tsconfig.json"));
     }
 
     #[test]
     fn test_invalid_enum_value_target() {
-        // `--target es99` is not a valid target enum value; emit
-        // "Argument for '--target' option must be: ..." (TS6046) listing the
-        // valid values, and leave target unset.
+
         let parsed = parse_command_line(&args(&["--target", "es99", "0.ts"]), "/proj", None);
         assert!(has_error_containing(&parsed, "Argument for"));
         assert!(has_error_containing(&parsed, "--target"));
@@ -5384,7 +4905,7 @@ mod tests {
 
     #[test]
     fn test_valid_enum_value_case_insensitive() {
-        // Enum values are matched case-insensitively (Go lowercases the key).
+
         let parsed = parse_command_line(&args(&["--target", "ES2020", "0.ts"]), "/proj", None);
         assert!(!has_error_containing(&parsed, "Argument for"));
         assert_eq!(parsed.compiler_options.target, ScriptTarget::ES2020);
@@ -5392,7 +4913,7 @@ mod tests {
 
     #[test]
     fn test_min_value_violation_builders() {
-        // `--builders 0` violates the min-value (1) constraint → TS5002.
+
         let parsed =
             parse_build_command_line(&args(&["--build", "--builders", "0"]), "/proj", None);
         assert!(diag_contains(
@@ -5405,7 +4926,7 @@ mod tests {
 
     #[test]
     fn test_min_value_accepted_builders() {
-        // `--builders 1` satisfies the min-value constraint.
+
         let parsed =
             parse_build_command_line(&args(&["--build", "--builders", "2"]), "/proj", None);
         assert!(!diag_contains(
@@ -5417,9 +4938,7 @@ mod tests {
 
     #[test]
     fn test_case_mismatch_in_tsconfig_json_emits_did_you_mean() {
-        // A `compilerOptions` key whose case does not exactly match the
-        // canonical declaration emits a "Did you mean" diagnostic (TS5025) and
-        // skips the key.
+
         let fs = InMemoryFS::new();
         fs.insert_dir("/proj");
         fs.insert_dir("/proj/src");
@@ -5440,15 +4959,15 @@ mod tests {
         assert!(has_error_containing(&parsed, "Did you mean"));
         assert!(has_error_containing(&parsed, "Target"));
         assert!(has_error_containing(&parsed, "target"));
-        // The miscased key is skipped, so target stays unset.
+
         assert_eq!(parsed.compiler_options.target, ScriptTarget::None);
-        // The correctly-cased key is still applied.
+
         assert!(parsed.compiler_options.no_emit.is_true());
     }
 
     #[test]
     fn test_tsconfig_json_correct_case_no_did_you_mean() {
-        // Correctly-cased keys must not trigger the did-you-mean diagnostic.
+
         let fs = InMemoryFS::new();
         fs.insert_dir("/proj");
         fs.insert_dir("/proj/src");
@@ -5472,7 +4991,7 @@ mod tests {
 
     #[test]
     fn test_enum_values_declared_on_all_enum_options() {
-        // Every Enum-kind declaration must carry enum_values.
+
         for o in OPTIONS.iter().chain(BUILD_OPTIONS.iter()) {
             if o.kind == OptionKind::Enum {
                 assert!(
@@ -5486,7 +5005,7 @@ mod tests {
 
     #[test]
     fn test_tsconfig_only_and_min_value_flags_set() {
-        // Spot-check that the declaration-driven flags are wired up.
+
         let composite = find_option("composite").expect("composite must exist");
         assert!(composite.is_tsconfig_only);
         let paths = find_option("paths").expect("paths must exist");
@@ -5495,14 +5014,9 @@ mod tests {
         assert_eq!(builders.min_value, Some(1));
     }
 
-    // ──────────────────────────────────────────────────────────────────────
-    // `${configDir}` template substitution tests (TS 5.5+)
-    // ──────────────────────────────────────────────────────────────────────
-
     #[test]
     fn test_config_dir_substitution_out_dir() {
-        // `${configDir}/out` in outDir should resolve to
-        // <config_dir>/out as an absolute path.
+
         let fs = InMemoryFS::new();
         fs.insert_dir("/proj");
         fs.insert_file(
@@ -5524,7 +5038,7 @@ mod tests {
 
     #[test]
     fn test_config_dir_substitution_root_dir() {
-        // `${configDir}/src` in rootDir should resolve to <config_dir>/src.
+
         let fs = InMemoryFS::new();
         fs.insert_dir("/proj");
         fs.insert_file(
@@ -5542,12 +5056,7 @@ mod tests {
 
     #[test]
     fn test_config_dir_substitution_case_insensitive_detection() {
-        // Go's `startsWithConfigDirTemplate` is case-insensitive, but
-        // `getSubstitutedPathWithConfigDirTemplate` uses `strings.Replace`
-        // which is case-sensitive. This means `${configdir}` (all lowercase)
-        // is detected as a configDir template (so `normalizeNonListOptionValue`
-        // skips normal path resolution) but the actual replacement doesn't
-        // match, leaving the literal text in place. This matches Go's behavior.
+
         let fs = InMemoryFS::new();
         fs.insert_dir("/proj");
         fs.insert_file(
@@ -5560,7 +5069,7 @@ mod tests {
             "/proj",
             &fs,
         );
-        // Exact case ${configDir} is substituted correctly.
+
         assert_eq!(parsed.compiler_options.out_dir, "/proj/out");
     }
 
@@ -5590,7 +5099,7 @@ mod tests {
 
     #[test]
     fn test_config_dir_substitution_root_dirs_array() {
-        // `${configDir}` in rootDirs array elements should be substituted.
+
         let fs = InMemoryFS::new();
         fs.insert_dir("/proj");
         fs.insert_file(
@@ -5613,7 +5122,7 @@ mod tests {
 
     #[test]
     fn test_config_dir_substitution_paths() {
-        // `${configDir}` in `paths` target values should be substituted.
+
         let fs = InMemoryFS::new();
         fs.insert_dir("/proj");
         fs.insert_file(
@@ -5642,7 +5151,7 @@ mod tests {
 
     #[test]
     fn test_config_dir_substitution_include() {
-        // `${configDir}/src` in include should resolve and match files.
+
         let fs = InMemoryFS::new();
         fs.insert_dir("/proj");
         fs.insert_dir("/proj/src");
@@ -5666,7 +5175,7 @@ mod tests {
 
     #[test]
     fn test_config_dir_substitution_files() {
-        // `${configDir}/main.ts` in files should resolve to the absolute path.
+
         let fs = InMemoryFS::new();
         fs.insert_dir("/proj");
         fs.insert_file("/proj/main.ts", "");
@@ -5689,7 +5198,7 @@ mod tests {
 
     #[test]
     fn test_config_dir_substitution_exclude() {
-        // `${configDir}/dist` in exclude should resolve and exclude files.
+
         let fs = InMemoryFS::new();
         fs.insert_dir("/proj");
         fs.insert_dir("/proj/src");
@@ -5720,10 +5229,7 @@ mod tests {
 
     #[test]
     fn test_config_dir_substitution_with_extends() {
-        // `${configDir}` in an extended config's outDir should resolve to
-        // the EXTENDED config's directory, not the own config's directory.
-        // `${configDir}` in the own config should resolve to the own config's
-        // directory.
+
         let fs = InMemoryFS::new();
         fs.insert_dir("/proj");
         fs.insert_dir("/proj/base");
@@ -5741,12 +5247,12 @@ mod tests {
             "/proj",
             &fs,
         );
-        // Extended config's outDir resolves to /proj/base/out (extended dir).
+
         assert_eq!(
             parsed.compiler_options.out_dir, "/proj/base/out",
             "extended config's ${{configDir}} should resolve to extended config's dir"
         );
-        // Own config's rootDir resolves to /proj/src (own dir).
+
         assert_eq!(
             parsed.compiler_options.root_dir, "/proj/src",
             "own config's ${{configDir}} should resolve to own config's dir"
@@ -5755,9 +5261,7 @@ mod tests {
 
     #[test]
     fn test_config_dir_not_substituted_for_non_prefix() {
-        // `${configDir}` must appear at the START of the value; embedded
-        // occurrences are NOT substituted (mirrors Go's
-        // `startsWithConfigDirTemplate`).
+
         let fs = InMemoryFS::new();
         fs.insert_dir("/proj");
         fs.insert_file(
@@ -5770,9 +5274,7 @@ mod tests {
             "/proj",
             &fs,
         );
-        // The value does NOT start with ${configDir}, so it's resolved as a
-        // relative path "prefix/${configDir}/out" → absolute path with that
-        // literal text.
+
         assert!(
             parsed.compiler_options.out_dir.contains("configDir"),
             "embedded ${{configDir}} should not be substituted, got {}",
@@ -5780,24 +5282,9 @@ mod tests {
         );
     }
 
-    // ──────────────────────────────────────────────────────────────────────
-    // Inherited include/exclude/files path-rewriting tests
-    // ──────────────────────────────────────────────────────────────────────
-
     #[test]
     fn test_extends_inherited_include_path_rewriting() {
-        // When an extended config has a relative `include` spec, it should be
-        // rewritten to be relative to the OWN config's directory, not the
-        // extended config's directory. Mirrors Go's `applyExtendedConfig`
-        // which calls `ConvertToRelativePath(GetDirectoryPath(extendedConfigPath), …)`.
-        //
-        // Setup:
-        //   /proj/tsconfig.json          (own, extends ./base/tsconfig.json)
-        //   /proj/base/tsconfig.json     (extended, include: ["src/**/*"])
-        //   /proj/base/src/a.ts          (file under extended dir)
-        //
-        // Expected: the inherited "src/**/*" is rewritten to "base/src/**/*"
-        // and resolved against /proj, so /proj/base/src/a.ts is included.
+
         let fs = InMemoryFS::new();
         fs.insert_dir("/proj");
         fs.insert_dir("/proj/base");
@@ -5823,9 +5310,7 @@ mod tests {
 
     #[test]
     fn test_extends_inherited_include_absolute_not_rewritten() {
-        // Absolute paths in inherited include specs are passed through as-is
-        // (not rewritten). Mirrors Go's `IsRootedDiskPath` check in
-        // `applyExtendedConfig`.
+
         let fs = InMemoryFS::new();
         fs.insert_dir("/proj");
         fs.insert_dir("/proj/base");
@@ -5854,10 +5339,7 @@ mod tests {
 
     #[test]
     fn test_extends_inherited_include_config_dir_not_rewritten() {
-        // `${configDir}`-prefixed paths in inherited include specs are passed
-        // through as-is (not rewritten relative to the extended config dir),
-        // and then substituted with the OWN config's directory. Mirrors Go's
-        // `startsWithConfigDirTemplate` check in `applyExtendedConfig`.
+
         let fs = InMemoryFS::new();
         fs.insert_dir("/proj");
         fs.insert_dir("/proj/base");
@@ -5877,8 +5359,7 @@ mod tests {
             "/proj",
             &fs,
         );
-        // `${configDir}` in inherited include is resolved against the OWN
-        // config's directory (/proj), so /proj/src/a.ts is included.
+
         assert!(
             parsed.file_names.iter().any(|f| f == "/proj/src/a.ts"),
             "expected /proj/src/a.ts in file_names (${{configDir}} resolved against own dir), got {:?}",
@@ -5888,8 +5369,7 @@ mod tests {
 
     #[test]
     fn test_extends_inherited_exclude_path_rewriting() {
-        // Inherited exclude specs are also rewritten relative to the own
-        // config's directory.
+
         let fs = InMemoryFS::new();
         fs.insert_dir("/proj");
         fs.insert_dir("/proj/base");
@@ -5911,13 +5391,13 @@ mod tests {
             "/proj",
             &fs,
         );
-        // src/a.ts should be included (rewritten to base/src/**/*).
+
         assert!(
             parsed.file_names.iter().any(|f| f == "/proj/base/src/a.ts"),
             "expected /proj/base/src/a.ts in file_names, got {:?}",
             parsed.file_names
         );
-        // excluded/b.ts should be excluded (rewritten to base/excluded).
+
         assert!(
             !parsed.file_names.iter().any(|f| f.contains("excluded")),
             "expected excluded/ files to be excluded, got {:?}",
@@ -5927,8 +5407,7 @@ mod tests {
 
     #[test]
     fn test_extends_inherited_files_path_rewriting() {
-        // Inherited files specs are also rewritten relative to the own
-        // config's directory.
+
         let fs = InMemoryFS::new();
         fs.insert_dir("/proj");
         fs.insert_dir("/proj/base");
@@ -5948,8 +5427,7 @@ mod tests {
             "/proj",
             &fs,
         );
-        // "src/main.ts" is rewritten to "base/src/main.ts" and resolved
-        // against /proj → /proj/base/src/main.ts.
+
         assert!(
             parsed
                 .file_names
@@ -5962,8 +5440,7 @@ mod tests {
 
     #[test]
     fn test_extends_own_include_overrides_inherited() {
-        // The own config's include overrides inherited include (first-wins
-        // among extended, but own always wins).
+
         let fs = InMemoryFS::new();
         fs.insert_dir("/proj");
         fs.insert_dir("/proj/base");
@@ -5982,7 +5459,7 @@ mod tests {
             "/proj",
             &fs,
         );
-        // Own include wins: own_src/a.ts is included, base/src/b.ts is NOT.
+
         assert!(
             parsed.file_names.iter().any(|f| f == "/proj/own_src/a.ts"),
             "expected /proj/own_src/a.ts in file_names, got {:?}",
@@ -5995,16 +5472,9 @@ mod tests {
         );
     }
 
-    // ── explicit `null` clearing (TS 5.5+) ────────────────────────────────
-    // Mirrors Go's `mergeCompilerOptions` `explicitNullFields` logic
-    // (`parsinghelpers.go:575-590`): setting a compiler option to `null` in
-    // the own config clears any inherited value from extended configs.
-
     #[test]
     fn test_extends_null_clears_inherited_tristate() {
-        // `"strict": null` in own config clears the inherited `strict: true`
-        // from the extended base. The result should be `Unknown` (default),
-        // NOT `true` (inherited).
+
         let fs = InMemoryFS::new();
         fs.insert_dir("/proj");
         fs.insert_file(
@@ -6030,7 +5500,7 @@ mod tests {
 
     #[test]
     fn test_extends_null_clears_inherited_string_field() {
-        // `"outDir": null` clears the inherited outDir from the extended base.
+
         let fs = InMemoryFS::new();
         fs.insert_dir("/proj");
         fs.insert_file(
@@ -6056,7 +5526,7 @@ mod tests {
 
     #[test]
     fn test_extends_null_clears_inherited_enum_field() {
-        // `"target": null` clears the inherited target from the extended base.
+
         let fs = InMemoryFS::new();
         fs.insert_dir("/proj");
         fs.insert_file(
@@ -6083,9 +5553,7 @@ mod tests {
 
     #[test]
     fn test_extends_null_does_not_override_command_line() {
-        // Command-line options take precedence over own config's `null`.
-        // If the command-line sets `strict: true` and the own config sets
-        // `strict: null`, the command-line value must win.
+
         let fs = InMemoryFS::new();
         fs.insert_dir("/proj");
         fs.insert_file(
@@ -6109,8 +5577,7 @@ mod tests {
 
     #[test]
     fn test_extends_null_only_clears_specified_field() {
-        // Setting one field to `null` should not affect other inherited
-        // fields. Here `strict` is nulled but `noImplicitAny` is inherited.
+
         let fs = InMemoryFS::new();
         fs.insert_dir("/proj");
         fs.insert_file(
@@ -6141,7 +5608,7 @@ mod tests {
 
     #[test]
     fn test_extends_null_with_multiple_fields() {
-        // Multiple fields can be nulled simultaneously.
+
         let fs = InMemoryFS::new();
         fs.insert_dir("/proj");
         fs.insert_file(
@@ -6176,17 +5643,9 @@ mod tests {
         );
     }
 
-    // ── extended config cache (diamond inheritance) ───────────────────────
-    // Mirrors Go's `ExtendedConfigCache` (`tsconfigparsing.go:154`): in
-    // diamond scenarios (A extends B and C; both B and C extend D), D is
-    // parsed once and reused from the cache.
-
     #[test]
     fn test_extends_diamond_inheritance() {
-        // Diamond: A extends [B, C]; B extends D; C extends D.
-        // D sets strict=true. Both B and C inherit it. A inherits from
-        // B (first in extends array, but options use last-wins so C wins
-        // for options D sets). The cache should parse D once and reuse.
+
         let fs = InMemoryFS::new();
         fs.insert_dir("/proj");
         fs.insert_file(
@@ -6205,7 +5664,7 @@ mod tests {
             "/proj",
             &fs,
         );
-        // D's strict=true and noImplicitAny=true are inherited via B and C.
+
         assert!(
             parsed.compiler_options.strict.is_true(),
             "expected strict=true from diamond D, got {:?}",
@@ -6220,16 +5679,10 @@ mod tests {
 
     #[test]
     fn test_extends_diamond_no_duplicate_errors() {
-        // In a diamond, D's errors should appear in the result. Without
-        // the cache, D would be parsed twice and its errors duplicated.
-        // With the cache, D is parsed once, but its errors are still
-        // appended once per reference (B and C each append D's errors).
-        // This matches Go behavior where getExtendedConfig returns the
-        // cached errors each time.
+
         let fs = InMemoryFS::new();
         fs.insert_dir("/proj");
-        // D has a case-mismatch option which generates a TS5025 diagnostic
-        // (Unknown compiler option 'Strict'. Did you mean 'strict'?).
+
         fs.insert_file(
             "/proj/d.json",
             r#"{ "compilerOptions": { "strict": true, "Strict": true } }"#,
@@ -6246,10 +5699,7 @@ mod tests {
             "/proj",
             &fs,
         );
-        // D's TS5025 error is propagated through both B and C — the cache
-        // parses D once but returns the cached errors each time, so the
-        // error appears twice (once per reference). This matches Go's
-        // `getExtendedConfig` behavior.
+
         let ts5025_count = parsed.errors.iter().filter(|d| d.code == 5025).count();
         assert_eq!(
             ts5025_count, 2,
@@ -6260,9 +5710,7 @@ mod tests {
 
     #[test]
     fn test_extends_cache_cycle_not_cached() {
-        // Cycle: A extends B, B extends A. The cache should bypass
-        // entries in the resolution stack to avoid incorrect caching.
-        // The cycle should be detected and reported as TS18000.
+
         let fs = InMemoryFS::new();
         fs.insert_dir("/proj");
         fs.insert_file("/proj/a.json", r#"{ "extends": "./b.json" }"#);
@@ -6274,7 +5722,7 @@ mod tests {
             "/proj",
             &fs,
         );
-        // Should detect the cycle and report TS18000.
+
         let has_cycle = parsed.errors.iter().any(|d| d.code == 18000);
         assert!(
             has_cycle,
@@ -6283,15 +5731,9 @@ mod tests {
         );
     }
 
-    // ── bare specifier extends (Node-style node_modules resolution) ──────
-    // Mirrors Go's `module.ResolveConfig` (`resolver.go:371`): bare
-    // specifiers (not starting with `./` or `../`) are resolved by walking
-    // `node_modules` directories.
-
     #[test]
     fn test_extends_bare_specifier_file_form() {
-        // `extends: "tsconfig-base"` resolves to
-        // `node_modules/tsconfig-base.json` (file form).
+
         let fs = InMemoryFS::new();
         fs.insert_dir("/proj");
         fs.insert_dir("/proj/node_modules");
@@ -6315,8 +5757,7 @@ mod tests {
 
     #[test]
     fn test_extends_bare_specifier_directory_form() {
-        // `extends: "tsconfig-base"` resolves to
-        // `node_modules/tsconfig-base/tsconfig.json` (directory form).
+
         let fs = InMemoryFS::new();
         fs.insert_dir("/proj");
         fs.insert_dir("/proj/node_modules");
@@ -6341,9 +5782,7 @@ mod tests {
 
     #[test]
     fn test_extends_bare_specifier_package_json_tsconfig_field() {
-        // `extends: "tsconfig-base"` resolves via the `tsconfig` field in
-        // `node_modules/tsconfig-base/package.json` (mirrors Go's
-        // `getPackageFile` with `isConfigLookup`, `resolver.go:1744`).
+
         let fs = InMemoryFS::new();
         fs.insert_dir("/proj");
         fs.insert_dir("/proj/node_modules");
@@ -6377,8 +5816,7 @@ mod tests {
 
     #[test]
     fn test_extends_bare_specifier_scoped_package() {
-        // `extends: "@scope/tsconfig-base"` resolves to
-        // `node_modules/@scope/tsconfig-base/tsconfig.json`.
+
         let fs = InMemoryFS::new();
         fs.insert_dir("/proj");
         fs.insert_dir("/proj/node_modules");
@@ -6407,9 +5845,7 @@ mod tests {
 
     #[test]
     fn test_extends_bare_specifier_ancestor_walk() {
-        // `extends: "tsconfig-base"` where node_modules is in a parent
-        // directory (not the config's own directory). Mirrors Go's
-        // `loadModuleFromNearestNodeModulesDirectory` ancestor walk.
+
         let fs = InMemoryFS::new();
         fs.insert_dir("/proj");
         fs.insert_dir("/proj/node_modules");
@@ -6439,9 +5875,7 @@ mod tests {
 
     #[test]
     fn test_extends_bare_specifier_not_found() {
-        // `extends: "nonexistent-config"` with no matching node_modules
-        // entry. The spec is silently dropped (resolution returns None).
-        // Own config options are still applied.
+
         let fs = InMemoryFS::new();
         fs.insert_dir("/proj");
         fs.insert_file(
@@ -6454,13 +5888,13 @@ mod tests {
             "/proj",
             &fs,
         );
-        // Own config options are still applied.
+
         assert_eq!(
             parsed.compiler_options.target,
             ScriptTarget::ES2020,
             "expected own config target to be applied"
         );
-        // Strict should NOT be inherited (no extended config was found).
+
         assert!(
             !parsed.compiler_options.strict.is_true(),
             "expected strict=false (no extended config found), got {:?}",

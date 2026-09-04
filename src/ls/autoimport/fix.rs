@@ -1,5 +1,3 @@
-//! Auto-import code fix logic (1:1 port of Go's `internal/ls/autoimport/fix.go`).
-
 use std::sync::Arc;
 
 use crate::ast::{Node, SourceFile};
@@ -12,9 +10,6 @@ use crate::modulespecifiers;
 use super::export::Export;
 use super::{AddAsTypeOnly, AutoImportFix, AutoImportFixKind, ImportKind};
 
-/// A new import binding to be created.
-///
-/// Mirrors `autoimport.newImportBinding` in Go.
 #[derive(Debug, Clone)]
 pub struct NewImportBinding {
     pub kind: ImportKind,
@@ -34,9 +29,6 @@ impl Default for NewImportBinding {
     }
 }
 
-/// An auto-import fix.
-///
-/// Mirrors `autoimport.Fix` in Go.
 #[derive(Debug, Clone, Default)]
 pub struct Fix {
     pub auto_import_fix: AutoImportFix,
@@ -46,9 +38,6 @@ pub struct Fix {
     pub type_only_alias_declaration: Option<Arc<Node>>,
 }
 
-/// An "add to existing import" fix.
-///
-/// Mirrors `autoimport.addToExistingImportFix` in Go.
 #[derive(Debug)]
 pub struct AddToExistingImportFix {
     pub import_clause_or_binding_pattern: Option<Arc<Node>>,
@@ -57,9 +46,7 @@ pub struct AddToExistingImportFix {
 }
 
 impl Fix {
-    /// Produces text edits and a description for this fix.
-    ///
-    /// Mirrors `(f *Fix) Edits` in Go.
+
     pub fn edits(
         &self,
         _file: &SourceFile,
@@ -67,14 +54,11 @@ impl Fix {
         _format_options: &FormatCodeSettings,
         _preferences: &UserPreferences,
     ) -> (Vec<TextEdit>, String) {
-        // Requires change.Tracker, diagnostics localization, scanner — stubbed.
+
         todo!("Fix::edits requires change.Tracker and diagnostics infrastructure")
     }
 }
 
-/// The kind of file syntax (ESM, CJS, or ambiguous).
-///
-/// Mirrors `autoimport.fileSyntaxKind` in Go.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum FileSyntaxKind {
     Ambiguous,
@@ -88,16 +72,10 @@ impl Default for FileSyntaxKind {
     }
 }
 
-/// Detects whether a source file has unambiguous ESM or CJS syntax.
-///
-/// Mirrors `detectSyntax` in Go.
 pub fn detect_syntax(_file: &SourceFile, _options: &CompilerOptions) -> FileSyntaxKind {
     todo!("detect_syntax requires file.ExternalModuleIndicator and file.CommonJSModuleIndicator")
 }
 
-/// Gets the import kind for an export.
-///
-/// Mirrors `getImportKind` in Go.
 pub fn get_import_kind(
     _importing_file: &SourceFile,
     _export: &Export,
@@ -106,9 +84,6 @@ pub fn get_import_kind(
     todo!("get_import_kind requires program.Options() and program.GetEmitModuleFormatOfFile")
 }
 
-/// Determines if an import should be type-only.
-///
-/// Mirrors `getAddAsTypeOnly` in Go.
 pub fn get_add_as_type_only(
     is_valid_type_only_use_site: bool,
     export_: &Export,
@@ -117,22 +92,15 @@ pub fn get_add_as_type_only(
     if !is_valid_type_only_use_site {
         return AddAsTypeOnly::NotAllowed;
     }
-    // The full Go logic checks verbatimModuleSyntax and export flags.
-    // Stubbed to return Allowed for now.
+
     let _ = export_;
     AddAsTypeOnly::Allowed
 }
 
-/// Gets the namespace-like import text from a declaration.
-///
-/// Mirrors `getNamespaceLikeImportText` in Go.
 pub fn get_namespace_like_import_text(_declaration: &Node) -> String {
     todo!("get_namespace_like_import_text requires ast node inspection")
 }
 
-/// Checks if a fix is possibly re-exporting the importing file.
-///
-/// Mirrors `isFixPossiblyReExportingImportingFile` in Go.
 pub fn is_fix_possibly_re_exporting_importing_file(fix: &Fix, importing_file_name: &str) -> bool {
     if fix.is_re_export && is_index_file_name(&fix.module_file_name) {
         let re_export_dir = crate::tspath::get_directory_path(&fix.module_file_name);
@@ -142,9 +110,6 @@ pub fn is_fix_possibly_re_exporting_importing_file(fix: &Fix, importing_file_nam
     }
 }
 
-/// Checks if a file name is an index file.
-///
-/// Mirrors `isIndexFileName` in Go.
 pub fn is_index_file_name(file_name: &str) -> bool {
     let last_slash = match file_name.rfind('/') {
         Some(i) => i,
@@ -160,16 +125,10 @@ pub fn is_index_file_name(file_name: &str) -> bool {
     )
 }
 
-/// Checks if a type-only import is needed.
-///
-/// Mirrors `needsTypeOnly` in Go.
 pub fn needs_type_only(add_as_type_only: AddAsTypeOnly) -> bool {
     add_as_type_only == AddAsTypeOnly::Required
 }
 
-/// Checks if a type-only import should be used.
-///
-/// Mirrors `shouldUseTypeOnly` in Go.
 pub fn should_use_type_only(
     add_as_type_only: AddAsTypeOnly,
     _preferences: &UserPreferences,
@@ -177,22 +136,15 @@ pub fn should_use_type_only(
     needs_type_only(add_as_type_only)
 }
 
-/// Compares fix kinds.
-///
-/// Mirrors `compareFixKinds` in Go.
 pub fn compare_fix_kinds(a: AutoImportFixKind, b: AutoImportFixKind) -> std::cmp::Ordering {
     (a as u8).cmp(&(b as u8))
 }
 
-/// Compares module specifier relativity for ranking.
-///
-/// Mirrors `compareModuleSpecifierRelativity` in Go.
 pub fn compare_module_specifier_relativity(
     _a: &Fix,
     _b: &Fix,
     _preferences: &modulespecifiers::UserPreferences,
 ) -> std::cmp::Ordering {
-    // The Go logic checks preferences.ImportModuleSpecifierPreference.
-    // Stubbed to return Equal.
+
     std::cmp::Ordering::Equal
 }

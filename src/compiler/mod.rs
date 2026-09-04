@@ -1,10 +1,3 @@
-//! The compiler program, ported from `internal/compiler/`.
-//!
-//! `Program` orchestrates loading, parsing, and binding of source files, and
-//! exposes the inputs the type checker needs. Emit and full module resolution
-//! are not yet ported; this module provides the minimum needed to drive the
-//! CLI pipeline (parse + bind + report diagnostics).
-
 use std::collections::HashMap;
 use std::sync::Arc;
 
@@ -27,18 +20,9 @@ use crate::vfs::FS;
 
 use crate::tsoptions::ParsedCommandLine;
 
-// ────────────────────────────────────────────────────────────────────────────
-// CompilerHost
-// ────────────────────────────────────────────────────────────────────────────
-
-/// Provides the file system and environment context the compiler runs in.
-///
-/// Mirrors `compiler.CompilerHost` in Go (a reduced form).
 pub trait CompilerHost: Send + Sync {
     fn fs(&self) -> &dyn FS;
-    /// Return the underlying file system as a cloneable `Arc`, so adapters
-    /// (e.g. the module resolver's `ResolutionHost`) can retain ownership of
-    /// the same FS without lifetime entanglement.
+
     fn fs_arc(&self) -> Arc<dyn FS>;
     fn current_directory(&self) -> &str;
     fn default_library_path(&self) -> &str;
@@ -47,7 +31,6 @@ pub trait CompilerHost: Send + Sync {
     }
 }
 
-/// A basic `CompilerHost` backed by a real (or virtual) file system.
 pub struct CompilerHostImpl {
     fs: Arc<dyn FS>,
     current_directory: String,
@@ -79,15 +62,6 @@ impl CompilerHost for CompilerHostImpl {
     }
 }
 
-// ────────────────────────────────────────────────────────────────────────────
-// ResolutionHostAdapter
-// ────────────────────────────────────────────────────────────────────────────
-
-/// Owned adapter that bridges `CompilerHost` and `module::ResolutionHost`.
-///
-/// Stored as `Arc<dyn ResolutionHost + Send + Sync>` inside the `Resolver`,
-/// so it must own its data (an `Arc<dyn FS>` and a `String` current directory)
-/// rather than borrow from the `CompilerHost`.
 struct ResolutionHostAdapter {
     fs: Arc<dyn FS>,
     current_directory: String,
@@ -111,23 +85,11 @@ impl module::ResolutionHost for ResolutionHostAdapter {
     }
 }
 
-// ────────────────────────────────────────────────────────────────────────────
-// ProgramOptions
-// ────────────────────────────────────────────────────────────────────────────
-
-/// Options for constructing a `Program`.
 pub struct ProgramOptions {
     pub config: ParsedCommandLine,
     pub host: Arc<dyn CompilerHost>,
 }
 
-// ────────────────────────────────────────────────────────────────────────────
-// Program
-// ────────────────────────────────────────────────────────────────────────────
-
-/// A compiled program: a set of parsed, bound source files plus diagnostics.
-///
-/// Mirrors `compiler.Program` in Go (a reduced form).
 pub struct Program {
     options: CompilerOptions,
     source_files: Vec<Arc<SourceFile>>,
@@ -136,21 +98,17 @@ pub struct Program {
     diagnostics: Vec<Arc<Diagnostic>>,
     host: Arc<dyn CompilerHost>,
     config_file_name: String,
-    /// Side table from the binder: maps node IDs to symbols, locals, and flow
-    /// nodes. Shared across all source files in the program (node IDs are
-    /// globally unique).
+
     symbol_map: NodeSymbolMap,
 }
 
 impl Program {
-    /// Create a new program: load lib files and input files, parse, and bind.
+
     pub fn new(opts: ProgramOptions) -> Self {
         let host = opts.host;
         let mut options = opts.config.compiler_options.clone();
         let config_file_name = opts.config.config_file_name.clone();
-        // Propagate the config file path onto the options so downstream
-        // consumers (e.g. the emitter's common-source-directory computation)
-        // can mirror Go's `options.ConfigFilePath`.
+
         if !config_file_name.is_empty() && options.config_file_path.is_empty() {
             options.config_file_path = config_file_name.clone();
         }
@@ -161,13 +119,6 @@ impl Program {
             std::collections::HashSet::new();
         let mut diagnostics: Vec<Arc<Diagnostic>> = Vec::new();
 
-        // TS5107 deprecation notice (node10AlternateResult family): an
-        // explicit `moduleResolution=node10` configuration carries a
-        // file-less option error with the aka.ms/ts6 migration note as a
-        // nested line. Only ever emitted when the option was set —
-        // ModuleResolutionKind::Unknown is the untouched default. (The
-        // `ignoreDeprecations` suppressant is not a recognized option in
-        // this port, so tests using it skip before reaching here.)
         if options.module_resolution == ModuleResolutionKind::Node10 {
             let mut deprecation = Diagnostic::new(
                 None,
@@ -191,10 +142,6 @@ impl Program {
             diagnostics.push(Arc::new(deprecation));
         }
 
-        // 1. Load default library files (unless --noLib).
-        // Go's program construction only loads default libs when there is at
-        // least one root file. Solution configs such as `files: []` should not
-        // parse libs by themselves.
         if !opts.config.file_names.is_empty() && !options.no_lib.is_true() {
             let lib_names = default_lib_file_names(&options);
             let mut visited: std::collections::HashSet<String> = std::collections::HashSet::new();
@@ -211,9 +158,6 @@ impl Program {
             }
         }
 
-        // 2. Load input files from the parsed command line / tsconfig.
-        //    Process `/// <reference path=... />` directives recursively so that
-        //    dependencies are loaded before dependent files (matching Go's ordering).
         let allow_js = options.get_allow_js();
         for file_name in &opts.config.file_names {
             load_source_file_with_references(
@@ -226,36 +170,19 @@ impl Program {
             );
         }
 
-        // 3. Resolve module imports (`import`/`export` specifiers) and load any
-        //    resolved dependencies that aren't already part of the program.
-        //    This mirrors Go's `processRootFile`/`fileLoader` import discovery,
-        //    performing a breadth-first walk over every loaded file's `imports`.
         {
             let resolution_host: Arc<dyn module::ResolutionHost + Send + Sync> =
                 Arc::new(ResolutionHostAdapter::new(host.as_ref()));
             let resolver = module::Resolver::new(
                 resolution_host,
                 Arc::new(options.clone()),
-                String::new(), // typings_location
-                String::new(), // project_name
+                String::new(),
+                String::new(),
             );
 
             let mut visited: std::collections::HashSet<String> = by_name.keys().cloned().collect();
             let mut stack: Vec<Arc<SourceFile>> = Vec::new();
-            // Worklist over `source_files` itself (index-driven): files
-            // pulled in MID-LOOP via `load_source_file_with_references`
-            // (import/type-ref targets whose OWN triple-slash path
-            // references load transitively) are appended to the vec and
-            // get their imports/type-refs processed on later iterations —
-            // a plain queue missed the transitive ones (privacy*DeclFile:
-            // the exporter loaded via import, its `/// <reference path=
-            // 'GlobalWidgets.ts'/>` followed, but the referenced file's
-            // own imports never processed).
 
-            // Resolve tsconfig `types` option — auto-include @types packages.
-            // `"*"` (Go `typesOption` wildcard): include EVERY package under
-            // each effective type root (moduleResolution_automaticType
-            // DirectiveNames).
             let expanded_types: Vec<String> = if options.types.iter().any(|t| t == "*") {
                 let (type_roots, _from_config) =
                     module::resolver::get_effective_type_roots(&options, host.current_directory());
@@ -295,25 +222,12 @@ impl Program {
                 }
             }
 
-            // LIFO worklist seeded with every loaded file (libs,
-            // roots, and types-option packages). Loading is via the
-            // REFERENCE-RECURSIVE loader; the files it appends (target +
-            // its path-reference closure) are drained onto the stack so
-            // their OWN imports/type-refs are processed too — the plain
-            // queue missed those (privacy*DeclFile).
             stack.extend(source_files.iter().cloned());
             while let Some(file) = stack.pop() {
-                // 3a. Resolve `/// <reference types="..." />` directives.
+
                 let type_refs = extract_reference_types_directives(&file.text);
                 for type_ref in &type_refs {
-                    // A `resolution-mode` attribute on the directive
-                    // overrides the default mode (the referencing file's
-                    // implied format under node16/nodenext) —
-                    // `/// <reference types="pkg" resolution-mode="import" />`
-                    // resolves through the `import` condition even from a
-                    // CJS-format file (TripleSlashReferenceModeOverride*).
-                    // A value other than import/require reports TS1453 and
-                    // resolves arbitrarily (Go: "resolves is arbitrary").
+
                     let mut mode = crate::core::compiler_options::ModuleKind::None;
                     let mut bad_mode_value = false;
                     match type_ref.mode_value.as_deref() {
@@ -325,10 +239,7 @@ impl Program {
                     if bad_mode_value {
                         diagnostics.push(Arc::new(crate::ast::Diagnostic::new(
                             Some(Arc::clone(&file)),
-                            // Official position: the types-value string
-                            // literal, NOT the mode attribute's value
-                            // (nodeModulesTripleSlashReferenceMode
-                            // OverrideModeError baseline (1,23)).
+
                             TextRange::new(
                                 type_ref.types_value_range.0,
                                 type_ref.types_value_range.1,
@@ -342,7 +253,7 @@ impl Program {
                         &type_ref.name,
                         &file.file_name,
                         mode,
-                        None, // redirected_reference
+                        None,
                     );
                     if let Some(resolved_tr) = resolved {
                         if resolved_tr.is_resolved() {
@@ -363,7 +274,6 @@ impl Program {
                     }
                 }
 
-                // 3b. Resolve `import`/`export` specifiers.
                 for import_node in &file.imports {
                     let module_spec = import_node.text();
                     if module_spec.is_empty() {
@@ -393,28 +303,14 @@ impl Program {
                     } else if module_spec.starts_with('.')
                         || !ambient_module_exists(&source_files, module_spec)
                     {
-                        // Module resolution failed — report TS2307 ("Cannot
-                        // find module"), unless the specifier names an
-                        // ambient module declared in a loaded file
-                        // (`declare module "x"`), which resolves globally
-                        // (Go's global module map). `file.imports` only contains real
-                        // import/export specifiers (ambient `declare module
-                        // "x"` names are collected separately), so every entry
-                        // here is a genuine import worth reporting. Mirrors
-                        // Go's `fileLoader` recording unresolved imports.
+
                         let mut module_not_found = Diagnostic::new(
                             Some(file.clone()),
                             import_node.loc,
                             crate::diagnostics::CANNOT_FIND_MODULE_0_OR_ITS_CORRESPONDING_TYPE_DECLARATIONS,
                             vec![module_spec.to_string()],
                         );
-                        // Alternate-result elaboration (TS 5.x semantics,
-                        // node10AlternateResult_noResolution): a bare
-                        // specifier that only resolves through package.json
-                        // `exports` under modern features carries the
-                        // "There are types at '...' but this result could
-                        // not be resolved under your current
-                        // 'moduleResolution' setting" chain line.
+
                         if let Some(alt) = resolved
                             .as_ref()
                             .and_then(|m| m.alternate_result.clone())
@@ -431,11 +327,6 @@ impl Program {
                     }
                 }
 
-                // 3c. Preload the implicit JSX runtime module for
-                // react-jsx/react-jsxdev files (Go's file loader consumes
-                // `GetJSXRuntimeImportSpecifier` like an import): the
-                // runtime's `JSX` export is the JSX namespace container,
-                // and TS2875 fires when this resolution fails.
                 use crate::core::compiler_options::JsxEmit;
                 if matches!(options.jsx, JsxEmit::ReactJSX | JsxEmit::ReactJSXDev)
                     && (file.file_name.ends_with(".tsx")
@@ -478,12 +369,10 @@ impl Program {
             }
         }
 
-        // 4. Report any errors from the parsed command line itself.
         for err in &opts.config.errors {
             diagnostics.push(Arc::new(err.clone()));
         }
 
-        // 5. Bind all source files.
         let mut binder = Binder::new();
         for file in &source_files {
             binder.bind_source_file(file);
@@ -518,14 +407,6 @@ impl Program {
         &self.diagnostics
     }
 
-    /// Diagnostics that should be reported, applying `skipLibCheck` /
-    /// `skipDefaultLibCheck` filtering.
-    ///
-    /// In typescript-go, `skipLibCheck` skips type-checking of *all*
-    /// declaration files (`.d.ts`) and external library files
-    /// (node_modules). `skipDefaultLibCheck` only skips the built-in default
-    /// library files (e.g. `lib.d.ts`). Both options also suppress parse/bind
-    /// diagnostics from the same set of files.
     pub fn get_diagnostics_to_report(&self) -> Vec<Arc<Diagnostic>> {
         let skip_lib = self.options.skip_lib_check.is_true();
         let skip_default_lib = self.options.skip_default_lib_check.is_true();
@@ -538,14 +419,13 @@ impl Program {
             .iter()
             .filter(|d| {
                 let Some(file) = &d.file else {
-                    return true; // Keep fileless diagnostics.
+                    return true;
                 };
                 if skip_lib {
-                    // skipLibCheck suppresses all declaration files and
-                    // node_modules files.
+
                     !file.is_declaration_file && !is_external_library_file(&file.file_name)
                 } else {
-                    // skipDefaultLibCheck suppresses only default library files.
+
                     !self.default_library_file_names.contains(&file.file_name)
                 }
             })
@@ -553,27 +433,13 @@ impl Program {
             .collect()
     }
 
-    /// Run the type checker and return semantic diagnostics.
-    ///
-    /// Go: `Program.GetSemanticDiagnostics` → creates a `Checker`, calls
-    /// `checkSourceFile` for each source file, and returns accumulated diagnostics.
-    ///
-    /// When `skipLibCheck` is on, the checker skips declaration files (`.d.ts`)
-    /// and node_modules files — mirroring Go's behavior of not type-checking
-    /// those files. `skipDefaultLibCheck` only skips built-in default library
-    /// files.
     pub fn get_semantic_diagnostics(self: &Arc<Self>) -> Vec<Diagnostic> {
         let skip_lib = self.options.skip_lib_check.is_true();
         let skip_default_lib = self.options.skip_default_lib_check.is_true();
 
         let checker = self.build_checker_internal(skip_lib, skip_default_lib);
         let check_diagnostics = checker.get_semantic_diagnostics();
-        // Surface binder-level diagnostics (e.g. TS2451 block-scoped
-        // redeclarations) alongside the checker's semantic diagnostics,
-        // applying the same skip filtering. Binder diagnostics come FIRST in
-        // the concatenation: the harness's stable position sort then keeps
-        // them ahead of same-position check diagnostics (Go concatenates
-        // bind- then check-phase diagnostics the same way).
+
         let mut diagnostics: Vec<Diagnostic> = if skip_lib {
             self.symbol_map
                 .binder_diagnostics
@@ -604,28 +470,11 @@ impl Program {
             self.symbol_map.binder_diagnostics.iter().cloned().collect()
         };
         diagnostics.extend(check_diagnostics);
-        // JS-file gating (Go: `Program.SkipTypeChecking` / `plainJSErrors` in
-        // `getBindAndCheckDiagnosticsWithChecker`): with `checkJs: false`,
-        // `.js`/`.jsx` files contribute no bind/check diagnostics at all, and
-        // plain JS (`checkJs` unset) only reports the restricted error set in
-        // `PLAIN_JS_ERROR_CODES`. Parse diagnostics (reported separately via
-        // `get_diagnostics_to_report`) are unaffected, matching Go.
+
         diagnostics.retain(|d| self.includes_semantic_diagnostic(d));
         diagnostics
     }
 
-    /// Mirrors Go `Program.canIncludeBindAndCheckDiagnostics` (the JS-file
-    /// portion): whether bind-and-check diagnostics from `file` are reported.
-    ///
-    /// - `.ts`/`.tsx`/external/deferred files are always checked;
-    /// - `.js`/`.jsx` files are checked when `checkJs` is enabled or left
-    ///   unset ("plain JS", which reports a restricted error set);
-    /// - an explicit `checkJs: false` excludes them entirely, so e.g. TS7006
-    ///   implicit-any errors are not reported for untyped JS parameters.
-    ///
-    /// Go additionally honors `// @ts-check` / `// @ts-nocheck` directives,
-    /// which the Rust port does not parse yet; files without such directives
-    /// behave identically in both implementations.
     fn can_include_bind_and_check_diagnostics(&self, file: &SourceFile) -> bool {
         match file.script_kind {
             ScriptKind::Ts | ScriptKind::Tsx | ScriptKind::External | ScriptKind::Deferred => true,
@@ -634,13 +483,9 @@ impl Program {
         }
     }
 
-    /// Whether a semantic (bind/check) diagnostic is reported, applying the
-    /// JS-file gating from Go's `getBindAndCheckDiagnosticsWithChecker`:
-    /// diagnostics from excluded files are dropped, and plain-JS files only
-    /// report codes in `PLAIN_JS_ERROR_CODES`.
     fn includes_semantic_diagnostic(&self, d: &Diagnostic) -> bool {
         let Some(file) = &d.file else {
-            return true; // Global diagnostics are not gated per file.
+            return true;
         };
         if !self.can_include_bind_and_check_diagnostics(file) {
             return false;
@@ -652,18 +497,10 @@ impl Program {
         true
     }
 
-    /// Build a fully-initialized `Checker` for this program, with all source
-    /// files already checked. Exposed so tests and advanced callers can
-    /// inspect checker state (e.g. emit-resolver visibility) after the
-    /// type-check pass. Mirrors the setup done by `get_semantic_diagnostics`.
     pub fn build_checker(self: &Arc<Self>) -> crate::checker::Checker {
         self.build_checker_internal(false, false)
     }
 
-    /// Internal checker builder with skipLibCheck / skipDefaultLibCheck support.
-    /// When `skip_lib` is true, skips checking declaration files and
-    /// node_modules files. When `skip_default_lib` is true (and `skip_lib`
-    /// is false), only skips built-in default library files.
     fn build_checker_internal(
         self: &Arc<Self>,
         skip_lib: bool,
@@ -673,11 +510,11 @@ impl Program {
         let program: Arc<dyn crate::checker::Program> = Arc::clone(self) as _;
         let mut checker = crate::checker::Checker::new(program, tracer);
         for file in &self.source_files {
-            // Skip declaration files when skipLibCheck is on.
+
             if skip_lib && (file.is_declaration_file || is_external_library_file(&file.file_name)) {
                 continue;
             }
-            // Skip default library files when skipDefaultLibCheck is on.
+
             if skip_default_lib && self.default_library_file_names.contains(&file.file_name) {
                 continue;
             }
@@ -690,8 +527,6 @@ impl Program {
         &self.config_file_name
     }
 
-    /// Side table from the binder: maps node IDs to symbols, locals, and flow
-    /// nodes. Used by the checker for identifier resolution and flow analysis.
     pub fn symbol_map(&self) -> &NodeSymbolMap {
         &self.symbol_map
     }
@@ -708,17 +543,12 @@ impl Program {
         self.host.fs().file_exists(file_name)
     }
 
-    /// Emit JavaScript output for all source files.
-    ///
-    /// Mirrors `Program.Emit` in Go. Writes `.js` files (and optionally
-    /// `.d.ts`, source maps) via the provided `write_file` callback.
     pub fn emit(
         &self,
         write_file: &dyn Fn(&str, &str) -> std::io::Result<()>,
     ) -> crate::emitter::EmitResult {
         let fs = self.host.fs();
-        // Only emit non-lib, non-external-library source files.
-        // External library files are those found under node_modules.
+
         let source_files: Vec<_> = self
             .source_files
             .iter()
@@ -740,7 +570,7 @@ impl crate::checker::Program for Program {
         &self.source_files
     }
     fn bind_source_files(&self) {
-        // Binding is performed eagerly during construction.
+
     }
     fn file_exists(&self, file_name: &str) -> bool {
         Program::file_exists(self, file_name)
@@ -757,10 +587,7 @@ impl crate::checker::Program for Program {
         containing_file: &str,
         resolution_mode: crate::core::compiler_options::ModuleKind,
     ) -> Option<String> {
-        // The same resolver construction the file-loading loop uses; the
-        // checker consumes it for module lookpaths its ambient/relative
-        // simplification can't see (e.g. the implicit `<importSource>/
-        // jsx-runtime` at node_modules/@types/...).
+
         let resolution_host: Arc<dyn module::ResolutionHost + Send + Sync> =
             Arc::new(ResolutionHostAdapter::new(self.host.as_ref()));
         let resolver = module::Resolver::new(
@@ -785,9 +612,7 @@ impl crate::checker::Program for Program {
         self.host.use_case_sensitive_file_names()
     }
     fn common_source_directory(&self) -> String {
-        // Delegate to the emitter's computation, which mirrors Go's
-        // `outputpaths.GetCommonSourceDirectory`. Only non-lib source files
-        // are considered (lib files don't affect the common source dir).
+
         let source_files: Vec<_> = self
             .source_files
             .iter()
@@ -803,14 +628,7 @@ impl crate::checker::Program for Program {
         &self,
         file_name: &str,
     ) -> crate::core::compiler_options::ModuleKind {
-        // Go `GetEmitModuleFormatOfFileWorker`: node16/node18/node20/nodenext
-        // emit per-file — a file whose implied node format is ESM emits as
-        // ES2020+ modules, a CJS-format file emits CommonJS requires. An
-        // UNSET module kind first resolves through the target (Go
-        // `GetEmitModuleKind`: ES2015+ targets emit native ES modules;
-        // below that CommonJS) — the resolved format feeds every
-        // format-sensitive check (reserved-name collisions' ES2015 gate,
-        // `es6UseOfTopLevelRequire` expects zero TS2441 at target ES6).
+
         use crate::core::compiler_options::ModuleKind;
         match self.options.module {
             ModuleKind::Node16 | ModuleKind::Node18 | ModuleKind::Node20 | ModuleKind::NodeNext => {
@@ -835,12 +653,6 @@ impl crate::checker::Program for Program {
     }
 }
 
-/// The implied node format of a file (Go `SourceFileMetaData.ImpliedNodeFormat`
-/// computed from the extension plus the nearest package.json `"type"` field):
-/// `.mts`/`.mjs` → ESM, `.cts`/`.cjs` → CommonJS, otherwise the nearest
-/// ancestor package.json decides (`"module"` → ESM, anything else → CJS).
-/// Returns `ModuleKind::ESNext` for ESM and `ModuleKind::CommonJS` for CJS
-/// (the same carriers Go's `ResolutionMode` uses).
 pub fn implied_node_format_of_file(
     file_name: &str,
     read_file: &dyn Fn(&str) -> Option<String>,
@@ -853,7 +665,7 @@ pub fn implied_node_format_of_file(
     if lower.ends_with(".cts") || lower.ends_with(".cjs") || lower.ends_with(".cjsx") {
         return ModuleKind::CommonJS;
     }
-    // Walk ancestor directories for the nearest package.json with a "type".
+
     let mut dir = tspath::get_directory_path(file_name);
     loop {
         let pkg = tspath::combine_paths(&dir, &["package.json"]);
@@ -874,12 +686,6 @@ pub fn implied_node_format_of_file(
     }
 }
 
-/// The resolution-mode override carried by an import/export statement's
-/// `with { "resolution-mode": "import"|"require" }` attribute clause (Go
-/// `getModeForUsageLocation`): only exclusively type-only clauses honor
-/// the override (others get TS2881 from the checker and resolve through
-/// the file's default mode). `import_node` is the module specifier; its
-/// parent is the declaration carrying the attributes.
 fn import_resolution_mode_override(
     import_node: &Arc<ast::Node>,
 ) -> crate::core::compiler_options::ModuleKind {
@@ -923,133 +729,111 @@ fn import_resolution_mode_override(
     }
 }
 
-/// Check if a file path belongs to an external library (node_modules).
-/// Mirrors Go's `IsSourceFileFromExternalLibrary` substring check.
 pub fn is_external_library_file(file_name: &str) -> bool {
     file_name.contains("/node_modules/") || file_name.contains("\\node_modules\\")
 }
 
-/// Mirrors Go `ast.IsPlainJSFile`: a `.js`/`.jsx` file with no
-/// `// @ts-check`/`// @ts-nocheck` directive and `checkJs` left unset.
-/// Such files are type-checked, but only report the restricted error set
-/// in `PLAIN_JS_ERROR_CODES`.
-///
-/// Check-js directives are not parsed by the Rust port yet, so the
-/// directive condition is treated as satisfied (absent).
 fn is_plain_js_file(file: &SourceFile, check_js: Tristate) -> bool {
     matches!(file.script_kind, ScriptKind::Js | ScriptKind::Jsx) && check_js.is_unknown()
 }
 
-/// Diagnostic codes reported for plain JS files (Go: `plainJSErrors` in
-/// `internal/compiler/program.go`). Plain JS — `.js`/`.jsx` files compiled
-/// with `allowJs` but without `checkJs` — only surfaces binder and grammar
-/// errors (plus one reference-equality type error); everything else,
-/// including TS7006 implicit-any, is suppressed.
 const PLAIN_JS_ERROR_CODES: &[i32] = &[
-    // binder errors
-    2451, // Cannot redeclare block-scoped variable '{0}'
-    2528, // A module cannot have multiple default exports
-    2753, // Another export default is here
-    2752, // The first export default is here
-    1262, // Identifier expected. '{0}' is a reserved word at the top-level of a module
-    1214, // Identifier expected. '{0}' is a reserved word in strict mode...
-    1359, // Identifier expected. '{0}' is a reserved word that cannot be used here
-    18012, // '{0}' is a reserved word (constructor)
-    1102, // 'delete' cannot be called on an identifier in strict mode
-    1210, // Code contained in a class is evaluated in JavaScript's strict mode...
-    1215, // Invalid use of '{0}' in strict mode (modules are automatically strict)
-    1100, // Invalid use of '{0}' in strict mode
-    1344, // A label is not allowed here
-    1101, // 'with' statements are not allowed in strict mode
-    // grammar errors
-    1105, // A 'break' statement can only be used within an enclosing iteration or switch statement
-    1116, // A 'break' statement can only jump to a label of an enclosing statement
-    1211, // A class declaration without the default modifier must have a name
-    1248, // A class member cannot have the '{0}' keyword
-    1171, // A comma expression is not allowed in a computed property name
-    1104, // A 'continue' statement can only be used within an enclosing iteration statement
-    1115, // A 'continue' statement can only jump to a label of an enclosing iteration statement
-    1113, // A 'default' clause can only appear more than once in a 'switch' statement
-    1258, // A default export must be at the top level of a file or module declaration
-    1255, // A definite assignment assertion '!' is not permitted in this context
-    1182, // A destructuring declaration must have an initializer
-    1054, // A 'get' accessor cannot have parameters
-    2501, // A rest element cannot contain a binding pattern
-    2566, // A rest element cannot have a property name
-    1186, // A rest element cannot have an initializer
-    2462, // A rest element must be last in a destructuring pattern
-    1048, // A rest parameter cannot have an initializer
-    1014, // A rest parameter must be last in a parameter list
-    1013, // A rest parameter or binding pattern may not have a trailing comma
-    18041, // A 'return' statement cannot be used inside a class static block
-    1053, // A 'set' accessor cannot have rest parameter
-    1049, // A 'set' accessor must have exactly one parameter
-    1474, // An export declaration can only be used at the top level of a module
-    1193, // An export declaration cannot have modifiers
-    1473, // An import declaration can only be used at the top level of a module
-    1191, // An import declaration cannot have modifiers
-    1162, // An object member cannot be declared optional
-    1325, // Argument of a dynamic import cannot be a spread element
-    2803, // Cannot assign to private method '{0}'...
-    2492, // Cannot redeclare identifier '{0}' in catch clause
-    1197, // Catch clause variable cannot have an initializer
-    18036, // Class decorators can't be used with static private identifier...
-    1174, // Classes can only extend a single class
-    18006, // Classes may not have a field named 'constructor'
-    1312, // Did you mean to use a ':'? An '=' can only follow a property name...
-    1114, // Duplicate label '{0}'
-    1450, // Dynamic imports can only accept a module specifier...
-    18038, // 'for await' loops cannot be used inside a class static block
-    17000, // JSX attributes must only be assigned a non-empty expression
-    17001, // JSX elements cannot have multiple attributes with the same name
-    18007, // JSX expressions may not use the comma operator...
-    2633, // JSX property access expressions cannot include JSX namespace names
-    1107, // Jump target cannot cross function boundary
-    1200, // Line terminator not permitted before arrow
-    1184, // Modifiers cannot appear here
-    1091, // Only a single variable declaration allowed in a 'for...in' statement
-    1188, // Only a single variable declaration allowed in a 'for...of' statement
-    18016, // Private identifiers are not allowed outside class bodies
-    1451, // Private identifiers are only allowed in class bodies...
-    18013, // Property '{0}' is not accessible outside class '{1}'...
-    1358, // Tagged template expressions are not permitted in an optional chain
-    1106, // The left-hand side of a 'for...of' statement may not be 'async'
-    1189, // The variable declaration of a 'for...in' statement cannot have an initializer
-    1190, // The variable declaration of a 'for...of' statement cannot have an initializer
-    1009, // Trailing comma not allowed
-    1123, // Variable declaration list cannot be empty
-    5076, // '{0}' and '{1}' operations cannot be mixed without parentheses
-    1005, // '{0}' expected
-    17012, // '{0}' is not a valid meta-property for keyword '{1}'...
-    1097, // '{0}' list cannot be empty
-    1030, // '{0}' modifier already seen
-    1089, // '{0}' modifier cannot appear on a constructor declaration
-    1044, // '{0}' modifier cannot appear on a module or namespace element
-    1090, // '{0}' modifier cannot appear on a parameter
-    1031, // '{0}' modifier cannot appear on class elements of this kind
-    1042, // '{0}' modifier cannot be used here
-    1029, // '{0}' modifier must precede '{1}' modifier
-    1156, // '{0}' declarations can only be declared inside a block
-    1155, // '{0}' declarations must be initialized
-    1172, // 'extends' clause already seen
-    2480, // 'let' is not allowed to be used as a name in 'let'/'const' declarations
-    1341, // Class constructor may not be an accessor
-    1368, // Class constructor may not be a generator
-    1308, // 'await' expressions are only allowed within async functions...
-    2852, // 'await using' statements are only allowed within async functions...
-    1111, // Private field '#{0}' must be declared in an enclosing class
-    // type errors
-    2839, // This condition will always return '{0}' since JavaScript compares objects by reference
+
+    2451,
+    2528,
+    2753,
+    2752,
+    1262,
+    1214,
+    1359,
+    18012,
+    1102,
+    1210,
+    1215,
+    1100,
+    1344,
+    1101,
+
+    1105,
+    1116,
+    1211,
+    1248,
+    1171,
+    1104,
+    1115,
+    1113,
+    1258,
+    1255,
+    1182,
+    1054,
+    2501,
+    2566,
+    1186,
+    2462,
+    1048,
+    1014,
+    1013,
+    18041,
+    1053,
+    1049,
+    1474,
+    1193,
+    1473,
+    1191,
+    1162,
+    1325,
+    2803,
+    2492,
+    1197,
+    18036,
+    1174,
+    18006,
+    1312,
+    1114,
+    1450,
+    18038,
+    17000,
+    17001,
+    18007,
+    2633,
+    1107,
+    1200,
+    1184,
+    1091,
+    1188,
+    18016,
+    1451,
+    18013,
+    1358,
+    1106,
+    1189,
+    1190,
+    1009,
+    1123,
+    5076,
+    1005,
+    17012,
+    1097,
+    1030,
+    1089,
+    1044,
+    1090,
+    1031,
+    1042,
+    1029,
+    1156,
+    1155,
+    1172,
+    2480,
+    1341,
+    1368,
+    1308,
+    2852,
+    1111,
+
+    2839,
 ];
 
-/// Whether a JavaScript file inside `node_modules` should be skipped when
-/// loading source files. When `allowJs`/`checkJs` is false (the default),
-/// `.js`/`.jsx`/`.mjs`/`.cjs` files are not part of the program: parsing them
-/// as TypeScript produces false TS1003/TS1005 syntax diagnostics. Only the
-/// corresponding `.d.ts` declarations (if any) are loaded for type checking.
-///
-/// Mirrors Go's `fileLoader`/`processRootFile`, which only includes JS files
-/// when `allowJs` is enabled. Files outside `node_modules` are unaffected.
 fn should_skip_js_file(file_name: &str, allow_js: bool) -> bool {
     if allow_js || !is_external_library_file(file_name) {
         return false;
@@ -1060,12 +844,6 @@ fn should_skip_js_file(file_name: &str, allow_js: bool) -> bool {
     )
 }
 
-// ────────────────────────────────────────────────────────────────────────────
-// File loading helpers
-// ────────────────────────────────────────────────────────────────────────────
-
-/// Read and parse a file from the host file system, returning the source file
-/// and any parse diagnostics.
 fn read_and_parse(
     file_name: &str,
     host: &dyn CompilerHost,
@@ -1078,12 +856,6 @@ fn read_and_parse(
     Ok((Arc::new(file), diags))
 }
 
-/// Load a single source file (no `/// <reference path=... />` following):
-/// read, parse, record parse diagnostics, and register it in the program's
-/// file tables. Returns the loaded file, or `None` if it was already loaded
-/// or could not be read.
-///
-/// Used by the module-resolution step to pull in import/export dependencies.
 fn load_source_file(
     file_name: &str,
     host: &dyn CompilerHost,
@@ -1096,9 +868,7 @@ fn load_source_file(
     if let Some(existing) = by_name.get(&normalized) {
         return Some(Arc::clone(existing));
     }
-    // G3: When `allowJs` is false, skip `.js`/`.jsx` (etc.) files pulled in
-    // from `node_modules` during module resolution — they are not part of the
-    // program and would otherwise produce false syntax diagnostics.
+
     if should_skip_js_file(&normalized, allow_js) {
         return None;
     }
@@ -1123,13 +893,6 @@ fn load_source_file(
     Some(file)
 }
 
-/// Load a source file and recursively process its `/// <reference path=... />`
-/// directives, so that referenced files are loaded before the referencing file.
-///
-/// Mirrors the triple-slash reference path resolution in Go's `fileLoader`.
-/// Referenced files are resolved relative to the containing file's directory,
-/// and each is loaded recursively before the containing file is added to the
-/// source file list. This produces a dependency-first ordering.
 fn load_source_file_with_references(
     file_name: &str,
     host: &dyn CompilerHost,
@@ -1142,8 +905,7 @@ fn load_source_file_with_references(
     if by_name.contains_key(&normalized) {
         return;
     }
-    // G3: When `allowJs` is false, skip `.js`/`.jsx` (etc.) files coming from
-    // `node_modules` — they are not part of the program.
+
     if should_skip_js_file(&normalized, allow_js) {
         return;
     }
@@ -1163,10 +925,8 @@ fn load_source_file_with_references(
         )));
     }
 
-    // Mark as loaded before recursing to break cycles.
     by_name.insert(normalized.clone(), Arc::clone(&file));
 
-    // Process `/// <reference path=... />` directives.
     let text = file.text.as_str();
     let refs = extract_reference_path_directives(text, &normalized);
     for ref_path in &refs {
@@ -1183,10 +943,6 @@ fn load_source_file_with_references(
     source_files.push(file);
 }
 
-/// Extract `/// <reference path="..." />` directives from source text.
-///
-/// Resolves each path relative to `containing_file`'s directory, mirroring
-/// Go's `resolveTripleslashPathReference`.
 fn extract_reference_path_directives(text: &str, containing_file: &str) -> Vec<String> {
     let mut refs = Vec::new();
     let base_dir = tspath::get_directory_path(containing_file);
@@ -1195,9 +951,7 @@ fn extract_reference_path_directives(text: &str, containing_file: &str) -> Vec<S
         let Some(rest) = trimmed.strip_prefix("///") else {
             continue;
         };
-        // Only `<reference path=... />` directives load files — other
-        // triple-slash comments carrying a `path=` attribute (e.g.
-        // `///<amd-dependency path='bar'/>`) are emit-only metadata.
+
         if !rest.trim_start().starts_with("<reference") {
             continue;
         }
@@ -1228,29 +982,15 @@ fn extract_reference_path_directives(text: &str, containing_file: &str) -> Vec<S
     refs
 }
 
-/// Extract `/// <reference types="..." />` directive names from source text.
-///
-/// Returns the raw package names (e.g. "node", "express") — not resolved
-/// paths. The caller resolves these via `resolve_type_reference_directive`.
-/// A `/// <reference types="..." />` directive: the target name plus the
-/// optional `resolution-mode` attribute's VALUE (raw text) and source
-/// range (for the TS1453 diagnostic when the value is neither `import`
-/// nor `require`).
 struct ReferenceTypesDirective {
     name: String,
     mode_value: Option<String>,
     #[allow(dead_code)]
     mode_value_range: (usize, usize),
-    /// Source range of the `types="..."` VALUE string literal (with
-    /// quotes) — Go reports the directive's TS1453 here, not at the
-    /// resolution-mode attribute value.
+
     types_value_range: (usize, usize),
 }
 
-/// Extract `/// <reference types="..." />` directives together with their
-/// optional `resolution-mode="import|require"` attribute (Go's
-/// `getTypeReferenceModeOverride`: the attribute overrides the default
-/// mode the referencing file's implied format would pick).
 fn extract_reference_types_directives(text: &str) -> Vec<ReferenceTypesDirective> {
     let mut types = Vec::new();
     let mut line_start = 0usize;
@@ -1261,7 +1001,7 @@ fn extract_reference_types_directives(text: &str) -> Vec<ReferenceTypesDirective
             line_start += line.len() + 1;
             continue;
         };
-        // Match types="..." or types='...'
+
         for quote in ['"', '\''] {
             let marker = format!("types={quote}");
             if let Some(start) = rest.find(&marker) {
@@ -1271,9 +1011,7 @@ fn extract_reference_types_directives(text: &str) -> Vec<ReferenceTypesDirective
                     if name.is_empty() {
                         continue;
                     }
-                    // The resolution-mode attribute rides on the same
-                    // directive line; capture its raw value and absolute
-                    // range for the TS1453 check.
+
                     let mut mode_value = None;
                     let mut mode_value_range = (0usize, 0usize);
                     let attr_marker = "resolution-mode=";
@@ -1295,9 +1033,7 @@ fn extract_reference_types_directives(text: &str) -> Vec<ReferenceTypesDirective
                         name: name.to_string(),
                         mode_value,
                         mode_value_range,
-                        // The types VALUE text (no quotes) in absolute
-                        // coordinates: `rest` starts after `///`, so add
-                        // its 3 columns back.
+
                         types_value_range: (
                             line_start + leading + 3 + start + marker.len(),
                             line_start + leading + 3 + start + marker.len() + end,
@@ -1311,7 +1047,6 @@ fn extract_reference_types_directives(text: &str) -> Vec<ReferenceTypesDirective
     types
 }
 
-/// Recursively load a lib file and its `/// <reference lib="..." />` dependencies.
 fn load_lib_recursive(
     lib_name: &str,
     host: &dyn CompilerHost,
@@ -1328,12 +1063,11 @@ fn load_lib_recursive(
     let text = match host.fs().read_file(&path) {
         Some(t) => t,
         None => {
-            // Lib file missing is non-fatal (the bundled set may be partial).
+
             return;
         }
     };
 
-    // Resolve referenced libs before adding this file.
     let references = extract_reference_lib_directives(&text);
     for ref_lib in &references {
         let ref_name = format!("lib.{ref_lib}.d.ts");
@@ -1361,7 +1095,6 @@ fn load_lib_recursive(
     source_files.push(file);
 }
 
-/// Extract `/// <reference lib="X" />` directives from source text.
 fn extract_reference_lib_directives(text: &str) -> Vec<String> {
     let mut refs = Vec::new();
     for line in text.lines() {
@@ -1378,17 +1111,6 @@ fn extract_reference_lib_directives(text: &str) -> Vec<String> {
     refs
 }
 
-/// Determine the default lib file name(s) from compiler options.
-///
-/// Mirrors Go `tsoptions.GetDefaultLibFileName` + `targetToLibMap`
-/// (enummaps.go): each ES2015+ script target selects its own entry lib
-/// (`lib.es6.d.ts` for ES2015 — deliberately not `.full` per the Go comment —
-/// `lib.es20XX.full.d.ts` for ES2016..ES2025, `lib.esnext.full.d.ts` for
-/// ESNext). Targets below ES2015 (and the unset/JSON targets) keep
-/// `lib.d.ts`. An explicit `lib` option always wins.
-/// The default-library file names for the given options (target → entry lib,
-/// or the explicit `lib` option). Public for the transpile module, mirroring
-/// Go's `tsoptions.GetDefaultLibFileName` consumer graph.
 pub fn default_lib_file_names(options: &CompilerOptions) -> Vec<String> {
     if !options.lib.is_empty() {
         return options
@@ -1421,10 +1143,6 @@ pub fn default_lib_file_names(options: &CompilerOptions) -> Vec<String> {
     vec![entry.to_string()]
 }
 
-// ────────────────────────────────────────────────────────────────────────────
-// Diagnostic conversion
-// ────────────────────────────────────────────────────────────────────────────
-
 fn parser_diagnostic_to_diagnostic(
     file: Arc<SourceFile>,
     pd: &crate::parser::ParserDiagnostic,
@@ -1450,46 +1168,32 @@ fn file_error_diagnostic(file_name: &str, _message: &str) -> Diagnostic {
     }
 }
 
-// Ensure `script_kind_from_file_name` is reachable (used by the parser).
 #[allow(dead_code)]
 fn _ensure_script_kind(file_name: &str) -> crate::ast::ScriptKind {
     script_kind_from_file_name(file_name)
 }
 
-// ────────────────────────────────────────────────────────────────────────────
-// File-include tracking types (ported from `internal/compiler/fileInclude.go`)
-// ────────────────────────────────────────────────────────────────────────────
-
-/// Why a file was included in the program.
-///
-/// Mirrors `compiler.fileIncludeKind` in Go.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 #[repr(i32)]
 #[allow(dead_code)]
 pub enum FileIncludeKind {
-    /// An `import`/`export` reference.
+
     #[default]
     Import = 0,
-    /// A `/// <reference path=... />` directive.
+
     ReferenceFile = 1,
-    /// A `/// <reference types=... />` directive.
+
     TypeReferenceDirective = 2,
-    /// A `/// <reference lib=... />` directive.
+
     LibReferenceDirective = 3,
-    /// A root file from the command line / tsconfig `files`.
+
     RootFile = 4,
-    /// A default library file.
+
     LibFile = 5,
-    /// An automatic type-directive file.
+
     AutomaticTypeDirectiveFile = 6,
 }
 
-/// A reason a file was included in the program.
-///
-/// Mirrors `compiler.FileIncludeReason` in Go. The Go struct carries an
-/// untyped `data any` field plus lazily-computed diagnostics; the Rust port
-/// models the common case (a `FileIncludeKind` plus an optional file-name
-/// payload).
 #[derive(Debug, Clone)]
 #[allow(dead_code)]
 pub struct FileIncludeReason {
@@ -1505,8 +1209,6 @@ impl FileIncludeReason {
         }
     }
 
-    /// Whether this reason is a referenced-file kind (reference path,
-    /// type-reference, or lib-reference directive).
     pub fn is_referenced_file(&self) -> bool {
         matches!(
             self.kind,
@@ -1517,9 +1219,6 @@ impl FileIncludeReason {
     }
 }
 
-/// A parsed file that was dropped from the final program (deduplicated).
-///
-/// Mirrors `compiler.DuplicateSourceFile` in Go.
 #[derive(Debug, Clone)]
 #[allow(dead_code)]
 pub struct DuplicateSourceFile {
@@ -1528,9 +1227,6 @@ pub struct DuplicateSourceFile {
     pub script_kind: crate::ast::ScriptKind,
 }
 
-/// A library file reference (name + resolved path + replaced flag).
-///
-/// Mirrors `compiler.LibFile` in Go.
 #[derive(Debug, Clone, Default)]
 #[allow(dead_code)]
 pub struct LibFile {
@@ -1539,11 +1235,6 @@ pub struct LibFile {
     pub replaced: bool,
 }
 
-/// Build-info snapshot for diagnostics and stats.
-///
-/// Mirrors the data surfaced by Go's `Program` stats methods
-/// (`LineCount`, `IdentifierCount`, `SymbolCount`, `TypeCount`,
-/// `InstantiationCount`).
 #[derive(Debug, Clone, Default)]
 #[allow(dead_code)]
 pub struct ProgramBuildInfo {
@@ -1555,54 +1246,31 @@ pub struct ProgramBuildInfo {
     pub instantiation_count: usize,
 }
 
-// ────────────────────────────────────────────────────────────────────────────
-// Additional Program methods (ported from `internal/compiler/program.go`)
-// ────────────────────────────────────────────────────────────────────────────
-
 #[allow(dead_code)]
 impl Program {
-    /// Get all source files as an owned vector.
-    ///
-    /// Mirrors `Program.GetSourceFiles` in Go (the capital-G alias that
-    /// returns the file slice). [`Program::source_files`] returns a borrow.
+
     pub fn get_source_files(&self) -> Vec<Arc<SourceFile>> {
         self.source_files.clone()
     }
 
-    /// Get the file-include reasons map (testing only).
-    ///
-    /// Mirrors `Program.GetIncludeReasons` in Go. The Rust program does not
-    /// yet track per-file include reasons, so this returns an empty map.
     pub fn get_file_include_reasons(&self) -> HashMap<String, Vec<FileIncludeReason>> {
-        // TODO: track include reasons during the file-loading pipeline.
+
         HashMap::new()
     }
 
-    /// Whether `path` is a missing file (referenced but not found).
-    ///
-    /// Mirrors `Program.IsMissingPath` in Go.
     pub fn is_missing_path(&self, path: &str) -> bool {
         !self.source_files_by_name.contains_key(path)
     }
 
-    /// Get a source file by its normalized path.
-    ///
-    /// Mirrors `Program.GetSourceFileByPath` in Go.
     pub fn get_source_file_by_path(&self, path: &str) -> Option<Arc<SourceFile>> {
         self.source_files_by_name.get(path).cloned()
     }
 
-    /// Get duplicate source files dropped during program construction.
-    ///
-    /// Mirrors `Program.DuplicateSourceFiles` in Go.
     pub fn duplicate_source_files(&self) -> &[DuplicateSourceFile] {
-        // TODO: track duplicates during the file-loading pipeline.
+
         &[]
     }
 
-    /// The total line count across all source files.
-    ///
-    /// Mirrors `Program.LineCount` in Go.
     pub fn line_count(&self) -> usize {
         self.source_files
             .iter()
@@ -1610,41 +1278,25 @@ impl Program {
             .sum()
     }
 
-    /// The total identifier count across all source files.
-    ///
-    /// Mirrors `Program.IdentifierCount` in Go.
     pub fn identifier_count(&self) -> usize {
-        // TODO: requires a node-count walk over each source file's AST.
+
         0
     }
 
-    /// The total symbol count.
-    ///
-    /// Mirrors `Program.SymbolCount` in Go.
     pub fn symbol_count(&self) -> usize {
         self.symbol_map.symbols.len()
     }
 
-    /// The total type count (checker stat).
-    ///
-    /// Mirrors `Program.TypeCount` in Go.
     pub fn type_count(&self) -> usize {
-        // TODO: requires checker-side type accounting.
+
         0
     }
 
-    /// The total instantiation count (checker stat).
-    ///
-    /// Mirrors `Program.InstantiationCount` in Go.
     pub fn instantiation_count(&self) -> usize {
-        // TODO: requires checker-side instantiation accounting.
+
         0
     }
 
-    /// A build-info snapshot.
-    ///
-    /// Aggregates the stats surfaced by Go's `Program` methods
-    /// (`LineCount`, `IdentifierCount`, `SymbolCount`, …).
     pub fn get_program_build_info(&self) -> ProgramBuildInfo {
         ProgramBuildInfo {
             file_count: self.source_files.len(),
@@ -1656,64 +1308,31 @@ impl Program {
         }
     }
 
-    /// Whether file names are compared case-sensitively.
-    ///
-    /// Mirrors `Program.UseCaseSensitiveFileNames` in Go.
     pub fn use_case_sensitive_file_names(&self) -> bool {
         self.host.use_case_sensitive_file_names()
     }
 
-    /// The current working directory.
-    ///
-    /// Mirrors `Program.GetCurrentDirectory` in Go.
     pub fn get_current_directory(&self) -> &str {
         self.host.current_directory()
     }
 
-    /// The resolved modules cache (per-file import resolutions).
-    ///
-    /// Mirrors `Program.GetResolvedModules` in Go.
     pub fn get_resolved_modules(
         &self,
     ) -> HashMap<String, Vec<(String, Option<crate::module::ResolvedModule>)>> {
-        // TODO: requires tracking per-file resolved modules during the
-        // file-loading pipeline. The current pipeline resolves modules
-        // inline without caching.
+
         HashMap::new()
     }
 
-    /// The set of package names discovered during module resolution.
-    ///
-    /// Mirrors `Program.GetPackagesMap` in Go.
     pub fn get_packages_map(&self) -> HashMap<String, bool> {
-        // TODO: requires package-name tracking during module resolution.
+
         HashMap::new()
     }
 
-    /// Whether the program runs single-threaded.
-    ///
-    /// Mirrors `Program.SingleThreaded` in Go. The Rust port is always
-    /// single-threaded for now.
     pub fn single_threaded(&self) -> bool {
         true
     }
 }
 
-// ────────────────────────────────────────────────────────────────────────────
-// File-loading pipeline (ported from `internal/compiler/fileloader.go` and
-// `internal/compiler/filesparser.go`). These functions mirror Go's
-// `processRootFile`/`processSourceFile`/`processAllProgramFiles`; the Rust
-// `Program::new` already inlines a simplified version of this pipeline, so
-// these are provided as standalone entry points for callers that need to
-// drive file loading incrementally.
-// ────────────────────────────────────────────────────────────────────────────
-
-/// Process a root file: read, parse, register, and recursively resolve its
-/// references and imports.
-///
-/// Mirrors `fileLoader.addRootFileTask` + `processRootFile` in Go. The Rust
-/// `Program::new` performs this inline; this entry point is provided for
-/// parity with the Go API surface.
 #[allow(dead_code)]
 pub fn process_root_file(
     file_name: &str,
@@ -1733,10 +1352,6 @@ pub fn process_root_file(
     );
 }
 
-/// Process a single source file: read, parse, and register it (no reference
-/// or import resolution).
-///
-/// Mirrors `fileLoader.parseSourceFile` / `processSourceFile` in Go.
 #[allow(dead_code)]
 pub fn process_source_file(
     file_name: &str,
@@ -1756,11 +1371,6 @@ pub fn process_source_file(
     )
 }
 
-/// Process all program files: load root files, resolve references and imports,
-/// and return the resulting file set.
-///
-/// Mirrors `compiler.processAllProgramFiles` in Go. The Rust `Program::new`
-/// inlines this pipeline; this entry point is provided for parity.
 #[allow(dead_code)]
 pub fn process_all_program_files(
     root_file_names: &[String],
@@ -1818,7 +1428,7 @@ mod tests {
             host,
         });
         assert_eq!(program.source_files().len(), 2);
-        // b.ts has a parse error.
+
         assert!(
             program
                 .diagnostics()
@@ -1829,7 +1439,7 @@ mod tests {
 
     #[test]
     fn program_does_not_load_bundled_libs_without_root_files() {
-        // Use the bundled lib files via BundledFS over OsFS.
+
         let fs = Arc::new(BundledFS::new(Arc::new(OsFS)));
         let args: Vec<String> = vec![];
         let parsed = parse_command_line(&args, "/proj", Some(fs.as_ref()));
@@ -1843,7 +1453,7 @@ mod tests {
 
     #[test]
     fn program_loads_bundled_libs_with_root_files() {
-        // Use the bundled lib files via BundledFS over OsFS.
+
         let inner = Arc::new(InMemoryFS::new());
         inner.insert_dir("/proj");
         inner.insert_file("/proj/a.ts", "let x = 1;");
@@ -1855,8 +1465,7 @@ mod tests {
             config: parsed,
             host,
         });
-        // lib.d.ts is the default lib; it should have loaded the root file plus
-        // at least one referenced lib file.
+
         assert!(program.source_files().len() > 1);
         assert!(
             program
@@ -1873,21 +1482,10 @@ mod tests {
         assert_eq!(refs, vec!["es5", "dom"]);
     }
 
-    /// Port of Go's `TestProgram` (BasicFileOrdering case).
-    ///
-    /// Verifies that `/// <reference path=... />` directives cause referenced
-    /// files to be loaded, and that files are ordered with dependencies first
-    /// (deepest dependency before dependent).
-    ///
-    /// Go's `TestProgram` also covers import-based file ordering (FileOrderingImports,
-    /// FileOrderingCycles), but those require module resolution which is not yet
-    /// ported to Rust. This test covers the reference-path case.
     #[test]
     fn program_file_ordering_with_reference_paths() {
         let fs = Arc::new(InMemoryFS::new());
 
-        // Build a chain: index.ts → 5.ts → 4.ts → 3.ts → 2.ts → 1.ts
-        //                index.ts → 10.ts → 9.ts → 8.ts → 7.ts → 6.ts
         let files = [
             (
                 "/dev/src/index.ts",
@@ -1965,25 +1563,10 @@ mod tests {
         assert_eq!(actual, expected);
     }
 
-    /// Port of Go's `TestProgram` — FileOrderingImports case.
-    ///
-    /// Same file graph as `program_file_ordering_with_reference_paths` but
-    /// using `import` statements instead of `/// <reference path=... />`
-    /// directives. Verifies that transitive `import` resolution pulls in the
-    /// full dependency graph (all 11 files).
-    ///
-    /// NOTE: Go orders files deepest-dependency-first (`1.ts … 5.ts, 6.ts …
-    /// 10.ts, index.ts`). The Rust `Program` currently emits files in
-    /// module-resolution discovery order (root first, then a stack-based walk
-    /// over resolved imports). The expected ordering below characterizes the
-    /// current Rust behavior; once dependency-first reordering is implemented
-    /// (mirroring Go's `fileLoader.processRootFile`), update the expected
-    /// vector to match Go's ordering.
     #[test]
     fn program_file_ordering_imports() {
         let fs = Arc::new(InMemoryFS::new());
-        // InMemoryFS requires explicit directory entries for
-        // `directory_exists` checks during module resolution.
+
         for dir in [
             "/dev/src",
             "/dev/src2/a",
@@ -2064,15 +1647,6 @@ mod tests {
         assert_eq!(actual, expected);
     }
 
-    /// Port of Go's `TestProgram` — FileOrderingCycles case.
-    ///
-    /// Same graph as `program_file_ordering_imports` but with cyclic imports
-    /// (3.ts and 9.ts import back to index.ts). Verifies that cycles are
-    /// broken gracefully and the full dependency graph still loads.
-    ///
-    /// NOTE: Same ordering caveat as `program_file_ordering_imports` — the
-    /// expected vector reflects current Rust discovery order, not Go's
-    /// dependency-first order.
     #[test]
     fn program_file_ordering_cycles() {
         let fs = Arc::new(InMemoryFS::new());
@@ -2159,9 +1733,6 @@ mod tests {
         assert_eq!(actual, expected);
     }
 
-    /// Module resolution: importing `"./foo"` should cause `foo.ts` to be
-    /// resolved and loaded into the program, even though it isn't listed as a
-    /// root file. This is the P5.6 integration of the `Resolver` into `Program`.
     #[test]
     fn program_resolves_module_imports() {
         let fs = Arc::new(InMemoryFS::new());
@@ -2191,7 +1762,6 @@ mod tests {
             host,
         });
 
-        // Should have loaded main.ts AND the resolved dependency foo.ts.
         assert_eq!(program.source_files().len(), 2);
         assert!(
             program.get_source_file("/src/foo.ts").is_some(),
@@ -2203,8 +1773,6 @@ mod tests {
         );
     }
 
-    /// Transitive module resolution: `a.ts` imports `b.ts`, which imports `c.ts`.
-    /// The resolver's BFS walk should pull in the whole dependency chain.
     #[test]
     fn program_resolves_transitive_module_imports() {
         let fs = Arc::new(InMemoryFS::new());
@@ -2238,24 +1806,16 @@ mod tests {
             host,
         });
 
-        // All three files should be loaded.
         assert_eq!(program.source_files().len(), 3);
         assert!(program.get_source_file("/src/b.ts").is_some());
         assert!(program.get_source_file("/src/c.ts").is_some());
     }
 
-    /// Port of Go's `TestIncludeProcessorDiagnosticsWithMissingFileCasing`.
-    ///
-    /// On a case-sensitive filesystem, requesting `/src/MyFile.ts` when only
-    /// `/src/myFile.ts` exists should produce a "file not found" diagnostic
-    /// without panicking. Go's test exercises the include processor's case-
-    /// sensitivity diagnostic; Rust doesn't have an include processor, but the
-    /// Program must still handle missing files gracefully.
     #[test]
     fn include_processor_diagnostics_with_missing_file_casing() {
         let fs = Arc::new(InMemoryFS::with_case_sensitivity(true));
         fs.insert_dir("/src");
-        // Only the lowercase version exists.
+
         fs.insert_file("/src/myFile.ts", "export const y = 2;");
 
         let parsed = ParsedCommandLine {
@@ -2265,7 +1825,7 @@ mod tests {
                 opts.skip_lib_check = Tristate::True;
                 opts
             },
-            // List both casings as root files.
+
             file_names: vec!["/src/MyFile.ts".to_string(), "/src/myFile.ts".to_string()],
             errors: vec![],
             config_file_name: String::new(),
@@ -2287,16 +1847,13 @@ mod tests {
             host,
         });
 
-        // The program should not panic when computing diagnostics.
-        // /src/MyFile.ts does not exist on the case-sensitive FS, so we expect
-        // at least one error diagnostic about the missing file.
         let diags = program.diagnostics();
         assert!(
             diags.iter().any(|d| d.category == Category::Error),
             "expected at least one error diagnostic for missing /src/MyFile.ts, got: {:?}",
             diags
         );
-        // The existing /src/myFile.ts should still be loaded.
+
         assert!(
             program.get_source_file("/src/myFile.ts").is_some(),
             "expected /src/myFile.ts to be loaded"
@@ -2316,11 +1873,6 @@ mod tests {
         let refs = extract_reference_path_directives(text, "/dev/src2/a/5.ts");
         assert_eq!(refs, vec!["/dev/src2/a/b/3.ts"]);
     }
-
-    // ── Bundled lib smoke tests (P2.9d) ─────────────────────────────────
-    // Verify that the historically-troublesome bundled lib files parse
-    // with zero parser diagnostics. Prior to P2.4/P2.5 these produced
-    // thousands of TS1003 errors.
 
     fn parse_bundled_lib(lib_name: &str) -> Vec<crate::parser::ParserDiagnostic> {
         let content = crate::bundled::lib_contents(lib_name)
@@ -2379,12 +1931,6 @@ mod tests {
         assert_no_parser_errors("lib.decorators.d.ts", &diags);
     }
 
-    // ── G3: node_modules .js files must not be parsed when allowJs is false ──
-
-    /// When `allowJs` is false (the default), `.js` files pulled in from
-    /// `node_modules` during module resolution must not be parsed as
-    /// TypeScript — otherwise they produce false TS1003/TS1005 syntax
-    /// diagnostics. They should also not appear in the program's source files.
     #[test]
     fn node_modules_js_skipped_when_allow_js_false() {
         let fs = Arc::new(InMemoryFS::new());
@@ -2392,9 +1938,7 @@ mod tests {
         fs.insert_dir("/proj/src");
         fs.insert_dir("/proj/node_modules");
         fs.insert_dir("/proj/node_modules/mypkg");
-        // A `.js` entry point whose package.json `main` points at it. This
-        // file is intentionally valid JS but would be parsed (and could
-        // surface syntax diagnostics) if it were loaded into the program.
+
         fs.insert_file(
             "/proj/node_modules/mypkg/index.js",
             "module.exports = { x: 1 };\nfunction f(a, b) { return a + b; }\n",
@@ -2408,7 +1952,6 @@ mod tests {
             "import * as pkg from 'mypkg';\nexport const v = pkg;",
         );
 
-        // allowJs is false (default): no `--allowJs`.
         let parsed = ParsedCommandLine {
             compiler_options: {
                 let mut opts = CompilerOptions::default();
@@ -2424,14 +1967,13 @@ mod tests {
             host,
         });
 
-        // The `.js` file must not have been loaded into the program.
         assert!(
             program
                 .get_source_file("/proj/node_modules/mypkg/index.js")
                 .is_none(),
             "expected node_modules .js file to be skipped when allowJs is false"
         );
-        // And it must not have produced any syntax diagnostics.
+
         let has_syntax_error = program
             .diagnostics()
             .iter()
@@ -2447,8 +1989,6 @@ mod tests {
         );
     }
 
-    /// When `allowJs` is true, `.js` files in `node_modules` ARE loaded.
-    /// This guards against the G3 filter being too aggressive.
     #[test]
     fn node_modules_js_loaded_when_allow_js_true() {
         let fs = Arc::new(InMemoryFS::new());
@@ -2496,8 +2036,6 @@ mod tests {
     }
 }
 
-/// Whether a top-level ambient module declaration (`declare module "name"`)
-/// exists in any of the given source files.
 fn ambient_module_exists(
     source_files: &[Arc<crate::ast::SourceFile>],
     name: &str,
@@ -2505,9 +2043,7 @@ fn ambient_module_exists(
     for file in source_files {
         if let crate::ast::NodeData::SourceFile(sf) = &file.node.data {
             for stmt in sf.statements.iter() {
-                // A `declare module "x"` inside an EXTERNAL module file is
-                // an augmentation, not a global ambient module — it doesn't
-                // make the name resolvable.
+
                 let file_is_external = file.external_module_indicator.is_some();
                 if let crate::ast::NodeData::ModuleDeclaration(md) = &stmt.data
                     && md.name.kind == crate::ast::SyntaxKind::StringLiteral
@@ -2522,8 +2058,6 @@ fn ambient_module_exists(
     false
 }
 
-/// Strip one layer of surrounding double/single quotes from a module-name
-/// string literal's text (module names keep their quotes in the AST).
 fn strip_quotes(s: &str) -> &str {
     let b = s.as_bytes();
     if b.len() >= 2

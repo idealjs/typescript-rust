@@ -1,8 +1,3 @@
-//! Package name validation (1:1 port of Go's `internal/project/ata/validatepackagename.go`).
-
-/// The result of validating a package name.
-///
-/// Mirrors `ata.NameValidationResult` in Go.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum NameValidationResult {
     NameOk,
@@ -21,10 +16,6 @@ impl Default for NameValidationResult {
 
 const MAX_PACKAGE_NAME_LENGTH: usize = 214;
 
-/// Validates a package name using rules defined at
-/// <https://docs.npmjs.com/files/package.json>.
-///
-/// Mirrors `ata.ValidatePackageName` in Go.
 pub fn validate_package_name(package_name: &str) -> (NameValidationResult, String, bool) {
     validate_package_name_worker(package_name, true)
 }
@@ -55,7 +46,7 @@ fn validate_package_name_worker(
             false,
         );
     }
-    // Check if name is a scoped package: starts with @ and has one '/' in the middle.
+
     if support_scoped_package {
         if let Some(without_scope) = package_name.strip_prefix('@') {
             if let Some((scope, scoped_package_name)) = without_scope.split_once('/') {
@@ -77,7 +68,7 @@ fn validate_package_name_worker(
             }
         }
     }
-    // Check URI-safe characters (Go uses url.QueryEscape).
+
     if query_escape(package_name) != package_name {
         return (
             NameValidationResult::NameContainsNonUriSafeCharacters,
@@ -88,9 +79,6 @@ fn validate_package_name_worker(
     (NameValidationResult::NameOk, String::new(), false)
 }
 
-/// Renders a package name validation failure message.
-///
-/// Mirrors `ata.renderPackageNameValidationFailure` in Go.
 pub fn render_package_name_validation_failure(
     typing: &str,
     result: NameValidationResult,
@@ -125,18 +113,13 @@ pub fn render_package_name_validation_failure(
     }
 }
 
-/// URL query-encode a string (mirrors Go's `url.QueryEscape`).
-///
-/// This encodes characters that are not safe in a URL query string.
-/// For npm package name validation, only the subset relevant to package
-/// names matters (alphanumeric, `-`, `_`, `.`, `~`).
 fn query_escape(s: &str) -> String {
     let mut result = String::with_capacity(s.len());
     for c in s.chars() {
         if c.is_ascii_alphanumeric() || matches!(c, '-' | '_' | '.' | '~') {
             result.push(c);
         } else {
-            // Encode as %XX (uppercase hex, matching Go's url.QueryEscape)
+
             let mut buf = [0u8; 4];
             for &byte in c.encode_utf8(&mut buf).as_bytes() {
                 result.push_str(&format!("%{:02X}", byte));

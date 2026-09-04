@@ -1,5 +1,3 @@
-//! Config file registry (1:1 port of Go's `internal/project/configfileregistry.go`).
-
 #![allow(dead_code)]
 
 use std::collections::HashMap;
@@ -7,10 +5,6 @@ use std::collections::HashMap;
 use crate::tsoptions::ParsedCommandLine;
 use crate::tspath::Path;
 
-
-/// Tracks the pending reload state of a config file entry.
-///
-/// Go: `type PendingReload int`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum PendingReload {
     None,
@@ -18,20 +12,16 @@ pub enum PendingReload {
     Full,
 }
 
-/// An entry in the config file registry tracking the parsed command line and
-/// its retaining projects/files/configs.
-///
-/// Go: `type configFileEntry struct { ... }`.
 #[derive(Clone)]
 pub struct ConfigFileEntry {
     pub file_name: String,
     pub pending_reload: PendingReload,
     pub command_line: Option<ParsedCommandLine>,
-    /// Projects that have called acquireConfig without releasing it.
+
     pub retaining_projects: HashMap<Path, ()>,
-    /// Open files that caused this config to load.
+
     pub retaining_open_files: HashMap<Path, ()>,
-    /// Config files that extend this one.
+
     pub retaining_configs: HashMap<Path, ()>,
 }
 
@@ -62,9 +52,6 @@ impl ConfigFileEntry {
     }
 }
 
-/// Cached config-file-name lookups for a given file path.
-///
-/// Go: `type configFileNames struct { ... }`.
 #[derive(Clone)]
 pub struct ConfigFileNames {
     pub nearest_config_file_name: String,
@@ -80,10 +67,6 @@ impl ConfigFileNames {
     }
 }
 
-/// Maps config file paths to their entries, and caches config-file-name
-/// lookups for open files.
-///
-/// Go: `type ConfigFileRegistry struct { ... }`.
 #[derive(Default)]
 pub struct ConfigFileRegistry {
     pub configs: HashMap<Path, ConfigFileEntry>,
@@ -115,9 +98,6 @@ impl ConfigFileRegistry {
             .unwrap_or("")
     }
 
-    /// Creates a shallow copy.
-    ///
-    /// Go: `func (c *ConfigFileRegistry) clone() *ConfigFileRegistry`.
     pub fn clone_shallow(&self) -> ConfigFileRegistry {
         ConfigFileRegistry {
             configs: self.configs.clone(),

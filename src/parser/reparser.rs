@@ -1,41 +1,7 @@
-//! JSDoc reparser: converts JSDoc tags into regular AST nodes.
-//!
-//! Ported from `internal/parser/reparser.go` (748 lines). The Go reparser
-//! has two categories:
-//! - **Unhosted tags** (`@typedef`, `@callback`, `@import`, `@overload`):
-//!   create entirely new statement nodes appended to the source file's
-//!   statement list.
-//! - **Hosted tags** (`@type`, `@param`, `@return`, `@readonly`, etc.):
-//!   mutate the host node (e.g., set a parameter's type from `@param {string}`).
-//!
-//! In Rust, the AST is immutable (`Arc<Node>`), so hosted-tag mutation would
-//! require rebuilding entire subtrees. This module currently implements the
-//! unhosted tag conversion (which creates new nodes). Hosted-tag support is
-//! deferred to a future phase.
-//!
-//! Key design difference from Go: since Rust nodes are immutable, we reuse
-//! `Arc<Node>` clones for type nodes extracted from JSDoc (no deep clone
-//! needed). The `Reparsed` flag is set on newly created declaration nodes
-//! to mark them as JSDoc-derived.
-
 use crate::ast::*;
 use crate::core::text::TextRange;
 use std::sync::Arc;
 
-// ────────────────────────────────────────────────────────────────────────────
-// Public entry point
-// ────────────────────────────────────────────────────────────────────────────
-
-/// Process JSDoc tags for a statement node, converting unhosted tags
-/// (`@typedef`, `@callback`, `@import`, `@overload`) into regular AST
-/// declaration nodes.
-///
-/// Mirrors Go's `reparseTags` (`reparser.go:54-68`): iterates JSDoc comments
-/// attached to `parent`, processes unhosted tags for all JSDoc comments, and
-/// hosted tags for the last JSDoc comment only.
-///
-/// Returns the list of new statement nodes to insert before `parent` in the
-/// statement list (matching Go's `reparseList` ordering).
 pub fn reparse_tags(parent: &Arc<Node>, js_docs: &[Arc<Node>]) -> Vec<Arc<Node>> {
     let mut reparse_list: Vec<Arc<Node>> = Vec::new();
 
@@ -50,12 +16,11 @@ pub fn reparse_tags(parent: &Arc<Node>, js_docs: &[Arc<Node>]) -> Vec<Arc<Node>>
         };
 
         for tag in &tags.nodes {
-            // Unhosted tags create new statements for all JSDoc comments
+
             if let Some(stmt) = reparse_unhosted(tag, parent, js_doc) {
                 reparse_list.push(stmt);
             }
-            // Hosted tags (which mutate existing nodes) are only processed
-            // for the last JSDoc comment. Deferred — requires mutable AST.
+
             let _ = is_last;
         }
     }
@@ -63,20 +28,6 @@ pub fn reparse_tags(parent: &Arc<Node>, js_docs: &[Arc<Node>]) -> Vec<Arc<Node>>
     reparse_list
 }
 
-// ────────────────────────────────────────────────────────────────────────────
-// Unhosted tag conversion
-// ────────────────────────────────────────────────────────────────────────────
-
-/// Convert an unhosted JSDoc tag into a new statement node.
-///
-/// Mirrors Go's `reparseUnhosted` (`reparser.go:70-140`). Handles:
-/// - `@typedef {Type} Name` → `TypeAliasDeclaration`
-/// - `@callback Name` → `TypeAliasDeclaration` with `FunctionType`
-/// - `@import ...` → `ImportDeclaration`
-/// - `@overload` → `FunctionDeclaration` / `MethodDeclaration` / `ConstructorDeclaration`
-///
-/// Returns `None` for tags that don't produce new statements or have
-/// insufficient information (e.g., `@typedef` without a type expression).
 fn reparse_unhosted(tag: &Arc<Node>, parent: &Arc<Node>, js_doc: &Arc<Node>) -> Option<Arc<Node>> {
     match tag.kind {
         SyntaxKind::JSDocTypedefTag => reparse_typedef_tag(tag, js_doc),
@@ -87,9 +38,6 @@ fn reparse_unhosted(tag: &Arc<Node>, parent: &Arc<Node>, js_doc: &Arc<Node>) -> 
     }
 }
 
-/// Convert `@typedef {Type} Name` into a `TypeAliasDeclaration`.
-///
-/// Mirrors Go's `reparseUnhosted` JSDocTypedefTag branch (`reparser.go:72-99`).
 fn reparse_typedef_tag(tag: &Arc<Node>, js_doc: &Arc<Node>) -> Option<Arc<Node>> {
     let (type_expression, full_name) = match &tag.data {
         NodeData::JSDocTypedefTag(d) => {
@@ -110,10 +58,9 @@ fn reparse_typedef_tag(tag: &Arc<Node>, js_doc: &Arc<Node>) -> Option<Arc<Node>>
     let inner_name = get_innermost_name_of_jsdoc_namespace(&full_name);
     let type_parameters = gather_type_parameters(js_doc, true);
 
-    // Determine the type node from the type expression
     let type_node = match type_expression.kind {
         SyntaxKind::JSDocTypeExpression => {
-            // Clone the inner type node
+
             match &type_expression.data {
                 NodeData::JSDocTypeExpression(d) => d.type_node.clone(),
                 _ => return None,
@@ -139,13 +86,10 @@ fn reparse_typedef_tag(tag: &Arc<Node>, js_doc: &Arc<Node>) -> Option<Arc<Node>>
     Some(result)
 }
 
-/// Convert `@callback Name` into a `TypeAliasDeclaration` with `FunctionType`.
-///
-/// Mirrors Go's `reparseUnhosted` JSDocCallbackTag branch (`reparser.go:100-118`).
 fn reparse_callback_tag(tag: &Arc<Node>, js_doc: &Arc<Node>) -> Option<Arc<Node>> {
     let (type_expression, full_name) = match &tag.data {
         NodeData::JSDocCallbackTag(d) => {
-            // type_expression is Arc<Node> (not Option) for callback
+
             let name = d.name.as_ref()?;
             (d.type_expression.clone(), name.clone())
         }
@@ -162,7 +106,6 @@ fn reparse_callback_tag(tag: &Arc<Node>, js_doc: &Arc<Node>) -> Option<Arc<Node>
     let inner_name = get_innermost_name_of_jsdoc_namespace(&full_name);
     let type_parameters = gather_type_parameters(js_doc, true);
 
-    // Build a FunctionTypeNode from the JSDocSignature
     let function_type = reparse_jsdoc_signature(&type_expression, tag, js_doc, tag, None);
 
     let type_alias = Arc::new(Node::with_loc_flags(
@@ -181,9 +124,6 @@ fn reparse_callback_tag(tag: &Arc<Node>, js_doc: &Arc<Node>) -> Option<Arc<Node>
     Some(result)
 }
 
-/// Convert `@import` JSDoc tag into an `ImportDeclaration`.
-///
-/// Mirrors Go's `reparseUnhosted` JSDocImportTag branch (`reparser.go:119-133`).
 fn reparse_import_tag(tag: &Arc<Node>) -> Option<Arc<Node>> {
     let (import_clause, module_specifier, attributes) = match &tag.data {
         NodeData::JSDocImportTag(d) => {
@@ -197,7 +137,6 @@ fn reparse_import_tag(tag: &Arc<Node>) -> Option<Arc<Node>> {
         _ => return None,
     };
 
-    // Set phase_modifier to TypeKeyword on the import clause
     let import_clause = match &import_clause.data {
         NodeData::ImportClause(d) => Arc::new(Node::with_loc_flags(
             SyntaxKind::ImportClause,
@@ -227,17 +166,12 @@ fn reparse_import_tag(tag: &Arc<Node>) -> Option<Arc<Node>> {
     Some(import_declaration)
 }
 
-/// Convert `@overload` JSDoc tag into a function/method/constructor declaration.
-///
-/// Mirrors Go's `reparseUnhosted` JSDocOverloadTag branch (`reparser.go:134-138`).
-/// Only creates overload signatures for function, method, and constructor
-/// declarations outside object literals.
 fn reparse_overload_tag(
     tag: &Arc<Node>,
     parent: &Arc<Node>,
     js_doc: &Arc<Node>,
 ) -> Option<Arc<Node>> {
-    // Only create overload signatures for function/method/constructor declarations
+
     let is_valid_parent = matches!(
         parent.kind,
         SyntaxKind::FunctionDeclaration | SyntaxKind::MethodDeclaration | SyntaxKind::Constructor
@@ -256,13 +190,6 @@ fn reparse_overload_tag(
     Some(signature)
 }
 
-// ────────────────────────────────────────────────────────────────────────────
-// JSDoc signature → function-like declaration
-// ────────────────────────────────────────────────────────────────────────────
-
-/// Build a function-like declaration from a JSDocSignature.
-///
-/// Mirrors Go's `reparseJSDocSignature` (`reparser.go:142-238`).
 fn reparse_jsdoc_signature(
     js_signature: &Arc<Node>,
     fun: &Arc<Node>,
@@ -271,23 +198,20 @@ fn reparse_jsdoc_signature(
     modifiers: Option<Arc<ModifierList>>,
 ) -> Arc<Node> {
     let loc = if tag.kind == SyntaxKind::JSDocOverloadTag {
-        // Use tag name location for overload
+
         tag_name_loc(tag).unwrap_or(tag.loc)
     } else {
         js_signature.loc
     };
 
-    // Gather type parameters (except for @callback which applies them to the type alias)
     let type_parameters = if tag.kind != SyntaxKind::JSDocCallbackTag {
         gather_type_parameters(js_doc, false)
     } else {
         None
     };
 
-    // Extract parameters and return type from the JSDocSignature
     let (params_list, return_type) = extract_jsdoc_signature_data(js_signature);
 
-    // Build the appropriate declaration node based on the host kind
     let parameters = Arc::new(NodeList::new(params_list));
     match fun.kind {
         SyntaxKind::FunctionDeclaration => {
@@ -349,7 +273,7 @@ fn reparse_jsdoc_signature(
             NodeFlags::Reparsed,
         )),
         SyntaxKind::JSDocCallbackTag => {
-            // For @callback, build a FunctionTypeNode
+
             Arc::new(Node::with_loc_flags(
                 SyntaxKind::FunctionType,
                 NodeData::FunctionTypeNode(FunctionTypeNodeData {
@@ -368,7 +292,7 @@ fn reparse_jsdoc_signature(
             ))
         }
         _ => {
-            // Fallback: build a FunctionTypeNode
+
             Arc::new(Node::with_loc_flags(
                 SyntaxKind::FunctionType,
                 NodeData::FunctionTypeNode(FunctionTypeNodeData {
@@ -383,9 +307,6 @@ fn reparse_jsdoc_signature(
     }
 }
 
-/// Extract parameters and return type from a JSDocSignature node.
-///
-/// Returns `(parameters, return_type)`.
 fn extract_jsdoc_signature_data(js_signature: &Arc<Node>) -> (Vec<Arc<Node>>, Option<Arc<Node>>) {
     match &js_signature.data {
         NodeData::JSDocSignature(d) => {
@@ -396,7 +317,7 @@ fn extract_jsdoc_signature_data(js_signature: &Arc<Node>) -> (Vec<Arc<Node>>, Op
                 .filter_map(|param| reparse_parameter_from_jsdoc(param))
                 .collect();
             let return_type = d.type_node.as_ref().and_then(|tn| {
-                // If it's a JSDocReturnTag, extract the type expression
+
                 match &tn.data {
                     NodeData::JSDocReturnTag(rt) => {
                         rt.type_expression.as_ref().and_then(|te| match &te.data {
@@ -413,9 +334,6 @@ fn extract_jsdoc_signature_data(js_signature: &Arc<Node>) -> (Vec<Arc<Node>>, Op
     }
 }
 
-/// Convert a JSDoc parameter tag into a `ParameterDeclaration`.
-///
-/// Handles `@param`, `@this`, and `@property` tags.
 fn reparse_parameter_from_jsdoc(param: &Arc<Node>) -> Option<Arc<Node>> {
     match param.kind {
         SyntaxKind::JSDocThisTag => {
@@ -431,7 +349,7 @@ fn reparse_parameter_from_jsdoc(param: &Arc<Node>) -> Option<Arc<Node>> {
                 tag_name.loc,
                 NodeFlags::Reparsed,
             ));
-            // type_expression is Arc<Node> (not Option) for JSDocThisTag
+
             let param_type = match &type_expression.data {
                 NodeData::JSDocTypeExpression(d) => Some(d.type_node.clone()),
                 _ => None,
@@ -453,7 +371,7 @@ fn reparse_parameter_from_jsdoc(param: &Arc<Node>) -> Option<Arc<Node>> {
         SyntaxKind::JSDocParameterTag | SyntaxKind::JSDocPropertyTag => {
             let (name, is_bracketed, type_expression) = match &param.data {
                 NodeData::JSDocParameterOrPropertyTag(d) => {
-                    // Skip sub-property parameters (e.g., @param x.y) — these have QualifiedNames
+
                     if name_is_qualified_name(&d.name) {
                         return None;
                     }
@@ -468,7 +386,7 @@ fn reparse_parameter_from_jsdoc(param: &Arc<Node>) -> Option<Arc<Node>> {
             if let Some(te) = type_expression {
                 if let NodeData::JSDocTypeExpression(ted) = &te.data {
                     if ted.type_node.kind == SyntaxKind::JSDocVariadicType {
-                        // Variadic: create DotDotDotToken and unwrap the inner type
+
                         dot_dot_dot_token = Some(Arc::new(Node::with_loc(
                             SyntaxKind::DotDotDotToken,
                             NodeData::Token,
@@ -503,17 +421,9 @@ fn reparse_parameter_from_jsdoc(param: &Arc<Node>) -> Option<Arc<Node>> {
     }
 }
 
-// ────────────────────────────────────────────────────────────────────────────
-// JSDoc type literal → TypeLiteralNode
-// ────────────────────────────────────────────────────────────────────────────
-
-/// Convert a JSDocTypeLiteral (from `@typedef {Object}`) into a regular
-/// `TypeLiteralNode` with `PropertySignatureDeclaration` members.
-///
-/// Mirrors Go's `reparseJSDocTypeLiteral` (`reparser.go:240-279`).
 fn reparse_jsdoc_type_literal(t: &Arc<Node>) -> Arc<Node> {
     if t.kind != SyntaxKind::JSDocTypeLiteral {
-        // Already a regular type node — return as-is (clone the Arc)
+
         return t.clone();
     }
 
@@ -537,7 +447,6 @@ fn reparse_jsdoc_type_literal(t: &Arc<Node>) -> Arc<Node> {
                 _ => continue,
             };
 
-            // For QualifiedName names, take the rightmost identifier
             let prop_name = if name.kind == SyntaxKind::QualifiedName {
                 match &name.data {
                     NodeData::QualifiedName(d) => d.right.clone(),
@@ -569,8 +478,7 @@ fn reparse_jsdoc_type_literal(t: &Arc<Node>) -> Arc<Node> {
                             TextRange::new(prop.pos(), prop.pos()),
                         ))
                     }),
-                    // initializer is Arc<Node> (not Option) in the generated AST;
-                    // use a missing node placeholder since JSDoc properties don't have initializers
+
                     initializer: Arc::new(Node::with_loc(
                         SyntaxKind::MissingDeclaration,
                         NodeData::MissingDeclaration(MissingDeclarationData { modifiers: None }),
@@ -593,7 +501,7 @@ fn reparse_jsdoc_type_literal(t: &Arc<Node>) -> Arc<Node> {
     ));
 
     if is_array_type {
-        // Wrap in ArrayType: T[]
+
         result = Arc::new(Node::with_loc_flags(
             SyntaxKind::ArrayType,
             NodeData::ArrayTypeNode(ArrayTypeNodeData {
@@ -607,16 +515,6 @@ fn reparse_jsdoc_type_literal(t: &Arc<Node>) -> Arc<Node> {
     result
 }
 
-// ────────────────────────────────────────────────────────────────────────────
-// Type parameter gathering
-// ────────────────────────────────────────────────────────────────────────────
-
-/// Collect `@template` tags from a JSDoc comment into a `NodeList` of
-/// `TypeParameter` declarations.
-///
-/// Mirrors Go's `gatherTypeParameters` (`reparser.go:293-340`).
-/// When `typedef_or_callback` is true and the JSDoc contains `@typedef` or
-/// `@callback`, `@template` tags apply to the type being defined.
 fn gather_type_parameters(js_doc: &Arc<Node>, typedef_or_callback: bool) -> Option<Arc<NodeList>> {
     let tags = match &js_doc.data {
         NodeData::JSDoc(d) => d.tags.as_ref(),
@@ -632,8 +530,7 @@ fn gather_type_parameters(js_doc: &Arc<Node>, typedef_or_callback: bool) -> Opti
     let mut first_template = true;
 
     for tag in &tags.nodes {
-        // When a JSDoc comment contains an @typedef or @callback tag,
-        // @template type parameter declarations apply to the type being defined.
+
         if !typedef_or_callback
             && (tag.kind == SyntaxKind::JSDocTypedefTag || tag.kind == SyntaxKind::JSDocCallbackTag)
         {
@@ -657,7 +554,7 @@ fn gather_type_parameters(js_doc: &Arc<Node>, typedef_or_callback: bool) -> Opti
         let mut first_type_parameter = true;
         for tp in &template_type_params.nodes {
             let reparse = if constraint.kind != SyntaxKind::Unknown && first_type_parameter {
-                // First type parameter gets the constraint
+
                 let (tp_modifiers, tp_name, tp_default) = match &tp.data {
                     NodeData::TypeParameterDeclaration(d) => {
                         (d.modifiers.clone(), d.name.clone(), d.default_type.clone())
@@ -698,16 +595,6 @@ fn gather_type_parameters(js_doc: &Arc<Node>, typedef_or_callback: bool) -> Opti
     }
 }
 
-// ────────────────────────────────────────────────────────────────────────────
-// Namespace helpers
-// ────────────────────────────────────────────────────────────────────────────
-
-/// Get the innermost identifier from a JSDoc namespace chain (ModuleDeclaration).
-///
-/// For a simple identifier, returns the identifier itself.
-/// For "A.B.C" (represented as nested ModuleDeclarations), returns "C".
-///
-/// Mirrors Go's `getInnermostNameOfJSDocNamespace` (`reparser.go:707-718`).
 fn get_innermost_name_of_jsdoc_namespace(full_name: &Arc<Node>) -> Arc<Node> {
     let mut current = full_name.clone();
     while current.kind == SyntaxKind::ModuleDeclaration {
@@ -718,7 +605,7 @@ fn get_innermost_name_of_jsdoc_namespace(full_name: &Arc<Node>) -> Arc<Node> {
         match body {
             Some(b) => current = b,
             None => {
-                // No body — return the name
+
                 return current.name().map(|n| deep_clone(n)).unwrap_or_else(|| {
                     Arc::new(Node::with_loc(
                         SyntaxKind::Identifier,
@@ -734,12 +621,6 @@ fn get_innermost_name_of_jsdoc_namespace(full_name: &Arc<Node>) -> Arc<Node> {
     current
 }
 
-/// Wrap a statement in namespace declarations corresponding to a JSDoc dotted name.
-///
-/// For name "A.B.C" and a type alias for C, produces:
-/// `namespace A { namespace B { type C = ... } }`
-///
-/// Mirrors Go's `wrapInJSDocNamespace` (`reparser.go:729-748`).
 fn wrap_in_jsdoc_namespace(
     full_name: &Arc<Node>,
     statement: &Arc<Node>,
@@ -749,14 +630,12 @@ fn wrap_in_jsdoc_namespace(
         return statement.clone();
     }
 
-    // Get the body for recursive wrapping
     let (body, name) = match &full_name.data {
         NodeData::ModuleDeclaration(d) => (d.body.clone(), d.name.clone()),
         _ => return statement.clone(),
     };
     let loc = full_name.loc;
 
-    // Recursively wrap from outermost to innermost
     let wrapped = match &body {
         Some(b) => wrap_in_jsdoc_namespace(b, statement, true),
         None => statement.clone(),
@@ -790,13 +669,6 @@ fn wrap_in_jsdoc_namespace(
     ))
 }
 
-// ────────────────────────────────────────────────────────────────────────────
-// Utility helpers
-// ────────────────────────────────────────────────────────────────────────────
-
-/// Create an export modifier list for a reparsed node.
-///
-/// Mirrors Go's `createExportModifier` (`reparser.go:696-702`).
 fn create_export_modifier(location_node: &Arc<Node>) -> Arc<ModifierList> {
     let export_modifier = Arc::new(Node::with_loc_flags(
         SyntaxKind::ExportKeyword,
@@ -810,9 +682,6 @@ fn create_export_modifier(location_node: &Arc<Node>) -> Arc<ModifierList> {
     ))
 }
 
-/// Create a QuestionToken if the JSDoc parameter/property is optional.
-///
-/// Mirrors Go's `makeQuestionIfOptional` (`reparser.go:611-619`).
 fn make_question_if_optional(
     is_bracketed: bool,
     type_expression: &Option<Arc<Node>>,
@@ -834,23 +703,14 @@ fn make_question_if_optional(
     }
 }
 
-/// Reuse a node's Arc clone for reparsing.
-///
-/// In Go, `DeepCloneReparse` creates a deep clone because nodes are mutable.
-/// In Rust, since nodes are immutable `Arc<Node>`, we can simply clone the
-/// Arc (a cheap reference-count increment). The `Reparsed` flag is not set
-/// on reused nodes — this is acceptable since the flag is primarily used for
-/// `GetReparsedNodeForNode` mapping in the binder, which is a secondary concern.
 fn deep_clone(node: &Arc<Node>) -> Arc<Node> {
     Arc::clone(node)
 }
 
-/// Check if a name node is a QualifiedName.
 fn name_is_qualified_name(name: &Arc<Node>) -> bool {
     name.kind == SyntaxKind::QualifiedName
 }
 
-/// Get the location of a tag's name token.
 fn tag_name_loc(tag: &Arc<Node>) -> Option<TextRange> {
     match &tag.data {
         NodeData::JSDocOverloadTag(d) => Some(d.tag_name.loc),
@@ -860,10 +720,6 @@ fn tag_name_loc(tag: &Arc<Node>) -> Option<TextRange> {
         _ => None,
     }
 }
-
-// ────────────────────────────────────────────────────────────────────────────
-// Tests
-// ────────────────────────────────────────────────────────────────────────────
 
 #[cfg(test)]
 mod tests {
@@ -875,11 +731,6 @@ mod tests {
         (Arc::new(result.0), result.1)
     }
 
-    /// Get JSDoc tags from the last statement's JSDoc.
-    /// Uses `resolve_jsdoc` directly (bypassing the `HasJSDoc` flag check).
-    /// Uses the last statement because `apply_jsdoc_reparser` (called during
-    /// parsing) inserts reparsed nodes before the original statement, making
-    /// the original statement the last one in the list.
     fn get_first_statement_jsdoc(file: &SourceFile) -> Vec<Arc<Node>> {
         let statements = match &file.node.data {
             NodeData::SourceFile(d) => &d.statements.nodes,
@@ -888,8 +739,7 @@ mod tests {
         if statements.is_empty() {
             return Vec::new();
         }
-        // The original statement (with JSDoc) is the last one after reparser
-        // integration inserts reparsed nodes before it.
+
         let stmt = statements.last().unwrap();
         file.resolve_jsdoc(stmt)
     }
@@ -906,7 +756,6 @@ let x;
         let jsdocs = get_first_statement_jsdoc(&file);
         assert!(!jsdocs.is_empty(), "should have JSDoc");
 
-        // Get tags from the first JSDoc
         let tags = match &jsdocs[0].data {
             NodeData::JSDoc(d) => d.tags.as_ref(),
             _ => None,
@@ -916,7 +765,6 @@ let x;
         assert_eq!(tags.nodes.len(), 1);
         assert_eq!(tags.nodes[0].kind, SyntaxKind::JSDocTypedefTag);
 
-        // Reparse
         let stmts = match &file.node.data {
             NodeData::SourceFile(d) => d.statements.nodes.clone(),
             _ => Vec::new(),
@@ -925,7 +773,6 @@ let x;
         assert_eq!(reparsed.len(), 1);
         assert_eq!(reparsed[0].kind, SyntaxKind::TypeAliasDeclaration);
 
-        // Check name
         match &reparsed[0].data {
             NodeData::TypeAliasDeclaration(d) => {
                 assert_eq!(node_text(&d.name), "MyString");
@@ -960,12 +807,7 @@ let p;
         match &reparsed[0].data {
             NodeData::TypeAliasDeclaration(d) => {
                 assert_eq!(node_text(&d.name), "Point");
-                // JSDoc parser currently produces a JSDocTypeExpression containing
-                // a TypeReference to "Object" (not a JSDocTypeLiteral with property
-                // tags). The reparser correctly extracts whatever the JSDoc parser
-                // produces. When the JSDoc parser is enhanced to produce
-                // JSDocTypeLiteral for @typedef {Object} with @property tags,
-                // this will become a TypeLiteral with 2 members.
+
                 assert_eq!(d.type_node.kind, SyntaxKind::TypeReference);
             }
             _ => panic!("expected TypeAliasDeclaration"),
@@ -988,14 +830,14 @@ let x;
         };
         let reparsed = reparse_tags(&stmts[0], &jsdocs);
         assert_eq!(reparsed.len(), 1);
-        // Should be wrapped in namespace Foo { type Bar = string }
+
         assert_eq!(reparsed[0].kind, SyntaxKind::ModuleDeclaration);
 
         match &reparsed[0].data {
             NodeData::ModuleDeclaration(d) => {
                 assert_eq!(d.keyword, SyntaxKind::NamespaceKeyword);
                 assert_eq!(node_text(&d.name), "Foo");
-                // Check body has a type alias
+
                 let body = d.body.as_ref().expect("should have body");
                 assert_eq!(body.kind, SyntaxKind::ModuleBlock);
                 if let NodeData::ModuleBlock(mb) = &body.data {
@@ -1034,12 +876,9 @@ let x;
             NodeData::TypeAliasDeclaration(d) => {
                 assert_eq!(node_text(&d.name), "MyCallback");
                 assert_eq!(d.type_node.kind, SyntaxKind::FunctionType);
-                // Note: parameter count depends on JSDoc parser's callback signature
-                // parsing, which may not yet extract @param tags into the signature's
-                // parameter list. The reparser correctly passes through whatever
-                // parameters the JSDoc parser produces.
+
                 if let NodeData::FunctionTypeNode(ft) = &d.type_node.data {
-                    // Verify it's a FunctionTypeNode with a type (return type or any)
+
                     assert!(
                         ft.type_node.is_some(),
                         "FunctionType should have a return type"
@@ -1054,11 +893,7 @@ let x;
 
     #[test]
     fn test_import_tag() {
-        // JSDoc @import tag parsing is currently a stub (parse_import_tag sets
-        // import_clause to None). The reparser correctly returns None when
-        // import_clause is None. This test verifies the reparser handles the
-        // stub gracefully. When full @import parsing is implemented, this test
-        // should be updated to expect an ImportDeclaration.
+
         let text = r#"
 /**
  * @import { Foo } from "bar"
@@ -1072,7 +907,7 @@ let x;
             _ => Vec::new(),
         };
         let reparsed = reparse_tags(&stmts[0], &jsdocs);
-        // import_clause is None (JSDoc parser stub), so no reparsed node
+
         assert_eq!(reparsed.len(), 0);
     }
 
@@ -1136,7 +971,7 @@ function foo(x) { return 42; }
 
     #[test]
     fn test_get_innermost_name_namespace() {
-        // Build: namespace A { namespace B { (name=C) } }
+
         let c = Arc::new(Node::with_loc(
             SyntaxKind::Identifier,
             NodeData::Identifier(IdentifierData {
@@ -1203,14 +1038,10 @@ function foo(x) { return 42; }
             }),
             TextRange::new(0, 1),
         ));
-        // Not a ModuleDeclaration — should return as-is
+
         let result = wrap_in_jsdoc_namespace(&statement, &statement, false);
         assert_eq!(result.kind, SyntaxKind::TypeAliasDeclaration);
     }
-
-    // ─────────────────────────────────────────────────────────────────────
-    // Integration tests: verify reparser runs during parsing (P2.6b)
-    // ─────────────────────────────────────────────────────────────────────
 
     #[test]
     fn test_integration_typedef_prepended_to_statements() {
@@ -1225,13 +1056,11 @@ let x;
             NodeData::SourceFile(d) => &d.statements.nodes,
             _ => panic!("expected SourceFile"),
         };
-        // After reparser integration, the TypeAliasDeclaration should be
-        // inserted before the original `let x;` statement.
+
         assert_eq!(statements.len(), 2);
         assert_eq!(statements[0].kind, SyntaxKind::TypeAliasDeclaration);
         assert_eq!(statements[1].kind, SyntaxKind::VariableStatement);
 
-        // Verify the TypeAliasDeclaration has the correct name and type
         match &statements[0].data {
             NodeData::TypeAliasDeclaration(d) => {
                 assert_eq!(node_text(&d.name), "MyString");
@@ -1254,7 +1083,7 @@ let x;
             NodeData::SourceFile(d) => &d.statements.nodes,
             _ => panic!("expected SourceFile"),
         };
-        // Should have: [ModuleDeclaration(Foo { type Bar }), VariableStatement]
+
         assert_eq!(statements.len(), 2);
         assert_eq!(statements[0].kind, SyntaxKind::ModuleDeclaration);
         assert_eq!(statements[1].kind, SyntaxKind::VariableStatement);
@@ -1275,12 +1104,11 @@ function foo(x) { return x; }
             NodeData::SourceFile(d) => &d.statements.nodes,
             _ => panic!("expected SourceFile"),
         };
-        // Should have: [FunctionDeclaration (overload), FunctionDeclaration (original)]
+
         assert_eq!(statements.len(), 2);
         assert_eq!(statements[0].kind, SyntaxKind::FunctionDeclaration);
         assert_eq!(statements[1].kind, SyntaxKind::FunctionDeclaration);
 
-        // The first (overload) should have Reparsed flag and no body
         assert!(statements[0].flags.contains(NodeFlags::Reparsed));
         match &statements[0].data {
             NodeData::FunctionDeclaration(d) => {
@@ -1292,7 +1120,7 @@ function foo(x) { return x; }
 
     #[test]
     fn test_integration_no_jsdoc_unchanged() {
-        // Source file without JSDoc should have the same number of statements
+
         let text = "let x = 1;\nlet y = 2;\n";
         let (file, _diags) = parse_source(text);
         let statements = match &file.node.data {
@@ -1304,7 +1132,7 @@ function foo(x) { return x; }
 
     #[test]
     fn test_integration_hosted_tags_only_unchanged() {
-        // JSDoc with only hosted tags (@param, @returns) should not add statements
+
         let text = r#"
 /**
  * @param {string} x

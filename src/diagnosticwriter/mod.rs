@@ -1,10 +1,3 @@
-//! Diagnostic formatting and reporting, ported from
-//! `internal/diagnosticwriter/diagnosticwriter.go`.
-//!
-//! Produces human-readable diagnostic output in either the compact
-//! `file(line,col): error TS1234: message` form or the pretty
-//! `file:line:col - error TS1234: message` form with a code snippet.
-
 use std::io::Write;
 use std::sync::Arc;
 
@@ -13,25 +6,18 @@ use crate::ast::{LineMap, SourceFile, utf16_len};
 use crate::diagnostics::Category;
 use crate::locale::Locale;
 
-/// Convert a byte offset into a 0-based (line, character) pair within a source
-/// file, using its line map. The character is a UTF-16 code unit offset from
-/// the start of the line, matching Go's `GetECMALineAndUTF16CharacterOfPosition`.
 pub fn line_and_character(line_map: &LineMap, text: &str, offset: usize) -> (usize, usize) {
     let starts = &line_map.line_starts;
     if starts.is_empty() {
         return (0, 0);
     }
-    // Clamp the offset to the text length. A diagnostic may carry an
-    // out-of-range position (e.g. a recovery/missing-token position past EOF);
-    // a display helper must never panic on it. Mirrors the Go behavior of
-    // returning a clamped position.
+
     let mut offset = offset.min(text.len());
-    // Positions may also land inside a multi-byte character (Go slices bytes
-    // freely; Rust must snap to a char boundary to avoid panicking).
+
     while offset > 0 && !text.is_char_boundary(offset) {
         offset -= 1;
     }
-    // Binary search for the last line start <= offset.
+
     let mut lo = 0usize;
     let mut hi = starts.len();
     while lo + 1 < hi {
@@ -52,11 +38,6 @@ pub fn line_and_character(line_map: &LineMap, text: &str, offset: usize) -> (usi
     (line, col)
 }
 
-/// Format a single diagnostic into a compact single-line string.
-///
-/// Mirrors `WriteFormatDiagnostic`: `file(line,col): category TScode: message`.
-/// When `locale` is `Some`, the message is localized via `Message::localize`;
-/// otherwise the English text is used.
 pub fn format_diagnostic_compact(diag: &Diagnostic, locale: Option<&Locale>) -> String {
     let mut out = String::new();
     if let Some(file) = &diag.file {
@@ -68,9 +49,6 @@ pub fn format_diagnostic_compact(diag: &Diagnostic, locale: Option<&Locale>) -> 
     out
 }
 
-/// Format a single diagnostic into a pretty string with a code snippet.
-///
-/// Mirrors `FormatDiagnosticWithColorAndContext` (without ANSI colors).
 pub fn format_diagnostic_pretty(diag: &Diagnostic, locale: Option<&Locale>) -> String {
     let mut out = String::new();
     if let Some(file) = &diag.file {
@@ -86,15 +64,10 @@ pub fn format_diagnostic_pretty(diag: &Diagnostic, locale: Option<&Locale>) -> S
     out
 }
 
-/// Resolve the flattened message text of a diagnostic (including its chain).
-/// When `locale` is `Some`, each message is localized.
 pub fn message_text(diag: &Diagnostic, locale: Option<&Locale>) -> String {
     message_text_ex(diag, locale, 0)
 }
 
-/// Depth-aware message text: chain entries render on their own lines with
-/// a 2-space indent per depth level, matching the official baseline format
-/// ('  Property \'x\' is missing in type ...').
 fn message_text_ex(diag: &Diagnostic, locale: Option<&Locale>, depth: usize) -> String {
     let mut out = match &diag.message {
         Some(msg) => {
@@ -114,7 +87,6 @@ fn message_text_ex(diag: &Diagnostic, locale: Option<&Locale>, depth: usize) -> 
     out
 }
 
-/// Render the source line containing `pos` with a `~~~` squiggle of `len`.
 fn code_snippet(file: &SourceFile, pos: usize, len: usize) -> String {
     let text = &file.text;
     let (line, col) = line_and_character(&file.line_map, text, pos);
@@ -133,7 +105,6 @@ fn code_snippet(file: &SourceFile, pos: usize, len: usize) -> String {
     out
 }
 
-/// Format a diagnostic using the chosen style.
 pub fn format_diagnostic(diag: &Diagnostic, pretty: bool, locale: Option<&Locale>) -> String {
     if pretty {
         format_diagnostic_pretty(diag, locale)
@@ -142,7 +113,6 @@ pub fn format_diagnostic(diag: &Diagnostic, pretty: bool, locale: Option<&Locale
     }
 }
 
-/// Write a slice of diagnostics to a writer, one per line.
 pub fn write_diagnostics<W: Write>(
     writer: &mut W,
     diags: &[Diagnostic],
@@ -155,7 +125,6 @@ pub fn write_diagnostics<W: Write>(
     Ok(())
 }
 
-/// Write a slice of diagnostics to a writer, returning the number of errors.
 pub fn report_diagnostics<W: Write>(
     writer: &mut W,
     diags: &[Arc<Diagnostic>],
