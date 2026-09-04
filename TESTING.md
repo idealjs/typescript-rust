@@ -5,7 +5,16 @@
 - **全量：compiler 6,537 + conformance 5,907 + transpile 22 = 12,466 条，双轮全量 sweep 全 0 FAIL**（第二轮为修复后验证轮；6 并发约 2.5h/轮）。
 - 四套门禁：`cargo test --lib` 1353 / `--test parity` 2 / `--test checker_parity` 1010 / `--test lsp_integration` 15。
 - 遗留已知差异全部在 `tests/baselines/reference/triaged.txt`（日期根因组）；性能工作在 idealjs/ts-go-rust-bench（根因报告在其 results/）。
-- 历史规则与命令见下方「# 测试流程」「# conformance 轮」与各页记录；旧 sweep 脚本在 `scripts/sweeps/`，过程性文档在 `docs/`。
+- 历史规则与命令见下方「## 整理轮回归（2026-09-04，整理+单测后全量验证）
+
+- **整理**：sweep 脚本归档 `scripts/sweeps/`（34）；次级文档归拢 `docs/`（9）；README/TESTING.md 头部/TODO.md 重写为当前状态；全部编译警告清零（cargo fix 清 unused imports；port-parity 占位 dead_code 逐项 allow；`convergence_tests`/`node_format_tests` 补 `#[cfg(test)]` 门——此前泄漏进生产 lib 编译；serde 字段名 struct 级 allow）。
+- **单元测试**：lib 1353→**1362**（+9），新增修复族回归单测：TS2349 apparent-type 链、never-交集 callee、联合目标/联合源 elaboration、optional 的 strictNullChecks 门控、IndexedAccess TP 注记、node10 TS5107+6280 链、每文件 @jsx pragma 覆盖。
+- **四门禁**：1362 / 2 / 1010 / 15 全绿；三笔提交 1d515ab / 179b776 / 1b1ad10。
+- **12,466 条回归（6 并发，~2.5h）：0 FAIL**（5,665P / 2,305S / 4,474ad + transpile 22ad）；4 例超时 SKIP（jsxRuntimePragma / arbitraryModuleNamespaceIdentifiers_module / callChainWithSuper / tsxReactEmitSpreadAttribute）单跑核实为已知慢多配置族（真实输出或台账 DIFF，非挂死）。与上一验证轮结论一致，整理无回归。
+
+# 测试流程
+
+# 测试流程」「# conformance 轮」与各页记录；旧 sweep 脚本在 `scripts/sweeps/`，过程性文档在 `docs/`。
 
 # 测试流程
 
