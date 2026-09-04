@@ -1,65 +1,35 @@
-# TypeScript-Rust Conformance Test Improvement TODO
+# TODO
 
-## Current Status
-- **Pass: 1787/5907 (30.2%)**
-- Panic: 0, Lib tests: 1295/1295
-- Total session progress: **+296 tests** (from 1491 to 1787)
+当前状态见 [`TESTING.md`](./TESTING.md) 顶部「当前状态」；遗留正确性差异台账在
+[`tests/baselines/reference/triaged.txt`](./tests/baselines/reference/triaged.txt)。
 
-## Remaining Priority Tasks
+## 性能（对应 idealjs/ts-go-rust-bench 的根因报告，按收益排序）
 
-### P0: Parser Syntax Features
-- [ ] `using` / `await using` in complex class contexts (partially works)
-- [ ] Decorator emit/semantic checking (parsing works)
-- [ ] Regex pattern parsing edge cases
+- [ ] 跨配置复用已解析库（SourceFile/程序级缓存）：多配置用例省 N-1 次全库解析，
+      24 配置用例 12.8s → ~1.6s，全库墙钟约 -55%
+- [ ] 扫描器注释/空白批量跳过 + ASCII 快路径：lib.dom.d.ts 1.35s → ~0.4s，底板 -60%
+- [ ] 解析器分配架构：节点 arena、标识符 interning、text 零拷贝（去注释后仍 ~5×）
+- [ ] 多线程解析/检查可行性评估
 
-### P1: TS2304 False Positives (~1000 tests remaining)
-- [x] Generic type parameters in FunctionType/ConstructorType
-- [x] Punctuation parser-recovery artifacts
-- [x] CommonJS globals (exports, require, module)
-- [x] ES built-in globals (Object, Array, Date, Math, etc.)
-- [ ] `import` keyword being treated as identifier (331 false positives)
-- [ ] Type parameter `T`/`U` scope in some contexts
+## 正确性（日期根因组，随分诊台账在案）
 
-### P2: TS2322 Type Assignment Compatibility (~977 tests missing)
-- [ ] Assignment type checking (deferred — needs precise type inference)
-- [ ] Structured type property matching
-- [ ] Union/intersection narrowing in assignments
-- [ ] Excess property checks for fresh object literals
+- [ ] 字符串映射 intrinsic 子系统（`Uppercase/Lowercase/Capitalize/Uncapitalize`）
+      ——templateLiteralTypes1 同族
+- [ ] 裸 Array 惰性成员表 vs 实例化 ReadonlyArray 的泛型签名规范化
+      ——arrayToLocaleStringES2020
+- [ ] 默认再导出链 TYPE 意义传播——reexportDefaultIsCallable
+- [ ] 选项门家族补齐：allowJs/checkJs、ES5 downlevel emit、moduleResolution=Classic、
+      noemit helpers、outFile 等
 
-### P3: TS2454 Variable Used Before Assignment
-- [x] For-of/in loop variable definite assignment
-- [ ] Precise control flow analysis for conditional branches
+## 工程化
 
-### P4: Message/Position Alignment
-- [x] TS1121 octal literal `{0}` placeholder fix
-- [x] TS2339 `typeof` prefix for constructor types
-- [x] TS2564 computed property name source text
-- [ ] Systematic position offset (Δline=-1 pattern)
+- [ ] CI 接入：四套门禁 + 分页 sweep 抽样
+- [ ] bench 仓 runner 常态化（每次优化后 `bench/compare.py` 复测）
+- [ ] `-next` 声明产出与 transpile 22 例 accepted-diff 逐项清账
 
-## Completed Work
+## 已完成（历史摘要，详情见 TESTING.md 各轮记录）
 
-### This Session (+296 tests)
-1. Object literal method/accessor shorthand parsing (+53 tests)
-2. Constructor parameter properties (+25 tests)
-3. Private identifier `#prop` scanning and parsing (+16 tests)
-4. Class static block `static { ... }` (+10 tests)
-5. CommonJS globals (+12 tests)
-6. **Class get/set accessors + generators (+ES globals) (+171 tests)**
-7. FunctionType/ConstructorType type param TS2304 suppression (+4 tests)
-8. TS1121 octal literal placeholder fix (+3 tests)
-9. Optional chaining element access `a?.[0]` (+2 tests)
-10. Punctuation parser-recovery TS2304 filtering
-11. TS2339 `typeof ClassName` prefix
-12. TS2564 computed property name fix
-13. For-of/in definite assignment
-14. Logical assignment operators (verified)
-
-### Previous Sessions
-- import.meta MetaProperty parsing
-- TS2564 strictPropertyInitialization check
-- Heritage clause extends expression TS2304 suppression
-- async function expression parsing
-- /.src/ path convention fix
-- TS-format error baseline generation
-- Real baseline comparison against TS reference
-- Stack-based type resolution cycle detection
+- 全量 12,466 用例（compiler/conformance/transpile）基线对齐，双轮 sweep 全 0 FAIL
+- 早期会话：对象字面量方法/访问器简写、构造器参数属性、`#prop` 私有标识符、
+  `static {}` 块、CommonJS 全局、类访问器+生成器、逻辑赋值、for-of 定赋值等
+  （彼时 conformance 30%→后经分页修复轮全量对齐）

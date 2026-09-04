@@ -1,3 +1,12 @@
+# TESTING — 测试状态与历史
+
+## 当前状态（2026-09-04；各轮记录按时间正序追加在下方各段）
+
+- **全量：compiler 6,537 + conformance 5,907 + transpile 22 = 12,466 条，双轮全量 sweep 全 0 FAIL**（第二轮为修复后验证轮；6 并发约 2.5h/轮）。
+- 四套门禁：`cargo test --lib` 1353 / `--test parity` 2 / `--test checker_parity` 1010 / `--test lsp_integration` 15。
+- 遗留已知差异全部在 `tests/baselines/reference/triaged.txt`（日期根因组）；性能工作在 idealjs/ts-go-rust-bench（根因报告在其 results/）。
+- 历史规则与命令见下方「# 测试流程」「# conformance 轮」与各页记录；旧 sweep 脚本在 `scripts/sweeps/`，过程性文档在 `docs/`。
+
 # 测试流程
 
 1. 每次测试 1000 个测试用例,不需要考虑回归。指令如下
