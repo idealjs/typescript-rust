@@ -23,6 +23,7 @@ bitflags::bitflags! {
     ///
     /// Mirrors `ast.SymbolFlags` in Go.
     #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Hash)]
+    #[allow(non_camel_case_types)]
     pub struct SymbolFlags: u32 {
         const None                   = 0;
         const FunctionScopedVariable = 1 << 0;
@@ -59,6 +60,7 @@ bitflags::bitflags! {
     }
 }
 
+#[allow(non_upper_case_globals)]
 impl SymbolFlags {
     // Composite flag groups (matching Go constants)
     pub const ENUM: Self = Self::RegularEnum.union(Self::ConstEnum);

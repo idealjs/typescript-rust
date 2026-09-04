@@ -8,10 +8,9 @@
 use std::sync::Arc;
 
 use crate::ast::node::LineMap;
-use crate::ast::{Node, SourceFile, Symbol, node_data_generated::for_each_child};
-use crate::checker::Checker;
+use crate::ast::{Node, node_data_generated::for_each_child};
 use crate::checker::nodebuilder::SymbolDisplayPart;
-use crate::ls::display_parts_writer::{DisplayPartsWriter, new_display_parts_writer};
+use crate::ls::display_parts_writer::DisplayPartsWriter;
 use crate::lsp::lsproto::lsp::{DocumentUri, Position, Range};
 
 use super::language_service::LanguageService;

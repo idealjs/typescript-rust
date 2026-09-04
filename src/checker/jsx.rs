@@ -24,7 +24,6 @@
 use std::sync::Arc;
 
 use crate::ast::{Node, NodeData, SyntaxKind, is_identifier, is_jsx_namespaced_name};
-use crate::diagnostics::Message;
 use crate::diagnostics::messages_generated::*;
 
 use super::checker::Checker;

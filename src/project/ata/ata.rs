@@ -4,11 +4,9 @@ use std::collections::HashMap;
 use std::sync::atomic::AtomicI32;
 use std::sync::{Arc, Mutex, Once};
 
-use crate::collections::set::Set;
 use crate::collections::syncmap::SyncMap;
 use crate::core::compiler_options::CompilerOptions;
 use crate::module;
-use crate::semver;
 use crate::tspath;
 use crate::vfs::FS;
 

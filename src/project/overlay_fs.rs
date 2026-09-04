@@ -3,7 +3,7 @@
 #![allow(dead_code)]
 
 use std::collections::HashMap;
-use std::sync::{Arc, Mutex, RwLock};
+use std::sync::{Arc, RwLock};
 
 use crate::lsp::lsproto;
 use crate::tspath::Path;

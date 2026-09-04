@@ -4,9 +4,7 @@
 
 use std::sync::Arc;
 
-use crate::compiler::{CompilerHost, Program};
-use crate::core::compiler_options::CompilerOptions;
-use crate::tsoptions::ParsedCommandLine;
+use crate::compiler::CompilerHost;
 use crate::tspath::Path;
 use crate::vfs::FS;
 

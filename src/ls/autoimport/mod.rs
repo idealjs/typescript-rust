@@ -23,14 +23,9 @@ pub mod view;
 // ============================================================================
 
 use std::collections::HashMap;
-use std::sync::Arc;
 
 use crate::collections::set::Set;
-use crate::collections::syncmap::SyncMap;
-use crate::core::compiler_options::CompilerOptions;
-use crate::core::tristate::Tristate;
 use crate::tspath;
-use crate::vfs::FS;
 
 // --- lsproto stubs (AutoImportFix and related enums) ---
 

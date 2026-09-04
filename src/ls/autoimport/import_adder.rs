@@ -10,10 +10,9 @@ use crate::ls::lsutil::format_code_options::FormatCodeSettings;
 use crate::ls::lsutil::user_preferences::UserPreferences;
 use crate::lsp::lsproto::TextEdit;
 
-use super::export::Export;
 use super::fix::Fix;
 use super::view::View;
-use super::{AddAsTypeOnly, AutoImportFixKind, ImportKind};
+use super::AddAsTypeOnly;
 
 /// Trait for accumulating import fixes and producing text edits.
 ///

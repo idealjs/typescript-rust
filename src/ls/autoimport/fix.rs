@@ -5,8 +5,8 @@ use std::sync::Arc;
 use crate::ast::{Node, SourceFile};
 use crate::core::compiler_options::CompilerOptions;
 use crate::ls::lsutil::format_code_options::FormatCodeSettings;
-use crate::ls::lsutil::user_preferences::{QuotePreference, UserPreferences};
-use crate::lsp::lsproto::{Position, TextEdit};
+use crate::ls::lsutil::user_preferences::UserPreferences;
+use crate::lsp::lsproto::TextEdit;
 use crate::modulespecifiers;
 
 use super::export::Export;

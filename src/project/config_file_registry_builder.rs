@@ -2,16 +2,12 @@
 
 #![allow(dead_code)]
 
-use std::collections::{HashMap, HashSet};
+use std::collections::HashSet;
 
-use crate::tsoptions::ParsedCommandLine;
 use crate::tspath::Path;
 
-use super::config_file_registry::{
-    ConfigFileEntry, ConfigFileNames, ConfigFileRegistry, PendingReload,
-};
+use super::config_file_registry::ConfigFileRegistry;
 use super::file_change::FileChangeSummary;
-use super::project_collection_builder::ProjectLoadKind;
 
 /// Result of processing file changes for config file registry.
 ///

@@ -566,7 +566,7 @@ impl Program {
         let skip_lib = self.options.skip_lib_check.is_true();
         let skip_default_lib = self.options.skip_default_lib_check.is_true();
 
-        let mut checker = self.build_checker_internal(skip_lib, skip_default_lib);
+        let checker = self.build_checker_internal(skip_lib, skip_default_lib);
         let check_diagnostics = checker.get_semantic_diagnostics();
         // Surface binder-level diagnostics (e.g. TS2451 block-scoped
         // redeclarations) alongside the checker's semantic diagnostics,
@@ -1239,6 +1239,7 @@ fn extract_reference_path_directives(text: &str, containing_file: &str) -> Vec<S
 struct ReferenceTypesDirective {
     name: String,
     mode_value: Option<String>,
+    #[allow(dead_code)]
     mode_value_range: (usize, usize),
     /// Source range of the `types="..."` VALUE string literal (with
     /// quotes) — Go reports the directive's TS1453 here, not at the

@@ -9,7 +9,6 @@ use crate::checker::Checker;
 use crate::core::text::TextRange;
 
 use super::language_service::LanguageService;
-use super::types::CompletionList;
 
 /// Completions derived from type string-literal members.
 pub struct CompletionsFromTypes {

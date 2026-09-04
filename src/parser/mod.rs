@@ -452,6 +452,7 @@ impl Parser {
     }
 
     /// Scan a JSX attribute value (quoted string or fall through to `{`).
+    #[allow(dead_code)]
     fn scan_jsx_attribute_value(&mut self) -> SyntaxKind {
         self.token = self.scanner.scan_jsx_attribute_value();
         self.drain_scanner_errors();
@@ -863,6 +864,7 @@ impl Parser {
     }
 
     /// Parse a bracket-enclosed delimited list.
+    #[allow(non_snake_case)]
     fn parse_bracketedList(
         &mut self,
         context: ParsingContext,
@@ -1190,6 +1192,7 @@ impl Parser {
     }
 
     /// Whether the current token is a literal.
+    #[allow(dead_code)]
     fn is_literal(&self) -> bool {
         matches!(
             self.token,
@@ -3277,19 +3280,6 @@ impl Parser {
                     TextRange::new(pos, end),
                 ))
             }
-            SyntaxKind::PrivateIdentifier => {
-                // Private identifier as property name: `#field` in class
-                // declaration, or `obj.#prop` in member access.
-                let text = self.scanner.token_value();
-                let pos = self.token_pos();
-                let end = self.token_end();
-                self.next_token();
-                Arc::new(Node::with_loc(
-                    SyntaxKind::PrivateIdentifier,
-                    NodeData::PrivateIdentifier(PrivateIdentifierData { text }),
-                    TextRange::new(pos, end),
-                ))
-            }
             _ => self.parse_identifier(),
         }
     }
@@ -4808,6 +4798,7 @@ impl Parser {
 
     /// Check if `get`/`set` keyword is followed by a property name (accessor)
     /// rather than being the property name itself.
+    #[allow(dead_code)]
     fn is_get_or_set_accessor(&self) -> bool {
         let mut scanner = self.scanner.clone();
         let next = scanner.scan();
@@ -4823,6 +4814,7 @@ impl Parser {
     }
 
     /// Parse a `get`/`set` accessor in an object literal.
+    #[allow(dead_code)]
     fn parse_object_accessor(&mut self, pos: usize, is_get: bool) -> Arc<Node> {
         self.next_token(); // consume `get`/`set`
         let name = self.parse_property_name();
@@ -4859,6 +4851,7 @@ impl Parser {
 
     /// Parse a `get`/`set` accessor in a class body (with modifiers).
     /// Mirrors Go's parseAccessorDeclaration (parser.go:1886-1937).
+    #[allow(dead_code)]
     fn parse_class_accessor(
         &mut self,
         pos: usize,
@@ -5724,7 +5717,7 @@ impl Parser {
         } else {
             None
         };
-        let mut outermost = segments.is_empty();
+        let outermost = segments.is_empty();
         // Dotted-name inner segments are implicitly exported — synthesize
         // the modifier up front (it applies from the first inner decl).
         let export_only: Option<Arc<ModifierList>> = if segments.is_empty() {
@@ -5837,6 +5830,7 @@ impl Parser {
         ))
     }
 
+    #[allow(dead_code)]
     fn parse_namespace_name(&mut self) -> Arc<Node> {
         let name = self.parse_identifier();
         // Handle dotted namespace names: namespace A.B.C { }
@@ -8872,7 +8866,7 @@ mod tests {
 
         // rest element
         let mut p = Parser::new("type T = [string, ...number[]];");
-        let node = p.parse_statement();
+        let _node = p.parse_statement();
         assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics());
 
         // named tuple member
@@ -8887,7 +8881,7 @@ mod tests {
 
         // optional tuple element
         let mut p = Parser::new("type T = [string?, number?];");
-        let node = p.parse_statement();
+        let _node = p.parse_statement();
         assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics());
     }
 
@@ -8913,12 +8907,12 @@ mod tests {
 
         // leading `|` union
         let mut p = Parser::new("type T = | A | B;");
-        let node = p.parse_statement();
+        let _node = p.parse_statement();
         assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics());
 
         // leading `&` intersection
         let mut p = Parser::new("type T = & A & B;");
-        let node = p.parse_statement();
+        let _node = p.parse_statement();
         assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics());
     }
 
@@ -8956,13 +8950,13 @@ mod tests {
 
         // qualified type reference: `type T = A.B.C<T>;`
         let mut p = Parser::new("type T = A.B.C<T>;");
-        let node = p.parse_statement();
+        let _node = p.parse_statement();
         assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics());
 
         // nested type arguments: `type T = Map<string, Array<number>>;`
         // This requires `>>` to be treated as two `>` tokens.
         let mut p = Parser::new("type T = Map<string, Array<number>>;");
-        let node = p.parse_statement();
+        let _node = p.parse_statement();
         assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics());
     }
 
@@ -8980,22 +8974,22 @@ mod tests {
 
         // readonly mapped type
         let mut p = Parser::new("type M<T> = { readonly [K in keyof T]: string };");
-        let node = p.parse_statement();
+        let _node = p.parse_statement();
         assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics());
 
         // -readonly (removes readonly)
         let mut p = Parser::new("type M<T> = { -readonly [K in keyof T]: string };");
-        let node = p.parse_statement();
+        let _node = p.parse_statement();
         assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics());
 
         // optional mapped type with -?
         let mut p = Parser::new("type M<T> = { [K in keyof T]-?: string };");
-        let node = p.parse_statement();
+        let _node = p.parse_statement();
         assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics());
 
         // `as` clause (key remapping)
         let mut p = Parser::new("type M<T> = { [K in keyof T as `${K}`]: string };");
-        let node = p.parse_statement();
+        let _node = p.parse_statement();
         assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics());
     }
 
@@ -9013,12 +9007,12 @@ mod tests {
 
         // nested conditional types
         let mut p = Parser::new("type R<T> = T extends A ? X : T extends B ? Y : Z;");
-        let node = p.parse_statement();
+        let _node = p.parse_statement();
         assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics());
 
         // `infer R` in extends clause
         let mut p = Parser::new("type R<T> = T extends (infer U)[] ? U : never;");
-        let node = p.parse_statement();
+        let _node = p.parse_statement();
         assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics());
     }
 
@@ -9026,17 +9020,17 @@ mod tests {
     fn parse_call_and_construct_signatures() {
         // call signature: `{ (): T }` or `{ (x: A): B }`
         let mut p = Parser::new("type T = { (): string };");
-        let node = p.parse_statement();
+        let _node = p.parse_statement();
         assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics());
 
         // construct signature: `{ new (): T }`
         let mut p = Parser::new("type T = { new (): Foo };");
-        let node = p.parse_statement();
+        let _node = p.parse_statement();
         assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics());
 
         // abstract construct signature
         let mut p = Parser::new("type T = { abstract new (): Foo };");
-        let node = p.parse_statement();
+        let _node = p.parse_statement();
         assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics());
 
         // function type: `() => T`
@@ -9064,17 +9058,17 @@ mod tests {
     fn parse_index_signatures() {
         // index signature: `{ [key: string]: T }`
         let mut p = Parser::new("type T = { [key: string]: number };");
-        let node = p.parse_statement();
+        let _node = p.parse_statement();
         assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics());
 
         // numeric index signature
         let mut p = Parser::new("type T = { [index: number]: string };");
-        let node = p.parse_statement();
+        let _node = p.parse_statement();
         assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics());
 
         // readonly index signature
         let mut p = Parser::new("type T = { readonly [key: string]: number };");
-        let node = p.parse_statement();
+        let _node = p.parse_statement();
         assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics());
     }
 
@@ -9082,17 +9076,17 @@ mod tests {
     fn parse_satisfies_and_as_const() {
         // `as const` expression
         let mut p = Parser::new("const x = { a: 1 } as const;");
-        let node = p.parse_statement();
+        let _node = p.parse_statement();
         assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics());
 
         // `satisfies T` expression
         let mut p = Parser::new("const x = { a: 1 } satisfies Foo;");
-        let node = p.parse_statement();
+        let _node = p.parse_statement();
         assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics());
 
         // non-null assertion
         let mut p = Parser::new("const x = foo!.bar;");
-        let node = p.parse_statement();
+        let _node = p.parse_statement();
         assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics());
     }
 
@@ -9494,17 +9488,17 @@ mod tests {
 
         // Regex with escaped slash
         let mut p = Parser::new(r"let x = /a\/b/;");
-        let node = p.parse_statement();
+        let _node = p.parse_statement();
         assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics);
 
         // Regex with character class containing slash
         let mut p = Parser::new(r"let x = /[\/]/;");
-        let node = p.parse_statement();
+        let _node = p.parse_statement();
         assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics);
 
         // Division after identifier should NOT be regex
         let mut p = Parser::new("let x = a / b;");
-        let node = p.parse_statement();
+        let _node = p.parse_statement();
         assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics);
     }
 
@@ -9599,11 +9593,11 @@ mod tests {
         assert_eq!(node.kind, SyntaxKind::TypeAliasDeclaration);
 
         let mut p = Parser::new("type P = (value: T, index: number) => value is S;");
-        let node = p.parse_statement();
+        let _node = p.parse_statement();
         assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics);
 
         let mut p = Parser::new("type P = () => this is T;");
-        let node = p.parse_statement();
+        let _node = p.parse_statement();
         assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics);
     }
 
@@ -9620,7 +9614,7 @@ mod tests {
         assert_eq!(node.kind, SyntaxKind::FunctionDeclaration);
 
         let mut p = Parser::new("const isFoo = (x: any): x is Foo => true;");
-        let node = p.parse_statement();
+        let _node = p.parse_statement();
         assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics);
     }
 
@@ -9634,12 +9628,12 @@ mod tests {
 
         // `[Symbol.toPrimitive]` as a property signature (no parens).
         let mut p = Parser::new("interface Symbol { [Symbol.toPrimitive](hint: string): symbol; }");
-        let node = p.parse_statement();
+        let _node = p.parse_statement();
         assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics);
 
         // `readonly [Symbol.toStringTag]: string` — computed property with modifier.
         let mut p = Parser::new("interface X { readonly [Symbol.toStringTag]: string; }");
-        let node = p.parse_statement();
+        let _node = p.parse_statement();
         assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics);
 
         // Index signature `[key: string]: T` should still be recognized.
@@ -9657,23 +9651,23 @@ mod tests {
     fn parse_contextual_keyword_as_property_name_in_type_member() {
         // `readonly static: boolean` — `static` is a property name, not a modifier.
         let mut p = Parser::new("interface X { readonly static: boolean; }");
-        let node = p.parse_statement();
+        let _node = p.parse_statement();
         assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics);
 
         // `readonly private: boolean` — `private` is a property name.
         let mut p = Parser::new("interface X { readonly private: boolean; }");
-        let node = p.parse_statement();
+        let _node = p.parse_statement();
         assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics);
 
         // `public: CryptoKey` — `public` is a property name (no preceding modifier).
         let mut p =
             Parser::new("interface EcdhKeyDeriveParams extends Algorithm { public: CryptoKey; }");
-        let node = p.parse_statement();
+        let _node = p.parse_statement();
         assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics);
 
         // Normal modifier usage should still work: `readonly x: boolean`.
         let mut p = Parser::new("interface X { readonly x: boolean; }");
-        let node = p.parse_statement();
+        let _node = p.parse_statement();
         assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics);
     }
 
@@ -9687,17 +9681,17 @@ mod tests {
 
         // Simple tuple type argument.
         let mut p = Parser::new("interface X extends Foo<[number]> {}");
-        let node = p.parse_statement();
+        let _node = p.parse_statement();
         assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics);
 
         // Multiple heritage clauses with tuple type args.
         let mut p = Parser::new("interface X extends A, Foo<[number, number]> {}");
-        let node = p.parse_statement();
+        let _node = p.parse_statement();
         assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics);
 
         // Class heritage clause with tuple type args.
         let mut p = Parser::new("class X extends Foo<[number, number]> {}");
-        let node = p.parse_statement();
+        let _node = p.parse_statement();
         assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics);
     }
 
@@ -9705,22 +9699,22 @@ mod tests {
     fn parse_contextual_keyword_as_class_member_name() {
         // `static: number` — `static` is a property name, not a modifier.
         let mut p = Parser::new("class C { static: number = 1; }");
-        let node = p.parse_statement();
+        let _node = p.parse_statement();
         assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics);
 
         // `public: number` — `public` is a property name.
         let mut p = Parser::new("class C { public: number = 1; }");
-        let node = p.parse_statement();
+        let _node = p.parse_statement();
         assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics);
 
         // `readonly static: boolean` — `static` is a property name.
         let mut p = Parser::new("class C { readonly static: boolean; }");
-        let node = p.parse_statement();
+        let _node = p.parse_statement();
         assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics);
 
         // Normal modifier usage should still work: `static x: number`.
         let mut p = Parser::new("class C { static x: number = 1; }");
-        let node = p.parse_statement();
+        let _node = p.parse_statement();
         assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics);
     }
 
@@ -9775,7 +9769,7 @@ mod tests {
     #[test]
     fn parse_yield_await_in_async_generator() {
         let mut p = Parser::new("async function* gen() { yield await fetch('url'); }");
-        let node = p.parse_statement();
+        let _node = p.parse_statement();
         assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics);
     }
 
@@ -9784,7 +9778,7 @@ mod tests {
         let mut p = Parser::new(
             "async function process(stream) { for await (const chunk of stream) { console.log(chunk); } }",
         );
-        let node = p.parse_statement();
+        let _node = p.parse_statement();
         assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics);
     }
 

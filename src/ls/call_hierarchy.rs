@@ -8,7 +8,6 @@ use crate::ast::Node;
 use crate::lsp::lsproto::lsp::{DocumentUri, Location, Position, Range};
 
 use super::language_service::LanguageService;
-use super::types::LocationLink;
 
 /// A call hierarchy declaration is just a node.
 pub type CallHierarchyDeclaration = Arc<Node>;

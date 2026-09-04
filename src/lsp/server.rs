@@ -8,10 +8,9 @@
 #![allow(dead_code)]
 
 use std::collections::HashMap;
-use std::io::{self, BufRead, BufReader, Write};
+use std::io::{self, Write};
 use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
-use std::sync::{Arc, Mutex, RwLock};
-use std::thread;
+use std::sync::{Arc, RwLock};
 
 use serde_json::{Value, json};
 
@@ -19,15 +18,10 @@ use crate::ls::host::{AutoImportRegistry, EcmaLineInfo, Host};
 use crate::ls::language_service::LanguageService;
 use crate::ls::lsconv::converters::{Converters, PositionEncodingKind};
 use crate::ls::lsutil::new_default_user_preferences;
-use crate::lsp::lsproto;
-use crate::project::client::Client;
-use crate::project::compiler_host::SessionOptions;
 use crate::project::session::Session;
-use crate::project::snapshot::Snapshot;
 
 use super::dynamic_queue::DynamicQueue;
 use super::logger::Logger;
-use super::progress::ProjectLoadingProgress;
 
 /// Dispatches a single LSP request.
 ///
@@ -121,7 +115,7 @@ impl Server {
     /// `LanguageService` providers (1:1 with the Go server's
     /// `ServerCapabilities`). Each capability here corresponds to a
     /// `provide_*` method on `LanguageService`.
-    pub fn handle_initialize(&self, params: &Value) -> Value {
+    pub fn handle_initialize(&self, _params: &Value) -> Value {
         self.mark_init_started();
 
         // Position encoding: prefer UTF-8, the rest of the LS converters

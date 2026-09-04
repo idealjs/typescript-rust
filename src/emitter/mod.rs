@@ -888,7 +888,7 @@ fn emit_declaration_statement(node: &Node, source: &str, start: usize, output: &
         NodeData::FunctionDeclaration(d) => {
             if let Some(body) = &d.body {
                 // Emit signature (up to body start), trim trailing space.
-                let mut sig = &source[start..body.pos()];
+                let sig = &source[start..body.pos()];
                 let mut sig_trimmed = sig.trim_end().to_string();
 
                 // Declaration emit drops the `async` keyword and the
@@ -906,7 +906,6 @@ fn emit_declaration_statement(node: &Node, source: &str, start: usize, output: &
                         sig_trimmed.replace_range(pos..pos + 6, "");
                     }
                 }
-                sig = &sig_trimmed;
 
                 // Check if signature already has a return type annotation.
                 // If not, and the function body returns JSX, add the
@@ -1314,7 +1313,6 @@ fn collect_all_comment_ranges(text: &str) -> Vec<(usize, usize)> {
             b'\'' | b'"' => {
                 // String literal.
                 let quote = b;
-                prev_significant = char::from(quote);
                 pos += 1;
                 while pos < len {
                     let c = bytes[pos];
@@ -2008,6 +2006,7 @@ fn add_implicit_semicolons(text: &str) -> String {
 /// semicolons. String literals, template literals (with `${}` interpolation),
 /// comments, and escape sequences are tracked so brackets inside them are
 /// ignored.
+#[allow(dead_code)]
 fn normalize_js_output(text: &str) -> String {
     let folded = fold_expression_newlines(text);
     let reindented = reindent_and_dedup(&folded);
@@ -2585,6 +2584,7 @@ fn normalize_js_output_tracked(text: &str, src_offsets: &[u32]) -> (String, Vec<
 /// The fold decision is based on the *innermost* enclosing bracket: a newline
 /// is dropped only when the nearest enclosing bracket is `(` or `[`, never `{`.
 /// Trailing commas left behind by the fold (e.g. `foo(a,)`) are removed.
+#[allow(dead_code)]
 fn fold_expression_newlines(text: &str) -> String {
     let chars: Vec<char> = text.chars().collect();
     let n = chars.len();
@@ -2844,6 +2844,7 @@ fn fold_expression_newlines(text: &str) -> String {
 
 /// Remove a trailing comma (and any horizontal whitespace before it) from the
 /// end of the output buffer. Used when a folded `()` / `[]` group closes.
+#[allow(dead_code)]
 fn drop_trailing_comma(out: &mut Vec<char>) {
     while let Some(&ch) = out.last() {
         if ch == ' ' || ch == '\t' {

@@ -39,8 +39,11 @@ pub enum Outcome {
     Passed,
     /// Mismatch; `local_path` has the actual written, `message` is the diff.
     Failed {
+        #[allow(dead_code)]
         local_path: PathBuf,
+        #[allow(dead_code)]
         reference_path: PathBuf,
+        #[allow(dead_code)]
         message: String,
     },
 }

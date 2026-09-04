@@ -6,8 +6,6 @@
 use std::sync::Arc;
 
 use crate::ast::Node;
-use crate::ast::SyntaxKind;
-use crate::compiler::Program;
 use crate::core::text::TextRange;
 
 use super::code_actions::{CodeFixContext, CodeFixProvider};

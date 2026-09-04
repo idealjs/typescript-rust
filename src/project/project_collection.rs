@@ -9,7 +9,7 @@ use crate::tspath::Path;
 
 use super::config_file_registry::ConfigFileRegistry;
 use super::overlay_fs::Overlay;
-use super::project::{INFERRED_PROJECT_NAME, Kind, Project};
+use super::project::{INFERRED_PROJECT_NAME, Project};
 
 /// Tracks the projects and files that API clients have explicitly opened.
 ///

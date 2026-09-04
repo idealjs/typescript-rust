@@ -13,7 +13,7 @@
 use std::sync::Arc;
 
 use crate::compiler;
-use crate::lsp::lsproto::lsp::{DocumentUri, Location, Position, Range};
+use crate::lsp::lsproto::lsp::{DocumentUri, Location, Position};
 use crate::tspath;
 
 use super::language_service::LanguageService;

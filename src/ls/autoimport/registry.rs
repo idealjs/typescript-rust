@@ -7,13 +7,11 @@ use crate::collections::set::Set;
 use crate::collections::syncmap::SyncMap;
 use crate::core::tristate::Tristate;
 use crate::ls::lsutil::user_preferences::UserPreferences;
-use crate::module;
 use crate::tspath;
 
-use super::export::{Export, ExportID};
+use super::export::Export;
 use super::index::Index;
-use super::specifiers::ResultKind;
-use super::{LogTree, Logger, RegistryCloneHost, ResolvedEntrypoint};
+use super::{LogTree, RegistryCloneHost, ResolvedEntrypoint};
 
 /// The set of packages known to require recursive directory search.
 pub fn known_recursive_search_packages() -> Set<String> {

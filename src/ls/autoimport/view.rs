@@ -14,7 +14,7 @@ use crate::tspath;
 use super::ModuleSpecifierEnding;
 use super::export::{Export, ExportID};
 use super::fix::Fix;
-use super::registry::{Registry, RegistryBucket};
+use super::registry::Registry;
 
 /// A view of the auto-import registry scoped to an importing file.
 ///

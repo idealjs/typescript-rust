@@ -19,7 +19,7 @@ use crate::ast::{Node, NodeData, Symbol, SymbolFlags, SyntaxKind};
 
 use super::checker::Checker;
 use super::types::{
-    DeclarationFileLinks, DeclarationLinks, SymbolAccessibility, SymbolAccessibilityResult,
+    SymbolAccessibility, SymbolAccessibilityResult,
 };
 
 /// The emit resolver. Provides access to checker data needed during emit.

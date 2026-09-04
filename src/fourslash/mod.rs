@@ -310,7 +310,7 @@ impl FourslashTest {
             .get_source_file(&file.filename)
             .unwrap_or_else(|| panic!("source file not found: {}", file.filename));
         let node = deepest_node_at(&sf, offset);
-        let mut checker = program.build_checker();
+        let checker = program.build_checker();
 
         // Resolve via the checker's scope walk first, then fall back to walking
         // the AST parent chain consulting the binder's symbol map.

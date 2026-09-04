@@ -8,9 +8,9 @@
 use std::sync::Arc;
 
 use crate::ast::node::LineMap;
-use crate::ast::{Node, SourceFile, Symbol, node_data_generated::for_each_child};
+use crate::ast::{Node, SourceFile, node_data_generated::for_each_child};
 use crate::checker::Checker;
-use crate::lsp::lsproto::lsp::{DocumentUri, Location, Position, Range};
+use crate::lsp::lsproto::lsp::{DocumentUri, Position, Range};
 use crate::scanner;
 
 use super::language_service::LanguageService;
@@ -40,7 +40,7 @@ impl LanguageService {
         let node = find_deepest_node(&source_file.node, offset);
 
         // Resolve symbol and get declarations.
-        let mut checker = program.build_checker();
+        let checker = program.build_checker();
         let declarations = get_declarations_from_location(&checker, &node);
 
         if declarations.is_empty() {

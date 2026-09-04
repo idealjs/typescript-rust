@@ -9,7 +9,6 @@ use crate::compiler::Program;
 use crate::tsoptions::ParsedCommandLine;
 use crate::tspath::Path;
 
-use super::watch::WatchedFiles;
 
 /// The inferred project's config file path (a fixed sentinel).
 ///
@@ -146,7 +145,7 @@ impl Project {
         self.program.as_ref()
     }
 
-    pub fn has_file(&self, file_name: &str) -> bool {
+    pub fn has_file(&self, _file_name: &str) -> bool {
         todo!("Project::has_file requires program integration")
     }
 

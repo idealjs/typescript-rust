@@ -19,8 +19,7 @@ use crate::lsp::lsproto::lsp::{DocumentUri, Position};
 
 use super::language_service::LanguageService;
 use super::types::{
-    CompletionContext, CompletionItem, CompletionItemApplyKinds, CompletionItemData,
-    CompletionItemDefaults, CompletionList,
+    CompletionContext, CompletionItem, CompletionItemData, CompletionList,
 };
 
 /// Error indicating that completions need auto-imports to be prepared.
@@ -58,7 +57,7 @@ impl LanguageService {
         position: Position,
         _context: &CompletionContext,
     ) -> CompletionList {
-        let (program, source_file) = self.get_program_and_file(document_uri);
+        let (_program, source_file) = self.get_program_and_file(document_uri);
         let offset = lsp_position_to_offset(&source_file.line_map, &position);
         match self.get_completions_at_position(&source_file, offset, None, false) {
             Ok(list) => ensure_item_data(&source_file.file_name, offset, list),

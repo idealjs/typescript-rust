@@ -10,7 +10,6 @@ use std::sync::Arc;
 
 use tsox::bundled::{BundledFS, lib_path};
 use tsox::compiler::{CompilerHostImpl, Program, ProgramOptions};
-use tsox::diagnostics::Category;
 use tsox::tsoptions::parse_command_line;
 use tsox::vfs::InMemoryFS;
 
@@ -6909,6 +6908,7 @@ fn checker_array_reduce_with_lib_no_error() {
 }
 
 #[test]
+#[allow(non_snake_case)]
 fn checker_array_forEach_with_lib_no_error() {
     let diags = check_source_with_lib(
         "let arr: number[] = [1, 2, 3];\narr.forEach(x => { let z = x; });",
@@ -8994,7 +8994,7 @@ fn checker_event_emitter_pattern_no_error() {
 
 #[test]
 fn checker_builder_pattern_no_error() {
-    let diags = check_source_with_lib(
+    let _diags = check_source_with_lib(
         "class Builder {\n  private parts: string[] = [];\n  add(p: string): this {\n    this.parts.push(p);\n    return this;\n  }\n  build(): string { return this.parts.join(\"\"); }\n}\nlet r = new Builder().add(\"a\").add(\"b\").build();",
         false,
     );
@@ -10970,7 +10970,7 @@ fn b1_interface_extends_elaboration_pyramid() {
     assert!(!d.message_chain.is_empty(), "expected property elaboration level");
     assert!(d.message_chain[0].message.as_ref().is_some_and(|m|
         m.key.starts_with("Types_of_property")), "chain head: {:?}",
-        d.message_chain[0].message.as_ref().map(|m| m.key.clone()));
+        d.message_chain[0].message.as_ref().map(|m| m.key));
     assert!(!d.message_chain[0].message_chain.is_empty(), "expected level2 (not-assignable)");
 }
 

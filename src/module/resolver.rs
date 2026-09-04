@@ -89,7 +89,7 @@ pub trait ResolutionHost {
 
 /// Key for module resolution cache entries.
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
-struct ModuleResolutionCacheKey {
+pub struct ModuleResolutionCacheKey {
     containing_directory: String,
     module_name: String,
     resolution_mode: ResolutionMode,
@@ -98,7 +98,7 @@ struct ModuleResolutionCacheKey {
 
 /// Key for type reference directive cache entries.
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
-struct TypeRefDirectiveCacheKey {
+pub struct TypeRefDirectiveCacheKey {
     containing_directory: String,
     type_reference_name: String,
     resolution_mode: ResolutionMode,
@@ -181,6 +181,7 @@ pub(crate) struct Resolved {
 }
 
 impl Resolved {
+    #[allow(dead_code)]
     pub fn is_resolved(&self) -> bool {
         !self.path.is_empty()
     }
@@ -318,7 +319,12 @@ pub struct Resolver {
     type_ref_cache: TypeRefDirectiveResolutionCache,
     host: Arc<dyn ResolutionHost + Send + Sync>,
     compiler_options: Arc<CompilerOptions>,
+    /// Go Resolver carries these for the auto-typings discovery pass
+    /// (`tryResolveFromTypingsLocation`); the port resolves typings through
+    /// the type-roots path instead, so they are kept only for parity.
+    #[allow(dead_code)]
     typings_location: String,
+    #[allow(dead_code)]
     project_name: String,
 }
 
@@ -534,6 +540,7 @@ pub(crate) struct ResolutionState<'a> {
     conditions: Vec<String>,
     extensions: Extensions,
     compiler_options: &'a CompilerOptions,
+    #[allow(dead_code)]
     resolve_package_directory_only: bool,
     fs: &'a dyn FS,
     current_directory: &'a str,

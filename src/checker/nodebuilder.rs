@@ -2385,6 +2385,7 @@ impl Checker {
     }
 
     /// Check if a variable symbol was declared with `const`.
+    #[allow(dead_code)]
     fn symbol_is_const(&self, symbol: &Arc<Symbol>) -> bool {
         for decl in &symbol.declarations {
             if let Some(parent) = &decl.parent {

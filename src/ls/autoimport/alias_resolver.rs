@@ -3,17 +3,14 @@
 use std::collections::HashMap;
 use std::sync::Arc;
 
-use crate::ast::{Node, SourceFile, Symbol};
-use crate::checker::Checker;
-use crate::collections::set::Set;
+use crate::ast::SourceFile;
 use crate::collections::syncmap::SyncMap;
 use crate::core::compiler_options::{CompilerOptions, ModuleKind, ResolutionMode};
-use crate::module::{self, ResolutionHost, ResolvedModule, Resolver};
-use crate::packagejson;
+use crate::module::{ResolvedModule, Resolver};
 use crate::tspath;
 
 use super::util::PathAndFileName;
-use super::{ModeAwareCache, ModeAwareCacheKey, RegistryCloneHost};
+use super::{ModeAwareCacheKey, RegistryCloneHost};
 
 /// Resolves aliases during export extraction by implementing a minimal
 /// `checker.Program` interface.

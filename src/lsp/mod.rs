@@ -523,7 +523,7 @@ impl LspServer {
         let offset = line_map.line_starts.get(line).copied().unwrap_or(0) as usize + character;
 
         let node = find_deepest_node(&source_file.node, offset);
-        let mut checker = program.build_checker();
+        let checker = program.build_checker();
 
         // Resolve the symbol, then find its value declaration.
         let symbol = checker.resolve_identifier(&node).or_else(|| {
@@ -544,7 +544,7 @@ impl LspServer {
                     .program
                     .source_files()
                     .iter()
-                    .find(|sf| decl.loc.pos() >= 0 && decl.loc.pos() < sf.text.len())
+                    .find(|sf| decl.loc.pos() < sf.text.len())
                     .cloned();
 
                 if let Some(sf) = decl_file {
@@ -606,8 +606,8 @@ impl LspServer {
         let line_map = crate::ast::LineMap::from_text(content);
         let offset = line_map.line_starts.get(line).copied().unwrap_or(0) as usize + character;
 
-        let node = find_deepest_node(&source_file.node, offset);
-        let mut checker = program.build_checker();
+        let _node = find_deepest_node(&source_file.node, offset);
+        let checker = program.build_checker();
 
         // Collect symbols in scope at the cursor position.
         let mut items: Vec<Value> = Vec::new();

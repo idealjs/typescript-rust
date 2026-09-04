@@ -69,6 +69,7 @@ bitflags! {
     }
 }
 
+#[allow(non_upper_case_globals)]
 impl NodeFlags {
     /// Block-scoped variable flags: `let | const | using`.
     pub const BlockScoped: Self = Self::Let.union(Self::Const).union(Self::Using);
@@ -148,6 +149,7 @@ bitflags! {
     }
 }
 
+#[allow(non_upper_case_globals)]
 impl ModifierFlags {
     /// Syntactic or JSDoc modifiers.
     pub const SyntacticOrJSDocModifiers: Self = Self::Public

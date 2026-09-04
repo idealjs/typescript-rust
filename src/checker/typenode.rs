@@ -1633,7 +1633,7 @@ impl Checker {
                 }
                 NodeData::IndexSignatureDeclaration(data) => {
                     let mut key_type = None;
-                    let mut value_type = None;
+                    let value_type;
                     if let Some(param) = data.parameters.iter().next() {
                         if let NodeData::ParameterDeclaration(pd) = &param.data {
                             key_type = pd
@@ -3718,6 +3718,7 @@ impl Checker {
     /// member kinds (MethodSignature, CallSignature, ConstructSignature)
     /// are skipped — their support requires signature construction which is
     /// part of P3.7.
+    #[allow(dead_code)]
     fn get_type_from_type_literal_members(&mut self, members: &Arc<NodeList>) -> Arc<Type> {
         let mut symbol_table = SymbolTable::new();
         let mut props: Vec<Arc<Symbol>> = Vec::new();
@@ -3746,7 +3747,7 @@ impl Checker {
                 NodeData::IndexSignatureDeclaration(data) => {
                     // `[key: string]: number` — extract key and value types.
                     let mut key_type = None;
-                    let mut value_type = None;
+                    let value_type;
                     if let Some(param) = data.parameters.iter().next() {
                         if let NodeData::ParameterDeclaration(pd) = &param.data {
                             key_type = pd
@@ -5274,7 +5275,7 @@ impl Checker {
                 Arc::clone(constraint)
             };
             if domain.flags.contains(TypeFlags::String) {
-                let mut keys = vec![domain, self.number_type()];
+                let keys = vec![domain, self.number_type()];
                 return self.get_union_type(keys);
             }
             return domain;

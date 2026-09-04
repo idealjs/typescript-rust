@@ -3,10 +3,7 @@
 
 #![allow(dead_code)]
 
-use std::sync::Arc;
 
-use crate::ast::{Node, Symbol};
-use crate::checker::Checker;
 
 use super::code_actions::{CodeFixContext, CodeFixProvider};
 use super::language_service::LanguageService;

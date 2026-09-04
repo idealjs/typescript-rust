@@ -8,12 +8,10 @@
 use std::sync::Arc;
 
 use crate::ast::{
-    self, CheckFlags, ModifierFlags, Node, NodeFlags, Symbol, SymbolFlags, SymbolTable, SyntaxKind,
-    get_combined_modifier_flags, has_syntactic_modifier, is_access_expression,
-    is_array_literal_expression, is_assertion_expression, is_call_expression, is_class_like,
-    is_element_access_expression, is_identifier, is_jsx_namespaced_name, is_non_null_expression,
-    is_object_literal_expression, is_property_access_expression, is_property_declaration,
-    is_qualified_name, is_static, is_type_reference_node, is_variable_declaration,
+    ModifierFlags, Node, NodeFlags, Symbol, SymbolFlags, SymbolTable, SyntaxKind,
+    get_combined_modifier_flags,
+    is_element_access_expression, is_property_access_expression,
+    is_qualified_name,
     is_variable_declaration_list, is_variable_statement,
 };
 
@@ -772,7 +770,7 @@ pub fn is_this_property(node: &Node) -> bool {
             .unwrap_or(false)
 }
 
-pub fn is_optional_declaration(declaration: &Node) -> bool {
+pub fn is_optional_declaration(_declaration: &Node) -> bool {
     // TODO: HasQuestionToken — need question_token accessor
     false
 }

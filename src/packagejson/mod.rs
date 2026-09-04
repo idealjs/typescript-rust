@@ -34,12 +34,14 @@ impl<T: Clone + Default> Expected<T> {
 }
 
 impl Expected<String> {
+    #[allow(dead_code)]
     fn expected_json_type() -> &'static str {
         "string"
     }
 }
 
 impl Expected<HashMap<String, String>> {
+    #[allow(dead_code)]
     fn expected_json_type() -> &'static str {
         "object"
     }

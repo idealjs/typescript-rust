@@ -3438,6 +3438,7 @@ fn path_is_under_dir(path: &str, dir: &str) -> bool {
             .is_some_and(|rest| rest.starts_with('/'))
 }
 
+#[allow(dead_code)]
 fn is_supported_source_file(path: &str) -> bool {
     is_supported_source_file_ex(path, false)
 }

@@ -4,7 +4,7 @@
 
 use std::collections::HashMap;
 use std::sync::mpsc;
-use std::sync::{Arc, Mutex};
+use std::sync::Arc;
 use std::thread;
 use std::time::Duration;
 

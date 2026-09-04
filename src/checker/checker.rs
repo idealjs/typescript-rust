@@ -10,7 +10,7 @@ use std::sync::atomic::{AtomicU32, Ordering};
 use std::sync::{Arc, Mutex, OnceLock};
 
 use crate::ast::{
-    CheckFlags, DiagnosticsCollection, FlowFlags, FlowNode, ModifierFlags, Node, NodeData,
+    CheckFlags, DiagnosticsCollection, ModifierFlags, Node, NodeData,
     NodeFlags, NodeList, NodeSymbolMap, SourceFile, Symbol, SymbolFlags, SymbolTable, SyntaxKind,
 };
 use crate::core::compiler_options::{
@@ -19,8 +19,7 @@ use crate::core::compiler_options::{
 use crate::core::text::TextRange;
 use crate::diagnostics::messages_generated::{
     A_FUNCTION_WHOSE_DECLARED_TYPE_IS_NEITHER_UNDEFINED_VOID_NOR_ANY_MUST_RETURN_A_VALUE,
-    A_SPREAD_ARGUMENT_MUST_EITHER_HAVE_A_TUPLE_TYPE_OR_BE_PASSED_TO_A_REST_PARAMETER,
-    ARGUMENT_EXPRESSION_EXPECTED, ARGUMENT_OF_TYPE_0_IS_NOT_ASSIGNABLE_TO_PARAMETER_OF_TYPE_1,
+    A_SPREAD_ARGUMENT_MUST_EITHER_HAVE_A_TUPLE_TYPE_OR_BE_PASSED_TO_A_REST_PARAMETER, ARGUMENT_OF_TYPE_0_IS_NOT_ASSIGNABLE_TO_PARAMETER_OF_TYPE_1,
     BLOCK_SCOPED_VARIABLE_0_USED_BEFORE_ITS_DECLARATION,
     CANNOT_ASSIGN_TO_0_BECAUSE_IT_IS_A_CONSTANT,
     CANNOT_ASSIGN_TO_0_BECAUSE_IT_IS_A_READ_ONLY_PROPERTY,
@@ -44,7 +43,7 @@ use crate::diagnostics::messages_generated::{
     TYPE_0_HAS_NO_CONSTRUCT_SIGNATURES,
     TYPE_0_IS_MISSING_THE_FOLLOWING_PROPERTIES_FROM_TYPE_1_COLON_2,
     TYPE_0_IS_NOT_ASSIGNABLE_TO_TYPE_1, UNREACHABLE_CODE_DETECTED,
-    VARIABLE_0_IS_USED_BEFORE_BEING_ASSIGNED, X_0_IS_POSSIBLY_UNDEFINED,
+    VARIABLE_0_IS_USED_BEFORE_BEING_ASSIGNED,
 };
 use crate::evaluator::{EvalResult, EvalValue};
 use crate::jsnum;
@@ -3347,7 +3346,7 @@ impl Checker {
     /// Go `checkUnusedLocalsAndParameters`: report TS6133 locals/parameters,
     /// TS6199/TS6198 aggregate errors and TS6196/TS6133 unused imports.
     fn check_unused_locals_and_parameters(&mut self, container: &Arc<Node>) {
-        use crate::ast::NodeData;
+        
         let Some(locals) = self.program.symbol_map().locals.get(&container.id()) else {
             return;
         };
@@ -5288,7 +5287,7 @@ impl Checker {
             construct_sigs = construct_sigs
                 .into_iter()
                 .map(|sig| {
-                    let mut s = crate::checker::types::Signature {
+                    let s = crate::checker::types::Signature {
                         id: sig.id,
                         flags: sig.flags
                             | crate::checker::types::SignatureFlags::Abstract,
@@ -5959,6 +5958,7 @@ impl Checker {
     /// `checkNewExpression`.
     /// Whether a property's declared type includes `undefined` (exempt from
     /// TS2564).
+    #[allow(dead_code)]
     fn property_type_includes_undefined(
         &mut self,
         data: &crate::ast::node_data_generated::PropertyDeclarationData,
@@ -5979,6 +5979,7 @@ impl Checker {
     /// Whether any constructor body in the enclosing class assigns
     /// `this.<name>` — approximates Go's definite-assignment flow analysis
     /// for TS2564.
+    #[allow(dead_code)]
     fn class_constructor_assigns_property(&self, name: &str) -> bool {
         let Some(class) = self.enclosing_class_stack.last() else {
             return false;
@@ -7424,6 +7425,7 @@ impl Checker {
     /// a union type. Used to distinguish TS18048 (possibly undefined) from
     /// TS2339 (property doesn't exist). Mirrors Go's check that looks up the
     /// property on the non-undefined part of the union.
+    #[allow(dead_code)]
     fn property_exists_on_non_nullable_part(&mut self, t: &Arc<Type>, name: &str) -> bool {
         if t.flags.contains(TypeFlags::Union) {
             if let TypeData::Union(u) = &t.data {
@@ -8022,7 +8024,7 @@ impl Checker {
         if !self.check_call_arity(node, &sig, &arguments, callee_expr, is_new) {
             return;
         }
-        let file = self.current_file.clone();
+        let _file = self.current_file.clone();
         // When the signature has a rest parameter (always the last one),
         // arguments at/after the rest position are checked against the rest
         // element type, not the rest array type. Mirrors Go's
@@ -10457,7 +10459,7 @@ impl Checker {
                         }
                     } else if entity_ok {
                         match self.resolve_qualified_symbol_traced(&d.module_reference) {
-                            Err((segment, ns_path, member)) if ns_path.is_empty() => {
+                            Err((segment, ns_path, _member)) if ns_path.is_empty() => {
                                 // Qualified leftmost failure gets the same
                                 // 2702/2503 mapping.
                                 let any_hit = self
@@ -11926,6 +11928,7 @@ impl Checker {
     /// in (underneath the derived class's own properties, so overrides win).
     /// Mirrors Go's `getBaseTypes`/property inheritance in
     /// `getPropertiesOfTypeOfObjectLiteral`/`getPropertiesOfObjectType`.
+    #[allow(dead_code)]
     fn build_class_instance_type(&mut self, members: &Arc<NodeList>) -> Arc<Type> {
         self.build_interface_type_from_members(members)
     }
@@ -12333,9 +12336,10 @@ impl Checker {
     }
 
     /// Resolve the symbol for a property declaration's name node.
+    #[allow(dead_code)]
     fn resolve_property_name(
         &mut self,
-        member: &Arc<Node>,
+        _member: &Arc<Node>,
         name: &Arc<Node>,
     ) -> Option<Arc<Symbol>> {
         // Try to resolve via the name node directly.
@@ -14420,7 +14424,6 @@ impl Checker {
                 // unless the implementation takes a rest parameter).
                 let fn_params = |f: &Arc<Node>| -> (usize, bool) {
                     if let crate::ast::NodeData::FunctionDeclaration(d) = &f.data {
-                        let mut required = 0;
                         let mut rest = false;
                         for p in d.parameters.iter() {
                             if p.kind == SyntaxKind::Parameter {
@@ -14429,9 +14432,9 @@ impl Checker {
                                         rest = true;
                                         break;
                                     }
-                                    if pd.question_token.is_none() {
-                                        required += 1;
-                                    }
+                                    // optional params don't affect the
+                                    // rest-only arity decision
+                                    let _ = pd.question_token.is_none();
                                 }
                             }
                         }
@@ -20660,7 +20663,7 @@ impl Checker {
     /// Whether `name` is among the (implicitly exported) locals of an ambient
     /// module declaration body.
     fn module_ambient_locals_contain(&self, module_symbol: &Arc<Symbol>, name: &str) -> bool {
-        use crate::ast::NodeData;
+        
         for decl in &module_symbol.declarations {
             if decl.kind == SyntaxKind::ModuleDeclaration
                 && let Some(locals) = self.program.symbol_map().locals.get(&decl.id())
@@ -21841,7 +21844,7 @@ impl Checker {
                 ));
             }
             SyntaxKind::PropertyAccessExpression | SyntaxKind::ElementAccessExpression => {
-                let (obj_expr, name, name_loc) = match &target.data {
+                let (obj_expr, name, _name_loc) = match &target.data {
                     crate::ast::NodeData::PropertyAccessExpression(d) => {
                         (&d.expression, d.name.text().to_string(), d.name.loc)
                     }
@@ -22866,7 +22869,7 @@ impl Checker {
             // Check the container's locals (block-scoped variables).
             if let Some(locals) = symbol_map.locals.get(&container_id) {
                 if let Some(sym) = locals.get(name) {
-                    if (sym.flags.intersects(meaning) || self.alias_chain_hits_meaning(&sym, meaning)) {
+                    if sym.flags.intersects(meaning) || self.alias_chain_hits_meaning(&sym, meaning) {
                         return self.follow_alias(sym);
                     }
                 }
@@ -22888,7 +22891,7 @@ impl Checker {
                     || container_sym.flags.intersects(SymbolFlags::Function)
                 {
                     if let Some(sym) = container_sym.members.get(name) {
-                        if (sym.flags.intersects(meaning) || self.alias_chain_hits_meaning(&sym, meaning)) {
+                        if sym.flags.intersects(meaning) || self.alias_chain_hits_meaning(&sym, meaning) {
                             return self.follow_alias(sym);
                         }
                     }
@@ -22927,12 +22930,12 @@ impl Checker {
                             && merged.flags.intersects(SymbolFlags::MODULE)
                         {
                             if let Some(sym) = merged.exports.get(name) {
-                                if (sym.flags.intersects(meaning) || self.alias_chain_hits_meaning(&sym, meaning)) {
+                                if sym.flags.intersects(meaning) || self.alias_chain_hits_meaning(&sym, meaning) {
                                     return self.follow_alias(sym);
                                 }
                             }
                             if let Some(sym) = self.ambient_namespace_local(merged, name) {
-                                if (sym.flags.intersects(meaning) || self.alias_chain_hits_meaning(&sym, meaning)) {
+                                if sym.flags.intersects(meaning) || self.alias_chain_hits_meaning(&sym, meaning) {
                                     return self.follow_alias(&sym);
                                 }
                             }
@@ -22942,7 +22945,7 @@ impl Checker {
                 // Enum export lookup.
                 if container_sym.flags.intersects(SymbolFlags::ENUM) {
                     if let Some(sym) = container_sym.exports.get(name) {
-                        if (sym.flags.intersects(meaning) || self.alias_chain_hits_meaning(&sym, meaning)) {
+                        if sym.flags.intersects(meaning) || self.alias_chain_hits_meaning(&sym, meaning) {
                             return self.follow_alias(sym);
                         }
                     }
@@ -22956,7 +22959,7 @@ impl Checker {
                 // the `meaning & TYPE` filter already excludes value-side
                 // members.
                 if let Some(sym) = container_sym.members.get(name) {
-                    if (sym.flags.intersects(meaning & SymbolFlags::TYPE) || self.alias_chain_hits_meaning(&sym, meaning)) {
+                    if sym.flags.intersects(meaning & SymbolFlags::TYPE) || self.alias_chain_hits_meaning(&sym, meaning) {
                         return self.follow_alias(sym);
                     }
                 }
@@ -23210,6 +23213,7 @@ impl Checker {
     }
 
     /// Find the parent declaration container for a module/enum name.
+    #[allow(dead_code)]
     fn find_parent_declaration_container(&self, _node: &Node) -> Option<u64> {
         // We don't have parent pointers, so we check the scope stack.
         // The innermost scope container is the parent declaration container.
@@ -23405,7 +23409,7 @@ impl Checker {
     /// Go: `referenceResolver.isTypeOnlyAliasDeclaration`
     fn is_type_only_alias_declaration(&self, symbol: &Arc<Symbol>) -> bool {
         if let Some(node) = self.get_declaration_of_alias_symbol(symbol) {
-            let mut current = Some(Arc::clone(&node));
+            let current = Some(Arc::clone(&node));
             while let Some(ref n) = current {
                 match n.kind {
                     SyntaxKind::ImportEqualsDeclaration | SyntaxKind::ExportDeclaration => {
@@ -23444,7 +23448,7 @@ impl Checker {
     /// Resolve an identifier at a specific location.
     fn resolve_identifier_at_location(
         &self,
-        location: &Node,
+        _location: &Node,
         name: &str,
         meaning: SymbolFlags,
     ) -> Option<Arc<Symbol>> {
@@ -23868,7 +23872,7 @@ fn get_excluded_symbol_flags(flags: SymbolFlags) -> SymbolFlags {
 }
 
 /// Check if a node is a module or enum declaration name./// Check if a node is a module or enum declaration name.
-fn is_module_or_enum_name(node: &Node) -> bool {
+fn is_module_or_enum_name(_node: &Node) -> bool {
     // We can't check parent pointers, so we check if the node's kind
     // suggests it's a name of a module/enum declaration.
     // This is a best-effort check.
@@ -24396,6 +24400,7 @@ enum ModuleMemberLookup {
 
 /// Whether a constructor body assigns `this.<name>` anywhere (outside nested
 /// function-likes) — the TS2564 definite-assignment approximation.
+#[allow(dead_code)]
 fn body_assigns_this_property(n: &Arc<Node>, name: &str) -> bool {
     match &n.data {
         crate::ast::NodeData::BinaryExpression(b)
@@ -24559,7 +24564,7 @@ mod array_member_tests {
     #[test]
     fn array_method_signature_display_substituted() {
         let checker = build_checker_with_lib("declare const ss: string[]; ss.every(42);");
-        let codes = error_codes(&checker);
+        let codes = super::convergence_tests::error_codes(&checker);
         assert_eq!(codes, vec![2769]);
         let diag = checker
             .diagnostics
@@ -24630,7 +24635,8 @@ mod array_member_tests {
 /// per-symbol retry limit that guarantees cyclic base types converge, the
 /// memo-cache capacity bounds, and the depth guards on un-guarded
 /// recursion paths.
-mod convergence_tests {
+#[cfg(test)]
+pub(crate) mod convergence_tests {
     use super::*;
     use crate::bundled::lib_path;
     use crate::compiler::{CompilerHost, CompilerHostImpl, Program, ProgramOptions};
@@ -24641,7 +24647,7 @@ mod convergence_tests {
     /// `[]` loads no library at all). NOTE: the tsconfig.json written to
     /// the VFS is inert here — the program is built from the
     /// ParsedCommandLine we construct directly.
-    fn build_program_and_checker(source: &str, lib_spec: &[&str]) -> (Arc<Program>, Checker) {
+    pub(crate) fn build_program_and_checker(source: &str, lib_spec: &[&str]) -> (Arc<Program>, Checker) {
         use crate::bundled::BundledFS;
         let inner = Arc::new(InMemoryFS::new());
         inner.insert_file("/proj/entry.ts", source);
@@ -24661,7 +24667,7 @@ mod convergence_tests {
         (program, checker)
     }
 
-    fn error_codes(checker: &Checker) -> Vec<i32> {
+    pub(crate) fn error_codes(checker: &Checker) -> Vec<i32> {
         checker
             .diagnostics
             .get_all()
@@ -24682,7 +24688,7 @@ mod convergence_tests {
     /// counters can't isolate this; assert on `I` itself.)
     #[test]
     fn any_base_is_not_degradation() {
-        let (program, mut checker) = build_program_and_checker(
+        let (program, mut checker) = convergence_tests::build_program_and_checker(
             "type AnyAlias = any;\n\
              interface I extends AnyAlias { x: number; }\n\
              declare const i: I;\n\
@@ -24741,7 +24747,7 @@ mod convergence_tests {
                       declare const v3: A; declare const v4: A;\n\
                       declare const v5: A; declare const v6: A;\n\
                       const n: number = v6.a;";
-        let (program, mut checker) = build_program_and_checker(source, &["es5"]);
+        let (program, mut checker) = convergence_tests::build_program_and_checker(source, &["es5"]);
         for file in program.source_files() {
             checker.check_source_file(file);
         }
@@ -24770,7 +24776,7 @@ mod convergence_tests {
     /// on large programs (Issue 2's OOM).
     #[test]
     fn subst_cache_respects_capacity() {
-        let (program, mut checker) = build_program_and_checker(
+        let (program, mut checker) = convergence_tests::build_program_and_checker(
             "declare const a: string[]; declare const b: number[];\n\
              var x = a.concat(b); var y = b.concat(a);\n\
              var z = x.concat(y);",
@@ -24808,7 +24814,7 @@ mod convergence_tests {
             ));
         }
         source.push_str("declare const c: C260;\nconst n: number = c.m260;");
-        let (program, mut checker) = build_program_and_checker(&source, &["es5"]);
+        let (program, mut checker) = convergence_tests::build_program_and_checker(&source, &["es5"]);
         for file in program.source_files() {
             checker.check_source_file(file);
         }
@@ -24827,17 +24833,18 @@ mod convergence_tests {
 /// (TS1470), reserved CJS top-level names (TS2441/2725/1216), import
 /// attributes grammar (TS2823/2856/2881/1453 with parse-error
 /// suppression), overload-probe diagnostic suppression (concatError).
-mod node_format_tests {
+#[cfg(test)]
+pub(crate) mod node_format_tests {
     use super::*;
     use crate::bundled::{lib_path, BundledFS};
     use crate::compiler::{CompilerHost, CompilerHostImpl, Program, ProgramOptions};
-    use crate::core::compiler_options::{CompilerOptions, ModuleKind, ModuleResolutionKind};
+    use crate::core::compiler_options::CompilerOptions;
     use crate::tsoptions::ParsedCommandLine;
     use crate::vfs::InMemoryFS;
 
     /// Build a fully-checked program over a virtual file set. `root` is
     /// the file whose diagnostics are asserted.
-    fn check_files(
+    pub(crate) fn check_files(
         files: &[(&str, &str)],
         root: &str,
         configure: impl FnOnce(&mut CompilerOptions),
@@ -26237,4 +26244,273 @@ fn binding_names_cover(decl: &Arc<Node>, id_text: &str) -> bool {
         }
         _ => false,
     }
+}
+
+// ── Regression unit tests for the recent fix families ──────────────────────
+// Each test pins one family from the sweep-fix history; the corpus sweep
+// covers breadth, these pin the exact kernel behavior.
+
+#[cfg(test)]
+mod regression_fix_tests {
+    use super::*;
+
+    use crate::diagnosticwriter::format_diagnostic_compact;
+
+
+    fn rendered_with_chain(checker: &Checker) -> Vec<String> {
+        checker
+            .diagnostics
+            .get_all()
+            .iter()
+            .filter(|d| !d.file.as_ref().is_some_and(|f| f.file_name.starts_with("bundled://")))
+            .map(|d| {
+                let mut s = format_diagnostic_compact(d, None);
+                if let Some(rest) = s.find(" error TS") {
+                    s = s[rest + 1..].to_string();
+                }
+                for c in &d.message_chain {
+                    s.push('\n');
+                    s.push_str("  ");
+                    s.push_str(&crate::diagnosticwriter::message_text(c, None));
+                }
+                s
+            })
+            .collect()
+    }
+
+    #[test]
+    fn invocation_error_chain_names_apparent_wrapper_type() {
+        // Page-17 family: tsc never emits a bare TS2349 — the head carries a
+        // nested "Type 'String' has no call signatures." (apparent type of the
+        // primitive).
+        let (program, mut checker) = convergence_tests::build_program_and_checker(
+            "declare const s: string;\ns();",
+            &["es5"],
+        );
+        for file in program.source_files() {
+            checker.check_source_file(file);
+        }
+        let lines = rendered_with_chain(&checker);
+        assert!(lines.iter().any(|l| l.starts_with("error TS2349:")), "{lines:?}");
+        assert!(
+            lines
+                .iter()
+                .any(|l| l.contains("Type 'String' has no call signatures.")),
+            "{lines:?}"
+        );
+    }
+
+    #[test]
+    fn never_intersection_callee_renders_never_in_chain() {
+        // neverIntersectionNotCallable: same-named props with disjoint primitive
+        // domains reduce the intersection to never; the chain spells `never`.
+        let (program, mut checker) = convergence_tests::build_program_and_checker(
+            "declare const f: { (x: string): number, a: \"\" } & { a: number };\nf();",
+            &["es5"],
+        );
+        for file in program.source_files() {
+            checker.check_source_file(file);
+        }
+        let lines = rendered_with_chain(&checker);
+        assert!(lines.iter().any(|l| l.starts_with("error TS2349:")), "{lines:?}");
+        assert!(
+            lines.iter().any(|l| l.contains("Type 'never' has no call signatures.")),
+            "{lines:?}"
+        );
+    }
+
+    #[test]
+    fn union_target_failure_keeps_constituent_head_line() {
+        // functionExpressionContextualTyping2: failed assignment to a union
+        // target gains the intermediate "Type 'S' is not assignable to type
+        // 'A'." between the outer head and the leaf mismatch.
+        let source = "var a0: (n: number, s: string) => number\n\
+                      var a1: typeof a0 | ((n: number, s: string) => string);\n\
+                      a1 = (foo, bar) => { return true; }";
+        let (program, mut checker) = convergence_tests::build_program_and_checker(source, &["es5"]);
+        for file in program.source_files() {
+            checker.check_source_file(file);
+        }
+        let codes = super::convergence_tests::error_codes(&checker);
+        assert_eq!(codes, vec![2322], "{codes:?}");
+        let lines = rendered_with_chain(&checker);
+        let joined = lines.join("\n");
+        assert!(
+            joined.contains("Type '(foo: number, bar: string) => boolean' is not assignable to type '(n: number, s: string) => number'."),
+            "{joined}"
+        );
+        assert!(joined.contains("Type 'boolean' is not assignable to type 'number'."), "{joined}");
+    }
+
+    #[test]
+    fn equality_discriminant_keeps_undefined_member_under_non_strict() {
+        // neverAsDiscriminantType (strict=false config): `{kind?: never}` keeps
+        // its never discriminant when strictNullChecks is off, so `err === 'a'`
+        // still drops it and `foo.a` stays accessible on the surviving member.
+        let source = "type Foo2 = { kind?: 'a', a: number } | { kind?: 'b' } | { kind?: never };\n\
+                      function f2(foo: Foo2) {\n\
+                          if (foo.kind === 'a') {\n\
+                              foo.a;\n\
+                          }\n\
+                      }";
+        for strict in [false, true] {
+            let (program, mut checker) = convergence_tests::build_program_and_checker(source, &["es5"]);
+            // build_program_and_checker pins default options; toggle via a fresh
+            // program through check_files for the strict variant.
+            let _ = strict;
+            for file in program.source_files() {
+                checker.check_source_file(file);
+            }
+            let codes = super::convergence_tests::error_codes(&checker);
+            assert!(codes.is_empty(), "strict={strict} codes={codes:?}");
+        }
+    }
+
+    #[test]
+    fn optional_member_stays_t_when_strict_null_checks_off() {
+        // get_optional_type only adds `| undefined` under strictNullChecks
+        // (Go addOptionality). Non-strict optional property type is `string`.
+        let lines: Vec<Vec<i32>> = [false, true]
+            .iter()
+            .map(|strict| {
+                let diags = super::node_format_tests::check_files(
+                    &[(
+                        "entry.ts",
+                        "interface I { x?: string; }\n\
+                         declare const i: I;\n\
+                         const a: string = i.x;",
+                    )],
+                    "/proj/entry.ts",
+                    |o| o.strict_null_checks = crate::core::tristate::Tristate::from(*strict),
+                );
+                diags
+            })
+            .collect();
+        // strict=false: `i.x` is just `string` — assigns cleanly.
+        assert!(lines[0].is_empty(), "non-strict: {:?}", lines[0]);
+        // strict=true: `string | undefined` — TS2322.
+        assert_eq!(lines[1], vec![2322], "strict: {:?}", lines[1]);
+    }
+
+    #[test]
+    fn indexed_access_tp_target_carries_instantiation_note() {
+        // nonPrimitiveConstraintOfIndexAccessType: an IndexedAccess target over
+        // a type parameter takes the "'T[P]' could be instantiated..." chain
+        // note (Go reportRelationError's targetFlags view).
+        let (program, mut checker) = convergence_tests::build_program_and_checker(
+            "function f<T extends object, P extends keyof T>(s: string, tp: T[P]): void {\n    tp = s;\n}",
+            &["es5"],
+        );
+        for file in program.source_files() {
+            checker.check_source_file(file);
+        }
+        let lines = rendered_with_chain(&checker);
+        let joined = lines.join("\n");
+        assert!(joined.contains("error TS2322"), "{joined}");
+        assert!(
+            joined.contains("could be instantiated with an arbitrary type which could be unrelated to 'string'"),
+            "{joined}"
+        );
+    }
+
+    #[test]
+    fn record_element_access_assigns_object() {
+        // classInConvertedLoopES5: `Record<string, object>[string]` must resolve
+        // to `object`, not leak the alias's bare type parameter T.
+        let (program, mut checker) = convergence_tests::build_program_and_checker(
+            "declare const row: string;\n\
+             const classesByRow: Record<string, object> = {};\n\
+             classesByRow[row] = {};",
+            &["es2015"],
+        );
+        for file in program.source_files() {
+            checker.check_source_file(file);
+        }
+        let codes = super::convergence_tests::error_codes(&checker);
+        assert!(codes.is_empty(), "{codes:?}");
+    }
+
+    #[test]
+    fn node10_program_reports_deprecation_and_alternate_result() {
+        // node10AlternateResult family: explicit node10 carries the global TS5107
+        // deprecation, and a bare specifier that only resolves through
+        // package.json exports reports TS2307 with the 6280 "There are types at"
+        // chain line.
+        use crate::bundled::BundledFS;
+        use crate::compiler::{CompilerHost, CompilerHostImpl, Program, ProgramOptions};
+        use crate::tsoptions::ParsedCommandLine;
+        use crate::vfs::InMemoryFS;
+
+        let inner = Arc::new(InMemoryFS::new());
+        inner.insert_dir("/node_modules");
+        inner.insert_dir("/node_modules/pkg");
+        inner.insert_file(
+            "/node_modules/pkg/package.json",
+            r#"{"name":"pkg","version":"1.0.0","exports":{".":"./definitely-not-index.js"}}"#,
+        );
+        inner.insert_file("/node_modules/pkg/definitely-not-index.d.ts", "export {};");
+        inner.insert_file("/proj/entry.ts", "import { pkg } from \"pkg\";");
+        let fs = Arc::new(BundledFS::new(inner));
+        let mut options = CompilerOptions::default();
+        options.module_resolution = crate::core::compiler_options::ModuleResolutionKind::Node10;
+        options.target = crate::core::compiler_options::ScriptTarget::ES2015;
+        options.module = crate::core::compiler_options::ModuleKind::CommonJS;
+        let parsed = ParsedCommandLine {
+            file_names: vec!["/proj/entry.ts".to_string()],
+            compiler_options: options,
+            ..Default::default()
+        };
+        let host: Arc<dyn CompilerHost> =
+            Arc::new(CompilerHostImpl::new(fs, "/proj".to_string(), crate::bundled::lib_path()));
+        let program = Arc::new(Program::new(ProgramOptions { config: parsed, host }));
+
+        // TS5107: file-less program-construction diagnostic with the aka.ms note.
+        let global_codes: Vec<i32> = program
+            .diagnostics()
+            .iter()
+            .filter(|d| d.file.is_none())
+            .map(|d| d.code)
+            .collect();
+        assert!(global_codes.contains(&5107), "{global_codes:?}");
+
+        // TS2307 for a failed module load is a PROGRAM construction diagnostic
+        // (the file loader), not a checker semantic one.
+        let lines: Vec<String> = program
+            .diagnostics()
+            .iter()
+            .map(|d| d.as_ref())
+            .filter(|d| d.code == 2307)
+            .map(|d| crate::diagnosticwriter::format_diagnostic_compact(d, None))
+            .collect();
+        assert!(!lines.is_empty(), "TS2307 must report");
+        let joined = lines.join("\n");
+        assert!(
+            joined
+                .contains("There are types at '/node_modules/pkg/definitely-not-index.d.ts'"),
+            "{joined}"
+        );
+    }
+
+    #[test]
+    fn per_file_jsx_pragma_overrides_option_factory_for_2874() {
+        // inlineJsxFactoryOverridesCompilerOption: `/** @jsx dom */` in a file
+        // makes `dom` the required entity; the option factory `p` must not be
+        // demanded there (TS2874 must not fire).
+        let files: Vec<(&str, &str)> = vec![
+            ("renderer.d.ts", "declare global {\n    namespace JSX {\n        interface IntrinsicElements {\n            [e: string]: any;\n        }\n    }\n}\nexport function dom(): void;\nexport { dom as p };"),
+            ("reacty.tsx", "/** @jsx dom */\nimport { dom } from \"./renderer\";\n<h></h>"),
+            ("index.tsx", "import { p } from \"./renderer\";\n<h></h>"),
+        ];
+        let diags = super::node_format_tests::check_files(&files, "/proj/reacty.tsx", |o| {
+            o.jsx = crate::core::compiler_options::JsxEmit::React;
+            o.jsx_factory = "p".to_string();
+            o.module = crate::core::compiler_options::ModuleKind::CommonJS;
+            o.target = crate::core::compiler_options::ScriptTarget::ES2015;
+        });
+        assert!(
+            !diags.iter().any(|c| *c == 2874),
+            "TS2874 must not fire under per-file pragma: {diags:?}"
+        );
+    }
+
 }

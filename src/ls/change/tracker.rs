@@ -84,7 +84,7 @@ enum TrackerEditKind {
 ///
 /// Mirrors `trackerEdit` in Go.
 #[derive(Debug, Clone)]
-struct TrackerEdit {
+pub struct TrackerEdit {
     kind: TrackerEditKind,
     range: Range,
     /// `kind == Text`.
@@ -100,7 +100,7 @@ struct TrackerEdit {
 ///
 /// Mirrors `nodesInsertedAtStartState` in Go.
 #[derive(Debug, Clone)]
-struct NodesInsertedAtStartState {
+pub struct NodesInsertedAtStartState {
     node: Arc<Node>,
     #[allow(dead_code)]
     source_file_file_name: String,

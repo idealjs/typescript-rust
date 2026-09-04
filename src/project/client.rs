@@ -5,7 +5,6 @@
 
 #![allow(dead_code)]
 
-use std::sync::Arc;
 
 use crate::diagnostics;
 use crate::lsp::lsproto;

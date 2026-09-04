@@ -66,6 +66,7 @@ pub const VERSION: &str = "7.1.0-dev";
 /// Mirrors `tsc.ExitStatus` in Go.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 #[repr(i32)]
+#[allow(non_camel_case_types)]
 pub enum ExitStatus {
     Success = 0,
     DiagnosticsPresent_OutputsSkipped = 1,
@@ -1233,7 +1234,7 @@ fn perform_compilation(
         && !options.list_files_only.is_true()
         && (error_count == 0 || !options.no_emit_on_error.is_true());
 
-    let mut emitted_any = false;
+    let _emitted_any;
     if should_emit {
         let fs = sys.fs();
         let emit_result = program.emit(&|path, data| {
@@ -1245,7 +1246,7 @@ fn perform_compilation(
             }
             fs.write_file(path, data)
         });
-        emitted_any = !emit_result.emitted_files.is_empty();
+        _emitted_any = !emit_result.emitted_files.is_empty();
         for diag in &emit_result.diagnostics {
             let _ = writeln!(writer, "{diag}");
         }

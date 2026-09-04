@@ -92,7 +92,7 @@ impl ApiServer {
     fn handle_message(&mut self, msg: &Value) -> Option<Value> {
         let id = msg.get("id").cloned();
         let method = msg.get("method").and_then(|m| m.as_str()).unwrap_or("");
-        let params = msg.get("params").cloned().unwrap_or(Value::Null);
+        let _params = msg.get("params").cloned().unwrap_or(Value::Null);
 
         match method {
             "configure" => {

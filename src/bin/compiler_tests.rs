@@ -53,7 +53,7 @@ struct CompilationOutput {
 }
 
 fn compile_test_case(content: &TestCaseContent) -> CompilationOutput {
-    let mut fs = InMemoryFS::new();
+    let fs = InMemoryFS::new();
     let mut file_names: Vec<String> = Vec::new();
     let mut input_files: Vec<(String, String)> = Vec::new();
     for unit in &content.units {
@@ -472,6 +472,7 @@ fn normalize_option_path(v: &str) -> String {
     }
 }
 
+#[allow(dead_code)]
 fn normalize_abs_path(name: &str, current_dir: &str) -> String {
     if name.starts_with('/') {
         name.to_string()
@@ -667,7 +668,7 @@ fn run_compiler_baselines(
     ));
 
     for chunk in batches.chunks(BATCH_SIZE) {
-        let chunk_start = Instant::now();
+        let _chunk_start = Instant::now();
 
         // Spawn subprocess for this batch.
         let mut cmd = Command::new(&exe);
@@ -750,7 +751,7 @@ fn run_compiler_baselines(
                 // Timeout — kill the child.
                 let _ = child.kill();
                 let _ = child.wait();
-                let elapsed = start.elapsed().as_secs();
+                let _elapsed = start.elapsed().as_secs();
                 let processed = total_pass + total_fail + total_new + total_panic + total_skip;
                 print_flush(&format!(
                     "  TIMEOUT at batch containing {}/{}\n",

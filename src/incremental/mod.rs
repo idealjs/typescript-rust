@@ -12,6 +12,9 @@ use serde::{Deserialize, Serialize};
 
 /// Minimal .tsbuildinfo file structure.
 #[derive(Debug, Clone, Serialize, Deserialize)]
+// Field names mirror the `.tsbuildinfo` JSON schema (camelCase) — keep them
+// for byte-compatible serialization.
+#[allow(non_snake_case)]
 pub struct BuildInfo {
     /// Schema version (currently "incremental-compilation").
     pub version: String,
@@ -20,6 +23,7 @@ pub struct BuildInfo {
     /// Root file range (simplified: just the project root path).
     pub root: String,
     /// Hash of compiler options that affect output.
+    #[allow(non_snake_case)]
     pub optionsHash: String,
     /// Referenced project tsconfig paths.
     pub references: Vec<String>,
@@ -27,6 +31,7 @@ pub struct BuildInfo {
 
 /// Per-file metadata in .tsbuildinfo.
 #[derive(Debug, Clone, Serialize, Deserialize)]
+#[allow(non_snake_case)]
 pub struct FileInfo {
     /// File path (absolute or relative to project root).
     pub path: String,
@@ -36,6 +41,7 @@ pub struct FileInfo {
     pub version: String,
     /// Whether this file affects the global scope.
     #[serde(default)]
+    #[allow(non_snake_case)]
     pub affectsGlobalScope: bool,
 }
 

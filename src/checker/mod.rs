@@ -40,6 +40,7 @@ pub use checker::*;
 pub use mapper::*;
 pub use relater::*;
 pub use tracer::*;
+#[allow(ambiguous_glob_reexports)]
 pub use types::*;
 pub use utilities::*;
 pub mod inference;

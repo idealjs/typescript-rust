@@ -9,6 +9,7 @@ use serde_json::Value;
 #[derive(Debug, Clone, Default)]
 pub struct JsonrpcVersion;
 
+#[allow(dead_code)]
 const JSON_RPC_VERSION: &str = r#""2.0""#;
 
 impl Serialize for JsonrpcVersion {

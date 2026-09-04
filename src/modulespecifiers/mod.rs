@@ -8,7 +8,7 @@
 #![allow(dead_code)]
 
 use crate::ast::{Node, Symbol};
-use crate::core::compiler_options::{CompilerOptions, ModuleResolutionKind, ResolutionMode};
+use crate::core::compiler_options::{CompilerOptions, ResolutionMode};
 use crate::tspath::{self, ComparePathsOptions};
 use std::sync::Arc;
 
@@ -444,10 +444,10 @@ pub fn get_node_module_path_parts(full_path: &str) -> Option<NodeModulePathParts
     let mut top_level_node_modules_index = 0usize;
     let mut top_level_package_name_index = 0usize;
     let mut package_root_index = 0usize;
-    let mut file_name_index = 0usize;
+    let file_name_index;
 
     let bytes = fullPathBytes(full_path);
-    let mut part_start = 0usize;
+    let mut part_start;
     let mut part_end = 0usize;
     // parse state: 0 = before node_modules, 1 = node_modules, 2 = scope, 3 = package content
     let mut state: u8 = 0;
@@ -608,7 +608,7 @@ pub fn get_module_specifier_preferences(
     old_import_specifier: &str,
 ) -> ModuleSpecifierPreferences {
     let excludes = prefs.auto_import_specifier_exclude_regexes.clone();
-    let mut relative_preference = RelativePreferenceKind::Shortest;
+    let relative_preference;
     if !old_import_specifier.is_empty() {
         if tspath::is_external_module_name_relative(old_import_specifier) {
             relative_preference = RelativePreferenceKind::Relative;
@@ -765,6 +765,7 @@ pub fn get_js_extension_for_file(file_name: &str, _options: &CompilerOptions) ->
 // Local helpers for `get_node_module_path_parts`.
 // ────────────────────────────────────────────────────────────────────────────
 
+#[allow(non_snake_case)]
 fn fullPathBytes(s: &str) -> Vec<u8> {
     s.as_bytes().to_vec()
 }

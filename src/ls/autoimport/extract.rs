@@ -8,8 +8,7 @@ use crate::checker::Checker;
 use crate::module::Resolver;
 use crate::tspath;
 
-use super::export::{Export, ExportID, ExportSyntax, ModuleID};
-use super::util::PathAndFileName;
+use super::export::{Export, ExportSyntax, ModuleID};
 use super::{
     INTERNAL_SYMBOL_NAME_DEFAULT, INTERNAL_SYMBOL_NAME_EXPORT_EQUALS,
     INTERNAL_SYMBOL_NAME_EXPORT_STAR,
@@ -142,7 +141,7 @@ impl ExportExtractor {
         _file: &SourceFile,
         _module_id: ModuleID,
         _module_file_name: &str,
-        exports: &mut Vec<Export>,
+        _exports: &mut Vec<Export>,
     ) {
         todo!("extract_from_module_declaration requires decl.Symbol.Exports")
     }

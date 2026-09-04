@@ -685,7 +685,7 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
                     // Identical duplicates (the middle declarations of a
                     // triple `let x` redeclare) collapse — Go's diagnostics
                     // are deduplicated before reporting.
-                    let mut push = |b: &mut Self, loc: crate::core::text::TextRange| {
+                    let push = |b: &mut Self, loc: crate::core::text::TextRange| {
                         if b
                             .symbol_map
                             .binder_diagnostics
@@ -1262,6 +1262,7 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
     /// [`Self::is_let_or_const_declaration`] for actual variable declarations;
     /// returns `false` for non-variable nodes. Used by the TS2300 check to
     /// allow a `var` to coexist with a function/class declaration.
+    #[allow(dead_code)]
     fn is_var_declaration(node: &Arc<Node>) -> bool {
         if node.kind == SyntaxKind::VariableDeclaration {
             if let Some(parent) = node.parent.as_ref() {
@@ -1309,6 +1310,7 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
     /// Whether an existing symbol was declared as a function-scoped `var`.
     /// Inspects the symbol's value declaration (falling back to its first
     /// declaration) to recover the variable keyword.
+    #[allow(dead_code)]
     fn symbol_is_var_declaration(symbol: &Arc<Symbol>) -> bool {
         let decl: Option<&Arc<Node>> = symbol
             .value_declaration
@@ -1458,6 +1460,7 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
     }
 
     /// Create a new flow node with the given flags.
+    #[allow(dead_code)]
     fn new_flow_node(&self, flags: FlowFlags) -> FlowNode {
         FlowNode::new(flags)
     }
@@ -3526,7 +3529,7 @@ self.symbol_map.set_symbol(node, Arc::clone(&existing));
                 // function types have no body and reject initializers.
                 // Parent pointers are populated before binding, so the
                 // enclosing function-like's body presence is checkable here.
-                let mut report_2371 = |b: &mut Self, loc: crate::core::text::TextRange| {
+                let report_2371 = |b: &mut Self, loc: crate::core::text::TextRange| {
                     b.symbol_map.binder_diagnostics.push(Diagnostic::new(
                         b.current_source_file.clone(),
                         loc,
@@ -4422,6 +4425,7 @@ fn get_container_flags(kind: SyntaxKind) -> ContainerFlags {
 }
 
 /// Whether a node kind is a block-scoped container.
+#[allow(dead_code)]
 fn is_block_scoped_container(kind: SyntaxKind) -> bool {
     matches!(
         kind,

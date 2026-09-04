@@ -3,7 +3,7 @@
 #![allow(dead_code)]
 
 use crate::core::text::{TextPos, TextRange};
-use crate::ls::lsconv::converters::{Converters, Script};
+use crate::ls::lsconv::converters::Script;
 use crate::lsp::lsproto::lsp::Location;
 
 use super::language_service::LanguageService;

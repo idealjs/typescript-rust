@@ -4,14 +4,11 @@ use std::collections::HashMap;
 
 use crate::collections::set::Set;
 use crate::core::compiler_options::CompilerOptions;
-use crate::json;
-use crate::packagejson::{self, DependencyFields};
 use crate::semver;
 use crate::tspath;
 use crate::vfs::FS;
 
 use super::types_map::lookup_type_name;
-use super::validate_package_name::NameValidationResult;
 
 /// Information about type acquisition settings.
 ///
@@ -89,7 +86,7 @@ pub fn discover_typings(
         .filter(|f| tspath::has_js_file_extension(f))
         .collect();
 
-    let mut files_to_watch: Vec<String> = Vec::new();
+    let files_to_watch: Vec<String> = Vec::new();
 
     // Add explicitly included types.
     if let Some(ref ta) = _typings_info.type_acquisition {

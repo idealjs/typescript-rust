@@ -56,6 +56,7 @@ pub const SIGNATURE_CHECK_MODE_CALLBACK: SignatureCheckMode =
 impl SignatureCheckMode {
     /// Convenience alias matching Go's `SignatureCheckModeCallback` constant.
     /// Equivalent to `BivariantCallback | StrictCallback`.
+    #[allow(non_upper_case_globals)]
     pub const Callback: Self = SIGNATURE_CHECK_MODE_CALLBACK;
 }
 
@@ -676,7 +677,7 @@ impl Checker {
     pub(crate) fn relater_report_error(
         &mut self,
         message: crate::diagnostics::Message,
-        mut args: Vec<String>,
+        args: Vec<String>,
     ) {
         use crate::diagnostics::messages_generated as msg;
         if !self.relater_chain_active {
@@ -3421,7 +3422,7 @@ impl Checker {
         }
         match (&source.t, &target.t) {
             (None, None) => Ternary::True,
-            (Some(s), None) => Ternary::True,
+            (Some(_s), None) => Ternary::True,
             (Some(s), Some(t)) => self.compare_types(s.clone(), t.clone(), relation, false),
             (None, Some(_)) => Ternary::False,
         }
@@ -5887,7 +5888,7 @@ impl Checker {
         }
 
         let check_type = ct.check_type.clone()?;
-        let extends_type = ct.extends_type.clone()?;
+        let _extends_type = ct.extends_type.clone()?;
 
         // Error type short-circuit (matches Go).
         if check_type.flags.contains(TypeFlags::Any) && check_type.intrinsic_name() == Some("error")

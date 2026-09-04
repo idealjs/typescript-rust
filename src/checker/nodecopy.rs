@@ -551,7 +551,7 @@ impl<'a> NodeBuilderImpl<'a> {
     ///
     /// Mirrors Go's `NodeBuilderImpl.getEnclosingDeclarationIgnoringFakeScope`.
     pub fn get_enclosing_declaration_ignoring_fake_scope(&self) -> Option<Arc<Node>> {
-        let mut enc = self.ctx.borrow().enclosing_declaration.clone();
+        let enc = self.ctx.borrow().enclosing_declaration.clone();
         // TODO: Port fakeScopeForSignatureDeclaration check
         // while enc != nil && b.links.Get(enc).fake_scope_for_signature_declaration != nil {
         //     enc = enc.parent
@@ -577,7 +577,7 @@ impl<'a> NodeBuilderImpl<'a> {
     pub fn new_identifier(&mut self, text: &str, symbol: Option<&Arc<Symbol>>) -> Arc<Node> {
         // TODO: Port ast.NodeFactory.NewIdentifier
         // For now, create a minimal node
-        let mut node = Node::new(SyntaxKind::Identifier, crate::ast::NodeData::Token);
+        let node = Node::new(SyntaxKind::Identifier, crate::ast::NodeData::Token);
         if let Some(sym) = symbol {
             // TODO: Set symbol on node
             let _ = sym;

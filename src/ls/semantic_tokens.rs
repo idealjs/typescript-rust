@@ -12,7 +12,7 @@ use crate::compiler::Program;
 use crate::lsp::lsproto::lsp::{DocumentUri, Range};
 
 use super::language_service::LanguageService;
-use super::types::{SemanticTokens, SemanticTokensClientCapabilities};
+use super::types::SemanticTokens;
 
 /// Token type index constants.
 pub mod token_type {

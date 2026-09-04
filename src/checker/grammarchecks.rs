@@ -60,7 +60,7 @@ impl Checker {
     /// file has parse diagnostics.
     fn grammar_error_at_pos(
         &mut self,
-        node_for_file: &Arc<Node>,
+        _node_for_file: &Arc<Node>,
         start: usize,
         length: usize,
         message: &Message,

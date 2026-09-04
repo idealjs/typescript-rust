@@ -6,13 +6,13 @@
 
 use std::sync::Arc;
 
-use tsox::bundled::{BundledFS, lib_path};
+use tsox::bundled::lib_path;
 use tsox::compiler::{CompilerHostImpl, Program, ProgramOptions};
 use tsox::ls::host::{AutoImportRegistry, EcmaLineInfo, Host};
 use tsox::ls::language_service::LanguageService;
 use tsox::ls::lsconv::converters::{Converters, PositionEncodingKind};
 use tsox::ls::lsutil::UserPreferences;
-use tsox::ls::types::{DocumentSymbol, FoldingRange, Hover, SelectionRange, SymbolKind};
+use tsox::ls::types::{DocumentSymbol, FoldingRange, SymbolKind};
 use tsox::lsp::lsproto::lsp::{DocumentUri, Position};
 use tsox::tsoptions::parse_command_line;
 use tsox::tspath::Path;

@@ -18,9 +18,8 @@ use std::sync::Arc;
 
 use crate::ast::{
     INTERNAL_SYMBOL_NAME_DEFAULT, INTERNAL_SYMBOL_NAME_EXPORT_EQUALS, Node, NodeFlags, SourceFile,
-    Symbol, SymbolFlags, SymbolTable, SyntaxKind, is_source_file,
+    Symbol, SymbolFlags, SymbolTable, SyntaxKind,
 };
-use crate::core::compiler_options::ResolutionMode;
 
 use super::checker::Checker;
 use super::types::{

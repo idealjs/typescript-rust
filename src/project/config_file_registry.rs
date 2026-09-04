@@ -7,7 +7,6 @@ use std::collections::HashMap;
 use crate::tsoptions::ParsedCommandLine;
 use crate::tspath::Path;
 
-use super::watch::WatchedFiles;
 
 /// Tracks the pending reload state of a config file entry.
 ///

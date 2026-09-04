@@ -6,13 +6,10 @@
 #![allow(dead_code)]
 
 use std::collections::HashMap;
-use std::path::PathBuf;
-use std::sync::mpsc;
 use std::sync::{Arc, Mutex};
-use std::thread;
 use std::time::Duration;
 
-use notify::{self, RecursiveMode};
+use notify::{self};
 
 use crate::lsp::lsproto;
 use crate::tspath;

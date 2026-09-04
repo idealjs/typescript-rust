@@ -99,6 +99,7 @@ fn compare_decimal_strings(a: &str, b: &str) -> i32 {
 /// The kind of class set expression currently being scanned, mirroring Go's
 /// `classSetExpressionType`.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[allow(dead_code)]
 pub enum ClassSetExpressionType {
     Unknown,
     ClassUnion,
@@ -133,6 +134,7 @@ pub struct RegExpParser<'a> {
     text: &'a str,
     pos: usize,
     body_end: usize,
+    #[allow(dead_code)]
     flags: u16,
     any_unicode_mode: bool,
     unicode_sets_mode: bool,
@@ -187,6 +189,7 @@ impl<'a> RegExpParser<'a> {
         }
     }
 
+    #[allow(dead_code)]
     pub fn flags(&self) -> u16 {
         self.flags
     }
@@ -195,6 +198,7 @@ impl<'a> RegExpParser<'a> {
         &self.errors
     }
 
+    #[allow(dead_code)]
     pub fn take_errors(&mut self) -> Vec<ScannerError> {
         std::mem::take(&mut self.errors)
     }
@@ -203,6 +207,7 @@ impl<'a> RegExpParser<'a> {
     // Position helpers
     // ────────────────────────────────────────────────────────────────────
 
+    #[allow(dead_code)]
     pub fn pos(&self) -> usize {
         self.pos
     }
@@ -241,6 +246,7 @@ impl<'a> RegExpParser<'a> {
         }
     }
 
+    #[allow(dead_code)]
     pub fn text(&self) -> &str {
         self.text
     }

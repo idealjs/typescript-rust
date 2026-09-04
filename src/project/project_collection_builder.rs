@@ -3,17 +3,13 @@
 #![allow(dead_code)]
 
 use std::collections::HashMap;
-use std::sync::Arc;
 
 use crate::lsp::lsproto;
 use crate::tspath::Path;
 
 use super::compiler_host::SessionOptions;
 use super::config_file_registry::ConfigFileRegistry;
-use super::extended_config_cache::ExtendedConfigCache;
 use super::file_change::FileChangeSummary;
-use super::parse_cache::ParseCache;
-use super::project::{Kind, Project};
 use super::project_collection::{APIState, ProjectCollection};
 use super::snapshot::{APISnapshotRequest, ATAStateChange};
 

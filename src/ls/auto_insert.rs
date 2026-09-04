@@ -4,10 +4,10 @@
 
 use std::sync::Arc;
 
-use crate::ast::{Node, SourceFile};
+use crate::ast::Node;
 
 use super::language_service::LanguageService;
-use super::types::{TextDocumentIdentifier, VsOnAutoInsertParams};
+use super::types::VsOnAutoInsertParams;
 
 /// VS OnAutoInsert response item.
 #[derive(Debug, Clone, Default)]

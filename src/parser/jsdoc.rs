@@ -988,7 +988,7 @@ impl super::Parser {
         start: usize,
         tag_name: Arc<Node>,
         margin: usize,
-        indent_text: &str,
+        _indent_text: &str,
     ) -> Arc<Node> {
         let type_expression = self.try_parse_type_expression();
         self.skip_whitespace_or_asterisk();
@@ -1018,7 +1018,7 @@ impl super::Parser {
         start: usize,
         tag_name: Arc<Node>,
         margin: usize,
-        indent_text: &str,
+        _indent_text: &str,
     ) -> Arc<Node> {
         let full_name = self.parse_jsdoc_type_name_with_namespace(false);
         let name = full_name.unwrap_or_else(|| {
@@ -1047,7 +1047,7 @@ impl super::Parser {
         start: usize,
         tag_name: Arc<Node>,
         margin: usize,
-        indent_text: &str,
+        _indent_text: &str,
     ) -> Arc<Node> {
         self.skip_whitespace();
         let comment = self.parse_tag_comments(margin, None);
@@ -1539,16 +1539,14 @@ impl super::Parser {
             self.parse_expected_token_jsdoc(SyntaxKind::BacktickToken);
         }
 
-        let mut end = name.end();
         if is_bracketed {
             self.skip_whitespace();
-            // Optional = defaultExpr
+            // Optional = defaultExpr (parsed for its diagnostics side effect;
+            // the span end is not tracked here).
             if self.parse_optional_jsdoc(SyntaxKind::EqualsToken) {
-                let default = self.parse_type();
-                end = default.end();
+                let _default = self.parse_type();
             }
-            let close = self.parse_expected_token_jsdoc(SyntaxKind::CloseBracketToken);
-            end = end.max(close.end());
+            let _close = self.parse_expected_token_jsdoc(SyntaxKind::CloseBracketToken);
         }
 
         (name, is_bracketed)

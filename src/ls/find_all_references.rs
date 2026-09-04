@@ -12,7 +12,6 @@ use std::sync::Arc;
 use crate::ast::node::LineMap;
 use crate::ast::node_data_generated::for_each_child;
 use crate::ast::{Node, SourceFile, Symbol};
-use crate::checker::Checker;
 use crate::compiler::Program;
 use crate::core::text::TextRange;
 use crate::lsp::lsproto::lsp::{DocumentUri, Location, Position, Range};

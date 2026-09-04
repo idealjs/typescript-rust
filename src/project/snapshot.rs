@@ -6,17 +6,14 @@ use std::collections::HashSet;
 use std::sync::Arc;
 use std::sync::atomic::{AtomicI32, Ordering};
 
-use crate::collections::ordered_map::OrderedMap;
 use crate::core::compiler_options::CompilerOptions;
 use crate::lsp::lsproto;
 use crate::tspath::Path;
 
 use super::config_file_registry::ConfigFileRegistry;
 use super::file_change::FileChangeSummary;
-use super::overlay_fs::{FileHandle, Overlay};
 use super::project::Project;
 use super::project_collection::ProjectCollection;
-use super::watch::WatchedFiles;
 
 /// Why the snapshot is being updated.
 ///

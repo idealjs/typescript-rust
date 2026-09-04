@@ -2,11 +2,9 @@
 
 #![allow(dead_code)]
 
-use std::collections::HashMap;
-use std::sync::{Mutex, OnceLock};
+use std::sync::Mutex;
 use std::time::{Duration, Instant};
 
-use crate::ast::SourceFile;
 use crate::compiler::Program;
 use std::sync::Arc;
 

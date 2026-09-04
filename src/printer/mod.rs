@@ -104,8 +104,10 @@ pub struct AutoGenerateOptions {
 /// Unique ID for tracking auto-generated names.
 pub type AutoGenerateId = u32;
 
+#[allow(dead_code)]
 static NEXT_AUTO_GENERATE_ID: AtomicU32 = AtomicU32::new(0);
 
+#[allow(dead_code)]
 fn next_auto_generate_id() -> AutoGenerateId {
     NEXT_AUTO_GENERATE_ID.fetch_add(1, Ordering::Relaxed) + 1
 }
@@ -3154,6 +3156,7 @@ mod tests {
 }
 
 /// Helper: get the statements from a ModuleBlock node.
+#[allow(dead_code)]
 fn get_module_block_statements(node: &Arc<Node>) -> Option<&[Arc<Node>]> {
     match &node.data {
         crate::ast::node_data_generated::NodeData::ModuleBlock(d) => Some(&d.statements.nodes),

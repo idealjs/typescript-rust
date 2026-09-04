@@ -2,7 +2,7 @@
 //!
 //! Ported from Go's `internal/lsp/lsproto/jsonrpc.go`.
 
-use crate::jsonrpc::jsonrpc::{Id as JsonrpcId, ResponseError};
+use crate::jsonrpc::jsonrpc::Id as JsonrpcId;
 
 /// Creates an ID from an IntegerOrString value.
 pub fn new_id(int_val: Option<i32>, str_val: Option<&str>) -> JsonrpcId {

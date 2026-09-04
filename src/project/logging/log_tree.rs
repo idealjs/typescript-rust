@@ -8,9 +8,11 @@ use std::sync::atomic::{AtomicI32, AtomicU64, Ordering};
 static SEQ: AtomicU64 = AtomicU64::new(0);
 
 struct LogEntry {
+    #[allow(dead_code)]
     seq: u64,
     time: String,
     message: String,
+    #[allow(dead_code)]
     child: Option<Box<LogTree>>,
 }
 
@@ -103,7 +105,7 @@ impl LogTree {
     }
 
     pub fn fork(&self, message: &str) -> Box<LogTree> {
-        let mut child = Box::new(LogTree {
+        let child = Box::new(LogTree {
             name: String::new(),
             logs: Mutex::new(Vec::new()),
             root: self.root,

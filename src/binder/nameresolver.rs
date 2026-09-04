@@ -104,7 +104,7 @@ impl NameResolver {
             Arc<Node>,
         > = None;
         let mut within_deferred_context = false;
-        let mut grandparent: Option<Arc<Node>> = None;
+        let mut grandparent: Option<Arc<Node>>;
         // Needed for did-you-mean error reporting, which gathers candidates
         // starting from the original location.
         let original_location = Arc::clone(location);
@@ -455,7 +455,7 @@ impl NameResolver {
     /// moved into the function body during emit).
     ///
     /// Mirrors `NameResolver.requiresScopeChange` in Go.
-    pub fn requires_scope_change(&self, node: &Arc<Node>) -> bool {
+    pub fn requires_scope_change(&self, _node: &Arc<Node>) -> bool {
         // TODO: `node.AsParameterDeclaration()` accessor + `.Name()` / `.Initializer`.
         let name: Option<&Arc<Node>> = None;
         let initializer: Option<&Arc<Node>> = None;
@@ -628,7 +628,7 @@ impl NameResolver {
         // TODO: enum member resolution via `getSymbolOfDeclaration` and
         // `enumSymbol.Exports`. The isolated-modules diagnostic below is
         // reproduced for fidelity.
-        if let Some(message) = name_not_found_message {
+        if let Some(_message) = name_not_found_message {
             if let Some(opts) = &self.compiler_options {
                 if opts.get_isolated_modules() {
                     let isolated_modules_like_flag_name =

@@ -146,12 +146,17 @@ impl InferenceContext {
 /// Recursive inference state used during `inferFromTypes`.
 struct InferenceState<'a> {
     inferences: &'a mut [InferenceInfo],
+    /// Saved originals (Go keeps these on the relater state); retained for
+    /// port parity even though the port reads them via locals today.
+    #[allow(dead_code)]
     original_source: Option<Arc<Type>>,
+    #[allow(dead_code)]
     original_target: Option<Arc<Type>>,
     priority: InferencePriority,
     inference_priority: InferencePriority,
     contravariant: bool,
     bivariant: bool,
+    #[allow(dead_code)]
     expanding_flags: ExpandingFlags,
     propagation_type: Option<Arc<Type>>,
     /// Source/target pointer pairs currently being inferred (cycle guard
@@ -459,7 +464,7 @@ impl Checker {
                 cleared = true;
             }
         }
-        drop(inference);
+        let _ = inference;
         if cleared {
             for info in state.inferences.iter_mut() {
                 info.inferred_type = None;
@@ -867,9 +872,9 @@ impl Checker {
                 // Prefer covariant if it's not never, it's assignable to some contravariant candidate,
                 // and no other type parameter is constrained to this one with conflicts.
                 let prefer_covariant = match (&inferred_covariant, &inferred_contravariant) {
-                    (Some(cov), None) => true,
+                    (Some(_cov), None) => true,
                     (None, Some(_)) => false,
-                    (Some(cov), Some(contra)) => {
+                    (Some(cov), Some(_contra)) => {
                         let cov_not_never_or_any =
                             !cov.flags.intersects(TypeFlags::Never | TypeFlags::Any);
                         let cov_assignable_to_contra = inference
@@ -2116,7 +2121,7 @@ impl Checker {
         for t in types {
             match &candidate {
                 None => candidate = Some(t.clone()),
-                Some(c) => {
+                Some(_c) => {
                     candidate = Some(t.clone());
                 }
             }
@@ -2254,11 +2259,13 @@ impl Checker {
     // implemented in `relater.rs` (real implementations, not stubs).
 
     /// Get the this argument type for a call node.
+    #[allow(dead_code)]
     fn get_this_argument_type(&self, _node: &crate::ast::Node) -> Arc<Type> {
         self.undefined_type()
     }
 
     /// Get the spread argument type for a list of arguments.
+    #[allow(dead_code)]
     fn get_spread_argument_type(
         &self,
         _args: &[Arc<crate::ast::Node>],

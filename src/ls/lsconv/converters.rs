@@ -1,7 +1,7 @@
 //! Converters between TS compiler types and LSP protocol types.
 //! Port of Go's `internal/ls/lsconv/converters.go`.
 
-use super::linemap::{LspLineMap, compute_lsp_line_starts};
+use super::linemap::compute_lsp_line_starts;
 use crate::lsp::lsproto::lsp::{DocumentUri, Location, Position, Range};
 
 /// Position encoding kind.

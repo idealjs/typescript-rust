@@ -2,7 +2,6 @@
 
 #![allow(dead_code)]
 
-use crate::lsp::lsproto;
 
 use super::file_change::FileChangeSummary;
 use super::session::Session;

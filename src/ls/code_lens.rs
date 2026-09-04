@@ -4,12 +4,12 @@
 
 use std::sync::Arc;
 
-use crate::ast::{Node, Symbol};
-use crate::lsp::lsproto::lsp::{DocumentUri, Range};
+use crate::ast::Node;
+use crate::lsp::lsproto::lsp::DocumentUri;
 
 use super::cross_project::CrossProjectOrchestrator;
 use super::language_service::LanguageService;
-use super::types::{CodeLens, code_lens_kind};
+use super::types::CodeLens;
 
 impl LanguageService {
     /// Provide code lenses for a document.
