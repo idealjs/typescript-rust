@@ -1028,7 +1028,7 @@ impl Checker {
             flags: TypeFlags::Object,
             object_flags: crate::checker::types::ObjectFlags::Anonymous
                 | crate::checker::types::ObjectFlags::ObjectLiteral,
-            id: 0,
+            id: crate::checker::types::next_type_id(),
             symbol: None,
             alias: None,
             data: crate::checker::types::TypeData::Object(

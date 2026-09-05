@@ -84,8 +84,8 @@ impl Checker {
         };
 
         {
-            let sp = Arc::as_ptr(&source) as *const Type as usize;
-            let tp = Arc::as_ptr(&target) as *const Type as usize;
+            let sp = source.id;
+            let tp = target.id;
             if source.flags.contains(TypeFlags::Object)
                 && target.flags.contains(TypeFlags::Object)
                 && (self.degraded_type_ptrs.contains(&sp)
@@ -144,8 +144,8 @@ impl Checker {
             self.relation_count = 2_000_000;
         }
         let key = RelationCacheKey {
-            source_ptr: Arc::as_ptr(&source) as usize,
-            target_ptr: Arc::as_ptr(&target) as usize,
+            source_id: source.id,
+            target_id: target.id,
             relation,
         };
 

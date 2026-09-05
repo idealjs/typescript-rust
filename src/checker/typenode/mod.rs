@@ -121,7 +121,7 @@ impl Checker {
         for map in &self.type_argument_stack {
             let mut entries: Vec<(usize, usize)> = map
                 .iter()
-                .map(|(k, v)| (*k as usize, Arc::as_ptr(v) as usize))
+                .map(|(k, v)| (*k as usize, v.id as usize))
                 .collect();
             entries.sort_unstable();
             entries.len().hash(&mut h);
@@ -415,7 +415,7 @@ impl Checker {
         Arc::new(Type {
             flags: TypeFlags::Object,
             object_flags: ObjectFlags::Anonymous,
-            id: 0,
+            id: crate::checker::types::next_type_id(),
             symbol: None,
             alias: None,
             data: TypeData::Object(ObjectTypeData {

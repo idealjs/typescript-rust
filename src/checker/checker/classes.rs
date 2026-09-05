@@ -932,7 +932,7 @@ impl Checker {
         Arc::new(Type {
             flags: TypeFlags::Object,
             object_flags: ObjectFlags::Anonymous,
-            id: 0,
+            id: crate::checker::types::next_type_id(),
 
             symbol: derived.symbol.clone(),
             alias: None,

@@ -39,7 +39,7 @@ impl Checker {
                             return Arc::new(Type {
                                 flags: inner.flags,
                                 object_flags: inner.object_flags,
-                                id: 0,
+                                id: crate::checker::types::next_type_id(),
                                 symbol: None,
                                 alias: None,
                                 data: TypeData::Tuple(TupleTypeData {
@@ -95,10 +95,8 @@ impl Checker {
                         .insert(Arc::as_ptr(&index_type_node) as *const crate::ast::Node)
                 {
 
-                    let ip = Arc::as_ptr(&index_type) as *const Type as usize;
-                    let op = Arc::as_ptr(&object_type) as *const Type as usize;
-                    let degraded = self.degraded_type_ptrs.contains(&ip)
-                        || self.degraded_type_ptrs.contains(&op);
+                    let degraded = self.degraded_type_ptrs.contains(&index_type.id)
+                        || self.degraded_type_ptrs.contains(&object_type.id);
                     if !degraded {
                         let type_str = if index_type_node.kind == SyntaxKind::BigIntLiteral {
                             "bigint".to_string()

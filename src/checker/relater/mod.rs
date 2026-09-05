@@ -127,8 +127,8 @@ pub enum RelationKind {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct RelationCacheKey {
-    pub source_ptr: usize,
-    pub target_ptr: usize,
+    pub source_id: u32,
+    pub target_id: u32,
     pub relation: RelationKind,
 }
 
@@ -447,13 +447,13 @@ mod tests {
     fn relation_cache_key_distinguishes_relation_kinds() {
 
         let k1 = RelationCacheKey {
-            source_ptr: 0x1000,
-            target_ptr: 0x2000,
+            source_id: 0x1000,
+            target_id: 0x2000,
             relation: RelationKind::Assignable,
         };
         let k2 = RelationCacheKey {
-            source_ptr: 0x1000,
-            target_ptr: 0x2000,
+            source_id: 0x1000,
+            target_id: 0x2000,
             relation: RelationKind::Subtype,
         };
         assert_ne!(k1, k2);
@@ -470,13 +470,13 @@ mod tests {
     fn relation_cache_key_distinguishes_type_pointers() {
 
         let k1 = RelationCacheKey {
-            source_ptr: 0x1000,
-            target_ptr: 0x2000,
+            source_id: 0x1000,
+            target_id: 0x2000,
             relation: RelationKind::Assignable,
         };
         let k2 = RelationCacheKey {
-            source_ptr: 0x3000,
-            target_ptr: 0x2000,
+            source_id: 0x3000,
+            target_id: 0x2000,
             relation: RelationKind::Assignable,
         };
         assert_ne!(k1, k2);

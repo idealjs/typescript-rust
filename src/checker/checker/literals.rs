@@ -180,7 +180,7 @@ impl Checker {
         Arc::new(Type {
             flags: TypeFlags::Object,
             object_flags: ObjectFlags::Anonymous | ObjectFlags::ObjectLiteral,
-            id: 0,
+            id: crate::checker::types::next_type_id(),
             symbol: None,
             alias: None,
             data: TypeData::Object(ObjectTypeData {

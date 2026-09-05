@@ -20,14 +20,22 @@
 
 - [`known-risks.md`](./known-risks.md) — 四项已识别风险与缓解状态。
 
-## 非确定性（高优先）
+## 非确定性（已修复 2026-09-05）
 
 - **run-to-run 结果翻转**：`allowSyntheticDefaultImports9.ts` 等用例在同一二进制上
-  多次运行结果不一致（通过/不一致翻转）。头号嫌疑：checker 中以 `Arc` 指针值
-  为键的缓存（interface_instantiation_cache / attached_type_args_cache 等）
-  存在 ABA 问题——进程间分配布局不同导致偶发错命中。
-  部分缓存已做"值钉住"防护（见 git history「三缓存 ABA 钉住」），未覆盖全部。
-  影响：任何单次运行的结果都不可作为最终判定；sweep 的 FAIL/通过都可能翻转。
-  修复方向：①为所有指针键缓存补充"值等价"校验或改用内容键
-  ②排查无锁单线程下的迭代顺序依赖（HashMap 随机种子逐进程不同）。
+  多次运行结果不一致。根因：checker 多处缓存以 `Arc` 指针值为键——
+  `Arc` 释放后地址被新对象复用（ABA），错命中导致诊断翻转。
+  无防护的键：`relation_cache`/`relation_in_progress`（值为 bool，不钉任何一侧）、
+  `degraded_type_ptrs`（degraded 未 accepted 的类型不进任何缓存，Arc 即释放）、
+  `probe_cache_permissive/restrictive` 与 `subst_object_in_progress`（值是派生类型，
+  输入类型不被钉住）、`type_argument_stack_hash` 与 `flow_cache_key`（地址混入哈希做缓存键）。
+  修复：`Type` 启用全局 `AtomicU32` 唯一 id（`types.rs::next_type_id`，26 处构造点全部接入），
+  上述缓存全部改按 id 键；id 单调递增不复用，ABA 通道消灭。
+  附带修复：`compare_types` 此前因 id 全 0 恒等短路（永远返回 Equal），
+  类型排序/去重随 id 启用恢复语义（对齐 tsc compareTypeIds）。
+  验证：单用例 20 连跑输出哈希一致；page-1 三连跑失败集一致；
+  300 例双跑失败集一致且与改动前逐用例相同（30 FAIL 集合零漂移）；
+  门禁 1362/2/1010/15 全绿。
+  遗留：Symbol/Node/Program 指针键因对象存活期等于进程存活期而安全，保持不变；
+  `Signature` id 仍全 0（独立隐患，未启用签名同一性比较）。
 

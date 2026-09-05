@@ -187,7 +187,7 @@ impl Checker {
                         Arc::new(Type {
                             flags: TypeFlags::Union,
                             object_flags: ObjectFlags::None,
-                            id: 0,
+                            id: crate::checker::types::next_type_id(),
                             symbol: None,
                             alias: None,
                             data: TypeData::Union(UnionTypeData {

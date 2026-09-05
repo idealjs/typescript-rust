@@ -897,8 +897,7 @@ impl Checker {
         }
         if heritage_degraded {
 
-            self.degraded_type_ptrs
-                .insert(Arc::as_ptr(&result) as *const crate::checker::types::Type as usize);
+            self.degraded_type_ptrs.insert(result.id);
         }
         if !has_type_args && cache_result {
             self.type_alias_links.get_or_default(symbol).declared_type = Some(result.clone());
@@ -1404,7 +1403,7 @@ impl Checker {
         Arc::new(Type {
             flags: TypeFlags::Object,
             object_flags: ObjectFlags::Anonymous,
-            id: 0,
+            id: crate::checker::types::next_type_id(),
             symbol: None,
             alias: None,
             data: TypeData::Object(ObjectTypeData {
@@ -1464,7 +1463,7 @@ impl Checker {
         let merged = Arc::new(Type {
             flags: TypeFlags::Object,
             object_flags: ObjectFlags::Anonymous,
-            id: 0,
+            id: crate::checker::types::next_type_id(),
             symbol: None,
             alias: None,
             data: TypeData::Object(ObjectTypeData {
@@ -1481,14 +1480,10 @@ impl Checker {
             }),
         });
 
-        let merged_degraded = {
-            let p = |t: &Arc<Type>| Arc::as_ptr(t) as *const Type as usize;
-            self.degraded_type_ptrs.contains(&p(base))
-                || self.degraded_type_ptrs.contains(&p(derived))
-        };
+        let merged_degraded = self.degraded_type_ptrs.contains(&base.id)
+            || self.degraded_type_ptrs.contains(&derived.id);
         if merged_degraded {
-            self.degraded_type_ptrs
-                .insert(Arc::as_ptr(&merged) as *const Type as usize);
+            self.degraded_type_ptrs.insert(merged.id);
         }
         merged
     }
@@ -1688,7 +1683,7 @@ impl Checker {
             return Arc::new(Type {
                 flags: TypeFlags::TypeParameter,
                 object_flags: ObjectFlags::None,
-                id: 0,
+                id: crate::checker::types::next_type_id(),
                 symbol: Some(Arc::clone(symbol)),
                 alias: None,
                 data: TypeData::TypeParameter(TypeParameterData {
@@ -1739,7 +1734,7 @@ impl Checker {
         let tp = Arc::new(Type {
             flags: TypeFlags::TypeParameter,
             object_flags: ObjectFlags::None,
-            id: 0,
+            id: crate::checker::types::next_type_id(),
             symbol: Some(Arc::clone(symbol)),
             alias: None,
             data: TypeData::TypeParameter(TypeParameterData {
@@ -1985,7 +1980,7 @@ impl Checker {
         let result = Arc::new(Type {
             flags: TypeFlags::Object,
             object_flags: ObjectFlags::Anonymous,
-            id: 0,
+            id: crate::checker::types::next_type_id(),
             symbol: Some(Arc::clone(symbol)),
             alias: None,
             data: TypeData::Object(ObjectTypeData {

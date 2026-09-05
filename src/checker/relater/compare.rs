@@ -395,8 +395,8 @@ impl Checker {
     ) -> bool {
 
         {
-            let sp = Arc::as_ptr(source) as *const Type as usize;
-            let tp = Arc::as_ptr(target) as *const Type as usize;
+            let sp = source.id;
+            let tp = target.id;
             if source.flags.contains(TypeFlags::Object)
                 && target.flags.contains(TypeFlags::Object)
                 && (self.degraded_type_ptrs.contains(&sp) || self.degraded_type_ptrs.contains(&tp))

@@ -111,7 +111,7 @@ impl Checker {
         Arc::new(Type {
             flags: TypeFlags::Object,
             object_flags: ObjectFlags::Reference,
-            id: 0,
+            id: crate::checker::types::next_type_id(),
             symbol: array_symbol,
             alias: None,
             data: TypeData::Object(ObjectTypeData {
@@ -461,7 +461,7 @@ impl Checker {
         Arc::new(Type {
             flags: TypeFlags::Object,
             object_flags: ObjectFlags::Tuple,
-            id: 0,
+            id: crate::checker::types::next_type_id(),
             symbol: None,
             alias: None,
             data: TypeData::Tuple(TupleTypeData {

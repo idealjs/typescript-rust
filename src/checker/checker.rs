@@ -333,7 +333,7 @@ pub struct Checker {
 
     pub requested_external_emit_helpers: HashMap<usize, u32>,
 
-    pub degraded_type_ptrs: std::collections::HashSet<usize>,
+    pub degraded_type_ptrs: std::collections::HashSet<u32>,
 
     pub jsx_implicit_namespace: HashMap<usize, Option<Arc<Symbol>>>,
 
@@ -353,7 +353,7 @@ pub struct Checker {
 
     pub relater_intersection_target_depth: u32,
 
-    pub subst_object_in_progress: std::collections::HashMap<usize, Arc<crate::checker::types::Type>>,
+    pub subst_object_in_progress: std::collections::HashMap<u32, Arc<crate::checker::types::Type>>,
 
     pub in_return_substitution: bool,
 
@@ -363,8 +363,8 @@ pub struct Checker {
 
     pub relation_cache: HashMap<crate::checker::relater::RelationCacheKey, bool>,
 
-    pub probe_cache_permissive: HashMap<usize, Arc<Type>>,
-    pub probe_cache_restrictive: HashMap<usize, Arc<Type>>,
+    pub probe_cache_permissive: HashMap<u32, Arc<Type>>,
+    pub probe_cache_restrictive: HashMap<u32, Arc<Type>>,
 
     pub enum_relation: HashMap<EnumRelationKey, crate::checker::relater::RelationComparisonResult>,
 
@@ -1301,7 +1301,7 @@ impl Checker {
                 Arc::new(Type {
                     flags: TypeFlags::Any,
                     object_flags: ObjectFlags::NonInferrableType,
-                    id: 0,
+                    id: crate::checker::types::next_type_id(),
                     symbol: None,
                     alias: None,
                     data: TypeData::Intrinsic(IntrinsicTypeData {
@@ -1330,7 +1330,7 @@ impl Checker {
         Arc::new(Type {
             flags: TypeFlags::Object,
             object_flags: ObjectFlags::EvolvingArray,
-            id: 0,
+            id: crate::checker::types::next_type_id(),
             symbol: None,
             alias: None,
             data: TypeData::EvolvingArray(EvolvingArrayTypeData {
@@ -1411,7 +1411,7 @@ impl Checker {
                 Arc::new(Type {
                     flags: TypeFlags::Object,
                     object_flags: ObjectFlags::Anonymous,
-                    id: 0,
+                    id: crate::checker::types::next_type_id(),
                     symbol: None,
                     alias: None,
                     data: TypeData::Object(ObjectTypeData::default()),
@@ -2077,7 +2077,7 @@ impl Checker {
             return Arc::new(Type {
                 flags: TypeFlags::Union,
                 object_flags: ObjectFlags::None,
-                id: 0,
+                id: crate::checker::types::next_type_id(),
                 symbol: None,
                 alias: None,
                 data: TypeData::Union(UnionTypeData {
@@ -2215,7 +2215,7 @@ impl Checker {
         Arc::new(Type {
             flags: TypeFlags::Object,
             object_flags: ObjectFlags::Anonymous | ObjectFlags::ObjectLiteral,
-            id: 0,
+            id: crate::checker::types::next_type_id(),
             symbol: None,
             alias: None,
             data: TypeData::Object(ObjectTypeData {
@@ -3670,8 +3670,8 @@ impl Checker {
         args: Vec<Arc<Type>>,
     ) -> Arc<Type> {
         let mut key = Vec::with_capacity(args.len() + 1);
-        key.push(Arc::as_ptr(t) as *const Type as usize);
-        key.extend(args.iter().map(|a| Arc::as_ptr(a) as *const Type as usize));
+        key.push(t.id as usize);
+        key.extend(args.iter().map(|a| a.id as usize));
         if let Some(cached) = self.attached_type_args_cache.get(&key) {
             return Arc::clone(&cached.2);
         }

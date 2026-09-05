@@ -299,7 +299,7 @@ impl Checker {
     }
 
     pub fn get_permissive_instantiation(&mut self, t: &Arc<Type>) -> Arc<Type> {
-        let key = Arc::as_ptr(t) as usize;
+        let key = t.id;
         if let Some(cached) = self.probe_cache_permissive.get(&key) {
             return Arc::clone(cached);
         }
@@ -309,7 +309,7 @@ impl Checker {
     }
 
     pub fn get_restrictive_instantiation(&mut self, t: &Arc<Type>) -> Arc<Type> {
-        let key = Arc::as_ptr(t) as usize;
+        let key = t.id;
         if let Some(cached) = self.probe_cache_restrictive.get(&key) {
             return Arc::clone(cached);
         }
@@ -517,7 +517,7 @@ impl Checker {
         params: &[Arc<Type>],
         substitutions: &[Arc<Type>],
     ) -> Arc<Type> {
-        let key = Arc::as_ptr(t) as usize;
+        let key = t.id;
         if let Some(cached) = self.subst_object_in_progress.get(&key) {
             return Arc::clone(cached);
         }

@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::sync::atomic::{AtomicU32, Ordering};
 use std::sync::{Arc, OnceLock};
 
 use bitflags::bitflags;
@@ -9,6 +10,12 @@ use crate::evaluator;
 use crate::jsnum;
 
 pub type TypeId = u32;
+
+static NEXT_TYPE_ID: AtomicU32 = AtomicU32::new(1);
+
+pub fn next_type_id() -> u32 {
+    NEXT_TYPE_ID.fetch_add(1, Ordering::Relaxed)
+}
 pub type SignatureId = u32;
 
 bitflags! {
@@ -1000,7 +1007,7 @@ impl Type {
         Self {
             flags,
             object_flags: ObjectFlags::empty(),
-            id: 0,
+            id: next_type_id(),
             symbol: None,
             alias: None,
             data,

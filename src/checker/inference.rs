@@ -121,7 +121,7 @@ struct InferenceState<'a> {
     expanding_flags: ExpandingFlags,
     propagation_type: Option<Arc<Type>>,
 
-    visited: HashMap<(usize, usize), InferencePriority>,
+    visited: HashMap<(u32, u32), InferencePriority>,
     depth: i32,
 }
 
@@ -164,7 +164,7 @@ impl Checker {
             return;
         }
 
-        let key = (Arc::as_ptr(source) as usize, Arc::as_ptr(target) as usize);
+        let key = (source.id, target.id);
         if state.visited.contains_key(&key) {
             return;
         }

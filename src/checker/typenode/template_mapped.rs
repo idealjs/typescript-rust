@@ -168,7 +168,7 @@ impl Checker {
             return Arc::new(Type {
                 flags: TypeFlags::Object,
                 object_flags: crate::checker::types::ObjectFlags::Mapped,
-                id: 0,
+                id: crate::checker::types::next_type_id(),
                 symbol: None,
                 alias: None,
                 data: TypeData::Mapped(MappedTypeData {
@@ -243,7 +243,7 @@ impl Checker {
         Arc::new(Type {
             flags: TypeFlags::Object,
             object_flags: ObjectFlags::Anonymous,
-            id: 0,
+            id: crate::checker::types::next_type_id(),
             symbol: None,
             alias: None,
             data: TypeData::Object(ObjectTypeData {

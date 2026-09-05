@@ -201,7 +201,7 @@ impl Checker {
         let face = Arc::new(Type {
             flags: TypeFlags::Object,
             object_flags: ObjectFlags::Anonymous,
-            id: 0,
+            id: crate::checker::types::next_type_id(),
             symbol: Some(Arc::clone(symbol)),
             alias: None,
             data: TypeData::Object(ObjectTypeData {
@@ -216,7 +216,7 @@ impl Checker {
         Arc::new(Type {
             flags: TypeFlags::Intersection,
             object_flags: ObjectFlags::None,
-            id: 0,
+            id: crate::checker::types::next_type_id(),
             symbol: None,
             alias: None,
             data: TypeData::Intersection(IntersectionTypeData {
@@ -531,7 +531,7 @@ impl Checker {
             Arc::new(Type {
                 flags: TypeFlags::Object,
                 object_flags: ObjectFlags::Anonymous,
-                id: 0,
+                id: crate::checker::types::next_type_id(),
                 symbol: Some(Arc::clone(symbol)),
                 alias: None,
                 data: TypeData::Object(ObjectTypeData {
@@ -602,7 +602,7 @@ impl Checker {
         let result = Arc::new(Type {
             flags: TypeFlags::Object,
             object_flags: ObjectFlags::Anonymous,
-            id: 0,
+            id: crate::checker::types::next_type_id(),
             symbol: Some(Arc::clone(symbol)),
             alias: None,
             data: TypeData::Object(ObjectTypeData {

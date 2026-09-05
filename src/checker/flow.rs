@@ -182,7 +182,7 @@ impl Checker {
             FlowRef::Node(node) => node.id(),
         };
         let flow_ptr = Arc::as_ptr(flow) as *const FlowNode as u64;
-        let initial_ptr = Arc::as_ptr(initial) as *const Type as u64;
+        let initial_ptr = initial.id as u64;
 
         (ref_part.rotate_left(17) ^ flow_ptr).rotate_left(29) ^ initial_ptr
     }

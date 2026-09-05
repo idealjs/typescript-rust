@@ -178,10 +178,8 @@ impl Checker {
             }
 
             {
-                let ap = Arc::as_ptr(&arg_type) as *const Type as usize;
-                let cp = Arc::as_ptr(&constraint_type) as *const Type as usize;
-                if self.degraded_type_ptrs.contains(&ap)
-                    || self.degraded_type_ptrs.contains(&cp)
+                if self.degraded_type_ptrs.contains(&arg_type.id)
+                    || self.degraded_type_ptrs.contains(&constraint_type.id)
                 {
                     continue;
                 }
@@ -380,7 +378,7 @@ impl Checker {
         Arc::new(Type {
             flags: TypeFlags::Object,
             object_flags: ObjectFlags::Anonymous,
-            id: 0,
+            id: crate::checker::types::next_type_id(),
             symbol: None,
             alias: None,
             data: TypeData::Object(ObjectTypeData {
