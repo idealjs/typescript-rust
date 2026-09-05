@@ -1282,7 +1282,46 @@ impl Checker {
         }
     }
 
-    pub(crate) fn get_property_of_type(&self, t: &Arc<Type>, name: &str) -> Option<Arc<Symbol>> {
+    pub(crate) fn get_property_of_type(&mut self, t: &Arc<Type>, name: &str) -> Option<Arc<Symbol>> {
+        if let Some(sym) = self.get_property_of_type_cached(t, name) {
+            return Some(sym);
+        }
+        if let Some(interface_sym) = self
+            .unresolved_interface_symbol_of(t)
+            && let Some(member) = self
+                .resolve_interface_type_ex(&interface_sym, None)
+                .as_structured()
+                .and_then(|s| s.members.get(name))
+        {
+            return Some(Arc::clone(member));
+        }
+        None
+    }
+
+    fn unresolved_interface_symbol_of(&self, t: &Arc<Type>) -> Option<Arc<Symbol>> {
+        if !t.flags.contains(crate::checker::types::TypeFlags::Object) {
+            return None;
+        }
+        let sym = t.symbol.as_ref()?;
+        let has_interface_decl = sym
+            .declarations
+            .iter()
+            .any(|d| matches!(d.data, NodeData::InterfaceDeclaration(_)));
+        if !has_interface_decl {
+            return None;
+        }
+        if self.type_alias_links.get(sym).map(|l| l.declared_type.is_some()) == Some(true) {
+            return None;
+        }
+        if let Some(structured) = t.as_structured()
+            && !structured.members.entries.is_empty()
+        {
+            return None;
+        }
+        Some(Arc::clone(sym))
+    }
+
+    pub(crate) fn get_property_of_type_cached(&self, t: &Arc<Type>, name: &str) -> Option<Arc<Symbol>> {
 
         if let TypeData::Mapped(m) = &t.data
             && m.type_parameter.is_some()

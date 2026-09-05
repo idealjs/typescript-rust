@@ -74,3 +74,20 @@
   阶段即解析接口成员，跳过检查无此损失。修复方向：绑定器预填充接口成员
   符号，或检查器对未解析符号做按需 resolveTypeMembers（get_property_of_type
   已可拆 cached/lazy 两段，lazy 段待接口类型解析器就位后接入）。
+
+## skipDefaultLibCheck 后续（2026-09-06，lazy 接口解析落地后）
+
+- `get_property_of_type` 已拆为 cached（&self，原行为）+ lazy（&mut）两段：
+  cached miss 且类型符号带 InterfaceDeclaration 声明、declared_type 未缓存时，
+  按需 `resolve_interface_type_ex` 解析实例侧成员。flag 关闭下 140/300 例
+  结果集与基线零漂移（行为中性），门禁 1362/2/1010/15 全绿。
+- 该改动使 `TSOX_PROBE_SKIPLIB=1` 下 abstractClassUnionInstantiation 恢复
+  7 条诊断（与 go 基线一致）。开启 skipDefaultLibCheck 后 140 例 14s→3-4s、
+  300 例 28s→7s（check 990ms→7ms）。
+- **仍未开启 harness 默认**：300 例 flag-on 出现 1 例新分歧
+  `arrayFlatMap.ts`（@lib es2019）——lib 声明中的条件类型（FlatArray）在
+  按需解析路径下的实例化与检查路径不等价，产生假阳性 TS2345/TS2322。
+  完整开启需要按需解析对 lib 条件类型/交叉类型片段的实例化做到与检查路径
+  字节等价（约等于移植 tsgo resolveTypeMembers 的完整语义），工程量较大。
+- 现状评估：不开 flag 全量已约 11min < Go 18min；开启后预计 ~3min，
+  但须先清掉条件类型长尾。

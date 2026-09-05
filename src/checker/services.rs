@@ -189,7 +189,7 @@ impl Checker {
         if is_type_any(t) {
             return true;
         }
-        let prop = self.get_property_of_type(t, property_name);
+        let prop = self.get_property_of_type_cached(t, property_name);
         prop.is_some() && self.is_property_accessible(node, is_super, false, t, &prop.unwrap())
     }
 
@@ -415,7 +415,7 @@ impl Checker {
                     let types = containing.types().unwrap_or(&[]);
                     let mut result = Vec::new();
                     for t in types {
-                        if let Some(prop) = self.get_property_of_type(t, &symbol.name) {
+                        if let Some(prop) = self.get_property_of_type_cached(t, &symbol.name) {
                             result.push(prop);
                         }
                     }

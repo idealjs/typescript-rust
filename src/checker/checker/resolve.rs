@@ -819,7 +819,7 @@ impl Checker {
             if let crate::ast::NodeData::PropertyAccessExpression(data) = &node.data {
                 if let Some(links) = self.type_node_links.get(&data.expression) {
                     if let Some(ref t) = links.resolved_type {
-                        return self.get_property_of_type(t, data.name.text());
+                        return self.get_property_of_type_cached(t, data.name.text());
                     }
                 }
             }
