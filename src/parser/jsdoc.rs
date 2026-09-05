@@ -33,24 +33,27 @@ impl super::Parser {
         end: usize,
         full_start: usize,
     ) -> Option<Arc<Node>> {
-        let text = self.scanner.text().to_string();
-
-        if !is_jsdoc_like_text(&text[start..]) {
-            return None;
+        {
+            let text = self.scanner.text();
+            if !is_jsdoc_like_text(&text[start..]) {
+                return None;
+            }
         }
+        let last_newline = {
+            let text = self.scanner.text();
+            text[..start].rfind('\n').map(|i| i + 1).unwrap_or(0)
+        };
+        let initial_indent = start + 4 - last_newline;
 
-        let saved_scanner = self.scanner.clone();
+        let saved_scanner = self.scanner.save_state();
         let saved_token = self.token;
         let saved_diagnostics_len = self.diagnostics.len();
 
         self.scanner.set_range(start + 3, end - 2);
 
-        let last_newline = text[..start].rfind('\n').map(|i| i + 1).unwrap_or(0);
-        let initial_indent = start + 4 - last_newline;
-
         let comment = self.parse_jsdoc_comment_worker(start, end, full_start, initial_indent);
 
-        self.scanner = saved_scanner;
+        self.scanner.restore_state(saved_scanner);
         self.token = saved_token;
         self.diagnostics.truncate(saved_diagnostics_len);
 
@@ -1960,6 +1963,27 @@ fn find_full_start(text: &str, token_pos: usize) -> usize {
     i
 }
 
+thread_local! {
+    static JSDOC_PARSER: std::cell::RefCell<Option<((u64, u64, u64), super::Parser)>> =
+        const { std::cell::RefCell::new(None) };
+}
+
+fn fnv1a(bytes: &[u8], seed: u64) -> u64 {
+    let mut hash = 0xcbf29ce484222325u64 ^ seed;
+    for &byte in bytes {
+        hash ^= byte as u64;
+        hash = hash.wrapping_mul(0x100000001b3);
+    }
+    hash
+}
+
+fn jsdoc_parser_key(file_name: &str, text: &str) -> (u64, u64, u64) {
+    let bytes = text.as_bytes();
+    let head = fnv1a(&bytes[..bytes.len().min(64)], 0x9e3779b9);
+    let tail = fnv1a(&bytes[bytes.len().saturating_sub(64)..], 0x85ebca6b);
+    (fnv1a(file_name.as_bytes(), 0), (text.len() as u64) ^ head, tail)
+}
+
 pub fn parse_jsdoc_for_node(source_file: &crate::ast::SourceFile, node: &Node) -> Vec<Arc<Node>> {
     let text = &source_file.text;
     let ranges = get_jsdoc_comment_ranges(text, node);
@@ -1967,15 +1991,22 @@ pub fn parse_jsdoc_for_node(source_file: &crate::ast::SourceFile, node: &Node) -
         return Vec::new();
     }
 
-    let mut parser = super::Parser::new(text.clone());
+    let key = jsdoc_parser_key(&source_file.file_name, text);
     let mut jsdocs: Vec<Arc<Node>> = Vec::with_capacity(ranges.len());
     let mut pos = node.pos();
-    for comment in &ranges {
-        if let Some(parsed) = parser.parse_jsdoc_comment(comment.pos, comment.end, pos) {
-            pos = parsed.end();
-            jsdocs.push(parsed);
+    JSDOC_PARSER.with(|cell| {
+        let mut slot = cell.borrow_mut();
+        if slot.as_ref().map(|(k, _)| *k) != Some(key) {
+            *slot = Some((key, super::Parser::new(text.clone())));
         }
-    }
+        let parser = &mut slot.as_mut().unwrap().1;
+        for comment in &ranges {
+            if let Some(parsed) = parser.parse_jsdoc_comment(comment.pos, comment.end, pos) {
+                pos = parsed.end();
+                jsdocs.push(parsed);
+            }
+        }
+    });
     jsdocs
 }
 

@@ -301,7 +301,7 @@ pub fn token_to_string(token: SyntaxKind) -> &'static str {
 
 #[derive(Clone)]
 pub struct Scanner {
-    text: String,
+    text: std::sync::Arc<str>,
     pos: usize,
     end: usize,
     token: SyntaxKind,
@@ -354,9 +354,60 @@ pub struct ScannerOptions {
     pub skip_trivia: bool,
 }
 
+#[derive(Clone, Copy)]
+pub(crate) struct ScannerState {
+    pos: usize,
+    end: usize,
+    token: SyntaxKind,
+    token_pos: usize,
+    token_end: usize,
+    full_start_pos: usize,
+    preceding_line_break: bool,
+    has_preceding_line_break: bool,
+    binary_marker_pos: Option<usize>,
+    token_flags: TokenFlags,
+    skip_jsdoc_leading_asterisks: i32,
+    errors_len: usize,
+    comment_directives_len: usize,
+}
+
 impl Scanner {
+    pub(crate) fn save_state(&self) -> ScannerState {
+        ScannerState {
+            pos: self.pos,
+            end: self.end,
+            token: self.token,
+            token_pos: self.token_pos,
+            token_end: self.token_end,
+            full_start_pos: self.full_start_pos,
+            preceding_line_break: self.preceding_line_break,
+            has_preceding_line_break: self.has_preceding_line_break,
+            binary_marker_pos: self.binary_marker_pos,
+            token_flags: self.token_flags,
+            skip_jsdoc_leading_asterisks: self.skip_jsdoc_leading_asterisks,
+            errors_len: self.errors.len(),
+            comment_directives_len: self.comment_directives.len(),
+        }
+    }
+
+    pub(crate) fn restore_state(&mut self, state: ScannerState) {
+        self.pos = state.pos;
+        self.end = state.end;
+        self.token = state.token;
+        self.token_pos = state.token_pos;
+        self.token_end = state.token_end;
+        self.full_start_pos = state.full_start_pos;
+        self.preceding_line_break = state.preceding_line_break;
+        self.has_preceding_line_break = state.has_preceding_line_break;
+        self.binary_marker_pos = state.binary_marker_pos;
+        self.token_flags = state.token_flags;
+        self.skip_jsdoc_leading_asterisks = state.skip_jsdoc_leading_asterisks;
+        self.errors.truncate(state.errors_len);
+        self.comment_directives.truncate(state.comment_directives_len);
+    }
+
     pub fn new(text: impl Into<String>) -> Self {
-        let text = text.into();
+        let text: std::sync::Arc<str> = std::sync::Arc::from(text.into());
         let len = text.len();
         Self {
             text,
