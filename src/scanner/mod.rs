@@ -570,6 +570,52 @@ impl Scanner {
                 break self.token;
             }
 
+            let b = self.text.as_bytes()[self.pos];
+
+            // ASCII fast path: dispatch on the raw byte; non-ASCII falls
+            // through to the char decode below.
+            if b < 128 {
+                match b {
+                    b' ' | b'\t' | b'\n' | b'\r' | 0x0B | 0x0C => {
+                        self.scan_whitespace();
+                        continue;
+                    }
+                    b'/' => {
+                        let next = *self.text.as_bytes().get(self.pos + 1).unwrap_or(&0);
+                        if next == b'/' {
+                            let comment_start = self.pos;
+                            self.scan_single_line_comment();
+                            self.process_comment_directive(comment_start, self.pos, false);
+                            continue;
+                        }
+                        if next == b'*' {
+                            let comment_start = self.pos;
+                            self.scan_multi_line_comment();
+                            self.process_comment_directive(comment_start, self.pos, true);
+                            continue;
+                        }
+                    }
+                    b'a'..=b'z' | b'A'..=b'Z' | b'_' | b'$' => {
+                        break self.scan_identifier();
+                    }
+                    b'0'..=b'9' => {
+                        break self.scan_number();
+                    }
+                    b'.' if self.pos + 1 < self.end
+                        && self.text.as_bytes()[self.pos + 1].is_ascii_digit() =>
+                    {
+                        break self.scan_number();
+                    }
+                    b'"' | b'\'' => {
+                        break self.scan_string(b as char);
+                    }
+                    b'`' => {
+                        break self.scan_template();
+                    }
+                    _ => {}
+                }
+            }
+
             let c = self.text[self.pos..].chars().next().unwrap();
 
             if is_whitespace(c) {
@@ -709,45 +755,52 @@ impl Scanner {
     }
 
     fn scan_whitespace(&mut self) {
-
+        let bytes = self.text.as_bytes();
         while self.pos < self.end {
+            let b = bytes[self.pos];
+            if b == b' ' || b == b'\t' || b == 0x0B || b == 0x0C {
+                self.pos += 1;
+                continue;
+            }
+            if b == b'\n' || b == b'\r' {
+                self.preceding_line_break = true;
+                self.pos += 1;
+                continue;
+            }
+            if b < 128 {
+                break;
+            }
             let c = self.text[self.pos..].chars().next().unwrap();
             if !is_whitespace(c) {
                 break;
-            }
-            if c == '\n' || c == '\r' {
-                self.preceding_line_break = true;
             }
             self.pos += c.len_utf8();
         }
     }
 
     fn scan_single_line_comment(&mut self) {
-
-        self.pos += 2;
-        while self.pos < self.end {
-            let c = self.text.as_bytes()[self.pos] as char;
-            if c == '\n' || c == '\r' {
+        let bytes = self.text.as_bytes();
+        let mut p = self.pos + 2;
+        while p < self.end {
+            let b = bytes[p];
+            if b == b'\n' || b == b'\r' {
                 break;
             }
-            self.pos += 1;
+            p += 1;
         }
+        self.pos = p;
     }
 
     fn scan_multi_line_comment(&mut self) {
-
+        let bytes = self.text.as_bytes();
         self.pos += 2;
 
         let is_jsdoc = self.pos < self.end
-            && self.text.as_bytes()[self.pos] as char == '*'
-            && (self.pos + 1 >= self.end || self.text.as_bytes()[self.pos + 1] as char != '/');
+            && bytes[self.pos] == b'*'
+            && (self.pos + 1 >= self.end || bytes[self.pos + 1] != b'/');
         let comment_start = self.token_pos;
-        while self.pos < self.end {
-            let c = self.text.as_bytes()[self.pos] as char;
-            if c == '*'
-                && self.pos + 1 < self.end
-                && self.text.as_bytes()[self.pos + 1] as char == '/'
-            {
+        while self.pos + 1 < self.end {
+            if bytes[self.pos] == b'*' && bytes[self.pos + 1] == b'/' {
                 self.pos += 2;
                 if is_jsdoc {
                     self.token_flags |= TOKEN_FLAGS_PRECEDING_JSDOC_COMMENT;
@@ -756,12 +809,12 @@ impl Scanner {
                 }
                 return;
             }
-            if c == '\n' || c == '\r' {
+            if bytes[self.pos] == b'\n' || bytes[self.pos] == b'\r' {
                 self.preceding_line_break = true;
             }
             self.pos += 1;
         }
-
+        self.pos = self.end;
         if is_jsdoc {
             self.token_flags |= TOKEN_FLAGS_PRECEDING_JSDOC_COMMENT;
             let comment_text = &self.text[comment_start..self.pos];
@@ -772,8 +825,22 @@ impl Scanner {
     fn scan_identifier(&mut self) -> SyntaxKind {
         let start = self.pos;
 
-        let first_c = self.text[self.pos..].chars().next().unwrap();
-        self.pos += first_c.len_utf8();
+        let bytes = self.text.as_bytes();
+        let first_b = bytes[self.pos];
+        if first_b < 128 {
+            self.pos += 1;
+            while self.pos < self.end {
+                let b = bytes[self.pos];
+                if b.is_ascii_alphanumeric() || b == b'_' || b == b'$' {
+                    self.pos += 1;
+                } else {
+                    break;
+                }
+            }
+        } else {
+            let first_c = self.text[self.pos..].chars().next().unwrap();
+            self.pos += first_c.len_utf8();
+        }
         while self.pos < self.end {
             let c = self.text[self.pos..].chars().next().unwrap();
             if !is_identifier_part(c) {

@@ -19,3 +19,15 @@
 ## 风险
 
 - [`known-risks.md`](./known-risks.md) — 四项已识别风险与缓解状态。
+
+## 非确定性（高优先）
+
+- **run-to-run 结果翻转**：`allowSyntheticDefaultImports9.ts` 等用例在同一二进制上
+  多次运行结果不一致（通过/不一致翻转）。头号嫌疑：checker 中以 `Arc` 指针值
+  为键的缓存（interface_instantiation_cache / attached_type_args_cache 等）
+  存在 ABA 问题——进程间分配布局不同导致偶发错命中。
+  部分缓存已做"值钉住"防护（见 git history「三缓存 ABA 钉住」），未覆盖全部。
+  影响：任何单次运行的结果都不可作为最终判定；sweep 的 FAIL/通过都可能翻转。
+  修复方向：①为所有指针键缓存补充"值等价"校验或改用内容键
+  ②排查无锁单线程下的迭代顺序依赖（HashMap 随机种子逐进程不同）。
+

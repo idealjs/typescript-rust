@@ -1,5 +1,5 @@
 use std::collections::HashMap;
-use std::sync::Arc;
+use std::sync::{Arc, Mutex};
 
 use crate::ast::NodeSymbolMap;
 use crate::ast::ScriptKind;
@@ -852,8 +852,38 @@ fn read_and_parse(
         .fs()
         .read_file(file_name)
         .ok_or_else(|| format!("Cannot read file '{file_name}'."))?;
-    let (file, diags) = Parser::parse_source_file_text_with_diagnostics(file_name, text);
-    Ok((Arc::new(file), diags))
+    read_and_parse_text(file_name, text)
+}
+
+fn cached_parse(
+    file_name: &str,
+    text: &str,
+) -> (Arc<SourceFile>, Vec<crate::parser::ParserDiagnostic>) {
+    static CACHE: std::sync::OnceLock<Mutex<HashMap<(String, u64), (Arc<SourceFile>, Vec<crate::parser::ParserDiagnostic>)>>> =
+        std::sync::OnceLock::new();
+    let cache = CACHE.get_or_init(|| Mutex::new(HashMap::new()));
+    use std::hash::{Hash, Hasher};
+    let mut hasher = std::collections::hash_map::DefaultHasher::new();
+    text.hash(&mut hasher);
+    let key = (file_name.to_string(), hasher.finish());
+    if let Some(hit) = cache.lock().unwrap().get(&key) {
+        return (Arc::clone(&hit.0), hit.1.clone());
+    }
+    let (file, diags) = Parser::parse_source_file_text_with_diagnostics(file_name, text.to_string());
+    let file = Arc::new(file);
+    cache
+        .lock()
+        .unwrap()
+        .insert(key, (Arc::clone(&file), diags.clone()));
+    (file, diags)
+}
+
+fn read_and_parse_text(
+    file_name: &str,
+    text: String,
+) -> Result<(Arc<SourceFile>, Vec<crate::parser::ParserDiagnostic>), String> {
+    let (file, diags) = cached_parse(file_name, &text);
+    Ok((file, diags))
 }
 
 fn load_source_file(
@@ -1082,8 +1112,7 @@ fn load_lib_recursive(
         );
     }
 
-    let (file, parse_diags) = Parser::parse_source_file_text_with_diagnostics(&path, text);
-    let file = Arc::new(file);
+    let (file, parse_diags) = cached_parse(&path, &text);
     for pd in &parse_diags {
         diagnostics.push(Arc::new(parser_diagnostic_to_diagnostic(
             Arc::clone(&file),
