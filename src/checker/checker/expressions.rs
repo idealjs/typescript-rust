@@ -3,16 +3,16 @@ use std::sync::Arc;
 use crate::ast::{
     ModifierFlags, Node, SymbolFlags, SyntaxKind,
 };
-use crate::diagnostics::messages_generated::{
-    CANNOT_ASSIGN_TO_0_BECAUSE_IT_IS_A_CONSTANT,
-    CANNOT_ASSIGN_TO_0_BECAUSE_IT_IS_A_READ_ONLY_PROPERTY,
-    CANNOT_CREATE_AN_INSTANCE_OF_AN_ABSTRACT_CLASS, CANNOT_FIND_NAME_0,
-    THIS_COMPARISON_APPEARS_TO_BE_UNINTENTIONAL_BECAUSE_THE_TYPES_0_AND_1_HAVE_NO_OVERLAP,
-    TYPE_0_IS_NOT_ASSIGNABLE_TO_TYPE_1,
-};
+use crate::diagnostics::messages_generated::*;
+
+
+
+
+
 
 
 use super::*;
+
 
 impl Checker {
     pub fn check_expression(&mut self, node: &Arc<Node>) {

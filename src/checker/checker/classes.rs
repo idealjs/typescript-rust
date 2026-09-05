@@ -4,16 +4,17 @@ use std::sync::Arc;
 use crate::ast::{
     ModifierFlags, Node, NodeList, Symbol, SymbolFlags, SymbolTable, SyntaxKind,
 };
-use crate::diagnostics::messages_generated::{
-    A_FUNCTION_WHOSE_DECLARED_TYPE_IS_NEITHER_UNDEFINED_VOID_NOR_ANY_MUST_RETURN_A_VALUE,
-    FUNCTION_LACKS_ENDING_RETURN_STATEMENT_AND_RETURN_TYPE_DOES_NOT_INCLUDE_UNDEFINED,
-    PROPERTY_0_HAS_NO_INITIALIZER_AND_IS_NOT_DEFINITELY_ASSIGNED_IN_THE_CONSTRUCTOR,
-    TYPE_0_IS_NOT_ASSIGNABLE_TO_TYPE_1,
-};
+use crate::diagnostics::messages_generated::*;
 
 use crate::checker::types::*;
 
+
+
+
+
+
 use super::*;
+
 
 impl Checker {
     pub(crate) fn check_class_member(&mut self, node: &Arc<Node>) {

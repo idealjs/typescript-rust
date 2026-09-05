@@ -4,15 +4,16 @@ use crate::ast::{
     ModifierFlags, Node, NodeData,
     NodeFlags, SymbolFlags, SyntaxKind,
 };
-use crate::diagnostics::messages_generated::{
-    A_FUNCTION_WHOSE_DECLARED_TYPE_IS_NEITHER_UNDEFINED_VOID_NOR_ANY_MUST_RETURN_A_VALUE,
-    FUNCTION_LACKS_ENDING_RETURN_STATEMENT_AND_RETURN_TYPE_DOES_NOT_INCLUDE_UNDEFINED,
-    OBJECT_LITERAL_MAY_ONLY_SPECIFY_KNOWN_PROPERTIES_AND_0_DOES_NOT_EXIST_IN_TYPE_1,
-    TYPE_0_IS_NOT_ASSIGNABLE_TO_TYPE_1, UNREACHABLE_CODE_DETECTED,
-};
+use crate::diagnostics::messages_generated::*;
+
+
+
+
+
 
 
 use super::*;
+
 
 impl Checker {
     pub fn check_statement(&mut self, node: &Arc<Node>) {
