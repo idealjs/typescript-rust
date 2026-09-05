@@ -50,7 +50,7 @@ for r in csv.reader(open('/tmp/gostd/go_configs.csv')):
     res = "通过" if actual == expect else "不一致"
     if status.startswith('skip-config') or status == 'error-case':
         res, d = "跳过", note
-    go[(suite, case, ckey(cfg))] = (res, ud(expect, actual) if res == "不一致" else (d if res == "跳过" else "一致"))
+    go[(suite, case, ckey(cfg))] = (res, ud(expect, actual) if res == "不一致" else (d if res == "跳过" else "一致"), actual)
 
 # ---- rust rows: header [status, suite, case, config, note, actual] ----
 ru = {}
@@ -67,32 +67,36 @@ for r in csv.DictReader(open('/tmp/gostd/rust_configs.csv')):
     res = "通过" if actual == expect else "不一致"
     if st == 'rust-skip':
         res, d = "跳过", r['note']
-    ru[(suite, case, ckey(cfg))] = (res, ud(expect, actual) if res == "不一致" else (d if res == "跳过" else "一致"))
+    ru[(suite, case, ckey(cfg))] = (res, ud(expect, actual) if res == "不一致" else (d if res == "跳过" else "一致"), actual)
 
 # ---- merge ----
 all_keys = sorted(set(go) | set(ru), key=lambda k: (k[0], k[1], sorted(k[2])))
 rows = []
 gn = rn = both = 0
 for (suite, case, ck) in all_keys:
-    g = go.get((suite, case, ck), ("未运行", "—"))
-    r = ru.get((suite, case, ck), ("未运行", "—"))
+    g = go.get((suite, case, ck), ("未运行", "—", "", ""))
+    r = ru.get((suite, case, ck), ("未运行", "—", "", ""))
     if g[0] != "未运行": gn += 1
     if r[0] != "未运行": rn += 1
     if g[0] != "未运行" and r[0] != "未运行": both += 1
     suffix = ",".join(sorted(x.split('=')[0] + '=' + x.split('=', 1)[1] if '=' in x else x for x in ck)) if ck else ""
     loc = f"{suite}/{case}" + (f" [{suffix}]" if suffix else "")
-    rows.append([suite, case, suffix, g[0], g[1], r[0], r[1]])
+    if g[0] in ("通过", "不一致") and r[0] in ("通过", "不一致"):
+        same = "相同" if g[2] == r[2] else "不同"
+    else:
+        same = "—"
+    rows.append([suite, case, suffix, g[0], g[1], r[0], r[1], same])
+
+import collections
+c = collections.Counter((rr[3], rr[5], rr[7]) for rr in rows)
 
 out = '/tmp/gostd/test_matrix.csv'
 with open(out, 'w', newline='', encoding='utf-8-sig') as f:
     w = csv.writer(f)
-    w.writerow(["测试编号", "文件位置", "go测试结果", "go测试预期差异", "rust测试结果", "rust测试预期差异"])
-    for i, (suite, case, suffix, gres, gdiff, rres, rdiff) in enumerate(rows, 1):
-        loc = f"{suite}/{case}" + (f" [{suffix}]" if suffix else "")
-        w.writerow([f"T{i:05d}", loc, gres, gdiff, rres, rdiff])
+    w.writerow(["测试编号", "文件位置", "go测试结果", "go测试预期差异", "rust测试结果", "rust测试预期差异", "双方预期差异是否相同"])
+    for i, (suite, case, suffix, gres, gdiff, rres, rdiff, same) in enumerate(rows, 1):
+        w.writerow([f"T{i:05d}", loc, gres, gdiff, rres, rdiff, same])
 
-import collections
-c = collections.Counter((rr[3], rr[5]) for rr in rows)
 print(f"rows={len(rows)}  go-ran={gn}  rust-ran={rn}  both-ran={both}")
-for k, v in c.most_common(10): print(" ", k, v)
-print(out)
+print(f"-> {out}")
+for k, v in c.most_common(12): print(" ", k, v)
