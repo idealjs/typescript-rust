@@ -375,7 +375,7 @@ fn process_case(content: &str, basename: &str) -> Vec<ConfigOutcome> {
         Ok(configs) => configs
             .into_iter()
             .map(|(suffix, config_settings)| {
-                let (compiler_options, unrecognized) = match &tsconfig {
+                let (mut compiler_options, unrecognized) = match &tsconfig {
                     Some((parsed_config, config_path)) => {
                         let (mut opts, unrec) = tsox::tsoptions::apply_test_settings_with_base(
                             &config_settings,
@@ -389,6 +389,9 @@ fn process_case(content: &str, basename: &str) -> Vec<ConfigOutcome> {
                     }
                     None => apply_test_settings(&config_settings),
                 };
+                if std::env::var_os("TSOX_PROBE_SKIPLIB").is_some() {
+                    compiler_options.skip_default_lib_check = tsox::core::tristate::Tristate::True;
+                }
                 if std::env::var_os("TSOX_DEBUG_OPTIONS").is_some() {
                     eprintln!(
                         "[opts] module={:?} modres={:?} target={:?} decl={} out={} jsxisrc={:?} nia={:?} strict={:?}",
@@ -472,7 +475,11 @@ fn run_case(
         .env("TSOX_SUBMODULE_OUT", &out_path)
         .stdin(Stdio::null())
         .stdout(Stdio::null())
-        .stderr(Stdio::null())
+        .stderr(if std::env::var_os("TSOX_PROBE_PHASES").is_some() {
+            Stdio::inherit()
+        } else {
+            Stdio::null()
+        })
         .spawn();
     let status = worker
         .map(|mut child| {
@@ -1135,7 +1142,9 @@ fn build_and_check(
     config.compiler_options = options.clone();
     config.file_names = file_names;
 
+    let t_program = std::time::Instant::now();
     let program = Arc::new(Program::new(ProgramOptions { config, host }));
+    let program_elapsed = t_program.elapsed();
     if std::env::var_os("TSOX_DEBUG_FILES").is_some() {
         eprintln!(
             "[files] refs_only={} roots={}",
@@ -1158,11 +1167,27 @@ fn build_and_check(
         );
     }
 
+    let t_check = std::time::Instant::now();
     let mut all = Vec::new();
     for d in program.diagnostics() {
         all.push((**d).clone());
     }
     all.extend(program.get_semantic_diagnostics());
+    let check_elapsed = t_check.elapsed();
+    if let Some(path) = std::env::var_os("TSOX_PROBE_PHASES") {
+        use std::io::Write as _;
+        let mut f = std::fs::OpenOptions::new()
+            .create(true)
+            .append(true)
+            .open(path)
+            .unwrap();
+        writeln!(
+            f,
+            "program_build={:?} check={:?}",
+            program_elapsed, check_elapsed
+        )
+        .ok();
+    }
     all
 }
 

@@ -56,3 +56,21 @@
 - Go 参照（同批 140 文件，tsgo runner `-parallel 20` + GOMAXPROCS=20）：**6s**；
   Rust debug：JOBS=8=89s / JOBS=20=149s（50 例撞 30s 超时记 SKIP，骤降复现）。
 
+
+## 剩余 ~2× 差距的定位（2026-09-06，分配架构修复 ec405ae 之后）
+
+- 分配架构修复后：lib.dom 解析 1.47s→158ms（9.3×），单例分配流量 51GB→29MB，
+  140 例 JOBS=8 89s→22s、JOBS=20 149s→14s（0 超时，并行恢复扩展），
+  全量 compiler 套件 66.6min→约 11min（20 worker 折算，跑到 99% 手动中止）。
+- **新瓶颈=检查器固定地板**：worker 单例相位计时（TSOX_PROBE_PHASES）
+  program_build=292ms / check=990ms / 其他≈20ms，与用例难度无关——check 的
+  99.7% 花在检查整个 lib bundle 上（harness 未开 skipDefaultLibCheck）；
+  临时开启实测 check 990ms→2.9ms。
+- **开启 skipDefaultLibCheck 的真正前置**：绑定器没有为接口声明预填充成员
+  符号——globals 合并后的 `Array` 符号 members 仅 `{T, ""}`，完整实例侧成员
+  （map/filter/…）在"检查该 lib 文件"时才经 type_alias_links.declared_type
+  解析并缓存。跳过检查后 `[...].map` 属性解析失败→回调参数上下文类型退化为
+  any→TS2511 丢失（abstractClassUnionInstantiation）。tsgo 的 binder 在绑定
+  阶段即解析接口成员，跳过检查无此损失。修复方向：绑定器预填充接口成员
+  符号，或检查器对未解析符号做按需 resolveTypeMembers（get_property_of_type
+  已可拆 cached/lazy 两段，lazy 段待接口类型解析器就位后接入）。
