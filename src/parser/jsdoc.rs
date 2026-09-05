@@ -13,14 +13,14 @@ enum JSDocState {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-struct PropertyLikeParse(u8);
+pub(crate) struct PropertyLikeParse(u8);
 
 impl PropertyLikeParse {
     const PROPERTY: u8 = 1;
     const PARAMETER: u8 = 2;
     const CALLBACK_PARAMETER: u8 = 4;
 
-    fn contains(self, flag: u8) -> bool {
+    pub(crate) fn contains(self, flag: u8) -> bool {
         self.0 & flag != 0
     }
 }
@@ -57,7 +57,7 @@ impl super::Parser {
         Some(comment)
     }
 
-    fn parse_jsdoc_comment_worker(
+    pub(crate) fn parse_jsdoc_comment_worker(
         &mut self,
         start: usize,
         end: usize,
@@ -287,7 +287,7 @@ impl super::Parser {
         Arc::new(jsdoc)
     }
 
-    fn finish_jsdoc_text(&self, comments: &[String], pos: usize, end: usize) -> Arc<Node> {
+    pub(crate) fn finish_jsdoc_text(&self, comments: &[String], pos: usize, end: usize) -> Arc<Node> {
         Arc::new(Node::with_loc(
             SyntaxKind::JSDocText,
             NodeData::JSDocText(JSDocTextData {
@@ -300,17 +300,17 @@ impl super::Parser {
 
 impl super::Parser {
 
-    fn next_token_jsdoc(&mut self) -> SyntaxKind {
+    pub(crate) fn next_token_jsdoc(&mut self) -> SyntaxKind {
         self.token = self.scanner.scan_jsdoc_token();
         self.token
     }
 
-    fn next_jsdoc_comment_text_token(&mut self, in_backticks: bool) -> SyntaxKind {
+    pub(crate) fn next_jsdoc_comment_text_token(&mut self, in_backticks: bool) -> SyntaxKind {
         self.token = self.scanner.scan_jsdoc_comment_text_token(in_backticks);
         self.token
     }
 
-    fn parse_optional_jsdoc(&mut self, kind: SyntaxKind) -> bool {
+    pub(crate) fn parse_optional_jsdoc(&mut self, kind: SyntaxKind) -> bool {
         if self.token == kind {
             self.next_token_jsdoc();
             true
@@ -319,13 +319,13 @@ impl super::Parser {
         }
     }
 
-    fn parse_expected_jsdoc(&mut self, kind: SyntaxKind) {
+    pub(crate) fn parse_expected_jsdoc(&mut self, kind: SyntaxKind) {
         if !self.parse_optional_jsdoc(kind) {
             self.parse_error_at_current_token(diagnostics::X_0_EXPECTED, &[token_to_string(kind)]);
         }
     }
 
-    fn parse_expected_token_jsdoc(&mut self, kind: SyntaxKind) -> Arc<Node> {
+    pub(crate) fn parse_expected_token_jsdoc(&mut self, kind: SyntaxKind) -> Arc<Node> {
         if self.token == kind {
             let node = self.create_token_node_jsdoc();
             self.next_token_jsdoc();
@@ -336,7 +336,7 @@ impl super::Parser {
         }
     }
 
-    fn create_token_node_jsdoc(&self) -> Arc<Node> {
+    pub(crate) fn create_token_node_jsdoc(&self) -> Arc<Node> {
         Arc::new(Node::with_loc(
             self.token,
             NodeData::Token,
@@ -344,7 +344,7 @@ impl super::Parser {
         ))
     }
 
-    fn create_missing_node(&self, kind: SyntaxKind, pos: usize, end: usize) -> Arc<Node> {
+    pub(crate) fn create_missing_node(&self, kind: SyntaxKind, pos: usize, end: usize) -> Arc<Node> {
         Arc::new(Node::with_loc(
             kind,
             NodeData::Token,
@@ -355,7 +355,7 @@ impl super::Parser {
 
 impl super::Parser {
 
-    fn parse_tag(&mut self, margin: usize) -> Arc<Node> {
+    pub(crate) fn parse_tag(&mut self, margin: usize) -> Arc<Node> {
         debug_assert_eq!(self.token, SyntaxKind::AtToken);
         let start = self.token_pos();
         self.next_token_jsdoc();
@@ -426,7 +426,7 @@ impl super::Parser {
         tag
     }
 
-    fn parse_simple_tag(
+    pub(crate) fn parse_simple_tag(
         &mut self,
         start: usize,
         tag_name: Arc<Node>,
@@ -467,7 +467,7 @@ impl super::Parser {
         Arc::new(Node::with_loc(kind, data, TextRange::new(start, end)))
     }
 
-    fn parse_deprecated_tag(
+    pub(crate) fn parse_deprecated_tag(
         &mut self,
         start: usize,
         tag_name: Arc<Node>,
@@ -491,7 +491,7 @@ impl super::Parser {
         ))
     }
 
-    fn parse_unknown_tag(
+    pub(crate) fn parse_unknown_tag(
         &mut self,
         start: usize,
         tag_name: Arc<Node>,
@@ -515,7 +515,7 @@ impl super::Parser {
         ))
     }
 
-    fn parse_return_tag(
+    pub(crate) fn parse_return_tag(
         &mut self,
         start: usize,
         tag_name: Arc<Node>,
@@ -543,7 +543,7 @@ impl super::Parser {
         ))
     }
 
-    fn parse_type_tag(
+    pub(crate) fn parse_type_tag(
         &mut self,
         start: usize,
         tag_name: Arc<Node>,
@@ -577,7 +577,7 @@ impl super::Parser {
         ))
     }
 
-    fn parse_this_tag(
+    pub(crate) fn parse_this_tag(
         &mut self,
         start: usize,
         tag_name: Arc<Node>,
@@ -604,7 +604,7 @@ impl super::Parser {
         ))
     }
 
-    fn parse_satisfies_tag(
+    pub(crate) fn parse_satisfies_tag(
         &mut self,
         start: usize,
         tag_name: Arc<Node>,
@@ -630,7 +630,7 @@ impl super::Parser {
         ))
     }
 
-    fn parse_throws_tag(
+    pub(crate) fn parse_throws_tag(
         &mut self,
         start: usize,
         tag_name: Arc<Node>,
@@ -658,7 +658,7 @@ impl super::Parser {
         ))
     }
 
-    fn parse_see_tag(
+    pub(crate) fn parse_see_tag(
         &mut self,
         start: usize,
         tag_name: Arc<Node>,
@@ -706,7 +706,7 @@ impl super::Parser {
         ))
     }
 
-    fn parse_implements_tag(
+    pub(crate) fn parse_implements_tag(
         &mut self,
         start: usize,
         tag_name: Arc<Node>,
@@ -732,7 +732,7 @@ impl super::Parser {
         ))
     }
 
-    fn parse_augments_tag(
+    pub(crate) fn parse_augments_tag(
         &mut self,
         start: usize,
         tag_name: Arc<Node>,
@@ -758,7 +758,7 @@ impl super::Parser {
         ))
     }
 
-    fn parse_parameter_or_property_tag(
+    pub(crate) fn parse_parameter_or_property_tag(
         &mut self,
         start: usize,
         tag_name: Arc<Node>,
@@ -811,7 +811,7 @@ impl super::Parser {
         ))
     }
 
-    fn parse_template_tag(
+    pub(crate) fn parse_template_tag(
         &mut self,
         start: usize,
         tag_name: Arc<Node>,
@@ -846,7 +846,7 @@ impl super::Parser {
         ))
     }
 
-    fn parse_template_tag_type_parameters(&mut self) -> Arc<NodeList> {
+    pub(crate) fn parse_template_tag_type_parameters(&mut self) -> Arc<NodeList> {
         let pos = self.token_pos();
         let mut params = Vec::new();
         loop {
@@ -863,7 +863,7 @@ impl super::Parser {
         })
     }
 
-    fn parse_template_tag_type_parameter(&mut self) -> Arc<Node> {
+    pub(crate) fn parse_template_tag_type_parameter(&mut self) -> Arc<Node> {
         let pos = self.token_pos();
 
         let modifiers = if self.token == SyntaxKind::ConstKeyword {
@@ -906,7 +906,7 @@ impl super::Parser {
         ))
     }
 
-    fn parse_typedef_tag(
+    pub(crate) fn parse_typedef_tag(
         &mut self,
         start: usize,
         tag_name: Arc<Node>,
@@ -934,7 +934,7 @@ impl super::Parser {
         ))
     }
 
-    fn parse_callback_tag(
+    pub(crate) fn parse_callback_tag(
         &mut self,
         start: usize,
         tag_name: Arc<Node>,
@@ -961,7 +961,7 @@ impl super::Parser {
         ))
     }
 
-    fn parse_overload_tag(
+    pub(crate) fn parse_overload_tag(
         &mut self,
         start: usize,
         tag_name: Arc<Node>,
@@ -983,7 +983,7 @@ impl super::Parser {
         ))
     }
 
-    fn parse_jsdoc_signature(&mut self, start: usize, indent: usize) -> Arc<Node> {
+    pub(crate) fn parse_jsdoc_signature(&mut self, start: usize, indent: usize) -> Arc<Node> {
         let parameters = self.parse_callback_tag_parameters(indent);
         let return_tag = if self.parse_optional_jsdoc(SyntaxKind::AtToken) {
             let tag = self.parse_tag(indent);
@@ -1010,7 +1010,7 @@ impl super::Parser {
         ))
     }
 
-    fn parse_callback_tag_parameters(&mut self, indent: usize) -> Arc<NodeList> {
+    pub(crate) fn parse_callback_tag_parameters(&mut self, indent: usize) -> Arc<NodeList> {
         let pos = self.token_pos();
         let mut params = Vec::new();
         loop {
@@ -1038,7 +1038,7 @@ impl super::Parser {
         })
     }
 
-    fn parse_import_tag(
+    pub(crate) fn parse_import_tag(
         &mut self,
         start: usize,
         tag_name: Arc<Node>,
@@ -1074,7 +1074,7 @@ impl super::Parser {
 
 impl super::Parser {
 
-    fn parse_jsdoc_type_expression(&mut self, may_omit_braces: bool) -> Arc<Node> {
+    pub(crate) fn parse_jsdoc_type_expression(&mut self, may_omit_braces: bool) -> Arc<Node> {
         let pos = self.token_pos();
         let has_brace = if may_omit_braces {
             self.parse_optional(SyntaxKind::OpenBraceToken)
@@ -1105,7 +1105,7 @@ impl super::Parser {
         ))
     }
 
-    fn parse_jsdoc_type(&mut self) -> Arc<Node> {
+    pub(crate) fn parse_jsdoc_type(&mut self) -> Arc<Node> {
         let pos = self.token_pos();
         let t = match self.token {
             SyntaxKind::AsteriskToken => {
@@ -1162,7 +1162,7 @@ impl super::Parser {
         }
     }
 
-    fn try_parse_type_expression(&mut self) -> Option<Arc<Node>> {
+    pub(crate) fn try_parse_type_expression(&mut self) -> Option<Arc<Node>> {
         self.skip_whitespace_or_asterisk();
         if self.token == SyntaxKind::OpenBraceToken {
             Some(self.parse_jsdoc_type_expression(false))
@@ -1171,7 +1171,7 @@ impl super::Parser {
         }
     }
 
-    fn parse_type_arguments_of_type_node(&mut self) -> Arc<NodeList> {
+    pub(crate) fn parse_type_arguments_of_type_node(&mut self) -> Arc<NodeList> {
         let pos = self.token_pos();
         self.parse_expected_jsdoc(SyntaxKind::LessThanToken);
         let mut types: Vec<Arc<Node>> = Vec::new();
@@ -1191,7 +1191,7 @@ impl super::Parser {
         })
     }
 
-    fn parse_expression_with_type_arguments_for_augments(&mut self) -> Arc<Node> {
+    pub(crate) fn parse_expression_with_type_arguments_for_augments(&mut self) -> Arc<Node> {
         let pos = self.token_pos();
         let has_brace = self.parse_optional_jsdoc(SyntaxKind::OpenBraceToken);
         let expression = self.parse_property_access_entity_name_expression();
@@ -1229,7 +1229,7 @@ impl super::Parser {
         ))
     }
 
-    fn parse_property_access_entity_name_expression(&mut self) -> Arc<Node> {
+    pub(crate) fn parse_property_access_entity_name_expression(&mut self) -> Arc<Node> {
         let mut node = self.parse_jsdoc_identifier_name(None);
         while self.parse_optional_jsdoc(SyntaxKind::DotToken) {
             let name = self.parse_jsdoc_identifier_name(None);
@@ -1251,7 +1251,7 @@ impl super::Parser {
 
 impl super::Parser {
 
-    fn parse_jsdoc_identifier_name(&mut self, diagnostic: Option<Message>) -> Arc<Node> {
+    pub(crate) fn parse_jsdoc_identifier_name(&mut self, diagnostic: Option<Message>) -> Arc<Node> {
         if !self.is_identifier() {
             if let Some(msg) = diagnostic {
                 self.parse_error_at_current_token(msg, &[]);
@@ -1276,7 +1276,7 @@ impl super::Parser {
         ))
     }
 
-    fn parse_jsdoc_entity_name(&mut self, diagnostic: Option<Message>) -> Arc<Node> {
+    pub(crate) fn parse_jsdoc_entity_name(&mut self, diagnostic: Option<Message>) -> Arc<Node> {
         let mut node = self.parse_jsdoc_identifier_name(diagnostic);
         while self.parse_optional_jsdoc(SyntaxKind::DotToken) {
             let right = self.parse_jsdoc_identifier_name(diagnostic);
@@ -1294,7 +1294,7 @@ impl super::Parser {
         node
     }
 
-    fn parse_jsdoc_name_reference(&mut self) -> Arc<Node> {
+    pub(crate) fn parse_jsdoc_name_reference(&mut self) -> Arc<Node> {
         let pos = self.token_pos();
         let has_brace = self.parse_optional_jsdoc(SyntaxKind::OpenBraceToken);
         let entity_name = self.parse_jsdoc_link_name();
@@ -1313,7 +1313,7 @@ impl super::Parser {
         ))
     }
 
-    fn parse_jsdoc_link_name(&mut self) -> Arc<Node> {
+    pub(crate) fn parse_jsdoc_link_name(&mut self) -> Arc<Node> {
         if !is_identifier_or_keyword_token(self.token) {
             return self.create_missing_node(
                 SyntaxKind::Identifier,
@@ -1365,7 +1365,7 @@ impl super::Parser {
         node
     }
 
-    fn parse_jsdoc_type_name_with_namespace(&mut self, nested: bool) -> Option<Arc<Node>> {
+    pub(crate) fn parse_jsdoc_type_name_with_namespace(&mut self, nested: bool) -> Option<Arc<Node>> {
         if !is_identifier_or_keyword_token(self.token) {
             return None;
         }
@@ -1392,7 +1392,7 @@ impl super::Parser {
         Some(node)
     }
 
-    fn parse_bracket_name_in_property_and_param_tag(
+    pub(crate) fn parse_bracket_name_in_property_and_param_tag(
         &mut self,
         target: PropertyLikeParse,
     ) -> (Arc<Node>, bool) {
@@ -1429,7 +1429,7 @@ impl super::Parser {
 
 impl super::Parser {
 
-    fn parse_jsdoc_link(&mut self, start: usize) -> Option<Arc<Node>> {
+    pub(crate) fn parse_jsdoc_link(&mut self, start: usize) -> Option<Arc<Node>> {
         let saved_scanner = self.scanner.clone();
         let saved_token = self.token;
 
@@ -1503,7 +1503,7 @@ impl super::Parser {
         )))
     }
 
-    fn parse_jsdoc_link_prefix(&mut self) -> (String, bool) {
+    pub(crate) fn parse_jsdoc_link_prefix(&mut self) -> (String, bool) {
         self.skip_whitespace_or_asterisk();
         if self.token != SyntaxKind::OpenBraceToken {
             return ("NONE".to_string(), false);
@@ -1528,7 +1528,7 @@ impl super::Parser {
 
 impl super::Parser {
 
-    fn parse_trailing_tag_comments(
+    pub(crate) fn parse_trailing_tag_comments(
         &mut self,
         pos: usize,
         end: usize,
@@ -1548,7 +1548,7 @@ impl super::Parser {
         self.parse_tag_comments(margin, initial_margin)
     }
 
-    fn parse_tag_comments(&mut self, indent: usize, initial_margin: Option<&str>) -> Arc<NodeList> {
+    pub(crate) fn parse_tag_comments(&mut self, indent: usize, initial_margin: Option<&str>) -> Arc<NodeList> {
         let pos = self.token_pos();
         let mut state = JSDocState::BeginningOfLine;
         let mut comments: Vec<String> = Vec::new();
@@ -1695,7 +1695,7 @@ impl super::Parser {
 
 impl super::Parser {
 
-    fn parse_child_parameter_or_property_tag(
+    pub(crate) fn parse_child_parameter_or_property_tag(
         &mut self,
         target: PropertyLikeParse,
         indent: usize,
@@ -1731,7 +1731,7 @@ impl super::Parser {
         }
     }
 
-    fn try_parse_child_tag(
+    pub(crate) fn try_parse_child_tag(
         &mut self,
         target: PropertyLikeParse,
         indent: usize,
@@ -1769,7 +1769,7 @@ impl super::Parser {
 
 impl super::Parser {
 
-    fn skip_whitespace(&mut self) {
+    pub(crate) fn skip_whitespace(&mut self) {
         if self.token == SyntaxKind::WhitespaceTrivia || self.token == SyntaxKind::NewLineTrivia {
 
             if self.is_next_nonwhitespace_token_eof() {
@@ -1782,7 +1782,7 @@ impl super::Parser {
         }
     }
 
-    fn is_next_nonwhitespace_token_eof(&mut self) -> bool {
+    pub(crate) fn is_next_nonwhitespace_token_eof(&mut self) -> bool {
         loop {
             self.next_token_jsdoc();
             if self.token == SyntaxKind::EndOfFile {
@@ -1795,7 +1795,7 @@ impl super::Parser {
         }
     }
 
-    fn skip_whitespace_or_asterisk(&mut self) -> String {
+    pub(crate) fn skip_whitespace_or_asterisk(&mut self) -> String {
         let mut indent_text = String::new();
         let mut preceding_line_break = false;
         let mut seen_line_break = false;
@@ -1983,7 +1983,7 @@ pub fn parse_jsdoc_for_node(source_file: &crate::ast::SourceFile, node: &Node) -
 mod tests {
     use super::*;
 
-    fn parse_jsdoc(source: &str) -> Arc<Node> {
+    pub(crate) fn parse_jsdoc(source: &str) -> Arc<Node> {
         let mut parser = super::super::Parser::new(source.to_string());
 
         let text = source;
@@ -1996,13 +1996,13 @@ mod tests {
     }
 
     #[test]
-    fn parse_empty_jsdoc() {
+    pub(crate) fn parse_empty_jsdoc() {
         let node = parse_jsdoc("/** */");
         assert_eq!(node.kind, SyntaxKind::JSDoc);
     }
 
     #[test]
-    fn parse_simple_comment() {
+    pub(crate) fn parse_simple_comment() {
         let node = parse_jsdoc("/** This is a comment */");
         assert_eq!(node.kind, SyntaxKind::JSDoc);
         if let NodeData::JSDoc(d) = &node.data {
@@ -2014,7 +2014,7 @@ mod tests {
     }
 
     #[test]
-    fn parse_param_tag() {
+    pub(crate) fn parse_param_tag() {
         let node = parse_jsdoc("/** @param {string} name The name */");
         assert_eq!(node.kind, SyntaxKind::JSDoc);
         if let NodeData::JSDoc(d) = &node.data {
@@ -2025,7 +2025,7 @@ mod tests {
     }
 
     #[test]
-    fn parse_returns_tag() {
+    pub(crate) fn parse_returns_tag() {
         let node = parse_jsdoc("/** @returns {number} The result */");
         if let NodeData::JSDoc(d) = &node.data {
             let tags = d.tags.as_ref().expect("should have tags");
@@ -2035,7 +2035,7 @@ mod tests {
     }
 
     #[test]
-    fn parse_type_tag() {
+    pub(crate) fn parse_type_tag() {
         let node = parse_jsdoc("/** @type {string} */");
         if let NodeData::JSDoc(d) = &node.data {
             let tags = d.tags.as_ref().expect("should have tags");
@@ -2045,7 +2045,7 @@ mod tests {
     }
 
     #[test]
-    fn parse_deprecated_tag() {
+    pub(crate) fn parse_deprecated_tag() {
         let node = parse_jsdoc("/** @deprecated Use newThing instead */");
         if let NodeData::JSDoc(d) = &node.data {
             let tags = d.tags.as_ref().expect("should have tags");
@@ -2055,7 +2055,7 @@ mod tests {
     }
 
     #[test]
-    fn parse_multiple_tags() {
+    pub(crate) fn parse_multiple_tags() {
         let node = parse_jsdoc(
             "/**\n * @param {string} x First\n * @param {number} y Second\n * @returns {boolean}\n */",
         );
@@ -2069,7 +2069,7 @@ mod tests {
     }
 
     #[test]
-    fn parse_template_tag() {
+    pub(crate) fn parse_template_tag() {
         let node = parse_jsdoc("/** @template T */");
         if let NodeData::JSDoc(d) = &node.data {
             let tags = d.tags.as_ref().expect("should have tags");
@@ -2079,7 +2079,7 @@ mod tests {
     }
 
     #[test]
-    fn parse_typedef_tag() {
+    pub(crate) fn parse_typedef_tag() {
         let node = parse_jsdoc("/** @typedef {Object} MyType */");
         if let NodeData::JSDoc(d) = &node.data {
             let tags = d.tags.as_ref().expect("should have tags");
@@ -2089,7 +2089,7 @@ mod tests {
     }
 
     #[test]
-    fn parse_callback_tag() {
+    pub(crate) fn parse_callback_tag() {
         let node = parse_jsdoc("/** @callback MyCallback */");
         if let NodeData::JSDoc(d) = &node.data {
             let tags = d.tags.as_ref().expect("should have tags");
@@ -2099,7 +2099,7 @@ mod tests {
     }
 
     #[test]
-    fn parse_see_tag() {
+    pub(crate) fn parse_see_tag() {
         let node = parse_jsdoc("/** @see OtherThing */");
         if let NodeData::JSDoc(d) = &node.data {
             let tags = d.tags.as_ref().expect("should have tags");
@@ -2109,7 +2109,7 @@ mod tests {
     }
 
     #[test]
-    fn parse_simple_tags() {
+    pub(crate) fn parse_simple_tags() {
         for (tag_str, expected_kind) in [
             ("@public", SyntaxKind::JSDocPublicTag),
             ("@private", SyntaxKind::JSDocPrivateTag),
@@ -2132,7 +2132,7 @@ mod tests {
     }
 
     #[test]
-    fn parse_unknown_tag() {
+    pub(crate) fn parse_unknown_tag() {
         let node = parse_jsdoc("/** @customtag some text */");
         if let NodeData::JSDoc(d) = &node.data {
             let tags = d.tags.as_ref().expect("should have tags");
@@ -2142,7 +2142,7 @@ mod tests {
     }
 
     #[test]
-    fn parse_throws_tag() {
+    pub(crate) fn parse_throws_tag() {
         let node = parse_jsdoc("/** @throws {Error} When something goes wrong */");
         if let NodeData::JSDoc(d) = &node.data {
             let tags = d.tags.as_ref().expect("should have tags");
@@ -2152,7 +2152,7 @@ mod tests {
     }
 
     #[test]
-    fn parse_satisfies_tag() {
+    pub(crate) fn parse_satisfies_tag() {
         let node = parse_jsdoc("/** @satisfies {string} */");
         if let NodeData::JSDoc(d) = &node.data {
             let tags = d.tags.as_ref().expect("should have tags");
@@ -2162,7 +2162,7 @@ mod tests {
     }
 
     #[test]
-    fn parse_this_tag() {
+    pub(crate) fn parse_this_tag() {
         let node = parse_jsdoc("/** @this {MyClass} */");
         if let NodeData::JSDoc(d) = &node.data {
             let tags = d.tags.as_ref().expect("should have tags");
@@ -2172,7 +2172,7 @@ mod tests {
     }
 
     #[test]
-    fn parse_param_with_brackets() {
+    pub(crate) fn parse_param_with_brackets() {
         let node = parse_jsdoc("/** @param {string} [name] Optional */");
         if let NodeData::JSDoc(d) = &node.data {
             let tags = d.tags.as_ref().expect("should have tags");
@@ -2186,7 +2186,7 @@ mod tests {
     }
 
     #[test]
-    fn parse_multiline_comment_with_tags() {
+    pub(crate) fn parse_multiline_comment_with_tags() {
         let source = "/**
  * Description here.
  *
@@ -2202,7 +2202,7 @@ mod tests {
     }
 
     #[test]
-    fn parse_link_in_comment() {
+    pub(crate) fn parse_link_in_comment() {
         let node = parse_jsdoc("/** See {@link Foo} for details */");
         assert_eq!(node.kind, SyntaxKind::JSDoc);
 
@@ -2212,7 +2212,7 @@ mod tests {
     }
 
     #[test]
-    fn parse_implements_tag() {
+    pub(crate) fn parse_implements_tag() {
         let node = parse_jsdoc("/** @implements {IFoo} */");
         if let NodeData::JSDoc(d) = &node.data {
             let tags = d.tags.as_ref().expect("should have tags");
@@ -2222,7 +2222,7 @@ mod tests {
     }
 
     #[test]
-    fn parse_augments_tag() {
+    pub(crate) fn parse_augments_tag() {
         let node = parse_jsdoc("/** @augments {Base} */");
         if let NodeData::JSDoc(d) = &node.data {
             let tags = d.tags.as_ref().expect("should have tags");
@@ -2232,7 +2232,7 @@ mod tests {
     }
 
     #[test]
-    fn parse_overload_tag() {
+    pub(crate) fn parse_overload_tag() {
         let node = parse_jsdoc("/** @overload */");
         if let NodeData::JSDoc(d) = &node.data {
             let tags = d.tags.as_ref().expect("should have tags");
@@ -2242,7 +2242,7 @@ mod tests {
     }
 
     #[test]
-    fn parse_template_with_constraint() {
+    pub(crate) fn parse_template_with_constraint() {
         let node = parse_jsdoc("/** @template {string} T */");
         if let NodeData::JSDoc(d) = &node.data {
             let tags = d.tags.as_ref().expect("should have tags");
@@ -2252,7 +2252,7 @@ mod tests {
     }
 
     #[test]
-    fn parse_template_multiple() {
+    pub(crate) fn parse_template_multiple() {
         let node = parse_jsdoc("/** @template T,U,V */");
         if let NodeData::JSDoc(d) = &node.data {
             let tags = d.tags.as_ref().expect("should have tags");
@@ -2265,7 +2265,7 @@ mod tests {
     }
 
     #[test]
-    fn parse_param_name_first() {
+    pub(crate) fn parse_param_name_first() {
 
         let node = parse_jsdoc("/** @param name {string} */");
         if let NodeData::JSDoc(d) = &node.data {
@@ -2280,14 +2280,14 @@ mod tests {
     }
 
     #[test]
-    fn parse_jsdoc_like_text_detection() {
+    pub(crate) fn parse_jsdoc_like_text_detection() {
         assert!(is_jsdoc_like_text("/** comment */"));
         assert!(!is_jsdoc_like_text("/**/"));
         assert!(!is_jsdoc_like_text("/* not jsdoc */"));
     }
 
     #[test]
-    fn parse_remove_trailing_whitespace() {
+    pub(crate) fn parse_remove_trailing_whitespace() {
         let comments = vec!["hello".to_string(), "  ".to_string(), "\n".to_string()];
         let result = remove_trailing_whitespace(comments);
         assert_eq!(result.len(), 1);
@@ -2295,18 +2295,18 @@ mod tests {
     }
 
     #[test]
-    fn parse_remove_leading_newlines() {
+    pub(crate) fn parse_remove_leading_newlines() {
         let comments = vec!["\n".to_string(), "\r\n".to_string(), "hello".to_string()];
         let result = remove_leading_newlines(comments);
         assert_eq!(result.len(), 1);
         assert_eq!(result[0], "hello");
     }
 
-    fn parse_source(source: &str) -> crate::ast::SourceFile {
+    pub(crate) fn parse_source(source: &str) -> crate::ast::SourceFile {
         super::super::Parser::parse_source_file_text("test.ts", source.to_string())
     }
 
-    fn first_statement(file: &crate::ast::SourceFile) -> Arc<Node> {
+    pub(crate) fn first_statement(file: &crate::ast::SourceFile) -> Arc<Node> {
         use crate::ast::node_data_generated::*;
         match &file.node.data {
             NodeData::SourceFile(d) => d.statements.nodes[0].clone(),
@@ -2315,7 +2315,7 @@ mod tests {
     }
 
     #[test]
-    fn get_jsdoc_comment_ranges_finds_leading_jsdoc() {
+    pub(crate) fn get_jsdoc_comment_ranges_finds_leading_jsdoc() {
         let text = "/** Hello */\nconst x = 1;";
         let file = parse_source(text);
         let stmt = first_statement(&file);
@@ -2325,7 +2325,7 @@ mod tests {
     }
 
     #[test]
-    fn get_jsdoc_comment_ranges_skips_non_jsdoc_comments() {
+    pub(crate) fn get_jsdoc_comment_ranges_skips_non_jsdoc_comments() {
         let text = "/* not jsdoc */\nconst x = 1;";
         let file = parse_source(text);
         let stmt = first_statement(&file);
@@ -2334,7 +2334,7 @@ mod tests {
     }
 
     #[test]
-    fn get_jsdoc_comment_ranges_skips_empty_jsdoc() {
+    pub(crate) fn get_jsdoc_comment_ranges_skips_empty_jsdoc() {
         let text = "/**/\nconst x = 1;";
         let file = parse_source(text);
         let stmt = first_statement(&file);
@@ -2343,7 +2343,7 @@ mod tests {
     }
 
     #[test]
-    fn parse_jsdoc_for_node_returns_parsed_tags() {
+    pub(crate) fn parse_jsdoc_for_node_returns_parsed_tags() {
         let text = "/**\n * @param {string} name\n * @returns {void}\n */\nfunction f(name) {}\n";
         let file = parse_source(text);
         let stmt = first_statement(&file);
@@ -2358,7 +2358,7 @@ mod tests {
     }
 
     #[test]
-    fn parse_jsdoc_for_node_no_comments_returns_empty() {
+    pub(crate) fn parse_jsdoc_for_node_no_comments_returns_empty() {
         let text = "const x = 1;";
         let file = parse_source(text);
         let stmt = first_statement(&file);
@@ -2367,7 +2367,7 @@ mod tests {
     }
 
     #[test]
-    fn resolve_jsdoc_caches_result() {
+    pub(crate) fn resolve_jsdoc_caches_result() {
         let text = "/** Doc */\nconst x = 1;";
         let file = parse_source(text);
         let stmt = first_statement(&file);
@@ -2381,7 +2381,7 @@ mod tests {
     }
 
     #[test]
-    fn resolve_jsdoc_multiple_jsdoc_comments() {
+    pub(crate) fn resolve_jsdoc_multiple_jsdoc_comments() {
         let text = "/** First */\n/** Second */\nconst x = 1;";
         let file = parse_source(text);
         let stmt = first_statement(&file);
@@ -2390,7 +2390,7 @@ mod tests {
     }
 
     #[test]
-    fn node_jsdoc_returns_empty_without_flag() {
+    pub(crate) fn node_jsdoc_returns_empty_without_flag() {
         let text = "/** Doc */\nconst x = 1;";
         let file = parse_source(text);
         let stmt = first_statement(&file);

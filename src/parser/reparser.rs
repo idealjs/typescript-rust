@@ -726,12 +726,12 @@ mod tests {
     use super::*;
     use crate::parser::Parser;
 
-    fn parse_source(text: &str) -> (Arc<SourceFile>, Vec<crate::parser::ParserDiagnostic>) {
+    pub(crate) fn parse_source(text: &str) -> (Arc<SourceFile>, Vec<crate::parser::ParserDiagnostic>) {
         let result = Parser::parse_source_file_text_with_diagnostics("test.ts", text.to_string());
         (Arc::new(result.0), result.1)
     }
 
-    fn get_first_statement_jsdoc(file: &SourceFile) -> Vec<Arc<Node>> {
+    pub(crate) fn get_first_statement_jsdoc(file: &SourceFile) -> Vec<Arc<Node>> {
         let statements = match &file.node.data {
             NodeData::SourceFile(d) => &d.statements.nodes,
             _ => return Vec::new(),
@@ -745,7 +745,7 @@ mod tests {
     }
 
     #[test]
-    fn test_typedef_simple() {
+    pub(crate) fn test_typedef_simple() {
         let text = r#"
 /**
  * @typedef {string} MyString
@@ -783,7 +783,7 @@ let x;
     }
 
     #[test]
-    fn test_typedef_object_literal() {
+    pub(crate) fn test_typedef_object_literal() {
         let text = r#"
 /**
  * @typedef {Object} Point
@@ -815,7 +815,7 @@ let p;
     }
 
     #[test]
-    fn test_typedef_namespace() {
+    pub(crate) fn test_typedef_namespace() {
         let text = r#"
 /**
  * @typedef {string} Foo.Bar
@@ -853,7 +853,7 @@ let x;
     }
 
     #[test]
-    fn test_callback_tag() {
+    pub(crate) fn test_callback_tag() {
         let text = r#"
 /**
  * @callback MyCallback
@@ -892,7 +892,7 @@ let x;
     }
 
     #[test]
-    fn test_import_tag() {
+    pub(crate) fn test_import_tag() {
 
         let text = r#"
 /**
@@ -912,7 +912,7 @@ let x;
     }
 
     #[test]
-    fn test_overload_tag_function() {
+    pub(crate) fn test_overload_tag_function() {
         let text = r#"
 /**
  * @overload
@@ -933,7 +933,7 @@ function foo(x) { return x; }
     }
 
     #[test]
-    fn test_no_unhosted_tags() {
+    pub(crate) fn test_no_unhosted_tags() {
         let text = r#"
 /**
  * @param {string} x
@@ -956,7 +956,7 @@ function foo(x) { return 42; }
     }
 
     #[test]
-    fn test_get_innermost_name_simple() {
+    pub(crate) fn test_get_innermost_name_simple() {
         let ident = Arc::new(Node::with_loc(
             SyntaxKind::Identifier,
             NodeData::Identifier(IdentifierData {
@@ -970,7 +970,7 @@ function foo(x) { return 42; }
     }
 
     #[test]
-    fn test_get_innermost_name_namespace() {
+    pub(crate) fn test_get_innermost_name_namespace() {
 
         let c = Arc::new(Node::with_loc(
             SyntaxKind::Identifier,
@@ -1017,7 +1017,7 @@ function foo(x) { return 42; }
     }
 
     #[test]
-    fn test_wrap_in_jsdoc_namespace_simple() {
+    pub(crate) fn test_wrap_in_jsdoc_namespace_simple() {
         let statement = Arc::new(Node::with_loc(
             SyntaxKind::TypeAliasDeclaration,
             NodeData::TypeAliasDeclaration(TypeAliasDeclarationData {
@@ -1044,7 +1044,7 @@ function foo(x) { return 42; }
     }
 
     #[test]
-    fn test_integration_typedef_prepended_to_statements() {
+    pub(crate) fn test_integration_typedef_prepended_to_statements() {
         let text = r#"
 /**
  * @typedef {string} MyString
@@ -1071,7 +1071,7 @@ let x;
     }
 
     #[test]
-    fn test_integration_typedef_namespace_prepended() {
+    pub(crate) fn test_integration_typedef_namespace_prepended() {
         let text = r#"
 /**
  * @typedef {string} Foo.Bar
@@ -1090,7 +1090,7 @@ let x;
     }
 
     #[test]
-    fn test_integration_overload_prepended_to_function() {
+    pub(crate) fn test_integration_overload_prepended_to_function() {
         let text = r#"
 /**
  * @overload
@@ -1119,7 +1119,7 @@ function foo(x) { return x; }
     }
 
     #[test]
-    fn test_integration_no_jsdoc_unchanged() {
+    pub(crate) fn test_integration_no_jsdoc_unchanged() {
 
         let text = "let x = 1;\nlet y = 2;\n";
         let (file, _diags) = parse_source(text);
@@ -1131,7 +1131,7 @@ function foo(x) { return x; }
     }
 
     #[test]
-    fn test_integration_hosted_tags_only_unchanged() {
+    pub(crate) fn test_integration_hosted_tags_only_unchanged() {
 
         let text = r#"
 /**
