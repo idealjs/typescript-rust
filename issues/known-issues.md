@@ -39,3 +39,20 @@
   遗留：Symbol/Node/Program 指针键因对象存活期等于进程存活期而安全，保持不变；
   `Signature` id 仍全 0（独立隐患，未启用签名同一性比较）。
 
+## skipDefaultLibCheck：已实现、刻意未作为 harness 默认开启（2026-09-06）
+
+- tsgo 的 test harness 对每条测试默认 `SkipDefaultLibCheck=true`（harnessutil.go，
+  TSUnknown 时强制置 true），程序内全部 lib 文件（libFiles 全集）不参与类型检查。
+- 我们的移植已实现同语义（compiler/mod.rs `build_checker_internal` 按
+  `default_library_file_names` 全集跳过 `check_source_file`，get_diagnostics_to_report
+  同步过滤），但 runner 从不设置该选项——测试口径当前为"检查 lib"。
+- **不能直接开启**：开启后 `abstractClassUnionInstantiation.ts` 丢失 3 条 TS2511
+  （140 例区间 105 pass→104）。丢失的恰是 `.map(cls => new cls())` 行——`Array.map`
+  的回调上下文类型来自 lib.es5；我们跳过 lib 文件检查后，经 lib 泛型回调的
+  上下文类型化失效。tsgo 同样跳过检查却不丢（其签名按需解析，不依赖文件级检查）。
+  前置修复=让 lib 签名的上下文类型化与"该文件是否被 check"解耦。
+- 开启也无性能收益：140 例 JOBS=8 实测 89s→90s（0），因为每例成本主体是 lib 的
+  **解析**（worker-per-case 下每例冷解析）而非检查；20 线程骤降的杠杆不在这一项。
+- Go 参照（同批 140 文件，tsgo runner `-parallel 20` + GOMAXPROCS=20）：**6s**；
+  Rust debug：JOBS=8=89s / JOBS=20=149s（50 例撞 30s 超时记 SKIP，骤降复现）。
+
