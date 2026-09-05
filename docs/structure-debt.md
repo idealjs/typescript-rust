@@ -23,6 +23,27 @@
      assignment / narrowing / services …）先拆出叶子模块，再递归。
 - 每步验收：`cargo test` 全门禁 + 12,466 用例 sweep 抽样。
 
+### 已完成（2026-09-05）
+
+| 文件 | 拆分前 | 拆分后 |
+|---|---|---|
+| checker/checker.rs | 26,517 | 12,992 + 10 族文件 |
+| checker/relater.rs | 7,052 | 538 + 6 族文件 |
+| checker/typenode.rs | 5,020 | 650 + 6 族文件 |
+| checker/flow.rs | 3,840 | 546 + 5 族文件 |
+| parser/mod.rs | 9,132 | 3,321 + 6 族文件 |
+| binder/mod.rs | 4,159 | 979 + 3 族文件 |
+| emitter/mod.rs | 4,883 | 2,361 + 6 族文件 |
+
+方法：rustfmt 格式约定定位方法 span（4 空格 `fn` 行起、恰好 `    }` 行止），
+按职责族切块，跨族调用提升 `pub(crate)`，可见性自 HEAD 恢复。
+
+### 待拆（下一期）
+
+parser 3,321 / binder 977 / emitter 2,361 的 mod.rs 二期收尾；
+tsoptions 5,905；nodebuilder 2,609；scanner；printer；module/resolver；
+execute；checker/checker.rs 12,992 二期。
+
 ## 规则 3：测试只在 tests/
 
 - 现状：**71 个 `#[cfg(test)]` 内联模块、1,306 个内联 `#[test]`**
