@@ -1,0 +1,4 @@
+#![allow(dead_code)]
+
+pub const MODULE_SPECIFIER_RESOLUTION_LIMIT: usize = 100;
+pub const MODULE_SPECIFIER_RESOLUTION_CACHE_ATTEMPT_LIMIT: usize = 1000;

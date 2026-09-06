@@ -1,0 +1,53 @@
+[package]
+name = "tsox"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[lib]
+name = "tsox"
+path = "src/lib.rs"
+
+[[bin]]
+name = "tsox"
+path = "src/main.rs"
+
+[[bin]]
+name = "baseline-accept"
+path = "src/bin/baseline_accept.rs"
+required-features = ["accept"]
+
+[features]
+# When enabled, baseline tests write their output to reference/ instead of
+# comparing. Used by the `baseline-accept` binary.
+accept = []
+
+[dependencies]
+tsox-ts-libs = { workspace = true }
+tokio = { version = "1", features = ["full"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = { version = "1", features = ["preserve_order"] }
+dashmap = "6"
+bumpalo = "3"
+string-interner = "0.17"
+tracing = "0.1"
+tracing-subscriber = "0.3"
+anyhow = "1"
+thiserror = "1"
+unicode-width = "0.2"
+unicode-ident = "1"
+xxhash-rust = { version = "0.8", features = ["xxh3"] }
+regex = "1"
+cfg-if = "1"
+bitflags = "2"
+base64 = "0.22"
+notify = "6"
+flate2 = "1"
+
+[target.'cfg(windows)'.dependencies]
+windows-sys = { version = "0.59", features = ["Win32_Storage_FileSystem", "Win32_Foundation"] }
+
+[dev-dependencies]
+pretty_assertions = "1"
+proptest = "1"
+criterion = "0.5"

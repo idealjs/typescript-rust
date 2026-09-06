@@ -1,0 +1,8 @@
+/target
+
+# baseline test output: reference/ 入库为标准答案，local/ 是本次产出不入库
+crates/tsox/tests/baselines/local/
+
+# submodule 全量/验证跑日志：结论记入 TESTING.md，原始日志不入库
+*.log
+__pycache__/

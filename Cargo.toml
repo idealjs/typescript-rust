@@ -1,0 +1,28 @@
+[workspace]
+resolver = "2"
+members = [
+    "crates/tsox-core",
+    "crates/tsox-ts-libs",
+    "crates/tsox-tsoptions",
+    "crates/tsox-execute",
+    "crates/tsox-lsp",
+    "crates/tsox-api",
+    "crates/tsox",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+license = "Apache-2.0"
+
+[workspace.dependencies]
+tsox-core = { path = "crates/tsox-core" }
+tsox-ts-libs = { path = "crates/tsox-ts-libs" }
+tsox-tsoptions = { path = "crates/tsox-tsoptions" }
+tsox-execute = { path = "crates/tsox-execute" }
+tsox-lsp = { path = "crates/tsox-lsp" }
+tsox-api = { path = "crates/tsox-api" }
+
+[profile.release]
+opt-level = 3
+debug = false
