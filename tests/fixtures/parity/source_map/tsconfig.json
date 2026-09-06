@@ -1,9 +1,10 @@
 {
   "compilerOptions": {
-    "noLib": true,
     "outDir": "dist",
     "pretty": false,
     "sourceMap": true
   },
-  "files": ["src/main.ts"]
+  "files": [
+    "src/main.ts"
+  ]
 }

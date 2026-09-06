@@ -764,6 +764,26 @@ impl Checker {
 
         if s.contains(TypeFlags::Object) && t.contains(TypeFlags::Object) {
 
+            if let (Some(ss), Some(ts)) = (&source.symbol, &target.symbol)
+                && ss.id() == ts.id()
+                && ss.flags.intersects(SymbolFlags::Interface | SymbolFlags::Class)
+            {
+                let source_args = self.get_type_arguments(source);
+                let target_args = self.get_type_arguments(target);
+                if source_args.is_empty() && target_args.is_empty() {
+                    return true;
+                }
+                if source_args.len() == target_args.len()
+                    && !source_args.is_empty()
+                    && source_args.iter().zip(target_args.iter()).all(|(a, b)| {
+                        self.is_type_related_to(a, b, relation)
+                            && self.is_type_related_to(b, a, relation)
+                    })
+                {
+                    return true;
+                }
+            }
+
             if self.is_array_type(source) && self.is_array_type(target) {
                 return self.is_array_type_related_to(source, target, relation);
             }

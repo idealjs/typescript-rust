@@ -107,16 +107,19 @@ impl Checker {
 
     pub(crate) fn create_array_type(&mut self, element_type: Arc<Type>) -> Arc<Type> {
 
-        let array_symbol = self.globals.get("Array").cloned();
+        let Some(array_symbol) = self.globals.get("Array").cloned() else {
+            return self.get_any_type();
+        };
+        let target = self.get_declared_type_of_symbol(&array_symbol);
         Arc::new(Type {
             flags: TypeFlags::Object,
             object_flags: ObjectFlags::Reference,
             id: crate::checker::types::next_type_id(),
-            symbol: array_symbol,
+            symbol: Some(array_symbol),
             alias: None,
             data: TypeData::Object(ObjectTypeData {
                 structured: StructuredTypeData::default(),
-                target: None,
+                target: Some(target),
                 mapper: None,
                 type_arguments: vec![element_type],
             }),

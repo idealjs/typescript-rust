@@ -418,13 +418,13 @@ fn process_case(content: &str, basename: &str) -> Vec<ConfigOutcome> {
                             && t.contains("true")
                     });
                     match catch_unwind(|| {
-                        let diags = build_and_check(
+                        let (diags, program_len) = build_and_check(
                             &compiler_options,
                             &parsed.units,
                             no_implicit_refs,
                             tsconfig.as_ref().map(|(c, _)| c.file_names.as_slice()),
                         );
-                        render_errors_baseline(&diags)
+                        render_errors_baseline(&diags, program_len)
                     }) {
                         Ok(actual) => CaseOutcome::Output(actual),
                         Err(payload) => {
@@ -1073,7 +1073,7 @@ fn build_and_check(
     units: &[common::case_parser::TestUnit],
     no_implicit_references: bool,
     tsconfig_file_names: Option<&[String]>,
-) -> Vec<Diagnostic> {
+) -> (Vec<Diagnostic>, usize) {
     let fs = Arc::new(InMemoryFS::new());
     fs.insert_dir("/proj");
 
@@ -1172,6 +1172,7 @@ fn build_and_check(
     for d in program.diagnostics() {
         all.push((**d).clone());
     }
+    let program_len = all.len();
     all.extend(program.get_semantic_diagnostics());
     let check_elapsed = t_check.elapsed();
     if let Some(path) = std::env::var_os("TSOX_PROBE_PHASES") {
@@ -1188,23 +1189,25 @@ fn build_and_check(
         )
         .ok();
     }
-    all
+    (all, program_len)
 }
 
-fn render_errors_baseline(diags: &[Diagnostic]) -> String {
+fn render_errors_baseline(diags: &[Diagnostic], program_len: usize) -> String {
     if diags.is_empty() {
         return NO_CONTENT.to_string();
     }
-    let mut keyed: Vec<(String, usize, usize, i32, &Diagnostic)> = diags
+    let mut keyed: Vec<(String, usize, usize, usize, i32, &Diagnostic)> = diags
         .iter()
-        .map(|d| {
+        .enumerate()
+        .map(|(i, d)| {
             let (file_name, line, col) = if let Some(f) = &d.file {
                 let (l, c) = crate_line_col(d);
                 (f.file_name.clone(), l, c)
             } else {
                 (String::new(), 0, 0)
             };
-            (file_name, line, col, d.code, d)
+            let bucket = if i < program_len { 0 } else { 1 };
+            (file_name, line, col, bucket, d.code, d)
         })
         .collect();
     keyed.sort_by(|a, b| {
@@ -1212,18 +1215,19 @@ fn render_errors_baseline(diags: &[Diagnostic]) -> String {
             .then(a.1.cmp(&b.1))
             .then(a.2.cmp(&b.2))
 
-            .then(a.4.loc.end.cmp(&b.4.loc.end))
+            .then(a.5.loc.end.cmp(&b.5.loc.end))
             .then(a.3.cmp(&b.3))
+            .then(a.4.cmp(&b.4))
     });
 
     let globals: Vec<&Diagnostic> = keyed
         .iter()
-        .filter(|(_, _, _, _, d)| d.file.is_none())
-        .map(|(_, _, _, _, d)| *d)
+        .filter(|(_, _, _, _, _, d)| d.file.is_none())
+        .map(|(_, _, _, _, _, d)| *d)
         .collect();
 
     let mut out = String::new();
-    for (_, _, _, _, d) in keyed {
+    for (_, _, _, _, _, d) in keyed {
         let mut line = format_diagnostic_compact(d, None);
 
         line = line.replace("/proj/", "");

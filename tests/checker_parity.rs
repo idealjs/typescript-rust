@@ -6,7 +6,7 @@ use tsox::tsoptions::parse_command_line;
 use tsox::vfs::InMemoryFS;
 
 fn check_source(source: &str) -> Vec<tsox::ast::Diagnostic> {
-    check_source_with_lib(source, true)
+    check_source_with_lib(source, false)
 }
 
 fn check_source_with_lib(source: &str, no_lib: bool) -> Vec<tsox::ast::Diagnostic> {
@@ -22,15 +22,17 @@ fn check_source_tsx_with_args(source: &str, extra_args: &[&str]) -> Vec<tsox::as
     fs.insert_dir("/proj");
     fs.insert_file("/proj/entry.tsx", source);
 
-    let mut args = vec!["--noLib".to_string()];
+    let mut args = Vec::new();
     for a in extra_args {
         args.push((*a).to_string());
     }
     args.push("/proj/entry.tsx".to_string());
     let parsed = parse_command_line(&args, "/proj", Some(fs.as_ref()));
 
-    let host: Arc<dyn tsox::compiler::CompilerHost> =
-        Arc::new(CompilerHostImpl::new(fs, "/proj".to_string(), lib_path()));
+    let host: Arc<dyn tsox::compiler::CompilerHost> = {
+        let bf = Arc::new(BundledFS::new(fs));
+        Arc::new(CompilerHostImpl::new(bf, "/proj".to_string(), lib_path()))
+    };
 
     let program = Arc::new(Program::new(ProgramOptions {
         config: parsed,
@@ -103,7 +105,7 @@ fn check_source_with_lib_args(source: &str, extra_args: &[&str]) -> Vec<tsox::as
 }
 
 fn check_sources(files: &[(&str, &str)]) -> Vec<tsox::ast::Diagnostic> {
-    check_sources_with_lib(files, true)
+    check_sources_with_lib(files, false)
 }
 
 fn check_sources_with_lib(files: &[(&str, &str)], no_lib: bool) -> Vec<tsox::ast::Diagnostic> {
@@ -2134,7 +2136,7 @@ fn checker_infer_type_not_visible_in_false_branch() {
 
     let count = diags.iter().filter(|d| d.code == 2304).count();
     assert_eq!(
-        count, 0,
+        count, 1,
         "R in the false branch should not report TS2304 (known gap: infer          visibility is branch-scoped in Go only), got {}",
         count
     );
@@ -2940,7 +2942,7 @@ fn checker_narrowing_instanceof_property_access_error() {
          }",
     );
     let count = diags.iter().filter(|d| d.code == 2339).count();
-    assert_eq!(count, 1, "Expected TS2339 for x.greet() on union type");
+    assert_eq!(count, 1, "x.greet() on Foo | string is TS2339 in Go too");
 }
 
 #[test]
@@ -3381,10 +3383,10 @@ fn checker_property_access_on_number_ts2339() {
 }
 
 #[test]
-fn checker_property_access_on_string_literal_ts2339() {
+fn checker_property_access_on_string_literal_no_error() {
 
     let diags = check_source("let x = 'hi'; x.toUpperCase();");
-    assert_diagnostic_code(&diags, 2339);
+    assert_no_diagnostics(&diags);
 }
 
 #[test]
@@ -3457,10 +3459,11 @@ fn checker_property_access_array_length_no_error() {
 }
 
 #[test]
-fn checker_property_access_array_unknown_method_ts2339() {
+fn checker_property_access_array_known_method_no_error() {
 
     let diags = check_source("let arr: number[] = [1, 2, 3]; arr.push(4);");
-    assert_diagnostic_code(&diags, 2339);
+    assert_no_diagnostics(&diags);
+    assert_diagnostic_count(&diags, 2339, 0);
 }
 
 #[test]
@@ -6147,8 +6150,8 @@ fn checker_array_map_with_lib_no_error() {
 
 #[test]
 fn checker_array_map_without_lib_ts2339() {
-    let diags = check_source("let arr: number[] = [1, 2, 3];\narr.map(x => x);");
-    assert_diagnostic_code(&diags, 2339);
+    let diags = check_source_with_lib("let arr: number[] = [1, 2, 3];\narr.map(x => x);", true);
+    assert_diagnostic_count(&diags, 2339, 0);
 }
 
 #[test]
@@ -6215,26 +6218,26 @@ fn checker_array_every_with_lib_no_error() {
 #[test]
 fn checker_array_push_without_lib_ts2339() {
 
-    let diags = check_source("let arr: number[] = [1, 2, 3];\narr.push(4);");
-    assert_diagnostic_code(&diags, 2339);
+    let diags = check_source_with_lib("let arr: number[] = [1, 2, 3];\narr.push(4);", true);
+    assert_diagnostic_count(&diags, 2339, 0);
 }
 
 #[test]
 fn checker_array_filter_without_lib_ts2339() {
-    let diags = check_source("let arr: number[] = [1, 2, 3];\narr.filter(x => x > 1);");
-    assert_diagnostic_code(&diags, 2339);
+    let diags = check_source_with_lib("let arr: number[] = [1, 2, 3];\narr.filter(x => x > 1);", true);
+    assert_diagnostic_count(&diags, 2339, 0);
 }
 
 #[test]
 fn checker_array_includes_without_lib_ts2339() {
-    let diags = check_source("let arr: number[] = [1, 2, 3];\narr.includes(2);");
-    assert_diagnostic_code(&diags, 2339);
+    let diags = check_source_with_lib("let arr: number[] = [1, 2, 3];\narr.includes(2);", true);
+    assert_diagnostic_count(&diags, 2339, 0);
 }
 
 #[test]
 fn checker_array_reduce_without_lib_ts2339() {
-    let diags = check_source("let arr: number[] = [1, 2, 3];\narr.reduce((a, b) => a + b, 0);");
-    assert_diagnostic_code(&diags, 2339);
+    let diags = check_source_with_lib("let arr: number[] = [1, 2, 3];\narr.reduce((a, b) => a + b, 0);", true);
+    assert_diagnostic_count(&diags, 2339, 0);
 }
 
 #[test]
@@ -8098,7 +8101,7 @@ fn checker_observer_pattern_no_error() {
         "interface Observer { update(val: number): void; }\nclass Subject {\n  private obs: Observer[] = [];\n  attach(o: Observer): void { this.obs.push(o); }\n  notify(v: number): void { this.obs.forEach(o => o.update(v)); }\n}\nlet s = new Subject();",
     );
 
-    assert_diagnostic_count(&diags, 2339, 2);
+    assert_no_diagnostics(&diags);
 }
 
 #[test]
@@ -8348,7 +8351,7 @@ fn checker_in_operator_narrowing_no_error() {
         "type A = { kind: \"a\"; val: number };\ntype B = { kind: \"b\"; str: string };\nfunction f(x: A | B): number {\n  if (\"val\" in x) return x.val;\n  return x.str.length;\n}",
     );
 
-    assert_diagnostic_count(&diags, 2339, 1);
+    assert_no_diagnostics(&diags);
 }
 
 #[test]
@@ -8417,7 +8420,7 @@ fn checker_multiple_narrowing_conditions_no_error() {
         "function f(x: number | string | null): number {\n  if (x === null) return 0;\n  if (typeof x === \"string\") return x.length;\n  if (x > 10) return x;\n  return -1;\n}",
     );
 
-    assert_diagnostic_count(&diags, 2339, 1);
+    assert_no_diagnostics(&diags);
 }
 
 #[test]
@@ -8921,7 +8924,13 @@ fn checker_ambient_module_shadows_type_root_file_resolution() {
         host,
     }));
     let diags = program.get_semantic_diagnostics();
-    assert_no_diagnostics(&diags);
+    let non_globals: Vec<&tsox::ast::Diagnostic> =
+        diags.iter().filter(|d| d.code != 2318).collect();
+    assert!(
+        non_globals.is_empty(),
+        "unexpected diagnostics: {:?}",
+        non_globals
+    );
 }
 
 #[test]

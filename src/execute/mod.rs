@@ -1557,7 +1557,6 @@ mod tests {
         fs.insert_file("/proj/a.ts", "let x: number = 1;");
         let sys = TestSystem::new(fs, "/proj");
         let args = vec![
-            "--noLib".to_string(),
             "--ignoreConfig".to_string(),
             "/proj/a.ts".to_string(),
         ];
@@ -1597,7 +1596,7 @@ mod tests {
         fs.insert_dir("/root/sub");
         fs.insert_file(
             "/root/tsconfig.json",
-            r#"{"compilerOptions":{"noLib":true},"files":["sub/a.ts"]}"#,
+            r#"{"compilerOptions":{},"files":["sub/a.ts"]}"#,
         );
         fs.insert_file("/root/sub/a.ts", "let x = 1;");
         let sys = TestSystem::new(fs, "/root/sub");
@@ -1613,7 +1612,7 @@ mod tests {
         fs.insert_file("/proj/a.ts", "let x: number = 1;");
         fs.insert_file(
             "/proj/tsconfig.json",
-            r#"{"compilerOptions":{"noLib":true},"files":["a.ts"]}"#,
+            r#"{"compilerOptions":{},"files":["a.ts"]}"#,
         );
         let sys = TestSystem::new(fs, "/proj");
         let args = vec!["-b".to_string()];
@@ -1640,7 +1639,6 @@ mod tests {
         );
         let sys = TestSystem::new(fs, "/proj");
         let args = vec![
-            "--noLib".to_string(),
             "--ignoreConfig".to_string(),
             "/proj/b.ts".to_string(),
         ];
@@ -1659,7 +1657,6 @@ mod tests {
         fs.insert_file("/proj/c.ts", "let y = 2;");
         let sys = TestSystem::new(fs, "/proj");
         let args = vec![
-            "--noLib".to_string(),
             "--ignoreConfig".to_string(),
             "--noEmit".to_string(),
             "/proj/c.ts".to_string(),
@@ -1676,7 +1673,6 @@ mod tests {
         fs.insert_file("/proj/src/d.ts", "let z: string = \"hi\";");
         let sys = TestSystem::new(fs, "/proj");
         let args = vec![
-            "--noLib".to_string(),
             "--ignoreConfig".to_string(),
             "--outDir".to_string(),
             "/proj/dist".to_string(),
@@ -1721,7 +1717,6 @@ mod tests {
         fs.insert_file("/proj/f.ts", "let x: number = 1;");
         let sys = TestSystem::new(fs, "/proj");
         let args = vec![
-            "--noLib".to_string(),
             "--ignoreConfig".to_string(),
             "--noEmitOnError".to_string(),
             "/proj/f.ts".to_string(),
@@ -1764,7 +1759,6 @@ mod tests {
         fs.insert_file("/proj/h.ts", "let x: number = 1;");
         let sys = TestSystem::new(fs, "/proj");
         let args = vec![
-            "--noLib".to_string(),
             "--ignoreConfig".to_string(),
             "--listFilesOnly".to_string(),
             "/proj/h.ts".to_string(),
@@ -1785,7 +1779,7 @@ mod tests {
         fs.insert_file("/proj/src/i.ts", "let value: number = 1;");
         fs.insert_file(
             "/proj/tsconfig.json",
-            r#"{"compilerOptions":{"noLib":true,"outDir":"/proj/dist"},"files":["src/i.ts"]}"#,
+            r#"{"compilerOptions":{"outDir":"/proj/dist"},"files":["src/i.ts"]}"#,
         );
         let sys = TestSystem::new(fs, "/proj");
         let args = vec!["-b".to_string()];
@@ -1813,7 +1807,7 @@ mod tests {
         );
         fs.insert_file(
             "/proj/tsconfig.app.json",
-            r#"{"compilerOptions":{"noLib":true,"outDir":"/proj/dist"},"include":["src"]}"#,
+            r#"{"compilerOptions":{"outDir":"/proj/dist"},"include":["src"]}"#,
         );
         fs.insert_file("/proj/src/app.ts", "export const app: number = 1;");
         let sys = TestSystem::new(fs, "/proj");
@@ -1919,15 +1913,15 @@ mod tests {
         fs.insert_file("/chain/c/c.ts", "let c = 3;");
         fs.insert_file(
             "/chain/a/tsconfig.json",
-            r#"{"compilerOptions":{"noLib":true},"files":["a.ts"],"references":[{"path":"../b"}]}"#,
+            r#"{"compilerOptions":{},"files":["a.ts"],"references":[{"path":"../b"}]}"#,
         );
         fs.insert_file(
             "/chain/b/tsconfig.json",
-            r#"{"compilerOptions":{"noLib":true},"files":["b.ts"],"references":[{"path":"../c"}]}"#,
+            r#"{"compilerOptions":{},"files":["b.ts"],"references":[{"path":"../c"}]}"#,
         );
         fs.insert_file(
             "/chain/c/tsconfig.json",
-            r#"{"compilerOptions":{"noLib":true},"files":["c.ts"]}"#,
+            r#"{"compilerOptions":{},"files":["c.ts"]}"#,
         );
         let sys = TestSystem::new(fs, "/chain/a");
         let args = vec!["-b".to_string()];
@@ -2132,7 +2126,7 @@ mod tests {
         fs.insert_file("/proj/first.ts", "export const a = 1;");
         fs.insert_file(
             "/proj/tsconfig.json",
-            r#"{"compilerOptions":{"noLib":true,"noEmit":true},"files":["first.ts"]}"#,
+            r#"{"compilerOptions":{"noEmit":true},"files":["first.ts"]}"#,
         );
         let sys = TestSystem::new(fs, "/proj");
         let args = vec!["-p".to_string(), "/proj/tsconfig.json".to_string()];
@@ -2153,7 +2147,7 @@ mod tests {
         fs.insert_file("/proj/first.ts", "export const a = 1;");
         fs.insert_file(
             "/proj/tsconfig.json",
-            r#"{"compilerOptions":{"noLib":true,"noEmit":true},"files":["first.ts"]}"#,
+            r#"{"compilerOptions":{"noEmit":true},"files":["first.ts"]}"#,
         );
         let sys = TestSystem::new(fs, "/proj");
         let args = vec!["-p".to_string(), "/proj".to_string()];
@@ -2168,7 +2162,7 @@ mod tests {
         fs.insert_file("/proj/first.ts", "export const a = 1;");
         fs.insert_file(
             "/proj/tsconfig.json",
-            r#"{"compilerOptions":{"noLib":true,"noEmit":true},"files":["first.ts"]}"#,
+            r#"{"compilerOptions":{"noEmit":true},"files":["first.ts"]}"#,
         );
         let sys = TestSystem::new(fs, "/proj");
         let args = vec!["-p".to_string(), ".".to_string()];
@@ -2225,7 +2219,7 @@ mod tests {
         fs.insert_file("/proj/first.ts", "export const a = 1;");
         fs.insert_file("/proj/tsconfig.json", "");
         let sys = TestSystem::new(fs, "/proj");
-        let args = vec!["-p".to_string(), ".".to_string(), "--noLib".to_string()];
+        let args = vec!["-p".to_string(), ".".to_string(), ];
         let result = command_line(&sys, &args);
         if result.status != ExitStatus::Success {
             panic!(
@@ -2279,7 +2273,6 @@ mod tests {
         fs.insert_file("/proj/b.ts", "export const y = 2;");
         let sys = TestSystem::new(fs, "/proj");
         let args = vec![
-            "--noLib".to_string(),
             "--ignoreConfig".to_string(),
             "/proj/a.ts".to_string(),
             "/proj/b.ts".to_string(),
@@ -2301,7 +2294,6 @@ mod tests {
         );
         let sys = TestSystem::new(fs, "/proj");
         let args = vec![
-            "--noLib".to_string(),
             "--ignoreConfig".to_string(),
             "--declaration".to_string(),
             "/proj/a.ts".to_string(),
@@ -2325,7 +2317,6 @@ mod tests {
         fs.insert_file("/proj/a.ts", "let x: number = 1;");
         let sys = TestSystem::new(fs, "/proj");
         let args = vec![
-            "--noLib".to_string(),
             "--ignoreConfig".to_string(),
             "--sourceMap".to_string(),
             "/proj/a.ts".to_string(),
@@ -2342,7 +2333,6 @@ mod tests {
         fs.insert_file("/proj/a.ts", "let x = 1;");
         let sys = TestSystem::new(fs, "/proj");
         let args = vec![
-            "--noLib".to_string(),
             "--ignoreConfig".to_string(),
             "--module".to_string(),
             "commonjs".to_string(),
@@ -2475,7 +2465,6 @@ mod tests {
         fs.insert_file("/proj/b.ts", "let y = 2;");
         let sys = TestSystem::new(fs, "/proj");
         let args = vec![
-            "--noLib".to_string(),
             "--ignoreConfig".to_string(),
             "--listFiles".to_string(),
             "/proj/a.ts".to_string(),
@@ -2643,8 +2632,7 @@ mod tests {
 
         let mut config = parse_command_line(
             &[
-                "--noLib".to_string(),
-                "--ignoreConfig".to_string(),
+                    "--ignoreConfig".to_string(),
                 "/proj/a.ts".to_string(),
             ],
             "/proj",

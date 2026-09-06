@@ -944,6 +944,33 @@ impl Checker {
         self.ensure_host_globals();
 
         self.ensure_jsx_namespace();
+
+        self.report_missing_global_types();
+    }
+
+    fn report_missing_global_types(&mut self) {
+        const GLOBAL_TYPE_NAMES: &[&str] = &[
+            "Array",
+            "Boolean",
+            "CallableFunction",
+            "Function",
+            "IArguments",
+            "NewableFunction",
+            "Number",
+            "Object",
+            "RegExp",
+            "String",
+        ];
+        for name in GLOBAL_TYPE_NAMES {
+            if self.globals.get(*name).is_none() {
+                self.diagnostics.add(crate::ast::Diagnostic::new(
+                    None,
+                    crate::core::text::TextRange::default(),
+                    crate::diagnostics::messages_generated::CANNOT_FIND_GLOBAL_TYPE_0,
+                    vec![(*name).to_string()],
+                ));
+            }
+        }
     }
 
     fn ensure_host_globals(&mut self) {
@@ -982,9 +1009,6 @@ impl Checker {
             "btoa",
             "scrollTo",
             "scrollBy",
-
-            "Function",
-
         ];
 
         const DOM_TYPES: &[&str] = &[
@@ -1052,15 +1076,9 @@ impl Checker {
             "Float64Array",
             "DataView",
 
-            "Object",
-            "Array",
-            "Number",
-            "String",
-            "Boolean",
             "Date",
             "Math",
             "Error",
-            "RegExp",
             "Intl",
             "JSON",
             "Map",
@@ -3695,12 +3713,15 @@ pub(crate) fn attach_explicit_type_arguments(t: &Arc<Type>, args: Vec<Arc<Type>>
                     index_infos: o.structured.index_infos.clone(),
                     ..Default::default()
                 },
-                target: o.target.clone(),
+                target: Some(match &o.target {
+                    Some(tg) => Arc::clone(tg),
+                    None => Arc::clone(t),
+                }),
                 mapper: o.mapper.clone(),
                 type_arguments: args,
             }),
         );
-        rebuilt.object_flags = t.object_flags;
+        rebuilt.object_flags = t.object_flags | ObjectFlags::Reference;
         rebuilt.symbol = t.symbol.clone();
         return Arc::new(rebuilt);
     }

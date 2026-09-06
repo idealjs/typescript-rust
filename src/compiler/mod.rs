@@ -142,6 +142,15 @@ impl Program {
             diagnostics.push(Arc::new(deprecation));
         }
 
+        if !options.lib.is_empty() && options.no_lib.is_true() {
+            diagnostics.push(Arc::new(Diagnostic::new(
+                None,
+                TextRange::default(),
+                crate::diagnostics::messages_generated::OPTION_0_CANNOT_BE_SPECIFIED_WITH_OPTION_1,
+                vec!["lib".to_string(), "noLib".to_string()],
+            )));
+        }
+
         if !opts.config.file_names.is_empty() && !options.no_lib.is_true() {
             let lib_names = default_lib_file_names(&options);
             let mut visited: std::collections::HashSet<String> = std::collections::HashSet::new();

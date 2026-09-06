@@ -109,6 +109,7 @@ impl Parser {
     ) -> Self {
         let mut parser = Self::new(source_text);
         parser.language_variant = language_variant;
+        parser.scanner.set_language_variant(language_variant);
         parser
     }
 
@@ -1289,7 +1290,7 @@ impl Parser {
                 self.parse_error_at_current_token(diagnostics::IDENTIFIER_EXPECTED, &[]);
             }
         }
-        let text = self.scanner.token_text().to_string();
+        let text = self.scanner.token_value();
         let pos = self.token_pos();
         let end = self.token_end();
         self.next_token();

@@ -151,6 +151,9 @@ impl Checker {
             SyntaxKind::ForInStatement | SyntaxKind::ForOfStatement => {
                 self.push_scope(node);
                 if let crate::ast::NodeData::ForInOrOfStatement(data) = &node.data {
+                    if node.kind == SyntaxKind::ForOfStatement && data.await_modifier.is_none() {
+                        self.check_for_of_iterated_type(node, &data.expression);
+                    }
                     self.check_for_initializer(&data.initializer);
                     self.check_expression(&data.expression);
                     self.break_continue_context_stack
@@ -1414,6 +1417,43 @@ impl Checker {
                 vec![module_str],
             ));
         }
+    }
+
+    fn check_for_of_iterated_type(&mut self, statement: &Arc<Node>, expression: &Arc<Node>) {
+        let readonly_array_exists = match self.globals.get("ReadonlyArray") {
+            Some(sym) => !sym.members.is_empty(),
+            None => false,
+        };
+        if !readonly_array_exists {
+            return;
+        }
+        let t = self.get_type_of_node(expression);
+        if t.flags.contains(TypeFlags::Any | TypeFlags::Never) {
+            return;
+        }
+        let mut parts: Vec<Arc<Type>> = Vec::new();
+        if t.is_union() {
+            parts = self.constituent_types(&t);
+        } else {
+            parts.push(t.clone());
+        }
+        for part in &parts {
+            let is_string_like = part
+                .flags
+                .intersects(TypeFlags::String | TypeFlags::StringLiteral);
+            if !(self.is_array_type(part) || self.is_tuple_type(part) || is_string_like) {
+                let type_str = self.type_to_string(&t);
+                self.diagnostics.add(crate::ast::Diagnostic::new(
+                    self.current_file.clone(),
+                    expression.loc,
+                    crate::diagnostics::messages_generated::
+                        TYPE_0_IS_NOT_AN_ARRAY_TYPE_OR_A_STRING_TYPE,
+                    vec![type_str],
+                ));
+                return;
+            }
+        }
+        let _ = statement;
     }
 
     fn check_for_initializer(&mut self, node: &Arc<Node>) {

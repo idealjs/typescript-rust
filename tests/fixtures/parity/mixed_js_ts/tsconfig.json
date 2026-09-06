@@ -1,10 +1,12 @@
 {
   "compilerOptions": {
-    "noLib": true,
     "outDir": "dist",
     "pretty": false,
     "allowJs": true,
     "checkJs": false
   },
-  "files": ["src/main.ts", "src/util.js"]
+  "files": [
+    "src/main.ts",
+    "src/util.js"
+  ]
 }

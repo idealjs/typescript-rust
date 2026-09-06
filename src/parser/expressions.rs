@@ -1354,6 +1354,14 @@ impl Parser {
                 TextRange::new(pos, end),
             ));
         }
+        if self.token == SyntaxKind::CommaToken {
+            let pos = self.token_pos();
+            return Arc::new(Node::with_loc(
+                SyntaxKind::OmittedExpression,
+                NodeData::OmittedExpression,
+                TextRange::new(pos, pos),
+            ));
+        }
         self.parse_assignment_expression()
     }
 

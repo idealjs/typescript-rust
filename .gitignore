@@ -8,3 +8,5 @@ tests/baselines/local/
 
 # submodule 全量/验证跑日志：结论记入 TESTING.md，原始日志不入库
 *.log
+__pycache__/
+scripts/gostd/rust_fresh_configs.csv

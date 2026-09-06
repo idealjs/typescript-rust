@@ -150,7 +150,12 @@ impl Checker {
         }
         let source_target = source.target()?;
         let target_target = target.target()?;
-        if !Arc::ptr_eq(source_target, target_target) {
+        let same_target = Arc::ptr_eq(source_target, target_target)
+            || match (&source_target.symbol, &target_target.symbol) {
+                (Some(ss), Some(ts)) => ss.id() == ts.id(),
+                _ => false,
+            };
+        if !same_target {
             return None;
         }
 

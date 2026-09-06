@@ -200,7 +200,6 @@ fn punctuation() -> &'static HashMap<&'static str, SyntaxKind> {
         m.insert(";", SyntaxKind::SemicolonToken);
         m.insert(",", SyntaxKind::CommaToken);
         m.insert("<", SyntaxKind::LessThanToken);
-        m.insert("</", SyntaxKind::LessThanSlashToken);
         m.insert(">", SyntaxKind::GreaterThanToken);
         m.insert("<=", SyntaxKind::LessThanEqualsToken);
         m.insert(">=", SyntaxKind::GreaterThanEqualsToken);
@@ -324,6 +323,10 @@ pub struct Scanner {
     comment_directives: Vec<CommentDirective>,
 
     script_target: crate::core::compiler_options::ScriptTarget,
+
+    language_variant: crate::ast::LanguageVariant,
+
+    identifier_value: Option<String>,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -426,6 +429,8 @@ impl Scanner {
             errors: Vec::new(),
             comment_directives: Vec::new(),
             script_target: crate::core::compiler_options::ScriptTarget::ESNext,
+            language_variant: crate::ast::LanguageVariant::Standard,
+            identifier_value: None,
         }
     }
 
@@ -436,6 +441,10 @@ impl Scanner {
 
     pub fn set_script_target(&mut self, target: crate::core::compiler_options::ScriptTarget) {
         self.script_target = target;
+    }
+
+    pub fn set_language_variant(&mut self, variant: crate::ast::LanguageVariant) {
+        self.language_variant = variant;
     }
 
     fn report_error(&mut self, kind: DiagnosticKind, pos: usize, length: usize) {
@@ -518,6 +527,9 @@ impl Scanner {
     }
 
     pub fn token_value(&self) -> String {
+        if let Some(cooked) = &self.identifier_value {
+            return cooked.clone();
+        }
         let text = self.token_text();
         if text.len() >= 2 {
             let first = text.as_bytes()[0];
@@ -609,6 +621,7 @@ impl Scanner {
 
         self.preceding_line_break = false;
         self.token_flags = TOKEN_FLAGS_NONE;
+        self.identifier_value = None;
 
         self.full_start_pos = self.pos;
 
@@ -662,6 +675,9 @@ impl Scanner {
                     }
                     b'`' => {
                         break self.scan_template();
+                    }
+                    b'\\' if *self.text.as_bytes().get(self.pos + 1).unwrap_or(&0) == b'u' => {
+                        break self.scan_identifier();
                     }
                     _ => {}
                 }
@@ -878,31 +894,122 @@ impl Scanner {
 
         let bytes = self.text.as_bytes();
         let first_b = bytes[self.pos];
-        if first_b < 128 {
+        let escaped_first = first_b == b'\\';
+        if !escaped_first {
+            if first_b < 128 {
+                self.pos += 1;
+                while self.pos < self.end {
+                    let b = bytes[self.pos];
+                    if b.is_ascii_alphanumeric() || b == b'_' || b == b'$' {
+                        self.pos += 1;
+                    } else {
+                        break;
+                    }
+                }
+            } else {
+                let first_c = self.text[self.pos..].chars().next().unwrap();
+                self.pos += first_c.len_utf8();
+            }
+        }
+
+        let mut cooked = String::new();
+        let mut has_escape = false;
+        let mut segment_start = start;
+        while self.pos < self.end {
+            let c = self.text[self.pos..].chars().next().unwrap();
+            if c != '\\' && is_identifier_part(c) {
+                self.pos += c.len_utf8();
+                continue;
+            }
+            if c != '\\' {
+                break;
+            }
+            let at_start = !has_escape && escaped_first;
+            match self.scan_identifier_escape_part(at_start) {
+                Some((escape_start, escaped)) => {
+                    cooked.push_str(&self.text[segment_start..escape_start]);
+                    cooked.push(escaped);
+                    segment_start = self.pos;
+                    has_escape = true;
+                }
+                None => break,
+            }
+        }
+        self.token_end = self.pos;
+        if has_escape {
+            cooked.push_str(&self.text[segment_start..self.pos]);
+            self.identifier_value = Some(cooked);
+            self.token = SyntaxKind::Identifier;
+        } else {
+            let text = &self.text[start..self.pos];
+            self.token = string_to_keyword(text).unwrap_or(SyntaxKind::Identifier);
+        }
+        self.token
+    }
+
+    fn scan_identifier_escape_part(&mut self, at_identifier_start: bool) -> Option<(usize, char)> {
+        let escape_start = self.pos;
+        let next = self.text.as_bytes().get(self.pos + 1).copied();
+        if next != Some(b'u') {
+            return None;
+        }
+        let escaped = self.scan_unicode_escape()?;
+        let valid = if at_identifier_start {
+            is_identifier_start(escaped)
+        } else {
+            is_identifier_part(escaped)
+        };
+        if !valid {
+            self.pos = escape_start;
+            return None;
+        }
+        Some((escape_start, escaped))
+    }
+
+    fn scan_unicode_escape(&mut self) -> Option<char> {
+        let escape_start = self.pos;
+        let bytes = self.text.as_bytes();
+        if bytes.get(self.pos) != Some(&b'\\') || bytes.get(self.pos + 1) != Some(&b'u') {
+            return None;
+        }
+        self.pos += 2;
+        let mut digits = String::new();
+        if bytes.get(self.pos) == Some(&b'{') {
             self.pos += 1;
             while self.pos < self.end {
                 let b = bytes[self.pos];
-                if b.is_ascii_alphanumeric() || b == b'_' || b == b'$' {
-                    self.pos += 1;
-                } else {
+                if b == b'}' {
                     break;
                 }
+                digits.push(b as char);
+                self.pos += 1;
             }
+            if bytes.get(self.pos) != Some(&b'}')
+                || digits.is_empty()
+                || digits.len() > 6
+                || !digits.chars().all(|d| d.is_ascii_hexdigit())
+            {
+                self.pos = escape_start;
+                return None;
+            }
+            self.pos += 1;
+            self.token_flags |= TOKEN_FLAGS_EXTENDED_UNICODE_ESCAPE;
         } else {
-            let first_c = self.text[self.pos..].chars().next().unwrap();
-            self.pos += first_c.len_utf8();
-        }
-        while self.pos < self.end {
-            let c = self.text[self.pos..].chars().next().unwrap();
-            if !is_identifier_part(c) {
-                break;
+            for _ in 0..4 {
+                match bytes.get(self.pos) {
+                    Some(b) if b.is_ascii_hexdigit() => {
+                        digits.push(*b as char);
+                        self.pos += 1;
+                    }
+                    _ => {
+                        self.pos = escape_start;
+                        return None;
+                    }
+                }
             }
-            self.pos += c.len_utf8();
         }
-        self.token_end = self.pos;
-        let text = &self.text[start..self.pos];
-        self.token = string_to_keyword(text).unwrap_or(SyntaxKind::Identifier);
-        self.token
+        let code = u32::from_str_radix(&digits, 16).ok()?;
+        char::from_u32(code)
     }
 
     fn scan_private_identifier(&mut self) -> SyntaxKind {
@@ -1360,6 +1467,41 @@ impl Scanner {
         let start = self.pos;
 
         let remaining = &self.text[start..];
+
+        if remaining.starts_with('<') {
+            if remaining.starts_with("<<=") {
+                self.pos = start + 3;
+                self.token_end = self.pos;
+                self.token = SyntaxKind::LessThanLessThanEqualsToken;
+                return self.token;
+            }
+            if remaining.starts_with("<<") {
+                self.pos = start + 2;
+                self.token_end = self.pos;
+                self.token = SyntaxKind::LessThanLessThanToken;
+                return self.token;
+            }
+            if remaining.starts_with("<=") {
+                self.pos = start + 2;
+                self.token_end = self.pos;
+                self.token = SyntaxKind::LessThanEqualsToken;
+                return self.token;
+            }
+            if self.language_variant == crate::ast::LanguageVariant::Jsx
+                && remaining.starts_with("</")
+                && !remaining[2..].starts_with('*')
+            {
+                self.pos = start + 2;
+                self.token_end = self.pos;
+                self.token = SyntaxKind::LessThanSlashToken;
+                return self.token;
+            }
+            self.pos = start + 1;
+            self.token_end = self.pos;
+            self.token = SyntaxKind::LessThanToken;
+            return self.token;
+        }
+
         let mut best_match: Option<SyntaxKind> = None;
         let mut best_len = 0;
 

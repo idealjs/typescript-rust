@@ -48,6 +48,22 @@
 - 测量工具入库 `scripts/gostd/`（godecls 解析 Go 选项声明得 72 项 vary-by / diffrun 逐配置双跑 / rust_diff / pair_analyze 配对）；全程修正三个测量伪影：指令行剥离的行号语义、`<no content>` 哨兵、CRLF 书写器编码（用例源码 9,247 个 CRLF 文件原样不动作被测内容）。
 - 四门禁 1362/2/1010/15 绿；本次仅动 tests/ 与 scripts/，src/ 无改动。
 
+## 逐例修复轮（2026-09-06，divergence_worklist 736 行逐行攻坚开始）
+
+- **方法**：`./test.sh <行号|路径>` 双跑（tsgo CLI + tsox worker）对 tsgo 自有基线逐行分诊；修复只改 src/，单例探针验证，最后四门禁（1362/1010/2/15 全绿）。不做全量 sweep（按用户指令）。
+- **分诊发现：diffrun 的 go 状态列有基线名 bug**（查 `stem(配置).ts.errors.txt` 带扩展名→查不到→按空基线判定），快照中相当部分 go-pass 不可信；例 #1 allowSyntheticDefaultImports9 实为 tsgo 基线过时（其 CLI 在 strict:false 下不报 TS7010），非 Rust 缺口。逐行分诊必须先核对 go 是否真一致。
+- **已修（src/）**：
+  1. scanner `</` 无条件产出 LessThanSlashToken → 按 languageVariant 条件化（Go scanner.go:788 权威）；修 commentsTypeParameters 等（TS1005/TS1068 解析爆炸族）。
+  2. 数组字面量省略元素 `[,,]` 未实现 → parse_array_literal_element 补 CommaToken→OmittedExpression 分支；修 commentOnArrayElement10 族。
+  3. 标识符 `\uXXXX`/`\u{...}` 转义未实现 → scanner 补 escape 扫描（cooked tokenValue）+ parse_identifier 用 token_value；修 extendedUnicodeEscapeSequenceIdentifiers 族。
+  4. TS5053（lib+noLib 冲突）缺诊断 → Program::new 补检查（Go program.go:1156）。
+  5. TS2318（Cannot find global type）checker 初始化不上报 → populate_globals 末尾补 10 个全局类型名存在性检查（Go checker.go:1355-1367）；同时从 ensure_host_globals stub 注入表移除 Array/Boolean/Number/Object/RegExp/String/Function（stub 行为与 tsgo 背离）。
+  6. 诊断排序：无位置诊断按 code 排序与 tsgo（program 桶在 checker 桶前）不符 → worker 排序键加 program/checker 桶位次。
+  7. for-of legacy 迭代检查（TS2495）缺失 → check_for_of_iterated_type（门控=ReadonlyArray 真实存在；string/数组/元组放行；联合展开成分判断）。
+  8. relater：同符号泛型引用快速通道（number[] vs Array<number> 假性 TS2322）+ attach_explicit_type_arguments 设 target/Reference 标志。
+- **测试配套**：execute 20 个 noLib 单测改挂 bundled libs；checker_parity 默认 helper 改带 lib；`*_without_lib` 5 测按 tsgo 实测（noLib 下数组方法静默）改断言；parity fixtures 去掉 noLib。
+- **清单回填**：divergence_worklist 列4 已标注 5 行修复；下一批靶子=#2-5/#8-10（上下文回调推断 TS7019/7006、async 生成器 void、TS2322 收窄族）。
+
 # 测试流程
 
 # 测试流程
