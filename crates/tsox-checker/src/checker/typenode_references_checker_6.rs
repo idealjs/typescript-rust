@@ -241,6 +241,42 @@ impl Checker {
         }
         let any_t = self.get_any_type();
         let anys: Vec<Arc<Type>> = tp_types.iter().map(|_| Arc::clone(&any_t)).collect();
-        self.substitute_infer_type_parameters(&instance_type, &tp_types, &anys)
+        let substituted = self.substitute_infer_type_parameters(&instance_type, &tp_types, &anys);
+        self.rebuild_with_type_arguments(&substituted, anys)
+    }
+
+    pub(crate) fn rebuild_with_type_arguments(
+        &self,
+        base: &Arc<Type>,
+        args: Vec<Arc<Type>>,
+    ) -> Arc<Type> {
+        if args.is_empty() {
+            return Arc::clone(base);
+        }
+        if let TypeData::Object(o) = &base.data {
+            if !o.type_arguments.is_empty() {
+                return Arc::clone(base);
+            }
+            let mut rebuilt = Type::new(
+                base.flags,
+                TypeData::Object(ObjectTypeData {
+                    structured: StructuredTypeData {
+                        members: o.structured.members.clone(),
+                        properties: o.structured.properties.clone(),
+                        signatures: o.structured.signatures.clone(),
+                        call_signature_count: o.structured.call_signature_count,
+                        index_infos: o.structured.index_infos.clone(),
+                        ..Default::default()
+                    },
+                    target: o.target.clone(),
+                    mapper: o.mapper.clone(),
+                    type_arguments: args,
+                }),
+            );
+            rebuilt.object_flags = base.object_flags | ObjectFlags::Reference;
+            rebuilt.symbol = base.symbol.clone();
+            return Arc::new(rebuilt);
+        }
+        Arc::clone(base)
     }
 }

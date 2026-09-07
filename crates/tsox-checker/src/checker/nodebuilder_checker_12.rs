@@ -200,7 +200,6 @@ impl Checker {
         }
         let ct = self.get_contextual_type(&obj, ContextFlags::None)?;
         let syms = self.get_property_symbols_from_contextual_type(parent, &ct, false);
-        eprintln!("DBG ctx syms={}", syms.len());
         if syms.len() == 1 {
             return Some(Arc::clone(&syms[0]));
         }
@@ -236,20 +235,65 @@ impl Checker {
             DisplayPartKind::ClassName,
         );
         // 首个构造签名
-        let declared = self.get_declared_type_of_symbol(symbol);
+        let declared = self.get_type_of_symbol(symbol);
         if let Some(structured) = declared.as_structured()
             && let Some(sig) = structured.construct_signatures().first()
         {
+            let ret = self
+                .get_return_type_of_signature(sig)
+                .unwrap_or_else(|| self.get_any_type());
+            let ret = self.instantiate_new_expression_return(cur, symbol, ret);
             push_punctuation(&mut parts, "(");
             self.append_signature_parameter_parts(&mut parts, sig);
             push_punctuation(&mut parts, ")");
             push_space(&mut parts, ": ");
-            let ret = self
-                .get_return_type_of_signature(sig)
-                .unwrap_or_else(|| self.get_any_type());
             parts.extend(self.type_to_display_parts(&ret));
         }
         Some(parts)
+    }
+
+    fn instantiate_new_expression_return(
+        &mut self,
+        new_expr: &Arc<Node>,
+        symbol: &Arc<Symbol>,
+        ret: Arc<Type>,
+    ) -> Arc<Type> {
+        let tsox_frontend::ast::NodeData::NewExpression(d) = &new_expr.data else {
+            return ret;
+        };
+        let Some(args) = &d.type_arguments else {
+            return ret;
+        };
+        let Some(decl) = symbol
+            .declarations
+            .iter()
+            .find(|dn| matches!(dn.kind, SyntaxKind::ClassDeclaration | SyntaxKind::ClassExpression))
+        else {
+            return ret;
+        };
+        let tps = match &decl.data {
+            tsox_frontend::ast::NodeData::ClassDeclaration(cd) => cd.type_parameters.clone(),
+            tsox_frontend::ast::NodeData::ClassExpression(ce) => ce.type_parameters.clone(),
+            _ => None,
+        };
+        let Some(tps) = tps else {
+            return ret;
+        };
+        let tp_symbols: Vec<Arc<Symbol>> = tps
+            .iter()
+            .filter_map(|tp| self.program.symbol_map().symbol_of(tp).cloned())
+            .collect();
+        let tp_types: Vec<Arc<Type>> = tp_symbols
+            .iter()
+            .map(|s| self.get_type_parameter_from_symbol(s))
+            .collect();
+        let arg_types: Vec<Arc<Type>> = args.iter().map(|t| self.get_type_from_type_node(t)).collect();
+        if tp_types.is_empty() || arg_types.is_empty() {
+            return ret;
+        }
+        let substituted =
+            self.substitute_infer_type_parameters(&ret, &tp_types, &arg_types);
+        self.rebuild_with_type_arguments(&substituted, arg_types)
     }
 
     fn new_expression_type_args_text(
@@ -291,6 +335,12 @@ impl Checker {
         if symbol.flags.intersects(SymbolFlags::Class)
             && let Some(parts) = self.constructor_display_parts(&symbol, node)
         {
+            let mut parts = parts;
+            let doc = self.constructor_jsdoc_documentation(&symbol);
+            if !doc.is_empty() {
+                push_space(&mut parts, "\n\n");
+                push_part(&mut parts, &doc, DisplayPartKind::Text);
+            }
             return parts;
         }
         // 悬停命中改名绑定的 property_name：按源属性身份渲染
@@ -338,6 +388,19 @@ impl Checker {
             push_part(&mut parts, &node.text(), DisplayPartKind::PropertyName);
             push_space(&mut parts, ": ");
             parts.extend(self.type_to_display_parts(&be_type));
+            return parts;
+        }
+        // 悬停在调用表达式的 callee 上且类型为签名 union：显示合成签名（对齐 Go getCallOrNewExpression 分支）
+        if symbol.flags.intersects(SymbolFlags::VARIABLE | SymbolFlags::Property)
+            && let Some(sig) = self.call_site_union_signature(&symbol, node)
+        {
+            let mut parts = self.variable_prefix_and_name_parts(&symbol);
+            parts.extend(self.arrow_signature_parts(&sig));
+            let doc = self.symbol_documentation(&symbol);
+            if !doc.is_empty() {
+                push_space(&mut parts, "\n\n");
+                push_part(&mut parts, &doc, DisplayPartKind::Text);
+            }
             return parts;
         }
         let mut parts = self.symbol_to_display_parts(&symbol, SymbolFlags::all(), &[]);
@@ -607,6 +670,40 @@ impl Checker {
         String::new()
     }
 
+    fn constructor_jsdoc_documentation(&mut self, class_symbol: &Arc<Symbol>) -> String {
+        let ctor_decl = class_symbol.declarations.iter().find_map(|decl| {
+            let members = match &decl.data {
+                tsox_frontend::ast::NodeData::ClassDeclaration(d) => Some(&d.members),
+                tsox_frontend::ast::NodeData::ClassExpression(d) => Some(&d.members),
+                _ => None,
+            }?;
+            members
+                .iter()
+                .find(|m| m.kind == SyntaxKind::Constructor)
+                .cloned()
+        });
+        let Some(ctor_decl) = ctor_decl else {
+            return String::new();
+        };
+        let Some(sf) = self.get_source_file_of_node(&ctor_decl) else {
+            return String::new();
+        };
+        let jds = tsox_frontend::parser::parse_jsdoc_for_node(&sf, &ctor_decl);
+        for jd in &jds {
+            let (p0, p1) = (jd.pos().min(sf.text.len()), jd.end().min(sf.text.len()));
+            let raw: String = if p0 < p1 {
+                sf.text[p0..p1].to_string()
+            } else {
+                String::new()
+            };
+            let cleaned = clean_jsdoc_text(&raw);
+            if !cleaned.is_empty() {
+                return self.render_jsdoc_links(&sf, &ctor_decl, &cleaned);
+            }
+        }
+        String::new()
+    }
+
     /// 成员符号无 parent 链接时，沿声明树上溯类/接口声明节点取容器符号
     fn container_symbol_from_declarations(
         &self,
@@ -811,18 +908,20 @@ impl Checker {
         parts
     }
 
-    pub(crate) fn variable_symbol_display_parts(
-        &mut self,
-        symbol: &Arc<Symbol>,
-    ) -> Vec<SymbolDisplayPart> {
-        // 先触发类型解析（binding_element_type 在此挂 container 链接）
-        let _ = self.get_type_of_symbol(symbol);
+    pub(crate) fn variable_prefix_and_name_parts(&mut self, symbol: &Arc<Symbol>) -> Vec<SymbolDisplayPart> {
         let mut parts = Vec::new();
         let is_parameter = symbol.declarations.iter().any(|d| {
-            d.kind == SyntaxKind::Parameter
-                || d.parent
-                    .as_ref()
-                    .is_some_and(|p| p.kind == SyntaxKind::Parameter)
+            let mut cur = Some(d.clone());
+            while let Some(n) = cur {
+                match n.kind {
+                    SyntaxKind::Parameter => return true,
+                    SyntaxKind::BindingElement | SyntaxKind::ObjectBindingPattern | SyntaxKind::ArrayBindingPattern => {
+                        cur = n.parent.clone();
+                    }
+                    _ => break,
+                }
+            }
+            false
         });
         if symbol.flags.intersects(SymbolFlags::Property) {
             push_punctuation(&mut parts, "(");
@@ -854,6 +953,16 @@ impl Checker {
             push_punctuation(&mut parts, "?");
         }
         push_space(&mut parts, ": ");
+        parts
+    }
+
+    pub(crate) fn variable_symbol_display_parts(
+        &mut self,
+        symbol: &Arc<Symbol>,
+    ) -> Vec<SymbolDisplayPart> {
+        // 先触发类型解析（binding_element_type 在此挂 container 链接）
+        let _ = self.get_type_of_symbol(symbol);
+        let mut parts = self.variable_prefix_and_name_parts(symbol);
         let t = self.get_type_of_symbol(symbol);
         parts.extend(self.type_to_display_parts(&t));
         parts
@@ -868,6 +977,9 @@ impl Checker {
             if i > 0 {
                 push_space(parts, ", ");
             }
+            if i + 1 == sig.parameters.len() && sig.has_rest_parameter() {
+                push_punctuation(parts, "...");
+            }
             push_part(parts, &param.name, DisplayPartKind::ParameterName);
             if param.flags.contains(SymbolFlags::Optional) {
                 push_punctuation(parts, "?");
@@ -876,6 +988,68 @@ impl Checker {
             let pt = self.get_type_of_symbol(param);
             parts.extend(self.type_to_display_parts(&pt));
         }
+    }
+
+    fn call_site_union_signature(
+        &mut self,
+        symbol: &Arc<Symbol>,
+        node: &Arc<Node>,
+    ) -> Option<Arc<Signature>> {
+        let mut cur = Arc::clone(node);
+        if cur.parent.as_ref().map(|p| p.kind) == Some(SyntaxKind::PropertyAccessExpression) {
+            cur = cur.parent.clone().expect("checked Some above");
+        }
+        let call = cur.parent.clone()?;
+        let callee_is_cur = match &call.data {
+            tsox_frontend::ast::NodeData::CallExpression(d) => Arc::ptr_eq(&d.expression, &cur),
+            _ => false,
+        };
+        if !callee_is_cur || call.kind != SyntaxKind::CallExpression {
+            return None;
+        }
+        let t = self.get_type_of_symbol(symbol);
+        if !t.is_union() {
+            return None;
+        }
+        let TypeData::Union(u) = &t.data else {
+            return None;
+        };
+        let lists: Vec<Vec<Arc<Signature>>> = u
+            .union_or_intersection
+            .types
+            .iter()
+            .map(|m| self.get_signatures_of_type(m, crate::checker::SignatureKind::Call))
+            .collect();
+        let sigs = self.get_union_signatures(&lists);
+        if sigs.is_empty() {
+            return None;
+        }
+        Some(Arc::clone(&sigs[0]))
+    }
+
+    fn arrow_signature_parts(&mut self, sig: &Arc<Signature>) -> Vec<SymbolDisplayPart> {
+        let mut parts = Vec::new();
+        if !sig.type_parameters.is_empty() {
+            let names: Vec<String> = sig
+                .type_parameters
+                .iter()
+                .filter_map(|tp| tp.symbol.as_ref().map(|s| s.name.clone()))
+                .collect();
+            if !names.is_empty() {
+                push_punctuation(&mut parts, "<");
+                push_part(&mut parts, &names.join(", "), DisplayPartKind::TypeParameterName);
+                push_punctuation(&mut parts, ">");
+            }
+        }
+        push_punctuation(&mut parts, "(");
+        self.append_signature_parameter_parts(&mut parts, sig);
+        push_punctuation(&mut parts, ")");
+        push_space(&mut parts, " => ");
+        let ret = self
+            .get_return_type_of_signature(sig)
+            .unwrap_or_else(|| self.any_type());
+        parts.extend(self.type_to_display_parts(&ret));
+        parts
     }
 
     pub(crate) fn append_type_parameter_parts(

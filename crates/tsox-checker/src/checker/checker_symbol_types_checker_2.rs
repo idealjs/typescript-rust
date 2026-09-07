@@ -2,6 +2,11 @@
 
 use crate::checker::checker_symbol_types::*;
 
+enum BindingPathSeg {
+    Prop(String, bool),
+    Index(usize),
+}
+
 impl Checker {
     pub(crate) fn resolve_symbol_declared_type_on_demand(
         &mut self,
@@ -34,6 +39,28 @@ impl Checker {
             _ => return None,
         };
         if type_node_and_init.0.is_none() && type_node_and_init.1.is_none() {
+            // 无注解参数：上下文定型（IIFE 实参 / 调用上下文签名），rest 参数优先走上下文
+            if decl.kind == SyntaxKind::Parameter {
+                let placeholder = self.get_any_type();
+                let existing = self
+                    .value_symbol_links
+                    .get_or_default(symbol)
+                    .resolved_type
+                    .replace(placeholder);
+                let t = self.contextual_type_of_parameter(&decl);
+                match &t {
+                    Some(t) => {
+                        self.value_symbol_links.get_or_default(symbol).resolved_type =
+                            Some(Arc::clone(t));
+                    }
+                    None => {
+                        self.value_symbol_links.get_or_default(symbol).resolved_type = existing;
+                    }
+                }
+                if t.is_some() {
+                    return t;
+                }
+            }
             // rest 参数无注解：元素类型数组（无上下文时 any[]）
             if let NodeData::ParameterDeclaration(d) = &decl.data {
                 if d.dot_dot_dot_token.is_some() {
@@ -88,6 +115,12 @@ impl Checker {
             };
             if let Some(tn) = type_node {
                 Some(checker.get_type_from_type_node(&tn))
+            } else if decl.kind == SyntaxKind::Parameter {
+                // Go getTypeForVariableLikeDeclaration：参数先上下文定型，无果才用 initializer
+                let param = Arc::clone(&decl);
+                checker
+                    .contextual_type_of_parameter(&param)
+                    .or_else(|| checker.initial_type_of_declaration(&decl))
             } else {
                 let owner_class = match &decl.data {
                     NodeData::PropertyDeclaration(_) => decl
@@ -185,29 +218,44 @@ impl Checker {
         }
     }
 
-    /// 绑定元素类型：沿模式链上行到根声明取类型，再按属性路径逐层查。
+    /// 绑定元素类型：沿模式链上行到根声明取类型，再按属性/索引路径逐层查。
     fn binding_element_type(&mut self, elem: &Arc<Node>) -> Option<Arc<Type>> {
         use tsox_frontend::ast::NodeData;
-        let mut path: Vec<String> = Vec::new();
-        let mut path_renamed: Vec<bool> = Vec::new();
+        let mut path: Vec<BindingPathSeg> = Vec::new();
         let mut cur = Arc::clone(elem);
         loop {
             match &cur.data {
                 NodeData::BindingElement(d) => {
-                    let renamed = d.property_name.as_ref().and_then(|n| match &n.data {
-                        NodeData::Identifier(i) => Some(i.text.clone()),
-                        NodeData::StringLiteral(s) => Some(s.text.clone()),
-                        NodeData::NumericLiteral(num) => Some(num.text.clone()),
-                        _ => None,
-                    });
-                    let seg = renamed.clone().or_else(|| {
-                        d.name.as_ref().and_then(|n| match &n.data {
-                            NodeData::Identifier(i) => Some(i.text.clone()),
+                    let parent_kind = cur.parent.as_ref().map(|p| p.kind);
+                    if parent_kind == Some(tsox_frontend::ast::SyntaxKind::ArrayBindingPattern) {
+                        let pattern = cur.parent.clone().expect("checked kind above");
+                        let index = match &pattern.data {
+                            NodeData::BindingPattern(bp) => bp
+                                .elements
+                                .iter()
+                                .position(|e| Arc::ptr_eq(e, &cur)),
                             _ => None,
-                        })
-                    })?;
-                    path.push(seg);
-                    path_renamed.push(renamed.is_some());
+                        }?;
+                        let renamed = d.property_name.as_ref().and_then(|n| match &n.data {
+                            NodeData::NumericLiteral(num) => num.text.parse::<usize>().ok(),
+                            _ => None,
+                        });
+                        path.push(BindingPathSeg::Index(renamed.unwrap_or(index)));
+                    } else {
+                        let renamed = d.property_name.as_ref().and_then(|n| match &n.data {
+                            NodeData::Identifier(i) => Some(i.text.clone()),
+                            NodeData::StringLiteral(s) => Some(s.text.clone()),
+                            NodeData::NumericLiteral(num) => Some(num.text.clone()),
+                            _ => None,
+                        });
+                        let seg = renamed.clone().or_else(|| {
+                            d.name.as_ref().and_then(|n| match &n.data {
+                                NodeData::Identifier(i) => Some(i.text.clone()),
+                                _ => None,
+                            })
+                        })?;
+                        path.push(BindingPathSeg::Prop(seg, renamed.is_some()));
+                    }
                     cur = Arc::clone(cur.parent.as_ref()?);
                 }
                 NodeData::BindingPattern(_) => {
@@ -216,17 +264,14 @@ impl Checker {
                 NodeData::ParameterDeclaration(d) => {
                     let mut t = match &d.type_node {
                         Some(tn) => self.get_type_from_type_node(tn),
-                        None => return None,
-                    };
-                    let mut last = String::new();
-                    for (i, seg) in path.iter().enumerate().rev() {
-                        if path_renamed[i] {
-                            self.link_binding_element_container(elem, &t, seg);
+                        None => {
+                            let param = Arc::clone(&cur);
+                            self.contextual_type_of_parameter(&param)?
                         }
-                        last = seg.clone();
-                        t = self.get_type_of_property_of_type(&t, seg)?;
+                    };
+                    for seg in path.iter().rev() {
+                        t = self.binding_path_step(elem, t, seg)?;
                     }
-                    let _ = last;
                     return Some(t);
                 }
                 NodeData::VariableDeclaration(d) => {
@@ -235,17 +280,167 @@ impl Checker {
                         (None, Some(init)) => self.get_type_of_node(init),
                         _ => return None,
                     };
-                    for (i, seg) in path.iter().enumerate().rev() {
-                        if path_renamed[i] {
-                            self.link_binding_element_container(elem, &t, seg);
-                        }
-                        t = self.get_type_of_property_of_type(&t, seg)?;
+                    for seg in path.iter().rev() {
+                        t = self.binding_path_step(elem, t, seg)?;
                     }
                     return Some(t);
                 }
                 _ => return None,
             }
         }
+    }
+
+    fn contextual_type_of_parameter(
+        &mut self,
+        param: &Arc<Node>,
+    ) -> Option<Arc<Type>> {
+        use tsox_frontend::ast::NodeData;
+        let host = param.parent.clone()?;
+        let (host_kind_ok, host_type_params, host_params) = match &host.data {
+            NodeData::FunctionExpression(d) => (true, d.type_parameters.clone(), Some(&d.parameters)),
+            NodeData::ArrowFunction(d) => (true, d.type_parameters.clone(), Some(&d.parameters)),
+            NodeData::FunctionDeclaration(d) => (true, d.type_parameters.clone(), Some(&d.parameters)),
+            _ => (false, None, None),
+        };
+        if !host_kind_ok || host_type_params.is_some() {
+            return None;
+        }
+        let host_params = host_params?;
+        let param_index = host_params.iter().position(|p| Arc::ptr_eq(p, param));
+        let param_index = param_index?;
+        let mut call = host.parent.clone()?;
+        let mut in_parens = false;
+        while call.kind == tsox_frontend::ast::SyntaxKind::ParenthesizedExpression {
+            in_parens = true;
+            call = call.parent.clone()?;
+        }
+        let call_ctx = match &call.data {
+            NodeData::CallExpression(d) => {
+                // IIFE：参数类型取对应实参的 widened 类型（Go GetImmediatelyInvokedFunctionExpression 分支）
+                let callee_is_host = (!in_parens && Arc::ptr_eq(&d.expression, &host))
+                    || (in_parens
+                        && host
+                            .parent
+                            .as_ref()
+                            .is_some_and(|p| Arc::ptr_eq(p, &d.expression)));
+                if callee_is_host {
+                    let call_id = call.id();
+                    if !self.resolving_contextual_calls.insert(call_id) {
+                        return None;
+                    }
+                    let args: Vec<Arc<Node>> = d.arguments.iter().cloned().collect();
+                    let result = (|| {
+                        if param_index < args.len() {
+                            let raw = self.get_type_of_node(&args[param_index]);
+                            let widened = self.widen_argument_type_deep(&raw);
+                            return Some(widened);
+                        }
+                        if host_params.iter().any(|p| {
+                            matches!(&p.data, NodeData::ParameterDeclaration(pd) if pd.initializer.is_some())
+                        }) {
+                            return None;
+                        }
+                        Some(self.undefined_type())
+                    })();
+                    self.resolving_contextual_calls.remove(&call_id);
+                    return result;
+                }
+                self.get_contextual_type_for_argument(&call, &host)
+            }
+            NodeData::NewExpression(_) => self.get_contextual_type_for_argument(&call, &host),
+            _ => None,
+        };
+        let ctx = call_ctx.or_else(|| self.get_contextual_type(&host, ContextFlags::None))?;
+        let sigs = self.get_signatures_of_type(&ctx, crate::checker::SignatureKind::Call);
+        let sig = sigs.first()?.clone();
+        let is_rest = matches!(&param.data, NodeData::ParameterDeclaration(pd) if pd.dot_dot_dot_token.is_some());
+        let is_this_param = param_index == 0
+            && matches!(&param.data, NodeData::ParameterDeclaration(pd)
+                if matches!(&pd.name.data, NodeData::Identifier(id) if id.text == "this"));
+        self.contextual_param_type_at(&sig, &host_params, param_index, param, is_rest, is_this_param)
+    }
+
+    fn widen_argument_type_deep(&mut self, t: &Arc<Type>) -> Arc<Type> {
+        let widened = self.get_widened_type(t);
+        let TypeData::Object(o) = &widened.data else {
+            return widened;
+        };
+        if widened.symbol.is_some() {
+            return widened;
+        }
+        let mut new_props: Vec<Arc<Symbol>> = Vec::with_capacity(o.structured.properties.len());
+        let mut new_members = SymbolTable::new();
+        let mut changed = false;
+        for p in &o.structured.properties {
+            let pt = self.get_type_of_symbol(p);
+            let wpt = self.widen_argument_type_deep(&pt);
+            if Arc::ptr_eq(&pt, &wpt) {
+                new_members.insert(p.name.clone(), Arc::clone(p));
+                new_props.push(Arc::clone(p));
+            } else {
+                let np = Arc::new(Symbol::new(p.flags, p.name.clone()));
+                self.value_symbol_links.insert(
+                    &np,
+                    ValueSymbolLinks {
+                        resolved_type: Some(wpt),
+                        ..Default::default()
+                    },
+                );
+                new_members.insert(np.name.clone(), Arc::clone(&np));
+                new_props.push(np);
+                changed = true;
+            }
+        }
+        if !changed {
+            return widened;
+        }
+        let mut rebuilt = Type::new(
+            widened.flags,
+            TypeData::Object(ObjectTypeData {
+                structured: StructuredTypeData {
+                    members: new_members,
+                    properties: new_props,
+                    ..Default::default()
+                },
+                ..Default::default()
+            }),
+        );
+        rebuilt.object_flags = widened.object_flags;
+        Arc::new(rebuilt)
+    }
+
+    fn binding_path_step(
+        &mut self,
+        elem: &Arc<Node>,
+        t: Arc<Type>,
+        seg: &BindingPathSeg,
+    ) -> Option<Arc<Type>> {
+        if let BindingPathSeg::Prop(name, renamed) = seg {
+            if *renamed {
+                self.link_binding_element_container(elem, &t, name);
+            }
+            return self.get_type_of_property_of_type(&t, name);
+        }
+        let BindingPathSeg::Index(index) = seg else {
+            return None;
+        };
+        let index = *index;
+        if let TypeData::Tuple(tuple) = &t.data {
+            return tuple
+                .element_infos
+                .get(index)
+                .and_then(|info| info.type_.clone());
+        }
+        if t.object_flags.contains(crate::checker::types::ObjectFlags::Tuple)
+            && let Some(structured) = t.as_structured()
+            && let Some(info) = structured.index_infos.first()
+        {
+            return info.value_type.clone();
+        }
+        if let Some(elem) = self.get_array_element_type_of(&t) {
+            return Some(elem);
+        }
+        self.get_type_of_property_of_type(&t, &index.to_string())
     }
 
     pub(crate) fn with_declaring_file_context<T>(

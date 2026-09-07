@@ -209,8 +209,12 @@ impl Checker {
         self.needs_parens_in_union(t)
     }
 
-    pub(crate) fn maybe_parenthesize_array_element(&mut self, elem: &Arc<Type>) -> String {
-        let s = self.type_to_string_ex(elem, TypeFormatFlags::NONE);
+    pub(crate) fn maybe_parenthesize_array_element_ex(
+        &mut self,
+        elem: &Arc<Type>,
+        flags: TypeFormatFlags,
+    ) -> String {
+        let s = self.type_to_string_ex(elem, flags);
         if self.needs_parens_as_array_element(elem) {
             format!("({})", s)
         } else {

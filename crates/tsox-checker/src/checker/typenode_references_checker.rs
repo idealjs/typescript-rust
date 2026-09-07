@@ -7,9 +7,114 @@ impl Checker {
         if let Some(t) = self.get_cached_type(node) {
             return t;
         }
-        let result = self.error_type();
+        let constraint = self.container_instance_type_of(node);
+        let result = self.create_this_type(node, constraint);
         self.cache_type(node, result.clone());
         result
+    }
+
+    fn container_instance_type_of(&mut self, node: &Arc<Node>) -> Arc<Type> {
+        let mut cur = node.parent.clone();
+        while let Some(n) = cur {
+            match n.kind {
+                SyntaxKind::ClassDeclaration | SyntaxKind::ClassExpression => {
+                    return self.build_class_instance_type_with_base(&n);
+                }
+                SyntaxKind::InterfaceDeclaration => {
+                    return self.interface_declaration_type(&n);
+                }
+                _ => {}
+            }
+            cur = n.parent.clone();
+        }
+        self.get_any_type()
+    }
+
+    pub(crate) fn polymorphic_this_of(&mut self, node: &Arc<Node>) -> Option<Arc<Type>> {
+        let mut cur = node.parent.clone();
+        while let Some(n) = cur {
+            match n.kind {
+                SyntaxKind::ArrowFunction => {}
+                SyntaxKind::MethodDeclaration
+                | SyntaxKind::Constructor
+                | SyntaxKind::GetAccessor
+                | SyntaxKind::SetAccessor
+                | SyntaxKind::MethodSignature => {
+                    let container = n.parent.clone()?;
+                    match container.kind {
+                        SyntaxKind::ClassDeclaration
+                        | SyntaxKind::ClassExpression
+                        | SyntaxKind::InterfaceDeclaration => {
+                            let instance = self.container_instance_type_of(&container);
+                            return Some(self.create_this_type(&container, instance));
+                        }
+                        _ => return None,
+                    }
+                }
+                SyntaxKind::FunctionExpression | SyntaxKind::FunctionDeclaration => {
+                    return None;
+                }
+                _ => {}
+            }
+            cur = n.parent.clone();
+        }
+        None
+    }
+
+    pub(crate) fn create_this_type(
+        &mut self,
+        container: &Arc<Node>,
+        instance: Arc<Type>,
+    ) -> Arc<Type> {
+        let mut t = Type::new(
+            TypeFlags::TypeParameter,
+            TypeData::TypeParameter(TypeParameterData {
+                constrained: ConstrainedTypeData::default(),
+                constraint: Some(instance),
+                target: None,
+                mapper: None,
+                is_this_type: true,
+                resolved_default_type: OnceLock::new(),
+            }),
+        );
+        t.symbol = self.program.symbol_map().symbol_of(container).cloned();
+        Arc::new(t)
+    }
+
+    fn interface_declaration_type(&mut self, node: &Arc<Node>) -> Arc<Type> {
+        if let Some(sym) = self.program.symbol_map().symbol_of(node).cloned() {
+            if let Some(t) = self.type_alias_links.get(&sym).and_then(|l| l.declared_type.clone())
+            {
+                return t;
+            }
+            let result = self.resolve_interface_type_ex(&sym, None);
+            self.type_alias_links.get_or_default(&sym).declared_type = Some(Arc::clone(&result));
+            return result;
+        }
+        self.get_any_type()
+    }
+
+    pub(crate) fn explicit_this_parameter_type(&mut self, node: &Arc<Node>) -> Option<Arc<Type>> {
+        let mut cur = node.parent.clone();
+        while let Some(n) = cur {
+            let params = match &n.data {
+                NodeData::MethodDeclaration(d) => Some(&d.parameters),
+                NodeData::FunctionExpression(d) => Some(&d.parameters),
+                NodeData::FunctionDeclaration(d) => Some(&d.parameters),
+                NodeData::ArrowFunction(d) => Some(&d.parameters),
+                _ => None,
+            };
+            if let Some(params) = params
+                && let Some(first) = params.iter().next()
+                && let NodeData::ParameterDeclaration(pd) = &first.data
+                && matches!(&pd.name.data, NodeData::Identifier(id) if id.text == "this")
+                && let Some(tn) = &pd.type_node
+            {
+                return Some(self.get_type_from_type_node(tn));
+            }
+            cur = n.parent.clone();
+        }
+        None
     }
 
     pub(crate) fn get_type_from_literal_type_node(&mut self, node: &Arc<Node>) -> Arc<Type> {

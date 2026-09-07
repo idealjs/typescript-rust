@@ -186,6 +186,9 @@ fn line_and_character(text: &str, offset: usize) -> (u32, u32) {
 }
 
 fn uri_of(_s: &Session, file: &str) -> crate::lsp::lsproto_lsp_uri::DocumentUri {
+    if file.starts_with('/') {
+        return crate::lsp::lsproto_lsp_uri::DocumentUri(format!("file://{file}"));
+    }
     crate::lsp::lsproto_lsp_uri::DocumentUri(format!(
         "file://{}/{}",
         super::session::PROJECT_ROOT,

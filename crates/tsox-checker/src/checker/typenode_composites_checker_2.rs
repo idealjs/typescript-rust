@@ -141,6 +141,117 @@ impl Checker {
         }
     }
 
+    pub(crate) fn get_array_element_type_node(node: &Arc<Node>) -> Option<Arc<Node>> {
+        match &node.data {
+            NodeData::ParenthesizedTypeNode(d) => Self::get_array_element_type_node(&d.type_node),
+            NodeData::TupleTypeNode(d) => {
+                if d.elements.len() == 1 {
+                    let elem = d.elements.iter().next();
+                    if let Some(NodeData::RestTypeNode(rd)) = elem.map(|e| &e.data) {
+                        return Self::get_array_element_type_node(&rd.type_node);
+                    }
+                    if let Some(NodeData::NamedTupleMember(nd)) = elem.map(|e| &e.data) {
+                        if nd.dot_dot_dot_token.is_some() {
+                            return Self::get_array_element_type_node(&nd.type_node);
+                        }
+                    }
+                }
+                None
+            }
+            NodeData::ArrayTypeNode(d) => Some(Arc::clone(&d.element_type)),
+            _ => None,
+        }
+    }
+
+    pub(crate) fn get_tuple_element_flags(&self, node: &Arc<Node>) -> ElementFlags {
+        match &node.data {
+            NodeData::OptionalTypeNode(_) => ElementFlags::Optional,
+            NodeData::RestTypeNode(rd) => {
+                if Self::get_array_element_type_node(&rd.type_node).is_some() {
+                    ElementFlags::Rest
+                } else {
+                    ElementFlags::Variadic
+                }
+            }
+            NodeData::NamedTupleMember(nd) => {
+                if nd.question_token.is_some() {
+                    ElementFlags::Optional
+                } else if nd.dot_dot_dot_token.is_some() {
+                    if Self::get_array_element_type_node(&nd.type_node).is_some() {
+                        ElementFlags::Rest
+                    } else {
+                        ElementFlags::Variadic
+                    }
+                } else {
+                    ElementFlags::Required
+                }
+            }
+            _ => ElementFlags::Required,
+        }
+    }
+
+    pub(crate) fn get_tuple_element_info(&self, node: &Arc<Node>) -> TupleElementInfo {
+        let label = match &node.data {
+            NodeData::NamedTupleMember(nd) => Some(nd.name.text().to_string()),
+            _ => None,
+        };
+        let labeled_declaration = match &node.data {
+            NodeData::NamedTupleMember(_) => Some(Arc::clone(node)),
+            _ => node
+                .parent
+                .as_ref()
+                .filter(|_| node.kind == SyntaxKind::Parameter)
+                .cloned(),
+        };
+        TupleElementInfo {
+            label,
+            flags: self.get_tuple_element_flags(node),
+            labeled_declaration,
+            type_: None,
+        }
+    }
+
+    pub(crate) fn create_tuple_type_ex(
+        &mut self,
+        element_types: Vec<Arc<Type>>,
+        mut element_infos: Vec<TupleElementInfo>,
+        readonly: bool,
+    ) -> Arc<Type> {
+        if element_infos.len() == 1 && element_infos[0].flags.contains(ElementFlags::Rest) {
+            let elem = element_types.into_iter().next().unwrap_or_else(|| self.any_type());
+            return self.create_array_type(elem);
+        }
+        for (i, info) in element_infos.iter_mut().enumerate() {
+            info.type_ = element_types.get(i).cloned();
+        }
+        let min_length = element_infos
+            .iter()
+            .filter(|e| e.flags.intersects(ElementFlags::Required | ElementFlags::Variadic))
+            .count();
+        let fixed_length = element_infos
+            .iter()
+            .filter(|e| e.flags.intersects(ElementFlags::Required | ElementFlags::Optional))
+            .count();
+        let combined_flags = element_infos
+            .iter()
+            .fold(ElementFlags::None, |acc, e| acc | e.flags);
+        Arc::new(Type {
+            flags: TypeFlags::Object,
+            object_flags: ObjectFlags::Tuple,
+            id: crate::checker::types::next_type_id(),
+            symbol: None,
+            alias: None,
+            data: TypeData::Tuple(TupleTypeData {
+                interface_data: Default::default(),
+                element_infos,
+                min_length,
+                fixed_length,
+                combined_flags,
+                readonly,
+            }),
+        })
+    }
+
     pub(crate) fn iife_with_too_few_arguments(
         declaration: &Option<Arc<Node>>,
         parameter_count: usize,

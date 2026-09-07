@@ -40,6 +40,7 @@ impl LanguageService {
                 node = prev;
             }
         }
+        node = get_node_for_quick_info(&node, offset);
 
         let mut checker = program.build_checker();
         let parts = checker.get_quick_info_display_parts(&node);
@@ -106,6 +107,32 @@ fn is_leaf_token(node: &Arc<Node>) -> bool {
         false
     });
     !has_child
+}
+
+fn get_node_for_quick_info(node: &Arc<Node>, offset: usize) -> Arc<Node> {
+    use tsox_frontend::ast::SyntaxKind;
+    let Some(parent) = node.parent.as_ref() else {
+        return Arc::clone(node);
+    };
+    if parent.kind == SyntaxKind::NewExpression
+        && node.pos() == parent.pos()
+        && let Some(expr) = parent.expression()
+    {
+        return Arc::clone(expr);
+    }
+    if node.kind == SyntaxKind::NewExpression
+        && let Some(expr) = node.expression()
+        && offset < expr.pos()
+    {
+        return Arc::clone(expr);
+    }
+    if parent.kind == SyntaxKind::NamedTupleMember && node.pos() == parent.pos() {
+        return Arc::clone(parent);
+    }
+    if parent.kind == SyntaxKind::JsxNamespacedName {
+        return Arc::clone(parent);
+    }
+    Arc::clone(node)
 }
 
 fn is_hoverable_node(node: &Arc<Node>) -> bool {

@@ -12,6 +12,7 @@ impl Checker {
             NodeData::TupleTypeNode(d) => {
                 let mut element_types = Vec::new();
 
+                let mut element_infos = Vec::new();
                 let mut variadic_types: Vec<Arc<Type>> = Vec::new();
                 let mut has_variadic_union = false;
                 for elem in d.elements.iter() {
@@ -22,12 +23,17 @@ impl Checker {
                             || matches!(&inner_t.data, TypeData::Union(_));
                         variadic_types.push(inner_t);
                     }
+                    element_infos.push(self.get_tuple_element_info(elem));
                     element_types.push(self.get_type_from_type_node(elem));
                 }
                 if has_variadic_union && !self.check_cross_product_union(node, &variadic_types) {
                     return self.error_type();
                 }
-                self.create_tuple_type(element_types)
+                let readonly = node.parent.as_ref().is_some_and(|p| {
+                    matches!(&p.data, NodeData::TypeOperatorNode(op)
+                        if op.operator == SyntaxKind::ReadonlyKeyword)
+                });
+                self.create_tuple_type_ex(element_types, element_infos, readonly)
             }
             _ => self.error_type(),
         }

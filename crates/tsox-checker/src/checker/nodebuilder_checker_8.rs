@@ -128,14 +128,23 @@ impl Checker {
                     .as_ref()
                     .map(|ty| self.type_to_string_ex(ty, flags))
                     .unwrap_or_else(|| "any".to_string());
-                if elem.flags.contains(ElementFlags::Rest)
-                    || elem.flags.contains(ElementFlags::Variadic)
-                {
-                    format!("...{}", ty_str)
-                } else if elem.flags.contains(ElementFlags::Optional) {
-                    format!("{}?", ty_str)
-                } else if let Some(label) = elem.label.clone() {
-                    format!("{label}: {ty_str}")
+                let label = elem.label.clone().or_else(|| {
+                    elem.labeled_declaration
+                        .as_ref()
+                        .and_then(|d| tsox_frontend::ast::node_data_generated::node_name(d))
+                        .map(|n| n.text().to_string())
+                });
+                let is_variable = elem.flags.contains(ElementFlags::Rest)
+                    || elem.flags.contains(ElementFlags::Variadic);
+                let is_optional = elem.flags.contains(ElementFlags::Optional);
+                if let Some(label) = label {
+                    let prefix = if is_variable { "..." } else { "" };
+                    let question = if is_optional { "?" } else { "" };
+                    format!("{prefix}{label}{question}: {ty_str}")
+                } else if is_variable {
+                    format!("...{ty_str}")
+                } else if is_optional {
+                    format!("{ty_str}?")
                 } else {
                     ty_str
                 }
@@ -160,12 +169,12 @@ impl Checker {
             let elem_str = self.type_to_string_ex(elem, flags);
             let symbol_name = t.symbol.as_ref().map(|s| s.name.as_str()).unwrap_or("");
             if symbol_name == "ReadonlyArray" {
-                return format!("readonly {}[]", self.maybe_parenthesize_array_element(elem));
+                return format!("readonly {}[]", self.maybe_parenthesize_array_element_ex(elem, flags));
             }
             if flags.contains(TypeFormatFlags::WRITE_ARRAY_AS_GENERIC) {
                 return format!("Array<{}>", elem_str);
             }
-            return format!("{}[]", self.maybe_parenthesize_array_element(elem));
+            return format!("{}[]", self.maybe_parenthesize_array_element_ex(elem, flags));
         }
 
         let name = t

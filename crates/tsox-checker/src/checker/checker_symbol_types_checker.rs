@@ -79,10 +79,18 @@ impl Checker {
                 }
             }
 
+            // 无注解参数的 any 可能是节点级缓存的占位（get_type_of_node 污染），
+            // 须放行到 on-demand 上下文定型
+            let param_any_placeholder = |decl: &Arc<Node>, t: &Arc<Type>| {
+                decl.kind == SyntaxKind::Parameter && t.flags.contains(TypeFlags::Any)
+            };
+
             if let Some(decl) = &symbol.value_declaration {
                 if let Some(links) = self.type_node_links.get(decl) {
                     if let Some(ref t) = links.resolved_type {
-                        return Arc::clone(t);
+                        if !param_any_placeholder(decl, t) {
+                            return Arc::clone(t);
+                        }
                     }
                 }
             }
@@ -90,7 +98,9 @@ impl Checker {
             for decl in &symbol.declarations {
                 if let Some(links) = self.type_node_links.get(decl) {
                     if let Some(ref t) = links.resolved_type {
-                        return Arc::clone(t);
+                        if !param_any_placeholder(decl, t) {
+                            return Arc::clone(t);
+                        }
                     }
                 }
             }

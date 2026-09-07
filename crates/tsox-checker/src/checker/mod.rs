@@ -142,6 +142,8 @@ pub(crate) mod checker_symbol_types_checker_4;
 pub(crate) mod checker_unused_diagnostics;
 pub(crate) mod checker_unused_diagnostics_checker;
 pub(crate) mod checker_unused_diagnostics_checker_2;
+pub(crate) mod checker_union_signatures;
+pub(crate) mod checker_union_signatures_checker;
 pub(crate) mod emitresolver_checker_3;
 pub(crate) mod emitresolver_checker_4;
 pub(crate) mod emitresolver_checker_5;
@@ -263,6 +265,8 @@ pub(crate) mod symbolaccessibility_checker_5;
 pub(crate) mod symbolaccessibility_symbol_table_id;
 #[cfg(test)]
 pub(crate) mod tracer_tests;
+pub(crate) mod typenode_contextual_param;
+pub(crate) mod typenode_contextual_param_checker;
 pub(crate) mod typenode_composites;
 pub(crate) mod typenode_composites_checker;
 pub(crate) mod typenode_composites_checker_2;

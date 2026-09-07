@@ -6,6 +6,16 @@ pub const FILENAME_DIRECTIVE: &str = "@Filename:";
 pub const SYMLINK_DIRECTIVE: &str = "@SYMlink:";
 pub const GLOBAL_OPTIONS_DIRECTIVE: &str = "@GlobalOptions:";
 
+fn strip_directive<'a>(rest: &'a str, directive: &str) -> Option<&'a str> {
+    let rb = rest.as_bytes();
+    let db = directive.as_bytes();
+    if rb.len() >= db.len() && rb[..db.len()].eq_ignore_ascii_case(db) {
+        Some(&rest[db.len()..])
+    } else {
+        None
+    }
+}
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Marker {
     pub file_name: String,
@@ -91,17 +101,17 @@ pub fn parse_test_data(contents: &str, default_file_name: &str) -> TestData {
     for line in contents.split('\n') {
         let trimmed = line.trim_start();
         if let Some(rest) = trimmed.strip_prefix("// ") {
-            if let Some(f) = rest.strip_prefix(FILENAME_DIRECTIVE) {
+            if let Some(f) = strip_directive(rest, FILENAME_DIRECTIVE) {
                 acc.finish(default_file_name, &mut data);
                 acc = FileAccumulator::new();
                 acc.name = Some(f.trim().to_string());
                 continue;
             }
-            if let Some(s) = rest.strip_prefix(SYMLINK_DIRECTIVE) {
+            if let Some(s) = strip_directive(rest, SYMLINK_DIRECTIVE) {
                 acc.symlink = Some(s.trim().to_string());
                 continue;
             }
-            if let Some(g) = rest.strip_prefix(GLOBAL_OPTIONS_DIRECTIVE) {
+            if let Some(g) = strip_directive(rest, GLOBAL_OPTIONS_DIRECTIVE) {
                 for kv in g.split(',') {
                     if let Some((k, v)) = kv.split_once(':') {
                         data.global_options

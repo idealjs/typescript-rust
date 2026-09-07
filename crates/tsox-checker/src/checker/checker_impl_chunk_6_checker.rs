@@ -169,6 +169,16 @@ impl Checker {
                 self.get_any_type()
             }
             SyntaxKind::ThisKeyword | SyntaxKind::SuperKeyword => {
+                if node.kind == SyntaxKind::ThisKeyword
+                    && let Some(t) = self.explicit_this_parameter_type(node)
+                {
+                    return t;
+                }
+                if node.kind == SyntaxKind::ThisKeyword
+                    && let Some(t) = self.polymorphic_this_of(node)
+                {
+                    return t;
+                }
                 if node.kind == SyntaxKind::SuperKeyword
                     && self.super_in_computed_name_of_innermost_class(node)
                     && self.enclosing_class_stack.len() >= 2

@@ -32,75 +32,27 @@ impl Checker {
                 && !is_rest
                 && matches!(&pd.name.data, NodeData::Identifier(id) if id.text == "this");
 
-            let param_type = match pd.type_node.as_ref() {
-                Some(tn) => self.get_type_from_type_node(tn),
+            let (param_type, ctx_resolved) = match pd.type_node.as_ref() {
+                Some(tn) => (self.get_type_from_type_node(tn), true),
                 None => {
-                    let mut t = None;
-                    if let Some(ctx_sig) = contextual_signature {
-                        // checker.go getContextuallyTypedParameterType：
-                        // index = 参数位 - 源 this 数（目标签名 parameters 不含 this）
-                        let src_has_this = parameters.iter().next().is_some_and(|first| {
-                            matches!(&first.data, NodeData::ParameterDeclaration(fd)
-                                if matches!(&fd.name.data, NodeData::Identifier(id) if id.text == "this"))
-                        });
-                        let si = i - usize::from(!is_this_param && src_has_this && i > 0);
-                        let is_last = parameters
-                            .iter()
-                            .next_back()
-                            .is_some_and(|p| Arc::ptr_eq(p, param));
-                        if is_rest && is_last {
-                            // getRestTypeAtPosition：余参打包（有 ctx rest 用之，否则具名元组）
-                            let ctx_params = &ctx_sig.parameters;
-                            let n = ctx_params.len();
-                            let ctx_rest = n > 0
-                                && ctx_params.last().is_some_and(|p| {
-                                    p.declarations.iter().any(|d| {
-                                        matches!(&d.data, NodeData::ParameterDeclaration(pd)
-                                                if pd.dot_dot_dot_token.is_some())
-                                    })
-                                });
-                            let fixed = n - usize::from(ctx_rest);
-                            if ctx_rest && si >= fixed.saturating_sub(1) {
-                                t = self
-                                    .signature_instantiated_param_type(ctx_sig, fixed - 1)
-                                    .or_else(|| {
-                                        Some(self.get_type_of_symbol(&ctx_params[fixed - 1]))
-                                    });
-                            } else {
-                                // Go getRestTypeAtPosition：无剩余参数 → 空元组
-                                let mut elems: Vec<Arc<Type>> = Vec::new();
-                                let mut names: Vec<String> = Vec::new();
-                                for j in si..fixed {
-                                    elems.push(
-                                        self.signature_instantiated_param_type(ctx_sig, j)
-                                            .unwrap_or_else(|| {
-                                                self.get_type_of_symbol(&ctx_params[j])
-                                            }),
-                                    );
-                                    names.push(ctx_params[j].name.clone());
-                                }
-                                t = Some(self.create_tuple_type_named(elems, names));
-                            }
-                        } else {
-                            // tryGetTypeAtPosition：定参直取，越界走 rest 元素
-                            let ctx_params = &ctx_sig.parameters;
-                            let n = ctx_params.len();
-                            let ctx_rest = n > 0
-                                && ctx_params.last().is_some_and(|p| {
-                                    p.declarations.iter().any(|d| {
-                                        matches!(&d.data, NodeData::ParameterDeclaration(pd)
-                                                if pd.dot_dot_dot_token.is_some())
-                                    })
-                                });
-                            let fixed = n - usize::from(ctx_rest);
-                            if si < fixed {
-                                t = self
-                                    .signature_instantiated_param_type(ctx_sig, si)
-                                    .or_else(|| Some(self.get_type_of_symbol(&ctx_params[si])));
-                            }
+                    // ast.HasContextSensitiveParameters：带类型参数的函数不做上下文定型
+                    let generic_source = declaration.as_ref().is_some_and(|d| {
+                        match &d.data {
+                            NodeData::FunctionExpression(fd) => fd.type_parameters.is_some(),
+                            NodeData::ArrowFunction(ad) => ad.type_parameters.is_some(),
+                            NodeData::FunctionDeclaration(fdd) => fdd.type_parameters.is_some(),
+                            NodeData::MethodDeclaration(md) => md.type_parameters.is_some(),
+                            _ => false,
                         }
+                    });
+                    match contextual_signature
+                        .filter(|_| !generic_source)
+                        .and_then(|ctx_sig| {
+                            self.contextual_param_type_at(ctx_sig, parameters, i, param, is_rest, is_this_param)
+                        }) {
+                        Some(t) => (t, true),
+                        None => (self.get_any_type(), false),
                     }
-                    t.unwrap_or_else(|| self.get_any_type())
                 }
             };
 
@@ -121,13 +73,15 @@ impl Checker {
                 Some(s) => Arc::clone(s),
                 None => Arc::new(Symbol::new(SymbolFlags::Property, name)),
             };
-            self.value_symbol_links.insert(
-                &sym,
-                ValueSymbolLinks {
-                    resolved_type: Some(param_type),
-                    ..Default::default()
-                },
-            );
+            if ctx_resolved {
+                self.value_symbol_links.insert(
+                    &sym,
+                    ValueSymbolLinks {
+                        resolved_type: Some(param_type),
+                        ..Default::default()
+                    },
+                );
+            }
             param_symbols.push(sym);
             if is_this_param && this_parameter.is_none() {
                 this_parameter = param_symbols.pop();
