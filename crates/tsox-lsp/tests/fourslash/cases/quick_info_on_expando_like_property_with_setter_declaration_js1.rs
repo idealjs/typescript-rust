@@ -1,0 +1,20 @@
+use tsox_lsp::fourslash::{self, Session};
+
+#[ignore = "generator: t.Skip('Known failing fourslash test')"]
+#[test]
+fn quick_info_on_expando_like_property_with_setter_declaration_js1() {
+    // TODO: t.Skip("Known failing fourslash test")
+    let content = r#"// @strict: true
+// @checkJs: true
+// @filename: index.js
+const x = {};
+
+Object.defineProperty(x, "foo", {
+  /** @param {number} v */
+  set(v) {},
+});
+
+x.foo/**/ = 1;"#;
+    let mut s = Session::new(content);
+    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "", "(property) x.foo: number", "")
+}

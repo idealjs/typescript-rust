@@ -1,0 +1,48 @@
+use tsox_lsp::fourslash::{self, Session};
+
+#[ignore = "unimplemented: fourslash.VerifyCompletions"]
+#[test]
+fn completion_list_on_aliases2() {
+    let content = r#"// @lib: es5
+namespace M {
+    export interface I { }
+    export class C {
+        static property;
+    }
+    export enum E {
+        value = 0
+    }
+    export namespace N {
+        export var v;
+    }
+    export var V = 0;
+    export function F() { }
+    export import A = M;
+}
+
+import m = M;
+import c = M.C;
+import e = M.E;
+import n = M.N;
+import v = M.V;
+import f = M.F;
+import a = M.A;
+
+m./*1*/;
+var tmp: m./*1Type*/;
+c./*2*/;
+e./*3*/;
+n./*4*/;
+v./*5*/;
+f./*6*/;
+a./*7*/;
+var tmp2: a./*7Type*/;"#;
+    let mut s = Session::new(content);
+    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, []string{"1", "7"}, &fourslash.CompletionsExpectedList{
+    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, []string{"1Type", "7Type"}, &fourslash.CompletionsExpectedList{
+    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "2", &fourslash.CompletionsExpectedList{
+    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "3", &fourslash.CompletionsExpectedList{
+    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "4", &fourslash.CompletionsExpectedList{
+    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "5", &fourslash.CompletionsExpectedList{
+    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "6", &fourslash.CompletionsExpectedList{
+}

@@ -1,0 +1,19 @@
+use tsox_lsp::fourslash::{self, Session};
+
+#[ignore = "generator: f.MarkTestAsStradaServer()"]
+#[test]
+fn occurrences01() {
+    let content = r#"// @lib: es5
+foo: [|switch|] (10) {
+    [|case|] 1:
+    [|case|] 2:
+    [|case|] 3:
+        [|break|];
+        [|break|] foo;
+        continue;
+        continue foo;
+}"#;
+    let mut s = Session::new(content);
+    // TODO: f.MarkTestAsStradaServer()
+    fourslash::unsupported("VerifyBaselineDocumentHighlights"); // f.VerifyBaselineDocumentHighlights(t, nil /*preferences*/, ToAny(f.Ranges())...)
+}

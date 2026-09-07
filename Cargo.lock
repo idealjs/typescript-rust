@@ -1175,7 +1175,16 @@ dependencies = [
  "tokio",
  "tracing",
  "tracing-subscriber",
+ "tsox-api",
+ "tsox-checker",
+ "tsox-compile",
+ "tsox-core",
+ "tsox-emit",
+ "tsox-execute",
+ "tsox-frontend",
+ "tsox-lsp",
  "tsox-ts-libs",
+ "tsox-tsoptions",
  "unicode-ident",
  "unicode-width",
  "windows-sys 0.59.0",
@@ -1185,18 +1194,99 @@ dependencies = [
 [[package]]
 name = "tsox-api"
 version = "0.1.0"
+dependencies = [
+ "serde_json",
+]
+
+[[package]]
+name = "tsox-checker"
+version = "0.1.0"
+dependencies = [
+ "bitflags 2.13.1",
+ "dashmap",
+ "tsox-core",
+ "tsox-frontend",
+ "tsox-ts-libs",
+ "tsox-tsoptions",
+]
+
+[[package]]
+name = "tsox-compile"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "serde_json",
+ "tsox-checker",
+ "tsox-core",
+ "tsox-emit",
+ "tsox-frontend",
+ "tsox-tsoptions",
+]
 
 [[package]]
 name = "tsox-core"
 version = "0.1.0"
+dependencies = [
+ "bumpalo",
+ "dashmap",
+ "flate2",
+ "regex",
+ "serde",
+ "serde_json",
+ "xxhash-rust",
+]
+
+[[package]]
+name = "tsox-emit"
+version = "0.1.0"
+dependencies = [
+ "base64",
+ "bitflags 2.13.1",
+ "serde",
+ "tsox-checker",
+ "tsox-core",
+ "tsox-frontend",
+ "tsox-tsoptions",
+]
 
 [[package]]
 name = "tsox-execute"
 version = "0.1.0"
+dependencies = [
+ "notify",
+ "serde_json",
+ "tsox-checker",
+ "tsox-compile",
+ "tsox-core",
+ "tsox-frontend",
+ "tsox-tsoptions",
+]
+
+[[package]]
+name = "tsox-frontend"
+version = "0.1.0"
+dependencies = [
+ "bitflags 2.13.1",
+ "tsox-core",
+ "unicode-ident",
+]
 
 [[package]]
 name = "tsox-lsp"
 version = "0.1.0"
+dependencies = [
+ "notify",
+ "regex",
+ "serde",
+ "serde_json",
+ "tsox-checker",
+ "tsox-compile",
+ "tsox-core",
+ "tsox-frontend",
+ "tsox-tsoptions",
+ "unicode-ident",
+ "xxhash-rust",
+]
 
 [[package]]
 name = "tsox-ts-libs"
@@ -1205,6 +1295,13 @@ version = "0.1.0"
 [[package]]
 name = "tsox-tsoptions"
 version = "0.1.0"
+dependencies = [
+ "bitflags 2.13.1",
+ "serde",
+ "serde_json",
+ "tsox-core",
+ "tsox-frontend",
+]
 
 [[package]]
 name = "unarray"

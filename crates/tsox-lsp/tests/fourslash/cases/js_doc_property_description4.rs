@@ -1,0 +1,16 @@
+use tsox_lsp::fourslash::{self, Session};
+
+#[ignore = "generator: t.Skip('Known failing fourslash test')"]
+#[test]
+fn js_doc_property_description4() {
+    // TODO: t.Skip("Known failing fourslash test")
+    let content = r#"interface MultipleExample {
+    /** Something generic */
+    [key: string | number | symbol]: string;
+}
+function multipleExample(e: MultipleExample) {
+    console.log(e./*multiple*/anything);
+}"#;
+    let mut s = Session::new(content);
+    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "multiple", "(index) MultipleExample[string | number | symbol]: string", "Som
+}

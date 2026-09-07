@@ -1,0 +1,48 @@
+use tsox_lsp::fourslash::{self, Session};
+
+#[ignore = "generator: f.MarkTestAsStradaServer()"]
+#[test]
+fn auto_import_provider_export_map8() {
+    let content = r#"// @Filename: /home/src/workspaces/project/tsconfig.json
+{
+  "compilerOptions": {
+    "module": "nodenext",
+    "lib": ["es5"]
+  }
+}
+// @Filename: /home/src/workspaces/project/package.json
+{
+  "type": "module",
+  "dependencies": {
+    "dependency": "^1.0.0"
+  }
+}
+// @Filename: /home/src/workspaces/project/node_modules/dependency/package.json
+{
+  "type": "module",
+  "name": "dependency",
+  "version": "1.0.0",
+  "exports": {
+    "./lol": {
+      "import": "./lib/index.js",
+      "require": "./lib/lol.js"
+    }
+  }
+}
+// @Filename: /home/src/workspaces/project/node_modules/dependency/lib/index.d.ts
+export function fooFromIndex(): void;
+// @Filename: /home/src/workspaces/project/node_modules/dependency/lib/lol.d.ts
+export function fooFromLol(): void;
+// @Filename: /home/src/workspaces/project/src/bar.ts
+import { fooFromIndex } from "dependency";
+// @Filename: /home/src/workspaces/project/src/foo.cts
+fooFrom/*cts*/
+// @Filename: /home/src/workspaces/project/src/foo.mts
+fooFrom/*mts*/"#;
+    let mut s = Session::new(content);
+    // TODO: f.MarkTestAsStradaServer()
+    fourslash::go_to_marker(&mut s, "cts");
+    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "cts", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "mts");
+    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "mts", &fourslash.CompletionsExpectedList{
+}

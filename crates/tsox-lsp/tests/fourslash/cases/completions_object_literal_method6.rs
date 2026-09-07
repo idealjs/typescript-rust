@@ -1,0 +1,15 @@
+use tsox_lsp::fourslash::{self, Session};
+
+#[ignore = "unimplemented: fourslash.VerifyCompletions"]
+#[test]
+fn completions_object_literal_method6() {
+    let content = r#"// @Filename: a.ts
+type T = {
+    foo: () => Promise<void>;
+}
+const foo: T = {
+    async f/**/
+}"#;
+    let mut s = Session::new(content);
+    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
+}

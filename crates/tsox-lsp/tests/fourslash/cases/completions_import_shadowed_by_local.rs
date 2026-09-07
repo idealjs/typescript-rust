@@ -1,0 +1,14 @@
+use tsox_lsp::fourslash::{self, Session};
+
+#[ignore = "unimplemented: fourslash.VerifyCompletions"]
+#[test]
+fn completions_import_shadowed_by_local() {
+    let content = r#"// @noLib: true
+// @Filename: /a.ts
+export const foo = 0;
+// @Filename: /b.ts
+const foo = 1;
+fo/**/"#;
+    let mut s = Session::new(content);
+    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
+}

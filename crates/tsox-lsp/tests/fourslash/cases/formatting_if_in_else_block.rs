@@ -1,0 +1,15 @@
+use tsox_lsp::fourslash::{self, Session};
+
+#[ignore = "generator: f.Insert(t, '}')"]
+#[test]
+fn formatting_if_in_else_block() {
+    let content = r#"if (true) {
+}
+else {
+    if (true) {
+        /*1*/
+}"#;
+    let mut s = Session::new(content);
+    fourslash::go_to_marker(&mut s, "1");
+    // TODO: f.Insert(t, "}")
+}

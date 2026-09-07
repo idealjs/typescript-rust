@@ -5,3 +5,14 @@ edition.workspace = true
 license.workspace = true
 
 [dependencies]
+notify = "6"
+regex = "1"
+serde = { version = "1", features = ["derive"] }
+serde_json = { version = "1", features = ["preserve_order"] }
+tsox-checker = { workspace = true }
+tsox-compile = { workspace = true }
+tsox-core = { workspace = true }
+tsox-frontend = { workspace = true }
+tsox-tsoptions = { workspace = true }
+unicode-ident = "1"
+xxhash-rust = { version = "0.8", features = ["xxh3"] }

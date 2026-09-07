@@ -1,2 +1,14 @@
-// Placeholder during migration; compiler internals currently live in the
-// `tsox` crate and will be split out into here step by step.
+pub mod collections;
+pub mod core;
+pub mod debug;
+pub mod diagnostics;
+pub mod glob;
+pub mod jsnum;
+pub mod json;
+pub mod locale;
+pub mod nativepath;
+pub mod semver;
+pub mod stringutil;
+pub mod symlinks;
+pub mod tracing;
+pub mod tspath;

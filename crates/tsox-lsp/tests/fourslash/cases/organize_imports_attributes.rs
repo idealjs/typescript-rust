@@ -1,0 +1,16 @@
+use tsox_lsp::fourslash::{self, Session};
+
+#[ignore = "unimplemented: fourslash.VerifyOrganizeImports"]
+#[test]
+fn organize_imports_attributes() {
+    let content = r#"import { A } from "./file";
+import { type B } from "./file";
+import { C } from "./file" with { type: "a" };
+import { A as D } from "./file" with { type: "b" };
+import { E } from "./file" with { type: "a" };
+import { A as F } from "./file" with { type: "b" };
+
+type G = A | B | C | D | E | F;"#;
+    let mut s = Session::new(content);
+    fourslash::unsupported("VerifyOrganizeImports"); // f.VerifyOrganizeImports(t,
+}

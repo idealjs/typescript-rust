@@ -1,0 +1,22 @@
+use tsox_lsp::fourslash::{self, Session};
+
+#[ignore = "unimplemented: fourslash.VerifyBaselineGoToDefinition"]
+#[test]
+fn go_to_definition_imports() {
+    let content = r#"// @Filename: /a.ts
+export default function /*fDef*/f() {}
+export const /*xDef*/x = 0;
+// @Filename: /b.ts
+/*bDef*/declare const b: number;
+export = b;
+// @Filename: /b.ts
+import f, { x } from "./a";
+import * as /*aDef*/a from "./a";
+import b = require("./b");
+[|/*fUse*/f|];
+[|/*xUse*/x|];
+[|/*aUse*/a|];
+[|/*bUse*/b|];"#;
+    let mut s = Session::new(content);
+    fourslash::unsupported("VerifyBaselineGoToDefinition"); // f.VerifyBaselineGoToDefinition(t, true, "aUse", "fUse", "xUse", "bUse")
+}

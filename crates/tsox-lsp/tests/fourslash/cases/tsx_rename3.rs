@@ -1,0 +1,24 @@
+use tsox_lsp::fourslash::{self, Session};
+
+#[ignore = "generator: }"]
+#[test]
+fn tsx_rename3() {
+    let content = r#"//@Filename: file.tsx
+declare namespace JSX {
+    interface Element { }
+    interface IntrinsicElements {
+    }
+    interface ElementAttributesProperty { props }
+}
+class MyClass {
+  props: {
+    [|[|{| "contextRangeIndex": 0 |}name|]?: string;|]
+    size?: number;
+}
+
+
+var x = <MyClass [|[|{| "contextRangeIndex": 2 |}name|]='hello'|]/>;"#;
+    let mut s = Session::new(content);
+    fourslash::unsupported("VerifyBaselineRenameAtRangesWithText"); // f.VerifyBaselineRenameAtRangesWithText(t, nil /*preferences*/, "name")
+    // TODO: }
+}

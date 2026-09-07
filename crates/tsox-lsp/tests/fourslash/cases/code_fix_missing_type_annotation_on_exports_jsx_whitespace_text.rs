@@ -1,0 +1,16 @@
+use tsox_lsp::fourslash::{self, Session};
+
+#[ignore = "unimplemented: fourslash.VerifyCodeFixAvailable"]
+#[test]
+fn code_fix_missing_type_annotation_on_exports_jsx_whitespace_text() {
+    let content = r#"// @isolatedDeclarations: true
+// @declaration: true
+// @module: preserve
+// @Filename: /test.tsx
+export const /**/elem = <div>
+    <span />
+</div>;"#;
+    let mut s = Session::new(content);
+    fourslash::go_to_marker(&mut s, "");
+    fourslash::unsupported("VerifyCodeFixAvailable"); // f.VerifyCodeFixAvailable(t, nil)
+}

@@ -1,0 +1,20 @@
+use tsox_lsp::fourslash::{self, Session};
+
+#[ignore = "generator: opts180 := f.GetOptions()"]
+#[test]
+fn formatting_space_between_parent() {
+    let content = r#"/*1*/foo(() => 1);
+/*2*/foo(1);
+/*3*/if((true)){}"#;
+    let mut s = Session::new(content);
+    // TODO: opts180 := f.GetOptions()
+    // TODO: opts180.FormatCodeSettings.InsertSpaceAfterOpeningAndBeforeClosingNonemptyParenthesis = core.TSTrue
+    fourslash::unsupported("Configure"); // f.Configure(t, opts180)
+    fourslash::unsupported("FormatDocument"); // f.FormatDocument(t, "")
+    fourslash::go_to_marker(&mut s, "1");
+    fourslash::verify_current_line_content(&mut s, r#"foo( () => 1 );"#);
+    fourslash::go_to_marker(&mut s, "2");
+    fourslash::verify_current_line_content(&mut s, r#"foo( 1 );"#);
+    fourslash::go_to_marker(&mut s, "3");
+    fourslash::verify_current_line_content(&mut s, r#"if ( ( true ) ) { }"#);
+}

@@ -1,0 +1,20 @@
+use tsox_lsp::fourslash::{self, Session};
+
+#[ignore = "generator: t.Skip('Known failing fourslash test')"]
+#[test]
+fn js_doc_property_description1() {
+    // TODO: t.Skip("Known failing fourslash test")
+    let content = r#"interface StringExample {
+    /** Something generic */
+    [p: string]: any; 
+    /** Something specific */
+    property: number;
+}
+function stringExample(e: StringExample) {
+    console.log(e./*property*/property);
+    console.log(e./*string*/anything); 
+}"#;
+    let mut s = Session::new(content);
+    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "property", "(property) StringExample.property: number", "Something specific"
+    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "string", "(index) StringExample[string]: any", "Something generic")
+}

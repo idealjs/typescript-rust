@@ -1,0 +1,24 @@
+use tsox_lsp::fourslash::{self, Session};
+
+#[ignore = "generator: }"]
+#[test]
+fn tsx_find_all_references3() {
+    let content = r#"//@Filename: file.tsx
+declare namespace JSX {
+    interface Element { }
+    interface IntrinsicElements {
+    }
+    interface ElementAttributesProperty { props }
+}
+class MyClass {
+  props: {
+    /*1*/name?: string;
+    size?: number;
+}
+
+
+var x = <MyClass name='hello'/>;"#;
+    let mut s = Session::new(content);
+    fourslash::unsupported("VerifyBaselineFindAllReferences"); // f.VerifyBaselineFindAllReferences(t, "1")
+    // TODO: }
+}

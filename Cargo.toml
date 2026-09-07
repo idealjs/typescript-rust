@@ -7,6 +7,10 @@ members = [
     "crates/tsox-execute",
     "crates/tsox-lsp",
     "crates/tsox-api",
+    "crates/tsox-frontend",
+    "crates/tsox-checker",
+    "crates/tsox-emit",
+    "crates/tsox-compile",
     "crates/tsox",
 ]
 
@@ -16,6 +20,10 @@ edition = "2024"
 license = "Apache-2.0"
 
 [workspace.dependencies]
+tsox-compile = { path = "crates/tsox-compile" }
+tsox-emit = { path = "crates/tsox-emit" }
+tsox-checker = { path = "crates/tsox-checker" }
+tsox-frontend = { path = "crates/tsox-frontend" }
 tsox-core = { path = "crates/tsox-core" }
 tsox-ts-libs = { path = "crates/tsox-ts-libs" }
 tsox-tsoptions = { path = "crates/tsox-tsoptions" }

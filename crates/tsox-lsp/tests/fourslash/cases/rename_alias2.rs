@@ -1,0 +1,11 @@
+use tsox_lsp::fourslash::{self, Session};
+
+#[ignore = "unimplemented: fourslash.VerifyBaselineRenameAtRangesWithText"]
+#[test]
+fn rename_alias2() {
+    let content = r#"[|module [|{| "contextRangeIndex": 0 |}SomeModule|] { export class SomeClass { } }|]
+import M = [|SomeModule|];
+import C = M.SomeClass;"#;
+    let mut s = Session::new(content);
+    fourslash::unsupported("VerifyBaselineRenameAtRangesWithText"); // f.VerifyBaselineRenameAtRangesWithText(t, nil /*preferences*/, "SomeModule")
+}

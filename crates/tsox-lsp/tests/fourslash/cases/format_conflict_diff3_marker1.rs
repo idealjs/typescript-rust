@@ -1,0 +1,29 @@
+use tsox_lsp::fourslash::{self, Session};
+
+#[ignore = "unimplemented: fourslash.FormatDocument"]
+#[test]
+fn format_conflict_diff3_marker1() {
+    let content = r#"class C {
+<<<<<<< HEAD
+v = 1;
+||||||| merged common ancestors
+v = 3;
+=======
+v = 2;
+>>>>>>> Branch - a
+}"#;
+    let mut s = Session::new(content);
+    fourslash::unsupported("FormatDocument"); // f.FormatDocument(t, "")
+    fourslash::verify_current_file_content(
+        &mut s,
+        r#"class C {
+<<<<<<< HEAD
+v = 1;
+||||||| merged common ancestors
+v = 3;
+=======
+v = 2;
+>>>>>>> Branch - a
+}"#,
+    );
+}

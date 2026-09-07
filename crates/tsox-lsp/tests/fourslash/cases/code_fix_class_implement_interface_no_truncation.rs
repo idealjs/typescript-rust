@@ -1,0 +1,24 @@
+use tsox_lsp::fourslash::{self, Session};
+
+#[ignore = "generator: t.Skip('Known failing fourslash test')"]
+#[test]
+fn code_fix_class_implement_interface_no_truncation() {
+    // TODO: t.Skip("Known failing fourslash test")
+    let content = r#"// @stableTypeOrdering: true
+type GeneratePrefixedNumbers<Limit extends number, Prefix extends string, Result extends number[] = []> = 
+    Result['length'] extends Limit ? ` + "`" + `${Prefix}${Result[number]}` + "`" + ` : GeneratePrefixedNumbers<Limit, Prefix, [...Result, Result['length']]>;
+
+type PrefixedNumbersUpTo5 = GeneratePrefixedNumbers<5, 'name'>; // result = "name0" | "name1" | "name2" | "name3" | "name4"
+
+interface A<T extends number, U extends string> {
+    foo(bar: GeneratePrefixedNumbers<T, U>): GeneratePrefixedNumbers<T, U>;
+    get bar(): GeneratePrefixedNumbers<T, U>;
+    set bar(value: GeneratePrefixedNumbers<T, U>);
+    baz<V extends GeneratePrefixedNumbers<T,U>>(value: V): V;
+}
+
+class B implements A<999, 'ASuperLongStringASuperLongStringThatWeOnlyWeOnlyUsedToHitTheNoTruncationIssueASuperLongStringThatWeOnlyWeOnlyUsedToHitTheNoTruncationIssueASuperLongStringThatWeOnlyWeOnlyUsedToHitTheNoTruncationIssueASuperLongStringThatWeOnlyWeOnlyUsedToHitTheNoTruncationIssueASuperLongStringThatWeOnlyWeOnlyUsedToHitTheNoTruncationIssueASuperLongStringThatWeOnlyWeOnlyUsedToHitTheNoTruncationIssueASuperLongStringThatWeOnlyWeOnlyUsedToHitTheNoTruncationIssueASuperLongStringThatWeOnlyWeOnlyUsedToHitTheNoTruncationIssueASuperLongStringThatWeOnlyWeOnlyUsedToHitTheNoTruncationIssueASuperLongStringThatWeOnlyWeOnlyUsedToHitTheNoTruncationIssueASuperLongStringThatWeOnlyWeOnlyUsedToHitTheNoTruncationIssueASuperLongStringThatWeOnlyWeOnlyUsedToHitTheNoTruncationIssueASuperLongStringThatWeOnlyWeOnlyUsedToHitTheNoTruncationIssueASuperLongStringThatWeOnlyWeOnlyUsedToHitTheNoTruncationIssueASuperLongStringThatWeOnlyWeOnlyUsedToHitTheNoTruncationIssueASuperLongStringThatWeOnlyWeOnlyUsedToHitTheNoTruncationIssueASuperLongStringThatWeOnlyWeOnlyUsedToHitTheNoTruncationIssueASuperLongStringThatWeOnlyWeOnlyUsedToHitTheNoTruncationIssueASuperLongStringThatWeOnlyWeOnlyUsedToHitTheNoTruncationIssueASuperLongStringThatWeOnlyWeOnlyUsedToHitTheNoTruncationIssueASuperLongStringThatWeOnlyWeOnlyUsedToHitTheNoTruncationIssueASuperLongStringThatWeOnlyWeOnlyUsedToHitTheNoTruncationIssueASuperLongStringThatWeOnlyWeOnlyUsedToHitTheNoTruncationIssueASuperLongStringThatWeOnlyWeOnlyUsedToHitTheNoTruncationIssueASuperLongStringThatWeOnlyWeOnlyUsedToHitTheNoTruncationIssueASuperLongStringThatWeOnlyWeOnlyUsedToHitTheNoTruncationIssueASuperLongStringThatWeOnlyWeOnlyUsedToHitTheNoTruncationIssueASuperLongStringThatWeOnlyWeOnlyUsedToHitTheNoTruncationIssueASuperLongStringThatWeOnlyWeOnlyUsedToHitTheNoTruncationIssueASuperLongStringThatWeOnlyWeOnlyUsedToHitTheNoTruncationIssueASuperLongStringThatWeOnlyWeOnlyUsedToHitTheNoTruncationIssueASuperLongStringThatWeOnlyWeOnlyUsedToHitTheNoTruncationIssueASuperLongStringThatWeOnlyWeOnlyUsedToHitTheNoTruncationIssueThatWeOnlyWeOnlyUsedToHitTheNoTruncation'> {
+}"#;
+    let mut s = Session::new(content);
+    fourslash::unsupported("VerifyCodeFix"); // f.VerifyCodeFix(t, fourslash.VerifyCodeFixOptions{
+}

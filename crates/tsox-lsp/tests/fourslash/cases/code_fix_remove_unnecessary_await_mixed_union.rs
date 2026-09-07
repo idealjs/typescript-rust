@@ -1,0 +1,16 @@
+use tsox_lsp::fourslash::{self, Session};
+
+#[ignore = "unimplemented: fourslash.VerifySuggestionDiagnostics"]
+#[test]
+fn code_fix_remove_unnecessary_await_mixed_union() {
+    let content = r#"// @target: esnext
+async function fn1(a: Promise<void> | void) {
+  await a;
+}
+
+async function fn2<T extends Promise<void> | void>(a: T) {
+  await a;
+}"#;
+    let mut s = Session::new(content);
+    fourslash::unsupported("VerifySuggestionDiagnostics"); // f.VerifySuggestionDiagnostics(t, nil)
+}

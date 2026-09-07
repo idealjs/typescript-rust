@@ -1,10 +1,10 @@
 use std::process::ExitCode;
 use std::thread;
 
-use tsox::execute::{OsSystem, command_line};
+use tsox_execute::execute::OsSystem;
+use tsox_execute::execute::command_line;
 
 fn main() -> ExitCode {
-
     let result = thread::Builder::new()
         .stack_size(256 * 1024 * 1024)
         .spawn(main_inner)
@@ -20,11 +20,11 @@ fn main_inner() -> ExitCode {
     if let Some(first) = args.first() {
         match first.as_str() {
             "--lsp" => {
-                let code = tsox::lsp::run_lsp();
+                let code = tsox_lsp::lsp::run_lsp();
                 return ExitCode::from(code as u8);
             }
             "--api" => {
-                let code = tsox::api::run_api();
+                let code = tsox_api::api::run_api();
                 return ExitCode::from(code as u8);
             }
             _ => {}

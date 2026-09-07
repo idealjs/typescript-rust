@@ -1,0 +1,15 @@
+use tsox_lsp::fourslash::{self, Session};
+
+#[ignore = "unimplemented: fourslash.VerifyImportFixAtPosition"]
+#[test]
+fn import_name_code_fix_new_import_file1() {
+    let content = r#"[|/// <reference path="./tripleSlashReference.ts" />
+f1/*0*/();|]
+// @Filename: Module.ts
+export function f1() {}
+export var v1 = 5;
+// @Filename: tripleSlashReference.ts
+var x = 5;/*dummy*/"#;
+    let mut s = Session::new(content);
+    fourslash::unsupported("VerifyImportFixAtPosition"); // f.VerifyImportFixAtPosition(t, []string{
+}

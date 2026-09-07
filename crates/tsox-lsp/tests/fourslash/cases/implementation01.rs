@@ -1,0 +1,12 @@
+use tsox_lsp::fourslash::{self, Session};
+
+#[ignore = "generator: f.MarkTestAsStradaServer()"]
+#[test]
+fn implementation01() {
+    let content = r#"// @lib: es5
+interface Fo/*1*/o {}
+class /*2*/Bar implements Foo {}"#;
+    let mut s = Session::new(content);
+    // TODO: f.MarkTestAsStradaServer()
+    fourslash::unsupported("VerifyBaselineGoToImplementation"); // f.VerifyBaselineGoToImplementation(t, "1")
+}

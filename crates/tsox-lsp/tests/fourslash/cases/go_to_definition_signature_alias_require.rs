@@ -1,0 +1,17 @@
+use tsox_lsp::fourslash::{self, Session};
+
+#[ignore = "unimplemented: fourslash.VerifyBaselineGoToDefinition"]
+#[test]
+fn go_to_definition_signature_alias_require() {
+    let content = r#"// @allowJs: true
+// @Filename: /a.js
+module.exports = function /*f*/f() {}
+// @Filename: /b.js
+const f = require("./a");
+[|/*use*/f|]();
+// @Filename: /bar.ts
+import f = require("./a");
+[|/*useTs*/f|]();"#;
+    let mut s = Session::new(content);
+    fourslash::unsupported("VerifyBaselineGoToDefinition"); // f.VerifyBaselineGoToDefinition(t, true, "use", "useTs")
+}

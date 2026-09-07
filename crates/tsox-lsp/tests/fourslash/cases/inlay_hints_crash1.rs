@@ -1,0 +1,17 @@
+use tsox_lsp::fourslash::{self, Session};
+
+#[ignore = "unimplemented: fourslash.VerifyBaselineInlayHints"]
+#[test]
+fn inlay_hints_crash1() {
+    let content = r#"// @allowJs: true
+// @checkJs: true
+// @Filename: foo.js
+/**
+ * @param {function(string): boolean} f
+ */
+function doThing(f) {
+    f(100)
+}"#;
+    let mut s = Session::new(content);
+    fourslash::unsupported("VerifyBaselineInlayHints"); // f.VerifyBaselineInlayHints(t, nil /*span*/, &lsutil.UserPreferences{InlayHints: lsutil.InlayHintsPre
+}

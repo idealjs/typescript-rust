@@ -1,0 +1,29 @@
+use tsox_lsp::fourslash::{self, Session};
+
+#[ignore = "unimplemented: fourslash.VerifyCompletions"]
+#[test]
+fn completion_list_at_invalid_locations() {
+    let content = r#"var v1 = '';
+" /*openString1*/
+var v2 = '';
+"/*openString2*/
+var v3 = '';
+" bar./*openString3*/
+var v4 = '';
+// bar./*inComment1*/
+var v6 = '';
+// /*inComment2*/
+var v7 = '';
+/* /*inComment3*/
+var v11 = '';
+  // /*inComment4*/
+var v12 = '';
+type htm/*inTypeAlias*/
+
+//  /*inComment5*/
+foo;
+var v10 = /reg/*inRegExp1*/ex/;"#;
+    let mut s = Session::new(content);
+    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, []string{"openString1", "openString2", "openString3"}, &fourslash.Completions
+    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, []string{"inComment1", "inComment2", "inComment3", "inComment4", "inTypeAlias
+}

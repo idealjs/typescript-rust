@@ -1,0 +1,15 @@
+use tsox_lsp::fourslash::{self, Session};
+
+#[ignore = "generator: t.Skip('Known failing fourslash test')"]
+#[test]
+fn code_fix_infer_from_usage_member2() {
+    // TODO: t.Skip("Known failing fourslash test")
+    let content = r#"// @noImplicitAny: true
+interface I {
+    [|p;|]
+}
+var i: I;
+i.p = 0;"#;
+    let mut s = Session::new(content);
+    fourslash::unsupported("VerifyRangeAfterCodeFix"); // f.VerifyRangeAfterCodeFix(t, `p: number;`, false, 0, 0)
+}

@@ -1,0 +1,14 @@
+use tsox_lsp::fourslash::{self, Session};
+
+#[ignore = "unimplemented: fourslash.VerifyBaselineFindAllReferences"]
+#[test]
+fn find_all_refs_class_expression2() {
+    let content = r#"// @allowJs: true
+// @Filename: /a.js
+exports./*0*/A = class {};
+// @Filename: /b.js
+import { /*1*/A } from "./a";
+/*2*/A;"#;
+    let mut s = Session::new(content);
+    fourslash::unsupported("VerifyBaselineFindAllReferences"); // f.VerifyBaselineFindAllReferences(t, "0", "1", "2")
+}

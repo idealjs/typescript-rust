@@ -1,0 +1,16 @@
+use tsox_lsp::fourslash::{self, Session};
+
+#[ignore = "unimplemented: fourslash.VerifyBaselineRename"]
+#[test]
+fn rename_string_property_names2() {
+    let content = r#"type Props = {
+  foo: boolean;
+}
+
+let { foo }: Props = null as any;
+foo;
+
+let asd: Props = { "foo"/**/: true }; // rename foo here"#;
+    let mut s = Session::new(content);
+    fourslash::unsupported("VerifyBaselineRename"); // f.VerifyBaselineRename(t, nil /*preferences*/, "")
+}

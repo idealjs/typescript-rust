@@ -1,0 +1,10 @@
+use tsox_lsp::fourslash::{self, Session};
+
+#[ignore = "unimplemented: fourslash.VerifyBaselineGoToTypeDefinition"]
+#[test]
+fn go_to_type_definition3() {
+    let content = r#"type /*definition*/T = string;
+const x: /*reference*/T;"#;
+    let mut s = Session::new(content);
+    fourslash::unsupported("VerifyBaselineGoToTypeDefinition"); // f.VerifyBaselineGoToTypeDefinition(t, "reference")
+}

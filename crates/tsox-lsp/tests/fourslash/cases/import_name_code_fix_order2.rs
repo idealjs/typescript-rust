@@ -1,0 +1,31 @@
+use tsox_lsp::fourslash::{self, Session};
+
+#[ignore = "generator: t.Skip('Known failing fourslash test')"]
+#[test]
+fn import_name_code_fix_order2() {
+    // TODO: t.Skip("Known failing fourslash test")
+    let content = r#"// @Filename: /a.ts
+export const _aB: number;
+export const _Ab: number;
+export const aB: number;
+export const Ab: number;
+// @Filename: /b.ts
+[|import {
+    _aB,
+    _Ab,
+    Ab,
+} from "./a";
+aB;|]
+// @Filename: /c.ts
+[|import {
+    _aB,
+    _Ab,
+    Ab,
+} from "./a";
+aB;|]"#;
+    let mut s = Session::new(content);
+    fourslash::go_to_file(&mut s, "/b.ts");
+    fourslash::unsupported("VerifyImportFixAtPosition"); // f.VerifyImportFixAtPosition(t, []string{
+    fourslash::go_to_file(&mut s, "/c.ts");
+    fourslash::unsupported("VerifyImportFixAtPosition"); // f.VerifyImportFixAtPosition(t, []string{
+}

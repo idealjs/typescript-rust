@@ -1,0 +1,52 @@
+use tsox_lsp::fourslash::{self, Session};
+
+#[ignore = "unimplemented: fourslash.VerifyCompletions"]
+#[test]
+fn import_type_member_completions() {
+    let content = r#"// @Filename: /ns.ts
+export namespace Foo {
+    export namespace Bar {
+        export class Baz {}
+        export interface Bat {}
+        export const a: number;
+        const b: string;
+    }
+}
+// @Filename: /top.ts
+export interface Bat {}
+export const a: number;
+// @Filename: /equals.ts
+class Foo {
+ public static bar: string;
+ private static baz: number;
+}
+export = Foo;
+// @Filename: /usage1.ts
+type A = typeof import("./ns")./*1*/
+// @Filename: /usage2.ts
+type B = typeof import("./ns").Foo./*2*/
+// @Filename: /usage3.ts
+type C = typeof import("./ns").Foo.Bar./*3*/
+// @Filename: /usage4.ts
+type D = import("./ns")./*4*/
+// @Filename: /usage5.ts
+type E = import("./ns").Foo./*5*/
+// @Filename: /usage6.ts
+type F = import("./ns").Foo.Bar./*6*/
+// @Filename: /usage7.ts
+type G = typeof import("./top")./*7*/
+// @Filename: /usage8.ts
+type H = import("./top")./*8*/
+// @Filename: /usage9.ts
+type H = typeof import("./equals")./*9*/"#;
+    let mut s = Session::new(content);
+    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
+    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "2", &fourslash.CompletionsExpectedList{
+    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "3", &fourslash.CompletionsExpectedList{
+    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "4", &fourslash.CompletionsExpectedList{
+    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "5", &fourslash.CompletionsExpectedList{
+    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "6", &fourslash.CompletionsExpectedList{
+    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "7", &fourslash.CompletionsExpectedList{
+    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "8", &fourslash.CompletionsExpectedList{
+    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "9", &fourslash.CompletionsExpectedList{
+}

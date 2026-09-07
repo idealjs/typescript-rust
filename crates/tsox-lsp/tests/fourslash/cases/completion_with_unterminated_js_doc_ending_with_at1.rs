@@ -1,0 +1,13 @@
+use tsox_lsp::fourslash::{self, Session};
+
+#[ignore = "unimplemented: fourslash.VerifyCompletions"]
+#[test]
+fn completion_with_unterminated_js_doc_ending_with_at1() {
+    let content = r#"// @allowJs: true
+// @Filename: /atOnNewLineAtEOF.js
+function foo(x) {}
+/**
+ * @/*1*/"#;
+    let mut s = Session::new(content);
+    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
+}

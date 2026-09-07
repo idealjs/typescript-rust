@@ -1,0 +1,23 @@
+use tsox_lsp::fourslash::{self, Session};
+
+#[ignore = "generator: f.MarkTestAsStradaServer()"]
+#[test]
+fn import_fixes_ambient_circular_default_crash() {
+    let content = r#"// @Filename: /home/src/workspaces/project/tsconfig.json
+{
+  "compilerOptions": {
+    "module": "preserve",
+    "lib": ["es5"]
+  }
+}
+// @Filename: /home/src/workspaces/project/types.d.ts
+declare module "mymod" {
+  import mymod from "mymod";
+  export default mymod;
+}
+// @Filename: /home/src/workspaces/project/index.ts
+my/**/"#;
+    let mut s = Session::new(content);
+    // TODO: f.MarkTestAsStradaServer()
+    fourslash::unsupported("VerifyImportFixModuleSpecifiers"); // f.VerifyImportFixModuleSpecifiers(t, "", []string{}, nil /*preferences*/)
+}

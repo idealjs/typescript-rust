@@ -1,0 +1,27 @@
+use tsox_lsp::fourslash::{self, Session};
+
+#[ignore = "generator: f.MarkTestAsStradaServer()"]
+#[test]
+fn jsdoc_typedef_tag_go_to_definition() {
+    let content = r#"// @lib: es5
+// @allowNonTsExtensions: true
+// @Filename: jsdocCompletion_typedef.js
+/**
+ * @typedef {Object} Person
+ * @property {string} /*1*/personName
+ * @property {number} personAge
+ */
+
+/**
+ * @typedef {{ /*2*/animalName: string, animalAge: number }} Animal
+ */
+
+/** @type {Person} */
+var person; person.[|personName/*3*/|]
+
+/** @type {Animal} */
+var animal; animal.[|animalName/*4*/|]"#;
+    let mut s = Session::new(content);
+    // TODO: f.MarkTestAsStradaServer()
+    fourslash::unsupported("VerifyBaselineGoToDefinition"); // f.VerifyBaselineGoToDefinition(t, true, "3", "4")
+}

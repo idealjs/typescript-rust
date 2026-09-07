@@ -1,0 +1,14 @@
+[package]
+name = "tsox-compile"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = { version = "1", features = ["preserve_order"] }
+tsox-checker = { workspace = true }
+tsox-core = { workspace = true }
+tsox-emit = { workspace = true }
+tsox-frontend = { workspace = true }
+tsox-tsoptions = { workspace = true }

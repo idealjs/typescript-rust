@@ -23,6 +23,15 @@ required-features = ["accept"]
 accept = []
 
 [dependencies]
+tsox-api = { workspace = true }
+tsox-execute = { workspace = true }
+tsox-lsp = { workspace = true }
+tsox-compile = { workspace = true }
+tsox-emit = { workspace = true }
+tsox-checker = { workspace = true }
+tsox-tsoptions = { workspace = true }
+tsox-frontend = { workspace = true }
+tsox-core = { workspace = true }
 tsox-ts-libs = { workspace = true }
 tokio = { version = "1", features = ["full"] }
 serde = { version = "1", features = ["derive"] }

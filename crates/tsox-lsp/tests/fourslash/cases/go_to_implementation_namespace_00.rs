@@ -1,0 +1,18 @@
+use tsox_lsp::fourslash::{self, Session};
+
+#[ignore = "unimplemented: fourslash.VerifyBaselineGoToImplementation"]
+#[test]
+fn go_to_implementation_namespace_00() {
+    let content = r#"namespace /*implementation0*/Foo {
+    export function hello() {}
+}
+
+module /*implementation1*/Bar {
+    export function sure() {}
+}
+
+let x = Fo/*reference0*/o;
+let y = Ba/*reference1*/r;"#;
+    let mut s = Session::new(content);
+    fourslash::unsupported("VerifyBaselineGoToImplementation"); // f.VerifyBaselineGoToImplementation(t, "reference0", "reference1")
+}

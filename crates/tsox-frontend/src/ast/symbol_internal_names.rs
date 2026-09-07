@@ -1,0 +1,22 @@
+pub const INTERNAL_SYMBOL_NAME_PREFIX: &str = "\u{FE}";
+
+pub const INTERNAL_SYMBOL_NAME_CALL: &str = "\u{FE}call";
+pub const INTERNAL_SYMBOL_NAME_CONSTRUCTOR: &str = "\u{FE}constructor";
+pub const INTERNAL_SYMBOL_NAME_NEW: &str = "\u{FE}new";
+pub const INTERNAL_SYMBOL_NAME_INDEX: &str = "\u{FE}index";
+pub const INTERNAL_SYMBOL_NAME_EXPORT_STAR: &str = "\u{FE}export";
+pub const INTERNAL_SYMBOL_NAME_GLOBAL: &str = "\u{FE}global";
+pub const INTERNAL_SYMBOL_NAME_MISSING: &str = "\u{FE}missing";
+pub const INTERNAL_SYMBOL_NAME_TYPE: &str = "\u{FE}type";
+pub const INTERNAL_SYMBOL_NAME_OBJECT: &str = "\u{FE}object";
+pub const INTERNAL_SYMBOL_NAME_JSX_ATTRIBUTES: &str = "\u{FE}jsxAttributes";
+pub const INTERNAL_SYMBOL_NAME_CLASS: &str = "\u{FE}class";
+pub const INTERNAL_SYMBOL_NAME_FUNCTION: &str = "\u{FE}function";
+pub const INTERNAL_SYMBOL_NAME_COMPUTED: &str = "\u{FE}computed";
+pub const INTERNAL_SYMBOL_NAME_ASSIGNMENT: &str = "\u{FE}assignment";
+pub const INTERNAL_SYMBOL_NAME_INSTANTIATION_EXPRESSION: &str = "\u{FE}instantiationExpression";
+pub const INTERNAL_SYMBOL_NAME_IMPORT_ATTRIBUTES: &str = "\u{FE}importAttributes";
+pub const INTERNAL_SYMBOL_NAME_EXPORT_EQUALS: &str = "export=";
+pub const INTERNAL_SYMBOL_NAME_DEFAULT: &str = "default";
+pub const INTERNAL_SYMBOL_NAME_THIS: &str = "this";
+pub const INTERNAL_SYMBOL_NAME_MODULE_EXPORTS: &str = "module.exports";

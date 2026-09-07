@@ -1,0 +1,48 @@
+#[derive(Debug, Clone, Default)]
+pub struct Stack<T> {
+    data: Vec<T>,
+}
+
+impl<T> Stack<T> {
+    pub fn new() -> Self {
+        Self { data: Vec::new() }
+    }
+
+    pub fn with_capacity(capacity: usize) -> Self {
+        Self {
+            data: Vec::with_capacity(capacity),
+        }
+    }
+
+    pub fn push(&mut self, item: T) {
+        self.data.push(item);
+    }
+
+    pub fn pop(&mut self) -> T {
+        self.data.pop().expect("stack is empty")
+    }
+
+    pub fn peek(&self) -> &T {
+        self.data.last().expect("stack is empty")
+    }
+
+    pub fn peek_mut(&mut self) -> &mut T {
+        self.data.last_mut().expect("stack is empty")
+    }
+
+    pub fn len(&self) -> usize {
+        self.data.len()
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.data.is_empty()
+    }
+
+    pub fn clear(&mut self) {
+        self.data.clear();
+    }
+
+    pub fn iter(&self) -> std::slice::Iter<'_, T> {
+        self.data.iter()
+    }
+}

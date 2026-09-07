@@ -1,0 +1,19 @@
+use tsox_lsp::fourslash::{self, Session};
+
+#[ignore = "unimplemented: fourslash.VerifyBaselineGoToImplementation"]
+#[test]
+fn go_to_implementation_class_method_01() {
+    let content = r#"abstract class AbstractBar {
+    abstract he/*declaration*/llo(): void;
+}
+
+class Bar extends AbstractBar{
+    [|hello|]() {}
+}
+
+function whatever(x: AbstractBar) {
+    x.he/*reference*/llo();
+}"#;
+    let mut s = Session::new(content);
+    fourslash::unsupported("VerifyBaselineGoToImplementation"); // f.VerifyBaselineGoToImplementation(t, "reference", "declaration")
+}
