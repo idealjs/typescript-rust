@@ -13,7 +13,7 @@ fn transitive_export_imports2() {
 // @Filename: c.ts
 [|import { /*C*/[|{| "isWriteAccess": true, "isDefinition": true, "contextRangeIndex": 6 |}B|] } from "./b";|]"#;
     let mut s = Session::new(content);
-    fourslash::unsupported("VerifyNoErrors"); // f.VerifyNoErrors(t)
+    fourslash::verify_no_errors(&mut s);
     fourslash::unsupported("VerifyBaselineFindAllReferences"); // f.VerifyBaselineFindAllReferences(t, "A", "B", "C")
     fourslash::unsupported("VerifyBaselineRename"); // f.VerifyBaselineRename(t, nil /*preferences*/, f.Ranges()[1], f.Ranges()[4])
     fourslash::unsupported("VerifyBaselineRename"); // f.VerifyBaselineRename(t, nil /*preferences*/, f.Ranges()[3], f.Ranges()[5])

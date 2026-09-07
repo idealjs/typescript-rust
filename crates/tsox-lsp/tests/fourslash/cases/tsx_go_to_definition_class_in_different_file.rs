@@ -10,6 +10,6 @@ export default class /*def*/C {}
 import C from "./C";
 const foo = </*use*/C />;"#;
     let mut s = Session::new(content);
-    fourslash::unsupported("VerifyNoErrors"); // f.VerifyNoErrors(t)
+    fourslash::verify_no_errors(&mut s);
     fourslash::unsupported("VerifyBaselineGoToDefinition"); // f.VerifyBaselineGoToDefinition(t, false, "use")
 }

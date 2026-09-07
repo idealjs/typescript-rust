@@ -225,7 +225,7 @@ pub fn parse_jsdoc_for_node(source_file: &crate::ast::SourceFile, node: &Node) -
 
     let key = jsdoc_parser_key(&source_file.file_name, text);
     let mut jsdocs: Vec<Arc<Node>> = Vec::with_capacity(ranges.len());
-    let mut pos = node.pos();
+    let mut pos = ranges[0].pos;
     JSDOC_PARSER.with(|cell| {
         let mut slot = cell.borrow_mut();
         if slot.as_ref().map(|(k, _)| *k) != Some(key) {

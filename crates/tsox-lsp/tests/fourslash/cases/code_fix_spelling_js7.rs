@@ -1,6 +1,5 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyNoErrors"]
 #[test]
 fn code_fix_spelling_js7() {
     let content = r#"// @allowjs: true
@@ -56,5 +55,5 @@ var other = {
 window.argle
 self.blargle"#;
     let mut s = Session::new(content);
-    fourslash::unsupported("VerifyNoErrors"); // f.VerifyNoErrors(t)
+    fourslash::verify_no_errors(&mut s);
 }

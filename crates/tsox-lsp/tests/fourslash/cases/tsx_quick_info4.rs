@@ -42,9 +42,24 @@ function buildSomeElement2(): JSX.Element {
 }
 let componenet = <MainButton onClick={()=>{}} ext/*5*/ra-prop>GO</MainButton>;"#;
     let mut s = Session::new(content);
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "1", "function MainButton(linkProps: LinkProps): JSX.Element (+1 overload)", 
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "2", "(property) LinkProps.to: string", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "3", "function MainButton(buttonProps: ButtonProps): JSX.Element (+1 overload
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "4", "(method) ButtonProps.onClick(event?: React.MouseEvent<HTMLButtonElement
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "5", "(property) extra-prop: true", "")
+    fourslash::verify_quick_info_at(
+        &mut s,
+        "1",
+        "function MainButton(linkProps: LinkProps): JSX.Element (+1 overload)",
+        "",
+    );
+    fourslash::verify_quick_info_at(&mut s, "2", "(property) LinkProps.to: string", "");
+    fourslash::verify_quick_info_at(
+        &mut s,
+        "3",
+        "function MainButton(buttonProps: ButtonProps): JSX.Element (+1 overload)",
+        "",
+    );
+    fourslash::verify_quick_info_at(
+        &mut s,
+        "4",
+        "(method) ButtonProps.onClick(event?: React.MouseEvent<HTMLButtonElement>): void",
+        "",
+    );
+    fourslash::verify_quick_info_at(&mut s, "5", "(property) extra-prop: true", "");
 }

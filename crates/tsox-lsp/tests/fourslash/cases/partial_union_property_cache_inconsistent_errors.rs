@@ -1,6 +1,5 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyNoErrors"]
 #[test]
 fn partial_union_property_cache_inconsistent_errors() {
     let content = r#"// @strict: true
@@ -39,8 +38,8 @@ export function withInstall<C extends Component, T extends WithInstallPlugin>(
   return "";
 }"#;
     let mut s = Session::new(content);
-    fourslash::unsupported("VerifyNoErrors"); // f.VerifyNoErrors(t)
+    fourslash::verify_no_errors(&mut s);
     fourslash::go_to_marker(&mut s, "");
     fourslash::insert(&mut s, "type C = Component['name']");
-    fourslash::unsupported("VerifyNoErrors"); // f.VerifyNoErrors(t)
+    fourslash::verify_no_errors(&mut s);
 }

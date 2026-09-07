@@ -13,5 +13,5 @@ class Foo {
   }
 }"#;
     let mut s = Session::new(content);
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "1", "", "")
+    fourslash::verify_quick_info_at(&mut s, "1", "", "");
 }

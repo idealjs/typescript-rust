@@ -16,6 +16,6 @@ class B implements B {
 const f = new B()
 f.x/*2*/"#;
     let mut s = Session::new(content);
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "1", "(property) A.x: string", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "2", "(property) B.x: string", "")
+    fourslash::verify_quick_info_at(&mut s, "1", "(property) A.x: string", "");
+    fourslash::verify_quick_info_at(&mut s, "2", "(property) B.x: string", "");
 }

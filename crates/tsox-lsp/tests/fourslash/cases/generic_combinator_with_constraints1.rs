@@ -9,6 +9,6 @@ fn generic_combinator_with_constraints1() {
     var /*2*/xs2 = source.map((x: T, a, b): U => { return null }); // any[] 
 }"#;
     let mut s = Session::new(content);
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "1", "(local var) xs: U[]", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "2", "(local var) xs2: U[]", "")
+    fourslash::verify_quick_info_at(&mut s, "1", "(local var) xs: U[]", "");
+    fourslash::verify_quick_info_at(&mut s, "2", "(local var) xs2: U[]", "");
 }

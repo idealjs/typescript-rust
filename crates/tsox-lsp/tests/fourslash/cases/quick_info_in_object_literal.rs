@@ -1,6 +1,5 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyQuickInfoAt"]
 #[test]
 fn quick_info_in_object_literal() {
     let content = r#"interface Foo {
@@ -21,6 +20,6 @@ class Foo {
   }
 }"#;
     let mut s = Session::new(content);
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "1", "(property) y1: () => string", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "2", "var value: number", "")
+    fourslash::verify_quick_info_at(&mut s, "1", "(property) y1: () => string", "");
+    fourslash::verify_quick_info_at(&mut s, "2", "var value: number", "");
 }

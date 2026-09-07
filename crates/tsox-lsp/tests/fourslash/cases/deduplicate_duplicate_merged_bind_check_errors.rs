@@ -1,6 +1,5 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyNumberOfErrorsInCurrentFile"]
 #[test]
 fn deduplicate_duplicate_merged_bind_check_errors() {
     let content = r#"class X {
@@ -12,5 +11,5 @@ fn deduplicate_duplicate_merged_bind_check_errors() {
   }
 }"#;
     let mut s = Session::new(content);
-    fourslash::unsupported("VerifyNumberOfErrorsInCurrentFile"); // f.VerifyNumberOfErrorsInCurrentFile(t, 2)
+    fourslash::verify_number_of_errors_in_current_file(&mut s, 2);
 }

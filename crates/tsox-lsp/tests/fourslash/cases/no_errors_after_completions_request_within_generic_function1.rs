@@ -10,5 +10,5 @@ func({ foo: 1, bar/*1*/: 1 });"#;
     let mut s = Session::new(content);
     fourslash::go_to_marker(&mut s, "1");
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, nil, nil)
-    fourslash::unsupported("VerifyNoErrors"); // f.VerifyNoErrors(t)
+    fourslash::verify_no_errors(&mut s);
 }

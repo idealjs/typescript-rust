@@ -20,6 +20,6 @@ for ([|{ skills: { [|{| "contextRangeIndex": 6 |}primary|], secondary } } of mul
     [|primary|];
 }"#;
     let mut s = Session::new(content);
-    fourslash::unsupported("VerifyNoErrors"); // f.VerifyNoErrors(t)
+    fourslash::verify_no_errors(&mut s);
     fourslash::unsupported("VerifyBaselineRename"); // f.VerifyBaselineRename(t, nil /*preferences*/, f.Ranges()[1], f.Ranges()[5], f.Ranges()[3], f.Ranges
 }

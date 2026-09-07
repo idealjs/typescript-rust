@@ -12,6 +12,6 @@ export as namespace /*0*/myLib;
 /// <reference path="0.d.ts" />
 /*1*/myLib.doThing();"#;
     let mut s = Session::new(content);
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "0", "export namespace myLib", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "1", "export namespace myLib", "")
+    fourslash::verify_quick_info_at(&mut s, "0", "export namespace myLib", "");
+    fourslash::verify_quick_info_at(&mut s, "1", "export namespace myLib", "");
 }

@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyNoErrors"]
+#[ignore = "unimplemented: fourslash.VerifyWillRenameFilesEdits"]
 #[test]
 fn get_edits_for_file_rename_preserve_path_ending() {
     let content = r#"// @allowJs: true
@@ -21,7 +21,7 @@ import { x as x2 } from "./index.js";
 import { y } from "./jsx.jsx";
 import { j } from "./j.jonah.json";"#;
     let mut s = Session::new(content);
-    fourslash::unsupported("VerifyNoErrors"); // f.VerifyNoErrors(t)
+    fourslash::verify_no_errors(&mut s);
     fourslash::unsupported("VerifyWillRenameFilesEdits"); // f.VerifyWillRenameFilesEdits(t, "/a.js", "/b.js", map[string]string{}, nil /*preferences*/)
     fourslash::unsupported("VerifyWillRenameFilesEdits"); // f.VerifyWillRenameFilesEdits(t, "/b.js", "/src/b.js", map[string]string{
 }

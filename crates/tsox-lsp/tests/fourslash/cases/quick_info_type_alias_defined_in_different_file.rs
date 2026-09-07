@@ -11,5 +11,5 @@ export function f(x: X): void {}
 import { f } from "./a";
 /**/f({ x: 1 });"#;
     let mut s = Session::new(content);
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "", "(alias) f(x: X): void\nimport f", "")
+    fourslash::verify_quick_info_at(&mut s, "", "(alias) f(x: X): void\nimport f", "");
 }

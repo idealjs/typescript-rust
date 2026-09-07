@@ -1,6 +1,5 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyNumberOfErrorsInCurrentFile"]
 #[test]
 fn incremental_resolve_function_property_assignment() {
     let content = r#"function bar(indexer: { getLength(): number; getTypeAtIndex(index: number): string; }): string {
@@ -24,6 +23,6 @@ function foo(a: string[]) {
 var val = foo(["myString1", "myString2"]);
 /*1*/val;"#;
     let mut s = Session::new(content);
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "1", "var val: string", "")
-    fourslash::unsupported("VerifyNumberOfErrorsInCurrentFile"); // f.VerifyNumberOfErrorsInCurrentFile(t, 1)
+    fourslash::verify_quick_info_at(&mut s, "1", "var val: string", "");
+    fourslash::verify_number_of_errors_in_current_file(&mut s, 1);
 }

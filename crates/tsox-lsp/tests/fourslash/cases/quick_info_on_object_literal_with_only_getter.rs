@@ -12,8 +12,13 @@ fn quick_info_on_object_literal_with_only_getter() {
 var /*4*/point = makePoint(2);
 var /*2*/x = point./*3*/x;"#;
     let mut s = Session::new(content);
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "1", "function makePoint(x: number): {\n    readonly x: number;\n}", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "2", "var x: number", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "4", "var point: {\n    readonly x: number;\n}", "")
+    fourslash::verify_quick_info_at(
+        &mut s,
+        "1",
+        "function makePoint(x: number): {\n    readonly x: number;\n}",
+        "",
+    );
+    fourslash::verify_quick_info_at(&mut s, "2", "var x: number", "");
+    fourslash::verify_quick_info_at(&mut s, "4", "var point: {\n    readonly x: number;\n}", "");
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "3", &fourslash.CompletionsExpectedList{
 }

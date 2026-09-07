@@ -1,6 +1,5 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyQuickInfoAt"]
 #[test]
 fn quick_info_root_symbol_js_doc_aggregation() {
     let content = r#"
@@ -39,7 +38,7 @@ duplicate./*duplicate*/a
 mixed./*mixed*/a
 "#;
     let mut s = Session::new(content);
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "distinct", "(property) a: number", "first\nsecond")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "duplicate", "(property) a: number", "same\nthird")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "mixed", "(property) a: number", "first\nsecond")
+    fourslash::verify_quick_info_at(&mut s, "distinct", "(property) a: number", "first\nsecond");
+    fourslash::verify_quick_info_at(&mut s, "duplicate", "(property) a: number", "same\nthird");
+    fourslash::verify_quick_info_at(&mut s, "mixed", "(property) a: number", "first\nsecond");
 }

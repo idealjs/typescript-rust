@@ -19,6 +19,16 @@ fn completion_list_in_named_function_expression() {
 fo/*referenceInGlobalScope*/o;"#;
     let mut s = Session::new(content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, []string{"globalScope", "insideFunctionDeclaration", "insideFunctionExpressio
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "referenceInsideFunctionExpression", "(local function) foo(): number", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "referenceInGlobalScope", "function foo(a: number): string", "")
+    fourslash::verify_quick_info_at(
+        &mut s,
+        "referenceInsideFunctionExpression",
+        "(local function) foo(): number",
+        "",
+    );
+    fourslash::verify_quick_info_at(
+        &mut s,
+        "referenceInGlobalScope",
+        "function foo(a: number): string",
+        "",
+    );
 }

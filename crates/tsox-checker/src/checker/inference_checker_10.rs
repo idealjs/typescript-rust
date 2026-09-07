@@ -174,6 +174,20 @@ impl Checker {
                 self.get_contextual_type_for_argument(&parent, node)
             }
 
+            SyntaxKind::TypeAssertionExpression => {
+                if let tsox_frontend::ast::NodeData::TypeAssertion(d) = &parent.data {
+                    Some(self.get_type_from_type_node(&d.type_node))
+                } else {
+                    None
+                }
+            }
+            SyntaxKind::AsExpression => {
+                if let tsox_frontend::ast::NodeData::AsExpression(d) = &parent.data {
+                    Some(self.get_type_from_type_node(&d.type_node))
+                } else {
+                    None
+                }
+            }
             SyntaxKind::SatisfiesExpression => {
                 if let tsox_frontend::ast::NodeData::SatisfiesExpression(d) = &parent.data {
                     Some(self.get_type_from_type_node(&d.type_node))

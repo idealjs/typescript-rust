@@ -8,5 +8,5 @@ fn quick_info_on_arguments_inside_function() {
     return /*1*/arguments;
 }"#;
     let mut s = Session::new(content);
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "1", "(local var) arguments: IArguments", "")
+    fourslash::verify_quick_info_at(&mut s, "1", "(local var) arguments: IArguments", "");
 }

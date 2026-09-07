@@ -11,5 +11,5 @@ fn paste_lambda_over_module() {
     fourslash::unsupported("GoToBOF"); // f.GoToBOF(t)
     fourslash::unsupported("DeleteAtCaret"); // f.DeleteAtCaret(t, 15)
     fourslash::insert(&mut s, "var t = (public x) => { };");
-    fourslash::unsupported("VerifyNumberOfErrorsInCurrentFile"); // f.VerifyNumberOfErrorsInCurrentFile(t, 1)
+    fourslash::verify_number_of_errors_in_current_file(&mut s, 1);
 }

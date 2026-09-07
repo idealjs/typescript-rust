@@ -14,7 +14,17 @@ var /*3*/point = makePoint(2);
 point./*2*/x = 30;"#;
     let mut s = Session::new(content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "2", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "1", "function makePoint(x: number): {\n    b: number;\n    x: number;\n}", "
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "2", "(property) x: number", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "3", "var point: {\n    b: number;\n    x: number;\n}", "")
+    fourslash::verify_quick_info_at(
+        &mut s,
+        "1",
+        "function makePoint(x: number): {\n    b: number;\n    x: number;\n}",
+        "",
+    );
+    fourslash::verify_quick_info_at(&mut s, "2", "(property) x: number", "");
+    fourslash::verify_quick_info_at(
+        &mut s,
+        "3",
+        "var point: {\n    b: number;\n    x: number;\n}",
+        "",
+    );
 }

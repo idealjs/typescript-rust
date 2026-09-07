@@ -1,6 +1,5 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyQuickInfoAt"]
 #[test]
 fn promise_typing1() {
     let content = r#"interface IPromise<T> {
@@ -17,7 +16,7 @@ var p/*1*/2 = p1.then(function (x/*2*/x) {
 p2.then(function (x/*3*/x) {
 } );"#;
     let mut s = Session::new(content);
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "1", "var p2: IPromise<string>", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "2", "(parameter) xx: string", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "3", "(parameter) xx: string", "")
+    fourslash::verify_quick_info_at(&mut s, "1", "var p2: IPromise<string>", "");
+    fourslash::verify_quick_info_at(&mut s, "2", "(parameter) xx: string", "");
+    fourslash::verify_quick_info_at(&mut s, "3", "(parameter) xx: string", "");
 }

@@ -1,6 +1,5 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyQuickInfoAt"]
 #[test]
 fn array_call_and_construct_typings() {
     let content = r#"var a/*1*/1 = new Array();
@@ -14,14 +13,14 @@ var a/*8*/8 = Array<boolean>();
 var a/*9*/9 = Array<boolean>(1);
 var a/*10*/10 = Array("s");"#;
     let mut s = Session::new(content);
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "1", "var a1: any[]", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "2", "var a2: any[]", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "3", "var a3: boolean[]", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "4", "var a4: boolean[]", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "5", "var a5: string[]", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "6", "var a6: any[]", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "7", "var a7: any[]", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "8", "var a8: boolean[]", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "9", "var a9: boolean[]", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "10", "var a10: string[]", "")
+    fourslash::verify_quick_info_at(&mut s, "1", "var a1: any[]", "");
+    fourslash::verify_quick_info_at(&mut s, "2", "var a2: any[]", "");
+    fourslash::verify_quick_info_at(&mut s, "3", "var a3: boolean[]", "");
+    fourslash::verify_quick_info_at(&mut s, "4", "var a4: boolean[]", "");
+    fourslash::verify_quick_info_at(&mut s, "5", "var a5: string[]", "");
+    fourslash::verify_quick_info_at(&mut s, "6", "var a6: any[]", "");
+    fourslash::verify_quick_info_at(&mut s, "7", "var a7: any[]", "");
+    fourslash::verify_quick_info_at(&mut s, "8", "var a8: boolean[]", "");
+    fourslash::verify_quick_info_at(&mut s, "9", "var a9: boolean[]", "");
+    fourslash::verify_quick_info_at(&mut s, "10", "var a10: string[]", "");
 }

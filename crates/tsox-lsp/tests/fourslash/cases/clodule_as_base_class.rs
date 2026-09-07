@@ -32,5 +32,5 @@ D./*2*/"#;
     fourslash::insert(&mut s, "foo()");
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "2", &fourslash.CompletionsExpectedList{
     fourslash::insert(&mut s, "bar()");
-    fourslash::unsupported("VerifyNoErrors"); // f.VerifyNoErrors(t)
+    fourslash::verify_no_errors(&mut s);
 }

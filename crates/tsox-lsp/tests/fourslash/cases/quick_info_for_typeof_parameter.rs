@@ -9,6 +9,6 @@ fn quick_info_for_typeof_parameter() {
     var x: typeof y/*ref2*/1;
 }"#;
     let mut s = Session::new(content);
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "ref1", "(local var) y1: string", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "ref2", "(local var) y1: string", "")
+    fourslash::verify_quick_info_at(&mut s, "ref1", "(local var) y1: string", "");
+    fourslash::verify_quick_info_at(&mut s, "ref2", "(local var) y1: string", "");
 }

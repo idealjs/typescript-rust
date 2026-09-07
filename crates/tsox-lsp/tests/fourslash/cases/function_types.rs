@@ -25,7 +25,7 @@ C.j./*5*/length === 1;
 typeof C.k./*6*/caller === 'function';
 l./*7*/prototype = Object.prototype;"#;
     let mut s = Session::new(content);
-    fourslash::unsupported("VerifyNoErrors"); // f.VerifyNoErrors(t)
+    fourslash::verify_no_errors(&mut s);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, []string{"1", "2", "3", "4", "5", "6"}, &fourslash.CompletionsExpectedList{
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "7", &fourslash.CompletionsExpectedList{
 }

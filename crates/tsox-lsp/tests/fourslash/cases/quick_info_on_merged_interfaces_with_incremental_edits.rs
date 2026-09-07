@@ -21,11 +21,11 @@ namespace MM {
     fourslash::unsupported("DeleteAtCaret"); // f.DeleteAtCaret(t, 1)
     fourslash::insert(&mut s, "z");
     fourslash::unsupported("VerifyQuickInfoIs"); // f.VerifyQuickInfoIs(t, "any", "")
-    fourslash::unsupported("VerifyNumberOfErrorsInCurrentFile"); // f.VerifyNumberOfErrorsInCurrentFile(t, 1)
+    fourslash::verify_number_of_errors_in_current_file(&mut s, 1);
     fourslash::unsupported("Backspace"); // f.Backspace(t, 1)
     fourslash::insert(&mut s, "a");
     fourslash::unsupported("VerifyQuickInfoIs"); // f.VerifyQuickInfoIs(t, "(property) B<string>.bar: string", "")
     fourslash::go_to_marker(&mut s, "2");
     fourslash::unsupported("VerifyQuickInfoIs"); // f.VerifyQuickInfoIs(t, "var r4: string", "")
-    fourslash::unsupported("VerifyNoErrors"); // f.VerifyNoErrors(t)
+    fourslash::verify_no_errors(&mut s);
 }

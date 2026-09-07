@@ -12,7 +12,7 @@ var /*2*/r = m2g/*3*/;"#;
     fourslash::insert(&mut s, "C.");
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, nil, nil)
     fourslash::unsupported("Backspace"); // f.Backspace(t, 1)
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "2", "var r: typeof m2g", "")
+    fourslash::verify_quick_info_at(&mut s, "2", "var r: typeof m2g", "");
     fourslash::go_to_marker(&mut s, "3");
     fourslash::unsupported("Insert"); // f.Insert(t, "(")
 }

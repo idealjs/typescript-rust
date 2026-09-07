@@ -18,9 +18,9 @@ function foo() {
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "3", &fourslash.CompletionsExpectedList{
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, []string{"5", "6"}, &fourslash.CompletionsExpectedList{
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "7", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "1", "const a: 10", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "2", "const a: 10", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "4", "const b: 20", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "5", "const b: 20", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "6", "const a: 10", "")
+    fourslash::verify_quick_info_at(&mut s, "1", "const a: 10", "");
+    fourslash::verify_quick_info_at(&mut s, "2", "const a: 10", "");
+    fourslash::verify_quick_info_at(&mut s, "4", "const b: 20", "");
+    fourslash::verify_quick_info_at(&mut s, "5", "const b: 20", "");
+    fourslash::verify_quick_info_at(&mut s, "6", "const a: 10", "");
 }

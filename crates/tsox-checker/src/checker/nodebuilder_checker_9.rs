@@ -131,6 +131,13 @@ impl Checker {
             && structured.construct_signatures().len() == 1
         {
             parts.join("")
+        } else if flags.contains(TypeFormatFlags::MULTILINE_OBJECT_LITERALS) {
+            let inner: String = parts
+                .iter()
+                .map(|p| format!("    {};", p))
+                .collect::<Vec<_>>()
+                .join("\n");
+            format!("{{\n{inner}\n}}")
         } else {
             format!("{{ {} }}", format!("{};", parts.join("; ")))
         }

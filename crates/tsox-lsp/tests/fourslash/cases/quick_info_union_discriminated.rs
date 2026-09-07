@@ -1,6 +1,5 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyQuickInfoAt"]
 #[test]
 fn quick_info_union_discriminated() {
     let content = r#"// @Filename: quickInfoJsDocTags.ts
@@ -29,8 +28,8 @@ const u2: U = {
     /*u2Prop*/prop: 1,
 };"#;
     let mut s = Session::new(content);
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "uKind", "(property) A.kind: \"a\"", "Kind A")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "uProp", "(property) A.prop: number", "Prop A")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "u2Kind", "(property) kind: \"bogus\"", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "u2Prop", "(property) prop: number", "")
+    fourslash::verify_quick_info_at(&mut s, "uKind", "(property) A.kind: \"a\"", "Kind A");
+    fourslash::verify_quick_info_at(&mut s, "uProp", "(property) A.prop: number", "Prop A");
+    fourslash::verify_quick_info_at(&mut s, "u2Kind", "(property) kind: \"bogus\"", "");
+    fourslash::verify_quick_info_at(&mut s, "u2Prop", "(property) prop: number", "");
 }

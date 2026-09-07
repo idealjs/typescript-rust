@@ -15,6 +15,16 @@ function Bar<T extends {prop: number}>(arg: T) {
     let a3 = <Component/*2*/Specific {...arg} prop="hello" />;   // U is "hello"
 }"#;
     let mut s = Session::new(content);
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "1", "function ComponentSpecific<number>(l: {\n    prop: number;\n}): JSX.Ele
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "2", "function ComponentSpecific<never>(l: {\n    prop: never;\n}): JSX.Eleme
+    fourslash::verify_quick_info_at(
+        &mut s,
+        "1",
+        "function ComponentSpecific<number>(l: {\n    prop: number;\n}): JSX.Element",
+        "",
+    );
+    fourslash::verify_quick_info_at(
+        &mut s,
+        "2",
+        "function ComponentSpecific<never>(l: {\n    prop: never;\n}): JSX.Element",
+        "",
+    );
 }

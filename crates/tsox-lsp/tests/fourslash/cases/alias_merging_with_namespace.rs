@@ -7,5 +7,5 @@ fn alias_merging_with_namespace() {
     let content = r#"namespace bar { }
 import bar = bar/**/;"#;
     let mut s = Session::new(content);
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "", "namespace bar\nimport bar = bar", "")
+    fourslash::verify_quick_info_at(&mut s, "", "namespace bar\nimport bar = bar", "");
 }

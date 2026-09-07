@@ -14,5 +14,5 @@ namespace multiM {
     fourslash::unsupported("DeleteAtCaret"); // f.DeleteAtCaret(t, 18)
     fourslash::unsupported("GoToEOF"); // f.GoToEOF(t)
     fourslash::insert(&mut s, "new multiM.c();");
-    fourslash::unsupported("VerifyNumberOfErrorsInCurrentFile"); // f.VerifyNumberOfErrorsInCurrentFile(t, 1)
+    fourslash::verify_number_of_errors_in_current_file(&mut s, 1);
 }

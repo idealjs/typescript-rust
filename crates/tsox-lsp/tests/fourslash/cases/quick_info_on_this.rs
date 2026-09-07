@@ -1,6 +1,5 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyQuickInfoAt"]
 #[test]
 fn quick_info_on_this() {
     let content = r#"interface Restricted {
@@ -26,11 +25,11 @@ class Foo {
     }
 }"#;
     let mut s = Session::new(content);
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "0", "this", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "1", "this: void", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "2", "this: this", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "3", "(parameter) this: Restricted", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "4", "this: Restricted", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "5", "(parameter) this: Foo", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "6", "this: Foo", "")
+    fourslash::verify_quick_info_at(&mut s, "0", "this", "");
+    fourslash::verify_quick_info_at(&mut s, "1", "this: void", "");
+    fourslash::verify_quick_info_at(&mut s, "2", "this: this", "");
+    fourslash::verify_quick_info_at(&mut s, "3", "(parameter) this: Restricted", "");
+    fourslash::verify_quick_info_at(&mut s, "4", "this: Restricted", "");
+    fourslash::verify_quick_info_at(&mut s, "5", "(parameter) this: Foo", "");
+    fourslash::verify_quick_info_at(&mut s, "6", "this: Foo", "");
 }

@@ -1,6 +1,5 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyQuickInfoAt"]
 #[test]
 fn quick_info_in_optional_chain() {
     let content = r#"// @strict: true
@@ -22,10 +21,20 @@ declare const foo2: Foo2;
 
 if (foo2.b/*4*/ar?.b/*5*/az.q/*6*/we) {}"#;
     let mut s = Session::new(content);
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "1", "(property) A.arr: string[]", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "2", "(property) Foo.bar: {\n    baz: string;\n}", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "3", "(property) baz: string | undefined", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "4", "(property) Foo2.bar?: {\n    baz: {\n        qwe: string;\n    };\n} | 
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "5", "(property) baz: {\n    qwe: string;\n}", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "6", "(property) qwe: string | undefined", "")
+    fourslash::verify_quick_info_at(&mut s, "1", "(property) A.arr: string[]", "");
+    fourslash::verify_quick_info_at(
+        &mut s,
+        "2",
+        "(property) Foo.bar: {\n    baz: string;\n}",
+        "",
+    );
+    fourslash::verify_quick_info_at(&mut s, "3", "(property) baz: string | undefined", "");
+    fourslash::verify_quick_info_at(
+        &mut s,
+        "4",
+        "(property) Foo2.bar?: {\n    baz: {\n        qwe: string;\n    };\n} | undefined",
+        "",
+    );
+    fourslash::verify_quick_info_at(&mut s, "5", "(property) baz: {\n    qwe: string;\n}", "");
+    fourslash::verify_quick_info_at(&mut s, "6", "(property) qwe: string | undefined", "");
 }

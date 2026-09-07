@@ -1,6 +1,5 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyNoErrors"]
 #[test]
 fn derived_type_indexer_with_generic_constraints() {
     let content = r#"// @strict: false
@@ -23,6 +22,6 @@ a = new DbSet<Entity>();
 var r2 = a._itemsByKey['x'];
 var result2 = r2.x;"#;
     let mut s = Session::new(content);
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "", "var r: CollectionItem", "")
-    fourslash::unsupported("VerifyNoErrors"); // f.VerifyNoErrors(t)
+    fourslash::verify_quick_info_at(&mut s, "", "var r: CollectionItem", "");
+    fourslash::verify_no_errors(&mut s);
 }

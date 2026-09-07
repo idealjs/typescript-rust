@@ -13,5 +13,5 @@ declare const record: Record<string, string>;
 record.fo/*1*/o;
 "#;
     let mut s = Session::new(content);
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "1", "string", "")
+    fourslash::verify_quick_info_at(&mut s, "1", "string", "");
 }

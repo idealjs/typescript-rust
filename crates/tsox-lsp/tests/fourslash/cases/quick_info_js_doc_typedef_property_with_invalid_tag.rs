@@ -1,6 +1,5 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyQuickInfoAt"]
 #[test]
 fn quick_info_js_doc_typedef_property_with_invalid_tag() {
     let content = r#"// @allowJs: true
@@ -56,19 +55,44 @@ const obj4 = { /*4n*/name: "", /*4a*/age: 10 };
 const obj5 = { /*5n*/name: "", /*5a*/age: 10 };
 "#;
     let mut s = Session::new(content);
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "t1", "type MyType1 = {\n    name: string;\n    age: number;\n}", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "t2", "type MyType2 = {\n    name: string;\n    age: number;\n}", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "t3", "type MyType3 = {\n    name: string;\n    age: number;\n}", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "t4", "type MyType4 = {\n    name: string;\n    age: number;\n}", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "t5", "type MyType5 = {\n    name: string;\n}", ""+
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "1n", "(property) name: string", "@-rule")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "2n", "(property) name: string", "some comment")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "3n", "(property) name: string", "@*stars")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "4n", "(property) name: string", "@(parens)")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "5n", "(property) name: string", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "1a", "(property) age: number", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "2a", "(property) age: number", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "3a", "(property) age: number", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "4a", "(property) age: number", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "5a", "(property) age: number", "")
+    fourslash::verify_quick_info_at(
+        &mut s,
+        "t1",
+        "type MyType1 = {\n    name: string;\n    age: number;\n}",
+        "",
+    );
+    fourslash::verify_quick_info_at(
+        &mut s,
+        "t2",
+        "type MyType2 = {\n    name: string;\n    age: number;\n}",
+        "",
+    );
+    fourslash::verify_quick_info_at(
+        &mut s,
+        "t3",
+        "type MyType3 = {\n    name: string;\n    age: number;\n}",
+        "",
+    );
+    fourslash::verify_quick_info_at(
+        &mut s,
+        "t4",
+        "type MyType4 = {\n    name: string;\n    age: number;\n}",
+        "",
+    );
+    fourslash::verify_quick_info_at(
+        &mut s,
+        "t5",
+        "type MyType5 = {\n    name: string;\n}",
+        concat!("", "\n\n*@foo* — *bar", "\n\n*@property* — {number} age"),
+    );
+    fourslash::verify_quick_info_at(&mut s, "1n", "(property) name: string", "@-rule");
+    fourslash::verify_quick_info_at(&mut s, "2n", "(property) name: string", "some comment");
+    fourslash::verify_quick_info_at(&mut s, "3n", "(property) name: string", "@*stars");
+    fourslash::verify_quick_info_at(&mut s, "4n", "(property) name: string", "@(parens)");
+    fourslash::verify_quick_info_at(&mut s, "5n", "(property) name: string", "");
+    fourslash::verify_quick_info_at(&mut s, "1a", "(property) age: number", "");
+    fourslash::verify_quick_info_at(&mut s, "2a", "(property) age: number", "");
+    fourslash::verify_quick_info_at(&mut s, "3a", "(property) age: number", "");
+    fourslash::verify_quick_info_at(&mut s, "4a", "(property) age: number", "");
+    fourslash::verify_quick_info_at(&mut s, "5a", "(property) age: number", "");
 }

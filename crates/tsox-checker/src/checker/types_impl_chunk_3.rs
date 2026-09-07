@@ -271,6 +271,7 @@ pub struct SymbolReferenceLinks {
 #[derive(Debug, Default)]
 pub struct ValueSymbolLinks {
     pub resolved_type: Option<Arc<Type>>,
+    pub container_symbol: Option<Arc<tsox_frontend::ast::Symbol>>,
     pub write_type: Option<Arc<Type>>,
     pub target: Option<Arc<Symbol>>,
     pub mapper: Option<Arc<TypeMapper>>,

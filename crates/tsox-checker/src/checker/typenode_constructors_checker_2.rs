@@ -155,10 +155,45 @@ impl Checker {
         }
     }
 
+    #[allow(dead_code)]
+    pub(crate) fn create_tuple_type_named(
+        &mut self,
+        element_types: Vec<Arc<Type>>,
+        names: Vec<String>,
+    ) -> Arc<Type> {
+        let element_infos: Vec<TupleElementInfo> = element_types
+            .iter()
+            .enumerate()
+            .map(|(i, t)| TupleElementInfo {
+                label: names.get(i).cloned(),
+                flags: ElementFlags::Required,
+                labeled_declaration: None,
+                type_: Some(Arc::clone(t)),
+            })
+            .collect();
+        let fixed_length = element_infos.len();
+        Arc::new(Type {
+            flags: TypeFlags::Object,
+            object_flags: ObjectFlags::Tuple,
+            id: crate::checker::types::next_type_id(),
+            symbol: None,
+            alias: None,
+            data: crate::checker::types::TypeData::Tuple(crate::checker::types::TupleTypeData {
+                interface_data: Default::default(),
+                element_infos,
+                min_length: fixed_length,
+                fixed_length,
+                combined_flags: ElementFlags::Required,
+                readonly: false,
+            }),
+        })
+    }
+
     pub(crate) fn create_tuple_type(&mut self, element_types: Vec<Arc<Type>>) -> Arc<Type> {
         let element_infos: Vec<TupleElementInfo> = element_types
             .iter()
             .map(|t| TupleElementInfo {
+                label: None,
                 flags: ElementFlags::Required,
                 labeled_declaration: None,
                 type_: Some(Arc::clone(t)),

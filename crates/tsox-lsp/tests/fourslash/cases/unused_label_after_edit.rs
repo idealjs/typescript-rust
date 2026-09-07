@@ -10,13 +10,13 @@ myLabel: while (true) {
     }
 }"#;
     let mut s = Session::new(content);
-    fourslash::unsupported("VerifyNumberOfErrorsInCurrentFile"); // f.VerifyNumberOfErrorsInCurrentFile(t, 0)
+    fourslash::verify_number_of_errors_in_current_file(&mut s, 0);
     fourslash::go_to_marker(&mut s, "marker");
     fourslash::unsupported("DeleteAtCaret"); // f.DeleteAtCaret(t, 14)
     fourslash::insert(&mut s, "break;");
-    fourslash::unsupported("VerifyNumberOfErrorsInCurrentFile"); // f.VerifyNumberOfErrorsInCurrentFile(t, 1)
+    fourslash::verify_number_of_errors_in_current_file(&mut s, 1);
     fourslash::go_to_marker(&mut s, "marker");
     fourslash::unsupported("DeleteAtCaret"); // f.DeleteAtCaret(t, 6)
     fourslash::insert(&mut s, "break myLabel;");
-    fourslash::unsupported("VerifyNumberOfErrorsInCurrentFile"); // f.VerifyNumberOfErrorsInCurrentFile(t, 0)
+    fourslash::verify_number_of_errors_in_current_file(&mut s, 0);
 }

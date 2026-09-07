@@ -116,7 +116,23 @@ impl Checker {
                     let false_type = self.get_type_of_node(&data.when_false);
                     let true_widened = self.get_widened_type_of_literal(&true_type);
                     let false_widened = self.get_widened_type_of_literal(&false_type);
-                    return self.get_union_type(vec![true_widened, false_widened]);
+                    let mut types = vec![true_widened, false_widened];
+                    // 非严格下 undefined 可赋给任意类型：undefined[] 是 T[] 的子类型，
+                    // 条件表达式按 UnionReductionSubtype 归约去掉（对齐 TS）
+                    if !self.strict_null_checks && types.len() == 2 {
+                        let undef_arr_idx = types.iter().position(|t| {
+                            self.is_array_type(t)
+                                && self.get_array_element_type(t).intrinsic_name()
+                                    == Some("undefined")
+                        });
+                        if let Some(i) = undef_arr_idx {
+                            let other = &types[1 - i];
+                            if self.is_array_type(other) {
+                                types.swap_remove(i);
+                            }
+                        }
+                    }
+                    return self.get_union_type(types);
                 }
                 self.get_any_type()
             }

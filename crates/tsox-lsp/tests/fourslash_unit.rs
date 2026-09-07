@@ -15,3 +15,37 @@ fn marker_and_range() {
     assert_eq!(d.marker_positions.get("m"), Some(&10));
     assert_eq!(d.ranges.len(), 1);
 }
+
+#[test]
+fn jsdoc_range_on_interface_member() {
+    let text = "interface I {\n    /** Documentation */\n    x: number;\n}";
+    let sf = tsox_frontend::parser::Parser::parse_source_file_text("a.ts", text.to_string());
+    let mut sig: Option<std::sync::Arc<tsox_frontend::ast::Node>> = None;
+    fn walk(
+        n: &std::sync::Arc<tsox_frontend::ast::Node>,
+        out: &mut Option<std::sync::Arc<tsox_frontend::ast::Node>>,
+    ) {
+        if out.is_some() {
+            return;
+        }
+        if n.kind == tsox_frontend::ast::SyntaxKind::PropertySignature {
+            *out = Some(n.clone());
+            return;
+        }
+        let mut kids: Vec<std::sync::Arc<tsox_frontend::ast::Node>> = Vec::new();
+        tsox_frontend::ast::node_data_generated::for_each_child(n, &mut |c: &std::sync::Arc<
+            tsox_frontend::ast::Node,
+        >| {
+            kids.push(std::sync::Arc::clone(c));
+            false
+        });
+        for k in kids {
+            walk(&k, out);
+        }
+    }
+    walk(&sf.node, &mut sig);
+    let sig = sig.expect("no PropertySignature");
+    let jds = sf.resolve_jsdoc(&sig);
+    assert_eq!(jds.len(), 1, "jsdoc 数不符 pos={}", sig.pos());
+}
+

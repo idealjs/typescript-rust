@@ -1,6 +1,5 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyNoErrors"]
 #[test]
 fn unreachable_statement_node_reuse() {
     let content = r#"function test() {
@@ -9,8 +8,8 @@ fn unreachable_statement_node_reuse() {
 }
 function abc() { }"#;
     let mut s = Session::new(content);
-    fourslash::unsupported("VerifyNumberOfErrorsInCurrentFile"); // f.VerifyNumberOfErrorsInCurrentFile(t, 1)
+    fourslash::verify_number_of_errors_in_current_file(&mut s, 1);
     fourslash::go_to_marker(&mut s, "a");
     fourslash::insert(&mut s, " ");
-    fourslash::unsupported("VerifyNoErrors"); // f.VerifyNoErrors(t)
+    fourslash::verify_no_errors(&mut s);
 }

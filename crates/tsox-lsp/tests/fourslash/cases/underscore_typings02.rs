@@ -23,5 +23,5 @@ export interface ChainedArray<T> extends ChainedObject<Array<T>> {
 }"#;
     let mut s = Session::new(content);
     fourslash::unsupported("GoToPosition"); // f.GoToPosition(t, 0)
-    fourslash::unsupported("VerifyNumberOfErrorsInCurrentFile"); // f.VerifyNumberOfErrorsInCurrentFile(t, 2)
+    fourslash::verify_number_of_errors_in_current_file(&mut s, 2);
 }

@@ -20,6 +20,9 @@ IMPL = {
     "Insert": ("insert", 1),
     "VerifyCurrentLineContent": ("verify_current_line_content", 1),
     "VerifyCurrentFileContent": ("verify_current_file_content", 1),
+    "VerifyQuickInfoAt": ("verify_quick_info_at", 3),
+    "VerifyNoErrors": ("verify_no_errors", 0),
+    "VerifyNumberOfErrorsInCurrentFile": ("verify_number_of_errors_in_current_file", 1),
 }
 
 
@@ -146,7 +149,11 @@ def split_statements(body):
     return [s for s in stmts if s]
 
 
+_CUR_TEST = [""]
+
+
 def translate_func(name, body, file_stem):
+    _CUR_TEST[0] = name[4].lower() + name[5:] if name.startswith("Test") and len(name) > 4 else name
     fn = snake(name[4:]) if name.startswith("Test") else snake(name)
     lines = []
     ignores = set()
@@ -324,6 +331,7 @@ def main():
         stem = snake(f[:-len("_test.go")])
         text = open(os.path.join(GO_DIR, f)).read()
         fns = []
+        go_funcs = [name for name, _ in parse_funcs(text)]
         for name, body in parse_funcs(text):
             r = translate_func(name, body, stem)
             if r is None:

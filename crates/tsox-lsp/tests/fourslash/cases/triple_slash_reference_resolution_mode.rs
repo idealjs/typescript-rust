@@ -24,5 +24,5 @@ export {};"#;
     let mut s = Session::new(content);
     // TODO: f.MarkTestAsStradaServer()
     fourslash::go_to_file(&mut s, "/home/src/workspaces/project/index.ts");
-    fourslash::unsupported("VerifyNumberOfErrorsInCurrentFile"); // f.VerifyNumberOfErrorsInCurrentFile(t, 0)
+    fourslash::verify_number_of_errors_in_current_file(&mut s, 0);
 }

@@ -14,5 +14,5 @@ declare var v1: Int<string>;
 var /*1*/v2/*2*/: Int<number> = v1;"#;
     let mut s = Session::new(content);
     fourslash::unsupported("VerifyErrorExistsBetweenMarkers"); // f.VerifyErrorExistsBetweenMarkers(t, "1", "2")
-    fourslash::unsupported("VerifyNumberOfErrorsInCurrentFile"); // f.VerifyNumberOfErrorsInCurrentFile(t, 1)
+    fourslash::verify_number_of_errors_in_current_file(&mut s, 1);
 }

@@ -19,5 +19,5 @@ Object.defineProperty(obj, "a", {
 
 obj.a/**/ = 100;"#;
     let mut s = Session::new(content);
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "", "(property) obj.a: any", "")
+    fourslash::verify_quick_info_at(&mut s, "", "(property) obj.a: any", "");
 }

@@ -16,5 +16,10 @@ function /**/myMixin(cls) {
     return class extends cls {}
 }"#;
     let mut s = Session::new(content);
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "", "function myMixin<T extends new (...args: any[]) => any>(cls: T): {\n    
+    fourslash::verify_quick_info_at(
+        &mut s,
+        "",
+        "function myMixin<T extends new (...args: any[]) => any>(cls: T): {\n    new (...args: any[]): (Anonymous class);\n    prototype: myMixin<any>.(Anonymous class);\n} & T",
+        "Doc",
+    );
 }

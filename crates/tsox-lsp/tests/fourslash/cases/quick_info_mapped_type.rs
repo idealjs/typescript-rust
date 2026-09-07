@@ -16,7 +16,7 @@ p.m/*1*/;
 declare const q: Pick<I, "m">;
 q.m/*2*/;"#;
     let mut s = Session::new(content);
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "0", "(property) m: number", "m documentation")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "1", "(method) m(): void", "m documentation")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "2", "(method) m(): void", "m documentation")
+    fourslash::verify_quick_info_at(&mut s, "0", "(property) m: number", "m documentation");
+    fourslash::verify_quick_info_at(&mut s, "1", "(method) m(): void", "m documentation");
+    fourslash::verify_quick_info_at(&mut s, "2", "(method) m(): void", "m documentation");
 }

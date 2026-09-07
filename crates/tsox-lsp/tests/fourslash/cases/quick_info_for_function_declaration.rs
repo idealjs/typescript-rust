@@ -1,6 +1,5 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyQuickInfoAt"]
 #[test]
 fn quick_info_for_function_declaration() {
     let content = r#"interface A<T> { }
@@ -14,6 +13,6 @@ function /*f*/f<T>(t: T) {
 var x = f(0);
 var y = makeA(0);"#;
     let mut s = Session::new(content);
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "makeA", "function makeA<T>(t: T): A<T>", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "f", "function f<T>(t: T): A<T>", "")
+    fourslash::verify_quick_info_at(&mut s, "makeA", "function makeA<T>(t: T): A<T>", "");
+    fourslash::verify_quick_info_at(&mut s, "f", "function f<T>(t: T): A<T>", "");
 }

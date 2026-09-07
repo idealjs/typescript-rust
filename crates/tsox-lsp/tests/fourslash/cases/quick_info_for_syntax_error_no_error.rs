@@ -1,6 +1,5 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyQuickInfoAt"]
 #[test]
 fn quick_info_for_syntax_error_no_error() {
     let content = r#"namespace X {
@@ -8,5 +7,5 @@ fn quick_info_for_syntax_error_no_error() {
 }
 X.add/*1*/"#;
     let mut s = Session::new(content);
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "1", "any", "")
+    fourslash::verify_quick_info_at(&mut s, "1", "any", "");
 }

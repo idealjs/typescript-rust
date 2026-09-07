@@ -1,6 +1,5 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyQuickInfoAt"]
 #[test]
 fn promise_typing2() {
     let content = r#"interface IPromise<T> {
@@ -17,11 +16,11 @@ var p/*5*/3 = p2.then(function (x/*6*/x) {
     return x/*7*/x;
 });"#;
     let mut s = Session::new(content);
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "1", "var p1: IPromise<number>", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "2", "(parameter) xx: number", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "3", "var p2: IPromise<string>", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "4", "(parameter) xx: number", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "5", "var p3: IPromise<string>", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "6", "(parameter) xx: string", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "7", "(parameter) xx: string", "")
+    fourslash::verify_quick_info_at(&mut s, "1", "var p1: IPromise<number>", "");
+    fourslash::verify_quick_info_at(&mut s, "2", "(parameter) xx: number", "");
+    fourslash::verify_quick_info_at(&mut s, "3", "var p2: IPromise<string>", "");
+    fourslash::verify_quick_info_at(&mut s, "4", "(parameter) xx: number", "");
+    fourslash::verify_quick_info_at(&mut s, "5", "var p3: IPromise<string>", "");
+    fourslash::verify_quick_info_at(&mut s, "6", "(parameter) xx: string", "");
+    fourslash::verify_quick_info_at(&mut s, "7", "(parameter) xx: string", "");
 }

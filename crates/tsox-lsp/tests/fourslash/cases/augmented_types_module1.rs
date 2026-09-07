@@ -11,5 +11,5 @@ var x: m1c./*1*/;
 var /*2*/r = m1c;"#;
     let mut s = Session::new(content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "2", "var r: number", "")
+    fourslash::verify_quick_info_at(&mut s, "2", "var r: number", "");
 }

@@ -1,6 +1,5 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyQuickInfoAt"]
 #[test]
 fn quick_info_on_property_access_in_write_location3() {
     let content = r#"// @strict: true
@@ -8,5 +7,5 @@ fn quick_info_on_property_access_in_write_location3() {
 declare const xx: { prop?: number };
 xx.prop/*1*/ ??= 1;"#;
     let mut s = Session::new(content);
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "1", "(property) prop?: number", "")
+    fourslash::verify_quick_info_at(&mut s, "1", "(property) prop?: number", "");
 }

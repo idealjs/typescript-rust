@@ -16,6 +16,6 @@ function literal1Example(e: Literal1Example) {
 }"#;
     let mut s = Session::new(content);
     fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "literal1", "(index) Literal1Example[`prefix${string}`]: string | number", ""
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "literal2", "any", "")
+    fourslash::verify_quick_info_at(&mut s, "literal2", "any", "");
     fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "literal3", "(index) Literal1Example[`prefix${string}` | `prefix${number}`]: 
 }

@@ -1,6 +1,5 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyQuickInfoAt"]
 #[test]
 fn duplicate_indexers() {
     let content = r#"interface I {
@@ -10,5 +9,5 @@ fn duplicate_indexers() {
 var i: I;
 var /**/r = i[1];"#;
     let mut s = Session::new(content);
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "", "var r: string", "")
+    fourslash::verify_quick_info_at(&mut s, "", "var r: string", "");
 }

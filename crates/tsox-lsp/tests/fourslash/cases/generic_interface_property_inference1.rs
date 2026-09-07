@@ -1,6 +1,5 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyNoErrors"]
 #[test]
 fn generic_interface_property_inference1() {
     let content = r#"// @strict: false
@@ -91,50 +90,60 @@ var f5_/*e7*/r14 = f5.ofIG6;
 var f5_/*e8*/r18 = f5.ofC2;
 var f5_/*e9*/r20 = f5.ofC4;"#;
     let mut s = Session::new(content);
-    fourslash::unsupported("VerifyNoErrors"); // f.VerifyNoErrors(t)
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "a1", "var f_r1: number", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "a2", "var f_r2: string", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "a3", "var f_r3: any", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "a4", "var f_r5: Foo<number>", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "a5", "var f_r8: I", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "a6", "var f_r12: {\n    x: number;\n}", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "a7", "var f_r14: {\n    x: any;\n}", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "a8", "var f_r18: C<number>", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "a9", "var f_r20: C<{\n    x: any;\n}>", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "b1", "var f2_r1: number", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "b2", "var f2_r2: string", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "b3", "var f2_r3: number", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "b4", "var f2_r5: Foo<number>", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "b5", "var f2_r8: I", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "b6", "var f2_r12: {\n    x: number;\n}", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "b7", "var f2_r14: {\n    x: number;\n}", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "b8", "var f2_r18: C<number>", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "b9", "var f2_r20: C<{\n    x: number;\n}>", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "c1", "var f3_r1: number", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "c2", "var f3_r2: string", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "c3", "var f3_r3: I", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "c4", "var f3_r5: Foo<number>", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "c5", "var f3_r8: I", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "c6", "var f3_r12: {\n    x: number;\n}", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "c7", "var f3_r14: {\n    x: I;\n}", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "c8", "var f3_r18: C<number>", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "c9", "var f3_r20: C<{\n    x: I;\n}>", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "d1", "var f4_r1: number", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "d2", "var f4_r2: string", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "d3", "var f4_r3: {\n    x: number;\n}", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "d4", "var f4_r5: Foo<number>", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "d5", "var f4_r8: I", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "d6", "var f4_r12: {\n    x: number;\n}", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "d7", "var f4_r14: {\n    x: {\n        x: number;\n    };\n}", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "d8", "var f4_r18: C<number>", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "d9", "var f4_r20: C<{\n    x: {\n        x: number;\n    };\n}>", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "e1", "var f5_r1: number", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "e2", "var f5_r2: string", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "e3", "var f5_r3: Foo<number>", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "e4", "var f5_r5: Foo<number>", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "e5", "var f5_r8: I", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "e6", "var f5_r12: {\n    x: number;\n}", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "e7", "var f5_r14: {\n    x: Foo<number>;\n}", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "e8", "var f5_r18: C<number>", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "e9", "var f5_r20: C<{\n    x: Foo<number>;\n}>", "")
+    fourslash::verify_no_errors(&mut s);
+    fourslash::verify_quick_info_at(&mut s, "a1", "var f_r1: number", "");
+    fourslash::verify_quick_info_at(&mut s, "a2", "var f_r2: string", "");
+    fourslash::verify_quick_info_at(&mut s, "a3", "var f_r3: any", "");
+    fourslash::verify_quick_info_at(&mut s, "a4", "var f_r5: Foo<number>", "");
+    fourslash::verify_quick_info_at(&mut s, "a5", "var f_r8: I", "");
+    fourslash::verify_quick_info_at(&mut s, "a6", "var f_r12: {\n    x: number;\n}", "");
+    fourslash::verify_quick_info_at(&mut s, "a7", "var f_r14: {\n    x: any;\n}", "");
+    fourslash::verify_quick_info_at(&mut s, "a8", "var f_r18: C<number>", "");
+    fourslash::verify_quick_info_at(&mut s, "a9", "var f_r20: C<{\n    x: any;\n}>", "");
+    fourslash::verify_quick_info_at(&mut s, "b1", "var f2_r1: number", "");
+    fourslash::verify_quick_info_at(&mut s, "b2", "var f2_r2: string", "");
+    fourslash::verify_quick_info_at(&mut s, "b3", "var f2_r3: number", "");
+    fourslash::verify_quick_info_at(&mut s, "b4", "var f2_r5: Foo<number>", "");
+    fourslash::verify_quick_info_at(&mut s, "b5", "var f2_r8: I", "");
+    fourslash::verify_quick_info_at(&mut s, "b6", "var f2_r12: {\n    x: number;\n}", "");
+    fourslash::verify_quick_info_at(&mut s, "b7", "var f2_r14: {\n    x: number;\n}", "");
+    fourslash::verify_quick_info_at(&mut s, "b8", "var f2_r18: C<number>", "");
+    fourslash::verify_quick_info_at(&mut s, "b9", "var f2_r20: C<{\n    x: number;\n}>", "");
+    fourslash::verify_quick_info_at(&mut s, "c1", "var f3_r1: number", "");
+    fourslash::verify_quick_info_at(&mut s, "c2", "var f3_r2: string", "");
+    fourslash::verify_quick_info_at(&mut s, "c3", "var f3_r3: I", "");
+    fourslash::verify_quick_info_at(&mut s, "c4", "var f3_r5: Foo<number>", "");
+    fourslash::verify_quick_info_at(&mut s, "c5", "var f3_r8: I", "");
+    fourslash::verify_quick_info_at(&mut s, "c6", "var f3_r12: {\n    x: number;\n}", "");
+    fourslash::verify_quick_info_at(&mut s, "c7", "var f3_r14: {\n    x: I;\n}", "");
+    fourslash::verify_quick_info_at(&mut s, "c8", "var f3_r18: C<number>", "");
+    fourslash::verify_quick_info_at(&mut s, "c9", "var f3_r20: C<{\n    x: I;\n}>", "");
+    fourslash::verify_quick_info_at(&mut s, "d1", "var f4_r1: number", "");
+    fourslash::verify_quick_info_at(&mut s, "d2", "var f4_r2: string", "");
+    fourslash::verify_quick_info_at(&mut s, "d3", "var f4_r3: {\n    x: number;\n}", "");
+    fourslash::verify_quick_info_at(&mut s, "d4", "var f4_r5: Foo<number>", "");
+    fourslash::verify_quick_info_at(&mut s, "d5", "var f4_r8: I", "");
+    fourslash::verify_quick_info_at(&mut s, "d6", "var f4_r12: {\n    x: number;\n}", "");
+    fourslash::verify_quick_info_at(
+        &mut s,
+        "d7",
+        "var f4_r14: {\n    x: {\n        x: number;\n    };\n}",
+        "",
+    );
+    fourslash::verify_quick_info_at(&mut s, "d8", "var f4_r18: C<number>", "");
+    fourslash::verify_quick_info_at(
+        &mut s,
+        "d9",
+        "var f4_r20: C<{\n    x: {\n        x: number;\n    };\n}>",
+        "",
+    );
+    fourslash::verify_quick_info_at(&mut s, "e1", "var f5_r1: number", "");
+    fourslash::verify_quick_info_at(&mut s, "e2", "var f5_r2: string", "");
+    fourslash::verify_quick_info_at(&mut s, "e3", "var f5_r3: Foo<number>", "");
+    fourslash::verify_quick_info_at(&mut s, "e4", "var f5_r5: Foo<number>", "");
+    fourslash::verify_quick_info_at(&mut s, "e5", "var f5_r8: I", "");
+    fourslash::verify_quick_info_at(&mut s, "e6", "var f5_r12: {\n    x: number;\n}", "");
+    fourslash::verify_quick_info_at(&mut s, "e7", "var f5_r14: {\n    x: Foo<number>;\n}", "");
+    fourslash::verify_quick_info_at(&mut s, "e8", "var f5_r18: C<number>", "");
+    fourslash::verify_quick_info_at(&mut s, "e9", "var f5_r20: C<{\n    x: Foo<number>;\n}>", "");
 }

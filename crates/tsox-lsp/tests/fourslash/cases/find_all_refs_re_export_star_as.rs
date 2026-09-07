@@ -11,6 +11,6 @@ export * as /*leafDef*/Leaf from './leafModule';
  import { /*leafImportDef*/Leaf } from './exporting';
  /*leafUse*/[|Leaf|]./*helloUse*/[|hello|]()"#;
     let mut s = Session::new(content);
-    fourslash::unsupported("VerifyNoErrors"); // f.VerifyNoErrors(t)
+    fourslash::verify_no_errors(&mut s);
     fourslash::unsupported("VerifyBaselineFindAllReferences"); // f.VerifyBaselineFindAllReferences(t, "helloDef", "helloUse", "leafDef", "leafImportDef", "leafUse")
 }

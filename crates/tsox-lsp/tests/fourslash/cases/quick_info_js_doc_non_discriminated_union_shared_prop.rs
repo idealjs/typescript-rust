@@ -1,6 +1,5 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyQuickInfoAt"]
 #[test]
 fn quick_info_js_doc_non_discriminated_union_shared_prop() {
     let content = r#"// @strict: false
@@ -46,5 +45,10 @@ const options: EntriesOptions[] = [
   },
 ];"#;
     let mut s = Session::new(content);
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "1", "(property) Entries.output?: string", "Output info...")
+    fourslash::verify_quick_info_at(
+        &mut s,
+        "1",
+        "(property) Entries.output?: string",
+        "Output info...",
+    );
 }

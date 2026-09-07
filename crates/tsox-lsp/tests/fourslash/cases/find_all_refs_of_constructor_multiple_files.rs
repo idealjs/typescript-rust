@@ -19,6 +19,6 @@ import B, { B1 } from "./a";
 const d = new B("b");
 const d1 = new B1("b1");"#;
     let mut s = Session::new(content);
-    fourslash::unsupported("VerifyNoErrors"); // f.VerifyNoErrors(t)
+    fourslash::verify_no_errors(&mut s);
     fourslash::unsupported("VerifyBaselineFindAllReferences"); // f.VerifyBaselineFindAllReferences(t, "aCtr")
 }

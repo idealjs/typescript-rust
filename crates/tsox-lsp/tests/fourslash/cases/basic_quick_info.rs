@@ -1,6 +1,5 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyQuickInfoAt"]
 #[test]
 fn basic_quick_info() {
     let content = r#"
@@ -19,7 +18,12 @@ class Foo/*3*/ {
 	#bar: string;
 }
 "#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "1", "var someVar: number", "Some var")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "2", "var otherVar: number", "Other var\nSee [someVar](file:///basicQuickInfo
+    let mut s = Session::new_for_test("basicQuickInfo", content);
+    fourslash::verify_quick_info_at(&mut s, "1", "var someVar: number", "Some var");
+    fourslash::verify_quick_info_at(
+        &mut s,
+        "2",
+        "var otherVar: number",
+        "Other var\nSee [someVar](file:///basicQuickInfo.ts#5,5-5,12)",
+    );
 }

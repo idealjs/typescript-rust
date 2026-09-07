@@ -22,9 +22,9 @@ namespace C {
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
     fourslash::insert(&mut s, "foo(1);");
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "2", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "3", "(local var) r: C<number>", "")
+    fourslash::verify_quick_info_at(&mut s, "3", "(local var) r: C<number>", "");
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "4", &fourslash.CompletionsExpectedList{
     fourslash::insert(&mut s, "x;");
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "5", "(local var) r2: number", "")
-    fourslash::unsupported("VerifyNoErrors"); // f.VerifyNoErrors(t)
+    fourslash::verify_quick_info_at(&mut s, "5", "(local var) r2: number", "");
+    fourslash::verify_no_errors(&mut s);
 }

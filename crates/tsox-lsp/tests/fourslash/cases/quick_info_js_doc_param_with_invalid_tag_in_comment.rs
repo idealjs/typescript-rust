@@ -16,9 +16,9 @@ function /*fn*/foo(/**/x, /*a*/a, /*b*/b, /*c*/c, /*d*/d) {}
 "#;
     let mut s = Session::new(content);
     fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "fn", "function foo(x: string, a: string, b: string, c: string, d: string): v
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "", "(parameter) x: string", "Checks @-rule here")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "a", "(parameter) a: string", "see")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "b", "(parameter) b: string", "see")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "c", "(parameter) c: string", "see @*not-ident here")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "d", "(parameter) d: string", "see @(paren) here")
+    fourslash::verify_quick_info_at(&mut s, "", "(parameter) x: string", "Checks @-rule here");
+    fourslash::verify_quick_info_at(&mut s, "a", "(parameter) a: string", "see");
+    fourslash::verify_quick_info_at(&mut s, "b", "(parameter) b: string", "see");
+    fourslash::verify_quick_info_at(&mut s, "c", "(parameter) c: string", "see @*not-ident here");
+    fourslash::verify_quick_info_at(&mut s, "d", "(parameter) d: string", "see @(paren) here");
 }

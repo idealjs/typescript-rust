@@ -9,5 +9,5 @@ fn generic_function_with_generic_params1() {
     return a;
 };"#;
     let mut s = Session::new(content);
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "", "(local var) xx: T", "")
+    fourslash::verify_quick_info_at(&mut s, "", "(local var) xx: T", "");
 }

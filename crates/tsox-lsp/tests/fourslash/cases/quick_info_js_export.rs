@@ -16,5 +16,10 @@ const testString = {
 
 export { test/**/String };"#;
     let mut s = Session::new(content);
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "", "(alias) type testString = string\n(alias) const testString: {\n    one: 
+    fourslash::verify_quick_info_at(
+        &mut s,
+        "",
+        "(alias) type testString = string\n(alias) const testString: {\n    one: string;\n    two: string;\n}\nexport testString",
+        "",
+    );
 }

@@ -16,6 +16,6 @@ const /*3*/j = require("/*4*/./j.json");
 // @Filename: /j.json
 /*6*/{ "x": 0 }"#;
     let mut s = Session::new(content);
-    fourslash::unsupported("VerifyNoErrors"); // f.VerifyNoErrors(t)
+    fourslash::verify_no_errors(&mut s);
     fourslash::unsupported("VerifyBaselineFindAllReferences"); // f.VerifyBaselineFindAllReferences(t, "0", "2", "1", "4", "3", "5", "6")
 }

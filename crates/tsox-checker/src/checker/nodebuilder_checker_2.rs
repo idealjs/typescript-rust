@@ -114,7 +114,6 @@ impl Checker {
         if tuple.element_infos.is_empty() {
             return format!("{readonly_prefix}[]");
         }
-        let parts: Vec<String> = tuple
             .element_infos
             .iter()
             .map(|elem| {
@@ -129,6 +128,15 @@ impl Checker {
                     format!("...{}", ty_str)
                 } else if elem.flags.contains(ElementFlags::Optional) {
                     format!("{}?", ty_str)
+                } else if let Some(label) = elem.label.clone() {
+                    format!("{label}: {ty_str}")
+                } else if let Some(label) = elem
+                    .labeled_declaration
+                    .as_ref()
+                    .and_then(|d| tsox_frontend::ast::node_data_generated::node_name(d))
+                    .map(|n| n.text().to_string())
+                {
+                    format!("{label}: {ty_str}")
                 } else {
                     ty_str
                 }

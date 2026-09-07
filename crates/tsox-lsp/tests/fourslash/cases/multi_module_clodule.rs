@@ -26,5 +26,5 @@ c./*3*/foo = C./*4*/foo;"#;
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, []string{"2", "4"}, &fourslash.CompletionsExpectedList{
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "3", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyNoErrors"); // f.VerifyNoErrors(t)
+    fourslash::verify_no_errors(&mut s);
 }

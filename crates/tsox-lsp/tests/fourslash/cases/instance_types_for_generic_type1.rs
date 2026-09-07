@@ -1,6 +1,5 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyQuickInfoAt"]
 #[test]
 fn instance_types_for_generic_type1() {
     let content = r#"class G<T> {               // Introduce type parameter T
@@ -10,6 +9,6 @@ fn instance_types_for_generic_type1() {
     }
 }"#;
     let mut s = Session::new(content);
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "1", "(property) G<T>.self: G<T>", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "2", "this: this", "")
+    fourslash::verify_quick_info_at(&mut s, "1", "(property) G<T>.self: G<T>", "");
+    fourslash::verify_quick_info_at(&mut s, "2", "this: this", "");
 }

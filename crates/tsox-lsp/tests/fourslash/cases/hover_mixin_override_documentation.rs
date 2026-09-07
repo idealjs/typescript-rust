@@ -1,6 +1,5 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyQuickInfoAt"]
 #[test]
 fn hover_mixin_override_documentation() {
     let content = r#"
@@ -24,5 +23,10 @@ declare class Mixed extends Mix(BaseClass) {
 Mixed./*1*/method;
 "#;
     let mut s = Session::new(content);
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "1", "(method) Mixed.method(): number", "some documentation")
+    fourslash::verify_quick_info_at(
+        &mut s,
+        "1",
+        "(method) Mixed.method(): number",
+        "some documentation",
+    );
 }

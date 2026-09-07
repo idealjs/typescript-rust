@@ -21,6 +21,6 @@ Builder<IThing>({
   doAnotherThing() { },
 })"#;
     let mut s = Session::new(content);
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "1", "const value: any", "")
+    fourslash::verify_quick_info_at(&mut s, "1", "const value: any", "");
     fourslash::unsupported("VerifyNonSuggestionDiagnostics"); // f.VerifyNonSuggestionDiagnostics(t, []*lsproto.Diagnostic{
 }

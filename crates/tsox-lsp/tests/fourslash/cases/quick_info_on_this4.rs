@@ -1,6 +1,5 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyQuickInfoAt"]
 #[test]
 fn quick_info_on_this4() {
     let content = r#"interface ContextualInterface {
@@ -18,6 +17,6 @@ interface ContextualInterface2 {
 }
 let contextualInterface2: ContextualInterface2 = function (th/*2*/is, n) { }"#;
     let mut s = Session::new(content);
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "1", "this: ContextualInterface", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "2", "(parameter) this: void", "")
+    fourslash::verify_quick_info_at(&mut s, "1", "this: ContextualInterface", "");
+    fourslash::verify_quick_info_at(&mut s, "2", "(parameter) this: void", "");
 }

@@ -212,6 +212,16 @@ var doSome/*1*/thing = function (dataTable) {
   */
 var anotherThing/*2*/ = function(a, b) {}"#;
     let mut s = Session::new(content);
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "1", "var doSomething: (dataTable: DataTableThing) => void", "Do something")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "2", "var anotherThing: SomeCallback", "Another thing")
+    fourslash::verify_quick_info_at(
+        &mut s,
+        "1",
+        "var doSomething: (dataTable: DataTableThing) => void",
+        "Do something",
+    );
+    fourslash::verify_quick_info_at(
+        &mut s,
+        "2",
+        "var anotherThing: SomeCallback",
+        "Another thing",
+    );
 }

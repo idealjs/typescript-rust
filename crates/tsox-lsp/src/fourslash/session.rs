@@ -1,45 +1,180 @@
-//! fourslash 会话：测试内容解析结果 + 当前文件状态（编辑作用于内存文本）。
+//! fourslash 会话：解析结果 + 内存文件状态 + 真实 LanguageService。
 //! 框架操作以自由函数形式提供（见 api 模块），Session 只承载数据。
 
 use crate::fourslash::parse::{Marker, RangeMarker, TestData, parse_test_data};
+use crate::ls::host::{AutoImportRegistry, EcmaLineInfo, Host};
+use crate::ls::language_service::LanguageService;
+use crate::ls::lsconv_converters::{Converters, PositionEncodingKind};
+use crate::ls::lsutil::UserPreferences;
+use std::sync::{Arc, Mutex};
+use tsox_checker::bundled::{BundledFS, lib_path};
+use tsox_compile::compiler::{CompilerHost, CompilerHostImpl, Program, ProgramOptions};
+use tsox_core::tspath::Path;
+use tsox_tsoptions::tsoptions::parse_command_line;
+use tsox_tsoptions::vfs::{FS, InMemoryFS};
 
-#[derive(Debug)]
+pub const DEFAULT_FILE_NAME: &str = "main.ts";
+
+thread_local! {
+    static DEFAULT_TEST_FILE: std::cell::RefCell<String> =
+        const { std::cell::RefCell::new(String::new()) };
+}
+pub const PROJECT_ROOT: &str = "";
+
+pub(crate) fn project_path(name: &str) -> String {
+    if name.starts_with('/') {
+        name.to_string()
+    } else {
+        format!("{PROJECT_ROOT}/{}", name)
+    }
+}
+
+struct FourslashHost {
+    fs: Arc<BundledFS>,
+    prefs: Arc<Mutex<UserPreferences>>,
+}
+
+impl Host for FourslashHost {
+    fn use_case_sensitive_file_names(&self) -> bool {
+        false
+    }
+    fn read_file(&self, path: &str) -> Option<String> {
+        self.fs.read_file(path)
+    }
+    fn converters(&self) -> Converters {
+        Converters::new(PositionEncodingKind::Utf8)
+    }
+    fn get_preferences(&self, _active_file: &str) -> UserPreferences {
+        self.prefs.lock().unwrap().clone()
+    }
+    fn get_ecma_line_info(&self, _file_name: &str) -> Option<EcmaLineInfo> {
+        None
+    }
+    fn auto_import_registry(&self) -> AutoImportRegistry {
+        AutoImportRegistry
+    }
+    fn read_directory(
+        &self,
+        _current_dir: &str,
+        _path: &str,
+        _extensions: &[String],
+        _excludes: &[String],
+        _includes: &[String],
+        _depth: i32,
+    ) -> Vec<String> {
+        Vec::new()
+    }
+    fn get_directories(&self, _path: &str) -> Vec<String> {
+        Vec::new()
+    }
+    fn directory_exists(&self, path: &str) -> bool {
+        self.fs.directory_exists(path)
+    }
+    fn file_exists(&self, path: &str) -> bool {
+        self.fs.file_exists(path)
+    }
+}
+
 pub struct Session {
     pub data: TestData,
     pub active_file: String,
     pub cursor: Option<usize>,
-    /// 文件名 -> 当前内容（应用过 Insert 等编辑后）
     contents: std::collections::BTreeMap<String, String>,
     pub capabilities: Option<String>,
+    inner_fs: Arc<InMemoryFS>,
+    prefs: Arc<Mutex<UserPreferences>>,
+    pub service: Option<LanguageService>,
 }
-
-pub const DEFAULT_FILE_NAME: &str = "main.ts";
 
 impl Session {
     pub fn new(content: &str) -> Session {
         Self::new_with_capabilities(content, None)
     }
 
+    /// 按测试名命名默认文件（对齐 Go fourslash 的 defaultFileName 行为）
+    pub fn new_for_test(test_name: &str, content: &str) -> Session {
+        DEFAULT_TEST_FILE.with(|n| *n.borrow_mut() = test_name.to_string());
+        Self::new_with_capabilities(content, None)
+    }
+
     pub fn new_with_capabilities(content: &str, capabilities: Option<String>) -> Session {
-        let data = parse_test_data(content, DEFAULT_FILE_NAME);
-        let mut contents = std::collections::BTreeMap::new();
-        let mut active = DEFAULT_FILE_NAME.to_string();
-        for f in &data.files {
-            contents.insert(f.file_name.clone(), f.content.clone());
-            if f.file_options.get("emitthisfile").is_none() {
-                // 首个文件为活动文件
+        let default_name = DEFAULT_TEST_FILE.with(|n| {
+            let b = n.borrow();
+            if b.is_empty() {
+                DEFAULT_FILE_NAME.to_string()
+            } else {
+                format!("{}.ts", b)
             }
+        });
+        let data = parse_test_data(content, &default_name);
+        let inner_fs = Arc::new(InMemoryFS::new());
+        let mut contents = std::collections::BTreeMap::new();
+        let mut file_names = Vec::new();
+        for f in &data.files {
+            let path = project_path(&f.file_name);
+            inner_fs.insert_file(&path, &f.content);
+            contents.insert(f.file_name.clone(), f.content.clone());
+            file_names.push(path);
         }
-        if let Some(first) = data.files.first() {
-            active = first.file_name.clone();
-        }
-        Session {
+        let active_file = data
+            .files
+            .first()
+            .map(|f| f.file_name.clone())
+            .unwrap_or_else(|| DEFAULT_FILE_NAME.to_string());
+        let prefs = Arc::new(Mutex::new(crate::ls::lsutil::new_default_user_preferences()));
+        let mut s = Session {
             data,
-            active_file: active,
+            active_file,
             cursor: None,
             contents,
             capabilities,
+            inner_fs,
+            prefs: prefs.clone(),
+            service: None,
+        };
+        s.rebuild_service(file_names);
+        s
+    }
+
+    fn rebuild_service(&mut self, file_names: Vec<String>) {
+        let dyn_fs: Arc<dyn FS> = Arc::clone(&self.inner_fs) as _;
+        let fs = Arc::new(BundledFS::new(dyn_fs));
+        // 合并全局与各文件 @options（对齐 Go fourslash：文件头选项作用于整个测试工程）
+        let mut merged_options = self.data.global_options.clone();
+        for f in &self.data.files {
+            for (k, v) in &f.file_options {
+                merged_options.insert(k.clone(), v.clone());
+            }
         }
+        let mut args: Vec<String> = Vec::new();
+        for (k, v) in &merged_options {
+            args.push(format!("--{k}"));
+            if !v.is_empty() {
+                args.push(v.clone());
+            }
+        }
+        args.extend(file_names);
+        let parsed = parse_command_line(&args, PROJECT_ROOT, Some(fs.as_ref()));
+        let host: Arc<dyn CompilerHost> = Arc::new(CompilerHostImpl::new(
+            fs.clone(),
+            PROJECT_ROOT.to_string(),
+            lib_path(),
+        ));
+        let program = Arc::new(Program::new(ProgramOptions {
+            config: parsed,
+            host,
+        }));
+        let active = project_path(&self.active_file);
+        let ls_host = Box::new(FourslashHost {
+            fs,
+            prefs: Arc::clone(&self.prefs),
+        });
+        self.service = Some(LanguageService::new(
+            Path::from(PROJECT_ROOT),
+            program,
+            ls_host,
+            &active,
+        ));
     }
 
     pub fn file_content(&self, name: &str) -> &str {
@@ -49,19 +184,27 @@ impl Session {
     }
 
     pub fn set_file_content(&mut self, name: &str, content: String) {
+        self.inner_fs
+            .insert_file(&project_path(name), &content);
         self.contents.insert(name.to_string(), content);
+        let file_names: Vec<String> = self
+            .data
+            .files
+            .iter()
+            .map(|f| project_path(&f.file_name))
+            .collect();
+        self.rebuild_service(file_names);
+    }
+
+    pub fn active_path(&self) -> String {
+        project_path(&self.active_file)
     }
 
     pub fn marker(&self, name: &str) -> &Marker {
-        let pos = self
-            .data
-            .marker_positions
-            .get(name)
-            .unwrap_or_else(|| panic!("标记不存在: {name}"));
         self.data
             .markers
             .iter()
-            .find(|m| m.position == *pos && m.name.as_deref() == Some(name))
+            .find(|m| m.name.as_deref() == Some(name))
             .unwrap_or_else(|| panic!("标记不存在: {name}"))
     }
 

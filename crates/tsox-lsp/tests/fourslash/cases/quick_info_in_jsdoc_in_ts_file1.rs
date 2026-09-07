@@ -37,12 +37,27 @@ if (stuff.quantity) {}
 /** @type {(a/*8*/: string) => void} */
 function test2(a: string) {}"#;
     let mut s = Session::new(content);
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "1", "", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "2", "", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "3", "", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "4", "type SomeObj = {\n    bar: string;\n}", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "5", "(parameter) stuff: {\n    quantity: number;\n}", "Stuff to do stuff wit
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "6", "(parameter) stuff: {\n    quantity: number;\n}", "Stuff to do stuff wit
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "7", "function doStuffWithStuff(stuff: {\n    quantity: number;\n}): void", "
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "8", "", "")
+    fourslash::verify_quick_info_at(&mut s, "1", "", "");
+    fourslash::verify_quick_info_at(&mut s, "2", "", "");
+    fourslash::verify_quick_info_at(&mut s, "3", "", "");
+    fourslash::verify_quick_info_at(&mut s, "4", "type SomeObj = {\n    bar: string;\n}", "");
+    fourslash::verify_quick_info_at(
+        &mut s,
+        "5",
+        "(parameter) stuff: {\n    quantity: number;\n}",
+        "Stuff to do stuff with",
+    );
+    fourslash::verify_quick_info_at(
+        &mut s,
+        "6",
+        "(parameter) stuff: {\n    quantity: number;\n}",
+        "Stuff to do stuff with",
+    );
+    fourslash::verify_quick_info_at(
+        &mut s,
+        "7",
+        "function doStuffWithStuff(stuff: {\n    quantity: number;\n}): void",
+        "",
+    );
+    fourslash::verify_quick_info_at(&mut s, "8", "", "");
 }

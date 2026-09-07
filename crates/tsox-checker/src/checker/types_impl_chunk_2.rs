@@ -39,6 +39,7 @@ pub struct TupleTypeData {
 
 #[derive(Debug, Clone)]
 pub struct TupleElementInfo {
+    pub label: Option<String>,
     pub flags: ElementFlags,
     pub labeled_declaration: Option<Arc<Node>>,
 

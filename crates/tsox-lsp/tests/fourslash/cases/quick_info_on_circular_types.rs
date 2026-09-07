@@ -1,6 +1,5 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyQuickInfoAt"]
 #[test]
 fn quick_info_on_circular_types() {
     let content = r#"interface A { (): B; };
@@ -17,6 +16,6 @@ var zz = c();
 
 x/*B*/x = y/*C*/y;"#;
     let mut s = Session::new(content);
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "B", "var xx: B", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "C", "var yy: C", "")
+    fourslash::verify_quick_info_at(&mut s, "B", "var xx: B", "");
+    fourslash::verify_quick_info_at(&mut s, "C", "var yy: C", "");
 }

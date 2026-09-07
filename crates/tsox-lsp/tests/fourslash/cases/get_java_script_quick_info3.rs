@@ -9,5 +9,5 @@ fn get_java_script_quick_info3() {
 /** @param {number[]} [a] */
 function /**/f(a) { }"#;
     let mut s = Session::new(content);
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "", "function f(a?: number[]): void", "")
+    fourslash::verify_quick_info_at(&mut s, "", "function f(a?: number[]): void", "");
 }

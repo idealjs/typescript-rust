@@ -1,6 +1,5 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyQuickInfoAt"]
 #[test]
 fn this_predicate_function_quick_info() {
     let content = r#"class RoyalGuard {
@@ -61,11 +60,36 @@ function isLeaderGuard(g: RoyalGuard) {
 }
 let checked/*14*/LeaderStatus = isLeader/*15*/Guard(a);"#;
     let mut s = Session::new(content);
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "1", "(method) RoyalGuard.isLeader(): this is LeadGuard", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "3", "(method) RoyalGuard.isFollower(): this is FollowerGuard", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "5", "(method) GuardInterface.isLeader(): this is LeadGuard", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "7", "(method) GuardInterface.isFollower(): this is FollowerGuard", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "13", "let leaderStatus: boolean", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "14", "let checkedLeaderStatus: boolean", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "15", "function isLeaderGuard(g: RoyalGuard): g is LeadGuard", "")
+    fourslash::verify_quick_info_at(
+        &mut s,
+        "1",
+        "(method) RoyalGuard.isLeader(): this is LeadGuard",
+        "",
+    );
+    fourslash::verify_quick_info_at(
+        &mut s,
+        "3",
+        "(method) RoyalGuard.isFollower(): this is FollowerGuard",
+        "",
+    );
+    fourslash::verify_quick_info_at(
+        &mut s,
+        "5",
+        "(method) GuardInterface.isLeader(): this is LeadGuard",
+        "",
+    );
+    fourslash::verify_quick_info_at(
+        &mut s,
+        "7",
+        "(method) GuardInterface.isFollower(): this is FollowerGuard",
+        "",
+    );
+    fourslash::verify_quick_info_at(&mut s, "13", "let leaderStatus: boolean", "");
+    fourslash::verify_quick_info_at(&mut s, "14", "let checkedLeaderStatus: boolean", "");
+    fourslash::verify_quick_info_at(
+        &mut s,
+        "15",
+        "function isLeaderGuard(g: RoyalGuard): g is LeadGuard",
+        "",
+    );
 }

@@ -1,6 +1,5 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyQuickInfoAt"]
 #[test]
 fn quick_info_for_aliased_generic() {
     let content = r#"namespace M {
@@ -13,6 +12,6 @@ import d = M.N;
 var /*1*/aa: d.C<number>;
 var /*2*/bb: d.D;"#;
     let mut s = Session::new(content);
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "1", "var aa: d.C<number>", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "2", "var bb: d.D", "")
+    fourslash::verify_quick_info_at(&mut s, "1", "var aa: d.C<number>", "");
+    fourslash::verify_quick_info_at(&mut s, "2", "var bb: d.D", "");
 }

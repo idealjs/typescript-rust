@@ -1,6 +1,5 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyQuickInfoAt"]
 #[test]
 fn type_of_a_fundule() {
     let content = r#"function m1() { return 1; }
@@ -10,5 +9,5 @@ function foo13() {
 }
 var /**/r13 = foo13();"#;
     let mut s = Session::new(content);
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "", "var r13: typeof m1", "")
+    fourslash::verify_quick_info_at(&mut s, "", "var r13: typeof m1", "");
 }

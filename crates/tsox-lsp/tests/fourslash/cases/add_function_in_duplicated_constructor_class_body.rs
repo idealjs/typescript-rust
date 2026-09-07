@@ -1,6 +1,5 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyNumberOfErrorsInCurrentFile"]
 #[test]
 fn add_function_in_duplicated_constructor_class_body() {
     let content = r#"class Foo {
@@ -11,5 +10,5 @@ fn add_function_in_duplicated_constructor_class_body() {
     let mut s = Session::new(content);
     fourslash::go_to_marker(&mut s, "");
     fourslash::insert(&mut s, "fn() { }");
-    fourslash::unsupported("VerifyNumberOfErrorsInCurrentFile"); // f.VerifyNumberOfErrorsInCurrentFile(t, 2)
+    fourslash::verify_number_of_errors_in_current_file(&mut s, 2);
 }

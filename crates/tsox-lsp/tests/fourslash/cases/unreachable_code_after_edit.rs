@@ -30,11 +30,11 @@ export class TransparentCrypto implements ISecretStorageCrypto {
     }
 }"#;
     let mut s = Session::new(content);
-    fourslash::unsupported("VerifyNumberOfErrorsInCurrentFile"); // f.VerifyNumberOfErrorsInCurrentFile(t, 0)
+    fourslash::verify_number_of_errors_in_current_file(&mut s, 0);
     fourslash::go_to_marker(&mut s, "before");
     fourslash::insert(&mut s, "throw new Error('foo');\n");
-    fourslash::unsupported("VerifyNumberOfErrorsInCurrentFile"); // f.VerifyNumberOfErrorsInCurrentFile(t, 1)
+    fourslash::verify_number_of_errors_in_current_file(&mut s, 1);
     fourslash::go_to_marker(&mut s, "before");
     fourslash::unsupported("DeleteAtCaret"); // f.DeleteAtCaret(t, 24)
-    fourslash::unsupported("VerifyNumberOfErrorsInCurrentFile"); // f.VerifyNumberOfErrorsInCurrentFile(t, 0)
+    fourslash::verify_number_of_errors_in_current_file(&mut s, 0);
 }

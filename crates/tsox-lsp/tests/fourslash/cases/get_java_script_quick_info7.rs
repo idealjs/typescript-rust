@@ -20,5 +20,10 @@ function a1(p) {
 
 x - /**/a1()"#;
     let mut s = Session::new(content);
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "", "function a1(p: any): number", "This is a very cool function that is very
+    fourslash::verify_quick_info_at(
+        &mut s,
+        "",
+        "function a1(p: any): number",
+        "This is a very cool function that is very nice.",
+    );
 }

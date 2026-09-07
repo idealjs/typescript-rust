@@ -21,5 +21,5 @@ function Foo(x?: any, y?: any, z?: any) {
 }
 Fo/**/o();"#;
     let mut s = Session::new(content);
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "", "function Foo(): any (+12 overloads)", "")
+    fourslash::verify_quick_info_at(&mut s, "", "function Foo(): any (+12 overloads)", "");
 }

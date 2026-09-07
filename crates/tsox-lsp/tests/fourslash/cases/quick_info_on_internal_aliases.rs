@@ -23,17 +23,47 @@ import /*8*/internalFoo = m1./*9*/foo;
 var /*10*/callVar = /*11*/internalFoo();
 var /*12*/anotherAliasFoo = /*13*/internalFoo;"#;
     let mut s = Session::new(content);
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "1", "class m1.m2.c", "class comment;")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "2", "(alias) class internalAlias\nimport internalAlias = m1.m2.c", "This is 
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "3", "class m1.m2.c", "class comment;")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "4", "var newVar: internalAlias", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "5", "(alias) new internalAlias(): internalAlias\nimport internalAlias = m1.m
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "6", "var anotherAliasVar: typeof internalAlias", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "7", "(alias) class internalAlias\nimport internalAlias = m1.m2.c", "This is 
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "8", "(alias) function internalFoo(): void\nimport internalFoo = m1.foo", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "9", "function m1.foo(): void", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "10", "var callVar: void", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "11", "(alias) internalFoo(): void\nimport internalFoo = m1.foo", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "12", "var anotherAliasFoo: () => void", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "13", "(alias) function internalFoo(): void\nimport internalFoo = m1.foo", ""
+    fourslash::verify_quick_info_at(&mut s, "1", "class m1.m2.c", "class comment;");
+    fourslash::verify_quick_info_at(
+        &mut s,
+        "2",
+        "(alias) class internalAlias\nimport internalAlias = m1.m2.c",
+        "This is on import declaration",
+    );
+    fourslash::verify_quick_info_at(&mut s, "3", "class m1.m2.c", "class comment;");
+    fourslash::verify_quick_info_at(&mut s, "4", "var newVar: internalAlias", "");
+    fourslash::verify_quick_info_at(
+        &mut s,
+        "5",
+        "(alias) new internalAlias(): internalAlias\nimport internalAlias = m1.m2.c",
+        "This is on import declaration",
+    );
+    fourslash::verify_quick_info_at(&mut s, "6", "var anotherAliasVar: typeof internalAlias", "");
+    fourslash::verify_quick_info_at(
+        &mut s,
+        "7",
+        "(alias) class internalAlias\nimport internalAlias = m1.m2.c",
+        "This is on import declaration",
+    );
+    fourslash::verify_quick_info_at(
+        &mut s,
+        "8",
+        "(alias) function internalFoo(): void\nimport internalFoo = m1.foo",
+        "",
+    );
+    fourslash::verify_quick_info_at(&mut s, "9", "function m1.foo(): void", "");
+    fourslash::verify_quick_info_at(&mut s, "10", "var callVar: void", "");
+    fourslash::verify_quick_info_at(
+        &mut s,
+        "11",
+        "(alias) internalFoo(): void\nimport internalFoo = m1.foo",
+        "",
+    );
+    fourslash::verify_quick_info_at(&mut s, "12", "var anotherAliasFoo: () => void", "");
+    fourslash::verify_quick_info_at(
+        &mut s,
+        "13",
+        "(alias) function internalFoo(): void\nimport internalFoo = m1.foo",
+        "",
+    );
 }

@@ -1,6 +1,5 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyQuickInfoAt"]
 #[test]
 fn quick_info_on_this2() {
     let content = r#"class Bar<T> {
@@ -12,6 +11,6 @@ fn quick_info_on_this2() {
     }
 }"#;
     let mut s = Session::new(content);
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "1", "this: this", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "2", "this: Bar<T>", "")
+    fourslash::verify_quick_info_at(&mut s, "1", "this: this", "");
+    fourslash::verify_quick_info_at(&mut s, "2", "this: Bar<T>", "");
 }

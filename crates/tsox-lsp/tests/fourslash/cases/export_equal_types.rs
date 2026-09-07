@@ -20,9 +20,14 @@ var t: /*1*/test;  // var 't' should be of type 'test'
 var /*2*/r1 = t(); // Should return a Date
 var /*3*/r2 = t./*4*/foo; // t should have 'foo' in dropdown list and be of type 'string'"#;
     let mut s = Session::new(content);
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "1", "(alias) interface test\nimport test = require('./exportEqualTypes_file0
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "2", "var r1: Date", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "3", "var r2: string", "")
+    fourslash::verify_quick_info_at(
+        &mut s,
+        "1",
+        "(alias) interface test\nimport test = require('./exportEqualTypes_file0')",
+        "",
+    );
+    fourslash::verify_quick_info_at(&mut s, "2", "var r1: Date", "");
+    fourslash::verify_quick_info_at(&mut s, "3", "var r2: string", "");
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "4", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyNoErrors"); // f.VerifyNoErrors(t)
+    fourslash::verify_no_errors(&mut s);
 }

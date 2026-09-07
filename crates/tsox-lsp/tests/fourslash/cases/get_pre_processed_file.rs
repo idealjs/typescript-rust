@@ -22,7 +22,7 @@ var obj1: D;
 var obj2: ref2.E;"#;
     let mut s = Session::new(content);
     fourslash::go_to_file(&mut s, "main.ts");
-    fourslash::unsupported("VerifyNumberOfErrorsInCurrentFile"); // f.VerifyNumberOfErrorsInCurrentFile(t, 7)
+    fourslash::verify_number_of_errors_in_current_file(&mut s, 7);
     fourslash::unsupported("VerifyErrorExistsBetweenMarkers"); // f.VerifyErrorExistsBetweenMarkers(t, "1", "2")
     fourslash::unsupported("VerifyErrorExistsBetweenMarkers"); // f.VerifyErrorExistsBetweenMarkers(t, "3", "4")
     fourslash::unsupported("VerifyErrorExistsBetweenMarkers"); // f.VerifyErrorExistsBetweenMarkers(t, "5", "6")

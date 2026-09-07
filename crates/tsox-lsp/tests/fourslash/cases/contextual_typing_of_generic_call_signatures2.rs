@@ -11,6 +11,6 @@ function f6(x: <T extends I>(p: T) => void) { }
 // x should not be contextually typed so this should be an error
 f6(/**/x => x<number>())"#;
     let mut s = Session::new(content);
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "", "(parameter) x: T extends I", "")
-    fourslash::unsupported("VerifyNumberOfErrorsInCurrentFile"); // f.VerifyNumberOfErrorsInCurrentFile(t, 1)
+    fourslash::verify_quick_info_at(&mut s, "", "(parameter) x: T extends I", "");
+    fourslash::verify_number_of_errors_in_current_file(&mut s, 1);
 }

@@ -14,7 +14,7 @@ export type fullType = /*foo3*/[|foo|]./*full1*/[|Full|];
 type namespaceImport = typeof import('./foo/types');
 type fullType2 = import('./foo/types')./*foo4*/[|foo|]./*full2*/[|Full|];"#;
     let mut s = Session::new(content);
-    fourslash::unsupported("VerifyNoErrors"); // f.VerifyNoErrors(t)
+    fourslash::verify_no_errors(&mut s);
     fourslash::unsupported("VerifyBaselineFindAllReferences"); // f.VerifyBaselineFindAllReferences(t, "full0", "full1", "full2", "foo0", "foo1", "foo2", "foo3", "foo
     fourslash::unsupported("VerifyBaselineRename"); // f.VerifyBaselineRename(t, nil /*preferences*/, f.Ranges()[1], f.Ranges()[9], f.Ranges()[11])
     fourslash::unsupported("VerifyBaselineRename"); // f.VerifyBaselineRename(t, nil /*preferences*/, f.Ranges()[3])

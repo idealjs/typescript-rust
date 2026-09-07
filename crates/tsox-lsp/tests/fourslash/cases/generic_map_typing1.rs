@@ -1,6 +1,5 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyNoErrors"]
 #[test]
 fn generic_map_typing1() {
     let content = r#"// @strict: false
@@ -24,14 +23,14 @@ var b/*4*/bb = _.map(aaa, xx => xx.length); // should be any[]
 var c/*5*/cc = _(aaa).map(xx => xx.length);  // Should not error, should be any[]
 var d/*6*/dd = aaa.map(xx => xx.length);     // should not error, should be any[]"#;
     let mut s = Session::new(content);
-    fourslash::unsupported("VerifyNoErrors"); // f.VerifyNoErrors(t)
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "1", "var bb: number[]", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "2", "var cc: number[]", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "3", "var dd: number[]", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "4", "var bbb: any[]", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "5", "var ccc: any[]", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "6", "var ddd: any[]", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "7", "(parameter) xx: string", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "8", "(parameter) xx: string", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "9", "(parameter) xx: string", "")
+    fourslash::verify_no_errors(&mut s);
+    fourslash::verify_quick_info_at(&mut s, "1", "var bb: number[]", "");
+    fourslash::verify_quick_info_at(&mut s, "2", "var cc: number[]", "");
+    fourslash::verify_quick_info_at(&mut s, "3", "var dd: number[]", "");
+    fourslash::verify_quick_info_at(&mut s, "4", "var bbb: any[]", "");
+    fourslash::verify_quick_info_at(&mut s, "5", "var ccc: any[]", "");
+    fourslash::verify_quick_info_at(&mut s, "6", "var ddd: any[]", "");
+    fourslash::verify_quick_info_at(&mut s, "7", "(parameter) xx: string", "");
+    fourslash::verify_quick_info_at(&mut s, "8", "(parameter) xx: string", "");
+    fourslash::verify_quick_info_at(&mut s, "9", "(parameter) xx: string", "");
 }

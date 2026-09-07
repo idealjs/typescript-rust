@@ -1,6 +1,5 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyQuickInfoAt"]
 #[test]
 fn quick_info_signature_rest_parameter_from_union3() {
     let content = r#"declare const fn:
@@ -9,5 +8,10 @@ fn quick_info_signature_rest_parameter_from_union3() {
 
 /**/fn();"#;
     let mut s = Session::new(content);
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "", "const fn: (a: {\n    x: number;\n} & {\n    y: number;\n}, b: {\n    x: 
+    fourslash::verify_quick_info_at(
+        &mut s,
+        "",
+        "const fn: (a: {\n    x: number;\n} & {\n    y: number;\n}, b: {\n    x: number;\n} & {\n    y: number;\n}, ...args: {\n    y: number;\n}[]) => number",
+        "",
+    );
 }

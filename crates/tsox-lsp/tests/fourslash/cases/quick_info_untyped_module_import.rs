@@ -12,7 +12,7 @@ import /*foo*/foo from /*fooModule*/"foo";
 /*fooCall*/foo();"#;
     let mut s = Session::new(content);
     fourslash::go_to_file(&mut s, "a.ts");
-    fourslash::unsupported("VerifyNumberOfErrorsInCurrentFile"); // f.VerifyNumberOfErrorsInCurrentFile(t, 0)
+    fourslash::verify_number_of_errors_in_current_file(&mut s, 0);
     fourslash::go_to_marker(&mut s, "fooModule");
     fourslash::unsupported("VerifyQuickInfoIs"); // f.VerifyQuickInfoIs(t, "", "")
     fourslash::go_to_marker(&mut s, "foo");

@@ -11,5 +11,5 @@ Foo.a();"#;
     let mut s = Session::new(content);
     fourslash::go_to_marker(&mut s, "");
     fourslash::unsupported("DeleteAtCaret"); // f.DeleteAtCaret(t, 7)
-    fourslash::unsupported("VerifyNumberOfErrorsInCurrentFile"); // f.VerifyNumberOfErrorsInCurrentFile(t, 1)
+    fourslash::verify_number_of_errors_in_current_file(&mut s, 1);
 }

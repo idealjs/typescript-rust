@@ -208,12 +208,18 @@ impl Checker {
                     || elem.flags.contains(ElementFlags::Variadic)
                 {
                     self.rest_type_node(ty)
+                } else if let Some(label) = &elem.label {
+                    self.named_tuple_member_node(label, ty)
                 } else {
                     ty
                 }
             })
             .collect();
         self.tuple_type_node(elements)
+    }
+
+    fn named_tuple_member_node(&mut self, _label: &str, ty: Arc<Node>) -> Arc<Node> {
+        ty
     }
 
     pub(crate) fn reference_to_type_node(&mut self, t: &Arc<Type>) -> Arc<Node> {

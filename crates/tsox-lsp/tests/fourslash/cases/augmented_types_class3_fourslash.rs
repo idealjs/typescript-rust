@@ -7,7 +7,7 @@ fn augmented_types_class3_fourslash() {
 namespace c/*2*/5b { export var y = 2; } // should be ok
 /*3*/"#;
     let mut s = Session::new(content);
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "1", "class c5b\nnamespace c5b", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "2", "class c5b\nnamespace c5b", "")
+    fourslash::verify_quick_info_at(&mut s, "1", "class c5b\nnamespace c5b", "");
+    fourslash::verify_quick_info_at(&mut s, "2", "class c5b\nnamespace c5b", "");
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "3", &fourslash.CompletionsExpectedList{
 }

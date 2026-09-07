@@ -19,7 +19,7 @@ fn find_all_refs_import_star_of_export_equals() {
 /*c1*/[|a|]();
 /*c2*/[|a|].x;"#;
     let mut s = Session::new(content);
-    fourslash::unsupported("VerifyNoErrors"); // f.VerifyNoErrors(t)
+    fourslash::verify_no_errors(&mut s);
     fourslash::unsupported("VerifyBaselineFindAllReferences"); // f.VerifyBaselineFindAllReferences(t, "a0", "a1", "a2", "b0", "b1", "c0", "c1", "c2")
     fourslash::unsupported("VerifyBaselineRename"); // f.VerifyBaselineRename(t, nil /*preferences*/, f.Ranges()[1], f.Ranges()[3], f.Ranges()[5])
     fourslash::unsupported("VerifyBaselineRename"); // f.VerifyBaselineRename(t, nil /*preferences*/, f.Ranges()[7], f.Ranges()[8], f.Ranges()[9])

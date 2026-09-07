@@ -32,7 +32,17 @@ c./*quickInfoC*/x;"#;
     fourslash::unsupported("VerifySignatureHelp"); // f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{Text: "x(a: number): void"})
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "completionA", &fourslash.CompletionsExpectedList{
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, []string{"completionB", "completionC"}, &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "quickInfoA", "(method) x(a: number): void", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "quickInfoB", "(property) x: (a: number) => void", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "quickInfoC", "(property) x: (a: number) => void", "")
+    fourslash::verify_quick_info_at(&mut s, "quickInfoA", "(method) x(a: number): void", "");
+    fourslash::verify_quick_info_at(
+        &mut s,
+        "quickInfoB",
+        "(property) x: (a: number) => void",
+        "",
+    );
+    fourslash::verify_quick_info_at(
+        &mut s,
+        "quickInfoC",
+        "(property) x: (a: number) => void",
+        "",
+    );
 }

@@ -14,5 +14,5 @@ namespace B {
     export function f() {}
 }"#;
     let mut s = Session::new(content);
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "", "(method) f(): void", "")
+    fourslash::verify_quick_info_at(&mut s, "", "(method) f(): void", "");
 }

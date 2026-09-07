@@ -11,5 +11,5 @@ fn quick_info_jsdoc_typedef_missing_type() {
  */
 var x;"#;
     let mut s = Session::new(content);
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "", "type A = any", "")
+    fourslash::verify_quick_info_at(&mut s, "", "type A = any", "");
 }

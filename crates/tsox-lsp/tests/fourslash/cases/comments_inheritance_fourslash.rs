@@ -241,15 +241,15 @@ class c6 extends c5 {
     fourslash::unsupported("VerifySignatureHelp"); // f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{DocComment: ""})
     fourslash::go_to_marker(&mut s, "l5");
     fourslash::unsupported("VerifySignatureHelp"); // f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{DocComment: ""})
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "1iq", "var i1_i: i1", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "2q", "(method) i1.i1_f1(): void", "i1_f1")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "3q", "(method) i1.i1_nc_f1(): void", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "4q", "(method) i1.f1(): void", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "5q", "(method) i1.nc_f1(): void", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "l2q", "(property) i1.i1_l1: () => void", "i1_l1")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "l3q", "(property) i1.i1_nc_l1: () => void", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "l4q", "(property) i1.l1: () => void", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "l5q", "(property) i1.nc_l1: () => void", "")
+    fourslash::verify_quick_info_at(&mut s, "1iq", "var i1_i: i1", "");
+    fourslash::verify_quick_info_at(&mut s, "2q", "(method) i1.i1_f1(): void", "i1_f1");
+    fourslash::verify_quick_info_at(&mut s, "3q", "(method) i1.i1_nc_f1(): void", "");
+    fourslash::verify_quick_info_at(&mut s, "4q", "(method) i1.f1(): void", "");
+    fourslash::verify_quick_info_at(&mut s, "5q", "(method) i1.nc_f1(): void", "");
+    fourslash::verify_quick_info_at(&mut s, "l2q", "(property) i1.i1_l1: () => void", "i1_l1");
+    fourslash::verify_quick_info_at(&mut s, "l3q", "(property) i1.i1_nc_l1: () => void", "");
+    fourslash::verify_quick_info_at(&mut s, "l4q", "(property) i1.l1: () => void", "");
+    fourslash::verify_quick_info_at(&mut s, "l5q", "(property) i1.nc_l1: () => void", "");
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "6", &fourslash.CompletionsExpectedList{
     fourslash::go_to_marker(&mut s, "7");
     fourslash::unsupported("VerifySignatureHelp"); // f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{DocComment: "i1_f1"})
@@ -267,15 +267,20 @@ class c6 extends c5 {
     fourslash::unsupported("VerifySignatureHelp"); // f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{DocComment: ""})
     fourslash::go_to_marker(&mut s, "l8");
     fourslash::unsupported("VerifySignatureHelp"); // f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{DocComment: ""})
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "6iq", "var c1_i: c1", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "7q", "(method) c1.i1_f1(): void", "i1_f1")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "8q", "(method) c1.i1_nc_f1(): void", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "9q", "(method) c1.f1(): void", "c1_f1")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "10q", "(method) c1.nc_f1(): void", "c1_nc_f1")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "l7q", "(property) c1.i1_l1: () => void", "i1_l1")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "l8q", "(property) c1.i1_nc_l1: () => void", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "l9q", "(property) c1.l1: () => void", "c1_l1")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "l10q", "(property) c1.nc_l1: () => void", "c1_nc_l1")
+    fourslash::verify_quick_info_at(&mut s, "6iq", "var c1_i: c1", "");
+    fourslash::verify_quick_info_at(&mut s, "7q", "(method) c1.i1_f1(): void", "i1_f1");
+    fourslash::verify_quick_info_at(&mut s, "8q", "(method) c1.i1_nc_f1(): void", "");
+    fourslash::verify_quick_info_at(&mut s, "9q", "(method) c1.f1(): void", "c1_f1");
+    fourslash::verify_quick_info_at(&mut s, "10q", "(method) c1.nc_f1(): void", "c1_nc_f1");
+    fourslash::verify_quick_info_at(&mut s, "l7q", "(property) c1.i1_l1: () => void", "i1_l1");
+    fourslash::verify_quick_info_at(&mut s, "l8q", "(property) c1.i1_nc_l1: () => void", "");
+    fourslash::verify_quick_info_at(&mut s, "l9q", "(property) c1.l1: () => void", "c1_l1");
+    fourslash::verify_quick_info_at(
+        &mut s,
+        "l10q",
+        "(property) c1.nc_l1: () => void",
+        "c1_nc_l1",
+    );
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "11", &fourslash.CompletionsExpectedList{
     fourslash::go_to_marker(&mut s, "12");
     fourslash::unsupported("VerifySignatureHelp"); // f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{DocComment: "i1_f1"})
@@ -293,27 +298,42 @@ class c6 extends c5 {
     fourslash::unsupported("VerifySignatureHelp"); // f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{DocComment: ""})
     fourslash::go_to_marker(&mut s, "l15");
     fourslash::unsupported("VerifySignatureHelp"); // f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{DocComment: ""})
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "12q", "(method) i1.i1_f1(): void", "i1_f1")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "13q", "(method) i1.i1_nc_f1(): void", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "14q", "(method) i1.f1(): void", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "15q", "(method) i1.nc_f1(): void", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "l12q", "(property) i1.i1_l1: () => void", "i1_l1")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "l13q", "(property) i1.i1_nc_l1: () => void", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "l14q", "(property) i1.l1: () => void", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "l15q", "(property) i1.nc_l1: () => void", "")
+    fourslash::verify_quick_info_at(&mut s, "12q", "(method) i1.i1_f1(): void", "i1_f1");
+    fourslash::verify_quick_info_at(&mut s, "13q", "(method) i1.i1_nc_f1(): void", "");
+    fourslash::verify_quick_info_at(&mut s, "14q", "(method) i1.f1(): void", "");
+    fourslash::verify_quick_info_at(&mut s, "15q", "(method) i1.nc_f1(): void", "");
+    fourslash::verify_quick_info_at(&mut s, "l12q", "(property) i1.i1_l1: () => void", "i1_l1");
+    fourslash::verify_quick_info_at(&mut s, "l13q", "(property) i1.i1_nc_l1: () => void", "");
+    fourslash::verify_quick_info_at(&mut s, "l14q", "(property) i1.l1: () => void", "");
+    fourslash::verify_quick_info_at(&mut s, "l15q", "(property) i1.nc_l1: () => void", "");
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "16", &fourslash.CompletionsExpectedList{
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "16i", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "17iq", "var c2_i: c2", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "18iq", "var c3_i: c3", "")
+    fourslash::verify_quick_info_at(&mut s, "17iq", "var c2_i: c2", "");
+    fourslash::verify_quick_info_at(&mut s, "18iq", "var c3_i: c3", "");
     fourslash::go_to_marker(&mut s, "17");
     fourslash::unsupported("VerifySignatureHelp"); // f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{DocComment: "c2 constructor"})
     fourslash::go_to_marker(&mut s, "18");
     fourslash::unsupported("VerifySignatureHelp"); // f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{DocComment: ""})
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "18sq", "constructor c2(a: number): c2", "c2 constructor")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "18spropq", "class c2", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "18spropProp", "(property) c2.c2_p1: number", "c2 c2_p1")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "17q", "constructor c2(a: number): c2", "c2 constructor")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "18q", "constructor c3(): c3", "")
+    fourslash::verify_quick_info_at(
+        &mut s,
+        "18sq",
+        "constructor c2(a: number): c2",
+        "c2 constructor",
+    );
+    fourslash::verify_quick_info_at(&mut s, "18spropq", "class c2", "");
+    fourslash::verify_quick_info_at(
+        &mut s,
+        "18spropProp",
+        "(property) c2.c2_p1: number",
+        "c2 c2_p1",
+    );
+    fourslash::verify_quick_info_at(
+        &mut s,
+        "17q",
+        "constructor c2(a: number): c2",
+        "c2 constructor",
+    );
+    fourslash::verify_quick_info_at(&mut s, "18q", "constructor c3(): c3", "");
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, []string{"19", "29"}, &fourslash.CompletionsExpectedList{
     fourslash::go_to_marker(&mut s, "20");
     fourslash::unsupported("VerifySignatureHelp"); // f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{DocComment: "c2 c2_f1"})
@@ -323,10 +343,10 @@ class c6 extends c5 {
     fourslash::unsupported("VerifySignatureHelp"); // f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{DocComment: ""})
     fourslash::go_to_marker(&mut s, "23");
     fourslash::unsupported("VerifySignatureHelp"); // f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{DocComment: ""})
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "20q", "(method) c2.c2_f1(): void", "c2 c2_f1")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "21q", "(method) c2.c2_nc_f1(): void", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "22q", "(method) c2.f1(): void", "c2 f1")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "23q", "(method) c2.nc_f1(): void", "")
+    fourslash::verify_quick_info_at(&mut s, "20q", "(method) c2.c2_f1(): void", "c2 c2_f1");
+    fourslash::verify_quick_info_at(&mut s, "21q", "(method) c2.c2_nc_f1(): void", "");
+    fourslash::verify_quick_info_at(&mut s, "22q", "(method) c2.f1(): void", "c2 f1");
+    fourslash::verify_quick_info_at(&mut s, "23q", "(method) c2.nc_f1(): void", "");
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "24", &fourslash.CompletionsExpectedList{
     fourslash::go_to_marker(&mut s, "25");
     fourslash::unsupported("VerifySignatureHelp"); // f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{DocComment: "c2 c2_f1"})
@@ -336,10 +356,10 @@ class c6 extends c5 {
     fourslash::unsupported("VerifySignatureHelp"); // f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{DocComment: ""})
     fourslash::go_to_marker(&mut s, "28");
     fourslash::unsupported("VerifySignatureHelp"); // f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{DocComment: ""})
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "25q", "(method) c2.c2_f1(): void", "c2 c2_f1")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "26q", "(method) c2.c2_nc_f1(): void", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "27q", "(method) c3.f1(): void", "c3 f1")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "28q", "(method) c3.nc_f1(): void", "")
+    fourslash::verify_quick_info_at(&mut s, "25q", "(method) c2.c2_f1(): void", "c2 c2_f1");
+    fourslash::verify_quick_info_at(&mut s, "26q", "(method) c2.c2_nc_f1(): void", "");
+    fourslash::verify_quick_info_at(&mut s, "27q", "(method) c3.f1(): void", "c3 f1");
+    fourslash::verify_quick_info_at(&mut s, "28q", "(method) c3.nc_f1(): void", "");
     fourslash::go_to_marker(&mut s, "30");
     fourslash::unsupported("VerifySignatureHelp"); // f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{DocComment: "c2 c2_f1"})
     fourslash::go_to_marker(&mut s, "32");
@@ -348,14 +368,19 @@ class c6 extends c5 {
     fourslash::unsupported("VerifySignatureHelp"); // f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{DocComment: ""})
     fourslash::go_to_marker(&mut s, "33");
     fourslash::unsupported("VerifySignatureHelp"); // f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{DocComment: ""})
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "30q", "(method) c2.c2_f1(): void", "c2 c2_f1")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "31q", "(method) c2.c2_nc_f1(): void", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "32q", "(method) c2.f1(): void", "c2 f1")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "33q", "(method) c2.nc_f1(): void", "")
+    fourslash::verify_quick_info_at(&mut s, "30q", "(method) c2.c2_f1(): void", "c2 c2_f1");
+    fourslash::verify_quick_info_at(&mut s, "31q", "(method) c2.c2_nc_f1(): void", "");
+    fourslash::verify_quick_info_at(&mut s, "32q", "(method) c2.f1(): void", "c2 f1");
+    fourslash::verify_quick_info_at(&mut s, "33q", "(method) c2.nc_f1(): void", "");
     fourslash::go_to_marker(&mut s, "34");
     fourslash::unsupported("VerifySignatureHelp"); // f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{DocComment: "c2 constructor"})
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "34iq", "var c4_i: c4", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "34q", "constructor c4(a: number): c4", "c2 constructor")
+    fourslash::verify_quick_info_at(&mut s, "34iq", "var c4_i: c4", "");
+    fourslash::verify_quick_info_at(
+        &mut s,
+        "34q",
+        "constructor c4(a: number): c4",
+        "c2 constructor",
+    );
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "35", &fourslash.CompletionsExpectedList{
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, []string{"36", "46"}, &fourslash.CompletionsExpectedList{
     fourslash::go_to_marker(&mut s, "37");
@@ -374,16 +399,16 @@ class c6 extends c5 {
     fourslash::unsupported("VerifySignatureHelp"); // f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{DocComment: ""})
     fourslash::go_to_marker(&mut s, "l40");
     fourslash::unsupported("VerifySignatureHelp"); // f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{DocComment: ""})
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "36iq", "var i2_i: i2", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "37iq", "var i3_i: i3", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "37q", "(method) i2.i2_f1(): void", "i2_f1")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "38q", "(method) i2.i2_nc_f1(): void", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "39q", "(method) i2.f1(): void", "i2 f1")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "40q", "(method) i2.nc_f1(): void", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "l37q", "(property) i2.i2_l1: () => void", "i2_l1")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "l38q", "(property) i2.i2_nc_l1: () => void", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "l39q", "(property) i2.l1: () => void", "i2 l1")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "l40q", "(property) i2.nc_l1: () => void", "")
+    fourslash::verify_quick_info_at(&mut s, "36iq", "var i2_i: i2", "");
+    fourslash::verify_quick_info_at(&mut s, "37iq", "var i3_i: i3", "");
+    fourslash::verify_quick_info_at(&mut s, "37q", "(method) i2.i2_f1(): void", "i2_f1");
+    fourslash::verify_quick_info_at(&mut s, "38q", "(method) i2.i2_nc_f1(): void", "");
+    fourslash::verify_quick_info_at(&mut s, "39q", "(method) i2.f1(): void", "i2 f1");
+    fourslash::verify_quick_info_at(&mut s, "40q", "(method) i2.nc_f1(): void", "");
+    fourslash::verify_quick_info_at(&mut s, "l37q", "(property) i2.i2_l1: () => void", "i2_l1");
+    fourslash::verify_quick_info_at(&mut s, "l38q", "(property) i2.i2_nc_l1: () => void", "");
+    fourslash::verify_quick_info_at(&mut s, "l39q", "(property) i2.l1: () => void", "i2 l1");
+    fourslash::verify_quick_info_at(&mut s, "l40q", "(property) i2.nc_l1: () => void", "");
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "41", &fourslash.CompletionsExpectedList{
     fourslash::go_to_marker(&mut s, "42");
     fourslash::unsupported("VerifySignatureHelp"); // f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{DocComment: "i2_f1"})
@@ -401,14 +426,14 @@ class c6 extends c5 {
     fourslash::unsupported("VerifySignatureHelp"); // f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{DocComment: ""})
     fourslash::go_to_marker(&mut s, "l45");
     fourslash::unsupported("VerifySignatureHelp"); // f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{DocComment: ""})
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "42q", "(method) i2.i2_f1(): void", "i2_f1")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "43q", "(method) i2.i2_nc_f1(): void", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "44q", "(method) i3.f1(): void", "i3 f1")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "45q", "(method) i3.nc_f1(): void", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "l42q", "(property) i2.i2_l1: () => void", "i2_l1")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "l43q", "(property) i2.i2_nc_l1: () => void", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "l44q", "(property) i3.l1: () => void", "i3 l1")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "l45q", "(property) i3.nc_l1: () => void", "")
+    fourslash::verify_quick_info_at(&mut s, "42q", "(method) i2.i2_f1(): void", "i2_f1");
+    fourslash::verify_quick_info_at(&mut s, "43q", "(method) i2.i2_nc_f1(): void", "");
+    fourslash::verify_quick_info_at(&mut s, "44q", "(method) i3.f1(): void", "i3 f1");
+    fourslash::verify_quick_info_at(&mut s, "45q", "(method) i3.nc_f1(): void", "");
+    fourslash::verify_quick_info_at(&mut s, "l42q", "(property) i2.i2_l1: () => void", "i2_l1");
+    fourslash::verify_quick_info_at(&mut s, "l43q", "(property) i2.i2_nc_l1: () => void", "");
+    fourslash::verify_quick_info_at(&mut s, "l44q", "(property) i3.l1: () => void", "i3 l1");
+    fourslash::verify_quick_info_at(&mut s, "l45q", "(property) i3.nc_l1: () => void", "");
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "46", &fourslash.CompletionsExpectedList{
     fourslash::go_to_marker(&mut s, "47");
     fourslash::unsupported("VerifySignatureHelp"); // f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{DocComment: "i2_f1"})
@@ -424,20 +449,25 @@ class c6 extends c5 {
     fourslash::unsupported("VerifySignatureHelp"); // f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{DocComment: ""})
     fourslash::go_to_marker(&mut s, "l50");
     fourslash::unsupported("VerifySignatureHelp"); // f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{DocComment: ""})
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "47q", "(method) i2.i2_f1(): void", "i2_f1")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "48q", "(method) i2.i2_nc_f1(): void", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "49q", "(method) i2.f1(): void", "i2 f1")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "50q", "(method) i2.nc_f1(): void", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "l47q", "(property) i2.i2_l1: () => void", "i2_l1")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "l48q", "(property) i2.i2_nc_l1: () => void", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "l49q", "(property) i2.l1: () => void", "i2 l1")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "l40q", "(property) i2.nc_l1: () => void", "")
+    fourslash::verify_quick_info_at(&mut s, "47q", "(method) i2.i2_f1(): void", "i2_f1");
+    fourslash::verify_quick_info_at(&mut s, "48q", "(method) i2.i2_nc_f1(): void", "");
+    fourslash::verify_quick_info_at(&mut s, "49q", "(method) i2.f1(): void", "i2 f1");
+    fourslash::verify_quick_info_at(&mut s, "50q", "(method) i2.nc_f1(): void", "");
+    fourslash::verify_quick_info_at(&mut s, "l47q", "(property) i2.i2_l1: () => void", "i2_l1");
+    fourslash::verify_quick_info_at(&mut s, "l48q", "(property) i2.i2_nc_l1: () => void", "");
+    fourslash::verify_quick_info_at(&mut s, "l49q", "(property) i2.l1: () => void", "i2 l1");
+    fourslash::verify_quick_info_at(&mut s, "l40q", "(property) i2.nc_l1: () => void", "");
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "51", &fourslash.CompletionsExpectedList{
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "51i", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "52", "constructor c5(): c5", "c5 class")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "53", "class c5", "c5 class")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "54", "(property) c5.b: number", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "55", "constructor c2(a: number): c2", "c2 constructor")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "56", "constructor c3(): c3", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "57", "constructor c6(): c6", "")
+    fourslash::verify_quick_info_at(&mut s, "52", "constructor c5(): c5", "c5 class");
+    fourslash::verify_quick_info_at(&mut s, "53", "class c5", "c5 class");
+    fourslash::verify_quick_info_at(&mut s, "54", "(property) c5.b: number", "");
+    fourslash::verify_quick_info_at(
+        &mut s,
+        "55",
+        "constructor c2(a: number): c2",
+        "c2 constructor",
+    );
+    fourslash::verify_quick_info_at(&mut s, "56", "constructor c3(): c3", "");
+    fourslash::verify_quick_info_at(&mut s, "57", "constructor c6(): c6", "");
 }

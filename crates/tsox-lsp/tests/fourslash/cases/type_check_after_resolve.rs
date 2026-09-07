@@ -11,7 +11,7 @@ fn type_check_after_resolve() {
     let mut s = Session::new(content);
     fourslash::unsupported("GoToEOF"); // f.GoToEOF(t)
     fourslash::unsupported("InsertLine"); // f.InsertLine(t, "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "IPointRef", "any", "")
+    fourslash::verify_quick_info_at(&mut s, "IPointRef", "any", "");
     fourslash::unsupported("VerifyErrorExistsAfterMarker"); // f.VerifyErrorExistsAfterMarker(t, "IPointRef")
     fourslash::unsupported("GoToEOF"); // f.GoToEOF(t)
     fourslash::unsupported("InsertLine"); // f.InsertLine(t, "")

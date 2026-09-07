@@ -30,13 +30,13 @@ class Foo {
     }
 }"#;
     let mut s = Session::new(content);
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "1", "(parameter) strOrNum: string | number", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "2", "(parameter) strOrNum: number", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "3", "(parameter) strOrNum: string", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "4", "let s: string | undefined", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "5", "let s: string | undefined", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "6", "let s: string", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "7", "(property) Foo.#privateProperty: string[]", "")
+    fourslash::verify_quick_info_at(&mut s, "1", "(parameter) strOrNum: string | number", "");
+    fourslash::verify_quick_info_at(&mut s, "2", "(parameter) strOrNum: number", "");
+    fourslash::verify_quick_info_at(&mut s, "3", "(parameter) strOrNum: string", "");
+    fourslash::verify_quick_info_at(&mut s, "4", "let s: string | undefined", "");
+    fourslash::verify_quick_info_at(&mut s, "5", "let s: string | undefined", "");
+    fourslash::verify_quick_info_at(&mut s, "6", "let s: string", "");
+    fourslash::verify_quick_info_at(&mut s, "7", "(property) Foo.#privateProperty: string[]", "");
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "2", &fourslash.CompletionsExpectedList{
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "3", &fourslash.CompletionsExpectedList{

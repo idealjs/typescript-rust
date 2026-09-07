@@ -11,5 +11,5 @@ interface B extends P {
 declare const b: B;
 b.t/*1*/est = 10;"#;
     let mut s = Session::new(content);
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "1", "(index) B[string]: number", "")
+    fourslash::verify_quick_info_at(&mut s, "1", "(index) B[string]: number", "");
 }

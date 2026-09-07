@@ -1,6 +1,5 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyNoErrors"]
 #[test]
 fn js_doc_function_signatures4() {
     let content = r#"// @allowNonTsExtensions: true
@@ -9,5 +8,5 @@ fn js_doc_function_signatures4() {
   * @param {function (string):void} y */
 function fn(x, y) { }"#;
     let mut s = Session::new(content);
-    fourslash::unsupported("VerifyNoErrors"); // f.VerifyNoErrors(t)
+    fourslash::verify_no_errors(&mut s);
 }

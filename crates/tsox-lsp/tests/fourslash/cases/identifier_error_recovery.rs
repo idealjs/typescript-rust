@@ -10,7 +10,7 @@ var bar;"#;
     let mut s = Session::new(content);
     fourslash::unsupported("VerifyErrorExistsBetweenMarkers"); // f.VerifyErrorExistsBetweenMarkers(t, "1", "2")
     fourslash::unsupported("VerifyErrorExistsBetweenMarkers"); // f.VerifyErrorExistsBetweenMarkers(t, "3", "4")
-    fourslash::unsupported("VerifyNumberOfErrorsInCurrentFile"); // f.VerifyNumberOfErrorsInCurrentFile(t, 3)
+    fourslash::verify_number_of_errors_in_current_file(&mut s, 3);
     fourslash::unsupported("GoToEOF"); // f.GoToEOF(t)
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, nil, &fourslash.CompletionsExpectedList{
 }

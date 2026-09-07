@@ -1,6 +1,5 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyQuickInfoAt"]
 #[test]
 fn quick_info_on_merged_interfaces() {
     let content = r#"namespace M {
@@ -19,5 +18,5 @@ fn quick_info_on_merged_interfaces() {
     var /*1*/r4 = a(1, true);
 }"#;
     let mut s = Session::new(content);
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "1", "var r4: number", "")
+    fourslash::verify_quick_info_at(&mut s, "1", "var r4: number", "");
 }

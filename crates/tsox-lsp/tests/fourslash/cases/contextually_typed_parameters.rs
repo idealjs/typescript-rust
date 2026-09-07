@@ -1,6 +1,5 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyQuickInfoAt"]
 #[test]
 fn contextually_typed_parameters() {
     let content = r#"declare function foo(cb: (this: any, x: number, y: string, z: boolean) => void): void;
@@ -41,22 +40,32 @@ foo(function(a, b, c, ...args) {
     args/*63*/;
 });"#;
     let mut s = Session::new(content);
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "10", "(parameter) a: number", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "11", "(parameter) args: [y: string, z: boolean]", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "20", "(parameter) a: number", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "21", "(parameter) b: string", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "22", "(parameter) args: [z: boolean]", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "30", "(parameter) a: number", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "31", "(parameter) b: string", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "32", "(parameter) c: boolean", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "33", "(parameter) args: []", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "40", "(parameter) a: number", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "41", "(parameter) args: [y: string, z: boolean]", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "50", "(parameter) a: number", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "51", "(parameter) b: string", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "52", "(parameter) args: [z: boolean]", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "60", "(parameter) a: number", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "61", "(parameter) b: string", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "62", "(parameter) c: boolean", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "63", "(parameter) args: []", "")
+    fourslash::verify_quick_info_at(&mut s, "10", "(parameter) a: number", "");
+    fourslash::verify_quick_info_at(
+        &mut s,
+        "11",
+        "(parameter) args: [y: string, z: boolean]",
+        "",
+    );
+    fourslash::verify_quick_info_at(&mut s, "20", "(parameter) a: number", "");
+    fourslash::verify_quick_info_at(&mut s, "21", "(parameter) b: string", "");
+    fourslash::verify_quick_info_at(&mut s, "22", "(parameter) args: [z: boolean]", "");
+    fourslash::verify_quick_info_at(&mut s, "30", "(parameter) a: number", "");
+    fourslash::verify_quick_info_at(&mut s, "31", "(parameter) b: string", "");
+    fourslash::verify_quick_info_at(&mut s, "32", "(parameter) c: boolean", "");
+    fourslash::verify_quick_info_at(&mut s, "33", "(parameter) args: []", "");
+    fourslash::verify_quick_info_at(&mut s, "40", "(parameter) a: number", "");
+    fourslash::verify_quick_info_at(
+        &mut s,
+        "41",
+        "(parameter) args: [y: string, z: boolean]",
+        "",
+    );
+    fourslash::verify_quick_info_at(&mut s, "50", "(parameter) a: number", "");
+    fourslash::verify_quick_info_at(&mut s, "51", "(parameter) b: string", "");
+    fourslash::verify_quick_info_at(&mut s, "52", "(parameter) args: [z: boolean]", "");
+    fourslash::verify_quick_info_at(&mut s, "60", "(parameter) a: number", "");
+    fourslash::verify_quick_info_at(&mut s, "61", "(parameter) b: string", "");
+    fourslash::verify_quick_info_at(&mut s, "62", "(parameter) c: boolean", "");
+    fourslash::verify_quick_info_at(&mut s, "63", "(parameter) args: []", "");
 }

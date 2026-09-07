@@ -6,5 +6,5 @@ fn interface_extends_primitive() {
     let content = r#"interface x extends /*1*/string/*2*/ { }"#;
     let mut s = Session::new(content);
     fourslash::unsupported("VerifyErrorExistsBetweenMarkers"); // f.VerifyErrorExistsBetweenMarkers(t, "1", "2")
-    fourslash::unsupported("VerifyNumberOfErrorsInCurrentFile"); // f.VerifyNumberOfErrorsInCurrentFile(t, 1)
+    fourslash::verify_number_of_errors_in_current_file(&mut s, 1);
 }

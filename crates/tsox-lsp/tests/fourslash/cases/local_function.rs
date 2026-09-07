@@ -13,8 +13,8 @@ fn local_function() {
 var x = function /*4*/bar4() {
 }"#;
     let mut s = Session::new(content);
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "1", "function foo(): void", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "2", "(local function) bar2(): void", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "3", "(local function) bar3(): void", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "4", "(local function) bar4(): void", "")
+    fourslash::verify_quick_info_at(&mut s, "1", "function foo(): void", "");
+    fourslash::verify_quick_info_at(&mut s, "2", "(local function) bar2(): void", "");
+    fourslash::verify_quick_info_at(&mut s, "3", "(local function) bar3(): void", "");
+    fourslash::verify_quick_info_at(&mut s, "4", "(local function) bar4(): void", "");
 }

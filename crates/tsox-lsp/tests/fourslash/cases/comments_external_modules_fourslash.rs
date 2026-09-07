@@ -35,26 +35,41 @@ import ex/*9*/tMod = require("./commentsExternalModules_file0");
 var new/*14*/Var = new extMod.m1.m2./*15*/c();"#;
     let mut s = Session::new(content);
     fourslash::go_to_file(&mut s, "commentsExternalModules_file0.ts");
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "1", "namespace m1", "Namespace comment")
+    fourslash::verify_quick_info_at(&mut s, "1", "namespace m1", "Namespace comment");
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "2", &fourslash.CompletionsExpectedList{
     fourslash::go_to_marker(&mut s, "3");
     fourslash::unsupported("VerifySignatureHelp"); // f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{DocComment: "foo's comment"})
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "3q", "function foo(): number", "foo's comment")
+    fourslash::verify_quick_info_at(&mut s, "3q", "function foo(): number", "foo's comment");
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "4", &fourslash.CompletionsExpectedList{
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "5", &fourslash.CompletionsExpectedList{
     fourslash::go_to_marker(&mut s, "6");
     fourslash::unsupported("VerifySignatureHelp"); // f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{DocComment: "exported function"})
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "6q", "function m1.fooExport(): number", "exported function")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "7", "var myvar: m1.m2.c", "")
+    fourslash::verify_quick_info_at(
+        &mut s,
+        "6q",
+        "function m1.fooExport(): number",
+        "exported function",
+    );
+    fourslash::verify_quick_info_at(&mut s, "7", "var myvar: m1.m2.c", "");
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "8", &fourslash.CompletionsExpectedList{
     fourslash::go_to_file(&mut s, "commentsExternalModules_file1.ts");
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "9", "import extMod = require(\"./commentsExternalModules_file0\")", "This is
+    fourslash::verify_quick_info_at(
+        &mut s,
+        "9",
+        "import extMod = require(\"./commentsExternalModules_file0\")",
+        "This is on import declaration",
+    );
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "10", &fourslash.CompletionsExpectedList{
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "11", &fourslash.CompletionsExpectedList{
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "12", &fourslash.CompletionsExpectedList{
     fourslash::go_to_marker(&mut s, "13");
     fourslash::unsupported("VerifySignatureHelp"); // f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{DocComment: "exported function"})
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "13q", "function extMod.m1.fooExport(): number", "exported function")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "14", "var newVar: extMod.m1.m2.c", "")
+    fourslash::verify_quick_info_at(
+        &mut s,
+        "13q",
+        "function extMod.m1.fooExport(): number",
+        "exported function",
+    );
+    fourslash::verify_quick_info_at(&mut s, "14", "var newVar: extMod.m1.m2.c", "");
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "15", &fourslash.CompletionsExpectedList{
 }

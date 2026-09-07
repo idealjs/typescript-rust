@@ -13,5 +13,5 @@ func({ foo: 1, bar/*1*/: 1 });"#;
     fourslash::go_to_marker(&mut s, "1");
     fourslash::insert(&mut s, "2");
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, nil, nil)
-    fourslash::unsupported("VerifyNoErrors"); // f.VerifyNoErrors(t)
+    fourslash::verify_no_errors(&mut s);
 }

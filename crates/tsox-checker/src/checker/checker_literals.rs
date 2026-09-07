@@ -120,6 +120,20 @@ impl Checker {
                             t = self.get_regular_type_of_literal_type(&t);
                         }
                     }
+                    // 上下文属性类型回写到属性符号（quickinfo 等消费符号类型）
+                    let prop_type = if let Some(ctx) = &contextual
+                        && let Some(prop_ctx) = self.get_type_of_property_of_type(ctx, &name)
+                    {
+                        prop_ctx
+                    } else {
+                        t.clone()
+                    };
+                    if let Some(sym) = self.program.symbol_map().symbol_of(prop) {
+                        let container = contextual.as_ref().and_then(|c| c.symbol.clone());
+                        let links = self.value_symbol_links.get_or_default(&sym);
+                        links.resolved_type = Some(prop_type);
+                        links.container_symbol = container;
+                    }
                     prop_pairs.push((name, t, Some(Arc::clone(prop))));
                 }
                 NodeData::ShorthandPropertyAssignment(data) => {

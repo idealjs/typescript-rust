@@ -1,6 +1,5 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyQuickInfoAt"]
 #[test]
 fn quick_info_from_contextual_union_type1() {
     let content = r#"// @strict: true
@@ -17,5 +16,5 @@ type X =
 
 const obj = { name: "john", /*1*/someProp: "foo" } satisfies X;"#;
     let mut s = Session::new(content);
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "1", "(property) someProp: string", "")
+    fourslash::verify_quick_info_at(&mut s, "1", "(property) someProp: string", "");
 }

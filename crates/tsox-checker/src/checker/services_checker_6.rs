@@ -279,7 +279,60 @@ impl Checker {
     }
 
     pub fn get_type_of_assignment_pattern(&mut self, expr: &Arc<Node>) -> Option<Arc<Type>> {
-        None
+        use crate::checker::types::StructuredTypeData;
+        use tsox_frontend::ast::SymbolTable;
+        if expr.kind != SyntaxKind::ObjectBindingPattern {
+            return None;
+        }
+        let NodeData::BindingPattern(pattern) = &expr.data else {
+            return None;
+        };
+        let mut table = SymbolTable::new();
+        let mut props: Vec<Arc<Symbol>> = Vec::new();
+        for el in &pattern.elements.nodes {
+            let NodeData::BindingElement(be) = &el.data else {
+                continue;
+            };
+            let prop_name = be
+                .property_name
+                .as_ref()
+                .map(|p| p.text())
+                .or_else(|| be.name.as_ref().map(|n| n.text()));
+            let Some(prop_name) = prop_name else {
+                continue;
+            };
+            if prop_name.is_empty() {
+                continue;
+            }
+            let elem_type: Arc<Type> = match &be.name {
+                Some(name_node) if name_node.kind == SyntaxKind::ObjectBindingPattern => {
+                    self.get_type_of_assignment_pattern(name_node)
+                        .unwrap_or_else(|| self.get_any_type())
+                }
+                _ => self.get_any_type(),
+            };
+            let symbol = Arc::new(Symbol::new(SymbolFlags::Property, prop_name.clone()));
+            self.value_symbol_links
+                .get_or_default(&symbol)
+                .resolved_type = Some(Arc::clone(&elem_type));
+            table.entries.insert(prop_name.to_string(), Arc::clone(&symbol));
+            props.push(symbol);
+        }
+        Some(Arc::new(Type {
+            flags: TypeFlags::Object,
+            object_flags: ObjectFlags::Anonymous,
+            id: crate::checker::types::next_type_id(),
+            symbol: None,
+            alias: None,
+            data: TypeData::Object(ObjectTypeData {
+                structured: StructuredTypeData {
+                    members: table,
+                    properties: props,
+                    ..Default::default()
+                },
+                ..Default::default()
+            }),
+        }))
     }
 
     pub fn get_signature_from_declaration(&mut self, _node: &Arc<Node>) -> Option<Arc<Signature>> {

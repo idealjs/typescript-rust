@@ -37,6 +37,6 @@ declare const /*MyComponent3*/MyComponent3: ComponentClass2;
 <[|/*jsxMyComponent3*/MyComponent3|] />;
 new [|/*newMyComponent3*/MyComponent3|]();"#;
     let mut s = Session::new(content);
-    fourslash::unsupported("VerifyNoErrors"); // f.VerifyNoErrors(t)
+    fourslash::verify_no_errors(&mut s);
     fourslash::unsupported("VerifyBaselineGoToDefinition"); // f.VerifyBaselineGoToDefinition(t, true, "useF", "useG", "useH", "useI", "useIFn", "useJ", "useM", "u
 }

@@ -9,5 +9,5 @@ fn get_java_script_quick_info6() {
 /** @type {function(this:number)} */
 function f() { /**/this }"#;
     let mut s = Session::new(content);
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "", "number", "")
+    fourslash::verify_quick_info_at(&mut s, "", "number", "");
 }

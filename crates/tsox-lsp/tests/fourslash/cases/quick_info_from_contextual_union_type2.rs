@@ -11,6 +11,6 @@ test1({ /*1*/prop: "bar" });
 function test2(arg: { prop: "foo" } | undefined) {}
 test2({ /*2*/prop: "bar" });"#;
     let mut s = Session::new(content);
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "1", "(property) prop: \"foo\"", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "2", "(property) prop: \"foo\"", "")
+    fourslash::verify_quick_info_at(&mut s, "1", "(property) prop: \"foo\"", "");
+    fourslash::verify_quick_info_at(&mut s, "2", "(property) prop: \"foo\"", "");
 }

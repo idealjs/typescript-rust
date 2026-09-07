@@ -13,7 +13,12 @@ function Baz<T,U>(key1: T, value: U) {
     let a1 = <ComponentWithTwoAttributes {...{key1, value: value}} key="Component" />
 }"#;
     let mut s = Session::new(content);
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "1", "function ComponentWithTwoAttributes<T, U>(l: {\n    key1: T;\n    value
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "2", "(property) key1: T", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "3", "(property) value: U", "")
+    fourslash::verify_quick_info_at(
+        &mut s,
+        "1",
+        "function ComponentWithTwoAttributes<T, U>(l: {\n    key1: T;\n    value: U;\n}): JSX.Element",
+        "",
+    );
+    fourslash::verify_quick_info_at(&mut s, "2", "(property) key1: T", "");
+    fourslash::verify_quick_info_at(&mut s, "3", "(property) value: U", "");
 }

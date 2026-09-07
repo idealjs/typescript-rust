@@ -10,5 +10,5 @@ const /**/x = require("./b");
 // @Filename: b.js
 exports.x = 0;"#;
     let mut s = Session::new(content);
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "", "import x", "")
+    fourslash::verify_quick_info_at(&mut s, "", "import x", "");
 }

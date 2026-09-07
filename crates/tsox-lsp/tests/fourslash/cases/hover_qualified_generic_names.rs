@@ -1,6 +1,5 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyQuickInfoAt"]
 #[test]
 fn hover_qualified_generic_names() {
     let content = r#"
@@ -21,7 +20,7 @@ const t2/*2*/ = new B()
 t2./*3*/foo()
 "#;
     let mut s = Session::new(content);
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "1", "let t1: f<string>.C", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "2", "const t2: B", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "3", "(method) A<string>.foo(): void", "")
+    fourslash::verify_quick_info_at(&mut s, "1", "let t1: f<string>.C", "");
+    fourslash::verify_quick_info_at(&mut s, "2", "const t2: B", "");
+    fourslash::verify_quick_info_at(&mut s, "3", "(method) A<string>.foo(): void", "");
 }

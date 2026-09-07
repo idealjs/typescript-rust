@@ -301,4 +301,55 @@ impl Checker {
         }
         None
     }
+
+    /// 类型参数显示文本：`T`、`T extends C`、`T = D`
+    pub(crate) fn collect_type_parameter_displays(
+        &self,
+        symbol: &Arc<Symbol>,
+    ) -> Option<Vec<String>> {
+        for decl in &symbol.declarations {
+            let tps = match &decl.data {
+                NodeData::ClassDeclaration(d) => d.type_parameters.as_ref(),
+                NodeData::InterfaceDeclaration(d) => d.type_parameters.as_ref(),
+                NodeData::TypeAliasDeclaration(d) => d.type_parameters.as_ref(),
+                NodeData::FunctionDeclaration(d) => d.type_parameters.as_ref(),
+                _ => continue,
+            };
+            if let Some(tps) = tps {
+                if tps.is_empty() {
+                    continue;
+                }
+                let sf = self.get_source_file_of_node(decl)?;
+                let text = &sf.text;
+                let node_text = |n: &Arc<Node>| {
+                    let (s, e) = (n.pos().min(text.len()), n.end().min(text.len()));
+                    if s < e {
+                        text[s..e].to_string()
+                    } else {
+                        String::new()
+                    }
+                };
+                return Some(
+                    tps.iter()
+                        .map(|tp| {
+                            let NodeData::TypeParameterDeclaration(tpd) = &tp.data else {
+                                return String::new();
+                            };
+                            let mut s = tpd.name.text().to_string();
+                            if let Some(c) = &tpd.constraint {
+                                s.push_str(" extends ");
+                                s.push_str(&node_text(c));
+                            }
+                            if let Some(def) = &tpd.default_type {
+                                s.push_str(" = ");
+                                s.push_str(&node_text(def));
+                            }
+                            s
+                        })
+                        .collect(),
+                );
+            }
+        }
+        None
+    }
 }

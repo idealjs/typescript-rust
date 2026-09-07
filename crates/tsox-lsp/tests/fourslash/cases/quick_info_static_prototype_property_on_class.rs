@@ -1,6 +1,5 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyQuickInfoAt"]
 #[test]
 fn quick_info_static_prototype_property_on_class() {
     let content = r#"class c1 {
@@ -22,8 +21,8 @@ c2./*2*/prototype;
 c3./*3*/prototype;
 c4./*4*/prototype;"#;
     let mut s = Session::new(content);
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "1", "(property) c1.prototype: c1", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "2", "(property) c2<T>.prototype: c2<any>", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "3", "(property) c3.prototype: c3", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "4", "(property) c4.prototype: c4", "")
+    fourslash::verify_quick_info_at(&mut s, "1", "(property) c1.prototype: c1", "");
+    fourslash::verify_quick_info_at(&mut s, "2", "(property) c2<T>.prototype: c2<any>", "");
+    fourslash::verify_quick_info_at(&mut s, "3", "(property) c3.prototype: c3", "");
+    fourslash::verify_quick_info_at(&mut s, "4", "(property) c4.prototype: c4", "");
 }

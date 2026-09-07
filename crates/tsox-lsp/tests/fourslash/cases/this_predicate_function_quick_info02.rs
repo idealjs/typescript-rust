@@ -35,12 +35,52 @@ if (crate.isSupplies/*7*/()) {
     }
 }"#;
     let mut s = Session::new(content);
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "1", "(method) Crate<T>.isSundries(): this is Crate<Sundries>", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "2", "(method) Crate<T>.isSupplies(): this is Crate<Supplies>", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "3", "(method) Crate<T>.isPackedTight(): this is (this & {\n    extraContents
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "4", "(method) Crate<any>.isPackedTight(): this is (Crate<any> & {\n    extra
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "5", "(method) Crate<any>.isSundries(): this is Crate<Sundries>", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "6", "(method) Crate<Sundries>.isPackedTight(): this is (Crate<Sundries> & {\
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "7", "(method) Crate<any>.isSupplies(): this is Crate<Supplies>", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "8", "(method) Crate<Supplies>.isPackedTight(): this is (Crate<Supplies> & {\
+    fourslash::verify_quick_info_at(
+        &mut s,
+        "1",
+        "(method) Crate<T>.isSundries(): this is Crate<Sundries>",
+        "",
+    );
+    fourslash::verify_quick_info_at(
+        &mut s,
+        "2",
+        "(method) Crate<T>.isSupplies(): this is Crate<Supplies>",
+        "",
+    );
+    fourslash::verify_quick_info_at(
+        &mut s,
+        "3",
+        "(method) Crate<T>.isPackedTight(): this is (this & {\n    extraContents: T;\n})",
+        "",
+    );
+    fourslash::verify_quick_info_at(
+        &mut s,
+        "4",
+        "(method) Crate<any>.isPackedTight(): this is (Crate<any> & {\n    extraContents: any;\n})",
+        "",
+    );
+    fourslash::verify_quick_info_at(
+        &mut s,
+        "5",
+        "(method) Crate<any>.isSundries(): this is Crate<Sundries>",
+        "",
+    );
+    fourslash::verify_quick_info_at(
+        &mut s,
+        "6",
+        "(method) Crate<Sundries>.isPackedTight(): this is (Crate<Sundries> & {\n    extraContents: Sundries;\n})",
+        "",
+    );
+    fourslash::verify_quick_info_at(
+        &mut s,
+        "7",
+        "(method) Crate<any>.isSupplies(): this is Crate<Supplies>",
+        "",
+    );
+    fourslash::verify_quick_info_at(
+        &mut s,
+        "8",
+        "(method) Crate<Supplies>.isPackedTight(): this is (Crate<Supplies> & {\n    extraContents: Supplies;\n})",
+        "",
+    );
 }

@@ -21,7 +21,7 @@ import express = require('./externalModuleIntellisense_file0');
 var x = express();/*1*/"#;
     let mut s = Session::new(content);
     fourslash::go_to_marker(&mut s, "1");
-    fourslash::unsupported("VerifyNumberOfErrorsInCurrentFile"); // f.VerifyNumberOfErrorsInCurrentFile(t, 0)
+    fourslash::verify_number_of_errors_in_current_file(&mut s, 0);
     fourslash::unsupported("GoToEOF"); // f.GoToEOF(t)
     fourslash::insert(&mut s, "x.");
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, nil, &fourslash.CompletionsExpectedList{

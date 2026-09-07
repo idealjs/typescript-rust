@@ -13,10 +13,10 @@ fn errors_after_resolving_variable_decl_of_merged_variable_and_class_decl() {
     }
 }"#;
     let mut s = Session::new(content);
-    fourslash::unsupported("VerifyNoErrors"); // f.VerifyNoErrors(t)
+    fourslash::verify_no_errors(&mut s);
     fourslash::go_to_marker(&mut s, "1");
     fourslash::unsupported("Backspace"); // f.Backspace(t, 1)
     fourslash::insert(&mut s, " ");
     fourslash::unsupported("VerifyQuickInfoIs"); // f.VerifyQuickInfoIs(t, "var M.C.C: typeof M.C", "")
-    fourslash::unsupported("VerifyNoErrors"); // f.VerifyNoErrors(t)
+    fourslash::verify_no_errors(&mut s);
 }

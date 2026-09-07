@@ -16,7 +16,7 @@ r2./*6*/"#;
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "2", &fourslash.CompletionsExpectedList{
     fourslash::go_to_marker(&mut s, "3");
     fourslash::unsupported("VerifySignatureHelp"); // f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{Text: "m3f(): m3f"})
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "4", "var r: m3f", "")
+    fourslash::verify_quick_info_at(&mut s, "4", "var r: m3f", "");
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "5", &fourslash.CompletionsExpectedList{
     fourslash::insert(&mut s, "foo(1)");
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "6", &fourslash.CompletionsExpectedList{

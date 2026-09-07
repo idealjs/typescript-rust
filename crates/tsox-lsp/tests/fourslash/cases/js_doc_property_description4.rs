@@ -12,5 +12,10 @@ function multipleExample(e: MultipleExample) {
     console.log(e./*multiple*/anything);
 }"#;
     let mut s = Session::new(content);
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "multiple", "(index) MultipleExample[string | number | symbol]: string", "Som
+    fourslash::verify_quick_info_at(
+        &mut s,
+        "multiple",
+        "(index) MultipleExample[string | number | symbol]: string",
+        "Something generic",
+    );
 }

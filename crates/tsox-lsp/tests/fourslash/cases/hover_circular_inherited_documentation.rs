@@ -1,6 +1,5 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyQuickInfoAt"]
 #[test]
 fn hover_circular_inherited_documentation() {
     let content = r#"// @filename: base.ts
@@ -14,5 +13,5 @@ declare module "./bridge" {
 declare const v: Options;
 v.hooks/*1*/;"#;
     let mut s = Session::new(content);
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "1", "(property) Options.hooks: {}", "")
+    fourslash::verify_quick_info_at(&mut s, "1", "(property) Options.hooks: {}", "");
 }

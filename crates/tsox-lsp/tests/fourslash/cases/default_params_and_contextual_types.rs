@@ -1,6 +1,5 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyQuickInfoAt"]
 #[test]
 fn default_params_and_contextual_types() {
     let content = r#"// @strict: false
@@ -16,6 +15,6 @@ var o: Foo = {
     }
 }"#;
     let mut s = Session::new(content);
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "1", "(parameter) xy: string", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "2", "(parameter) options: FooOptions", "")
+    fourslash::verify_quick_info_at(&mut s, "1", "(parameter) xy: string", "");
+    fourslash::verify_quick_info_at(&mut s, "2", "(parameter) options: FooOptions", "");
 }

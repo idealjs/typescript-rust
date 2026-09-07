@@ -15,6 +15,16 @@ function stringExample(e: StringExample) {
     console.log(e./*string*/anything); 
 }"#;
     let mut s = Session::new(content);
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "property", "(property) StringExample.property: number", "Something specific"
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "string", "(index) StringExample[string]: any", "Something generic")
+    fourslash::verify_quick_info_at(
+        &mut s,
+        "property",
+        "(property) StringExample.property: number",
+        "Something specific",
+    );
+    fourslash::verify_quick_info_at(
+        &mut s,
+        "string",
+        "(index) StringExample[string]: any",
+        "Something generic",
+    );
 }

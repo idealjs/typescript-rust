@@ -3,50 +3,372 @@
 use crate::checker::nodebuilder::*;
 use crate::checker::nodebuilder_type_format_flags_2::TypeFormatFlags;
 
+fn clean_jsdoc_text(raw: &str) -> String {
+    let body = raw
+        .trim_start()
+        .strip_prefix("/**")
+        .map(|b| b.strip_suffix("*/").unwrap_or(b))
+        .unwrap_or(raw);
+    let mut lines: Vec<String> = Vec::new();
+    for line in body.lines() {
+        let t = line.trim_start();
+        let t = t.strip_prefix('*').map(str::trim_start).unwrap_or(t);
+        if !(t.is_empty() && lines.iter().all(|l| l.trim().is_empty())) {
+            lines.push(t.to_string());
+        }
+    }
+    while lines.first().is_some_and(|l| l.trim().is_empty()) {
+        lines.remove(0);
+    }
+    while lines.last().is_some_and(|l| l.trim().is_empty()) {
+        lines.pop();
+    }
+    lines.join("\n")
+}
+
+fn node_line_char(
+    sf: &tsox_frontend::ast::SourceFile,
+    start: usize,
+    end: usize,
+) -> (usize, usize, usize, usize) {
+    let text = &sf.text;
+    let lc = |off: usize| {
+        let prefix = &text[..off.min(text.len())];
+        let line = prefix.matches('\n').count();
+        let col = prefix
+            .rfind('\n')
+            .map(|i| prefix.len() - i - 1)
+            .unwrap_or(prefix.len());
+        (line + 1, col)
+    };
+    let (l1, c1) = lc(start);
+    let (l2, c2) = lc(end);
+    (l1, c1 + 1, l2, c2 + 1)
+}
+
+fn is_declaration_name(parent: &Arc<Node>, name: &Arc<Node>) -> bool {
+    let hit = |n: Option<&Arc<Node>>| n.is_some_and(|x| Arc::ptr_eq(x, name));
+    if let tsox_frontend::ast::NodeData::BindingElement(d) = &parent.data {
+        return hit(d.name.as_ref()) || hit(d.property_name.as_ref());
+    }
+    if let Some(n) = tsox_frontend::ast::node_data_generated::node_name(parent) {
+        return hit(Some(n));
+    }
+    false
+}
+
 impl Checker {
+    pub(crate) fn resolve_property_access_symbol(&mut self, node: &Arc<Node>) -> Option<Arc<Symbol>> {
+        let parent = node.parent.as_ref()?;
+        if parent.kind == SyntaxKind::ElementAccessExpression {
+            let tsox_frontend::ast::NodeData::ElementAccessExpression(d) = &parent.data else {
+                return None;
+            };
+            if !Arc::ptr_eq(&d.argument_expression, node) {
+                return None;
+            }
+            let tsox_frontend::ast::NodeData::StringLiteral(sl) = &d.argument_expression.data
+            else {
+                return None;
+            };
+            let name = sl.text.clone();
+            let obj_type = self.get_type_of_node(&d.expression);
+            return self
+                .get_property_of_type(&obj_type, &name)
+                .or_else(|| self.property_from_union(&obj_type, &name));
+        }
+        if parent.kind != SyntaxKind::PropertyAccessExpression {
+            return None;
+        }
+        let tsox_frontend::ast::NodeData::PropertyAccessExpression(d) = &parent.data else {
+            return None;
+        };
+        if !Arc::ptr_eq(&d.name, node) {
+            return None;
+        }
+        let name = d.name.text();
+        let obj_type = self.get_type_of_node(&d.expression);
+        self.get_property_of_type(&obj_type, &name)
+            .or_else(|| self.property_from_union(&obj_type, &name))
+    }
+
+    fn property_from_union(&mut self, t: &Arc<Type>, name: &str) -> Option<Arc<Symbol>> {
+        if !t.is_union() {
+            return None;
+        }
+        self.constituent_types(t)
+            .into_iter()
+            .find_map(|c| self.get_property_of_type(&c, name))
+    }
+
+    pub(crate) fn resolve_symbol_for_hover(&self, node: &Arc<Node>) -> Option<Arc<Symbol>> {
+        // 1) 引用：沿祖先容器查 binder locals（hover 无作用域栈时的等价物）
+        let by_locals = (|| {
+            let name = match &node.data {
+                tsox_frontend::ast::NodeData::Identifier(i) => i.text.clone(),
+                _ => tsox_frontend::ast::node_data_generated::node_name(node)
+                    .and_then(|n| match &n.data {
+                        tsox_frontend::ast::NodeData::Identifier(i) => Some(i.text.clone()),
+                        _ => None,
+                    })
+                    .unwrap_or_default(),
+            };
+            if name.is_empty() {
+                return None;
+            }
+            let symbol_map = self.program.symbol_map();
+            let mut cur = node.parent.as_ref();
+            while let Some(n) = cur {
+                if let Some(locals) = symbol_map.locals.get(&n.id()) {
+                    if let Some(sym) = locals.get(&name)
+                        && !sym.flags.intersects(
+                            SymbolFlags::ValueModule
+                                | SymbolFlags::NamespaceModule
+                                | SymbolFlags::ModuleExports,
+                        )
+                    {
+                        return Some(Arc::clone(sym));
+                    }
+                }
+                cur = n.parent.as_ref();
+            }
+            None
+        })();
+        if let Some(s) = self.resolve_identifier(node) {
+            return Some(s);
+        }
+        if let Some(s) = by_locals {
+            return Some(s);
+        }
+        // 2) 声明处名字：取所属声明节点符号
+        if let Some(parent) = node.parent.as_ref()
+            && is_declaration_name(parent, node)
+            && let Some(sym) = self.program.symbol_map().symbol_of(parent)
+        {
+            return Some(Arc::clone(sym));
+        }
+        // 3) 仅当节点自身或其所属声明（节点为该声明的名字）带符号时采纳，
+        //    不做无边界上溯（否则悬停未解析名会误命中外层函数/类符号）
+        let symbol_map = self.program.symbol_map();
+        if let Some(sym) = symbol_map.symbol_of(node) {
+            if sym.flags.intersects(
+                SymbolFlags::ValueModule
+                    | SymbolFlags::NamespaceModule
+                    | SymbolFlags::ModuleExports,
+            ) {
+                return None;
+            }
+            return Some(Arc::clone(sym));
+        }
+        let mut current = node.parent.as_ref();
+        while let Some(n) = current {
+            if is_declaration_name(n, node) {
+                if let Some(sym) = symbol_map.symbol_of(n) {
+                    if sym.flags.intersects(
+                        SymbolFlags::ValueModule
+                            | SymbolFlags::NamespaceModule
+                            | SymbolFlags::ModuleExports,
+                    ) {
+                        return None;
+                    }
+                    return Some(Arc::clone(sym));
+                }
+                break;
+            }
+            current = n.parent.as_ref();
+        }
+        None
+    }
+
+
+    /// 对象字面量属性名按上下文类型解析（对齐 Go getSymbolAtLocationForQuickInfo）
+    pub(crate) fn resolve_contextual_property_symbol(
+        &mut self,
+        node: &Arc<Node>,
+    ) -> Option<Arc<Symbol>> {
+        let parent = node.parent.as_ref()?;
+        match parent.kind {
+            SyntaxKind::PropertyAssignment
+            | SyntaxKind::ShorthandPropertyAssignment
+            | SyntaxKind::PropertyDeclaration
+            | SyntaxKind::MethodDeclaration => {}
+            _ => return None,
+        }
+        let obj = parent.parent.as_ref()?;
+        if obj.kind != SyntaxKind::ObjectLiteralExpression {
+            return None;
+        }
+        let ct = self.get_contextual_type(&obj, ContextFlags::None)?;
+        let syms = self.get_property_symbols_from_contextual_type(parent, &ct, false);
+        eprintln!("DBG ctx syms={}", syms.len());
+        if syms.len() == 1 {
+            return Some(Arc::clone(&syms[0]));
+        }
+        None
+    }
+
+    /// `new Cat()` / `new C<any>()` 的构造函数悬停：`constructor C<any>(): C<any>`
+    fn constructor_display_parts(
+        &mut self,
+        symbol: &Arc<Symbol>,
+        node: &Arc<Node>,
+    ) -> Option<Vec<SymbolDisplayPart>> {
+        // 节点须处于 new 表达式中：new 关键字、表达式名或类型实参内
+        let mut cur = node.parent.as_ref()?;
+        loop {
+            match cur.kind {
+                SyntaxKind::NewExpression => break,
+                SyntaxKind::PropertyAccessExpression
+                | SyntaxKind::TypeReference
+                | SyntaxKind::ExpressionWithTypeArguments => cur = cur.parent.as_ref()?,
+                _ => return None,
+            }
+        }
+        // 实参文本：显式 <...>；无实参显示类自身的类型参数
+        let type_args_text = self
+            .new_expression_type_args_text(cur, symbol)
+            .unwrap_or_default();
+        let mut parts = Vec::new();
+        push_keyword(&mut parts, "constructor ");
+        push_part(
+            &mut parts,
+            &format!("{}{}", symbol.name, type_args_text),
+            DisplayPartKind::ClassName,
+        );
+        // 首个构造签名
+        let declared = self.get_declared_type_of_symbol(symbol);
+        if let Some(structured) = declared.as_structured()
+            && let Some(sig) = structured.construct_signatures().first()
+        {
+            push_punctuation(&mut parts, "(");
+            self.append_signature_parameter_parts(&mut parts, sig);
+            push_punctuation(&mut parts, ")");
+            push_space(&mut parts, ": ");
+            let ret = self
+                .get_return_type_of_signature(sig)
+                .unwrap_or_else(|| self.get_any_type());
+            parts.extend(self.type_to_display_parts(&ret));
+        }
+        Some(parts)
+    }
+
+    fn new_expression_type_args_text(
+        &mut self,
+        new_expr: &Arc<Node>,
+        symbol: &Arc<Symbol>,
+    ) -> Option<String> {
+        let tsox_frontend::ast::NodeData::NewExpression(d) = &new_expr.data else {
+            return None;
+        };
+        let Some(args) = &d.type_arguments else {
+            return None;
+        };
+        let texts: Vec<String> = args
+            .iter()
+            .map(|t| {
+                let arg_type = self.get_type_from_type_node(t);
+                self.type_to_string(&arg_type)
+            })
+            .collect();
+        let _ = symbol;
+        Some(format!("<{}>", texts.join(", ")))
+    }
+
+    pub fn get_quick_info_display_parts(&mut self, node: &Arc<Node>) -> Vec<SymbolDisplayPart> {
+        let symbol = match self.resolve_contextual_property_symbol(node) {
+            Some(s) => s,
+            None => match self.resolve_property_access_symbol(node) {
+                Some(s) => s,
+                None => {
+                    let Some(symbol) = self.resolve_symbol_for_hover(node) else {
+                        return Vec::new();
+                    };
+                    symbol
+                }
+            },
+        };
+        // new 表达式中的类名/new 关键字：构造函数签名显示（对齐 Go writeSignatures("constructor ")）
+        if symbol.flags.intersects(SymbolFlags::Class)
+            && let Some(parts) = self.constructor_display_parts(&symbol, node)
+        {
+            return parts;
+        }
+        // 悬停命中改名绑定的 property_name：按源属性身份渲染
+        if let Some(elem) = node.parent.as_ref()
+            && elem.kind == SyntaxKind::BindingElement
+            && let tsox_frontend::ast::NodeData::BindingElement(d) = &elem.data
+            && d.property_name
+                .as_ref()
+                .is_some_and(|pn| Arc::ptr_eq(pn, node))
+        {
+            let _ = self.get_type_of_symbol(&symbol);
+            if let Some(member) = self
+                .value_symbol_links
+                .get(&symbol)
+                .and_then(|l| l.container_symbol.clone())
+            {
+                return self.variable_symbol_display_parts(&member);
+            }
+            // 无链接时按属性名在绑定类型中查源属性（如 property1: {} 嵌套解构）
+            let declared_type = self.get_type_of_symbol(&symbol);
+            if let Some(st) = declared_type.as_structured()
+                && let Some(m) = st.members.get(&node.text())
+            {
+                return self.variable_symbol_display_parts(&m);
+            }
+            // 名字是嵌套模式：属性类型即模式自身的形状
+            let nested_pattern_type = match d.name.as_ref() {
+                Some(name_node) if name_node.kind == SyntaxKind::ObjectBindingPattern => {
+                    self.get_type_of_assignment_pattern(name_node)
+                }
+                _ => None,
+            };
+            let has_nested_pattern = nested_pattern_type.is_some();
+            let be_type = nested_pattern_type.unwrap_or_else(|| Arc::clone(&declared_type));
+            if !has_nested_pattern
+                && let Some(st) = be_type.as_structured()
+                && let Some(m) = st.members.get(&node.text())
+            {
+                return self.variable_symbol_display_parts(&m);
+            }
+            let mut parts = Vec::new();
+            push_punctuation(&mut parts, "(");
+            push_part(&mut parts, "property", DisplayPartKind::Text);
+            push_punctuation(&mut parts, ") ");
+            push_part(&mut parts, &node.text(), DisplayPartKind::PropertyName);
+            push_space(&mut parts, ": ");
+            parts.extend(self.type_to_display_parts(&be_type));
+            return parts;
+        }
+        let mut parts = self.symbol_to_display_parts(&symbol, SymbolFlags::all(), &[]);
+        let doc = self.symbol_documentation(&symbol);
+        if !doc.is_empty() {
+            push_space(&mut parts, "\n\n");
+            push_part(&mut parts, &doc, DisplayPartKind::Text);
+        }
+        parts
+    }
+
     pub fn get_quick_info_text(&mut self, node: &Arc<Node>) -> String {
         if node.kind == SyntaxKind::ThisKeyword {
             let t = self.get_type_of_node(node);
             return format!("this: {}", self.type_to_string(&t));
         }
-
-        let symbol = self.resolve_identifier(node).or_else(|| {
-            let symbol_map = self.program.symbol_map();
-            let mut current: Option<&Arc<Node>> = Some(node);
-            while let Some(n) = current {
-                if let Some(sym) = symbol_map.symbol_of(n) {
-                    return Some(Arc::clone(sym));
-                }
-                current = n.parent.as_ref();
-            }
-            None
-        });
-        let Some(symbol) = symbol else {
+        let Some(symbol) = self.resolve_symbol_for_hover(node) else {
             if self.node_has_type(node) {
                 let t = self.get_type_of_node(node);
+                return self.type_to_string(&t);
+            }
+            // 属性访问名未解析到符号时按表达式类型显示（对齐 Go shouldGetType）
+            if let Some(parent) = node.parent.as_ref()
+                && parent.kind == SyntaxKind::PropertyAccessExpression
+            {
+                let t = self.get_type_of_node(parent);
                 return self.type_to_string(&t);
             }
             return String::new();
         };
         self.format_quick_info_for_symbol(&symbol, node)
-    }
-
-    pub fn get_quick_info_display_parts(&mut self, node: &Arc<Node>) -> Vec<SymbolDisplayPart> {
-        let symbol = self.resolve_identifier(node).or_else(|| {
-            let symbol_map = self.program.symbol_map();
-            let mut current: Option<&Arc<Node>> = Some(node);
-            while let Some(n) = current {
-                if let Some(sym) = symbol_map.symbol_of(n) {
-                    return Some(Arc::clone(sym));
-                }
-                current = n.parent.as_ref();
-            }
-            None
-        });
-        let Some(symbol) = symbol else {
-            return Vec::new();
-        };
-        self.symbol_to_display_parts(&symbol, SymbolFlags::all(), &[])
     }
 
     pub fn symbol_to_display_parts(
@@ -90,14 +412,35 @@ impl Checker {
             return self.type_alias_symbol_display_parts(symbol);
         }
         if flags.intersects(SymbolFlags::TypeParameter) {
-            return self.type_parameter_symbol_display_parts(symbol);
+            let mut parts = Vec::new();
+            push_punctuation(&mut parts, "(");
+            push_part(&mut parts, "type parameter", DisplayPartKind::Text);
+            push_punctuation(&mut parts, ") ");
+            parts.extend(self.type_parameter_symbol_display_parts(symbol));
+            return parts;
         }
         if flags.intersects(SymbolFlags::EnumMember) {
             let mut parts = Vec::new();
+            push_punctuation(&mut parts, "(");
+            push_part(&mut parts, "enum member", DisplayPartKind::Text);
+            push_punctuation(&mut parts, ") ");
+            push_part(
+                &mut parts,
+                &self.qualified_symbol_name(symbol),
+                DisplayPartKind::EnumName,
+            );
             let t = self.get_type_of_symbol(symbol);
-            push_part(&mut parts, &symbol.name, DisplayPartKind::PropertyName);
-            push_space(&mut parts, ": ");
-            parts.extend(self.type_to_display_parts(&t));
+            let literal = match &t.data {
+                crate::checker::types::TypeData::Literal(lit) => Some(lit.value.clone()),
+                _ => None,
+            };
+            if let Some(value) = literal {
+                push_space(&mut parts, " = ");
+                push_part(&mut parts, &value.to_string(), DisplayPartKind::StringLiteral);
+            } else {
+                push_space(&mut parts, ": ");
+                parts.extend(self.type_to_display_parts(&t));
+            }
             return parts;
         }
         if flags.intersects(SymbolFlags::VARIABLE)
@@ -129,8 +472,218 @@ impl Checker {
         parts
     }
 
+    fn doc_lookup_symbols(&mut self, symbol: &Arc<Symbol>) -> Vec<Arc<Symbol>> {
+        let mut targets = vec![Arc::clone(symbol)];
+        if let Some(container) = self
+            .value_symbol_links
+            .get(symbol)
+            .and_then(|l| l.container_symbol.clone())
+        {
+            if let Some(st) = self
+                .resolve_interface_type_ex(&container, None)
+                .as_structured()
+                && let Some(member) = st.members.get(&symbol.name)
+            {
+                targets.push(Arc::clone(member));
+            } else if let Some(member) = container.members.entries.get(&symbol.name) {
+                targets.push(Arc::clone(member));
+            }
+        }
+        targets
+    }
+
+    /// {@link name} -> [name](file:///{file}#{l},{c}-{l2},{c2})（tsc hover 文档链接形态）
+    fn render_jsdoc_links(
+        &mut self,
+        sf: &tsox_frontend::ast::SourceFile,
+        decl: &Arc<Node>,
+        text: &str,
+    ) -> String {
+        let mut out = String::new();
+        let mut rest = text;
+        while let Some(i) = rest.find("{@link ") {
+            out.push_str(&rest[..i]);
+            let after = &rest[i + 7..];
+            let Some(end) = after.find('}') else { break };
+            let inner = &after[..end];
+            let name = inner.split_whitespace().next().unwrap_or(inner);
+            let target = self
+                .resolve_name_from(sf, decl, name)
+                .and_then(|s| s.declarations.first().cloned());
+            match target {
+                Some(t) => {
+                    let (l1, c1, l2, c2) = node_line_char(
+                        sf,
+                        t.pos(),
+                        t.name().map(|n| n.end()).unwrap_or_else(|| t.end()),
+                    );
+                    out.push_str(&format!(
+                        "[{name}](file:///{}#{l1},{c1}-{l2},{c2})",
+                        sf.file_name.trim_start_matches('/'),
+                    ));
+                }
+                None => out.push_str(name),
+            }
+            rest = &after[end + 1..];
+        }
+        out.push_str(rest);
+        out
+    }
+
+    fn resolve_name_from(
+        &self,
+        _sf: &tsox_frontend::ast::SourceFile,
+        decl: &Arc<Node>,
+        name: &str,
+    ) -> Option<Arc<Symbol>> {
+        let symbol_map = self.program.symbol_map();
+        let mut cur = decl.parent.as_ref();
+        while let Some(n) = cur {
+            if let Some(locals) = symbol_map.locals.get(&n.id())
+                && let Some(sym) = locals.get(name)
+            {
+                return Some(Arc::clone(sym));
+            }
+            if let Some(container_sym) = symbol_map.symbols.get(&n.id())
+                && let Some(sym) = container_sym.members.get(name)
+            {
+                return Some(Arc::clone(sym));
+            }
+            cur = n.parent.as_ref();
+        }
+        self.globals.get(name).cloned()
+    }
+
+    fn symbol_documentation(&mut self, symbol: &Arc<Symbol>) -> String {
+        for target in self.doc_lookup_symbols(symbol) {
+            for decl in &target.declarations {
+                let Some(sf) = self.get_source_file_of_node(decl) else {
+                    continue;
+                };
+                // 声明层无 jsdoc 时上探到语句层（var 声明的文档挂在 VariableStatement）
+                let mut jds = tsox_frontend::parser::parse_jsdoc_for_node(&sf, decl);
+                if jds.is_empty() {
+                    let mut p = decl.parent.as_ref();
+                    while let Some(n) = p
+                        && n.kind != SyntaxKind::VariableStatement
+                    {
+                        p = n.parent.as_ref();
+                    }
+                    if let Some(stmt) = p {
+                        jds = tsox_frontend::parser::parse_jsdoc_for_node(&sf, stmt);
+                    }
+                }
+                for jd in &jds {
+                    let (p0, p1) = (jd.pos().min(sf.text.len()), jd.end().min(sf.text.len()));
+                    let raw: String = if p0 < p1 {
+                        sf.text[p0..p1].to_string()
+                    } else {
+                        String::new()
+                    };
+                    let cleaned = clean_jsdoc_text(&raw);
+                    if !cleaned.is_empty() {
+                        return self.render_jsdoc_links(&sf, decl, &cleaned);
+                    }
+                    if let crate::checker::nodebuilder::NodeData::JSDoc(data) = &jd.data {
+                        let parsed: String = data
+                            .comment
+                            .iter()
+                            .map(|n| match &n.data {
+                                crate::checker::nodebuilder::NodeData::JSDocText(td) => {
+                                    td.text.join("")
+                                }
+                                _ => String::new(),
+                            })
+                            .collect::<Vec<_>>()
+                            .join("");
+                        let parsed = parsed.trim();
+                        if !parsed.is_empty() {
+                            return self.render_jsdoc_links(&sf, decl, parsed);
+                        }
+                    }
+                }
+            }
+        }
+        String::new()
+    }
+
+    /// 成员符号无 parent 链接时，沿声明树上溯类/接口声明节点取容器符号
+    fn container_symbol_from_declarations(
+        &self,
+        symbol: &Arc<Symbol>,
+    ) -> Option<Arc<Symbol>> {
+        let symbol_map = self.program.symbol_map();
+        symbol.declarations.first().and_then(|decl| {
+            let mut cur = decl.parent.as_ref();
+            while let Some(n) = cur {
+                match n.kind {
+                    SyntaxKind::ClassDeclaration
+                    | SyntaxKind::InterfaceDeclaration
+                    | SyntaxKind::EnumDeclaration
+                    | SyntaxKind::ClassExpression => {
+                        return symbol_map.symbol_of(n).map(Arc::clone);
+                    }
+                    _ => cur = n.parent.as_ref(),
+                }
+            }
+            None
+        })
+    }
+
+    fn qualified_symbol_name(&self, symbol: &Arc<Symbol>) -> String {
+        let parent = symbol
+            .parent
+            .clone()
+            .or_else(|| {
+                self.value_symbol_links
+                    .get(symbol)
+                    .and_then(|l| l.container_symbol.clone())
+            })
+            .or_else(|| self.container_symbol_from_declarations(symbol));
+        let Some(parent) = parent else {
+            return symbol.name.clone();
+        };
+        if !(parent.flags.intersects(SymbolFlags::Interface)
+            || parent.flags.intersects(SymbolFlags::Class)
+            || parent.flags.intersects(SymbolFlags::ENUM))
+        {
+            return symbol.name.clone();
+        }
+        let mut q = parent.name.clone();
+        if let Some(tps) = parent.declarations.iter().find_map(|d| match &d.data {
+            crate::checker::nodebuilder::NodeData::InterfaceDeclaration(data) => {
+                data.type_parameters.as_ref()
+            }
+            crate::checker::nodebuilder::NodeData::ClassDeclaration(data) => {
+                data.type_parameters.as_ref()
+            }
+            _ => None,
+        }) {
+            let names: Vec<String> = tps
+                .iter()
+                .filter_map(|tp| match &tp.data {
+                    crate::checker::nodebuilder::NodeData::TypeParameterDeclaration(tpd) => {
+                        Some(tpd.name.text().to_string())
+                    }
+                    _ => None,
+                })
+                .collect();
+            if !names.is_empty() {
+                q.push('<');
+                q.push_str(&names.join(", "));
+                q.push('>');
+            }
+        }
+        q.push('.');
+        q.push_str(&symbol.name);
+        q
+    }
+
     pub fn type_to_display_parts(&mut self, t: &Arc<Type>) -> Vec<SymbolDisplayPart> {
-        let s = self.type_to_string(t);
+        let s = self.type_to_string_ex(
+            t,
+            crate::checker::nodebuilder_type_format_flags_2::TypeFormatFlags::MULTILINE_OBJECT_LITERALS,
+        );
 
         if let Some(name) = t.intrinsic_name() {
             if is_keyword_type_name(name) {
@@ -151,11 +704,19 @@ impl Checker {
         is_method: bool,
     ) -> Vec<SymbolDisplayPart> {
         let mut parts: Vec<SymbolDisplayPart> = Vec::new();
-        if !is_method {
+        if is_method {
+            push_punctuation(&mut parts, "(");
+            push_part(&mut parts, "method", DisplayPartKind::Text);
+            push_punctuation(&mut parts, ") ");
+        } else {
             push_keyword(&mut parts, "function");
             push_space(&mut parts, " ");
         }
-        push_part(&mut parts, &symbol.name, DisplayPartKind::FunctionName);
+        push_part(
+            &mut parts,
+            &self.qualified_symbol_name(symbol),
+            DisplayPartKind::FunctionName,
+        );
         self.append_type_parameter_parts(&mut parts, symbol);
 
         let t = self.get_type_of_symbol(symbol);
@@ -189,7 +750,7 @@ impl Checker {
         let mut parts = Vec::new();
         push_keyword(&mut parts, keyword);
         push_space(&mut parts, " ");
-        push_part(&mut parts, &symbol.name, name_kind);
+        push_part(&mut parts, &self.qualified_symbol_name(symbol), name_kind);
         self.append_type_parameter_parts(&mut parts, symbol);
         parts
     }
@@ -220,6 +781,33 @@ impl Checker {
             push_keyword(&mut parts, " extends ");
             parts.extend(self.type_to_display_parts(&c));
         }
+        // 上下文：`(type parameter) T in type X<T = string>`（对齐 Go hover writeSymbol）
+        if let Some(owner) = symbol
+            .declarations
+            .first()
+            .and_then(|tp| tp.parent.clone())
+        {
+            match owner.kind {
+                SyntaxKind::TypeAliasDeclaration => {
+                    let alias_sym = self.program.symbol_map().symbol_of(&owner).cloned();
+                    push_keyword(&mut parts, " in ");
+                    push_keyword(&mut parts, "type ");
+                    if let Some(alias_sym) = alias_sym {
+                        push_part(&mut parts, &alias_sym.name, DisplayPartKind::InterfaceName);
+                        self.append_type_parameter_parts(&mut parts, &alias_sym);
+                    }
+                }
+                SyntaxKind::ClassDeclaration | SyntaxKind::InterfaceDeclaration => {
+                    let owner_sym = self.program.symbol_map().symbol_of(&owner).cloned();
+                    push_keyword(&mut parts, " in ");
+                    if let Some(owner_sym) = owner_sym {
+                        push_part(&mut parts, &owner_sym.name, DisplayPartKind::ClassName);
+                        self.append_type_parameter_parts(&mut parts, &owner_sym);
+                    }
+                }
+                _ => {}
+            }
+        }
         parts
     }
 
@@ -227,7 +815,15 @@ impl Checker {
         &mut self,
         symbol: &Arc<Symbol>,
     ) -> Vec<SymbolDisplayPart> {
+        // 先触发类型解析（binding_element_type 在此挂 container 链接）
+        let _ = self.get_type_of_symbol(symbol);
         let mut parts = Vec::new();
+        let is_parameter = symbol.declarations.iter().any(|d| {
+            d.kind == SyntaxKind::Parameter
+                || d.parent
+                    .as_ref()
+                    .is_some_and(|p| p.kind == SyntaxKind::Parameter)
+        });
         if symbol.flags.intersects(SymbolFlags::Property) {
             push_punctuation(&mut parts, "(");
             push_part(&mut parts, "property", DisplayPartKind::Text);
@@ -235,6 +831,10 @@ impl Checker {
         } else if symbol.flags.intersects(SymbolFlags::ACCESSOR) {
             push_punctuation(&mut parts, "(");
             push_part(&mut parts, "accessor", DisplayPartKind::Text);
+            push_punctuation(&mut parts, ") ");
+        } else if is_parameter {
+            push_punctuation(&mut parts, "(");
+            push_part(&mut parts, "parameter", DisplayPartKind::Text);
             push_punctuation(&mut parts, ") ");
         } else {
             push_keyword(&mut parts, self.variable_decl_prefix(symbol).trim());
@@ -249,7 +849,7 @@ impl Checker {
         } else {
             DisplayPartKind::VariableName
         };
-        push_part(&mut parts, &symbol.name, name_kind);
+        push_part(&mut parts, &self.qualified_symbol_name(symbol), name_kind);
         if symbol.flags.contains(SymbolFlags::Optional) {
             push_punctuation(&mut parts, "?");
         }
@@ -283,7 +883,7 @@ impl Checker {
         parts: &mut Vec<SymbolDisplayPart>,
         symbol: &Arc<Symbol>,
     ) {
-        if let Some(tps) = self.collect_type_parameter_names(symbol) {
+        if let Some(tps) = self.collect_type_parameter_displays(symbol) {
             if !tps.is_empty() {
                 push_punctuation(parts, "<");
                 for (i, tp) in tps.iter().enumerate() {

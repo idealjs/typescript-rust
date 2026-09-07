@@ -11,6 +11,6 @@ fn quick_info_link2() {
  * @property {boolean} autoDetect
  */"#;
     let mut s = Session::new(content);
-    fourslash::unsupported("VerifyNoErrors"); // f.VerifyNoErrors(t)
+    fourslash::verify_no_errors(&mut s);
     fourslash::unsupported("VerifyBaselineHover"); // f.VerifyBaselineHover(t)
 }

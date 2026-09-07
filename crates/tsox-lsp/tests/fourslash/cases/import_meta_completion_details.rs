@@ -10,5 +10,5 @@ fn import_meta_completion_details() {
 let x = import.meta/**/;"#;
     let mut s = Session::new(content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyNoErrors"); // f.VerifyNoErrors(t)
+    fourslash::verify_no_errors(&mut s);
 }

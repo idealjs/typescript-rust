@@ -1,6 +1,5 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyQuickInfoAt"]
 #[test]
 fn quick_info_for_object_binding_element_name02() {
     let content = r#"interface I {
@@ -11,5 +10,5 @@ fn quick_info_for_object_binding_element_name02() {
 var foo: I;
 var { property1: /**/prop1 } = foo;"#;
     let mut s = Session::new(content);
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "", "var prop1: number", "")
+    fourslash::verify_quick_info_at(&mut s, "", "var prop1: number", "");
 }

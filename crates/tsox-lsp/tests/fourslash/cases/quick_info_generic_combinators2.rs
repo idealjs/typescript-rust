@@ -59,34 +59,64 @@ var /*22*/r7b = _.map<number, A, string>(c4, /*22error1*/rf3/*22error2*/);
 
 var /*23*/r8a = _.map<number, /*error1*/B/*error2*/, string>(c5, (/*8a*/x,/*8b*/y) => { return y.foo() }); "#;
     let mut s = Session::new(content);
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "2a", "(parameter) x: Collection<number, number>", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "2b", "(parameter) y: string", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "3a", "(parameter) x: number", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "3b", "(parameter) y: A", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "4a", "(parameter) x: number", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "4b", "(parameter) y: B<any>", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "5a", "(parameter) x: number", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "5b", "(parameter) y: string", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "6a", "(parameter) x: Collection<number, number>", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "6b", "(parameter) y: string", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "7a", "(parameter) x: number", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "7b", "(parameter) y: A", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "8a", "(parameter) x: number", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "8b", "(parameter) y: any", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "9", "var r1a: Collection<number, string>", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "10", "var r1b: Collection<number, string>", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "11", "var r2a: Collection<Collection<number, number>, number>", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "12", "var r2b: Collection<Collection<number, number>, number>", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "13", "var r3a: Collection<number, unknown>", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "14", "var r3b: Collection<number, unknown>", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "15", "var r4a: Collection<number, any>", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "17", "var r5a: Collection<number, Date>", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "18", "var r5b: Collection<number, Date>", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "19", "var r6a: Collection<Collection<number, number>, Date>", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "20", "var r6b: Collection<Collection<number, number>, Date>", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "21", "var r7a: Collection<number, string>", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "22", "var r7b: Collection<number, string>", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "23", "var r8a: Collection<number, string>", "")
+    fourslash::verify_quick_info_at(
+        &mut s,
+        "2a",
+        "(parameter) x: Collection<number, number>",
+        "",
+    );
+    fourslash::verify_quick_info_at(&mut s, "2b", "(parameter) y: string", "");
+    fourslash::verify_quick_info_at(&mut s, "3a", "(parameter) x: number", "");
+    fourslash::verify_quick_info_at(&mut s, "3b", "(parameter) y: A", "");
+    fourslash::verify_quick_info_at(&mut s, "4a", "(parameter) x: number", "");
+    fourslash::verify_quick_info_at(&mut s, "4b", "(parameter) y: B<any>", "");
+    fourslash::verify_quick_info_at(&mut s, "5a", "(parameter) x: number", "");
+    fourslash::verify_quick_info_at(&mut s, "5b", "(parameter) y: string", "");
+    fourslash::verify_quick_info_at(
+        &mut s,
+        "6a",
+        "(parameter) x: Collection<number, number>",
+        "",
+    );
+    fourslash::verify_quick_info_at(&mut s, "6b", "(parameter) y: string", "");
+    fourslash::verify_quick_info_at(&mut s, "7a", "(parameter) x: number", "");
+    fourslash::verify_quick_info_at(&mut s, "7b", "(parameter) y: A", "");
+    fourslash::verify_quick_info_at(&mut s, "8a", "(parameter) x: number", "");
+    fourslash::verify_quick_info_at(&mut s, "8b", "(parameter) y: any", "");
+    fourslash::verify_quick_info_at(&mut s, "9", "var r1a: Collection<number, string>", "");
+    fourslash::verify_quick_info_at(&mut s, "10", "var r1b: Collection<number, string>", "");
+    fourslash::verify_quick_info_at(
+        &mut s,
+        "11",
+        "var r2a: Collection<Collection<number, number>, number>",
+        "",
+    );
+    fourslash::verify_quick_info_at(
+        &mut s,
+        "12",
+        "var r2b: Collection<Collection<number, number>, number>",
+        "",
+    );
+    fourslash::verify_quick_info_at(&mut s, "13", "var r3a: Collection<number, unknown>", "");
+    fourslash::verify_quick_info_at(&mut s, "14", "var r3b: Collection<number, unknown>", "");
+    fourslash::verify_quick_info_at(&mut s, "15", "var r4a: Collection<number, any>", "");
+    fourslash::verify_quick_info_at(&mut s, "17", "var r5a: Collection<number, Date>", "");
+    fourslash::verify_quick_info_at(&mut s, "18", "var r5b: Collection<number, Date>", "");
+    fourslash::verify_quick_info_at(
+        &mut s,
+        "19",
+        "var r6a: Collection<Collection<number, number>, Date>",
+        "",
+    );
+    fourslash::verify_quick_info_at(
+        &mut s,
+        "20",
+        "var r6b: Collection<Collection<number, number>, Date>",
+        "",
+    );
+    fourslash::verify_quick_info_at(&mut s, "21", "var r7a: Collection<number, string>", "");
+    fourslash::verify_quick_info_at(&mut s, "22", "var r7b: Collection<number, string>", "");
+    fourslash::verify_quick_info_at(&mut s, "23", "var r8a: Collection<number, string>", "");
     fourslash::unsupported("VerifyErrorExistsBetweenMarkers"); // f.VerifyErrorExistsBetweenMarkers(t, "error1", "error2")
     fourslash::unsupported("VerifyErrorExistsBetweenMarkers"); // f.VerifyErrorExistsBetweenMarkers(t, "17error1", "17error2")
     fourslash::unsupported("VerifyErrorExistsBetweenMarkers"); // f.VerifyErrorExistsBetweenMarkers(t, "22error1", "22error2")

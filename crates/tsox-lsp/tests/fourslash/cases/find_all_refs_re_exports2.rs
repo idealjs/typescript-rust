@@ -8,6 +8,6 @@ export function /*1*/foo(): void {}
 // @Filename: /b.ts
 import { foo as oof } from "./a";"#;
     let mut s = Session::new(content);
-    fourslash::unsupported("VerifyNoErrors"); // f.VerifyNoErrors(t)
+    fourslash::verify_no_errors(&mut s);
     fourslash::unsupported("VerifyBaselineFindAllReferences"); // f.VerifyBaselineFindAllReferences(t, "1")
 }

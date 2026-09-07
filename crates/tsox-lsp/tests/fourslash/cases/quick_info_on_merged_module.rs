@@ -20,6 +20,6 @@ namespace M2 {
     var r = a.fo/*1*/o + a.bar;
 }"#;
     let mut s = Session::new(content);
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "1", "(property) M2.A.foo: string", "")
-    fourslash::unsupported("VerifyNoErrors"); // f.VerifyNoErrors(t)
+    fourslash::verify_quick_info_at(&mut s, "1", "(property) M2.A.foo: string", "");
+    fourslash::verify_no_errors(&mut s);
 }

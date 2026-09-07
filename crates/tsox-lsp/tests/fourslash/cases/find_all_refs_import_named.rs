@@ -11,6 +11,6 @@ function /*start*/foo(a: number, b: number) { }
 import x = require("./f");
 x.foo(1, 2);"#;
     let mut s = Session::new(content);
-    fourslash::unsupported("VerifyNoErrors"); // f.VerifyNoErrors(t)
+    fourslash::verify_no_errors(&mut s);
     fourslash::unsupported("VerifyBaselineFindAllReferences"); // f.VerifyBaselineFindAllReferences(t, "start")
 }

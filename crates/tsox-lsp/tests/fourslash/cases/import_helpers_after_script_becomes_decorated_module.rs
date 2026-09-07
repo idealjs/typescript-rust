@@ -29,8 +29,8 @@ exports.__decorate = function () {};
 "#;
     let mut s = Session::new(content);
     fourslash::go_to_file(&mut s, "/foo.ts");
-    fourslash::unsupported("VerifyNumberOfErrorsInCurrentFile"); // f.VerifyNumberOfErrorsInCurrentFile(t, 0)
+    fourslash::verify_number_of_errors_in_current_file(&mut s, 0);
     fourslash::unsupported("Replace"); // f.Replace(t, f.MarkerByName(t, "insert").Position, 0, `@dec
     // TODO: // The second diagnostics request forces external helper resolution after the edit.
-    fourslash::unsupported("VerifyNumberOfErrorsInCurrentFile"); // f.VerifyNumberOfErrorsInCurrentFile(t, 0)
+    fourslash::verify_number_of_errors_in_current_file(&mut s, 0);
 }

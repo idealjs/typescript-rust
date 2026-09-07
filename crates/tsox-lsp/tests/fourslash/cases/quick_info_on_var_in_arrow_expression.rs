@@ -16,5 +16,5 @@ each(categories, category => {
 });
 function each<T>(items: T[], handler: (item: T) => void) { }"#;
     let mut s = Session::new(content);
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "1", "(local var) changes: string[]", "")
+    fourslash::verify_quick_info_at(&mut s, "1", "(local var) changes: string[]", "");
 }

@@ -18,7 +18,7 @@ export default function Home() {
 }"#;
     let mut s = Session::new(content);
     // TODO: // Hover on the intrinsic element first...
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "1", "(property) JSX.IntrinsicElements.div: any", "")
+    fourslash::verify_quick_info_at(&mut s, "1", "(property) JSX.IntrinsicElements.div: any", "");
     // TODO: // ...then a subsequent diagnostic pull must not invent a TS2304 for `div`.
-    fourslash::unsupported("VerifyNoErrors"); // f.VerifyNoErrors(t)
+    fourslash::verify_no_errors(&mut s);
 }

@@ -208,8 +208,11 @@ impl Checker {
                         rt
                     };
 
-                    if let tsox_frontend::ast::NodeData::NewExpression(d) = &node.data
-                        && let Some(type_args) = &d.type_arguments
+                    let explicit_type_args = match &node.data {
+                        tsox_frontend::ast::NodeData::NewExpression(d) => d.type_arguments.clone(),
+                        _ => None,
+                    };
+                    if let Some(type_args) = &explicit_type_args
                         && let Some(class_sym) = rt.symbol.clone()
                     {
                         let tps = self.declared_type_parameter_types(&class_sym);
@@ -219,6 +222,29 @@ impl Checker {
                             .collect();
                         if !tps.is_empty() && tps.len() == arg_types.len() {
                             return self.attach_explicit_type_arguments_cached(&rt, arg_types);
+                        }
+                    }
+                    // new SS() / new SS：未绑定实参的类类型参数按 unknown 实例化
+                    if explicit_type_args.is_none()
+                        && let Some(class_sym) = rt.symbol.clone()
+                    {
+                        let has_attached_args = match &rt.data {
+                            crate::checker::types::TypeData::Object(o) => !o.type_arguments.is_empty(),
+                            crate::checker::types::TypeData::Interface(i) => {
+                                !i.object.type_arguments.is_empty()
+                            }
+                            _ => false,
+                        };
+                        if !has_attached_args {
+                            let tps = self.declared_type_parameter_types(&class_sym);
+                            if !tps.is_empty() {
+                                let unknowns: Vec<Arc<Type>> = tps
+                                    .iter()
+                                    .map(|_| self.get_unknown_type())
+                                    .collect();
+                                return self
+                                    .attach_explicit_type_arguments_cached(&rt, unknowns);
+                            }
                         }
                     }
                     return rt;

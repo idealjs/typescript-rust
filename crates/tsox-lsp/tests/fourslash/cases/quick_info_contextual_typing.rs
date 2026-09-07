@@ -197,114 +197,224 @@ Point.prototype = {
     }
 };"#;
     let mut s = Session::new(content);
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "1", "(property) C1T5.foo: (i: number, s: string) => number", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "2", "(parameter) i: number", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "3", "(parameter) i: number", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "4", "var C2T5.foo: (i: number, s: string) => number", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "5", "(parameter) i: number", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "6", "(parameter) i: number", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "7", "var c3t1: (s: string) => string", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "8", "(parameter) s: string", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "9", "(parameter) s: string", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "10", "var c3t2: IFoo", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "11", "var c3t3: number[]", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "12", "var c3t4: () => IFoo", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "13", "var c3t5: (n: number) => IFoo", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "14", "(parameter) n: number", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "15", "var c3t6: (n: number, s: string) => IFoo", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "16", "(parameter) n: number", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "17", "(parameter) s: string", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "18", "var c3t7: {\n    (n: number): number;\n    (s1: string): number;\n}", 
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "20", "var c3t8: (n: number, s: string) => number", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "21", "(parameter) n: number", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "22", "var c3t9: number[][]", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "23", "var c3t10: IFoo[]", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "24", "var c3t11: ((n: number, s: string) => string)[]", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "25", "(parameter) n: number", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "26", "(parameter) s: string", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "27", "var c3t12: IBar", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "28", "(property) IBar.foo: IFoo", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "29", "var c3t13: IFoo", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "30", "(method) IFoo.f(i: number, s: string): string", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "31", "(parameter) i: number", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "32", "(parameter) s: string", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "33", "var c3t14: IFoo", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "34", "(property) IFoo.a: number[]", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "35", "(property) C4T5.foo: (i: number, s: string) => string", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "36", "(parameter) i: number", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "37", "(parameter) s: string", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "38", "var C5T5.foo: (i: number, s: string) => string", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "39", "(parameter) i: number", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "40", "(parameter) s: string", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "41", "var c6t5: (n: number) => IFoo", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "42", "(parameter) n: number", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "43", "var c7t2: IFoo[]", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "44", "var c7t2: IFoo[]", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "45", "(property) t1: (s: string) => string", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "46", "(parameter) s: string", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "47", "(property) t2: IFoo", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "48", "(property) t3: number[]", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "49", "(property) t4: () => IFoo", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "50", "(property) t5: (n: number) => IFoo", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "51", "(parameter) n: number", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "52", "(property) t6: (n: number, s: string) => IFoo", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "53", "(parameter) n: number", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "54", "(parameter) s: string", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "55", "(property) t7: (n: number, s: string) => number", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "56", "(property) t8: (n: number, s: string) => number", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "57", "(parameter) n: number", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "58", "(property) t9: number[][]", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "59", "(property) t10: IFoo[]", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "60", "(property) t11: ((n: number, s: string) => string)[]", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "61", "(parameter) n: number", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "62", "(parameter) s: string", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "63", "(property) t12: IBar", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "64", "(property) IBar.foo: IFoo", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "65", "(property) t13: IFoo", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "66", "(method) IFoo.f(i: number, s: string): string", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "67", "(parameter) i: number", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "68", "(parameter) s: string", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "69", "(property) t14: IFoo", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "70", "(property) IFoo.a: number[]", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "71", "(parameter) n: number", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "72", "var c10t5: () => (n: number) => IFoo", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "73", "(parameter) n: number", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "74", "(parameter) n: number", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "75", "var c12t1: (s: string) => string", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "76", "(parameter) s: string", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "77", "var c12t2: IFoo", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "78", "var c12t3: number[]", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "79", "var c12t4: () => IFoo", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "80", "var c12t5: (n: number) => IFoo", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "81", "(parameter) n: number", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "82", "var c12t6: (n: number, s: string) => IFoo", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "83", "(parameter) n: number", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "84", "(parameter) s: string", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "85", "var c12t7: (n: number, s: string) => number", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "86", "var c12t8: (n: number, s: string) => number", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "87", "(parameter) n: number", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "88", "var c12t9: number[][]", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "89", "var c12t10: IFoo[]", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "90", "var c12t11: ((n: number, s: string) => string)[]", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "91", "(parameter) n: number", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "92", "(parameter) s: string", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "93", "var c12t12: IBar", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "94", "(property) IBar.foo: IFoo", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "95", "var c12t13: IFoo", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "96", "(method) IFoo.f(i: number, s: string): string", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "97", "(parameter) i: number", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "98", "(parameter) s: string", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "99", "var c12t14: IFoo", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "100", "(property) IFoo.a: number[]", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "101", "function EF1(a: number, b: number): number", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "102", "(parameter) a: any", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "103", "(parameter) b: any", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "110", "(property) Point.origin: Point", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "111", "constructor Point(x: number, y: number): Point", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "112", "(method) Point.add(dx: number, dy: number): Point", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "113", "(parameter) dx: number", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "114", "(parameter) dy: number", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "115", "(method) Point.add(dx: number, dy: number): Point", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "116", "(parameter) dx: number", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "117", "(parameter) dy: number", "")
+    fourslash::verify_quick_info_at(
+        &mut s,
+        "1",
+        "(property) C1T5.foo: (i: number, s: string) => number",
+        "",
+    );
+    fourslash::verify_quick_info_at(&mut s, "2", "(parameter) i: number", "");
+    fourslash::verify_quick_info_at(&mut s, "3", "(parameter) i: number", "");
+    fourslash::verify_quick_info_at(
+        &mut s,
+        "4",
+        "var C2T5.foo: (i: number, s: string) => number",
+        "",
+    );
+    fourslash::verify_quick_info_at(&mut s, "5", "(parameter) i: number", "");
+    fourslash::verify_quick_info_at(&mut s, "6", "(parameter) i: number", "");
+    fourslash::verify_quick_info_at(&mut s, "7", "var c3t1: (s: string) => string", "");
+    fourslash::verify_quick_info_at(&mut s, "8", "(parameter) s: string", "");
+    fourslash::verify_quick_info_at(&mut s, "9", "(parameter) s: string", "");
+    fourslash::verify_quick_info_at(&mut s, "10", "var c3t2: IFoo", "");
+    fourslash::verify_quick_info_at(&mut s, "11", "var c3t3: number[]", "");
+    fourslash::verify_quick_info_at(&mut s, "12", "var c3t4: () => IFoo", "");
+    fourslash::verify_quick_info_at(&mut s, "13", "var c3t5: (n: number) => IFoo", "");
+    fourslash::verify_quick_info_at(&mut s, "14", "(parameter) n: number", "");
+    fourslash::verify_quick_info_at(&mut s, "15", "var c3t6: (n: number, s: string) => IFoo", "");
+    fourslash::verify_quick_info_at(&mut s, "16", "(parameter) n: number", "");
+    fourslash::verify_quick_info_at(&mut s, "17", "(parameter) s: string", "");
+    fourslash::verify_quick_info_at(
+        &mut s,
+        "18",
+        "var c3t7: {\n    (n: number): number;\n    (s1: string): number;\n}",
+        "",
+    );
+    fourslash::verify_quick_info_at(
+        &mut s,
+        "20",
+        "var c3t8: (n: number, s: string) => number",
+        "",
+    );
+    fourslash::verify_quick_info_at(&mut s, "21", "(parameter) n: number", "");
+    fourslash::verify_quick_info_at(&mut s, "22", "var c3t9: number[][]", "");
+    fourslash::verify_quick_info_at(&mut s, "23", "var c3t10: IFoo[]", "");
+    fourslash::verify_quick_info_at(
+        &mut s,
+        "24",
+        "var c3t11: ((n: number, s: string) => string)[]",
+        "",
+    );
+    fourslash::verify_quick_info_at(&mut s, "25", "(parameter) n: number", "");
+    fourslash::verify_quick_info_at(&mut s, "26", "(parameter) s: string", "");
+    fourslash::verify_quick_info_at(&mut s, "27", "var c3t12: IBar", "");
+    fourslash::verify_quick_info_at(&mut s, "28", "(property) IBar.foo: IFoo", "");
+    fourslash::verify_quick_info_at(&mut s, "29", "var c3t13: IFoo", "");
+    fourslash::verify_quick_info_at(
+        &mut s,
+        "30",
+        "(method) IFoo.f(i: number, s: string): string",
+        "",
+    );
+    fourslash::verify_quick_info_at(&mut s, "31", "(parameter) i: number", "");
+    fourslash::verify_quick_info_at(&mut s, "32", "(parameter) s: string", "");
+    fourslash::verify_quick_info_at(&mut s, "33", "var c3t14: IFoo", "");
+    fourslash::verify_quick_info_at(&mut s, "34", "(property) IFoo.a: number[]", "");
+    fourslash::verify_quick_info_at(
+        &mut s,
+        "35",
+        "(property) C4T5.foo: (i: number, s: string) => string",
+        "",
+    );
+    fourslash::verify_quick_info_at(&mut s, "36", "(parameter) i: number", "");
+    fourslash::verify_quick_info_at(&mut s, "37", "(parameter) s: string", "");
+    fourslash::verify_quick_info_at(
+        &mut s,
+        "38",
+        "var C5T5.foo: (i: number, s: string) => string",
+        "",
+    );
+    fourslash::verify_quick_info_at(&mut s, "39", "(parameter) i: number", "");
+    fourslash::verify_quick_info_at(&mut s, "40", "(parameter) s: string", "");
+    fourslash::verify_quick_info_at(&mut s, "41", "var c6t5: (n: number) => IFoo", "");
+    fourslash::verify_quick_info_at(&mut s, "42", "(parameter) n: number", "");
+    fourslash::verify_quick_info_at(&mut s, "43", "var c7t2: IFoo[]", "");
+    fourslash::verify_quick_info_at(&mut s, "44", "var c7t2: IFoo[]", "");
+    fourslash::verify_quick_info_at(&mut s, "45", "(property) t1: (s: string) => string", "");
+    fourslash::verify_quick_info_at(&mut s, "46", "(parameter) s: string", "");
+    fourslash::verify_quick_info_at(&mut s, "47", "(property) t2: IFoo", "");
+    fourslash::verify_quick_info_at(&mut s, "48", "(property) t3: number[]", "");
+    fourslash::verify_quick_info_at(&mut s, "49", "(property) t4: () => IFoo", "");
+    fourslash::verify_quick_info_at(&mut s, "50", "(property) t5: (n: number) => IFoo", "");
+    fourslash::verify_quick_info_at(&mut s, "51", "(parameter) n: number", "");
+    fourslash::verify_quick_info_at(
+        &mut s,
+        "52",
+        "(property) t6: (n: number, s: string) => IFoo",
+        "",
+    );
+    fourslash::verify_quick_info_at(&mut s, "53", "(parameter) n: number", "");
+    fourslash::verify_quick_info_at(&mut s, "54", "(parameter) s: string", "");
+    fourslash::verify_quick_info_at(
+        &mut s,
+        "55",
+        "(property) t7: (n: number, s: string) => number",
+        "",
+    );
+    fourslash::verify_quick_info_at(
+        &mut s,
+        "56",
+        "(property) t8: (n: number, s: string) => number",
+        "",
+    );
+    fourslash::verify_quick_info_at(&mut s, "57", "(parameter) n: number", "");
+    fourslash::verify_quick_info_at(&mut s, "58", "(property) t9: number[][]", "");
+    fourslash::verify_quick_info_at(&mut s, "59", "(property) t10: IFoo[]", "");
+    fourslash::verify_quick_info_at(
+        &mut s,
+        "60",
+        "(property) t11: ((n: number, s: string) => string)[]",
+        "",
+    );
+    fourslash::verify_quick_info_at(&mut s, "61", "(parameter) n: number", "");
+    fourslash::verify_quick_info_at(&mut s, "62", "(parameter) s: string", "");
+    fourslash::verify_quick_info_at(&mut s, "63", "(property) t12: IBar", "");
+    fourslash::verify_quick_info_at(&mut s, "64", "(property) IBar.foo: IFoo", "");
+    fourslash::verify_quick_info_at(&mut s, "65", "(property) t13: IFoo", "");
+    fourslash::verify_quick_info_at(
+        &mut s,
+        "66",
+        "(method) IFoo.f(i: number, s: string): string",
+        "",
+    );
+    fourslash::verify_quick_info_at(&mut s, "67", "(parameter) i: number", "");
+    fourslash::verify_quick_info_at(&mut s, "68", "(parameter) s: string", "");
+    fourslash::verify_quick_info_at(&mut s, "69", "(property) t14: IFoo", "");
+    fourslash::verify_quick_info_at(&mut s, "70", "(property) IFoo.a: number[]", "");
+    fourslash::verify_quick_info_at(&mut s, "71", "(parameter) n: number", "");
+    fourslash::verify_quick_info_at(&mut s, "72", "var c10t5: () => (n: number) => IFoo", "");
+    fourslash::verify_quick_info_at(&mut s, "73", "(parameter) n: number", "");
+    fourslash::verify_quick_info_at(&mut s, "74", "(parameter) n: number", "");
+    fourslash::verify_quick_info_at(&mut s, "75", "var c12t1: (s: string) => string", "");
+    fourslash::verify_quick_info_at(&mut s, "76", "(parameter) s: string", "");
+    fourslash::verify_quick_info_at(&mut s, "77", "var c12t2: IFoo", "");
+    fourslash::verify_quick_info_at(&mut s, "78", "var c12t3: number[]", "");
+    fourslash::verify_quick_info_at(&mut s, "79", "var c12t4: () => IFoo", "");
+    fourslash::verify_quick_info_at(&mut s, "80", "var c12t5: (n: number) => IFoo", "");
+    fourslash::verify_quick_info_at(&mut s, "81", "(parameter) n: number", "");
+    fourslash::verify_quick_info_at(
+        &mut s,
+        "82",
+        "var c12t6: (n: number, s: string) => IFoo",
+        "",
+    );
+    fourslash::verify_quick_info_at(&mut s, "83", "(parameter) n: number", "");
+    fourslash::verify_quick_info_at(&mut s, "84", "(parameter) s: string", "");
+    fourslash::verify_quick_info_at(
+        &mut s,
+        "85",
+        "var c12t7: (n: number, s: string) => number",
+        "",
+    );
+    fourslash::verify_quick_info_at(
+        &mut s,
+        "86",
+        "var c12t8: (n: number, s: string) => number",
+        "",
+    );
+    fourslash::verify_quick_info_at(&mut s, "87", "(parameter) n: number", "");
+    fourslash::verify_quick_info_at(&mut s, "88", "var c12t9: number[][]", "");
+    fourslash::verify_quick_info_at(&mut s, "89", "var c12t10: IFoo[]", "");
+    fourslash::verify_quick_info_at(
+        &mut s,
+        "90",
+        "var c12t11: ((n: number, s: string) => string)[]",
+        "",
+    );
+    fourslash::verify_quick_info_at(&mut s, "91", "(parameter) n: number", "");
+    fourslash::verify_quick_info_at(&mut s, "92", "(parameter) s: string", "");
+    fourslash::verify_quick_info_at(&mut s, "93", "var c12t12: IBar", "");
+    fourslash::verify_quick_info_at(&mut s, "94", "(property) IBar.foo: IFoo", "");
+    fourslash::verify_quick_info_at(&mut s, "95", "var c12t13: IFoo", "");
+    fourslash::verify_quick_info_at(
+        &mut s,
+        "96",
+        "(method) IFoo.f(i: number, s: string): string",
+        "",
+    );
+    fourslash::verify_quick_info_at(&mut s, "97", "(parameter) i: number", "");
+    fourslash::verify_quick_info_at(&mut s, "98", "(parameter) s: string", "");
+    fourslash::verify_quick_info_at(&mut s, "99", "var c12t14: IFoo", "");
+    fourslash::verify_quick_info_at(&mut s, "100", "(property) IFoo.a: number[]", "");
+    fourslash::verify_quick_info_at(
+        &mut s,
+        "101",
+        "function EF1(a: number, b: number): number",
+        "",
+    );
+    fourslash::verify_quick_info_at(&mut s, "102", "(parameter) a: any", "");
+    fourslash::verify_quick_info_at(&mut s, "103", "(parameter) b: any", "");
+    fourslash::verify_quick_info_at(&mut s, "110", "(property) Point.origin: Point", "");
+    fourslash::verify_quick_info_at(
+        &mut s,
+        "111",
+        "constructor Point(x: number, y: number): Point",
+        "",
+    );
+    fourslash::verify_quick_info_at(
+        &mut s,
+        "112",
+        "(method) Point.add(dx: number, dy: number): Point",
+        "",
+    );
+    fourslash::verify_quick_info_at(&mut s, "113", "(parameter) dx: number", "");
+    fourslash::verify_quick_info_at(&mut s, "114", "(parameter) dy: number", "");
+    fourslash::verify_quick_info_at(
+        &mut s,
+        "115",
+        "(method) Point.add(dx: number, dy: number): Point",
+        "",
+    );
+    fourslash::verify_quick_info_at(&mut s, "116", "(parameter) dx: number", "");
+    fourslash::verify_quick_info_at(&mut s, "117", "(parameter) dy: number", "");
 }

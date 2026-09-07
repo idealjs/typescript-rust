@@ -10,5 +10,5 @@ fn completion_before_semantic_diagnostics_in_arrow_function1() {
     fourslash::unsupported("Backspace"); // f.Backspace(t, 1)
     fourslash::insert(&mut s, "A");
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, nil, &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyNumberOfErrorsInCurrentFile"); // f.VerifyNumberOfErrorsInCurrentFile(t, 1)
+    fourslash::verify_number_of_errors_in_current_file(&mut s, 1);
 }

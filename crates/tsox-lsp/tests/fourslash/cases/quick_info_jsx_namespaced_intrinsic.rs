@@ -1,6 +1,5 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyQuickInfoAt"]
 #[test]
 fn quick_info_jsx_namespaced_intrinsic() {
     let content = r#"// @jsx: react
@@ -20,6 +19,11 @@ declare namespace JSX {
 }
 <foo:ba/*tag*/r fo/*attr*/o />"#;
     let mut s = Session::new(content);
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "tag", "(property) JSX.IntrinsicElements[\"foo:bar\"]: {\n    foo: boolean;\n
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "attr", "(property) foo: boolean", "Foo docs")
+    fourslash::verify_quick_info_at(
+        &mut s,
+        "tag",
+        "(property) JSX.IntrinsicElements[\"foo:bar\"]: {\n    foo: boolean;\n    bar: string;\n}",
+        "Element docs",
+    );
+    fourslash::verify_quick_info_at(&mut s, "attr", "(property) foo: boolean", "Foo docs");
 }

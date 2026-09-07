@@ -16,7 +16,7 @@ var a = new /*4*/[|b|]./**/[|b|]();"#;
     let mut s = Session::new(content);
     fourslash::go_to_marker(&mut s, "");
     fourslash::unsupported("VerifyQuickInfoExists"); // f.VerifyQuickInfoExists(t)
-    fourslash::unsupported("VerifyNoErrors"); // f.VerifyNoErrors(t)
+    fourslash::verify_no_errors(&mut s);
     fourslash::unsupported("VerifyBaselineFindAllReferences"); // f.VerifyBaselineFindAllReferences(t, "1", "2", "3", "4")
     fourslash::unsupported("VerifyBaselineRename"); // f.VerifyBaselineRename(t, nil /*preferences*/, f.Ranges()[1], f.Ranges()[3])
     fourslash::unsupported("VerifyBaselineRename"); // f.VerifyBaselineRename(t, nil /*preferences*/, f.Ranges()[5], f.Ranges()[9])

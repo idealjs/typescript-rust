@@ -12,5 +12,10 @@ function stringClass(e: typeof StringClass) {
     console.log(e./*stringClass*/anything);
 }"#;
     let mut s = Session::new(content);
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "stringClass", "(index) StringClass[string]: any", "Something generic")
+    fourslash::verify_quick_info_at(
+        &mut s,
+        "stringClass",
+        "(index) StringClass[string]: any",
+        "Something generic",
+    );
 }

@@ -1,6 +1,5 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyNoErrors"]
 #[test]
 fn super_in_derived_type_of_generic_with_statics() {
     let content = r#"// @strict: false
@@ -19,5 +18,5 @@ class D extends M.C<Date> {
     let mut s = Session::new(content);
     fourslash::go_to_marker(&mut s, "");
     fourslash::insert(&mut s, "super();");
-    fourslash::unsupported("VerifyNoErrors"); // f.VerifyNoErrors(t)
+    fourslash::verify_no_errors(&mut s);
 }

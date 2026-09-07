@@ -15,20 +15,50 @@ new /*Dsig*/D<string>();"#;
     let mut s = Session::new(content);
     fourslash::go_to_marker(&mut s, "B");
     fourslash::insert(&mut s, "constructor(val: T) { }");
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "Asig", "constructor A<string>(): A<string>", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "Bsig", "constructor B<string>(val: string): B<string>", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "Csig", "constructor C<string>(val: string): C<string>", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "Dsig", "constructor D<string>(val: string): D<string>", "")
+    fourslash::verify_quick_info_at(&mut s, "Asig", "constructor A<string>(): A<string>", "");
+    fourslash::verify_quick_info_at(
+        &mut s,
+        "Bsig",
+        "constructor B<string>(val: string): B<string>",
+        "",
+    );
+    fourslash::verify_quick_info_at(
+        &mut s,
+        "Csig",
+        "constructor C<string>(val: string): C<string>",
+        "",
+    );
+    fourslash::verify_quick_info_at(
+        &mut s,
+        "Dsig",
+        "constructor D<string>(val: string): D<string>",
+        "",
+    );
     fourslash::go_to_marker(&mut s, "C");
     fourslash::unsupported("DeleteAtCaret"); // f.DeleteAtCaret(t, 23)
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "Asig", "constructor A<string>(): A<string>", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "Bsig", "constructor B<string>(val: string): B<string>", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "Csig", "constructor C<unknown>(): C<unknown>", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "Dsig", "constructor D<string>(val: string): D<string>", "")
+    fourslash::verify_quick_info_at(&mut s, "Asig", "constructor A<string>(): A<string>", "");
+    fourslash::verify_quick_info_at(
+        &mut s,
+        "Bsig",
+        "constructor B<string>(val: string): B<string>",
+        "",
+    );
+    fourslash::verify_quick_info_at(&mut s, "Csig", "constructor C<unknown>(): C<unknown>", "");
+    fourslash::verify_quick_info_at(
+        &mut s,
+        "Dsig",
+        "constructor D<string>(val: string): D<string>",
+        "",
+    );
     fourslash::go_to_marker(&mut s, "D");
     fourslash::unsupported("DeleteAtCaret"); // f.DeleteAtCaret(t, 6)
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "Asig", "constructor A<string>(): A<string>", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "Bsig", "constructor B<string>(val: string): B<string>", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "Csig", "constructor C<unknown>(): C<unknown>", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "Dsig", "constructor D<string>(): D<string>", "")
+    fourslash::verify_quick_info_at(&mut s, "Asig", "constructor A<string>(): A<string>", "");
+    fourslash::verify_quick_info_at(
+        &mut s,
+        "Bsig",
+        "constructor B<string>(val: string): B<string>",
+        "",
+    );
+    fourslash::verify_quick_info_at(&mut s, "Csig", "constructor C<unknown>(): C<unknown>", "");
+    fourslash::verify_quick_info_at(&mut s, "Dsig", "constructor D<string>(): D<string>", "");
 }

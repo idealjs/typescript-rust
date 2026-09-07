@@ -1,6 +1,5 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyQuickInfoAt"]
 #[test]
 fn generic_derived_type_across_module_boundary1() {
     let content = r#"namespace M {
@@ -16,6 +15,6 @@ var n = new N.D1();
 var /*1*/n2 = new N.D2<number>();
 var /*2*/n3 = new N.D2();"#;
     let mut s = Session::new(content);
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "1", "var n2: N.D2<number>", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "2", "var n3: N.D2<unknown>", "")
+    fourslash::verify_quick_info_at(&mut s, "1", "var n2: N.D2<number>", "");
+    fourslash::verify_quick_info_at(&mut s, "2", "var n3: N.D2<unknown>", "");
 }

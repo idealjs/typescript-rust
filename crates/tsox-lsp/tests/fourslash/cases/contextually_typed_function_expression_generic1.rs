@@ -12,8 +12,8 @@ interface Comparer {
 }
 var max2: Comparer = (x/*1*/x, y/*2*/y) => { return x/*3*/x.compareTo(y/*4*/y) };"#;
     let mut s = Session::new(content);
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "1", "(parameter) xx: T extends Comparable<T>", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "2", "(parameter) yy: T extends Comparable<T>", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "3", "(parameter) xx: T extends Comparable<T>", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "4", "(parameter) yy: T extends Comparable<T>", "")
+    fourslash::verify_quick_info_at(&mut s, "1", "(parameter) xx: T extends Comparable<T>", "");
+    fourslash::verify_quick_info_at(&mut s, "2", "(parameter) yy: T extends Comparable<T>", "");
+    fourslash::verify_quick_info_at(&mut s, "3", "(parameter) xx: T extends Comparable<T>", "");
+    fourslash::verify_quick_info_at(&mut s, "4", "(parameter) yy: T extends Comparable<T>", "");
 }

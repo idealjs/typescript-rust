@@ -30,5 +30,5 @@ a./**/"#;
     fourslash::insert(&mut s, "name;\nsausages.");
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, nil, &fourslash.CompletionsExpectedList{
     fourslash::insert(&mut s, "eggs;");
-    fourslash::unsupported("VerifyNoErrors"); // f.VerifyNoErrors(t)
+    fourslash::verify_no_errors(&mut s);
 }

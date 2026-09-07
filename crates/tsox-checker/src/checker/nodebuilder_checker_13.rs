@@ -161,7 +161,44 @@ impl Checker {
             }
         }
 
-        if symbol.flags.contains(SymbolFlags::BlockScopedVariable) {
+        // 绑定元素：穿透模式链找 VariableDeclarationList 的声明风格
+        for decl in &symbol.declarations {
+            if decl.kind == SyntaxKind::BindingElement {
+                let mut cur = decl.parent.as_ref();
+                while let Some(n) = cur {
+                    if n.kind == SyntaxKind::VariableDeclaration {
+                        if let Some(p) = n.parent.as_ref() {
+                            if p.kind == SyntaxKind::VariableDeclarationList {
+                                if p.flags.contains(tsox_frontend::ast::NodeFlags::Const) {
+                                    return "const ";
+                                }
+                                if p.flags.contains(tsox_frontend::ast::NodeFlags::Let) {
+                                    return "let ";
+                                }
+                                return "var ";
+                            }
+                        }
+                    }
+                    if matches!(
+                        n.kind,
+                        SyntaxKind::ObjectBindingPattern
+                            | SyntaxKind::ArrayBindingPattern
+                            | SyntaxKind::BindingElement
+                    ) {
+                        cur = n.parent.as_ref();
+                        continue;
+                    }
+                    break;
+                }
+            }
+        }
+        if symbol.flags.contains(SymbolFlags::BlockScopedVariable)
+            && !symbol.declarations.iter().any(|d| {
+                d.parent
+                    .as_ref()
+                    .is_some_and(|p| p.kind == SyntaxKind::CatchClause)
+            })
+        {
             "let "
         } else {
             "var "

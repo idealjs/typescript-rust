@@ -14,7 +14,12 @@ class B extends A<number, string> {
     constructor() { super(va/*1*/lue => String(va/*2*/lue.toExpone/*3*/ntial())); }
 }"#;
     let mut s = Session::new(content);
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "1", "(parameter) value: number", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "2", "(parameter) value: number", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "3", "(method) Number.toExponential(fractionDigits?: number): string", "Retur
+    fourslash::verify_quick_info_at(&mut s, "1", "(parameter) value: number", "");
+    fourslash::verify_quick_info_at(&mut s, "2", "(parameter) value: number", "");
+    fourslash::verify_quick_info_at(
+        &mut s,
+        "3",
+        "(method) Number.toExponential(fractionDigits?: number): string",
+        "Returns a string containing a number represented in exponential notation.",
+    );
 }

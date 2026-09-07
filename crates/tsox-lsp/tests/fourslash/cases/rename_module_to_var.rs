@@ -16,6 +16,6 @@ namespace Y {
     fourslash::go_to_marker(&mut s, "");
     fourslash::unsupported("Backspace"); // f.Backspace(t, 6)
     fourslash::insert(&mut s, "var");
-    fourslash::unsupported("VerifyNoErrors"); // f.VerifyNoErrors(t)
+    fourslash::verify_no_errors(&mut s);
     // TODO: }
 }

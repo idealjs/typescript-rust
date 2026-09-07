@@ -1,6 +1,5 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyQuickInfoAt"]
 #[test]
 fn quick_info_generic_property_accessor() {
     let content = r#"
@@ -15,6 +14,16 @@ o.f/*1*/(x)
 o.g/*2*/(x)
 "#;
     let mut s = Session::new(content);
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "1", "(property) f: <number>(x: number) => number", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "2", "(accessor) g: <number>(x: number) => number", "")
+    fourslash::verify_quick_info_at(
+        &mut s,
+        "1",
+        "(property) f: <number>(x: number) => number",
+        "",
+    );
+    fourslash::verify_quick_info_at(
+        &mut s,
+        "2",
+        "(accessor) g: <number>(x: number) => number",
+        "",
+    );
 }

@@ -20,11 +20,46 @@ function Baz<T extends {b: number}, U extends {a: boolean, b:string}>(arg1: T, a
     let a6 = <Overloa/*7*/dComponent {...arg1} ignore-prop {...arg2} />;
 }"#;
     let mut s = Session::new(content);
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "1", "function OverloadComponent<number>(attr: {\n    b: number;\n    a?: str
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "2", "function OverloadComponent<boolean, string>(attr: {\n    b: string;\n  
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "3", "function OverloadComponent<boolean, string>(attr: {\n    b: string;\n  
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "4", "function OverloadComponent(): JSX.Element (+2 overloads)", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "5", "function OverloadComponent(): JSX.Element (+2 overloads)", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "6", "function OverloadComponent<boolean, never>(attr: {\n    b: never;\n    
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "7", "function OverloadComponent<boolean, never>(attr: {\n    b: never;\n    
+    fourslash::verify_quick_info_at(
+        &mut s,
+        "1",
+        "function OverloadComponent<number>(attr: {\n    b: number;\n    a?: string;\n    \"ignore-prop\": boolean;\n}): JSX.Element (+2 overloads)",
+        "",
+    );
+    fourslash::verify_quick_info_at(
+        &mut s,
+        "2",
+        "function OverloadComponent<boolean, string>(attr: {\n    b: string;\n    a: boolean;\n}): JSX.Element (+2 overloads)",
+        "",
+    );
+    fourslash::verify_quick_info_at(
+        &mut s,
+        "3",
+        "function OverloadComponent<boolean, string>(attr: {\n    b: string;\n    a: boolean;\n}): JSX.Element (+2 overloads)",
+        "",
+    );
+    fourslash::verify_quick_info_at(
+        &mut s,
+        "4",
+        "function OverloadComponent(): JSX.Element (+2 overloads)",
+        "",
+    );
+    fourslash::verify_quick_info_at(
+        &mut s,
+        "5",
+        "function OverloadComponent(): JSX.Element (+2 overloads)",
+        "",
+    );
+    fourslash::verify_quick_info_at(
+        &mut s,
+        "6",
+        "function OverloadComponent<boolean, never>(attr: {\n    b: never;\n    a: boolean;\n}): JSX.Element (+2 overloads)",
+        "",
+    );
+    fourslash::verify_quick_info_at(
+        &mut s,
+        "7",
+        "function OverloadComponent<boolean, never>(attr: {\n    b: never;\n    a: boolean;\n}): JSX.Element (+2 overloads)",
+        "",
+    );
 }

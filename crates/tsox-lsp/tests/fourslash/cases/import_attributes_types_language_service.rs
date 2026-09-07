@@ -55,7 +55,7 @@ import * as text from /*textModule*/"./copy.asset" with { type: "text" };
 css./*cssUse*/shared;
 text./*textUse*/shared;"#;
     let mut s = Session::new(content);
-    fourslash::unsupported("VerifyNoErrors"); // f.VerifyNoErrors(t)
+    fourslash::verify_no_errors(&mut s);
     fourslash::unsupported("VerifyBaselineHover"); // f.VerifyBaselineHover(t)
     fourslash::unsupported("VerifyBaselineGoToDefinition"); // f.VerifyBaselineGoToDefinition(t, true, "cssModule", "textModule", "cssUse", "textUse")
     fourslash::unsupported("VerifyBaselineGoToTypeDefinition"); // f.VerifyBaselineGoToTypeDefinition(t, "cssUse", "textUse")

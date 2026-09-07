@@ -1,6 +1,5 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyQuickInfoAt"]
 #[test]
 fn quick_info_for_contextually_typed_function_in_return_statement() {
     let content = r#"interface Accumulator {
@@ -18,5 +17,5 @@ function makeAccumulator(): Accumulator {
     };
 }"#;
     let mut s = Session::new(content);
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "", "(parameter) value: number", "")
+    fourslash::verify_quick_info_at(&mut s, "", "(parameter) value: number", "");
 }

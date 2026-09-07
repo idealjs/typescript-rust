@@ -7,5 +7,5 @@ fn quick_info_for_generic_constraints1() {
     let content = r#"function foo4<T extends Date>(te/**/st: T): T;
 function foo4<T extends Date>(test: any): any { return null; }"#;
     let mut s = Session::new(content);
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "", "(parameter) test: T extends Date", "")
+    fourslash::verify_quick_info_at(&mut s, "", "(parameter) test: T extends Date", "");
 }

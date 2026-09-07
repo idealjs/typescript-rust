@@ -1,6 +1,5 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyNoErrors"]
 #[test]
 fn generic_interface_with_inheritance_edit1() {
     let content = r#"interface ChainedObject<T> {
@@ -16,8 +15,8 @@ interface ChainedArray<T> extends ChainedObject<Array<T>> {
 }
  /*1*/"#;
     let mut s = Session::new(content);
-    fourslash::unsupported("VerifyNoErrors"); // f.VerifyNoErrors(t)
+    fourslash::verify_no_errors(&mut s);
     fourslash::go_to_marker(&mut s, "1");
     fourslash::insert(&mut s, " ");
-    fourslash::unsupported("VerifyNoErrors"); // f.VerifyNoErrors(t)
+    fourslash::verify_no_errors(&mut s);
 }

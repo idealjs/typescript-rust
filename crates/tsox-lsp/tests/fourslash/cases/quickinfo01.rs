@@ -21,7 +21,12 @@ x./*2*/commonProperty;
 x./*3*/commonFunction;"#;
     let mut s = Session::new(content);
     // TODO: f.MarkTestAsStradaServer()
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "1", "var x: One | Two", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "2", "(property) commonProperty: string | number", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "3", "(method) commonFunction(): number", "")
+    fourslash::verify_quick_info_at(&mut s, "1", "var x: One | Two", "");
+    fourslash::verify_quick_info_at(
+        &mut s,
+        "2",
+        "(property) commonProperty: string | number",
+        "",
+    );
+    fourslash::verify_quick_info_at(&mut s, "3", "(method) commonFunction(): number", "");
 }

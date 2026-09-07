@@ -19,7 +19,12 @@ const product = {
     /*3*/
 }"#;
     let mut s = Session::new(content);
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "1", "(property) high-top: boolean", "some-comments")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "2", "type Product = {\n    title: string;\n    \"high-top\": boolean;\n}", "
+    fourslash::verify_quick_info_at(&mut s, "1", "(property) high-top: boolean", "some-comments");
+    fourslash::verify_quick_info_at(
+        &mut s,
+        "2",
+        "type Product = {\n    title: string;\n    \"high-top\": boolean;\n}",
+        "",
+    );
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, []string{"3"}, &fourslash.CompletionsExpectedList{
 }

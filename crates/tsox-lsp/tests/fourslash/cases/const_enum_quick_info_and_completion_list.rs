@@ -11,6 +11,6 @@ fn const_enum_quick_info_and_completion_list() {
 /*2*/e.a;"#;
     let mut s = Session::new(content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "2", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "1", "const enum e", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "2", "const enum e", "")
+    fourslash::verify_quick_info_at(&mut s, "1", "const enum e", "");
+    fourslash::verify_quick_info_at(&mut s, "2", "const enum e", "");
 }

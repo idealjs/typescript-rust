@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyNoErrors"]
+#[ignore = "unimplemented: fourslash.VerifySuggestionDiagnostics"]
 #[test]
 fn code_fix_cannot_find_module_suggestion_false_positive() {
     let content = r#"// @moduleResolution: bundler
@@ -13,7 +13,7 @@ fn code_fix_cannot_find_module_suggestion_false_positive() {
 import abs = require([|"foo/bar.json"|]);
 abs;"#;
     let mut s = Session::new(content);
-    fourslash::unsupported("VerifyNoErrors"); // f.VerifyNoErrors(t)
+    fourslash::verify_no_errors(&mut s);
     fourslash::go_to_file(&mut s, "/a.ts");
     fourslash::unsupported("VerifySuggestionDiagnostics"); // f.VerifySuggestionDiagnostics(t, nil)
 }

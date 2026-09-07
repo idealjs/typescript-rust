@@ -12,5 +12,5 @@ interface ImportMeta {
 }"#;
     let mut s = Session::new(content);
     fourslash::unsupported("VerifyBaselineGoToDefinition"); // f.VerifyBaselineGoToDefinition(t, true, "reference")
-    fourslash::unsupported("VerifyNoErrors"); // f.VerifyNoErrors(t)
+    fourslash::verify_no_errors(&mut s);
 }

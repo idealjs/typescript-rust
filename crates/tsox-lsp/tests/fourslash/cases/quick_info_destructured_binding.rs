@@ -13,13 +13,13 @@ var { /*6*/e } = { e: true };
 "#;
     let mut s = Session::new(content);
     // TODO: // Destructured object binding parameters should show "(parameter)" not "var"
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "1", "(parameter) x: number", "")
+    fourslash::verify_quick_info_at(&mut s, "1", "(parameter) x: number", "");
     // TODO: // Destructured array binding parameters should show "(parameter)" not "var"
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "2", "(parameter) y: number", "")
+    fourslash::verify_quick_info_at(&mut s, "2", "(parameter) y: number", "");
     // TODO: // Nested destructured parameters should also show "(parameter)"
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "3", "(parameter) b: string", "")
+    fourslash::verify_quick_info_at(&mut s, "3", "(parameter) b: string", "");
     // TODO: // Destructured const/let/var bindings should show their proper keyword
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "4", "const c: number", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "5", "let d: string", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "6", "var e: boolean", "")
+    fourslash::verify_quick_info_at(&mut s, "4", "const c: number", "");
+    fourslash::verify_quick_info_at(&mut s, "5", "let d: string", "");
+    fourslash::verify_quick_info_at(&mut s, "6", "var e: boolean", "");
 }

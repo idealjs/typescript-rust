@@ -12,6 +12,6 @@ export namespace ns {
 import type { ns } from './a';
 let x: /*1*/ns./*2*/Box<string>;"#;
     let mut s = Session::new(content);
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "1", "(alias) namespace ns\nimport ns", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "2", "class ns.Box<T>", "")
+    fourslash::verify_quick_info_at(&mut s, "1", "(alias) namespace ns\nimport ns", "");
+    fourslash::verify_quick_info_at(&mut s, "2", "class ns.Box<T>", "");
 }

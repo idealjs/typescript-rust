@@ -14,6 +14,6 @@ export class D extends C {
 }
 new C().m/**/ // and here (with a different thing trying to access undefined)"#;
     let mut s = Session::new(content);
-    fourslash::unsupported("VerifyNoErrors"); // f.VerifyNoErrors(t)
+    fourslash::verify_no_errors(&mut s);
     fourslash::unsupported("VerifyBaselineHover"); // f.VerifyBaselineHover(t)
 }

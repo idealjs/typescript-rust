@@ -1,6 +1,5 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyQuickInfoAt"]
 #[test]
 fn quick_info_call_property() {
     let content = r#"interface I {
@@ -11,5 +10,5 @@ function f(x: I): void {
     x./**/m();
 }"#;
     let mut s = Session::new(content);
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "", "(property) I.m: () => void", "Doc")
+    fourslash::verify_quick_info_at(&mut s, "", "(property) I.m: () => void", "Doc");
 }

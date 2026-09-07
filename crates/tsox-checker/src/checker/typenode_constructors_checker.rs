@@ -4,7 +4,7 @@ use crate::checker::typenode_constructors::*;
 
 impl Checker {
     pub(crate) fn get_optional_type(&mut self, t: Arc<Type>) -> Arc<Type> {
-        if self.strict_null_checks {
+        if self.strict_null_checks && !self.exact_optional_property_types {
             self.get_union_type(vec![t, self.undefined_type()])
         } else {
             t

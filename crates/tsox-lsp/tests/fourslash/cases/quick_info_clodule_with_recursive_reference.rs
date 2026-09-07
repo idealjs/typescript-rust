@@ -13,6 +13,6 @@ fn quick_info_clodule_with_recursive_reference() {
   }
 }"#;
     let mut s = Session::new(content);
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "", "var M.C.C: typeof M.C", "")
-    fourslash::unsupported("VerifyNoErrors"); // f.VerifyNoErrors(t)
+    fourslash::verify_quick_info_at(&mut s, "", "var M.C.C: typeof M.C", "");
+    fourslash::verify_no_errors(&mut s);
 }

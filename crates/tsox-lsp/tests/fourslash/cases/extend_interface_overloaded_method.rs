@@ -1,6 +1,5 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyNoErrors"]
 #[test]
 fn extend_interface_overloaded_method() {
     let content = r#"// @strict: false
@@ -15,6 +14,6 @@ interface B<T> extends A<T> {
 var b: B<number>;
 var /**/x = b.foo2().foo(5).foo(); // 'x' is of type 'void'"#;
     let mut s = Session::new(content);
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "", "var x: void", "")
-    fourslash::unsupported("VerifyNoErrors"); // f.VerifyNoErrors(t)
+    fourslash::verify_quick_info_at(&mut s, "", "var x: void", "");
+    fourslash::verify_no_errors(&mut s);
 }

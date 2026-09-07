@@ -31,15 +31,15 @@ else {
     strOrNum = m./*9*/exportedStrOrNum;
 }"#;
     let mut s = Session::new(content);
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "1", "var nonExportedStrOrNum: string | number", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "2", "var nonExportedStrOrNum: number", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "3", "var nonExportedStrOrNum: string", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "4", "var m.exportedStrOrNum: string | number", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "5", "var m.exportedStrOrNum: number", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "6", "var m.exportedStrOrNum: string", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "7", "var m.exportedStrOrNum: string | number", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "8", "var m.exportedStrOrNum: number", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "9", "var m.exportedStrOrNum: string", "")
+    fourslash::verify_quick_info_at(&mut s, "1", "var nonExportedStrOrNum: string | number", "");
+    fourslash::verify_quick_info_at(&mut s, "2", "var nonExportedStrOrNum: number", "");
+    fourslash::verify_quick_info_at(&mut s, "3", "var nonExportedStrOrNum: string", "");
+    fourslash::verify_quick_info_at(&mut s, "4", "var m.exportedStrOrNum: string | number", "");
+    fourslash::verify_quick_info_at(&mut s, "5", "var m.exportedStrOrNum: number", "");
+    fourslash::verify_quick_info_at(&mut s, "6", "var m.exportedStrOrNum: string", "");
+    fourslash::verify_quick_info_at(&mut s, "7", "var m.exportedStrOrNum: string | number", "");
+    fourslash::verify_quick_info_at(&mut s, "8", "var m.exportedStrOrNum: number", "");
+    fourslash::verify_quick_info_at(&mut s, "9", "var m.exportedStrOrNum: string", "");
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "2", &fourslash.CompletionsExpectedList{
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "3", &fourslash.CompletionsExpectedList{

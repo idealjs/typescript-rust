@@ -65,7 +65,7 @@ impl FileAccumulator {
             return;
         }
         let name = self.name.take().unwrap_or_else(|| default_name.to_string());
-        let joined = self.lines.join("\n").trim_start_matches('\n').to_string();
+        let joined = self.lines.join("\n");
         let (content, head_options, markers, ranges) = parse_file_content(&name, &joined);
         for (k, v) in head_options {
             self.options.entry(k).or_insert(v);

@@ -17,8 +17,28 @@ class C {
 let instance = new C();
 instance./*setterUse*/myValue = instance./*getterUse*/myValue;"#;
     let mut s = Session::new(content);
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "getterUse", "(property) C.myValue: Promise<string>", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "getterDef", "(getter) C.myValue: Promise<string>", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "setterUse", "(property) C.myValue: string | Promise<string>", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "setterDef", "(setter) C.myValue: string | Promise<string>", "")
+    fourslash::verify_quick_info_at(
+        &mut s,
+        "getterUse",
+        "(property) C.myValue: Promise<string>",
+        "",
+    );
+    fourslash::verify_quick_info_at(
+        &mut s,
+        "getterDef",
+        "(getter) C.myValue: Promise<string>",
+        "",
+    );
+    fourslash::verify_quick_info_at(
+        &mut s,
+        "setterUse",
+        "(property) C.myValue: string | Promise<string>",
+        "",
+    );
+    fourslash::verify_quick_info_at(
+        &mut s,
+        "setterDef",
+        "(setter) C.myValue: string | Promise<string>",
+        "",
+    );
 }

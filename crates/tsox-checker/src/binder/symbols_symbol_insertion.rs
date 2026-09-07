@@ -54,10 +54,12 @@ impl Binder {
                 }
             } else if let Some(parent_sym) = &self.parent_symbol {
                 let parent_sym_mut = Arc::as_ptr(parent_sym) as *mut Symbol;
+                let symbol_mut = Arc::as_ptr(&symbol) as *mut Symbol;
                 unsafe {
                     (*parent_sym_mut)
                         .members
                         .insert(name.to_string(), Arc::clone(&symbol));
+                    (*symbol_mut).parent = Some(Arc::clone(parent_sym));
                 }
             } else if let Some(hoist) = &var_hoist_container {
                 match hoist.kind {

@@ -69,5 +69,10 @@ d.dogAge./*dogAge*/;"#;
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "cat", &fourslash.CompletionsExpectedList{
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "catName", &fourslash.CompletionsExpectedList{
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "catAge", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "AnimalType", "type Animal = {\n    animalName: string;\n    animalAge: numbe
+    fourslash::verify_quick_info_at(
+        &mut s,
+        "AnimalType",
+        "type Animal = {\n    animalName: string;\n    animalAge: number;\n}",
+        "- think Giraffes",
+    );
 }

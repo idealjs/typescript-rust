@@ -18,7 +18,7 @@ const E = {
 /** @type {/*type*/E} */
 const x = /*value*/E.A;"#;
     let mut s = Session::new(content);
-    fourslash::unsupported("VerifyNoErrors"); // f.VerifyNoErrors(t)
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "type", "type E = number", "Doc")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "value", "const E: {\n    A: number;\n}", "Doc")
+    fourslash::verify_no_errors(&mut s);
+    fourslash::verify_quick_info_at(&mut s, "type", "type E = number", "Doc");
+    fourslash::verify_quick_info_at(&mut s, "value", "const E: {\n    A: number;\n}", "Doc");
 }

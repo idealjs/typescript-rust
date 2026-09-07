@@ -17,9 +17,39 @@ impl Checker {
             NodeData::PropertyDeclaration(d) => (d.type_node.clone(), d.initializer.clone()),
             NodeData::PropertySignatureDeclaration(d) => (Some(Arc::clone(&d.type_node)), None),
             NodeData::ParameterDeclaration(d) => (d.type_node.clone(), d.initializer.clone()),
+            NodeData::BindingElement(_) => return self.binding_element_type(&decl),
+            NodeData::EnumMember(_) => {
+                let value = self.get_enum_member_value(&decl).value?;
+                let t = match value {
+                    tsox_frontend::evaluator::EvalValue::String(s) => {
+                        self.get_string_literal_type(&s)
+                    }
+                    tsox_frontend::evaluator::EvalValue::Number(n) => {
+                        self.get_number_literal_type(n)
+                    }
+                    _ => return None,
+                };
+                return Some(t);
+            }
             _ => return None,
         };
         if type_node_and_init.0.is_none() && type_node_and_init.1.is_none() {
+            // rest 参数无注解：元素类型数组（无上下文时 any[]）
+            if let NodeData::ParameterDeclaration(d) = &decl.data {
+                if d.dot_dot_dot_token.is_some() {
+                    let elem = self.get_any_type();
+                    return Some(self.create_array_type(elem));
+                }
+            }
+            // catch 子句变量无注解无初始化：unknown（useUnknownInCatchVariables 默认）
+            if decl.kind == SyntaxKind::VariableDeclaration
+                && decl
+                    .parent
+                    .as_ref()
+                    .is_some_and(|p| p.kind == SyntaxKind::CatchClause)
+            {
+                return Some(self.get_unknown_type());
+            }
             if decl.kind == SyntaxKind::VariableDeclaration {
                 let placeholder = self.get_any_type();
                 let existing = self
@@ -129,6 +159,93 @@ impl Checker {
             }
         }
         result
+    }
+
+    /// 绑定元素解析属性时，把源类型的属性符号挂为 container（显示限定名用）。
+    fn link_binding_element_container(&mut self, elem: &Arc<Node>, t: &Arc<Type>, name: &str) {
+        let Some(sym) = t.symbol.clone() else { return };
+        let member = self
+            .resolve_interface_type_ex(&sym, None)
+            .as_structured()
+            .and_then(|s| s.members.get(name).cloned())
+            .or_else(|| sym.members.entries.get(name).cloned());
+        let Some(member) = member else { return };
+        if let Some(s) = self.program.symbol_map().symbol_of(elem) {
+            let links = self.value_symbol_links.get_or_default(s);
+            if links.container_symbol.is_none() {
+                links.container_symbol = Some(Arc::clone(&member));
+            }
+        }
+        // 成员自身的限定容器 = 根类型符号（如 I），供 qualified_symbol_name 使用
+        if member.parent.is_none() {
+            let mlinks = self.value_symbol_links.get_or_default(&member);
+            if mlinks.container_symbol.is_none() {
+                mlinks.container_symbol = Some(sym);
+            }
+        }
+    }
+
+    /// 绑定元素类型：沿模式链上行到根声明取类型，再按属性路径逐层查。
+    fn binding_element_type(&mut self, elem: &Arc<Node>) -> Option<Arc<Type>> {
+        use tsox_frontend::ast::NodeData;
+        let mut path: Vec<String> = Vec::new();
+        let mut path_renamed: Vec<bool> = Vec::new();
+        let mut cur = Arc::clone(elem);
+        loop {
+            match &cur.data {
+                NodeData::BindingElement(d) => {
+                    let renamed = d.property_name.as_ref().and_then(|n| match &n.data {
+                        NodeData::Identifier(i) => Some(i.text.clone()),
+                        NodeData::StringLiteral(s) => Some(s.text.clone()),
+                        NodeData::NumericLiteral(num) => Some(num.text.clone()),
+                        _ => None,
+                    });
+                    let seg = renamed.clone().or_else(|| {
+                        d.name.as_ref().and_then(|n| match &n.data {
+                            NodeData::Identifier(i) => Some(i.text.clone()),
+                            _ => None,
+                        })
+                    })?;
+                    path.push(seg);
+                    path_renamed.push(renamed.is_some());
+                    cur = Arc::clone(cur.parent.as_ref()?);
+                }
+                NodeData::BindingPattern(_) => {
+                    cur = Arc::clone(cur.parent.as_ref()?);
+                }
+                NodeData::ParameterDeclaration(d) => {
+                    let mut t = match &d.type_node {
+                        Some(tn) => self.get_type_from_type_node(tn),
+                        None => return None,
+                    };
+                    let mut last = String::new();
+                    for (i, seg) in path.iter().enumerate().rev() {
+                        if path_renamed[i] {
+                            self.link_binding_element_container(elem, &t, seg);
+                        }
+                        last = seg.clone();
+                        t = self.get_type_of_property_of_type(&t, seg)?;
+                    }
+                    let _ = last;
+                    return Some(t);
+                }
+                NodeData::VariableDeclaration(d) => {
+                    let mut t = match (&d.type_node, &d.initializer) {
+                        (Some(tn), _) => self.get_type_from_type_node(tn),
+                        (None, Some(init)) => self.get_type_of_node(init),
+                        _ => return None,
+                    };
+                    for (i, seg) in path.iter().enumerate().rev() {
+                        if path_renamed[i] {
+                            self.link_binding_element_container(elem, &t, seg);
+                        }
+                        t = self.get_type_of_property_of_type(&t, seg)?;
+                    }
+                    return Some(t);
+                }
+                _ => return None,
+            }
+        }
     }
 
     pub(crate) fn with_declaring_file_context<T>(

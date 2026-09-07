@@ -1,6 +1,5 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyQuickInfoAt"]
 #[test]
 fn best_common_type_object_literals() {
     let content = r#"// @stableTypeOrdering: true
@@ -20,8 +19,23 @@ interface I {
 var i: I;
 var /*4*/c3 = [i, a];"#;
     let mut s = Session::new(content);
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "1", "var c: {\n    name: string;\n    age: number;\n}[]", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "2", "var c1: {\n    name: string;\n    age: number;\n}[]", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "3", "var c2: ({\n    name: string;\n    age: number;\n    address: string;\n
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "4", "var c3: I[]", "")
+    fourslash::verify_quick_info_at(
+        &mut s,
+        "1",
+        "var c: {\n    name: string;\n    age: number;\n}[]",
+        "",
+    );
+    fourslash::verify_quick_info_at(
+        &mut s,
+        "2",
+        "var c1: {\n    name: string;\n    age: number;\n}[]",
+        "",
+    );
+    fourslash::verify_quick_info_at(
+        &mut s,
+        "3",
+        "var c2: ({\n    name: string;\n    age: number;\n    address: string;\n} | {\n    name: string;\n    age: number;\n    dob: Date;\n})[]",
+        "",
+    );
+    fourslash::verify_quick_info_at(&mut s, "4", "var c3: I[]", "");
 }

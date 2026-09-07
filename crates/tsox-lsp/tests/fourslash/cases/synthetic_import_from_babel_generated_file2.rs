@@ -20,5 +20,10 @@ function f(t) {}
 import f from "./a"
 /**/f"#;
     let mut s = Session::new(content);
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "", "(alias) function f(t: string): void\nimport f", "Run this function")
+    fourslash::verify_quick_info_at(
+        &mut s,
+        "",
+        "(alias) function f(t: string): void\nimport f",
+        "Run this function",
+    );
 }

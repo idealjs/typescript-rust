@@ -16,5 +16,10 @@ function Person(age) {
 let x = new Person(100);
 x.canVote/**/;"#;
     let mut s = Session::new(content);
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "", "(property) Person.canVote: number | boolean", "")
+    fourslash::verify_quick_info_at(
+        &mut s,
+        "",
+        "(property) Person.canVote: number | boolean",
+        "",
+    );
 }

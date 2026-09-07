@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyNoErrors"]
+#[ignore = "unimplemented: fourslash.VerifySuggestionDiagnostics"]
 #[test]
 fn jsdoc_deprecated_suggestion8() {
     let content = r#"// @Filename: first.ts
@@ -12,6 +12,6 @@ import { tap } from './first';
 tap"#;
     let mut s = Session::new(content);
     fourslash::go_to_file(&mut s, "second.ts");
-    fourslash::unsupported("VerifyNoErrors"); // f.VerifyNoErrors(t)
+    fourslash::verify_no_errors(&mut s);
     fourslash::unsupported("VerifySuggestionDiagnostics"); // f.VerifySuggestionDiagnostics(t, nil)
 }

@@ -9,5 +9,10 @@ const optionals: ((a?: number) => unknown) & ((b?: string) => unknown) = (
   arg,
 ) =/**/> {};"#;
     let mut s = Session::new(content);
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "", "function(arg: string | number | undefined): void", "")
+    fourslash::verify_quick_info_at(
+        &mut s,
+        "",
+        "function(arg: string | number | undefined): void",
+        "",
+    );
 }

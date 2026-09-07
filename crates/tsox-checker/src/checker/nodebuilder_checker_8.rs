@@ -134,6 +134,8 @@ impl Checker {
                     format!("...{}", ty_str)
                 } else if elem.flags.contains(ElementFlags::Optional) {
                     format!("{}?", ty_str)
+                } else if let Some(label) = elem.label.clone() {
+                    format!("{label}: {ty_str}")
                 } else {
                     ty_str
                 }

@@ -18,7 +18,7 @@ function SortFilter(arr,valuator)
 var a/*1*/ = SortFilter([0, 1, 2], q/*2*/ => q);
 var b/*3*/ = SortFilter([0, 1, 2], undefined);"#;
     let mut s = Session::new(content);
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "1", "var a: number[]", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "2", "(parameter) q: number", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "3", "var b: number[]", "")
+    fourslash::verify_quick_info_at(&mut s, "1", "var a: number[]", "");
+    fourslash::verify_quick_info_at(&mut s, "2", "(parameter) q: number", "");
+    fourslash::verify_quick_info_at(&mut s, "3", "var b: number[]", "");
 }

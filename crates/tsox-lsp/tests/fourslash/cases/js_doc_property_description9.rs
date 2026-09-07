@@ -17,6 +17,6 @@ function literalClass(e: typeof LiteralClass) {
 }"#;
     let mut s = Session::new(content);
     fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "literal1Class", "(index) LiteralClass[`prefix${string}`]: any", "Something g
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "literal2Class", "any", "")
+    fourslash::verify_quick_info_at(&mut s, "literal2Class", "any", "");
     fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "literal3Class", "(index) LiteralClass[`prefix${string}` | `prefix${number}`]
 }

@@ -11,8 +11,8 @@ import f = /*foo*/foo;
 
 /*delete*/var x;"#;
     let mut s = Session::new(content);
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "foo", "namespace foo", "")
+    fourslash::verify_quick_info_at(&mut s, "foo", "namespace foo", "");
     fourslash::go_to_marker(&mut s, "delete");
     fourslash::unsupported("DeleteAtCaret"); // f.DeleteAtCaret(t, 6)
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "foo", "namespace foo", "")
+    fourslash::verify_quick_info_at(&mut s, "foo", "namespace foo", "");
 }

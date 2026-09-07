@@ -12,5 +12,5 @@ function other2<T extends Date>(arg: T) {
     var /*1*/r2 = foo(b); // just shows T
 }"#;
     let mut s = Session::new(content);
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "1", "(local var) r2: {\n    [x: string]: T;\n}", "")
+    fourslash::verify_quick_info_at(&mut s, "1", "(local var) r2: {\n    [x: string]: T;\n}", "");
 }

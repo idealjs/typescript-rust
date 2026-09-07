@@ -1,6 +1,5 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyQuickInfoAt"]
 #[test]
 fn hover_over_private_name() {
     let content = r#"class A {
@@ -18,12 +17,12 @@ fn hover_over_private_name() {
     }
 }"#;
     let mut s = Session::new(content);
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "1", "(property) A.#foo: number", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "2", "(property) A.#bar: number", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "3", "(property) A.#baz: () => string", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "4", "(method) A.#qux(n: number): string", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "5", "(property) A.#staticFoo: number", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "6", "(property) A.#staticBar: number", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "7", "(property) A.#staticBaz: () => string", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "8", "(method) A.#staticQux(n: number): string", "")
+    fourslash::verify_quick_info_at(&mut s, "1", "(property) A.#foo: number", "");
+    fourslash::verify_quick_info_at(&mut s, "2", "(property) A.#bar: number", "");
+    fourslash::verify_quick_info_at(&mut s, "3", "(property) A.#baz: () => string", "");
+    fourslash::verify_quick_info_at(&mut s, "4", "(method) A.#qux(n: number): string", "");
+    fourslash::verify_quick_info_at(&mut s, "5", "(property) A.#staticFoo: number", "");
+    fourslash::verify_quick_info_at(&mut s, "6", "(property) A.#staticBar: number", "");
+    fourslash::verify_quick_info_at(&mut s, "7", "(property) A.#staticBaz: () => string", "");
+    fourslash::verify_quick_info_at(&mut s, "8", "(method) A.#staticQux(n: number): string", "");
 }

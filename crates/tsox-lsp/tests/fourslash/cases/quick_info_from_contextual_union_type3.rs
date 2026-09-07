@@ -31,6 +31,16 @@ foo1({ bar: { /*1*/X: "test" } });
 
 foo2({ bar: { /*2*/X: "test" } });"#;
     let mut s = Session::new(content);
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "1", "(property) X: \"Error: bar should be boolean\"", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "2", "(property) X: \"Error: bar should be boolean\"", "")
+    fourslash::verify_quick_info_at(
+        &mut s,
+        "1",
+        "(property) X: \"Error: bar should be boolean\"",
+        "",
+    );
+    fourslash::verify_quick_info_at(
+        &mut s,
+        "2",
+        "(property) X: \"Error: bar should be boolean\"",
+        "",
+    );
 }

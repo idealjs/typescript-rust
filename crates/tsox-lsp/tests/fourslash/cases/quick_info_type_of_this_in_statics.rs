@@ -14,6 +14,6 @@ fn quick_info_type_of_this_in_statics() {
     }
 }"#;
     let mut s = Session::new(content);
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "1", "(local var) r: typeof C", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "2", "(local var) r: typeof C", "")
+    fourslash::verify_quick_info_at(&mut s, "1", "(local var) r: typeof C", "");
+    fourslash::verify_quick_info_at(&mut s, "2", "(local var) r: typeof C", "");
 }

@@ -18,8 +18,13 @@ var _: Combinators;
 
 var /*9*/r1a  = _.ma/*1c*/p(c2, (/*1a*/x,/*1b*/y) => { return x + "" });  // check quick info of map here"#;
     let mut s = Session::new(content);
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "1a", "(parameter) x: number", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "1b", "(parameter) y: string", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "1c", "(method) Combinators.map<number, string, string>(c: Collection<number,
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "9", "var r1a: Collection<number, string>", "")
+    fourslash::verify_quick_info_at(&mut s, "1a", "(parameter) x: number", "");
+    fourslash::verify_quick_info_at(&mut s, "1b", "(parameter) y: string", "");
+    fourslash::verify_quick_info_at(
+        &mut s,
+        "1c",
+        "(method) Combinators.map<number, string, string>(c: Collection<number, string>, f: (x: number, y: string) => string): Collection<number, string> (+1 overload)",
+        "",
+    );
+    fourslash::verify_quick_info_at(&mut s, "9", "var r1a: Collection<number, string>", "");
 }

@@ -9,5 +9,5 @@ fn quick_info_type_error() {
     f() {}
 });"#;
     let mut s = Session::new(content);
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "", "(method) f(): void", "")
+    fourslash::verify_quick_info_at(&mut s, "", "(method) f(): void", "");
 }

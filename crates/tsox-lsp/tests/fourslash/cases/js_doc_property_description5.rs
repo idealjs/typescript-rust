@@ -1,6 +1,5 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyQuickInfoAt"]
 #[test]
 fn js_doc_property_description5() {
     let content = r#"interface Multiple1Example {
@@ -11,5 +10,5 @@ function multiple1Example(e: Multiple1Example) {
     console.log(e./*multiple1*/anything);
 }"#;
     let mut s = Session::new(content);
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "multiple1", "any", "")
+    fourslash::verify_quick_info_at(&mut s, "multiple1", "any", "");
 }

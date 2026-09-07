@@ -14,6 +14,6 @@ class C {
     }
 }"#;
     let mut s = Session::new(content);
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "write", "(property) C.x: any", "Doc")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "read", "(property) C.x: number", "Doc")
+    fourslash::verify_quick_info_at(&mut s, "write", "(property) C.x: any", "Doc");
+    fourslash::verify_quick_info_at(&mut s, "read", "(property) C.x: number", "Doc");
 }

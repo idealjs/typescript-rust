@@ -16,5 +16,5 @@ Object.defineProperty(x, "foo", {
 
 x.foo/**/ = 1;"#;
     let mut s = Session::new(content);
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "", "(property) x.foo: number", "")
+    fourslash::verify_quick_info_at(&mut s, "", "(property) x.foo: number", "");
 }

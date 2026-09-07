@@ -10,6 +10,6 @@ function /*fn*/foo(/*x*/x) {}
 "#;
     let mut s = Session::new(content);
     fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "fn", "function foo(x: string): void", "\n\n*@param* `x` — trailing @")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "x", "(parameter) x: string", "trailing @")
+    fourslash::verify_quick_info_at(&mut s, "x", "(parameter) x: string", "trailing @");
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "at", &fourslash.CompletionsExpectedList{
 }

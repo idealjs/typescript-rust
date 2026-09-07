@@ -9,5 +9,5 @@ function f() {
    try { } catch (/**/e) { }
 }"#;
     let mut s = Session::new(content);
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "", "(local var) e: any", "")
+    fourslash::verify_quick_info_at(&mut s, "", "(local var) e: any", "");
 }

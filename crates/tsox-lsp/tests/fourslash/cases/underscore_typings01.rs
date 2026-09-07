@@ -30,17 +30,17 @@ var /*11*/dd = aa.map(/*12*/x => x.length);
 
 var e = a.map(x => x./*13*/"#;
     let mut s = Session::new(content);
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "1", "var b: number[]", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "2", "(parameter) x: string", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "3", "var c: number[]", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "4", "(parameter) x: string", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "5", "var d: number[]", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "6", "(parameter) x: string", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "7", "var bb: any[]", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "8", "(parameter) x: any", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "9", "var cc: any[]", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "10", "(parameter) x: any", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "11", "var dd: any[]", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "12", "(parameter) x: any", "")
+    fourslash::verify_quick_info_at(&mut s, "1", "var b: number[]", "");
+    fourslash::verify_quick_info_at(&mut s, "2", "(parameter) x: string", "");
+    fourslash::verify_quick_info_at(&mut s, "3", "var c: number[]", "");
+    fourslash::verify_quick_info_at(&mut s, "4", "(parameter) x: string", "");
+    fourslash::verify_quick_info_at(&mut s, "5", "var d: number[]", "");
+    fourslash::verify_quick_info_at(&mut s, "6", "(parameter) x: string", "");
+    fourslash::verify_quick_info_at(&mut s, "7", "var bb: any[]", "");
+    fourslash::verify_quick_info_at(&mut s, "8", "(parameter) x: any", "");
+    fourslash::verify_quick_info_at(&mut s, "9", "var cc: any[]", "");
+    fourslash::verify_quick_info_at(&mut s, "10", "(parameter) x: any", "");
+    fourslash::verify_quick_info_at(&mut s, "11", "var dd: any[]", "");
+    fourslash::verify_quick_info_at(&mut s, "12", "(parameter) x: any", "");
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "13", &fourslash.CompletionsExpectedList{
 }

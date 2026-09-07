@@ -14,8 +14,8 @@ o2./*2*/"#;
     let mut s = Session::new(content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
     fourslash::insert(&mut s, "__proto__ = 10;");
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "1", "(property) \"__proto__\": number", "")
+    fourslash::verify_quick_info_at(&mut s, "1", "(property) \"__proto__\": number", "");
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "2", &fourslash.CompletionsExpectedList{
     fourslash::insert(&mut s, "__proto__ = 10;");
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "2", "(property) __proto__: number", "")
+    fourslash::verify_quick_info_at(&mut s, "2", "(property) __proto__: number", "");
 }

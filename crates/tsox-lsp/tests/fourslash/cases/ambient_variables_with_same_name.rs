@@ -10,5 +10,5 @@ declare var x: number;"#;
     let mut s = Session::new(content);
     fourslash::unsupported("GoToEOF"); // f.GoToEOF(t)
     fourslash::unsupported("InsertLine"); // f.InsertLine(t, "")
-    fourslash::unsupported("VerifyNoErrors"); // f.VerifyNoErrors(t)
+    fourslash::verify_no_errors(&mut s);
 }

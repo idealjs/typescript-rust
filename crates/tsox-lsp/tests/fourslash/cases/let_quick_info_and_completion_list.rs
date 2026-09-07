@@ -14,9 +14,9 @@ function foo() {
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "2", &fourslash.CompletionsExpectedList{
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "4", &fourslash.CompletionsExpectedList{
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "5", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "1", "let a: number", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "2", "let a: number", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "3", "let b: number", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "4", "let b: number", "")
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "5", "let a: number", "")
+    fourslash::verify_quick_info_at(&mut s, "1", "let a: number", "");
+    fourslash::verify_quick_info_at(&mut s, "2", "let a: number", "");
+    fourslash::verify_quick_info_at(&mut s, "3", "let b: number", "");
+    fourslash::verify_quick_info_at(&mut s, "4", "let b: number", "");
+    fourslash::verify_quick_info_at(&mut s, "5", "let a: number", "");
 }

@@ -12,5 +12,10 @@ interface Serializer {
 declare let box: Serializer;
 box['value'/*1*/] += 10;"#;
     let mut s = Session::new(content);
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "1", "(property) Serializer.value: string | number", "")
+    fourslash::verify_quick_info_at(
+        &mut s,
+        "1",
+        "(property) Serializer.value: string | number",
+        "",
+    );
 }

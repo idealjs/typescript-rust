@@ -1,11 +1,10 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyQuickInfoAt"]
 #[test]
 fn quick_info_ambient_module() {
     let content = r#"declare module "*.css"/*1*/;"#;
     let mut s = Session::new(content);
-    fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "1", `module "*.css"`, "")
+    fourslash::verify_quick_info_at(&mut s, "1", r#"module "*.css""#, "");
 }
 
 #[ignore = "unimplemented: fourslash.VerifyBaselineHoverWithVerbosity"]

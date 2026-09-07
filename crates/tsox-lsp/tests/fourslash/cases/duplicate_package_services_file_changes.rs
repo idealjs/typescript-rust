@@ -28,7 +28,7 @@ import { b } from "b";
 a(/*error*/b);"#;
     let mut s = Session::new(content);
     fourslash::go_to_file(&mut s, "/src/a.ts");
-    fourslash::unsupported("VerifyNumberOfErrorsInCurrentFile"); // f.VerifyNumberOfErrorsInCurrentFile(t, 0)
+    fourslash::verify_number_of_errors_in_current_file(&mut s, 0);
     // TODO: testChangeAndChangeBack := func(versionPatch string, def string) {
     // TODO: testChangeAndChangeBack("aVersionPatch", "defAX")
     // TODO: testChangeAndChangeBack("bVersionPatch", "defBX")
