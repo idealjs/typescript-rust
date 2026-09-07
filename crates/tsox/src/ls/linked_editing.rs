@@ -13,7 +13,6 @@ use super::types::{LinkedEditingRangeParams, LinkedEditingRanges};
 pub const JSX_TAG_WORD_PATTERN: &str = "[a-zA-Z0-9:\\-\\._$]*";
 
 impl LanguageService {
-
     pub fn provide_linked_editing_range(
         &self,
         params: &LinkedEditingRangeParams,
@@ -40,7 +39,6 @@ impl LanguageService {
 }
 
 fn find_jsx_linked_ranges(node: &Arc<Node>, line_map: &LineMap) -> Vec<Range> {
-
     let tag_node = find_jsx_tag_ancestor(node);
 
     let tag_node = match tag_node {
@@ -50,7 +48,6 @@ fn find_jsx_linked_ranges(node: &Arc<Node>, line_map: &LineMap) -> Vec<Range> {
 
     match tag_node.kind {
         SyntaxKind::JsxOpeningElement => {
-
             let opening_range = jsx_tag_name_range(&tag_node, line_map);
 
             let closing_range = tag_node.parent.as_ref().and_then(|parent| {
@@ -67,7 +64,6 @@ fn find_jsx_linked_ranges(node: &Arc<Node>, line_map: &LineMap) -> Vec<Range> {
             }
         }
         SyntaxKind::JsxClosingElement => {
-
             let closing_range = jsx_tag_name_range(&tag_node, line_map);
 
             let opening_range = tag_node.parent.as_ref().and_then(|parent| {
@@ -83,13 +79,10 @@ fn find_jsx_linked_ranges(node: &Arc<Node>, line_map: &LineMap) -> Vec<Range> {
                 _ => Vec::new(),
             }
         }
-        SyntaxKind::JsxSelfClosingElement => {
-
-            match jsx_tag_name_range(&tag_node, line_map) {
-                Some(r) => vec![r],
-                None => Vec::new(),
-            }
-        }
+        SyntaxKind::JsxSelfClosingElement => match jsx_tag_name_range(&tag_node, line_map) {
+            Some(r) => vec![r],
+            None => Vec::new(),
+        },
         _ => Vec::new(),
     }
 }

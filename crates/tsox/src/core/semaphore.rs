@@ -1,7 +1,6 @@
 use std::sync::{Condvar, Mutex};
 
 pub trait Semaphore: Send + Sync {
-
     fn acquire(&self) -> SemaphoreGuard<'_>;
 }
 
@@ -62,7 +61,6 @@ impl Semaphore for LimitedSemaphore {
         }
         guard.available -= 1;
         SemaphoreGuard::new(move || {
-
             let this = unsafe { &*(self as *const Self) };
             let mut guard = this.inner.lock().unwrap();
             guard.available += 1;
@@ -72,22 +70,4 @@ impl Semaphore for LimitedSemaphore {
 }
 
 #[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn unlimited() {
-        let s = UnlimitedSemaphore;
-        let _g = s.acquire();
-    }
-
-    #[test]
-    fn limited() {
-        let s = LimitedSemaphore::new(2);
-        let g1 = s.acquire();
-        let g2 = s.acquire();
-        drop(g1);
-        drop(g2);
-        let _g3 = s.acquire();
-    }
-}
+mod tests;

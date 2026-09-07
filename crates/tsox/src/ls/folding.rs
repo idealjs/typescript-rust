@@ -15,7 +15,6 @@ pub struct RegionDelimiterResult {
 }
 
 impl LanguageService {
-
     pub fn provide_folding_range(&self, document_uri: &DocumentUri) -> Vec<FoldingRange> {
         let (_program, source_file) = self.get_program_and_file(document_uri);
         let mut res = add_node_outlining_spans(&source_file);

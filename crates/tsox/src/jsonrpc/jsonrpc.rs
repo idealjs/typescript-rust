@@ -36,7 +36,6 @@ pub enum Id {
 }
 
 impl Id {
-
     pub fn new_string(s: &str) -> Self {
         Id::Str(s.to_string())
     }
@@ -145,7 +144,6 @@ pub struct Message {
 }
 
 impl Message {
-
     pub fn kind(&self) -> MessageKind {
         if self.id.is_some() && self.method.is_empty() {
             MessageKind::Response

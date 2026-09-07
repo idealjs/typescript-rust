@@ -5,7 +5,6 @@ pub struct Reader<R: Read> {
 }
 
 impl<R: Read> Reader<R> {
-
     pub fn new(r: R) -> Self {
         Reader {
             r: BufReader::new(r),
@@ -76,7 +75,6 @@ pub struct Writer<W: Write> {
 }
 
 impl<W: Write> Writer<W> {
-
     pub fn new(w: W) -> Self {
         Writer { w }
     }

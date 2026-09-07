@@ -1,17 +1,8 @@
 use std::sync::Arc;
 
-use crate::ast::{
-    Node, Symbol, SymbolFlags, SyntaxKind,
-};
-
-
-
-
-
-
+use crate::ast::{Node, Symbol, SymbolFlags, SyntaxKind};
 
 use super::*;
-
 
 impl Checker {
     fn op_display(kind: crate::ast::SyntaxKind) -> &'static str {
@@ -45,10 +36,7 @@ impl Checker {
         }
     }
 
-    fn nonvariable_assignment_target_type(
-        &mut self,
-        operand: &Arc<Node>,
-    ) -> Option<Arc<Type>> {
+    fn nonvariable_assignment_target_type(&mut self, operand: &Arc<Node>) -> Option<Arc<Type>> {
         if operand.kind != SyntaxKind::Identifier {
             return None;
         }
@@ -102,7 +90,11 @@ impl Checker {
         }
         for operand in [&data.left, &data.right] {
             if matches!(operand.kind, NullKeyword | UndefinedKeyword) {
-                let word = if operand.kind == NullKeyword { "null" } else { "undefined" };
+                let word = if operand.kind == NullKeyword {
+                    "null"
+                } else {
+                    "undefined"
+                };
                 let file = self.current_file.clone();
                 self.diagnostics.add(crate::ast::Diagnostic::new(
                     file,
@@ -120,8 +112,10 @@ impl Checker {
             .nonvariable_assignment_target_type(&data.left)
             .unwrap_or_else(|| self.get_type_of_node(&data.left));
         let rt = self.get_type_of_node(&data.right);
-        let boolean_like =
-            |t: &Arc<Type>| t.flags.intersects(TypeFlags::Boolean | TypeFlags::BooleanLiteral);
+        let boolean_like = |t: &Arc<Type>| {
+            t.flags
+                .intersects(TypeFlags::Boolean | TypeFlags::BooleanLiteral)
+        };
         if boolean_like(&lt) && boolean_like(&rt) {
             let suggested = match op {
                 AmpersandToken | AmpersandEqualsToken => Some("&&"),
@@ -194,11 +188,7 @@ impl Checker {
             .unwrap_or_else(|| self.get_type_of_node(&data.left));
         let rt = self.get_type_of_node(&data.right);
         let number_like = |t: &Arc<Type>| {
-
-            (!self.strict_null_checks
-                && t.flags.intersects(
-                    TypeFlags::Undefined | TypeFlags::Null,
-                ))
+            (!self.strict_null_checks && t.flags.intersects(TypeFlags::Undefined | TypeFlags::Null))
                 || t.flags.contains(TypeFlags::Never)
                 || t.flags.intersects(
                     TypeFlags::Number
@@ -208,12 +198,13 @@ impl Checker {
                 )
         };
         let bigint_like = |t: &Arc<Type>| {
-            t.flags.intersects(
-                TypeFlags::BigInt | TypeFlags::BigIntLiteral | TypeFlags::Union,
-            )
+            t.flags
+                .intersects(TypeFlags::BigInt | TypeFlags::BigIntLiteral | TypeFlags::Union)
         };
-        let string_like =
-            |t: &Arc<Type>| t.flags.intersects(TypeFlags::String | TypeFlags::StringLiteral);
+        let string_like = |t: &Arc<Type>| {
+            t.flags
+                .intersects(TypeFlags::String | TypeFlags::StringLiteral)
+        };
         let valid = (number_like(&lt) && number_like(&rt))
             || (bigint_like(&lt) && bigint_like(&rt))
             || string_like(&lt)
@@ -246,7 +237,6 @@ impl Checker {
         let left_type = self.assignment_target_type(target)?;
         let frame = match operator {
             QuestionQuestionEqualsToken => {
-
                 let parts: Vec<Arc<Type>> = self
                     .flow_constituents_public(&left_type)
                     .into_iter()
@@ -259,7 +249,6 @@ impl Checker {
                 }
             }
             BarBarEqualsToken => {
-
                 let parts: Vec<Arc<Type>> = self
                     .flow_constituents_public(&left_type)
                     .into_iter()
@@ -272,7 +261,6 @@ impl Checker {
                 }
             }
             AmpersandAmpersandEqualsToken => {
-
                 let parts: Vec<Arc<Type>> = self
                     .flow_constituents_public(&left_type)
                     .into_iter()

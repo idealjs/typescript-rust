@@ -179,7 +179,6 @@ pub fn get_symbol_kind(
     _symbol: &Symbol,
     _location: &Arc<Node>,
 ) -> ScriptElementKind {
-
     ScriptElementKind::Unknown
 }
 
@@ -187,6 +186,5 @@ pub fn get_symbol_modifiers(
     _type_checker: Option<&Checker>,
     _symbol: Option<&Symbol>,
 ) -> ScriptElementKindModifier {
-
     ScriptElementKindModifier::NONE
 }

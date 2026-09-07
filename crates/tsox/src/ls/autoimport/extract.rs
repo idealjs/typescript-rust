@@ -33,7 +33,6 @@ pub struct ExportExtractor {
 }
 
 impl ExportExtractor {
-
     pub fn stats(&self) -> &ExtractorStats {
         &self.symbol_extractor.stats
     }
@@ -78,9 +77,7 @@ pub fn new_symbol_extractor(
 }
 
 impl SymbolExtractor {
-
     pub fn get_module_id(&self, file: &SourceFile) -> ModuleID {
-
         if let (Some(realpath_fn), Some(to_path_fn)) = (&self.realpath, &self.to_path) {
             let rp = realpath_fn(&file.file_name);
             return to_path_fn(&rp).0;
@@ -95,7 +92,6 @@ impl SymbolExtractor {
 }
 
 impl ExportExtractor {
-
     pub fn extract_from_file(&self, _file: &SourceFile) -> Vec<Export> {
         todo!("extract_from_file requires ast.Symbol, file.Symbol.Exports iteration")
     }
@@ -117,7 +113,6 @@ impl ExportExtractor {
 }
 
 impl SymbolExtractor {
-
     pub fn extract_from_symbol(
         &self,
         _name: &str,
@@ -164,7 +159,6 @@ pub fn file_name_for_default_export_name(
     module_file_name: &str,
     module_id: &ModuleID,
 ) -> String {
-
     if !module_file_name.is_empty() {
         module_file_name.to_string()
     } else {

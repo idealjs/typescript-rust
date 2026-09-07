@@ -13,7 +13,6 @@ use super::export::ModuleID;
 pub fn try_get_module_id_and_file_name_of_module_symbol(
     _symbol: &Symbol,
 ) -> Option<(ModuleID, String)> {
-
     todo!("try_get_module_id_and_file_name_of_module_symbol requires ast helpers")
 }
 
@@ -87,7 +86,6 @@ pub fn create_checker_pool(
 }
 
 pub fn add_package_json_dependencies(_deps: &mut Set<String>) {
-
     todo!("addPackageJsonDependencies requires packagejson.Contents.RangeDependencies")
 }
 
@@ -108,7 +106,6 @@ pub fn get_package_realpath_funcs(
         let real_package_dir = real_package_dir.clone();
         let package_dir = package_dir.to_string();
         Box::new(move |file_name: &str| {
-
             if is_symlinked {
                 if let Some(after) = file_name.strip_prefix(&package_dir) {
                     return format!("{}{}", real_package_dir, after);

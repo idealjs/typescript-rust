@@ -137,7 +137,6 @@ impl NonLocalDefinition {
 }
 
 impl LanguageService {
-
     pub fn provide_references(
         &self,
         document_uri: &DocumentUri,
@@ -168,7 +167,6 @@ impl LanguageService {
         references
             .iter()
             .filter(|ref_node| {
-
                 if !include_declaration && declaration_ids.contains(&ref_node.id()) {
                     return false;
                 }
@@ -187,7 +185,6 @@ impl LanguageService {
         _position: Position,
         _orchestrator: Option<&dyn CrossProjectOrchestrator>,
     ) -> Vec<Location> {
-
         Vec::new()
     }
 
@@ -198,12 +195,10 @@ impl LanguageService {
         _is_rename: bool,
         _implementations: bool,
     ) -> Option<SymbolAndEntriesData> {
-
         None
     }
 
     pub fn get_range_of_entry(&self, _entry: &ReferenceEntry) -> Range {
-
         Range::default()
     }
 
@@ -224,7 +219,6 @@ pub fn get_referenced_symbols_for_node(
     _source_files: &[Arc<SourceFile>],
     _options: RefOptions,
 ) -> Vec<SymbolAndEntries> {
-
     Vec::new()
 }
 

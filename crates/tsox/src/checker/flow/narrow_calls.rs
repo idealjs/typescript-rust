@@ -5,7 +5,6 @@ use crate::ast::{Node, NodeData, SyntaxKind};
 use crate::checker::checker::Checker;
 use crate::checker::types::*;
 
-
 use super::FlowRef;
 
 use super::NarrowKind;
@@ -32,7 +31,6 @@ impl Checker {
             if predicate.kind != TypePredicateKind::Identifier
                 && predicate.kind != TypePredicateKind::AssertsIdentifier
             {
-
                 if predicate.kind == TypePredicateKind::This
                     && let Some(pred_type) = &predicate.t
                 {
@@ -56,11 +54,8 @@ impl Checker {
                     let instantiated = if sig.type_parameters.is_empty() {
                         Arc::clone(pred_type)
                     } else {
-                        let args: Vec<Arc<Type>> = sig
-                            .type_parameters
-                            .iter()
-                            .map(|_| Arc::clone(&u))
-                            .collect();
+                        let args: Vec<Arc<Type>> =
+                            sig.type_parameters.iter().map(|_| Arc::clone(&u)).collect();
                         self.substitute_infer_type_parameters(
                             pred_type,
                             &sig.type_parameters,
@@ -132,16 +127,12 @@ impl Checker {
             };
 
             if !self.expr_matches_target(arg, target) {
-
-                if let Some(narrowed) =
-                    self.narrow_by_asserted_comparison(type_, arg, target)
-                {
+                if let Some(narrowed) = self.narrow_by_asserted_comparison(type_, arg, target) {
                     return narrowed;
                 }
                 continue;
             }
             if let Some(pred_type) = &predicate.t {
-
                 return self.intersect_or_narrow(type_, pred_type);
             }
 
@@ -161,8 +152,10 @@ impl Checker {
         };
         use crate::ast::SyntaxKind::*;
         let (cmp, target_side, literal_side) = match bin.operator_token.kind {
-            ExclamationEqualsEqualsToken | ExclamationEqualsToken
-            | EqualsEqualsEqualsToken | EqualsEqualsToken => {
+            ExclamationEqualsEqualsToken
+            | ExclamationEqualsToken
+            | EqualsEqualsEqualsToken
+            | EqualsEqualsToken => {
                 let l_matches = self.expr_matches_target(&bin.left, target);
                 let r_matches = self.expr_matches_target(&bin.right, target);
                 if l_matches {
@@ -191,14 +184,12 @@ impl Checker {
         pred_type: &Arc<Type>,
         assume_true: bool,
     ) -> Arc<Type> {
-
         if type_.flags.contains(TypeFlags::Any) {
             return Arc::clone(type_);
         }
         if assume_true {
             self.intersect_or_narrow(type_, pred_type)
         } else {
-
             let constituents = self.constituent_types(type_);
             let remaining: Vec<Arc<Type>> = constituents
                 .into_iter()
@@ -245,11 +236,9 @@ impl Checker {
             "symbol" => TYPE_FLAGS_ES_SYMBOL_LIKE,
             "undefined" => TypeFlags::Undefined,
             "function" => {
-
                 return self.filter_type_by_callable(type_, narrow_to_value);
             }
             "object" => {
-
                 if narrow_to_value {
                     return self.filter_type_by_object(type_, is_loose);
                 }
@@ -267,7 +256,6 @@ impl Checker {
     pub(crate) fn narrow_by_truthiness(&self, type_: &Arc<Type>, kind: NarrowKind) -> Arc<Type> {
         match kind {
             NarrowKind::TrueBranch => {
-
                 let falsy_flags = TypeFlags::Undefined
                     | TypeFlags::Null
                     | TypeFlags::Void
@@ -276,10 +264,7 @@ impl Checker {
                     | TypeFlags::NumberLiteral;
                 self.remove_falsy_from_union(type_, falsy_flags)
             }
-            NarrowKind::FalseBranch => {
-
-                self.filter_to_falsy(type_)
-            }
+            NarrowKind::FalseBranch => self.filter_to_falsy(type_),
         }
     }
 
@@ -291,7 +276,6 @@ impl Checker {
         kind: NarrowKind,
         _depth: u32,
     ) -> Arc<Type> {
-
         if self.expr_matches_target(expr, target) {
             return match kind {
                 NarrowKind::TrueBranch => self.remove_nullable_from_union(type_),

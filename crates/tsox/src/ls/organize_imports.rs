@@ -12,7 +12,6 @@ use crate::scanner;
 use super::language_service::LanguageService;
 
 impl LanguageService {
-
     pub fn organize_imports(
         &self,
         source_file: &Arc<SourceFile>,
@@ -53,7 +52,6 @@ impl LanguageService {
         }
 
         import_infos.sort_by(|a, b| {
-
             match (a.is_used, b.is_used) {
                 (false, true) => return std::cmp::Ordering::Less,
                 (true, false) => return std::cmp::Ordering::Greater,
@@ -119,7 +117,6 @@ fn get_module_specifier(node: &Arc<Node>) -> String {
 
 fn is_type_only_import(node: &Arc<Node>) -> bool {
     if let NodeData::ImportDeclaration(data) = &node.data {
-
         if let Some(ref clause) = data.import_clause {
             if let NodeData::ImportClause(ic) = &clause.data {
                 return ic.phase_modifier == Some(SyntaxKind::TypeKeyword);
@@ -157,7 +154,6 @@ fn collect_imported_identifiers(clause: &Arc<Node>) -> Vec<Arc<Node>> {
     let mut result = Vec::new();
     match &clause.data {
         NodeData::ImportClause(data) => {
-
             if let Some(ref name) = data.name {
                 result.push(Arc::clone(name));
             }

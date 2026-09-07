@@ -14,22 +14,18 @@ pub struct VsOnAutoInsertResponseItem {
 }
 
 impl LanguageService {
-
     pub fn provide_on_auto_insert(
         &self,
         _params: &VsOnAutoInsertParams,
     ) -> Option<VsOnAutoInsertResponseItem> {
-
         None
     }
 }
 
 pub fn is_unclosed_tag(_element: &Arc<Node>) -> bool {
-
     false
 }
 
 pub fn is_unclosed_fragment(_fragment: &Arc<Node>) -> bool {
-
     false
 }

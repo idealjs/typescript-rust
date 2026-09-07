@@ -35,7 +35,6 @@ pub enum Invocation {
 }
 
 impl LanguageService {
-
     pub fn provide_signature_help(
         &self,
         document_uri: &DocumentUri,
@@ -54,7 +53,6 @@ impl LanguageService {
         source_file: &Arc<SourceFile>,
         _context: &SignatureHelpContext,
     ) -> Option<SignatureHelp> {
-
         let node = find_deepest_node(&source_file.node, position);
 
         let (call_node, argument_index) = find_enclosing_call_and_argument_index(&node, position)?;

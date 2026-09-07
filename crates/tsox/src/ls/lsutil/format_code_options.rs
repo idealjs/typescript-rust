@@ -11,7 +11,6 @@ pub enum IndentStyle {
 }
 
 impl IndentStyle {
-
     pub fn parse(value: &serde_json::Value) -> IndentStyle {
         match value {
             serde_json::Value::String(s) => match s.to_ascii_lowercase().as_str() {
@@ -109,7 +108,6 @@ pub struct FormatCodeSettings {
 }
 
 impl FormatCodeSettings {
-
     pub fn editor_settings(&self) -> EditorSettings {
         EditorSettings {
             base_indent_size: self.base_indent_size,

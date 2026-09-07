@@ -13,13 +13,11 @@ pub enum ResultKind {
 }
 
 impl View {
-
     pub fn get_module_specifier(
         &self,
         _export: &Export,
         _user_preferences: &modulespecifiers::UserPreferences,
     ) -> (String, ResultKind) {
-
         todo!(
             "get_module_specifier requires registry entrypoints and modulespecifiers infrastructure"
         )

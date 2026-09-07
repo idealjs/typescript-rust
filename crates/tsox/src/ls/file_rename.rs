@@ -14,18 +14,15 @@ pub struct ToImport {
 }
 
 impl LanguageService {
-
     pub fn get_edits_for_file_rename(
         &self,
         _old_uri: &DocumentUri,
         _new_uri: &DocumentUri,
     ) -> Vec<RenameFile> {
-
         Vec::new()
     }
 
     pub fn create_path_updater(&self, _old_path: &str, _new_path: &str) -> PathUpdater {
-
         Box::new(|path: &str| (path.to_string(), false))
     }
 
@@ -36,10 +33,7 @@ impl LanguageService {
         _old_path: &str,
         _new_path: &str,
     ) {
-
     }
 
-    pub fn update_imports_for_file_rename(&self, _program: &Program, _old_to_new: &PathUpdater) {
-
-    }
+    pub fn update_imports_for_file_rename(&self, _program: &Program, _old_to_new: &PathUpdater) {}
 }

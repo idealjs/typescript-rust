@@ -5,7 +5,6 @@ use crate::ast::{Node, NodeData, SyntaxKind, is_binding_pattern, is_identifier};
 use super::checker::Checker;
 
 impl Checker {
-
     pub fn check_unmatched_jsdoc_parameters(&mut self, node: &Arc<Node>) {
         let jsdoc_parameters = self.get_all_jsdoc_parameter_tags(node);
         if jsdoc_parameters.is_empty() {
@@ -44,7 +43,6 @@ impl Checker {
         }
 
         if self.contains_arguments_reference(node) {
-
             if is_js {
                 let last_idx = jsdoc_parameters.len() - 1;
                 let last_tag = &jsdoc_parameters[last_idx];
@@ -88,7 +86,6 @@ impl Checker {
                 }
                 if name.kind == SyntaxKind::QualifiedName {
                     if is_js {
-
                         let full = name.text().to_string();
                         let left = match &name.data {
                             NodeData::QualifiedName(d) => d.left.text().to_string(),
@@ -101,7 +98,6 @@ impl Checker {
                         );
                     }
                 } else if !is_name_first {
-
                     self.grammar_error_on_node_with_args(
                         name,
                         &crate::diagnostics::messages_generated::JSDOC_PARAM_TAG_HAS_NAME_0_BUT_THERE_IS_NO_PARAMETER_WITH_THAT_NAME,
@@ -113,7 +109,6 @@ impl Checker {
     }
 
     fn get_all_jsdoc_parameter_tags(&self, _node: &Arc<Node>) -> Vec<Arc<Node>> {
-
         Vec::new()
     }
 
@@ -147,7 +142,6 @@ impl Checker {
             | SyntaxKind::GetAccessor
             | SyntaxKind::SetAccessor
             | SyntaxKind::ClassStaticBlockDeclaration => {
-
                 return;
             }
             _ => {}

@@ -5,7 +5,6 @@ use super::session::Session;
 use super::snapshot::{APISnapshotRequest, Snapshot};
 
 impl Session {
-
     pub fn api_update(
         &self,
         _api_file_changes: &FileChangeSummary,

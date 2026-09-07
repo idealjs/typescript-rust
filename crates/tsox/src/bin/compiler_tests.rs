@@ -31,7 +31,6 @@ const SKIPPED_TESTS: &[&str] = &[
     "parserS7.2_A1.5_T2.ts",
     "scannerS7.2_A1.5_T2.ts",
     "ifDoWhileStatements.ts",
-
     "controlFlowGraphStress01.ts",
 ];
 
@@ -45,11 +44,9 @@ fn compile_test_case(content: &TestCaseContent) -> CompilationOutput {
     let mut file_names: Vec<String> = Vec::new();
     let mut input_files: Vec<(String, String)> = Vec::new();
     for unit in &content.units {
-
         let abs_path = if unit.name.starts_with('/') {
             unit.name.clone()
         } else {
-
             let basename = Path::new(&unit.name)
                 .file_name()
                 .map(|f| f.to_string_lossy().to_string())
@@ -207,7 +204,6 @@ fn format_error_baseline(output: &CompilationOutput) -> String {
         }
 
         for (line_idx, line) in lines.iter().enumerate() {
-
             let line = line.strip_suffix('\r').unwrap_or(line);
 
             let this_line_start = *line_starts.get(line_idx).unwrap_or(&0);
@@ -476,7 +472,6 @@ fn process_batch(
             continue;
         }
         let clean_name = if is_submodule {
-
             let components: Vec<&str> = rel_path.split('/').collect();
             let n = components.len();
             if n >= 2 {
@@ -509,7 +504,6 @@ fn process_batch(
                 let error_baseline = format_error_baseline(&output);
 
                 if let Some(ref_dir) = ts_ref_dir {
-
                     let ts_name = basename
                         .strip_suffix(".ts")
                         .or_else(|| basename.strip_suffix(".tsx"))
@@ -525,7 +519,6 @@ fn process_batch(
                     };
 
                     if expected.is_empty() && actual == baseline::NO_CONTENT {
-
                         pass += 1;
                     } else if expected.trim_end() == actual.trim_end() {
                         pass += 1;
@@ -663,7 +656,6 @@ fn run_compiler_baselines(
 
         match result {
             Ok(Some(status)) => {
-
                 let output = child.wait_with_output();
                 if let Ok(out) = output {
                     let stdout = String::from_utf8_lossy(&out.stdout);
@@ -693,12 +685,9 @@ fn run_compiler_baselines(
                     }
                 }
 
-                if !status.success() && status.code() != Some(134) {
-
-                }
+                if !status.success() && status.code() != Some(134) {}
             }
             Ok(None) => {
-
                 let _ = child.kill();
                 let _ = child.wait();
                 let _elapsed = start.elapsed().as_secs();
@@ -750,7 +739,6 @@ fn run_compiler_baselines(
 }
 
 fn main() {
-
     let handle = std::thread::Builder::new()
         .stack_size(256 * 1024 * 1024)
         .spawn(main_inner)
@@ -925,7 +913,6 @@ impl ChildWaitTimeout for std::process::Child {
         &mut self,
         duration: Duration,
     ) -> std::io::Result<Option<std::process::ExitStatus>> {
-
         let start = Instant::now();
         loop {
             match self.try_wait()? {

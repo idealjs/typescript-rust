@@ -19,12 +19,10 @@ pub fn isolated_declarations_fix_provider() -> CodeFixProvider {
 }
 
 impl LanguageService {
-
     pub fn get_isolated_declarations_code_actions(
         &self,
         _context: &CodeFixContext,
     ) -> Vec<CodeAction> {
-
         Vec::new()
     }
 
@@ -32,7 +30,6 @@ impl LanguageService {
         &self,
         _context: &CodeFixContext,
     ) -> super::code_actions::CombinedCodeActions {
-
         super::code_actions::CombinedCodeActions {
             description: String::new(),
             changes: Vec::new(),
@@ -57,6 +54,5 @@ pub fn can_have_type_annotation(_node: &Arc<Node>) -> bool {
 }
 
 pub fn get_class(_file: &Arc<crate::ast::SourceFile>, _span: TextRange) -> Option<Arc<Node>> {
-
     None
 }

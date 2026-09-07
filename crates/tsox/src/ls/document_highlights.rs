@@ -12,7 +12,6 @@ use super::language_service::LanguageService;
 use super::types::{DocumentHighlight, DocumentHighlightKind, MultiDocumentHighlight};
 
 impl LanguageService {
-
     pub fn provide_document_highlights(
         &self,
         document_uri: &DocumentUri,
@@ -50,7 +49,6 @@ impl LanguageService {
         document_position: Position,
         files_to_search: &[DocumentUri],
     ) -> Vec<MultiDocumentHighlight> {
-
         let highlights = self.provide_document_highlights(document_uri, document_position.clone());
         let primary = MultiDocumentHighlight {
             uri: DocumentUri(document_uri.0.clone()),
@@ -117,7 +115,6 @@ impl LanguageService {
         node: &Arc<Node>,
         source_file: &Arc<SourceFile>,
     ) -> Vec<DocumentHighlight> {
-
         let text = node.text();
         if text.is_empty() {
             return Vec::new();

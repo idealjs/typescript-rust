@@ -22,13 +22,11 @@ pub struct CallHierarchyOutgoingCall {
 }
 
 impl LanguageService {
-
     pub fn prepare_call_hierarchy(
         &self,
         _document_uri: &DocumentUri,
         _position: Position,
     ) -> Vec<CallHierarchyDeclaration> {
-
         Vec::new()
     }
 
@@ -37,7 +35,6 @@ impl LanguageService {
         _document_uri: &DocumentUri,
         _position: Position,
     ) -> Vec<CallHierarchyIncomingCall> {
-
         Vec::new()
     }
 
@@ -46,22 +43,18 @@ impl LanguageService {
         _document_uri: &DocumentUri,
         _position: Position,
     ) -> Vec<CallHierarchyOutgoingCall> {
-
         Vec::new()
     }
 }
 
 pub fn is_named_expression(_node: &Arc<Node>) -> bool {
-
     false
 }
 
 pub fn is_variable_like(_node: &Arc<Node>) -> bool {
-
     false
 }
 
 pub fn is_possible_call_hierarchy_declaration(_node: &Arc<Node>) -> bool {
-
     false
 }

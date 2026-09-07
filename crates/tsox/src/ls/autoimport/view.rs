@@ -55,7 +55,6 @@ pub struct FixAndExport {
 }
 
 impl View {
-
     pub fn new(
         _registry: Arc<Registry>,
         _importing_file: Arc<SourceFile>,
@@ -63,7 +62,6 @@ impl View {
         _program: Arc<Program>,
         _preferences: modulespecifiers::UserPreferences,
     ) -> View {
-
         todo!("View::new requires program and module infrastructure")
     }
 
@@ -117,7 +115,6 @@ impl View {
     }
 
     fn compute_should_use_require(&self) -> bool {
-
         todo!("View::compute_should_use_require requires program infrastructure")
     }
 }

@@ -108,7 +108,6 @@ fn from_map(files: &[(&str, &str)], case_sensitive: bool) -> InMemoryFS {
 
 #[test]
 fn test_insensitive() {
-
     let contents = "bar";
     let fs = from_map(
         &[
@@ -132,7 +131,6 @@ fn test_insensitive() {
 
 #[test]
 fn test_insensitive_upper() {
-
     let contents = "bar";
     let fs = from_map(
         &[
@@ -176,13 +174,11 @@ fn test_sensitive() {
 #[test]
 #[should_panic(expected = "duplicate path")]
 fn test_sensitive_duplicate_path() {
-
     let _fs = from_map(&[("/foo", "bar"), ("/Foo", "baz")], false);
 }
 
 #[test]
 fn test_insensitive_duplicate_path() {
-
     let fs = from_map(&[("/foo", "bar"), ("/Foo", "baz")], true);
     assert_eq!(fs.read_file("/foo"), Some("bar".to_string()));
     assert_eq!(fs.read_file("/Foo"), Some("baz".to_string()));
@@ -207,7 +203,6 @@ fn test_writable_fs() {
 
 #[test]
 fn test_writable_fs_write_under_file() {
-
     let fs = InMemoryFS::with_case_sensitivity(false);
     fs.write_file("/foo/bar/baz", "hello, world").unwrap();
 
@@ -238,7 +233,6 @@ fn test_writable_fs_delete() {
 
 #[test]
 fn test_writable_fs_delete_directory_recursive() {
-
     let fs = InMemoryFS::with_case_sensitivity(false);
     fs.write_file("/foo/bar/test/remove2.ts", "remove2")
         .unwrap();
@@ -293,7 +287,6 @@ fn test_stress() {
 #[test]
 #[should_panic(expected = "not a directory")]
 fn test_parent_dir_file() {
-
     let _fs = from_map(&[("/foo", "bar"), ("/foo/oops", "baz")], false);
 }
 
@@ -330,34 +323,29 @@ fn test_from_map_windows() {
 #[test]
 #[should_panic(expected = "mixed posix and windows paths")]
 fn test_from_map_mixed() {
-
     let _fs = from_map(&[("/string", "x"), ("c:/bytes", "x")], false);
 }
 
 #[test]
 #[should_panic(expected = "non-rooted path")]
 fn test_from_map_non_rooted() {
-
     let _fs = from_map(&[("string", "x")], false);
 }
 
 #[test]
 #[should_panic(expected = "non-normalized path")]
 fn test_from_map_non_normalized() {
-
     let _fs = from_map(&[("/string/", "x")], false);
 }
 
 #[test]
 #[should_panic(expected = "non-normalized path")]
 fn test_from_map_non_normalized2() {
-
     let _fs = from_map(&[("/string/../foo", "x")], false);
 }
 
 #[test]
 fn test_from_map_invalid_file() {
-
     let fs = from_map(&[("/a", "1"), ("/b", "text")], true);
     assert_eq!(fs.read_file("/a"), Some("1".to_string()));
     assert_eq!(fs.read_file("/b"), Some("text".to_string()));
@@ -406,7 +394,6 @@ fn test_vfs_test_map_fs_windows() {
 
 #[test]
 fn test_bom() {
-
     let expected = "hello, world";
     let fs = from_map(&[("/foo.ts", "\u{FEFF}hello, world")], true);
     assert_eq!(fs.read_file("/foo.ts"), Some(expected.to_string()));
@@ -414,7 +401,6 @@ fn test_bom() {
 
 #[test]
 fn test_symlink() {
-
     let fs = InMemoryFS::with_case_sensitivity(true);
     fs.insert_file("/foo.ts", "hello, world");
     fs.insert_dir("/dir");
@@ -442,7 +428,6 @@ fn test_symlink() {
 
 #[test]
 fn test_writable_fs_symlink() {
-
     let fs = InMemoryFS::with_case_sensitivity(true);
     fs.write_file("/foo", "hello").unwrap();
     fs.create_symlink("/link", "/foo");
@@ -459,7 +444,6 @@ fn test_writable_fs_symlink() {
 
 #[test]
 fn test_writable_fs_symlink_chain() {
-
     let fs = InMemoryFS::with_case_sensitivity(true);
     fs.write_file("/d", "x").unwrap();
     fs.create_symlink("/a", "/b");
@@ -474,7 +458,6 @@ fn test_writable_fs_symlink_chain() {
 
 #[test]
 fn test_writable_fs_symlink_chain_not_dir() {
-
     let fs = InMemoryFS::with_case_sensitivity(true);
     fs.write_file("/d", "x").unwrap();
     fs.create_symlink("/a", "/b");
@@ -490,7 +473,6 @@ fn test_writable_fs_symlink_chain_not_dir() {
 
 #[test]
 fn test_writable_fs_symlink_delete() {
-
     let fs = InMemoryFS::with_case_sensitivity(true);
     fs.write_file("/foo", "hello").unwrap();
     fs.create_symlink("/link", "/foo");

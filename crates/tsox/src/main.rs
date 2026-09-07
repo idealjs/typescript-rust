@@ -4,7 +4,6 @@ use std::thread;
 use tsox::execute::{OsSystem, command_line};
 
 fn main() -> ExitCode {
-
     let result = thread::Builder::new()
         .stack_size(256 * 1024 * 1024)
         .spawn(main_inner)

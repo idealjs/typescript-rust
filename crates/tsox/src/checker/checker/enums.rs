@@ -1,19 +1,10 @@
 use std::sync::Arc;
 
-use crate::ast::{
-    ModifierFlags, Node, NodeData, Symbol, SyntaxKind,
-};
+use crate::ast::{ModifierFlags, Node, NodeData, Symbol, SyntaxKind};
 use crate::evaluator::{EvalResult, EvalValue};
 use crate::jsnum;
 
-
-
-
-
-
-
 use super::*;
-
 
 impl Checker {
     pub(crate) fn check_enum_member(&mut self, node: &Arc<Node>) {
@@ -51,8 +42,10 @@ impl Checker {
             | crate::ast::NodeData::NoSubstitutionTemplateLiteral(_) => true,
             crate::ast::NodeData::Identifier(_) => true,
             crate::ast::NodeData::PrefixUnaryExpression(u) => {
-                matches!(u.operator, SyntaxKind::PlusToken | SyntaxKind::MinusToken | SyntaxKind::TildeToken)
-                    && Self::is_constant_enum_initializer(&u.operand)
+                matches!(
+                    u.operator,
+                    SyntaxKind::PlusToken | SyntaxKind::MinusToken | SyntaxKind::TildeToken
+                ) && Self::is_constant_enum_initializer(&u.operand)
             }
             crate::ast::NodeData::BinaryExpression(b) => {
                 matches!(

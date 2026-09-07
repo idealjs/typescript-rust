@@ -202,7 +202,6 @@ fn run_match_full(
 
 #[test]
 fn test_read_directory() {
-
     {
         let host = common_folders_host();
         let got = run_match(&host, TS_EXTS, &[], &[]);
@@ -646,7 +645,6 @@ fn test_read_directory() {
 
 #[test]
 fn test_read_directory_edge_cases() {
-
     {
         let host = case_insensitive_host();
         let got = run_match(&host, &[".ts"], &[], &["/dev/a.ts"]);
@@ -719,7 +717,6 @@ fn test_read_directory_empty_includes() {
 
 #[test]
 fn test_read_directory_symlink_cycle() {
-
     let fs = build_fs(&[], true);
     fs.create_symlink("/a", "/b");
     fs.create_symlink("/b", "/a");
@@ -746,7 +743,6 @@ fn test_read_directory_symlink_cycle() {
 
 #[test]
 fn test_read_directory_matches_typescript_baselines() {
-
     {
         let host = build_fs(
             &[
@@ -995,7 +991,6 @@ fn test_is_implicit_glob() {
 
 #[test]
 fn test_spec_matcher() {
-
     {
         let m = SpecMatcher::new(&["*.ts"], "/project", Usage::Files, true);
         assert!(m.is_some());
@@ -1047,7 +1042,6 @@ fn test_spec_matcher() {
 
 #[test]
 fn test_spec_matcher_match_string() {
-
     {
         let m = SpecMatcher::new(&["*.ts"], "/project", Usage::Files, true).unwrap();
         let paths = ["/project/a.ts", "/project/sub/a.ts", "/project/a.js"];
@@ -1085,7 +1079,6 @@ fn test_spec_matcher_match_string() {
 
 #[test]
 fn test_single_spec_matcher_match_string() {
-
     {
         let m = SpecMatcher::new(&["*.ts"], "/project", Usage::Files, true).unwrap();
         let paths = ["/project/a.ts", "/project/sub/a.ts", "/project/a.js"];
@@ -1109,7 +1102,6 @@ fn test_single_spec_matcher_match_string() {
 
 #[test]
 fn test_spec_matchers_match_index() {
-
     {
         let m = SpecMatcher::new(&["*.ts", "*.tsx"], "/project", Usage::Files, true).unwrap();
         let paths = ["/project/a.ts", "/project/a.tsx", "/project/a.js"];
@@ -1145,7 +1137,6 @@ fn test_spec_matchers_match_index() {
 
 #[test]
 fn test_single_spec_matcher() {
-
     {
         let m = SpecMatcher::new(&["*.ts"], "/project", Usage::Files, true);
         assert!(m.is_some());
@@ -1170,7 +1161,6 @@ fn test_single_spec_matcher() {
 
 #[test]
 fn test_spec_matchers() {
-
     {
         let m =
             SpecMatcher::new(&["*.ts", "*.tsx", "*.js"], "/project", Usage::Files, true).unwrap();
@@ -1188,7 +1178,6 @@ fn test_spec_matchers() {
 
 #[test]
 fn test_glob_pattern_internals() {
-
     {
         let path = "/dev//foo///bar";
 
@@ -1323,7 +1312,6 @@ fn test_glob_pattern_internals() {
 
 #[test]
 fn test_match_segments_edge_cases() {
-
     {
         let p = compile_glob_pattern("a?b", "/", Usage::Files, true).unwrap();
 
@@ -1451,7 +1439,6 @@ fn test_read_directory_consecutive_slashes() {
 
 #[test]
 fn test_glob_pattern_literal_with_package_folders() {
-
     {
         let host = build_fs(&[("/dev/a.ts", ""), ("/dev/node_modules/b.ts", "")], false);
         let got = match_files(
@@ -1491,7 +1478,6 @@ fn test_glob_pattern_literal_with_package_folders() {
 
 #[test]
 fn test_get_base_paths_case_sensitivity() {
-
     {
         let base_paths = get_base_paths("/root", &["../Other/**/*.ts", "../other/**/*.ts"], true);
         assert!(

@@ -14,7 +14,11 @@ fn main() {
     for entry in fs::read_dir(&libs_source_dir).unwrap().flatten() {
         let path = entry.path();
         if path.extension().and_then(|e| e.to_str()) == Some("ts") {
-            let name = path.file_name().and_then(|n| n.to_str()).unwrap().to_string();
+            let name = path
+                .file_name()
+                .and_then(|n| n.to_str())
+                .unwrap()
+                .to_string();
             let dest = dest_libs_dir.join(&name);
             fs::copy(&path, &dest).unwrap();
             entries.push((name, dest));

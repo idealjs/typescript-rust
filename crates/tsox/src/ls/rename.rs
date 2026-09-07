@@ -25,7 +25,6 @@ pub struct RenameInfo {
 }
 
 impl LanguageService {
-
     pub fn provide_rename(
         &self,
         params: &RenameParams,

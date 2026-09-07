@@ -16,7 +16,6 @@ const INLAY_HINT_KIND_TYPE: i32 = 1;
 const INLAY_HINT_KIND_PARAMETER: i32 = 2;
 
 impl LanguageService {
-
     pub fn provide_inlay_hints(&self, document_uri: &DocumentUri, range: Range) -> Vec<InlayHint> {
         let (program, source_file) = self.get_program_and_file(document_uri);
         let line_map = &source_file.line_map;
@@ -39,7 +38,6 @@ impl LanguageService {
     }
 
     pub fn provide_inlay_hint(&self, document_uri: &DocumentUri) -> Vec<InlayHint> {
-
         let (_, source_file) = self.get_program_and_file(document_uri);
         let end = source_file.text.len();
         self.provide_inlay_hints(
@@ -66,13 +64,11 @@ fn collect_inlay_hints(
     line_map: &LineMap,
     hints: &mut Vec<InlayHint>,
 ) {
-
     if node.end() < range_start || node.pos() > range_end {
         return;
     }
 
     match &node.data {
-
         NodeData::VariableDeclaration(data) => {
             if data.type_node.is_none() {
                 if let Some(ref initializer) = data.initializer {
@@ -80,7 +76,6 @@ fn collect_inlay_hints(
                     let type_str = checker.type_to_string(&ty);
 
                     if !type_str.is_empty() && !is_omit_type_hint(&data.name.text(), &type_str) {
-
                         let hint_pos = offset_to_position(line_map, data.name.end());
                         hints.push(InlayHint {
                             position: hint_pos,
@@ -117,7 +112,6 @@ fn add_parameter_name_hints(
     line_map: &LineMap,
     hints: &mut Vec<InlayHint>,
 ) {
-
     let (signature, _candidate_signatures) =
         checker.get_resolved_signature_for_signature_help(_call_node, data.arguments.len() as i32);
 

@@ -11,11 +11,9 @@ use crate::ls::lsutil::utilities::probably_uses_semicolons;
 use super::tracker::{LeadingTriviaOption, NodeOptions, Tracker, TrailingTriviaOption};
 
 impl Tracker {
-
     pub(crate) fn get_text_changes_from_changes(
         &self,
     ) -> std::collections::HashMap<String, Vec<TextEdit>> {
-
         std::collections::HashMap::new()
     }
 

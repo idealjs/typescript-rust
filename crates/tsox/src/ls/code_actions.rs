@@ -34,7 +34,6 @@ pub struct CombinedCodeActions {
 }
 
 impl LanguageService {
-
     pub fn provide_code_actions(&self, params: &CodeActionParams) -> Vec<CodeAction> {
         let (program, source_file) = self.get_program_and_file(&params.text_document.uri);
         let line_map = &source_file.line_map;
@@ -48,7 +47,6 @@ impl LanguageService {
         let mut actions = Vec::new();
 
         for diag in &diagnostics {
-
             let belongs_to_file = diag
                 .file
                 .as_ref()

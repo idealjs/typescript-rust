@@ -76,12 +76,7 @@ impl Logger for LoggerImpl {
 
     fn verbose(&self) -> Option<&dyn Logger> {
         let inner = self.inner.lock().unwrap();
-        if inner.verbose {
-
-            None
-        } else {
-            None
-        }
+        if inner.verbose { None } else { None }
     }
 
     fn is_verbose(&self) -> bool {
@@ -122,12 +117,10 @@ pub fn new_nop_logger() -> NopLogger {
 }
 
 fn format_time_now() -> String {
-
     "[time]".to_string()
 }
 
 fn format_args_string(format: &str, args: &[&dyn std::fmt::Display]) -> String {
-
     let mut result = format.to_string();
     for arg in args {
         result = result.replacen("{}", &arg.to_string(), 1);

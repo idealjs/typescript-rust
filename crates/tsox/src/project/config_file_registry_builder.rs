@@ -29,7 +29,6 @@ pub struct ConfigFileRegistryBuilder {
 }
 
 impl ConfigFileRegistryBuilder {
-
     pub fn new(
         has_relative_pattern_capability: bool,
         old_config_file_registry: ConfigFileRegistry,
@@ -59,7 +58,6 @@ impl ConfigFileRegistryBuilder {
     }
 
     pub fn did_change_files(&self, _summary: &FileChangeSummary) -> ChangeFileResult {
-
         ChangeFileResult::default()
     }
 
@@ -67,9 +65,7 @@ impl ConfigFileRegistryBuilder {
         self.custom_config_file_name_changed
     }
 
-    pub fn cleanup(&self) {
-
-    }
+    pub fn cleanup(&self) {}
 
     pub fn is_config_base_name(&self, base_name: &str) -> bool {
         base_name == "tsconfig.json"

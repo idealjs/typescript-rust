@@ -17,13 +17,11 @@ pub struct CommentOwnerInfo {
 }
 
 impl LanguageService {
-
     pub fn get_jsdoc_snippet_completion(
         &self,
         _file: &Arc<SourceFile>,
         _position: usize,
     ) -> Option<CompletionItem> {
-
         None
     }
 }
@@ -32,7 +30,6 @@ pub fn is_potentially_valid_jsdoc_snippet_completion_position(
     _file: &Arc<SourceFile>,
     _position: usize,
 ) -> bool {
-
     false
 }
 
@@ -42,11 +39,9 @@ pub fn get_doc_comment_template_at_position(
     _generate_return: bool,
     _new_line: &str,
 ) -> Option<DocCommentTemplate> {
-
     None
 }
 
 pub fn template_to_snippet(template: &str, _new_line: &str) -> String {
-
     template.to_string()
 }

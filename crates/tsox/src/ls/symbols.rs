@@ -1,17 +1,20 @@
 #![allow(dead_code)]
 
+mod names;
+
 use std::sync::Arc;
 
 use crate::ast::node::LineMap;
-use crate::ast::{Node, NodeData, SourceFile, SyntaxKind, node_data_generated::for_each_child};
+use crate::ast::{Node, SourceFile, SyntaxKind, node_data_generated::for_each_child};
 use crate::lsp::lsproto::lsp::{DocumentUri, Range};
 use crate::scanner;
 
 use super::language_service::LanguageService;
 use super::types::{DocumentSymbol, SymbolKind};
 
-impl LanguageService {
+use names::*;
 
+impl LanguageService {
     pub fn provide_document_symbols(&self, document_uri: &DocumentUri) -> Vec<DocumentSymbol> {
         let (_program, source_file) = self.get_program_and_file(document_uri);
         get_document_symbols_for_children(&source_file.node, &source_file)
@@ -43,7 +46,6 @@ fn visit_for_symbols(
     let kind = node.kind;
 
     match kind {
-
         SyntaxKind::ClassDeclaration
         | SyntaxKind::ClassExpression
         | SyntaxKind::InterfaceDeclaration
@@ -177,83 +179,6 @@ fn new_document_symbol(
         tags: None,
         deprecated: None,
     })
-}
-
-fn get_node_name(node: &Arc<Node>, text: &str) -> Option<String> {
-    match &node.data {
-        NodeData::ClassDeclaration(d) => d.name.as_ref().map(|n| identifier_text(n, text)),
-        NodeData::InterfaceDeclaration(d) => Some(identifier_text(&d.name, text)),
-        NodeData::EnumDeclaration(d) => Some(identifier_text(&d.name, text)),
-        NodeData::FunctionDeclaration(d) => d.name.as_ref().map(|n| identifier_text(n, text)),
-        NodeData::FunctionExpression(d) => d.name.as_ref().map(|n| identifier_text(n, text)),
-        NodeData::MethodDeclaration(d) => Some(property_name_text(&d.name, text)),
-        NodeData::GetAccessorDeclaration(d) => Some(property_name_text(&d.name, text)),
-        NodeData::SetAccessorDeclaration(d) => Some(property_name_text(&d.name, text)),
-        NodeData::ConstructorDeclaration(_) => Some("constructor".to_string()),
-        NodeData::VariableDeclaration(d) => Some(binding_name_text(&d.name, text)),
-        NodeData::TypeAliasDeclaration(d) => Some(identifier_text(&d.name, text)),
-        NodeData::EnumMember(d) => Some(property_name_text(&d.name, text)),
-        NodeData::PropertyDeclaration(d) => Some(property_name_text(&d.name, text)),
-        NodeData::PropertySignatureDeclaration(d) => Some(property_name_text(&d.name, text)),
-        NodeData::MethodSignatureDeclaration(d) => Some(property_name_text(&d.name, text)),
-        NodeData::PropertyAssignment(d) => Some(property_name_text(&d.name, text)),
-        NodeData::ModuleDeclaration(d) => Some(module_name_text(&d.name, text)),
-        NodeData::ImportSpecifier(d) => Some(identifier_text(&d.name, text)),
-        NodeData::ImportClause(d) => d.name.as_ref().map(|n| identifier_text(n, text)),
-        NodeData::ExportSpecifier(d) => Some(identifier_text(
-            d.property_name.as_ref().unwrap_or(&d.name),
-            text,
-        )),
-        _ => None,
-    }
-}
-
-fn get_name_range(node: &Arc<Node>, text: &str, node_start: usize) -> (usize, usize) {
-    let name_ref: Option<&Arc<Node>> = match &node.data {
-        NodeData::ClassDeclaration(d) => d.name.as_ref(),
-        NodeData::FunctionDeclaration(d) => d.name.as_ref(),
-        NodeData::VariableDeclaration(d) => Some(&d.name),
-        NodeData::InterfaceDeclaration(d) => Some(&d.name),
-        NodeData::EnumDeclaration(d) => Some(&d.name),
-        NodeData::TypeAliasDeclaration(d) => Some(&d.name),
-        _ => None,
-    };
-
-    if let Some(name) = name_ref {
-        let start = scanner::skip_trivia(text, name.pos());
-        let end = name.end();
-        return (start.max(node_start), end.max(node_start));
-    }
-
-    (node_start, node_start)
-}
-
-fn identifier_text(node: &Arc<Node>, text: &str) -> String {
-    text[node.pos()..node.end()].trim().to_string()
-}
-
-fn property_name_text(node: &Arc<Node>, text: &str) -> String {
-    match &node.data {
-        NodeData::Identifier(d) => d.text.clone(),
-        NodeData::StringLiteral(d) => format!("\"{}\"", d.text),
-        NodeData::NumericLiteral(d) => d.text.clone(),
-        NodeData::ComputedPropertyName(d) => {
-            let inner = &d.expression;
-            text[inner.pos()..inner.end()].to_string()
-        }
-        _ => text[node.pos()..node.end()].trim().to_string(),
-    }
-}
-
-fn binding_name_text(node: &Arc<Node>, text: &str) -> String {
-    match &node.data {
-        NodeData::Identifier(d) => d.text.clone(),
-        _ => text[node.pos()..node.end()].trim().to_string(),
-    }
-}
-
-fn module_name_text(node: &Arc<Node>, text: &str) -> String {
-    text[node.pos()..node.end()].trim().to_string()
 }
 
 fn symbol_kind_from_node(kind: SyntaxKind) -> SymbolKind {

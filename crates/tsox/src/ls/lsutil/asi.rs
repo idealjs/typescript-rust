@@ -7,7 +7,6 @@ pub fn position_is_asi_candidate(
     _context: Option<&Arc<Node>>,
     _file: &SourceFile,
 ) -> bool {
-
     false
 }
 
@@ -66,6 +65,5 @@ pub fn syntax_requires_trailing_semicolon_or_asi(kind: SyntaxKind) -> bool {
 }
 
 pub fn node_is_asi_candidate(_node: &Arc<Node>, _file: &SourceFile) -> bool {
-
     false
 }

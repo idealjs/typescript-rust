@@ -9,7 +9,6 @@ use crate::tspath;
 use crate::vfs::InMemoryFS;
 
 pub struct TranspileOptions {
-
     pub compiler_options: CompilerOptions,
 
     pub file_name: String,
@@ -138,7 +137,6 @@ pub fn transpile_worker(
 
     let mut all_diagnostics: Vec<Diagnostic> = Vec::new();
     if options.report_diagnostics {
-
         for d in program.diagnostics() {
             all_diagnostics.push((**d).clone());
         }
@@ -167,5 +165,8 @@ pub fn transpile_worker(
 
 fn default_lib_file_name(options: &CompilerOptions) -> String {
     let names = crate::compiler::default_lib_file_names(options);
-    names.first().cloned().unwrap_or_else(|| "lib.d.ts".to_string())
+    names
+        .first()
+        .cloned()
+        .unwrap_or_else(|| "lib.d.ts".to_string())
 }

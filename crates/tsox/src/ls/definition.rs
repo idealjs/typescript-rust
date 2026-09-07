@@ -12,7 +12,6 @@ use super::language_service::LanguageService;
 use super::types::LocationLink;
 
 impl LanguageService {
-
     pub fn provide_definition(
         &self,
         document_uri: &DocumentUri,
@@ -58,7 +57,6 @@ impl LanguageService {
         document_uri: &DocumentUri,
         position: Position,
     ) -> Vec<LocationLink> {
-
         let (program, source_file) = self.get_program_and_file(document_uri);
         let line_map = &source_file.line_map;
         let offset = lsp_position_to_offset(line_map, &position);
@@ -100,7 +98,6 @@ pub fn get_declarations_from_location(checker: &Checker, node: &Arc<Node>) -> Ve
 }
 
 pub fn try_get_signature_declaration(_checker: &Checker, _node: &Arc<Node>) -> Option<Arc<Node>> {
-
     None
 }
 
@@ -133,7 +130,6 @@ fn find_deepest_node(node: &Arc<Node>, offset: usize) -> Arc<Node> {
 }
 
 fn get_source_file_of_node(node: &Arc<Node>, fallback: &Arc<SourceFile>) -> Arc<SourceFile> {
-
     let _ = node;
     Arc::clone(fallback)
 }

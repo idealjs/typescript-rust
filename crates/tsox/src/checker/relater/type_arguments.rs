@@ -5,12 +5,10 @@ use std::sync::Arc;
 use crate::checker::is_tuple_type;
 
 use crate::checker::checker::Checker;
-use crate::checker::types::*;
 
 use super::*;
 
 impl Checker {
-
     pub fn type_arguments_related_to(
         &mut self,
         sources: &[Arc<Type>],
@@ -18,14 +16,12 @@ impl Checker {
         variances: &[VarianceFlags],
         relation: RelationKind,
     ) -> Ternary {
-
         if sources.len() != targets.len() && relation == RelationKind::Identity {
             return Ternary::False;
         }
         let length = sources.len().min(targets.len());
         let mut result = Ternary::True;
         for i in 0..length {
-
             let variance_flags = variances
                 .get(i)
                 .copied()
@@ -42,10 +38,8 @@ impl Checker {
                 && !variance_flags
                     .intersects(VarianceFlags::Unmeasurable | VarianceFlags::Unreliable)
             {
-
                 self.compare_types(Arc::clone(s), Arc::clone(t), relation, false)
             } else if variance_flags.intersects(VarianceFlags::Unmeasurable) {
-
                 if relation == RelationKind::Identity {
                     if self.is_type_related_to(s, t, relation) {
                         Ternary::True
@@ -63,15 +57,10 @@ impl Checker {
                         self.compare_types(Arc::clone(s), Arc::clone(t), relation, false)
                     }
                     VarianceFlags::Contravariant => {
-
                         self.compare_types(Arc::clone(t), Arc::clone(s), relation, false)
                     }
-                    VarianceFlags::Independent => {
-
-                        Ternary::True
-                    }
+                    VarianceFlags::Independent => Ternary::True,
                     _ => {
-
                         let is_bivariant = variance_flags.intersects(VARIANCE_FLAGS_BIVARIANT)
                             && variance != VarianceFlags::None;
                         let contra =
@@ -83,7 +72,6 @@ impl Checker {
                                 self.compare_types(Arc::clone(s), Arc::clone(t), relation, false)
                             }
                         } else {
-
                             let co =
                                 self.compare_types(Arc::clone(s), Arc::clone(t), relation, false);
                             if co.is_false() {
@@ -135,7 +123,6 @@ impl Checker {
         target: &Arc<Type>,
         relation: RelationKind,
     ) -> Option<Ternary> {
-
         if !source.flags.contains(TypeFlags::Object) || !target.flags.contains(TypeFlags::Object) {
             return None;
         }
@@ -177,7 +164,6 @@ impl Checker {
     }
 
     pub fn get_variances(&self, _target: &Arc<Type>) -> Vec<VarianceFlags> {
-
         match &_target.data {
             TypeData::Object(o) => {
                 if let Some(t) = o.target.as_ref() {
@@ -201,7 +187,6 @@ impl Checker {
     }
 
     pub fn is_empty_array_literal_type(&self, t: &Arc<Type>) -> bool {
-
         t.object_flags.contains(ObjectFlags::FreshLiteral) && self.is_array_type(t)
     }
 }

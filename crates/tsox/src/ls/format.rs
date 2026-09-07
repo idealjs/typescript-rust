@@ -11,7 +11,6 @@ use crate::lsp::lsproto::lsp::{DocumentUri, Position, Range, TextEdit};
 use super::language_service::LanguageService;
 
 impl LanguageService {
-
     pub fn to_ls_proto_text_edits(
         &self,
         file: &Arc<SourceFile>,
@@ -72,7 +71,6 @@ impl LanguageService {
         _options: &FormatCodeSettings,
         _r: TextRange,
     ) -> Vec<TextChange> {
-
         Vec::new()
     }
 
@@ -81,7 +79,6 @@ impl LanguageService {
         _file: &Arc<SourceFile>,
         _options: &FormatCodeSettings,
     ) -> Vec<TextChange> {
-
         Vec::new()
     }
 
@@ -92,7 +89,6 @@ impl LanguageService {
         _position: usize,
         _key: &str,
     ) -> Vec<TextChange> {
-
         Vec::new()
     }
 }
@@ -103,6 +99,5 @@ pub fn get_range_of_enclosing_comment(
     _preceding_token: Option<&Arc<crate::ast::Node>>,
     _token_at_position: Option<&Arc<crate::ast::Node>>,
 ) -> Option<crate::scanner::CommentRange> {
-
     None
 }

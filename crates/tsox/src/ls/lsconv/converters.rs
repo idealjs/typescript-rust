@@ -87,7 +87,6 @@ impl Converters {
             if line_map.ascii_only || self.position_encoding == PositionEncodingKind::Utf8 {
                 position - start
             } else {
-
                 let mut char_count = 0u32;
                 for r in text[start..position].chars() {
                     char_count += utf16_len_of_char(r) as u32;
@@ -164,9 +163,5 @@ fn utf8_char_len(first_byte: u8) -> usize {
 
 fn utf16_len_of_char(c: char) -> usize {
     let code = c as u32;
-    if code >= 0x10000 {
-        2
-    } else {
-        1
-    }
+    if code >= 0x10000 { 2 } else { 1 }
 }

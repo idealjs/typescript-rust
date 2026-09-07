@@ -61,7 +61,6 @@ pub fn discover_typings(
     _package_name_to_typing_location: &HashMap<String, CachedTyping>,
     _types_registry: &HashMap<String, HashMap<String, String>>,
 ) -> (Vec<String>, Vec<String>, Vec<String>) {
-
     let mut inferred_typings: HashMap<String, String> = HashMap::new();
 
     let js_file_names: Vec<&String> = file_names
@@ -152,7 +151,6 @@ pub fn remove_min_and_version_numbers(file_name: &str) -> String {
     while pos > 0 {
         let ch = bytes[pos - 1];
         if ch >= b'0' && ch <= b'9' {
-
             loop {
                 pos -= 1;
                 if pos == 0 || !(bytes[pos - 1] >= b'0' && bytes[pos - 1] <= b'9') {
@@ -160,7 +158,6 @@ pub fn remove_min_and_version_numbers(file_name: &str) -> String {
                 }
             }
         } else if pos > 4 && (ch == b'n' || ch == b'N') {
-
             pos -= 1;
             if pos == 0 || (bytes[pos - 1] != b'i' && bytes[pos - 1] != b'I') {
                 break;
@@ -188,17 +185,4 @@ pub fn remove_min_and_version_numbers(file_name: &str) -> String {
 }
 
 #[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_remove_min_and_version_numbers() {
-        assert_eq!(remove_min_and_version_numbers("jquery-min.4.2.3"), "jquery");
-        assert_eq!(
-            remove_min_and_version_numbers("angular-route.1.2.3"),
-            "angular-route"
-        );
-        assert_eq!(remove_min_and_version_numbers("jquery"), "jquery");
-        assert_eq!(remove_min_and_version_numbers("jquery.min"), "jquery");
-    }
-}
+mod tests;

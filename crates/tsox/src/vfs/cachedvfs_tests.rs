@@ -156,7 +156,6 @@ fn create_mock_fs() -> CountingFS {
 
 #[test]
 fn test_cached_directory_exists() {
-
     let underlying = Arc::new(create_mock_fs());
     let cached = CachedFS::new(underlying.clone());
 
@@ -190,7 +189,6 @@ fn test_cached_directory_exists() {
 
 #[test]
 fn test_cached_file_exists() {
-
     let underlying = Arc::new(create_mock_fs());
     let cached = CachedFS::new(underlying.clone());
 
@@ -224,7 +222,6 @@ fn test_cached_file_exists() {
 
 #[test]
 fn test_cached_get_accessible_entries() {
-
     let underlying = Arc::new(create_mock_fs());
     let cached = CachedFS::new(underlying.clone());
 
@@ -258,7 +255,6 @@ fn test_cached_get_accessible_entries() {
 
 #[test]
 fn test_cached_realpath() {
-
     let underlying = Arc::new(create_mock_fs());
     let cached = CachedFS::new(underlying.clone());
 
@@ -292,7 +288,6 @@ fn test_cached_realpath() {
 
 #[test]
 fn test_cached_stat() {
-
     let underlying = Arc::new(create_mock_fs());
     let cached = CachedFS::new(underlying.clone());
 
@@ -326,7 +321,6 @@ fn test_cached_stat() {
 
 #[test]
 fn test_cached_read_file() {
-
     let underlying = Arc::new(create_mock_fs());
     let cached = CachedFS::new(underlying.clone());
 
@@ -357,7 +351,6 @@ fn test_cached_read_file() {
 
 #[test]
 fn test_cached_use_case_sensitive_file_names() {
-
     let underlying = Arc::new(create_mock_fs());
     let cached = CachedFS::new(underlying.clone());
 
@@ -388,7 +381,6 @@ fn test_cached_use_case_sensitive_file_names() {
 
 #[test]
 fn test_cached_walk_dir() {
-
     let underlying = Arc::new(create_mock_fs());
     let cached = CachedFS::new(underlying.clone());
 
@@ -421,7 +413,6 @@ fn test_cached_walk_dir() {
 
 #[test]
 fn test_cached_remove() {
-
     let underlying = Arc::new(create_mock_fs());
     let cached = CachedFS::new(underlying.clone());
 
@@ -452,7 +443,6 @@ fn test_cached_remove() {
 
 #[test]
 fn test_cached_write_file() {
-
     let underlying = Arc::new(create_mock_fs());
     let cached = CachedFS::new(underlying.clone());
 

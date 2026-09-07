@@ -80,27 +80,12 @@ impl ApiServer {
         let _params = msg.get("params").cloned().unwrap_or(Value::Null);
 
         match method {
-            "configure" => {
-
-                Some(make_response(id, json!({})))
-            }
-            "createProject" => {
-
-                Some(make_response(id, json!({ "projectId": "default" })))
-            }
-            "updateProject" => {
-
-                Some(make_response(id, json!({})))
-            }
-            "getDiagnostics" => {
-
-                Some(make_response(id, json!({ "diagnostics": [] })))
-            }
+            "configure" => Some(make_response(id, json!({}))),
+            "createProject" => Some(make_response(id, json!({ "projectId": "default" }))),
+            "updateProject" => Some(make_response(id, json!({}))),
+            "getDiagnostics" => Some(make_response(id, json!({ "diagnostics": [] }))),
             "closeProject" => Some(make_response(id, json!({}))),
-            "getQuickInfo" => {
-
-                Some(make_response(id, Value::Null))
-            }
+            "getQuickInfo" => Some(make_response(id, Value::Null)),
             "shutdown" => {
                 self.shutdown_requested = true;
                 Some(make_response(id, Value::Null))

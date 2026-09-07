@@ -13,7 +13,6 @@ pub struct CachedFS {
 }
 
 impl CachedFS {
-
     pub fn new(fs: Arc<dyn FS>) -> Self {
         CachedFS {
             fs,

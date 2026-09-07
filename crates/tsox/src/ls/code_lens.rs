@@ -10,9 +10,7 @@ use super::language_service::LanguageService;
 use super::types::CodeLens;
 
 impl LanguageService {
-
     pub fn provide_code_lenses(&self, _document_uri: &DocumentUri) -> Vec<CodeLens> {
-
         Vec::new()
     }
 
@@ -22,7 +20,6 @@ impl LanguageService {
         _show_locations_command_name: Option<&str>,
         _orchestrator: Option<&dyn CrossProjectOrchestrator>,
     ) -> CodeLens {
-
         CodeLens::default()
     }
 
@@ -33,17 +30,14 @@ impl LanguageService {
         _node: &Arc<Node>,
         _kind: &str,
     ) -> CodeLens {
-
         CodeLens::default()
     }
 }
 
 pub fn is_valid_reference_lens_node(_node: &Arc<Node>) -> bool {
-
     false
 }
 
 pub fn is_valid_implementations_code_lens_node(_node: &Arc<Node>) -> bool {
-
     false
 }

@@ -51,7 +51,6 @@ bitflags::bitflags! {
 }
 
 impl NodeBuilderFlags {
-
     pub const IGNORE_ERRORS: Self = Self::AllowThisInObjectLiteral
         .union(Self::AllowQualifiedNameInPlaceOfIdentifier)
         .union(Self::AllowAnonymousIdentifier)
@@ -74,7 +73,6 @@ bitflags::bitflags! {
 }
 
 pub trait SymbolTracker {
-
     fn track_symbol(
         &mut self,
         symbol: &Arc<Symbol>,
@@ -142,9 +140,7 @@ pub struct SymbolTrackerImpl {
 }
 
 impl SymbolTrackerImpl {
-
     pub fn new(context: SharedNodeBuilderContext, tracker: Option<Box<dyn SymbolTracker>>) -> Self {
-
         SymbolTrackerImpl {
             context,
             inner: tracker,

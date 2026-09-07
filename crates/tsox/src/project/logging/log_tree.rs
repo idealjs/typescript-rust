@@ -166,7 +166,6 @@ impl LogTree {
             f.write_str(" ")?;
             f.write_str(&log.message)?;
             f.write_str("\n")?;
-
         }
         Ok(())
     }

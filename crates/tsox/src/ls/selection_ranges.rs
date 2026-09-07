@@ -10,7 +10,6 @@ use super::language_service::LanguageService;
 use super::types::SelectionRange;
 
 impl LanguageService {
-
     pub fn provide_selection_ranges(
         &self,
         document_uri: &DocumentUri,
@@ -63,7 +62,6 @@ pub fn get_smart_selection_range(source_file: &Arc<SourceFile>, pos: usize) -> S
 }
 
 fn find_deepest_node<'a>(node: &'a Arc<Node>, pos: usize) -> Arc<Node> {
-
     if pos < node.pos() || pos > node.end() {
         return node.clone();
     }

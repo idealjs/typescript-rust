@@ -6,7 +6,6 @@ use std::sync::Mutex;
 
 #[derive(Debug, Clone, Default)]
 pub struct RefCountCacheOptions {
-
     pub disable_deletion: bool,
 }
 
@@ -58,7 +57,6 @@ impl<K: Eq + Hash + Clone, V: Clone> RefCountCache<K, V> {
             None => panic!("cache entry not found"),
             Some(entry) => {
                 if entry.ref_count <= 0 && !self.options.disable_deletion {
-
                     entry.ref_count = 1;
                 } else {
                     entry.ref_count += 1;

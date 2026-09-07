@@ -13,7 +13,6 @@ pub fn delete_declaration(
     _source_file: &SourceFile,
     _node: &Arc<Node>,
 ) {
-
 }
 
 pub fn delete_default_import(
@@ -57,12 +56,10 @@ pub fn delete_node_in_list(
 }
 
 pub fn positions_are_on_same_line(_pos1: usize, _pos2: usize, _source_file: &SourceFile) -> bool {
-
     true
 }
 
 pub fn has_jsdoc_nodes(node: &Arc<Node>) -> bool {
-
     let _ = node;
     false
 }

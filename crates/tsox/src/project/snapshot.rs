@@ -84,7 +84,6 @@ pub struct Snapshot {
 }
 
 impl Snapshot {
-
     pub fn new(id: u64) -> Self {
         let s = Snapshot {
             id,
@@ -154,9 +153,7 @@ impl Snapshot {
         }
     }
 
-    fn dispose(&self) {
-
-    }
+    fn dispose(&self) {}
 }
 
 #[derive(Default, Clone)]

@@ -20,7 +20,6 @@ impl<K: Clone + Eq + Hash, V: Clone> MapEntry<K, V> {
 
     pub fn value(&self) -> V {
         if self.delete {
-
             self.original.clone()
         } else {
             self.value.clone()

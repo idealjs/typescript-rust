@@ -82,7 +82,6 @@ impl Logger {
     }
 
     pub fn logf(&self, format: &str, args: &[&str]) {
-
         let mut result = format.to_string();
         for arg in args {
             result = result.replacen("{}", arg, 1);

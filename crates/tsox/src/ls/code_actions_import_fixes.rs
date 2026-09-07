@@ -19,9 +19,7 @@ pub struct FixInfo {
 }
 
 impl LanguageService {
-
     pub fn get_import_code_actions(&self, _context: &CodeFixContext) -> Vec<CodeAction> {
-
         Vec::new()
     }
 
@@ -29,7 +27,6 @@ impl LanguageService {
         &self,
         _context: &CodeFixContext,
     ) -> super::code_actions::CombinedCodeActions {
-
         super::code_actions::CombinedCodeActions {
             description: String::new(),
             changes: Vec::new(),

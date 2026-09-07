@@ -13,7 +13,6 @@ use super::snapshot::{APISnapshotRequest, ATAStateChange};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum ProjectLoadKind {
-
     Find,
 
     Create,
@@ -30,7 +29,6 @@ pub struct ProjectCollectionBuilder {
 }
 
 impl ProjectCollectionBuilder {
-
     pub fn new(
         new_snapshot_id: u64,
         compiler_options_for_inferred_projects: Option<
@@ -62,13 +60,9 @@ impl ProjectCollectionBuilder {
         todo!("ProjectCollectionBuilder::did_change_files requires full integration")
     }
 
-    pub fn did_update_ata_state(&mut self, _ata_changes: &HashMap<Path, ATAStateChange>) {
+    pub fn did_update_ata_state(&mut self, _ata_changes: &HashMap<Path, ATAStateChange>) {}
 
-    }
-
-    pub fn did_change_custom_config_file_name(&mut self) {
-
-    }
+    pub fn did_change_custom_config_file_name(&mut self) {}
 
     pub fn did_request_file(
         &mut self,

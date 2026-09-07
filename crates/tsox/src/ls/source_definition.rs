@@ -15,13 +15,11 @@ pub struct SourceDefResolver<'a> {
 }
 
 impl LanguageService {
-
     pub fn provide_source_definition(
         &self,
         _document_uri: &DocumentUri,
         _position: Position,
     ) -> Vec<LocationLink> {
-
         Vec::new()
     }
 
@@ -40,13 +38,11 @@ impl LanguageService {
 pub fn find_containing_module_specifier(
     _node: &Arc<crate::ast::Node>,
 ) -> Option<Arc<crate::ast::Node>> {
-
     None
 }
 
 pub fn get_source_definition_entry_declarations(
     _source_file: &Arc<SourceFile>,
 ) -> Vec<Arc<crate::ast::Node>> {
-
     Vec::new()
 }

@@ -1,18 +1,9 @@
 use std::sync::Arc;
 
-use crate::ast::{
-    Node, NodeData, Symbol, SymbolFlags, SymbolTable, SyntaxKind,
-};
+use crate::ast::{Node, NodeData, Symbol, SymbolFlags, SymbolTable, SyntaxKind};
 use crate::core::text::TextRange;
 
-
-
-
-
-
-
 use super::*;
-
 
 impl Checker {
     pub fn get_widened_type_of_literal(&self, t: &Arc<Type>) -> Arc<Type> {
@@ -43,7 +34,6 @@ impl Checker {
     }
 
     pub(crate) fn infer_number_literal_type(&mut self, text: &str) -> Arc<Type> {
-
         let num = crate::jsnum::Number::from_string(text);
         if num.is_nan() {
             return self.number_type();
@@ -77,7 +67,6 @@ impl Checker {
     pub(crate) fn get_const_assertion_type(&mut self, expr: &Arc<Node>) -> Arc<Type> {
         match expr.kind {
             SyntaxKind::ArrayLiteralExpression => {
-
                 let elements = match &expr.data {
                     crate::ast::NodeData::ArrayLiteralExpression(data) => &data.elements,
                     _ => return self.get_any_type(),
@@ -85,7 +74,6 @@ impl Checker {
                 let mut element_types: Vec<Arc<Type>> = Vec::new();
                 for elem in elements.iter() {
                     if elem.kind == SyntaxKind::SpreadElement {
-
                         let t = self.get_type_of_node(elem);
                         element_types.push(t);
                     } else {
@@ -94,10 +82,7 @@ impl Checker {
                 }
                 self.create_tuple_type(element_types)
             }
-            _ => {
-
-                self.get_type_of_node(expr)
-            }
+            _ => self.get_type_of_node(expr),
         }
     }
 
@@ -107,8 +92,7 @@ impl Checker {
             _ => return self.get_any_type(),
         };
 
-        let contextual =
-            self.get_contextual_type(node, ContextFlags::empty());
+        let contextual = self.get_contextual_type(node, ContextFlags::empty());
         let mut prop_pairs: Vec<(String, Arc<Type>, Option<Arc<Node>>)> = Vec::new();
         let mut fell_back_to_any = false;
         for prop in properties.iter() {
@@ -125,7 +109,6 @@ impl Checker {
                         && let Some(prop_ctx) = self.get_type_of_property_of_type(ctx, &name)
                         && crate::checker::is_fresh_literal_type(&t)
                     {
-
                         if !self.is_literal_of_contextual_type(&t, &prop_ctx) {
                             t = self.get_widened_literal_type(&t);
                         } else {
@@ -145,7 +128,6 @@ impl Checker {
                     prop_pairs.push((name, t, Some(Arc::clone(prop))));
                 }
                 NodeData::SpreadAssignment(_) => {
-
                     fell_back_to_any = true;
                     break;
                 }
@@ -194,8 +176,11 @@ impl Checker {
         })
     }
 
-    pub(crate) fn get_excess_property_name(&self, source: &Arc<Type>, target: &Arc<Type>) -> Option<String> {
-
+    pub(crate) fn get_excess_property_name(
+        &self,
+        source: &Arc<Type>,
+        target: &Arc<Type>,
+    ) -> Option<String> {
         if !crate::checker::is_object_literal_type(source) {
             return None;
         }
@@ -206,7 +191,6 @@ impl Checker {
             return None;
         }
         for prop in &source_struct.properties {
-
             if !self.target_has_property(target, &prop.name) {
                 return Some(prop.name.clone());
             }
@@ -215,7 +199,6 @@ impl Checker {
     }
 
     fn target_has_property(&self, t: &Arc<Type>, name: &str) -> bool {
-
         if matches!(&t.data, TypeData::Mapped(m) if m.type_parameter.is_some()) {
             return true;
         }
@@ -263,7 +246,6 @@ impl Checker {
             _ => return self.get_any_type(),
         };
         if elements.is_empty() {
-
             let elem = if self.strict_null_checks {
                 self.never_type()
             } else {
@@ -274,7 +256,6 @@ impl Checker {
 
         let mut element_types: Vec<Arc<Type>> = Vec::new();
         for elem in elements.iter() {
-
             if elem.kind == SyntaxKind::SpreadElement {
                 return self.create_array_type(self.get_any_type());
             }

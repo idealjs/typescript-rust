@@ -21,7 +21,6 @@ pub struct SymbolDisplayInfo {
 }
 
 impl LanguageService {
-
     pub fn provide_hover(&self, document_uri: &DocumentUri, position: Position) -> Option<Hover> {
         let (program, source_file) = self.get_program_and_file(document_uri);
 

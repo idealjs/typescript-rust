@@ -67,7 +67,6 @@ bitflags! {
 
 #[allow(non_upper_case_globals)]
 impl NodeFlags {
-
     pub const BlockScoped: Self = Self::Let.union(Self::Const).union(Self::Using);
 
     pub const Constant: Self = Self::Const.union(Self::Using);
@@ -145,7 +144,6 @@ bitflags! {
 
 #[allow(non_upper_case_globals)]
 impl ModifierFlags {
-
     pub const SyntacticOrJSDocModifiers: Self = Self::Public
         .union(Self::Private)
         .union(Self::Protected)

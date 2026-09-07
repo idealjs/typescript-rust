@@ -12,7 +12,6 @@ use super::language_service::LanguageService;
 use super::types::{Diagnostic as LspDiagnostic, DiagnosticRelatedInformation};
 
 impl LanguageService {
-
     pub fn provide_diagnostics(&self, document_uri: &DocumentUri) -> Vec<LspDiagnostic> {
         let (program, source_file) = self.get_program_and_file(document_uri);
         let line_map = &source_file.line_map;

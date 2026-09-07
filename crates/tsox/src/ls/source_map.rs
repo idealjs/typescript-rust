@@ -27,9 +27,7 @@ impl Script for ScriptInfo {
 }
 
 impl LanguageService {
-
     pub fn get_mapped_location(&self, _file_name: &str, _file_range: TextRange) -> Location {
-
         Location::default()
     }
 
@@ -46,7 +44,6 @@ impl LanguageService {
         _file_name: &str,
         _position: TextPos,
     ) -> Option<DocumentPosition> {
-
         None
     }
 }

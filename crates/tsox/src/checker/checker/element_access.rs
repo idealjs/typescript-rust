@@ -2,14 +2,7 @@ use std::sync::Arc;
 
 use crate::ast::Node;
 
-
-
-
-
-
-
 use super::*;
-
 
 impl Checker {
     pub(crate) fn get_type_of_element_access(&mut self, node: &Arc<Node>) -> Arc<Type> {
@@ -32,10 +25,7 @@ impl Checker {
                 && !is_type_param_or_union_of
             {
                 let parts: Vec<Arc<Type>> = if arg_type.is_union() {
-                    arg_type
-                        .types()
-                        .map(|ts| ts.to_vec())
-                        .unwrap_or_default()
+                    arg_type.types().map(|ts| ts.to_vec()).unwrap_or_default()
                 } else {
                     vec![Arc::clone(&arg_type)]
                 };
@@ -93,7 +83,6 @@ impl Checker {
         obj_type: &Arc<Type>,
         arg_expr: &Arc<Node>,
     ) -> Arc<Type> {
-
         if self.is_tuple_type(obj_type) {
             if let Some(index) = self.get_constant_numeric_value(arg_expr) {
                 if let Some(t) = self.get_tuple_element_type(obj_type, index as usize) {

@@ -11,7 +11,6 @@ pub fn position_belongs_to_node(candidate: &Arc<Node>, position: usize, file: &S
 }
 
 pub fn is_completed_node(_node: &Arc<Node>, _source_file: &SourceFile) -> bool {
-
     true
 }
 
@@ -20,7 +19,6 @@ pub fn node_ends_with(
     _expected_last_token: SyntaxKind,
     _source_file: &SourceFile,
 ) -> bool {
-
     false
 }
 
@@ -29,6 +27,5 @@ pub fn has_child_of_kind(
     _kind: SyntaxKind,
     _source_file: &SourceFile,
 ) -> bool {
-
     false
 }

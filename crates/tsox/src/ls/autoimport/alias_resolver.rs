@@ -29,7 +29,6 @@ pub trait HasFileName {
 }
 
 impl AliasResolver {
-
     pub fn new(
         root_files: Vec<Arc<SourceFile>>,
         symlinks: HashMap<tspath::Path, PathAndFileName>,
@@ -49,9 +48,7 @@ impl AliasResolver {
         }
     }
 
-    pub fn bind_source_files(&self) {
-
-    }
+    pub fn bind_source_files(&self) {}
 
     pub fn source_files(&self) -> &[Arc<SourceFile>] {
         &self.root_files
@@ -72,7 +69,6 @@ impl AliasResolver {
     }
 
     pub fn get_source_file(&self, _file_name: &str) -> Option<Arc<SourceFile>> {
-
         todo!("AliasResolver::get_source_file requires binder integration")
     }
 

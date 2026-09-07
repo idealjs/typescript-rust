@@ -5,7 +5,6 @@ use crate::ast::{Node, NodeData, SyntaxKind};
 use crate::checker::checker::Checker;
 use crate::checker::types::*;
 
-
 use super::FlowRef;
 
 use super::NarrowKind;
@@ -19,7 +18,6 @@ impl Checker {
         kind: NarrowKind,
         depth: u32,
     ) -> Arc<Type> {
-
         if expr.kind == SyntaxKind::ParenthesizedExpression {
             if let NodeData::ParenthesizedExpression(p) = &expr.data {
                 return self.narrow_by_expression(type_, &p.expression, target, kind, depth);
@@ -61,14 +59,11 @@ impl Checker {
                         return self.flow_union_of(&[a_false, b_false]);
                     }
 
-                    let narrowed =
-                        self.narrow_by_expression(type_, &bin.left, target, kind, depth);
-                    return self
-                        .narrow_by_expression(&narrowed, &bin.right, target, kind, depth);
+                    let narrowed = self.narrow_by_expression(type_, &bin.left, target, kind, depth);
+                    return self.narrow_by_expression(&narrowed, &bin.right, target, kind, depth);
                 }
                 if bin.operator_token.kind == SyntaxKind::BarBarToken {
                     if kind == NarrowKind::FalseBranch {
-
                         let narrowed =
                             self.narrow_by_expression(type_, &bin.left, target, kind, depth);
                         return self
@@ -99,9 +94,7 @@ impl Checker {
                     return self.flow_union_of(&[a_true, b_true]);
                 }
                 if bin.operator_token.kind == SyntaxKind::QuestionQuestionToken {
-
                     if kind == NarrowKind::TrueBranch {
-
                         return Arc::clone(type_);
                     }
 
@@ -235,10 +228,13 @@ impl Checker {
             } else {
                 vec![Arc::clone(&prop_type)]
             };
-            let any_falsy = parts.iter().any(|p| self.constituent_is_definitely_falsy(p));
-            let all_falsy = parts.iter().all(|p| self.constituent_is_definitely_falsy(p));
+            let any_falsy = parts
+                .iter()
+                .any(|p| self.constituent_is_definitely_falsy(p));
+            let all_falsy = parts
+                .iter()
+                .all(|p| self.constituent_is_definitely_falsy(p));
             match kind {
-
                 NarrowKind::FalseBranch if any_falsy => kept.push(Arc::clone(c)),
 
                 NarrowKind::TrueBranch if !all_falsy => kept.push(Arc::clone(c)),

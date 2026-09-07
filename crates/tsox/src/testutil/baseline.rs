@@ -7,7 +7,6 @@ pub const NO_CONTENT: &str = "<no content>";
 
 #[derive(Default)]
 pub struct BaselineOptions {
-
     pub subfolder: String,
 
     pub is_submodule: bool,

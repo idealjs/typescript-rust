@@ -31,7 +31,6 @@ pub struct LanguageService {
 }
 
 impl LanguageService {
-
     pub fn new(
         project_path: tspath::Path,
         program: Arc<compiler::Program>,
@@ -51,11 +50,7 @@ impl LanguageService {
     }
 
     pub fn to_path(&self, file_name: &str) -> tspath::Path {
-        tspath::to_path(
-            file_name,
-            "",
-            self.use_case_sensitive_file_names(),
-        )
+        tspath::to_path(file_name, "", self.use_case_sensitive_file_names())
     }
 
     pub fn get_program(&self) -> Arc<compiler::Program> {
@@ -93,7 +88,6 @@ impl LanguageService {
         &self,
         _file_name: &str,
     ) -> Option<&DocumentPositionMapper> {
-
         None
     }
 
@@ -141,14 +135,8 @@ impl LanguageService {
         extensions: &[String],
         includes: &[String],
     ) -> Vec<String> {
-        self.host.read_directory(
-            "",
-            path,
-            extensions,
-            &[],
-            includes,
-            -1,
-        )
+        self.host
+            .read_directory("", path, extensions, &[], includes, -1)
     }
 
     pub fn get_directories(&self, path: &str) -> Vec<String> {

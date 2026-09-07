@@ -1,8 +1,8 @@
 #![allow(dead_code)]
 
 use std::collections::HashMap;
-use std::sync::mpsc;
 use std::sync::Arc;
+use std::sync::mpsc;
 use std::thread;
 use std::time::Duration;
 
@@ -88,7 +88,6 @@ impl ProjectLoadingProgress {
                         reporter.create_work_done_progress(&token);
                     } else {
                         delay_fired = false;
-
                     }
                 }
                 if delay_fired {

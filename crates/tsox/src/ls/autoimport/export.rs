@@ -128,7 +128,6 @@ impl super::index::Named for Export {
 }
 
 pub fn symbol_to_export(_symbol: &Symbol, _ch: &Checker) -> Option<Export> {
-
     todo!("symbol_to_export requires checker.IsExternalModuleSymbol and ast helpers")
 }
 

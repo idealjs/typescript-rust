@@ -4,7 +4,6 @@ use crate::core::tristate::Tristate;
 use super::user_preferences::{QuotePreference, UserPreferences};
 
 pub fn probably_uses_semicolons(_file: &SourceFile) -> bool {
-
     true
 }
 
@@ -12,12 +11,10 @@ pub fn should_use_uri_style_node_core_modules(
     _file: &SourceFile,
     _program: &crate::compiler::Program,
 ) -> Tristate {
-
     Tristate::Unknown
 }
 
 pub fn quote_preference_from_string(str_node: &Node) -> QuotePreference {
-
     let _ = str_node;
     QuotePreference::Double
 }
@@ -97,7 +94,6 @@ pub fn module_specifier_to_valid_identifier(
 }
 
 pub fn is_non_contextual_keyword(token: Option<SyntaxKind>) -> bool {
-
     token.is_some()
 }
 

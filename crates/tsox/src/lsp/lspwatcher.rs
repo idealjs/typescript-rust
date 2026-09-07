@@ -32,7 +32,6 @@ struct WatcherInner {
 }
 
 impl Watcher {
-
     pub fn new(
         fs: Arc<dyn FS>,
         on_changes: impl Fn(&[lsproto::FileEvent]) + Send + Sync + 'static,

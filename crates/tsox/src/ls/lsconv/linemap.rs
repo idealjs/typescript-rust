@@ -32,7 +32,6 @@ pub fn compute_lsp_line_starts(text: &str) -> LspLineMap {
                 _ => {}
             }
         } else {
-
             let char_len = utf8_char_len(b);
             pos += char_len;
             ascii_only = false;
@@ -47,7 +46,6 @@ pub fn compute_lsp_line_starts(text: &str) -> LspLineMap {
 }
 
 impl LspLineMap {
-
     pub fn compute_index_of_line_start(&self, target_pos: usize) -> usize {
         match self.line_starts.binary_search(&target_pos) {
             Ok(idx) => idx,

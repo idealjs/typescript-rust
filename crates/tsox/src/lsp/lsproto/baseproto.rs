@@ -5,7 +5,6 @@ pub struct BaseReader<R: std::io::Read> {
 }
 
 impl<R: std::io::Read> BaseReader<R> {
-
     pub fn new(r: R) -> Self {
         BaseReader {
             inner: baseproto::Reader::new(r),
@@ -18,7 +17,6 @@ pub struct BaseWriter<W: std::io::Write> {
 }
 
 impl<W: std::io::Write> BaseWriter<W> {
-
     pub fn new(w: W) -> Self {
         BaseWriter {
             inner: baseproto::Writer::new(w),

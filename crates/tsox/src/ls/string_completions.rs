@@ -30,7 +30,6 @@ pub struct StringLiteralCompletions {
 }
 
 impl LanguageService {
-
     pub fn get_string_literal_completions(
         &self,
         _file: &Arc<SourceFile>,
@@ -38,7 +37,6 @@ impl LanguageService {
         _context_token: Option<&Arc<Node>>,
         _checker: &Checker,
     ) -> Option<StringLiteralCompletions> {
-
         None
     }
 }

@@ -43,13 +43,11 @@ impl<'a> MissingMemberFixer<'a> {
         _source_file: &Arc<crate::ast::SourceFile>,
         _preserve_optional: u32,
     ) -> Vec<Arc<Node>> {
-
         Vec::new()
     }
 }
 
 impl LanguageService {
-
     pub fn new_missing_member_fixer<'a>(
         &'a self,
         _program: &'a Program,

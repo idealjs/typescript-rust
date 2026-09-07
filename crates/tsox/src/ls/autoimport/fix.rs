@@ -46,7 +46,6 @@ pub struct AddToExistingImportFix {
 }
 
 impl Fix {
-
     pub fn edits(
         &self,
         _file: &SourceFile,
@@ -54,7 +53,6 @@ impl Fix {
         _format_options: &FormatCodeSettings,
         _preferences: &UserPreferences,
     ) -> (Vec<TextEdit>, String) {
-
         todo!("Fix::edits requires change.Tracker and diagnostics infrastructure")
     }
 }
@@ -145,6 +143,5 @@ pub fn compare_module_specifier_relativity(
     _b: &Fix,
     _preferences: &modulespecifiers::UserPreferences,
 ) -> std::cmp::Ordering {
-
     std::cmp::Ordering::Equal
 }

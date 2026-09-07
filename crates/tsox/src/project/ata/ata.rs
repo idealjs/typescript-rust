@@ -57,7 +57,6 @@ pub struct TypingsInstaller {
 }
 
 impl TypingsInstaller {
-
     pub fn new(
         options: &TypingsInstallerOptions,
         host: Arc<dyn TypingsInstallerHost>,
@@ -92,14 +91,11 @@ impl TypingsInstaller {
         &mut self,
         _request: &TypingsInstallRequest,
     ) -> Result<TypingsInstallResult, String> {
-
         todo!("install_typings requires npm install and types registry infrastructure")
     }
 
     pub fn init(&self, _project_id: &str, _fs: &dyn FS, _logger: Option<&dyn AtaLogger>) {
-        self.init_once.call_once(|| {
-
-        });
+        self.init_once.call_once(|| {});
     }
 
     pub fn filter_typings(
@@ -125,7 +121,6 @@ impl TypingsInstaller {
             }
             drop(registry);
             if let Some(_typing_location) = self.package_name_to_typing_location.load(&typing_key) {
-
                 continue;
             }
             result.push(typing_key);
@@ -134,7 +129,6 @@ impl TypingsInstaller {
     }
 
     pub fn typing_to_file_name(&self, _resolver: &module::Resolver, _package_name: &str) -> String {
-
         todo!("typing_to_file_name requires module resolver")
     }
 }
@@ -144,7 +138,6 @@ pub fn install_npm_packages(
     _concurrency_limit: usize,
     _install_packages: &dyn Fn(&[String]) -> Result<(), String>,
 ) -> Result<(), String> {
-
     todo!("install_npm_packages requires concurrency infrastructure")
 }
 

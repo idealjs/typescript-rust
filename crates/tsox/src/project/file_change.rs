@@ -18,7 +18,6 @@ pub enum FileChangeKind {
 }
 
 impl FileChangeKind {
-
     pub fn is_watch_kind(&self) -> bool {
         matches!(
             self,
@@ -56,7 +55,6 @@ impl Default for FileChange {
 
 #[derive(Debug, Clone, Default)]
 pub struct FileChangeSummary {
-
     pub opened: lsproto::DocumentUri,
 
     pub reopened: lsproto::DocumentUri,

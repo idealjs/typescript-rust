@@ -32,7 +32,6 @@ impl<T: Send> DynamicQueue<T> {
     }
 
     pub fn put(&self, item: T) -> Result<(), T> {
-
         let mut state = self
             .idle_rx
             .recv_timeout(Duration::from_secs(0))
@@ -46,7 +45,6 @@ impl<T: Send> DynamicQueue<T> {
             });
 
         if state.is_none() {
-
             state = self.idle_rx.recv().ok().flatten();
             if state.is_none() {
                 state = self.ready_rx.recv().ok().flatten();

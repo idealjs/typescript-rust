@@ -1,7 +1,10 @@
 use super::*;
 
 impl Parser {
-    pub(crate) fn parse_jsx_element_or_fragment(&mut self, in_expression_context: bool) -> Arc<Node> {
+    pub(crate) fn parse_jsx_element_or_fragment(
+        &mut self,
+        in_expression_context: bool,
+    ) -> Arc<Node> {
         let pos = self.token_pos();
         self.expect(SyntaxKind::LessThanToken);
 
@@ -133,7 +136,6 @@ impl Parser {
     pub(crate) fn parse_jsx_attribute(&mut self) -> Arc<Node> {
         let pos = self.token_pos();
         if self.token == SyntaxKind::OpenBraceToken {
-
             self.next_token();
             self.expect(SyntaxKind::DotDotDotToken);
             let expression = self.parse_expression();

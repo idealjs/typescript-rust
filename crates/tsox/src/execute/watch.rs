@@ -16,7 +16,6 @@ pub(crate) fn watch_mode(
     pretty: bool,
     locale: Option<Locale>,
 ) -> CommandLineResult {
-
     {
         let mut writer = sys.writer();
         let _ = writeln!(writer);

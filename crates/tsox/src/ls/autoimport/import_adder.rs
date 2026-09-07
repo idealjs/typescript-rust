@@ -8,9 +8,9 @@ use crate::ls::lsutil::format_code_options::FormatCodeSettings;
 use crate::ls::lsutil::user_preferences::UserPreferences;
 use crate::lsp::lsproto::TextEdit;
 
+use super::AddAsTypeOnly;
 use super::fix::Fix;
 use super::view::View;
-use super::AddAsTypeOnly;
 
 pub trait ImportAdderTrait {
     fn has_fixes(&self) -> bool;
@@ -47,7 +47,6 @@ pub fn new_imports_key(module_specifier: &str, top_level_type_only: bool) -> Str
 }
 
 pub struct ImportAdder {
-
     pub checker: Option<Arc<Checker>>,
     pub view: Option<Arc<View>>,
     pub format_options: FormatCodeSettings,
@@ -60,7 +59,6 @@ pub struct ImportAdder {
 }
 
 impl ImportAdder {
-
     pub fn new(
         _program: &Program,
         checker: Arc<Checker>,
@@ -100,17 +98,14 @@ impl ImportAdderTrait for ImportAdder {
         _symbol: &Symbol,
         _is_valid_type_only_use_site: bool,
     ) {
-
         todo!("add_import_from_exported_symbol requires checker and export resolution")
     }
 
     fn add_import_fix(&mut self, _fix: &Fix) {
-
         todo!("add_import_fix requires change.Tracker infrastructure")
     }
 
     fn edits(&mut self) -> Vec<TextEdit> {
-
         todo!("edits requires change.Tracker infrastructure")
     }
 }

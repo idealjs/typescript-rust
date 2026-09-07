@@ -26,13 +26,11 @@ impl std::fmt::Display for LsError {
 impl std::error::Error for LsError {}
 
 impl LanguageService {
-
     pub fn get_symbol_at_position(
         &self,
         _file_name: &str,
         _position: usize,
     ) -> Result<Option<Arc<Symbol>>, LsError> {
-
         let (_program, file) = self.try_get_program_and_file(_file_name);
         let file = file.ok_or_else(|| LsError::NoSourceFile(_file_name.to_string()))?;
         let _ = file;
@@ -41,17 +39,14 @@ impl LanguageService {
     }
 
     pub fn get_symbol_at_location(&self, _node: &Arc<Node>) -> Option<Arc<Symbol>> {
-
         None
     }
 
     pub fn get_type_of_symbol(&self, _symbol: &Arc<Symbol>) -> Option<Arc<crate::checker::Type>> {
-
         None
     }
 }
 
 pub fn get_source_file_of_node(_node: &Arc<Node>) -> Option<Arc<SourceFile>> {
-
     None
 }
