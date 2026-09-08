@@ -87,7 +87,7 @@ impl Program {
         }
     }
 
-    pub(crate) fn includes_semantic_diagnostic(&self, d: &Diagnostic) -> bool {
+    pub fn includes_semantic_diagnostic(&self, d: &Diagnostic) -> bool {
         let Some(file) = &d.file else {
             return true;
         };
