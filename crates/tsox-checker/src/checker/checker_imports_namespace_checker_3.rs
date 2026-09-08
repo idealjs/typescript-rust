@@ -3,7 +3,106 @@
 use crate::checker::checker_imports_namespace::*;
 
 impl Checker {
+    // 裸说明符的程序内回退解析：node_modules / @types 约定路径（内存 FS 场景）
+    fn resolve_bare_specifier_in_program(&self, spec: &str) -> Option<String> {
+        let candidates = [
+            format!("/node_modules/@types/{spec}/index.d.ts"),
+            format!("/node_modules/{spec}/index.d.ts"),
+            format!("/node_modules/@types/{spec}.d.ts"),
+            format!("/node_modules/{spec}.d.ts"),
+        ];
+        for c in candidates {
+            if self.program.get_source_file(&c).is_some() {
+                return Some(c);
+            }
+        }
+        None
+    }
+
     pub(crate) fn type_of_imported_symbol(&mut self, symbol: &Arc<Symbol>) -> Option<Arc<Type>> {
+        // import * as X from "m"：X 的类型是模块命名空间类型（typeof import("m")）
+        if std::env::var_os("TSOX_DEBUG_QI").is_some() {
+            eprintln!(
+                "[tois] sym={} decls={:?} flags={:?}",
+                symbol.name,
+                symbol.declarations.iter().map(|d| d.kind).collect::<Vec<_>>(),
+                symbol.flags
+            );
+        }
+        if let Some(decl) = symbol
+            .declarations
+            .iter()
+            .find(|d| d.kind == SyntaxKind::NamespaceImport)
+        {
+            let mut cur = decl.parent.clone();
+            loop {
+                if std::env::var_os("TSOX_DEBUG_QI").is_some() {
+                    eprintln!("[nsi-walk] kind={:?}", cur.as_ref().map(|n| n.kind));
+                }
+                let Some(n) = cur else { break };
+                if let tsox_frontend::ast::NodeData::ImportDeclaration(id) = &n.data {
+                    let spec = id
+                        .module_specifier
+                        .text()
+                        .trim_matches(['"', '\'', '`'])
+                        .to_string();
+                    if std::env::var_os("TSOX_DEBUG_QI").is_some() {
+                        let three_files: Vec<String> = self
+                            .program
+                            .source_files()
+                            .iter()
+                            .filter(|f| f.file_name.contains("three"))
+                            .map(|f| f.file_name.clone())
+                            .collect();
+                        eprintln!("[nsi-fs] three_files={three_files:?} spec={spec:?}");
+                    }
+                    let module_sym = self
+                        .resolve_module_file_symbol(&spec)
+                        .or_else(|| {
+                            let file = self
+                                .display_enclosing_file
+                                .clone()
+                                .or_else(|| self.current_file.clone())?;
+                            let dir = match file.file_name.rfind('/') {
+                                Some(i) => file.file_name[..i].to_string(),
+                                None => String::new(),
+                            };
+                            self.resolve_module_file_symbol_in(&dir, &spec)
+                        })
+                        .or_else(|| {
+                            let file = self
+                                .display_enclosing_file
+                                .clone()
+                                .or_else(|| self.current_file.clone())?;
+                            let path = self.program.resolve_external_module_path(
+                                &spec,
+                                &file.file_name,
+                                tsox_core::core::compiler_options::ModuleKind::None,
+                            );
+                            if std::env::var_os("TSOX_DEBUG_QI").is_some() {
+                                eprintln!(
+                                    "[nsi-res] spec={spec:?} from={:?} path={path:?}",
+                                    file.file_name
+                                );
+                            }
+                            let path = match path {
+                                Some(p) => p,
+                                // 内存 FS 下 @types 查找缺 package.json 时 Resolver 失败：
+                                // 直接按 node_modules 约定路径匹配程序内已加载文件
+                                None => self.resolve_bare_specifier_in_program(&spec)?,
+                            };
+                            let sf = self.program.get_source_file(&path)?;
+                            self.program.symbol_map().symbol_of(&sf.node).cloned()
+                        })?;
+                    // 记录显示用 specifier（模块类型显示 typeof import("spec")）
+                    self.module_display_specifiers
+                        .insert(module_sym.id(), spec.clone());
+                    return Some(self.get_type_of_symbol(&module_sym));
+                }
+                cur = n.parent.clone();
+            }
+            return None;
+        }
         if let Some(decl) = symbol
             .declarations
             .iter()

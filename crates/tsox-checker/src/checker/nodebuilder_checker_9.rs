@@ -1,6 +1,7 @@
 #![allow(unused_imports)]
 
 use crate::checker::nodebuilder::*;
+use tsox_frontend::ast::is_global_scope_augmentation;
 use crate::checker::nodebuilder_type_format_flags_2::TypeFormatFlags;
 
 impl Checker {
@@ -171,6 +172,14 @@ impl Checker {
             if !ns.flags.contains(SymbolFlags::ValueModule) {
                 return None;
             }
+            // declare global 增强容器不参与限定名
+            if ns
+                .declarations
+                .iter()
+                .any(|d| tsox_frontend::ast::is_global_scope_augmentation(d))
+            {
+                break;
+            }
             // hover 在该命名空间声明内：符号就地可访问，无需限定
             if let Some(enclosing) = self.display_enclosing_node.clone()
                 && ns
@@ -212,6 +221,10 @@ impl Checker {
         while let Some(ns) = cur {
             if !ns.flags.contains(SymbolFlags::ValueModule) {
                 return None;
+            }
+            // declare global 增强容器不参与限定名（tsc IsGlobalScopeAugmentation 跳过）
+            if ns.declarations.iter().any(|d| tsox_frontend::ast::is_global_scope_augmentation(d)) {
+                break;
             }
             if ns.declarations.iter().any(|d| d.kind == SyntaxKind::SourceFile) {
                 break;
@@ -422,6 +435,10 @@ impl Checker {
                 .iter()
                 .any(|d| d.kind == SyntaxKind::SourceFile)
             {
+                let recorded = self.module_display_specifiers.get(&sym.id()).cloned();
+                if let Some(spec) = recorded {
+                    return format!("typeof import(\"{spec}\")");
+                }
                 return format!("typeof import(\"{}\")", module_specifier_of_name(&sym.name));
             }
             for d in &sym.declarations {

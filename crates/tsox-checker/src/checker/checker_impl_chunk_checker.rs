@@ -234,6 +234,7 @@ impl Checker {
             current_file: None,
             current_file_id: 0,
             display_enclosing_file: None,
+            module_display_specifiers: std::collections::HashMap::new(),
             display_enclosing_node: None,
             current_file_symbol: None,
             scope_stack: Vec::new(),
