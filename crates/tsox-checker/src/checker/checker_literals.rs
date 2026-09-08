@@ -272,10 +272,12 @@ impl Checker {
             _ => return self.get_any_type(),
         };
         if elements.is_empty() {
+            // Go：strictNullChecks 用 implicitNeverType；非严格用 undefinedWideningType
+            // （widening 标志使推断结果最终 widen 为 any，如 _.all([], ...) → T=any）
             let elem = if self.strict_null_checks {
                 self.never_type()
             } else {
-                self.undefined_type()
+                self.nullish_widening_type(self.undefined_type())
             };
             return self.create_array_type(elem);
         }

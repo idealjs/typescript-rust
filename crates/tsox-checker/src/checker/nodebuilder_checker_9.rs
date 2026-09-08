@@ -154,6 +154,14 @@ impl Checker {
     // Go getSymbolChain 的别名感知限定：命名空间父级链显示时，
     // 遇显示上下文文件内解析到该命名空间的别名用别名名；到 enclosing 文件自身模块不加前缀
     pub(crate) fn namespace_qualifier_of(&mut self, symbol: &Arc<Symbol>) -> Option<String> {
+        if std::env::var_os("TSOX_DEBUG_QI").is_some() {
+            let p_info = symbol
+                .parent
+                .clone()
+                .map(|p| format!("{}/flags={:?}", p.name, p.flags))
+                .unwrap_or_else(|| "NONE".into());
+            eprintln!("[nsq] sym={} parent={p_info}", symbol.name);
+        }
         let mut parts: Vec<String> = Vec::new();
         let mut cur = symbol
             .parent
@@ -185,6 +193,28 @@ impl Checker {
             }
             if is_file_module {
                 return if parts.is_empty() { None } else { Some(parts.join(".")) };
+            }
+            parts.insert(0, ns.name.clone());
+            cur = ns.parent.clone();
+        }
+        if parts.is_empty() {
+            None
+        } else {
+            Some(parts.join("."))
+        }
+    }
+
+    // 类型成员限定名：只收集命名空间段（ValueModule 且非文件模块），不使用 alias 前缀
+    // （tsc getSymbolChain：外部模块 root 的链段被跳过；值成员才经 alias 显示）
+    pub(crate) fn namespace_only_qualifier_of(&mut self, symbol: &Arc<Symbol>) -> Option<String> {
+        let mut parts: Vec<String> = Vec::new();
+        let mut cur = symbol.parent.clone();
+        while let Some(ns) = cur {
+            if !ns.flags.contains(SymbolFlags::ValueModule) {
+                return None;
+            }
+            if ns.declarations.iter().any(|d| d.kind == SyntaxKind::SourceFile) {
+                break;
             }
             parts.insert(0, ns.name.clone());
             cur = ns.parent.clone();

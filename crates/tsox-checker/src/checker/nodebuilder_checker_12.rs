@@ -115,18 +115,39 @@ impl Checker {
         }
         let obj_type = self.get_type_of_node(&pae.expression);
         let obj_data = obj_type.as_object()?;
-        if obj_data.type_arguments.is_empty() {
-            return None;
-        }
         let class_sym = obj_type.symbol.as_ref()?;
         if !class_sym.flags.intersects(SymbolFlags::Class | SymbolFlags::Interface) {
             return None;
         }
+        // 方法成员（泛型与非泛型 owner 均可）：调用位推断实参 + 限定名 + 方法形态
         let prop_sym = self.get_property_of_type(&obj_type, &node.text())?;
         let prop_type = self.substituted_member_type_of(&obj_type, &prop_sym);
-        let is_method = prop_type
-            .as_structured()
-            .is_some_and(|s| !s.call_signatures().is_empty());
+        let is_method = prop_sym.flags.intersects(SymbolFlags::Method)
+            || prop_sym.declarations.iter().any(|d| {
+                matches!(d.kind, SyntaxKind::MethodSignature | SyntaxKind::MethodDeclaration)
+            });
+        let sig = prop_type.as_structured().and_then(|s| s.call_signatures().first().cloned());
+        if !is_method && obj_data.type_arguments.is_empty() {
+            return None;
+        }
+        // 调用位：从实参推断类型实参（f<a>(...) 形态）
+        let call = p.parent.clone().filter(|c| c.kind == SyntaxKind::CallExpression);
+        let inferred: Vec<Arc<Type>> = match (&call, &sig) {
+            (Some(call_node), Some(sig)) => {
+                let args: Vec<Arc<Node>> = match &call_node.data {
+                    tsox_frontend::ast::NodeData::CallExpression(d) => {
+                        d.arguments.iter().cloned().collect()
+                    }
+                    _ => Vec::new(),
+                };
+                if !sig.type_parameters.is_empty() {
+                    self.infer_call_type_arguments(call_node, sig, &args)
+                } else {
+                    Vec::new()
+                }
+            }
+            _ => Vec::new(),
+        };
         let mut parts = Vec::new();
         if is_method {
             push_punctuation(&mut parts, "(");
@@ -137,27 +158,49 @@ impl Checker {
             push_part(&mut parts, "property", DisplayPartKind::Text);
             push_punctuation(&mut parts, ") ");
         }
-        push_part(&mut parts, &class_sym.name, DisplayPartKind::ClassName);
-        let args: Vec<String> = obj_data
-            .type_arguments
-            .iter()
-            .map(|a| self.type_to_string(a))
-            .collect();
-        push_punctuation(&mut parts, "<");
-        push_part(&mut parts, &args.join(", "), DisplayPartKind::Text);
-        push_punctuation(&mut parts, ">");
+        // 限定名：命名空间限定 + 接口/类名 + 成员名
+        let ns_prefix = self
+            .namespace_only_qualifier_of(class_sym)
+            .map(|q| format!("{q}."))
+            .unwrap_or_default();
+        push_part(
+            &mut parts,
+            &format!("{ns_prefix}{}", class_sym.name),
+            DisplayPartKind::ClassName,
+        );
+        if !obj_data.type_arguments.is_empty() {
+            let args: Vec<String> = obj_data
+                .type_arguments
+                .iter()
+                .map(|a| self.type_to_string(a))
+                .collect();
+            push_punctuation(&mut parts, "<");
+            push_part(&mut parts, &args.join(", "), DisplayPartKind::Text);
+            push_punctuation(&mut parts, ">");
+        }
         push_punctuation(&mut parts, ".");
         push_part(&mut parts, &node.text(), DisplayPartKind::PropertyName);
         if is_method {
-            if let Some(structured) = prop_type.as_structured()
-                && let Some(sig) = structured.call_signatures().first()
-            {
+            if let Some(sig) = &sig {
+                if !inferred.is_empty() {
+                    let names: Vec<String> =
+                        inferred.iter().map(|t| self.type_to_string(t)).collect();
+                    push_punctuation(&mut parts, "<");
+                    push_part(&mut parts, &names.join(", "), DisplayPartKind::Text);
+                    push_punctuation(&mut parts, ">");
+                }
+                // 参数与返回都按推断实参实例化显示（Go writeSignature display）
+                let inst = if inferred.is_empty() {
+                    Arc::clone(sig)
+                } else {
+                    self.get_signature_instantiation(sig, &inferred)
+                };
                 push_punctuation(&mut parts, "(");
-                self.append_signature_parameter_parts(&mut parts, sig);
+                self.append_signature_parameter_parts(&mut parts, &inst);
                 push_punctuation(&mut parts, ")");
                 push_space(&mut parts, ": ");
                 let ret = self
-                    .get_return_type_of_signature(sig)
+                    .get_return_type_of_signature(&inst)
                     .unwrap_or_else(|| self.any_type());
                 parts.extend(self.type_to_display_parts(&ret));
             }
@@ -1567,7 +1610,11 @@ impl Checker {
                 push_punctuation(parts, "...");
             }
             push_part(parts, &param.name, DisplayPartKind::ParameterName);
-            if param.flags.contains(SymbolFlags::Optional) {
+            // binder 不给参数符号设 Optional：从声明 question token / initializer 判定
+            let declared_optional = param.declarations.iter().any(|d| {
+                matches!(&d.data, tsox_frontend::ast::NodeData::ParameterDeclaration(pd) if pd.question_token.is_some() || pd.initializer.is_some())
+            });
+            if param.flags.contains(SymbolFlags::Optional) || declared_optional {
                 push_punctuation(parts, "?");
             }
             push_space(parts, ": ");

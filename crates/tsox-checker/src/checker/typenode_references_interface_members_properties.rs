@@ -101,7 +101,10 @@ impl Checker {
             return;
         }
         let fn_type = self.create_function_or_constructor_type(vec![sig], false);
-        let symbol = Arc::new(Symbol::new(SymbolFlags::Property, name.clone()));
+        // tsc 接口方法成员：SymbolFlags.Method + 方法签名声明（quick info (method) 身份用）
+        let mut symbol = Symbol::new(SymbolFlags::Property | SymbolFlags::Method, name.clone());
+        symbol.declarations.push(Arc::clone(&member));
+        let symbol = Arc::new(symbol);
         self.value_symbol_links.insert(
             &symbol,
             ValueSymbolLinks {
