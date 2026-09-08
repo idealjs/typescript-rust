@@ -285,29 +285,50 @@ impl Checker {
             if elem.kind == SyntaxKind::SpreadElement {
                 return self.create_array_type(self.get_any_type());
             }
+            // Go checkArrayLiteral：元素参与 best common supertype 的 subtype reduction。
+            // fresh literal widen（[1] → number[]）；null/undefined 保持原始形态参与
+            // 缩减（null ⊑ 其他成员时被移除），不做先行 widen
             let t = self.get_type_of_node(elem);
-
-            // tsc getWidenedType：null/undefined（requiresWidening）在非严格模式 widen 为 any
             let widened = if crate::checker::is_object_literal_type(&t) {
                 self.widen_initializer_type(&t)
+            } else if t.flags.intersects(
+                TypeFlags::Null | TypeFlags::Undefined,
+            ) {
+                t
             } else {
                 self.get_widened_type(&t)
             };
             element_types.push(widened);
         }
 
-        let first = &element_types[0];
-        let all_same = element_types[1..]
-            .iter()
-            .all(|t| Arc::ptr_eq(t, first) || self.types_are_equal(t, first));
-        if all_same {
-            return self.create_array_type(Arc::clone(first));
-        }
-
-        // Go checkArrayLiteral：元素联合走 UnionReductionSubtype
-        // （相同结构成员归一、{name,age} ⊑ I 时移除字面量成员）
+        // Go getUnionTypeWorker：subtype reduction 移除可赋给其他成员的类型
+        // （非严格下 null/undefined ⊑ 任何类型，先被移除）
         let reduced = self.remove_subtype_redundant_members(element_types);
+        if reduced.is_empty() {
+            // 全部成员互删（如 [null, undefined]）：Go 空集返回 nullWideningType → any
+            return self.create_array_type(self.get_any_type());
+        }
+        if reduced.len() == 1 {
+            // 剩余成员是 null/undefined（widening）时终局 widen 为 any（[null] → any[]）
+            let only = &reduced[0];
+            if !self.strict_null_checks
+                && only
+                    .flags
+                    .intersects(TypeFlags::Null | TypeFlags::Undefined)
+            {
+                return self.create_array_type(self.get_any_type());
+            }
+            return self.create_array_type(Arc::clone(only));
+        }
+        let has_nullable = reduced
+            .iter()
+            .any(|t| t.flags.intersects(TypeFlags::Null | TypeFlags::Undefined));
         let elem_union = self.get_union_type(reduced);
+        // 非严格下联合含剩余 null/undefined 时终局 widen 为 any
+        if !self.strict_null_checks && has_nullable {
+            let elem_any = self.get_any_type();
+            return self.create_array_type(elem_any);
+        }
         self.create_array_type(elem_union)
     }
 }

@@ -303,12 +303,17 @@ impl Checker {
                 continue;
             }
             let source = &types[i];
-            if !source.flags.intersects(
-                TypeFlags::Object
-                    | TypeFlags::Union
-                    | TypeFlags::Intersection
-                    | TypeFlags::TypeParameter,
-            ) {
+            // 非严格模式下 widening null/undefined 可赋给任何类型，参与缩减
+            let nullable_source = !self.strict_null_checks
+                && source.flags.intersects(TypeFlags::Null | TypeFlags::Undefined);
+            if !nullable_source
+                && !source.flags.intersects(
+                    TypeFlags::Object
+                        | TypeFlags::Union
+                        | TypeFlags::Intersection
+                        | TypeFlags::TypeParameter,
+                )
+            {
                 continue;
             }
             for (j, target) in types.iter().enumerate() {
