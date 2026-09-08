@@ -123,10 +123,14 @@ impl Checker {
         }
         state.bivariant = save_biv;
 
+        // Go applyToReturnTypes：仅当 target 返回类型含类型变量时才推断
+        // （此前无条件推断会向无类型变量的 target 灌入垃圾候选）
         let st = self.get_return_type_of_signature(source);
         let tt = self.get_return_type_of_signature(target);
         if let (Some(st), Some(tt)) = (st, tt) {
-            self.infer_from_types(state, &st, &tt);
+            if self.could_contain_type_variables(&tt) {
+                self.infer_from_types(state, &st, &tt);
+            }
         }
     }
 

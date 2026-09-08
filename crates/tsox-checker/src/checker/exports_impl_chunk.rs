@@ -204,21 +204,100 @@ impl Checker {
         None
     }
 
+    // Go checker.isContextSensitive：递归判定（函数/嵌套箭头/||、??/条件/数组/对象字面量/括号）
     pub fn is_context_sensitive(&self, node: &Arc<Node>) -> bool {
         use tsox_frontend::ast::NodeData;
-        let (parameters, type_parameters) = match &node.data {
-            NodeData::ArrowFunction(d) => (&d.parameters, d.type_parameters.is_some()),
-            NodeData::FunctionExpression(d) => (&d.parameters, d.type_parameters.is_some()),
-            NodeData::MethodDeclaration(d) => (&d.parameters, d.type_parameters.is_some()),
-            _ => return false,
-        };
-        if type_parameters {
+        match &node.data {
+            NodeData::FunctionExpression(d) => self.is_context_sensitive_fn_like(
+                d.type_parameters.is_some(),
+                &d.parameters,
+                d.type_node.as_ref(),
+                Some(&d.body),
+                false,
+            ),
+            NodeData::ArrowFunction(d) => self.is_context_sensitive_fn_like(
+                d.type_parameters.is_some(),
+                &d.parameters,
+                d.type_node.as_ref(),
+                Some(&d.body),
+                true,
+            ),
+            NodeData::MethodDeclaration(d) => self.is_context_sensitive_fn_like(
+                d.type_parameters.is_some(),
+                &d.parameters,
+                d.type_node.as_ref(),
+                d.body.as_ref(),
+                false,
+            ),
+            NodeData::FunctionDeclaration(d) => self.is_context_sensitive_fn_like(
+                d.type_parameters.is_some(),
+                &d.parameters,
+                d.type_node.as_ref(),
+                d.body.as_ref(),
+                false,
+            ),
+            NodeData::ObjectLiteralExpression(d) => d.properties.iter().any(|p| self.is_context_sensitive(p)),
+            NodeData::ArrayLiteralExpression(d) => d.elements.iter().any(|e| self.is_context_sensitive(e)),
+            NodeData::ConditionalExpression(d) => {
+                self.is_context_sensitive(&d.when_true) || self.is_context_sensitive(&d.when_false)
+            }
+            NodeData::BinaryExpression(d)
+                if matches!(
+                    d.operator_token.kind,
+                    SyntaxKind::BarBarToken | SyntaxKind::QuestionQuestionToken
+                ) =>
+            {
+                self.is_context_sensitive(&d.left) || self.is_context_sensitive(&d.right)
+            }
+            NodeData::PropertyAssignment(d) => self.is_context_sensitive(&d.initializer),
+            NodeData::ParenthesizedExpression(d) => self.is_context_sensitive(&d.expression),
+            _ => false,
+        }
+    }
+
+    fn is_context_sensitive_fn_like(
+        &self,
+        has_type_parameters: bool,
+        parameters: &tsox_frontend::ast::NodeList,
+        type_node: Option<&Arc<Node>>,
+        body: Option<&Arc<Node>>,
+        is_arrow: bool,
+    ) -> bool {
+        use tsox_frontend::ast::NodeData;
+        if has_type_parameters {
             return false;
         }
-        // Go ast.HasContextSensitiveParameters：存在无注解参数即上下文敏感
-        parameters.iter().any(|p| {
+        // Go HasContextSensitiveParameters：任一参数无注解即敏感
+        if parameters.iter().any(|p| {
             matches!(&p.data, NodeData::ParameterDeclaration(pd) if pd.type_node.is_none())
-        })
+        }) {
+            return true;
+        }
+        // 非箭头：首参非显式 this 时，函数体含 this 引用即敏感
+        if !is_arrow {
+            let first_is_this = parameters.iter().next().is_some_and(|p| {
+                matches!(&p.data, NodeData::ParameterDeclaration(pd)
+                    if matches!(&pd.name.data, NodeData::Identifier(id) if id.text == "this"))
+            });
+            if !first_is_this
+                && let Some(b) = body
+                && body_contains_this(b)
+            {
+                return true;
+            }
+        }
+        // Go hasContextSensitiveReturnExpression：无返回注解时按 return 表达式递归
+        if type_node.is_none()
+            && let Some(b) = body
+        {
+            if b.kind != SyntaxKind::Block {
+                return self.is_context_sensitive(b);
+            }
+            if let Some(hit) = for_each_return_expression(b) {
+                return self.is_context_sensitive(&hit);
+            }
+        }
+        false
     }
 
     pub fn fill_missing_type_arguments(
@@ -270,4 +349,45 @@ impl Checker {
     pub fn create_type_checker_cache(&self) {}
 
     pub fn clear_possible_type_requests(&mut self) {}
+}
+
+fn body_contains_this(node: &Arc<Node>) -> bool {
+    if node.kind == SyntaxKind::ThisKeyword {
+        return true;
+    }
+    if matches!(node.data, tsox_frontend::ast::NodeData::FunctionExpression(_))
+        || matches!(node.data, tsox_frontend::ast::NodeData::ArrowFunction(_))
+        || matches!(node.data, tsox_frontend::ast::NodeData::MethodDeclaration(_))
+    {
+        return false;
+    }
+    let mut hit = false;
+    tsox_frontend::ast::node_data_generated::for_each_child(node, |c| {
+        hit = body_contains_this(c);
+        hit
+    });
+    hit
+}
+
+fn for_each_return_expression(body: &Arc<Node>) -> Option<Arc<Node>> {
+    if body.kind == SyntaxKind::ReturnStatement {
+        if let tsox_frontend::ast::NodeData::ReturnStatement(data) = &body.data {
+            return data.expression.clone();
+        }
+        return None;
+    }
+    if matches!(body.data, tsox_frontend::ast::NodeData::FunctionExpression(_))
+        || matches!(body.data, tsox_frontend::ast::NodeData::ArrowFunction(_))
+    {
+        return None;
+    }
+    let mut hit: Option<Arc<Node>> = None;
+    tsox_frontend::ast::node_data_generated::for_each_child(body, |c| {
+        if let Some(e) = for_each_return_expression(c) {
+            hit = Some(e);
+            return true;
+        }
+        false
+    });
+    hit
 }

@@ -121,22 +121,35 @@ impl Binder {
         let new_type_alias = new_flags.contains(SymbolFlags::TypeAlias);
         let class_side = SymbolFlags::Class;
 
+        // Go TypeAliasExcludes = SymbolFlagsType（仅类型意义 class/interface/enum）：
+        // type alias 与 class/interface/enum 相遇是 TS2300；与纯值声明（var/let/const/
+        // function）合法合并（lib 形态：type NodeFilter + declare var NodeFilter）
+        if (existing_type_alias
+            && new_flags
+                .intersects(SymbolFlags::Interface | SymbolFlags::Class | SymbolFlags::ENUM))
+            || (new_type_alias
+                && existing_flags
+                    .intersects(SymbolFlags::Interface | SymbolFlags::Class | SymbolFlags::ENUM))
+        {
+            return false;
+        }
+        // type alias 与纯值声明合并
+        if (existing_type_alias && new_flags.intersects(SymbolFlags::VALUE))
+            || (new_type_alias && existing_flags.intersects(SymbolFlags::VALUE))
+        {
+            return true;
+        }
+
         let enum_side = SymbolFlags::ENUM;
         if (existing_flags.intersects(enum_side) && new_interface)
             || (new_flags.intersects(enum_side) && existing_interface)
         {
             return false;
         }
-        if (existing_interface && !new_interface && !new_type_alias)
-            || (new_interface && !existing_interface && !existing_type_alias)
-            || (existing_type_alias
-                && !new_type_alias
-                && !new_flags.intersects(class_side)
-                && !new_interface)
-            || (new_type_alias
-                && !existing_type_alias
-                && !existing_flags.intersects(class_side)
-                && !existing_interface)
+        // Go InterfaceExcludes = Type & ^(Interface|Class)：interface 与 class/值意义
+        // （var/function 等）合法合并；type alias 冲突已由上方分支处理
+        if (existing_interface && new_flags.intersects(SymbolFlags::VALUE | SymbolFlags::Class))
+            || (new_interface && existing_flags.intersects(SymbolFlags::VALUE | SymbolFlags::Class))
         {
             return true;
         }

@@ -143,7 +143,14 @@ impl Checker {
                         break;
                     }
 
-                    let t = self.get_type_of_node(&data.name);
+                    let raw = self.get_type_of_node(&data.name);
+                    let t = self.get_widened_literal_type(&raw);
+                    // 回写变量符号类型（shorthand 引用的外层变量在字面量上下文中显示属性类型）
+                    if let Some(sym) = self.program.symbol_map().symbol_of(&data.name) {
+                        self.value_symbol_links
+                            .get_or_default(&sym)
+                            .resolved_type = Some(t.clone());
+                    }
                     prop_pairs.push((name, t, Some(Arc::clone(prop))));
                 }
                 NodeData::SpreadAssignment(_) => {
@@ -280,10 +287,11 @@ impl Checker {
             }
             let t = self.get_type_of_node(elem);
 
+            // tsc getWidenedType：null/undefined（requiresWidening）在非严格模式 widen 为 any
             let widened = if crate::checker::is_object_literal_type(&t) {
                 self.widen_initializer_type(&t)
             } else {
-                self.get_widened_type_of_literal(&t)
+                self.get_widened_type(&t)
             };
             element_types.push(widened);
         }

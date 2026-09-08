@@ -145,6 +145,7 @@ impl Parser {
                 self.parse_variable_statement()
             }
             SyntaxKind::IfKeyword => self.parse_if_statement(),
+            SyntaxKind::WithKeyword => self.parse_with_statement(),
             SyntaxKind::DoKeyword => self.parse_do_statement(),
             SyntaxKind::WhileKeyword => self.parse_while_statement(),
             SyntaxKind::ForKeyword => self.parse_for_statement(),

@@ -100,7 +100,9 @@ pub fn parse_test_data(contents: &str, default_file_name: &str) -> TestData {
 
     for line in contents.split('\n') {
         let trimmed = line.trim_start();
-        if let Some(rest) = trimmed.strip_prefix("// ") {
+        // 指令形态两种：`// @Filename:` 与 `//@Filename:`（tsc fourslash 均合法）
+        let rest_after_slashes = trimmed.strip_prefix("//").map(|r| r.trim_start_matches(' '));
+        if let Some(rest) = rest_after_slashes {
             if let Some(f) = strip_directive(rest, FILENAME_DIRECTIVE) {
                 acc.finish(default_file_name, &mut data);
                 acc = FileAccumulator::new();

@@ -175,7 +175,7 @@ impl Checker {
                 }
                 tsox_frontend::ast::NodeData::ShorthandPropertyAssignment(sa) => {
                     let t = self.get_type_of_node(&sa.name);
-                    (t, false)
+                    (self.get_widened_type_of_literal(&t), false)
                 }
                 tsox_frontend::ast::NodeData::GetAccessorDeclaration(gd) => {
                     let t = match &gd.type_node {

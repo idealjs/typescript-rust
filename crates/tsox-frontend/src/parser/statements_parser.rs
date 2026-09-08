@@ -3,6 +3,24 @@
 use crate::parser::statements::*;
 
 impl Parser {
+    pub(crate) fn parse_with_statement(&mut self) -> Arc<Node> {
+        let pos = self.token_pos();
+        self.expect(SyntaxKind::WithKeyword);
+        self.expect(SyntaxKind::OpenParenToken);
+        let expression = self.parse_expression();
+        self.expect(SyntaxKind::CloseParenToken);
+        let statement = self.parse_statement();
+        let end = statement.end();
+        Arc::new(Node::with_loc(
+            SyntaxKind::WithStatement,
+            NodeData::WithStatement(WithStatementData {
+                expression,
+                statement,
+            }),
+            TextRange::new(pos, end),
+        ))
+    }
+
     pub(crate) fn parse_if_statement(&mut self) -> Arc<Node> {
         let pos = self.token_pos();
         self.expect(SyntaxKind::IfKeyword);

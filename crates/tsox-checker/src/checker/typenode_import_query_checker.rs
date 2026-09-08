@@ -12,10 +12,76 @@ impl Checker {
         result
     }
 
+    fn module_specifier_of_external_ref(&self, module_reference: &Arc<Node>) -> Option<String> {
+        let tsox_frontend::ast::NodeData::ExternalModuleReference(emr) = &module_reference.data
+        else {
+            return None;
+        };
+        let tsox_frontend::ast::NodeData::StringLiteral(s) = &emr.expression.data else {
+            return None;
+        };
+        Some(s.text.trim_matches(['"', '\'', '`']).to_string())
+    }
+
+    fn resolve_module_file_symbol_relative(&self, spec: &str) -> Option<Arc<Symbol>> {
+        let file = self.display_enclosing_file.clone().or_else(|| self.current_file.clone())?;
+        let dir = match file.file_name.rfind('/') {
+            Some(i) => file.file_name[..i].to_string(),
+            None => String::new(),
+        };
+        self.resolve_module_file_symbol_in(&dir, spec)
+    }
+
     pub(crate) fn resolve_import_alias_target_symbol(
         &mut self,
         alias: &Arc<Symbol>,
     ) -> Option<Arc<Symbol>> {
+        // import X = require("./m") 形式：目标 = 模块的 export= 符号
+        if std::env::var_os("TSOX_DEBUG_QI").is_some() && alias.name == "C" {
+            eprintln!("[req-alias] C decls={:?}", alias.declarations.iter().map(|d| d.kind).collect::<Vec<_>>());
+        }
+        if let Some(decl) = alias
+            .declarations
+            .iter()
+            .find(|d| matches!(d.data, NodeData::ImportEqualsDeclaration(_)))
+        {
+            if let tsox_frontend::ast::NodeData::ImportEqualsDeclaration(data) = &decl.data {
+                let spec = self.module_specifier_of_external_ref(&data.module_reference)?;
+                let module_sym = self.resolve_module_file_symbol_relative(&spec)?;
+                // export = X：解析 export assignment 指向的符号（export=X 的 X 标识符）
+                let export_equals = module_sym
+                    .exports
+                    .get(tsox_frontend::ast::INTERNAL_SYMBOL_NAME_EXPORT_EQUALS)
+                    .cloned();
+                if std::env::var_os("TSOX_DEBUG_QI").is_some() {
+                    eprintln!("[req-alias] ee_found={}", export_equals.is_some());
+                }
+                if let Some(ee) = export_equals {
+                    if let Some(d) = ee
+                        .declarations
+                        .iter()
+                        .find(|d| matches!(d.data, NodeData::ExportAssignment(_)))
+                        && let NodeData::ExportAssignment(ea) = &d.data
+                    {
+                        // X 在模块文件顶层容器里（file locals / module members）
+                        let expr_name = ea.expression.text().to_string();
+                        let sym_map = self.program.symbol_map();
+                        let file_locals = d
+                            .parent
+                            .as_ref()
+                            .and_then(|sf| sym_map.locals.get(&sf.id()));
+                        if let Some(cs) = file_locals.and_then(|l| l.get(&expr_name).cloned()) {
+                            return Some(cs);
+                        }
+                        if let Some(cs) = module_sym.members.get(&expr_name).cloned() {
+                            return Some(cs);
+                        }
+                    }
+                    return Some(ee);
+                }
+                return Some(module_sym);
+            }
+        }
         let (member_name, import_decl): (String, Arc<Node>) = {
             let decl = alias
                 .declarations
