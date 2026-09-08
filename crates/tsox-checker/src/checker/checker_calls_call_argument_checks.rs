@@ -100,7 +100,16 @@ impl Checker {
                 let pt = Arc::clone(&param_type);
                 self.check_contextual_elements(arg, &pt, arg.loc);
             }
-            let arg_type = self.get_type_of_node(arg);
+            // 上下文敏感实参（箭头/函数表达式含无注解参数）：用固定后的参数类型重定型，
+            // 与 infer_type_arguments 两阶段一致（节点缓存的类型是未固定形态）
+            let arg_type = if !sig.type_parameters.is_empty()
+                && !inferred_types.is_empty()
+                && self.is_context_sensitive(arg)
+            {
+                self.type_of_context_sensitive_arg(arg, &param_type)
+            } else {
+                self.get_type_of_node(arg)
+            };
 
             let display_param = if i < sig.parameters.len() {
                 let param_optional = sig.parameters[i]

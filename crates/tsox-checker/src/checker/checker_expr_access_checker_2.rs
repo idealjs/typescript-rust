@@ -55,6 +55,14 @@ impl Checker {
             arg.kind,
             SyntaxKind::ArrowFunction | SyntaxKind::FunctionExpression
         );
+        // Go chooseOverload 的 SkipContextSensitive：泛型 callee 的上下文敏感实参
+        // 不做预先检查，待推断固定类型参数后重定型（否则参数以未固定 T 定型污染节点缓存）
+        if is_function_arg
+            && self.is_context_sensitive(arg)
+            && self.callee_has_generic_signature(callee_expr)
+        {
+            return;
+        }
         if is_function_arg {
             let ctx = self.contextual_param_count_for_arg(callee_expr, arg_index);
             if std::env::var_os("TSOX_DEBUG_SYMBOL").is_some() {
@@ -66,6 +74,13 @@ impl Checker {
         if is_function_arg {
             self.call_arg_arrow_context.pop();
         }
+    }
+
+    fn callee_has_generic_signature(&mut self, callee_expr: &Arc<Node>) -> bool {
+        let callee_type = self.get_type_of_node(callee_expr);
+        self.get_signatures_of_type(&callee_type, crate::checker::SignatureKind::Call)
+            .first()
+            .is_some_and(|sig| !sig.type_parameters.is_empty())
     }
 
     pub(crate) fn contextual_signature_of_arrow(

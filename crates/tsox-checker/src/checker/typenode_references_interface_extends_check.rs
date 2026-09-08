@@ -73,6 +73,15 @@ impl Checker {
                             std::mem::replace(&mut self.relater_error_chain, saved_chain);
                         self.relater_chain_active = was_active;
                         if incompatible {
+                            if std::env::var_os("TSOX_DEBUG_INFER").is_some() {
+                                eprintln!(
+                                    "[ext-check] {} extends: prop={} dt={} bt={}",
+                                    symbol.name,
+                                    own_prop.name,
+                                    self.type_to_string(&dt),
+                                    self.type_to_string(&bt)
+                                );
+                            }
                             self.interface_extends_reported.insert(dedup_key);
                             let base_name = base
                                 .symbol

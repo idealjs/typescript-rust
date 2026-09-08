@@ -13,6 +13,11 @@ impl Checker {
         if t.object_flags.contains(ObjectFlags::Reference)
             && o.target.is_none()
             && o.type_arguments.len() == 1
+            && t.symbol.as_ref().is_some_and(|s| {
+                self.globals
+                    .get("Array")
+                    .is_some_and(|arr| Arc::ptr_eq(arr, s))
+            })
         {
             let new_elem =
                 self.substitute_infer_type_parameters(&o.type_arguments[0], params, substitutions);
@@ -63,13 +68,51 @@ impl Checker {
                         }
                     })
                     .collect();
+                let new_signatures: Vec<Arc<Signature>> = o
+                    .structured
+                    .signatures
+                    .iter()
+                    .map(|sig| {
+                        let Some(old_inst) = sig.instantiated_parameter_types.as_ref() else {
+                            return Arc::clone(sig);
+                        };
+                        let new_inst: Vec<Arc<Type>> = old_inst
+                            .iter()
+                            .map(|pt| {
+                                self.substitute_infer_type_parameters(pt, params, substitutions)
+                            })
+                            .collect();
+                        let changed = old_inst
+                            .iter()
+                            .zip(new_inst.iter())
+                            .any(|(old, new)| !Arc::ptr_eq(old, new));
+                        if !changed {
+                            return Arc::clone(sig);
+                        }
+                        let mut inst = Signature::new();
+                        inst.flags = sig.flags;
+                        inst.min_argument_count = sig.min_argument_count;
+                        inst.resolved_min_argument_count = sig.resolved_min_argument_count;
+                        inst.declaration = sig.declaration.clone();
+                        inst.target = sig.target.clone();
+                        inst.parameters = sig.parameters.clone();
+                        inst.this_parameter = sig.this_parameter.clone();
+                        inst.type_parameters = sig.type_parameters.clone();
+                        inst.resolved_type_predicate = sig.resolved_type_predicate.clone();
+                        inst.instantiated_parameter_types = Some(new_inst);
+                        if let Some(rt) = self.get_return_type_of_signature(sig) {
+                            let _ = inst.resolved_return_type.set(rt);
+                        }
+                        Arc::new(inst)
+                    })
+                    .collect();
                 let mut rebuilt = Type::new(
                     t.flags,
                     TypeData::Object(ObjectTypeData {
                         structured: StructuredTypeData {
                             members: o.structured.members.clone(),
                             properties: o.structured.properties.clone(),
-                            signatures: o.structured.signatures.clone(),
+                            signatures: new_signatures,
                             call_signature_count: o.structured.call_signature_count,
                             index_infos: new_index_infos,
                             ..Default::default()

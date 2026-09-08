@@ -214,6 +214,11 @@ impl Checker {
         }
         if !inference.is_fixed {
             let candidate = propagation_type.unwrap_or_else(|| Arc::clone(source));
+            // 自引用推断（T←T）无信息量：Go 用 non-fixing mapper 让上下文化实参的类型参数
+            // 引用脱离推断跟踪，此处以候选与被推断类型参数符号等价拦截
+            if crate::checker::utilities::type_parameters_match(&candidate, &inference.type_parameter) {
+                return;
+            }
             if priority.bits() < inference.priority.bits() {
                 inference.candidates.clear();
                 inference.candidate_depths.clear();
@@ -229,15 +234,6 @@ impl Checker {
                         .iter()
                         .any(|c| Arc::ptr_eq(c, &candidate))
                     {
-                        if std::env::var_os("TSOX_DEBUG_INFER").is_some() {
-                            eprintln!(
-                                "[contra-rec] depth={} biv={} tp={} cand={}",
-                                depth,
-                                bivariant,
-                                self.type_to_string(&inference.type_parameter),
-                                self.type_to_string(&candidate)
-                            );
-                        }
                         inference.contra_candidates.push(candidate);
                         cleared = true;
                     }

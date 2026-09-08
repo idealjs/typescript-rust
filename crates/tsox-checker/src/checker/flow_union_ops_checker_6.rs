@@ -41,11 +41,22 @@ impl Checker {
         if t.flags.contains(TypeFlags::Object)
             && t.object_flags.contains(ObjectFlags::Anonymous)
             && let Some(structured) = t.as_structured()
-            && structured.call_signature_count > 0
+            && (structured.call_signature_count > 0 || !structured.construct_signatures().is_empty())
             && !self.is_array_type(t)
             && !matches!(&t.data, TypeData::EvolvingArray(_))
         {
+            // tsc resolveStructuredTypeMembers：无 symbol 的函数类型成员取全局 Function 接口
             if let Some(function_sym) = self.globals.get("Function") {
+                if let Some(declared) = self
+                    .type_alias_links
+                    .get(function_sym)
+                    .and_then(|l| l.declared_type.clone())
+                    && let Some(member) = declared
+                        .as_structured()
+                        .and_then(|s| s.members.get(name).cloned())
+                {
+                    return Some(member);
+                }
                 if let Some(member) = function_sym.members.get(name) {
                     return Some(Arc::clone(member));
                 }
@@ -54,6 +65,17 @@ impl Checker {
 
         if let Some(interface_name) = self.primitive_interface_name(t) {
             if let Some(sym) = self.globals.get(interface_name) {
+                // 原始类型的接口成员在声明类型里（binder 不往接口符号 members 塞成员）
+                if let Some(declared) = self
+                    .type_alias_links
+                    .get(sym)
+                    .and_then(|l| l.declared_type.clone())
+                    && let Some(member) = declared
+                        .as_structured()
+                        .and_then(|s| s.members.get(name).cloned())
+                {
+                    return Some(member);
+                }
                 if let Some(member) = sym.members.get(name) {
                     return Some(Arc::clone(member));
                 }

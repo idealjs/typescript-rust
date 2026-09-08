@@ -189,7 +189,16 @@ impl Checker {
             }
             let member_type = self.get_type_of_symbol(member_sym);
 
-            let prop_sym = Arc::new(Symbol::new(SymbolFlags::Property, name.clone()));
+            // 保留成员原始身份（flags/声明/父链），显示 var A.Y 等限定前缀用
+            let prop_sym = {
+                let s = Arc::as_ptr(member_sym) as *mut Symbol;
+                unsafe {
+                    if (*s).parent.is_none() {
+                        (*s).parent = Some(Arc::clone(symbol));
+                    }
+                }
+                Arc::clone(member_sym)
+            };
             self.value_symbol_links.insert(
                 &prop_sym,
                 ValueSymbolLinks {

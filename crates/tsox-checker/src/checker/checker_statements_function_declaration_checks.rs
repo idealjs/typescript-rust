@@ -40,6 +40,10 @@ impl Checker {
                 && data.body.is_none()
                 && let Some(name) = &data.name
                 && name.kind == SyntaxKind::Identifier
+                && !self
+                    .current_file
+                    .as_ref()
+                    .is_some_and(|f| f.has_parse_diagnostics)
             {
                 let file = self.current_file.clone();
                 let diagnostic = tsox_frontend::ast::Diagnostic::new(

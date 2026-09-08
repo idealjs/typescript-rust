@@ -18,6 +18,13 @@ impl Checker {
             matches!(&first.data, NodeData::ParameterDeclaration(fd)
                 if matches!(&fd.name.data, NodeData::Identifier(id) if id.text == "this"))
         });
+        // 无注解 this 参数：取上下文签名 this 参数类型（Go getTypeForVariableLikeDeclaration 的 InternalSymbolNameThis 分支）
+        if is_this_param {
+            if let Some(ctx_this) = ctx_sig.this_parameter.clone() {
+                return Some(self.get_type_of_symbol(&ctx_this));
+            }
+            return Some(self.get_void_type());
+        }
         let si = i - usize::from(!is_this_param && src_has_this && i > 0);
         let is_last = parameters
             .iter()

@@ -81,6 +81,20 @@ impl Checker {
             }
         }
 
+        // 循环引用中的接口壳（声明正在解析、成员未就绪）：比较无意义，放行
+        if source.flags.contains(TypeFlags::Object)
+            && source
+                .symbol
+                .as_ref()
+                .is_some_and(|s| {
+                    self.pending_interface_shells
+                        .contains_key(&(Arc::as_ptr(s) as *const tsox_frontend::ast::Symbol as usize))
+                })
+            && source.as_structured().is_some_and(|s| s.members.entries.is_empty())
+        {
+            return true;
+        }
+
         if !source.flags.intersects(
             TypeFlags::Object
                 | TypeFlags::Union

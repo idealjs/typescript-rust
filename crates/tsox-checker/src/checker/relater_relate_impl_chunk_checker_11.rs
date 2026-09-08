@@ -88,7 +88,7 @@ impl Checker {
                         );
                     }
                     if related.is_false() {
-                        related = self.compare_types(target_this, source_this, relation, false);
+                        related = self.compare_types(target_this.clone(), source_this, relation, false);
                     }
                     if related.is_false() {
                         return Ternary::False;

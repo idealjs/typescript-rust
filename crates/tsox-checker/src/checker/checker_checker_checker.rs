@@ -162,6 +162,7 @@ pub struct Checker {
     pub array_type_cache: std::collections::HashMap<(usize, usize), Arc<Type>>,
     pub interface_instantiation_cache:
         std::collections::HashMap<Vec<usize>, (Vec<Arc<Type>>, Arc<Type>)>,
+    pub pending_interface_shells: std::collections::HashMap<usize, Arc<Type>>,
     pub attached_type_args_cache:
         std::collections::HashMap<Vec<usize>, (Arc<Type>, Vec<Arc<Type>>, Arc<Type>)>,
     pub typequery_instantiation_cache:
@@ -180,6 +181,8 @@ pub struct Checker {
     pub type_print_stack: Vec<usize>,
     pub current_file: Option<Arc<SourceFile>>,
     pub current_file_id: u64,
+    pub display_enclosing_file: Option<Arc<SourceFile>>,
+    pub display_enclosing_node: Option<Arc<Node>>,
     pub current_file_symbol: Option<Arc<Symbol>>,
     pub scope_stack: Vec<u64>,
     pub function_scope_count: usize,

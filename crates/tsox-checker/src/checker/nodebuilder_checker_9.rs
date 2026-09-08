@@ -132,15 +132,219 @@ impl Checker {
         {
             parts.join("")
         } else if flags.contains(TypeFormatFlags::MULTILINE_OBJECT_LITERALS) {
+            // 嵌套字面量的续行同步缩进（成员串内含换行时逐行加进）
             let inner: String = parts
                 .iter()
-                .map(|p| format!("    {};", p))
+                .map(|p| {
+                    let indented = p
+                        .split('\n')
+                        .map(|l| format!("    {l}"))
+                        .collect::<Vec<_>>()
+                        .join("\n");
+                    format!("{indented};")
+                })
                 .collect::<Vec<_>>()
                 .join("\n");
             format!("{{\n{inner}\n}}")
         } else {
             format!("{{ {} }}", format!("{};", parts.join("; ")))
         }
+    }
+
+    // Go getSymbolChain 的别名感知限定：命名空间父级链显示时，
+    // 遇显示上下文文件内解析到该命名空间的别名用别名名；到 enclosing 文件自身模块不加前缀
+    pub(crate) fn namespace_qualifier_of(&mut self, symbol: &Arc<Symbol>) -> Option<String> {
+        let mut parts: Vec<String> = Vec::new();
+        let mut cur = symbol
+            .parent
+            .clone()
+            .or_else(|| self.namespace_container_from_declarations(symbol));
+        while let Some(ns) = cur {
+            if !ns.flags.contains(SymbolFlags::ValueModule) {
+                return None;
+            }
+            // hover 在该命名空间声明内：符号就地可访问，无需限定
+            if let Some(enclosing) = self.display_enclosing_node.clone()
+                && ns
+                    .declarations
+                    .iter()
+                    .any(|d| Self::node_within(&enclosing, d))
+            {
+                return if parts.is_empty() { None } else { Some(parts.join(".")) };
+            }
+            // 文件模块（含 lib 全局）：路径名不参与限定；跨文件引用经别名（import）访问
+            let is_file_module = ns
+                .declarations
+                .iter()
+                .any(|d| d.kind == SyntaxKind::SourceFile);
+            if let Some(file) = self.display_enclosing_file.clone()
+                && let Some(alias_name) = self.alias_name_of_namespace_in_file(&ns, &file)
+            {
+                parts.insert(0, alias_name);
+                return Some(parts.join("."));
+            }
+            if is_file_module {
+                return if parts.is_empty() { None } else { Some(parts.join(".")) };
+            }
+            parts.insert(0, ns.name.clone());
+            cur = ns.parent.clone();
+        }
+        if parts.is_empty() {
+            None
+        } else {
+            Some(parts.join("."))
+        }
+    }
+
+    // import X = A.B.C 形式别名：解析实体名链
+    fn resolve_import_equals_entity(&mut self, alias: &Arc<Symbol>) -> Option<Arc<Symbol>> {
+        let decl = alias
+            .declarations
+            .iter()
+            .find(|d| matches!(d.data, tsox_frontend::ast::NodeData::ImportEqualsDeclaration(_)))?
+            .clone();
+        let tsox_frontend::ast::NodeData::ImportEqualsDeclaration(data) = &decl.data else {
+            return None;
+        };
+        // require('./x') 形式：解析模块说明符到模块符号
+        if let Some(spec) = self.module_specifier_of_require(&data.module_reference) {
+            let file = self.display_enclosing_file.clone()?;
+            let dir = match file.file_name.rfind('/') {
+                Some(i) => file.file_name[..i].to_string(),
+                None => String::new(),
+            };
+            if let Some(sym) = self.resolve_module_file_symbol_in(&dir, &spec) {
+                return Some(sym);
+            }
+            let path = self.program.resolve_external_module_path(
+                &spec,
+                &file.file_name,
+                tsox_core::core::compiler_options::ModuleKind::None,
+            )?;
+            let sf = self.program.get_source_file(&path)?;
+            return self.program.symbol_map().symbol_of(&sf.node).cloned();
+        }
+        let mut segments: Vec<String> = Vec::new();
+        let mut cur = Arc::clone(&data.module_reference);
+        loop {
+            match &cur.data {
+                tsox_frontend::ast::NodeData::Identifier(id) => {
+                    segments.push(id.text.clone());
+                    break;
+                }
+                tsox_frontend::ast::NodeData::QualifiedName(q) => {
+                    if let tsox_frontend::ast::NodeData::Identifier(id) = &q.right.data {
+                        segments.push(id.text.clone());
+                    }
+                    cur = Arc::clone(&q.left);
+                }
+                _ => return None,
+            }
+        }
+        segments.reverse();
+        let first = segments.first()?.clone();
+        let file = self.display_enclosing_file.clone()?;
+        let mut resolved = self.symbol_by_name_in_file_scope(&first, &file)?;
+        for seg in segments.iter().skip(1) {
+            resolved = resolved.exports.get(seg).cloned().or_else(|| resolved.members.get(seg).cloned())?;
+        }
+        Some(resolved)
+    }
+
+    fn module_specifier_of_require(&self, module_reference: &Arc<Node>) -> Option<String> {
+        let tsox_frontend::ast::NodeData::ExternalModuleReference(emr) = &module_reference.data
+        else {
+            return None;
+        };
+        let expr = &emr.expression;
+        let tsox_frontend::ast::NodeData::StringLiteral(s) = &expr.data else {
+            return None;
+        };
+        Some(s.text.trim_matches(['"', '\'', '`']).to_string())
+    }
+
+    fn symbol_by_name_in_file_scope(
+        &self,
+        name: &str,
+        file: &Arc<tsox_frontend::ast::SourceFile>,
+    ) -> Option<Arc<Symbol>> {
+        let symbol_map = self.program.symbol_map();
+        if let Some(locals) = symbol_map.locals.get(&file.node.id())
+            && let Some(sym) = locals.get(name)
+        {
+            return Some(Arc::clone(sym));
+        }
+        if let Some(module_sym) = symbol_map.symbol_of(&file.node) {
+            if let Some(sym) = module_sym.exports.get(name) {
+                return Some(Arc::clone(sym));
+            }
+            if let Some(sym) = module_sym.members.get(name) {
+                return Some(Arc::clone(sym));
+            }
+        }
+        None
+    }
+
+    fn node_within(node: &Arc<Node>, ancestor: &Arc<Node>) -> bool {
+        let mut cur = node.parent.clone();
+        while let Some(n) = cur {
+            if Arc::ptr_eq(&n, ancestor) {
+                return true;
+            }
+            cur = n.parent.clone();
+        }
+        false
+    }
+
+    fn namespace_container_from_declarations(
+        &self,
+        symbol: &Arc<Symbol>,
+    ) -> Option<Arc<Symbol>> {
+        let symbol_map = self.program.symbol_map();
+        symbol.declarations.first().and_then(|decl| {
+            let mut cur = decl.parent.as_ref();
+            while let Some(n) = cur {
+                match n.kind {
+                    SyntaxKind::ModuleDeclaration | SyntaxKind::SourceFile => {
+                        return symbol_map.symbol_of(n).map(Arc::clone);
+                    }
+                    _ => cur = n.parent.as_ref(),
+                }
+            }
+            None
+        })
+    }
+
+    fn alias_name_of_namespace_in_file(
+        &mut self,
+        ns: &Arc<Symbol>,
+        file: &Arc<tsox_frontend::ast::SourceFile>,
+    ) -> Option<String> {
+        let symbol_map = self.program.symbol_map();
+        let mut tables: Vec<tsox_frontend::ast::SymbolTable> = Vec::new();
+        if let Some(locals) = symbol_map.locals.get(&file.node.id()) {
+            tables.push(locals.clone());
+        }
+        if let Some(module_sym) = symbol_map.symbol_of(&file.node) {
+            tables.push(module_sym.members.clone());
+            tables.push(module_sym.exports.clone());
+        }
+        for table in tables {
+            for (name, sym) in table.iter() {
+                if !sym.flags.contains(SymbolFlags::Alias) {
+                    continue;
+                }
+                let target = self
+                    .resolve_import_equals_entity(sym)
+                    .or_else(|| self.resolve_import_alias_target_symbol(sym));
+                if let Some(target) = target {
+                    if Arc::ptr_eq(&target, ns) {
+                        return Some(sym.name.clone());
+                    }
+                }
+            }
+        }
+        None
     }
 
     pub(crate) fn symbol_type_to_string(
@@ -166,7 +370,11 @@ impl Checker {
                     .iter()
                     .map(|ty| self.type_to_string_ex(ty, flags))
                     .collect();
-                return format!("{}<{}>", sym.name, args.join(", "));
+                let qualified = self
+                    .namespace_qualifier_of(sym)
+                    .map(|q| format!("{q}.{}", sym.name))
+                    .unwrap_or_else(|| sym.name.clone());
+                return format!("{}<{}>", qualified, args.join(", "));
             }
         }
 
@@ -197,6 +405,13 @@ impl Checker {
                 }
             }
             return format!("typeof {}", sym.name);
+        }
+
+        if sym.parent.as_ref().is_some_and(|p| p.flags.contains(SymbolFlags::ValueModule)) {
+            return self
+                .namespace_qualifier_of(sym)
+                .map(|q| format!("{q}.{}", sym.name))
+                .unwrap_or_else(|| sym.name.clone());
         }
 
         sym.name.clone()

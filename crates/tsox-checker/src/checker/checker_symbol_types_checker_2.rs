@@ -300,6 +300,7 @@ impl Checker {
             NodeData::FunctionExpression(d) => (true, d.type_parameters.clone(), Some(&d.parameters)),
             NodeData::ArrowFunction(d) => (true, d.type_parameters.clone(), Some(&d.parameters)),
             NodeData::FunctionDeclaration(d) => (true, d.type_parameters.clone(), Some(&d.parameters)),
+            NodeData::MethodDeclaration(d) => (true, d.type_parameters.clone(), Some(&d.parameters)),
             _ => (false, None, None),
         };
         if !host_kind_ok || host_type_params.is_some() {
@@ -308,6 +309,29 @@ impl Checker {
         let host_params = host_params?;
         let param_index = host_params.iter().position(|p| Arc::ptr_eq(p, param));
         let param_index = param_index?;
+        // 对象字面量方法：上下文签名取字面量上下文类型的同名属性（Go getContextualSignatureForObjectLiteralMethod）
+        if matches!(host.data, NodeData::MethodDeclaration(_)) {
+            let obj_lit = host.parent.clone()?;
+            if obj_lit.kind != SyntaxKind::ObjectLiteralExpression {
+                return None;
+            }
+            let ctx = self.get_contextual_type(&obj_lit, ContextFlags::None)?;
+            let method_name = match &host.data {
+                NodeData::MethodDeclaration(d) => self.get_property_name_from_node(&d.name),
+                _ => String::new(),
+            };
+            let prop_type = self.get_type_of_property_of_contextual_type(&ctx, &method_name)?;
+            let sigs =
+                self.get_signatures_of_type(&prop_type, crate::checker::SignatureKind::Call);
+            let sig = sigs.first()?.clone();
+            let is_rest = matches!(&param.data, NodeData::ParameterDeclaration(pd) if pd.dot_dot_dot_token.is_some());
+            let is_this_param = param_index == 0
+                && matches!(&param.data, NodeData::ParameterDeclaration(pd)
+                    if matches!(&pd.name.data, NodeData::Identifier(id) if id.text == "this"));
+            return self
+                .contextual_param_type_at(&sig, &host_params, param_index, param, is_rest, is_this_param)
+                .into();
+        }
         let mut call = host.parent.clone()?;
         let mut in_parens = false;
         while call.kind == tsox_frontend::ast::SyntaxKind::ParenthesizedExpression {

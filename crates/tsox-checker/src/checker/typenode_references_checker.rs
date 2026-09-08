@@ -61,6 +61,51 @@ impl Checker {
         None
     }
 
+    // 对象字面量方法的 this：取上下文签名 this 参数类型（Go getContextualThisParameterType 上下文敏感分支）；
+    // 多态 this 只在接口声明内有意义，字面量方法中转为其约束
+    pub(crate) fn object_literal_method_contextual_this(
+        &mut self,
+        node: &Arc<Node>,
+    ) -> Option<Arc<Type>> {
+        let mut cur = node.parent.clone();
+        while let Some(n) = cur {
+            match n.kind {
+                SyntaxKind::ArrowFunction => {}
+                SyntaxKind::FunctionExpression | SyntaxKind::FunctionDeclaration => return None,
+                SyntaxKind::MethodDeclaration => {
+                    let container = n.parent.clone()?;
+                    if container.kind != SyntaxKind::ObjectLiteralExpression {
+                        return None;
+                    }
+                    let ctx = self.get_contextual_type(&container, ContextFlags::None)?;
+                    let name = match &n.data {
+                        NodeData::MethodDeclaration(d) => {
+                            self.get_property_name_from_node(&d.name)
+                        }
+                        _ => return None,
+                    };
+                    let prop_type =
+                        self.get_type_of_property_of_contextual_type(&ctx, &name)?;
+                    let sig = self
+                        .get_signatures_of_type(&prop_type, crate::checker::SignatureKind::Call)
+                        .into_iter()
+                        .next()?;
+                    let this_param = sig.this_parameter.clone()?;
+                    let t = self.get_type_of_symbol(&this_param);
+                    if crate::checker::utilities::is_this_type_parameter(&t)
+                        && let Some(constraint) = self.get_constraint_of_type_parameter(&t)
+                    {
+                        return Some(constraint);
+                    }
+                    return Some(t);
+                }
+                _ => {}
+            }
+            cur = n.parent.clone();
+        }
+        None
+    }
+
     pub(crate) fn create_this_type(
         &mut self,
         container: &Arc<Node>,
@@ -87,9 +132,8 @@ impl Checker {
             {
                 return t;
             }
-            let result = self.resolve_interface_type_ex(&sym, None);
-            self.type_alias_links.get_or_default(&sym).declared_type = Some(Arc::clone(&result));
-            return result;
+            // 重入时 _ex 返回 pending 壳，不能作为声明类型缓存（_ex 内部按 cache_result 自管）
+            return self.resolve_interface_type_ex(&sym, None);
         }
         self.get_any_type()
     }

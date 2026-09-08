@@ -49,6 +49,9 @@ impl Checker {
                 return Arc::clone(t);
             }
             self.push_scope(decl);
+            // 符号类型是声明形式：重建时与进行中的实例化映射隔离，防止类型参数被外部绑定污染缓存
+            let saved_stack = std::mem::take(&mut self.type_argument_stack);
+            let saved_frames = std::mem::take(&mut self.type_argument_name_frames);
             let return_type = match data.type_node.as_ref() {
                 Some(tn) => self.get_type_from_type_node(tn),
                 None => self.get_any_type(),
@@ -58,8 +61,10 @@ impl Checker {
                 return_type,
                 false,
                 None,
-                Some(Arc::clone(decl)),
+                Some(Arc::clone(&decl)),
             );
+            self.type_argument_name_frames = saved_frames;
+            self.type_argument_stack = saved_stack;
             self.pop_scope();
             let t = self.create_function_or_constructor_type(vec![sig], false);
             self.value_symbol_links.get_or_default(symbol).resolved_type = Some(Arc::clone(&t));

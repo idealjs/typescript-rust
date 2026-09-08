@@ -319,6 +319,8 @@ impl Checker {
     }
 
     pub fn get_quick_info_display_parts(&mut self, node: &Arc<Node>) -> Vec<SymbolDisplayPart> {
+        self.display_enclosing_file = self.get_source_file_of_node(node);
+        self.display_enclosing_node = Some(Arc::clone(node));
         let symbol = match self.resolve_contextual_property_symbol(node) {
             Some(s) => s,
             None => match self.resolve_property_access_symbol(node) {
@@ -331,6 +333,7 @@ impl Checker {
                 }
             },
         };
+
         // new 表达式中的类名/new 关键字：构造函数签名显示（对齐 Go writeSignatures("constructor ")）
         if symbol.flags.intersects(SymbolFlags::Class)
             && let Some(parts) = self.constructor_display_parts(&symbol, node)
@@ -390,13 +393,132 @@ impl Checker {
             parts.extend(self.type_to_display_parts(&be_type));
             return parts;
         }
+        // 调用位的泛型函数属性/变量：属性前缀 + 实例化箭头签名 <number>(x: number) => number
+        // （Go getCallOrNewExpression 分支 WriteTypeArgumentsOfSignature|WriteArrowStyleSignature）
+        if symbol.flags.intersects(SymbolFlags::VARIABLE | SymbolFlags::Property)
+            && let Some(call) = Self::enclosing_call_or_new(node)
+            && let Some(sig) = self.resolved_call_signature(&call)
+            && !sig.type_parameters.is_empty()
+        {
+            let args: Vec<Arc<Node>> = match &call.data {
+                crate::checker::nodebuilder::NodeData::CallExpression(d) => {
+                    d.arguments.iter().cloned().collect()
+                }
+                crate::checker::nodebuilder::NodeData::NewExpression(d) => d
+                    .arguments
+                    .as_ref()
+                    .map(|a| a.iter().cloned().collect())
+                    .unwrap_or_default(),
+                _ => Vec::new(),
+            };
+            let inferred = self.infer_call_type_arguments(&call, &sig, &args);
+            let inst = self.get_signature_instantiation(&sig, &inferred);
+            let mut parts = self.variable_prefix_and_name_parts(&symbol);
+            if !inferred.is_empty() {
+                let names: Vec<String> = inferred.iter().map(|t| self.type_to_string(t)).collect();
+                push_punctuation(&mut parts, "<");
+                push_part(&mut parts, &names.join(", "), DisplayPartKind::Text);
+                push_punctuation(&mut parts, ">");
+            }
+            if call.kind == SyntaxKind::NewExpression {
+                push_keyword(&mut parts, "new ");
+            }
+            push_punctuation(&mut parts, "(");
+            self.append_signature_parameter_parts(&mut parts, &inst);
+            push_punctuation(&mut parts, ")");
+            push_space(&mut parts, " => ");
+            let ret = self
+                .get_return_type_of_signature(&inst)
+                .unwrap_or_else(|| self.any_type());
+            parts.extend(self.type_to_display_parts(&ret));
+            let doc = self.hover_documentation(&symbol, node);
+            if !doc.is_empty() {
+                push_space(&mut parts, "\n\n");
+                push_part(&mut parts, &doc, DisplayPartKind::Text);
+            }
+            return parts;
+        }
+        // 调用位的泛型函数：显示推断实例化签名 function f<number>(...)（Go getCallOrNewExpression
+        // 分支 + writeSignatures WriteTypeArgumentsOfSignature）
+        if symbol.flags.intersects(SymbolFlags::Function | SymbolFlags::Method)
+            && let Some(call) = Self::enclosing_call_or_new(node)
+            && call.kind == SyntaxKind::CallExpression
+            && let Some(sig) = self.resolved_call_signature(&call)
+            && !sig.type_parameters.is_empty()
+        {
+            let args: Vec<Arc<Node>> = match &call.data {
+                crate::checker::nodebuilder::NodeData::CallExpression(d) => {
+                    d.arguments.iter().cloned().collect()
+                }
+                _ => Vec::new(),
+            };
+            let inferred = self.infer_call_type_arguments(&call, &sig, &args);
+            let inst = self.get_signature_instantiation(&sig, &inferred);
+            let mut parts = Vec::new();
+            if symbol.flags.intersects(SymbolFlags::Method) {
+                push_punctuation(&mut parts, "(");
+                push_part(&mut parts, "method", DisplayPartKind::Text);
+                push_punctuation(&mut parts, ") ");
+            } else {
+                push_keyword(&mut parts, "function");
+                push_space(&mut parts, " ");
+            }
+            push_part(
+                &mut parts,
+                &self.qualified_symbol_name(&symbol),
+                DisplayPartKind::FunctionName,
+            );
+            if !inferred.is_empty() {
+                let names: Vec<String> = inferred
+                    .iter()
+                    .map(|t| self.type_to_string(t))
+                    .collect();
+                push_punctuation(&mut parts, "<");
+                push_part(&mut parts, &names.join(", "), DisplayPartKind::Text);
+                push_punctuation(&mut parts, ">");
+            }
+            push_punctuation(&mut parts, "(");
+            self.append_signature_parameter_parts(&mut parts, &inst);
+            push_punctuation(&mut parts, ")");
+            push_space(&mut parts, ": ");
+            let ret = self
+                .get_return_type_of_signature(&inst)
+                .unwrap_or_else(|| self.any_type());
+            parts.extend(self.type_to_display_parts(&ret));
+            let doc = self.hover_documentation(&symbol, node);
+            if !doc.is_empty() {
+                push_space(&mut parts, "\n\n");
+                push_part(&mut parts, &doc, DisplayPartKind::Text);
+            }
+            return parts;
+        }
+        // new 表达式的 callee：显示构造签名形态 new () => T（Go getCallOrNewExpression 分支）
+        if symbol.flags.intersects(SymbolFlags::VARIABLE | SymbolFlags::Property)
+            && let Some(call) = Self::enclosing_call_or_new(node)
+            && call.kind == SyntaxKind::NewExpression
+            && let Some(sig) = self.resolved_call_signature(&call)
+            && sig.declaration.as_ref().is_some_and(|d| {
+                matches!(d.kind, SyntaxKind::ConstructSignature | SyntaxKind::NewExpression)
+                    || matches!(d.kind, SyntaxKind::CallSignature)
+            })
+        {
+            let mut parts = self.variable_prefix_and_name_parts(&symbol);
+            push_keyword(&mut parts, "new ");
+            parts.extend(self.arrow_signature_parts(&sig));
+            let doc = self.hover_documentation(&symbol, node);
+            if !doc.is_empty() {
+                push_space(&mut parts, "\n\n");
+                push_part(&mut parts, &doc, DisplayPartKind::Text);
+            }
+            return parts;
+        }
         // 悬停在调用表达式的 callee 上且类型为签名 union：显示合成签名（对齐 Go getCallOrNewExpression 分支）
         if symbol.flags.intersects(SymbolFlags::VARIABLE | SymbolFlags::Property)
             && let Some(sig) = self.call_site_union_signature(&symbol, node)
         {
             let mut parts = self.variable_prefix_and_name_parts(&symbol);
             parts.extend(self.arrow_signature_parts(&sig));
-            let doc = self.symbol_documentation(&symbol);
+            let doc = self.hover_documentation(&symbol, node);
             if !doc.is_empty() {
                 push_space(&mut parts, "\n\n");
                 push_part(&mut parts, &doc, DisplayPartKind::Text);
@@ -404,7 +526,7 @@ impl Checker {
             return parts;
         }
         let mut parts = self.symbol_to_display_parts(&symbol, SymbolFlags::all(), &[]);
-        let doc = self.symbol_documentation(&symbol);
+        let doc = self.hover_documentation(&symbol, node);
         if !doc.is_empty() {
             push_space(&mut parts, "\n\n");
             push_part(&mut parts, &doc, DisplayPartKind::Text);
@@ -413,9 +535,14 @@ impl Checker {
     }
 
     pub fn get_quick_info_text(&mut self, node: &Arc<Node>) -> String {
+        self.display_enclosing_file = self.get_source_file_of_node(node);
+        self.display_enclosing_node = Some(Arc::clone(node));
         if node.kind == SyntaxKind::ThisKeyword {
             let t = self.get_type_of_node(node);
             return format!("this: {}", self.type_to_string(&t));
+        }
+        if node.kind == SyntaxKind::ThisType {
+            return "this".to_string();
         }
         let Some(symbol) = self.resolve_symbol_for_hover(node) else {
             if self.node_has_type(node) {
@@ -617,6 +744,94 @@ impl Checker {
         self.globals.get(name).cloned()
     }
 
+    // Go getDocumentationForSymbol：先取调用位解析签名的声明文档（call/construct 签名），
+    // 再回退符号声明文档
+    fn hover_documentation(&mut self, symbol: &Arc<Symbol>, node: &Arc<Node>) -> String {
+        if let Some(call) = Self::enclosing_call_or_new(node)
+            && let Some(sig) = self.resolved_call_signature(&call)
+            && let Some(decl) = sig.declaration.clone()
+            && matches!(decl.kind, SyntaxKind::CallSignature | SyntaxKind::ConstructSignature)
+        {
+            let doc = self.declaration_jsdoc_text(&decl);
+            if !doc.is_empty() {
+                return doc;
+            }
+        }
+        self.symbol_documentation(symbol)
+    }
+
+    fn enclosing_call_or_new(node: &Arc<Node>) -> Option<Arc<Node>> {
+        let mut cur = Arc::clone(node);
+        // 仅当节点是属性访问的「名字」段（被调函数）时穿透到访问表达式；
+        // object 段（如 p1.then 里的 p1）不是被调函数
+        if cur.parent.as_ref().map(|p| p.kind) == Some(SyntaxKind::PropertyAccessExpression) {
+            let pae = cur.parent.clone().expect("checked Some above");
+            if let crate::checker::nodebuilder::NodeData::PropertyAccessExpression(d) = &pae.data
+                && Arc::ptr_eq(&d.name, &cur)
+            {
+                cur = pae;
+            }
+        }
+        let parent = cur.parent.clone()?;
+        match parent.kind {
+            SyntaxKind::CallExpression => {
+                let is_callee = match &parent.data {
+                    crate::checker::nodebuilder::NodeData::CallExpression(d) => {
+                        Arc::ptr_eq(&d.expression, &cur)
+                    }
+                    _ => false,
+                };
+                if is_callee { Some(parent) } else { None }
+            }
+            SyntaxKind::NewExpression => Some(parent),
+            _ => None,
+        }
+    }
+
+    fn resolved_call_signature(&mut self, call: &Arc<Node>) -> Option<Arc<Signature>> {
+        let (callee, args) = match &call.data {
+            crate::checker::nodebuilder::NodeData::CallExpression(d) => {
+                (&d.expression, d.arguments.clone())
+            }
+            crate::checker::nodebuilder::NodeData::NewExpression(d) => {
+                (&d.expression, d.arguments.clone().unwrap_or_default())
+            }
+            _ => return None,
+        };
+        let callee_type = self.get_type_of_node(callee);
+        let structured = callee_type.as_structured()?;
+        let sigs = if call.kind == SyntaxKind::NewExpression {
+            structured.construct_signatures()
+        } else {
+            structured.call_signatures()
+        };
+        if sigs.is_empty() {
+            return None;
+        }
+        let idx = if sigs.len() == 1 {
+            0
+        } else {
+            self.find_matching_signature(call, sigs, &args)
+        };
+        Some(Arc::clone(&sigs[idx]))
+    }
+
+    fn declaration_jsdoc_text(&mut self, decl: &Arc<Node>) -> String {
+        let Some(sf) = self.get_source_file_of_node(decl) else {
+            return String::new();
+        };
+        let jds = tsox_frontend::parser::parse_jsdoc_for_node(&sf, decl);
+        for jd in &jds {
+            let (p0, p1) = (jd.pos().min(sf.text.len()), jd.end().min(sf.text.len()));
+            let raw = if p0 < p1 { sf.text[p0..p1].to_string() } else { String::new() };
+            let cleaned = clean_jsdoc_text(&raw);
+            if !cleaned.is_empty() {
+                return self.render_jsdoc_links(&sf, decl, &cleaned);
+            }
+        }
+        String::new()
+    }
+
     fn symbol_documentation(&mut self, symbol: &Arc<Symbol>) -> String {
         for target in self.doc_lookup_symbols(symbol) {
             for decl in &target.declarations {
@@ -717,7 +932,9 @@ impl Checker {
                     SyntaxKind::ClassDeclaration
                     | SyntaxKind::InterfaceDeclaration
                     | SyntaxKind::EnumDeclaration
-                    | SyntaxKind::ClassExpression => {
+                    | SyntaxKind::ClassExpression
+                    | SyntaxKind::ModuleDeclaration
+                    | SyntaxKind::SourceFile => {
                         return symbol_map.symbol_of(n).map(Arc::clone);
                     }
                     _ => cur = n.parent.as_ref(),
@@ -727,7 +944,7 @@ impl Checker {
         })
     }
 
-    fn qualified_symbol_name(&self, symbol: &Arc<Symbol>) -> String {
+    fn qualified_symbol_name(&mut self, symbol: &Arc<Symbol>) -> String {
         let parent = symbol
             .parent
             .clone()
@@ -740,6 +957,12 @@ impl Checker {
         let Some(parent) = parent else {
             return symbol.name.clone();
         };
+        if parent.flags.contains(SymbolFlags::ValueModule) {
+            return self
+                .namespace_qualifier_of(symbol)
+                .map(|q| format!("{q}.{}", symbol.name))
+                .unwrap_or_else(|| symbol.name.clone());
+        }
         if !(parent.flags.intersects(SymbolFlags::Interface)
             || parent.flags.intersects(SymbolFlags::Class)
             || parent.flags.intersects(SymbolFlags::ENUM))
@@ -839,7 +1062,7 @@ impl Checker {
     }
 
     pub(crate) fn named_type_symbol_display_parts(
-        &self,
+        &mut self,
         symbol: &Arc<Symbol>,
         keyword: &'static str,
         name_kind: DisplayPartKind,
@@ -923,13 +1146,13 @@ impl Checker {
             }
             false
         });
-        if symbol.flags.intersects(SymbolFlags::Property) {
-            push_punctuation(&mut parts, "(");
-            push_part(&mut parts, "property", DisplayPartKind::Text);
-            push_punctuation(&mut parts, ") ");
-        } else if symbol.flags.intersects(SymbolFlags::ACCESSOR) {
+        if symbol.flags.intersects(SymbolFlags::ACCESSOR) {
             push_punctuation(&mut parts, "(");
             push_part(&mut parts, "accessor", DisplayPartKind::Text);
+            push_punctuation(&mut parts, ") ");
+        } else if symbol.flags.intersects(SymbolFlags::Property) {
+            push_punctuation(&mut parts, "(");
+            push_part(&mut parts, "property", DisplayPartKind::Text);
             push_punctuation(&mut parts, ") ");
         } else if is_parameter {
             push_punctuation(&mut parts, "(");
@@ -985,7 +1208,9 @@ impl Checker {
                 push_punctuation(parts, "?");
             }
             push_space(parts, ": ");
-            let pt = self.get_type_of_symbol(param);
+            let pt = self
+                .signature_instantiated_param_type(sig, i)
+                .unwrap_or_else(|| self.get_type_of_symbol(param));
             parts.extend(self.type_to_display_parts(&pt));
         }
     }

@@ -31,6 +31,17 @@ impl LanguageService {
                 all_diagnostics.push(Arc::clone(diag));
             }
         }
+        // binder 层诊断（重复声明等）与 checker 诊断合并（对齐 program.get_semantic_diagnostics）
+        for diag in &program.symbol_map().binder_diagnostics {
+            if diag
+                .file
+                .as_ref()
+                .map(|f| f.file_name == *file_name)
+                .unwrap_or(false)
+            {
+                all_diagnostics.push(Arc::new(diag.clone()));
+            }
+        }
 
         let checker = program.build_checker();
         let semantic_diagnostics = checker.get_semantic_diagnostics();

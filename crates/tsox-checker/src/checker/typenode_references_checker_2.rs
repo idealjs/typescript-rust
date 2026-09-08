@@ -108,6 +108,13 @@ impl Checker {
             return self.resolve_type_parameter_reference(&symbol, type_name);
         }
         if symbol.flags.contains(SymbolFlags::Interface) {
+            // tsc getTypeFromClassOrInterfaceReference：无实参引用且类型参数带默认值时按默认值实例化
+            if type_arguments.is_none() {
+                let defaults = self.interface_default_type_arguments(&symbol);
+                if !defaults.is_empty() {
+                    return self.resolve_interface_type_ex(&symbol, Some(defaults));
+                }
+            }
             return self.resolve_interface_type(&symbol, type_arguments);
         }
         if symbol.flags.intersects(SymbolFlags::ENUM) {
@@ -116,7 +123,9 @@ impl Checker {
         if symbol.flags.contains(SymbolFlags::Class) {
             let key = Arc::as_ptr(&symbol) as *const tsox_frontend::ast::Symbol;
             let merged_with_ns = symbol.flags.contains(SymbolFlags::ValueModule);
-            if !merged_with_ns {
+            // 声明缓存仅在无类型实参时可直接复用；带实参引用须实例化（attach），
+            // 否则 C<number> 会被裸声明形态污染
+            if !merged_with_ns && type_arguments.is_none() {
                 if let Some(cached) = self
                     .type_alias_links
                     .get(&symbol)
@@ -217,5 +226,42 @@ impl Checker {
         }
 
         self.resolve_type_alias_reference(&symbol, type_arguments)
+    }
+
+    fn interface_default_type_arguments(&mut self, symbol: &Arc<Symbol>) -> Vec<Arc<Type>> {
+        let decl = symbol.declarations.iter().find(|d| {
+            matches!(d.data, NodeData::InterfaceDeclaration(_))
+        });
+        let Some(decl) = decl else {
+            return Vec::new();
+        };
+        let NodeData::InterfaceDeclaration(data) = &decl.data else {
+            return Vec::new();
+        };
+        let Some(tps) = &data.type_parameters else {
+            return Vec::new();
+        };
+        let has_any_default = tps.iter().any(|tp| {
+            matches!(&tp.data, NodeData::TypeParameterDeclaration(td) if td.default_type.is_some())
+        });
+        if !has_any_default {
+            return Vec::new();
+        }
+        let saved_stack = std::mem::take(&mut self.type_argument_stack);
+        self.push_scope(decl);
+        let args: Vec<Arc<Type>> = tps
+            .clone()
+            .iter()
+            .map(|tp| match &tp.data {
+                NodeData::TypeParameterDeclaration(td) => match &td.default_type {
+                    Some(default_node) => self.get_type_from_type_node(default_node),
+                    None => self.get_unknown_type(),
+                },
+                _ => self.get_unknown_type(),
+            })
+            .collect();
+        self.pop_scope();
+        self.type_argument_stack = saved_stack;
+        args
     }
 }

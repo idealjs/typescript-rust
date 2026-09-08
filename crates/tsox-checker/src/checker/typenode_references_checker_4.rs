@@ -3,6 +3,23 @@
 use crate::checker::typenode_references::*;
 
 impl Checker {
+    fn push_interface_shell(&mut self, symbol: &Arc<Symbol>) -> bool {
+        let key = Arc::as_ptr(symbol) as *const tsox_frontend::ast::Symbol as usize;
+        if self.pending_interface_shells.contains_key(&key) {
+            return false;
+        }
+        let shell = Arc::new(Type {
+            flags: crate::checker::types::TypeFlags::Object,
+            object_flags: crate::checker::types::ObjectFlags::Reference,
+            id: crate::checker::types::next_type_id(),
+            symbol: Some(Arc::clone(symbol)),
+            alias: None,
+            data: crate::checker::types::TypeData::Object(Default::default()),
+        });
+        self.pending_interface_shells.insert(key, shell);
+        true
+    }
+
     pub(crate) fn resolve_interface_type_ex(
         &mut self,
         symbol: &Arc<Symbol>,
@@ -43,9 +60,24 @@ impl Checker {
             key,
             crate::checker::checker::TypeResolutionProperty::DeclaredType,
         ) {
+            if let Some(shell) = self.pending_interface_shells.get(&(key as usize)) {
+                let shell = Arc::clone(shell);
+                let args = type_args.unwrap_or_default();
+                // 壳让外层构建不完整：标记 degraded 使其不进缓存（重试拿完整版），
+                // relater 对 degraded 放行
+                self.heritage_degraded_events += 1;
+                return self.rebuild_with_type_arguments(&shell, args);
+            }
             self.heritage_degraded_events += 1;
             return self.error_type();
         }
+        let shell_key = key as usize;
+        let shell_inserted = self.push_interface_shell(symbol);
+        let shell_cleanup = |checker: &mut Checker| {
+            if shell_inserted {
+                checker.pending_interface_shells.remove(&shell_key);
+            }
+        };
 
         let interface_decls: Vec<Arc<Node>> = symbol
             .declarations
@@ -76,6 +108,9 @@ impl Checker {
                 };
 
                 let arg_types: Vec<Arc<Type>> = type_args.unwrap_or_default();
+                // 声明类型（及其实例）的成员按声明自身的类型参数求值，
+                // 不受外层进行中的实例化映射影响（对齐 Go 声明类型与实例化解耦）
+                let saved_type_argument_stack = std::mem::take(&mut self.type_argument_stack);
                 if has_type_args {
                     self.push_interface_type_argument_mapping(
                         &interface_decls,
@@ -113,9 +148,7 @@ impl Checker {
                     heritage_degraded = true;
                 }
                 self.pop_scope();
-                if has_type_args {
-                    self.type_argument_stack.pop();
-                }
+                self.type_argument_stack = saved_type_argument_stack;
                 let result = if base_types.is_empty() {
                     own_result.clone()
                 } else {
@@ -149,6 +182,7 @@ impl Checker {
             None => self.error_type(),
         };
         self.pop_type_resolution();
+        shell_cleanup(self);
 
         if self.heritage_degraded_events != epoch_at_entry {
             heritage_degraded = true;

@@ -16,6 +16,7 @@ impl Checker {
             _ => None,
         }?;
 
+
         let arg_index = args.iter().position(|a| Arc::ptr_eq(a, arg_node))?;
 
         let is_new = matches!(&call_node.data, NodeData::NewExpression(_));

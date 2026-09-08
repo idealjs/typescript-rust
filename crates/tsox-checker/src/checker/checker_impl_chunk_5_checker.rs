@@ -99,7 +99,13 @@ impl Checker {
     }
 
     pub fn is_array_type(&self, t: &Arc<Type>) -> bool {
-        t.flags.contains(TypeFlags::Object) && t.object_flags.contains(ObjectFlags::Reference)
+        t.flags.contains(TypeFlags::Object)
+            && t.object_flags.contains(ObjectFlags::Reference)
+            && self
+                .globals
+                .get("Array")
+                .zip(t.symbol.as_ref())
+                .is_some_and(|(array_sym, sym)| Arc::ptr_eq(array_sym, sym))
     }
 
     pub fn is_tuple_type(&self, t: &Arc<Type>) -> bool {

@@ -234,13 +234,18 @@ impl Checker {
         if let Some(sym) = self.get_property_of_type_cached(t, name) {
             return Some(sym);
         }
-        if let Some(interface_sym) = self.unresolved_interface_symbol_of(t)
-            && let Some(member) = self
-                .resolve_interface_type_ex(&interface_sym, None)
+        if let Some(interface_sym) = self.unresolved_interface_symbol_of(t) {
+            // 壳（自引用/实例化重建）：按 owner 的 type_arguments 取实例成员符号，
+            // 成员类型已在实例中替换；实例仍为空壳时视为未解析（防重入循环）
+            let args = t.as_object().map(|o| o.type_arguments.clone());
+            let inst = self.resolve_interface_type_ex(&interface_sym, args);
+            if let Some(member) = inst
                 .as_structured()
                 .and_then(|s| s.members.get(name))
-        {
-            return Some(Arc::clone(member));
+                .cloned()
+            {
+                return Some(member);
+            }
         }
         None
     }
@@ -255,14 +260,6 @@ impl Checker {
             .iter()
             .any(|d| matches!(d.data, NodeData::InterfaceDeclaration(_)));
         if !has_interface_decl {
-            return None;
-        }
-        if self
-            .type_alias_links
-            .get(sym)
-            .map(|l| l.declared_type.is_some())
-            == Some(true)
-        {
             return None;
         }
         if let Some(structured) = t.as_structured()

@@ -22,6 +22,8 @@ impl Checker {
         let mut reached_optional_or_rest = false;
 
         let mut this_parameter: Option<Arc<Symbol>> = None;
+        let mut instantiated_params: Vec<Arc<Type>> = Vec::new();
+        let mut instantiation_active = false;
         for (i, param) in parameters.iter().enumerate() {
             let NodeData::ParameterDeclaration(pd) = &param.data else {
                 continue;
@@ -32,6 +34,7 @@ impl Checker {
                 && !is_rest
                 && matches!(&pd.name.data, NodeData::Identifier(id) if id.text == "this");
 
+            let mapping_active = !self.type_argument_stack.is_empty();
             let (param_type, ctx_resolved) = match pd.type_node.as_ref() {
                 Some(tn) => (self.get_type_from_type_node(tn), true),
                 None => {
@@ -73,18 +76,27 @@ impl Checker {
                 Some(s) => Arc::clone(s),
                 None => Arc::new(Symbol::new(SymbolFlags::Property, name)),
             };
-            if ctx_resolved {
+            // 参数符号与声明共享：实例化上下文（映射活跃）不写缓存，
+            // 防止实例化类型覆盖声明形式（Go 实例化签名用 cloneSymbol 隔离）
+            if ctx_resolved && self.type_argument_stack.is_empty() {
                 self.value_symbol_links.insert(
                     &sym,
                     ValueSymbolLinks {
-                        resolved_type: Some(param_type),
+                        resolved_type: Some(Arc::clone(&param_type)),
                         ..Default::default()
                     },
                 );
             }
             param_symbols.push(sym);
+            if mapping_active {
+                instantiation_active = true;
+                instantiated_params.push(Arc::clone(&param_type));
+            }
             if is_this_param && this_parameter.is_none() {
                 this_parameter = param_symbols.pop();
+                if mapping_active {
+                    instantiated_params.pop();
+                }
                 continue;
             }
             if is_rest {
@@ -101,6 +113,13 @@ impl Checker {
                 min_argument_count += 1;
             }
         }
+        // 实例化上下文（映射活跃）中构建的签名：实例化参数类型挂在签名上
+        // 而非共享参数符号缓存（Go 实例化签名用 cloneSymbol，语义等价）
+        let instantiated_parameter_types = if instantiated_params.is_empty() {
+            None
+        } else {
+            Some(instantiated_params)
+        };
         let sig = Arc::new(Signature {
             id: 0,
             flags,
@@ -115,7 +134,7 @@ impl Checker {
             target: None,
             mapper: None,
             isolated_signature_type: std::sync::OnceLock::new(),
-            instantiated_parameter_types: None,
+            instantiated_parameter_types,
         });
 
         let _ = sig.resolved_return_type.set(return_type);

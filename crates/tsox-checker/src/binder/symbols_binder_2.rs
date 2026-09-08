@@ -3,6 +3,22 @@
 use crate::binder::symbols::*;
 
 impl Binder {
+    // Go binder 各声明类别的 excludes（值成员互斥表）
+    fn excludes_for_declaration(kind: SyntaxKind) -> SymbolFlags {
+        let value = SymbolFlags::VALUE;
+        match kind {
+            SyntaxKind::MethodDeclaration | SyntaxKind::MethodSignature => {
+                value & !SymbolFlags::Method
+            }
+            SyntaxKind::GetAccessor => value & !(SymbolFlags::SetAccessor | SymbolFlags::Property),
+            SyntaxKind::SetAccessor => value & !(SymbolFlags::GetAccessor | SymbolFlags::Property),
+            SyntaxKind::PropertyDeclaration
+            | SyntaxKind::PropertySignature
+            | SyntaxKind::PropertyAssignment => value & !SymbolFlags::Property,
+            _ => SymbolFlags::empty(),
+        }
+    }
+
     pub(crate) fn declare_symbol(
         &mut self,
         node: &Arc<Node>,
@@ -81,6 +97,46 @@ impl Binder {
         let mut conflicted = false;
 
         if let Some(existing) = existing {
+            // Go binder declareSymbol 冲突表：按声明类别 excludes 判定冲突
+            // （method 与 accessor 互斥、property 与 accessor 互斥等），
+            // 冲突时报所有既有声明 + 当前声明的 Duplicate identifier，且不合并符号
+            let excludes = Self::excludes_for_declaration(node.kind);
+            let assignment_merge_exception = (includes.contains(SymbolFlags::FunctionScopedVariable)
+                && existing.flags.contains(SymbolFlags::Assignment))
+                || (includes.contains(SymbolFlags::Assignment)
+                    && existing
+                        .flags
+                        .contains(SymbolFlags::FunctionScopedVariable));
+            if !excludes.is_empty()
+                && !name.is_empty()
+                && existing.flags.intersects(excludes)
+                && !assignment_merge_exception
+            {
+                self.report_duplicate_identifier_all(node, &existing, &name);
+                if existing.flags.intersects(SymbolFlags::ACCESSOR)
+                    && (existing.flags & SymbolFlags::ACCESSOR) != (includes & SymbolFlags::ACCESSOR)
+                {
+                    let existing_mut = Arc::as_ptr(&existing) as *mut Symbol;
+                    unsafe {
+                        (*existing_mut).flags |= SymbolFlags::ACCESSOR;
+                    }
+                }
+                let symbol = self.new_symbol(includes, name.clone());
+                {
+                    let symbol_mut = Arc::as_ptr(&symbol) as *mut Symbol;
+                    unsafe {
+                        (*symbol_mut).declarations.push(Arc::clone(node));
+                        if (*symbol_mut).value_declaration.is_none()
+                            && includes.intersects(SymbolFlags::VALUE)
+                        {
+                            (*symbol_mut).value_declaration = Some(Arc::clone(node));
+                        }
+                    }
+                }
+                self.insert_symbol_into_container(node, &symbol, &name, &var_hoist_container);
+                self.symbol_map.set_symbol(node, Arc::clone(&symbol));
+                return symbol;
+            }
             if let Some(merged) = self.merge_into_existing_symbol(node, &existing, includes) {
                 return merged;
             }

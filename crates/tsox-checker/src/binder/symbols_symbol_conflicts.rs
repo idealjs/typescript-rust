@@ -3,6 +3,34 @@
 use crate::binder::symbols::*;
 
 impl Binder {
+    // Go declareSymbol 冲突路径：报所有既有声明名 + 当前声明名的 Duplicate identifier
+    pub(crate) fn report_duplicate_identifier_all(
+        &mut self,
+        node: &Arc<Node>,
+        existing: &Arc<Symbol>,
+        name: &str,
+    ) {
+        let push = |b: &mut Self, n: &Arc<Node>| {
+            let name_node = tsox_frontend::ast::utilities::get_name_of_declaration(n)
+                .unwrap_or_else(|| Arc::clone(n));
+            if b.symbol_map.binder_diagnostics.iter().any(|d| {
+                d.loc == name_node.loc && d.code == DUPLICATE_IDENTIFIER_0.code
+            }) {
+                return;
+            }
+            b.symbol_map.binder_diagnostics.push(Diagnostic::new(
+                b.current_source_file.clone(),
+                name_node.loc,
+                DUPLICATE_IDENTIFIER_0,
+                vec![name.to_string()],
+            ));
+        };
+        for d in &existing.declarations {
+            push(self, d);
+        }
+        push(self, node);
+    }
+
     pub(crate) fn report_symbol_conflict(
         &mut self,
         node: &Arc<Node>,

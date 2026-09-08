@@ -183,8 +183,23 @@ impl Checker {
             .map(|s| s.name.clone())
             .unwrap_or_else(|| "object".to_string());
 
+        let qualified = t
+            .symbol
+            .as_ref()
+            .filter(|s| {
+                s.parent
+                    .as_ref()
+                    .is_some_and(|p| p.flags.contains(tsox_frontend::ast::SymbolFlags::ValueModule))
+            })
+            .map(|s| {
+                self.namespace_qualifier_of(s)
+                    .map(|q| format!("{q}.{}", s.name))
+                    .unwrap_or_else(|| s.name.clone())
+            })
+            .unwrap_or(name);
+
         if obj_data.type_arguments.is_empty() {
-            return name;
+            return qualified;
         }
 
         let args: Vec<String> = obj_data
@@ -192,7 +207,7 @@ impl Checker {
             .iter()
             .map(|ty| self.type_to_string_ex(ty, flags))
             .collect();
-        format!("{}<{}>", name, args.join(", "))
+        format!("{}<{}>", qualified, args.join(", "))
     }
 
     pub(crate) fn signature_instantiated_param_type(

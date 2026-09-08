@@ -42,6 +42,36 @@ fn reparse_unhosted(tag: &Arc<Node>, parent: &Arc<Node>, js_doc: &Arc<Node>) -> 
     }
 }
 
+use crate::parser::reparser_type_literal::property_tags_to_signatures;
+
+fn js_doc_property_tags_after(js_doc: &Arc<Node>, typedef_tag: &Arc<Node>) -> Vec<Arc<Node>> {
+    let tags = match &js_doc.data {
+        NodeData::JSDoc(d) => d.tags.as_ref(),
+        _ => None,
+    };
+    let Some(tags) = tags else {
+        return Vec::new();
+    };
+    let mut result = Vec::new();
+    let mut after = false;
+    for t in tags.iter() {
+        if Arc::ptr_eq(t, typedef_tag) {
+            after = true;
+            continue;
+        }
+        if t.kind == SyntaxKind::JSDocTypedefTag || t.kind == SyntaxKind::JSDocCallbackTag {
+            if after {
+                break;
+            }
+            continue;
+        }
+        if after && t.kind == SyntaxKind::JSDocPropertyTag {
+            result.push(Arc::clone(t));
+        }
+    }
+    result
+}
+
 fn reparse_typedef_tag(tag: &Arc<Node>, js_doc: &Arc<Node>) -> Option<Arc<Node>> {
     let (type_expression, full_name) = match &tag.data {
         NodeData::JSDocTypedefTag(d) => {
@@ -62,7 +92,7 @@ fn reparse_typedef_tag(tag: &Arc<Node>, js_doc: &Arc<Node>) -> Option<Arc<Node>>
     let inner_name = get_innermost_name_of_jsdoc_namespace(&full_name);
     let type_parameters = gather_type_parameters(js_doc, true);
 
-    let type_node = match type_expression.kind {
+    let mut type_node = match type_expression.kind {
         SyntaxKind::JSDocTypeExpression => match &type_expression.data {
             NodeData::JSDocTypeExpression(d) => d.type_node.clone(),
             _ => return None,
@@ -70,6 +100,22 @@ fn reparse_typedef_tag(tag: &Arc<Node>, js_doc: &Arc<Node>) -> Option<Arc<Node>>
         SyntaxKind::JSDocTypeLiteral => reparse_jsdoc_type_literal(&type_expression),
         _ => return None,
     };
+
+    // @typedef {Object} 后跟 @property 标签：属性并入类型字面量（tsc jsdoc 解析器行为）；
+    // 无效标签自然跳过，只收集 JSDocPropertyTag
+    let property_tags: Vec<Arc<Node>> = js_doc_property_tags_after(js_doc, tag);
+    if !property_tags.is_empty()
+        && matches!(type_node.data, NodeData::TypeReferenceNode(_))
+        && matches!(&type_node.data, NodeData::TypeReferenceNode(tr) if tr.type_name.text() == "Object")
+    {
+        let members = Arc::new(NodeList::new(property_tags_to_signatures(&property_tags)));
+        type_node = Arc::new(Node::with_loc_flags(
+            SyntaxKind::TypeLiteral,
+            NodeData::TypeLiteralNode(TypeLiteralNodeData { members }),
+            tag.loc,
+            NodeFlags::Reparsed,
+        ));
+    }
 
     let type_alias = Arc::new(Node::with_loc_flags(
         SyntaxKind::TypeAliasDeclaration,

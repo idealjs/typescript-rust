@@ -112,7 +112,7 @@ impl Checker {
             placeholder,
             false,
             contextual_signature,
-            None,
+            Some(Arc::clone(node)),
         );
 
         let return_type = self.infer_function_return_type(body, type_node);

@@ -205,7 +205,20 @@ impl Checker {
     }
 
     pub fn is_context_sensitive(&self, node: &Arc<Node>) -> bool {
-        false
+        use tsox_frontend::ast::NodeData;
+        let (parameters, type_parameters) = match &node.data {
+            NodeData::ArrowFunction(d) => (&d.parameters, d.type_parameters.is_some()),
+            NodeData::FunctionExpression(d) => (&d.parameters, d.type_parameters.is_some()),
+            NodeData::MethodDeclaration(d) => (&d.parameters, d.type_parameters.is_some()),
+            _ => return false,
+        };
+        if type_parameters {
+            return false;
+        }
+        // Go ast.HasContextSensitiveParameters：存在无注解参数即上下文敏感
+        parameters.iter().any(|p| {
+            matches!(&p.data, NodeData::ParameterDeclaration(pd) if pd.type_node.is_none())
+        })
     }
 
     pub fn fill_missing_type_arguments(

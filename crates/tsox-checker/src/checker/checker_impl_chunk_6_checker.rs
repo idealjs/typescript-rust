@@ -8,10 +8,12 @@ impl Checker {
             return self.compute_type_of_node(node);
         }
 
-        if let Some(links) = self.type_node_links.get(node) {
-            if let Some(ref t) = links.resolved_type {
-                return Arc::clone(t);
-            }
+        if let Some(cached) = self
+            .type_node_links
+            .get(node)
+            .and_then(|l| l.resolved_type.clone())
+        {
+            return cached;
         }
         let result = self.compute_type_of_node(node);
         self.type_node_links.get_or_default(node).resolved_type = Some(result.clone());
@@ -176,6 +178,11 @@ impl Checker {
                 }
                 if node.kind == SyntaxKind::ThisKeyword
                     && let Some(t) = self.polymorphic_this_of(node)
+                {
+                    return t;
+                }
+                if node.kind == SyntaxKind::ThisKeyword
+                    && let Some(t) = self.object_literal_method_contextual_this(node)
                 {
                     return t;
                 }

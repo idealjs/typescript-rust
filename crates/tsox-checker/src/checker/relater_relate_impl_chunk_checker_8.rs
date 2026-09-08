@@ -9,6 +9,28 @@ impl Checker {
         target: &Arc<Type>,
         relation: RelationKind,
     ) -> bool {
+        // 未解析的接口壳（自引用重建实例，members 空）：先解析成完整实例再比较
+        // （tsc type reference 的成员延迟解析语义）
+        if let Some(sym) = target.symbol.as_ref()
+            && sym
+                .declarations
+                .iter()
+                .any(|d| matches!(d.data, tsox_frontend::ast::NodeData::InterfaceDeclaration(_)))
+            && target.as_structured().is_some_and(|s| s.members.entries.is_empty())
+            && !self
+                .pending_interface_shells
+                .contains_key(&(Arc::as_ptr(sym) as *const tsox_frontend::ast::Symbol as usize))
+        {
+            let args = target.as_object().map(|o| o.type_arguments.clone());
+            let resolved = self.resolve_interface_type_ex(sym, args);
+            if !Arc::ptr_eq(&resolved, target)
+                && resolved
+                    .as_structured()
+                    .is_some_and(|s| !s.members.entries.is_empty())
+            {
+                return self.is_object_type_related_to(source, &resolved, relation);
+            }
+        }
         let source_struct = match source.as_structured() {
             Some(s) => s,
             None => return false,
@@ -109,8 +131,12 @@ impl Checker {
             && source_struct.members.is_empty();
         for target_prop in &target_struct.properties {
             let source_declares_locally = source_struct.members.get(&target_prop.name).is_some();
-            let source_prop = match source_struct.members.get(&target_prop.name) {
-                Some(p) => Arc::clone(p),
+            let mut source_prop = source_struct.members.get(&target_prop.name).cloned();
+            if source_prop.is_none() {
+                source_prop = self.get_property_of_type(source, &target_prop.name);
+            }
+            let source_prop = match source_prop {
+                Some(p) => p,
                 None => {
                     if source_is_bare_array
                         && let Some(p) = self.declared_array_member_symbol(&target_prop.name)

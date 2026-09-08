@@ -37,6 +37,7 @@ impl Checker {
             }
         }
 
+
         let key = Arc::as_ptr(symbol) as *const tsox_frontend::ast::Symbol;
         for map in self.type_argument_stack.iter().rev() {
             if let Some(t) = map.get(&key) {

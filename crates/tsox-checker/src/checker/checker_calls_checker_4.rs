@@ -158,6 +158,10 @@ impl Checker {
             }
             _ => return self.get_any_type(),
         };
+        let explicit_type_args = match &node.data {
+            tsox_frontend::ast::NodeData::CallExpression(d) => d.type_arguments.clone(),
+            _ => None,
+        };
         let callee_type = self.get_type_of_node(&callee.0);
         if let Some(structured) = callee_type.as_structured() {
             let signatures = structured.call_signatures();
@@ -165,7 +169,15 @@ impl Checker {
                 return self.get_any_type();
             }
 
-            let matching_idx = if signatures.len() == 1 {
+            // 显式类型实参优先选元数匹配的泛型重载
+            let matching_idx = if let Some(ta) = &explicit_type_args
+                && signatures.len() > 1
+                && let Some(idx) = signatures
+                    .iter()
+                    .position(|s| s.type_parameters.len() == ta.len())
+            {
+                idx
+            } else if signatures.len() == 1 {
                 0
             } else {
                 self.find_matching_signature(node, signatures, &callee.1)
@@ -174,7 +186,13 @@ impl Checker {
             if let Some(rt) = self.get_return_type_of_signature(sig) {
                 if !sig.type_parameters.is_empty() {
                     let args: Vec<Arc<Node>> = callee.1.iter().cloned().collect();
-                    let inferred = self.infer_call_type_arguments(node, sig, &args);
+                    let inferred = match &explicit_type_args {
+                        Some(ta) if ta.len() == sig.type_parameters.len() => ta
+                            .iter()
+                            .map(|t| self.get_type_from_type_node(t))
+                            .collect(),
+                        _ => self.infer_call_type_arguments(node, sig, &args),
+                    };
                     self.in_return_substitution = true;
                     let r =
                         self.substitute_infer_type_parameters(&rt, &sig.type_parameters, &inferred);
@@ -198,7 +216,20 @@ impl Checker {
         };
         let callee_type = self.get_type_of_node(callee);
         if let Some(structured) = callee_type.as_structured() {
-            for sig in structured.construct_signatures() {
+            let construct_sigs = structured.construct_signatures();
+            if construct_sigs.is_empty() {
+                return self.get_any_type();
+            }
+            // 多构造重载按实参选择（对齐 call 路径 find_matching_signature）
+            let matching_idx = if construct_sigs.len() == 1 {
+                0
+            } else {
+                self.find_matching_signature(node, construct_sigs, &args)
+            };
+            let sigs_vec: Vec<Arc<crate::checker::types::Signature>> =
+                construct_sigs.iter().cloned().collect();
+            let sig = &sigs_vec[matching_idx];
+            {
                 if let Some(rt) = self.get_return_type_of_signature(sig) {
                     let rt = if !sig.type_parameters.is_empty() {
                         let arg_vec: Vec<Arc<Node>> = args.iter().cloned().collect();

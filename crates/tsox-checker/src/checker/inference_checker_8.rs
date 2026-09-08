@@ -95,38 +95,38 @@ impl Checker {
         source: &Arc<Signature>,
         target: &Arc<Signature>,
     ) {
+        // Go inferFromSignature：方法/构造签名的参数位置是双变的，进入后保持
+        let save_biv = state.bivariant;
+        let target_is_method = target.declaration.as_ref().is_some_and(|d| {
+            matches!(
+                d.kind,
+                SyntaxKind::MethodDeclaration | SyntaxKind::MethodSignature | SyntaxKind::Constructor
+            )
+        });
+        state.bivariant = state.bivariant || target_is_method;
         let param_count = source.parameters.len().min(target.parameters.len());
         for i in 0..param_count {
             let source_param = &source.parameters[i];
             let target_param = &target.parameters[i];
             let st = self.get_type_of_symbol(source_param);
             let tt = self.get_type_of_symbol(target_param);
-            let save_contra = state.contravariant;
-            let save_biv = state.bivariant;
-            state.contravariant = true;
-            state.bivariant = false;
-            self.infer_from_types(state, &tt, &st);
-            state.contravariant = save_contra;
-            state.bivariant = save_biv;
+            // Go applyToParameterTypes→inferFromContravariantTypesIfStrictFunctionTypes：
+            // 类型方向不变（target 仍是推断目标），仅 strictFunctionTypes 下翻转 contra 标志
+            if self.strict_function_types {
+                let save_contra = state.contravariant;
+                state.contravariant = !state.contravariant;
+                self.infer_from_types(state, &st, &tt);
+                state.contravariant = save_contra;
+            } else {
+                self.infer_from_types(state, &st, &tt);
+            }
         }
+        state.bivariant = save_biv;
 
         let st = self.get_return_type_of_signature(source);
         let tt = self.get_return_type_of_signature(target);
         if let (Some(st), Some(tt)) = (st, tt) {
-            if std::env::var_os("TSOX_DEBUG_INFER").is_some() {
-                eprintln!(
-                    "[infer-sig] ret {} -> {}",
-                    self.type_to_string(&st),
-                    self.type_to_string(&tt)
-                );
-            }
             self.infer_from_types(state, &st, &tt);
-        } else if std::env::var_os("TSOX_DEBUG_INFER").is_some() {
-            eprintln!(
-                "[infer-sig] ret MISSING src={} tgt={}",
-                source.resolved_return_type.get().is_some(),
-                target.resolved_return_type.get().is_some()
-            );
         }
     }
 
@@ -231,6 +231,95 @@ impl Checker {
         false
     }
 
+    // Go contextuallyCheckFunctionExpressionOrObjectLiteralMethod 的固定阶段：
+    // 用固定实例化后的上下文签名重定型上下文敏感实参（参数写入符号缓存、返回类型重推）
+    pub(crate) fn type_of_context_sensitive_arg(
+        &mut self,
+        node: &Arc<tsox_frontend::ast::Node>,
+        ctx_type: &Arc<Type>,
+    ) -> Arc<Type> {
+        let Some(ctx_sig) = self
+            .get_signatures_of_type(ctx_type, SignatureKind::Call)
+            .into_iter()
+            .next()
+        else {
+            // 无上下文签名（callee 尚未定型等）：结果劣化，不冻结子树缓存，
+            // 后续推断轮次用更好的上下文重算
+            let t = self.get_type_of_node(node);
+            self.clear_node_type_cache_under(node);
+            return t;
+        };
+        let (parameters, body, type_node) = match &node.data {
+            tsox_frontend::ast::NodeData::ArrowFunction(d) => {
+                (&d.parameters, Some(&d.body), d.type_node.as_ref())
+            }
+            tsox_frontend::ast::NodeData::FunctionExpression(d) => {
+                (&d.parameters, Some(&d.body), d.type_node.as_ref())
+            }
+            _ => return self.get_type_of_node(node),
+        };
+        let is_arrow = matches!(node.data, tsox_frontend::ast::NodeData::ArrowFunction(_));
+        // 前一轮（部分推断）可能已把 body 定型为劣化类型并缓存，重定型前失效子树节点缓存
+        self.clear_node_type_cache_under(node);
+        if is_arrow {
+            self.push_arrow_function_scope(node);
+        } else {
+            self.push_function_scope(node);
+        }
+        for (i, param) in parameters.iter().enumerate() {
+            let tsox_frontend::ast::NodeData::ParameterDeclaration(pd) = &param.data else {
+                continue;
+            };
+            if pd.type_node.is_some() {
+                continue;
+            }
+            let is_rest = pd.dot_dot_dot_token.is_some();
+            let is_this_param = i == 0
+                && matches!(&pd.name.data, tsox_frontend::ast::NodeData::Identifier(id) if id.text == "this");
+            let Some(sym) = self
+                .program
+                .symbol_map()
+                .symbol_of(param)
+                .cloned()
+            else {
+                continue;
+            };
+            if let Some(t) = self.contextual_param_type_at(
+                &ctx_sig, parameters, i, param, is_rest, is_this_param,
+            ) {
+                self.value_symbol_links.insert(
+                    &sym,
+                    crate::checker::types_impl_chunk_3::ValueSymbolLinks {
+                        resolved_type: Some(t),
+                        ..Default::default()
+                    },
+                );
+            }
+        }
+        let return_type = self.infer_function_return_type(body, type_node);
+        if is_arrow {
+            self.pop_arrow_function_scope();
+        } else {
+            self.pop_function_scope();
+        }
+        let sig = self.build_signature_from_function_like_type_node(
+            parameters,
+            return_type,
+            false,
+            None,
+            Some(Arc::clone(node)),
+        );
+        self.create_function_or_constructor_type(vec![sig], false)
+    }
+
+    pub(crate) fn clear_node_type_cache_under(&mut self, node: &Arc<tsox_frontend::ast::Node>) {
+        self.type_node_links.data.remove(&node.id());
+        tsox_frontend::ast::node_data_generated::for_each_child(node, |c| {
+            self.clear_node_type_cache_under(c);
+            false
+        });
+    }
+
     pub fn infer_type_arguments(
         &mut self,
         node: &tsox_frontend::ast::Node,
@@ -263,24 +352,73 @@ impl Checker {
         } else {
             usize::MAX
         };
-        for i in 0..args.len() {
+        // Go chooseOverload 两阶段：上下文敏感实参（箭头/函数表达式含无注解参数）后置，
+        // 先由非敏感实参固定类型参数，再用固定后的实例化上下文签名重定型敏感实参
+        let has_cs_args = !signature.type_parameters.is_empty()
+            && args.iter().any(|a| self.is_context_sensitive(a));
+        let order: Vec<usize> = if has_cs_args {
+            let mut ordered: Vec<usize> = (0..args.len())
+                .filter(|&i| !self.is_context_sensitive(&args[i]))
+                .collect();
+            ordered.extend((0..args.len()).filter(|&i| self.is_context_sensitive(&args[i])));
+            ordered
+        } else {
+            (0..args.len()).collect()
+        };
+        for i in order {
             let param_type = if has_rest && i >= rest_index {
-                let rest_type = self.get_type_of_symbol(&signature.parameters[rest_index]);
+                let rest_type = self
+                    .try_get_type_at_position(signature, rest_index)
+                    .unwrap_or_else(|| self.get_type_of_symbol(&signature.parameters[rest_index]));
                 self.get_array_element_type(&rest_type)
             } else if i < signature.parameters.len() {
-                self.get_type_of_symbol(&signature.parameters[i])
+                self.signature_instantiated_param_type(signature, i)
+                    .unwrap_or_else(|| self.get_type_of_symbol(&signature.parameters[i]))
             } else {
                 continue;
             };
             if self.could_contain_type_variables(&param_type) {
-                let arg_type = self.get_type_of_node(&args[i]);
-                self.infer_types(
-                    &mut context.inferences,
-                    Some(arg_type),
-                    Some(param_type),
-                    InferencePriority::None,
-                    false,
-                );
+                let is_cs = has_cs_args && self.is_context_sensitive(&args[i]);
+                if is_cs {
+                    // 阶段二（上下文敏感实参）：快照候选，其推断结果只补充尚无候选的类型参数
+                    // （tsc checkArguments 中 CS 实参经上下文定型后以 ReturnType 优先级补推断，
+                    // 不覆盖已由普通实参固定的类型参数）
+                    let saved: Vec<(Vec<Arc<Type>>, Vec<Arc<Type>>)> = context
+                        .inferences
+                        .iter()
+                        .map(|info| (info.candidates.clone(), info.contra_candidates.clone()))
+                        .collect();
+                    let partial = self.get_inferred_types(context);
+                    let inst_param = self.substitute_infer_type_parameters(
+                        &param_type,
+                        &signature.type_parameters,
+                        &partial,
+                    );
+                    let arg_type = self.type_of_context_sensitive_arg(&args[i], &inst_param);
+                    self.infer_types(
+                        &mut context.inferences,
+                        Some(arg_type),
+                        Some(param_type),
+                        InferencePriority::None,
+                        false,
+                    );
+                    for (info, (cands, contra)) in context.inferences.iter_mut().zip(saved) {
+                        if !cands.is_empty() || !contra.is_empty() {
+                            info.candidates = cands;
+                            info.contra_candidates = contra;
+                            info.inferred_type = None;
+                        }
+                    }
+                } else {
+                    let arg_type = self.get_type_of_node(&args[i]);
+                    self.infer_types(
+                        &mut context.inferences,
+                        Some(arg_type),
+                        Some(param_type),
+                        InferencePriority::None,
+                        false,
+                    );
+                }
             }
         }
 

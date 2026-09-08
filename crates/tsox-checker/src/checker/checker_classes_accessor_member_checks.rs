@@ -94,6 +94,10 @@ impl Checker {
             && matches!(node.kind, SyntaxKind::MethodDeclaration)
             && type_node.is_none()
             && body.is_none()
+            && !self
+                .current_file
+                .as_ref()
+                .is_some_and(|f| f.has_parse_diagnostics)
         {
             if let Some(name) = Self::class_member_name_node(node) {
                 if name.kind == SyntaxKind::Identifier {

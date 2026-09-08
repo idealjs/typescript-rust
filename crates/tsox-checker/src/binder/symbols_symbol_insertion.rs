@@ -29,10 +29,15 @@ impl Binder {
                 if has_export {
                     if let Some(parent_sym) = &self.parent_symbol {
                         let parent_sym_mut = Arc::as_ptr(parent_sym) as *mut Symbol;
+                        let symbol_mut = Arc::as_ptr(symbol) as *mut Symbol;
                         unsafe {
                             (*parent_sym_mut)
                                 .exports
                                 .insert(name.to_string(), Arc::clone(&symbol));
+                            // 命名空间成员挂父链（显示限定名用，对齐 tsc symbol.parent）
+                            if (*symbol_mut).parent.is_none() {
+                                (*symbol_mut).parent = Some(Arc::clone(parent_sym));
+                            }
                         }
                     }
 
@@ -51,6 +56,14 @@ impl Binder {
                         .entry(container.id())
                         .or_insert_with(SymbolTable::new);
                     locals.insert(name.to_string(), Arc::clone(&symbol));
+                    if let Some(parent_sym) = &self.parent_symbol {
+                        let symbol_mut = Arc::as_ptr(symbol) as *mut Symbol;
+                        unsafe {
+                            if (*symbol_mut).parent.is_none() {
+                                (*symbol_mut).parent = Some(Arc::clone(parent_sym));
+                            }
+                        }
+                    }
                 }
             } else if let Some(parent_sym) = &self.parent_symbol {
                 let parent_sym_mut = Arc::as_ptr(parent_sym) as *mut Symbol;
