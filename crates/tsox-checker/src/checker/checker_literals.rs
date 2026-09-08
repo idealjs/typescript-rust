@@ -304,7 +304,10 @@ impl Checker {
             return self.create_array_type(Arc::clone(first));
         }
 
-        let elem_union = self.get_union_type(element_types);
+        // Go checkArrayLiteral：元素联合走 UnionReductionSubtype
+        // （相同结构成员归一、{name,age} ⊑ I 时移除字面量成员）
+        let reduced = self.remove_subtype_redundant_members(element_types);
+        let elem_union = self.get_union_type(reduced);
         self.create_array_type(elem_union)
     }
 }

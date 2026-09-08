@@ -118,23 +118,11 @@ impl Checker {
                     let false_type = self.get_type_of_node(&data.when_false);
                     let true_widened = self.get_widened_type_of_literal(&true_type);
                     let false_widened = self.get_widened_type_of_literal(&false_type);
-                    let mut types = vec![true_widened, false_widened];
-                    // 非严格下 undefined 可赋给任意类型：undefined[] 是 T[] 的子类型，
-                    // 条件表达式按 UnionReductionSubtype 归约去掉（对齐 TS）
-                    if !self.strict_null_checks && types.len() == 2 {
-                        let undef_arr_idx = types.iter().position(|t| {
-                            self.is_array_type(t)
-                                && self.get_array_element_type(t).intrinsic_name()
-                                    == Some("undefined")
-                        });
-                        if let Some(i) = undef_arr_idx {
-                            let other = &types[1 - i];
-                            if self.is_array_type(other) {
-                                types.swap_remove(i);
-                            }
-                        }
-                    }
-                    return self.get_union_type(types);
+                    let types = vec![true_widened, false_widened];
+                    // Go checkConditionalExpression：UnionReductionSubtype（移除可赋给
+                    // 其他成员的 structured 成员，如 any[] ⊑ number[] → number[]）
+                    let reduced = self.remove_subtype_redundant_members(types);
+                    return self.get_union_type(reduced);
                 }
                 self.get_any_type()
             }
@@ -299,5 +287,49 @@ impl Checker {
         } else {
             node
         }
+    }
+}
+
+impl Checker {
+    // Go removeSubtypes 的受限版：structured/instantiable 成员若可赋给另一成员则移除
+    pub(crate) fn remove_subtype_redundant_members(&mut self, types: Vec<Arc<Type>>) -> Vec<Arc<Type>> {
+        if types.len() < 2 {
+            return types;
+        }
+        // Go removeSubtypes：从后往前遍历，位置靠前的成员在互相可赋时优先保留
+        let mut keep: Vec<bool> = vec![true; types.len()];
+        for i in (0..types.len()).rev() {
+            if !keep[i] {
+                continue;
+            }
+            let source = &types[i];
+            if !source.flags.intersects(
+                TypeFlags::Object
+                    | TypeFlags::Union
+                    | TypeFlags::Intersection
+                    | TypeFlags::TypeParameter,
+            ) {
+                continue;
+            }
+            for (j, target) in types.iter().enumerate() {
+                if i == j || !keep[j] {
+                    continue;
+                }
+                if Arc::ptr_eq(source, target) {
+                    continue;
+                }
+                if self.is_type_assignable_to(source, target) {
+                    keep[i] = false;
+                    break;
+                }
+            }
+        }
+        let result: Vec<Arc<Type>> = types
+            .into_iter()
+            .zip(keep)
+            .filter(|(_, k)| *k)
+            .map(|(t, _)| t)
+            .collect();
+        result
     }
 }
