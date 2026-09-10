@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.BaselineAutoImportsCompletions"]
 #[test]
 fn import_module_specifier_preference_shortest() {
@@ -7,7 +8,7 @@ fn import_module_specifier_preference_shortest() {
 export const helperFunc = () => {};
 // @Filename: /project/src/index.ts
 helper/**/"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("importModuleSpecifierPreferenceShortest", content);
     fourslash::unsupported("Configure"); // f.Configure(t, lsutil.UserPreferences{
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
     fourslash::unsupported("BaselineAutoImportsCompletions"); // f.BaselineAutoImportsCompletions(t, []string{""})
@@ -20,7 +21,7 @@ fn import_module_specifier_preference_project_relative() {
 export const helperFunc = () => {};
 // @Filename: /project/tests/index.ts
 helper/**/"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("importModuleSpecifierPreferenceProjectRelative", content);
     fourslash::unsupported("Configure"); // f.Configure(t, lsutil.UserPreferences{
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
     fourslash::unsupported("BaselineAutoImportsCompletions"); // f.BaselineAutoImportsCompletions(t, []string{""})
@@ -33,7 +34,7 @@ fn import_module_specifier_preference_relative() {
 export const helperFunc = () => {};
 // @Filename: /project/src/index.ts
 helper/**/"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("importModuleSpecifierPreferenceRelative", content);
     fourslash::unsupported("Configure"); // f.Configure(t, lsutil.UserPreferences{
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
     fourslash::unsupported("BaselineAutoImportsCompletions"); // f.BaselineAutoImportsCompletions(t, []string{""})
@@ -58,7 +59,7 @@ fn import_module_specifier_preference_project_relative_with_paths() {
 export const helperFunc = () => {};
 // @Filename: /project/src/app/index.ts
 helper/**/"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("importModuleSpecifierPreferenceProjectRelativeWithPaths", content);
     fourslash::unsupported("Configure"); // f.Configure(t, lsutil.UserPreferences{
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
     fourslash::unsupported("BaselineAutoImportsCompletions"); // f.BaselineAutoImportsCompletions(t, []string{""})
@@ -80,7 +81,7 @@ fn import_module_specifier_preference_non_relative() {
 export const helperFunc = () => {};
 // @Filename: /project/src/app/index.ts
 helper/**/"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("importModuleSpecifierPreferenceNonRelative", content);
     fourslash::unsupported("Configure"); // f.Configure(t, lsutil.UserPreferences{
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
     fourslash::unsupported("BaselineAutoImportsCompletions"); // f.BaselineAutoImportsCompletions(t, []string{""})

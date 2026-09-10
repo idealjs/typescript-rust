@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: t.Skip('Known failing fourslash test')"]
 #[test]
 fn completions_import_umd_default_no_crash1() {
@@ -35,6 +36,6 @@ fn completions_import_umd_default_no_crash1() {
 })();
 // @Filename: /src/index.js
 /**/"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("completionsImport_umdDefaultNoCrash1", content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

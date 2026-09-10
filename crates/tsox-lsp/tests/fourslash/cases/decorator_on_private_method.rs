@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: // Verify completions don't panic on decorator applied to pr"]
 #[test]
 fn decorator_completion_on_private_method() {
@@ -10,7 +11,7 @@ class C {
     @dec/**/
     #method() {}
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("decoratorCompletionOnPrivateMethod", content);
     // TODO: // Verify completions don't panic on decorator applied to private method
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
+    fourslash::verify_completions_include_exclude_at(&mut s, Some(""), &["dec"], &[]);
 }

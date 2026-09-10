@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyRename"]
 #[test]
 fn get_edits_for_file_rename_js_rename() {
@@ -10,6 +11,6 @@ fn get_edits_for_file_rename_js_rename() {
 export const a = 1;
 // @Filename: /b.ts
 import { a } from ".//*rename*/a.js";"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("getEditsForFileRename_jsRename", content);
     fourslash::unsupported("VerifyRename"); // f.VerifyRename(t, "rename", "c.js", map[string]string{
 }

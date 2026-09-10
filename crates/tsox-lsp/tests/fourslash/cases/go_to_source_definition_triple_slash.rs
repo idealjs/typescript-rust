@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: // /// <reference types='foo'/> resolves to @types/foo/index"]
 #[test]
 fn go_to_source_reference_types_to_js() {
@@ -18,7 +19,7 @@ export function /*target*/bar() { return "hello"; }
 /// <reference types="[|foo/*refTypes*/|]" />
 import { bar } from "foo";
 bar();"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("goToSourceReferenceTypesToJS", content);
     fourslash::unsupported("VerifyBaselineGoToSourceDefinition"); // f.VerifyBaselineGoToSourceDefinition(t, "refTypes")
 }
 
@@ -42,6 +43,6 @@ export function main() {}
 // @Filename: /home/src/workspaces/project/index.ts
 /// <reference path="./node_modules/pkg/[|lib.d.ts/*refPath*/|]" />
 declare function helper(): string;"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("goToSourceReferencePathToDts", content);
     fourslash::unsupported("VerifyBaselineGoToSourceDefinition"); // f.VerifyBaselineGoToSourceDefinition(t, "refPath")
 }

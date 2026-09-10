@@ -30,11 +30,22 @@ impl Checker {
 
         let export_equals = namespace.exports.get("export=")?;
         for d in &export_equals.declarations {
-            if let tsox_frontend::ast::NodeData::ExportAssignment(ea) = &d.data
-                && ea.is_export_equals
-            {
-                if let tsox_frontend::ast::NodeData::ObjectLiteralExpression(ol) =
-                    &ea.expression.data
+            let (expression, is_export_equals_form) = match &d.data {
+                tsox_frontend::ast::NodeData::ExportAssignment(ea) => {
+                    (Some(Arc::clone(&ea.expression)), ea.is_export_equals)
+                }
+                tsox_frontend::ast::NodeData::BinaryExpression(bin)
+                    if bin.operator_token.kind == SyntaxKind::EqualsToken =>
+                {
+                    (Some(Arc::clone(&bin.right)), true)
+                }
+                _ => (None, false),
+            };
+            let Some(expression) = expression else {
+                continue;
+            };
+            if is_export_equals_form {
+                if let tsox_frontend::ast::NodeData::ObjectLiteralExpression(ol) = &expression.data
                 {
                     for prop in ol.properties.iter() {
                         if prop.text() == name
@@ -46,17 +57,19 @@ impl Checker {
                     continue;
                 }
                 if matches!(
-                    ea.expression.kind,
+                    expression.kind,
                     SyntaxKind::Identifier | SyntaxKind::QualifiedName
                 ) {
                     let scope_decl = namespace
                         .declarations
                         .iter()
-                        .find(|d| d.kind == SyntaxKind::ModuleDeclaration)
+                        .find(|d| {
+                            matches!(d.kind, SyntaxKind::ModuleDeclaration | SyntaxKind::SourceFile)
+                        })
                         .cloned();
                     let target = scope_decl.and_then(|scope_decl| {
                         self.push_scope(&scope_decl);
-                        let t = self.resolve_qualified_symbol(&ea.expression);
+                        let t = self.resolve_qualified_symbol(&expression);
                         self.pop_scope();
                         t
                     });

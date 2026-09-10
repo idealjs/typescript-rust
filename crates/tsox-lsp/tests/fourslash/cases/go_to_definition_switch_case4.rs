@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineGoToDefinition"]
 #[test]
 fn go_to_definition_switch_case4() {
@@ -10,6 +11,6 @@ fn go_to_definition_switch_case4() {
      switch (null) {
         [|/*start*/case|] null: break;
      }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("goToDefinitionSwitchCase4", content);
     fourslash::unsupported("VerifyBaselineGoToDefinition"); // f.VerifyBaselineGoToDefinition(t, true, "start")
 }

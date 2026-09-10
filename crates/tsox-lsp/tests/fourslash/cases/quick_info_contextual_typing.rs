@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: t.Skip('Known failing fourslash test')"]
 #[test]
 fn quick_info_contextual_typing() {
@@ -196,21 +197,11 @@ Point.prototype = {
         return new Point(this.x + dx, this.y + dy);
     }
 };"#;
-    let mut s = Session::new(content);
-    fourslash::verify_quick_info_at(
-        &mut s,
-        "1",
-        "(property) C1T5.foo: (i: number, s: string) => number",
-        "",
-    );
+    let mut s = Session::new_for_test("quickInfoContextualTyping", content);
+    fourslash::verify_quick_info_at(&mut s, "1", "(property) C1T5.foo: (i: number, s: string) => number", "");
     fourslash::verify_quick_info_at(&mut s, "2", "(parameter) i: number", "");
     fourslash::verify_quick_info_at(&mut s, "3", "(parameter) i: number", "");
-    fourslash::verify_quick_info_at(
-        &mut s,
-        "4",
-        "var C2T5.foo: (i: number, s: string) => number",
-        "",
-    );
+    fourslash::verify_quick_info_at(&mut s, "4", "var C2T5.foo: (i: number, s: string) => number", "");
     fourslash::verify_quick_info_at(&mut s, "5", "(parameter) i: number", "");
     fourslash::verify_quick_info_at(&mut s, "6", "(parameter) i: number", "");
     fourslash::verify_quick_info_at(&mut s, "7", "var c3t1: (s: string) => string", "");
@@ -224,56 +215,26 @@ Point.prototype = {
     fourslash::verify_quick_info_at(&mut s, "15", "var c3t6: (n: number, s: string) => IFoo", "");
     fourslash::verify_quick_info_at(&mut s, "16", "(parameter) n: number", "");
     fourslash::verify_quick_info_at(&mut s, "17", "(parameter) s: string", "");
-    fourslash::verify_quick_info_at(
-        &mut s,
-        "18",
-        "var c3t7: {\n    (n: number): number;\n    (s1: string): number;\n}",
-        "",
-    );
-    fourslash::verify_quick_info_at(
-        &mut s,
-        "20",
-        "var c3t8: (n: number, s: string) => number",
-        "",
-    );
+    fourslash::verify_quick_info_at(&mut s, "18", "var c3t7: {\n    (n: number): number;\n    (s1: string): number;\n}", "");
+    fourslash::verify_quick_info_at(&mut s, "20", "var c3t8: (n: number, s: string) => number", "");
     fourslash::verify_quick_info_at(&mut s, "21", "(parameter) n: number", "");
     fourslash::verify_quick_info_at(&mut s, "22", "var c3t9: number[][]", "");
     fourslash::verify_quick_info_at(&mut s, "23", "var c3t10: IFoo[]", "");
-    fourslash::verify_quick_info_at(
-        &mut s,
-        "24",
-        "var c3t11: ((n: number, s: string) => string)[]",
-        "",
-    );
+    fourslash::verify_quick_info_at(&mut s, "24", "var c3t11: ((n: number, s: string) => string)[]", "");
     fourslash::verify_quick_info_at(&mut s, "25", "(parameter) n: number", "");
     fourslash::verify_quick_info_at(&mut s, "26", "(parameter) s: string", "");
     fourslash::verify_quick_info_at(&mut s, "27", "var c3t12: IBar", "");
     fourslash::verify_quick_info_at(&mut s, "28", "(property) IBar.foo: IFoo", "");
     fourslash::verify_quick_info_at(&mut s, "29", "var c3t13: IFoo", "");
-    fourslash::verify_quick_info_at(
-        &mut s,
-        "30",
-        "(method) IFoo.f(i: number, s: string): string",
-        "",
-    );
+    fourslash::verify_quick_info_at(&mut s, "30", "(method) IFoo.f(i: number, s: string): string", "");
     fourslash::verify_quick_info_at(&mut s, "31", "(parameter) i: number", "");
     fourslash::verify_quick_info_at(&mut s, "32", "(parameter) s: string", "");
     fourslash::verify_quick_info_at(&mut s, "33", "var c3t14: IFoo", "");
     fourslash::verify_quick_info_at(&mut s, "34", "(property) IFoo.a: number[]", "");
-    fourslash::verify_quick_info_at(
-        &mut s,
-        "35",
-        "(property) C4T5.foo: (i: number, s: string) => string",
-        "",
-    );
+    fourslash::verify_quick_info_at(&mut s, "35", "(property) C4T5.foo: (i: number, s: string) => string", "");
     fourslash::verify_quick_info_at(&mut s, "36", "(parameter) i: number", "");
     fourslash::verify_quick_info_at(&mut s, "37", "(parameter) s: string", "");
-    fourslash::verify_quick_info_at(
-        &mut s,
-        "38",
-        "var C5T5.foo: (i: number, s: string) => string",
-        "",
-    );
+    fourslash::verify_quick_info_at(&mut s, "38", "var C5T5.foo: (i: number, s: string) => string", "");
     fourslash::verify_quick_info_at(&mut s, "39", "(parameter) i: number", "");
     fourslash::verify_quick_info_at(&mut s, "40", "(parameter) s: string", "");
     fourslash::verify_quick_info_at(&mut s, "41", "var c6t5: (n: number) => IFoo", "");
@@ -287,46 +248,21 @@ Point.prototype = {
     fourslash::verify_quick_info_at(&mut s, "49", "(property) t4: () => IFoo", "");
     fourslash::verify_quick_info_at(&mut s, "50", "(property) t5: (n: number) => IFoo", "");
     fourslash::verify_quick_info_at(&mut s, "51", "(parameter) n: number", "");
-    fourslash::verify_quick_info_at(
-        &mut s,
-        "52",
-        "(property) t6: (n: number, s: string) => IFoo",
-        "",
-    );
+    fourslash::verify_quick_info_at(&mut s, "52", "(property) t6: (n: number, s: string) => IFoo", "");
     fourslash::verify_quick_info_at(&mut s, "53", "(parameter) n: number", "");
     fourslash::verify_quick_info_at(&mut s, "54", "(parameter) s: string", "");
-    fourslash::verify_quick_info_at(
-        &mut s,
-        "55",
-        "(property) t7: (n: number, s: string) => number",
-        "",
-    );
-    fourslash::verify_quick_info_at(
-        &mut s,
-        "56",
-        "(property) t8: (n: number, s: string) => number",
-        "",
-    );
+    fourslash::verify_quick_info_at(&mut s, "55", "(property) t7: (n: number, s: string) => number", "");
+    fourslash::verify_quick_info_at(&mut s, "56", "(property) t8: (n: number, s: string) => number", "");
     fourslash::verify_quick_info_at(&mut s, "57", "(parameter) n: number", "");
     fourslash::verify_quick_info_at(&mut s, "58", "(property) t9: number[][]", "");
     fourslash::verify_quick_info_at(&mut s, "59", "(property) t10: IFoo[]", "");
-    fourslash::verify_quick_info_at(
-        &mut s,
-        "60",
-        "(property) t11: ((n: number, s: string) => string)[]",
-        "",
-    );
+    fourslash::verify_quick_info_at(&mut s, "60", "(property) t11: ((n: number, s: string) => string)[]", "");
     fourslash::verify_quick_info_at(&mut s, "61", "(parameter) n: number", "");
     fourslash::verify_quick_info_at(&mut s, "62", "(parameter) s: string", "");
     fourslash::verify_quick_info_at(&mut s, "63", "(property) t12: IBar", "");
     fourslash::verify_quick_info_at(&mut s, "64", "(property) IBar.foo: IFoo", "");
     fourslash::verify_quick_info_at(&mut s, "65", "(property) t13: IFoo", "");
-    fourslash::verify_quick_info_at(
-        &mut s,
-        "66",
-        "(method) IFoo.f(i: number, s: string): string",
-        "",
-    );
+    fourslash::verify_quick_info_at(&mut s, "66", "(method) IFoo.f(i: number, s: string): string", "");
     fourslash::verify_quick_info_at(&mut s, "67", "(parameter) i: number", "");
     fourslash::verify_quick_info_at(&mut s, "68", "(parameter) s: string", "");
     fourslash::verify_quick_info_at(&mut s, "69", "(property) t14: IFoo", "");
@@ -342,79 +278,34 @@ Point.prototype = {
     fourslash::verify_quick_info_at(&mut s, "79", "var c12t4: () => IFoo", "");
     fourslash::verify_quick_info_at(&mut s, "80", "var c12t5: (n: number) => IFoo", "");
     fourslash::verify_quick_info_at(&mut s, "81", "(parameter) n: number", "");
-    fourslash::verify_quick_info_at(
-        &mut s,
-        "82",
-        "var c12t6: (n: number, s: string) => IFoo",
-        "",
-    );
+    fourslash::verify_quick_info_at(&mut s, "82", "var c12t6: (n: number, s: string) => IFoo", "");
     fourslash::verify_quick_info_at(&mut s, "83", "(parameter) n: number", "");
     fourslash::verify_quick_info_at(&mut s, "84", "(parameter) s: string", "");
-    fourslash::verify_quick_info_at(
-        &mut s,
-        "85",
-        "var c12t7: (n: number, s: string) => number",
-        "",
-    );
-    fourslash::verify_quick_info_at(
-        &mut s,
-        "86",
-        "var c12t8: (n: number, s: string) => number",
-        "",
-    );
+    fourslash::verify_quick_info_at(&mut s, "85", "var c12t7: (n: number, s: string) => number", "");
+    fourslash::verify_quick_info_at(&mut s, "86", "var c12t8: (n: number, s: string) => number", "");
     fourslash::verify_quick_info_at(&mut s, "87", "(parameter) n: number", "");
     fourslash::verify_quick_info_at(&mut s, "88", "var c12t9: number[][]", "");
     fourslash::verify_quick_info_at(&mut s, "89", "var c12t10: IFoo[]", "");
-    fourslash::verify_quick_info_at(
-        &mut s,
-        "90",
-        "var c12t11: ((n: number, s: string) => string)[]",
-        "",
-    );
+    fourslash::verify_quick_info_at(&mut s, "90", "var c12t11: ((n: number, s: string) => string)[]", "");
     fourslash::verify_quick_info_at(&mut s, "91", "(parameter) n: number", "");
     fourslash::verify_quick_info_at(&mut s, "92", "(parameter) s: string", "");
     fourslash::verify_quick_info_at(&mut s, "93", "var c12t12: IBar", "");
     fourslash::verify_quick_info_at(&mut s, "94", "(property) IBar.foo: IFoo", "");
     fourslash::verify_quick_info_at(&mut s, "95", "var c12t13: IFoo", "");
-    fourslash::verify_quick_info_at(
-        &mut s,
-        "96",
-        "(method) IFoo.f(i: number, s: string): string",
-        "",
-    );
+    fourslash::verify_quick_info_at(&mut s, "96", "(method) IFoo.f(i: number, s: string): string", "");
     fourslash::verify_quick_info_at(&mut s, "97", "(parameter) i: number", "");
     fourslash::verify_quick_info_at(&mut s, "98", "(parameter) s: string", "");
     fourslash::verify_quick_info_at(&mut s, "99", "var c12t14: IFoo", "");
     fourslash::verify_quick_info_at(&mut s, "100", "(property) IFoo.a: number[]", "");
-    fourslash::verify_quick_info_at(
-        &mut s,
-        "101",
-        "function EF1(a: number, b: number): number",
-        "",
-    );
+    fourslash::verify_quick_info_at(&mut s, "101", "function EF1(a: number, b: number): number", "");
     fourslash::verify_quick_info_at(&mut s, "102", "(parameter) a: any", "");
     fourslash::verify_quick_info_at(&mut s, "103", "(parameter) b: any", "");
     fourslash::verify_quick_info_at(&mut s, "110", "(property) Point.origin: Point", "");
-    fourslash::verify_quick_info_at(
-        &mut s,
-        "111",
-        "constructor Point(x: number, y: number): Point",
-        "",
-    );
-    fourslash::verify_quick_info_at(
-        &mut s,
-        "112",
-        "(method) Point.add(dx: number, dy: number): Point",
-        "",
-    );
+    fourslash::verify_quick_info_at(&mut s, "111", "constructor Point(x: number, y: number): Point", "");
+    fourslash::verify_quick_info_at(&mut s, "112", "(method) Point.add(dx: number, dy: number): Point", "");
     fourslash::verify_quick_info_at(&mut s, "113", "(parameter) dx: number", "");
     fourslash::verify_quick_info_at(&mut s, "114", "(parameter) dy: number", "");
-    fourslash::verify_quick_info_at(
-        &mut s,
-        "115",
-        "(method) Point.add(dx: number, dy: number): Point",
-        "",
-    );
+    fourslash::verify_quick_info_at(&mut s, "115", "(method) Point.add(dx: number, dy: number): Point", "");
     fourslash::verify_quick_info_at(&mut s, "116", "(parameter) dx: number", "");
     fourslash::verify_quick_info_at(&mut s, "117", "(parameter) dy: number", "");
 }

@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: t.Skip('Known failing fourslash test')"]
 #[test]
 fn get_jsx_outlining_spans() {
@@ -38,6 +39,6 @@ export class Home extends Component[| {
     )|];
   }|]
 }|]"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("getJSXOutliningSpans", content);
     fourslash::unsupported("VerifyOutliningSpans"); // f.VerifyOutliningSpans(t)
 }

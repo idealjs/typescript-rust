@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyCompletions"]
+
 #[test]
 fn completion_list_for_transitively_exported_members03() {
     let content = r#"// @Filename: A.ts
@@ -30,6 +30,6 @@ export * from "./B"
 // @Filename: D.ts
 import * as c from "./C";
 var x: c./**/"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
+    let mut s = Session::new_for_test("completionListForTransitivelyExportedMembers03", content);
+    fourslash::verify_completions_include_exclude_at(&mut s, Some(""), &["I1", "I2", "I1_OR_I2", "C1"], &[]);
 }

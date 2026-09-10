@@ -192,6 +192,27 @@ impl Checker {
                     .is_some_and(|p| p.flags.contains(tsox_frontend::ast::SymbolFlags::ValueModule))
             })
             .map(|s| {
+                // Go getSymbolChain：符号是父模块的 export=（自身隔代父），
+                // 链退化为模块限定名（别名 a），不再追加符号名
+                let is_export_equals = s
+                    .parent
+                    .as_ref()
+                    .and_then(|p| p.exports.get("export="))
+                    .is_some_and(|exp| {
+                        Arc::ptr_eq(exp, s)
+                            || exp
+                                .export_symbol
+                                .as_ref()
+                                .is_some_and(|t| Arc::ptr_eq(t, s))
+                            || self
+                                .follow_alias_resolving(exp)
+                                .is_some_and(|target| Arc::ptr_eq(&target, s))
+                    });
+                if is_export_equals {
+                    return self
+                        .namespace_qualifier_of(s)
+                        .unwrap_or_else(|| s.name.clone());
+                }
                 self.namespace_qualifier_of(s)
                     .map(|q| format!("{q}.{}", s.name))
                     .unwrap_or_else(|| s.name.clone())
@@ -250,14 +271,21 @@ impl Checker {
                 let param_type = self
                     .signature_instantiated_param_type(sig, i)
                     .unwrap_or_else(|| self.get_type_of_symbol(param));
-                let type_str = self.type_to_string_ex(&param_type, flags);
+                let type_str = self
+                    .annotated_param_type_text(param, &param_type)
+                    .unwrap_or_else(|| self.type_to_string_ex(&param_type, flags));
+                let prefix = if i + 1 == sig.parameters.len() && sig.has_rest_parameter() {
+                    "..."
+                } else {
+                    ""
+                };
                 if param
                     .flags
                     .contains(tsox_frontend::ast::SymbolFlags::Optional)
                 {
-                    format!("{}?: {}", name, type_str)
+                    format!("{prefix}{name}?: {type_str}")
                 } else {
-                    format!("{}: {}", name, type_str)
+                    format!("{prefix}{name}: {type_str}")
                 }
             })
             .collect();

@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyNoSignatureHelpForMarkers"]
 #[test]
 fn super_inside_inner_class() {
@@ -14,6 +15,6 @@ class Derived extends Base {
 		}
 	}
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("superInsideInnerClass", content);
     fourslash::unsupported("VerifyNoSignatureHelpForMarkers"); // f.VerifyNoSignatureHelpForMarkers(t, "1")
 }

@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: t.Skip('Known failing fourslash test')"]
 #[test]
 fn import_name_code_fix_jsx4() {
@@ -20,7 +21,7 @@ export class Text extends React.Component {};
 // @Filename: /a.tsx
 import { Text } from "react-native";
 <Text></Text>;"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("importNameCodeFix_jsx4", content);
     fourslash::go_to_file(&mut s, "/a.tsx");
     fourslash::unsupported("VerifyCodeFix"); // f.VerifyCodeFix(t, fourslash.VerifyCodeFixOptions{
 }

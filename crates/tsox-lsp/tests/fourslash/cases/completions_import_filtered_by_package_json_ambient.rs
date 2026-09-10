@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCompletions"]
 #[test]
 fn completions_import_filtered_by_package_json_ambient() {
@@ -45,7 +46,7 @@ aga/*2*/
 somethi/*3*/
 declaredBy/*4*/
 loca/*5*/"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("completionsImport_filteredByPackageJson_ambient", content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "2", &fourslash.CompletionsExpectedList{
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "3", &fourslash.CompletionsExpectedList{

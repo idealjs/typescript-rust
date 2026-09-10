@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCompletions"]
 #[test]
 fn completion_list_for_export_equals() {
@@ -13,6 +14,6 @@ declare namespace Foo {
 }
 // @Filename: /a.ts
 import { /**/ } from "foo";"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("completionListForExportEquals", content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

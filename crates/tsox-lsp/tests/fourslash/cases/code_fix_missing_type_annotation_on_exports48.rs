@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCodeFix"]
 #[test]
 fn code_fix_missing_type_annotation_on_exports48() {
@@ -34,7 +35,7 @@ import './';
 import './';
 // @filename: /a.tsx
 export const x = <div aria-label="label text" />;"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("codeFixMissingTypeAnnotationOnExports48", content);
     fourslash::go_to_file(&mut s, "/a.tsx");
     fourslash::unsupported("VerifyCodeFix"); // f.VerifyCodeFix(t, fourslash.VerifyCodeFixOptions{
 }

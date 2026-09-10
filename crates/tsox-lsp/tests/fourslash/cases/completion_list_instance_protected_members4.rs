@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyCompletions"]
+
 #[test]
 fn completion_list_instance_protected_members4() {
     let content = r#"class Base {
@@ -24,6 +24,6 @@ class C1 extends Base {
 
  var c: C1;
  c./*1*/"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
+    let mut s = Session::new_for_test("completionListInstanceProtectedMembers4", content);
+    fourslash::verify_completions_exact_at(&mut s, Some("1"), &["protectedOverriddenMethod", "protectedOverriddenProperty", "publicMethod", "publicProperty"]);
 }

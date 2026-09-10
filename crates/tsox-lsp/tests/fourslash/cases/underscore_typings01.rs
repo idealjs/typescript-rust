@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCompletions"]
 #[test]
 fn underscore_typings01() {
@@ -29,7 +30,7 @@ var /*9*/cc = _(aa).map(/*10*/x => x.length);
 var /*11*/dd = aa.map(/*12*/x => x.length);
 
 var e = a.map(x => x./*13*/"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("underscoreTypings01", content);
     fourslash::verify_quick_info_at(&mut s, "1", "var b: number[]", "");
     fourslash::verify_quick_info_at(&mut s, "2", "(parameter) x: string", "");
     fourslash::verify_quick_info_at(&mut s, "3", "var c: number[]", "");

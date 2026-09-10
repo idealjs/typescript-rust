@@ -72,6 +72,11 @@ impl FileAccumulator {
 
     fn finish(mut self, default_name: &str, data: &mut TestData) {
         if self.is_empty() {
+            // 无内容无文件名的头部选项行（首个 @Filename 前的 // @option）按
+            // Go fourslash 语义并入全项目选项
+            for (k, v) in self.options {
+                data.global_options.entry(k).or_insert(v);
+            }
             return;
         }
         let name = self.name.take().unwrap_or_else(|| default_name.to_string());

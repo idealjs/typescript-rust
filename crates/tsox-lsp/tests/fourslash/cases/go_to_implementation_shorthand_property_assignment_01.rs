@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineGoToImplementation"]
 #[test]
 fn go_to_implementation_shorthand_property_assignment_01() {
@@ -44,6 +45,6 @@ var y = class Foo {
 };
 
 createBarUsingClassDeclaration().Fo/*reference*/o;"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("goToImplementationShorthandPropertyAssignment_01", content);
     fourslash::unsupported("VerifyBaselineGoToImplementation"); // f.VerifyBaselineGoToImplementation(t, "reference")
 }

@@ -21,7 +21,7 @@ impl Parser {
         if !self.try_parse_semicolon() {
             self.parse_error_for_missing_semicolon_after(&expression);
         }
-        let end = self.token_pos();
+        let end = self.node_pos();
         Arc::new(Node::with_loc(
             SyntaxKind::ThrowStatement,
             NodeData::ThrowStatement(ThrowStatementData { expression }),
@@ -95,7 +95,7 @@ impl Parser {
         let pos = self.token_pos();
         self.expect(SyntaxKind::DebuggerKeyword);
         self.parse_semicolon();
-        let end = self.token_pos();
+        let end = self.node_pos();
         Arc::new(Node::with_loc(
             SyntaxKind::DebuggerStatement,
             NodeData::DebuggerStatement,
@@ -110,7 +110,7 @@ impl Parser {
         if self.token == SyntaxKind::ColonToken && expression.kind == SyntaxKind::Identifier {
             self.next_token();
             let statement = self.parse_statement();
-            let end = self.token_pos();
+            let end = self.node_pos();
             return Arc::new(Node::with_loc(
                 SyntaxKind::LabeledStatement,
                 NodeData::LabeledStatement(LabeledStatementData {
@@ -124,7 +124,7 @@ impl Parser {
         if !self.try_parse_semicolon() {
             self.parse_error_for_missing_semicolon_after(&expression);
         }
-        let end = self.token_pos();
+        let end = self.node_pos();
         Arc::new(Node::with_loc(
             SyntaxKind::ExpressionStatement,
             NodeData::ExpressionStatement(ExpressionStatementData { expression }),
@@ -214,7 +214,7 @@ impl Parser {
         let multi_line = self.has_preceding_line_break();
         let statements = self.parse_list(ParsingContext::BlockStatements, Parser::parse_statement);
         self.expect(SyntaxKind::CloseBraceToken);
-        let end = self.token_pos();
+        let end = self.node_pos();
         Arc::new(Node::with_loc(
             SyntaxKind::Block,
             NodeData::Block(BlockData {
@@ -236,7 +236,7 @@ impl Parser {
         let pos = self.token_pos();
         let declaration_list = self.parse_variable_declaration_list(false);
         self.parse_semicolon();
-        let end = self.token_pos();
+        let end = self.node_pos();
         Arc::new(Node::with_loc(
             SyntaxKind::VariableStatement,
             NodeData::VariableStatement(VariableStatementData {
@@ -273,7 +273,7 @@ impl Parser {
                 Parser::parse_variable_declaration_allow_exclamation
             },
         );
-        let end = self.token_pos();
+        let end = self.node_pos();
         let mut node = Node::with_loc(
             SyntaxKind::VariableDeclarationList,
             NodeData::VariableDeclarationList(VariableDeclarationListData {

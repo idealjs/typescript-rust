@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifySignatureHelp"]
 #[test]
 fn generic_function_return_type2() {
@@ -12,7 +13,7 @@ fn generic_function_return_type2() {
 var x = new C(1);
 var /*2*/r = x.foo(/*1*/3);
 var /*4*/r2 = r(/*3*/4);"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("genericFunctionReturnType2", content);
     fourslash::go_to_marker(&mut s, "1");
     fourslash::unsupported("VerifySignatureHelp"); // f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{Text: "foo(x: number): (a: number) => 
     fourslash::verify_quick_info_at(&mut s, "2", "var r: (a: number) => number", "");

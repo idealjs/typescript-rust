@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyRenameSucceeded"]
 #[test]
 fn rename_for_aliasing_export02() {
@@ -7,7 +8,7 @@ fn rename_for_aliasing_export02() {
 let x = 1;
 
 export { x as /**/[|y|] };"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("renameForAliasingExport02", content);
     fourslash::go_to_marker(&mut s, "");
     fourslash::unsupported("VerifyRenameSucceeded"); // f.VerifyRenameSucceeded(t, nil /*preferences*/)
 }

@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineHover"]
 #[test]
 fn quick_info_js_doc_tags6() {
@@ -27,6 +28,6 @@ class Bar extends Foo {
         return res;
     }
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("quickInfoJsDocTags6", content);
     fourslash::unsupported("VerifyBaselineHover"); // f.VerifyBaselineHover(t)
 }

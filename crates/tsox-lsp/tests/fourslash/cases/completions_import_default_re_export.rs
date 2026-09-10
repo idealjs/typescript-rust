@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCompletions"]
 #[test]
 fn completions_import_default_re_export() {
@@ -16,7 +17,7 @@ export default a;
 import * as foo from './file1';
 /**/
 export default foo.b;"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("completionsImport_default_reExport", content);
     fourslash::go_to_marker(&mut s, "");
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

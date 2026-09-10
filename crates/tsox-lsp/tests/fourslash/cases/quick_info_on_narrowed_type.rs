@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCompletions"]
 #[test]
 fn quick_info_on_narrowed_type() {
@@ -29,7 +30,7 @@ class Foo {
         this./*7*/#privateProperty;
     }
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("quickInfoOnNarrowedType", content);
     fourslash::verify_quick_info_at(&mut s, "1", "(parameter) strOrNum: string | number", "");
     fourslash::verify_quick_info_at(&mut s, "2", "(parameter) strOrNum: number", "");
     fourslash::verify_quick_info_at(&mut s, "3", "(parameter) strOrNum: string", "");

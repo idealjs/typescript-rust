@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyImportFixModuleSpecifiers"]
 #[test]
 fn auto_import_specifier_exclude_regexes3() {
@@ -19,7 +20,7 @@ export function add(a: number, b: number) {}
 export * from "./utils";
 // @Filename: /src/index.ts
 add/**/"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("autoImportSpecifierExcludeRegexes3", content);
     fourslash::unsupported("VerifyImportFixModuleSpecifiers"); // f.VerifyImportFixModuleSpecifiers(t, "", []string{"pkg", "pkg/utils"}, nil /*preferences*/)
     fourslash::unsupported("VerifyImportFixModuleSpecifiers"); // f.VerifyImportFixModuleSpecifiers(t, "", []string{"pkg/utils"}, &lsutil.UserPreferences{AutoImportSp
 }

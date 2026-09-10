@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineRename"]
 #[test]
 fn rename_destructuring_assignment_nested_in_for_of2() {
@@ -17,6 +18,6 @@ for ([|{ skills: { [|{| "contextRangeIndex": 4 |}primary|]: primaryA, secondary:
 for ([|{ skills: { [|{| "contextRangeIndex": 6 |}primary|], secondary } } of multiRobots|]) {
     console.log([|primary|]);
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("renameDestructuringAssignmentNestedInForOf2", content);
     fourslash::unsupported("VerifyBaselineRename"); // f.VerifyBaselineRename(t, nil /*preferences*/, f.Ranges()[1], f.Ranges()[5], f.Ranges()[3], f.Ranges
 }

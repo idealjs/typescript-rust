@@ -54,6 +54,9 @@ pub struct MappedTypeData {
     pub constraint_type: Option<Arc<Type>>,
     pub name_type: Option<Arc<Type>>,
     pub template_type: Option<Arc<Type>>,
+    pub template_node: Option<Arc<Node>>,
+    /// 惰性模板解析时依序应用的 (参数, 实参) 替换链（Go 实例化 mapper 的等价物）
+    pub template_subst: Option<Box<Vec<(Vec<Arc<Type>>, Vec<Arc<Type>>)>>>,
     pub modifiers_type: Option<Arc<Type>>,
     pub resolved_apparent_type: OnceLock<Arc<Type>>,
     pub contains_error: bool,

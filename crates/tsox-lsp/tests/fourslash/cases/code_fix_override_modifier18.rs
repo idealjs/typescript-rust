@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCodeFixNotAvailable"]
 #[test]
 fn code_fix_override_modifier18() {
@@ -10,6 +11,6 @@ class A {
 class B extends A {
     [|static foo() {}|]
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("codeFixOverrideModifier18", content);
     fourslash::unsupported("VerifyCodeFixNotAvailable"); // f.VerifyCodeFixNotAvailable(t, "fixAddOverrideModifier")
 }

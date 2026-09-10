@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineRename"]
 #[test]
 fn rename_js_special_assignment_rhs2() {
@@ -13,6 +14,6 @@ const foo = {
         this._x = [|x|].prop;
     }
 };"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("renameJsSpecialAssignmentRhs2", content);
     fourslash::unsupported("VerifyBaselineRename"); // f.VerifyBaselineRename(t, nil /*preferences*/)
 }

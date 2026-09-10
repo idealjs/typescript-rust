@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifySignatureHelp"]
 #[test]
 fn tsx_signature_help2() {
@@ -25,7 +26,7 @@ export function MainButton(props: ButtonProps | LinkProps): JSX.Element {
     return this._buildMainButton(props);
 }
 let e1 = <MainButton/*1*/ /*2*/"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("tsxSignatureHelp2", content);
     fourslash::go_to_marker(&mut s, "1");
     fourslash::unsupported("VerifySignatureHelp"); // f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{Text: "MainButton(buttonProps: ButtonP
     fourslash::go_to_marker(&mut s, "2");

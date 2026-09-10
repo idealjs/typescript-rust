@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: // The parent-directory solution tsconfig only references th"]
 #[test]
 fn get_edits_for_file_rename_with_solution_config_file() {
@@ -31,7 +32,7 @@ b;
 
 // @Filename: /src/b.ts
 export const b = 0;"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("getEditsForFileRenameWithSolutionConfigFile", content);
     fourslash::unsupported("VerifyWillRenameFilesEdits"); // f.VerifyWillRenameFilesEdits(t, "/src/b.ts", "/src/c.ts", map[string]string{
 }
 
@@ -78,7 +79,7 @@ helper;
 // @Filename: /app/main.ts
 import { helper } from "../lib/helper";
 helper;"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("getEditsForFileRenameLoadsUnopenedCompositeProject", content);
     fourslash::go_to_marker(&mut s, "helper");
     // TODO: result := f.WillRenameFiles(t, &lsproto.FileRename{
     // TODO: if result.WorkspaceEdit == nil || result.WorkspaceEdit.DocumentChanges == nil {

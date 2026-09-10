@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCompletions"]
 #[test]
 fn member_list_on_this_in_class_with_privates() {
@@ -9,6 +10,6 @@ fn member_list_on_this_in_class_with_privates() {
    public pubProp = 0;
    private privProp = 0;
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("memberListOnThisInClassWithPrivates", content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

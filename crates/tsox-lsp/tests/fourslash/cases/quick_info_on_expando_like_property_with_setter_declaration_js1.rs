@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: t.Skip('Known failing fourslash test')"]
 #[test]
 fn quick_info_on_expando_like_property_with_setter_declaration_js1() {
@@ -15,6 +16,6 @@ Object.defineProperty(x, "foo", {
 });
 
 x.foo/**/ = 1;"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("quickInfoOnExpandoLikePropertyWithSetterDeclarationJs1", content);
     fourslash::verify_quick_info_at(&mut s, "", "(property) x.foo: number", "");
 }

@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: t.Skip('Known failing fourslash test')"]
 #[test]
 fn jsdoc_template_prototype_completions() {
@@ -16,6 +17,6 @@ function Foo() {}
  */
 Foo.prototype.foo = function (bar) {};
 new Foo().foo({ id: 1234 })./**/"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
+    let mut s = Session::new_for_test("jsdocTemplatePrototypeCompletions", content);
+    fourslash::verify_completions_exact_at(&mut s, Some(""), &["id"]);
 }

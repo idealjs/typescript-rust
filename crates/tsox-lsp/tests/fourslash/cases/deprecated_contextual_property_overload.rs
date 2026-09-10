@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifySuggestionDiagnostics"]
 #[test]
 fn deprecated_contextual_property_overload() {
@@ -63,6 +64,6 @@ declare function selectDeprecated(options: FirstDeprecatedOptions): void;
 declare function selectDeprecated(options: SecondDeprecatedOptions): void;
 
 selectDeprecated({ kind: "second", [|value|]: 1 });"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("deprecatedContextualPropertyOverload", content);
     fourslash::unsupported("VerifySuggestionDiagnostics"); // f.VerifySuggestionDiagnostics(t, []*lsproto.Diagnostic{
 }

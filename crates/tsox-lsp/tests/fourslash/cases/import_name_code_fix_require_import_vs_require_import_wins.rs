@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCodeFix"]
 #[test]
 fn import_name_code_fix_require_import_vs_require_import_wins() {
@@ -19,7 +20,7 @@ import fs from 'fs';
 const path = require('path');
 
 new Blah"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("importNameCodeFix_require_importVsRequire_importWins", content);
     fourslash::go_to_file(&mut s, "addToExisting.js");
     fourslash::unsupported("VerifyCodeFix"); // f.VerifyCodeFix(t, fourslash.VerifyCodeFixOptions{
     fourslash::go_to_file(&mut s, "newImport.js");

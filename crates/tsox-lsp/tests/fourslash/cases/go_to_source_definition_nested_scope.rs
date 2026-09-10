@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: // a function body. We should navigate to the exported funct"]
 #[test]
 fn go_to_source_nested_scope_shadowing() {
@@ -21,7 +22,7 @@ function unrelated() {
 // @Filename: /home/src/workspaces/project/index.ts
 import { /*importHelper*/helper } from "pkg";
 helper/*usage*/();"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("goToSourceNestedScopeShadowing", content);
     fourslash::unsupported("VerifyBaselineGoToSourceDefinition"); // f.VerifyBaselineGoToSourceDefinition(t, "importHelper", "usage")
 }
 
@@ -44,6 +45,6 @@ function factory() {
 // @Filename: /home/src/workspaces/project/index.ts
 import { /*importWidget*/Widget } from "pkg";
 new Widget();"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("goToSourceNestedClassShadowing", content);
     fourslash::unsupported("VerifyBaselineGoToSourceDefinition"); // f.VerifyBaselineGoToSourceDefinition(t, "importWidget")
 }

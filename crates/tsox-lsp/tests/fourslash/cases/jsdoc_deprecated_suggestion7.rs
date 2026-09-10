@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifySuggestionDiagnostics"]
 #[test]
 fn jsdoc_deprecated_suggestion7() {
@@ -12,6 +13,6 @@ type T = Direction.Left
 const x = 1
 type x = string
 var y: x = 'hi'"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("jsdocDeprecated_suggestion7", content);
     fourslash::unsupported("VerifySuggestionDiagnostics"); // f.VerifySuggestionDiagnostics(t, nil)
 }

@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyImportFixModuleSpecifiers"]
 #[test]
 fn auto_import_paths() {
@@ -22,6 +23,6 @@ fn auto_import_paths() {
 bar/**/
 // @Filename: /package2/file1.js
 export const bar = 0;"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("autoImportPaths", content);
     fourslash::unsupported("VerifyImportFixModuleSpecifiers"); // f.VerifyImportFixModuleSpecifiers(t, "", []string{"package2/file1"}, &lsutil.UserPreferences{ImportM
 }

@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyImportFixModuleSpecifiers"]
 #[test]
 fn auto_import_package_json_imports_length2() {
@@ -14,6 +15,6 @@ fn auto_import_package_json_imports_length2() {
 export function something(name: string): any;
 // @Filename: /a.ts
 something/**/"##;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("autoImportPackageJsonImportsLength2", content);
     fourslash::unsupported("VerifyImportFixModuleSpecifiers"); // f.VerifyImportFixModuleSpecifiers(t, "", []string{"#a/b/c/something"}, nil /*preferences*/)
 }

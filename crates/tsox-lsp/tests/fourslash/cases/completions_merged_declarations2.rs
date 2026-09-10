@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyCompletions"]
+
 #[test]
 fn completions_merged_declarations2() {
     let content = r#"class point {
@@ -15,7 +15,7 @@ namespace point {
 var p1 = new point(0, 0);
 var p2 = point./*1*/origin;
 var b = point./*2*/equals(p1, p2);"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "2", &fourslash.CompletionsExpectedList{
+    let mut s = Session::new_for_test("completionsMergedDeclarations2", content);
+    fourslash::verify_completions_include_exclude_at(&mut s, Some("1"), &["origin"], &[]);
+    fourslash::verify_completions_include_exclude_at(&mut s, Some("2"), &["equals"], &[]);
 }

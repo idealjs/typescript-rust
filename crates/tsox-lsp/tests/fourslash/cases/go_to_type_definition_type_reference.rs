@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineGoToTypeDefinition"]
 #[test]
 fn go_to_type_definition_type_reference() {
@@ -7,6 +8,6 @@ fn go_to_type_definition_type_reference() {
 type Box<T> = { value: T };
 declare const boxedUser: Box<User>
 /*reference*/boxedUser"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("goToTypeDefinition_typeReference", content);
     fourslash::unsupported("VerifyBaselineGoToTypeDefinition"); // f.VerifyBaselineGoToTypeDefinition(t, "reference")
 }

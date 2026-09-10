@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineGoToDefinition"]
 #[test]
 fn go_to_definition_signature_alias() {
@@ -36,7 +37,7 @@ new [|/*newMyComponent2*/MyComponent2|]();
 declare const /*MyComponent3*/MyComponent3: ComponentClass2;
 <[|/*jsxMyComponent3*/MyComponent3|] />;
 new [|/*newMyComponent3*/MyComponent3|]();"#;
-    let mut s = Session::new(content);
-    fourslash::verify_no_errors(&mut s);
+    let mut s = Session::new_for_test("goToDefinitionSignatureAlias", content);
+    fourslash::verify_no_errors(&mut s, );
     fourslash::unsupported("VerifyBaselineGoToDefinition"); // f.VerifyBaselineGoToDefinition(t, true, "useF", "useG", "useH", "useI", "useIFn", "useJ", "useM", "u
 }

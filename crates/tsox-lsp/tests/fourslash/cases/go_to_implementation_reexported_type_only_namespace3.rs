@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineGoToImplementation"]
 #[test]
 fn go_to_implementation_reexported_type_only_namespace3() {
@@ -20,6 +21,6 @@ import type {TSE/*impl*/STree} from '@typescript-eslint/utils';
 let node: TSESTree.Node | undefined;
 export default node;
 "#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("goToImplementationReexportedTypeOnlyNamespace3", content);
     fourslash::unsupported("VerifyBaselineGoToImplementation"); // f.VerifyBaselineGoToImplementation(t, "impl")
 }

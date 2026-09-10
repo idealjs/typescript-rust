@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: t.Skip('Known failing fourslash test')"]
 #[test]
 fn js_doc_inherit_doc() {
@@ -60,31 +61,11 @@ b.method2/*2*/();
 Bar.method1/*3*/();
 const p1 = b.property1/*4*/;
 const p2 = b.property2/*5*/;"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("jsDocInheritDoc", content);
     fourslash::verify_quick_info_at(&mut s, "1", "constructor Bar(value: number): Bar", "");
-    fourslash::verify_quick_info_at(
-        &mut s,
-        "2",
-        "(method) Bar.method2(): void",
-        "Foo#method2 documentation",
-    );
-    fourslash::verify_quick_info_at(
-        &mut s,
-        "3",
-        "(method) Bar.method1(): void",
-        "Foo#method1 documentation",
-    );
-    fourslash::verify_quick_info_at(
-        &mut s,
-        "4",
-        "(property) Bar.property1: string",
-        "Foo#property1 documentation",
-    );
-    fourslash::verify_quick_info_at(
-        &mut s,
-        "5",
-        "(property) Bar.property2: object",
-        "Baz#property2 documentation\nBar#property2",
-    );
+    fourslash::verify_quick_info_at(&mut s, "2", "(method) Bar.method2(): void", "Foo#method2 documentation");
+    fourslash::verify_quick_info_at(&mut s, "3", "(method) Bar.method1(): void", "Foo#method1 documentation");
+    fourslash::verify_quick_info_at(&mut s, "4", "(property) Bar.property1: string", "Foo#property1 documentation");
+    fourslash::verify_quick_info_at(&mut s, "5", "(property) Bar.property2: object", "Baz#property2 documentation\nBar#property2");
     fourslash::verify_quick_info_at(&mut s, "6", "(property) Bar.property3: string", "");
 }

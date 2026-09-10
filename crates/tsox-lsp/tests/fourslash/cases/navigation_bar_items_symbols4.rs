@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineDocumentSymbol"]
 #[test]
 fn navigation_bar_items_symbols4() {
@@ -21,6 +22,6 @@ class MyClass {
         const x = this[_sym];
     }
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("navigationBarItemsSymbols4", content);
     fourslash::unsupported("VerifyBaselineDocumentSymbol"); // f.VerifyBaselineDocumentSymbol(t)
 }

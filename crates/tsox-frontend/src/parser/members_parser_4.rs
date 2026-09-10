@@ -193,7 +193,7 @@ impl Parser {
             None
         };
         self.parse_semicolon_after_property_name(&name, type_node.as_ref(), initializer.as_ref());
-        let end = self.token_pos();
+        let end = self.node_pos();
         Arc::new(Node::with_loc(
             SyntaxKind::PropertyDeclaration,
             NodeData::PropertyDeclaration(PropertyDeclarationData {

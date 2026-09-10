@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[test]
 fn code_fix_spelling_js3() {
     let content = r#"// @allowjs: true
@@ -18,6 +19,6 @@ class Derivee extends Classe {
         return super.none
     }
 }"#;
-    let mut s = Session::new(content);
-    fourslash::verify_no_errors(&mut s);
+    let mut s = Session::new_for_test("codeFixSpellingJs3", content);
+    fourslash::verify_no_errors(&mut s, );
 }

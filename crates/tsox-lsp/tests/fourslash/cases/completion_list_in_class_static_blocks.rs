@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCompletions"]
 #[test]
 fn completion_list_in_class_static_blocks() {
@@ -20,6 +21,6 @@ class Foo {
         Foo./*4*/
     }
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("completionListInClassStaticBlocks", content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, []string{"1", "2", "3", "4"}, &fourslash.CompletionsExpectedList{
 }

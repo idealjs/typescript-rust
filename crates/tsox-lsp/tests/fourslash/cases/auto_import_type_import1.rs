@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyImportFixAtPosition"]
 #[test]
 fn auto_import_type_import1() {
@@ -14,7 +15,7 @@ export class D = { y: string };
 import { A, D, type C } from './foo';
 const b: B/**/ | C;
 console.log(A, D);"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("autoImportTypeImport1", content);
     fourslash::go_to_marker(&mut s, "");
     fourslash::unsupported("VerifyImportFixAtPosition"); // f.VerifyImportFixAtPosition(t, []string{
     fourslash::unsupported("VerifyImportFixAtPosition"); // f.VerifyImportFixAtPosition(t, []string{

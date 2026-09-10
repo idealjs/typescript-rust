@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineDocumentHighlights"]
 #[test]
 fn document_highlight_at_inherited_properties3() {
@@ -12,6 +13,6 @@ interface interface1 extends interface1 {
 var v: interface1;
 v.[|propName|];
 v.[|doStuff|]();"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("documentHighlightAtInheritedProperties3", content);
     fourslash::unsupported("VerifyBaselineDocumentHighlights"); // f.VerifyBaselineDocumentHighlights(t, nil /*preferences*/, ToAny(f.Ranges())...)
 }

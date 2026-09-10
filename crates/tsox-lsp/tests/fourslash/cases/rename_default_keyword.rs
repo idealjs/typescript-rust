@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: for _, marker := range markers {"]
 #[test]
 fn rename_default_keyword() {
@@ -16,7 +17,7 @@ class /*4*/default {}
 const foo = {
     /*5*/[|default|]: 1
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("renameDefaultKeyword", content);
     // TODO: markers := []string{"1", "2", "3", "4"}
     // TODO: for _, marker := range markers {
     fourslash::go_to_marker(&mut s, "5");

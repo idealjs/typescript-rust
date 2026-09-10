@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineFindAllReferences"]
 #[test]
 fn duplicate_package_services() {
@@ -26,7 +27,7 @@ export default class /*defBX*/X {
 import { a } from "a";
 import { b } from "b";
 a(/*error*/b);"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("duplicatePackageServices", content);
     fourslash::go_to_file(&mut s, "/src/a.ts");
     fourslash::verify_number_of_errors_in_current_file(&mut s, 0);
     fourslash::unsupported("VerifyBaselineFindAllReferences"); // f.VerifyBaselineFindAllReferences(t, "useAX", "defAX", "useBX")

@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineHover"]
 #[test]
 fn hover_self_re_exported_namespace_generic_no_crash() {
@@ -12,7 +13,7 @@ import { Box } from "./mod"
 declare const b: Box<string>
 const x = b./*1*/content
 "#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("hoverSelfReExportedNamespaceGenericNoCrash", content);
     fourslash::unsupported("VerifyBaselineHover"); // f.VerifyBaselineHover(t)
 }
 
@@ -27,7 +28,7 @@ import { Box } from "./mod"
 declare const b: Box<string>
 const x = b./*1*/content
 "#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("hoverSelfReExportedNamespaceGenericClassNoCrash", content);
     fourslash::unsupported("VerifyBaselineHover"); // f.VerifyBaselineHover(t)
 }
 
@@ -42,6 +43,6 @@ import { Box } from "./mod"
 declare const b: Box<string>
 const x = b./*1*/content
 "#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("hoverNamespaceExportGenericNonColliding", content);
     fourslash::unsupported("VerifyBaselineHover"); // f.VerifyBaselineHover(t)
 }

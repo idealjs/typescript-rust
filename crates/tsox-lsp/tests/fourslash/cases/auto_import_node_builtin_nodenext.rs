@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCompletions"]
 #[test]
 fn auto_import_node_builtin_nodenext() {
@@ -17,6 +18,6 @@ declare module "fs" {
 declare module "node:fs" { export * from "fs"; }
 // @Filename: /index.ts
 existsSync/**/"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("autoImportNodeBuiltinNodenext", content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

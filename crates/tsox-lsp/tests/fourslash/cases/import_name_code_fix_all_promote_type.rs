@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCodeFixAll"]
 #[test]
 fn import_name_code_fix_all_promote_type() {
@@ -19,7 +20,7 @@ new F;
 import type { A, C, D, E, G } from './a';
 type Z = B | A;
 type Y = F;"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("importNameCodeFix_all_promoteType", content);
     fourslash::go_to_file(&mut s, "/b.ts");
     fourslash::unsupported("VerifyCodeFixAll"); // f.VerifyCodeFixAll(t, fourslash.VerifyCodeFixAllOptions{
     fourslash::go_to_file(&mut s, "/c.ts");

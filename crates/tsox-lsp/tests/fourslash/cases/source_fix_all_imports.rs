@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: // Test per-fixId fix-all via VerifyCodeFixAll (quickfix pat"]
 #[test]
 fn source_fix_all_imports() {
@@ -10,7 +11,7 @@ export const b: number = 2;
 // @Filename: /main.ts
 a;
 b;"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("sourceFixAllImports", content);
     fourslash::go_to_file(&mut s, "/main.ts");
     // TODO: // Test per-fixId fix-all via VerifyCodeFixAll (quickfix path)
     fourslash::unsupported("VerifyCodeFixAll"); // f.VerifyCodeFixAll(t, fourslash.VerifyCodeFixAllOptions{
@@ -26,7 +27,7 @@ export const b: number = 2;
 // @Filename: /main.ts
 a;
 b;"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("sourceFixAllCodeAction", content);
     fourslash::go_to_file(&mut s, "/main.ts");
     // TODO: // Test source.fixAll code action directly (on-save path)
     fourslash::unsupported("VerifySourceFixAll"); // f.VerifySourceFixAll(t, `import { a } from "./a";

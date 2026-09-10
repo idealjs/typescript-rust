@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCompletions"]
 #[test]
 fn completions_js_doc_no_crash2() {
@@ -21,6 +22,6 @@ fn completions_js_doc_no_crash2() {
   </example>
  */
 var ngShowDirective = ['$animate', function($animate) {}];"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("completionsJSDocNoCrash2", content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

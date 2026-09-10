@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineGoToDefinition"]
 #[test]
 fn go_to_definition_overloads_in_multiple_property_accesses() {
@@ -11,6 +12,6 @@ fn go_to_definition_overloads_in_multiple_property_accesses() {
     }
 }
 A.B.[|/*2*/f|]("");"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("goToDefinitionOverloadsInMultiplePropertyAccesses", content);
     fourslash::unsupported("VerifyBaselineGoToDefinition"); // f.VerifyBaselineGoToDefinition(t, true, "2")
 }

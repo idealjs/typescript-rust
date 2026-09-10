@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: t.Skip('Known failing fourslash test')"]
 #[test]
 fn completions_merged_declarations1() {
@@ -21,7 +22,7 @@ namespace point {
 var p1 = /*1*/point(0, 0);
 var p2 = point./*2*/origin;
 var b = point./*3*/equals(p1, p2);"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
+    let mut s = Session::new_for_test("completionsMergedDeclarations1", content);
+    fourslash::verify_completions_include_exclude_at(&mut s, Some("1"), &["point"], &[]);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, []string{"2", "3"}, &fourslash.CompletionsExpectedList{
 }

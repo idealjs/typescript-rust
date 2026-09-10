@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineGoToDefinition"]
 #[test]
 fn tsx_go_to_definition_intrinsics() {
@@ -17,6 +18,6 @@ declare namespace JSX {
 var x = <[|di/*ds*/v|] />;
 var y = <[|s/*ss*/pan|] />;
 var z = <div [|na/*ps*/me|]='hello' />;"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("tsxGoToDefinitionIntrinsics", content);
     fourslash::unsupported("VerifyBaselineGoToDefinition"); // f.VerifyBaselineGoToDefinition(t, true, "ds", "ss", "ps")
 }

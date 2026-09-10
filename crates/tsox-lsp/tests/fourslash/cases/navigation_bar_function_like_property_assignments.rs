@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineDocumentSymbol"]
 #[test]
 fn navigation_bar_function_like_property_assignments() {
@@ -11,6 +12,6 @@ fn navigation_bar_function_like_property_assignments() {
     e: y(),
     f() { }
 };"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("navigationBarFunctionLikePropertyAssignments", content);
     fourslash::unsupported("VerifyBaselineDocumentSymbol"); // f.VerifyBaselineDocumentSymbol(t)
 }

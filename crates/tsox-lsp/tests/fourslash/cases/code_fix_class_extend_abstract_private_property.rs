@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCodeFixNotAvailable"]
 #[test]
 fn code_fix_class_extend_abstract_private_property() {
@@ -10,6 +11,6 @@ abstract class A {
 }
 
 class C extends A {[| |]}"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("codeFixClassExtendAbstractPrivateProperty", content);
     fourslash::unsupported("VerifyCodeFixNotAvailable"); // f.VerifyCodeFixNotAvailable(t)
 }

@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineSignatureHelp"]
 #[test]
 fn signature_help_comments_function_expression() {
@@ -29,6 +30,6 @@ var assigned = /**
   return s.length;
 }
 assigned(/*18*/"hey");"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("signatureHelpCommentsFunctionExpression", content);
     fourslash::unsupported("VerifyBaselineSignatureHelp"); // f.VerifyBaselineSignatureHelp(t)
 }

@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCompletions"]
 #[test]
 fn completions_with_optional_properties_generic_valid_boolean() {
@@ -10,6 +11,6 @@ interface MyOptions {
 }
 declare function bar<T extends MyOptions>(options?: Partial<T>): void;
 bar({ hello: true, /*1*/ });"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("completionsWithOptionalPropertiesGenericValidBoolean", content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
 }

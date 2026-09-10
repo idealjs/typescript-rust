@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.FormatDocument"]
 #[test]
 fn format_document_with_trivia() {
@@ -26,11 +27,9 @@ while (true) {
 // 5 above  
    
    "#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("formatDocumentWithTrivia", content);
     fourslash::unsupported("FormatDocument"); // f.FormatDocument(t, "")
-    fourslash::verify_current_file_content(
-        &mut s,
-        r#"
+    fourslash::verify_current_file_content(&mut s, r#"
 // 1 below   
 
 // 2 above   
@@ -52,6 +51,5 @@ while (true) {
 
 // 5 above  
 
-"#,
-    );
+"#);
 }

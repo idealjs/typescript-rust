@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineDocumentHighlights"]
 #[test]
 fn get_occurrences_export3() {
@@ -63,6 +64,6 @@ namespace m {
 declare [|export|] var v1, v2;
 declare namespace dm { }
 [|export|] class EC { }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("getOccurrencesExport3", content);
     fourslash::unsupported("VerifyBaselineDocumentHighlights"); // f.VerifyBaselineDocumentHighlights(t, nil /*preferences*/, ToAny(f.Ranges())...)
 }

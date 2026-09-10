@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyCompletions"]
+
 #[test]
 fn completions_js_doc_import_tag_empty_module_specifier1() {
     let content = r#"// @strict: true
@@ -11,6 +11,6 @@ fn completions_js_doc_import_tag_empty_module_specifier1() {
 export type MyUnion = string | number;
 // @filename: index.js
 /** @import { MyUnion } from "/**/" */"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
+    let mut s = Session::new_for_test("completionsJSDocImportTagEmptyModuleSpecifier1", content);
+    fourslash::verify_completions_exact_at(&mut s, Some(""), &["pkg"]);
 }

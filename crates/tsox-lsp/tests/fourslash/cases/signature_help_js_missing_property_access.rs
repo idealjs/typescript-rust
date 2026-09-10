@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineSignatureHelp"]
 #[test]
 fn signature_help_js_missing_property_access() {
@@ -7,6 +8,6 @@ fn signature_help_js_missing_property_access() {
 // @checkJs: true
 // @Filename: test.js
 foo.filter(/**/)"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("signatureHelpJSMissingPropertyAccess", content);
     fourslash::unsupported("VerifyBaselineSignatureHelp"); // f.VerifyBaselineSignatureHelp(t)
 }

@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineGoToDefinition"]
 #[test]
 fn go_to_definition_union_type_property_discriminated() {
@@ -23,6 +24,6 @@ const u2: U = {
   [|/*kindBogus*/kind|]: "bogus",
   [|/*propBogus*/prop|]: 0,
 };"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("goToDefinitionUnionTypeProperty_discriminated", content);
     fourslash::unsupported("VerifyBaselineGoToDefinition"); // f.VerifyBaselineGoToDefinition(t, true, "kind", "prop", "kindBogus", "propBogus")
 }

@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCompletions"]
 #[test]
 fn completion_list_at_this_type() {
@@ -16,6 +17,6 @@ class Test {
 
     baz<T>(a: T, k: keyof T) {}
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("completionListAtThisType", content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, []string{"1", "2"}, &fourslash.CompletionsExpectedList{
 }

@@ -1,5 +1,7 @@
 pub(crate) use crate::checker::checker::*;
 #[allow(unused_imports)]
+pub use crate::checker::checker_statements_alias_symbol::*;
+#[allow(unused_imports)]
 pub use crate::checker::checker_statements_checker::*;
 #[allow(unused_imports)]
 pub use crate::checker::checker_statements_checker_2::*;

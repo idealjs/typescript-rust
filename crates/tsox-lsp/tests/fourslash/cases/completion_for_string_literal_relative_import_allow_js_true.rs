@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCompletions"]
 #[test]
 fn completion_for_string_literal_relative_import_allow_js_true() {
@@ -27,6 +28,6 @@ var foo6 = require("./f/*require1*/
 
 // @Filename: g2.js
 "#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("completionForStringLiteralRelativeImportAllowJSTrue", content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, f.Markers(), &fourslash.CompletionsExpectedList{
 }

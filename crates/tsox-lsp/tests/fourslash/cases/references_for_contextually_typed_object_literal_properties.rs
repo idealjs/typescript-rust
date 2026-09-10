@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineFindAllReferences"]
 #[test]
 fn references_for_contextually_typed_object_literal_properties() {
@@ -27,6 +28,6 @@ var w: IFoo = { xy: undefined };
 
 // Untped -- should not be included
 var u = { xy: 0 };"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("referencesForContextuallyTypedObjectLiteralProperties", content);
     fourslash::unsupported("VerifyBaselineFindAllReferences"); // f.VerifyBaselineFindAllReferences(t, "xy")
 }

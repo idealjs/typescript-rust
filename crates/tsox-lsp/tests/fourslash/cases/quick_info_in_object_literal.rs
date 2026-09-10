@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[test]
 fn quick_info_in_object_literal() {
     let content = r#"interface Foo {
@@ -19,7 +20,7 @@ class Foo {
         }
   }
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("quickInfoInObjectLiteral", content);
     fourslash::verify_quick_info_at(&mut s, "1", "(property) y1: () => string", "");
     fourslash::verify_quick_info_at(&mut s, "2", "var value: number", "");
 }

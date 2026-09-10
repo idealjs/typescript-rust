@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCompletions"]
 #[test]
 fn completion_list_enum_values() {
@@ -15,7 +16,7 @@ x./*variableOfEnumType*/;
 
 function foo(): Colors { return null; }
 foo()./*callOfEnumReturnType*/"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "enumVariable", &fourslash.CompletionsExpectedList{
+    let mut s = Session::new_for_test("completionListEnumValues", content);
+    fourslash::verify_completions_exact_at(&mut s, Some("enumVariable"), &["Green", "Red"]);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, []string{"variableOfEnumType", "callOfEnumReturnType"}, &fourslash.Completion
 }

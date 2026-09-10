@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifySemanticTokens"]
 #[test]
 fn semantic_modern_classification_infinity_and_na_n() {
@@ -27,6 +28,6 @@ const obj2 = {
 
 obj2.Infinity;
 obj2.NaN;"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("semanticModernClassificationInfinityAndNaN", content);
     fourslash::unsupported("VerifySemanticTokens"); // f.VerifySemanticTokens(t, []fourslash.SemanticToken{
 }

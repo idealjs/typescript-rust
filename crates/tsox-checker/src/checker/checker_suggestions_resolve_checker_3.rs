@@ -170,20 +170,31 @@ impl Checker {
         dir: &str,
         specifier: &str,
     ) -> Option<Arc<Symbol>> {
-        let stem = specifier.strip_prefix("./").unwrap_or(specifier);
+        let raw = specifier.strip_prefix("./").unwrap_or(specifier);
 
-        let stem = stem
+        let stripped = raw
             .strip_suffix(".js")
-            .or_else(|| stem.strip_suffix(".jsx"))
-            .unwrap_or(stem);
+            .or_else(|| raw.strip_suffix(".jsx"))
+            .unwrap_or(raw);
+        let stripped = stripped
+            .strip_suffix(".mjs")
+            .or_else(|| stripped.strip_suffix(".cjs"))
+            .unwrap_or(stripped);
+
+        // 候选顺序对齐 tsc loadModuleFromFile：精确命中（含 .d.ts/.js 原样）、
+        // .js 说明符回退到同名 .ts/.tsx/.d.ts、目录 index
+        let candidates = [
+            format!("{dir}/{raw}"),
+            format!("{dir}/{stripped}.ts"),
+            format!("{dir}/{stripped}.tsx"),
+            format!("{dir}/{stripped}.d.ts"),
+            format!("{dir}/{stripped}.js"),
+            format!("{dir}/{stripped}.jsx"),
+            format!("{dir}/{stripped}/index.ts"),
+            format!("{dir}/{stripped}/index.d.ts"),
+        ];
         let symbol_map = self.program.symbol_map();
-        for cand in [
-            format!("{dir}/{stem}.ts"),
-            format!("{dir}/{stem}.tsx"),
-            format!("{dir}/{stem}.d.ts"),
-            format!("{dir}/{stem}/index.ts"),
-            format!("{dir}/{stem}/index.d.ts"),
-        ] {
+        for cand in candidates {
             if let Some(sf) = self
                 .program
                 .source_files()

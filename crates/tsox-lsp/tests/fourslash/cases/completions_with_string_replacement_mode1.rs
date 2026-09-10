@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCompletions"]
 #[test]
 fn completions_with_string_replacement_mode1() {
@@ -23,6 +24,6 @@ fn completions_with_string_replacement_mode1() {
 }
 const f: TFunction = (() => {}) as any;
 f('[|login./**/|]')"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("completionsWithStringReplacementMode1", content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

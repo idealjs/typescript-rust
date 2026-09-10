@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.GoToEOF"]
 #[test]
 fn type_check_after_resolve() {
@@ -8,7 +9,7 @@ fn type_check_after_resolve() {
         ssss;
     }
 }/*end*/"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("typeCheckAfterResolve", content);
     fourslash::unsupported("GoToEOF"); // f.GoToEOF(t)
     fourslash::unsupported("InsertLine"); // f.InsertLine(t, "")
     fourslash::verify_quick_info_at(&mut s, "IPointRef", "any", "");

@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineGoToDefinition"]
 #[test]
 fn really_large_file() {
@@ -583710,6 +583711,6 @@ namespace /*1*/Foo {
 
 
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("reallyLargeFile", content);
     fourslash::unsupported("VerifyBaselineGoToDefinition"); // f.VerifyBaselineGoToDefinition(t, false, "1")
 }

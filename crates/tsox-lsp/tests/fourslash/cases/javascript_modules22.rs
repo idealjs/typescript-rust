@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.Backspace"]
 #[test]
 fn javascript_modules22() {
@@ -22,13 +23,13 @@ var x = {name: 'test'};
 import {a} from "./mod"
 import def, {sausages} from "./mod2"
 a./**/"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
+    let mut s = Session::new_for_test("javascriptModules22", content);
+    fourslash::verify_completions_include_exclude_at(&mut s, Some(""), &["toString"], &[]);
     fourslash::unsupported("Backspace"); // f.Backspace(t, 2)
     fourslash::insert(&mut s, "def.");
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, nil, &fourslash.CompletionsExpectedList{
+    fourslash::verify_completions_include_exclude_at(&mut s, None, &["name"], &[]);
     fourslash::insert(&mut s, "name;\nsausages.");
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, nil, &fourslash.CompletionsExpectedList{
+    fourslash::verify_completions_include_exclude_at(&mut s, None, &["eggs"], &[]);
     fourslash::insert(&mut s, "eggs;");
-    fourslash::verify_no_errors(&mut s);
+    fourslash::verify_no_errors(&mut s, );
 }

@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyOrganizeImports"]
 #[test]
 fn organize_imports21() {
@@ -15,7 +16,7 @@ export {
     PersonDefinitions as NameDefinitions,
     PersonDefinitions,
 } from './a';"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("organizeImports21", content);
     fourslash::go_to_file(&mut s, "/b.ts");
     fourslash::unsupported("VerifyOrganizeImports"); // f.VerifyOrganizeImports(t,
 }

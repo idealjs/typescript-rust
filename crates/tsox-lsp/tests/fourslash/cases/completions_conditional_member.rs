@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCompletions"]
 #[test]
 fn completions_conditional_member() {
@@ -9,7 +10,7 @@ fn completions_conditional_member() {
 
 f<'foo'>({ a: { /*1*/ } });
 f<string>({ a: { /*2*/ } });"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("completionsConditionalMember", content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "2", &fourslash.CompletionsExpectedList{
 }

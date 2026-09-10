@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCompletions"]
 #[test]
 fn completion_for_string_literal_quote_preference8() {
@@ -10,7 +11,7 @@ import { a } from './a';
 
 const foo = { '"a name\'s all good but it\'s better with more"': null };
 foo[|./**/|]"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("completionForStringLiteral_quotePreference8", content);
     fourslash::go_to_file(&mut s, "/b.ts");
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

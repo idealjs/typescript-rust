@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyImportFixAtPosition"]
 #[test]
 fn auto_import_pnpm() {
@@ -15,7 +16,7 @@ autorun/**/
 import "mobx";
 // @link: /node_modules/.pnpm/mobx@6.0.4/node_modules/mobx -> /node_modules/mobx
 // @link: /node_modules/.pnpm/mobx@6.0.4/node_modules/mobx -> /node_modules/.pnpm/cool-mobx-dependent@1.2.3/node_modules/mobx"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("autoImportPnpm", content);
     fourslash::go_to_marker(&mut s, "");
     fourslash::unsupported("VerifyImportFixAtPosition"); // f.VerifyImportFixAtPosition(t, []string{
 }

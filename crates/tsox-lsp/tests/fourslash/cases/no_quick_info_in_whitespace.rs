@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyNotQuickInfoExists"]
 #[test]
 fn no_quick_info_in_whitespace() {
@@ -12,7 +13,7 @@ fn no_quick_info_in_whitespace() {
         }
     }
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("noQuickInfoInWhitespace", content);
     fourslash::go_to_marker(&mut s, "1");
     fourslash::unsupported("VerifyNotQuickInfoExists"); // f.VerifyNotQuickInfoExists(t)
     fourslash::go_to_marker(&mut s, "2");

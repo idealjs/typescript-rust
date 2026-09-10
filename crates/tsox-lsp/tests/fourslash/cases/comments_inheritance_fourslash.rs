@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: t.Skip('Known failing fourslash test')"]
 #[test]
 fn comments_inheritance_fourslash() {
@@ -223,7 +224,7 @@ class c6 extends c5 {
         this.d = /*53*/super./*54*/b;
     }
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("commentsInheritanceFourslash", content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, []string{"1", "11"}, &fourslash.CompletionsExpectedList{
     fourslash::go_to_marker(&mut s, "2");
     fourslash::unsupported("VerifySignatureHelp"); // f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{DocComment: "i1_f1"})
@@ -275,12 +276,7 @@ class c6 extends c5 {
     fourslash::verify_quick_info_at(&mut s, "l7q", "(property) c1.i1_l1: () => void", "i1_l1");
     fourslash::verify_quick_info_at(&mut s, "l8q", "(property) c1.i1_nc_l1: () => void", "");
     fourslash::verify_quick_info_at(&mut s, "l9q", "(property) c1.l1: () => void", "c1_l1");
-    fourslash::verify_quick_info_at(
-        &mut s,
-        "l10q",
-        "(property) c1.nc_l1: () => void",
-        "c1_nc_l1",
-    );
+    fourslash::verify_quick_info_at(&mut s, "l10q", "(property) c1.nc_l1: () => void", "c1_nc_l1");
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "11", &fourslash.CompletionsExpectedList{
     fourslash::go_to_marker(&mut s, "12");
     fourslash::unsupported("VerifySignatureHelp"); // f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{DocComment: "i1_f1"})
@@ -314,25 +310,10 @@ class c6 extends c5 {
     fourslash::unsupported("VerifySignatureHelp"); // f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{DocComment: "c2 constructor"})
     fourslash::go_to_marker(&mut s, "18");
     fourslash::unsupported("VerifySignatureHelp"); // f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{DocComment: ""})
-    fourslash::verify_quick_info_at(
-        &mut s,
-        "18sq",
-        "constructor c2(a: number): c2",
-        "c2 constructor",
-    );
+    fourslash::verify_quick_info_at(&mut s, "18sq", "constructor c2(a: number): c2", "c2 constructor");
     fourslash::verify_quick_info_at(&mut s, "18spropq", "class c2", "");
-    fourslash::verify_quick_info_at(
-        &mut s,
-        "18spropProp",
-        "(property) c2.c2_p1: number",
-        "c2 c2_p1",
-    );
-    fourslash::verify_quick_info_at(
-        &mut s,
-        "17q",
-        "constructor c2(a: number): c2",
-        "c2 constructor",
-    );
+    fourslash::verify_quick_info_at(&mut s, "18spropProp", "(property) c2.c2_p1: number", "c2 c2_p1");
+    fourslash::verify_quick_info_at(&mut s, "17q", "constructor c2(a: number): c2", "c2 constructor");
     fourslash::verify_quick_info_at(&mut s, "18q", "constructor c3(): c3", "");
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, []string{"19", "29"}, &fourslash.CompletionsExpectedList{
     fourslash::go_to_marker(&mut s, "20");
@@ -375,12 +356,7 @@ class c6 extends c5 {
     fourslash::go_to_marker(&mut s, "34");
     fourslash::unsupported("VerifySignatureHelp"); // f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{DocComment: "c2 constructor"})
     fourslash::verify_quick_info_at(&mut s, "34iq", "var c4_i: c4", "");
-    fourslash::verify_quick_info_at(
-        &mut s,
-        "34q",
-        "constructor c4(a: number): c4",
-        "c2 constructor",
-    );
+    fourslash::verify_quick_info_at(&mut s, "34q", "constructor c4(a: number): c4", "c2 constructor");
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "35", &fourslash.CompletionsExpectedList{
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, []string{"36", "46"}, &fourslash.CompletionsExpectedList{
     fourslash::go_to_marker(&mut s, "37");
@@ -462,12 +438,7 @@ class c6 extends c5 {
     fourslash::verify_quick_info_at(&mut s, "52", "constructor c5(): c5", "c5 class");
     fourslash::verify_quick_info_at(&mut s, "53", "class c5", "c5 class");
     fourslash::verify_quick_info_at(&mut s, "54", "(property) c5.b: number", "");
-    fourslash::verify_quick_info_at(
-        &mut s,
-        "55",
-        "constructor c2(a: number): c2",
-        "c2 constructor",
-    );
+    fourslash::verify_quick_info_at(&mut s, "55", "constructor c2(a: number): c2", "c2 constructor");
     fourslash::verify_quick_info_at(&mut s, "56", "constructor c3(): c3", "");
     fourslash::verify_quick_info_at(&mut s, "57", "constructor c6(): c6", "");
 }

@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineGoToDefinition"]
 #[test]
 fn go_to_definition_getter_returning_callable_interface() {
@@ -18,6 +19,6 @@ import { TextDocuments } from "./type";
 declare const documents: TextDocuments | undefined;
 
 documents!./*usage*/onDidChangeContent()"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("goToDefinitionGetterReturningCallableInterface", content);
     fourslash::unsupported("VerifyBaselineGoToDefinition"); // f.VerifyBaselineGoToDefinition(t, false /*includeOriginalSelectionRange*/, "usage")
 }

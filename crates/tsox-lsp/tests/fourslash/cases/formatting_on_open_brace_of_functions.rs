@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: }"]
 #[test]
 fn formatting_on_open_brace_of_functions() {
@@ -7,7 +8,7 @@ fn formatting_on_open_brace_of_functions() {
 {
 Plugin.T1.t1_x();
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("formattingOnOpenBraceOfFunctions", content);
     fourslash::unsupported("FormatDocument"); // f.FormatDocument(t, "")
     fourslash::go_to_marker(&mut s, "");
     fourslash::verify_current_line_content(&mut s, r#"function T2_y() {"#);

@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: }"]
 #[test]
 fn format_try_catch() {
@@ -9,7 +10,7 @@ fn format_try_catch() {
     /*catch*/catch (e) {
     }
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("formatTryCatch", content);
     fourslash::unsupported("FormatDocument"); // f.FormatDocument(t, "")
     fourslash::unsupported("FormatDocument"); // f.FormatDocument(t, "")
     fourslash::unsupported("FormatDocument"); // f.FormatDocument(t, "")

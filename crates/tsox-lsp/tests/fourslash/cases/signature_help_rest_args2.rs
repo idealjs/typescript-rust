@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineSignatureHelp"]
 #[test]
 fn signature_help_rest_args2() {
@@ -15,6 +16,6 @@ const promisify = function (thisArg, fnName) {
         });
     };
 };"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("signatureHelpRestArgs2", content);
     fourslash::unsupported("VerifyBaselineSignatureHelp"); // f.VerifyBaselineSignatureHelp(t)
 }

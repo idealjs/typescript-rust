@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: f.MarkTestAsStradaServer()"]
 #[test]
 fn import_suggestions_cache_export_undefined() {
@@ -12,7 +13,7 @@ const x = undefined;
 export = x;
 // @Filename: /home/src/workspaces/project/index.ts
  /**/"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("importSuggestionsCache_exportUndefined", content);
     // TODO: f.MarkTestAsStradaServer()
     fourslash::go_to_marker(&mut s, "");
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, nil, &fourslash.CompletionsExpectedList{

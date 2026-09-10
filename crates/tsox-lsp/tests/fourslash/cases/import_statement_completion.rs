@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: preferences := lsutil.NewDefaultUserPreferences()"]
 #[test]
 fn import_statement_completion_uses_named_import() {
@@ -8,7 +9,7 @@ export interface I {}
 // @Filename: 1.ts
 import * as u from "./a";
 [|import I/*a*/|]"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("importStatementCompletionUsesNamedImport", content);
     // TODO: preferences := lsutil.NewDefaultUserPreferences()
     // TODO: preferences.IncludeCompletionsForModuleExports = core.TSFalse
     // TODO: preferences.IncludeCompletionsForImportStatements = core.TSTrue

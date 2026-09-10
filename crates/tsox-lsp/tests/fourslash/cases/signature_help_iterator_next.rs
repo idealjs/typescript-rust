@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineSignatureHelp"]
 #[test]
 fn signature_help_iterator_next() {
@@ -23,6 +24,6 @@ declare const asyncGenerator: AsyncGenerator<string, void, number>;
 
 asyncGenerator.next(/*7*/);
 asyncGenerator.next(/*8*/ 0);"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("signatureHelpIteratorNext", content);
     fourslash::unsupported("VerifyBaselineSignatureHelp"); // f.VerifyBaselineSignatureHelp(t)
 }

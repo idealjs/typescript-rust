@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: f.MarkTestAsStradaServer()"]
 #[test]
 fn jsdoc_typedef_tag_rename04() {
@@ -19,7 +20,7 @@ function test2() {
    /** @type {NumberLike2} */
    var n/*2*/umberLike2;
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("jsdocTypedefTagRename04", content);
     // TODO: f.MarkTestAsStradaServer()
     fourslash::go_to_marker(&mut s, "2");
     fourslash::unsupported("VerifyQuickInfoExists"); // f.VerifyQuickInfoExists(t)

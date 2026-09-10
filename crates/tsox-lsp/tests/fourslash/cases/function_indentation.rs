@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.FormatDocument"]
 #[test]
 fn function_indentation() {
@@ -41,86 +42,44 @@ var t,
 u = 1,
 v;
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("functionIndentation", content);
     fourslash::unsupported("FormatDocument"); // f.FormatDocument(t, "")
-    fourslash::verify_current_file_content(
-        &mut s,
-        concat!(
-            r#"namespace M {
-"#,
-            r#"    export =
-"#,
-            r#"        C;
-"#,
-            r#"    class C {
-"#,
-            r#"        constructor(b
-"#,
-            r#"        ) {
-"#,
-            r#"        }
-"#,
-            r#"        foo(a
-"#,
-            r#"            : string) {
-"#,
-            r#"            return a
-"#,
-            r#"                || true;
-"#,
-            r#"        }
-"#,
-            r#"        get bar(
-"#,
-            r#"        ) {
-"#,
-            r#"            return 1;
-"#,
-            r#"        }
-"#,
-            r#"    }
-"#,
-            r#"    function foo(a,
-"#,
-            r#"        b?) {
-"#,
-            r#"        new M.C(
-"#,
-            r#"            "hello");
-"#,
-            r#"    }
-"#,
-            r#"    {
-"#,
-            r#"        {
-"#,
-            r#"        }
-"#,
-            r#"    }
-"#,
-            r#"    foo(
-"#,
-            r#"        function() {
-"#,
-            r#"            "hello";
-"#,
-            r#"        });
-"#,
-            r#"    foo(
-"#,
-            r#"        () => {
-"#,
-            r#"            "hello";
-"#,
-            r#"        });
-"#,
-            r#"    var t,
-"#,
-            r#"        u = 1,
-"#,
-            r#"        v;
-"#,
-            r#"}"#
-        ),
-    );
+    fourslash::verify_current_file_content(&mut s, concat!(r#"namespace M {
+"#, r#"    export =
+"#, r#"        C;
+"#, r#"    class C {
+"#, r#"        constructor(b
+"#, r#"        ) {
+"#, r#"        }
+"#, r#"        foo(a
+"#, r#"            : string) {
+"#, r#"            return a
+"#, r#"                || true;
+"#, r#"        }
+"#, r#"        get bar(
+"#, r#"        ) {
+"#, r#"            return 1;
+"#, r#"        }
+"#, r#"    }
+"#, r#"    function foo(a,
+"#, r#"        b?) {
+"#, r#"        new M.C(
+"#, r#"            "hello");
+"#, r#"    }
+"#, r#"    {
+"#, r#"        {
+"#, r#"        }
+"#, r#"    }
+"#, r#"    foo(
+"#, r#"        function() {
+"#, r#"            "hello";
+"#, r#"        });
+"#, r#"    foo(
+"#, r#"        () => {
+"#, r#"            "hello";
+"#, r#"        });
+"#, r#"    var t,
+"#, r#"        u = 1,
+"#, r#"        v;
+"#, r#"}"#));
 }

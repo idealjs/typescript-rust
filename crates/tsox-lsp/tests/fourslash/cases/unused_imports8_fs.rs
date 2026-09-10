@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: t.Skip('Known failing fourslash test')"]
 #[test]
 fn unused_imports8_fs() {
@@ -21,6 +22,6 @@ export function test() {
 export function test2() {
 
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("unusedImports8FS", content);
     fourslash::unsupported("VerifyRangeAfterCodeFix"); // f.VerifyRangeAfterCodeFix(t, `import {Calculator as calc, test as t1} from "./file1"`, false, 0, 0)
 }

@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCompletions"]
 #[test]
 fn tsx_completion8() {
@@ -11,6 +12,6 @@ declare namespace JSX {
     }
 }
 var x = <div /*1*/ autoComplete /*2*/ />;"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("tsxCompletion8", content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, []string{"1", "2"}, &fourslash.CompletionsExpectedList{
 }

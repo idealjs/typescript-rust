@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: // The second diagnostics request forces external helper res"]
 #[test]
 fn import_helpers_after_script_becomes_decorated_module() {
@@ -27,7 +28,7 @@ export declare function __decorate(...args: any[]): any;
 // @Filename: /node_modules/tslib/tslib.js
 exports.__decorate = function () {};
 "#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("importHelpersAfterScriptBecomesDecoratedModule", content);
     fourslash::go_to_file(&mut s, "/foo.ts");
     fourslash::verify_number_of_errors_in_current_file(&mut s, 0);
     fourslash::unsupported("Replace"); // f.Replace(t, f.MarkerByName(t, "insert").Position, 0, `@dec

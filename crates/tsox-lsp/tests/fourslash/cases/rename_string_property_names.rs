@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineRenameAtRangesWithText"]
 #[test]
 fn rename_string_property_names() {
@@ -14,6 +15,6 @@ o = {
 o["[|prop|]"];
 o['[|prop|]'];
 o.[|prop|];"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("renameStringPropertyNames", content);
     fourslash::unsupported("VerifyBaselineRenameAtRangesWithText"); // f.VerifyBaselineRenameAtRangesWithText(t, nil /*preferences*/, "prop")
 }

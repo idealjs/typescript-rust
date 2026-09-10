@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCompletions"]
 #[test]
 fn auto_import_same_name_default_exported() {
@@ -13,6 +14,6 @@ declare function Table(): void;
 export default Table;
 // @Filename: /index.ts
 Table/**/"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("autoImportSameNameDefaultExported", content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

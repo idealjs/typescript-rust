@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineInlayHints"]
 #[test]
 fn inlay_hints_js_doc_parameter_names() {
@@ -17,7 +18,7 @@ y.foo(1, 2)
  * @type {string}
  */
 var z = """#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("inlayHintsJsDocParameterNames", content);
     fourslash::go_to_file(&mut s, "/a.js");
     fourslash::unsupported("VerifyBaselineInlayHints"); // f.VerifyBaselineInlayHints(t, nil /*span*/, &lsutil.UserPreferences{InlayHints: lsutil.InlayHintsPre
 }

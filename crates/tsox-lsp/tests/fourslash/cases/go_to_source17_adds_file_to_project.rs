@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: f.MarkTestAsStradaServer()"]
 #[test]
 fn go_to_source17_adds_file_to_project() {
@@ -32,7 +33,7 @@ import { command } from "yargs";
 command("foo", yargs => {
     yargs.[|/*start*/positional|]();
 });"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("goToSource17_AddsFileToProject", content);
     // TODO: f.MarkTestAsStradaServer()
     fourslash::unsupported("VerifyBaselineGoToSourceDefinition"); // f.VerifyBaselineGoToSourceDefinition(t, "start")
 }

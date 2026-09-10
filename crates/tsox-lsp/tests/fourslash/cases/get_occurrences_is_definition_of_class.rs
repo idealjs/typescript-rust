@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineFindAllReferences"]
 #[test]
 fn get_occurrences_is_definition_of_class() {
@@ -10,6 +11,6 @@ fn get_occurrences_is_definition_of_class() {
     }
 }
 let c = new /*3*/C();"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("getOccurrencesIsDefinitionOfClass", content);
     fourslash::unsupported("VerifyBaselineFindAllReferences"); // f.VerifyBaselineFindAllReferences(t, "1", "2", "3")
 }

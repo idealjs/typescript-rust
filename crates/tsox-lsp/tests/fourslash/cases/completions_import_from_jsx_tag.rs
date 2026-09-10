@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyApplyCodeActionFromCompletion"]
 #[test]
 fn completions_import_from_jsx_tag() {
@@ -18,6 +19,6 @@ export function App() {
     </div>
   )
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("completionsImportFromJSXTag", content);
     fourslash::unsupported("VerifyApplyCodeActionFromCompletion"); // f.VerifyApplyCodeActionFromCompletion(t, new(""), &fourslash.ApplyCodeActionFromCompletionOptions{
 }

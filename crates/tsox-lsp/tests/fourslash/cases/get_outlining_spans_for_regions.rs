@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: f.MarkTestAsStradaServer()"]
 #[test]
 fn get_outlining_spans_for_regions() {
@@ -51,7 +52,7 @@ test // #endregion
 /*
 // #endregion
 */"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("getOutliningSpansForRegions", content);
     // TODO: f.MarkTestAsStradaServer()
     fourslash::unsupported("VerifyOutliningSpans"); // f.VerifyOutliningSpans(t, lsproto.FoldingRangeKindRegion)
 }

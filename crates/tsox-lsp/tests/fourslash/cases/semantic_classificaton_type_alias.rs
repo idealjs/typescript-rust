@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifySemanticTokens"]
 #[test]
 fn semantic_classificaton_type_alias() {
@@ -7,6 +8,6 @@ fn semantic_classificaton_type_alias() {
 var x: /*1*/Alias;
 var y = </*2*/Alias>{};
 function f(x: /*3*/Alias): /*4*/Alias { return undefined; }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("semanticClassificatonTypeAlias", content);
     fourslash::unsupported("VerifySemanticTokens"); // f.VerifySemanticTokens(t, []fourslash.SemanticToken{
 }

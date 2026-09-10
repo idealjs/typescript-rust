@@ -1,6 +1,8 @@
 #![allow(unused_imports)]
 
 use crate::checker::checker_statements::*;
+use tsox_core::core::tristate::Tristate;
+use tsox_core::diagnostics::Category;
 
 impl Checker {
     pub fn check_statement(&mut self, node: &Arc<Node>) {
@@ -168,12 +170,24 @@ impl Checker {
                                 | SyntaxKind::ClassDeclaration
                         );
                         if after_terminator && !is_hoistable_decl {
-                            self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
-                                self.current_file.clone(),
-                                stmt.loc,
-                                UNREACHABLE_CODE_DETECTED,
-                                vec![],
-                            ));
+                            // Go addErrorOrSuggestion：allowUnreachableCode 为 True 跳过，
+                            // False 报 Error，未设置降级 Suggestion（LSP 侧映射 Hint）
+                            if !matches!(self.allow_unreachable_code, Tristate::True) {
+                                let category = if matches!(self.allow_unreachable_code, Tristate::False)
+                                {
+                                    Category::Error
+                                } else {
+                                    Category::Suggestion
+                                };
+                                let mut diag = tsox_frontend::ast::Diagnostic::new(
+                                    self.current_file.clone(),
+                                    stmt.loc,
+                                    UNREACHABLE_CODE_DETECTED,
+                                    vec![],
+                                );
+                                diag.category = category;
+                                self.diagnostics.add(diag);
+                            }
                         }
                         self.check_statement(stmt);
                         if Self::is_block_terminating_statement(stmt) {
@@ -245,6 +259,7 @@ impl Checker {
                 self.check_type_alias_and_specifiers(node);
                 self.check_import_ambient_rules(node);
                 self.check_import_equals_conflicts(node);
+                self.check_alias_symbol_bindings(node);
             }
             SyntaxKind::EnumDeclaration => {
                 self.check_enum_declaration(node);

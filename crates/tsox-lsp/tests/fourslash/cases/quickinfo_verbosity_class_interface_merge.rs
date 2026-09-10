@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineHoverWithVerbosity"]
 #[test]
 fn quickinfo_verbosity_class_interface_merge() {
@@ -12,6 +13,6 @@ declare interface Foo {
 }
 const f: Foo/*2*/ = { x: 1, y: "hello" };
 "#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("quickinfoVerbosityClassInterfaceMerge", content);
     fourslash::unsupported("VerifyBaselineHoverWithVerbosity"); // f.VerifyBaselineHoverWithVerbosity(t, map[string][]int{
 }

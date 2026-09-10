@@ -34,7 +34,7 @@ impl Parser {
             }
             self.next_token();
         }
-        let end = self.token_pos();
+        let end = self.node_pos();
         Arc::new(Node::with_loc(
             SyntaxKind::TemplateExpression,
             NodeData::TemplateExpression(TemplateExpressionData {
@@ -67,7 +67,7 @@ impl Parser {
             );
         }
         self.expect(SyntaxKind::GreaterThanToken);
-        let end = self.token_pos();
+        let end = self.node_pos();
         Some(Arc::new(NodeList {
             loc: TextRange::new(pos, end),
             nodes: params.nodes,
@@ -139,7 +139,7 @@ impl Parser {
         self.expect(SyntaxKind::OpenParenToken);
         let params = self.parse_delimited_list(ParsingContext::Parameters, Parser::parse_parameter);
         self.expect(SyntaxKind::CloseParenToken);
-        let end = self.token_pos();
+        let end = self.node_pos();
         Arc::new(NodeList {
             loc: TextRange::new(pos, end),
             nodes: params.nodes,
@@ -239,9 +239,21 @@ impl Parser {
 
         let dot_dot_dot_token = self.parse_optional_token(SyntaxKind::DotDotDotToken);
 
-        let name = self.parse_identifier_or_pattern_with_diagnostic(Some(
-            &tsox_core::diagnostics::PRIVATE_IDENTIFIERS_CANNOT_BE_USED_AS_PARAMETERS,
-        ));
+        // Go parseParameter：this 参数特判（ThisKeyword 可作参数名）
+        let name = if self.token == SyntaxKind::ThisKeyword {
+            let pos = self.token_pos();
+            let end = self.token_end();
+            self.next_token();
+            Arc::new(Node::with_loc(
+                SyntaxKind::ThisKeyword,
+                NodeData::Token,
+                TextRange::new(pos, end),
+            ))
+        } else {
+            self.parse_identifier_or_pattern_with_diagnostic(Some(
+                &tsox_core::diagnostics::PRIVATE_IDENTIFIERS_CANNOT_BE_USED_AS_PARAMETERS,
+            ))
+        };
         let question_token = self.parse_optional_token(SyntaxKind::QuestionToken);
         let type_node = self.parse_optional_type_annotation();
         let initializer = if self.token == SyntaxKind::EqualsToken {

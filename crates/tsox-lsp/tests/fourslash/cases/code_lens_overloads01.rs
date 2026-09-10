@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineCodeLens"]
 #[test]
 fn code_lens_overloads01() {
@@ -18,6 +19,6 @@ foo("hello");
 // but is really just here to test how it affects how code lens.
 foo(Math.random() ? 1 : "hello");
 "#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("codeLensOverloads01", content);
     fourslash::unsupported("VerifyBaselineCodeLens"); // f.VerifyBaselineCodeLens(t, &lsutil.UserPreferences{
 }

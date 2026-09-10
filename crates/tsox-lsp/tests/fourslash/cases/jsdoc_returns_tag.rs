@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineSignatureHelp"]
 #[test]
 fn jsdoc_returns_tag() {
@@ -15,6 +16,6 @@ fn jsdoc_returns_tag() {
 function find(l, x) {
 }
 find(''/**/);"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("jsdocReturnsTag", content);
     fourslash::unsupported("VerifyBaselineSignatureHelp"); // f.VerifyBaselineSignatureHelp(t)
 }

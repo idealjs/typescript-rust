@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCompletions"]
 #[test]
 fn completion_in_checks1() {
@@ -25,9 +26,9 @@ if ("/*6*/" in c1) {}
 class Cls2 { foo = ''; private bar = 0; }
 declare const c2: Cls2;
 if ("/*7*/" in c2) {}"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("completionInChecks1", content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, []string{"1", "2", "3", "4"}, &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "5", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "6", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "7", &fourslash.CompletionsExpectedList{
+    fourslash::verify_completions_exact_at(&mut s, Some("5"), &["missing", "result"]);
+    fourslash::verify_completions_exact_at(&mut s, Some("6"), &["foo"]);
+    fourslash::verify_completions_exact_at(&mut s, Some("7"), &["bar", "foo"]);
 }

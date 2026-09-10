@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: t.Skip('Known failing fourslash test')"]
 #[test]
 fn completion_for_string_literal_quote_preference1() {
@@ -15,6 +16,6 @@ interface B {
 const b: B = {
     a: /**/
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("completionForStringLiteral_quotePreference1", content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

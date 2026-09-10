@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: t.Skip('Known failing fourslash test')"]
 #[test]
 fn comments_line_preservation() {
@@ -117,128 +118,28 @@ function /*l*/l(param1: string) { /*9*/param1 = "hello"; }
  second line text
  */
 function /*m*/m(param1: string) { /*10*/param1 = "hello"; }"#;
-    let mut s = Session::new(content);
-    fourslash::verify_quick_info_at(
-        &mut s,
-        "a",
-        "var a: string",
-        "This is firstLine\nThis is second Line\n\nThis is fourth Line",
-    );
-    fourslash::verify_quick_info_at(
-        &mut s,
-        "b",
-        "var b: string",
-        "This is firstLine\nThis is second Line\n\nThis is fourth Line",
-    );
-    fourslash::verify_quick_info_at(
-        &mut s,
-        "c",
-        "var c: string",
-        "This is firstLine\nThis is second Line\n\nThis is fourth Line",
-    );
-    fourslash::verify_quick_info_at(
-        &mut s,
-        "d",
-        "function d(param: string): void",
-        "This is firstLine\nThis is second Line",
-    );
+    let mut s = Session::new_for_test("commentsLinePreservation", content);
+    fourslash::verify_quick_info_at(&mut s, "a", "var a: string", "This is firstLine\nThis is second Line\n\nThis is fourth Line");
+    fourslash::verify_quick_info_at(&mut s, "b", "var b: string", "This is firstLine\nThis is second Line\n\nThis is fourth Line");
+    fourslash::verify_quick_info_at(&mut s, "c", "var c: string", "This is firstLine\nThis is second Line\n\nThis is fourth Line");
+    fourslash::verify_quick_info_at(&mut s, "d", "function d(param: string): void", "This is firstLine\nThis is second Line");
     fourslash::verify_quick_info_at(&mut s, "1", "(parameter) param: string", "");
-    fourslash::verify_quick_info_at(
-        &mut s,
-        "e",
-        "function e(param: string): void",
-        "This is firstLine\nThis is second Line",
-    );
+    fourslash::verify_quick_info_at(&mut s, "e", "function e(param: string): void", "This is firstLine\nThis is second Line");
     fourslash::verify_quick_info_at(&mut s, "2", "(parameter) param: string", "");
-    fourslash::verify_quick_info_at(
-        &mut s,
-        "f",
-        "function f(param1: string): void",
-        "This is firstLine\nThis is second Line",
-    );
-    fourslash::verify_quick_info_at(
-        &mut s,
-        "3",
-        "(parameter) param1: string",
-        "first line of param\n\nparam information third line",
-    );
-    fourslash::verify_quick_info_at(
-        &mut s,
-        "g",
-        "function g(param1: string): void",
-        "This is firstLine\nThis is second Line",
-    );
-    fourslash::verify_quick_info_at(
-        &mut s,
-        "4",
-        "(parameter) param1: string",
-        " param information first line",
-    );
-    fourslash::verify_quick_info_at(
-        &mut s,
-        "h",
-        "function h(param1: string): void",
-        "This is firstLine\nThis is second Line",
-    );
-    fourslash::verify_quick_info_at(
-        &mut s,
-        "5",
-        "(parameter) param1: string",
-        " param information first line\n\n param information third line",
-    );
-    fourslash::verify_quick_info_at(
-        &mut s,
-        "i",
-        "function i(param1: string): void",
-        "This is firstLine\nThis is second Line",
-    );
-    fourslash::verify_quick_info_at(
-        &mut s,
-        "6",
-        "(parameter) param1: string",
-        " param information first line\n\n param information third line",
-    );
-    fourslash::verify_quick_info_at(
-        &mut s,
-        "j",
-        "function j(param1: string): void",
-        "This is firstLine\nThis is second Line",
-    );
-    fourslash::verify_quick_info_at(
-        &mut s,
-        "7",
-        "(parameter) param1: string",
-        " param information first line\n\n param information third line",
-    );
-    fourslash::verify_quick_info_at(
-        &mut s,
-        "k",
-        "function k(param1: string): void",
-        "This is firstLine\nThis is second Line",
-    );
+    fourslash::verify_quick_info_at(&mut s, "f", "function f(param1: string): void", "This is firstLine\nThis is second Line");
+    fourslash::verify_quick_info_at(&mut s, "3", "(parameter) param1: string", "first line of param\n\nparam information third line");
+    fourslash::verify_quick_info_at(&mut s, "g", "function g(param1: string): void", "This is firstLine\nThis is second Line");
+    fourslash::verify_quick_info_at(&mut s, "4", "(parameter) param1: string", " param information first line");
+    fourslash::verify_quick_info_at(&mut s, "h", "function h(param1: string): void", "This is firstLine\nThis is second Line");
+    fourslash::verify_quick_info_at(&mut s, "5", "(parameter) param1: string", " param information first line\n\n param information third line");
+    fourslash::verify_quick_info_at(&mut s, "i", "function i(param1: string): void", "This is firstLine\nThis is second Line");
+    fourslash::verify_quick_info_at(&mut s, "6", "(parameter) param1: string", " param information first line\n\n param information third line");
+    fourslash::verify_quick_info_at(&mut s, "j", "function j(param1: string): void", "This is firstLine\nThis is second Line");
+    fourslash::verify_quick_info_at(&mut s, "7", "(parameter) param1: string", " param information first line\n\n param information third line");
+    fourslash::verify_quick_info_at(&mut s, "k", "function k(param1: string): void", "This is firstLine\nThis is second Line");
     fourslash::verify_quick_info_at(&mut s, "8", "(parameter) param1: string", "hello");
-    fourslash::verify_quick_info_at(
-        &mut s,
-        "l",
-        "function l(param1: string): void",
-        "This is firstLine\nThis is second Line",
-    );
-    fourslash::verify_quick_info_at(
-        &mut s,
-        "9",
-        "(parameter) param1: string",
-        "first Line text\nblank line that shouldnt be shown when starting this \nsecond time information about the param again",
-    );
-    fourslash::verify_quick_info_at(
-        &mut s,
-        "m",
-        "function m(param1: string): void",
-        "This is firstLine\nThis is second Line\n[1]: third * line",
-    );
-    fourslash::verify_quick_info_at(
-        &mut s,
-        "10",
-        "(parameter) param1: string",
-        "first Line text\nsecond line text",
-    );
+    fourslash::verify_quick_info_at(&mut s, "l", "function l(param1: string): void", "This is firstLine\nThis is second Line");
+    fourslash::verify_quick_info_at(&mut s, "9", "(parameter) param1: string", "first Line text\nblank line that shouldnt be shown when starting this \nsecond time information about the param again");
+    fourslash::verify_quick_info_at(&mut s, "m", "function m(param1: string): void", "This is firstLine\nThis is second Line\n[1]: third * line");
+    fourslash::verify_quick_info_at(&mut s, "10", "(parameter) param1: string", "first Line text\nsecond line text");
 }

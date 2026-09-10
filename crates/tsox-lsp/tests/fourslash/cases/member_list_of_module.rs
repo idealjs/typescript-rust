@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyCompletions"]
+
 #[test]
 fn member_list_of_module() {
     let content = r#"namespace Foo {
@@ -15,6 +15,6 @@ fn member_list_of_module() {
 }
 
 var x: Foo./**/"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
+    let mut s = Session::new_for_test("memberListOfModule", content);
+    fourslash::verify_completions_exact_at(&mut s, Some(""), &["Bar"]);
 }

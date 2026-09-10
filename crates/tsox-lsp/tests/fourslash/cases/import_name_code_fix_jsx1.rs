@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyImportFixAtPosition"]
 #[test]
 fn import_name_code_fix_jsx1() {
@@ -16,7 +17,7 @@ import { React } from "react";
 // @Filename: /d.tsx
 import { Foo } from "./Foo";
 <Foo />;"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("importNameCodeFix_jsx1", content);
     fourslash::go_to_file(&mut s, "/a.tsx");
     fourslash::unsupported("VerifyImportFixAtPosition"); // f.VerifyImportFixAtPosition(t, []string{}, nil /*preferences*/)
     fourslash::go_to_file(&mut s, "/c.tsx");

@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyOutliningSpans"]
 #[test]
 fn folding_range_jsx_property_access() {
@@ -12,6 +13,6 @@ const Components =[| {
 export const Test = () =>[| {
   return [|<Components.Nested></Components.Nested>|];
 }|];"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("foldingRangeJSXPropertyAccess", content);
     fourslash::unsupported("VerifyOutliningSpans"); // f.VerifyOutliningSpans(t)
 }

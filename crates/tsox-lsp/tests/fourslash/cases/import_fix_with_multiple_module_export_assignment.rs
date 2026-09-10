@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyImportFixAtPosition"]
 #[test]
 fn import_fix_with_multiple_module_export_assignment() {
@@ -14,7 +15,7 @@ module.exports = 42;
 export const foo = 0;
 // @Filename: /c.js
 foo"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("importFixWithMultipleModuleExportAssignment", content);
     fourslash::go_to_file(&mut s, "/c.js");
     fourslash::unsupported("VerifyImportFixAtPosition"); // f.VerifyImportFixAtPosition(t, []string{
 }

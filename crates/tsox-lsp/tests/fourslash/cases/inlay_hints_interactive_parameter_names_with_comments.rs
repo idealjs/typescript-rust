@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineInlayHints"]
 #[test]
 fn inlay_hints_interactive_parameter_names_with_comments() {
@@ -34,6 +35,6 @@ foo(
     /** name */
     3
 )"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("inlayHintsInteractiveParameterNamesWithComments", content);
     fourslash::unsupported("VerifyBaselineInlayHints"); // f.VerifyBaselineInlayHints(t, nil /*span*/, &lsutil.UserPreferences{InlayHints: lsutil.InlayHintsPre
 }

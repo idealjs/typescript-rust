@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyWorkspaceSymbol"]
 #[test]
 fn navigation_items_special_property_assignment() {
@@ -14,6 +15,6 @@ function Cls() {
 Cls.[|staticMethod|] = function() {};
 Cls.[|staticProperty|] = 0;
 Cls.prototype.[|instanceMethod|] = function() {};"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("navigationItemsSpecialPropertyAssignment", content);
     fourslash::unsupported("VerifyWorkspaceSymbol"); // f.VerifyWorkspaceSymbol(t, []*fourslash.VerifyWorkspaceSymbolCase{
 }

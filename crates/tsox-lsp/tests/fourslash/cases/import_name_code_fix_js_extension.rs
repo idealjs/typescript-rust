@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCodeFixAll"]
 #[test]
 fn import_name_code_fix_js_extension() {
@@ -17,7 +18,7 @@ import * as g from "global"; // Global imports skipped
 import { a } from "./a.js";
 import { a as a2 } from "./a"; // Ignored, only the first relative import is considered
 b; c;"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("importNameCodeFix_jsExtension", content);
     fourslash::go_to_file(&mut s, "/c.ts");
     fourslash::unsupported("VerifyCodeFixAll"); // f.VerifyCodeFixAll(t, fourslash.VerifyCodeFixAllOptions{
 }

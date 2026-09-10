@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCompletions"]
 #[test]
 fn completions_namespace_name() {
@@ -11,9 +12,9 @@ namespace N./*2*/
 namespace N1.M/*3*/ {}
 namespace N2.M {}
 namespace N2.M/*4*/"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("completionsNamespaceName", content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, []string{"0", "1"}, &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "2", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "3", nil)
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "4", &fourslash.CompletionsExpectedList{
+    fourslash::verify_completions_exact_at(&mut s, Some("2"), &["M"]);
+    fourslash::verify_completions_empty_at(&mut s, Some("3"));
+    fourslash::verify_completions_exact_at(&mut s, Some("4"), &["M"]);
 }

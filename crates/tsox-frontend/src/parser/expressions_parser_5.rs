@@ -55,7 +55,7 @@ impl Parser {
                         self.next_token();
                         let argument = self.parse_expression();
                         self.expect(SyntaxKind::CloseBracketToken);
-                        let end = self.token_pos();
+                        let end = self.node_pos();
                         expr = Arc::new(Node::with_loc(
                             SyntaxKind::ElementAccessExpression,
                             NodeData::ElementAccessExpression(ElementAccessExpressionData {
@@ -99,7 +99,7 @@ impl Parser {
                     self.next_token();
                     let argument = self.parse_expression();
                     self.expect(SyntaxKind::CloseBracketToken);
-                    let end = self.token_pos();
+                    let end = self.node_pos();
                     expr = Arc::new(Node::with_loc(
                         SyntaxKind::ElementAccessExpression,
                         NodeData::ElementAccessExpression(ElementAccessExpressionData {
@@ -133,7 +133,7 @@ impl Parser {
                 SyntaxKind::ExclamationToken if !self.has_preceding_line_break() => {
                     let pos = expr.pos();
                     self.next_token();
-                    let end = self.token_pos();
+                    let end = self.node_pos();
                     expr = Arc::new(Node::with_loc(
                         SyntaxKind::NonNullExpression,
                         NodeData::NonNullExpression(NonNullExpressionData { expression: expr }),
@@ -152,7 +152,7 @@ impl Parser {
         let nodes =
             self.parse_delimited_list(ParsingContext::ArgumentExpressions, Parser::parse_argument);
         self.expect(SyntaxKind::CloseParenToken);
-        let end = self.token_pos();
+        let end = self.node_pos();
         Arc::new(NodeList {
             loc: TextRange::new(pos, end),
             nodes: nodes.nodes,
@@ -183,7 +183,7 @@ impl Parser {
 
         self.re_scan_greater_than();
         self.expect(SyntaxKind::GreaterThanToken);
-        let end = self.token_pos();
+        let end = self.node_pos();
         Some(Arc::new(NodeList {
             loc: TextRange::new(pos, end),
             nodes: args.nodes,
@@ -219,7 +219,7 @@ impl Parser {
             self.diagnostics.truncate(diag_len);
             return None;
         }
-        let end = self.token_pos();
+        let end = self.node_pos();
         Some(Arc::new(NodeList {
             loc: TextRange::new(pos, end),
             nodes: args.nodes,

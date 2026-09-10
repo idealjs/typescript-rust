@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: t.Skip('Known failing fourslash test')"]
 #[test]
 fn js_doc_function_signatures8() {
@@ -18,7 +19,7 @@ function Person(name, age) {
     this.age = age;
 }
 var p = new Pers/**/on();"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("jsDocFunctionSignatures8", content);
     fourslash::go_to_marker(&mut s, "");
     fourslash::unsupported("VerifyQuickInfoIs"); // f.VerifyQuickInfoIs(t, "constructor Person(name: string, age: number): Person", "Represents a person
 }

@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineHover"]
 #[test]
 fn deprecated_inherited_js_doc_overload() {
@@ -29,6 +30,6 @@ declare const a: ThingWithDeprecations<void>
 a.subscribe/**/(() => {
   console.log('something happened');
 });"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("deprecatedInheritedJSDocOverload", content);
     fourslash::unsupported("VerifyBaselineHover"); // f.VerifyBaselineHover(t)
 }

@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: t.Skip('Known failing fourslash test')"]
 #[test]
 fn auto_import_verbatim_type_only1() {
@@ -12,7 +13,7 @@ export class C { constructor(v: any) {} }
 export interface I {}
 // @Filename: /a.mts
 const x: /**/"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("autoImportVerbatimTypeOnly1", content);
     fourslash::unsupported("VerifyApplyCodeActionFromCompletion"); // f.VerifyApplyCodeActionFromCompletion(t, new(""), &fourslash.ApplyCodeActionFromCompletionOptions{
     fourslash::insert(&mut s, "I = new C");
     fourslash::unsupported("VerifyApplyCodeActionFromCompletion"); // f.VerifyApplyCodeActionFromCompletion(t, nil, &fourslash.ApplyCodeActionFromCompletionOptions{

@@ -116,7 +116,7 @@ impl Parser {
         let type_parameters = self.parse_optional_type_parameters();
         let heritage_clauses = self.parse_heritage_clauses();
         let members = self.parse_class_members();
-        let end = self.token_pos();
+        let end = self.node_pos();
         Arc::new(Node::with_loc(
             SyntaxKind::ClassExpression,
             NodeData::ClassExpression(ClassExpressionData {

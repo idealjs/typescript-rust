@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.FormatDocument"]
 #[test]
 fn format_conflict_marker1() {
@@ -10,16 +11,13 @@ v = 1;
 v = 2;
 >>>>>>> Branch - a
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("formatConflictMarker1", content);
     fourslash::unsupported("FormatDocument"); // f.FormatDocument(t, "")
-    fourslash::verify_current_file_content(
-        &mut s,
-        r#"class C {
+    fourslash::verify_current_file_content(&mut s, r#"class C {
 <<<<<<< HEAD
 v = 1;
 =======
 v = 2;
 >>>>>>> Branch - a
-}"#,
-    );
+}"#);
 }

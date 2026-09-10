@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyOrganizeImports"]
 #[test]
 fn organize_imports_group_newline() {
@@ -10,6 +11,6 @@ import a from "A"; // not count
 import b from "B";
 
 console.log(a, b, c, d)"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("organizeImportsGroup_Newline", content);
     fourslash::unsupported("VerifyOrganizeImports"); // f.VerifyOrganizeImports(t,
 }

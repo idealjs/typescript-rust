@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyOrganizeImports"]
 #[test]
 fn organize_imports_attributes4() {
@@ -13,6 +14,6 @@ import { Y } from "./a" with { foo: 42 };
 import { Z } from "./a" with { foo: "42" };
 
 export type G = A | B | C | D | E | F | Y | Z;"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("organizeImportsAttributes4", content);
     fourslash::unsupported("VerifyOrganizeImports"); // f.VerifyOrganizeImports(t,
 }

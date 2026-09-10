@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: t.Skip('Known failing fourslash test')"]
 #[test]
 fn completion_preferred_suggestions1() {
@@ -16,10 +17,10 @@ declare let v4: LiteralUnion1<"a" | "b" | "c", string>;
 v4 = "/*4*/";
 declare let v5: LiteralUnion2<"a" | "b" | "c", string>;
 v5 = "/*5*/";"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "2", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "3", &fourslash.CompletionsExpectedList{
+    let mut s = Session::new_for_test("completionPreferredSuggestions1", content);
+    fourslash::verify_completions_include_exclude_at(&mut s, Some("1"), &["a", "b", "c"], &[]);
+    fourslash::verify_completions_include_exclude_at(&mut s, Some("2"), &["0", "1", "2"], &[]);
+    fourslash::verify_completions_include_exclude_at(&mut s, Some("3"), &["a", "b", "c"], &[]);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "4", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "5", &fourslash.CompletionsExpectedList{
+    fourslash::verify_completions_include_exclude_at(&mut s, Some("5"), &["a", "b", "c"], &[]);
 }

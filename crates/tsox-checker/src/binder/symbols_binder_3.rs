@@ -14,11 +14,25 @@ impl Binder {
 
         let existing: Option<Arc<Symbol>> = match &target {
             DeclareTarget::Exports(parent_sym) => parent_sym.exports.get(&name).cloned(),
-            DeclareTarget::Locals(container) => self
-                .symbol_map
-                .locals
-                .get(&container.id())
-                .and_then(|locals| locals.get(&name).cloned()),
+            DeclareTarget::Locals(container) => {
+                let locals_hit = || {
+                    self.symbol_map
+                        .locals
+                        .get(&container.id())
+                        .and_then(|locals| locals.get(&name).cloned())
+                };
+                // 文件顶层的别名（import）与普通声明（typedef/class 等，经
+                // declare_symbol 进容器符号 members）必须互相可见才能合并
+                if container.kind == SyntaxKind::SourceFile {
+                    locals_hit().or_else(|| {
+                        self.symbol_map
+                            .symbol_of(container)
+                            .and_then(|sym| sym.members.get(&name).cloned())
+                    })
+                } else {
+                    locals_hit()
+                }
+            }
         };
 
         if let Some(existing) = existing {
@@ -70,6 +84,16 @@ impl Binder {
                     .entry(container.id())
                     .or_insert_with(SymbolTable::new);
                 locals.insert(name.clone(), Arc::clone(&symbol));
+                if container.kind == SyntaxKind::SourceFile
+                    && let Some(container_sym) = self.symbol_map.symbol_of(container)
+                {
+                    let container_sym_mut = Arc::as_ptr(&container_sym) as *mut Symbol;
+                    unsafe {
+                        (*container_sym_mut)
+                            .members
+                            .insert(name.clone(), Arc::clone(&symbol));
+                    }
+                }
             }
         }
 

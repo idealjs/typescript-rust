@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.DeleteAtCaret"]
 #[test]
 fn remove_exported_class_from_reopened_module() {
@@ -9,7 +10,7 @@ namespace multiM {
     /*1*/export class c { }
 }
 "#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("removeExportedClassFromReopenedModule", content);
     fourslash::go_to_marker(&mut s, "1");
     fourslash::unsupported("DeleteAtCaret"); // f.DeleteAtCaret(t, 18)
     fourslash::unsupported("GoToEOF"); // f.GoToEOF(t)

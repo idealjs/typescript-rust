@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCompletions"]
 #[test]
 fn jsdoc_parameter_name_completion() {
@@ -21,8 +22,8 @@ function h(cat, canary, canoodle, cantaloupe, zebra) {}
  * @param /*3*/ {string} /*4*/
  */
 function i(foo, bar) {}"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("jsdocParameterNameCompletion", content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, []string{"0", "3", "4"}, &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "2", &fourslash.CompletionsExpectedList{
+    fourslash::verify_completions_exact_at(&mut s, Some("1"), &["bar"]);
+    fourslash::verify_completions_exact_at(&mut s, Some("2"), &["canary", "canoodle"]);
 }

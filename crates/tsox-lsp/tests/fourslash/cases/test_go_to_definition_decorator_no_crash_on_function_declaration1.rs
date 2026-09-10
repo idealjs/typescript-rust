@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineGoToDefinition"]
 #[test]
 fn go_to_definition_decorator_no_crash_on_function_declaration1() {
@@ -7,6 +8,6 @@ fn go_to_definition_decorator_no_crash_on_function_declaration1() {
 
 @/*1*/dec
 function foo() {}"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("goToDefinitionDecoratorNoCrashOnFunctionDeclaration1", content);
     fourslash::unsupported("VerifyBaselineGoToDefinition"); // f.VerifyBaselineGoToDefinition(t, true, "1")
 }

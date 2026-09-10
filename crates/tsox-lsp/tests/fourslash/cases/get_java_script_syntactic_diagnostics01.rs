@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: f.MarkTestAsStradaServer()"]
 #[test]
 fn get_java_script_syntactic_diagnostics01() {
@@ -7,7 +8,7 @@ fn get_java_script_syntactic_diagnostics01() {
 // @allowJs: true
 // @Filename: a.js
 var ===;"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("getJavaScriptSyntacticDiagnostics01", content);
     // TODO: f.MarkTestAsStradaServer()
     fourslash::unsupported("VerifyBaselineNonSuggestionDiagnostics"); // f.VerifyBaselineNonSuggestionDiagnostics(t)
 }

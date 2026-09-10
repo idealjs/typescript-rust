@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: t.Skip('Known failing fourslash test')"]
 #[test]
 fn quick_info_on_this3() {
@@ -19,7 +20,7 @@ function explicitInterface(th/*4*/is: Restricted): void {
 function explicitLiteral(th/*6*/is: { n: number }): void {
     console.log(th/*7*/is);
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("quickInfoOnThis3", content);
     fourslash::verify_quick_info_at(&mut s, "1", "any", "");
     fourslash::verify_quick_info_at(&mut s, "2", "(parameter) this: void", "");
     fourslash::verify_quick_info_at(&mut s, "3", "this: void", "");

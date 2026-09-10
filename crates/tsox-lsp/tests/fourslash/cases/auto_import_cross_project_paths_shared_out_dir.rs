@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: f.MarkTestAsStradaServer()"]
 #[test]
 fn auto_import_cross_project_paths_shared_out_dir() {
@@ -33,7 +34,7 @@ import "packages/dep";
 import "./sub/folder";
 // @Filename: /home/src/workspaces/project/packages/dep/sub/folder/index.ts
 export const dep = 0;"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("autoImportCrossProject_paths_sharedOutDir", content);
     // TODO: f.MarkTestAsStradaServer()
     fourslash::go_to_marker(&mut s, "");
     fourslash::unsupported("VerifyImportFixAtPosition"); // f.VerifyImportFixAtPosition(t, []string{

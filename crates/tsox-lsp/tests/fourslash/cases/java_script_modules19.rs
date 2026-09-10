@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCompletions"]
 #[test]
 fn java_script_modules19() {
@@ -12,7 +13,7 @@ var y = 10;
 // @Filename: consumer.js
 var x = require('./myMod');
 /**/;"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("javaScriptModules19", content);
     fourslash::go_to_file(&mut s, "consumer.js");
     fourslash::go_to_marker(&mut s, "");
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{

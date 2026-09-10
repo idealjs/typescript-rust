@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineDocumentHighlights"]
 #[test]
 fn get_occurrences_loop_break_continue_negatives() {
@@ -65,6 +66,6 @@ label1: for (var n in arr) {
 label5: while (true) break label5;
 
 label7: while (true) co/*10*/ntinue label5;"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("getOccurrencesLoopBreakContinueNegatives", content);
     fourslash::unsupported("VerifyBaselineDocumentHighlights"); // f.VerifyBaselineDocumentHighlights(t, nil /*preferences*/, ToAny(f.Markers())...)
 }

@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineHoverWithVerbosity"]
 #[test]
 fn quickinfo_verbosity_nested_namespace() {
@@ -12,6 +13,6 @@ declare namespace Outer/*1*/ {
     const outerVal: boolean;
 }
 "#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("quickinfoVerbosityNestedNamespace", content);
     fourslash::unsupported("VerifyBaselineHoverWithVerbosity"); // f.VerifyBaselineHoverWithVerbosity(t, map[string][]int{"1": {0, 1}})
 }

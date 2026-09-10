@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineFindAllReferences"]
 #[test]
 fn find_all_references_link_tag1() {
@@ -66,6 +67,6 @@ function nestor() {
     function d3() { }
     function r2/*6*/() { }
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("findAllReferencesLinkTag1", content);
     fourslash::unsupported("VerifyBaselineFindAllReferences"); // f.VerifyBaselineFindAllReferences(t, "1", "2", "3", "4", "5", "6", "7", "8")
 }

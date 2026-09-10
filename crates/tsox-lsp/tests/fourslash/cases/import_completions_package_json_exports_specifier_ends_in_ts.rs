@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCompletions"]
 #[test]
 fn import_completions_package_json_exports_specifier_ends_in_ts() {
@@ -22,6 +23,6 @@ export function foo(): void;
  }
 // @Filename: /index.ts
 import {} from "pkg//*1*/";"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("importCompletionsPackageJsonExportsSpecifierEndsInTs", content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, []string{"1"}, &fourslash.CompletionsExpectedList{
 }

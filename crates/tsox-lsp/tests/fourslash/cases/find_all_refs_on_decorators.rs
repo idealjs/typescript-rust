@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineFindAllReferences"]
 #[test]
 fn find_all_refs_on_decorators() {
@@ -14,6 +15,6 @@ class C {
     @/*6*/decorator
     method() {}
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("findAllRefsOnDecorators", content);
     fourslash::unsupported("VerifyBaselineFindAllReferences"); // f.VerifyBaselineFindAllReferences(t, "1", "2", "3", "4", "5", "6")
 }

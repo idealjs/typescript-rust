@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineDocumentHighlightsWithOptions"]
 #[test]
 fn document_highlights_module_import_files_to_search() {
@@ -12,6 +13,6 @@ foo.[|x|];
 import { [|x|] } from "foo";
 // @Filename: /c.ts
 import { x } from "foo";"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("documentHighlights_moduleImport_filesToSearch", content);
     fourslash::unsupported("VerifyBaselineDocumentHighlightsWithOptions"); // f.VerifyBaselineDocumentHighlightsWithOptions(t, nil /*preferences*/, []string{"/a.ts", "/b.ts"}, To
 }

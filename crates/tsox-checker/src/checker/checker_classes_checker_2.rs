@@ -62,6 +62,7 @@ impl Checker {
                                     }
                                     _ => Vec::new(),
                                 };
+                            let mut pushed_args: Option<Vec<Arc<Type>>> = None;
                             let pushed = if let Some(args) = &heritage_args
                                 && !base_tps.is_empty()
                             {
@@ -84,6 +85,7 @@ impl Checker {
                                 }
                                 self.type_argument_stack.push(mapping);
                                 self.type_argument_name_frames.push(name_frame);
+                                pushed_args = Some(arg_types);
                                 true
                             } else {
                                 false
@@ -94,7 +96,18 @@ impl Checker {
                                 self.pop_scope();
                                 i
                             };
-                            if pushed {
+                            if let Some(arg_types) = pushed_args {
+                                let tp_types: Vec<Arc<Type>> = base_tps
+                                    .iter()
+                                    .map(|s| self.get_type_parameter_from_symbol(s))
+                                    .collect();
+                                self.mark_structured_members_instantiated(
+                                    &instance,
+                                    &symbol,
+                                    &base_tps,
+                                    &tp_types,
+                                    &arg_types,
+                                );
                                 self.type_argument_stack.pop();
                                 self.type_argument_name_frames.pop();
                             }

@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineFindAllReferences"]
 #[test]
 fn find_all_references_js_doc_type_literal() {
@@ -15,6 +16,6 @@ fn find_all_references_js_doc_type_literal() {
  * @param {number} o.nested.times - twice? probably!??
  */
  function f(o) { return o.nested./*2*/great; }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("findAllReferencesJsDocTypeLiteral", content);
     fourslash::unsupported("VerifyBaselineFindAllReferences"); // f.VerifyBaselineFindAllReferences(t, "1", "2")
 }

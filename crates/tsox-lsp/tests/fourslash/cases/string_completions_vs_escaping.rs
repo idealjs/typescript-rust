@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: t.Skip('Known failing fourslash test')"]
 #[test]
 fn string_completions_vs_escaping() {
@@ -17,13 +18,13 @@ export const singleQuoted2: ` + "`" + `'single-quoted'` + "`" + ` = '/*6*/'
 
 export const backtickQuoted1: '` + "`" + `backtick-quoted` + "`" + `' = "/*7*/"
 export const backtickQuoted2: '` + "`" + `backtick-quoted` + "`" + `' = ` + "`" + `/*8*/` + "`" + `"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "2", &fourslash.CompletionsExpectedList{
+    let mut s = Session::new_for_test("stringCompletionsVsEscaping", content);
+    fourslash::verify_completions_exact_at(&mut s, Some("1"), &["var(--\\\\\\\\\\\\\\\\, one)", "var(--\\\\\\\\\\\\\\\\, two)"]);
+    fourslash::verify_completions_exact_at(&mut s, Some("2"), &["\\\\ntest\\\\n"]);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "3", &fourslash.CompletionsExpectedList{
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "4", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "5", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "6", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "7", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "8", &fourslash.CompletionsExpectedList{
+    fourslash::verify_completions_exact_at(&mut s, Some("5"), &["'single-quoted'"]);
+    fourslash::verify_completions_exact_at(&mut s, Some("6"), &["\\\\'single-quoted\\\\'"]);
+    fourslash::verify_completions_exact_at(&mut s, Some("7"), &["`backtick-quoted`"]);
+    fourslash::verify_completions_exact_at(&mut s, Some("8"), &["\\\\`backtick-quoted\\\\`"]);
 }

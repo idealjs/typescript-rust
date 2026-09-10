@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: t.Skip('Known failing fourslash test')"]
 #[test]
 fn completion_list_in_named_function_expression() {
@@ -17,18 +18,8 @@ fn completion_list_in_named_function_expression() {
 
 /*globalScope*/
 fo/*referenceInGlobalScope*/o;"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("completionListInNamedFunctionExpression", content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, []string{"globalScope", "insideFunctionDeclaration", "insideFunctionExpressio
-    fourslash::verify_quick_info_at(
-        &mut s,
-        "referenceInsideFunctionExpression",
-        "(local function) foo(): number",
-        "",
-    );
-    fourslash::verify_quick_info_at(
-        &mut s,
-        "referenceInGlobalScope",
-        "function foo(a: number): string",
-        "",
-    );
+    fourslash::verify_quick_info_at(&mut s, "referenceInsideFunctionExpression", "(local function) foo(): number", "");
+    fourslash::verify_quick_info_at(&mut s, "referenceInGlobalScope", "function foo(a: number): string", "");
 }

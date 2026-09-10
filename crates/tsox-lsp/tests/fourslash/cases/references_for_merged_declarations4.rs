@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineFindAllReferences"]
 #[test]
 fn references_for_merged_declarations4() {
@@ -22,6 +23,6 @@ var c2: /*6*/testClass.Bar;
 /*9*/testClass.bind(this);
 /*10*/testClass.s;
 new /*11*/testClass();"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("referencesForMergedDeclarations4", content);
     fourslash::unsupported("VerifyBaselineFindAllReferences"); // f.VerifyBaselineFindAllReferences(t, "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11")
 }

@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: t.Skip('Known failing fourslash test')"]
 #[test]
 fn auto_import_file_exclude_patterns3() {
@@ -16,7 +17,7 @@ declare module "foo" {
 }
 // @Filename: /index.ts
 /**/"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("autoImportFileExcludePatterns3", content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

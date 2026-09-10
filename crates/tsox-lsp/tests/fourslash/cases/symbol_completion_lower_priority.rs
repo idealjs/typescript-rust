@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: t.Skip('Known failing fourslash test')"]
 #[test]
 fn symbol_completion_lower_priority() {
@@ -12,6 +13,6 @@ interface TestInterface {
 }
 const obj: TestInterface = {} as any;
 obj./*completions*/"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("symbolCompletionLowerPriority", content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "completions", &fourslash.CompletionsExpectedList{
 }

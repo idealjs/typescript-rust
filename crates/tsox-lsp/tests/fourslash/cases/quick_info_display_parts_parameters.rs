@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineHover"]
 #[test]
 fn quick_info_display_parts_parameters() {
@@ -10,6 +11,6 @@ function /*1*/foo(/*2*/param: string, /*3*/optionalParam?: string, /*4*/paramWit
     /*8*/paramWithInitializer = "Hello";
     /*9*/restParam[0] = "World";
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("quickInfoDisplayPartsParameters", content);
     fourslash::unsupported("VerifyBaselineHover"); // f.VerifyBaselineHover(t)
 }

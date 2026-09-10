@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: // Close all files and open temp file, only inferred project"]
 #[test]
 fn implementations_across_projects() {
@@ -94,7 +95,7 @@ class B2 implements Foo {
 	],
 }
 "#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("implementationsAcrossProjects", content);
     fourslash::go_to_marker(&mut s, "impl");
     // TODO: // Open temp file and verify all projects alive
     fourslash::go_to_marker(&mut s, "temp");

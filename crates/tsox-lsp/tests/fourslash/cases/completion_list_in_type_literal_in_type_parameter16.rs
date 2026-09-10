@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCompletions"]
 #[test]
 fn completion_list_in_type_literal_in_type_parameter16() {
@@ -29,9 +30,9 @@ declare const b: {
     <T extends { one: false }>(): {};
 }
 b<{/*3*/}>;"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "0", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "2", &fourslash.CompletionsExpectedList{
+    let mut s = Session::new_for_test("completionListInTypeLiteralInTypeParameter16", content);
+    fourslash::verify_completions_unsorted_at(&mut s, Some("0"), &["one", "two"]);
+    fourslash::verify_completions_unsorted_at(&mut s, Some("1"), &["one", "two"]);
+    fourslash::verify_completions_unsorted_at(&mut s, Some("2"), &["one", "two", "three", "four"]);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "3", &fourslash.CompletionsExpectedList{
 }

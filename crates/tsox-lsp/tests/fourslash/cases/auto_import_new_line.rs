@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.BaselineAutoImportsCompletions"]
 #[test]
 fn auto_import_new_line() {
@@ -12,7 +13,7 @@ import {} from "./other2";
 
 
 readFileSync/**/"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("autoImportNewLine", content);
     fourslash::unsupported("BaselineAutoImportsCompletions"); // f.BaselineAutoImportsCompletions(t, []string{""})
 }
 
@@ -29,6 +30,6 @@ import {} from "./other2";
 
 
 readFileSync/**/"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("autoImportNewLineWithHeaderComment", content);
     fourslash::unsupported("BaselineAutoImportsCompletions"); // f.BaselineAutoImportsCompletions(t, []string{""})
 }

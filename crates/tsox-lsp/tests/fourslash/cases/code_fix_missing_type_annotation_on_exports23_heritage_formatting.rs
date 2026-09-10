@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: t.Skip('Known failing fourslash test')"]
 #[test]
 fn code_fix_missing_type_annotation_on_exports23_heritage_formatting() {
@@ -19,7 +20,7 @@ export class Point3D extends
     {
               z = 0;
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("codeFixMissingTypeAnnotationOnExports23_heritage_formatting", content);
     fourslash::unsupported("VerifyCodeFixAvailable"); // f.VerifyCodeFixAvailable(t, []string{"Extract base class to variable"})
     fourslash::unsupported("VerifyCodeFix"); // f.VerifyCodeFix(t, fourslash.VerifyCodeFixOptions{
 }

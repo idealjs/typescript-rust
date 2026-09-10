@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: // At this point, newlyAddedFunction doesn't exist yet in pr"]
 #[test]
 fn auto_import_symlinked_monorepo_granular_update() {
@@ -49,7 +50,7 @@ import { projectBValue } from "project-b";
 console.log(projectBValue);
 newlyAdded/*projectACompletion*/
 // @link: /packages/project-b -> /packages/project-a/node_modules/project-b"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("autoImportSymlinkedMonorepoGranularUpdate", content);
     // TODO: // Get initial completions in project-a - this builds the initial auto-import index.
     // TODO: // At this point, newlyAddedFunction doesn't exist yet in project-b.
     fourslash::go_to_marker(&mut s, "projectACompletion");

@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCompletions"]
 #[test]
 fn completions_overriding_method17() {
@@ -14,6 +15,6 @@ export class Class implements Interface {
 
     /**/
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("completionsOverridingMethod17", content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

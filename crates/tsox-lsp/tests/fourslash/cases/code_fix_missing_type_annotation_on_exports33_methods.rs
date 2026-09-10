@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCodeFix"]
 #[test]
 fn code_fix_missing_type_annotation_on_exports33_methods() {
@@ -10,7 +11,7 @@ export class Foo {
   m() {
   }
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("codeFixMissingTypeAnnotationOnExports33_methods", content);
     fourslash::unsupported("VerifyCodeFixAvailable"); // f.VerifyCodeFixAvailable(t, []string{"Add return type 'void'"})
     fourslash::unsupported("VerifyCodeFix"); // f.VerifyCodeFix(t, fourslash.VerifyCodeFixOptions{
 }

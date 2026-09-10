@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineFindAllReferences"]
 #[test]
 fn find_all_refs_nonexistent_property_no_crash1() {
@@ -48,6 +49,6 @@ const Parser = function Parser(context, imports, fileInfo, currentIndex) {
 };
 
 export default Parser;"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("findAllRefsNonexistentPropertyNoCrash1", content);
     fourslash::unsupported("VerifyBaselineFindAllReferences"); // f.VerifyBaselineFindAllReferences(t, "1")
 }

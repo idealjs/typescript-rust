@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: linkedCursors1 := []lsproto.Range{"]
 #[test]
 fn linked_editing_jsx_tag9() {
@@ -16,7 +17,7 @@ const triviaOpening = (
     /* this is/*14*/ comment *//*15*/</*16*//* /*17*/more/*18*/ comment *//*19*/ /*20start*/di/*20*/v/*20end*/ /* comments */>/*21*/Hello/*22*/
     <//*23*/ /*24*///*25*/* even/*26*/ more comment *//*27*/ /*28start*/d/*28*/iv/*28end*/ /* b/*29*/ye */>
 );"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("linkedEditingJsxTag9", content);
     // TODO: linkedCursors1 := []lsproto.Range{
     // TODO: linkedCursors2 := []lsproto.Range{
     // TODO: linkedCursors3 := []lsproto.Range{

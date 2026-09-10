@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: t.Skip('Known failing fourslash test')"]
 #[test]
 fn quick_info_untyped_module_import() {
@@ -10,7 +11,7 @@ fn quick_info_untyped_module_import() {
 // @Filename: a.ts
 import /*foo*/foo from /*fooModule*/"foo";
 /*fooCall*/foo();"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("quickInfoUntypedModuleImport", content);
     fourslash::go_to_file(&mut s, "a.ts");
     fourslash::verify_number_of_errors_in_current_file(&mut s, 0);
     fourslash::go_to_marker(&mut s, "fooModule");

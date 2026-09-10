@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyErrorExistsBetweenMarkers"]
 #[test]
 fn generic_combinators1() {
@@ -40,7 +41,7 @@ var /*20*/r6b = _.map<Collection<number>, number>(c3, rf2);
 var /*21*/r7a = _.map<A, A>(c4, (/*7*/x: A) => { return x.foo() });
 var /*22*/r7b = _.map<A, A>(c4, rf3);
 var /*23*/r8a = _.map</*error1*/B/*error2*/, string>(c5, (/*8*/x) => { return x.foo() });"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("genericCombinators1", content);
     fourslash::verify_quick_info_at(&mut s, "1", "(parameter) x: number", "");
     fourslash::verify_quick_info_at(&mut s, "2", "(parameter) x: Collection<number>", "");
     fourslash::verify_quick_info_at(&mut s, "3", "(parameter) x: A", "");

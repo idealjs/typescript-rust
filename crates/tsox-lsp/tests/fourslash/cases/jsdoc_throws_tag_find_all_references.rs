@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineFindAllReferences"]
 #[test]
 fn jsdoc_throws_tag_find_all_references() {
@@ -8,6 +9,6 @@ fn jsdoc_throws_tag_find_all_references() {
  * @throws {E}
  */
 function f() {}"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("jsdocThrowsTag_findAllReferences", content);
     fourslash::unsupported("VerifyBaselineFindAllReferences"); // f.VerifyBaselineFindAllReferences(t, "")
 }

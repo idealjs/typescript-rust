@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineHover"]
 #[test]
 fn quick_info_display_parts_internal_module_alias() {
@@ -17,6 +18,6 @@ namespace m2 {
     export import /*7*/a4 = m.m1;
     new /*8*/a4.c();
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("quickInfoDisplayPartsInternalModuleAlias", content);
     fourslash::unsupported("VerifyBaselineHover"); // f.VerifyBaselineHover(t)
 }

@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: t.Skip('Known failing fourslash test')"]
 #[test]
 fn quickinfo_for_union_property() {
@@ -18,13 +19,8 @@ var /*1*/x : One | Two;
 
 x./*2*/commonProperty;
 x./*3*/commonFunction;"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("quickinfoForUnionProperty", content);
     fourslash::verify_quick_info_at(&mut s, "1", "var x: One | Two", "");
-    fourslash::verify_quick_info_at(
-        &mut s,
-        "2",
-        "(property) commonProperty: string | number",
-        "",
-    );
+    fourslash::verify_quick_info_at(&mut s, "2", "(property) commonProperty: string | number", "");
     fourslash::verify_quick_info_at(&mut s, "3", "(method) commonFunction(): number", "");
 }

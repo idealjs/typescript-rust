@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.DeleteAtCaret"]
 #[test]
 fn delete_extension_in_reopened_interface() {
@@ -13,7 +14,7 @@ var i: I;
 class C /*delImplements*/implements A { }
 var c: C;
 c.a;"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("deleteExtensionInReopenedInterface", content);
     fourslash::go_to_marker(&mut s, "del");
     fourslash::unsupported("DeleteAtCaret"); // f.DeleteAtCaret(t, 9)
     fourslash::unsupported("GoToEOF"); // f.GoToEOF(t)

@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyQuickInfoExists"]
 #[test]
 fn quick_info_assign_to_existing_class() {
@@ -15,7 +16,7 @@ fn quick_info_assign_to_existing_class() {
         }
     }
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("quickInfoAssignToExistingClass", content);
     fourslash::go_to_marker(&mut s, "");
     fourslash::unsupported("VerifyQuickInfoExists"); // f.VerifyQuickInfoExists(t)
 }

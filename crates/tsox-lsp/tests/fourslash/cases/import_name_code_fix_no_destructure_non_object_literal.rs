@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: t.Skip('Known failing fourslash test')"]
 #[test]
 fn import_name_code_fix_no_destructure_non_object_literal() {
@@ -27,6 +28,6 @@ export = $;
 module.exports = {};
 // @Filename: /index.ts
 filter/**/"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("importNameCodeFix_noDestructureNonObjectLiteral", content);
     fourslash::unsupported("VerifyImportFixModuleSpecifiers"); // f.VerifyImportFixModuleSpecifiers(t, "", []string{"./object-literal", "./jquery"}, nil /*preferences
 }

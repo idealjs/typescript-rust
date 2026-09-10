@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: t.Skip('Known failing fourslash test')"]
 #[test]
 fn proto_var_visible_with_outer_scope_underscore_proto() {
@@ -10,6 +11,6 @@ function foo() {
     var __proto__ = "hello";
     /**/
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("protoVarVisibleWithOuterScopeUnderscoreProto", content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

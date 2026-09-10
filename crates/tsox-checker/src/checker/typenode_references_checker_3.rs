@@ -6,9 +6,21 @@ impl Checker {
     pub(crate) fn resolve_alias_body(&mut self, symbol: &Arc<Symbol>) -> Arc<Type> {
         for decl in &symbol.declarations {
             if let NodeData::TypeAliasDeclaration(data) = &decl.data {
+                // body 按别名声明的词法作用域解析（Go 节点级查找）；
+                // 外层栈可能是推断中构造的无关作用域，不得泄漏进来
+                let saved_scopes = std::mem::take(&mut self.scope_stack);
+                let mut scope_chain: Vec<u64> = Vec::new();
+                let mut cur = decl.parent.as_ref();
+                while let Some(c) = cur {
+                    scope_chain.push(c.id());
+                    cur = c.parent.as_ref();
+                }
+                scope_chain.reverse();
+                self.scope_stack = scope_chain;
                 self.push_scope(decl);
                 let result = self.get_type_from_type_node(&data.type_node);
                 self.pop_scope();
+                self.scope_stack = saved_scopes;
                 return result;
             }
         }

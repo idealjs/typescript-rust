@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifySignatureHelp"]
 #[test]
 fn static_generic_overloads1() {
@@ -12,7 +13,7 @@ fn static_generic_overloads1() {
 }
 var a = new A<number>();
 A.B(/**/"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("staticGenericOverloads1", content);
     fourslash::go_to_marker(&mut s, "");
     fourslash::unsupported("VerifySignatureHelp"); // f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{OverloadsCount: 2})
     fourslash::insert(&mut s, "a");

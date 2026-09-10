@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCompletions"]
 #[test]
 fn completion_for_string_literal_quote_preference3() {
@@ -7,6 +8,6 @@ fn completion_for_string_literal_quote_preference3() {
     "#": "a"
 };
 a[|./**/|]"##;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("completionForStringLiteral_quotePreference3", content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineFindAllReferences"]
 #[test]
 fn find_all_refs_indexed_access_types() {
@@ -11,6 +12,6 @@ interface J {
     a: I[/*3*/0],
     b: I["/*4*/s"],
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("findAllRefsIndexedAccessTypes", content);
     fourslash::unsupported("VerifyBaselineFindAllReferences"); // f.VerifyBaselineFindAllReferences(t, "1", "2", "3", "4")
 }

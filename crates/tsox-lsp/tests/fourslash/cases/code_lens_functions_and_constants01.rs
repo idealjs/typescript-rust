@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineCodeLens"]
 #[test]
 fn code_lens_functions_and_constants01() {
@@ -29,6 +30,6 @@ import { foo, bar } from "./exports";
 foo(5);
 console.log(bar);
 "#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("codeLensFunctionsAndConstants01", content);
     fourslash::unsupported("VerifyBaselineCodeLens"); // f.VerifyBaselineCodeLens(t, &lsutil.UserPreferences{
 }

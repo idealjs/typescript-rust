@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCodeFixNotAvailable"]
 #[test]
 fn code_fix_add_optional_param14() {
@@ -9,6 +10,6 @@ function f(a: string, b?: number): string {
     return "";
 }
 f("", "", 1);"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("codeFixAddOptionalParam14", content);
     fourslash::unsupported("VerifyCodeFixNotAvailable"); // f.VerifyCodeFixNotAvailable(t, "addOptionalParam")
 }

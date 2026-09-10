@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyOrganizeImports"]
 #[test]
 fn organize_imports1() {
@@ -18,7 +19,7 @@ import {
 
 console.log(a, B, b, c, C, d, D);
 console.log(e, f, F, g, G, H, h);"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("organizeImports1", content);
     fourslash::unsupported("VerifyOrganizeImportsWithRequestKind"); // f.VerifyOrganizeImportsWithRequestKind(t,
     fourslash::unsupported("VerifyOrganizeImports"); // f.VerifyOrganizeImports(t,
 }

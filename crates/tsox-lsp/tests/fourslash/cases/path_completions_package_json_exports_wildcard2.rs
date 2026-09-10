@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCompletions"]
 #[test]
 fn path_completions_package_json_exports_wildcard2() {
@@ -20,7 +21,7 @@ fn path_completions_package_json_exports_wildcard2() {
 export const actionRenderer = 0;
 // @Filename: /index.mts
 import { } from "salesforce-pageobjects//**/";"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("pathCompletionsPackageJsonExportsWildcard2", content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
     fourslash::insert(&mut s, "action/");
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, nil, &fourslash.CompletionsExpectedList{

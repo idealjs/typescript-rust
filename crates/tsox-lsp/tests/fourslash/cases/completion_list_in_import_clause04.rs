@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCompletions"]
 #[test]
 fn completion_list_in_import_clause04() {
@@ -12,9 +13,9 @@ fn completion_list_in_import_clause04() {
  export = Foo; /*2*/
 // @Filename: app.ts
 import {/*1*/} from './foo';"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("completionListInImportClause04", content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
-    fourslash::verify_no_errors(&mut s);
+    fourslash::verify_no_errors(&mut s, );
     fourslash::go_to_marker(&mut s, "2");
-    fourslash::verify_no_errors(&mut s);
+    fourslash::verify_no_errors(&mut s, );
 }

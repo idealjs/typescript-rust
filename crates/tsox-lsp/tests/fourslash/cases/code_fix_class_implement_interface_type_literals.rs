@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCodeFix"]
 #[test]
 fn code_fix_class_implement_interface_type_literals() {
@@ -18,6 +19,6 @@ interface Foo {
     request(): DeepPartial<{ nested1: Nested; test2: Nested }>;
 }
 [|export class C implements Foo {}|]"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("codeFixClassImplementInterfaceTypeLiterals", content);
     fourslash::unsupported("VerifyCodeFix"); // f.VerifyCodeFix(t, fourslash.VerifyCodeFixOptions{
 }

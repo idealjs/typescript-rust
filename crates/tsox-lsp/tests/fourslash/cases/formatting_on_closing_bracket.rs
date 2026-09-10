@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: opts874 := f.GetOptions()"]
 #[test]
 fn formatting_on_closing_bracket() {
@@ -35,7 +36,7 @@ a++;/*19*/
         break;/*25*/
     }/*26*/
 }/*27*/"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("formattingOnClosingBracket", content);
     // TODO: opts874 := f.GetOptions()
     // TODO: opts874.FormatCodeSettings.InsertSpaceAfterSemicolonInForStatements = core.TSTrue
     fourslash::unsupported("Configure"); // f.Configure(t, opts874)

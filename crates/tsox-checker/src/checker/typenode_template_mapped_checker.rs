@@ -139,11 +139,17 @@ impl Checker {
 
         let constraint_all_literals = self.union_is_all_string_literals(&constraint_type);
         if keys.is_empty() || !constraint_all_literals {
-            let tp_type = self.get_type_from_type_node(&data.type_parameter);
-            let template_type = match &data.type_node {
-                Some(tn) => self.get_type_from_type_node(tn),
-                None => self.get_any_type(),
-            };
+            // Go getTypeParameterFromMappedType：类型参数按声明符号取型
+            // （get_type_from_type_node 对 TypeParameter 声明节点无臂，会落 error）
+            let tp_type = self
+                .program
+                .symbol_map()
+                .symbol_of(&data.type_parameter)
+                .cloned()
+                .map(|sym| self.get_type_parameter_from_symbol(&sym))
+                .unwrap_or_else(|| self.error_type());
+            // Go createMappedType：模板按需解析（getTemplateTypeFromMappedType），
+            // 泛型约束下急切解析嵌套别名（Deep<T[K]>）会互递归
             let name_type = data
                 .name_type
                 .as_ref()
@@ -163,7 +169,9 @@ impl Checker {
                     type_parameter: Some(tp_type),
                     constraint_type: Some(constraint_type),
                     name_type,
-                    template_type: Some(template_type),
+                    template_type: None,
+                    template_node: data.type_node.clone(),
+                    template_subst: None,
                     modifiers_type: None,
                     resolved_apparent_type: OnceLock::new(),
                     contains_error: false,

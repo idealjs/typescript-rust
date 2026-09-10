@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineHover"]
 #[test]
 fn quick_info_import_meta() {
@@ -16,6 +17,6 @@ im/*1*/port.me/*2*/ta;
  */
  interface ImportMeta {
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("quickInfoImportMeta", content);
     fourslash::unsupported("VerifyBaselineHover"); // f.VerifyBaselineHover(t)
 }

@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyCompletions"]
+
 #[test]
 fn completion_list_at_node_boundary() {
     let content = r#"interface Iterator<T, U> {
@@ -19,6 +19,6 @@ interface Underscore {
 declare var _: Underscore;
 var a: string[];
 var e = a.map(x => x./**/);"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
+    let mut s = Session::new_for_test("completionListAtNodeBoundary", content);
+    fourslash::verify_completions_include_exclude_at(&mut s, Some(""), &["charAt"], &[]);
 }

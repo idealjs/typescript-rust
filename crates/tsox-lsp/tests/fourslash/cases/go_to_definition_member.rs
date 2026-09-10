@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineGoToDefinition"]
 #[test]
 fn go_to_definition_member() {
@@ -7,6 +8,6 @@ fn go_to_definition_member() {
 class A {
     private z/*z*/: string;
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("goToDefinitionMember", content);
     fourslash::unsupported("VerifyBaselineGoToDefinition"); // f.VerifyBaselineGoToDefinition(t, true, "z")
 }

@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineGoToDefinition"]
 #[test]
 fn go_to_definition_source_unit() {
@@ -17,6 +18,6 @@ fn go_to_definition_source_unit() {
 
 // @Filename: b.ts
 /*fileB*/"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("goToDefinitionSourceUnit", content);
     fourslash::unsupported("VerifyBaselineGoToDefinition"); // f.VerifyBaselineGoToDefinition(t, true, "unknownFile", "knownFile")
 }

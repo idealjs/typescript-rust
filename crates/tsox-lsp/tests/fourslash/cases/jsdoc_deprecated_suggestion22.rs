@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifySuggestionDiagnostics"]
 #[test]
 fn jsdoc_deprecated_suggestion22() {
@@ -13,6 +14,6 @@ const foo: {
 } = (a: string, b: string | number) => a + b;
 
 [|foo|](1, 1);"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("jsdocDeprecated_suggestion22", content);
     fourslash::unsupported("VerifySuggestionDiagnostics"); // f.VerifySuggestionDiagnostics(t, nil)
 }

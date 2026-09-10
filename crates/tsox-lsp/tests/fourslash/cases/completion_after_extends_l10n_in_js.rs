@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.GetCompletions"]
 #[test]
 fn completion_after_extends_l10n_in_js() {
@@ -28,7 +29,7 @@ class GenericL10n extends L10n/*1*/ {
 }
 
 "#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("completionAfterExtendsL10nInJs", content);
     fourslash::go_to_marker(&mut s, "1");
     fourslash::unsupported("GetCompletions"); // f.GetCompletions(t, nil /*userPreferences*/)
 }

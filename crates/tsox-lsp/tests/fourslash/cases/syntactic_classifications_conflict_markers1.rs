@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifySemanticTokens"]
 #[test]
 fn syntactic_classifications_conflict_markers1() {
@@ -10,6 +11,6 @@ fn syntactic_classifications_conflict_markers1() {
     v = 2;
 >>>>>>> Branch - a
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("syntacticClassificationsConflictMarkers1", content);
     fourslash::unsupported("VerifySemanticTokens"); // f.VerifySemanticTokens(t, []fourslash.SemanticToken{
 }

@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineFindAllReferences"]
 #[test]
 fn find_all_refs_for_import_call() {
@@ -15,6 +16,6 @@ async function main() {
     const mod = await import("./app")
     mod.hello();
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("findAllRefsForImportCall", content);
     fourslash::unsupported("VerifyBaselineFindAllReferences"); // f.VerifyBaselineFindAllReferences(t, "")
 }

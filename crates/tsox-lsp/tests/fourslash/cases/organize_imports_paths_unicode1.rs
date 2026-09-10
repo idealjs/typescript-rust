@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyOrganizeImports"]
 #[test]
 fn organize_imports_paths_unicode1() {
@@ -9,7 +10,7 @@ import * as aB from "./aB";
 import * as _Ab from "./_Ab";
 
 console.log(_aB, _Ab, aB, Ab);"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("organizeImportsPathsUnicode1", content);
     fourslash::unsupported("VerifyOrganizeImports"); // f.VerifyOrganizeImports(t,
     fourslash::unsupported("VerifyOrganizeImports"); // f.VerifyOrganizeImports(t,
 }

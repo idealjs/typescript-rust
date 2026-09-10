@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyApplyCodeActionFromCompletion"]
 #[test]
 fn completions_import_quote_style() {
@@ -8,7 +9,7 @@ fn completions_import_quote_style() {
 export const foo = 0;
 // @Filename: /b.ts
 fo/**/"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("completionsImport_quoteStyle", content);
     fourslash::go_to_marker(&mut s, "");
     fourslash::unsupported("VerifyApplyCodeActionFromCompletion"); // f.VerifyApplyCodeActionFromCompletion(t, new(""), &fourslash.ApplyCodeActionFromCompletionOptions{
 }

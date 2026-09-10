@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: f.MarkTestAsStradaServer()"]
 #[test]
 fn jsdoc_param_tag_special_keywords() {
@@ -12,7 +13,7 @@ fn jsdoc_param_tag_special_keywords() {
 function test(type) {
     type./**/
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("jsdocParamTagSpecialKeywords", content);
     // TODO: f.MarkTestAsStradaServer()
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
+    fourslash::verify_completions_include_exclude_at(&mut s, Some(""), &["charAt"], &[]);
 }

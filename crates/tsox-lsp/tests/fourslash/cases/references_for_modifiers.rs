@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineFindAllReferences"]
 #[test]
 fn references_for_modifiers() {
@@ -15,6 +16,6 @@ fn references_for_modifiers() {
 }|]
 [|/*asyncModifier*/async function fn() {}|]
 [|/*exportModifier*/export /*defaultModifier*/default class C2 {}|]"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("referencesForModifiers", content);
     fourslash::unsupported("VerifyBaselineFindAllReferences"); // f.VerifyBaselineFindAllReferences(t, "declareModifier", "abstractModifier", "staticModifier", "reado
 }

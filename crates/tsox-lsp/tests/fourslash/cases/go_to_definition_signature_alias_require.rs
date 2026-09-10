@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineGoToDefinition"]
 #[test]
 fn go_to_definition_signature_alias_require() {
@@ -12,6 +13,6 @@ const f = require("./a");
 // @Filename: /bar.ts
 import f = require("./a");
 [|/*useTs*/f|]();"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("goToDefinitionSignatureAlias_require", content);
     fourslash::unsupported("VerifyBaselineGoToDefinition"); // f.VerifyBaselineGoToDefinition(t, true, "use", "useTs")
 }

@@ -163,6 +163,9 @@ impl Checker {
                     return format!("typeof {}", sym.name);
                 }
             }
+            // 类实例（含与命名空间合并的类）：typeof 前缀只给静态侧（构造签名
+            // 所在），实例侧按符号名显示（Go typeToString 同）
+            return sym.name.clone();
         }
 
         if sym.flags.contains(SymbolFlags::ValueModule) {

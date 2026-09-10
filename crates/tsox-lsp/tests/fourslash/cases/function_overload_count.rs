@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifySignatureHelp"]
 #[test]
 fn function_overload_count() {
@@ -13,7 +14,7 @@ fn function_overload_count() {
 }
 var i = new C1;
 i.attr(/*1*/"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("functionOverloadCount", content);
     fourslash::go_to_marker(&mut s, "1");
     fourslash::unsupported("VerifySignatureHelp"); // f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{OverloadsCount: 3})
 }

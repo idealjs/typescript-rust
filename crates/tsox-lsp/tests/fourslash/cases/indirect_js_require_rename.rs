@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineFindAllReferences"]
 #[test]
 fn indirect_js_require_rename() {
@@ -10,7 +11,7 @@ require('../lib/classes/Error').log/**/Warning(` + "`" + `CLI triage crashed wit
 const { logWarning } = require('../../../../../../classes/Error');
 // @Filename: /lib/classes/Error.js
 module.exports.logWarning = message => { };"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("indirectJsRequireRename", content);
     fourslash::go_to_marker(&mut s, "");
     fourslash::unsupported("VerifyBaselineFindAllReferences"); // f.VerifyBaselineFindAllReferences(t, "")
 }

@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifySignatureHelp"]
 #[test]
 fn generic_parameter_help_type_references() {
@@ -20,7 +21,7 @@ let i: I</*interface*/>;
 
 type Ty<T> = T;
 let t: Ty</*typeAlias*/>;"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("genericParameterHelpTypeReferences", content);
     fourslash::go_to_marker(&mut s, "type1");
     fourslash::unsupported("VerifySignatureHelp"); // f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{Text: "testClass<T extends IFoo, U, M 
     fourslash::go_to_marker(&mut s, "type2");

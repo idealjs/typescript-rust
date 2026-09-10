@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyOutliningSpans"]
 #[test]
 fn outlining_spans_for_import_tag_js_doc() {
@@ -17,6 +18,6 @@ fn outlining_spans_for_import_tag_js_doc() {
  */|]
 
 "#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("outliningSpansForImportTagJSDoc", content);
     fourslash::unsupported("VerifyOutliningSpans"); // f.VerifyOutliningSpans(t)
 }

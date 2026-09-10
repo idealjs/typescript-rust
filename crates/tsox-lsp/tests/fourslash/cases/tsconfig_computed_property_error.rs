@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: f.MarkTestAsStradaServer()"]
 #[test]
 fn tsconfig_computed_property_error() {
@@ -12,7 +13,7 @@ fn tsconfig_computed_property_error() {
     ],
     "compileOnSave": true
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("tsconfigComputedPropertyError", content);
     // TODO: f.MarkTestAsStradaServer()
     fourslash::unsupported("VerifyNonSuggestionDiagnostics"); // f.VerifyNonSuggestionDiagnostics(t, []*lsproto.Diagnostic{
 }

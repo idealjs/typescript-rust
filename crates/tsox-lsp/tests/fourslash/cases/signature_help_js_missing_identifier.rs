@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyNoSignatureHelpForMarkers"]
 #[test]
 fn signature_help_js_missing_identifier() {
@@ -7,6 +8,6 @@ fn signature_help_js_missing_identifier() {
 // @checkJs: true
 // @Filename: test.js
 log(/**/)"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("signatureHelpJSMissingIdentifier", content);
     fourslash::unsupported("VerifyNoSignatureHelpForMarkers"); // f.VerifyNoSignatureHelpForMarkers(t, "")
 }

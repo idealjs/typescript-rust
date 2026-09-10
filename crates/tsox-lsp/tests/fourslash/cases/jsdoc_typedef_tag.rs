@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: f.MarkTestAsStradaServer()"]
 #[test]
 fn jsdoc_typedef_tag() {
@@ -54,25 +55,20 @@ c.catAge./*catAge*/;
 var d;d./*dog*/;
 d.dogName./*dogName*/;
 d.dogAge./*dogAge*/;"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("jsdocTypedefTag", content);
     // TODO: f.MarkTestAsStradaServer()
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "numberLike", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "person", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "personName", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "personAge", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "animal", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "animalName", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "animalAge", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "dog", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "dogName", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "dogAge", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "cat", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "catName", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "catAge", &fourslash.CompletionsExpectedList{
-    fourslash::verify_quick_info_at(
-        &mut s,
-        "AnimalType",
-        "type Animal = {\n    animalName: string;\n    animalAge: number;\n}",
-        "- think Giraffes",
-    );
+    fourslash::verify_completions_include_exclude_at(&mut s, Some("numberLike"), &["charAt", "toExponential"], &[]);
+    fourslash::verify_completions_include_exclude_at(&mut s, Some("person"), &["personName", "personAge"], &[]);
+    fourslash::verify_completions_include_exclude_at(&mut s, Some("personName"), &["charAt"], &[]);
+    fourslash::verify_completions_include_exclude_at(&mut s, Some("personAge"), &["toExponential"], &[]);
+    fourslash::verify_completions_include_exclude_at(&mut s, Some("animal"), &["animalName", "animalAge"], &[]);
+    fourslash::verify_completions_include_exclude_at(&mut s, Some("animalName"), &["charAt"], &[]);
+    fourslash::verify_completions_include_exclude_at(&mut s, Some("animalAge"), &["toExponential"], &[]);
+    fourslash::verify_completions_include_exclude_at(&mut s, Some("dog"), &["dogName", "dogAge"], &[]);
+    fourslash::verify_completions_include_exclude_at(&mut s, Some("dogName"), &["charAt"], &[]);
+    fourslash::verify_completions_include_exclude_at(&mut s, Some("dogAge"), &["toExponential"], &[]);
+    fourslash::verify_completions_include_exclude_at(&mut s, Some("cat"), &["catName", "catAge"], &[]);
+    fourslash::verify_completions_include_exclude_at(&mut s, Some("catName"), &["charAt"], &[]);
+    fourslash::verify_completions_include_exclude_at(&mut s, Some("catAge"), &["toExponential"], &[]);
+    fourslash::verify_quick_info_at(&mut s, "AnimalType", "type Animal = {\n    animalName: string;\n    animalAge: number;\n}", "- think Giraffes");
 }

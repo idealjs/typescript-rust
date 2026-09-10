@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCompletions"]
 #[test]
 fn completions_generic_indexed_access6() {
@@ -18,6 +19,6 @@ type Options<T extends keyof CustomElements> = { kind: T } & Required<{ x: Custo
 declare function Component<T extends keyof CustomElements>(props: Options<T>): void;
 
 const c = <Component /**/ kind="component-one" />"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("completionsGenericIndexedAccess6", content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

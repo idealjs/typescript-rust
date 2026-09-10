@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCompletions"]
 #[test]
 fn class_member_completion_keeps_name_fallback() {
@@ -9,7 +10,7 @@ fn class_member_completion_keeps_name_fallback() {
 class C extends B {
 	/*a*/
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("classMemberCompletionKeepsNameFallback", content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "a", &fourslash.CompletionsExpectedList{
 }
 
@@ -21,6 +22,6 @@ class B {
     method() {}
 }
 class C implements B {[| |]}"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("implementClassFixDoesNotAddInvalidOverride", content);
     fourslash::unsupported("VerifyCodeFix"); // f.VerifyCodeFix(t, fourslash.VerifyCodeFixOptions{
 }

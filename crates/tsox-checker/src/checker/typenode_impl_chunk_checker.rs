@@ -191,4 +191,23 @@ impl Checker {
         }
         self.type_node_links.get_or_default(node).resolved_type = Some(t);
     }
+
+    /// 环断路器补写：预缓存 error 后解析途中 shell 让位会 bump
+    /// heritage_degraded_events，常规 cache_type 的 epoch 守卫会跳过最终
+    /// 写回，error 永驻；最终结果非 error 时强制落盘
+    pub(crate) fn cache_type_overwrite_error(&mut self, node: &Arc<Node>, t: Arc<Type>) {
+        if !self.type_argument_stack.is_empty() {
+            return;
+        }
+        let is_error_new = crate::checker::utilities::is_type_error(&t);
+        let existing_is_error = self
+            .type_node_links
+            .get(node)
+            .and_then(|l| l.resolved_type.as_ref())
+            .is_some_and(|t| crate::checker::utilities::is_type_error(t));
+        if is_error_new && !existing_is_error {
+            return;
+        }
+        self.type_node_links.get_or_default(node).resolved_type = Some(t);
+    }
 }

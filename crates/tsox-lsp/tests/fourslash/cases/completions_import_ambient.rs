@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyApplyCodeActionFromCompletion"]
 #[test]
 fn completions_import_ambient() {
@@ -18,7 +19,7 @@ declare module 'path2longer' {
 
 // @Filename: b.ts
 Ba/**/"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("completionsImport_ambient", content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
     fourslash::unsupported("VerifyApplyCodeActionFromCompletion"); // f.VerifyApplyCodeActionFromCompletion(t, new(""), &fourslash.ApplyCodeActionFromCompletionOptions{
 }

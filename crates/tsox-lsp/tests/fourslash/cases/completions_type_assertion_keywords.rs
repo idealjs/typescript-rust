@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCompletions"]
 #[test]
 fn completions_type_assertion_keywords() {
@@ -13,6 +14,6 @@ const a = {
 const b = 42 as /*2*/
 
 var c = </*3*/>42"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("completionsTypeAssertionKeywords", content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, f.Markers(), &fourslash.CompletionsExpectedList{
 }

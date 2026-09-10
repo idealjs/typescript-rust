@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyWorkspaceSymbol"]
 #[test]
 fn navto_exclude_lib1() {
@@ -12,7 +13,7 @@ const [|weirdName|]: number = 1;
 export const [|weirdName|];
 // @filename: /node_modules/bar/package.json
 {}"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("navto_excludeLib1", content);
     fourslash::unsupported("VerifyWorkspaceSymbol"); // f.VerifyWorkspaceSymbol(t, []*fourslash.VerifyWorkspaceSymbolCase{
     fourslash::unsupported("VerifyWorkspaceSymbol"); // f.VerifyWorkspaceSymbol(t, []*fourslash.VerifyWorkspaceSymbolCase{
 }

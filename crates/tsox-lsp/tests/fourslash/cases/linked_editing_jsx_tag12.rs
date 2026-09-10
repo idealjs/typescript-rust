@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineLinkedEditing"]
 #[test]
 fn linked_editing_jsx_tag12() {
@@ -51,7 +52,7 @@ function Test() {
         </div>
     </div>
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("linkedEditingJsxTag12", content);
     fourslash::unsupported("VerifyLinkedEditing"); // f.VerifyLinkedEditing(t, map[string][]lsproto.Range{"0": nil})
     fourslash::unsupported("VerifyBaselineLinkedEditing"); // f.VerifyBaselineLinkedEditing(t)
 }

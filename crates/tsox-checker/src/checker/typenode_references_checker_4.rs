@@ -56,7 +56,7 @@ impl Checker {
         }
 
         let key = Arc::as_ptr(symbol) as *const tsox_frontend::ast::Symbol;
-        if !self.push_type_resolution(
+                if !self.push_type_resolution(
             key,
             crate::checker::checker::TypeResolutionProperty::DeclaredType,
         ) {
@@ -140,6 +140,19 @@ impl Checker {
                 self.in_static_member_type = false;
                 let own_result = self.build_interface_type_from_members(&merged_list);
                 self.in_static_member_type = saved_static;
+                if has_type_args {
+                    let tp_types: Vec<Arc<Type>> = tp_symbols
+                        .iter()
+                        .map(|s| self.get_type_parameter_from_symbol(s))
+                        .collect();
+                    self.mark_structured_members_instantiated(
+                        &own_result,
+                        symbol,
+                        &tp_symbols,
+                        &tp_types,
+                        &arg_types,
+                    );
+                }
 
                 let mut heritage_base_degraded = false;
                 let base_types = self

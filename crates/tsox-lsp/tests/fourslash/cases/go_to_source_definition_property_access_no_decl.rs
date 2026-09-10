@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: // When a property exists only via a mapped type in the .d.t"]
 #[test]
 fn go_to_source_property_access_no_declaration() {
@@ -19,7 +20,7 @@ export const config = { /*targetAlpha*/alpha: "a", /*targetBeta*/beta: "b" };
 import { config } from "pkg";
 config./*accessAlpha*/alpha;
 config./*accessBeta*/beta;"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("goToSourcePropertyAccessNoDeclaration", content);
     fourslash::unsupported("VerifyBaselineGoToSourceDefinition"); // f.VerifyBaselineGoToSourceDefinition(t, "accessAlpha", "accessBeta")
 }
 
@@ -39,7 +40,7 @@ export const nested = { inner: { /*targetValue*/value: 42 } };
 // @Filename: /home/src/workspaces/project/index.ts
 import { nested } from "pkg";
 nested.inner./*accessValue*/value;"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("goToSourcePropertyAccessDeepChain", content);
     fourslash::unsupported("VerifyBaselineGoToSourceDefinition"); // f.VerifyBaselineGoToSourceDefinition(t, "accessValue")
 }
 
@@ -60,6 +61,6 @@ export const coords = { /*targetX*/x: 10, /*targetY*/y: 20 };
 import { coords } from "pkg";
 coords./*accessX*/x;
 coords./*accessY*/y;"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("goToSourcePropertyAccessNamespaceImport", content);
     fourslash::unsupported("VerifyBaselineGoToSourceDefinition"); // f.VerifyBaselineGoToSourceDefinition(t, "accessX", "accessY")
 }

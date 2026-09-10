@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCodeFixAll"]
 #[test]
 fn import_name_code_fix_all_js() {
@@ -13,7 +14,7 @@ export class C {}
 C;
 /** @type {T} */
 const x = 0;"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("importNameCodeFix_all_js", content);
     fourslash::go_to_file(&mut s, "/b.js");
     fourslash::unsupported("VerifyCodeFixAll"); // f.VerifyCodeFixAll(t, fourslash.VerifyCodeFixAllOptions{
 }

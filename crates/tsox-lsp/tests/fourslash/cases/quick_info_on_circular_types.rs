@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[test]
 fn quick_info_on_circular_types() {
     let content = r#"interface A { (): B; };
@@ -15,7 +16,7 @@ declare var c: C;
 var zz = c();
 
 x/*B*/x = y/*C*/y;"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("quickInfoOnCircularTypes", content);
     fourslash::verify_quick_info_at(&mut s, "B", "var xx: B", "");
     fourslash::verify_quick_info_at(&mut s, "C", "var yy: C", "");
 }

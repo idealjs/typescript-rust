@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCompletions"]
 #[test]
 fn member_list_inside_object_literals() {
@@ -26,7 +27,7 @@ fn member_list_inside_object_literals() {
         /*4*/y1
     };
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("memberListInsideObjectLiterals", content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, []string{"1", "3", "4"}, &fourslash.CompletionsExpectedList{
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, []string{"2"}, &fourslash.CompletionsExpectedList{
 }

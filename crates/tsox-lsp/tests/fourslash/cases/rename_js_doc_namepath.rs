@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineRename"]
 #[test]
 fn rename_js_doc_namepath() {
@@ -9,6 +10,6 @@ fn rename_js_doc_namepath() {
  */
 var x = 1
 var /*0*/A = 0;"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("renameJSDocNamepath", content);
     fourslash::unsupported("VerifyBaselineRename"); // f.VerifyBaselineRename(t, nil /*preferences*/, "0")
 }

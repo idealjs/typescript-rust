@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: // This should show projectBFunction once, not twice"]
 #[test]
 fn auto_import_symlinked_monorepo() {
@@ -17,7 +18,7 @@ import { projectBValue } from "project-b";
 console.log(projectBValue);
 projectBFunc/**/
 // @link: /packages/project-b -> /packages/project-a/node_modules/project-b"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("autoImportSymlinkedMonorepo", content);
     fourslash::go_to_marker(&mut s, "");
     // TODO: // This should show projectBFunction once, not twice
     fourslash::unsupported("BaselineAutoImportsCompletions"); // f.BaselineAutoImportsCompletions(t, []string{""})

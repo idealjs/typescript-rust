@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineDocumentHighlights"]
 #[test]
 fn get_occurrences_switch_case_default5() {
@@ -20,6 +21,6 @@ fn get_occurrences_switch_case_default5() {
         break/*13*/;
     case 16/*14*/:
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("getOccurrencesSwitchCaseDefault5", content);
     fourslash::unsupported("VerifyBaselineDocumentHighlights"); // f.VerifyBaselineDocumentHighlights(t, nil /*preferences*/, ToAny(f.Markers())...)
 }

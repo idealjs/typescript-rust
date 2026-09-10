@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyImportFixAtPosition"]
 #[test]
 fn auto_import_cjs_with_node_module_kind() {
@@ -19,7 +20,7 @@ module.exports = { LIB_VERSION: 1 };
 // @Filename: /main.js
 module.exports.foo = 0;
 LIB_VERSION/**/"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("autoImportCJSWithNodeModuleKind", content);
     fourslash::go_to_marker(&mut s, "");
     fourslash::unsupported("VerifyImportFixAtPosition"); // f.VerifyImportFixAtPosition(t, []string{
 }
@@ -42,7 +43,7 @@ fn auto_import_cjs_with_node_module_kind_empty_file() {
 module.exports = { LIB_VERSION: 1 };
 // @Filename: /main.js
 LIB_VERSION/**/"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("autoImportCJSWithNodeModuleKindEmptyFile", content);
     fourslash::go_to_marker(&mut s, "");
     fourslash::unsupported("VerifyImportFixAtPosition"); // f.VerifyImportFixAtPosition(t, []string{
 }
@@ -65,7 +66,7 @@ export const LIB_VERSION = 1;
 // @Filename: /main.js
 const path = require("path");
 LIB_VERSION/**/"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("autoImportCJSWithModuleDetectionForce", content);
     fourslash::go_to_marker(&mut s, "");
     fourslash::unsupported("VerifyImportFixAtPosition"); // f.VerifyImportFixAtPosition(t, []string{
 }

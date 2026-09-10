@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineCallHierarchy"]
 #[test]
 fn call_hierarchy_interface_method() {
@@ -10,7 +11,7 @@ fn call_hierarchy_interface_method() {
 const obj: I = { foo() {} };
 
 obj.foo();"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("callHierarchyInterfaceMethod", content);
     fourslash::go_to_marker(&mut s, "");
     fourslash::unsupported("VerifyBaselineCallHierarchy"); // f.VerifyBaselineCallHierarchy(t)
 }

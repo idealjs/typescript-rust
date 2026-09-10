@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: f.MarkTestAsStradaServer()"]
 #[test]
 fn auto_import_provider4() {
@@ -16,7 +17,7 @@ new Shape/**/
 // @Filename: /home/src/workspaces/project/b/index.ts
 export class Shape {}
 // @link: /home/src/workspaces/project/b -> /home/src/workspaces/project/a/node_modules/b"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("autoImportProvider4", content);
     // TODO: f.MarkTestAsStradaServer()
     fourslash::go_to_marker(&mut s, "");
     fourslash::unsupported("VerifyImportFixAtPosition"); // f.VerifyImportFixAtPosition(t, []string{

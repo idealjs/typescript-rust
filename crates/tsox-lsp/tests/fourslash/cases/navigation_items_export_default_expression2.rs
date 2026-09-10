@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineDocumentSymbol"]
 #[test]
 fn navigation_items_export_default_expression2() {
@@ -32,6 +33,6 @@ export default (class {
 export default (class Cls {
   prop = 42;
 });"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("navigationItemsExportDefaultExpression2", content);
     fourslash::unsupported("VerifyBaselineDocumentSymbol"); // f.VerifyBaselineDocumentSymbol(t)
 }

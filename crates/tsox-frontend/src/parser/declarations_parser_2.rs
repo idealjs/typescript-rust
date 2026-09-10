@@ -31,7 +31,7 @@ impl Parser {
             let statements =
                 self.parse_list(ParsingContext::BlockStatements, Parser::parse_statement);
             self.expect(SyntaxKind::CloseBraceToken);
-            let end = self.token_pos();
+            let end = self.node_pos();
             Some(Arc::new(Node::with_loc(
                 SyntaxKind::ModuleBlock,
                 NodeData::ModuleBlock(ModuleBlockData {
@@ -118,7 +118,7 @@ impl Parser {
             let statements =
                 self.parse_list(ParsingContext::BlockStatements, Parser::parse_statement);
             self.expect(SyntaxKind::CloseBraceToken);
-            let end = self.token_pos();
+            let end = self.node_pos();
             Some(Arc::new(Node::with_loc(
                 SyntaxKind::ModuleBlock,
                 NodeData::ModuleBlock(ModuleBlockData {
@@ -240,7 +240,7 @@ impl Parser {
         let module_specifier = self.parse_module_specifier();
         let attributes = self.try_parse_import_attributes();
         self.parse_semicolon();
-        let end = self.token_pos();
+        let end = self.node_pos();
         Arc::new(Node::with_loc(
             SyntaxKind::ImportDeclaration,
             NodeData::ImportDeclaration(ImportDeclarationData {

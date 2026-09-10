@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineFindAllReferences"]
 #[test]
 fn references_for_ambients2() {
@@ -17,7 +18,7 @@ declare module "c" {
     import b = require("b");
     const x: b.a./*4*/T;
 }"#;
-    let mut s = Session::new(content);
-    fourslash::verify_no_errors(&mut s);
+    let mut s = Session::new_for_test("referencesForAmbients2", content);
+    fourslash::verify_no_errors(&mut s, );
     fourslash::unsupported("VerifyBaselineFindAllReferences"); // f.VerifyBaselineFindAllReferences(t, "1", "2", "3", "4")
 }

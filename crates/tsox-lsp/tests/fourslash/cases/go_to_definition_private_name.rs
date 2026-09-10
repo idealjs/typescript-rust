@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineGoToDefinition"]
 #[test]
 fn go_to_definition_private_name() {
@@ -14,6 +15,6 @@ fn go_to_definition_private_name() {
         this.[|/*pnPropUse*/#prop|]
     }
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("goToDefinitionPrivateName", content);
     fourslash::unsupported("VerifyBaselineGoToDefinition"); // f.VerifyBaselineGoToDefinition(t, true, "pnFieldUse", "pnMethodUse", "pnPropUse")
 }

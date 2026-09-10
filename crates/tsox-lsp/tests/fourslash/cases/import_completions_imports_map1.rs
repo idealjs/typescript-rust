@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: f.MarkTestAsStradaServer()"]
 #[test]
 fn import_completions_imports_map1() {
@@ -28,7 +29,7 @@ export const isBrowser = true;
 export const isBrowser = false;
 // @Filename: /home/src/workspaces/project/src/a.ts
 import {} from "/*1*/";"##;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("importCompletions_importsMap1", content);
     // TODO: f.MarkTestAsStradaServer()
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, []string{"1"}, &fourslash.CompletionsExpectedList{
 }

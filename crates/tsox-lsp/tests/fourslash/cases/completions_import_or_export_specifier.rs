@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: t.Skip('Known failing fourslash test')"]
 #[test]
 fn completions_import_or_export_specifier() {
@@ -37,12 +38,12 @@ export { type /*typeExport0*/ } from "./exports";
 export { type /*typeExport1*/ as typeExport1 } from "./exports";
 export { type foo as /*typeExport2*/ } from "./exports";
 export { type foo, type /*typeExport3*/ } from "./exports";"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("completionsImportOrExportSpecifier", content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "valueImport0", &fourslash.CompletionsExpectedList{
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "valueImport1", &fourslash.CompletionsExpectedList{
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "valueImport2", &fourslash.CompletionsExpectedList{
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "valueImport3", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "namespaceImport1", &fourslash.CompletionsExpectedList{
+    fourslash::verify_completions_exact_at(&mut s, Some("namespaceImport1"), &["foo"]);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "valueExport0", &fourslash.CompletionsExpectedList{
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "valueExport1", &fourslash.CompletionsExpectedList{
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "valueExport2", &fourslash.CompletionsExpectedList{

@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineHover"]
 #[test]
 fn quick_info_display_parts_local_function() {
@@ -25,6 +26,6 @@ fn quick_info_display_parts_local_function() {
     /*15*/foowith3overload(true);
 }
 /*16*/outerFoo();"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("quickInfoDisplayPartsLocalFunction", content);
     fourslash::unsupported("VerifyBaselineHover"); // f.VerifyBaselineHover(t)
 }

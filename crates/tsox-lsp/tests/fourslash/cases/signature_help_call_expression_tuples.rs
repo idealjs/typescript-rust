@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifySignatureHelp"]
 #[test]
 fn signature_help_call_expression_tuples() {
@@ -13,23 +14,13 @@ fnVariadicWrapped/*4*/(/*5*/'', /*6*/5);
 function fnNoParams () { }
 var fnNoParamsWrapped = wrap(fnNoParams);
 fnNoParamsWrapped/*7*/(/*8*/);"#;
-    let mut s = Session::new(content);
-    fourslash::verify_quick_info_at(
-        &mut s,
-        "3",
-        "var fnWrapped: (str: string, num: number) => void",
-        "",
-    );
+    let mut s = Session::new_for_test("signatureHelpCallExpressionTuples", content);
+    fourslash::verify_quick_info_at(&mut s, "3", "var fnWrapped: (str: string, num: number) => void", "");
     fourslash::go_to_marker(&mut s, "1");
     fourslash::unsupported("VerifySignatureHelp"); // f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{Text: "fnWrapped(str: string, num: num
     fourslash::go_to_marker(&mut s, "2");
     fourslash::unsupported("VerifySignatureHelp"); // f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{ParameterName: "num", ParameterSpan: "
-    fourslash::verify_quick_info_at(
-        &mut s,
-        "4",
-        "var fnVariadicWrapped: (str: string, ...num: number[]) => void",
-        "",
-    );
+    fourslash::verify_quick_info_at(&mut s, "4", "var fnVariadicWrapped: (str: string, ...num: number[]) => void", "");
     fourslash::go_to_marker(&mut s, "5");
     fourslash::unsupported("VerifySignatureHelp"); // f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{Text: "fnVariadicWrapped(str: string, 
     fourslash::go_to_marker(&mut s, "6");

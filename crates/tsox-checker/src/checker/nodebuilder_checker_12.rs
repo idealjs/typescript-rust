@@ -46,7 +46,7 @@ fn node_line_char(
     (l1, c1 + 1, l2, c2 + 1)
 }
 
-fn is_declaration_name(parent: &Arc<Node>, name: &Arc<Node>) -> bool {
+pub(crate) fn is_declaration_name(parent: &Arc<Node>, name: &Arc<Node>) -> bool {
     let hit = |n: Option<&Arc<Node>>| n.is_some_and(|x| Arc::ptr_eq(x, name));
     if let tsox_frontend::ast::NodeData::BindingElement(d) = &parent.data {
         return hit(d.name.as_ref()) || hit(d.property_name.as_ref());
@@ -102,9 +102,9 @@ impl Checker {
     }
 
     // x: C<number> 的成员访问显示：qualified 名带实例实参 + 方法/属性形态
-    fn instantiated_member_access_parts(&mut self, node: &Arc<Node>) -> Option<Vec<SymbolDisplayPart>> {
+    pub(crate) fn instantiated_member_access_parts(&mut self, node: &Arc<Node>) -> Option<Vec<SymbolDisplayPart>> {
         let p = node.parent.as_ref()?;
-        if p.kind != SyntaxKind::PropertyAccessExpression {
+                if p.kind != SyntaxKind::PropertyAccessExpression {
             return None;
         }
         let tsox_frontend::ast::NodeData::PropertyAccessExpression(pae) = &p.data else {
@@ -113,12 +113,41 @@ impl Checker {
         if !Arc::ptr_eq(&pae.name, node) {
             return None;
         }
-        let obj_type = self.get_type_of_node(&pae.expression);
+        let raw_type = self.get_type_of_node(&pae.expression);
+        // expando 挂载产生「函数 & {属性}」交集：取承载具名成员的成分
+        let obj_type = if let TypeData::Intersection(i) = &raw_type.data {
+            i.union_or_intersection
+                .types
+                .iter()
+                .find(|c| {
+                    c.as_structured()
+                        .is_some_and(|st| !st.properties.is_empty())
+                })
+                .cloned()
+                .unwrap_or_else(|| Arc::clone(&raw_type))
+        } else {
+            raw_type
+        };
         let obj_data = obj_type.as_object()?;
-        let class_sym = obj_type.symbol.as_ref()?;
-        if !class_sym.flags.intersects(SymbolFlags::Class | SymbolFlags::Interface) {
-            return None;
+        let call = p.parent.clone().filter(|c| c.kind == SyntaxKind::CallExpression);
+                let mut class_sym = obj_type.symbol.clone();
+        let mut from_call_return = false;
+        if !class_sym
+            .as_ref()
+            .is_some_and(|s| s.flags.intersects(SymbolFlags::Class | SymbolFlags::Interface))
+        {
+            // 泛型调用返回的局部函数型：容器用 expando face 携带的函数符号
+            // （getProps<{}>.x；实参由调用位推断补足）。仅限接收者是调用表达式，
+            // 模块/命名空间成员不在此列
+            if pae.expression.kind != SyntaxKind::CallExpression {
+                return None;
+            }
+            from_call_return = true;
         }
+        let Some(class_sym) = class_sym else {
+            return None;
+        };
+        let mut display_class_sym = Arc::clone(&class_sym);
         // 方法成员（泛型与非泛型 owner 均可）：调用位推断实参 + 限定名 + 方法形态
         let prop_sym = self.get_property_of_type(&obj_type, &node.text())?;
         let prop_type = self.substituted_member_type_of(&obj_type, &prop_sym);
@@ -127,11 +156,10 @@ impl Checker {
                 matches!(d.kind, SyntaxKind::MethodSignature | SyntaxKind::MethodDeclaration)
             });
         let sig = prop_type.as_structured().and_then(|s| s.call_signatures().first().cloned());
-        if !is_method && obj_data.type_arguments.is_empty() {
+        if !is_method && obj_data.type_arguments.is_empty() && !from_call_return {
             return None;
         }
         // 调用位：从实参推断类型实参（f<a>(...) 形态）
-        let call = p.parent.clone().filter(|c| c.kind == SyntaxKind::CallExpression);
         let inferred: Vec<Arc<Type>> = match (&call, &sig) {
             (Some(call_node), Some(sig)) => {
                 let args: Vec<Arc<Node>> = match &call_node.data {
@@ -148,6 +176,32 @@ impl Checker {
             }
             _ => Vec::new(),
         };
+        // 容器实参：owner 的类型实参；局部函数返回容器用调用位推断实参（getProps<{}>）；
+        // 继承自泛型基类的成员按声明容器 + 成员 mapper 写 `A<string>.m`（Go symbol 链语义）
+        let declaring_container = prop_sym
+            .parent
+            .clone()
+            .or_else(|| self.container_symbol_from_declarations(&prop_sym))
+            .filter(|p| {
+                p.flags.intersects(SymbolFlags::Class | SymbolFlags::Interface)
+                    && !Arc::ptr_eq(&class_sym, p)
+            });
+        if let Some(declaring) = &declaring_container {
+            let args = self.instantiated_member_container_args(&prop_sym, declaring);
+            if args.is_some() {
+                display_class_sym = Arc::clone(declaring);
+            }
+        }
+        let container_args: Vec<Arc<Type>> = if let Some(declaring) = &declaring_container {
+            self.instantiated_member_container_args(&prop_sym, declaring)
+                .unwrap_or_default()
+        } else if !obj_data.type_arguments.is_empty() {
+            obj_data.type_arguments.clone()
+        } else if from_call_return && pae.expression.kind == SyntaxKind::CallExpression {
+            self.call_inferred_type_arguments(&pae.expression)
+        } else {
+            Vec::new()
+        };
         let mut parts = Vec::new();
         if is_method {
             push_punctuation(&mut parts, "(");
@@ -160,17 +214,16 @@ impl Checker {
         }
         // 限定名：命名空间限定 + 接口/类名 + 成员名
         let ns_prefix = self
-            .namespace_only_qualifier_of(class_sym)
+            .namespace_only_qualifier_of(&display_class_sym)
             .map(|q| format!("{q}."))
             .unwrap_or_default();
         push_part(
             &mut parts,
-            &format!("{ns_prefix}{}", class_sym.name),
+            &format!("{ns_prefix}{}", display_class_sym.name),
             DisplayPartKind::ClassName,
         );
-        if !obj_data.type_arguments.is_empty() {
-            let args: Vec<String> = obj_data
-                .type_arguments
+        if !container_args.is_empty() {
+            let args: Vec<String> = container_args
                 .iter()
                 .map(|a| self.type_to_string(a))
                 .collect();
@@ -198,11 +251,7 @@ impl Checker {
                 push_punctuation(&mut parts, "(");
                 self.append_signature_parameter_parts(&mut parts, &inst);
                 push_punctuation(&mut parts, ")");
-                push_space(&mut parts, ": ");
-                let ret = self
-                    .get_return_type_of_signature(&inst)
-                    .unwrap_or_else(|| self.any_type());
-                parts.extend(self.type_to_display_parts(&ret));
+                self.append_signature_return_parts(&mut parts, &inst);
             }
         } else {
             push_space(&mut parts, ": ");
@@ -211,8 +260,81 @@ impl Checker {
         Some(parts)
     }
 
+    /// 泛型调用返回的局部函数符号：解析调用签名声明体内 return 的标识符
+    pub(crate) fn call_return_function_symbol(
+        &mut self,
+        call: &Arc<Node>,
+    ) -> Option<Arc<Symbol>> {
+        let sig = self.resolved_call_signature(call);
+                let sig = sig?;
+        let decl = sig.declaration.clone()?;
+                let body = match &decl.data {
+            crate::checker::nodebuilder::NodeData::FunctionDeclaration(d) => d.body.clone(),
+            _ => return None,
+        };
+        let mut found: Option<Arc<Node>> = None;
+        if let Some(body) = &body {
+                        self.find_first_return_expression(body, &mut found);
+        }
+                let ret_expr = found?;
+        if ret_expr.kind != SyntaxKind::Identifier {
+            return None;
+        }
+        let sym = self.resolve_identifier(&ret_expr);
+                let sym = sym?;
+        sym.flags
+            .contains(SymbolFlags::Function)
+            .then(|| sym)
+    }
+
+    fn find_first_return_expression(
+        &self,
+        node: &Arc<Node>,
+        found: &mut Option<Arc<Node>>,
+    ) {
+        if found.is_some() {
+            return;
+        }
+        use tsox_frontend::ast::node_data_generated::for_each_child;
+        match node.kind {
+            SyntaxKind::ReturnStatement => {
+                if let crate::checker::nodebuilder::NodeData::ReturnStatement(d) = &node.data {
+                    *found = d.expression.clone();
+                }
+                return;
+            }
+            SyntaxKind::FunctionDeclaration
+            | SyntaxKind::FunctionExpression
+            | SyntaxKind::ArrowFunction
+            | SyntaxKind::MethodDeclaration => return,
+            _ => {}
+        }
+        for_each_child(node, |child| {
+                        self.find_first_return_expression(child, found);
+            found.is_some()
+        });
+    }
+
+    /// 调用位的被调签名推断实参（容器显示 getProps<{}>）
+    pub(crate) fn call_inferred_type_arguments(&mut self, call: &Arc<Node>) -> Vec<Arc<Type>> {
+        let Some(sig) = self.resolved_call_signature(call) else {
+            return Vec::new();
+        };
+        if sig.type_parameters.is_empty() {
+            return Vec::new();
+        }
+        let args: Vec<Arc<Node>> = match &call.data {
+            crate::checker::nodebuilder::NodeData::CallExpression(d) => {
+                d.arguments.iter().cloned().collect()
+            }
+            _ => Vec::new(),
+        };
+        let inferred = self.infer_call_type_arguments(call, &sig, &args);
+                inferred
+    }
+
     // JSX 属性 hover：<Opt propx={2}/> 的 propx → (property) propx: <元素类型属性>
-    fn jsx_attribute_parts(&mut self, node: &Arc<Node>) -> Option<Vec<SymbolDisplayPart>> {
+    pub(crate) fn jsx_attribute_parts(&mut self, node: &Arc<Node>) -> Option<Vec<SymbolDisplayPart>> {
         let p = node.parent.as_ref()?;
         if p.kind != SyntaxKind::JsxAttribute {
             return None;
@@ -233,12 +355,63 @@ impl Checker {
             tsox_frontend::ast::NodeData::JsxOpeningElement(d) => Arc::clone(&d.tag_name),
             _ => return None,
         };
-        let tag_text = tag_name.text();
-        let name_text = node.text();
+        let tag_text = tag_name
+            .jsx_namespaced_name_text()
+            .unwrap_or_else(|| tag_name.text().to_string());
+        let name_text = node
+            .jsx_namespaced_name_text()
+            .unwrap_or_else(|| node.text().to_string());
         if !tag_text.chars().next().is_some_and(|c| c.is_ascii_uppercase()) {
-            return None;
+            // intrinsic 元素属性：props 类型上同名属性（Go getContextualJsxElementAttributesType
+            // + GetPropertySymbolsFromContextualType）
+            let elem = self.jsx_intrinsic_element_symbol(&tag_text)?;
+            let elem_type = self.get_type_of_symbol(&elem);
+            let prop = self.get_property_of_type(&elem_type, &name_text)?;
+            let prop_type = self.get_type_of_symbol(&prop);
+            let display_name = self.symbol_name_as_written(&prop).unwrap_or_else(|| name_text.clone());
+            let mut parts = Vec::new();
+            push_punctuation(&mut parts, "(");
+            push_part(&mut parts, "property", DisplayPartKind::Text);
+            push_punctuation(&mut parts, ") ");
+            push_part(&mut parts, &display_name, DisplayPartKind::PropertyName);
+            push_space(&mut parts, ": ");
+            parts.extend(self.type_to_display_parts(&prop_type));
+            if let Some(decl) = prop.value_declaration.as_ref().or(prop.declarations.first()) {
+                let doc = self.declaration_jsdoc_text(decl);
+                if !doc.is_empty() {
+                    push_space(&mut parts, "\n\n");
+                    push_part(&mut parts, &doc, DisplayPartKind::Text);
+                }
+            }
+            return Some(parts);
         }
         let class_sym = self.resolve_identifier(&tag_name)?;
+        // Go getContextualJsxElementAttributesType：首个构造签名参数类型经属性值
+        // 推断实例化（Component<T> 的 props），成员符号带容器实参显示
+        if let Some(prop) =
+            self.jsx_attribute_symbol_from_construct_signature(&class_sym, p, &name_text)
+        {
+            let prop_type = self.get_type_of_symbol(&prop);
+            let mut parts = Vec::new();
+            push_punctuation(&mut parts, "(");
+            push_part(&mut parts, "property", DisplayPartKind::Text);
+            push_punctuation(&mut parts, ") ");
+            let display_name = self.qualified_symbol_name(&prop);
+            push_part(&mut parts, &display_name, DisplayPartKind::PropertyName);
+            if prop.flags.contains(SymbolFlags::Optional) {
+                push_punctuation(&mut parts, "?");
+            }
+            push_punctuation(&mut parts, ": ");
+            parts.extend(self.type_to_display_parts(&prop_type));
+            if let Some(decl) = prop.value_declaration.as_ref().or(prop.declarations.first()) {
+                let doc = self.declaration_jsdoc_text(decl);
+                if !doc.is_empty() {
+                    push_space(&mut parts, "\n\n");
+                    push_part(&mut parts, &doc, DisplayPartKind::Text);
+                }
+            }
+            return Some(parts);
+        }
         // 类值符号 → 实例类型（成员属性在实例上，构造类型只有静态成员）
         let instance = match class_sym.declarations.first() {
             Some(d) if matches!(d.kind, SyntaxKind::ClassDeclaration | SyntaxKind::ClassExpression) => {
@@ -264,10 +437,101 @@ impl Checker {
         Some(parts)
     }
 
-    fn is_jsx_tag_name(&self, node: &Arc<Node>) -> bool {
-        if node.kind != SyntaxKind::Identifier {
-            return false;
+    /// JSX 元素属性上下文类型（Go getContextualJsxElementAttributesType）：
+    /// 类标签首个构造签名参数类型，泛型按属性值（跳过函数值）推断实例化
+    pub(crate) fn jsx_element_attributes_contextual_type(
+        &mut self,
+        elem: &Arc<Node>,
+    ) -> Option<Arc<Type>> {
+        let (tag_name, attrs) = match &elem.data {
+            tsox_frontend::ast::NodeData::JsxSelfClosingElement(d) => {
+                (Arc::clone(&d.tag_name), Arc::clone(&d.attributes))
+            }
+            tsox_frontend::ast::NodeData::JsxOpeningElement(d) => {
+                (Arc::clone(&d.tag_name), Arc::clone(&d.attributes))
+            }
+            _ => return None,
+        };
+        if !tag_name
+            .text()
+            .chars()
+            .next()
+            .is_some_and(|c| c.is_ascii_uppercase())
+        {
+            return None;
         }
+        let class_sym = self.resolve_identifier(&tag_name)?;
+        let ctor_type = self.get_type_of_symbol(&class_sym);
+        let sig = self
+            .get_signatures_of_type(&ctor_type, SignatureKind::Construct)
+            .first()
+            .cloned()?;
+        if sig.parameters.is_empty() {
+            return None;
+        }
+        let mut param_type = self
+            .signature_instantiated_param_type(&sig, 0)
+            .unwrap_or_else(|| self.get_type_of_symbol(&sig.parameters[0]));
+        if !sig.type_parameters.is_empty() {
+            let mut attr_args: Vec<Arc<Node>> = Vec::new();
+            {
+                let properties: Vec<Arc<Node>> = match &attrs.data {
+                    tsox_frontend::ast::NodeData::JsxAttributes(data) => {
+                        data.properties.iter().cloned().collect()
+                    }
+                    _ => Vec::new(),
+                };
+                for attr in properties {
+                    let value = match &attr.data {
+                        tsox_frontend::ast::NodeData::JsxAttribute(d) => d.initializer.clone(),
+                        _ => None,
+                    };
+                    let Some(value) = value else { continue };
+                    let expr = match &value.data {
+                        tsox_frontend::ast::NodeData::JsxExpression(je) => je.expression.clone(),
+                        _ => Some(Arc::clone(&value)),
+                    };
+                    if let Some(expr) = expr
+                        && !matches!(
+                            expr.kind,
+                            SyntaxKind::ArrowFunction | SyntaxKind::FunctionExpression
+                        )
+                    {
+                        attr_args.push(expr);
+                    }
+                }
+            }
+            let inferred = self.infer_call_type_arguments(elem, &sig, &attr_args);
+            if !inferred.is_empty() {
+                param_type = self.substitute_infer_type_parameters(
+                    &param_type,
+                    &sig.type_parameters,
+                    &inferred,
+                );
+            }
+        }
+        Some(param_type)
+    }
+
+    /// JSX 属性符号：构造签名参数类型（泛型按属性值推断实例化）上的成员，
+    /// union 按 name 判别式收窄（Go GetPropertySymbolsFromContextualType）
+    fn jsx_attribute_symbol_from_construct_signature(
+        &mut self,
+        class_sym: &Arc<Symbol>,
+        attr_node: &Arc<Node>,
+        name: &str,
+    ) -> Option<Arc<Symbol>> {
+        let attrs = attr_node.parent.clone()?;
+        let elem = attrs.parent.clone()?;
+        let param_type = self.jsx_element_attributes_contextual_type(&elem)?;
+        let syms = self.get_property_symbols_from_contextual_type(attr_node, &param_type, false);
+        if syms.len() == 1 {
+            return Some(Arc::clone(&syms[0]));
+        }
+        None
+    }
+
+    pub(crate) fn is_jsx_tag_name(&self, node: &Arc<Node>) -> bool {
         let is_jsx_container = |k: SyntaxKind| {
             matches!(
                 k,
@@ -276,6 +540,16 @@ impl Checker {
                     | SyntaxKind::JsxSelfClosingElement
             )
         };
+        // Go IsJsxTagName：不限 kind，只看父节点的 tag_name 槽位
+        if node.kind == SyntaxKind::JsxNamespacedName {
+            return node
+                .parent
+                .as_ref()
+                .is_some_and(|p| is_jsx_container(p.kind));
+        }
+        if node.kind != SyntaxKind::Identifier {
+            return false;
+        }
         let Some(p) = node.parent.as_ref() else {
             return false;
         };
@@ -289,8 +563,58 @@ impl Checker {
                 .is_some_and(|g| is_jsx_container(g.kind))
     }
 
+    /// IntrinsicElements 上的元素属性符号（供 tag hover 与属性上下文共用）
+    pub(crate) fn jsx_intrinsic_element_symbol(&mut self, name: &str) -> Option<Arc<Symbol>> {
+        let find_jsx = |checker: &Checker| -> Option<Arc<Symbol>> {
+            let symbol_map = checker.program.symbol_map();
+            let file = checker.display_enclosing_file.clone()?;
+            if let Some(locals) = symbol_map.locals.get(&file.node.id())
+                && let Some(sym) = locals.get("JSX")
+            {
+                return Some(Arc::clone(sym));
+            }
+            if let Some(sym) = symbol_map.symbol_of(&file.node)
+                && let Some(sym) = sym.members.get("JSX")
+            {
+                return Some(Arc::clone(sym));
+            }
+            None
+        };
+        let jsx_sym = find_jsx(self).or_else(|| self.globals.get("JSX").cloned())?;
+        let jsx_type = self.get_type_of_symbol(&jsx_sym);
+        let find_member = |checker: &Checker, sym: &Arc<Symbol>, member: &str| -> Option<Arc<Symbol>> {
+            for d in &sym.declarations {
+                if let Some(locals) = checker.program.symbol_map().locals.get(&d.id())
+                    && let Some(m) = locals.get(member)
+                {
+                    return Some(Arc::clone(m));
+                }
+            }
+            sym.members.get(member).cloned().or_else(|| sym.exports.get(member).cloned())
+        };
+        let intrinsics = find_member(self, &jsx_sym, "IntrinsicElements");
+        let intrinsics = intrinsics
+            .or_else(|| self.get_property_of_type(&jsx_type, "IntrinsicElements"))?;
+        let intrinsics_type = self.get_type_of_symbol(&intrinsics);
+        // IntrinsicElements 是接口声明：成员由 checker 按声明构建（resolve_interface_type_ex）
+        self.resolve_interface_type_ex(&intrinsics, None)
+            .as_structured()
+            .and_then(|s| s.members.get(name).cloned())
+            .or_else(|| self.get_property_of_type(&intrinsics_type, name))
+    }
+
+    /// 符号名按声明原样（保留引号风格，Go getNameOfSymbolAsWritten）
+    pub(crate) fn symbol_name_as_written(&mut self, symbol: &Arc<Symbol>) -> Option<String> {
+        let decl = symbol
+            .value_declaration
+            .as_ref()
+            .or(symbol.declarations.first())?;
+        let name_node = tsox_frontend::ast::node_data_generated::node_name(decl)?;
+        self.node_source_text(name_node)
+    }
+
     // 查全局 JSX 命名空间的 IntrinsicElements 属性，产出 (property) JSX.IntrinsicElements.div: any
-    fn jsx_intrinsic_element_parts(&mut self, name: &str) -> Option<Vec<SymbolDisplayPart>> {
+    pub(crate) fn jsx_intrinsic_element_parts(&mut self, name: &str) -> Option<Vec<SymbolDisplayPart>> {
         // JSX 命名空间可来自文件内 declare namespace 或全局 lib：
         // 沿 enclosing 文件容器 locals/members 找名字为 JSX 的命名空间符号
         let find_jsx = |checker: &Checker| -> Option<Arc<Symbol>> {
@@ -321,19 +645,7 @@ impl Checker {
             }
             sym.members.get(member).cloned().or_else(|| sym.exports.get(member).cloned())
         };
-        let intrinsics = find_member(self, &jsx_sym, "IntrinsicElements");
-        let intrinsics = intrinsics
-            .or_else(|| self.get_property_of_type(&jsx_type, "IntrinsicElements"))?;
-        let intrinsics_type = self.get_type_of_symbol(&intrinsics);
-        // IntrinsicElements 是接口声明：成员由 checker 按声明构建（resolve_interface_type_ex）
-        let elem = self
-            .resolve_interface_type_ex(&intrinsics, None)
-            .as_structured()
-            .and_then(|s| s.members.get(name).cloned())
-            .or_else(|| self.get_property_of_type(&intrinsics_type, name));
-        let Some(elem) = elem else {
-            return None;
-        };
+        let elem = self.jsx_intrinsic_element_symbol(name)?;
         let elem_type = self.get_type_of_symbol(&elem);
         let mut parts = Vec::new();
         push_punctuation(&mut parts, "(");
@@ -342,10 +654,31 @@ impl Checker {
         push_part(&mut parts, "JSX", DisplayPartKind::Text);
         push_punctuation(&mut parts, ".");
         push_part(&mut parts, "IntrinsicElements", DisplayPartKind::InterfaceName);
-        push_punctuation(&mut parts, ".");
-        push_part(&mut parts, name, DisplayPartKind::PropertyName);
+        // 非标识符成员（foo:bar 等）按声明引号风格渲染元素访问
+        if name.chars().all(|c| c.is_alphanumeric() || c == '_' || c == '$')
+            && !name.chars().next().is_some_and(|c| c.is_ascii_digit())
+        {
+            push_punctuation(&mut parts, ".");
+            push_part(&mut parts, name, DisplayPartKind::PropertyName);
+        } else {
+            push_punctuation(&mut parts, "[");
+            push_part(&mut parts, &format!("\"{name}\""), DisplayPartKind::StringLiteral);
+            push_punctuation(&mut parts, "]");
+        }
         push_space(&mut parts, ": ");
         parts.extend(self.type_to_display_parts(&elem_type));
+        // 属性声明上的 JSDoc
+        if let Some(decl) = elem
+            .value_declaration
+            .as_ref()
+            .or(elem.declarations.first())
+        {
+            let doc = self.declaration_jsdoc_text(decl);
+            if !doc.is_empty() {
+                push_space(&mut parts, "\n\n");
+                push_part(&mut parts, &doc, DisplayPartKind::Text);
+            }
+        }
         Some(parts)
     }
 
@@ -470,7 +803,7 @@ impl Checker {
     }
 
     /// `new Cat()` / `new C<any>()` 的构造函数悬停：`constructor C<any>(): C<any>`
-    fn constructor_display_parts(
+    pub(crate) fn constructor_display_parts(
         &mut self,
         symbol: &Arc<Symbol>,
         node: &Arc<Node>,
@@ -582,7 +915,7 @@ impl Checker {
     }
 
     pub fn get_quick_info_display_parts(&mut self, node: &Arc<Node>) -> Vec<SymbolDisplayPart> {
-        self.display_enclosing_file = self.get_source_file_of_node(node);
+                self.display_enclosing_file = self.get_source_file_of_node(node);
         self.display_enclosing_node = Some(Arc::clone(node));
         // tsc getTypeOfNode：with 块内无法回答语义问题，类型查询返回 error（显示 any）
         if node_in_with_block(node) {
@@ -717,8 +1050,15 @@ impl Checker {
         let symbol = match self.resolve_contextual_property_symbol(node) {
             Some(s) => s,
             None => match self.resolve_property_access_symbol(node) {
-                Some(s) => s,
+                Some(s) => {
+                                        s
+                }
                 None => {
+                    // 属性名无具名成员但接收者带字符串索引签名（如反向映射 {[x: string]: ...}）：
+                    // 显示索引值类型（无前缀，tsc 经索引访问定型）
+                    if let Some(parts) = self.index_signature_property_parts(node) {
+                        return parts;
+                    }
                     let Some(symbol) = self.resolve_symbol_for_hover(node) else {
                         return Vec::new();
                     };
@@ -742,48 +1082,8 @@ impl Checker {
         // 悬停命中改名绑定的 property_name：按源属性身份渲染
         if let Some(elem) = node.parent.as_ref()
             && elem.kind == SyntaxKind::BindingElement
-            && let tsox_frontend::ast::NodeData::BindingElement(d) = &elem.data
-            && d.property_name
-                .as_ref()
-                .is_some_and(|pn| Arc::ptr_eq(pn, node))
+            && let Some(parts) = self.binding_element_property_name_parts(node, &symbol)
         {
-            let _ = self.get_type_of_symbol(&symbol);
-            if let Some(member) = self
-                .value_symbol_links
-                .get(&symbol)
-                .and_then(|l| l.container_symbol.clone())
-            {
-                return self.variable_symbol_display_parts(&member);
-            }
-            // 无链接时按属性名在绑定类型中查源属性（如 property1: {} 嵌套解构）
-            let declared_type = self.get_type_of_symbol(&symbol);
-            if let Some(st) = declared_type.as_structured()
-                && let Some(m) = st.members.get(&node.text())
-            {
-                return self.variable_symbol_display_parts(&m);
-            }
-            // 名字是嵌套模式：属性类型即模式自身的形状
-            let nested_pattern_type = match d.name.as_ref() {
-                Some(name_node) if name_node.kind == SyntaxKind::ObjectBindingPattern => {
-                    self.get_type_of_assignment_pattern(name_node)
-                }
-                _ => None,
-            };
-            let has_nested_pattern = nested_pattern_type.is_some();
-            let be_type = nested_pattern_type.unwrap_or_else(|| Arc::clone(&declared_type));
-            if !has_nested_pattern
-                && let Some(st) = be_type.as_structured()
-                && let Some(m) = st.members.get(&node.text())
-            {
-                return self.variable_symbol_display_parts(&m);
-            }
-            let mut parts = Vec::new();
-            push_punctuation(&mut parts, "(");
-            push_part(&mut parts, "property", DisplayPartKind::Text);
-            push_punctuation(&mut parts, ") ");
-            push_part(&mut parts, &node.text(), DisplayPartKind::PropertyName);
-            push_space(&mut parts, ": ");
-            parts.extend(self.type_to_display_parts(&be_type));
             return parts;
         }
         // 调用位的泛型函数属性/变量：属性前缀 + 实例化箭头签名 <number>(x: number) => number
@@ -1096,14 +1396,23 @@ impl Checker {
                 .and_then(|s| s.declarations.first().cloned());
             match target {
                 Some(t) => {
-                    let (l1, c1, l2, c2) = node_line_char(
-                        sf,
-                        t.pos(),
-                        t.name().map(|n| n.end()).unwrap_or_else(|| t.end()),
-                    );
+                    // Go writeNameLink：链接指向目标声明的名字节点，URI 取目标
+                    // 所在文件（非悬停文件）
+                    let target_sf = match self.get_source_file_of_node(&t) {
+                        Some(f) => f,
+                        None => {
+                            out.push_str(name);
+                            rest = &after[end + 1..];
+                            continue;
+                        }
+                    };
+                    let name_start = t.name().map(|n| n.pos()).unwrap_or_else(|| t.pos());
+                    let name_end = t.name().map(|n| n.end()).unwrap_or_else(|| t.end());
+                    let (l1, c1, l2, c2) =
+                        node_line_char(&target_sf, name_start, name_end);
                     out.push_str(&format!(
                         "[{name}](file:///{}#{l1},{c1}-{l2},{c2})",
-                        sf.file_name.trim_start_matches('/'),
+                        target_sf.file_name.trim_start_matches('/'),
                     ));
                 }
                 None => out.push_str(name),
@@ -1140,7 +1449,7 @@ impl Checker {
 
     // Go getDocumentationForSymbol：先取调用位解析签名的声明文档（call/construct 签名），
     // 再回退符号声明文档
-    fn hover_documentation(&mut self, symbol: &Arc<Symbol>, node: &Arc<Node>) -> String {
+    pub(crate) fn hover_documentation(&mut self, symbol: &Arc<Symbol>, node: &Arc<Node>) -> String {
         if let Some(call) = Self::enclosing_call_or_new(node)
             && let Some(sig) = self.resolved_call_signature(&call)
             && let Some(decl) = sig.declaration.clone()
@@ -1154,7 +1463,7 @@ impl Checker {
         self.symbol_documentation(symbol)
     }
 
-    fn enclosing_call_or_new(node: &Arc<Node>) -> Option<Arc<Node>> {
+    pub(crate) fn enclosing_call_or_new(node: &Arc<Node>) -> Option<Arc<Node>> {
         let mut cur = Arc::clone(node);
         // 仅当节点是属性访问的「名字」段（被调函数）时穿透到访问表达式；
         // object 段（如 p1.then 里的 p1）不是被调函数
@@ -1182,7 +1491,7 @@ impl Checker {
         }
     }
 
-    fn resolved_call_signature(&mut self, call: &Arc<Node>) -> Option<Arc<Signature>> {
+    pub(crate) fn resolved_call_signature(&mut self, call: &Arc<Node>) -> Option<Arc<Signature>> {
         let (callee, args) = match &call.data {
             crate::checker::nodebuilder::NodeData::CallExpression(d) => {
                 (&d.expression, d.arguments.clone())
@@ -1210,10 +1519,25 @@ impl Checker {
         Some(Arc::clone(&sigs[idx]))
     }
 
-    fn declaration_jsdoc_text(&mut self, decl: &Arc<Node>) -> String {
+    pub(crate) fn declaration_jsdoc_text(&mut self, decl: &Arc<Node>) -> String {
         let Some(sf) = self.get_source_file_of_node(decl) else {
             return String::new();
         };
+        // Reparsed 的 JSDoc 合成成员（@property → PropertySignature）：
+        // 注释挂在原 jsdoc 标签上，按位置回查标签注释
+        if decl.flags.contains(tsox_frontend::ast::NodeFlags::Reparsed) {
+            if decl.kind == SyntaxKind::TypeAliasDeclaration {
+                // @typedef 重解析的别名：文档为原 JSDoc 块整体（块首注释 +
+                // 各标签 "*@name* — comments"，跳过 type/typedef/callback）
+                if let Some(doc) = jsdoc_block_doc(&sf, decl) {
+                    return doc;
+                }
+            }
+            let doc = self.jsdoc_tag_comment_at(&sf, decl);
+            if !doc.is_empty() {
+                return doc;
+            }
+        }
         let jds = tsox_frontend::parser::parse_jsdoc_for_node(&sf, decl);
         for jd in &jds {
             let (p0, p1) = (jd.pos().min(sf.text.len()), jd.end().min(sf.text.len()));
@@ -1226,7 +1550,36 @@ impl Checker {
         String::new()
     }
 
-    fn symbol_documentation(&mut self, symbol: &Arc<Symbol>) -> String {
+    pub(crate) fn symbol_documentation(&mut self, symbol: &Arc<Symbol>) -> String {
+        let direct = self.symbol_documentation_direct(symbol);
+        if !direct.is_empty() {
+            return direct;
+        }
+        // Go ls/jsdoc.go getJSDocOrTag：声明无 JSDoc 且父节点为类/接口时，
+        // 沿基类型找同名成员的 JSDoc（mixin 覆盖场景）
+        self.base_member_documentation(symbol)
+    }
+
+    fn symbol_documentation_direct(&mut self, symbol: &Arc<Symbol>) -> String {
+        // Reparsed 的 JSDoc 合成成员（@property）：注释在原 jsdoc 标签上
+        for target in self.doc_lookup_symbols(symbol) {
+            for decl in &target.declarations {
+                if decl.flags.contains(tsox_frontend::ast::NodeFlags::Reparsed) {
+                    if let Some(sf) = self.get_source_file_of_node(decl) {
+                        if decl.kind == SyntaxKind::TypeAliasDeclaration {
+                            // @typedef 重解析的别名：文档为原 JSDoc 块整体
+                            if let Some(doc) = jsdoc_block_doc(&sf, decl) {
+                                return doc;
+                            }
+                        }
+                        let doc = self.jsdoc_tag_comment_at(&sf, decl);
+                        if !doc.is_empty() {
+                            return doc;
+                        }
+                    }
+                }
+            }
+        }
         for target in self.doc_lookup_symbols(symbol) {
             for decl in &target.declarations {
                 let Some(sf) = self.get_source_file_of_node(decl) else {
@@ -1279,7 +1632,7 @@ impl Checker {
         String::new()
     }
 
-    fn constructor_jsdoc_documentation(&mut self, class_symbol: &Arc<Symbol>) -> String {
+    pub(crate) fn constructor_jsdoc_documentation(&mut self, class_symbol: &Arc<Symbol>) -> String {
         let ctor_decl = class_symbol.declarations.iter().find_map(|decl| {
             let members = match &decl.data {
                 tsox_frontend::ast::NodeData::ClassDeclaration(d) => Some(&d.members),
@@ -1323,6 +1676,9 @@ impl Checker {
             let mut cur = decl.parent.as_ref();
             while let Some(n) = cur {
                 match n.kind {
+                    // 类型字面量成员无可限定容器（Go getContainersOfSymbol：
+                    // type literal 无符号，匿名成员裸名显示）
+                    SyntaxKind::TypeLiteral => return None,
                     SyntaxKind::ClassDeclaration
                     | SyntaxKind::InterfaceDeclaration
                     | SyntaxKind::EnumDeclaration
@@ -1338,7 +1694,54 @@ impl Checker {
         })
     }
 
-    fn qualified_symbol_name(&mut self, symbol: &Arc<Symbol>) -> String {
+    /// 合并 namespace+class 容器段：Class&lt;T extends C = D&gt; 形态（约束/默认值经解析渲染）
+    fn merged_class_container_segment(&mut self, parent: &Arc<Symbol>) -> Option<String> {
+        let tps = parent.declarations.iter().find_map(|d| match &d.data {
+            crate::checker::nodebuilder::NodeData::ClassDeclaration(data) => {
+                data.type_parameters.as_ref()
+            }
+            _ => None,
+        })?;
+        let parts: Vec<String> = tps
+            .iter()
+            .filter_map(|tp| {
+                let crate::checker::nodebuilder::NodeData::TypeParameterDeclaration(tpd) = &tp.data
+                else {
+                    return None;
+                };
+                let mut s = tpd.name.text().to_string();
+                if let Some(c) = &tpd.constraint {
+                    let t = self.get_type_from_type_node(c);
+                    let text = self.type_to_string_ex(
+                        &t,
+                        crate::checker::nodebuilder_type_format_flags_2::TypeFormatFlags::USE_ALIAS_DEFINED_OUTSIDE_CURRENT_SCOPE,
+                    );
+                    s.push_str(&format!(" extends {text}"));
+                }
+                if let Some(dflt) = &tpd.default_type {
+                    let t = self.get_type_from_type_node(dflt);
+                    let text = self.type_to_string_ex(
+                        &t,
+                        crate::checker::nodebuilder_type_format_flags_2::TypeFormatFlags::USE_ALIAS_DEFINED_OUTSIDE_CURRENT_SCOPE,
+                    );
+                    s.push_str(&format!(" = {text}"));
+                }
+                Some(s)
+            })
+            .collect();
+        if parts.is_empty() {
+            return None;
+        }
+        Some(format!("{}<{}>", parent.name, parts.join(", ")))
+    }
+
+    pub(crate) fn qualified_symbol_name(&mut self, symbol: &Arc<Symbol>) -> String {
+        // Go getNameOfSymbolAsWritten：内部名符号按声明形态显示匿名占位
+        if symbol.name.starts_with('\u{FE}') {
+            if let Some(display) = anonymous_symbol_display_name(symbol) {
+                return display;
+            }
+        }
         let parent = symbol
             .parent
             .clone()
@@ -1352,6 +1755,15 @@ impl Checker {
             return symbol.name.clone();
         };
         if parent.flags.contains(SymbolFlags::ValueModule) {
+            // 合并 namespace+class 符号：类声明的类型参数（含约束/默认值）
+            // 挂在最内层段（AMap.MassMarks<D extends ... = ...>.Data）
+            if parent.flags.contains(SymbolFlags::Class)
+                && let Some(seg) = self.merged_class_container_segment(&parent)
+                && let Some(q) = self.namespace_qualifier_of(symbol)
+                && let Some(pos) = q.rfind('.')
+            {
+                return format!("{}.{seg}.{}", &q[..pos], symbol.name);
+            }
             return self
                 .namespace_qualifier_of(symbol)
                 .map(|q| format!("{q}.{}", symbol.name))
@@ -1364,6 +1776,17 @@ impl Checker {
             return symbol.name.clone();
         }
         let mut q = parent.name.clone();
+        if let Some(args) = self.instantiated_member_container_args(symbol, &parent) {
+            let rendered: Vec<String> = args.iter().map(|a| self.type_to_string(a)).collect();
+            if !rendered.is_empty() {
+                q.push('<');
+                q.push_str(&rendered.join(", "));
+                q.push('>');
+            }
+            q.push('.');
+            q.push_str(&symbol.name);
+            return q;
+        }
         if let Some(tps) = parent.declarations.iter().find_map(|d| match &d.data {
             crate::checker::nodebuilder::NodeData::InterfaceDeclaration(data) => {
                 data.type_parameters.as_ref()
@@ -1394,9 +1817,11 @@ impl Checker {
     }
 
     pub fn type_to_display_parts(&mut self, t: &Arc<Type>) -> Vec<SymbolDisplayPart> {
+        use crate::checker::nodebuilder_type_format_flags_2::TypeFormatFlags;
         let s = self.type_to_string_ex(
             t,
-            crate::checker::nodebuilder_type_format_flags_2::TypeFormatFlags::MULTILINE_OBJECT_LITERALS,
+            TypeFormatFlags::MULTILINE_OBJECT_LITERALS
+                .union(TypeFormatFlags::USE_ALIAS_DEFINED_OUTSIDE_CURRENT_SCOPE),
         );
 
         if let Some(name) = t.intrinsic_name() {
@@ -1439,13 +1864,7 @@ impl Checker {
                 push_punctuation(&mut parts, "(");
                 self.append_signature_parameter_parts(&mut parts, sig);
                 push_punctuation(&mut parts, ")");
-                push_space(&mut parts, ": ");
-                let ret = sig
-                    .resolved_return_type
-                    .get()
-                    .cloned()
-                    .unwrap_or_else(|| self.any_type());
-                parts.extend(self.type_to_display_parts(&ret));
+                self.append_signature_return_parts(&mut parts, sig);
                 return parts;
             }
         }
@@ -1577,7 +1996,16 @@ impl Checker {
         } else {
             DisplayPartKind::VariableName
         };
-        push_part(&mut parts, &self.qualified_symbol_name(symbol), name_kind);
+        // 反向映射属性为合成符号：显示裸名（tsc 不经声明容器限定）
+        let display_name = if symbol
+            .check_flags
+            .contains(tsox_frontend::ast::CheckFlags::ReverseMapped)
+        {
+            symbol.name.clone()
+        } else {
+            self.qualified_symbol_name(symbol)
+        };
+        push_part(&mut parts, &display_name, name_kind);
         if symbol.flags.contains(SymbolFlags::Optional) {
             push_punctuation(&mut parts, "?");
         }
@@ -1621,11 +2049,81 @@ impl Checker {
             let pt = self
                 .signature_instantiated_param_type(sig, i)
                 .unwrap_or_else(|| self.get_type_of_symbol(param));
-            parts.extend(self.type_to_display_parts(&pt));
+            // Go serializeTypeForDeclaration：解析类型与注解等价时复用注解原文（保留引号风格），
+            // kind 分类仍按解析类型（number 等 intrinsic 为 Keyword）
+            if let Some(text) = self.annotated_param_type_text(param, &pt) {
+                let mut dp = self.type_to_display_parts(&pt);
+                if let Some(first) = dp.first_mut() {
+                    first.text = text;
+                }
+                parts.extend(dp);
+            } else {
+                parts.extend(self.type_to_display_parts(&pt));
+            }
         }
     }
 
-    fn call_site_union_signature(
+    /// 参数注解与解析类型等价（按类型 id）时返回注解源文本
+    pub(crate) fn annotated_param_type_text(
+        &mut self,
+        param: &Arc<Symbol>,
+        resolved: &Arc<Type>,
+    ) -> Option<String> {
+        let decl = param
+            .value_declaration
+            .as_ref()
+            .or(param.declarations.first())?;
+        let tn = match &decl.data {
+            crate::checker::nodebuilder::NodeData::ParameterDeclaration(
+                tsox_frontend::ast::ParameterDeclarationData {
+                    type_node: Some(tn),
+                    ..
+                },
+            ) => Arc::clone(tn),
+            _ => return None,
+        };
+        self.equivalent_annotation_text(&tn, resolved)
+    }
+
+    /// 声明注解与解析类型等价（按类型 id）时返回注解源文本（保留引号风格）
+    pub(crate) fn equivalent_annotation_text(
+        &mut self,
+        tn: &Arc<Node>,
+        resolved: &Arc<Type>,
+    ) -> Option<String> {
+        let annotated = self.get_type_from_type_node(tn);
+        if annotated.id != resolved.id {
+            return None;
+        }
+        self.node_source_text(tn)
+    }
+
+    /// 变量/属性声明注解与解析类型等价时返回注解源文本
+    pub(crate) fn annotated_decl_type_text(
+        &mut self,
+        symbol: &Arc<Symbol>,
+        resolved: &Arc<Type>,
+    ) -> Option<String> {
+        let decl = symbol
+            .value_declaration
+            .as_ref()
+            .or(symbol.declarations.first())?;
+        let tn = match &decl.data {
+            crate::checker::nodebuilder::NodeData::ParameterDeclaration(d) => {
+                d.type_node.clone()?
+            }
+            crate::checker::nodebuilder::NodeData::VariableDeclaration(d) => {
+                d.type_node.clone()?
+            }
+            crate::checker::nodebuilder::NodeData::PropertyDeclaration(d) => {
+                d.type_node.clone()?
+            }
+            _ => return None,
+        };
+        self.equivalent_annotation_text(&tn, resolved)
+    }
+
+    pub(crate) fn call_site_union_signature(
         &mut self,
         symbol: &Arc<Symbol>,
         node: &Arc<Node>,
@@ -1662,7 +2160,7 @@ impl Checker {
         Some(Arc::clone(&sigs[0]))
     }
 
-    fn arrow_signature_parts(&mut self, sig: &Arc<Signature>) -> Vec<SymbolDisplayPart> {
+    pub(crate) fn arrow_signature_parts(&mut self, sig: &Arc<Signature>) -> Vec<SymbolDisplayPart> {
         let mut parts = Vec::new();
         if !sig.type_parameters.is_empty() {
             let names: Vec<String> = sig
@@ -1738,7 +2236,7 @@ fn assignment_target_expr(obj: &Arc<Node>) -> Arc<Node> {
     Arc::clone(obj)
 }
 
-fn node_in_with_block(node: &Arc<Node>) -> bool {
+pub(crate) fn node_in_with_block(node: &Arc<Node>) -> bool {
     // 遍历兄弟扫描祖先 WithStatement 的 span 包含（parser 可能不把 with body 挂进祖先链）
     let mut cur = node.parent.clone();
     while let Some(n) = cur {
@@ -1764,4 +2262,320 @@ fn node_in_with_block(node: &Arc<Node>) -> bool {
         cur = n.parent.clone();
     }
     false
+}
+
+impl Checker {
+    /// 悬停命中改名绑定的 property_name：按源属性身份渲染（对齐 tsc checkBindingElement）
+    pub(crate) fn binding_element_property_name_parts(
+        &mut self,
+        node: &Arc<Node>,
+        symbol: &Arc<Symbol>,
+    ) -> Option<Vec<SymbolDisplayPart>> {
+        if let Some(elem) = node.parent.as_ref()
+            && elem.kind == SyntaxKind::BindingElement
+            && let tsox_frontend::ast::NodeData::BindingElement(d) = &elem.data
+            && d.property_name
+                .as_ref()
+                .is_some_and(|pn| Arc::ptr_eq(pn, node))
+        {
+            let _ = self.get_type_of_symbol(&symbol);
+            if let Some(member) = self
+                .value_symbol_links
+                .get(&symbol)
+                .and_then(|l| l.container_symbol.clone())
+            {
+                return Some(self.variable_symbol_display_parts(&member));
+            }
+            // 无链接时按属性名在绑定类型中查源属性（如 property1: {} 嵌套解构）
+            let declared_type = self.get_type_of_symbol(&symbol);
+            if let Some(st) = declared_type.as_structured()
+                && let Some(m) = st.members.get(&node.text())
+            {
+                return Some(self.variable_symbol_display_parts(&m));
+            }
+            // 名字是嵌套模式：属性类型即模式自身的形状
+            let nested_pattern_type = match d.name.as_ref() {
+                Some(name_node) if name_node.kind == SyntaxKind::ObjectBindingPattern => {
+                    self.get_type_of_assignment_pattern(name_node)
+                }
+                _ => None,
+            };
+            let has_nested_pattern = nested_pattern_type.is_some();
+            let be_type = nested_pattern_type.unwrap_or_else(|| Arc::clone(&declared_type));
+            if !has_nested_pattern
+                && let Some(st) = be_type.as_structured()
+                && let Some(m) = st.members.get(&node.text())
+            {
+                return Some(self.variable_symbol_display_parts(&m));
+            }
+            let mut parts = Vec::new();
+            push_punctuation(&mut parts, "(");
+            push_part(&mut parts, "property", DisplayPartKind::Text);
+            push_punctuation(&mut parts, ") ");
+            push_part(&mut parts, &node.text(), DisplayPartKind::PropertyName);
+            push_space(&mut parts, ": ");
+            parts.extend(self.type_to_display_parts(&be_type));
+            return Some(parts);
+        }
+        None
+    }
+}
+
+fn anonymous_symbol_display_name(symbol: &Arc<Symbol>) -> Option<String> {
+    let decl = symbol
+        .value_declaration
+        .as_ref()
+        .or(symbol.declarations.first())?;
+    let unnamed = match &decl.data {
+        crate::checker::nodebuilder::NodeData::ClassExpression(d) => d.name.is_none(),
+        crate::checker::nodebuilder::NodeData::FunctionExpression(d) => d.name.is_none(),
+        crate::checker::nodebuilder::NodeData::ArrowFunction(_) => true,
+        _ => false,
+    };
+    if !unnamed {
+        return None;
+    }
+    match decl.kind {
+        SyntaxKind::ClassExpression => Some("(Anonymous class)".to_string()),
+        SyntaxKind::FunctionExpression | SyntaxKind::ArrowFunction => {
+            Some("(Anonymous function)".to_string())
+        }
+        _ => None,
+    }
+}
+
+impl Checker {
+    fn base_member_documentation(&mut self, symbol: &Arc<Symbol>) -> String {
+        let decl = symbol
+            .value_declaration
+            .as_ref()
+            .or(symbol.declarations.first())
+            .cloned();
+        let Some(decl) = decl else {
+            return String::new();
+        };
+        let Some(class_node) = decl.parent.as_ref().filter(|p| {
+            matches!(p.kind, SyntaxKind::ClassDeclaration | SyntaxKind::ClassExpression)
+        }) else {
+            return String::new();
+        };
+        let Some(class_sym) = self
+            .program
+            .symbol_map()
+            .symbol_of(class_node)
+            .map(Arc::clone)
+        else {
+            return String::new();
+        };
+        let is_static = decl
+            .has_syntactic_modifier(tsox_frontend::ast::ModifierFlags::Static);
+        let base_type: Option<Arc<Type>> = if is_static {
+            let t = self.get_type_of_symbol(&class_sym);
+            self.get_base_types(&t).into_iter().next()
+        } else {
+            match class_node.data {
+                crate::checker::nodebuilder::NodeData::ClassDeclaration(_)
+                | crate::checker::nodebuilder::NodeData::ClassExpression(_) => {
+                    let inst = self.build_class_instance_type_with_base(class_node);
+                    self.get_base_types(&inst).into_iter().next()
+                }
+                _ => None,
+            }
+        };
+        let Some(base) = base_type else {
+            return String::new();
+        };
+        let Some(prop) = self.get_property_of_type(&base, &symbol.name) else {
+            return String::new();
+        };
+        let Some(prop_decl) = prop
+            .value_declaration
+            .as_ref()
+            .or(prop.declarations.first())
+        else {
+            return String::new();
+        };
+        let Some(sf) = self.get_source_file_of_node(prop_decl) else {
+            return String::new();
+        };
+        let jds = tsox_frontend::parser::parse_jsdoc_for_node(&sf, prop_decl);
+        for jd in &jds {
+            let (p0, p1) = (jd.pos().min(sf.text.len()), jd.end().min(sf.text.len()));
+            if p0 >= p1 {
+                continue;
+            }
+            let raw = sf.text[p0..p1].to_string();
+            let cleaned = clean_jsdoc_text(&raw);
+            if !cleaned.is_empty() {
+                return self.render_jsdoc_links(&sf, prop_decl, &cleaned);
+            }
+        }
+        String::new()
+    }
+}
+
+impl Checker {
+    /// 位置落在 jsdoc 标签（@property 等）内的合成声明：取该标签的注释文本
+    fn jsdoc_tag_comment_at(
+        &mut self,
+        sf: &Arc<tsox_frontend::ast::SourceFile>,
+        decl: &Arc<Node>,
+    ) -> String {
+        use crate::checker::nodebuilder::NodeData;
+        let comments = tsox_frontend::scanner::get_leading_comment_ranges(&sf.text, 0);
+        for range in comments {
+            let mut parser = tsox_frontend::parser::Parser::new(sf.text.clone());
+            let jsdoc = parser.parse_jsdoc_comment(range.pos, range.end, range.pos);
+            let Some(jsdoc) = jsdoc else {
+                continue;
+            };
+            let NodeData::JSDoc(d) = &jsdoc.data else {
+                continue;
+            };
+            let Some(tags) = &d.tags else {
+                continue;
+            };
+            for tag in tags.nodes.iter() {
+                if tag.loc.pos <= decl.loc.pos && decl.loc.end <= tag.loc.end {
+                    if let crate::checker::nodebuilder::NodeData::JSDocParameterOrPropertyTag(
+                        ptag,
+                    ) = &tag.data
+                    {
+                        return jsdoc_comment_text(ptag.comment.as_ref());
+                    }
+                    return jsdoc_tag_trailing_comment(&sf.text, tag);
+                }
+            }
+        }
+        String::new()
+    }
+}
+
+/// @tag 注释段：标签行尾起的连续注释文本（去除前导 * 与空白）
+fn jsdoc_tag_trailing_comment(text: &str, tag: &crate::checker::nodebuilder::Node) -> String {
+    let mut lines: Vec<String> = Vec::new();
+    let body = &text[tag.loc.pos as usize..tag.loc.end as usize];
+    for (i, raw) in body.split('\n').enumerate() {
+        let line = raw.trim();
+        let line = if i == 0 {
+            // 首行：去掉 @tag 与名字/类型（启发式：首个空格后内容）
+            match line.find(' ') {
+                Some(sp) => line[sp + 1..].trim_start(),
+                None => "",
+            }
+        } else {
+            line.strip_prefix('*').map(|l| l.trim_start()).unwrap_or(line)
+        };
+        if !line.is_empty() {
+            lines.push(line.to_string());
+        }
+    }
+    lines.join("\n")
+}
+
+fn jsdoc_comment_text(comment: Option<&Arc<tsox_frontend::ast::NodeList>>) -> String {
+    let Some(list) = comment else {
+        return String::new();
+    };
+    let mut out = String::new();
+    for part in list.nodes.iter() {
+        if let crate::checker::nodebuilder::NodeData::JSDocText(t) = &part.data {
+            out.push_str(&t.text.join(""));
+        } else if part.kind != tsox_frontend::ast::SyntaxKind::JSDocText {
+            break;
+        }
+    }
+    out.trim().to_string()
+}
+
+/// Go getDocumentationFromDeclaration 对 reparse @typedef 别名的整块文档：
+/// 块首注释 + 各标签 "*@name* — comments"（跳过 type/typedef/callback）
+fn jsdoc_block_doc(sf: &Arc<tsox_frontend::ast::SourceFile>, decl: &Arc<Node>) -> Option<String> {
+    let ranges = tsox_frontend::scanner::get_leading_comment_ranges(&sf.text, 0);
+    for range in ranges {
+        if !(range.pos <= decl.pos() && decl.end() <= range.end) {
+            continue;
+        }
+        let mut parser = tsox_frontend::parser::Parser::new(sf.text.clone());
+        let jsdoc = parser.parse_jsdoc_comment(range.pos, range.end, range.pos)?;
+        if jsdoc.kind != tsox_frontend::ast::SyntaxKind::JSDoc {
+            continue;
+        }
+        let crate::checker::nodebuilder::NodeData::JSDoc(d) = &jsdoc.data else {
+            continue;
+        };
+        let mut out = jsdoc_comment_text(Some(&d.comment));
+        if let Some(tags) = &d.tags {
+            for tag in tags.nodes.iter() {
+                if matches!(
+                    tag.kind,
+                    tsox_frontend::ast::SyntaxKind::JSDocTypeTag
+                        | tsox_frontend::ast::SyntaxKind::JSDocTypedefTag
+                        | tsox_frontend::ast::SyntaxKind::JSDocCallbackTag
+                ) {
+                    continue;
+                }
+                let Some(tag_name) = jsdoc_tag_name(tag) else {
+                    continue;
+                };
+                out.push_str("\n\n*@");
+                out.push_str(&tag_name);
+                out.push('*');
+                if matches!(
+                    tag.kind,
+                    tsox_frontend::ast::SyntaxKind::JSDocParameterTag
+                        | tsox_frontend::ast::SyntaxKind::JSDocPropertyTag
+                ) {
+                    if let crate::checker::nodebuilder::NodeData::JSDocParameterOrPropertyTag(p) =
+                        &tag.data
+                    {
+                        out.push_str(" `");
+                        out.push_str(p.name.text());
+                        out.push('`');
+                    }
+                }
+                let comments = jsdoc_tag_comment(tag);
+                if !comments.is_empty() {
+                    out.push(' ');
+                    if !comments.starts_with('-') {
+                        out.push_str("— ");
+                    }
+                    out.push_str(&comments);
+                }
+            }
+        }
+        let out = out.trim().to_string();
+        if !out.is_empty() {
+            return Some(out);
+        }
+    }
+    None
+}
+
+fn jsdoc_tag_name(tag: &Arc<Node>) -> Option<String> {
+    let name = match &tag.data {
+        crate::checker::nodebuilder::NodeData::JSDocUnknownTag(d) => &d.tag_name,
+        crate::checker::nodebuilder::NodeData::JSDocParameterOrPropertyTag(d) => &d.tag_name,
+        crate::checker::nodebuilder::NodeData::JSDocTemplateTag(d) => &d.tag_name,
+        crate::checker::nodebuilder::NodeData::JSDocReturnTag(d) => &d.tag_name,
+        crate::checker::nodebuilder::NodeData::JSDocTypeTag(d) => &d.tag_name,
+        crate::checker::nodebuilder::NodeData::JSDocTypedefTag(d) => &d.tag_name,
+        crate::checker::nodebuilder::NodeData::JSDocThrowsTag(d) => &d.tag_name,
+        crate::checker::nodebuilder::NodeData::JSDocSeeTag(d) => &d.tag_name,
+        crate::checker::nodebuilder::NodeData::JSDocDeprecatedTag(d) => &d.tag_name,
+        _ => return None,
+    };
+    Some(name.text().to_string())
+}
+
+fn jsdoc_tag_comment(tag: &Arc<Node>) -> String {
+    let comment = match &tag.data {
+        crate::checker::nodebuilder::NodeData::JSDocUnknownTag(d) => d.comment.as_ref(),
+        crate::checker::nodebuilder::NodeData::JSDocParameterOrPropertyTag(d) => d.comment.as_ref(),
+        crate::checker::nodebuilder::NodeData::JSDocTemplateTag(d) => d.comment.as_ref(),
+        crate::checker::nodebuilder::NodeData::JSDocReturnTag(d) => d.comment.as_ref(),
+        crate::checker::nodebuilder::NodeData::JSDocDeprecatedTag(d) => d.comment.as_ref(),
+        _ => None,
+    };
+    jsdoc_comment_text(comment)
 }

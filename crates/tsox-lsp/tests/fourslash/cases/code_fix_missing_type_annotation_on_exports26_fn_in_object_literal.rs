@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCodeFixAll"]
 #[test]
 fn code_fix_missing_type_annotation_on_exports26_fn_in_object_literal() {
@@ -15,6 +16,6 @@ export const extensions = {
        return actualValue === expectedValue
     }
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("codeFixMissingTypeAnnotationOnExports26_fn_in_object_literal", content);
     fourslash::unsupported("VerifyCodeFixAll"); // f.VerifyCodeFixAll(t, fourslash.VerifyCodeFixAllOptions{
 }

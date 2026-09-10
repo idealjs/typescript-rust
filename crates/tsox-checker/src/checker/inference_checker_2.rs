@@ -95,17 +95,37 @@ impl Checker {
         source: &Arc<Signature>,
         target: &Arc<Signature>,
     ) {
-        let param_count = source.parameters.len().min(target.parameters.len());
+        // Go applyToParameterTypes：非 rest 参数成对（源无 rest 时按源参数数截断），
+        // 目标带 rest 时用源在 rest 起点的展开类型对位（...t: T vs ...rest: infer R
+        // 推出 R = T[number][]）
+        let source_count = self.get_parameter_count(source);
+        let target_count = self.get_parameter_count(target);
+        let source_rest = self.get_effective_rest_type(source);
+        let target_rest = self.get_effective_rest_type(target);
+        let target_non_rest = target_count - usize::from(target_rest.is_some());
+        let param_count = if source_rest.is_some() {
+            target_non_rest
+        } else {
+            source_count.min(target_non_rest)
+        };
         for i in 0..param_count {
-            let source_param = &source.parameters[i];
-            let target_param = &target.parameters[i];
-            let st = self.get_type_of_symbol(source_param);
-            let tt = self.get_type_of_symbol(target_param);
+            let st = self.get_type_at_position(source, i);
+            let tt = self.get_type_at_position(target, i);
             let save_contra = state.contravariant;
             let save_biv = state.bivariant;
             state.contravariant = true;
             state.bivariant = false;
             self.infer_from_types(state, &tt, &st);
+            state.contravariant = save_contra;
+            state.bivariant = save_biv;
+        }
+        if let Some(target_rest_type) = target_rest {
+            let source_rest_at = self.source_rest_type_at(source, param_count);
+            let save_contra = state.contravariant;
+            let save_biv = state.bivariant;
+            state.contravariant = true;
+            state.bivariant = false;
+            self.infer_from_types(state, &target_rest_type, &source_rest_at);
             state.contravariant = save_contra;
             state.bivariant = save_biv;
         }
@@ -288,3 +308,4 @@ impl Checker {
     }
 
 }
+

@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCompletions"]
 #[test]
 fn completion_list_on_aliases2() {
@@ -37,12 +38,12 @@ v./*5*/;
 f./*6*/;
 a./*7*/;
 var tmp2: a./*7Type*/;"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("completionListOnAliases2", content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, []string{"1", "7"}, &fourslash.CompletionsExpectedList{
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, []string{"1Type", "7Type"}, &fourslash.CompletionsExpectedList{
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "2", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "3", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "4", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "5", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "6", &fourslash.CompletionsExpectedList{
+    fourslash::verify_completions_exact_at(&mut s, Some("3"), &["value"]);
+    fourslash::verify_completions_exact_at(&mut s, Some("4"), &["v"]);
+    fourslash::verify_completions_include_exclude_at(&mut s, Some("5"), &["toFixed"], &[]);
+    fourslash::verify_completions_include_exclude_at(&mut s, Some("6"), &["call"], &[]);
 }

@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyCompletions"]
+
 #[test]
 fn import_type_member_completions() {
     let content = r#"// @Filename: /ns.ts
@@ -39,14 +39,14 @@ type G = typeof import("./top")./*7*/
 type H = import("./top")./*8*/
 // @Filename: /usage9.ts
 type H = typeof import("./equals")./*9*/"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "2", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "3", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "4", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "5", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "6", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "7", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "8", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "9", &fourslash.CompletionsExpectedList{
+    let mut s = Session::new_for_test("importTypeMemberCompletions", content);
+    fourslash::verify_completions_exact_at(&mut s, Some("1"), &["Foo"]);
+    fourslash::verify_completions_exact_at(&mut s, Some("2"), &["Bar"]);
+    fourslash::verify_completions_exact_at(&mut s, Some("3"), &["a", "Baz"]);
+    fourslash::verify_completions_exact_at(&mut s, Some("4"), &["Foo"]);
+    fourslash::verify_completions_exact_at(&mut s, Some("5"), &["Bar"]);
+    fourslash::verify_completions_exact_at(&mut s, Some("6"), &["Bat", "Baz"]);
+    fourslash::verify_completions_exact_at(&mut s, Some("7"), &["a"]);
+    fourslash::verify_completions_exact_at(&mut s, Some("8"), &["Bat"]);
+    fourslash::verify_completions_exact_at(&mut s, Some("9"), &["bar", "prototype"]);
 }

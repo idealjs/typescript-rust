@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: f.MarkTestAsStradaServer()"]
 #[test]
 fn path_completions_package_json_imports_src_no_dist_wildcard6() {
@@ -27,7 +28,7 @@ export const index = 0;
 export const blah = 0;
 // @Filename: /home/src/workspaces/project/src/m.mts
 import { } from "/**/";"##;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("pathCompletionsPackageJsonImportsSrcNoDistWildcard6", content);
     // TODO: f.MarkTestAsStradaServer()
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

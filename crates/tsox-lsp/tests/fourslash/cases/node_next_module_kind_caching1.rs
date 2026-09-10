@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: f.MarkTestAsStradaServer()"]
 #[test]
 fn node_next_module_kind_caching1() {
@@ -31,7 +32,7 @@ helloWorld()
 export function helloWorld() {
     console.log('Hello, world!')
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("nodeNextModuleKindCaching1", content);
     // TODO: f.MarkTestAsStradaServer()
     fourslash::go_to_marker(&mut s, "");
     fourslash::verify_number_of_errors_in_current_file(&mut s, 1);

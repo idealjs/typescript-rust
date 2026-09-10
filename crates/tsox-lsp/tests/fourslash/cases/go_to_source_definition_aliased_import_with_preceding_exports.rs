@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: // When importing { original as alias }, the module specifie"]
 #[test]
 fn go_to_source_aliased_import_with_preceding_exports() {
@@ -19,7 +20,7 @@ export function /*target*/original() { return "ok"; }
 // @Filename: /home/src/workspaces/project/index.ts
 import { original as /*aliasedImport*/renamed } from "pkg";
 renamed();"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("goToSourceAliasedImportWithPrecedingExports", content);
     fourslash::unsupported("VerifyBaselineGoToSourceDefinition"); // f.VerifyBaselineGoToSourceDefinition(t, "aliasedImport")
 }
 
@@ -39,6 +40,6 @@ export function unrelated() {}
 export function /*target*/original() { return "ok"; }
 // @Filename: /home/src/workspaces/project/reexport.ts
 export { original as /*reExportAlias*/renamed } from "pkg";"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("goToSourceReExportAliasWithPrecedingExports", content);
     fourslash::unsupported("VerifyBaselineGoToSourceDefinition"); // f.VerifyBaselineGoToSourceDefinition(t, "reExportAlias")
 }

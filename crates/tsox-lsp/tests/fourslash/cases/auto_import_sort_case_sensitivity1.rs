@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: t.Skip('Known failing fourslash test')"]
 #[test]
 fn auto_import_sort_case_sensitivity1() {
@@ -23,7 +24,7 @@ a/*0*/
 import { A, a, B, b } from "./exports1";
 import { E } from "./exports2";
 d/*1*/"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("autoImportSortCaseSensitivity1", content);
     fourslash::go_to_marker(&mut s, "0");
     fourslash::unsupported("VerifyImportFixAtPosition"); // f.VerifyImportFixAtPosition(t, []string{
     fourslash::unsupported("VerifyImportFixAtPosition"); // f.VerifyImportFixAtPosition(t, []string{

@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineGoToTypeDefinition"]
 #[test]
 fn go_to_type_definition_primitives() {
@@ -13,6 +14,6 @@ w./*reference1*/a;
 /*reference2*/x;
 /*reference3*/y;
 /*reference4*/y;"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("goToTypeDefinitionPrimitives", content);
     fourslash::unsupported("VerifyBaselineGoToTypeDefinition"); // f.VerifyBaselineGoToTypeDefinition(t, "reference1", "reference2", "reference3", "reference4")
 }

@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCompletions"]
 #[test]
 fn basic_js_doc_completions() {
@@ -44,10 +45,10 @@ function baz(x = 0) {
   return x * 2;
 }
 "#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("basicJSDocCompletions", content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "2", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "3", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "4", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "5", &fourslash.CompletionsExpectedList{
+    fourslash::verify_completions_include_exclude_at(&mut s, Some("2"), &["@param", "@param {*} x "], &[]);
+    fourslash::verify_completions_include_exclude_at(&mut s, Some("3"), &["@param", "@param {object} param1 \\n* @param {*} param1.y "], &[]);
+    fourslash::verify_completions_include_exclude_at(&mut s, Some("4"), &["number"], &[]);
+    fourslash::verify_completions_include_exclude_at(&mut s, Some("5"), &["param {number} [x=0] "], &[]);
 }

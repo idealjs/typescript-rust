@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.FormatDocument"]
 #[test]
 fn formatting_q_mark() {
@@ -7,7 +8,7 @@ fn formatting_q_mark() {
 /*1*/    foo?     ();
 /*2*/    foo?             <T>();
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("formattingQMark", content);
     fourslash::unsupported("FormatDocument"); // f.FormatDocument(t, "")
     fourslash::go_to_marker(&mut s, "1");
     fourslash::verify_current_line_content(&mut s, r#"    foo?();"#);

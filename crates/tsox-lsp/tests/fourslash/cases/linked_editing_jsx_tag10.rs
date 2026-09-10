@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineLinkedEditing"]
 #[test]
 fn linked_editing_jsx_tag10() {
@@ -35,6 +36,6 @@ const jsx = </*13*/> //*13a*/>;
 const jsx = </*14*/> </*14a*/div> <//*14b*/> <//*14c*/div>;
 // @Filename: /jsx15.tsx
 const jsx = </*15*/div> </*15a*/> <//*15b*/div> <//*15c*/>;"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("linkedEditingJsxTag10", content);
     fourslash::unsupported("VerifyBaselineLinkedEditing"); // f.VerifyBaselineLinkedEditing(t)
 }

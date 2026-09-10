@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCompletions"]
 #[test]
 fn completions_class_member_import_type_node_parameter3() {
@@ -18,6 +19,6 @@ import { Cls } from "./other/cls.js";
 export declare class Derived extends Cls {
   /*1*/
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("completionsClassMemberImportTypeNodeParameter3", content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
 }

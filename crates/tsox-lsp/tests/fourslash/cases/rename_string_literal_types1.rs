@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineRenameAtRangesWithText"]
 #[test]
 fn rename_string_literal_types1() {
@@ -12,6 +13,6 @@ fn rename_string_literal_types1() {
 function animate(o: AnimationOptions) { }
 
 animate({ deltaX: 100, deltaY: 100, easing: "[|ease-in-out|]" });"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("renameStringLiteralTypes1", content);
     fourslash::unsupported("VerifyBaselineRenameAtRangesWithText"); // f.VerifyBaselineRenameAtRangesWithText(t, nil /*preferences*/, "ease-in-out")
 }

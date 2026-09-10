@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineGoToDefinition"]
 #[test]
 fn go_to_definition_constructor_overloads() {
@@ -17,6 +18,6 @@ class Extended extends ConstructorOverload {
 }
 var extended1 = new [|/*extendedRef1*/Extended|]();
 var extended2 = new [|/*extendedRef2*/Extended|]("foo");"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("goToDefinitionConstructorOverloads", content);
     fourslash::unsupported("VerifyBaselineGoToDefinition"); // f.VerifyBaselineGoToDefinition(t, true, "constructorOverloadReference1", "constructorOverloadReferen
 }

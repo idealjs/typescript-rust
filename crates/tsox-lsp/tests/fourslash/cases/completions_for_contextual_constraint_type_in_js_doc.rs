@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: //"]
 #[test]
 fn completions_for_contextual_constraint_type_in_js_doc() {
@@ -20,7 +21,7 @@ let x;
 
 /** @type {a.Blah<{ a: /*2*/ }>} */
 "#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("completionsForContextualConstraintTypeInJsDoc", content);
     // TODO: // These examples both would panic in retrieving the symbols
     // TODO: // of property signature nodes within JSDoc types.
     // TODO: // In both cases, we'd have a JSDoc property signature that has no symbol.

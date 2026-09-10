@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCompletions"]
 #[test]
 fn completion_list_before_keyword() {
@@ -18,6 +19,6 @@ TypeModule1./*ValueReference*/
 namespace TypeModule3 {
     export class Test3 {}
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("completionListBeforeKeyword", content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, f.Markers(), &fourslash.CompletionsExpectedList{
 }

@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: f.MarkTestAsStradaServer()"]
 #[test]
 fn content_mapper_declaration_map_navigation() {
@@ -30,7 +31,7 @@ export declare const component: ComponentProps;
 import { component } from "component";
 /*use*/component.label;
 "#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("contentMapperDeclarationMapNavigation", content);
     // TODO: f.MarkTestAsStradaServer()
     fourslash::unsupported("VerifyBaselineGoToDefinition"); // f.VerifyBaselineGoToDefinition(t, true, "use")
     fourslash::unsupported("VerifyBaselineFindAllReferences"); // f.VerifyBaselineFindAllReferences(t, "use")

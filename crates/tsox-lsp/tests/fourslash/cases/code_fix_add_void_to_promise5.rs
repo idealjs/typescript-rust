@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCodeFixNotAvailable"]
 #[test]
 fn code_fix_add_void_to_promise5() {
@@ -7,6 +8,6 @@ fn code_fix_add_void_to_promise5() {
 // @lib: es2015
 // @strict: true
 const p4: Promise<number> = new Promise(resolve => resolve());"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("codeFixAddVoidToPromise5", content);
     fourslash::unsupported("VerifyCodeFixNotAvailable"); // f.VerifyCodeFixNotAvailable(t)
 }

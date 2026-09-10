@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineHover"]
 #[test]
 fn quick_info_typedef_tag() {
@@ -27,6 +28,6 @@ g/*2*/()
  */
 function h(keep) { }
 h/*3*/({ nope: 1 })"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("quickInfoTypedefTag", content);
     fourslash::unsupported("VerifyBaselineHover"); // f.VerifyBaselineHover(t)
 }

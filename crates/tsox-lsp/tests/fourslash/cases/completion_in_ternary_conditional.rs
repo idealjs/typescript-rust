@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: // Test marker 1 - should have Foo preselected in simple cal"]
 #[test]
 fn completion_in_ternary_conditional() {
@@ -15,7 +16,7 @@ const a = '';
 foo(/*1*/);
 bar(a, a == '' ? /*2*/);
 bar(a, a == '' ? /*3*/ : /*4*/);"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("completionInTernaryConditional", content);
     // TODO: // Test marker 1 - should have Foo preselected in simple call
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
     // TODO: // Test marker 2 - should have Foo preselected after ? in incomplete ternary

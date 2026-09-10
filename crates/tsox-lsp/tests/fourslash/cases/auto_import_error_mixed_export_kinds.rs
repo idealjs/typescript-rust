@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: // Verify we don't crash from the mixed exports"]
 #[test]
 fn auto_import_error_mixed_export_kinds() {
@@ -14,7 +15,7 @@ export { bar as foo };
 // @Filename: b.ts
 foo/**/
 "#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("autoImportErrorMixedExportKinds", content);
     // TODO: // Verify we don't crash from the mixed exports
     fourslash::unsupported("BaselineAutoImportsCompletions"); // f.BaselineAutoImportsCompletions(t, []string{""})
 }

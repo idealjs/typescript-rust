@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineFindAllReferences"]
 #[test]
 fn references_for_class_local() {
@@ -20,6 +21,6 @@ class foo {
         var n = 12;
     }
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("referencesForClassLocal", content);
     fourslash::unsupported("VerifyBaselineFindAllReferences"); // f.VerifyBaselineFindAllReferences(t, "1", "2", "3", "4")
 }

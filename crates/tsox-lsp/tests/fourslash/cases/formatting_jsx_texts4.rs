@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.FormatDocument"]
 #[test]
 fn formatting_jsx_texts4() {
@@ -9,14 +10,11 @@ const a = <ns: foobar   x : test1   x :test2="string"  x:test3={true?1:0}  />;
 
 return a;
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("formattingJsxTexts4", content);
     fourslash::unsupported("FormatDocument"); // f.FormatDocument(t, "")
-    fourslash::verify_current_file_content(
-        &mut s,
-        r#"function foo() {
+    fourslash::verify_current_file_content(&mut s, r#"function foo() {
     const a = <ns:foobar x:test1 x:test2="string" x:test3={true ? 1 : 0} />;
 
     return a;
-}"#,
-    );
+}"#);
 }

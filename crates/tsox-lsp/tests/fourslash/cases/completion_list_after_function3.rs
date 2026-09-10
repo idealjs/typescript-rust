@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCompletions"]
 #[test]
 fn completion_list_after_function3() {
@@ -7,7 +8,7 @@ fn completion_list_after_function3() {
 var x1 = (a: number) => { }/*1*/;
 
 var x2 = (b: number) => {/*2*/ };"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("completionListAfterFunction3", content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "2", &fourslash.CompletionsExpectedList{
+    fourslash::verify_completions_include_exclude_at(&mut s, Some("2"), &["b"], &[]);
 }

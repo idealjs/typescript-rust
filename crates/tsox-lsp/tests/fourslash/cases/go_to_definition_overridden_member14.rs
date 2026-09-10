@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineGoToDefinition"]
 #[test]
 fn go_to_definition_overridden_member14() {
@@ -11,6 +12,6 @@ class B extends A {}
 class C extends B {
     [|/*1*/override|] m() {}
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("goToDefinitionOverriddenMember14", content);
     fourslash::unsupported("VerifyBaselineGoToDefinition"); // f.VerifyBaselineGoToDefinition(t, true, "1")
 }

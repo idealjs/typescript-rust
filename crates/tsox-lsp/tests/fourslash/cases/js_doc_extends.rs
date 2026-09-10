@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: t.Skip('Known failing fourslash test')"]
 #[test]
 fn js_doc_extends() {
@@ -19,7 +20,7 @@ class MyStringThing extends Thing {
 declare class Thing<T> {
     mine: T;
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("jsDocExtends", content);
     fourslash::go_to_marker(&mut s, "");
     fourslash::unsupported("VerifyQuickInfoIs"); // f.VerifyQuickInfoIs(t, "(local var) x: string", "")
 }

@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineFindAllReferences"]
 #[test]
 fn find_all_refs_object_binding_element_property_name02() {
@@ -10,6 +11,6 @@ fn find_all_refs_object_binding_element_property_name02() {
 
 var foo: I;
 /*2*/var { /*3*/property1: {} } = foo;"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("findAllRefsObjectBindingElementPropertyName02", content);
     fourslash::unsupported("VerifyBaselineFindAllReferences"); // f.VerifyBaselineFindAllReferences(t, "1", "2", "3")
 }

@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: f.MarkTestAsStradaServer()"]
 #[test]
 fn references_in_empty_file_with_multiple_projects() {
@@ -12,7 +13,7 @@ fn references_in_empty_file_with_multiple_projects() {
 { "files": ["b.ts"], "compilerOptions": { "lib": ["es5"] } }
 // @Filename: /home/src/workspaces/project/b/b.ts
 /*2*/;"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("referencesInEmptyFileWithMultipleProjects", content);
     // TODO: f.MarkTestAsStradaServer()
     fourslash::unsupported("VerifyBaselineFindAllReferences"); // f.VerifyBaselineFindAllReferences(t, "1", "2")
 }

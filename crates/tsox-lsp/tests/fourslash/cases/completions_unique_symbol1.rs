@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCompletions"]
 #[test]
 fn completions_unique_symbol1() {
@@ -17,6 +18,6 @@ namespace N {
 
 declare const i: N.I;
 i[|./**/|];"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("completionsUniqueSymbol1", content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

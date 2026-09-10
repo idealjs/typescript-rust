@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyImportFixAtPosition"]
 #[test]
 fn import_name_code_fix_new_import_file_quote_style_mixed0() {
@@ -13,6 +14,6 @@ export function f1() {}
 export var v2 = 6;
 // @Filename: module3.ts
 export var v3 = 6;"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("importNameCodeFixNewImportFileQuoteStyleMixed0", content);
     fourslash::unsupported("VerifyImportFixAtPosition"); // f.VerifyImportFixAtPosition(t, []string{
 }

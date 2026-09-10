@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineGoToDefinition"]
 #[test]
 fn go_to_definition_class_constructors() {
@@ -29,6 +30,6 @@ class HasConstructor extends Base {
     readonly name: string = '';
 }
 const hasConstructor = new [|/*HasConstructor*/HasConstructor|](cArg)"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("goToDefinitionClassConstructors", content);
     fourslash::unsupported("VerifyBaselineGoToDefinition"); // f.VerifyBaselineGoToDefinition(t, true, "Derived", "SameFile", "HasConstructor", "Base")
 }

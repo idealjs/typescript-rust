@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.BaselineAutoImportsCompletions"]
 #[test]
 fn auto_import_package_json_imports_hash_slash_nodenext() {
@@ -24,7 +25,7 @@ fn auto_import_package_json_imports_hash_slash_nodenext() {
 export const entity = 1;
 // @Filename: /src/features/deep/consumer.ts
 entit/**/"##;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("autoImportPackageJsonImportsHashSlashNodenext", content);
     fourslash::unsupported("BaselineAutoImportsCompletions"); // f.BaselineAutoImportsCompletions(t, []string{""})
 }
 
@@ -47,6 +48,6 @@ fn auto_import_package_json_imports_hash_slash_node16() {
 export const entity = 1;
 // @Filename: /src/consumer.ts
 entit/**/"##;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("autoImportPackageJsonImportsHashSlashNode16", content);
     fourslash::unsupported("BaselineAutoImportsCompletions"); // f.BaselineAutoImportsCompletions(t, []string{""})
 }

@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: }"]
 #[test]
 fn completion_list_in_type_literal_in_type_parameter6() {
@@ -13,7 +14,7 @@ interface Bar<T extends Foo> {
 }
 
 var foobar: Bar<{ one: string } | {/**/"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
+    let mut s = Session::new_for_test("completionListInTypeLiteralInTypeParameter6", content);
+    fourslash::verify_completions_exact_at(&mut s, Some(""), &["one", "two"]);
     // TODO: }
 }

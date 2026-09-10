@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCompletions"]
 #[test]
 fn jsdoc_typedef_tag_type_expression_completion() {
@@ -33,13 +34,13 @@ Foo./*valueMemberOfFoo*/;
   * @type { {/*propertyName*/ageX: number} }
   */
 var y;"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("jsdocTypedefTagTypeExpressionCompletion", content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "type1", &fourslash.CompletionsExpectedList{
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "typeFooMember", &fourslash.CompletionsExpectedList{
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "NamespaceMember", &fourslash.CompletionsExpectedList{
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "globalValue", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "valueMemberOfSomeType", nil)
+    fourslash::verify_completions_empty_at(&mut s, Some("valueMemberOfSomeType"));
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "valueMemberOfFooInstance", &fourslash.CompletionsExpectedList{
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "valueMemberOfFoo", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "propertyName", nil)
+    fourslash::verify_completions_empty_at(&mut s, Some("propertyName"));
 }

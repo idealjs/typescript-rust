@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineGoToDefinition"]
 #[test]
 fn as_const_refs_no_errors3() {
@@ -8,7 +9,7 @@ fn as_const_refs_no_errors3() {
 class Tex {
     type = (/** @type {/**/const} */'Text');
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("asConstRefsNoErrors3", content);
     fourslash::unsupported("VerifyBaselineGoToDefinition"); // f.VerifyBaselineGoToDefinition(t, true, "")
-    fourslash::verify_no_errors(&mut s);
+    fourslash::verify_no_errors(&mut s, );
 }

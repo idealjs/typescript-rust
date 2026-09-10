@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineHover"]
 #[test]
 fn hover_mapped_type_property_js_doc() {
@@ -24,7 +25,7 @@ import { A } from './a';
 
 A.X/*2*/;
 "#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("hoverMappedTypePropertyJSDoc", content);
     fourslash::unsupported("VerifyBaselineHover"); // f.VerifyBaselineHover(t)
 }
 
@@ -34,6 +35,6 @@ fn hover_mapped_type_without_property_type() {
     let content = r#"
 declare function uhoh/*1*/<T>(x: { [K in keyof T] }): void;
 "#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("hoverMappedTypeWithoutPropertyType", content);
     fourslash::unsupported("VerifyBaselineHover"); // f.VerifyBaselineHover(t)
 }

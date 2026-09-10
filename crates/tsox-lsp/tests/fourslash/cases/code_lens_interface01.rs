@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineCodeLens"]
 #[test]
 fn code_lens_interface01() {
@@ -38,6 +39,6 @@ const p: Pointable = {
   },
 };
 "#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("codeLensInterface01", content);
     fourslash::unsupported("VerifyBaselineCodeLens"); // f.VerifyBaselineCodeLens(t, &lsutil.UserPreferences{
 }

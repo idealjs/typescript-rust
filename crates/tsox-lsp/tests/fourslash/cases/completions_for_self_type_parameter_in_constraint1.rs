@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCompletions"]
 #[test]
 fn completions_for_self_type_parameter_in_constraint1() {
@@ -10,6 +11,6 @@ fn completions_for_self_type_parameter_in_constraint1() {
 declare function createMachine<Config extends StateMachine</*1*/>>(
   config: Config,
 ): void;"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("completionsForSelfTypeParameterInConstraint1", content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, []string{"1"}, &fourslash.CompletionsExpectedList{
 }

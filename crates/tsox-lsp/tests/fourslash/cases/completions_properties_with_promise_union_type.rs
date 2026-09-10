@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCompletions"]
 #[test]
 fn completions_properties_with_promise_union_type() {
@@ -13,6 +14,6 @@ fakeTest(() => {
     /*a*/
   };
 });"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("completionsPropertiesWithPromiseUnionType", content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, []string{"a"}, &fourslash.CompletionsExpectedList{
 }

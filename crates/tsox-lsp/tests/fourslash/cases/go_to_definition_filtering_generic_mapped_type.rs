@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineGoToDefinition"]
 #[test]
 fn go_to_definition_filtering_generic_mapped_type() {
@@ -24,6 +25,6 @@ const obj2 = omit2(obj, {
 });
 
 obj2.[|/*ref*/id|];"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("goToDefinition_filteringGenericMappedType", content);
     fourslash::unsupported("VerifyBaselineGoToDefinition"); // f.VerifyBaselineGoToDefinition(t, true, "ref")
 }

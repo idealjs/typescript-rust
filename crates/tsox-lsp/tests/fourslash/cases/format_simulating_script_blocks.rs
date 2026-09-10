@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: opts640 := f.GetOptions()"]
 #[test]
 fn format_simulating_script_blocks() {
@@ -21,7 +22,7 @@ fn format_simulating_script_blocks() {
             var f = 1;
         /*end1*/
 /* END EXTERNAL SOURCE */"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("formatSimulatingScriptBlocks", content);
     // TODO: opts640 := f.GetOptions()
     // TODO: opts640.FormatCodeSettings.BaseIndentSize = 12
     fourslash::unsupported("Configure"); // f.Configure(t, opts640)
@@ -33,9 +34,7 @@ fn format_simulating_script_blocks() {
     fourslash::unsupported("Configure"); // f.Configure(t, opts794)
     fourslash::unsupported("FormatSelection"); // f.FormatSelection(t, "begin4", "end4")
     fourslash::unsupported("FormatSelection"); // f.FormatSelection(t, "begin5", "end5")
-    fourslash::verify_current_file_content(
-        &mut s,
-        r#"/* BEGIN EXTERNAL SOURCE */
+    fourslash::verify_current_file_content(&mut s, r#"/* BEGIN EXTERNAL SOURCE */
 
                         var a = 1;
                         alert("/********/");
@@ -52,6 +51,5 @@ fn format_simulating_script_blocks() {
             var e = "/********/";
             var f = 1;
 
-/* END EXTERNAL SOURCE */"#,
-    );
+/* END EXTERNAL SOURCE */"#);
 }

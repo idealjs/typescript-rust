@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: endRange := f.MarkerByName(t, '3').LSPosition"]
 #[test]
 fn linked_editing_jsx_tag7() {
@@ -17,7 +18,7 @@ const jsx3 = (
     <>/*7*/
     </>
 );/*e*/"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("linkedEditingJsxTag7", content);
     // TODO: startRange := f.MarkerByName(t, "0").LSPosition
     // TODO: endRange := f.MarkerByName(t, "3").LSPosition
     // TODO: linkedCursors1 := []lsproto.Range{

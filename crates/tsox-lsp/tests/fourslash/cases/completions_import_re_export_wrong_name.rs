@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyApplyCodeActionFromCompletion"]
 #[test]
 fn completions_import_re_export_wrong_name() {
@@ -10,7 +11,7 @@ export const x = 0;
 export { x as y } from "./a";
 // @Filename: /c.ts
 /**/"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("completionsImport_reExport_wrongName", content);
     fourslash::go_to_marker(&mut s, "");
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
     fourslash::unsupported("VerifyApplyCodeActionFromCompletion"); // f.VerifyApplyCodeActionFromCompletion(t, new(""), &fourslash.ApplyCodeActionFromCompletionOptions{

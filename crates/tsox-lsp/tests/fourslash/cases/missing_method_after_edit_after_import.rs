@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.DeleteAtCaret"]
 #[test]
 fn missing_method_after_edit_after_import() {
@@ -10,7 +11,7 @@ fn missing_method_after_edit_after_import() {
 import f = /*foo*/foo;
 
 /*delete*/var x;"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("missingMethodAfterEditAfterImport", content);
     fourslash::verify_quick_info_at(&mut s, "foo", "namespace foo", "");
     fourslash::go_to_marker(&mut s, "delete");
     fourslash::unsupported("DeleteAtCaret"); // f.DeleteAtCaret(t, 6)

@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: // findContainingModuleSpecifier handles require() calls."]
 #[test]
 fn go_to_source_require_call() {
@@ -16,7 +17,7 @@ exports./*target*/helper = function() { return "ok"; };
 // @Filename: /home/src/workspaces/project/index.js
 const { /*importName*/helper } = require("pkg");
 helper/*usage*/();"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("goToSourceRequireCall", content);
     fourslash::unsupported("VerifyBaselineGoToSourceDefinition"); // f.VerifyBaselineGoToSourceDefinition(t, "importName", "usage")
 }
 
@@ -38,6 +39,6 @@ async function main() {
     const mod = await import("pkg");
     mod./*usage*/dynHelper();
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("goToSourceDynamicImport", content);
     fourslash::unsupported("VerifyBaselineGoToSourceDefinition"); // f.VerifyBaselineGoToSourceDefinition(t, "usage")
 }

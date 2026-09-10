@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineFindAllReferences"]
 #[test]
 fn find_all_refs_js_this_property_assignment2() {
@@ -27,6 +28,6 @@ infer({
         },
     }
 });"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("findAllRefsJsThisPropertyAssignment2", content);
     fourslash::unsupported("VerifyBaselineFindAllReferences"); // f.VerifyBaselineFindAllReferences(t, "1", "2")
 }

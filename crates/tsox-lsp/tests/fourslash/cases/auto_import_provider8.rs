@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: f.MarkTestAsStradaServer()"]
 #[test]
 fn auto_import_provider8() {
@@ -23,7 +24,7 @@ export class MyClass2 {}
 
 const a = new MyClass/*1*/();
 const b = new MyClass2/*2*/();"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("autoImportProvider8", content);
     // TODO: f.MarkTestAsStradaServer()
     fourslash::go_to_marker(&mut s, "1");
     // TODO: opts1158 := f.GetOptions()

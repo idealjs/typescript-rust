@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: t.Skip('Known failing fourslash test')"]
 #[test]
 fn tsx_quick_info6() {
@@ -14,17 +15,7 @@ function Bar<T extends {prop: number}>(arg: T) {
     let a2 = <ComponentSpecific1 {...arg} ignore-prop={10} />;  // U is number
     let a3 = <Component/*2*/Specific {...arg} prop="hello" />;   // U is "hello"
 }"#;
-    let mut s = Session::new(content);
-    fourslash::verify_quick_info_at(
-        &mut s,
-        "1",
-        "function ComponentSpecific<number>(l: {\n    prop: number;\n}): JSX.Element",
-        "",
-    );
-    fourslash::verify_quick_info_at(
-        &mut s,
-        "2",
-        "function ComponentSpecific<never>(l: {\n    prop: never;\n}): JSX.Element",
-        "",
-    );
+    let mut s = Session::new_for_test("tsxQuickInfo6", content);
+    fourslash::verify_quick_info_at(&mut s, "1", "function ComponentSpecific<number>(l: {\n    prop: number;\n}): JSX.Element", "");
+    fourslash::verify_quick_info_at(&mut s, "2", "function ComponentSpecific<never>(l: {\n    prop: never;\n}): JSX.Element", "");
 }

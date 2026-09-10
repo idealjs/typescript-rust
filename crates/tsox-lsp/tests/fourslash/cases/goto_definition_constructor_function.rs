@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineGoToDefinition"]
 #[test]
 fn goto_definition_constructor_function() {
@@ -15,6 +16,6 @@ StringStreamm.prototype = {
 function runMode () {
 new [|/*start*/StringStreamm|]()
 };"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("gotoDefinitionConstructorFunction", content);
     fourslash::unsupported("VerifyBaselineGoToDefinition"); // f.VerifyBaselineGoToDefinition(t, true, "start")
 }

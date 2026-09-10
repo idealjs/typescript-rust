@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: }"]
 #[test]
 fn formattingof_single_line_block_constructs() {
@@ -15,7 +16,7 @@ function foo()/*8*/{{}}
 (function()/*10*/{});
 (() =>/*11*/{});
 var x :/*12*/{};"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("formattingofSingleLineBlockConstructs", content);
     fourslash::unsupported("FormatDocument"); // f.FormatDocument(t, "")
     fourslash::go_to_marker(&mut s, "1");
     fourslash::verify_current_line_content(&mut s, r#"namespace InternalModule { }"#);

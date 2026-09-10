@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineHoverWithVerbosity"]
 #[test]
 fn quickinfo_verbosity_namespace_anonymous_class_heritage1() {
@@ -12,6 +13,6 @@ namespace NS/*1*/ {
     }
 }
 "#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("quickinfoVerbosityNamespaceAnonymousClassHeritage1", content);
     fourslash::unsupported("VerifyBaselineHoverWithVerbosity"); // f.VerifyBaselineHoverWithVerbosity(t, map[string][]int{"1": {0, 1}})
 }

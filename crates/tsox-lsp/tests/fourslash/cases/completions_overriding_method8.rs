@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyApplyCodeActionFromCompletion"]
 #[test]
 fn completions_overriding_method8() {
@@ -14,7 +15,7 @@ import { Base } from "./types2";
 export class C implements Base {
   /**/
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("completionsOverridingMethod8", content);
     fourslash::go_to_marker(&mut s, "");
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
     fourslash::unsupported("VerifyApplyCodeActionFromCompletion"); // f.VerifyApplyCodeActionFromCompletion(t, new(""), &fourslash.ApplyCodeActionFromCompletionOptions{

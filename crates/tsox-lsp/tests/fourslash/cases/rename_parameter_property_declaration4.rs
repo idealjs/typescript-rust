@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineRename"]
 #[test]
 fn rename_parameter_property_declaration4() {
@@ -8,6 +9,6 @@ fn rename_parameter_property_declaration4() {
         let myProtectedParam = [|protectedParam|];
     }
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("renameParameterPropertyDeclaration4", content);
     fourslash::unsupported("VerifyBaselineRename"); // f.VerifyBaselineRename(t, nil /*preferences*/, f.Ranges()[1], f.Ranges()[2])
 }

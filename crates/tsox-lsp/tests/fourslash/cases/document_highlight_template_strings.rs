@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineDocumentHighlights"]
 #[test]
 fn document_highlight_template_strings() {
@@ -16,6 +17,6 @@ class C {
        }
    }
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("documentHighlightTemplateStrings", content);
     fourslash::unsupported("VerifyBaselineDocumentHighlights"); // f.VerifyBaselineDocumentHighlights(t, nil /*preferences*/, f.Ranges()[2])
 }

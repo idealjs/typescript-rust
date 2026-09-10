@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCompletions"]
 #[test]
 fn completion_list_for_object_spread() {
@@ -22,7 +23,7 @@ let spreadUndefined: { a: number } =
     { a: 7, ...undefined }
 spreadNull./*3*/a;
 spreadUndefined./*4*/a;"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("completionListForObjectSpread", content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "2", &fourslash.CompletionsExpectedList{
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, []string{"3", "4"}, &fourslash.CompletionsExpectedList{

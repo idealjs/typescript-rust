@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineGoToDefinition"]
 #[test]
 fn go_to_definition_await4() {
@@ -8,6 +9,6 @@ fn go_to_definition_await4() {
       [|/*start*/await|] Promise.resolve(0);
     }
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("goToDefinitionAwait4", content);
     fourslash::unsupported("VerifyBaselineGoToDefinition"); // f.VerifyBaselineGoToDefinition(t, true, "start")
 }

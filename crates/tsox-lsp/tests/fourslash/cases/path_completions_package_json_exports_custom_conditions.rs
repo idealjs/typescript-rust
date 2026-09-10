@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCompletions"]
 #[test]
 fn path_completions_package_json_exports_custom_conditions() {
@@ -18,6 +19,6 @@ fn path_completions_package_json_exports_custom_conditions() {
 export const index = 0;
 // @Filename: /index.ts
 import { } from "foo//**/";"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("pathCompletionsPackageJsonExportsCustomConditions", content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

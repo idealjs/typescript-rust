@@ -74,9 +74,25 @@ impl Binder {
                 return true;
             }
             SyntaxKind::CallExpression => {
+                if matches!(
+                    crate::binder::get_assignment_declaration_kind(node),
+                    crate::binder::bind_js_assignment_declarations::JsDeclarationKind::ObjectDefinePropertyExports
+                ) {
+                    self.bind_exports_or_object_define_property(node);
+                }
                 self.bind_call_expression_flow(node);
             }
             SyntaxKind::BinaryExpression => {
+                match crate::binder::get_assignment_declaration_kind(node) {
+                    crate::binder::bind_js_assignment_declarations::JsDeclarationKind::ModuleExports => {
+                        self.bind_module_exports_assignment(node);
+                    }
+                    crate::binder::bind_js_assignment_declarations::JsDeclarationKind::ExportsProperty => {
+                        self.bind_exports_or_object_define_property(node);
+                    }
+                    _ => {}
+                }
+
                 self.bind_this_property_assignment(node);
 
                 self.collect_expando_assignment(node);

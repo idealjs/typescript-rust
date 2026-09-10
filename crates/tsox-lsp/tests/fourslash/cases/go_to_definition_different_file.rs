@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineGoToDefinition"]
 #[test]
 fn go_to_definition_different_file() {
@@ -15,6 +16,6 @@ module /*remoteModuleDefinition*/remoteModule{ export var foo = 1;}
 var foo = new /*remoteClassReference*/remoteClass();
 class fooCls implements /*remoteInterfaceReference*/remoteInterface { }
 var fooVar = /*remoteModuleReference*/remoteModule.foo;"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("goToDefinitionDifferentFile", content);
     fourslash::unsupported("VerifyBaselineGoToDefinition"); // f.VerifyBaselineGoToDefinition(t, false, "remoteVariableReference", "remoteFunctionReference", "remo
 }

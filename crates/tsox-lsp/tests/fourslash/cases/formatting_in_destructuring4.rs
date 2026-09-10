@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: opts198 := f.GetOptions()"]
 #[test]
 fn formatting_in_destructuring4() {
@@ -7,7 +8,7 @@ fn formatting_in_destructuring4() {
 /*2*/    a,
 /*3*/    b,
 /*4*/} = { a: 1, b: 2 };"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("formattingInDestructuring4", content);
     // TODO: opts198 := f.GetOptions()
     // TODO: opts198.FormatCodeSettings.InsertSpaceAfterOpeningAndBeforeClosingNonemptyBraces = core.TSFalse
     fourslash::unsupported("Configure"); // f.Configure(t, opts198)

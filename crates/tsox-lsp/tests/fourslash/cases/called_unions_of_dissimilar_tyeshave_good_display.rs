@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifySignatureHelp"]
 #[test]
 fn called_unions_of_dissimilar_tyeshave_good_display() {
@@ -45,7 +46,7 @@ declare const callableThing5:
 
 callableThing5(/*5*/1)
 "#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("calledUnionsOfDissimilarTyeshaveGoodDisplay", content);
     fourslash::go_to_marker(&mut s, "1");
     fourslash::unsupported("VerifySignatureHelp"); // f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{Text: "callableThing1(o1: { x: number;
     fourslash::go_to_marker(&mut s, "2");

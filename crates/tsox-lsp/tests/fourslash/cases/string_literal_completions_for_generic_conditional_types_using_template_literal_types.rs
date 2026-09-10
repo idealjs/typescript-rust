@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCompletions"]
 #[test]
 fn string_literal_completions_for_generic_conditional_types_using_template_literal_types() {
@@ -11,6 +12,6 @@ fn string_literal_completions_for_generic_conditional_types_using_template_liter
 declare function consumer<K extends string>(path: PathOf<{a: string, b: {c: string}}, K>) : number;
 
 consumer('b./*ts*/')"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("stringLiteralCompletionsForGenericConditionalTypesUsingTemplateLiteralTypes", content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, []string{"ts"}, &fourslash.CompletionsExpectedList{
 }

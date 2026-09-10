@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: t.Skip('Known failing fourslash test')"]
 #[test]
 fn allow_late_bound_symbols_overwrite_early_bound_symbols() {
@@ -13,6 +14,6 @@ interface T0 {
     [prop]: number;
     abc: number;
 }"#;
-    let mut s = Session::new(content);
-    fourslash::verify_no_errors(&mut s);
+    let mut s = Session::new_for_test("allowLateBoundSymbolsOverwriteEarlyBoundSymbols", content);
+    fourslash::verify_no_errors(&mut s, );
 }

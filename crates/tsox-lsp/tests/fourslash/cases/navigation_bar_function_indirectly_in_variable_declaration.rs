@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineDocumentSymbol"]
 #[test]
 fn navigation_bar_function_indirectly_in_variable_declaration() {
@@ -15,6 +16,6 @@ b = {
         var d;
     }
 };"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("navigationBarFunctionIndirectlyInVariableDeclaration", content);
     fourslash::unsupported("VerifyBaselineDocumentSymbol"); // f.VerifyBaselineDocumentSymbol(t)
 }

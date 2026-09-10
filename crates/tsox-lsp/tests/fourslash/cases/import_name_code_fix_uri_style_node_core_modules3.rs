@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: t.Skip('Known failing fourslash test')"]
 #[test]
 fn import_name_code_fix_uri_style_node_core_modules3() {
@@ -35,7 +36,7 @@ writeFile/*test1*/
 // @Filename: /test2.ts
 import "node:test";
 writeFile/*test2*/"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("importNameCodeFix_uriStyleNodeCoreModules3", content);
     fourslash::unsupported("VerifyImportFixModuleSpecifiers"); // f.VerifyImportFixModuleSpecifiers(t, "noPrefix", []string{"fs", "fs/promises"}, nil /*preferences*/)
     fourslash::unsupported("VerifyImportFixModuleSpecifiers"); // f.VerifyImportFixModuleSpecifiers(t, "prefix", []string{"node:fs", "node:fs/promises"}, nil /*prefer
     fourslash::unsupported("VerifyImportFixModuleSpecifiers"); // f.VerifyImportFixModuleSpecifiers(t, "mixed1", []string{"node:fs", "node:fs/promises"}, nil /*prefer

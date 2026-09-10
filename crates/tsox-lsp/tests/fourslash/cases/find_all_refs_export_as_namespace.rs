@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineFindAllReferences"]
 #[test]
 fn find_all_refs_export_as_namespace() {
@@ -10,7 +11,7 @@ export as namespace A;
 import { /*1*/f } from "a";
 // @Filename: /c.ts
 A./*2*/f();"#;
-    let mut s = Session::new(content);
-    fourslash::verify_no_errors(&mut s);
+    let mut s = Session::new_for_test("findAllRefsExportAsNamespace", content);
+    fourslash::verify_no_errors(&mut s, );
     fourslash::unsupported("VerifyBaselineFindAllReferences"); // f.VerifyBaselineFindAllReferences(t, "0", "1", "2")
 }

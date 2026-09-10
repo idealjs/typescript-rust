@@ -142,11 +142,23 @@ impl Binder {
             }
             let Some(sym) = target else { continue };
 
-            if !sym
+            // tsc getExpandoSymbol：函数声明，或初始化为函数表达式/箭头函数的变量
+            let expando_eligible = sym
                 .value_declaration
                 .as_ref()
-                .is_some_and(|d| d.kind == SyntaxKind::FunctionDeclaration)
-            {
+                .is_some_and(|d| match &d.data {
+                    NodeData::FunctionDeclaration(_) => true,
+                    NodeData::VariableDeclaration(vd) => {
+                        vd.initializer.as_ref().is_some_and(|init| {
+                            matches!(
+                                init.kind,
+                                SyntaxKind::FunctionExpression | SyntaxKind::ArrowFunction
+                            )
+                        })
+                    }
+                    _ => false,
+                });
+            if !expando_eligible {
                 continue;
             }
             let member_name: Option<String> = match &bin.left.data {

@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineHover"]
 #[test]
 fn quick_info_display_parts_enum1() {
@@ -21,6 +22,6 @@ var /*20*/eInstance1: /*21*/constE;
 /*22*/eInstance1 = /*23*/constE./*24*/e1;
 /*25*/eInstance1 = /*26*/constE./*27*/e2;
 /*28*/eInstance1 = /*29*/constE./*30*/e3;"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("quickInfoDisplayPartsEnum1", content);
     fourslash::unsupported("VerifyBaselineHover"); // f.VerifyBaselineHover(t)
 }

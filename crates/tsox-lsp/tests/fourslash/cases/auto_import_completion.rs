@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.BaselineAutoImportsCompletions"]
 #[test]
 fn auto_import_completion1() {
@@ -14,7 +15,7 @@ import {someVar} from "./a.ts";
 someVar;
 a/**/
 "#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("autoImportCompletion1", content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
     fourslash::unsupported("BaselineAutoImportsCompletions"); // f.BaselineAutoImportsCompletions(t, []string{""})
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
@@ -32,7 +33,7 @@ import {someVar} from "./a.ts";
 someVar;
 a/**/
 "#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("autoImportCompletion2", content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
     fourslash::unsupported("BaselineAutoImportsCompletions"); // f.BaselineAutoImportsCompletions(t, []string{""})
 }
@@ -50,7 +51,7 @@ import { aa, someVar } from "./a.ts";
 someVar;
 b/**/
 "#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("autoImportCompletion3", content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
     fourslash::unsupported("BaselineAutoImportsCompletions"); // f.BaselineAutoImportsCompletions(t, []string{""})
 }

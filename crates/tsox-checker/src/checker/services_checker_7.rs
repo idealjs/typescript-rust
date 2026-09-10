@@ -123,11 +123,22 @@ impl Checker {
         property_name: &Arc<Node>,
     ) -> Option<Arc<Type>> {
         match property_name.kind {
-            SyntaxKind::StringLiteral => Some(self.get_string_literal_type(property_name.text())),
-            SyntaxKind::NumericLiteral => None,
-            SyntaxKind::PrivateIdentifier => None,
-            SyntaxKind::ComputedPropertyName => None,
-            _ => None,
+            SyntaxKind::PrivateIdentifier => Some(self.never_type()),
+            SyntaxKind::NumericLiteral => {
+                let lit = self.infer_number_literal_type(property_name.text());
+                Some(self.get_regular_type_of_literal_type(&lit))
+            }
+            SyntaxKind::ComputedPropertyName => {
+                let NodeData::ComputedPropertyName(d) = &property_name.data else {
+                    return None;
+                };
+                let t = self.get_type_of_node(&d.expression);
+                Some(self.get_regular_type_of_literal_type(&t))
+            }
+            SyntaxKind::StringLiteral | SyntaxKind::Identifier => {
+                Some(self.get_string_literal_type(property_name.text()))
+            }
+            _ => Some(self.never_type()),
         }
     }
 

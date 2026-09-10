@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: // Pre-fix (#2763), hovering on the static property could pa"]
 #[test]
 fn hover_nil_base_symbol_intersection() {
@@ -15,7 +16,7 @@ class Derived extends BaseFactory {
   static /*1*/idField = "id" as const;
 }
 "#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("hoverNilBaseSymbolIntersection", content);
     // TODO: // We only care that hover/quickinfo does not crash (panic) when baseType.Symbol() is nil.
     // TODO: // Pre-fix (#2763), hovering on the static property could panic in getJSDocOrTag.
     fourslash::unsupported("VerifyBaselineHover"); // f.VerifyBaselineHover(t)

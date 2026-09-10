@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineHover"]
 #[test]
 fn quick_info_on_union_properties_with_identical_js_doc_comments01() {
@@ -28,6 +29,6 @@ fn quick_info_on_union_properties_with_identical_js_doc_comments01() {
 
 declare let x: DocumentFilter;
 x./**/language"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("quickInfoOnUnionPropertiesWithIdenticalJSDocComments01", content);
     fourslash::unsupported("VerifyBaselineHover"); // f.VerifyBaselineHover(t)
 }

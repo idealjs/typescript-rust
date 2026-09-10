@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyNonSuggestionDiagnostics"]
 #[test]
 fn issue57429() {
@@ -20,7 +21,7 @@ Builder<IThing>({
   },
   doAnotherThing() { },
 })"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("issue57429", content);
     fourslash::verify_quick_info_at(&mut s, "1", "const value: any", "");
     fourslash::unsupported("VerifyNonSuggestionDiagnostics"); // f.VerifyNonSuggestionDiagnostics(t, []*lsproto.Diagnostic{
 }

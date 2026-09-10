@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: t.Skip('Known failing fourslash test')"]
 #[test]
 fn completion_list_string_parenthesized_type() {
@@ -22,7 +23,7 @@ interface Foo {
 const a: Foo["[|/*6*/|]"];
 const b: Foo[("[|/*7*/|]")];
 const b: Foo[(("[|/*8*/|]"))];"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("completionListStringParenthesizedType", content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "2", &fourslash.CompletionsExpectedList{
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "3", &fourslash.CompletionsExpectedList{

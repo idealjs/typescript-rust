@@ -201,6 +201,10 @@ impl Checker {
         } else {
             self.get_common_supertype(&base_candidates)
         };
+        // Go getWidenedType 不拓宽顶层字面量类型；此处保持推断出的字面量
+        if unwidened_type.flags.intersects(crate::checker::types::TYPE_FLAGS_LITERAL) {
+            return Some(unwidened_type);
+        }
         Some(self.get_widened_type(&unwidened_type))
     }
 

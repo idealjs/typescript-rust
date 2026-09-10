@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineGoToDefinition"]
 #[test]
 fn go_to_definition_simple() {
@@ -8,6 +9,6 @@ class /*2*/c { }
 // @Filename: Consumption.ts
  var n = new [|/*1*/c|]();
  var n = new [|c/*3*/|]();"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("goToDefinitionSimple", content);
     fourslash::unsupported("VerifyBaselineGoToDefinition"); // f.VerifyBaselineGoToDefinition(t, true, "1", "3")
 }

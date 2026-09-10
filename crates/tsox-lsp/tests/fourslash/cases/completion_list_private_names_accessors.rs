@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyCompletions"]
+
 #[test]
 fn completion_list_private_names_accessors() {
     let content = r#"class Foo {
@@ -31,9 +31,9 @@ class Bar extends Foo {
 }
 
 new Foo()./*4*/"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "2", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "3", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "4", &fourslash.CompletionsExpectedList{
+    let mut s = Session::new_for_test("completionListPrivateNamesAccessors", content);
+    fourslash::verify_completions_unsorted_at(&mut s, Some("1"), &["#z", "t", "l", "y"]);
+    fourslash::verify_completions_unsorted_at(&mut s, Some("2"), &["#z", "#u", "v", "k"]);
+    fourslash::verify_completions_unsorted_at(&mut s, Some("3"), &["#z", "t", "l", "y"]);
+    fourslash::verify_completions_exact_at(&mut s, Some("4"), &["y"]);
 }

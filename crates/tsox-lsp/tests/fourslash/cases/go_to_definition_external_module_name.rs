@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineGoToDefinition"]
 #[test]
 fn go_to_definition_external_module_name() {
@@ -8,6 +9,6 @@ import n = require([|'./a/*1*/'|]);
 var x = new n.Foo();
 // @Filename: a.ts
  /*2*/export class Foo {}"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("goToDefinitionExternalModuleName", content);
     fourslash::unsupported("VerifyBaselineGoToDefinition"); // f.VerifyBaselineGoToDefinition(t, true, "1")
 }

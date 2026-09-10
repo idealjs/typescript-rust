@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: t.Skip('Known failing fourslash test')"]
 #[test]
 fn completion_for_object_property() {
@@ -22,7 +23,7 @@ const test6 = { unrelated: foo/*6*/ }
 const test7: { foo/*7*/: "unrelated" }
 // @Filename: /h.ts
 const test8: { foo: string } = { foo/*8*/ }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("completionForObjectProperty", content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "2", &fourslash.CompletionsExpectedList{
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "3", &fourslash.CompletionsExpectedList{

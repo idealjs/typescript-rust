@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifySignatureHelp"]
 #[test]
 fn signature_help_type_arguments() {
@@ -19,7 +20,7 @@ declare const C: {
 new C</*C0*/;
 new C<number, /*C1*/;
 new C<number, string, /*C2*/;"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("signatureHelpTypeArguments", content);
     fourslash::go_to_marker(&mut s, "f0");
     fourslash::unsupported("VerifySignatureHelp"); // f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{Text: "f<T extends number>(): void", P
     fourslash::go_to_marker(&mut s, "f1");

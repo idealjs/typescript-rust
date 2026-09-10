@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCodeFix"]
 #[test]
 fn code_fix_missing_type_annotation_on_exports35_variable_releative() {
@@ -8,6 +9,6 @@ fn code_fix_missing_type_annotation_on_exports35_variable_releative() {
 // @Filename: /code.ts
 const foo = { a: 1 }
 export const exported = foo;"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("codeFixMissingTypeAnnotationOnExports35_variable_releative", content);
     fourslash::unsupported("VerifyCodeFix"); // f.VerifyCodeFix(t, fourslash.VerifyCodeFixOptions{
 }

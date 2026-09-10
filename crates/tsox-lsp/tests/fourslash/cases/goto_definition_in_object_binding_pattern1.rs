@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineGoToDefinition"]
 #[test]
 fn goto_definition_in_object_binding_pattern1() {
@@ -10,6 +11,6 @@ interface Test {
   /*destination*/prop2: number
 }
 bar<Test>(({[|pr/*goto*/op2|]})=>{});"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("gotoDefinitionInObjectBindingPattern1", content);
     fourslash::unsupported("VerifyBaselineGoToDefinition"); // f.VerifyBaselineGoToDefinition(t, true, "goto")
 }

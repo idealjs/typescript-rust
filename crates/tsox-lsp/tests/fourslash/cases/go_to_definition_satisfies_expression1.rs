@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineGoToDefinition"]
 #[test]
 fn go_to_definition_satisfies_expression1() {
@@ -9,6 +10,6 @@ fn go_to_definition_satisfies_expression1() {
 
 //somewhere in app
 STRINGS.[|/*usage*/title|]"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("goToDefinitionSatisfiesExpression1", content);
     fourslash::unsupported("VerifyBaselineGoToDefinition"); // f.VerifyBaselineGoToDefinition(t, true, "definition", "usage")
 }

@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.Backspace"]
 #[test]
 fn completions_overriding_method_crash2() {

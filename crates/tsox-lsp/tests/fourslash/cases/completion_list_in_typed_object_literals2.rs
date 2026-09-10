@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: }"]
 #[test]
 fn completion_list_in_typed_object_literals2() {
@@ -8,7 +9,7 @@ fn completion_list_in_typed_object_literals2() {
 }
 var aaa: Foo;
 aaa = { /*9*/"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "9", &fourslash.CompletionsExpectedList{
+    let mut s = Session::new_for_test("completionListInTypedObjectLiterals2", content);
+    fourslash::verify_completions_exact_at(&mut s, Some("9"), &["x"]);
     // TODO: }
 }

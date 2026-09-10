@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: t.Skip('Known failing fourslash test')"]
 #[test]
 fn member_list_in_reopened_enum() {
@@ -13,6 +14,6 @@ fn member_list_in_reopened_enum() {
     }
     var x = E./*1*/
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("memberListInReopenedEnum", content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
 }

@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineFindAllReferences"]
 #[test]
 fn ambient_shorthand_find_all_refs() {
@@ -9,6 +10,6 @@ declare module "jquery";
 import {/*1*/x} from "jquery";
 // @Filename: user2.ts
 import {/*2*/x} from "jquery";"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("ambientShorthandFindAllRefs", content);
     fourslash::unsupported("VerifyBaselineFindAllReferences"); // f.VerifyBaselineFindAllReferences(t, "1", "2")
 }

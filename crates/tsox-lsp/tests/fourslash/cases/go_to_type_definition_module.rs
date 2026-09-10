@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineGoToTypeDefinition"]
 #[test]
 fn go_to_type_definition_module() {
@@ -11,6 +12,6 @@ var m: typeof M;
 // @Filename: module3.ts
 /*reference1*/M;
 /*reference2*/m;"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("goToTypeDefinitionModule", content);
     fourslash::unsupported("VerifyBaselineGoToTypeDefinition"); // f.VerifyBaselineGoToTypeDefinition(t, "reference1", "reference2")
 }

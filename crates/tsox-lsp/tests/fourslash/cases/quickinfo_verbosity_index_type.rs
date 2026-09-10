@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineHoverWithVerbosity"]
 #[test]
 fn quickinfo_verbosity_index_type() {
@@ -16,6 +17,6 @@ function fn1<T extends T1>(obj: T, key: keyof T, k2: keyof T1) {
 	}
 	return key;
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("quickinfoVerbosityIndexType", content);
     fourslash::unsupported("VerifyBaselineHoverWithVerbosity"); // f.VerifyBaselineHoverWithVerbosity(t, map[string][]int{"x1": {0, 1}, "x2": {0}, "k2": {0, 1}, "key":
 }

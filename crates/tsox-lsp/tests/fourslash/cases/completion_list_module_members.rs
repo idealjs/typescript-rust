@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCompletions"]
 #[test]
 fn completion_list_module_members() {
@@ -23,7 +24,7 @@ var x : Module./*TypeReference*/
 class TestClass extends Module./*TypeReferenceInExtendsList*/ { }
 
 interface TestInterface implements Module./*TypeReferenceInImplementsList*/ { }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("completionListModuleMembers", content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, []string{"ValueReference", "TypeReferenceInExtendsList"}, &fourslash.Completi
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, []string{"TypeReference", "TypeReferenceInImplementsList"}, &fourslash.Comple
 }

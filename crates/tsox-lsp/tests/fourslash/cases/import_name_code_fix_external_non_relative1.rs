@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: f.MarkTestAsStradaServer()"]
 #[test]
 fn import_name_code_fix_external_non_relative1() {
@@ -40,7 +41,7 @@ export const Pkg2 = {};
 // @Filename: /home/src/workspaces/project/packages/pkg-2/src/blah/foo/data.ts
 Pkg2/*internal*/
 // @link: /home/src/workspaces/project/packages/pkg-2 -> /home/src/workspaces/project/packages/pkg-1/node_modules/pkg-2"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("importNameCodeFix_externalNonRelative1", content);
     // TODO: f.MarkTestAsStradaServer()
     // TODO: opts1534 := f.GetOptions()
     // TODO: opts1534.FormatCodeSettings.NewLineCharacter = "\n"

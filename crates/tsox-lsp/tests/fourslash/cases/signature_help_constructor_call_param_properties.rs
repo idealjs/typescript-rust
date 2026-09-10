@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineSignatureHelp"]
 #[test]
 fn signature_help_constructor_call_param_properties() {
@@ -12,6 +13,6 @@ fn signature_help_constructor_call_param_properties() {
     }
 }
 var a = new Circle(/**/"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("signatureHelpConstructorCallParamProperties", content);
     fourslash::unsupported("VerifyBaselineSignatureHelp"); // f.VerifyBaselineSignatureHelp(t)
 }

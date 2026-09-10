@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineDocumentSymbol"]
 #[test]
 fn navigation_bar_items_class6() {
@@ -8,6 +9,6 @@ fn navigation_bar_items_class6() {
 Z.foo = 42
 
 class Z { }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("navigationBarItemsClass6", content);
     fourslash::unsupported("VerifyBaselineDocumentSymbol"); // f.VerifyBaselineDocumentSymbol(t)
 }

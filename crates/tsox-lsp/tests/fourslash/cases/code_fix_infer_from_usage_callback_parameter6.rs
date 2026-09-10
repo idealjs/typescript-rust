@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCodeFixNotAvailable"]
 #[test]
 fn code_fix_infer_from_usage_callback_parameter6() {
@@ -8,6 +9,6 @@ fn code_fix_infer_from_usage_callback_parameter6() {
 // @noImplicitAny: false
 // @filename: /foo.js
 const foo = [(/** @type {number} */ x) => x + 1];"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("codeFixInferFromUsageCallbackParameter6", content);
     fourslash::unsupported("VerifyCodeFixNotAvailable"); // f.VerifyCodeFixNotAvailable(t)
 }

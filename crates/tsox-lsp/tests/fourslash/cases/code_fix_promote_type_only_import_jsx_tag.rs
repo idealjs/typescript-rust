@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: // React since it's already imported (as type-only, handled "]
 #[test]
 fn code_fix_promote_type_only_import_jsx_tag() {
@@ -13,7 +14,7 @@ export default React;
 import type React from "./react";
 
 <Foo/**/ />;"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("codeFixPromoteTypeOnlyImportJsxTag", content);
     fourslash::go_to_marker(&mut s, "");
     // TODO: // The fix should promote the type-only import of React to a regular import.
     // TODO: // The "Cannot find name 'Foo'" error does not produce an auto-import for
@@ -37,7 +38,7 @@ import type React from "./react";
 import type { Foo } from "./foo";
 
 <Foo/**/ />;"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("codeFixPromoteTypeOnlyImportJsxTagBothTypeOnly", content);
     fourslash::go_to_marker(&mut s, "");
     // TODO: // Both Foo and React are type-only imported. The error message string
     // TODO: // matching disambiguates which diagnostic is about which symbol, so each

@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: t.Skip('Known failing fourslash test')"]
 #[test]
 fn import_name_code_fix_re_export_default() {
@@ -19,7 +20,7 @@ function foo() {}
 export default foo;
 // @Filename: /unnamed.ts
 export default 0;"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("importNameCodeFix_reExportDefault", content);
     fourslash::go_to_file(&mut s, "/user.ts");
     fourslash::unsupported("VerifyImportFixAtPosition"); // f.VerifyImportFixAtPosition(t, []string{
     fourslash::go_to_file(&mut s, "/user2.ts");

@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "needs live LSP session"]
 #[test]
 fn formatting_on_nested_do_while_by_enter() {
@@ -9,7 +10,7 @@ fn formatting_on_nested_do_while_by_enter() {
 /*5*/}while(a!==b)
 /*6*/}while(a!==b)
 /*7*/}while(a!==b)"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("formattingOnNestedDoWhileByEnter", content);
     fourslash::go_to_marker(&mut s, "1");
     fourslash::insert(&mut s, "\n");
     fourslash::verify_current_line_content(&mut s, r#"    {"#);

@@ -38,6 +38,8 @@ impl Checker {
 
         self.check_export_assignment_conflicts(&statements);
 
+        self.check_declaration_diagnostics(&statements);
+
         self.check_unused_identifiers_in_file(&file_node);
 
         self.pop_scope();

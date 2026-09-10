@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: // This should show projectBFunction once via re-export and "]
 #[test]
 fn auto_import_symlinked_monorepo_reexport() {
@@ -50,7 +51,7 @@ import { projectBValue } from "project-b";
 console.log(projectBValue);
 projectBFunction/**/
 // @link: /packages/project-b -> /packages/project-a/node_modules/project-b"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("autoImportSymlinkedMonorepoReexport", content);
     // TODO: prefs := lsutil.NewDefaultUserPreferences()
     // TODO: prefs.AutoImportEntrypointDirectorySearch = core.TSTrue
     fourslash::unsupported("Configure"); // f.Configure(t, prefs)

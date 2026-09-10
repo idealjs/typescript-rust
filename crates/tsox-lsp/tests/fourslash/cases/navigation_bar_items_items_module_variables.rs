@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineDocumentSymbol"]
 #[test]
 fn navigation_bar_items_items_module_variables() {
@@ -18,7 +19,7 @@ namespace Module1.SubModule {
 namespace Module1 {
     export var z = 0;
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("navigationBarItemsItemsModuleVariables", content);
     fourslash::go_to_marker(&mut s, "file1");
     fourslash::unsupported("VerifyBaselineDocumentSymbol"); // f.VerifyBaselineDocumentSymbol(t)
     fourslash::go_to_marker(&mut s, "file2");

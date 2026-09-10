@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineCallHierarchy"]
 #[test]
 fn call_hierarchy_container_name() {
@@ -38,7 +39,7 @@ namespace Foo {
 namespace Foo.Bar {
   const sameName = () => new Foo.C();
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("callHierarchyContainerName", content);
     fourslash::go_to_marker(&mut s, "");
     fourslash::unsupported("VerifyBaselineCallHierarchy"); // f.VerifyBaselineCallHierarchy(t)
 }

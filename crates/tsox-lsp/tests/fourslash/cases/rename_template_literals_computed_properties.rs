@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineRenameAtRangesWithText"]
 #[test]
 fn rename_template_literals_computed_properties() {
@@ -39,6 +40,6 @@ obj[` + "`" + `[|num|]` + "`" + `];
 
 obj.[|bool|];
 obj[` + "`" + `[|bool|]` + "`" + `];"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("renameTemplateLiteralsComputedProperties", content);
     fourslash::unsupported("VerifyBaselineRenameAtRangesWithText"); // f.VerifyBaselineRenameAtRangesWithText(t, nil /*preferences*/, "num", "bool")
 }

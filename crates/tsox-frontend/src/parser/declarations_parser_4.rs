@@ -112,7 +112,7 @@ impl Parser {
 
             let expr = self.parse_assignment_expression();
             self.parse_semicolon();
-            let end = self.token_pos();
+            let end = self.node_pos();
             return Arc::new(Node::with_loc(
                 SyntaxKind::ExportAssignment,
                 NodeData::ExportAssignment(ExportAssignmentData {
@@ -129,7 +129,7 @@ impl Parser {
             self.next_token();
             let expr = self.parse_assignment_expression();
             self.parse_semicolon();
-            let end = self.token_pos();
+            let end = self.node_pos();
             return Arc::new(Node::with_loc(
                 SyntaxKind::ExportAssignment,
                 NodeData::ExportAssignment(ExportAssignmentData {
@@ -148,7 +148,7 @@ impl Parser {
                 self.next_token();
                 let name = self.parse_identifier_name_or_keyword();
                 self.parse_semicolon();
-                let end = self.token_pos();
+                let end = self.node_pos();
                 return Arc::new(Node::with_loc(
                     SyntaxKind::NamespaceExportDeclaration,
                     NodeData::NamespaceExportDeclaration(NamespaceExportDeclarationData {
@@ -202,7 +202,7 @@ impl Parser {
                 let export_mod = self.make_export_modifier(pos, export_end);
                 let declaration_list = self.parse_variable_declaration_list(false);
                 self.parse_semicolon();
-                let end = self.token_pos();
+                let end = self.node_pos();
                 return Arc::new(Node::with_loc(
                     SyntaxKind::VariableStatement,
                     NodeData::VariableStatement(VariableStatementData {
@@ -246,7 +246,7 @@ impl Parser {
         };
         let attributes = self.try_parse_import_attributes();
         self.parse_semicolon();
-        let end = self.token_pos();
+        let end = self.node_pos();
         Arc::new(Node::with_loc(
             SyntaxKind::ExportDeclaration,
             NodeData::ExportDeclaration(ExportDeclarationData {
@@ -268,7 +268,7 @@ impl Parser {
             Parser::parse_export_specifier,
         );
         self.expect(SyntaxKind::CloseBraceToken);
-        let end = self.token_pos();
+        let end = self.node_pos();
         Arc::new(Node::with_loc(
             SyntaxKind::NamedExports,
             NodeData::NamedExports(NamedExportsData {

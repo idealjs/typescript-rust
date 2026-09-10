@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineFindAllReferences"]
 #[test]
 fn find_all_references_from_link_tag_reference3() {
@@ -12,6 +13,6 @@ enum E {
     /** {@link /**/Foo} */
     Foo
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("findAllReferencesFromLinkTagReference3", content);
     fourslash::unsupported("VerifyBaselineFindAllReferences"); // f.VerifyBaselineFindAllReferences(t, "")
 }

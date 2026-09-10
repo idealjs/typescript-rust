@@ -11,6 +11,8 @@ pub use crate::checker::relater_probing_checker_3::*;
 #[allow(unused_imports)]
 pub use crate::checker::relater_probing_checker_4::*;
 #[allow(unused_imports)]
+pub use crate::checker::relater_probing_mapped_apply::*;
+pub use crate::checker::relater_probing_substitute_infer_mapped::*;
 pub use crate::checker::relater_probing_substitute_infer_object::*;
 #[allow(unused_imports)]
 pub use crate::checker::relater_probing_substitute_infer_variants::*;

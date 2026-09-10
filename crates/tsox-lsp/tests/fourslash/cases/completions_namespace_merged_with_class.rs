@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCompletions"]
 #[test]
 fn completions_namespace_merged_with_class() {
@@ -15,7 +16,7 @@ namespace D {
 
 let x: D./*type*/;
 D./*value*/"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "type", &fourslash.CompletionsExpectedList{
+    let mut s = Session::new_for_test("completionsNamespaceMergedWithClass", content);
+    fourslash::verify_completions_exact_at(&mut s, Some("type"), &["T"]);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "value", &fourslash.CompletionsExpectedList{
 }

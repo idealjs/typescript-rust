@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyImportFixAtPosition"]
 #[test]
 fn import_name_code_fix_export_as_default_existing_import() {
@@ -11,6 +12,6 @@ export { v4 as default };
 export const v1 = 5;
 export const v2 = 5;
 export const v3 = 5;"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("importNameCodeFixExportAsDefaultExistingImport", content);
     fourslash::unsupported("VerifyImportFixAtPosition"); // f.VerifyImportFixAtPosition(t, []string{
 }

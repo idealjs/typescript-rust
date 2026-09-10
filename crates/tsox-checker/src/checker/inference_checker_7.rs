@@ -123,7 +123,12 @@ impl Checker {
             return;
         }
 
-        if target.flags.contains(TypeFlags::TypeParameter) {
+        // Go TypeFlagsTypeVariable 为复合标志：TypeParameter | IndexedAccess | Substitution，
+        // 延迟 IndexedAccess（反向映射的 T[K]）同样登记候选
+        if target
+            .flags
+            .intersects(TypeFlags::TypeParameter | TypeFlags::IndexedAccess)
+        {
             self.infer_to_type_variable(state, source, target);
             return;
         }
@@ -199,7 +204,7 @@ impl Checker {
         let inference_idx = state.inferences.iter().position(|info| {
             crate::checker::utilities::type_parameters_match(&info.type_parameter, target)
         });
-        let Some(idx) = inference_idx else { return };
+                let Some(idx) = inference_idx else { return };
 
         let priority = state.priority;
         let contravariant = state.contravariant;
@@ -249,9 +254,15 @@ impl Checker {
                     }
                 }
             }
+            // Go inference.go:207：仅当类型参数不在原始目标的顶层位置时清除 topLevel
+            let at_top_level = match state.original_target.as_ref() {
+                Some(orig) => self.is_type_parameter_at_top_level(orig, target, 0),
+                None => true,
+            };
             if !priority.contains(InferencePriority::ReturnType)
                 && target.flags.contains(TypeFlags::TypeParameter)
                 && inference.top_level
+                && !at_top_level
             {
                 inference.top_level = false;
                 cleared = true;

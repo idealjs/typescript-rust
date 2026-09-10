@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineGoToTypeDefinition"]
 #[test]
 fn go_to_type_definition_promise_type() {
@@ -10,6 +11,6 @@ async function /*reference*/getUser() { return { name: "Bob" } satisfies User as
 const /*reference2*/promisedBob = getUser() 
 
 export {}"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("goToTypeDefinition_promiseType", content);
     fourslash::unsupported("VerifyBaselineGoToTypeDefinition"); // f.VerifyBaselineGoToTypeDefinition(t, "reference", "reference2")
 }

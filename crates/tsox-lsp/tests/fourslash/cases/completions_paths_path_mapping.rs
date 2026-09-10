@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCompletions"]
 #[test]
 fn completions_paths_path_mapping() {
@@ -19,7 +20,7 @@ import {} from "foo/dir//*1*/";
         }
     }
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("completionsPaths_pathMapping", content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "0", &fourslash.CompletionsExpectedList{
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
 }

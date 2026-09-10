@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCompletions"]
 #[test]
 fn completions_js_doc_no_crash3() {
@@ -16,6 +17,6 @@ class MssqlClient {
 }
 
 export default MssqlClient;"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("completionsJSDocNoCrash3", content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

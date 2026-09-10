@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCompletions"]
 #[test]
 fn export_equal_callable_interface() {
@@ -15,6 +16,6 @@ export = x;
 import test = require('./exportEqualCallableInterface_file0');
 var t2: test;
 t2./**/"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("exportEqualCallableInterface", content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

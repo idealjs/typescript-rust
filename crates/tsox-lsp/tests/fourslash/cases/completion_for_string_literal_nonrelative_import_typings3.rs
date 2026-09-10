@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCompletions"]
 #[test]
 fn completion_for_string_literal_nonrelative_import_typings3() {
@@ -16,6 +17,6 @@ export var x = 9;
 export var y = 9;
 // @Filename: package.json
 { "dependencies": { "@types/module-y": "latest" } }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("completionForStringLiteralNonrelativeImportTypings3", content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, []string{"types_ref0", "import_as0", "import_equals0", "require0"}, &fourslas
 }

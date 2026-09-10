@@ -1,12 +1,13 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: opts444 := f.GetOptions()"]
 #[test]
 fn formatting_for_loop_semicolons() {
     let content = r#"/*1*/for (;;) { }
 /*2*/for (var x;x<0;x++) { }
 /*3*/for (var x ;x<0 ;x++) { }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("formattingForLoopSemicolons", content);
     fourslash::unsupported("FormatDocument"); // f.FormatDocument(t, "")
     fourslash::go_to_marker(&mut s, "1");
     fourslash::verify_current_line_content(&mut s, r#"for (; ;) { }"#);

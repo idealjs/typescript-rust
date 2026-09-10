@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCodeFixAll"]
 #[test]
 fn import_name_code_fix_add_all_missing_imports() {
@@ -13,7 +14,7 @@ export const c: number;
 a;
 b;
 c;"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("importNameCodeFix_add_all_missing_imports", content);
     fourslash::go_to_file(&mut s, "/main.ts");
     fourslash::unsupported("VerifyCodeFixAll"); // f.VerifyCodeFixAll(t, fourslash.VerifyCodeFixAllOptions{
 }

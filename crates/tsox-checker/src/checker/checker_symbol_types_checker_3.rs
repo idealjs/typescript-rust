@@ -91,6 +91,11 @@ impl Checker {
                 data.body.as_ref(),
                 data.type_node.as_ref(),
             ),
+            tsox_frontend::ast::NodeData::MethodSignatureDeclaration(data) => (
+                &data.parameters,
+                None,
+                data.type_node.as_ref(),
+            ),
             _ => return self.get_any_type(),
         };
 

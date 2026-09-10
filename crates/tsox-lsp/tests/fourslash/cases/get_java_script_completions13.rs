@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: t.Skip('Known failing fourslash test')"]
 #[test]
 fn get_java_script_completions13() {
@@ -13,7 +14,7 @@ var file2Identifier1 = 2;
 var file2Identifier2 = 2;
 /*1*/
 file2Identifier2./*2*/"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("getJavaScriptCompletions13", content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "2", &fourslash.CompletionsExpectedList{
 }

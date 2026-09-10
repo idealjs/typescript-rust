@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: t.Skip('Known failing fourslash test')"]
 #[test]
 fn member_list_of_exported_class() {
@@ -13,6 +14,6 @@ fn member_list_of_exported_class() {
 var c = new M.C();
 
 c./**/ // test on c."#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("memberListOfExportedClass", content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

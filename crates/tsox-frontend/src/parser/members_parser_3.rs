@@ -65,7 +65,7 @@ impl Parser {
             .parse_optional_type_annotation()
             .unwrap_or_else(|| self.missing_node(self.token_pos()));
         self.parse_type_member_semicolon();
-        let end = self.token_pos();
+        let end = self.node_pos();
         Arc::new(Node::with_loc(
             SyntaxKind::IndexSignature,
             NodeData::IndexSignatureDeclaration(IndexSignatureDeclarationData {
@@ -86,7 +86,7 @@ impl Parser {
         let parameters = self.parse_parameter_list();
         let type_node = self.parse_optional_return_type();
         self.parse_type_member_semicolon();
-        let end = self.token_pos();
+        let end = self.node_pos();
         if kind == SyntaxKind::CallSignature {
             Arc::new(Node::with_loc(
                 SyntaxKind::CallSignature,
@@ -121,7 +121,7 @@ impl Parser {
         self.expect(SyntaxKind::OpenBraceToken);
         let members = self.parse_list(ParsingContext::ClassMembers, Parser::parse_class_member);
         self.expect(SyntaxKind::CloseBraceToken);
-        let end = self.token_pos();
+        let end = self.node_pos();
         NodeList {
             loc: TextRange::new(pos, end),
             nodes: members.nodes,

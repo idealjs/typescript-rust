@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCompletions"]
 #[test]
 fn import_completions_package_json_exports_trailing_slash1() {
@@ -24,7 +25,7 @@ export function foo(): void;
 // @Filename: /index.ts
 import {} from "pkg//*1*/";
 import {} from "pkg/test//*2*/";"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("importCompletionsPackageJsonExportsTrailingSlash1", content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, []string{"1"}, &fourslash.CompletionsExpectedList{
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, []string{"2"}, &fourslash.CompletionsExpectedList{
 }

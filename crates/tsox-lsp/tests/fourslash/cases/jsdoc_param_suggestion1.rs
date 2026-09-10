@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifySuggestionDiagnostics"]
 #[test]
 fn jsdoc_param_suggestion1() {
@@ -16,7 +17,7 @@ declare function bad(options: any): void
 function worse(): void {
     arguments
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("jsdocParam_suggestion1", content);
     fourslash::go_to_file(&mut s, "a.ts");
     fourslash::unsupported("VerifySuggestionDiagnostics"); // f.VerifySuggestionDiagnostics(t, nil)
 }

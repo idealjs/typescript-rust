@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineFindAllReferences"]
 #[test]
 fn find_all_refs_this_keyword() {
@@ -26,6 +27,6 @@ class C {
 // These are *not* real uses of the 'this' keyword, they are identifiers.
 const x = { /*10*/this: 0 }
 x./*11*/this;"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("findAllRefsThisKeyword", content);
     fourslash::unsupported("VerifyBaselineFindAllReferences"); // f.VerifyBaselineFindAllReferences(t, "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11")
 }

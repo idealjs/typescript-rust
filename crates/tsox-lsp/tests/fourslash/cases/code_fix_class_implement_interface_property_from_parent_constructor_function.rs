@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCodeFixNotAvailable"]
 #[test]
 fn code_fix_class_implement_interface_property_from_parent_constructor_function() {
@@ -8,6 +9,6 @@ fn code_fix_class_implement_interface_property_from_parent_constructor_function(
 }
 
 class B implements A {[| |]}"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("codeFixClassImplementInterfacePropertyFromParentConstructorFunction", content);
     fourslash::unsupported("VerifyCodeFixNotAvailable"); // f.VerifyCodeFixNotAvailable(t)
 }

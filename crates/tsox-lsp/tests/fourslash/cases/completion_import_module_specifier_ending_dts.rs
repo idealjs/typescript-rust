@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCompletions"]
 #[test]
 fn completion_import_module_specifier_ending_dts() {
@@ -7,7 +8,7 @@ fn completion_import_module_specifier_ending_dts() {
  export declare class Test {}
 //@Filename:module.ts
 import { Test } from ".//**/""#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("completionImportModuleSpecifierEndingDts", content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

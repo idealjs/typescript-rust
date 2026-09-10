@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: // When the resolved .js file is empty (0 statements), sourc"]
 #[test]
 fn go_to_source_definition_empty_js_file() {
@@ -14,7 +15,7 @@ export declare function foo(): void;
 // @Filename: /home/src/workspaces/project/index.ts
 import { foo } from /*specifier*/"pkg";
 foo();"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("goToSourceDefinitionEmptyJsFile", content);
     fourslash::unsupported("VerifyBaselineGoToSourceDefinition"); // f.VerifyBaselineGoToSourceDefinition(t, "specifier")
 }
 
@@ -34,6 +35,6 @@ module.exports = { create: internalCreate };
 // @Filename: /home/src/workspaces/project/index.ts
 import /*importDefault*/create from "pkg";
 create();"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("goToSourceDefaultImportNoDefaultInJs", content);
     fourslash::unsupported("VerifyBaselineGoToSourceDefinition"); // f.VerifyBaselineGoToSourceDefinition(t, "importDefault")
 }

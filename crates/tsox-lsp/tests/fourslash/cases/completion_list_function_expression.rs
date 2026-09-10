@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.InsertLine"]
 #[test]
 fn completion_list_function_expression() {
@@ -16,9 +17,9 @@ class DataHandler {
         }
     }
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("completionListFunctionExpression", content);
     fourslash::go_to_marker(&mut s, "local");
     fourslash::unsupported("InsertLine"); // f.InsertLine(t, "")
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, nil, &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "this", nil)
+    fourslash::verify_completions_include_exclude_at(&mut s, None, &["xmlEvent"], &[]);
+    fourslash::verify_completions_empty_at(&mut s, Some("this"));
 }

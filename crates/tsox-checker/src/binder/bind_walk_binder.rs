@@ -70,23 +70,16 @@ impl Binder {
                 }
             }
             SyntaxKind::ClassExpression => {
-                let has_name = matches!(
-                    &node.data,
-                    NodeData::ClassExpression(data) if data.name.is_some()
-                );
-                if has_name {
-                    self.bind_anonymous_declaration(
-                        node,
-                        SymbolFlags::Class,
-                        INTERNAL_SYMBOL_NAME_CLASS,
-                    );
-                } else {
-                    self.bind_anonymous_declaration(
-                        node,
-                        SymbolFlags::Class,
-                        INTERNAL_SYMBOL_NAME_CLASS,
-                    );
-                }
+                // TS 命名类表达式：真实名字（不入容器表），匿名类保持内部名
+                let name = match &node.data {
+                    NodeData::ClassExpression(data) => data
+                        .name
+                        .as_ref()
+                        .map(|n| self.node_text(n))
+                        .unwrap_or_else(|| INTERNAL_SYMBOL_NAME_CLASS.to_string()),
+                    _ => INTERNAL_SYMBOL_NAME_CLASS.to_string(),
+                };
+                self.bind_anonymous_declaration(node, SymbolFlags::Class, &name);
             }
             SyntaxKind::InterfaceDeclaration => {
                 self.declare_symbol(node, SymbolFlags::Interface, SymbolFlags::TYPE);
@@ -141,6 +134,10 @@ impl Binder {
             }
             SyntaxKind::MethodDeclaration | SyntaxKind::MethodSignature => {
                 self.declare_symbol(node, SymbolFlags::Method, SymbolFlags::VALUE);
+            }
+            // Go bindJsxAttribute：JSX 属性是 Property 符号（JsxAttributes 为容器）
+            SyntaxKind::JsxAttribute => {
+                self.declare_symbol(node, SymbolFlags::Property, SymbolFlags::VALUE);
             }
             SyntaxKind::PropertyAssignment => {
                 self.declare_symbol(node, SymbolFlags::Property, SymbolFlags::VALUE);

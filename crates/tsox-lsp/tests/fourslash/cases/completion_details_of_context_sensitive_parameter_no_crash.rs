@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineHover"]
 #[test]
 fn completion_details_of_context_sensitive_parameter_no_crash() {
@@ -90,6 +91,6 @@ export const createStyling: CurriedFunction3<
     },
     3
 );"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("completionDetailsOfContextSensitiveParameterNoCrash", content);
     fourslash::unsupported("VerifyBaselineHover"); // f.VerifyBaselineHover(t)
 }

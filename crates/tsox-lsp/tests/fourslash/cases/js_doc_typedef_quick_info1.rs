@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineHover"]
 #[test]
 fn js_doc_typedef_quick_info1() {
@@ -31,6 +32,6 @@ function foo1(/*2*/opts1) {
     opts1.x;
 }
 foo1({x: 'abc'});"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("jsDocTypedefQuickInfo1", content);
     fourslash::unsupported("VerifyBaselineHover"); // f.VerifyBaselineHover(t)
 }

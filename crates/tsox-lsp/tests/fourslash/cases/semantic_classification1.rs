@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifySemanticTokens"]
 #[test]
 fn semantic_classification1() {
@@ -8,6 +9,6 @@ fn semantic_classification1() {
     }
 }
 interface /*2*/X extends /*3*/M./*4*/I { }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("semanticClassification1", content);
     fourslash::unsupported("VerifySemanticTokens"); // f.VerifySemanticTokens(t, []fourslash.SemanticToken{
 }

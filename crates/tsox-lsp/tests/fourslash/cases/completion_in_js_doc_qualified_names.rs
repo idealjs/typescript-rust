@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCompletions"]
 #[test]
 fn completion_in_js_doc_qualified_names() {
@@ -11,6 +12,6 @@ export type T = number;
 import * as Foo from "foo";
 /** @type {Foo./**/} */
 const x = 0;"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("completionInJsDocQualifiedNames", content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

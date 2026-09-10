@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineRenameAtRangesWithText"]
 #[test]
 fn tsx_rename1() {
@@ -15,6 +16,6 @@ declare namespace JSX {
     }
 }
 var x = [|<[|{| "contextRangeIndex": 2 |}div|] />|];"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("tsxRename1", content);
     fourslash::unsupported("VerifyBaselineRenameAtRangesWithText"); // f.VerifyBaselineRenameAtRangesWithText(t, nil /*preferences*/, "div")
 }

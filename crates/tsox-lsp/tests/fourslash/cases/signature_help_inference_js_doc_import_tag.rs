@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineSignatureHelp"]
 #[test]
 fn signature_help_inference_js_doc_import_tag() {
@@ -20,6 +21,6 @@ export interface Foo {}
  */
 function foo(a) {}
 foo(/**/)"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("signatureHelpInferenceJsDocImportTag", content);
     fourslash::unsupported("VerifyBaselineSignatureHelp"); // f.VerifyBaselineSignatureHelp(t)
 }

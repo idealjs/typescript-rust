@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.BaselineAutoImportsCompletions"]
 #[test]
 fn auto_import_export_equals_of_import_star() {
@@ -21,7 +22,7 @@ export declare function compile(): void
 { "dependencies": { "mdx": "*" } }
 // @Filename: /index.ts
 mdx/**/"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("autoImportExportEqualsOfImportStar", content);
     fourslash::go_to_marker(&mut s, "");
     fourslash::unsupported("BaselineAutoImportsCompletions"); // f.BaselineAutoImportsCompletions(t, []string{""})
 }

@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCompletions"]
 #[test]
 fn path_completions_package_json_imports_wildcard6() {
@@ -20,6 +21,6 @@ export const index = 0;
 export const blah = 0;
 // @Filename: /index.mts
 import { } from "/**/";"##;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("pathCompletionsPackageJsonImportsWildcard6", content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

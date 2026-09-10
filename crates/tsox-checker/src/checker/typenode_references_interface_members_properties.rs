@@ -40,10 +40,18 @@ impl Checker {
             }
         }
         let symbol = Arc::new(symbol);
+        // 递归接口（text: (v) => SameInterface）在构建窗口内经 FunctionTypeNode
+        // 环断路器拿到 in-flight error：不驻留，留 None 走 get_type_of_symbol
+        // 的 on-demand 重解析（窗口关闭后节点缓存为完整结果）
+        let resolved = if crate::checker::utilities::is_type_error(&prop_type) {
+            None
+        } else {
+            Some(prop_type)
+        };
         self.value_symbol_links.insert(
             &symbol,
             ValueSymbolLinks {
-                resolved_type: Some(prop_type),
+                resolved_type: resolved,
                 ..Default::default()
             },
         );
@@ -193,10 +201,18 @@ impl Checker {
             }
         }
         let symbol = Arc::new(symbol);
+        // 递归接口（text: (v) => SameInterface）在构建窗口内经 FunctionTypeNode
+        // 环断路器拿到 in-flight error：不驻留，留 None 走 get_type_of_symbol
+        // 的 on-demand 重解析（窗口关闭后节点缓存为完整结果）
+        let resolved = if crate::checker::utilities::is_type_error(&prop_type) {
+            None
+        } else {
+            Some(prop_type)
+        };
         self.value_symbol_links.insert(
             &symbol,
             ValueSymbolLinks {
-                resolved_type: Some(prop_type),
+                resolved_type: resolved,
                 ..Default::default()
             },
         );
@@ -224,7 +240,15 @@ impl Checker {
         self.push_scope(member);
         let return_type = match data.type_node.as_ref() {
             Some(tn) => self.get_type_from_type_node(tn),
-            None => self.get_any_type(),
+            None => {
+                if data.body.as_ref().is_some_and(|b| {
+                    !Self::function_body_has_explicit_return(b)
+                }) {
+                    self.void_type()
+                } else {
+                    self.get_any_type()
+                }
+            }
         };
         let sig = self.build_signature_from_function_like_type_node(
             &data.parameters,

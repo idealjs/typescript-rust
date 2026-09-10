@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: f.MarkTestAsStradaServer()"]
 #[test]
 fn ng_proxy2() {
@@ -17,7 +18,7 @@ fn ng_proxy2() {
 let x = [1, 2];
 x/**/
 "#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("ngProxy2", content);
     // TODO: f.MarkTestAsStradaServer()
     fourslash::go_to_marker(&mut s, "");
     fourslash::unsupported("VerifyQuickInfoIs"); // f.VerifyQuickInfoIs(t, "let x: number[]", "")

@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCompletions"]
 #[test]
 fn get_java_script_completions5() {
@@ -12,6 +13,6 @@ fn get_java_script_completions5() {
 function foo(a) { }
 let x = foo;
 foo(1)./**/"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("getJavaScriptCompletions5", content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyImportFixAtPosition"]
 #[test]
 fn import_name_code_fix_jsx_opening_tag_import_default() {
@@ -11,7 +12,7 @@ export default function (props: any) {}
 export function Index() {
     return <Component/**/ />;
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("importNameCodeFix_jsxOpeningTagImportDefault", content);
     fourslash::go_to_marker(&mut s, "");
     fourslash::unsupported("VerifyImportFixAtPosition"); // f.VerifyImportFixAtPosition(t, []string{
 }

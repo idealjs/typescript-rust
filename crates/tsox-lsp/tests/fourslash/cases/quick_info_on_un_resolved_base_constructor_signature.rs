@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyQuickInfoExists"]
 #[test]
 fn quick_info_on_un_resolved_base_constructor_signature() {
@@ -12,7 +13,7 @@ class genericBaseClassInheritingConstructorFromBase<TValue> extends baseClassWit
 class classInheritingSpecializedClass extends genericBaseClassInheritingConstructorFromBase<string> {
 }
 new class/*1*/InheritingSpecializedClass();"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("quickInfoOnUnResolvedBaseConstructorSignature", content);
     fourslash::go_to_marker(&mut s, "1");
     fourslash::unsupported("VerifyQuickInfoExists"); // f.VerifyQuickInfoExists(t)
 }

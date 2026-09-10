@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: }"]
 #[test]
 fn generics_formatting() {
@@ -24,25 +25,16 @@ foo()<number, string, T >();
 }
 /*expressionWithTypeArguments*/class A < T > extends bar <  T >( )  <  T > {
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("genericsFormatting", content);
     fourslash::unsupported("FormatDocument"); // f.FormatDocument(t, "")
     fourslash::go_to_marker(&mut s, "inClassDeclaration");
     fourslash::verify_current_line_content(&mut s, r#"class Foo<T1, T2> {"#);
     fourslash::go_to_marker(&mut s, "inMethodDeclaration");
-    fourslash::verify_current_line_content(
-        &mut s,
-        r#"    public method<T3, T4>(a: T1, b: Array<T4>): Map<T1, T2, Array<T3>> {"#,
-    );
+    fourslash::verify_current_line_content(&mut s, r#"    public method<T3, T4>(a: T1, b: Array<T4>): Map<T1, T2, Array<T3>> {"#);
     fourslash::go_to_marker(&mut s, "typeArguments");
-    fourslash::verify_current_line_content(
-        &mut s,
-        r#"var foo = new Foo<number, Array<number>>();"#,
-    );
+    fourslash::verify_current_line_content(&mut s, r#"var foo = new Foo<number, Array<number>>();"#);
     fourslash::go_to_marker(&mut s, "typeArgumentsWithTypeLiterals");
-    fourslash::verify_current_line_content(
-        &mut s,
-        r#"foo = new Foo<{ bar: number }, Array<{ baz: string }>>();"#,
-    );
+    fourslash::verify_current_line_content(&mut s, r#"foo = new Foo<{ bar: number }, Array<{ baz: string }>>();"#);
     fourslash::go_to_marker(&mut s, "inNewSignature");
     fourslash::verify_current_line_content(&mut s, r#"    new <T>(a: T);"#);
     fourslash::go_to_marker(&mut s, "inOptionalMethodSignature");

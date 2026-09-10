@@ -16,7 +16,8 @@ impl Checker {
     ) -> Option<Arc<Type>> {
         let src_has_this = parameters.iter().next().is_some_and(|first| {
             matches!(&first.data, NodeData::ParameterDeclaration(fd)
-                if matches!(&fd.name.data, NodeData::Identifier(id) if id.text == "this"))
+                if matches!(&fd.name.data, NodeData::Identifier(id) if id.text == "this")
+                    || fd.name.kind == tsox_frontend::ast::SyntaxKind::ThisKeyword)
         });
         // 无注解 this 参数：取上下文签名 this 参数类型（Go getTypeForVariableLikeDeclaration 的 InternalSymbolNameThis 分支）
         if is_this_param {

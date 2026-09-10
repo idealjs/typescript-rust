@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: t.Skip('Known failing fourslash test')"]
 #[test]
 fn auto_import_package_json_imports_case_sensitivity() {
@@ -17,6 +18,6 @@ fn auto_import_package_json_imports_case_sensitivity() {
 export function add(a: number, b: number) {}
 // @Filename: /src/index.ts
 add/*imports*/;"##;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("autoImportPackageJsonImportsCaseSensitivity", content);
     fourslash::unsupported("VerifyImportFixModuleSpecifiers"); // f.VerifyImportFixModuleSpecifiers(t, "imports", []string{"#src/add.ts"}, &lsutil.UserPreferences{Imp
 }

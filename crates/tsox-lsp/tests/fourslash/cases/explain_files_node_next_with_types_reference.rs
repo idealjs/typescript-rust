@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineFindAllReferences"]
 #[test]
 fn explain_files_node_next_with_types_reference() {
@@ -39,6 +40,6 @@ declare namespace React { export interface Whatever {} }
 }
 // @Filename: /index.ts
 import { useForm } from "react-hook-form";"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("explainFilesNodeNextWithTypesReference", content);
     fourslash::unsupported("VerifyBaselineFindAllReferences"); // f.VerifyBaselineFindAllReferences(t, "")
 }

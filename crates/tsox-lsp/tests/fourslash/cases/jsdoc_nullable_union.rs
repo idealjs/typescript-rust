@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyCompletions"]
+
 #[test]
 fn jsdoc_nullable_union() {
     let content = r#"// @allowNonTsExtensions: true
@@ -17,8 +17,8 @@ function f(p1, p2, p3) {
     p2./*2*/;
     p3./*3*/;
 }"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "2", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "3", &fourslash.CompletionsExpectedList{
+    let mut s = Session::new_for_test("jsdocNullableUnion", content);
+    fourslash::verify_completions_exact_at(&mut s, Some("1"), &["x"]);
+    fourslash::verify_completions_exact_at(&mut s, Some("2"), &["y"]);
+    fourslash::verify_completions_exact_at(&mut s, Some("3"), &["z"]);
 }

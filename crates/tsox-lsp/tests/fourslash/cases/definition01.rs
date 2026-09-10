@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: f.MarkTestAsStradaServer()"]
 #[test]
 fn definition01() {
@@ -9,7 +10,7 @@ import n = require([|'./a/*1*/'|]);
 var x = new n.Foo();
 // @Filename: a.ts
  /*2*/export class Foo {}"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("definition01", content);
     // TODO: f.MarkTestAsStradaServer()
     fourslash::unsupported("VerifyBaselineGoToDefinition"); // f.VerifyBaselineGoToDefinition(t, true, "1")
 }

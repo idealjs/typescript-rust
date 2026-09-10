@@ -83,7 +83,13 @@ impl Checker {
                     ) {
                         return Some(self.auto_type());
                     }
-                    return Some(self.get_type_of_node(init));
+                    let t = self.get_type_of_node(init);
+                    // Go widenTypeInferredFromInitializer：可变变量初始化式含 widening
+                    // 成员时拓宽（如推断 T | undefinedWidening → any）
+                    if type_contains_widening_member(&t) {
+                        return Some(self.get_widened_type(&t));
+                    }
+                    return Some(t);
                 }
                 let for_stmt = Self::for_in_or_of_statement_of(expr)?;
                 let NodeData::ForInOrOfStatement(data) = &for_stmt.data else {
@@ -231,6 +237,48 @@ impl Checker {
         t: &Arc<Type>,
         name: &str,
     ) -> Option<Arc<Symbol>> {
+        if t.is_union() || t.is_intersection() {
+            return self.get_union_or_intersection_property(t, name);
+        }
+        // 挂起的条件类型（checkType 已具体时）先解析再取成员
+        if matches!(&t.data, crate::checker::types::TypeData::Conditional(_))
+            && let Some(resolved) = self.resolve_conditional_type(t)
+        {
+            if !Arc::ptr_eq(&resolved, t) {
+                return self.get_property_of_type(&resolved, name);
+            }
+        }
+        // 带实参的接口引用但成员是声明形式或来自其它实参集的克隆（substitute
+        // 重建型）：经实例化重取成员（Go 结构化成员解析：实例引用的成员来自
+        // 实例化 target；成员 owner 与当前型一致才视为已实例化）
+        if let Some(obj) = t.as_object()
+            && !obj.type_arguments.is_empty()
+            && let Some(sym) = t.symbol.as_ref()
+            && sym.flags.contains(SymbolFlags::Interface)
+            && !obj.structured.members.entries.is_empty()
+            && obj
+                .structured
+                .members
+                .entries
+                .values()
+                .next()
+                .is_some_and(|m| {
+                    !m.check_flags
+                        .contains(tsox_frontend::ast::CheckFlags::Instantiated)
+                        || self
+                            .instantiated_member_owner
+                            .get(&(Arc::as_ptr(m) as usize))
+                            .is_none_or(|owner| *owner != u64::from(t.id))
+                })
+        {
+            let inst = self.resolve_interface_type_ex(sym, Some(obj.type_arguments.clone()));
+            if let Some(member) = inst
+                .as_structured()
+                .and_then(|s| s.members.get(name).cloned())
+            {
+                return Some(member);
+            }
+        }
         if let Some(sym) = self.get_property_of_type_cached(t, name) {
             return Some(sym);
         }
@@ -245,6 +293,15 @@ impl Checker {
                 .cloned()
             {
                 return Some(member);
+            }
+        }
+        // 类型参数（含多态 this）成员经约束解析（tsc resolveStructuredTypeMembers 语义）
+        if let crate::checker::types::TypeData::TypeParameter(tp) = &t.data
+            && let Some(constraint) = tp.constraint.clone()
+        {
+            let member = self.get_property_of_type(&constraint, name);
+            if member.is_some() {
+                return member;
             }
         }
         None
@@ -269,4 +326,22 @@ impl Checker {
         }
         Some(Arc::clone(sym))
     }
+}
+
+
+fn type_contains_widening_member(t: &Arc<Type>) -> bool {
+    if t
+        .object_flags
+        .intersects(crate::checker::types::ObjectFlags::ContainsWideningType)
+    {
+        return true;
+    }
+    if let TypeData::Union(u) = &t.data {
+        return u
+            .union_or_intersection
+            .types
+            .iter()
+            .any(type_contains_widening_member);
+    }
+    false
 }

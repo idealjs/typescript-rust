@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: f.MarkTestAsStradaServer()"]
 #[test]
 fn jsdoc_typedef_tag_navigate_to() {
@@ -13,7 +14,7 @@ var NumberLike2;
 
 /** @type {/*1*/NumberLike} */
 var numberLike;"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("jsdocTypedefTagNavigateTo", content);
     // TODO: f.MarkTestAsStradaServer()
     fourslash::unsupported("VerifyBaselineDocumentSymbol"); // f.VerifyBaselineDocumentSymbol(t)
 }

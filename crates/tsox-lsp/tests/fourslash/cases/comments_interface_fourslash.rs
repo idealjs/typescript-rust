@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: t.Skip('Known failing fourslash test')"]
 #[test]
 fn comments_interface_fourslash() {
@@ -72,37 +73,22 @@ i3_i = {
 i3_i./*43q*/l(/*43*/10);
 i3_i.nc_/*44q*/f(/*44*/10);
 i3_i.nc/*45q*/_l(/*45*/10);"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("commentsInterfaceFourslash", content);
     fourslash::verify_quick_info_at(&mut s, "1", "interface i1", "this is interface 1");
     fourslash::verify_quick_info_at(&mut s, "2", "var i1_i: i1", "");
     fourslash::verify_quick_info_at(&mut s, "3", "interface nc_i1", "");
     fourslash::verify_quick_info_at(&mut s, "4", "var nc_i1_i: nc_i1", "");
-    fourslash::verify_quick_info_at(
-        &mut s,
-        "5",
-        "interface i2",
-        "this is interface 2 with members",
-    );
+    fourslash::verify_quick_info_at(&mut s, "5", "interface i2", "this is interface 2 with members");
     fourslash::verify_quick_info_at(&mut s, "6", "var i2_i: i2", "");
     fourslash::verify_quick_info_at(&mut s, "7", "var i2_i_x: number", "");
     fourslash::verify_quick_info_at(&mut s, "8", "(property) i2.x: number", "this is x");
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "8", &fourslash.CompletionsExpectedList{
     fourslash::verify_quick_info_at(&mut s, "9", "var i2_i_foo: (b: number) => string", "");
-    fourslash::verify_quick_info_at(
-        &mut s,
-        "10",
-        "(property) i2.foo: (b: number) => string",
-        "this is foo",
-    );
+    fourslash::verify_quick_info_at(&mut s, "10", "(property) i2.foo: (b: number) => string", "this is foo");
     fourslash::verify_quick_info_at(&mut s, "11", "var i2_i_foo_r: string", "");
     fourslash::go_to_marker(&mut s, "12");
     fourslash::unsupported("VerifySignatureHelp"); // f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{DocComment: "", ParameterDocComment: "
-    fourslash::verify_quick_info_at(
-        &mut s,
-        "12q",
-        "(property) i2.foo: (b: number) => string",
-        "this is foo",
-    );
+    fourslash::verify_quick_info_at(&mut s, "12q", "(property) i2.foo: (b: number) => string", "this is foo");
     fourslash::verify_quick_info_at(&mut s, "13", "var i2_i_i2_si: number", "");
     fourslash::verify_quick_info_at(&mut s, "13q", "var i2_i: i2", "");
     fourslash::verify_quick_info_at(&mut s, "14", "var i2_i_i2_ii: number", "");
@@ -110,57 +96,27 @@ i3_i.nc/*45q*/_l(/*45*/10);"#;
     fourslash::verify_quick_info_at(&mut s, "15", "var i2_i_n: any", "");
     fourslash::go_to_marker(&mut s, "16");
     fourslash::unsupported("VerifySignatureHelp"); // f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{DocComment: "new method", ParameterDoc
-    fourslash::verify_quick_info_at(
-        &mut s,
-        "16q",
-        "var i2_i: i2\nnew (i: i1) => any",
-        "new method",
-    );
+    fourslash::verify_quick_info_at(&mut s, "16q", "var i2_i: i2\nnew (i: i1) => any", "new method");
     fourslash::verify_quick_info_at(&mut s, "17", "var i2_i_nc_x: number", "");
     fourslash::verify_quick_info_at(&mut s, "18", "(property) i2.nc_x: number", "");
     fourslash::verify_quick_info_at(&mut s, "19", "var i2_i_nc_foo: (b: number) => string", "");
-    fourslash::verify_quick_info_at(
-        &mut s,
-        "20",
-        "(property) i2.nc_foo: (b: number) => string",
-        "",
-    );
+    fourslash::verify_quick_info_at(&mut s, "20", "(property) i2.nc_foo: (b: number) => string", "");
     fourslash::verify_quick_info_at(&mut s, "21", "var i2_i_nc_foo_r: string", "");
     fourslash::go_to_marker(&mut s, "22");
     fourslash::unsupported("VerifySignatureHelp"); // f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{DocComment: ""})
-    fourslash::verify_quick_info_at(
-        &mut s,
-        "22q",
-        "(property) i2.nc_foo: (b: number) => string",
-        "",
-    );
+    fourslash::verify_quick_info_at(&mut s, "22q", "(property) i2.nc_foo: (b: number) => string", "");
     fourslash::verify_quick_info_at(&mut s, "23", "var i2_i_r: number", "");
     fourslash::go_to_marker(&mut s, "24");
     fourslash::unsupported("VerifySignatureHelp"); // f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{DocComment: "this is call signature", 
-    fourslash::verify_quick_info_at(
-        &mut s,
-        "24q",
-        "var i2_i: i2\n(a: number, b: number) => number",
-        "this is call signature",
-    );
+    fourslash::verify_quick_info_at(&mut s, "24q", "var i2_i: i2\n(a: number, b: number) => number", "this is call signature");
     fourslash::go_to_marker(&mut s, "25");
     fourslash::unsupported("VerifySignatureHelp"); // f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{DocComment: "this is call signature", 
     fourslash::verify_quick_info_at(&mut s, "26", "var i2_i_fnfoo: (b: number) => string", "");
-    fourslash::verify_quick_info_at(
-        &mut s,
-        "27",
-        "(method) i2.fnfoo(b: number): string",
-        "this is fnfoo",
-    );
+    fourslash::verify_quick_info_at(&mut s, "27", "(method) i2.fnfoo(b: number): string", "this is fnfoo");
     fourslash::verify_quick_info_at(&mut s, "28", "var i2_i_fnfoo_r: string", "");
     fourslash::go_to_marker(&mut s, "29");
     fourslash::unsupported("VerifySignatureHelp"); // f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{DocComment: "this is fnfoo", Parameter
-    fourslash::verify_quick_info_at(
-        &mut s,
-        "29q",
-        "(method) i2.fnfoo(b: number): string",
-        "this is fnfoo",
-    );
+    fourslash::verify_quick_info_at(&mut s, "29q", "(method) i2.fnfoo(b: number): string", "this is fnfoo");
     fourslash::verify_quick_info_at(&mut s, "30", "var i2_i_nc_fnfoo: (b: number) => string", "");
     fourslash::verify_quick_info_at(&mut s, "31", "(method) i2.nc_fnfoo(b: number): string", "");
     fourslash::verify_quick_info_at(&mut s, "32", "var i2_i_nc_fnfoo_r: string", "");
@@ -179,21 +135,11 @@ i3_i.nc/*45q*/_l(/*45*/10);"#;
     fourslash::unsupported("VerifySignatureHelp"); // f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{DocComment: "Function i3 f", Parameter
     fourslash::go_to_marker(&mut s, "43");
     fourslash::unsupported("VerifySignatureHelp"); // f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{DocComment: "", ParameterDocComment: "
-    fourslash::verify_quick_info_at(
-        &mut s,
-        "43q",
-        "(property) i3.l: (b: number) => string",
-        "i3 l",
-    );
+    fourslash::verify_quick_info_at(&mut s, "43q", "(property) i3.l: (b: number) => string", "i3 l");
     fourslash::go_to_marker(&mut s, "44");
     fourslash::unsupported("VerifySignatureHelp"); // f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{DocComment: ""})
     fourslash::verify_quick_info_at(&mut s, "44q", "(method) i3.nc_f(a: number): string", "");
     fourslash::go_to_marker(&mut s, "45");
     fourslash::unsupported("VerifySignatureHelp"); // f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{DocComment: ""})
-    fourslash::verify_quick_info_at(
-        &mut s,
-        "45q",
-        "(property) i3.nc_l: (b: number) => string",
-        "",
-    );
+    fourslash::verify_quick_info_at(&mut s, "45q", "(property) i3.nc_l: (b: number) => string", "");
 }

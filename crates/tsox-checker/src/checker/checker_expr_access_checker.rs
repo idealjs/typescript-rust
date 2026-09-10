@@ -201,6 +201,20 @@ impl Checker {
         if name_text == "length" && self.is_array_type(&obj_type) {
             return self.number_type();
         }
+        // 无具名成员：适用的字符串索引签名值（tsc getApplicableIndexInfo）
+        if let Some(structured) = obj_type.as_structured() {
+            for info in &structured.index_infos {
+                let key_matches = info.key_type.as_ref().is_some_and(|k| {
+                    k.flags.contains(TypeFlags::String)
+                        || k.flags.contains(TypeFlags::Number)
+                });
+                if key_matches {
+                    if let Some(value) = &info.value_type {
+                        return self.flow_type_of_access_expression(node, None, Arc::clone(value));
+                    }
+                }
+            }
+        }
         self.get_any_type()
     }
 

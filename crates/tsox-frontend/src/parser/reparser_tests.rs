@@ -89,7 +89,8 @@ let p;
         NodeData::TypeAliasDeclaration(d) => {
             assert_eq!(node_text(&d.name), "Point");
 
-            assert_eq!(d.type_node.kind, SyntaxKind::TypeReference);
+            // @property 标签并入：Object 引用替换为含成员的类型字面量（tsc 语义）
+            assert_eq!(d.type_node.kind, SyntaxKind::TypeLiteral);
         }
         _ => panic!("expected TypeAliasDeclaration"),
     }

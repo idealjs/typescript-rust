@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[test]
 fn return_recursive_type() {
     let content = r#"interface MyInt {
@@ -7,6 +8,6 @@ fn return_recursive_type() {
 }
 function MyFn() { return <MyInt>MyFn; }
 var My/**/Var = MyFn();"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("returnRecursiveType", content);
     fourslash::verify_quick_info_at(&mut s, "", "var MyVar: MyInt", "");
 }

@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.BaselineAutoImportsCompletions"]
 #[test]
 fn auto_import_default_pascal_case() {
@@ -17,7 +18,7 @@ export function SomeScreen() {
   return <ChargerHeader/*1*/
 }
 "#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("autoImportDefaultPascalCase", content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
     fourslash::unsupported("BaselineAutoImportsCompletions"); // f.BaselineAutoImportsCompletions(t, []string{"1"})
 }
@@ -39,7 +40,7 @@ export function SomeScreen() {
   return <ChargerHeader/*1*/
 }
 "#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("autoImportDefaultPascalCaseAnonymous", content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
     fourslash::unsupported("BaselineAutoImportsCompletions"); // f.BaselineAutoImportsCompletions(t, []string{"1"})
 }
@@ -62,7 +63,7 @@ export function SomeScreen() {
   return <ChargerHeader/*1*/
 }
 "#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("autoImportDefaultPascalCaseCaseInsensitive", content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
     fourslash::unsupported("BaselineAutoImportsCompletions"); // f.BaselineAutoImportsCompletions(t, []string{"1"})
 }
@@ -85,7 +86,7 @@ export function SomeScreen() {
   return <ChargerHeader/*1*/
 }
 "#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("autoImportDefaultPascalCaseAnonymousCaseInsensitive", content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
     fourslash::unsupported("BaselineAutoImportsCompletions"); // f.BaselineAutoImportsCompletions(t, []string{"1"})
 }
@@ -111,7 +112,7 @@ export function SomeScreen() {
   return <ChargerHeader/*1*/
 }
 "#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("autoImportDefaultPascalCaseReexportCaseInsensitive", content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
     fourslash::unsupported("BaselineAutoImportsCompletions"); // f.BaselineAutoImportsCompletions(t, []string{"1"})
 }
@@ -135,7 +136,7 @@ export function SomeScreen() {
   return <ChargerHeader/*1*/
 }
 "#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("autoImportDefaultPascalCaseAliasCaseInsensitive", content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
     fourslash::unsupported("BaselineAutoImportsCompletions"); // f.BaselineAutoImportsCompletions(t, []string{"1"})
 }

@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: t.Skip('Known failing fourslash test')"]
 #[test]
 fn import_name_code_fix_new_import_type_roots1() {
@@ -17,6 +18,6 @@ export function foo() {};
         ]
     }
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("importNameCodeFixNewImportTypeRoots1", content);
     fourslash::unsupported("VerifyImportFixAtPosition"); // f.VerifyImportFixAtPosition(t, []string{
 }

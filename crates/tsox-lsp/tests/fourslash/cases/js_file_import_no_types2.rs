@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: t.Skip('Known failing fourslash test')"]
 #[test]
 fn js_file_import_no_types2() {
@@ -23,6 +24,6 @@ export class TestClassBaseline {}
 export interface TestInterfaceBaseline {}
 // @Filename: /a.js
 import /**/"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("jsFileImportNoTypes2", content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

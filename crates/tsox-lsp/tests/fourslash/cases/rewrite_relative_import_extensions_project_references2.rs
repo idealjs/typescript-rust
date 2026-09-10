@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: f.MarkTestAsStradaServer()"]
 #[test]
 fn rewrite_relative_import_extensions_project_references2() {
@@ -31,7 +32,7 @@ export {};
 }
 // @Filename: src/services/services.ts
 import {} from "../compiler/parser.ts";"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("rewriteRelativeImportExtensionsProjectReferences2", content);
     // TODO: f.MarkTestAsStradaServer()
     fourslash::go_to_file(&mut s, "/src/services/services.ts");
     fourslash::unsupported("VerifyBaselineNonSuggestionDiagnostics"); // f.VerifyBaselineNonSuggestionDiagnostics(t)

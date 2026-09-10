@@ -4,6 +4,36 @@ use crate::checker::checker_symbol_types::*;
 
 impl Checker {
     pub fn get_type_of_symbol(&mut self, symbol: &Arc<Symbol>) -> Arc<Type> {
+        // Go getTypeOfReverseMappedSymbol：反向映射符号类型经
+        // inferReverseMappedType(propertyType, mappedType, constraintType) 惰性求值
+        if let Some(links) = self.reverse_mapped_symbol_links.get(symbol)
+            && links.property_type.is_some()
+        {
+            if let Some(t) = self
+                .value_symbol_links
+                .get(symbol)
+                .and_then(|l| l.resolved_type.clone())
+            {
+                return t;
+            }
+            let (Some(prop_t), Some(mapped), Some(constraint)) = (
+                links.property_type.clone(),
+                links.mapped_type.clone(),
+                links.constraint_type.clone(),
+            ) else {
+                return self.get_unknown_type();
+            };
+            let inferred = self.infer_reverse_mapped_type(&prop_t, &mapped, &constraint);
+            if self.template_resolution_letway {
+                // 模板让位（外层解析在途）：不驻留 unknown，待外层完成后重取
+                return self.get_unknown_type();
+            }
+            let t = inferred.unwrap_or_else(|| self.get_unknown_type());
+            self.value_symbol_links
+                .get_or_default(symbol)
+                .resolved_type = Some(Arc::clone(&t));
+            return t;
+        }
         if symbol.flags.contains(SymbolFlags::Alias) {
             let target = self.follow_alias(symbol);
             if let Some(target) = target
@@ -13,7 +43,13 @@ impl Checker {
                 self.value_symbol_links.get_or_default(symbol).resolved_type = Some(Arc::clone(&t));
                 return t;
             }
-            return self.get_any_type();
+            // 合并符号（re-export 局部符号带 Alias 位）：按非 alias 意义继续解析
+            if !symbol
+                .flags
+                .intersects(SymbolFlags::VALUE | SymbolFlags::TYPE | SymbolFlags::NAMESPACE)
+            {
+                return self.get_any_type();
+            }
         }
 
         if symbol.flags.contains(SymbolFlags::ValueModule)
@@ -91,10 +127,14 @@ impl Checker {
                 decl.kind == SyntaxKind::Parameter && t.flags.contains(TypeFlags::Any)
             };
 
+            // 环断路器 in-flight error（递归接口构建窗口）不作为声明型返回，
+            // 落到 on-demand 重解析
             if let Some(decl) = &symbol.value_declaration {
                 if let Some(links) = self.type_node_links.get(decl) {
                     if let Some(ref t) = links.resolved_type {
-                        if !param_any_placeholder(decl, t) {
+                        if !param_any_placeholder(decl, t)
+                            && !crate::checker::utilities::is_type_error(t)
+                        {
                             return Arc::clone(t);
                         }
                     }
@@ -104,7 +144,9 @@ impl Checker {
             for decl in &symbol.declarations {
                 if let Some(links) = self.type_node_links.get(decl) {
                     if let Some(ref t) = links.resolved_type {
-                        if !param_any_placeholder(decl, t) {
+                        if !param_any_placeholder(decl, t)
+                            && !crate::checker::utilities::is_type_error(t)
+                        {
                             return Arc::clone(t);
                         }
                     }
@@ -112,7 +154,12 @@ impl Checker {
             }
 
             if let Some(t) = self.resolve_symbol_declared_type_on_demand(symbol) {
-                self.value_symbol_links.get_or_default(symbol).resolved_type = Some(Arc::clone(&t));
+                // 同 resolve_symbol_declared_type_on_demand：error（环断路器
+                // in-flight 产物）不驻留
+                if !crate::checker::utilities::is_type_error(&t) {
+                    self.value_symbol_links.get_or_default(symbol).resolved_type =
+                        Some(Arc::clone(&t));
+                }
                 return t;
             }
             self.get_any_type()

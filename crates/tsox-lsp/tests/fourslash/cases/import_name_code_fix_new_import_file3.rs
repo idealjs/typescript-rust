@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyImportFixAtPosition"]
 #[test]
 fn import_name_code_fix_new_import_file3() {
@@ -9,6 +10,6 @@ export namespace XXX {
    export interface I {
    }
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("importNameCodeFixNewImportFile3", content);
     fourslash::unsupported("VerifyImportFixAtPosition"); // f.VerifyImportFixAtPosition(t, []string{
 }

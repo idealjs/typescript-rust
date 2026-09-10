@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: t.Skip('Known failing fourslash test')"]
 #[test]
 fn js_doc_property_description11() {
@@ -13,6 +14,6 @@ fn js_doc_property_description11() {
 function aliasExample(e: AliasExample) {
     console.log(e./*alias*/anything);
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("jsDocPropertyDescription11", content);
     fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "alias", "(index) AliasExample[string | `any${string}`]: string", "Something 
 }

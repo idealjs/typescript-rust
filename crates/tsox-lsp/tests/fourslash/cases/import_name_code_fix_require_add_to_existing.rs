@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: t.Skip('Known failing fourslash test')"]
 #[test]
 fn import_name_code_fix_require_add_to_existing() {
@@ -16,7 +17,7 @@ var path = require('path')
   , { Named1 } = require('./blah')
 
 new Blah"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("importNameCodeFix_require_addToExisting", content);
     fourslash::go_to_file(&mut s, "index.js");
     fourslash::unsupported("VerifyCodeFix"); // f.VerifyCodeFix(t, fourslash.VerifyCodeFixOptions{
 }

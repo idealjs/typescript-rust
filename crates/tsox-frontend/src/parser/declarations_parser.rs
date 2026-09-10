@@ -164,7 +164,7 @@ impl Parser {
         let type_parameters = self.parse_optional_type_parameters();
         let heritage_clauses = self.parse_heritage_clauses();
         let members = self.parse_class_members();
-        let end = self.token_pos();
+        let end = self.node_pos();
         Arc::new(Node::with_loc(
             SyntaxKind::ClassDeclaration,
             NodeData::ClassDeclaration(ClassDeclarationData {
@@ -194,7 +194,7 @@ impl Parser {
         self.expect(SyntaxKind::OpenBraceToken);
         let members = self.parse_list(ParsingContext::TypeMembers, Parser::parse_type_member);
         self.expect(SyntaxKind::CloseBraceToken);
-        let end = self.token_pos();
+        let end = self.node_pos();
         Arc::new(Node::with_loc(
             SyntaxKind::InterfaceDeclaration,
             NodeData::InterfaceDeclaration(InterfaceDeclarationData {
@@ -223,7 +223,7 @@ impl Parser {
         self.expect(SyntaxKind::EqualsToken);
         let type_node = self.parse_type();
         self.parse_semicolon();
-        let end = self.token_pos();
+        let end = self.node_pos();
         Arc::new(Node::with_loc(
             SyntaxKind::TypeAliasDeclaration,
             NodeData::TypeAliasDeclaration(TypeAliasDeclarationData {
@@ -251,7 +251,7 @@ impl Parser {
         let members =
             self.parse_delimited_list(ParsingContext::EnumMembers, Self::parse_enum_member);
         self.expect(SyntaxKind::CloseBraceToken);
-        let end = self.token_pos();
+        let end = self.node_pos();
         Arc::new(Node::with_loc(
             SyntaxKind::EnumDeclaration,
             NodeData::EnumDeclaration(EnumDeclarationData {

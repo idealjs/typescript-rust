@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: t.Skip('Known failing fourslash test')"]
 #[test]
 fn unused_localsin_constructor_fs2() {
@@ -13,6 +14,6 @@ class greeter {
         used = used + "second part";
     }|]
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("unusedLocalsinConstructorFS2", content);
     fourslash::unsupported("VerifyRangeAfterCodeFix"); // f.VerifyRangeAfterCodeFix(t, `
 }

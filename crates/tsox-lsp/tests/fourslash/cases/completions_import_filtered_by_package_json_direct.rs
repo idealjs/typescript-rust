@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: t.Skip('Known failing fourslash test')"]
 #[test]
 fn completions_import_filtered_by_package_json_direct() {
@@ -27,6 +28,6 @@ export declare var ReactFake: any;
 }
 //@Filename: /src/index.ts
 const x = Re/**/"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("completionsImport_filteredByPackageJson_direct", content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

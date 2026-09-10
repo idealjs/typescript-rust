@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: }"]
 #[test]
 fn tsx_rename3() {
@@ -18,7 +19,7 @@ class MyClass {
 
 
 var x = <MyClass [|[|{| "contextRangeIndex": 2 |}name|]='hello'|]/>;"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("tsxRename3", content);
     fourslash::unsupported("VerifyBaselineRenameAtRangesWithText"); // f.VerifyBaselineRenameAtRangesWithText(t, nil /*preferences*/, "name")
     // TODO: }
 }

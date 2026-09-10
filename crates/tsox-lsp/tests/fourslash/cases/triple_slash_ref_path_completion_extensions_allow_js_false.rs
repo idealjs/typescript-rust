@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCompletions"]
 #[test]
 fn triple_slash_ref_path_completion_extensions_allow_js_false() {
@@ -21,6 +22,6 @@ fn triple_slash_ref_path_completion_extensions_allow_js_false() {
 
 // @Filename: f1.cs
 "#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("tripleSlashRefPathCompletionExtensionsAllowJSFalse", content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, f.Markers(), &fourslash.CompletionsExpectedList{
 }

@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: t.Skip('Known failing fourslash test')"]
 #[test]
 fn unused_constant_in_function1() {
@@ -8,6 +9,6 @@ fn unused_constant_in_function1() {
 [| function f1 () {
     const x: string = "x";
 } |]"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("unusedConstantInFunction1", content);
     fourslash::unsupported("VerifyRangeAfterCodeFix"); // f.VerifyRangeAfterCodeFix(t, `function f1 () {
 }

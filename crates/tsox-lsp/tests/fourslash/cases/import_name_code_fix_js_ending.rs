@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyImportFixModuleSpecifiers"]
 #[test]
 fn import_name_code_fix_js_ending() {
@@ -13,6 +14,6 @@ import "./decorators";
 export declare function customElement(name: string): any;
 // @Filename: /a.ts
 customElement/**/"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("importNameCodeFixJsEnding", content);
     fourslash::unsupported("VerifyImportFixModuleSpecifiers"); // f.VerifyImportFixModuleSpecifiers(t, "", []string{"lit/decorators.js"}, &lsutil.UserPreferences{Impo
 }

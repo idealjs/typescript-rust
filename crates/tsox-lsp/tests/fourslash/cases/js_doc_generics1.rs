@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: }"]
 #[test]
 fn js_doc_generics1() {
@@ -23,7 +24,7 @@ w.x[0][0]./*2*/
 /** @type {Array<Thing.Thung>} */
 var x;
 x[0].a./*3*/"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("jsDocGenerics1", content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, f.Markers(), &fourslash.CompletionsExpectedList{
     // TODO: }
 }

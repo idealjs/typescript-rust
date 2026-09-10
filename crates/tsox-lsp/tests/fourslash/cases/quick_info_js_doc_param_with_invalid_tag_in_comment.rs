@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyQuickInfoAt"]
 #[test]
 fn quick_info_js_doc_param_with_invalid_tag_in_comment() {
@@ -14,7 +15,7 @@ fn quick_info_js_doc_param_with_invalid_tag_in_comment() {
  */
 function /*fn*/foo(/**/x, /*a*/a, /*b*/b, /*c*/c, /*d*/d) {}
 "#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("quickInfoJSDocParamWithInvalidTagInComment", content);
     fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "fn", "function foo(x: string, a: string, b: string, c: string, d: string): v
     fourslash::verify_quick_info_at(&mut s, "", "(parameter) x: string", "Checks @-rule here");
     fourslash::verify_quick_info_at(&mut s, "a", "(parameter) a: string", "see");

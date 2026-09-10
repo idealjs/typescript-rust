@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyImportFixAtPosition"]
 #[test]
 fn import_name_code_fix_new_import_allow_synthetic_default_imports3() {
@@ -12,6 +13,6 @@ bar/*0*/();|]
 declare function bar(): number;
 export = bar;
 export as namespace bar;"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("importNameCodeFixNewImportAllowSyntheticDefaultImports3", content);
     fourslash::unsupported("VerifyImportFixAtPosition"); // f.VerifyImportFixAtPosition(t, []string{
 }

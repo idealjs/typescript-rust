@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineDocumentHighlights"]
 #[test]
 fn get_occurrences_if_else5() {
@@ -24,6 +25,6 @@ else/*11*/
 if/*12*/ (false) {
 }
 else/*13*/ { }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("getOccurrencesIfElse5", content);
     fourslash::unsupported("VerifyBaselineDocumentHighlights"); // f.VerifyBaselineDocumentHighlights(t, nil /*preferences*/, ToAny(f.Markers())...)
 }

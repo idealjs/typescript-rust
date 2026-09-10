@@ -197,6 +197,34 @@ impl Checker {
                     let r =
                         self.substitute_infer_type_parameters(&rt, &sig.type_parameters, &inferred);
                     self.in_return_substitution = false;
+                    // 泛型函数体内声明的类经调用位实例化：携带 (外层函数, 实参) 显示元
+                    // （变量侧渲染 f<string>.C 形态；仅限体内声明，不污染顶层类）
+                    if !inferred.is_empty()
+                        && r.alias.is_none()
+                        && let Some(fn_decl) = sig.declaration.clone()
+                        && let Some(fn_sym) = fn_decl.name().and_then(|n| self.resolve_identifier(&n))
+                        && r.symbol.as_ref().is_some_and(|class_sym| {
+                            class_sym.flags.contains(tsox_frontend::ast::SymbolFlags::Class)
+                                && class_sym.declarations.iter().any(|d| {
+                                    let mut cur = d.parent.clone();
+                                    while let Some(n) = cur {
+                                        if Arc::ptr_eq(&n, &fn_decl) {
+                                            return true;
+                                        }
+                                        cur = n.parent.clone();
+                                    }
+                                    false
+                                })
+                        })
+                    {
+                        let ptr = Arc::as_ptr(&r) as *mut crate::checker::types::Type;
+                        unsafe {
+                            (*ptr).alias = Some(Box::new(crate::checker::types::TypeAlias::new(
+                                Some(Arc::clone(&fn_sym)),
+                                inferred.clone(),
+                            )));
+                        }
+                    }
                     return r;
                 }
                 return rt;

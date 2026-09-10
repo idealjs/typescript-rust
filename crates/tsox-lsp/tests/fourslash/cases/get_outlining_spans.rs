@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyOutliningSpans"]
 #[test]
 fn get_outlining_spans() {
@@ -127,6 +128,6 @@ class D<T> extends C<T>[| {
         super<T>(x);
     }|]
 }|]"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("getOutliningSpans", content);
     fourslash::unsupported("VerifyOutliningSpans"); // f.VerifyOutliningSpans(t)
 }

@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineDocumentSymbol"]
 #[test]
 fn navigation_bar_anonymous_class_and_function_expressions() {
@@ -30,6 +31,6 @@ fn navigation_bar_anonymous_class_and_function_expressions() {
     console.log(class cls3 {});
     (class { });
 })"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("navigationBarAnonymousClassAndFunctionExpressions", content);
     fourslash::unsupported("VerifyBaselineDocumentSymbol"); // f.VerifyBaselineDocumentSymbol(t)
 }

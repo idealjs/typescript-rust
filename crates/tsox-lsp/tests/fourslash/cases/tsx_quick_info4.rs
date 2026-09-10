@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: t.Skip('Known failing fourslash test')"]
 #[test]
 fn tsx_quick_info4() {
@@ -41,25 +42,10 @@ function buildSomeElement2(): JSX.Element {
     );
 }
 let componenet = <MainButton onClick={()=>{}} ext/*5*/ra-prop>GO</MainButton>;"#;
-    let mut s = Session::new(content);
-    fourslash::verify_quick_info_at(
-        &mut s,
-        "1",
-        "function MainButton(linkProps: LinkProps): JSX.Element (+1 overload)",
-        "",
-    );
+    let mut s = Session::new_for_test("tsxQuickInfo4", content);
+    fourslash::verify_quick_info_at(&mut s, "1", "function MainButton(linkProps: LinkProps): JSX.Element (+1 overload)", "");
     fourslash::verify_quick_info_at(&mut s, "2", "(property) LinkProps.to: string", "");
-    fourslash::verify_quick_info_at(
-        &mut s,
-        "3",
-        "function MainButton(buttonProps: ButtonProps): JSX.Element (+1 overload)",
-        "",
-    );
-    fourslash::verify_quick_info_at(
-        &mut s,
-        "4",
-        "(method) ButtonProps.onClick(event?: React.MouseEvent<HTMLButtonElement>): void",
-        "",
-    );
+    fourslash::verify_quick_info_at(&mut s, "3", "function MainButton(buttonProps: ButtonProps): JSX.Element (+1 overload)", "");
+    fourslash::verify_quick_info_at(&mut s, "4", "(method) ButtonProps.onClick(event?: React.MouseEvent<HTMLButtonElement>): void", "");
     fourslash::verify_quick_info_at(&mut s, "5", "(property) extra-prop: true", "");
 }

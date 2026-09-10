@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCompletions"]
 #[test]
 fn auto_import_paths_aliases_and_barrels() {
@@ -27,6 +28,6 @@ fn auto_import_paths_aliases_and_barrels() {
  export class Thing1B {}
 // @Filename: /src/dirB/thing2B.ts
  export class Thing2B {}"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("autoImportPathsAliasesAndBarrels", content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

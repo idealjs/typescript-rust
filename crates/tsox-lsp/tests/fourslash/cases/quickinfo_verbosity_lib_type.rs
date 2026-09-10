@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineHoverWithVerbosity"]
 #[test]
 fn quickinfo_verbosity_lib_type() {
@@ -14,6 +15,6 @@ function f(): Promise<Apple> {
 const g/*g*/ = f;
 const u/*u*/: Map<string, Apple> = new Map;
 type Foo<T> = Promise/*p*/<T>;"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("quickinfoVerbosityLibType", content);
     fourslash::unsupported("VerifyBaselineHoverWithVerbosity"); // f.VerifyBaselineHoverWithVerbosity(t, map[string][]int{"g": {0, 1}, "u": {0, 1}, "p": {0}})
 }

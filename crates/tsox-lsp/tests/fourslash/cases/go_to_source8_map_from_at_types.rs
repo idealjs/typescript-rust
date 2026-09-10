@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: f.MarkTestAsStradaServer()"]
 #[test]
 fn go_to_source8_map_from_at_types() {
@@ -71,7 +72,7 @@ declare module "../index" {
 }
 // @Filename: /home/src/workspaces/project/index.ts
 import { [|/*start*/add|] } from 'lodash';"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("goToSource8_mapFromAtTypes", content);
     // TODO: f.MarkTestAsStradaServer()
     fourslash::unsupported("VerifyBaselineGoToSourceDefinition"); // f.VerifyBaselineGoToSourceDefinition(t, "start")
 }

@@ -1,10 +1,12 @@
 #![allow(unused_imports)]
 
+use crate::parser::binary_precedence::is_keyword;
 use crate::parser::jsdoc::*;
 
 impl crate::parser::Parser {
     pub(crate) fn parse_jsdoc_identifier_name(&mut self, diagnostic: Option<Message>) -> Arc<Node> {
-        if !self.is_identifier() {
+        // JSDoc 标签名允许关键字（@this/@class 等），沿用词法名判定
+        if !(self.token == SyntaxKind::Identifier || is_keyword(self.token)) {
             if let Some(msg) = diagnostic {
                 self.parse_error_at_current_token(msg, &[]);
             }

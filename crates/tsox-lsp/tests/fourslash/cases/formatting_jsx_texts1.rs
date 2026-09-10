@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.FormatDocument"]
 #[test]
 fn formatting_jsx_texts1() {
@@ -59,11 +60,9 @@ fn formatting_jsx_texts1() {
 
     (    homu   )    homu
 </option>;"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("formattingJsxTexts1", content);
     fourslash::unsupported("FormatDocument"); // f.FormatDocument(t, "")
-    fourslash::verify_current_file_content(
-        &mut s,
-        r#"<option>
+    fourslash::verify_current_file_content(&mut s, r#"<option>
     homu   ;      homu
     homu;homu
     homu   :    homu
@@ -117,6 +116,5 @@ fn formatting_jsx_texts1() {
     homu@homu
 
     (    homu   )    homu
-</option>;"#,
-    );
+</option>;"#);
 }

@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyOutliningSpans"]
 #[test]
 fn get_outlining_spans_for_unbalanced_end_region() {
@@ -9,6 +10,6 @@ fn get_outlining_spans_for_unbalanced_end_region() {
 // #endregion matched|]
 
 // #endregion unmatched"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("getOutliningSpansForUnbalancedEndRegion", content);
     fourslash::unsupported("VerifyOutliningSpans"); // f.VerifyOutliningSpans(t, lsproto.FoldingRangeKindRegion)
 }

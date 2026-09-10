@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyApplyCodeActionFromCompletion"]
 #[test]
 fn import_name_code_fix_default_export6() {
@@ -7,6 +8,6 @@ fn import_name_code_fix_default_export6() {
 export default Math.foo;
 // @Filename: /index.ts
 a/**/"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("importNameCodeFixDefaultExport6", content);
     fourslash::unsupported("VerifyApplyCodeActionFromCompletion"); // f.VerifyApplyCodeActionFromCompletion(t, new(""), &fourslash.ApplyCodeActionFromCompletionOptions{
 }

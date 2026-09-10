@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineFindAllReferences"]
 #[test]
 fn find_all_refs_on_private_parameter_property1() {
@@ -11,6 +12,6 @@ fn find_all_refs_on_private_parameter_property1() {
         return this./*3*/z;
     }
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("findAllRefsOnPrivateParameterProperty1", content);
     fourslash::unsupported("VerifyBaselineFindAllReferences"); // f.VerifyBaselineFindAllReferences(t, "1", "2", "3")
 }

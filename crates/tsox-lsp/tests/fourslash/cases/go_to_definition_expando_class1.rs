@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineGoToDefinition"]
 #[test]
 fn go_to_definition_expando_class1() {
@@ -14,6 +15,6 @@ Core.Test = class { }
 Core.Test.prototype.foo = 10
 
 new Core.Tes/*1*/t()"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("goToDefinitionExpandoClass1", content);
     fourslash::unsupported("VerifyBaselineGoToDefinition"); // f.VerifyBaselineGoToDefinition(t, true, "1")
 }

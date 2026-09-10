@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyCompletions"]
+
 #[test]
 fn jsx_qualified_tag_completion() {
     let content = r#"//@Filename: file.tsx
@@ -10,8 +10,8 @@ namespace NS {
 }
 const j = <NS.Foo>Hello!/**/
 "#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("jsxQualifiedTagCompletion", content);
     fourslash::go_to_marker(&mut s, "");
     fourslash::insert(&mut s, "</");
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, nil, &fourslash.CompletionsExpectedList{
+    fourslash::verify_completions_exact_at(&mut s, None, &["NS.Foo>"]);
 }

@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineFindAllReferences"]
 #[test]
 fn references_for_class_members_extending_generic_class() {
@@ -15,6 +16,6 @@ class MyClass extends Base<number> {
 var c: MyClass;
 c./*a3*/a;
 c./*method3*/method();"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("referencesForClassMembersExtendingGenericClass", content);
     fourslash::unsupported("VerifyBaselineFindAllReferences"); // f.VerifyBaselineFindAllReferences(t, "a1", "a2", "a3", "method1", "method2", "method3")
 }

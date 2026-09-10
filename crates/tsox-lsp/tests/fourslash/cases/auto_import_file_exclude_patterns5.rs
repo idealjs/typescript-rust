@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: t.Skip('Known failing fourslash test')"]
 #[test]
 fn auto_import_file_exclude_patterns5() {
@@ -22,6 +23,6 @@ export { Event };
 // @Filename: /src/vs/workbench/canImport.ts
 import { Event } from '../event/event';
 export { Event };"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("autoImportFileExcludePatterns5", content);
     fourslash::unsupported("VerifyCodeFix"); // f.VerifyCodeFix(t, fourslash.VerifyCodeFixOptions{
 }

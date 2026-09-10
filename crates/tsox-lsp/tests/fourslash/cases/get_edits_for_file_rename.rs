@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyWillRenameFilesEdits"]
 #[test]
 fn get_edits_for_file_rename() {
@@ -18,6 +19,6 @@ import { x } from "././src/./foo/./a";
 export default 0;
 // @Filename: /tsconfig.json
 { "files": ["a.ts", "src/a.ts", "src/foo/a.ts", "src/old.ts"] }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("getEditsForFileRename", content);
     fourslash::unsupported("VerifyWillRenameFilesEdits"); // f.VerifyWillRenameFilesEdits(t, "/src/old.ts", "/src/new.ts", map[string]string{
 }

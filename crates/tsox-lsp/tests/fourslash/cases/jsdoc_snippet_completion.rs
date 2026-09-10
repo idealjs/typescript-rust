@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: assert.Assert(t, item.TextEdit != nil)"]
 #[test]
 fn js_doc_snippet_completion_for_function() {
@@ -23,7 +24,7 @@ function abcdef(x, y) { }
     // TODO: assert.DeepEqual(t, item.InsertTextFormat, new(lsproto.InsertTextFormatSnippet))
     // TODO: assert.Assert(t, item.TextEdit != nil)
     // TODO: assert.Assert(t, item.TextEdit.InsertReplaceEdit != nil)
-    // TODO: assert.Equal(t, item.TextEdit.InsertReplaceEdit.NewText, "/**\n * $0\n * @param x ${1}\n * @param y
+    // TODO: assert.Equal(t, item.TextEdit.InsertReplaceEdit.NewText, "/**\n * $0\n * @param x ${1}\n * @param y 
     // TODO: assert.DeepEqual(t, item.TextEdit.InsertReplaceEdit.Insert, lsproto.Range{
     // TODO: assert.DeepEqual(t, item.TextEdit.InsertReplaceEdit.Replace, lsproto.Range{
 }
@@ -42,7 +43,7 @@ function abcdef(x) { return x; }
     // TODO: list := f.GetCompletions(t, nil /*userPreferences*/)
     // TODO: assert.Assert(t, list != nil)
     // TODO: assert.Equal(t, len(list.Items), 1)
-    // TODO: assert.Equal(t, list.Items[0].TextEdit.InsertReplaceEdit.NewText, "/**\n * $0\n * @param x ${1}\n *
+    // TODO: assert.Equal(t, list.Items[0].TextEdit.InsertReplaceEdit.NewText, "/**\n * $0\n * @param x ${1}\n * 
 }
 
 #[ignore = "generator: assert.Assert(t, list != nil)"]
@@ -88,7 +89,7 @@ fn js_doc_snippet_completion_respects_enabled_preference() {
     let content = r#"/*completion*/ */
 function abcdef(x) { }
 "#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("jSDocSnippetCompletionRespectsEnabledPreference", content);
     fourslash::go_to_marker(&mut s, "completion");
     fourslash::insert(&mut s, "/**");
     // TODO: userPreferences := lsutil.NewDefaultUserPreferences()
@@ -115,12 +116,11 @@ class C {
     // TODO: assert.Equal(t, list.Items[0].TextEdit.InsertReplaceEdit.NewText, "/**\n * $0\n */")
 }
 
-#[ignore = "unimplemented: fourslash.VerifyCompletions"]
 #[test]
 fn js_doc_snippet_completion_not_in_non_empty_comment() {
     let content = r#"/** text /*completion*/ */
 function abcdef(x) { }
 "#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "completion", nil)
+    let mut s = Session::new_for_test("jSDocSnippetCompletionNotInNonEmptyComment", content);
+    fourslash::verify_completions_empty_at(&mut s, Some("completion"));
 }

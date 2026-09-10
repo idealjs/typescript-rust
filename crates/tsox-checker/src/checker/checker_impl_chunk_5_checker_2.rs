@@ -180,6 +180,12 @@ impl Checker {
         let Some(decl) = sig.declaration.as_ref() else {
             return None;
         };
+        // TS5.5 body 谓词推断：唯一 return 表达式是参数方法的 this 谓词调用
+        if decl.type_node().is_none() {
+            if let Some(pred) = self.infer_type_predicate_from_body(decl, sig) {
+                return Some(pred);
+            }
+        }
         let Some(type_node) = decl.type_node() else {
             return None;
         };
@@ -260,5 +266,77 @@ impl Checker {
 
     pub fn was_canceled(&self) -> bool {
         false
+    }
+}
+
+impl Checker {
+    /// Go checkIfExpressionRefinesParameter（简化移植）：
+    /// `return g.isLeader()` 且 isLeader 的签名是 `this is T` 谓词 → 推断 `g is T`
+    fn infer_type_predicate_from_body(
+        &mut self,
+        decl: &Arc<Node>,
+        sig: &Arc<Signature>,
+    ) -> Option<TypePredicate> {
+        let body = match &decl.data {
+            NodeData::FunctionDeclaration(d) => d.body.as_ref(),
+            _ => None,
+        }?;
+        let NodeData::Block(block) = &body.data else {
+            return None;
+        };
+        let rets: Vec<&Arc<Node>> = block
+            .statements
+            .iter()
+            .filter(|s| s.kind == SyntaxKind::ReturnStatement)
+            .collect();
+        if rets.len() != 1 {
+            return None;
+        }
+        let NodeData::ReturnStatement(ret) = &rets[0].data else {
+            return None;
+        };
+        let call = ret.expression.as_ref()?;
+        if call.kind != SyntaxKind::CallExpression {
+            return None;
+        }
+        let NodeData::CallExpression(cd) = &call.data else {
+            return None;
+        };
+        // 返回类型应为 boolean
+        let ret_type = self.get_return_type_of_signature(sig)?;
+        if !ret_type.flags.contains(TypeFlags::Boolean) {
+            return None;
+        }
+        let callee = match &cd.expression.data {
+            NodeData::PropertyAccessExpression(p) => p,
+            _ => return None,
+        };
+        let NodeData::Identifier(recv) = &callee.expression.data else {
+            return None;
+        };
+        // 接收者须是本签名的参数
+        let param = sig
+            .parameters
+            .iter()
+            .find(|p| p.name == recv.text)?;
+        let callee_type = self.get_type_of_node(&cd.expression);
+        if !callee_type.flags.contains(TypeFlags::Object) {
+            return None;
+        }
+        let callee_sig = self
+            .get_signatures_of_type(&callee_type, crate::checker::SignatureKind::Call)
+            .into_iter()
+            .next()?;
+        let pred = self.compute_type_predicate_of_signature(&callee_sig)?;
+        if !matches!(pred.kind, TypePredicateKind::This) {
+            return None;
+        }
+        let t = pred.t?;
+        Some(TypePredicate {
+            kind: TypePredicateKind::Identifier,
+            parameter_name: param.name.clone(),
+            parameter_index: -1,
+            t: Some(t),
+        })
     }
 }

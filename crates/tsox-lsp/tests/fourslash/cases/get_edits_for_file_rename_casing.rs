@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyWillRenameFilesEdits"]
 #[test]
 fn get_edits_for_file_rename_casing() {
@@ -7,6 +8,6 @@ fn get_edits_for_file_rename_casing() {
 import { foo } from "./dir/fOo";
 // @Filename: /dir/fOo.ts
 export const foo = 0;"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("getEditsForFileRename_casing", content);
     fourslash::unsupported("VerifyWillRenameFilesEdits"); // f.VerifyWillRenameFilesEdits(t, "/dir", "/newDir", map[string]string{
 }

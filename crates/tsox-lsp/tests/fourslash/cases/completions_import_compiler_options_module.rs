@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCompletions"]
 #[test]
 fn completions_import_compiler_options_module() {
@@ -27,6 +28,6 @@ fo/*dcheck*/
 // @Filename: /d2.ts
 const a = import("./a"); // Does not make this an external module
 fo/*dts*/"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("completionsImport_compilerOptionsModule", content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, []string{"b", "c", "ccheck", "cts", "d", "dcheck", "dts"}, &fourslash.Complet
 }

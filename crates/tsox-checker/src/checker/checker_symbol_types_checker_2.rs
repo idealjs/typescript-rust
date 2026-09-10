@@ -18,10 +18,61 @@ impl Checker {
             .clone()
             .or_else(|| symbol.declarations.first().cloned())?;
         let type_node_and_init: (Option<Arc<Node>>, Option<Arc<Node>>) = match &decl.data {
+            // 函数表达式/箭头函数变量（const getProps = () => {}）：按需建型并挂 expando
+            NodeData::VariableDeclaration(d)
+                if d.type_node.is_none()
+                    && d.initializer.as_ref().is_some_and(|init| {
+                        matches!(
+                            init.kind,
+                            SyntaxKind::FunctionExpression | SyntaxKind::ArrowFunction
+                        )
+                    }) =>
+            {
+                let init = d.initializer.clone().expect("checked above");
+                let base = self.get_type_of_node(&init);
+                let t = self.attach_function_expando_type(symbol, base);
+                self.type_node_links.get_or_default(&decl).resolved_type = Some(Arc::clone(&t));
+                return Some(t);
+            }
             NodeData::VariableDeclaration(d) => (d.type_node.clone(), d.initializer.clone()),
             NodeData::PropertyDeclaration(d) => (d.type_node.clone(), d.initializer.clone()),
-            NodeData::PropertySignatureDeclaration(d) => (Some(Arc::clone(&d.type_node)), None),
+            NodeData::PropertySignatureDeclaration(d) => {
+                (Some(Arc::clone(&d.type_node)), None)
+            }
             NodeData::ParameterDeclaration(d) => (d.type_node.clone(), d.initializer.clone()),
+            // 局部函数声明：按需建函数型（外层返回推断在体检查前消费标识符引用），
+            // 与 check_function_declaration 同步挂 expando 属性（binder 期 exports 已就绪）
+            NodeData::FunctionDeclaration(_) => {
+                let base = self.get_type_of_function_like(&decl);
+                let t = self.attach_function_expando_type(symbol, base);
+                self.type_node_links.get_or_default(&decl).resolved_type = Some(Arc::clone(&t));
+                return Some(t);
+            }
+            // 局部类声明：按需建实例型（return new C() 在体检查前消费）
+            NodeData::ClassDeclaration(_) => {
+                let t = self.get_type_of_class_declaration(&decl);
+                self.type_node_links.get_or_default(&decl).resolved_type = Some(Arc::clone(&t));
+                return Some(t);
+            }
+            // Go checkJsxAttribute：有初始化式按可变位置（fresh 字面量拓宽），
+            // 无初始化式是 true 语法糖
+            NodeData::JsxAttribute(d) => {
+                return match d.initializer.as_ref() {
+                    Some(init) => {
+                        // {expr} 的初始化式是 JsxExpression 包装
+                        let expr = match &init.data {
+                            NodeData::JsxExpression(je) => je.expression.clone(),
+                            _ => Some(Arc::clone(init)),
+                        };
+                        let t = match expr {
+                            Some(e) => self.get_type_of_node(&e),
+                            None => self.get_any_type(),
+                        };
+                        Some(self.get_widened_type(&t))
+                    }
+                    None => Some(self.true_type()),
+                };
+            }
             NodeData::BindingElement(_) => return self.binding_element_type(&decl),
             NodeData::EnumMember(_) => {
                 let value = self.get_enum_member_value(&decl).value?;
@@ -85,6 +136,22 @@ impl Checker {
                     .resolved_type
                     .replace(placeholder);
                 let t = self.initial_type_of_declaration(&decl);
+                // expando：函数初始化式的变量携带函数体属性赋值（binder exports）
+                let t = t.map(|t| {
+                    let is_fn_init = matches!(
+                        &decl.data,
+                        NodeData::VariableDeclaration(d)
+                            if d.initializer.as_ref().is_some_and(|i| matches!(
+                                i.kind,
+                                SyntaxKind::FunctionExpression | SyntaxKind::ArrowFunction
+                            ))
+                    );
+                    if is_fn_init && !symbol.exports.is_empty() {
+                        self.attach_function_expando_type(symbol, t)
+                    } else {
+                        t
+                    }
+                });
                 match &t {
                     Some(t) => {
                         self.value_symbol_links.get_or_default(symbol).resolved_type =
@@ -109,7 +176,9 @@ impl Checker {
             let (type_node, initializer) = match &decl.data {
                 NodeData::VariableDeclaration(d) => (d.type_node.clone(), d.initializer.clone()),
                 NodeData::PropertyDeclaration(d) => (d.type_node.clone(), d.initializer.clone()),
-                NodeData::PropertySignatureDeclaration(d) => (Some(Arc::clone(&d.type_node)), None),
+                NodeData::PropertySignatureDeclaration(d) => {
+                (Some(Arc::clone(&d.type_node)), None)
+            }
                 NodeData::ParameterDeclaration(d) => (d.type_node.clone(), d.initializer.clone()),
                 _ => (None, None),
             };
@@ -185,7 +254,12 @@ impl Checker {
         };
         match &result {
             Some(t) => {
-                self.value_symbol_links.get_or_default(symbol).resolved_type = Some(Arc::clone(t));
+                // 递归类型在构建窗口内经环断路器拿到 in-flight error：不驻留，
+                // 留 None 待窗口关闭后重试（节点缓存届时为完整结果）
+                if !crate::checker::utilities::is_type_error(t) {
+                    self.value_symbol_links.get_or_default(symbol).resolved_type =
+                        Some(Arc::clone(t));
+                }
             }
             None => {
                 self.value_symbol_links.get_or_default(symbol).resolved_type = existing;
@@ -327,7 +401,8 @@ impl Checker {
             let is_rest = matches!(&param.data, NodeData::ParameterDeclaration(pd) if pd.dot_dot_dot_token.is_some());
             let is_this_param = param_index == 0
                 && matches!(&param.data, NodeData::ParameterDeclaration(pd)
-                    if matches!(&pd.name.data, NodeData::Identifier(id) if id.text == "this"));
+                    if matches!(&pd.name.data, NodeData::Identifier(id) if id.text == "this")
+                        || pd.name.kind == SyntaxKind::ThisKeyword);
             return self
                 .contextual_param_type_at(&sig, &host_params, param_index, param, is_rest, is_this_param)
                 .into();
@@ -380,7 +455,8 @@ impl Checker {
         let is_rest = matches!(&param.data, NodeData::ParameterDeclaration(pd) if pd.dot_dot_dot_token.is_some());
         let is_this_param = param_index == 0
             && matches!(&param.data, NodeData::ParameterDeclaration(pd)
-                if matches!(&pd.name.data, NodeData::Identifier(id) if id.text == "this"));
+                if matches!(&pd.name.data, NodeData::Identifier(id) if id.text == "this")
+                    || pd.name.kind == SyntaxKind::ThisKeyword);
         self.contextual_param_type_at(&sig, &host_params, param_index, param, is_rest, is_this_param)
     }
 

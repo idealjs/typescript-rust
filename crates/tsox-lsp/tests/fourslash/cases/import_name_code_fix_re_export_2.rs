@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyImportFixAtPosition"]
 #[test]
 fn import_name_code_fix_re_export() {
@@ -9,7 +10,7 @@ export default function foo(): void {}
 export { default } from "./a";
 // @Filename: /user.ts
 [|foo;|]"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("importNameCodeFix_reExport", content);
     fourslash::go_to_file(&mut s, "/user.ts");
     fourslash::unsupported("VerifyImportFixAtPosition"); // f.VerifyImportFixAtPosition(t, []string{
 }

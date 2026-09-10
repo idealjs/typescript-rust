@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineGoToTypeDefinition"]
 #[test]
 fn go_to_type_definition_enum_members() {
@@ -10,6 +11,6 @@ fn go_to_type_definition_enum_members() {
 var x = E.value2;
 
 /*reference*/x;"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("goToTypeDefinitionEnumMembers", content);
     fourslash::unsupported("VerifyBaselineGoToTypeDefinition"); // f.VerifyBaselineGoToTypeDefinition(t, "reference")
 }

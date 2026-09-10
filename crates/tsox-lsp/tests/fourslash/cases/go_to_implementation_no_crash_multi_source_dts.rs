@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: //   - col 11 onwards maps to b.ts"]
 #[test]
 fn go_to_implementation_no_crash_multi_source_dts() {
@@ -23,6 +24,6 @@ export declare class Bar {
 import { Bar } from './combined';
 declare const bar: Bar;
 bar./*impl*/method();"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("goToImplementationNoCrashMultiSourceDts", content);
     fourslash::unsupported("VerifyBaselineGoToImplementation"); // f.VerifyBaselineGoToImplementation(t, "impl")
 }

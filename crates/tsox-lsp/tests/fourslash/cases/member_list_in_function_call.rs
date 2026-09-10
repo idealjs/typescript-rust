@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyCompletions"]
+
 #[test]
 fn member_list_in_function_call() {
     let content = r#"function aa(x: any) {}
@@ -10,8 +10,8 @@ aa({
     b/**/;
   }
 });"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("memberListInFunctionCall", content);
     fourslash::go_to_marker(&mut s, "");
     fourslash::insert(&mut s, ".");
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, nil, &fourslash.CompletionsExpectedList{
+    fourslash::verify_completions_include_exclude_at(&mut s, None, &["charAt"], &[]);
 }

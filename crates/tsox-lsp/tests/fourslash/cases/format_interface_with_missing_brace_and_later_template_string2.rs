@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: }"]
 #[test]
 fn format_interface_with_missing_brace_and_later_template_string2() {
@@ -16,7 +17,7 @@ const FormCheck: DynamicRefForwardingComponent<'input', FormCheckProps> =
 
 FormCheck.displayName = 'FormCheck';
 "#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("formatInterfaceWithMissingBraceAndLaterTemplateString2", content);
     fourslash::unsupported("FormatDocument"); // f.FormatDocument(t, "")
     fourslash::unsupported("VerifyCurrentFileContent"); // f.VerifyCurrentFileContent(t, `interface FormCheckProps {
     // TODO: }

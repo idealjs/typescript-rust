@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineRename"]
 #[test]
 fn rename_object_spread() {
@@ -9,6 +10,6 @@ let a1: A1;
 let a2: A2;
 let a12 = { ...a1, ...a2 };
 a12.[|a|];"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("renameObjectSpread", content);
     fourslash::unsupported("VerifyBaselineRename"); // f.VerifyBaselineRename(t, nil /*preferences*/, f.Ranges()[1], f.Ranges()[3], f.Ranges()[4])
 }

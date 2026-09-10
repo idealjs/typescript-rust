@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifySignatureHelp"]
 #[test]
 fn class_extends_interface_sig_help1() {
@@ -13,7 +14,7 @@ interface I extends C {
 }
 var i: I;
 i.foo(/**/"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("classExtendsInterfaceSigHelp1", content);
     fourslash::go_to_marker(&mut s, "");
     fourslash::unsupported("VerifySignatureHelp"); // f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{ParameterSpan: "x: string", OverloadsC
 }

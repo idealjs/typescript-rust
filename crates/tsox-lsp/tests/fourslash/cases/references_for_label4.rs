@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineFindAllReferences"]
 #[test]
 fn references_for_label4() {
@@ -8,6 +9,6 @@ fn references_for_label4() {
         /*2*/break /*3*/label;
     }
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("referencesForLabel4", content);
     fourslash::unsupported("VerifyBaselineFindAllReferences"); // f.VerifyBaselineFindAllReferences(t, "1", "2", "3")
 }

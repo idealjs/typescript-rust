@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyImportFixAtPosition"]
 #[test]
 fn import_name_code_fix_import_type6() {
@@ -12,7 +13,7 @@ declare module "react" { var React: any; export = React; export as namespace Rea
 import type React from "react";
 function Component() {}
 (<Component/**/ />)"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("importNameCodeFix_importType6", content);
     fourslash::go_to_marker(&mut s, "");
     fourslash::unsupported("VerifyImportFixAtPosition"); // f.VerifyImportFixAtPosition(t, []string{
 }

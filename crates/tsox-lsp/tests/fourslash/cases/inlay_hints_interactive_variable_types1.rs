@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineInlayHints"]
 #[test]
 fn inlay_hints_interactive_variable_types1() {
@@ -23,6 +24,6 @@ const l = ((({ a: 1, b: 1 })));
  const o = () => -1 as const;
  const p = ([a]: Foo[]) => a;
  const q = ({ a }: { a: Foo }) => a;"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("inlayHintsInteractiveVariableTypes1", content);
     fourslash::unsupported("VerifyBaselineInlayHints"); // f.VerifyBaselineInlayHints(t, nil /*span*/, &lsutil.UserPreferences{InlayHints: lsutil.InlayHintsPre
 }

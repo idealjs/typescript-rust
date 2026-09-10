@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineHover"]
 #[test]
 fn jsdoc_link1() {
@@ -15,6 +16,6 @@ fn jsdoc_link1() {
  */
 function /**/CC() {
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("jsdocLink1", content);
     fourslash::unsupported("VerifyBaselineHover"); // f.VerifyBaselineHover(t)
 }

@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: t.Skip('Known failing fourslash test')"]
 #[test]
 fn import_name_code_fix_order2() {
@@ -23,7 +24,7 @@ aB;|]
     Ab,
 } from "./a";
 aB;|]"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("importNameCodeFix_order2", content);
     fourslash::go_to_file(&mut s, "/b.ts");
     fourslash::unsupported("VerifyImportFixAtPosition"); // f.VerifyImportFixAtPosition(t, []string{
     fourslash::go_to_file(&mut s, "/c.ts");

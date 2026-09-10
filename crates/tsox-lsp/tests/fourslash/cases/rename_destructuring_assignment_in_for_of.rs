@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineRename"]
 #[test]
 fn rename_destructuring_assignment_in_for_of() {
@@ -16,7 +17,7 @@ for ([|{ [|{| "contextRangeIndex": 4 |}property1|] } of elems|]) {
 }
 for ([|{ [|{| "contextRangeIndex": 7 |}property1|]: p2 } of elems|]) {
 }"#;
-    let mut s = Session::new(content);
-    fourslash::verify_no_errors(&mut s);
+    let mut s = Session::new_for_test("renameDestructuringAssignmentInForOf", content);
+    fourslash::verify_no_errors(&mut s, );
     fourslash::unsupported("VerifyBaselineRename"); // f.VerifyBaselineRename(t, nil /*preferences*/, f.Ranges()[1], f.Ranges()[8], f.Ranges()[3], f.Ranges
 }

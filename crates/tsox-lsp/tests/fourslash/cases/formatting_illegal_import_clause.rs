@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.FormatDocument"]
 #[test]
 fn formatting_illegal_import_clause() {
@@ -19,7 +20,7 @@ describe('<Failed />', () => {
   it('redirects to order summary', () => {
   });
 });"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("formattingIllegalImportClause", content);
     fourslash::unsupported("FormatDocument"); // f.FormatDocument(t, "")
     fourslash::go_to_marker(&mut s, "1");
     fourslash::verify_current_line_content(&mut s, r#"import React from 'react';"#);

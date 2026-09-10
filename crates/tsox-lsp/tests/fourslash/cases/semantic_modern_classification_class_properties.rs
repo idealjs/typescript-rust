@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifySemanticTokens"]
 #[test]
 fn semantic_modern_classification_class_properties() {
@@ -9,6 +10,6 @@ fn semantic_modern_classification_class_properties() {
   get z() : number { return this.x + this.y; }
   set a(v: number) { }
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("semanticModernClassificationClassProperties", content);
     fourslash::unsupported("VerifySemanticTokens"); // f.VerifySemanticTokens(t, []fourslash.SemanticToken{
 }

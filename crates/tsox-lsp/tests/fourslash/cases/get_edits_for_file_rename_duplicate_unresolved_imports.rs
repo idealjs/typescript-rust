@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: // The pathological file: imports the same unresolvable modu"]
 #[test]
 fn get_edits_for_file_rename_duplicate_unresolved_imports() {
@@ -13,7 +14,7 @@ fn get_edits_for_file_rename_duplicate_unresolved_imports() {
     // TODO: content.WriteString("// @Filename: /pkg/ugly.ts\n")
     // TODO: for range numImports {
     // TODO: content.WriteString("import { v0 } from \"../src/file0\";\n")
-    let mut s = Session::new("");
+    let mut s = Session::new_for_test("getEditsForFileRename_duplicateUnresolvedImports", "");
     // TODO: var expected strings.Builder
     // TODO: for range numImports {
     // TODO: expected.WriteString("import { v0 } from \"../src/file0-renamed\";\n")

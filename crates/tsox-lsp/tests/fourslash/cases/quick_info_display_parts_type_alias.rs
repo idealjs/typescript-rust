@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineHover"]
 #[test]
 fn quick_info_display_parts_type_alias() {
@@ -7,6 +8,6 @@ fn quick_info_display_parts_type_alias() {
 }
 type /*2*/t1 = /*3*/c;
 var /*4*/cInstance: /*5*/t1 = new /*6*/c();"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("quickInfoDisplayPartsTypeAlias", content);
     fourslash::unsupported("VerifyBaselineHover"); // f.VerifyBaselineHover(t)
 }

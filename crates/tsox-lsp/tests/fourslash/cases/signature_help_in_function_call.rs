@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyNoSignatureHelpForMarkers"]
 #[test]
 fn signature_help_in_function_call() {
@@ -7,6 +8,6 @@ fn signature_help_in_function_call() {
 items.forEach(item => {
     for (/**/
 });"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("signatureHelpInFunctionCall", content);
     fourslash::unsupported("VerifyNoSignatureHelpForMarkers"); // f.VerifyNoSignatureHelpForMarkers(t, "")
 }

@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyCompletions"]
+
 #[test]
 fn triple_slash_ref_path_completion_rootdirs() {
     let content = r#"// @rootDirs: sub/src1,src2
@@ -28,6 +28,6 @@ export var z = 0;
 /*e1*/
 // @Filename: e2.js
 /*e2*/"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "0", &fourslash.CompletionsExpectedList{
+    let mut s = Session::new_for_test("tripleSlashRefPathCompletionRootdirs", content);
+    fourslash::verify_completions_exact_at(&mut s, Some("0"), &["module0.ts"]);
 }

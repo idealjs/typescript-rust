@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCompletions"]
 #[test]
 fn completions_destructuring() {
@@ -7,6 +8,6 @@ fn completions_destructuring() {
 points.forEach(({ /*a*/ }) => { });
 const { /*b*/ } = points[0];
 for (const { /*c*/ } of points) {}"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("completionsDestructuring", content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, f.Markers(), &fourslash.CompletionsExpectedList{
 }

@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: t.Skip('Known failing fourslash test')"]
 #[test]
 fn import_fixes_global_typings_cache() {
@@ -16,7 +17,7 @@ export class BrowserRouter {}
  export const BrowserRouter = () => null;
 // @Filename: /project/index.js
 BrowserRouter/**/"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("importFixesGlobalTypingsCache", content);
     fourslash::go_to_file(&mut s, "/project/index.js");
     fourslash::unsupported("VerifyImportFixAtPosition"); // f.VerifyImportFixAtPosition(t, []string{
 }

@@ -21,7 +21,12 @@ impl Checker {
                 inference
                     .candidates
                     .iter()
-                    .map(|c| self.type_to_string(c))
+                    .map(|c| format!(
+                        "{}(wid={})",
+                        self.type_to_string(c),
+                        c.object_flags
+                            .contains(crate::checker::types::ObjectFlags::ContainsWideningType)
+                    ))
                     .collect::<Vec<_>>()
                     .join(","),
                 inference

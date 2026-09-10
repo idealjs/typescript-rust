@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: 'function updateBadge() {\n' +"]
 #[test]
 fn call_hierarchy_unclosed_template_expr_no_crash1() {
@@ -11,7 +12,7 @@ fn call_hierarchy_unclosed_template_expr_no_crash1() {
     // TODO: // node" assertion failure.
     // TODO: const content = "// @Filename: /main.ts\n" +
     // TODO: "function updateBadge() {\n" +
-    let mut s = Session::new("");
+    let mut s = Session::new_for_test("callHierarchyUnclosedTemplateExprNoCrash1", "");
     fourslash::go_to_marker(&mut s, "1");
     fourslash::unsupported("VerifyBaselineCallHierarchy"); // f.VerifyBaselineCallHierarchy(t)
     // TODO: }

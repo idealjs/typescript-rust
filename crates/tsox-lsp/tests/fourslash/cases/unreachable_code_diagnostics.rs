@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineNonSuggestionDiagnostics"]
 #[test]
 fn unreachable_code_diagnostics() {
@@ -8,6 +9,6 @@ throw new Error();
 	
 (() => {})();
 	"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("unreachableCodeDiagnostics", content);
     fourslash::unsupported("VerifyBaselineNonSuggestionDiagnostics"); // f.VerifyBaselineNonSuggestionDiagnostics(t)
 }

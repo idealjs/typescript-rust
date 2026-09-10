@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: }"]
 #[test]
 fn multiline_comment_before_open_brace() {
@@ -11,7 +12,7 @@ fn multiline_comment_before_open_brace() {
 }
 function a() {
     /* %^ */ }/*3*/"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("multilineCommentBeforeOpenBrace", content);
     fourslash::unsupported("FormatDocument"); // f.FormatDocument(t, "")
     fourslash::go_to_marker(&mut s, "1");
     fourslash::verify_current_line_content(&mut s, r#"function test() /* %^ */ {"#);

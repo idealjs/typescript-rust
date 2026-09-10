@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineGoToImplementation"]
 #[test]
 fn go_to_implementation_interface_property_00() {
@@ -19,6 +20,6 @@ class Bar {
 
     constructor(public f: Foo = { [|hello|]: 7 } ) {}
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("goToImplementationInterfaceProperty_00", content);
     fourslash::unsupported("VerifyBaselineGoToImplementation"); // f.VerifyBaselineGoToImplementation(t, "reference")
 }

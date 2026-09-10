@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineInlayHints"]
 #[test]
 fn inlay_hints_interactive_multifile1() {
@@ -15,7 +16,7 @@ async function main () {
     const a = await foo()
     const b = await bar()
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("inlayHintsInteractiveMultifile1", content);
     fourslash::go_to_file(&mut s, "/b.ts");
     fourslash::unsupported("VerifyBaselineInlayHints"); // f.VerifyBaselineInlayHints(t, nil /*span*/, &lsutil.UserPreferences{InlayHints: lsutil.InlayHintsPre
 }

@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: t.Skip('Known failing fourslash test')"]
 #[test]
 fn completions_redeclare_module_as_global() {
@@ -21,6 +22,6 @@ declare global {
 // @Filename: /index.ts
 /// <reference path="./ambient.d.ts" />
 asser/**/;"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("completionsRedeclareModuleAsGlobal", content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

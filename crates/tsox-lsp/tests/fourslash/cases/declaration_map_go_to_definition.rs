@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: f.MarkTestAsStradaServer()"]
 #[test]
 fn declaration_map_go_to_definition() {
@@ -41,7 +42,7 @@ export interface SomeType {
 import * as mod from "./indexdef";
 const instance = new mod.Foo();
 instance.[|/*1*/methodName|]({member: 12});"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("declarationMapGoToDefinition", content);
     // TODO: f.MarkTestAsStradaServer()
     fourslash::unsupported("VerifyBaselineGoToDefinition"); // f.VerifyBaselineGoToDefinition(t, true, "1")
 }

@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: // When the cursor is on a usage of an aliased import (not o"]
 #[test]
 fn go_to_source_aliased_import_at_usage_site() {
@@ -20,7 +21,7 @@ export function /*target*/original() { return "ok"; }
 // @Filename: /home/src/workspaces/project/index.ts
 import { original as renamed } from "pkg";
 renamed/*usage*/();"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("goToSourceAliasedImportAtUsageSite", content);
     fourslash::unsupported("VerifyBaselineGoToSourceDefinition"); // f.VerifyBaselineGoToSourceDefinition(t, "usage")
 }
 
@@ -40,6 +41,6 @@ export function /*target*/helper() { return "ok"; }
 // @Filename: /home/src/workspaces/project/index.ts
 import * as ns from "pkg";
 ns./*usage*/helper();"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("goToSourceAliasedImportAtUsageSiteNamespaceImport", content);
     fourslash::unsupported("VerifyBaselineGoToSourceDefinition"); // f.VerifyBaselineGoToSourceDefinition(t, "usage")
 }

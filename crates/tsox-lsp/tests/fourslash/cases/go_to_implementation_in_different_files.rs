@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: f.MarkTestAsStradaServer()"]
 #[test]
 fn go_to_implementation_in_different_files() {
@@ -18,7 +19,7 @@ class [|B|] implements Foo {
 export interface /**/Foo {
     func();
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("goToImplementation_inDifferentFiles", content);
     // TODO: f.MarkTestAsStradaServer()
     fourslash::unsupported("VerifyBaselineGoToImplementation"); // f.VerifyBaselineGoToImplementation(t, "")
 }

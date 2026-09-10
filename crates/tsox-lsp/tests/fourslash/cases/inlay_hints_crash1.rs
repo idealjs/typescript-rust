@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineInlayHints"]
 #[test]
 fn inlay_hints_crash1() {
@@ -12,6 +13,6 @@ fn inlay_hints_crash1() {
 function doThing(f) {
     f(100)
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("inlayHintsCrash1", content);
     fourslash::unsupported("VerifyBaselineInlayHints"); // f.VerifyBaselineInlayHints(t, nil /*span*/, &lsutil.UserPreferences{InlayHints: lsutil.InlayHintsPre
 }

@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifySignatureHelp"]
 #[test]
 fn signature_help_for_super_calls1() {
@@ -19,7 +20,7 @@ class C2 extends B2 {
         super(/*2*/ // sig help here?
     }
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("signatureHelpForSuperCalls1", content);
     fourslash::go_to_marker(&mut s, "1");
     fourslash::unsupported("VerifySignatureHelp"); // f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{Text: "B(): B"})
     fourslash::go_to_marker(&mut s, "2");

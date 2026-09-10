@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineDocumentSymbol"]
 #[test]
 fn navigation_bar_nested_object_literals() {
@@ -16,6 +17,6 @@ fn navigation_bar_nested_object_literals() {
         },
     },
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("navigationBarNestedObjectLiterals", content);
     fourslash::unsupported("VerifyBaselineDocumentSymbol"); // f.VerifyBaselineDocumentSymbol(t)
 }

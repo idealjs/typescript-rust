@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyImportFixAtPosition"]
 #[test]
 fn import_name_code_fix_import_type2() {
@@ -22,7 +23,7 @@ const x: OtherType/*c*/
 // @Filename: /d.ts
 import type { OtherType } from "./exports1.js";
 const x: OtherOtherType/*d*/"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("importNameCodeFix_importType2", content);
     fourslash::go_to_marker(&mut s, "a");
     fourslash::unsupported("VerifyImportFixAtPosition"); // f.VerifyImportFixAtPosition(t, []string{
     fourslash::go_to_marker(&mut s, "b");

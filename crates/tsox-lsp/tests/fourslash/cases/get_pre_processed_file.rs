@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyErrorExistsBetweenMarkers"]
 #[test]
 fn get_pre_processed_file() {
@@ -20,7 +21,7 @@ import invalidRef2 = /*9*/requi/*10*/(/*10A*/"refFile2");
 var obj: /*11*/C/*12*/;
 var obj1: D;
 var obj2: ref2.E;"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("getPreProcessedFile", content);
     fourslash::go_to_file(&mut s, "main.ts");
     fourslash::verify_number_of_errors_in_current_file(&mut s, 7);
     fourslash::unsupported("VerifyErrorExistsBetweenMarkers"); // f.VerifyErrorExistsBetweenMarkers(t, "1", "2")

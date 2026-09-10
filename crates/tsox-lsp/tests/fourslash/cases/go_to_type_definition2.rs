@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineGoToTypeDefinition"]
 #[test]
 fn go_to_type_definition2() {
@@ -14,6 +15,6 @@ interface I2 {
 // @Filename: goToTypeDefinition2_Consumption.ts
 var i2: I2;
 i2.prop/*reference*/erty;"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("goToTypeDefinition2", content);
     fourslash::unsupported("VerifyBaselineGoToTypeDefinition"); // f.VerifyBaselineGoToTypeDefinition(t, "reference")
 }

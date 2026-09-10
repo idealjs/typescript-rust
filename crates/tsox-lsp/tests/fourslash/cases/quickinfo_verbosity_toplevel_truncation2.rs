@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineHoverWithVerbosity"]
 #[test]
 fn quickinfo_verbosity_toplevel_truncation2() {
@@ -52,6 +53,6 @@ export interface LargeInterface/*2*/ {
     property19: { nestedProp3: boolean; nestedProp4: Date };
     property20: () => void;
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("quickinfoVerbosityToplevelTruncation2", content);
     fourslash::unsupported("VerifyBaselineHoverWithVerbosity"); // f.VerifyBaselineHoverWithVerbosity(t, map[string][]int{"1": {1}, "2": {1}})
 }

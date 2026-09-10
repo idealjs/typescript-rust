@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCodeFix"]
 #[test]
 fn code_fix_class_implement_interface_computed_property_name_well_known_symbols() {
@@ -21,6 +22,6 @@ interface I<Species> {
     [Symbol.unscopables]: any;
 }
 class C implements I<number> {}"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("codeFixClassImplementInterfaceComputedPropertyNameWellKnownSymbols", content);
     fourslash::unsupported("VerifyCodeFix"); // f.VerifyCodeFix(t, fourslash.VerifyCodeFixOptions{
 }

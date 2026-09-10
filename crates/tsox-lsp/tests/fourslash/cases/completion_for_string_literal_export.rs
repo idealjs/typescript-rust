@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCompletions"]
 #[test]
 fn completion_for_string_literal_export() {
@@ -16,9 +17,9 @@ export {} from ".//*4*/";
 /*someFile2*/
 // @Filename: fourslash/my_typings/some-module/index.d.ts
 export var x = 9;"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("completionForStringLiteralExport", content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, []string{"0", "4"}, &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
+    fourslash::verify_completions_unsorted_at(&mut s, Some("1"), &["someFile2"]);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "2", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "3", &fourslash.CompletionsExpectedList{
+    fourslash::verify_completions_unsorted_at(&mut s, Some("3"), &["fourslash"]);
 }

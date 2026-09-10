@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: // Open temp file and verify all projects alive"]
 #[test]
 fn declaration_maps_workspace_symbols() {
@@ -74,7 +75,7 @@ export function fnUser() {
 /*dummy*/export const a = 10;
 // @Filename: dummy/tsconfig.json
 {}"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("declarationMapsWorkspaceSymbols", content);
     fourslash::go_to_marker(&mut s, "user");
     // TODO: // Ref projects are loaded after as part of this command
     fourslash::unsupported("VerifyBaselineWorkspaceSymbol"); // f.VerifyBaselineWorkspaceSymbol(t, "fn")
@@ -119,7 +120,7 @@ export declare function f(): void;
 	"names":[],
 	"mappings":"AAAA,wBAAgB,CAAC,SAAK"
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("declarationMapsFindAllRefsDefinitionInMappedFile", content);
     fourslash::unsupported("VerifyBaselineFindAllReferences"); // f.VerifyBaselineFindAllReferences(t, "1")
 }
 
@@ -156,6 +157,6 @@ import { a, b } from "./indexdef";
 /*2*/b();
 // @Filename: /src/tsconfig.json
 {}"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("declarationMapsNonMonotonicMappings", content);
     fourslash::unsupported("VerifyBaselineGoToDefinition"); // f.VerifyBaselineGoToDefinition(t, true, "1", "2")
 }

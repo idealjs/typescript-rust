@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: }"]
 #[test]
 fn tsx_find_all_references3() {
@@ -18,7 +19,7 @@ class MyClass {
 
 
 var x = <MyClass name='hello'/>;"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("tsxFindAllReferences3", content);
     fourslash::unsupported("VerifyBaselineFindAllReferences"); // f.VerifyBaselineFindAllReferences(t, "1")
     // TODO: }
 }

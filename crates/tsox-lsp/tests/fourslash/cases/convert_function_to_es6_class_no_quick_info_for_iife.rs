@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCodeFixNotAvailable"]
 #[test]
 fn convert_function_to_es6_class_no_quick_info_for_iife() {
@@ -11,7 +12,7 @@ fn convert_function_to_es6_class_no_quick_info_for_iife() {
    };
    foo;
 })();"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("convertFunctionToEs6Class_noQuickInfoForIIFE", content);
     fourslash::go_to_marker(&mut s, "1");
     fourslash::unsupported("VerifyCodeFixNotAvailable"); // f.VerifyCodeFixNotAvailable(t)
 }

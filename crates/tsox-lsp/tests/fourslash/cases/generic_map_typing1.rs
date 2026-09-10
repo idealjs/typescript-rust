@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[test]
 fn generic_map_typing1() {
     let content = r#"// @strict: false
@@ -22,8 +23,8 @@ var aaa: any[];
 var b/*4*/bb = _.map(aaa, xx => xx.length); // should be any[]
 var c/*5*/cc = _(aaa).map(xx => xx.length);  // Should not error, should be any[]
 var d/*6*/dd = aaa.map(xx => xx.length);     // should not error, should be any[]"#;
-    let mut s = Session::new(content);
-    fourslash::verify_no_errors(&mut s);
+    let mut s = Session::new_for_test("genericMapTyping1", content);
+    fourslash::verify_no_errors(&mut s, );
     fourslash::verify_quick_info_at(&mut s, "1", "var bb: number[]", "");
     fourslash::verify_quick_info_at(&mut s, "2", "var cc: number[]", "");
     fourslash::verify_quick_info_at(&mut s, "3", "var dd: number[]", "");

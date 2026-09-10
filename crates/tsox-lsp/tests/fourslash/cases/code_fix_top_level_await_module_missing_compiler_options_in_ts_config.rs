@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCodeFixNotAvailable"]
 #[test]
 fn code_fix_top_level_await_module_missing_compiler_options_in_ts_config() {
@@ -13,6 +14,6 @@ export {};
         "module": "commonjs"
     }
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("codeFixTopLevelAwait_module_missingCompilerOptionsInTsConfig", content);
     fourslash::unsupported("VerifyCodeFixNotAvailable"); // f.VerifyCodeFixNotAvailable(t, "fixModuleOption")
 }

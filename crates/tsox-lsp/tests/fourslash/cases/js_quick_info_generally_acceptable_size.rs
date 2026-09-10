@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: t.Skip('Known failing fourslash test')"]
 #[test]
 fn js_quick_info_generally_acceptable_size() {
@@ -211,17 +212,7 @@ var doSome/*1*/thing = function (dataTable) {
   * @type {SomeCallback}
   */
 var anotherThing/*2*/ = function(a, b) {}"#;
-    let mut s = Session::new(content);
-    fourslash::verify_quick_info_at(
-        &mut s,
-        "1",
-        "var doSomething: (dataTable: DataTableThing) => void",
-        "Do something",
-    );
-    fourslash::verify_quick_info_at(
-        &mut s,
-        "2",
-        "var anotherThing: SomeCallback",
-        "Another thing",
-    );
+    let mut s = Session::new_for_test("jsQuickInfoGenerallyAcceptableSize", content);
+    fourslash::verify_quick_info_at(&mut s, "1", "var doSomething: (dataTable: DataTableThing) => void", "Do something");
+    fourslash::verify_quick_info_at(&mut s, "2", "var anotherThing: SomeCallback", "Another thing");
 }

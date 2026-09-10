@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: t.Skip('Known failing fourslash test')"]
 #[test]
 fn completion_entry_for_union_property2() {
@@ -21,7 +22,7 @@ var x : One | Two;
 
 x.commonProperty./*1*/;
 x.anotherProperty./*2*/;"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("completionEntryForUnionProperty2", content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "2", &fourslash.CompletionsExpectedList{
 }

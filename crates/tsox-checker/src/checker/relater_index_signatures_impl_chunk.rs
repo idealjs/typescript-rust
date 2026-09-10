@@ -244,10 +244,83 @@ impl Checker {
         }
     }
 
-    pub fn get_template_type_from_mapped_type(&self, t: &Arc<Type>) -> Option<Arc<Type>> {
+    pub fn get_template_type_from_mapped_type(&mut self, t: &Arc<Type>) -> Option<Arc<Type>> {
         if let TypeData::Mapped(m) = &t.data {
-            return m.template_type.clone();
+            // 坏上下文（推断中空作用域）解析出的 error 不得驻留：视为未解析重试
+            if let Some(tpl) = &m.template_type
+                && tpl.intrinsic_name() != Some("error")
+            {
+                return Some(Arc::clone(tpl));
+            }
+            // 惰性解析模板节点并回写（Go getTemplateTypeFromMappedType）。
+            // 空栈解析：按节点祖先链构造作用域（模板里的类型参数按声明处解析），
+            // 实例差异由替换链承担。解析中途的惰性重入直接让位（外层完成后有缓存）
+            let node = m.template_node.clone()?;
+            if !self.template_resolving_ids.insert(t.id) {
+                return None;
+            }
+            let chain = m.template_subst.as_ref().map(|c| c.as_ref().clone());
+            self.clear_type_node_cache_subtree(&node);
+            let saved_stack = std::mem::take(&mut self.type_argument_stack);
+            let saved_scopes = std::mem::take(&mut self.scope_stack);
+            let mut scope_chain: Vec<u64> = Vec::new();
+            let mut cur = node.parent.as_ref();
+            while let Some(c) = cur {
+                scope_chain.push(c.id());
+                cur = c.parent.as_ref();
+            }
+            scope_chain.reverse();
+            self.scope_stack = scope_chain;
+            // Go getTemplateTypeFromMappedType（checker.go 23042）：按声明符号直接
+            // 实例化别名，不走节点级解析（type_node_resolving 守卫会把外层对同一
+            // 模板节点的在途解析误判为循环）
+            let resolved = match &node.data {
+                tsox_frontend::ast::NodeData::TypeReferenceNode(tr) => {
+                    match self.resolve_identifier(&tr.type_name) {
+                        Some(symbol) if symbol.flags.intersects(SymbolFlags::TypeAlias) => {
+                            let args = tr.type_arguments.clone();
+                            self.resolve_type_alias_reference(&symbol, args)
+                        }
+                        _ => self.get_type_from_type_node(&node),
+                    }
+                }
+                _ => self.get_type_from_type_node(&node),
+            };
+            self.scope_stack = saved_scopes;
+            self.type_argument_stack = saved_stack;
+            let resolved = match &chain {
+                Some(chain) => self.apply_template_subst_chain(&resolved, chain),
+                None => resolved,
+            };
+            self.template_resolving_ids.remove(&t.id);
+            if resolved.intrinsic_name() == Some("error") {
+                // 外层对同一别名/节点的解析在途（符号级循环守卫）会产出 error；
+                // 让位不驻留：本次不回写，推断层也不缓存，待外层完成后重试
+                self.template_resolution_letway = true;
+                return None;
+            }
+            let ptr = Arc::as_ptr(t) as *mut crate::checker::types::Type;
+            unsafe {
+                if let TypeData::Mapped(m) = &mut (*ptr).data {
+                    m.template_type = Some(Arc::clone(&resolved));
+                }
+            }
+            return Some(resolved);
         }
         None
+    }
+
+    fn clear_type_node_cache_subtree(&mut self, node: &Arc<Node>) {
+        if let Some(links) = self.type_node_links.get_mut(node) {
+            links.resolved_type = None;
+        }
+        let mut children = Vec::new();
+        tsox_frontend::ast::node_data_generated::for_each_child(node, |child| {
+            children.push(Arc::clone(child));
+            false
+        });
+        for child in children {
+            self.clear_type_node_cache_subtree(&child);
+        }
     }
 }

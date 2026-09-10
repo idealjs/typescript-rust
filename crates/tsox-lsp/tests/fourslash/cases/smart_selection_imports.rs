@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineSelectionRanges"]
 #[test]
 fn smart_selection_imports() {
@@ -7,6 +8,6 @@ fn smart_selection_imports() {
 import { b } from './';
 
 console.log(1);"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("smartSelection_imports", content);
     fourslash::unsupported("VerifyBaselineSelectionRanges"); // f.VerifyBaselineSelectionRanges(t)
 }

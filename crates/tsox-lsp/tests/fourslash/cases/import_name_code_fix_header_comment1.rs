@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyImportFixAtPosition"]
 #[test]
 fn import_name_code_fix_header_comment1() {
@@ -14,7 +15,7 @@ export const bar = 0;
 
 import { bar } from "./b";
 foo;"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("importNameCodeFix_HeaderComment1", content);
     fourslash::go_to_file(&mut s, "/c.ts");
     fourslash::unsupported("VerifyImportFixAtPosition"); // f.VerifyImportFixAtPosition(t, []string{
 }

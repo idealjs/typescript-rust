@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineFindAllReferences"]
 #[test]
 fn find_all_refs_destructure_getter() {
@@ -10,6 +11,6 @@ fn find_all_refs_destructure_getter() {
 }
 const { /*x1*/x, /*y1*/y } = new Test();
 /*x2*/x; /*y2*/y;"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("findAllRefsDestructureGetter", content);
     fourslash::unsupported("VerifyBaselineFindAllReferences"); // f.VerifyBaselineFindAllReferences(t, "x0", "x1", "x2", "y0", "y1", "y2")
 }

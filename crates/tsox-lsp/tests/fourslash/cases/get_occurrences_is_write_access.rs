@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineDocumentHighlights"]
 #[test]
 fn get_occurrences_is_write_access() {
@@ -20,6 +21,6 @@ var postDecrement = [|{| "isWriteAccess": true |}x|]--;
 
 [|{| "isWriteAccess": true |}x|] += 1;
 [|{| "isWriteAccess": true |}x|] <<= 1;"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("getOccurrencesIsWriteAccess", content);
     fourslash::unsupported("VerifyBaselineDocumentHighlights"); // f.VerifyBaselineDocumentHighlights(t, nil /*preferences*/, f.Ranges()[0])
 }

@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineDocumentHighlights"]
 #[test]
 fn get_occurrences_of_anonymous_function2() {
@@ -12,6 +13,6 @@ function foo() {}
 //global foo references
 fo/*global*/o();
 var f = foo;"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("getOccurrencesOfAnonymousFunction2", content);
     fourslash::unsupported("VerifyBaselineDocumentHighlights"); // f.VerifyBaselineDocumentHighlights(t, nil /*preferences*/, "local", "global")
 }

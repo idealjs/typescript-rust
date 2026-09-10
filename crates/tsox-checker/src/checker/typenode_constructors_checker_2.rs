@@ -263,8 +263,15 @@ impl Checker {
             if let Some(constraint) = self.get_constraint_of_type_parameter(t) {
                 return self.get_index_type(&constraint);
             }
-
-            return self.string_type();
+            // Go shouldDeferIndexType：类型参数的 keyof 保持延迟 Index 类型（驻留保恒等）
+            return self.deferred_index_type(t);
+        }
+        // Go shouldDeferIndexType（InstantiableNonPrimitive）：泛型挂起的索引
+        // 访问/条件的 keyof 同样保持延迟（keyof T["_type"] 不归约为 never）
+        if t.flags.intersects(TypeFlags::IndexedAccess | TypeFlags::Conditional)
+            || matches!(&t.data, TypeData::IndexedAccess(_))
+        {
+            return self.deferred_index_type(t);
         }
 
         if let TypeData::Mapped(m) = &t.data
@@ -324,5 +331,23 @@ impl Checker {
             found
         });
         found
+    }
+}
+
+impl Checker {
+    fn deferred_index_type(&mut self, t: &Arc<Type>) -> Arc<Type> {
+        if let Some(cached) = self.index_type_cache.get(&t.id) {
+            return Arc::clone(cached);
+        }
+        let index = Arc::new(Type::new(
+            TypeFlags::Index,
+            TypeData::Index(crate::checker::types::IndexTypeData {
+                constrained: Default::default(),
+                target: Some(Arc::clone(t)),
+                index_flags: Default::default(),
+            }),
+        ));
+        self.index_type_cache.insert(t.id, Arc::clone(&index));
+        index
     }
 }

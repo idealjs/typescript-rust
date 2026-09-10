@@ -45,6 +45,7 @@ pub mod definition;
 pub mod diagnostics;
 pub mod display_parts_writer;
 pub mod document_highlights;
+pub(crate) mod position;
 pub mod file_rename;
 pub mod find_all_references;
 pub mod folding;

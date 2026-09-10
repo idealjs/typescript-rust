@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.FormatDocument"]
 #[test]
 fn formatting_on_statements_with_no_semicolon() {
@@ -60,7 +61,7 @@ fn formatting_on_statements_with_no_semicolon() {
          while (0)/*66*/
             while (0)/*67*/
          while (0)/*68*/"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("formattingOnStatementsWithNoSemicolon", content);
     fourslash::unsupported("FormatDocument"); // f.FormatDocument(t, "")
     fourslash::go_to_marker(&mut s, "1");
     fourslash::verify_current_line_content(&mut s, r#"do {"#);
@@ -87,10 +88,7 @@ fn formatting_on_statements_with_no_semicolon() {
     fourslash::go_to_marker(&mut s, "12");
     fourslash::verify_current_line_content(&mut s, r#"}"#);
     fourslash::go_to_marker(&mut s, "13");
-    fourslash::verify_current_line_content(
-        &mut s,
-        r#"do { do { do { } while (a !== b) } while (a !== b) } while (a !== b)"#,
-    );
+    fourslash::verify_current_line_content(&mut s, r#"do { do { do { } while (a !== b) } while (a !== b) } while (a !== b)"#);
     fourslash::go_to_marker(&mut s, "14");
     fourslash::verify_current_line_content(&mut s, r#"do {"#);
     fourslash::go_to_marker(&mut s, "15");

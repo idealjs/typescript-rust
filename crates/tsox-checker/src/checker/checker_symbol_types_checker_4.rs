@@ -80,6 +80,19 @@ impl Checker {
             construct_sigs.push(sig);
         }
 
+        // Go getSignatureFromDeclaration：构造签名类型参数取自类声明（构造器自身不可带）
+        let class_tp_types: Vec<Arc<Type>> = self.class_type_parameter_types_of(node);
+        if !class_tp_types.is_empty() {
+            for sig in &construct_sigs {
+                let sig_mut = Arc::as_ptr(sig) as *mut crate::checker::types::Signature;
+                unsafe {
+                    if (*sig_mut).type_parameters.is_empty() {
+                        (*sig_mut).type_parameters = class_tp_types.clone();
+                    }
+                }
+            }
+        }
+
         if node.has_syntactic_modifier(ModifierFlags::Abstract) {
             construct_sigs = construct_sigs
                 .into_iter()

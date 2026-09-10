@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineGoToImplementation"]
 #[test]
 fn go_to_implementation_type_alias_00() {
@@ -8,6 +9,6 @@ export type TypeAlias = { P: number }
 // @Filename: ref.ts
 import { TypeAlias } from "./def";
 const c: T/*ref*/ypeAlias = [|{ P: 2 }|];"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("goToImplementationTypeAlias_00", content);
     fourslash::unsupported("VerifyBaselineGoToImplementation"); // f.VerifyBaselineGoToImplementation(t, "ref")
 }

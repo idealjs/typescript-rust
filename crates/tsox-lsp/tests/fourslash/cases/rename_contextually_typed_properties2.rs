@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineRenameAtRangesWithText"]
 #[test]
 fn rename_contextually_typed_properties2() {
@@ -57,6 +58,6 @@ var o10: I = {
     set ["prop1"](v) { },
     [|set ["[|{| "contextRangeIndex": 20 |}prop2|]"](v) { }|]
 };"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("renameContextuallyTypedProperties2", content);
     fourslash::unsupported("VerifyBaselineRenameAtRangesWithText"); // f.VerifyBaselineRenameAtRangesWithText(t, nil /*preferences*/, "prop2")
 }

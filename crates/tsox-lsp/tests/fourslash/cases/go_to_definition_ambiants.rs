@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineGoToDefinition"]
 #[test]
 fn go_to_definition_ambiants() {
@@ -16,6 +17,6 @@ declare class ambientClass {
 var ambientClassVariable = new /*constructorReference*/ambientClass();
 ambientClass./*staticMethodReference*/method();
 ambientClassVariable./*instanceMethodReference*/method();"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("goToDefinitionAmbiants", content);
     fourslash::unsupported("VerifyBaselineGoToDefinition"); // f.VerifyBaselineGoToDefinition(t, false, "ambientVariableReference", "ambientFunctionReference", "co
 }

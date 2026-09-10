@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCompletions"]
 #[test]
 fn completion_in_incomplete_call_expression() {
@@ -7,6 +8,6 @@ fn completion_in_incomplete_call_expression() {
 var array = [1, 2, 4]
 function a4(x, y, z) { }
 a4(...<crash>/**/"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("completionInIncompleteCallExpression", content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

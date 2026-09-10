@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyImportFixModuleSpecifiers"]
 #[test]
 fn auto_import_package_json_imports_conditions() {
@@ -17,6 +18,6 @@ fn auto_import_package_json_imports_conditions() {
 something/*a*/
 // @Filename: /types/thing.d.ts
 export function something(name: string): any;"##;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("autoImportPackageJsonImportsConditions", content);
     fourslash::unsupported("VerifyImportFixModuleSpecifiers"); // f.VerifyImportFixModuleSpecifiers(t, "a", []string{"#thing"}, nil /*preferences*/)
 }

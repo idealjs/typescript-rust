@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineGoToDefinition"]
 #[test]
 fn go_to_definition_rest() {
@@ -11,6 +12,6 @@ fn go_to_definition_rest() {
 let t: Gen;
 var { x, ...rest } = t;
 rest.[|/*2*/parent|];"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("goToDefinitionRest", content);
     fourslash::unsupported("VerifyBaselineGoToDefinition"); // f.VerifyBaselineGoToDefinition(t, true, "2")
 }

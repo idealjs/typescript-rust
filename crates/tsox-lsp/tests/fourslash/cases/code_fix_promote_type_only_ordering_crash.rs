@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyImportFixAtPosition"]
 #[test]
 fn code_fix_promote_type_only_ordering_crash() {
@@ -15,7 +16,7 @@ import type {
 } from "./bar";
 
 let x: AAA = new BBB()"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("codeFixPromoteTypeOnlyOrderingCrash", content);
     fourslash::go_to_file(&mut s, "/foo.ts");
     fourslash::unsupported("VerifyImportFixAtPosition"); // f.VerifyImportFixAtPosition(t, []string{
 }

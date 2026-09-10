@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineHover"]
 #[test]
 fn quick_info_for_arguments_property_name_in_js_mode1() {
@@ -14,6 +15,6 @@ function /*1*/f2(x) {
 }
 
 /*2*/f2('');"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("quickInfoForArgumentsPropertyNameInJsMode1", content);
     fourslash::unsupported("VerifyBaselineHover"); // f.VerifyBaselineHover(t)
 }

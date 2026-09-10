@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: f.MarkTestAsStradaServer()"]
 #[test]
 fn jsdoc_typedef_tag_rename02() {
@@ -11,7 +12,7 @@ fn jsdoc_typedef_tag_rename02() {
 
 /** @type {[|NumberLike|]} */
 var numberLike;"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("jsdocTypedefTagRename02", content);
     // TODO: f.MarkTestAsStradaServer()
     fourslash::unsupported("VerifyBaselineRename"); // f.VerifyBaselineRename(t, nil /*preferences*/, ToAny(f.Ranges()[1:])...)
 }

@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyCompletions"]
+
 #[test]
 fn java_script_modules_with_backticks() {
     let content = r#"// @allowJs: true
@@ -9,6 +9,6 @@ exports.x = 0;
 // @Filename: consumer.js
 var a = require(` + "`" + `./a` + "`" + `);
 a./**/;"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
+    let mut s = Session::new_for_test("javaScriptModulesWithBackticks", content);
+    fourslash::verify_completions_include_exclude_at(&mut s, Some(""), &["x"], &[]);
 }

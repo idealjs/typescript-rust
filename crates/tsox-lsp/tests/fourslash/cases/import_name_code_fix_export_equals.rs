@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCodeFixAll"]
 #[test]
 fn import_name_code_fix_export_equals() {
@@ -15,7 +16,7 @@ export = a;
 // @Filename: /b.ts
 a;
 let x: b;"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("importNameCodeFix_exportEquals", content);
     fourslash::go_to_file(&mut s, "/b.ts");
     fourslash::unsupported("VerifyCodeFixAll"); // f.VerifyCodeFixAll(t, fourslash.VerifyCodeFixAllOptions{
 }

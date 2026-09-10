@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCodeFix"]
 #[test]
 fn import_name_code_fix_require_umd() {
@@ -15,7 +16,7 @@ export as namespace Foo;
 // @Filename: index.js
 Foo;
 module.exports = {};"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("importNameCodeFix_require_UMD", content);
     fourslash::go_to_file(&mut s, "index.js");
     fourslash::unsupported("VerifyCodeFix"); // f.VerifyCodeFix(t, fourslash.VerifyCodeFixOptions{
 }

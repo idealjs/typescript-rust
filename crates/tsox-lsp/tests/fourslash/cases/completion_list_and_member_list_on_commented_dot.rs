@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyCompletions"]
+
 #[test]
 fn completion_list_and_member_list_on_commented_dot() {
     let content = r#"namespace M {
@@ -15,6 +15,6 @@ c. // test on c.
 
 //Test for comment
 //c./**/"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "", nil)
+    let mut s = Session::new_for_test("completionListAndMemberListOnCommentedDot", content);
+    fourslash::verify_completions_empty_at(&mut s, Some(""));
 }

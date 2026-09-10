@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineRenameAtRangesWithText"]
 #[test]
 fn rename_rest() {
@@ -11,6 +12,6 @@ fn rename_rest() {
 let t: Gen;
 var { x, ...rest } = t;
 rest.[|parent|];"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("renameRest", content);
     fourslash::unsupported("VerifyBaselineRenameAtRangesWithText"); // f.VerifyBaselineRenameAtRangesWithText(t, nil /*preferences*/, "parent")
 }

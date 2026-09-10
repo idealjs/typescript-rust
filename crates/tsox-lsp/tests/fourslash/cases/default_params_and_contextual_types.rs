@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[test]
 fn default_params_and_contextual_types() {
     let content = r#"// @strict: false
@@ -14,7 +15,7 @@ var o: Foo = {
         // expect xy to have type string, and options to have type FooOptions in here
     }
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("defaultParamsAndContextualTypes", content);
     fourslash::verify_quick_info_at(&mut s, "1", "(parameter) xy: string", "");
     fourslash::verify_quick_info_at(&mut s, "2", "(parameter) options: FooOptions", "");
 }

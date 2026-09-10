@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineGoToImplementation"]
 #[test]
 fn go_to_implementation_interface_method_04() {
@@ -22,6 +23,6 @@ class OtherBar implements Foo {
 function (x: SuperBar) {
     x.he/*function_call*/llo()
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("goToImplementationInterfaceMethod_04", content);
     fourslash::unsupported("VerifyBaselineGoToImplementation"); // f.VerifyBaselineGoToImplementation(t, "function_call")
 }

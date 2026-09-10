@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: f.MarkTestAsStradaServer()"]
 #[test]
 fn triple_slash_reference_resolution_mode() {
@@ -21,7 +22,7 @@ declare global { const pkgImportGlobal: PkgImportInterface; }
 /// <reference types="pkg" resolution-mode="import" />
 pkgImportGlobal;
 export {};"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("tripleSlashReferenceResolutionMode", content);
     // TODO: f.MarkTestAsStradaServer()
     fourslash::go_to_file(&mut s, "/home/src/workspaces/project/index.ts");
     fourslash::verify_number_of_errors_in_current_file(&mut s, 0);

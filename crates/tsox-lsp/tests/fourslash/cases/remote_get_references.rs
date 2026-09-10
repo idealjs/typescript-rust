@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineFindAllReferences"]
 #[test]
 fn remote_get_references() {
@@ -178,6 +179,6 @@ namespace remotemodTest {
 		var remoteboo = remotefoo;
 	}
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("remoteGetReferences", content);
     fourslash::unsupported("VerifyBaselineFindAllReferences"); // f.VerifyBaselineFindAllReferences(t, "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", 
 }

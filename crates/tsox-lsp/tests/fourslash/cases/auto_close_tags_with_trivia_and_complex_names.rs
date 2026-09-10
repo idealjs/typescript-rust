@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: // Using separate files for each example to avoid unclosed J"]
 #[test]
 fn auto_close_tags_with_trivia_and_complex_names() {
@@ -84,6 +85,6 @@ const x = <SomeComponent<number>>/*9*/
 // Tag name containing $ (must be snippet-escaped)
 const x = <$Foo>/*10*/
 "#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("autoCloseTagsWithTriviaAndComplexNames", content);
     fourslash::unsupported("VerifyBaselineClosingTags"); // f.VerifyBaselineClosingTags(t)
 }

@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[test]
 fn quick_info_property_tag() {
     let content = r#"// @allowJs: true
@@ -12,6 +13,6 @@ fn quick_info_property_tag() {
 
 /** @type {I} */
 const obj = { /**/x: 10 };"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("quickInfoPropertyTag", content);
     fourslash::verify_quick_info_at(&mut s, "", "(property) x: number", "Doc\nMore doc");
 }

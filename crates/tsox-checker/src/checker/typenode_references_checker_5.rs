@@ -52,7 +52,7 @@ impl Checker {
         let call_signature_count = call_signatures.len();
         let mut signatures = call_signatures;
         signatures.extend(construct_signatures);
-        Arc::new(Type {
+                Arc::new(Type {
             flags: TypeFlags::Object,
             object_flags: ObjectFlags::Anonymous,
             id: crate::checker::types::next_type_id(),

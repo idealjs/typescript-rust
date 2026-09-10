@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCompletions"]
 #[test]
 fn completion_list_in_closed_object_type_literal_in_signature04() {
@@ -9,6 +10,6 @@ fn completion_list_in_closed_object_type_literal_in_signature04() {
 }
 
 declare function foo<TString, TNumber>(obj: I<TString, TNumber>): { /*1*/ }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("completionListInClosedObjectTypeLiteralInSignature04", content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
 }

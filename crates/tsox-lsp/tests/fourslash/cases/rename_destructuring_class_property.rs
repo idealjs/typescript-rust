@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineRename"]
 #[test]
 fn rename_destructuring_class_property() {
@@ -18,6 +19,6 @@ class B {
         [|foo|] = "newString";
     }
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("renameDestructuringClassProperty", content);
     fourslash::unsupported("VerifyBaselineRename"); // f.VerifyBaselineRename(t, nil /*preferences*/, f.Ranges()[1], f.Ranges()[5], f.Ranges()[3], f.Ranges
 }

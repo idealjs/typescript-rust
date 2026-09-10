@@ -31,20 +31,37 @@ impl LanguageService {
         let line = position.line as usize;
         let character = position.character as usize;
         let line_start = line_map.line_starts.get(line).copied().unwrap_or(0) as usize;
-        let offset = line_start + character;
-
-        let mut node = find_deepest_node(&source_file.node, offset);
-        // tsc quickinfo：节点不宜悬停（标点/非标识符）时回退 findPrecedingToken（边界取前 token）
-        if !is_hoverable_node(&node) {
-            if let Some(prev) = find_deepest_token_ending_at(&source_file.node, offset) {
-                node = prev;
+        // LSP character 是 UTF-16 列：行内按码元推进，不得与字节行首直接相加
+        let mut offset = line_start;
+        let mut units = 0usize;
+        for c in source_file.text[line_start..].chars() {
+            if units >= character {
+                break;
             }
+            units += c.len_utf16();
+            offset += c.len_utf8();
         }
-        node = get_node_for_quick_info(&node, offset);
+
+        // tsc quickinfo：GetTouchingPropertyName（谓词含关键字/私有名，带前 token 回退）；
+        // JSDoc 内位置需附带 JSDoc 子树（Go VisitEachChildAndJSDoc）
+        let node =
+            tsox_frontend::astnav::get_touching_property_name_with_jsdoc(&source_file, offset)?;
+        if node.kind == tsox_frontend::ast::SyntaxKind::SourceFile {
+            return None;
+        }
+        let node = get_node_for_quick_info(&node, offset);
 
         let mut checker = program.build_checker();
-        let parts = checker.get_quick_info_display_parts(&node);
-        let type_str = if parts.is_empty() {
+        // Go getQuickInfoAndDeclarationAtLocation 结构化移植优先（骨架转正中）；
+        // 迁移期回退：旧补丁式路径
+        let mut parts = checker.quick_info_display_for_node(&node);
+        if parts.is_empty() {
+            parts = checker.quick_info_parts(&node);
+        }
+        if parts.is_empty() {
+            parts = checker.get_quick_info_display_parts(&node);
+        }
+        let mut type_str = if parts.is_empty() {
             checker.get_quick_info_text(&node)
         } else {
             display_parts_to_string(&parts)
@@ -100,15 +117,6 @@ fn display_parts_to_string(parts: &[SymbolDisplayPart]) -> String {
     parts.iter().map(|p| p.text.as_str()).collect()
 }
 
-fn is_leaf_token(node: &Arc<Node>) -> bool {
-    let mut has_child = false;
-    for_each_child(node, |_| {
-        has_child = true;
-        false
-    });
-    !has_child
-}
-
 fn get_node_for_quick_info(node: &Arc<Node>, offset: usize) -> Arc<Node> {
     use tsox_frontend::ast::SyntaxKind;
     let Some(parent) = node.parent.as_ref() else {
@@ -129,94 +137,17 @@ fn get_node_for_quick_info(node: &Arc<Node>, offset: usize) -> Arc<Node> {
     if parent.kind == SyntaxKind::NamedTupleMember && node.pos() == parent.pos() {
         return Arc::clone(parent);
     }
+    if parent.kind == SyntaxKind::MetaProperty {
+        if let tsox_frontend::ast::NodeData::MetaProperty(mp) = &parent.data {
+            if mp.keyword_token == SyntaxKind::ImportKeyword && Arc::ptr_eq(&mp.name, node) {
+                return Arc::clone(parent);
+            }
+        }
+    }
     if parent.kind == SyntaxKind::JsxNamespacedName {
         return Arc::clone(parent);
     }
     Arc::clone(node)
-}
-
-fn is_hoverable_node(node: &Arc<Node>) -> bool {
-    use tsox_frontend::ast::SyntaxKind;
-    matches!(
-        node.kind,
-        SyntaxKind::Identifier
-            | SyntaxKind::ThisKeyword
-            | SyntaxKind::PrivateIdentifier
-            | SyntaxKind::StringLiteral
-            | SyntaxKind::NumericLiteral
-    ) || is_declaration_kind(node.kind)
-}
-
-fn is_declaration_kind(kind: tsox_frontend::ast::SyntaxKind) -> bool {
-    use tsox_frontend::ast::SyntaxKind;
-    matches!(
-        kind,
-        SyntaxKind::ClassDeclaration
-            | SyntaxKind::InterfaceDeclaration
-            | SyntaxKind::EnumDeclaration
-            | SyntaxKind::TypeAliasDeclaration
-            | SyntaxKind::FunctionDeclaration
-            | SyntaxKind::MethodDeclaration
-            | SyntaxKind::PropertyDeclaration
-            | SyntaxKind::VariableDeclaration
-            | SyntaxKind::Parameter
-            | SyntaxKind::PropertySignature
-    )
-}
-
-/// 边界回退（tsc findPrecedingToken 语义）：包含下钻到最深，再向子级/祖先兄弟找 end==offset 的叶子
-fn find_deepest_token_ending_at(root: &Arc<Node>, offset: usize) -> Option<Arc<Node>> {
-    let start = find_deepest_node(root, offset);
-    let mut cur: Option<Arc<Node>> = Some(Arc::clone(&start));
-    while let Some(n) = cur {
-        let mut hit: Option<Arc<Node>> = None;
-        for_each_child(&n, |ch| {
-            if ch.end() == offset {
-                hit = Some(Arc::clone(ch));
-            }
-            false
-        });
-        if let Some(h) = hit {
-            let mut d = h;
-            loop {
-                let mut nx: Option<Arc<Node>> = None;
-                for_each_child(&d, |ch| {
-                    if ch.end() == offset {
-                        nx = Some(Arc::clone(ch));
-                    }
-                    false
-                });
-                match nx {
-                    Some(child) => d = child,
-                    None => break,
-                }
-            }
-            return Some(d);
-        }
-        cur = n.parent.clone();
-    }
-    None
-}
-
-fn find_deepest_node(node: &Arc<Node>, offset: usize) -> Arc<Node> {
-    let mut deepest = Arc::clone(node);
-    loop {
-        let current = Arc::clone(&deepest);
-        let mut next: Option<Arc<Node>> = None;
-        for_each_child(&current, |child| {
-            if child.pos() <= offset && offset < child.end() {
-                next = Some(Arc::clone(child));
-                true
-            } else {
-                false
-            }
-        });
-        match next {
-            Some(child) => deepest = child,
-            None => break,
-        }
-    }
-    deepest
 }
 
 fn node_range_to_lsp_range(line_map: &LineMap, node: &Arc<Node>) -> Range {

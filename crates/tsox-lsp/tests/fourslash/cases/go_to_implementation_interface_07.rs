@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineGoToImplementation"]
 #[test]
 fn go_to_implementation_interface_07() {
@@ -27,6 +28,6 @@ let x11 = class [|{|"parts": ["(","local class",")"," ","C"], "kind": "local cla
 function isFoo(a: any): a is Foo {
     return true;
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("goToImplementationInterface_07", content);
     fourslash::unsupported("VerifyBaselineGoToImplementation"); // f.VerifyBaselineGoToImplementation(t, "interface_definition")
 }

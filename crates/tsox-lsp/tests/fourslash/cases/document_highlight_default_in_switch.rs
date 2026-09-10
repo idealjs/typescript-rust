@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineDocumentHighlights"]
 #[test]
 fn document_highlight_default_in_switch() {
@@ -10,6 +11,6 @@ fn document_highlight_default_in_switch() {
    [|default|]:
        [|break|];
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("documentHighlightDefaultInSwitch", content);
     fourslash::unsupported("VerifyBaselineDocumentHighlights"); // f.VerifyBaselineDocumentHighlights(t, nil /*preferences*/, f.Ranges()[1], f.Ranges()[4])
 }

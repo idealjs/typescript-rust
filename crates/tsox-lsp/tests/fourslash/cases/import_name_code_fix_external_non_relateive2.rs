@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: f.MarkTestAsStradaServer()"]
 #[test]
 fn import_name_code_fix_external_non_relateive2() {
@@ -24,7 +25,7 @@ export const utils = 0;
 export const shared = 0;
 // @Filename: /home/src/workspaces/project/shared/data.ts
 shared/*external2external*/"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("importNameCodeFix_externalNonRelateive2", content);
     // TODO: f.MarkTestAsStradaServer()
     // TODO: opts839 := f.GetOptions()
     // TODO: opts839.FormatCodeSettings.NewLineCharacter = "\n"

@@ -36,7 +36,19 @@ impl Parser {
             scanner.scan();
             if scanner.token() == SyntaxKind::IsKeyword && !scanner.has_preceding_line_break() {
                 let pos = self.token_pos();
-                let parameter_name = self.parse_identifier();
+                // this 谓词左部是关键字节点，标识符谓词照常解析
+                let parameter_name = if self.token == SyntaxKind::ThisKeyword {
+                    let start = self.token_pos();
+                    let end = self.token_end();
+                    self.next_token();
+                    Arc::new(Node::with_loc(
+                        SyntaxKind::ThisKeyword,
+                        NodeData::Token,
+                        TextRange::new(start, end),
+                    ))
+                } else {
+                    self.parse_identifier()
+                };
                 self.expect(SyntaxKind::IsKeyword);
                 let type_node = self.parse_type();
                 let end = type_node.end();
@@ -127,7 +139,7 @@ impl Parser {
                 self.next_token();
                 if self.token == SyntaxKind::CloseBracketToken {
                     self.next_token();
-                    let end = self.token_pos();
+                    let end = self.node_pos();
                     type_node = Arc::new(Node::with_loc(
                         SyntaxKind::ArrayType,
                         NodeData::ArrayTypeNode(ArrayTypeNodeData {
@@ -139,7 +151,7 @@ impl Parser {
                 }
                 let index_type = self.parse_type();
                 self.expect(SyntaxKind::CloseBracketToken);
-                let end = self.token_pos();
+                let end = self.node_pos();
                 type_node = Arc::new(Node::with_loc(
                     SyntaxKind::IndexedAccessType,
                     NodeData::IndexedAccessTypeNode(IndexedAccessTypeNodeData {

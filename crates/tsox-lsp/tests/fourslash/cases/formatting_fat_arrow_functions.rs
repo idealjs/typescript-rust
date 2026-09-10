@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.FormatDocument"]
 #[test]
 fn formatting_fat_arrow_functions() {
@@ -116,7 +117,7 @@ fn formatting_fat_arrow_functions() {
 /*86*/        (        a )           =>        (        b )           =>        (        c )           =>    121   ,
 /*87*/        false       ?            (        a )           =>    0     :        (        b )           =>    122
  /*88*/)      ;"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("formattingFatArrowFunctions", content);
     fourslash::unsupported("FormatDocument"); // f.FormatDocument(t, "")
     fourslash::go_to_marker(&mut s, "1");
     fourslash::verify_current_line_content(&mut s, r#"() => 1;"#);
@@ -147,10 +148,7 @@ fn formatting_fat_arrow_functions() {
     fourslash::go_to_marker(&mut s, "13");
     fourslash::verify_current_line_content(&mut s, r#"(arg1: number, arg2: number) => 15;"#);
     fourslash::go_to_marker(&mut s, "14");
-    fourslash::verify_current_line_content(
-        &mut s,
-        r#"(arg1: number = 0, arg2: number = 1) => 16;"#,
-    );
+    fourslash::verify_current_line_content(&mut s, r#"(arg1: number = 0, arg2: number = 1) => 16;"#);
     fourslash::go_to_marker(&mut s, "15");
     fourslash::verify_current_line_content(&mut s, r#"(arg1?: number, arg2?: number) => 17;"#);
     fourslash::go_to_marker(&mut s, "16");
@@ -224,15 +222,9 @@ fn formatting_fat_arrow_functions() {
     fourslash::go_to_marker(&mut s, "50");
     fourslash::verify_current_line_content(&mut s, r#"false ? null : (...arg: number[]) => 68;"#);
     fourslash::go_to_marker(&mut s, "51");
-    fourslash::verify_current_line_content(
-        &mut s,
-        r#"((a?) => { return a; }) ? (b?) => { return b; } : (c?) => { return c; };"#,
-    );
+    fourslash::verify_current_line_content(&mut s, r#"((a?) => { return a; }) ? (b?) => { return b; } : (c?) => { return c; };"#);
     fourslash::go_to_marker(&mut s, "52");
-    fourslash::verify_current_line_content(
-        &mut s,
-        r#"((a?) => { return a; }) ? (b) => (c) => 81 : (c) => (d) => 82;"#,
-    );
+    fourslash::verify_current_line_content(&mut s, r#"((a?) => { return a; }) ? (b) => (c) => 81 : (c) => (d) => 82;"#);
     fourslash::go_to_marker(&mut s, "53");
     fourslash::verify_current_line_content(&mut s, r#"((arg) => 90) instanceof Function;"#);
     fourslash::go_to_marker(&mut s, "54");
@@ -242,61 +234,31 @@ fn formatting_fat_arrow_functions() {
     fourslash::go_to_marker(&mut s, "56");
     fourslash::verify_current_line_content(&mut s, r#"((arg: number) => 93) instanceof Function;"#);
     fourslash::go_to_marker(&mut s, "57");
-    fourslash::verify_current_line_content(
-        &mut s,
-        r#"((arg: number = 1) => 94) instanceof Function;"#,
-    );
+    fourslash::verify_current_line_content(&mut s, r#"((arg: number = 1) => 94) instanceof Function;"#);
     fourslash::go_to_marker(&mut s, "58");
-    fourslash::verify_current_line_content(
-        &mut s,
-        r#"((arg?: number) => 95) instanceof Function;"#,
-    );
+    fourslash::verify_current_line_content(&mut s, r#"((arg?: number) => 95) instanceof Function;"#);
     fourslash::go_to_marker(&mut s, "59");
-    fourslash::verify_current_line_content(
-        &mut s,
-        r#"((...arg: number[]) => 96) instanceof Function;"#,
-    );
+    fourslash::verify_current_line_content(&mut s, r#"((...arg: number[]) => 96) instanceof Function;"#);
     fourslash::go_to_marker(&mut s, "60");
     fourslash::verify_current_line_content(&mut s, r#"'' + ((arg) => 100);"#);
     fourslash::go_to_marker(&mut s, "61");
     fourslash::verify_current_line_content(&mut s, r#"((arg) => 0) + '' + ((arg) => 101);"#);
     fourslash::go_to_marker(&mut s, "62");
-    fourslash::verify_current_line_content(
-        &mut s,
-        r#"((arg = 1) => 0) + '' + ((arg = 2) => 102);"#,
-    );
+    fourslash::verify_current_line_content(&mut s, r#"((arg = 1) => 0) + '' + ((arg = 2) => 102);"#);
     fourslash::go_to_marker(&mut s, "63");
     fourslash::verify_current_line_content(&mut s, r#"((arg?) => 0) + '' + ((arg?) => 103);"#);
     fourslash::go_to_marker(&mut s, "64");
-    fourslash::verify_current_line_content(
-        &mut s,
-        r#"((arg: number) => 0) + '' + ((arg: number) => 104);"#,
-    );
+    fourslash::verify_current_line_content(&mut s, r#"((arg: number) => 0) + '' + ((arg: number) => 104);"#);
     fourslash::go_to_marker(&mut s, "65");
-    fourslash::verify_current_line_content(
-        &mut s,
-        r#"((arg: number = 1) => 0) + '' + ((arg: number = 2) => 105);"#,
-    );
+    fourslash::verify_current_line_content(&mut s, r#"((arg: number = 1) => 0) + '' + ((arg: number = 2) => 105);"#);
     fourslash::go_to_marker(&mut s, "66");
-    fourslash::verify_current_line_content(
-        &mut s,
-        r#"((arg?: number) => 0) + '' + ((arg?: number) => 106);"#,
-    );
+    fourslash::verify_current_line_content(&mut s, r#"((arg?: number) => 0) + '' + ((arg?: number) => 106);"#);
     fourslash::go_to_marker(&mut s, "67");
-    fourslash::verify_current_line_content(
-        &mut s,
-        r#"((...arg: number[]) => 0) + '' + ((...arg: number[]) => 107);"#,
-    );
+    fourslash::verify_current_line_content(&mut s, r#"((...arg: number[]) => 0) + '' + ((...arg: number[]) => 107);"#);
     fourslash::go_to_marker(&mut s, "68");
-    fourslash::verify_current_line_content(
-        &mut s,
-        r#"((arg1, arg2?) => 0) + '' + ((arg1, arg2?) => 108);"#,
-    );
+    fourslash::verify_current_line_content(&mut s, r#"((arg1, arg2?) => 0) + '' + ((arg1, arg2?) => 108);"#);
     fourslash::go_to_marker(&mut s, "69");
-    fourslash::verify_current_line_content(
-        &mut s,
-        r#"((arg1, ...arg2: number[]) => 0) + '' + ((arg1, ...arg2: number[]) => 108);"#,
-    );
+    fourslash::verify_current_line_content(&mut s, r#"((arg1, ...arg2: number[]) => 0) + '' + ((arg1, ...arg2: number[]) => 108);"#);
     fourslash::go_to_marker(&mut s, "70");
     fourslash::verify_current_line_content(&mut s, r#"function foo(...arg: any[]) { }"#);
     fourslash::go_to_marker(&mut s, "71");

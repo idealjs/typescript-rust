@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: // Close all files and open temp file, only inferred project"]
 #[test]
 fn code_lens_across_projects() {
@@ -102,7 +103,7 @@ class Point2 implements Pointable {
 	],
 }
 "#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("codeLensAcrossProjects", content);
     fourslash::go_to_marker(&mut s, "impl");
     // TODO: // Open temp file and verify all projects alive
     fourslash::go_to_marker(&mut s, "temp");
@@ -154,6 +155,6 @@ aaa();
 import * as foo from '../../a/dist/foo.js';
 foo.aaa();
 "#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("codeLensOnFunctionAcrossProjects1", content);
     fourslash::unsupported("VerifyBaselineCodeLens"); // f.VerifyBaselineCodeLens(t, &lsutil.UserPreferences{
 }

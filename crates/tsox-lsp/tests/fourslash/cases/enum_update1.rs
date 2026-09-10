@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[test]
 fn enum_update1() {
     let content = r#"namespace M {
@@ -15,9 +16,9 @@ namespace M {
 		return M.E.A;
 	}
 }"#;
-    let mut s = Session::new(content);
-    fourslash::verify_no_errors(&mut s);
+    let mut s = Session::new_for_test("enumUpdate1", content);
+    fourslash::verify_no_errors(&mut s, );
     fourslash::go_to_marker(&mut s, "1");
     fourslash::insert(&mut s, "D = C << 1,");
-    fourslash::verify_no_errors(&mut s);
+    fourslash::verify_no_errors(&mut s, );
 }

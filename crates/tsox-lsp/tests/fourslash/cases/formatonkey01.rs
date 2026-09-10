@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: f.Insert(t, '}')"]
 #[test]
 fn formatonkey01() {
@@ -10,7 +11,7 @@ switch (1) {
             /*1*/
         break;
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("formatonkey01", content);
     // TODO: f.MarkTestAsStradaServer()
     fourslash::go_to_marker(&mut s, "1");
     // TODO: f.Insert(t, "}")

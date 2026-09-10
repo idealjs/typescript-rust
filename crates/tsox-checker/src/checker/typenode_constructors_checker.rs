@@ -56,6 +56,46 @@ impl Checker {
             };
             flattened.sort_by_key(rank);
         }
+        // Go getUnionType 默认 Literal 归约（removeSubtypes）：字面量成员被
+        // 同族原始类型成员吸收（"john" | string → string）
+        let has_primitive = |ts: &[Arc<Type>], flag: TypeFlags| {
+            ts.iter()
+                .any(|t| t.flags.contains(flag) && !crate::checker::types::TYPE_FLAGS_LITERAL.contains(t.flags))
+        };
+        let literal_base = |t: &Arc<Type>| -> Option<TypeFlags> {
+            for (lit, prim) in [
+                (TypeFlags::StringLiteral, TypeFlags::String),
+                (TypeFlags::NumberLiteral, TypeFlags::Number),
+                (TypeFlags::BigIntLiteral, TypeFlags::BigInt),
+                (TypeFlags::BooleanLiteral, TypeFlags::Boolean),
+            ] {
+                if t.flags.contains(lit) {
+                    return Some(prim);
+                }
+            }
+            None
+        };
+        let absorb: Vec<TypeFlags> = {
+            let mut v = Vec::new();
+            for t in &flattened {
+                if let Some(prim) = literal_base(t)
+                    && has_primitive(&flattened, prim)
+                    && !v.contains(&prim)
+                {
+                    v.push(prim);
+                }
+            }
+            v
+        };
+        if !absorb.is_empty() {
+            flattened.retain(|t| match literal_base(t) {
+                Some(prim) => !absorb.contains(&prim),
+                None => true,
+            });
+        }
+        if flattened.len() == 1 {
+            return flattened.into_iter().next().expect("exactly one");
+        }
         Arc::new(Type::new(
             TypeFlags::Union,
             TypeData::Union(UnionTypeData {
@@ -261,6 +301,22 @@ impl Checker {
         declared
             .and_then(|t| t.as_structured().map(|s| s.properties.clone()))
             .unwrap_or_default()
+    }
+
+    /// 全局接口（String/Number/Boolean/Symbol）的实例成员（补全 apparent 用）
+    pub fn global_interface_properties(
+        &mut self,
+        interface_name: &str,
+    ) -> Option<Vec<Arc<Symbol>>> {
+        let sym = self.globals.get(interface_name).cloned()?;
+        let declared = self
+            .type_alias_links
+            .get(&sym)
+            .and_then(|l| l.declared_type.clone())
+            .or_else(|| Some(self.resolve_interface_type(&sym, None)))?;
+        declared
+            .as_structured()
+            .map(|s| s.properties.clone())
     }
 
     pub(crate) fn global_interface_member_symbol(

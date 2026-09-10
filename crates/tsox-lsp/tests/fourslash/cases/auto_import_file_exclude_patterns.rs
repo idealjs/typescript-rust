@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: // Baseline the auto-imports"]
 #[test]
 fn auto_import_file_exclude_patterns() {
@@ -10,7 +11,7 @@ export const ignoredSymbol = 2;
 // @Filename: bar.ts
 mySym/*1*/
 ignoredSym/*2*/"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("autoImportFileExcludePatterns", content);
     fourslash::unsupported("Configure"); // f.Configure(t, lsutil.UserPreferences{
     // TODO: // Verify that mySymbol is included, but ignoredSymbol is excluded from completions
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{

@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: t.Skip('Known failing fourslash test')"]
 #[test]
 fn js_doc_property_description6() {
@@ -14,7 +15,7 @@ function literal1Example(e: Literal1Example) {
     console.log(e./*literal2*/anything);
     console.log(e./*literal3*/prefix0);
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("jsDocPropertyDescription6", content);
     fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "literal1", "(index) Literal1Example[`prefix${string}`]: string | number", ""
     fourslash::verify_quick_info_at(&mut s, "literal2", "any", "");
     fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "literal3", "(index) Literal1Example[`prefix${string}` | `prefix${number}`]: 

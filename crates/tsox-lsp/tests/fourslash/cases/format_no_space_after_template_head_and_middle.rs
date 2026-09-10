@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: ${ 1 }${ 1 }"]
 #[test]
 fn format_no_space_after_template_head_and_middle() {
@@ -16,7 +17,7 @@ const a2 = ` + "`" + "#;
     // TODO: text ${ 1 }
     // TODO: text
     // TODO: ` + "`" + `;`
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("formatNoSpaceAfterTemplateHeadAndMiddle", content);
     // TODO: opts429 := f.GetOptions()
     // TODO: opts429.FormatCodeSettings.InsertSpaceAfterOpeningAndBeforeClosingTemplateStringBraces = core.TSFals
     fourslash::unsupported("Configure"); // f.Configure(t, opts429)

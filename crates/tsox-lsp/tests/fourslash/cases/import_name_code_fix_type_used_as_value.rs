@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyImportFixAtPosition"]
 #[test]
 fn import_name_code_fix_type_used_as_value() {
@@ -7,7 +8,7 @@ fn import_name_code_fix_type_used_as_value() {
 export class ReadonlyArray<T> {}
 // @Filename: /b.ts
 [|new ReadonlyArray<string>();|]"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("importNameCodeFix_typeUsedAsValue", content);
     fourslash::go_to_file(&mut s, "/b.ts");
     fourslash::unsupported("VerifyImportFixAtPosition"); // f.VerifyImportFixAtPosition(t, []string{
 }

@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCodeFixNotAvailable"]
 #[test]
 fn code_fix_infer_from_usage_inaccessible_types() {
@@ -20,6 +21,6 @@ function h2() {
     f2(false);
 }
 "#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("codeFixInferFromUsageInaccessibleTypes", content);
     fourslash::unsupported("VerifyCodeFixNotAvailable"); // f.VerifyCodeFixNotAvailable(t)
 }

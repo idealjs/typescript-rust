@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyQuickInfoExists"]
 #[test]
 fn symbol_name_at_unparseable_function_overload() {
@@ -11,7 +12,7 @@ fn symbol_name_at_unparseable_function_overload() {
     }
 }
 "#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("symbolNameAtUnparseableFunctionOverload", content);
     fourslash::go_to_marker(&mut s, "");
     fourslash::unsupported("VerifyQuickInfoExists"); // f.VerifyQuickInfoExists(t)
 }

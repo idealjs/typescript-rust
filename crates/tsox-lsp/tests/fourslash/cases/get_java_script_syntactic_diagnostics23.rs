@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyNonSuggestionDiagnostics"]
 #[test]
 fn get_java_script_syntactic_diagnostics23() {
@@ -12,7 +13,7 @@ function Person(age) {
         this.canVote = false;
     }
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("getJavaScriptSyntacticDiagnostics23", content);
     fourslash::unsupported("VerifyNonSuggestionDiagnostics"); // f.VerifyNonSuggestionDiagnostics(t, nil)
     fourslash::unsupported("VerifyNonSuggestionDiagnostics"); // f.VerifyNonSuggestionDiagnostics(t, nil)
 }

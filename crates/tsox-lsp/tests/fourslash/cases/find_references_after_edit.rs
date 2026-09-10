@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineFindAllReferences"]
 #[test]
 fn find_references_after_edit() {
@@ -13,7 +14,7 @@ interface A {
 function foo(x: A) {
     x./*2*/foo
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("findReferencesAfterEdit", content);
     fourslash::unsupported("VerifyBaselineFindAllReferences"); // f.VerifyBaselineFindAllReferences(t, "1", "2")
     fourslash::go_to_marker(&mut s, "");
     fourslash::insert(&mut s, "\n");

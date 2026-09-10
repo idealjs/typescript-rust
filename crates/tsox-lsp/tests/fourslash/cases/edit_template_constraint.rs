@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: }"]
 #[test]
 fn edit_template_constraint() {
@@ -7,7 +8,7 @@ fn edit_template_constraint() {
  * @template {/**/
  */
 function f() {}"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("editTemplateConstraint", content);
     fourslash::go_to_marker(&mut s, "");
     fourslash::insert(&mut s, "n");
     fourslash::insert(&mut s, "u");

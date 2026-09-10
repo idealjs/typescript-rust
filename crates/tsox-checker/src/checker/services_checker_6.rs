@@ -10,6 +10,7 @@ impl Checker {
     ) -> bool {
         let properties: Vec<Arc<Node>> = match &obj.data {
             NodeData::ObjectLiteralExpression(data) => data.properties.nodes.clone(),
+            NodeData::JsxAttributes(data) => data.properties.iter().cloned().collect(),
             _ => Vec::new(),
         };
         for property in &properties {
@@ -33,7 +34,7 @@ impl Checker {
             }
             if let Some(ref exp) = expected {
                 if is_literal_type(exp) {
-                    let prop_type = self.get_type_of_node(property);
+                    let prop_type = self.discriminant_property_value_type(property);
                     if !self.is_type_assignable_to(&prop_type, exp) {
                         return true;
                     }
@@ -41,6 +42,26 @@ impl Checker {
             }
         }
         false
+    }
+
+    /// 判别式属性的取值类型：JsxAttribute 走初始化式字面量（不经符号拓宽），
+    /// 其余按节点类型（Go getTypeOfNode）
+    fn discriminant_property_value_type(&mut self, property: &Arc<Node>) -> Arc<Type> {
+        if property.kind == SyntaxKind::JsxAttribute {
+            if let NodeData::JsxAttribute(d) = &property.data
+                && let Some(value) = &d.initializer
+            {
+                let expr = match &value.data {
+                    NodeData::JsxExpression(je) => je.expression.clone(),
+                    _ => Some(Arc::clone(value)),
+                };
+                if let Some(expr) = expr {
+                    return self.get_type_of_node(&expr);
+                }
+            }
+            return self.get_any_type();
+        }
+        self.get_type_of_node(property)
     }
 
     pub fn get_exports_and_properties_of_module(

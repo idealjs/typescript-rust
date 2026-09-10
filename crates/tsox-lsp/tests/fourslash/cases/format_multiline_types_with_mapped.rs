@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.FormatDocument"]
 #[test]
 fn format_multiline_types_with_mapped() {
@@ -38,11 +39,9 @@ const f = {
 } satisfies {
   [index: string]: string
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("formatMultilineTypesWithMapped", content);
     fourslash::unsupported("FormatDocument"); // f.FormatDocument(t, "")
-    fourslash::verify_current_file_content(
-        &mut s,
-        r#"type Z = 'z'
+    fourslash::verify_current_file_content(&mut s, r#"type Z = 'z'
 type A = {
     a: 'a'
 } | {
@@ -76,6 +75,5 @@ const f = {
     f: 'f'
 } satisfies {
     [index: string]: string
-}"#,
-    );
+}"#);
 }

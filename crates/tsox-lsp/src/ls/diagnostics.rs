@@ -235,8 +235,9 @@ fn category_to_severity(category: Category) -> u32 {
     match category {
         Category::Error => 1,
         Category::Warning => 2,
-        Category::Suggestion => 3,
-        Category::Message => 4,
+        // Go lsconv：Suggestion→Hint(4)、Message→Information(3)
+        Category::Suggestion => 4,
+        Category::Message => 3,
     }
 }
 

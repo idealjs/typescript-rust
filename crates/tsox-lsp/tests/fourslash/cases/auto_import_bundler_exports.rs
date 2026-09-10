@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyImportFixModuleSpecifiers"]
 #[test]
 fn auto_import_bundler_exports() {
@@ -17,6 +18,6 @@ fn auto_import_bundler_exports() {
 export const dep: number;
 // @Filename: /index.ts
 dep/**/"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("autoImportBundlerExports", content);
     fourslash::unsupported("VerifyImportFixModuleSpecifiers"); // f.VerifyImportFixModuleSpecifiers(t, "", []string{"dep"}, nil /*preferences*/)
 }

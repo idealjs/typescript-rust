@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: t.Skip('Known failing fourslash test')"]
 #[test]
 fn get_java_script_quick_info6() {
@@ -8,6 +9,6 @@ fn get_java_script_quick_info6() {
 // @Filename: Foo.js
 /** @type {function(this:number)} */
 function f() { /**/this }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("getJavaScriptQuickInfo6", content);
     fourslash::verify_quick_info_at(&mut s, "", "number", "");
 }

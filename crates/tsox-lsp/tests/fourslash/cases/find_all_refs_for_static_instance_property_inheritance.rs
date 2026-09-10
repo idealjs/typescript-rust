@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineFindAllReferences"]
 #[test]
 fn find_all_refs_for_static_instance_property_inheritance() {
@@ -24,6 +25,6 @@ y./*5*/foo;
 z./*6*/foo;
 Y./*7*/foo;
 Z./*8*/foo;"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("findAllRefsForStaticInstancePropertyInheritance", content);
     fourslash::unsupported("VerifyBaselineFindAllReferences"); // f.VerifyBaselineFindAllReferences(t, "0", "1", "2", "3", "4", "5", "6", "7", "8")
 }

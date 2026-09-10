@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.FormatDocument"]
 #[test]
 fn format_parameter() {
@@ -15,7 +16,7 @@ fn format_parameter() {
     )
 ) {
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("formatParameter", content);
     fourslash::unsupported("FormatDocument"); // f.FormatDocument(t, "")
     fourslash::go_to_marker(&mut s, "first");
     fourslash::verify_current_line_content(&mut s, r#"        number,"#);

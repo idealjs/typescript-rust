@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCompletions"]
 #[test]
 fn special_intersections_order_independent() {
@@ -7,6 +8,6 @@ fn special_intersections_order_independent() {
 a('/*1*/')
 declare function b(arg: 'test' | ({} & string)): void
 b('/*2*/')"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("specialIntersectionsOrderIndependent", content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, []string{"1", "2"}, &fourslash.CompletionsExpectedList{
 }

@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: t.Skip('Known failing fourslash test')"]
 #[test]
 fn unused_locals_in_function3() {
@@ -10,6 +11,6 @@ function greeter() {
     x+1;
     z+1;
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("unusedLocalsInFunction3", content);
     fourslash::unsupported("VerifyRangeAfterCodeFix"); // f.VerifyRangeAfterCodeFix(t, `var x,z = 1;`, false, 6133, 0)
 }

@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCompletions"]
 #[test]
 fn completions_js_property_assignment() {
@@ -8,6 +9,6 @@ fn completions_js_property_assignment() {
 /** @type {{ p: "x" | "y" }} */
 const x = { p: "x"  };
 x.p = "[|/**/|]";"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("completionsJsPropertyAssignment", content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

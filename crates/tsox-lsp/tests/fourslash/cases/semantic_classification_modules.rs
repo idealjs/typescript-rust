@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifySemanticTokens"]
 #[test]
 fn semantic_classification_modules() {
@@ -11,6 +12,6 @@ fn semantic_classification_modules() {
 
 var x: /*2*/M./*3*/I = /*4*/M.v;
 var y = /*5*/M;"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("semanticClassificationModules", content);
     fourslash::unsupported("VerifySemanticTokens"); // f.VerifySemanticTokens(t, []fourslash.SemanticToken{
 }

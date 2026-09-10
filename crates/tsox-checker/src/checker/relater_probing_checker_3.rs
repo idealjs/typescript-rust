@@ -80,6 +80,38 @@ impl Checker {
             new_members.insert(prop.name.clone(), Arc::clone(&new_sym));
             new_props.push(new_sym);
         }
+        // 索引签名值类型同样实例化（Go instantiateIndexInfos）
+        let mut new_index_infos: Vec<Arc<crate::checker::IndexInfo>> =
+            Vec::with_capacity(o.structured.index_infos.len());
+        for info in &o.structured.index_infos {
+            let new_value = info
+                .value_type
+                .as_ref()
+                .map(|v| self.substitute_infer_type_parameters(v, params, substitutions));
+            let value_changed = new_value.as_ref().is_some_and(|nv| {
+                info.value_type.as_ref().is_some_and(|ov| !Arc::ptr_eq(nv, ov))
+            });
+            let new_key = info
+                .key_type
+                .as_ref()
+                .map(|k| self.substitute_infer_type_parameters(k, params, substitutions));
+            let key_changed = new_key.as_ref().is_some_and(|nk| {
+                info.key_type.as_ref().is_some_and(|ok| !Arc::ptr_eq(nk, ok))
+            });
+            if !value_changed && !key_changed {
+                new_index_infos.push(Arc::clone(info));
+                continue;
+            }
+            changed = true;
+            new_index_infos.push(Arc::new(crate::checker::IndexInfo {
+                key_type: new_key,
+                value_type: new_value,
+                is_readonly: info.is_readonly,
+                declaration: info.declaration.clone(),
+                index_symbol: info.index_symbol.clone(),
+                components: info.components.clone(),
+            }));
+        }
         if !changed {
             self.subst_object_in_progress.remove(&key);
             return Arc::clone(t);
@@ -91,6 +123,7 @@ impl Checker {
                 if let TypeData::Object(so) = &mut (*shell_mut).data {
                     so.structured.members = new_members;
                     so.structured.properties = new_props;
+                    so.structured.index_infos = new_index_infos;
                 }
             }
         }

@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCompletions"]
 #[test]
 fn completion_list_class_members() {
@@ -25,9 +26,9 @@ class Class {
 Class./*staticsOutsideClassScope*/publicStaticMethod();
 var c = new Class();
 c./*instanceMembersOutsideClassScope*/privateProperty;"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("completionListClassMembers", content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "staticsInsideClassScope", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "instanceMembersInsideClassScope", &fourslash.CompletionsExpectedList{
+    fourslash::verify_completions_unsorted_at(&mut s, Some("instanceMembersInsideClassScope"), &["privateInstanceMethod", "publicInstanceMethod", "privateProperty", "publicProperty"]);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "staticsOutsideClassScope", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "instanceMembersOutsideClassScope", &fourslash.CompletionsExpectedList{
+    fourslash::verify_completions_exact_at(&mut s, Some("instanceMembersOutsideClassScope"), &["publicInstanceMethod", "publicProperty"]);
 }

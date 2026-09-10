@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCodeFixNotAvailable"]
 #[test]
 fn code_fix_top_level_await_target_compatible_compiler_options_in_ts_config() {
@@ -14,6 +15,6 @@ export {};
         "module": "esnext"
     }
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("codeFixTopLevelAwait_target_compatibleCompilerOptionsInTsConfig", content);
     fourslash::unsupported("VerifyCodeFixNotAvailable"); // f.VerifyCodeFixNotAvailable(t)
 }

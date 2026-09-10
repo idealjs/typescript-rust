@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineRename"]
 #[test]
 fn rename_for_default_export03() {
@@ -19,6 +20,6 @@ var y = /*4*/[|f|]();
 [|namespace /*5*/[|{| "contextRangeIndex": 7 |}f|] {
     var local = 100;
 }|]"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("renameForDefaultExport03", content);
     fourslash::unsupported("VerifyBaselineRename"); // f.VerifyBaselineRename(t, nil /*preferences*/, ToAny(core.Filter(f.GetRangesByText().Get("f"), func(
 }

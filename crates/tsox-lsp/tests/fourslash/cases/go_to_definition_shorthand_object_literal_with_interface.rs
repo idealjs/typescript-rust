@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineGoToDefinition"]
 #[test]
 fn go_to_definition_shorthand_object_literal_with_interface() {
@@ -10,6 +11,6 @@ fn go_to_definition_shorthand_object_literal_with_interface() {
 function makeSomething([|foo|]: string): Something {
     return { [|f/*1*/oo|] };
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("goToDefinitionShorthandObjectLiteralWithInterface", content);
     fourslash::unsupported("VerifyBaselineGoToDefinition"); // f.VerifyBaselineGoToDefinition(t, true, "1")
 }

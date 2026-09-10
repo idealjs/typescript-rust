@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineFindAllReferences"]
 #[test]
 fn tsx_find_all_references_union_element_type1() {
@@ -20,6 +21,6 @@ function SFC2(prop: { x: boolean }) {
 }
 /*1*/var /*2*/SFCComp = SFC1 || SFC2;
 /*3*/</*4*/SFCComp x={ "hi" } />"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("tsxFindAllReferencesUnionElementType1", content);
     fourslash::unsupported("VerifyBaselineFindAllReferences"); // f.VerifyBaselineFindAllReferences(t, "1", "2", "3", "4")
 }

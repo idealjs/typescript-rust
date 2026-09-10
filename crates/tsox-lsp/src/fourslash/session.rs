@@ -19,13 +19,30 @@ thread_local! {
     static DEFAULT_TEST_FILE: std::cell::RefCell<String> =
         const { std::cell::RefCell::new(String::new()) };
 }
-pub const PROJECT_ROOT: &str = "";
+pub const PROJECT_ROOT: &str = "/";
+
+/// 路径归一（对齐 path.Clean）：去掉 `.` 段、合并重复分隔符；`/./foo.ts` → `/foo.ts`
+pub(crate) fn normalize_path(path: &str) -> String {
+    let mut parts: Vec<&str> = Vec::new();
+    for seg in path.split('/') {
+        match seg {
+            "" | "." => {}
+            _ => parts.push(seg),
+        }
+    }
+    let joined = parts.join("/");
+    if path.starts_with('/') {
+        format!("/{joined}")
+    } else {
+        joined
+    }
+}
 
 pub(crate) fn project_path(name: &str) -> String {
     if name.starts_with('/') {
-        name.to_string()
+        normalize_path(name)
     } else {
-        format!("{PROJECT_ROOT}/{}", name)
+        normalize_path(&format!("{PROJECT_ROOT}/{}", name))
     }
 }
 

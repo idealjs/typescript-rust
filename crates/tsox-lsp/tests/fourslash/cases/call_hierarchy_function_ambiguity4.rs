@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineCallHierarchy"]
 #[test]
 fn call_hierarchy_function_ambiguity4() {
@@ -12,7 +13,7 @@ declare function /**/foo(x?: boolean): void;
 function bar() {
     foo();
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("callHierarchyFunctionAmbiguity4", content);
     fourslash::go_to_marker(&mut s, "");
     fourslash::unsupported("VerifyBaselineCallHierarchy"); // f.VerifyBaselineCallHierarchy(t)
 }

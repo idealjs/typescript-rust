@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifySuggestionDiagnostics"]
 #[test]
 fn jsdoc_deprecated_suggestion1() {
@@ -78,7 +79,7 @@ type A = f.[|Foo|];
 type B = f.[|QW|];
 type C = f.WQ;
 type [|O|] = Z | A | B | C;"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("jsdocDeprecated_suggestion1", content);
     fourslash::go_to_file(&mut s, "a.ts");
     fourslash::unsupported("VerifySuggestionDiagnostics"); // f.VerifySuggestionDiagnostics(t, []*lsproto.Diagnostic{
     fourslash::go_to_file(&mut s, "j.tsx");

@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCompletions"]
 #[test]
 fn completion_for_string_literal16() {
@@ -18,6 +19,6 @@ f1<Foo>("/*3*/",,,);
 f2<Foo>("/*4*/", "/*5*/",);
 f2<Foo>("/*6*/", "/*7*/");
 f2<Foo>("/*8*/", "/*9*/",,,);"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("completionForStringLiteral16", content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, f.Markers(), &fourslash.CompletionsExpectedList{
 }

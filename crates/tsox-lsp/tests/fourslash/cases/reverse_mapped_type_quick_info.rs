@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[test]
 fn reverse_mapped_type_quick_info() {
     let content = r#"interface IAction {
@@ -29,12 +30,7 @@ type FinalType/*1*/ = ReturnType<typeof test_outer>;
 
 var k: FinalType;
 k.test.test_inner/*2*/"#;
-    let mut s = Session::new(content);
-    fourslash::verify_quick_info_at(
-        &mut s,
-        "1",
-        "type FinalType = {\n    test: {\n        test_inner: string;\n    };\n}",
-        "",
-    );
+    let mut s = Session::new_for_test("reverseMappedTypeQuickInfo", content);
+    fourslash::verify_quick_info_at(&mut s, "1", "type FinalType = {\n    test: {\n        test_inner: string;\n    };\n}", "");
     fourslash::verify_quick_info_at(&mut s, "2", "(property) test_inner: string", "");
 }

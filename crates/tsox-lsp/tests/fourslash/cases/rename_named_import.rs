@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: f.MarkTestAsStradaServer()"]
 #[test]
 fn rename_named_import() {
@@ -15,7 +16,7 @@ import { /*i*/someExportedVariable } from '../lib/index';
 someExportedVariable;
 // @Filename: /home/src/workspaces/project/tsconfig.json
 { "compilerOptions": { "lib": ["es5"] } }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("renameNamedImport", content);
     // TODO: f.MarkTestAsStradaServer()
     fourslash::go_to_file(&mut s, "/home/src/workspaces/project/lib/index.ts");
     fourslash::go_to_file(&mut s, "/home/src/workspaces/project/src/index.ts");

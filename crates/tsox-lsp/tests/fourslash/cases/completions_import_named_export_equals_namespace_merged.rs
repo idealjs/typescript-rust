@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCompletions"]
 #[test]
 fn completions_import_named_export_equals_namespace_merged() {
@@ -15,6 +16,6 @@ declare module "n" {
 declare namespace N {}
 // @Filename: /a.ts
 fo/**/"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("completionsImport_named_exportEqualsNamespace_merged", content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

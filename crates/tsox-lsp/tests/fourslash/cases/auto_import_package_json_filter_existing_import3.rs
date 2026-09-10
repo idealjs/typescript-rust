@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: f.MarkTestAsStradaServer()"]
 #[test]
 fn auto_import_package_json_filter_existing_import3() {
@@ -14,7 +15,7 @@ declare module "node:fs" {
 {}
 // @Filename: /home/src/workspaces/project/index.ts
 readFile/**/"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("autoImportPackageJsonFilterExistingImport3", content);
     // TODO: f.MarkTestAsStradaServer()
     fourslash::go_to_marker(&mut s, "");
     fourslash::unsupported("VerifyImportFixAtPosition"); // f.VerifyImportFixAtPosition(t, []string{}, nil /*preferences*/)

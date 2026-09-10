@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: linkedCursors := []lsproto.Range{"]
 #[test]
 fn linked_editing_jsx_tag4() {
@@ -17,7 +18,7 @@ const jsx = (
       </*15*/p />
    <//*16*/div>
 );"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("linkedEditingJsxTag4", content);
     // TODO: linkedCursors := []lsproto.Range{
     fourslash::unsupported("VerifyLinkedEditing"); // f.VerifyLinkedEditing(t, map[string][]lsproto.Range{
 }

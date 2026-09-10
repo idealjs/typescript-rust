@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyCompletions"]
+
 #[test]
 fn completion_list_in_type_literal_in_type_parameter19() {
     let content = r#"class Foo<T extends 'one' | 'two'> {}
@@ -15,12 +15,12 @@ foo<'/*3*/'>;
 Foo<'/*4*/'>;
 tag<'/*5*/'>` + "`" + `` + "`" + `;
 class { @decorator<'/*6*/'>; method() {} }"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "0", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "2", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "3", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "4", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "5", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "6", &fourslash.CompletionsExpectedList{
+    let mut s = Session::new_for_test("completionListInTypeLiteralInTypeParameter19", content);
+    fourslash::verify_completions_unsorted_at(&mut s, Some("0"), &["one", "two"]);
+    fourslash::verify_completions_unsorted_at(&mut s, Some("1"), &["one", "two"]);
+    fourslash::verify_completions_unsorted_at(&mut s, Some("2"), &["one", "two"]);
+    fourslash::verify_completions_unsorted_at(&mut s, Some("3"), &["one", "two"]);
+    fourslash::verify_completions_unsorted_at(&mut s, Some("4"), &["one", "two"]);
+    fourslash::verify_completions_unsorted_at(&mut s, Some("5"), &["one", "two"]);
+    fourslash::verify_completions_unsorted_at(&mut s, Some("6"), &["one", "two"]);
 }

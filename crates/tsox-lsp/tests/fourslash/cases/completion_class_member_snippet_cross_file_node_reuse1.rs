@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: opts786 := f.GetOptions()"]
 #[test]
 fn completion_class_member_snippet_cross_file_node_reuse1() {
@@ -24,7 +25,7 @@ export class CollapsibleContainerNode extends ElementNode {
 
   /*1*/
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("completionClassMemberSnippetCrossFileNodeReuse1", content);
     // TODO: opts786 := f.GetOptions()
     // TODO: opts786.FormatCodeSettings.InsertSpaceAfterConstructor = core.TSFalse
     fourslash::unsupported("Configure"); // f.Configure(t, opts786)

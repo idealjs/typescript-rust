@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: prefs := lsutil.NewDefaultUserPreferences()"]
 #[test]
 fn auto_import_reexport_of_cross_package_augmentation() {
@@ -27,7 +28,7 @@ export interface AugmentedInterface {
 { "name": "test", "dependencies": { "vitest": "*" } }
 // @Filename: /index.ts
 uniqueFunction/**/"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("autoImportReexportOfCrossPackageAugmentation", content);
     // TODO: prefs := lsutil.NewDefaultUserPreferences()
     // TODO: prefs.AutoImportEntrypointDirectorySearch = core.TSTrue
     fourslash::unsupported("Configure"); // f.Configure(t, prefs)

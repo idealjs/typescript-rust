@@ -176,13 +176,30 @@ def translate_func(name, body, file_stem):
             if var not in content_vars:
                 ignores.add(f"generator: 变量 {var} 非标准 content")
                 rust_var = '""'
+            go_test_name = _CUR_TEST[0]
             if caps.startswith("nil"):
-                lines.append(f"let mut s = Session::new({rust_var});")
+                lines.append(f"let mut s = Session::new_for_test(\"{go_test_name}\", {rust_var});")
             else:
                 lines.append(
                     f"let mut s = Session::new_with_capabilities"
                     f"({rust_var}, None);")
             has_session = True
+            continue
+        m = match_verify_completions(stmt)
+        if m is not None:
+            kind, marker, labels = m
+            marker_arg = "None" if marker is None else f'Some("{marker}")'
+            def _lit(l):
+                return '"' + l.replace("\\", "\\\\").replace('"', '\\"') + '"'
+            labels_lit = "&[" + ", ".join(_lit(l) for l in labels) + "]"
+            if kind == "empty":
+                lines.append(f"fourslash::verify_completions_empty_at(&mut s, {marker_arg});")
+            elif kind == "exact":
+                lines.append(f"fourslash::verify_completions_exact_at(&mut s, {marker_arg}, {labels_lit});")
+            elif kind == "unsorted":
+                lines.append(f"fourslash::verify_completions_unsorted_at(&mut s, {marker_arg}, {labels_lit});")
+            else:
+                lines.append(f"fourslash::verify_completions_include_exclude_at(&mut s, {marker_arg}, {labels_lit}, &[]);")
             continue
         m = match_f_call(stmt)
         if m:
@@ -225,6 +242,124 @@ def translate_func(name, body, file_stem):
     body_text = "\n".join(out)
     return fn, body_text, bool(ignores)
 
+
+
+def match_verify_completions(stmt):
+    """解析 f.VerifyCompletions(t, <marker>, <expected>) 的 label 级形态。
+    返回 (kind, marker, labels)；kind in {empty, exact, includes, unsorted}。
+    非纯字符串条目/组合字段/复杂形态返回 None（由上层 fallback 到 ignore）。"""
+    if not stmt.startswith("f.VerifyCompletions(t, "):
+        return None
+    inner = stmt[len("f.VerifyCompletions(t, "):-1]
+    parts = split_top_commas(inner)
+    if len(parts) < 2:
+        return None
+    marker_expr, expected_expr = parts[0], parts[1]
+    if marker_expr == "nil":
+        marker = None
+    elif re.fullmatch(r'"(?:[^"\\]|\\.)*"', marker_expr):
+        marker = marker_expr[1:-1]
+    else:
+        return None
+    if expected_expr == "nil":
+        return ("empty", marker, [])
+    m = re.match(r"&fourslash\.CompletionsExpectedList\{(.*)\}$", expected_expr, re.S)
+    if not m:
+        return None
+    body = m.group(1)
+    items_m = re.search(r"Items:\s*&fourslash\.CompletionsExpectedItems\{(.*?)\n\t*\},?\s*$", body, re.S)
+    if not items_m:
+        # Items 后还有其它字段（少见）——收紧到 Items 块必须可定位
+        items_m = re.search(r"Items:\s*&fourslash\.CompletionsExpectedItems\{", body)
+        if not items_m:
+            return None
+        # 找 Items 块的平衡括号
+        start = items_m.end() - 1
+        depth = 0
+        i = start
+        in_bt = in_str = False
+        while i < len(body):
+            ch = body[i]
+            if in_bt:
+                if ch == "`":
+                    in_bt = False
+            elif in_str:
+                if ch == '"':
+                    in_str = False
+            elif ch == "`":
+                in_bt = True
+            elif ch == '"':
+                in_str = True
+            elif ch == "{":
+                depth += 1
+            elif ch == "}":
+                depth -= 1
+                if depth == 0:
+                    break
+            i += 1
+        items_body = body[start + 1:i]
+    else:
+        items_body = items_m.group(1)
+    fields = re.findall(r"(Exact|Includes|Excludes|Unsorted):", items_body)
+    if len(fields) != 1 or fields[0] not in ("Exact", "Includes", "Unsorted"):
+        return None
+    field_name = fields[0]
+    kind = field_name.lower()
+    # 提取该字段的字符串列表
+    vm = re.search(field_name + r":\s*\[\]fourslash\.CompletionsExpectedItem\{(.*?)\n\t*\},", items_body, re.S)
+    if not vm:
+        return None
+    entries_body = vm.group(1)
+    labels = re.findall(r'"((?:[^"\\]|\\.)*)"', entries_body)
+    # 纯字符串列表校验：除字符串/逗号/空白外不应有其它 token
+    residue = re.sub(r'"(?:[^"\\]|\\.)*"', "", entries_body)
+    residue = residue.replace(",", "").strip()
+    if residue:
+        return None
+    if len(labels) != entries_body.count('"') // 2:
+        return None
+    return (kind, marker, labels)
+
+
+def split_top_commas(expr):
+    parts, cur, depth = [], [], 0
+    in_bt = in_str = False
+    esc = False
+    for ch in expr:
+        if in_bt:
+            cur.append(ch)
+            if ch == "`":
+                in_bt = False
+            continue
+        if in_str:
+            cur.append(ch)
+            if esc:
+                esc = False
+            elif ch == "\\":
+                esc = True
+            elif ch == '"':
+                in_str = False
+            continue
+        if ch == "`":
+            in_bt = True
+            cur.append(ch)
+        elif ch == '"':
+            in_str = True
+            cur.append(ch)
+        elif ch in "([{":
+            depth += 1
+            cur.append(ch)
+        elif ch in ")]}":
+            depth -= 1
+            cur.append(ch)
+        elif ch == "," and depth == 0:
+            parts.append("".join(cur).strip())
+            cur = []
+        else:
+            cur.append(ch)
+    if "".join(cur).strip():
+        parts.append("".join(cur).strip())
+    return parts
 
 
 def match_const(stmt):

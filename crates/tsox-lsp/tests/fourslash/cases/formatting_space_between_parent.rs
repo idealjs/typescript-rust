@@ -1,12 +1,13 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: opts180 := f.GetOptions()"]
 #[test]
 fn formatting_space_between_parent() {
     let content = r#"/*1*/foo(() => 1);
 /*2*/foo(1);
 /*3*/if((true)){}"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("formattingSpaceBetweenParent", content);
     // TODO: opts180 := f.GetOptions()
     // TODO: opts180.FormatCodeSettings.InsertSpaceAfterOpeningAndBeforeClosingNonemptyParenthesis = core.TSTrue
     fourslash::unsupported("Configure"); // f.Configure(t, opts180)

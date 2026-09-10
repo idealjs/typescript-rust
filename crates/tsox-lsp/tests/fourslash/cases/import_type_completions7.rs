@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCompletions"]
 #[test]
 fn import_type_completions7() {
@@ -10,7 +11,7 @@ declare namespace Foo {}
 export = Foo;
 // @Filename: /test.ts
 [|import F/**/|]"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("importTypeCompletions7", content);
     fourslash::go_to_file(&mut s, "/test.ts");
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

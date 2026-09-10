@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: }"]
 #[test]
 fn tsx_completion4() {
@@ -12,7 +13,7 @@ declare namespace JSX {
 }
 let bag = { x: 100, y: 200 };
 <div {.../**/"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
+    let mut s = Session::new_for_test("tsxCompletion4", content);
+    fourslash::verify_completions_include_exclude_at(&mut s, Some(""), &["bag"], &[]);
     // TODO: }
 }

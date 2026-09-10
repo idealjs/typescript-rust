@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[test]
 fn promise_typing2() {
     let content = r#"interface IPromise<T> {
@@ -15,7 +16,7 @@ var p/*3*/2 = p1.then(function (x/*4*/x) { return "hello"; })
 var p/*5*/3 = p2.then(function (x/*6*/x) {
     return x/*7*/x;
 });"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("promiseTyping2", content);
     fourslash::verify_quick_info_at(&mut s, "1", "var p1: IPromise<number>", "");
     fourslash::verify_quick_info_at(&mut s, "2", "(parameter) xx: number", "");
     fourslash::verify_quick_info_at(&mut s, "3", "var p2: IPromise<string>", "");

@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCompletions"]
 #[test]
 fn completions_optional_kind_modifier() {
@@ -7,6 +8,6 @@ fn completions_optional_kind_modifier() {
 function f(x: A) {
 x./*a*/;
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("completionsOptionalKindModifier", content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "a", &fourslash.CompletionsExpectedList{
 }

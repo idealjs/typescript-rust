@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: t.Skip('Known failing fourslash test')"]
 #[test]
 fn unused_class_in_namespace_with_trivia2() {
@@ -13,6 +14,6 @@ fn unused_class_in_namespace_with_trivia2() {
   class /* comment2 */ class1 {
   }
 } |]"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("unusedClassInNamespaceWithTrivia2", content);
     fourslash::unsupported("VerifyRangeAfterCodeFix"); // f.VerifyRangeAfterCodeFix(t, `namespace greeter {
 }

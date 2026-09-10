@@ -1,11 +1,12 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: opts319 := f.GetOptions()"]
 #[test]
 fn formatting_spaces_after_constructor() {
     let content = r#"/*1*/class test { constructor                   () { } }
 /*2*/class test { constructor                   () { } }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("formattingSpacesAfterConstructor", content);
     fourslash::unsupported("FormatDocument"); // f.FormatDocument(t, "")
     fourslash::go_to_marker(&mut s, "1");
     fourslash::verify_current_line_content(&mut s, r#"class test { constructor() { } }"#);

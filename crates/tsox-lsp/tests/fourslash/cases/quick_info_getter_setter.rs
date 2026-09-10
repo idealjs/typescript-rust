@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: t.Skip('Known failing fourslash test')"]
 #[test]
 fn quick_info_getter_setter() {
@@ -16,29 +17,9 @@ class C {
 }
 let instance = new C();
 instance./*setterUse*/myValue = instance./*getterUse*/myValue;"#;
-    let mut s = Session::new(content);
-    fourslash::verify_quick_info_at(
-        &mut s,
-        "getterUse",
-        "(property) C.myValue: Promise<string>",
-        "",
-    );
-    fourslash::verify_quick_info_at(
-        &mut s,
-        "getterDef",
-        "(getter) C.myValue: Promise<string>",
-        "",
-    );
-    fourslash::verify_quick_info_at(
-        &mut s,
-        "setterUse",
-        "(property) C.myValue: string | Promise<string>",
-        "",
-    );
-    fourslash::verify_quick_info_at(
-        &mut s,
-        "setterDef",
-        "(setter) C.myValue: string | Promise<string>",
-        "",
-    );
+    let mut s = Session::new_for_test("quickInfoGetterSetter", content);
+    fourslash::verify_quick_info_at(&mut s, "getterUse", "(property) C.myValue: Promise<string>", "");
+    fourslash::verify_quick_info_at(&mut s, "getterDef", "(getter) C.myValue: Promise<string>", "");
+    fourslash::verify_quick_info_at(&mut s, "setterUse", "(property) C.myValue: string | Promise<string>", "");
+    fourslash::verify_quick_info_at(&mut s, "setterDef", "(setter) C.myValue: string | Promise<string>", "");
 }

@@ -119,6 +119,14 @@ impl Checker {
         if inferred_type.is_some() {
             let constraint = self.get_constraint_of_type_parameter(&inference.type_parameter);
             if let Some(constraint) = constraint {
+                // 裸类型参数约束按其有效约束判定（无约束 tp 的目标是 unknown，
+                // 任何源可赋值，Go isTypeAssignableTo 对 tp 目标的语义）
+                let constraint = if constraint.flags.contains(TypeFlags::TypeParameter) {
+                    self.get_constraint_of_type_parameter(&constraint)
+                        .unwrap_or_else(|| self.unknown_type())
+                } else {
+                    constraint
+                };
                 if !self.is_type_assignable_to(inferred_type.as_ref().unwrap(), &constraint) {
                     if inference.priority.contains(InferencePriority::ReturnType) {
                         let inferred = inferred_type.as_ref().unwrap();

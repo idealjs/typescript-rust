@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: // Using separate files for each example to avoid unclosed J"]
 #[test]
 fn auto_close_tag() {
@@ -48,6 +49,6 @@ const x = <p>
         <div>/*9*/
     </div>
 </p>"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("autoCloseTag", content);
     fourslash::unsupported("VerifyJsxClosingTag"); // f.VerifyJsxClosingTag(t, map[string]*string{
 }

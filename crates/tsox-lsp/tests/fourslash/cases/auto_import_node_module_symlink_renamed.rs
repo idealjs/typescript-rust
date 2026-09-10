@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: f.MarkTestAsStradaServer()"]
 #[test]
 fn auto_import_node_module_symlink_renamed() {
@@ -57,7 +58,7 @@ gainUtility/**/
 // @link: /home/src/workspaces/solution/packages/utils -> /home/src/workspaces/solution/node_modules/utils
 // @link: /home/src/workspaces/solution/packages/utils -> /home/src/workspaces/solution/node_modules/@monorepo/utils
 // @link: /home/src/workspaces/solution/packages/web -> /home/src/workspaces/solution/node_modules/web"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("autoImportNodeModuleSymlinkRenamed", content);
     // TODO: f.MarkTestAsStradaServer()
     fourslash::go_to_marker(&mut s, "");
     fourslash::unsupported("VerifyImportFixModuleSpecifiers"); // f.VerifyImportFixModuleSpecifiers(t, "", []string{"@monorepo/utils"}, nil /*preferences*/)

@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyQuickInfoExists"]
 #[test]
 fn module_enum_module() {
@@ -12,7 +13,7 @@ enum A {
 namespace A {
     var p;
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("moduleEnumModule", content);
     fourslash::go_to_marker(&mut s, "");
     fourslash::unsupported("VerifyQuickInfoExists"); // f.VerifyQuickInfoExists(t)
 }

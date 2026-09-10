@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifySignatureHelp"]
 #[test]
 fn signature_help_super_constructor_overload() {
@@ -19,7 +20,7 @@ class SuperOverLoad2 extends SuperOverloadBase {
         super(""/*superOverload2*/);
     }
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("signatureHelpSuperConstructorOverload", content);
     fourslash::go_to_marker(&mut s, "superOverload1");
     fourslash::unsupported("VerifySignatureHelp"); // f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{Text: "SuperOverloadBase(): SuperOverl
     fourslash::go_to_marker(&mut s, "superOverload2");

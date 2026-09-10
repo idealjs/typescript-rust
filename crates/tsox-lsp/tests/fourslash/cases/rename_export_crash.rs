@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineRename"]
 #[test]
 fn rename_export_crash() {
@@ -8,6 +9,6 @@ fn rename_export_crash() {
 let a;
 module.exports = /**/a;
 exports["foo"] = a;"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("renameExportCrash", content);
     fourslash::unsupported("VerifyBaselineRename"); // f.VerifyBaselineRename(t, nil /*preferences*/, "")
 }

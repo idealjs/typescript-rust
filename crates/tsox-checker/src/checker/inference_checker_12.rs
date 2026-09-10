@@ -63,11 +63,12 @@ impl Checker {
                 let inferred = self.infer_call_type_arguments(call_node, &sig, &sibling_args);
                 self.resolving_contextual_calls.remove(&key);
                 if !inferred.is_empty() {
-                    return Some(self.substitute_infer_type_parameters(
+                    let substed = self.substitute_infer_type_parameters(
                         &base_param_type,
                         &sig.type_parameters,
                         &inferred,
-                    ));
+                    );
+                    return Some(substed);
                 }
             }
         }
@@ -172,6 +173,20 @@ impl Checker {
             return None;
         }
         let candidates = self.union_object_and_array_literal_candidates(&inference.candidates);
+        // Go convertAutoToAny/widen：widening 标记候选（auto、undefinedWidening 等
+        // 内部标记型）按 any 参与联合（_.all([], ...) → T=any）
+        let candidates: Vec<Arc<Type>> = candidates
+            .into_iter()
+            .map(|t| {
+                if t.object_flags
+                    .contains(crate::checker::types::ObjectFlags::ContainsWideningType)
+                {
+                    self.get_any_type()
+                } else {
+                    t
+                }
+            })
+            .collect();
         let primitive_constraint = self.has_primitive_constraint(&inference.type_parameter)
             || self.is_const_type_variable(&inference.type_parameter, 0);
         let widen_literal_types = !primitive_constraint
@@ -202,6 +217,10 @@ impl Checker {
         } else {
             self.get_common_supertype(&base_candidates)
         };
+        // Go getWidenedType 不拓宽顶层字面量类型；推断结果保留字面量（f<2>(a: 2)）
+        if unwidened_type.flags.intersects(crate::checker::types::TYPE_FLAGS_LITERAL) {
+            return Some(unwidened_type);
+        }
         Some(self.get_widened_type(&unwidened_type))
     }
 

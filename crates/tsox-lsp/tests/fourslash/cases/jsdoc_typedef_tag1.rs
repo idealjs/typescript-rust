@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: f.MarkTestAsStradaServer()"]
 #[test]
 fn jsdoc_typedef_tag1() {
@@ -17,7 +18,7 @@ function foo() { }
 function a(my) {
     my.yes./*1*/
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("jsdocTypedefTag1", content);
     // TODO: f.MarkTestAsStradaServer()
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
+    fourslash::verify_completions_include_exclude_at(&mut s, Some("1"), &["charAt"], &[]);
 }

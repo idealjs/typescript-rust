@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: f.MarkTestAsStradaServer()"]
 #[test]
 fn auto_import_provider_references_crash() {
@@ -30,7 +31,7 @@ new A/**/();
 // @Filename: /home/src/workspaces/project/c/index.ts
 export {};
 // @link: /home/src/workspaces/project/a -> /home/src/workspaces/project/c/node_modules/a"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("autoImportProvider_referencesCrash", content);
     // TODO: f.MarkTestAsStradaServer()
     fourslash::go_to_file(&mut s, "/home/src/workspaces/project/c/index.ts");
     fourslash::unsupported("VerifyBaselineFindAllReferences"); // f.VerifyBaselineFindAllReferences(t, "")

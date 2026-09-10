@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineFindAllReferences"]
 #[test]
 fn find_references_jsx_tag_name() {
@@ -12,6 +13,6 @@ function displaySubreddit(subreddit: string) {
 // @Filename: RedditSubmission.ts
 export const /*2*/SubmissionComp = (submission: SubmissionProps) =>
     <div style={{ fontFamily: "sans-serif" }}></div>;"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("findReferencesJSXTagName", content);
     fourslash::unsupported("VerifyBaselineFindAllReferences"); // f.VerifyBaselineFindAllReferences(t, "1", "2")
 }

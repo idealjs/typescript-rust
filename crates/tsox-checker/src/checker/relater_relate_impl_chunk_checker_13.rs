@@ -86,10 +86,47 @@ impl Checker {
         pos: usize,
     ) -> Option<Arc<Type>> {
         let parameter_count = self.get_parameter_count(sig);
-        if pos >= parameter_count.saturating_sub(1) {
-            return self.get_effective_rest_type(sig);
+        if !sig.has_rest_parameter() {
+            return None;
         }
-        None
+        // Go getRestTypeAtPosition：rest 位本身返回 rest 数组；越过后返回
+        // rest[number][]；rest 位之前返回剩余参数的（含 variadic 尾部的）元组
+        if pos >= parameter_count.saturating_sub(1) {
+            let rest = self.get_effective_rest_type(sig)?;
+            if pos == parameter_count.saturating_sub(1) {
+                return Some(rest);
+            }
+            let indexed = self.get_indexed_access_type(&rest, &self.number_type());
+            return Some(self.create_array_type(indexed));
+        }
+        let min_argument_count = self.get_min_argument_count(sig).max(0) as usize;
+        let mut element_types: Vec<Arc<Type>> = Vec::new();
+        let mut infos: Vec<crate::checker::types::TupleElementInfo> = Vec::new();
+        for i in pos..parameter_count {
+            if i == parameter_count - 1 {
+                let rest = self.get_effective_rest_type(sig)?;
+                element_types.push(rest);
+                infos.push(crate::checker::types::TupleElementInfo {
+                    flags: ElementFlags::Variadic,
+                    labeled_declaration: None,
+                    label: None,
+                    type_: None,
+                });
+            } else {
+                element_types.push(self.get_type_at_position(sig, i));
+                infos.push(crate::checker::types::TupleElementInfo {
+                    flags: if i < min_argument_count {
+                        ElementFlags::Required
+                    } else {
+                        ElementFlags::Optional
+                    },
+                    labeled_declaration: None,
+                    label: None,
+                    type_: None,
+                });
+            }
+        }
+        Some(self.create_tuple_type_ex(element_types, infos, false))
     }
 
     pub fn get_effective_rest_type(&mut self, sig: &Arc<Signature>) -> Option<Arc<Type>> {

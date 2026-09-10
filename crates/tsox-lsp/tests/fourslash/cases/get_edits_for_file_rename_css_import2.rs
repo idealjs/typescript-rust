@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyWillRenameFilesEdits"]
 #[test]
 fn get_edits_for_file_rename_css_import2() {
@@ -16,6 +17,6 @@ declare const css: {
 export default css;
 // @Filename: /a.ts
 import styles from "./app.css";"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("getEditsForFileRename_cssImport2", content);
     fourslash::unsupported("VerifyWillRenameFilesEdits"); // f.VerifyWillRenameFilesEdits(t, "/app.d.css.ts", "/app2.d.css.ts", map[string]string{
 }

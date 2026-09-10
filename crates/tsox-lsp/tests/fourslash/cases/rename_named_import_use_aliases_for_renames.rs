@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineRename"]
 #[test]
 fn rename_named_import_use_aliases_for_renames() {
@@ -10,7 +11,7 @@ const type: MyTypeA = { foo: "bar" };
 export interface MyTypeA {
     foo: string;
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("renameNamedImportUseAliasesForRenames", content);
     fourslash::unsupported("VerifyBaselineRename"); // f.VerifyBaselineRename(t, &lsutil.UserPreferences{UseAliasesForRename: core.TSFalse}, "import")
     fourslash::unsupported("VerifyBaselineRename"); // f.VerifyBaselineRename(t, &lsutil.UserPreferences{UseAliasesForRename: core.TSTrue}, "import")
 }
@@ -29,7 +30,7 @@ declare const f: Foo;
 export interface Foo {
     bar: string;
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("renameNamedImportDefaultInNodeModules", content);
     fourslash::unsupported("VerifyBaselineRename"); // f.VerifyBaselineRename(t, nil /*preferences*/, "fooImport")
     fourslash::unsupported("VerifyBaselineRename"); // f.VerifyBaselineRename(t, &lsutil.UserPreferences{UseAliasesForRename: core.TSTrue}, "fooImport")
     fourslash::go_to_marker(&mut s, "fooImport");

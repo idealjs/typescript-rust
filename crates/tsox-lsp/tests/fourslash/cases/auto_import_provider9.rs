@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: f.MarkTestAsStradaServer()"]
 #[test]
 fn auto_import_provider9() {
@@ -68,7 +69,7 @@ export class Lib10 {}
 { "name": "lib11", "types": "./index.d.ts" }
 // @Filename: /home/src/workspaces/project/node_modules/lib11/index.d.ts
 export class Lib11 {}"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("autoImportProvider9", content);
     // TODO: f.MarkTestAsStradaServer()
     fourslash::unsupported("VerifyImportFixModuleSpecifiers"); // f.VerifyImportFixModuleSpecifiers(t, "", []string{}, nil /*preferences*/)
     fourslash::unsupported("VerifyImportFixModuleSpecifiers"); // f.VerifyImportFixModuleSpecifiers(t, "", []string{}, nil /*preferences*/)

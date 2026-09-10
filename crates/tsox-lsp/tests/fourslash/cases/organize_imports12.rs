@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyOrganizeImports"]
 #[test]
 fn organize_imports12() {
@@ -8,6 +9,6 @@ fn organize_imports12() {
 declare export default class A {}
 declare export { a, b };
 declare export * from "foo";"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("organizeImports12", content);
     fourslash::unsupported("VerifyOrganizeImports"); // f.VerifyOrganizeImports(t,
 }

@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: t.Skip('Known failing fourslash test')"]
 #[test]
 fn quick_info_on_undefined() {
@@ -11,7 +12,7 @@ var x = {
     undefined: 10
 };
 x./*2*/undefined = 30;"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("quickInfoOnUndefined", content);
     fourslash::verify_quick_info_at(&mut s, "1", "var undefined", "");
     fourslash::verify_quick_info_at(&mut s, "2", "(property) undefined: number", "");
 }

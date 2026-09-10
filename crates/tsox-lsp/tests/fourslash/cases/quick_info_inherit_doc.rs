@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineHover"]
 #[test]
 fn quick_info_inherit_doc() {
@@ -63,6 +64,6 @@ class SubClass extends BaseClass {
      */
     public static readonly /*3*/someProperty: string = 'specific to this class value'
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("quickInfoInheritDoc", content);
     fourslash::unsupported("VerifyBaselineHover"); // f.VerifyBaselineHover(t)
 }

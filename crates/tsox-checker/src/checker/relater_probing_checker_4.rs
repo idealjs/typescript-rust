@@ -24,7 +24,7 @@ impl Checker {
                         .is_some_and(|(ps, ts)| {
                             Arc::ptr_eq(ps, ts)
                                 || (ps.name == ts.name
-                                    && self.type_param_symbols_share_container(ps, ts))
+                                    && self.type_param_symbols_equivalent(ps, ts))
                         })))
             {
                 return Arc::clone(&substitutions[i.min(substitutions.len() - 1)]);
@@ -62,6 +62,8 @@ impl Checker {
             TypeData::Conditional(ct) => {
                 self.substitute_infer_conditional(t, ct, params, substitutions)
             }
+            TypeData::Index(idx) => self.substitute_infer_index(t, idx, params, substitutions),
+            TypeData::Mapped(m) => self.substitute_infer_mapped(t, m, params, substitutions),
             _ => Arc::clone(t),
         }
     }

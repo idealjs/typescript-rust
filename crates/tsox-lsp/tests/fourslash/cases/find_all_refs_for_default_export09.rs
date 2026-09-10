@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineFindAllReferences"]
 #[test]
 fn find_all_refs_for_default_export09() {
@@ -30,6 +31,6 @@ import * as /*4*/c from "./c"
 import /*5*/cDefault from "./c"
 import * as /*6*/d from "./d"
 import /*7*/dDefault from "./d""#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("findAllRefsForDefaultExport09", content);
     fourslash::unsupported("VerifyBaselineFindAllReferences"); // f.VerifyBaselineFindAllReferences(t, "0", "1", "2", "3", "4", "5", "6", "7")
 }

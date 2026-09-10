@@ -91,13 +91,42 @@ impl Checker {
         }
     }
 
+    /// Go checkPropertyAssignment：属性赋值类型 = 初始化式按可变位置检查，
+    /// 字面量视上下文属性类型保留 regular 字面量或拓宽
+    pub(crate) fn property_assignment_type(
+        &mut self,
+        prop: &Arc<Node>,
+        initializer: &Arc<Node>,
+        literal: &Arc<Node>,
+        name: &str,
+    ) -> Arc<Type> {
+        let mut t = self.get_type_of_node(initializer);
+        let contextual = self.get_contextual_type(literal, ContextFlags::empty());
+        if let Some(ctx) = &contextual
+            && let Some(prop_ctx) = self.get_type_of_property_of_contextual_type(ctx, name)
+            && crate::checker::is_fresh_literal_type(&t)
+        {
+            if !self.is_literal_of_contextual_type(&t, &prop_ctx) {
+                t = self.get_widened_literal_type(&t);
+            } else {
+                t = self.get_regular_type_of_literal_type(&t);
+            }
+        }
+        if let Some(sym) = self.program.symbol_map().symbol_of(prop) {
+            let container = contextual.as_ref().and_then(|c| c.symbol.clone());
+            let links = self.value_symbol_links.get_or_default(&sym);
+            links.resolved_type = Some(Arc::clone(&t));
+            links.container_symbol = container;
+        }
+        t
+    }
+
     pub(crate) fn get_type_of_object_literal(&mut self, node: &Arc<Node>) -> Arc<Type> {
         let properties = match &node.data {
             tsox_frontend::ast::NodeData::ObjectLiteralExpression(data) => &data.properties,
             _ => return self.get_any_type(),
         };
 
-        let contextual = self.get_contextual_type(node, ContextFlags::empty());
         let mut prop_pairs: Vec<(String, Arc<Type>, Option<Arc<Node>>)> = Vec::new();
         let mut fell_back_to_any = false;
         for prop in properties.iter() {
@@ -109,31 +138,7 @@ impl Checker {
                         break;
                     }
 
-                    let mut t = self.get_type_of_node(&data.initializer);
-                    if let Some(ctx) = &contextual
-                        && let Some(prop_ctx) = self.get_type_of_property_of_type(ctx, &name)
-                        && crate::checker::is_fresh_literal_type(&t)
-                    {
-                        if !self.is_literal_of_contextual_type(&t, &prop_ctx) {
-                            t = self.get_widened_literal_type(&t);
-                        } else {
-                            t = self.get_regular_type_of_literal_type(&t);
-                        }
-                    }
-                    // 上下文属性类型回写到属性符号（quickinfo 等消费符号类型）
-                    let prop_type = if let Some(ctx) = &contextual
-                        && let Some(prop_ctx) = self.get_type_of_property_of_type(ctx, &name)
-                    {
-                        prop_ctx
-                    } else {
-                        t.clone()
-                    };
-                    if let Some(sym) = self.program.symbol_map().symbol_of(prop) {
-                        let container = contextual.as_ref().and_then(|c| c.symbol.clone());
-                        let links = self.value_symbol_links.get_or_default(&sym);
-                        links.resolved_type = Some(prop_type);
-                        links.container_symbol = container;
-                    }
+                    let t = self.property_assignment_type(prop, &data.initializer, node, &name);
                     prop_pairs.push((name, t, Some(Arc::clone(prop))));
                 }
                 NodeData::ShorthandPropertyAssignment(data) => {
@@ -151,6 +156,26 @@ impl Checker {
                             .get_or_default(&sym)
                             .resolved_type = Some(t.clone());
                     }
+                    prop_pairs.push((name, t, Some(Arc::clone(prop))));
+                }
+                NodeData::MethodDeclaration(data) => {
+                    let name = self.get_property_name_from_node(&data.name);
+                    if name.is_empty() {
+                        fell_back_to_any = true;
+                        break;
+                    }
+                    // 方法成员：符号类型（声明签名/体推断），类型容器挂字面量
+                    let sym = self
+                        .program
+                        .symbol_map()
+                        .symbol_of(prop)
+                        .map(Arc::clone);
+                    let t = match &sym {
+                        Some(sym) => {
+                            self.get_type_of_symbol(sym)
+                        }
+                        None => self.get_type_of_function_like(prop),
+                    };
                     prop_pairs.push((name, t, Some(Arc::clone(prop))));
                 }
                 NodeData::SpreadAssignment(_) => {

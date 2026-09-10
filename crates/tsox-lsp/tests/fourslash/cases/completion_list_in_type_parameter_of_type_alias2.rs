@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCompletions"]
 #[test]
 fn completion_list_in_type_parameter_of_type_alias2() {
@@ -7,8 +8,8 @@ fn completion_list_in_type_parameter_of_type_alias2() {
 type Map1<K, /*1*/V> = [];
 type Map1<K,V> = /*2*/[];
 type Map1<K1, V1> = </*3*/"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("completionListInTypeParameterOfTypeAlias2", content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, []string{"0", "1"}, nil)
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "2", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "3", nil)
+    fourslash::verify_completions_include_exclude_at(&mut s, Some("2"), &["K", "V"], &[]);
+    fourslash::verify_completions_empty_at(&mut s, Some("3"));
 }

@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.FormatSelection"]
 #[test]
 fn format_selection_with_trivia() {
@@ -10,16 +11,13 @@ fn format_selection_with_trivia() {
      ;    
        
       }/*end*/"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("formatSelectionWithTrivia", content);
     fourslash::unsupported("FormatSelection"); // f.FormatSelection(t, "begin", "end")
-    fourslash::verify_current_file_content(
-        &mut s,
-        r#"if (true) {     
+    fourslash::verify_current_file_content(&mut s, r#"if (true) {     
   //   
 
     //    
     ;
 
-}"#,
-    );
+}"#);
 }

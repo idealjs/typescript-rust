@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: t.Skip('Known failing fourslash test')"]
 #[test]
 fn comments_variables() {
@@ -44,7 +45,7 @@ function foo2(b: string): void;
 function foo2(aOrb) {
 }
 var x = fo/*15*/o2;"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("commentsVariables", content);
     fourslash::verify_quick_info_at(&mut s, "1", "var myVariable: number", "This is my variable");
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "2", &fourslash.CompletionsExpectedList{
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "3", &fourslash.CompletionsExpectedList{
@@ -68,10 +69,5 @@ var x = fo/*15*/o2;"#;
     fourslash::verify_quick_info_at(&mut s, "12", "var fooVar: () => void", "fooVar comment");
     fourslash::verify_quick_info_at(&mut s, "13", "var fooVar: () => void", "fooVar comment");
     fourslash::verify_quick_info_at(&mut s, "14", "function foo(): void", "foos comment");
-    fourslash::verify_quick_info_at(
-        &mut s,
-        "15",
-        "function foo2(a: number): void (+1 overload)",
-        "",
-    );
+    fourslash::verify_quick_info_at(&mut s, "15", "function foo2(a: number): void (+1 overload)", "");
 }

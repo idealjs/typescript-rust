@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyApplyCodeActionFromCompletion"]
 #[test]
 fn completions_import_named_export_equals_namespace() {
@@ -11,7 +12,7 @@ declare namespace N {
 export = N;
 // @Filename: /b.ts
 f/**/;"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("completionsImport_named_exportEqualsNamespace", content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
     fourslash::unsupported("VerifyApplyCodeActionFromCompletion"); // f.VerifyApplyCodeActionFromCompletion(t, new(""), &fourslash.ApplyCodeActionFromCompletionOptions{
 }

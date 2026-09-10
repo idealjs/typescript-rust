@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyOutliningSpans"]
 #[test]
 fn get_outlining_for_tuple_type() {
@@ -18,6 +19,6 @@ type B =[| [
         ]|]
     ]|]
 ]|]"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("getOutliningForTupleType", content);
     fourslash::unsupported("VerifyOutliningSpans"); // f.VerifyOutliningSpans(t)
 }

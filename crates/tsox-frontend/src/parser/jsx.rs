@@ -18,13 +18,18 @@ impl Parser {
             self.scan_jsx_text();
             let children = self.parse_jsx_children();
             let closing_pos = self.token_pos();
+            // span 先记 </ 的结尾；> 匹配成功再延伸
+            let slash_end = self.token_end();
             self.expect(SyntaxKind::LessThanSlashToken);
-            let closing_end = self.token_end();
-            self.expect_without_advancing(SyntaxKind::GreaterThanToken);
-            if in_expression_context {
-                self.next_token();
-            } else {
-                self.scan_jsx_text();
+            let mut closing_end = slash_end;
+            // Go parseJsxClosingFragment：缺失 > 时不推进（保留 Foo 供后续语句解析）
+            if self.expect_without_advancing(SyntaxKind::GreaterThanToken) {
+                closing_end = self.token_end();
+                if in_expression_context {
+                    self.next_token();
+                } else {
+                    self.scan_jsx_text();
+                }
             }
             let closing = Arc::new(Node::with_loc(
                 SyntaxKind::JsxClosingFragment,
@@ -95,6 +100,20 @@ impl Parser {
 
         self.scan_jsx_identifier();
         let mut name = self.parse_identifier_name_or_keyword();
+        // Go parseJsxTagName：冒号后为命名空间名（foo:bar），优先于点号限定
+        if self.parse_optional(SyntaxKind::ColonToken) {
+            self.scan_jsx_identifier();
+            let right = self.parse_identifier_name_or_keyword();
+            let end = right.end();
+            return Arc::new(Node::with_loc(
+                SyntaxKind::JsxNamespacedName,
+                NodeData::JsxNamespacedName(JsxNamespacedNameData {
+                    namespace: name,
+                    name: right,
+                }),
+                TextRange::new(pos, end),
+            ));
+        }
         while self.parse_optional(SyntaxKind::DotToken) {
             self.scan_jsx_identifier();
             let right = self.parse_identifier_name_or_keyword();
@@ -149,6 +168,22 @@ impl Parser {
 
         self.scan_jsx_identifier();
         let name = self.parse_identifier_name_or_keyword();
+        // Go parseJsxAttributeName：属性名支持命名空间（prop:foo）
+        let name = if self.parse_optional(SyntaxKind::ColonToken) {
+            self.scan_jsx_identifier();
+            let right = self.parse_identifier_name_or_keyword();
+            let end = right.end();
+            Arc::new(Node::with_loc(
+                SyntaxKind::JsxNamespacedName,
+                NodeData::JsxNamespacedName(JsxNamespacedNameData {
+                    namespace: name,
+                    name: right,
+                }),
+                TextRange::new(pos, end),
+            ))
+        } else {
+            name
+        };
         let initializer = if self.parse_optional(SyntaxKind::EqualsToken) {
             if self.token == SyntaxKind::StringLiteral {
                 Some(self.parse_string_literal_node())

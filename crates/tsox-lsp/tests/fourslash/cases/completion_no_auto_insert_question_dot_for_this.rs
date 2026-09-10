@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCompletions"]
 #[test]
 fn completion_no_auto_insert_question_dot_for_this() {
@@ -11,6 +12,6 @@ class Address {
         this[|./**/|]
     }
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("completionNoAutoInsertQuestionDotForThis", content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

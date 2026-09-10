@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: t.Skip('Known failing fourslash test')"]
 #[test]
 fn this_predicate_function_quick_info01() {
@@ -43,53 +44,13 @@ if (obj.isDirectory/*6*/()) {
 if (obj.isNetworked/*8*/()) {
     obj.;
 }"#;
-    let mut s = Session::new(content);
-    fourslash::verify_quick_info_at(
-        &mut s,
-        "1",
-        "(method) FileSystemObject.isFile(): this is Item",
-        "",
-    );
-    fourslash::verify_quick_info_at(
-        &mut s,
-        "2",
-        "(method) FileSystemObject.isDirectory(): this is Directory",
-        "",
-    );
-    fourslash::verify_quick_info_at(
-        &mut s,
-        "3",
-        "(method) FileSystemObject.isNetworked(): this is (Networked & this)",
-        "",
-    );
-    fourslash::verify_quick_info_at(
-        &mut s,
-        "4",
-        "(method) FileSystemObject.isFile(): this is Item",
-        "",
-    );
-    fourslash::verify_quick_info_at(
-        &mut s,
-        "5",
-        "(method) FileSystemObject.isNetworked(): this is (Networked & Item)",
-        "",
-    );
-    fourslash::verify_quick_info_at(
-        &mut s,
-        "6",
-        "(method) FileSystemObject.isDirectory(): this is Directory",
-        "",
-    );
-    fourslash::verify_quick_info_at(
-        &mut s,
-        "7",
-        "(method) FileSystemObject.isNetworked(): this is (Networked & Directory)",
-        "",
-    );
-    fourslash::verify_quick_info_at(
-        &mut s,
-        "8",
-        "(method) FileSystemObject.isNetworked(): this is (Networked & FileSystemObject)",
-        "",
-    );
+    let mut s = Session::new_for_test("thisPredicateFunctionQuickInfo01", content);
+    fourslash::verify_quick_info_at(&mut s, "1", "(method) FileSystemObject.isFile(): this is Item", "");
+    fourslash::verify_quick_info_at(&mut s, "2", "(method) FileSystemObject.isDirectory(): this is Directory", "");
+    fourslash::verify_quick_info_at(&mut s, "3", "(method) FileSystemObject.isNetworked(): this is (Networked & this)", "");
+    fourslash::verify_quick_info_at(&mut s, "4", "(method) FileSystemObject.isFile(): this is Item", "");
+    fourslash::verify_quick_info_at(&mut s, "5", "(method) FileSystemObject.isNetworked(): this is (Networked & Item)", "");
+    fourslash::verify_quick_info_at(&mut s, "6", "(method) FileSystemObject.isDirectory(): this is Directory", "");
+    fourslash::verify_quick_info_at(&mut s, "7", "(method) FileSystemObject.isNetworked(): this is (Networked & Directory)", "");
+    fourslash::verify_quick_info_at(&mut s, "8", "(method) FileSystemObject.isNetworked(): this is (Networked & FileSystemObject)", "");
 }

@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.FormatDocument"]
 #[test]
 fn formatting_non_null_assertion_operator() {
@@ -8,7 +9,7 @@ fn formatting_non_null_assertion_operator() {
 /*3*/ 'bar' [ 1 ] ! ;
 /*4*/ var  bar  =  'bar' . foo ! ;
 /*5*/ var  foo  =  bar ! ;"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("formattingNonNullAssertionOperator", content);
     fourslash::unsupported("FormatDocument"); // f.FormatDocument(t, "")
     fourslash::go_to_marker(&mut s, "1");
     fourslash::verify_current_line_content(&mut s, r#"'bar'!;"#);

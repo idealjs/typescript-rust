@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: f.MarkTestAsStradaServer()"]
 #[test]
 fn completions_import_add_to_named_with_different_cache_value() {
@@ -21,7 +22,7 @@ export class MyClass2 {}
 
 const a = new MyClass/*1*/();
 const b = new MyClass2/*2*/();"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("completionsImport_addToNamedWithDifferentCacheValue", content);
     // TODO: f.MarkTestAsStradaServer()
     fourslash::go_to_marker(&mut s, "1");
     // TODO: opts1267 := f.GetOptions()

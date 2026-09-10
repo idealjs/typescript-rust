@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifySuggestionDiagnostics"]
 #[test]
 fn type_reference_and_import_deprecated() {
@@ -21,7 +22,7 @@ export declare const value2: {
 export declare const value3: {
     sliceSelectors: <FuncMap extends [|SelectorMap<FuncMap>|]>(selectorsBySlice: FuncMap) => { [P in keyof FuncMap]: Parameters<FuncMap[P]> };
 };"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("typeReferenceAndImportDeprecated", content);
     fourslash::go_to_file(&mut s, "index.ts");
     fourslash::unsupported("VerifySuggestionDiagnostics"); // f.VerifySuggestionDiagnostics(t, []*lsproto.Diagnostic{
 }

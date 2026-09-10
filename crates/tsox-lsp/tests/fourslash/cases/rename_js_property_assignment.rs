@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineRenameAtRangesWithText"]
 #[test]
 fn rename_js_property_assignment() {
@@ -9,6 +10,6 @@ function bar() {
 }
 [|bar.[|{| "contextRangeIndex": 0 |}foo|] = "foo";|]
 console.log(bar.[|foo|]);"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("renameJsPropertyAssignment", content);
     fourslash::unsupported("VerifyBaselineRenameAtRangesWithText"); // f.VerifyBaselineRenameAtRangesWithText(t, nil /*preferences*/, "foo")
 }

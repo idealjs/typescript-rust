@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCompletions"]
 #[test]
 fn completions_literal_from_inference_within_inferred_type2() {
@@ -51,6 +52,6 @@ createMachine({
     EV: "/*ts*/",
   },
 });"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("completionsLiteralFromInferenceWithinInferredType2", content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, []string{"ts"}, &fourslash.CompletionsExpectedList{
 }

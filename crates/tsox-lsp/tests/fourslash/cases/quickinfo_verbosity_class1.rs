@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineHoverWithVerbosity"]
 #[test]
 fn quickinfo_verbosity_class1() {
@@ -55,6 +56,6 @@ fn quickinfo_verbosity_class1() {
     };
     const k/*k1*/ = new klass();
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("quickinfoVerbosityClass1", content);
     fourslash::unsupported("VerifyBaselineHoverWithVerbosity"); // f.VerifyBaselineHoverWithVerbosity(t, map[string][]int{"f1": {0, 1}, "f2": {0, 1, 2}, "f3": {0, 1}, 
 }

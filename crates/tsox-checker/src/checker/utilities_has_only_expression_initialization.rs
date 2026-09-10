@@ -219,11 +219,28 @@ pub fn compare_type_lists(s1: &[Arc<Type>], s2: &[Arc<Type>]) -> std::cmp::Order
 }
 
 pub fn type_parameters_match(a: &Type, b: &Type) -> bool {
+    // 恒等实例（含驻留的延迟 IndexedAccess T[P]）总是匹配
+    if std::ptr::eq(a as *const Type, b as *const Type) || a.id == b.id {
+        return true;
+    }
+    // 延迟 IndexedAccess 按成分结构等价（Go 依赖完整驻留，我们补结构判定）
+    if let (TypeData::IndexedAccess(x), TypeData::IndexedAccess(y)) = (&a.data, &b.data) {
+        let obj_eq = x
+            .object_type
+            .as_ref()
+            .zip(y.object_type.as_ref())
+            .is_some_and(|(p, q)| p.id == q.id);
+        let idx_eq = x
+            .index_type
+            .as_ref()
+            .zip(y.index_type.as_ref())
+            .is_some_and(|(p, q)| p.id == q.id);
+        if obj_eq && idx_eq {
+            return true;
+        }
+    }
     if !a.flags.contains(TypeFlags::TypeParameter) || !b.flags.contains(TypeFlags::TypeParameter) {
         return false;
-    }
-    if std::ptr::eq(a as *const Type, b as *const Type) {
-        return true;
     }
     match (&a.symbol, &b.symbol) {
         (Some(x), Some(y)) => Arc::ptr_eq(x, y),

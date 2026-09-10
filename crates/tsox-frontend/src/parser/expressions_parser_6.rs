@@ -138,7 +138,8 @@ impl Parser {
     }
 
     pub(crate) fn parse_fallback_identifier_or_error(&mut self) -> Arc<Node> {
-        if is_identifier_or_keyword(self.token)
+        // Go parseIdentifierWithDiagnostic：保留字不作表达式标识符（报错且不消费）
+        if self.is_identifier()
             && self.token != SyntaxKind::InKeyword
             && self.token != SyntaxKind::InstanceOfKeyword
         {
@@ -186,7 +187,7 @@ impl Parser {
 
         let expr = self.parse_expression();
         self.expect(SyntaxKind::CloseParenToken);
-        let end = self.token_pos();
+        let end = self.node_pos();
 
         if self.token == SyntaxKind::EqualsGreaterThanToken {
             let arrow_token = self.create_token_node();
@@ -227,7 +228,7 @@ impl Parser {
             Parser::parse_array_literal_element,
         );
         self.expect(SyntaxKind::CloseBracketToken);
-        let end = self.token_pos();
+        let end = self.node_pos();
         Arc::new(Node::with_loc(
             SyntaxKind::ArrayLiteralExpression,
             NodeData::ArrayLiteralExpression(ArrayLiteralExpressionData {
@@ -268,7 +269,7 @@ impl Parser {
             Parser::parse_object_literal_element,
         );
         self.expect(SyntaxKind::CloseBraceToken);
-        let end = self.token_pos();
+        let end = self.node_pos();
         Arc::new(Node::with_loc(
             SyntaxKind::ObjectLiteralExpression,
             NodeData::ObjectLiteralExpression(ObjectLiteralExpressionData {

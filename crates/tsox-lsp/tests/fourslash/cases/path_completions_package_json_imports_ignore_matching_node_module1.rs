@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCompletions"]
 #[test]
 fn path_completions_package_json_imports_ignore_matching_node_module1() {
@@ -14,6 +15,6 @@ fn path_completions_package_json_imports_ignore_matching_node_module1() {
 export function something(name: string): any;
 // @Filename: /src/a.ts
 import {} from "#internal//*1*/";"##;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("pathCompletionsPackageJsonImportsIgnoreMatchingNodeModule1", content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, []string{"1"}, &fourslash.CompletionsExpectedList{
 }

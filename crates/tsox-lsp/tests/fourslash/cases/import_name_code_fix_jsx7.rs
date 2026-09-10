@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCodeFixNotAvailable"]
 #[test]
 fn import_name_code_fix_jsx7() {
@@ -11,7 +12,7 @@ fn import_name_code_fix_jsx7() {
 // React was not defined
 // @Filename: /a.tsx
 <[|Text|]></Text>;"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("importNameCodeFix_jsx7", content);
     fourslash::go_to_file(&mut s, "/a.tsx");
     fourslash::unsupported("VerifyCodeFixNotAvailable"); // f.VerifyCodeFixNotAvailable(t)
 }

@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: f.MarkTestAsStradaServer()"]
 #[test]
 fn signature_help_js_doc_callback_tag() {
@@ -28,7 +29,7 @@ var t;
  */
 var t2;
 t(/*4*/"!", /*5*/12, /*6*/false);"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("signatureHelpJSDocCallbackTag", content);
     // TODO: f.MarkTestAsStradaServer()
     fourslash::unsupported("VerifyBaselineSignatureHelp"); // f.VerifyBaselineSignatureHelp(t)
 }

@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCompletions"]
 #[test]
 fn completion_entry_after_asi_expression_in_class() {
@@ -20,6 +21,6 @@ class ChildTwo extends Parent {
   x = () => 1
   /*root*/ //nothing
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("completionEntryAfterASIExpressionInClass", content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, []string{"insideid", "root"}, &fourslash.CompletionsExpectedList{
 }

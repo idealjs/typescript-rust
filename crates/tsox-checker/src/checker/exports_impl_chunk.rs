@@ -192,8 +192,34 @@ impl Checker {
         symbol.flags
     }
 
-    pub fn get_base_types(&self, t: &Arc<Type>) -> Vec<Arc<Type>> {
-        Vec::new()
+    pub fn get_base_types(&mut self, t: &Arc<Type>) -> Vec<Arc<Type>> {
+        let Some(class_sym) = t.symbol.clone() else {
+            return Vec::new();
+        };
+        let mut result = Vec::new();
+        for decl in class_sym.declarations.iter() {
+            let heritage = match &decl.data {
+                tsox_frontend::ast::NodeData::ClassDeclaration(d) => d.heritage_clauses.clone(),
+                tsox_frontend::ast::NodeData::ClassExpression(d) => d.heritage_clauses.clone(),
+                _ => continue,
+            };
+            let Some(clauses) = heritage else {
+                continue;
+            };
+            for clause in clauses.iter() {
+                let tsox_frontend::ast::NodeData::HeritageClause(hc) = &clause.data else {
+                    continue;
+                };
+                for h in hc.types.iter() {
+                    let tsox_frontend::ast::NodeData::ExpressionWithTypeArguments(d) = &h.data
+                    else {
+                        continue;
+                    };
+                    result.push(self.get_type_of_node(&d.expression));
+                }
+            }
+        }
+        result
     }
 
     pub fn get_base_constructor_type_of_class(&self, t: &Arc<Type>) -> Option<Arc<Type>> {

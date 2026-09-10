@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: f.MarkTestAsStradaServer()"]
 #[test]
 fn completions_import_js_module_exports_assignment() {
@@ -23,7 +24,7 @@ module.exports = {
 };
 // @Filename: /home/src/workspaces/project/index.ts
 /**/"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("completionsImport_jsModuleExportsAssignment", content);
     // TODO: f.MarkTestAsStradaServer()
     // TODO: opts666 := f.GetOptions()
     // TODO: opts666.FormatCodeSettings.NewLineCharacter = "\n"

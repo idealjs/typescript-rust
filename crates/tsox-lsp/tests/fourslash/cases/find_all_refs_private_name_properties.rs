@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineFindAllReferences"]
 #[test]
 fn find_all_refs_private_name_properties() {
@@ -22,6 +23,6 @@ class E {
         this./*5*/#foo = 20;
     }
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("findAllRefsPrivateNameProperties", content);
     fourslash::unsupported("VerifyBaselineFindAllReferences"); // f.VerifyBaselineFindAllReferences(t, "1", "2", "3", "4", "5")
 }

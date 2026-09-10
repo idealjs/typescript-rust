@@ -1,6 +1,7 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyCompletions"]
+
+#[ignore = "unimplemented: fourslash.VerifyNonSuggestionDiagnostics"]
 #[test]
 fn type_error_after_string_completions_in_nested_call() {
     let content = r#"// @stableTypeOrdering: true
@@ -27,9 +28,9 @@ declare function createMachine<TEvent extends { type: string }>(config: {
 createMachine<GreetingEvent>({
   [|/*error*/actions|]: raise({ type: "ALOHA/*1*/" }),
 });"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("typeErrorAfterStringCompletionsInNestedCall", content);
     fourslash::go_to_marker(&mut s, "1");
     fourslash::insert(&mut s, "x");
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, nil, &fourslash.CompletionsExpectedList{
+    fourslash::verify_completions_exact_at(&mut s, None, &["ALOHA", "ALOHAx", "LUNCH_TIME", "MORNING"]);
     fourslash::unsupported("VerifyNonSuggestionDiagnostics"); // f.VerifyNonSuggestionDiagnostics(t, []*lsproto.Diagnostic{
 }

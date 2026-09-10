@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCompletions"]
 #[test]
 fn member_list_error_recovery() {
@@ -7,6 +8,6 @@ fn member_list_error_recovery() {
 
 Foo./**/;
 /*1*/var bar;"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("memberListErrorRecovery", content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

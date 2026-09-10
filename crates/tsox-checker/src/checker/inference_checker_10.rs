@@ -201,6 +201,7 @@ impl Checker {
             SyntaxKind::PropertyAssignment | SyntaxKind::ShorthandPropertyAssignment => {
                 self.get_contextual_type_for_object_literal_element(&parent, _context_flags)
             }
+            SyntaxKind::JsxExpression => self.get_contextual_type_for_jsx_expression(node, _context_flags),
             SyntaxKind::ArrayLiteralExpression => {
                 self.get_contextual_type_for_array_literal_element(node, &parent, _context_flags)
             }

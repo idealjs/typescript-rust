@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineRename"]
 #[test]
 fn rename_private_method() {
@@ -9,6 +10,6 @@ fn rename_private_method() {
        return this.[|#foo|]();
    }
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("renamePrivateMethod", content);
     fourslash::unsupported("VerifyBaselineRename"); // f.VerifyBaselineRename(t, nil /*preferences*/, ToAny(f.GetRangesByText().Get("#foo"))...)
 }

@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineFindAllReferences"]
 #[test]
 fn tslib_find_all_references_on_runtime_import_with_paths1() {
@@ -24,6 +25,6 @@ export function __importStar(...args: any): any;
         }
     }
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("tslibFindAllReferencesOnRuntimeImportWithPaths1", content);
     fourslash::unsupported("VerifyBaselineFindAllReferences"); // f.VerifyBaselineFindAllReferences(t, "")
 }

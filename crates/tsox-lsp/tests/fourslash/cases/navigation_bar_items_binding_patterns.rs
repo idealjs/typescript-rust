@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineDocumentSymbol"]
 #[test]
 fn navigation_bar_items_binding_patterns() {
@@ -10,6 +11,6 @@ let foo1, {a, b}
 const bar1, [c, d]
 var {e, x: [f, g]} = {a:1, x:[]};
 var { h: i = function j() {} } = obj;"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("navigationBarItemsBindingPatterns", content);
     fourslash::unsupported("VerifyBaselineDocumentSymbol"); // f.VerifyBaselineDocumentSymbol(t)
 }

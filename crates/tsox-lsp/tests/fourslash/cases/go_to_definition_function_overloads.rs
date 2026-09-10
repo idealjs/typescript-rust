@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineGoToDefinition"]
 #[test]
 fn go_to_definition_function_overloads() {
@@ -10,6 +11,6 @@ function /*functionOverloadDefinition*/functionOverload() {}
 [|/*functionOverloadReference1*/functionOverload|](123);
 [|/*functionOverloadReference2*/functionOverload|]("123");
 [|/*brokenOverload*/functionOverload|]({});"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("goToDefinitionFunctionOverloads", content);
     fourslash::unsupported("VerifyBaselineGoToDefinition"); // f.VerifyBaselineGoToDefinition(t, true, "functionOverloadReference1", "functionOverloadReference2", 
 }

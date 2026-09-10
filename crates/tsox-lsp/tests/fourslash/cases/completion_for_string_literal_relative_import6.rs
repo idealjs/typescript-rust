@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCompletions"]
 #[test]
 fn completion_for_string_literal_relative_import6() {
@@ -16,7 +17,7 @@ var foo3 = require("./dir//*require2*/
 /*f1*/
 // @Filename: /repo/generated2/dir/f2.ts
 /*f2*/"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("completionForStringLiteralRelativeImport6", content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, []string{"import_as1", "import_equals1", "require1"}, &fourslash.CompletionsE
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, []string{"import_as2", "import_equals2", "require2"}, &fourslash.CompletionsE
 }

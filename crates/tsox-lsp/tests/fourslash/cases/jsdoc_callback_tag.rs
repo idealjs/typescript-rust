@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: f.MarkTestAsStradaServer()"]
 #[test]
 fn jsdoc_callback_tag() {
@@ -30,7 +31,7 @@ var t/*1*/;
  */
 var t2/*2*/;
 t(/*4*/"!", /*5*/12, /*6*/false);"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("jsdocCallbackTag", content);
     // TODO: f.MarkTestAsStradaServer()
     fourslash::go_to_marker(&mut s, "1");
     fourslash::unsupported("VerifyQuickInfoIs"); // f.VerifyQuickInfoIs(t, "var t: FooHandler", "")

@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineGoToTypeDefinition"]
 #[test]
 fn go_to_type_definition_union_type() {
@@ -20,6 +21,6 @@ namespace M {
 var x: C | I | M.I;
 
 /*reference*/x;"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("goToTypeDefinitionUnionType", content);
     fourslash::unsupported("VerifyBaselineGoToTypeDefinition"); // f.VerifyBaselineGoToTypeDefinition(t, "reference")
 }

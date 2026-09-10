@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineFindAllReferences"]
 #[test]
 fn get_occurrences_is_definition_of_enum() {
@@ -8,6 +9,6 @@ fn get_occurrences_is_definition_of_enum() {
     Second
 }
 let first = /*3*/E.First;"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("getOccurrencesIsDefinitionOfEnum", content);
     fourslash::unsupported("VerifyBaselineFindAllReferences"); // f.VerifyBaselineFindAllReferences(t, "1", "2", "3")
 }

@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: // When an implementation file re-exports from another file,"]
 #[test]
 fn go_to_source_forwarded_re_export_chain() {
@@ -17,6 +18,6 @@ export function /*targetHelper*/helper() { return "ok"; }
 // @Filename: /home/src/workspaces/project/index.ts
 import { /*importHelper*/helper } from "pkg";
 helper();"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("goToSourceForwardedReExportChain", content);
     fourslash::unsupported("VerifyBaselineGoToSourceDefinition"); // f.VerifyBaselineGoToSourceDefinition(t, "importHelper")
 }

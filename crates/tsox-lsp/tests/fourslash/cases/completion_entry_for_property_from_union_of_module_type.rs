@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCompletions"]
 #[test]
 fn completion_entry_for_property_from_union_of_module_type() {
@@ -13,6 +14,6 @@ namespace F {
 }
 var q: typeof E | typeof F;
 var j = q./*1*/"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("completionEntryForPropertyFromUnionOfModuleType", content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
 }

@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: // Another file already imports from `myLib` (resolving to @"]
 #[test]
 fn import_fix_from_at_types_with_real_package() {
@@ -22,7 +23,7 @@ import { f1 } from "myLib";
 f1();
 // @Filename: /index.ts
 [|f2/*0*/();|]"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("importFixFromAtTypesWithRealPackage", content);
     fourslash::unsupported("VerifyImportFixModuleSpecifiers"); // f.VerifyImportFixModuleSpecifiers(t, "0", []string{"myLib"}, nil /*preferences*/)
 }
 
@@ -47,6 +48,6 @@ import { f1 } from "myLib";
 f1();
 // @Filename: /index.ts
 [|f2/*0*/();|]"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("importFixFromAtTypesWithRealPackageExports", content);
     fourslash::unsupported("VerifyImportFixModuleSpecifiers"); // f.VerifyImportFixModuleSpecifiers(t, "0", []string{"myLib"}, nil /*preferences*/)
 }

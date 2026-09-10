@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyApplyCodeActionFromCompletion"]
 #[test]
 fn completions_import_paths_conflict() {
@@ -20,7 +21,7 @@ export function configureStore() {}
 // @Filename: /src/tests/createAsyncThunk.typetest.ts
 import {} from "@reduxjs/toolkit";
 /**/"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("completionsImportPathsConflict", content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
     fourslash::unsupported("VerifyApplyCodeActionFromCompletion"); // f.VerifyApplyCodeActionFromCompletion(t, new(""), &fourslash.ApplyCodeActionFromCompletionOptions{
 }

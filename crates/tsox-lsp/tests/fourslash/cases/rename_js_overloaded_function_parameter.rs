@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineRename"]
 #[test]
 fn rename_js_overloaded_function_parameter() {
@@ -21,6 +22,6 @@ fn rename_js_overloaded_function_parameter() {
 function foo(x/**/) {
   return x;
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("renameJsOverloadedFunctionParameter", content);
     fourslash::unsupported("VerifyBaselineRename"); // f.VerifyBaselineRename(t, nil /*preferences*/, "")
 }

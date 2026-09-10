@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCodeFixAll"]
 #[test]
 fn import_name_code_fix_all() {
@@ -37,7 +38,7 @@ cd; cd; c0; c0;
 dd; dd; d0; d0; d1; d1;
 e; e;
 class X extends Disposable { }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("importNameCodeFix_all", content);
     fourslash::go_to_file(&mut s, "/user.ts");
     fourslash::unsupported("VerifyCodeFixAll"); // f.VerifyCodeFixAll(t, fourslash.VerifyCodeFixAllOptions{
 }

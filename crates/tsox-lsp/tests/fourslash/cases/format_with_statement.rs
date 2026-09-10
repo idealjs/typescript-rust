@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: opts227 := f.GetOptions()"]
 #[test]
 fn format_with_statement() {
@@ -12,7 +13,7 @@ fn format_with_statement() {
 with (bar.blah)/*4*/
 {/*5*/
 }/*6*/"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("formatWithStatement", content);
     // TODO: opts227 := f.GetOptions()
     // TODO: opts227.FormatCodeSettings.PlaceOpenBraceOnNewLineForControlBlocks = core.TSFalse
     fourslash::unsupported("Configure"); // f.Configure(t, opts227)

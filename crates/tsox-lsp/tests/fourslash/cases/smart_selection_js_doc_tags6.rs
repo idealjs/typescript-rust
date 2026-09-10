@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineSelectionRanges"]
 #[test]
 fn smart_selection_js_doc_tags6() {
@@ -11,6 +12,6 @@ fn smart_selection_js_doc_tags6() {
 function foo(x) {
     return x;
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("smartSelection_JSDocTags6", content);
     fourslash::unsupported("VerifyBaselineSelectionRanges"); // f.VerifyBaselineSelectionRanges(t)
 }

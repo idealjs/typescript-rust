@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCompletions"]
 #[test]
 fn completion_entry_for_class_members_static_when_base_type_is_not_resolved() {
@@ -13,6 +14,6 @@ class Slider extends React.Component {
     }
     handleChange = () => 10;
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("completionEntryForClassMembers_StaticWhenBaseTypeIsNotResolved", content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

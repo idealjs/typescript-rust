@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCodeFixAll"]
 #[test]
 fn code_fix_add_missing_import_for_react_jsx2() {
@@ -25,7 +26,7 @@ export declare var React: any;
     "react": "*"
   }
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("codeFixAddMissingImportForReactJsx2", content);
     fourslash::go_to_file(&mut s, "bar.tsx");
     fourslash::unsupported("VerifyCodeFixAll"); // f.VerifyCodeFixAll(t, fourslash.VerifyCodeFixAllOptions{
 }

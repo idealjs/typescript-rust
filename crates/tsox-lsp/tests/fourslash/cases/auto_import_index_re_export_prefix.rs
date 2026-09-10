@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyImportFixModuleSpecifiers"]
 #[test]
 fn auto_import_index_re_export_prefix() {
@@ -12,6 +13,6 @@ export { sum } from "./sum.js";
 export const sum = 0;
 // @Filename: /utils/sumAB.ts
 sum/**/"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("autoImportIndexReExportPrefix", content);
     fourslash::unsupported("VerifyImportFixModuleSpecifiers"); // f.VerifyImportFixModuleSpecifiers(t, "", []string{"./sum/index.js", "./sum/sum.js"}, &lsutil.UserPre
 }

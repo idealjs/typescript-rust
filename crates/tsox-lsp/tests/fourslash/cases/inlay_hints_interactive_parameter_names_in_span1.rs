@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: end := f.MarkerByName(t, 'h')"]
 #[test]
 fn inlay_hints_interactive_parameter_names_in_span1() {
@@ -16,7 +17,7 @@ function c3 () { foo3(/*e*/1, /*f*/2); }
 function c4 () { foo4(/*g*/1, /*h*/2); }
 function c5 () { foo5(/*i*/1, /*j*/2); }
 function c6 () { foo6(/*k*/1, /*l*/2); }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("inlayHintsInteractiveParameterNamesInSpan1", content);
     // TODO: start := f.MarkerByName(t, "c")
     // TODO: end := f.MarkerByName(t, "h")
     // TODO: span := &lsproto.Range{Start: start.LSPosition, End: end.LSPosition}

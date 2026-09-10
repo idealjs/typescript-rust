@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyApplyCodeActionFromCompletion"]
 #[test]
 fn completions_import_weird_default_synthesis() {
@@ -13,6 +14,6 @@ class Collection {
 export = Collection as typeof Collection & { default: typeof Collection };
 // @Filename: /index.ts
 Colle/**/"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("completionsImport_weirdDefaultSynthesis", content);
     fourslash::unsupported("VerifyApplyCodeActionFromCompletion"); // f.VerifyApplyCodeActionFromCompletion(t, new(""), &fourslash.ApplyCodeActionFromCompletionOptions{
 }

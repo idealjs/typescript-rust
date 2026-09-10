@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineFindAllReferences"]
 #[test]
 fn find_all_refs_for_default_export02() {
@@ -13,6 +14,6 @@ var y = /*5*/DefaultExportedFunction();
 
 /*6*/namespace /*7*/DefaultExportedFunction {
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("findAllRefsForDefaultExport02", content);
     fourslash::unsupported("VerifyBaselineFindAllReferences"); // f.VerifyBaselineFindAllReferences(t, "1", "2", "3", "4", "5", "6", "7")
 }

@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineGoToDefinition"]
 #[test]
 fn tsx_go_to_definition_union_element_type1() {
@@ -20,6 +21,6 @@ function SFC2(prop: { x: boolean }) {
 }
 var /*def*/SFCComp = SFC1 || SFC2;
 <[|SFC/*one*/Comp|] x />"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("tsxGoToDefinitionUnionElementType1", content);
     fourslash::unsupported("VerifyBaselineGoToDefinition"); // f.VerifyBaselineGoToDefinition(t, true, "one")
 }

@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifySignatureHelp"]
 #[test]
 fn signature_help_explicit_type_arguments() {
@@ -19,7 +20,7 @@ j(/*7*/);
 g<number>(/*8*/);
 h<number>(/*9*/);
 j<number>(/*10*/);"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("signatureHelpExplicitTypeArguments", content);
     fourslash::go_to_marker(&mut s, "1");
     fourslash::unsupported("VerifySignatureHelp"); // f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{Text: "f(x: number, y: string): number
     fourslash::go_to_marker(&mut s, "2");

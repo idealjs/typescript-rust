@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[test]
 fn quick_info_union_discriminated() {
     let content = r#"// @Filename: quickInfoJsDocTags.ts
@@ -27,7 +28,7 @@ const u2: U = {
     /*u2Kind*/kind: "bogus",
     /*u2Prop*/prop: 1,
 };"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("quickInfoUnion_discriminated", content);
     fourslash::verify_quick_info_at(&mut s, "uKind", "(property) A.kind: \"a\"", "Kind A");
     fourslash::verify_quick_info_at(&mut s, "uProp", "(property) A.prop: number", "Prop A");
     fourslash::verify_quick_info_at(&mut s, "u2Kind", "(property) kind: \"bogus\"", "");

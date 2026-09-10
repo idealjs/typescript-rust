@@ -222,26 +222,6 @@ impl Checker {
                             &tsox_core::diagnostics::messages_generated::IMPORT_NAME_CANNOT_BE_0,
                         );
                     }
-
-                    let non_alias_flags = alias_sym.flags.difference(SymbolFlags::Alias);
-                    let has_local_conflict = target_resolved
-                        && alias_sym.declarations.iter().any(|dd| dd.id() != node.id())
-                        && !non_alias_flags.is_empty()
-                        && {
-                            let value_side = non_alias_flags.intersects(SymbolFlags::VALUE);
-                            let type_side = non_alias_flags.intersects(SymbolFlags::TYPE);
-                            (value_side && target.flags.intersects(SymbolFlags::VALUE))
-                                || (type_side && target.flags.intersects(SymbolFlags::TYPE))
-                        };
-                    if has_local_conflict {
-                        self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
-                                self.current_file.clone(),
-                                node.loc,
-                                tsox_core::diagnostics::messages_generated::
-                                    IMPORT_DECLARATION_CONFLICTS_WITH_LOCAL_DECLARATION_OF_0,
-                                vec![d.name.text().to_string()],
-                            ));
-                    }
                 }
             }
         }

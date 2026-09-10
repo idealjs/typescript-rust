@@ -200,7 +200,12 @@ impl Checker {
             return self.create_function_or_constructor_type(new_sigs, is_construct);
         }
 
-        if self.in_return_substitution && t.symbol.is_none() && !o.structured.properties.is_empty()
+        // Go instantiateType：匿名对象类型的成员/索引签名按需实例化
+        // （签名实例化与泛型 owner 成员访问路径同样深入，不限 call-return）
+        // Go instantiateType：匿名对象类型的成员/索引签名按需实例化
+        // （签名实例化与泛型 owner 成员访问路径同样深入，不限 call-return）
+        if t.symbol.is_none()
+            && (!o.structured.properties.is_empty() || !o.structured.index_infos.is_empty())
         {
             let fresh = self.subst_object_in_progress.is_empty();
             let result = self.substitute_object_properties_deep(t, params, substitutions);

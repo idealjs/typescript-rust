@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCompletions"]
 #[test]
 fn member_list_of_module_after_invalid_charater() {
@@ -8,6 +9,6 @@ fn member_list_of_module_after_invalid_charater() {
 }
 @
 testModule./**/"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("memberListOfModuleAfterInvalidCharater", content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineGoToImplementation"]
 #[test]
 fn go_to_implementation_no_crash_triple_slash_ref2() {
@@ -12,6 +13,6 @@ export type JSX = {};
 // @Filename: /index.ts
 import type {JSX} from '/*m*/react';
 "#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("goToImplementationNoCrashTripleSlashRef2", content);
     fourslash::unsupported("VerifyBaselineGoToImplementation"); // f.VerifyBaselineGoToImplementation(t, "m")
 }

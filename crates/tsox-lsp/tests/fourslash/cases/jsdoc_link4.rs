@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineHover"]
 #[test]
 fn jsdoc_link4() {
@@ -17,6 +18,6 @@ function f(x) {
 }
 f/*3*/()
 type Pos = [number, number]"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("jsdocLink4", content);
     fourslash::unsupported("VerifyBaselineHover"); // f.VerifyBaselineHover(t)
 }

@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyCompletions"]
+
 #[test]
 fn no_errors_after_completions_request_within_generic_function2() {
     let content = r#"// @strict: true
@@ -9,9 +9,9 @@ fn no_errors_after_completions_request_within_generic_function2() {
 
 declare function func<T extends { foo: 1 }>(arg: T): void;
 func({ foo: 1, bar/*1*/: 1 });"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("noErrorsAfterCompletionsRequestWithinGenericFunction2", content);
     fourslash::go_to_marker(&mut s, "1");
     fourslash::insert(&mut s, "2");
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, nil, nil)
-    fourslash::verify_no_errors(&mut s);
+    fourslash::verify_completions_empty_at(&mut s, None);
+    fourslash::verify_no_errors(&mut s, );
 }

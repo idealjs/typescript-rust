@@ -65,6 +65,13 @@ impl Checker {
             .collect();
         let mut context = InferenceContext::new(inferences);
         context.signature = Some(Arc::clone(signature));
-        self.infer_type_arguments(node, signature, args, &mut context)
+        let result = self.infer_type_arguments(node, signature, args, &mut context);
+        if std::env::var("TSOX_DEBUG_HOVER").is_ok() {
+            let rendered: Vec<String> = result.iter().map(|t| self.type_to_string(t)).collect();
+            let sig_text = self
+                .signature_to_string(signature);
+            eprintln!("[infer-call] sig={} -> [{}]", sig_text, rendered.join(", "));
+        }
+        result
     }
 }

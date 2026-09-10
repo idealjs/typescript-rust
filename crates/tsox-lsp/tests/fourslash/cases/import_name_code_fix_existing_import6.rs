@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyImportFixAtPosition"]
 #[test]
 fn import_name_code_fix_existing_import6() {
@@ -10,6 +11,6 @@ f1/*0*/();
 // @Filename: ../node_modules/fake-module/index.ts
 export var v1 = 5;
 export function f1();"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("importNameCodeFixExistingImport6", content);
     fourslash::unsupported("VerifyImportFixAtPosition"); // f.VerifyImportFixAtPosition(t, []string{
 }

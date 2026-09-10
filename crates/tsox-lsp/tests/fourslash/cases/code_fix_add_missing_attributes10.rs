@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCodeFixNotAvailable"]
 #[test]
 fn code_fix_add_missing_attributes10() {
@@ -14,6 +15,6 @@ const A = (props: { [K in D]: K }) =>
 
 const Bar = () =>
    [|<A></A>|]"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("codeFixAddMissingAttributes10", content);
     fourslash::unsupported("VerifyCodeFixNotAvailable"); // f.VerifyCodeFixNotAvailable(t, "fixMissingAttributes")
 }

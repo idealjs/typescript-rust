@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineFindAllReferences"]
 #[test]
 fn find_all_refs_import_type_meaning_at_location() {
@@ -9,6 +10,6 @@ fn find_all_refs_import_type_meaning_at_location() {
 // @Filename: /b.ts
 const x: import("./a")./*5*/T = 0;
 const x: typeof import("./a")./*6*/T = 0;"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("findAllRefs_importType_meaningAtLocation", content);
     fourslash::unsupported("VerifyBaselineFindAllReferences"); // f.VerifyBaselineFindAllReferences(t, "1", "2", "3", "4", "5", "6")
 }

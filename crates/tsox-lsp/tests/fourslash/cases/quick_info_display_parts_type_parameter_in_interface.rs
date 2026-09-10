@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineHover"]
 #[test]
 fn quick_info_display_parts_type_parameter_in_interface() {
@@ -21,6 +22,6 @@ var /*53*/iVal1: /*54*/I1</*55*/I<string>>;
 new /*56*/iVal1(/*57*/iVal, /*58*/iVal);
 /*59*/iVal1(/*60*/iVal, /*61*/iVal);
 /*62*/iVal1./*63*/method(/*64*/iVal, /*65*/iVal);"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("quickInfoDisplayPartsTypeParameterInInterface", content);
     fourslash::unsupported("VerifyBaselineHover"); // f.VerifyBaselineHover(t)
 }

@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyWillRenameFilesEdits"]
 #[test]
 fn get_edits_for_file_rename_symlink() {
@@ -8,7 +9,7 @@ fn get_edits_for_file_rename_symlink() {
 export const x = 0;
 // @Filename: /user.ts
 import { x } from 'foo';"#;
-    let mut s = Session::new(content);
-    fourslash::verify_no_errors(&mut s);
+    let mut s = Session::new_for_test("getEditsForFileRename_symlink", content);
+    fourslash::verify_no_errors(&mut s, );
     fourslash::unsupported("VerifyWillRenameFilesEdits"); // f.VerifyWillRenameFilesEdits(t, "/user.ts", "/luser.ts", map[string]string{}, nil /*preferences*/)
 }

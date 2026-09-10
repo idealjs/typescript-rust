@@ -164,3 +164,13 @@ pub fn node_modifiers(node: &Node) -> Option<&Arc<ModifierList>> {
         _ => None,
     }
 }
+
+impl Node {
+    /// JsxNamespacedName 的合成文本 namespace:name（Go ast.Text 同源）
+    pub fn jsx_namespaced_name_text(&self) -> Option<String> {
+        if let crate::ast::NodeData::JsxNamespacedName(d) = &self.data {
+            return Some(format!("{}:{}", d.namespace.text(), d.name.text()));
+        }
+        None
+    }
+}

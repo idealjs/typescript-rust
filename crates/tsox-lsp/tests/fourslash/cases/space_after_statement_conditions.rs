@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.FormatDocument"]
 #[test]
 fn space_after_statement_conditions() {
@@ -25,11 +26,9 @@ for(let foo of [1, 2]) --i;
 for(let j = 0; j < 10; j++) ++i;
 for(let j = 0; j < 10; j++) --i;
 "#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("spaceAfterStatementConditions", content);
     fourslash::unsupported("FormatDocument"); // f.FormatDocument(t, "")
-    fourslash::verify_current_file_content(
-        &mut s,
-        r#"let i = 0;
+    fourslash::verify_current_file_content(&mut s, r#"let i = 0;
 
 if (i < 0) ++i;
 if (i < 0) --i;
@@ -50,6 +49,5 @@ for (let foo of [1, 2]) --i;
 
 for (let j = 0; j < 10; j++) ++i;
 for (let j = 0; j < 10; j++) --i;
-"#,
-    );
+"#);
 }

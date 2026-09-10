@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: t.Skip('Known failing fourslash test')"]
 #[test]
 fn quick_info_on_narrowed_type_in_module() {
@@ -30,7 +31,7 @@ if (typeof m./*7*/exportedStrOrNum === "number") {
 else {
     strOrNum = m./*9*/exportedStrOrNum;
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("quickInfoOnNarrowedTypeInModule", content);
     fourslash::verify_quick_info_at(&mut s, "1", "var nonExportedStrOrNum: string | number", "");
     fourslash::verify_quick_info_at(&mut s, "2", "var nonExportedStrOrNum: number", "");
     fourslash::verify_quick_info_at(&mut s, "3", "var nonExportedStrOrNum: string", "");

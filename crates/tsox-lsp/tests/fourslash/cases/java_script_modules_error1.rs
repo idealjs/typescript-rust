@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[test]
 fn java_script_modules_error1() {
     let content = r#"// @allowNonTsExtensions: true
@@ -7,6 +8,6 @@ fn java_script_modules_error1() {
 define('mod1', ['a'], /**/function(a, b) {
 	
 });"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("javaScriptModulesError1", content);
     fourslash::go_to_marker(&mut s, "");
 }

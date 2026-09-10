@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineFindAllReferences"]
 #[test]
 fn find_all_refs_inherited_properties4() {
@@ -15,6 +16,6 @@ interface D extends C {
 var d: D;
 d./*3*/prop0;
 d./*4*/prop1;"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("findAllRefsInheritedProperties4", content);
     fourslash::unsupported("VerifyBaselineFindAllReferences"); // f.VerifyBaselineFindAllReferences(t, "0", "2", "3", "1", "4")
 }

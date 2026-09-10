@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCodeFixNotAvailable"]
 #[test]
 fn code_fix_convert_to_type_only_import3() {
@@ -23,7 +24,7 @@ declare const c: C;
 declare const d: D;
 declare const o: typeof others;
 console.log(a, b, c, d, o);"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("codeFixConvertToTypeOnlyImport3", content);
     fourslash::go_to_file(&mut s, "imports.ts");
     fourslash::unsupported("VerifyCodeFixNotAvailable"); // f.VerifyCodeFixNotAvailable(t)
 }

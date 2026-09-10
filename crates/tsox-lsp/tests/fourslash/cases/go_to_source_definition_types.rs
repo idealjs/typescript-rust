@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineGoToSourceDefinition"]
 #[test]
 fn go_to_source_fallbacks_to_definition_for_interface() {
@@ -15,7 +16,7 @@ exports.makeConfig = () => ({ enabled: true });
 // @Filename: /home/src/workspaces/project/index.ts
 import type { /*importName*/Config } from "pkg";
 let value: /*typeRef*/Config;"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("goToSourceFallbacksToDefinitionForInterface", content);
     fourslash::unsupported("VerifyBaselineGoToSourceDefinition"); // f.VerifyBaselineGoToSourceDefinition(t, "importName", "typeRef")
 }
 
@@ -42,7 +43,7 @@ export function makeConfig() { return { enabled: true }; }
 import { Config, makeConfig } from "pkg";
 let c: /*typeRef*/Config;
 makeConfig/*callRef*/();"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("goToSourceTypeOnlySymbolFallback", content);
     fourslash::unsupported("VerifyBaselineGoToSourceDefinition"); // f.VerifyBaselineGoToSourceDefinition(t, "typeRef", "callRef")
 }
 
@@ -67,6 +68,6 @@ export { Config } from "./types.js";
 // @Filename: /home/src/workspaces/project/index.ts
 import { /*importName*/Config } from "pkg";
 let c: Config;"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("goToSourceForwardedNonConcreteMerge", content);
     fourslash::unsupported("VerifyBaselineGoToSourceDefinition"); // f.VerifyBaselineGoToSourceDefinition(t, "importName")
 }

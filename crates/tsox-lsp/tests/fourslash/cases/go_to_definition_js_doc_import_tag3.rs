@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineGoToDefinition"]
 #[test]
 fn go_to_definition_js_doc_import_tag3() {
@@ -11,6 +12,6 @@ fn go_to_definition_js_doc_import_tag3() {
 /**
  * @import { A } [|from     /*1*/|] "./b";
  */"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("goToDefinitionJsDocImportTag3", content);
     fourslash::unsupported("VerifyBaselineGoToDefinition"); // f.VerifyBaselineGoToDefinition(t, true, "1")
 }

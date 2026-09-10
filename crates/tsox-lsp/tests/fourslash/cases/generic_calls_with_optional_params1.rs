@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[test]
 fn generic_calls_with_optional_params1() {
     let content = r#"class Collection<T> {
@@ -12,7 +13,7 @@ var c = new Collection<string>();
 var utils: Utils;
 var /*1*/r = utils.fold(c, (s, t) => t, "");
 var /*2*/r2 = utils.fold(c, (s, t) => t);"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("genericCallsWithOptionalParams1", content);
     fourslash::verify_quick_info_at(&mut s, "1", "var r: string", "");
     fourslash::verify_quick_info_at(&mut s, "2", "var r2: string", "");
 }

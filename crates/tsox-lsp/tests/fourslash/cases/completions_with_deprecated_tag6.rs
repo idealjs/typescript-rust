@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCompletions"]
 #[test]
 fn completions_with_deprecated_tag6() {
@@ -8,6 +9,6 @@ fn completions_with_deprecated_tag6() {
     export var foo: number;
 }
 Foo./**/"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("completionsWithDeprecatedTag6", content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

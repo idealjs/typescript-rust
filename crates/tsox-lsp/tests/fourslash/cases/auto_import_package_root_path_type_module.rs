@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: t.Skip()"]
 #[test]
 fn auto_import_package_root_path_type_module() {
@@ -22,6 +23,6 @@ export function foo() {};
  }
 // @Filename: /index.ts
 foo/**/"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("autoImportPackageRootPathTypeModule", content);
     fourslash::unsupported("VerifyImportFixModuleSpecifiers"); // f.VerifyImportFixModuleSpecifiers(t, "", []string{"pkg"}, nil /*preferences*/)
 }

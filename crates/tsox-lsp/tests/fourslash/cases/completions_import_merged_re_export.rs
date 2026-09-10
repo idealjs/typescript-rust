@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: f.MarkTestAsStradaServer()"]
 #[test]
 fn completions_import_merged_re_export() {
@@ -27,7 +28,7 @@ declare module "@jest/types" {
 }
 // @Filename: /home/src/workspaces/project/index.ts
 C/**/"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("completionsImport_mergedReExport", content);
     // TODO: f.MarkTestAsStradaServer()
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
     fourslash::insert(&mut s, "o");

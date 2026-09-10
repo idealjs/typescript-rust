@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: t.Skip('Known failing fourslash test')"]
 #[test]
 fn quick_info_on_element_access_in_write_location4() {
@@ -11,11 +12,6 @@ interface Serializer {
 }
 declare let box: Serializer;
 box['value'/*1*/] = true;"#;
-    let mut s = Session::new(content);
-    fourslash::verify_quick_info_at(
-        &mut s,
-        "1",
-        "(property) Serializer.value: string | number | boolean",
-        "",
-    );
+    let mut s = Session::new_for_test("quickInfoOnElementAccessInWriteLocation4", content);
+    fourslash::verify_quick_info_at(&mut s, "1", "(property) Serializer.value: string | number | boolean", "");
 }

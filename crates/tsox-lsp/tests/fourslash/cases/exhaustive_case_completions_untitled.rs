@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: // Locally defined enum should provide exhaustive case compl"]
 #[test]
 fn exhaustive_case_completions_untitled_local_enum() {

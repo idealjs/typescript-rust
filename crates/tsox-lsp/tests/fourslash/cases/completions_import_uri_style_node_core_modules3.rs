@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: t.Skip('Known failing fourslash test')"]
 #[test]
 fn completions_import_uri_style_node_core_modules3() {
@@ -36,7 +37,7 @@ writeFile/*test1*/
 // @Filename: /test2.ts
 import "node:test";
 writeFile/*test2*/"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("completionsImport_uriStyleNodeCoreModules3", content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "noPrefix", &fourslash.CompletionsExpectedList{
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "prefix", &fourslash.CompletionsExpectedList{
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "mixed1", &fourslash.CompletionsExpectedList{

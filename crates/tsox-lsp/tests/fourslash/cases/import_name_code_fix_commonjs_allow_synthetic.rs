@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyImportFixAtPosition"]
 #[test]
 fn import_name_code_fix_commonjs_allow_synthetic() {
@@ -15,7 +16,7 @@ module.exports = MY_EXPORTS;
 const newVar = {
   any: MY_EXPORTS/**/,
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("importNameCodeFix_commonjs_allowSynthetic", content);
     fourslash::go_to_marker(&mut s, "");
     fourslash::unsupported("VerifyImportFixAtPosition"); // f.VerifyImportFixAtPosition(t, []string{
 }

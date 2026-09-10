@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineRename"]
 #[test]
 fn rename_label6() {
@@ -9,6 +10,6 @@ fn rename_label6() {
         if (j === 5) break /**/loop2;
     }
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("renameLabel6", content);
     fourslash::unsupported("VerifyBaselineRename"); // f.VerifyBaselineRename(t, nil /*preferences*/, "")
 }

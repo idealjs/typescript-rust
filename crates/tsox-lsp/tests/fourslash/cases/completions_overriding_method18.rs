@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyApplyCodeActionFromCompletion"]
 #[test]
 fn completions_overriding_method18() {
@@ -16,7 +17,7 @@ class DecoratorBase {
 class DecoratorSub extends DecoratorBase {
     @decorator protected /**/
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("completionsOverridingMethod18", content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
     fourslash::unsupported("VerifyApplyCodeActionFromCompletion"); // f.VerifyApplyCodeActionFromCompletion(t, new(""), &fourslash.ApplyCodeActionFromCompletionOptions{
 }

@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyNoSignatureHelpForMarkers"]
 #[test]
 fn signature_help_tagged_templates_negatives1() {
@@ -7,6 +8,6 @@ fn signature_help_tagged_templates_negatives1() {
 function g(templateStrings, x, y, z) { return ""; }
 
 /*1*/f/*2*/ /*3*/` + "`" + ` qwerty ${ 123 } asdf ${   41234   }  zxcvb ${ g ` + "`" + `    ` + "`" + ` }     ` + "`" + `/*4*/"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("signatureHelpTaggedTemplatesNegatives1", content);
     fourslash::unsupported("VerifyNoSignatureHelpForMarkers"); // f.VerifyNoSignatureHelpForMarkers(t, f.MarkerNames()...)
 }

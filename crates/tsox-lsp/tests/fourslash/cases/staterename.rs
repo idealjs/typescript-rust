@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: // Close all files and open temp file, only inferred project"]
 #[test]
 fn rename_ancestor_project_ref_mangement() {
@@ -76,7 +77,7 @@ export function getMyConst() {
 	],
 }
 "#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("renameAncestorProjectRefMangement", content);
     fourslash::go_to_marker(&mut s, "find");
     // TODO: // Open temp file and verify all projects alive
     fourslash::go_to_marker(&mut s, "temp");
@@ -111,7 +112,7 @@ console.log(C)
 // @Filename: /projects/c/fc.ts
 export const /*find*/C = 42;
 "#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("renameInCommonFile", content);
     fourslash::go_to_marker(&mut s, "aTs");
     fourslash::go_to_marker(&mut s, "bTs");
     // TODO: findMarker := f.MarkerByName(t, "find")

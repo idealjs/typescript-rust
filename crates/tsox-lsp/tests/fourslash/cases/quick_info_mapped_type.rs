@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: t.Skip('Known failing fourslash test')"]
 #[test]
 fn quick_info_mapped_type() {
@@ -15,7 +16,7 @@ p.m/*1*/;
 
 declare const q: Pick<I, "m">;
 q.m/*2*/;"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("quickInfoMappedType", content);
     fourslash::verify_quick_info_at(&mut s, "0", "(property) m: number", "m documentation");
     fourslash::verify_quick_info_at(&mut s, "1", "(method) m(): void", "m documentation");
     fourslash::verify_quick_info_at(&mut s, "2", "(method) m(): void", "m documentation");

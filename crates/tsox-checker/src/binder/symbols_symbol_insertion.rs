@@ -67,11 +67,22 @@ impl Binder {
                 }
             } else if let Some(parent_sym) = &self.parent_symbol {
                 let parent_sym_mut = Arc::as_ptr(parent_sym) as *mut Symbol;
-                let symbol_mut = Arc::as_ptr(&symbol) as *mut Symbol;
+                let symbol_mut = Arc::as_ptr(symbol) as *mut Symbol;
                 unsafe {
-                    (*parent_sym_mut)
-                        .members
-                        .insert(name.to_string(), Arc::clone(&symbol));
+                    // export 语境的别名进 exports 表（对齐 Go declareModuleMember），
+                    // 其余本地声明进 members
+                    if matches!(
+                        node.kind,
+                        SyntaxKind::ExportSpecifier | SyntaxKind::NamespaceExportDeclaration
+                    ) {
+                        (*parent_sym_mut)
+                            .exports
+                            .insert(name.to_string(), Arc::clone(symbol));
+                    } else {
+                        (*parent_sym_mut)
+                            .members
+                            .insert(name.to_string(), Arc::clone(symbol));
+                    }
                     (*symbol_mut).parent = Some(Arc::clone(parent_sym));
                 }
             } else if let Some(hoist) = &var_hoist_container {

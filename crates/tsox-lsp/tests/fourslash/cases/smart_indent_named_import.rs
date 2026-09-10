@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.FormatDocument"]
 #[test]
 fn smart_indent_named_import() {
@@ -7,7 +8,7 @@ fn smart_indent_named_import() {
     numbers as bn,/*1*/
     list/*2*/
 } from '@bykov/basics';/*3*/"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("smartIndentNamedImport", content);
     fourslash::unsupported("FormatDocument"); // f.FormatDocument(t, "")
     fourslash::go_to_marker(&mut s, "0");
     fourslash::verify_current_line_content(&mut s, r#"import {"#);

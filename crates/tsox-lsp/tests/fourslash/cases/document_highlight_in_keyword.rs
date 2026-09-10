@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineDocumentHighlights"]
 #[test]
 fn document_highlight_in_keyword() {
@@ -10,6 +11,6 @@ fn document_highlight_in_keyword() {
 "a" [|in|] {};
 
 for (let a [|in|] {}) {}"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("documentHighlightInKeyword", content);
     fourslash::unsupported("VerifyBaselineDocumentHighlights"); // f.VerifyBaselineDocumentHighlights(t, nil /*preferences*/, ToAny(f.Ranges())...)
 }

@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: markers := []string{'a', 'dir', 'index'}"]
 #[test]
 fn allow_rename_of_import_path() {
@@ -14,7 +15,7 @@ import * as dir2 from "./dir/[|index|]";
 // @Filename: /c.js
 const a = require("./[|a|]");
 "#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("allowRenameOfImportPath", content);
     // TODO: prefsTrue := lsutil.UserPreferences{
     // TODO: prefsFalse := lsutil.UserPreferences{
     // TODO: markers := []string{"a", "dir", "index"}
@@ -32,7 +33,7 @@ export const foo = "bar";
 // @Filename: /index.ts
 export * from "./[|lib/*rename*/rary|]";
 "#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("renameInfoForImportPathTriggerSpan", content);
     fourslash::go_to_marker(&mut s, "rename");
     fourslash::unsupported("VerifyRenameRange"); // f.VerifyRenameRange(t, f.Ranges()[0].LSRange, "library", &lsutil.UserPreferences{
 }

@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCompletions"]
 #[test]
 fn completions_paths_json_module() {
@@ -9,6 +10,6 @@ fn completions_paths_json_module() {
 not read
 // @Filename: /project/index.ts
 import { } from "/**/";"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("completionsPathsJsonModule", content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

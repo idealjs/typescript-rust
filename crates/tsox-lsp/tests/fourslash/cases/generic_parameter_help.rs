@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifySignatureHelp"]
 #[test]
 fn generic_parameter_help() {
@@ -15,7 +16,7 @@ testFunction<any, /*2*/
 testFunction<any, any, any>(/*3*/
 testFunction<any, any,/*4*/ any>(null, null, null);
 testFunction<, ,/*5*/>(null, null, null);"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("genericParameterHelp", content);
     fourslash::go_to_marker(&mut s, "1");
     fourslash::unsupported("VerifySignatureHelp"); // f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{Text: "testFunction<T extends IFoo, U,
     fourslash::go_to_marker(&mut s, "2");

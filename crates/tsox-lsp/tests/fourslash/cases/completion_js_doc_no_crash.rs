@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: // The assertion here is simply 'does not crash/panic'."]
 #[test]
 fn completion_js_doc_no_crash() {
@@ -13,7 +14,7 @@ class ErrorMap {
   errorMap;
 }
 "#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("completionJSDocNoCrash", content);
     // TODO: // The assertion here is simply "does not crash/panic".
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
 }

@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: t.Skip('Known failing fourslash test')"]
 #[test]
 fn clodule_type_of1() {
@@ -18,13 +19,13 @@ namespace C {
         return typeof r;
     }
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("cloduleTypeOf1", content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
     fourslash::insert(&mut s, "foo(1);");
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "2", &fourslash.CompletionsExpectedList{
+    fourslash::verify_completions_include_exclude_at(&mut s, Some("2"), &["x"], &[]);
     fourslash::verify_quick_info_at(&mut s, "3", "(local var) r: C<number>", "");
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "4", &fourslash.CompletionsExpectedList{
+    fourslash::verify_completions_include_exclude_at(&mut s, Some("4"), &["x"], &[]);
     fourslash::insert(&mut s, "x;");
     fourslash::verify_quick_info_at(&mut s, "5", "(local var) r2: number", "");
-    fourslash::verify_no_errors(&mut s);
+    fourslash::verify_no_errors(&mut s, );
 }

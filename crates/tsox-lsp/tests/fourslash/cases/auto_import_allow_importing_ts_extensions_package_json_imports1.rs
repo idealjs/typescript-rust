@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: t.Skip('Known failing fourslash test')"]
 #[test]
 fn auto_import_allow_importing_ts_extensions_package_json_imports1() {
@@ -36,7 +37,7 @@ export function add(a: number, b: number) {}
 // @Filename: /src/index.ts
 add/*imports*/;
 external/*exports*/;"##;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("autoImportAllowImportingTsExtensionsPackageJsonImports1", content);
     fourslash::unsupported("VerifyImportFixModuleSpecifiers"); // f.VerifyImportFixModuleSpecifiers(t, "imports", []string{"#add.ts"}, nil /*preferences*/)
     fourslash::unsupported("VerifyImportFixModuleSpecifiers"); // f.VerifyImportFixModuleSpecifiers(t, "exports", []string{"pkg/external.js"}, nil /*preferences*/)
 }

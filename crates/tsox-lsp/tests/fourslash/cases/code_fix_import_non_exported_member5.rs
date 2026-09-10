@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCodeFixNotAvailable"]
 #[test]
 fn code_fix_import_non_exported_member5() {
@@ -9,7 +10,7 @@ fn code_fix_import_non_exported_member5() {
 function bar() {}
 // @filename: /b.ts
 import { bar } from "./foo";"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("codeFixImportNonExportedMember5", content);
     fourslash::go_to_file(&mut s, "/b.ts");
     fourslash::unsupported("VerifyCodeFixNotAvailable"); // f.VerifyCodeFixNotAvailable(t, "fixImportNonExportedMember")
 }

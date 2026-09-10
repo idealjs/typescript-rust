@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: prefs := lsutil.NewDefaultUserPreferences()"]
 #[test]
 fn completions_import_default_false_positive() {
@@ -10,7 +11,7 @@ export const concat = 0;
 // @Filename: /a.ts
 export {};
 conca/**/"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("completionsImport_defaultFalsePositive", content);
     // TODO: prefs := lsutil.NewDefaultUserPreferences()
     // TODO: prefs.AutoImportEntrypointDirectorySearch = core.TSTrue
     fourslash::unsupported("Configure"); // f.Configure(t, prefs)

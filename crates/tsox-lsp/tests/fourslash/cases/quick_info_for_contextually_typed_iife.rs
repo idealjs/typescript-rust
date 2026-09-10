@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[test]
 fn quick_info_for_contextually_typed_iife() {
     let content = r#"(({ q/*1*/, qq/*2*/ }, x/*3*/, { p/*4*/ }) => {
@@ -9,7 +10,7 @@ fn quick_info_for_contextually_typed_iife() {
     var v: number = x/*8*/;
     return q; })({ q: 13, qq: 12 }, 1, { p: 14 });
 ((a/*9*/, b/*10*/, c/*11*/) => [a/*12*/,b/*13*/,c/*14*/])("foo", 101, false);"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("quickInfoForContextuallyTypedIife", content);
     fourslash::verify_quick_info_at(&mut s, "1", "(parameter) q: number", "");
     fourslash::verify_quick_info_at(&mut s, "2", "(parameter) qq: number", "");
     fourslash::verify_quick_info_at(&mut s, "3", "(parameter) x: number", "");

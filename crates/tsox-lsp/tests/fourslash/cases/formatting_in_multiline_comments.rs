@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: }"]
 #[test]
 fn formatting_in_multiline_comments() {
@@ -9,7 +10,7 @@ fn formatting_in_multiline_comments() {
 }
 
 // newline at the end of the file"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("formattingInMultilineComments", content);
     fourslash::go_to_marker(&mut s, "2");
     fourslash::unsupported("InsertLine"); // f.InsertLine(t, "")
     fourslash::go_to_marker(&mut s, "1");

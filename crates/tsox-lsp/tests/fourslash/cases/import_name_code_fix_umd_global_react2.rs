@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyImportFixAtPosition"]
 #[test]
 fn import_name_code_fix_umd_global_react2() {
@@ -14,7 +15,7 @@ declare global {
 }
 // @Filename: /a.tsx
 [|<div/>|]"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("importNameCodeFixUMDGlobalReact2", content);
     fourslash::go_to_file(&mut s, "/a.tsx");
     fourslash::unsupported("VerifyImportFixAtPosition"); // f.VerifyImportFixAtPosition(t, []string{
 }

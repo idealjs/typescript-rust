@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineHover"]
 #[test]
 fn quick_info_js_doc_getter_setter() {
@@ -47,6 +48,6 @@ new A()./*6*/x = "1";
 new B()./*7*/x = "1";
 new C()./*8*/x = "1";
 new D()./*9*/x = "1";"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("quickInfoJsDocGetterSetter", content);
     fourslash::unsupported("VerifyBaselineHover"); // f.VerifyBaselineHover(t)
 }

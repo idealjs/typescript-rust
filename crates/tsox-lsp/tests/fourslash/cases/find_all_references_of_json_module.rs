@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineFindAllReferences"]
 #[test]
 fn find_all_references_of_json_module() {
@@ -11,6 +12,6 @@ fn find_all_references_of_json_module() {
 /*3*/settings;
 // @Filename: /settings.json
  {}"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("findAllReferencesOfJsonModule", content);
     fourslash::unsupported("VerifyBaselineFindAllReferences"); // f.VerifyBaselineFindAllReferences(t, "1", "2", "3")
 }

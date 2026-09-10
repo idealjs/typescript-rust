@@ -56,7 +56,7 @@ impl Parser {
         let expression = self.parse_expression();
         self.expect(SyntaxKind::CloseParenToken);
         self.parse_optional(SyntaxKind::SemicolonToken);
-        let end = self.token_pos();
+        let end = self.node_pos();
         Arc::new(Node::with_loc(
             SyntaxKind::DoStatement,
             NodeData::DoStatement(DoStatementData {
@@ -179,7 +179,7 @@ impl Parser {
         self.expect(SyntaxKind::BreakKeyword);
         let label = self.parse_identifier_if_not_semicolon();
         self.parse_semicolon();
-        let end = self.token_pos();
+        let end = self.node_pos();
         Arc::new(Node::with_loc(
             SyntaxKind::BreakStatement,
             NodeData::BreakStatement(BreakStatementData { label }),
@@ -192,7 +192,7 @@ impl Parser {
         self.expect(SyntaxKind::ContinueKeyword);
         let label = self.parse_identifier_if_not_semicolon();
         self.parse_semicolon();
-        let end = self.token_pos();
+        let end = self.node_pos();
         Arc::new(Node::with_loc(
             SyntaxKind::ContinueStatement,
             NodeData::ContinueStatement(ContinueStatementData { label }),
@@ -217,7 +217,7 @@ impl Parser {
             None
         };
         self.parse_semicolon();
-        let end = self.token_pos();
+        let end = self.node_pos();
         Arc::new(Node::with_loc(
             SyntaxKind::ReturnStatement,
             NodeData::ReturnStatement(ReturnStatementData { expression }),
@@ -251,7 +251,7 @@ impl Parser {
             Parser::parse_case_or_default_clause,
         );
         self.expect(SyntaxKind::CloseBraceToken);
-        let end = self.token_pos();
+        let end = self.node_pos();
         Arc::new(Node::with_loc(
             SyntaxKind::CaseBlock,
             NodeData::CaseBlock(CaseBlockData {
@@ -271,7 +271,7 @@ impl Parser {
                 ParsingContext::SwitchClauseStatements,
                 Parser::parse_statement,
             );
-            let end = self.token_pos();
+            let end = self.node_pos();
             Arc::new(Node::with_loc(
                 SyntaxKind::CaseClause,
                 NodeData::CaseOrDefaultClause(CaseOrDefaultClauseData {
@@ -288,7 +288,7 @@ impl Parser {
                 ParsingContext::SwitchClauseStatements,
                 Parser::parse_statement,
             );
-            let end = self.token_pos();
+            let end = self.node_pos();
             Arc::new(Node::with_loc(
                 SyntaxKind::DefaultClause,
                 NodeData::CaseOrDefaultClause(CaseOrDefaultClauseData {

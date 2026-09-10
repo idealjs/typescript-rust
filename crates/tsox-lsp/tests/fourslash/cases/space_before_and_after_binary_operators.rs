@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: }"]
 #[test]
 fn space_before_and_after_binary_operators() {
@@ -12,7 +13,7 @@ fn space_before_and_after_binary_operators() {
 let s = 'foo';
 /*6*/for (var i = 0,ii = 2; i < s.length; ii++,i++) {
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("spaceBeforeAndAfterBinaryOperators", content);
     fourslash::unsupported("FormatDocument"); // f.FormatDocument(t, "")
     fourslash::go_to_marker(&mut s, "1");
     fourslash::verify_current_line_content(&mut s, r#"(i++, i++);"#);
@@ -25,9 +26,6 @@ let s = 'foo';
     fourslash::go_to_marker(&mut s, "5");
     fourslash::verify_current_line_content(&mut s, r#"(i++, i++, ++i, i--, 2);"#);
     fourslash::go_to_marker(&mut s, "6");
-    fourslash::verify_current_line_content(
-        &mut s,
-        r#"for (var i = 0, ii = 2; i < s.length; ii++, i++) {"#,
-    );
+    fourslash::verify_current_line_content(&mut s, r#"for (var i = 0, ii = 2; i < s.length; ii++, i++) {"#);
     // TODO: }
 }

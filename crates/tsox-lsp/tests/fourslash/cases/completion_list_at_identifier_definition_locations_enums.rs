@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCompletions"]
 #[test]
 fn completion_list_at_identifier_definition_locations_enums() {
@@ -7,6 +8,6 @@ fn completion_list_at_identifier_definition_locations_enums() {
 enum /*enumName1*/
 enum a/*enumName2*/
 var x = 0; enum /*enumName4*/"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("completionListAtIdentifierDefinitionLocations_enums", content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, f.Markers(), nil)
 }

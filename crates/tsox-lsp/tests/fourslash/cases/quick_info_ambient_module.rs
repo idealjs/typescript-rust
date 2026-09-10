@@ -1,9 +1,10 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[test]
 fn quick_info_ambient_module() {
     let content = r#"declare module "*.css"/*1*/;"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("quickInfoAmbientModule", content);
     fourslash::verify_quick_info_at(&mut s, "1", r#"module "*.css""#, "");
 }
 
@@ -14,7 +15,7 @@ fn quick_info_pattern_ambient_module_with_import_attributes() {
     const styles: { readonly [className: string]: string };
     export default styles;
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("quickInfoPatternAmbientModuleWithImportAttributes", content);
     fourslash::unsupported("VerifyBaselineHoverWithVerbosity"); // f.VerifyBaselineHoverWithVerbosity(t, map[string][]int{"1": {0, 1}})
 }
 
@@ -36,6 +37,6 @@ declare module "*.asset" with { type: "css" } {
 declare module "*.asset" with { type: "text" } {
     export const textAlso: "text-also";
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("quickInfoMergedPatternAmbientModuleWithImportAttributes", content);
     fourslash::unsupported("VerifyBaselineHoverWithVerbosity"); // f.VerifyBaselineHoverWithVerbosity(t, map[string][]int{"css": {0, 1}, "text": {0, 1}})
 }

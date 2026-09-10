@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: capabilities := fourslash.GetDefaultCapabilities()"]
 #[test]
 fn exhaustive_case_completions10() {

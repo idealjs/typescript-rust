@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.FormatDocument"]
 #[test]
 fn formatting_type_infer() {
@@ -20,46 +21,22 @@ fn formatting_type_infer() {
 
 /*L8*/  type   Bar  <  T  >   =   T   extends   {   a  :   (x  :  infer  U  ) =>   void  ,   b  :   (x  :   infer   U  )   =>   void   }    ?   U   :   never  ;
 "#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("formattingTypeInfer", content);
     fourslash::unsupported("FormatDocument"); // f.FormatDocument(t, "")
     fourslash::go_to_marker(&mut s, "L1");
-    fourslash::verify_current_line_content(
-        &mut s,
-        r#"type C<T> = T extends Array<infer U> ? U : never;"#,
-    );
+    fourslash::verify_current_line_content(&mut s, r#"type C<T> = T extends Array<infer U> ? U : never;"#);
     fourslash::go_to_marker(&mut s, "L2");
-    fourslash::verify_current_line_content(
-        &mut s,
-        r#"type C<T> = T extends Array<infer U> ? U : never;"#,
-    );
+    fourslash::verify_current_line_content(&mut s, r#"type C<T> = T extends Array<infer U> ? U : never;"#);
     fourslash::go_to_marker(&mut s, "L3");
-    fourslash::verify_current_line_content(
-        &mut s,
-        r#"type C<T> = T extends Array<infer U> ? U : T;"#,
-    );
+    fourslash::verify_current_line_content(&mut s, r#"type C<T> = T extends Array<infer U> ? U : T;"#);
     fourslash::go_to_marker(&mut s, "L4");
-    fourslash::verify_current_line_content(
-        &mut s,
-        r#"type C<T> = T extends Array<infer U> ? U : T;"#,
-    );
+    fourslash::verify_current_line_content(&mut s, r#"type C<T> = T extends Array<infer U> ? U : T;"#);
     fourslash::go_to_marker(&mut s, "L5");
-    fourslash::verify_current_line_content(
-        &mut s,
-        r#"type Foo<T> = T extends { a: infer U, b: infer U } ? U : never;"#,
-    );
+    fourslash::verify_current_line_content(&mut s, r#"type Foo<T> = T extends { a: infer U, b: infer U } ? U : never;"#);
     fourslash::go_to_marker(&mut s, "L6");
-    fourslash::verify_current_line_content(
-        &mut s,
-        r#"type Foo<T> = T extends { a: infer U, b: infer U } ? U : never;"#,
-    );
+    fourslash::verify_current_line_content(&mut s, r#"type Foo<T> = T extends { a: infer U, b: infer U } ? U : never;"#);
     fourslash::go_to_marker(&mut s, "L7");
-    fourslash::verify_current_line_content(
-        &mut s,
-        r#"type Bar<T> = T extends { a: (x: infer U) => void, b: (x: infer U) => void } ? U : never;"#,
-    );
+    fourslash::verify_current_line_content(&mut s, r#"type Bar<T> = T extends { a: (x: infer U) => void, b: (x: infer U) => void } ? U : never;"#);
     fourslash::go_to_marker(&mut s, "L8");
-    fourslash::verify_current_line_content(
-        &mut s,
-        r#"type Bar<T> = T extends { a: (x: infer U) => void, b: (x: infer U) => void } ? U : never;"#,
-    );
+    fourslash::verify_current_line_content(&mut s, r#"type Bar<T> = T extends { a: (x: infer U) => void, b: (x: infer U) => void } ? U : never;"#);
 }

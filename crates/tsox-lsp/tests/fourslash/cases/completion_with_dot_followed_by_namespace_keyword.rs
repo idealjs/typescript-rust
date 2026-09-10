@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: }"]
 #[test]
 fn completion_with_dot_followed_by_namespace_keyword() {
@@ -10,7 +11,7 @@ fn completion_with_dot_followed_by_namespace_keyword() {
         namespace B {
             export function baz() { }
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("completionWithDotFollowedByNamespaceKeyword", content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
     // TODO: }
 }

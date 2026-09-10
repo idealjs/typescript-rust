@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineDocumentSymbol"]
 #[test]
 fn navigation_bar_js_doc() {
@@ -8,6 +9,6 @@ fn navigation_bar_js_doc() {
 /** @typedef {(number|string)} NumberLike */
 /** @typedef {(string|number)} */
 const x = 0;"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("navigationBarJsDoc", content);
     fourslash::unsupported("VerifyBaselineDocumentSymbol"); // f.VerifyBaselineDocumentSymbol(t)
 }

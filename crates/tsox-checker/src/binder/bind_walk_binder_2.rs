@@ -10,6 +10,11 @@ impl Binder {
         name: &str,
     ) {
         let symbol = self.new_symbol(flags, name.to_string());
+        let symbol_ptr = Arc::as_ptr(&symbol) as *mut Symbol;
+        unsafe {
+            (*symbol_ptr).declarations.push(Arc::clone(node));
+            (*symbol_ptr).value_declaration = Some(Arc::clone(node));
+        }
         self.symbol_map.set_symbol(node, symbol);
     }
 

@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: // Line 0: if (EMPTY_TAGs.has(tag)) {"]
 #[test]
 fn folding_range_line_folding_only() {

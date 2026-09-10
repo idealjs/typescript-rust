@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifySignatureHelp"]
 #[test]
 fn signature_help_for_optional_methods() {
@@ -13,7 +14,7 @@ const o: Obj = {
     return {};
   }
 };"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("signatureHelpForOptionalMethods", content);
     fourslash::go_to_marker(&mut s, "1");
     fourslash::unsupported("VerifySignatureHelp"); // f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{Text: "optionalMethod(current: any): a
 }

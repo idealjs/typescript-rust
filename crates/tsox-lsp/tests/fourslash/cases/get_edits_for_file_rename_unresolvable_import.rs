@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyWillRenameFilesEdits"]
 #[test]
 fn get_edits_for_file_rename_unresolvable_import() {
@@ -20,6 +21,6 @@ fn get_edits_for_file_rename_unresolvable_import() {
 import "@local/some-other-import";
 // @Filename: /modules/@local/index.js
 import "@local/some-other-import";"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("getEditsForFileRename_unresolvableImport", content);
     fourslash::unsupported("VerifyWillRenameFilesEdits"); // f.VerifyWillRenameFilesEdits(t, "/modules/@app/something", "/modules/@app/something-2", map[string]s
 }

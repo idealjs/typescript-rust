@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyQuickInfoIs"]
 #[test]
 fn js_doc_function_signatures12() {
@@ -18,7 +19,7 @@ fn js_doc_function_signatures12() {
 function f1(o) {
     o/**/;
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("jsDocFunctionSignatures12", content);
     fourslash::go_to_marker(&mut s, "");
     fourslash::unsupported("VerifyQuickInfoIs"); // f.VerifyQuickInfoIs(t, "(parameter) o: {\n    stringProp: string;\n    numProp: number;\n    boolPro
 }

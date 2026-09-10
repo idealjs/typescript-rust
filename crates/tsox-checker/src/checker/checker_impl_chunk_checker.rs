@@ -13,6 +13,7 @@ impl Checker {
 
         let legacy_decorators = compiler_options.experimental_decorators.is_true();
         let emit_standard_class_fields = compiler_options.get_emit_standard_class_fields();
+        let allow_unreachable_code = compiler_options.allow_unreachable_code;
         let strict_null_checks =
             compiler_options.get_strict_option_value(compiler_options.strict_null_checks);
         let strict_function_types =
@@ -60,6 +61,7 @@ impl Checker {
             legacy_decorators,
             emit_standard_class_fields,
             strict_null_checks,
+            allow_unreachable_code,
             strict_function_types,
             strict_bind_call_apply,
             strict_property_initialization,
@@ -164,6 +166,18 @@ impl Checker {
             spread_links: LinkStore::new(),
             variance_links: LinkStore::new(),
             reverse_mapped_symbol_links: LinkStore::new(),
+            reverse_mapped_cache: HashMap::new(),
+            template_resolving_ids: std::collections::HashSet::new(),
+            template_resolution_letway: false,
+            deferred_indexed_access_cache: HashMap::new(),
+            index_type_cache: HashMap::new(),
+            interface_shell_reify_cache: HashMap::new(),
+            reverse_mapped_print_stack: Vec::new(),
+            alias_args_resolution_stack: Vec::new(),
+            alias_instantiation_cache: HashMap::new(),
+            current_alias_frame: None,
+            reverse_mapped_depth: Vec::new(),
+            reverse_mapped_target_depth: Vec::new(),
             marked_assignment_symbol_links: LinkStore::new(),
             symbol_container_links: LinkStore::new(),
             symbol_table_alias_cache: HashMap::new(),
@@ -222,6 +236,7 @@ impl Checker {
             array_member_type_cache: std::collections::HashMap::new(),
             instantiated_member_type_cache: std::collections::HashMap::new(),
             instantiated_member_type_cache_limit: 300_000,
+            instantiated_member_owner: std::collections::HashMap::new(),
 
             any_signature: OnceLock::new(),
             unknown_signature: OnceLock::new(),

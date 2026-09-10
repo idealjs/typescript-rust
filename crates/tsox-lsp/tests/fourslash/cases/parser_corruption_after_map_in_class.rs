@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyNonSuggestionDiagnostics"]
 #[test]
 fn parser_corruption_after_map_in_class() {
@@ -13,7 +14,7 @@ class C {
 
     }
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("parserCorruptionAfterMapInClass", content);
     fourslash::go_to_marker(&mut s, "$");
     fourslash::insert(&mut s, "()");
     fourslash::unsupported("VerifyNonSuggestionDiagnostics"); // f.VerifyNonSuggestionDiagnostics(t, []*lsproto.Diagnostic{

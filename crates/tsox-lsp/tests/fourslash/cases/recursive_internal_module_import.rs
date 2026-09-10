@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: t.Skip('Known failing fourslash test')"]
 #[test]
 fn recursive_internal_module_import() {
@@ -9,7 +10,7 @@ fn recursive_internal_module_import() {
     import /**/B = A;
 }
 "#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("recursiveInternalModuleImport", content);
     fourslash::go_to_marker(&mut s, "");
     fourslash::unsupported("VerifyQuickInfoExists"); // f.VerifyQuickInfoExists(t)
 }

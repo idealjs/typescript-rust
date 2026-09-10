@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: f.MarkTestAsStradaServer()"]
 #[test]
 fn is_definition_across_module_projects() {
@@ -125,7 +126,7 @@ const ic: I = { FC() {} };
         "lib": ["es5"],
     }
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("isDefinitionAcrossModuleProjects", content);
     // TODO: f.MarkTestAsStradaServer()
     fourslash::unsupported("VerifyBaselineFindAllReferences"); // f.VerifyBaselineFindAllReferences(t, "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12")
 }

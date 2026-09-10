@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineFindAllReferences"]
 #[test]
 fn find_all_refs_write_access() {
@@ -20,6 +21,6 @@ o[` + "`" + `num` + "`" + `] = 3;
 
 o['num'];
 o[` + "`" + `num` + "`" + `];"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("findAllRefsWriteAccess", content);
     fourslash::unsupported("VerifyBaselineFindAllReferences"); // f.VerifyBaselineFindAllReferences(t, "1")
 }

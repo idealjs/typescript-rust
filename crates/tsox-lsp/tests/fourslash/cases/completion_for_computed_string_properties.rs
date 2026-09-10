@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCompletions"]
 #[test]
 fn completion_for_computed_string_properties() {
@@ -10,6 +11,6 @@ interface A {
 }
 declare const a: A;
 a[|./**/|]"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("completionForComputedStringProperties", content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

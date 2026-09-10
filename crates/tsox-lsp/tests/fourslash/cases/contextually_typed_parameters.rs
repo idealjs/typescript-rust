@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[test]
 fn contextually_typed_parameters() {
     let content = r#"declare function foo(cb: (this: any, x: number, y: string, z: boolean) => void): void;
@@ -39,14 +40,9 @@ foo(function(a, b, c, ...args) {
     c/*62*/;
     args/*63*/;
 });"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("contextuallyTypedParameters", content);
     fourslash::verify_quick_info_at(&mut s, "10", "(parameter) a: number", "");
-    fourslash::verify_quick_info_at(
-        &mut s,
-        "11",
-        "(parameter) args: [y: string, z: boolean]",
-        "",
-    );
+    fourslash::verify_quick_info_at(&mut s, "11", "(parameter) args: [y: string, z: boolean]", "");
     fourslash::verify_quick_info_at(&mut s, "20", "(parameter) a: number", "");
     fourslash::verify_quick_info_at(&mut s, "21", "(parameter) b: string", "");
     fourslash::verify_quick_info_at(&mut s, "22", "(parameter) args: [z: boolean]", "");
@@ -55,12 +51,7 @@ foo(function(a, b, c, ...args) {
     fourslash::verify_quick_info_at(&mut s, "32", "(parameter) c: boolean", "");
     fourslash::verify_quick_info_at(&mut s, "33", "(parameter) args: []", "");
     fourslash::verify_quick_info_at(&mut s, "40", "(parameter) a: number", "");
-    fourslash::verify_quick_info_at(
-        &mut s,
-        "41",
-        "(parameter) args: [y: string, z: boolean]",
-        "",
-    );
+    fourslash::verify_quick_info_at(&mut s, "41", "(parameter) args: [y: string, z: boolean]", "");
     fourslash::verify_quick_info_at(&mut s, "50", "(parameter) a: number", "");
     fourslash::verify_quick_info_at(&mut s, "51", "(parameter) b: string", "");
     fourslash::verify_quick_info_at(&mut s, "52", "(parameter) args: [z: boolean]", "");

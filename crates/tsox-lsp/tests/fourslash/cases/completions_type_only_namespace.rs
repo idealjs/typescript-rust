@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCompletions"]
 #[test]
 fn completions_type_only_namespace() {
@@ -12,6 +13,6 @@ export namespace ns {
 // @Filename: /b.ts
 import type { ns } from './a';
 let x: ns./**/"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("completionsTypeOnlyNamespace", content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

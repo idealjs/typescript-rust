@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCompletions"]
 #[test]
 fn string_literal_completions_in_arg_using_inference_result_from_previous_arg() {
@@ -30,6 +31,6 @@ function myFunction2<K extends keyof typeof myEnum>(
 
 myFunction2("valA", { b: "/*ts3*/" });
 myFunction2("valA", { b: ` + "`" + `/*ts4*/` + "`" + ` });"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("stringLiteralCompletionsInArgUsingInferenceResultFromPreviousArg", content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, []string{"ts1", "ts2", "ts3", "ts4"}, &fourslash.CompletionsExpectedList{
 }

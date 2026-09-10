@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineVSFindAllReferences"]
 #[test]
 fn find_all_refs_inherited_properties1_vs() {

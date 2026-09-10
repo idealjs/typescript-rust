@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: opts211 := f.GetOptions()"]
 #[test]
 fn formatting_single_line_with_new_line_option_set() {
@@ -8,7 +9,7 @@ fn formatting_single_line_with_new_line_option_set() {
 /*3*/if (true){}
 /*4*/function boo() {
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("formattingSingleLineWithNewLineOptionSet", content);
     // TODO: opts211 := f.GetOptions()
     // TODO: opts211.FormatCodeSettings.PlaceOpenBraceOnNewLineForFunctions = core.TSTrue
     fourslash::unsupported("Configure"); // f.Configure(t, opts211)

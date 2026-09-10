@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: }"]
 #[test]
 fn completion_list_at_identifier_definition_locations_destructuring() {
@@ -19,7 +20,7 @@ var {x, y/*variable6*/
 function func1({ a/*parameter1*/
 // @Filename: h.ts
 function func2({ a, b/*parameter2*/"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("completionListAtIdentifierDefinitionLocations_destructuring", content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, f.Markers(), nil)
     // TODO: }
 }

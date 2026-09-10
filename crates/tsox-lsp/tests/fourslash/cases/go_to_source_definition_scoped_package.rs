@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: // Scoped packages (@scope/pkg) exercise UnmangleScopedPacka"]
 #[test]
 fn go_to_source_scoped_package() {
@@ -15,7 +16,7 @@ export function /*target*/scopedHelper() { return "scoped"; }
 // @Filename: /home/src/workspaces/project/index.ts
 import { /*importName*/scopedHelper } from "@myscope/mylib";
 scopedHelper/*usage*/();"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("goToSourceScopedPackage", content);
     fourslash::unsupported("VerifyBaselineGoToSourceDefinition"); // f.VerifyBaselineGoToSourceDefinition(t, "importName", "usage")
 }
 
@@ -35,6 +36,6 @@ export function /*target*/nsHelper() { return 42; }
 // @Filename: /home/src/workspaces/project/index.ts
 import { nsHelper } from "@myns/mylib";
 nsHelper/*usage*/();"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("goToSourceScopedAtTypesPackage", content);
     fourslash::unsupported("VerifyBaselineGoToSourceDefinition"); // f.VerifyBaselineGoToSourceDefinition(t, "usage")
 }

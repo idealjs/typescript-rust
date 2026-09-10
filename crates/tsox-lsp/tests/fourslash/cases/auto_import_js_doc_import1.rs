@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: t.Skip('Known failing fourslash test')"]
 #[test]
 fn auto_import_js_doc_import1() {
@@ -25,7 +26,7 @@ fn auto_import_js_doc_import1() {
  * @param { D } d
  */
 export function f(a, b, c, d) { }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("autoImportJsDocImport1", content);
     fourslash::go_to_marker(&mut s, "");
     fourslash::unsupported("VerifyImportFixAtPosition"); // f.VerifyImportFixAtPosition(t, []string{
 }

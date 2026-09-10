@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCompletions"]
 #[test]
 fn completions_with_optional_properties_generic_constructor() {
@@ -14,6 +15,6 @@ export class Clazz<T extends Options> {
 }
 
 new Clazz({ /*1*/ })"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("completionsWithOptionalPropertiesGenericConstructor", content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
 }

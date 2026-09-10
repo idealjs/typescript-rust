@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineGoToDefinition"]
 #[test]
 fn go_to_definition_property_assignment() {
@@ -9,6 +10,6 @@ Component./*PropertyResult*/displayName = 'Component'
 [|/*FunctionClick*/Component|]
 
 Component.[|/*PropertyClick*/displayName|]"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("goToDefinitionPropertyAssignment", content);
     fourslash::unsupported("VerifyBaselineGoToDefinition"); // f.VerifyBaselineGoToDefinition(t, true, "FunctionClick", "PropertyClick")
 }

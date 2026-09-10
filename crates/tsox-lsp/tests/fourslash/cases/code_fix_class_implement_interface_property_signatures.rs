@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCodeFix"]
 #[test]
 fn code_fix_class_implement_interface_property_signatures() {
@@ -21,6 +22,6 @@ fn code_fix_class_implement_interface_property_signatures() {
     a10: { (b10: number, c10: string): number; [d10: string]: I };
 }
 class C implements I {}"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("codeFixClassImplementInterfacePropertySignatures", content);
     fourslash::unsupported("VerifyCodeFix"); // f.VerifyCodeFix(t, fourslash.VerifyCodeFixOptions{
 }

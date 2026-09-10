@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[test]
 fn update_to_class_statics() {
     let content = r#"namespace TypeScript {
@@ -18,7 +19,7 @@ fn update_to_class_statics() {
 namespace TypeScript {
     var x : TypeScript.SymbolAndDiagnostics;
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("updateToClassStatics", content);
     fourslash::go_to_marker(&mut s, "");
     fourslash::insert(&mut s, "someNewProperty = 0;");
 }

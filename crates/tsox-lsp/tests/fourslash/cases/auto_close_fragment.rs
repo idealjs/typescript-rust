@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: // Using separate files for each example to avoid unclosed J"]
 #[test]
 fn auto_close_fragment() {
@@ -47,6 +48,6 @@ const x = <p>
         <>/*9*/
     </>
 </p>"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("autoCloseFragment", content);
     fourslash::unsupported("VerifyJsxClosingTag"); // f.VerifyJsxClosingTag(t, map[string]*string{
 }

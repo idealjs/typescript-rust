@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCompletions"]
 #[test]
 fn completion_list_for_rest() {
@@ -11,6 +12,6 @@ fn completion_list_for_rest() {
 let t: Gen;
 var { x, ...rest } = t;
 rest./*1*/x;"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("completionListForRest", content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
 }

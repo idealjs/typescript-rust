@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCompletions"]
 #[test]
 fn auto_imports_with_root_dirs_and_rooted_path01() {
@@ -15,7 +16,7 @@ fn auto_imports_with_root_dirs_and_rooted_path01() {
         "rootDirs": ["D:/"]
     }
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("autoImportsWithRootDirsAndRootedPath01", content);
     fourslash::go_to_marker(&mut s, "$");
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, nil, &fourslash.CompletionsExpectedList{
 }

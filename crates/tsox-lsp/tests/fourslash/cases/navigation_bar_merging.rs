@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineDocumentSymbol"]
 #[test]
 fn navigation_bar_merging() {
@@ -30,7 +31,7 @@ namespace a {
 // @Filename: file4.ts
 namespace A { export var x; }
 namespace A.B { export var y; }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("navigationBarMerging", content);
     fourslash::unsupported("VerifyBaselineDocumentSymbol"); // f.VerifyBaselineDocumentSymbol(t)
     fourslash::go_to_file(&mut s, "file2.ts");
     fourslash::unsupported("VerifyBaselineDocumentSymbol"); // f.VerifyBaselineDocumentSymbol(t)

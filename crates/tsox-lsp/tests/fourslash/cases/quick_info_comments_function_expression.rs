@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineHover"]
 #[test]
 fn quick_info_comments_function_expression() {
@@ -29,6 +30,6 @@ var assi/*14*/gned = /**
   return s.length;
 }
 assig/*16*/ned("hey");"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("quickInfoCommentsFunctionExpression", content);
     fourslash::unsupported("VerifyBaselineHover"); // f.VerifyBaselineHover(t)
 }

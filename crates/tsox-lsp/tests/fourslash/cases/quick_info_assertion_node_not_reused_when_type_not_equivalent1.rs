@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[test]
 fn quick_info_assertion_node_not_reused_when_type_not_equivalent1() {
     let content = r#"// @strict: true
@@ -29,6 +30,6 @@ type Unwrap<T extends Wrapper<any>> = T["_type"] extends Record<
   : T["_type"];
 
 type Test/*1*/ = Unwrap<typeof value>;"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("quickInfoAssertionNodeNotReusedWhenTypeNotEquivalent1", content);
     fourslash::verify_quick_info_at(&mut s, "1", "type Test = {\n    prop1: \"hello\";\n}", "");
 }

@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineInlayHints"]
 #[test]
 fn inlay_hints_property_declaration_computed_name1() {
@@ -9,6 +10,6 @@ fn inlay_hints_property_declaration_computed_name1() {
     [sym] = 123;
   }
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("inlayHintsPropertyDeclarationComputedName1", content);
     fourslash::unsupported("VerifyBaselineInlayHints"); // f.VerifyBaselineInlayHints(t, nil /*span*/, &lsutil.UserPreferences{
 }

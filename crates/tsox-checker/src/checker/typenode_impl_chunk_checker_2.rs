@@ -32,7 +32,8 @@ impl Checker {
             let is_optional = pd.question_token.is_some();
             let is_this_param = i == 0
                 && !is_rest
-                && matches!(&pd.name.data, NodeData::Identifier(id) if id.text == "this");
+                && (matches!(&pd.name.data, NodeData::Identifier(id) if id.text == "this")
+                    || pd.name.kind == SyntaxKind::ThisKeyword);
 
             let mapping_active = !self.type_argument_stack.is_empty();
             let (param_type, ctx_resolved) = match pd.type_node.as_ref() {
@@ -53,7 +54,14 @@ impl Checker {
                         .and_then(|ctx_sig| {
                             self.contextual_param_type_at(ctx_sig, parameters, i, param, is_rest, is_this_param)
                         }) {
-                        Some(t) => (t, true),
+                        Some(t) => {
+                            // 推断期的泛型占位（类型含未解析类型参数）不落符号缓存：
+                            // hover 按需经实例化后的上下文重定型（Go 推断期跳过
+                            // context-sensitive 定型）
+                            let mut free: Vec<Arc<Type>> = Vec::new();
+                            self.collect_free_type_parameters_deep(&t, &mut free);
+                            (t, free.is_empty())
+                        }
                         None => (self.get_any_type(), false),
                     }
                 }
@@ -263,7 +271,8 @@ impl Checker {
             SyntaxKind::ReturnStatement => {
                 if let tsox_frontend::ast::NodeData::ReturnStatement(data) = &node.data {
                     if let Some(expr) = &data.expression {
-                        types.push(self.get_type_of_node(expr));
+                        let t = self.get_type_of_node(expr);
+                                                types.push(t);
                     }
                 }
                 return;
@@ -294,7 +303,8 @@ impl Checker {
             return self.get_type_from_type_node(type_node);
         }
         let Some(body) = body else {
-            return self.void_type();
+            // Go：无注解无体的签名（方法签名/重载声明）返回 any
+            return self.get_any_type();
         };
 
         if body.kind != SyntaxKind::Block {

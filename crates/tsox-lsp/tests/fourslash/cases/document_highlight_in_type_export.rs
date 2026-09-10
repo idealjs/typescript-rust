@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineDocumentHighlights"]
 #[test]
 fn document_highlight_in_type_export() {
@@ -14,6 +15,6 @@ export { [|A|] as [|B|] };
 type [|A|] = 1;
 let [|A|]: [|A|] = 1;
 export type { [|A|] as [|B|] };"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("documentHighlightInTypeExport", content);
     fourslash::unsupported("VerifyBaselineDocumentHighlights"); // f.VerifyBaselineDocumentHighlights(t, nil /*preferences*/, ToAny(f.Ranges())...)
 }

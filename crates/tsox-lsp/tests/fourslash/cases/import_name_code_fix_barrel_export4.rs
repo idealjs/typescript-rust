@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyImportFixModuleSpecifiers"]
 #[test]
 fn import_name_code_fix_barrel_export4() {
@@ -21,7 +22,7 @@ export {};
 A/*parent*/
 // @Filename: /src/index.ts
 export * from "./a";"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("importNameCodeFix_barrelExport4", content);
     fourslash::unsupported("VerifyImportFixModuleSpecifiers"); // f.VerifyImportFixModuleSpecifiers(t, "sibling", []string{"./a", ".", ".."}, nil /*preferences*/)
     fourslash::unsupported("VerifyImportFixModuleSpecifiers"); // f.VerifyImportFixModuleSpecifiers(t, "parent", []string{"../foo", "../foo/a", ".."}, nil /*preferenc
 }

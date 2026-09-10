@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: capabilities := fourslash.GetDefaultCapabilities()"]
 #[test]
 fn get_edits_for_file_rename_css_import4() {

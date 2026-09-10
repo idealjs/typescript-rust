@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyErrorExistsBetweenMarkers"]
 #[test]
 fn quick_info_generic_combinators2() {
@@ -58,13 +59,8 @@ var /*21*/r7a = _.map<number, A, string>(c4, (/*7a*/x,/*7b*/y) => { return y.foo
 var /*22*/r7b = _.map<number, A, string>(c4, /*22error1*/rf3/*22error2*/);
 
 var /*23*/r8a = _.map<number, /*error1*/B/*error2*/, string>(c5, (/*8a*/x,/*8b*/y) => { return y.foo() }); "#;
-    let mut s = Session::new(content);
-    fourslash::verify_quick_info_at(
-        &mut s,
-        "2a",
-        "(parameter) x: Collection<number, number>",
-        "",
-    );
+    let mut s = Session::new_for_test("quickInfoGenericCombinators2", content);
+    fourslash::verify_quick_info_at(&mut s, "2a", "(parameter) x: Collection<number, number>", "");
     fourslash::verify_quick_info_at(&mut s, "2b", "(parameter) y: string", "");
     fourslash::verify_quick_info_at(&mut s, "3a", "(parameter) x: number", "");
     fourslash::verify_quick_info_at(&mut s, "3b", "(parameter) y: A", "");
@@ -72,12 +68,7 @@ var /*23*/r8a = _.map<number, /*error1*/B/*error2*/, string>(c5, (/*8a*/x,/*8b*/
     fourslash::verify_quick_info_at(&mut s, "4b", "(parameter) y: B<any>", "");
     fourslash::verify_quick_info_at(&mut s, "5a", "(parameter) x: number", "");
     fourslash::verify_quick_info_at(&mut s, "5b", "(parameter) y: string", "");
-    fourslash::verify_quick_info_at(
-        &mut s,
-        "6a",
-        "(parameter) x: Collection<number, number>",
-        "",
-    );
+    fourslash::verify_quick_info_at(&mut s, "6a", "(parameter) x: Collection<number, number>", "");
     fourslash::verify_quick_info_at(&mut s, "6b", "(parameter) y: string", "");
     fourslash::verify_quick_info_at(&mut s, "7a", "(parameter) x: number", "");
     fourslash::verify_quick_info_at(&mut s, "7b", "(parameter) y: A", "");
@@ -85,35 +76,15 @@ var /*23*/r8a = _.map<number, /*error1*/B/*error2*/, string>(c5, (/*8a*/x,/*8b*/
     fourslash::verify_quick_info_at(&mut s, "8b", "(parameter) y: any", "");
     fourslash::verify_quick_info_at(&mut s, "9", "var r1a: Collection<number, string>", "");
     fourslash::verify_quick_info_at(&mut s, "10", "var r1b: Collection<number, string>", "");
-    fourslash::verify_quick_info_at(
-        &mut s,
-        "11",
-        "var r2a: Collection<Collection<number, number>, number>",
-        "",
-    );
-    fourslash::verify_quick_info_at(
-        &mut s,
-        "12",
-        "var r2b: Collection<Collection<number, number>, number>",
-        "",
-    );
+    fourslash::verify_quick_info_at(&mut s, "11", "var r2a: Collection<Collection<number, number>, number>", "");
+    fourslash::verify_quick_info_at(&mut s, "12", "var r2b: Collection<Collection<number, number>, number>", "");
     fourslash::verify_quick_info_at(&mut s, "13", "var r3a: Collection<number, unknown>", "");
     fourslash::verify_quick_info_at(&mut s, "14", "var r3b: Collection<number, unknown>", "");
     fourslash::verify_quick_info_at(&mut s, "15", "var r4a: Collection<number, any>", "");
     fourslash::verify_quick_info_at(&mut s, "17", "var r5a: Collection<number, Date>", "");
     fourslash::verify_quick_info_at(&mut s, "18", "var r5b: Collection<number, Date>", "");
-    fourslash::verify_quick_info_at(
-        &mut s,
-        "19",
-        "var r6a: Collection<Collection<number, number>, Date>",
-        "",
-    );
-    fourslash::verify_quick_info_at(
-        &mut s,
-        "20",
-        "var r6b: Collection<Collection<number, number>, Date>",
-        "",
-    );
+    fourslash::verify_quick_info_at(&mut s, "19", "var r6a: Collection<Collection<number, number>, Date>", "");
+    fourslash::verify_quick_info_at(&mut s, "20", "var r6b: Collection<Collection<number, number>, Date>", "");
     fourslash::verify_quick_info_at(&mut s, "21", "var r7a: Collection<number, string>", "");
     fourslash::verify_quick_info_at(&mut s, "22", "var r7b: Collection<number, string>", "");
     fourslash::verify_quick_info_at(&mut s, "23", "var r8a: Collection<number, string>", "");

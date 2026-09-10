@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineRenameAtRangesWithText"]
 #[test]
 fn rename_locations_for_class_expression01() {
@@ -22,6 +23,6 @@ var y = class {
    }
 }
 var z = class Foo {}"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("renameLocationsForClassExpression01", content);
     fourslash::unsupported("VerifyBaselineRenameAtRangesWithText"); // f.VerifyBaselineRenameAtRangesWithText(t, nil /*preferences*/, "Foo")
 }

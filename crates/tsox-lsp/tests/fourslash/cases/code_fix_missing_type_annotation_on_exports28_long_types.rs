@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: f.VerifyCodeFixAvailable(t, []string{'Add return type 'Promi"]
 #[test]
 fn code_fix_missing_type_annotation_on_exports28_long_types() {
@@ -41,6 +42,6 @@ export const sessionLoader = {
         };
     },
 };"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("codeFixMissingTypeAnnotationOnExports28_long_types", content);
     // TODO: f.VerifyCodeFixAvailable(t, []string{"Add return type 'Promise<{\n    PROP_1: {\n        name: boole
 }

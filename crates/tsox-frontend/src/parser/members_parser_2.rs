@@ -11,7 +11,7 @@ impl Parser {
                 ParsingContext::HeritageClauseElement,
                 Parser::parse_heritage_clause_element,
             );
-            let end = self.token_pos();
+            let end = self.node_pos();
             clauses.push(Arc::new(Node::with_loc(
                 SyntaxKind::HeritageClause,
                 NodeData::HeritageClause(HeritageClauseData {
@@ -28,7 +28,7 @@ impl Parser {
                 ParsingContext::HeritageClauseElement,
                 Parser::parse_heritage_clause_element,
             );
-            let end = self.token_pos();
+            let end = self.node_pos();
             clauses.push(Arc::new(Node::with_loc(
                 SyntaxKind::HeritageClause,
                 NodeData::HeritageClause(HeritageClauseData {
@@ -101,7 +101,7 @@ impl Parser {
             let parameters = self.parse_parameter_list();
             let type_node = self.parse_optional_return_type();
             self.parse_type_member_semicolon();
-            let end = self.token_pos();
+            let end = self.node_pos();
             return Arc::new(Node::with_loc(
                 SyntaxKind::MethodSignature,
                 NodeData::MethodSignatureDeclaration(MethodSignatureDeclarationData {
@@ -125,7 +125,7 @@ impl Parser {
             self.missing_node(self.token_pos())
         };
         self.parse_type_member_semicolon();
-        let end = self.token_pos();
+        let end = self.node_pos();
         Arc::new(Node::with_loc(
             SyntaxKind::PropertySignature,
             NodeData::PropertySignatureDeclaration(PropertySignatureDeclarationData {

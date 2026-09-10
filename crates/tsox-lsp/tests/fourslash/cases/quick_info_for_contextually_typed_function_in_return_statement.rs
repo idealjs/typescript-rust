@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[test]
 fn quick_info_for_contextually_typed_function_in_return_statement() {
     let content = r#"interface Accumulator {
@@ -16,6 +17,6 @@ function makeAccumulator(): Accumulator {
         result: function () { return sum; }
     };
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("quickInfoForContextuallyTypedFunctionInReturnStatement", content);
     fourslash::verify_quick_info_at(&mut s, "", "(parameter) value: number", "");
 }

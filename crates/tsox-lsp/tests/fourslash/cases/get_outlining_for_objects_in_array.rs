@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyOutliningSpans"]
 #[test]
 fn get_outlining_for_objects_in_array() {
@@ -51,6 +52,6 @@ const z =[| [
         [|{ hello: 7 }|]
     ]|]
 ]|];"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("getOutliningForObjectsInArray", content);
     fourslash::unsupported("VerifyOutliningSpans"); // f.VerifyOutliningSpans(t)
 }

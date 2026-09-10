@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineHover"]
 #[test]
 fn destructured_interface_js_doc() {
@@ -17,7 +18,7 @@ declare const fubar: FooBar;
 
 const {/*1*/foo, /*2*/bar, /*3*/baz: /*4*/biz} = fubar;
 "#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("destructuredInterfaceJSDoc", content);
     fourslash::unsupported("VerifyBaselineHover"); // f.VerifyBaselineHover(t)
 }
 
@@ -36,7 +37,7 @@ declare const fubar: FooBar;
 
 const {foo: /*1*/myFoo, bar: /*2*/myBar} = fubar;
 "#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("destructuredInterfaceJSDocWithRename", content);
     fourslash::unsupported("VerifyBaselineHover"); // f.VerifyBaselineHover(t)
 }
 
@@ -59,6 +60,6 @@ const {
     /** Comment on baz destructuring. */ /*2*/baz
 } = foo;
 "#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("destructuredWithOwnJSDoc", content);
     fourslash::unsupported("VerifyBaselineHover"); // f.VerifyBaselineHover(t)
 }

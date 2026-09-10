@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCompletions"]
 #[test]
 fn completion_list_at_invalid_locations() {
@@ -23,7 +24,7 @@ type htm/*inTypeAlias*/
 //  /*inComment5*/
 foo;
 var v10 = /reg/*inRegExp1*/ex/;"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("completionListAtInvalidLocations", content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, []string{"openString1", "openString2", "openString3"}, &fourslash.Completions
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, []string{"inComment1", "inComment2", "inComment3", "inComment4", "inTypeAlias
 }

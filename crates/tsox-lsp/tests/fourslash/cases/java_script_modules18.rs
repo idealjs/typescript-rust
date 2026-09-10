@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCompletions"]
 #[test]
 fn java_script_modules18() {
@@ -8,6 +9,6 @@ fn java_script_modules18() {
 var x = require('fs');
 // @Filename: other.js
 /**/;"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("javaScriptModules18", content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

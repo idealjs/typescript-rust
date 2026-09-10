@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.DeleteAtCaret"]
 #[test]
 fn delete_modifier_before_var_statement1() {
@@ -23,7 +24,7 @@ declare var WScript: {
     Quit(): number;
 }
 "#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("deleteModifierBeforeVarStatement1", content);
     fourslash::unsupported("GoToFileNumber"); // f.GoToFileNumber(t, 0)
     fourslash::unsupported("GoToPosition"); // f.GoToPosition(t, 0)
     fourslash::unsupported("DeleteAtCaret"); // f.DeleteAtCaret(t, 100)

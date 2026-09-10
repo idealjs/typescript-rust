@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineRenameAtRangesWithText"]
 #[test]
 fn double_underscore_renames() {
@@ -11,6 +12,6 @@ fn double_underscore_renames() {
 [|import { [|{| "contextRangeIndex": 2 |}__foo|] as bar } from "./fileA";|]
 
 bar();"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("doubleUnderscoreRenames", content);
     fourslash::unsupported("VerifyBaselineRenameAtRangesWithText"); // f.VerifyBaselineRenameAtRangesWithText(t, nil /*preferences*/, "__foo")
 }

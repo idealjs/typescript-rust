@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCompletions"]
 #[test]
 fn completion_list_after_numeric_literal() {
@@ -17,7 +18,7 @@ fn completion_list_after_numeric_literal() {
 (0.)./*validDotOnNumberExpressions2*/
 // @Filename: f7.ts
 (0.0)./*validDotOnNumberExpressions3*/"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("completionListAfterNumericLiteral", content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, []string{"dotOnNumberExpressions1", "dotOnNumberExpressions4"}, nil)
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, []string{"dotOnNumberExpressions2", "dotOnNumberExpressions3", "validDotOnNum
 }

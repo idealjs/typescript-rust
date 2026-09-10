@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCompletions"]
 #[test]
 fn completions_import_base_url() {
@@ -14,6 +15,6 @@ fn completions_import_base_url() {
 export const foo = 0;
 // @Filename: /src/b.ts
 fo/**/"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("completionsImportBaseUrl", content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

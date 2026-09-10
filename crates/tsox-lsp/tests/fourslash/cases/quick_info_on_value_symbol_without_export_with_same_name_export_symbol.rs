@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[test]
 fn quick_info_on_value_symbol_without_export_with_same_name_export_symbol() {
     let content = r#"// @strict: true
@@ -16,7 +17,7 @@ export type Fn = () => void
 // repro from #41897
 const /*4*/X = 1;
 export interface X {}"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("quickInfoOnValueSymbolWithoutExportWithSameNameExportSymbol", content);
     fourslash::verify_quick_info_at(&mut s, "1", "const Unit: number", "");
     fourslash::verify_quick_info_at(&mut s, "2", "const Unit: number", "");
     fourslash::verify_quick_info_at(&mut s, "3", "function Fn(): void", "");

@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifySuggestionDiagnostics"]
 #[test]
 fn code_fix_remove_unnecessary_await_not_available_on_return() {
@@ -7,6 +8,6 @@ fn code_fix_remove_unnecessary_await_not_available_on_return() {
 async function fn(): Promise<number> {
   return 0;
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("codeFixRemoveUnnecessaryAwait_notAvailableOnReturn", content);
     fourslash::unsupported("VerifySuggestionDiagnostics"); // f.VerifySuggestionDiagnostics(t, nil)
 }

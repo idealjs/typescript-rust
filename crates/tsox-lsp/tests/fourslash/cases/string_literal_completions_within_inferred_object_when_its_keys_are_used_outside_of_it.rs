@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCompletions"]
 #[test]
 fn string_literal_completions_within_inferred_object_when_its_keys_are_used_outside_of_it() {
@@ -28,6 +29,6 @@ createMachine({
     },
   },
 });"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("stringLiteralCompletionsWithinInferredObjectWhenItsKeysAreUsedOutsideOfIt", content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, []string{"1", "2"}, &fourslash.CompletionsExpectedList{
 }

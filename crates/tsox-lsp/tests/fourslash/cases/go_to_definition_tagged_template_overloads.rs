@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineGoToDefinition"]
 #[test]
 fn go_to_definition_tagged_template_overloads() {
@@ -9,6 +10,6 @@ function f(strs: TemplateStringsArray, x: number | boolean) {}
 
 [|/*useFNumber*/f|]` + "`" + `${0}` + "`" + `;
 [|/*useFBool*/f|]` + "`" + `${false}` + "`" + `;"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("goToDefinitionTaggedTemplateOverloads", content);
     fourslash::unsupported("VerifyBaselineGoToDefinition"); // f.VerifyBaselineGoToDefinition(t, true, "useFNumber", "useFBool")
 }

@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyOutliningSpans"]
 #[test]
 fn outlining_spans_for_arguments() {
@@ -17,6 +18,6 @@ console.log[|(
     123,
     456
 )|]|];"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("outliningSpansForArguments", content);
     fourslash::unsupported("VerifyOutliningSpans"); // f.VerifyOutliningSpans(t)
 }

@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyImportFixAtPosition"]
 #[test]
 fn auto_import_type_only_preferred2() {
@@ -21,7 +22,7 @@ import { useState } from "react";
 import type { ComponentType } from "react";
 
 type _ = ComponentProps/*2*/;"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("autoImportTypeOnlyPreferred2", content);
     fourslash::go_to_marker(&mut s, "1");
     fourslash::unsupported("VerifyImportFixAtPosition"); // f.VerifyImportFixAtPosition(t, []string{
     fourslash::go_to_marker(&mut s, "2");

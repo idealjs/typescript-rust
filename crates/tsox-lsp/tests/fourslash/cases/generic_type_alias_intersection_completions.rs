@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyCompletions"]
+
 #[test]
 fn generic_type_alias_intersection_completions() {
     let content = r#"type MixinCtor<A, B> = new () => A & B & { constructor: MixinCtor<A, B> };
@@ -30,6 +30,6 @@ abstract class RightSideNode extends TreeNode {
 
 var obj = new (merge(LeftSideNode, RightSideNode))();
 obj./**/"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
+    let mut s = Session::new_for_test("genericTypeAliasIntersectionCompletions", content);
+    fourslash::verify_completions_unsorted_at(&mut s, Some(""), &["right", "left", "value", "constructor"]);
 }

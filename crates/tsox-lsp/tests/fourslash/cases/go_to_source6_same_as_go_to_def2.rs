@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: f.MarkTestAsStradaServer()"]
 #[test]
 fn go_to_source6_same_as_go_to_def2() {
@@ -18,7 +19,7 @@ export const a = 'a';
 // @Filename: /home/src/workspaces/project/b.ts
 import { a } from 'foo/a';
 [|a/*start*/|]"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("goToSource6_sameAsGoToDef2", content);
     // TODO: f.MarkTestAsStradaServer()
     fourslash::unsupported("VerifyBaselineGoToSourceDefinition"); // f.VerifyBaselineGoToSourceDefinition(t, "start")
     fourslash::unsupported("VerifyBaselineGoToDefinition"); // f.VerifyBaselineGoToDefinition(t, true, "start")

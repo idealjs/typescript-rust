@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineFindAllReferences"]
 #[test]
 fn find_all_refs_js_doc_import_tag4() {
@@ -29,6 +30,6 @@ import * as C from './component.js';
  * @extends C/*1*/.Component
  */
 export class Player extends Component {}"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("findAllRefsJsDocImportTag4", content);
     fourslash::unsupported("VerifyBaselineFindAllReferences"); // f.VerifyBaselineFindAllReferences(t, "1")
 }

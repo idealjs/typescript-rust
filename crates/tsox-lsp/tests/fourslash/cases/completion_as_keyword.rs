@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCompletions"]
 #[test]
 fn completion_as_keyword() {
@@ -7,6 +8,6 @@ fn completion_as_keyword() {
 function foo() {
     const x = this /*2*/
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("completionAsKeyword", content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, []string{"1", "2"}, &fourslash.CompletionsExpectedList{
 }

@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCodeFixAll"]
 #[test]
 fn import_name_code_fix_require_named_and_default() {
@@ -12,7 +13,7 @@ export const Named2 = 1;
 // @Filename: index.js
 Named1 + Named2;
 new Blah;"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("importNameCodeFix_require_namedAndDefault", content);
     fourslash::go_to_file(&mut s, "index.js");
     fourslash::unsupported("VerifyCodeFixAll"); // f.VerifyCodeFixAll(t, fourslash.VerifyCodeFixAllOptions{
 }

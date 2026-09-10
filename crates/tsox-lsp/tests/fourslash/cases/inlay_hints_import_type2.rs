@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineInlayHints"]
 #[test]
 fn inlay_hints_import_type2() {
@@ -12,7 +13,7 @@ function foo () { return require('./a'); }
 function bar () { return require('./a').a; }
 const c = foo()
 const d = bar()"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("inlayHintsImportType2", content);
     fourslash::go_to_file(&mut s, "/b.js");
     fourslash::unsupported("VerifyBaselineInlayHints"); // f.VerifyBaselineInlayHints(t, nil /*span*/, &lsutil.UserPreferences{InlayHints: lsutil.InlayHintsPre
 }

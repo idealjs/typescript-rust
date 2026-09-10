@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: t.Skip('Known failing fourslash test')"]
 #[test]
 fn js_doc_property_description4() {
@@ -11,11 +12,6 @@ fn js_doc_property_description4() {
 function multipleExample(e: MultipleExample) {
     console.log(e./*multiple*/anything);
 }"#;
-    let mut s = Session::new(content);
-    fourslash::verify_quick_info_at(
-        &mut s,
-        "multiple",
-        "(index) MultipleExample[string | number | symbol]: string",
-        "Something generic",
-    );
+    let mut s = Session::new_for_test("jsDocPropertyDescription4", content);
+    fourslash::verify_quick_info_at(&mut s, "multiple", "(index) MultipleExample[string | number | symbol]: string", "Something generic");
 }

@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: t.Skip('Known failing fourslash test')"]
 #[test]
 fn javascript_modules24() {
@@ -14,7 +15,7 @@ export = foo;
 import * as foo from "./mod"
 foo/*1*/();
 foo.bar(/*2*/"test");"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("javascriptModules24", content);
     fourslash::go_to_marker(&mut s, "1");
     fourslash::unsupported("VerifyErrorExistsBeforeMarker"); // f.VerifyErrorExistsBeforeMarker(t, "1")
     fourslash::unsupported("VerifyQuickInfoIs"); // f.VerifyQuickInfoIs(t, "(alias) function foo(): number\n(alias) namespace foo\nimport foo", "")

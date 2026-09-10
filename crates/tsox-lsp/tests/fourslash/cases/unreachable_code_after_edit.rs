@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.DeleteAtCaret"]
 #[test]
 fn unreachable_code_after_edit() {
@@ -29,7 +30,7 @@ export class TransparentCrypto implements ISecretStorageCrypto {
         return data;
     }
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("unreachableCodeAfterEdit", content);
     fourslash::verify_number_of_errors_in_current_file(&mut s, 0);
     fourslash::go_to_marker(&mut s, "before");
     fourslash::insert(&mut s, "throw new Error('foo');\n");

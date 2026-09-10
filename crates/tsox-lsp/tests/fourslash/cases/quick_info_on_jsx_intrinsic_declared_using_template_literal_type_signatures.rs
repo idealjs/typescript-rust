@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineHover"]
 #[test]
 fn quick_info_on_jsx_intrinsic_declared_using_template_literal_type_signatures() {
@@ -13,6 +14,6 @@ declare namespace JSX {
 }
 </*1*/foobaz />;
 </*2*/foobarbaz />;"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("quickInfoOnJsxIntrinsicDeclaredUsingTemplateLiteralTypeSignatures", content);
     fourslash::unsupported("VerifyBaselineHover"); // f.VerifyBaselineHover(t)
 }

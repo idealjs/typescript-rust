@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCompletions"]
 #[test]
 fn object_literal_binding_in_parameter() {
@@ -18,6 +19,6 @@ let x: Foo = {
     set prop({ /*4*/ }) {
     }
 };"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("objectLiteralBindingInParameter", content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, f.Markers(), &fourslash.CompletionsExpectedList{
 }

@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: capabilities := fourslash.GetDefaultCapabilities()"]
 #[test]
 fn doc_comment_template_interfaces_enums_and_type_aliases() {

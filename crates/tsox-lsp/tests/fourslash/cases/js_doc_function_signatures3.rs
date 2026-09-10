@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.Backspace"]
 #[test]
 fn js_doc_function_signatures3() {
@@ -22,7 +23,7 @@ var someObject = {
     }
 
 };"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("jsDocFunctionSignatures3", content);
     fourslash::go_to_marker(&mut s, "1");
     fourslash::insert(&mut s, ".");
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, nil, &fourslash.CompletionsExpectedList{

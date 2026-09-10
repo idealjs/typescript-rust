@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineHover"]
 #[test]
 fn quick_info_display_parts_modules() {
@@ -15,6 +16,6 @@ namespace /*8*/m1./*9*/m2 {
 }
 var /*12*/x = /*13*/m1./*14*/m2;
 var /*15*/y: typeof /*16*/m1./*17*/m2;"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("quickInfoDisplayPartsModules", content);
     fourslash::unsupported("VerifyBaselineHover"); // f.VerifyBaselineHover(t)
 }

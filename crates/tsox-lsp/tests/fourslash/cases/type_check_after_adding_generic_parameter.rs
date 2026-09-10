@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[test]
 fn type_check_after_adding_generic_parameter() {
     let content = r#"function f<x, x>() { }
@@ -14,7 +15,7 @@ interface I<X, X> {
     f2<X>(/*addParam*/a: X): X;
 }
 "#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("typeCheckAfterAddingGenericParameter", content);
     fourslash::go_to_marker(&mut s, "addParam");
     fourslash::insert(&mut s, ", X");
     fourslash::go_to_marker(&mut s, "addTypeParam");

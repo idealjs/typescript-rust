@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineFindAllReferences"]
 #[test]
 fn references_for_numeric_literal_property_names() {
@@ -11,6 +12,6 @@ var x: Foo;
 x[12];
 x = { "12": 0 };
 x = { 12: 0 };"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("referencesForNumericLiteralPropertyNames", content);
     fourslash::unsupported("VerifyBaselineFindAllReferences"); // f.VerifyBaselineFindAllReferences(t, "1")
 }

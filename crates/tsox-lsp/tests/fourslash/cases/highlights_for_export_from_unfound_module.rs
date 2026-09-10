@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineRename"]
 #[test]
 fn highlights_for_export_from_unfound_module() {
@@ -13,7 +14,7 @@ export {
 export {
    /**/foo
 } from './a';"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("highlightsForExportFromUnfoundModule", content);
     fourslash::go_to_marker(&mut s, "");
     fourslash::unsupported("VerifyBaselineRename"); // f.VerifyBaselineRename(t, nil /*preferences*/, "")
 }

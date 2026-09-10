@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyOutliningSpans"]
 #[test]
 fn outlining_spans_for_arrow_function_body() {
@@ -14,6 +15,6 @@ fn outlining_spans_for_arrow_function_body() {
 () =>[| "foo" +
     "bar" +
     "baz"|];"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("outliningSpansForArrowFunctionBody", content);
     fourslash::unsupported("VerifyOutliningSpans"); // f.VerifyOutliningSpans(t)
 }

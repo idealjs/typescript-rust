@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: t.Skip('Known failing fourslash test')"]
 #[test]
 fn import_completions_package_json_imports_pattern_root_wildcard() {
@@ -17,6 +18,6 @@ export function something(name: string): any;
 export function bar(): any;
 // @Filename: /a.ts
 import {} from "#//*1*/";"##;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("importCompletionsPackageJsonImportsPatternRootWildcard", content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, []string{"1"}, &fourslash.CompletionsExpectedList{
 }

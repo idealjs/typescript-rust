@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: t.Skip('Known failing fourslash test')"]
 #[test]
 fn auto_import_module_none2() {
@@ -11,7 +12,7 @@ fn auto_import_module_none2() {
 export const x: number;
 // @Filename: /index.ts
  x/**/"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("autoImportModuleNone2", content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
     fourslash::unsupported("ReplaceLine"); // f.ReplaceLine(t, 0, "import { x } from 'dep'; x;")
     fourslash::unsupported("VerifyNonSuggestionDiagnostics"); // f.VerifyNonSuggestionDiagnostics(t, nil)

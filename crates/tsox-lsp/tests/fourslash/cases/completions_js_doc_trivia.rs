@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCompletions"]
 #[test]
 fn completions_js_doc_trivia() {
@@ -11,7 +12,7 @@ fn completions_js_doc_trivia() {
  * }}
  */
 var someVariable;"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("completionsJSDocTrivia", content);
     fourslash::go_to_marker(&mut s, "$");
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, nil, &fourslash.CompletionsExpectedList{
 }

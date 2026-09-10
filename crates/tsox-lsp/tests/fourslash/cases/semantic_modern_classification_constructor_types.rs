@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifySemanticTokens"]
 #[test]
 fn semantic_modern_classification_constructor_types() {
@@ -7,6 +8,6 @@ fn semantic_modern_classification_constructor_types() {
 Object.create(null);
 const x = Promise.resolve(Number.MAX_VALUE);
 if (x instanceof Promise) {}"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("semanticModernClassificationConstructorTypes", content);
     fourslash::unsupported("VerifySemanticTokens"); // f.VerifySemanticTokens(t, []fourslash.SemanticToken{
 }

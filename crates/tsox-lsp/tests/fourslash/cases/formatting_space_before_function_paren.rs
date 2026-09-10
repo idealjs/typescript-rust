@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: opts333 := f.GetOptions()"]
 #[test]
 fn formatting_space_before_function_paren() {
@@ -10,7 +11,7 @@ fn formatting_space_before_function_paren() {
 /*5*/function tmpl <T> () { }
 /*6*/var f = function*() { };
 /*7*/function* g () { }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("formattingSpaceBeforeFunctionParen", content);
     // TODO: opts333 := f.GetOptions()
     // TODO: opts333.FormatCodeSettings.InsertSpaceBeforeFunctionParenthesis = core.TSTrue
     fourslash::unsupported("Configure"); // f.Configure(t, opts333)

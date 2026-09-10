@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCompletions"]
 #[test]
 fn completion_with_namespace_inside_function() {
@@ -23,7 +24,7 @@ function f2() {
     /*22*/
 }
 /*33*/"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("completionWithNamespaceInsideFunction", content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, []string{"1", "2", "3"}, &fourslash.CompletionsExpectedList{
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "11", &fourslash.CompletionsExpectedList{
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "22", &fourslash.CompletionsExpectedList{

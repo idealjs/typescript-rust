@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: }"]
 #[test]
 fn quick_info_display_parts_literal_like_names01() {
@@ -16,7 +17,7 @@ fn quick_info_display_parts_literal_like_names01() {
         this./*9*/NaN();
         C./*10*/stringLiteralName();
     }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("quickInfoDisplayPartsLiteralLikeNames01", content);
     fourslash::unsupported("VerifyBaselineHover"); // f.VerifyBaselineHover(t)
     // TODO: }
 }

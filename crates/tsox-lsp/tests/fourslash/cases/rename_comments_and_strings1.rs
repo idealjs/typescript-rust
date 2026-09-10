@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineRenameAtRangesWithText"]
 #[test]
 fn rename_comments_and_strings1() {
@@ -8,6 +9,6 @@ fn rename_comments_and_strings1() {
     // This is a reference to Bar in a comment.
     "this is a reference to Bar in a string"
 }|]"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("renameCommentsAndStrings1", content);
     fourslash::unsupported("VerifyBaselineRenameAtRangesWithText"); // f.VerifyBaselineRenameAtRangesWithText(t, nil /*preferences*/, "Bar")
 }

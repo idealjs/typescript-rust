@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineHoverWithVerbosity"]
 #[test]
 fn quickinfo_verbosity_intersection1() {
@@ -19,6 +20,6 @@ fn quickinfo_verbosity_intersection1() {
     type Never = Foo & Bar;
     const obj/*o3*/: Never = { a: "" };
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("quickinfoVerbosityIntersection1", content);
     fourslash::unsupported("VerifyBaselineHoverWithVerbosity"); // f.VerifyBaselineHoverWithVerbosity(t, map[string][]int{"o1": {0, 1}, "o2": {0}, "o3": {0}})
 }

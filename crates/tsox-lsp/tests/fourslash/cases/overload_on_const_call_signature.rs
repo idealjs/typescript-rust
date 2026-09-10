@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifySignatureHelp"]
 #[test]
 fn overload_on_const_call_signature() {
@@ -10,7 +11,7 @@ fn overload_on_const_call_signature() {
     (name: 'done'): string;
 }
 var /*2*/x = foo(/*1*/"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("overloadOnConstCallSignature", content);
     fourslash::go_to_marker(&mut s, "1");
     fourslash::unsupported("VerifySignatureHelp"); // f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{Text: "foo(name: 'order'): string", Ov
     fourslash::insert(&mut s, "\"hi\"");

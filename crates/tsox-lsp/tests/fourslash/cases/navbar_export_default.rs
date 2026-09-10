@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineDocumentSymbol"]
 #[test]
 fn navbar_export_default() {
@@ -11,7 +12,7 @@ export default class C { }
 export default function { }
 // @Filename: d.ts
 export default function Func { }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("navbar_exportDefault", content);
     fourslash::go_to_file(&mut s, "a.ts");
     fourslash::unsupported("VerifyBaselineDocumentSymbol"); // f.VerifyBaselineDocumentSymbol(t)
     fourslash::go_to_file(&mut s, "b.ts");

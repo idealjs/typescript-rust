@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCompletions"]
 #[test]
 fn js_doc_function_type_completions_no_crash() {
@@ -10,6 +11,6 @@ fn js_doc_function_type_completions_no_crash() {
 function updateCalendarEvent() {
   return "";
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("jsDocFunctionTypeCompletionsNoCrash", content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

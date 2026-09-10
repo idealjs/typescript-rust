@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: capabilities := fourslash.GetDefaultCapabilities()"]
 #[test]
 fn rename_import_specifier_no_resource_operations() {

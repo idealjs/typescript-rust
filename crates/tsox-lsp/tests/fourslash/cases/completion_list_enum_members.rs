@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCompletions"]
 #[test]
 fn completion_list_enum_members() {
@@ -11,7 +12,7 @@ fn completion_list_enum_members() {
 var v = Foo./*valueReference*/ba;
 var t :Foo./*typeReference*/ba;
 Foo.bar./*enumValueReference*/;"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("completionListEnumMembers", content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, []string{"valueReference", "typeReference"}, &fourslash.CompletionsExpectedLi
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "enumValueReference", &fourslash.CompletionsExpectedList{
+    fourslash::verify_completions_unsorted_at(&mut s, Some("enumValueReference"), &["toString", "toFixed", "toExponential", "toPrecision", "valueOf", "toLocaleString"]);
 }

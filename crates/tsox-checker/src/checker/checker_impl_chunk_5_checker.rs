@@ -52,6 +52,26 @@ impl Checker {
 
     pub fn get_properties_of_type(&self, t: &Arc<Type>) -> Vec<Arc<Symbol>> {
         if let Some(structured) = t.as_structured() {
+            if !structured.properties.is_empty() {
+                return structured.properties.clone();
+            }
+            // 空壳再水化：递归接口构建窗口内嵌出的 shell 无成员，经符号的
+            // 完整声明型回取（Go deferred 引用的查询期等价）
+            if let Some(sym) = &t.symbol
+                && sym.flags.intersects(
+                    SymbolFlags::Interface | SymbolFlags::Class | SymbolFlags::TypeLiteral,
+                )
+                && let Some(declared) = self
+                    .type_alias_links
+                    .get(sym)
+                    .and_then(|l| l.declared_type.clone())
+                && !Arc::ptr_eq(&declared, t)
+                && !crate::checker::utilities::is_type_error(&declared)
+                && let Some(ds) = declared.as_structured()
+                && !ds.properties.is_empty()
+            {
+                return ds.properties.clone();
+            }
             return structured.properties.clone();
         }
         Vec::new()
@@ -233,6 +253,25 @@ impl Checker {
             }
 
             return self.build_union_from_types(widened);
+        }
+
+        // Go getWidenedTypeWithContext：数组/元组逐类型实参 widen（"s"[] → string[]）
+        if t.object_flags.contains(ObjectFlags::Reference)
+            && let Some(obj) = t.as_object()
+            && !obj.type_arguments.is_empty()
+        {
+            let widened: Vec<Arc<Type>> = obj
+                .type_arguments
+                .iter()
+                .map(|a| self.get_widened_type(a))
+                .collect();
+            let unchanged = widened
+                .iter()
+                .zip(obj.type_arguments.iter())
+                .all(|(w, o)| Arc::ptr_eq(w, o));
+            if !unchanged {
+                return crate::checker::checker_attach_explicit_type_arguments::attach_explicit_type_arguments(t, widened);
+            }
         }
         Arc::clone(t)
     }

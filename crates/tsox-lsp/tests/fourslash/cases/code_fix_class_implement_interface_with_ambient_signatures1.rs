@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCodeFix"]
 #[test]
 fn code_fix_class_implement_interface_with_ambient_signatures1() {
@@ -19,7 +20,7 @@ declare global {
 /// <reference path="globals.d.ts" />
 // @Filename: a.ts
 class Foo implements Disposable {}"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("codeFixClassImplementInterfaceWithAmbientSignatures1", content);
     fourslash::go_to_file(&mut s, "a.ts");
     fourslash::unsupported("VerifyCodeFix"); // f.VerifyCodeFix(t, fourslash.VerifyCodeFixOptions{
 }

@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.InsertLine"]
 #[test]
 fn format_after_whitespace() {
@@ -8,16 +9,13 @@ fn format_after_whitespace() {
     var bar;
     /*1*/
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("formatAfterWhitespace", content);
     fourslash::go_to_marker(&mut s, "1");
     fourslash::unsupported("InsertLine"); // f.InsertLine(t, "")
-    fourslash::verify_current_file_content(
-        &mut s,
-        r#"function foo()
+    fourslash::verify_current_file_content(&mut s, r#"function foo()
 {
     var bar;
 
 
-}"#,
-    );
+}"#);
 }

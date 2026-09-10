@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineHoverWithVerbosity"]
 #[test]
 fn quickinfo_verbosity_truncation1() {
@@ -28,6 +29,6 @@ interface LotsOfProps {
     someLongMethodName2(a: FooType, b: BarType): Sym;
 }
 const obj1/*o1*/: LotsOfProps = undefined as any as LotsOfProps;"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("quickinfoVerbosityTruncation1", content);
     fourslash::unsupported("VerifyBaselineHoverWithVerbosity"); // f.VerifyBaselineHoverWithVerbosity(t, map[string][]int{"o1": {0, 1}})
 }

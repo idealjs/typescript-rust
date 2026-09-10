@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineSignatureHelp"]
 #[test]
 fn signature_help_unresolved_type_in_error_recovered_signature() {
@@ -8,6 +9,6 @@ fn signature_help_unresolved_type_in_error_recovered_signature() {
     b?: (p: U) => void
 }) {}
 f(/*a*/);"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("signatureHelpUnresolvedTypeInErrorRecoveredSignature", content);
     fourslash::unsupported("VerifyBaselineSignatureHelp"); // f.VerifyBaselineSignatureHelp(t)
 }

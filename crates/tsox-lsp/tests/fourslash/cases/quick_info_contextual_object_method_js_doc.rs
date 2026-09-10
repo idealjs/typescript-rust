@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyQuickInfoAt"]
 #[test]
 fn quick_info_contextual_object_method_js_doc() {
@@ -18,6 +19,6 @@ class Foo {
 
 new Foo({ func/*1*/() {} })
 "#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("quickInfoContextualObjectMethodJSDoc", content);
     fourslash::unsupported("VerifyQuickInfoAt"); // f.VerifyQuickInfoAt(t, "1", "(method) I.func(arg: number): void", "Description of func.\n\n*@param* 
 }

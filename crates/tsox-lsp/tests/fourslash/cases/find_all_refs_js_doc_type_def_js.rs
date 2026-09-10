@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineFindAllReferences"]
 #[test]
 fn find_all_refs_js_doc_type_def_js() {
@@ -16,6 +17,6 @@ function f(obj) { return 0; }
  * @return {/*4*/T}
  */
 function f2(obj) { return 0; }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("findAllRefsJsDocTypeDef_js", content);
     fourslash::unsupported("VerifyBaselineFindAllReferences"); // f.VerifyBaselineFindAllReferences(t, "1", "2", "3", "4")
 }

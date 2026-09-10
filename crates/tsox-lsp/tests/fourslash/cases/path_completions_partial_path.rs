@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyCompletions"]
+
 #[test]
 fn path_completions_partial_path_relative_import() {
     let content = r#"// @Filename: /src/main.ts
@@ -11,11 +11,10 @@ export const asyncApi = "async";
 export const fsApi = "fs";
 // @Filename: /src/foo/sync.ts
 export const syncApi = "sync";"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "$", &fourslash.CompletionsExpectedList{
+    let mut s = Session::new_for_test("pathCompletionsPartialPathRelativeImport", content);
+    fourslash::verify_completions_exact_at(&mut s, Some("$"), &["async", "fs", "sync"]);
 }
 
-#[ignore = "unimplemented: fourslash.VerifyCompletions"]
 #[test]
 fn path_completions_partial_path_package_no_exports() {
     let content = r#"// @moduleResolution: bundler
@@ -31,11 +30,10 @@ export const syncApi = "sync";
 { "dependencies": { "@typescript/typescript": "0.0.0" } }
 // @Filename: /src/main.ts
 import { } from "@typescript/typescript/unstable//*$*/";"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "$", &fourslash.CompletionsExpectedList{
+    let mut s = Session::new_for_test("pathCompletionsPartialPathPackageNoExports", content);
+    fourslash::verify_completions_exact_at(&mut s, Some("$"), &["async", "fs", "sync"]);
 }
 
-#[ignore = "unimplemented: fourslash.VerifyCompletions"]
 #[test]
 fn path_completions_partial_path_package_exports() {
     let content = r#"// @moduleResolution: bundler
@@ -61,11 +59,10 @@ export const syncApi = "sync";
 { "dependencies": { "@typescript/typescript": "0.0.0" } }
 // @Filename: /src/main.ts
 import { } from "@typescript/typescript/unstable//*$*/";"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "$", &fourslash.CompletionsExpectedList{
+    let mut s = Session::new_for_test("pathCompletionsPartialPathPackageExports", content);
+    fourslash::verify_completions_exact_at(&mut s, Some("$"), &["async", "fs", "sync"]);
 }
 
-#[ignore = "unimplemented: fourslash.VerifyCompletions"]
 #[test]
 fn path_completions_partial_path_package_exports_ending_star() {
     let content = r#"// @moduleResolution: bundler
@@ -87,11 +84,10 @@ export declare const syncApi: string;
 { "dependencies": { "@typescript/typescript": "0.0.0" } }
 // @Filename: /src/main.ts
 import { } from "@typescript/typescript/unstable//*$*/";"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "$", &fourslash.CompletionsExpectedList{
+    let mut s = Session::new_for_test("pathCompletionsPartialPathPackageExportsEndingStar", content);
+    fourslash::verify_completions_exact_at(&mut s, Some("$"), &["async", "fs", "sync"]);
 }
 
-#[ignore = "unimplemented: fourslash.VerifyCompletions"]
 #[test]
 fn path_completions_partial_path_package_exports_middle_star() {
     let content = r#"// @moduleResolution: bundler
@@ -113,6 +109,6 @@ export declare const syncApi: string;
 { "dependencies": { "@typescript/typescript": "0.0.0" } }
 // @Filename: /src/main.ts
 import { } from "@typescript/typescript/unstable//*$*/";"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "$", &fourslash.CompletionsExpectedList{
+    let mut s = Session::new_for_test("pathCompletionsPartialPathPackageExportsMiddleStar", content);
+    fourslash::verify_completions_exact_at(&mut s, Some("$"), &["_async/api", "_fs/api", "_sync/api"]);
 }

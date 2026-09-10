@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCompletions"]
 #[test]
 fn member_completion_on_type_parameters() {
@@ -15,8 +16,8 @@ function foo<S, T extends IFoo, U extends Object, V extends IFoo>() {
     u./*U*/;    // IFoo
     v./*V*/;    // IFoo
 }"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "S", nil)
+    let mut s = Session::new_for_test("memberCompletionOnTypeParameters", content);
+    fourslash::verify_completions_empty_at(&mut s, Some("S"));
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, []string{"T", "V"}, &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "U", &fourslash.CompletionsExpectedList{
+    fourslash::verify_completions_unsorted_at(&mut s, Some("U"), &["constructor", "toString", "toLocaleString", "valueOf", "hasOwnProperty", "isPrototypeOf", "propertyIsEnumerable"]);
 }

@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: t.Skip('Known failing fourslash test')"]
 #[test]
 fn quick_info_clodule_with_recursive_reference() {
@@ -12,7 +13,7 @@ fn quick_info_clodule_with_recursive_reference() {
     export var /**/C = M.C
   }
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("quickInfoCloduleWithRecursiveReference", content);
     fourslash::verify_quick_info_at(&mut s, "", "var M.C.C: typeof M.C", "");
-    fourslash::verify_no_errors(&mut s);
+    fourslash::verify_no_errors(&mut s, );
 }

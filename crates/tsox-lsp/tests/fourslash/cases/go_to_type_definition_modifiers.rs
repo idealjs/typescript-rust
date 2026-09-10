@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineGoToTypeDefinition"]
 #[test]
 fn go_to_type_definition_modifiers() {
@@ -21,6 +22,6 @@ fn go_to_type_definition_modifiers() {
 }
 
 exp/*exportFunction*/ort function foo/*foo*/() { }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("goToTypeDefinitionModifiers", content);
     fourslash::unsupported("VerifyBaselineGoToTypeDefinition"); // f.VerifyBaselineGoToTypeDefinition(t, "export", "A", "private", "z", "private2", "y", "readonly", "x
 }

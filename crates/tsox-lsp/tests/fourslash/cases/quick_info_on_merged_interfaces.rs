@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[test]
 fn quick_info_on_merged_interfaces() {
     let content = r#"namespace M {
@@ -17,6 +18,6 @@ fn quick_info_on_merged_interfaces() {
     var r3 = a(true, 2);
     var /*1*/r4 = a(1, true);
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("quickInfoOnMergedInterfaces", content);
     fourslash::verify_quick_info_at(&mut s, "1", "var r4: number", "");
 }

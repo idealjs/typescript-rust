@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCompletions"]
 #[test]
 fn completions_jsdoc_tag() {
@@ -7,6 +8,6 @@ fn completions_jsdoc_tag() {
  * @typedef {object} T
  * /**/
  */"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("completionsJsdocTag", content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

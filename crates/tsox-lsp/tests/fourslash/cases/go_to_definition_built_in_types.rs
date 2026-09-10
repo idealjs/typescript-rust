@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineGoToDefinition"]
 #[test]
 fn go_to_definition_built_in_types() {
@@ -7,6 +8,6 @@ fn go_to_definition_built_in_types() {
 var s: /*string*/string;
 var b: /*boolean*/boolean;
 var v: /*void*/void;"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("goToDefinitionBuiltInTypes", content);
     fourslash::unsupported("VerifyBaselineGoToDefinition"); // f.VerifyBaselineGoToDefinition(t, true, f.MarkerNames()...)
 }

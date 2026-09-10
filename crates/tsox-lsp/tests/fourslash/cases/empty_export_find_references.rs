@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineDocumentHighlights"]
 #[test]
 fn empty_export_find_references() {
@@ -8,6 +9,6 @@ fn empty_export_find_references() {
 /**/module.exports = {
 
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("emptyExportFindReferences", content);
     fourslash::unsupported("VerifyBaselineDocumentHighlights"); // f.VerifyBaselineDocumentHighlights(t, nil /*preferences*/, "")
 }

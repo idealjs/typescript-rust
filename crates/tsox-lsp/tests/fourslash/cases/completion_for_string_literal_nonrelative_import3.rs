@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCompletions"]
 #[test]
 fn completion_for_string_literal_nonrelative_import3() {
@@ -24,6 +25,6 @@ var foo3 = require("fake-module//*require0*/
 /*repeatedjs*/
 // @Filename: node_modules/fake-module/repeated.jsx
 /*repeatedjsx*/"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("completionForStringLiteralNonrelativeImport3", content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, []string{"import_as0", "import_equals0", "require0"}, &fourslash.CompletionsE
 }

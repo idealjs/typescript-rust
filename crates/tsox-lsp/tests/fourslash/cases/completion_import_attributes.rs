@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.GoToEachMarker"]
 #[test]
 fn completion_import_attributes() {
@@ -14,6 +15,6 @@ import yadda3 from "yadda" with {attr: /*attrValue*/}
 // @filename: yadda
 export default {};
 "#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("completionImportAttributes", content);
     fourslash::unsupported("GoToEachMarker"); // f.GoToEachMarker(t, nil, func(marker *fourslash.Marker, index int) {
 }

@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCurrentFileContent"]
 #[test]
 fn white_space_trimming2() {
@@ -7,7 +8,7 @@ fn white_space_trimming2() {
 let templateHead = ` + "`" + `/*    /*2*/${1 + 2}` + "`" + `;
 let templateMiddle = ` + "`" + `/*    ${1 + 2    /*3*/}` + "`" + `;
 let templateTail = ` + "`" + `/*    ${1 + 2}    /*4*/` + "`" + `;"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("whiteSpaceTrimming2", content);
     fourslash::go_to_marker(&mut s, "1");
     fourslash::insert(&mut s, "\n");
     fourslash::go_to_marker(&mut s, "2");

@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.FormatDocument"]
 #[test]
 fn formatting_of_export_default() {
@@ -7,7 +8,7 @@ fn formatting_of_export_default() {
 /*1*/    export        default        class        Test { }
 }
 /*2*/export        default        function        bar() { }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("formattingOfExportDefault", content);
     fourslash::unsupported("FormatDocument"); // f.FormatDocument(t, "")
     fourslash::go_to_marker(&mut s, "1");
     fourslash::verify_current_line_content(&mut s, r#"    export default class Test { }"#);

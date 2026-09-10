@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.Insert"]
 #[test]
 fn signature_help_import_star_from_export_equals() {
@@ -10,7 +11,7 @@ export = abs;
 // @Filename: /a.js
 import * as abs from "abs";
 abs.default/**/;"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("signatureHelpImportStarFromExportEquals", content);
     fourslash::go_to_marker(&mut s, "");
     fourslash::unsupported("Insert"); // f.Insert(t, "(")
 }

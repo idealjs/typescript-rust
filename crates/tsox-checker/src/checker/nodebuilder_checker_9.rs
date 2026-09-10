@@ -24,13 +24,18 @@ impl Checker {
                         .signature_instantiated_param_type(sig, i)
                         .unwrap_or_else(|| self.get_type_of_symbol(param));
                     let type_str = self.type_to_string_ex(&param_type, flags);
+                    let prefix = if i + 1 == sig.parameters.len() && sig.has_rest_parameter() {
+                        "..."
+                    } else {
+                        ""
+                    };
                     if param
                         .flags
                         .contains(tsox_frontend::ast::SymbolFlags::Optional)
                     {
-                        format!("{}?: {}", name, type_str)
+                        format!("{prefix}{name}?: {type_str}")
                     } else {
-                        format!("{}: {}", name, type_str)
+                        format!("{prefix}{name}: {type_str}")
                     }
                 })
                 .collect();
@@ -41,7 +46,7 @@ impl Checker {
                 .unwrap_or_else(|| self.any_type());
             let ret_str = self.type_to_string_ex(&ret_type, flags);
             let tp = self.signature_type_param_prefix(sig);
-            parts.push(format!("{tp}({}) => {}", params.join(", "), ret_str));
+            parts.push(format!("{tp}({}): {}", params.join(", "), ret_str));
         }
 
         for sig in structured.construct_signatures() {
@@ -53,8 +58,13 @@ impl Checker {
                     let param_type = self
                         .signature_instantiated_param_type(sig, i)
                         .unwrap_or_else(|| self.get_type_of_symbol(param));
+                    let prefix = if i + 1 == sig.parameters.len() && sig.has_rest_parameter() {
+                        "..."
+                    } else {
+                        ""
+                    };
                     format!(
-                        "{}: {}",
+                        "{prefix}{}: {}",
                         param.name,
                         self.type_to_string_ex(&param_type, flags)
                     )
@@ -67,7 +77,7 @@ impl Checker {
                 .unwrap_or_else(|| self.any_type());
             let ret_str = self.type_to_string_ex(&ret_type, flags);
             let tp = self.signature_type_param_prefix(sig);
-            parts.push(format!("new {tp}({}) => {}", params.join(", "), ret_str));
+            parts.push(format!("new {tp}({}): {}", params.join(", "), ret_str));
         }
 
         for prop in &structured.properties {
@@ -82,7 +92,29 @@ impl Checker {
                 name
             };
             let prop_type = self.get_type_of_symbol(prop);
-            let type_str = self.type_to_string_ex(&prop_type, flags);
+            // 可选成员的 "?:" 已表达 undefined：显示剥掉烘焙的 undefined 成分
+            let prop_type = if prop.flags.contains(SymbolFlags::Optional) {
+                self.strip_optional_undefined(&prop_type)
+            } else {
+                prop_type
+            };
+            // Go shouldUsePlaceholderForProperty：反向映射属性的三条件省略 +
+            // 打印栈追踪（嵌套时对非匿名源立即截断为 ...）
+            let use_placeholder = self.should_use_placeholder_for_property(prop);
+            let pushed = prop
+                .check_flags
+                .contains(tsox_frontend::ast::CheckFlags::ReverseMapped);
+            if pushed {
+                self.reverse_mapped_print_stack.push(Arc::clone(prop));
+            }
+            let type_str = if use_placeholder {
+                "...".to_string()
+            } else {
+                self.type_to_string_ex(&prop_type, flags)
+            };
+            if pushed {
+                self.reverse_mapped_print_stack.pop();
+            }
             let readonly = prop
                 .check_flags
                 .contains(tsox_frontend::ast::CheckFlags::Readonly);
@@ -102,11 +134,18 @@ impl Checker {
                 .as_ref()
                 .map(|k| self.type_to_string_ex(k, flags))
                 .unwrap_or_else(|| "string".to_string());
-            let val_str = info
-                .value_type
-                .as_ref()
-                .map(|v| self.type_to_string_ex(v, flags))
-                .unwrap_or_else(|| "any".to_string());
+            // Go：反向映射型的索引签名值打印省略号
+            let val_str = if _t
+                .object_flags
+                .contains(crate::checker::ObjectFlags::ReverseMapped)
+            {
+                "...".to_string()
+            } else {
+                info.value_type
+                    .as_ref()
+                    .map(|v| self.type_to_string_ex(v, flags))
+                    .unwrap_or_else(|| "any".to_string())
+            };
 
             let key_name = info
                 .declaration
@@ -413,10 +452,43 @@ impl Checker {
                     .iter()
                     .map(|ty| self.type_to_string_ex(ty, flags))
                     .collect();
-                let qualified = self
-                    .namespace_qualifier_of(sym)
-                    .map(|q| format!("{q}.{}", sym.name))
-                    .unwrap_or_else(|| sym.name.clone());
+                // Go getSymbolChain：符号是父模块 export=（隔代自身）时，
+                // 链退化为模块限定名（容器解析与限定名同源）
+                let container = sym
+                    .parent
+                    .clone()
+                    .or_else(|| self.namespace_container_from_declarations(sym));
+                if std::env::var_os("TSOX_DEBUG_QI").is_some() {
+                    eprintln!(
+                        "[xeq9] sym={} container={:?} exports={:?}",
+                        sym.name,
+                        container.as_ref().map(|c| c.name.clone()),
+                        container
+                            .as_ref()
+                            .map(|c| c.exports.entries.keys().cloned().collect::<Vec<_>>())
+                    );
+                }
+                let is_export_equals = container
+                    .as_ref()
+                    .and_then(|p| p.exports.get("export="))
+                    .is_some_and(|exp| {
+                        Arc::ptr_eq(exp, sym)
+                            || exp
+                                .export_symbol
+                                .as_ref()
+                                .is_some_and(|t| Arc::ptr_eq(t, sym))
+                            || self
+                                .follow_alias_resolving(exp)
+                                .is_some_and(|target| Arc::ptr_eq(&target, sym))
+                    });
+                let qualified = if is_export_equals {
+                    self.namespace_qualifier_of(sym)
+                        .unwrap_or_else(|| sym.name.clone())
+                } else {
+                    self.namespace_qualifier_of(sym)
+                        .map(|q| format!("{q}.{}", sym.name))
+                        .unwrap_or_else(|| sym.name.clone())
+                };
                 return format!("{}<{}>", qualified, args.join(", "));
             }
         }
@@ -427,6 +499,9 @@ impl Checker {
                     return format!("typeof {}", sym.name);
                 }
             }
+            // 类实例（含与命名空间合并的类）：typeof 前缀只给静态侧（构造
+            // 签名所在），实例侧按符号名显示（Go typeToString 同）
+            return sym.name.clone();
         }
 
         if sym.flags.contains(SymbolFlags::ValueModule) {
@@ -479,6 +554,15 @@ impl Checker {
             return true;
         }
         if matches!(&t.data, TypeData::Conditional(_) | TypeData::Index(_)) {
+            return true;
+        }
+        // typeof X（类构造类型/命名空间值）作为数组元素需括号：(typeof Foo)[]
+        if let Some(sym) = &t.symbol
+            && (sym.flags.contains(SymbolFlags::ValueModule)
+                || (sym.flags.contains(SymbolFlags::Class)
+                    && t.as_structured()
+                        .is_some_and(|s| !s.construct_signatures().is_empty())))
+        {
             return true;
         }
         self.needs_parens_in_union(t)

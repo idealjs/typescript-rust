@@ -37,7 +37,8 @@ impl Checker {
             if let Some(constraint) = self.get_constraint_of_type_parameter(object_type) {
                 return self.get_indexed_access_type(&constraint, index_type);
             }
-            return self.any_type();
+            // Go createIndexedAccessType：泛型对象的索引访问保持延迟（驻留保恒等）
+            return self.deferred_indexed_access(object_type, index_type);
         }
 
         if let TypeData::Mapped(m) = &object_type.data
@@ -73,6 +74,11 @@ impl Checker {
                     })
                     .and_then(|(tp_node, template_node, decl)| {
                         let tp_sym = self.program.symbol_map().symbol_of(&tp_node).cloned()?;
+                        let chain = m
+                            .template_subst
+                            .as_ref()
+                            .map(|c| c.as_ref().clone())
+                            .unwrap_or_default();
 
                         if !Self::type_node_references_name(&template_node, &tp_sym.name) {
                             return None;
@@ -87,11 +93,45 @@ impl Checker {
                         let t = self.get_type_from_type_node(&template_node);
                         self.type_argument_stack.pop();
                         self.pop_scope();
+                        let t = if chain.is_empty() {
+                            t
+                        } else {
+                            self.apply_template_subst_chain(&t, &chain)
+                        };
                         Some(t)
                     });
-                return substituted.unwrap_or_else(|| {
-                    Arc::clone(m.template_type.as_ref().expect("template present"))
-                });
+                if let Some(t) = substituted {
+                    return t;
+                }
+                // 实例化路径已预替换的模板优先
+                if let Some(t) = &m.template_type {
+                    return Arc::clone(t);
+                }
+                // 模板惰性：等价 get_template_type_from_mapped_type（此处已被
+                // &t.data 借用，直接解析模板节点）
+                let Some(template_node) = m.template_node.clone() else {
+                    return self.get_any_type();
+                };
+                let chain = m
+                    .template_subst
+                    .as_ref()
+                    .map(|c| c.as_ref().clone())
+                    .unwrap_or_default();
+                let saved_stack = std::mem::take(&mut self.type_argument_stack);
+                let t = self.get_type_from_type_node(&template_node);
+                self.type_argument_stack = saved_stack;
+                let t = if chain.is_empty() {
+                    t
+                } else {
+                    self.apply_template_subst_chain(&t, &chain)
+                };
+                let ptr = Arc::as_ptr(object_type) as *mut crate::checker::types::Type;
+                unsafe {
+                    if let TypeData::Mapped(m) = &mut (*ptr).data {
+                        m.template_type = Some(Arc::clone(&t));
+                    }
+                }
+                return t;
             }
         }
 
@@ -122,11 +162,25 @@ impl Checker {
             }
 
             if self.is_tuple_type(object_type) {
-                if let Some(structured) = object_type.as_structured() {
-                    let elem_types: Vec<Arc<Type>> = structured
-                        .properties
+                if let TypeData::Tuple(tup) = &object_type.data {
+                    // 数字字面量按位取元素，number 取全体并集
+                    if index_type.flags.contains(TypeFlags::NumberLiteral)
+                        && let Some(n) = index_type.literal_value().and_then(|v| match v {
+                            LiteralValue::Number(n) => Some(n),
+                            _ => None,
+                        })
+                    {
+                        let i = n.0 as usize;
+                        if i < tup.element_infos.len()
+                            && let Some(t) = &tup.element_infos[i].type_
+                        {
+                            return Arc::clone(t);
+                        }
+                    }
+                    let elem_types: Vec<Arc<Type>> = tup
+                        .element_infos
                         .iter()
-                        .map(|p| self.get_type_of_symbol(p))
+                        .filter_map(|ei| ei.type_.clone())
                         .collect();
                     if !elem_types.is_empty() {
                         return self.get_union_type(elem_types);

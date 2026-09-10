@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCodeFixNotAvailable"]
 #[test]
 fn code_fix_forgotten_this_property_access04() {
@@ -11,6 +12,6 @@ export class C {
         return <a.div />;
     }
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("codeFixForgottenThisPropertyAccess04", content);
     fourslash::unsupported("VerifyCodeFixNotAvailable"); // f.VerifyCodeFixNotAvailable(t)
 }

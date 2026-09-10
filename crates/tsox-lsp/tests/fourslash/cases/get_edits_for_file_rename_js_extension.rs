@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyWillRenameFilesEdits"]
 #[test]
 fn get_edits_for_file_rename_js_extension() {
@@ -8,6 +9,6 @@ fn get_edits_for_file_rename_js_extension() {
 export const a = 0;
 // @Filename: /b.js
 import { a } from "./src/a.js";"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("getEditsForFileRename_jsExtension", content);
     fourslash::unsupported("VerifyWillRenameFilesEdits"); // f.VerifyWillRenameFilesEdits(t, "/b.js", "/src/b.js", map[string]string{
 }

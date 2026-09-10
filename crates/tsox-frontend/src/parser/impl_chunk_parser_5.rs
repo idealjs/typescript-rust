@@ -95,6 +95,11 @@ impl Parser {
     }
 
     pub(crate) fn is_identifier(&self) -> bool {
+        // Go isIdentifier：token > LastReservedWord（保留字不可作标识符，
+        // yield/await/上下文关键字可以）
+        if is_reserved_word_kind(self.token) {
+            return false;
+        }
         self.token == SyntaxKind::Identifier || is_keyword(self.token)
     }
 
@@ -253,14 +258,15 @@ impl Parser {
                 self.next_token();
                 let expression = self.parse_assignment_expression();
                 self.expect(SyntaxKind::CloseBracketToken);
-                let end = self.token_pos();
+                let end = self.node_pos();
                 Arc::new(Node::with_loc(
                     SyntaxKind::ComputedPropertyName,
                     NodeData::ComputedPropertyName(ComputedPropertyNameData { expression }),
                     TextRange::new(pos, end),
                 ))
             }
-            _ => self.parse_identifier(),
+            _ => self.parse_identifier_name_or_keyword(),
+
         }
     }
 

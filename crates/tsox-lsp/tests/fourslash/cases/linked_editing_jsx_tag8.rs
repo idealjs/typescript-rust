@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyLinkedEditing"]
 #[test]
 fn linked_editing_jsx_tag8() {
@@ -10,6 +11,6 @@ const jsx = (
     </*8*/A>
     </B>
 );"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("linkedEditingJsxTag8", content);
     fourslash::unsupported("VerifyLinkedEditing"); // f.VerifyLinkedEditing(t, map[string][]lsproto.Range{
 }

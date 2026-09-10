@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineDocumentHighlights"]
 #[test]
 fn js_doc_services() {
@@ -11,7 +12,7 @@ fn js_doc_services() {
 function f([|[|/*def*/{| "contextRangeIndex": 1 |}foo|]: I|]) {
     return /*use2*/[|foo|];
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("jsDocServices", content);
     fourslash::go_to_marker(&mut s, "use");
     fourslash::unsupported("VerifyQuickInfoIs"); // f.VerifyQuickInfoIs(t, "(parameter) foo: I", "I pity the foo")
     fourslash::unsupported("VerifyBaselineFindAllReferences"); // f.VerifyBaselineFindAllReferences(t, "use", "def", "use2")

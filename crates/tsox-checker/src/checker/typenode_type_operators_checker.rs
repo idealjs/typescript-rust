@@ -66,7 +66,8 @@ impl Checker {
             let object_type = self.get_type_from_type_node(&object_type_node);
             let index_type = self.get_type_from_type_node(&index_type_node);
 
-            if self.should_defer_indexed_access_type(&object_type, &index_type) {
+            let defer = self.should_defer_indexed_access_type(&object_type, &index_type);
+            if defer {
                 Arc::new(Type::new(
                     TypeFlags::IndexedAccess,
                     TypeData::IndexedAccess(IndexedAccessTypeData {

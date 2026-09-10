@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCompletions"]
 #[test]
 fn completions_import_prefer_updating_existing_import() {
@@ -15,6 +16,6 @@ export { x, y };
 import { x } from "./deep/module/why/you/want/this/path";
 
 y/**/"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("completionsImport_preferUpdatingExistingImport", content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

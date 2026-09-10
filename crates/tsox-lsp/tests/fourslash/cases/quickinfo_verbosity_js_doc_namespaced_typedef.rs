@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineHoverWithVerbosity"]
 #[test]
 fn quick_info_verbosity_js_doc_namespaced_typedef() {
@@ -16,6 +17,6 @@ fn quick_info_verbosity_js_doc_namespaced_typedef() {
 // Namespaced typedef aliased to implicitly-resolved typedef.
 /** @typedef {U} NS./*v*/V */
 "#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("quickInfoVerbosityJSDocNamespacedTypedef", content);
     fourslash::unsupported("VerifyBaselineHoverWithVerbosity"); // f.VerifyBaselineHoverWithVerbosity(t, map[string][]int{
 }

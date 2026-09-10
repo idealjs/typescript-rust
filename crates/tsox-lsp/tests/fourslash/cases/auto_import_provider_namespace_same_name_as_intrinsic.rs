@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: f.MarkTestAsStradaServer()"]
 #[test]
 fn auto_import_provider_namespace_same_name_as_intrinsic() {
@@ -16,7 +17,7 @@ export type SafeString = string;
 { "compilerOptions": { "module": "commonjs", "lib": ["es5"] } }
 // @Filename: /home/src/workspaces/project/index.ts
 type A = { name: string/**/ }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("autoImportProvider_namespaceSameNameAsIntrinsic", content);
     // TODO: f.MarkTestAsStradaServer()
     fourslash::go_to_marker(&mut s, "");
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{

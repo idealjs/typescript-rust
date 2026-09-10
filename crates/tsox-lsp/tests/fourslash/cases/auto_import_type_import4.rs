@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: t.Skip('Known failing fourslash test')"]
 #[test]
 fn auto_import_type_import4() {
@@ -34,7 +35,7 @@ b;
 import { A, a, B, b, type Y, type Z } from "./exports1";
 import { E } from "./exports2";
 d/*2*//*2a*//*2b*//*2c*/"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("autoImportTypeImport4", content);
     fourslash::go_to_marker(&mut s, "0");
     fourslash::unsupported("VerifyImportFixAtPosition"); // f.VerifyImportFixAtPosition(t, []string{
     fourslash::go_to_marker(&mut s, "0a");

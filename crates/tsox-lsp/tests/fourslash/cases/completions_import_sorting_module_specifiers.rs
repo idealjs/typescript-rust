@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: f.MarkTestAsStradaServer()"]
 #[test]
 fn completions_import_sorting_module_specifiers() {
@@ -17,7 +18,7 @@ declare module "path" {
 }
 // @Filename: main.ts
 normalize/**/"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("completionsImport_sortingModuleSpecifiers", content);
     // TODO: f.MarkTestAsStradaServer()
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

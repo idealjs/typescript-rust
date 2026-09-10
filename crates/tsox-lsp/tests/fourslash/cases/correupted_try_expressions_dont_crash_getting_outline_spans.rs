@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyOutliningSpans"]
 #[test]
 fn correupted_try_expressions_dont_crash_getting_outline_spans() {
@@ -10,6 +11,6 @@ fn correupted_try_expressions_dont_crash_getting_outline_spans() {
 } catch (e)[| {
   
 }|]"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("correuptedTryExpressionsDontCrashGettingOutlineSpans", content);
     fourslash::unsupported("VerifyOutliningSpans"); // f.VerifyOutliningSpans(t)
 }

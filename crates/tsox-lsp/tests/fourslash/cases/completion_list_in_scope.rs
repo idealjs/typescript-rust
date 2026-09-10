@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: t.Skip('Known failing fourslash test')"]
 #[test]
 fn completion_list_in_scope() {
@@ -62,8 +63,8 @@ class TestClass {
         /*insideMethod*/
     }
 }"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "valueReference", &fourslash.CompletionsExpectedList{
+    let mut s = Session::new_for_test("completionListInScope", content);
+    fourslash::verify_completions_include_exclude_at(&mut s, Some("valueReference"), &["localVariable", "exportedVariable", "localFunction", "exportedFunction", "localClass", "exportedClass", "localModule", "exportedModule", "exportedVariable2", "exportedFunction2", "exportedClass2", "exportedModule2"], &[]);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "typeReference", &fourslash.CompletionsExpectedList{
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "insideMethod", &fourslash.CompletionsExpectedList{
 }

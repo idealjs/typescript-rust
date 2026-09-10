@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineHover"]
 #[test]
 fn quick_info_display_parts_class_property() {
@@ -22,6 +23,6 @@ fn quick_info_display_parts_class_property() {
 var cInstance = new c();
 /*9*/cInstance./*10*/publicProperty;
 /*11*/c./*12*/staticProperty;"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("quickInfoDisplayPartsClassProperty", content);
     fourslash::unsupported("VerifyBaselineHover"); // f.VerifyBaselineHover(t)
 }

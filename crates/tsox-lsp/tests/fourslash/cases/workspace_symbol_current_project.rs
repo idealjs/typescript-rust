@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: allOpenProjects := lsutil.NewDefaultUserPreferences()"]
 #[test]
 fn workspace_symbol_current_project() {
@@ -16,7 +17,7 @@ export function [|fromA|]() {}
 // @Filename: /home/projects/b/index.ts
 export function [|fromB|]() {}
 "#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("workspaceSymbolCurrentProject", content);
     fourslash::go_to_file(&mut s, "/home/projects/a/index.ts");
     // TODO: allOpenProjects := lsutil.NewDefaultUserPreferences()
     // TODO: currentProject := lsutil.NewDefaultUserPreferences()

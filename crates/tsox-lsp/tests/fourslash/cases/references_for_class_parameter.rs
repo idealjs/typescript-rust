@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineFindAllReferences"]
 #[test]
 fn references_for_class_parameter() {
@@ -19,6 +20,6 @@ class foo {
 
 var n = new foo(undefined);
 n./*4*/p = null;"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("referencesForClassParameter", content);
     fourslash::unsupported("VerifyBaselineFindAllReferences"); // f.VerifyBaselineFindAllReferences(t, "1", "2", "3", "4")
 }

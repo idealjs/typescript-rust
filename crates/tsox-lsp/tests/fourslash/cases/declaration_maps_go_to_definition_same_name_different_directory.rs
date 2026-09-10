@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: f.MarkTestAsStradaServer()"]
 #[test]
 fn declaration_maps_go_to_definition_same_name_different_directory() {
@@ -59,7 +60,7 @@ class Button extends [|/*1*/Control|] {
         }
     }
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("declarationMapsGoToDefinitionSameNameDifferentDirectory", content);
     // TODO: f.MarkTestAsStradaServer()
     fourslash::unsupported("VerifyBaselineGoToDefinition"); // f.VerifyBaselineGoToDefinition(t, true, "1", "3")
 }

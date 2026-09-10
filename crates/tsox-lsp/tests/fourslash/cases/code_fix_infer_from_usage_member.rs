@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: t.Skip('Known failing fourslash test')"]
 #[test]
 fn code_fix_infer_from_usage_member() {
@@ -11,6 +12,6 @@ class C {
         this.p.push(10);
     }
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("codeFixInferFromUsageMember", content);
     fourslash::unsupported("VerifyRangeAfterCodeFix"); // f.VerifyRangeAfterCodeFix(t, `p: number[];`, false, 0, 0)
 }

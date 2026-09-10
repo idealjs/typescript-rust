@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyApplyCodeActionFromCompletion"]
 #[test]
 fn completions_import_re_export_default() {
@@ -11,7 +12,7 @@ export default function foo() {}
 export { default as foo } from "./b/impl";
 // @Filename: /use.ts
 fo/**/"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("completionsImport_reExportDefault", content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
     fourslash::unsupported("VerifyApplyCodeActionFromCompletion"); // f.VerifyApplyCodeActionFromCompletion(t, new(""), &fourslash.ApplyCodeActionFromCompletionOptions{
 }

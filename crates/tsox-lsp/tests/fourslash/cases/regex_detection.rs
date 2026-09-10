@@ -1,10 +1,11 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyNotQuickInfoExists"]
 #[test]
 fn regex_detection() {
     let content = r#" /*1*/15 / /*2*/Math.min(61 / /*3*/42, 32 / 15) / /*4*/15;"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("regexDetection", content);
     fourslash::go_to_marker(&mut s, "1");
     fourslash::unsupported("VerifyNotQuickInfoExists"); // f.VerifyNotQuickInfoExists(t)
     fourslash::go_to_marker(&mut s, "2");

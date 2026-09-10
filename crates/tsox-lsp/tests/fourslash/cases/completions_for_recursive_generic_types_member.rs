@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyCompletions"]
+
 #[test]
 fn completions_for_recursive_generic_types_member() {
     let content = r#"export class TestBase<T extends TestBase<T>>
@@ -13,6 +13,6 @@ fn completions_for_recursive_generic_types_member() {
         t./**/
     }
 }"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
+    let mut s = Session::new_for_test("completionsForRecursiveGenericTypesMember", content);
+    fourslash::verify_completions_exact_at(&mut s, Some(""), &["privateMethod", "protectedMethod", "publicMethod", "test"]);
 }

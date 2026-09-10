@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyRenameSucceeded"]
 #[test]
 fn rename_umd_module_alias2() {
@@ -10,7 +11,7 @@ export as namespace /**/[|myLib|];
 // @Filename: 1.ts
 /// <reference path="0.d.ts" />
 myLib.doThing();"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("renameUMDModuleAlias2", content);
     fourslash::go_to_marker(&mut s, "");
     fourslash::unsupported("VerifyRenameSucceeded"); // f.VerifyRenameSucceeded(t, nil /*preferences*/)
 }

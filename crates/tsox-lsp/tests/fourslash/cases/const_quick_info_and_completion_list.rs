@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: t.Skip('Known failing fourslash test')"]
 #[test]
 fn const_quick_info_and_completion_list() {
@@ -13,7 +14,7 @@ function foo() {
     var z = /*6*/a;
     /*7*/
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("constQuickInfoAndCompletionList", content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "2", &fourslash.CompletionsExpectedList{
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "3", &fourslash.CompletionsExpectedList{
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, []string{"5", "6"}, &fourslash.CompletionsExpectedList{

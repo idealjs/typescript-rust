@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyCompletions"]
+
 #[test]
 fn completion_list_private_members() {
     let content = r#"class Foo {
@@ -13,6 +13,6 @@ class Bar extends Foo {
         this./**/
     }
 }"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
+    let mut s = Session::new_for_test("completionListPrivateMembers", content);
+    fourslash::verify_completions_exact_at(&mut s, Some(""), &["foo", "y"]);
 }

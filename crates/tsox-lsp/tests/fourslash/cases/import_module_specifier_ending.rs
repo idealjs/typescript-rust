@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.BaselineAutoImportsCompletions"]
 #[test]
 fn import_module_specifier_ending_auto() {
@@ -7,7 +8,7 @@ fn import_module_specifier_ending_auto() {
 export const helperFunc = () => {};
 // @Filename: /project/index.ts
 helper/**/"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("importModuleSpecifierEndingAuto", content);
     fourslash::unsupported("Configure"); // f.Configure(t, lsutil.UserPreferences{
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
     fourslash::unsupported("BaselineAutoImportsCompletions"); // f.BaselineAutoImportsCompletions(t, []string{""})
@@ -20,7 +21,7 @@ fn import_module_specifier_ending_minimal() {
 export const helperFunc = () => {};
 // @Filename: /project/index.ts
 helper/**/"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("importModuleSpecifierEndingMinimal", content);
     fourslash::unsupported("Configure"); // f.Configure(t, lsutil.UserPreferences{
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
     fourslash::unsupported("BaselineAutoImportsCompletions"); // f.BaselineAutoImportsCompletions(t, []string{""})
@@ -33,7 +34,7 @@ fn import_module_specifier_ending_index() {
 export const helperFunc = () => {};
 // @Filename: /project/index.ts
 helper/**/"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("importModuleSpecifierEndingIndex", content);
     fourslash::unsupported("Configure"); // f.Configure(t, lsutil.UserPreferences{
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
     fourslash::unsupported("BaselineAutoImportsCompletions"); // f.BaselineAutoImportsCompletions(t, []string{""})
@@ -46,7 +47,7 @@ fn import_module_specifier_ending_js() {
 export const helperFunc = () => {};
 // @Filename: /project/index.ts
 helper/**/"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("importModuleSpecifierEndingJs", content);
     fourslash::unsupported("Configure"); // f.Configure(t, lsutil.UserPreferences{
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
     fourslash::unsupported("BaselineAutoImportsCompletions"); // f.BaselineAutoImportsCompletions(t, []string{""})

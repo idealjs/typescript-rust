@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: t.Skip('Known failing fourslash test')"]
 #[test]
 fn completion_in_function_like_body_includes_primitive_types() {
@@ -15,7 +16,7 @@ function excludesTypes1() {
 function excludesTypes2() {
     1</*3*/
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("completionInFunctionLikeBody_includesPrimitiveTypes", content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, []string{"1"}, &fourslash.CompletionsExpectedList{
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, []string{"2", "3"}, &fourslash.CompletionsExpectedList{
 }

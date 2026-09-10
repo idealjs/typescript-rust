@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyQuickInfoExists"]
 #[test]
 fn inverted_clodule_after_quick_info() {
@@ -12,7 +13,7 @@ namespace M {
         /**/c
     }
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("invertedCloduleAfterQuickInfo", content);
     fourslash::go_to_marker(&mut s, "");
     fourslash::unsupported("VerifyQuickInfoExists"); // f.VerifyQuickInfoExists(t)
     fourslash::verify_number_of_errors_in_current_file(&mut s, 1);

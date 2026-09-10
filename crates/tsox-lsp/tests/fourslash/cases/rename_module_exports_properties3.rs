@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineRename"]
 #[test]
 fn rename_module_exports_properties3() {
@@ -7,6 +8,6 @@ fn rename_module_exports_properties3() {
 // @Filename: a.js
 [|class [|{| "contextRangeIndex": 0 |}A|] {}|]
 module.exports = { [|A|] }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("renameModuleExportsProperties3", content);
     fourslash::unsupported("VerifyBaselineRename"); // f.VerifyBaselineRename(t, &lsutil.UserPreferences{UseAliasesForRename: core.TSTrue}, f.Ranges()[1], 
 }

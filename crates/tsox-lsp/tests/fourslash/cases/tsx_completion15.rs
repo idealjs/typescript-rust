@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyCompletions"]
+
 #[test]
 fn tsx_completion15() {
     let content = r#"//@module: commonjs
@@ -29,17 +29,17 @@ var x9  = <Exp.M.SFCComp></[|Exp.M./*9*/|]>;
 var x10 = <Exp.M.SFCComp></      [|/*10*/Exp.M.Foo.Bar.Baz.Wut|]>;
 var x11 = <Exp.M.SFCComp></[|Exp./*11*/M.SFCComp|]>;
 var x12 = <Exp.M.SFCComp><div><span /></div></[|Exp.M./*12*/SFCComp|]>;"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "2", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "3", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "4", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "5", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "6", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "7", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "8", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "9", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "10", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "11", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "12", &fourslash.CompletionsExpectedList{
+    let mut s = Session::new_for_test("tsxCompletion15", content);
+    fourslash::verify_completions_exact_at(&mut s, Some("1"), &["Exp.M.SFCComp"]);
+    fourslash::verify_completions_exact_at(&mut s, Some("2"), &["Exp.M.SFCComp"]);
+    fourslash::verify_completions_exact_at(&mut s, Some("3"), &["Exp.M.SFCComp"]);
+    fourslash::verify_completions_exact_at(&mut s, Some("4"), &["Exp.M.SFCComp>"]);
+    fourslash::verify_completions_exact_at(&mut s, Some("5"), &["Exp.M.SFCComp"]);
+    fourslash::verify_completions_exact_at(&mut s, Some("6"), &["Exp.M.SFCComp"]);
+    fourslash::verify_completions_exact_at(&mut s, Some("7"), &["Exp.M.SFCComp"]);
+    fourslash::verify_completions_exact_at(&mut s, Some("8"), &["Exp.M.SFCComp"]);
+    fourslash::verify_completions_exact_at(&mut s, Some("9"), &["Exp.M.SFCComp"]);
+    fourslash::verify_completions_exact_at(&mut s, Some("10"), &["Exp.M.SFCComp"]);
+    fourslash::verify_completions_exact_at(&mut s, Some("11"), &["Exp.M.SFCComp"]);
+    fourslash::verify_completions_exact_at(&mut s, Some("12"), &["Exp.M.SFCComp"]);
 }

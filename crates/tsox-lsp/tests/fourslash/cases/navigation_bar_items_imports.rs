@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineDocumentSymbol"]
 #[test]
 fn navigation_bar_items_imports() {
@@ -14,6 +15,6 @@ import d2, { c, d as D } from "a"
 import e = require("a");
 
 import * as ns from "a";"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("navigationBarItemsImports", content);
     fourslash::unsupported("VerifyBaselineDocumentSymbol"); // f.VerifyBaselineDocumentSymbol(t)
 }

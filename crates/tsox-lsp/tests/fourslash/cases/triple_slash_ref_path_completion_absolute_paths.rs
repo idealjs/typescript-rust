@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCompletions"]
 #[test]
 fn triple_slash_ref_path_completion_absolute_paths() {
@@ -23,7 +24,7 @@ fn triple_slash_ref_path_completion_absolute_paths() {
 /*e1*/
 // @Filename: /tests/cases/fourslash/e2.js
 /*e2*/"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("tripleSlashRefPathCompletionAbsolutePaths", content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, []string{"0", "1"}, &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "2", &fourslash.CompletionsExpectedList{
+    fourslash::verify_completions_exact_at(&mut s, Some("2"), &["e1.ts", "f1.ts", "f2.tsx", "folder", "tests"]);
 }

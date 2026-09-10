@@ -1,11 +1,12 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: opts131 := f.GetOptions()"]
 #[test]
 fn formatting_crash() {
     let content = r#"/**/module Default{ 
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("formattingCrash", content);
     // TODO: opts131 := f.GetOptions()
     // TODO: opts131.FormatCodeSettings.PlaceOpenBraceOnNewLineForFunctions = core.TSTrue
     fourslash::unsupported("Configure"); // f.Configure(t, opts131)

@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyCompletions"]
+
 #[test]
 fn tsx_completions_generic_component() {
     let content = r#"// @jsx: preserve
@@ -27,6 +27,6 @@ function createTable(width) {
 }
 
 createTable(800);"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
+    let mut s = Session::new_for_test("tsxCompletionsGenericComponent", content);
+    fourslash::verify_completions_include_exclude_at(&mut s, Some("1"), &["widthInCol", "text"], &[]);
 }

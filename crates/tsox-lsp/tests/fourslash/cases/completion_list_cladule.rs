@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCompletions"]
 #[test]
 fn completion_list_cladule() {
@@ -14,14 +15,14 @@ Foo/*c1*/; // should get "x", "prototype"
 var s: Foo/*c2*/; // no types, in Foo, so shouldnt have anything
 var f = new Foo();
 f/*c3*/;"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("completionListCladule", content);
     fourslash::go_to_marker(&mut s, "c1");
     fourslash::insert(&mut s, ".");
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, nil, &fourslash.CompletionsExpectedList{
     fourslash::go_to_marker(&mut s, "c2");
     fourslash::insert(&mut s, ".");
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, nil, nil)
+    fourslash::verify_completions_empty_at(&mut s, None);
     fourslash::go_to_marker(&mut s, "c3");
     fourslash::insert(&mut s, ".");
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, nil, &fourslash.CompletionsExpectedList{
+    fourslash::verify_completions_exact_at(&mut s, None, &["doStuff"]);
 }

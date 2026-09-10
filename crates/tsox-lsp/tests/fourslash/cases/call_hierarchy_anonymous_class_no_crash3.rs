@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineCallHierarchy"]
 #[test]
 fn call_hierarchy_anonymous_class_no_crash3() {
@@ -13,7 +14,7 @@ function foo() {
 export default class {
     constructor() {}
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("callHierarchyAnonymousClassNoCrash3", content);
     fourslash::go_to_marker(&mut s, "1");
     fourslash::unsupported("VerifyBaselineCallHierarchy"); // f.VerifyBaselineCallHierarchy(t)
 }

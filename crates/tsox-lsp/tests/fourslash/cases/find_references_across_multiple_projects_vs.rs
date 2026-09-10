@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineVSFindAllReferences"]
 #[test]
 fn find_references_across_multiple_projects_vs() {

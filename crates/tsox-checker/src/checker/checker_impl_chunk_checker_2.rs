@@ -116,7 +116,92 @@ impl Checker {
 
         self.ensure_jsx_namespace();
 
+        self.merge_module_augmentations();
+
         self.report_missing_global_types();
+    }
+
+    /// Go mergeModuleAugmentation（非 global）：增广模块的导出并入目标模块符号；
+    /// 目标带 export * 时先并入 re-export 解析出的目标符号（声明合并）
+    fn merge_module_augmentations(&mut self) {
+        use tsox_frontend::ast::INTERNAL_SYMBOL_NAME_EXPORT_STAR;
+        let mut augs: Vec<(Arc<Node>, Arc<Node>)> = Vec::new();
+        for file in &self.files {
+            for name in &file.module_augmentations {
+                let Some(module_node) = name.parent.clone() else {
+                    continue;
+                };
+                if tsox_frontend::ast::is_global_scope_augmentation(&module_node) {
+                    continue;
+                }
+                augs.push((Arc::clone(name), module_node));
+            }
+        }
+        for (aug_name, module_node) in augs {
+            let symbol_map = self.program.symbol_map();
+            let Some(aug_sym) = symbol_map.symbol_of(&module_node).cloned() else {
+                continue;
+            };
+            let Some(file) = self.get_source_file_of_node(&aug_name) else {
+                continue;
+            };
+            let Some(file_module) = symbol_map.symbol_of(&file.node).cloned() else {
+                continue;
+            };
+            let spec = aug_name.text().trim_matches(['"', '\'', '`']).to_string();
+            let main_module = self.resolve_module_spec_from(&file_module, &spec);
+            let Some(main_module) = main_module else {
+                continue;
+            };
+            let main_module = self.resolve_external_module_symbol(&main_module, false);
+            if !main_module.flags.intersects(SymbolFlags::NAMESPACE) {
+                continue;
+            }
+            let mut aug_entries: Vec<(String, Arc<Symbol>)> = Vec::new();
+            for (k, v) in aug_sym.exports.iter() {
+                aug_entries.push((k.clone(), Arc::clone(v)));
+            }
+            for (k, v) in aug_sym.members.iter() {
+                if !aug_entries.iter().any(|(ek, _)| ek == k) {
+                    aug_entries.push((k.clone(), Arc::clone(v)));
+                }
+            }
+            if let Some(locals) = symbol_map.locals_of(&module_node) {
+                for (k, v) in locals.iter() {
+                    if !aug_entries.iter().any(|(ek, _)| ek == k) {
+                        aug_entries.push((k.clone(), Arc::clone(v)));
+                    }
+                }
+            }
+            if aug_entries.is_empty() {
+                continue;
+            }
+            if main_module.exports.get(INTERNAL_SYMBOL_NAME_EXPORT_STAR).is_some() {
+                let resolved = self.get_exports_of_module_table(&main_module);
+                for (key, value) in &aug_entries {
+                    if main_module.exports.get(key).is_none()
+                        && let Some(target) = resolved.get(key)
+                        && !Arc::ptr_eq(target, value)
+                    {
+                        merge_declarations_into(target, value);
+                    }
+                }
+            }
+            let m_mut = Arc::as_ptr(&main_module) as *mut Symbol;
+            for (key, value) in aug_entries {
+                unsafe {
+                    match (*m_mut).exports.get(&key) {
+                        Some(existing) => merge_declarations_into(existing, &value),
+                        None => {
+                            (*m_mut).exports.entries.insert(key.clone(), value.clone());
+                        }
+                    }
+                    if (*m_mut).members.get(&key).is_none() {
+                        (*m_mut).members.entries.insert(key, value);
+                    }
+                }
+            }
+        }
     }
 
     pub(crate) fn report_missing_global_types(&mut self) {
@@ -142,5 +227,18 @@ impl Checker {
                 ));
             }
         }
+    }
+}
+
+fn merge_declarations_into(target: &Arc<Symbol>, source: &Arc<Symbol>) {
+    let t_mut = Arc::as_ptr(target) as *mut Symbol;
+    let s_mut = Arc::as_ptr(source) as *mut Symbol;
+    unsafe {
+        for d in &(*s_mut).declarations {
+            if !(*t_mut).declarations.iter().any(|x| Arc::ptr_eq(x, d)) {
+                (*t_mut).declarations.push(Arc::clone(d));
+            }
+        }
+        (*t_mut).flags |= (*s_mut).flags;
     }
 }

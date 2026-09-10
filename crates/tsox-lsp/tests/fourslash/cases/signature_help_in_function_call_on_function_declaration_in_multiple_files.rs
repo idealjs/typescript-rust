@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifySignatureHelp"]
 #[test]
 fn signature_help_in_function_call_on_function_declaration_in_multiple_files() {
@@ -9,7 +10,7 @@ declare function fn(x: string, y: number);
 declare function fn(x: string);
 // @Filename: signatureHelpInFunctionCallOnFunctionDeclarationInMultipleFiles_file2.ts
 fn(/*1*/"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("signatureHelpInFunctionCallOnFunctionDeclarationInMultipleFiles", content);
     fourslash::go_to_marker(&mut s, "1");
     fourslash::unsupported("VerifySignatureHelp"); // f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{OverloadsCount: 2})
 }

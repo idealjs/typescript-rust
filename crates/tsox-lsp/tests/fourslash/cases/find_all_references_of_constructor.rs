@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: }"]
 #[test]
 fn find_all_references_of_constructor() {
@@ -35,7 +36,7 @@ class E implements C {
 import * as a from "./a";
 new a.C();
 class d extends a.C { constructor() { super(); }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("findAllReferencesOfConstructor", content);
     fourslash::unsupported("VerifyBaselineFindAllReferences"); // f.VerifyBaselineFindAllReferences(t, "0", "1", "2")
     // TODO: }
 }

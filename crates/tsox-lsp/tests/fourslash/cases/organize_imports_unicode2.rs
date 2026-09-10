@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyOrganizeImports"]
 #[test]
 fn organize_imports_unicode2() {
@@ -10,7 +11,7 @@ fn organize_imports_unicode2() {
 } from './foo';
 
 console.log(a1, a2, a100);"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("organizeImportsUnicode2", content);
     fourslash::unsupported("VerifyOrganizeImports"); // f.VerifyOrganizeImports(t,
     fourslash::unsupported("VerifyOrganizeImports"); // f.VerifyOrganizeImports(t,
 }

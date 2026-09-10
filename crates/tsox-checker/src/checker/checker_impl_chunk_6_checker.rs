@@ -21,6 +21,10 @@ impl Checker {
     }
 
     pub(crate) fn compute_type_of_node(&mut self, node: &Arc<Node>) -> Arc<Type> {
+        // Go getTypeOfNode：类型节点整体委托 getTypeFromTypeNode（含 NamedTupleMember 等）
+        if tsox_frontend::ast::is_type_node(node) {
+            return self.get_type_from_type_node(node);
+        }
         match node.kind {
             SyntaxKind::NumericLiteral => {
                 if let tsox_frontend::ast::NodeData::NumericLiteral(data) = &node.data {
@@ -48,9 +52,22 @@ impl Checker {
             SyntaxKind::ObjectLiteralExpression => {
                 return self.get_type_of_object_literal(node);
             }
+            SyntaxKind::PropertyAssignment => {
+                if let tsox_frontend::ast::NodeData::PropertyAssignment(d) = &node.data
+                    && let Some(literal) = node
+                        .parent
+                        .as_ref()
+                        .filter(|p| p.kind == SyntaxKind::ObjectLiteralExpression)
+                {
+                    let name = self.get_property_name_from_node(&d.name);
+                    return self.property_assignment_type(node, &d.initializer, literal, &name);
+                }
+                self.get_any_type()
+            }
             SyntaxKind::FunctionExpression | SyntaxKind::ArrowFunction => {
                 self.get_type_of_function_like(node)
             }
+            SyntaxKind::RegularExpressionLiteral => self.global_regexp_type(),
             SyntaxKind::FunctionDeclaration => self.get_type_of_function_like(node),
             SyntaxKind::Identifier => self.get_type_of_identifier(node),
             SyntaxKind::MetaProperty => self.get_type_of_meta_property(node),

@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.FormatDocument"]
 #[test]
 fn format_tsx_multiline_attribute_string() {
@@ -10,15 +11,12 @@ fn format_tsx_multiline_attribute_string() {
         x"
     />
 );"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("formatTsxMultilineAttributeString", content);
     fourslash::unsupported("FormatDocument"); // f.FormatDocument(t, "")
-    fourslash::verify_current_file_content(
-        &mut s,
-        r#"(
+    fourslash::verify_current_file_content(&mut s, r#"(
     <input
         value="x
         x"
     />
-);"#,
-    );
+);"#);
 }

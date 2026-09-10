@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyOrganizeImports"]
 #[test]
 fn organize_imports_react_jsx_dev() {
@@ -26,7 +27,7 @@ declare namespace React {}
 import './';
 // @filename: node_modules/react/jsx-dev-runtime.d.ts
 import './';"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("organizeImportsReactJsxDev", content);
     fourslash::go_to_file(&mut s, "test.tsx");
     fourslash::unsupported("VerifyOrganizeImports"); // f.VerifyOrganizeImports(t,
 }

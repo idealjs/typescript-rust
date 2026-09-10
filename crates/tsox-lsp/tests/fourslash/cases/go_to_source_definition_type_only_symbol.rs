@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: // .d.ts declaration rather than jumping to the first line o"]
 #[test]
 fn go_to_source_definition_type_only_import_falls_back_to_declaration() {
@@ -21,7 +22,7 @@ export function create(config) { return config; }
 import { /*importConfig*/Config, create } from "pkg";
 const c: Config = { name: "test", value: 1 };
 create(c);"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("goToSourceDefinitionTypeOnlyImportFallsBackToDeclaration", content);
     fourslash::unsupported("VerifyBaselineGoToSourceDefinition"); // f.VerifyBaselineGoToSourceDefinition(t, "importConfig")
 }
 
@@ -46,7 +47,7 @@ export function create(config) { return config; }
 import { Config, create } from "pkg";
 const c: /*usageSite*/Config = { name: "test" };
 create(c);"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("goToSourceDefinitionTypeOnlyUsageFallsBackToDeclaration", content);
     fourslash::unsupported("VerifyBaselineGoToSourceDefinition"); // f.VerifyBaselineGoToSourceDefinition(t, "usageSite")
 }
 
@@ -65,6 +66,6 @@ export function /*targetCreate*/create() {}
 // @Filename: /home/src/workspaces/project/index.ts
 import { /*importCreate*/create } from "pkg";
 create();"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("goToSourceDefinitionValueImportStillWorks", content);
     fourslash::unsupported("VerifyBaselineGoToSourceDefinition"); // f.VerifyBaselineGoToSourceDefinition(t, "importCreate")
 }

@@ -61,12 +61,38 @@ impl Checker {
         if !object_changed && !index_changed {
             return Arc::clone(t);
         }
+        let object_type = new_object.or_else(|| ia.object_type.clone());
+        let index_type = new_index.or_else(|| ia.index_type.clone());
+        // Go instantiateIndexedAccessType：替换后对象类型不再是泛型载体
+        // （类型参数/索引访问/条件型）时立即归约（T["name"] 代入 Error 后解析为 string）
+        let generic_object = |t: &Arc<Type>| {
+            t.flags.intersects(
+                TypeFlags::TypeParameter | TypeFlags::IndexedAccess | TypeFlags::Conditional,
+            ) || matches!(&t.data, TypeData::IndexedAccess(_))
+        };
+        if let (Some(obj), Some(idx)) = (object_type.as_ref(), index_type.as_ref())
+            && !generic_object(obj)
+            && !generic_object(idx)
+        {
+            let resolved = self.get_indexed_access_type(obj, idx);
+            if resolved.intrinsic_name() != Some("error") {
+                return resolved;
+            }
+        }
+        // 保持延迟的 IndexedAccess 按 (对象, 索引) 驻留，保证类型恒等
+        // （推断信息表按恒等匹配，Go 依赖 interning）
+        if let (Some(obj), Some(idx)) = (object_type.as_ref(), index_type.as_ref()) {
+            let interned = self.deferred_indexed_access(obj, idx);
+            if interned.flags.contains(TypeFlags::IndexedAccess) {
+                return interned;
+            }
+        }
         let mut rebuilt = Type::new(
             t.flags,
             TypeData::IndexedAccess(IndexedAccessTypeData {
                 constrained: ConstrainedTypeData::default(),
-                object_type: new_object.or_else(|| ia.object_type.clone()),
-                index_type: new_index.or_else(|| ia.index_type.clone()),
+                object_type,
+                index_type,
                 access_flags: ia.access_flags,
             }),
         );
@@ -89,7 +115,28 @@ impl Checker {
         if Arc::ptr_eq(&new_check, &old_check) || type_contains_type_parameter(&new_check) {
             return Arc::clone(t);
         }
-        self.resolve_conditional_type_with_check(t, Some(new_check))
-            .unwrap_or_else(|| Arc::clone(t))
+        // Go getConditionalType：分支结果 = instantiateType(branchNode, trueMapper)，
+        // 解析出的分支再用 mapper 实例化（T→实参）；嵌套别名引用在实例化中
+        // 按 (symbol, args) 缓存递归收敛
+        // Go getConditionalType：分支以 trueMapper（本层 params→substitutions）
+        // 实例化；帧栈是全局的，嵌套实例化时外层帧会污染本层分支节点的解析，
+        // 解析期间把栈替换为本层帧
+        let saved_stack = std::mem::take(&mut self.type_argument_stack);
+        let mut frame: HashMap<*const tsox_frontend::ast::Symbol, Arc<Type>> = HashMap::new();
+        for (i, p) in params.iter().enumerate() {
+            if let Some(sym) = &p.symbol {
+                frame.insert(
+                    Arc::as_ptr(sym) as *const tsox_frontend::ast::Symbol,
+                    Arc::clone(&substitutions[i.min(substitutions.len() - 1)]),
+                );
+            }
+        }
+        self.type_argument_stack.push(frame);
+        let resolved_branch = self.resolve_conditional_type_with_check(t, Some(new_check));
+        self.type_argument_stack = saved_stack;
+        match resolved_branch {
+            Some(branch) => self.substitute_infer_type_parameters(&branch, params, substitutions),
+            None => Arc::clone(t),
+        }
     }
 }

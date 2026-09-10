@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineRenameAtRangesWithText"]
 #[test]
 fn rename_parameter_property_declaration5() {
@@ -8,6 +9,6 @@ fn rename_parameter_property_declaration5() {
         let myProtectedParam = [|protectedParam|];
     }
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("renameParameterPropertyDeclaration5", content);
     fourslash::unsupported("VerifyBaselineRenameAtRangesWithText"); // f.VerifyBaselineRenameAtRangesWithText(t, nil /*preferences*/, "protectedParam")
 }

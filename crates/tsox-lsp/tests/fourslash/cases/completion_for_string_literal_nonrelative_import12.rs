@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCompletions"]
 #[test]
 fn completion_for_string_literal_nonrelative_import12() {
@@ -14,6 +15,6 @@ var foo3 = require("m/*require0*/
     "optionalDependencies": { "optional-module": "latest" },
     "peerDependencies": { "peer-module": "latest" }
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("completionForStringLiteralNonrelativeImport12", content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, f.Markers(), &fourslash.CompletionsExpectedList{
 }

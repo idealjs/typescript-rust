@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineGoToDefinition"]
 #[test]
 fn go_to_definition_jsx_not_set() {
@@ -12,6 +13,6 @@ export default Foo;
 // @Filename: /bar.jsx
 import Foo from './foo';
 const a = <[|/*use*/Foo|] />"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("goToDefinitionJsxNotSet", content);
     fourslash::unsupported("VerifyBaselineGoToDefinition"); // f.VerifyBaselineGoToDefinition(t, true, "use")
 }

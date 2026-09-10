@@ -150,8 +150,10 @@ impl Parser {
             return;
         }
 
-        let (end_of_file_token, old_loc) = match &file.node.data {
-            NodeData::SourceFile(d) => (d.end_of_file_token.clone(), file.node.loc),
+        let (end_of_file_token, old_loc, old_flags) = match &file.node.data {
+            NodeData::SourceFile(d) => {
+                (d.end_of_file_token.clone(), file.node.loc, file.node.flags)
+            }
             _ => return,
         };
         let new_statements_node_list = Arc::new(NodeList {
@@ -164,13 +166,14 @@ impl Parser {
             ),
             nodes: new_statements,
         });
-        let new_node = Arc::new(Node::with_loc(
+        let new_node = Arc::new(Node::with_loc_flags(
             SyntaxKind::SourceFile,
             NodeData::SourceFile(SourceFileData {
                 statements: new_statements_node_list,
                 end_of_file_token,
             }),
             old_loc,
+            old_flags,
         ));
         file.node = new_node;
     }
@@ -266,6 +269,12 @@ impl Parser {
 
     pub(crate) fn token_pos(&self) -> usize {
         self.scanner.token_pos()
+    }
+
+    /// Go Parser.nodePos：节点 end 取当前 token 的 fullStart（即刚消费完的
+    /// 语法 token 的真实结尾），不得吞下一 token 的前导 trivia
+    pub(crate) fn node_pos(&self) -> usize {
+        self.scanner.full_start_pos()
     }
 
     pub(crate) fn token_end(&self) -> usize {

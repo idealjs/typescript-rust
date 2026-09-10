@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineGoToDefinition"]
 #[test]
 fn go_to_definition_import2() {
@@ -7,6 +8,6 @@ fn go_to_definition_import2() {
 /*2*/export const foo = 1;
 // @Filename: /a.ts
 import { foo } [|from/*1*/|]       "./b";"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("goToDefinitionImport2", content);
     fourslash::unsupported("VerifyBaselineGoToDefinition"); // f.VerifyBaselineGoToDefinition(t, true, "1")
 }

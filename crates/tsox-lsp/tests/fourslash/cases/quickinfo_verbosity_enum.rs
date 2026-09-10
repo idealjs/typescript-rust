@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineHoverWithVerbosity"]
 #[test]
 fn quickinfo_verbosity_enum() {
@@ -29,6 +30,6 @@ export enum Color {
 // @filename: c.ts
 import { Color } from "./b";
 const c: Color/*a*/ = Color.Red;"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("quickinfoVerbosityEnum", content);
     fourslash::unsupported("VerifyBaselineHoverWithVerbosity"); // f.VerifyBaselineHoverWithVerbosity(t, map[string][]int{"c": {0, 1}, "x": {0, 1}, "d": {0, 1}, "y": {
 }

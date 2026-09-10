@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineFindAllReferences"]
 #[test]
 fn find_all_references_from_link_tag_reference4() {
@@ -8,6 +9,6 @@ fn find_all_references_from_link_tag_reference4() {
     A,
     B
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("findAllReferencesFromLinkTagReference4", content);
     fourslash::unsupported("VerifyBaselineFindAllReferences"); // f.VerifyBaselineFindAllReferences(t, "")
 }

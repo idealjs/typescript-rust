@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineCallHierarchy"]
 #[test]
 fn call_hierarchy_in_prop_declaration_of_exported_default_class1() {
@@ -11,7 +12,7 @@ export default class {
   };
 }
 "#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("callHierarchyInPropDeclarationOfExportedDefaultClass1", content);
     fourslash::go_to_marker(&mut s, "m1");
     fourslash::unsupported("VerifyBaselineCallHierarchy"); // f.VerifyBaselineCallHierarchy(t)
 }

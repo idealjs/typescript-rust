@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: opts235 := f.GetOptions()"]
 #[test]
 fn formatting_space_before_close_paren() {
@@ -8,7 +9,7 @@ fn formatting_space_before_close_paren() {
 /*3*/({foo:42});
 /*4*/(  {foo:42}  );
 /*5*/var bar = (function (a) { });"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("formattingSpaceBeforeCloseParen", content);
     // TODO: opts235 := f.GetOptions()
     // TODO: opts235.FormatCodeSettings.InsertSpaceAfterOpeningAndBeforeClosingNonemptyParenthesis = core.TSTrue
     fourslash::unsupported("Configure"); // f.Configure(t, opts235)

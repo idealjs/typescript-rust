@@ -193,7 +193,7 @@ impl Parser {
             }
         }
         self.parsing_contexts = save_contexts;
-        let end = self.token_pos();
+        let end = self.node_pos();
         NodeList {
             loc: TextRange::new(pos, end),
             nodes,
@@ -237,7 +237,7 @@ impl Parser {
             }
         }
         self.parsing_contexts = save_contexts;
-        let end = self.token_pos();
+        let end = self.node_pos();
         NodeList {
             loc: TextRange::new(pos, end),
             nodes,

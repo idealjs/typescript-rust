@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: t.Skip('Known failing fourslash test')"]
 #[test]
 fn member_list_in_with_block() {
@@ -14,7 +15,7 @@ fn member_list_in_with_block() {
         }
     }
 }"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "1", nil)
+    let mut s = Session::new_for_test("memberListInWithBlock", content);
+    fourslash::verify_completions_empty_at(&mut s, Some("1"));
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "2", &fourslash.CompletionsExpectedList{
 }

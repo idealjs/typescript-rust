@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: f.MarkTestAsStradaServer()"]
 #[test]
 fn type_reference_on_server() {
@@ -7,7 +8,7 @@ fn type_reference_on_server() {
 /// <reference types="foo" />
 var x: number;
 x./*1*/"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("typeReferenceOnServer", content);
     // TODO: f.MarkTestAsStradaServer()
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
+    fourslash::verify_completions_include_exclude_at(&mut s, Some("1"), &["toFixed"], &[]);
 }

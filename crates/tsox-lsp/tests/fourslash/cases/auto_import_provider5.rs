@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: f.MarkTestAsStradaServer()"]
 #[test]
 fn auto_import_provider5() {
@@ -14,7 +15,7 @@ export * from "./useForm";
 export declare function useForm(): void;
 // @Filename: /home/src/workspaces/project/index.ts
 useForm/**/"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("autoImportProvider5", content);
     fourslash::unsupported("Configure"); // f.Configure(t, lsutil.UserPreferences{AutoImportEntrypointDirectorySearch: core.TSTrue})
     // TODO: f.MarkTestAsStradaServer()
     fourslash::go_to_marker(&mut s, "");

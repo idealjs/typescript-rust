@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCompletions"]
 #[test]
 fn completions_after_js_doc() {
@@ -7,6 +8,6 @@ fn completions_after_js_doc() {
   /** JSDoc */
   /**/foo(): void;
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("completionsAfterJSDoc", content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

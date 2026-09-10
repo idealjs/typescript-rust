@@ -78,7 +78,7 @@ impl Parser {
             Parser::parse_array_binding_element,
         );
         self.expect(SyntaxKind::CloseBracketToken);
-        let end = self.token_pos();
+        let end = self.node_pos();
         Arc::new(Node::with_loc(
             SyntaxKind::ArrayBindingPattern,
             NodeData::BindingPattern(BindingPatternData {
@@ -126,7 +126,7 @@ impl Parser {
             Parser::parse_object_binding_element,
         );
         self.expect(SyntaxKind::CloseBraceToken);
-        let end = self.token_pos();
+        let end = self.node_pos();
         Arc::new(Node::with_loc(
             SyntaxKind::ObjectBindingPattern,
             NodeData::BindingPattern(BindingPatternData {

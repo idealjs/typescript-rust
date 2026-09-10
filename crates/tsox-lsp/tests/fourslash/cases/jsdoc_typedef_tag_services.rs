@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineDocumentHighlights"]
 #[test]
 fn jsdoc_typedef_tag_services() {
@@ -14,13 +15,8 @@ fn jsdoc_typedef_tag_services() {
  * @type {[|/*use*/Product|]}
  */
 const product = null;"#;
-    let mut s = Session::new(content);
-    fourslash::verify_quick_info_at(
-        &mut s,
-        "use",
-        "type Product = {\n    title: string;\n}",
-        "Doc comment",
-    );
+    let mut s = Session::new_for_test("jsdocTypedefTagServices", content);
+    fourslash::verify_quick_info_at(&mut s, "use", "type Product = {\n    title: string;\n}", "Doc comment");
     fourslash::unsupported("VerifyBaselineFindAllReferences"); // f.VerifyBaselineFindAllReferences(t, "use", "def")
     fourslash::unsupported("VerifyBaselineRename"); // f.VerifyBaselineRename(t, nil /*preferences*/, ToAny(f.Ranges()[1:])...)
     fourslash::unsupported("VerifyBaselineDocumentHighlights"); // f.VerifyBaselineDocumentHighlights(t, nil /*preferences*/, ToAny(f.Ranges()[1:])...)

@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineFindAllReferences"]
 #[test]
 fn find_all_refs_union_property() {
@@ -16,6 +17,6 @@ if (t./*t3*/type === "a") {
 } else {
     t./*t5*/type;
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("findAllRefsUnionProperty", content);
     fourslash::unsupported("VerifyBaselineFindAllReferences"); // f.VerifyBaselineFindAllReferences(t, "t0", "t1", "t3", "t4", "t5", "t2", "p0", "p1", "p2")
 }

@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: t.Skip('Known failing fourslash test')"]
 #[test]
 fn unused_enum_in_namespace1() {
@@ -10,6 +11,6 @@ fn unused_enum_in_namespace1() {
       Monday
   }
 } |]"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("unusedEnumInNamespace1", content);
     fourslash::unsupported("VerifyRangeAfterCodeFix"); // f.VerifyRangeAfterCodeFix(t, `namespace greeter {
 }

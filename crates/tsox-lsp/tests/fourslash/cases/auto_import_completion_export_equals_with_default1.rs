@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyApplyCodeActionFromCompletion"]
 #[test]
 fn auto_import_completion_export_equals_with_default1() {
@@ -50,7 +51,7 @@ declare abstract class Container_ extends Node {
 declare class Container extends Container_ {}
 
 export = Container;"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("autoImportCompletionExportEqualsWithDefault1", content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
     fourslash::unsupported("VerifyApplyCodeActionFromCompletion"); // f.VerifyApplyCodeActionFromCompletion(t, new("1"), &fourslash.ApplyCodeActionFromCompletionOptions{
 }

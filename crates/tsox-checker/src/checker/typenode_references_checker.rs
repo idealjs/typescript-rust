@@ -14,7 +14,9 @@ impl Checker {
     }
 
     fn container_instance_type_of(&mut self, node: &Arc<Node>) -> Arc<Type> {
-        let mut cur = node.parent.clone();
+        // 从 container 自身查起：调用方传入的即是类/接口容器（顶层类的
+        // parent 是 SourceFile，跳过自身会一直走到 any）
+        let mut cur: Option<Arc<Node>> = Some(Arc::clone(node));
         while let Some(n) = cur {
             match n.kind {
                 SyntaxKind::ClassDeclaration | SyntaxKind::ClassExpression => {
@@ -77,27 +79,42 @@ impl Checker {
                     if container.kind != SyntaxKind::ObjectLiteralExpression {
                         return None;
                     }
-                    let ctx = self.get_contextual_type(&container, ContextFlags::None)?;
                     let name = match &n.data {
                         NodeData::MethodDeclaration(d) => {
                             self.get_property_name_from_node(&d.name)
                         }
                         _ => return None,
                     };
-                    let prop_type =
-                        self.get_type_of_property_of_contextual_type(&ctx, &name)?;
-                    let sig = self
-                        .get_signatures_of_type(&prop_type, crate::checker::SignatureKind::Call)
-                        .into_iter()
-                        .next()?;
-                    let this_param = sig.this_parameter.clone()?;
-                    let t = self.get_type_of_symbol(&this_param);
-                    if crate::checker::utilities::is_this_type_parameter(&t)
-                        && let Some(constraint) = self.get_constraint_of_type_parameter(&t)
-                    {
-                        return Some(constraint);
+                    // 上下文签名带 this 参数：取其约束（多态 this）
+                    if let Some(ctx) = self.get_contextual_type(&container, ContextFlags::None) {
+                        if let Some(prop_type) =
+                            self.get_type_of_property_of_contextual_type(&ctx, &name)
+                        {
+                            if let Some(sig) = self
+                                .get_signatures_of_type(
+                                    &prop_type,
+                                    crate::checker::SignatureKind::Call,
+                                )
+                                .into_iter()
+                                .next()
+                            {
+                                if let Some(this_param) = sig.this_parameter.clone() {
+                                    let t = self.get_type_of_symbol(&this_param);
+                                    if crate::checker::utilities::is_this_type_parameter(&t)
+                                        && let Some(constraint) =
+                                            self.get_constraint_of_type_parameter(&t)
+                                    {
+                                        return Some(constraint);
+                                    }
+                                    return Some(t);
+                                }
+                            }
+                        }
                     }
-                    return Some(t);
+                    // Go getContextualThisParameterType：无上下文时回退到
+                    // 对象字面量自身类型（widened），方法成员可经 this.test 解析
+                    let literal_type = self.get_type_of_object_literal(&container);
+                    return Some(self.get_widened_type(&literal_type));
                 }
                 _ => {}
             }
@@ -151,7 +168,8 @@ impl Checker {
             if let Some(params) = params
                 && let Some(first) = params.iter().next()
                 && let NodeData::ParameterDeclaration(pd) = &first.data
-                && matches!(&pd.name.data, NodeData::Identifier(id) if id.text == "this")
+                && (matches!(&pd.name.data, NodeData::Identifier(id) if id.text == "this")
+                    || pd.name.kind == SyntaxKind::ThisKeyword)
                 && let Some(tn) = &pd.type_node
             {
                 return Some(self.get_type_from_type_node(tn));

@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyWillRenameFilesEdits"]
 #[test]
 fn get_edits_for_file_rename_tsconfig_empty_include() {
@@ -7,6 +8,6 @@ fn get_edits_for_file_rename_tsconfig_empty_include() {
 const x = 1
 // @Filename: /a/tsconfig.json
 { "include": [] }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("getEditsForFileRename_tsconfig_empty_include", content);
     fourslash::unsupported("VerifyWillRenameFilesEdits"); // f.VerifyWillRenameFilesEdits(t, "/a/foo.ts", "/a/bar.ts", map[string]string{}, nil /*preferences*/)
 }

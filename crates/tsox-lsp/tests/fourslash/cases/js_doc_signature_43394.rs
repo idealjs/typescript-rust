@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineSignatureHelp"]
 #[test]
 fn js_doc_signature_43394() {
@@ -8,6 +9,6 @@ fn js_doc_signature_43394() {
  * @property {number} ...
  * /**/@typedef {number} Bar
  */"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("jsDocSignature_43394", content);
     fourslash::unsupported("VerifyBaselineSignatureHelp"); // f.VerifyBaselineSignatureHelp(t)
 }

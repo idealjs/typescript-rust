@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCompletions"]
 #[test]
 fn completion_for_string_literal_in_indexed_access01() {
@@ -9,6 +10,6 @@ fn completion_for_string_literal_in_indexed_access01() {
 }
 
 let x: Foo["[|/*1*/|]"]"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("completionForStringLiteralInIndexedAccess01", content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
 }

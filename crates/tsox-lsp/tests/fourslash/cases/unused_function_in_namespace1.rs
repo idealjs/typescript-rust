@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: t.Skip('Known failing fourslash test')"]
 #[test]
 fn unused_function_in_namespace1() {
@@ -10,6 +11,6 @@ fn unused_function_in_namespace1() {
   function function1() {
   }/*1*/
 } |]"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("unusedFunctionInNamespace1", content);
     fourslash::unsupported("VerifyRangeAfterCodeFix"); // f.VerifyRangeAfterCodeFix(t, `namespace greeter {
 }

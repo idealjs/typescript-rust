@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineFindAllReferences"]
 #[test]
 fn find_all_refs_for_object_spread() {
@@ -10,6 +11,6 @@ let a2: A2;
 let a12 = { ...a1, ...a2 };
 a12./*2*/a;
 a1./*3*/a;"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("findAllRefsForObjectSpread", content);
     fourslash::unsupported("VerifyBaselineFindAllReferences"); // f.VerifyBaselineFindAllReferences(t, "0", "1", "2", "3")
 }

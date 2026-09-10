@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: f.Insert(t, '"]
 #[test]
 fn formatting_in_comment() {
@@ -7,7 +8,7 @@ fn formatting_in_comment() {
 foo(              ); // /*1*/
 }
 function foo() {       var x;       } // /*2*/"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("formattingInComment", content);
     fourslash::go_to_marker(&mut s, "1");
     fourslash::insert(&mut s, ";");
     fourslash::verify_current_line_content(&mut s, r#"foo(              ); // ;"#);

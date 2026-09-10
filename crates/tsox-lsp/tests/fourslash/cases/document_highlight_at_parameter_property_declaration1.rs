@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineDocumentHighlights"]
 #[test]
 fn document_highlight_at_parameter_property_declaration1() {
@@ -19,6 +20,6 @@ class Foo {
         this.[|protectedParam|] = false;
     }
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("documentHighlightAtParameterPropertyDeclaration1", content);
     fourslash::unsupported("VerifyBaselineDocumentHighlights"); // f.VerifyBaselineDocumentHighlights(t, nil /*preferences*/, ToAny(f.Ranges())...)
 }

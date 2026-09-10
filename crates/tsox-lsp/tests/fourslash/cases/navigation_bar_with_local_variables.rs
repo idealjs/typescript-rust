@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineDocumentSymbol"]
 #[test]
 fn navigation_bar_with_local_variables() {
@@ -7,6 +8,6 @@ fn navigation_bar_with_local_variables() {
 	const x = Object()
 	x.foo = ""
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("navigationBarWithLocalVariables", content);
     fourslash::unsupported("VerifyBaselineDocumentSymbol"); // f.VerifyBaselineDocumentSymbol(t)
 }

@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineFindAllReferences"]
 #[test]
 fn find_references_across_multiple_projects() {
@@ -11,6 +12,6 @@ fn find_references_across_multiple_projects() {
 //@Filename: c.ts
 /// <reference path="a.ts" />
 /*4*/x++;"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("findReferencesAcrossMultipleProjects", content);
     fourslash::unsupported("VerifyBaselineFindAllReferences"); // f.VerifyBaselineFindAllReferences(t, "1", "2", "3", "4")
 }

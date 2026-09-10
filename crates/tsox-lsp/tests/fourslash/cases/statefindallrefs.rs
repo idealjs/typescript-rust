@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: // !!! TODO Verify errors"]
 #[test]
 fn find_all_refs_solution_referencing_default_project_directly() {
@@ -36,7 +37,7 @@ import { /*fooIndirect3Import*/foo } from '../target/src/main';
 foo()
 export function bar() {}
 "#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("findAllRefsSolutionReferencingDefaultProjectDirectly", content);
     // TODO: // Ensure configured project is found for open file
     fourslash::go_to_marker(&mut s, "mainFoo");
     // TODO: // !!! TODO Verify errors
@@ -126,7 +127,7 @@ export const indirect = 1;
 	]
 }
 "#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("findAllRefsSolutionReferencingDefaultProjectIndirectly", content);
     // TODO: // Ensure configured project is found for open file
     fourslash::go_to_marker(&mut s, "mainFoo");
     // TODO: // !!! TODO Verify errors
@@ -145,8 +146,7 @@ export const indirect = 1;
 
 #[ignore = "generator: // !!! TODO Verify errors"]
 #[test]
-fn find_all_refs_solution_with_disable_referenced_project_load_referencing_default_project_directly()
- {
+fn find_all_refs_solution_with_disable_referenced_project_load_referencing_default_project_directly() {
     let content = r#"
 // @stateBaseline: true 
 // @tsc: --build /myproject/tsconfig.json
@@ -183,7 +183,7 @@ import { /*fooIndirect3Import*/foo } from '../target/src/main';
 foo()
 export function bar() {}
 "#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("findAllRefsSolutionWithDisableReferencedProjectLoadReferencingDefaultProjectDirectly", content);
     // TODO: // Ensure configured project is found for open file
     fourslash::go_to_marker(&mut s, "mainFoo");
     // TODO: // !!! TODO Verify errors
@@ -202,8 +202,7 @@ export function bar() {}
 
 #[ignore = "generator: // !!! TODO Verify errors"]
 #[test]
-fn find_all_refs_solution_referencing_default_project_indirectly_through_disable_referenced_project_load()
- {
+fn find_all_refs_solution_referencing_default_project_indirectly_through_disable_referenced_project_load() {
     let content = r#"
 // @stateBaseline: true 
 // @tsc: --build /myproject/tsconfig.json
@@ -276,7 +275,7 @@ export const indirect = 1;
 	]
 }
 "#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("findAllRefsSolutionReferencingDefaultProjectIndirectlyThroughDisableReferencedProjectLoad", content);
     // TODO: // Ensure configured project is found for open file
     fourslash::go_to_marker(&mut s, "mainFoo");
     // TODO: // !!! TODO Verify errors
@@ -295,8 +294,7 @@ export const indirect = 1;
 
 #[ignore = "generator: // !!! TODO Verify errors"]
 #[test]
-fn find_all_refs_solution_referencing_default_project_indirectly_through_disable_referenced_project_load_in_one_but_without_it_in_another()
- {
+fn find_all_refs_solution_referencing_default_project_indirectly_through_disable_referenced_project_load_in_one_but_without_it_in_another() {
     let content = r#"
 // @stateBaseline: true 
 // @tsc: --build /myproject/tsconfig.json
@@ -368,7 +366,7 @@ export const indirect = 1;
 	]
 }
 "#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("findAllRefsSolutionReferencingDefaultProjectIndirectlyThroughDisableReferencedProjectLoadInOneButWithoutItInAnother", content);
     // TODO: // Ensure configured project is found for open file
     fourslash::go_to_marker(&mut s, "mainFoo");
     // TODO: // !!! TODO Verify errors
@@ -425,7 +423,7 @@ import { /*fooIndirect3Import*/foo } from '../target/src/main';
 foo()
 export function bar() {}
 "#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("findAllRefsProjectWithOwnFilesReferencingFileFromReferencedProject", content);
     // TODO: // Ensure configured project is found for open file
     fourslash::go_to_marker(&mut s, "mainFoo");
     // TODO: // !!! TODO Verify errors
@@ -513,7 +511,7 @@ import { I } from "../a";
 import { C } from "../c";
 export const D: I = C;
 "#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("findAllRefsOverlappingProjects", content);
     // TODO: // The first search will trigger project loads
     fourslash::unsupported("VerifyBaselineFindAllReferences"); // f.VerifyBaselineFindAllReferences(t, "")
     // TODO: // The second search starts with the projects already loaded
@@ -657,7 +655,7 @@ export const noCoreRef2Const = 10;
 		"composite": true,
 	},
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("findAllRefsTwoProjectsOpenAndOneProjectReferences", content);
     fourslash::go_to_marker(&mut s, "main");
     fourslash::unsupported("VerifyBaselineFindAllReferences"); // f.VerifyBaselineFindAllReferences(t, "find")
 }
@@ -709,7 +707,7 @@ export interface Bar {
 const bar: Bar = {
 	prop: 1
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("findAllRefsDoesNotTryToSearchProjectAfterItsUpdateDoesNotIncludeTheFile", content);
     fourslash::go_to_marker(&mut s, "change");
     fourslash::go_to_marker(&mut s, "prop");
     // TODO: // Now change `babel-loader` project to no longer import `core` project
@@ -740,7 +738,7 @@ export function foobar() {}
 // @Filename: /myproject/playground/tsconfig-json/tests/spec.ts
 export function /*find*/bar() { }
 "#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("findAllRefsOpenFileInConfiguredProjectThatWillBeRemoved", content);
     fourslash::go_to_marker(&mut s, "tests");
     fourslash::unsupported("CloseFileOfMarker"); // f.CloseFileOfMarker(t, "tests")
     fourslash::unsupported("VerifyBaselineFindAllReferences"); // f.VerifyBaselineFindAllReferences(t, "find")
@@ -805,7 +803,7 @@ import { /*symbolAUsage*/symbolA } from '../project-a/public';
 console.log(symbolB);
 console.log(symbolA);
 "#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("findAllRefsReExportInMultiProjectSolution", content);
     // TODO: // Find all refs for symbolA - should find definition in private.ts, re-export in public.ts, and usa
     fourslash::unsupported("VerifyBaselineFindAllReferences"); // f.VerifyBaselineFindAllReferences(t, "symbolA")
     // TODO: // Find all refs for symbolB - should find definition and usage (no re-export involved)

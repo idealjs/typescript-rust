@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: // F.A and F.B (no C because C's value is the same as A's)"]
 #[test]
 fn exhaustive_case_completions4() {

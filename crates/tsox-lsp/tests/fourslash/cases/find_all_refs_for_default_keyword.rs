@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineFindAllReferences"]
 #[test]
 fn find_all_refs_for_default_keyword() {
@@ -15,6 +16,6 @@ class /*4*/default {}
 const foo = {
     /*5*/default: 1
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("findAllRefsForDefaultKeyword", content);
     fourslash::unsupported("VerifyBaselineFindAllReferences"); // f.VerifyBaselineFindAllReferences(t, "1", "2", "3", "4", "5")
 }

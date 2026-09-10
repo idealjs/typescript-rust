@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.Backspace"]
 #[test]
 fn quick_info_on_merged_interfaces_with_incremental_edits() {
@@ -15,7 +16,7 @@ namespace MM {
     var r3 = b.foo; // number
     var r/*2*/4 = b.b/*1*/ar; // string
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("quickInfoOnMergedInterfacesWithIncrementalEdits", content);
     fourslash::go_to_marker(&mut s, "1");
     fourslash::unsupported("VerifyQuickInfoIs"); // f.VerifyQuickInfoIs(t, "(property) B<string>.bar: string", "")
     fourslash::unsupported("DeleteAtCaret"); // f.DeleteAtCaret(t, 1)
@@ -27,5 +28,5 @@ namespace MM {
     fourslash::unsupported("VerifyQuickInfoIs"); // f.VerifyQuickInfoIs(t, "(property) B<string>.bar: string", "")
     fourslash::go_to_marker(&mut s, "2");
     fourslash::unsupported("VerifyQuickInfoIs"); // f.VerifyQuickInfoIs(t, "var r4: string", "")
-    fourslash::verify_no_errors(&mut s);
+    fourslash::verify_no_errors(&mut s, );
 }

@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineRename"]
 #[test]
 fn rename_js_doc_type_literal() {
@@ -12,7 +13,7 @@ fn rename_js_doc_type_literal() {
  * @param {number} options.bar
  */
 function foo(/**/options) {}"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("renameJsDocTypeLiteral", content);
     fourslash::go_to_file(&mut s, "/a.js");
     fourslash::unsupported("VerifyBaselineRename"); // f.VerifyBaselineRename(t, nil /*preferences*/, "")
 }

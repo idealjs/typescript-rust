@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.FormatDocument"]
 #[test]
 fn format_remove_new_line_after_open_brace() {
@@ -9,13 +10,10 @@ fn format_remove_new_line_after_open_brace() {
 if (true)
 {
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("formatRemoveNewLineAfterOpenBrace", content);
     fourslash::unsupported("FormatDocument"); // f.FormatDocument(t, "")
-    fourslash::verify_current_file_content(
-        &mut s,
-        r#"function foo() {
+    fourslash::verify_current_file_content(&mut s, r#"function foo() {
 }
 if (true) {
-}"#,
-    );
+}"#);
 }

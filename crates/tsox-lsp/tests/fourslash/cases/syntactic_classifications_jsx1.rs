@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifySemanticTokens"]
 #[test]
 fn syntactic_classifications_jsx1() {
@@ -9,6 +10,6 @@ let x  = <div a = "some-value" b = {1}>
 </div>;
 
 let y = <element attr="123"/>"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("syntacticClassificationsJsx1", content);
     fourslash::unsupported("VerifySemanticTokens"); // f.VerifySemanticTokens(t, []fourslash.SemanticToken{
 }

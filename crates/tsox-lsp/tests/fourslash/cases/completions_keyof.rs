@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCompletions"]
 #[test]
 fn completions_keyof() {
@@ -9,7 +10,7 @@ function f<T extends keyof A>(key: T) {}
 f("[|/*f*/|]");
 function g<T extends keyof B>(key: T) {}
 g("[|/*g*/|]");"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("completionsKeyof", content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "f", &fourslash.CompletionsExpectedList{
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "g", &fourslash.CompletionsExpectedList{
 }

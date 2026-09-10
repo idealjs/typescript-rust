@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: t.Skip('Known failing fourslash test')"]
 #[test]
 fn code_fix_undeclared_property_accesses() {
@@ -17,6 +18,6 @@ obj.c;
 type T<U> = I | U;
 let t: T<number>;
 t.x;"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("codeFixUndeclaredPropertyAccesses", content);
     fourslash::unsupported("VerifyCodeFixAvailable"); // f.VerifyCodeFixAvailable(t, nil)
 }

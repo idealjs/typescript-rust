@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCompletions"]
 #[test]
 fn jsx_attribute_completion_style_no_snippet() {
@@ -23,6 +24,6 @@ declare namespace JSX {
 }
 
 <foo [|prop_/**/|] />"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("jsxAttributeCompletionStyleNoSnippet", content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

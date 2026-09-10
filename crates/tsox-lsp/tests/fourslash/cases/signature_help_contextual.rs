@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifySignatureHelp"]
 #[test]
 fn signature_help_contextual() {
@@ -25,7 +26,7 @@ type Cb = () => void;
 const cb: Cb = (/*contextualTypeAlias*/)
 
 const cb2: () => void = (/*contextualFunctionType*/)"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("signatureHelp_contextual", content);
     fourslash::go_to_marker(&mut s, "takesObj0");
     fourslash::unsupported("VerifySignatureHelp"); // f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{Text: "m(n: number, s: string): void",
     fourslash::go_to_marker(&mut s, "takesObj1");

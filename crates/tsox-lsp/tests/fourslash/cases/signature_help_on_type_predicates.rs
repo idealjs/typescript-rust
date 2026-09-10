@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifySignatureHelp"]
 #[test]
 fn signature_help_on_type_predicates() {
@@ -9,7 +10,7 @@ function f3(a: any, ...b): a is number {}
 f1(/*1*/)
 f2(/*2*/)
 f3(/*3*/)"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("signatureHelpOnTypePredicates", content);
     fourslash::go_to_marker(&mut s, "1");
     fourslash::unsupported("VerifySignatureHelp"); // f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{Text: "f1(a: any): a is number"})
     fourslash::go_to_marker(&mut s, "2");

@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "generator: }"]
 #[test]
 fn signature_help_jsx() {
@@ -7,7 +8,7 @@ fn signature_help_jsx() {
 //@jsx: react
 declare var React: any;
 const z = <div>{[].map(x => </**/"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("signatureHelpJSX", content);
     fourslash::go_to_marker(&mut s, "");
     fourslash::unsupported("VerifyNoSignatureHelpWithContext"); // f.VerifyNoSignatureHelpWithContext(t, &lsproto.SignatureHelpContext{TriggerKind: lsproto.SignatureHe
     // TODO: }

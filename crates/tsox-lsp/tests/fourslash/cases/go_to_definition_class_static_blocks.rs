@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineGoToDefinition"]
 #[test]
 fn go_to_definition_class_static_blocks() {
@@ -11,6 +12,6 @@ fn go_to_definition_class_static_blocks() {
     static y;
     [|/*classStaticBocks3*/static|] {}
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("goToDefinitionClassStaticBlocks", content);
     fourslash::unsupported("VerifyBaselineGoToDefinition"); // f.VerifyBaselineGoToDefinition(t, true, "classStaticBocks1", "classStaticBocks2", "classStaticBocks3
 }

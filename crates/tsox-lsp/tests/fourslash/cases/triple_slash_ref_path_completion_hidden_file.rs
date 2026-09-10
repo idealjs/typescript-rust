@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCompletions"]
 #[test]
 fn triple_slash_ref_path_completion_hidden_file() {
@@ -12,7 +13,7 @@ fn triple_slash_ref_path_completion_hidden_file() {
 /// <reference path="[|./*1*/|]
 /// <reference path=".//*2*/
 /// <reference path=".\/*3*/"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("tripleSlashRefPathCompletionHiddenFile", content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, []string{"0", "2", "3"}, &fourslash.CompletionsExpectedList{
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
 }

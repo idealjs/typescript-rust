@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCompletions"]
 #[test]
 fn string_literal_completions_in_position_typed_using_rest() {
@@ -14,7 +15,7 @@ class Q<T> {
   public select<Keys extends keyof T>(...args: Keys[]) {}
 }
 new Q<{ id: string; name: string }>().select("name", "/*ts3*/");"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("stringLiteralCompletionsInPositionTypedUsingRest", content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, []string{"ts1", "ts2"}, &fourslash.CompletionsExpectedList{
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, []string{"ts3"}, &fourslash.CompletionsExpectedList{
 }

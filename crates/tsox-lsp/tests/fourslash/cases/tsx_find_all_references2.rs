@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyBaselineFindAllReferences"]
 #[test]
 fn tsx_find_all_references2() {
@@ -15,6 +16,6 @@ declare namespace JSX {
     }
 }
 var x = <div name="hello" />;"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("tsxFindAllReferences2", content);
     fourslash::unsupported("VerifyBaselineFindAllReferences"); // f.VerifyBaselineFindAllReferences(t, "1")
 }

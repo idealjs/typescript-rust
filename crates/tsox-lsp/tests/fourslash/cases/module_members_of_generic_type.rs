@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCompletions"]
 #[test]
 fn module_members_of_generic_type() {
@@ -7,6 +8,6 @@ fn module_members_of_generic_type() {
     export var x = <T>(x: T) => x;
 }
 var r = M./**/;"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("moduleMembersOfGenericType", content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

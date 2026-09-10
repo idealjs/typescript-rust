@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[test]
 fn recursive_wrapped_type_parameters1() {
     let content = r#"interface I<T> {
@@ -15,7 +16,7 @@ var c/*4*/c = x.c;
 var d/*5*/d = x.c.a;
 var e/*6*/e = x.c.b;
 var f/*7*/f = x.c.c; "#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("recursiveWrappedTypeParameters1", content);
     fourslash::verify_quick_info_at(&mut s, "1", "var yy: I<I<I<I<I<I<number>>>>>>", "");
     fourslash::verify_quick_info_at(&mut s, "2", "var aa: number", "");
     fourslash::verify_quick_info_at(&mut s, "3", "var bb: I<number>", "");

@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCompletions"]
 #[test]
 fn completion_list_builder_locations_properties() {
@@ -10,6 +11,6 @@ class A1 {
 class A2 {
     public static a/*property2*/
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("completionListBuilderLocations_properties", content);
     fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, f.Markers(), &fourslash.CompletionsExpectedList{
 }

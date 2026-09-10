@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.DeleteAtCaret"]
 #[test]
 fn generic_respecialization1() {
@@ -66,15 +67,15 @@ class GenericPlanet2<T extends Food, V>{
     constructor(public name: string, public solarSystem: string, public species: GenericMonster<T, V>) { }
 }
  /*1*/"#;
-    let mut s = Session::new(content);
-    fourslash::verify_no_errors(&mut s);
+    let mut s = Session::new_for_test("genericRespecialization1", content);
+    fourslash::verify_no_errors(&mut s, );
     fourslash::go_to_marker(&mut s, "1");
     fourslash::unsupported("InsertLine"); // f.InsertLine(t, "")
     fourslash::unsupported("InsertLine"); // f.InsertLine(t, "")
-    fourslash::verify_no_errors(&mut s);
+    fourslash::verify_no_errors(&mut s, );
     fourslash::go_to_marker(&mut s, "2");
     fourslash::unsupported("DeleteAtCaret"); // f.DeleteAtCaret(t, 6)
     fourslash::insert(&mut s, "any");
-    fourslash::verify_no_errors(&mut s);
+    fourslash::verify_no_errors(&mut s, );
     fourslash::unsupported("InsertLine"); // f.InsertLine(t, "var narnia = new GenericPlanet2<Cookie, string>(")
 }

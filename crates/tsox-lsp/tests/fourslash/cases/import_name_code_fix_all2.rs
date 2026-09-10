@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[ignore = "unimplemented: fourslash.VerifyCodeFixAll"]
 #[test]
 fn import_name_code_fix_all2() {
@@ -11,7 +12,7 @@ export declare function homedir(): void;
 
 join();
 homedir();"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("importNameCodeFix_all2", content);
     fourslash::go_to_file(&mut s, "/index.ts");
     fourslash::unsupported("VerifyCodeFixAll"); // f.VerifyCodeFixAll(t, fourslash.VerifyCodeFixAllOptions{
 }

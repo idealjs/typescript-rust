@@ -106,6 +106,12 @@ impl Checker {
             return Some(self.get_type_from_type_node(type_node));
         }
 
+        // JS 文件：JSDoc @type 标签充当类型注解（Go getEffectiveTypeAnnotationNode
+        // 的 reparse 通道等价物）
+        if let Some(t) = self.jsdoc_type_annotation(declaration) {
+            return Some(t);
+        }
+
         if let NodeData::BindingElement(_) = &declaration.data {
             if let Some(ctx) = self.get_contextual_type_from_binding_element(declaration) {
                 return Some(ctx);
@@ -283,6 +289,60 @@ impl Checker {
         if let NodeData::CallExpression(call) = &parent.data {
             if Arc::ptr_eq(&call.expression, fn_node) {
                 return self.get_contextual_type(&parent, ContextFlags::None);
+            }
+        }
+        None
+    }
+}
+
+impl Checker {
+    /// 声明 JSDoc @type 标签的类型（仅 JS 文件）
+    pub(crate) fn jsdoc_type_annotation(
+        &mut self,
+        declaration: &Arc<tsox_frontend::ast::Node>,
+    ) -> Option<Arc<Type>> {
+        use tsox_frontend::ast::NodeData;
+        let file = self.get_source_file_of_node(declaration)?;
+        if !file.file_name.ends_with(".js")
+            && !file.file_name.ends_with(".jsx")
+            && !file.file_name.ends_with(".mjs")
+        {
+            return None;
+        }
+        let mut jsdocs = tsox_frontend::parser::parse_jsdoc_for_node(&file, declaration);
+        if jsdocs.is_empty() {
+            // 文档挂在语句层（const obj 的 @type 挂 VariableStatement）
+            if let Some(stmt) = declaration
+                .parent
+                .as_ref()
+                .and_then(|p| p.parent.as_ref())
+                .filter(|n| matches!(n.kind, tsox_frontend::ast::SyntaxKind::VariableStatement))
+                .or_else(|| {
+                    declaration
+                        .parent
+                        .as_ref()
+                        .filter(|n| matches!(n.kind, tsox_frontend::ast::SyntaxKind::VariableStatement))
+                })
+            {
+                jsdocs = tsox_frontend::parser::parse_jsdoc_for_node(&file, stmt);
+            }
+        }
+        for jd in jsdocs.iter() {
+            let NodeData::JSDoc(d) = &jd.data else {
+                continue;
+            };
+            let Some(tags) = &d.tags else {
+                continue;
+            };
+            for tag in tags.nodes.iter() {
+                let NodeData::JSDocTypeTag(t) = &tag.data else {
+                    continue;
+                };
+                let NodeData::JSDocTypeExpression(e) = &t.type_expression.data else {
+                    continue;
+                };
+                let t = self.get_type_from_type_node(&e.type_node);
+                return Some(t);
             }
         }
         None
