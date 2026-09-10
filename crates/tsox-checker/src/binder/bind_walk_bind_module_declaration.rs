@@ -4,6 +4,24 @@ use crate::binder::bind_walk::*;
 
 impl Binder {
     pub(crate) fn bind_module_declaration(&mut self, node: &Arc<Node>) {
+        self.set_export_context_flag(node);
+        self.bind_module_declaration_inner(node)
+    }
+
+    /// Go setExportContextFlag：ambient 模块且无 export 声明时是隐式导出语境
+    /// （declare namespace 内未加 export 的声明自动入 exports）
+    fn set_export_context_flag(&mut self, node: &Arc<Node>) {
+        let is_ambient = node.has_syntactic_modifier(ModifierFlags::Ambient)
+            || node.flags.contains(NodeFlags::Ambient);
+        if is_ambient && !Self::has_export_declarations(node) {
+            let ptr = Arc::as_ptr(node) as *mut tsox_frontend::ast::Node;
+            unsafe {
+                (*ptr).flags |= NodeFlags::ExportContext;
+            }
+        }
+    }
+
+    fn bind_module_declaration_inner(&mut self, node: &Arc<Node>) {
         let dotted_name = match &node.data {
             tsox_frontend::ast::NodeData::ModuleDeclaration(md) => match md.name.kind {
                 SyntaxKind::Identifier => md.name.text().to_string(),

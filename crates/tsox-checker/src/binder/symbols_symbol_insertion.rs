@@ -8,6 +8,11 @@ impl Binder {
             || self
                 .get_combined_modifier_flags(node)
                 .contains(ModifierFlags::Export)
+            // Go declareModuleMember：ambient 容器的 ExportContext 内隐式导出
+            || self
+                .container
+                .as_ref()
+                .is_some_and(|c| c.flags.contains(NodeFlags::ExportContext))
     }
 
     pub(crate) fn insert_symbol_into_container(

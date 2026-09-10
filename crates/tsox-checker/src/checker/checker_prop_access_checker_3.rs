@@ -49,7 +49,7 @@ impl Checker {
         self.has_property_of_type(t, name)
     }
 
-    pub(crate) fn infer_call_type_arguments(
+    pub fn infer_call_type_arguments(
         &mut self,
         node: &Arc<Node>,
         signature: &Arc<Signature>,

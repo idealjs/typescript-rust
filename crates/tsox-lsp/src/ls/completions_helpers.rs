@@ -305,6 +305,10 @@ pub(super) fn member_symbols_after_dot(
             if q == 0 || &text[q - 1..q] != "." {
                 return MemberDotResult::NotDot;
             }
+            // spread（`...`）与 `..` 不是成员访问点
+            if q >= 2 && &text[q - 2..q - 1] == "." {
+                return MemberDotResult::NotDot;
+            }
             let dot = q - 1;
             let Some(recv) = deepest_node_ending_at(&root, dot) else {
                 return MemberDotResult::Dot(Vec::new());

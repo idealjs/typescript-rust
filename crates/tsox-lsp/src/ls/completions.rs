@@ -59,7 +59,17 @@ impl LanguageService {
         _trigger_character: Option<&str>,
         _include_symbols: bool,
     ) -> Result<CompletionList, String> {
-        let node = find_deepest_node(&file.node, position);
+        let mut node = find_deepest_node(&file.node, position);
+        // EOF 边界（未闭合串跨到文件尾）：offset==全部节点 end 时 deepest 退化
+        // 为 SourceFile；按 Go preceding-token 语义回看 offset-1 定位 token
+        if node.kind == tsox_frontend::ast::SyntaxKind::SourceFile && position > 0 {
+            let boundary = find_deepest_node(&file.node, position - 1);
+            // EOF 回看仅用于 token 恢复（未闭合串/点）；回看命中标识符等
+            // 正常 token 时保持原位（extends 子句 EOF 补全仍走 scope 路径）
+            if boundary.kind != tsox_frontend::ast::SyntaxKind::SourceFile {
+                node = boundary;
+            }
+        }
 
         let mut checker = program_build_checker(&self.get_program());
 
