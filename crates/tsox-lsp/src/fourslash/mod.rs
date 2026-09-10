@@ -2,6 +2,7 @@
 //! 框架操作（api，自由函数 + 显式 Session 参数）。
 
 pub mod api;
+mod api_completions;
 pub mod parse;
 pub mod session;
 

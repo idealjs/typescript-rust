@@ -197,9 +197,10 @@ impl Checker {
         Some(self.create_function_or_constructor_type(signatures, false))
     }
 
-    pub(crate) fn get_type_of_class_declaration(&mut self, node: &Arc<Node>) -> Arc<Type> {
+    pub fn get_type_of_class_declaration(&mut self, node: &Arc<Node>) -> Arc<Type> {
         let members = match &node.data {
             tsox_frontend::ast::NodeData::ClassDeclaration(data) => Arc::clone(&data.members),
+            tsox_frontend::ast::NodeData::ClassExpression(data) => Arc::clone(&data.members),
             _ => return self.get_any_type(),
         };
 
