@@ -106,7 +106,7 @@ impl Checker {
         }
     }
 
-    pub(crate) fn build_class_instance_type_with_base(&mut self, node: &Arc<Node>) -> Arc<Type> {
+    pub fn build_class_instance_type_with_base(&mut self, node: &Arc<Node>) -> Arc<Type> {
         let (members, heritage_clauses) = match &node.data {
             tsox_frontend::ast::NodeData::ClassDeclaration(data) => {
                 (&data.members, data.heritage_clauses.clone())

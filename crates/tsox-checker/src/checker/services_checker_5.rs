@@ -1,5 +1,9 @@
 #![allow(unused_imports)]
 
+use super::services_type_argument_constraints::{
+    callee_expression_of, constraint_type_of_type_parameter_node, single_constraint,
+    type_argument_constraint, type_arguments_of, type_parameter_nodes_of_type_reference,
+};
 use crate::checker::services::*;
 
 impl Checker {
@@ -264,6 +268,7 @@ impl Checker {
     }
 
     pub fn get_type_argument_constraint(&mut self, node: &Arc<Node>) -> Option<Arc<Type>> {
-        None
+        type_argument_constraint(self, node)
     }
+
 }

@@ -9,6 +9,8 @@ use tsox_frontend::ast::SyntaxKind;
 use tsox_frontend::ast::SourceFile;
 use tsox_frontend::ast::Symbol;
 
+use tsox_frontend::ast::NodeData;
+
 use super::language_service::LanguageService;
 
 pub struct CompletionsFromTypes {
@@ -40,31 +42,7 @@ pub fn string_literal_completion_labels(
     node: &Arc<Node>,
     position: usize,
 ) -> Option<Vec<String>> {
-    use tsox_frontend::ast::NodeData;
-
-    // 定位包含位置的最内字符串字面量
-    let mut lit: Option<Arc<Node>> = None;
-    let mut cur = Some(Arc::clone(node));
-    while let Some(c) = cur {
-        if c.kind == tsox_frontend::ast::SyntaxKind::StringLiteral {
-            lit = Some(Arc::clone(&c));
-            break;
-        }
-        if c.pos() > position || c.end() <= position {
-            break;
-        }
-        let mut next: Option<Arc<Node>> = None;
-        tsox_frontend::ast::node_data_generated::for_each_child(&c, |ch| {
-            if ch.pos() <= position && position <= ch.end() {
-                next = Some(Arc::clone(ch));
-                true
-            } else {
-                false
-            }
-        });
-        cur = next;
-    }
-    let lit = lit?;
+    let lit = innermost_string_literal(node, position)?;
     let parent = lit.parent.clone()?;
 
     match &parent.data {
@@ -159,6 +137,29 @@ pub fn string_literal_completion_labels(
     }
 }
 
+fn innermost_string_literal(node: &Arc<Node>, position: usize) -> Option<Arc<Node>> {
+    let mut cur = Some(Arc::clone(node));
+    while let Some(c) = cur {
+        if c.kind == tsox_frontend::ast::SyntaxKind::StringLiteral {
+            return Some(c);
+        }
+        if c.pos() > position || c.end() < position {
+            return None;
+        }
+        let mut next: Option<Arc<Node>> = None;
+        tsox_frontend::ast::node_data_generated::for_each_child(&c, |ch| {
+            if ch.pos() <= position && position <= ch.end() {
+                next = Some(Arc::clone(ch));
+                true
+            } else {
+                false
+            }
+        });
+        cur = next;
+    }
+    None
+}
+
 fn literal_union_labels(
     checker: &mut Checker,
     t: &Arc<tsox_checker::checker::types::Type>,
@@ -198,4 +199,94 @@ fn collect_string_literals(
             collect_string_literals(checker, &c, out, depth + 1);
         }
     }
+}
+
+/// Go getStringLiteralCompletionsFromModuleNames 的相对路径段：列出目标目录下
+/// 程序内已知文件的基名与子目录名
+pub fn relative_module_specifier_labels(
+    program: &Arc<tsox_compile::compiler::Program>,
+    file: &Arc<SourceFile>,
+    node: &Arc<Node>,
+    text: &str,
+    position: usize,
+) -> Option<Vec<String>> {
+    let lit = innermost_string_literal(node, position)?;
+    if !is_module_specifier_literal(&lit) {
+        return None;
+    }
+    let raw = text.get(lit.pos()..lit.end().min(text.len()))?;
+    let content = raw.trim_matches(|c| c == '"' || c == '\'' || c == '`');
+    let directory = match content.rfind('/') {
+        Some(idx) => &content[..=idx],
+        None => return None,
+    };
+    if !directory.starts_with('.') && !directory.starts_with('/') {
+        return None;
+    }
+
+    let script_dir = match file.file_name.rfind('/') {
+        Some(idx) => &file.file_name[..idx],
+        None => "",
+    };
+    let base_dir = normalize_path(&format!("{script_dir}/{directory}"));
+
+    let mut labels: Vec<String> = Vec::new();
+    let prefix = format!("{base_dir}/");
+    for other in program.source_files() {
+        if other.file_name == file.file_name {
+            continue;
+        }
+        let Some(rest) = other.file_name.strip_prefix(&prefix) else {
+            continue;
+        };
+        if rest.is_empty() {
+            continue;
+        }
+        match rest.find('/') {
+            Some(idx) => labels.push(rest[..idx].to_string()),
+            None => labels.push(strip_module_extension(rest).to_string()),
+        }
+    }
+    labels.sort();
+    labels.dedup();
+    Some(labels)
+}
+
+fn is_module_specifier_literal(lit: &Arc<Node>) -> bool {
+    let Some(parent) = &lit.parent else {
+        return false;
+    };
+    match &parent.data {
+        NodeData::ImportDeclaration(d) => Arc::ptr_eq(&d.module_specifier, lit),
+        NodeData::ExportDeclaration(d) => {
+            d.module_specifier.as_ref().is_some_and(|s| Arc::ptr_eq(s, lit))
+        }
+        NodeData::ExternalModuleReference(d) => Arc::ptr_eq(&d.expression, lit),
+        NodeData::CallExpression(_) => true,
+        _ => false,
+    }
+}
+
+fn normalize_path(path: &str) -> String {
+    let mut parts: Vec<&str> = Vec::new();
+    for part in path.split('/') {
+        match part {
+            "" | "." => continue,
+            ".." => {
+                parts.pop();
+            }
+            other => parts.push(other),
+        }
+    }
+    format!("/{}", parts.join("/"))
+}
+
+fn strip_module_extension(name: &str) -> &str {
+    for ext in [".d.ts", ".d.mts", ".d.cts", ".ts", ".tsx", ".mts", ".cts", ".js", ".jsx", ".mjs", ".cjs"] {
+        if let Some(stripped) = name.strip_suffix(ext) {
+            return stripped;
+        }
+    }
+    name
+
 }

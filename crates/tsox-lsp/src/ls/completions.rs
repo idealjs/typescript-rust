@@ -1,6 +1,11 @@
 #![allow(dead_code)]
 
 pub(crate) use crate::ls::completions_helpers::*;
+pub(crate) use crate::ls::{
+    completions_context, completions_object_like, completions_object_like_types,
+};
+#[allow(unused_imports)]
+pub(crate) use crate::ls::completions_members::*;
 
 pub(crate) use std::sync::Arc;
 
@@ -70,8 +75,16 @@ impl LanguageService {
                 node = boundary;
             }
         }
+        let jsx = completions_context::is_jsx_file(file);
 
         let mut checker = program_build_checker(&self.get_program());
+
+        let comment_ranges = completions_context::comment_ranges(&file.text, jsx);
+        if let Some(range) = completions_context::enclosing_comment(&comment_ranges, &file.text, position)
+            && !completions_context::is_doc_comment(&range, &file.text)
+        {
+            return Ok(CompletionList::default());
+        }
 
         // Go right-of-dot：位置在 '.'（或 '?.'）之后的成员补全，优先于全局
         // scope 符号（completions.go getTypeScriptMemberSymbols）；点后语境
@@ -91,7 +104,7 @@ impl LanguageService {
             MemberDotResult::NotDot => {}
         }
 
-        // 字符串字面量位：形参约束的字面量并集 / 索引访问的属性名
+        // 字符串字面量位：形参约束的字面量集合 / 索引访问的属性名
         // （Go getStringLiteralCompletions）
         if let Some(labels) =
             crate::ls::string_completions::string_literal_completion_labels(&mut checker, &node, position)
@@ -103,6 +116,86 @@ impl LanguageService {
                     kind: Some(12), // String kind
                     ..Default::default()
                 })
+                .collect();
+            return Ok(CompletionList {
+                is_incomplete: false,
+                items,
+            });
+        }
+
+        let (context_token, _previous_token) =
+            completions_context::relevant_tokens(&file.text, jsx, 0, position);
+        let containing_token = completions_context::token_containing(&file.text, jsx, position);
+
+        // 模块说明符字符串（import/export/require/import() 实参）的路径补全
+        if let Some(labels) = crate::ls::string_completions::relative_module_specifier_labels(
+            &self.get_program(),
+            file,
+            &node,
+            &file.text,
+            position,
+        ) {
+            let items = labels
+                .into_iter()
+                .map(|l| CompletionItem {
+                    label: l,
+                    kind: Some(9), // Module kind
+                    ..Default::default()
+                })
+                .collect();
+            return Ok(CompletionList {
+                is_incomplete: false,
+                items,
+            });
+        }
+
+        // 类型实参内类型字面量的成员补全（Go
+        // tryGetObjectTypeLiteralInTypeArgumentCompletionSymbols）
+        if let Some(symbols) = completions_object_like_types::type_literal_in_type_argument_completion(
+            &mut checker,
+            &node,
+            &file.text,
+            jsx,
+            position,
+        ) {
+            let items = symbols
+                .iter()
+                .filter(|s| !s.name.is_empty() && !s.name.starts_with('\u{FE}'))
+                .map(|s| symbol_to_completion_item(s))
+                .collect();
+            return Ok(CompletionList {
+                is_incomplete: false,
+                items,
+            });
+        }
+
+        // Go isCompletionListBlocker：确定的无效补全位置直接空列表
+        if completions_context::is_completion_list_blocker(
+            context_token.as_ref(),
+            containing_token.as_ref(),
+            &file.text,
+            position,
+            &node,
+        ) {
+            return Ok(CompletionList::default());
+        }
+
+        if let Some(container) = completions_object_like::try_get_object_like_container(
+            &node,
+            &file.text,
+            jsx,
+            position,
+        ) && let Some(symbols) = completions_object_like::object_like_completion(
+            &mut checker,
+            file,
+            &container,
+            &file.text,
+            position,
+        ) {
+            let items = symbols
+                .iter()
+                .filter(|s| !s.name.is_empty() && !s.name.starts_with('\u{FE}'))
+                .map(|s| symbol_to_completion_item(s))
                 .collect();
             return Ok(CompletionList {
                 is_incomplete: false,
