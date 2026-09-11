@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
 
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn import_fixes_global_typings_cache() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"// @Filename: /project/tsconfig.json
  { "compilerOptions": { "allowJs": true, "checkJs": true, "module": "commonjs" } }
 // @Filename: /home/src/Library/Caches/typescript/node_modules/@types/react-router-dom/package.json

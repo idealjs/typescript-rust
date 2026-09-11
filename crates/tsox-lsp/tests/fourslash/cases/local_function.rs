@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
 
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn local_function() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"function /*1*/foo() {
     function /*2*/bar2() {
     }

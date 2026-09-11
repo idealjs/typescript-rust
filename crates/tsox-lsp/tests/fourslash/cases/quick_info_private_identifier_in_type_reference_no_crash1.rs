@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
 
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn quick_info_private_identifier_in_type_reference_no_crash1() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"// @target: esnext
 class Foo {
   #prop: string = "";

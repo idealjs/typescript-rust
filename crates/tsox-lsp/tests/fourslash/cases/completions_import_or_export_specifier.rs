@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
 
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn completions_import_or_export_specifier() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"// @Filename: exports.ts
 export let foo = 1;
 let someValue = 2;

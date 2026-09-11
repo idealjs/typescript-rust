@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
 
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn suggestion_of_unused_variable_with_external_module() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"//@allowJs: true
 //@module: commonjs
 // @Filename: /mymodule.js

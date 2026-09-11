@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
 
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn completion_list_without_variableinitializer() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"const a = a/*1*/;
 const b = a && b/*2*/;
 const c = [{ prop: [c/*3*/] }];

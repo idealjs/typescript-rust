@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
 
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn formatting_object_literal_open_curly_newline_typing() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"
 var varName =/**/
 "#;

@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
 
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn quick_info_for_indexer_result_with_constraint() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"function foo<T>(x: T) {
         return x;
 }

@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
 
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn ambient_shorthand_goto_definition() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"// @Filename: declarations.d.ts
 declare module /*module*/"jquery"
 // @Filename: user.ts

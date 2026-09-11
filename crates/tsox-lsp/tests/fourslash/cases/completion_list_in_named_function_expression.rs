@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
 
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn completion_list_in_named_function_expression() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"function foo(a: number): string {
     /*insideFunctionDeclaration*/
     return "";

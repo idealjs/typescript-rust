@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
 
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn overload_quick_info() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"function Foo(a: string, b: number, c: boolean);
 function Foo(a: any, name: string, age: number);
 function Foo(fred: any[], name: string, age: number);

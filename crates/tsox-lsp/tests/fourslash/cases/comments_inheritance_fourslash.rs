@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
 
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn comments_inheritance_fourslash() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"/** i1 is interface with properties*/
 interface i1 {
     /** i1_p1*/

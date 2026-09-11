@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
 
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn completions_in_export_module_block() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"const outOfScope = 0;
 
 declare module 'mod' {

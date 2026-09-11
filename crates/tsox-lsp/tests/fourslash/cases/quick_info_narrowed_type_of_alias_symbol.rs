@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
 
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn quick_info_narrowed_type_of_alias_symbol() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"// @strict: true
 // @Filename: modules.ts
 export declare const someEnv: string | undefined;

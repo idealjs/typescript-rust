@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
 
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn formatting_on_invalid_codes() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"/*1*/var a;var c          , b;var  $d
 /*2*/var $e
 /*3*/var f

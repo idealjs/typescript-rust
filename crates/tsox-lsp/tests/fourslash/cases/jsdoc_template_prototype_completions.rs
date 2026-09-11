@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
 
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn jsdoc_template_prototype_completions() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"// @checkJs: true
 // @filename: index.js
 https://github.com/microsoft/TypeScript/issues/11492

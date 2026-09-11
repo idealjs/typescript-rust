@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
 
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn completion_lists_string_literal_type_as_indexed_access_type_object() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"let firstCase: "a/*case_1*/"["foo"]
 let secondCase: "b/*case_2*/"["bar"]
 let thirdCase: "c/*case_3*/"["baz"]

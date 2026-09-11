@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
 
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn code_fix_spelling_case_sensitive3() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"class Node {}
 let node = new Node();
 [|nodes|]"#;

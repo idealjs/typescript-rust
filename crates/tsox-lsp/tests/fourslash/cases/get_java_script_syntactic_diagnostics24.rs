@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
 
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn get_java_script_syntactic_diagnostics24() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"// @allowJs: true
 // @Filename: a.js
 function Person(age) {

@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
 
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn completions_trigger_character() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"// @jsx: preserve
 /** @/*tag*/ */
 //</*comment*/

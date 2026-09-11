@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
 
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn completions_unique_symbol_import() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"// @noLib: true
 // @Filename: /globals.d.ts
 declare const Symbol: () => symbol;

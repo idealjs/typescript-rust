@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
 
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn js_doc_augments_and_extends() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"// @allowJs: true
 // @checkJs: true
 // @Filename: dummy.js

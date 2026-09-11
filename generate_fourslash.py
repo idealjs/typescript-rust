@@ -161,9 +161,19 @@ def translate_func(name, body, file_stem):
     content_vars = {}
     has_session = False
 
+    go_skip = None
     for stmt in split_statements(body):
         if stmt in ("t.Parallel()",) or stmt.startswith("defer testutil.") \
                 or stmt.startswith("defer done()") or stmt == "":
+            continue
+        sm = re.match(r't\.Skip\("((?:[^"\\]|\\.)*)"\)', stmt)
+        if sm:
+            # 上游语料自标已知失败（t.Skip）：镜像为 ignore，忠实于 Go
+            go_skip = "go: t.Skip('" + sm.group(1).replace('"', "'") + "')"
+            continue
+        sm2 = re.match(r't\.Skip\(\)', stmt)
+        if sm2:
+            go_skip = "go: t.Skip()"
             continue
         m = match_const(stmt)
         if m:
@@ -226,12 +236,13 @@ def translate_func(name, body, file_stem):
 
     if not has_session:
         return None
-    out = [f"#[test]\nfn {fn}() {{"]
+    attr = f'#[ignore = "{go_skip}"]\n' if go_skip else ""
+    out = [attr + f"#[test]\nfn {fn}() {{"]
     for ln in lines:
         out.append("    " + ln)
     out.append("}")
     body_text = "\n".join(out)
-    return fn, body_text
+    return fn, body_text, bool(go_skip)
 
 
 
@@ -489,9 +500,11 @@ def main():
             if r is None:
                 rows.append((stem, name, "skipped", "无 NewFourslash"))
                 continue
-            fn, body_text = r
+            fn, body_text, go_skipped = r
             fns.append(body_text)
-            rows.append((stem, name, "generated", ""))
+            rows.append((stem, name,
+                         "go-skip" if go_skipped else "generated",
+                         "上游 t.Skip" if go_skipped else ""))
         if fns:
             base = stem
             k = 2
@@ -508,12 +521,13 @@ def main():
     open(f"{OUT_DIR}/main.rs", "w").write("mod cases;\n")
     with open("fourslash-migration.txt", "w") as fh:
         gen_n = sum(1 for r in rows if r[2] == "generated")
+        skip_n = sum(1 for r in rows if r[2] == "go-skip")
         sk_n = sum(1 for r in rows if r[2] == "skipped")
         fh.write(f"# fourslash 用例迁移清单：生成 {gen_n}"
-                 f" / 跳过 {sk_n}，文件 {len(stems)} 个\n")
+                 f" / 上游自标 go-skip {skip_n} / 跳过 {sk_n}，文件 {len(stems)} 个\n")
         for stem, name, status, why in rows:
             fh.write(f"{stem}\t{name}\t{status}\t{why}\n")
-    print(f"文件 {len(stems)}，生成 {gen_n}，跳过 {sk_n}")
+    print(f"文件 {len(stems)}，生成 {gen_n}，上游自标 {skip_n}，跳过 {sk_n}")
 
 
 if __name__ == "__main__":

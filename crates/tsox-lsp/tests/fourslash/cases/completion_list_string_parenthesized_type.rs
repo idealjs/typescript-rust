@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
 
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn completion_list_string_parenthesized_type() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"type T1 = "a" | "b" | "c";
 type T2<T extends T1> = {};
 

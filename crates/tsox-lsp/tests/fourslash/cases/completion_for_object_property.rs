@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
 
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn completion_for_object_property() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"// @Filename: /a.ts
 export const foo = { bar: 'baz' };
 // @Filename: /b.ts

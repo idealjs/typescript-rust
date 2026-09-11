@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
 
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn format_v8_directive() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"// @Filename: foo.js
 function foo() {}
 /*1*/%PrepareFunctionForOptimization(foo)/*2*/;"#;

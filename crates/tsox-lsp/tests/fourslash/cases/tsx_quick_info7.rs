@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
 
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn tsx_quick_info7() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"//@Filename: file.tsx
 // @jsx: preserve
 // @noLib: true

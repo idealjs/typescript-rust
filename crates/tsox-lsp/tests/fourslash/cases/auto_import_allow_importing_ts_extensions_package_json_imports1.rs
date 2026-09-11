@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
 
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn auto_import_allow_importing_ts_extensions_package_json_imports1() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r##"// @lib: es5
 // @module: node18
 // @allowImportingTsExtensions: true

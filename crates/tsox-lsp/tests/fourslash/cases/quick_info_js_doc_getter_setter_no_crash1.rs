@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
 
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn quick_info_js_doc_getter_setter_no_crash1() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"class A implements A {
   get x(): string { return "" }
 }

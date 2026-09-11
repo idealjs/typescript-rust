@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
 
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn quick_info_on_undefined() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"function foo(a: string) {
 }
 foo(/*1*/undefined);

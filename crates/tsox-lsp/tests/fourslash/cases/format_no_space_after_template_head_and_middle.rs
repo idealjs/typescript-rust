@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
 
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn format_no_space_after_template_head_and_middle() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"const a1 = ` + "`" + `${ 1 }${ 1 }` + "`" + `;
 const a2 = ` + "`" + "#;
     // TODO: ${ 1 }${ 1 }

@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
 
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn doc_comment_template_indentation() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"// @Filename: indents.ts
     a   /*2*/
     /*1*/

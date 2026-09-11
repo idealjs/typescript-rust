@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
 
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn clodule_type_of1() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"// @strict: false
 class C<T> {
     static foo(x: number) { }

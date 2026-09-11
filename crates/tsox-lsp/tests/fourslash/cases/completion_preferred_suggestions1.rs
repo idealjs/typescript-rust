@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
 
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn completion_preferred_suggestions1() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"declare let v1: string & {} | "a" | "b" | "c";
 v1 = "/*1*/";
 declare let v2: number & {} | 0 | 1 | 2;

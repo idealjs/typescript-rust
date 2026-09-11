@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
 
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn comments_external_modules_fourslash() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"// @Filename: commentsExternalModules_file0.ts
 /** Namespace comment*/
 export namespace m/*1*/1 {

@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
 
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn allow_late_bound_symbols_overwrite_early_bound_symbols() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"export {};
 const prop = "abc";
 function foo(): void {};

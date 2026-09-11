@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
 
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn completion_for_meta_property() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"import./*1*/;
 new./*2*/;
 function test() { new./*3*/ }"#;

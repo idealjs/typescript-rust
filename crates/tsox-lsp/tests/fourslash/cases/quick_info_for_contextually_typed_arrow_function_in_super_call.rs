@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
 
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn quick_info_for_contextually_typed_arrow_function_in_super_call() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"class A<T1, T2> {
     constructor(private map: (value: T1) => T2) {
 

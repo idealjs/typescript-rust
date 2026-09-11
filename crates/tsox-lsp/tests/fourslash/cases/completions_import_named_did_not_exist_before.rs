@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
 
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn completions_import_named_did_not_exist_before() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"// @noLib: true
 // @Filename: /a.ts
 export function Test1() {}

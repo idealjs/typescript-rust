@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
 
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn member_list_in_reopened_enum() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"namespace M {
     enum E {
         A, B

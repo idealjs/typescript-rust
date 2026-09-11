@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
 
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn quick_info_on_prop_declared_using_index_signature_on_interface_with_base() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"interface P {}
 interface B extends P {
   [k: string]: number;

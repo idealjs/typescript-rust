@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
 
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn completions_literal_from_inference_within_inferred_type3() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"// @stableTypeOrdering: true
 declare function test<T>(a: {
   [K in keyof T]: {

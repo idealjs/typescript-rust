@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
 
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn comments_variables() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"/** This is my variable*/
 var myV/*1*/ariable = 10;
 /*2*/

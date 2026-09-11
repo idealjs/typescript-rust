@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
 
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn completions_import_filtered_by_package_json_peer_dependencies() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"//@noEmit: true
 //@Filename: /package.json
 {

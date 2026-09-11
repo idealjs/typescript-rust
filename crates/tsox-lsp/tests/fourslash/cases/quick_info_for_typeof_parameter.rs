@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
 
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn quick_info_for_typeof_parameter() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"function foo() {
     var y/*ref1*/1: string;
     var x: typeof y/*ref2*/1;

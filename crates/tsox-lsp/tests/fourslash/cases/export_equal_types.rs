@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
 
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn export_equal_types() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"// @module: commonjs
 // @lib: es5
 // @strict: false

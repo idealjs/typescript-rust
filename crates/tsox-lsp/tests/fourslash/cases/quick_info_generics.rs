@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
 
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn quick_info_generics() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"class Con/*1*/tainer<T> {
     x: T;
 }

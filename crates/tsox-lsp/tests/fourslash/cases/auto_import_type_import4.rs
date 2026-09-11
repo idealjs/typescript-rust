@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
 
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn auto_import_type_import4() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"// @verbatimModuleSyntax: true
 // @target: esnext
 // @Filename: /exports1.ts

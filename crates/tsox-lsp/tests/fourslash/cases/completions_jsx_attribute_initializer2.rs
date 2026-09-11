@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
 
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn completions_jsx_attribute_initializer2() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"// @Filename: /a.tsx
 declare namespace JSX {
     interface IntrinsicElements {

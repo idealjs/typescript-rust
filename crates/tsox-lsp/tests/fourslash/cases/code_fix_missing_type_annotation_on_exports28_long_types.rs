@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
 
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn code_fix_missing_type_annotation_on_exports28_long_types() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"// @strict: false
 // @isolatedDeclarations: true
 // @declaration: true

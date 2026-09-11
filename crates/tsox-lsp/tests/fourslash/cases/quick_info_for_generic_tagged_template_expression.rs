@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
 
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn quick_info_for_generic_tagged_template_expression() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"interface T1 {}
 class T2 {}
 type T3 = "a" | "b";

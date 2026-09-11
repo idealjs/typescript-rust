@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
 
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn auto_import_file_exclude_patterns10() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"// @Filename: /src/vs/test.ts
 import { Parts } from './parts';
 export class /**/Extended implements Parts {

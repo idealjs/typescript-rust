@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
 
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn auto_import_type_only_preferred3() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"// @module: esnext
 // @moduleResolution: bundler
 // @Filename: /a.ts

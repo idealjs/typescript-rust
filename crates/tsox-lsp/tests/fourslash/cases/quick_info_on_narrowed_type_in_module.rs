@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
 
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn quick_info_on_narrowed_type_in_module() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"// @strict: false
 var strOrNum: string | number;
 namespace m {

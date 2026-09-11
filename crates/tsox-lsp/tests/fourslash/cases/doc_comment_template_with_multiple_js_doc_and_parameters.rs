@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
 
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn doc_comment_template_with_multiple_js_doc_and_parameters() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"/** */
 /**
  * 

@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
 
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn completions_merged_declarations1() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"// @lib: es5
 interface Point {
     x: number;

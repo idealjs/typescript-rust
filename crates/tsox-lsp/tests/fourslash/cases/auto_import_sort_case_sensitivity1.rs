@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
 
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn auto_import_sort_case_sensitivity1() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"// @Filename: /exports1.ts
 export const a = 0;
 export const A = 1;

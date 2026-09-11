@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
 
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn import_name_code_fix_new_import_base_url2() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"// @Filename: /tsconfig.json
 {
     "compilerOptions": {

@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
 
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn completion_list_string_parenthesized_expression() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"const foo = {
     a: 1,
     b: 1,

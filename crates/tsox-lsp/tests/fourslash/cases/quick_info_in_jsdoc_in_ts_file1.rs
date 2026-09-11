@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
 
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn quick_info_in_jsdoc_in_ts_file1() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"/** @type {() => { /*1*/data: string[] }} */
 function test(): { data: string[] } {
   return {

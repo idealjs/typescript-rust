@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
 
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn import_name_code_fix_uri_style_node_core_modules2() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"// @module: commonjs
 // @Filename: /node_modules/@types/node/index.d.ts
 declare module "fs" { function writeFile(): void }

@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
 
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn completions_element_access_numeric() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"// @target: esnext
 type Tup = [
     /**

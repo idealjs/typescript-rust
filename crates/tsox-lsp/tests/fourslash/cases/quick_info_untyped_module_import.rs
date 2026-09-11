@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
 
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn quick_info_untyped_module_import() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"// @strict: false
 // @Filename: node_modules/foo/index.js
  /*index*/{}

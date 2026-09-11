@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
 
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn completion_for_string_literal() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"type Options = "Option 1" | "Option 2" | "Option 3";
 var x: Options = "[|/*1*/Option 3|]";
 

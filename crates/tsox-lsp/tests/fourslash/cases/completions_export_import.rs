@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
 
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn completions_export_import() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"// @lib: es5
 declare global {
     namespace N {

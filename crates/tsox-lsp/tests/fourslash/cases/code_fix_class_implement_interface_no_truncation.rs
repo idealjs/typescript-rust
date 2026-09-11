@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
 
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn code_fix_class_implement_interface_no_truncation() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"// @stableTypeOrdering: true
 type GeneratePrefixedNumbers<Limit extends number, Prefix extends string, Result extends number[] = []> = 
     Result['length'] extends Limit ? `${Prefix}${Result[number]}` : GeneratePrefixedNumbers<Limit, Prefix, [...Result, Result['length']]>;

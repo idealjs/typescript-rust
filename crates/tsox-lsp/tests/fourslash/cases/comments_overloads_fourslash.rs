@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
 
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn comments_overloads_fourslash() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"/** this is signature 1*/
 function /*1*/f1(/**param a*/a: number): number;
 function /*2*/f1(b: string): number;

@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
 
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn code_fix_spelling5() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"// @Filename: f1.ts
 export const fooooooooo = 1;
 // @Filename: f2.ts

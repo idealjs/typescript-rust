@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
 
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn completions_literals() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"const x: 0 | "one" = /**/;
 const y: 0 | "one" | 1n = /*1*/;
 const y2: 0 | "one" | 1n = 'one'/*2*/;"#;

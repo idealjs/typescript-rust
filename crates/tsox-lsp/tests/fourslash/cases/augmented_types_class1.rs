@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
 
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn augmented_types_class1() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"class c5b { public foo() { } }
 namespace c5b { export var y = 2; } // should be ok
 c5b./*1*/

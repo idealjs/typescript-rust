@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
 
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn contextually_typed_function_expression_generic1() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"interface Comparable<T> {
    compareTo(other: T): T;
 }

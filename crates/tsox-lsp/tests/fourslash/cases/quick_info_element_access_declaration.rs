@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
 
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn quick_info_element_access_declaration() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"// @checkJs: true
 // @allowJs: true
 // @Filename: a.js

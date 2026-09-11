@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
 
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn completions_before_rest_arg1() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"// @target: esnext
 // @lib: esnext
 const layers = Object.assign({}, /*1*/...[]);"#;

@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
 
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn quick_info_on_element_access_in_write_location4() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"// @strict: true
 interface Serializer {
   set value(v: string | number | boolean);

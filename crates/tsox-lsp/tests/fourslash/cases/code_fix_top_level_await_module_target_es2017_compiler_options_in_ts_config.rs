@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
 
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn code_fix_top_level_await_module_target_es2017_compiler_options_in_ts_config() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"// @filename: /dir/a.ts
 declare const p: Promise<number>;
 await p;

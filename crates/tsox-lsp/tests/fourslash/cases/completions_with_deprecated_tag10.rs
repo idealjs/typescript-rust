@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
 
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn completions_with_deprecated_tag10() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"// @Filename: /foo.ts
 /** @deprecated foo */
 export const foo = 0;

@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
 
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn quick_info_on_var_in_arrow_expression() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"interface IMap<T> {
     [key: string]: T;
 }

@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
 
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn js_doc_function_signatures13() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"/**
  * @template {string} K/**/ a golden opportunity
  */

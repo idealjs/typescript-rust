@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
 
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn completion_list_in_arrow_function_in_unclosed_call_site01() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"declare function foo(...params: any[]): any;
 function getAllFiles(rootFileNames: string[]) {
     var processedFiles = rootFileNames.map(fileName => foo(/*1*/"#;

@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
 
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn import_completions_package_json_imports_pattern_root_wildcard() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r##"// @module: nodenext
 // @Filename: /package.json
 {

@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
 
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn completion_for_string_literal_quote_preference() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"enum A {
     A,
     B,

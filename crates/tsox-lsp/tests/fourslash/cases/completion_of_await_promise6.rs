@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
 
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn completion_of_await_promise6() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"// @lib: es2015
 async function foo(x: Promise<string>) {
    [|x./**/|]

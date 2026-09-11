@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
 
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn completion_import_meta_with_global_declaration() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"// @Filename: a.ts
 import./*1*/
 // @Filename: b.ts

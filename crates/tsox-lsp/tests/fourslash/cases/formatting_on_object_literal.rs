@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
 
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn formatting_on_object_literal() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"var x = /*1*/{foo:/*2*/ 1,
 bar: "tt",/*3*/
 boo: /*4*/1 + 5}/*5*/;

@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
 
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn codefix_infer_from_usage_nullish() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"// @strict: false
 // @noImplicitAny: true
 declare const a: string

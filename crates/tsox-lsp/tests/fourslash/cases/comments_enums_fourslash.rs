@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
 
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn comments_enums_fourslash() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"/** Enum of colors*/
 enum /*1*/Colors {
     /** Fancy name for 'blue'*/

@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
 
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn let_quick_info_and_completion_list() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"let /*1*/a = 10;
 /*2*/a = 30;
 function foo() {

@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
 
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn completions_import_windows_paths_project_relative() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"// @Filename: c:/project/tsconfig.json
 {
   "compilerOptions": {

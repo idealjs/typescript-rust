@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
 
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn comments_line_preservation() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"/** This is firstLine
   * This is second Line
   * 

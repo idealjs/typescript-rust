@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
 
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn code_fix_undeclared_property_accesses() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"interface I { x: number; }
 let i: I;
 i.y;

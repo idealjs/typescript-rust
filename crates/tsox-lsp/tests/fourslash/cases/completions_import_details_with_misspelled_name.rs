@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
 
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn completions_import_details_with_misspelled_name() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"// @Filename: /a.ts
 export const abc = 0;
 // @Filename: /b.ts

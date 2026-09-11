@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
 
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn completion_after_question_dot() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"// @strict: true
 class User {
     #foo: User;

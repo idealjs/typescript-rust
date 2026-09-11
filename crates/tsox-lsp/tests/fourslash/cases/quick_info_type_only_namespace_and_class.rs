@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
 
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn quick_info_type_only_namespace_and_class() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"// @Filename: /a.ts
 export namespace ns {
   export class Box<T> {}

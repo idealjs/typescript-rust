@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
 
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn code_fix_class_extend_abstract_some_properties_present() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"// @strict: false
 // @noImplicitOverride: true
 abstract class A {

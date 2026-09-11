@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
 
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn completion_list_for_derived_type1() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"interface IFoo {
     bar(): IFoo;
 }

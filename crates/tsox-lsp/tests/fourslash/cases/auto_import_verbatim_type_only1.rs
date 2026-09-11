@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
 
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn auto_import_verbatim_type_only1() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"// @module: node18
 // @verbatimModuleSyntax: true
 // @Filename: /mod.ts

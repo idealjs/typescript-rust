@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
 
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn auto_import_node_module_symlink_renamed() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"// @Filename: /home/src/workspaces/solution/package.json
 {
     "name": "monorepo",

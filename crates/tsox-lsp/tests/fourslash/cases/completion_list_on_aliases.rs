@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
 
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn completion_list_on_aliases() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"namespace M {
     export var value;
 

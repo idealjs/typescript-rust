@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
 
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn this_predicate_function_quick_info02() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"interface Sundries {
     broken: boolean;
 }

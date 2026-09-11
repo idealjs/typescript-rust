@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
 
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn multi_module_fundule() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"// @strict: false
 function C(x: number) { }
 

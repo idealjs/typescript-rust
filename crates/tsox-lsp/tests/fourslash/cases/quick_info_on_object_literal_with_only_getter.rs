@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
 
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn quick_info_on_object_literal_with_only_getter() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"function /*1*/makePoint(x: number) {
     return {
         get x() { return x; },

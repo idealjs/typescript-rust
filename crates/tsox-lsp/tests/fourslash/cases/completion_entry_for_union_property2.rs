@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
 
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn completion_entry_for_union_property2() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"// @lib: es5
 interface One {
     commonProperty: string;

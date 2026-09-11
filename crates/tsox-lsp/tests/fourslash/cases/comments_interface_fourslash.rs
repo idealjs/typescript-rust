@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
 
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn comments_interface_fourslash() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"// @lib: es5
 /** this is interface 1*/
 interface i/*1*/1 {

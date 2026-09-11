@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
 
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn get_jsx_outlining_spans() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"import React, { Component } from 'react';
 
 export class Home extends Component[| {

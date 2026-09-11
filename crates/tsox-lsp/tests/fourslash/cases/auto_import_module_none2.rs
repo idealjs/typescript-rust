@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
 
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn auto_import_module_none2() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"// @module: none
 // @moduleResolution: bundler
 // @target: es2015

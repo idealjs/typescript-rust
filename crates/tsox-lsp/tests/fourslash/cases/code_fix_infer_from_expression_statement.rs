@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
 
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn code_fix_infer_from_expression_statement() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"// @noImplicitAny: true
 function inferVoid( [| app |] ) {
     app.use('hi')

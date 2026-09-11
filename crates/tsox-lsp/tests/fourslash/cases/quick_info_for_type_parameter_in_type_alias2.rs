@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
 
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn quick_info_for_type_parameter_in_type_alias2() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"type Call<AA> = { (): A/*1*/A };
 type Index<AA> = {[foo: string]: A/*2*/A};
 type GenericMethod<AA> = { method<BB>(): A/*3*/A & B/*4*/B }

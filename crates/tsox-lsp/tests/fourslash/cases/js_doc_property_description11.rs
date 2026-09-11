@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
 
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn js_doc_property_description11() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"type AliasExample = {
     /** Something generic */
     [p: string]: string;

@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
 
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn doc_comment_template_class_decl01() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"/*decl*/class C {
     private p;
     constructor(a, b, c, d);

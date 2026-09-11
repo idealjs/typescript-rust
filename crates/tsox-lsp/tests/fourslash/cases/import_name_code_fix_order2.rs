@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
 
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn import_name_code_fix_order2() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"// @Filename: /a.ts
 export const _aB: number;
 export const _Ab: number;

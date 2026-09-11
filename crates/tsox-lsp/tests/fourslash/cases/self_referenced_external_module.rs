@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
 
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn self_referenced_external_module() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"// @Filename: app.ts
 export import A = require('./app');
 export var I = 1;

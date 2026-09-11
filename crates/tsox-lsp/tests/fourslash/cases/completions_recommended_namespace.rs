@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
 
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn completions_recommended_namespace() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"// @noLib: true
 // @Filename: /a.ts
 export namespace Name {

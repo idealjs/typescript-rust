@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
 
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn quick_info_module_variables() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"var x = 1;
 namespace M {
     export var x = 2;

@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
 
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn import_name_code_fix_jsx4() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"// @jsx: react
 // @module: esnext
 // @esModuleInterop: true

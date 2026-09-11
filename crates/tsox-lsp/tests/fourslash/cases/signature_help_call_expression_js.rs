@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
 
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn signature_help_call_expression_js() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"// @strict: false
 // @checkJs: true
 // @allowJs: true

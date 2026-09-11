@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
 
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn code_fix_unused_identifier_suggestion() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"// @strict: false
 function f([|p|]) {
     const [|x|] = 0;

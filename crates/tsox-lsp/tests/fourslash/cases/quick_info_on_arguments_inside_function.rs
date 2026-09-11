@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
 
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn quick_info_on_arguments_inside_function() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"function foo(x: string) {
     return /*1*/arguments;
 }"#;

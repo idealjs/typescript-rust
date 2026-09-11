@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
 
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn code_fix_infer_from_usage_member3() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"// @noImplicitAny: true
 class C {
     constructor([|public p)|] { }

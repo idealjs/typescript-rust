@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
 
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn jsx_with_type_parametershas_instantiated_signature_help() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"declare namespace JSX {
     interface Element {
         render(): Element | string | false;

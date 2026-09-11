@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
 
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn completions_redeclare_module_as_global() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"// @esModuleInterop: true,
 // @target: esnext
 // @Filename: /myAssert.d.ts

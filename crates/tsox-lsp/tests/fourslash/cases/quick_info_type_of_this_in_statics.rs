@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
 
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn quick_info_type_of_this_in_statics() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"class C {
     static foo() {
         var /*1*/r = this;

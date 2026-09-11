@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
 
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn quickfix_implement_interface_unreachable_type_uses_relative_import() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"// @Filename: class.ts
 export class Class { }
 // @Filename: interface.ts

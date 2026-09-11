@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
 
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn completion_list_in_unclosed_function08() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"function foo(x: string, y: number, z: boolean) {
     function bar(a: number, b: string = "hello", c: typeof x = "hello") {
         var v = /*1*/"#;

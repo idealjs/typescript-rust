@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
 
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn quick_info_union_of_namespaces() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"declare const x: typeof A | typeof B;
 x./**/f;
 

@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
 
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn quick_info_contextually_typed_signature_optional_parameter_from_intersection1() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"// @strict: true
 const optionals: ((a?: number) => unknown) & ((b?: string) => unknown) = (
   arg,

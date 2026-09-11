@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
 
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn get_java_script_global_completions1() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"// @allowNonTsExtensions: true
 // @Filename: Foo.js
 function f() {

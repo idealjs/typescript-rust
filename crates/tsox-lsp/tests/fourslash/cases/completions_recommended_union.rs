@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
 
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn completions_recommended_union() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"// @strictNullChecks: true
 const enum E { A = "A", B = "B" }
 const enum E2 { X = "X", Y = "Y" }

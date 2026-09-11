@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
 
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn completion_in_function_like_body_includes_primitive_types() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"class Foo<T> { }
 class Bar { }
 function includesTypes() {

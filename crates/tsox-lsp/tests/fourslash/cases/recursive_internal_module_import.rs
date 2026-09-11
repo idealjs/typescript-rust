@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
 
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn recursive_internal_module_import() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"namespace M {
     import A = B;
     import /**/B = A;

@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
 
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn generic_combinator_with_constraints1() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"function apply<T, U extends Date>(source: T[], selector: (x: T) => U) {
     var /*1*/xs = source.map(selector); // any[]
     var /*2*/xs2 = source.map((x: T, a, b): U => { return null }); // any[] 

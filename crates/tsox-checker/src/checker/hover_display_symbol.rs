@@ -124,6 +124,21 @@ impl Checker {
         b.extend(prefix);
         // shorthand 成员类型 = 引用变量类型的 widen
         let mut t = shorthand_widen_type(self, symbol).unwrap_or_else(|| self.get_type_of_symbol(symbol));
+        // Go hover.go:741：类型是带约束的类型参数 → 显示 "T extends 约束"
+        //（TypeParameterToDeclaration 渲染）
+        if let TypeData::TypeParameter(tp) = &t.data
+            && !tp.is_this_type
+            && let Some(constraint) = self.get_constraint_of_type_parameter(&t)
+        {
+            let name = t
+                .symbol
+                .as_ref()
+                .map(|s| s.name.clone())
+                .unwrap_or_else(|| "T".to_string());
+            let rendered = format!("{name} extends {}", self.type_to_string(&constraint));
+            b.write_text(&rendered, DisplayPartKind::Text);
+            return;
+        }
         // 对象字面量属性在拓宽位（无注解函数返回等）显示拓宽类型
         // （tsc getTypeOfSymbolAtLocation 经字面量拓宽上下文取型）
         if symbol.flags.contains(SymbolFlags::Property)

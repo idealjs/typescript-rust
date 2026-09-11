@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
 
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn format_dot_after_number() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"1+ 2 .toString() +3/*1*/
 1+ 2. .toString() +3/*2*/
 1+ 2.0 .toString() +3/*3*/

@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
 
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn string_completions_vs_escaping() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"type Value<P extends string> = `var(--\\\\, ${P})`
 export const value: Value<'one' | 'two'> = "/*1*/"
 

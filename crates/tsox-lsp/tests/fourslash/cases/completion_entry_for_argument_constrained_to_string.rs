@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
 
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn completion_entry_for_argument_constrained_to_string() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"declare function test<P extends "a" | "b">(p: P): void;
 
 test(/*ts*/)
