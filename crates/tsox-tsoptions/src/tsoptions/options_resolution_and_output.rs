@@ -200,4 +200,11 @@ pub(crate) const RESOLUTION_AND_OUTPUT: &[OptionDecl] = &[
         is_file_path: false,
         ..DEFAULT_DECL
     },
+    OptionDecl {
+        name: "resolveJsonModule",
+        short_name: None,
+        kind: OptionKind::Boolean,
+        is_file_path: false,
+        ..DEFAULT_DECL
+    },
 ];

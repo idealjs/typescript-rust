@@ -3,8 +3,10 @@
 use std::sync::Arc;
 
 use tsox_checker::checker::Checker;
+use tsox_checker::checker::types::ContextFlags;
 use tsox_core::core::text::TextRange;
 use tsox_frontend::ast::Node;
+use tsox_frontend::ast::SymbolFlags;
 use tsox_frontend::ast::SyntaxKind;
 use tsox_frontend::ast::SourceFile;
 use tsox_frontend::ast::Symbol;
@@ -46,6 +48,12 @@ pub fn string_literal_completion_labels(
     let parent = lit.parent.clone()?;
 
     match &parent.data {
+        // 类型位字面量 `Foo<'...'>` / `Foo<{ x: '...' }>`（Go
+        // getStringLiteralCompletionEntries 的 LiteralType 分支 →
+        // fromUnionableLiteralType）
+        NodeData::LiteralTypeNode(_) => {
+            from_unionable_literal_type(checker, &parent, position)
+        }
         // f("...")：按实参位取形参约束；泛型签名先由其余实参推断类型参数
         // （Go getStringLiteralCompletionsFromSignature）
         NodeData::CallExpression(d) => {
@@ -112,6 +120,44 @@ pub fn string_literal_completion_labels(
             let t = checker.get_type_of_node(&other);
             Some(literal_union_labels(checker, &t))
         }
+        // with { type: "..." }：全局 ImportAttributes 接口同名属性的字面量
+        // 并集（Go getContextualImportAttributeType）
+        NodeData::ImportAttribute(d) => {
+            let attr_name = match &d.name.data {
+                NodeData::Identifier(id) => id.text.clone(),
+                NodeData::StringLiteral(_) => d.name.text().trim_matches(['"', '\'']).to_string(),
+                _ => return None,
+            };
+            import_attribute_value_labels(checker, &attr_name)
+        }
+        // {"…"}：对象字面量引号键名位的成员名并集（Go
+        // stringLiteralCompletionsForObjectLiteral）
+        NodeData::PropertyAssignment(_) | NodeData::ShorthandPropertyAssignment(_) => {
+            let is_name = match &parent.data {
+                NodeData::PropertyAssignment(d) => Arc::ptr_eq(&d.name, &lit),
+                NodeData::ShorthandPropertyAssignment(d) => Arc::ptr_eq(&d.name, &lit),
+                _ => false,
+            };
+            if !is_name {
+                return None;
+            }
+            let Some(grand) = parent.parent.clone() else {
+                return None;
+            };
+            if grand.kind != SyntaxKind::ObjectLiteralExpression {
+                return None;
+            }
+            let Some(t) = checker.get_contextual_type(&grand, ContextFlags::None) else {
+                return None;
+            };
+            let members =
+                super::completions_object_like::properties_for_object_expression(
+                    checker,
+                    &t,
+                    &grand,
+                );
+            Some(members.into_iter().map(|m| m.name.clone()).collect())
+        }
         // var x: 'a'|'b' = '...'：注解类型（Go GetContextualType 默认路径）
         NodeData::VariableDeclaration(d) => {
             let tn = d.type_node.as_ref()?;
@@ -172,6 +218,83 @@ fn literal_union_labels(
     out
 }
 
+/// Go fromUnionableLiteralType：类型位字符串字面量的约束来源判定。
+/// literal_type 为 LiteralType 节点，grandparent 为其（跨括号）父节点
+fn from_unionable_literal_type(
+    checker: &mut Checker,
+    literal_type: &Arc<Node>,
+    position: usize,
+) -> Option<Vec<String>> {
+    let grandparent = literal_type.parent.clone()?;
+    match grandparent.kind {
+        SyntaxKind::CallExpression
+        | SyntaxKind::NewExpression
+        | SyntaxKind::TaggedTemplateExpression
+        | SyntaxKind::ExpressionWithTypeArguments
+        | SyntaxKind::JsxOpeningElement
+        | SyntaxKind::JsxSelfClosingElement
+        | SyntaxKind::TypeReference => {
+            let mut type_argument = Arc::clone(literal_type);
+            while let Some(p) = type_argument.parent.clone() {
+                if Arc::ptr_eq(&p, &grandparent) {
+                    break;
+                }
+                type_argument = p;
+            }
+            let t = checker.get_type_argument_constraint(&type_argument)?;
+            Some(literal_union_labels(checker, &t))
+        }
+        SyntaxKind::IndexedAccessType => {
+            let NodeData::IndexedAccessTypeNode(d) = &grandparent.data else {
+                return None;
+            };
+            if !(d.index_type.pos() <= position && position <= d.index_type.end()) {
+                return None;
+            }
+            let obj_t = checker.get_type_from_type_node(&d.object_type);
+            Some(
+                checker
+                    .get_apparent_properties(&obj_t)
+                    .into_iter()
+                    .map(|p| p.name.clone())
+                    .collect(),
+            )
+        }
+        SyntaxKind::UnionType => {
+            let result = from_unionable_literal_type(checker, &grandparent, position)?;
+            let used = already_used_literals_in_union(&grandparent, literal_type);
+            Some(
+                result
+                    .into_iter()
+                    .filter(|l| !used.contains(l))
+                    .collect(),
+            )
+        }
+        SyntaxKind::PropertySignature => {
+            let t = super::completions_object_like_types::constraint_of_type_argument_property(
+                checker, &grandparent,
+            )?;
+            Some(literal_union_labels(checker, &t))
+        }
+        _ => None,
+    }
+}
+
+fn already_used_literals_in_union(union: &Arc<Node>, current: &Arc<Node>) -> Vec<String> {
+    let NodeData::UnionTypeNode(d) = &union.data else {
+        return Vec::new();
+    };
+    d.types
+        .nodes
+        .iter()
+        .filter(|t| !Arc::ptr_eq(t, current) && t.kind == SyntaxKind::LiteralType)
+        .filter_map(|t| match &t.data {
+            NodeData::LiteralTypeNode(l) => Some(l.literal.text().to_string()),
+            _ => None,
+        })
+        .collect()
+}
+
 fn collect_string_literals(
     checker: &mut Checker,
     t: &Arc<tsox_checker::checker::types::Type>,
@@ -201,9 +324,11 @@ fn collect_string_literals(
     }
 }
 
-/// Go getStringLiteralCompletionsFromModuleNames 的相对路径段：列出目标目录下
-/// 程序内已知文件的基名与子目录名
+/// Go getStringLiteralCompletionsFromModuleNames 的模块说明符补全：
+/// 相对/根路径走程序内文件枚举；非相对（裸包名）走 node_modules 管线
+/// （completions_path 的 exports/typesVersions 处理）
 pub fn relative_module_specifier_labels(
+    service: &LanguageService,
     program: &Arc<tsox_compile::compiler::Program>,
     file: &Arc<SourceFile>,
     node: &Arc<Node>,
@@ -216,22 +341,38 @@ pub fn relative_module_specifier_labels(
     }
     let raw = text.get(lit.pos()..lit.end().min(text.len()))?;
     let content = raw.trim_matches(|c| c == '"' || c == '\'' || c == '`');
+    if !(content.starts_with("./")
+        || content.starts_with("../")
+        || content.starts_with('/'))
+    {
+        return Some(super::completions_path::non_relative_module_labels(
+            service,
+            program,
+            &file.file_name,
+            content,
+        ));
+    }
     let directory = match content.rfind('/') {
         Some(idx) => &content[..=idx],
         None => return None,
     };
-    if !directory.starts_with('.') && !directory.starts_with('/') {
-        return None;
-    }
 
     let script_dir = match file.file_name.rfind('/') {
         Some(idx) => &file.file_name[..idx],
         None => "",
     };
     let base_dir = normalize_path(&format!("{script_dir}/{directory}"));
+    let with_slash = format!("{base_dir}/");
+    if !program
+        .source_files()
+        .iter()
+        .any(|f| f.file_name.starts_with(&with_slash))
+    {
+        return None;
+    }
 
     let mut labels: Vec<String> = Vec::new();
-    let prefix = format!("{base_dir}/");
+    let prefix = with_slash;
     for other in program.source_files() {
         if other.file_name == file.file_name {
             continue;
@@ -289,4 +430,19 @@ fn strip_module_extension(name: &str) -> &str {
     }
     name
 
+}
+
+/// with { key: "value" } 值位的字面量并集（Go getContextualImportAttributeType：
+/// 全局 ImportAttributes/ImportAssertions 接口同名属性类型）
+pub(super) fn import_attribute_value_labels(
+    checker: &mut Checker,
+    attr_name: &str,
+) -> Option<Vec<String>> {
+    let global = checker
+        .get_global_symbol_by_name("ImportAttributes", SymbolFlags::TYPE)
+        .or_else(|| checker.get_global_symbol_by_name("ImportAssertions", SymbolFlags::TYPE))?;
+    let t = checker.resolve_interface_type_ex(&global, None);
+    let prop = checker.get_property_of_type(&t, attr_name)?;
+    let prop_t = checker.get_type_of_symbol(&prop);
+    Some(literal_union_labels(checker, &prop_t))
 }

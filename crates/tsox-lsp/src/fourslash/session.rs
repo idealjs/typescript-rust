@@ -51,6 +51,59 @@ struct FourslashHost {
     prefs: Arc<Mutex<UserPreferences>>,
 }
 
+/// 虚拟 FS 的 ReadDirectory：按扩展名过滤文件，include glob 的
+/// `./*`（当前层）与 `**/*后缀`（递归）两种形态
+fn read_virtual_directory(
+    fs: &dyn tsox_tsoptions::vfs::FS,
+    path: &str,
+    extensions: &[String],
+    includes: &[String],
+) -> Vec<String> {
+    let recursive = includes.iter().any(|i| i.starts_with("**/"));
+    let suffix_filters: Vec<&str> = includes
+        .iter()
+        .filter_map(|i| i.strip_prefix("**/*"))
+        .collect();
+    let mut out = Vec::new();
+    let mut stack = vec![path.to_string()];
+    while let Some(dir) = stack.pop() {
+        let entries = fs.get_accessible_entries(&dir);
+        for file in entries.files {
+            let full = if dir.ends_with('/') {
+                format!("{dir}{file}")
+            } else {
+                format!("{dir}/{file}")
+            };
+            let name_matches_ext = extensions.is_empty()
+                || extensions.iter().any(|e| file.ends_with(e.as_str()));
+            let name_matches_include = if recursive {
+                suffix_filters.is_empty()
+                    || suffix_filters.iter().any(|s| file.ends_with(s))
+            } else {
+                full.trim_start_matches(path).trim_start_matches('/').len()
+                    == file.len()
+            };
+            if name_matches_ext && name_matches_include {
+                out.push(full);
+            }
+        }
+        if recursive {
+            for sub in entries.directories {
+                let full = if dir.ends_with('/') {
+                    format!("{dir}{sub}")
+                } else {
+                    format!("{dir}/{sub}")
+                };
+                if !full.contains("/node_modules/") {
+                    stack.push(full);
+                }
+            }
+        }
+    }
+    out.sort();
+    out
+}
+
 impl Host for FourslashHost {
     fn use_case_sensitive_file_names(&self) -> bool {
         false
@@ -73,16 +126,16 @@ impl Host for FourslashHost {
     fn read_directory(
         &self,
         _current_dir: &str,
-        _path: &str,
-        _extensions: &[String],
+        path: &str,
+        extensions: &[String],
         _excludes: &[String],
-        _includes: &[String],
+        includes: &[String],
         _depth: i32,
     ) -> Vec<String> {
-        Vec::new()
+        read_virtual_directory(&*self.fs, path, extensions, includes)
     }
-    fn get_directories(&self, _path: &str) -> Vec<String> {
-        Vec::new()
+    fn get_directories(&self, path: &str) -> Vec<String> {
+        self.fs.get_accessible_entries(path).directories
     }
     fn directory_exists(&self, path: &str) -> bool {
         self.fs.directory_exists(path)
@@ -165,9 +218,10 @@ impl Session {
         }
         let mut args: Vec<String> = Vec::new();
         for (k, v) in &merged_options {
-            args.push(format!("--{k}"));
-            if !v.is_empty() {
-                args.push(v.clone());
+            if v.is_empty() {
+                args.push(format!("--{k}"));
+            } else {
+                args.push(format!("--{k}={v}"));
             }
         }
         args.extend(file_names);

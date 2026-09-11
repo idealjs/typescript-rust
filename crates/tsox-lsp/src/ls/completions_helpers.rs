@@ -104,6 +104,29 @@ pub(super) fn symbol_to_completion_item(symbol: &Arc<Symbol>) -> CompletionItem 
     }
 }
 
+/// Go createCompletionItem：成员补全中可选成员（声明名后紧跟 `?`）label 带 `?`
+pub(super) fn member_completion_label(symbol: &Arc<Symbol>, text: &str) -> String {
+    let optional = symbol.declarations.iter().any(|d| {
+        if !matches!(
+            d.kind,
+            tsox_frontend::ast::SyntaxKind::MethodSignature
+                | tsox_frontend::ast::SyntaxKind::PropertySignature
+                | tsox_frontend::ast::SyntaxKind::MethodDeclaration
+                | tsox_frontend::ast::SyntaxKind::PropertyDeclaration
+        ) {
+            return false;
+        }
+        d.name()
+            .and_then(|n| text.get(n.end()..n.end() + 1))
+            .is_some_and(|t| t == "?")
+    });
+    if optional {
+        format!("{}?", symbol.name)
+    } else {
+        symbol.name.clone()
+    }
+}
+
 pub(super) fn flags_to_detail(flags: &SymbolFlags) -> String {
     if flags.contains(SymbolFlags::Function) {
         "function".to_string()

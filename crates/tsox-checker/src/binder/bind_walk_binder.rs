@@ -26,7 +26,18 @@ impl Binder {
 
         match node.kind {
             SyntaxKind::VariableDeclaration => {
-                self.declare_symbol(node, SymbolFlags::BlockScopedVariable, SymbolFlags::VALUE);
+                // Go bindVariableDeclarationOrBindingElement：JS 里
+                // `var x = require("...")` 绑为别名（目标是模块符号）
+                if self.current_source_file.as_ref().is_some_and(|f| {
+                    f.node
+                        .flags
+                        .contains(tsox_frontend::ast::NodeFlags::JavaScriptFile)
+                }) && is_variable_declaration_initialized_to_require(node)
+                {
+                    self.declare_symbol(node, SymbolFlags::Alias, SymbolFlags::Alias);
+                } else {
+                    self.declare_symbol(node, SymbolFlags::BlockScopedVariable, SymbolFlags::VALUE);
+                }
             }
             SyntaxKind::VariableStatement => {}
             SyntaxKind::FunctionDeclaration => {
@@ -253,4 +264,34 @@ impl Binder {
             }
         }
     }
+}
+
+/// Go IsVariableDeclarationInitializedToRequire：JS 文件、无类型注解、
+/// 非 export、初始化式为 require(string-like) 调用
+fn is_variable_declaration_initialized_to_require(node: &Arc<Node>) -> bool {
+    let NodeData::VariableDeclaration(d) = &node.data else {
+        return false;
+    };
+    if d.type_node.is_some() {
+        return false;
+    }
+    if let Some(gp) = node.parent.as_ref().and_then(|p| p.parent.as_ref())
+        && gp.kind == SyntaxKind::VariableStatement
+        && gp.syntactic_modifier_flags().contains(ModifierFlags::Export)
+    {
+        return false;
+    }
+    let Some(init) = &d.initializer else {
+        return false;
+    };
+    let NodeData::CallExpression(call) = &init.data else {
+        return false;
+    };
+    matches!(&call.expression.data, NodeData::Identifier(i) if i.text == "require")
+        && call.arguments.nodes.first().is_some_and(|a| {
+            matches!(
+                a.kind,
+                SyntaxKind::StringLiteral | SyntaxKind::NoSubstitutionTemplateLiteral
+            )
+        })
 }

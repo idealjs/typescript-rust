@@ -127,6 +127,13 @@ impl Binder {
         existing_flags: SymbolFlags,
         new_flags: SymbolFlags,
     ) -> bool {
+        // Go bindExportDeclaration 以 excludes=None 声明 __export：多个
+        // export * 恒合并进同一符号的 declarations
+        if existing_flags.contains(SymbolFlags::ExportStar)
+            && new_flags.contains(SymbolFlags::ExportStar)
+        {
+            return true;
+        }
         let existing_alias = existing_flags.contains(SymbolFlags::Alias);
         let new_alias = new_flags.contains(SymbolFlags::Alias);
         if existing_alias || new_alias {

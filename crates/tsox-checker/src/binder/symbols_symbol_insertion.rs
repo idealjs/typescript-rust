@@ -87,6 +87,24 @@ impl Binder {
                         (*parent_sym_mut)
                             .members
                             .insert(name.to_string(), Arc::clone(symbol));
+                        // Go declareSourceFileMember：外部模块文件的顶层导出成员
+                        // 同时进 exports（default 导出走各自专用路径，此处排除）
+                        let file_is_external_module = self
+                            .current_source_file
+                            .as_ref()
+                            .is_some_and(|f| f.external_module_indicator.is_some());
+                        if file_is_external_module
+                            && self
+                                .get_combined_modifier_flags(node)
+                                .contains(ModifierFlags::Export)
+                            && !self
+                                .get_combined_modifier_flags(node)
+                                .contains(ModifierFlags::Default)
+                        {
+                            (*parent_sym_mut)
+                                .exports
+                                .insert(name.to_string(), Arc::clone(symbol));
+                        }
                     }
                     (*symbol_mut).parent = Some(Arc::clone(parent_sym));
                 }

@@ -67,6 +67,9 @@ impl Checker {
             SyntaxKind::FunctionExpression | SyntaxKind::ArrowFunction => {
                 self.get_type_of_function_like(node)
             }
+            SyntaxKind::ClassDeclaration | SyntaxKind::ClassExpression => {
+                self.get_type_of_class_declaration(node)
+            }
             SyntaxKind::RegularExpressionLiteral => self.global_regexp_type(),
             SyntaxKind::FunctionDeclaration => self.get_type_of_function_like(node),
             SyntaxKind::Identifier => self.get_type_of_identifier(node),

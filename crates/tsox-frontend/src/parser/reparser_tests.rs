@@ -188,7 +188,9 @@ let x;
     };
     let reparsed = reparse_tags(&stmts[0], &jsdocs);
 
-    assert_eq!(reparsed.len(), 0);
+    // Go reparser：带子句的 @import 重宿主为 JS import 声明
+    assert_eq!(reparsed.len(), 1);
+    assert_eq!(reparsed[0].kind, SyntaxKind::ImportDeclaration);
 }
 
 #[test]

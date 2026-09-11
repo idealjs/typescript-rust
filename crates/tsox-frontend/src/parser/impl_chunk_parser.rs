@@ -12,6 +12,7 @@ impl Parser {
             token,
             diagnostics: Vec::new(),
             language_variant: LanguageVariant::Standard,
+            javascript_file: false,
             last_template_literal_was_middle: false,
             yield_context: false,
             await_context: false,
@@ -30,6 +31,10 @@ impl Parser {
         parser.language_variant = language_variant;
         parser.scanner.set_language_variant(language_variant);
         parser
+    }
+
+    pub(crate) fn set_javascript_file(&mut self, javascript_file: bool) {
+        self.javascript_file = javascript_file;
     }
 
     pub fn parse_source_file(file_name: impl Into<String>) -> SourceFile {
@@ -53,6 +58,7 @@ impl Parser {
             _ => LanguageVariant::Standard,
         };
         let mut parser = Parser::new_with_language_variant(text.clone(), language_variant);
+        parser.set_javascript_file(matches!(script_kind, ScriptKind::Js | ScriptKind::Jsx));
         let statements = parser.parse_list(ParsingContext::SourceElements, Parser::parse_statement);
         let end_of_file = parser.create_token_node();
         let pos = 0usize;

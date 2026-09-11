@@ -232,7 +232,7 @@ impl Checker {
         }
     }
 
-    pub(crate) fn get_property_of_type(
+    pub fn get_property_of_type(
         &mut self,
         t: &Arc<Type>,
         name: &str,

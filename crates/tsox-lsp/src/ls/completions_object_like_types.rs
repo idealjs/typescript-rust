@@ -72,7 +72,7 @@ fn find_ancestor_type_literal(node: &Arc<Node>) -> Option<Arc<Node>> {
     None
 }
 
-fn constraint_of_type_argument_property(
+pub(super) fn constraint_of_type_argument_property(
     checker: &mut Checker,
     node: &Arc<Node>,
 ) -> Option<Arc<Type>> {
@@ -81,7 +81,8 @@ fn constraint_of_type_argument_property(
     {
         return Some(constraint);
     }
-    let t = constraint_of_type_argument_property(checker, node.parent.as_ref()?)?;
+    let parent = node.parent.clone()?;
+    let t = constraint_of_type_argument_property(checker, &parent)?;
     match node.kind {
         SyntaxKind::PropertySignature => {
             let name = node.name()?.text().to_string();

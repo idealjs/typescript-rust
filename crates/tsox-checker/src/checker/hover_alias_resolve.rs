@@ -11,7 +11,8 @@ impl Checker {
         if !Arc::ptr_eq(&chained, symbol) {
             return Some(chained);
         }
-        self.resolve_alias_by_declaration(symbol)
+        let r = self.resolve_alias_by_declaration(symbol);
+        r
     }
 
     pub(crate) fn resolve_alias_by_declaration(&mut self, symbol: &Arc<Symbol>) -> Option<Arc<Symbol>> {
@@ -85,6 +86,36 @@ impl Checker {
             NodeData::ImportEqualsDeclaration(d) => self
                 .resolve_qualified_symbol_traced(&d.module_reference)
                 .ok(),
+            // JS 赋值别名（module.exports.x = expr，绑定期 expression_is_alias）：
+            // 目标是右侧表达式符号（Go getTargetOfAliasDeclaration 的 Binary 分支）
+            NodeData::BinaryExpression(d) => self.resolve_identifier(&d.right),
+            // JS `var x = require("./m")`（binder 绑为 Alias）：目标是模块符号
+            //（Go getTargetOfAliasDeclaration 的 VariableDeclaration →
+            // getTargetOfImportEqualsDeclaration）
+            NodeData::VariableDeclaration(d) => {
+                let NodeData::CallExpression(call) = &d.initializer.as_ref()?.data else {
+                    return None;
+                };
+                if !matches!(&call.expression.data, NodeData::Identifier(i) if i.text == "require")
+                {
+                    return None;
+                }
+                let spec_node = call.arguments.nodes.first()?;
+                if !matches!(
+                    spec_node.kind,
+                    SyntaxKind::StringLiteral | SyntaxKind::NoSubstitutionTemplateLiteral
+                ) {
+                    return None;
+                }
+                let spec = spec_node
+                    .text()
+                    .trim_matches(['"', '\'', '`'])
+                    .to_string();
+                let file_module = self.module_symbol_of_containing_file(&decl);
+                let file_module = file_module?;
+                let r = self.resolve_module_spec_from(&file_module, &spec);
+                r
+            }
             NodeData::ExportAssignment(d) if d.is_export_equals => {
                 // export = <expr>：别名目标是表达式符号
                 self.resolve_identifier(&d.expression)

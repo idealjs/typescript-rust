@@ -268,6 +268,7 @@ impl Parser {
             token: self.token,
             diagnostics: Vec::new(),
             language_variant: self.language_variant,
+            javascript_file: self.javascript_file,
             last_template_literal_was_middle: self.last_template_literal_was_middle,
             yield_context: self.yield_context,
             await_context: self.await_context,

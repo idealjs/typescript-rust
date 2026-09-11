@@ -264,7 +264,7 @@ impl Checker {
     }
 
     pub fn get_type_argument_constraint(&mut self, node: &Arc<Node>) -> Option<Arc<Type>> {
-        None
+        super::services_type_argument_constraints::type_argument_constraint(self, node)
     }
 
 }

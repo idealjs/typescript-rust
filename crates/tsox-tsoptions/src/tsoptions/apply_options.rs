@@ -20,6 +20,11 @@ pub(crate) fn apply_options(options: &HashMap<String, OptValue>, out: &mut Compi
                     out.module_resolution = parse_module_resolution(s);
                 }
             }
+            "resolveJsonModule" => {
+                if let Some(b) = value.as_bool() {
+                    out.resolve_json_module = Tristate::from(b);
+                }
+            }
             "jsx" => {
                 if let Some(s) = value.as_str() {
                     out.jsx = parse_jsx_emit(s);

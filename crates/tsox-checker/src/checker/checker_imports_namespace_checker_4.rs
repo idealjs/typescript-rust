@@ -108,7 +108,14 @@ impl Checker {
                         if target.flags.contains(SymbolFlags::ValueModule) {
                             return self.namespace_member_recursive(&target, name);
                         }
-                        return Some(target);
+                        // export = <expr>：具名导入取 expr 类型的同名属性
+                        //（Go getExternalModuleMember 的 export= 值属性；default
+                        // 走 getTargetOfModuleDefault 的合成默认导出近似路径）
+                        if name == "default" {
+                            return Some(target);
+                        }
+                        let t = self.get_type_of_symbol(&target);
+                        return self.get_property_of_type(&t, name);
                     }
                 }
             }

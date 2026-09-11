@@ -38,6 +38,7 @@ pub(crate) mod checker_attach_explicit_type_arguments;
 pub(crate) mod checker_calls;
 pub(crate) mod checker_calls_call_argument_checks;
 pub(crate) mod checker_calls_checker;
+pub(crate) mod checker_calls_overload_union;
 pub(crate) mod checker_calls_checker_2;
 pub(crate) mod checker_calls_checker_3;
 pub(crate) mod checker_calls_checker_4;

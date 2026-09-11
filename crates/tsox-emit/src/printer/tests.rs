@@ -1289,13 +1289,21 @@ fn parenthesize_new_3() {
 #[test]
 fn parenthesize_tagged_template_1() {
     let expr = first_expression("(a, b) ``");
-    assert_eq!(expr.kind, SyntaxKind::ParenthesizedExpression);
+    assert_eq!(expr.kind, SyntaxKind::TaggedTemplateExpression);
+    let NodeData::TaggedTemplateExpression(d) = &expr.data else {
+        panic!("expected TaggedTemplateExpression");
+    };
+    assert_eq!(d.tag.kind, SyntaxKind::ParenthesizedExpression);
 }
 
 #[test]
 fn parenthesize_tagged_template_2() {
     let expr = first_expression("(a?.b) ``");
-    assert_eq!(expr.kind, SyntaxKind::ParenthesizedExpression);
+    assert_eq!(expr.kind, SyntaxKind::TaggedTemplateExpression);
+    let NodeData::TaggedTemplateExpression(d) = &expr.data else {
+        panic!("expected TaggedTemplateExpression");
+    };
+    assert_eq!(d.tag.kind, SyntaxKind::ParenthesizedExpression);
 }
 
 #[test]

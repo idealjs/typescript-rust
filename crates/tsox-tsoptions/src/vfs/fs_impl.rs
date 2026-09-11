@@ -135,8 +135,13 @@ impl FS for InMemoryFS {
 
         for key in self.files.read().unwrap().keys() {
             if let Some(rest) = strip_path_prefix(key, &prefix, self.case_sensitive) {
-                if !rest.is_empty() && !rest.contains('/') {
-                    entries.files.push(rest.to_string());
+                if rest.is_empty() {
+                    continue;
+                }
+                match rest.find('/') {
+                    None => entries.files.push(rest.to_string()),
+                    // 文件路径隐含的中间目录（虚拟 FS 未显式建目录时与真实 FS 对齐）
+                    Some(idx) => entries.directories.push(rest[..idx].to_string()),
                 }
             }
         }
@@ -150,7 +155,9 @@ impl FS for InMemoryFS {
         }
 
         entries.files.sort();
+        entries.files.dedup();
         entries.directories.sort();
+        entries.directories.dedup();
         entries
     }
 

@@ -203,6 +203,31 @@ impl crate::parser::Parser {
         })
     }
 
+    /// Go parseImportTag：`@import [clause] from "specifier" [with {…}]`，
+    /// jsdoc token 模式下解析子句/说明符/属性（字符串字面量由 jsdoc
+    /// 扫描器产出）
+    /// Go jsdoc import 解析用 skip-asterisks 主扫描器（trivia 自动跳过）；
+    /// 本仓 jsdoc 扫描器产出空白 token，各解析步间显式跳 trivia
+    /// （换行后的 * 行装饰一并跳过）
+    fn skip_jsdoc_import_trivia(&mut self) {
+        let mut after_newline = false;
+        loop {
+            match self.token {
+                SyntaxKind::WhitespaceTrivia => {
+                    self.next_token_jsdoc();
+                }
+                SyntaxKind::NewLineTrivia => {
+                    after_newline = true;
+                    self.next_token_jsdoc();
+                }
+                SyntaxKind::AsteriskToken if after_newline => {
+                    self.next_token_jsdoc();
+                }
+                _ => break,
+            }
+        }
+    }
+
     pub(crate) fn parse_import_tag(
         &mut self,
         start: usize,
@@ -210,28 +235,235 @@ impl crate::parser::Parser {
         margin: usize,
         indent_text: &str,
     ) -> Arc<Node> {
+        let after_import_pos = self.token_pos();
+
+        let mut identifier: Option<Arc<Node>> = None;
+        if self.token == SyntaxKind::Identifier {
+            identifier = Some(self.parse_jsdoc_identifier_name(None));
+            self.skip_jsdoc_import_trivia();
+        }
+
+        let import_clause: Option<Arc<Node>> =
+            if identifier.is_some() || self.token == SyntaxKind::AsteriskToken || self.token == SyntaxKind::OpenBraceToken
+            {
+                let named_bindings: Option<Arc<Node>> =
+                    if identifier.is_none() || {
+                        self.skip_jsdoc_import_trivia();
+                        self.parse_optional_jsdoc(SyntaxKind::CommaToken)
+                    } {
+                        self.skip_jsdoc_import_trivia();
+                        if self.token == SyntaxKind::AsteriskToken {
+                            Some(self.parse_jsdoc_namespace_import())
+                        } else {
+                            Some(self.parse_jsdoc_named_imports())
+                        }
+                    } else {
+                        None
+                    };
+                let clause_end = named_bindings
+                    .as_ref()
+                    .map(|b| b.end())
+                    .or_else(|| identifier.as_ref().map(|i| i.end()))
+                    .unwrap_or(after_import_pos);
+                self.skip_jsdoc_import_trivia();
+                self.parse_expected_jsdoc(SyntaxKind::FromKeyword);
+                self.skip_jsdoc_import_trivia();
+                Some(Arc::new(Node::with_loc(
+                    SyntaxKind::ImportClause,
+                    NodeData::ImportClause(ImportClauseData {
+                        phase_modifier: None,
+                        name: identifier.clone(),
+                        named_bindings,
+                    }),
+                    TextRange::new(after_import_pos, clause_end),
+                )))
+            } else {
+                None
+            };
+
+        self.skip_jsdoc_import_trivia();
+        let module_specifier = if self.token == SyntaxKind::StringLiteral {
+            let lit = self.create_token_node_jsdoc();
+            self.next_token_jsdoc();
+            lit
+        } else {
+            // Go parseModuleSpecifier 回退 parseExpression：错误恢复消费到
+            // with/@/EOF 为止（`from () with {…}` 的 () 被吃掉）
+            let miss_pos = self.token_pos();
+            let mut guard = 0;
+            while !matches!(
+                self.token,
+                SyntaxKind::WithKeyword
+                    | SyntaxKind::AssertKeyword
+                    | SyntaxKind::AtToken
+                    | SyntaxKind::EndOfFile
+            ) && guard < 8
+            {
+                self.next_token_jsdoc();
+                guard += 1;
+            }
+            self.create_missing_node(SyntaxKind::StringLiteral, miss_pos, miss_pos)
+        };
+
+        self.skip_jsdoc_import_trivia();
+        let attributes: Option<Arc<Node>> =
+            if self.token == SyntaxKind::WithKeyword || self.token == SyntaxKind::AssertKeyword {
+                Some(self.parse_jsdoc_import_attributes())
+            } else {
+                None
+            };
+
         let comment = self.parse_trailing_tag_comments(
             self.token_pos(),
             self.token_end(),
             margin,
             indent_text,
         );
-        let end = comment.end();
-        let module_specifier = self.create_missing_node(
-            SyntaxKind::StringLiteral,
-            self.token_pos(),
-            self.token_pos(),
-        );
+        let content_end = attributes
+            .as_ref()
+            .map(|a| a.end())
+            .unwrap_or_else(|| module_specifier.end())
+            .max(comment.end());
         Arc::new(Node::with_loc(
             SyntaxKind::JSDocImportTag,
             NodeData::JSDocImportTag(JSDocImportTagData {
                 tag_name,
-                import_clause: None,
+                import_clause,
                 module_specifier,
-                attributes: None,
+                attributes,
                 comment: Some(comment),
             }),
-            TextRange::new(start, end),
+            TextRange::new(start, content_end.max(start)),
+        ))
+    }
+
+    /// `* as name`
+    fn parse_jsdoc_namespace_import(&mut self) -> Arc<Node> {
+        let pos = self.token_pos();
+        self.parse_expected_jsdoc(SyntaxKind::AsteriskToken);
+        self.skip_jsdoc_import_trivia();
+        self.parse_expected_jsdoc(SyntaxKind::AsKeyword);
+        self.skip_jsdoc_import_trivia();
+        let name = self.parse_jsdoc_identifier_name(None);
+        let end = name.end();
+        Arc::new(Node::with_loc(
+            SyntaxKind::NamespaceImport,
+            NodeData::NamespaceImport(NamespaceImportData { name }),
+            TextRange::new(pos, end),
+        ))
+    }
+
+    /// `{ A, B as C }`
+    fn parse_jsdoc_named_imports(&mut self) -> Arc<Node> {
+        let pos = self.token_pos();
+        self.parse_expected_jsdoc(SyntaxKind::OpenBraceToken);
+        let mut elements: Vec<Arc<Node>> = Vec::new();
+        loop {
+            self.skip_jsdoc_import_trivia();
+            if self.token == SyntaxKind::CloseBraceToken
+                || self.token == SyntaxKind::EndOfFile
+                || self.token == SyntaxKind::AtToken
+            {
+                break;
+            }
+            let spec_pos = self.token_pos();
+            let mut property_name: Option<Arc<Node>> = None;
+            let first = self.parse_jsdoc_identifier_name(None);
+            self.skip_jsdoc_import_trivia();
+            let name = if self.parse_optional_jsdoc(SyntaxKind::AsKeyword) {
+                property_name = Some(first);
+                self.skip_jsdoc_import_trivia();
+                self.parse_jsdoc_identifier_name(None)
+            } else {
+                first
+            };
+            let end = name.end();
+            elements.push(Arc::new(Node::with_loc(
+                SyntaxKind::ImportSpecifier,
+                NodeData::ImportSpecifier(ImportSpecifierData {
+                    is_type_only: false,
+                    property_name,
+                    name,
+                }),
+                TextRange::new(spec_pos, end),
+            )));
+            self.skip_jsdoc_import_trivia();
+            if !self.parse_optional_jsdoc(SyntaxKind::CommaToken) {
+                break;
+            }
+        }
+        self.skip_jsdoc_import_trivia();
+        self.parse_expected_jsdoc(SyntaxKind::CloseBraceToken);
+        let end = self.token_end();
+        Arc::new(Node::with_loc(
+            SyntaxKind::NamedImports,
+            NodeData::NamedImports(NamedImportsData {
+                elements: Arc::new(NodeList::new(elements)),
+            }),
+            TextRange::new(pos, end),
+        ))
+    }
+
+    /// `with { key: "value", … }`
+    fn parse_jsdoc_import_attributes(&mut self) -> Arc<Node> {
+        let pos = self.token_pos();
+        let token = self.token;
+        self.parse_expected_jsdoc(token);
+        self.skip_jsdoc_import_trivia();
+        self.parse_expected_jsdoc(SyntaxKind::OpenBraceToken);
+        let mut attributes: Vec<Arc<Node>> = Vec::new();
+        loop {
+            self.skip_jsdoc_import_trivia();
+            if self.token == SyntaxKind::CloseBraceToken
+                || self.token == SyntaxKind::EndOfFile
+                || self.token == SyntaxKind::AtToken
+            {
+                break;
+            }
+            let attr_pos = self.token_pos();
+            let name = if self.token == SyntaxKind::StringLiteral {
+                let lit = self.create_token_node_jsdoc();
+                self.next_token_jsdoc();
+                lit
+            } else {
+                self.parse_jsdoc_identifier_name(None)
+            };
+            self.skip_jsdoc_import_trivia();
+            self.parse_expected_jsdoc(SyntaxKind::ColonToken);
+            self.skip_jsdoc_import_trivia();
+            let value = if self.token == SyntaxKind::StringLiteral {
+                let lit = self.create_token_node_jsdoc();
+                self.next_token_jsdoc();
+                lit
+            } else {
+                self.create_missing_node(
+                    SyntaxKind::StringLiteral,
+                    self.token_pos(),
+                    self.token_pos(),
+                )
+            };
+            let end = value.end();
+            attributes.push(Arc::new(Node::with_loc(
+                SyntaxKind::ImportAttribute,
+                NodeData::ImportAttribute(ImportAttributeData { name, value }),
+                TextRange::new(attr_pos, end),
+            )));
+            self.skip_jsdoc_import_trivia();
+            if !self.parse_optional_jsdoc(SyntaxKind::CommaToken) {
+                break;
+            }
+        }
+        self.skip_jsdoc_import_trivia();
+        self.parse_expected_jsdoc(SyntaxKind::CloseBraceToken);
+        let end = self.token_end();
+        Arc::new(Node::with_loc(
+            SyntaxKind::ImportAttributes,
+            NodeData::ImportAttributes(ImportAttributesData {
+                token,
+                attributes: Arc::new(NodeList::new(attributes)),
+                multi_line: false,
+            }),
+            TextRange::new(pos, end),
         ))
     }
 }

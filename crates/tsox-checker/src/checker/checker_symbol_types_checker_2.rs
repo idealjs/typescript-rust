@@ -92,6 +92,13 @@ impl Checker {
         if type_node_and_init.0.is_none() && type_node_and_init.1.is_none() {
             // 无注解参数：上下文定型（IIFE 实参 / 调用上下文签名），rest 参数优先走上下文
             if decl.kind == SyntaxKind::Parameter {
+                // JS 无注解形参：@param 标签充当注解
+                //（Go getTypeForVariableLikeDeclaration 的 jsdoc 通道）
+                if let Some(t) = self.jsdoc_type_annotation(&decl) {
+                    self.value_symbol_links.get_or_default(symbol).resolved_type =
+                        Some(Arc::clone(&t));
+                    return Some(t);
+                }
                 let placeholder = self.get_any_type();
                 let existing = self
                     .value_symbol_links

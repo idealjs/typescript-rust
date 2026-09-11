@@ -20,7 +20,7 @@ impl Checker {
         true
     }
 
-    pub(crate) fn resolve_interface_type_ex(
+    pub fn resolve_interface_type_ex(
         &mut self,
         symbol: &Arc<Symbol>,
         type_args: Option<Vec<Arc<Type>>>,

@@ -32,19 +32,53 @@ impl Checker {
         };
         let signatures = self.get_signatures_of_type(&expression_type, kind);
 
-        let sig = signatures
-            .iter()
-            .find(|s| s.parameters.len() > arg_index)
-            .or_else(|| signatures.first())?
-            .clone();
+        // 全重载不可适用时用联合签名（参数位=各重载并集，Go
+        // getCandidateForOverloadFailure → createUnionOfSignaturesForOverloadFailure）；
+        // 重载判定会回查实参类型（自递归，见 resolving_contextual_calls）
+        let resolved: Option<Arc<Signature>> = {
+            let key = call_node.id();
+            if self.resolving_contextual_calls.insert(key) {
+                let found = self.find_matching_signature_opt(call_node, &signatures, args);
+                let combined = match found {
+                    Some(idx) => Some(Arc::clone(&signatures[idx])),
+                    None => self.candidate_for_overload_failure(call_node, &signatures, args),
+                };
+                self.resolving_contextual_calls.remove(&key);
+                combined
+            } else {
+                None
+            }
+        };
+        let sig = match resolved {
+            Some(s) => s,
+            None => signatures
+                .iter()
+                .find(|s| s.parameters.len() > arg_index)
+                .or_else(|| signatures.first())?
+                .clone(),
+        };
 
-        if arg_index >= sig.parameters.len() {
+        if arg_index >= sig.parameters.len() && !sig.has_rest_parameter() {
             return None;
         }
 
         let base_param_type = self
-            .signature_instantiated_param_type(&sig, arg_index)
-            .unwrap_or_else(|| self.get_type_of_symbol(&sig.parameters[arg_index]));
+            .try_get_type_at_position(&sig, arg_index)
+            .or_else(|| {
+                // rest 位（含联合签名的合成 rest 数组）给元素类型
+                if sig.has_rest_parameter() && arg_index >= sig.parameters.len() - 1 {
+                    let rest = self.get_type_of_symbol(sig.parameters.last()?);
+                    Some(self.get_array_element_type_of(&rest).unwrap_or(rest))
+                } else {
+                    None
+                }
+            })
+            .or_else(|| {
+                sig.parameters
+                    .get(arg_index)
+                    .map(|p| self.get_type_of_symbol(p))
+            })
+            .unwrap_or_else(|| self.any_type());
 
         if !sig.type_parameters.is_empty() {
             let key = call_node.id();

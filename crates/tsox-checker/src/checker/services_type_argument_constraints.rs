@@ -61,10 +61,10 @@ pub(super) fn type_parameter_nodes_of_type_reference(
     let NodeData::TypeReferenceNode(d) = &type_ref.data else {
         return Vec::new();
     };
-    let Some(sym) = checker.get_symbol_at_location(&d.type_name) else {
+    let Some(sym) = checker.resolve_identifier(&d.type_name) else {
         return Vec::new();
     };
-    let base = checker.resolve_alias_base(Arc::clone(&sym));
+    let base = checker.resolve_alias_base(sym);
     for decl in &base.declarations {
         if let Some(params) = declaration_type_parameters(decl) {
             return params.iter().cloned().collect();

@@ -574,7 +574,7 @@ pub struct TemplateSpanData {
 #[derive(Debug)]
 pub struct TaggedTemplateExpressionData {
     pub tag: Arc<Node>,
-    pub question_dot_token: Arc<Node>,
+    pub question_dot_token: Option<Arc<Node>>,
     pub type_arguments: Option<Arc<NodeList>>,
     pub template: Arc<Node>,
 }
@@ -2561,7 +2561,9 @@ where
             if visitor(&data.tag) {
                 return true;
             }
-            if visitor(&data.question_dot_token) {
+            if let Some(child) = &data.question_dot_token
+                && visitor(child)
+            {
                 return true;
             }
             if let Some(list) = &data.type_arguments {

@@ -219,11 +219,21 @@ fn parse_file_content(
                 if prev == '|' && cur == '}' {
                     let (src, _) = open_source.take().unwrap();
                     let text: String = chars[src + 2..i - 1].iter().collect();
+                    let data = text.trim().to_string();
+                    // Go getObjectMarker：按 JSON 解析，"name" 字段可用作标记名
+                    let name = serde_json::from_str::<serde_json::Value>(&format!("{{ {data} }}"))
+                        .ok()
+                        .and_then(|v| {
+                            v.get("name")
+                                .and_then(|n| n.as_str())
+                                .filter(|n| !n.is_empty())
+                                .map(str::to_string)
+                        });
                     markers.push(Marker {
                         file_name: file_name.into(),
                         position: src - difference,
-                        name: None,
-                        data: Some(text.trim().to_string()),
+                        name,
+                        data: Some(data),
                     });
                     if let Some(last) = open_ranges.last_mut() {
                         last.1 = markers.last().cloned();

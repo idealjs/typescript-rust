@@ -121,12 +121,16 @@ pub(super) fn is_doc_comment(range: &CommentRange, text: &str) -> bool {
 
 pub(super) fn is_completion_list_blocker(
     context_token: Option<&ScanToken>,
+    previous_token: Option<&ScanToken>,
     containing_token: Option<&ScanToken>,
     text: &str,
     position: usize,
     node_at_position: &Arc<Node>,
 ) -> bool {
-    if let Some(tok) = containing_token
+    // Go isCompletionListBlocker 用 contextToken：正则尾（含 flags）与
+    // 未闭合串的 end 位也算「在内」
+    let literal_token = context_token.or(containing_token);
+    if let Some(tok) = literal_token
         && is_in_string_or_regular_expression_or_template(tok, text, position)
     {
         return true;
@@ -134,7 +138,7 @@ pub(super) fn is_completion_list_blocker(
     let Some(context) = context_token else {
         return false;
     };
-    is_solely_identifier_definition_location(context, node_at_position)
+    is_solely_identifier_definition_location(context, node_at_position, previous_token, position)
         || is_dot_of_numeric_literal(context, text)
         || context.kind == SyntaxKind::BigIntLiteral
 }
@@ -174,8 +178,10 @@ fn is_dot_of_numeric_literal(tok: &ScanToken, text: &str) -> bool {
 fn is_solely_identifier_definition_location(
     context: &ScanToken,
     node_at_position: &Arc<Node>,
+    previous_token: Option<&ScanToken>,
+    position: usize,
 ) -> bool {
-    match context.kind {
+    let blocked_by_switch = match context.kind {
         SyntaxKind::ColonToken => node_at_position.kind == SyntaxKind::BindingElement,
         SyntaxKind::OpenBracketToken | SyntaxKind::DotToken => {
             node_at_position.kind == SyntaxKind::ArrayBindingPattern
@@ -238,7 +244,8 @@ fn is_solely_identifier_definition_location(
         | SyntaxKind::ConstKeyword
         | SyntaxKind::InferKeyword => true,
         _ => false,
-    }
+    };
+    blocked_by_switch
 }
 
 fn is_function_like_but_not_constructor(node: &Arc<Node>) -> bool {

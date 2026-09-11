@@ -22,7 +22,7 @@ impl Parser {
                 SyntaxKind::DotToken => {
                     let pos = expr.pos();
                     self.next_token();
-                    let name = self.parse_property_name();
+                    let name = self.parse_right_side_of_dot();
                     let end = name.end();
                     expr = Arc::new(Node::with_loc(
                         SyntaxKind::PropertyAccessExpression,
@@ -113,19 +113,67 @@ impl Parser {
                 SyntaxKind::LessThanToken => {
                     let pos = expr.pos();
 
-                    let type_arguments = match self.try_parse_type_arguments(true) {
-                        Some(ta) => ta,
-                        None => break,
+                    // Go parseMemberExpressionRest tryParseTypeArgumentsInExpression：
+                    // 类型实参须能被表达式语境跟随（`(`/模板/行断/二元符/非表达式起始），
+                    // 否则回退为关系运算符解释
+                    let Some(type_arguments) = self.try_parse_type_arguments_in_expression()
+                    else {
+                        break;
                     };
-                    let arguments = self.parse_argument_list();
-                    let end = arguments.end();
+                    if self.token == SyntaxKind::OpenParenToken {
+                        let arguments = self.parse_argument_list();
+                        let end = arguments.end();
+                        expr = Arc::new(Node::with_loc(
+                            SyntaxKind::CallExpression,
+                            NodeData::CallExpression(CallExpressionData {
+                                expression: expr,
+                                question_dot_token: None,
+                                type_arguments: Some(type_arguments),
+                                arguments,
+                            }),
+                            TextRange::new(pos, end),
+                        ));
+                    } else if self.token == SyntaxKind::NoSubstitutionTemplateLiteral
+                        || self.token == SyntaxKind::TemplateHead
+                    {
+                        // Go parseTaggedTemplateRest 吸收 ExpressionWithTypeArguments 的类型实参
+                        let template = self.parse_tagged_template_literal();
+                        let end = template.end();
+                        expr = Arc::new(Node::with_loc(
+                            SyntaxKind::TaggedTemplateExpression,
+                            NodeData::TaggedTemplateExpression(TaggedTemplateExpressionData {
+                                tag: expr,
+                                question_dot_token: None,
+                                type_arguments: Some(type_arguments),
+                                template,
+                            }),
+                            TextRange::new(pos, end),
+                        ));
+                    } else {
+                        // 实例化表达式/装饰器类型实参（Go ExpressionWithTypeArguments）
+                        let end = self.node_pos();
+                        expr = Arc::new(Node::with_loc(
+                            SyntaxKind::ExpressionWithTypeArguments,
+                            NodeData::ExpressionWithTypeArguments(ExpressionWithTypeArgumentsData {
+                                expression: expr,
+                                type_arguments: Some(type_arguments),
+                            }),
+                            TextRange::new(pos, end),
+                        ));
+                    }
+                }
+                SyntaxKind::NoSubstitutionTemplateLiteral | SyntaxKind::TemplateHead => {
+                    // Go parseMemberExpressionRest isTemplateStartOfTaggedTemplate
+                    let pos = expr.pos();
+                    let template = self.parse_tagged_template_literal();
+                    let end = template.end();
                     expr = Arc::new(Node::with_loc(
-                        SyntaxKind::CallExpression,
-                        NodeData::CallExpression(CallExpressionData {
-                            expression: expr,
+                        SyntaxKind::TaggedTemplateExpression,
+                        NodeData::TaggedTemplateExpression(TaggedTemplateExpressionData {
+                            tag: expr,
                             question_dot_token: None,
-                            type_arguments: Some(type_arguments),
-                            arguments,
+                            type_arguments: None,
+                            template,
                         }),
                         TextRange::new(pos, end),
                     ));
@@ -144,6 +192,72 @@ impl Parser {
             }
         }
         expr
+    }
+
+    pub(crate) fn parse_tagged_template_literal(&mut self) -> Arc<Node> {
+        // Go parseTaggedTemplateRest：无替换模板为字面量 token，带插值的走模板表达式
+        if self.token == SyntaxKind::NoSubstitutionTemplateLiteral {
+            let text = self.scanner.token_value();
+            let pos = self.token_pos();
+            let end = self.token_end();
+            self.next_token();
+            Arc::new(Node::with_loc(
+                SyntaxKind::NoSubstitutionTemplateLiteral,
+                NodeData::NoSubstitutionTemplateLiteral(NoSubstitutionTemplateLiteralData {
+                    text,
+                    template_flags: 0,
+                }),
+                TextRange::new(pos, end),
+            ))
+        } else {
+            self.parse_template_expression()
+        }
+    }
+
+    // Go canFollowTypeArgumentsInExpression：实参表后可被表达式语境跟随的 token 集
+    fn can_follow_type_arguments_in_expression(&self) -> bool {
+        match self.token {
+            SyntaxKind::OpenParenToken
+            | SyntaxKind::NoSubstitutionTemplateLiteral
+            | SyntaxKind::TemplateHead => true,
+            SyntaxKind::LessThanToken
+            | SyntaxKind::GreaterThanToken
+            | SyntaxKind::PlusToken
+            | SyntaxKind::MinusToken => false,
+            _ => {
+                self.has_preceding_line_break()
+                    || crate::ast::node_data_generated::is_binary_operator(self.token)
+                    || !self.is_start_of_expression()
+            }
+        }
+    }
+
+    // Go tryParseTypeArgumentsInExpression：JS 文件禁用（与二元 `<` 歧义），失败整体回退
+    pub(crate) fn try_parse_type_arguments_in_expression(&mut self) -> Option<Arc<NodeList>> {
+        if self.javascript_file || self.token != SyntaxKind::LessThanToken {
+            return None;
+        }
+        let saved_scanner = self.scanner.clone();
+        let saved_token = self.token;
+        let diag_len = self.diagnostics.len();
+        let pos = self.token_pos();
+        self.next_token();
+        let args = self.parse_delimited_list(ParsingContext::TypeArguments, Parser::parse_type);
+        self.re_scan_greater_than();
+        if self.token == SyntaxKind::GreaterThanToken {
+            self.next_token();
+            if self.can_follow_type_arguments_in_expression() {
+                let end = self.node_pos();
+                return Some(Arc::new(NodeList {
+                    loc: TextRange::new(pos, end),
+                    nodes: args.nodes,
+                }));
+            }
+        }
+        self.scanner = saved_scanner;
+        self.token = saved_token;
+        self.diagnostics.truncate(diag_len);
+        None
     }
 
     pub(crate) fn parse_argument_list(&mut self) -> Arc<NodeList> {

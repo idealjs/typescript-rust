@@ -79,7 +79,7 @@ impl Checker {
         exports
     }
 
-    pub fn get_exports_of_module_as_array(&self, module_symbol: &Arc<Symbol>) -> Vec<Arc<Symbol>> {
+    pub fn get_exports_of_module_as_array(&mut self, module_symbol: &Arc<Symbol>) -> Vec<Arc<Symbol>> {
         symbols_to_array(&self.get_exports_of_module_table(module_symbol))
     }
 

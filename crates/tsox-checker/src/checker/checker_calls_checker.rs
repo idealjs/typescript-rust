@@ -199,26 +199,45 @@ impl Checker {
         signatures: &[Arc<Signature>],
         arguments: &Arc<NodeList>,
     ) -> usize {
+        self.find_matching_signature_opt(node, signatures, arguments)
+            .unwrap_or(0)
+    }
+
+    /// Some=命中重载；None=全部不可适用（Go resolveCall 失败态，供联合
+    /// 签名与最长候选兜底）
+    pub(crate) fn find_matching_signature_opt(
+        &mut self,
+        node: &Arc<Node>,
+        signatures: &[Arc<Signature>],
+        arguments: &Arc<NodeList>,
+    ) -> Option<usize> {
         self.speculation_depth += 1;
         let result = (|| {
             for (idx, sig) in signatures.iter().enumerate() {
                 if self.signature_accepts_arguments(node, sig, arguments) {
-                    return idx;
+                    return Some(idx);
                 }
             }
 
-            let arg_count = arguments.len();
-            for (idx, sig) in signatures.iter().enumerate() {
-                let max_params = if sig.has_rest_parameter() {
-                    usize::MAX
-                } else {
-                    sig.parameters.len()
-                };
-                if arg_count <= max_params && arg_count >= sig.min_argument_count.max(0) as usize {
-                    return idx;
+            // Go pickLongestCandidateSignature 语义：元数兜底仅在单签名或含
+            // 泛型重载时启用；无泛型的多重载全败走联合签名（None）
+            let has_generic = signatures.iter().any(|s| !s.type_parameters.is_empty());
+            if signatures.len() == 1 || has_generic {
+                let arg_count = arguments.len();
+                for (idx, sig) in signatures.iter().enumerate() {
+                    let max_params = if sig.has_rest_parameter() {
+                        usize::MAX
+                    } else {
+                        sig.parameters.len()
+                    };
+                    if arg_count <= max_params
+                        && arg_count >= sig.min_argument_count.max(0) as usize
+                    {
+                        return Some(idx);
+                    }
                 }
             }
-            0
+            None
         })();
         self.speculation_depth -= 1;
         result

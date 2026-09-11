@@ -223,6 +223,24 @@ pub(crate) fn jsdoc_parser_key(file_name: &str, text: &str) -> (u64, u64, u64) {
     )
 }
 
+/// 按给定注释区间解析 JSDoc（补全等位置驱动路径使用，不依附具体节点）
+pub fn parse_jsdoc_comment_range(
+    source_file: &crate::ast::SourceFile,
+    pos: usize,
+    end: usize,
+) -> Option<Arc<Node>> {
+    let text = &source_file.text;
+    let key = jsdoc_parser_key(&source_file.file_name, text);
+    JSDOC_PARSER.with(|cell| {
+        let mut slot = cell.borrow_mut();
+        if slot.as_ref().map(|(k, _)| *k) != Some(key) {
+            *slot = Some((key, crate::parser::Parser::new(text.clone())));
+        }
+        let parser = &mut slot.as_mut().unwrap().1;
+        parser.parse_jsdoc_comment(pos, end, pos)
+    })
+}
+
 pub fn parse_jsdoc_for_node(source_file: &crate::ast::SourceFile, node: &Node) -> Vec<Arc<Node>> {
     let text = &source_file.text;
     let ranges = get_jsdoc_comment_ranges(text, node);

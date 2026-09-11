@@ -439,17 +439,21 @@ impl Checker {
 
     /// JSX 元素属性上下文类型（Go getContextualJsxElementAttributesType）：
     /// 类标签首个构造签名参数类型，泛型按属性值（跳过函数值）推断实例化
-    pub(crate) fn jsx_element_attributes_contextual_type(
+    pub fn jsx_element_attributes_contextual_type(
         &mut self,
         elem: &Arc<Node>,
     ) -> Option<Arc<Type>> {
-        let (tag_name, attrs) = match &elem.data {
-            tsox_frontend::ast::NodeData::JsxSelfClosingElement(d) => {
-                (Arc::clone(&d.tag_name), Arc::clone(&d.attributes))
-            }
-            tsox_frontend::ast::NodeData::JsxOpeningElement(d) => {
-                (Arc::clone(&d.tag_name), Arc::clone(&d.attributes))
-            }
+        let (tag_name, attrs, elem_type_arguments) = match &elem.data {
+            tsox_frontend::ast::NodeData::JsxSelfClosingElement(d) => (
+                Arc::clone(&d.tag_name),
+                Arc::clone(&d.attributes),
+                d.type_arguments.clone(),
+            ),
+            tsox_frontend::ast::NodeData::JsxOpeningElement(d) => (
+                Arc::clone(&d.tag_name),
+                Arc::clone(&d.attributes),
+                d.type_arguments.clone(),
+            ),
             _ => return None,
         };
         if !tag_name
@@ -473,7 +477,23 @@ impl Checker {
             .signature_instantiated_param_type(&sig, 0)
             .unwrap_or_else(|| self.get_type_of_symbol(&sig.parameters[0]));
         if !sig.type_parameters.is_empty() {
-            let mut attr_args: Vec<Arc<Node>> = Vec::new();
+            // 显式类型实参（<Table<Props> .../>）优先于属性值推断
+            let explicit: Vec<Arc<Type>> = elem_type_arguments
+                .as_ref()
+                .map(|args| {
+                    args.iter()
+                        .map(|arg| self.get_type_from_type_node(arg))
+                        .collect()
+                })
+                .unwrap_or_default();
+            if !explicit.is_empty() {
+                param_type = self.substitute_infer_type_parameters(
+                    &param_type,
+                    &sig.type_parameters,
+                    &explicit,
+                );
+            } else {
+                let mut attr_args: Vec<Arc<Node>> = Vec::new();
             {
                 let properties: Vec<Arc<Node>> = match &attrs.data {
                     tsox_frontend::ast::NodeData::JsxAttributes(data) => {
@@ -508,6 +528,7 @@ impl Checker {
                     &sig.type_parameters,
                     &inferred,
                 );
+            }
             }
         }
         Some(param_type)
@@ -564,7 +585,7 @@ impl Checker {
     }
 
     /// IntrinsicElements 上的元素属性符号（供 tag hover 与属性上下文共用）
-    pub(crate) fn jsx_intrinsic_element_symbol(&mut self, name: &str) -> Option<Arc<Symbol>> {
+    pub fn jsx_intrinsic_element_symbol(&mut self, name: &str) -> Option<Arc<Symbol>> {
         let find_jsx = |checker: &Checker| -> Option<Arc<Symbol>> {
             let symbol_map = checker.program.symbol_map();
             let file = checker.display_enclosing_file.clone()?;

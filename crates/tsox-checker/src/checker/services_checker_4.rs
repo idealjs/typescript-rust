@@ -1,6 +1,7 @@
 #![allow(unused_imports)]
 
 use crate::checker::services::*;
+use tsox_frontend::ast::{INTERNAL_SYMBOL_NAME_DEFAULT, INTERNAL_SYMBOL_NAME_EXPORT_STAR};
 
 impl Checker {
     pub fn get_symbols_in_scope(
@@ -11,18 +12,70 @@ impl Checker {
         Vec::new()
     }
 
-    pub fn get_exports_of_module(&self, symbol: &Arc<Symbol>) -> Vec<Arc<Symbol>> {
+    pub fn get_exports_of_module(&mut self, symbol: &Arc<Symbol>) -> Vec<Arc<Symbol>> {
         symbols_to_array(&self.get_exports_of_module_table(symbol))
     }
 
-    pub fn get_exports_of_module_table(&self, module_symbol: &Arc<Symbol>) -> SymbolTable {
+    pub fn get_exports_of_module_table(&mut self, module_symbol: &Arc<Symbol>) -> SymbolTable {
         if let Some(links) = self.module_symbol_links.get(module_symbol) {
             if !links.resolved_exports.is_empty() {
                 return links.resolved_exports.clone();
             }
         }
+        let exports = self.get_exports_of_module_worker(module_symbol);
+        self.module_symbol_links.insert(
+            module_symbol,
+            ModuleSymbolLinks {
+                resolved_exports: exports.clone(),
+                ..Default::default()
+            },
+        );
+        exports
+    }
 
-        module_symbol.exports.clone()
+    // Go getExportsOfModuleWorker：export= 先归一，visit 递归展开 export * 链
+    fn get_exports_of_module_worker(&mut self, module_symbol: &Arc<Symbol>) -> SymbolTable {
+        let module_symbol = self.resolve_external_module_symbol(module_symbol, false);
+        let mut visited: Vec<Arc<Symbol>> = Vec::new();
+        self.visit_module_exports(&module_symbol, &mut visited)
+    }
+
+    fn visit_module_exports(
+        &mut self,
+        symbol: &Arc<Symbol>,
+        visited: &mut Vec<Arc<Symbol>>,
+    ) -> SymbolTable {
+        if visited.iter().any(|s| Arc::ptr_eq(s, symbol)) {
+            return SymbolTable::default();
+        }
+        visited.push(Arc::clone(symbol));
+        let mut symbols = symbol.exports.clone();
+        let Some(export_stars) = symbols.get(INTERNAL_SYMBOL_NAME_EXPORT_STAR).cloned() else {
+            return symbols;
+        };
+        let mut nested = SymbolTable::default();
+        for node in export_stars.declarations.iter() {
+            let tsox_frontend::ast::NodeData::ExportDeclaration(d) = &node.data else {
+                continue;
+            };
+            let Some(spec) = &d.module_specifier else {
+                continue;
+            };
+            let spec_text = spec.text().trim_matches(['"', '\'', '`']).to_string();
+            let Some(file_module) = self
+                .get_source_file_of_node(node)
+                .and_then(|f| self.program.symbol_map().symbol_of(&f.node).cloned())
+            else {
+                continue;
+            };
+            let Some(resolved) = self.resolve_module_spec_from(&file_module, &spec_text) else {
+                continue;
+            };
+            let exported = self.visit_module_exports(&resolved, visited);
+            extend_export_symbols(&mut nested, &exported);
+        }
+        extend_export_symbols(&mut symbols, &nested);
+        symbols
     }
 
     pub fn for_each_export_and_property_of_module(
@@ -257,7 +310,7 @@ impl Checker {
     }
 
     pub fn try_get_member_in_module_exports(
-        &self,
+        &mut self,
         member_name: &str,
         module_symbol: &Arc<Symbol>,
     ) -> Option<Arc<Symbol>> {
@@ -285,5 +338,17 @@ impl Checker {
         context_flags: ContextFlags,
     ) -> Option<Arc<Type>> {
         self.get_contextual_type(node, context_flags)
+    }
+}
+
+// Go extendExportSymbols：default 不传递；已有名不覆盖（本地导出优先于星号导出）
+fn extend_export_symbols(target: &mut SymbolTable, source: &SymbolTable) {
+    for (id, sym) in source.entries.iter() {
+        if id == INTERNAL_SYMBOL_NAME_DEFAULT {
+            continue;
+        }
+        if target.get(id).is_none() {
+            target.entries.insert(id.clone(), Arc::clone(sym));
+        }
     }
 }

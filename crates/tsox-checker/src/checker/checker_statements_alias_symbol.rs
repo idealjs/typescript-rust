@@ -228,7 +228,11 @@ fn import_or_require_specifier_of(node: &Arc<Node>) -> Option<String> {
 }
 
 fn module_specifier_text(spec: &Arc<Node>) -> Option<String> {
-    if spec.kind != SyntaxKind::StringLiteral {
+    // Go isStringLiteralLike：无替换模板字面量同字符串（require(`./a`)）
+    if !matches!(
+        spec.kind,
+        SyntaxKind::StringLiteral | SyntaxKind::NoSubstitutionTemplateLiteral
+    ) {
         return None;
     }
     Some(spec.text().trim_matches(['"', '\'', '`']).to_string())

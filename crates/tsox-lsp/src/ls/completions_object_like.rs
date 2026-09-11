@@ -102,7 +102,7 @@ fn object_literal_type_members(
         None => Arc::clone(&instantiated),
     };
     let number_index = checker.get_number_index_type(&effective);
-    let members = properties_for_object_expression(checker, &instantiated);
+    let members = properties_for_object_expression(checker, &instantiated, container);
     if members.is_empty() && number_index.is_none() {
         return None;
     }
@@ -134,16 +134,17 @@ fn walk_up_parenthesized_expressions(node: &Arc<Node>) -> Arc<Node> {
     current
 }
 
-fn properties_for_object_expression(
+pub(super) fn properties_for_object_expression(
     checker: &mut Checker,
     contextual_type: &Arc<Type>,
+    obj: &Arc<Node>,
 ) -> Vec<Arc<Symbol>> {
     if !contextual_type.flags.contains(TypeFlags::Union) {
         return checker.get_apparent_properties(contextual_type);
     }
     let filtered: Vec<Arc<Type>> = union_member_types(contextual_type)
         .into_iter()
-        .filter(|t| !is_union_member_excluded(checker, t))
+        .filter(|t| !is_union_member_excluded(checker, t, obj))
         .collect();
     if filtered.is_empty() {
         return Vec::new();
@@ -151,19 +152,59 @@ fn properties_for_object_expression(
     checker.get_all_possible_properties_of_types(&filtered)
 }
 
-fn is_union_member_excluded(checker: &mut Checker, t: &Arc<Type>) -> bool {
+fn is_union_member_excluded(checker: &mut Checker, t: &Arc<Type>, obj: &Arc<Node>) -> bool {
+    // Go getApparentProperties 的联合成员五条件：primitive、array-like、
+    // 判别已失效（isTypeInvalidDueToUnionDiscriminant）、调用/构造签名、
+    // 含非公开成员的 class
     if t.flags.intersects(TYPE_FLAGS_PRIMITIVE) {
         return true;
     }
-    if checker.is_array_like_type(t) {
+    if checker.is_array_type(t)
+        || checker.is_array_like_type(t)
+        || extends_array_like(checker, t)
+    {
+        return true;
+    }
+    if checker.is_type_invalid_due_to_union_discriminant(t, obj) {
         return true;
     }
     if checker.type_has_call_or_construct_signatures(t) {
         return true;
     }
-    if t.is_class() {
+    // 类实例型未带 Class 旗标时按符号声明回判（Go IsClass 语义）
+    let is_class_like = t.is_class()
+        || t.symbol.as_ref().is_some_and(|s| {
+            s.declarations
+                .iter()
+                .any(|d| matches!(d.kind, SyntaxKind::ClassDeclaration | SyntaxKind::ClassExpression))
+        });
+    if is_class_like {
         let props = checker.get_apparent_properties(t);
         return props.iter().any(is_non_public_member);
+    }
+    false
+}
+
+// Go isArrayLikeType 的 isTypeAssignableTo(anyReadonlyArrayType) 近似：
+// 接口/引用目标的基类链走到全局 Array/ReadonlyArray（Many extends
+// ReadonlyArray 形态）
+fn extends_array_like(checker: &mut Checker, t: &Arc<Type>) -> bool {
+    let Some(target) = t.target() else {
+        return false;
+    };
+    let mut stack: Vec<Arc<Type>> = vec![Arc::clone(&target)];
+    let mut guard = 0;
+    while let Some(cur) = stack.pop() {
+        guard += 1;
+        if guard > 16 {
+            return false;
+        }
+        if let Some(sym) = cur.symbol.clone()
+            && matches!(sym.name.as_str(), "Array" | "ReadonlyArray")
+        {
+            return true;
+        }
+        stack.extend(checker.get_base_types(&cur));
     }
     false
 }
@@ -221,7 +262,7 @@ fn existing_member_name(member: &Arc<Node>) -> Option<String> {
     None
 }
 
-fn is_currently_editing_node(node: &Arc<Node>, text: &str, position: usize) -> bool {
+pub(super) fn is_currently_editing_node(node: &Arc<Node>, text: &str, position: usize) -> bool {
     let start = skip_trivia(text, node.pos());
     start <= position && position <= node.end()
 }
@@ -249,6 +290,21 @@ pub(super) fn enclosing_binding_element(node: &Arc<Node>) -> bool {
             return false;
         }
         current = n.parent.clone();
+    }
+    false
+}
+
+/// Go NodeFlagsInWithStatement：对象字面量位于 with 语句内
+pub(super) fn in_with_statement(container: &Arc<Node>) -> bool {
+    let mut cur = Some(Arc::clone(container));
+    while let Some(n) = cur {
+        if n.kind == SyntaxKind::WithStatement {
+            return true;
+        }
+        if n.kind == SyntaxKind::SourceFile {
+            break;
+        }
+        cur = n.parent.clone();
     }
     false
 }

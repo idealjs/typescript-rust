@@ -74,7 +74,30 @@ impl Parser {
             SyntaxKind::ImportKeyword => {
                 self.parse_import_equals_declaration_with_modifiers(modifiers)
             }
-            _ => self.parse_expression_statement(),
+            _ => {
+                // Go parseDeclarationWorker：装饰器/修饰符后无声明 → 保留在
+                // MissingDeclaration（装饰器表达式仍供补全/诊断使用）
+                if modifiers.as_ref().is_some_and(|m| !m.nodes.is_empty()) {
+                    self.parse_error_at_current_token(
+                        tsox_core::diagnostics::DECLARATION_EXPECTED,
+                        &[],
+                    );
+                    // 起点含装饰器（Go finishNode(pos)），span 覆盖装饰器
+                    // 表达式，补全/诊断可定位其中的节点
+                    let start = modifiers
+                        .as_ref()
+                        .and_then(|m| m.nodes.first())
+                        .map(|n| n.pos())
+                        .unwrap_or_else(|| self.token_pos());
+                    let end = self.token_pos();
+                    return Arc::new(Node::with_loc(
+                        SyntaxKind::MissingDeclaration,
+                        NodeData::MissingDeclaration(MissingDeclarationData { modifiers }),
+                        TextRange::new(start, end),
+                    ));
+                }
+                self.parse_expression_statement()
+            }
         }
     }
 

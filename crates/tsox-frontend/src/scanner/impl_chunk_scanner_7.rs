@@ -48,9 +48,28 @@ impl Scanner {
             '=' => SyntaxKind::EqualsToken,
             ',' => SyntaxKind::CommaToken,
             '.' => SyntaxKind::DotToken,
+            // @import 属性的 key:value 分隔（Go jsdoc import 用主扫描器可产冒号）
+            ':' => SyntaxKind::ColonToken,
             '`' => SyntaxKind::BacktickToken,
             '#' => SyntaxKind::HashToken,
             '\\' => SyntaxKind::Unknown,
+            // @import 说明符/属性值需要完整的字符串字面量 token（Go jsdoc
+            // import 解析用带 skip-asterisks 模式的主扫描器，字符串可扫出）
+            quote @ ('"' | '\'') => {
+                while self.pos < self.end {
+                    let (ch2, size2) = decode_char(&self.text, self.pos);
+                    if ch2 == quote || is_line_break(ch2) {
+                        break;
+                    }
+                    self.pos += size2;
+                }
+                if self.pos < self.end
+                    && decode_char(&self.text, self.pos).0 == quote
+                {
+                    self.pos += 1;
+                }
+                SyntaxKind::StringLiteral
+            }
             _ if is_identifier_start(ch) => {
                 while self.pos < self.end {
                     let (next_ch, next_size) = decode_char(&self.text, self.pos);

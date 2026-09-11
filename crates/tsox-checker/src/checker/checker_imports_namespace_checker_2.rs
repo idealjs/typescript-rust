@@ -128,6 +128,13 @@ impl Checker {
                 return Some(Arc::clone(target));
             }
         }
+        // export= 模块（module.exports = foo）的具名导入：目标在 export= 值的
+        // 属性上（Go tryGetMemberInModuleExportsAndProperties）
+        if sym.is_none()
+            && let Some(target) = self.try_get_member_in_module_exports_and_properties(name, module_sym)
+        {
+            return Some(target);
+        }
 
         let mut clause_hits: Vec<(String, Option<String>)> = Vec::new();
         self.for_each_module_statement(module_sym, |stmt| {

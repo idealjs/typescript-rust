@@ -51,6 +51,45 @@ impl Checker {
     }
 
     pub fn get_properties_of_type(&self, t: &Arc<Type>) -> Vec<Arc<Symbol>> {
+        // Go getPropertiesOfUnionOrIntersectionType：联合=各成员共有属性
+        // （never 不参与，`never | {x}` 出 x）
+        if t.is_union()
+            && let Some(members) = t.types()
+        {
+            let relevant: Vec<&Arc<Type>> = members
+                .iter()
+                .filter(|m| !m.flags.contains(TypeFlags::Never))
+                .collect();
+            if relevant.is_empty() {
+                return Vec::new();
+            }
+            let mut props = self.get_properties_of_type(relevant[0]);
+            for m in &relevant[1..] {
+                if props.is_empty() {
+                    break;
+                }
+                let others = self.get_properties_of_type(m);
+                props.retain(|p| others.iter().any(|o| o.name == p.name));
+            }
+            return props;
+        }
+        // Go getPropertiesOfType：交集成员属性合并（同名属性取首个声明，
+        // 完整交集属性合成走 getUnionOrIntersectionProperty）
+        if t.is_intersection()
+            && let Some(members) = t.types()
+        {
+            let mut merged: Vec<Arc<Symbol>> = Vec::new();
+            for m in members {
+                for p in self.get_properties_of_type(m) {
+                    if !merged.iter().any(|x| x.name == p.name) {
+                        merged.push(Arc::clone(&p));
+                    }
+                }
+            }
+            if !merged.is_empty() {
+                return merged;
+            }
+        }
         if let Some(structured) = t.as_structured() {
             if !structured.properties.is_empty() {
                 return structured.properties.clone();

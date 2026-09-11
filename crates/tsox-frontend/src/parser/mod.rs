@@ -11,7 +11,7 @@ pub(crate) mod jsdoc;
 pub(crate) mod references;
 pub(crate) mod reparser;
 
-pub use jsdoc::parse_jsdoc_for_node;
+pub use jsdoc::{parse_jsdoc_comment_range, parse_jsdoc_for_node};
 pub use references::{collect_external_module_references, set_external_module_indicator};
 pub use reparser::reparse_tags;
 

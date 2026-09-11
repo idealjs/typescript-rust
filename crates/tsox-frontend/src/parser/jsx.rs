@@ -48,6 +48,13 @@ impl Parser {
         }
 
         let tag_name = self.parse_jsx_name();
+        // Go parseJsxOpeningOrSelfClosingElementOrOpeningFragment：TS 文件中
+        // 标签名后为类型实参（<Component<T> .../>），JS 文件不解析
+        let type_arguments = if !self.javascript_file && self.token == SyntaxKind::LessThanToken {
+            Some(self.parse_jsx_type_arguments())
+        } else {
+            None
+        };
         let attributes = self.parse_jsx_attributes();
         if self.parse_optional(SyntaxKind::SlashToken) {
             let end = self.token_end();
@@ -62,7 +69,7 @@ impl Parser {
                 SyntaxKind::JsxSelfClosingElement,
                 NodeData::JsxSelfClosingElement(JsxSelfClosingElementData {
                     tag_name,
-                    type_arguments: None,
+                    type_arguments,
                     attributes,
                 }),
                 TextRange::new(pos, end),
@@ -77,7 +84,7 @@ impl Parser {
             SyntaxKind::JsxOpeningElement,
             NodeData::JsxOpeningElement(JsxOpeningElementData {
                 tag_name,
-                type_arguments: None,
+                type_arguments,
                 attributes,
             }),
             TextRange::new(pos, opening_end),
@@ -93,6 +100,19 @@ impl Parser {
             }),
             TextRange::new(pos, self.token_pos()),
         ))
+    }
+
+    pub(crate) fn parse_jsx_type_arguments(&mut self) -> Arc<NodeList> {
+        let pos = self.token_pos();
+        self.expect(SyntaxKind::LessThanToken);
+        let args = self.parse_delimited_list(ParsingContext::TypeArguments, Parser::parse_type);
+        self.re_scan_greater_than();
+        self.expect(SyntaxKind::GreaterThanToken);
+        let end = self.node_pos();
+        Arc::new(NodeList {
+            loc: TextRange::new(pos, end),
+            nodes: args.nodes,
+        })
     }
 
     pub(crate) fn parse_jsx_name(&mut self) -> Arc<Node> {
@@ -286,7 +306,23 @@ impl Parser {
     pub(crate) fn parse_jsx_closing_element(&mut self, in_expression_context: bool) -> Arc<Node> {
         let pos = self.token_pos();
         self.expect(SyntaxKind::LessThanSlashToken);
-        let tag_name = self.parse_jsx_name();
+        // Go parseJsxTagName 对非标识符 token 产零宽 missing 名且不消费，
+        // 由下方 expect `>` + 手动推进保证前进（本语境无列表循环，安全；
+        // 共享 parse_jsx_name 的消费语义会把 `>` 吞成标识符并拉长 span）
+        let tag_name = if self.token == SyntaxKind::Identifier
+            || is_keyword(self.token) && !is_reserved_word_kind(self.token)
+        {
+            self.parse_jsx_name()
+        } else {
+            let p = self.token_pos();
+            Arc::new(Node::with_loc(
+                SyntaxKind::Identifier,
+                NodeData::Identifier(IdentifierData {
+                    text: String::new(),
+                }),
+                TextRange::new(p, p),
+            ))
+        };
         let end = self.token_end();
         self.expect_without_advancing(SyntaxKind::GreaterThanToken);
 

@@ -5,10 +5,7 @@ use crate::parser::expressions::*;
 impl Parser {
     pub(crate) fn try_parse_generic_arrow_function(&mut self) -> Option<Arc<Node>> {
         let starts_with_async = self.token == SyntaxKind::AsyncKeyword;
-        if !starts_with_async
-            && (self.token != SyntaxKind::LessThanToken
-                || self.language_variant == LanguageVariant::Jsx)
-        {
+        if !starts_with_async && self.token != SyntaxKind::LessThanToken {
             return None;
         }
 
@@ -26,6 +23,25 @@ impl Parser {
                 || (t1 as i16) > (SyntaxKind::WithKeyword as i16))
             {
                 return None;
+            }
+            // Go nextIsParenthesizedArrowFunctionExpression 的 JSX 消歧：
+            // `<T extends X`（X 非 =/>//）、`<T,`、`<T=` 视为泛型箭头，其余归 JSX
+            if self.language_variant == LanguageVariant::Jsx {
+                let t2 = s.scan();
+                let is_arrow = if t2 == SyntaxKind::ExtendsKeyword {
+                    let t3 = s.scan();
+                    !matches!(
+                        t3,
+                        SyntaxKind::EqualsToken
+                            | SyntaxKind::GreaterThanToken
+                            | SyntaxKind::SlashToken
+                    )
+                } else {
+                    t2 == SyntaxKind::CommaToken || t2 == SyntaxKind::EqualsToken
+                };
+                if !is_arrow {
+                    return None;
+                }
             }
         }
 

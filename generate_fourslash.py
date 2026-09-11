@@ -362,17 +362,46 @@ def split_top_commas(expr):
     return parts
 
 
+def unescape_go_string(raw):
+    return raw.replace('\\"', '"').replace("\\\\", "\\")
+
+
+def eval_go_concat(expr):
+    """求值 Go 拼接表达式：反引号字面量取内容、双引号串反转义后连接。
+    无法识别时返回 None（调用方回退旧切片行为）"""
+    parts = split_top_plus(expr)
+    if not parts:
+        return None
+    out = []
+    for part in parts:
+        p = part.strip()
+        if len(p) >= 2 and p.startswith("`") and p.endswith("`"):
+            out.append(p[1:-1])
+        elif re.fullmatch(r'"(?:[^"\\]|\\.)*"', p, re.S):
+            out.append(unescape_go_string(p[1:-1]))
+        else:
+            return None
+    return "".join(out)
+
+
 def match_const(stmt):
-    m = re.match(r"const (\w+) = `", stmt)
+    m = re.match(r"const (\w+) = ", stmt)
     if not m:
-        m2 = re.match(r"(\w+) := `", stmt)
+        m2 = re.match(r"(\w+) := ", stmt)
         if not m2:
             return None
         m = m2
-    end = stmt.rfind("`")
-    if end <= m.end() - 1:
+    rhs = stmt[m.end():]
+    val = eval_go_concat(rhs)
+    if val is not None:
+        return m.group(1), val
+    # 回退：首尾反引号之间原文（含未求值的拼接胶水）
+    if not rhs.startswith("`"):
         return None
-    return m.group(1), stmt[m.end():end]
+    end = rhs.rfind("`")
+    if end <= 0:
+        return None
+    return m.group(1), rhs[1:end]
 
 
 def match_new_fourslash(stmt):

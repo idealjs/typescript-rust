@@ -198,6 +198,33 @@ impl Parser {
         ))
     }
 
+    /// Go parseRightSideOfDot：`. 后换行 + 标识符/关键字 + 同行再一个
+    /// 标识符/关键字` 视为 ASI 断点，返回零宽 missing 且不消费
+    /// （`this.\nclass Baz {}` 的 class 属此类）
+    pub(crate) fn parse_right_side_of_dot(&mut self) -> Arc<Node> {
+        if self.has_preceding_line_break()
+            && (self.token == SyntaxKind::Identifier || is_keyword(self.token))
+            && self.next_token_is_identifier_or_keyword_on_same_line()
+        {
+            let pos = self.token_pos();
+            return Arc::new(Node::with_loc(
+                SyntaxKind::Identifier,
+                NodeData::Identifier(IdentifierData {
+                    text: String::new(),
+                }),
+                TextRange::new(pos, pos),
+            ));
+        }
+        self.parse_property_name()
+    }
+
+    fn next_token_is_identifier_or_keyword_on_same_line(&self) -> bool {
+        let mut scanner = self.scanner.clone();
+        let kind = scanner.scan();
+        (kind == SyntaxKind::Identifier || is_keyword(kind))
+            && !scanner.has_preceding_line_break()
+    }
+
     pub(crate) fn parse_property_name(&mut self) -> Arc<Node> {
         match self.token {
             SyntaxKind::PrivateIdentifier => {

@@ -176,13 +176,22 @@ impl Checker {
                     .iter()
                     .position(|s| s.type_parameters.len() == ta.len())
             {
-                idx
+                Some(idx)
             } else if signatures.len() == 1 {
-                0
+                Some(0)
             } else {
-                self.find_matching_signature(node, signatures, &callee.1)
+                self.find_matching_signature_opt(node, signatures, &callee.1)
             };
-            let sig = &signatures[matching_idx];
+            // 全重载不可适用：Go getCandidateForOverloadFailure 给联合签名
+            //（参数位并集/返回交集）
+            let combined: Option<Arc<Signature>> = match matching_idx {
+                Some(idx) => None,
+                None => self.candidate_for_overload_failure(node, signatures, &callee.1),
+            };
+            let sig: &Arc<Signature> = match &combined {
+                Some(c) => c,
+                None => &signatures[matching_idx.unwrap_or(0)],
+            };
             if let Some(rt) = self.get_return_type_of_signature(sig) {
                 if !sig.type_parameters.is_empty() {
                     let args: Vec<Arc<Node>> = callee.1.iter().cloned().collect();

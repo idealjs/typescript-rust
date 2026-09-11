@@ -345,6 +345,60 @@ impl Checker {
                 return Some(t);
             }
         }
+
+        // JS 形参无注解：@param 标签充当类型注解（Go getJSDocTypeForParameter）
+        if let NodeData::ParameterDeclaration(pd) = &declaration.data {
+            let param_name = pd.name.text().to_string();
+            let func = self.enclosing_function_of(declaration)?;
+            let func_docs = tsox_frontend::parser::parse_jsdoc_for_node(&file, &func);
+            for jd in func_docs.iter() {
+                let NodeData::JSDoc(d) = &jd.data else {
+                    continue;
+                };
+                let Some(tags) = &d.tags else {
+                    continue;
+                };
+                for tag in tags.nodes.iter() {
+                    if tag.kind != tsox_frontend::ast::SyntaxKind::JSDocParameterTag {
+                        continue;
+                    }
+                    let NodeData::JSDocParameterOrPropertyTag(pt) = &tag.data else {
+                        continue;
+                    };
+                    if pt.name.text() != param_name {
+                        continue;
+                    }
+                    let Some(te) = &pt.type_expression else {
+                        continue;
+                    };
+                    let NodeData::JSDocTypeExpression(e) = &te.data else {
+                        continue;
+                    };
+                    return Some(self.get_type_from_type_node(&e.type_node));
+                }
+            }
+        }
+        None
+    }
+
+    fn enclosing_function_of(
+        &self,
+        node: &Arc<tsox_frontend::ast::Node>,
+    ) -> Option<Arc<tsox_frontend::ast::Node>> {
+        let mut cur = node.parent.clone();
+        while let Some(n) = cur {
+            if matches!(
+                n.kind,
+                tsox_frontend::ast::SyntaxKind::FunctionDeclaration
+                    | tsox_frontend::ast::SyntaxKind::FunctionExpression
+                    | tsox_frontend::ast::SyntaxKind::ArrowFunction
+                    | tsox_frontend::ast::SyntaxKind::MethodDeclaration
+                    | tsox_frontend::ast::SyntaxKind::Constructor
+            ) {
+                return Some(n);
+            }
+            cur = n.parent.clone();
+        }
         None
     }
 }
