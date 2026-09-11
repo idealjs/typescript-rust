@@ -1,0 +1,22 @@
+use tsox_lsp::fourslash::{self, Session};
+
+
+#[test]
+fn jsdoc_param_suggestion1() {
+    let content = r#"// @Filename: a.ts
+/**
+ * @param options - whatever
+ * @param options.zone - equally bad
+ */
+declare function bad(options: any): void
+
+/**
+ * @param {number} obtuse
+ */
+function worse(): void {
+    arguments
+}"#;
+    let mut s = Session::new_for_test("jsdocParam_suggestion1", content);
+    fourslash::go_to_file(&mut s, "a.ts");
+    // TODO: f.VerifySuggestionDiagnostics(t, nil)
+}

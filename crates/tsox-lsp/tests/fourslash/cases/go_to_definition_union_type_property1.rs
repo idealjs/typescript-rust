@@ -1,0 +1,22 @@
+use tsox_lsp::fourslash::{self, Session};
+
+
+#[test]
+fn go_to_definition_union_type_property1() {
+    let content = r#"interface One {
+    /*propertyDefinition1*/commonProperty: number;
+    commonFunction(): number;
+}
+
+interface Two {
+    /*propertyDefinition2*/commonProperty: string
+    commonFunction(): number;
+}
+
+var x : One | Two;
+
+x.[|/*propertyReference*/commonProperty|];
+x./*3*/commonFunction;"#;
+    let mut s = Session::new_for_test("goToDefinitionUnionTypeProperty1", content);
+    // TODO: f.VerifyBaselineGoToDefinition(t, true, "propertyReference")
+}

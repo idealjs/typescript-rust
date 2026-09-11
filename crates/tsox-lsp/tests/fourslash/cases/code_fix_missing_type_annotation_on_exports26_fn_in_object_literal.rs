@@ -1,0 +1,20 @@
+use tsox_lsp::fourslash::{self, Session};
+
+
+#[test]
+fn code_fix_missing_type_annotation_on_exports26_fn_in_object_literal() {
+    let content = r#"// @isolatedDeclarations: true
+// @declaration: true
+export const extensions = {
+    /**
+     */
+    fn: <T>(actualValue: T, expectedValue: T) => {
+       return actualValue === expectedValue
+    },
+    fn2: function<T>(actualValue: T, expectedValue: T)  {
+       return actualValue === expectedValue
+    }
+}"#;
+    let mut s = Session::new_for_test("codeFixMissingTypeAnnotationOnExports26_fn_in_object_literal", content);
+    // TODO: f.VerifyCodeFixAll(t, fourslash.VerifyCodeFixAllOptions{
+}

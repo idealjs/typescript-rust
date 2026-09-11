@@ -1,0 +1,22 @@
+use tsox_lsp::fourslash::{self, Session};
+
+
+#[test]
+fn call_hierarchy_export_equals_function() {
+    let content = r#"// @filename: main.ts
+import bar = require("./other");
+
+function foo() {
+    bar();
+}
+// @filename: other.ts
+export = /**/function () {
+    baz();
+}
+
+function baz() {
+}"#;
+    let mut s = Session::new_for_test("callHierarchyExportEqualsFunction", content);
+    fourslash::go_to_marker(&mut s, "");
+    // TODO: f.VerifyBaselineCallHierarchy(t)
+}

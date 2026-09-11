@@ -1,0 +1,14 @@
+use tsox_lsp::fourslash::{self, Session};
+
+
+#[test]
+fn import_name_code_fix_re_export() {
+    let content = r#"// @Filename: /a.ts
+export const x = 0";
+// @Filename: /b.ts
+[|export { x } from "./a";
+x;|]"#;
+    let mut s = Session::new_for_test("importNameCodeFixReExport", content);
+    fourslash::go_to_file(&mut s, "/b.ts");
+    // TODO: f.VerifyRangeAfterCodeFix(t, `import { x } from "./a";
+}

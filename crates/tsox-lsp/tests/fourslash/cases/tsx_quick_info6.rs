@@ -1,0 +1,20 @@
+use tsox_lsp::fourslash::{self, Session};
+
+
+#[test]
+fn tsx_quick_info6() {
+    // TODO: t.Skip("Known failing fourslash test")
+    let content = r#"//@Filename: file.tsx
+// @jsx: preserve
+// @noLib: true
+declare function ComponentSpecific<U>(l: {prop: U}): JSX.Element;
+declare function ComponentSpecific1<U>(l: {prop: U, "ignore-prop": number}): JSX.Element;
+function Bar<T extends {prop: number}>(arg: T) {
+    let a1 = <Compone/*1*/ntSpecific {...arg} ignore-prop="hi" />;  // U is number
+    let a2 = <ComponentSpecific1 {...arg} ignore-prop={10} />;  // U is number
+    let a3 = <Component/*2*/Specific {...arg} prop="hello" />;   // U is "hello"
+}"#;
+    let mut s = Session::new_for_test("tsxQuickInfo6", content);
+    fourslash::verify_quick_info_at(&mut s, "1", "function ComponentSpecific<number>(l: {\n    prop: number;\n}): JSX.Element", "");
+    fourslash::verify_quick_info_at(&mut s, "2", "function ComponentSpecific<never>(l: {\n    prop: never;\n}): JSX.Element", "");
+}

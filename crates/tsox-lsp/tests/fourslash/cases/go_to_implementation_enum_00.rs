@@ -1,0 +1,14 @@
+use tsox_lsp::fourslash::{self, Session};
+
+
+#[test]
+fn go_to_implementation_enum_00() {
+    let content = r#"enum Foo {
+    [|Foo1|] = function initializer() { return 5 } (),
+    Foo2 = 6
+}
+
+Foo.Fo/*reference*/o1;"#;
+    let mut s = Session::new_for_test("goToImplementationEnum_00", content);
+    // TODO: f.VerifyBaselineGoToImplementation(t, "reference")
+}

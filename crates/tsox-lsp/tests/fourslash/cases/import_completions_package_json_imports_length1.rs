@@ -1,0 +1,27 @@
+use tsox_lsp::fourslash::{self, Session};
+
+
+#[test]
+fn import_completions_package_json_imports_length1() {
+    let content = r##"// @module: node18
+// @Filename: /package.json
+{
+  "imports": {
+    "#*": "./src/*.ts"
+  }
+}
+// @Filename: /src/a/b/c/something.ts
+export function something(name: string): any;
+// @Filename: /src/a/b/c/d.ts
+import {} from "/*1*/";
+import {} from "#a//*2*/";
+import {} from "#a/b//*3*/";
+import {} from "#a/b/c//*4*/";
+import {} from "#a/b/c/something//*5*/";"##;
+    let mut s = Session::new_for_test("importCompletionsPackageJsonImportsLength1", content);
+    // TODO: f.VerifyCompletions(t, []string{"1"}, &fourslash.CompletionsExpectedList{
+    // TODO: f.VerifyCompletions(t, []string{"2"}, &fourslash.CompletionsExpectedList{
+    // TODO: f.VerifyCompletions(t, []string{"3"}, &fourslash.CompletionsExpectedList{
+    // TODO: f.VerifyCompletions(t, []string{"4"}, &fourslash.CompletionsExpectedList{
+    // TODO: f.VerifyCompletions(t, []string{"5"}, &fourslash.CompletionsExpectedList{
+}

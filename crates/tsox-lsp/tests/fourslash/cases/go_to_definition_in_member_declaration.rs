@@ -1,0 +1,26 @@
+use tsox_lsp::fourslash::{self, Session};
+
+
+#[test]
+fn go_to_definition_in_member_declaration() {
+    let content = r#"interface /*interfaceDefinition*/IFoo { method1(): number; }
+
+class /*classDefinition*/Foo implements IFoo {
+    public method1(): number { return 0; }
+}
+
+enum /*enumDefinition*/Enum { value1, value2 };
+
+class /*selfDefinition*/Bar {
+    public _interface: [|IFo/*interfaceReference*/o|] = new [|Fo/*classReferenceInInitializer*/o|]();
+    public _class: [|Fo/*classReference*/o|] = new Foo();
+    public _list: [|IF/*interfaceReferenceInList*/oo|][]=[];
+    public _enum: [|E/*enumReference*/num|] = [|En/*enumReferenceInInitializer*/um|].value1;
+    public _self: [|Ba/*selfReference*/r|];
+
+    constructor(public _inConstructor: [|IFo/*interfaceReferenceInConstructor*/o|]) {
+    }
+}"#;
+    let mut s = Session::new_for_test("goToDefinitionInMemberDeclaration", content);
+    // TODO: f.VerifyBaselineGoToDefinition(t, true, "interfaceReference", "interfaceReferenceInList", "interface
+}

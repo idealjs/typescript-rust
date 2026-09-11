@@ -1,0 +1,448 @@
+use tsox_lsp::fourslash::{self, Session};
+
+
+#[test]
+fn comments_overloads_fourslash() {
+    // TODO: t.Skip("Known failing fourslash test")
+    let content = r#"/** this is signature 1*/
+function /*1*/f1(/**param a*/a: number): number;
+function /*2*/f1(b: string): number;
+function /*3*/f1(aOrb: any) {
+    return 10;
+}
+f/*4q*/1(/*4*/"hello");
+f/*o4q*/1(/*o4*/10);
+function /*5*/f2(/**param a*/a: number): number;
+/** this is signature 2*/
+function /*6*/f2(b: string): number;
+/** this is f2 var comment*/
+function /*7*/f2(aOrb: any) {
+    return 10;
+}
+f/*8q*/2(/*8*/"hello");
+f/*o8q*/2(/*o8*/10);
+function /*9*/f3(a: number): number;
+function /*10*/f3(b: string): number;
+function /*11*/f3(aOrb: any) {
+    return 10;
+}
+f/*12q*/3(/*12*/"hello");
+f/*o12q*/3(/*o12*/10);
+/** this is signature 4 - with number parameter*/
+function /*13*/f4(/**param a*/a: number): number;
+/** this is signature 4 - with string parameter*/
+function /*14*/f4(b: string): number;
+function /*15*/f4(aOrb: any) {
+    return 10;
+}
+f/*16q*/4(/*16*/"hello");
+f/*o16q*/4(/*o16*/10);
+/*17*/
+interface i1 {
+    /**this signature 1*/
+    (/**param a*/ a: number): number;
+    /**this is signature 2*/
+    (b: string): number;
+    /** foo 1*/
+    foo(a: number): number;
+    /** foo 2*/
+    foo(b: string): number;
+    foo2(a: number): number;
+    /** foo2 2*/
+    foo2(b: string): number;
+    foo3(a: number): number;
+    foo3(b: string): number;
+    /** foo4 1*/
+    foo4(a: number): number;
+    foo4(b: string): number;
+    /** new 1*/
+    new (a: string);
+    new (b: number);
+}
+var i1_i: i1;
+interface i2 {
+    new (a: string);
+    /** new 2*/
+    new (b: number);
+    (a: number): number;
+    /**this is signature 2*/
+    (b: string): number;
+}
+var i2_i: i2;
+interface i3 {
+    /** new 1*/
+    new (a: string);
+    /** new 2*/
+    new (b: number);
+    /**this is signature 1*/
+    (a: number): number;
+    (b: string): number;
+}
+var i3_i: i3;
+interface i4 {
+    new (a: string);
+    new (b: number);
+    (a: number): number;
+    (b: string): number;
+}
+var i4_i: i4;
+new /*18*/i1/*19q*/_i(/*19*/10);
+new i/*20q*/1_i(/*20*/"Hello");
+i/*21q*/1_i(/*21*/10);
+i/*22q*/1_i(/*22*/"hello");
+i1_i./*23*/f/*24q*/oo(/*24*/10);
+i1_i.f/*25q*/oo(/*25*/"hello");
+i1_i.fo/*26q*/o2(/*26*/10);
+i1_i.fo/*27q*/o2(/*27*/"hello");
+i1_i.fo/*28q*/o3(/*28*/10);
+i1_i.fo/*29q*/o3(/*29*/"hello");
+i1_i.fo/*30q*/o4(/*30*/10);
+i1_i.fo/*31q*/o4(/*31*/"hello");
+new i2/*32q*/_i(/*32*/10);
+new i2/*33q*/_i(/*33*/"Hello");
+i/*34q*/2_i(/*34*/10);
+i2/*35q*/_i(/*35*/"hello");
+new i/*36q*/3_i(/*36*/10);
+new i3/*37q*/_i(/*37*/"Hello");
+i3/*38q*/_i(/*38*/10);
+i3/*39q*/_i(/*39*/"hello");
+new i4/*40q*/_i(/*40*/10);
+new i/*41q*/4_i(/*41*/"Hello");
+i4/*42q*/_i(/*42*/10);
+i4/*43q*/_i(/*43*/"hello");
+class c {
+    public /*93*/prop1(a: number): number;
+    public /*94*/prop1(b: string): number;
+    public /*95*/prop1(aorb: any) {
+        return 10;
+    }
+    /** prop2 1*/
+    public /*96*/prop2(a: number): number;
+    public /*97*/prop2(b: string): number;
+    public /*98*/prop2(aorb: any) {
+        return 10;
+    }
+    public /*99*/prop3(a: number): number;
+    /** prop3 2*/
+    public /*100*/prop3(b: string): number;
+    public /*101*/prop3(aorb: any) {
+        return 10;
+    }
+    /** prop4 1*/
+    public /*102*/prop4(a: number): number;
+    /** prop4 2*/
+    public /*103*/prop4(b: string): number;
+    public /*104*/prop4(aorb: any) {
+        return 10;
+    }
+    /** prop5 1*/
+    public /*105*/prop5(a: number): number;
+    /** prop5 2*/
+    public /*106*/prop5(b: string): number;
+    /** Prop5 implementaion*/
+    public /*107*/prop5(aorb: any) {
+        return 10;
+    }
+}
+class c1 {
+    /*78*/constructor(a: number);
+    /*79*/constructor(b: string);
+    /*80*/constructor(aorb: any) {
+    }
+}
+class c2 {
+    /** c2 1*/
+    /*81*/constructor(a: number);
+    /*82*/constructor(b: string);
+    /*83*/constructor(aorb: any) {
+    }
+}
+class c3 {
+    /*84*/constructor(a: number);
+    /** c3 2*/
+    /*85*/constructor(b: string);
+    /*86*/constructor(aorb: any) {
+    }
+}
+class c4 {
+    /** c4 1*/
+    /*87*/constructor(a: number);
+    /** c4 2*/
+    /*88*/constructor(b: string);
+    /*89*/constructor(aorb: any) {
+    }
+}
+class c5 {
+    /** c5 1*/
+    /*90*/constructor(a: number);
+    /** c5 2*/
+    /*91*/constructor(b: string);
+    /** c5 implementation*/
+    /*92*/constructor(aorb: any) {
+    }
+}
+var c_i = new c();
+c_i./*44*/pro/*45q*/p1(/*45*/10);
+c_i.pr/*46q*/op1(/*46*/"hello");
+c_i.pr/*47q*/op2(/*47*/10);
+c_i.pr/*48q*/op2(/*48*/"hello");
+c_i.pro/*49q*/p3(/*49*/10);
+c_i.pr/*50q*/op3(/*50*/"hello");
+c_i.pr/*51q*/op4(/*51*/10);
+c_i.pr/*52q*/op4(/*52*/"hello");
+c_i.pr/*53q*/op5(/*53*/10);
+c_i.pr/*54q*/op5(/*54*/"hello");
+var c1/*66*/_i_1 = new c/*55q*/1(/*55*/10);
+var c1_i_2 = new c/*56q*/1(/*56*/"hello");
+var c2_i_1 = new c/*57q*/2(/*57*/10);
+var c/*67*/2_i_2 = new c/*58q*/2(/*58*/"hello");
+var c3_i_1 = new c/*59q*/3(/*59*/10);
+var c/*68*/3_i_2 = new c/*60q*/3(/*60*/"hello");
+var c4/*69*/_i_1 = new c/*61q*/4(/*61*/10);
+var c4_i_2 = new c/*62q*/4(/*62*/"hello");
+var c/*70*/5_i_1 = new c/*63q*/5(/*63*/10);
+var c5_i_2 = new c/*64q*/5(/*64*/"hello");
+/** This is multiOverload F1 1*/
+function multiOverload(a: number): string;
+/** This is multiOverload F1 2*/
+function multiOverload(b: string): string;
+/** This is multiOverload F1 3*/
+function multiOverload(c: boolean): string;
+/** This is multiOverload Implementation */
+function multiOverload(d): string {
+    return "Hello";
+}
+multiOverl/*71*/oad(10);
+multiOverl/*72*/oad("hello");
+multiOverl/*73*/oad(true);
+/** This is ambient F1 1*/
+declare function ambientF1(a: number): string;
+/** This is ambient F1 2*/
+declare function ambientF1(b: string): string;
+/** This is ambient F1 3*/
+declare function ambientF1(c: boolean): boolean;
+/*65*/
+ambient/*74*/F1(10);
+ambient/*75*/F1("hello");
+ambient/*76*/F1(true);
+function foo(a/*77*/a: i3) {
+}
+foo(null);"#;
+    let mut s = Session::new_for_test("commentsOverloadsFourslash", content);
+    fourslash::verify_quick_info_at(&mut s, "1", "function f1(a: number): number (+1 overload)", "this is signature 1");
+    fourslash::verify_quick_info_at(&mut s, "2", "function f1(b: string): number (+1 overload)", "this is signature 1");
+    fourslash::verify_quick_info_at(&mut s, "3", "function f1(a: number): number (+1 overload)", "this is signature 1");
+    fourslash::verify_quick_info_at(&mut s, "4q", "function f1(b: string): number (+1 overload)", "this is signature 1");
+    fourslash::verify_quick_info_at(&mut s, "o4q", "function f1(a: number): number (+1 overload)", "this is signature 1");
+    fourslash::go_to_marker(&mut s, "4");
+    // TODO: f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{OverloadsCount: 2})
+    fourslash::go_to_marker(&mut s, "o4");
+    // TODO: f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{DocComment: "this is signature 1", Par
+    fourslash::verify_quick_info_at(&mut s, "5", "function f2(a: number): number (+1 overload)", "");
+    fourslash::verify_quick_info_at(&mut s, "6", "function f2(b: string): number (+1 overload)", "this is signature 2");
+    fourslash::verify_quick_info_at(&mut s, "7", "function f2(a: number): number (+1 overload)", "");
+    fourslash::verify_quick_info_at(&mut s, "8q", "function f2(b: string): number (+1 overload)", "this is signature 2");
+    fourslash::verify_quick_info_at(&mut s, "o8q", "function f2(a: number): number (+1 overload)", "");
+    fourslash::go_to_marker(&mut s, "8");
+    // TODO: f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{DocComment: "this is signature 2", Ove
+    fourslash::go_to_marker(&mut s, "o8");
+    // TODO: f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{ParameterDocComment: "param a", Overlo
+    fourslash::verify_quick_info_at(&mut s, "9", "function f3(a: number): number (+1 overload)", "");
+    fourslash::verify_quick_info_at(&mut s, "10", "function f3(b: string): number (+1 overload)", "");
+    fourslash::verify_quick_info_at(&mut s, "11", "function f3(a: number): number (+1 overload)", "");
+    fourslash::verify_quick_info_at(&mut s, "12q", "function f3(b: string): number (+1 overload)", "");
+    fourslash::verify_quick_info_at(&mut s, "o12q", "function f3(a: number): number (+1 overload)", "");
+    fourslash::go_to_marker(&mut s, "12");
+    // TODO: f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{OverloadsCount: 2})
+    fourslash::go_to_marker(&mut s, "o12");
+    // TODO: f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{OverloadsCount: 2})
+    fourslash::verify_quick_info_at(&mut s, "13", "function f4(a: number): number (+1 overload)", "this is signature 4 - with number parameter");
+    fourslash::verify_quick_info_at(&mut s, "14", "function f4(b: string): number (+1 overload)", "this is signature 4 - with string parameter");
+    fourslash::verify_quick_info_at(&mut s, "15", "function f4(a: number): number (+1 overload)", "this is signature 4 - with number parameter");
+    fourslash::verify_quick_info_at(&mut s, "16q", "function f4(b: string): number (+1 overload)", "this is signature 4 - with string parameter");
+    fourslash::verify_quick_info_at(&mut s, "o16q", "function f4(a: number): number (+1 overload)", "this is signature 4 - with number parameter");
+    fourslash::go_to_marker(&mut s, "16");
+    // TODO: f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{DocComment: "this is signature 4 - wit
+    fourslash::go_to_marker(&mut s, "o16");
+    // TODO: f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{DocComment: "this is signature 4 - wit
+    // TODO: f.VerifyCompletions(t, "17", &fourslash.CompletionsExpectedList{
+    // TODO: f.VerifyCompletions(t, "18", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "19");
+    // TODO: f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{OverloadsCount: 2})
+    fourslash::verify_quick_info_at(&mut s, "19q", "var i1_i: i1\nnew (b: number) => any (+1 overload)", "new 1");
+    fourslash::go_to_marker(&mut s, "20");
+    // TODO: f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{DocComment: "new 1", OverloadsCount: 2
+    fourslash::verify_quick_info_at(&mut s, "20q", "var i1_i: i1\nnew (a: string) => any (+1 overload)", "new 1");
+    fourslash::go_to_marker(&mut s, "21");
+    // TODO: f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{DocComment: "this signature 1", Parame
+    fourslash::verify_quick_info_at(&mut s, "21q", "var i1_i: i1\n(a: number) => number (+1 overload)", "this signature 1");
+    fourslash::go_to_marker(&mut s, "22");
+    // TODO: f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{DocComment: "this is signature 2", Ove
+    fourslash::go_to_marker(&mut s, "22q");
+    fourslash::verify_quick_info_at(&mut s, "22q", "var i1_i: i1\n(b: string) => number (+1 overload)", "this is signature 2");
+    // TODO: f.VerifyCompletions(t, "23", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "24");
+    // TODO: f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{DocComment: "foo 1", OverloadsCount: 2
+    fourslash::verify_quick_info_at(&mut s, "24q", "(method) i1.foo(a: number): number (+1 overload)", "foo 1");
+    fourslash::go_to_marker(&mut s, "25");
+    // TODO: f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{DocComment: "foo 2", OverloadsCount: 2
+    fourslash::verify_quick_info_at(&mut s, "25q", "(method) i1.foo(b: string): number (+1 overload)", "foo 2");
+    fourslash::go_to_marker(&mut s, "26");
+    // TODO: f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{OverloadsCount: 2})
+    fourslash::verify_quick_info_at(&mut s, "26q", "(method) i1.foo2(a: number): number (+1 overload)", "");
+    fourslash::go_to_marker(&mut s, "27");
+    // TODO: f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{DocComment: "foo2 2", OverloadsCount: 
+    fourslash::verify_quick_info_at(&mut s, "27q", "(method) i1.foo2(b: string): number (+1 overload)", "foo2 2");
+    fourslash::go_to_marker(&mut s, "28");
+    // TODO: f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{OverloadsCount: 2})
+    fourslash::verify_quick_info_at(&mut s, "28q", "(method) i1.foo3(a: number): number (+1 overload)", "");
+    fourslash::go_to_marker(&mut s, "29");
+    // TODO: f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{OverloadsCount: 2})
+    fourslash::verify_quick_info_at(&mut s, "29q", "(method) i1.foo3(b: string): number (+1 overload)", "");
+    fourslash::go_to_marker(&mut s, "30");
+    // TODO: f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{DocComment: "foo4 1", OverloadsCount: 
+    fourslash::verify_quick_info_at(&mut s, "30q", "(method) i1.foo4(a: number): number (+1 overload)", "foo4 1");
+    fourslash::go_to_marker(&mut s, "31");
+    // TODO: f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{OverloadsCount: 2})
+    fourslash::verify_quick_info_at(&mut s, "31q", "(method) i1.foo4(b: string): number (+1 overload)", "foo4 1");
+    fourslash::go_to_marker(&mut s, "32");
+    // TODO: f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{DocComment: "new 2", OverloadsCount: 2
+    fourslash::verify_quick_info_at(&mut s, "32q", "var i2_i: i2\nnew (b: number) => any (+1 overload)", "new 2");
+    fourslash::go_to_marker(&mut s, "33");
+    // TODO: f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{OverloadsCount: 2})
+    fourslash::verify_quick_info_at(&mut s, "33q", "var i2_i: i2\nnew (a: string) => any (+1 overload)", "");
+    fourslash::go_to_marker(&mut s, "34");
+    // TODO: f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{OverloadsCount: 2})
+    fourslash::verify_quick_info_at(&mut s, "34q", "var i2_i: i2\n(a: number) => number (+1 overload)", "");
+    fourslash::go_to_marker(&mut s, "35");
+    // TODO: f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{DocComment: "this is signature 2", Ove
+    fourslash::verify_quick_info_at(&mut s, "35q", "var i2_i: i2\n(b: string) => number (+1 overload)", "this is signature 2");
+    fourslash::go_to_marker(&mut s, "36");
+    // TODO: f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{DocComment: "new 2", OverloadsCount: 2
+    fourslash::verify_quick_info_at(&mut s, "36q", "var i3_i: i3\nnew (b: number) => any (+1 overload)", "new 2");
+    fourslash::go_to_marker(&mut s, "37");
+    // TODO: f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{DocComment: "new 1", OverloadsCount: 2
+    fourslash::verify_quick_info_at(&mut s, "37q", "var i3_i: i3\nnew (a: string) => any (+1 overload)", "new 1");
+    fourslash::go_to_marker(&mut s, "38");
+    // TODO: f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{DocComment: "this is signature 1", Ove
+    fourslash::verify_quick_info_at(&mut s, "38q", "var i3_i: i3\n(a: number) => number (+1 overload)", "this is signature 1");
+    fourslash::go_to_marker(&mut s, "39");
+    // TODO: f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{OverloadsCount: 2})
+    fourslash::verify_quick_info_at(&mut s, "39q", "var i3_i: i3\n(b: string) => number (+1 overload)", "this is signature 1");
+    fourslash::go_to_marker(&mut s, "40");
+    // TODO: f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{OverloadsCount: 2})
+    fourslash::verify_quick_info_at(&mut s, "40q", "var i4_i: i4\nnew (b: number) => any (+1 overload)", "");
+    fourslash::go_to_marker(&mut s, "41");
+    // TODO: f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{OverloadsCount: 2})
+    fourslash::verify_quick_info_at(&mut s, "41q", "var i4_i: i4\nnew (a: string) => any (+1 overload)", "");
+    fourslash::go_to_marker(&mut s, "42");
+    // TODO: f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{OverloadsCount: 2})
+    fourslash::verify_quick_info_at(&mut s, "42q", "var i4_i: i4\n(a: number) => number (+1 overload)", "");
+    fourslash::go_to_marker(&mut s, "43");
+    // TODO: f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{OverloadsCount: 2})
+    fourslash::verify_quick_info_at(&mut s, "43q", "var i4_i: i4\n(b: string) => number (+1 overload)", "");
+    // TODO: f.VerifyCompletions(t, "44", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "45");
+    // TODO: f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{OverloadsCount: 2})
+    fourslash::verify_quick_info_at(&mut s, "45q", "(method) c.prop1(a: number): number (+1 overload)", "");
+    fourslash::go_to_marker(&mut s, "46");
+    // TODO: f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{OverloadsCount: 2})
+    fourslash::verify_quick_info_at(&mut s, "46q", "(method) c.prop1(b: string): number (+1 overload)", "");
+    fourslash::go_to_marker(&mut s, "47");
+    // TODO: f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{DocComment: "prop2 1", OverloadsCount:
+    fourslash::verify_quick_info_at(&mut s, "47q", "(method) c.prop2(a: number): number (+1 overload)", "prop2 1");
+    fourslash::go_to_marker(&mut s, "48");
+    // TODO: f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{OverloadsCount: 2})
+    fourslash::verify_quick_info_at(&mut s, "48q", "(method) c.prop2(b: string): number (+1 overload)", "prop2 1");
+    fourslash::go_to_marker(&mut s, "49");
+    // TODO: f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{OverloadsCount: 2})
+    fourslash::verify_quick_info_at(&mut s, "49q", "(method) c.prop3(a: number): number (+1 overload)", "");
+    fourslash::go_to_marker(&mut s, "50");
+    // TODO: f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{DocComment: "prop3 2", OverloadsCount:
+    fourslash::verify_quick_info_at(&mut s, "50q", "(method) c.prop3(b: string): number (+1 overload)", "prop3 2");
+    fourslash::go_to_marker(&mut s, "51");
+    // TODO: f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{DocComment: "prop4 1", OverloadsCount:
+    fourslash::verify_quick_info_at(&mut s, "51q", "(method) c.prop4(a: number): number (+1 overload)", "prop4 1");
+    fourslash::go_to_marker(&mut s, "52");
+    // TODO: f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{DocComment: "prop4 2", OverloadsCount:
+    fourslash::verify_quick_info_at(&mut s, "52q", "(method) c.prop4(b: string): number (+1 overload)", "prop4 2");
+    fourslash::go_to_marker(&mut s, "53");
+    // TODO: f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{DocComment: "prop5 1", OverloadsCount:
+    fourslash::verify_quick_info_at(&mut s, "53q", "(method) c.prop5(a: number): number (+1 overload)", "prop5 1");
+    fourslash::go_to_marker(&mut s, "54");
+    // TODO: f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{DocComment: "prop5 2", OverloadsCount:
+    fourslash::verify_quick_info_at(&mut s, "54q", "(method) c.prop5(b: string): number (+1 overload)", "prop5 2");
+    fourslash::go_to_marker(&mut s, "55");
+    // TODO: f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{OverloadsCount: 2})
+    fourslash::verify_quick_info_at(&mut s, "55q", "constructor c1(a: number): c1 (+1 overload)", "");
+    fourslash::go_to_marker(&mut s, "56");
+    // TODO: f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{OverloadsCount: 2})
+    fourslash::verify_quick_info_at(&mut s, "56q", "constructor c1(b: string): c1 (+1 overload)", "");
+    fourslash::go_to_marker(&mut s, "57");
+    // TODO: f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{DocComment: "c2 1", OverloadsCount: 2}
+    fourslash::verify_quick_info_at(&mut s, "57q", "constructor c2(a: number): c2 (+1 overload)", "c2 1");
+    fourslash::go_to_marker(&mut s, "58");
+    // TODO: f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{OverloadsCount: 2})
+    fourslash::verify_quick_info_at(&mut s, "58q", "constructor c2(b: string): c2 (+1 overload)", "c2 1");
+    fourslash::go_to_marker(&mut s, "59");
+    // TODO: f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{OverloadsCount: 2})
+    fourslash::verify_quick_info_at(&mut s, "59q", "constructor c3(a: number): c3 (+1 overload)", "");
+    fourslash::go_to_marker(&mut s, "60");
+    // TODO: f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{DocComment: "c3 2", OverloadsCount: 2}
+    fourslash::verify_quick_info_at(&mut s, "60q", "constructor c3(b: string): c3 (+1 overload)", "c3 2");
+    fourslash::go_to_marker(&mut s, "61");
+    // TODO: f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{DocComment: "c4 1", OverloadsCount: 2}
+    fourslash::verify_quick_info_at(&mut s, "61q", "constructor c4(a: number): c4 (+1 overload)", "c4 1");
+    fourslash::go_to_marker(&mut s, "62");
+    // TODO: f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{DocComment: "c4 2", OverloadsCount: 2}
+    fourslash::verify_quick_info_at(&mut s, "62q", "constructor c4(b: string): c4 (+1 overload)", "c4 2");
+    fourslash::go_to_marker(&mut s, "63");
+    // TODO: f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{DocComment: "c5 1", OverloadsCount: 2}
+    fourslash::verify_quick_info_at(&mut s, "63q", "constructor c5(a: number): c5 (+1 overload)", "c5 1");
+    fourslash::go_to_marker(&mut s, "64");
+    // TODO: f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{DocComment: "c5 2", OverloadsCount: 2}
+    fourslash::verify_quick_info_at(&mut s, "64q", "constructor c5(b: string): c5 (+1 overload)", "c5 2");
+    // TODO: f.VerifyCompletions(t, "65", &fourslash.CompletionsExpectedList{
+    fourslash::verify_quick_info_at(&mut s, "66", "var c1_i_1: c1", "");
+    fourslash::verify_quick_info_at(&mut s, "67", "var c2_i_2: c2", "");
+    fourslash::verify_quick_info_at(&mut s, "68", "var c3_i_2: c3", "");
+    fourslash::verify_quick_info_at(&mut s, "69", "var c4_i_1: c4", "");
+    fourslash::verify_quick_info_at(&mut s, "70", "var c5_i_1: c5", "");
+    fourslash::verify_quick_info_at(&mut s, "71", "function multiOverload(a: number): string (+2 overloads)", "This is multiOverload F1 1");
+    fourslash::verify_quick_info_at(&mut s, "72", "function multiOverload(b: string): string (+2 overloads)", "This is multiOverload F1 2");
+    fourslash::verify_quick_info_at(&mut s, "73", "function multiOverload(c: boolean): string (+2 overloads)", "This is multiOverload F1 3");
+    fourslash::verify_quick_info_at(&mut s, "74", "function ambientF1(a: number): string (+2 overloads)", "This is ambient F1 1");
+    fourslash::verify_quick_info_at(&mut s, "75", "function ambientF1(b: string): string (+2 overloads)", "This is ambient F1 2");
+    fourslash::verify_quick_info_at(&mut s, "76", "function ambientF1(c: boolean): boolean (+2 overloads)", "This is ambient F1 3");
+    fourslash::verify_quick_info_at(&mut s, "77", "(parameter) aa: i3", "");
+    fourslash::verify_quick_info_at(&mut s, "78", "constructor c1(a: number): c1 (+1 overload)", "");
+    fourslash::verify_quick_info_at(&mut s, "79", "constructor c1(b: string): c1 (+1 overload)", "");
+    fourslash::verify_quick_info_at(&mut s, "80", "constructor c1(a: number): c1 (+1 overload)", "");
+    fourslash::verify_quick_info_at(&mut s, "81", "constructor c2(a: number): c2 (+1 overload)", "c2 1");
+    fourslash::verify_quick_info_at(&mut s, "82", "constructor c2(b: string): c2 (+1 overload)", "c2 1");
+    fourslash::verify_quick_info_at(&mut s, "83", "constructor c2(a: number): c2 (+1 overload)", "c2 1");
+    fourslash::verify_quick_info_at(&mut s, "84", "constructor c3(a: number): c3 (+1 overload)", "");
+    fourslash::verify_quick_info_at(&mut s, "85", "constructor c3(b: string): c3 (+1 overload)", "c3 2");
+    fourslash::verify_quick_info_at(&mut s, "86", "constructor c3(a: number): c3 (+1 overload)", "");
+    fourslash::verify_quick_info_at(&mut s, "87", "constructor c4(a: number): c4 (+1 overload)", "c4 1");
+    fourslash::verify_quick_info_at(&mut s, "88", "constructor c4(b: string): c4 (+1 overload)", "c4 2");
+    fourslash::verify_quick_info_at(&mut s, "89", "constructor c4(a: number): c4 (+1 overload)", "c4 1");
+    fourslash::verify_quick_info_at(&mut s, "90", "constructor c5(a: number): c5 (+1 overload)", "c5 1");
+    fourslash::verify_quick_info_at(&mut s, "91", "constructor c5(b: string): c5 (+1 overload)", "c5 2");
+    fourslash::verify_quick_info_at(&mut s, "92", "constructor c5(a: number): c5 (+1 overload)", "c5 1");
+    fourslash::verify_quick_info_at(&mut s, "93", "(method) c.prop1(a: number): number (+1 overload)", "");
+    fourslash::verify_quick_info_at(&mut s, "94", "(method) c.prop1(b: string): number (+1 overload)", "");
+    fourslash::verify_quick_info_at(&mut s, "95", "(method) c.prop1(a: number): number (+1 overload)", "");
+    fourslash::verify_quick_info_at(&mut s, "96", "(method) c.prop2(a: number): number (+1 overload)", "prop2 1");
+    fourslash::verify_quick_info_at(&mut s, "97", "(method) c.prop2(b: string): number (+1 overload)", "prop2 1");
+    fourslash::verify_quick_info_at(&mut s, "98", "(method) c.prop2(a: number): number (+1 overload)", "prop2 1");
+    fourslash::verify_quick_info_at(&mut s, "99", "(method) c.prop3(a: number): number (+1 overload)", "");
+    fourslash::verify_quick_info_at(&mut s, "100", "(method) c.prop3(b: string): number (+1 overload)", "prop3 2");
+    fourslash::verify_quick_info_at(&mut s, "101", "(method) c.prop3(a: number): number (+1 overload)", "");
+    fourslash::verify_quick_info_at(&mut s, "102", "(method) c.prop4(a: number): number (+1 overload)", "prop4 1");
+    fourslash::verify_quick_info_at(&mut s, "103", "(method) c.prop4(b: string): number (+1 overload)", "prop4 2");
+    fourslash::verify_quick_info_at(&mut s, "104", "(method) c.prop4(a: number): number (+1 overload)", "prop4 1");
+    fourslash::verify_quick_info_at(&mut s, "105", "(method) c.prop5(a: number): number (+1 overload)", "prop5 1");
+    fourslash::verify_quick_info_at(&mut s, "106", "(method) c.prop5(b: string): number (+1 overload)", "prop5 2");
+    fourslash::verify_quick_info_at(&mut s, "107", "(method) c.prop5(a: number): number (+1 overload)", "prop5 1");
+}

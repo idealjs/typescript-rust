@@ -1,0 +1,13 @@
+use tsox_lsp::fourslash::{self, Session};
+
+
+#[test]
+fn code_fix_class_implement_interface_type_param_instantiation() {
+    let content = r#"interface I<T> {
+   x: T;
+}
+
+class C implements I { }"#;
+    let mut s = Session::new_for_test("codeFixClassImplementInterfaceTypeParamInstantiation", content);
+    // TODO: f.VerifyCodeFixNotAvailable(t)
+}

@@ -1,0 +1,18 @@
+use tsox_lsp::fourslash::{self, Session};
+
+
+#[test]
+fn inlay_hints_import_type2() {
+    let content = r#"// @allowJs: true
+// @checkJs: true
+// @Filename: /a.js
+module.exports.a = 1
+// @Filename: /b.js
+function foo () { return require('./a'); }
+function bar () { return require('./a').a; }
+const c = foo()
+const d = bar()"#;
+    let mut s = Session::new_for_test("inlayHintsImportType2", content);
+    fourslash::go_to_file(&mut s, "/b.js");
+    // TODO: f.VerifyBaselineInlayHints(t, nil /*span*/, &lsutil.UserPreferences{InlayHints: lsutil.InlayHintsPre
+}

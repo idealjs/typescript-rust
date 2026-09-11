@@ -1,0 +1,16 @@
+use tsox_lsp::fourslash::{self, Session};
+
+
+#[test]
+fn completion_list_for_export_equals2() {
+    let content = r#"// @Filename: /node_modules/foo/index.d.ts
+export = Foo;
+interface Foo { bar: number; }
+declare namespace Foo {
+    interface Static {}
+}
+// @Filename: /a.ts
+import { /**/ } from "foo";"#;
+    let mut s = Session::new_for_test("completionListForExportEquals2", content);
+    // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
+}

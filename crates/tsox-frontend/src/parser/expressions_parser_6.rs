@@ -153,9 +153,12 @@ impl Parser {
                 TextRange::new(pos, end),
             ))
         } else {
+            // 铁律：错误恢复不允许「不消费的返回」——零宽 missing 后必须
+            // 前进，否则语句层循环在同一 token 上无限重入（OOM）
             let pos = self.token_pos();
             let end = self.token_end();
             self.parse_error_at(pos, end, tsox_core::diagnostics::EXPRESSION_EXPECTED, &[]);
+            self.next_token();
             Arc::new(Node::with_loc(
                 SyntaxKind::Identifier,
                 NodeData::Identifier(IdentifierData {

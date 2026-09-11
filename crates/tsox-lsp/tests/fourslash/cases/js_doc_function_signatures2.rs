@@ -1,0 +1,15 @@
+use tsox_lsp::fourslash::{self, Session};
+
+
+#[test]
+fn js_doc_function_signatures2() {
+    let content = r#"// @allowNonTsExtensions: true
+// @Filename: Foo.js
+/** @type {(arg0: string, arg1?: boolean) => number} */
+var f6;
+
+f6('', /**/false)"#;
+    let mut s = Session::new_for_test("jsDocFunctionSignatures2", content);
+    fourslash::go_to_marker(&mut s, "");
+    // TODO: f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{Text: "f6(arg0: string, arg1?: boolean
+}

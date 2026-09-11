@@ -1,0 +1,14 @@
+use tsox_lsp::fourslash::{self, Session};
+
+
+#[test]
+fn as_const_refs_no_errors3() {
+    let content = r#"// @checkJs: true
+// @Filename: file.js
+class Tex {
+    type = (/** @type {/**/const} */'Text');
+}"#;
+    let mut s = Session::new_for_test("asConstRefsNoErrors3", content);
+    // TODO: f.VerifyBaselineGoToDefinition(t, true, "")
+    fourslash::verify_no_errors(&mut s, );
+}

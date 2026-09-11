@@ -1,0 +1,19 @@
+use tsox_lsp::fourslash::{self, Session};
+
+
+#[test]
+fn code_fix_add_missing_attributes10() {
+    let content = r#"// @jsx: preserve
+// @filename: foo.tsx
+type A = 'a' | 'b' | 'c' | 'd' | 'e';
+type B = 1 | 2 | 3;
+type C = '@' | '!';
+type D = `${A}${Uppercase<A>}${B}${C}`;
+const A = (props: { [K in D]: K }) =>
+   <div {...props}></div>;
+
+const Bar = () =>
+   [|<A></A>|]"#;
+    let mut s = Session::new_for_test("codeFixAddMissingAttributes10", content);
+    // TODO: f.VerifyCodeFixNotAvailable(t, "fixMissingAttributes")
+}

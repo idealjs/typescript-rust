@@ -1,0 +1,17 @@
+use tsox_lsp::fourslash::{self, Session};
+
+
+#[test]
+fn organize_imports16() {
+    let content = r#"import { a, A, b } from "foo";
+interface Use extends A {}
+console.log(a, b);"#;
+    let mut s = Session::new_for_test("organizeImports16", content);
+    // TODO: f.VerifyOrganizeImports(t,
+    // TODO: f.ReplaceLine(t, 0, "import { a, A, b } from \"foo1\";")
+    // TODO: f.VerifyOrganizeImports(t,
+    // TODO: f.ReplaceLine(t, 0, "import { a, A, b } from \"foo2\";")
+    // TODO: f.VerifyOrganizeImports(t,
+    // TODO: f.ReplaceLine(t, 0, "import { a, A, b } from \"foo3\";")
+    // TODO: f.VerifyOrganizeImports(t,
+}

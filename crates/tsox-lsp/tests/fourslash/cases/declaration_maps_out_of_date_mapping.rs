@@ -1,0 +1,32 @@
+use tsox_lsp::fourslash::{self, Session};
+
+
+#[test]
+fn declaration_maps_out_of_date_mapping() {
+    let content = r#"// @lib: es5
+// @Filename: /home/src/workspaces/project/node_modules/a/dist/index.d.ts
+export declare class Foo {
+    bar: any;
+}
+//# sourceMappingURL=index.d.ts.map
+// @Filename: /home/src/workspaces/project/node_modules/a/dist/index.d.ts.map
+{"version":3,"file":"index.d.ts","sourceRoot":"","sources":["../src/index.ts"],"names":[],"mappings":"AAAA,qBAAa,GAAG;IACZ,GAAG,MAAC;CACP"}
+// @Filename: /home/src/workspaces/project/node_modules/a/src/index.ts
+export class /*2*/Foo {
+}
+
+// @Filename: /home/src/workspaces/project/node_modules/a/package.json
+{
+    "name": "a",
+    "version": "0.0.0",
+    "private": true,
+    "main": "dist",
+    "types": "dist"
+}
+// @Filename: /home/src/workspaces/project/index.ts
+import { Foo/*1*/ } from "a";"#;
+    let mut s = Session::new_for_test("declarationMapsOutOfDateMapping", content);
+    // TODO: f.MarkTestAsStradaServer()
+    fourslash::go_to_file(&mut s, "/home/src/workspaces/project/index.ts");
+    // TODO: f.VerifyBaselineGoToDefinition(t, false, "1")
+}

@@ -1,0 +1,20 @@
+use tsox_lsp::fourslash::{self, Session};
+
+
+#[test]
+fn signature_help_type_arguments2() {
+    let content = r#"/** some documentation
+ * @template T some documentation 2
+ * @template W
+ * @template U,V others
+ * @param a ok
+ * @param b not ok
+ */
+function f<T, U, V, W>(a: number, b: string, c: boolean): void { }
+f</*f0*/;
+f<number, /*f1*/;
+f<number, string, /*f2*/;
+f<number, string, boolean, /*f3*/;"#;
+    let mut s = Session::new_for_test("signatureHelpTypeArguments2", content);
+    // TODO: f.VerifyBaselineSignatureHelp(t)
+}

@@ -1,0 +1,12 @@
+use tsox_lsp::fourslash::{self, Session};
+
+
+#[test]
+fn rename_module_exports_properties3() {
+    let content = r#"// @allowJs: true
+// @Filename: a.js
+[|class [|{| "contextRangeIndex": 0 |}A|] {}|]
+module.exports = { [|A|] }"#;
+    let mut s = Session::new_for_test("renameModuleExportsProperties3", content);
+    // TODO: f.VerifyBaselineRename(t, &lsutil.UserPreferences{UseAliasesForRename: core.TSTrue}, f.Ranges()[1], 
+}

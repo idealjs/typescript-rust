@@ -1,0 +1,18 @@
+use tsox_lsp::fourslash::{self, Session};
+
+
+#[test]
+fn delete_type_parameter() {
+    let content = r#"interface Query<T> {
+    groupBy(): Query</**/T>;
+}
+interface Query2<T> {
+    groupBy(): Query2<Query<T>>;
+}
+var q1: Query<number>;
+var q2: Query2<number>;
+q1 = q2;"#;
+    let mut s = Session::new_for_test("deleteTypeParameter", content);
+    fourslash::go_to_marker(&mut s, "");
+    // TODO: f.DeleteAtCaret(t, 1)
+}

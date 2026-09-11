@@ -1,0 +1,16 @@
+use tsox_lsp::fourslash::{self, Session};
+
+
+#[test]
+fn completions_ecma_private_member() {
+    let content = r#"// @target: esnext
+class K {
+  #value: number;
+
+  foo() {
+     this.#va/**/
+  }
+}"#;
+    let mut s = Session::new_for_test("completionsECMAPrivateMember", content);
+    // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
+}

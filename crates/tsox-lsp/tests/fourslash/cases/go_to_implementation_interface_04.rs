@@ -1,0 +1,22 @@
+use tsox_lsp::fourslash::{self, Session};
+
+
+#[test]
+fn go_to_implementation_interface_04() {
+    let content = r#"interface Fo/*interface_definition*/o {
+    (a: number): void
+}
+
+var bar: Foo = [|(a) => {/**0*/}|];
+
+function whatever(x: Foo = [|(a) => {/**1*/}|] ) {
+}
+
+class Bar {
+    x: Foo = [|(a) => {/**2*/}|]
+
+    constructor(public f: Foo = [|function(a) {}|] ) {}
+}"#;
+    let mut s = Session::new_for_test("goToImplementationInterface_04", content);
+    // TODO: f.VerifyBaselineGoToImplementation(t, "interface_definition")
+}
