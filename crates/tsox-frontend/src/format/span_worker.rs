@@ -212,15 +212,21 @@ impl FormatSpanWorker {
             }
             if ok {
                 action_mask = RuleAction(action_mask.0 | spec.rule.action.0);
+                if std::env::var("FMT_DEBUG").is_ok() {
+                    eprintln!("FMTRULE {} on ({:?},{:?})", spec.rule.debug_name, previous.kind, current.kind);
+                }
                 accepted.push(spec.rule.clone());
             }
         }
 
         if std::env::var("FMT_DEBUG").is_ok() {
+            let text = &self.source_file.text;
+            let prev_text = &text[previous.loc.pos().min(text.len())..previous.loc.end().min(text.len())];
+            let cur_text = &text[current.loc.pos().min(text.len())..current.loc.end().min(text.len())];
             eprintln!(
-                "FMTPAIR prev=({}..{} {:?}) cur=({}..{} {:?})",
-                previous.loc.pos(), previous.loc.end(), previous.kind,
-                current.loc.pos(), current.loc.end(), current.kind,
+                "FMTPAIR prev=({}..{} {:?} {:?}) cur=({}..{} {:?} {:?})",
+                previous.loc.pos(), previous.loc.end(), previous.kind, prev_text,
+                current.loc.pos(), current.loc.end(), current.kind, cur_text,
             );
         }
         let mut trim_trailing = self.options.editor_settings.trim_trailing_whitespace;
@@ -307,14 +313,11 @@ impl FormatSpanWorker {
                 if rule.flags != RuleFlags::CanDeleteNewLines && previous_line != current_line {
                     return LineAction::None;
                 }
+                // 源文本里 prev.end 与 cur.pos 之间可能有多个空白：先删后插
+                // 合并为一次替换（Go recordReplace 语义）
                 let pos_delta = current.loc.pos() - previous.loc.end();
-                let has_space = self
-                    .source_file
-                    .text
-                    .as_bytes()
-                    .get(previous.loc.end())
-                    == Some(&b' ');
-                if pos_delta != 1 || !has_space {
+                let gap = &self.source_file.text[previous.loc.end().min(self.source_file.text.len())..current.loc.pos().min(self.source_file.text.len())];
+                if gap != " " {
                     self.edits.push(TextChange {
                         pos: previous.loc.end(),
                         end: current.loc.pos(),
@@ -324,6 +327,7 @@ impl FormatSpanWorker {
                         return LineAction::LineRemoved;
                     }
                 }
+                let _ = pos_delta;
                 LineAction::None
             }
             a if a.contains(RuleAction::INSERT_TRAILING_SEMICOLON) => {
