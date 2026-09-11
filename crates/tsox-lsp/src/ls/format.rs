@@ -132,8 +132,7 @@ fn to_engine_settings(
     };
     tsox_frontend::format::FormatCodeSettings {
         editor_settings: editor,
-        insert_space_before_type_annotation: options.insert_space_before_type_annotation
-            == tsox_core::core::tristate::Tristate::True,
+        insert_space_before_type_annotation: tristate(options.insert_space_before_type_annotation),
         insert_space_before_and_after_binary_operators: options
             .insert_space_before_and_after_binary_operators
             != tsox_core::core::tristate::Tristate::False,

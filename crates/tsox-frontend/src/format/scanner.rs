@@ -118,7 +118,7 @@ impl FormattingScanner {
             self.leading_trivia.push(item);
         }
 
-        self.saved_pos = self.s.full_start_pos();
+        self.saved_pos = self.s.token_pos();
     }
 
     pub(crate) fn read_token_info(&mut self, n: Option<&Arc<Node>>) -> TokenInfo {
@@ -144,7 +144,7 @@ impl FormattingScanner {
 
         let current_token = self.get_next_token(n, expected_scan_action);
 
-        let token = TextRangeWithKind::new(self.s.full_start_pos(), self.s.token_end(), current_token);
+        let token = TextRangeWithKind::new(self.s.token_pos(), self.s.token_end(), current_token);
 
         // 消费 trailing trivia
         self.trailing_trivia = Vec::new();
@@ -284,7 +284,7 @@ impl FormattingScanner {
                 return tok.loc.pos();
             }
         }
-        self.s.full_start_pos()
+        self.s.token_pos()
     }
 
     pub(crate) fn get_token_end(&self) -> usize {

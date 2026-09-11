@@ -31,7 +31,7 @@ pub struct EditorSettings {
 #[derive(Debug, Clone)]
 pub struct FormatCodeSettings {
     pub editor_settings: EditorSettings,
-    pub insert_space_before_type_annotation: bool,
+    pub insert_space_before_type_annotation: Tristate,
     pub insert_space_before_and_after_binary_operators: bool,
     pub insert_space_after_comma_delimiter: Tristate,
     pub insert_space_after_semicolon_in_for_statements: Tristate,
@@ -62,7 +62,7 @@ pub fn get_default_format_code_settings() -> FormatCodeSettings {
             indent_style: IndentStyle::Smart,
             trim_trailing_whitespace: true,
         },
-        insert_space_before_type_annotation: false,
+        
         insert_space_before_and_after_binary_operators: true,
         insert_space_after_comma_delimiter: Tristate::True,
         insert_space_after_semicolon_in_for_statements: Tristate::True,
@@ -71,8 +71,9 @@ pub fn get_default_format_code_settings() -> FormatCodeSettings {
         insert_space_after_function_keyword_for_anonymous_functions: Tristate::False,
         insert_space_after_opening_and_before_closing_nonempty_parenthesis: Tristate::False,
         insert_space_after_opening_and_before_closing_nonempty_brackets: Tristate::False,
-        insert_space_after_opening_and_before_closing_nonempty_braces: Tristate::False,
-        insert_space_after_opening_and_before_closing_empty_braces: Tristate::False,
+        insert_space_before_type_annotation: Tristate::Unknown,
+        insert_space_after_opening_and_before_closing_nonempty_braces: Tristate::True,
+        insert_space_after_opening_and_before_closing_empty_braces: Tristate::Unknown,
         insert_space_after_opening_and_before_closing_template_string_braces: Tristate::False,
         insert_space_after_opening_and_before_closing_jsx_expression_braces: Tristate::False,
         insert_space_after_type_assertion: Tristate::False,

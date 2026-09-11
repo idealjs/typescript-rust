@@ -111,6 +111,11 @@ impl crate::format::scanner::FormatSpanWorkerLike for FormatSpanWorker {
             scanner.advance();
         }
 
+        if std::env::var("FMT_DEBUG").is_ok() {
+            for e in &self.edits {
+                eprintln!("FMTEDIT ({}..{}) => {:?}", e.pos, e.end, e.new_text);
+            }
+        }
         std::mem::take(&mut self.edits)
     }
 }
@@ -184,7 +189,8 @@ impl FormatSpanWorker {
             common,
         );
 
-        // Go getRules：按优先序收集可接受规则（action 掩码互斥）
+        // Go getRules + getRuleActionExclusion：按优先序收集规则，
+        // 已见动作位的同类后续规则被排除（防止多重编辑叠加）
         let mut accepted: Vec<crate::format::rule::RuleImpl> = Vec::new();
         let mut action_mask = RuleAction::NONE;
         for spec in &crate::format::rules::get_all_rules() {
@@ -193,8 +199,8 @@ impl FormatSpanWorker {
             {
                 continue;
             }
-            let accept = !action_mask.intersects(RuleAction::STOP_ACTION);
-            if !accept {
+            let exclusion = get_rule_action_exclusion(action_mask);
+            if (spec.rule.action.0 & !exclusion.0) != spec.rule.action.0 {
                 continue;
             }
             let mut ok = true;
@@ -210,6 +216,13 @@ impl FormatSpanWorker {
             }
         }
 
+        if std::env::var("FMT_DEBUG").is_ok() {
+            eprintln!(
+                "FMTPAIR prev=({}..{} {:?}) cur=({}..{} {:?})",
+                previous.loc.pos(), previous.loc.end(), previous.kind,
+                current.loc.pos(), current.loc.end(), current.kind,
+            );
+        }
         let mut trim_trailing = self.options.editor_settings.trim_trailing_whitespace;
         let mut line_action = LineAction::None;
 
@@ -356,4 +369,22 @@ impl FormatSpanWorker {
             }
         }
     }
+}
+
+/// Go getRuleActionExclusion：已见动作位生成后续规则的排除掩码
+fn get_rule_action_exclusion(action: RuleAction) -> RuleAction {
+    let mut mask = RuleAction::NONE;
+    if action.intersects(RuleAction::STOP_PROCESSING_SPACE_ACTIONS) {
+        mask = RuleAction(mask.0 | RuleAction::MODIFY_SPACE_ACTION.0);
+    }
+    if action.intersects(RuleAction::STOP_PROCESSING_TOKEN_ACTIONS) {
+        mask = RuleAction(mask.0 | RuleAction::MODIFY_TOKEN_ACTION.0);
+    }
+    if action.intersects(RuleAction::MODIFY_SPACE_ACTION) {
+        mask = RuleAction(mask.0 | RuleAction::MODIFY_SPACE_ACTION.0);
+    }
+    if action.intersects(RuleAction::MODIFY_TOKEN_ACTION) {
+        mask = RuleAction(mask.0 | RuleAction::MODIFY_TOKEN_ACTION.0);
+    }
+    mask
 }

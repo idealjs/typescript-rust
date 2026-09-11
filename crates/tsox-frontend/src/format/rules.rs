@@ -656,9 +656,9 @@ pub(crate) fn get_all_rules() -> Vec<RuleSpec> {
 }
 
 fn is_insert_space_before_type_annotation_enabled(context: &mut crate::format::rule_context::FormattingContext) -> bool {
-    context.options.insert_space_before_type_annotation
+    context.options.insert_space_before_type_annotation == crate::format::Tristate::True
 }
 
 fn is_insert_space_before_type_annotation_disabled(context: &mut crate::format::rule_context::FormattingContext) -> bool {
-    !context.options.insert_space_before_type_annotation
+    context.options.insert_space_before_type_annotation != crate::format::Tristate::True
 }
