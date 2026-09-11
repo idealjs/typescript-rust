@@ -10,6 +10,7 @@ export const foo = 0;
 import * as s from "something";
 fo/*b*/"#;
     let mut s = Session::new_for_test("completionsImport_require", content);
+    fourslash::go_to_marker(&mut s, "b");
     // TODO: f.VerifyCompletions(t, "b", &fourslash.CompletionsExpectedList{
     // TODO: f.VerifyApplyCodeActionFromCompletion(t, new("b"), &fourslash.ApplyCodeActionFromCompletionOptions{
 }

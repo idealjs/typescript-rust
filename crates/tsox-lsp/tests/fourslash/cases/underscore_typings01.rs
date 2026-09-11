@@ -42,5 +42,6 @@ var e = a.map(x => x./*13*/"#;
     fourslash::verify_quick_info_at(&mut s, "10", "(parameter) x: any", "");
     fourslash::verify_quick_info_at(&mut s, "11", "var dd: any[]", "");
     fourslash::verify_quick_info_at(&mut s, "12", "(parameter) x: any", "");
+    fourslash::go_to_marker(&mut s, "13");
     // TODO: f.VerifyCompletions(t, "13", &fourslash.CompletionsExpectedList{
 }

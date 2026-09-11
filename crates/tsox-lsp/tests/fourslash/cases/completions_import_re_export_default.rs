@@ -12,6 +12,7 @@ export { default as foo } from "./b/impl";
 // @Filename: /use.ts
 fo/**/"#;
     let mut s = Session::new_for_test("completionsImport_reExportDefault", content);
+    fourslash::go_to_marker(&mut s, "");
     // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
     // TODO: f.VerifyApplyCodeActionFromCompletion(t, new(""), &fourslash.ApplyCodeActionFromCompletionOptions{
 }

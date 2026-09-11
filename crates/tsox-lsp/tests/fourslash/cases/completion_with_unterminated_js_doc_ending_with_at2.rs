@@ -8,5 +8,6 @@ fn completion_with_unterminated_js_doc_ending_with_at2() {
 function foo(x) {}
 /** some text @/*1*/"#;
     let mut s = Session::new_for_test("completionWithUnterminatedJSDocEndingWithAt2", content);
+    fourslash::go_to_marker(&mut s, "1");
     // TODO: f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
 }

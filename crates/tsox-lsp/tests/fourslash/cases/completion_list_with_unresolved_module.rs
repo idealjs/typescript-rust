@@ -8,5 +8,6 @@ fn completion_list_with_unresolved_module() {
     var n: num/**/
 }"#;
     let mut s = Session::new_for_test("completionListWithUnresolvedModule", content);
+    fourslash::go_to_marker(&mut s, "");
     // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

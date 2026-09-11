@@ -13,7 +13,9 @@ def/*0*/
 fooB/*1*/"#;
     let mut s = Session::new_for_test("completionsImport_default_anonymous", content);
     fourslash::go_to_marker(&mut s, "0");
+    fourslash::go_to_marker(&mut s, "0");
     // TODO: f.VerifyCompletions(t, "0", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "1");
     // TODO: f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
     // TODO: f.VerifyApplyCodeActionFromCompletion(t, new("1"), &fourslash.ApplyCodeActionFromCompletionOptions{
 }

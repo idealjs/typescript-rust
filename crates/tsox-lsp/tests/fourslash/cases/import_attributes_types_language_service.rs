@@ -27,9 +27,13 @@ import * as text from "./copy.asset" with { type: "text" };
 css./*css*/cssOnly;
 text./*text*/textOnly;"#;
     let mut s = Session::new_for_test("completionsPatternAmbientModuleWithImportAttributes", content);
+    fourslash::go_to_marker(&mut s, "attributeName");
     // TODO: f.VerifyCompletions(t, "attributeName", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "attributeValue");
     // TODO: f.VerifyCompletions(t, "attributeValue", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "css");
     // TODO: f.VerifyCompletions(t, "css", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "text");
     // TODO: f.VerifyCompletions(t, "text", &fourslash.CompletionsExpectedList{
 }
 

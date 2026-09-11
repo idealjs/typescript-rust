@@ -36,5 +36,6 @@ export const u = 1;
 [|import u/*a*/|]
 "#;
     let mut s = Session::new_for_test("resolveImportStatementCompletion", content);
+    fourslash::go_to_marker(&mut s, "a");
     // TODO: f.VerifyCompletions(t, "a", &fourslash.CompletionsExpectedList{
 }

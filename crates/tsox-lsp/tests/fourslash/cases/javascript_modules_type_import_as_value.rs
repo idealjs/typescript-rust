@@ -13,5 +13,6 @@ module.exports = { a: 1 };
 // @Filename: app.js
 import { /**/ } from "./types""#;
     let mut s = Session::new_for_test("javascriptModulesTypeImportAsValue", content);
+    fourslash::go_to_marker(&mut s, "");
     // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

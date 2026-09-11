@@ -18,6 +18,7 @@ export var x = 9;"#;
     let mut s = Session::new_for_test("completionForStringLiteralWithDynamicImport", content);
     fourslash::verify_completions_unsorted_at(&mut s, Some("0"), &["someFile1", "my_typings", "sub"]);
     fourslash::verify_completions_unsorted_at(&mut s, Some("1"), &["someFile2"]);
+    fourslash::go_to_marker(&mut s, "2");
     // TODO: f.VerifyCompletions(t, "2", &fourslash.CompletionsExpectedList{
     fourslash::verify_completions_unsorted_at(&mut s, Some("3"), &["fourslash"]);
 }

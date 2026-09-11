@@ -29,6 +29,7 @@ var foobar: Bar<{
 }>;"#;
     let mut s = Session::new_for_test("completionListInTypeLiteralInTypeParameter8", content);
     fourslash::verify_completions_exact_at(&mut s, Some("4"), &["four"]);
+    fourslash::go_to_marker(&mut s, "0");
     // TODO: f.VerifyCompletions(t, "0", &fourslash.CompletionsExpectedList{
     fourslash::verify_completions_exact_at(&mut s, Some("1"), &["one"]);
 }

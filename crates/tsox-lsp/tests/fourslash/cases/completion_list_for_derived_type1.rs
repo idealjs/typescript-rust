@@ -15,6 +15,8 @@ var f2: IFoo2;
 f./*1*/; // completion here shows bar with return type is any
 f2./*2*/ // here bar has return type any, but bar2 is Foo2"#;
     let mut s = Session::new_for_test("completionListForDerivedType1", content);
+    fourslash::go_to_marker(&mut s, "1");
     // TODO: f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "2");
     // TODO: f.VerifyCompletions(t, "2", &fourslash.CompletionsExpectedList{
 }

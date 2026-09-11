@@ -23,7 +23,9 @@ let spreadUndefined: { a: number } =
 spreadNull./*3*/a;
 spreadUndefined./*4*/a;"#;
     let mut s = Session::new_for_test("completionListForObjectSpread", content);
+    fourslash::go_to_marker(&mut s, "1");
     // TODO: f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "2");
     // TODO: f.VerifyCompletions(t, "2", &fourslash.CompletionsExpectedList{
     // TODO: f.VerifyCompletions(t, []string{"3", "4"}, &fourslash.CompletionsExpectedList{
 }

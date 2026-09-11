@@ -7,5 +7,6 @@ fn jsdoc_extends_tag_completion() {
 /** @extends {/**/} */
 class A {}"#;
     let mut s = Session::new_for_test("jsdocExtendsTagCompletion", content);
+    fourslash::go_to_marker(&mut s, "");
     // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

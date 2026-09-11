@@ -14,5 +14,6 @@ declare function f(options: {
     xyz?: string
 }): void;"#;
     let mut s = Session::new_for_test("completionsWithDeprecatedTag4", content);
+    fourslash::go_to_marker(&mut s, "");
     // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

@@ -15,5 +15,6 @@ class Sub implements Base {
    /*a*/
 }"#;
     let mut s = Session::new_for_test("completionsOverridingMethod10", content);
+    fourslash::go_to_marker(&mut s, "a");
     // TODO: f.VerifyCompletions(t, "a", &fourslash.CompletionsExpectedList{
 }

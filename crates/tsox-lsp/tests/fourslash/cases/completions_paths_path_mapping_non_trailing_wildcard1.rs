@@ -22,8 +22,11 @@ import {} from "foo/_dir//*3*/";
     }
 }"#;
     let mut s = Session::new_for_test("completionsPaths_pathMapping_nonTrailingWildcard1", content);
+    fourslash::go_to_marker(&mut s, "0");
     // TODO: f.VerifyCompletions(t, "0", &fourslash.CompletionsExpectedList{
     fourslash::verify_completions_empty_at(&mut s, Some("1"));
+    fourslash::go_to_marker(&mut s, "2");
     // TODO: f.VerifyCompletions(t, "2", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "3");
     // TODO: f.VerifyCompletions(t, "3", &fourslash.CompletionsExpectedList{
 }

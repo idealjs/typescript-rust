@@ -24,5 +24,6 @@ export interface TestInterfaceBaseline {}
 // @Filename: /a.js
 import /**/"#;
     let mut s = Session::new_for_test("jsFileImportNoTypes2", content);
+    fourslash::go_to_marker(&mut s, "");
     // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

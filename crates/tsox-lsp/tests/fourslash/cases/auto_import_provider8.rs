@@ -29,6 +29,7 @@ const b = new MyClass2/*2*/();"#;
     // TODO: opts1158 := f.GetOptions()
     // TODO: opts1158.FormatCodeSettings.NewLineCharacter = "\n"
     // TODO: f.Configure(t, opts1158)
+    fourslash::go_to_marker(&mut s, "1");
     // TODO: f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
     // TODO: f.VerifyApplyCodeActionFromCompletion(t, new("1"), &fourslash.ApplyCodeActionFromCompletionOptions{
 }

@@ -11,5 +11,6 @@ function updateCalendarEvent() {
   return "";
 }"#;
     let mut s = Session::new_for_test("jsDocFunctionTypeCompletionsNoCrash", content);
+    fourslash::go_to_marker(&mut s, "");
     // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

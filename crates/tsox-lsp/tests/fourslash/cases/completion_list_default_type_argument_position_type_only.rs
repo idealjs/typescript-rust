@@ -7,5 +7,6 @@ fn completion_list_default_type_argument_position_type_only() {
 const foo = "foo";
 function test1<T = /*1*/>() {}"#;
     let mut s = Session::new_for_test("completionListDefaultTypeArgumentPositionTypeOnly", content);
+    fourslash::go_to_marker(&mut s, "1");
     // TODO: f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
 }

@@ -13,5 +13,6 @@ declare module "a" {
 
 /**/"#;
     let mut s = Session::new_for_test("completionListInScope_doesNotIncludeAugmentations", content);
+    fourslash::go_to_marker(&mut s, "");
     // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

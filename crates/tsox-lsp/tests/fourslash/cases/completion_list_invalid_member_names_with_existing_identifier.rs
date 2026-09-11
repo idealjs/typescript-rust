@@ -9,6 +9,8 @@ x[|.fo/*0*/|];
 x[|./*1*/|]
 unrelatedIdentifier;"#;
     let mut s = Session::new_for_test("completionListInvalidMemberNames_withExistingIdentifier", content);
+    fourslash::go_to_marker(&mut s, "0");
     // TODO: f.VerifyCompletions(t, "0", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "1");
     // TODO: f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
 }

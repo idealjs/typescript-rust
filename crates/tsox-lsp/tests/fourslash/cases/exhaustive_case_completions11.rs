@@ -9,5 +9,6 @@ switch (u) {
     case/*1*/
 }"#;
     let mut s = Session::new_with_capabilities(content, None);
+    fourslash::go_to_marker(&mut s, "1");
     // TODO: f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
 }

@@ -15,5 +15,6 @@ class ErrorMap {
 "#;
     let mut s = Session::new_for_test("completionJSDocNoCrash", content);
     // TODO: // The assertion here is simply "does not crash/panic".
+    fourslash::go_to_marker(&mut s, "1");
     // TODO: f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
 }

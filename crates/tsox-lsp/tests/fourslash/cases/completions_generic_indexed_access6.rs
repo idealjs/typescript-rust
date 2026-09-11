@@ -19,5 +19,6 @@ declare function Component<T extends keyof CustomElements>(props: Options<T>): v
 
 const c = <Component /**/ kind="component-one" />"#;
     let mut s = Session::new_for_test("completionsGenericIndexedAccess6", content);
+    fourslash::go_to_marker(&mut s, "");
     // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

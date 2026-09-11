@@ -15,5 +15,6 @@ const goodbye = 5;
 
 console./*0*/"#;
     let mut s = Session::new_for_test("completionInUncheckedJSFile", content);
+    fourslash::go_to_marker(&mut s, "0");
     // TODO: f.VerifyCompletions(t, "0", &fourslash.CompletionsExpectedList{
 }

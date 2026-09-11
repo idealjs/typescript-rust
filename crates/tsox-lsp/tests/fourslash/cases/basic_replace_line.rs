@@ -11,7 +11,9 @@ interface Point {
 declare const p: Point;
 p./*a*/"#;
     let mut s = Session::new_for_test("basicReplaceLine", content);
+    fourslash::go_to_marker(&mut s, "a");
     // TODO: f.VerifyCompletions(t, "a", &fourslash.CompletionsExpectedList{
     // TODO: f.ReplaceLine(t, 3, "	z: number;") // `y: number;`
+    fourslash::go_to_marker(&mut s, "a");
     // TODO: f.VerifyCompletions(t, "a", &fourslash.CompletionsExpectedList{
 }

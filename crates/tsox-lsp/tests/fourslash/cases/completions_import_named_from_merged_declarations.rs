@@ -15,6 +15,7 @@ declare module "m" {
 // @Filename: /c.ts
 /**/"#;
     let mut s = Session::new_for_test("completionsImport_named_fromMergedDeclarations", content);
+    fourslash::go_to_marker(&mut s, "");
     // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
     // TODO: f.VerifyApplyCodeActionFromCompletion(t, new(""), &fourslash.ApplyCodeActionFromCompletionOptions{
 }

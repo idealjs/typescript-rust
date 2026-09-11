@@ -13,5 +13,6 @@ interface TestInterface {
 const obj: TestInterface = {} as any;
 obj./*completions*/"#;
     let mut s = Session::new_for_test("symbolCompletionLowerPriority", content);
+    fourslash::go_to_marker(&mut s, "completions");
     // TODO: f.VerifyCompletions(t, "completions", &fourslash.CompletionsExpectedList{
 }

@@ -45,6 +45,7 @@ function baz(x = 0) {
 }
 "#;
     let mut s = Session::new_for_test("basicJSDocCompletions", content);
+    fourslash::go_to_marker(&mut s, "1");
     // TODO: f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
     fourslash::verify_completions_include_exclude_at(&mut s, Some("2"), &["@param", "@param {*} x "], &[]);
     fourslash::verify_completions_include_exclude_at(&mut s, Some("3"), &["@param", "@param {object} param1 \\n* @param {*} param1.y "], &[]);

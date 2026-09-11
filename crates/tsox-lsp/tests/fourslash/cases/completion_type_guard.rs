@@ -10,7 +10,10 @@ function assert2(condition: any, msg?: string): /*2*/ { }
 function assert3(condition: any, msg?: string): /*3*/
 hi"#;
     let mut s = Session::new_for_test("completionTypeGuard", content);
+    fourslash::go_to_marker(&mut s, "1");
     // TODO: f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "2");
     // TODO: f.VerifyCompletions(t, "2", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "3");
     // TODO: f.VerifyCompletions(t, "3", &fourslash.CompletionsExpectedList{
 }

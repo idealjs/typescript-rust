@@ -16,6 +16,8 @@ let fifthCase: Foo["b/*case_5*/"]
 let sixthCase: Foo["qu/*case_6*/"]"#;
     let mut s = Session::new_for_test("completionListsStringLiteralTypeAsIndexedAccessTypeObject", content);
     // TODO: f.VerifyCompletions(t, []string{"case_1", "case_2", "case_3", "case_4"}, nil)
+    fourslash::go_to_marker(&mut s, "case_5");
     // TODO: f.VerifyCompletions(t, "case_5", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "case_6");
     // TODO: f.VerifyCompletions(t, "case_6", &fourslash.CompletionsExpectedList{
 }

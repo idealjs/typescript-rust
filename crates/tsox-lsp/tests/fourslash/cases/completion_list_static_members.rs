@@ -10,5 +10,6 @@ class Foo {
 }
 Foo./**/"#;
     let mut s = Session::new_for_test("completionListStaticMembers", content);
+    fourslash::go_to_marker(&mut s, "");
     // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

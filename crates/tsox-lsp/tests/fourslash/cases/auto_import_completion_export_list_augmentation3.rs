@@ -26,6 +26,7 @@ class FullPiece extends Piece {
   /*1*/
 }"#;
     let mut s = Session::new_for_test("autoImportCompletionExportListAugmentation3", content);
+    fourslash::go_to_marker(&mut s, "1");
     // TODO: f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
     // TODO: f.VerifyApplyCodeActionFromCompletion(t, new("1"), &fourslash.ApplyCodeActionFromCompletionOptions{
 }

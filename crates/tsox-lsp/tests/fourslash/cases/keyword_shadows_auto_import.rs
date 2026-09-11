@@ -14,5 +14,6 @@ function/**/
     let mut s = Session::new_for_test("keywordShadowsAutoImport", content);
     // TODO: // The keyword `function` should appear, and the auto-import `function` from ./mod should NOT.
     // TODO: // Includes consumes the keyword match; Excludes then verifies no auto-import `function` remains.
+    fourslash::go_to_marker(&mut s, "");
     // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

@@ -15,6 +15,7 @@ var x = require('./myMod');
     let mut s = Session::new_for_test("javaScriptModules19", content);
     fourslash::go_to_file(&mut s, "consumer.js");
     fourslash::go_to_marker(&mut s, "");
+    fourslash::go_to_marker(&mut s, "");
     // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
     fourslash::insert(&mut s, "x.");
     // TODO: f.VerifyCompletions(t, nil, &fourslash.CompletionsExpectedList{

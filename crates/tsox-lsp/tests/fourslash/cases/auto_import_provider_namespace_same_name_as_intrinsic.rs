@@ -19,5 +19,6 @@ type A = { name: string/**/ }"#;
     let mut s = Session::new_for_test("autoImportProvider_namespaceSameNameAsIntrinsic", content);
     // TODO: f.MarkTestAsStradaServer()
     fourslash::go_to_marker(&mut s, "");
+    fourslash::go_to_marker(&mut s, "");
     // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

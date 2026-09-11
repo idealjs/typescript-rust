@@ -22,5 +22,6 @@ declare global {
 /// <reference path="./ambient.d.ts" />
 asser/**/;"#;
     let mut s = Session::new_for_test("completionsRedeclareModuleAsGlobal", content);
+    fourslash::go_to_marker(&mut s, "");
     // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

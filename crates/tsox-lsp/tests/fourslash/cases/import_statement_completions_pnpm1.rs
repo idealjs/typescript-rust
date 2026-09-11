@@ -13,5 +13,6 @@ export declare function Component(): void;
     let mut s = Session::new_with_capabilities(content, None);
     // TODO: f.MarkTestAsStradaServer()
     fourslash::go_to_marker(&mut s, "");
+    fourslash::go_to_marker(&mut s, "");
     // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

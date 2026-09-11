@@ -9,5 +9,6 @@ if (!!true) {
   export { /**/ };
 }"#;
     let mut s = Session::new_for_test("completionsInExport_invalid", content);
+    fourslash::go_to_marker(&mut s, "");
     // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

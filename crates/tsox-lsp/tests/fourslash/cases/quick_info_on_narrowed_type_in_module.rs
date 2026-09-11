@@ -40,13 +40,22 @@ else {
     fourslash::verify_quick_info_at(&mut s, "7", "var m.exportedStrOrNum: string | number", "");
     fourslash::verify_quick_info_at(&mut s, "8", "var m.exportedStrOrNum: number", "");
     fourslash::verify_quick_info_at(&mut s, "9", "var m.exportedStrOrNum: string", "");
+    fourslash::go_to_marker(&mut s, "1");
     // TODO: f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "2");
     // TODO: f.VerifyCompletions(t, "2", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "3");
     // TODO: f.VerifyCompletions(t, "3", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "4");
     // TODO: f.VerifyCompletions(t, "4", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "5");
     // TODO: f.VerifyCompletions(t, "5", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "6");
     // TODO: f.VerifyCompletions(t, "6", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "7");
     // TODO: f.VerifyCompletions(t, "7", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "8");
     // TODO: f.VerifyCompletions(t, "8", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "9");
     // TODO: f.VerifyCompletions(t, "9", &fourslash.CompletionsExpectedList{
 }

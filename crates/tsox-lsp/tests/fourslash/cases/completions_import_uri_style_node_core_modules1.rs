@@ -13,5 +13,6 @@ declare module "node:fs/promises" { export * from "fs/promises"; }
 // @Filename: /index.ts
 write/**/"#;
     let mut s = Session::new_for_test("completionsImport_uriStyleNodeCoreModules1", content);
+    fourslash::go_to_marker(&mut s, "");
     // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

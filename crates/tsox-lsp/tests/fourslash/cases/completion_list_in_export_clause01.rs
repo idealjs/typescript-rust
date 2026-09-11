@@ -15,8 +15,10 @@ export {bar as /*5*/, /*6*/ from "./m1"
 export {foo, bar, baz as b,/*7*/} from "./m1""#;
     let mut s = Session::new_for_test("completionListInExportClause01", content);
     // TODO: f.VerifyCompletions(t, []string{"1", "2", "3"}, &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "4");
     // TODO: f.VerifyCompletions(t, "4", &fourslash.CompletionsExpectedList{
     fourslash::verify_completions_empty_at(&mut s, Some("5"));
+    fourslash::go_to_marker(&mut s, "6");
     // TODO: f.VerifyCompletions(t, "6", &fourslash.CompletionsExpectedList{
     fourslash::verify_completions_empty_at(&mut s, Some("7"));
     // TODO: }

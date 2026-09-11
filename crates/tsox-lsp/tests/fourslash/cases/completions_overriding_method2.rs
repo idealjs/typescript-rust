@@ -15,5 +15,6 @@ class USD implements DollarSign {
     /*a*/
 }"#;
     let mut s = Session::new_with_capabilities(content, None);
+    fourslash::go_to_marker(&mut s, "a");
     // TODO: f.VerifyCompletions(t, "a", &fourslash.CompletionsExpectedList{
 }

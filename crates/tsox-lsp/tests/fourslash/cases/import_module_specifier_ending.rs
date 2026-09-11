@@ -9,6 +9,7 @@ export const helperFunc = () => {};
 helper/**/"#;
     let mut s = Session::new_for_test("importModuleSpecifierEndingAuto", content);
     // TODO: f.Configure(t, lsutil.UserPreferences{
+    fourslash::go_to_marker(&mut s, "");
     // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
     // TODO: f.BaselineAutoImportsCompletions(t, []string{""})
 }
@@ -21,6 +22,7 @@ export const helperFunc = () => {};
 helper/**/"#;
     let mut s = Session::new_for_test("importModuleSpecifierEndingMinimal", content);
     // TODO: f.Configure(t, lsutil.UserPreferences{
+    fourslash::go_to_marker(&mut s, "");
     // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
     // TODO: f.BaselineAutoImportsCompletions(t, []string{""})
 }
@@ -33,6 +35,7 @@ export const helperFunc = () => {};
 helper/**/"#;
     let mut s = Session::new_for_test("importModuleSpecifierEndingIndex", content);
     // TODO: f.Configure(t, lsutil.UserPreferences{
+    fourslash::go_to_marker(&mut s, "");
     // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
     // TODO: f.BaselineAutoImportsCompletions(t, []string{""})
 }
@@ -45,6 +48,7 @@ export const helperFunc = () => {};
 helper/**/"#;
     let mut s = Session::new_for_test("importModuleSpecifierEndingJs", content);
     // TODO: f.Configure(t, lsutil.UserPreferences{
+    fourslash::go_to_marker(&mut s, "");
     // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
     // TODO: f.BaselineAutoImportsCompletions(t, []string{""})
 }

@@ -22,6 +22,7 @@ v.x.V./*4*/;"#;
     let mut s = Session::new_for_test("getJavaScriptCompletions15", content);
     fourslash::verify_completions_include_exclude_at(&mut s, Some("1"), &["toExponential"], &[]);
     fourslash::verify_completions_include_exclude_at(&mut s, Some("2"), &["toLowerCase"], &[]);
+    fourslash::go_to_marker(&mut s, "3");
     // TODO: f.VerifyCompletions(t, "3", &fourslash.CompletionsExpectedList{
     fourslash::verify_completions_include_exclude_at(&mut s, Some("4"), &["toLowerCase"], &[]);
 }

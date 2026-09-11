@@ -13,6 +13,7 @@ export function Index() {
 }"#;
     let mut s = Session::new_for_test("completionsImport_jsxOpeningTagImportDefault", content);
     fourslash::go_to_marker(&mut s, "");
+    fourslash::go_to_marker(&mut s, "");
     // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
     // TODO: f.VerifyApplyCodeActionFromCompletion(t, new(""), &fourslash.ApplyCodeActionFromCompletionOptions{
 }

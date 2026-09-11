@@ -14,5 +14,6 @@ var y = function () {
 }"#;
     let mut s = Session::new_for_test("completionListInNamedFunctionExpressionWithShadowing", content);
     // TODO: f.VerifyCompletions(t, []string{"0", "2"}, &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "1");
     // TODO: f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
 }

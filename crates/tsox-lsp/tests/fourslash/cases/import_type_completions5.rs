@@ -13,5 +13,6 @@ export = Foo;
  [|import type f/**/|]"#;
     let mut s = Session::new_for_test("importTypeCompletions5", content);
     fourslash::go_to_file(&mut s, "/bar.ts");
+    fourslash::go_to_marker(&mut s, "");
     // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

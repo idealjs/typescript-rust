@@ -34,12 +34,18 @@ Foo./*valueMemberOfFoo*/;
   */
 var y;"#;
     let mut s = Session::new_for_test("jsdocTypedefTagTypeExpressionCompletion", content);
+    fourslash::go_to_marker(&mut s, "type1");
     // TODO: f.VerifyCompletions(t, "type1", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "typeFooMember");
     // TODO: f.VerifyCompletions(t, "typeFooMember", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "NamespaceMember");
     // TODO: f.VerifyCompletions(t, "NamespaceMember", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "globalValue");
     // TODO: f.VerifyCompletions(t, "globalValue", &fourslash.CompletionsExpectedList{
     fourslash::verify_completions_empty_at(&mut s, Some("valueMemberOfSomeType"));
+    fourslash::go_to_marker(&mut s, "valueMemberOfFooInstance");
     // TODO: f.VerifyCompletions(t, "valueMemberOfFooInstance", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "valueMemberOfFoo");
     // TODO: f.VerifyCompletions(t, "valueMemberOfFoo", &fourslash.CompletionsExpectedList{
     fourslash::verify_completions_empty_at(&mut s, Some("propertyName"));
 }

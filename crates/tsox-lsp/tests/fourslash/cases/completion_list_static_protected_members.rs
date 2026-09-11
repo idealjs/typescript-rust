@@ -29,5 +29,6 @@ class C1 extends Base {
 }"#;
     let mut s = Session::new_for_test("completionListStaticProtectedMembers", content);
     // TODO: f.VerifyCompletions(t, []string{"1", "2"}, &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "3");
     // TODO: f.VerifyCompletions(t, "3", &fourslash.CompletionsExpectedList{
 }

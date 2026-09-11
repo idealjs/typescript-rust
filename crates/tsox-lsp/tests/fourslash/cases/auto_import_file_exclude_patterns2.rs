@@ -17,6 +17,7 @@ export * from "./main";
 // @Filename: /i-hate-index-files.ts
 Button/**/"#;
     let mut s = Session::new_for_test("autoImportFileExcludePatterns2", content);
+    fourslash::go_to_marker(&mut s, "");
     // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
     // TODO: f.VerifyImportFixModuleSpecifiers(t, "", []string{"./lib/main", "./lib/components/button/Button"}, &
 }

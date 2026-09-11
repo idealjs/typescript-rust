@@ -27,8 +27,10 @@ const b = new MyClass2/*2*/();"#;
     // TODO: opts1267 := f.GetOptions()
     // TODO: opts1267.FormatCodeSettings.NewLineCharacter = "\n"
     // TODO: f.Configure(t, opts1267)
+    fourslash::go_to_marker(&mut s, "1");
     // TODO: f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
     // TODO: f.VerifyApplyCodeActionFromCompletion(t, new("1"), &fourslash.ApplyCodeActionFromCompletionOptions{
     // TODO: f.ReplaceLine(t, 0, "import { MyClass } from \"mylib\";")
+    fourslash::go_to_marker(&mut s, "2");
     // TODO: f.VerifyCompletions(t, "2", &fourslash.CompletionsExpectedList{
 }

@@ -34,6 +34,8 @@ export declare var Redux: any;
 //@Filename: /dir/index.ts
 const x = Re/**/"#;
     let mut s = Session::new_for_test("completionsImport_filteredByPackageJson_nested", content);
+    fourslash::go_to_marker(&mut s, "");
     // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "");
     // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

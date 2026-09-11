@@ -9,5 +9,6 @@ fn completions_with_deprecated_tag6() {
 }
 Foo./**/"#;
     let mut s = Session::new_for_test("completionsWithDeprecatedTag6", content);
+    fourslash::go_to_marker(&mut s, "");
     // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

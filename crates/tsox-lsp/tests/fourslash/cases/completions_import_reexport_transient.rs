@@ -16,5 +16,6 @@ export { one } from "./r1";
 one/**/"#;
     let mut s = Session::new_for_test("completionsImport_reexportTransient", content);
     fourslash::go_to_marker(&mut s, "");
+    fourslash::go_to_marker(&mut s, "");
     // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

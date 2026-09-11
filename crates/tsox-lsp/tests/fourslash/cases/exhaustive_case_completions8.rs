@@ -10,5 +10,6 @@ export function foo(position: -1n | 0n) {
     }
 }"#;
     let mut s = Session::new_with_capabilities(content, None);
+    fourslash::go_to_marker(&mut s, "");
     // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

@@ -10,5 +10,6 @@ export type Abc = number;
  import { Abc } from "./abc";
 function f(Abc: Ab/**/) {}"#;
     let mut s = Session::new_for_test("completionsIsTypeOnlyCompletion", content);
+    fourslash::go_to_marker(&mut s, "");
     // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

@@ -21,5 +21,6 @@ fn completions_import_export_equals_global() {
 // @Filename: /a.ts
 conso/**/"#;
     let mut s = Session::new_for_test("completionsImport_exportEquals_global", content);
+    fourslash::go_to_marker(&mut s, "");
     // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

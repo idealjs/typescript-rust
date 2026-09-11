@@ -12,6 +12,7 @@ class BFoo extends AFoo {
     async /*b*/
 }"#;
     let mut s = Session::new_for_test("completionsOverridingMethod21", content);
+    fourslash::go_to_marker(&mut s, "b");
     // TODO: f.VerifyCompletions(t, "b", &fourslash.CompletionsExpectedList{
     // TODO: f.VerifyApplyCodeActionFromCompletion(t, new("b"), &fourslash.ApplyCodeActionFromCompletionOptions{
 }

@@ -12,5 +12,6 @@ export function helper() {}
 /**/"#;
     let mut s = Session::new_for_test("completionsFromUntitledFile", content);
     // TODO: // Request completions - this should not crash
+    fourslash::go_to_marker(&mut s, "");
     // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

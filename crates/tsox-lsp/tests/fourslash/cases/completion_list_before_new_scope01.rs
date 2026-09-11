@@ -9,5 +9,6 @@ function fun(param) {
     let party = Math.random() < 0.99;
 }"#;
     let mut s = Session::new_for_test("completionListBeforeNewScope01", content);
+    fourslash::go_to_marker(&mut s, "1");
     // TODO: f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
 }

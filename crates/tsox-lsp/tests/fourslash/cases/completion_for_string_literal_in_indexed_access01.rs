@@ -10,5 +10,6 @@ fn completion_for_string_literal_in_indexed_access01() {
 
 let x: Foo["[|/*1*/|]"]"#;
     let mut s = Session::new_for_test("completionForStringLiteralInIndexedAccess01", content);
+    fourslash::go_to_marker(&mut s, "1");
     // TODO: f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
 }

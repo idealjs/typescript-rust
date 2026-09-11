@@ -15,6 +15,7 @@ conca/**/"#;
     // TODO: prefs.AutoImportEntrypointDirectorySearch = core.TSTrue
     // TODO: f.Configure(t, prefs)
     fourslash::go_to_file(&mut s, "/a.ts");
+    fourslash::go_to_marker(&mut s, "");
     // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
     // TODO: f.VerifyApplyCodeActionFromCompletion(t, new(""), &fourslash.ApplyCodeActionFromCompletionOptions{
 }

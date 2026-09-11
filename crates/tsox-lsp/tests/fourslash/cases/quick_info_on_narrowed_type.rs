@@ -37,10 +37,15 @@ class Foo {
     fourslash::verify_quick_info_at(&mut s, "5", "let s: string | undefined", "");
     fourslash::verify_quick_info_at(&mut s, "6", "let s: string", "");
     fourslash::verify_quick_info_at(&mut s, "7", "(property) Foo.#privateProperty: string[]", "");
+    fourslash::go_to_marker(&mut s, "1");
     // TODO: f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "2");
     // TODO: f.VerifyCompletions(t, "2", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "3");
     // TODO: f.VerifyCompletions(t, "3", &fourslash.CompletionsExpectedList{
     // TODO: f.VerifyCompletions(t, []string{"4", "5"}, &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "6");
     // TODO: f.VerifyCompletions(t, "6", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "7");
     // TODO: f.VerifyCompletions(t, "7", &fourslash.CompletionsExpectedList{
 }

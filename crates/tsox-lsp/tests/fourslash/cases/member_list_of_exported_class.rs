@@ -14,5 +14,6 @@ var c = new M.C();
 
 c./**/ // test on c."#;
     let mut s = Session::new_for_test("memberListOfExportedClass", content);
+    fourslash::go_to_marker(&mut s, "");
     // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

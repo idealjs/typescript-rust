@@ -15,8 +15,10 @@ someVar;
 a/**/
 "#;
     let mut s = Session::new_for_test("autoImportCompletion1", content);
+    fourslash::go_to_marker(&mut s, "");
     // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
     // TODO: f.BaselineAutoImportsCompletions(t, []string{""})
+    fourslash::go_to_marker(&mut s, "");
     // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }
 
@@ -32,6 +34,7 @@ someVar;
 a/**/
 "#;
     let mut s = Session::new_for_test("autoImportCompletion2", content);
+    fourslash::go_to_marker(&mut s, "");
     // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
     // TODO: f.BaselineAutoImportsCompletions(t, []string{""})
 }
@@ -49,6 +52,7 @@ someVar;
 b/**/
 "#;
     let mut s = Session::new_for_test("autoImportCompletion3", content);
+    fourslash::go_to_marker(&mut s, "");
     // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
     // TODO: f.BaselineAutoImportsCompletions(t, []string{""})
 }

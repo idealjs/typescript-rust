@@ -7,5 +7,6 @@ fn completion_for_string_literal_from_signature2() {
 declare function f(a: string, b: number): void;
 f("/**/", 0);"#;
     let mut s = Session::new_for_test("completionForStringLiteralFromSignature2", content);
+    fourslash::go_to_marker(&mut s, "");
     // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

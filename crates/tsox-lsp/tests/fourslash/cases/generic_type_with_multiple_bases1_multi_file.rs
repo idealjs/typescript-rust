@@ -20,5 +20,6 @@ var x: iScope<number>;
 // @Filename: genericTypeWithMultipleBases_4.ts
 x./**/"#;
     let mut s = Session::new_for_test("genericTypeWithMultipleBases1MultiFile", content);
+    fourslash::go_to_marker(&mut s, "");
     // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

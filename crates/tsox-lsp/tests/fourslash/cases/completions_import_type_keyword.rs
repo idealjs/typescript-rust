@@ -11,5 +11,6 @@ declare module "os" {
 // @Filename: /index.ts
 type/**/"#;
     let mut s = Session::new_for_test("completionsImportTypeKeyword", content);
+    fourslash::go_to_marker(&mut s, "");
     // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

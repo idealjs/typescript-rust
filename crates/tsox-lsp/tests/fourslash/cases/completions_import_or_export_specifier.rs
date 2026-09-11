@@ -38,21 +38,37 @@ export { type /*typeExport1*/ as typeExport1 } from "./exports";
 export { type foo as /*typeExport2*/ } from "./exports";
 export { type foo, type /*typeExport3*/ } from "./exports";"#;
     let mut s = Session::new_for_test("completionsImportOrExportSpecifier", content);
+    fourslash::go_to_marker(&mut s, "valueImport0");
     // TODO: f.VerifyCompletions(t, "valueImport0", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "valueImport1");
     // TODO: f.VerifyCompletions(t, "valueImport1", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "valueImport2");
     // TODO: f.VerifyCompletions(t, "valueImport2", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "valueImport3");
     // TODO: f.VerifyCompletions(t, "valueImport3", &fourslash.CompletionsExpectedList{
     fourslash::verify_completions_exact_at(&mut s, Some("namespaceImport1"), &["foo"]);
+    fourslash::go_to_marker(&mut s, "valueExport0");
     // TODO: f.VerifyCompletions(t, "valueExport0", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "valueExport1");
     // TODO: f.VerifyCompletions(t, "valueExport1", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "valueExport2");
     // TODO: f.VerifyCompletions(t, "valueExport2", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "valueExport3");
     // TODO: f.VerifyCompletions(t, "valueExport3", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "typeImport0");
     // TODO: f.VerifyCompletions(t, "typeImport0", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "typeImport1");
     // TODO: f.VerifyCompletions(t, "typeImport1", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "typeImport2");
     // TODO: f.VerifyCompletions(t, "typeImport2", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "typeImport3");
     // TODO: f.VerifyCompletions(t, "typeImport3", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "typeExport0");
     // TODO: f.VerifyCompletions(t, "typeExport0", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "typeExport1");
     // TODO: f.VerifyCompletions(t, "typeExport1", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "typeExport2");
     // TODO: f.VerifyCompletions(t, "typeExport2", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "typeExport3");
     // TODO: f.VerifyCompletions(t, "typeExport3", &fourslash.CompletionsExpectedList{
 }

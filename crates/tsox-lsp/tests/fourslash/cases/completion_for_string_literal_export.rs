@@ -19,6 +19,7 @@ export var x = 9;"#;
     let mut s = Session::new_for_test("completionForStringLiteralExport", content);
     // TODO: f.VerifyCompletions(t, []string{"0", "4"}, &fourslash.CompletionsExpectedList{
     fourslash::verify_completions_unsorted_at(&mut s, Some("1"), &["someFile2"]);
+    fourslash::go_to_marker(&mut s, "2");
     // TODO: f.VerifyCompletions(t, "2", &fourslash.CompletionsExpectedList{
     fourslash::verify_completions_unsorted_at(&mut s, Some("3"), &["fourslash"]);
 }

@@ -10,6 +10,7 @@ class C extends B {
 	/*a*/
 }"#;
     let mut s = Session::new_for_test("classMemberCompletionKeepsNameFallback", content);
+    fourslash::go_to_marker(&mut s, "a");
     // TODO: f.VerifyCompletions(t, "a", &fourslash.CompletionsExpectedList{
 }
 

@@ -14,5 +14,6 @@ export const fooBar = 1;
 foo/**/
 "#;
     let mut s = Session::new_for_test("autoImportCompletionsForArbitraryNonIdentifierExports", content);
+    fourslash::go_to_marker(&mut s, "");
     // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

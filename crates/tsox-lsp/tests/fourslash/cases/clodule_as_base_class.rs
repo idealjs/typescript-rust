@@ -30,6 +30,7 @@ D./*2*/"#;
     let mut s = Session::new_for_test("cloduleAsBaseClass", content);
     fourslash::verify_completions_exact_at(&mut s, Some("1"), &["foo", "foo2"]);
     fourslash::insert(&mut s, "foo()");
+    fourslash::go_to_marker(&mut s, "2");
     // TODO: f.VerifyCompletions(t, "2", &fourslash.CompletionsExpectedList{
     fourslash::insert(&mut s, "bar()");
     fourslash::verify_no_errors(&mut s, );

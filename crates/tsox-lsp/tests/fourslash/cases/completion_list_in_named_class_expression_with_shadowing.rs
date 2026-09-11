@@ -18,8 +18,10 @@ var y = class {
    /*5*/
 }"#;
     let mut s = Session::new_for_test("completionListInNamedClassExpressionWithShadowing", content);
+    fourslash::go_to_marker(&mut s, "0");
     // TODO: f.VerifyCompletions(t, "0", &fourslash.CompletionsExpectedList{
     // TODO: f.VerifyCompletions(t, []string{"1", "4"}, &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "2");
     // TODO: f.VerifyCompletions(t, "2", &fourslash.CompletionsExpectedList{
     // TODO: f.VerifyCompletions(t, []string{"3", "5"}, &fourslash.CompletionsExpectedList{
 }

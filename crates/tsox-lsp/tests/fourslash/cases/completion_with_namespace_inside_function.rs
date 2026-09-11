@@ -25,7 +25,10 @@ function f2() {
 /*33*/"#;
     let mut s = Session::new_for_test("completionWithNamespaceInsideFunction", content);
     // TODO: f.VerifyCompletions(t, []string{"1", "2", "3"}, &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "11");
     // TODO: f.VerifyCompletions(t, "11", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "22");
     // TODO: f.VerifyCompletions(t, "22", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "33");
     // TODO: f.VerifyCompletions(t, "33", &fourslash.CompletionsExpectedList{
 }

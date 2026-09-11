@@ -9,5 +9,6 @@ namespace c/*2*/5b { export var y = 2; } // should be ok
     let mut s = Session::new_for_test("augmentedTypesClass3Fourslash", content);
     fourslash::verify_quick_info_at(&mut s, "1", "class c5b\nnamespace c5b", "");
     fourslash::verify_quick_info_at(&mut s, "2", "class c5b\nnamespace c5b", "");
+    fourslash::go_to_marker(&mut s, "3");
     // TODO: f.VerifyCompletions(t, "3", &fourslash.CompletionsExpectedList{
 }

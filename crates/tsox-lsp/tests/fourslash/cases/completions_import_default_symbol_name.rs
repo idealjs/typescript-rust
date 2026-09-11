@@ -17,6 +17,7 @@ export = RangeParser;
 // @Filename: /b.ts
 R/*0*/"#;
     let mut s = Session::new_for_test("completionsImport_default_symbolName", content);
+    fourslash::go_to_marker(&mut s, "0");
     // TODO: f.VerifyCompletions(t, "0", &fourslash.CompletionsExpectedList{
     // TODO: f.VerifyApplyCodeActionFromCompletion(t, new("0"), &fourslash.ApplyCodeActionFromCompletionOptions{
 }

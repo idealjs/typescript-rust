@@ -27,5 +27,6 @@ l./*7*/prototype = Object.prototype;"#;
     let mut s = Session::new_for_test("functionTypes", content);
     fourslash::verify_no_errors(&mut s, );
     // TODO: f.VerifyCompletions(t, []string{"1", "2", "3", "4", "5", "6"}, &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "7");
     // TODO: f.VerifyCompletions(t, "7", &fourslash.CompletionsExpectedList{
 }

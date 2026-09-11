@@ -14,5 +14,6 @@ namespace F {
 var q: typeof E | typeof F;
 var j = q./*1*/"#;
     let mut s = Session::new_for_test("completionEntryForPropertyFromUnionOfModuleType", content);
+    fourslash::go_to_marker(&mut s, "1");
     // TODO: f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
 }

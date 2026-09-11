@@ -18,6 +18,7 @@ class test2 implements IFoo./*2*/ {}
 interface test3 extends IFoo./*3*/ {}
 interface test4 implements Foo./*4*/ {}"#;
     let mut s = Session::new_for_test("completionListInExtendsClause", content);
+    fourslash::go_to_marker(&mut s, "1");
     // TODO: f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
     // TODO: f.VerifyCompletions(t, []string{"2", "3", "4"}, nil)
 }

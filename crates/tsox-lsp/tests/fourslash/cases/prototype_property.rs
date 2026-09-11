@@ -8,5 +8,6 @@ A./*1*/prototype;
 A./*2*/"#;
     let mut s = Session::new_for_test("prototypeProperty", content);
     fourslash::verify_quick_info_at(&mut s, "1", "(property) A.prototype: A", "");
+    fourslash::go_to_marker(&mut s, "2");
     // TODO: f.VerifyCompletions(t, "2", &fourslash.CompletionsExpectedList{
 }

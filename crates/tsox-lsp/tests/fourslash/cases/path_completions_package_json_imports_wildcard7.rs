@@ -16,5 +16,6 @@ export const blah = 0;
 // @Filename: /index.mts
 import { } from "/**/";"##;
     let mut s = Session::new_for_test("pathCompletionsPackageJsonImportsWildcard7", content);
+    fourslash::go_to_marker(&mut s, "");
     // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

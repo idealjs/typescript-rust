@@ -12,5 +12,6 @@ const User: UserTuple = [["name", "2333"], ["age", 2333], ["address", "2333"]];"
     let mut s = Session::new_for_test("completionsInEmptyTupleType", content);
     // TODO: f.VerifyCompletions(t, []string{"1", "2"}, &fourslash.CompletionsExpectedList{
     // TODO: // After `typeof` in a tuple type we are back in a value location, so type-only symbols shouldn't be
+    fourslash::go_to_marker(&mut s, "3");
     // TODO: f.VerifyCompletions(t, "3", &fourslash.CompletionsExpectedList{
 }

@@ -16,6 +16,7 @@ const foo = 0;
 <div a="1" b/*1*/ />
 <div a /*2*/ />"#;
     let mut s = Session::new_for_test("completionsJsxAttributeInitializer2", content);
+    fourslash::go_to_marker(&mut s, "0");
     // TODO: f.VerifyCompletions(t, "0", &fourslash.CompletionsExpectedList{
     // TODO: f.VerifyCompletions(t, []string{"1", "2"}, &fourslash.CompletionsExpectedList{
 }

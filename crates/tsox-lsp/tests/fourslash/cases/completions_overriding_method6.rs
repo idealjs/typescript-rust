@@ -25,9 +25,14 @@ class f extends Base {
     protected /*f*/
 }"#;
     let mut s = Session::new_for_test("completionsOverridingMethod6", content);
+    fourslash::go_to_marker(&mut s, "a");
     // TODO: f.VerifyCompletions(t, "a", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "b");
     // TODO: f.VerifyCompletions(t, "b", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "c");
     // TODO: f.VerifyCompletions(t, "c", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "d");
     // TODO: f.VerifyCompletions(t, "d", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "f");
     // TODO: f.VerifyCompletions(t, "f", &fourslash.CompletionsExpectedList{
 }

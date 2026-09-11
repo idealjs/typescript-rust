@@ -265,7 +265,9 @@ foo(null);"#;
     // TODO: f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{DocComment: "this is signature 4 - wit
     fourslash::go_to_marker(&mut s, "o16");
     // TODO: f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{DocComment: "this is signature 4 - wit
+    fourslash::go_to_marker(&mut s, "17");
     // TODO: f.VerifyCompletions(t, "17", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "18");
     // TODO: f.VerifyCompletions(t, "18", &fourslash.CompletionsExpectedList{
     fourslash::go_to_marker(&mut s, "19");
     // TODO: f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{OverloadsCount: 2})
@@ -280,6 +282,7 @@ foo(null);"#;
     // TODO: f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{DocComment: "this is signature 2", Ove
     fourslash::go_to_marker(&mut s, "22q");
     fourslash::verify_quick_info_at(&mut s, "22q", "var i1_i: i1\n(b: string) => number (+1 overload)", "this is signature 2");
+    fourslash::go_to_marker(&mut s, "23");
     // TODO: f.VerifyCompletions(t, "23", &fourslash.CompletionsExpectedList{
     fourslash::go_to_marker(&mut s, "24");
     // TODO: f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{DocComment: "foo 1", OverloadsCount: 2
@@ -341,6 +344,7 @@ foo(null);"#;
     fourslash::go_to_marker(&mut s, "43");
     // TODO: f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{OverloadsCount: 2})
     fourslash::verify_quick_info_at(&mut s, "43q", "var i4_i: i4\n(b: string) => number (+1 overload)", "");
+    fourslash::go_to_marker(&mut s, "44");
     // TODO: f.VerifyCompletions(t, "44", &fourslash.CompletionsExpectedList{
     fourslash::go_to_marker(&mut s, "45");
     // TODO: f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{OverloadsCount: 2})
@@ -402,6 +406,7 @@ foo(null);"#;
     fourslash::go_to_marker(&mut s, "64");
     // TODO: f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{DocComment: "c5 2", OverloadsCount: 2}
     fourslash::verify_quick_info_at(&mut s, "64q", "constructor c5(b: string): c5 (+1 overload)", "c5 2");
+    fourslash::go_to_marker(&mut s, "65");
     // TODO: f.VerifyCompletions(t, "65", &fourslash.CompletionsExpectedList{
     fourslash::verify_quick_info_at(&mut s, "66", "var c1_i_1: c1", "");
     fourslash::verify_quick_info_at(&mut s, "67", "var c2_i_2: c2", "");

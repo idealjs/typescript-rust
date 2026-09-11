@@ -20,5 +20,6 @@ var y = 10;
 var x = require('myMod');
 /**/;"#;
     let mut s = Session::new_for_test("javaScriptModules14", content);
+    fourslash::go_to_marker(&mut s, "");
     // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

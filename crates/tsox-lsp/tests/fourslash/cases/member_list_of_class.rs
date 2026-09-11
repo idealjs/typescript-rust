@@ -12,5 +12,6 @@ fn member_list_of_class() {
 var f = new C1();
 f./**/"#;
     let mut s = Session::new_for_test("memberListOfClass", content);
+    fourslash::go_to_marker(&mut s, "");
     // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

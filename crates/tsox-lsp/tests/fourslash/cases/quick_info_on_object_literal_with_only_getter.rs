@@ -15,5 +15,6 @@ var /*2*/x = point./*3*/x;"#;
     fourslash::verify_quick_info_at(&mut s, "1", "function makePoint(x: number): {\n    readonly x: number;\n}", "");
     fourslash::verify_quick_info_at(&mut s, "2", "var x: number", "");
     fourslash::verify_quick_info_at(&mut s, "4", "var point: {\n    readonly x: number;\n}", "");
+    fourslash::go_to_marker(&mut s, "3");
     // TODO: f.VerifyCompletions(t, "3", &fourslash.CompletionsExpectedList{
 }

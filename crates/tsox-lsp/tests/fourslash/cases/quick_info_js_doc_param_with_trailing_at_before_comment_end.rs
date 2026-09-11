@@ -11,5 +11,6 @@ function /*fn*/foo(/*x*/x) {}
     let mut s = Session::new_for_test("quickInfoJSDocParamWithTrailingAtBeforeCommentEnd", content);
     // TODO: f.VerifyQuickInfoAt(t, "fn", "function foo(x: string): void", "\n\n*@param* `x` — trailing @")
     fourslash::verify_quick_info_at(&mut s, "x", "(parameter) x: string", "trailing @");
+    fourslash::go_to_marker(&mut s, "at");
     // TODO: f.VerifyCompletions(t, "at", &fourslash.CompletionsExpectedList{
 }

@@ -11,6 +11,8 @@ export function f(){
 //@Filename:module.js
 import { f } from ".//**/""#;
     let mut s = Session::new_for_test("completionImportModuleSpecifierEndingJs", content);
+    fourslash::go_to_marker(&mut s, "");
     // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "");
     // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

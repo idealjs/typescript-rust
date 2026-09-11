@@ -7,5 +7,6 @@ fn type_keyword_in_function() {
     ty/**/
 }"#;
     let mut s = Session::new_for_test("typeKeywordInFunction", content);
+    fourslash::go_to_marker(&mut s, "");
     // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

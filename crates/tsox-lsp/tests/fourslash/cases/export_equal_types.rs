@@ -23,6 +23,7 @@ var /*3*/r2 = t./*4*/foo; // t should have 'foo' in dropdown list and be of type
     fourslash::verify_quick_info_at(&mut s, "1", "(alias) interface test\nimport test = require('./exportEqualTypes_file0')", "");
     fourslash::verify_quick_info_at(&mut s, "2", "var r1: Date", "");
     fourslash::verify_quick_info_at(&mut s, "3", "var r2: string", "");
+    fourslash::go_to_marker(&mut s, "4");
     // TODO: f.VerifyCompletions(t, "4", &fourslash.CompletionsExpectedList{
     fourslash::verify_no_errors(&mut s, );
 }

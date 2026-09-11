@@ -32,5 +32,6 @@ export default methods.$;
 // @Filename: /swipe-back.js
 /*1*/"#;
     let mut s = Session::new_for_test("completionsImportDefaultExportCrash2", content);
+    fourslash::go_to_marker(&mut s, "1");
     // TODO: f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
 }

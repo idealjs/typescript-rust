@@ -22,5 +22,6 @@ fn completions_js_doc_no_crash2() {
  */
 var ngShowDirective = ['$animate', function($animate) {}];"#;
     let mut s = Session::new_for_test("completionsJSDocNoCrash2", content);
+    fourslash::go_to_marker(&mut s, "");
     // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

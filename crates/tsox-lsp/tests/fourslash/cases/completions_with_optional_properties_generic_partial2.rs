@@ -10,5 +10,6 @@ interface Foo {
 function partialFoo<T extends Partial<Foo>>(x: T, y: T) {return t}
 partialFoo({ a: true, b: true }, { /*1*/ });"#;
     let mut s = Session::new_for_test("completionsWithOptionalPropertiesGenericPartial2", content);
+    fourslash::go_to_marker(&mut s, "1");
     // TODO: f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
 }

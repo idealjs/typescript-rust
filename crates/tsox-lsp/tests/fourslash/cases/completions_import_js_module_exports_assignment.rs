@@ -29,8 +29,10 @@ module.exports = {
     // TODO: opts666.FormatCodeSettings.NewLineCharacter = "\n"
     // TODO: f.Configure(t, opts666)
     fourslash::go_to_marker(&mut s, "");
+    fourslash::go_to_marker(&mut s, "");
     // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
     fourslash::insert(&mut s, "d");
+    fourslash::go_to_marker(&mut s, "");
     // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
     // TODO: f.VerifyApplyCodeActionFromCompletion(t, new(""), &fourslash.ApplyCodeActionFromCompletionOptions{
 }

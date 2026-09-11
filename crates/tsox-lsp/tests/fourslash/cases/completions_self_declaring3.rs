@@ -7,7 +7,9 @@ fn completions_self_declaring3() {
 f({ x/*x*/: 0, hello/*hello*/: "", goodbye/*goodbye*/: 0, abc/*abc*/: "" })"#;
     let mut s = Session::new_for_test("completionsSelfDeclaring3", content);
     fourslash::verify_completions_exact_at(&mut s, Some("x"), &["x"]);
+    fourslash::go_to_marker(&mut s, "hello");
     // TODO: f.VerifyCompletions(t, "hello", &fourslash.CompletionsExpectedList{
     fourslash::verify_completions_exact_at(&mut s, Some("goodbye"), &["goodbye"]);
+    fourslash::go_to_marker(&mut s, "abc");
     // TODO: f.VerifyCompletions(t, "abc", &fourslash.CompletionsExpectedList{
 }

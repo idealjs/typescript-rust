@@ -29,7 +29,9 @@ declare module "@jest/types" {
 C/**/"#;
     let mut s = Session::new_for_test("completionsImport_mergedReExport", content);
     // TODO: f.MarkTestAsStradaServer()
+    fourslash::go_to_marker(&mut s, "");
     // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
     fourslash::insert(&mut s, "o");
+    fourslash::go_to_marker(&mut s, "");
     // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

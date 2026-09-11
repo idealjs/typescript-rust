@@ -18,6 +18,7 @@ export function SomeScreen() {
 }
 "#;
     let mut s = Session::new_for_test("autoImportDefaultPascalCase", content);
+    fourslash::go_to_marker(&mut s, "1");
     // TODO: f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
     // TODO: f.BaselineAutoImportsCompletions(t, []string{"1"})
 }
@@ -39,6 +40,7 @@ export function SomeScreen() {
 }
 "#;
     let mut s = Session::new_for_test("autoImportDefaultPascalCaseAnonymous", content);
+    fourslash::go_to_marker(&mut s, "1");
     // TODO: f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
     // TODO: f.BaselineAutoImportsCompletions(t, []string{"1"})
 }
@@ -61,6 +63,7 @@ export function SomeScreen() {
 }
 "#;
     let mut s = Session::new_for_test("autoImportDefaultPascalCaseCaseInsensitive", content);
+    fourslash::go_to_marker(&mut s, "1");
     // TODO: f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
     // TODO: f.BaselineAutoImportsCompletions(t, []string{"1"})
 }
@@ -83,6 +86,7 @@ export function SomeScreen() {
 }
 "#;
     let mut s = Session::new_for_test("autoImportDefaultPascalCaseAnonymousCaseInsensitive", content);
+    fourslash::go_to_marker(&mut s, "1");
     // TODO: f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
     // TODO: f.BaselineAutoImportsCompletions(t, []string{"1"})
 }
@@ -108,6 +112,7 @@ export function SomeScreen() {
 }
 "#;
     let mut s = Session::new_for_test("autoImportDefaultPascalCaseReexportCaseInsensitive", content);
+    fourslash::go_to_marker(&mut s, "1");
     // TODO: f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
     // TODO: f.BaselineAutoImportsCompletions(t, []string{"1"})
 }
@@ -131,6 +136,7 @@ export function SomeScreen() {
 }
 "#;
     let mut s = Session::new_for_test("autoImportDefaultPascalCaseAliasCaseInsensitive", content);
+    fourslash::go_to_marker(&mut s, "1");
     // TODO: f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
     // TODO: f.BaselineAutoImportsCompletions(t, []string{"1"})
 }

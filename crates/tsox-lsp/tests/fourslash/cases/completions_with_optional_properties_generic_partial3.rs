@@ -13,5 +13,6 @@ function partialFoo<T extends Partial<Foo>>(x: T, y: T extends { b?: boolean } ?
 
 partialFoo({ a: true, b: true }, { /*1*/ });"#;
     let mut s = Session::new_for_test("completionsWithOptionalPropertiesGenericPartial3", content);
+    fourslash::go_to_marker(&mut s, "1");
     // TODO: f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
 }

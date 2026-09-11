@@ -10,5 +10,6 @@ export const foo = 0;
 const foo = 1;
 fo/**/"#;
     let mut s = Session::new_for_test("completionsImport_shadowedByLocal", content);
+    fourslash::go_to_marker(&mut s, "");
     // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

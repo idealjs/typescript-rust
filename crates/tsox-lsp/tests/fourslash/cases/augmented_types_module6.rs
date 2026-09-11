@@ -11,6 +11,7 @@ r./*5*/
 var r2: m3f.I = r;
 r2./*6*/"#;
     let mut s = Session::new_for_test("augmentedTypesModule6", content);
+    fourslash::go_to_marker(&mut s, "1");
     // TODO: f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
     fourslash::insert(&mut s, "I;");
     fourslash::verify_completions_include_exclude_at(&mut s, Some("2"), &["m3f"], &[]);

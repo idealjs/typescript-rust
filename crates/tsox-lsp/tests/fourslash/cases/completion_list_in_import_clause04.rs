@@ -13,6 +13,7 @@ fn completion_list_in_import_clause04() {
 // @Filename: app.ts
 import {/*1*/} from './foo';"#;
     let mut s = Session::new_for_test("completionListInImportClause04", content);
+    fourslash::go_to_marker(&mut s, "1");
     // TODO: f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
     fourslash::verify_no_errors(&mut s, );
     fourslash::go_to_marker(&mut s, "2");

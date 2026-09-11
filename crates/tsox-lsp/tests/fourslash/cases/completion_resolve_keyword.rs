@@ -7,5 +7,6 @@ fn completion_resolve_keyword() {
 	/*a*/
 }"#;
     let mut s = Session::new_for_test("completionResolveKeyword", content);
+    fourslash::go_to_marker(&mut s, "a");
     // TODO: f.VerifyCompletions(t, "a", &fourslash.CompletionsExpectedList{
 }

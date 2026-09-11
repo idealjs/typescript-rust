@@ -11,5 +11,6 @@ class Prv {
 }
 new Prv()['[|/**/|]'];"#;
     let mut s = Session::new_for_test("getJavaScriptCompletions21", content);
+    fourslash::go_to_marker(&mut s, "");
     // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

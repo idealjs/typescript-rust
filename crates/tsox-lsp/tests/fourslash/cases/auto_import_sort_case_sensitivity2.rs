@@ -12,6 +12,7 @@ export type __String = string;
 import { __String, HasBar, hasBar } from "./a";
 f/**/;"#;
     let mut s = Session::new_for_test("autoImportSortCaseSensitivity2", content);
+    fourslash::go_to_marker(&mut s, "");
     // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
     // TODO: f.VerifyApplyCodeActionFromCompletion(t, new(""), &fourslash.ApplyCodeActionFromCompletionOptions{
 }

@@ -19,5 +19,6 @@ declare module "path" {
 normalize/**/"#;
     let mut s = Session::new_for_test("completionsImport_sortingModuleSpecifiers", content);
     // TODO: f.MarkTestAsStradaServer()
+    fourslash::go_to_marker(&mut s, "");
     // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

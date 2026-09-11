@@ -29,5 +29,6 @@ export const blah = 0;
 import { } from "/**/";"##;
     let mut s = Session::new_for_test("pathCompletionsPackageJsonImportsSrcNoDistWildcard6", content);
     // TODO: f.MarkTestAsStradaServer()
+    fourslash::go_to_marker(&mut s, "");
     // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

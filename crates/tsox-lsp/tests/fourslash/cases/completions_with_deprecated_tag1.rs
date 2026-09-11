@@ -24,9 +24,14 @@ foo.pro/*3*/;
 
 fooba/*5*/;"#;
     let mut s = Session::new_for_test("completionsWithDeprecatedTag1", content);
+    fourslash::go_to_marker(&mut s, "1");
     // TODO: f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "2");
     // TODO: f.VerifyCompletions(t, "2", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "3");
     // TODO: f.VerifyCompletions(t, "3", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "4");
     // TODO: f.VerifyCompletions(t, "4", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "5");
     // TODO: f.VerifyCompletions(t, "5", &fourslash.CompletionsExpectedList{
 }

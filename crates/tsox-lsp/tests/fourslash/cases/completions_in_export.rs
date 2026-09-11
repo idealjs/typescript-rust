@@ -8,6 +8,7 @@ fn completions_in_export() {
 type T = number;
 export { /**/ };"#;
     let mut s = Session::new_for_test("completionsInExport", content);
+    fourslash::go_to_marker(&mut s, "");
     // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
     fourslash::insert(&mut s, "a, ");
     // TODO: f.VerifyCompletions(t, nil, &fourslash.CompletionsExpectedList{

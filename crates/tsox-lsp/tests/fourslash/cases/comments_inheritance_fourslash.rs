@@ -250,6 +250,7 @@ class c6 extends c5 {
     fourslash::verify_quick_info_at(&mut s, "l3q", "(property) i1.i1_nc_l1: () => void", "");
     fourslash::verify_quick_info_at(&mut s, "l4q", "(property) i1.l1: () => void", "");
     fourslash::verify_quick_info_at(&mut s, "l5q", "(property) i1.nc_l1: () => void", "");
+    fourslash::go_to_marker(&mut s, "6");
     // TODO: f.VerifyCompletions(t, "6", &fourslash.CompletionsExpectedList{
     fourslash::go_to_marker(&mut s, "7");
     // TODO: f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{DocComment: "i1_f1"})
@@ -276,6 +277,7 @@ class c6 extends c5 {
     fourslash::verify_quick_info_at(&mut s, "l8q", "(property) c1.i1_nc_l1: () => void", "");
     fourslash::verify_quick_info_at(&mut s, "l9q", "(property) c1.l1: () => void", "c1_l1");
     fourslash::verify_quick_info_at(&mut s, "l10q", "(property) c1.nc_l1: () => void", "c1_nc_l1");
+    fourslash::go_to_marker(&mut s, "11");
     // TODO: f.VerifyCompletions(t, "11", &fourslash.CompletionsExpectedList{
     fourslash::go_to_marker(&mut s, "12");
     // TODO: f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{DocComment: "i1_f1"})
@@ -301,7 +303,9 @@ class c6 extends c5 {
     fourslash::verify_quick_info_at(&mut s, "l13q", "(property) i1.i1_nc_l1: () => void", "");
     fourslash::verify_quick_info_at(&mut s, "l14q", "(property) i1.l1: () => void", "");
     fourslash::verify_quick_info_at(&mut s, "l15q", "(property) i1.nc_l1: () => void", "");
+    fourslash::go_to_marker(&mut s, "16");
     // TODO: f.VerifyCompletions(t, "16", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "16i");
     // TODO: f.VerifyCompletions(t, "16i", &fourslash.CompletionsExpectedList{
     fourslash::verify_quick_info_at(&mut s, "17iq", "var c2_i: c2", "");
     fourslash::verify_quick_info_at(&mut s, "18iq", "var c3_i: c3", "");
@@ -327,6 +331,7 @@ class c6 extends c5 {
     fourslash::verify_quick_info_at(&mut s, "21q", "(method) c2.c2_nc_f1(): void", "");
     fourslash::verify_quick_info_at(&mut s, "22q", "(method) c2.f1(): void", "c2 f1");
     fourslash::verify_quick_info_at(&mut s, "23q", "(method) c2.nc_f1(): void", "");
+    fourslash::go_to_marker(&mut s, "24");
     // TODO: f.VerifyCompletions(t, "24", &fourslash.CompletionsExpectedList{
     fourslash::go_to_marker(&mut s, "25");
     // TODO: f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{DocComment: "c2 c2_f1"})
@@ -356,6 +361,7 @@ class c6 extends c5 {
     // TODO: f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{DocComment: "c2 constructor"})
     fourslash::verify_quick_info_at(&mut s, "34iq", "var c4_i: c4", "");
     fourslash::verify_quick_info_at(&mut s, "34q", "constructor c4(a: number): c4", "c2 constructor");
+    fourslash::go_to_marker(&mut s, "35");
     // TODO: f.VerifyCompletions(t, "35", &fourslash.CompletionsExpectedList{
     // TODO: f.VerifyCompletions(t, []string{"36", "46"}, &fourslash.CompletionsExpectedList{
     fourslash::go_to_marker(&mut s, "37");
@@ -384,6 +390,7 @@ class c6 extends c5 {
     fourslash::verify_quick_info_at(&mut s, "l38q", "(property) i2.i2_nc_l1: () => void", "");
     fourslash::verify_quick_info_at(&mut s, "l39q", "(property) i2.l1: () => void", "i2 l1");
     fourslash::verify_quick_info_at(&mut s, "l40q", "(property) i2.nc_l1: () => void", "");
+    fourslash::go_to_marker(&mut s, "41");
     // TODO: f.VerifyCompletions(t, "41", &fourslash.CompletionsExpectedList{
     fourslash::go_to_marker(&mut s, "42");
     // TODO: f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{DocComment: "i2_f1"})
@@ -409,6 +416,7 @@ class c6 extends c5 {
     fourslash::verify_quick_info_at(&mut s, "l43q", "(property) i2.i2_nc_l1: () => void", "");
     fourslash::verify_quick_info_at(&mut s, "l44q", "(property) i3.l1: () => void", "i3 l1");
     fourslash::verify_quick_info_at(&mut s, "l45q", "(property) i3.nc_l1: () => void", "");
+    fourslash::go_to_marker(&mut s, "46");
     // TODO: f.VerifyCompletions(t, "46", &fourslash.CompletionsExpectedList{
     fourslash::go_to_marker(&mut s, "47");
     // TODO: f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{DocComment: "i2_f1"})
@@ -432,7 +440,9 @@ class c6 extends c5 {
     fourslash::verify_quick_info_at(&mut s, "l48q", "(property) i2.i2_nc_l1: () => void", "");
     fourslash::verify_quick_info_at(&mut s, "l49q", "(property) i2.l1: () => void", "i2 l1");
     fourslash::verify_quick_info_at(&mut s, "l40q", "(property) i2.nc_l1: () => void", "");
+    fourslash::go_to_marker(&mut s, "51");
     // TODO: f.VerifyCompletions(t, "51", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "51i");
     // TODO: f.VerifyCompletions(t, "51i", &fourslash.CompletionsExpectedList{
     fourslash::verify_quick_info_at(&mut s, "52", "constructor c5(): c5", "c5 class");
     fourslash::verify_quick_info_at(&mut s, "53", "class c5", "c5 class");

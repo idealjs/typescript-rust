@@ -36,8 +36,10 @@ const op: Op = {
     /*d*/
 }"#;
     let mut s = Session::new_with_capabilities(content, None);
+    fourslash::go_to_marker(&mut s, "a");
     // TODO: f.VerifyCompletions(t, "a", &fourslash.CompletionsExpectedList{
     // TODO: {
     // TODO: {
+    fourslash::go_to_marker(&mut s, "d");
     // TODO: f.VerifyCompletions(t, "d", &fourslash.CompletionsExpectedList{
 }

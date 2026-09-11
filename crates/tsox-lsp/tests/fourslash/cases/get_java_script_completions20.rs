@@ -22,5 +22,6 @@ function Person(name, age) {
 Person.getName = 10;
 Person.getNa/**/ = 10;"#;
     let mut s = Session::new_for_test("getJavaScriptCompletions20", content);
+    fourslash::go_to_marker(&mut s, "");
     // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

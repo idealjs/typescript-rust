@@ -14,6 +14,8 @@ interface J { [N.s2]: number; }
 declare const j: J;
 j[|./*j*/|];"#;
     let mut s = Session::new_for_test("completionsSymbolMembers", content);
+    fourslash::go_to_marker(&mut s, "i");
     // TODO: f.VerifyCompletions(t, "i", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "j");
     // TODO: f.VerifyCompletions(t, "j", &fourslash.CompletionsExpectedList{
 }

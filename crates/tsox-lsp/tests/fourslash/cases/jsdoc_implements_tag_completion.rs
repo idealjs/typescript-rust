@@ -7,5 +7,6 @@ fn jsdoc_implements_tag_completion() {
 /** @implements {/**/} */
 class A {}"#;
     let mut s = Session::new_for_test("jsdocImplementsTagCompletion", content);
+    fourslash::go_to_marker(&mut s, "");
     // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

@@ -19,5 +19,6 @@ declare module "*.asset" with { type: "css" } {
 // @Filename: /index.ts
 sty/**/"#;
     let mut s = Session::new_for_test("autoImportMergedPatternAmbientModule", content);
+    fourslash::go_to_marker(&mut s, "");
     // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

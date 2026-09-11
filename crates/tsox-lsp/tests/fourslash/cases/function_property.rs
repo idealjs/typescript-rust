@@ -30,6 +30,7 @@ c./*quickInfoC*/x;"#;
     // TODO: f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{Text: "x(a: number): void"})
     fourslash::go_to_marker(&mut s, "signatureC");
     // TODO: f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{Text: "x(a: number): void"})
+    fourslash::go_to_marker(&mut s, "completionA");
     // TODO: f.VerifyCompletions(t, "completionA", &fourslash.CompletionsExpectedList{
     // TODO: f.VerifyCompletions(t, []string{"completionB", "completionC"}, &fourslash.CompletionsExpectedList{
     fourslash::verify_quick_info_at(&mut s, "quickInfoA", "(method) x(a: number): void", "");

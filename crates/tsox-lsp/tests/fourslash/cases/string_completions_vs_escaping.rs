@@ -20,7 +20,9 @@ export const backtickQuoted2: '`backtick-quoted`' = `/*8*/`"#;
     let mut s = Session::new_for_test("stringCompletionsVsEscaping", content);
     fourslash::verify_completions_exact_at(&mut s, Some("1"), &["var(--\\\\\\\\\\\\\\\\, one)", "var(--\\\\\\\\\\\\\\\\, two)"]);
     fourslash::verify_completions_exact_at(&mut s, Some("2"), &["\\\\ntest\\\\n"]);
+    fourslash::go_to_marker(&mut s, "3");
     // TODO: f.VerifyCompletions(t, "3", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "4");
     // TODO: f.VerifyCompletions(t, "4", &fourslash.CompletionsExpectedList{
     fourslash::verify_completions_exact_at(&mut s, Some("5"), &["'single-quoted'"]);
     fourslash::verify_completions_exact_at(&mut s, Some("6"), &["\\\\'single-quoted\\\\'"]);

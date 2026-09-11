@@ -28,5 +28,6 @@ export class CollapsibleContainerNode extends ElementNode {
     // TODO: opts786 := f.GetOptions()
     // TODO: opts786.FormatCodeSettings.InsertSpaceAfterConstructor = core.TSFalse
     // TODO: f.Configure(t, opts786)
+    fourslash::go_to_marker(&mut s, "1");
     // TODO: f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
 }

@@ -12,5 +12,6 @@ fn completion_list_object_members() {
  };
 object./**/"#;
     let mut s = Session::new_for_test("completionListObjectMembers", content);
+    fourslash::go_to_marker(&mut s, "");
     // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

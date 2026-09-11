@@ -19,7 +19,9 @@ import.meta./*3*/url
 import./*4*/meta"#;
     let mut s = Session::new_for_test("completionImportMetaWithGlobalDeclaration", content);
     fourslash::verify_completions_exact_at(&mut s, Some("1"), &["meta"]);
+    fourslash::go_to_marker(&mut s, "2");
     // TODO: f.VerifyCompletions(t, "2", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "3");
     // TODO: f.VerifyCompletions(t, "3", &fourslash.CompletionsExpectedList{
     fourslash::verify_completions_exact_at(&mut s, Some("4"), &["meta"]);
 }

@@ -64,6 +64,8 @@ class TestClass {
 }"#;
     let mut s = Session::new_for_test("completionListInScope", content);
     fourslash::verify_completions_include_exclude_at(&mut s, Some("valueReference"), &["localVariable", "exportedVariable", "localFunction", "exportedFunction", "localClass", "exportedClass", "localModule", "exportedModule", "exportedVariable2", "exportedFunction2", "exportedClass2", "exportedModule2"], &[]);
+    fourslash::go_to_marker(&mut s, "typeReference");
     // TODO: f.VerifyCompletions(t, "typeReference", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "insideMethod");
     // TODO: f.VerifyCompletions(t, "insideMethod", &fourslash.CompletionsExpectedList{
 }

@@ -8,5 +8,6 @@ fn code_completion_escaping() {
 // @allowJs: true
 ___foo; __foo;/**/"#;
     let mut s = Session::new_for_test("codeCompletionEscaping", content);
+    fourslash::go_to_marker(&mut s, "");
     // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

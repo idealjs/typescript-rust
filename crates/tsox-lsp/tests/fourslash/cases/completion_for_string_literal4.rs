@@ -21,5 +21,6 @@ f/*1*/('literal', 'literal', "[|o/*2*/ther1|]", 12);"#;
     fourslash::go_to_marker(&mut s, "1");
     // TODO: f.VerifyQuickInfoExists(t)
     // TODO: f.VerifyQuickInfoIs(t, "function f(p1: \"literal\", p2: \"literal\", p3: \"other1\" | \"other2\", p4
+    fourslash::go_to_marker(&mut s, "2");
     // TODO: f.VerifyCompletions(t, "2", &fourslash.CompletionsExpectedList{
 }

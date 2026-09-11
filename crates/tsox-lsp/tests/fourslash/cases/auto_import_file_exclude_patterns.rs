@@ -13,7 +13,9 @@ ignoredSym/*2*/"#;
     let mut s = Session::new_for_test("autoImportFileExcludePatterns", content);
     // TODO: f.Configure(t, lsutil.UserPreferences{
     // TODO: // Verify that mySymbol is included, but ignoredSymbol is excluded from completions
+    fourslash::go_to_marker(&mut s, "1");
     // TODO: f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "2");
     // TODO: f.VerifyCompletions(t, "2", &fourslash.CompletionsExpectedList{
     // TODO: // Baseline the auto-imports
     // TODO: f.BaselineAutoImportsCompletions(t, []string{"1", "2"})

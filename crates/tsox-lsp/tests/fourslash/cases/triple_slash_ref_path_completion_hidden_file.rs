@@ -14,5 +14,6 @@ fn triple_slash_ref_path_completion_hidden_file() {
 /// <reference path=".\/*3*/"#;
     let mut s = Session::new_for_test("tripleSlashRefPathCompletionHiddenFile", content);
     // TODO: f.VerifyCompletions(t, []string{"0", "2", "3"}, &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "1");
     // TODO: f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
 }

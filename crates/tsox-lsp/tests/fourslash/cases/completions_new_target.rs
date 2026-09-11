@@ -16,5 +16,6 @@ class D {
 }"#;
     let mut s = Session::new_for_test("completionsNewTarget", content);
     fourslash::verify_completions_exact_at(&mut s, Some("1"), &["target"]);
+    fourslash::go_to_marker(&mut s, "2");
     // TODO: f.VerifyCompletions(t, "2", &fourslash.CompletionsExpectedList{
 }

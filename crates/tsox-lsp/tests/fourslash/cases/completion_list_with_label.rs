@@ -18,5 +18,6 @@ fn completion_list_with_label() {
     let mut s = Session::new_for_test("completionListWithLabel", content);
     // TODO: f.VerifyCompletions(t, []string{"1", "2", "7"}, &fourslash.CompletionsExpectedList{
     // TODO: f.VerifyCompletions(t, []string{"3", "4", "5", "6"}, &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "8");
     // TODO: f.VerifyCompletions(t, "8", &fourslash.CompletionsExpectedList{
 }

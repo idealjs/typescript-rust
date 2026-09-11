@@ -9,5 +9,6 @@ export import A = require('./app');
 export var I = 1;
 A./**/I"#;
     let mut s = Session::new_for_test("selfReferencedExternalModule", content);
+    fourslash::go_to_marker(&mut s, "");
     // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

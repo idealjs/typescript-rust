@@ -33,6 +33,7 @@ let opt = <MainButton goTo="goTo" /*5*/ />;
 let opt = <MainButton wrong /*6*/ />;"#;
     let mut s = Session::new_for_test("tsxCompletion13", content);
     // TODO: f.VerifyCompletions(t, []string{"1", "6"}, &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "2");
     // TODO: f.VerifyCompletions(t, "2", &fourslash.CompletionsExpectedList{
     // TODO: f.VerifyCompletions(t, []string{"3", "4", "5"}, &fourslash.CompletionsExpectedList{
 }

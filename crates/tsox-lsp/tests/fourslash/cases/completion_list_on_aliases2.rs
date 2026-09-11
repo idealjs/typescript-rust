@@ -40,6 +40,7 @@ var tmp2: a./*7Type*/;"#;
     let mut s = Session::new_for_test("completionListOnAliases2", content);
     // TODO: f.VerifyCompletions(t, []string{"1", "7"}, &fourslash.CompletionsExpectedList{
     // TODO: f.VerifyCompletions(t, []string{"1Type", "7Type"}, &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "2");
     // TODO: f.VerifyCompletions(t, "2", &fourslash.CompletionsExpectedList{
     fourslash::verify_completions_exact_at(&mut s, Some("3"), &["value"]);
     fourslash::verify_completions_exact_at(&mut s, Some("4"), &["v"]);

@@ -20,6 +20,8 @@ import {} from "foo/dir//*1*/";
     }
 }"#;
     let mut s = Session::new_for_test("completionsPaths_pathMapping", content);
+    fourslash::go_to_marker(&mut s, "0");
     // TODO: f.VerifyCompletions(t, "0", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "1");
     // TODO: f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
 }

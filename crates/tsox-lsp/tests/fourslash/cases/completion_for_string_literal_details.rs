@@ -19,7 +19,10 @@ interface I {
 declare const o: I;
 o["[|/*prop*/|]"];"#;
     let mut s = Session::new_for_test("completionForStringLiteral_details", content);
+    fourslash::go_to_marker(&mut s, "path");
     // TODO: f.VerifyCompletions(t, "path", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "type");
     // TODO: f.VerifyCompletions(t, "type", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "prop");
     // TODO: f.VerifyCompletions(t, "prop", &fourslash.CompletionsExpectedList{
 }

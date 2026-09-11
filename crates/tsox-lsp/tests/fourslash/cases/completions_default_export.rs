@@ -9,5 +9,6 @@ export default function f() {}
 import * as a from "./a";
 a./**/;"#;
     let mut s = Session::new_for_test("completionsDefaultExport", content);
+    fourslash::go_to_marker(&mut s, "");
     // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

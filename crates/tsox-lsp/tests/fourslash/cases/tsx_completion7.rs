@@ -13,5 +13,6 @@ declare namespace JSX {
 let y = { ONE: '' };
 var x = <div {...y} /**/ />;"#;
     let mut s = Session::new_for_test("tsxCompletion7", content);
+    fourslash::go_to_marker(&mut s, "");
     // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

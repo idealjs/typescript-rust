@@ -19,5 +19,6 @@ point./*3*/x = 30;"#;
     fourslash::verify_quick_info_at(&mut s, "2", "var x: number", "");
     fourslash::verify_quick_info_at(&mut s, "3", "(property) x: number", "");
     fourslash::verify_quick_info_at(&mut s, "4", "var point: {\n    b: number;\n    x: number;\n}", "");
+    fourslash::go_to_marker(&mut s, "3");
     // TODO: f.VerifyCompletions(t, "3", &fourslash.CompletionsExpectedList{
 }

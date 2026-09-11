@@ -12,5 +12,6 @@ import * as u from "./a";
     // TODO: preferences := lsutil.NewDefaultUserPreferences()
     // TODO: preferences.IncludeCompletionsForModuleExports = core.TSFalse
     // TODO: preferences.IncludeCompletionsForImportStatements = core.TSTrue
+    fourslash::go_to_marker(&mut s, "a");
     // TODO: f.VerifyCompletions(t, "a", &fourslash.CompletionsExpectedList{
 }

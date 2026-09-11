@@ -16,5 +16,6 @@ fn completion_js_doc_no_crash2() {
 "#;
     let mut s = Session::new_for_test("completionJSDocNoCrash2", content);
     // TODO: // The assertion here is simply "does not crash/panic".
+    fourslash::go_to_marker(&mut s, "1");
     // TODO: f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
 }

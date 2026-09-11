@@ -20,5 +20,6 @@ const o: I = {
     // TODO: f.VerifyCompletions(t, []string{"a", "b"}, nil)
     // TODO: f.VerifyCompletions(t, []string{"c", "d"}, &fourslash.CompletionsExpectedList{
     fourslash::verify_completions_exact_at(&mut s, Some("e"), &["baseMethod"]);
+    fourslash::go_to_marker(&mut s, "f");
     // TODO: f.VerifyCompletions(t, "f", &fourslash.CompletionsExpectedList{
 }

@@ -8,5 +8,6 @@ fn member_list_on_function_parameter() {
     x.forEach(function (y) { y./**/} );
 }"#;
     let mut s = Session::new_for_test("memberListOnFunctionParameter", content);
+    fourslash::go_to_marker(&mut s, "");
     // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

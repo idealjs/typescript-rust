@@ -35,18 +35,22 @@ export { type foo, type "/*typeExport3*/" } from "./exports";"#;
     let mut s = Session::new_for_test("stringCompletionsImportOrExportSpecifier", content);
     fourslash::verify_completions_exact_at(&mut s, Some("valueImport0"), &["__some type", "__some value", "foo"]);
     fourslash::verify_completions_exact_at(&mut s, Some("valueImport1"), &["__some type", "__some value", "foo"]);
+    fourslash::go_to_marker(&mut s, "valueImport2");
     // TODO: f.VerifyCompletions(t, "valueImport2", &fourslash.CompletionsExpectedList{
     fourslash::verify_completions_exact_at(&mut s, Some("valueImport3"), &["__some type", "__some value"]);
     fourslash::verify_completions_exact_at(&mut s, Some("valueExport0"), &["__some type", "__some value", "foo"]);
     fourslash::verify_completions_exact_at(&mut s, Some("valueExport1"), &["__some type", "__some value", "foo"]);
+    fourslash::go_to_marker(&mut s, "valueExport2");
     // TODO: f.VerifyCompletions(t, "valueExport2", &fourslash.CompletionsExpectedList{
     fourslash::verify_completions_exact_at(&mut s, Some("valueExport3"), &["__some type", "__some value"]);
     fourslash::verify_completions_exact_at(&mut s, Some("typeImport0"), &["__some type", "__some value", "foo"]);
     fourslash::verify_completions_exact_at(&mut s, Some("typeImport1"), &["__some type", "__some value", "foo"]);
+    fourslash::go_to_marker(&mut s, "typeImport2");
     // TODO: f.VerifyCompletions(t, "typeImport2", &fourslash.CompletionsExpectedList{
     fourslash::verify_completions_exact_at(&mut s, Some("typeImport3"), &["__some type", "__some value"]);
     fourslash::verify_completions_exact_at(&mut s, Some("typeExport0"), &["__some type", "__some value", "foo"]);
     fourslash::verify_completions_exact_at(&mut s, Some("typeExport1"), &["__some type", "__some value", "foo"]);
+    fourslash::go_to_marker(&mut s, "typeExport2");
     // TODO: f.VerifyCompletions(t, "typeExport2", &fourslash.CompletionsExpectedList{
     fourslash::verify_completions_exact_at(&mut s, Some("typeExport3"), &["__some type", "__some value"]);
 }

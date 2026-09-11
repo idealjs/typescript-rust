@@ -21,5 +21,6 @@ var x1; x1./*3*/;"#;
     let mut s = Session::new_for_test("jsdocTypedefTagNamespace", content);
     // TODO: f.MarkTestAsStradaServer()
     // TODO: f.VerifyCompletions(t, []string{"1", "3"}, &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "2");
     // TODO: f.VerifyCompletions(t, "2", &fourslash.CompletionsExpectedList{
 }

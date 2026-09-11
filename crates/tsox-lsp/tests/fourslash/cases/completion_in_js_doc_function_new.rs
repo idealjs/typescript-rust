@@ -8,5 +8,6 @@ fn completion_in_js_doc_function_new() {
 /** @type {function (new: string, string): string} */
 var f = function () { return new/**/; }"#;
     let mut s = Session::new_for_test("completionInJSDocFunctionNew", content);
+    fourslash::go_to_marker(&mut s, "");
     // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

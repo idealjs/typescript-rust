@@ -14,5 +14,6 @@ export default Table;
 // @Filename: /index.ts
 Table/**/"#;
     let mut s = Session::new_for_test("autoImportSameNameDefaultExported", content);
+    fourslash::go_to_marker(&mut s, "");
     // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

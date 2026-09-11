@@ -18,11 +18,18 @@ fn completions_assert_keyword() {
 // @Filename: b.js
  import * as thing from "thing" /*js*/;"#;
     let mut s = Session::new_for_test("completionsAssertKeyword", content);
+    fourslash::go_to_marker(&mut s, "0");
     // TODO: f.VerifyCompletions(t, "0", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "1");
     // TODO: f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "2");
     // TODO: f.VerifyCompletions(t, "2", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "3");
     // TODO: f.VerifyCompletions(t, "3", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "4");
     // TODO: f.VerifyCompletions(t, "4", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "5");
     // TODO: f.VerifyCompletions(t, "5", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "js");
     // TODO: f.VerifyCompletions(t, "js", &fourslash.CompletionsExpectedList{
 }

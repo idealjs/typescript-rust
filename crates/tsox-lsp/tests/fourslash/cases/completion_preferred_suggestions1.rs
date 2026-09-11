@@ -20,6 +20,7 @@ v5 = "/*5*/";"#;
     fourslash::verify_completions_include_exclude_at(&mut s, Some("1"), &["a", "b", "c"], &[]);
     fourslash::verify_completions_include_exclude_at(&mut s, Some("2"), &["0", "1", "2"], &[]);
     fourslash::verify_completions_include_exclude_at(&mut s, Some("3"), &["a", "b", "c"], &[]);
+    fourslash::go_to_marker(&mut s, "4");
     // TODO: f.VerifyCompletions(t, "4", &fourslash.CompletionsExpectedList{
     fourslash::verify_completions_include_exclude_at(&mut s, Some("5"), &["a", "b", "c"], &[]);
 }

@@ -8,5 +8,6 @@ fn completions_jsdoc_type_tag_cast() {
 // @Filename: /a.js
 const x = /** @type {{ s: string }} */ ({ /**/ });"#;
     let mut s = Session::new_for_test("completionsJsdocTypeTagCast", content);
+    fourslash::go_to_marker(&mut s, "");
     // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

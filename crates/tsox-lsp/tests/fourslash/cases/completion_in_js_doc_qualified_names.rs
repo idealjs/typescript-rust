@@ -12,5 +12,6 @@ import * as Foo from "foo";
 /** @type {Foo./**/} */
 const x = 0;"#;
     let mut s = Session::new_for_test("completionInJsDocQualifiedNames", content);
+    fourslash::go_to_marker(&mut s, "");
     // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

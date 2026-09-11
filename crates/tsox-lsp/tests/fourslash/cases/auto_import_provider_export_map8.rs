@@ -42,7 +42,9 @@ fooFrom/*mts*/"#;
     let mut s = Session::new_for_test("autoImportProvider_exportMap8", content);
     // TODO: f.MarkTestAsStradaServer()
     fourslash::go_to_marker(&mut s, "cts");
+    fourslash::go_to_marker(&mut s, "cts");
     // TODO: f.VerifyCompletions(t, "cts", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "mts");
     fourslash::go_to_marker(&mut s, "mts");
     // TODO: f.VerifyCompletions(t, "mts", &fourslash.CompletionsExpectedList{
 }

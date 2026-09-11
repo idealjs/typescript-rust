@@ -11,5 +11,6 @@ interface MyOptions {
 declare function bar<T extends MyOptions>(options?: Partial<T>): void;
 bar({ hello: true, /*1*/ });"#;
     let mut s = Session::new_for_test("completionsWithOptionalPropertiesGenericValidBoolean", content);
+    fourslash::go_to_marker(&mut s, "1");
     // TODO: f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
 }

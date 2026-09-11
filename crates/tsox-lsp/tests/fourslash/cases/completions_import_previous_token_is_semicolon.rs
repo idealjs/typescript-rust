@@ -9,5 +9,6 @@ export function foo() {}
 import * as a from 'a';
 /**/"#;
     let mut s = Session::new_for_test("completionsImport_previousTokenIsSemicolon", content);
+    fourslash::go_to_marker(&mut s, "");
     // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

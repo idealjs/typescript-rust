@@ -14,9 +14,12 @@ function foo() {
     /*7*/
 }"#;
     let mut s = Session::new_for_test("constQuickInfoAndCompletionList", content);
+    fourslash::go_to_marker(&mut s, "2");
     // TODO: f.VerifyCompletions(t, "2", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "3");
     // TODO: f.VerifyCompletions(t, "3", &fourslash.CompletionsExpectedList{
     // TODO: f.VerifyCompletions(t, []string{"5", "6"}, &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "7");
     // TODO: f.VerifyCompletions(t, "7", &fourslash.CompletionsExpectedList{
     fourslash::verify_quick_info_at(&mut s, "1", "const a: 10", "");
     fourslash::verify_quick_info_at(&mut s, "2", "const a: 10", "");

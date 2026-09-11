@@ -12,5 +12,6 @@ const foo = { '"a name\'s all good but it\'s better with more"': null };
 foo[|./**/|]"#;
     let mut s = Session::new_for_test("completionForStringLiteral_quotePreference8", content);
     fourslash::go_to_file(&mut s, "/b.ts");
+    fourslash::go_to_marker(&mut s, "");
     // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

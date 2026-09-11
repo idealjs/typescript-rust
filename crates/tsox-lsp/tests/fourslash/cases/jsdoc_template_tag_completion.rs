@@ -10,5 +10,6 @@ fn jsdoc_template_tag_completion() {
  * @property {T} foo
  */"#;
     let mut s = Session::new_for_test("jsdocTemplateTagCompletion", content);
+    fourslash::go_to_marker(&mut s, "");
     // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

@@ -12,6 +12,7 @@ declare module 'mod' {
   export { /**/ };
 }"#;
     let mut s = Session::new_for_test("completionsInExport_moduleBlock", content);
+    fourslash::go_to_marker(&mut s, "");
     // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
     fourslash::insert(&mut s, "a, ");
     // TODO: f.VerifyCompletions(t, nil, &fourslash.CompletionsExpectedList{

@@ -74,6 +74,32 @@ impl Checker {
             }
         }
 
+        // Go initializeTypeChecker：UMD 全局（export as namespace）并入
+        // globals（first-in-wins，仅外部模块声明文件可产生）
+        for file in &self.files {
+            if file.external_module_indicator.is_none() {
+                continue;
+            }
+            let symbol_map = self.program.symbol_map();
+            let Some(file_sym) = symbol_map.symbol_of(&file.node).cloned() else {
+                continue;
+            };
+            for (name, sym) in file_sym.exports.entries.iter() {
+                let is_umd_alias = sym.declarations.iter().any(|d| {
+                    d.kind == tsox_frontend::ast::SyntaxKind::NamespaceExportDeclaration
+                });
+                if !is_umd_alias {
+                    continue;
+                }
+                match self.globals.get(name) {
+                    Some(_) => {}
+                    None => {
+                        self.globals.insert(name.clone(), Arc::clone(sym));
+                    }
+                }
+            }
+        }
+
         for file in &self.files {
             for aug_name in &file.module_augmentations {
                 let Some(module_node) = aug_name.parent.clone() else {

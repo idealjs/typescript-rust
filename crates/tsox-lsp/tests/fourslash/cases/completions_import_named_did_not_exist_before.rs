@@ -12,5 +12,6 @@ export function Test2() {}
 import { Test2 } from "./a";
 t/**/"#;
     let mut s = Session::new_for_test("completionsImport_named_didNotExistBefore", content);
+    fourslash::go_to_marker(&mut s, "");
     // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

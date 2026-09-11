@@ -46,5 +46,6 @@ export const d1: number;
 /**/"#;
     let mut s = Session::new_for_test("autoImportProvider_wildcardExports1", content);
     // TODO: f.MarkTestAsStradaServer()
+    fourslash::go_to_marker(&mut s, "");
     // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

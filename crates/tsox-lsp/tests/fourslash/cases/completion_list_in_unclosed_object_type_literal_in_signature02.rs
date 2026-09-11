@@ -10,6 +10,7 @@ fn completion_list_in_unclosed_object_type_literal_in_signature02() {
 
 declare function foo<TString, TNumber>(obj: I<TString, TNumber>): { str: TStr/*1*/"#;
     let mut s = Session::new_for_test("completionListInUnclosedObjectTypeLiteralInSignature02", content);
+    fourslash::go_to_marker(&mut s, "1");
     // TODO: f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
     // TODO: }
 }

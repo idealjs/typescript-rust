@@ -11,5 +11,6 @@ declare module "*.css" {
 // @Filename: /index.ts
 import style/**/"#;
     let mut s = Session::new_with_capabilities(content, None);
+    fourslash::go_to_marker(&mut s, "");
     // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

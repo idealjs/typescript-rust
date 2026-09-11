@@ -14,5 +14,6 @@ class Slider extends React.Component {
     handleChange = () => 10;
 }"#;
     let mut s = Session::new_for_test("completionEntryForClassMembers_StaticWhenBaseTypeIsNotResolved", content);
+    fourslash::go_to_marker(&mut s, "");
     // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

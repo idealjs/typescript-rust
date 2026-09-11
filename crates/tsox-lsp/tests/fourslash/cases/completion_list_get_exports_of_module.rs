@@ -10,5 +10,6 @@ fn completion_list_get_exports_of_module() {
 
 let y: /**/"#;
     let mut s = Session::new_for_test("completionList_getExportsOfModule", content);
+    fourslash::go_to_marker(&mut s, "");
     // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

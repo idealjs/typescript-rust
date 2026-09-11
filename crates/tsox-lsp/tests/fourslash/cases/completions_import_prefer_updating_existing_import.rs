@@ -16,5 +16,6 @@ import { x } from "./deep/module/why/you/want/this/path";
 
 y/**/"#;
     let mut s = Session::new_for_test("completionsImport_preferUpdatingExistingImport", content);
+    fourslash::go_to_marker(&mut s, "");
     // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

@@ -12,5 +12,6 @@ const foo: Foo = {
     /*m*/
 }"#;
     let mut s = Session::new_with_capabilities(content, None);
+    fourslash::go_to_marker(&mut s, "m");
     // TODO: f.VerifyCompletions(t, "m", &fourslash.CompletionsExpectedList{
 }

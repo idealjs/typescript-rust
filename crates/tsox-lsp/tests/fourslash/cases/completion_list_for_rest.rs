@@ -12,5 +12,6 @@ let t: Gen;
 var { x, ...rest } = t;
 rest./*1*/x;"#;
     let mut s = Session::new_for_test("completionListForRest", content);
+    fourslash::go_to_marker(&mut s, "1");
     // TODO: f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
 }

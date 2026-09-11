@@ -25,7 +25,9 @@ let opt3 = <Opt propx={100} optional /*4*/ />;
 let opt4 = <Opt wrong /*5*/ />;"#;
     let mut s = Session::new_for_test("tsxCompletion12", content);
     // TODO: f.VerifyCompletions(t, []string{"1", "5"}, &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "2");
     // TODO: f.VerifyCompletions(t, "2", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "3");
     // TODO: f.VerifyCompletions(t, "3", &fourslash.CompletionsExpectedList{
     fourslash::verify_completions_exact_at(&mut s, Some("4"), &["propString"]);
 }

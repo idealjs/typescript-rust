@@ -12,5 +12,6 @@ module.exports = foo();
 import mod from "./mod"
 mod./**/"#;
     let mut s = Session::new_for_test("javascriptModules21", content);
+    fourslash::go_to_marker(&mut s, "");
     // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

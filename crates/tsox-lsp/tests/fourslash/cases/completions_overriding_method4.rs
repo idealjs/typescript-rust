@@ -28,5 +28,6 @@ class Gossip extends Secret {
     /*a*/
 }"#;
     let mut s = Session::new_for_test("completionsOverridingMethod4", content);
+    fourslash::go_to_marker(&mut s, "a");
     // TODO: f.VerifyCompletions(t, "a", &fourslash.CompletionsExpectedList{
 }

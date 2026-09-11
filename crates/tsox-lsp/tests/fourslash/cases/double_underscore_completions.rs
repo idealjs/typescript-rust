@@ -12,5 +12,6 @@ function MyObject(){
 var instance = new MyObject();
 instance./*1*/"#;
     let mut s = Session::new_for_test("doubleUnderscoreCompletions", content);
+    fourslash::go_to_marker(&mut s, "1");
     // TODO: f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
 }

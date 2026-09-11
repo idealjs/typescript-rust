@@ -9,5 +9,6 @@ fn completion_jsx_no_crash() {
 "#;
     let mut s = Session::new_for_test("completionJsxNoCrash", content);
     // TODO: // The assertion here is simply "does not crash/panic".
+    fourslash::go_to_marker(&mut s, "1");
     // TODO: f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
 }

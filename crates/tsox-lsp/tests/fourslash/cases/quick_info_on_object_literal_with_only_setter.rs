@@ -13,6 +13,7 @@ fn quick_info_on_object_literal_with_only_setter() {
 var /*3*/point = makePoint(2);
 point./*2*/x = 30;"#;
     let mut s = Session::new_for_test("quickInfoOnObjectLiteralWithOnlySetter", content);
+    fourslash::go_to_marker(&mut s, "2");
     // TODO: f.VerifyCompletions(t, "2", &fourslash.CompletionsExpectedList{
     fourslash::verify_quick_info_at(&mut s, "1", "function makePoint(x: number): {\n    b: number;\n    x: number;\n}", "");
     fourslash::verify_quick_info_at(&mut s, "2", "(property) x: number", "");

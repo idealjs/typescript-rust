@@ -57,10 +57,14 @@ f4({
     /*6*/
 })"#;
     let mut s = Session::new_for_test("completionsObjectLiteralWithPartialConstraint", content);
+    fourslash::go_to_marker(&mut s, "1");
     // TODO: f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "2");
     // TODO: f.VerifyCompletions(t, "2", &fourslash.CompletionsExpectedList{
     fourslash::verify_completions_exact_at(&mut s, Some("3"), &["b", "g", "r"]);
+    fourslash::go_to_marker(&mut s, "4");
     // TODO: f.VerifyCompletions(t, "4", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "5");
     // TODO: f.VerifyCompletions(t, "5", &fourslash.CompletionsExpectedList{
     fourslash::verify_completions_exact_at(&mut s, Some("6"), &["a"]);
 }

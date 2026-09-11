@@ -10,5 +10,6 @@ var x: Array<numb/*a*/;
 1 < Infini/*c*/;"#;
     let mut s = Session::new_for_test("tsxCompletionNonTagLessThan", content);
     // TODO: f.VerifyCompletions(t, []string{"a", "b"}, &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "c");
     // TODO: f.VerifyCompletions(t, "c", &fourslash.CompletionsExpectedList{
 }

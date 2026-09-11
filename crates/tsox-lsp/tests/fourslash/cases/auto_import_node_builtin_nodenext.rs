@@ -18,5 +18,6 @@ declare module "node:fs" { export * from "fs"; }
 // @Filename: /index.ts
 existsSync/**/"#;
     let mut s = Session::new_for_test("autoImportNodeBuiltinNodenext", content);
+    fourslash::go_to_marker(&mut s, "");
     // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

@@ -31,10 +31,13 @@ const divide = 1 //*divide*/"#;
     let mut s = Session::new_for_test("completionsTriggerCharacter", content);
     fourslash::verify_completions_include_exclude_at(&mut s, Some("tag"), &["param"], &[]);
     fourslash::verify_completions_empty_at(&mut s, Some("comment"));
+    fourslash::go_to_marker(&mut s, "openQuote");
     // TODO: f.VerifyCompletions(t, "openQuote", &fourslash.CompletionsExpectedList{
     fourslash::verify_completions_empty_at(&mut s, Some("closeQuote"));
+    fourslash::go_to_marker(&mut s, "openSingleQuote");
     // TODO: f.VerifyCompletions(t, "openSingleQuote", &fourslash.CompletionsExpectedList{
     fourslash::verify_completions_empty_at(&mut s, Some("closeSingleQuote"));
+    fourslash::go_to_marker(&mut s, "openTemplate");
     // TODO: f.VerifyCompletions(t, "openTemplate", &fourslash.CompletionsExpectedList{
     fourslash::verify_completions_empty_at(&mut s, Some("closeTemplate"));
     fourslash::verify_completions_empty_at(&mut s, Some("quoteInComment"));

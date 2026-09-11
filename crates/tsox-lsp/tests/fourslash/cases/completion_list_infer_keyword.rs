@@ -7,5 +7,6 @@ fn completion_list_infer_keyword() {
    ? U
    : never;"#;
     let mut s = Session::new_for_test("completionListInferKeyword", content);
+    fourslash::go_to_marker(&mut s, "");
     // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

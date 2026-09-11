@@ -14,5 +14,6 @@ class Foo implements IFoo {
     /**/
 }"#;
     let mut s = Session::new_for_test("completionsOverridingMethod9", content);
+    fourslash::go_to_marker(&mut s, "");
     // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

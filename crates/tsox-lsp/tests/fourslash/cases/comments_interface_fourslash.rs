@@ -81,6 +81,7 @@ i3_i.nc/*45q*/_l(/*45*/10);"#;
     fourslash::verify_quick_info_at(&mut s, "6", "var i2_i: i2", "");
     fourslash::verify_quick_info_at(&mut s, "7", "var i2_i_x: number", "");
     fourslash::verify_quick_info_at(&mut s, "8", "(property) i2.x: number", "this is x");
+    fourslash::go_to_marker(&mut s, "8");
     // TODO: f.VerifyCompletions(t, "8", &fourslash.CompletionsExpectedList{
     fourslash::verify_quick_info_at(&mut s, "9", "var i2_i_foo: (b: number) => string", "");
     fourslash::verify_quick_info_at(&mut s, "10", "(property) i2.foo: (b: number) => string", "this is foo");
@@ -122,13 +123,18 @@ i3_i.nc/*45q*/_l(/*45*/10);"#;
     fourslash::go_to_marker(&mut s, "33");
     // TODO: f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{DocComment: ""})
     fourslash::verify_quick_info_at(&mut s, "33q", "(method) i2.nc_fnfoo(b: number): string", "");
+    fourslash::go_to_marker(&mut s, "34");
     // TODO: f.VerifyCompletions(t, "34", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "34i");
     // TODO: f.VerifyCompletions(t, "34i", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "36");
     // TODO: f.VerifyCompletions(t, "36", &fourslash.CompletionsExpectedList{
     fourslash::verify_quick_info_at(&mut s, "40q", "var i3_i: i3", "");
+    fourslash::go_to_marker(&mut s, "40");
     // TODO: f.VerifyCompletions(t, "40", &fourslash.CompletionsExpectedList{
     fourslash::go_to_marker(&mut s, "41");
     // TODO: f.VerifyQuickInfoIs(t, "(method) i3.f(a: number): string", "Function i3 f")
+    fourslash::go_to_marker(&mut s, "41");
     // TODO: f.VerifyCompletions(t, "41", &fourslash.CompletionsExpectedList{
     fourslash::go_to_marker(&mut s, "42");
     // TODO: f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{DocComment: "Function i3 f", Parameter

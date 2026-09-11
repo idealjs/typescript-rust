@@ -8,5 +8,6 @@ let foo = 5 as const /*1*/
 /*2*/"#;
     let mut s = Session::new_for_test("completionAfterNewline2", content);
     fourslash::verify_completions_empty_at(&mut s, Some("1"));
+    fourslash::go_to_marker(&mut s, "2");
     // TODO: f.VerifyCompletions(t, "2", &fourslash.CompletionsExpectedList{
 }

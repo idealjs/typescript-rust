@@ -10,5 +10,6 @@ fn member_list_on_this_in_class_with_privates() {
    private privProp = 0;
 }"#;
     let mut s = Session::new_for_test("memberListOnThisInClassWithPrivates", content);
+    fourslash::go_to_marker(&mut s, "");
     // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

@@ -9,5 +9,6 @@ fn completions_js_property_assignment() {
 const x = { p: "x"  };
 x.p = "[|/**/|]";"#;
     let mut s = Session::new_for_test("completionsJsPropertyAssignment", content);
+    fourslash::go_to_marker(&mut s, "");
     // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

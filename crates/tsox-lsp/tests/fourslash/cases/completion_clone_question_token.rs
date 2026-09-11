@@ -17,5 +17,6 @@ class Foo extends Bar<TwoKeys> {
     /**/
 }"#;
     let mut s = Session::new_for_test("completionCloneQuestionToken", content);
+    fourslash::go_to_marker(&mut s, "");
     // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

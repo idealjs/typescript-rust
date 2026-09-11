@@ -15,5 +15,6 @@ export class Clazz<T extends Options> {
 
 new Clazz({ /*1*/ })"#;
     let mut s = Session::new_for_test("completionsWithOptionalPropertiesGenericConstructor", content);
+    fourslash::go_to_marker(&mut s, "1");
     // TODO: f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
 }

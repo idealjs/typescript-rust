@@ -26,5 +26,6 @@ function b(my2) {
     let mut s = Session::new_for_test("jsdocTypedefTag2", content);
     // TODO: f.MarkTestAsStradaServer()
     fourslash::verify_completions_include_exclude_at(&mut s, Some("1"), &["charAt"], &[]);
+    fourslash::go_to_marker(&mut s, "2");
     // TODO: f.VerifyCompletions(t, "2", &fourslash.CompletionsExpectedList{
 }

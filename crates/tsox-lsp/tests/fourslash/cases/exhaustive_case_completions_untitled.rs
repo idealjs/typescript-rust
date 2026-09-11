@@ -16,6 +16,7 @@ switch (e) {
 }"#;
     let mut s = Session::new_with_capabilities(content, None);
     // TODO: // Locally defined enum should provide exhaustive case completions in untitled file
+    fourslash::go_to_marker(&mut s, "");
     // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }
 
@@ -37,6 +38,7 @@ switch (direction) {
 }"#;
     let mut s = Session::new_with_capabilities(content, None);
     // TODO: // Globally declared enum should provide exhaustive case completions in untitled file
+    fourslash::go_to_marker(&mut s, "");
     // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }
 
@@ -51,6 +53,7 @@ switch (status) {
 }"#;
     let mut s = Session::new_with_capabilities(content, None);
     // TODO: // String literal unions should provide exhaustive case completions in untitled file
+    fourslash::go_to_marker(&mut s, "");
     // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }
 
@@ -70,5 +73,6 @@ switch (s) {
     case/**/
 }"#;
     let mut s = Session::new_with_capabilities(content, None);
+    fourslash::go_to_marker(&mut s, "");
     // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

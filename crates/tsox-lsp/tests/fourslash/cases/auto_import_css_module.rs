@@ -21,5 +21,6 @@ myClass/**/
 "#;
     let mut s = Session::new_for_test("autoImportCssModule", content);
     // TODO: // Verify auto-import completions don't panic when importing from .css module augmentation
+    fourslash::go_to_marker(&mut s, "");
     // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

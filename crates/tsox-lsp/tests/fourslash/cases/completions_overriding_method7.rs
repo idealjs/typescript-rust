@@ -14,6 +14,7 @@ abstract class Derived extends Base {
     abstract /*a*/
 }"#;
     let mut s = Session::new_for_test("completionsOverridingMethod7", content);
+    fourslash::go_to_marker(&mut s, "a");
     // TODO: f.VerifyCompletions(t, "a", &fourslash.CompletionsExpectedList{
     // TODO: f.VerifyApplyCodeActionFromCompletion(t, new("a"), &fourslash.ApplyCodeActionFromCompletionOptions{
 }

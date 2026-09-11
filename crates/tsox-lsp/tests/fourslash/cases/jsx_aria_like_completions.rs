@@ -14,5 +14,6 @@ declare namespace JSX {
 }
 const a = <div {...{}} /*1*/></div>;"#;
     let mut s = Session::new_for_test("jsxAriaLikeCompletions", content);
+    fourslash::go_to_marker(&mut s, "1");
     // TODO: f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
 }

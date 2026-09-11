@@ -36,25 +36,33 @@ var new/*14*/Var = new extMod.m1.m2./*15*/c();"#;
     let mut s = Session::new_for_test("commentsExternalModulesFourslash", content);
     fourslash::go_to_file(&mut s, "commentsExternalModules_file0.ts");
     fourslash::verify_quick_info_at(&mut s, "1", "namespace m1", "Namespace comment");
+    fourslash::go_to_marker(&mut s, "2");
     // TODO: f.VerifyCompletions(t, "2", &fourslash.CompletionsExpectedList{
     fourslash::go_to_marker(&mut s, "3");
     // TODO: f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{DocComment: "foo's comment"})
     fourslash::verify_quick_info_at(&mut s, "3q", "function foo(): number", "foo's comment");
+    fourslash::go_to_marker(&mut s, "4");
     // TODO: f.VerifyCompletions(t, "4", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "5");
     // TODO: f.VerifyCompletions(t, "5", &fourslash.CompletionsExpectedList{
     fourslash::go_to_marker(&mut s, "6");
     // TODO: f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{DocComment: "exported function"})
     fourslash::verify_quick_info_at(&mut s, "6q", "function m1.fooExport(): number", "exported function");
     fourslash::verify_quick_info_at(&mut s, "7", "var myvar: m1.m2.c", "");
+    fourslash::go_to_marker(&mut s, "8");
     // TODO: f.VerifyCompletions(t, "8", &fourslash.CompletionsExpectedList{
     fourslash::go_to_file(&mut s, "commentsExternalModules_file1.ts");
     fourslash::verify_quick_info_at(&mut s, "9", "import extMod = require(\"./commentsExternalModules_file0\")", "This is on import declaration");
+    fourslash::go_to_marker(&mut s, "10");
     // TODO: f.VerifyCompletions(t, "10", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "11");
     // TODO: f.VerifyCompletions(t, "11", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "12");
     // TODO: f.VerifyCompletions(t, "12", &fourslash.CompletionsExpectedList{
     fourslash::go_to_marker(&mut s, "13");
     // TODO: f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{DocComment: "exported function"})
     fourslash::verify_quick_info_at(&mut s, "13q", "function extMod.m1.fooExport(): number", "exported function");
     fourslash::verify_quick_info_at(&mut s, "14", "var newVar: extMod.m1.m2.c", "");
+    fourslash::go_to_marker(&mut s, "15");
     // TODO: f.VerifyCompletions(t, "15", &fourslash.CompletionsExpectedList{
 }

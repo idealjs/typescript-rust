@@ -18,6 +18,8 @@ fn completion_list_invalid_member_names() {
 x[|./*a*/|];
 x["[|/*b*/|]"];"##;
     let mut s = Session::new_for_test("completionListInvalidMemberNames", content);
+    fourslash::go_to_marker(&mut s, "b");
     // TODO: f.VerifyCompletions(t, "b", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "a");
     // TODO: f.VerifyCompletions(t, "a", &fourslash.CompletionsExpectedList{
 }

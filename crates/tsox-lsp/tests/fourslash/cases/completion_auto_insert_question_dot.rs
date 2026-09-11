@@ -13,5 +13,6 @@ interface User {
 declare const user: User;
 user.address[|./**/|]"#;
     let mut s = Session::new_for_test("completionAutoInsertQuestionDot", content);
+    fourslash::go_to_marker(&mut s, "");
     // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

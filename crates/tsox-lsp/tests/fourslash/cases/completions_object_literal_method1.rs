@@ -35,9 +35,12 @@ const p: Prop = {
     /*d*/
 }"#;
     let mut s = Session::new_with_capabilities(content, None);
+    fourslash::go_to_marker(&mut s, "a");
     // TODO: f.VerifyCompletions(t, "a", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "b");
     // TODO: f.VerifyCompletions(t, "b", &fourslash.CompletionsExpectedList{
     // TODO: {
+    fourslash::go_to_marker(&mut s, "d");
     // TODO: f.VerifyCompletions(t, "d", &fourslash.CompletionsExpectedList{
     // TODO: {
     // TODO: {

@@ -10,5 +10,6 @@ type List3<T1> = /*3*/;"#;
     let mut s = Session::new_for_test("completionListInTypeParameterOfTypeAlias1", content);
     // TODO: f.VerifyCompletions(t, []string{"0", "1"}, nil)
     fourslash::verify_completions_include_exclude_at(&mut s, Some("2"), &["T"], &[]);
+    fourslash::go_to_marker(&mut s, "3");
     // TODO: f.VerifyCompletions(t, "3", &fourslash.CompletionsExpectedList{
 }

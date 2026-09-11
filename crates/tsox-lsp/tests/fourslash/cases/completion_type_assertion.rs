@@ -7,5 +7,6 @@ fn completion_type_assertion() {
 var x = 'something'
 var y = this as/*1*/"#;
     let mut s = Session::new_for_test("completionTypeAssertion", content);
+    fourslash::go_to_marker(&mut s, "1");
     // TODO: f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
 }

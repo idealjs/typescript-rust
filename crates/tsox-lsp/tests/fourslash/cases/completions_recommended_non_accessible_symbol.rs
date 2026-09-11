@@ -9,5 +9,6 @@ fn completions_recommended_non_accessible_symbol() {
 }
 f()(new /**/);"#;
     let mut s = Session::new_for_test("completionsRecommended_nonAccessibleSymbol", content);
+    fourslash::go_to_marker(&mut s, "");
     // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

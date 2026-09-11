@@ -7,5 +7,6 @@ fn completion_list_class_members_with_super_class_from_unknown_namespace() {
     /**/
 }"#;
     let mut s = Session::new_for_test("completionListClassMembersWithSuperClassFromUnknownNamespace", content);
+    fourslash::go_to_marker(&mut s, "");
     // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

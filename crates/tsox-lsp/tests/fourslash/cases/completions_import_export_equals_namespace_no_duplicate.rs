@@ -17,5 +17,6 @@ declare module "a/alias" {
 import * as a from "a";
 /**/foo;"#;
     let mut s = Session::new_for_test("completionsImport_exportEqualsNamespace_noDuplicate", content);
+    fourslash::go_to_marker(&mut s, "");
     // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

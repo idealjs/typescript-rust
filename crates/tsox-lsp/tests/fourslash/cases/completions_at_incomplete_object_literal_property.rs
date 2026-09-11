@@ -10,5 +10,6 @@ f({
 });
 declare function f(options: { abc?: number, xyz?: string }): void;"#;
     let mut s = Session::new_for_test("completionsAtIncompleteObjectLiteralProperty", content);
+    fourslash::go_to_marker(&mut s, "");
     // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

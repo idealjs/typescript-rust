@@ -13,5 +13,6 @@ declare module "./a" {
 // @Filename: /user.ts
 /**/"#;
     let mut s = Session::new_for_test("completionsImport_augmentation", content);
+    fourslash::go_to_marker(&mut s, "");
     // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

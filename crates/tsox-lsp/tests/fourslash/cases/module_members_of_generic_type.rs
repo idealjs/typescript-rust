@@ -8,5 +8,6 @@ fn module_members_of_generic_type() {
 }
 var r = M./**/;"#;
     let mut s = Session::new_for_test("moduleMembersOfGenericType", content);
+    fourslash::go_to_marker(&mut s, "");
     // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

@@ -23,7 +23,10 @@ create('hello', { props: { /*1*/ } })
 create('goodbye', { props: { /*2*/ } })
 create('component-one', { props: { /*3*/ } });"#;
     let mut s = Session::new_for_test("completionsGenericIndexedAccess4", content);
+    fourslash::go_to_marker(&mut s, "1");
     // TODO: f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "2");
     // TODO: f.VerifyCompletions(t, "2", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "3");
     // TODO: f.VerifyCompletions(t, "3", &fourslash.CompletionsExpectedList{
 }

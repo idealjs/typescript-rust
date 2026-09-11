@@ -15,10 +15,15 @@ const baz2: Baz = { x: 0, z: '/*4*/' };
 const baz3: Baz = { x: 0, y: 1, z: '/*5*/' };
 const baz4: Baz = { x: 2, y: 1, z: '/*6*/' };"#;
     let mut s = Session::new_for_test("completionsUnionStringLiteralProperty", content);
+    fourslash::go_to_marker(&mut s, "1");
     // TODO: f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "2");
     // TODO: f.VerifyCompletions(t, "2", &fourslash.CompletionsExpectedList{
     fourslash::verify_completions_include_exclude_at(&mut s, Some("3"), &["a", "b", "c", "d"], &[]);
+    fourslash::go_to_marker(&mut s, "4");
     // TODO: f.VerifyCompletions(t, "4", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "5");
     // TODO: f.VerifyCompletions(t, "5", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "6");
     // TODO: f.VerifyCompletions(t, "6", &fourslash.CompletionsExpectedList{
 }

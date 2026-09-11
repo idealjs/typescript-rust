@@ -10,5 +10,6 @@ export const foo = { bar: 'baz' };
 import { foo } from './a';
 const test = foo./*1*/"#;
     let mut s = Session::new_for_test("basicMultifileCompletions", content);
+    fourslash::go_to_marker(&mut s, "1");
     // TODO: f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
 }

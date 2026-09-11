@@ -11,5 +11,6 @@ fn completions_deprecated_tags() {
 }
 o./**/"#;
     let mut s = Session::new_for_test("completionsDeprecatedTags", content);
+    fourslash::go_to_marker(&mut s, "");
     // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

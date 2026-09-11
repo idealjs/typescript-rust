@@ -11,5 +11,6 @@ const foo: T = {
     async f/**/
 }"#;
     let mut s = Session::new_for_test("completionsObjectLiteralMethod6", content);
+    fourslash::go_to_marker(&mut s, "");
     // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

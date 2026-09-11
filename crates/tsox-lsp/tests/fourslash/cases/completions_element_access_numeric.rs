@@ -18,5 +18,6 @@ type Tup = [
 declare var x: Tup;
 x[|./**/|]"#;
     let mut s = Session::new_for_test("completionsElementAccessNumeric", content);
+    fourslash::go_to_marker(&mut s, "");
     // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

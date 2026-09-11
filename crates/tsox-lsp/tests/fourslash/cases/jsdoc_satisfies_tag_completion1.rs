@@ -13,5 +13,6 @@ fn jsdoc_satisfies_tag_completion1() {
  */
 const t = { a: 1 };"#;
     let mut s = Session::new_for_test("jsdocSatisfiesTagCompletion1", content);
+    fourslash::go_to_marker(&mut s, "");
     // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

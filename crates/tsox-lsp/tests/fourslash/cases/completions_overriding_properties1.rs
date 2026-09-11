@@ -13,5 +13,6 @@ class Sub extends Base {
     /*a*/
 }"#;
     let mut s = Session::new_for_test("completionsOverridingProperties1", content);
+    fourslash::go_to_marker(&mut s, "a");
     // TODO: f.VerifyCompletions(t, "a", &fourslash.CompletionsExpectedList{
 }

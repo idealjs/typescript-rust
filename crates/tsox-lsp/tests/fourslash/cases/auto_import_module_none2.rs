@@ -12,6 +12,7 @@ export const x: number;
 // @Filename: /index.ts
  x/**/"#;
     let mut s = Session::new_for_test("autoImportModuleNone2", content);
+    fourslash::go_to_marker(&mut s, "");
     // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
     // TODO: f.ReplaceLine(t, 0, "import { x } from 'dep'; x;")
     // TODO: f.VerifyNonSuggestionDiagnostics(t, nil)

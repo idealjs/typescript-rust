@@ -18,5 +18,6 @@ import * as foo from './file1';
 export default foo.b;"#;
     let mut s = Session::new_for_test("completionsImport_default_reExport", content);
     fourslash::go_to_marker(&mut s, "");
+    fourslash::go_to_marker(&mut s, "");
     // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

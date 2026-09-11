@@ -21,6 +21,8 @@ declare function create<T extends keyof CustomElements>(name: T, options: Option
 create('component-one', { props: { /*1*/ } });
 create('component-two', { props: { /*2*/ } });"#;
     let mut s = Session::new_for_test("completionsGenericIndexedAccess3", content);
+    fourslash::go_to_marker(&mut s, "1");
     // TODO: f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "2");
     // TODO: f.VerifyCompletions(t, "2", &fourslash.CompletionsExpectedList{
 }

@@ -10,6 +10,7 @@ export default 1;
 // @Filename: /index.ts
 someMo/**/"#;
     let mut s = Session::new_for_test("completionsImport_defaultAndNamedConflict", content);
+    fourslash::go_to_marker(&mut s, "");
     // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
     // TODO: f.VerifyApplyCodeActionFromCompletion(t, new(""), &fourslash.ApplyCodeActionFromCompletionOptions{
 }

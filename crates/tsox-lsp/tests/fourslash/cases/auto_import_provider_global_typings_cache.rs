@@ -23,5 +23,6 @@ fn auto_import_provider_global_typings_cache() {
 BrowserRouter/**/"#;
     let mut s = Session::new_for_test("autoImportProvider_globalTypingsCache", content);
     // TODO: f.MarkTestAsStradaServer()
+    fourslash::go_to_marker(&mut s, "");
     // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

@@ -11,5 +11,6 @@ var C3 = class D<T, /*3*/U>{}
 var C4 = class D<T extends /*4*/>{}"#;
     let mut s = Session::new_for_test("completionListInTypeParameterOfClassExpression1", content);
     // TODO: f.VerifyCompletions(t, []string{"0", "1", "2", "3"}, nil)
+    fourslash::go_to_marker(&mut s, "4");
     // TODO: f.VerifyCompletions(t, "4", &fourslash.CompletionsExpectedList{
 }

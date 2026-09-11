@@ -14,5 +14,6 @@ class HSub extends HBase {
     [|f/*h*/|]
 }"#;
     let mut s = Session::new_for_test("completionsOverridingMethod1", content);
+    fourslash::go_to_marker(&mut s, "h");
     // TODO: f.VerifyCompletions(t, "h", &fourslash.CompletionsExpectedList{
 }

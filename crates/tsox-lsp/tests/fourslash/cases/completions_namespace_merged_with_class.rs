@@ -17,5 +17,6 @@ let x: D./*type*/;
 D./*value*/"#;
     let mut s = Session::new_for_test("completionsNamespaceMergedWithClass", content);
     fourslash::verify_completions_exact_at(&mut s, Some("type"), &["T"]);
+    fourslash::go_to_marker(&mut s, "value");
     // TODO: f.VerifyCompletions(t, "value", &fourslash.CompletionsExpectedList{
 }

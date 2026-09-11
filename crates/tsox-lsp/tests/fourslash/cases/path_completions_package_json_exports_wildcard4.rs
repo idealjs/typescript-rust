@@ -27,6 +27,7 @@ export const one = 0;
 // @Filename: /a.mts
 import { } from "foo//**/";"#;
     let mut s = Session::new_for_test("pathCompletionsPackageJsonExportsWildcard4", content);
+    fourslash::go_to_marker(&mut s, "");
     // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
     fourslash::insert(&mut s, "foo/");
     // TODO: f.VerifyCompletions(t, nil, &fourslash.CompletionsExpectedList{

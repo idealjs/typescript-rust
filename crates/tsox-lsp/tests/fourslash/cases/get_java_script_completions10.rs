@@ -11,5 +11,6 @@ fn get_java_script_completions10() {
  */
 function f() { this./**/ }"#;
     let mut s = Session::new_for_test("getJavaScriptCompletions10", content);
+    fourslash::go_to_marker(&mut s, "");
     // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

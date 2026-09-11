@@ -7,5 +7,6 @@ fn member_list_on_constructor_type() {
 var f: new () => void;
 f./*1*/"#;
     let mut s = Session::new_for_test("memberListOnConstructorType", content);
+    fourslash::go_to_marker(&mut s, "1");
     // TODO: f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
 }

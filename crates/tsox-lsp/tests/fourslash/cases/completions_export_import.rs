@@ -13,5 +13,6 @@ declare global {
 export import foo = N.foo;
 /**/"#;
     let mut s = Session::new_for_test("completionsExportImport", content);
+    fourslash::go_to_marker(&mut s, "");
     // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

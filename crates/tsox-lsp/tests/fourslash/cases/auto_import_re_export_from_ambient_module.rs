@@ -21,6 +21,7 @@ export * from "fs";
 access/**/"#;
     let mut s = Session::new_for_test("autoImportReExportFromAmbientModule", content);
     // TODO: f.MarkTestAsStradaServer()
+    fourslash::go_to_marker(&mut s, "");
     // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
     // TODO: f.VerifyApplyCodeActionFromCompletion(t, new(""), &fourslash.ApplyCodeActionFromCompletionOptions{
 }

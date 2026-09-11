@@ -29,11 +29,14 @@ var new/*9*/Var = new extMod.m1.m2./*10*/c();"#;
     let mut s = Session::new_for_test("commentsImportDeclaration", content);
     fourslash::verify_quick_info_at(&mut s, "2", "namespace m1", "NamespaceComment");
     fourslash::verify_quick_info_at(&mut s, "3", "import extMod = require(\"./commentsImportDeclaration_file0\")", "Import declaration");
+    fourslash::go_to_marker(&mut s, "6");
     // TODO: f.VerifyCompletions(t, "6", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "7");
     // TODO: f.VerifyCompletions(t, "7", &fourslash.CompletionsExpectedList{
     fourslash::go_to_marker(&mut s, "8");
     // TODO: f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{DocComment: "exported function"})
     fourslash::verify_quick_info_at(&mut s, "8q", "function extMod.m1.fooExport(): number", "exported function");
     fourslash::verify_quick_info_at(&mut s, "9", "var newVar: extMod.m1.m2.c", "");
+    fourslash::go_to_marker(&mut s, "10");
     // TODO: f.VerifyCompletions(t, "10", &fourslash.CompletionsExpectedList{
 }

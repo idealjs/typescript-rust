@@ -13,5 +13,6 @@ declare class Poltergeist implements Ghost {
     /*b*/
 }"#;
     let mut s = Session::new_for_test("completionsOverridingMethod3", content);
+    fourslash::go_to_marker(&mut s, "b");
     // TODO: f.VerifyCompletions(t, "b", &fourslash.CompletionsExpectedList{
 }

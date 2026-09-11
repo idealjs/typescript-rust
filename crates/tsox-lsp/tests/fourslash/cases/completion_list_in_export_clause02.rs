@@ -11,5 +11,6 @@ declare module "M2" {
     export { /**/ } from "M1"
 }"#;
     let mut s = Session::new_for_test("completionListInExportClause02", content);
+    fourslash::go_to_marker(&mut s, "");
     // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

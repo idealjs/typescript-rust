@@ -9,6 +9,7 @@ export default function foo() {}
 // @Filename: /b.ts
 f/**/;"#;
     let mut s = Session::new_for_test("completionsImport_default_didNotExistBefore", content);
+    fourslash::go_to_marker(&mut s, "");
     // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
     // TODO: f.VerifyApplyCodeActionFromCompletion(t, new(""), &fourslash.ApplyCodeActionFromCompletionOptions{
 }

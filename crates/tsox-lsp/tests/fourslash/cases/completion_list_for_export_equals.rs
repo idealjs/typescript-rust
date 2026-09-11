@@ -14,5 +14,6 @@ declare namespace Foo {
 // @Filename: /a.ts
 import { /**/ } from "foo";"#;
     let mut s = Session::new_for_test("completionListForExportEquals", content);
+    fourslash::go_to_marker(&mut s, "");
     // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

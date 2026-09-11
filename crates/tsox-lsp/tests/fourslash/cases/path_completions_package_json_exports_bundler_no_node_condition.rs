@@ -21,5 +21,6 @@ export const index = 0;
 // @Filename: /index.ts
 import { } from "foo//**/";"#;
     let mut s = Session::new_for_test("pathCompletionsPackageJsonExportsBundlerNoNodeCondition", content);
+    fourslash::go_to_marker(&mut s, "");
     // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

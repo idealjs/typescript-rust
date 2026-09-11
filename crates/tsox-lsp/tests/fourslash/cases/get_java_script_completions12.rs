@@ -27,7 +27,9 @@ convert(1, "")./*3*/
  */
 var test1 = function(x) { return x./*4*/ }, test2 = function(a) { return a./*5*/ };"#;
     let mut s = Session::new_for_test("getJavaScriptCompletions12", content);
+    fourslash::go_to_marker(&mut s, "1");
     // TODO: f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
     // TODO: f.VerifyCompletions(t, []string{"2", "3", "4"}, &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "5");
     // TODO: f.VerifyCompletions(t, "5", &fourslash.CompletionsExpectedList{
 }

@@ -73,20 +73,36 @@ function fn16() {
     return <Foo something={false} [|onC/*16*/|]="" foo />
 }"#;
     let mut s = Session::new_with_capabilities(content, None);
+    fourslash::go_to_marker(&mut s, "1");
     // TODO: f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "2");
     // TODO: f.VerifyCompletions(t, "2", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "3");
     // TODO: f.VerifyCompletions(t, "3", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "4");
     // TODO: f.VerifyCompletions(t, "4", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "5");
     // TODO: f.VerifyCompletions(t, "5", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "6");
     // TODO: f.VerifyCompletions(t, "6", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "7");
     // TODO: f.VerifyCompletions(t, "7", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "8");
     // TODO: f.VerifyCompletions(t, "8", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "9");
     // TODO: f.VerifyCompletions(t, "9", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "10");
     // TODO: f.VerifyCompletions(t, "10", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "11");
     // TODO: f.VerifyCompletions(t, "11", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "12");
     // TODO: f.VerifyCompletions(t, "12", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "13");
     // TODO: f.VerifyCompletions(t, "13", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "14");
     // TODO: f.VerifyCompletions(t, "14", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "15");
     // TODO: f.VerifyCompletions(t, "15", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "16");
     // TODO: f.VerifyCompletions(t, "16", &fourslash.CompletionsExpectedList{
 }

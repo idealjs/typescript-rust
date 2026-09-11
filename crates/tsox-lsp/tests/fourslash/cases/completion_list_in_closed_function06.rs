@@ -12,5 +12,6 @@ function foo(x: string, y: number, z: boolean) {
     }
 }"#;
     let mut s = Session::new_for_test("completionListInClosedFunction06", content);
+    fourslash::go_to_marker(&mut s, "1");
     // TODO: f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
 }

@@ -24,5 +24,6 @@ f("component-one", {
     }]
 })"#;
     let mut s = Session::new_for_test("completionsGenericIndexedAccess5", content);
+    fourslash::go_to_marker(&mut s, "");
     // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

@@ -46,8 +46,11 @@ function foo2(aOrb) {
 var x = fo/*15*/o2;"#;
     let mut s = Session::new_for_test("commentsVariables", content);
     fourslash::verify_quick_info_at(&mut s, "1", "var myVariable: number", "This is my variable");
+    fourslash::go_to_marker(&mut s, "2");
     // TODO: f.VerifyCompletions(t, "2", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "3");
     // TODO: f.VerifyCompletions(t, "3", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "4");
     // TODO: f.VerifyCompletions(t, "4", &fourslash.CompletionsExpectedList{
     fourslash::go_to_marker(&mut s, "5");
     // TODO: f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{DocComment: "foos comment"})
@@ -55,6 +58,7 @@ var x = fo/*15*/o2;"#;
     fourslash::go_to_marker(&mut s, "6");
     // TODO: f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{DocComment: "fooVar comment"})
     fourslash::verify_quick_info_at(&mut s, "6q", "var fooVar: () => void", "fooVar comment");
+    fourslash::go_to_marker(&mut s, "7");
     // TODO: f.VerifyCompletions(t, "7", &fourslash.CompletionsExpectedList{
     fourslash::go_to_marker(&mut s, "8");
     // TODO: f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{DocComment: "foos comment"})
@@ -63,7 +67,9 @@ var x = fo/*15*/o2;"#;
     // TODO: f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{DocComment: "fooVar comment"})
     fourslash::verify_quick_info_at(&mut s, "9q", "var fooVar: () => void", "fooVar comment");
     fourslash::verify_quick_info_at(&mut s, "9aq", "var fooVar: () => void", "fooVar comment");
+    fourslash::go_to_marker(&mut s, "10");
     // TODO: f.VerifyCompletions(t, "10", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "11");
     // TODO: f.VerifyCompletions(t, "11", &fourslash.CompletionsExpectedList{
     fourslash::verify_quick_info_at(&mut s, "12", "var fooVar: () => void", "fooVar comment");
     fourslash::verify_quick_info_at(&mut s, "13", "var fooVar: () => void", "fooVar comment");

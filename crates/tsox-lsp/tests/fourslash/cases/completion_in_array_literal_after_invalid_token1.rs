@@ -8,5 +8,6 @@ fn completion_in_array_literal_after_invalid_token1() {
 };
 "#;
     let mut s = Session::new_for_test("completionInArrayLiteralAfterInvalidToken1", content);
+    fourslash::go_to_marker(&mut s, "m1");
     // TODO: f.VerifyCompletions(t, "m1", &fourslash.CompletionsExpectedList{
 }

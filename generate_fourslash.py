@@ -196,6 +196,16 @@ def translate_func(name, body, file_stem):
                     f"({rust_var}, None);")
             has_session = True
             continue
+        if stmt.startswith("f.VerifyCompletions(t, ") and not match_verify_completions(stmt):
+            # 复杂 VerifyCompletions 形态不可译，但首个参数若是 marker 名，
+            # Go 侧会先 GoToMarker 定位光标——后续 Insert 依赖该语义
+            inner = stmt[len("f.VerifyCompletions(t, "):-1]
+            first = split_top_commas(inner)[0].strip() if split_top_commas(inner) else ""
+            if re.fullmatch(r'"(?:[^"\\]|\\.)*"', first):
+                marker = first[1:-1]
+                lines.append(f'fourslash::go_to_marker(&mut s, "{marker}");')
+            lines.append(f"// TODO: {stmt.splitlines()[0][:100]}")
+            continue
         m = match_verify_completions(stmt)
         if m is not None:
             kind, marker, labels = m

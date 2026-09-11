@@ -9,6 +9,7 @@ export const helperFunc = () => {};
 helper/**/"#;
     let mut s = Session::new_for_test("importModuleSpecifierPreferenceShortest", content);
     // TODO: f.Configure(t, lsutil.UserPreferences{
+    fourslash::go_to_marker(&mut s, "");
     // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
     // TODO: f.BaselineAutoImportsCompletions(t, []string{""})
 }
@@ -21,6 +22,7 @@ export const helperFunc = () => {};
 helper/**/"#;
     let mut s = Session::new_for_test("importModuleSpecifierPreferenceProjectRelative", content);
     // TODO: f.Configure(t, lsutil.UserPreferences{
+    fourslash::go_to_marker(&mut s, "");
     // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
     // TODO: f.BaselineAutoImportsCompletions(t, []string{""})
 }
@@ -33,6 +35,7 @@ export const helperFunc = () => {};
 helper/**/"#;
     let mut s = Session::new_for_test("importModuleSpecifierPreferenceRelative", content);
     // TODO: f.Configure(t, lsutil.UserPreferences{
+    fourslash::go_to_marker(&mut s, "");
     // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
     // TODO: f.BaselineAutoImportsCompletions(t, []string{""})
 }
@@ -57,6 +60,7 @@ export const helperFunc = () => {};
 helper/**/"#;
     let mut s = Session::new_for_test("importModuleSpecifierPreferenceProjectRelativeWithPaths", content);
     // TODO: f.Configure(t, lsutil.UserPreferences{
+    fourslash::go_to_marker(&mut s, "");
     // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
     // TODO: f.BaselineAutoImportsCompletions(t, []string{""})
 }
@@ -78,6 +82,7 @@ export const helperFunc = () => {};
 helper/**/"#;
     let mut s = Session::new_for_test("importModuleSpecifierPreferenceNonRelative", content);
     // TODO: f.Configure(t, lsutil.UserPreferences{
+    fourslash::go_to_marker(&mut s, "");
     // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
     // TODO: f.BaselineAutoImportsCompletions(t, []string{""})
 }

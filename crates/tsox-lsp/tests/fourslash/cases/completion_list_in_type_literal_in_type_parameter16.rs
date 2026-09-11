@@ -33,5 +33,6 @@ b<{/*3*/}>;"#;
     fourslash::verify_completions_unsorted_at(&mut s, Some("0"), &["one", "two"]);
     fourslash::verify_completions_unsorted_at(&mut s, Some("1"), &["one", "two"]);
     fourslash::verify_completions_unsorted_at(&mut s, Some("2"), &["one", "two", "three", "four"]);
+    fourslash::go_to_marker(&mut s, "3");
     // TODO: f.VerifyCompletions(t, "3", &fourslash.CompletionsExpectedList{
 }

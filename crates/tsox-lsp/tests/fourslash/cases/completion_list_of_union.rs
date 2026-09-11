@@ -9,6 +9,8 @@ interface I { a: number; }
 function f(...args: Array<I | I[]>) {}
 f({ /*f*/ });"#;
     let mut s = Session::new_for_test("completionListOfUnion", content);
+    fourslash::go_to_marker(&mut s, "x");
     // TODO: f.VerifyCompletions(t, "x", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "f");
     // TODO: f.VerifyCompletions(t, "f", &fourslash.CompletionsExpectedList{
 }
