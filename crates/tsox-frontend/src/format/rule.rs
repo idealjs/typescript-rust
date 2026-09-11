@@ -1,12 +1,13 @@
 //! Go format/rule.go 的移植：规则结构与动作/旗标位掩码。
+//! 规则表在运行时构建（rules.rs::get_all_rules），故使用拥有式数据。
 
 use super::rule_context::FormattingContext;
 use crate::ast::SyntaxKind;
 
-pub(crate) type ContextPredicate = fn(&FormattingContext) -> bool;
+pub(crate) type ContextPredicate = fn(&mut FormattingContext) -> bool;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub(crate) struct RuleAction(u16);
+pub(crate) struct RuleAction(pub(crate) u16);
 
 impl RuleAction {
     pub(crate) const NONE: Self = Self(0);
@@ -20,9 +21,8 @@ impl RuleAction {
 
     pub(crate) const STOP_ACTION: Self =
         Self(Self::STOP_PROCESSING_SPACE_ACTIONS.0 | Self::STOP_PROCESSING_TOKEN_ACTIONS.0);
-    pub(crate) const MODIFY_SPACE_ACTION: Self = Self(
-        Self::INSERT_SPACE.0 | Self::INSERT_NEW_LINE.0 | Self::DELETE_SPACE.0,
-    );
+    pub(crate) const MODIFY_SPACE_ACTION: Self =
+        Self(Self::INSERT_SPACE.0 | Self::INSERT_NEW_LINE.0 | Self::DELETE_SPACE.0);
     pub(crate) const MODIFY_TOKEN_ACTION: Self =
         Self(Self::DELETE_TOKEN.0 | Self::INSERT_TRAILING_SEMICOLON.0);
 
@@ -40,47 +40,68 @@ pub(crate) enum RuleFlags {
     CanDeleteNewLines,
 }
 
-#[derive(Clone, Copy)]
+#[derive(Clone)]
 pub(crate) struct RuleImpl {
-    pub(crate) context: &'static [ContextPredicate],
+    pub(crate) debug_name: &'static str,
+    pub(crate) context: Vec<ContextPredicate>,
     pub(crate) action: RuleAction,
     pub(crate) flags: RuleFlags,
 }
 
-impl RuleImpl {
-    pub(crate) fn action(&self) -> RuleAction {
-        self.action
-    }
-    pub(crate) fn flags(&self) -> RuleFlags {
-        self.flags
-    }
-    pub(crate) fn context(&self) -> &'static [ContextPredicate] {
-        self.context
-    }
-}
-
-#[derive(Clone, Copy)]
+#[derive(Clone)]
 pub(crate) struct TokenRange {
-    pub(crate) tokens: &'static [SyntaxKind],
-    /// Go isSpecific：具体 token 集合（vs any 的全量排除集）；
-    /// 匹配语义相同（contains），仅影响调试
-    pub(crate) is_specific: bool,
+    pub(crate) tokens: Vec<SyntaxKind>,
 }
 
-#[derive(Clone, Copy)]
+impl TokenRange {
+    pub(crate) fn contains(&self, kind: SyntaxKind) -> bool {
+        self.tokens.contains(&kind)
+    }
+}
+
+#[derive(Clone)]
 pub(crate) struct RuleSpec {
     pub(crate) left_token_range: TokenRange,
     pub(crate) right_token_range: TokenRange,
-    pub(crate) rule: &'static RuleImpl,
+    pub(crate) rule: RuleImpl,
 }
 
-pub(crate) fn rule(
-    left: TokenRange,
-    right: TokenRange,
-    context: &'static [ContextPredicate],
-    action: RuleAction,
-    flags: RuleFlags,
-    rule: &'static RuleImpl,
-) -> RuleSpec {
-    RuleSpec { left_token_range: left, right_token_range: right, rule }
+pub(crate) struct RuleBuilder {
+    pub(crate) debug_name: &'static str,
+}
+
+impl RuleBuilder {
+    /// Go rule()：left/right 接受 Kind、Vec<Kind> 或 tokenRange（此处由
+    /// 调用点先归一为 TokenRange）
+    pub(crate) fn rule(
+        self,
+        left: TokenRange,
+        right: TokenRange,
+        context: Vec<ContextPredicate>,
+        action: RuleAction,
+        flags: RuleFlags,
+    ) -> RuleSpec {
+        RuleSpec {
+            left_token_range: left,
+            right_token_range: right,
+            rule: RuleImpl {
+                debug_name: self.debug_name,
+                context,
+                action,
+                flags,
+            },
+        }
+    }
+}
+
+pub(crate) fn r(name: &'static str) -> RuleBuilder {
+    RuleBuilder { debug_name: name }
+}
+
+pub(crate) fn kind_range(kind: SyntaxKind) -> TokenRange {
+    TokenRange { tokens: vec![kind] }
+}
+
+pub(crate) fn kinds_range(kinds: &[SyntaxKind]) -> TokenRange {
+    TokenRange { tokens: kinds.to_vec() }
 }
