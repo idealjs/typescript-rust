@@ -10,6 +10,6 @@ fn formatting_after_chained_fat_arrow() {
 };"#;
     let mut s = Session::new_for_test("formattingAfterChainedFatArrow", content);
     fourslash::go_to_marker(&mut s, "");
-    // TODO: f.FormatDocument(t, "")
+    fourslash::format_document(&mut s, "");
     // TODO: f.VerifyCurrentLineContent(t, `
 }

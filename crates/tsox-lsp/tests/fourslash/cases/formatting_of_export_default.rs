@@ -8,7 +8,7 @@ fn formatting_of_export_default() {
 }
 /*2*/export        default        function        bar() { }"#;
     let mut s = Session::new_for_test("formattingOfExportDefault", content);
-    // TODO: f.FormatDocument(t, "")
+    fourslash::format_document(&mut s, "");
     fourslash::go_to_marker(&mut s, "1");
     fourslash::verify_current_line_content(&mut s, r#"    export default class Test { }"#);
     fourslash::go_to_marker(&mut s, "2");

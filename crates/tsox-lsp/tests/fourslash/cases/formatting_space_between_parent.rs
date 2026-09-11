@@ -10,7 +10,7 @@ fn formatting_space_between_parent() {
     // TODO: opts180 := f.GetOptions()
     // TODO: opts180.FormatCodeSettings.InsertSpaceAfterOpeningAndBeforeClosingNonemptyParenthesis = core.TSTrue
     // TODO: f.Configure(t, opts180)
-    // TODO: f.FormatDocument(t, "")
+    fourslash::format_document(&mut s, "");
     fourslash::go_to_marker(&mut s, "1");
     fourslash::verify_current_line_content(&mut s, r#"foo( () => 1 );"#);
     fourslash::go_to_marker(&mut s, "2");

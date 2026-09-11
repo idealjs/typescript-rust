@@ -24,7 +24,7 @@ fn formatting_chaining_methods() {
     .toFixed(
         2);"#;
     let mut s = Session::new_for_test("formattingChainingMethods", content);
-    // TODO: f.FormatDocument(t, "")
+    fourslash::format_document(&mut s, "");
     fourslash::verify_current_file_content(&mut s, r#"z$ = this.store.select(this.fake())
     .ofType(
         'ACTION',

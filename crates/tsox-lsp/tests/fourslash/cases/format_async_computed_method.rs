@@ -7,7 +7,7 @@ fn format_async_computed_method() {
     /*method*/async [0]() { }
 }"#;
     let mut s = Session::new_for_test("formatAsyncComputedMethod", content);
-    // TODO: f.FormatDocument(t, "")
+    fourslash::format_document(&mut s, "");
     fourslash::go_to_marker(&mut s, "method");
     fourslash::verify_current_line_content(&mut s, r#"    async [0]() { }"#);
 }

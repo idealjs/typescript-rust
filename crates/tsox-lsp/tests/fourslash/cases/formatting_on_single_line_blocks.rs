@@ -8,7 +8,7 @@ fn formatting_on_single_line_blocks() {
 if (true)
 {}"#;
     let mut s = Session::new_for_test("formattingOnSingleLineBlocks", content);
-    // TODO: f.FormatDocument(t, "")
+    fourslash::format_document(&mut s, "");
     fourslash::verify_current_file_content(&mut s, r#"class C { }
 if (true) { }"#);
 }

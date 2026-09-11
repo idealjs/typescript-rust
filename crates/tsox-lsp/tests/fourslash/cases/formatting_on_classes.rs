@@ -86,7 +86,7 @@ fn formatting_on_classes() {
 /*66*/                                                                         {};
 /*END*/}"#;
     let mut s = Session::new_for_test("formattingOnClasses", content);
-    // TODO: f.FormatDocument(t, "")
+    fourslash::format_document(&mut s, "");
     fourslash::go_to_marker(&mut s, "1");
     fourslash::verify_current_line_content(&mut s, r#"class a {"#);
     fourslash::go_to_marker(&mut s, "2");

@@ -9,7 +9,7 @@ return[1];/*2*/
 return    ;/*3*/
 }"#;
     let mut s = Session::new_for_test("spaceAfterReturn", content);
-    // TODO: f.FormatDocument(t, "")
+    fourslash::format_document(&mut s, "");
     fourslash::go_to_marker(&mut s, "1");
     fourslash::verify_current_line_content(&mut s, r#"    return 1;"#);
     fourslash::go_to_marker(&mut s, "2");

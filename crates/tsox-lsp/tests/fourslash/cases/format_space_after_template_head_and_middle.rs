@@ -20,6 +20,6 @@ const a2 = ` + "`" + "#;
     // TODO: opts405 := f.GetOptions()
     // TODO: opts405.FormatCodeSettings.InsertSpaceAfterOpeningAndBeforeClosingTemplateStringBraces = core.TSTrue
     // TODO: f.Configure(t, opts405)
-    // TODO: f.FormatDocument(t, "")
+    fourslash::format_document(&mut s, "");
     // TODO: f.VerifyCurrentFileContent(t, "const a1 = `${ 1 }${ 1 }`;\n"+"const a2 = `\n"+`    ${ 1 }${ 1 }
 }

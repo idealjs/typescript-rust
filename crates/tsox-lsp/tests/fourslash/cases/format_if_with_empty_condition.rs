@@ -9,7 +9,7 @@ fn format_if_with_empty_condition() {
     // TODO: opts123 := f.GetOptions()
     // TODO: opts123.FormatCodeSettings.PlaceOpenBraceOnNewLineForControlBlocks = core.TSTrue
     // TODO: f.Configure(t, opts123)
-    // TODO: f.FormatDocument(t, "")
+    fourslash::format_document(&mut s, "");
     fourslash::verify_current_file_content(&mut s, r#"if ()
 {
 }"#);

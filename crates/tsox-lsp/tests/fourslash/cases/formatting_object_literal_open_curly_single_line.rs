@@ -13,7 +13,7 @@ let obj2 =
 { y: 10 };
 "#;
     let mut s = Session::new_for_test("formattingObjectLiteralOpenCurlySingleLine", content);
-    // TODO: f.FormatDocument(t, "")
+    fourslash::format_document(&mut s, "");
     fourslash::verify_current_file_content(&mut s, r#"
 let obj1 =
     { x: 10 };

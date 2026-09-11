@@ -8,5 +8,5 @@ fn format_v8_directive() {
 function foo() {}
 /*1*/%PrepareFunctionForOptimization(foo)/*2*/;"#;
     let mut s = Session::new_for_test("formatV8Directive", content);
-    // TODO: f.FormatSelection(t, "1", "2")
+    fourslash::format_selection(&mut s, "1", "2");
 }

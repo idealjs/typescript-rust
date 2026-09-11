@@ -11,7 +11,7 @@ fn format_tsx_multiline_attribute_string() {
     />
 );"#;
     let mut s = Session::new_for_test("formatTsxMultilineAttributeString", content);
-    // TODO: f.FormatDocument(t, "")
+    fourslash::format_document(&mut s, "");
     fourslash::verify_current_file_content(&mut s, r#"(
     <input
         value="x

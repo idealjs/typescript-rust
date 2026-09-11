@@ -8,5 +8,5 @@ interface I<T1, T2> {
     next: I</* */
 }"#;
     let mut s = Session::new_for_test("formatInTsxFiles", content);
-    // TODO: f.FormatDocument(t, "")
+    fourslash::format_document(&mut s, "");
 }

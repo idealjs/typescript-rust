@@ -20,7 +20,7 @@ type Complexed =
     Bar |
     Baz;"#;
     let mut s = Session::new_for_test("formatLiteralTypeInUnionOrIntersectionType", content);
-    // TODO: f.FormatDocument(t, "")
+    fourslash::format_document(&mut s, "");
     fourslash::verify_current_file_content(&mut s, r#"type NumberAndString = {
     a: number
 } & {

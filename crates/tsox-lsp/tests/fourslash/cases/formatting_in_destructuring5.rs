@@ -8,7 +8,7 @@ fn formatting_in_destructuring5() {
 /*2*/if (true)        [a, b] = [1, 2];
 /*3*/var a = [1, 2, 3].map(num => num) [0];"#;
     let mut s = Session::new_for_test("formattingInDestructuring5", content);
-    // TODO: f.FormatDocument(t, "")
+    fourslash::format_document(&mut s, "");
     fourslash::go_to_marker(&mut s, "1");
     fourslash::verify_current_line_content(&mut s, r#"if (false) [a, b] = [1, 2];"#);
     fourslash::go_to_marker(&mut s, "2");

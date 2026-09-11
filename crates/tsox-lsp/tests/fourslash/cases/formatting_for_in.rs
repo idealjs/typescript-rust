@@ -5,7 +5,7 @@ use tsox_lsp::fourslash::{self, Session};
 fn formatting_for_in() {
     let content = r#"/**/for (var i    in[]   )  {}"#;
     let mut s = Session::new_for_test("formattingForIn", content);
-    // TODO: f.FormatDocument(t, "")
+    fourslash::format_document(&mut s, "");
     fourslash::go_to_marker(&mut s, "");
     fourslash::verify_current_line_content(&mut s, r#"for (var i in []) { }"#);
 }

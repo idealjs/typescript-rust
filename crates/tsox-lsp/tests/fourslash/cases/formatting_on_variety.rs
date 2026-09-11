@@ -21,7 +21,7 @@ return e^f;/*10*/
 for (var i = 0   ; i < this.foo(); i++) {/*15*/
 }/*16*/"#;
     let mut s = Session::new_for_test("formattingOnVariety", content);
-    // TODO: f.FormatDocument(t, "")
+    fourslash::format_document(&mut s, "");
     fourslash::go_to_marker(&mut s, "1");
     fourslash::verify_current_line_content(&mut s, r#"function f(a, b, c, d) {"#);
     fourslash::go_to_marker(&mut s, "2");

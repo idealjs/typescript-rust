@@ -7,7 +7,7 @@ fn formatting_on_document_ready_function() {
 /*2*/    alert    (           'i am ready'  )   ;
 /*3*/           }                 );"#;
     let mut s = Session::new_for_test("formattingOnDocumentReadyFunction", content);
-    // TODO: f.FormatDocument(t, "")
+    fourslash::format_document(&mut s, "");
     fourslash::go_to_marker(&mut s, "1");
     fourslash::verify_current_line_content(&mut s, r#"$(document).ready(function() {"#);
     fourslash::go_to_marker(&mut s, "2");

@@ -14,7 +14,7 @@ fn formatting_on_empty_interface_literal() {
 /*5*/       y  :       (         )    =>    {     }   ;
 /*6*/                                                    }"#;
     let mut s = Session::new_for_test("formattingOnEmptyInterfaceLiteral", content);
-    // TODO: f.FormatDocument(t, "")
+    fourslash::format_document(&mut s, "");
     fourslash::go_to_marker(&mut s, "1");
     fourslash::verify_current_line_content(&mut s, r#"function foo(x: {}) { }"#);
     fourslash::go_to_marker(&mut s, "2");

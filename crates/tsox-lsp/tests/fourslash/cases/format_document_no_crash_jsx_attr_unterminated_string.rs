@@ -7,6 +7,6 @@ fn format_document_no_crash_jsx_attr_unterminated_string() {
 const x = <HangupButton customClass = 'ha
 "#;
     let mut s = Session::new_for_test("formatDocumentNoCrashJsxAttrUnterminatedString", content);
-    // TODO: f.FormatDocument(t, "")
+    fourslash::format_document(&mut s, "");
     fourslash::verify_current_file_content(&mut s, "const x = <HangupButton customClass= 'ha\n");
 }

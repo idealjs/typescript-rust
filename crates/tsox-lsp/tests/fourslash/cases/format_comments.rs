@@ -15,7 +15,7 @@ wow(
 // wua/*argument2*/
 );"#;
     let mut s = Session::new_for_test("formatComments", content);
-    // TODO: f.FormatDocument(t, "")
+    fourslash::format_document(&mut s, "");
     fourslash::go_to_marker(&mut s, "callChain1");
     fourslash::verify_current_line_content(&mut s, r#"    // wow"#);
     fourslash::go_to_marker(&mut s, "callChain2");

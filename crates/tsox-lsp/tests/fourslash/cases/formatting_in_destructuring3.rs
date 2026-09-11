@@ -9,7 +9,7 @@ fn formatting_in_destructuring3() {
 /*4*/} = {a: 1, b: 2};
 /*5*/const {a: c} = {a: 1, b: 2};"#;
     let mut s = Session::new_for_test("formattingInDestructuring3", content);
-    // TODO: f.FormatDocument(t, "")
+    fourslash::format_document(&mut s, "");
     fourslash::go_to_marker(&mut s, "1");
     fourslash::verify_current_line_content(&mut s, r#"const {"#);
     fourslash::go_to_marker(&mut s, "2");

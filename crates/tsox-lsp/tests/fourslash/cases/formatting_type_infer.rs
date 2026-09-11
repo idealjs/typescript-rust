@@ -21,7 +21,7 @@ fn formatting_type_infer() {
 /*L8*/  type   Bar  <  T  >   =   T   extends   {   a  :   (x  :  infer  U  ) =>   void  ,   b  :   (x  :   infer   U  )   =>   void   }    ?   U   :   never  ;
 "#;
     let mut s = Session::new_for_test("formattingTypeInfer", content);
-    // TODO: f.FormatDocument(t, "")
+    fourslash::format_document(&mut s, "");
     fourslash::go_to_marker(&mut s, "L1");
     fourslash::verify_current_line_content(&mut s, r#"type C<T> = T extends Array<infer U> ? U : never;"#);
     fourslash::go_to_marker(&mut s, "L2");

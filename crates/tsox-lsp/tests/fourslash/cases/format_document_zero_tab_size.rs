@@ -14,6 +14,6 @@ fn format_document_zero_tab_size() {
     // TODO: opts.FormatCodeSettings.IndentSize = 0
     // TODO: opts.FormatCodeSettings.ConvertTabsToSpaces = core.TSTrue
     // TODO: f.Configure(t, opts)
-    // TODO: f.FormatDocument(t, "")
+    fourslash::format_document(&mut s, "");
     fourslash::verify_current_file_content(&mut s, "function foo() {\nif (true) {\nvar x = 1;\n}\n}");
 }

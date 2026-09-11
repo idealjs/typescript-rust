@@ -9,7 +9,7 @@ fn formatting_await() {
     }
 }"#;
     let mut s = Session::new_for_test("formattingAwait", content);
-    // TODO: f.FormatDocument(t, "")
+    fourslash::format_document(&mut s, "");
     fourslash::verify_current_file_content(&mut s, r#"async function f() {
     for await (const x of g()) {
         console.log(x);

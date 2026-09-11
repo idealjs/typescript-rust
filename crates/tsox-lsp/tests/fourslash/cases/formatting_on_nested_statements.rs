@@ -9,7 +9,7 @@ fn formatting_on_nested_statements() {
 }/*2*/
 }"#;
     let mut s = Session::new_for_test("formattingOnNestedStatements", content);
-    // TODO: f.FormatSelection(t, "1", "2")
+    fourslash::format_selection(&mut s, "1", "2");
     fourslash::go_to_marker(&mut s, "1");
     fourslash::verify_current_line_content(&mut s, r#"    {"#);
     fourslash::go_to_marker(&mut s, "3");

@@ -8,7 +8,7 @@ fn formatting_q_mark() {
 /*2*/    foo?             <T>();
 }"#;
     let mut s = Session::new_for_test("formattingQMark", content);
-    // TODO: f.FormatDocument(t, "")
+    fourslash::format_document(&mut s, "");
     fourslash::go_to_marker(&mut s, "1");
     fourslash::verify_current_line_content(&mut s, r#"    foo?();"#);
     fourslash::go_to_marker(&mut s, "2");

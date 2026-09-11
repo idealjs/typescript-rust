@@ -12,7 +12,7 @@ fn formatting_space_before_close_paren() {
     // TODO: opts235 := f.GetOptions()
     // TODO: opts235.FormatCodeSettings.InsertSpaceAfterOpeningAndBeforeClosingNonemptyParenthesis = core.TSTrue
     // TODO: f.Configure(t, opts235)
-    // TODO: f.FormatDocument(t, "")
+    fourslash::format_document(&mut s, "");
     fourslash::go_to_marker(&mut s, "1");
     fourslash::verify_current_line_content(&mut s, r#"( {} );"#);
     fourslash::go_to_marker(&mut s, "2");
@@ -26,7 +26,7 @@ fn formatting_space_before_close_paren() {
     // TODO: opts674 := f.GetOptions()
     // TODO: opts674.FormatCodeSettings.InsertSpaceAfterOpeningAndBeforeClosingNonemptyParenthesis = core.TSFalse
     // TODO: f.Configure(t, opts674)
-    // TODO: f.FormatDocument(t, "")
+    fourslash::format_document(&mut s, "");
     fourslash::go_to_marker(&mut s, "1");
     fourslash::verify_current_line_content(&mut s, r#"({});"#);
     fourslash::go_to_marker(&mut s, "2");

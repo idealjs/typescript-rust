@@ -15,7 +15,7 @@ class C3 extends Array<string>{
 class C4 extends Number{
 }"#;
     let mut s = Session::new_for_test("formatSpaceAfterImplementsExtends", content);
-    // TODO: f.FormatDocument(t, "")
+    fourslash::format_document(&mut s, "");
     fourslash::verify_current_file_content(&mut s, r#"class C1 implements Array<string> {
 }
 

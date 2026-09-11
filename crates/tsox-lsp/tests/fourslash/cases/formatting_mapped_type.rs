@@ -7,7 +7,7 @@ fn formatting_mapped_type() {
 /*map*/   [   P   in   keyof    T  ]   :   T  [  P  ]
 };"#;
     let mut s = Session::new_for_test("formattingMappedType", content);
-    // TODO: f.FormatDocument(t, "")
+    fourslash::format_document(&mut s, "");
     fourslash::go_to_marker(&mut s, "generic");
     fourslash::verify_current_line_content(&mut s, r#"type t<T> = {"#);
     fourslash::go_to_marker(&mut s, "map");

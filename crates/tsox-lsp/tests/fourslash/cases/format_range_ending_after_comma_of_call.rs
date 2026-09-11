@@ -8,5 +8,5 @@ fn format_range_ending_after_comma_of_call() {
     "something else"
 );"#;
     let mut s = Session::new_for_test("formatRangeEndingAfterCommaOfCall", content);
-    // TODO: f.FormatSelection(t, "start", "end")
+    fourslash::format_selection(&mut s, "start", "end");
 }

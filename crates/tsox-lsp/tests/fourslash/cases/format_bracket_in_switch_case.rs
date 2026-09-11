@@ -9,7 +9,7 @@ switch (x) {
 }"#;
     let mut s = Session::new_for_test("formatBracketInSwitchCase", content);
     // TODO: f.MarkTestAsStradaServer()
-    // TODO: f.FormatDocument(t, "")
+    fourslash::format_document(&mut s, "");
     fourslash::verify_current_file_content(&mut s, r#"switch (x) {
     case []:
 }"#);

@@ -10,7 +10,7 @@ const x = (
 </a-b.c>
 );"#;
     let mut s = Session::new_for_test("formatJsxDottedTagName", content);
-    // TODO: f.FormatDocument(t, "")
+    fourslash::format_document(&mut s, "");
     fourslash::verify_current_file_content(&mut s, r#"const x = (
     <a-b.c>
         <a-b.c></a-b.c>

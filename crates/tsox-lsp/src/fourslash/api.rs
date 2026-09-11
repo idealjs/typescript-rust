@@ -219,3 +219,72 @@ fn strip_code_fence(text: &str) -> String {
     }
     t.to_string()
 }
+
+/// Go f.FormatDocument：请求格式化并把 TextEdits 应用到文件内容
+/// （TextEdits 按 range 从后往前应用，避免偏移漂移）
+pub fn format_document(s: &mut Session, filename: &str) {
+    let file = if filename.is_empty() { s.active_file.clone() } else { filename.to_string() };
+    let uri = uri_of(s, &file);
+    let service = s.service.as_ref().expect("无 LanguageService");
+    let options = crate::lsp::lsproto_lsp::FormattingOptions::default();
+    let edits = service.provide_format_document(&uri, &options);
+    apply_edits(s, &file, &edits);
+}
+
+/// Go f.FormatSelection：对选区（起止 marker 名）做格式化
+pub fn format_selection(s: &mut Session, start_marker: &str, end_marker: &str) {
+    let file = s.active_file.clone();
+    let start = s.marker(start_marker).position;
+    let end = s.marker(end_marker).position;
+    let uri = uri_of(s, &file);
+    let service = s.service.as_ref().expect("无 LanguageService");
+    let options = crate::lsp::lsproto_lsp::FormattingOptions::default();
+    let (line0, col0) = line_and_character(&s.file_content(&file), start);
+    let (line1, col1) = line_and_character(&s.file_content(&file), end);
+    let range = crate::lsp::lsproto_lsp::Range {
+        start: crate::lsp::lsproto_lsp::Position { line: line0, character: col0 },
+        end: crate::lsp::lsproto_lsp::Position { line: line1, character: col1 },
+    };
+    let edits = service.provide_format_document_range(&uri, &options, range);
+    apply_edits(s, &file, &edits);
+}
+
+fn apply_edits(s: &mut Session, file: &str, edits: &[crate::lsp::lsproto_lsp::TextEdit]) {
+    if edits.is_empty() {
+        return;
+    }
+    let content = s.file_content(file).to_string();
+    // LSP edits 通常已按位置排序；从后往前应用避免偏移漂移
+    let mut ranges: Vec<(usize, usize, &str)> = edits
+        .iter()
+        .map(|e| {
+            let content_len = content.len();
+            let start = line_col_to_offset(&content, e.range.start.line as usize, e.range.start.character as usize);
+            let end = line_col_to_offset(&content, e.range.end.line as usize, e.range.end.character as usize);
+            (start.min(content_len), end.min(content_len), e.new_text.as_str())
+        })
+        .collect();
+    ranges.sort_by_key(|(start, end, _)| (*end, std::cmp::Reverse(*start)));
+    let mut next = content.clone();
+    for (start, end, text) in ranges.iter().rev() {
+        let _ = text.len();
+        next.replace_range(start..end, text);
+    }
+    s.set_file_content(file, next);
+}
+
+fn line_col_to_offset(text: &str, line: usize, character: usize) -> usize {
+    let mut offset = 0usize;
+    let mut cur_line = 0usize;
+    for (i, b) in text.as_bytes().iter().enumerate() {
+        if cur_line == line {
+            offset = i;
+            // character 按 UTF-16 码元计；ASCII 场景逐字节即可
+            return (offset + character).min(text.len());
+        }
+        if *b == b'\n' {
+            cur_line += 1;
+        }
+    }
+    text.len()
+}

@@ -6,6 +6,6 @@ fn format_tsx() {
     let content = r#"// @Filename: foo.tsx
 <div><p>'</p><p>{function(){return 1;}]}</p></div>"#;
     let mut s = Session::new_for_test("formatTsx", content);
-    // TODO: f.FormatDocument(t, "")
+    fourslash::format_document(&mut s, "");
     fourslash::verify_current_file_content(&mut s, r#"<div><p>'</p><p>{function() { return 1; }]}</p></div>"#);
 }

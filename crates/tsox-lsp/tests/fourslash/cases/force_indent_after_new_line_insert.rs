@@ -14,7 +14,7 @@ function g()
 return 0;
 }}"#;
     let mut s = Session::new_for_test("forceIndentAfterNewLineInsert", content);
-    // TODO: f.FormatDocument(t, "")
+    fourslash::format_document(&mut s, "");
     fourslash::verify_current_file_content(&mut s, r#"function f1() { return 0; }
 function f2() {
     return 0;

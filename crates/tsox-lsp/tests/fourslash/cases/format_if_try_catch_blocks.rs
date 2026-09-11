@@ -16,7 +16,7 @@ catch (e) {
     // TODO: opts187 := f.GetOptions()
     // TODO: opts187.FormatCodeSettings.PlaceOpenBraceOnNewLineForControlBlocks = core.TSTrue
     // TODO: f.Configure(t, opts187)
-    // TODO: f.FormatDocument(t, "")
+    fourslash::format_document(&mut s, "");
     fourslash::verify_current_file_content(&mut s, r#"try
 {
 }

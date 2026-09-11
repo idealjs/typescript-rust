@@ -19,7 +19,7 @@ fn formatting_multiline_comments_with_tabs1() {
 	}
 }"#;
     let mut s = Session::new_for_test("formattingMultilineCommentsWithTabs1", content);
-    // TODO: f.FormatDocument(t, "")
+    fourslash::format_document(&mut s, "");
     fourslash::go_to_marker(&mut s, "1");
     fourslash::verify_current_line_content(&mut s, r#"            /* when current checkbox has focus, Firefox has changed check state already"#);
     fourslash::go_to_marker(&mut s, "2");

@@ -11,7 +11,7 @@ fn formatting_nested_scopes() {
 /*6*/}]).run(My.App.setup);
 /*7*/      }"#;
     let mut s = Session::new_for_test("formattingNestedScopes", content);
-    // TODO: f.FormatDocument(t, "")
+    fourslash::format_document(&mut s, "");
     fourslash::go_to_marker(&mut s, "1");
     fourslash::verify_current_line_content(&mut s, r#"namespace My.App {"#);
     fourslash::go_to_marker(&mut s, "2");

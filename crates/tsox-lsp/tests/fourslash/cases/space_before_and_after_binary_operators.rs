@@ -13,7 +13,7 @@ let s = 'foo';
 /*6*/for (var i = 0,ii = 2; i < s.length; ii++,i++) {
 }"#;
     let mut s = Session::new_for_test("spaceBeforeAndAfterBinaryOperators", content);
-    // TODO: f.FormatDocument(t, "")
+    fourslash::format_document(&mut s, "");
     fourslash::go_to_marker(&mut s, "1");
     fourslash::verify_current_line_content(&mut s, r#"(i++, i++);"#);
     fourslash::go_to_marker(&mut s, "2");

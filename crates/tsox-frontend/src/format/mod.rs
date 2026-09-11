@@ -3,9 +3,10 @@ pub(crate) mod rule_context;
 pub(crate) mod rule_context_2;
 pub(crate) mod rules;
 pub(crate) mod scanner;
+pub(crate) mod span_worker;
 
 pub(crate) use crate::ast::SourceFile;
-pub(crate) use rule_context::Tristate;
+pub use rule_context::Tristate;
 pub(crate) use crate::ast::node::Node;
 pub(crate) use std::sync::Arc;
 
@@ -59,7 +60,7 @@ pub fn get_default_format_code_settings() -> FormatCodeSettings {
             new_line_character: "\n".to_string(),
             convert_tabs_to_spaces: true,
             indent_style: IndentStyle::Smart,
-            trim_trailing_whitespace: false,
+            trim_trailing_whitespace: true,
         },
         insert_space_before_type_annotation: false,
         insert_space_before_and_after_binary_operators: true,
@@ -112,8 +113,9 @@ pub struct TextChange {
     pub new_text: String,
 }
 
-pub fn format_document(_ctx: &FormatContext, _source_file: &SourceFile) -> Vec<TextChange> {
-    Vec::new()
+pub fn format_document(ctx: &FormatContext, source_file: &Arc<SourceFile>) -> Vec<TextChange> {
+    let _ = ctx;
+    span_worker::format_document(source_file, get_default_format_code_settings())
 }
 
 pub fn format_selection(

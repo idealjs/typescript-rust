@@ -12,7 +12,7 @@ fn multiline_comment_before_open_brace() {
 function a() {
     /* %^ */ }/*3*/"#;
     let mut s = Session::new_for_test("multilineCommentBeforeOpenBrace", content);
-    // TODO: f.FormatDocument(t, "")
+    fourslash::format_document(&mut s, "");
     fourslash::go_to_marker(&mut s, "1");
     fourslash::verify_current_line_content(&mut s, r#"function test() /* %^ */ {"#);
     fourslash::go_to_marker(&mut s, "2");

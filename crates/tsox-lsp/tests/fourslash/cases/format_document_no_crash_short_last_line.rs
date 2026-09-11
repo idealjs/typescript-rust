@@ -5,5 +5,5 @@ use tsox_lsp::fourslash::{self, Session};
 fn format_document_no_crash_short_last_line() {
     let content = r#"type X = {\n\tb}"#;
     let mut s = Session::new_for_test("formatDocumentNoCrashShortLastLine", content);
-    // TODO: f.FormatDocument(t, "")
+    fourslash::format_document(&mut s, "");
 }

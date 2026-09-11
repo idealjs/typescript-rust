@@ -39,7 +39,7 @@ a++;/*19*/
     // TODO: opts874 := f.GetOptions()
     // TODO: opts874.FormatCodeSettings.InsertSpaceAfterSemicolonInForStatements = core.TSTrue
     // TODO: f.Configure(t, opts874)
-    // TODO: f.FormatDocument(t, "")
+    fourslash::format_document(&mut s, "");
     fourslash::go_to_marker(&mut s, "1");
     fourslash::verify_current_line_content(&mut s, r#"function f() {"#);
     fourslash::go_to_marker(&mut s, "2");

@@ -9,7 +9,7 @@ void 0;"#;
     // TODO: opts110 := f.GetOptions()
     // TODO: opts110.FormatCodeSettings.Semicolons = "remove"
     // TODO: f.Configure(t, opts110)
-    // TODO: f.FormatSelection(t, "1", "2")
+    fourslash::format_selection(&mut s, "1", "2");
     fourslash::verify_current_file_content(&mut s, r#"var x = 1
 void 0;"#);
 }

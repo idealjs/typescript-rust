@@ -26,7 +26,7 @@ for(let j = 0; j < 10; j++) ++i;
 for(let j = 0; j < 10; j++) --i;
 "#;
     let mut s = Session::new_for_test("spaceAfterStatementConditions", content);
-    // TODO: f.FormatDocument(t, "")
+    fourslash::format_document(&mut s, "");
     fourslash::verify_current_file_content(&mut s, r#"let i = 0;
 
 if (i < 0) ++i;

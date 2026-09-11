@@ -71,6 +71,6 @@ const t = s<
       >`abc${1}def` ;
 "#;
     let mut s = Session::new_for_test("genericsFormattingMultiline", content);
-    // TODO: f.FormatDocument(t, "")
+    fourslash::format_document(&mut s, "");
     // TODO: f.VerifyCurrentFileContent(t, "\nclass Foo<\n    T1 extends unknown,\n    T2\n> {\n    public method
 }

@@ -61,7 +61,7 @@ fn formatting_on_statements_with_no_semicolon() {
             while (0)/*67*/
          while (0)/*68*/"#;
     let mut s = Session::new_for_test("formattingOnStatementsWithNoSemicolon", content);
-    // TODO: f.FormatDocument(t, "")
+    fourslash::format_document(&mut s, "");
     fourslash::go_to_marker(&mut s, "1");
     fourslash::verify_current_line_content(&mut s, r#"do {"#);
     fourslash::go_to_marker(&mut s, "2");

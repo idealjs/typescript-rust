@@ -40,7 +40,7 @@ function foo()/*8*/
 var x :/*12*/
 {};/*13*/"#;
     let mut s = Session::new_for_test("formattingOfMultilineBlockConstructs", content);
-    // TODO: f.FormatDocument(t, "")
+    fourslash::format_document(&mut s, "");
     fourslash::go_to_marker(&mut s, "1");
     fourslash::verify_current_line_content(&mut s, r#"namespace InternalModule {"#);
     fourslash::go_to_marker(&mut s, "2");

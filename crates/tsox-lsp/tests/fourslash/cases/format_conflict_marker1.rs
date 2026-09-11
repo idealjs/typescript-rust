@@ -11,7 +11,7 @@ v = 2;
 >>>>>>> Branch - a
 }"#;
     let mut s = Session::new_for_test("formatConflictMarker1", content);
-    // TODO: f.FormatDocument(t, "")
+    fourslash::format_document(&mut s, "");
     fourslash::verify_current_file_content(&mut s, r#"class C {
 <<<<<<< HEAD
 v = 1;

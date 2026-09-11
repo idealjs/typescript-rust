@@ -21,7 +21,7 @@ pub(crate) enum FormatRequestKind {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
-pub(crate) enum Tristate {
+pub enum Tristate {
     #[default]
     Unknown,
     True,

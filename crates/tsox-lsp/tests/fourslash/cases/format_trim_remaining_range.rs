@@ -10,7 +10,7 @@ fn format_trim_remaining_range() {
 */"#;
     let mut s = Session::new_for_test("formatTrimRemainingRange", content);
     // TODO: f.MarkTestAsStradaServer()
-    // TODO: f.FormatDocument(t, "")
+    fourslash::format_document(&mut s, "");
     fourslash::verify_current_file_content(&mut s, r#";
 /*
  

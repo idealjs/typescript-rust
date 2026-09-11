@@ -9,7 +9,7 @@ fn format_selection_single_property() {
 /*2*/    b: 2
 })"#;
     let mut s = Session::new_for_test("formatSelectionSingleProperty", content);
-    // TODO: f.FormatSelection(t, "1", "2")
+    fourslash::format_selection(&mut s, "1", "2");
     fourslash::verify_current_file_content(&mut s, r#"console.log({
 }, {
     a: 1,

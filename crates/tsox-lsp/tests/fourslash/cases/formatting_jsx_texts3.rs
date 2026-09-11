@@ -12,7 +12,7 @@ return (
 )
 }"#;
     let mut s = Session::new_for_test("formattingJsxTexts3", content);
-    // TODO: f.FormatDocument(t, "")
+    fourslash::format_document(&mut s, "");
     fourslash::verify_current_file_content(&mut s, r#"function foo() {
     const bar = "Oh no";
 

@@ -48,7 +48,7 @@ fn formatting_decorators() {
 /*32*/function test2(@decorator38()@decorator39()param) {};
 }"#;
     let mut s = Session::new_for_test("formattingDecorators", content);
-    // TODO: f.FormatDocument(t, "")
+    fourslash::format_document(&mut s, "");
     fourslash::go_to_marker(&mut s, "1");
     fourslash::verify_current_line_content(&mut s, r#"@decorator1"#);
     fourslash::go_to_marker(&mut s, "2");

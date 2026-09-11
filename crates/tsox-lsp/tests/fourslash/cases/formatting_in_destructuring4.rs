@@ -11,7 +11,7 @@ fn formatting_in_destructuring4() {
     // TODO: opts198 := f.GetOptions()
     // TODO: opts198.FormatCodeSettings.InsertSpaceAfterOpeningAndBeforeClosingNonemptyBraces = core.TSFalse
     // TODO: f.Configure(t, opts198)
-    // TODO: f.FormatDocument(t, "")
+    fourslash::format_document(&mut s, "");
     fourslash::go_to_marker(&mut s, "1");
     fourslash::verify_current_line_content(&mut s, r#"const {"#);
     fourslash::go_to_marker(&mut s, "2");

@@ -7,7 +7,7 @@ fn format_selection_with_trivia3() {
 /*begin*/// test comment
 /*end*/}"#;
     let mut s = Session::new_for_test("formatSelectionWithTrivia3", content);
-    // TODO: f.FormatSelection(t, "begin", "end")
+    fourslash::format_selection(&mut s, "begin", "end");
     fourslash::verify_current_file_content(&mut s, r#"if (true) {
     // test comment
 }"#);

@@ -10,9 +10,9 @@ fn format_try_catch() {
     }
 }"#;
     let mut s = Session::new_for_test("formatTryCatch", content);
-    // TODO: f.FormatDocument(t, "")
-    // TODO: f.FormatDocument(t, "")
-    // TODO: f.FormatDocument(t, "")
+    fourslash::format_document(&mut s, "");
+    fourslash::format_document(&mut s, "");
+    fourslash::format_document(&mut s, "");
     fourslash::go_to_marker(&mut s, "try");
     fourslash::verify_current_line_content(&mut s, r#"    try {"#);
     fourslash::go_to_marker(&mut s, "catch");

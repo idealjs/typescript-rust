@@ -17,7 +17,7 @@ const FormCheck: DynamicRefForwardingComponent<'input', FormCheckProps> =
 FormCheck.displayName = 'FormCheck';
 "#;
     let mut s = Session::new_for_test("formatInterfaceWithMissingBraceAndLaterTemplateString2", content);
-    // TODO: f.FormatDocument(t, "")
+    fourslash::format_document(&mut s, "");
     // TODO: f.VerifyCurrentFileContent(t, `interface FormCheckProps {
     // TODO: }
 }

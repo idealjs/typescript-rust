@@ -8,7 +8,7 @@ fn smart_indent_named_import() {
     list/*2*/
 } from '@bykov/basics';/*3*/"#;
     let mut s = Session::new_for_test("smartIndentNamedImport", content);
-    // TODO: f.FormatDocument(t, "")
+    fourslash::format_document(&mut s, "");
     fourslash::go_to_marker(&mut s, "0");
     fourslash::verify_current_line_content(&mut s, r#"import {"#);
     fourslash::go_to_marker(&mut s, "1");

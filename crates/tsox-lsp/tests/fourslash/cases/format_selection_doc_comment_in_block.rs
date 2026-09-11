@@ -16,7 +16,7 @@ while (true) {
  *//*4*/
 }"#;
     let mut s = Session::new_for_test("formatSelectionDocCommentInBlock", content);
-    // TODO: f.FormatSelection(t, "1", "2")
+    fourslash::format_selection(&mut s, "1", "2");
     fourslash::verify_current_file_content(&mut s, r#"{
     /**
      * Some doc comment
@@ -29,7 +29,7 @@ while (true) {
  * Some doc comment
  */
 }"#);
-    // TODO: f.FormatSelection(t, "3", "4")
+    fourslash::format_selection(&mut s, "3", "4");
     fourslash::verify_current_file_content(&mut s, r#"{
     /**
      * Some doc comment

@@ -16,7 +16,7 @@ var obj2 = obj ||
 }
 "#;
     let mut s = Session::new_for_test("formattingObjectLiteralOpenCurlyNewlineAssignment", content);
-    // TODO: f.FormatDocument(t, "")
+    fourslash::format_document(&mut s, "");
     fourslash::verify_current_file_content(&mut s, r#"
 var obj = {};
 obj =
@@ -32,7 +32,7 @@ var obj2 = obj ||
     // TODO: opts400 := f.GetOptions()
     // TODO: opts400.FormatCodeSettings.IndentMultiLineObjectLiteralBeginningOnBlankLine = core.TSTrue
     // TODO: f.Configure(t, opts400)
-    // TODO: f.FormatDocument(t, "")
+    fourslash::format_document(&mut s, "");
     fourslash::verify_current_file_content(&mut s, r#"
 var obj = {};
 obj =

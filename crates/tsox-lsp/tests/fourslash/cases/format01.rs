@@ -7,7 +7,7 @@ fn format01() {
 /**/namespace Default{var x= ( { } ) ;}"#;
     let mut s = Session::new_for_test("format01", content);
     // TODO: f.MarkTestAsStradaServer()
-    // TODO: f.FormatDocument(t, "")
+    fourslash::format_document(&mut s, "");
     fourslash::go_to_marker(&mut s, "");
     fourslash::verify_current_line_content(&mut s, r#"namespace Default { var x = ({}); }"#);
 }

@@ -41,7 +41,7 @@ const f =
   bar
           </div>"#;
     let mut s = Session::new_for_test("formattingJsxTexts2", content);
-    // TODO: f.FormatDocument(t, "")
+    fourslash::format_document(&mut s, "");
     fourslash::verify_current_file_content(&mut s, r#"const a = (
     <div>
         foo

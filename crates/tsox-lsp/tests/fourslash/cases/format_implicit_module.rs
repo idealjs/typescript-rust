@@ -7,7 +7,7 @@ fn format_implicit_module() {
 
        }"#;
     let mut s = Session::new_for_test("formatImplicitModule", content);
-    // TODO: f.FormatDocument(t, "")
+    fourslash::format_document(&mut s, "");
     // TODO: f.GoToBOF(t)
     fourslash::verify_current_line_content(&mut s, r#"export class A {"#);
     // TODO: f.GoToEOF(t)

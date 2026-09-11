@@ -7,7 +7,7 @@ fn formatting_object_literal() {
 "a": 1/**/
 }"#;
     let mut s = Session::new_for_test("formattingObjectLiteral", content);
-    // TODO: f.FormatDocument(t, "")
+    fourslash::format_document(&mut s, "");
     fourslash::go_to_marker(&mut s, "");
     fourslash::verify_current_line_content(&mut s, r#"    "a": 1"#);
 }

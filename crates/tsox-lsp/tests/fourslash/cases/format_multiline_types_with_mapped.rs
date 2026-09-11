@@ -39,7 +39,7 @@ const f = {
   [index: string]: string
 }"#;
     let mut s = Session::new_for_test("formatMultilineTypesWithMapped", content);
-    // TODO: f.FormatDocument(t, "")
+    fourslash::format_document(&mut s, "");
     fourslash::verify_current_file_content(&mut s, r#"type Z = 'z'
 type A = {
     a: 'a'

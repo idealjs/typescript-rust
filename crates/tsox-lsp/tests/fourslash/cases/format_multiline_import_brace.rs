@@ -8,7 +8,7 @@ fn format_multiline_import_brace() {
 	extname, joinPath } from '../base/resources.js';
 import { URI } from '../base/uri.js';"#;
     let mut s = Session::new_for_test("formatMultilineImportBrace", content);
-    // TODO: f.FormatDocument(t, "")
+    fourslash::format_document(&mut s, "");
     fourslash::verify_current_file_content(&mut s, r#"import {
     basename,
     extname, joinPath

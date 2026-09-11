@@ -7,6 +7,6 @@ fn format_document_no_crash_jsx_namespaced_name2() {
 const x = <A my-ns:attr="val" />;
 "#;
     let mut s = Session::new_for_test("formatDocumentNoCrashJsxNamespacedName2", content);
-    // TODO: f.FormatDocument(t, "")
+    fourslash::format_document(&mut s, "");
     fourslash::verify_current_file_content(&mut s, "const x = <A my-ns:attr=\"val\" />;\n");
 }

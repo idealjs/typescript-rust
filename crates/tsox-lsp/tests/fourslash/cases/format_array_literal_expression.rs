@@ -25,7 +25,7 @@ export let Things2 = [
         Pie: 'pie'
     }];/*9*/"#;
     let mut s = Session::new_for_test("formatArrayLiteralExpression", content);
-    // TODO: f.FormatDocument(t, "")
+    fourslash::format_document(&mut s, "");
     fourslash::go_to_marker(&mut s, "1");
     fourslash::verify_current_line_content(&mut s, r#"    Hat: 'hat',"#);
     fourslash::go_to_marker(&mut s, "2");

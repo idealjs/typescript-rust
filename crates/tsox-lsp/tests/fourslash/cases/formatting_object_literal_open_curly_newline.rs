@@ -15,7 +15,7 @@ var clear =
 };
 "#;
     let mut s = Session::new_for_test("formattingObjectLiteralOpenCurlyNewline", content);
-    // TODO: f.FormatDocument(t, "")
+    fourslash::format_document(&mut s, "");
     fourslash::verify_current_file_content(&mut s, r#"
 var clear =
 {
@@ -30,7 +30,7 @@ var clear =
     // TODO: opts444 := f.GetOptions()
     // TODO: opts444.FormatCodeSettings.IndentMultiLineObjectLiteralBeginningOnBlankLine = core.TSTrue
     // TODO: f.Configure(t, opts444)
-    // TODO: f.FormatDocument(t, "")
+    fourslash::format_document(&mut s, "");
     fourslash::verify_current_file_content(&mut s, r#"
 var clear =
     {

@@ -8,7 +8,7 @@ fn formatting_on_open_brace_of_functions() {
 Plugin.T1.t1_x();
 }"#;
     let mut s = Session::new_for_test("formattingOnOpenBraceOfFunctions", content);
-    // TODO: f.FormatDocument(t, "")
+    fourslash::format_document(&mut s, "");
     fourslash::go_to_marker(&mut s, "");
     fourslash::verify_current_line_content(&mut s, r#"function T2_y() {"#);
     // TODO: }

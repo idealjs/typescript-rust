@@ -5,6 +5,6 @@ use tsox_lsp::fourslash::{self, Session};
 fn format_no_space_before_close_brace2() {
     let content = r#"new Foo(1,     );"#;
     let mut s = Session::new_for_test("formatNoSpaceBeforeCloseBrace2", content);
-    // TODO: f.FormatDocument(t, "")
+    fourslash::format_document(&mut s, "");
     fourslash::verify_current_file_content(&mut s, r#"new Foo(1,);"#);
 }

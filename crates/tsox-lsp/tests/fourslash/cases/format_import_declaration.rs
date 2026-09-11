@@ -10,7 +10,7 @@ import bar  =    Foo;/*3*/
 
 import bar2=Foo;/*4*/"#;
     let mut s = Session::new_for_test("formatImportDeclaration", content);
-    // TODO: f.FormatDocument(t, "")
+    fourslash::format_document(&mut s, "");
     fourslash::go_to_marker(&mut s, "1");
     fourslash::verify_current_line_content(&mut s, r#"namespace Foo {"#);
     fourslash::go_to_marker(&mut s, "2");

@@ -17,7 +17,7 @@ fn formatting_space_before_function_paren() {
     // TODO: opts414 := f.GetOptions()
     // TODO: opts414.FormatCodeSettings.InsertSpaceAfterFunctionKeywordForAnonymousFunctions = core.TSFalse
     // TODO: f.Configure(t, opts414)
-    // TODO: f.FormatDocument(t, "")
+    fourslash::format_document(&mut s, "");
     fourslash::go_to_marker(&mut s, "1");
     fourslash::verify_current_line_content(&mut s, r#"function foo () { }"#);
     fourslash::go_to_marker(&mut s, "2");

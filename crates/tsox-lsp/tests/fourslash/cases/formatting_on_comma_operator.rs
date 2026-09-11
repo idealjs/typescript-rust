@@ -9,7 +9,7 @@ function f1() {
     return a, v1, a;/*2*/
 }"#;
     let mut s = Session::new_for_test("formattingOnCommaOperator", content);
-    // TODO: f.FormatDocument(t, "")
+    fourslash::format_document(&mut s, "");
     fourslash::go_to_marker(&mut s, "1");
     fourslash::verify_current_line_content(&mut s, r#"var v1 = ((1, 2, 3), 4, 5, (6, 7));"#);
     fourslash::go_to_marker(&mut s, "2");

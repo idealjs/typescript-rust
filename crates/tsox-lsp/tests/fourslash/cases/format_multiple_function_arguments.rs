@@ -24,7 +24,7 @@ fn format_multiple_function_arguments() {
      }
  );"#;
     let mut s = Session::new_for_test("formatMultipleFunctionArguments", content);
-    // TODO: f.FormatDocument(t, "")
+    fourslash::format_document(&mut s, "");
     fourslash::verify_current_file_content(&mut s, r#"
 someRandomFunction({
     prop1: 1,

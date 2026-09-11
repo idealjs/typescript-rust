@@ -7,7 +7,7 @@ fn format_async_keyword() {
 /*2*/let y = async() => 1;
 /*3*/let z = async    function   () { return 1; };"#;
     let mut s = Session::new_for_test("formatAsyncKeyword", content);
-    // TODO: f.FormatDocument(t, "")
+    fourslash::format_document(&mut s, "");
     fourslash::go_to_marker(&mut s, "1");
     fourslash::verify_current_line_content(&mut s, r#"let x = async () => 1;"#);
     fourslash::go_to_marker(&mut s, "2");

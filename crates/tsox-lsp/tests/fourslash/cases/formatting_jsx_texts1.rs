@@ -60,7 +60,7 @@ fn formatting_jsx_texts1() {
     (    homu   )    homu
 </option>;"#;
     let mut s = Session::new_for_test("formattingJsxTexts1", content);
-    // TODO: f.FormatDocument(t, "")
+    fourslash::format_document(&mut s, "");
     fourslash::verify_current_file_content(&mut s, r#"<option>
     homu   ;      homu
     homu;homu

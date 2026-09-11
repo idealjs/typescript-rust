@@ -17,7 +17,7 @@ x
 /*7*/.toString()
 /*8*/.length;"#;
     let mut s = Session::new_for_test("formattingOnChainedCallbacksAndPropertyAccesses", content);
-    // TODO: f.FormatDocument(t, "")
+    fourslash::format_document(&mut s, "");
     fourslash::go_to_marker(&mut s, "1");
     fourslash::verify_current_line_content(&mut s, r#"    .toFixed"#);
     fourslash::go_to_marker(&mut s, "2");

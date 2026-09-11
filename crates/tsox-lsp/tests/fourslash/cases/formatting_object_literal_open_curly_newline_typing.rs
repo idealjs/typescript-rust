@@ -10,7 +10,7 @@ var varName =/**/
     let mut s = Session::new_for_test("formattingObjectLiteralOpenCurlyNewlineTyping", content);
     fourslash::go_to_marker(&mut s, "");
     // TODO: f.Insert(t, "\n{")
-    // TODO: f.FormatDocument(t, "")
+    fourslash::format_document(&mut s, "");
     fourslash::verify_current_file_content(&mut s, r#"
 var varName =
 {

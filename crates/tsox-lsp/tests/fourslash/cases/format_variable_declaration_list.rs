@@ -17,7 +17,7 @@ fn format_variable_declaration_list() {
 /*11*/                return   fun            ;
 /*12*/}   (           fun1            )   )       ;"#;
     let mut s = Session::new_for_test("formatVariableDeclarationList", content);
-    // TODO: f.FormatDocument(t, "")
+    fourslash::format_document(&mut s, "");
     fourslash::go_to_marker(&mut s, "1");
     fourslash::verify_current_line_content(&mut s, r#"var fun1 = function() {"#);
     fourslash::go_to_marker(&mut s, "2");

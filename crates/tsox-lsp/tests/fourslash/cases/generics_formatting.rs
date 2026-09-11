@@ -25,7 +25,7 @@ foo()<number, string, T >();
 /*expressionWithTypeArguments*/class A < T > extends bar <  T >( )  <  T > {
 }"#;
     let mut s = Session::new_for_test("genericsFormatting", content);
-    // TODO: f.FormatDocument(t, "")
+    fourslash::format_document(&mut s, "");
     fourslash::go_to_marker(&mut s, "inClassDeclaration");
     fourslash::verify_current_line_content(&mut s, r#"class Foo<T1, T2> {"#);
     fourslash::go_to_marker(&mut s, "inMethodDeclaration");

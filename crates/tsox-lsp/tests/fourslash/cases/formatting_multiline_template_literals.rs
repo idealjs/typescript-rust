@@ -7,7 +7,7 @@ fn formatting_multiline_template_literals() {
     // TODO: /*2*/                at projectPath : ${projectFile}
     // TODO: /*3*/                with error: ${ex.message}` + "`" + `)`
     let mut s = Session::new_for_test("formattingMultilineTemplateLiterals", content);
-    // TODO: f.FormatDocument(t, "")
+    fourslash::format_document(&mut s, "");
     fourslash::go_to_marker(&mut s, "1");
     // TODO: f.VerifyCurrentLineContent(t, "new Error(`Failed to expand glob: ${projectSpec.filesGlob}")
 }

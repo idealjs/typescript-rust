@@ -17,7 +17,7 @@ function b(){
     // TODO: opts233 := f.GetOptions()
     // TODO: opts233.FormatCodeSettings.TrimTrailingWhitespace = core.TSFalse
     // TODO: f.Configure(t, opts233)
-    // TODO: f.FormatDocument(t, "")
+    fourslash::format_document(&mut s, "");
     fourslash::verify_current_file_content(&mut s, r#"
 var a;     
 var b     

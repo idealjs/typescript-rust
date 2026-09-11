@@ -12,7 +12,7 @@ fn formatting_crash() {
     // TODO: opts199 := f.GetOptions()
     // TODO: opts199.FormatCodeSettings.PlaceOpenBraceOnNewLineForControlBlocks = core.TSTrue
     // TODO: f.Configure(t, opts199)
-    // TODO: f.FormatDocument(t, "")
+    fourslash::format_document(&mut s, "");
     fourslash::go_to_marker(&mut s, "");
     fourslash::verify_current_line_content(&mut s, r#"module Default"#);
 }

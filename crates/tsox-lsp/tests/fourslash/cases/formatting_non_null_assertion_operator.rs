@@ -9,7 +9,7 @@ fn formatting_non_null_assertion_operator() {
 /*4*/ var  bar  =  'bar' . foo ! ;
 /*5*/ var  foo  =  bar ! ;"#;
     let mut s = Session::new_for_test("formattingNonNullAssertionOperator", content);
-    // TODO: f.FormatDocument(t, "")
+    fourslash::format_document(&mut s, "");
     fourslash::go_to_marker(&mut s, "1");
     fourslash::verify_current_line_content(&mut s, r#"'bar'!;"#);
     fourslash::go_to_marker(&mut s, "2");

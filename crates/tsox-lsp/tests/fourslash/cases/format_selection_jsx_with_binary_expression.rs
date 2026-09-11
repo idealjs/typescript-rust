@@ -20,7 +20,7 @@ function TestWidget() {
     );
 }"#;
     let mut s = Session::new_for_test("formatSelectionJsxWithBinaryExpression", content);
-    // TODO: f.FormatSelection(t, "1", "2")
+    fourslash::format_selection(&mut s, "1", "2");
     fourslash::verify_current_file_content(&mut s, r#"function TestWidget() {
     const test = true;
     return (

@@ -16,7 +16,7 @@ with (bar.blah)/*4*/
     // TODO: opts227 := f.GetOptions()
     // TODO: opts227.FormatCodeSettings.PlaceOpenBraceOnNewLineForControlBlocks = core.TSFalse
     // TODO: f.Configure(t, opts227)
-    // TODO: f.FormatDocument(t, "")
+    fourslash::format_document(&mut s, "");
     fourslash::go_to_marker(&mut s, "1");
     fourslash::verify_current_line_content(&mut s, r#"with (foo.bar) {"#);
     fourslash::go_to_marker(&mut s, "3");
@@ -28,7 +28,7 @@ with (bar.blah)/*4*/
     // TODO: opts565 := f.GetOptions()
     // TODO: opts565.FormatCodeSettings.PlaceOpenBraceOnNewLineForControlBlocks = core.TSTrue
     // TODO: f.Configure(t, opts565)
-    // TODO: f.FormatDocument(t, "")
+    fourslash::format_document(&mut s, "");
     fourslash::go_to_marker(&mut s, "1");
     fourslash::verify_current_line_content(&mut s, r#"with (foo.bar)"#);
     fourslash::go_to_marker(&mut s, "2");

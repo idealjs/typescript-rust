@@ -12,7 +12,7 @@ interface Foo {
     // TODO: opts207 := f.GetOptions()
     // TODO: opts207.FormatCodeSettings.InsertSpaceBeforeTypeAnnotation = core.TSTrue
     // TODO: f.Configure(t, opts207)
-    // TODO: f.FormatDocument(t, "")
+    fourslash::format_document(&mut s, "");
     fourslash::verify_current_file_content(&mut s, r#"function foo(x : number, y ?: string) : number { }
 interface Foo {
     x : number;

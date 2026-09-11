@@ -7,6 +7,6 @@ fn format_no_space_between_closing_paren_and_template_string() {
 bar()`def`;
 baz()`a${x}b`;"#;
     let mut s = Session::new_for_test("formatNoSpaceBetweenClosingParenAndTemplateString", content);
-    // TODO: f.FormatDocument(t, "")
+    fourslash::format_document(&mut s, "");
     // TODO: f.VerifyCurrentFileContent(t, "foo()`abc`;\nbar()`def`;\nbaz()`a${x}b`;")
 }

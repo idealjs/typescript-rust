@@ -7,7 +7,7 @@ fn formatting_on_module_indentation() {
     export    namespace    A  .   B  .   C     {      }/**/
                }"#;
     let mut s = Session::new_for_test("formattingOnModuleIndentation", content);
-    // TODO: f.FormatDocument(t, "")
+    fourslash::format_document(&mut s, "");
     // TODO: f.GoToBOF(t)
     fourslash::verify_current_line_content(&mut s, r#"namespace Foo {"#);
     fourslash::go_to_marker(&mut s, "");

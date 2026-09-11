@@ -16,6 +16,8 @@ PRELUDE = "use tsox_lsp::fourslash::{self, Session};\n"
 
 IMPL = {
     "GoToMarker": ("go_to_marker", 1),
+    "FormatDocument": ("format_document", 1),
+    "FormatSelection": ("format_selection", 2),
     "GoToFile": ("go_to_file", 1),
     "Insert": ("insert", 1),
     "VerifyCurrentLineContent": ("verify_current_line_content", 1),

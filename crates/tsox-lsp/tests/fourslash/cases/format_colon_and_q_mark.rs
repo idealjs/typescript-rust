@@ -8,7 +8,7 @@ fn format_colon_and_q_mark() {
     x:number = 1?2:3;/*3*/
 }/*4*/"#;
     let mut s = Session::new_for_test("formatColonAndQMark", content);
-    // TODO: f.FormatDocument(t, "")
+    fourslash::format_document(&mut s, "");
     fourslash::go_to_marker(&mut s, "1");
     fourslash::verify_current_line_content(&mut s, r#"class foo {"#);
     fourslash::go_to_marker(&mut s, "2");
