@@ -27,6 +27,7 @@ pub(crate) mod impl_chunk_scanner_4;
 pub(crate) mod impl_chunk_scanner_5;
 pub(crate) mod impl_chunk_scanner_6;
 pub(crate) mod impl_chunk_scanner_7;
+pub(crate) mod impl_chunk_scanner_8;
 pub(crate) mod regexp;
 pub(crate) mod regexp_class_ranges;
 pub(crate) mod regexp_class_set;
