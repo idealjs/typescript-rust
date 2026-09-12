@@ -57,8 +57,8 @@ pub fn is_function_block(node: &Node) -> bool {
     if node.kind != SyntaxKind::Block {
         return false;
     }
-    match &node.parent {
-        Some(parent) => is_function_like(parent),
+    match node.parent() {
+        Some(parent) => is_function_like(&parent),
         None => false,
     }
 }
@@ -67,7 +67,7 @@ pub fn is_block_statement(node: &Node) -> bool {
     if node.kind != SyntaxKind::Block {
         return false;
     }
-    if let Some(parent) = &node.parent {
+    if let Some(parent) = node.parent() {
         if parent.kind == SyntaxKind::TryStatement || parent.kind == SyntaxKind::CatchClause {
             return false;
         }

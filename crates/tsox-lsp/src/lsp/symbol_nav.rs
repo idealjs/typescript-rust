@@ -10,7 +10,7 @@ pub(super) fn resolve_identifier_symbol(
         NodeData::Identifier(data) => data.text.as_str(),
         _ => return None,
     };
-    let mut current: Option<&Arc<tsox_frontend::ast::Node>> = Some(node);
+    let mut current: Option<Arc<tsox_frontend::ast::Node>> = Some(Arc::clone(node));
     while let Some(n) = current {
         if let Some(locals) = symbol_map.locals.get(&n.id()) {
             if let Some(sym) = locals.get(name) {
@@ -27,7 +27,7 @@ pub(super) fn resolve_identifier_symbol(
                 }
             }
         }
-        current = n.parent.as_ref();
+        current = n.parent();
     }
     None
 }
@@ -37,7 +37,7 @@ pub(super) fn resolve_symbol_for_node(
     node: &Arc<tsox_frontend::ast::Node>,
 ) -> Option<Arc<tsox_frontend::ast::Symbol>> {
     if node.kind == tsox_frontend::ast::SyntaxKind::Identifier {
-        if let Some(parent) = node.parent.as_ref() {
+        if let Some(parent) = node.parent().as_ref() {
             if let Some(name) = parent.name() {
                 if Arc::ptr_eq(name, node) {
                     if let Some(sym) = symbol_map.symbol_of(parent) {
@@ -58,7 +58,7 @@ pub(super) fn is_declaration_name(
     if node.kind != tsox_frontend::ast::SyntaxKind::Identifier {
         return false;
     }
-    if let Some(parent) = node.parent.as_ref() {
+    if let Some(parent) = node.parent().as_ref() {
         if let Some(name) = parent.name() {
             if Arc::ptr_eq(name, node) {
                 return symbol_map.symbol_of(parent).is_some();
@@ -73,7 +73,7 @@ pub(super) fn is_property_access_name(node: &Arc<tsox_frontend::ast::Node>) -> b
     if node.kind != tsox_frontend::ast::SyntaxKind::Identifier {
         return false;
     }
-    if let Some(parent) = node.parent.as_ref() {
+    if let Some(parent) = node.parent().as_ref() {
         if let NodeData::PropertyAccessExpression(data) = &parent.data {
             return Arc::ptr_eq(&data.name, node);
         }

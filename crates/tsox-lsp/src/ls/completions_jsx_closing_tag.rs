@@ -18,7 +18,7 @@ pub(super) fn jsx_closing_tag_completion(
     position: usize,
 ) -> Option<CompletionItem> {
     let closing = find_jsx_closing_element(text, node_at_position, position)?;
-    let element = closing.parent.clone()?;
+    let element = closing.parent()?;
     let opening = match &element.data {
         NodeData::JsxElement(d) => Arc::clone(&d.opening_element),
         _ => return None,
@@ -69,7 +69,7 @@ fn find_jsx_closing_element(
             | SyntaxKind::JsxNamespacedName => {}
             _ => return None,
         }
-        current = n.parent.clone();
+        current = n.parent();
     }
     None
 }

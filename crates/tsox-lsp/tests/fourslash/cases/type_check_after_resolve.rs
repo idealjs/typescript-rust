@@ -9,11 +9,11 @@ fn type_check_after_resolve() {
     }
 }/*end*/"#;
     let mut s = Session::new_for_test("typeCheckAfterResolve", content);
-    // TODO: f.GoToEOF(t)
-    // TODO: f.InsertLine(t, "")
+    fourslash::go_to_eof(&mut s, );
+    fourslash::insert_line(&mut s, "");
     fourslash::verify_quick_info_at(&mut s, "IPointRef", "any", "");
     // TODO: f.VerifyErrorExistsAfterMarker(t, "IPointRef")
-    // TODO: f.GoToEOF(t)
-    // TODO: f.InsertLine(t, "")
+    fourslash::go_to_eof(&mut s, );
+    fourslash::insert_line(&mut s, "");
     // TODO: f.VerifyErrorExistsAfterMarker(t, "IPointRef")
 }

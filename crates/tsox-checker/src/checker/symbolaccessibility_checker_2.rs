@@ -149,7 +149,7 @@ impl Checker {
             return None;
         }
         let first_decl = &symbol.declarations[0];
-        let parent = first_decl.parent.as_ref()?;
+        let parent = first_decl.parent().as_ref()?;
 
         None
     }
@@ -162,12 +162,12 @@ impl Checker {
             return self.get_symbol_of_declaration(declaration);
         }
 
-        let mut node = declaration.parent.as_ref();
+        let mut node = declaration.parent();
         while let Some(n) = node {
-            if has_external_module_symbol(n) {
-                return self.get_symbol_of_declaration(n);
+            if has_external_module_symbol(&n) {
+                return self.get_symbol_of_declaration(&n);
             }
-            node = n.parent.as_ref();
+            node = n.parent();
         }
         None
     }
@@ -224,7 +224,7 @@ impl Checker {
 
         let mut candidates: Vec<Arc<Symbol>> = Vec::new();
         for d in &symbol.declarations {
-            if let Some(ref parent) = d.parent {
+            if let Some(ref parent) = d.parent() {
                 if has_non_global_augmentation_external_module_symbol(parent) {
                     if let Some(sym) = self.get_symbol_of_declaration(parent) {
                         if !candidates.iter().any(|c| c.id() == sym.id()) {

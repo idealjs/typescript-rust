@@ -78,7 +78,7 @@ impl Parser {
         let equals_greater_than_token = self.create_token_node();
         self.next_token();
         let body = if self.token == SyntaxKind::OpenBraceToken {
-            self.parse_block()
+            self.parse_block_ex(true)
         } else {
             self.parse_assignment_expression()
         };
@@ -126,7 +126,7 @@ impl Parser {
         let saved_await = self.await_context;
         self.await_context = true;
         let body = if self.token == SyntaxKind::OpenBraceToken {
-            self.parse_block()
+            self.parse_block_ex(true)
         } else {
             self.parse_assignment_expression()
         };
@@ -154,7 +154,7 @@ impl Parser {
         let equals_greater_than_token = self.create_token_node();
         self.expect(SyntaxKind::EqualsGreaterThanToken);
         let body = if self.token == SyntaxKind::OpenBraceToken {
-            self.parse_block()
+            self.parse_block_ex(true)
         } else {
             self.parse_assignment_expression()
         };
@@ -195,7 +195,7 @@ impl Parser {
         let equals_greater_than_token = self.create_token_node();
         self.expect(SyntaxKind::EqualsGreaterThanToken);
         let body = if self.token == SyntaxKind::OpenBraceToken {
-            self.parse_block()
+            self.parse_block_ex(true)
         } else {
             self.parse_assignment_expression()
         };

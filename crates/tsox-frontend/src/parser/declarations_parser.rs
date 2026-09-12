@@ -105,7 +105,7 @@ impl Parser {
         &mut self,
         modifiers: Option<Arc<ModifierList>>,
     ) -> Arc<Node> {
-        let pos = self.token_pos();
+        let pos = Self::declaration_start(&modifiers, self.token_pos());
         self.next_token();
         let name = self.parse_identifier();
         self.parse_import_equals_tail(pos, modifiers, name, false)
@@ -119,7 +119,7 @@ impl Parser {
         &mut self,
         modifiers: Option<Arc<ModifierList>>,
     ) -> Arc<Node> {
-        let pos = self.token_pos();
+        let pos = Self::declaration_start(&modifiers, self.token_pos());
         self.next_token();
         let asterisk_token = self.parse_optional_token(SyntaxKind::AsteriskToken);
         let is_generator = asterisk_token.is_some();
@@ -177,7 +177,7 @@ impl Parser {
         &mut self,
         modifiers: Option<Arc<ModifierList>>,
     ) -> Arc<Node> {
-        let pos = self.token_pos();
+        let pos = Self::declaration_start(&modifiers, self.token_pos());
         self.next_token();
         let name = if self.is_identifier() {
             Some(self.parse_identifier())
@@ -209,7 +209,7 @@ impl Parser {
         &mut self,
         modifiers: Option<Arc<ModifierList>>,
     ) -> Arc<Node> {
-        let pos = self.token_pos();
+        let pos = Self::declaration_start(&modifiers, self.token_pos());
         self.next_token();
         let name = self.parse_identifier();
         let type_parameters = self.parse_optional_type_parameters();
@@ -239,7 +239,7 @@ impl Parser {
         &mut self,
         modifiers: Option<Arc<ModifierList>>,
     ) -> Arc<Node> {
-        let pos = self.token_pos();
+        let pos = Self::declaration_start(&modifiers, self.token_pos());
         self.next_token();
         let name = self.parse_identifier();
         let type_parameters = self.parse_optional_type_parameters();
@@ -267,7 +267,7 @@ impl Parser {
         &mut self,
         modifiers: Option<Arc<ModifierList>>,
     ) -> Arc<Node> {
-        let pos = self.token_pos();
+        let pos = Self::declaration_start(&modifiers, self.token_pos());
         self.next_token();
         let name = self.parse_identifier();
         self.expect(SyntaxKind::OpenBraceToken);

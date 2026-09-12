@@ -15,6 +15,6 @@ fn edit_lambda_arg_to_type_parameter1() {
     fourslash::insert(&mut s, "T");
     fourslash::verify_no_errors(&mut s, );
     fourslash::go_to_marker(&mut s, "2");
-    // TODO: f.InsertLine(t, "")
+    fourslash::insert_line(&mut s, "");
     fourslash::verify_no_errors(&mut s, );
 }

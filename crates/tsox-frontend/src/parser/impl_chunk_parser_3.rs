@@ -179,7 +179,7 @@ impl Parser {
         context: ParsingContext,
         parse_element: fn(&mut Self) -> Arc<Node>,
     ) -> NodeList {
-        let pos = self.token_pos();
+        let pos = self.node_pos();
 
         let save_contexts = self.parsing_contexts;
         self.parsing_contexts |= 1 << (context as u32);
@@ -205,7 +205,7 @@ impl Parser {
         context: ParsingContext,
         parse_element: fn(&mut Self) -> Arc<Node>,
     ) -> NodeList {
-        let pos = self.token_pos();
+        let pos = self.node_pos();
         let save_contexts = self.parsing_contexts;
         self.parsing_contexts |= 1 << (context as u32);
         let mut nodes = Vec::new();

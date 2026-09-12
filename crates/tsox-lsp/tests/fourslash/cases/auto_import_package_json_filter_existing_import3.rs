@@ -18,8 +18,8 @@ readFile/**/"#;
     // TODO: f.MarkTestAsStradaServer()
     fourslash::go_to_marker(&mut s, "");
     // TODO: f.VerifyImportFixAtPosition(t, []string{}, nil /*preferences*/)
-    // TODO: f.GoToBOF(t)
-    // TODO: f.InsertLine(t, "import { writeFile } from \"node:fs\";")
+    fourslash::go_to_bof(&mut s, );
+    fourslash::insert_line(&mut s, "import { writeFile } from \"node:fs\";");
     fourslash::go_to_marker(&mut s, "");
     // TODO: f.VerifyImportFixAtPosition(t, []string{
 }

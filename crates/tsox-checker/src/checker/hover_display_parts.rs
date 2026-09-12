@@ -245,19 +245,19 @@ impl Checker {
     /// Go getCallOrNewExpression：属性访问名字段提升 + 父级调用/构造位
     pub(crate) fn hover_call_or_new_expression(&self, node: &Arc<Node>) -> Option<Arc<Node>> {
         let mut node = Arc::clone(node);
-        if let Some(parent) = node.parent.as_ref()
+        if let Some(parent) = node.parent().as_ref()
             && parent.kind == SyntaxKind::PropertyAccessExpression
             && let tsox_frontend::ast::NodeData::PropertyAccessExpression(pa) = &parent.data
             && Arc::ptr_eq(&pa.name, &node)
         {
             node = Arc::clone(parent);
         }
-        let parent = node.parent.as_ref()?;
+        let parent = node.parent()?;
         match parent.kind {
             SyntaxKind::CallExpression | SyntaxKind::NewExpression => {
                 let expr = parent.expression()?;
                 if Arc::ptr_eq(&expr, &node) {
-                    Some(Arc::clone(parent))
+                    Some(Arc::clone(&parent))
                 } else {
                     None
                 }

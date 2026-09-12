@@ -38,7 +38,7 @@ pub fn get_declaration_modifier_flags_from_symbol_ex(s: &Symbol, is_write: bool)
             .unwrap_or_else(|| Arc::clone(value_declaration));
         let flags = get_combined_modifier_flags(&declaration);
 
-        if let Some(parent) = &s.parent {
+        if let Some(parent) = &s.parent() {
             if !parent.flags.contains(SymbolFlags::Class) {
                 return flags.difference(ModifierFlags::AccessibilityModifier);
             }

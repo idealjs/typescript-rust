@@ -10,10 +10,7 @@ fn format_document_zero_tab_size() {
 }"#;
     let mut s = Session::new_for_test("formatDocumentZeroTabSize", content);
     // TODO: opts := f.GetOptions()
-    // TODO: opts.FormatCodeSettings.TabSize = 0
-    // TODO: opts.FormatCodeSettings.IndentSize = 0
-    // TODO: opts.FormatCodeSettings.ConvertTabsToSpaces = core.TSTrue
-    // TODO: f.Configure(t, opts)
+    fourslash::configure_format_settings(&mut s, &[("tab_size", "0"), ("indent_size", "0"), ("convert_tabs_to_spaces", "true")]);
     fourslash::format_document(&mut s, "");
     fourslash::verify_current_file_content(&mut s, "function foo() {\nif (true) {\nvar x = 1;\n}\n}");
 }

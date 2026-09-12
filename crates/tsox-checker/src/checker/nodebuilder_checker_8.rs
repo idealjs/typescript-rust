@@ -187,7 +187,7 @@ impl Checker {
             .symbol
             .as_ref()
             .filter(|s| {
-                s.parent
+                s.parent()
                     .as_ref()
                     .is_some_and(|p| p.flags.contains(tsox_frontend::ast::SymbolFlags::ValueModule))
             })
@@ -195,7 +195,7 @@ impl Checker {
                 // Go getSymbolChain：符号是父模块的 export=（自身隔代父），
                 // 链退化为模块限定名（别名 a），不再追加符号名
                 let is_export_equals = s
-                    .parent
+                    .parent()
                     .as_ref()
                     .and_then(|p| p.exports.get("export="))
                     .is_some_and(|exp| {

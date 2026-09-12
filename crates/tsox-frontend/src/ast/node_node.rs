@@ -3,7 +3,7 @@ use crate::ast::node_flags::{ModifierFlags, NodeFlags};
 use crate::ast::node_node_list::ModifierList;
 use crate::ast::node_source_file::SourceFile;
 use crate::ast::syntax_kind_generated::SyntaxKind;
-use std::sync::Arc;
+use std::sync::{Arc, OnceLock, Weak};
 use std::sync::atomic::{AtomicU64, Ordering};
 use tsox_core::core::text::TextRange;
 
@@ -15,7 +15,9 @@ pub struct Node {
     pub flags: NodeFlags,
     pub loc: TextRange,
     id: AtomicU64,
-    pub parent: Option<Arc<Node>>,
+    /// Go Node.Parent 是非持有回指针（ast.go），所有权只沿父到子方向；
+    /// 这里以 Weak 表达，避免 parent/child 强引用环令整棵 AST 永不释放
+    pub(crate) parent: OnceLock<Weak<Node>>,
     pub data: NodeData,
 }
 
@@ -26,7 +28,7 @@ impl Node {
             flags: NodeFlags::empty(),
             loc: TextRange::undefined(),
             id: AtomicU64::new(0),
-            parent: None,
+            parent: OnceLock::new(),
             data,
         }
     }
@@ -37,7 +39,7 @@ impl Node {
             flags: NodeFlags::empty(),
             loc,
             id: AtomicU64::new(0),
-            parent: None,
+            parent: OnceLock::new(),
             data,
         }
     }
@@ -53,9 +55,19 @@ impl Node {
             flags,
             loc,
             id: AtomicU64::new(0),
-            parent: None,
+            parent: OnceLock::new(),
             data,
         }
+    }
+
+    /// Go node.Parent：非持有回指针，树存活期内 upgrade 恒成功
+    pub fn parent(&self) -> Option<Arc<Node>> {
+        self.parent.get().and_then(|w| w.upgrade())
+    }
+
+    /// binder 的 setParentPointers 在 parse 后一次性回填
+    pub fn set_parent(&self, parent: &Arc<Node>) {
+        let _ = self.parent.set(Arc::downgrade(parent));
     }
 
     #[inline]

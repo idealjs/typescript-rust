@@ -76,7 +76,7 @@ impl Checker {
 
         let block_scope_flags = node.flags & NodeFlags::BlockScoped;
         if block_scope_flags == NodeFlags::Using || block_scope_flags == NodeFlags::AwaitUsing {
-            if let Some(parent) = &node.parent {
+            if let Some(parent) = node.parent() {
                 if parent.kind == SyntaxKind::ForInStatement {
                     let message = if block_scope_flags == NodeFlags::Using {
                         &THE_LEFT_HAND_SIDE_OF_A_FOR_IN_STATEMENT_CANNOT_BE_A_USING_DECLARATION
@@ -136,9 +136,9 @@ impl Checker {
         }
 
         let in_for_in_or_of = node
-            .parent
+            .parent()
             .as_ref()
-            .and_then(|p| p.parent.clone())
+            .and_then(|p| p.parent())
             .map(|grandparent| {
                 grandparent.kind == SyntaxKind::ForInStatement
                     || grandparent.kind == SyntaxKind::ForOfStatement
@@ -149,7 +149,7 @@ impl Checker {
             if data.initializer.is_none() {
                 if is_binding_pattern(&data.name) {
                     let parent_is_binding_pattern = node
-                        .parent
+                        .parent()
                         .as_ref()
                         .map(|p| is_binding_pattern(p))
                         .unwrap_or(false);
@@ -190,9 +190,9 @@ impl Checker {
 
         if let Some(excl_token) = &data.exclamation_token {
             let parent_kind = node
-                .parent
+                .parent()
                 .as_ref()
-                .and_then(|p| p.parent.as_ref())
+                .and_then(|p| p.parent())
                 .map(|gp| gp.kind);
             let in_variable_statement = parent_kind == Some(SyntaxKind::VariableStatement);
             let has_type = data.type_node.is_some();

@@ -90,7 +90,7 @@ impl Checker {
         if std::env::var_os("TSOX_DEBUG_SYMBOL").is_some() {
             eprintln!(
                 "[arrow-ctx] entered parent={:?}",
-                node.parent.as_ref().map(|p| p.kind)
+                node.parent().as_ref().map(|p| p.kind)
             );
         }
         let t = self.get_contextual_type(node, ContextFlags::None)?;
@@ -261,9 +261,9 @@ impl Checker {
                         decl.kind,
                         SyntaxKind::PropertyDeclaration | SyntaxKind::MethodDeclaration
                     ) {
-                        if let Some(parent) = &decl.parent {
+                        if let Some(parent) = decl.parent() {
                             if parent.kind == SyntaxKind::ClassDeclaration {
-                                return Some(Arc::clone(parent));
+                                return Some(Arc::clone(&parent));
                             }
                         }
                     }
@@ -284,12 +284,12 @@ impl Checker {
                     | SyntaxKind::GetAccessor
                     | SyntaxKind::SetAccessor
             ) {
-                if let Some(parent) = &decl.parent {
+                if let Some(parent) = decl.parent() {
                     if matches!(
                         parent.kind,
                         SyntaxKind::ClassDeclaration | SyntaxKind::ClassExpression
                     ) {
-                        return Some(Arc::clone(parent));
+                        return Some(Arc::clone(&parent));
                     }
                 }
             }

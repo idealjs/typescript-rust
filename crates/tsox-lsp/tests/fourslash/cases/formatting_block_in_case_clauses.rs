@@ -11,5 +11,6 @@ fn formatting_block_in_case_clauses() {
 }"#;
     let mut s = Session::new_for_test("formattingBlockInCaseClauses", content);
     fourslash::go_to_marker(&mut s, "1");
-    // TODO: f.Insert(t, "}")
+    fourslash::insert(&mut s, "}");
+    // TODO: f.VerifyCurrentLineContent(t, `
 }

@@ -7,5 +7,8 @@ fn format_any_type_literal() {
 /**/"#;
     let mut s = Session::new_for_test("formatAnyTypeLiteral", content);
     fourslash::go_to_marker(&mut s, "");
-    // TODO: f.Insert(t, "}")
+    fourslash::insert(&mut s, "}");
+    fourslash::go_to_marker(&mut s, "objLit");
+    fourslash::verify_current_line_content(&mut s, r#"function foo(x: {}) {"#);
+    // TODO: }
 }

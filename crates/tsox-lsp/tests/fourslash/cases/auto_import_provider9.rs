@@ -72,6 +72,6 @@ export class Lib11 {}"#;
     // TODO: f.MarkTestAsStradaServer()
     // TODO: f.VerifyImportFixModuleSpecifiers(t, "", []string{}, nil /*preferences*/)
     // TODO: f.VerifyImportFixModuleSpecifiers(t, "", []string{}, nil /*preferences*/)
-    // TODO: f.InsertLine(t, "import {} from 'lib2';")
+    fourslash::insert_line(&mut s, "import {} from 'lib2';");
     // TODO: f.VerifyImportFixModuleSpecifiers(t, "", []string{"lib1"}, nil /*preferences*/)
 }

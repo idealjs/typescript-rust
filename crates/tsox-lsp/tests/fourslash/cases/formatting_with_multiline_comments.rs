@@ -7,7 +7,7 @@ fn formatting_with_multiline_comments() {
 /*2*/         */() => { /*1*/ });"#;
     let mut s = Session::new_for_test("formattingWithMultilineComments", content);
     fourslash::go_to_marker(&mut s, "1");
-    // TODO: f.InsertLine(t, "")
+    fourslash::insert_line(&mut s, "");
     fourslash::go_to_marker(&mut s, "2");
     fourslash::verify_current_line_content(&mut s, r#"         */() => {"#);
     // TODO: }

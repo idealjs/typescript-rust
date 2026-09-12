@@ -243,12 +243,12 @@ impl Binder {
 
     pub(crate) fn bind_type_parameter(&mut self, node: &Arc<Node>) {
         let parent_is_infer = node
-            .parent
+            .parent()
             .as_ref()
             .map_or(false, |p| p.kind == SyntaxKind::InferType);
         if parent_is_infer {
             if let Some(container) = node
-                .parent
+                .parent()
                 .as_ref()
                 .and_then(|infer| self.get_infer_type_container(infer))
             {
@@ -271,8 +271,8 @@ impl Binder {
     pub(crate) fn get_infer_type_container(&self, infer_node: &Arc<Node>) -> Option<Arc<Node>> {
         let mut current = Arc::clone(infer_node);
         loop {
-            let parent = match &current.parent {
-                Some(p) => Arc::clone(p),
+            let parent = match current.parent() {
+                Some(p) => Arc::clone(&p),
                 None => return None,
             };
             if parent.kind == SyntaxKind::ConditionalType {

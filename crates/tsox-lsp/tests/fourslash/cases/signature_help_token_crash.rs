@@ -15,4 +15,5 @@ foo/** More comments*/((/*2*/
 "#;
     let mut s = Session::new_for_test("signatureHelpTokenCrash", content);
     // TODO: f.VerifySignatureHelpWithCases(t, &fourslash.SignatureHelpCase{
+    // TODO: f.VerifySignatureHelpWithCases(t, &fourslash.SignatureHelpCase{
 }

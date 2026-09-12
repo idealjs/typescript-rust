@@ -6,10 +6,10 @@ pub(crate) fn ast_get_combined_modifier_flags(node: &Arc<Node>) -> ModifierFlags
     let current = Checker::get_root_declaration(node);
     let mut flags = current.syntactic_modifier_flags();
     if current.kind == SyntaxKind::VariableDeclaration {
-        if let Some(parent) = current.parent.clone() {
+        if let Some(parent) = current.parent() {
             if parent.kind == SyntaxKind::VariableDeclarationList {
                 flags |= parent.syntactic_modifier_flags();
-                if let Some(gp) = parent.parent.clone() {
+                if let Some(gp) = parent.parent() {
                     if gp.kind == SyntaxKind::VariableStatement {
                         flags |= gp.syntactic_modifier_flags();
                     }

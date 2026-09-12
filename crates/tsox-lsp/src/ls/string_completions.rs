@@ -45,7 +45,7 @@ pub fn string_literal_completion_labels(
     position: usize,
 ) -> Option<Vec<String>> {
     let lit = innermost_string_literal(node, position)?;
-    let parent = lit.parent.clone()?;
+    let parent = lit.parent()?;
 
     match &parent.data {
         // 类型位字面量 `Foo<'...'>` / `Foo<{ x: '...' }>`（Go
@@ -141,7 +141,7 @@ pub fn string_literal_completion_labels(
             if !is_name {
                 return None;
             }
-            let Some(grand) = parent.parent.clone() else {
+            let Some(grand) = parent.parent() else {
                 return None;
             };
             if grand.kind != SyntaxKind::ObjectLiteralExpression {
@@ -167,10 +167,10 @@ pub fn string_literal_completion_labels(
         // case '...'：switch 表达式类型（Go KindCaseClause → getSwitchedType）
         NodeData::CaseOrDefaultClause(_) => {
             let clause = Arc::clone(&parent);
-            let Some(switch_stmt) = clause.parent.clone() else {
+            let Some(switch_stmt) = clause.parent() else {
                 return None;
             };
-            let Some(case_block) = switch_stmt.parent.clone() else {
+            let Some(case_block) = switch_stmt.parent() else {
                 return None;
             };
             let NodeData::SwitchStatement(sw) = &case_block.data else {
@@ -225,7 +225,7 @@ fn from_unionable_literal_type(
     literal_type: &Arc<Node>,
     position: usize,
 ) -> Option<Vec<String>> {
-    let grandparent = literal_type.parent.clone()?;
+    let grandparent = literal_type.parent()?;
     match grandparent.kind {
         SyntaxKind::CallExpression
         | SyntaxKind::NewExpression
@@ -235,7 +235,7 @@ fn from_unionable_literal_type(
         | SyntaxKind::JsxSelfClosingElement
         | SyntaxKind::TypeReference => {
             let mut type_argument = Arc::clone(literal_type);
-            while let Some(p) = type_argument.parent.clone() {
+            while let Some(p) = type_argument.parent() {
                 if Arc::ptr_eq(&p, &grandparent) {
                     break;
                 }
@@ -394,7 +394,7 @@ pub fn relative_module_specifier_labels(
 }
 
 fn is_module_specifier_literal(lit: &Arc<Node>) -> bool {
-    let Some(parent) = &lit.parent else {
+    let Some(parent) = &lit.parent() else {
         return false;
     };
     match &parent.data {

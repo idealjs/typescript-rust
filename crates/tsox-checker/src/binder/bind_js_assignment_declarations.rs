@@ -22,12 +22,12 @@ pub(crate) enum JsDeclarationKind {
 pub(crate) fn get_assignment_declaration_kind(node: &Arc<Node>) -> JsDeclarationKind {
     // JavaScriptFile 标志只落在 SourceFile 节点上；沿祖先判定
     fn is_in_js(n: &Arc<Node>) -> bool {
-        let mut cur = Some(n);
+        let mut cur = Some(Arc::clone(n));
         while let Some(c) = cur {
             if c.flags.contains(NodeFlags::JavaScriptFile) {
                 return true;
             }
-            cur = c.parent.as_ref();
+            cur = c.parent();
         }
         false
     }

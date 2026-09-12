@@ -128,7 +128,7 @@ impl Binder {
         for child in &children {
             let child_mut = Arc::as_ptr(child) as *mut Node;
             unsafe {
-                (*child_mut).parent = Some(Arc::clone(&parent_clone));
+                (*child_mut).set_parent(&parent_clone);
             }
             self.set_parent_pointers(child);
         }

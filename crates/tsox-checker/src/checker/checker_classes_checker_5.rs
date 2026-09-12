@@ -165,7 +165,7 @@ impl Checker {
             return;
         }
 
-        let class_node = match node.parent.as_ref() {
+        let class_node = match node.parent() {
             Some(p) => p,
             None => return,
         };
@@ -179,7 +179,7 @@ impl Checker {
             .map(|n| n.text().to_string())
             .unwrap_or_default();
 
-        let instance_type = self.build_class_instance_type_with_base(class_node);
+        let instance_type = self.build_class_instance_type_with_base(&class_node);
 
         for type_ref in data.types.iter() {
             let interface_type = self.get_type_from_heritage_type_reference(type_ref);
@@ -230,7 +230,7 @@ impl Checker {
                 if !issued_member_error {
                     let iface_name = self.type_to_string(&interface_type);
                     self.grammar_error_on_node_with_args(
-                        class_node,
+                        &class_node,
                         &tsox_core::diagnostics::messages_generated::CLASS_0_INCORRECTLY_IMPLEMENTS_INTERFACE_1,
                         &[class_name.clone(), iface_name],
                     );

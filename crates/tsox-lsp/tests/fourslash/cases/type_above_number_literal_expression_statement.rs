@@ -7,6 +7,6 @@ fn type_above_number_literal_expression_statement() {
 // foo
 1;"#;
     let mut s = Session::new_for_test("typeAboveNumberLiteralExpressionStatement", content);
-    // TODO: f.GoToBOF(t)
+    fourslash::go_to_bof(&mut s, );
     fourslash::insert(&mut s, "var x;\n");
 }

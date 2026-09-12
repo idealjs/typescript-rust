@@ -38,7 +38,7 @@ impl Checker {
                 && self.arguments_symbol.is_some()
                 && Arc::ptr_eq(&symbol, self.arguments_symbol.as_ref().unwrap())
             {
-                let mut cur = node.parent.as_ref();
+                let mut cur = node.parent();
                 let mut in_initializer_or_static_block = false;
                 while let Some(a) = cur {
                     match a.kind {
@@ -49,7 +49,7 @@ impl Checker {
                         | SyntaxKind::GetAccessor
                         | SyntaxKind::SetAccessor => break,
                         SyntaxKind::ArrowFunction => {
-                            cur = a.parent.as_ref();
+                            cur = a.parent();
                             continue;
                         }
                         SyntaxKind::PropertyDeclaration
@@ -59,7 +59,7 @@ impl Checker {
                         }
                         _ => {}
                     }
-                    cur = a.parent.as_ref();
+                    cur = a.parent();
                 }
                 if in_initializer_or_static_block {
                     self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
@@ -74,7 +74,7 @@ impl Checker {
             }
 
             let is_export_assignment_name = node
-                .parent
+                .parent()
                 .as_ref()
                 .is_some_and(|p| p.kind == SyntaxKind::ExportAssignment);
             let base = self.resolve_alias_base(Arc::clone(&symbol));

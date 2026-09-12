@@ -5,8 +5,8 @@ use tsox_lsp::fourslash::{self, Session};
 fn format_empty_block() {
     let content = r#"{}"#;
     let mut s = Session::new_for_test("formatEmptyBlock", content);
-    // TODO: f.GoToEOF(t)
+    fourslash::go_to_eof(&mut s, );
     fourslash::insert(&mut s, "\n");
-    // TODO: f.GoToBOF(t)
+    fourslash::go_to_bof(&mut s, );
     fourslash::verify_current_line_content(&mut s, r#"{ }"#);
 }

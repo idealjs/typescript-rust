@@ -177,3 +177,90 @@ pub fn to_ls_format_options(settings: &FormatCodeSettings) -> FormattingOptions 
         trim_trailing_whitespace: Some(settings.trim_trailing_whitespace.is_true()),
     }
 }
+
+/// fourslash Configure 用：按 raw 字段名覆盖 FormatCodeSettings 单项。
+pub fn set_format_code_setting(
+    settings: &mut FormatCodeSettings,
+    name: &str,
+    tristate: Tristate,
+    raw_value: &str,
+) {
+    match name {
+        "base_indent_size" => settings.base_indent_size = raw_value.parse().unwrap_or(0),
+        "indent_size" => settings.indent_size = raw_value.parse().unwrap_or(4),
+        "tab_size" => settings.tab_size = raw_value.parse().unwrap_or(4),
+        "new_line_character" => settings.new_line_character = raw_value.to_string(),
+        "convert_tabs_to_spaces" => settings.convert_tabs_to_spaces = tristate,
+        "indent_style" => {
+            settings.indent_style = match raw_value {
+                "none" => IndentStyle::None,
+                "block" => IndentStyle::Block,
+                _ => IndentStyle::Smart,
+            }
+        }
+        "trim_trailing_whitespace" => settings.trim_trailing_whitespace = tristate,
+        "insert_space_after_comma_delimiter" => {
+            settings.insert_space_after_comma_delimiter = tristate
+        }
+        "insert_space_after_semicolon_in_for_statements" => {
+            settings.insert_space_after_semicolon_in_for_statements = tristate
+        }
+        "insert_space_before_and_after_binary_operators" => {
+            settings.insert_space_before_and_after_binary_operators = tristate
+        }
+        "insert_space_after_constructor" => settings.insert_space_after_constructor = tristate,
+        "insert_space_after_keywords_in_control_flow_statements" => {
+            settings.insert_space_after_keywords_in_control_flow_statements = tristate
+        }
+        "insert_space_after_function_keyword_for_anonymous_functions" => {
+            settings.insert_space_after_function_keyword_for_anonymous_functions = tristate
+        }
+        "insert_space_after_opening_and_before_closing_nonempty_parenthesis" => {
+            settings.insert_space_after_opening_and_before_closing_nonempty_parenthesis = tristate
+        }
+        "insert_space_after_opening_and_before_closing_nonempty_brackets" => {
+            settings.insert_space_after_opening_and_before_closing_nonempty_brackets = tristate
+        }
+        "insert_space_after_opening_and_before_closing_nonempty_braces" => {
+            settings.insert_space_after_opening_and_before_closing_nonempty_braces = tristate
+        }
+        "insert_space_after_opening_and_before_closing_empty_braces" => {
+            settings.insert_space_after_opening_and_before_closing_empty_braces = tristate
+        }
+        "insert_space_after_opening_and_before_closing_template_string_braces" => {
+            settings
+                .insert_space_after_opening_and_before_closing_template_string_braces = tristate
+        }
+        "insert_space_after_opening_and_before_closing_jsx_expression_braces" => {
+            settings
+                .insert_space_after_opening_and_before_closing_jsx_expression_braces = tristate
+        }
+        "insert_space_after_type_assertion" => {
+            settings.insert_space_after_type_assertion = tristate
+        }
+        "insert_space_before_function_parenthesis" => {
+            settings.insert_space_before_function_parenthesis = tristate
+        }
+        "place_open_brace_on_new_line_for_functions" => {
+            settings.place_open_brace_on_new_line_for_functions = tristate
+        }
+        "place_open_brace_on_new_line_for_control_blocks" => {
+            settings.place_open_brace_on_new_line_for_control_blocks = tristate
+        }
+        "insert_space_before_type_annotation" => {
+            settings.insert_space_before_type_annotation = tristate
+        }
+        "indent_multi_line_object_literal_beginning_on_blank_line" => {
+            settings.indent_multi_line_object_literal_beginning_on_blank_line = tristate
+        }
+        "indent_switch_case" => settings.indent_switch_case = tristate,
+        "semicolons" => {
+            settings.semicolons = match raw_value {
+                "insert" => SemicolonPreference::Insert,
+                "remove" => SemicolonPreference::Remove,
+                _ => SemicolonPreference::Ignore,
+            }
+        }
+        _ => {}
+    }
+}

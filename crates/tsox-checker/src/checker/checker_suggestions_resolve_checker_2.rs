@@ -273,12 +273,12 @@ impl Checker {
     }
 
     pub(crate) fn ambient_ancestor(&self, node: &Arc<Node>) -> bool {
-        let mut cur = node.parent.as_ref();
+        let mut cur = node.parent();
         while let Some(a) = cur {
             if a.has_syntactic_modifier(ModifierFlags::Ambient) {
                 return true;
             }
-            cur = a.parent.as_ref();
+            cur = a.parent();
         }
         false
     }

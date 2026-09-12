@@ -158,8 +158,8 @@ impl Checker {
         parameter: &Arc<Node>,
         parameter_name: &str,
     ) -> Option<(Arc<Symbol>, Arc<Symbol>)> {
-        let constructor_declaration = parameter.parent.as_ref()?;
-        let class_declaration = constructor_declaration.parent.as_ref()?;
+        let constructor_declaration = parameter.parent().as_ref()?;
+        let class_declaration = constructor_declaration.parent().as_ref()?;
 
         let _ = parameter_name;
         let _ = class_declaration;

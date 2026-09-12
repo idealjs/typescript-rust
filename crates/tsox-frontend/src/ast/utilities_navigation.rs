@@ -5,12 +5,12 @@ pub fn find_ancestor<F>(node: &Arc<Node>, callback: F) -> Option<Arc<Node>>
 where
     F: Fn(&Node) -> bool,
 {
-    let mut current: Option<&Arc<Node>> = Some(node);
+    let mut current: Option<Arc<Node>> = Some(Arc::clone(node));
     while let Some(n) = current {
-        if callback(n) {
-            return Some(Arc::clone(n));
+        if callback(&n) {
+            return Some(n);
         }
-        current = n.parent.as_ref();
+        current = n.parent();
     }
     None
 }
@@ -24,12 +24,12 @@ pub fn get_source_file_of_node(node: &Arc<Node>) -> Option<Arc<Node>> {
 }
 
 pub fn is_node_descendant_of(node: &Arc<Node>, ancestor: &Arc<Node>) -> bool {
-    let mut current: Option<&Arc<Node>> = Some(node);
+    let mut current: Option<Arc<Node>> = Some(Arc::clone(node));
     while let Some(n) = current {
-        if Arc::ptr_eq(n, ancestor) {
+        if Arc::ptr_eq(&n, ancestor) {
             return true;
         }
-        current = n.parent.as_ref();
+        current = n.parent();
     }
     false
 }
@@ -37,13 +37,11 @@ pub fn is_node_descendant_of(node: &Arc<Node>, ancestor: &Arc<Node>) -> bool {
 pub fn get_root_declaration(node: &Arc<Node>) -> Arc<Node> {
     let mut current = Arc::clone(node);
     while current.kind == SyntaxKind::BindingElement {
-        match &current.parent {
-            Some(parent) => match &parent.parent {
-                Some(grandparent) => {
-                    current = Arc::clone(grandparent);
-                }
-                None => break,
-            },
+        let Some(parent) = current.parent() else {
+            break;
+        };
+        match parent.parent() {
+            Some(grandparent) => current = Arc::clone(&grandparent),
             None => break,
         }
     }
@@ -65,14 +63,14 @@ where
     let root = get_root_declaration(node);
     let mut flags = get_flags(&root);
     let mut current = if root.kind == SyntaxKind::VariableDeclaration {
-        root.parent.clone()
+        root.parent()
     } else {
         None
     };
     if let Some(parent) = &current {
         if parent.kind == SyntaxKind::VariableDeclarationList {
             flags = flags | get_flags(parent);
-            current = parent.parent.clone();
+            current = parent.parent();
         }
     }
     if let Some(parent) = &current {
@@ -112,7 +110,7 @@ fn get_non_assigned_name_of_declaration(declaration: &Arc<Node>) -> Option<Arc<N
 }
 
 fn get_assigned_name(node: &Arc<Node>) -> Option<Arc<Node>> {
-    let parent = node.parent.as_ref()?;
+    let parent = node.parent()?;
     match parent.kind {
         SyntaxKind::PropertyAssignment => parent.name().map(Arc::clone),
         SyntaxKind::BindingElement => parent.name().map(Arc::clone),

@@ -65,7 +65,7 @@ impl Checker {
             if first_parent.is_none() {
                 first_parent = self
                     .parent_symbol_of_declaration_chain(prop)
-                    .or_else(|| prop.parent.clone());
+                    .or_else(|| prop.parent().clone());
             }
             prop_types.push(self.get_type_of_symbol(prop));
         }
@@ -73,7 +73,9 @@ impl Checker {
         let mut result = Symbol::new(prop_flags, name.to_string());
         result.check_flags = CheckFlags::SyntheticProperty;
         result.declarations = declarations;
-        result.parent = first_parent;
+        if let Some(fp) = first_parent {
+            result.set_parent(&fp);
+        }
         let symbol = Arc::new(result);
         let resolved = if is_union {
             self.get_union_type(prop_types)
@@ -103,10 +105,10 @@ impl Checker {
         prop: &Arc<Symbol>,
     ) -> Option<Arc<Symbol>> {
         let decl = prop.value_declaration.as_ref().or(prop.declarations.first())?;
-        let parent_node = decl.parent.as_ref()?;
+        let parent_node = decl.parent()?;
         self.program
             .symbol_map()
-            .symbol_of(parent_node)
+            .symbol_of(&parent_node)
             .map(Arc::clone)
     }
 

@@ -26,7 +26,7 @@ impl Checker {
                     | SyntaxKind::ExportAssignment
                     | SyntaxKind::NamespaceExportDeclaration
             )
-            && node.parent.as_ref().is_some_and(|p| {
+            && node.parent().as_ref().is_some_and(|p| {
                 matches!(
                     p.kind,
                     SyntaxKind::Block | SyntaxKind::ModuleBlock | SyntaxKind::SourceFile
@@ -34,7 +34,7 @@ impl Checker {
             })
             && !Self::inside_function_body(node)
         {
-            let block_id = node.parent.as_ref().unwrap().id();
+            let block_id = node.parent().as_ref().unwrap().id();
             if !self.ambient_ts1036_reported_blocks.contains(&block_id) {
                 self.ambient_ts1036_reported_blocks.insert(block_id);
                 let file = self.current_file.clone();

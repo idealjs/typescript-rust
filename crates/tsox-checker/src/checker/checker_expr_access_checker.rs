@@ -240,7 +240,7 @@ impl Checker {
     }
 
     pub(crate) fn is_definite_assignment_target(node: &Arc<Node>) -> bool {
-        let Some(parent) = &node.parent else {
+        let Some(parent) = &node.parent() else {
             return false;
         };
         match &parent.data {

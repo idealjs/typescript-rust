@@ -37,8 +37,7 @@ a++;/*19*/
 }/*27*/"#;
     let mut s = Session::new_for_test("formattingOnClosingBracket", content);
     // TODO: opts874 := f.GetOptions()
-    // TODO: opts874.FormatCodeSettings.InsertSpaceAfterSemicolonInForStatements = core.TSTrue
-    // TODO: f.Configure(t, opts874)
+    fourslash::configure_format_settings(&mut s, &[("insert_space_after_semicolon_in_for_statements", "true")]);
     fourslash::format_document(&mut s, "");
     fourslash::go_to_marker(&mut s, "1");
     fourslash::verify_current_line_content(&mut s, r#"function f() {"#);

@@ -88,7 +88,7 @@ pub(super) fn type_argument_constraint(
     checker: &mut Checker,
     node: &Arc<Node>,
 ) -> Option<Arc<Type>> {
-        let parent = node.parent.clone()?;
+        let parent = node.parent()?;
         let args = type_arguments_of(&parent)?;
         let position = args.iter().position(|a| Arc::ptr_eq(a, node))?;
         if let Some(callee) = callee_expression_of(&parent) {

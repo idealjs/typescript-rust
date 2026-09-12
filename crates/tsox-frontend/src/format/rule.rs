@@ -51,6 +51,9 @@ pub(crate) struct RuleImpl {
 #[derive(Clone)]
 pub(crate) struct TokenRange {
     pub(crate) tokens: Vec<SyntaxKind>,
+    /// Go tokenRange.isSpecific：anyToken/anyTokenExcept 为 false，
+    /// 其余组合子为 true，决定规则在桶中的分段优先级
+    pub(crate) is_specific: bool,
 }
 
 impl TokenRange {
@@ -99,9 +102,14 @@ pub(crate) fn r(name: &'static str) -> RuleBuilder {
 }
 
 pub(crate) fn kind_range(kind: SyntaxKind) -> TokenRange {
-    TokenRange { tokens: vec![kind] }
+    TokenRange { tokens: vec![kind], is_specific: true }
 }
 
 pub(crate) fn kinds_range(kinds: &[SyntaxKind]) -> TokenRange {
-    TokenRange { tokens: kinds.to_vec() }
+    TokenRange { tokens: kinds.to_vec(), is_specific: true }
+}
+
+/// Go anyToken/anyTokenExcept：非 specific
+pub(crate) fn non_specific_range(tokens: Vec<SyntaxKind>) -> TokenRange {
+    TokenRange { tokens, is_specific: false }
 }

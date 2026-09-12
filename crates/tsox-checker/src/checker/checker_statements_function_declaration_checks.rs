@@ -72,14 +72,14 @@ impl Checker {
                 .as_ref()
                 .and_then(|n| self.resolve_identifier(n))
                 .or_else(|| {
-                    node.parent
+                    node.parent()
                         .as_ref()
                         .filter(|p| p.kind == SyntaxKind::VariableDeclaration)
                         .and_then(|p| p.name())
                         .and_then(|n| self.resolve_identifier(&n))
                 }),
             tsox_frontend::ast::NodeData::ArrowFunction(_) => node
-                .parent
+                .parent()
                 .as_ref()
                 .filter(|p| p.kind == SyntaxKind::VariableDeclaration)
                 .and_then(|p| p.name())

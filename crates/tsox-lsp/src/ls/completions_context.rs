@@ -214,14 +214,14 @@ fn is_solely_identifier_definition_location(
         SyntaxKind::DotDotDotToken => {
             node_at_position.kind == SyntaxKind::Parameter
                 || node_at_position
-                    .parent
+                    .parent()
                     .as_ref()
                     .is_some_and(|p| p.kind == SyntaxKind::ArrayBindingPattern)
         }
         SyntaxKind::PublicKeyword | SyntaxKind::PrivateKeyword | SyntaxKind::ProtectedKeyword => {
             node_at_position.kind == SyntaxKind::Parameter
                 && node_at_position
-                    .parent
+                    .parent()
                     .as_ref()
                     .is_none_or(|p| p.kind != SyntaxKind::Constructor)
         }
@@ -261,7 +261,7 @@ pub(super) fn find_ancestor(
         if predicate(&n) {
             return Some(n);
         }
-        current = n.parent.clone();
+        current = n.parent();
     }
     None
 }

@@ -8,7 +8,7 @@ fn format_on_enter_in_comment() {
     */"#;
     let mut s = Session::new_for_test("formatOnEnterInComment", content);
     fourslash::go_to_marker(&mut s, "1");
-    // TODO: f.InsertLine(t, "")
+    fourslash::insert_line(&mut s, "");
     fourslash::verify_current_file_content(&mut s, r#"  /**
    * 
 

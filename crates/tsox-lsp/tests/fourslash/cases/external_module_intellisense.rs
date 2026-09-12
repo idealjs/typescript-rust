@@ -22,7 +22,7 @@ var x = express();/*1*/"#;
     let mut s = Session::new_for_test("externalModuleIntellisense", content);
     fourslash::go_to_marker(&mut s, "1");
     fourslash::verify_number_of_errors_in_current_file(&mut s, 0);
-    // TODO: f.GoToEOF(t)
+    fourslash::go_to_eof(&mut s, );
     fourslash::insert(&mut s, "x.");
     fourslash::verify_completions_exact_at(&mut s, None, &["enable", "post"]);
 }

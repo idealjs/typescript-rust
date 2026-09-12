@@ -10,11 +10,11 @@ pub(crate) fn is_assignment_target_literal(obj: &Arc<Node>) -> bool {
         Some(t) => t,
         None => return false,
     };
-    let mut cur = obj.parent.clone();
+    let mut cur = obj.parent();
     while let Some(n) = cur {
         match n.kind {
             SyntaxKind::ObjectLiteralExpression | SyntaxKind::ParenthesizedExpression => {
-                cur = n.parent.clone()
+                cur = n.parent()
             }
             SyntaxKind::BinaryExpression => {
                 if let tsox_frontend::ast::NodeData::BinaryExpression(be) = &n.data {
@@ -31,11 +31,11 @@ pub(crate) fn is_assignment_target_literal(obj: &Arc<Node>) -> bool {
 }
 
 fn assignment_target_expr(obj: &Arc<Node>) -> Option<Arc<Node>> {
-    let mut cur = obj.parent.clone();
+    let mut cur = obj.parent();
     while let Some(n) = cur.clone() {
         match n.kind {
             SyntaxKind::ObjectLiteralExpression | SyntaxKind::ParenthesizedExpression => {
-                cur = n.parent.clone()
+                cur = n.parent()
             }
             SyntaxKind::BinaryExpression => {
                 if let tsox_frontend::ast::NodeData::BinaryExpression(be) = &n.data {

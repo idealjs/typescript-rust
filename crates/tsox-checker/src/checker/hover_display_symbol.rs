@@ -99,7 +99,7 @@ impl Checker {
                     if Arc::ptr_eq(&n, c) {
                         return true;
                     }
-                    cur = n.parent.clone();
+                    cur = n.parent();
                 }
                 false
             })
@@ -267,7 +267,7 @@ impl Checker {
             });
         let prefix = if is_method { "method" } else { "function " };
         if node.kind == SyntaxKind::Identifier
-            && let Some(parent) = node.parent.as_ref()
+            && let Some(parent) = node.parent().as_ref()
             && tsox_frontend::ast::is_function_like_kind(parent.kind)
             && tsox_frontend::ast::node_data_generated::node_name(parent)
                 .is_some_and(|n| Arc::ptr_eq(&n, node))
@@ -313,7 +313,7 @@ impl Checker {
             b.write_keyword(" extends ");
             b.extend(self.type_to_display_parts(&c));
         }
-        if let Some(parent) = &symbol.parent {
+        if let Some(parent) = &symbol.parent() {
             if parent.flags.intersects(SymbolFlags::TypeAlias) {
                 // 别名的类型参数：`in type X<T = string>`
                 b.write_keyword(" in type ");
@@ -339,7 +339,7 @@ impl Checker {
             .find(|d| d.kind == SyntaxKind::TypeParameter)
             .cloned();
         if let Some(decl) = decl
-            && let Some(host) = decl.parent.as_ref()
+            && let Some(host) = decl.parent().as_ref()
         {
             if tsox_frontend::ast::is_function_like(host) {
                 b.write_keyword(" in ");
@@ -430,7 +430,7 @@ fn shorthand_widen_type(checker: &mut Checker, symbol: &Arc<Symbol>) -> Option<A
 impl Checker {
     /// node 是 PAE 名字段，且所在访问是可选链最外层、链下方存在 ?.
     fn is_outermost_optional_chain_access(&self, node: &Arc<Node>) -> bool {
-        let Some(parent) = node.parent.as_ref() else {
+        let Some(parent) = node.parent() else {
             return false;
         };
         if parent.kind != SyntaxKind::PropertyAccessExpression {
@@ -443,8 +443,8 @@ impl Checker {
             return false;
         }
         // 上溯到链最外层（父级名字链）
-        let mut outer = Arc::clone(parent);
-        while let Some(grand) = outer.parent.as_ref() {
+        let mut outer = Arc::clone(&parent);
+        while let Some(grand) = outer.parent().as_ref() {
             if grand.kind == SyntaxKind::PropertyAccessExpression {
                 let NodeData::PropertyAccessExpression(gd) = &grand.data else {
                     break;
@@ -456,7 +456,7 @@ impl Checker {
             }
             break;
         }
-        if !Arc::ptr_eq(&outer, parent) {
+        if !Arc::ptr_eq(&outer, &parent) {
             return false;
         }
         // 链下方（接收者子树）存在 ?.；本访问自身的 ?. 只产 marker（显示剥离）

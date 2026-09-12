@@ -13,45 +13,242 @@ pub fn go_to_file(s: &mut Session, name: &str) {
     s.active_file = name.to_string();
 }
 
+/// Go typeText：逐字符插入；每敲一个字符按 Go 语义发送 OnTypeFormatting
+/// 并应用返回的编辑（光标与 marker 随编辑平移）。
 pub fn insert(s: &mut Session, text: &str) {
+    for ch in text.chars() {
+        let pos = s
+            .cursor
+            .unwrap_or_else(|| panic!("insert 前无光标（go_to_marker）"));
+        let ch_text = ch.to_string();
+        edit_script(s, pos, pos, &ch_text);
+        let mut offset = pos + 1;
+        s.cursor = Some(offset);
+
+        if s.enable_formatting {
+            let edits = on_type_formatting(s, offset, &ch_text);
+            if !edits.is_empty() {
+                offset += apply_text_edits(s, &edits);
+                s.cursor = Some(offset);
+            }
+        }
+    }
+}
+
+fn apply_text_edits_lsp(s: &mut Session, edits: &[crate::lsp::lsproto_lsp::TextEdit]) {
+    if edits.is_empty() {
+        return;
+    }
+    apply_text_edits(s, edits);
+}
+
+/// Go GoToBOF
+pub fn go_to_bof(s: &mut Session) {
+    s.cursor = Some(0);
+}
+
+/// Go InsertLine：在光标处输入文本 + 换行（逐字符触发 on-type 格式化）
+pub fn insert_line(s: &mut Session, text: &str) {
+    let combined = format!("{text}\n");
+    insert(s, &combined);
+}
+
+/// Go Configure：覆盖 FormatCodeSettings 后重建服务
+pub fn configure_format_settings(s: &mut Session, settings: &[(&str, &str)]) {
+    {
+        let mut prefs = s.prefs.lock().unwrap();
+        for (name, value) in settings {
+            apply_format_setting(&mut prefs.format_code_settings, name, value);
+        }
+    }
+    let file_names = s.data.files.iter().map(|f| f.file_name.clone()).collect();
+    s.rebuild_service(file_names);
+}
+
+fn apply_format_setting(settings: &mut crate::ls::lsutil::FormatCodeSettings, name: &str, value: &str) {
+    let tristate = match value {
+        "true" => tsox_core::core::tristate::Tristate::True,
+        "false" => tsox_core::core::tristate::Tristate::False,
+        _ => tsox_core::core::tristate::Tristate::Unknown,
+    };
+    crate::ls::lsutil::set_format_code_setting(settings, name, tristate, value);
+}
+
+/// Go Paste：文本以粘贴方式进入，随后对粘贴范围做 range formatting。
+pub fn paste(s: &mut Session, text: &str) {
     let pos = s
         .cursor
-        .unwrap_or_else(|| panic!("insert 前无光标（go_to_marker）"));
+        .unwrap_or_else(|| panic!("paste 前无光标（go_to_marker）"));
+    edit_script(s, pos, pos, text);
+    if !s.enable_formatting {
+        let delta: usize = text.chars().count();
+        s.cursor = Some(pos + delta);
+        return;
+    }
+    let end = pos + text.chars().count();
+    let edits = range_formatting(s, pos, end);
+    if !edits.is_empty() {
+        apply_text_edits(s, &edits);
+    }
+}
+
+/// Go GoToEOF
+pub fn go_to_eof(s: &mut Session) {
+    let content = s.file_content(&s.active_file);
+    s.cursor = Some(content.chars().count());
+}
+
+fn edit_script(s: &mut Session, start: usize, end: usize, new_text: &str) {
     let file = s.active_file.clone();
     let content = s.file_content(&file).to_string();
-    let char_pos = byte_index_of_char(&content, pos);
-    let mut next = String::with_capacity(content.len() + text.len());
-    next.push_str(&content[..char_pos]);
-    next.push_str(text);
-    next.push_str(&content[char_pos..]);
+    let b_start = byte_index_of_char(&content, start);
+    let b_end = byte_index_of_char(&content, end);
+    let mut next = String::with_capacity(content.len() + new_text.len());
+    next.push_str(&content[..b_start]);
+    next.push_str(new_text);
+    next.push_str(&content[b_end..]);
     s.set_file_content(&file, next);
-    // 编辑后平移同文件 marker/range（对齐 Go fourslash editScriptAndUpdateMarkers）
-    let delta: usize = text.chars().count();
+    shift_positions(s, &file, start, end, new_text);
+}
+
+/// Go updatePosition：<= start 不动；在编辑区间内置 1（无效）；
+/// 之后平移 len(new_text)-(end-start)
+fn shift_positions(s: &mut Session, file: &str, start: usize, end: usize, new_text: &str) {
+    let new_len: usize = new_text.chars().count();
+    let delta = new_len as isize - (end as isize - start as isize);
+    let shift = |p: &mut usize| {
+        if *p <= start {
+            // 不动
+        } else if *p < end {
+            *p = usize::MAX; // invalid
+        } else {
+            *p = (*p as isize + delta) as usize;
+        }
+    };
     for m in &mut s.data.markers {
-        if m.file_name == file && m.position > pos {
-            m.position += delta;
+        if m.file_name == file {
+            shift(&mut m.position);
         }
     }
     for r in &mut s.data.ranges {
         if r.file_name == file {
-            if r.start > pos {
-                r.start += delta;
-            }
-            if r.end > pos {
-                r.end += delta;
-            }
+            shift(&mut r.start);
+            shift(&mut r.end);
         }
     }
     s.data.marker_positions = s
         .data
         .markers
         .iter()
+        .filter(|m| m.position != usize::MAX)
         .filter_map(|m| m.name.clone().map(|n| (n, m.position)))
         .collect();
-    // Go typeText：逐字符插入后光标推进到插入文本之后
-    if let Some(c) = s.cursor.as_mut() {
-        *c += delta;
+}
+
+/// Go applyTextEdits：按起点升序排序后逆序应用，同步光标；
+/// 返回净偏移。
+fn apply_text_edits(s: &mut Session, edits: &[crate::lsp::lsproto_lsp::TextEdit]) -> usize {
+    let file = s.active_file.clone();
+    let content = s.file_content(&file).to_string();
+    let mut starts: Vec<(usize, usize, &str)> = edits
+        .iter()
+        .map(|e| {
+            let start = line_col_to_offset(&content, e.range.start.line as usize, e.range.start.character as usize);
+            let end = line_col_to_offset(&content, e.range.end.line as usize, e.range.end.character as usize);
+            (start, end, e.new_text.as_str())
+        })
+        .collect();
+    // LSP character 为 UTF-16；line_col_to_offset 按 ASCII 处理，
+    // 用字符下标换算保持与 marker 体系一致
+    starts.sort_by_key(|(start, _, _)| *start);
+
+    let mut caret = s.cursor.unwrap_or(0);
+    let mut edits_char: Vec<(usize, usize, String)> = starts
+        .into_iter()
+        .map(|(b_start, b_end, text)| {
+            (
+                char_index_of_byte(&content, b_start),
+                char_index_of_byte(&content, b_end),
+                text.to_string(),
+            )
+        })
+        .collect();
+
+    let mut total_offset = 0usize;
+    let mut buffer = content.clone();
+    for (start, end, text) in edits_char.iter().rev() {
+        // 逆序（高位置先拼接）下，低位置编辑的 char/byte 下标不受
+        // 先前拼接影响，可在同一缓冲上按原始坐标顺序完成全部拼接；
+        // marker/光标平移与拼接同序（降序），全部完成后只触发一次
+        // 文件内容更新与服务重建
+        let b_start = byte_index_of_char(&buffer, *start);
+        let b_end = byte_index_of_char(&buffer, *end);
+        buffer.replace_range(b_start..b_end, text);
+        shift_positions(s, &file, *start, *end, text);
+        let delta: isize = text.chars().count() as isize - (*end as isize - *start as isize);
+        if *start <= caret {
+            if *end <= caret {
+                caret = (caret as isize + delta) as usize;
+            } else {
+                caret = *start;
+            }
+        }
+        total_offset += delta.unsigned_abs();
     }
+    if buffer != content {
+        s.set_file_content(&file, buffer);
+    }
+    s.cursor = Some(caret);
+    total_offset
+}
+
+fn on_type_formatting(
+    s: &mut Session,
+    offset: usize,
+    ch: &str,
+) -> Vec<crate::lsp::lsproto_lsp::TextEdit> {
+    let uri = uri_of(s, &s.active_file);
+    let service = match s.service.as_ref() {
+        Some(service) => service,
+        None => return Vec::new(),
+    };
+    let content = s.file_content(&s.active_file);
+    let (line, character) = line_and_character(content, offset);
+    let options = crate::lsp::lsproto_lsp::FormattingOptions::default();
+    service.provide_format_document_on_type(
+        &uri,
+        &options,
+        crate::lsp::lsproto_lsp::Position { line, character },
+        ch,
+    )
+}
+
+fn range_formatting(
+    s: &mut Session,
+    start: usize,
+    end: usize,
+) -> Vec<crate::lsp::lsproto_lsp::TextEdit> {
+    let uri = uri_of(s, &s.active_file);
+    let service = match s.service.as_ref() {
+        Some(service) => service,
+        None => return Vec::new(),
+    };
+    let content = s.file_content(&s.active_file);
+    let (line0, col0) = line_and_character(content, start);
+    let (line1, col1) = line_and_character(content, end);
+    let options = crate::lsp::lsproto_lsp::FormattingOptions::default();
+    service.provide_format_document_range(
+        &uri,
+        &options,
+        crate::lsp::lsproto_lsp::Range {
+            start: crate::lsp::lsproto_lsp::Position { line: line0, character: col0 },
+            end: crate::lsp::lsproto_lsp::Position { line: line1, character: col1 },
+        },
+    )
+}
+
+fn char_index_of_byte(text: &str, byte: usize) -> usize {
+    text[..byte.min(text.len())].chars().count()
 }
 
 pub fn verify_current_line_content(s: &Session, expected: &str) {
@@ -228,7 +425,7 @@ pub fn format_document(s: &mut Session, filename: &str) {
     let service = s.service.as_ref().expect("无 LanguageService");
     let options = crate::lsp::lsproto_lsp::FormattingOptions::default();
     let edits = service.provide_format_document(&uri, &options);
-    apply_edits(s, &file, &edits);
+    apply_text_edits_lsp(s, &edits);
 }
 
 /// Go f.FormatSelection：对选区（起止 marker 名）做格式化
@@ -246,7 +443,7 @@ pub fn format_selection(s: &mut Session, start_marker: &str, end_marker: &str) {
         end: crate::lsp::lsproto_lsp::Position { line: line1, character: col1 },
     };
     let edits = service.provide_format_document_range(&uri, &options, range);
-    apply_edits(s, &file, &edits);
+    apply_text_edits_lsp(s, &edits);
 }
 
 fn apply_edits(s: &mut Session, file: &str, edits: &[crate::lsp::lsproto_lsp::TextEdit]) {

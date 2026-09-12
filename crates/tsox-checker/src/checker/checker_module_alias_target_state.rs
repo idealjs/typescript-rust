@@ -15,7 +15,7 @@ pub(crate) fn module_alias_target_state(
         return 2;
     }
     let target_text = target_name.text();
-    let mut anc = export_decl.parent.as_ref();
+    let mut anc = export_decl.parent();
     while let Some(p) = anc {
         if matches!(
             p.kind,
@@ -44,7 +44,7 @@ pub(crate) fn module_alias_target_state(
                 return f;
             }
         }
-        anc = p.parent.as_ref();
+        anc = p.parent();
     }
     2
 }

@@ -154,8 +154,8 @@ impl Checker {
         node: &Arc<tsox_frontend::ast::Node>,
         _context_flags: ContextFlags,
     ) -> Option<Arc<Type>> {
-        let parent = match &node.parent {
-            Some(p) => Arc::clone(p),
+        let parent = match node.parent() {
+            Some(p) => Arc::clone(&p),
             None => return None,
         };
 

@@ -58,7 +58,7 @@ impl Checker {
         }
 
         if node.kind == SyntaxKind::BindingElement {
-            if let Some(parent) = node.parent.as_ref() {
+            if let Some(parent) = node.parent().as_ref() {
                 if parent.kind == SyntaxKind::ObjectBindingPattern {
                     let elements: Vec<Arc<Node>> = match &parent.data {
                         tsox_frontend::ast::NodeData::BindingPattern(d) => {
@@ -84,9 +84,9 @@ impl Checker {
             SyntaxKind::Parameter => true,
             SyntaxKind::VariableDeclaration => {
                 let mut in_for = false;
-                if let Some(parent) = node.parent.as_ref() {
+                if let Some(parent) = node.parent().as_ref() {
                     if parent.kind == SyntaxKind::VariableDeclarationList {
-                        if let Some(gp) = parent.parent.as_ref() {
+                        if let Some(gp) = parent.parent().as_ref() {
                             in_for = matches!(
                                 gp.kind,
                                 SyntaxKind::ForInStatement | SyntaxKind::ForOfStatement
@@ -98,7 +98,7 @@ impl Checker {
             }
             SyntaxKind::BindingElement => {
                 let parent_is_object_pattern = node
-                    .parent
+                    .parent()
                     .as_ref()
                     .is_some_and(|p| p.kind == SyntaxKind::ObjectBindingPattern);
                 let has_property_name = matches!(&node.data,
@@ -156,7 +156,7 @@ impl Checker {
             }
         }
         if declaration_count > 1 && declaration_count == unused.len() {
-            let loc = clause.parent.as_ref().map(|p| p.loc).unwrap_or(clause.loc);
+            let loc = clause.parent().as_ref().map(|p| p.loc).unwrap_or(clause.loc);
             self.report_unused(
                 clause,
                 false,
@@ -220,13 +220,13 @@ impl Checker {
 
             let already = unsafe {
                 (*child_mut)
-                    .parent
+                    .parent()
                     .as_ref()
                     .map_or(false, |p| Arc::ptr_eq(p, &parent_clone))
             };
             if !already {
                 unsafe {
-                    (*child_mut).parent = Some(Arc::clone(&parent_clone));
+                    (*child_mut).set_parent(&parent_clone);
                 }
             }
             self.set_parent_pointers(child);

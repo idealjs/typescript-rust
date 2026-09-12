@@ -2,7 +2,7 @@ use crate::ast::node::Node;
 use crate::ast::symbol_flags::CheckFlags;
 use crate::ast::symbol_flags::SymbolFlags;
 use std::collections::HashMap;
-use std::sync::Arc;
+use std::sync::{Arc, OnceLock, Weak};
 use std::sync::atomic::{AtomicU64, Ordering};
 
 #[derive(Debug)]
@@ -14,7 +14,9 @@ pub struct Symbol {
     pub value_declaration: Option<Arc<Node>>,
     pub members: SymbolTable,
     pub exports: SymbolTable,
-    pub parent: Option<Arc<Symbol>>,
+    /// Go Symbol.parent 是非持有回指针；强引用会与 members/exports 的
+    /// 父到子持有构成环，令每轮 bind 的符号图整体泄漏
+    pub(crate) parent: OnceLock<Weak<Symbol>>,
     pub export_symbol: Option<Arc<Symbol>>,
     id: AtomicU64,
 }
@@ -29,10 +31,18 @@ impl Symbol {
             value_declaration: None,
             members: SymbolTable::default(),
             exports: SymbolTable::default(),
-            parent: None,
+            parent: OnceLock::new(),
             export_symbol: None,
             id: AtomicU64::new(0),
         }
+    }
+
+    pub fn parent(&self) -> Option<Arc<Symbol>> {
+        self.parent.get().and_then(|w| w.upgrade())
+    }
+
+    pub fn set_parent(&self, parent: &Arc<Symbol>) {
+        let _ = self.parent.set(Arc::downgrade(parent));
     }
 
     pub fn id(&self) -> u64 {

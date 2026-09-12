@@ -16,8 +16,8 @@ useMemo/**/"#;
     // TODO: f.MarkTestAsStradaServer()
     fourslash::go_to_marker(&mut s, "");
     // TODO: f.VerifyImportFixAtPosition(t, []string{}, nil /*preferences*/)
-    // TODO: f.GoToBOF(t)
-    // TODO: f.InsertLine(t, "import { useState } from \"react\";")
+    fourslash::go_to_bof(&mut s, );
+    fourslash::insert_line(&mut s, "import { useState } from \"react\";");
     fourslash::go_to_marker(&mut s, "");
     // TODO: f.VerifyImportFixAtPosition(t, []string{
 }

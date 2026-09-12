@@ -64,8 +64,7 @@ impl Checker {
                     .trim_matches(['"', '\'', '`'])
                     .to_string();
                 let export_decl = self
-                    .ancestor_of_kind(&decl, SyntaxKind::ExportDeclaration)
-                    .map(Arc::clone)?;
+                    .ancestor_of_kind(&decl, SyntaxKind::ExportDeclaration)?;
                 let NodeData::ExportDeclaration(ed) = &export_decl.data else {
                     return None;
                 };
@@ -130,8 +129,7 @@ impl Checker {
         decl: &Arc<Node>,
     ) -> Option<(Arc<Symbol>, String)> {
         let import_decl = self
-            .ancestor_of_kind(decl, SyntaxKind::ImportDeclaration)
-            .map(Arc::clone)?;
+            .ancestor_of_kind(decl, SyntaxKind::ImportDeclaration)?;
         let NodeData::ImportDeclaration(d) = &import_decl.data else {
             return None;
         };
@@ -155,13 +153,13 @@ impl Checker {
         &self,
         node: &'a Arc<Node>,
         kind: SyntaxKind,
-    ) -> Option<&'a Arc<Node>> {
-        let mut cur = node.parent.as_ref();
+    ) -> Option<Arc<Node>> {
+        let mut cur = node.parent();
         while let Some(n) = cur {
             if n.kind == kind {
                 return Some(n);
             }
-            cur = n.parent.as_ref();
+            cur = n.parent();
         }
         None
     }
@@ -188,7 +186,7 @@ impl Checker {
         node: &Arc<Node>,
     ) -> Option<Arc<Symbol>> {
         let spec = node.text().trim_matches(['"', '\'', '`']).to_string();
-        let is_specifier_slot = node.parent.as_ref().is_some_and(|p| {
+        let is_specifier_slot = node.parent().as_ref().is_some_and(|p| {
             let slot = match &p.data {
                 NodeData::ImportDeclaration(d) => Some(Arc::clone(&d.module_specifier)),
                 NodeData::ExportDeclaration(d) => d.module_specifier.clone(),
@@ -196,12 +194,12 @@ impl Checker {
             };
             slot.is_some_and(|s| Arc::ptr_eq(&s, node))
         }) || matches!(
-            (&node.parent.as_ref().map(|p| p.kind), &node.parent.as_ref().map(|p| &p.data)),
+            (&node.parent().as_ref().map(|p| p.kind), &node.parent().as_ref().map(|p| &p.data)),
             (Some(SyntaxKind::CallExpression), Some(NodeData::CallExpression(d)))
                 if d.expression.kind == SyntaxKind::ImportKeyword
                     || matches!(&d.expression.data, NodeData::Identifier(i) if i.text == "require")
         ) || node
-            .parent
+            .parent()
             .as_ref()
             .is_some_and(|p| {
                 matches!(&p.data,

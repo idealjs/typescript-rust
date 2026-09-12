@@ -46,6 +46,8 @@ pub struct Parser {
 
     pub(crate) await_context: bool,
 
+    pub(crate) decorator_context: bool,
+
     pub(crate) parsing_contexts: u32,
 }
 

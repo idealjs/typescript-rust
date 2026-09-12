@@ -106,7 +106,7 @@ impl Checker {
         if let Some(ref sym) = symbol {
             if sym.flags.contains(SymbolFlags::EnumMember) {
                 if let Some(ref member) = sym.value_declaration {
-                    if let Some(ref parent) = member.parent {
+                    if let Some(ref parent) = member.parent() {
                         if parent.flags.contains(tsox_frontend::ast::NodeFlags::Const) {
                             return self.get_enum_member_value(member).value;
                         }
@@ -245,7 +245,7 @@ impl Checker {
             .cloned()
             .collect();
 
-        if let Some(ref parent) = node.parent {
+        if let Some(ref parent) = node.parent() {
             if parent.kind == SyntaxKind::ObjectLiteralExpression
                 || parent.kind == SyntaxKind::JsxAttributes
             {
@@ -288,11 +288,11 @@ impl Checker {
         &mut self,
         location: &Arc<Node>,
     ) -> Option<Arc<Symbol>> {
-        let parent = location.parent.as_ref()?;
-        let grandparent = parent.parent.as_ref()?;
+        let parent = location.parent()?;
+        let grandparent = parent.parent()?;
 
-        if is_array_literal_or_object_literal_destructuring_pattern(grandparent) {
-            if let Some(type_of_object_literal) = self.get_type_of_assignment_pattern(grandparent) {
+        if is_array_literal_or_object_literal_destructuring_pattern(&grandparent) {
+            if let Some(type_of_object_literal) = self.get_type_of_assignment_pattern(&grandparent) {
                 return self.get_property_of_type(&type_of_object_literal, location.text());
             }
         }

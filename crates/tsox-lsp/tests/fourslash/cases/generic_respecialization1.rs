@@ -69,12 +69,12 @@ class GenericPlanet2<T extends Food, V>{
     let mut s = Session::new_for_test("genericRespecialization1", content);
     fourslash::verify_no_errors(&mut s, );
     fourslash::go_to_marker(&mut s, "1");
-    // TODO: f.InsertLine(t, "")
-    // TODO: f.InsertLine(t, "")
+    fourslash::insert_line(&mut s, "");
+    fourslash::insert_line(&mut s, "");
     fourslash::verify_no_errors(&mut s, );
     fourslash::go_to_marker(&mut s, "2");
     // TODO: f.DeleteAtCaret(t, 6)
     fourslash::insert(&mut s, "any");
     fourslash::verify_no_errors(&mut s, );
-    // TODO: f.InsertLine(t, "var narnia = new GenericPlanet2<Cookie, string>(")
+    fourslash::insert_line(&mut s, "var narnia = new GenericPlanet2<Cookie, string>(");
 }

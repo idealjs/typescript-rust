@@ -15,5 +15,6 @@ var /*2*/r = m2f/*3*/;"#;
     // TODO: f.Backspace(t, 1)
     fourslash::verify_quick_info_at(&mut s, "2", "var r: (x: number) => void", "");
     fourslash::go_to_marker(&mut s, "3");
-    // TODO: f.Insert(t, "(")
+    fourslash::insert(&mut s, "(");
+    // TODO: f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{Text: "m2f(x: number): void"})
 }

@@ -16,17 +16,17 @@ impl Checker {
         };
 
         let source_parent = if source_symbol.flags.contains(SymbolFlags::EnumMember) {
-            source_symbol.parent.as_ref().unwrap_or(source_symbol)
+            source_symbol.parent().clone().unwrap_or_else(|| Arc::clone(source_symbol))
         } else {
-            source_symbol
+            Arc::clone(source_symbol)
         };
         let target_parent = if target_symbol.flags.contains(SymbolFlags::EnumMember) {
-            target_symbol.parent.as_ref().unwrap_or(target_symbol)
+            target_symbol.parent().clone().unwrap_or_else(|| Arc::clone(target_symbol))
         } else {
-            target_symbol
+            Arc::clone(target_symbol)
         };
 
-        if Arc::ptr_eq(source_parent, target_parent) {
+        if Arc::ptr_eq(&source_parent, &target_parent) {
             return true;
         }
 
@@ -48,8 +48,8 @@ impl Checker {
             }
         }
 
-        let source_type = self.get_type_of_symbol(source_parent);
-        let target_type = self.get_type_of_symbol(target_parent);
+        let source_type = self.get_type_of_symbol(&source_parent);
+        let target_type = self.get_type_of_symbol(&target_parent);
         let source_properties = self.get_properties_of_type(&source_type);
 
         for source_prop in source_properties {

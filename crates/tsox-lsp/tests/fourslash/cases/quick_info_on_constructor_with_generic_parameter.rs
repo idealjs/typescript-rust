@@ -23,5 +23,6 @@ var x = new /*2*/B(/*1*/"#;
     // TODO: f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{Text: "B(a: Foo<I>, b: number): B"})
     fourslash::insert(&mut s, "null,");
     // TODO: f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{Text: "B(a: Foo<I>, b: number): B"})
-    // TODO: f.Insert(t, "10);")
+    fourslash::insert(&mut s, "10);");
+    fourslash::verify_quick_info_at(&mut s, "2", "constructor B(a: Foo<I>, b: number): B", "");
 }

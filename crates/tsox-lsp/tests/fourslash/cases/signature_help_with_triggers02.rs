@@ -9,5 +9,13 @@ declare function bar<U>(x: U, y: U): U;
 foo(bar/*1*/)"#;
     let mut s = Session::new_for_test("signatureHelpWithTriggers02", content);
     fourslash::go_to_marker(&mut s, "1");
-    // TODO: f.Insert(t, "(")
+    fourslash::insert(&mut s, "(");
+    // TODO: f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{Text: "bar(x: unknown, y: unknown): un
+    // TODO: f.Backspace(t, 1)
+    fourslash::insert(&mut s, "<");
+    // TODO: f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{Text: "bar<U>(x: U, y: U): U"})
+    // TODO: f.Backspace(t, 1)
+    fourslash::insert(&mut s, ",");
+    // TODO: f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{Text: "foo(x: <U>(x: U, y: U) => U, y:
+    // TODO: f.Backspace(t, 1)
 }

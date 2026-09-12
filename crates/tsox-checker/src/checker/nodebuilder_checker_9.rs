@@ -196,7 +196,7 @@ impl Checker {
     pub(crate) fn namespace_qualifier_of(&mut self, symbol: &Arc<Symbol>) -> Option<String> {
         if std::env::var_os("TSOX_DEBUG_QI").is_some() {
             let p_info = symbol
-                .parent
+                .parent()
                 .clone()
                 .map(|p| format!("{}/flags={:?}", p.name, p.flags))
                 .unwrap_or_else(|| "NONE".into());
@@ -204,7 +204,7 @@ impl Checker {
         }
         let mut parts: Vec<String> = Vec::new();
         let mut cur = symbol
-            .parent
+            .parent()
             .clone()
             .or_else(|| self.namespace_container_from_declarations(symbol));
         while let Some(ns) = cur {
@@ -243,7 +243,7 @@ impl Checker {
                 return if parts.is_empty() { None } else { Some(parts.join(".")) };
             }
             parts.insert(0, ns.name.clone());
-            cur = ns.parent.clone();
+            cur = ns.parent();
         }
         if parts.is_empty() {
             None
@@ -256,7 +256,7 @@ impl Checker {
     // （tsc getSymbolChain：外部模块 root 的链段被跳过；值成员才经 alias 显示）
     pub(crate) fn namespace_only_qualifier_of(&mut self, symbol: &Arc<Symbol>) -> Option<String> {
         let mut parts: Vec<String> = Vec::new();
-        let mut cur = symbol.parent.clone();
+        let mut cur = symbol.parent().clone();
         while let Some(ns) = cur {
             if !ns.flags.contains(SymbolFlags::ValueModule) {
                 return None;
@@ -269,7 +269,7 @@ impl Checker {
                 break;
             }
             parts.insert(0, ns.name.clone());
-            cur = ns.parent.clone();
+            cur = ns.parent();
         }
         if parts.is_empty() {
             None
@@ -368,12 +368,12 @@ impl Checker {
     }
 
     fn node_within(node: &Arc<Node>, ancestor: &Arc<Node>) -> bool {
-        let mut cur = node.parent.clone();
+        let mut cur = node.parent();
         while let Some(n) = cur {
             if Arc::ptr_eq(&n, ancestor) {
                 return true;
             }
-            cur = n.parent.clone();
+            cur = n.parent();
         }
         false
     }
@@ -384,13 +384,13 @@ impl Checker {
     ) -> Option<Arc<Symbol>> {
         let symbol_map = self.program.symbol_map();
         symbol.declarations.first().and_then(|decl| {
-            let mut cur = decl.parent.as_ref();
+            let mut cur = decl.parent();
             while let Some(n) = cur {
                 match n.kind {
                     SyntaxKind::ModuleDeclaration | SyntaxKind::SourceFile => {
-                        return symbol_map.symbol_of(n).map(Arc::clone);
+                        return symbol_map.symbol_of(&n).map(Arc::clone);
                     }
-                    _ => cur = n.parent.as_ref(),
+                    _ => cur = n.parent(),
                 }
             }
             None
@@ -455,7 +455,7 @@ impl Checker {
                 // Go getSymbolChain：符号是父模块 export=（隔代自身）时，
                 // 链退化为模块限定名（容器解析与限定名同源）
                 let container = sym
-                    .parent
+                    .parent()
                     .clone()
                     .or_else(|| self.namespace_container_from_declarations(sym));
                 if std::env::var_os("TSOX_DEBUG_QI").is_some() {
@@ -529,7 +529,7 @@ impl Checker {
             return format!("typeof {}", sym.name);
         }
 
-        if sym.parent.as_ref().is_some_and(|p| p.flags.contains(SymbolFlags::ValueModule)) {
+        if sym.parent().clone().as_ref().is_some_and(|p| p.flags.contains(SymbolFlags::ValueModule)) {
             return self
                 .namespace_qualifier_of(sym)
                 .map(|q| format!("{q}.{}", sym.name))

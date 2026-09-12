@@ -48,8 +48,8 @@ impl Parser {
                 }
                 self.token == SyntaxKind::DotDotDotToken || self.is_start_of_expression()
             }
-            ParsingContext::Parameters => self.is_start_of_parameter(),
-            ParsingContext::JSDocParameters => self.is_start_of_parameter(),
+            ParsingContext::Parameters => self.is_start_of_parameter(false),
+            ParsingContext::JSDocParameters => self.is_start_of_parameter(true),
             ParsingContext::TypeArguments | ParsingContext::TupleElementTypes => {
                 self.token == SyntaxKind::CommaToken || self.is_start_of_type()
             }
@@ -143,26 +143,40 @@ impl Parser {
             | SyntaxKind::TryKeyword
             | SyntaxKind::DebuggerKeyword
             | SyntaxKind::CatchKeyword
-            | SyntaxKind::FinallyKeyword
-            | SyntaxKind::ConstKeyword
-            | SyntaxKind::ExportKeyword
-            | SyntaxKind::ImportKeyword
+            | SyntaxKind::FinallyKeyword => true,
+            SyntaxKind::ImportKeyword => {
+                self.is_start_of_declaration()
+                    || self.is_next_token_open_paren_or_less_than_or_dot()
+            }
+            SyntaxKind::ConstKeyword | SyntaxKind::ExportKeyword => {
+                self.is_start_of_declaration()
+            }
+            SyntaxKind::AsyncKeyword
             | SyntaxKind::InterfaceKeyword
             | SyntaxKind::TypeKeyword
             | SyntaxKind::ModuleKeyword
             | SyntaxKind::NamespaceKeyword
             | SyntaxKind::DeclareKeyword
-            | SyntaxKind::AsyncKeyword
             | SyntaxKind::GlobalKeyword
-            | SyntaxKind::DeferKeyword
-            | SyntaxKind::AccessorKeyword
+            | SyntaxKind::DeferKeyword => true,
+            SyntaxKind::AccessorKeyword
             | SyntaxKind::PublicKeyword
             | SyntaxKind::PrivateKeyword
             | SyntaxKind::ProtectedKeyword
             | SyntaxKind::StaticKeyword
-            | SyntaxKind::ReadonlyKeyword => true,
+            | SyntaxKind::ReadonlyKeyword => {
+                self.is_start_of_declaration()
+                    || !self.next_token_is_identifier_or_keyword_on_same_line()
+            }
             _ => self.is_start_of_expression(),
         }
+    }
+
+    pub(crate) fn is_next_token_open_paren_or_less_than_or_dot(&self) -> bool {
+        matches!(
+            self.look_ahead_token(),
+            SyntaxKind::OpenParenToken | SyntaxKind::LessThanToken | SyntaxKind::DotToken
+        )
     }
 
     pub(crate) fn is_start_of_expression(&self) -> bool {
@@ -272,6 +286,7 @@ impl Parser {
             last_template_literal_was_middle: self.last_template_literal_was_middle,
             yield_context: self.yield_context,
             await_context: self.await_context,
+            decorator_context: self.decorator_context,
             parsing_contexts: self.parsing_contexts,
         }
     }

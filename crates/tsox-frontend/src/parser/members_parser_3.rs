@@ -117,14 +117,9 @@ impl Parser {
     }
 
     pub(crate) fn parse_class_members(&mut self) -> NodeList {
-        let pos = self.token_pos();
         self.expect(SyntaxKind::OpenBraceToken);
         let members = self.parse_list(ParsingContext::ClassMembers, Parser::parse_class_member);
         self.expect(SyntaxKind::CloseBraceToken);
-        let end = self.node_pos();
-        NodeList {
-            loc: TextRange::new(pos, end),
-            nodes: members.nodes,
-        }
+        members
     }
 }

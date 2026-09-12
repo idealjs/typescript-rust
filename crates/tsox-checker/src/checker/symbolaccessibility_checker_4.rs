@@ -100,7 +100,7 @@ impl Checker {
             return true;
         }
 
-        if let Some(ref parent) = symbol_from_symbol_table.parent {
+        if let Some(ref parent) = symbol_from_symbol_table.parent() {
             let parent_ctx = AccessibleSymbolChainContext {
                 symbol: Arc::clone(parent),
                 enclosing_declaration: ctx.enclosing_declaration.clone(),
@@ -241,7 +241,7 @@ impl Checker {
                 _ => {}
             }
 
-            location = loc.parent.clone();
+            location = loc.parent();
         }
 
         if !self.globals.is_empty() {

@@ -70,7 +70,7 @@ impl Checker {
         if node.kind != SyntaxKind::ConstKeyword {
             return None;
         }
-        let assertion = node.parent.as_ref()?;
+        let assertion = node.parent()?;
         if assertion.kind != SyntaxKind::AsExpression {
             return None;
         }

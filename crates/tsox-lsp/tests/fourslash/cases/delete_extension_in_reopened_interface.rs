@@ -16,7 +16,7 @@ c.a;"#;
     let mut s = Session::new_for_test("deleteExtensionInReopenedInterface", content);
     fourslash::go_to_marker(&mut s, "del");
     // TODO: f.DeleteAtCaret(t, 9)
-    // TODO: f.GoToEOF(t)
+    fourslash::go_to_eof(&mut s, );
     fourslash::insert(&mut s, "var a = i.a;");
     fourslash::go_to_marker(&mut s, "delImplements");
     // TODO: f.DeleteAtCaret(t, 12)

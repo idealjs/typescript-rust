@@ -110,12 +110,48 @@ impl Parser {
             || self.token == SyntaxKind::OpenBraceToken
     }
 
-    pub(crate) fn is_start_of_parameter(&self) -> bool {
-        self.token == SyntaxKind::OpenBracketToken
-            || self.token == SyntaxKind::OpenBraceToken
-            || self.token == SyntaxKind::DotDotDotToken
-            || self.is_identifier()
-            || self.is_literal_property_name()
+    /// Go isStartOfParameter
+    pub(crate) fn is_start_of_parameter(&self, is_jsdoc_parameter: bool) -> bool {
+        self.token == SyntaxKind::DotDotDotToken
+            || self.is_binding_identifier_or_pattern()
+            || crate::ast::node_data_generated::is_modifier_kind(self.token)
+            || self.token == SyntaxKind::AtToken
+            || self.is_start_of_type_ex(!is_jsdoc_parameter)
+    }
+
+    /// Go isStartOfType(inStartOfParameter)
+    pub(crate) fn is_start_of_type_ex(&self, in_start_of_parameter: bool) -> bool {
+        use SyntaxKind::*;
+        match self.token {
+            AnyKeyword | UnknownKeyword | StringKeyword | NumberKeyword | BigIntKeyword
+            | BooleanKeyword | ReadonlyKeyword | SymbolKeyword | UniqueKeyword | VoidKeyword
+            | UndefinedKeyword | NullKeyword | ThisKeyword | TypeOfKeyword | NeverKeyword
+            | OpenBraceToken | OpenBracketToken | LessThanToken | BarToken | AmpersandToken
+            | NewKeyword | StringLiteral | NumericLiteral | BigIntLiteral | TrueKeyword
+            | FalseKeyword | ObjectKeyword | AsteriskToken | QuestionToken | ExclamationToken
+            | DotDotDotToken | InferKeyword | ImportKeyword | AssertsKeyword
+            | NoSubstitutionTemplateLiteral | TemplateHead => true,
+            FunctionKeyword => !in_start_of_parameter,
+            MinusToken => !in_start_of_parameter && self.next_token_is_numeric_or_big_int_literal(),
+            OpenParenToken => {
+                !in_start_of_parameter && self.next_is_parenthesized_or_function_type()
+            }
+            _ => self.is_identifier(),
+        }
+    }
+
+    pub(crate) fn next_token_is_numeric_or_big_int_literal(&self) -> bool {
+        let mut s = self.scanner.clone();
+        let t = s.scan();
+        t == SyntaxKind::NumericLiteral || t == SyntaxKind::BigIntLiteral
+    }
+
+    pub(crate) fn next_is_parenthesized_or_function_type(&self) -> bool {
+        let mut s = self.clone_state();
+        s.next_token();
+        s.token == SyntaxKind::CloseParenToken
+            || s.is_start_of_parameter(false)
+            || s.is_start_of_type_ex(false)
     }
 
     pub(crate) fn is_start_of_type(&self) -> bool {
@@ -186,6 +222,16 @@ impl Parser {
             } else {
                 self.parse_error_at_current_token(tsox_core::diagnostics::IDENTIFIER_EXPECTED, &[]);
             }
+            // Go createIdentifierWithDiagnostic：报错后返回零宽 missing，
+            // 不消费当前 token（由外层 expect/列表恢复推进）
+            let pos = self.token_pos();
+            return Arc::new(Node::with_loc(
+                SyntaxKind::Identifier,
+                NodeData::Identifier(IdentifierData {
+                    text: String::new(),
+                }),
+                TextRange::new(pos, pos),
+            ));
         }
         let text = self.scanner.token_value();
         let pos = self.token_pos();
@@ -218,11 +264,10 @@ impl Parser {
         self.parse_property_name()
     }
 
-    fn next_token_is_identifier_or_keyword_on_same_line(&self) -> bool {
+    pub(crate) fn next_token_is_identifier_or_keyword_on_same_line(&self) -> bool {
         let mut scanner = self.scanner.clone();
         let kind = scanner.scan();
-        (kind == SyntaxKind::Identifier || is_keyword(kind))
-            && !scanner.has_preceding_line_break()
+        is_identifier_or_keyword(kind) && !scanner.has_preceding_line_break()
     }
 
     pub(crate) fn parse_property_name(&mut self) -> Arc<Node> {

@@ -2,7 +2,7 @@ use crate::ast::*;
 use std::sync::Arc;
 
 pub fn is_identifier_name(node: &Arc<Node>) -> bool {
-    let Some(parent) = node.parent.as_ref() else {
+    let Some(parent) = node.parent() else {
         return false;
     };
     match parent.kind {
@@ -42,10 +42,10 @@ pub fn is_identifier_name(node: &Arc<Node>) -> bool {
 }
 
 pub fn is_in_top_level_context(node: &Arc<Node>) -> bool {
-    let Some(parent) = node.parent.as_ref() else {
+    let Some(parent) = node.parent() else {
         return true;
     };
-    !find_ancestor(parent, is_function_like).is_some()
+    !find_ancestor(&parent, is_function_like).is_some()
 }
 
 pub fn is_module_with_string_literal_name(node: &Node) -> bool {

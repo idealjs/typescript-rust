@@ -175,7 +175,7 @@ impl Checker {
         if t.flags.contains(TypeFlags::EnumLiteral) {
             if let Some(sym) = &t.symbol
                 && sym.flags.contains(SymbolFlags::EnumMember)
-                && let Some(parent) = &sym.parent
+                && let Some(parent) = &sym.parent()
                 && let Some(cached) = self
                     .type_alias_links
                     .get(parent)

@@ -7,7 +7,7 @@ impl Parser {
         &mut self,
         modifiers: Option<Arc<ModifierList>>,
     ) -> Arc<Node> {
-        let pos = self.token_pos();
+        let pos = Self::declaration_start(&modifiers, self.token_pos());
         let keyword = self.token;
 
         if self.token == SyntaxKind::GlobalKeyword {
@@ -43,60 +43,45 @@ impl Parser {
             self.parse_semicolon();
             None
         };
+
         let end = body.as_ref().map_or(self.token_pos(), |b| b.end());
 
         let mut name = segments.pop().expect("at least one segment");
         let mut inner_body = body;
-
-        let user_modifiers = modifiers;
-        let mut mods = if segments.is_empty() {
-            user_modifiers.clone()
-        } else {
-            None
-        };
         let outermost = segments.is_empty();
 
-        let export_only: Option<Arc<ModifierList>> = if segments.is_empty() {
-            None
-        } else {
-            let export_tok = Arc::new(Node::with_loc(
-                SyntaxKind::ExportKeyword,
-                NodeData::Token,
-                TextRange::new(pos, pos + 6),
-            ));
-            Some(Arc::new(ModifierList::new(
-                vec![export_tok],
-                ModifierFlags::Export,
-            )))
-        };
         loop {
+            let decl_pos = if segments.is_empty() { pos } else { name.pos() };
+            let mods = if segments.is_empty() && outermost {
+                modifiers.clone()
+            } else {
+                let phantom_pos = name.pos();
+                let export_tok = Arc::new(Node::with_loc_flags(
+                    SyntaxKind::ExportKeyword,
+                    NodeData::Token,
+                    TextRange::new(phantom_pos, phantom_pos),
+                    crate::ast::NodeFlags::Reparsed,
+                ));
+                let mut ml = ModifierList::new(vec![export_tok], ModifierFlags::Export);
+                ml.list.loc = TextRange::new(phantom_pos, phantom_pos);
+                Some(Arc::new(ml))
+            };
             let decl = Arc::new(Node::with_loc(
                 SyntaxKind::ModuleDeclaration,
                 NodeData::ModuleDeclaration(ModuleDeclarationData {
-                    modifiers: mods.clone().or_else(|| export_only.clone()),
+                    modifiers: mods,
                     keyword,
                     name: Arc::clone(&name),
                     body: inner_body,
                 }),
-                TextRange::new(pos, end),
+                TextRange::new(decl_pos, end),
             ));
             match segments.pop() {
                 Some(seg) => {
                     name = seg;
                     inner_body = Some(decl);
-                    mods = None;
                 }
-                None => {
-                    if !outermost {
-                        let decl_mut = Arc::as_ptr(&decl) as *mut Node;
-                        unsafe {
-                            if let NodeData::ModuleDeclaration(d) = &mut (*decl_mut).data {
-                                d.modifiers = user_modifiers.clone();
-                            }
-                        }
-                    }
-                    return decl;
-                }
+                None => return decl,
             }
         }
     }

@@ -19,15 +19,15 @@ pub(crate) fn is_variable_statement(node: &Arc<Node>) -> bool {
 }
 
 pub(crate) fn is_parent_module_block_or_source_file(node: &Arc<Node>) -> bool {
-    match &node.parent {
-        Some(parent) => is_module_block(parent) || is_source_file(parent),
+    match node.parent() {
+        Some(parent) => is_module_block(&parent) || is_source_file(&parent),
         None => false,
     }
 }
 
 pub(crate) fn is_parent_class_like(node: &Arc<Node>) -> bool {
-    match &node.parent {
-        Some(parent) => is_class_declaration(parent) || is_class_expression(parent),
+    match node.parent() {
+        Some(parent) => is_class_declaration(&parent) || is_class_expression(&parent),
         None => false,
     }
 }

@@ -218,8 +218,8 @@ impl Checker {
                 return None;
             };
             if be.dot_dot_dot_token.is_none() && be.initializer.is_none() {
-                let pattern = decl.parent.as_ref()?;
-                let var_decl = Arc::clone(pattern.parent.as_ref()?);
+                let pattern = decl.parent()?;
+                let var_decl = Arc::clone(pattern.parent().as_ref()?);
                 if let Some(init) = Self::candidate_variable_declaration_initializer(&var_decl) {
                     let init_matches = match init.kind {
                         SyntaxKind::Identifier => self.is_symbol_identifier(&init, symbol),

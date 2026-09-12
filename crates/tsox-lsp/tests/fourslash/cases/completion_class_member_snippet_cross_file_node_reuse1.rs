@@ -26,8 +26,7 @@ export class CollapsibleContainerNode extends ElementNode {
 }"#;
     let mut s = Session::new_for_test("completionClassMemberSnippetCrossFileNodeReuse1", content);
     // TODO: opts786 := f.GetOptions()
-    // TODO: opts786.FormatCodeSettings.InsertSpaceAfterConstructor = core.TSFalse
-    // TODO: f.Configure(t, opts786)
+    fourslash::configure_format_settings(&mut s, &[("insert_space_after_constructor", "false")]);
     fourslash::go_to_marker(&mut s, "1");
     // TODO: f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
 }

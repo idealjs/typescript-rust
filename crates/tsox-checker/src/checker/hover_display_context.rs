@@ -7,7 +7,7 @@ use tsox_frontend::ast::{Node, SyntaxKind};
 /// Go ast.IsInExpressionContext：父节点类别 + 表达式归属判定
 pub(crate) fn is_in_expression_context(node: &Arc<Node>) -> bool {
     use tsox_frontend::ast::NodeData;
-    let Some(parent) = node.parent.as_ref() else {
+    let Some(parent) = node.parent() else {
         return false;
     };
     let is = |child: &Arc<Node>| Arc::ptr_eq(child, node);
@@ -21,7 +21,7 @@ pub(crate) fn is_in_expression_context(node: &Arc<Node>) -> bool {
         | SyntaxKind::EnumMember
         | SyntaxKind::PropertyAssignment
         | SyntaxKind::BindingElement => {
-            node_initializer(parent).is_some_and(|i| is(&i))
+            node_initializer(&parent).is_some_and(|i| is(&i))
         }
         SyntaxKind::ExpressionStatement
         | SyntaxKind::IfStatement
@@ -48,7 +48,7 @@ pub(crate) fn is_in_expression_context(node: &Arc<Node>) -> bool {
         SyntaxKind::ShorthandPropertyAssignment => {
             matches!(&parent.data, NodeData::ShorthandPropertyAssignment(sd) if sd.object_assignment_initializer.as_ref().is_some_and(|i| is(i)))
         }
-        _ => is_expression_node(parent),
+        _ => is_expression_node(&parent),
     }
 }
 
@@ -113,7 +113,7 @@ fn node_initializer(parent: &Arc<Node>) -> Option<Arc<Node>> {
 
 /// Go ast.IsThisInTypeQuery：typeof 查询中的 this
 pub(crate) fn is_this_in_type_query(node: &Arc<Node>) -> bool {
-    let Some(parent) = node.parent.as_ref() else {
+    let Some(parent) = node.parent() else {
         return false;
     };
     if parent.kind != SyntaxKind::TypeOfExpression {

@@ -67,7 +67,7 @@ impl Checker {
                         let expr_name = ea.expression.text().to_string();
                         let sym_map = self.program.symbol_map();
                         let file_locals = d
-                            .parent
+                            .parent()
                             .as_ref()
                             .and_then(|sf| sym_map.locals.get(&sf.id()));
                         if let Some(cs) = file_locals.and_then(|l| l.get(&expr_name).cloned()) {
@@ -104,9 +104,9 @@ impl Checker {
                 _ => return None,
             }
         };
-        let mut import_decl = import_decl.parent.as_ref()?;
+        let mut import_decl = import_decl.parent()?;
         while !matches!(import_decl.data, NodeData::ImportDeclaration(_)) {
-            import_decl = import_decl.parent.as_ref()?;
+            import_decl = import_decl.parent()?;
         }
         let module_spec = match &import_decl.data {
             NodeData::ImportDeclaration(d) => d.module_specifier.text().to_string(),

@@ -65,6 +65,9 @@ pub struct Scanner {
     pub(crate) language_variant: crate::ast::LanguageVariant,
 
     pub(crate) identifier_value: Option<String>,
+
+    /// Go Scanner.skipTrivia：false 时 scan() 产出 trivia token（格式化器用）
+    pub(crate) skip_trivia: bool,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

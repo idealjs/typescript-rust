@@ -21,7 +21,7 @@ impl Checker {
             return;
         }
         if node.kind == SyntaxKind::ConstructorKeyword
-            && let Some(parent) = node.parent.as_ref()
+            && let Some(parent) = node.parent().as_ref()
             && matches!(
                 parent.kind,
                 SyntaxKind::Constructor | SyntaxKind::ConstructSignature

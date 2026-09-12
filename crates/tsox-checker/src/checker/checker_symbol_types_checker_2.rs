@@ -129,7 +129,7 @@ impl Checker {
             // catch 子句变量无注解无初始化：unknown（useUnknownInCatchVariables 默认）
             if decl.kind == SyntaxKind::VariableDeclaration
                 && decl
-                    .parent
+                    .parent()
                     .as_ref()
                     .is_some_and(|p| p.kind == SyntaxKind::CatchClause)
             {
@@ -200,7 +200,7 @@ impl Checker {
             } else {
                 let owner_class = match &decl.data {
                     NodeData::PropertyDeclaration(_) => decl
-                        .parent
+                        .parent()
                         .as_ref()
                         .filter(|p| {
                             matches!(
@@ -291,7 +291,7 @@ impl Checker {
             }
         }
         // 成员自身的限定容器 = 根类型符号（如 I），供 qualified_symbol_name 使用
-        if member.parent.is_none() {
+        if member.parent().is_none() {
             let mlinks = self.value_symbol_links.get_or_default(&member);
             if mlinks.container_symbol.is_none() {
                 mlinks.container_symbol = Some(sym);
@@ -307,9 +307,9 @@ impl Checker {
         loop {
             match &cur.data {
                 NodeData::BindingElement(d) => {
-                    let parent_kind = cur.parent.as_ref().map(|p| p.kind);
+                    let parent_kind = cur.parent().as_ref().map(|p| p.kind);
                     if parent_kind == Some(tsox_frontend::ast::SyntaxKind::ArrayBindingPattern) {
-                        let pattern = cur.parent.clone().expect("checked kind above");
+                        let pattern = cur.parent().expect("checked kind above");
                         let index = match &pattern.data {
                             NodeData::BindingPattern(bp) => bp
                                 .elements
@@ -337,10 +337,10 @@ impl Checker {
                         })?;
                         path.push(BindingPathSeg::Prop(seg, renamed.is_some()));
                     }
-                    cur = Arc::clone(cur.parent.as_ref()?);
+                    cur = Arc::clone(cur.parent().as_ref()?);
                 }
                 NodeData::BindingPattern(_) => {
-                    cur = Arc::clone(cur.parent.as_ref()?);
+                    cur = Arc::clone(cur.parent().as_ref()?);
                 }
                 NodeData::ParameterDeclaration(d) => {
                     let mut t = match &d.type_node {
@@ -376,7 +376,7 @@ impl Checker {
         param: &Arc<Node>,
     ) -> Option<Arc<Type>> {
         use tsox_frontend::ast::NodeData;
-        let host = param.parent.clone()?;
+        let host = param.parent()?;
         let (host_kind_ok, host_type_params, host_params) = match &host.data {
             NodeData::FunctionExpression(d) => (true, d.type_parameters.clone(), Some(&d.parameters)),
             NodeData::ArrowFunction(d) => (true, d.type_parameters.clone(), Some(&d.parameters)),
@@ -392,7 +392,7 @@ impl Checker {
         let param_index = param_index?;
         // 对象字面量方法：上下文签名取字面量上下文类型的同名属性（Go getContextualSignatureForObjectLiteralMethod）
         if matches!(host.data, NodeData::MethodDeclaration(_)) {
-            let obj_lit = host.parent.clone()?;
+            let obj_lit = host.parent()?;
             if obj_lit.kind != SyntaxKind::ObjectLiteralExpression {
                 return None;
             }
@@ -414,11 +414,11 @@ impl Checker {
                 .contextual_param_type_at(&sig, &host_params, param_index, param, is_rest, is_this_param)
                 .into();
         }
-        let mut call = host.parent.clone()?;
+        let mut call = host.parent()?;
         let mut in_parens = false;
         while call.kind == tsox_frontend::ast::SyntaxKind::ParenthesizedExpression {
             in_parens = true;
-            call = call.parent.clone()?;
+            call = call.parent()?;
         }
         let call_ctx = match &call.data {
             NodeData::CallExpression(d) => {
@@ -426,7 +426,7 @@ impl Checker {
                 let callee_is_host = (!in_parens && Arc::ptr_eq(&d.expression, &host))
                     || (in_parens
                         && host
-                            .parent
+                            .parent()
                             .as_ref()
                             .is_some_and(|p| Arc::ptr_eq(p, &d.expression)));
                 if callee_is_host {
@@ -565,7 +565,7 @@ impl Checker {
             self.current_file_symbol = self.program.symbol_map().symbol_of(&file.node).cloned();
 
             let mut chain: Vec<Arc<Node>> = Vec::new();
-            let mut cur = decl.parent.clone();
+            let mut cur = decl.parent();
             while let Some(n) = cur {
                 if matches!(
                     n.kind,
@@ -600,7 +600,7 @@ impl Checker {
                         break;
                     }
                 }
-                cur = n.parent.clone();
+                cur = n.parent();
             }
             for scope in chain.iter().rev() {
                 self.push_scope(scope);

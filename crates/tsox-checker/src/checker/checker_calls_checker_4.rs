@@ -215,12 +215,12 @@ impl Checker {
                         && r.symbol.as_ref().is_some_and(|class_sym| {
                             class_sym.flags.contains(tsox_frontend::ast::SymbolFlags::Class)
                                 && class_sym.declarations.iter().any(|d| {
-                                    let mut cur = d.parent.clone();
+                                    let mut cur = d.parent();
                                     while let Some(n) = cur {
                                         if Arc::ptr_eq(&n, &fn_decl) {
                                             return true;
                                         }
-                                        cur = n.parent.clone();
+                                        cur = n.parent();
                                     }
                                     false
                                 })

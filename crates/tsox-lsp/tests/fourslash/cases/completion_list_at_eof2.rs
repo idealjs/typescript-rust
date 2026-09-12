@@ -10,6 +10,6 @@ fn completion_list_at_eof2() {
 }
 var p = <Shapes."#;
     let mut s = Session::new_for_test("completionListAtEOF2", content);
-    // TODO: f.GoToEOF(t)
+    fourslash::go_to_eof(&mut s, );
     fourslash::verify_completions_exact_at(&mut s, None, &["Point"]);
 }

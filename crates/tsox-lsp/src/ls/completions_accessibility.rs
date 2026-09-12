@@ -36,7 +36,7 @@ pub(super) fn is_property_accessible(
 
 fn declaring_class_of(symbol: &Arc<Symbol>) -> Option<Arc<Node>> {
     for decl in &symbol.declarations {
-        let mut current = decl.parent.clone();
+        let mut current = decl.parent();
         while let Some(n) = current {
             if matches!(
                 n.kind,
@@ -44,7 +44,7 @@ fn declaring_class_of(symbol: &Arc<Symbol>) -> Option<Arc<Node>> {
             ) {
                 return Some(n);
             }
-            current = n.parent.clone();
+            current = n.parent();
         }
     }
     None
@@ -100,7 +100,7 @@ pub(super) fn class_named_like(scope: &Arc<Node>, name: &str) -> Option<Arc<Node
             });
             return found;
         }
-        current = n.parent.clone();
+        current = n.parent();
     }
     None
 }
@@ -129,13 +129,13 @@ pub(super) fn is_node_descendant_of(node: &Arc<Node>, ancestor: &Arc<Node>) -> b
         if n.kind == SyntaxKind::SourceFile {
             return false;
         }
-        current = n.parent.clone();
+        current = n.parent();
     }
     false
 }
 
 pub(super) fn enclosing_class_of(node: &Arc<Node>) -> Option<Arc<Node>> {
-    let mut current = node.parent.clone();
+    let mut current = node.parent();
     while let Some(n) = current {
         if matches!(
             n.kind,
@@ -143,7 +143,7 @@ pub(super) fn enclosing_class_of(node: &Arc<Node>) -> Option<Arc<Node>> {
         ) {
             return Some(n);
         }
-        current = n.parent.clone();
+        current = n.parent();
     }
     None
 }

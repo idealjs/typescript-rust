@@ -3,6 +3,18 @@
 use crate::parser::impl_chunk::*;
 
 impl Parser {
+    /// Go 声明节点 span 起于首修饰符/装饰符（statement 级 pos 在修饰符前捕获），
+    /// Rust 各声明解析入口在关键字处取 pos，此处向前扩展覆盖修饰符。
+    pub(crate) fn declaration_start(
+        modifiers: &Option<Arc<ModifierList>>,
+        keyword_pos: usize,
+    ) -> usize {
+        modifiers
+            .as_ref()
+            .and_then(|m| m.nodes.first().map(|n| n.pos()))
+            .map_or(keyword_pos, |p| p.min(keyword_pos))
+    }
+
     pub(crate) fn make_modifier_list(
         &self,
         modifiers: Vec<(SyntaxKind, usize, usize)>,
@@ -47,7 +59,11 @@ impl Parser {
     pub(crate) fn parse_decorator(&mut self) -> Arc<Node> {
         let pos = self.token_pos();
         self.expect(SyntaxKind::AtToken);
+        // Go doInContext(NodeFlagsDecoratorContext)：装饰器表达式内不算元素访问
+        let save_decorator_context = self.decorator_context;
+        self.decorator_context = true;
         let expression = self.parse_left_hand_side_expression();
+        self.decorator_context = save_decorator_context;
         let end = expression.end();
         Arc::new(Node::with_loc(
             SyntaxKind::Decorator,

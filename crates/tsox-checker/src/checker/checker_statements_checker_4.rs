@@ -7,13 +7,13 @@ impl Checker {
         if let tsox_frontend::ast::NodeData::VariableDeclaration(data) = &node.data {
             if data.initializer.is_none() {
                 let is_const = node
-                    .parent
+                    .parent()
                     .as_ref()
                     .is_some_and(|list| list.flags.contains(NodeFlags::Const));
                 let in_for_in_of = node
-                    .parent
+                    .parent()
                     .as_ref()
-                    .and_then(|l| l.parent.as_ref())
+                    .and_then(|l| l.parent())
                     .is_some_and(|g| {
                         matches!(
                             g.kind,
@@ -23,19 +23,19 @@ impl Checker {
                 let is_ambient = self.ambient_context_depth > 0
                     || node.flags.contains(NodeFlags::Ambient)
                     || node
-                        .parent
+                        .parent()
                         .as_ref()
-                        .and_then(|p| p.parent.as_ref())
+                        .and_then(|p| p.parent())
                         .is_some_and(|stmt| stmt.has_syntactic_modifier(ModifierFlags::Ambient))
                     || {
-                        let mut anc = node.parent.as_ref();
+                        let mut anc = node.parent();
                         let mut found = false;
                         while let Some(a) = anc {
                             if a.has_syntactic_modifier(ModifierFlags::Ambient) {
                                 found = true;
                                 break;
                             }
-                            anc = a.parent.as_ref();
+                            anc = a.parent();
                         }
                         found
                     }
@@ -56,11 +56,11 @@ impl Checker {
             }
 
             if data.initializer.is_some() && data.name.kind == SyntaxKind::Identifier {
-                let list_is_var = node.parent.as_ref().is_none_or(|l| {
+                let list_is_var = node.parent().as_ref().is_none_or(|l| {
                     !(l.flags.contains(NodeFlags::Let) || l.flags.contains(NodeFlags::Const))
                 });
                 let is_param = node
-                    .parent
+                    .parent()
                     .as_ref()
                     .is_some_and(|l| l.kind == SyntaxKind::Parameter);
                 if list_is_var && !is_param {
@@ -70,16 +70,16 @@ impl Checker {
                         && local.flags.contains(SymbolFlags::BlockScopedVariable)
                         && let Some(vd) = local.value_declaration.clone()
                         && vd.kind == SyntaxKind::VariableDeclaration
-                        && let Some(list) = vd.parent.as_ref()
+                        && let Some(list) = vd.parent().as_ref()
                         && list.kind == SyntaxKind::VariableDeclarationList
                     {
-                        let container = list.parent.as_ref().and_then(|s| s.parent.as_ref());
+                        let container = list.parent().and_then(|s| s.parent());
                         let names_share_scope = container.is_some_and(|c| {
                             c.kind == SyntaxKind::ModuleBlock
                                 || c.kind == SyntaxKind::ModuleDeclaration
                                 || c.kind == SyntaxKind::SourceFile
                                 || (c.kind == SyntaxKind::Block
-                                    && c.parent.as_ref().is_some_and(|p| {
+                                    && c.parent().as_ref().is_some_and(|p| {
                                         matches!(
                                             p.kind,
                                             SyntaxKind::FunctionDeclaration

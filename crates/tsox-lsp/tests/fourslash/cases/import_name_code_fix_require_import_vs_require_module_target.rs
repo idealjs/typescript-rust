@@ -14,6 +14,6 @@ x"#;
     fourslash::go_to_file(&mut s, "index.js");
     // TODO: f.VerifyCodeFix(t, fourslash.VerifyCodeFixOptions{
     // TODO: f.GoToPosition(t, 0)
-    // TODO: f.InsertLine(t, "const fs = require('fs');\n")
+    fourslash::insert_line(&mut s, "const fs = require('fs');\n");
     // TODO: f.VerifyCodeFix(t, fourslash.VerifyCodeFixOptions{
 }

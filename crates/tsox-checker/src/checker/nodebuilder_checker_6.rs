@@ -16,7 +16,7 @@ impl Checker {
                 if let Some(sym) = symbol_map.symbol_of(n) {
                     return Some(Arc::clone(sym));
                 }
-                current = n.parent.as_ref();
+                current = n.parent().as_ref();
             }
             None
         });
@@ -38,7 +38,7 @@ impl Checker {
                 if let Some(sym) = symbol_map.symbol_of(n) {
                     return Some(Arc::clone(sym));
                 }
-                current = n.parent.as_ref();
+                current = n.parent().as_ref();
             }
             None
         });

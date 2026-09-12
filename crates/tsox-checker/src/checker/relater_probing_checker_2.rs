@@ -330,12 +330,12 @@ impl Checker {
         }
         let symbol_map = self.program.symbol_map();
         let container_name = |s: &Symbol| -> Option<String> {
-            let mut node = s.declarations.first()?.parent.as_ref()?;
+            let mut node = s.declarations.first()?.parent()?;
             for _ in 0..4 {
                 if let Some(sym) = symbol_map.symbols.get(&node.id()) {
                     return Some(sym.name.clone());
                 }
-                node = node.parent.as_ref()?;
+                node = node.parent()?;
             }
             None
         };
@@ -353,12 +353,12 @@ impl Checker {
     ) -> bool {
         let symbol_map = self.program.symbol_map();
         let container_of = |s: &Arc<Symbol>| -> Option<usize> {
-            let mut node = s.declarations.first()?.parent.as_ref()?;
+            let mut node = s.declarations.first()?.parent()?;
             for _ in 0..4 {
                 if let Some(sym) = symbol_map.symbols.get(&node.id()) {
                     return Some(Arc::as_ptr(sym) as *const Symbol as usize);
                 }
-                node = node.parent.as_ref()?;
+                node = node.parent()?;
             }
             None
         };

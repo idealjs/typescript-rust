@@ -3,12 +3,93 @@
 use crate::scanner::impl_chunk::*;
 
 impl Scanner {
+    /// Go scan() 在 skipTrivia=false 时产出 trivia token 的分支
+    fn try_scan_trivia_token(&mut self) -> Option<SyntaxKind> {
+        use SyntaxKind::*;
+        if self.pos >= self.end {
+            return None;
+        }
+        let b = self.text.as_bytes()[self.pos];
+        self.token_pos = self.pos;
+        match b {
+            b' ' | b'\t' | 0x0B | 0x0C => {
+                self.pos += 1;
+                while self.pos < self.end {
+                    let ch = self.text.as_bytes()[self.pos];
+                    if !matches!(ch, b' ' | b'\t' | 0x0B | 0x0C) {
+                        break;
+                    }
+                    self.pos += 1;
+                }
+                self.token = WhitespaceTrivia;
+                self.token_end = self.pos;
+                Some(WhitespaceTrivia)
+            }
+            b'\n' | b'\r' => {
+                self.token_flags |= TOKEN_FLAGS_PRECEDING_LINE_BREAK;
+                if b == b'\r'
+                    && self.pos + 1 < self.end
+                    && self.text.as_bytes()[self.pos + 1] == b'\n'
+                {
+                    self.pos += 2;
+                } else {
+                    self.pos += 1;
+                }
+                self.token = NewLineTrivia;
+                self.token_end = self.pos;
+                Some(NewLineTrivia)
+            }
+            b'/' if self.text.as_bytes().get(self.pos + 1) == Some(&b'*') => {
+                self.pos += 2;
+                let mut closed = false;
+                while self.pos < self.end {
+                    if self.text.as_bytes()[self.pos] == b'*'
+                        && self.text.as_bytes().get(self.pos + 1) == Some(&b'/')
+                    {
+                        self.pos += 2;
+                        closed = true;
+                        break;
+                    }
+                    let ch = self.text.as_bytes()[self.pos] as char;
+                    if matches!(ch, '\n' | '\r' | '\u{2028}' | '\u{2029}') {
+                        self.token_flags |= TOKEN_FLAGS_PRECEDING_LINE_BREAK;
+                    }
+                    self.pos += 1;
+                }
+                let _ = closed;
+                self.token = MultiLineCommentTrivia;
+                self.token_end = self.pos;
+                Some(MultiLineCommentTrivia)
+            }
+            b'/' if self.text.as_bytes().get(self.pos + 1) == Some(&b'/') => {
+                self.pos += 2;
+                while self.pos < self.end {
+                    let ch = self.text.as_bytes()[self.pos] as char;
+                    if matches!(ch, '\n' | '\r' | '\u{2028}' | '\u{2029}') {
+                        break;
+                    }
+                    self.pos += 1;
+                }
+                self.token = SingleLineCommentTrivia;
+                self.token_end = self.pos;
+                Some(SingleLineCommentTrivia)
+            }
+            _ => None,
+        }
+    }
+
     pub fn scan(&mut self) -> SyntaxKind {
         self.preceding_line_break = false;
         self.token_flags = TOKEN_FLAGS_NONE;
         self.identifier_value = None;
 
         self.full_start_pos = self.pos;
+
+        if !self.skip_trivia {
+            if let Some(kind) = self.try_scan_trivia_token() {
+                return kind;
+            }
+        }
 
         let token = loop {
             self.token_pos = self.pos;
@@ -151,6 +232,27 @@ impl Scanner {
                 break self.scan_private_identifier();
             }
 
+            // Go：`<<<<<<<`/`|||||||`/`=======`/`>>>>>>>` 行首冲突标记（scan_punctuation 前）
+            let cb = c as u8;
+            if matches!(cb, b'<' | b'=' | b'>' | b'|')
+                && cb == *self.text.as_bytes().get(self.pos + 1).unwrap_or(&0)
+                && crate::scanner::is_conflict_marker_trivia(&self.text, self.pos)
+            {
+                self.report_error(
+                    DiagnosticKind::RegexMessage(tsox_core::diagnostics::MERGE_CONFLICT_MARKER_ENCOUNTERED),
+                    self.pos,
+                    MERGE_CONFLICT_MARKER_LENGTH,
+                );
+                let end = crate::scanner::scan_conflict_marker_trivia(&self.text, self.pos, None);
+                self.pos = end;
+                self.token_end = end;
+                self.token = SyntaxKind::ConflictMarkerTrivia;
+                if self.skip_trivia {
+                    continue;
+                }
+                break self.token;
+            }
+
             break self.scan_punctuation();
         };
 
@@ -164,11 +266,16 @@ impl Scanner {
     pub fn scan_template_continuation(&mut self) -> SyntaxKind {
         self.preceding_line_break = false;
         self.token_flags = TOKEN_FLAGS_NONE;
+        // Go ReScanTemplateToken：从 `}` 的 tokenStart 重扫，模板段 token 覆盖 `}`
+        self.pos = self.token_pos;
         self.token_pos = self.pos;
-
         self.full_start_pos = self.pos;
 
         let mut has_substitution = false;
+        if self.pos < self.end && self.text.as_bytes()[self.pos] == b'}' {
+            self.pos += 1;
+            has_substitution = true;
+        }
         while self.pos < self.end {
             let c = self.text.as_bytes()[self.pos] as char;
             if c == '`' {

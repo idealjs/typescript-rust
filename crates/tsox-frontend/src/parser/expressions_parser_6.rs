@@ -153,12 +153,11 @@ impl Parser {
                 TextRange::new(pos, end),
             ))
         } else {
-            // 铁律：错误恢复不允许「不消费的返回」——零宽 missing 后必须
-            // 前进，否则语句层循环在同一 token 上无限重入（OOM）
+            // Go createIdentifierWithDiagnostic：报 Expression expected 后返回
+            // 零宽 missing，不消费当前 token（由外层 expect/列表恢复推进）
             let pos = self.token_pos();
             let end = self.token_end();
             self.parse_error_at(pos, end, tsox_core::diagnostics::EXPRESSION_EXPECTED, &[]);
-            self.next_token();
             Arc::new(Node::with_loc(
                 SyntaxKind::Identifier,
                 NodeData::Identifier(IdentifierData {
@@ -196,7 +195,7 @@ impl Parser {
             let arrow_token = self.create_token_node();
             self.next_token();
             let body = if self.token == SyntaxKind::OpenBraceToken {
-                self.parse_block()
+                self.parse_block_ex(true)
             } else {
                 self.parse_assignment_expression()
             };

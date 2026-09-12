@@ -7,11 +7,9 @@ fn formatting_crash() {
 }"#;
     let mut s = Session::new_for_test("formattingCrash", content);
     // TODO: opts131 := f.GetOptions()
-    // TODO: opts131.FormatCodeSettings.PlaceOpenBraceOnNewLineForFunctions = core.TSTrue
-    // TODO: f.Configure(t, opts131)
+    fourslash::configure_format_settings(&mut s, &[("place_open_brace_on_new_line_for_functions", "true")]);
     // TODO: opts199 := f.GetOptions()
-    // TODO: opts199.FormatCodeSettings.PlaceOpenBraceOnNewLineForControlBlocks = core.TSTrue
-    // TODO: f.Configure(t, opts199)
+    fourslash::configure_format_settings(&mut s, &[("place_open_brace_on_new_line_for_control_blocks", "true")]);
     fourslash::format_document(&mut s, "");
     fourslash::go_to_marker(&mut s, "");
     fourslash::verify_current_line_content(&mut s, r#"module Default"#);

@@ -60,6 +60,7 @@ impl Scanner {
             script_target: tsox_core::core::compiler_options::ScriptTarget::ESNext,
             language_variant: crate::ast::LanguageVariant::Standard,
             identifier_value: None,
+            skip_trivia: true,
         }
     }
 
@@ -74,6 +75,11 @@ impl Scanner {
 
     pub fn set_language_variant(&mut self, variant: crate::ast::LanguageVariant) {
         self.language_variant = variant;
+    }
+
+    /// Go SetSkipTrivia
+    pub fn set_skip_trivia(&mut self, skip: bool) {
+        self.skip_trivia = skip;
     }
 
     pub(crate) fn report_error(&mut self, kind: DiagnosticKind, pos: usize, length: usize) {

@@ -136,7 +136,7 @@ impl Checker {
                     }
 
                     let parent_is_abstract_class = node
-                        .parent
+                        .parent()
                         .as_ref()
                         .map(|p| {
                             p.kind == SyntaxKind::ClassDeclaration
@@ -177,7 +177,7 @@ impl Checker {
                     ));
                 } else if flags.contains(ModifierFlags::Ambient)
                     || node
-                        .parent
+                        .parent()
                         .as_ref()
                         .map(|p| p.flags.contains(NodeFlags::Ambient))
                         .unwrap_or(false)

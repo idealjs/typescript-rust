@@ -22,7 +22,7 @@ pub(super) fn source_text_of(checker: &Checker, node: &Arc<Node>) -> Option<(Str
     let sf = checker.get_source_file_of_node(node)?;
     let mut cur = Arc::clone(node);
     while cur.kind != tsox_frontend::ast::SyntaxKind::SourceFile {
-        cur = cur.parent.clone()?;
+        cur = cur.parent()?;
     }
     Some((sf.text.clone(), cur))
 }

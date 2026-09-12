@@ -82,7 +82,7 @@ impl Parser {
         let type_parameters = self.parse_optional_type_parameters();
         let parameters = self.parse_parameter_list();
         let type_node = self.parse_optional_return_type();
-        let body = self.parse_block();
+        let body = self.parse_block_ex(true);
         let end = body.end();
         Arc::new(Node::with_loc(
             SyntaxKind::FunctionExpression,

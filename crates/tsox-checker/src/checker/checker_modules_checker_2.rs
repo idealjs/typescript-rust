@@ -19,7 +19,7 @@ impl Checker {
 
         let mut cur = decl;
         for _ in 0..4 {
-            let Some(parent) = cur.parent.clone() else {
+            let Some(parent) = cur.parent() else {
                 return None;
             };
             if parent.kind == SyntaxKind::ExportDeclaration {
@@ -264,7 +264,7 @@ impl Checker {
             return false;
         }
         for decl in &symbol.declarations {
-            let mut cur = decl.parent.as_ref();
+            let mut cur = decl.parent();
             while let Some(n) = cur {
                 if let NodeData::ModuleDeclaration(md) = &n.data
                     && md.name.kind == SyntaxKind::StringLiteral
@@ -275,7 +275,7 @@ impl Checker {
                 if n.kind == SyntaxKind::SourceFile {
                     break;
                 }
-                cur = n.parent.as_ref();
+                cur = n.parent();
             }
         }
         false

@@ -15,7 +15,7 @@ impl Checker {
         {
             return true;
         }
-        let mut cur = Some(node);
+        let mut cur = Some(Arc::clone(node));
         while let Some(n) = cur {
             if n.has_syntactic_modifier(ModifierFlags::Ambient) {
                 return true;
@@ -29,7 +29,7 @@ impl Checker {
             ) {
                 break;
             }
-            cur = n.parent.as_ref();
+            cur = n.parent();
         }
         false
     }
@@ -53,7 +53,7 @@ impl Checker {
         }
 
         let mut top_level = false;
-        let mut p = node.parent.as_ref();
+        let mut p = node.parent();
         while let Some(parent) = p {
             match parent.kind {
                 SyntaxKind::SourceFile => {
@@ -61,7 +61,7 @@ impl Checker {
                     break;
                 }
                 SyntaxKind::VariableDeclarationList | SyntaxKind::VariableStatement => {
-                    p = parent.parent.as_ref();
+                    p = parent.parent();
                 }
                 _ => break,
             }
@@ -88,9 +88,9 @@ impl Checker {
             ));
         } else if text == "__esModule" {
             let var_stmt = node
-                .parent
+                .parent()
                 .as_ref()
-                .and_then(|list| list.parent.as_ref())
+                .and_then(|list| list.parent())
                 .filter(|stmt| stmt.kind == SyntaxKind::VariableStatement);
             let exported =
                 var_stmt.is_some_and(|stmt| stmt.has_syntactic_modifier(ModifierFlags::Export));

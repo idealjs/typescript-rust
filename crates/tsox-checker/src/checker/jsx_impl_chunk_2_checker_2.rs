@@ -123,18 +123,18 @@ impl Checker {
         node: &Arc<Node>,
         _context_flags: crate::checker::types::ContextFlags,
     ) -> Option<Arc<crate::checker::types::Type>> {
-        let jsx_expr = node.parent.as_ref()?;
+        let jsx_expr = node.parent()?;
         if jsx_expr.kind != SyntaxKind::JsxExpression {
             return None;
         }
-        let attr = jsx_expr.parent.as_ref()?;
+        let attr = jsx_expr.parent()?;
         if attr.kind != SyntaxKind::JsxAttribute {
             return None;
         }
-        let attrs = attr.parent.as_ref()?;
-        let elem = attrs.parent.as_ref()?;
+        let attrs = attr.parent()?;
+        let elem = attrs.parent()?;
         let name = attr.name().map(|n| n.text().to_string())?;
-        let ct = self.jsx_element_attributes_contextual_type(elem)?;
+        let ct = self.jsx_element_attributes_contextual_type(&elem)?;
         self.get_type_of_property_of_contextual_type(&ct, &name)
     }
 

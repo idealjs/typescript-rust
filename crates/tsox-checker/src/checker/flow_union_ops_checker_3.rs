@@ -226,7 +226,7 @@ impl Checker {
             ) {
                 return Some(current);
             }
-            current = Arc::clone(current.parent.as_ref()?);
+            current = Arc::clone(current.parent().as_ref()?);
         }
     }
 

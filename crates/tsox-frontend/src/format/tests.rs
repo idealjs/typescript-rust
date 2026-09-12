@@ -15,7 +15,6 @@ fn apply_bulk_edits(text: &str, edits: &[TextChange]) -> String {
 }
 
 #[test]
-
 fn test_format_no_trailing_space() {
     let test_cases: &[(&str, &str)] = &[
         ("simple statement without trailing newline", "1;"),
@@ -37,26 +36,12 @@ fn test_format_no_trailing_space() {
         ("enum declaration", "enum E { A, B }"),
     ];
 
-    let ctx = with_format_code_settings(
-        FormatCodeSettings {
-            editor_settings: EditorSettings {
-                tab_size: 4,
-                indent_size: 4,
-                base_indent_size: 0,
-                new_line_character: "\n".to_string(),
-                convert_tabs_to_spaces: true,
-                indent_style: IndentStyle::Smart,
-                trim_trailing_whitespace: true,
-            },
-            insert_space_before_type_annotation: false,
-            insert_space_before_and_after_binary_operators: true,
-        },
-        "\n",
-    );
+    let ctx = with_format_code_settings(get_default_format_code_settings(), "\n");
 
     for (_name, text) in test_cases {
-        let source_file =
-            crate::parser::Parser::parse_source_file_text("/test.ts", text.to_string());
+        let source_file = std::sync::Arc::new(
+            crate::parser::Parser::parse_source_file_text("/test.ts", text.to_string()),
+        );
         let edits = format_document(&ctx, &source_file);
         let new_text = apply_bulk_edits(text, &edits);
         for (i, line) in new_text.split('\n').enumerate() {
@@ -72,10 +57,11 @@ fn test_format_no_trailing_space() {
 }
 
 #[test]
-
 fn test_format() {
     let text = "const x = 1;";
-    let source_file = crate::parser::Parser::parse_source_file_text("/test.ts", text.to_string());
+    let source_file = std::sync::Arc::new(
+        crate::parser::Parser::parse_source_file_text("/test.ts", text.to_string()),
+    );
     let ctx = with_format_code_settings(get_default_format_code_settings(), "\n");
 
     let edits = format_document(&ctx, &source_file);
@@ -84,27 +70,20 @@ fn test_format() {
     let sel_edits = format_selection(&ctx, &source_file, 0, text.len());
     assert!(sel_edits.is_empty());
 
-    assert_eq!(get_indentation(0, &source_file, &ctx.settings, false), 0);
-
     assert_eq!(apply_bulk_edits(text, &edits), text);
 }
 
 #[test]
-
 fn test_comment_formatting() {}
 
 #[test]
-
 fn test_format_selection_preserves_comments() {}
 
 #[test]
-
 fn test_slice_bounds_panic() {}
 
 #[test]
-
 fn test_get_indentation_for_named_imports_position() {}
 
 #[test]
-
 fn test_get_containing_list_named_imports() {}

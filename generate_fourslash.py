@@ -20,6 +20,10 @@ IMPL = {
     "FormatSelection": ("format_selection", 2),
     "GoToFile": ("go_to_file", 1),
     "Insert": ("insert", 1),
+    "Paste": ("paste", 1),
+    "GoToEOF": ("go_to_eof", 0),
+    "GoToBOF": ("go_to_bof", 0),
+    "InsertLine": ("insert_line", 1),
     "VerifyCurrentLineContent": ("verify_current_line_content", 1),
     "VerifyCurrentFileContent": ("verify_current_file_content", 1),
     "VerifyQuickInfoAt": ("verify_quick_info_at", 3),
@@ -122,7 +126,7 @@ def parse_funcs(text):
 
 def split_statements(body):
     stmts, cur, depth = [], [], 0
-    in_bt = False
+    in_bt = in_str = esc = False
     i = 0
     while i < len(body):
         c = body[i]
@@ -132,8 +136,21 @@ def split_statements(body):
                 in_bt = False
             i += 1
             continue
+        if in_str:
+            cur.append(c)
+            if esc:
+                esc = False
+            elif c == "\\":
+                esc = True
+            elif c == '"':
+                in_str = False
+            i += 1
+            continue
         if c == "`":
             in_bt = True
+            cur.append(c)
+        elif c == '"':
+            in_str = True
             cur.append(c)
         elif c in "([{":
             depth += 1
@@ -142,8 +159,12 @@ def split_statements(body):
             depth -= 1
             cur.append(c)
         elif c == "\n" and depth == 0:
-            stmts.append("".join(cur).strip())
-            cur = []
+            # Go 拼接续行：行尾 + 时语句未完，跨行继续
+            if "".join(cur).rstrip().endswith("+"):
+                cur.append(c)
+            else:
+                stmts.append("".join(cur).strip())
+                cur = []
         else:
             cur.append(c)
         i += 1
@@ -156,6 +177,7 @@ _CUR_TEST = [""]
 
 
 def translate_func(name, body, file_stem):
+    pending_format_settings = []
     _CUR_TEST[0] = name[4].lower() + name[5:] if name.startswith("Test") and len(name) > 4 else name
     fn = snake(name[4:]) if name.startswith("Test") else snake(name)
     lines = []
@@ -224,9 +246,31 @@ def translate_func(name, body, file_stem):
             else:
                 lines.append(f"fourslash::verify_completions_include_exclude_at(&mut s, {marker_arg}, {labels_lit}, &[]);")
             continue
+        m = re.match(r"(\w+)\.FormatCodeSettings\.(\w+) = core\.(TS\w+)", stmt)
+        if m:
+            field = snake(m.group(2))
+            value = {"TSTrue": "true", "TSFalse": "false"}.get(m.group(3), "unknown")
+            pending_format_settings.append((field, value))
+            continue
+        m = re.match(r"(\w+)\.FormatCodeSettings\.(\w+) = (\d+)$", stmt)
+        if m:
+            pending_format_settings.append((snake(m.group(2)), m.group(3)))
+            continue
+        m = re.match(r"(\w+)\.FormatCodeSettings\.(\w+) = \"(\w+)\"$", stmt)
+        if m:
+            pending_format_settings.append((snake(m.group(2)), m.group(3)))
+            continue
         m = match_f_call(stmt)
         if m:
             method, args = m
+            if method == "Configure":
+                if pending_format_settings:
+                    items = ", ".join(f'("{f_}", "{v}")' for f_, v in pending_format_settings)
+                    lines.append(f"fourslash::configure_format_settings(&mut s, &[{items}]);")
+                    pending_format_settings.clear()
+                else:
+                    lines.append(f"// TODO: {stmt.splitlines()[0][:100]}")
+                continue
             if method in IMPL:
                 rust_fn, arity = IMPL[method]
                 arg_list = [a for a in split_args(args)] if args.strip() else []
@@ -377,7 +421,20 @@ def split_top_commas(expr):
 
 
 def unescape_go_string(raw):
-    return raw.replace('\\"', '"').replace("\\\\", "\\")
+    out, i = [], 0
+    while i < len(raw):
+        c = raw[i]
+        if c == "\\" and i + 1 < len(raw):
+            n = raw[i + 1]
+            mapped = {"n": "\n", "t": "\t", "r": "\r", "\\": "\\",
+                      '"': '"', "'": "'"}.get(n)
+            if mapped is not None:
+                out.append(mapped)
+                i += 2
+                continue
+        out.append(c)
+        i += 1
+    return "".join(out)
 
 
 def eval_go_concat(expr):

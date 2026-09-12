@@ -8,7 +8,7 @@ fn basic_class_members() {
 }
 var t = new n(0, 1, '');"#;
     let mut s = Session::new_for_test("basicClassMembers", content);
-    // TODO: f.GoToEOF(t)
+    fourslash::go_to_eof(&mut s, );
     fourslash::insert(&mut s, "t.");
     // TODO: f.VerifyCompletions(t, nil, &fourslash.CompletionsExpectedList{
 }

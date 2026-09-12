@@ -20,9 +20,9 @@ impl Checker {
     pub(crate) fn determine_if_declaration_is_visible(&mut self, node: &Arc<Node>) -> bool {
         match node.kind {
             SyntaxKind::BindingElement => node
-                .parent
+                .parent()
                 .clone()
-                .and_then(|p| p.parent.clone())
+                .and_then(|p| p.parent())
                 .map(|gp| self.is_declaration_visible(&gp))
                 .unwrap_or(false),
 
@@ -85,7 +85,7 @@ impl Checker {
                 if flags & private_protected != 0 {
                     return false;
                 }
-                node.parent
+                node.parent()
                     .clone()
                     .map(|p| self.is_declaration_visible(&p))
                     .unwrap_or(false)
@@ -107,7 +107,7 @@ impl Checker {
             | SyntaxKind::IntersectionType
             | SyntaxKind::ParenthesizedType
             | SyntaxKind::NamedTupleMember => node
-                .parent
+                .parent()
                 .clone()
                 .map(|p| self.is_declaration_visible(&p))
                 .unwrap_or(false),
@@ -123,7 +123,7 @@ impl Checker {
             SyntaxKind::ExportAssignment => false,
 
             SyntaxKind::ExportSpecifier => {
-                let export_decl = match node.parent.clone().and_then(|p| p.parent.clone()) {
+                let export_decl = match node.parent().and_then(|p| p.parent()) {
                     Some(ed) if ed.kind == SyntaxKind::ExportDeclaration => ed,
                     _ => return false,
                 };
@@ -135,7 +135,7 @@ impl Checker {
                     return false;
                 }
                 export_decl
-                    .parent
+                    .parent()
                     .clone()
                     .map(|p| self.is_declaration_visible(&p))
                     .unwrap_or(false)
@@ -240,7 +240,7 @@ impl Checker {
                         if let Some(first_id) = first_id {
                             let saved = self.scope_stack.clone();
 
-                            if let Some(parent) = declaration.parent.clone() {
+                            if let Some(parent) = declaration.parent() {
                                 self.scope_stack.push(parent.id());
                             }
                             let resolved = self.resolve_identifier_with_meaning(
@@ -261,7 +261,7 @@ impl Checker {
     }
 
     pub(crate) fn resolve_export_symbol_for_alias(&self, node: &Arc<Node>) -> Option<Arc<Symbol>> {
-        let parent = node.parent.clone()?;
+        let parent = node.parent()?;
         match parent.kind {
             SyntaxKind::ExportAssignment | SyntaxKind::BinaryExpression => {
                 let name = node.text();

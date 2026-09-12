@@ -2,7 +2,7 @@
 
 use crate::checker::utilities::*;
 
-pub(crate) fn get_assignment_target(node: &Node) -> Option<&Node> {
+pub(crate) fn get_assignment_target(node: &Arc<Node>) -> Option<Arc<Node>> {
     pub(crate) fn is_assignment_operator(kind: SyntaxKind) -> bool {
         use SyntaxKind::*;
         matches!(
@@ -25,12 +25,12 @@ pub(crate) fn get_assignment_target(node: &Node) -> Option<&Node> {
                 | QuestionQuestionEqualsToken
         )
     }
-    let mut current: &Node = node;
+    let mut current = Arc::clone(node);
     loop {
-        let parent = current.parent.as_ref()?;
+        let parent = current.parent()?;
         match &parent.data {
             tsox_frontend::ast::NodeData::BinaryExpression(bin) => {
-                let on_path = Arc::as_ref(&bin.left) as *const Node == current;
+                let on_path = Arc::as_ptr(&bin.left) == Arc::as_ptr(&current);
                 return if on_path && is_assignment_operator(bin.operator_token.kind) {
                     Some(parent)
                 } else {
@@ -42,7 +42,7 @@ pub(crate) fn get_assignment_target(node: &Node) -> Option<&Node> {
                     pre.operator,
                     SyntaxKind::PlusPlusToken | SyntaxKind::MinusMinusToken
                 );
-                let on_path = Arc::as_ref(&pre.operand) as *const Node == current;
+                let on_path = Arc::as_ptr(&pre.operand) == Arc::as_ptr(&current);
                 return if incdec && on_path {
                     Some(parent)
                 } else {
@@ -54,7 +54,7 @@ pub(crate) fn get_assignment_target(node: &Node) -> Option<&Node> {
                     post.operator,
                     SyntaxKind::PlusPlusToken | SyntaxKind::MinusMinusToken
                 );
-                let on_path = Arc::as_ref(&post.operand) as *const Node == current;
+                let on_path = Arc::as_ptr(&post.operand) == Arc::as_ptr(&current);
                 return if incdec && on_path {
                     Some(parent)
                 } else {
@@ -62,7 +62,7 @@ pub(crate) fn get_assignment_target(node: &Node) -> Option<&Node> {
                 };
             }
             tsox_frontend::ast::NodeData::ForInOrOfStatement(for_stmt) => {
-                let on_path = Arc::as_ref(&for_stmt.initializer) as *const Node == current;
+                let on_path = Arc::as_ptr(&for_stmt.initializer) == Arc::as_ptr(&current);
                 return if on_path { Some(parent) } else { None };
             }
             tsox_frontend::ast::NodeData::ParenthesizedExpression(_) => {
@@ -88,7 +88,7 @@ pub fn is_compound_like_assignment(assignment: &Node) -> bool {
         if is_shift_operator_or_higher(rhs.operator_token.kind))
 }
 
-pub fn is_in_compound_like_assignment(node: &Node) -> bool {
+pub fn is_in_compound_like_assignment(node: &Arc<Node>) -> bool {
     let Some(target) = get_assignment_target(node) else {
         return false;
     };
@@ -96,28 +96,28 @@ pub fn is_in_compound_like_assignment(node: &Node) -> bool {
     let tsox_frontend::ast::NodeData::BinaryExpression(bin) = &target.data else {
         return false;
     };
-    bin.operator_token.kind == SyntaxKind::EqualsToken && is_compound_like_assignment(target)
+    bin.operator_token.kind == SyntaxKind::EqualsToken && is_compound_like_assignment(&target)
 }
 
-pub fn is_delete_target(node: &Node) -> bool {
+pub fn is_delete_target(node: &Arc<Node>) -> bool {
     if !tsox_frontend::ast::is_access_expression(node) {
         return false;
     }
-    node.parent
+    node.parent()
         .as_ref()
         .map(|p| p.kind == SyntaxKind::DeleteExpression)
         .unwrap_or(false)
 }
 
 pub fn is_right_side_of_access_expression(node: &Node) -> bool {
-    if let Some(parent) = &node.parent {
-        if is_property_access_expression(parent) {
+    if let Some(parent) = node.parent() {
+        if is_property_access_expression(&parent) {
             return parent
                 .name()
                 .map(|n| std::ptr::eq(n.as_ref(), node))
                 .unwrap_or(false);
         }
-        if is_element_access_expression(parent) {
+        if is_element_access_expression(&parent) {
             return parent
                 .expression()
                 .map(|e| std::ptr::eq(e.as_ref(), node))
@@ -140,7 +140,7 @@ pub fn is_syntactic_default(node: &Node) -> bool {
 }
 
 pub fn is_type_reference_identifier(node: &Node) -> bool {
-    node.parent
+    node.parent()
         .as_ref()
         .map(|p| tsox_frontend::ast::is_type_reference_node(p))
         .unwrap_or(false)
@@ -179,11 +179,11 @@ pub fn entity_name_to_string(name: &Node) -> String {
 
 pub fn get_containing_qualified_name_node(node: &Arc<Node>) -> Arc<Node> {
     let mut result = Arc::clone(node);
-    let mut current = node.parent.clone();
+    let mut current = node.parent();
     while let Some(ref parent) = current {
         if is_qualified_name(parent) {
             result = Arc::clone(parent);
-            current = parent.parent.clone();
+            current = parent.parent();
         } else {
             break;
         }
@@ -206,11 +206,11 @@ pub fn is_jsx_intrinsic_tag_name(tag_name: &Node) -> bool {
 }
 
 pub fn walk_up_outer_expressions(node: &Node) -> Option<Arc<Node>> {
-    node.parent.clone()
+    node.parent()
 }
 
 pub fn get_containing_function_or_class_static_block(node: &Node) -> Option<Arc<Node>> {
-    node.parent.as_ref().and_then(|parent| {
+    node.parent().as_ref().and_then(|parent| {
         tsox_frontend::ast::find_ancestor(parent, |n| {
             tsox_frontend::ast::is_function_like_or_class_static_block_declaration(n)
         })
@@ -218,7 +218,7 @@ pub fn get_containing_function_or_class_static_block(node: &Node) -> Option<Arc<
 }
 
 pub fn get_enclosing_container(node: &Node) -> Option<Arc<Node>> {
-    node.parent.as_ref().and_then(|parent| {
+    node.parent().as_ref().and_then(|parent| {
         tsox_frontend::ast::find_ancestor(parent, |n| {
             matches!(
                 n.kind,
@@ -272,15 +272,15 @@ pub fn is_valid_es_symbol_declaration(node: &Node) -> bool {
 }
 
 pub fn is_variable_declaration_in_variable_statement(node: &Node) -> bool {
-    node.parent
+    node.parent()
         .as_ref()
         .map(|p| is_variable_declaration_list(p))
         .unwrap_or(false)
         && node
-            .parent
+            .parent()
             .as_ref()
-            .and_then(|p| p.parent.as_ref())
-            .map(|gp| is_variable_statement(gp))
+            .and_then(|p| p.parent())
+            .map(|gp| is_variable_statement(&gp))
             .unwrap_or(false)
 }
 

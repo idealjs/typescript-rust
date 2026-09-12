@@ -5,7 +5,7 @@ use crate::checker::checker_expressions::*;
 impl Checker {
     pub fn check_object_literal_expression(&mut self, node: &Arc<Node>) {
         if let tsox_frontend::ast::NodeData::ObjectLiteralExpression(data) = &node.data {
-            let is_destructuring_assignment_target = node.parent.as_ref().is_some_and(|p| match &p
+            let is_destructuring_assignment_target = node.parent().as_ref().is_some_and(|p| match &p
                 .data
             {
                 tsox_frontend::ast::NodeData::BinaryExpression(b) => {
@@ -15,7 +15,7 @@ impl Checker {
             });
             if is_destructuring_assignment_target
                 && self.in_ctor_body_stack.last() == Some(&true)
-                && let Some(rhs) = node.parent.as_ref().and_then(|p| match &p.data {
+                && let Some(rhs) = node.parent().as_ref().and_then(|p| match &p.data {
                     tsox_frontend::ast::NodeData::BinaryExpression(b) => Some(Arc::clone(&b.right)),
                     _ => None,
                 })
@@ -170,7 +170,7 @@ impl Checker {
                         contextual_this = Some(t);
                         break;
                     }
-                    match &literal.parent.as_ref().map(|p| (p.kind, p.parent.clone())) {
+                    match &literal.parent().as_ref().map(|p| (p.kind, p.parent())) {
                         Some((SyntaxKind::PropertyAssignment, Some(pp))) => {
                             literal = Arc::clone(pp);
                         }

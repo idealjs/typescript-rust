@@ -8,7 +8,7 @@ class bar {/**/ }
 // new line here"#;
     let mut s = Session::new_for_test("formattingOnEnter", content);
     fourslash::go_to_marker(&mut s, "");
-    // TODO: f.InsertLine(t, "")
+    fourslash::insert_line(&mut s, "");
     fourslash::verify_current_file_content(&mut s, r#"class foo { }
 class bar {
 }

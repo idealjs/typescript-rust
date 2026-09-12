@@ -7,5 +7,8 @@ fn formatting_on_close_brace() {
     /**/"#;
     let mut s = Session::new_for_test("formattingOnCloseBrace", content);
     fourslash::go_to_marker(&mut s, "");
-    // TODO: f.Insert(t, "}")
+    fourslash::insert(&mut s, "}");
+    fourslash::go_to_bof(&mut s, );
+    fourslash::verify_current_line_content(&mut s, r#"class foo {"#);
+    // TODO: }
 }

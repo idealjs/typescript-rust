@@ -12,5 +12,6 @@ class C extends B {
 }"#;
     let mut s = Session::new_for_test("signatureHelpOnSuperWhenMembersAreNotResolved", content);
     fourslash::go_to_marker(&mut s, "1");
-    // TODO: f.Insert(t, "super(")
+    fourslash::insert(&mut s, "super(");
+    // TODO: f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{Text: "B(x: string): B"})
 }

@@ -8,7 +8,7 @@ fn ambient_variables_with_same_name() {
 }
 declare var x: number;"#;
     let mut s = Session::new_for_test("ambientVariablesWithSameName", content);
-    // TODO: f.GoToEOF(t)
-    // TODO: f.InsertLine(t, "")
+    fourslash::go_to_eof(&mut s, );
+    fourslash::insert_line(&mut s, "");
     fourslash::verify_no_errors(&mut s, );
 }

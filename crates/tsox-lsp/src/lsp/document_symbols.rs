@@ -95,7 +95,7 @@ fn symbol_kind_for(node: &Arc<tsox_frontend::ast::Node>) -> i32 {
         K::ModuleDeclaration => 3,
         K::VariableDeclaration => {
             let is_const = node
-                .parent
+                .parent()
                 .as_ref()
                 .map_or(false, |p| p.flags.contains(NodeFlags::Const));
             if is_const { 14 } else { 13 }

@@ -138,7 +138,7 @@ impl Checker {
         let in_for_in_or_of = node
             .parent
             .as_ref()
-            .and_then(|p| p.parent.clone())
+            .and_then(|p| p.parent())
             .map(|grandparent| {
                 grandparent.kind == SyntaxKind::ForInStatement
                     || grandparent.kind == SyntaxKind::ForOfStatement
@@ -192,7 +192,7 @@ impl Checker {
             let parent_kind = node
                 .parent
                 .as_ref()
-                .and_then(|p| p.parent.as_ref())
+                .and_then(|p| p.parent().as_ref())
                 .map(|gp| gp.kind);
             let in_variable_statement = parent_kind == Some(SyntaxKind::VariableStatement);
             let has_type = data.type_node.is_some();

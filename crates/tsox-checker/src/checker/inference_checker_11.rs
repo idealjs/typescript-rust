@@ -7,9 +7,9 @@ impl Checker {
         &mut self,
         node: &Arc<tsox_frontend::ast::Node>,
     ) -> Option<Arc<Signature>> {
-        let mut parent = node.parent.clone()?;
+        let mut parent = node.parent()?;
         while parent.kind == SyntaxKind::ParenthesizedExpression {
-            parent = parent.parent.clone()?;
+            parent = parent.parent()?;
         }
         let tsox_frontend::ast::NodeData::CallExpression(call) = &parent.data else {
             return None;
@@ -68,7 +68,7 @@ impl Checker {
     ) -> Option<Arc<Type>> {
         use tsox_frontend::ast::NodeData;
 
-        let declaration = node.parent.as_ref()?;
+        let declaration = node.parent()?;
 
         let is_initializer = match &declaration.data {
             NodeData::VariableDeclaration(data) => data
@@ -108,12 +108,12 @@ impl Checker {
 
         // JS 文件：JSDoc @type 标签充当类型注解（Go getEffectiveTypeAnnotationNode
         // 的 reparse 通道等价物）
-        if let Some(t) = self.jsdoc_type_annotation(declaration) {
+        if let Some(t) = self.jsdoc_type_annotation(&declaration) {
             return Some(t);
         }
 
         if let NodeData::BindingElement(_) = &declaration.data {
-            if let Some(ctx) = self.get_contextual_type_from_binding_element(declaration) {
+            if let Some(ctx) = self.get_contextual_type_from_binding_element(&declaration) {
                 return Some(ctx);
             }
         }
@@ -127,8 +127,8 @@ impl Checker {
     ) -> Option<Arc<Type>> {
         use tsox_frontend::ast::NodeData;
 
-        let binding_pattern = binding_element.parent.as_ref()?;
-        let var_declaration = binding_pattern.parent.as_ref()?;
+        let binding_pattern = binding_element.parent()?;
+        let var_declaration = binding_pattern.parent()?;
 
         let var_data = match &var_declaration.data {
             NodeData::VariableDeclaration(d) => d,
@@ -199,15 +199,15 @@ impl Checker {
     ) -> Option<Arc<Type>> {
         use tsox_frontend::ast::NodeData;
 
-        let parent = node.parent.as_ref()?;
+        let parent = node.parent()?;
         match &parent.data {
             NodeData::VariableDeclaration(data) => data
                 .type_node
                 .as_ref()
                 .map(|tn| self.get_type_from_type_node(tn)),
             NodeData::ReturnStatement(_) => {
-                let fn_node = parent.parent.as_ref()?;
-                self.get_return_type_annotation_of_function(fn_node)
+                let fn_node = parent.parent()?;
+                self.get_return_type_annotation_of_function(&fn_node)
             }
             _ => None,
         }
@@ -237,7 +237,7 @@ impl Checker {
         _node: &Arc<tsox_frontend::ast::Node>,
         _context_flags: ContextFlags,
     ) -> Option<Arc<Type>> {
-        let mut current = _node.parent.as_ref()?.clone();
+        let mut current = _node.parent().as_ref()?.clone();
         loop {
             match current.kind {
                 SyntaxKind::FunctionDeclaration
@@ -249,7 +249,7 @@ impl Checker {
                 | SyntaxKind::SetAccessor => break,
                 SyntaxKind::SourceFile => return None,
                 _ => {
-                    current = current.parent.as_ref()?.clone();
+                    current = current.parent().as_ref()?.clone();
                 }
             }
         }
@@ -282,9 +282,9 @@ impl Checker {
             }
         }
 
-        let mut parent = fn_node.parent.clone()?;
+        let mut parent = fn_node.parent()?;
         while parent.kind == SyntaxKind::ParenthesizedExpression {
-            parent = parent.parent.clone()?;
+            parent = parent.parent()?;
         }
         if let NodeData::CallExpression(call) = &parent.data {
             if Arc::ptr_eq(&call.expression, fn_node) {
@@ -313,18 +313,16 @@ impl Checker {
         if jsdocs.is_empty() {
             // 文档挂在语句层（const obj 的 @type 挂 VariableStatement）
             if let Some(stmt) = declaration
-                .parent
-                .as_ref()
-                .and_then(|p| p.parent.as_ref())
+                .parent()
+                .and_then(|p| p.parent())
                 .filter(|n| matches!(n.kind, tsox_frontend::ast::SyntaxKind::VariableStatement))
                 .or_else(|| {
                     declaration
-                        .parent
-                        .as_ref()
+                        .parent()
                         .filter(|n| matches!(n.kind, tsox_frontend::ast::SyntaxKind::VariableStatement))
                 })
             {
-                jsdocs = tsox_frontend::parser::parse_jsdoc_for_node(&file, stmt);
+                jsdocs = tsox_frontend::parser::parse_jsdoc_for_node(&file, &stmt);
             }
         }
         for jd in jsdocs.iter() {
@@ -385,7 +383,7 @@ impl Checker {
         &self,
         node: &Arc<tsox_frontend::ast::Node>,
     ) -> Option<Arc<tsox_frontend::ast::Node>> {
-        let mut cur = node.parent.clone();
+        let mut cur = node.parent();
         while let Some(n) = cur {
             if matches!(
                 n.kind,
@@ -397,7 +395,7 @@ impl Checker {
             ) {
                 return Some(n);
             }
-            cur = n.parent.clone();
+            cur = n.parent();
         }
         None
     }

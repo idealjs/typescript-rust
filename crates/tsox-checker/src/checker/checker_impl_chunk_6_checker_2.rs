@@ -222,7 +222,7 @@ impl Checker {
     }
 
     pub(crate) fn is_indirect_call_comma(&self, comma: &Arc<Node>) -> bool {
-        let Some(paren) = comma.parent.as_ref() else {
+        let Some(paren) = comma.parent() else {
             return false;
         };
         if paren.kind != SyntaxKind::ParenthesizedExpression {
@@ -235,11 +235,11 @@ impl Checker {
         if !zero_left {
             return false;
         }
-        let Some(grand) = paren.parent.as_ref() else {
+        let Some(grand) = paren.parent() else {
             return false;
         };
         let call_uses_paren = matches!(&grand.data, tsox_frontend::ast::NodeData::CallExpression(ce)
-            if std::ptr::eq(&ce.expression, paren));
+            if Arc::as_ptr(&ce.expression) == Arc::as_ptr(&paren));
         if !call_uses_paren && grand.kind != SyntaxKind::TaggedTemplateExpression {
             return false;
         }

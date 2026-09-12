@@ -55,7 +55,7 @@ impl Checker {
             SyntaxKind::PropertyAssignment => {
                 if let tsox_frontend::ast::NodeData::PropertyAssignment(d) = &node.data
                     && let Some(literal) = node
-                        .parent
+                        .parent()
                         .as_ref()
                         .filter(|p| p.kind == SyntaxKind::ObjectLiteralExpression)
                 {
@@ -253,18 +253,18 @@ impl Checker {
 
     pub(crate) fn is_evolving_array_operation_target(&self, node: &Arc<Node>) -> bool {
         let root = self.get_reference_root(node);
-        let Some(parent) = &root.parent else {
+        let Some(parent) = root.parent() else {
             return false;
         };
 
         if let NodeData::PropertyAccessExpression(pa) = &parent.data {
-            if Arc::ptr_eq(&pa.expression, root) {
+            if Arc::ptr_eq(&pa.expression, &root) {
                 let name = pa.name.text();
                 if name == "length" {
                     return true;
                 }
                 if name == "push" || name == "unshift" {
-                    if let Some(grandparent) = &parent.parent {
+                    if let Some(grandparent) = parent.parent() {
                         if matches!(grandparent.kind, SyntaxKind::CallExpression) {
                             return true;
                         }
@@ -274,11 +274,11 @@ impl Checker {
         }
 
         if let NodeData::ElementAccessExpression(ea) = &parent.data {
-            if Arc::ptr_eq(&ea.expression, root) {
-                if let Some(grandparent) = &parent.parent {
+            if Arc::ptr_eq(&ea.expression, &root) {
+                if let Some(grandparent) = parent.parent() {
                     if let NodeData::BinaryExpression(bin) = &grandparent.data {
                         if bin.operator_token.kind == SyntaxKind::EqualsToken
-                            && Arc::ptr_eq(&bin.left, parent)
+                            && Arc::ptr_eq(&bin.left, &parent)
                         {
                             return true;
                         }
@@ -289,9 +289,9 @@ impl Checker {
         false
     }
 
-    pub(crate) fn get_reference_root<'a>(&self, node: &'a Arc<Node>) -> &'a Arc<Node> {
-        let Some(parent) = &node.parent else {
-            return node;
+    pub(crate) fn get_reference_root(&self, node: &Arc<Node>) -> Arc<Node> {
+        let Some(parent) = node.parent() else {
+            return Arc::clone(node);
         };
         let recurse = match &parent.data {
             NodeData::ParenthesizedExpression(_) => true,
@@ -303,9 +303,9 @@ impl Checker {
             _ => false,
         };
         if recurse {
-            self.get_reference_root(parent)
+            self.get_reference_root(&parent)
         } else {
-            node
+            Arc::clone(node)
         }
     }
 }

@@ -11,7 +11,7 @@ impl Checker {
         if name.kind != SyntaxKind::Identifier {
             return;
         }
-        let Some(parent) = node.parent.as_ref() else {
+        let Some(parent) = node.parent() else {
             return;
         };
         let stmts = match &parent.data {
@@ -104,7 +104,7 @@ impl Checker {
         if name.kind != SyntaxKind::Identifier {
             return;
         }
-        let Some(parent) = node.parent.as_ref() else {
+        let Some(parent) = node.parent() else {
             return;
         };
         let stmts = match &parent.data {
@@ -116,15 +116,15 @@ impl Checker {
         let is_ambient = node.has_syntactic_modifier(ModifierFlags::Ambient)
             || node.flags.contains(NodeFlags::Ambient)
             || self.ambient_context_depth > 0
-            || node.parent.as_ref().is_some_and(|_| {
-                let mut anc = node.parent.as_ref();
+            || node.parent().as_ref().is_some_and(|_| {
+                let mut anc = node.parent();
                 let mut found = false;
                 while let Some(a) = anc {
                     if a.has_syntactic_modifier(ModifierFlags::Ambient) {
                         found = true;
                         break;
                     }
-                    anc = a.parent.as_ref();
+                    anc = a.parent();
                 }
                 found
             })
@@ -198,7 +198,7 @@ impl Checker {
     }
 
     pub(crate) fn check_multiple_constructor_implementations(&mut self, node: &Arc<Node>) {
-        let Some(class) = node.parent.as_ref() else {
+        let Some(class) = node.parent() else {
             return;
         };
         if !matches!(

@@ -11,6 +11,6 @@ var bar;"#;
     // TODO: f.VerifyErrorExistsBetweenMarkers(t, "1", "2")
     // TODO: f.VerifyErrorExistsBetweenMarkers(t, "3", "4")
     fourslash::verify_number_of_errors_in_current_file(&mut s, 3);
-    // TODO: f.GoToEOF(t)
+    fourslash::go_to_eof(&mut s, );
     fourslash::verify_completions_include_exclude_at(&mut s, None, &["foo", "bar"], &[]);
 }

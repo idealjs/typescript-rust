@@ -119,7 +119,7 @@ impl Checker {
     }
 
     pub(crate) fn inside_function_body(node: &Arc<Node>) -> bool {
-        let mut anc = node.parent.as_ref();
+        let mut anc = node.parent();
         while let Some(a) = anc {
             match a.kind {
                 SyntaxKind::FunctionDeclaration
@@ -134,7 +134,7 @@ impl Checker {
                 | SyntaxKind::ModuleDeclaration => return false,
                 _ => {}
             }
-            anc = a.parent.as_ref();
+            anc = a.parent();
         }
         false
     }

@@ -12,9 +12,8 @@ x.forEach(y => y/*2*/"#;
     fourslash::go_to_marker(&mut s, "1");
     fourslash::insert(&mut s, ".");
     fourslash::verify_completions_include_exclude_at(&mut s, None, &["trim"], &[]);
-    // TODO: f.Insert(t, "});")
-    // TODO: IsIncomplete: false,
-    // TODO: ItemDefaults: &fourslash.CompletionsExpectedItemDefaults{
-    // TODO: Items: &fourslash.CompletionsExpectedItems{
-    // TODO: })
+    fourslash::insert(&mut s, "});");
+    fourslash::go_to_marker(&mut s, "2");
+    fourslash::insert(&mut s, ".");
+    fourslash::verify_completions_include_exclude_at(&mut s, None, &["trim"], &[]);
 }

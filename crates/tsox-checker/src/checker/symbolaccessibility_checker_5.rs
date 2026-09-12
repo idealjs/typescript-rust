@@ -34,7 +34,7 @@ impl Checker {
     }
 
     pub(crate) fn get_parent_of_symbol(&self, symbol: &Arc<Symbol>) -> Option<Arc<Symbol>> {
-        symbol.parent.clone()
+        symbol.parent().clone()
     }
 
     pub(crate) fn sort_symbols(&self, symbols: &mut Vec<Arc<Symbol>>) {

@@ -40,7 +40,7 @@ impl Parser {
                     self.next_token();
                     if self.token == SyntaxKind::OpenParenToken {
                         let arguments = self.parse_argument_list();
-                        let end = arguments.end();
+                        let end = self.node_pos();
                         expr = Arc::new(Node::with_loc(
                             SyntaxKind::CallExpression,
                             NodeData::CallExpression(CallExpressionData {
@@ -82,7 +82,7 @@ impl Parser {
                 SyntaxKind::OpenParenToken => {
                     let pos = expr.pos();
                     let arguments = self.parse_argument_list();
-                    let end = arguments.end();
+                    let end = self.node_pos();
                     expr = Arc::new(Node::with_loc(
                         SyntaxKind::CallExpression,
                         NodeData::CallExpression(CallExpressionData {
@@ -94,7 +94,7 @@ impl Parser {
                         TextRange::new(pos, end),
                     ));
                 }
-                SyntaxKind::OpenBracketToken => {
+                SyntaxKind::OpenBracketToken if !self.decorator_context => {
                     let pos = expr.pos();
                     self.next_token();
                     let argument = self.parse_expression();
@@ -122,7 +122,7 @@ impl Parser {
                     };
                     if self.token == SyntaxKind::OpenParenToken {
                         let arguments = self.parse_argument_list();
-                        let end = arguments.end();
+                        let end = self.node_pos();
                         expr = Arc::new(Node::with_loc(
                             SyntaxKind::CallExpression,
                             NodeData::CallExpression(CallExpressionData {
@@ -261,16 +261,11 @@ impl Parser {
     }
 
     pub(crate) fn parse_argument_list(&mut self) -> Arc<NodeList> {
-        let pos = self.token_pos();
         self.expect(SyntaxKind::OpenParenToken);
         let nodes =
             self.parse_delimited_list(ParsingContext::ArgumentExpressions, Parser::parse_argument);
         self.expect(SyntaxKind::CloseParenToken);
-        let end = self.node_pos();
-        Arc::new(NodeList {
-            loc: TextRange::new(pos, end),
-            nodes: nodes.nodes,
-        })
+        Arc::new(nodes)
     }
 
     pub(crate) fn parse_argument(&mut self) -> Arc<Node> {

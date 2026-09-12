@@ -110,7 +110,7 @@ fn find_enclosing_call_and_argument_index(
                 return Some((Arc::clone(&current), idx));
             }
             _ => {
-                current = current.parent.clone()?;
+                current = current.parent()?;
             }
         }
     }

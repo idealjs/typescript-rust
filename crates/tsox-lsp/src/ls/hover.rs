@@ -119,7 +119,7 @@ fn display_parts_to_string(parts: &[SymbolDisplayPart]) -> String {
 
 fn get_node_for_quick_info(node: &Arc<Node>, offset: usize) -> Arc<Node> {
     use tsox_frontend::ast::SyntaxKind;
-    let Some(parent) = node.parent.as_ref() else {
+    let Some(parent) = node.parent() else {
         return Arc::clone(node);
     };
     if parent.kind == SyntaxKind::NewExpression
@@ -135,17 +135,17 @@ fn get_node_for_quick_info(node: &Arc<Node>, offset: usize) -> Arc<Node> {
         return Arc::clone(expr);
     }
     if parent.kind == SyntaxKind::NamedTupleMember && node.pos() == parent.pos() {
-        return Arc::clone(parent);
+        return Arc::clone(&parent);
     }
     if parent.kind == SyntaxKind::MetaProperty {
         if let tsox_frontend::ast::NodeData::MetaProperty(mp) = &parent.data {
             if mp.keyword_token == SyntaxKind::ImportKeyword && Arc::ptr_eq(&mp.name, node) {
-                return Arc::clone(parent);
+                return Arc::clone(&parent);
             }
         }
     }
     if parent.kind == SyntaxKind::JsxNamespacedName {
-        return Arc::clone(parent);
+        return Arc::clone(&parent);
     }
     Arc::clone(node)
 }

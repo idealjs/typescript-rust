@@ -77,7 +77,7 @@ impl Binder {
                         .exports
                         .insert("prototype", Arc::clone(&prototype));
                     let proto_mut = Arc::as_ptr(&prototype) as *mut Symbol;
-                    (*proto_mut).parent = Some(Arc::clone(&class_symbol));
+                    (*proto_mut).set_parent(&class_symbol);
                 }
             }
             SyntaxKind::ClassExpression => {
@@ -118,7 +118,7 @@ impl Binder {
                     ));
                 };
                 if let NodeData::ParameterDeclaration(pd) = &node.data
-                    && let Some(parent) = node.parent.as_ref()
+                    && let Some(parent) = node.parent().as_ref()
                     && !fn_like_body_present(parent)
                 {
                     if pd.initializer.is_some() {
@@ -195,7 +195,7 @@ impl Binder {
                 self.declare_symbol(node, SymbolFlags::BlockScopedVariable, SymbolFlags::VALUE);
             }
             SyntaxKind::TypeParameter => {
-                if let Some(list) = node.parent.as_ref()
+                if let Some(list) = node.parent().as_ref()
                     && let Some(name) = node.name()
                     && name.kind == SyntaxKind::Identifier
                 {
@@ -275,7 +275,7 @@ fn is_variable_declaration_initialized_to_require(node: &Arc<Node>) -> bool {
     if d.type_node.is_some() {
         return false;
     }
-    if let Some(gp) = node.parent.as_ref().and_then(|p| p.parent.as_ref())
+    if let Some(gp) = node.parent().and_then(|p| p.parent())
         && gp.kind == SyntaxKind::VariableStatement
         && gp.syntactic_modifier_flags().contains(ModifierFlags::Export)
     {

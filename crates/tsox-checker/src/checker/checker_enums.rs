@@ -18,7 +18,7 @@ impl Checker {
                 self.check_expression(init);
 
                 let ambient = node
-                    .parent
+                    .parent()
                     .as_ref()
                     .is_some_and(|p| p.has_syntactic_modifier(ModifierFlags::Ambient))
                     || self.ambient_context_depth > 0
@@ -85,7 +85,7 @@ impl Checker {
     }
 
     pub fn get_enum_member_value(&mut self, node: &Arc<Node>) -> EvalResult {
-        if let Some(parent) = node.parent.as_ref() {
+        if let Some(parent) = node.parent().as_ref() {
             self.compute_enum_member_values(parent);
         }
         self.enum_member_links

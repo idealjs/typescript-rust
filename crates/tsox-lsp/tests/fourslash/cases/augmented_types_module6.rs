@@ -21,5 +21,6 @@ r2./*6*/"#;
     fourslash::verify_completions_include_exclude_at(&mut s, Some("5"), &["foo"], &[]);
     fourslash::insert(&mut s, "foo(1)");
     fourslash::verify_completions_include_exclude_at(&mut s, Some("6"), &["foo"], &[]);
-    // TODO: f.Insert(t, "foo(")
+    fourslash::insert(&mut s, "foo(");
+    // TODO: f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{Text: "foo(): void"})
 }

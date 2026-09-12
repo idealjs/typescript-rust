@@ -115,7 +115,7 @@ impl Binder {
                     let op = bin.operator_token.kind;
 
                     let parent_is_expr_stmt = node
-                        .parent
+                        .parent()
                         .as_ref()
                         .is_some_and(|p| p.kind == SyntaxKind::ExpressionStatement);
                     if is_assignment_operator(op)

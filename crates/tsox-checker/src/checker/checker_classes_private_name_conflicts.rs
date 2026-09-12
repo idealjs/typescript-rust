@@ -4,7 +4,7 @@ use crate::checker::checker_classes::*;
 
 impl Checker {
     pub(crate) fn check_private_name_conflicts(&mut self, node: &Arc<Node>) {
-        let class_node = node.parent.clone();
+        let class_node = node.parent();
         if let Some(cls) = &class_node
             && matches!(
                 cls.kind,

@@ -63,7 +63,7 @@ impl Checker {
         let narrowed = self.type_at_flow_node(declared, declared, &flow, &target, 0, &mut query);
         self.flow_type_cache.insert(key, Arc::clone(&narrowed));
 
-        if let Some(parent) = &reference.parent {
+        if let Some(parent) = reference.parent() {
             if parent.kind == SyntaxKind::NonNullExpression
                 && !narrowed.flags.contains(TypeFlags::Never)
                 && self.type_is_never_after_removing_nullable(&narrowed)
@@ -197,12 +197,12 @@ impl Checker {
             return;
         };
         let mut block: Option<Arc<Node>> = None;
-        let mut cur = anchor.parent.clone();
+        let mut cur = anchor.parent();
         while let Some(n) = cur {
             let is_function_or_module_block = match n.kind {
                 SyntaxKind::SourceFile | SyntaxKind::ModuleBlock => true,
                 SyntaxKind::Block => n
-                    .parent
+                    .parent()
                     .as_ref()
                     .is_some_and(|p| tsox_frontend::ast::utilities::is_function_like_kind(p.kind)),
                 _ => false,
@@ -211,7 +211,7 @@ impl Checker {
                 block = Some(Arc::clone(&n));
                 break;
             }
-            cur = n.parent.clone();
+            cur = n.parent();
         }
         let Some(block) = block else { return };
 

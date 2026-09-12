@@ -132,12 +132,12 @@ impl Checker {
             return symbol.name.clone();
         };
         let mut parts: Vec<String> = Vec::new();
-        let mut current: Option<&Arc<Node>> = Some(decl);
+        let mut current: Option<Arc<Node>> = Some(Arc::clone(decl));
         while let Some(n) = current {
             if let tsox_frontend::ast::NodeData::ModuleDeclaration(md) = &n.data {
                 parts.push(md.name.text().trim_matches(['"', '\'']).to_string());
             }
-            current = n.parent.as_ref();
+            current = n.parent();
         }
         parts.reverse();
         parts.join(".")

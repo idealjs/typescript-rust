@@ -40,8 +40,8 @@ impl Binder {
                                 .exports
                                 .insert(name.to_string(), Arc::clone(&symbol));
                             // 命名空间成员挂父链（显示限定名用，对齐 tsc symbol.parent）
-                            if (*symbol_mut).parent.is_none() {
-                                (*symbol_mut).parent = Some(Arc::clone(parent_sym));
+                            if (*symbol_mut).parent().is_none() {
+                                (*symbol_mut).set_parent(parent_sym);
                             }
                         }
                     }
@@ -64,8 +64,8 @@ impl Binder {
                     if let Some(parent_sym) = &self.parent_symbol {
                         let symbol_mut = Arc::as_ptr(symbol) as *mut Symbol;
                         unsafe {
-                            if (*symbol_mut).parent.is_none() {
-                                (*symbol_mut).parent = Some(Arc::clone(parent_sym));
+                            if (*symbol_mut).parent().is_none() {
+                                (*symbol_mut).set_parent(parent_sym);
                             }
                         }
                     }
@@ -106,7 +106,7 @@ impl Binder {
                                 .insert(name.to_string(), Arc::clone(symbol));
                         }
                     }
-                    (*symbol_mut).parent = Some(Arc::clone(parent_sym));
+                    (*symbol_mut).set_parent(parent_sym);
                 }
             } else if let Some(hoist) = &var_hoist_container {
                 match hoist.kind {

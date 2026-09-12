@@ -10,11 +10,9 @@ fn formatting_single_line_with_new_line_option_set() {
 }"#;
     let mut s = Session::new_for_test("formattingSingleLineWithNewLineOptionSet", content);
     // TODO: opts211 := f.GetOptions()
-    // TODO: opts211.FormatCodeSettings.PlaceOpenBraceOnNewLineForFunctions = core.TSTrue
-    // TODO: f.Configure(t, opts211)
+    fourslash::configure_format_settings(&mut s, &[("place_open_brace_on_new_line_for_functions", "true")]);
     // TODO: opts279 := f.GetOptions()
-    // TODO: opts279.FormatCodeSettings.PlaceOpenBraceOnNewLineForControlBlocks = core.TSTrue
-    // TODO: f.Configure(t, opts279)
+    fourslash::configure_format_settings(&mut s, &[("place_open_brace_on_new_line_for_control_blocks", "true")]);
     fourslash::format_document(&mut s, "");
     fourslash::go_to_marker(&mut s, "1");
     fourslash::verify_current_line_content(&mut s, r#"namespace Default { }"#);

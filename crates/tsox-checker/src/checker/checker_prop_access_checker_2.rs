@@ -40,7 +40,7 @@ impl Checker {
                         d.kind == SyntaxKind::PropertyDeclaration
                             && d.has_syntactic_modifier(ModifierFlags::Abstract)
                     })
-                    && let Some(parent) = &abstract_decl.parent
+                    && let Some(parent) = &abstract_decl.parent()
                     && parent.kind == SyntaxKind::ClassDeclaration
                     && let Some(class_name) = class_declaration_name(parent)
                 {

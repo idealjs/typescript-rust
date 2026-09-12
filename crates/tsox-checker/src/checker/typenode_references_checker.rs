@@ -27,13 +27,13 @@ impl Checker {
                 }
                 _ => {}
             }
-            cur = n.parent.clone();
+            cur = n.parent();
         }
         self.get_any_type()
     }
 
     pub(crate) fn polymorphic_this_of(&mut self, node: &Arc<Node>) -> Option<Arc<Type>> {
-        let mut cur = node.parent.clone();
+        let mut cur = node.parent();
         while let Some(n) = cur {
             match n.kind {
                 SyntaxKind::ArrowFunction => {}
@@ -42,7 +42,7 @@ impl Checker {
                 | SyntaxKind::GetAccessor
                 | SyntaxKind::SetAccessor
                 | SyntaxKind::MethodSignature => {
-                    let container = n.parent.clone()?;
+                    let container = n.parent()?;
                     match container.kind {
                         SyntaxKind::ClassDeclaration
                         | SyntaxKind::ClassExpression
@@ -58,7 +58,7 @@ impl Checker {
                 }
                 _ => {}
             }
-            cur = n.parent.clone();
+            cur = n.parent();
         }
         None
     }
@@ -69,13 +69,13 @@ impl Checker {
         &mut self,
         node: &Arc<Node>,
     ) -> Option<Arc<Type>> {
-        let mut cur = node.parent.clone();
+        let mut cur = node.parent();
         while let Some(n) = cur {
             match n.kind {
                 SyntaxKind::ArrowFunction => {}
                 SyntaxKind::FunctionExpression | SyntaxKind::FunctionDeclaration => return None,
                 SyntaxKind::MethodDeclaration => {
-                    let container = n.parent.clone()?;
+                    let container = n.parent()?;
                     if container.kind != SyntaxKind::ObjectLiteralExpression {
                         return None;
                     }
@@ -118,7 +118,7 @@ impl Checker {
                 }
                 _ => {}
             }
-            cur = n.parent.clone();
+            cur = n.parent();
         }
         None
     }
@@ -156,7 +156,7 @@ impl Checker {
     }
 
     pub(crate) fn explicit_this_parameter_type(&mut self, node: &Arc<Node>) -> Option<Arc<Type>> {
-        let mut cur = node.parent.clone();
+        let mut cur = node.parent();
         while let Some(n) = cur {
             let params = match &n.data {
                 NodeData::MethodDeclaration(d) => Some(&d.parameters),
@@ -174,7 +174,7 @@ impl Checker {
             {
                 return Some(self.get_type_from_type_node(tn));
             }
-            cur = n.parent.clone();
+            cur = n.parent();
         }
         None
     }

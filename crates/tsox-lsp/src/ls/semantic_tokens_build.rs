@@ -152,7 +152,7 @@ fn classify_node_token(checker: &Checker, node: &Arc<Node>) -> Option<SemanticTo
     }
 
     if kind == SyntaxKind::Identifier {
-        if let Some(parent) = node.parent.as_ref() {
+        if let Some(parent) = node.parent().as_ref() {
             let decl_type = token_from_declaration_mapping(parent.kind);
             if decl_type != token_type::INVALID {
                 let mut modifier = 0u32;

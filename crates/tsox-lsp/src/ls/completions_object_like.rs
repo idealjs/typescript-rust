@@ -26,7 +26,7 @@ fn find_object_like_container(node: &Arc<Node>) -> Option<Arc<Node>> {
             | SyntaxKind::SourceFile => return None,
             _ => {}
         }
-        current = n.parent.clone();
+        current = n.parent();
     }
     None
 }
@@ -113,7 +113,7 @@ fn try_get_object_literal_contextual_type(
     checker: &mut Checker,
     container: &Arc<Node>,
 ) -> Option<Arc<Type>> {
-    let parent = walk_up_parenthesized_expressions(container.parent.as_ref()?);
+    let parent = walk_up_parenthesized_expressions(container.parent().as_ref()?);
     if parent.kind == SyntaxKind::BinaryExpression
         && let NodeData::BinaryExpression(d) = &parent.data
         && d.operator_token.kind == SyntaxKind::EqualsToken
@@ -127,7 +127,7 @@ fn try_get_object_literal_contextual_type(
 fn walk_up_parenthesized_expressions(node: &Arc<Node>) -> Arc<Node> {
     let mut current = Arc::clone(node);
     while current.kind == SyntaxKind::ParenthesizedExpression
-        && let Some(parent) = &current.parent
+        && let Some(parent) = &current.parent()
     {
         current = Arc::clone(parent);
     }
@@ -289,7 +289,7 @@ pub(super) fn enclosing_binding_element(node: &Arc<Node>) -> bool {
         ) {
             return false;
         }
-        current = n.parent.clone();
+        current = n.parent();
     }
     false
 }
@@ -304,7 +304,7 @@ pub(super) fn in_with_statement(container: &Arc<Node>) -> bool {
         if n.kind == SyntaxKind::SourceFile {
             break;
         }
-        cur = n.parent.clone();
+        cur = n.parent();
     }
     false
 }

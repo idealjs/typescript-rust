@@ -98,12 +98,12 @@ impl LspServer {
 
         let symbol = checker.resolve_identifier(&node).or_else(|| {
             let symbol_map = checker.program.symbol_map();
-            let mut current: Option<&Arc<tsox_frontend::ast::Node>> = Some(&node);
+            let mut current: Option<Arc<tsox_frontend::ast::Node>> = Some(Arc::clone(&node));
             while let Some(n) = current {
-                if let Some(sym) = symbol_map.symbol_of(n) {
+                if let Some(sym) = symbol_map.symbol_of(&n) {
                     return Some(Arc::clone(sym));
                 }
-                current = n.parent.as_ref();
+                current = n.parent();
             }
             None
         });

@@ -48,7 +48,7 @@ impl ReferenceResolverImpl {
             if let Some(callback) = &self.hooks.get_parent_of_symbol_fn {
                 return callback(symbol);
             }
-            return symbol.parent.clone();
+            return symbol.parent().clone();
         }
         None
     }
@@ -131,11 +131,11 @@ impl ReferenceResolverImpl {
                         if node_is_type_only(&current) {
                             return true;
                         }
-                        node = current.parent.clone();
+                        node = current.parent();
                         continue;
                     }
                     SyntaxKind::NamedImports | SyntaxKind::NamedExports => {
-                        node = current.parent.clone();
+                        node = current.parent();
                         continue;
                     }
                     _ => break,
@@ -183,7 +183,7 @@ impl ReferenceResolver for ReferenceResolverImpl {
         node: &Arc<Node>,
         prefix_locals: bool,
     ) -> Option<Arc<Node>> {
-        let start_in_declaration_container = node.parent.as_ref().map_or(false, |parent| {
+        let start_in_declaration_container = node.parent().as_ref().map_or(false, |parent| {
             (parent.kind == SyntaxKind::ModuleDeclaration
                 || parent.kind == SyntaxKind::EnumDeclaration)
                 && parent.name().map(|n| Arc::ptr_eq(n, node)).unwrap_or(false)

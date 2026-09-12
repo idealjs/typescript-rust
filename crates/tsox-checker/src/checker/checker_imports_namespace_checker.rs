@@ -4,14 +4,14 @@ use crate::checker::checker_imports_namespace::*;
 
 impl Checker {
     pub(crate) fn enclosing_function_is_generator(&self, node: &Arc<Node>) -> bool {
-        let mut cur = node.parent.clone();
+        let mut cur = node.parent();
         while let Some(n) = cur {
             let in_name_of_current = tsox_frontend::ast::node_data_generated::node_name(&n)
                 .is_some_and(|name| {
                     name.loc.pos() <= node.loc.pos() && node.loc.end() <= name.loc.end()
                 });
             if in_name_of_current {
-                cur = n.parent.clone();
+                cur = n.parent();
                 continue;
             }
             match &n.data {
@@ -31,7 +31,7 @@ impl Checker {
                 | tsox_frontend::ast::NodeData::ConstructorDeclaration(_) => return false,
                 _ => {}
             }
-            cur = n.parent.clone();
+            cur = n.parent();
         }
         false
     }

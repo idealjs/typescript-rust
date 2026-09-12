@@ -202,7 +202,7 @@ impl Checker {
     }
 
     pub(crate) fn get_type_of_prototype_property(&mut self, symbol: &Arc<Symbol>) -> Arc<Type> {
-        let Some(parent) = symbol.parent.clone() else {
+        let Some(parent) = symbol.parent().clone() else {
             return self.get_any_type();
         };
         let Some(class_decl) = parent

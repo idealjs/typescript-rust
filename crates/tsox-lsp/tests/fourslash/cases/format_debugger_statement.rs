@@ -7,8 +7,8 @@ fn format_debugger_statement() {
   if    (   false   )   {    debugger  ;   }"#;
     let mut s = Session::new_for_test("formatDebuggerStatement", content);
     fourslash::format_document(&mut s, "");
-    // TODO: f.GoToBOF(t)
+    fourslash::go_to_bof(&mut s, );
     fourslash::verify_current_line_content(&mut s, r#"if (false) { debugger; }"#);
-    // TODO: f.GoToEOF(t)
+    fourslash::go_to_eof(&mut s, );
     fourslash::verify_current_line_content(&mut s, r#"if (false) { debugger; }"#);
 }

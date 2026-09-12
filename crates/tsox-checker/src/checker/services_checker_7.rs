@@ -192,7 +192,7 @@ impl Checker {
                 }
                 return None;
             }
-            current = current.parent.clone()?;
+            current = current.parent()?;
         }
     }
 }
@@ -294,7 +294,7 @@ pub(crate) fn is_array_literal_or_object_literal_destructuring_pattern(node: &Ar
         node.kind,
         SyntaxKind::ArrayLiteralExpression | SyntaxKind::ObjectLiteralExpression
     ) && node
-        .parent
+        .parent()
         .as_ref()
         .map(|p| {
             p.kind == SyntaxKind::BinaryExpression

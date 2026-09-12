@@ -197,7 +197,7 @@ impl Parser {
         let saved_await = self.await_context;
         self.await_context = true;
         let body = if self.token == SyntaxKind::OpenBraceToken {
-            self.parse_block()
+            self.parse_block_ex(true)
         } else {
             self.parse_assignment_expression()
         };

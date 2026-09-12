@@ -10,7 +10,7 @@ fn indent_after_function_closing_braces() {
 }"#;
     let mut s = Session::new_for_test("indentAfterFunctionClosingBraces", content);
     fourslash::go_to_marker(&mut s, "2");
-    // TODO: f.InsertLine(t, "")
+    fourslash::insert_line(&mut s, "");
     fourslash::go_to_marker(&mut s, "1");
     // TODO: f.VerifyCurrentLineContent(t, `
 }

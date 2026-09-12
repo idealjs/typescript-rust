@@ -11,5 +11,6 @@ else {
 }"#;
     let mut s = Session::new_for_test("formattingIfInElseBlock", content);
     fourslash::go_to_marker(&mut s, "1");
-    // TODO: f.Insert(t, "}")
+    fourslash::insert(&mut s, "}");
+    // TODO: f.VerifyCurrentLineContent(t, `
 }

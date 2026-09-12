@@ -29,7 +29,7 @@ impl Checker {
 
     pub(crate) fn symbol_is_const_variable(&self, symbol: &Arc<Symbol>) -> bool {
         for decl in &symbol.declarations {
-            if let Some(parent) = &decl.parent {
+            if let Some(parent) = decl.parent() {
                 if parent.kind == SyntaxKind::VariableDeclarationList
                     && parent.flags.contains(NodeFlags::Const)
                 {
@@ -127,14 +127,14 @@ impl Checker {
     }
 
     pub(crate) fn binding_element_in_var_pattern(element: &Arc<Node>) -> bool {
-        let pattern = element.parent.as_ref();
-        let Some(decl) = pattern.and_then(|p| p.parent.as_ref()) else {
+        let pattern = element.parent();
+        let Some(decl) = pattern.and_then(|p| p.parent()) else {
             return false;
         };
         if decl.kind != SyntaxKind::VariableDeclaration {
             return false;
         }
-        let Some(list) = decl.parent.as_ref() else {
+        let Some(list) = decl.parent() else {
             return false;
         };
         if list.kind != SyntaxKind::VariableDeclarationList {

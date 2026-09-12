@@ -159,10 +159,10 @@ impl Checker {
                 SyntaxKind::TypeAliasDeclaration,
                 SyntaxKind::EnumDeclaration,
             ];
-            let mut ancestor = node.parent.as_ref();
+            let mut ancestor = node.parent();
             while let Some(a) = ancestor {
                 if !ANCESTRY_CONTAINERS.contains(&a.kind) {
-                    ancestor = a.parent.as_ref();
+                    ancestor = a.parent();
                     continue;
                 }
                 let aid = a.id();
@@ -221,7 +221,7 @@ impl Checker {
                         return self.follow_alias(sym);
                     }
                 }
-                ancestor = a.parent.as_ref();
+                ancestor = a.parent();
             }
         }
 

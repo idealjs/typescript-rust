@@ -59,7 +59,7 @@ pub(crate) fn is_declaration_name(parent: &Arc<Node>, name: &Arc<Node>) -> bool 
 
 impl Checker {
     pub(crate) fn resolve_property_access_symbol(&mut self, node: &Arc<Node>) -> Option<Arc<Symbol>> {
-        let parent = node.parent.as_ref()?;
+        let parent = node.parent()?;
         if parent.kind == SyntaxKind::ElementAccessExpression {
             let tsox_frontend::ast::NodeData::ElementAccessExpression(d) = &parent.data else {
                 return None;
@@ -103,7 +103,7 @@ impl Checker {
 
     // x: C<number> 的成员访问显示：qualified 名带实例实参 + 方法/属性形态
     pub(crate) fn instantiated_member_access_parts(&mut self, node: &Arc<Node>) -> Option<Vec<SymbolDisplayPart>> {
-        let p = node.parent.as_ref()?;
+        let p = node.parent()?;
                 if p.kind != SyntaxKind::PropertyAccessExpression {
             return None;
         }
@@ -129,7 +129,7 @@ impl Checker {
             raw_type
         };
         let obj_data = obj_type.as_object()?;
-        let call = p.parent.clone().filter(|c| c.kind == SyntaxKind::CallExpression);
+        let call = p.parent().filter(|c| c.kind == SyntaxKind::CallExpression);
                 let mut class_sym = obj_type.symbol.clone();
         let mut from_call_return = false;
         if !class_sym
@@ -179,7 +179,7 @@ impl Checker {
         // 容器实参：owner 的类型实参；局部函数返回容器用调用位推断实参（getProps<{}>）；
         // 继承自泛型基类的成员按声明容器 + 成员 mapper 写 `A<string>.m`（Go symbol 链语义）
         let declaring_container = prop_sym
-            .parent
+            .parent()
             .clone()
             .or_else(|| self.container_symbol_from_declarations(&prop_sym))
             .filter(|p| {
@@ -335,7 +335,7 @@ impl Checker {
 
     // JSX 属性 hover：<Opt propx={2}/> 的 propx → (property) propx: <元素类型属性>
     pub(crate) fn jsx_attribute_parts(&mut self, node: &Arc<Node>) -> Option<Vec<SymbolDisplayPart>> {
-        let p = node.parent.as_ref()?;
+        let p = node.parent()?;
         if p.kind != SyntaxKind::JsxAttribute {
             return None;
         }
@@ -346,9 +346,9 @@ impl Checker {
             return None;
         }
         // 属性列表（JsxAttributes）与元素之间可能隔一层
-        let mut elem = p.parent.as_ref()?;
+        let mut elem = p.parent()?;
         while elem.kind == SyntaxKind::JsxAttributes {
-            elem = elem.parent.as_ref()?;
+            elem = elem.parent()?;
         }
         let tag_name = match &elem.data {
             tsox_frontend::ast::NodeData::JsxSelfClosingElement(d) => Arc::clone(&d.tag_name),
@@ -389,7 +389,7 @@ impl Checker {
         // Go getContextualJsxElementAttributesType：首个构造签名参数类型经属性值
         // 推断实例化（Component<T> 的 props），成员符号带容器实参显示
         if let Some(prop) =
-            self.jsx_attribute_symbol_from_construct_signature(&class_sym, p, &name_text)
+            self.jsx_attribute_symbol_from_construct_signature(&class_sym, &p, &name_text)
         {
             let prop_type = self.get_type_of_symbol(&prop);
             let mut parts = Vec::new();
@@ -542,8 +542,8 @@ impl Checker {
         attr_node: &Arc<Node>,
         name: &str,
     ) -> Option<Arc<Symbol>> {
-        let attrs = attr_node.parent.clone()?;
-        let elem = attrs.parent.clone()?;
+        let attrs = attr_node.parent()?;
+        let elem = attrs.parent()?;
         let param_type = self.jsx_element_attributes_contextual_type(&elem)?;
         let syms = self.get_property_symbols_from_contextual_type(attr_node, &param_type, false);
         if syms.len() == 1 {
@@ -564,14 +564,14 @@ impl Checker {
         // Go IsJsxTagName：不限 kind，只看父节点的 tag_name 槽位
         if node.kind == SyntaxKind::JsxNamespacedName {
             return node
-                .parent
+                .parent()
                 .as_ref()
                 .is_some_and(|p| is_jsx_container(p.kind));
         }
         if node.kind != SyntaxKind::Identifier {
             return false;
         }
-        let Some(p) = node.parent.as_ref() else {
+        let Some(p) = node.parent() else {
             return false;
         };
         if is_jsx_container(p.kind) {
@@ -579,7 +579,7 @@ impl Checker {
         }
         // 前端可能把 tag name 包成 TypeReference
         p.kind == SyntaxKind::TypeReference
-            && p.parent
+            && p.parent()
                 .as_ref()
                 .is_some_and(|g| is_jsx_container(g.kind))
     }
@@ -719,7 +719,7 @@ impl Checker {
                 return None;
             }
             let symbol_map = self.program.symbol_map();
-            let mut cur = node.parent.as_ref();
+            let mut cur = node.parent();
             while let Some(n) = cur {
                 if let Some(locals) = symbol_map.locals.get(&n.id()) {
                     if let Some(sym) = locals.get(&name)
@@ -733,7 +733,7 @@ impl Checker {
                         // 身份让位于外层同名变量
                         let is_destructuring_member = sym.declarations.iter().any(|d| {
                             d.kind == SyntaxKind::ShorthandPropertyAssignment
-                                && d.parent.as_ref().is_some_and(|o| {
+                                && d.parent().as_ref().is_some_and(|o| {
                                     o.kind == SyntaxKind::ObjectLiteralExpression
                                         && o.pos() >= assignment_target_expr(o).pos()
                                             && o.end() <= assignment_target_expr(o).end()
@@ -744,14 +744,14 @@ impl Checker {
                         }
                     }
                 }
-                cur = n.parent.as_ref();
+                cur = n.parent();
             }
             None
         })();
         // 1.5) 声明处名字优先于容器查找：const Unit 与 export type Unit 同名时，
         // by_locals 命中的是后声明覆盖的符号；声明名字节点的身份由其自身声明决定
         // （shorthand 属性名排除：其身份由专用分支处理）
-        if let Some(parent) = node.parent.as_ref()
+        if let Some(parent) = node.parent().as_ref()
             && parent.kind != SyntaxKind::ShorthandPropertyAssignment
             && is_declaration_name(parent, node)
             && let Some(sym) = self.program.symbol_map().symbol_of(parent)
@@ -777,10 +777,10 @@ impl Checker {
             }
             return Some(Arc::clone(sym));
         }
-        let mut current = node.parent.as_ref();
+        let mut current = node.parent();
         while let Some(n) = current {
-            if is_declaration_name(n, node) {
-                if let Some(sym) = symbol_map.symbol_of(n) {
+            if is_declaration_name(&n, node) {
+                if let Some(sym) = symbol_map.symbol_of(&n) {
                     if sym.flags.intersects(
                         SymbolFlags::ValueModule
                             | SymbolFlags::NamespaceModule
@@ -792,7 +792,7 @@ impl Checker {
                 }
                 break;
             }
-            current = n.parent.as_ref();
+            current = n.parent();
         }
         None
     }
@@ -803,7 +803,7 @@ impl Checker {
         &mut self,
         node: &Arc<Node>,
     ) -> Option<Arc<Symbol>> {
-        let parent = node.parent.as_ref()?;
+        let parent = node.parent()?;
         match parent.kind {
             SyntaxKind::PropertyAssignment
             | SyntaxKind::ShorthandPropertyAssignment
@@ -811,12 +811,12 @@ impl Checker {
             | SyntaxKind::MethodDeclaration => {}
             _ => return None,
         }
-        let obj = parent.parent.as_ref()?;
+        let obj = parent.parent()?;
         if obj.kind != SyntaxKind::ObjectLiteralExpression {
             return None;
         }
         let ct = self.get_contextual_type(&obj, ContextFlags::None)?;
-        let syms = self.get_property_symbols_from_contextual_type(parent, &ct, false);
+        let syms = self.get_property_symbols_from_contextual_type(&parent, &ct, false);
         if syms.len() == 1 {
             return Some(Arc::clone(&syms[0]));
         }
@@ -830,19 +830,19 @@ impl Checker {
         node: &Arc<Node>,
     ) -> Option<Vec<SymbolDisplayPart>> {
         // 节点须处于 new 表达式中：new 关键字、表达式名或类型实参内
-        let mut cur = node.parent.as_ref()?;
+        let mut cur = node.parent()?;
         loop {
             match cur.kind {
                 SyntaxKind::NewExpression => break,
                 SyntaxKind::PropertyAccessExpression
                 | SyntaxKind::TypeReference
-                | SyntaxKind::ExpressionWithTypeArguments => cur = cur.parent.as_ref()?,
+                | SyntaxKind::ExpressionWithTypeArguments => cur = cur.parent()?,
                 _ => return None,
             }
         }
         // 实参文本：显式 <...>；无实参显示类自身的类型参数
         let type_args_text = self
-            .new_expression_type_args_text(cur, symbol)
+            .new_expression_type_args_text(&cur, symbol)
             .unwrap_or_default();
         let mut parts = Vec::new();
         push_keyword(&mut parts, "constructor ");
@@ -859,7 +859,7 @@ impl Checker {
             let ret = self
                 .get_return_type_of_signature(sig)
                 .unwrap_or_else(|| self.get_any_type());
-            let ret = self.instantiate_new_expression_return(cur, symbol, ret);
+            let ret = self.instantiate_new_expression_return(&cur, symbol, ret);
             push_punctuation(&mut parts, "(");
             self.append_signature_parameter_parts(&mut parts, sig);
             push_punctuation(&mut parts, ")");
@@ -988,7 +988,7 @@ impl Checker {
             .resolve_symbol_for_hover(node)
             .is_some_and(|s| s.flags.intersects(SymbolFlags::TypeAlias | SymbolFlags::Interface));
         if merged_with_type
-            && node.parent.as_ref().is_some_and(|p| {
+            && node.parent().as_ref().is_some_and(|p| {
                 matches!(
                     p.kind,
                     SyntaxKind::VariableDeclaration
@@ -999,7 +999,7 @@ impl Checker {
             }) && let Some(value_sym) = self
             .program
             .symbol_map()
-            .symbol_of(node.parent.as_ref().expect("checked above"))
+            .symbol_of(node.parent().as_ref().expect("checked above"))
             .cloned()
         {
             // 合并符号 flags 含类型意义：值身份强制走变量显示（tsc 按位置意义选前缀）
@@ -1013,11 +1013,11 @@ impl Checker {
         }
         // shorthand 属性名：hover 命中的是外层同名变量符号，tsc 显示为字面量属性身份，
         // 类型 = 引用变量类型的 widen（tsc getTypeOfShorthandPropertyAssignment）
-        let shorthand_info = node.parent.as_ref().and_then(|p| {
+        let shorthand_info = node.parent().as_ref().and_then(|p| {
             if p.kind != SyntaxKind::ShorthandPropertyAssignment {
                 return None;
             }
-            p.parent
+            p.parent()
                 .as_ref()
                 .filter(|o| o.kind == SyntaxKind::ObjectLiteralExpression)?;
             let tsox_frontend::ast::NodeData::ShorthandPropertyAssignment(sa) = &p.data else {
@@ -1031,11 +1031,11 @@ impl Checker {
             // 字面量处于赋值目标位置（解构赋值）：成员身份让位于外层变量
             let is_assignment_target = {
                 let mut is_target = false;
-                let mut cur = p.parent.clone();
+                let mut cur = p.parent();
                 while let Some(n) = cur {
                     match n.kind {
                         SyntaxKind::ObjectLiteralExpression
-                        | SyntaxKind::ParenthesizedExpression => cur = n.parent.clone(),
+                        | SyntaxKind::ParenthesizedExpression => cur = n.parent(),
                         SyntaxKind::BinaryExpression => {
                             if let tsox_frontend::ast::NodeData::BinaryExpression(be) = &n.data {
                                 let op_is_eq = be.operator_token.kind == SyntaxKind::EqualsToken;
@@ -1101,7 +1101,7 @@ impl Checker {
             return parts;
         }
         // 悬停命中改名绑定的 property_name：按源属性身份渲染
-        if let Some(elem) = node.parent.as_ref()
+        if let Some(elem) = node.parent().as_ref()
             && elem.kind == SyntaxKind::BindingElement
             && let Some(parts) = self.binding_element_property_name_parts(node, &symbol)
         {
@@ -1264,7 +1264,7 @@ impl Checker {
                 return self.type_to_string(&t);
             }
             // 属性访问名未解析到符号时按表达式类型显示（对齐 Go shouldGetType）
-            if let Some(parent) = node.parent.as_ref()
+            if let Some(parent) = node.parent().as_ref()
                 && parent.kind == SyntaxKind::PropertyAccessExpression
             {
                 let t = self.get_type_of_node(parent);
@@ -1451,7 +1451,7 @@ impl Checker {
         name: &str,
     ) -> Option<Arc<Symbol>> {
         let symbol_map = self.program.symbol_map();
-        let mut cur = decl.parent.as_ref();
+        let mut cur = decl.parent();
         while let Some(n) = cur {
             if let Some(locals) = symbol_map.locals.get(&n.id())
                 && let Some(sym) = locals.get(name)
@@ -1463,7 +1463,7 @@ impl Checker {
             {
                 return Some(Arc::clone(sym));
             }
-            cur = n.parent.as_ref();
+            cur = n.parent();
         }
         self.globals.get(name).cloned()
     }
@@ -1488,15 +1488,15 @@ impl Checker {
         let mut cur = Arc::clone(node);
         // 仅当节点是属性访问的「名字」段（被调函数）时穿透到访问表达式；
         // object 段（如 p1.then 里的 p1）不是被调函数
-        if cur.parent.as_ref().map(|p| p.kind) == Some(SyntaxKind::PropertyAccessExpression) {
-            let pae = cur.parent.clone().expect("checked Some above");
+        if cur.parent().as_ref().map(|p| p.kind) == Some(SyntaxKind::PropertyAccessExpression) {
+            let pae = cur.parent().expect("checked Some above");
             if let crate::checker::nodebuilder::NodeData::PropertyAccessExpression(d) = &pae.data
                 && Arc::ptr_eq(&d.name, &cur)
             {
                 cur = pae;
             }
         }
-        let parent = cur.parent.clone()?;
+        let parent = cur.parent()?;
         match parent.kind {
             SyntaxKind::CallExpression => {
                 let is_callee = match &parent.data {
@@ -1609,14 +1609,14 @@ impl Checker {
                 // 声明层无 jsdoc 时上探到语句层（var 声明的文档挂在 VariableStatement）
                 let mut jds = tsox_frontend::parser::parse_jsdoc_for_node(&sf, decl);
                 if jds.is_empty() {
-                    let mut p = decl.parent.as_ref();
-                    while let Some(n) = p
+                    let mut p = decl.parent();
+                    while let Some(n) = p.as_ref()
                         && n.kind != SyntaxKind::VariableStatement
                     {
-                        p = n.parent.as_ref();
+                        p = n.parent();
                     }
                     if let Some(stmt) = p {
-                        jds = tsox_frontend::parser::parse_jsdoc_for_node(&sf, stmt);
+                        jds = tsox_frontend::parser::parse_jsdoc_for_node(&sf, &stmt);
                     }
                 }
                 for jd in &jds {
@@ -1694,7 +1694,7 @@ impl Checker {
     ) -> Option<Arc<Symbol>> {
         let symbol_map = self.program.symbol_map();
         symbol.declarations.first().and_then(|decl| {
-            let mut cur = decl.parent.as_ref();
+            let mut cur = decl.parent();
             while let Some(n) = cur {
                 match n.kind {
                     // 类型字面量成员无可限定容器（Go getContainersOfSymbol：
@@ -1706,9 +1706,9 @@ impl Checker {
                     | SyntaxKind::ClassExpression
                     | SyntaxKind::ModuleDeclaration
                     | SyntaxKind::SourceFile => {
-                        return symbol_map.symbol_of(n).map(Arc::clone);
+                        return symbol_map.symbol_of(&n).map(Arc::clone);
                     }
-                    _ => cur = n.parent.as_ref(),
+                    _ => cur = n.parent(),
                 }
             }
             None
@@ -1764,7 +1764,7 @@ impl Checker {
             }
         }
         let parent = symbol
-            .parent
+            .parent()
             .clone()
             .or_else(|| {
                 self.value_symbol_links
@@ -1939,7 +1939,7 @@ impl Checker {
         if let Some(owner) = symbol
             .declarations
             .first()
-            .and_then(|tp| tp.parent.clone())
+            .and_then(|tp| tp.parent())
         {
             match owner.kind {
                 SyntaxKind::TypeAliasDeclaration => {
@@ -1973,7 +1973,7 @@ impl Checker {
                 match n.kind {
                     SyntaxKind::Parameter => return true,
                     SyntaxKind::BindingElement | SyntaxKind::ObjectBindingPattern | SyntaxKind::ArrayBindingPattern => {
-                        cur = n.parent.clone();
+                        cur = n.parent();
                     }
                     _ => break,
                 }
@@ -1992,7 +1992,7 @@ impl Checker {
             // 对象字面量纯 shorthand 成员：属性身份（tsc getSymbolAtLocationForQuickInfo）；
             // 解构赋值目标形态（{b = a}）不算
             d.kind == SyntaxKind::ShorthandPropertyAssignment
-                && d.parent
+                && d.parent()
                     .as_ref()
                     .is_some_and(|p| p.kind == SyntaxKind::ObjectLiteralExpression)
                 && !matches!(&d.data, NodeData::ShorthandPropertyAssignment(sd) if sd.object_assignment_initializer.is_some() || sd.equals_token.is_some())
@@ -2150,10 +2150,10 @@ impl Checker {
         node: &Arc<Node>,
     ) -> Option<Arc<Signature>> {
         let mut cur = Arc::clone(node);
-        if cur.parent.as_ref().map(|p| p.kind) == Some(SyntaxKind::PropertyAccessExpression) {
-            cur = cur.parent.clone().expect("checked Some above");
+        if cur.parent().as_ref().map(|p| p.kind) == Some(SyntaxKind::PropertyAccessExpression) {
+            cur = cur.parent().expect("checked Some above");
         }
-        let call = cur.parent.clone()?;
+        let call = cur.parent()?;
         let callee_is_cur = match &call.data {
             tsox_frontend::ast::NodeData::CallExpression(d) => Arc::ptr_eq(&d.expression, &cur),
             _ => false,
@@ -2227,22 +2227,22 @@ impl Checker {
 }
 
 fn node_is_descendant_of_expr(node: &Arc<Node>, ancestor: &Arc<Node>) -> bool {
-    let mut cur = node.parent.clone();
+    let mut cur = node.parent();
     while let Some(n) = cur {
         if Arc::ptr_eq(&n, ancestor) {
             return true;
         }
-        cur = n.parent.clone();
+        cur = n.parent();
     }
     false
 }
 
 fn assignment_target_expr(obj: &Arc<Node>) -> Arc<Node> {
     // 向上找最近的 BinaryExpression=，返回其左操作数；找不到返回 obj 自身
-    let mut cur = obj.parent.clone();
+    let mut cur = obj.parent();
     while let Some(n) = cur {
         match n.kind {
-            SyntaxKind::ParenthesizedExpression => cur = n.parent.clone(),
+            SyntaxKind::ParenthesizedExpression => cur = n.parent(),
             SyntaxKind::BinaryExpression => {
                 if let tsox_frontend::ast::NodeData::BinaryExpression(be) = &n.data {
                     if be.operator_token.kind == SyntaxKind::EqualsToken {
@@ -2259,12 +2259,12 @@ fn assignment_target_expr(obj: &Arc<Node>) -> Arc<Node> {
 
 pub(crate) fn node_in_with_block(node: &Arc<Node>) -> bool {
     // 遍历兄弟扫描祖先 WithStatement 的 span 包含（parser 可能不把 with body 挂进祖先链）
-    let mut cur = node.parent.clone();
+    let mut cur = node.parent();
     while let Some(n) = cur {
         if n.kind == SyntaxKind::WithStatement {
             return true;
         }
-        if let Some(parent) = n.parent.as_ref() {
+        if let Some(parent) = n.parent().as_ref() {
             let mut hit = false;
             tsox_frontend::ast::node_data_generated::for_each_child(parent, |sib| {
                 if sib.kind == SyntaxKind::WithStatement
@@ -2280,7 +2280,7 @@ pub(crate) fn node_in_with_block(node: &Arc<Node>) -> bool {
                 return true;
             }
         }
-        cur = n.parent.clone();
+        cur = n.parent();
     }
     false
 }
@@ -2292,7 +2292,7 @@ impl Checker {
         node: &Arc<Node>,
         symbol: &Arc<Symbol>,
     ) -> Option<Vec<SymbolDisplayPart>> {
-        if let Some(elem) = node.parent.as_ref()
+        if let Some(elem) = node.parent().as_ref()
             && elem.kind == SyntaxKind::BindingElement
             && let tsox_frontend::ast::NodeData::BindingElement(d) = &elem.data
             && d.property_name
@@ -2375,7 +2375,7 @@ impl Checker {
         let Some(decl) = decl else {
             return String::new();
         };
-        let Some(class_node) = decl.parent.as_ref().filter(|p| {
+        let Some(class_node) = decl.parent().filter(|p| {
             matches!(p.kind, SyntaxKind::ClassDeclaration | SyntaxKind::ClassExpression)
         }) else {
             return String::new();
@@ -2383,7 +2383,7 @@ impl Checker {
         let Some(class_sym) = self
             .program
             .symbol_map()
-            .symbol_of(class_node)
+            .symbol_of(&class_node)
             .map(Arc::clone)
         else {
             return String::new();
@@ -2397,7 +2397,7 @@ impl Checker {
             match class_node.data {
                 crate::checker::nodebuilder::NodeData::ClassDeclaration(_)
                 | crate::checker::nodebuilder::NodeData::ClassExpression(_) => {
-                    let inst = self.build_class_instance_type_with_base(class_node);
+                    let inst = self.build_class_instance_type_with_base(&class_node);
                     self.get_base_types(&inst).into_iter().next()
                 }
                 _ => None,

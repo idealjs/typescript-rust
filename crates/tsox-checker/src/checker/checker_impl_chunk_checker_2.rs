@@ -102,7 +102,7 @@ impl Checker {
 
         for file in &self.files {
             for aug_name in &file.module_augmentations {
-                let Some(module_node) = aug_name.parent.clone() else {
+                let Some(module_node) = aug_name.parent() else {
                     continue;
                 };
                 if !tsox_frontend::ast::is_global_scope_augmentation(&module_node) {
@@ -154,7 +154,7 @@ impl Checker {
         let mut augs: Vec<(Arc<Node>, Arc<Node>)> = Vec::new();
         for file in &self.files {
             for name in &file.module_augmentations {
-                let Some(module_node) = name.parent.clone() else {
+                let Some(module_node) = name.parent() else {
                     continue;
                 };
                 if tsox_frontend::ast::is_global_scope_augmentation(&module_node) {

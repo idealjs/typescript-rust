@@ -151,6 +151,19 @@ pub fn parse_test_data(contents: &str, default_file_name: &str) -> TestData {
     data
 }
 
+/// Go chompLeadingSpace：所有非空行均以空格开头时，每行剥掉 1 个前导空格
+fn chomp_leading_space(content: &str) -> String {
+    let lines: Vec<&str> = content.split('\n').collect();
+    if lines.iter().any(|l| !l.is_empty() && !l.starts_with(' ')) {
+        return content.to_string();
+    }
+    lines
+        .iter()
+        .map(|l| l.get(1..).unwrap_or(""))
+        .collect::<Vec<_>>()
+        .join("\n")
+}
+
 fn parse_file_content(
     file_name: &str,
     content: &str,
@@ -160,6 +173,7 @@ fn parse_file_content(
     Vec<Marker>,
     Vec<RangeMarker>,
 ) {
+    let content = chomp_leading_space(content);
     let chars: Vec<char> = content.chars().collect();
     let mut out = String::new();
     let mut markers: Vec<Marker> = Vec::new();

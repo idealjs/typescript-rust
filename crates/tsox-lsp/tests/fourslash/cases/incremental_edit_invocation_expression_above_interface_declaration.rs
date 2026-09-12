@@ -11,5 +11,7 @@ interface Foo {
 }"#;
     let mut s = Session::new_for_test("incrementalEditInvocationExpressionAboveInterfaceDeclaration", content);
     fourslash::go_to_marker(&mut s, "1");
-    // TODO: f.Insert(t, "alert(")
+    fourslash::insert(&mut s, "alert(");
+    // TODO: f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{Text: "alert(message?: any): void"})
+    // TODO: f.VerifyErrorExistsAfterMarker(t, "1")
 }

@@ -14,13 +14,13 @@ impl Checker {
                 .clone()
                 .or_else(|| symbol.declarations.first().cloned());
             let owned_by_class = tp_decl.is_some_and(|d| {
-                let mut cur = d.parent.as_ref();
+                let mut cur = d.parent();
                 while let Some(a) = cur {
                     match a.kind {
                         tsox_frontend::ast::SyntaxKind::ClassDeclaration
                         | tsox_frontend::ast::SyntaxKind::ClassExpression => return true,
                         tsox_frontend::ast::SyntaxKind::SourceFile => return false,
-                        _ => cur = a.parent.as_ref(),
+                        _ => cur = a.parent(),
                     }
                 }
                 false

@@ -161,11 +161,11 @@ impl Checker {
 
         let invalid_in_form = matches!(&expr.data, tsox_frontend::ast::NodeData::BinaryExpression(b)
             if b.operator_token.kind == SyntaxKind::InKeyword)
-            && name.parent.as_ref().is_some_and(|member| {
+            && name.parent().as_ref().is_some_and(|member| {
                 !matches!(
                     member.kind,
                     SyntaxKind::GetAccessor | SyntaxKind::SetAccessor
-                ) && member.parent.as_ref().is_some_and(|container| {
+                ) && member.parent().as_ref().is_some_and(|container| {
                     matches!(
                         container.kind,
                         SyntaxKind::TypeLiteral
@@ -279,12 +279,12 @@ impl Checker {
     }
 
     pub(crate) fn node_source_text(&self, node: &Arc<Node>) -> Option<String> {
-        let mut root: &Arc<Node> = node;
-        while let Some(p) = root.parent.as_ref() {
+        let mut root = Arc::clone(node);
+        while let Some(p) = root.parent() {
             root = p;
         }
         for f in &self.files {
-            if Arc::ptr_eq(&f.node, root) {
+            if Arc::ptr_eq(&f.node, &root) {
                 return f
                     .text
                     .get(node.loc.pos()..node.loc.end())

@@ -10,7 +10,7 @@ impl Checker {
                     && let Some(init) = &vd.initializer
                     && (node.has_syntactic_modifier(ModifierFlags::Ambient)
                         || node
-                            .parent
+                            .parent()
                             .as_ref()
                             .is_some_and(|p| p.has_syntactic_modifier(ModifierFlags::Ambient))
                         || self.ambient_context_depth > 0
@@ -124,7 +124,7 @@ impl Checker {
         }) else {
             return;
         };
-        let Some(parent) = &abstract_decl.parent else {
+        let Some(parent) = &abstract_decl.parent() else {
             return;
         };
         let Some(class_name) = class_declaration_name(parent) else {
@@ -141,7 +141,7 @@ impl Checker {
     }
 
     pub(crate) fn access_in_property_initializer(&self, node: &Arc<Node>) -> bool {
-        let mut cur = node.parent.as_ref();
+        let mut cur = node.parent();
         while let Some(a) = cur {
             match a.kind {
                 SyntaxKind::PropertyDeclaration => return true,
@@ -157,7 +157,7 @@ impl Checker {
                 | SyntaxKind::ClassExpression => return false,
                 _ => {}
             }
-            cur = a.parent.as_ref();
+            cur = a.parent();
         }
         false
     }
@@ -196,7 +196,7 @@ impl Checker {
             }) else {
                 continue;
             };
-            let Some(parent) = &abstract_decl.parent else {
+            let Some(parent) = &abstract_decl.parent() else {
                 continue;
             };
             let Some(class_name) = class_declaration_name(parent) else {

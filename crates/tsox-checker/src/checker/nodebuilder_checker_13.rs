@@ -147,7 +147,7 @@ impl Checker {
 
     pub(crate) fn variable_decl_prefix(&self, symbol: &Arc<Symbol>) -> &'static str {
         for decl in &symbol.declarations {
-            if let Some(parent) = &decl.parent {
+            if let Some(parent) = decl.parent() {
                 if parent.kind == SyntaxKind::VariableDeclarationList {
                     if parent.flags.contains(tsox_frontend::ast::NodeFlags::Const) {
                         return "const ";
@@ -164,10 +164,10 @@ impl Checker {
         // 绑定元素：穿透模式链找 VariableDeclarationList 的声明风格
         for decl in &symbol.declarations {
             if decl.kind == SyntaxKind::BindingElement {
-                let mut cur = decl.parent.as_ref();
+                let mut cur = decl.parent();
                 while let Some(n) = cur {
                     if n.kind == SyntaxKind::VariableDeclaration {
-                        if let Some(p) = n.parent.as_ref() {
+                        if let Some(p) = n.parent().as_ref() {
                             if p.kind == SyntaxKind::VariableDeclarationList {
                                 if p.flags.contains(tsox_frontend::ast::NodeFlags::Const) {
                                     return "const ";
@@ -185,7 +185,7 @@ impl Checker {
                             | SyntaxKind::ArrayBindingPattern
                             | SyntaxKind::BindingElement
                     ) {
-                        cur = n.parent.as_ref();
+                        cur = n.parent();
                         continue;
                     }
                     break;
@@ -194,7 +194,7 @@ impl Checker {
         }
         if symbol.flags.contains(SymbolFlags::BlockScopedVariable)
             && !symbol.declarations.iter().any(|d| {
-                d.parent
+                d.parent()
                     .as_ref()
                     .is_some_and(|p| p.kind == SyntaxKind::CatchClause)
             })
@@ -230,7 +230,7 @@ impl Checker {
     #[allow(dead_code)]
     pub(crate) fn symbol_is_const(&self, symbol: &Arc<Symbol>) -> bool {
         for decl in &symbol.declarations {
-            if let Some(parent) = &decl.parent {
+            if let Some(parent) = decl.parent() {
                 if parent.kind == SyntaxKind::VariableDeclarationList
                     && parent.flags.contains(tsox_frontend::ast::NodeFlags::Const)
                 {

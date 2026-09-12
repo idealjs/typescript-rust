@@ -15,8 +15,7 @@ fn formatting_for_loop_semicolons() {
     fourslash::go_to_marker(&mut s, "3");
     fourslash::verify_current_line_content(&mut s, r#"for (var x; x < 0; x++) { }"#);
     // TODO: opts444 := f.GetOptions()
-    // TODO: opts444.FormatCodeSettings.InsertSpaceAfterSemicolonInForStatements = core.TSFalse
-    // TODO: f.Configure(t, opts444)
+    fourslash::configure_format_settings(&mut s, &[("insert_space_after_semicolon_in_for_statements", "false")]);
     fourslash::format_document(&mut s, "");
     fourslash::go_to_marker(&mut s, "1");
     fourslash::verify_current_line_content(&mut s, r#"for (;;) { }"#);

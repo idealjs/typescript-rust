@@ -34,7 +34,7 @@ impl Checker {
             .iter()
             .find(|d| d.kind == SyntaxKind::NamespaceImport)
         {
-            let mut cur = decl.parent.clone();
+            let mut cur = decl.parent();
             loop {
                 if std::env::var_os("TSOX_DEBUG_QI").is_some() {
                     eprintln!("[nsi-walk] kind={:?}", cur.as_ref().map(|n| n.kind));
@@ -99,7 +99,7 @@ impl Checker {
                         .insert(module_sym.id(), spec.clone());
                     return Some(self.get_type_of_symbol(&module_sym));
                 }
-                cur = n.parent.clone();
+                cur = n.parent();
             }
             return None;
         }
@@ -240,12 +240,12 @@ impl Checker {
             _ => return None,
         };
 
-        let mut import_decl = decl.parent.as_ref()?;
+        let mut import_decl = decl.parent()?;
         while !matches!(
             import_decl.data,
             tsox_frontend::ast::NodeData::ImportDeclaration(_)
         ) {
-            import_decl = import_decl.parent.as_ref()?;
+            import_decl = import_decl.parent()?;
         }
         let module_spec = match &import_decl.data {
             tsox_frontend::ast::NodeData::ImportDeclaration(d) => {

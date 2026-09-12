@@ -84,7 +84,7 @@ impl Checker {
                 .declarations
                 .extend(source.declarations.iter().cloned());
 
-            merged.parent = effective_target.parent.clone();
+merged.set_parent(&effective_target);
 
             merged.members = SymbolTable {
                 entries: effective_target.members.entries.clone(),
@@ -98,7 +98,7 @@ impl Checker {
             let mut result_mut = Symbol::new(result.flags, &result.name);
             result_mut.value_declaration = result.value_declaration.clone();
             result_mut.declarations = result.declarations.clone();
-            result_mut.parent = result.parent.clone();
+result_mut.set_parent(&result);
             result_mut.members = SymbolTable {
                 entries: result.members.entries.clone(),
             };
@@ -196,7 +196,7 @@ impl Checker {
     pub fn clone_symbol(&self, symbol: &Arc<Symbol>) -> Option<Arc<Symbol>> {
         let mut cloned = Symbol::new(symbol.flags | SymbolFlags::Transient, &symbol.name);
         cloned.declarations = symbol.declarations.clone();
-        cloned.parent = symbol.parent.clone();
+cloned.set_parent(&symbol);
         cloned.value_declaration = symbol.value_declaration.clone();
         cloned.members = SymbolTable {
             entries: symbol.members.entries.clone(),
@@ -222,12 +222,12 @@ impl Checker {
         }
 
         if node.kind == tsox_frontend::ast::SyntaxKind::Identifier {
-            let mut current = node.parent.as_ref();
+            let mut current = node.parent();
             while let Some(parent) = current {
-                if let Some(sym) = self.program.symbol_map().symbol_of(parent) {
+                if let Some(sym) = self.program.symbol_map().symbol_of(&parent) {
                     return Some(Arc::clone(sym));
                 }
-                current = parent.parent.as_ref();
+                current = parent.parent();
             }
         }
 

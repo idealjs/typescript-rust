@@ -12,5 +12,6 @@ import * as abs from "abs";
 abs.default/**/;"#;
     let mut s = Session::new_for_test("signatureHelpImportStarFromExportEquals", content);
     fourslash::go_to_marker(&mut s, "");
-    // TODO: f.Insert(t, "(")
+    fourslash::insert(&mut s, "(");
+    // TODO: f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{Text: "default(str: string): string"})
 }

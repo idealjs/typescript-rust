@@ -10,11 +10,15 @@ fn format_nested_class_with_open_brace_on_new_lines() {
 }"#;
     let mut s = Session::new_for_test("formatNestedClassWithOpenBraceOnNewLines", content);
     // TODO: opts168 := f.GetOptions()
-    // TODO: opts168.FormatCodeSettings.PlaceOpenBraceOnNewLineForControlBlocks = core.TSTrue
-    // TODO: f.Configure(t, opts168)
+    fourslash::configure_format_settings(&mut s, &[("place_open_brace_on_new_line_for_control_blocks", "true")]);
     // TODO: opts232 := f.GetOptions()
-    // TODO: opts232.FormatCodeSettings.PlaceOpenBraceOnNewLineForFunctions = core.TSTrue
-    // TODO: f.Configure(t, opts232)
+    fourslash::configure_format_settings(&mut s, &[("place_open_brace_on_new_line_for_functions", "true")]);
     fourslash::go_to_marker(&mut s, "1");
-    // TODO: f.Insert(t, "}")
+    fourslash::insert(&mut s, "}");
+    fourslash::verify_current_file_content(&mut s, r#"module A
+{
+    class B
+    {
+    }
+}"#);
 }

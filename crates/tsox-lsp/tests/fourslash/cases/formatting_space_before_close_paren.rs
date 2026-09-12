@@ -10,8 +10,7 @@ fn formatting_space_before_close_paren() {
 /*5*/var bar = (function (a) { });"#;
     let mut s = Session::new_for_test("formattingSpaceBeforeCloseParen", content);
     // TODO: opts235 := f.GetOptions()
-    // TODO: opts235.FormatCodeSettings.InsertSpaceAfterOpeningAndBeforeClosingNonemptyParenthesis = core.TSTrue
-    // TODO: f.Configure(t, opts235)
+    fourslash::configure_format_settings(&mut s, &[("insert_space_after_opening_and_before_closing_nonempty_parenthesis", "true")]);
     fourslash::format_document(&mut s, "");
     fourslash::go_to_marker(&mut s, "1");
     fourslash::verify_current_line_content(&mut s, r#"( {} );"#);
@@ -24,8 +23,7 @@ fn formatting_space_before_close_paren() {
     fourslash::go_to_marker(&mut s, "5");
     fourslash::verify_current_line_content(&mut s, r#"var bar = ( function( a ) { } );"#);
     // TODO: opts674 := f.GetOptions()
-    // TODO: opts674.FormatCodeSettings.InsertSpaceAfterOpeningAndBeforeClosingNonemptyParenthesis = core.TSFalse
-    // TODO: f.Configure(t, opts674)
+    fourslash::configure_format_settings(&mut s, &[("insert_space_after_opening_and_before_closing_nonempty_parenthesis", "false")]);
     fourslash::format_document(&mut s, "");
     fourslash::go_to_marker(&mut s, "1");
     fourslash::verify_current_line_content(&mut s, r#"({});"#);

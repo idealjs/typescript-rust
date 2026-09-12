@@ -45,8 +45,8 @@ impl Checker {
             let sym_mut = Arc::as_ptr(&sym) as *mut Symbol;
             unsafe {
                 (*sym_mut).check_flags |= CheckFlags::Instantiated;
-                if (*sym_mut).parent.is_none() {
-                    (*sym_mut).parent = Some(Arc::clone(container));
+                if (*sym_mut).parent().is_none() {
+                    (*sym_mut).set_parent(container);
                 }
             }
             self.value_symbol_links

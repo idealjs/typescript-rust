@@ -78,7 +78,7 @@ impl Checker {
         };
         if decl_name_pos <= node.pos() {
             let inside_own_initializer = {
-                let mut cur = declaration.parent.as_ref();
+                let mut cur = declaration.parent();
                 let mut found = false;
                 while let Some(a) = cur {
                     if matches!(&a.data, tsox_frontend::ast::NodeData::VariableDeclaration(vdd)
@@ -93,7 +93,7 @@ impl Checker {
                             | SyntaxKind::ArrayBindingPattern
                             | SyntaxKind::ObjectBindingPattern
                     ) {
-                        cur = a.parent.as_ref();
+                        cur = a.parent();
                         continue;
                     }
                     break;

@@ -1,9 +1,16 @@
-pub(crate) mod rule;
-pub(crate) mod rule_context;
-pub(crate) mod rule_context_2;
-pub(crate) mod rules;
-pub(crate) mod scanner;
-pub(crate) mod span_worker;
+mod api;
+mod indentation;
+mod indenter;
+mod lists;
+mod rule;
+mod rule_context;
+mod rule_context_2;
+mod rules;
+mod rulesmap;
+mod scanner;
+mod span;
+mod util;
+mod visit_generated;
 
 pub(crate) use crate::ast::SourceFile;
 pub use rule_context::Tristate;
@@ -49,6 +56,8 @@ pub struct FormatCodeSettings {
     pub place_open_brace_on_new_line_for_functions: Tristate,
     pub place_open_brace_on_new_line_for_control_blocks: Tristate,
     pub semicolons: SemicolonPreference,
+    pub indent_switch_case: Tristate,
+    pub indent_multi_line_object_literal_beginning_on_blank_line: Tristate,
 }
 
 pub fn get_default_format_code_settings() -> FormatCodeSettings {
@@ -81,6 +90,8 @@ pub fn get_default_format_code_settings() -> FormatCodeSettings {
         place_open_brace_on_new_line_for_functions: Tristate::False,
         place_open_brace_on_new_line_for_control_blocks: Tristate::False,
         semicolons: SemicolonPreference::Ignore,
+        indent_switch_case: Tristate::True,
+        indent_multi_line_object_literal_beginning_on_blank_line: Tristate::Unknown,
     }
 }
 
@@ -115,34 +126,32 @@ pub struct TextChange {
 }
 
 pub fn format_document(ctx: &FormatContext, source_file: &Arc<SourceFile>) -> Vec<TextChange> {
-    let _ = ctx;
-    span_worker::format_document(source_file, get_default_format_code_settings())
+    api::format_document_with(ctx, source_file)
 }
 
 pub fn format_selection(
-    _ctx: &FormatContext,
-    _source_file: &SourceFile,
-    _start: usize,
-    _end: usize,
+    ctx: &FormatContext,
+    source_file: &Arc<SourceFile>,
+    start: usize,
+    end: usize,
 ) -> Vec<TextChange> {
-    Vec::new()
+    api::format_selection_with(ctx, source_file, start, end)
 }
 
-pub fn get_indentation(
-    _line_start: usize,
-    _source_file: &SourceFile,
-    _options: &FormatCodeSettings,
-    _inverted: bool,
-) -> u32 {
-    0
+pub fn format_on_semicolon(ctx: &FormatContext, source_file: &Arc<SourceFile>, position: usize) -> Vec<TextChange> {
+    api::format_on_semicolon_with(ctx, source_file, position)
 }
 
-pub fn get_line_start_position_for_position(_pos: usize, _source_file: &SourceFile) -> usize {
-    0
+pub fn format_on_enter(ctx: &FormatContext, source_file: &Arc<SourceFile>, position: usize) -> Vec<TextChange> {
+    api::format_on_enter_with(ctx, source_file, position)
 }
 
-pub fn get_containing_list(_node: &Arc<Node>, _source_file: &SourceFile) -> Option<Vec<Arc<Node>>> {
-    None
+pub fn format_on_opening_curly(ctx: &FormatContext, source_file: &Arc<SourceFile>, position: usize) -> Vec<TextChange> {
+    api::format_on_opening_curly_with(ctx, source_file, position)
+}
+
+pub fn format_on_closing_curly(ctx: &FormatContext, source_file: &Arc<SourceFile>, position: usize) -> Vec<TextChange> {
+    api::format_on_closing_curly_with(ctx, source_file, position)
 }
 
 #[cfg(test)]

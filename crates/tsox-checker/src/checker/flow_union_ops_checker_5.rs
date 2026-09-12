@@ -105,8 +105,8 @@ impl Checker {
                 }
             }
             NodeData::BindingElement(be) => {
-                let pattern = Arc::clone(expr.parent.as_ref()?);
-                let pattern_parent = Arc::clone(pattern.parent.as_ref()?);
+                let pattern = Arc::clone(expr.parent().as_ref()?);
+                let pattern_parent = Arc::clone(pattern.parent().as_ref()?);
                 let parent_type = self.initial_type_of_declaration(&pattern_parent);
                 let mut t = match (&parent_type, pattern.kind) {
                     (Some(parent_type), SyntaxKind::ObjectBindingPattern) => {
@@ -206,16 +206,16 @@ impl Checker {
     }
 
     pub(crate) fn for_in_or_of_statement_of(decl: &Arc<Node>) -> Option<Arc<Node>> {
-        let list = decl.parent.as_ref()?;
+        let list = decl.parent()?;
         if list.kind != SyntaxKind::VariableDeclarationList {
             return None;
         }
-        let stmt = list.parent.as_ref()?;
+        let stmt = list.parent()?;
         if matches!(
             stmt.kind,
             SyntaxKind::ForInStatement | SyntaxKind::ForOfStatement
         ) {
-            Some(Arc::clone(stmt))
+            Some(Arc::clone(&stmt))
         } else {
             None
         }

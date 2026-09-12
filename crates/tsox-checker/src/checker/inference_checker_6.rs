@@ -80,7 +80,7 @@ impl Checker {
     ) -> Option<Arc<Type>> {
         use tsox_frontend::ast::NodeData;
 
-        let parent = node.parent.as_ref()?;
+        let parent = node.parent().as_ref()?;
         let binary = match &parent.data {
             NodeData::BinaryExpression(data) => data,
             _ => return None,
@@ -118,7 +118,7 @@ impl Checker {
     ) -> Option<Arc<Type>> {
         use tsox_frontend::ast::NodeData;
 
-        let object_literal = node.parent.as_ref()?;
+        let object_literal = node.parent().as_ref()?;
 
         let contextual_type = self.get_contextual_type(object_literal, _context_flags)?;
 

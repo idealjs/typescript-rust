@@ -24,4 +24,8 @@ x/**/"#;
     // TODO: f.VerifyImportFixModuleSpecifiers(t, "", []string{"ambient"}, &lsutil.UserPreferences{AutoImportSpec
     // TODO: f.VerifyImportFixModuleSpecifiers(t, "", []string{"ambient/utils"}, &lsutil.UserPreferences{AutoImpo
     // TODO: f.VerifyImportFixModuleSpecifiers(t, "", []string{"ambient", "ambient/utils"}, &lsutil.UserPreferenc
+    fourslash::go_to_marker(&mut s, "");
+    // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "");
+    // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

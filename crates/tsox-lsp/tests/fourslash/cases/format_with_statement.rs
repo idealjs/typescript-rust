@@ -14,8 +14,7 @@ with (bar.blah)/*4*/
 }/*6*/"#;
     let mut s = Session::new_for_test("formatWithStatement", content);
     // TODO: opts227 := f.GetOptions()
-    // TODO: opts227.FormatCodeSettings.PlaceOpenBraceOnNewLineForControlBlocks = core.TSFalse
-    // TODO: f.Configure(t, opts227)
+    fourslash::configure_format_settings(&mut s, &[("place_open_brace_on_new_line_for_control_blocks", "false")]);
     fourslash::format_document(&mut s, "");
     fourslash::go_to_marker(&mut s, "1");
     fourslash::verify_current_line_content(&mut s, r#"with (foo.bar) {"#);
@@ -26,8 +25,7 @@ with (bar.blah)/*4*/
     fourslash::go_to_marker(&mut s, "6");
     fourslash::verify_current_line_content(&mut s, r#"}"#);
     // TODO: opts565 := f.GetOptions()
-    // TODO: opts565.FormatCodeSettings.PlaceOpenBraceOnNewLineForControlBlocks = core.TSTrue
-    // TODO: f.Configure(t, opts565)
+    fourslash::configure_format_settings(&mut s, &[("place_open_brace_on_new_line_for_control_blocks", "true")]);
     fourslash::format_document(&mut s, "");
     fourslash::go_to_marker(&mut s, "1");
     fourslash::verify_current_line_content(&mut s, r#"with (foo.bar)"#);

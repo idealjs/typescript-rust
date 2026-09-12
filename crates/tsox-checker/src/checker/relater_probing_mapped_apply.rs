@@ -185,10 +185,10 @@ impl Checker {
         // 调用现场栈（如 objWrapper 约束解析）含无关同名类型参数，不得泄漏
         let saved_scopes = std::mem::take(&mut self.scope_stack);
         let mut scope_chain: Vec<u64> = Vec::new();
-        let mut cur = template_node.parent.as_ref();
+        let mut cur = template_node.parent();
         while let Some(c) = cur {
             scope_chain.push(c.id());
-            cur = c.parent.as_ref();
+            cur = c.parent();
         }
         scope_chain.reverse();
         self.scope_stack = scope_chain;

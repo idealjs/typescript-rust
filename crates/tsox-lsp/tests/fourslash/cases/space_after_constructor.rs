@@ -10,5 +10,8 @@ fn space_after_constructor() {
     }/*2*/"#;
     let mut s = Session::new_for_test("spaceAfterConstructor", content);
     fourslash::go_to_marker(&mut s, "2");
-    // TODO: f.Insert(t, "}")
+    fourslash::insert(&mut s, "}");
+    fourslash::go_to_marker(&mut s, "1");
+    fourslash::verify_current_line_content(&mut s, r#"    constructor(processId: number) {"#);
+    // TODO: }
 }

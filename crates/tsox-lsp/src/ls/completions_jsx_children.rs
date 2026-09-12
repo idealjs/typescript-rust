@@ -28,7 +28,7 @@ pub(super) fn jsx_children_param_type(
     if matches!(&param.data, NodeData::ParameterDeclaration(d) if d.type_node.is_some()) {
         return None;
     }
-    let fn_node = param.parent.clone()?;
+    let fn_node = param.parent()?;
     if !matches!(
         fn_node.kind,
         SyntaxKind::ArrowFunction | SyntaxKind::FunctionExpression
@@ -54,7 +54,7 @@ fn jsx_children_contextual_type(
     checker: &mut Checker,
     jsx_expression: &Arc<Node>,
 ) -> Option<Arc<Type>> {
-    let element = jsx_expression.parent.clone()?;
+    let element = jsx_expression.parent()?;
     let opening = match &element.data {
         NodeData::JsxElement(d) => Arc::clone(&d.opening_element),
         _ => return None,
@@ -147,13 +147,13 @@ fn fn_parameters(fn_node: &Arc<Node>) -> Vec<Arc<Node>> {
 
 /// 函数体宿主向上（跳过括号）是否为 JsxElement children 里的 JsxExpression
 fn enclosing_jsx_child_expression(fn_node: &Arc<Node>) -> Option<Arc<Node>> {
-    let mut current = fn_node.parent.clone()?;
+    let mut current = fn_node.parent()?;
     while current.kind == SyntaxKind::ParenthesizedExpression {
-        current = current.parent.clone()?;
+        current = current.parent()?;
     }
     if current.kind == SyntaxKind::JsxExpression
         && current
-            .parent
+            .parent()
             .as_ref()
             .is_some_and(|p| p.kind == SyntaxKind::JsxElement)
     {

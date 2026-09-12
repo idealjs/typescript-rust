@@ -43,4 +43,6 @@ export const sessionLoader = {
 };"#;
     let mut s = Session::new_for_test("codeFixMissingTypeAnnotationOnExports28_long_types", content);
     // TODO: f.VerifyCodeFixAvailable(t, []string{"Add return type 'Promise<{\n    PROP_1: {\n        name: boole
+    // TODO: f.VerifyCodeFix(t, fourslash.VerifyCodeFixOptions{
+    // TODO: }
 }

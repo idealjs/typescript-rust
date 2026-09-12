@@ -11,5 +11,7 @@ fn formatting_after_multi_line_if_condition() {
  /**/"#;
     let mut s = Session::new_for_test("formattingAfterMultiLineIfCondition", content);
     fourslash::go_to_marker(&mut s, "");
-    // TODO: f.Insert(t, "}")
+    fourslash::insert(&mut s, "}");
+    fourslash::go_to_marker(&mut s, "comment");
+    fourslash::verify_current_line_content(&mut s, r#"    // This is a comment"#);
 }

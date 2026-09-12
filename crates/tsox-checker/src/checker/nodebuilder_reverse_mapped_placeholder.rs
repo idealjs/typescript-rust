@@ -19,7 +19,7 @@ impl Checker {
                 Arc::clone(&pae.expression)
             }
             _ => {
-                let parent = node.parent.as_ref()?;
+                let parent = node.parent()?;
                 if parent.kind != SyntaxKind::PropertyAccessExpression {
                     return None;
                 }

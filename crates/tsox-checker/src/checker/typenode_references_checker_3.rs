@@ -10,10 +10,10 @@ impl Checker {
                 // 外层栈可能是推断中构造的无关作用域，不得泄漏进来
                 let saved_scopes = std::mem::take(&mut self.scope_stack);
                 let mut scope_chain: Vec<u64> = Vec::new();
-                let mut cur = decl.parent.as_ref();
+                let mut cur = decl.parent();
                 while let Some(c) = cur {
                     scope_chain.push(c.id());
-                    cur = c.parent.as_ref();
+                    cur = c.parent();
                 }
                 scope_chain.reverse();
                 self.scope_stack = scope_chain;

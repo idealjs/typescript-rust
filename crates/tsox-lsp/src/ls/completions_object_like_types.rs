@@ -29,7 +29,7 @@ pub(super) fn type_literal_in_type_argument_completion(
     ) {
         return None;
     }
-    let parent = type_literal.parent.clone()?;
+    let parent = type_literal.parent()?;
     let container = if parent.kind == SyntaxKind::IntersectionType {
         parent
     } else {
@@ -67,7 +67,7 @@ fn find_ancestor_type_literal(node: &Arc<Node>) -> Option<Arc<Node>> {
         ) {
             return None;
         }
-        current = n.parent.clone();
+        current = n.parent();
     }
     None
 }
@@ -81,7 +81,7 @@ pub(super) fn constraint_of_type_argument_property(
     {
         return Some(constraint);
     }
-    let parent = node.parent.clone()?;
+    let parent = node.parent()?;
     let t = constraint_of_type_argument_property(checker, &parent)?;
     match node.kind {
         SyntaxKind::PropertySignature => {
@@ -90,7 +90,7 @@ pub(super) fn constraint_of_type_argument_property(
         }
         SyntaxKind::ColonToken => {
             if node
-                .parent
+                .parent()
                 .as_ref()
                 .is_some_and(|p| p.kind == SyntaxKind::PropertySignature)
             {
@@ -112,7 +112,7 @@ fn parameter_jsdoc_type(
     file: &Arc<SourceFile>,
     param: &Arc<Node>,
 ) -> Option<Arc<Type>> {
-    let func = param.parent.clone()?;
+    let func = param.parent()?;
     let index = function_parameter_index(&func, param)?;
     let mut position = 0usize;
     for jsdoc in file.resolve_jsdoc(&func) {
@@ -190,10 +190,10 @@ fn binding_pattern_type(
     file: &Arc<SourceFile>,
     pattern: &Arc<Node>,
 ) -> Option<Arc<Type>> {
-    let parent = pattern.parent.clone()?;
+    let parent = pattern.parent()?;
     match parent.kind {
         SyntaxKind::BindingElement => {
-            let outer_pattern = parent.parent.clone()?;
+            let outer_pattern = parent.parent()?;
             let outer_type = binding_pattern_type(checker, file, &outer_pattern)?;
             if outer_pattern.kind == SyntaxKind::ArrayBindingPattern {
                 let index = element_index(&outer_pattern, &parent)?;

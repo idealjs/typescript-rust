@@ -76,7 +76,7 @@ impl Checker {
                 ) {
                     return Some(current);
                 }
-                current = Arc::clone(current.parent.as_ref()?);
+                current = Arc::clone(current.parent().as_ref()?);
             }
         };
         let same_scope = match (flow_container_of(node), flow_container_of(declaration)) {
@@ -88,7 +88,7 @@ impl Checker {
         }
 
         if node
-            .parent
+            .parent()
             .as_ref()
             .is_some_and(|p| p.kind == SyntaxKind::NonNullExpression)
         {

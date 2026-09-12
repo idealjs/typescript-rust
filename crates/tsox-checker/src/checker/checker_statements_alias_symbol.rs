@@ -195,9 +195,9 @@ fn property_name_or_name(node: &Arc<Node>) -> Option<Arc<Node>> {
 /// Go TryGetModuleSpecifierFromDeclaration：沿祖先找 import/export/require
 /// 声明并取其模块说明符
 fn import_or_require_specifier_of(node: &Arc<Node>) -> Option<String> {
-    let mut cur = node;
+    let mut cur = Arc::clone(node);
     loop {
-        let parent = cur.parent.as_ref()?;
+        let parent = cur.parent()?;
         match &parent.data {
             NodeData::ImportDeclaration(d) => {
                 return module_specifier_text(&d.module_specifier);

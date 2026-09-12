@@ -53,7 +53,7 @@ impl NameResolver {
                     node.name().map(|n| Arc::ptr_eq(n, last)).unwrap_or(false)
                 })
             {
-                let parent = node.parent.clone();
+                let parent = node.parent();
                 last_location = Some(node);
                 current = parent;
                 continue 'outer;
@@ -136,7 +136,7 @@ impl NameResolver {
                     }
                 }
                 SyntaxKind::ComputedPropertyName => {
-                    grandparent = node.parent.as_ref().and_then(|p| p.parent.clone());
+                    grandparent = node.parent().as_ref().and_then(|p| p.parent());
                     let should_return_nil = self.resolve_computed_property_name_case(
                         &original_location,
                         &grandparent,
@@ -173,18 +173,18 @@ impl NameResolver {
                 }
                 SyntaxKind::Decorator => {
                     let mut next = Arc::clone(&node);
-                    if let Some(parent) = &node.parent {
+                    if let Some(parent) = node.parent() {
                         if parent.kind == SyntaxKind::Parameter {
-                            next = Arc::clone(parent);
+                            next = Arc::clone(&parent);
                         }
                     }
-                    if let Some(parent) = &node.parent {
-                        if is_class_element(parent) || parent.kind == SyntaxKind::ClassDeclaration {
-                            next = Arc::clone(parent);
+                    if let Some(parent) = node.parent() {
+                        if is_class_element(&parent) || parent.kind == SyntaxKind::ClassDeclaration {
+                            next = Arc::clone(&parent);
                         }
                     }
                     last_location = Some(node);
-                    current = next.parent.clone();
+                    current = next.parent();
                     continue 'outer;
                 }
                 SyntaxKind::Parameter => {
@@ -225,7 +225,7 @@ impl NameResolver {
             }
             last_location = Some(node);
 
-            current = last_location.as_ref().and_then(|n| n.parent.clone());
+            current = last_location.as_ref().and_then(|n| n.parent());
         }
 
         if is_use {
@@ -248,8 +248,8 @@ impl NameResolver {
         }
         if result.is_none() {
             if is_in_js_file(&original_location) {
-                if let Some(orig_parent) = &original_location.parent {
-                    if is_require_call(orig_parent, false) {
+                if let Some(orig_parent) = original_location.parent() {
+                    if is_require_call(&orig_parent, false) {
                         return self.require_symbol.clone();
                     }
                 }

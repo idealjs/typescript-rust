@@ -16,6 +16,7 @@ impl Parser {
             last_template_literal_was_middle: false,
             yield_context: false,
             await_context: false,
+            decorator_context: false,
             parsing_contexts: 0,
         };
 

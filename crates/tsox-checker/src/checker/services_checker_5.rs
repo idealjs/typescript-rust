@@ -162,8 +162,8 @@ impl Checker {
         parameter: &Arc<Node>,
         parameter_name: &str,
     ) -> Option<(Arc<Symbol>, Arc<Symbol>)> {
-        let constructor_declaration = parameter.parent.as_ref()?;
-        let class_declaration = constructor_declaration.parent.as_ref()?;
+        let constructor_declaration = parameter.parent()?;
+        let class_declaration = constructor_declaration.parent()?;
 
         let _ = parameter_name;
         let _ = class_declaration;
@@ -217,7 +217,7 @@ impl Checker {
                     return true;
                 }
             }
-            if let Some(ref parent) = token.parent {
+            if let Some(ref parent) = token.parent() {
                 if parent.kind == SyntaxKind::ShorthandPropertyAssignment {
                     let shorthand_symbol = self.get_shorthand_assignment_value_symbol(Some(parent));
                     if let Some(ref shorthand) = shorthand_symbol {
@@ -252,7 +252,7 @@ impl Checker {
                     continue;
                 }
             }
-            if let Some(ref parent) = token.parent {
+            if let Some(ref parent) = token.parent() {
                 if parent.kind == SyntaxKind::ShorthandPropertyAssignment {
                     let shorthand_symbol = self.get_shorthand_assignment_value_symbol(Some(parent));
                     if let Some(ref shorthand) = shorthand_symbol {

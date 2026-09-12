@@ -61,6 +61,8 @@ pub(crate) fn new_formatting_scanner(
     worker: &mut dyn FormatSpanWorkerLike,
 ) -> Vec<crate::format::TextChange> {
     let mut scan = Scanner::new(text.to_string());
+    // Go newFormattingScanner：SetSkipTrivia(false)，trivia 作为 token 产出
+    scan.set_skip_trivia(false);
     scan.set_language_variant(language_variant);
     scan.set_range(start_pos, end_pos);
 
@@ -122,8 +124,13 @@ impl FormattingScanner {
     }
 
     pub(crate) fn read_token_info(&mut self, n: Option<&Arc<Node>>) -> TokenInfo {
+        let last_kind = self
+            .last_token_info
+            .token
+            .as_ref()
+            .map(|t| t.kind);
         let expected_scan_action = n
-            .map(|n| expected_scan_action_for(n))
+            .map(|n| expected_scan_action_for(n, last_kind))
             .unwrap_or(ScanAction::Scan);
 
         if self.has_last_token_info && expected_scan_action == self.last_scan_action {
@@ -135,8 +142,9 @@ impl FormattingScanner {
             return info;
         }
 
+        // Go：fullStart != savedPos 时重扫；skip 留下的零宽 Unknown 态
+        // 原样返回，由 trailing trivia 收集与 advance 推进扫描器
         if self.s.full_start_pos() != self.saved_pos {
-            // 同一位置但扫描动作不同——回退重扫
             let end = self.s.end();
             self.s.set_range(self.saved_pos, end);
             self.s.scan();
@@ -144,7 +152,7 @@ impl FormattingScanner {
 
         let current_token = self.get_next_token(n, expected_scan_action);
 
-        let token = TextRangeWithKind::new(self.s.token_pos(), self.s.token_end(), current_token);
+        let token = TextRangeWithKind::new(self.s.full_start_pos(), self.s.token_end(), current_token);
 
         // 消费 trailing trivia
         self.trailing_trivia = Vec::new();
@@ -202,6 +210,22 @@ impl FormattingScanner {
                 if token == SyntaxKind::CloseBraceToken {
                     self.last_scan_action = ScanAction::RescanTemplateToken;
                     return self.s.re_scan_template_token();
+                }
+                // Go 靠 ResetTokenState(savedPos) 把被 trailing trivia 推过的
+                // 扫描器拉回 `}` 再重扫；这里回到上一消费 token 的起点补重扫
+                if self
+                    .last_token_info
+                    .token
+                    .as_ref()
+                    .is_some_and(|t| t.kind == SyntaxKind::CloseBraceToken)
+                {
+                    let start = self.last_token_info.token.as_ref().unwrap().loc.pos();
+                    self.s.set_range(start, self.s.end());
+                    self.s.scan();
+                    if self.s.token() == SyntaxKind::CloseBraceToken {
+                        self.last_scan_action = ScanAction::RescanTemplateToken;
+                        return self.s.re_scan_template_token();
+                    }
                 }
             }
             ScanAction::RescanJsxIdentifier => {
@@ -284,7 +308,7 @@ impl FormattingScanner {
                 return tok.loc.pos();
             }
         }
-        self.s.token_pos()
+        self.s.full_start_pos()
     }
 
     pub(crate) fn get_token_end(&self) -> usize {
@@ -301,7 +325,7 @@ fn is_trivia(kind: SyntaxKind) -> bool {
     crate::ast::node_data_generated::is_trivia_kind(kind)
 }
 
-fn expected_scan_action_for(n: &Arc<Node>) -> ScanAction {
+fn expected_scan_action_for(n: &Arc<Node>, last_token_kind: Option<SyntaxKind>) -> ScanAction {
     if should_rescan_greater_than_token(n) {
         ScanAction::RescanGreaterThanToken
     } else if should_rescan_slash_token(n) {
@@ -310,9 +334,36 @@ fn expected_scan_action_for(n: &Arc<Node>) -> ScanAction {
         ScanAction::RescanTemplateToken
     } else if should_rescan_jsx_identifier(n) {
         ScanAction::RescanJsxIdentifier
+    } else if should_rescan_jsx_text(n, last_token_kind) {
+        ScanAction::RescanJsxText
+    } else if should_rescan_jsx_attribute_value(n) {
+        ScanAction::RescanJsxAttributeValue
     } else {
         ScanAction::Scan
     }
+}
+
+fn should_rescan_jsx_text(n: &Arc<Node>, last_token_kind: Option<SyntaxKind>) -> bool {
+    if n.kind == SyntaxKind::JsxText {
+        return true;
+    }
+    if n.kind != SyntaxKind::JsxElement {
+        return false;
+    }
+    last_token_kind == Some(SyntaxKind::JsxText)
+}
+
+fn should_rescan_jsx_attribute_value(n: &Arc<Node>) -> bool {
+    let Some(parent) = n.parent() else {
+        return false;
+    };
+    if parent.kind != SyntaxKind::JsxAttribute {
+        return false;
+    }
+    let crate::ast::node_data_generated::NodeData::JsxAttribute(d) = &parent.data else {
+        return false;
+    };
+    d.initializer.as_ref().is_some_and(|i| Arc::ptr_eq(i, n))
 }
 
 fn should_rescan_greater_than_token(n: &Arc<Node>) -> bool {
@@ -337,7 +388,7 @@ fn should_rescan_template_token(n: &Arc<Node>) -> bool {
 
 fn should_rescan_jsx_identifier(n: &Arc<Node>) -> bool {
     use SyntaxKind::*;
-    let Some(parent) = n.parent.as_ref() else {
+    let Some(parent) = n.parent() else {
         return false;
     };
     match parent.kind {
@@ -355,7 +406,7 @@ fn should_rescan_jsx_identifier(n: &Arc<Node>) -> bool {
 fn is_leftmost_jsx_tag_name(node: &Arc<Node>) -> bool {
     let mut n = node.clone();
     loop {
-        let Some(parent) = n.parent.clone() else {
+        let Some(parent) = n.parent() else {
             return false;
         };
         if is_jsx_tag_name(&n) {
@@ -374,7 +425,7 @@ fn is_leftmost_jsx_tag_name(node: &Arc<Node>) -> bool {
 }
 
 fn is_jsx_tag_name(n: &Arc<Node>) -> bool {
-    let Some(parent) = n.parent.as_ref() else {
+    let Some(parent) = n.parent() else {
         return false;
     };
     matches!(

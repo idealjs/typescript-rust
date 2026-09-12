@@ -13,5 +13,6 @@ switch (1) {
     let mut s = Session::new_for_test("formatonkey01", content);
     // TODO: f.MarkTestAsStradaServer()
     fourslash::go_to_marker(&mut s, "1");
-    // TODO: f.Insert(t, "}")
+    fourslash::insert(&mut s, "}");
+    // TODO: f.VerifyCurrentLineContent(t, `
 }

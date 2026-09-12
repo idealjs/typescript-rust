@@ -86,7 +86,7 @@ impl Checker {
             if t.flags.intersects(TYPE_FLAGS_ENUM_LIKE) {
                 if let Some(sym) = &t.symbol
                     && sym.flags.contains(SymbolFlags::EnumMember)
-                    && let Some(parent) = &sym.parent
+                    && let Some(parent) = &sym.parent()
                     && let Some(cached) = self
                         .type_alias_links
                         .get(parent)
@@ -181,13 +181,13 @@ impl Checker {
 
     pub fn get_combined_node_flags(&mut self, node: &Arc<Node>) -> NodeFlags {
         let mut flags = node.flags;
-        let mut parent = node.parent.clone();
+        let mut parent = node.parent();
         while let Some(p) = parent {
             if p.kind == SyntaxKind::SourceFile {
                 break;
             }
             flags |= p.flags;
-            parent = p.parent.clone();
+            parent = p.parent();
         }
         flags
     }
@@ -207,12 +207,12 @@ impl Checker {
     pub fn get_root_declaration(node: &Arc<Node>) -> Arc<Node> {
         let mut current = Arc::clone(node);
         while current.kind == SyntaxKind::BindingElement {
-            let parent = match &current.parent {
-                Some(p) => Arc::clone(p),
+            let parent = match current.parent() {
+                Some(p) => Arc::clone(&p),
                 None => break,
             };
-            let grandparent = match &parent.parent {
-                Some(gp) => Arc::clone(gp),
+            let grandparent = match parent.parent() {
+                Some(gp) => gp,
                 None => break,
             };
             current = grandparent;
@@ -237,10 +237,10 @@ impl Checker {
         let mut current = Some(root);
         while let Some(n) = current {
             if skip(n.kind) {
-                current = n.parent.clone();
+                current = n.parent();
                 continue;
             }
-            return n.parent.clone();
+            return n.parent();
         }
         None
     }

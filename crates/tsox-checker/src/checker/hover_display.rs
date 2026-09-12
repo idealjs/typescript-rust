@@ -93,7 +93,7 @@ impl Checker {
         };
 
         // 改名绑定的 property_name：源属性身份
-        if node.parent.as_ref().is_some_and(|p| p.kind == SyntaxKind::BindingElement)
+        if node.parent().as_ref().is_some_and(|p| p.kind == SyntaxKind::BindingElement)
             && let Some(parts) =
                 self.binding_element_property_name_parts(node, &symbol)
         {
@@ -124,7 +124,7 @@ impl Checker {
     fn get_symbol_at_location_for_quick_info(&mut self, node: &Arc<Node>) -> Option<Arc<Symbol>> {
         // 类型位限定名段（AMap.MassMarks.Data 的 Data）：解析整条限定链
         // （限定链可能是 QualifiedName 或 heritage 位的 PropertyAccessExpression）
-        let in_type_chain = node.parent.as_ref().is_some_and(|p| {
+        let in_type_chain = node.parent().as_ref().is_some_and(|p| {
             if p.kind == SyntaxKind::QualifiedName {
                 return true;
             }
@@ -137,14 +137,14 @@ impl Checker {
                     ) {
                         return true;
                     }
-                    cur = n.parent.clone();
+                    cur = n.parent();
                 }
             }
             false
         });
         if in_type_chain {
             let mut root = Arc::clone(node);
-            while let Some(parent) = root.parent.as_ref() {
+            while let Some(parent) = root.parent().as_ref() {
                 if matches!(
                     parent.kind,
                     SyntaxKind::QualifiedName | SyntaxKind::PropertyAccessExpression
@@ -154,7 +154,7 @@ impl Checker {
                     break;
                 }
             }
-                        if root.parent.as_ref().is_some_and(|p| {
+                        if root.parent().as_ref().is_some_and(|p| {
                 matches!(
                     p.kind,
                     SyntaxKind::TypeReference
@@ -177,7 +177,7 @@ impl Checker {
         // 类型位的 this（ThisType 节点）：容器类/接口符号；this 参数名是
         // ThisKeyword，走下方参数符号解析
         if node.kind == SyntaxKind::ThisType {
-            let mut cur = node.parent.clone();
+            let mut cur = node.parent();
             while let Some(n) = cur {
                 if matches!(
                     n.kind,
@@ -190,7 +190,7 @@ impl Checker {
                     }
                     break;
                 }
-                cur = n.parent.clone();
+                cur = n.parent();
             }
         }
         if let Some(sym) = self.resolve_contextual_property_symbol(node) {
@@ -206,8 +206,8 @@ impl Checker {
         }
         // 纯 shorthand 成员（{name1}）：属性身份优先于外层同名变量；
         // 解构赋值目标形态（parser 重建丢失字段）需位置判定排除
-        if node.parent.as_ref().is_some_and(|p| p.kind == SyntaxKind::ShorthandPropertyAssignment)
-            && let Some(parent) = node.parent.as_ref()
+        if node.parent().as_ref().is_some_and(|p| p.kind == SyntaxKind::ShorthandPropertyAssignment)
+            && let Some(parent) = node.parent().as_ref()
             && !matches!(
                 &parent.data,
                 tsox_frontend::ast::NodeData::ShorthandPropertyAssignment(sd)
@@ -297,7 +297,7 @@ pub(crate) fn select_flags_by_meaning(flags: &SymbolFlags, meaning: u8) -> Symbo
 
 /// Go ls/utilities.go getContainerNode
 pub(crate) fn get_container_node(node: &Arc<Node>) -> Option<Arc<Node>> {
-    let mut cur = node.parent.clone();
+    let mut cur = node.parent();
     while let Some(n) = cur {
         if matches!(
             n.kind,
@@ -315,7 +315,7 @@ pub(crate) fn get_container_node(node: &Arc<Node>) -> Option<Arc<Node>> {
         ) {
             return Some(n);
         }
-        cur = n.parent.clone();
+        cur = n.parent();
     }
     None
 }
@@ -326,7 +326,7 @@ pub(crate) fn should_get_type(node: &Arc<Node>) -> bool {
         SyntaxKind::Identifier => {
             !node_in_jsdoc(node)
                 && !node
-                    .parent
+                    .parent()
                     .as_ref()
                     .is_some_and(|p| p.kind == SyntaxKind::TypeReference && p.text() == "const")
         }
@@ -342,7 +342,7 @@ pub(crate) fn should_get_type(node: &Arc<Node>) -> bool {
 }
 
 fn node_in_jsdoc(node: &Arc<Node>) -> bool {
-    let mut cur = node.parent.clone();
+    let mut cur = node.parent();
     while let Some(n) = cur {
         if matches!(
             n.kind,
@@ -353,7 +353,7 @@ fn node_in_jsdoc(node: &Arc<Node>) -> bool {
         ) {
             return true;
         }
-        cur = n.parent.clone();
+        cur = n.parent();
     }
     false
 }
@@ -361,7 +361,7 @@ fn node_in_jsdoc(node: &Arc<Node>) -> bool {
 
 /// Go ls/utilities.go getMeaningFromLocation（精简：覆盖声明名/类型引用/默认值）
 pub(crate) fn get_meaning_from_location(node: &Arc<Node>) -> u8 {
-    let Some(parent) = node.parent.as_ref() else {
+    let Some(parent) = node.parent() else {
         return MEANING_VALUE;
     };
     use SyntaxKind::*;
@@ -372,7 +372,7 @@ pub(crate) fn get_meaning_from_location(node: &Arc<Node>) -> u8 {
         return MEANING_ALL;
     }
     // 声明名字：意义由声明类别决定
-    if crate::checker::nodebuilder_checker_12::is_declaration_name(parent, node) {
+    if crate::checker::nodebuilder_checker_12::is_declaration_name(&parent, node) {
         return match parent.kind {
             TypeParameter | InterfaceDeclaration | TypeAliasDeclaration | TypeLiteral => MEANING_TYPE,
             EnumMember | ClassDeclaration => MEANING_VALUE | MEANING_TYPE,
@@ -395,10 +395,10 @@ pub(crate) fn get_meaning_from_location(node: &Arc<Node>) -> u8 {
 }
 
 fn is_part_of_type_reference(node: &Arc<Node>) -> bool {
-    let mut cur = node.parent.clone();
+    let mut cur = node.parent();
     while let Some(n) = cur {
         match n.kind {
-            SyntaxKind::TypeReference | SyntaxKind::QualifiedName => cur = n.parent.clone(),
+            SyntaxKind::TypeReference | SyntaxKind::QualifiedName => cur = n.parent(),
             _ => return false,
         }
     }

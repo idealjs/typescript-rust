@@ -8,5 +8,6 @@ class Foo {
     /**/"#;
     let mut s = Session::new_for_test("unclosedStringLiteralAutoformating", content);
     fourslash::go_to_marker(&mut s, "");
-    // TODO: f.Insert(t, "}")
+    fourslash::insert(&mut s, "}");
+    // TODO: f.VerifyCurrentLineContent(t, `
 }

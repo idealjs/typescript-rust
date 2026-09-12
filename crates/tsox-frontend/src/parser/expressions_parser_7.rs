@@ -28,7 +28,7 @@ impl Parser {
                 let type_node = self.parse_optional_return_type();
 
                 let body = if self.token == SyntaxKind::OpenBraceToken {
-                    Some(self.parse_block())
+                    Some(self.parse_block_ex(true))
                 } else {
                     self.parse_semicolon();
                     None
@@ -87,7 +87,7 @@ impl Parser {
             let type_node = self.parse_optional_return_type();
 
             let body = if self.token == SyntaxKind::OpenBraceToken {
-                Some(self.parse_block())
+                Some(self.parse_block_ex(true))
             } else {
                 self.expect(SyntaxKind::OpenBraceToken);
                 None
@@ -169,7 +169,7 @@ impl Parser {
     pub(crate) fn parse_object_accessor(&mut self, pos: usize, is_get: bool) -> Arc<Node> {
         self.next_token();
         let name = self.parse_property_name();
-        let body = self.parse_block();
+        let body = self.parse_block_ex(true);
         let end = body.end();
         let kind = if is_get {
             SyntaxKind::GetAccessor
@@ -213,7 +213,7 @@ impl Parser {
         let parameters = self.parse_parameter_list();
         let type_node = self.parse_optional_return_type();
         let body = if self.token == SyntaxKind::OpenBraceToken {
-            Some(self.parse_block())
+            Some(self.parse_block_ex(true))
         } else {
             self.parse_semicolon();
             None

@@ -201,14 +201,14 @@ impl Checker {
             let mut in_extends_clause = false;
             let mut cur = Some(Arc::clone(node));
             while let Some(n) = cur {
-                if let Some(p) = n.parent.clone()
+                if let Some(p) = n.parent()
                     && let NodeData::ConditionalTypeNode(cd) = &p.data
                     && Arc::ptr_eq(&cd.extends_type, &n)
                 {
                     in_extends_clause = true;
                     break;
                 }
-                cur = n.parent.clone();
+                cur = n.parent();
             }
             if !in_extends_clause {
                 let already = self

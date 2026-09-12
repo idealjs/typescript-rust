@@ -11,7 +11,7 @@ fn formatting_on_enter_in_comments() {
 }"#;
     let mut s = Session::new_for_test("formattingOnEnterInComments", content);
     fourslash::go_to_marker(&mut s, "1");
-    // TODO: f.InsertLine(t, "")
+    fourslash::insert_line(&mut s, "");
     fourslash::go_to_marker(&mut s, "2");
     // TODO: f.VerifyCurrentLineContent(t, `
 }

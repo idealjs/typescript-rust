@@ -75,7 +75,7 @@ impl Checker {
             return;
         };
         if !class_decl
-            .parent
+            .parent()
             .as_ref()
             .is_some_and(|p| Self::node_inside_function_body(p))
             || class_decl.has_syntactic_modifier(ModifierFlags::Export)
@@ -110,7 +110,7 @@ impl Checker {
                 SyntaxKind::SourceFile => return false,
                 _ => {}
             }
-            cur = n.parent.clone();
+            cur = n.parent();
         }
         false
     }

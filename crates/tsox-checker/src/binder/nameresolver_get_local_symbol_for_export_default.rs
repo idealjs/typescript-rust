@@ -47,8 +47,8 @@ pub fn is_type_parameter_symbol_declared_in_container(
 ) -> bool {
     for decl in &symbol.declarations {
         if decl.kind == SyntaxKind::TypeParameter {
-            if let Some(parent) = &decl.parent {
-                if Arc::ptr_eq(parent, container) {
+            if let Some(parent) = decl.parent() {
+                if Arc::ptr_eq(&parent, container) {
                     return true;
                 }
             }

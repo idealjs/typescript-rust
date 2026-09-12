@@ -8,6 +8,6 @@ fn tabbing_after_newline_inserted_before_while() {
 }"#;
     let mut s = Session::new_for_test("tabbingAfterNewlineInsertedBeforeWhile", content);
     fourslash::go_to_marker(&mut s, "");
-    // TODO: f.InsertLine(t, "")
+    fourslash::insert_line(&mut s, "");
     fourslash::verify_current_line_content(&mut s, r#"    while (true) { }"#);
 }

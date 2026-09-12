@@ -3,7 +3,7 @@
 use crate::checker::checker::*;
 
 pub(crate) fn object_literal_is_destructuring_target(literal: &Arc<Node>) -> bool {
-    let Some(parent) = literal.parent.as_ref() else {
+    let Some(parent) = literal.parent() else {
         return false;
     };
     match parent.kind {
@@ -16,13 +16,13 @@ pub(crate) fn object_literal_is_destructuring_target(literal: &Arc<Node>) -> boo
                     literal.as_ref() as *const Node
                 ))
         }
-        SyntaxKind::ParenthesizedExpression => object_literal_is_destructuring_target(parent),
+        SyntaxKind::ParenthesizedExpression => object_literal_is_destructuring_target(&parent),
         _ => false,
     }
 }
 
 pub(crate) fn is_assignment_target(node: &Arc<Node>) -> bool {
-    let Some(parent) = node.parent.as_ref() else {
+    let Some(parent) = node.parent() else {
         return false;
     };
 
@@ -45,11 +45,11 @@ pub(crate) fn is_assignment_target(node: &Arc<Node>) -> bool {
                 sa.name.as_ref() as *const Node,
                 node.as_ref() as *const Node,
             );
-            let literal = parent.parent.as_ref();
+            let literal = parent.parent();
             if name_is_node
                 && literal.is_some_and(|lit| {
                     lit.kind == SyntaxKind::ObjectLiteralExpression
-                        && object_literal_is_destructuring_target(lit)
+                        && object_literal_is_destructuring_target(&lit)
                 })
             {
                 return true;
@@ -74,7 +74,7 @@ pub(crate) fn is_assignment_target(node: &Arc<Node>) -> bool {
 }
 
 pub(crate) fn is_let_or_const_declaration(declaration: &Arc<Node>) -> bool {
-    if let Some(parent) = declaration.parent.as_ref() {
+    if let Some(parent) = declaration.parent().as_ref() {
         if parent.kind == SyntaxKind::VariableDeclarationList {
             return parent.flags.intersects(NodeFlags::Let | NodeFlags::Const);
         }
@@ -206,12 +206,12 @@ pub(crate) fn prop_decl_has_initializer(decl: &Arc<Node>) -> bool {
 }
 
 pub(crate) fn later_sibling_property(node: &Arc<Node>, prop_decl: &Arc<Node>) -> bool {
-    let mut cur = node.parent.as_ref();
+    let mut cur = node.parent();
     while let Some(a) = cur {
         if a.kind == SyntaxKind::PropertyDeclaration {
             return prop_decl.loc.pos() > a.loc.pos();
         }
-        cur = a.parent.as_ref();
+        cur = a.parent();
     }
     false
 }

@@ -10,78 +10,48 @@ use crate::format::rule_context_2::*;
 use super::rule_context::FormattingContext;
 
 fn all_tokens() -> Vec<SyntaxKind> {
-    // Go getAllRules 遍历 KindFirstToken..=KindLastToken。本仓 SyntaxKind
-    // 无范围常量，用补充表：所有 token/keyword/字面量 kind（排除 trivia
-    // 与 EOF，由调用方按需附加）
-    use SyntaxKind::*;
-    vec![
-        Identifier, PrivateIdentifier, CommaToken, SemicolonToken, ColonToken,
-        QuestionToken, QuestionQuestionToken, DotToken, DotDotDotToken,
-        EqualsToken, EqualsEqualsToken, EqualsEqualsEqualsToken,
-        ExclamationEqualsToken, ExclamationEqualsEqualsToken, LessThanToken,
-        LessThanSlashToken, GreaterThanToken, LessThanEqualsToken,
-        GreaterThanEqualsToken, PlusToken, MinusToken, AsteriskToken,
-        AsteriskAsteriskToken, SlashToken, SlashEqualsToken, PercentToken,
-        PlusPlusToken, MinusMinusToken, LessThanLessThanToken,
-        GreaterThanGreaterThanToken, GreaterThanGreaterThanGreaterThanToken,
-        AmpersandToken, BarToken, CaretToken, AmpersandAmpersandToken,
-        BarBarToken, ExclamationToken, TildeToken, QuestionDotToken,
-        OpenParenToken, CloseParenToken, OpenBracketToken, CloseBracketToken,
-        OpenBraceToken, CloseBraceToken, AtToken, BacktickToken,
-        EqualsGreaterThanToken, NumericLiteral, BigIntLiteral, StringLiteral,
-        RegularExpressionLiteral, NoSubstitutionTemplateLiteral, TemplateHead,
-        TemplateMiddle, TemplateTail, JsxText, JsxTextAllWhiteSpaces,
-        TrueKeyword, FalseKeyword, NullKeyword, ThisKeyword, SuperKeyword,
-        NewKeyword, ModuleKeyword, RequireKeyword, YieldKeyword, AwaitKeyword,
-        AsyncKeyword, PublicKeyword, PrivateKeyword, ProtectedKeyword,
-        ReadonlyKeyword, AbstractKeyword, AccessorKeyword, DeclareKeyword,
-        OverrideKeyword, EnumKeyword, ExportKeyword, ImportKeyword,
-        ClassKeyword, InterfaceKeyword, TypeKeyword, FromKeyword, KeyOfKeyword,
-        InferKeyword, AsKeyword, IsKeyword, SatisfiesKeyword, ConstKeyword,
-        LetKeyword, VarKeyword, FunctionKeyword, ConstructorKeyword,
-        GetKeyword, SetKeyword, StaticKeyword, InKeyword, InstanceOfKeyword,
-        OfKeyword, IfKeyword, ElseKeyword, DoKeyword, WhileKeyword,
-        ForKeyword, ReturnKeyword, SwitchKeyword, CaseKeyword, BreakKeyword,
-        ContinueKeyword, TryKeyword, CatchKeyword, FinallyKeyword,
-        ThrowKeyword, WithKeyword, DeleteKeyword, VoidKeyword, TypeOfKeyword,
-        NumberKeyword, StringKeyword, BooleanKeyword, AnyKeyword,
-        UnknownKeyword, NeverKeyword, UniqueKeyword, SymbolKeyword,
-        ObjectKeyword, AssertsKeyword, BigIntKeyword, GlobalKeyword,
-        ExtendsKeyword, ImplementsKeyword, DebuggerKeyword,
-    ]
+    // Go getAllRules 遍历 KindFirstToken(=KindUnknown)..=KindLastToken
+    // (=KindDeferKeyword)，包含 trivia kinds，仅排除 KindEndOfFile。
+    // 本仓 SyntaxKind 与 Go Kind 同序（#[repr(i16)]）。
+    let first = SyntaxKind::Unknown as i16;
+    let last = SyntaxKind::DeferKeyword as i16;
+    let eof = SyntaxKind::EndOfFile as i16;
+    (first..=last)
+        .filter(|v| *v != eof)
+        .map(|v| unsafe { std::mem::transmute::<i16, SyntaxKind>(v) })
+        .collect()
 }
 
+
 fn any_token() -> TokenRange {
-    TokenRange { tokens: all_tokens() }
+    super::rule::non_specific_range(all_tokens())
 }
 
 fn any_token_except(tokens: &[SyntaxKind]) -> TokenRange {
     let excluded = tokens.to_vec();
-    TokenRange { tokens: all_tokens().into_iter().filter(|t| !excluded.contains(t)).collect() }
+    super::rule::non_specific_range(all_tokens().into_iter().filter(|t| !excluded.contains(t)).collect())
 }
 
 fn keywords() -> TokenRange {
+    // Go keywords = tokenRangeFromRange(FirstKeyword..LastKeyword)：specific
     let kw: Vec<SyntaxKind> = all_tokens()
         .into_iter()
         .filter(|t| crate::scanner::is_jsx_line_break::is_keyword(*t))
         .collect();
-    TokenRange { tokens: kw }
+    kinds_range(&kw)
 }
 
 fn binary_operators() -> TokenRange {
-    use SyntaxKind::*;
-    kinds_range(&[
-        EqualsToken, PlusEqualsToken, MinusEqualsToken, AsteriskEqualsToken,
-        SlashEqualsToken, PercentEqualsToken, LessThanLessThanEqualsToken,
-        GreaterThanGreaterThanEqualsToken, GreaterThanGreaterThanGreaterThanEqualsToken,
-        AmpersandEqualsToken, BarEqualsToken, CaretEqualsToken, QuestionQuestionEqualsToken,
-        LessThanToken, GreaterThanToken, LessThanEqualsToken, GreaterThanEqualsToken,
-        EqualsEqualsToken, EqualsEqualsEqualsToken, ExclamationEqualsToken,
-        ExclamationEqualsEqualsToken, AsteriskToken, SlashToken, PercentToken, PlusToken,
-        MinusToken, AsteriskAsteriskToken, LessThanLessThanToken, GreaterThanGreaterThanToken,
-        GreaterThanGreaterThanGreaterThanToken, AmpersandToken, BarToken, CaretToken,
-        AmpersandAmpersandToken, BarBarToken, QuestionQuestionToken,
-    ])
+    // Go tokenRangeFromRange(KindFirstBinaryOperator=LessThanToken,
+    // KindLastBinaryOperator=CaretEqualsToken)：完整 iota 区间，
+    // 含 QuestionToken/ColonToken/AtToken/BacktickToken 等
+    let first = SyntaxKind::LessThanToken as i16;
+    let last = SyntaxKind::CaretEqualsToken as i16;
+    kinds_range(
+        &(first..=last)
+            .map(|v| unsafe { std::mem::transmute::<i16, SyntaxKind>(v) })
+            .collect::<Vec<_>>(),
+    )
 }
 
 fn binary_keyword_operators() -> TokenRange {
@@ -169,19 +139,19 @@ fn type_names() -> TokenRange {
         ])
         .tokens,
     );
-    TokenRange { tokens }
+    kinds_range(&tokens)
 }
 
 fn any_token_including_multiline_comments() -> TokenRange {
     let mut tokens = all_tokens();
     tokens.push(SyntaxKind::MultiLineCommentTrivia);
-    TokenRange { tokens }
+    kinds_range(&tokens)
 }
 
 fn any_token_including_eof() -> TokenRange {
     let mut tokens = all_tokens();
     tokens.push(SyntaxKind::EndOfFile);
-    TokenRange { tokens }
+    kinds_range(&tokens)
 }
 
 fn function_open_brace_left() -> TokenRange {
@@ -537,6 +507,9 @@ pub(crate) fn get_all_rules() -> Vec<RuleSpec> {
     add("SpaceBeforeCloseBrace", any_token(), kind_range(SyntaxKind::CloseBraceToken),
         vec![is_insert_space_nonempty_braces_enabled_or_undef, FormattingContext::is_brace_wrapped_context],
         RuleAction::INSERT_SPACE, RuleFlags::None);
+    add("NoSpaceBetweenEmptyBraceBrackets", kind_range(SyntaxKind::OpenBraceToken), kind_range(SyntaxKind::CloseBraceToken),
+        vec![FormattingContext::is_non_jsx_same_line_token_context, FormattingContext::is_object_context],
+        RuleAction::DELETE_SPACE, RuleFlags::None);
     add("NoSpaceAfterOpenBrace", kind_range(SyntaxKind::OpenBraceToken), any_token(),
         vec![is_insert_space_nonempty_braces_disabled, FormattingContext::is_non_jsx_same_line_token_context],
         RuleAction::DELETE_SPACE, RuleFlags::None);

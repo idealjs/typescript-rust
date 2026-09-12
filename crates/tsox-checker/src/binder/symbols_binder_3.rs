@@ -74,7 +74,7 @@ impl Binder {
                         .insert(name.clone(), Arc::clone(&symbol));
 
                     let symbol_mut = Arc::as_ptr(&symbol) as *mut Symbol;
-                    (*symbol_mut).parent = Some(Arc::clone(parent_sym));
+                    (*symbol_mut).set_parent(parent_sym);
                 }
             }
             DeclareTarget::Locals(container) => {
@@ -244,7 +244,7 @@ impl Binder {
 
     pub(crate) fn is_let_or_const_declaration(node: &Arc<Node>) -> bool {
         if node.kind == SyntaxKind::VariableDeclaration {
-            if let Some(parent) = node.parent.as_ref() {
+            if let Some(parent) = node.parent().as_ref() {
                 if parent.kind == SyntaxKind::VariableDeclarationList {
                     return parent.flags.intersects(NodeFlags::Let | NodeFlags::Const);
                 }
@@ -276,7 +276,7 @@ impl Binder {
     #[allow(dead_code)]
     pub(crate) fn is_var_declaration(node: &Arc<Node>) -> bool {
         if node.kind == SyntaxKind::VariableDeclaration {
-            if let Some(parent) = node.parent.as_ref() {
+            if let Some(parent) = node.parent().as_ref() {
                 if parent.kind == SyntaxKind::VariableDeclarationList {
                     return !parent.flags.intersects(NodeFlags::Let | NodeFlags::Const);
                 }
@@ -286,20 +286,18 @@ impl Binder {
     }
 
     pub(crate) fn declaration_is_var(node: &Arc<Node>) -> bool {
-        let mut current = node;
+        let mut current = Arc::clone(node);
         loop {
             match current.kind {
                 SyntaxKind::VariableDeclaration => {
-                    return if let Some(parent) = current.parent.as_ref() {
+                    return current.parent().is_some_and(|parent| {
                         parent.kind == SyntaxKind::VariableDeclarationList
                             && !parent.flags.intersects(NodeFlags::Let | NodeFlags::Const)
-                    } else {
-                        false
-                    };
+                    });
                 }
                 SyntaxKind::BindingElement
                 | SyntaxKind::ObjectBindingPattern
-                | SyntaxKind::ArrayBindingPattern => match current.parent.as_ref() {
+                | SyntaxKind::ArrayBindingPattern => match current.parent() {
                     Some(parent) => current = parent,
                     None => return false,
                 },
@@ -323,10 +321,10 @@ impl Binder {
     pub(crate) fn get_combined_modifier_flags(&self, node: &Arc<Node>) -> ModifierFlags {
         let mut flags = node.syntactic_modifier_flags();
         if node.kind == SyntaxKind::VariableDeclaration {
-            if let Some(parent) = &node.parent {
+            if let Some(parent) = node.parent() {
                 if parent.kind == SyntaxKind::VariableDeclarationList {
                     flags |= parent.syntactic_modifier_flags();
-                    if let Some(gp) = &parent.parent {
+                    if let Some(gp) = parent.parent() {
                         if gp.kind == SyntaxKind::VariableStatement {
                             flags |= gp.syntactic_modifier_flags();
                         }

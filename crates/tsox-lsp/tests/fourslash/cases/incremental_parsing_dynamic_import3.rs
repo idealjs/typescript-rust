@@ -11,5 +11,6 @@ var x = import/*1*/"#;
     let mut s = Session::new_for_test("incrementalParsingDynamicImport3", content);
     fourslash::verify_number_of_errors_in_current_file(&mut s, 0);
     fourslash::go_to_marker(&mut s, "1");
-    // TODO: f.Insert(t, "(")
+    fourslash::insert(&mut s, "(");
+    fourslash::verify_number_of_errors_in_current_file(&mut s, 1);
 }

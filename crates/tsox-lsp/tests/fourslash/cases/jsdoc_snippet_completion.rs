@@ -46,7 +46,9 @@ function abcdef(x) { return x; }
 
 #[test]
 fn js_doc_snippet_completion_preserves_crlf() {
-    let content = r#"/*completion*/ */\r\nfunction abcdef(x) { return x; }\r\n"#;
+    let content = r#"/*completion*/ */
+function abcdef(x) { return x; }
+"#;
     // TODO: capabilities := fourslash.GetDefaultCapabilities()
     // TODO: capabilities.TextDocument.Completion.CompletionItem.SnippetSupport = new(true)
     let mut s = Session::new_with_capabilities(content, None);

@@ -157,7 +157,7 @@ impl Parser {
         let parameters = self.parse_parameter_list();
         let type_node = self.parse_optional_return_type();
         let body = if self.token == SyntaxKind::OpenBraceToken {
-            Some(self.parse_block())
+            Some(self.parse_block_ex(true))
         } else {
             self.parse_semicolon();
             None

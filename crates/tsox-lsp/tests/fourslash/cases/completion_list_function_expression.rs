@@ -18,7 +18,7 @@ class DataHandler {
 }"#;
     let mut s = Session::new_for_test("completionListFunctionExpression", content);
     fourslash::go_to_marker(&mut s, "local");
-    // TODO: f.InsertLine(t, "")
+    fourslash::insert_line(&mut s, "");
     fourslash::verify_completions_include_exclude_at(&mut s, None, &["xmlEvent"], &[]);
     fourslash::verify_completions_empty_at(&mut s, Some("this"));
 }

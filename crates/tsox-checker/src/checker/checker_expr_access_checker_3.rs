@@ -24,7 +24,7 @@ impl Checker {
                     }
                 }
             }
-            current = n.parent.clone();
+            current = n.parent();
         }
         None
     }
@@ -35,7 +35,7 @@ impl Checker {
             if Arc::ptr_eq(&n, ancestor) {
                 return true;
             }
-            current = n.parent.clone();
+            current = n.parent();
         }
         false
     }
@@ -79,14 +79,14 @@ impl Checker {
                 let same_class = lx
                     .declarations
                     .first()
-                    .and_then(|ld| ld.parent.clone())
-                    .zip(m.declarations.first().and_then(|d| d.parent.clone()))
+                    .and_then(|ld| ld.parent())
+                    .zip(m.declarations.first().and_then(|d| d.parent()))
                     .is_some_and(|(a, b)| a.id() == b.id());
                 let synthetic_same_class = m.declarations.is_empty()
                     && lx
                         .declarations
                         .first()
-                        .and_then(|d| d.parent.clone())
+                        .and_then(|d| d.parent())
                         .and_then(|class| self.program.symbol_map().symbol_of(&class))
                         .zip(obj_type.symbol.clone())
                         .is_some_and(|(a, b)| Arc::ptr_eq(&a, &b));
@@ -165,9 +165,9 @@ impl Checker {
             return false;
         };
         let mut in_computed_name = false;
-        let mut cur = node.parent.as_ref();
+        let mut cur = node.parent();
         while let Some(c) = cur {
-            if Arc::ptr_eq(c, innermost) {
+            if Arc::ptr_eq(&c, innermost) {
                 return in_computed_name;
             }
             if c.kind == SyntaxKind::ComputedPropertyName {
@@ -179,7 +179,7 @@ impl Checker {
             ) {
                 return false;
             }
-            cur = c.parent.as_ref();
+            cur = c.parent();
         }
         false
     }

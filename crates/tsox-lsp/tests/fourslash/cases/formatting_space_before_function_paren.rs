@@ -12,11 +12,9 @@ fn formatting_space_before_function_paren() {
 /*7*/function* g () { }"#;
     let mut s = Session::new_for_test("formattingSpaceBeforeFunctionParen", content);
     // TODO: opts333 := f.GetOptions()
-    // TODO: opts333.FormatCodeSettings.InsertSpaceBeforeFunctionParenthesis = core.TSTrue
-    // TODO: f.Configure(t, opts333)
+    fourslash::configure_format_settings(&mut s, &[("insert_space_before_function_parenthesis", "true")]);
     // TODO: opts414 := f.GetOptions()
-    // TODO: opts414.FormatCodeSettings.InsertSpaceAfterFunctionKeywordForAnonymousFunctions = core.TSFalse
-    // TODO: f.Configure(t, opts414)
+    fourslash::configure_format_settings(&mut s, &[("insert_space_after_function_keyword_for_anonymous_functions", "false")]);
     fourslash::format_document(&mut s, "");
     fourslash::go_to_marker(&mut s, "1");
     fourslash::verify_current_line_content(&mut s, r#"function foo () { }"#);

@@ -10,8 +10,7 @@ fn formatting_spaces_after_constructor() {
     fourslash::go_to_marker(&mut s, "1");
     fourslash::verify_current_line_content(&mut s, r#"class test { constructor() { } }"#);
     // TODO: opts319 := f.GetOptions()
-    // TODO: opts319.FormatCodeSettings.InsertSpaceAfterConstructor = core.TSTrue
-    // TODO: f.Configure(t, opts319)
+    fourslash::configure_format_settings(&mut s, &[("insert_space_after_constructor", "true")]);
     fourslash::format_document(&mut s, "");
     fourslash::go_to_marker(&mut s, "2");
     fourslash::verify_current_line_content(&mut s, r#"class test { constructor () { } }"#);

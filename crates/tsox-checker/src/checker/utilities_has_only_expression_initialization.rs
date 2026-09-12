@@ -264,7 +264,7 @@ pub fn compare_types(t1: &Type, t2: &Type) -> std::cmp::Ordering {
     t1.id.cmp(&t2.id)
 }
 
-pub fn get_assignment_target_kind(node: &Node) -> AssignmentKind {
+pub fn get_assignment_target_kind(node: &Arc<Node>) -> AssignmentKind {
     let Some(target) = get_assignment_target(node) else {
         return AssignmentKind::None;
     };

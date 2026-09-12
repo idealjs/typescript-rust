@@ -198,7 +198,7 @@ impl Checker {
         let labeled_declaration = match &node.data {
             NodeData::NamedTupleMember(_) => Some(Arc::clone(node)),
             _ => node
-                .parent
+                .parent()
                 .as_ref()
                 .filter(|_| node.kind == SyntaxKind::Parameter)
                 .cloned(),
@@ -266,13 +266,13 @@ impl Checker {
             return false;
         }
         let mut prev: Arc<Node> = Arc::clone(decl);
-        let mut parent: Option<Arc<Node>> = decl.parent.clone();
+        let mut parent: Option<Arc<Node>> = decl.parent();
         while matches!(
             parent.as_ref().map(|p| p.kind),
             Some(SyntaxKind::ParenthesizedExpression)
         ) {
             prev = parent.clone().expect("checked Some above");
-            parent = prev.parent.clone();
+            parent = prev.parent();
         }
         let Some(parent) = parent else {
             return false;

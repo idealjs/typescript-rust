@@ -84,7 +84,7 @@ impl Checker {
                     | SyntaxKind::Parameter
                     | SyntaxKind::BindingElement => {
                         if let Some(root) = Self::root_declaration(declaration) {
-                            if let Some(parent) = root.parent.as_ref() {
+                            if let Some(parent) = root.parent().as_ref() {
                                 if !variable_parents.iter().any(|(n, _)| Arc::ptr_eq(n, parent)) {
                                     variable_parents.push((Arc::clone(parent), false));
                                 }
@@ -142,10 +142,10 @@ impl Checker {
         for _ in 0..100 {
             match cursor.kind {
                 SyntaxKind::BindingElement => {
-                    cursor = cursor.parent.as_ref()?.clone();
+                    cursor = cursor.parent().as_ref()?.clone();
                 }
                 SyntaxKind::ObjectBindingPattern | SyntaxKind::ArrayBindingPattern => {
-                    cursor = cursor.parent.as_ref()?.clone();
+                    cursor = cursor.parent().as_ref()?.clone();
                 }
                 _ => return Some(cursor),
             }
@@ -161,11 +161,11 @@ impl Checker {
     pub(crate) fn import_clause_from_imported(node: &Arc<Node>) -> Arc<Node> {
         match node.kind {
             SyntaxKind::ImportClause => Arc::clone(node),
-            SyntaxKind::NamespaceImport => node.parent.clone().unwrap_or_else(|| Arc::clone(node)),
+            SyntaxKind::NamespaceImport => node.parent().unwrap_or_else(|| Arc::clone(node)),
             _ => node
-                .parent
+                .parent()
                 .clone()
-                .and_then(|p| p.parent.clone())
+                .and_then(|p| p.parent())
                 .unwrap_or_else(|| Arc::clone(node)),
         }
     }

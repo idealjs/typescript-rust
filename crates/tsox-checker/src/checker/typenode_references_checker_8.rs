@@ -193,8 +193,8 @@ impl Checker {
             let prop_sym = {
                 let s = Arc::as_ptr(member_sym) as *mut Symbol;
                 unsafe {
-                    if (*s).parent.is_none() {
-                        (*s).parent = Some(Arc::clone(symbol));
+                    if (*s).parent().is_none() {
+                        (*s).set_parent(symbol);
                     }
                 }
                 Arc::clone(member_sym)

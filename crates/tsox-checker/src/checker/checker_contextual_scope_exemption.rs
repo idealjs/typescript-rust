@@ -22,13 +22,13 @@ impl Checker {
                 )
             };
             let immediately_invoked = |n: &Arc<Node>| -> bool {
-                let Some(p) = n.parent.as_ref() else {
+                let Some(p) = n.parent() else {
                     return false;
                 };
                 match &p.data {
                     tsox_frontend::ast::NodeData::CallExpression(_) => true,
                     tsox_frontend::ast::NodeData::ParenthesizedExpression(_) => {
-                        let mut cur = p.parent.as_ref();
+                        let mut cur = p.parent();
                         while let Some(a) = cur {
                             if matches!(&a.data, tsox_frontend::ast::NodeData::CallExpression(_)) {
                                 return true;
@@ -37,7 +37,7 @@ impl Checker {
                                 &a.data,
                                 tsox_frontend::ast::NodeData::ParenthesizedExpression(_)
                             ) {
-                                cur = a.parent.as_ref();
+                                cur = a.parent();
                                 continue;
                             }
                             break;
@@ -48,26 +48,26 @@ impl Checker {
                 }
             };
 
-            let mut dc = declaration_for_scope.parent.as_ref();
+            let mut dc = declaration_for_scope.parent();
             let mut decl_container: Option<Arc<Node>> = None;
             while let Some(a) = dc {
-                if is_fn_like(a) {
-                    decl_container = Some(Arc::clone(a));
+                if is_fn_like(&a) {
+                    decl_container = Some(Arc::clone(&a));
                     break;
                 }
-                dc = a.parent.as_ref();
+                dc = a.parent();
             }
-            let mut cur = node.parent.as_ref();
+            let mut cur = node.parent();
             let mut exempt = false;
             while let Some(a) = cur {
                 if let Some(dcont) = &decl_container {
-                    if Arc::ptr_eq(a, dcont) {
+                    if Arc::ptr_eq(&a, dcont) {
                         break;
                     }
                 }
-                if is_fn_like(a) {
-                    if immediately_invoked(a) {
-                        cur = a.parent.as_ref();
+                if is_fn_like(&a) {
+                    if immediately_invoked(&a) {
+                        cur = a.parent();
                         continue;
                     }
                     exempt = true;
@@ -85,7 +85,7 @@ impl Checker {
                         break;
                     }
                 }
-                cur = a.parent.as_ref();
+                cur = a.parent();
             }
             if exempt {
                 return true;

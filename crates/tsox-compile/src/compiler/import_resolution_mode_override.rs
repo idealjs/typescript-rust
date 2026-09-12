@@ -6,7 +6,7 @@ pub(crate) fn import_resolution_mode_override(
     import_node: &Arc<tsox_frontend::ast::Node>,
 ) -> tsox_core::core::compiler_options::ModuleKind {
     use tsox_core::core::compiler_options::ModuleKind;
-    let Some(decl) = import_node.parent.as_ref() else {
+    let Some(decl) = import_node.parent() else {
         return ModuleKind::None;
     };
     let (attributes, type_only) = match &decl.data {
@@ -98,10 +98,19 @@ pub(crate) fn cached_parse(
     Arc<SourceFile>,
     Vec<tsox_frontend::parser::ParserDiagnostic>,
 ) {
+    // 只缓存 bundled lib 文件：内容稳定、被每个 Program 重复解析，
+    // 收益集中于此。用户/测试文件一律不缓存，否则每个唯一文件名都会
+    // 永久钉住一棵 AST（fourslash 每用例默认文件名唯一，全量跑即缓慢
+    // 泄漏至数十 GiB）。lib 文件版本替换与容量上限做双保险。
+    if !tsox_checker::bundled::is_bundled(file_name) {
+        let (file, diags) =
+            Parser::parse_source_file_text_with_diagnostics(file_name, text.to_string());
+        return (Arc::new(file), diags);
+    }
     static CACHE: std::sync::OnceLock<
         Mutex<
             HashMap<
-                (String, u64),
+                String,
                 (
                     Arc<SourceFile>,
                     Vec<tsox_frontend::parser::ParserDiagnostic>,
@@ -110,12 +119,14 @@ pub(crate) fn cached_parse(
         >,
     > = std::sync::OnceLock::new();
     let cache = CACHE.get_or_init(|| Mutex::new(HashMap::new()));
-    use std::hash::{Hash, Hasher};
-    let mut hasher = std::collections::hash_map::DefaultHasher::new();
-    text.hash(&mut hasher);
-    let key = (file_name.to_string(), hasher.finish());
-    if let Some(hit) = cache.lock().unwrap().get(&key) {
-        return (Arc::clone(&hit.0), hit.1.clone());
+    let key = file_name.to_string();
+    {
+        let map = cache.lock().unwrap();
+        if let Some(hit) = map.get(&key) {
+            if hit.0.text == text {
+                return (Arc::clone(&hit.0), hit.1.clone());
+            }
+        }
     }
     let (file, diags) =
         Parser::parse_source_file_text_with_diagnostics(file_name, text.to_string());

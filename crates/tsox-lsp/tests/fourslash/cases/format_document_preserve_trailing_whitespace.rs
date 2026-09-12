@@ -15,8 +15,7 @@ function b(){
 "#;
     let mut s = Session::new_for_test("formatDocumentPreserveTrailingWhitespace", content);
     // TODO: opts233 := f.GetOptions()
-    // TODO: opts233.FormatCodeSettings.TrimTrailingWhitespace = core.TSFalse
-    // TODO: f.Configure(t, opts233)
+    fourslash::configure_format_settings(&mut s, &[("trim_trailing_whitespace", "false")]);
     fourslash::format_document(&mut s, "");
     fourslash::verify_current_file_content(&mut s, r#"
 var a;     

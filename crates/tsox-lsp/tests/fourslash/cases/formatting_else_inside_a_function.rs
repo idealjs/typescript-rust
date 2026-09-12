@@ -11,7 +11,7 @@ fn formatting_else_inside_a_function() {
 // newline at the end of the file"#;
     let mut s = Session::new_for_test("formattingElseInsideAFunction", content);
     fourslash::go_to_marker(&mut s, "2");
-    // TODO: f.InsertLine(t, "")
+    fourslash::insert_line(&mut s, "");
     fourslash::go_to_marker(&mut s, "1");
     fourslash::verify_current_line_content(&mut s, r#"    } else {"#);
     // TODO: }

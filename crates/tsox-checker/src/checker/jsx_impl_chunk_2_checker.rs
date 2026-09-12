@@ -80,8 +80,8 @@ impl Checker {
                         }
                         None => {
                             let mut span = error_node.loc;
-                            let mut node: &Arc<Node> = error_node;
-                            while let Some(parent) = node.parent.as_ref() {
+                            let mut node = Arc::clone(error_node);
+                            while let Some(parent) = node.parent() {
                                 match parent.kind {
                                     tsox_frontend::ast::SyntaxKind::JsxElement
                                     | tsox_frontend::ast::SyntaxKind::JsxSelfClosingElement

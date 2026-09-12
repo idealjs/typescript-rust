@@ -78,18 +78,18 @@ fn opening_like_element_of(
     let mut current = Some(Arc::clone(node_at_position));
     while let Some(n) = current {
         if n.pos() > position {
-            current = n.parent.clone();
+            current = n.parent();
             continue;
         }
         let attrs = match n.kind {
-            SyntaxKind::JsxAttribute | SyntaxKind::JsxSpreadAttribute => n.parent.clone(),
+            SyntaxKind::JsxAttribute | SyntaxKind::JsxSpreadAttribute => n.parent(),
             // 仅属性初始化器里的 JsxExpression 算属性语境；children 位置
             // （父为 JsxElement/JsxFragment）不算
             SyntaxKind::JsxExpression => n
-                .parent
+                .parent()
                 .clone()
                 .filter(|p| p.kind == SyntaxKind::JsxAttribute)
-                .and_then(|attr| attr.parent.clone()),
+                .and_then(|attr| attr.parent()),
             SyntaxKind::JsxSelfClosingElement | SyntaxKind::JsxOpeningElement => {
                 let attrs = match &n.data {
                     NodeData::JsxSelfClosingElement(d) => Arc::clone(&d.attributes),
@@ -100,14 +100,14 @@ fn opening_like_element_of(
             }
             SyntaxKind::SourceFile => return None,
             _ => {
-                current = n.parent.clone();
+                current = n.parent();
                 continue;
             }
         };
         let element = attrs
             .as_ref()
             .and_then(|a| {
-                (a.kind == SyntaxKind::JsxAttributes).then(|| a.parent.clone())
+                (a.kind == SyntaxKind::JsxAttributes).then(|| a.parent())
             })
             .flatten();
         return element.map(|e| (e, attrs.unwrap()));

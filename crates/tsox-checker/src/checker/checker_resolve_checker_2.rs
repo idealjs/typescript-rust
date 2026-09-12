@@ -56,7 +56,7 @@ impl Checker {
                         return None;
                     }
 
-                    if let Some(parent) = &merged.parent {
+                    if let Some(parent) = &merged.parent() {
                         if parent.flags.intersects(SymbolFlags::ValueModule)
                             && parent.value_declaration.is_some()
                         {

@@ -8,8 +8,8 @@ fn format_implicit_module() {
        }"#;
     let mut s = Session::new_for_test("formatImplicitModule", content);
     fourslash::format_document(&mut s, "");
-    // TODO: f.GoToBOF(t)
+    fourslash::go_to_bof(&mut s, );
     fourslash::verify_current_line_content(&mut s, r#"export class A {"#);
-    // TODO: f.GoToEOF(t)
+    fourslash::go_to_eof(&mut s, );
     fourslash::verify_current_line_content(&mut s, r#"}"#);
 }

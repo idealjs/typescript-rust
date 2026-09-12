@@ -84,7 +84,7 @@ pub(super) fn member_symbols_after_dot(
                 break;
             }
             SyntaxKind::DotToken | SyntaxKind::QuestionDotToken => {
-                let Some(parent) = access.parent.clone() else {
+                let Some(parent) = access.parent() else {
                     break;
                 };
                 if parent.kind == SyntaxKind::PropertyAccessExpression {
@@ -94,7 +94,7 @@ pub(super) fn member_symbols_after_dot(
             }
             _ => {
                 // EOF 等位置 deepest 节点是 SourceFile：中断 walk 落到点回退
-                let Some(parent) = access.parent.clone() else {
+                let Some(parent) = access.parent() else {
                     break;
                 };
                 access = parent;
@@ -147,7 +147,7 @@ pub(super) fn member_symbols_after_dot(
         NodeData::QualifiedName(d) => {
             // typeof X. 的右段是值位（typeof 取值侧），类型成员不参与
             let in_typeof = {
-                let mut cur = access.parent.clone();
+                let mut cur = access.parent();
                 let mut hit = false;
                 while let Some(c) = cur {
                     if c.kind == SyntaxKind::TypeQuery {
@@ -157,7 +157,7 @@ pub(super) fn member_symbols_after_dot(
                     if matches!(c.kind, SyntaxKind::SourceFile) {
                         break;
                     }
-                    cur = c.parent.clone();
+                    cur = c.parent();
                 }
                 hit
             };
@@ -315,7 +315,7 @@ fn receiver_type(checker: &mut Checker, receiver: &Arc<Node>) -> Arc<Type> {
 }
 
 fn in_static_member_context(node: &Arc<Node>) -> bool {
-    let mut current = node.parent.clone();
+    let mut current = node.parent();
     while let Some(n) = current {
         match n.kind {
             SyntaxKind::MethodDeclaration
@@ -327,7 +327,7 @@ fn in_static_member_context(node: &Arc<Node>) -> bool {
             SyntaxKind::ClassDeclaration | SyntaxKind::ClassExpression => return false,
             _ => {}
         }
-        current = n.parent.clone();
+        current = n.parent();
     }
     false
 }

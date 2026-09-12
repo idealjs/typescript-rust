@@ -49,8 +49,8 @@ impl Checker {
             .find(|info| {
                 info.declaration
                     .as_ref()
-                    .and_then(|d| d.parent.as_ref())
-                    .is_some_and(|p| Arc::ptr_eq(p, declaration))
+                    .and_then(|d| d.parent())
+                    .is_some_and(|p| Arc::ptr_eq(&p, declaration))
             })
             .cloned();
         let is_interface = declaration.kind == SyntaxKind::InterfaceDeclaration;
@@ -60,7 +60,7 @@ impl Checker {
                 continue;
             };
             if first_decl
-                .parent
+                .parent()
                 .as_ref()
                 .is_some_and(|p| Arc::ptr_eq(p, declaration))
             {

@@ -9,7 +9,19 @@ var varName =/**/
 "#;
     let mut s = Session::new_for_test("formattingObjectLiteralOpenCurlyNewlineTyping", content);
     fourslash::go_to_marker(&mut s, "");
-    // TODO: f.Insert(t, "\n{")
+    fourslash::insert(&mut s, "\n{");
+    fourslash::verify_current_file_content(&mut s, r#"
+var varName =
+    {
+"#);
+    fourslash::insert(&mut s, "\na: 1");
+    fourslash::format_document(&mut s, "");
+    fourslash::verify_current_file_content(&mut s, r#"
+var varName =
+{
+    a: 1
+"#);
+    fourslash::insert(&mut s, "\n};");
     fourslash::format_document(&mut s, "");
     fourslash::verify_current_file_content(&mut s, r#"
 var varName =

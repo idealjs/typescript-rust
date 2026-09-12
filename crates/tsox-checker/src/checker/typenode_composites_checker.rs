@@ -29,7 +29,7 @@ impl Checker {
                 if has_variadic_union && !self.check_cross_product_union(node, &variadic_types) {
                     return self.error_type();
                 }
-                let readonly = node.parent.as_ref().is_some_and(|p| {
+                let readonly = node.parent().as_ref().is_some_and(|p| {
                     matches!(&p.data, NodeData::TypeOperatorNode(op)
                         if op.operator == SyntaxKind::ReadonlyKeyword)
                 });
@@ -62,7 +62,7 @@ impl Checker {
             return true;
         }
         let provided: Vec<Arc<Node>> = type_name
-            .parent
+            .parent()
             .as_ref()
             .and_then(|p| match &p.data {
                 NodeData::TypeReferenceNode(tr) => tr.type_arguments.clone(),

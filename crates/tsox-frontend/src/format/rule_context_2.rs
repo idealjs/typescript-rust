@@ -274,7 +274,7 @@ impl FormattingContext {
             | SyntaxKind::CatchClause
             | SyntaxKind::ModuleBlock
             | SyntaxKind::SwitchStatement => true,
-            SyntaxKind::Block => match parent.parent.as_ref() {
+            SyntaxKind::Block => match parent.parent().as_ref() {
                 None => true,
                 Some(gp) => !matches!(gp.kind, SyntaxKind::ArrowFunction | SyntaxKind::FunctionExpression),
             },
@@ -355,7 +355,7 @@ impl FormattingContext {
         let Some(parent) = &self.next_token_parent else { return false };
         parent.kind == SyntaxKind::JsxAttribute
             || (parent.kind == SyntaxKind::JsxNamespacedName
-                && parent.parent.as_ref().is_some_and(|p| p.kind == SyntaxKind::JsxAttribute))
+                && parent.parent().as_ref().is_some_and(|p| p.kind == SyntaxKind::JsxAttribute))
     }
 
     pub(crate) fn is_jsx_attribute_context(&mut self) -> bool {
@@ -635,7 +635,7 @@ fn node_is_in_decorator_context(node: &Arc<Node>) -> bool {
         if !crate::ast::utilities_expressions::is_expression(&n) {
             return n.kind == SyntaxKind::Decorator;
         }
-        cur = n.parent.clone();
+        cur = n.parent();
     }
     false
 }

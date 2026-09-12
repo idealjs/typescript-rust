@@ -40,18 +40,18 @@ pub(crate) fn names_contain(names: &[String], text: &str) -> bool {
 }
 
 pub(crate) fn type_name_inside_conditional_branch(node: &Arc<Node>) -> bool {
-    let mut cur = node.parent.as_ref();
+    let mut cur = node.parent();
     while let Some(a) = cur {
         if matches!(&a.data, NodeData::ConditionalTypeNode(_)) {
             if let NodeData::ConditionalTypeNode(c) = &a.data {
                 if node_inside(node, &c.check_type) || node_inside(node, &c.extends_type) {
-                    cur = a.parent.as_ref();
+                    cur = a.parent();
                     continue;
                 }
             }
             return true;
         }
-        cur = a.parent.as_ref();
+        cur = a.parent();
     }
     false
 }
@@ -60,19 +60,19 @@ pub(crate) fn node_inside(node: &Arc<Node>, root: &Arc<Node>) -> bool {
     if Arc::ptr_eq(node, root) {
         return true;
     }
-    let mut cur = node.parent.as_ref();
+    let mut cur = node.parent();
     while let Some(a) = cur {
-        if Arc::ptr_eq(a, root) {
+        if Arc::ptr_eq(&a, root) {
             return true;
         }
-        cur = a.parent.as_ref();
+        cur = a.parent();
     }
     false
 }
 
 pub(crate) fn type_name_shadowed_by_type_parameter(type_name: &Arc<Node>) -> bool {
     let name = type_name.text();
-    let mut cur = type_name.parent.as_ref();
+    let mut cur = type_name.parent();
     while let Some(a) = cur {
         let tps = match &a.data {
             NodeData::TypeAliasDeclaration(t) => t.type_parameters.as_ref(),
@@ -89,7 +89,7 @@ pub(crate) fn type_name_shadowed_by_type_parameter(type_name: &Arc<Node>) -> boo
         {
             return true;
         }
-        cur = a.parent.as_ref();
+        cur = a.parent();
     }
     false
 }

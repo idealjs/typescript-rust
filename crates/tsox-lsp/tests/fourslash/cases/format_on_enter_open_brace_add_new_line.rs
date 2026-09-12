@@ -8,17 +8,16 @@ if(false)/*1*/{
 }"#;
     let mut s = Session::new_for_test("formatOnEnterOpenBraceAddNewLine", content);
     // TODO: opts148 := f.GetOptions()
-    // TODO: opts148.FormatCodeSettings.PlaceOpenBraceOnNewLineForControlBlocks = core.TSTrue
-    // TODO: f.Configure(t, opts148)
+    fourslash::configure_format_settings(&mut s, &[("place_open_brace_on_new_line_for_control_blocks", "true")]);
     fourslash::go_to_marker(&mut s, "0");
-    // TODO: f.InsertLine(t, "")
+    fourslash::insert_line(&mut s, "");
     fourslash::verify_current_file_content(&mut s, r#"if (true)
 {
 }
 if(false){
 }"#);
     fourslash::go_to_marker(&mut s, "1");
-    // TODO: f.InsertLine(t, "")
+    fourslash::insert_line(&mut s, "");
     fourslash::verify_current_file_content(&mut s, r#"if (true)
 {
 }

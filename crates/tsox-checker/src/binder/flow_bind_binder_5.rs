@@ -138,7 +138,7 @@ impl Binder {
                         break;
                     }
                 }
-                scope = sc.parent.clone();
+                scope = sc.parent();
             }
             let Some(sym) = target else { continue };
 
@@ -207,7 +207,7 @@ impl Binder {
                             let prop_mut = Arc::as_ptr(&prop) as *mut Symbol;
                             unsafe {
                                 (*prop_mut).declarations.push(Arc::clone(&node));
-                                (*prop_mut).parent = Some(Arc::clone(&sym));
+                                (*prop_mut).set_parent(&sym);
                             }
                             let sym_mut = Arc::as_ptr(&sym) as *mut Symbol;
                             unsafe {
@@ -234,7 +234,7 @@ impl Binder {
                             let p_mut = Arc::as_ptr(&p) as *mut Symbol;
                             unsafe {
                                 (*p_mut).declarations.push(Arc::clone(&node));
-                                (*p_mut).parent = Some(Arc::clone(&sym));
+                                (*p_mut).set_parent(&sym);
                             }
                             let sym_mut = Arc::as_ptr(&sym) as *mut Symbol;
                             unsafe {
@@ -289,10 +289,10 @@ impl Binder {
     }
 
     pub(crate) fn is_in_for_in_or_of_head(node: &Arc<Node>) -> bool {
-        let Some(parent) = &node.parent else {
+        let Some(parent) = &node.parent() else {
             return false;
         };
-        let Some(grandparent) = &parent.parent else {
+        let Some(grandparent) = &parent.parent() else {
             return false;
         };
         matches!(

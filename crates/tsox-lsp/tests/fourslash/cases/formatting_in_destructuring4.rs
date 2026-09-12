@@ -9,8 +9,7 @@ fn formatting_in_destructuring4() {
 /*4*/} = { a: 1, b: 2 };"#;
     let mut s = Session::new_for_test("formattingInDestructuring4", content);
     // TODO: opts198 := f.GetOptions()
-    // TODO: opts198.FormatCodeSettings.InsertSpaceAfterOpeningAndBeforeClosingNonemptyBraces = core.TSFalse
-    // TODO: f.Configure(t, opts198)
+    fourslash::configure_format_settings(&mut s, &[("insert_space_after_opening_and_before_closing_nonempty_braces", "false")]);
     fourslash::format_document(&mut s, "");
     fourslash::go_to_marker(&mut s, "1");
     fourslash::verify_current_line_content(&mut s, r#"const {"#);

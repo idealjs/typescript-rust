@@ -94,7 +94,7 @@ impl Parser {
             if !s.has_preceding_line_break() && s.token() == SyntaxKind::OpenBraceToken {
                 let pos = self.token_pos();
                 self.next_token();
-                let body = self.parse_block();
+                let body = self.parse_block_ex(true);
                 let end = body.end();
                 return Arc::new(Node::with_loc(
                     SyntaxKind::ClassStaticBlockDeclaration,
@@ -145,7 +145,7 @@ impl Parser {
             let parameters = self.parse_parameter_list();
             let type_node = self.parse_optional_return_type();
             let body = if self.token == SyntaxKind::OpenBraceToken {
-                Some(self.parse_block())
+                Some(self.parse_block_ex(true))
             } else {
                 self.parse_semicolon();
                 None
