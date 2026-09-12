@@ -54,8 +54,10 @@ pub fn string_literal_completion_labels(
         NodeData::LiteralTypeNode(_) => {
             from_unionable_literal_type(checker, &parent, position)
         }
-        // f("...")：按实参位取形参约束；泛型签名先由其余实参推断类型参数
-        // （Go getStringLiteralCompletionsFromSignature）
+        // f("...")：按实参位取形参约束，对全部重载签名求并集
+        // （Go getStringLiteralCompletionsFromSignature ×
+        // GetCandidateSignaturesForStringLiteralCompletions）；泛型签名先由
+        // 其余实参推断类型参数
         NodeData::CallExpression(d) => {
             let idx = d
                 .arguments
@@ -65,35 +67,51 @@ pub fn string_literal_completion_labels(
             let callee_type = checker.get_type_of_node(&d.expression);
             let structured = callee_type.as_structured()?;
             let sigs = structured.call_signatures();
-            let sig = sigs.first()?.clone();
-            let param = sig.parameters.get(idx).cloned()?;
-            let t = checker.get_type_of_symbol(&param);
-            if !sig.type_parameters.is_empty() {
-                let mut inferred =
-                    checker.infer_call_type_arguments(&parent, &sig, &d.arguments.nodes);
-                // 推断值可含未回填的其它类型参数（K=keyof T）：对推断结果自身
-                // 再过一遍替换链闭环
-                for _ in 0..2 {
-                    let current = inferred.clone();
-                    inferred = inferred
-                        .into_iter()
-                        .map(|x| {
-                            checker.substitute_infer_type_parameters(
-                                &x,
-                                &sig.type_parameters,
-                                &current,
-                            )
-                        })
-                        .collect::<Vec<_>>();
+            let mut labels: Vec<String> = Vec::new();
+            for sig in sigs.iter() {
+                let sig = sig.clone();
+                // Go：无 rest 形参且实参个数超出形参个数的候选剔除
+                if !sig.has_rest_parameter() && d.arguments.nodes.len() > sig.parameters.len() {
+                    continue;
                 }
-                let inst = checker.substitute_infer_type_parameters(
-                    &t,
-                    &sig.type_parameters,
-                    &inferred,
-                );
-                return Some(literal_union_labels(checker, &inst));
+                let per_sig: Vec<String> = if !sig.type_parameters.is_empty() {
+                    let param = sig.parameters.get(idx).cloned()?;
+                    let t = checker.get_type_of_symbol(&param);
+                    let mut inferred =
+                        checker.infer_call_type_arguments(&parent, &sig, &d.arguments.nodes);
+                    // 推断值可含未回填的其它类型参数（K=keyof T）：对推断结果
+                    // 自身再过一遍替换链闭环
+                    for _ in 0..2 {
+                        let current = inferred.clone();
+                        inferred = inferred
+                            .into_iter()
+                            .map(|x| {
+                                checker.substitute_infer_type_parameters(
+                                    &x,
+                                    &sig.type_parameters,
+                                    &current,
+                                )
+                            })
+                            .collect::<Vec<_>>();
+                    }
+                    let inst = checker.substitute_infer_type_parameters(
+                        &t,
+                        &sig.type_parameters,
+                        &inferred,
+                    );
+                    literal_union_labels(checker, &inst)
+                } else {
+                    let t = checker.get_type_parameter_at_position(&sig, idx);
+                    literal_union_labels(checker, &t)
+                };
+                labels.extend(per_sig);
             }
-            Some(literal_union_labels(checker, &t))
+            if labels.is_empty() {
+                return None;
+            }
+            labels.sort();
+            labels.dedup();
+            return Some(labels);
         }
         // obj["..."]：对象属性名
         NodeData::IndexedAccessTypeNode(d) if Arc::ptr_eq(&d.index_type, &lit) => {
@@ -179,8 +197,40 @@ pub fn string_literal_completion_labels(
             let t = checker.get_type_of_node(&sw.expression);
             Some(literal_union_labels(checker, &t))
         }
+        // o["..."]：表达式类型的属性名（Go KindElementAccessExpression →
+        // stringLiteralCompletionsFromProperties）
+        NodeData::ElementAccessExpression(d) => {
+            let arg = skip_parens(Arc::clone(&d.argument_expression));
+            if !Arc::ptr_eq(&arg, &lit) {
+                return None;
+            }
+            let t = checker.get_type_of_node(&d.expression);
+            let mut names: Vec<String> = checker
+                .get_apparent_properties(&t)
+                .into_iter()
+                .filter(|s| {
+                    !s.value_declaration
+                        .as_ref()
+                        .is_some_and(|decl| decl.kind == SyntaxKind::PrivateIdentifier)
+                })
+                .map(|s| s.name.clone())
+                .collect();
+            names.sort();
+            Some(names)
+        }
         _ => None,
     }
+}
+
+/// Go ast.SkipParentheses：下穿括号取内层表达式
+fn skip_parens(mut n: Arc<Node>) -> Arc<Node> {
+    while n.kind == SyntaxKind::ParenthesizedExpression {
+        let NodeData::ParenthesizedExpression(d) = &n.data else {
+            break;
+        };
+        n = Arc::clone(&d.expression);
+    }
+    n
 }
 
 fn innermost_string_literal(node: &Arc<Node>, position: usize) -> Option<Arc<Node>> {
