@@ -12,6 +12,8 @@ pub struct Checker {
     pub total_instantiation_count: u32,
     pub instantiation_count: u32,
     pub instantiation_depth: u32,
+    /// type_of_imported_symbol 访问中环守卫（Go symbolLinks 解析中缓存）
+    pub imported_type_resolution: Vec<u64>,
     pub language_version: ScriptTarget,
     pub module_kind: ModuleKind,
     pub module_resolution_kind: ModuleResolutionKind,

@@ -54,6 +54,7 @@ impl Checker {
             total_instantiation_count: 0,
             instantiation_count: 0,
             instantiation_depth: 0,
+            imported_type_resolution: Vec::new(),
 
             language_version,
             module_kind,

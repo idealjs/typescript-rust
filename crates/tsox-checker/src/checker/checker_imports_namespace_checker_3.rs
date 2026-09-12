@@ -20,6 +20,19 @@ impl Checker {
     }
 
     pub(crate) fn type_of_imported_symbol(&mut self, symbol: &Arc<Symbol>) -> Option<Arc<Type>> {
+        // 环守卫：`export import B = A` 的 A 又解析回 B 时无限递归；
+        // Go 在 symbolLinks 里缓存解析中状态，这里以访问栈等价
+        let key = symbol.id();
+        if self.imported_type_resolution.contains(&key) {
+            return None;
+        }
+        self.imported_type_resolution.push(key);
+        let result = self.type_of_imported_symbol_inner(symbol);
+        self.imported_type_resolution.pop();
+        result
+    }
+
+    fn type_of_imported_symbol_inner(&mut self, symbol: &Arc<Symbol>) -> Option<Arc<Type>> {
         // import * as X from "m"：X 的类型是模块命名空间类型（typeof import("m")）
         if std::env::var_os("TSOX_DEBUG_QI").is_some() {
             eprintln!(

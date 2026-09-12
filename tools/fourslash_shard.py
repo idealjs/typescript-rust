@@ -83,7 +83,11 @@ def run_shard(binary, names, log_path, as_limit=AS_LIMIT, kill_rss=KILL_RSS):
             break
         time.sleep(POLL_SEC)
     proc.wait()
-    return peak, killed or proc.returncode in (-9, 134), time.time() - start
+    killed = killed or proc.returncode in (-9, 134, -6)
+    # 栈溢出等中途崩溃：进程异常退出或日志缺 test result 汇总行
+    with open(log_path) as fh:
+        has_result = "test result:" in fh.read()
+    return peak, killed or not has_result, time.time() - start
 
 
 def last_running_test(log_path):
