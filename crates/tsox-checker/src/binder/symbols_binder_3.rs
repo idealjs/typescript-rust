@@ -101,27 +101,6 @@ impl Binder {
         symbol
     }
 
-    pub(crate) fn ns_is_instantiated_static(ns: &Arc<Node>) -> bool {
-        let NodeData::ModuleDeclaration(md) = &ns.data else {
-            return false;
-        };
-        let Some(body) = &md.body else {
-            return false;
-        };
-        let mut found = false;
-        tsox_frontend::ast::node_data_generated::for_each_child(body, |stmt| {
-            match stmt.kind {
-                SyntaxKind::InterfaceDeclaration
-                | SyntaxKind::TypeAliasDeclaration
-                | SyntaxKind::ImportDeclaration
-                | SyntaxKind::ImportEqualsDeclaration
-                | SyntaxKind::ExportDeclaration => {}
-                _ => found = true,
-            }
-            false
-        });
-        found
-    }
     pub(crate) fn can_merge_symbols(
         &self,
         existing_flags: SymbolFlags,
@@ -138,6 +117,11 @@ impl Binder {
         let new_alias = new_flags.contains(SymbolFlags::Alias);
         if existing_alias || new_alias {
             return !(existing_alias && new_alias);
+        }
+
+        // Go NamespaceModuleExcludes = None：非实例化 namespace 声明与任何既有符号合并且不冲突
+        if new_flags.contains(SymbolFlags::NamespaceModule) {
+            return true;
         }
 
         if existing_flags.contains(SymbolFlags::Interface)
@@ -191,6 +175,11 @@ impl Binder {
         let new_fn = new_flags.contains(SymbolFlags::Function);
         if (existing_class && new_fn) || (existing_fn && new_class) {
             return true;
+        }
+        // Go ClassExcludes 含 Class：同名 class 相交冲突（TS2300，含 ambient），
+        // 冲突符号另建、不合并 declarations
+        if existing_class && new_class {
+            return false;
         }
 
         let existing_ns = existing_flags.contains(SymbolFlags::ValueModule);

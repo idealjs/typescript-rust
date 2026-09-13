@@ -73,6 +73,7 @@ pub struct Checker {
     pub members_and_exports_links: LinkStore<Symbol, MembersAndExportsLinks>,
     pub type_alias_links: LinkStore<Symbol, TypeAliasLinks>,
     pub declared_type_links: LinkStore<Symbol, DeclaredTypeLinks>,
+    pub class_instance_type_cache: HashMap<u64, Arc<Type>>,
     pub type_resolution_stack: Vec<TypeResolutionEntry>,
     pub type_argument_stack: Vec<HashMap<*const tsox_frontend::ast::Symbol, Arc<Type>>>,
     pub type_argument_name_frames: Vec<Vec<(Arc<Symbol>, Arc<Type>)>>,

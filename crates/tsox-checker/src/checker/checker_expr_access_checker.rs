@@ -194,7 +194,9 @@ impl Checker {
                 let substituted = self.substituted_member_type_of(&obj_type, &sym);
                 return self.flow_type_of_access_expression(node, Some(&sym), substituted);
             }
-            let prop_type = self.get_type_of_symbol(&sym);
+            // 类实例型成员是急建合成符号（无注解方法返回 any 驻缓存）：
+            // 回源 binder 声明符号走惰性体推断（this 返回型等）
+            let prop_type = self.member_decl_symbol_type(&sym);
             return self.flow_type_of_access_expression(node, Some(&sym), prop_type);
         }
 

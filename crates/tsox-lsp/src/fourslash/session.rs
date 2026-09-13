@@ -210,6 +210,17 @@ impl Session {
                 merged_options.insert(k.clone(), v.clone());
             }
         }
+        // Go fourslash 基底默认（fourslash.go:205）：skipDefaultLibCheck /
+        // target=latest / jsx=preserve，可被 @options 覆盖
+        merged_options
+            .entry("skipDefaultLibCheck".to_string())
+            .or_insert_with(|| String::new());
+        merged_options
+            .entry("target".to_string())
+            .or_insert_with(|| "latest".to_string());
+        merged_options
+            .entry("jsx".to_string())
+            .or_insert_with(|| "preserve".to_string());
         let mut args: Vec<String> = Vec::new();
         for (k, v) in &merged_options {
             if v.is_empty() {
@@ -243,9 +254,18 @@ impl Session {
     }
 
     pub fn file_content(&self, name: &str) -> &str {
-        self.contents
-            .get(name)
-            .unwrap_or_else(|| panic!("文件不存在: {name}"))
+        self.contents.get(name).unwrap_or_else(|| {
+            // 用例代码可能用 @Filename 原样名（无 / 前缀）查文件：按解析侧
+            // 的规范化（GetNormalizedAbsolutePath(x, "/")）兜底
+            let normalized = if name.starts_with('/') {
+                name.to_string()
+            } else {
+                format!("/{name}")
+            };
+            self.contents
+                .get(&normalized)
+                .unwrap_or_else(|| panic!("文件不存在: {name}"))
+        })
     }
 
     pub fn set_file_content(&mut self, name: &str, content: String) {

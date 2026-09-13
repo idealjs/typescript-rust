@@ -155,6 +155,30 @@ impl Checker {
                     }
                 }
             }
+            // node_modules 向上查找（Go loadModuleFromFile 的 node 解析）：
+            // <dir>/node_modules/<pkg>/index.{d.ts,ts,...}
+            let file = self.display_enclosing_file.clone().or_else(|| self.current_file.clone())?;
+            let mut dir = match file.file_name.rfind('/') {
+                Some(i) => file.file_name[..i].to_string(),
+                None => return None,
+            };
+            loop {
+                let pkg_dir = format!("{dir}/node_modules/{specifier}");
+                for index in ["./index.d.ts", "./index.ts", "./index.tsx"] {
+                    if let Some(sym) = self.resolve_module_file_symbol_in(&pkg_dir, index) {
+                        return Some(sym);
+                    }
+                }
+                let parent = match dir.rfind('/') {
+                    Some(0) => "/".to_string(),
+                    Some(i) => dir[..i].to_string(),
+                    None => break,
+                };
+                if parent == dir {
+                    break;
+                }
+                dir = parent;
+            }
             return None;
         }
         let current = self.current_file.as_ref()?;

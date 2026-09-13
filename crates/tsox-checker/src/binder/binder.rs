@@ -34,6 +34,8 @@ pub struct Binder {
     pub(crate) has_explicit_return: bool,
 
     pub(crate) has_flow_effects: bool,
+
+    pub(crate) not_const_enum_only_modules: std::collections::HashSet<u64>,
 }
 
 impl Default for Binder {
@@ -68,6 +70,7 @@ impl Binder {
             active_label_list: None,
             has_explicit_return: false,
             has_flow_effects: false,
+            not_const_enum_only_modules: std::collections::HashSet::new(),
         }
     }
 

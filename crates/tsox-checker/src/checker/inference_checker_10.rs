@@ -171,7 +171,7 @@ impl Checker {
                 self.get_contextual_type_for_return_expression(node, _context_flags)
             }
             SyntaxKind::CallExpression | SyntaxKind::NewExpression => {
-                self.get_contextual_type_for_argument(&parent, node)
+                self.get_contextual_type_for_argument_ex(&parent, node, _context_flags)
             }
 
             SyntaxKind::TypeAssertionExpression => {

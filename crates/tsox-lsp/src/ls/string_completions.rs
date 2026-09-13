@@ -45,7 +45,20 @@ pub fn string_literal_completion_labels(
     position: usize,
 ) -> Option<Vec<String>> {
     let lit = innermost_string_literal(node, position)?;
-    let parent = lit.parent()?;
+    // case ('...') 等括号包裹：字面量的直接父是括号，上跳到语法父
+    let mut parent = lit.parent()?;
+    while parent.kind == SyntaxKind::ParenthesizedExpression {
+        parent = parent.parent()?;
+    }
+    // '...' as const / '...' as T / <T>'...'：断言不影响补全位语义，
+    // 取断言表达式位的上下文型
+    if matches!(
+        parent.kind,
+        SyntaxKind::AsExpression | SyntaxKind::TypeAssertionExpression | SyntaxKind::SatisfiesExpression
+    ) {
+        let t = checker.get_contextual_type(&parent, ContextFlags::IgnoreNodeInferences);
+        return t.map(|t| literal_union_labels(checker, &t));
+    }
 
     match &parent.data {
         // 类型位字面量 `Foo<'...'>` / `Foo<{ x: '...' }>`（Go
@@ -149,7 +162,9 @@ pub fn string_literal_completion_labels(
             import_attribute_value_labels(checker, &attr_name)
         }
         // {"…"}：对象字面量引号键名位的成员名并集（Go
-        // stringLiteralCompletionsForObjectLiteral）
+        // stringLiteralCompletionsForObjectLiteral）；
+        // 属性值位 type: '…'：上下文型字面量并集（Go
+        // getStringLiteralCompletionsFromContextualType）
         NodeData::PropertyAssignment(_) | NodeData::ShorthandPropertyAssignment(_) => {
             let is_name = match &parent.data {
                 NodeData::PropertyAssignment(d) => Arc::ptr_eq(&d.name, &lit),
@@ -157,7 +172,10 @@ pub fn string_literal_completion_labels(
                 _ => false,
             };
             if !is_name {
-                return None;
+                // IgnoreNodeInferences：正在编辑的实参从推断源剔除，
+                // 泛型回落返回位推断（Go completions 探针语义）
+                let t = checker.get_contextual_type(&lit, ContextFlags::IgnoreNodeInferences);
+                return t.map(|t| literal_union_labels(checker, &t));
             }
             let Some(grand) = parent.parent() else {
                 return None;
@@ -168,10 +186,13 @@ pub fn string_literal_completion_labels(
             let Some(t) = checker.get_contextual_type(&grand, ContextFlags::None) else {
                 return None;
             };
+            let completions_type =
+                checker.get_contextual_type(&grand, ContextFlags::IgnoreNodeInferences);
             let members =
                 super::completions_object_like::properties_for_object_expression(
                     checker,
                     &t,
+                    completions_type.as_ref(),
                     &grand,
                 );
             Some(members.into_iter().map(|m| m.name.clone()).collect())
@@ -182,7 +203,8 @@ pub fn string_literal_completion_labels(
             let t = checker.get_type_from_type_node(tn);
             Some(literal_union_labels(checker, &t))
         }
-        // case '...'：switch 表达式类型（Go KindCaseClause → getSwitchedType）
+        // case '...'：switch 表达式类型（Go KindCaseClause → getSwitchedType），
+        // 已用的 case 字面量排除（Go newCaseClauseTracker）
         NodeData::CaseOrDefaultClause(_) => {
             let clause = Arc::clone(&parent);
             let Some(switch_stmt) = clause.parent() else {
@@ -195,7 +217,10 @@ pub fn string_literal_completion_labels(
                 return None;
             };
             let t = checker.get_type_of_node(&sw.expression);
-            Some(literal_union_labels(checker, &t))
+            let mut labels = literal_union_labels(checker, &t);
+            let used = case_block_literals(&sw.case_block, lit.pos());
+            labels.retain(|l| !used.iter().any(|u| u == l));
+            Some(labels)
         }
         // o["..."]：表达式类型的属性名（Go KindElementAccessExpression →
         // stringLiteralCompletionsFromProperties）
@@ -220,6 +245,30 @@ pub fn string_literal_completion_labels(
         }
         _ => None,
     }
+}
+
+/// case block 内已用的字符串字面量（跳过正在编辑的 editing_lit_pos）
+fn case_block_literals(block: &Arc<Node>, editing_lit_pos: usize) -> Vec<String> {
+    fn collect(expr: &Arc<Node>, editing_lit_pos: usize, out: &mut Vec<String>) {
+        if expr.kind == SyntaxKind::StringLiteral && expr.pos() != editing_lit_pos {
+            out.push(expr.text().trim_matches(['"', '\'']).to_string());
+            return;
+        }
+        tsox_frontend::ast::node_data_generated::for_each_child(expr, |c| {
+            collect(c, editing_lit_pos, out);
+            false
+        });
+    }
+    let NodeData::CaseBlock(d) = &block.data else {
+        return Vec::new();
+    };
+    let mut out = Vec::new();
+    for clause in d.clauses.iter() {
+        if let NodeData::CaseOrDefaultClause(cd) = &clause.data {
+            collect(&cd.expression, editing_lit_pos, &mut out);
+        }
+    }
+    out
 }
 
 /// Go ast.SkipParentheses：下穿括号取内层表达式
@@ -412,7 +461,12 @@ pub fn relative_module_specifier_labels(
         None => "",
     };
     let base_dir = normalize_path(&format!("{script_dir}/{directory}"));
-    let with_slash = format!("{base_dir}/");
+    // base_dir 归一化到根（`..//` 说明符）时不能再叠尾斜杠
+    let with_slash = if base_dir == "/" {
+        "/".to_string()
+    } else {
+        format!("{base_dir}/")
+    };
     if !program
         .source_files()
         .iter()

@@ -371,6 +371,34 @@ impl Checker {
         }
     }
 
+    // 所在调用带显式类型实参时按实参实例化上下文签名（Go inferSignature：
+    // 显式实参直接固定映射；错误实参落 error 型，参数位显示 any）
+    fn substitute_explicit_call_type_args(
+        &mut self,
+        call: &Arc<Node>,
+        sig: &Arc<Signature>,
+    ) -> Arc<Signature> {
+        if sig.type_parameters.is_empty() {
+            return Arc::clone(sig);
+        }
+        let ta = match &call.data {
+            NodeData::CallExpression(d) => d.type_arguments.as_ref(),
+            NodeData::NewExpression(d) => d.type_arguments.as_ref(),
+            _ => None,
+        };
+        let Some(ta) = ta else {
+            return Arc::clone(sig);
+        };
+        if ta.len() != sig.type_parameters.len() {
+            return Arc::clone(sig);
+        }
+        let args: Vec<Arc<Type>> = ta
+            .iter()
+            .map(|t| self.get_type_from_type_node(t))
+            .collect();
+        self.get_signature_instantiation(sig, &args)
+    }
+
     fn contextual_type_of_parameter(
         &mut self,
         param: &Arc<Node>,
@@ -458,7 +486,7 @@ impl Checker {
         };
         let ctx = call_ctx.or_else(|| self.get_contextual_type(&host, ContextFlags::None))?;
         let sigs = self.get_signatures_of_type(&ctx, crate::checker::SignatureKind::Call);
-        let sig = sigs.first()?.clone();
+        let sig = self.substitute_explicit_call_type_args(&call, &sigs.first()?.clone());
         let is_rest = matches!(&param.data, NodeData::ParameterDeclaration(pd) if pd.dot_dot_dot_token.is_some());
         let is_this_param = param_index == 0
             && matches!(&param.data, NodeData::ParameterDeclaration(pd)

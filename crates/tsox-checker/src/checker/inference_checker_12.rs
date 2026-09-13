@@ -8,6 +8,17 @@ impl Checker {
         call_node: &Arc<tsox_frontend::ast::Node>,
         arg_node: &Arc<tsox_frontend::ast::Node>,
     ) -> Option<Arc<Type>> {
+        self.get_contextual_type_for_argument_ex(call_node, arg_node, ContextFlags::None)
+    }
+
+    // Go runWithInferenceBlockedFromSourceNode：IgnoreNodeInferences 把当前节点
+    // （到包含调用为止）从推断源剔除，completionsType 回落到未代入的参数型
+    pub(crate) fn get_contextual_type_for_argument_ex(
+        &mut self,
+        call_node: &Arc<tsox_frontend::ast::Node>,
+        arg_node: &Arc<tsox_frontend::ast::Node>,
+        context_flags: ContextFlags,
+    ) -> Option<Arc<Type>> {
         use tsox_frontend::ast::NodeData;
 
         let args = match &call_node.data {
@@ -83,6 +94,19 @@ impl Checker {
         if !sig.type_parameters.is_empty() {
             let key = call_node.id();
             if self.resolving_contextual_calls.insert(key) {
+                let ignore_node = context_flags
+                    .contains(ContextFlags::IgnoreNodeInferences);
+                // 调用位显式类型实参优先（Go inferSignature：显式实参直接
+                // 固定映射，不从实参推断；错误实参落 error 型）
+                let explicit: Option<Vec<Arc<Type>>> = match &call_node.data {
+                    NodeData::CallExpression(d) => d.type_arguments.as_ref().map(|ta| {
+                        ta.iter().map(|t| self.get_type_from_type_node(t)).collect()
+                    }),
+                    NodeData::NewExpression(d) => d.type_arguments.as_ref().map(|ta| {
+                        ta.iter().map(|t| self.get_type_from_type_node(t)).collect()
+                    }),
+                    _ => None,
+                };
                 let sibling_args: Vec<Arc<tsox_frontend::ast::Node>> = args
                     .iter()
                     .enumerate()
@@ -92,9 +116,21 @@ impl Checker {
                             SyntaxKind::ArrowFunction | SyntaxKind::FunctionExpression
                         )
                     })
+                    .filter(|(_, a)| !(ignore_node && Arc::ptr_eq(a, arg_node)))
                     .map(|(_, a)| Arc::clone(a))
                     .collect();
-                let inferred = self.infer_call_type_arguments(call_node, &sig, &sibling_args);
+                let inferred = match &explicit {
+                    Some(ex) if ex.len() == sig.type_parameters.len() => ex.clone(),
+                    _ => self.infer_call_type_arguments(call_node, &sig, &sibling_args),
+                };
+                if std::env::var("TSOX_DEBUG_SUBST").is_ok() {
+                    let rendered: Vec<String> = inferred.iter().map(|t| self.type_to_string(t)).collect();
+                    let node_text = self.node_source_text(call_node).unwrap_or_default();
+                    let exp_len = explicit.as_ref().map(|e| e.len());
+                    eprintln!("[ctx-arg-explicit] used={} sig_tps={} exp={:?} call=`{}` -> [{}]",
+                        explicit.is_some() && explicit.as_ref().is_some_and(|e| e.len() == sig.type_parameters.len()),
+                        sig.type_parameters.len(), exp_len, node_text.chars().take(40).collect::<String>(), rendered.join(", "));
+                }
                 self.resolving_contextual_calls.remove(&key);
                 if !inferred.is_empty() {
                     let substed = self.substitute_infer_type_parameters(
@@ -203,10 +239,19 @@ impl Checker {
         inference: &InferenceInfo,
         _signature: &Arc<Signature>,
     ) -> Option<Arc<Type>> {
-        if inference.candidates.is_empty() {
+        // Go non-fixing mapper：候选即类型参数自身（自引用推断）不参与
+        let filtered: Vec<Arc<Type>> = inference
+            .candidates
+            .iter()
+            .filter(|c| {
+                !crate::checker::utilities::type_parameters_match(c, &inference.type_parameter)
+            })
+            .cloned()
+            .collect();
+        if filtered.is_empty() {
             return None;
         }
-        let candidates = self.union_object_and_array_literal_candidates(&inference.candidates);
+        let candidates = self.union_object_and_array_literal_candidates(&filtered);
         // Go convertAutoToAny/widen：widening 标记候选（auto、undefinedWidening 等
         // 内部标记型）按 any 参与联合（_.all([], ...) → T=any）
         let candidates: Vec<Arc<Type>> = candidates

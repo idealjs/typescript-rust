@@ -125,6 +125,7 @@ impl Checker {
             members_and_exports_links: LinkStore::new(),
             type_alias_links: LinkStore::new(),
             declared_type_links: LinkStore::new(),
+            class_instance_type_cache: HashMap::new(),
             type_resolution_stack: Vec::new(),
             type_argument_stack: Vec::new(),
             type_argument_name_frames: Vec::new(),

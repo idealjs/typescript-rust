@@ -179,20 +179,8 @@ impl Checker {
                 self.get_any_type()
             }
             SyntaxKind::ThisKeyword | SyntaxKind::SuperKeyword => {
-                if node.kind == SyntaxKind::ThisKeyword
-                    && let Some(t) = self.explicit_this_parameter_type(node)
-                {
-                    return t;
-                }
-                if node.kind == SyntaxKind::ThisKeyword
-                    && let Some(t) = self.polymorphic_this_of(node)
-                {
-                    return t;
-                }
-                if node.kind == SyntaxKind::ThisKeyword
-                    && let Some(t) = self.object_literal_method_contextual_this(node)
-                {
-                    return t;
+                if node.kind == SyntaxKind::ThisKeyword {
+                    return self.this_expression_type(node);
                 }
                 if node.kind == SyntaxKind::SuperKeyword
                     && self.super_in_computed_name_of_innermost_class(node)

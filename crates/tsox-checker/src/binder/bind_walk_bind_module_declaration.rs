@@ -105,7 +105,8 @@ impl Binder {
             }
 
             let last = parts[parts.len() - 1];
-            let symbol = Arc::new(Symbol::new(SymbolFlags::ValueModule, last.to_string()));
+            let (includes, excludes) = Self::module_symbol_flags(node);
+            let symbol = Arc::new(Symbol::new(includes, last.to_string()));
             {
                 let symbol_mut = Arc::as_ptr(&symbol) as *mut Symbol;
                 unsafe {
@@ -140,7 +141,48 @@ impl Binder {
             }
             self.symbol_map.set_symbol(node, Arc::clone(&symbol));
         } else {
-            self.declare_symbol(node, SymbolFlags::ValueModule, SymbolFlags::MODULE);
+            let name_is_string_literal = match &node.data {
+                tsox_frontend::ast::NodeData::ModuleDeclaration(md) => {
+                    md.name.kind == SyntaxKind::StringLiteral
+                }
+                _ => false,
+            };
+            if name_is_string_literal {
+                // Go bindModuleDeclaration ambient 分支：字符串名 ambient 模块恒 ValueModule
+                self.declare_symbol(node, SymbolFlags::ValueModule, SymbolFlags::ValueModuleExcludes);
+            } else {
+                // Go declareModuleSymbol：按模块实例化状态取 ValueModule/NamespaceModule
+                let state = get_module_instance_state(node);
+                let (includes, excludes) = Self::module_symbol_flags(node);
+                let symbol = self.declare_symbol(node, includes, excludes);
+                if state != ModuleInstanceState::NonInstantiated {
+                    let const_enum_only = !symbol
+                        .flags
+                        .intersects(SymbolFlags::Function | SymbolFlags::Class | SymbolFlags::RegularEnum)
+                        && state == ModuleInstanceState::ConstEnumOnly
+                        && !self.not_const_enum_only_modules.contains(&symbol.id());
+                    let symbol_mut = Arc::as_ptr(&symbol) as *mut Symbol;
+                    unsafe {
+                        if const_enum_only {
+                            (*symbol_mut).flags |= SymbolFlags::ConstEnumOnlyModule;
+                        } else {
+                            (*symbol_mut).flags &= !SymbolFlags::ConstEnumOnlyModule;
+                        }
+                    }
+                    if !const_enum_only {
+                        self.not_const_enum_only_modules.insert(symbol.id());
+                    }
+                }
+            }
+        }
+    }
+
+    fn module_symbol_flags(node: &Arc<Node>) -> (SymbolFlags, SymbolFlags) {
+        let state = get_module_instance_state(node);
+        if state != ModuleInstanceState::NonInstantiated {
+            (SymbolFlags::ValueModule, SymbolFlags::ValueModuleExcludes)
+        } else {
+            (SymbolFlags::NamespaceModule, SymbolFlags::NamespaceModuleExcludes)
         }
     }
 }

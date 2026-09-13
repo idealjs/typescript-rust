@@ -106,46 +106,6 @@ impl Checker {
         }
     }
 
-    pub fn build_class_instance_type_with_base(&mut self, node: &Arc<Node>) -> Arc<Type> {
-        let (members, heritage_clauses) = match &node.data {
-            tsox_frontend::ast::NodeData::ClassDeclaration(data) => {
-                (&data.members, data.heritage_clauses.clone())
-            }
-
-            tsox_frontend::ast::NodeData::ClassExpression(data) => {
-                (&data.members, data.heritage_clauses.clone())
-            }
-            _ => return self.build_interface_type_from_members(&Arc::new(NodeList::default())),
-        };
-
-        let own_type = self.build_interface_type_from_members(members);
-
-        if let Some(class_sym) = self.program.symbol_map().symbol_of(node) {
-            let own_mut = Arc::as_ptr(&own_type) as *mut crate::checker::types::Type;
-            unsafe {
-                (*own_mut).symbol = Some(Arc::clone(class_sym));
-            }
-        }
-
-        let mut base_type: Option<Arc<Type>> = None;
-        if let Some(ref heritage) = heritage_clauses {
-            for clause in heritage.iter() {
-                if let tsox_frontend::ast::NodeData::HeritageClause(hc) = &clause.data {
-                    if hc.token == SyntaxKind::ExtendsKeyword {
-                        if let Some(type_ref) = hc.types.iter().next() {
-                            base_type = Some(self.resolve_base_class_instance_type(type_ref));
-                        }
-                        break;
-                    }
-                }
-            }
-        }
-        match base_type {
-            Some(base) => self.merge_instance_types(&own_type, &base),
-            None => own_type,
-        }
-    }
-
     pub(crate) fn get_constituent_property(
         &mut self,
         object_type: &Arc<Type>,

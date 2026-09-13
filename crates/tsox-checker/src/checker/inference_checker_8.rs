@@ -364,7 +364,7 @@ impl Checker {
 
     pub fn infer_type_arguments(
         &mut self,
-        node: &tsox_frontend::ast::Node,
+        node: &Arc<tsox_frontend::ast::Node>,
         signature: &Arc<Signature>,
         args: &[Arc<tsox_frontend::ast::Node>],
         context: &mut InferenceContext,

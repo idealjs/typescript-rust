@@ -99,6 +99,9 @@ pub enum JsDocPosition {
     NotInDocComment,
     Labels(Vec<String>),
     ImportTag(Arc<Node>),
+    /// Go completionDataJSDocParameterName：@param 名字位（名 missing 或
+    /// 光标在名区间）给未标注的函数形参名
+    ParameterNames(Vec<String>),
     ContinuePipeline,
     Blocked,
 }
@@ -122,8 +125,16 @@ pub fn jsdoc_position_completions(
     };
 
     if let Some(tags) = &d.tags {
-        for tag in tags.nodes.iter() {
-            if !(tag.pos() <= position && position <= tag.end()) {
+        let n = tags.nodes.len();
+        for (idx, tag) in tags.nodes.iter().enumerate() {
+            // Go JSDocTag 的 span 含尾随 comment 区（到下一 tag/注释尾）：
+            // 间隔归属前一 tag
+            let span_end = tags
+                .nodes
+                .get(idx + 1)
+                .map(|next| next.pos())
+                .unwrap_or(range.end);
+            if !(tag.pos() <= position && position < span_end) {
                 continue;
             }
             // Go getJSDocTagAtPosition：标签名区间（含裸 @ 零宽名）
@@ -140,8 +151,44 @@ pub fn jsdoc_position_completions(
                 return JsDocPosition::ImportTag(Arc::clone(tag));
             }
             // 标签的类型表达式内按类型位补全
-            if tag_type_expression_span(tag).is_some_and(|(s, e)| s <= position && position <= e) {
+            if let Some((s, e)) = tag_type_expression_span(tag)
+                && s <= position
+                && position <= e
+            {
+                // 嵌套对象字面量的属性名位（`{ {…` 的内层 { 后）：无上下文
+                // 约束（Go ObjectPropertyDeclaration 空集），不回退 scope；
+                // 外层开括号后仍是类型位（`{ Foo.…`）
+                let mut q = position;
+                while q > s
+                    && file.text[s..q].chars().last().is_some_and(char::is_whitespace)
+                {
+                    q -= file.text[s..q].chars().last().unwrap().len_utf8();
+                }
+                let nested_object_literal = q > s
+                    && &file.text[q - 1..q] == "{"
+                    && file.text[s..q - 1].contains('{');
+                if nested_object_literal {
+                    return JsDocPosition::Blocked;
+                }
                 return JsDocPosition::ContinuePipeline;
+            }
+            // Go IsJSDocParameterTag：名字 missing（类型在前、名未打）或光标
+            // 在名区间 → 形参名补全
+            if tag.kind == SyntaxKind::JSDocParameterTag
+                && let NodeData::JSDocParameterOrPropertyTag(pd) = &tag.data
+            {
+                let name = Arc::clone(&pd.name);
+                if name.pos() >= name.end()
+                    || (name.pos() <= position && position <= name.end())
+                {
+                    return JsDocPosition::ParameterNames(parameter_name_completions(
+                        file,
+                        tag,
+                        &name,
+                        tags.nodes.as_slice(),
+                        range.end,
+                    ));
+                }
             }
         }
     }
@@ -180,6 +227,68 @@ fn tag_name_of(tag: &Arc<Node>) -> Option<Arc<Node>> {
         false
     });
     name
+}
+
+/// Go getJSDocParameterNameCompletions：函数形参名 - 同 JSDoc 内已被其它
+/// @param 标注的名字 - nameThusFar 前缀过滤；解构形参不参与
+fn parameter_name_completions(
+    file: &Arc<SourceFile>,
+    tag: &Arc<Node>,
+    editing_name: &Arc<Node>,
+    all_tags: &[Arc<Node>],
+    doc_end: usize,
+) -> Vec<String> {
+    let name_thus_far = if editing_name.pos() < editing_name.end() {
+        editing_name.text().to_string()
+    } else {
+        String::new()
+    };
+    // jsdoc 是函数的 leading trivia（pos 不含注释）：注释 range 已含闭合
+    // `*/`，锚点取其后跳过空白的首字符（函数关键字处），再上爬函数
+    let close = doc_end;
+    let anchor = close + (file.text[close..].len() - file.text[close..].trim_start().len());
+    let mut cur = Some(crate::ls::completions_helpers::find_deepest_node(
+        &file.node,
+        anchor,
+    ));
+    while let Some(c) = &cur
+        && !tsox_frontend::ast::is_function_like_kind(c.kind)
+    {
+        cur = c.parent();
+    }
+    let Some(fn_node) = cur else {
+        return Vec::new();
+    };
+    let mut params: Vec<Arc<Node>> = Vec::new();
+    tsox_frontend::ast::node_data_generated::for_each_child(&fn_node, |c| {
+        if c.kind == SyntaxKind::Parameter {
+            params.push(Arc::clone(c));
+        }
+        false
+    });
+    params
+        .iter()
+        .filter_map(|p| {
+            let NodeData::ParameterDeclaration(pd) = &p.data else {
+                return None;
+            };
+            if pd.name.kind != SyntaxKind::Identifier {
+                return None;
+            }
+            let name = pd.name.text().to_string();
+            let annotated = all_tags.iter().any(|t| {
+                !Arc::ptr_eq(t, tag)
+                    && matches!(&t.data, NodeData::JSDocParameterOrPropertyTag(td)
+                        if td.name.kind == SyntaxKind::Identifier && td.name.text() == name)
+            });
+            if annotated
+                || (!name_thus_far.is_empty() && !name.starts_with(&name_thus_far))
+            {
+                return None;
+            }
+            Some(name)
+        })
+        .collect()
 }
 
 /// @import 标签内的字符串补全：说明符位出模块名（Go

@@ -13,7 +13,7 @@ impl Checker {
         result
     }
 
-    fn container_instance_type_of(&mut self, node: &Arc<Node>) -> Arc<Type> {
+    pub(crate) fn container_instance_type_of(&mut self, node: &Arc<Node>) -> Arc<Type> {
         // 从 container 自身查起：调用方传入的即是类/接口容器（顶层类的
         // parent 是 SourceFile，跳过自身会一直走到 any）
         let mut cur: Option<Arc<Node>> = Some(Arc::clone(node));

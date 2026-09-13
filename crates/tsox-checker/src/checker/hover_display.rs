@@ -7,7 +7,10 @@ use super::hover_display_context::{is_in_expression_context, is_this_in_type_que
 use super::hover_display_target::is_assignment_target_literal;
 use super::hover_display_parts::HoverPartsBuilder;
 use crate::checker::nodebuilder::*;
-use tsox_frontend::ast::{Node, Symbol, SymbolFlags, SyntaxKind};
+use tsox_frontend::ast::{
+    get_module_instance_state, is_ambient_module, ModuleInstanceState, Node, Symbol, SymbolFlags,
+    SyntaxKind,
+};
 
 /// Go SemanticMeaning：Value=1 Type=2 Namespace=4
 pub(crate) const MEANING_VALUE: u8 = 1;
@@ -376,7 +379,16 @@ pub(crate) fn get_meaning_from_location(node: &Arc<Node>) -> u8 {
         return match parent.kind {
             TypeParameter | InterfaceDeclaration | TypeAliasDeclaration | TypeLiteral => MEANING_TYPE,
             EnumMember | ClassDeclaration => MEANING_VALUE | MEANING_TYPE,
-            ModuleDeclaration => MEANING_NAMESPACE | MEANING_VALUE,
+            ModuleDeclaration => {
+                // Go getMeaningFromDeclaration：ambient/实例化模块带 Value，仅类型 namespace 只 Namespace
+                let instantiated = is_ambient_module(&parent)
+                    || get_module_instance_state(&parent) == ModuleInstanceState::Instantiated;
+                if instantiated {
+                    MEANING_NAMESPACE | MEANING_VALUE
+                } else {
+                    MEANING_NAMESPACE
+                }
+            }
             EnumDeclaration => MEANING_VALUE | MEANING_TYPE,
             _ => MEANING_VALUE,
         };

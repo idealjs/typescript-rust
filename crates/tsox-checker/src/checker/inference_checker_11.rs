@@ -195,7 +195,7 @@ impl Checker {
 
     pub(crate) fn get_contextual_type_for_call_or_new(
         &mut self,
-        node: &tsox_frontend::ast::Node,
+        node: &Arc<tsox_frontend::ast::Node>,
     ) -> Option<Arc<Type>> {
         use tsox_frontend::ast::NodeData;
 
@@ -209,7 +209,9 @@ impl Checker {
                 let fn_node = parent.parent()?;
                 self.get_return_type_annotation_of_function(&fn_node)
             }
-            _ => None,
+            // 其余位（属性值/数组元素/实参等）走通用上下文定型
+            //（Go inferTypeArguments 用 getContextualType 全量分发）
+            _ => self.get_contextual_type(node, ContextFlags::None),
         }
     }
 

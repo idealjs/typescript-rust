@@ -23,6 +23,9 @@ pub(super) fn member_symbols_after_dot(
 ) -> MemberDotResult {
     use tsox_frontend::ast::NodeData;
     use tsox_frontend::ast::SyntaxKind;
+    let _dbg_result = (|| {
+        let _ = (&NodeData::Identifier, &SyntaxKind::Identifier);
+    })();
 
     // `q..`：第二个点右侧是缺名（Go 取缺失名节点类型 error）→ 无可访问属性；
     // 三个点（spread）不适用，走既有 NotDot 回退
@@ -134,10 +137,25 @@ pub(super) fn member_symbols_after_dot(
             }
             let dot = q - 1;
             let Some(recv) = deepest_node_ending_at(&root, dot) else {
+                // import("./m"). 尾部：成员点被 ImportType 节点的 trailing
+                // 区域吞掉（end 越过点），无 end==dot 的节点；marker 处最深
+                // 节点即 ImportType 自身
+                if node.kind == SyntaxKind::ImportType {
+                    return MemberDotResult::Dot(
+                        member_symbols_of_receiver(checker, node, false, false)
+                            .unwrap_or_default(),
+                    );
+                }
                 return MemberDotResult::Dot(Vec::new());
             };
             return MemberDotResult::Dot(
-                member_symbols_of_receiver(checker, &recv, false).unwrap_or_default(),
+                member_symbols_of_receiver(
+                    checker,
+                    &recv,
+                    false,
+                    receiver_in_namespace_declaration(&recv),
+                )
+                .unwrap_or_default(),
             );
         }
     };
@@ -166,8 +184,13 @@ pub(super) fn member_symbols_after_dot(
         _ => return MemberDotResult::NotDot,
     };
 
+    // Go isNamespaceName：namespace N.M 声明名的限定段位
+    let is_namespace_name = matches!(access.kind, SyntaxKind::QualifiedName)
+        && matches!(access.parent().map(|p| p.kind), Some(SyntaxKind::ModuleDeclaration));
+
     MemberDotResult::Dot(
-        member_symbols_of_receiver(checker, &receiver, is_expression).unwrap_or_default(),
+        member_symbols_of_receiver(checker, &receiver, is_expression, is_namespace_name)
+            .unwrap_or_default(),
     )
 }
 
@@ -180,7 +203,23 @@ fn member_symbols_of_receiver(
     checker: &mut Checker,
     receiver: &Arc<Node>,
     value_only: bool,
+    is_namespace_name: bool,
 ) -> Option<Vec<Arc<Symbol>>> {
+    // ImportType 语境（Go getTypeScriptMemberSymbols 的 isImportType 分支）：
+    // import("./m"). / import("./m").Q. 点左实体为 ImportType 或其 qualifier 段
+    if receiver.kind == SyntaxKind::ImportType || in_import_type_qualifier(receiver) {
+        if let Some((base, is_type_of)) = checker.resolve_import_type_member_base(receiver) {
+            if base
+                .flags
+                .intersects(SymbolFlags::ValueModule | SymbolFlags::NamespaceModule | SymbolFlags::ENUM)
+            {
+                return Some(import_type_module_members(checker, &base, is_type_of));
+            }
+        }
+        // export= 类等非模块基点：receiver 是 ImportType 时落回下方类型通道
+        //（get_type_of_node → get_type_from_import_type_node 给值/引用类型）
+    }
+
     // 命名空间/枚举导出：Go GetExportsOfModule + 值/类型位过滤；
     // 限定链（c.Inner.）逐段解析到链尾符号
     if let Some(target) = resolve_module_qualified(checker, receiver) {
@@ -205,14 +244,25 @@ fn member_symbols_of_receiver(
                     }
                 }
             }
-            // Go isValidValueAccess=IsValidPropertyAccess：直接值/Assignment，
-            // 或别名解析目标具值意义（JS module.exports.x = fn 的别名导出）
+            // Go isNamespaceName 分支：namespace N.M/**/ 的名位只给 namespace
+            // 标志成员，且排除「仅由正在编辑的声明引入」的名字
+            let editing_parent = if is_namespace_name {
+                receiver.parent().map(|p| p.id())
+            } else {
+                None
+            };
             let mut symbols: Vec<Arc<Symbol>> = Vec::new();
             for e in exports {
                 if e.name.is_empty() || e.name.starts_with('\u{FE}') {
                     continue;
                 }
-                let accessible = if value_only {
+                let accessible = if let Some(parent_id) = editing_parent {
+                    e.flags.intersects(SymbolFlags::NAMESPACE)
+                        && !e
+                            .declarations
+                            .iter()
+                            .all(|d| d.parent().is_some_and(|p| p.id() == parent_id))
+                } else if value_only {
                     e.flags.intersects(SymbolFlags::VALUE | SymbolFlags::Assignment)
                         || (e.flags.intersects(SymbolFlags::Alias)
                             && checker
@@ -222,8 +272,10 @@ fn member_symbols_of_receiver(
                                 }))
                 } else {
                     // 类型位的 X.：仅类型意义（Go
-                    // symbolCanBeReferencedAtTypeLocation：namespace 与纯值导出不参与）
+                    // symbolCanBeReferencedAtTypeLocation：Type 联合，或
+                    // namespace 的 exports 递归存在可类型引用成员）
                     e.flags.intersects(SymbolFlags::TYPE)
+                        || symbol_referenced_at_type_location(checker, &e, &mut Vec::new())
                 };
                 if accessible {
                     symbols.push(e);
@@ -287,20 +339,10 @@ fn member_symbols_of_receiver(
     Some(props)
 }
 
-/// `this` / `super` 接收者的类型：Go getTypeAtLocation(this) 在服务路径下
-/// 由词法位置回推（检查器遍历栈已展开）
+/// `this` / `super` 接收者的类型：this 走 checker 结构化解析
+/// （checkThisExpression/getThisContainer，Go getTypeAtLocation 同源）
 fn receiver_type(checker: &mut Checker, receiver: &Arc<Node>) -> Arc<Type> {
     match receiver.kind {
-        SyntaxKind::ThisKeyword => match enclosing_class_of(receiver) {
-            Some(class) => {
-                if in_static_member_context(receiver) {
-                    checker.get_type_of_class_declaration(&class)
-                } else {
-                    checker.build_class_instance_type_with_base(&class)
-                }
-            }
-            None => checker.get_type_of_node(receiver),
-        },
         SyntaxKind::SuperKeyword => base_class_of(receiver)
             .map(|base| checker.build_class_instance_type_with_base(&base))
             .unwrap_or_else(|| checker.get_type_of_node(receiver)),
@@ -312,24 +354,6 @@ fn receiver_type(checker: &mut Checker, receiver: &Arc<Node>) -> Arc<Type> {
         }
         _ => checker.get_type_of_node(receiver),
     }
-}
-
-fn in_static_member_context(node: &Arc<Node>) -> bool {
-    let mut current = node.parent();
-    while let Some(n) = current {
-        match n.kind {
-            SyntaxKind::MethodDeclaration
-            | SyntaxKind::PropertyDeclaration
-            | SyntaxKind::GetAccessor
-            | SyntaxKind::SetAccessor => {
-                return n.has_syntactic_modifier(ModifierFlags::Static);
-            }
-            SyntaxKind::ClassDeclaration | SyntaxKind::ClassExpression => return false,
-            _ => {}
-        }
-        current = n.parent();
-    }
-    false
 }
 
 fn base_class_of(node: &Arc<Node>) -> Option<Arc<Node>> {
@@ -362,6 +386,108 @@ fn base_class_of(node: &Arc<Node>) -> Option<Arc<Node>> {
         }
     }
     None
+}
+
+/// receiver（限定段/标识符）向上是否归属 namespace 声明名（Go
+/// isNamespaceName）
+fn receiver_in_namespace_declaration(receiver: &Arc<Node>) -> bool {
+    let mut cur = receiver.parent();
+    while let Some(c) = cur {
+        if matches!(c.kind, SyntaxKind::QualifiedName | SyntaxKind::Identifier) {
+            cur = c.parent();
+            continue;
+        }
+        return c.kind == SyntaxKind::ModuleDeclaration;
+    }
+    false
+}
+
+/// receiver 是否为某 ImportTypeNode 的 qualifier 链上的标识符/限定名
+fn in_import_type_qualifier(receiver: &Arc<Node>) -> bool {
+    if !matches!(receiver.kind, SyntaxKind::Identifier | SyntaxKind::QualifiedName) {
+        return false;
+    }
+    let Some(mut cur) = receiver.parent() else {
+        return false;
+    };
+    while cur.kind == SyntaxKind::QualifiedName {
+        let Some(parent) = cur.parent() else {
+            return false;
+        };
+        cur = parent;
+    }
+    if let NodeData::ImportTypeNode(d) = &cur.data {
+        return d
+            .qualifier
+            .as_ref()
+            .is_some_and(|q| q.end() >= receiver.end() && q.pos() <= receiver.pos());
+    }
+    false
+}
+
+/// ImportType 语境的模块成员枚举（Go GetExportsOfModule + 值/类型位过滤，
+/// 类型位含 namespace 的 exports 递归可引用判定）
+fn import_type_module_members(
+    checker: &mut Checker,
+    module: &Arc<Symbol>,
+    value_only: bool,
+) -> Vec<Arc<Symbol>> {
+    let mut exports: Vec<Arc<Symbol>> = Vec::new();
+    checker.for_each_export_and_property_of_module(module, &mut |sym, _| {
+        if !exports.iter().any(|e| Arc::ptr_eq(e, sym)) {
+            exports.push(Arc::clone(sym));
+        }
+    });
+    let mut out = Vec::new();
+    for e in exports {
+        if e.name.is_empty() || e.name.starts_with('\u{FE}') {
+            continue;
+        }
+        let accessible = if value_only {
+            e.flags.intersects(SymbolFlags::VALUE | SymbolFlags::Assignment)
+                || (e.flags.intersects(SymbolFlags::Alias)
+                    && checker
+                        .follow_alias_resolving(&e)
+                        .is_some_and(|t| t.flags.intersects(SymbolFlags::VALUE | SymbolFlags::Assignment)))
+        } else {
+            let mut seen = Vec::new();
+            symbol_referenced_at_type_location(checker, &e, &mut seen)
+        };
+        if accessible {
+            out.push(e);
+        }
+    }
+    out
+}
+
+/// Go symbolCanBeReferencedAtTypeLocation：具类型意义，或 namespace 的
+/// exports 递归存在可类型引用成员
+fn symbol_referenced_at_type_location(
+    checker: &mut Checker,
+    symbol: &Arc<Symbol>,
+    seen: &mut Vec<*const Symbol>,
+) -> bool {
+    let key = Arc::as_ptr(symbol);
+    if seen.contains(&key) {
+        return false;
+    }
+    seen.push(key);
+    if symbol.flags.intersects(SymbolFlags::TYPE) {
+        return true;
+    }
+    if symbol.flags.intersects(SymbolFlags::ValueModule | SymbolFlags::NamespaceModule) {
+        let mut children = Vec::new();
+        checker.for_each_export_and_property_of_module(symbol, &mut |sym, _| {
+            if !sym.name.starts_with('\u{FE}') {
+                children.push(Arc::clone(sym));
+            }
+        });
+        return children.iter().any(|c| {
+            let mut sub_seen = seen.clone();
+            symbol_referenced_at_type_location(checker, c, &mut sub_seen)
+        });
+    }
+    false
 }
 
 // 限定链接收者（c. / c.Inner. / A.B.C.）解析到链尾符号：基点标识符经

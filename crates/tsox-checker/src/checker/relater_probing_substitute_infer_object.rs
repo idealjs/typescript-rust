@@ -215,6 +215,27 @@ impl Checker {
             return result;
         }
 
+        // Go instantiateType→getObjectTypeInstantiation：带声明类型参数的符号型
+        //（类/接口声明型）把类型参数过映射后挂为实参（C --{T→number}--> C<number>）
+        if o.type_arguments.is_empty()
+            && let Some(sym) = t.symbol.clone()
+        {
+            let tps = self.declared_type_parameter_types(&sym);
+            if !tps.is_empty() {
+                let mapped: Vec<Arc<Type>> = tps
+                    .iter()
+                    .map(|tp| self.substitute_infer_type_parameters(tp, params, substitutions))
+                    .collect();
+                let changed = tps
+                    .iter()
+                    .zip(mapped.iter())
+                    .any(|(a, b)| !Arc::ptr_eq(a, b));
+                if changed {
+                    return self.attach_explicit_type_arguments_cached(t, mapped);
+                }
+            }
+        }
+
         Arc::clone(t)
     }
 }

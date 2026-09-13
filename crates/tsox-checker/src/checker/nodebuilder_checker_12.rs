@@ -212,16 +212,9 @@ impl Checker {
             push_part(&mut parts, "property", DisplayPartKind::Text);
             push_punctuation(&mut parts, ") ");
         }
-        // 限定名：命名空间限定 + 接口/类名 + 成员名
-        let ns_prefix = self
-            .namespace_only_qualifier_of(&display_class_sym)
-            .map(|q| format!("{q}."))
-            .unwrap_or_default();
-        push_part(
-            &mut parts,
-            &format!("{ns_prefix}{}", display_class_sym.name),
-            DisplayPartKind::ClassName,
-        );
+        // 限定名：命名空间限定（含别名/纯类型命名空间段/export= 退化）+ 成员名
+        let container_display = self.namespace_qualified_display_name(&display_class_sym);
+        push_part(&mut parts, &container_display, DisplayPartKind::ClassName);
         if !container_args.is_empty() {
             let args: Vec<String> = container_args
                 .iter()
@@ -1582,6 +1575,10 @@ impl Checker {
     }
 
     fn symbol_documentation_direct(&mut self, symbol: &Arc<Symbol>) -> String {
+        // JS 函数参数：文档来自所在函数 JSDoc 的同名 @param tag 注释
+        if let Some(doc) = self.jsdoc_param_tag_documentation(symbol) {
+            return doc;
+        }
         // Reparsed 的 JSDoc 合成成员（@property）：注释在原 jsdoc 标签上
         for target in self.doc_lookup_symbols(symbol) {
             for decl in &target.declarations {
@@ -1796,7 +1793,9 @@ impl Checker {
         {
             return symbol.name.clone();
         }
-        let mut q = parent.name.clone();
+        // 容器自身嵌在命名空间内时先向上限定（Underscore.Static.all）；
+        // 容器是父模块 export=（隔代自身）时链退化为限定名，不追加符号名
+        let mut q = self.namespace_qualified_display_name(&parent);
         if let Some(args) = self.instantiated_member_container_args(symbol, &parent) {
             let rendered: Vec<String> = args.iter().map(|a| self.type_to_string(a)).collect();
             if !rendered.is_empty() {
@@ -2017,10 +2016,13 @@ impl Checker {
         } else {
             DisplayPartKind::VariableName
         };
-        // 反向映射属性为合成符号：显示裸名（tsc 不经声明容器限定）
-        let display_name = if symbol
-            .check_flags
-            .contains(tsox_frontend::ast::CheckFlags::ReverseMapped)
+        // 反向映射属性为合成符号：显示裸名（tsc 不经声明容器限定）；
+        // 参数符号的父容器是函数（非 class/enum/module），Go SymbolToStringEx
+        // 不限定 → 裸名
+        let display_name = if is_parameter
+            || symbol
+                .check_flags
+                .contains(tsox_frontend::ast::CheckFlags::ReverseMapped)
         {
             symbol.name.clone()
         } else {

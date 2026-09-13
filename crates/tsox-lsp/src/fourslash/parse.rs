@@ -80,6 +80,13 @@ impl FileAccumulator {
             return;
         }
         let name = self.name.take().unwrap_or_else(|| default_name.to_string());
+        // Go GetNormalizedAbsolutePath(fileName, "/")：@Filename 相对名规范化
+        // 为虚拟根下绝对路径（packages/x → /packages/x）
+        let name = if name.starts_with('/') {
+            name
+        } else {
+            format!("/{name}")
+        };
         let joined = self.lines.join("\n");
         let (content, head_options, markers, ranges) = parse_file_content(&name, &joined);
         for (k, v) in head_options {
@@ -252,7 +259,8 @@ fn parse_file_content(
                     if let Some(last) = open_ranges.last_mut() {
                         last.1 = markers.last().cloned();
                     }
-                    flush(&mut out, &chars, &mut last_normal, Some(i + 1));
+                    // 对象标记文本不入内容：仅推进续写位置（Go lastNormalCharPosition = i + 1）
+                    last_normal = i + 1;
                     difference += i + 1 - src;
                     state = 0;
                 }

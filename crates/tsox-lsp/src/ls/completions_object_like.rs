@@ -1,60 +1,122 @@
 use std::sync::Arc;
 
 use tsox_checker::checker::Checker;
-use tsox_checker::checker::types::{ContextFlags, TYPE_FLAGS_PRIMITIVE, Type, TypeData, TypeFlags};
+use tsox_checker::checker::types::{
+    ContextFlags, TYPE_FLAGS_ANY_OR_UNKNOWN, TYPE_FLAGS_PRIMITIVE, Type, TypeData, TypeFlags,
+};
 use tsox_frontend::ast::{Node, NodeData, SourceFile, Symbol, SyntaxKind};
 use tsox_frontend::scanner::skip_trivia;
 
 use super::completions_accessibility::is_non_public_member;
-use super::completions_context::relevant_tokens;
+use super::completions_context::{ScanToken, line_of_position};
+use super::completions_definition_location::token_parent;
 use super::completions_object_like_types::binding_pattern_type_members;
 
-/// 光标所在的最内层物体字面量/解构模式（不跨越函数边界）
-fn find_object_like_container(node: &Arc<Node>) -> Option<Arc<Node>> {
+/// Go tryGetObjectLikeCompletionContainer：contextToken.Parent 语义定位容器
+pub(super) fn try_get_object_like_container(
+    context_token: Option<&ScanToken>,
+    text: &str,
+    position: usize,
+    root: &Arc<Node>,
+) -> Option<Arc<Node>> {
+    let context = context_token?;
+    let parent = token_parent(root, context)?;
+    match context.kind {
+        SyntaxKind::OpenBraceToken | SyntaxKind::CommaToken => {
+            if matches!(
+                parent.kind,
+                SyntaxKind::ObjectLiteralExpression | SyntaxKind::ObjectBindingPattern
+            ) {
+                Some(parent)
+            } else {
+                None
+            }
+        }
+        SyntaxKind::AsteriskToken => {
+            if parent.kind == SyntaxKind::MethodDeclaration
+                && parent
+                    .parent()
+                    .as_ref()
+                    .is_some_and(|p| p.kind == SyntaxKind::ObjectLiteralExpression)
+            {
+                parent.parent()
+            } else {
+                None
+            }
+        }
+        SyntaxKind::AsyncKeyword => parent
+            .parent()
+            .filter(|p| p.kind == SyntaxKind::ObjectLiteralExpression),
+        SyntaxKind::Identifier => {
+            if &text[context.pos..context.end] == "async"
+                && parent.kind == SyntaxKind::ShorthandPropertyAssignment
+            {
+                return parent.parent();
+            }
+            if let Some(grand) = parent.parent()
+                && grand.kind == SyntaxKind::ObjectLiteralExpression
+                && (parent.kind == SyntaxKind::SpreadAssignment
+                    || (parent.kind == SyntaxKind::ShorthandPropertyAssignment
+                        && line_of_position(text, context.end)
+                            != line_of_position(text, position)))
+            {
+                return Some(grand);
+            }
+            property_assignment_ancestor_container(&parent, context)
+        }
+        _ => {
+            if let Some(method) = parent.parent()
+                && let Some(container) = method.parent()
+                && matches!(
+                    method.kind,
+                    SyntaxKind::MethodDeclaration
+                        | SyntaxKind::GetAccessor
+                        | SyntaxKind::SetAccessor
+                )
+                && container.kind == SyntaxKind::ObjectLiteralExpression
+            {
+                return Some(container);
+            }
+            if parent.kind == SyntaxKind::SpreadAssignment
+                && parent
+                    .parent()
+                    .as_ref()
+                    .is_some_and(|p| p.kind == SyntaxKind::ObjectLiteralExpression)
+            {
+                return parent.parent();
+            }
+            if context.kind != SyntaxKind::ColonToken {
+                return property_assignment_ancestor_container(&parent, context);
+            }
+            None
+        }
+    }
+}
+
+/// PropertyAssignment 祖先的末 token 恰为 contextToken → 容器为其父 OLE
+fn property_assignment_ancestor_container(
+    parent: &Arc<Node>,
+    context: &ScanToken,
+) -> Option<Arc<Node>> {
+    let ancestor = find_ancestor_property_assignment(parent)?;
+    if ancestor.loc.end() != context.end {
+        return None;
+    }
+    ancestor
+        .parent()
+        .filter(|p| p.kind == SyntaxKind::ObjectLiteralExpression)
+}
+
+fn find_ancestor_property_assignment(node: &Arc<Node>) -> Option<Arc<Node>> {
     let mut current = Some(Arc::clone(node));
     while let Some(n) = current {
-        match n.kind {
-            SyntaxKind::ObjectLiteralExpression | SyntaxKind::ObjectBindingPattern => {
-                return Some(n);
-            }
-            SyntaxKind::ArrowFunction
-            | SyntaxKind::FunctionExpression
-            | SyntaxKind::FunctionDeclaration
-            | SyntaxKind::MethodDeclaration
-            | SyntaxKind::ClassDeclaration
-            | SyntaxKind::ClassExpression
-            | SyntaxKind::SourceFile => return None,
-            _ => {}
+        if n.kind == SyntaxKind::PropertyAssignment {
+            return Some(n);
         }
         current = n.parent();
     }
     None
 }
-
-/// 命中物体语境返回容器；context token 为 `{` / `,` / `async` / `*` 才属成员名位
-pub(super) fn try_get_object_like_container(
-    node_at_position: &Arc<Node>,
-    text: &str,
-    jsx: bool,
-    position: usize,
-) -> Option<Arc<Node>> {
-    let container = find_object_like_container(node_at_position)?;
-    let (context, _previous) = relevant_tokens(text, jsx, container.pos(), position);
-    let context = context?;
-    if matches!(
-        context.kind,
-        SyntaxKind::OpenBraceToken | SyntaxKind::CommaToken | SyntaxKind::AsyncKeyword
-    ) {
-        return Some(container);
-    }
-    if context.kind == SyntaxKind::AsteriskToken
-        && container.kind == SyntaxKind::ObjectLiteralExpression
-    {
-        return Some(container);
-    }
-    None
-}
-
 
 /// Go tryGetObjectLikeCompletionSymbols：Some(成员) 表示命中物体语境（可能为空
 /// 列表，不回退 scope）；None 表示继续走后续搜索
@@ -102,7 +164,12 @@ fn object_literal_type_members(
         None => Arc::clone(&instantiated),
     };
     let number_index = checker.get_number_index_type(&effective);
-    let members = properties_for_object_expression(checker, &instantiated, container);
+    let members = properties_for_object_expression(
+        checker,
+        &instantiated,
+        completions_type.as_ref(),
+        container,
+    );
     if members.is_empty() && number_index.is_none() {
         return None;
     }
@@ -136,20 +203,59 @@ fn walk_up_parenthesized_expressions(node: &Arc<Node>) -> Arc<Node> {
 
 pub(super) fn properties_for_object_expression(
     checker: &mut Checker,
-    contextual_type: &Arc<Type>,
+    instantiated: &Arc<Type>,
+    completions_type: Option<&Arc<Type>>,
     obj: &Arc<Node>,
 ) -> Vec<Arc<Symbol>> {
-    if !contextual_type.flags.contains(TypeFlags::Union) {
-        return checker.get_apparent_properties(contextual_type);
+    // Go getPropertiesForObjectExpression：t = 实例化上下文 ∪ completionsType
+    //（非 any）；completionsType 存在时剔除「唯一声明在字面量自身」的成员
+    //（f({abc}) 的 abc 因自声明进入 T，防自证补全）
+    let has_completions_type = completions_type
+        .is_some_and(|c| !Arc::ptr_eq(c, instantiated));
+    let use_completions_union = has_completions_type
+        && completions_type
+            .is_some_and(|c| !c.flags.intersects(TYPE_FLAGS_ANY_OR_UNKNOWN));
+    let mut union_types: Vec<Arc<Type>> = if instantiated.flags.contains(TypeFlags::Union) {
+        union_member_types(instantiated)
+    } else {
+        vec![Arc::clone(instantiated)]
+    };
+    if use_completions_union {
+        union_types.push(Arc::clone(completions_type.unwrap()));
     }
-    let filtered: Vec<Arc<Type>> = union_member_types(contextual_type)
-        .into_iter()
-        .filter(|t| !is_union_member_excluded(checker, t, obj))
-        .collect();
-    if filtered.is_empty() {
+    // Go hasDeclarationOtherThanSelf 按成员声明过滤后再并入联合；本仓推断
+    // 代入生成无声明合成符号，等价视作字面量自声明（先过滤后按名去重，
+    // 否则首胜去重会吞掉 completionsType 一侧的具声明成员）
+    let declared_elsewhere = |m: &Arc<Symbol>| {
+        !m.declarations.is_empty()
+            && m.declarations
+                .iter()
+                .any(|d| d.parent().as_ref().is_some_and(|p| !Arc::ptr_eq(p, obj)))
+    };
+    let mut seen: std::collections::HashSet<String> = std::collections::HashSet::new();
+    let mut properties: Vec<Arc<Symbol>> = Vec::new();
+    let constituents: Vec<Arc<Type>> = if union_types.len() > 1 {
+        union_types
+            .into_iter()
+            .filter(|t| !is_union_member_excluded(checker, t, obj))
+            .collect()
+    } else {
+        union_types
+    };
+    if constituents.is_empty() {
         return Vec::new();
     }
-    checker.get_all_possible_properties_of_types(&filtered)
+    for t in &constituents {
+        let t_props = checker.get_augmented_properties_of_type(t);
+        for p in t_props {            if has_completions_type && !declared_elsewhere(&p) {
+                continue;
+            }
+            if seen.insert(p.name.clone()) {
+                properties.push(p);
+            }
+        }
+    }
+    properties
 }
 
 fn is_union_member_excluded(checker: &mut Checker, t: &Arc<Type>, obj: &Arc<Node>) -> bool {

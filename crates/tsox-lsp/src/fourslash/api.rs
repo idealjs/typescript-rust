@@ -98,6 +98,16 @@ pub fn go_to_eof(s: &mut Session) {
     s.cursor = Some(content.chars().count());
 }
 
+/// Go DeleteAtCaret：在光标处向后删除 count 个字符（光标不动）
+pub fn delete_at_caret(s: &mut Session, count: usize) {
+    for _ in 0..count {
+        let pos = s
+            .cursor
+            .unwrap_or_else(|| panic!("delete_at_caret 前无光标（go_to_marker）"));
+        edit_script(s, pos, pos + 1, "");
+    }
+}
+
 fn edit_script(s: &mut Session, start: usize, end: usize, new_text: &str) {
     let file = s.active_file.clone();
     let content = s.file_content(&file).to_string();

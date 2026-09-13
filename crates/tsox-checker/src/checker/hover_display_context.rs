@@ -111,8 +111,11 @@ fn node_initializer(parent: &Arc<Node>) -> Option<Arc<Node>> {
     }
 }
 
-/// Go ast.IsThisInTypeQuery：typeof 查询中的 this
+/// Go ast.IsThisInTypeQuery：typeof 查询中的 this（仅 this 关键字/ThisType 自身）
 pub(crate) fn is_this_in_type_query(node: &Arc<Node>) -> bool {
+    if !matches!(node.kind, SyntaxKind::ThisKeyword | SyntaxKind::ThisType) {
+        return false;
+    }
     let Some(parent) = node.parent() else {
         return false;
     };

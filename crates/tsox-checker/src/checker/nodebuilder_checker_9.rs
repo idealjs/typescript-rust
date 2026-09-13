@@ -208,8 +208,11 @@ impl Checker {
             .clone()
             .or_else(|| self.namespace_container_from_declarations(symbol));
         while let Some(ns) = cur {
-            if !ns.flags.contains(SymbolFlags::ValueModule) {
-                return None;
+            if !ns.flags.intersects(SymbolFlags::MODULE) {
+                // Go getSymbolChain：非模块父（脚本文件符号/函数）终止上爬，
+                // 已收集的命名空间段保留；纯类型命名空间（NamespaceModule）
+                // 同样参与限定（Underscore.Static.all 的 Underscore 段）
+                break;
             }
             // declare global 增强容器不参与限定名
             if ns
@@ -276,6 +279,35 @@ impl Checker {
         } else {
             Some(parts.join("."))
         }
+    }
+
+    // 符号的命名空间限定显示名：export= 符号退化为限定名（隔代自身），
+    // 否则 限定名.符号名（Go getSymbolChain + getAliasForSymbolInContainer）
+    pub(crate) fn namespace_qualified_display_name(&mut self, sym: &Arc<Symbol>) -> String {
+        let export_eq_container = sym
+            .parent()
+            .or_else(|| self.namespace_container_from_declarations(sym));
+        let is_export_equals = export_eq_container
+            .as_ref()
+            .and_then(|p| p.exports.get("export="))
+            .is_some_and(|exp| {
+                Arc::ptr_eq(exp, sym)
+                    || exp
+                        .export_symbol
+                        .as_ref()
+                        .is_some_and(|t| Arc::ptr_eq(t, sym))
+                    || self
+                        .follow_alias_resolving(exp)
+                        .is_some_and(|target| Arc::ptr_eq(&target, sym))
+            });
+        if is_export_equals {
+            return self
+                .namespace_qualifier_of(sym)
+                .unwrap_or_else(|| sym.name.clone());
+        }
+        self.namespace_qualifier_of(sym)
+            .map(|q| format!("{q}.{}", sym.name))
+            .unwrap_or_else(|| sym.name.clone())
     }
 
     // import X = A.B.C 形式别名：解析实体名链
@@ -378,7 +410,7 @@ impl Checker {
         false
     }
 
-    fn namespace_container_from_declarations(
+    pub(crate) fn namespace_container_from_declarations(
         &self,
         symbol: &Arc<Symbol>,
     ) -> Option<Arc<Symbol>> {
@@ -496,12 +528,13 @@ impl Checker {
         if sym.flags.contains(SymbolFlags::Class) {
             if let Some(structured) = t.as_structured() {
                 if !structured.construct_signatures().is_empty() {
-                    return format!("typeof {}", sym.name);
+                    return format!("typeof {}", self.namespace_qualified_name(sym));
                 }
             }
             // 类实例（含与命名空间合并的类）：typeof 前缀只给静态侧（构造
-            // 签名所在），实例侧按符号名显示（Go typeToString 同）
-            return sym.name.clone();
+            // 签名所在），实例侧按符号名显示（Go typeToString 同）；命名空间
+            // 内类同尾部分支给限定名（d.D）
+            return self.namespace_qualified_name(sym);
         }
 
         if sym.flags.contains(SymbolFlags::ValueModule) {
@@ -536,6 +569,19 @@ impl Checker {
                 .unwrap_or_else(|| sym.name.clone());
         }
 
+        sym.name.clone()
+    }
+
+    fn namespace_qualified_name(&mut self, sym: &Arc<Symbol>) -> String {
+        if sym
+            .parent()
+            .as_ref()
+            .is_some_and(|p| p.flags.contains(SymbolFlags::ValueModule))
+        {
+            if let Some(q) = self.namespace_qualifier_of(sym) {
+                return format!("{q}.{}", sym.name);
+            }
+        }
         sym.name.clone()
     }
 

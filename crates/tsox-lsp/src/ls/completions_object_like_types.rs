@@ -5,33 +5,38 @@ use tsox_checker::checker::types::{Type, TypeFlags};
 use tsox_frontend::ast::{Node, NodeData, SourceFile, Symbol, SyntaxKind};
 
 use super::completions_accessibility::{enclosing_class_of, is_property_accessible};
-use super::completions_context::relevant_tokens;
+use super::completions_context::ScanToken;
+use super::completions_definition_location::token_parent;
 use super::completions_object_like::union_member_types;
 
 /// Go tryGetObjectTypeLiteralInTypeArgumentCompletionSymbols：类型实参位置的
 /// 类型字面量 `f<{ /**/ }>()`，按形参约束补全成员
 pub(super) fn type_literal_in_type_argument_completion(
     checker: &mut Checker,
-    node_at_position: &Arc<Node>,
-    text: &str,
-    jsx: bool,
-    position: usize,
+    context_token: Option<&ScanToken>,
+    root: &Arc<Node>,
 ) -> Option<Vec<Arc<Symbol>>> {
-    let type_literal = find_ancestor_type_literal(node_at_position)?;
-    let (context, _) = relevant_tokens(text, jsx, type_literal.pos(), position);
-    let context = context?;
-    if !matches!(
-        context.kind,
-        SyntaxKind::OpenBraceToken
-            | SyntaxKind::SemicolonToken
-            | SyntaxKind::CommaToken
-            | SyntaxKind::Identifier
-    ) {
-        return None;
-    }
-    let parent = type_literal.parent()?;
-    let container = if parent.kind == SyntaxKind::IntersectionType {
-        parent
+    let context = context_token?;
+    let parent = token_parent(root, context)?;
+    let type_literal = match context.kind {
+        SyntaxKind::OpenBraceToken if parent.kind == SyntaxKind::TypeLiteral => Some(parent),
+        SyntaxKind::SemicolonToken | SyntaxKind::CommaToken | SyntaxKind::Identifier
+            if parent.kind == SyntaxKind::PropertySignature
+                && parent
+                    .parent()
+                    .as_ref()
+                    .is_some_and(|gp| gp.kind == SyntaxKind::TypeLiteral) =>
+        {
+            parent.parent()
+        }
+        _ => None,
+    }?;
+    let container = if type_literal
+        .parent()
+        .as_ref()
+        .is_some_and(|p| p.kind == SyntaxKind::IntersectionType)
+    {
+        type_literal.parent()?
     } else {
         type_literal
     };
@@ -53,23 +58,6 @@ pub(super) fn type_literal_in_type_argument_completion(
             .filter(|m| !actual_names.contains(&m.name))
             .collect(),
     )
-}
-
-fn find_ancestor_type_literal(node: &Arc<Node>) -> Option<Arc<Node>> {
-    let mut current = Some(Arc::clone(node));
-    while let Some(n) = current {
-        if n.kind == SyntaxKind::TypeLiteral {
-            return Some(n);
-        }
-        if matches!(
-            n.kind,
-            SyntaxKind::SourceFile | SyntaxKind::FunctionDeclaration | SyntaxKind::Block
-        ) {
-            return None;
-        }
-        current = n.parent();
-    }
-    None
 }
 
 pub(super) fn constraint_of_type_argument_property(

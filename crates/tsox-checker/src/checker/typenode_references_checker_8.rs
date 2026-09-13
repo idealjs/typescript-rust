@@ -18,6 +18,23 @@ impl Checker {
             .map(|(k, v)| (k.clone(), Arc::clone(v)))
             .collect();
 
+        // Go binder 静态成员入 exports；本仓静态在 members：clodule 合并类型
+        // 须并入类静态成员（typeof A 含 bar/x/baz 的成员来源）
+        if symbol.flags.contains(SymbolFlags::Class) {
+            for sym in symbol.members.entries.values() {
+                if sym
+                    .declarations
+                    .iter()
+                    .any(|d| {
+                        d.has_syntactic_modifier(tsox_frontend::ast::ModifierFlags::Static)
+                    })
+                    && !members.iter().any(|(n, _)| *n == sym.name)
+                {
+                    members.push((sym.name.clone(), Arc::clone(sym)));
+                }
+            }
+        }
+
         if self.ambient_namespace_locals_visible(symbol) {
             let local_members: Vec<(String, Arc<Symbol>)> = symbol
                 .declarations

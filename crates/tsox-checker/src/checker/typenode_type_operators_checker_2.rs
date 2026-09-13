@@ -93,22 +93,6 @@ impl Checker {
             .collect()
     }
 
-    pub(crate) fn get_type_from_import_type_node(&mut self, node: &Arc<Node>) -> Arc<Type> {
-        if let Some(t) = self.get_cached_type(node) {
-            return t;
-        }
-
-        if let NodeData::ImportTypeNode(d) = &node.data
-            && let Some(attrs) = &d.attributes
-        {
-            let attrs = Arc::clone(attrs);
-            let _ = self.get_resolution_mode_override(&attrs, true);
-        }
-        let result = self.error_type();
-        self.cache_type(node, result.clone());
-        result
-    }
-
     pub(crate) fn cross_product_union_size(types: &[Arc<Type>]) -> u64 {
         let mut size: u64 = 1;
         for t in types {

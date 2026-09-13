@@ -56,7 +56,7 @@ impl Checker {
     ) -> Arc<Type> {
         let decl_tps = self.declared_type_parameter_types(owner_sym);
         if decl_tps.len() == args.len() && !decl_tps.is_empty() {
-            let raw = self.get_type_of_symbol(prop);
+            let raw = self.member_decl_symbol_type(prop);
             let substitutions = args.to_vec();
             let r = self.substitute_infer_type_parameters(&raw, &decl_tps, &substitutions);
             r
@@ -349,5 +349,50 @@ impl Checker {
         ));
         self.index_type_cache.insert(t.id, Arc::clone(&index));
         index
+    }
+
+    // 类实例型成员是急建合成符号（无注解方法返回 any 驻缓存）：回源 binder
+    // 声明符号走惰性体推断（Go 成员即 binder 符号、返回型惰性解析）
+    pub(crate) fn member_decl_symbol_type(&mut self, prop: &Arc<Symbol>) -> Arc<Type> {
+        if let Some(decl) = prop
+            .declarations
+            .iter()
+            .find(|d| d.kind == SyntaxKind::MethodDeclaration)
+        {
+            let binder_sym = self.program.symbol_map().symbol_of(decl).map(Arc::clone);
+            if let Some(bs) = binder_sym
+                && !Arc::ptr_eq(&bs, prop)
+            {
+                let t = self.get_type_of_symbol(&bs);
+                if !t.flags.contains(TypeFlags::Any) {
+                    return self.substitute_member_this_type(decl, t);
+                }
+            }
+        }
+        self.get_type_of_symbol(prop)
+    }
+
+    // Go getTypeWithThisArgument：非 this 接收者上的成员签名把多态 this
+    // 按声明容器实例化（A.foo(): this -> A）
+    fn substitute_member_this_type(
+        &mut self,
+        method_decl: &Arc<Node>,
+        t: Arc<Type>,
+    ) -> Arc<Type> {
+        let owner = match method_decl.parent() {
+            Some(p) => p,
+            None => return t,
+        };
+        if !matches!(
+            owner.kind,
+            SyntaxKind::ClassDeclaration
+                | SyntaxKind::ClassExpression
+                | SyntaxKind::InterfaceDeclaration
+        ) {
+            return t;
+        }
+        let instance = self.container_instance_type_of(&owner);
+        let this_t = self.create_this_type(&owner, Arc::clone(&instance));
+        self.substitute_infer_type_parameters(&t, &[this_t], &[instance])
     }
 }

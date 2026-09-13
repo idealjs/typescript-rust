@@ -102,7 +102,23 @@ impl Checker {
             self.check_explicit_type_argument_count(node, &sig, is_new, callee_type);
         }
 
-        let inferred_types = self.infer_call_type_arguments(node, &sig, &arguments.nodes);
+        // 调用位显式类型实参：直接用作代入（Go inferTypeArguments 显式实参
+        // 固定映射，不从实参推断；错误实参落 error 型）
+        let explicit_args: Option<Vec<Arc<Type>>> = match &node.data {
+            tsox_frontend::ast::NodeData::CallExpression(d) => d
+                .type_arguments
+                .as_ref()
+                .map(|ta| ta.iter().map(|t| self.get_type_from_type_node(t)).collect()),
+            _ => None,
+        };
+        let explicit_args = match explicit_args {
+            Some(a) if a.len() == sig.type_parameters.len() => Some(a),
+            _ => None,
+        };
+        let inferred_types = match &explicit_args {
+            Some(ex) => ex.clone(),
+            None => self.infer_call_type_arguments(node, &sig, &arguments.nodes),
+        };
 
         let new_explicit_subst: Option<(Vec<Arc<Type>>, Vec<Arc<Type>>)> = if is_new {
             self.get_return_type_of_signature(&sig)

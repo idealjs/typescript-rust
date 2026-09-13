@@ -91,9 +91,33 @@ impl LanguageService {
                 prev.end,
             ));
         }
+        // Go getStringLiteralCompletions 在注释 gate 之前：isInReferenceComment →
+        // getTripleSlashReferenceCompletions，`/// <reference path|types="…`
+        // （引号未闭合）的路径 / 包名补全
+        if let Some(labels) = crate::ls::completions_triple_slash::triple_slash_reference_labels(
+            self,
+            &self.get_program(),
+            file,
+            &file.text,
+            position,
+        ) {
+            let items = labels
+                .into_iter()
+                .map(|l| CompletionItem {
+                    label: l,
+                    kind: Some(9), // Module kind
+                    ..Default::default()
+                })
+                .collect();
+            return Ok(CompletionList {
+                is_incomplete: false,
+                items,
+            });
+        }
+
         if let Some(range) =
             completions_context::enclosing_comment(&comment_ranges, &file.text, position)
-                && !completions_context::is_doc_comment(&range, &file.text)
+            && !completions_context::is_doc_comment(&range, &file.text)
         {
             return Ok(CompletionList::default());
         }
@@ -140,6 +164,20 @@ impl LanguageService {
             }
             crate::ls::completions_jsdoc::JsDocPosition::Blocked => {
                 return Ok(CompletionList::default());
+            }
+            crate::ls::completions_jsdoc::JsDocPosition::ParameterNames(names) => {
+                let items = names
+                    .into_iter()
+                    .map(|l| CompletionItem {
+                        label: l,
+                        kind: Some(18), // Parameter kind（Go jsDocCompletionInfo）
+                        ..Default::default()
+                    })
+                    .collect();
+                return Ok(CompletionList {
+                    is_incomplete: false,
+                    items,
+                });
             }
             _ => {}
         }
@@ -226,26 +264,6 @@ impl LanguageService {
             });
         }
 
-        // 类型实参内类型字面量的成员补全（Go
-        // tryGetObjectTypeLiteralInTypeArgumentCompletionSymbols）
-        if let Some(symbols) = completions_object_like_types::type_literal_in_type_argument_completion(
-            &mut checker,
-            &node,
-            &file.text,
-            jsx,
-            position,
-        ) {
-            let items = symbols
-                .iter()
-                .filter(|s| !s.name.is_empty() && !s.name.starts_with('\u{FE}'))
-                .map(|s| symbol_to_completion_item(s))
-                .collect();
-            return Ok(CompletionList {
-                is_incomplete: false,
-                items,
-            });
-        }
-
         // Go JSX 属性名补全：contextToken 在 JsxAttribute/JsxExpression 等
         // JSX 语境时，列出 opening element 名字类型的属性（已写属性名过滤）
         if jsx
@@ -275,40 +293,24 @@ impl LanguageService {
         }
 
         // Go isCompletionListBlocker：确定的无效补全位置直接空列表
-        if completions_context::is_completion_list_blocker(
+        if crate::ls::completions_definition_location::is_completion_list_blocker(
             context_token.as_ref(),
             previous_token.as_ref(),
             containing_token.as_ref(),
+            &node,
             &file.text,
             position,
-            &node,
+            &file.node,
         ) {
             return Ok(CompletionList::default());
         }
 
-        if let Some(container) = completions_object_like::try_get_object_like_container(
-            &node,
-            &file.text,
-            jsx,
-            position,
-        ) {
-            // Go tryGetObjectLikeCompletionSymbols：with 语句内的对象字面量
-            // 不给属性补全（globalsSearchFail → 空）
-            if completions_object_like::in_with_statement(&container) {
-                return Ok(CompletionList::default());
-            }
-        }
-        if let Some(container) = completions_object_like::try_get_object_like_container(
-            &node,
-            &file.text,
-            jsx,
-            position,
-        ) && let Some(symbols) = completions_object_like::object_like_completion(
+        // 类型实参内类型字面量的成员补全（Go
+        // tryGetObjectTypeLiteralInTypeArgumentCompletionSymbols，globalSearchFuncs 首位）
+        if let Some(symbols) = completions_object_like_types::type_literal_in_type_argument_completion(
             &mut checker,
-            file,
-            &container,
-            &file.text,
-            position,
+            context_token.as_ref(),
+            &file.node,
         ) {
             let items = symbols
                 .iter()
@@ -319,6 +321,64 @@ impl LanguageService {
                 is_incomplete: false,
                 items,
             });
+        }
+
+        // Go tryGetObjectLikeCompletionSymbols 的 DotDotDotToken 前置放行
+        if context_token.as_ref().is_none_or(|t| t.kind != tsox_frontend::ast::SyntaxKind::DotDotDotToken)
+            && let Some(container) = completions_object_like::try_get_object_like_container(
+                context_token.as_ref(),
+                &file.text,
+                position,
+                &file.node,
+            )
+        {
+            // Go tryGetObjectLikeCompletionSymbols：with 语句内的对象字面量
+            // 不给属性补全（globalsSearchFail → 空）
+            if completions_object_like::in_with_statement(&container) {
+                return Ok(CompletionList::default());
+            }
+            if let Some(symbols) = completions_object_like::object_like_completion(
+                &mut checker,
+                file,
+                &container,
+                &file.text,
+                position,
+            ) {
+                let items = symbols
+                    .iter()
+                    .filter(|s| !s.name.is_empty() && !s.name.starts_with('\u{FE}'))
+                    .map(|s| symbol_to_completion_item(s))
+                    .collect();
+                return Ok(CompletionList {
+                    is_incomplete: false,
+                    items,
+                });
+            }
+        }
+
+        // Go tryGetImportOrExportClauseCompletionSymbols：import/export 子句成员
+        match crate::ls::completions_import_export_clause::import_or_export_clause_completion(
+            &mut checker,
+            file,
+            context_token.as_ref(),
+            &file.node,
+            position,
+        ) {
+            crate::ls::completions_import_export_clause::ClauseResult::Symbols(symbols) => {
+                let items = symbols
+                    .iter()
+                    .filter(|s| !s.name.is_empty() && !s.name.starts_with('\u{FE}'))
+                    .map(|s| symbol_to_completion_item(s))
+                    .collect();
+                return Ok(CompletionList {
+                    is_incomplete: false,
+                    items,
+                });
+            }
+            crate::ls::completions_import_export_clause::ClauseResult::Empty => {
+                return Ok(CompletionList::default());
+            }
+            crate::ls::completions_import_export_clause::ClauseResult::Continue => {}
         }
 
         let meaning = SymbolFlags::VALUE

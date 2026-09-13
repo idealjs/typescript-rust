@@ -93,9 +93,8 @@ impl Checker {
                 if result.is_true() {
                     return true;
                 }
-                if result.is_false() {
-                    return false;
-                }
+                // False 不提前返回：方差是加速判定，错误细化须走结构比较
+                //（Int<string> 与 Int<number> 经属性 val 报 TYPES_OF_PROPERTY）
             }
             return self.is_object_type_related_to(source, target, relation);
         }

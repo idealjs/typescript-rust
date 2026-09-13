@@ -56,6 +56,43 @@ impl Checker {
         format!("{}: {}", symbol.name, self.type_to_string(&t))
     }
 
+    /// JS 函数参数符号的文档：所在函数 JSDoc 的同名 @param tag 注释
+    /// （Go getDocumentationForSymbol 对 parameter 走 JSDocParameterTag）
+    pub(crate) fn jsdoc_param_tag_documentation(&mut self, symbol: &Arc<Symbol>) -> Option<String> {
+        let decl = symbol
+            .value_declaration
+            .as_ref()
+            .or_else(|| symbol.declarations.first())?;
+        if decl.kind != SyntaxKind::Parameter {
+            return None;
+        }
+        let sf = self.get_source_file_of_node(decl)?;
+        let fn_node = decl.parent()?;
+        let jds = tsox_frontend::parser::parse_jsdoc_for_node(&sf, &fn_node);
+        for jd in &jds {
+            let NodeData::JSDoc(doc) = &jd.data else {
+                continue;
+            };
+            let Some(tags) = &doc.tags else {
+                continue;
+            };
+            for tag in tags.nodes.iter() {
+                let NodeData::JSDocParameterOrPropertyTag(pd) = &tag.data else {
+                    continue;
+                };
+                if pd.name.kind != SyntaxKind::Identifier || pd.name.text() != symbol.name {
+                    continue;
+                }
+                let text = jsdoc_comment_text(&pd.comment);
+                let text = text.trim().to_string();
+                if !text.is_empty() {
+                    return Some(text);
+                }
+            }
+        }
+        None
+    }
+
     pub(crate) fn format_function_quick_info(
         &mut self,
         symbol: &Arc<Symbol>,
@@ -299,3 +336,17 @@ impl Checker {
 }
 
 pub(crate) const MAX_SERIALIZATION_LEVEL: i32 = 2;
+
+/// JSDoc tag comment 的 NodeList → 纯文本
+fn jsdoc_comment_text(comment: &Option<Arc<tsox_frontend::ast::NodeList>>) -> String {
+    let Some(list) = comment else {
+        return String::new();
+    };
+    let mut out = String::new();
+    for part in list.iter() {
+        if let NodeData::JSDocText(td) = &part.data {
+            out.push_str(&td.text.join(""));
+        }
+    }
+    out
+}

@@ -16,16 +16,14 @@ impl Binder {
                 .iter()
                 .all(|d| Self::declaration_is_var(d));
 
+        // Go declareSymbol：var 与非实例化 namespace 互相合并（var excludes 不含
+        // NamespaceModule；非实例化 namespace excludes=None）
         let ns_var_merge = Self::declaration_is_var(node)
-            && existing.flags.contains(SymbolFlags::ValueModule)
-            && existing
-                .declarations
-                .iter()
-                .filter(|d| d.kind == SyntaxKind::ModuleDeclaration)
-                .all(|ns| !Self::ns_is_instantiated_static(ns));
+            && existing.flags.contains(SymbolFlags::NamespaceModule)
+            && !existing.flags.contains(SymbolFlags::ValueModule);
 
         let var_ns_merge = node.kind == SyntaxKind::ModuleDeclaration
-            && !Self::ns_is_instantiated_static(node)
+            && get_module_instance_state(node) == ModuleInstanceState::NonInstantiated
             && existing.flags == SymbolFlags::BlockScopedVariable;
 
         let import_export_alias_merge = includes.contains(SymbolFlags::Alias)

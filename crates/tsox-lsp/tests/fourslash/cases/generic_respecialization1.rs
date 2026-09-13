@@ -73,7 +73,7 @@ class GenericPlanet2<T extends Food, V>{
     fourslash::insert_line(&mut s, "");
     fourslash::verify_no_errors(&mut s, );
     fourslash::go_to_marker(&mut s, "2");
-    // TODO: f.DeleteAtCaret(t, 6)
+    fourslash::delete_at_caret(&mut s, 6);
     fourslash::insert(&mut s, "any");
     fourslash::verify_no_errors(&mut s, );
     fourslash::insert_line(&mut s, "var narnia = new GenericPlanet2<Cookie, string>(");

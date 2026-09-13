@@ -49,35 +49,27 @@ impl Checker {
                 return;
             }
             self.hover_write_variable(b, symbol, container);
-            return;
         }
         if flags.intersects(SymbolFlags::EnumMember) {
             self.hover_write_enum_member(b, symbol);
-            return;
         }
         if flags.intersects(SymbolFlags::Function | SymbolFlags::Method) {
             self.hover_write_function(b, symbol, node);
-            return;
         }
         if flags.intersects(SymbolFlags::Class | SymbolFlags::Interface) {
             self.hover_write_class_or_interface(b, symbol, node);
-            return;
         }
         if flags.intersects(SymbolFlags::RegularEnum | SymbolFlags::ConstEnum) {
             self.hover_write_enum(b, symbol);
-            return;
         }
-        if flags.intersects(SymbolFlags::NAMESPACE) {
+        if flags.intersects(SymbolFlags::MODULE) {
             self.hover_write_module(b, symbol);
-            return;
         }
         if flags.intersects(SymbolFlags::TypeParameter) {
             self.hover_write_type_parameter(b, symbol);
-            return;
         }
         if flags.intersects(SymbolFlags::TypeAlias) {
             self.hover_write_type_alias(b, symbol);
-            return;
         }
         if flags.intersects(SymbolFlags::Signature) {
             b.write_new_line();
@@ -139,13 +131,18 @@ impl Checker {
             b.write_text(&rendered, DisplayPartKind::Text);
             return;
         }
-        // 对象字面量属性在拓宽位（无注解函数返回等）显示拓宽类型
-        // （tsc getTypeOfSymbolAtLocation 经字面量拓宽上下文取型）
-        if symbol.flags.contains(SymbolFlags::Property)
+        // 对象字面量属性/解构绑定元素在拓宽位（无注解函数返回等）显示拓宽
+        // 类型（tsc GetTypeOfSymbolAtLocation 经字面量拓宽上下文取型）：
+        // `const { c } = { c: 42 }` 的 c 显示 number
+        if (symbol.flags.contains(SymbolFlags::Property)
             && symbol
                 .declarations
                 .iter()
                 .any(|d| d.kind == SyntaxKind::PropertyAssignment)
+            || symbol
+                .declarations
+                .iter()
+                .any(|d| d.kind == SyntaxKind::BindingElement))
             && t.flags.intersects(crate::checker::types::TypeFlags::StringLiteral | crate::checker::types::TypeFlags::NumberLiteral | crate::checker::types::TypeFlags::BooleanLiteral)
         {
             t = self.get_widened_type(&t);
