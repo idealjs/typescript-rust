@@ -1,0 +1,9 @@
+indirectDiscriminantAndExcessProperty.ts(8,7): error TS2345: Argument of type '{ type: string; abc: string; }' is not assignable to parameter of type '{ type: "foo"; abc: string; } | { type: "bar"; xyz: number; extra: any; }'.
+  Types of property 'type' are incompatible.
+    Type 'string' is not assignable to type '"foo"'.
+indirectDiscriminantAndExcessProperty.ts(14,7): error TS2345: Argument of type '{ type: string; abc: string; extra: number; }' is not assignable to parameter of type '{ type: "foo"; abc: string; } | { type: "bar"; xyz: number; extra: any; }'.
+  Types of property 'type' are incompatible.
+    Type 'string' is not assignable to type '"foo"'.
+indirectDiscriminantAndExcessProperty.ts(21,7): error TS2345: Argument of type '{ type: string; xyz: number; extra: number; }' is not assignable to parameter of type '{ type: "foo"; abc: string; } | { type: "bar"; xyz: number; extra: any; }'.
+  Types of property 'type' are incompatible.
+    Type 'string' is not assignable to type '"foo"'.

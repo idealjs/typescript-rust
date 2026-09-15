@@ -1,0 +1,1 @@
+noReachabilityErrorsOnEmptyStatement.ts(2,14): suggestion TS7027: Unreachable code detected.

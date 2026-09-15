@@ -1,0 +1,5 @@
+gettersAndSettersErrors.ts(3,16): error TS2300: Duplicate identifier 'Foo'.
+gettersAndSettersErrors.ts(5,12): error TS2300: Duplicate identifier 'Foo'.
+gettersAndSettersErrors.ts(6,16): error TS1054: A 'get' accessor cannot have parameters.
+gettersAndSettersErrors.ts(6,38): error TS2322: Type 'null' is not assignable to type 'string'.
+gettersAndSettersErrors.ts(7,16): error TS1095: A 'set' accessor cannot have a return type annotation.

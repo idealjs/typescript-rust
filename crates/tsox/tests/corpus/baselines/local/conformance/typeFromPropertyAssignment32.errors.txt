@@ -1,0 +1,4 @@
+expando.ts(12,1): error TS2322: Type 'boolean' is not assignable to type 'number'.
+expando.ts(13,1): error TS2322: Type 'boolean' is not assignable to type 'number'.
+expando.ts(14,192): error TS2349: This expression is not callable.
+  Type 'typeof ExpandoMerge' has no call signatures.

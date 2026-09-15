@@ -1,0 +1,1 @@
+incorrectNumberOfTypeArgumentsDuringErrorReporting.ts(18,4): error TS2558: Expected 2 type arguments, but got 1.

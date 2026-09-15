@@ -1,0 +1,3 @@
+unresolvableSelfReferencingAwaitedUnion.ts(9,7): error TS2322: Type '() => string | Promise<any>' is not assignable to type '<T>() => T'.
+  Type 'string | Promise<any>' is not assignable to type 'T'.
+    'T' could be instantiated with an arbitrary type which could be unrelated to 'string | Promise<any>'.

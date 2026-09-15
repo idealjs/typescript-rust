@@ -1,0 +1,25 @@
+genericAssignmentCompatWithInterfaces1.ts(10,39): error TS2416: Property 'compareTo' in type 'A' is not assignable to the same property in base type 'Comparable<T>'.
+genericAssignmentCompatWithInterfaces1.ts(12,23): error TS2322: Type 'A<number>' is not assignable to type 'Comparable<string>'.
+  Types of property 'compareTo' are incompatible.
+    Type '(other: T) => number' is not assignable to type '(other: string) => number'.
+      Types of parameters 'other' and 'other' are incompatible.
+        Type 'string' is not assignable to type 'T'.
+          'T' could be instantiated with an arbitrary type which could be unrelated to 'string'.
+genericAssignmentCompatWithInterfaces1.ts(13,5): error TS2322: Type '{ x: A<number>; }' is not assignable to type 'I<string>'.
+  The types of 'x.compareTo' are incompatible between these types.
+    Type '(other: T) => number' is not assignable to type '(other: string) => number'.
+      Types of parameters 'other' and 'other' are incompatible.
+        Type 'string' is not assignable to type 'T'.
+          'T' could be instantiated with an arbitrary type which could be unrelated to 'string'.
+genericAssignmentCompatWithInterfaces1.ts(16,5): error TS2322: Type '{ x: A<number>; }' is not assignable to type 'I<string>'.
+  The types of 'x.compareTo' are incompatible between these types.
+    Type '(other: T) => number' is not assignable to type '(other: string) => number'.
+      Types of parameters 'other' and 'other' are incompatible.
+        Type 'string' is not assignable to type 'T'.
+          'T' could be instantiated with an arbitrary type which could be unrelated to 'string'.
+genericAssignmentCompatWithInterfaces1.ts(17,5): error TS2322: Type 'K<number>' is not assignable to type 'I<string>'.
+  The types of 'x.compareTo' are incompatible between these types.
+    Type '(other: T) => number' is not assignable to type '(other: string) => number'.
+      Types of parameters 'other' and 'other' are incompatible.
+        Type 'string' is not assignable to type 'T'.
+          'T' could be instantiated with an arbitrary type which could be unrelated to 'string'.

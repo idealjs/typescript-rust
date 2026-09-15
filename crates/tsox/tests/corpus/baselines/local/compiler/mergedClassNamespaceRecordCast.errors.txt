@@ -1,0 +1,1 @@
+mergedClassNamespaceRecordCast.ts(12,10): error TS2339: Property 'unrelated' does not exist on type 'C2'.

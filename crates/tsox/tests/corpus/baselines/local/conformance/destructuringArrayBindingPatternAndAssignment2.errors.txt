@@ -1,0 +1,5 @@
+destructuringArrayBindingPatternAndAssignment2.ts(15,5): error TS2322: Type '[number, number, number]' is not assignable to type 'J'.
+  The types returned by 'pop()' are incompatible between these types.
+    Type 'T | undefined' is not assignable to type 'Number | undefined'.
+      Type 'T' is not assignable to type 'Number | undefined'.
+destructuringArrayBindingPatternAndAssignment2.ts(15,12): error TS2352: Conversion of type 'number[]' to type '[number, number, number]' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.

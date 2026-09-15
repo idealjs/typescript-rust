@@ -1,0 +1,5 @@
+recursiveTypeComparison.ts(14,5): error TS2322: Type 'Observable<{}>' is not assignable to type 'Property<number>'.
+  The types of 'needThisOne.expo1' are incompatible between these types.
+    Type 'Property<{}[]>' is not assignable to type 'Property<number[]>'.
+      Type 'Property<{}[]>' is missing the following properties from type 'Property<number[]>': needThisOne, expo1, expo2, expo3
+recursiveTypeComparison.ts(14,31): error TS2454: Variable 'p' is used before being assigned.

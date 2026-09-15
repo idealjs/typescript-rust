@@ -1,0 +1,7 @@
+privateNamesAndIndexedAccess.ts(7,15): error TS1155: 'const' declarations must be initialized.
+privateNamesAndIndexedAccess.ts(7,28): error TS1155: 'const' declarations must be initialized.
+privateNamesAndIndexedAccess.ts(7,28): error TS2749: '' refers to a value, but is being used as a type here. Did you mean 'typeof '?
+privateNamesAndIndexedAccess.ts(7,28): error TS18016: Private identifiers are not allowed outside class bodies.
+privateNamesAndIndexedAccess.ts(7,32): error TS1134: Variable declaration expected.
+privateNamesAndIndexedAccess.ts(7,34): error TS1134: Variable declaration expected.
+privateNamesAndIndexedAccess.ts(7,36): error TS1134: Variable declaration expected.

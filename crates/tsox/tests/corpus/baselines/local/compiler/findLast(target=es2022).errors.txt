@@ -1,0 +1,48 @@
+findLast.ts(1,44): error TS2339: Property 'findLast' does not exist on type 'number[]'.
+findLast.ts(2,51): error TS2339: Property 'findLast' does not exist on type 'string[]'.
+findLast.ts(3,1): error TS2349: This expression is not callable.
+  Type 'Number' has no call signatures.
+findLast.ts(4,1): error TS2349: This expression is not callable.
+  Type 'Number' has no call signatures.
+findLast.ts(5,1): error TS2349: This expression is not callable.
+  Type 'Number' has no call signatures.
+findLast.ts(6,1): error TS2349: This expression is not callable.
+  Type 'Number' has no call signatures.
+findLast.ts(7,1): error TS2349: This expression is not callable.
+  Type 'Number' has no call signatures.
+findLast.ts(8,1): error TS2349: This expression is not callable.
+  Type 'Number' has no call signatures.
+findLast.ts(9,1): error TS2349: This expression is not callable.
+  Type 'Number' has no call signatures.
+findLast.ts(10,1): error TS2349: This expression is not callable.
+  Type 'Number' has no call signatures.
+findLast.ts(11,1): error TS2349: This expression is not callable.
+  Type 'Number' has no call signatures.
+findLast.ts(12,1): error TS2349: This expression is not callable.
+  Type 'BigInt' has no call signatures.
+findLast.ts(13,1): error TS2349: This expression is not callable.
+  Type 'BigInt' has no call signatures.
+findLast.ts(15,33): error TS2339: Property 'findLastIndex' does not exist on type 'number[]'.
+findLast.ts(16,40): error TS2339: Property 'findLastIndex' does not exist on type 'string[]'.
+findLast.ts(17,1): error TS2349: This expression is not callable.
+  Type 'Number' has no call signatures.
+findLast.ts(18,1): error TS2349: This expression is not callable.
+  Type 'Number' has no call signatures.
+findLast.ts(19,1): error TS2349: This expression is not callable.
+  Type 'Number' has no call signatures.
+findLast.ts(20,1): error TS2349: This expression is not callable.
+  Type 'Number' has no call signatures.
+findLast.ts(21,1): error TS2349: This expression is not callable.
+  Type 'Number' has no call signatures.
+findLast.ts(22,1): error TS2349: This expression is not callable.
+  Type 'Number' has no call signatures.
+findLast.ts(23,1): error TS2349: This expression is not callable.
+  Type 'Number' has no call signatures.
+findLast.ts(24,1): error TS2349: This expression is not callable.
+  Type 'Number' has no call signatures.
+findLast.ts(25,1): error TS2349: This expression is not callable.
+  Type 'Number' has no call signatures.
+findLast.ts(26,1): error TS2349: This expression is not callable.
+  Type 'BigInt' has no call signatures.
+findLast.ts(27,1): error TS2349: This expression is not callable.
+  Type 'BigInt' has no call signatures.

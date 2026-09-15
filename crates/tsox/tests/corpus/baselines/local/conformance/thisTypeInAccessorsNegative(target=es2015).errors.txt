@@ -1,0 +1,3 @@
+thisTypeInAccessorsNegative.ts(10,9): error TS1054: A 'get' accessor cannot have parameters.
+thisTypeInAccessorsNegative.ts(11,9): error TS1049: A 'set' accessor must have exactly one parameter.
+thisTypeInAccessorsNegative.ts(15,9): error TS7023: 'x' implicitly has return type 'any' because it does not have a return type annotation and is referenced directly or indirectly in one of its return expressions.

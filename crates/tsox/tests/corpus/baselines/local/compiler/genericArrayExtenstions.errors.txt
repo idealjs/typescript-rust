@@ -1,0 +1,1 @@
+genericArrayExtenstions.ts(1,1): error TS2420: Class 'ObservableArray' incorrectly implements interface 'Array<T>'.

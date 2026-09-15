@@ -1,0 +1,5 @@
+error TS6053: File '/.lib/react.d.ts' not found.
+foo.tsx(2,10): error TS2305: Module '"a"' has no exported member 'Test'.
+
+
+!!! error TS6053: File '/.lib/react.d.ts' not found.

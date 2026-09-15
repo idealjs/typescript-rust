@@ -1,0 +1,2 @@
+staticIndexSignature7.ts(2,5): error TS1071: 'static' modifier cannot appear on an index signature.
+staticIndexSignature7.ts(6,5): error TS1071: 'static' modifier cannot appear on an index signature.

@@ -1,0 +1,1 @@
+dependentDestructuredVariablesNoCrash2.ts(3,11): error TS2371: A parameter initializer is only allowed in a function or constructor implementation.

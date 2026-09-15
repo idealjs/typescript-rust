@@ -1,0 +1,1 @@
+privateNameAndIndexSignature.ts(6,14): error TS2339: Property '#f' does not exist on type 'this'.

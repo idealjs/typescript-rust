@@ -1,0 +1,4 @@
+privateNamesNotAllowedAsParameters.ts(2,12): error TS7006: Parameter '' implicitly has an 'any' type.
+privateNamesNotAllowedAsParameters.ts(2,12): error TS18009: Private identifiers cannot be used as parameters.
+privateNamesNotAllowedAsParameters.ts(2,16): error TS1138: Parameter declaration expected.
+privateNamesNotAllowedAsParameters.ts(2,18): error TS7006: Parameter 'string' implicitly has an 'any' type.

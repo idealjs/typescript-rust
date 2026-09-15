@@ -1,0 +1,30 @@
+unionTypeErrorMessageTypeRefs01.ts(25,1): error TS2322: Type 'A<Foo>' is not assignable to type 'A<Bar> | B<Baz> | C<Kwah>'.
+  Types of property 'aProp' are incompatible.
+    Type 'Foo' is not assignable to type 'Bar'.
+      Property 'bar' is missing in type 'Foo' but required in type 'Bar'.
+        Property 'bar' is missing in type 'Foo' but required in type 'Bar'.
+unionTypeErrorMessageTypeRefs01.ts(26,1): error TS2322: Type 'B<Foo>' is not assignable to type 'A<Bar> | B<Baz> | C<Kwah>'.
+  Types of property 'bProp' are incompatible.
+    Type 'Foo' is not assignable to type 'Baz'.
+      Property 'baz' is missing in type 'Foo' but required in type 'Baz'.
+        Property 'baz' is missing in type 'Foo' but required in type 'Baz'.
+unionTypeErrorMessageTypeRefs01.ts(27,1): error TS2322: Type 'C<Foo>' is not assignable to type 'A<Bar> | B<Baz> | C<Kwah>'.
+  Types of property 'cProp' are incompatible.
+    Type 'Foo' is not assignable to type 'Kwah'.
+      Property 'kwah' is missing in type 'Foo' but required in type 'Kwah'.
+        Property 'kwah' is missing in type 'Foo' but required in type 'Kwah'.
+unionTypeErrorMessageTypeRefs01.ts(48,1): error TS2322: Type '{ xProp: Foo; }' is not assignable to type '{ xProp: Bar; } | { yProp: Baz; } | { zProp: Kwah; }'.
+  Type '{ xProp: Foo; }' is not assignable to type '{ xProp: Bar; }'.
+    Types of property 'xProp' are incompatible.
+      Type 'Foo' is not assignable to type 'Bar'.
+        Property 'bar' is missing in type 'Foo' but required in type 'Bar'.
+unionTypeErrorMessageTypeRefs01.ts(49,1): error TS2322: Type '{ yProp: Foo; }' is not assignable to type '{ xProp: Bar; } | { yProp: Baz; } | { zProp: Kwah; }'.
+  Type '{ yProp: Foo; }' is not assignable to type '{ yProp: Baz; }'.
+    Types of property 'yProp' are incompatible.
+      Type 'Foo' is not assignable to type 'Baz'.
+        Property 'baz' is missing in type 'Foo' but required in type 'Baz'.
+unionTypeErrorMessageTypeRefs01.ts(50,1): error TS2322: Type '{ zProp: Foo; }' is not assignable to type '{ xProp: Bar; } | { yProp: Baz; } | { zProp: Kwah; }'.
+  Type '{ zProp: Foo; }' is not assignable to type '{ zProp: Kwah; }'.
+    Types of property 'zProp' are incompatible.
+      Type 'Foo' is not assignable to type 'Kwah'.
+        Property 'kwah' is missing in type 'Foo' but required in type 'Kwah'.

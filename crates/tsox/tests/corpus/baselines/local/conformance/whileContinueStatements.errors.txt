@@ -1,0 +1,2 @@
+whileContinueStatements.ts(17,1): suggestion TS7028: Unused label.
+whileContinueStatements.ts(25,5): suggestion TS7028: Unused label.

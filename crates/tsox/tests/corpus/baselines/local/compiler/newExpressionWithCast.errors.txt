@@ -1,0 +1,6 @@
+newExpressionWithCast.ts(5,10): error TS2300: Duplicate identifier 'Test2'.
+newExpressionWithCast.ts(7,17): error TS1109: Expression expected.
+newExpressionWithCast.ts(7,22): error TS1005: ',' expected.
+newExpressionWithCast.ts(7,22): error TS2300: Duplicate identifier 'Test2'.
+newExpressionWithCast.ts(7,27): error TS1005: ',' expected.
+newExpressionWithCast.ts(7,28): error TS1109: Expression expected.

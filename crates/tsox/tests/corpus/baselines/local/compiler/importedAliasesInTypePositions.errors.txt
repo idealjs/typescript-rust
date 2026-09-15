@@ -1,0 +1,1 @@
+file2.ts(1,27): error TS2307: Cannot find module 'file1' or its corresponding type declarations.

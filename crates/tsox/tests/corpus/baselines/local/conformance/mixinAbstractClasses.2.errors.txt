@@ -1,0 +1,1 @@
+mixinAbstractClasses.2.ts(25,1): error TS2511: Cannot create an instance of an abstract class.

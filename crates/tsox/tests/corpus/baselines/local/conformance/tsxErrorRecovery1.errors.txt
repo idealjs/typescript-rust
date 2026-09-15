@@ -1,0 +1,4 @@
+file.tsx(4,19): error TS1109: Expression expected.
+file.tsx(7,11): error TS2304: Cannot find name 'a'.
+file.tsx(7,12): error TS1005: '}' expected.
+file.tsx(8,1): error TS1005: '' expected.

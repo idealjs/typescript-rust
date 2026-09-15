@@ -1,0 +1,6 @@
+interfaceDeclaration1.ts(2,5): error TS2300: Duplicate identifier 'item'.
+interfaceDeclaration1.ts(3,5): error TS2300: Duplicate identifier 'item'.
+interfaceDeclaration1.ts(7,5): error TS2300: Duplicate identifier 'item'.
+interfaceDeclaration1.ts(8,5): error TS2300: Duplicate identifier 'item'.
+interfaceDeclaration1.ts(33,1): error TS2454: Variable 'v1' is used before being assigned.
+interfaceDeclaration1.ts(35,1): error TS2420: Class 'C1' incorrectly implements interface 'I3'.

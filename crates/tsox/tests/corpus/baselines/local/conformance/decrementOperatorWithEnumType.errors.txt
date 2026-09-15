@@ -1,0 +1,1 @@
+decrementOperatorWithEnumType.ts(12,7): error TS2304: Cannot find name 'A'.

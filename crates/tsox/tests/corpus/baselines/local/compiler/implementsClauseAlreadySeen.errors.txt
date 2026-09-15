@@ -1,0 +1,5 @@
+implementsClauseAlreadySeen.ts(4,22): error TS1005: '{' expected.
+implementsClauseAlreadySeen.ts(4,22): error TS2304: Cannot find name 'implements'.
+implementsClauseAlreadySeen.ts(4,33): error TS1434: Unexpected keyword or identifier.
+implementsClauseAlreadySeen.ts(5,5): error TS2304: Cannot find name 'baz'.
+implementsClauseAlreadySeen.ts(5,11): error TS1005: ';' expected.

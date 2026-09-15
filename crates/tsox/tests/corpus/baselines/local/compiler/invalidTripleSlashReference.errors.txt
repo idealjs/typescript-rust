@@ -1,0 +1,6 @@
+error TS6053: File 'filedoesnotexist.ts' not found.
+error TS6053: File 'otherdoesnotexist.d.ts' not found.
+
+
+!!! error TS6053: File 'filedoesnotexist.ts' not found.
+!!! error TS6053: File 'otherdoesnotexist.d.ts' not found.

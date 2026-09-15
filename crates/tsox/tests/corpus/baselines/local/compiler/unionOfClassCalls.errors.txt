@@ -1,0 +1,11 @@
+unionOfClassCalls.ts(12,17): error TS2769: No overload matches this call.
+  Overload 1 of 2, '<K>(k: K): A[K]', gave the following error.
+    Argument of type 'string' is not assignable to parameter of type 'keyof T'.
+  Overload 2 of 2, '<K>(k: K): B[K]', gave the following error.
+    Argument of type 'string' is not assignable to parameter of type 'keyof T'.
+unionOfClassCalls.ts(74,18): error TS2345: Argument of type '(result: Bar | Baz) => void' is not assignable to parameter of type '((value: this) => void | PromiseLike<void>) | null'.
+  Type '(result: Bar | Baz) => void' is not assignable to type '(value: this) => void | PromiseLike<void>'.
+    Types of parameters 'result' and 'value' are incompatible.
+      Type 'this' is not assignable to type 'Bar | Baz'.
+        Property 'bar' is missing in type 'Foo' but required in type 'Bar'.
+          Property 'bar' is missing in type 'Foo' but required in type 'Bar'.

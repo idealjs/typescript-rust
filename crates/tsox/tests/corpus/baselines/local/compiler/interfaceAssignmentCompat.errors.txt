@@ -1,0 +1,6 @@
+interfaceAssignmentCompat.ts(32,18): error TS2345: Argument of type '(a: IFrenchEye, b: IFrenchEye) => number' is not assignable to parameter of type '(a: M.IEye, b: M.IEye) => number'.
+  Type '(a: IFrenchEye, b: IFrenchEye) => number' is not assignable to type '(a: M.IEye, b: M.IEye) => number'.
+    Types of parameters 'a' and 'a' are incompatible.
+      Type 'M.IEye' is not assignable to type 'M.IFrenchEye'.
+        Property 'coleur' is missing in type 'M.IEye' but required in type 'M.IFrenchEye'.
+interfaceAssignmentCompat.ts(37,29): error TS2339: Property '_map' does not exist on type 'M.Color'.

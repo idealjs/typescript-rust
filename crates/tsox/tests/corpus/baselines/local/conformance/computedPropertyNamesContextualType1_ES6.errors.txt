@@ -1,0 +1,2 @@
+computedPropertyNamesContextualType1_ES6.ts(7,14): error TS7006: Parameter 'y' implicitly has an 'any' type.
+computedPropertyNamesContextualType1_ES6.ts(8,15): error TS7006: Parameter 'y' implicitly has an 'any' type.

@@ -1,0 +1,7 @@
+genericTypeWithNonGenericBaseMisMatch.ts(8,5): error TS2322: Type 'X<{ a: string; }>' is not assignable to type 'I'.
+  Types of property 'f' are incompatible.
+    Type '(a: { a: string; }) => void' is not assignable to type '(a: { a: number }) => void'.
+      Types of parameters 'a' and 'a' are incompatible.
+        Type '{ a: number; }' is not assignable to type '{ a: string; }'.
+          Types of property 'a' are incompatible.
+            Type 'number' is not assignable to type 'string'.

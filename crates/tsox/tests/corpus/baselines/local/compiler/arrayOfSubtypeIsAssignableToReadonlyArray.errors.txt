@@ -1,0 +1,84 @@
+arrayOfSubtypeIsAssignableToReadonlyArray.ts(15,1): error TS2322: Type 'C<A>' is not assignable to type 'ReadonlyArray<A>'.
+  Types of property 'concat' are incompatible.
+    Type '{ (...items: ConcatArray<T>[]): A[]; (...items: (T | ConcatArray<T>)[]): A[]; }' is not assignable to type '{ (...items: ConcatArray<A>[]): A[]; (...items: (A | ConcatArray<A>)[]): A[]; }'.
+      Types of parameters 'items' and 'items' are incompatible.
+        Type 'ConcatArray<A>[]' is not assignable to type '(T | ConcatArray<T>)[]'.
+          The types returned by 'slice(...)' are incompatible between these types.
+            Type 'A[]' is not assignable to type 'T[]'.
+              The types returned by 'slice(...)' are incompatible between these types.
+                Type 'A[]' is not assignable to type 'T[]'.
+                  Type 'T' is not assignable to type 'ConcatArray<A>'.
+                    Type 'T' is not assignable to type 'ConcatArray<A>'.
+                      Types of parameters 'items' and 'items' are incompatible.
+                        Type 'ConcatArray<A>[]' is not assignable to type 'ConcatArray<T>[]'.
+                          The types returned by 'slice(...)' are incompatible between these types.
+                            Type 'A[]' is not assignable to type 'T[]'.
+                              The types returned by 'slice(...)' are incompatible between these types.
+                                Type 'A[]' is not assignable to type 'T[]'.
+                                  The types returned by 'slice(...)' are incompatible between these types.
+                                    Type 'T[]' is not assignable to type 'A[]'.
+                                      The types returned by 'slice(...)' are incompatible between these types.
+                                        Type 'T[]' is not assignable to type 'A[]'.
+arrayOfSubtypeIsAssignableToReadonlyArray.ts(16,1): error TS2322: Type 'C<B>' is not assignable to type 'ReadonlyArray<A>'.
+  Types of property 'concat' are incompatible.
+    Type '{ (...items: ConcatArray<T>[]): B[]; (...items: (T | ConcatArray<T>)[]): B[]; }' is not assignable to type '{ (...items: ConcatArray<A>[]): A[]; (...items: (A | ConcatArray<A>)[]): A[]; }'.
+      Types of parameters 'items' and 'items' are incompatible.
+        Type 'ConcatArray<A>[]' is not assignable to type '(T | ConcatArray<T>)[]'.
+          The types returned by 'slice(...)' are incompatible between these types.
+            Type 'A[]' is not assignable to type 'T[]'.
+              The types returned by 'slice(...)' are incompatible between these types.
+                Type 'A[]' is not assignable to type 'T[]'.
+                  Type 'T' is not assignable to type 'ConcatArray<A>'.
+                    Type 'T' is not assignable to type 'ConcatArray<A>'.
+                      Types of parameters 'items' and 'items' are incompatible.
+                        Type 'ConcatArray<A>[]' is not assignable to type 'ConcatArray<T>[]'.
+                          The types returned by 'slice(...)' are incompatible between these types.
+                            Type 'A[]' is not assignable to type 'T[]'.
+                              The types returned by 'slice(...)' are incompatible between these types.
+                                Type 'A[]' is not assignable to type 'T[]'.
+                                  The types returned by 'slice(...)' are incompatible between these types.
+                                    Type 'T[]' is not assignable to type 'A[]'.
+                                      The types returned by 'slice(...)' are incompatible between these types.
+                                        Type 'T[]' is not assignable to type 'A[]'.
+arrayOfSubtypeIsAssignableToReadonlyArray.ts(17,1): error TS2322: Type 'C<B>' is not assignable to type 'ReadonlyArray<B>'.
+  Types of property 'concat' are incompatible.
+    Type '{ (...items: ConcatArray<T>[]): B[]; (...items: (T | ConcatArray<T>)[]): B[]; }' is not assignable to type '{ (...items: ConcatArray<B>[]): B[]; (...items: (B | ConcatArray<B>)[]): B[]; }'.
+      Types of parameters 'items' and 'items' are incompatible.
+        Type 'ConcatArray<B>[]' is not assignable to type '(T | ConcatArray<T>)[]'.
+          The types returned by 'slice(...)' are incompatible between these types.
+            Type 'B[]' is not assignable to type 'T[]'.
+              The types returned by 'slice(...)' are incompatible between these types.
+                Type 'B[]' is not assignable to type 'T[]'.
+                  Type 'T' is not assignable to type 'ConcatArray<B>'.
+                    Type 'T' is not assignable to type 'ConcatArray<B>'.
+                      Types of parameters 'items' and 'items' are incompatible.
+                        Type 'ConcatArray<B>[]' is not assignable to type 'ConcatArray<T>[]'.
+                          The types returned by 'slice(...)' are incompatible between these types.
+                            Type 'B[]' is not assignable to type 'T[]'.
+                              The types returned by 'slice(...)' are incompatible between these types.
+                                Type 'B[]' is not assignable to type 'T[]'.
+                                  The types returned by 'slice(...)' are incompatible between these types.
+                                    Type 'T[]' is not assignable to type 'B[]'.
+                                      The types returned by 'slice(...)' are incompatible between these types.
+                                        Type 'T[]' is not assignable to type 'B[]'.
+arrayOfSubtypeIsAssignableToReadonlyArray.ts(18,1): error TS2322: Type 'C<A>' is not assignable to type 'ReadonlyArray<B>'.
+  Types of property 'concat' are incompatible.
+    Type '{ (...items: ConcatArray<T>[]): A[]; (...items: (T | ConcatArray<T>)[]): A[]; }' is not assignable to type '{ (...items: ConcatArray<B>[]): B[]; (...items: (B | ConcatArray<B>)[]): B[]; }'.
+      Types of parameters 'items' and 'items' are incompatible.
+        Type 'ConcatArray<B>[]' is not assignable to type '(T | ConcatArray<T>)[]'.
+          The types returned by 'slice(...)' are incompatible between these types.
+            Type 'B[]' is not assignable to type 'T[]'.
+              The types returned by 'slice(...)' are incompatible between these types.
+                Type 'B[]' is not assignable to type 'T[]'.
+                  Type 'T' is not assignable to type 'ConcatArray<B>'.
+                    Type 'T' is not assignable to type 'ConcatArray<B>'.
+                      Types of parameters 'items' and 'items' are incompatible.
+                        Type 'ConcatArray<B>[]' is not assignable to type 'ConcatArray<T>[]'.
+                          The types returned by 'slice(...)' are incompatible between these types.
+                            Type 'B[]' is not assignable to type 'T[]'.
+                              The types returned by 'slice(...)' are incompatible between these types.
+                                Type 'B[]' is not assignable to type 'T[]'.
+                                  The types returned by 'slice(...)' are incompatible between these types.
+                                    Type 'T[]' is not assignable to type 'B[]'.
+                                      The types returned by 'slice(...)' are incompatible between these types.
+                                        Type 'T[]' is not assignable to type 'B[]'.

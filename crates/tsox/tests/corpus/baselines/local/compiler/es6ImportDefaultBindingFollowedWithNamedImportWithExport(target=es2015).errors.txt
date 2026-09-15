@@ -1,0 +1,37 @@
+client.ts(1,30): error TS1005: '=' expected.
+client.ts(1,36): error TS1434: Unexpected keyword or identifier.
+client.ts(1,36): error TS2304: Cannot find name 'from'.
+client.ts(2,30): error TS1005: '=' expected.
+client.ts(2,34): error TS2304: Cannot find name 'a'.
+client.ts(2,38): error TS1434: Unexpected keyword or identifier.
+client.ts(2,38): error TS2304: Cannot find name 'from'.
+client.ts(3,25): error TS2304: Cannot find name 'a'.
+client.ts(4,30): error TS1005: '=' expected.
+client.ts(4,34): error TS2304: Cannot find name 'a'.
+client.ts(4,39): error TS2304: Cannot find name 'b'.
+client.ts(4,43): error TS1434: Unexpected keyword or identifier.
+client.ts(4,43): error TS2304: Cannot find name 'from'.
+client.ts(5,25): error TS2304: Cannot find name 'b'.
+client.ts(6,30): error TS1005: '=' expected.
+client.ts(6,34): error TS2304: Cannot find name 'x'.
+client.ts(6,34): error TS2695: Left side of comma operator is unused and has no side effects.
+client.ts(6,37): error TS2304: Cannot find name 'a'.
+client.ts(6,42): error TS2304: Cannot find name 'y'.
+client.ts(6,46): error TS1434: Unexpected keyword or identifier.
+client.ts(6,46): error TS2304: Cannot find name 'from'.
+client.ts(7,25): error TS2304: Cannot find name 'x'.
+client.ts(8,25): error TS2304: Cannot find name 'y'.
+client.ts(9,30): error TS1005: '=' expected.
+client.ts(9,34): error TS2304: Cannot find name 'x'.
+client.ts(9,39): error TS2304: Cannot find name 'z'.
+client.ts(9,43): error TS1109: Expression expected.
+client.ts(9,45): error TS1434: Unexpected keyword or identifier.
+client.ts(9,45): error TS2304: Cannot find name 'from'.
+client.ts(10,25): error TS2304: Cannot find name 'z'.
+client.ts(11,30): error TS1005: '=' expected.
+client.ts(11,34): error TS2304: Cannot find name 'm'.
+client.ts(11,34): error TS2695: Left side of comma operator is unused and has no side effects.
+client.ts(11,38): error TS1109: Expression expected.
+client.ts(11,40): error TS1434: Unexpected keyword or identifier.
+client.ts(11,40): error TS2304: Cannot find name 'from'.
+client.ts(12,25): error TS2304: Cannot find name 'm'.

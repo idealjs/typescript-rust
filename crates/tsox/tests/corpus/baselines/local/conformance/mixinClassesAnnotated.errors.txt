@@ -1,0 +1,7 @@
+mixinClassesAnnotated.ts(18,5): error TS2322: Type 'typeof þclass' is not assignable to type '() => unknown & { message: string; } & T'.
+mixinClassesAnnotated.ts(21,33): error TS2339: Property 'x' does not exist on type 'this'.
+mixinClassesAnnotated.ts(21,48): error TS2339: Property 'y' does not exist on type 'this'.
+mixinClassesAnnotated.ts(51,23): error TS2351: This expression is not constructable.
+  Type '() => unknown & () => unknown & { message: string; } & typeof Derived' has no construct signatures.
+mixinClassesAnnotated.ts(60,14): error TS2339: Property '_tag' does not exist on type 'this'.
+mixinClassesAnnotated.ts(63,14): error TS2339: Property 'print' does not exist on type 'this'.

@@ -1,0 +1,13 @@
+templateLiteralTypes2.ts(6,11): error TS2322: Type 'string' is not assignable to type '`abc${string}`'.
+templateLiteralTypes2.ts(7,11): error TS2322: Type 'string' is not assignable to type '`abc${number}`'.
+templateLiteralTypes2.ts(8,11): error TS2322: Type 'string' is not assignable to type '`abc${"foo" | "bar" | "baz"}`'.
+templateLiteralTypes2.ts(9,11): error TS2322: Type 'string' is not assignable to type '`abc${T}`'.
+templateLiteralTypes2.ts(21,11): error TS2322: Type 'string' is not assignable to type '`abc${string}`'.
+templateLiteralTypes2.ts(23,11): error TS2322: Type 'string' is not assignable to type '`abc${string}`'.
+templateLiteralTypes2.ts(29,11): error TS2322: Type 'string' is not assignable to type '`foo${string}` | `bar${string}`'.
+templateLiteralTypes2.ts(32,11): error TS2322: Type 'string' is not assignable to type '`foo${string}` | `bar${string}` | `baz${string}`'.
+templateLiteralTypes2.ts(43,11): error TS2322: Type 'string' is not assignable to type '`foo${string}`'.
+templateLiteralTypes2.ts(68,9): error TS2322: Type '`foo${number}`' is not assignable to type 'Object'.
+templateLiteralTypes2.ts(104,7): error TS2322: Type 'string' is not assignable to type '`${number}px`'.
+templateLiteralTypes2.ts(106,7): error TS2322: Type 'string' is not assignable to type '`${number}px`'.
+templateLiteralTypes2.ts(111,5): error TS2322: Type 'string' is not assignable to type '`test-${string}`'.

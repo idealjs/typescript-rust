@@ -1,0 +1,1 @@
+functionsWithModifiersInBlocks1.ts(4,12): error TS1029: 'export' modifier must precede 'declare' modifier.

@@ -1,0 +1,4 @@
+numericStringNamedPropertyEquivalence.ts(6,5): error TS2300: Duplicate identifier '1.0'.
+numericStringNamedPropertyEquivalence.ts(10,5): error TS2300: Duplicate identifier '1'.
+numericStringNamedPropertyEquivalence.ts(12,5): error TS2300: Duplicate identifier '1'.
+numericStringNamedPropertyEquivalence.ts(22,5): error TS1117: An object literal cannot have multiple properties with the same name.

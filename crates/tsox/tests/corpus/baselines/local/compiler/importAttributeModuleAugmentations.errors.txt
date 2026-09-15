@@ -1,0 +1,6 @@
+/augmentations.ts(3,16): error TS2664: Invalid module name in augmentation, module 'merged.asset' cannot be found.
+/augmentations.ts(7,16): error TS2664: Invalid module name in augmentation, module 'attributed/file.asset' cannot be found.
+/augmentations.ts(11,16): error TS2664: Invalid module name in augmentation, module 'unattributed.special' cannot be found.
+/index.ts(1,25): error TS2307: Cannot find module 'merged.asset' or its corresponding type declarations.
+/index.ts(5,29): error TS2307: Cannot find module 'attributed/file.asset' or its corresponding type declarations.
+/index.ts(9,31): error TS2307: Cannot find module 'unattributed.special' or its corresponding type declarations.

@@ -1,0 +1,6 @@
+privateNameStaticAccessorsAccess.ts(7,21): error TS2806: Private accessor was defined without a getter.
+privateNameStaticAccessorsAccess.ts(9,9): error TS2806: Private accessor was defined without a getter.
+privateNameStaticAccessorsAccess.ts(11,13): error TS2806: Private accessor was defined without a getter.
+privateNameStaticAccessorsAccess.ts(16,4): error TS18013: Property '#prop' is not accessible outside class 'A2' because it has a private identifier.
+privateNameStaticAccessorsAccess.ts(19,8): error TS18013: Property '#prop' is not accessible outside class 'A2' because it has a private identifier.
+privateNameStaticAccessorsAccess.ts(24,12): error TS18013: Property '#prop' is not accessible outside class 'A2' because it has a private identifier.

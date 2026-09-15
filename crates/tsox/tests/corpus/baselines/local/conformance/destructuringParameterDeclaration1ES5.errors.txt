@@ -1,0 +1,9 @@
+destructuringParameterDeclaration1ES5.ts(23,5): error TS7010: 'b5', which lacks return-type annotation, implicitly has an 'any' return type.
+destructuringParameterDeclaration1ES5.ts(23,8): error TS7006: Parameter 'z' implicitly has an 'any' type.
+destructuringParameterDeclaration1ES5.ts(23,11): error TS7006: Parameter 'y' implicitly has an 'any' type.
+destructuringParameterDeclaration1ES5.ts(62,10): error TS2393: Duplicate function implementation.
+destructuringParameterDeclaration1ES5.ts(62,13): error TS7006: Parameter 'x' implicitly has an 'any' type.
+destructuringParameterDeclaration1ES5.ts(63,10): error TS2393: Duplicate function implementation.
+destructuringParameterDeclaration1ES5.ts(66,5): error TS7010: 'd3', which lacks return-type annotation, implicitly has an 'any' return type.
+destructuringParameterDeclaration1ES5.ts(67,5): error TS7010: 'd4', which lacks return-type annotation, implicitly has an 'any' return type.
+destructuringParameterDeclaration1ES5.ts(68,5): error TS7010: 'e0', which lacks return-type annotation, implicitly has an 'any' return type.

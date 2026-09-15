@@ -1,0 +1,7 @@
+generatorTypeCheck25.ts(1,13): error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
+generatorTypeCheck25.ts(2,25): error TS2564: Property 'y' has no initializer and is not definitely assigned in the constructor.
+generatorTypeCheck25.ts(3,13): error TS2564: Property 'z' has no initializer and is not definitely assigned in the constructor.
+generatorTypeCheck25.ts(4,5): error TS2322: Type '() => void' is not assignable to type '() => Iterable<Foo>'.
+  Type 'void' is not assignable to type 'Iterable<Foo>'.
+generatorTypeCheck25.ts(5,5): error TS1212: Identifier expected. 'yield' is a reserved word in strict mode.
+generatorTypeCheck25.ts(5,5): error TS2304: Cannot find name 'yield'.

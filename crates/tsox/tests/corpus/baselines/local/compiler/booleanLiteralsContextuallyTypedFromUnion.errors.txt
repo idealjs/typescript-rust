@@ -1,0 +1,12 @@
+error TS6053: File '/.lib/react.d.ts' not found.
+booleanLiteralsContextuallyTypedFromUnion.tsx(6,7): error TS2322: Type '{ isIt: boolean; text: "hey"; } | { isIt: boolean; value: 123; }' is not assignable to type 'A | B'.
+  Type '{ isIt: boolean; text: "hey"; }' is not assignable to type 'A | B'.
+    Types of property 'isIt' are incompatible.
+      Type 'boolean' is not assignable to type 'true'.
+booleanLiteralsContextuallyTypedFromUnion.tsx(7,7): error TS2322: Type '{ isIt: boolean; text: "hey"; } | { isIt: boolean; value: 123; }' is not assignable to type 'A | B'.
+  Type '{ isIt: boolean; text: "hey"; }' is not assignable to type 'A | B'.
+    Types of property 'isIt' are incompatible.
+      Type 'boolean' is not assignable to type 'true'.
+
+
+!!! error TS6053: File '/.lib/react.d.ts' not found.

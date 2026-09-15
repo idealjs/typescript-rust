@@ -1,0 +1,7 @@
+error TS6053: File '/.lib/react16.d.ts' not found.
+controlFlowOptionalChain3.tsx(5,19): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+controlFlowOptionalChain3.tsx(30,8): error TS18048: 'foo' is possibly 'undefined'.
+controlFlowOptionalChain3.tsx(36,31): error TS18048: 'options' is possibly 'undefined'.
+
+
+!!! error TS6053: File '/.lib/react16.d.ts' not found.

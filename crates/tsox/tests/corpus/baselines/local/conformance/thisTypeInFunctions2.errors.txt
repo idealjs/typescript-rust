@@ -1,0 +1,2 @@
+thisTypeInFunctions2.ts(14,5): error TS7010: 'foo', which lacks return-type annotation, implicitly has an 'any' return type.
+thisTypeInFunctions2.ts(46,9): error TS7006: Parameter 'n' implicitly has an 'any' type.

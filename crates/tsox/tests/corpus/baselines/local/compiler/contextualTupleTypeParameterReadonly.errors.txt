@@ -1,0 +1,22 @@
+contextualTupleTypeParameterReadonly.ts(8,21): error TS2345: Argument of type '[(string | number)[], (string | number)[]]' is not assignable to parameter of type 'ReadonlyArray<ReadonlyArray<any>>'.
+  Types of property 'concat' are incompatible.
+    Type '{ (...items: ConcatArray<T>[]): T[]; (...items: (T | ConcatArray<T>)[]): T[]; }' is not assignable to type '{ (...items: ConcatArray<ReadonlyArray<any>>[]): ReadonlyArray<any>[]; (...items: (ReadonlyArray<any> | ConcatArray<ReadonlyArray<any>>)[]): ReadonlyArray<any>[]; }'.
+      Types of parameters 'items' and 'items' are incompatible.
+        Type 'ConcatArray<ReadonlyArray<any>>[]' is not assignable to type '(T | ConcatArray<T>)[]'.
+          The types returned by 'slice(...)' are incompatible between these types.
+            Type 'ReadonlyArray<any>[]' is not assignable to type 'T[]'.
+              The types returned by 'slice(...)' are incompatible between these types.
+                Type 'ReadonlyArray<any>[]' is not assignable to type 'T[]'.
+                  Type 'T' is not assignable to type 'ConcatArray<ReadonlyArray<any>>'.
+                    Type 'T' is not assignable to type 'ConcatArray<ReadonlyArray<any>>'.
+                      Types of parameters 'items' and 'items' are incompatible.
+                        Type 'ConcatArray<ReadonlyArray<any>>[]' is not assignable to type 'ConcatArray<T>[]'.
+                          The types returned by 'slice(...)' are incompatible between these types.
+                            Type 'ReadonlyArray<any>[]' is not assignable to type 'T[]'.
+                              The types returned by 'slice(...)' are incompatible between these types.
+                                Type 'ReadonlyArray<any>[]' is not assignable to type 'T[]'.
+                                  The types returned by 'slice(...)' are incompatible between these types.
+                                    Type 'T[]' is not assignable to type 'ReadonlyArray<any>[]'.
+                                      The types returned by 'slice(...)' are incompatible between these types.
+                                        Type 'T[]' is not assignable to type 'ReadonlyArray<any>[]'.
+contextualTupleTypeParameterReadonly.ts(10,12): error TS7006: Parameter 'b' implicitly has an 'any' type.

@@ -1,0 +1,2 @@
+arrayDestructuringInSwitch2.ts(12,7): error TS2322: Type '[1] | []' is not assignable to type '1'.
+  Type '[1]' is not assignable to type '1'.

@@ -1,0 +1,22 @@
+additionOperatorWithUndefinedValueAndInvalidOperands.ts(11,10): error TS18050: The value 'undefined' cannot be used here.
+additionOperatorWithUndefinedValueAndInvalidOperands.ts(11,10): error TS2365: Operator '+' cannot be applied to types 'undefined' and 'boolean'.
+additionOperatorWithUndefinedValueAndInvalidOperands.ts(12,10): error TS18050: The value 'undefined' cannot be used here.
+additionOperatorWithUndefinedValueAndInvalidOperands.ts(12,10): error TS2365: Operator '+' cannot be applied to types 'undefined' and 'Object'.
+additionOperatorWithUndefinedValueAndInvalidOperands.ts(13,10): error TS18050: The value 'undefined' cannot be used here.
+additionOperatorWithUndefinedValueAndInvalidOperands.ts(13,10): error TS2365: Operator '+' cannot be applied to types 'undefined' and 'void'.
+additionOperatorWithUndefinedValueAndInvalidOperands.ts(14,10): error TS2365: Operator '+' cannot be applied to types 'boolean' and 'undefined'.
+additionOperatorWithUndefinedValueAndInvalidOperands.ts(14,14): error TS18050: The value 'undefined' cannot be used here.
+additionOperatorWithUndefinedValueAndInvalidOperands.ts(15,10): error TS2365: Operator '+' cannot be applied to types 'Object' and 'undefined'.
+additionOperatorWithUndefinedValueAndInvalidOperands.ts(15,14): error TS18050: The value 'undefined' cannot be used here.
+additionOperatorWithUndefinedValueAndInvalidOperands.ts(16,10): error TS18050: The value 'undefined' cannot be used here.
+additionOperatorWithUndefinedValueAndInvalidOperands.ts(16,10): error TS2365: Operator '+' cannot be applied to types 'undefined' and 'void'.
+additionOperatorWithUndefinedValueAndInvalidOperands.ts(19,10): error TS18050: The value 'undefined' cannot be used here.
+additionOperatorWithUndefinedValueAndInvalidOperands.ts(19,10): error TS2365: Operator '+' cannot be applied to types 'undefined' and 'Number'.
+additionOperatorWithUndefinedValueAndInvalidOperands.ts(20,10): error TS18050: The value 'undefined' cannot be used here.
+additionOperatorWithUndefinedValueAndInvalidOperands.ts(20,10): error TS2365: Operator '+' cannot be applied to types 'undefined' and 'true'.
+additionOperatorWithUndefinedValueAndInvalidOperands.ts(21,10): error TS18050: The value 'undefined' cannot be used here.
+additionOperatorWithUndefinedValueAndInvalidOperands.ts(21,10): error TS2365: Operator '+' cannot be applied to types 'undefined' and '{ a: ""; }'.
+additionOperatorWithUndefinedValueAndInvalidOperands.ts(22,11): error TS18050: The value 'undefined' cannot be used here.
+additionOperatorWithUndefinedValueAndInvalidOperands.ts(22,11): error TS2365: Operator '+' cannot be applied to types 'undefined' and 'void'.
+additionOperatorWithUndefinedValueAndInvalidOperands.ts(23,11): error TS18050: The value 'undefined' cannot be used here.
+additionOperatorWithUndefinedValueAndInvalidOperands.ts(23,11): error TS2365: Operator '+' cannot be applied to types 'undefined' and '() => void'.

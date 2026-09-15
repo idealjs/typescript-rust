@@ -1,0 +1,6 @@
+contextualTypeShouldBeLiteral.ts(15,5): error TS2345: Argument of type '{ type: "y"; value: string; method: () => void; }' is not assignable to parameter of type 'X | Y'.
+  Types of property 'type' are incompatible.
+    Type '"y"' is not assignable to type '"x"'.
+contextualTypeShouldBeLiteral.ts(39,6): error TS2345: Argument of type '{ type2: "y"; value: string; method: () => void; }' is not assignable to parameter of type 'X2 | Y2'.
+  Types of property 'value' are incompatible.
+    Type 'string' is not assignable to type '"none" | "done"'.

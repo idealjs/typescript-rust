@@ -1,0 +1,8 @@
+disallowedBlockScopedInPresenceOfParseErrors1.ts(6,17): error TS2454: Variable 'e' is used before being assigned.
+disallowedBlockScopedInPresenceOfParseErrors1.ts(8,1): error TS1128: Declaration or statement expected.
+disallowedBlockScopedInPresenceOfParseErrors1.ts(13,17): error TS2454: Variable 'e' is used before being assigned.
+disallowedBlockScopedInPresenceOfParseErrors1.ts(15,1): error TS1128: Declaration or statement expected.
+disallowedBlockScopedInPresenceOfParseErrors1.ts(22,17): error TS2454: Variable 'e' is used before being assigned.
+disallowedBlockScopedInPresenceOfParseErrors1.ts(24,1): error TS1128: Declaration or statement expected.
+disallowedBlockScopedInPresenceOfParseErrors1.ts(31,17): error TS2454: Variable 'e' is used before being assigned.
+disallowedBlockScopedInPresenceOfParseErrors1.ts(33,1): error TS1128: Declaration or statement expected.

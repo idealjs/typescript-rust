@@ -1,0 +1,6 @@
+error TS6053: File '/.lib/react.d.ts' not found.
+file.tsx(40,29): error TS7006: Parameter 'x' implicitly has an 'any' type.
+file.tsx(43,16): error TS1005: ',' expected.
+
+
+!!! error TS6053: File '/.lib/react.d.ts' not found.

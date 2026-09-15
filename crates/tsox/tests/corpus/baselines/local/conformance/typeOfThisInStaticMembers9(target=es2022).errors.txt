@@ -1,0 +1,3 @@
+typeOfThisInStaticMembers9.ts(7,62): error TS2339: Property 'f' does not exist on type 'D'.
+typeOfThisInStaticMembers9.ts(8,50): error TS2339: Property 'f' does not exist on type 'typeof þclass'.
+typeOfThisInStaticMembers9.ts(16,30): error TS2339: Property 'f' does not exist on type 'C'.

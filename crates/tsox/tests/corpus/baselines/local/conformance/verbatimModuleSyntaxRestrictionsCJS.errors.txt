@@ -1,0 +1,1 @@
+/ambient.d.ts(3,20): error TS2454: Variable '_default' is used before being assigned.

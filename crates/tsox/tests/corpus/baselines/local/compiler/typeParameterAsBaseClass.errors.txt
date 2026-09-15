@@ -1,0 +1,1 @@
+typeParameterAsBaseClass.ts(2,1): error TS2420: Class 'C2' incorrectly implements interface 'T'.

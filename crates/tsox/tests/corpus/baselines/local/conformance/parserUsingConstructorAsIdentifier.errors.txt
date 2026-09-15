@@ -1,0 +1,9 @@
+parserUsingConstructorAsIdentifier.ts(3,13): error TS2304: Cannot find name 'PluginUtilities'.
+parserUsingConstructorAsIdentifier.ts(5,17): error TS2304: Cannot find name 'initializeProperties'.
+parserUsingConstructorAsIdentifier.ts(8,17): error TS2304: Cannot find name 'initializeProperties'.
+parserUsingConstructorAsIdentifier.ts(18,17): error TS2304: Cannot find name 'PluginUtilities'.
+parserUsingConstructorAsIdentifier.ts(19,77): error TS2345: Argument of type '{ value: any; writable: boolean; configurable: boolean; enumerable: boolean; }' is not assignable to parameter of type 'PropertyDescriptor & ThisType<any>'.
+  Type '{ value: any; writable: boolean; configurable: boolean; enumerable: boolean; }' is missing the following properties from type 'PropertyDescriptor': get, set
+parserUsingConstructorAsIdentifier.ts(21,21): error TS2304: Cannot find name 'initializeProperties'.
+parserUsingConstructorAsIdentifier.ts(24,21): error TS2304: Cannot find name 'initializeProperties'.
+parserUsingConstructorAsIdentifier.ts(36,17): error TS2304: Cannot find name 'initializeProperties'.

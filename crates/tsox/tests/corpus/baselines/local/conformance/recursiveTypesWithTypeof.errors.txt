@@ -1,0 +1,19 @@
+recursiveTypesWithTypeof.ts(11,5): error TS2403: Subsequent variable declarations must have the same type.  Variable 'f' must be of type 'Array<any>', but here has type 'any'.
+recursiveTypesWithTypeof.ts(13,5): error TS2403: Subsequent variable declarations must have the same type.  Variable 'f2' must be of type 'Foo<any>', but here has type 'any'.
+recursiveTypesWithTypeof.ts(15,5): error TS2403: Subsequent variable declarations must have the same type.  Variable 'f3' must be of type 'Foo<any>[]', but here has type 'any'.
+recursiveTypesWithTypeof.ts(20,15): error TS2304: Cannot find name ''.
+recursiveTypesWithTypeof.ts(22,9): error TS2454: Variable 'h' is used before being assigned.
+recursiveTypesWithTypeof.ts(24,9): error TS2454: Variable 'i' is used before being assigned.
+recursiveTypesWithTypeof.ts(24,11): error TS2454: Variable 'i' is used before being assigned.
+recursiveTypesWithTypeof.ts(26,9): error TS2454: Variable 'j' is used before being assigned.
+recursiveTypesWithTypeof.ts(26,11): error TS2454: Variable 'j' is used before being assigned.
+recursiveTypesWithTypeof.ts(30,14): error TS2454: Variable 'h2' is used before being assigned.
+recursiveTypesWithTypeof.ts(32,14): error TS2454: Variable 'i2' is used before being assigned.
+recursiveTypesWithTypeof.ts(32,17): error TS2454: Variable 'i2' is used before being assigned.
+recursiveTypesWithTypeof.ts(34,14): error TS2454: Variable 'j2' is used before being assigned.
+recursiveTypesWithTypeof.ts(34,17): error TS2454: Variable 'j2' is used before being assigned.
+recursiveTypesWithTypeof.ts(38,9): error TS2454: Variable 'k' is used before being assigned.
+recursiveTypesWithTypeof.ts(39,5): error TS2403: Subsequent variable declarations must have the same type.  Variable 'k' must be of type '{ [n: number]: any; [s: string]: any; }', but here has type 'any'.
+recursiveTypesWithTypeof.ts(44,11): error TS2454: Variable 'hy1' is used before being assigned.
+recursiveTypesWithTypeof.ts(46,11): error TS2454: Variable 'hy2' is used before being assigned.
+recursiveTypesWithTypeof.ts(52,5): error TS2403: Subsequent variable declarations must have the same type.  Variable 'hy3' must be of type 'Foo2<any, { x: any; }>', but here has type 'any'.

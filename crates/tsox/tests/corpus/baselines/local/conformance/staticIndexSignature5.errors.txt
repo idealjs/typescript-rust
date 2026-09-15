@@ -1,0 +1,4 @@
+staticIndexSignature5.ts(2,5): error TS1071: 'static' modifier cannot appear on an index signature.
+staticIndexSignature5.ts(3,5): error TS1071: 'static' modifier cannot appear on an index signature.
+staticIndexSignature5.ts(21,26): error TS2344: Type 'number' does not satisfy the constraint 'string'.
+staticIndexSignature5.ts(22,20): error TS2344: Type 'number' does not satisfy the constraint 'string'.

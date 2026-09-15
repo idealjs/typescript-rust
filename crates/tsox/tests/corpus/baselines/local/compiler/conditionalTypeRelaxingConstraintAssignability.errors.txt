@@ -1,0 +1,4 @@
+conditionalTypeRelaxingConstraintAssignability.ts(35,16): error TS2345: Argument of type '{ a?: string; }' is not assignable to parameter of type '{ a?: DeepPartial<T["a"]>; }'.
+  Types of property 'a' are incompatible.
+    Type 'string | undefined' is not assignable to type 'DeepPartial<T["a"]> | undefined'.
+      Type 'string' is not assignable to type 'DeepPartial<T["a"]> | undefined'.

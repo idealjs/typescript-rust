@@ -1,0 +1,25 @@
+inferTypePredicates.ts(84,9): error TS2322: Type '{ foo: string; } | { foo: string; } & { bar: string; }' is not assignable to type '{ foo: string; } & { bar: string; }'.
+  Type '{ foo: string; }' is not assignable to type '{ foo: string; } & { bar: string; }'.
+    Property 'bar' is missing in type '{ foo: string; }' but required in type '{ bar: string; }'.
+inferTypePredicates.ts(90,8): error TS2345: Argument of type 'number' is not assignable to parameter of type 'string'.
+inferTypePredicates.ts(104,7): error TS2322: Type 'string | number' is not assignable to type 'string'.
+  Type 'number' is not assignable to type 'string'.
+inferTypePredicates.ts(106,7): error TS2322: Type 'string | number' is not assignable to type 'number'.
+  Type 'string' is not assignable to type 'number'.
+inferTypePredicates.ts(113,7): error TS2322: Type 'string | number' is not assignable to type 'string'.
+  Type 'number' is not assignable to type 'string'.
+inferTypePredicates.ts(115,7): error TS2322: Type 'string | number' is not assignable to type 'number'.
+  Type 'string' is not assignable to type 'number'.
+inferTypePredicates.ts(127,7): error TS2322: Type 'object' is not assignable to type 'Date'.
+inferTypePredicates.ts(133,7): error TS2322: Type 'object' is not assignable to type 'Date'.
+inferTypePredicates.ts(189,7): error TS2322: Type 'string | number' is not assignable to type 'number'.
+  Type 'string' is not assignable to type 'number'.
+inferTypePredicates.ts(191,7): error TS2322: Type 'string | number' is not assignable to type 'string'.
+  Type 'number' is not assignable to type 'string'.
+inferTypePredicates.ts(205,7): error TS2741: Property 'z' is missing in type 'C1' but required in type 'C2'.
+inferTypePredicates.ts(214,37): error TS2339: Property 'length' does not exist on type 'never'.
+inferTypePredicates.ts(230,7): error TS2322: Type 'string' is not assignable to type 'never'.
+inferTypePredicates.ts(239,7): error TS2322: Type 'unknown' is not assignable to type 'string | number'.
+inferTypePredicates.ts(252,7): error TS2322: Type 'string | number | Date' is not assignable to type 'string'.
+  Type 'number' is not assignable to type 'string'.
+inferTypePredicates.ts(277,10): error TS2339: Property 'foo' does not exist on type '{ type: "foo"; foo: number; } | { type: "bar"; bar: string; }'.

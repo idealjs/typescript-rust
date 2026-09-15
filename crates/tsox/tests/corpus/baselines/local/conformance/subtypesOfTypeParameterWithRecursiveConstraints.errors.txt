@@ -1,0 +1,42 @@
+subtypesOfTypeParameterWithRecursiveConstraints.ts(3,16): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
+subtypesOfTypeParameterWithRecursiveConstraints.ts(23,9): error TS2403: Subsequent variable declarations must have the same type.  Variable 'r5' must be of type 'U', but here has type 'Foo<T>'.
+subtypesOfTypeParameterWithRecursiveConstraints.ts(32,9): error TS2403: Subsequent variable declarations must have the same type.  Variable 'r7' must be of type 'T', but here has type 'Foo<U>'.
+subtypesOfTypeParameterWithRecursiveConstraints.ts(53,9): error TS2403: Subsequent variable declarations must have the same type.  Variable 'r12' must be of type 'V', but here has type 'Foo<V>'.
+subtypesOfTypeParameterWithRecursiveConstraints.ts(58,9): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
+subtypesOfTypeParameterWithRecursiveConstraints.ts(63,9): error TS2416: Property 'foo' in type 'D1' is not assignable to the same property in base type 'Base'.
+subtypesOfTypeParameterWithRecursiveConstraints.ts(63,9): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
+subtypesOfTypeParameterWithRecursiveConstraints.ts(68,9): error TS2416: Property 'foo' in type 'D2' is not assignable to the same property in base type 'Base'.
+subtypesOfTypeParameterWithRecursiveConstraints.ts(68,9): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
+subtypesOfTypeParameterWithRecursiveConstraints.ts(73,9): error TS2416: Property 'foo' in type 'D3' is not assignable to the same property in base type 'Base'.
+subtypesOfTypeParameterWithRecursiveConstraints.ts(73,9): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
+subtypesOfTypeParameterWithRecursiveConstraints.ts(78,9): error TS2416: Property 'foo' in type 'D4' is not assignable to the same property in base type 'Base'.
+subtypesOfTypeParameterWithRecursiveConstraints.ts(78,9): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
+subtypesOfTypeParameterWithRecursiveConstraints.ts(83,9): error TS2416: Property 'foo' in type 'D5' is not assignable to the same property in base type 'Base'.
+subtypesOfTypeParameterWithRecursiveConstraints.ts(83,9): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
+subtypesOfTypeParameterWithRecursiveConstraints.ts(88,9): error TS2416: Property 'foo' in type 'D6' is not assignable to the same property in base type 'Base'.
+subtypesOfTypeParameterWithRecursiveConstraints.ts(88,9): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
+subtypesOfTypeParameterWithRecursiveConstraints.ts(93,9): error TS2416: Property 'foo' in type 'D7' is not assignable to the same property in base type 'Base'.
+subtypesOfTypeParameterWithRecursiveConstraints.ts(93,9): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
+subtypesOfTypeParameterWithRecursiveConstraints.ts(98,9): error TS2416: Property 'foo' in type 'D8' is not assignable to the same property in base type 'Base'.
+subtypesOfTypeParameterWithRecursiveConstraints.ts(98,9): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
+subtypesOfTypeParameterWithRecursiveConstraints.ts(103,9): error TS2416: Property 'foo' in type 'D9' is not assignable to the same property in base type 'Base'.
+subtypesOfTypeParameterWithRecursiveConstraints.ts(103,9): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
+subtypesOfTypeParameterWithRecursiveConstraints.ts(110,9): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
+subtypesOfTypeParameterWithRecursiveConstraints.ts(115,9): error TS2416: Property 'foo' in type 'D1' is not assignable to the same property in base type 'Base2'.
+subtypesOfTypeParameterWithRecursiveConstraints.ts(115,9): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
+subtypesOfTypeParameterWithRecursiveConstraints.ts(120,9): error TS2416: Property 'foo' in type 'D2' is not assignable to the same property in base type 'Base2'.
+subtypesOfTypeParameterWithRecursiveConstraints.ts(120,9): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
+subtypesOfTypeParameterWithRecursiveConstraints.ts(125,9): error TS2416: Property 'foo' in type 'D3' is not assignable to the same property in base type 'Base2'.
+subtypesOfTypeParameterWithRecursiveConstraints.ts(125,9): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
+subtypesOfTypeParameterWithRecursiveConstraints.ts(130,9): error TS2416: Property 'foo' in type 'D4' is not assignable to the same property in base type 'Base2'.
+subtypesOfTypeParameterWithRecursiveConstraints.ts(130,9): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
+subtypesOfTypeParameterWithRecursiveConstraints.ts(135,9): error TS2416: Property 'foo' in type 'D5' is not assignable to the same property in base type 'Base2'.
+subtypesOfTypeParameterWithRecursiveConstraints.ts(135,9): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
+subtypesOfTypeParameterWithRecursiveConstraints.ts(140,9): error TS2416: Property 'foo' in type 'D6' is not assignable to the same property in base type 'Base2'.
+subtypesOfTypeParameterWithRecursiveConstraints.ts(140,9): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
+subtypesOfTypeParameterWithRecursiveConstraints.ts(145,9): error TS2416: Property 'foo' in type 'D7' is not assignable to the same property in base type 'Base2'.
+subtypesOfTypeParameterWithRecursiveConstraints.ts(145,9): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
+subtypesOfTypeParameterWithRecursiveConstraints.ts(150,9): error TS2416: Property 'foo' in type 'D8' is not assignable to the same property in base type 'Base2'.
+subtypesOfTypeParameterWithRecursiveConstraints.ts(150,9): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
+subtypesOfTypeParameterWithRecursiveConstraints.ts(155,9): error TS2416: Property 'foo' in type 'D9' is not assignable to the same property in base type 'Base2'.
+subtypesOfTypeParameterWithRecursiveConstraints.ts(155,9): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.

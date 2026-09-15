@@ -1,0 +1,1 @@
+parserUnaryExpression2.ts(1,12): error TS7006: Parameter 'e' implicitly has an 'any' type.

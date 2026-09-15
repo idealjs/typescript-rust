@@ -1,0 +1,4 @@
+for-of48.ts(4,12): error TS1005: ',' expected.
+for-of48.ts(4,15): error TS1117: An object literal cannot have multiple properties with the same name.
+for-of48.ts(4,15): error TS1005: ',' expected.
+for-of48.ts(4,16): error TS1117: An object literal cannot have multiple properties with the same name.

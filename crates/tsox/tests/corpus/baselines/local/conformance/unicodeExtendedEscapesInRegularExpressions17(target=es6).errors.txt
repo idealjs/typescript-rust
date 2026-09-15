@@ -1,0 +1,3 @@
+unicodeExtendedEscapesInRegularExpressions17.ts(1,14): error TS1508: Unexpected '{0}'. Did you mean to escape it with backslash?
+unicodeExtendedEscapesInRegularExpressions17.ts(1,19): error TS1508: Unexpected '{0}'. Did you mean to escape it with backslash?
+unicodeExtendedEscapesInRegularExpressions17.ts(1,24): error TS1508: Unexpected '{0}'. Did you mean to escape it with backslash?

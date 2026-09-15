@@ -1,0 +1,60 @@
+covariantCallbacks.ts(12,5): error TS2322: Type 'P<A>' is not assignable to type 'P<B>'.
+  Types of property 'then' are incompatible.
+    Type '(cb: (value: A) => void) => void' is not assignable to type '(cb: (value: B) => void) => void'.
+      Types of parameters 'cb' and 'cb' are incompatible.
+        Type '(value: B) => void' is not assignable to type '(value: A) => void'.
+          Types of parameters 'value' and 'value' are incompatible.
+            Type 'A' is not assignable to type 'B'.
+              Property 'b' is missing in type 'A' but required in type 'B'.
+                Property 'b' is missing in type 'A' but required in type 'B'.
+covariantCallbacks.ts(17,5): error TS2322: Type 'Promise<A>' is not assignable to type 'Promise<B>'.
+  Types of property 'then' are incompatible.
+    Type '<TResult1, TResult2>(onfulfilled: ((value: A) => TResult1 | PromiseLike<TResult1>) | null | undefined, onrejected: ((reason: any) => TResult2 | PromiseLike<TResult2>) | null | undefined) => Promise<TResult1 | TResult2>' is not assignable to type '<TResult1, TResult2>(onfulfilled: ((value: B) => TResult1 | PromiseLike<TResult1>) | null | undefined, onrejected: ((reason: any) => TResult2 | PromiseLike<TResult2>) | null | undefined) => Promise<TResult1 | TResult2>'.
+      Types of parameters 'onfulfilled' and 'onfulfilled' are incompatible.
+        Type '((value: B) => TResult1 | PromiseLike<TResult1>) | null | undefined' is not assignable to type '((value: A) => TResult1 | PromiseLike<TResult1>) | null | undefined'.
+          Types of parameters 'value' and 'value' are incompatible.
+            Type 'A' is not assignable to type 'B'.
+              Property 'b' is missing in type 'A' but required in type 'B'.
+                Property 'b' is missing in type 'A' but required in type 'B'.
+covariantCallbacks.ts(30,5): error TS2322: Type 'AList1' is not assignable to type 'BList1'.
+  Types of property 'forEach' are incompatible.
+    Type '(cb: (item: A) => void) => void' is not assignable to type '(cb: (item: B) => void) => void'.
+      Types of parameters 'cb' and 'cb' are incompatible.
+        Type '(item: B) => void' is not assignable to type '(item: A) => void'.
+          Types of parameters 'item' and 'item' are incompatible.
+            Type 'A' is not assignable to type 'B'.
+              Property 'b' is missing in type 'A' but required in type 'B'.
+covariantCallbacks.ts(43,5): error TS2322: Type 'AList2' is not assignable to type 'BList2'.
+  Types of property 'forEach' are incompatible.
+    Type '(cb: (item: A) => boolean) => void' is not assignable to type '(cb: (item: A) => void) => void'.
+      Types of parameters 'cb' and 'cb' are incompatible.
+        Type '(item: A) => void' is not assignable to type '(item: A) => boolean'.
+          Type 'void' is not assignable to type 'boolean'.
+covariantCallbacks.ts(56,5): error TS2322: Type 'AList3' is not assignable to type 'BList3'.
+  Types of property 'forEach' are incompatible.
+    Type '(cb: (item: A) => void) => void' is not assignable to type '(cb: (item: A, context: any) => void) => void'.
+      Types of parameters 'cb' and 'cb' are incompatible.
+        Type '(item: A, context: any) => void' is not assignable to type '(item: A) => void'.
+          Target signature provides too few arguments. Expected 2 or more, but got 1.
+covariantCallbacks.ts(69,5): error TS2322: Type 'AList4' is not assignable to type 'BList4'.
+  Types of property 'forEach' are incompatible.
+    Type '(cb: (item: A) => A) => void' is not assignable to type '(cb: (item: B) => B) => void'.
+      Types of parameters 'cb' and 'cb' are incompatible.
+        Type '(item: B) => B' is not assignable to type '(item: A) => A'.
+          Types of parameters 'item' and 'item' are incompatible.
+            Type 'A' is not assignable to type 'B'.
+              Property 'b' is missing in type 'A' but required in type 'B'.
+covariantCallbacks.ts(98,1): error TS2322: Type '{ set: (value: (x: string) => void) => void; get: () => (x: string) => void; }' is not assignable to type '{ set: (value: (x: unknown) => void) => void; get: () => (x: unknown) => void; }'.
+  The types returned by 'get()' are incompatible between these types.
+    Type '(x: string) => void' is not assignable to type '(x: unknown) => void'.
+      Types of parameters 'x' and 'x' are incompatible.
+        Type 'unknown' is not assignable to type 'string'.
+          Types of parameters 'x' and 'x' are incompatible.
+            Type 'unknown' is not assignable to type 'string'.
+covariantCallbacks.ts(106,1): error TS2322: Type '{ set: (value: (x: string) => void) => void; get: () => (x: string) => void; }' is not assignable to type '{ set: (value: (x: unknown) => void) => void; get: () => (x: unknown) => void; }'.
+  The types returned by 'get()' are incompatible between these types.
+    Type '(x: string) => void' is not assignable to type '(x: unknown) => void'.
+      Types of parameters 'x' and 'x' are incompatible.
+        Type 'unknown' is not assignable to type 'string'.
+          Types of parameters 'x' and 'x' are incompatible.
+            Type 'unknown' is not assignable to type 'string'.

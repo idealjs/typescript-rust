@@ -1,0 +1,1 @@
+normalizedIntersectionTooComplex.ts(36,40): error TS7006: Parameter 'x' implicitly has an 'any' type.

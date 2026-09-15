@@ -1,0 +1,1 @@
+/packages/a/src/re_export.ts(1,24): error TS2307: Cannot find module 'package-b' or its corresponding type declarations.

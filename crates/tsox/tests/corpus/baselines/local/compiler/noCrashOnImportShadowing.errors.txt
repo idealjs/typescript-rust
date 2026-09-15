@@ -1,0 +1,1 @@
+index.ts(9,10): error TS2749: 'OriginalB' refers to a value, but is being used as a type here. Did you mean 'typeof OriginalB'?

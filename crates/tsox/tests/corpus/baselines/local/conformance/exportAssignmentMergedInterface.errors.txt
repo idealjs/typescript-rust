@@ -1,0 +1,5 @@
+foo_1.ts(3,1): error TS2454: Variable 'x' is used before being assigned.
+foo_1.ts(4,1): error TS2454: Variable 'x' is used before being assigned.
+foo_1.ts(5,17): error TS2454: Variable 'x' is used before being assigned.
+foo_1.ts(6,6): error TS2454: Variable 'x' is used before being assigned.
+foo_1.ts(8,5): error TS2454: Variable 'x' is used before being assigned.

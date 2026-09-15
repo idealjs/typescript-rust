@@ -1,0 +1,4 @@
+/augmentation.ts(2,16): error TS2664: Invalid module name in augmentation, module 'file.augmentable' cannot be found.
+/valid.d.ts(3,18): error TS2454: Variable 'stylesheet' is used before being assigned.
+/valid.d.ts(8,18): error TS2454: Variable 'text' is used before being assigned.
+/valid.d.ts(13,18): error TS2454: Variable 'data' is used before being assigned.

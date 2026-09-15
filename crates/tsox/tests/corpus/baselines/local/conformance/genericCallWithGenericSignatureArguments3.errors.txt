@@ -1,0 +1,12 @@
+genericCallWithGenericSignatureArguments3.ts(11,37): error TS2345: Argument of type '(x: Object) => string' is not assignable to parameter of type '(x: string) => string'.
+  Types of parameters 'x' and 'x' are incompatible.
+    Type 'string' is not assignable to type 'Object'.
+genericCallWithGenericSignatureArguments3.ts(14,28): error TS2345: Argument of type '(x: Object) => string' is not assignable to parameter of type '(x: Object) => Object'.
+  Type 'string' is not assignable to type 'Object'.
+genericCallWithGenericSignatureArguments3.ts(32,19): error TS2345: Argument of type '(a1: (y: string) => string) => (n: Object) => number' is not assignable to parameter of type '(x: (a: string) => boolean) => (n: Object) => number'.
+  Types of parameters 'a1' and 'x' are incompatible.
+    Type '(a: string) => boolean' is not assignable to type '(y: string) => string'.
+      Type 'boolean' is not assignable to type 'string'.
+        Type 'string' is not assignable to type 'boolean'.
+genericCallWithGenericSignatureArguments3.ts(33,69): error TS2345: Argument of type '(a2: (z: string) => boolean) => number' is not assignable to parameter of type '(x: (z: string) => boolean) => (n: Object) => number'.
+  Type 'number' is not assignable to type '(n: Object) => number'.

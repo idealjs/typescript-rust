@@ -1,0 +1,3 @@
+propertyNamedPrototype.ts(2,5): error TS2564: Property 'prototype' has no initializer and is not definitely assigned in the constructor.
+propertyNamedPrototype.ts(3,12): error TS2300: Duplicate identifier 'prototype'.
+propertyNamedPrototype.ts(3,12): error TS2717: Subsequent property declarations must have the same type.  Property 'prototype' must be of type 'number', but here has type 'C'.

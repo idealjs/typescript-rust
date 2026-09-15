@@ -1,0 +1,42 @@
+inferFromGenericFunctionReturnTypes2.ts(13,45): error TS2345: Argument of type '(x: T) => U' is not assignable to parameter of type '(x: string) => number'.
+  Types of parameters 'x' and 'x' are incompatible.
+    Type 'string' is not assignable to type 'T'.
+      'T' could be instantiated with an arbitrary type which could be unrelated to 'string'.
+inferFromGenericFunctionReturnTypes2.ts(14,43): error TS2345: Argument of type '(x: A) => B' is not assignable to parameter of type '(x: string) => unknown'.
+  Types of parameters 'x' and 'x' are incompatible.
+    Type 'string' is not assignable to type 'A'.
+      'A' could be instantiated with an arbitrary type which could be unrelated to 'string'.
+inferFromGenericFunctionReturnTypes2.ts(20,30): error TS2345: Argument of type '(x: T) => any[]' is not assignable to parameter of type '(x: string) => any[]'.
+  Types of parameters 'x' and 'x' are incompatible.
+    Type 'string' is not assignable to type 'T'.
+      'T' could be instantiated with an arbitrary type which could be unrelated to 'string'.
+inferFromGenericFunctionReturnTypes2.ts(21,33): error TS2345: Argument of type '(x: A) => B' is not assignable to parameter of type '(x: string) => unknown'.
+  Types of parameters 'x' and 'x' are incompatible.
+    Type 'string' is not assignable to type 'A'.
+      'A' could be instantiated with an arbitrary type which could be unrelated to 'string'.
+inferFromGenericFunctionReturnTypes2.ts(22,25): error TS2345: Argument of type '(x: T) => U' is not assignable to parameter of type '(value: string, index: number, array: string[]) => unknown'.
+  Types of parameters 'x' and 'value' are incompatible.
+    Type 'string' is not assignable to type 'T'.
+      'T' could be instantiated with an arbitrary type which could be unrelated to 'string'.
+inferFromGenericFunctionReturnTypes2.ts(22,43): error TS2345: Argument of type '(x: B) => C' is not assignable to parameter of type '(x: T) => unknown'.
+  Types of parameters 'x' and 'x' are incompatible.
+    Type 'T' is not assignable to type 'B'.
+      'B' could be instantiated with an arbitrary type which could be unrelated to 'T'.
+inferFromGenericFunctionReturnTypes2.ts(23,33): error TS2345: Argument of type '(x: A) => B' is not assignable to parameter of type '(x: string) => T'.
+  Types of parameters 'x' and 'x' are incompatible.
+    Type 'string' is not assignable to type 'A'.
+      'A' could be instantiated with an arbitrary type which could be unrelated to 'string'.
+inferFromGenericFunctionReturnTypes2.ts(27,3): error TS2564: Property '_store' has no initializer and is not definitely assigned in the constructor.
+inferFromGenericFunctionReturnTypes2.ts(55,11): error TS2322: Type 'SetOf<unknown>' is not assignable to type 'SetOf<B>'.
+  Types of property '_store' are incompatible.
+    Type 'unknown[]' is not assignable to type 'B[]'.
+inferFromGenericFunctionReturnTypes2.ts(78,5): error TS2345: Argument of type '(s: SetOf<A>) => SetOf<A>' is not assignable to parameter of type '(a: SetOf<number>) => SetOf<A>'.
+  Types of parameters 's' and 'a' are incompatible.
+    Type 'SetOf<number>' is not assignable to type 'SetOf<A>'.
+      Types of property '_store' are incompatible.
+        Type 'number[]' is not assignable to type 'A[]'.
+inferFromGenericFunctionReturnTypes2.ts(89,5): error TS2345: Argument of type '(s: SetOf<A>) => SetOf<A>' is not assignable to parameter of type '(a: SetOf<number>) => SetOf<A>'.
+  Types of parameters 's' and 'a' are incompatible.
+    Type 'SetOf<number>' is not assignable to type 'SetOf<A>'.
+      Types of property '_store' are incompatible.
+        Type 'number[]' is not assignable to type 'A[]'.

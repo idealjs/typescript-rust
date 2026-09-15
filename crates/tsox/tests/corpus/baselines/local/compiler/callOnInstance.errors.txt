@@ -1,0 +1,5 @@
+callOnInstance.ts(5,18): error TS2348: Value of type 'typeof D' is not callable. Did you mean to include 'new'?
+callOnInstance.ts(7,18): error TS2349: This expression is not callable.
+  Type 'D' has no call signatures.
+callOnInstance.ts(10,1): error TS2349: This expression is not callable.
+  Type 'C' has no call signatures.

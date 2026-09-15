@@ -1,0 +1,1 @@
+noImplicitSymbolToString.ts(8,1): error TS2322: Type 'symbol' is not assignable to type 'string'.

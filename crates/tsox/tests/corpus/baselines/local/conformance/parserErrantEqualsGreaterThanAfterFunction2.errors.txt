@@ -1,0 +1,4 @@
+parserErrantEqualsGreaterThanAfterFunction2.ts(1,10): error TS2391: Function implementation is missing or not immediately following the declaration.
+parserErrantEqualsGreaterThanAfterFunction2.ts(1,15): error TS2304: Cannot find name 'A'.
+parserErrantEqualsGreaterThanAfterFunction2.ts(1,18): error TS1005: ';' expected.
+parserErrantEqualsGreaterThanAfterFunction2.ts(1,21): error TS2304: Cannot find name 'p'.

@@ -1,0 +1,2 @@
+parserForStatement5.ts(1,12): error TS2304: Cannot find name 'b'.
+parserForStatement5.ts(1,13): error TS1005: ';' expected.

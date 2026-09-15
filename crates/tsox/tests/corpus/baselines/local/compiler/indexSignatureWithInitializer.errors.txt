@@ -1,0 +1,2 @@
+indexSignatureWithInitializer.ts(7,5): error TS2564: Property '[x = 0]' has no initializer and is not definitely assigned in the constructor.
+indexSignatureWithInitializer.ts(7,6): error TS2304: Cannot find name 'x'.

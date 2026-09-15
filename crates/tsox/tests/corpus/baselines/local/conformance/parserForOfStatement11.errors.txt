@@ -1,0 +1,2 @@
+parserForOfStatement11.ts(1,22): error TS2304: Cannot find name 'X'.
+parserForOfStatement11.ts(1,22): error TS2495: Type 'any' is not an array type or a string type.

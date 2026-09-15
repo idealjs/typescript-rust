@@ -1,0 +1,2 @@
+arrayFlatMap.ts(3,44): error TS2322: Type 'never[]' is not assignable to type 'ReadonlyArray<number>'.
+arrayFlatMap.ts(4,52): error TS2322: Type 'never[]' is not assignable to type 'ReadonlyArray<number>'.

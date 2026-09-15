@@ -1,0 +1,2 @@
+recursiveComplicatedClasses.ts(10,12): error TS2564: Property 'bound' has no initializer and is not definitely assigned in the constructor.
+recursiveComplicatedClasses.ts(13,27): error TS2454: Variable 'b' is used before being assigned.

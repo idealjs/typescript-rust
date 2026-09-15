@@ -1,0 +1,4 @@
+constructorParameterProperties2.ts(2,5): error TS2564: Property 'y' has no initializer and is not definitely assigned in the constructor.
+constructorParameterProperties2.ts(10,5): error TS2564: Property 'y' has no initializer and is not definitely assigned in the constructor.
+constructorParameterProperties2.ts(18,5): error TS2564: Property 'y' has no initializer and is not definitely assigned in the constructor.
+constructorParameterProperties2.ts(26,5): error TS2564: Property 'y' has no initializer and is not definitely assigned in the constructor.

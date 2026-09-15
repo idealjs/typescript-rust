@@ -1,0 +1,21 @@
+privacyImportParseErrors.ts(22,27): error TS2664: Invalid module name in augmentation, module 'm1_M3_public' cannot be found.
+privacyImportParseErrors.ts(30,20): error TS2664: Invalid module name in augmentation, module 'm1_M4_private' cannot be found.
+privacyImportParseErrors.ts(106,27): error TS2664: Invalid module name in augmentation, module 'm2_M3_public' cannot be found.
+privacyImportParseErrors.ts(114,20): error TS2664: Invalid module name in augmentation, module 'm2_M4_private' cannot be found.
+privacyImportParseErrors.ts(180,23): error TS2664: Invalid module name in augmentation, module 'glo_M2_public' cannot be found.
+privacyImportParseErrors.ts(198,23): error TS2664: Invalid module name in augmentation, module 'glo_M4_private' cannot be found.
+privacyImportParseErrors.ts(218,34): error TS2307: Cannot find module 'glo_M2_public' or its corresponding type declarations.
+privacyImportParseErrors.ts(238,34): error TS2307: Cannot find module 'glo_M4_private' or its corresponding type declarations.
+privacyImportParseErrors.ts(251,40): error TS2307: Cannot find module 'glo_M2_public' or its corresponding type declarations.
+privacyImportParseErrors.ts(252,40): error TS2307: Cannot find module 'glo_M4_private' or its corresponding type declarations.
+privacyImportParseErrors.ts(255,23): error TS2664: Invalid module name in augmentation, module 'use_glo_M1_public' cannot be found.
+privacyImportParseErrors.ts(284,16): error TS2664: Invalid module name in augmentation, module 'use_glo_M3_private' cannot be found.
+privacyImportParseErrors.ts(312,16): error TS2664: Invalid module name in augmentation, module 'anotherParseError' cannot be found.
+privacyImportParseErrors.ts(314,24): error TS2664: Invalid module name in augmentation, module 'abc' cannot be found.
+privacyImportParseErrors.ts(319,16): error TS2664: Invalid module name in augmentation, module 'abc2' cannot be found.
+privacyImportParseErrors.ts(322,12): error TS2664: Invalid module name in augmentation, module 'abc3' cannot be found.
+privacyImportParseErrors.ts(326,9): error TS1029: 'export' modifier must precede 'declare' modifier.
+privacyImportParseErrors.ts(326,23): error TS2664: Invalid module name in augmentation, module 'anotherParseError2' cannot be found.
+privacyImportParseErrors.ts(328,24): error TS2664: Invalid module name in augmentation, module 'abc' cannot be found.
+privacyImportParseErrors.ts(333,16): error TS2664: Invalid module name in augmentation, module 'abc2' cannot be found.
+privacyImportParseErrors.ts(336,12): error TS2664: Invalid module name in augmentation, module 'abc3' cannot be found.

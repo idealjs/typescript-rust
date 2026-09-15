@@ -1,0 +1,2 @@
+contextuallyTypeAsyncFunctionAwaitOperand.ts(5,11): error TS2322: Type 'unknown' is not assignable to type 'Obj'.
+contextuallyTypeAsyncFunctionAwaitOperand.ts(5,62): error TS2353: Object literal may only specify known properties, and 'key' does not exist in type 'unknown | PromiseLike<unknown>'.

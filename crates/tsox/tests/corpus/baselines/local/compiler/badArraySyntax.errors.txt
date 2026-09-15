@@ -1,0 +1,6 @@
+badArraySyntax.ts(6,16): error TS1109: Expression expected.
+badArraySyntax.ts(7,16): error TS1109: Expression expected.
+badArraySyntax.ts(8,21): error TS1109: Expression expected.
+badArraySyntax.ts(9,21): error TS1109: Expression expected.
+badArraySyntax.ts(10,36): error TS1109: Expression expected.
+badArraySyntax.ts(10,43): error TS1109: Expression expected.

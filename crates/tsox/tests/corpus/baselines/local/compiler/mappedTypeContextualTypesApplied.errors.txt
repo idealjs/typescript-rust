@@ -1,0 +1,2 @@
+mappedTypeContextualTypesApplied.ts(18,15): error TS7006: Parameter 's' implicitly has an 'any' type.
+mappedTypeContextualTypesApplied.ts(19,15): error TS7006: Parameter 's' implicitly has an 'any' type.

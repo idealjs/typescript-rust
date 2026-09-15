@@ -1,0 +1,5 @@
+referenceSatisfiesExpression.ts(9,1): error TS2364: The left-hand side of an assignment expression must be a variable or a property access.
+referenceSatisfiesExpression.ts(9,2): error TS2454: Variable 'b' is used before being assigned.
+referenceSatisfiesExpression.ts(9,2): error TS2454: Variable 'b' is used before being assigned.
+referenceSatisfiesExpression.ts(12,3): error TS2454: Variable 'c' is used before being assigned.
+referenceSatisfiesExpression.ts(23,39): error TS1005: ';' expected.

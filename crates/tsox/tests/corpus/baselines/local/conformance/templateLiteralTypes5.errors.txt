@@ -1,0 +1,11 @@
+templateLiteralTypes5.ts(8,7): error TS2322: Type '<T0>(x: `${T0}`) => TypeMap[T0]' is not assignable to type '<T1>(x: `${T1}`) => TypeMap[T1]'.
+  Types of parameters 'x' and 'x' are incompatible.
+    Type '`${T1}`' is not assignable to type '`${T0}`'.
+templateLiteralTypes5.ts(9,49): error TS2536: Type '`${T2}`' cannot be used to index type 'TypeMap'.
+templateLiteralTypes5.ts(10,7): error TS2322: Type '<T0>(x: `${T0}`) => TypeMap[T0]' is not assignable to type '<T2>(x: `${T2}`) => TypeMap[`${T2}`]'.
+  Types of parameters 'x' and 'x' are incompatible.
+    Type '`${T2}`' is not assignable to type '`${T0}`'.
+templateLiteralTypes5.ts(13,11): error TS2322: Type 'T3' is not assignable to type '`${T3}`'.
+  Type 'string' is not assignable to type '`${T3}`'.
+templateLiteralTypes5.ts(14,11): error TS2322: Type '`${T3}`' is not assignable to type 'T3'.
+  'T3' could be instantiated with an arbitrary type which could be unrelated to '`${T3}`'.

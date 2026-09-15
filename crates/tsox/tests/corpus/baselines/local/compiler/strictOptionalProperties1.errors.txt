@@ -1,0 +1,32 @@
+strictOptionalProperties1.ts(6,5): error TS2322: Type 'undefined' is not assignable to type 'string'.
+strictOptionalProperties1.ts(53,5): error TS2322: Type 'undefined' is not assignable to type 'string'.
+strictOptionalProperties1.ts(99,34): error TS2322: Type 'undefined' is not assignable to type 'string'.
+strictOptionalProperties1.ts(111,31): error TS2322: Type 'undefined' is not assignable to type 'number'.
+strictOptionalProperties1.ts(119,5): error TS2411: Property 'bar' of type 'string | undefined' is not assignable to 'string' index type 'string'.
+strictOptionalProperties1.ts(145,5): error TS2345: Argument of type '[string | undefined?]' is not assignable to parameter of type '[string | undefined]'.
+strictOptionalProperties1.ts(146,5): error TS2345: Argument of type '[string | undefined | undefined?]' is not assignable to parameter of type '[string | undefined]'.
+strictOptionalProperties1.ts(150,5): error TS2345: Argument of type '{ p: string; }' is not assignable to parameter of type '{ p?: T["p"]; }'.
+  Types of property 'p' are incompatible.
+    Type 'string' is not assignable to type 'T["p"]'.
+strictOptionalProperties1.ts(151,5): error TS2345: Argument of type '{ p: string | undefined; }' is not assignable to parameter of type '{ p?: T["p"]; }'.
+  Types of property 'p' are incompatible.
+    Type 'string | undefined' is not assignable to type 'T["p"]'.
+      Type 'undefined' is not assignable to type 'T["p"]'.
+strictOptionalProperties1.ts(152,5): error TS2345: Argument of type '{ p?: string; }' is not assignable to parameter of type '{ p?: T["p"]; }'.
+  Types of property 'p' are incompatible.
+    Type 'string' is not assignable to type 'T["p"]'.
+strictOptionalProperties1.ts(153,5): error TS2345: Argument of type '{ p?: string; }' is not assignable to parameter of type '{ p?: T["p"]; }'.
+  Types of property 'p' are incompatible.
+    Type 'string | undefined' is not assignable to type 'T["p"]'.
+      Type 'undefined' is not assignable to type 'T["p"]'.
+strictOptionalProperties1.ts(193,1): error TS2322: Type 'string | boolean | undefined' is not assignable to type 'string | number | undefined'.
+  Type 'boolean' is not assignable to type 'string | number | undefined'.
+strictOptionalProperties1.ts(194,1): error TS2322: Type 'string | boolean | undefined' is not assignable to type 'string | number'.
+  Type 'undefined' is not assignable to type 'string | number'.
+strictOptionalProperties1.ts(197,5): error TS2322: Type 'undefined' is not assignable to type 'string | number'.
+strictOptionalProperties1.ts(210,1): error TS2322: Type '{ a: number; b: string | undefined; }' is not assignable to type '{ [x: string]: string | number; }'.
+  Index signature for type 'string' is missing in type '{ a: number; b: string | undefined; }'.
+    Type 'undefined' is not assignable to type 'string | number'.
+strictOptionalProperties1.ts(211,1): error TS2322: Type '{ a: number; b?: string; }' is not assignable to type '{ [x: string]: string | number; }'.
+  Index signature for type 'string' is missing in type '{ a: number; b?: string; }'.
+    Type 'undefined' is not assignable to type 'string | number'.

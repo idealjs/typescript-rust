@@ -1,0 +1,3 @@
+classImplementsPrimitive.ts(3,20): error TS2304: Cannot find name 'number'.
+classImplementsPrimitive.ts(4,21): error TS2304: Cannot find name 'string'.
+classImplementsPrimitive.ts(5,21): error TS2304: Cannot find name 'boolean'.

@@ -1,0 +1,2 @@
+parser519458.ts(1,15): error TS2503: Cannot find namespace 'module'.
+parser519458.ts(1,21): error TS1005: ';' expected.

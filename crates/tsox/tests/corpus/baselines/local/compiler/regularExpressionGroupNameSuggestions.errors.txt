@@ -1,0 +1,1 @@
+regularExpressionGroupNameSuggestions.ts(1,27): error TS1532: There is no capturing group named '{0}' in this regular expression.

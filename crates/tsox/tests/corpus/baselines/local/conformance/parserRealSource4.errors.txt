@@ -1,0 +1,5 @@
+error TS6053: File 'typescript.ts' not found.
+parserRealSource4.ts(195,38): error TS1109: Expression expected.
+
+
+!!! error TS6053: File 'typescript.ts' not found.

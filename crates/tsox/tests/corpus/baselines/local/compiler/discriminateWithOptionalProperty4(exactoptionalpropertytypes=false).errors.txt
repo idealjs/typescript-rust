@@ -1,0 +1,7 @@
+discriminateWithOptionalProperty4.ts(6,5): error TS2339: Property 'a' does not exist on type '{ a: any | string[]; } | { b: string[]; }'.
+discriminateWithOptionalProperty4.ts(7,9): error TS2339: Property 'a' does not exist on type '{ a: any | string[]; } | { b: string[]; }'.
+discriminateWithOptionalProperty4.ts(8,9): error TS2339: Property 'b' does not exist on type '{ a: any | string[]; } | { b: string[]; }'.
+discriminateWithOptionalProperty4.ts(14,19): error TS18048: 'zWorkAround.a' is possibly 'undefined'.
+discriminateWithOptionalProperty4.ts(14,46): error TS18048: 'zWorkAround.b' is possibly 'undefined'.
+discriminateWithOptionalProperty4.ts(16,16): error TS2339: Property 'a' does not exist on type '{ a: any | string[]; } | { b: string[]; }'.
+discriminateWithOptionalProperty4.ts(16,33): error TS2339: Property 'b' does not exist on type '{ a: any | string[]; } | { b: string[]; }'.

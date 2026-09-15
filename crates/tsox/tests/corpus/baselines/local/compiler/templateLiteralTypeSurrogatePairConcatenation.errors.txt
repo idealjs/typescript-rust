@@ -1,0 +1,2 @@
+templateLiteralTypeSurrogatePairConcatenation.ts(9,7): error TS2322: Type '"😀"' is not assignable to type '"��"'.
+templateLiteralTypeSurrogatePairConcatenation.ts(10,7): error TS2322: Type '"��"' is not assignable to type '"😀"'.

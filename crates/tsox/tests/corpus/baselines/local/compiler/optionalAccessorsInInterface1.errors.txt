@@ -1,0 +1,1 @@
+optionalAccessorsInInterface1.ts(7,30): error TS2741: Property 'set' is missing in type '{ get: () => number; }' but required in type 'MyPropertyDescriptor'.

@@ -1,0 +1,2 @@
+exportNonInitializedVariablesInIfThenStatementNoCrash1.ts(4,14): error TS1155: 'const' declarations must be initialized.
+exportNonInitializedVariablesInIfThenStatementNoCrash1.ts(4,26): error TS2304: Cannot find name 'CssExports'.

@@ -1,0 +1,2 @@
+typeGuardFunctionOfFormThisErrors.ts(55,7): error TS2339: Property 'follow' does not exist on type 'RoyalGuard'.
+typeGuardFunctionOfFormThisErrors.ts(58,7): error TS2339: Property 'lead' does not exist on type 'RoyalGuard'.

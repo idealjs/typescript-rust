@@ -1,0 +1,10 @@
+genericTypeAliases.ts(26,5): error TS2454: Variable 'y' is used before being assigned.
+genericTypeAliases.ts(54,1): error TS2454: Variable 'p' is used before being assigned.
+genericTypeAliases.ts(54,1): error TS2322: Type '1' is not assignable to type 'T'.
+  'T' could be instantiated with an arbitrary type which could be unrelated to '1'.
+genericTypeAliases.ts(55,1): error TS2454: Variable 'p' is used before being assigned.
+genericTypeAliases.ts(55,1): error TS2322: Type '2' is not assignable to type 'T'.
+  'T' could be instantiated with an arbitrary type which could be unrelated to '2'.
+genericTypeAliases.ts(56,1): error TS2454: Variable 'p' is used before being assigned.
+genericTypeAliases.ts(61,12): error TS2454: Variable 'x' is used before being assigned.
+genericTypeAliases.ts(67,12): error TS2454: Variable 'x' is used before being assigned.

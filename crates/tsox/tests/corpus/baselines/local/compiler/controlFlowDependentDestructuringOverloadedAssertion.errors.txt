@@ -1,0 +1,2 @@
+controlFlowDependentDestructuringOverloadedAssertion.ts(14,10): error TS18048: 'payload' is possibly 'undefined'.
+controlFlowDependentDestructuringOverloadedAssertion.ts(15,10): error TS18048: 'payload' is possibly 'undefined'.

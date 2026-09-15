@@ -1,0 +1,5 @@
+jsxEntityDecoderAfterNonEntityAmpersand.tsx(1,12): error TS2874: This JSX tag requires 'React' to be in scope, but it could not be found.
+jsxEntityDecoderAfterNonEntityAmpersand.tsx(2,12): error TS2874: This JSX tag requires 'React' to be in scope, but it could not be found.
+jsxEntityDecoderAfterNonEntityAmpersand.tsx(3,12): error TS2874: This JSX tag requires 'React' to be in scope, but it could not be found.
+jsxEntityDecoderAfterNonEntityAmpersand.tsx(4,12): error TS2874: This JSX tag requires 'React' to be in scope, but it could not be found.
+jsxEntityDecoderAfterNonEntityAmpersand.tsx(5,12): error TS2874: This JSX tag requires 'React' to be in scope, but it could not be found.

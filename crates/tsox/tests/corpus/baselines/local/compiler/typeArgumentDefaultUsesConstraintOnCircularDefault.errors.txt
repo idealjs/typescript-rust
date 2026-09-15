@@ -1,0 +1,3 @@
+typeArgumentDefaultUsesConstraintOnCircularDefault.ts(3,18): error TS2353: Object literal may only specify known properties, and 'foo' does not exist in type '{ value: T; }'.
+typeArgumentDefaultUsesConstraintOnCircularDefault.ts(5,19): error TS2322: Type '{}' is not assignable to type 'T'.
+  'T' could be instantiated with an arbitrary type which could be unrelated to '{}'.

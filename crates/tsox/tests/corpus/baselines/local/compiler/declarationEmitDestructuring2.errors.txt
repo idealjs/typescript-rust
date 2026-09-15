@@ -1,0 +1,6 @@
+declarationEmitDestructuring2.ts(3,13): error TS2451: Cannot redeclare block-scoped variable 'a'.
+declarationEmitDestructuring2.ts(3,17): error TS2451: Cannot redeclare block-scoped variable 'b'.
+declarationEmitDestructuring2.ts(3,23): error TS2451: Cannot redeclare block-scoped variable 'c'.
+declarationEmitDestructuring2.ts(3,41): error TS2451: Cannot redeclare block-scoped variable 'a'.
+declarationEmitDestructuring2.ts(3,44): error TS2451: Cannot redeclare block-scoped variable 'b'.
+declarationEmitDestructuring2.ts(3,47): error TS2451: Cannot redeclare block-scoped variable 'c'.

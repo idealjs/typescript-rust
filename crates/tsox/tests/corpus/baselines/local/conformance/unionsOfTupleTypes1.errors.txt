@@ -1,0 +1,2 @@
+unionsOfTupleTypes1.ts(54,5): error TS2322: Type 'number' is not assignable to type 'boolean | number[][]'.
+unionsOfTupleTypes1.ts(60,21): error TS2352: Conversion of type 'string[]' to type '[string] | [string, number]' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.

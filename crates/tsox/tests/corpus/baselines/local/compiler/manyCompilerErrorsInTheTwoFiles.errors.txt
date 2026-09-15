@@ -1,0 +1,19 @@
+a.ts(1,11): error TS1109: Expression expected.
+a.ts(1,12): error TS1127: Invalid character.
+a.ts(2,12): error TS1109: Expression expected.
+a.ts(2,13): error TS1127: Invalid character.
+a.ts(2,16): error TS1127: Invalid character.
+a.ts(2,19): error TS1127: Invalid character.
+a.ts(3,1): error TS1146: Declaration expected.
+a.ts(3,1): error TS2304: Cannot find name 'OK'.
+a.ts(4,1): error TS1434: Unexpected keyword or identifier.
+a.ts(4,1): error TS2304: Cannot find name 'HERE'.
+a.ts(4,5): error TS1002: Unterminated string literal.
+a.ts(5,1): error TS1434: Unexpected keyword or identifier.
+a.ts(5,1): error TS2304: Cannot find name 'GOTTA'.
+a.ts(5,7): error TS1434: Unexpected keyword or identifier.
+a.ts(5,7): error TS2304: Cannot find name 'GO'.
+a.ts(5,10): error TS2304: Cannot find name 'FAST'.
+b.ts(1,1): error TS2304: Cannot find name 'fhqwhgads'.
+b.ts(2,1): error TS2304: Cannot find name 'to'.
+b.ts(3,1): error TS2304: Cannot find name 'limit'.

@@ -1,0 +1,1 @@
+importDeclWithExportModifier.ts(5,21): error TS2694: Namespace 'x' has no exported member 'c'.

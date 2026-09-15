@@ -1,0 +1,5 @@
+callSignatureWithOptionalParameterAndInitializer.ts(3,14): error TS1015: Parameter cannot have question mark and initializer.
+callSignatureWithOptionalParameterAndInitializer.ts(23,6): error TS2371: A parameter initializer is only allowed in a function or constructor implementation.
+callSignatureWithOptionalParameterAndInitializer.ts(24,20): error TS2371: A parameter initializer is only allowed in a function or constructor implementation.
+callSignatureWithOptionalParameterAndInitializer.ts(34,6): error TS2371: A parameter initializer is only allowed in a function or constructor implementation.
+callSignatureWithOptionalParameterAndInitializer.ts(35,9): error TS2371: A parameter initializer is only allowed in a function or constructor implementation.

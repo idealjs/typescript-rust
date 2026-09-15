@@ -1,0 +1,1 @@
+contextualTypeAppliedToVarArgs.ts(9,42): error TS7006: Parameter 'args2' implicitly has an 'any' type.

@@ -1,0 +1,2 @@
+narrowingPastLastAssignment.ts(152,25): error TS18048: 'foo' is possibly 'undefined'.
+narrowingPastLastAssignment.ts(161,9): error TS18048: 'foo' is possibly 'undefined'.

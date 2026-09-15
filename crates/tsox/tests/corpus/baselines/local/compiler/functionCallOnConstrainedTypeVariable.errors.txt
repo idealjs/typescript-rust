@@ -1,0 +1,16 @@
+functionCallOnConstrainedTypeVariable.ts(11,7): error TS2769: No overload matches this call.
+  Overload 1 of 2, '(x: number): string', gave the following error.
+    Argument of type 'string' is not assignable to parameter of type 'number'.
+  Overload 2 of 2, '(x: boolean): string', gave the following error.
+    Argument of type 'string' is not assignable to parameter of type 'boolean'.
+functionCallOnConstrainedTypeVariable.ts(15,7): error TS2769: No overload matches this call.
+  Overload 1 of 2, '(x: number): string', gave the following error.
+    Argument of type 'string' is not assignable to parameter of type 'number'.
+  Overload 2 of 2, '(x: boolean): string', gave the following error.
+    Argument of type 'string' is not assignable to parameter of type 'boolean'.
+functionCallOnConstrainedTypeVariable.ts(17,7): error TS2322: Type '((x: number) => string) | ((x: boolean) => string)' is not assignable to type 'T["a"]'.
+  'T["a"]' could be instantiated with an arbitrary type which could be unrelated to '((x: number) => string) | ((x: boolean) => string)'.
+functionCallOnConstrainedTypeVariable.ts(18,3): error TS2349: This expression is not callable.
+  Type 'T["a"]' has no call signatures.
+functionCallOnConstrainedTypeVariable.ts(19,3): error TS2349: This expression is not callable.
+  Type 'T["a"]' has no call signatures.

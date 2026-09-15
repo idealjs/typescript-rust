@@ -1,0 +1,1 @@
+inKeywordAndIntersection.ts(28,14): error TS2339: Property 'one' does not exist on type 'InstanceOne | InstanceTwo'.

@@ -1,0 +1,33 @@
+typeofThis.ts(4,26): error TS2304: Cannot find name ''.
+typeofThis.ts(12,26): error TS2304: Cannot find name ''.
+typeofThis.ts(13,25): error TS2304: Cannot find name ''.
+typeofThis.ts(15,26): error TS2304: Cannot find name 'this'.
+typeofThis.ts(18,25): error TS2304: Cannot find name ''.
+typeofThis.ts(18,30): error TS1003: Identifier expected.
+typeofThis.ts(18,30): error TS2364: The left-hand side of an assignment expression must be a variable or a property access.
+typeofThis.ts(24,19): error TS2304: Cannot find name ''.
+typeofThis.ts(28,19): error TS2304: Cannot find name ''.
+typeofThis.ts(32,19): error TS2304: Cannot find name ''.
+typeofThis.ts(40,23): error TS2304: Cannot find name ''.
+typeofThis.ts(46,23): error TS2304: Cannot find name ''.
+typeofThis.ts(52,23): error TS2304: Cannot find name ''.
+typeofThis.ts(57,19): error TS2304: Cannot find name ''.
+typeofThis.ts(66,30): error TS2304: Cannot find name 'this'.
+typeofThis.ts(71,30): error TS2304: Cannot find name 'this'.
+typeofThis.ts(78,30): error TS2304: Cannot find name ''.
+typeofThis.ts(82,19): error TS1155: 'const' declarations must be initialized.
+typeofThis.ts(82,30): error TS2304: Cannot find name ''.
+typeofThis.ts(82,35): error TS1003: Identifier expected.
+typeofThis.ts(82,35): error TS2364: The left-hand side of an assignment expression must be a variable or a property access.
+typeofThis.ts(99,23): error TS2304: Cannot find name ''.
+typeofThis.ts(101,27): error TS2304: Cannot find name ''.
+typeofThis.ts(102,27): error TS2304: Cannot find name ''.
+typeofThis.ts(105,31): error TS2304: Cannot find name ''.
+typeofThis.ts(116,25): error TS2304: Cannot find name ''.
+typeofThis.ts(116,27): error TS1003: Identifier expected.
+typeofThis.ts(116,27): error TS2364: The left-hand side of an assignment expression must be a variable or a property access.
+typeofThis.ts(126,28): error TS2304: Cannot find name 'this'.
+typeofThis.ts(131,9): suggestion TS7027: Unreachable code detected.
+typeofThis.ts(131,28): error TS2304: Cannot find name 'this'.
+typeofThis.ts(136,28): error TS2304: Cannot find name 'this'.
+typeofThis.ts(141,28): error TS2304: Cannot find name 'this'.

@@ -1,0 +1,8 @@
+genericCallbacksAndClassHierarchy.ts(6,16): error TS2564: Property 'value' has no initializer and is not definitely assigned in the constructor.
+genericCallbacksAndClassHierarchy.ts(16,17): error TS2322: Type 'M.I<T>' is not assignable to type 'M.I<M.A<T>>'.
+  Types of property 'subscribe' are incompatible.
+    Type '(callback: (newValue: T) => void) => any' is not assignable to type '(callback: (newValue: M.A<T>) => void) => any'.
+      Types of parameters 'callback' and 'callback' are incompatible.
+        Type '(newValue: M.A<T>) => void' is not assignable to type '(newValue: T) => void'.
+          Types of parameters 'newValue' and 'newValue' are incompatible.
+            Type 'T' is not assignable to type 'M.A<T>'.

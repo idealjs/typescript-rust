@@ -1,0 +1,11 @@
+classWithConstructors.ts(6,13): error TS2554: Expected 1 arguments, but got 0.
+classWithConstructors.ts(15,14): error TS2554: Expected 1 arguments, but got 0.
+classWithConstructors.ts(21,13): error TS2554: Expected 1 arguments, but got 0.
+classWithConstructors.ts(23,20): error TS2345: Argument of type 'string' is not assignable to parameter of type 'number'.
+classWithConstructors.ts(31,13): error TS2554: Expected 1 arguments, but got 0.
+classWithConstructors.ts(40,14): error TS2554: Expected 1 arguments, but got 0.
+classWithConstructors.ts(46,13): error TS2554: Expected 1 arguments, but got 0.
+classWithConstructors.ts(47,20): error TS2345: Argument of type '1' is not assignable to parameter of type 'T'.
+  'T' could be instantiated with an arbitrary type which could be unrelated to '1'.
+classWithConstructors.ts(48,20): error TS2345: Argument of type '""' is not assignable to parameter of type 'T'.
+  'T' could be instantiated with an arbitrary type which could be unrelated to '""'.

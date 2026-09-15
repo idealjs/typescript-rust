@@ -1,0 +1,8 @@
+error TS6053: File '/.lib/react16.d.ts' not found.
+jsxElementTypeLiteral.tsx(2,24): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+jsxElementTypeLiteral.tsx(13,9): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+jsxElementTypeLiteral.tsx(16,9): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+jsxElementTypeLiteral.tsx(20,9): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+
+
+!!! error TS6053: File '/.lib/react16.d.ts' not found.

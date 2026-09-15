@@ -1,0 +1,1 @@
+performanceComparisonOfStructurallyIdenticalInterfacesWithGenericSignatures.ts(35,12): error TS2416: Property 'filter' in type 'A' is not assignable to the same property in base type 'InterfaceB<T>'.

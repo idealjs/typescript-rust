@@ -1,0 +1,2 @@
+duplicateSymbolsExportMatching.ts(45,16): error TS2403: Subsequent variable declarations must have the same type.  Variable 'w' must be of type 'number', but here has type 'string'.
+duplicateSymbolsExportMatching.ts(49,15): error TS2434: A namespace declaration cannot be located prior to a class or function with which it is merged.

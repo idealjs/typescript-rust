@@ -1,0 +1,3 @@
+symbolProperty52.ts(2,13): error TS2339: Property 'nonsense' does not exist on type 'SymbolConstructor'.
+symbolProperty52.ts(5,1): error TS2741: Property '[Symbol.nonsense]' is missing in type '{}' but required in type '{ [Symbol.nonsense]: number; }'.
+symbolProperty52.ts(7,12): error TS2339: Property 'nonsense' does not exist on type 'SymbolConstructor'.

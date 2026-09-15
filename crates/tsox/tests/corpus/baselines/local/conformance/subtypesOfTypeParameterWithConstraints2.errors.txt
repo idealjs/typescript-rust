@@ -1,0 +1,23 @@
+subtypesOfTypeParameterWithConstraints2.ts(29,9): error TS2403: Subsequent variable declarations must have the same type.  Variable 'r2' must be of type 'T', but here has type 'Date'.
+subtypesOfTypeParameterWithConstraints2.ts(33,9): error TS2403: Subsequent variable declarations must have the same type.  Variable 'r3' must be of type 'U', but here has type 'Date'.
+subtypesOfTypeParameterWithConstraints2.ts(38,12): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
+subtypesOfTypeParameterWithConstraints2.ts(39,15): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
+subtypesOfTypeParameterWithConstraints2.ts(45,11): error TS2564: Property 'baz' has no initializer and is not definitely assigned in the constructor.
+subtypesOfTypeParameterWithConstraints2.ts(76,9): error TS2403: Subsequent variable declarations must have the same type.  Variable 'r4' must be of type 'Date', but here has type 'T'.
+subtypesOfTypeParameterWithConstraints2.ts(81,9): error TS2403: Subsequent variable declarations must have the same type.  Variable 'r5' must be of type 'RegExp', but here has type 'T'.
+subtypesOfTypeParameterWithConstraints2.ts(91,9): error TS2403: Subsequent variable declarations must have the same type.  Variable 'r7' must be of type '() => void', but here has type 'T'.
+subtypesOfTypeParameterWithConstraints2.ts(101,21): error TS2454: Variable 'i1' is used before being assigned.
+subtypesOfTypeParameterWithConstraints2.ts(102,9): error TS2403: Subsequent variable declarations must have the same type.  Variable 'r9' must be of type 'I1', but here has type 'T'.
+subtypesOfTypeParameterWithConstraints2.ts(102,25): error TS2454: Variable 'i1' is used before being assigned.
+subtypesOfTypeParameterWithConstraints2.ts(107,22): error TS2454: Variable 'c1' is used before being assigned.
+subtypesOfTypeParameterWithConstraints2.ts(108,9): error TS2403: Subsequent variable declarations must have the same type.  Variable 'r10' must be of type 'C1', but here has type 'T'.
+subtypesOfTypeParameterWithConstraints2.ts(108,26): error TS2454: Variable 'c1' is used before being assigned.
+subtypesOfTypeParameterWithConstraints2.ts(113,22): error TS2454: Variable 'c2' is used before being assigned.
+subtypesOfTypeParameterWithConstraints2.ts(114,9): error TS2403: Subsequent variable declarations must have the same type.  Variable 'r12' must be of type 'C2<number>', but here has type 'T'.
+subtypesOfTypeParameterWithConstraints2.ts(114,26): error TS2454: Variable 'c2' is used before being assigned.
+subtypesOfTypeParameterWithConstraints2.ts(127,22): error TS2454: Variable 'af' is used before being assigned.
+subtypesOfTypeParameterWithConstraints2.ts(128,9): error TS2403: Subsequent variable declarations must have the same type.  Variable 'r15' must be of type '() => void', but here has type 'T'.
+subtypesOfTypeParameterWithConstraints2.ts(128,26): error TS2454: Variable 'af' is used before being assigned.
+subtypesOfTypeParameterWithConstraints2.ts(133,22): error TS2454: Variable 'ac' is used before being assigned.
+subtypesOfTypeParameterWithConstraints2.ts(134,9): error TS2403: Subsequent variable declarations must have the same type.  Variable 'r16' must be of type 'typeof c', but here has type 'T'.
+subtypesOfTypeParameterWithConstraints2.ts(134,26): error TS2454: Variable 'ac' is used before being assigned.

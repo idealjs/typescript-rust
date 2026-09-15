@@ -1,0 +1,2 @@
+parserSuperExpression4.ts(3,9): error TS2322: Type 'number' is not assignable to type '() => void'.
+parserSuperExpression4.ts(10,13): error TS2322: Type 'number' is not assignable to type '() => void'.

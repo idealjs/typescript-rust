@@ -1,0 +1,3 @@
+index.tsx(29,9): error TS7006: Parameter 'x' implicitly has an 'any' type.
+index.tsx(57,9): error TS7006: Parameter 's' implicitly has an 'any' type.
+index.tsx(73,34): error TS7006: Parameter 's' implicitly has an 'any' type.

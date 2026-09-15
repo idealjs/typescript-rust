@@ -1,0 +1,2 @@
+controlFlowWithTemplateLiterals.ts(3,3): error TS18048: 'envVar' is possibly 'undefined'.
+controlFlowWithTemplateLiterals.ts(8,7): error TS2339: Property 'test' does not exist on type '{ test: string; } | {}'.

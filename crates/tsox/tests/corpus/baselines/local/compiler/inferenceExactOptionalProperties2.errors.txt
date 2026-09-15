@@ -1,0 +1,2 @@
+inferenceExactOptionalProperties2.ts(29,26): error TS2344: Type '{ src: string | number & string; logic: TActors[string | number & string]; }' does not satisfy the constraint 'ProvidedActor'.
+inferenceExactOptionalProperties2.ts(50,41): error TS2344: Type '{ src: string | number & string; logic: TActors[string | number & string]; }' does not satisfy the constraint 'ProvidedActor'.

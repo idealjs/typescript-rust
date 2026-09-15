@@ -1,0 +1,2 @@
+parserES5ForOfStatement1.d.ts(1,15): error TS2304: Cannot find name 'e'.
+parserES5ForOfStatement1.d.ts(1,15): error TS2495: Type 'any' is not an array type or a string type.

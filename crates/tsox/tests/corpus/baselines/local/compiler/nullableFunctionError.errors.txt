@@ -1,0 +1,9 @@
+nullableFunctionError.ts(1,1): error TS2349: This expression is not callable.
+  Type 'null' has no call signatures.
+nullableFunctionError.ts(1,1): error TS2721: Cannot invoke an object which is possibly 'null'.
+nullableFunctionError.ts(2,1): error TS2349: This expression is not callable.
+  Type 'undefined' has no call signatures.
+nullableFunctionError.ts(2,1): error TS2722: Cannot invoke an object which is possibly 'undefined'.
+nullableFunctionError.ts(4,1): error TS2349: This expression is not callable.
+  No constituent of type 'null | undefined' is callable.
+nullableFunctionError.ts(4,1): error TS2723: Cannot invoke an object which is possibly 'null' or 'undefined'.

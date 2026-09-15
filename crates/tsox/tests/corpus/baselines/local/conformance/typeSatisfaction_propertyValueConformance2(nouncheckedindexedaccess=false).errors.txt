@@ -1,0 +1,1 @@
+typeSatisfaction_propertyValueConformance2.ts(12,15): error TS2339: Property 'z' does not exist on type '{ m: boolean; }'.

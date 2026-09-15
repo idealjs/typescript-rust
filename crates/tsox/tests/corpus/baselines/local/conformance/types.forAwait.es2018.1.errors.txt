@@ -1,0 +1,6 @@
+types.forAwait.es2018.1.ts(12,16): error TS2454: Variable 'y' is used before being assigned.
+types.forAwait.es2018.1.ts(14,16): error TS2454: Variable 'y' is used before being assigned.
+types.forAwait.es2018.1.ts(16,16): error TS2454: Variable 'y' is used before being assigned.
+types.forAwait.es2018.1.ts(27,16): error TS2454: Variable 'y' is used before being assigned.
+types.forAwait.es2018.1.ts(29,16): error TS2454: Variable 'y' is used before being assigned.
+types.forAwait.es2018.1.ts(31,16): error TS2454: Variable 'y' is used before being assigned.

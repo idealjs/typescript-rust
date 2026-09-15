@@ -1,0 +1,3 @@
+forAwaitForIntersection1.ts(16,19): error TS2495: Type 'Iterable<A2> & AsyncIterable<B2>' is not an array type or a string type.
+forAwaitForIntersection1.ts(27,19): error TS2495: Type 'Iterable<A3> & AsyncIterable<B3>' is not an array type or a string type.
+forAwaitForIntersection1.ts(37,19): error TS2495: Type 'Iterable<A4> & AsyncIterable<B4>' is not an array type or a string type.

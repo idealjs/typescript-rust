@@ -1,0 +1,9 @@
+destructuringParameterDeclaration2.ts(7,29): error TS1005: ',' expected.
+destructuringParameterDeclaration2.ts(16,8): error TS2371: A parameter initializer is only allowed in a function or constructor implementation.
+destructuringParameterDeclaration2.ts(16,16): error TS2371: A parameter initializer is only allowed in a function or constructor implementation.
+destructuringParameterDeclaration2.ts(38,4): error TS2345: Argument of type '{ b: boolean; }' is not assignable to parameter of type '{ b: string | number; }'.
+  Types of property 'b' are incompatible.
+    Type 'boolean' is not assignable to type 'string | number'.
+destructuringParameterDeclaration2.ts(65,18): error TS2451: Cannot redeclare block-scoped variable 'number'.
+destructuringParameterDeclaration2.ts(65,26): error TS2451: Cannot redeclare block-scoped variable 'number'.
+destructuringParameterDeclaration2.ts(65,34): error TS2451: Cannot redeclare block-scoped variable 'number'.

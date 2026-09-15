@@ -1,0 +1,1 @@
+parserModifierOnStatementInBlock2.ts(2,20): error TS1039: Initializers are not allowed in ambient contexts.

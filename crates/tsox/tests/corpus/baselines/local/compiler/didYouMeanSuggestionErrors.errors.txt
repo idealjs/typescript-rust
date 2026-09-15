@@ -1,0 +1,9 @@
+didYouMeanSuggestionErrors.ts(1,1): error TS2304: Cannot find name 'describe'.
+didYouMeanSuggestionErrors.ts(2,5): error TS2304: Cannot find name 'it'.
+didYouMeanSuggestionErrors.ts(3,19): error TS2304: Cannot find name '$'.
+didYouMeanSuggestionErrors.ts(7,1): error TS2304: Cannot find name 'suite'.
+didYouMeanSuggestionErrors.ts(8,5): error TS2304: Cannot find name 'test'.
+didYouMeanSuggestionErrors.ts(9,21): error TS2591: Cannot find name 'process'. Do you need to install type definitions for node? Try `npm i --save-dev @types/node` and then add 'node' to the types field in your tsconfig.
+didYouMeanSuggestionErrors.ts(12,19): error TS2591: Cannot find name 'require'. Do you need to install type definitions for node? Try `npm i --save-dev @types/node` and then add 'node' to the types field in your tsconfig.
+didYouMeanSuggestionErrors.ts(13,19): error TS2591: Cannot find name 'Buffer'. Do you need to install type definitions for node? Try `npm i --save-dev @types/node` and then add 'node' to the types field in your tsconfig.
+didYouMeanSuggestionErrors.ts(14,19): error TS2591: Cannot find name 'module'. Do you need to install type definitions for node? Try `npm i --save-dev @types/node` and then add 'node' to the types field in your tsconfig.

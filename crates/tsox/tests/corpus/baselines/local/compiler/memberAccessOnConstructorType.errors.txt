@@ -1,0 +1,2 @@
+memberAccessOnConstructorType.ts(2,1): error TS2454: Variable 'f' is used before being assigned.
+memberAccessOnConstructorType.ts(2,3): error TS2339: Property 'arguments' does not exist on type '() => unknown'.

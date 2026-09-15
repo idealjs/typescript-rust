@@ -1,0 +1,7 @@
+mappedTypes3.ts(2,5): error TS2564: Property 'value' has no initializer and is not definitely assigned in the constructor.
+mappedTypes3.ts(29,22): error TS2345: Argument of type '{ isPerfect: Box<boolean>; weight: Box<number>; }' is not assignable to parameter of type '{ isPerfect: Box<T["isPerfect"]>; weight: Box<T["weight"]>; }'.
+  The types of 'isPerfect.value' are incompatible between these types.
+    Type 'boolean' is not assignable to type 'T["isPerfect"]'.
+mappedTypes3.ts(35,29): error TS2345: Argument of type 'BoxifiedBacon' is not assignable to parameter of type '{ isPerfect: Box<T["isPerfect"]>; weight: Box<T["weight"]>; }'.
+  The types of 'isPerfect.value' are incompatible between these types.
+    Type 'boolean' is not assignable to type 'T["isPerfect"]'.

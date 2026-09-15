@@ -1,0 +1,2 @@
+restUnion.ts(4,22): error TS2454: Variable 'union' is used before being assigned.
+restUnion.ts(14,22): error TS2454: Variable 'nullUnion' is used before being assigned.

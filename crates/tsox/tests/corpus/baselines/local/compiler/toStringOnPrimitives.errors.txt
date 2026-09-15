@@ -1,0 +1,2 @@
+toStringOnPrimitives.ts(1,6): error TS2339: Property 'toString' does not exist on type 'true'.
+toStringOnPrimitives.ts(3,7): error TS2339: Property 'toString' does not exist on type 'boolean'.

@@ -1,0 +1,1 @@
+augment.ts(12,26): error TS2694: Namespace 'Root' has no exported member 'Foo'.

@@ -1,0 +1,54 @@
+arrayBestCommonTypes.ts(15,37): error TS2345: Argument of type 'number' is not assignable to parameter of type 'boolean'.
+arrayBestCommonTypes.ts(16,37): error TS2345: Argument of type 'number | undefined' is not assignable to parameter of type 'boolean'.
+  Type 'undefined' is not assignable to type 'boolean'.
+arrayBestCommonTypes.ts(17,37): error TS2345: Argument of type 'number | undefined' is not assignable to parameter of type 'boolean'.
+  Type 'undefined' is not assignable to type 'boolean'.
+arrayBestCommonTypes.ts(18,37): error TS2345: Argument of type 'number | null' is not assignable to parameter of type 'boolean'.
+  Type 'null' is not assignable to type 'boolean'.
+arrayBestCommonTypes.ts(19,37): error TS2345: Argument of type 'number | null' is not assignable to parameter of type 'boolean'.
+  Type 'null' is not assignable to type 'boolean'.
+arrayBestCommonTypes.ts(20,37): error TS2345: Argument of type 'number | null | undefined' is not assignable to parameter of type 'boolean'.
+  Type 'undefined' is not assignable to type 'boolean'.
+arrayBestCommonTypes.ts(22,37): error TS2345: Argument of type 'string' is not assignable to parameter of type 'boolean'.
+arrayBestCommonTypes.ts(23,37): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'boolean'.
+  Type 'undefined' is not assignable to type 'boolean'.
+arrayBestCommonTypes.ts(24,37): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'boolean'.
+  Type 'undefined' is not assignable to type 'boolean'.
+arrayBestCommonTypes.ts(25,37): error TS2345: Argument of type 'string | null' is not assignable to parameter of type 'boolean'.
+  Type 'null' is not assignable to type 'boolean'.
+arrayBestCommonTypes.ts(26,37): error TS2345: Argument of type 'string | null' is not assignable to parameter of type 'boolean'.
+  Type 'null' is not assignable to type 'boolean'.
+arrayBestCommonTypes.ts(27,37): error TS2345: Argument of type 'string | null | undefined' is not assignable to parameter of type 'boolean'.
+  Type 'undefined' is not assignable to type 'boolean'.
+arrayBestCommonTypes.ts(29,37): error TS2345: Argument of type 'number | null' is not assignable to parameter of type 'boolean'.
+  Type 'null' is not assignable to type 'boolean'.
+arrayBestCommonTypes.ts(56,35): error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
+arrayBestCommonTypes.ts(56,46): error TS2564: Property 'y' has no initializer and is not definitely assigned in the constructor.
+arrayBestCommonTypes.ts(57,36): error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
+arrayBestCommonTypes.ts(57,47): error TS2564: Property 'z' has no initializer and is not definitely assigned in the constructor.
+arrayBestCommonTypes.ts(58,34): error TS2564: Property 'a' has no initializer and is not definitely assigned in the constructor.
+arrayBestCommonTypes.ts(68,37): error TS2345: Argument of type 'number' is not assignable to parameter of type 'boolean'.
+arrayBestCommonTypes.ts(69,37): error TS2345: Argument of type 'number | undefined' is not assignable to parameter of type 'boolean'.
+  Type 'undefined' is not assignable to type 'boolean'.
+arrayBestCommonTypes.ts(70,37): error TS2345: Argument of type 'number | undefined' is not assignable to parameter of type 'boolean'.
+  Type 'undefined' is not assignable to type 'boolean'.
+arrayBestCommonTypes.ts(71,37): error TS2345: Argument of type 'number | null' is not assignable to parameter of type 'boolean'.
+  Type 'null' is not assignable to type 'boolean'.
+arrayBestCommonTypes.ts(72,37): error TS2345: Argument of type 'number | null' is not assignable to parameter of type 'boolean'.
+  Type 'null' is not assignable to type 'boolean'.
+arrayBestCommonTypes.ts(73,37): error TS2345: Argument of type 'number | null | undefined' is not assignable to parameter of type 'boolean'.
+  Type 'undefined' is not assignable to type 'boolean'.
+arrayBestCommonTypes.ts(75,37): error TS2345: Argument of type 'string' is not assignable to parameter of type 'boolean'.
+arrayBestCommonTypes.ts(76,37): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'boolean'.
+  Type 'undefined' is not assignable to type 'boolean'.
+arrayBestCommonTypes.ts(77,37): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'boolean'.
+  Type 'undefined' is not assignable to type 'boolean'.
+arrayBestCommonTypes.ts(78,37): error TS2345: Argument of type 'string | null' is not assignable to parameter of type 'boolean'.
+  Type 'null' is not assignable to type 'boolean'.
+arrayBestCommonTypes.ts(79,37): error TS2345: Argument of type 'string | null' is not assignable to parameter of type 'boolean'.
+  Type 'null' is not assignable to type 'boolean'.
+arrayBestCommonTypes.ts(80,37): error TS2345: Argument of type 'string | null | undefined' is not assignable to parameter of type 'boolean'.
+  Type 'undefined' is not assignable to type 'boolean'.
+arrayBestCommonTypes.ts(82,37): error TS2345: Argument of type 'number | null' is not assignable to parameter of type 'boolean'.
+  Type 'null' is not assignable to type 'boolean'.
+arrayBestCommonTypes.ts(95,17): error TS2322: Type 'null' is not assignable to type 'NonEmptyTypes.iface'.

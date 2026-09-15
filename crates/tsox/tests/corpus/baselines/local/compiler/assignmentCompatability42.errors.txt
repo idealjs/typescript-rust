@@ -1,0 +1,2 @@
+assignmentCompatability42.ts(9,1): error TS2322: Type '__test1__.interfaceWithPublicAndOptional<number, string>' is not assignable to type '__test2__.classWithPublicPrivate<number, string>'.
+  Property 'two' is private in type '__test2__.classWithPublicPrivate<number, string>' but not in type '__test1__.interfaceWithPublicAndOptional<number, string>'.

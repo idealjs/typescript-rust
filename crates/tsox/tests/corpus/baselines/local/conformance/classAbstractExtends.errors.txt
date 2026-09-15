@@ -1,0 +1,1 @@
+classAbstractExtends.ts(9,7): error TS2654: Non-abstract class 'C' is missing implementations for the following members of 'B': 'bar'.

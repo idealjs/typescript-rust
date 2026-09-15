@@ -1,0 +1,3 @@
+classDoesNotDependOnBaseTypes.ts(9,12): error TS2454: Variable 'x' is used before being assigned.
+classDoesNotDependOnBaseTypes.ts(10,5): error TS2454: Variable 'x' is used before being assigned.
+classDoesNotDependOnBaseTypes.ts(11,5): error TS2454: Variable 'x' is used before being assigned.

@@ -1,0 +1,612 @@
+promisePermutations.ts(79,19): error TS2769: No overload matches this call.
+  Overload 1 of 4, '<U>(success?: (value: string) => IPromise<U>, error?: (error: any) => IPromise<U>, progress?: (progress: any) => void): IPromise<U>', gave the following error.
+    Argument of type '(x: number, y: string) => IPromise<string>' is not assignable to parameter of type '(value: string) => IPromise<string>'.
+      Types of parameters 'x' and 'value' are incompatible.
+        Type 'string' is not assignable to type 'number'.
+  Overload 2 of 4, '<U>(success?: (value: string) => IPromise<U>, error?: (error: any) => U, progress?: (progress: any) => void): IPromise<U>', gave the following error.
+    Argument of type '(x: number, y: string) => IPromise<string>' is not assignable to parameter of type '(value: string) => IPromise<string>'.
+      Types of parameters 'x' and 'value' are incompatible.
+        Type 'string' is not assignable to type 'number'.
+  Overload 3 of 4, '<U>(success?: (value: string) => U, error?: (error: any) => IPromise<U>, progress?: (progress: any) => void): IPromise<U>', gave the following error.
+    Argument of type '(x: number, y: string) => IPromise<string>' is not assignable to parameter of type '(value: string) => IPromise<string>'.
+      Types of parameters 'x' and 'value' are incompatible.
+        Type 'string' is not assignable to type 'number'.
+  Overload 4 of 4, '<U>(success?: (value: string) => U, error?: (error: any) => U, progress?: (progress: any) => void): IPromise<U>', gave the following error.
+    Argument of type '(x: number, y: string) => IPromise<string>' is not assignable to parameter of type '(value: string) => IPromise<string>'.
+      Types of parameters 'x' and 'value' are incompatible.
+        Type 'string' is not assignable to type 'number'.
+promisePermutations.ts(82,19): error TS2769: No overload matches this call.
+  Overload 1 of 4, '<U>(success?: (value: string) => Promise<U>, error?: (error: any) => Promise<U>, progress?: (progress: any) => void): Promise<U>', gave the following error.
+    Argument of type '(x: number, y: string) => IPromise<string>' is not assignable to parameter of type '(value: string) => Promise<string>'.
+      Types of parameters 'x' and 'value' are incompatible.
+        Type 'string' is not assignable to type 'number'.
+  Overload 2 of 4, '<U>(success?: (value: string) => Promise<U>, error?: (error: any) => U, progress?: (progress: any) => void): Promise<U>', gave the following error.
+    Argument of type '(x: number, y: string) => IPromise<string>' is not assignable to parameter of type '(value: string) => Promise<string>'.
+      Types of parameters 'x' and 'value' are incompatible.
+        Type 'string' is not assignable to type 'number'.
+  Overload 3 of 4, '<U>(success?: (value: string) => U, error?: (error: any) => Promise<U>, progress?: (progress: any) => void): Promise<U>', gave the following error.
+    Argument of type '(x: number, y: string) => IPromise<string>' is not assignable to parameter of type '(value: string) => IPromise<string>'.
+      Types of parameters 'x' and 'value' are incompatible.
+        Type 'string' is not assignable to type 'number'.
+  Overload 4 of 4, '<U>(success?: (value: string) => U, error?: (error: any) => U, progress?: (progress: any) => void): Promise<U>', gave the following error.
+    Argument of type '(x: number, y: string) => IPromise<string>' is not assignable to parameter of type '(value: string) => IPromise<string>'.
+      Types of parameters 'x' and 'value' are incompatible.
+        Type 'string' is not assignable to type 'number'.
+promisePermutations.ts(83,19): error TS2769: No overload matches this call.
+  Overload 1 of 4, '<U>(success?: (value: string) => Promise<U>, error?: (error: any) => Promise<U>, progress?: (progress: any) => void): Promise<U>', gave the following error.
+    Argument of type '(x: number, y: string) => Promise<string>' is not assignable to parameter of type '(value: string) => Promise<string>'.
+      Types of parameters 'x' and 'value' are incompatible.
+        Type 'string' is not assignable to type 'number'.
+  Overload 2 of 4, '<U>(success?: (value: string) => Promise<U>, error?: (error: any) => U, progress?: (progress: any) => void): Promise<U>', gave the following error.
+    Argument of type '(x: number, y: string) => Promise<string>' is not assignable to parameter of type '(value: string) => Promise<string>'.
+      Types of parameters 'x' and 'value' are incompatible.
+        Type 'string' is not assignable to type 'number'.
+  Overload 3 of 4, '<U>(success?: (value: string) => U, error?: (error: any) => Promise<U>, progress?: (progress: any) => void): Promise<U>', gave the following error.
+    Argument of type '(x: number, y: string) => Promise<string>' is not assignable to parameter of type '(value: string) => Promise<string>'.
+      Types of parameters 'x' and 'value' are incompatible.
+        Type 'string' is not assignable to type 'number'.
+  Overload 4 of 4, '<U>(success?: (value: string) => U, error?: (error: any) => U, progress?: (progress: any) => void): Promise<U>', gave the following error.
+    Argument of type '(x: number, y: string) => Promise<string>' is not assignable to parameter of type '(value: string) => Promise<string>'.
+      Types of parameters 'x' and 'value' are incompatible.
+        Type 'string' is not assignable to type 'number'.
+promisePermutations.ts(84,19): error TS2769: No overload matches this call.
+  Overload 1 of 4, '<U>(success?: (value: string) => Promise<U>, error?: (error: any) => Promise<U>, progress?: (progress: any) => void): Promise<U>', gave the following error.
+    Argument of type '(x: number, y: string) => Promise<string>' is not assignable to parameter of type '(value: string) => Promise<string>'.
+      Types of parameters 'x' and 'value' are incompatible.
+        Type 'string' is not assignable to type 'number'.
+  Overload 2 of 4, '<U>(success?: (value: string) => Promise<U>, error?: (error: any) => U, progress?: (progress: any) => void): Promise<U>', gave the following error.
+    Argument of type '(x: number, y: string) => Promise<string>' is not assignable to parameter of type '(value: string) => Promise<string>'.
+      Types of parameters 'x' and 'value' are incompatible.
+        Type 'string' is not assignable to type 'number'.
+  Overload 3 of 4, '<U>(success?: (value: string) => U, error?: (error: any) => Promise<U>, progress?: (progress: any) => void): Promise<U>', gave the following error.
+    Argument of type '(x: number, y: string) => Promise<string>' is not assignable to parameter of type '(value: string) => Promise<string>'.
+      Types of parameters 'x' and 'value' are incompatible.
+        Type 'string' is not assignable to type 'number'.
+  Overload 4 of 4, '<U>(success?: (value: string) => U, error?: (error: any) => U, progress?: (progress: any) => void): Promise<U>', gave the following error.
+    Argument of type '(x: number, y: string) => Promise<string>' is not assignable to parameter of type '(value: string) => IPromise<string>'.
+      Types of parameters 'x' and 'value' are incompatible.
+        Type 'string' is not assignable to type 'number'.
+promisePermutations.ts(88,19): error TS2769: No overload matches this call.
+  Overload 1 of 4, '<U>(success?: (value: string) => IPromise<U>, error?: (error: any) => IPromise<U>, progress?: (progress: any) => void): IPromise<U>', gave the following error.
+    Argument of type '(x: number, cb: (a: string) => string) => IPromise<string>' is not assignable to parameter of type '(value: string) => IPromise<string>'.
+      Target signature provides too few arguments. Expected 2 or more, but got 1.
+  Overload 2 of 4, '<U>(success?: (value: string) => IPromise<U>, error?: (error: any) => U, progress?: (progress: any) => void): IPromise<U>', gave the following error.
+    Argument of type '(x: number, cb: (a: string) => string) => IPromise<string>' is not assignable to parameter of type '(value: string) => IPromise<string>'.
+      Target signature provides too few arguments. Expected 2 or more, but got 1.
+  Overload 3 of 4, '<U>(success?: (value: string) => U, error?: (error: any) => IPromise<U>, progress?: (progress: any) => void): IPromise<U>', gave the following error.
+    Argument of type '(x: number, cb: (a: string) => string) => IPromise<string>' is not assignable to parameter of type '(value: string) => IPromise<string>'.
+      Target signature provides too few arguments. Expected 2 or more, but got 1.
+  Overload 4 of 4, '<U>(success?: (value: string) => U, error?: (error: any) => U, progress?: (progress: any) => void): IPromise<U>', gave the following error.
+    Argument of type '(x: number, cb: (a: string) => string) => IPromise<string>' is not assignable to parameter of type '(value: string) => IPromise<string>'.
+      Target signature provides too few arguments. Expected 2 or more, but got 1.
+promisePermutations.ts(91,19): error TS2769: No overload matches this call.
+  Overload 1 of 4, '<U>(success?: (value: string) => Promise<U>, error?: (error: any) => Promise<U>, progress?: (progress: any) => void): Promise<U>', gave the following error.
+    Argument of type '(x: number, cb: (a: string) => string) => IPromise<string>' is not assignable to parameter of type '(value: string) => Promise<string>'.
+      Target signature provides too few arguments. Expected 2 or more, but got 1.
+  Overload 2 of 4, '<U>(success?: (value: string) => Promise<U>, error?: (error: any) => U, progress?: (progress: any) => void): Promise<U>', gave the following error.
+    Argument of type '(x: number, cb: (a: string) => string) => IPromise<string>' is not assignable to parameter of type '(value: string) => Promise<string>'.
+      Target signature provides too few arguments. Expected 2 or more, but got 1.
+  Overload 3 of 4, '<U>(success?: (value: string) => U, error?: (error: any) => Promise<U>, progress?: (progress: any) => void): Promise<U>', gave the following error.
+    Argument of type '(x: number, cb: (a: string) => string) => IPromise<string>' is not assignable to parameter of type '(value: string) => IPromise<string>'.
+      Target signature provides too few arguments. Expected 2 or more, but got 1.
+  Overload 4 of 4, '<U>(success?: (value: string) => U, error?: (error: any) => U, progress?: (progress: any) => void): Promise<U>', gave the following error.
+    Argument of type '(x: number, cb: (a: string) => string) => IPromise<string>' is not assignable to parameter of type '(value: string) => IPromise<string>'.
+      Target signature provides too few arguments. Expected 2 or more, but got 1.
+promisePermutations.ts(92,19): error TS2769: No overload matches this call.
+  Overload 1 of 4, '<U>(success?: (value: string) => Promise<U>, error?: (error: any) => Promise<U>, progress?: (progress: any) => void): Promise<U>', gave the following error.
+    Argument of type '(x: number, cb: (a: string) => string) => Promise<string>' is not assignable to parameter of type '(value: string) => Promise<string>'.
+      Target signature provides too few arguments. Expected 2 or more, but got 1.
+  Overload 2 of 4, '<U>(success?: (value: string) => Promise<U>, error?: (error: any) => U, progress?: (progress: any) => void): Promise<U>', gave the following error.
+    Argument of type '(x: number, cb: (a: string) => string) => Promise<string>' is not assignable to parameter of type '(value: string) => Promise<string>'.
+      Target signature provides too few arguments. Expected 2 or more, but got 1.
+  Overload 3 of 4, '<U>(success?: (value: string) => U, error?: (error: any) => Promise<U>, progress?: (progress: any) => void): Promise<U>', gave the following error.
+    Argument of type '(x: number, cb: (a: string) => string) => Promise<string>' is not assignable to parameter of type '(value: string) => Promise<string>'.
+      Target signature provides too few arguments. Expected 2 or more, but got 1.
+  Overload 4 of 4, '<U>(success?: (value: string) => U, error?: (error: any) => U, progress?: (progress: any) => void): Promise<U>', gave the following error.
+    Argument of type '(x: number, cb: (a: string) => string) => Promise<string>' is not assignable to parameter of type '(value: string) => Promise<string>'.
+      Target signature provides too few arguments. Expected 2 or more, but got 1.
+promisePermutations.ts(93,19): error TS2769: No overload matches this call.
+  Overload 1 of 4, '<U>(success?: (value: string) => Promise<U>, error?: (error: any) => Promise<U>, progress?: (progress: any) => void): Promise<U>', gave the following error.
+    Argument of type '(x: number, cb: (a: string) => string) => Promise<string>' is not assignable to parameter of type '(value: string) => Promise<string>'.
+      Target signature provides too few arguments. Expected 2 or more, but got 1.
+  Overload 2 of 4, '<U>(success?: (value: string) => Promise<U>, error?: (error: any) => U, progress?: (progress: any) => void): Promise<U>', gave the following error.
+    Argument of type '(x: number, cb: (a: string) => string) => Promise<string>' is not assignable to parameter of type '(value: string) => Promise<string>'.
+      Target signature provides too few arguments. Expected 2 or more, but got 1.
+  Overload 3 of 4, '<U>(success?: (value: string) => U, error?: (error: any) => Promise<U>, progress?: (progress: any) => void): Promise<U>', gave the following error.
+    Argument of type '(x: number, cb: (a: string) => string) => Promise<string>' is not assignable to parameter of type '(value: string) => Promise<string>'.
+      Target signature provides too few arguments. Expected 2 or more, but got 1.
+  Overload 4 of 4, '<U>(success?: (value: string) => U, error?: (error: any) => U, progress?: (progress: any) => void): Promise<U>', gave the following error.
+    Argument of type '(x: number, cb: (a: string) => string) => Promise<string>' is not assignable to parameter of type '(value: string) => IPromise<string>'.
+      Target signature provides too few arguments. Expected 2 or more, but got 1.
+promisePermutations.ts(97,19): error TS2769: No overload matches this call.
+  Overload 1 of 4, '<U>(success?: (value: string) => IPromise<U>, error?: (error: any) => IPromise<U>, progress?: (progress: any) => void): IPromise<U>', gave the following error.
+    Argument of type '(x: number, cb: <T>(a: T) => T) => IPromise<string>' is not assignable to parameter of type '(value: string) => IPromise<string>'.
+      Target signature provides too few arguments. Expected 2 or more, but got 1.
+  Overload 2 of 4, '<U>(success?: (value: string) => IPromise<U>, error?: (error: any) => U, progress?: (progress: any) => void): IPromise<U>', gave the following error.
+    Argument of type '(x: number, cb: <T>(a: T) => T) => IPromise<string>' is not assignable to parameter of type '(value: string) => IPromise<string>'.
+      Target signature provides too few arguments. Expected 2 or more, but got 1.
+  Overload 3 of 4, '<U>(success?: (value: string) => U, error?: (error: any) => IPromise<U>, progress?: (progress: any) => void): IPromise<U>', gave the following error.
+    Argument of type '(x: number, cb: <T>(a: T) => T) => IPromise<string>' is not assignable to parameter of type '(value: string) => IPromise<string>'.
+      Target signature provides too few arguments. Expected 2 or more, but got 1.
+  Overload 4 of 4, '<U>(success?: (value: string) => U, error?: (error: any) => U, progress?: (progress: any) => void): IPromise<U>', gave the following error.
+    Argument of type '(x: number, cb: <T>(a: T) => T) => IPromise<string>' is not assignable to parameter of type '(value: string) => IPromise<string>'.
+      Target signature provides too few arguments. Expected 2 or more, but got 1.
+promisePermutations.ts(100,19): error TS2769: No overload matches this call.
+  Overload 1 of 4, '<U>(success?: (value: string) => Promise<U>, error?: (error: any) => Promise<U>, progress?: (progress: any) => void): Promise<U>', gave the following error.
+    Argument of type '(x: number, cb: <T>(a: T) => T) => IPromise<string>' is not assignable to parameter of type '(value: string) => Promise<string>'.
+      Target signature provides too few arguments. Expected 2 or more, but got 1.
+  Overload 2 of 4, '<U>(success?: (value: string) => Promise<U>, error?: (error: any) => U, progress?: (progress: any) => void): Promise<U>', gave the following error.
+    Argument of type '(x: number, cb: <T>(a: T) => T) => IPromise<string>' is not assignable to parameter of type '(value: string) => Promise<string>'.
+      Target signature provides too few arguments. Expected 2 or more, but got 1.
+  Overload 3 of 4, '<U>(success?: (value: string) => U, error?: (error: any) => Promise<U>, progress?: (progress: any) => void): Promise<U>', gave the following error.
+    Argument of type '(x: number, cb: <T>(a: T) => T) => IPromise<string>' is not assignable to parameter of type '(value: string) => IPromise<string>'.
+      Target signature provides too few arguments. Expected 2 or more, but got 1.
+  Overload 4 of 4, '<U>(success?: (value: string) => U, error?: (error: any) => U, progress?: (progress: any) => void): Promise<U>', gave the following error.
+    Argument of type '(x: number, cb: <T>(a: T) => T) => IPromise<string>' is not assignable to parameter of type '(value: string) => IPromise<string>'.
+      Target signature provides too few arguments. Expected 2 or more, but got 1.
+promisePermutations.ts(101,19): error TS2769: No overload matches this call.
+  Overload 1 of 4, '<U>(success?: (value: string) => Promise<U>, error?: (error: any) => Promise<U>, progress?: (progress: any) => void): Promise<U>', gave the following error.
+    Argument of type '(x: number, cb: <T>(a: T) => T) => Promise<string>' is not assignable to parameter of type '(value: string) => Promise<string>'.
+      Target signature provides too few arguments. Expected 2 or more, but got 1.
+  Overload 2 of 4, '<U>(success?: (value: string) => Promise<U>, error?: (error: any) => U, progress?: (progress: any) => void): Promise<U>', gave the following error.
+    Argument of type '(x: number, cb: <T>(a: T) => T) => Promise<string>' is not assignable to parameter of type '(value: string) => Promise<string>'.
+      Target signature provides too few arguments. Expected 2 or more, but got 1.
+  Overload 3 of 4, '<U>(success?: (value: string) => U, error?: (error: any) => Promise<U>, progress?: (progress: any) => void): Promise<U>', gave the following error.
+    Argument of type '(x: number, cb: <T>(a: T) => T) => Promise<string>' is not assignable to parameter of type '(value: string) => Promise<string>'.
+      Target signature provides too few arguments. Expected 2 or more, but got 1.
+  Overload 4 of 4, '<U>(success?: (value: string) => U, error?: (error: any) => U, progress?: (progress: any) => void): Promise<U>', gave the following error.
+    Argument of type '(x: number, cb: <T>(a: T) => T) => Promise<string>' is not assignable to parameter of type '(value: string) => Promise<string>'.
+      Target signature provides too few arguments. Expected 2 or more, but got 1.
+promisePermutations.ts(102,19): error TS2769: No overload matches this call.
+  Overload 1 of 4, '<U>(success?: (value: string) => Promise<U>, error?: (error: any) => Promise<U>, progress?: (progress: any) => void): Promise<U>', gave the following error.
+    Argument of type '(x: number, cb: <T>(a: T) => T) => Promise<string>' is not assignable to parameter of type '(value: string) => Promise<string>'.
+      Target signature provides too few arguments. Expected 2 or more, but got 1.
+  Overload 2 of 4, '<U>(success?: (value: string) => Promise<U>, error?: (error: any) => U, progress?: (progress: any) => void): Promise<U>', gave the following error.
+    Argument of type '(x: number, cb: <T>(a: T) => T) => Promise<string>' is not assignable to parameter of type '(value: string) => Promise<string>'.
+      Target signature provides too few arguments. Expected 2 or more, but got 1.
+  Overload 3 of 4, '<U>(success?: (value: string) => U, error?: (error: any) => Promise<U>, progress?: (progress: any) => void): Promise<U>', gave the following error.
+    Argument of type '(x: number, cb: <T>(a: T) => T) => Promise<string>' is not assignable to parameter of type '(value: string) => Promise<string>'.
+      Target signature provides too few arguments. Expected 2 or more, but got 1.
+  Overload 4 of 4, '<U>(success?: (value: string) => U, error?: (error: any) => U, progress?: (progress: any) => void): Promise<U>', gave the following error.
+    Argument of type '(x: number, cb: <T>(a: T) => T) => Promise<string>' is not assignable to parameter of type '(value: string) => IPromise<string>'.
+      Target signature provides too few arguments. Expected 2 or more, but got 1.
+promisePermutations.ts(106,19): error TS2769: No overload matches this call.
+  Overload 1 of 4, '<U>(success?: (value: string) => IPromise<U>, error?: (error: any) => IPromise<U>, progress?: (progress: any) => void): IPromise<U>', gave the following error.
+    Argument of type '(cb: <T>(a: T) => T) => IPromise<string>' is not assignable to parameter of type '(value: string) => IPromise<string>'.
+      Types of parameters 'cb' and 'value' are incompatible.
+        Type 'string' is not assignable to type '<T>(a: T) => T'.
+  Overload 2 of 4, '<U>(success?: (value: string) => IPromise<U>, error?: (error: any) => U, progress?: (progress: any) => void): IPromise<U>', gave the following error.
+    Argument of type '(cb: <T>(a: T) => T) => IPromise<string>' is not assignable to parameter of type '(value: string) => IPromise<string>'.
+      Types of parameters 'cb' and 'value' are incompatible.
+        Type 'string' is not assignable to type '<T>(a: T) => T'.
+  Overload 3 of 4, '<U>(success?: (value: string) => U, error?: (error: any) => IPromise<U>, progress?: (progress: any) => void): IPromise<U>', gave the following error.
+    Argument of type '(cb: <T>(a: T) => T) => IPromise<string>' is not assignable to parameter of type '(value: string) => IPromise<string>'.
+      Types of parameters 'cb' and 'value' are incompatible.
+        Type 'string' is not assignable to type '<T>(a: T) => T'.
+  Overload 4 of 4, '<U>(success?: (value: string) => U, error?: (error: any) => U, progress?: (progress: any) => void): IPromise<U>', gave the following error.
+    Argument of type '(cb: <T>(a: T) => T) => IPromise<string>' is not assignable to parameter of type '(value: string) => IPromise<string>'.
+      Types of parameters 'cb' and 'value' are incompatible.
+        Type 'string' is not assignable to type '<T>(a: T) => T'.
+promisePermutations.ts(109,19): error TS2769: No overload matches this call.
+  Overload 1 of 4, '<U>(success?: (value: string) => IPromise<U>, error?: (error: any) => IPromise<U>, progress?: (progress: any) => void): IPromise<U>', gave the following error.
+    Argument of type '(cb: <T>(a: T) => T) => IPromise<string>' is not assignable to parameter of type '(value: string) => IPromise<string>'.
+      Types of parameters 'cb' and 'value' are incompatible.
+        Type 'string' is not assignable to type '<T>(a: T) => T'.
+  Overload 2 of 4, '<U>(success?: (value: string) => IPromise<U>, error?: (error: any) => U, progress?: (progress: any) => void): IPromise<U>', gave the following error.
+    Argument of type '(cb: <T>(a: T) => T) => IPromise<string>' is not assignable to parameter of type '(value: string) => IPromise<string>'.
+      Types of parameters 'cb' and 'value' are incompatible.
+        Type 'string' is not assignable to type '<T>(a: T) => T'.
+  Overload 3 of 4, '<U>(success?: (value: string) => U, error?: (error: any) => IPromise<U>, progress?: (progress: any) => void): IPromise<U>', gave the following error.
+    Argument of type '(cb: <T>(a: T) => T) => IPromise<string>' is not assignable to parameter of type '(value: string) => IPromise<string>'.
+      Types of parameters 'cb' and 'value' are incompatible.
+        Type 'string' is not assignable to type '<T>(a: T) => T'.
+  Overload 4 of 4, '<U>(success?: (value: string) => U, error?: (error: any) => U, progress?: (progress: any) => void): IPromise<U>', gave the following error.
+    Argument of type '(cb: <T>(a: T) => T) => IPromise<string>' is not assignable to parameter of type '(value: string) => IPromise<string>'.
+      Types of parameters 'cb' and 'value' are incompatible.
+        Type 'string' is not assignable to type '<T>(a: T) => T'.
+promisePermutations.ts(110,19): error TS2769: No overload matches this call.
+  Overload 1 of 4, '<U>(success?: (value: string) => IPromise<U>, error?: (error: any) => IPromise<U>, progress?: (progress: any) => void): IPromise<U>', gave the following error.
+    Argument of type '(cb: <T>(a: T) => T) => Promise<string>' is not assignable to parameter of type '(value: string) => IPromise<string>'.
+      Types of parameters 'cb' and 'value' are incompatible.
+        Type 'string' is not assignable to type '<T>(a: T) => T'.
+  Overload 2 of 4, '<U>(success?: (value: string) => IPromise<U>, error?: (error: any) => U, progress?: (progress: any) => void): IPromise<U>', gave the following error.
+    Argument of type '(cb: <T>(a: T) => T) => Promise<string>' is not assignable to parameter of type '(value: string) => IPromise<string>'.
+      Types of parameters 'cb' and 'value' are incompatible.
+        Type 'string' is not assignable to type '<T>(a: T) => T'.
+  Overload 3 of 4, '<U>(success?: (value: string) => U, error?: (error: any) => IPromise<U>, progress?: (progress: any) => void): IPromise<U>', gave the following error.
+    Argument of type '(cb: <T>(a: T) => T) => Promise<string>' is not assignable to parameter of type '(value: string) => Promise<string>'.
+      Types of parameters 'cb' and 'value' are incompatible.
+        Type 'string' is not assignable to type '<T>(a: T) => T'.
+  Overload 4 of 4, '<U>(success?: (value: string) => U, error?: (error: any) => U, progress?: (progress: any) => void): IPromise<U>', gave the following error.
+    Argument of type '(cb: <T>(a: T) => T) => Promise<string>' is not assignable to parameter of type '(value: string) => Promise<string>'.
+      Types of parameters 'cb' and 'value' are incompatible.
+        Type 'string' is not assignable to type '<T>(a: T) => T'.
+promisePermutations.ts(111,19): error TS2769: No overload matches this call.
+  Overload 1 of 4, '<U>(success?: (value: string) => IPromise<U>, error?: (error: any) => IPromise<U>, progress?: (progress: any) => void): IPromise<U>', gave the following error.
+    Argument of type '(cb: <T>(a: T) => T) => Promise<string>' is not assignable to parameter of type '(value: string) => IPromise<string>'.
+      Types of parameters 'cb' and 'value' are incompatible.
+        Type 'string' is not assignable to type '<T>(a: T) => T'.
+  Overload 2 of 4, '<U>(success?: (value: string) => IPromise<U>, error?: (error: any) => U, progress?: (progress: any) => void): IPromise<U>', gave the following error.
+    Argument of type '(cb: <T>(a: T) => T) => Promise<string>' is not assignable to parameter of type '(value: string) => IPromise<string>'.
+      Types of parameters 'cb' and 'value' are incompatible.
+        Type 'string' is not assignable to type '<T>(a: T) => T'.
+  Overload 3 of 4, '<U>(success?: (value: string) => U, error?: (error: any) => IPromise<U>, progress?: (progress: any) => void): IPromise<U>', gave the following error.
+    Argument of type '(cb: <T>(a: T) => T) => Promise<string>' is not assignable to parameter of type '(value: string) => Promise<string>'.
+      Types of parameters 'cb' and 'value' are incompatible.
+        Type 'string' is not assignable to type '<T>(a: T) => T'.
+  Overload 4 of 4, '<U>(success?: (value: string) => U, error?: (error: any) => U, progress?: (progress: any) => void): IPromise<U>', gave the following error.
+    Argument of type '(cb: <T>(a: T) => T) => Promise<string>' is not assignable to parameter of type '(value: string) => IPromise<string>'.
+      Types of parameters 'cb' and 'value' are incompatible.
+        Type 'string' is not assignable to type '<T>(a: T) => T'.
+promisePermutations.ts(117,19): error TS2769: No overload matches this call.
+  Overload 1 of 4, '<U>(success?: (value: number) => IPromise<U>, error?: (error: any) => IPromise<U>, progress?: (progress: any) => void): IPromise<U>', gave the following error.
+    Argument of type '<T>(x: T, cb: (a: T) => T) => IPromise<T>' is not assignable to parameter of type '(value: number) => IPromise<T>'.
+      Target signature provides too few arguments. Expected 2 or more, but got 1.
+  Overload 2 of 4, '<U>(success?: (value: number) => IPromise<U>, error?: (error: any) => U, progress?: (progress: any) => void): IPromise<U>', gave the following error.
+    Argument of type '<T>(x: T, cb: (a: T) => T) => IPromise<T>' is not assignable to parameter of type '(value: number) => IPromise<T>'.
+      Target signature provides too few arguments. Expected 2 or more, but got 1.
+  Overload 3 of 4, '<U>(success?: (value: number) => U, error?: (error: any) => IPromise<U>, progress?: (progress: any) => void): IPromise<U>', gave the following error.
+    Argument of type '<T>(x: T, cb: (a: T) => T) => IPromise<T>' is not assignable to parameter of type '(value: number) => IPromise<T>'.
+      Target signature provides too few arguments. Expected 2 or more, but got 1.
+  Overload 4 of 4, '<U>(success?: (value: number) => U, error?: (error: any) => U, progress?: (progress: any) => void): IPromise<U>', gave the following error.
+    Argument of type '<T>(x: T, cb: (a: T) => T) => IPromise<T>' is not assignable to parameter of type '(value: number) => IPromise<T>'.
+      Target signature provides too few arguments. Expected 2 or more, but got 1.
+promisePermutations.ts(120,19): error TS2769: No overload matches this call.
+  Overload 1 of 4, '<U>(success?: (value: number) => Promise<U>, error?: (error: any) => Promise<U>, progress?: (progress: any) => void): Promise<U>', gave the following error.
+    Argument of type '<T>(x: T, cb: (a: T) => T) => IPromise<T>' is not assignable to parameter of type '(value: number) => Promise<T>'.
+      Target signature provides too few arguments. Expected 2 or more, but got 1.
+  Overload 2 of 4, '<U>(success?: (value: number) => Promise<U>, error?: (error: any) => U, progress?: (progress: any) => void): Promise<U>', gave the following error.
+    Argument of type '<T>(x: T, cb: (a: T) => T) => IPromise<T>' is not assignable to parameter of type '(value: number) => Promise<T>'.
+      Target signature provides too few arguments. Expected 2 or more, but got 1.
+  Overload 3 of 4, '<U>(success?: (value: number) => U, error?: (error: any) => Promise<U>, progress?: (progress: any) => void): Promise<U>', gave the following error.
+    Argument of type '<T>(x: T, cb: (a: T) => T) => IPromise<T>' is not assignable to parameter of type '(value: number) => IPromise<T>'.
+      Target signature provides too few arguments. Expected 2 or more, but got 1.
+  Overload 4 of 4, '<U>(success?: (value: number) => U, error?: (error: any) => U, progress?: (progress: any) => void): Promise<U>', gave the following error.
+    Argument of type '<T>(x: T, cb: (a: T) => T) => IPromise<T>' is not assignable to parameter of type '(value: number) => IPromise<T>'.
+      Target signature provides too few arguments. Expected 2 or more, but got 1.
+promisePermutations.ts(121,19): error TS2769: No overload matches this call.
+  Overload 1 of 4, '<U>(success?: (value: number) => Promise<U>, error?: (error: any) => Promise<U>, progress?: (progress: any) => void): Promise<U>', gave the following error.
+    Argument of type '<T>(x: T, cb: (a: T) => T) => Promise<T>' is not assignable to parameter of type '(value: number) => Promise<T>'.
+      Target signature provides too few arguments. Expected 2 or more, but got 1.
+  Overload 2 of 4, '<U>(success?: (value: number) => Promise<U>, error?: (error: any) => U, progress?: (progress: any) => void): Promise<U>', gave the following error.
+    Argument of type '<T>(x: T, cb: (a: T) => T) => Promise<T>' is not assignable to parameter of type '(value: number) => Promise<T>'.
+      Target signature provides too few arguments. Expected 2 or more, but got 1.
+  Overload 3 of 4, '<U>(success?: (value: number) => U, error?: (error: any) => Promise<U>, progress?: (progress: any) => void): Promise<U>', gave the following error.
+    Argument of type '<T>(x: T, cb: (a: T) => T) => Promise<T>' is not assignable to parameter of type '(value: number) => Promise<T>'.
+      Target signature provides too few arguments. Expected 2 or more, but got 1.
+  Overload 4 of 4, '<U>(success?: (value: number) => U, error?: (error: any) => U, progress?: (progress: any) => void): Promise<U>', gave the following error.
+    Argument of type '<T>(x: T, cb: (a: T) => T) => Promise<T>' is not assignable to parameter of type '(value: number) => Promise<T>'.
+      Target signature provides too few arguments. Expected 2 or more, but got 1.
+promisePermutations.ts(122,19): error TS2769: No overload matches this call.
+  Overload 1 of 4, '<U>(success?: (value: number) => Promise<U>, error?: (error: any) => Promise<U>, progress?: (progress: any) => void): Promise<U>', gave the following error.
+    Argument of type '<T>(x: T, cb: (a: T) => T) => Promise<T>' is not assignable to parameter of type '(value: number) => Promise<T>'.
+      Target signature provides too few arguments. Expected 2 or more, but got 1.
+  Overload 2 of 4, '<U>(success?: (value: number) => Promise<U>, error?: (error: any) => U, progress?: (progress: any) => void): Promise<U>', gave the following error.
+    Argument of type '<T>(x: T, cb: (a: T) => T) => Promise<T>' is not assignable to parameter of type '(value: number) => Promise<T>'.
+      Target signature provides too few arguments. Expected 2 or more, but got 1.
+  Overload 3 of 4, '<U>(success?: (value: number) => U, error?: (error: any) => Promise<U>, progress?: (progress: any) => void): Promise<U>', gave the following error.
+    Argument of type '<T>(x: T, cb: (a: T) => T) => Promise<T>' is not assignable to parameter of type '(value: number) => Promise<T>'.
+      Target signature provides too few arguments. Expected 2 or more, but got 1.
+  Overload 4 of 4, '<U>(success?: (value: number) => U, error?: (error: any) => U, progress?: (progress: any) => void): Promise<U>', gave the following error.
+    Argument of type '<T>(x: T, cb: (a: T) => T) => Promise<T>' is not assignable to parameter of type '(value: number) => Promise<T>'.
+      Target signature provides too few arguments. Expected 2 or more, but got 1.
+promisePermutations.ts(126,19): error TS2769: No overload matches this call.
+  Overload 1 of 4, '<U>(success?: (value: number) => IPromise<U>, error?: (error: any) => IPromise<U>, progress?: (progress: any) => void): IPromise<U>', gave the following error.
+    Argument of type '<T>(x: T, cb: <U>(a: U) => U) => IPromise<T>' is not assignable to parameter of type '(value: number) => IPromise<T>'.
+      Target signature provides too few arguments. Expected 2 or more, but got 1.
+  Overload 2 of 4, '<U>(success?: (value: number) => IPromise<U>, error?: (error: any) => U, progress?: (progress: any) => void): IPromise<U>', gave the following error.
+    Argument of type '<T>(x: T, cb: <U>(a: U) => U) => IPromise<T>' is not assignable to parameter of type '(value: number) => IPromise<T>'.
+      Target signature provides too few arguments. Expected 2 or more, but got 1.
+  Overload 3 of 4, '<U>(success?: (value: number) => U, error?: (error: any) => IPromise<U>, progress?: (progress: any) => void): IPromise<U>', gave the following error.
+    Argument of type '<T>(x: T, cb: <U>(a: U) => U) => IPromise<T>' is not assignable to parameter of type '(value: number) => IPromise<T>'.
+      Target signature provides too few arguments. Expected 2 or more, but got 1.
+  Overload 4 of 4, '<U>(success?: (value: number) => U, error?: (error: any) => U, progress?: (progress: any) => void): IPromise<U>', gave the following error.
+    Argument of type '<T>(x: T, cb: <U>(a: U) => U) => IPromise<T>' is not assignable to parameter of type '(value: number) => IPromise<T>'.
+      Target signature provides too few arguments. Expected 2 or more, but got 1.
+promisePermutations.ts(129,33): error TS2769: No overload matches this call.
+  Overload 1 of 4, '<U>(success?: (value: number) => IPromise<U>, error?: (error: any) => IPromise<U>, progress?: (progress: any) => void): IPromise<U>', gave the following error.
+    Argument of type '(x: any) => IPromise<string>' is not assignable to parameter of type '(error: any) => IPromise<number>'.
+      Type 'IPromise<string>' is not assignable to type 'IPromise<number>'.
+        Types of property 'then' are incompatible.
+          Type '{ <U>(success: (value: string) => IPromise<U>, error: (error: any) => IPromise<U>, progress: (progress: any) => void): IPromise<U>; <U>(success: (value: string) => IPromise<U>, error: (error: any) => U, progress: (progress: any) => void): IPromise<U>; <U>(success: (value: string) => U, error: (error: any) => IPromise<U>, progress: (progress: any) => void): IPromise<U>; <U>(success: (value: string) => U, error: (error: any) => U, progress: (progress: any) => void): IPromise<U>; }' is not assignable to type '{ <U>(success: (value: number) => IPromise<U>, error: (error: any) => IPromise<U>, progress: (progress: any) => void): IPromise<U>; <U>(success: (value: number) => IPromise<U>, error: (error: any) => U, progress: (progress: any) => void): IPromise<U>; <U>(success: (value: number) => U, error: (error: any) => IPromise<U>, progress: (progress: any) => void): IPromise<U>; <U>(success: (value: number) => U, error: (error: any) => U, progress: (progress: any) => void): IPromise<U>; }'.
+            Types of parameters 'success' and 'success' are incompatible.
+              Type '(value: number) => IPromise<any>' is not assignable to type '(value: string) => any'.
+                Types of parameters 'value' and 'value' are incompatible.
+                  Type 'string' is not assignable to type 'number'.
+                    Types of parameters 'success' and 'success' are incompatible.
+                      Type '(value: number) => IPromise<any>' is not assignable to type '(value: string) => any'.
+                        Types of parameters 'value' and 'value' are incompatible.
+                          Type 'string' is not assignable to type 'number'.
+                            Types of parameters 'success' and 'success' are incompatible.
+                              Type '(value: number) => IPromise<any>' is not assignable to type '(value: string) => IPromise<any>'.
+                                Types of parameters 'value' and 'value' are incompatible.
+                                  Type 'string' is not assignable to type 'number'.
+                                    Types of parameters 'success' and 'success' are incompatible.
+                                      Type '(value: number) => IPromise<any>' is not assignable to type '(value: string) => IPromise<any>'.
+                                        Types of parameters 'value' and 'value' are incompatible.
+                                          Type 'string' is not assignable to type 'number'.
+  Overload 2 of 4, '<U>(success?: (value: number) => IPromise<U>, error?: (error: any) => U, progress?: (progress: any) => void): IPromise<U>', gave the following error.
+    Argument of type '(x: any) => IPromise<string>' is not assignable to parameter of type '(error: any) => number'.
+      Type 'IPromise<string>' is not assignable to type 'number'.
+  Overload 3 of 4, '<U>(success?: (value: number) => U, error?: (error: any) => IPromise<U>, progress?: (progress: any) => void): IPromise<U>', gave the following error.
+    Argument of type '(x: any) => IPromise<string>' is not assignable to parameter of type '(error: any) => IPromise<IPromise<number>>'.
+      Type 'IPromise<string>' is not assignable to type 'IPromise<IPromise<number>>'.
+        Types of property 'then' are incompatible.
+          Type '{ <U>(success: (value: string) => IPromise<U>, error: (error: any) => IPromise<U>, progress: (progress: any) => void): IPromise<U>; <U>(success: (value: string) => IPromise<U>, error: (error: any) => U, progress: (progress: any) => void): IPromise<U>; <U>(success: (value: string) => U, error: (error: any) => IPromise<U>, progress: (progress: any) => void): IPromise<U>; <U>(success: (value: string) => U, error: (error: any) => U, progress: (progress: any) => void): IPromise<U>; }' is not assignable to type '{ <U>(success: (value: IPromise<number>) => IPromise<U>, error: (error: any) => IPromise<U>, progress: (progress: any) => void): IPromise<U>; <U>(success: (value: IPromise<number>) => IPromise<U>, error: (error: any) => U, progress: (progress: any) => void): IPromise<U>; <U>(success: (value: IPromise<number>) => U, error: (error: any) => IPromise<U>, progress: (progress: any) => void): IPromise<U>; <U>(success: (value: IPromise<number>) => U, error: (error: any) => U, progress: (progress: any) => void): IPromise<U>; }'.
+            Types of parameters 'success' and 'success' are incompatible.
+              Type '(value: IPromise<number>) => IPromise<any>' is not assignable to type '(value: string) => any'.
+                Types of parameters 'value' and 'value' are incompatible.
+                  Type 'string' is not assignable to type 'IPromise<number>'.
+                    Types of parameters 'success' and 'success' are incompatible.
+                      Type '(value: IPromise<number>) => IPromise<any>' is not assignable to type '(value: string) => any'.
+                        Types of parameters 'value' and 'value' are incompatible.
+                          Type 'string' is not assignable to type 'IPromise<number>'.
+                            Types of parameters 'success' and 'success' are incompatible.
+                              Type '(value: IPromise<number>) => IPromise<any>' is not assignable to type '(value: string) => IPromise<any>'.
+                                Types of parameters 'value' and 'value' are incompatible.
+                                  Type 'string' is not assignable to type 'IPromise<number>'.
+                                    Types of parameters 'success' and 'success' are incompatible.
+                                      Type '(value: IPromise<number>) => IPromise<any>' is not assignable to type '(value: string) => IPromise<any>'.
+                                        Types of parameters 'value' and 'value' are incompatible.
+                                          Type 'string' is not assignable to type 'IPromise<number>'.
+  Overload 4 of 4, '<U>(success?: (value: number) => U, error?: (error: any) => U, progress?: (progress: any) => void): IPromise<U>', gave the following error.
+    Argument of type '(x: any) => IPromise<string>' is not assignable to parameter of type '(error: any) => IPromise<number>'.
+      Type 'IPromise<string>' is not assignable to type 'IPromise<number>'.
+        Types of property 'then' are incompatible.
+          Type '{ <U>(success: (value: string) => IPromise<U>, error: (error: any) => IPromise<U>, progress: (progress: any) => void): IPromise<U>; <U>(success: (value: string) => IPromise<U>, error: (error: any) => U, progress: (progress: any) => void): IPromise<U>; <U>(success: (value: string) => U, error: (error: any) => IPromise<U>, progress: (progress: any) => void): IPromise<U>; <U>(success: (value: string) => U, error: (error: any) => U, progress: (progress: any) => void): IPromise<U>; }' is not assignable to type '{ <U>(success: (value: number) => IPromise<U>, error: (error: any) => IPromise<U>, progress: (progress: any) => void): IPromise<U>; <U>(success: (value: number) => IPromise<U>, error: (error: any) => U, progress: (progress: any) => void): IPromise<U>; <U>(success: (value: number) => U, error: (error: any) => IPromise<U>, progress: (progress: any) => void): IPromise<U>; <U>(success: (value: number) => U, error: (error: any) => U, progress: (progress: any) => void): IPromise<U>; }'.
+            Types of parameters 'success' and 'success' are incompatible.
+              Type '(value: number) => IPromise<any>' is not assignable to type '(value: string) => any'.
+                Types of parameters 'value' and 'value' are incompatible.
+                  Type 'string' is not assignable to type 'number'.
+                    Types of parameters 'success' and 'success' are incompatible.
+                      Type '(value: number) => IPromise<any>' is not assignable to type '(value: string) => any'.
+                        Types of parameters 'value' and 'value' are incompatible.
+                          Type 'string' is not assignable to type 'number'.
+                            Types of parameters 'success' and 'success' are incompatible.
+                              Type '(value: number) => IPromise<any>' is not assignable to type '(value: string) => IPromise<any>'.
+                                Types of parameters 'value' and 'value' are incompatible.
+                                  Type 'string' is not assignable to type 'number'.
+                                    Types of parameters 'success' and 'success' are incompatible.
+                                      Type '(value: number) => IPromise<any>' is not assignable to type '(value: string) => IPromise<any>'.
+                                        Types of parameters 'value' and 'value' are incompatible.
+                                          Type 'string' is not assignable to type 'number'.
+promisePermutations.ts(132,19): error TS2769: No overload matches this call.
+  Overload 1 of 4, '<U>(success?: (value: number) => Promise<U>, error?: (error: any) => Promise<U>, progress?: (progress: any) => void): Promise<U>', gave the following error.
+    Argument of type '<T>(x: T, cb: <U>(a: U) => U) => IPromise<T>' is not assignable to parameter of type '(value: number) => Promise<T>'.
+      Target signature provides too few arguments. Expected 2 or more, but got 1.
+  Overload 2 of 4, '<U>(success?: (value: number) => Promise<U>, error?: (error: any) => U, progress?: (progress: any) => void): Promise<U>', gave the following error.
+    Argument of type '<T>(x: T, cb: <U>(a: U) => U) => IPromise<T>' is not assignable to parameter of type '(value: number) => Promise<T>'.
+      Target signature provides too few arguments. Expected 2 or more, but got 1.
+  Overload 3 of 4, '<U>(success?: (value: number) => U, error?: (error: any) => Promise<U>, progress?: (progress: any) => void): Promise<U>', gave the following error.
+    Argument of type '<T>(x: T, cb: <U>(a: U) => U) => IPromise<T>' is not assignable to parameter of type '(value: number) => IPromise<T>'.
+      Target signature provides too few arguments. Expected 2 or more, but got 1.
+  Overload 4 of 4, '<U>(success?: (value: number) => U, error?: (error: any) => U, progress?: (progress: any) => void): Promise<U>', gave the following error.
+    Argument of type '<T>(x: T, cb: <U>(a: U) => U) => IPromise<T>' is not assignable to parameter of type '(value: number) => IPromise<T>'.
+      Target signature provides too few arguments. Expected 2 or more, but got 1.
+promisePermutations.ts(133,19): error TS2769: No overload matches this call.
+  Overload 1 of 4, '<U>(success?: (value: number) => Promise<U>, error?: (error: any) => Promise<U>, progress?: (progress: any) => void): Promise<U>', gave the following error.
+    Argument of type '<T>(x: T, cb: <U>(a: U) => U) => Promise<T>' is not assignable to parameter of type '(value: number) => Promise<T>'.
+      Target signature provides too few arguments. Expected 2 or more, but got 1.
+  Overload 2 of 4, '<U>(success?: (value: number) => Promise<U>, error?: (error: any) => U, progress?: (progress: any) => void): Promise<U>', gave the following error.
+    Argument of type '<T>(x: T, cb: <U>(a: U) => U) => Promise<T>' is not assignable to parameter of type '(value: number) => Promise<T>'.
+      Target signature provides too few arguments. Expected 2 or more, but got 1.
+  Overload 3 of 4, '<U>(success?: (value: number) => U, error?: (error: any) => Promise<U>, progress?: (progress: any) => void): Promise<U>', gave the following error.
+    Argument of type '<T>(x: T, cb: <U>(a: U) => U) => Promise<T>' is not assignable to parameter of type '(value: number) => Promise<T>'.
+      Target signature provides too few arguments. Expected 2 or more, but got 1.
+  Overload 4 of 4, '<U>(success?: (value: number) => U, error?: (error: any) => U, progress?: (progress: any) => void): Promise<U>', gave the following error.
+    Argument of type '<T>(x: T, cb: <U>(a: U) => U) => Promise<T>' is not assignable to parameter of type '(value: number) => Promise<T>'.
+      Target signature provides too few arguments. Expected 2 or more, but got 1.
+promisePermutations.ts(134,19): error TS2769: No overload matches this call.
+  Overload 1 of 4, '<U>(success?: (value: number) => Promise<U>, error?: (error: any) => Promise<U>, progress?: (progress: any) => void): Promise<U>', gave the following error.
+    Argument of type '<T>(x: T, cb: <U>(a: U) => U) => Promise<T>' is not assignable to parameter of type '(value: number) => Promise<T>'.
+      Target signature provides too few arguments. Expected 2 or more, but got 1.
+  Overload 2 of 4, '<U>(success?: (value: number) => Promise<U>, error?: (error: any) => U, progress?: (progress: any) => void): Promise<U>', gave the following error.
+    Argument of type '<T>(x: T, cb: <U>(a: U) => U) => Promise<T>' is not assignable to parameter of type '(value: number) => Promise<T>'.
+      Target signature provides too few arguments. Expected 2 or more, but got 1.
+  Overload 3 of 4, '<U>(success?: (value: number) => U, error?: (error: any) => Promise<U>, progress?: (progress: any) => void): Promise<U>', gave the following error.
+    Argument of type '<T>(x: T, cb: <U>(a: U) => U) => Promise<T>' is not assignable to parameter of type '(value: number) => Promise<T>'.
+      Target signature provides too few arguments. Expected 2 or more, but got 1.
+  Overload 4 of 4, '<U>(success?: (value: number) => U, error?: (error: any) => U, progress?: (progress: any) => void): Promise<U>', gave the following error.
+    Argument of type '<T>(x: T, cb: <U>(a: U) => U) => Promise<T>' is not assignable to parameter of type '(value: number) => Promise<T>'.
+      Target signature provides too few arguments. Expected 2 or more, but got 1.
+promisePermutations.ts(137,33): error TS2769: No overload matches this call.
+  Overload 1 of 4, '<U>(success?: (value: number) => Promise<U>, error?: (error: any) => Promise<U>, progress?: (progress: any) => void): Promise<U>', gave the following error.
+    Argument of type '(x: any) => IPromise<string>' is not assignable to parameter of type '(error: any) => Promise<number>'.
+      Type 'IPromise<string>' is not assignable to type 'Promise<number>'.
+        Types of property 'then' are incompatible.
+          Type '{ <U>(success: (value: string) => IPromise<U>, error: (error: any) => IPromise<U>, progress: (progress: any) => void): IPromise<U>; <U>(success: (value: string) => IPromise<U>, error: (error: any) => U, progress: (progress: any) => void): IPromise<U>; <U>(success: (value: string) => U, error: (error: any) => IPromise<U>, progress: (progress: any) => void): IPromise<U>; <U>(success: (value: string) => U, error: (error: any) => U, progress: (progress: any) => void): IPromise<U>; }' is not assignable to type '{ <U>(success: (value: number) => Promise<U>, error: (error: any) => Promise<U>, progress: (progress: any) => void): Promise<U>; <U>(success: (value: number) => Promise<U>, error: (error: any) => U, progress: (progress: any) => void): Promise<U>; <U>(success: (value: number) => U, error: (error: any) => Promise<U>, progress: (progress: any) => void): Promise<U>; <U>(success: (value: number) => U, error: (error: any) => U, progress: (progress: any) => void): Promise<U>; }'.
+            Types of parameters 'success' and 'success' are incompatible.
+              Type '(value: number) => Promise<any>' is not assignable to type '(value: string) => any'.
+                Types of parameters 'value' and 'value' are incompatible.
+                  Type 'string' is not assignable to type 'number'.
+                    Types of parameters 'success' and 'success' are incompatible.
+                      Type '(value: number) => Promise<any>' is not assignable to type '(value: string) => any'.
+                        Types of parameters 'value' and 'value' are incompatible.
+                          Type 'string' is not assignable to type 'number'.
+                            Types of parameters 'success' and 'success' are incompatible.
+                              Type '(value: number) => Promise<any>' is not assignable to type '(value: string) => IPromise<any>'.
+                                Types of parameters 'value' and 'value' are incompatible.
+                                  Type 'string' is not assignable to type 'number'.
+                                    Types of parameters 'success' and 'success' are incompatible.
+                                      Type '(value: number) => Promise<any>' is not assignable to type '(value: string) => IPromise<any>'.
+                                        Types of parameters 'value' and 'value' are incompatible.
+                                          Type 'string' is not assignable to type 'number'.
+  Overload 2 of 4, '<U>(success?: (value: number) => Promise<U>, error?: (error: any) => U, progress?: (progress: any) => void): Promise<U>', gave the following error.
+    Argument of type '(x: any) => IPromise<string>' is not assignable to parameter of type '(error: any) => number'.
+      Type 'IPromise<string>' is not assignable to type 'number'.
+  Overload 3 of 4, '<U>(success?: (value: number) => U, error?: (error: any) => Promise<U>, progress?: (progress: any) => void): Promise<U>', gave the following error.
+    Argument of type '(x: any) => IPromise<string>' is not assignable to parameter of type '(error: any) => Promise<IPromise<number>>'.
+      Type 'IPromise<string>' is not assignable to type 'Promise<IPromise<number>>'.
+        Types of property 'then' are incompatible.
+          Type '{ <U>(success: (value: string) => IPromise<U>, error: (error: any) => IPromise<U>, progress: (progress: any) => void): IPromise<U>; <U>(success: (value: string) => IPromise<U>, error: (error: any) => U, progress: (progress: any) => void): IPromise<U>; <U>(success: (value: string) => U, error: (error: any) => IPromise<U>, progress: (progress: any) => void): IPromise<U>; <U>(success: (value: string) => U, error: (error: any) => U, progress: (progress: any) => void): IPromise<U>; }' is not assignable to type '{ <U>(success: (value: IPromise<number>) => Promise<U>, error: (error: any) => Promise<U>, progress: (progress: any) => void): Promise<U>; <U>(success: (value: IPromise<number>) => Promise<U>, error: (error: any) => U, progress: (progress: any) => void): Promise<U>; <U>(success: (value: IPromise<number>) => U, error: (error: any) => Promise<U>, progress: (progress: any) => void): Promise<U>; <U>(success: (value: IPromise<number>) => U, error: (error: any) => U, progress: (progress: any) => void): Promise<U>; }'.
+            Types of parameters 'success' and 'success' are incompatible.
+              Type '(value: IPromise<number>) => Promise<any>' is not assignable to type '(value: string) => any'.
+                Types of parameters 'value' and 'value' are incompatible.
+                  Type 'string' is not assignable to type 'IPromise<number>'.
+                    Types of parameters 'success' and 'success' are incompatible.
+                      Type '(value: IPromise<number>) => Promise<any>' is not assignable to type '(value: string) => any'.
+                        Types of parameters 'value' and 'value' are incompatible.
+                          Type 'string' is not assignable to type 'IPromise<number>'.
+                            Types of parameters 'success' and 'success' are incompatible.
+                              Type '(value: IPromise<number>) => Promise<any>' is not assignable to type '(value: string) => IPromise<any>'.
+                                Types of parameters 'value' and 'value' are incompatible.
+                                  Type 'string' is not assignable to type 'IPromise<number>'.
+                                    Types of parameters 'success' and 'success' are incompatible.
+                                      Type '(value: IPromise<number>) => Promise<any>' is not assignable to type '(value: string) => IPromise<any>'.
+                                        Types of parameters 'value' and 'value' are incompatible.
+                                          Type 'string' is not assignable to type 'IPromise<number>'.
+  Overload 4 of 4, '<U>(success?: (value: number) => U, error?: (error: any) => U, progress?: (progress: any) => void): Promise<U>', gave the following error.
+    Argument of type '(x: any) => IPromise<string>' is not assignable to parameter of type '(error: any) => IPromise<number>'.
+      Type 'IPromise<string>' is not assignable to type 'IPromise<number>'.
+        Types of property 'then' are incompatible.
+          Type '{ <U>(success: (value: string) => IPromise<U>, error: (error: any) => IPromise<U>, progress: (progress: any) => void): IPromise<U>; <U>(success: (value: string) => IPromise<U>, error: (error: any) => U, progress: (progress: any) => void): IPromise<U>; <U>(success: (value: string) => U, error: (error: any) => IPromise<U>, progress: (progress: any) => void): IPromise<U>; <U>(success: (value: string) => U, error: (error: any) => U, progress: (progress: any) => void): IPromise<U>; }' is not assignable to type '{ <U>(success: (value: number) => IPromise<U>, error: (error: any) => IPromise<U>, progress: (progress: any) => void): IPromise<U>; <U>(success: (value: number) => IPromise<U>, error: (error: any) => U, progress: (progress: any) => void): IPromise<U>; <U>(success: (value: number) => U, error: (error: any) => IPromise<U>, progress: (progress: any) => void): IPromise<U>; <U>(success: (value: number) => U, error: (error: any) => U, progress: (progress: any) => void): IPromise<U>; }'.
+            Types of parameters 'success' and 'success' are incompatible.
+              Type '(value: number) => IPromise<any>' is not assignable to type '(value: string) => any'.
+                Types of parameters 'value' and 'value' are incompatible.
+                  Type 'string' is not assignable to type 'number'.
+                    Types of parameters 'success' and 'success' are incompatible.
+                      Type '(value: number) => IPromise<any>' is not assignable to type '(value: string) => any'.
+                        Types of parameters 'value' and 'value' are incompatible.
+                          Type 'string' is not assignable to type 'number'.
+                            Types of parameters 'success' and 'success' are incompatible.
+                              Type '(value: number) => IPromise<any>' is not assignable to type '(value: string) => IPromise<any>'.
+                                Types of parameters 'value' and 'value' are incompatible.
+                                  Type 'string' is not assignable to type 'number'.
+                                    Types of parameters 'success' and 'success' are incompatible.
+                                      Type '(value: number) => IPromise<any>' is not assignable to type '(value: string) => IPromise<any>'.
+                                        Types of parameters 'value' and 'value' are incompatible.
+                                          Type 'string' is not assignable to type 'number'.
+promisePermutations.ts(144,35): error TS2769: No overload matches this call.
+  Overload 1 of 4, '<U>(success?: (value: unknown) => IPromise<U>, error?: (error: any) => IPromise<U>, progress?: (progress: any) => void): IPromise<U>', gave the following error.
+    Argument of type '(x: any) => IPromise<string>' is not assignable to parameter of type '(error: any) => IPromise<number>'.
+      Type 'IPromise<string>' is not assignable to type 'IPromise<number>'.
+        Types of property 'then' are incompatible.
+          Type '{ <U>(success: (value: string) => IPromise<U>, error: (error: any) => IPromise<U>, progress: (progress: any) => void): IPromise<U>; <U>(success: (value: string) => IPromise<U>, error: (error: any) => U, progress: (progress: any) => void): IPromise<U>; <U>(success: (value: string) => U, error: (error: any) => IPromise<U>, progress: (progress: any) => void): IPromise<U>; <U>(success: (value: string) => U, error: (error: any) => U, progress: (progress: any) => void): IPromise<U>; }' is not assignable to type '{ <U>(success: (value: number) => IPromise<U>, error: (error: any) => IPromise<U>, progress: (progress: any) => void): IPromise<U>; <U>(success: (value: number) => IPromise<U>, error: (error: any) => U, progress: (progress: any) => void): IPromise<U>; <U>(success: (value: number) => U, error: (error: any) => IPromise<U>, progress: (progress: any) => void): IPromise<U>; <U>(success: (value: number) => U, error: (error: any) => U, progress: (progress: any) => void): IPromise<U>; }'.
+            Types of parameters 'success' and 'success' are incompatible.
+              Type '(value: number) => IPromise<any>' is not assignable to type '(value: string) => any'.
+                Types of parameters 'value' and 'value' are incompatible.
+                  Type 'string' is not assignable to type 'number'.
+                    Types of parameters 'success' and 'success' are incompatible.
+                      Type '(value: number) => IPromise<any>' is not assignable to type '(value: string) => any'.
+                        Types of parameters 'value' and 'value' are incompatible.
+                          Type 'string' is not assignable to type 'number'.
+                            Types of parameters 'success' and 'success' are incompatible.
+                              Type '(value: number) => IPromise<any>' is not assignable to type '(value: string) => IPromise<any>'.
+                                Types of parameters 'value' and 'value' are incompatible.
+                                  Type 'string' is not assignable to type 'number'.
+                                    Types of parameters 'success' and 'success' are incompatible.
+                                      Type '(value: number) => IPromise<any>' is not assignable to type '(value: string) => IPromise<any>'.
+                                        Types of parameters 'value' and 'value' are incompatible.
+                                          Type 'string' is not assignable to type 'number'.
+  Overload 2 of 4, '<U>(success?: (value: unknown) => IPromise<U>, error?: (error: any) => U, progress?: (progress: any) => void): IPromise<U>', gave the following error.
+    Argument of type '(x: any) => IPromise<string>' is not assignable to parameter of type '(error: any) => number'.
+      Type 'IPromise<string>' is not assignable to type 'number'.
+  Overload 3 of 4, '<U>(success?: (value: unknown) => U, error?: (error: any) => IPromise<U>, progress?: (progress: any) => void): IPromise<U>', gave the following error.
+    Argument of type '(x: any) => IPromise<string>' is not assignable to parameter of type '(error: any) => IPromise<IPromise<number>>'.
+      Type 'IPromise<string>' is not assignable to type 'IPromise<IPromise<number>>'.
+        Types of property 'then' are incompatible.
+          Type '{ <U>(success: (value: string) => IPromise<U>, error: (error: any) => IPromise<U>, progress: (progress: any) => void): IPromise<U>; <U>(success: (value: string) => IPromise<U>, error: (error: any) => U, progress: (progress: any) => void): IPromise<U>; <U>(success: (value: string) => U, error: (error: any) => IPromise<U>, progress: (progress: any) => void): IPromise<U>; <U>(success: (value: string) => U, error: (error: any) => U, progress: (progress: any) => void): IPromise<U>; }' is not assignable to type '{ <U>(success: (value: IPromise<number>) => IPromise<U>, error: (error: any) => IPromise<U>, progress: (progress: any) => void): IPromise<U>; <U>(success: (value: IPromise<number>) => IPromise<U>, error: (error: any) => U, progress: (progress: any) => void): IPromise<U>; <U>(success: (value: IPromise<number>) => U, error: (error: any) => IPromise<U>, progress: (progress: any) => void): IPromise<U>; <U>(success: (value: IPromise<number>) => U, error: (error: any) => U, progress: (progress: any) => void): IPromise<U>; }'.
+            Types of parameters 'success' and 'success' are incompatible.
+              Type '(value: IPromise<number>) => IPromise<any>' is not assignable to type '(value: string) => any'.
+                Types of parameters 'value' and 'value' are incompatible.
+                  Type 'string' is not assignable to type 'IPromise<number>'.
+                    Types of parameters 'success' and 'success' are incompatible.
+                      Type '(value: IPromise<number>) => IPromise<any>' is not assignable to type '(value: string) => any'.
+                        Types of parameters 'value' and 'value' are incompatible.
+                          Type 'string' is not assignable to type 'IPromise<number>'.
+                            Types of parameters 'success' and 'success' are incompatible.
+                              Type '(value: IPromise<number>) => IPromise<any>' is not assignable to type '(value: string) => IPromise<any>'.
+                                Types of parameters 'value' and 'value' are incompatible.
+                                  Type 'string' is not assignable to type 'IPromise<number>'.
+                                    Types of parameters 'success' and 'success' are incompatible.
+                                      Type '(value: IPromise<number>) => IPromise<any>' is not assignable to type '(value: string) => IPromise<any>'.
+                                        Types of parameters 'value' and 'value' are incompatible.
+                                          Type 'string' is not assignable to type 'IPromise<number>'.
+  Overload 4 of 4, '<U>(success?: (value: unknown) => U, error?: (error: any) => U, progress?: (progress: any) => void): IPromise<U>', gave the following error.
+    Argument of type '(x: any) => IPromise<string>' is not assignable to parameter of type '(error: any) => IPromise<number>'.
+      Type 'IPromise<string>' is not assignable to type 'IPromise<number>'.
+        Types of property 'then' are incompatible.
+          Type '{ <U>(success: (value: string) => IPromise<U>, error: (error: any) => IPromise<U>, progress: (progress: any) => void): IPromise<U>; <U>(success: (value: string) => IPromise<U>, error: (error: any) => U, progress: (progress: any) => void): IPromise<U>; <U>(success: (value: string) => U, error: (error: any) => IPromise<U>, progress: (progress: any) => void): IPromise<U>; <U>(success: (value: string) => U, error: (error: any) => U, progress: (progress: any) => void): IPromise<U>; }' is not assignable to type '{ <U>(success: (value: number) => IPromise<U>, error: (error: any) => IPromise<U>, progress: (progress: any) => void): IPromise<U>; <U>(success: (value: number) => IPromise<U>, error: (error: any) => U, progress: (progress: any) => void): IPromise<U>; <U>(success: (value: number) => U, error: (error: any) => IPromise<U>, progress: (progress: any) => void): IPromise<U>; <U>(success: (value: number) => U, error: (error: any) => U, progress: (progress: any) => void): IPromise<U>; }'.
+            Types of parameters 'success' and 'success' are incompatible.
+              Type '(value: number) => IPromise<any>' is not assignable to type '(value: string) => any'.
+                Types of parameters 'value' and 'value' are incompatible.
+                  Type 'string' is not assignable to type 'number'.
+                    Types of parameters 'success' and 'success' are incompatible.
+                      Type '(value: number) => IPromise<any>' is not assignable to type '(value: string) => any'.
+                        Types of parameters 'value' and 'value' are incompatible.
+                          Type 'string' is not assignable to type 'number'.
+                            Types of parameters 'success' and 'success' are incompatible.
+                              Type '(value: number) => IPromise<any>' is not assignable to type '(value: string) => IPromise<any>'.
+                                Types of parameters 'value' and 'value' are incompatible.
+                                  Type 'string' is not assignable to type 'number'.
+                                    Types of parameters 'success' and 'success' are incompatible.
+                                      Type '(value: number) => IPromise<any>' is not assignable to type '(value: string) => IPromise<any>'.
+                                        Types of parameters 'value' and 'value' are incompatible.
+                                          Type 'string' is not assignable to type 'number'.
+promisePermutations.ts(152,36): error TS2769: No overload matches this call.
+  Overload 1 of 4, '<U>(success?: (value: unknown) => Promise<U>, error?: (error: any) => Promise<U>, progress?: (progress: any) => void): Promise<U>', gave the following error.
+    Argument of type '(x: any) => IPromise<string>' is not assignable to parameter of type '(error: any) => Promise<number>'.
+      Type 'IPromise<string>' is not assignable to type 'Promise<number>'.
+        Types of property 'then' are incompatible.
+          Type '{ <U>(success: (value: string) => IPromise<U>, error: (error: any) => IPromise<U>, progress: (progress: any) => void): IPromise<U>; <U>(success: (value: string) => IPromise<U>, error: (error: any) => U, progress: (progress: any) => void): IPromise<U>; <U>(success: (value: string) => U, error: (error: any) => IPromise<U>, progress: (progress: any) => void): IPromise<U>; <U>(success: (value: string) => U, error: (error: any) => U, progress: (progress: any) => void): IPromise<U>; }' is not assignable to type '{ <U>(success: (value: number) => Promise<U>, error: (error: any) => Promise<U>, progress: (progress: any) => void): Promise<U>; <U>(success: (value: number) => Promise<U>, error: (error: any) => U, progress: (progress: any) => void): Promise<U>; <U>(success: (value: number) => U, error: (error: any) => Promise<U>, progress: (progress: any) => void): Promise<U>; <U>(success: (value: number) => U, error: (error: any) => U, progress: (progress: any) => void): Promise<U>; }'.
+            Types of parameters 'success' and 'success' are incompatible.
+              Type '(value: number) => Promise<any>' is not assignable to type '(value: string) => any'.
+                Types of parameters 'value' and 'value' are incompatible.
+                  Type 'string' is not assignable to type 'number'.
+                    Types of parameters 'success' and 'success' are incompatible.
+                      Type '(value: number) => Promise<any>' is not assignable to type '(value: string) => any'.
+                        Types of parameters 'value' and 'value' are incompatible.
+                          Type 'string' is not assignable to type 'number'.
+                            Types of parameters 'success' and 'success' are incompatible.
+                              Type '(value: number) => Promise<any>' is not assignable to type '(value: string) => IPromise<any>'.
+                                Types of parameters 'value' and 'value' are incompatible.
+                                  Type 'string' is not assignable to type 'number'.
+                                    Types of parameters 'success' and 'success' are incompatible.
+                                      Type '(value: number) => Promise<any>' is not assignable to type '(value: string) => IPromise<any>'.
+                                        Types of parameters 'value' and 'value' are incompatible.
+                                          Type 'string' is not assignable to type 'number'.
+  Overload 2 of 4, '<U>(success?: (value: unknown) => Promise<U>, error?: (error: any) => U, progress?: (progress: any) => void): Promise<U>', gave the following error.
+    Argument of type '(x: any) => IPromise<string>' is not assignable to parameter of type '(error: any) => number'.
+      Type 'IPromise<string>' is not assignable to type 'number'.
+  Overload 3 of 4, '<U>(success?: (value: unknown) => U, error?: (error: any) => Promise<U>, progress?: (progress: any) => void): Promise<U>', gave the following error.
+    Argument of type '(x: any) => IPromise<string>' is not assignable to parameter of type '(error: any) => Promise<Promise<number>>'.
+      Type 'IPromise<string>' is not assignable to type 'Promise<Promise<number>>'.
+        Types of property 'then' are incompatible.
+          Type '{ <U>(success: (value: string) => IPromise<U>, error: (error: any) => IPromise<U>, progress: (progress: any) => void): IPromise<U>; <U>(success: (value: string) => IPromise<U>, error: (error: any) => U, progress: (progress: any) => void): IPromise<U>; <U>(success: (value: string) => U, error: (error: any) => IPromise<U>, progress: (progress: any) => void): IPromise<U>; <U>(success: (value: string) => U, error: (error: any) => U, progress: (progress: any) => void): IPromise<U>; }' is not assignable to type '{ <U>(success: (value: Promise<number>) => Promise<U>, error: (error: any) => Promise<U>, progress: (progress: any) => void): Promise<U>; <U>(success: (value: Promise<number>) => Promise<U>, error: (error: any) => U, progress: (progress: any) => void): Promise<U>; <U>(success: (value: Promise<number>) => U, error: (error: any) => Promise<U>, progress: (progress: any) => void): Promise<U>; <U>(success: (value: Promise<number>) => U, error: (error: any) => U, progress: (progress: any) => void): Promise<U>; }'.
+            Types of parameters 'success' and 'success' are incompatible.
+              Type '(value: Promise<number>) => Promise<any>' is not assignable to type '(value: string) => any'.
+                Types of parameters 'value' and 'value' are incompatible.
+                  Type 'string' is not assignable to type 'Promise<number>'.
+                    Types of parameters 'success' and 'success' are incompatible.
+                      Type '(value: Promise<number>) => Promise<any>' is not assignable to type '(value: string) => any'.
+                        Types of parameters 'value' and 'value' are incompatible.
+                          Type 'string' is not assignable to type 'Promise<number>'.
+                            Types of parameters 'success' and 'success' are incompatible.
+                              Type '(value: Promise<number>) => Promise<any>' is not assignable to type '(value: string) => IPromise<any>'.
+                                Types of parameters 'value' and 'value' are incompatible.
+                                  Type 'string' is not assignable to type 'Promise<number>'.
+                                    Types of parameters 'success' and 'success' are incompatible.
+                                      Type '(value: Promise<number>) => Promise<any>' is not assignable to type '(value: string) => IPromise<any>'.
+                                        Types of parameters 'value' and 'value' are incompatible.
+                                          Type 'string' is not assignable to type 'Promise<number>'.
+  Overload 4 of 4, '<U>(success?: (value: unknown) => U, error?: (error: any) => U, progress?: (progress: any) => void): Promise<U>', gave the following error.
+    Argument of type '(x: any) => IPromise<string>' is not assignable to parameter of type '(error: any) => Promise<number>'.
+      Type 'IPromise<string>' is not assignable to type 'Promise<number>'.
+        Types of property 'then' are incompatible.
+          Type '{ <U>(success: (value: string) => IPromise<U>, error: (error: any) => IPromise<U>, progress: (progress: any) => void): IPromise<U>; <U>(success: (value: string) => IPromise<U>, error: (error: any) => U, progress: (progress: any) => void): IPromise<U>; <U>(success: (value: string) => U, error: (error: any) => IPromise<U>, progress: (progress: any) => void): IPromise<U>; <U>(success: (value: string) => U, error: (error: any) => U, progress: (progress: any) => void): IPromise<U>; }' is not assignable to type '{ <U>(success: (value: number) => Promise<U>, error: (error: any) => Promise<U>, progress: (progress: any) => void): Promise<U>; <U>(success: (value: number) => Promise<U>, error: (error: any) => U, progress: (progress: any) => void): Promise<U>; <U>(success: (value: number) => U, error: (error: any) => Promise<U>, progress: (progress: any) => void): Promise<U>; <U>(success: (value: number) => U, error: (error: any) => U, progress: (progress: any) => void): Promise<U>; }'.
+            Types of parameters 'success' and 'success' are incompatible.
+              Type '(value: number) => Promise<any>' is not assignable to type '(value: string) => any'.
+                Types of parameters 'value' and 'value' are incompatible.
+                  Type 'string' is not assignable to type 'number'.
+                    Types of parameters 'success' and 'success' are incompatible.
+                      Type '(value: number) => Promise<any>' is not assignable to type '(value: string) => any'.
+                        Types of parameters 'value' and 'value' are incompatible.
+                          Type 'string' is not assignable to type 'number'.
+                            Types of parameters 'success' and 'success' are incompatible.
+                              Type '(value: number) => Promise<any>' is not assignable to type '(value: string) => IPromise<any>'.
+                                Types of parameters 'value' and 'value' are incompatible.
+                                  Type 'string' is not assignable to type 'number'.
+                                    Types of parameters 'success' and 'success' are incompatible.
+                                      Type '(value: number) => Promise<any>' is not assignable to type '(value: string) => IPromise<any>'.
+                                        Types of parameters 'value' and 'value' are incompatible.
+                                          Type 'string' is not assignable to type 'number'.

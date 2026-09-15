@@ -1,0 +1,4 @@
+invalidUndefinedValues.ts(7,5): error TS2454: Variable 'a' is used before being assigned.
+invalidUndefinedValues.ts(10,11): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
+invalidUndefinedValues.ts(13,5): error TS2454: Variable 'b' is used before being assigned.
+invalidUndefinedValues.ts(17,5): error TS2454: Variable 'c' is used before being assigned.

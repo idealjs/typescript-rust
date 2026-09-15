@@ -1,0 +1,1 @@
+classExtendingBuiltinType.ts(9,18): error TS2314: Generic type 'Array<T>' requires 1 type argument(s).

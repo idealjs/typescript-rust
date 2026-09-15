@@ -1,0 +1,2 @@
+scopeCheckExtendedClassInsidePublicMethod2.ts(4,7): error TS2304: Cannot find name 'v'.
+scopeCheckExtendedClassInsidePublicMethod2.ts(6,7): error TS2304: Cannot find name 's'.

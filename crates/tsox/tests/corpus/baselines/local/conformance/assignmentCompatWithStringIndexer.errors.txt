@@ -1,0 +1,2 @@
+assignmentCompatWithStringIndexer.ts(46,14): error TS2454: Variable 'b3' is used before being assigned.
+assignmentCompatWithStringIndexer.ts(50,14): error TS2454: Variable 'b4' is used before being assigned.

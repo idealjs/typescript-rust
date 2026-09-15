@@ -1,0 +1,6 @@
+stringIndexerConstrainsPropertyDeclarations.ts(45,5): error TS2411: Property 'b' of type 'number' is not assignable to 'string' index type 'string'.
+stringIndexerConstrainsPropertyDeclarations.ts(46,5): error TS2411: Property 'c' of type '() => {}' is not assignable to 'string' index type 'string'.
+stringIndexerConstrainsPropertyDeclarations.ts(48,5): error TS2411: Property 'e' of type 'number' is not assignable to 'string' index type 'string'.
+stringIndexerConstrainsPropertyDeclarations.ts(53,5): error TS2411: Property 'foo' of type '() => string' is not assignable to 'string' index type 'string'.
+stringIndexerConstrainsPropertyDeclarations.ts(55,5): error TS2411: Property '4.0' of type 'number' is not assignable to 'string' index type 'string'.
+stringIndexerConstrainsPropertyDeclarations.ts(56,5): error TS2411: Property 'f' of type 'MyString' is not assignable to 'string' index type 'string'.

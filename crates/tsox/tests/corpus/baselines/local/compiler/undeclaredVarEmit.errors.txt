@@ -1,0 +1,2 @@
+undeclaredVarEmit.ts(1,1): suggestion TS7028: Unused label.
+undeclaredVarEmit.ts(1,4): error TS2693: 'number' only refers to a type, but is being used as a value here.

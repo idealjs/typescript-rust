@@ -1,0 +1,22 @@
+genericRestParameters2.ts(20,9): error TS2345: Argument of type 'string' is not assignable to parameter of type 'number'.
+genericRestParameters2.ts(21,18): error TS2554: Expected 2 arguments, but got 3.
+genericRestParameters2.ts(22,18): error TS2554: Expected 2 arguments, but got 4.
+genericRestParameters2.ts(23,19): error TS2554: Expected 2 arguments, but got 4.
+genericRestParameters2.ts(24,8): error TS2556: A spread argument must either have a tuple type or be passed to a rest parameter.
+genericRestParameters2.ts(25,12): error TS2556: A spread argument must either have a tuple type or be passed to a rest parameter.
+genericRestParameters2.ts(26,21): error TS2556: A spread argument must either have a tuple type or be passed to a rest parameter.
+genericRestParameters2.ts(27,27): error TS2556: A spread argument must either have a tuple type or be passed to a rest parameter.
+genericRestParameters2.ts(28,27): error TS2556: A spread argument must either have a tuple type or be passed to a rest parameter.
+genericRestParameters2.ts(31,18): error TS2554: Expected 2 arguments, but got 3.
+genericRestParameters2.ts(32,18): error TS2554: Expected 2 arguments, but got 4.
+genericRestParameters2.ts(33,19): error TS2554: Expected 2 arguments, but got 4.
+genericRestParameters2.ts(34,8): error TS2556: A spread argument must either have a tuple type or be passed to a rest parameter.
+genericRestParameters2.ts(35,12): error TS2556: A spread argument must either have a tuple type or be passed to a rest parameter.
+genericRestParameters2.ts(36,21): error TS2556: A spread argument must either have a tuple type or be passed to a rest parameter.
+genericRestParameters2.ts(37,27): error TS2556: A spread argument must either have a tuple type or be passed to a rest parameter.
+genericRestParameters2.ts(38,27): error TS2556: A spread argument must either have a tuple type or be passed to a rest parameter.
+genericRestParameters2.ts(44,8): error TS2556: A spread argument must either have a tuple type or be passed to a rest parameter.
+genericRestParameters2.ts(45,12): error TS2556: A spread argument must either have a tuple type or be passed to a rest parameter.
+genericRestParameters2.ts(53,19): error TS2345: Argument of type 'boolean[][]' is not assignable to parameter of type 'boolean'.
+genericRestParameters2.ts(54,8): error TS2556: A spread argument must either have a tuple type or be passed to a rest parameter.
+genericRestParameters2.ts(55,12): error TS2556: A spread argument must either have a tuple type or be passed to a rest parameter.

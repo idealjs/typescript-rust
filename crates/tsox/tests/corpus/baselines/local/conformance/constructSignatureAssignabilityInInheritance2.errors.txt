@@ -1,0 +1,7 @@
+constructSignatureAssignabilityInInheritance2.ts(3,14): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
+constructSignatureAssignabilityInInheritance2.ts(4,30): error TS2564: Property 'bar' has no initializer and is not definitely assigned in the constructor.
+constructSignatureAssignabilityInInheritance2.ts(5,34): error TS2564: Property 'baz' has no initializer and is not definitely assigned in the constructor.
+constructSignatureAssignabilityInInheritance2.ts(6,35): error TS2564: Property 'bing' has no initializer and is not definitely assigned in the constructor.
+constructSignatureAssignabilityInInheritance2.ts(49,11): error TS2430: Interface 'I' incorrectly extends interface 'A'.
+  The types returned by 'new a14(...)' are incompatible between these types.
+    Type 'string' is not assignable to type 'Object'.

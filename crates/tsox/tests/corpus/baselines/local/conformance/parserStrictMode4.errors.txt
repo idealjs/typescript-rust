@@ -1,0 +1,1 @@
+parserStrictMode4.ts(2,1): error TS2304: Cannot find name 'arguments'.

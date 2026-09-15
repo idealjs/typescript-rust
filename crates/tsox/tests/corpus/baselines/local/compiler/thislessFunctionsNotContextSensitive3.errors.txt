@@ -1,0 +1,6 @@
+thislessFunctionsNotContextSensitive3.ts(62,22): error TS2339: Property 'editor' does not exist on type '{ name?: string; addOptions?: () => { suggestion: SuggestionOptions; }; addProseMirrorPlugins?: () => Plugin[]; }'.
+thislessFunctionsNotContextSensitive3.ts(63,17): error TS2339: Property 'options' does not exist on type '{ name?: string; addOptions?: () => { suggestion: SuggestionOptions; }; addProseMirrorPlugins?: () => Plugin[]; }'.
+thislessFunctionsNotContextSensitive3.ts(81,22): error TS2339: Property 'editor' does not exist on type '{ name?: string; addOptions?: () => { suggestion: SuggestionOptions; }; addProseMirrorPlugins?: () => Plugin[]; }'.
+thislessFunctionsNotContextSensitive3.ts(82,17): error TS2339: Property 'options' does not exist on type '{ name?: string; addOptions?: () => { suggestion: SuggestionOptions; }; addProseMirrorPlugins?: () => Plugin[]; }'.
+thislessFunctionsNotContextSensitive3.ts(96,3): error TS2353: Object literal may only specify known properties, and 'child' does not exist in type '{ parent?: Options["parent"]; overwrite?: Options["overwrite"]; } | undefined'.
+thislessFunctionsNotContextSensitive3.ts(108,3): error TS2353: Object literal may only specify known properties, and 'child' does not exist in type '{ parent?: Options["parent"]; overwrite?: Options["overwrite"]; } | undefined'.

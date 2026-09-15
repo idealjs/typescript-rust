@@ -1,0 +1,4 @@
+extendFromAny.ts(8,9): error TS2339: Property 'length' does not exist on type 'number'.
+extendFromAny.ts(9,10): error TS2339: Property 'length' does not exist on type 'number'.
+extendFromAny.ts(10,3): error TS2551: Property 'unknown' does not exist on type 'C'. Did you mean 'known'?
+extendFromAny.ts(11,3): error TS2551: Property 'sunknown' does not exist on type 'typeof C'. Did you mean 'sknown'?

@@ -1,0 +1,26 @@
+dissallowSymbolAsWeakType.ts(3,24): error TS2345: Argument of type 'symbol[]' is not assignable to parameter of type 'object[] | null'.
+  Type 'symbol[]' is not assignable to type 'object[]'.
+dissallowSymbolAsWeakType.ts(4,8): error TS2345: Argument of type 'symbol' is not assignable to parameter of type 'object'.
+dissallowSymbolAsWeakType.ts(5,8): error TS2345: Argument of type 'symbol' is not assignable to parameter of type 'object'.
+dissallowSymbolAsWeakType.ts(6,11): error TS2345: Argument of type 'symbol' is not assignable to parameter of type 'object'.
+dissallowSymbolAsWeakType.ts(8,24): error TS2769: No overload matches this call.
+  Overload 1 of 2, '<K, V>(entries?: readonly [K, V][] | null | undefined): WeakMap<K, V>', gave the following error.
+    Argument of type '(boolean | symbol)[][]' is not assignable to parameter of type '[object, unknown][] | null'.
+      Type '(boolean | symbol)[][]' is not assignable to type '[object, unknown][]'.
+  Overload 2 of 2, '<K, V>(iterable?: Iterable<readonly [K, V]> | null | undefined): WeakMap<K, V>', gave the following error.
+    Argument of type '(boolean | symbol)[][]' is not assignable to parameter of type 'Iterable<[object, unknown]> | null'.
+      The types returned by '__@iterator()' are incompatible between these types.
+        Type 'ArrayIterator<(boolean | symbol)[]>' is not assignable to type 'Iterator<[object, unknown], TReturn, TNext>'.
+          The types returned by 'next(...)' are incompatible between these types.
+            Type 'IteratorYieldResult<(boolean | symbol)[]> | IteratorReturnResult<any>' is not assignable to type 'IteratorYieldResult<[object, unknown]> | IteratorReturnResult<TReturn>'.
+              Type 'IteratorYieldResult<(boolean | symbol)[]>' is not assignable to type 'IteratorYieldResult<[object, unknown]> | IteratorReturnResult<TReturn>'.
+                Types of property 'done' are incompatible.
+                  Type 'false | undefined' is not assignable to type 'true'.
+                    Type 'undefined' is not assignable to type 'true'.
+dissallowSymbolAsWeakType.ts(9,8): error TS2345: Argument of type 'symbol' is not assignable to parameter of type 'object'.
+dissallowSymbolAsWeakType.ts(10,8): error TS2345: Argument of type 'symbol' is not assignable to parameter of type 'object'.
+dissallowSymbolAsWeakType.ts(11,8): error TS2345: Argument of type 'symbol' is not assignable to parameter of type 'object'.
+dissallowSymbolAsWeakType.ts(12,11): error TS2345: Argument of type 'symbol' is not assignable to parameter of type 'object'.
+dissallowSymbolAsWeakType.ts(14,24): error TS2345: Argument of type 'symbol' is not assignable to parameter of type 'object'.
+dissallowSymbolAsWeakType.ts(18,12): error TS2345: Argument of type 'symbol' is not assignable to parameter of type 'object'.
+dissallowSymbolAsWeakType.ts(19,14): error TS2345: Argument of type 'symbol' is not assignable to parameter of type 'object'.

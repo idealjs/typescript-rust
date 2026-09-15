@@ -1,0 +1,8 @@
+localTypeParameterInferencePriority.ts(19,7): error TS2322: Type 'typeof ColumnSelectViewImp' is not assignable to type '() => unknown'.
+  Type 'ColumnSelectViewImp<{ [x: string]: unknown; }>' is not assignable to type 'Table<UnrollOnHover<S>>'.
+    Types of property '__schema' are incompatible.
+      Type 'S' is not assignable to type 'UnrollOnHover<S>'.
+localTypeParameterInferencePriority.ts(20,7): error TS2322: Type 'typeof Table' is not assignable to type '() => unknown'.
+  Type 'Table<{ [x: string]: unknown; }>' is not assignable to type 'Table<UnrollOnHover<S>>'.
+    Types of property '__schema' are incompatible.
+      Type '{ [x: string]: unknown; }' is not assignable to type 'UnrollOnHover<S>'.

@@ -1,0 +1,5 @@
+inferFromAnnotatedReturn1.ts(11,29): error TS2345: Argument of type '{ source: () => number; computation: (s: D) => number; }' is not assignable to parameter of type '{ source: () => number; computation: (source: number) => number; }'.
+  Types of property 'computation' are incompatible.
+    Type '(s: D) => number' is not assignable to type '(source: number) => number'.
+      Types of parameters 's' and 'source' are incompatible.
+        Type 'number' is not assignable to type 'D'.

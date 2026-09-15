@@ -1,0 +1,9 @@
+error TS6053: File '/.lib/react.d.ts' not found.
+file.tsx(2,24): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+file.tsx(11,66): error TS7006: Parameter 'a' implicitly has an 'any' type.
+file.tsx(12,58): error TS7006: Parameter 'a' implicitly has an 'any' type.
+file.tsx(13,66): error TS7006: Parameter 'a' implicitly has an 'any' type.
+file.tsx(14,66): error TS7006: Parameter 'a' implicitly has an 'any' type.
+
+
+!!! error TS6053: File '/.lib/react.d.ts' not found.

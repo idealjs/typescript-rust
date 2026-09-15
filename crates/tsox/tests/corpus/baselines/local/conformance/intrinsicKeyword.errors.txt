@@ -1,0 +1,1 @@
+intrinsicKeyword.ts(10,20): error TS2503: Cannot find namespace 'intrinsic'.

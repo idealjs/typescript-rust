@@ -1,0 +1,2 @@
+numericIndexerConstraint5.ts(2,5): error TS2322: Type '{ name: string; 0: Date; }' is not assignable to type '{ [name: number]: string; }'.
+  Index signature for type 'number' is missing in type '{ name: string; 0: Date; }'.

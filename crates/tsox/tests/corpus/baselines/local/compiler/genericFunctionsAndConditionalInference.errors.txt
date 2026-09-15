@@ -1,0 +1,3 @@
+genericFunctionsAndConditionalInference.ts(6,21): error TS2345: Argument of type '{ u: { value: U; }; v: { value: V; }; }' is not assignable to parameter of type '{ u: { value: T["u"]; }; v: { value: T["v"]; }; }'.
+  The types of 'u.value' are incompatible between these types.
+    Type 'U' is not assignable to type 'T["u"]'.

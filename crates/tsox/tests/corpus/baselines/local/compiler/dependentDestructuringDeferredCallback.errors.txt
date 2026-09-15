@@ -1,0 +1,1 @@
+dependentDestructuringDeferredCallback.ts(9,35): error TS2339: Property 'toFixed' does not exist on type 'string | number'.

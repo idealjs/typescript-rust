@@ -1,0 +1,1 @@
+typeGuardFunction.ts(30,13): error TS2551: Property 'propC' does not exist on type 'A'. Did you mean 'propA'?

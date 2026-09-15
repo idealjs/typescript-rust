@@ -1,0 +1,1 @@
+generatorTypeCheck8.ts(2,17): error TS2355: A function whose declared type is neither 'undefined', 'void', nor 'any' must return a value.

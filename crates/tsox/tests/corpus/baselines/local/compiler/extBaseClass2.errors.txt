@@ -1,0 +1,1 @@
+extBaseClass2.ts(7,29): error TS2304: Cannot find name 'B'.

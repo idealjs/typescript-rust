@@ -1,0 +1,6 @@
+error TS6053: File '/.lib/react.d.ts' not found.
+jsxSpreadFirstUnionNoErrors.tsx(2,19): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+jsxSpreadFirstUnionNoErrors.tsx(11,17): error TS2339: Property 'content' does not exist on type '{ status: "hidden"; } | { status: "visible"; content: string; }'.
+
+
+!!! error TS6053: File '/.lib/react.d.ts' not found.

@@ -1,0 +1,3 @@
+objectTypeWithCallSignatureHidingMembersOfFunctionAssignmentCompat.ts(13,1): error TS2322: Type '() => void' is not assignable to type 'Object'.
+objectTypeWithCallSignatureHidingMembersOfFunctionAssignmentCompat.ts(14,1): error TS2322: Type 'Object' is not assignable to type '() => void'.
+  Type 'Object' provides no match for the signature '(): void'.

@@ -1,0 +1,4 @@
+topLevelVarHoistingCommonJS.ts(41,12): error TS1005: ';' expected.
+topLevelVarHoistingCommonJS.ts(45,1): suggestion TS7027: Unreachable code detected.
+topLevelVarHoistingCommonJS.ts(45,15): error TS2495: Type 'never' is not an array type or a string type.
+topLevelVarHoistingCommonJS.ts(47,11): error TS2495: Type 'never' is not an array type or a string type.

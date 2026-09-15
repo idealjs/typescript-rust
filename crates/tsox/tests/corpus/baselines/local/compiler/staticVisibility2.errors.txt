@@ -1,0 +1,1 @@
+staticVisibility2.ts(4,14): error TS2339: Property 'sideLength' does not exist on type 'this'.

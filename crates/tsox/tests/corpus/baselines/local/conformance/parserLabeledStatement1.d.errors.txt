@@ -1,0 +1,2 @@
+parserLabeledStatement1.d.ts(1,1): suggestion TS7028: Unused label.
+parserLabeledStatement1.d.ts(2,3): error TS2304: Cannot find name 'bar'.

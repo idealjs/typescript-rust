@@ -1,0 +1,16 @@
+conditionalOperatorWithoutIdenticalBCT.ts(2,27): error TS2564: Property 'propertyX1' has no initializer and is not definitely assigned in the constructor.
+conditionalOperatorWithoutIdenticalBCT.ts(2,47): error TS2564: Property 'propertyX2' has no initializer and is not definitely assigned in the constructor.
+conditionalOperatorWithoutIdenticalBCT.ts(3,21): error TS2564: Property 'propertyA' has no initializer and is not definitely assigned in the constructor.
+conditionalOperatorWithoutIdenticalBCT.ts(4,21): error TS2564: Property 'propertyB' has no initializer and is not definitely assigned in the constructor.
+conditionalOperatorWithoutIdenticalBCT.ts(15,5): error TS2322: Type 'A | B' is not assignable to type 'A'.
+  Property 'propertyA' is missing in type 'B' but required in type 'A'.
+conditionalOperatorWithoutIdenticalBCT.ts(16,5): error TS2322: Type 'A | B' is not assignable to type 'B'.
+  Property 'propertyB' is missing in type 'A' but required in type 'B'.
+conditionalOperatorWithoutIdenticalBCT.ts(19,41): error TS7006: Parameter 'm' implicitly has an 'any' type.
+conditionalOperatorWithoutIdenticalBCT.ts(19,63): error TS7006: Parameter 'n' implicitly has an 'any' type.
+conditionalOperatorWithoutIdenticalBCT.ts(20,41): error TS7006: Parameter 'm' implicitly has an 'any' type.
+conditionalOperatorWithoutIdenticalBCT.ts(20,63): error TS7006: Parameter 'n' implicitly has an 'any' type.
+conditionalOperatorWithoutIdenticalBCT.ts(21,42): error TS7006: Parameter 'm' implicitly has an 'any' type.
+conditionalOperatorWithoutIdenticalBCT.ts(21,64): error TS7006: Parameter 'n' implicitly has an 'any' type.
+conditionalOperatorWithoutIdenticalBCT.ts(22,50): error TS7006: Parameter 'm' implicitly has an 'any' type.
+conditionalOperatorWithoutIdenticalBCT.ts(22,72): error TS7006: Parameter 'n' implicitly has an 'any' type.

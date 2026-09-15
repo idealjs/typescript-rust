@@ -1,0 +1,8 @@
+error TS6053: File '/.lib/react16.d.ts' not found.
+errorInfoForRelatedIndexTypesNoConstraintElaboration.ts(3,26): error TS2503: Cannot find namespace 'JSX'.
+errorInfoForRelatedIndexTypesNoConstraintElaboration.ts(3,66): error TS2503: Cannot find namespace 'JSX'.
+errorInfoForRelatedIndexTypesNoConstraintElaboration.ts(5,17): error TS2503: Cannot find namespace 'JSX'.
+errorInfoForRelatedIndexTypesNoConstraintElaboration.ts(6,19): error TS2503: Cannot find namespace 'JSX'.
+
+
+!!! error TS6053: File '/.lib/react16.d.ts' not found.

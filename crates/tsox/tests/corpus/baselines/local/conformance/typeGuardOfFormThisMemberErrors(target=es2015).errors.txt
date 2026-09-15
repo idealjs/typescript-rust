@@ -1,0 +1,3 @@
+typeGuardOfFormThisMemberErrors.ts(4,3): error TS2564: Property 'isFSO' has no initializer and is not definitely assigned in the constructor.
+typeGuardOfFormThisMemberErrors.ts(14,3): error TS2564: Property 'isNetworked' has no initializer and is not definitely assigned in the constructor.
+typeGuardOfFormThisMemberErrors.ts(22,3): error TS2564: Property 'children' has no initializer and is not definitely assigned in the constructor.

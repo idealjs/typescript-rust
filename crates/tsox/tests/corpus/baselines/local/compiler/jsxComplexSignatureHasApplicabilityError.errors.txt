@@ -1,0 +1,53 @@
+error TS6053: File '/.lib/react16.d.ts' not found.
+jsxComplexSignatureHasApplicabilityError.tsx(3,24): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+jsxComplexSignatureHasApplicabilityError.tsx(23,23): error TS2503: Cannot find namespace 'React'.
+jsxComplexSignatureHasApplicabilityError.tsx(24,4): error TS2503: Cannot find namespace 'React'.
+jsxComplexSignatureHasApplicabilityError.tsx(25,13): error TS7006: Parameter 'props' implicitly has an 'any' type.
+jsxComplexSignatureHasApplicabilityError.tsx(27,13): error TS2558: Expected 0 type arguments, but got 1.
+jsxComplexSignatureHasApplicabilityError.tsx(32,28): error TS7006: Parameter 'value' implicitly has an 'any' type.
+jsxComplexSignatureHasApplicabilityError.tsx(53,58): error TS2503: Cannot find namespace 'React'.
+jsxComplexSignatureHasApplicabilityError.tsx(53,58): error TS2503: Cannot find namespace 'React'.
+jsxComplexSignatureHasApplicabilityError.tsx(53,58): error TS2503: Cannot find namespace 'React'.
+jsxComplexSignatureHasApplicabilityError.tsx(53,58): error TS2503: Cannot find namespace 'React'.
+jsxComplexSignatureHasApplicabilityError.tsx(54,58): error TS2503: Cannot find namespace 'React'.
+jsxComplexSignatureHasApplicabilityError.tsx(54,58): error TS2503: Cannot find namespace 'React'.
+jsxComplexSignatureHasApplicabilityError.tsx(54,58): error TS2503: Cannot find namespace 'React'.
+jsxComplexSignatureHasApplicabilityError.tsx(54,58): error TS2503: Cannot find namespace 'React'.
+jsxComplexSignatureHasApplicabilityError.tsx(69,37): error TS2503: Cannot find namespace 'React'.
+jsxComplexSignatureHasApplicabilityError.tsx(69,37): error TS2503: Cannot find namespace 'React'.
+jsxComplexSignatureHasApplicabilityError.tsx(69,37): error TS2503: Cannot find namespace 'React'.
+jsxComplexSignatureHasApplicabilityError.tsx(69,37): error TS2503: Cannot find namespace 'React'.
+jsxComplexSignatureHasApplicabilityError.tsx(72,30): error TS2503: Cannot find namespace 'React'.
+jsxComplexSignatureHasApplicabilityError.tsx(72,30): error TS2503: Cannot find namespace 'React'.
+jsxComplexSignatureHasApplicabilityError.tsx(72,30): error TS2503: Cannot find namespace 'React'.
+jsxComplexSignatureHasApplicabilityError.tsx(72,30): error TS2503: Cannot find namespace 'React'.
+jsxComplexSignatureHasApplicabilityError.tsx(73,29): error TS2503: Cannot find namespace 'React'.
+jsxComplexSignatureHasApplicabilityError.tsx(73,29): error TS2503: Cannot find namespace 'React'.
+jsxComplexSignatureHasApplicabilityError.tsx(73,29): error TS2503: Cannot find namespace 'React'.
+jsxComplexSignatureHasApplicabilityError.tsx(73,29): error TS2503: Cannot find namespace 'React'.
+jsxComplexSignatureHasApplicabilityError.tsx(76,90): error TS2503: Cannot find namespace 'React'.
+jsxComplexSignatureHasApplicabilityError.tsx(76,90): error TS2503: Cannot find namespace 'React'.
+jsxComplexSignatureHasApplicabilityError.tsx(237,18): error TS2503: Cannot find namespace 'React'.
+jsxComplexSignatureHasApplicabilityError.tsx(256,66): error TS2503: Cannot find namespace 'React'.
+jsxComplexSignatureHasApplicabilityError.tsx(256,66): error TS2503: Cannot find namespace 'React'.
+jsxComplexSignatureHasApplicabilityError.tsx(256,66): error TS2503: Cannot find namespace 'React'.
+jsxComplexSignatureHasApplicabilityError.tsx(256,66): error TS2503: Cannot find namespace 'React'.
+jsxComplexSignatureHasApplicabilityError.tsx(422,26): error TS2503: Cannot find namespace 'React'.
+jsxComplexSignatureHasApplicabilityError.tsx(422,26): error TS2503: Cannot find namespace 'React'.
+jsxComplexSignatureHasApplicabilityError.tsx(422,26): error TS2503: Cannot find namespace 'React'.
+jsxComplexSignatureHasApplicabilityError.tsx(422,26): error TS2503: Cannot find namespace 'React'.
+jsxComplexSignatureHasApplicabilityError.tsx(430,17): error TS2503: Cannot find namespace 'React'.
+jsxComplexSignatureHasApplicabilityError.tsx(430,17): error TS2503: Cannot find namespace 'React'.
+jsxComplexSignatureHasApplicabilityError.tsx(430,17): error TS2503: Cannot find namespace 'React'.
+jsxComplexSignatureHasApplicabilityError.tsx(430,17): error TS2503: Cannot find namespace 'React'.
+jsxComplexSignatureHasApplicabilityError.tsx(581,13): error TS2503: Cannot find namespace 'React'.
+jsxComplexSignatureHasApplicabilityError.tsx(581,13): error TS2503: Cannot find namespace 'React'.
+jsxComplexSignatureHasApplicabilityError.tsx(581,13): error TS2503: Cannot find namespace 'React'.
+jsxComplexSignatureHasApplicabilityError.tsx(581,13): error TS2503: Cannot find namespace 'React'.
+jsxComplexSignatureHasApplicabilityError.tsx(596,20): error TS2503: Cannot find namespace 'React'.
+jsxComplexSignatureHasApplicabilityError.tsx(596,20): error TS2503: Cannot find namespace 'React'.
+jsxComplexSignatureHasApplicabilityError.tsx(596,20): error TS2503: Cannot find namespace 'React'.
+jsxComplexSignatureHasApplicabilityError.tsx(596,20): error TS2503: Cannot find namespace 'React'.
+
+
+!!! error TS6053: File '/.lib/react16.d.ts' not found.

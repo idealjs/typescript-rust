@@ -1,0 +1,2 @@
+overloadResolutionOverCTLambda.ts(2,5): error TS2345: Argument of type '(a: number) => number' is not assignable to parameter of type '(item: number) => boolean'.
+  Type 'number' is not assignable to type 'boolean'.

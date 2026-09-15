@@ -1,0 +1,2 @@
+privateNameMethodAsync.ts(5,33): error TS2339: Property 'next' does not exist on type 'void'.
+privateNameMethodAsync.ts(5,74): error TS2339: Property 'next' does not exist on type 'void'.

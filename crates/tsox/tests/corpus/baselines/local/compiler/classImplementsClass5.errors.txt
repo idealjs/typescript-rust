@@ -1,0 +1,5 @@
+classImplementsClass5.ts(5,1): error TS2420: Class 'C' incorrectly implements interface 'A'.
+classImplementsClass5.ts(16,1): error TS2322: Type 'C2' is not assignable to type 'C'.
+  Types have separate declarations of a private property 'x'.
+classImplementsClass5.ts(17,1): error TS2322: Type 'C' is not assignable to type 'C2'.
+  Types have separate declarations of a private property 'x'.

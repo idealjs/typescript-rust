@@ -1,0 +1,1 @@
+parserShorthandPropertyAssignment2.ts(1,11): error TS2552: Cannot find name 'class'. Did you mean 'CSS'?

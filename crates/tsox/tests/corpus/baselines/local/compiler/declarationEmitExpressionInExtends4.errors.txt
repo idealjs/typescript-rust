@@ -1,0 +1,1 @@
+declarationEmitExpressionInExtends4.ts(14,18): error TS2304: Cannot find name 'SomeUndefinedFunction'.

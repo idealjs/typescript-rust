@@ -1,0 +1,2 @@
+interfaceImplementation1.ts(12,1): error TS2420: Class 'C1' incorrectly implements interface 'I1'.
+interfaceImplementation1.ts(12,1): error TS2420: Class 'C1' incorrectly implements interface 'I2'.

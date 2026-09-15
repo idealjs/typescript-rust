@@ -1,0 +1,2 @@
+decoratorOnEnum2.ts(4,5): error TS1005: 'identifier' expected.
+decoratorOnEnum2.ts(4,10): error TS1005: ',' expected.

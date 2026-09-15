@@ -1,0 +1,1 @@
+es6ImportWithoutFromClauseInEs5_1.ts(1,8): error TS2307: Cannot find module 'es6ImportWithoutFromClauseInEs5_0' or its corresponding type declarations.

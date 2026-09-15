@@ -1,0 +1,5 @@
+castingTuple.ts(23,14): error TS2352: Conversion of type '[{}, {}]' to type '{}[]' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+castingTuple.ts(30,10): error TS2352: Conversion of type '[number, string]' to type '[number, number]' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+castingTuple.ts(31,10): error TS2352: Conversion of type '[C, D]' to type '[A, I]' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+castingTuple.ts(32,14): error TS2352: Conversion of type '[number, string]' to type 'number[]' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+castingTuple.ts(33,1): error TS2304: Cannot find name 't4'.

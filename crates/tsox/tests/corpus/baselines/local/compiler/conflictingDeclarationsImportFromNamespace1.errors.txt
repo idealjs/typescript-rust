@@ -1,0 +1,3 @@
+index.ts(2,27): error TS2349: This expression is not callable.
+  Type 'typeof import("pick")' has no call signatures.
+node_modules/@types/lodash/pick.d.ts(1,10): error TS2305: Module '"./index"' has no exported member 'pick'.

@@ -1,0 +1,76 @@
+typeGuardFunctionErrors.ts(1,7): error TS2300: Duplicate identifier 'A'.
+typeGuardFunctionErrors.ts(2,5): error TS2564: Property 'propA' has no initializer and is not definitely assigned in the constructor.
+typeGuardFunctionErrors.ts(6,5): error TS2564: Property 'propB' has no initializer and is not definitely assigned in the constructor.
+typeGuardFunctionErrors.ts(10,5): error TS2564: Property 'propC' has no initializer and is not definitely assigned in the constructor.
+typeGuardFunctionErrors.ts(13,40): error TS7006: Parameter 'x' implicitly has an 'any' type.
+typeGuardFunctionErrors.ts(14,5): error TS2322: Type 'string' is not assignable to type 'boolean'.
+typeGuardFunctionErrors.ts(17,10): error TS2391: Function implementation is missing or not immediately following the declaration.
+typeGuardFunctionErrors.ts(17,46): error TS7006: Parameter 'x' implicitly has an 'any' type.
+typeGuardFunctionErrors.ts(17,57): error TS1005: ';' expected.
+typeGuardFunctionErrors.ts(17,60): error TS1434: Unexpected keyword or identifier.
+typeGuardFunctionErrors.ts(18,5): error TS1108: A 'return' statement can only be used within a function body.
+typeGuardFunctionErrors.ts(21,1): suggestion TS7027: Unreachable code detected.
+typeGuardFunctionErrors.ts(21,33): error TS2749: 'x' refers to a value, but is being used as a type here. Did you mean 'typeof x'?
+typeGuardFunctionErrors.ts(29,10): error TS2391: Function implementation is missing or not immediately following the declaration.
+typeGuardFunctionErrors.ts(29,40): error TS7006: Parameter 'x' implicitly has an 'any' type.
+typeGuardFunctionErrors.ts(30,5): error TS1131: Property or signature expected.
+typeGuardFunctionErrors.ts(30,5): error TS1108: A 'return' statement can only be used within a function body.
+typeGuardFunctionErrors.ts(31,1): error TS1128: Declaration or statement expected.
+typeGuardFunctionErrors.ts(33,34): error TS7006: Parameter 'y' implicitly has an 'any' type.
+typeGuardFunctionErrors.ts(52,22): error TS7006: Parameter 'p1' implicitly has an 'any' type.
+typeGuardFunctionErrors.ts(53,22): error TS7006: Parameter 'p1' implicitly has an 'any' type.
+typeGuardFunctionErrors.ts(55,33): error TS7006: Parameter 'x' implicitly has an 'any' type.
+typeGuardFunctionErrors.ts(58,5): error TS2349: This expression is not callable.
+  Type 'never' has no call signatures.
+typeGuardFunctionErrors.ts(59,7): error TS2339: Property 'propB' does not exist on type 'never'.
+typeGuardFunctionErrors.ts(63,5): error TS2349: This expression is not callable.
+  Type 'never' has no call signatures.
+typeGuardFunctionErrors.ts(64,7): error TS2339: Property 'propB' does not exist on type 'never'.
+typeGuardFunctionErrors.ts(68,5): error TS2349: This expression is not callable.
+  Type 'never' has no call signatures.
+typeGuardFunctionErrors.ts(69,7): error TS2339: Property 'propB' does not exist on type 'never'.
+typeGuardFunctionErrors.ts(73,68): error TS7006: Parameter 'p1' implicitly has an 'any' type.
+typeGuardFunctionErrors.ts(74,1): error TS2349: This expression is not callable.
+  Type 'never' has no call signatures.
+typeGuardFunctionErrors.ts(78,1): suggestion TS7027: Unreachable code detected.
+typeGuardFunctionErrors.ts(84,1): suggestion TS7027: Unreachable code detected.
+typeGuardFunctionErrors.ts(90,1): error TS2322: Type '(p1: any, p2: any, p3: any) => boolean' is not assignable to type '(p1: any, p2: any) => boolean'.
+  Target signature provides too few arguments. Expected 3 or more, but got 2.
+typeGuardFunctionErrors.ts(90,1): suggestion TS7027: Unreachable code detected.
+typeGuardFunctionErrors.ts(90,28): error TS7006: Parameter 'p3' implicitly has an 'any' type.
+typeGuardFunctionErrors.ts(95,9): error TS2749: 'b' refers to a value, but is being used as a type here. Did you mean 'typeof b'?
+typeGuardFunctionErrors.ts(95,11): error TS1005: ',' expected.
+typeGuardFunctionErrors.ts(95,14): error TS1005: ',' expected.
+typeGuardFunctionErrors.ts(95,14): error TS2300: Duplicate identifier 'A'.
+typeGuardFunctionErrors.ts(96,1): suggestion TS7027: Unreachable code detected.
+typeGuardFunctionErrors.ts(96,16): error TS2749: 'b' refers to a value, but is being used as a type here. Did you mean 'typeof b'?
+typeGuardFunctionErrors.ts(96,18): error TS1005: ',' expected.
+typeGuardFunctionErrors.ts(96,18): error TS7006: Parameter 'is' implicitly has an 'any' type.
+typeGuardFunctionErrors.ts(96,21): error TS1005: ',' expected.
+typeGuardFunctionErrors.ts(96,21): error TS7006: Parameter 'A' implicitly has an 'any' type.
+typeGuardFunctionErrors.ts(97,10): error TS2391: Function implementation is missing or not immediately following the declaration.
+typeGuardFunctionErrors.ts(97,20): error TS2749: 'b' refers to a value, but is being used as a type here. Did you mean 'typeof b'?
+typeGuardFunctionErrors.ts(97,22): error TS1005: ';' expected.
+typeGuardFunctionErrors.ts(97,25): error TS1434: Unexpected keyword or identifier.
+typeGuardFunctionErrors.ts(98,5): error TS1108: A 'return' statement can only be used within a function body.
+typeGuardFunctionErrors.ts(98,5): suggestion TS7027: Unreachable code detected.
+typeGuardFunctionErrors.ts(99,2): suggestion TS7027: Unreachable code detected.
+typeGuardFunctionErrors.ts(106,9): error TS1054: A 'get' accessor cannot have parameters.
+typeGuardFunctionErrors.ts(109,9): error TS1095: A 'set' accessor cannot have a return type annotation.
+typeGuardFunctionErrors.ts(119,22): error TS2304: Cannot find name 'p1'.
+typeGuardFunctionErrors.ts(119,25): error TS1131: Property or signature expected.
+typeGuardFunctionErrors.ts(120,1): error TS1128: Declaration or statement expected.
+typeGuardFunctionErrors.ts(123,13): error TS7019: Rest parameter 'a' implicitly has an 'any[]' type.
+typeGuardFunctionErrors.ts(128,25): error TS7006: Parameter 'p2' implicitly has an 'any' type.
+typeGuardFunctionErrors.ts(128,29): error TS7006: Parameter 'p3' implicitly has an 'any' type.
+typeGuardFunctionErrors.ts(132,25): error TS7006: Parameter 'p2' implicitly has an 'any' type.
+typeGuardFunctionErrors.ts(132,29): error TS7006: Parameter 'p3' implicitly has an 'any' type.
+typeGuardFunctionErrors.ts(136,30): error TS7006: Parameter 'p2' implicitly has an 'any' type.
+typeGuardFunctionErrors.ts(136,34): error TS7006: Parameter 'p3' implicitly has an 'any' type.
+typeGuardFunctionErrors.ts(142,1): suggestion TS7027: Unreachable code detected.
+typeGuardFunctionErrors.ts(142,5): error TS2349: This expression is not callable.
+  Type 'never' has no call signatures.
+typeGuardFunctionErrors.ts(143,7): error TS2339: Property 'propA' does not exist on type 'never'.
+typeGuardFunctionErrors.ts(162,31): error TS2344: Type '{ "a": number; }' does not satisfy the constraint '{ "a": string; }'.
+typeGuardFunctionErrors.ts(163,35): error TS2344: Type 'number' does not satisfy the constraint '{ "a": string; }'.
+typeGuardFunctionErrors.ts(164,1): suggestion TS7027: Unreachable code detected.

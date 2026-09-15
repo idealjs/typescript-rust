@@ -1,0 +1,8 @@
+taggedTemplateStringsWithIncompatibleTypedTagsES6.ts(7,6): error TS2749: 'x' refers to a value, but is being used as a type here. Did you mean 'typeof x'?
+taggedTemplateStringsWithIncompatibleTypedTagsES6.ts(7,6): error TS2749: 'x' refers to a value, but is being used as a type here. Did you mean 'typeof x'?
+taggedTemplateStringsWithIncompatibleTypedTagsES6.ts(7,7): error TS1005: ']' expected.
+taggedTemplateStringsWithIncompatibleTypedTagsES6.ts(7,9): error TS1131: Property or signature expected.
+taggedTemplateStringsWithIncompatibleTypedTagsES6.ts(7,9): error TS2693: 'number' only refers to a type, but is being used as a value here.
+taggedTemplateStringsWithIncompatibleTypedTagsES6.ts(7,15): error TS1128: Declaration or statement expected.
+taggedTemplateStringsWithIncompatibleTypedTagsES6.ts(7,16): error TS1128: Declaration or statement expected.
+taggedTemplateStringsWithIncompatibleTypedTagsES6.ts(8,1): error TS1128: Declaration or statement expected.

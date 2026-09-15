@@ -1,0 +1,4 @@
+privateNameNotAllowedOutsideClass.ts(1,7): error TS1155: 'const' declarations must be initialized.
+privateNameNotAllowedOutsideClass.ts(1,7): error TS18029: Private identifiers are not allowed in variable declarations.
+privateNameNotAllowedOutsideClass.ts(1,12): error TS1134: Variable declaration expected.
+privateNameNotAllowedOutsideClass.ts(1,14): error TS1134: Variable declaration expected.

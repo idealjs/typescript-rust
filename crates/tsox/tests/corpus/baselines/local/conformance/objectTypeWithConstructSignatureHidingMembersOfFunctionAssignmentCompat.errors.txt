@@ -1,0 +1,3 @@
+objectTypeWithConstructSignatureHidingMembersOfFunctionAssignmentCompat.ts(13,1): error TS2322: Type '() => unknown' is not assignable to type 'Object'.
+objectTypeWithConstructSignatureHidingMembersOfFunctionAssignmentCompat.ts(14,1): error TS2322: Type 'Object' is not assignable to type '() => unknown'.
+  Type 'Object' provides no match for the signature 'new (): any'.

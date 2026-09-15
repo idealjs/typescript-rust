@@ -1,0 +1,33 @@
+objectTypeWithConstructSignatureHidingMembersOfExtendedFunction.ts(2,5): error TS2411: Property 'data' of type 'number' is not assignable to 'string' index type 'Object'.
+objectTypeWithConstructSignatureHidingMembersOfExtendedFunction.ts(15,13): error TS2339: Property 'arguments' does not exist on type 'I'.
+objectTypeWithConstructSignatureHidingMembersOfExtendedFunction.ts(16,13): error TS2339: Property 'data' does not exist on type 'I'.
+objectTypeWithConstructSignatureHidingMembersOfExtendedFunction.ts(27,13): error TS2339: Property 'arguments' does not exist on type '{ new (): number; apply: (a: any, b: any) => void; call: (thisArg: number, ...argArray: number[]) => any; }'.
+objectTypeWithConstructSignatureHidingMembersOfExtendedFunction.ts(28,13): error TS2339: Property 'data' does not exist on type '{ new (): number; apply: (a: any, b: any) => void; call: (thisArg: number, ...argArray: number[]) => any; }'.
+bundled:///libs/lib.es5.d.ts(273,1): error TS2411: Property 'name' of type 'string' is not assignable to 'string' index type 'Object'.
+bundled:///libs/lib.es5.d.ts(273,1): error TS2411: Property 'data' of type 'number' is not assignable to 'string' index type 'Object'.
+bundled:///libs/lib.es5.d.ts(279,5): error TS2411: Property 'apply' of type '(thisArg: any, argArray: any) => any' is not assignable to 'string' index type 'Object'.
+bundled:///libs/lib.es5.d.ts(286,5): error TS2411: Property 'call' of type '(thisArg: any, ...argArray: any[]) => any' is not assignable to 'string' index type 'Object'.
+bundled:///libs/lib.es5.d.ts(294,5): error TS2411: Property 'bind' of type '(thisArg: any, ...argArray: any[]) => any' is not assignable to 'string' index type 'Object'.
+bundled:///libs/lib.es5.d.ts(297,5): error TS2411: Property 'toString' of type '() => string' is not assignable to 'string' index type 'Object'.
+bundled:///libs/lib.es5.d.ts(300,14): error TS2411: Property 'length' of type 'number' is not assignable to 'string' index type 'Object'.
+bundled:///libs/lib.es5.d.ts(304,5): error TS2411: Property 'caller' of type 'Function' is not assignable to 'string' index type 'Object'.
+bundled:///libs/lib.es5.d.ts(329,1): error TS2411: Property 'toString' of type '() => string' is not assignable to 'string' index type 'Object'.
+bundled:///libs/lib.es5.d.ts(329,1): error TS2411: Property 'length' of type 'number' is not assignable to 'string' index type 'Object'.
+bundled:///libs/lib.es5.d.ts(329,1): error TS2411: Property 'caller' of type 'Function' is not assignable to 'string' index type 'Object'.
+bundled:///libs/lib.es5.d.ts(329,1): error TS2411: Property 'name' of type 'string' is not assignable to 'string' index type 'Object'.
+bundled:///libs/lib.es5.d.ts(329,1): error TS2411: Property 'data' of type 'number' is not assignable to 'string' index type 'Object'.
+bundled:///libs/lib.es5.d.ts(334,5): error TS2411: Property 'apply' of type '{ <T, R>(thisArg: T): R; <T, A, R>(thisArg: T, args: A): R; }' is not assignable to 'string' index type 'Object'.
+bundled:///libs/lib.es5.d.ts(341,5): error TS2411: Property 'apply' of type '{ <T, R>(thisArg: T): R; <T, A, R>(thisArg: T, args: A): R; }' is not assignable to 'string' index type 'Object'.
+bundled:///libs/lib.es5.d.ts(348,5): error TS2411: Property 'call' of type '<T, A, R>(thisArg: T, ...args: A) => R' is not assignable to 'string' index type 'Object'.
+bundled:///libs/lib.es5.d.ts(355,5): error TS2411: Property 'bind' of type '{ <T>(thisArg: unknown): OmitThisParameter<T>; <T, A, B, R>(thisArg: T, ...args: A): (...args: B) => R; }' is not assignable to 'string' index type 'Object'.
+bundled:///libs/lib.es5.d.ts(363,5): error TS2411: Property 'bind' of type '{ <T>(thisArg: unknown): OmitThisParameter<T>; <T, A, B, R>(thisArg: T, ...args: A): (...args: B) => R; }' is not assignable to 'string' index type 'Object'.
+bundled:///libs/lib.es5.d.ts(366,1): error TS2411: Property 'toString' of type '() => string' is not assignable to 'string' index type 'Object'.
+bundled:///libs/lib.es5.d.ts(366,1): error TS2411: Property 'length' of type 'number' is not assignable to 'string' index type 'Object'.
+bundled:///libs/lib.es5.d.ts(366,1): error TS2411: Property 'caller' of type 'Function' is not assignable to 'string' index type 'Object'.
+bundled:///libs/lib.es5.d.ts(366,1): error TS2411: Property 'name' of type 'string' is not assignable to 'string' index type 'Object'.
+bundled:///libs/lib.es5.d.ts(366,1): error TS2411: Property 'data' of type 'number' is not assignable to 'string' index type 'Object'.
+bundled:///libs/lib.es5.d.ts(371,5): error TS2411: Property 'apply' of type '{ <T>(thisArg: T): void; <T, A>(thisArg: T, args: A): void; }' is not assignable to 'string' index type 'Object'.
+bundled:///libs/lib.es5.d.ts(377,5): error TS2411: Property 'apply' of type '{ <T>(thisArg: T): void; <T, A>(thisArg: T, args: A): void; }' is not assignable to 'string' index type 'Object'.
+bundled:///libs/lib.es5.d.ts(384,5): error TS2411: Property 'call' of type '<T, A>(thisArg: T, ...args: A) => void' is not assignable to 'string' index type 'Object'.
+bundled:///libs/lib.es5.d.ts(391,5): error TS2411: Property 'bind' of type '{ <T>(thisArg: any): T; <A, B, R>(thisArg: any, ...args: A): () => unknown; }' is not assignable to 'string' index type 'Object'.
+bundled:///libs/lib.es5.d.ts(399,5): error TS2411: Property 'bind' of type '{ <T>(thisArg: any): T; <A, B, R>(thisArg: any, ...args: A): () => unknown; }' is not assignable to 'string' index type 'Object'.

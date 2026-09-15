@@ -1,0 +1,4 @@
+story.ts(8,54): error TS7006: Parameter 'args' implicitly has an 'any' type.
+story.ts(13,1): error TS2322: Type '{ disabled: boolean; }' is not assignable to type '{ colors?: (Props<T> & { ref?: { current: HTMLButtonElement | null; }; })["colors"]; value?: (Props<T> & { ref?: { current: HTMLButtonElement | null; }; })["value"]; onValueChange?: (Props<T> & { ref?: { current: HTMLButtonElement | null; }; })["onValueChange"]; disabled?: (Props<T> & { ref?: { current: HTMLButtonElement | null; }; })["disabled"]; ref?: (Props<T> & { ref?: { current: HTMLButtonElement | null; }; })["ref"]; } | undefined'.
+  Types of property 'disabled' are incompatible.
+    Type 'boolean' is not assignable to type '(Props<T> & { ref?: { current: HTMLButtonElement | null; }; })["disabled"] | undefined'.

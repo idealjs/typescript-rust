@@ -1,0 +1,4 @@
+genericCallAtYieldExpressionInGenericCall2.ts(20,4): error TS2345: Argument of type '(queue: Enqueue<any>, value: any) => void' is not assignable to parameter of type '(queue: Enqueue<any>, value: any) => Generator<Effect, unknown, any>'.
+  Type 'void' is not assignable to type 'Generator<Effect, unknown, any>'.
+genericCallAtYieldExpressionInGenericCall2.ts(24,4): error TS2345: Argument of type '(queue: Enqueue<any>, value: any) => void' is not assignable to parameter of type '(queue: Enqueue<any>, value: any) => Generator<Effect, unknown, any>'.
+  Type 'void' is not assignable to type 'Generator<Effect, unknown, any>'.

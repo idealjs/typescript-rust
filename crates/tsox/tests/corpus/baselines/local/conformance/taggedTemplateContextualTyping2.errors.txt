@@ -1,0 +1,4 @@
+taggedTemplateContextualTyping2.ts(14,14): error TS7006: Parameter 'x' implicitly has an 'any' type.
+taggedTemplateContextualTyping2.ts(15,14): error TS7006: Parameter 'x' implicitly has an 'any' type.
+taggedTemplateContextualTyping2.ts(15,67): error TS7006: Parameter 'y' implicitly has an 'any' type.
+taggedTemplateContextualTyping2.ts(16,14): error TS7006: Parameter 'x' implicitly has an 'any' type.

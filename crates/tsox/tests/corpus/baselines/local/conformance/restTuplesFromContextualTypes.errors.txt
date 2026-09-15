@@ -1,0 +1,93 @@
+restTuplesFromContextualTypes.ts(3,12): error TS7006: Parameter 'a' implicitly has an 'any' type.
+restTuplesFromContextualTypes.ts(3,15): error TS7006: Parameter 'b' implicitly has an 'any' type.
+restTuplesFromContextualTypes.ts(3,18): error TS7006: Parameter 'c' implicitly has an 'any' type.
+restTuplesFromContextualTypes.ts(4,12): error TS7019: Rest parameter 'x' implicitly has an 'any[]' type.
+restTuplesFromContextualTypes.ts(5,12): error TS7006: Parameter 'a' implicitly has an 'any' type.
+restTuplesFromContextualTypes.ts(5,15): error TS7019: Rest parameter 'x' implicitly has an 'any[]' type.
+restTuplesFromContextualTypes.ts(6,12): error TS7006: Parameter 'a' implicitly has an 'any' type.
+restTuplesFromContextualTypes.ts(6,15): error TS7006: Parameter 'b' implicitly has an 'any' type.
+restTuplesFromContextualTypes.ts(6,18): error TS7019: Rest parameter 'x' implicitly has an 'any[]' type.
+restTuplesFromContextualTypes.ts(7,12): error TS7006: Parameter 'a' implicitly has an 'any' type.
+restTuplesFromContextualTypes.ts(7,15): error TS7006: Parameter 'b' implicitly has an 'any' type.
+restTuplesFromContextualTypes.ts(7,18): error TS7006: Parameter 'c' implicitly has an 'any' type.
+restTuplesFromContextualTypes.ts(7,21): error TS7019: Rest parameter 'x' implicitly has an 'any[]' type.
+restTuplesFromContextualTypes.ts(11,8): error TS7006: Parameter 'b' implicitly has an 'any' type.
+restTuplesFromContextualTypes.ts(11,11): error TS7006: Parameter 'c' implicitly has an 'any' type.
+restTuplesFromContextualTypes.ts(13,4): error TS2345: Argument of type '(a: any, x_0: number, x_1: boolean, x_2: string) => void' is not assignable to parameter of type '(args_0: number, args_1: boolean, args_2: string) => void'.
+  Target signature provides too few arguments. Expected 4 or more, but got 3.
+restTuplesFromContextualTypes.ts(13,8): error TS7019: Rest parameter 'x' implicitly has an 'any[]' type.
+restTuplesFromContextualTypes.ts(14,4): error TS2345: Argument of type '(a: any, b: any, x_0: number, x_1: boolean, x_2: string) => void' is not assignable to parameter of type '(args_0: number, args_1: boolean, args_2: string) => void'.
+  Target signature provides too few arguments. Expected 5 or more, but got 3.
+restTuplesFromContextualTypes.ts(14,8): error TS7006: Parameter 'b' implicitly has an 'any' type.
+restTuplesFromContextualTypes.ts(14,11): error TS7019: Rest parameter 'x' implicitly has an 'any[]' type.
+restTuplesFromContextualTypes.ts(15,4): error TS2345: Argument of type '(a: any, b: any, c: any, x_0: number, x_1: boolean, x_2: string) => void' is not assignable to parameter of type '(args_0: number, args_1: boolean, args_2: string) => void'.
+  Target signature provides too few arguments. Expected 6 or more, but got 3.
+restTuplesFromContextualTypes.ts(15,8): error TS7006: Parameter 'b' implicitly has an 'any' type.
+restTuplesFromContextualTypes.ts(15,11): error TS7006: Parameter 'c' implicitly has an 'any' type.
+restTuplesFromContextualTypes.ts(15,14): error TS7019: Rest parameter 'x' implicitly has an 'any[]' type.
+restTuplesFromContextualTypes.ts(19,12): error TS7006: Parameter 'a' implicitly has an 'any' type.
+restTuplesFromContextualTypes.ts(19,15): error TS7006: Parameter 'b' implicitly has an 'any' type.
+restTuplesFromContextualTypes.ts(19,18): error TS7006: Parameter 'c' implicitly has an 'any' type.
+restTuplesFromContextualTypes.ts(20,12): error TS7019: Rest parameter 'x' implicitly has an 'any[]' type.
+restTuplesFromContextualTypes.ts(21,12): error TS7006: Parameter 'a' implicitly has an 'any' type.
+restTuplesFromContextualTypes.ts(21,15): error TS7019: Rest parameter 'x' implicitly has an 'any[]' type.
+restTuplesFromContextualTypes.ts(22,12): error TS7006: Parameter 'a' implicitly has an 'any' type.
+restTuplesFromContextualTypes.ts(22,15): error TS7006: Parameter 'b' implicitly has an 'any' type.
+restTuplesFromContextualTypes.ts(22,18): error TS7019: Rest parameter 'x' implicitly has an 'any[]' type.
+restTuplesFromContextualTypes.ts(23,12): error TS7006: Parameter 'a' implicitly has an 'any' type.
+restTuplesFromContextualTypes.ts(23,15): error TS7006: Parameter 'b' implicitly has an 'any' type.
+restTuplesFromContextualTypes.ts(23,18): error TS7006: Parameter 'c' implicitly has an 'any' type.
+restTuplesFromContextualTypes.ts(23,21): error TS7019: Rest parameter 'x' implicitly has an 'any[]' type.
+restTuplesFromContextualTypes.ts(27,4): error TS2345: Argument of type '(a: any, b: any, c: any) => void' is not assignable to parameter of type '(args_0: number, args_1: boolean, args_2: string[][][]) => void'.
+  Target signature provides too few arguments. Expected 3 or more, but got 2.
+restTuplesFromContextualTypes.ts(27,8): error TS7006: Parameter 'b' implicitly has an 'any' type.
+restTuplesFromContextualTypes.ts(27,11): error TS7006: Parameter 'c' implicitly has an 'any' type.
+restTuplesFromContextualTypes.ts(29,4): error TS2345: Argument of type '(a: any, x_0: number, x_1: boolean, x_2: string[][][]) => void' is not assignable to parameter of type '(args_0: number, args_1: boolean, args_2: string[][][]) => void'.
+  Target signature provides too few arguments. Expected 3 or more, but got 2.
+restTuplesFromContextualTypes.ts(29,8): error TS7019: Rest parameter 'x' implicitly has an 'any[]' type.
+restTuplesFromContextualTypes.ts(30,4): error TS2345: Argument of type '(a: any, b: any, x_0: number, x_1: boolean, x_2: string[][][]) => void' is not assignable to parameter of type '(args_0: number, args_1: boolean, args_2: string[][][]) => void'.
+  Target signature provides too few arguments. Expected 4 or more, but got 2.
+restTuplesFromContextualTypes.ts(30,8): error TS7006: Parameter 'b' implicitly has an 'any' type.
+restTuplesFromContextualTypes.ts(30,11): error TS7019: Rest parameter 'x' implicitly has an 'any[]' type.
+restTuplesFromContextualTypes.ts(31,4): error TS2345: Argument of type '(a: any, b: any, c: any, x_0: number, x_1: boolean, x_2: string[][][]) => void' is not assignable to parameter of type '(args_0: number, args_1: boolean, args_2: string[][][]) => void'.
+  Target signature provides too few arguments. Expected 5 or more, but got 2.
+restTuplesFromContextualTypes.ts(31,8): error TS7006: Parameter 'b' implicitly has an 'any' type.
+restTuplesFromContextualTypes.ts(31,11): error TS7006: Parameter 'c' implicitly has an 'any' type.
+restTuplesFromContextualTypes.ts(31,14): error TS7019: Rest parameter 'x' implicitly has an 'any[]' type.
+restTuplesFromContextualTypes.ts(35,12): error TS7006: Parameter 'a' implicitly has an 'any' type.
+restTuplesFromContextualTypes.ts(35,15): error TS7006: Parameter 'b' implicitly has an 'any' type.
+restTuplesFromContextualTypes.ts(35,18): error TS7006: Parameter 'c' implicitly has an 'any' type.
+restTuplesFromContextualTypes.ts(36,12): error TS7019: Rest parameter 'x' implicitly has an 'any[]' type.
+restTuplesFromContextualTypes.ts(37,12): error TS7006: Parameter 'a' implicitly has an 'any' type.
+restTuplesFromContextualTypes.ts(37,15): error TS7019: Rest parameter 'x' implicitly has an 'any[]' type.
+restTuplesFromContextualTypes.ts(38,12): error TS7006: Parameter 'a' implicitly has an 'any' type.
+restTuplesFromContextualTypes.ts(38,15): error TS7006: Parameter 'b' implicitly has an 'any' type.
+restTuplesFromContextualTypes.ts(38,18): error TS7019: Rest parameter 'x' implicitly has an 'any[]' type.
+restTuplesFromContextualTypes.ts(39,12): error TS7006: Parameter 'a' implicitly has an 'any' type.
+restTuplesFromContextualTypes.ts(39,15): error TS7006: Parameter 'b' implicitly has an 'any' type.
+restTuplesFromContextualTypes.ts(39,18): error TS7006: Parameter 'c' implicitly has an 'any' type.
+restTuplesFromContextualTypes.ts(39,21): error TS7019: Rest parameter 'x' implicitly has an 'any[]' type.
+restTuplesFromContextualTypes.ts(43,4): error TS2345: Argument of type '(a: number, b: any, c: any) => void' is not assignable to parameter of type '(x: number, args_0: boolean, args_1: string[][][]) => void'.
+  Target signature provides too few arguments. Expected 3 or more, but got 2.
+restTuplesFromContextualTypes.ts(43,11): error TS7006: Parameter 'c' implicitly has an 'any' type.
+restTuplesFromContextualTypes.ts(46,4): error TS2345: Argument of type '(a: number, b: any, x_0: boolean, x_1: string[][][]) => void' is not assignable to parameter of type '(x: number, args_0: boolean, args_1: string[][][]) => void'.
+  Target signature provides too few arguments. Expected 3 or more, but got 2.
+restTuplesFromContextualTypes.ts(46,11): error TS7019: Rest parameter 'x' implicitly has an 'any[]' type.
+restTuplesFromContextualTypes.ts(47,4): error TS2345: Argument of type '(a: number, b: any, c: any, x_0: boolean, x_1: string[][][]) => void' is not assignable to parameter of type '(x: number, args_0: boolean, args_1: string[][][]) => void'.
+  Target signature provides too few arguments. Expected 4 or more, but got 2.
+restTuplesFromContextualTypes.ts(47,11): error TS7006: Parameter 'c' implicitly has an 'any' type.
+restTuplesFromContextualTypes.ts(47,14): error TS7019: Rest parameter 'x' implicitly has an 'any[]' type.
+restTuplesFromContextualTypes.ts(50,15): error TS7019: Rest parameter 'x' implicitly has an 'any[]' type.
+restTuplesFromContextualTypes.ts(51,15): error TS7006: Parameter 'a' implicitly has an 'any' type.
+restTuplesFromContextualTypes.ts(51,18): error TS7019: Rest parameter 'x' implicitly has an 'any[]' type.
+restTuplesFromContextualTypes.ts(52,15): error TS7006: Parameter 'a' implicitly has an 'any' type.
+restTuplesFromContextualTypes.ts(52,18): error TS7019: Rest parameter 'x' implicitly has an 'any[]' type.
+restTuplesFromContextualTypes.ts(56,7): error TS2345: Argument of type '(a: number, b: any, ...x: T) => void' is not assignable to parameter of type '(x: number, ...args: T) => void'.
+  Types of parameters 'b' and 'args' are incompatible.
+    Type 'T' is not assignable to type '[any, ...T]'.
+restTuplesFromContextualTypes.ts(56,14): error TS7019: Rest parameter 'x' implicitly has an 'any[]' type.
+restTuplesFromContextualTypes.ts(77,15): error TS7006: Parameter 'a' implicitly has an 'any' type.
+restTuplesFromContextualTypes.ts(77,18): error TS7006: Parameter 'b' implicitly has an 'any' type.
+restTuplesFromContextualTypes.ts(83,15): error TS7019: Rest parameter 'rest' implicitly has an 'any[]' type.
+restTuplesFromContextualTypes.ts(83,29): error TS2345: Argument of type '""' is not assignable to parameter of type '1'.
+restTuplesFromContextualTypes.ts(91,52): error TS7006: Parameter 'strOrErr' implicitly has an 'any' type.

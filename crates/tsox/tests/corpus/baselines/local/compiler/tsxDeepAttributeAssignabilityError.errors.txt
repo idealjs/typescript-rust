@@ -1,0 +1,6 @@
+error TS6053: File '/.lib/react.d.ts' not found.
+file1.tsx(1,24): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+my-component.tsx(2,24): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+
+
+!!! error TS6053: File '/.lib/react.d.ts' not found.

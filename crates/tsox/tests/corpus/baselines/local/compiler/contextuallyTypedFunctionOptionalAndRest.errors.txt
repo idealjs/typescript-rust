@@ -1,0 +1,2 @@
+contextuallyTypedFunctionOptionalAndRest.ts(1,24): error TS7006: Parameter 'a' implicitly has an 'any' type.
+contextuallyTypedFunctionOptionalAndRest.ts(1,28): error TS7019: Rest parameter 'b' implicitly has an 'any[]' type.

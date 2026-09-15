@@ -1,0 +1,14 @@
+enumAssignmentCompat3.ts(68,1): error TS2322: Type '0 | 1 | 2 | 3' is not assignable to type '0 | 1 | 2'.
+  Type '3' is not assignable to type '0 | 1 | 2'.
+enumAssignmentCompat3.ts(72,1): error TS2322: Type '0 | 1 | 3' is not assignable to type '0 | 1 | 2'.
+  Type '3' is not assignable to type '0 | 1 | 2'.
+enumAssignmentCompat3.ts(75,1): error TS2322: Type '0 | 1 | 2' is not assignable to type '0 | 1'.
+  Type '2' is not assignable to type '0 | 1'.
+enumAssignmentCompat3.ts(76,1): error TS2322: Type '0 | 1 | 2' is not assignable to type '0 | 1'.
+  Type '2' is not assignable to type '0 | 1'.
+enumAssignmentCompat3.ts(78,1): error TS2322: Type '0 | 1 | 2' is not assignable to type '0 | 1 | 3'.
+  Type '2' is not assignable to type '0 | 1 | 3'.
+enumAssignmentCompat3.ts(86,1): error TS2322: Type '0 | 1 | 3 | 4' is not assignable to type '0 | 1 | 2'.
+  Type '3' is not assignable to type '0 | 1 | 2'.
+enumAssignmentCompat3.ts(87,1): error TS2322: Type '0 | 1 | 2' is not assignable to type '0 | 1 | 3 | 4'.
+  Type '2' is not assignable to type '0 | 1 | 3 | 4'.

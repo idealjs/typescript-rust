@@ -1,0 +1,1 @@
+wrappedIncovations1.ts(2,4): error TS2339: Property 'foo' does not exist on type 'typeof globalThis'.

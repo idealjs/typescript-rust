@@ -1,0 +1,3 @@
+ArrowFunction3.ts(1,10): error TS7006: Parameter 'a' implicitly has an 'any' type.
+ArrowFunction3.ts(1,14): error TS2304: Cannot find name ''.
+ArrowFunction3.ts(1,14): error TS1003: Identifier expected.

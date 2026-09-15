@@ -1,0 +1,3 @@
+parser509669.ts(2,10): error TS1109: Expression expected.
+parser509669.ts(2,11): error TS1005: ';' expected.
+parser509669.ts(2,12): suggestion TS7027: Unreachable code detected.

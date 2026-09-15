@@ -1,0 +1,6 @@
+conditionalTypesExcessProperties.ts(8,5): error TS2322: Type '{ test: string; arg: A; }' is not assignable to type '{ test: string; } & T extends object ? { arg: T; } : { arg?: undefined; }'.
+  Types of property 'arg' are incompatible.
+    Type 'A' is not assignable to type 'undefined'.
+conditionalTypesExcessProperties.ts(9,5): error TS2322: Type '{ test: string; arg: A; arr: A; }' is not assignable to type '{ test: string; } & T extends object ? { arg: T; } : { arg?: undefined; }'.
+  Types of property 'arg' are incompatible.
+    Type 'A' is not assignable to type 'undefined'.

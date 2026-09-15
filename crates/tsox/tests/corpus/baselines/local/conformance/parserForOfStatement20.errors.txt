@@ -1,0 +1,2 @@
+parserForOfStatement20.ts(1,22): error TS1005: ',' expected.
+parserForOfStatement20.ts(1,27): error TS1005: ';' expected.

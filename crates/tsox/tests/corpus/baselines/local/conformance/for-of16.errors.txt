@@ -1,0 +1,4 @@
+for-of16.ts(8,6): error TS2454: Variable 'v' is used before being assigned.
+for-of16.ts(8,11): error TS2495: Type 'MyStringIterator' is not an array type or a string type.
+for-of16.ts(10,6): error TS2454: Variable 'v' is used before being assigned.
+for-of16.ts(10,11): error TS2495: Type 'MyStringIterator' is not an array type or a string type.

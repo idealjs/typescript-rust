@@ -1,0 +1,6 @@
+client.ts(1,30): error TS1005: '=' expected.
+client.ts(1,30): error TS2503: Cannot find namespace 'from'.
+client.ts(1,35): error TS1005: ';' expected.
+client.ts(3,31): error TS1005: '=' expected.
+client.ts(3,31): error TS2503: Cannot find namespace 'from'.
+client.ts(3,36): error TS1005: ';' expected.

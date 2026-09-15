@@ -1,0 +1,2 @@
+parserErrorRecovery_ExtendsOrImplementsClause4.ts(1,17): error TS2304: Cannot find name 'A'.
+parserErrorRecovery_ExtendsOrImplementsClause4.ts(2,2): error TS1005: '{' expected.

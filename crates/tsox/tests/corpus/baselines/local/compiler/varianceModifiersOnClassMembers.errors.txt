@@ -1,0 +1,2 @@
+varianceModifiersOnClassMembers.ts(4,3): error TS1434: Unexpected keyword or identifier.
+varianceModifiersOnClassMembers.ts(5,3): error TS1435: Unknown keyword or identifier. Did you mean 'out'?

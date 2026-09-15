@@ -1,0 +1,4 @@
+objectLiteralMemberWithQuestionMark1.ts(1,11): error TS2304: Cannot find name 'foo'.
+objectLiteralMemberWithQuestionMark1.ts(1,14): error TS1005: ',' expected.
+objectLiteralMemberWithQuestionMark1.ts(1,15): error TS1117: An object literal cannot have multiple properties with the same name.
+objectLiteralMemberWithQuestionMark1.ts(1,15): error TS1005: 'identifier' expected.

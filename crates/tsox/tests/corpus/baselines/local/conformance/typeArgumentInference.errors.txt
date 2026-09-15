@@ -1,0 +1,16 @@
+typeArgumentInference.ts(32,21): error TS2345: Argument of type '() => undefined' is not assignable to parameter of type '() => Date'.
+  Type 'undefined' is not assignable to type 'Date'.
+typeArgumentInference.ts(39,31): error TS2345: Argument of type 'null' is not assignable to parameter of type 'string'.
+typeArgumentInference.ts(45,31): error TS2345: Argument of type 'null' is not assignable to parameter of type 'number'.
+typeArgumentInference.ts(62,27): error TS2345: Argument of type 'null' is not assignable to parameter of type '(a: string) => string'.
+typeArgumentInference.ts(66,5): error TS2322: Type 'null' is not assignable to type 'T'.
+  'T' could be instantiated with an arbitrary type which could be unrelated to 'null'.
+typeArgumentInference.ts(68,29): error TS2345: Argument of type '0' is not assignable to parameter of type '""'.
+typeArgumentInference.ts(69,5): error TS2403: Subsequent variable declarations must have the same type.  Variable 'a9a' must be of type 'string', but here has type '{}'.
+typeArgumentInference.ts(70,75): error TS2345: Argument of type 'null' is not assignable to parameter of type '{ a?: number; b?: string; }'.
+typeArgumentInference.ts(82,38): error TS2353: Object literal may only specify known properties, and 'x' does not exist in type 'undefined | undefined'.
+typeArgumentInference.ts(82,63): error TS2353: Object literal may only specify known properties, and 'x' does not exist in type 'undefined | undefined'.
+typeArgumentInference.ts(83,5): error TS2403: Subsequent variable declarations must have the same type.  Variable 'a9e' must be of type 'undefined | undefined', but here has type '{}'.
+typeArgumentInference.ts(84,30): error TS2345: Argument of type 'undefined' is not assignable to parameter of type 'A92'.
+typeArgumentInference.ts(89,5): error TS2403: Subsequent variable declarations must have the same type.  Variable 'a9d' must be of type '{ x: number; } | { x: number; } | { x: number; }', but here has type '{ x: number; }'.
+typeArgumentInference.ts(98,5): error TS2403: Subsequent variable declarations must have the same type.  Variable 'arr' must be of type 'never[] | null | undefined', but here has type 'any[]'.

@@ -1,0 +1,2 @@
+genericWithIndexerOfTypeParameterType2.ts(2,5): error TS2564: Property '_itemsByKey' has no initializer and is not definitely assigned in the constructor.
+genericWithIndexerOfTypeParameterType2.ts(12,5): error TS2564: Property '__isNew' has no initializer and is not definitely assigned in the constructor.

@@ -1,0 +1,1 @@
+test.tsx(9,17): error TS2874: This JSX tag requires 'MyElement' to be in scope, but it could not be found.

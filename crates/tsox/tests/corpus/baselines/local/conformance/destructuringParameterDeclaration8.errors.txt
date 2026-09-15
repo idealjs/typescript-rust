@@ -1,0 +1,6 @@
+destructuringParameterDeclaration8.ts(17,6): error TS2345: Argument of type '{ method: "z"; nested: { p: "b"; }; }' is not assignable to parameter of type '{ method?: "x" | "y"; nested?: { p: "a" | "b"; }; }'.
+  Types of property 'method' are incompatible.
+    Type '"z"' is not assignable to type '"x" | "y" | undefined'.
+destructuringParameterDeclaration8.ts(18,6): error TS2345: Argument of type '{ method: "one"; nested: { p: "a"; }; }' is not assignable to parameter of type '{ method?: "x" | "y"; nested?: { p: "a" | "b"; }; }'.
+  Types of property 'method' are incompatible.
+    Type '"one"' is not assignable to type '"x" | "y" | undefined'.

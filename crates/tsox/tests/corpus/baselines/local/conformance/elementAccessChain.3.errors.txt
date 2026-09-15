@@ -1,0 +1,10 @@
+elementAccessChain.3.ts(13,1): error TS2779: The left-hand side of an assignment expression may not be an optional property access.
+elementAccessChain.3.ts(15,1): error TS2779: The left-hand side of an assignment expression may not be an optional property access.
+elementAccessChain.3.ts(18,22): error TS1005: ';' expected.
+elementAccessChain.3.ts(19,1): suggestion TS7027: Unreachable code detected.
+elementAccessChain.3.ts(19,11): error TS2339: Property 'a' does not exist on type 'never'.
+elementAccessChain.3.ts(19,23): error TS1005: ';' expected.
+elementAccessChain.3.ts(21,11): error TS2339: Property 'a' does not exist on type 'never'.
+elementAccessChain.3.ts(24,12): error TS2339: Property 'a' does not exist on type 'never'.
+elementAccessChain.3.ts(26,12): error TS2339: Property 'a' does not exist on type 'never'.
+elementAccessChain.3.ts(28,10): error TS2339: Property 'a' does not exist on type 'never'.

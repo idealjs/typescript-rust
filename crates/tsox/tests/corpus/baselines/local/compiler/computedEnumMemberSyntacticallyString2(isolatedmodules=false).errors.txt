@@ -1,0 +1,6 @@
+error TS6053: File 'foo.ts' not found.
+error TS6053: File 'bar.ts' not found.
+
+
+!!! error TS6053: File 'foo.ts' not found.
+!!! error TS6053: File 'bar.ts' not found.

@@ -1,0 +1,7 @@
+error TS6053: File '/.lib/react16.d.ts' not found.
+jsxCallElaborationCheckNoCrash1.tsx(3,24): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+jsxCallElaborationCheckNoCrash1.tsx(9,4): error TS2503: Cannot find namespace 'React'.
+jsxCallElaborationCheckNoCrash1.tsx(10,29): error TS2604: JSX element type 'TagElement' does not have any construct or call signatures.
+
+
+!!! error TS6053: File '/.lib/react16.d.ts' not found.

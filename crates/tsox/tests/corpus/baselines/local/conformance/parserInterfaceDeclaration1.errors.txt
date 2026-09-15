@@ -1,0 +1,4 @@
+parserInterfaceDeclaration1.ts(1,21): error TS2304: Cannot find name 'A'.
+parserInterfaceDeclaration1.ts(1,23): error TS1005: '{' expected.
+parserInterfaceDeclaration1.ts(1,31): error TS1131: Property or signature expected.
+parserInterfaceDeclaration1.ts(1,31): error TS2304: Cannot find name 'B'.

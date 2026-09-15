@@ -1,0 +1,1 @@
+emitClassExpressionInDeclarationFile.ts(29,6): error TS2339: Property 'tags' does not exist on type 'Test'.

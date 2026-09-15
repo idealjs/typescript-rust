@@ -1,0 +1,7 @@
+implicitConstParameters.ts(7,27): error TS2339: Property 'toFixed' does not exist on type 'string | number'.
+implicitConstParameters.ts(15,23): error TS18048: 'x' is possibly 'undefined'.
+implicitConstParameters.ts(21,31): error TS18048: 'x' is possibly 'undefined'.
+implicitConstParameters.ts(30,31): error TS18048: 'x' is possibly 'undefined'.
+implicitConstParameters.ts(38,27): error TS18048: 'x' is possibly 'undefined'.
+implicitConstParameters.ts(44,27): error TS18048: 'x' is possibly 'undefined'.
+implicitConstParameters.ts(53,27): error TS18048: 'y' is possibly 'undefined'.

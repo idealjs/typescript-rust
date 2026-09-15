@@ -1,0 +1,6 @@
+foo2.ts(16,5): error TS2564: Property 'item' has no initializer and is not definitely assigned in the constructor.
+usage.ts(5,5): error TS2564: Property 'item' has no initializer and is not definitely assigned in the constructor.
+usage.ts(9,12): error TS2322: Type '{ Bar: typeof Bar2; }' is not assignable to type 'typeof import("foo2")'.
+  Type 'undefined' is not assignable to type 'J'.
+    Property 'Baz' is missing in type '{ Bar: typeof Bar2; }' but required in type 'typeof import("foo2")'.
+      Type 'undefined' is not assignable to type 'J'.

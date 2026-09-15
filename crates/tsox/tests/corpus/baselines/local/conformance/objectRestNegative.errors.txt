@@ -1,0 +1,1 @@
+objectRestNegative.ts(6,10): error TS2454: Variable 'notAssignable' is used before being assigned.

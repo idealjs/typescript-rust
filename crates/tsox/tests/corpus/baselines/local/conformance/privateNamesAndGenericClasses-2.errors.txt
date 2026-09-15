@@ -1,0 +1,10 @@
+privateNamesAndGenericClasses-2.ts(2,5): error TS2564: Property '#foo' has no initializer and is not definitely assigned in the constructor.
+privateNamesAndGenericClasses-2.ts(22,1): error TS2322: Type '5' is not assignable to type 'T'.
+  'T' could be instantiated with an arbitrary type which could be unrelated to '5'.
+privateNamesAndGenericClasses-2.ts(24,3): error TS18013: Property '#foo' is not accessible outside class 'C' because it has a private identifier.
+privateNamesAndGenericClasses-2.ts(25,1): error TS2322: Type 'C<string>' is not assignable to type 'C<number>'.
+  Types of property '#foo' are incompatible.
+    Type 'string' is not assignable to type 'number'.
+privateNamesAndGenericClasses-2.ts(26,1): error TS2322: Type 'C<number>' is not assignable to type 'C<string>'.
+  Types of property '#foo' are incompatible.
+    Type 'number' is not assignable to type 'string'.

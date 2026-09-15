@@ -1,0 +1,1 @@
+argumentsObjectIterator02_ES6.ts(5,21): error TS2495: Type 'any' is not an array type or a string type.

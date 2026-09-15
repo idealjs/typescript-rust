@@ -1,0 +1,25 @@
+returnTypeInferenceContextualParameterTypesInGenerator1.ts(50,3): error TS2345: Argument of type 'Effect<unknown>' is not assignable to parameter of type 'Effect<HandlersFrom<R>>'.
+  Types of property '_A' are incompatible.
+    Type 'unknown' is not assignable to type 'HandlersFrom<R>'.
+returnTypeInferenceContextualParameterTypesInGenerator1.ts(50,7): error TS2345: Argument of type '() => { Register: (id: any) => string; }' is not assignable to parameter of type '() => Generator<Effect<any>, HandlersFrom<R>>'.
+  The types returned by '_A()' are incompatible between these types.
+    Type '{ Register: (id: any) => string; }' is not assignable to type 'Generator<Effect<any>, HandlersFrom<R>>'.
+      Type '{ Register: (id: any) => string; }' is missing the following properties from type 'Generator<Effect<any>, HandlersFrom<R>>': next, return, throw, __@iterator, and 13 more.
+        The types returned by '_A()' are incompatible between these types.
+          The types returned by '_A()' are incompatible between these types.
+            Type '{ Register: (id: any) => string; }' is not assignable to type 'Generator<Effect<any>, HandlersFrom<R>>'.
+              Type '{ Register: (id: any) => string; }' is missing the following properties from type 'Generator<Effect<any>, HandlersFrom<R>>': next, return, throw, __@iterator, and 13 more.
+                Types of property '_A' are incompatible.
+                  Type 'unknown' is not assignable to type 'HandlersFrom<R>'.
+                    Type '{ Register: (id: any) => string; }' is not assignable to type 'Generator<Effect<any>, HandlersFrom<R>>'.
+                      The types returned by '_A()' are incompatible between these types.
+                        Type '{ Register: (id: any) => string; }' is not assignable to type 'Generator<Effect<any>, HandlersFrom<R>>'.
+                          Type '{ Register: (id: any) => string; }' is missing the following properties from type 'Generator<Effect<any>, HandlersFrom<R>>': next, return, throw, __@iterator, and 13 more.
+                            Types of property '_A' are incompatible.
+                              Type 'unknown' is not assignable to type 'HandlersFrom<R>'.
+                                Type '{ Register: (id: any) => string; }' is missing the following properties from type 'Generator<Effect<any>, HandlersFrom<R>>': next, return, throw, __@iterator, and 13 more.
+                                  The types returned by '_A()' are incompatible between these types.
+                                    Type '{ Register: (id: any) => string; }' is not assignable to type 'Generator<Effect<any>, HandlersFrom<R>>'.
+                                      Type '{ Register: (id: any) => string; }' is missing the following properties from type 'Generator<Effect<any>, HandlersFrom<R>>': next, return, throw, __@iterator, and 13 more.
+                                        Types of property '_A' are incompatible.
+                                          Type 'unknown' is not assignable to type 'HandlersFrom<R>'.

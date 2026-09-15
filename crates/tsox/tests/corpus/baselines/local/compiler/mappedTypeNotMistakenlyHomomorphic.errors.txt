@@ -1,0 +1,2 @@
+mappedTypeNotMistakenlyHomomorphic.ts(24,48): error TS2353: Object literal may only specify known properties, and 'a' does not exist in type '{ v: string; }'.
+mappedTypeNotMistakenlyHomomorphic.ts(25,48): error TS2353: Object literal may only specify known properties, and 'b' does not exist in type '{ v: string; }'.

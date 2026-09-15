@@ -1,0 +1,9 @@
+classWithOnlyPublicMembersEquivalentToInterface.ts(4,12): error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
+classWithOnlyPublicMembersEquivalentToInterface.ts(5,35): error TS2322: Type 'null' is not assignable to type 'number'.
+classWithOnlyPublicMembersEquivalentToInterface.ts(14,5): error TS2411: Property 'x' of type 'string' is not assignable to 'string' index type 'Object'.
+classWithOnlyPublicMembersEquivalentToInterface.ts(15,5): error TS2411: Property 'y' of type '(b: number) => number' is not assignable to 'string' index type 'Object'.
+classWithOnlyPublicMembersEquivalentToInterface.ts(16,5): error TS2411: Property 'z' of type 'number' is not assignable to 'string' index type 'Object'.
+classWithOnlyPublicMembersEquivalentToInterface.ts(19,5): error TS2411: Property '0' of type 'number' is not assignable to 'number' index type 'Object'.
+classWithOnlyPublicMembersEquivalentToInterface.ts(24,5): error TS2454: Variable 'i' is used before being assigned.
+classWithOnlyPublicMembersEquivalentToInterface.ts(25,1): error TS2322: Type 'C' is not assignable to type 'I'.
+  Index signature for type 'string' is missing in type 'C'.

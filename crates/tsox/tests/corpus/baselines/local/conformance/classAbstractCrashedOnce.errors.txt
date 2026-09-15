@@ -1,0 +1,1 @@
+classAbstractCrashedOnce.ts(8,5): error TS2339: Property '' does not exist on type 'this'.

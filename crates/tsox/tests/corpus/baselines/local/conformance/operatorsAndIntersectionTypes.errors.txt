@@ -1,0 +1,3 @@
+operatorsAndIntersectionTypes.ts(22,12): error TS2365: Operator '+' cannot be applied to types 'string & { $Guid: any; }' and 'string & { $Guid: any; }'.
+operatorsAndIntersectionTypes.ts(23,12): error TS2365: Operator '+' cannot be applied to types 'string & { $Guid: any; }' and 'number & { $SerialNo: any; }'.
+operatorsAndIntersectionTypes.ts(26,12): error TS2365: Operator '+' cannot be applied to types 'number & { $SerialNo: any; }' and 'number & { $SerialNo: any; }'.

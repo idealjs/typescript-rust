@@ -1,0 +1,2 @@
+superAccess2.ts(17,15): error TS2339: Property 'y' does not exist on type 'Q'.
+superAccess2.ts(21,15): error TS2339: Property 'x' does not exist on type 'typeof Q'.

@@ -1,0 +1,10 @@
+assignmentCompatWithGenericCallSignatures4.ts(11,1): error TS2719: Type '<T>(z: T) => void' is not assignable to type '<T>(z: T) => void'. Two different types with this name exist, but they are unrelated.
+  Types of parameters 'z' and 'z' are incompatible.
+    Type 'T' is not assignable to type 'I2<I2<T>>'.
+      The types of 'p.p' are incompatible between these types.
+        Type 'T' is not assignable to type 'I2<T>'.
+assignmentCompatWithGenericCallSignatures4.ts(12,1): error TS2719: Type '<T>(z: T) => void' is not assignable to type '<T>(z: T) => void'. Two different types with this name exist, but they are unrelated.
+  Types of parameters 'z' and 'z' are incompatible.
+    Type 'T' is not assignable to type 'I2<T>'.
+      The types of 'p.p' are incompatible between these types.
+        Type 'I2<T>' is not assignable to type 'T'.

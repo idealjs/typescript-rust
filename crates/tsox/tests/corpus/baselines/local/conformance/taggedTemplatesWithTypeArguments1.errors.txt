@@ -1,0 +1,8 @@
+taggedTemplatesWithTypeArguments1.ts(11,7): error TS7006: Parameter 'stuff' implicitly has an 'any' type.
+taggedTemplatesWithTypeArguments1.ts(13,7): error TS7006: Parameter 'stuff' implicitly has an 'any' type.
+taggedTemplatesWithTypeArguments1.ts(15,7): error TS7006: Parameter 'stuff' implicitly has an 'any' type.
+taggedTemplatesWithTypeArguments1.ts(24,7): error TS7006: Parameter 'stuff' implicitly has an 'any' type.
+taggedTemplatesWithTypeArguments1.ts(26,7): error TS7006: Parameter 'stuff' implicitly has an 'any' type.
+taggedTemplatesWithTypeArguments1.ts(28,7): error TS7006: Parameter 'stuff' implicitly has an 'any' type.
+taggedTemplatesWithTypeArguments1.ts(37,39): error TS7006: Parameter 'input' implicitly has an 'any' type.
+taggedTemplatesWithTypeArguments1.ts(42,25): error TS7006: Parameter 'input' implicitly has an 'any' type.

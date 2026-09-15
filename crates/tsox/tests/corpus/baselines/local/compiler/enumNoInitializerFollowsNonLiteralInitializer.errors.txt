@@ -1,0 +1,8 @@
+error TS6053: File 'helpers.ts' not found.
+error TS6053: File 'bad.ts' not found.
+error TS6053: File 'good.ts' not found.
+
+
+!!! error TS6053: File 'helpers.ts' not found.
+!!! error TS6053: File 'bad.ts' not found.
+!!! error TS6053: File 'good.ts' not found.

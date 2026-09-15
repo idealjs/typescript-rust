@@ -1,0 +1,4 @@
+awaitUsingDeclarationsInForOf.2.ts(2,16): error TS2304: Cannot find name 'using'.
+awaitUsingDeclarationsInForOf.2.ts(2,25): error TS2304: Cannot find name 'of'.
+awaitUsingDeclarationsInForOf.2.ts(2,25): error TS2495: Type 'any' is not an array type or a string type.
+awaitUsingDeclarationsInForOf.2.ts(2,29): error TS1109: Expression expected.

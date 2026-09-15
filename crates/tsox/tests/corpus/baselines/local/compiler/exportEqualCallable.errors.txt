@@ -1,0 +1,2 @@
+exportEqualCallable_0.ts(4,10): error TS2454: Variable 'server' is used before being assigned.
+exportEqualCallable_1.ts(2,26): error TS2307: Cannot find module 'exportEqualCallable_0' or its corresponding type declarations.

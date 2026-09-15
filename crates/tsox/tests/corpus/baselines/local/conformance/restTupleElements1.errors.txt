@@ -1,0 +1,8 @@
+restTupleElements1.ts(10,22): error TS2304: Cannot find name ''.
+restTupleElements1.ts(10,22): error TS1005: ',' expected.
+restTupleElements1.ts(67,5): error TS7006: Parameter 'x' implicitly has an 'any' type.
+restTupleElements1.ts(67,17): error TS7006: Parameter 'x' implicitly has an 'any' type.
+restTupleElements1.ts(67,32): error TS7006: Parameter 'x' implicitly has an 'any' type.
+restTupleElements1.ts(68,16): error TS7006: Parameter 'x' implicitly has an 'any' type.
+restTupleElements1.ts(68,16): error TS2554: Expected 1 arguments, but got 3.
+restTupleElements1.ts(68,31): error TS7006: Parameter 'x' implicitly has an 'any' type.

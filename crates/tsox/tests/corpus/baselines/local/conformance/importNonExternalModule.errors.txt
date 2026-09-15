@@ -1,0 +1,1 @@
+foo_1.ts(3,8): error TS2339: Property 'answer' does not exist on type 'typeof import("foo_0")'.

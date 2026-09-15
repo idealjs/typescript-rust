@@ -1,0 +1,14 @@
+objectLiteralNormalization.ts(4,4): error TS2339: Property 'b' does not exist on type '{ a: number; }'.
+objectLiteralNormalization.ts(5,4): error TS2339: Property 'c' does not exist on type '{ a: number; }'.
+objectLiteralNormalization.ts(8,1): error TS2322: Type '{ b: string; }' is not assignable to type '{ a: number; }'.
+  Property 'a' is missing in type '{ b: "y"; }' but required in type '{ a: number; }'.
+objectLiteralNormalization.ts(9,1): error TS2322: Type '{ c: boolean; }' is not assignable to type '{ a: number; }'.
+  Property 'a' is missing in type '{ c: true; }' but required in type '{ a: number; }'.
+objectLiteralNormalization.ts(12,4): error TS2339: Property 'a' does not exist on type '{}'.
+objectLiteralNormalization.ts(13,4): error TS2339: Property 'b' does not exist on type '{}'.
+objectLiteralNormalization.ts(37,8): error TS2339: Property 'x' does not exist on type '{ x: number; y: number; } | { a: string; } | { b: number; }'.
+objectLiteralNormalization.ts(38,8): error TS2339: Property 'y' does not exist on type '{ x: number; y: number; } | { a: string; } | { b: number; }'.
+objectLiteralNormalization.ts(39,8): error TS2339: Property 'a' does not exist on type '{ x: number; y: number; } | { a: string; } | { b: number; }'.
+objectLiteralNormalization.ts(40,8): error TS2339: Property 'b' does not exist on type '{ x: number; y: number; } | { a: string; } | { b: number; }'.
+objectLiteralNormalization.ts(48,18): error TS2739: Type '{ a: 2; }' is missing the following properties from type '{ a: 1; b: "abc"; c: true; }': b, c
+objectLiteralNormalization.ts(49,12): error TS2739: Type '{ a: 2; }' is missing the following properties from type '{ a: 1; b: "abc"; c: true; }': b, c

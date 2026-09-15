@@ -1,0 +1,6 @@
+inferentialTypingObjectLiteralMethod1.ts(5,9): error TS2345: Argument of type '{ method: (p1: T) => any; }' is not assignable to parameter of type 'Int<string, unknown>'.
+  Types of property 'method' are incompatible.
+    Type '(p1: T) => any' is not assignable to type '(x: string) => unknown'.
+      Types of parameters 'p1' and 'x' are incompatible.
+        Type 'string' is not assignable to type 'T'.
+          'T' could be instantiated with an arbitrary type which could be unrelated to 'string'.

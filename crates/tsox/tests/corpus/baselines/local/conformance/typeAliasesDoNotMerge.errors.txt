@@ -1,0 +1,2 @@
+typeAliasesDoNotMerge.ts(1,13): error TS2300: Duplicate identifier 'A'.
+typeAliasesDoNotMerge.ts(2,6): error TS2300: Duplicate identifier 'A'.

@@ -1,0 +1,8 @@
+cloduleTest2.ts(4,13): error TS2554: Expected 1 arguments, but got 0.
+cloduleTest2.ts(10,13): error TS2554: Expected 1 arguments, but got 0.
+cloduleTest2.ts(18,7): error TS2339: Property 'bar' does not exist on type 'T3.m3d'.
+cloduleTest2.ts(19,7): error TS2339: Property 'y' does not exist on type 'T3.m3d'.
+cloduleTest2.ts(27,7): error TS2339: Property 'bar' does not exist on type 'T4.m3d'.
+cloduleTest2.ts(28,7): error TS2339: Property 'y' does not exist on type 'T4.m3d'.
+cloduleTest2.ts(33,9): error TS2554: Expected 1 arguments, but got 0.
+cloduleTest2.ts(36,10): error TS2554: Expected 1 arguments, but got 0.

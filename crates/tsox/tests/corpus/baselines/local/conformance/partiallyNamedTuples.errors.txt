@@ -1,0 +1,2 @@
+partiallyNamedTuples.ts(58,21): error TS2345: Argument of type '[first: { type: number; }, { type: string; }]' is not assignable to parameter of type '[...{ [K in keyof T]: any; }[]]'.
+  Type '{ type: number; }' is missing the following properties from type 'Array<{ [K in keyof T]: any; }>': length, toString, toLocaleString, pop, and 27 more.

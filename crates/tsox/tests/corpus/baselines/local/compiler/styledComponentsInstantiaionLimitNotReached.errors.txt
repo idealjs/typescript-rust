@@ -1,0 +1,43 @@
+error TS6053: File '/.lib/react16.d.ts' not found.
+styledComponentsInstantiaionLimitNotReached.ts(2,24): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+styledComponentsInstantiaionLimitNotReached.ts(47,15): error TS2503: Cannot find namespace 'React'.
+styledComponentsInstantiaionLimitNotReached.ts(47,15): error TS2503: Cannot find namespace 'React'.
+styledComponentsInstantiaionLimitNotReached.ts(54,23): error TS2503: Cannot find namespace 'React'.
+styledComponentsInstantiaionLimitNotReached.ts(54,23): error TS2503: Cannot find namespace 'React'.
+styledComponentsInstantiaionLimitNotReached.ts(64,21): error TS2503: Cannot find namespace 'JSX'.
+styledComponentsInstantiaionLimitNotReached.ts(64,21): error TS2503: Cannot find namespace 'JSX'.
+styledComponentsInstantiaionLimitNotReached.ts(64,45): error TS2503: Cannot find namespace 'React'.
+styledComponentsInstantiaionLimitNotReached.ts(64,45): error TS2503: Cannot find namespace 'React'.
+styledComponentsInstantiaionLimitNotReached.ts(72,31): error TS2503: Cannot find namespace 'React'.
+styledComponentsInstantiaionLimitNotReached.ts(72,31): error TS2503: Cannot find namespace 'React'.
+styledComponentsInstantiaionLimitNotReached.ts(76,24): error TS2503: Cannot find namespace 'React'.
+styledComponentsInstantiaionLimitNotReached.ts(90,17): error TS2503: Cannot find namespace 'React'.
+styledComponentsInstantiaionLimitNotReached.ts(90,17): error TS2503: Cannot find namespace 'React'.
+styledComponentsInstantiaionLimitNotReached.ts(99,17): error TS2503: Cannot find namespace 'React'.
+styledComponentsInstantiaionLimitNotReached.ts(99,17): error TS2503: Cannot find namespace 'React'.
+styledComponentsInstantiaionLimitNotReached.ts(121,59): error TS2503: Cannot find namespace 'React'.
+styledComponentsInstantiaionLimitNotReached.ts(121,97): error TS2503: Cannot find namespace 'React'.
+styledComponentsInstantiaionLimitNotReached.ts(121,97): error TS2503: Cannot find namespace 'React'.
+styledComponentsInstantiaionLimitNotReached.ts(124,20): error TS2503: Cannot find namespace 'React'.
+styledComponentsInstantiaionLimitNotReached.ts(126,43): error TS2503: Cannot find namespace 'JSX'.
+styledComponentsInstantiaionLimitNotReached.ts(131,37): error TS2503: Cannot find namespace 'React'.
+styledComponentsInstantiaionLimitNotReached.ts(131,37): error TS2503: Cannot find namespace 'React'.
+styledComponentsInstantiaionLimitNotReached.ts(131,79): error TS2503: Cannot find namespace 'React'.
+styledComponentsInstantiaionLimitNotReached.ts(131,79): error TS2503: Cannot find namespace 'React'.
+styledComponentsInstantiaionLimitNotReached.ts(134,24): error TS2503: Cannot find namespace 'React'.
+styledComponentsInstantiaionLimitNotReached.ts(138,24): error TS2503: Cannot find namespace 'React'.
+styledComponentsInstantiaionLimitNotReached.ts(156,24): error TS2503: Cannot find namespace 'React'.
+styledComponentsInstantiaionLimitNotReached.ts(162,86): error TS2503: Cannot find namespace 'React'.
+styledComponentsInstantiaionLimitNotReached.ts(162,86): error TS2503: Cannot find namespace 'React'.
+styledComponentsInstantiaionLimitNotReached.ts(165,27): error TS2503: Cannot find namespace 'React'.
+styledComponentsInstantiaionLimitNotReached.ts(165,79): error TS2503: Cannot find namespace 'React'.
+styledComponentsInstantiaionLimitNotReached.ts(167,8): error TS2503: Cannot find namespace 'React'.
+styledComponentsInstantiaionLimitNotReached.ts(167,8): error TS2503: Cannot find namespace 'React'.
+styledComponentsInstantiaionLimitNotReached.ts(177,39): error TS2503: Cannot find namespace 'JSX'.
+styledComponentsInstantiaionLimitNotReached.ts(177,63): error TS2503: Cannot find namespace 'React'.
+styledComponentsInstantiaionLimitNotReached.ts(182,53): error TS2503: Cannot find namespace 'React'.
+styledComponentsInstantiaionLimitNotReached.ts(193,21): error TS2503: Cannot find namespace 'JSX'.
+styledComponentsInstantiaionLimitNotReached.ts(193,45): error TS2503: Cannot find namespace 'React'.
+
+
+!!! error TS6053: File '/.lib/react16.d.ts' not found.

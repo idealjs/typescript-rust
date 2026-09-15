@@ -1,0 +1,7 @@
+err3.d.ts(3,15): error TS1146: Declaration expected.
+err3.d.ts(3,15): error TS2304: Cannot find name 'as'.
+err3.d.ts(4,16): error TS1146: Declaration expected.
+err3.d.ts(4,16): error TS2304: Cannot find name 'as'.
+err3.d.ts(5,15): error TS1146: Declaration expected.
+err3.d.ts(5,15): error TS2304: Cannot find name 'as'.
+err3.d.ts(6,7): error TS1389: 'export' is not allowed as a variable declaration name.

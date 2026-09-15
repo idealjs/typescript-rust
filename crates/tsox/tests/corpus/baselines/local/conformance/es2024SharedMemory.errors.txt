@@ -1,0 +1,2 @@
+es2024SharedMemory.ts(10,34): error TS2339: Property 'waitAsync' does not exist on type 'Atomics'.
+es2024SharedMemory.ts(11,52): error TS2339: Property 'waitAsync' does not exist on type 'Atomics'.

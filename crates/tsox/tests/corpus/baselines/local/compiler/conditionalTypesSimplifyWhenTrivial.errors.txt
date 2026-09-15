@@ -1,0 +1,18 @@
+conditionalTypesSimplifyWhenTrivial.ts(3,14): error TS2322: Type 'Pick<Params, Exclude<ArrayBufferView<ArrayBuffer> | ArrayBuffer, ArrayBuffer>>' is not assignable to type 'Params'.
+conditionalTypesSimplifyWhenTrivial.ts(6,9): error TS2322: Type 'Exclude<ArrayBufferView<ArrayBuffer> | ArrayBuffer, ArrayBuffer>' is not assignable to type 'T'.
+  'T' could be instantiated with an arbitrary type which could be unrelated to 'Exclude<ArrayBufferView<ArrayBuffer> | ArrayBuffer, ArrayBuffer>'.
+conditionalTypesSimplifyWhenTrivial.ts(7,5): error TS2322: Type 'T' is not assignable to type 'Exclude<ArrayBufferView<ArrayBuffer> | ArrayBuffer, ArrayBuffer>'.
+conditionalTypesSimplifyWhenTrivial.ts(12,14): error TS2322: Type 'Pick<Params, Extract<keyof Params, keyof Params>>' is not assignable to type 'Params'.
+conditionalTypesSimplifyWhenTrivial.ts(15,9): error TS2322: Type 'Extract<T, T>' is not assignable to type 'T'.
+  'T' could be instantiated with an arbitrary type which could be unrelated to 'Extract<T, T>'.
+conditionalTypesSimplifyWhenTrivial.ts(16,5): error TS2322: Type 'T' is not assignable to type 'Extract<T, T>'.
+conditionalTypesSimplifyWhenTrivial.ts(27,14): error TS2322: Type 'Pick<Params, ExcludeWithDefault<keyof Params, never>>' is not assignable to type 'Params'.
+conditionalTypesSimplifyWhenTrivial.ts(30,9): error TS2322: Type 'ExcludeWithDefault<T, never>' is not assignable to type 'T'.
+  'T' could be instantiated with an arbitrary type which could be unrelated to 'ExcludeWithDefault<T, never>'.
+conditionalTypesSimplifyWhenTrivial.ts(31,5): error TS2322: Type 'T' is not assignable to type 'ExcludeWithDefault<T, never>'.
+conditionalTypesSimplifyWhenTrivial.ts(36,14): error TS2322: Type 'Pick<Params, ExtractWithDefault<keyof Params, keyof Params>>' is not assignable to type 'Params'.
+conditionalTypesSimplifyWhenTrivial.ts(39,9): error TS2322: Type 'ExtractWithDefault<T, T>' is not assignable to type 'T'.
+  'T' could be instantiated with an arbitrary type which could be unrelated to 'ExtractWithDefault<T, T>'.
+conditionalTypesSimplifyWhenTrivial.ts(40,5): error TS2322: Type 'T' is not assignable to type 'ExtractWithDefault<T, T>'.
+conditionalTypesSimplifyWhenTrivial.ts(47,14): error TS2322: Type 'Pick<Params, TemplatedConditional<keyof Params, never, never, keyof Params>>' is not assignable to type 'Params'.
+conditionalTypesSimplifyWhenTrivial.ts(56,14): error TS2322: Type 'Pick<Params, TemplatedConditional<keyof Params, keyof Params, keyof Params, never>>' is not assignable to type 'Params'.

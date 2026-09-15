@@ -1,0 +1,1 @@
+mappedTypeAsClauses.ts(55,7): error TS2741: Property 'bar' is missing in type '{ foo: string; }' but required in type '{ foo: string; bar: number; }'.

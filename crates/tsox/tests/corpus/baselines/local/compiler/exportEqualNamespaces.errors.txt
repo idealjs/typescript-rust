@@ -1,0 +1,2 @@
+exportEqualNamespaces.ts(1,19): error TS2300: Duplicate identifier 'server'.
+exportEqualNamespaces.ts(5,11): error TS2300: Duplicate identifier 'server'.

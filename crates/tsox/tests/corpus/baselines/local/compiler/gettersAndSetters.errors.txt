@@ -1,0 +1,5 @@
+gettersAndSetters.ts(25,13): error TS2339: Property 'Baz' does not exist on type 'C'.
+gettersAndSetters.ts(26,3): error TS2339: Property 'Baz' does not exist on type 'C'.
+gettersAndSetters.ts(45,26): error TS2339: Property 'toUpperCase' does not exist on type 'string | number'.
+gettersAndSetters.ts(46,27): error TS2339: Property 'toUpperCase' does not exist on type 'string | number'.
+gettersAndSetters.ts(47,25): error TS2339: Property 'toUpperCase' does not exist on type 'string | number'.

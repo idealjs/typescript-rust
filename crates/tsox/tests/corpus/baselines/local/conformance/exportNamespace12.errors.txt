@@ -1,0 +1,1 @@
+main.ts(4,19): error TS2339: Property 'c' does not exist on type 'typeof import("./types")'.

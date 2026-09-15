@@ -1,0 +1,7 @@
+error TS6053: File '/.lib/react16.d.ts' not found.
+reactTagNameComponentWithPropsNoOOM.tsx(3,24): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+reactTagNameComponentWithPropsNoOOM.tsx(4,26): error TS2503: Cannot find namespace 'React'.
+reactTagNameComponentWithPropsNoOOM.tsx(9,2): error TS2604: JSX element type 'Tag' does not have any construct or call signatures.
+
+
+!!! error TS6053: File '/.lib/react16.d.ts' not found.

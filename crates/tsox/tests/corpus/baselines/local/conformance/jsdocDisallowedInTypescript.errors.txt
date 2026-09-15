@@ -1,0 +1,76 @@
+jsdocDisallowedInTypescript.ts(2,10): error TS2702: 'Array' only refers to a type, but is being used as a namespace here.
+jsdocDisallowedInTypescript.ts(2,16): error TS1003: Identifier expected.
+jsdocDisallowedInTypescript.ts(4,15): error TS2749: '' refers to a value, but is being used as a type here. Did you mean 'typeof '?
+jsdocDisallowedInTypescript.ts(4,15): error TS7006: Parameter '' implicitly has an 'any' type.
+jsdocDisallowedInTypescript.ts(4,15): error TS1003: Identifier expected.
+jsdocDisallowedInTypescript.ts(4,16): error TS1005: ',' expected.
+jsdocDisallowedInTypescript.ts(4,16): error TS7006: Parameter 'number' implicitly has an 'any' type.
+jsdocDisallowedInTypescript.ts(4,27): error TS2702: 'Array' only refers to a type, but is being used as a namespace here.
+jsdocDisallowedInTypescript.ts(4,33): error TS1003: Identifier expected.
+jsdocDisallowedInTypescript.ts(7,10): error TS2391: Function implementation is missing or not immediately following the declaration.
+jsdocDisallowedInTypescript.ts(7,20): error TS2304: Cannot find name 'function'.
+jsdocDisallowedInTypescript.ts(7,28): error TS1005: ',' expected.
+jsdocDisallowedInTypescript.ts(7,32): error TS1109: Expression expected.
+jsdocDisallowedInTypescript.ts(7,34): error TS2695: Left side of comma operator is unused and has no side effects.
+jsdocDisallowedInTypescript.ts(7,42): error TS2693: 'string' only refers to a type, but is being used as a value here.
+jsdocDisallowedInTypescript.ts(7,48): error TS1005: ';' expected.
+jsdocDisallowedInTypescript.ts(7,49): error TS1128: Declaration or statement expected.
+jsdocDisallowedInTypescript.ts(8,5): error TS1108: A 'return' statement can only be used within a function body.
+jsdocDisallowedInTypescript.ts(8,16): error TS2304: Cannot find name 'ctor'.
+jsdocDisallowedInTypescript.ts(10,1): suggestion TS7027: Unreachable code detected.
+jsdocDisallowedInTypescript.ts(10,10): error TS2391: Function implementation is missing or not immediately following the declaration.
+jsdocDisallowedInTypescript.ts(10,18): error TS2304: Cannot find name 'function'.
+jsdocDisallowedInTypescript.ts(10,26): error TS1005: ',' expected.
+jsdocDisallowedInTypescript.ts(10,31): error TS1005: ')' expected.
+jsdocDisallowedInTypescript.ts(10,33): error TS2695: Left side of comma operator is unused and has no side effects.
+jsdocDisallowedInTypescript.ts(10,41): error TS2693: 'string' only refers to a type, but is being used as a value here.
+jsdocDisallowedInTypescript.ts(10,47): error TS1005: ';' expected.
+jsdocDisallowedInTypescript.ts(10,48): error TS1128: Declaration or statement expected.
+jsdocDisallowedInTypescript.ts(10,50): error TS1434: Unexpected keyword or identifier.
+jsdocDisallowedInTypescript.ts(10,50): error TS2693: 'string' only refers to a type, but is being used as a value here.
+jsdocDisallowedInTypescript.ts(10,56): error TS1128: Declaration or statement expected.
+jsdocDisallowedInTypescript.ts(11,5): error TS1108: A 'return' statement can only be used within a function body.
+jsdocDisallowedInTypescript.ts(11,5): suggestion TS7027: Unreachable code detected.
+jsdocDisallowedInTypescript.ts(11,12): error TS2349: This expression is not callable.
+  Type 'never' has no call signatures.
+jsdocDisallowedInTypescript.ts(13,14): error TS2304: Cannot find name ''.
+jsdocDisallowedInTypescript.ts(13,14): error TS1003: Identifier expected.
+jsdocDisallowedInTypescript.ts(13,16): error TS1134: Variable declaration expected.
+jsdocDisallowedInTypescript.ts(13,18): error TS1134: Variable declaration expected.
+jsdocDisallowedInTypescript.ts(13,18): suggestion TS7027: Unreachable code detected.
+jsdocDisallowedInTypescript.ts(14,11): error TS2304: Cannot find name ''.
+jsdocDisallowedInTypescript.ts(14,11): error TS1003: Identifier expected.
+jsdocDisallowedInTypescript.ts(14,13): error TS1134: Variable declaration expected.
+jsdocDisallowedInTypescript.ts(14,15): error TS1134: Variable declaration expected.
+jsdocDisallowedInTypescript.ts(14,15): suggestion TS7027: Unreachable code detected.
+jsdocDisallowedInTypescript.ts(15,8): error TS2304: Cannot find name 'function'.
+jsdocDisallowedInTypescript.ts(15,16): error TS1005: ',' expected.
+jsdocDisallowedInTypescript.ts(15,16): suggestion TS7027: Unreachable code detected.
+jsdocDisallowedInTypescript.ts(15,17): error TS7006: Parameter 'number' implicitly has an 'any' type.
+jsdocDisallowedInTypescript.ts(15,25): error TS7006: Parameter 'number' implicitly has an 'any' type.
+jsdocDisallowedInTypescript.ts(15,41): error TS1005: '=>' expected.
+jsdocDisallowedInTypescript.ts(15,41): error TS2322: Type '(n: any, m: any) => any' is not assignable to type 'number'.
+jsdocDisallowedInTypescript.ts(15,44): error TS7006: Parameter 'n' implicitly has an 'any' type.
+jsdocDisallowedInTypescript.ts(15,46): error TS7006: Parameter 'm' implicitly has an 'any' type.
+jsdocDisallowedInTypescript.ts(16,11): error TS2304: Cannot find name ''.
+jsdocDisallowedInTypescript.ts(16,11): error TS1003: Identifier expected.
+jsdocDisallowedInTypescript.ts(16,11): error TS2364: The left-hand side of an assignment expression must be a variable or a property access.
+jsdocDisallowedInTypescript.ts(16,11): suggestion TS7027: Unreachable code detected.
+jsdocDisallowedInTypescript.ts(16,12): error TS2693: 'string' only refers to a type, but is being used as a value here.
+jsdocDisallowedInTypescript.ts(16,12): error TS2693: 'string' only refers to a type, but is being used as a value here.
+jsdocDisallowedInTypescript.ts(17,23): error TS1005: ',' expected.
+jsdocDisallowedInTypescript.ts(17,23): error TS2364: The left-hand side of an assignment expression must be a variable or a property access.
+jsdocDisallowedInTypescript.ts(17,23): suggestion TS7027: Unreachable code detected.
+jsdocDisallowedInTypescript.ts(17,25): error TS1109: Expression expected.
+jsdocDisallowedInTypescript.ts(18,23): error TS1005: ',' expected.
+jsdocDisallowedInTypescript.ts(18,25): error TS1134: Variable declaration expected.
+jsdocDisallowedInTypescript.ts(20,16): error TS2304: Cannot find name ''.
+jsdocDisallowedInTypescript.ts(20,16): error TS1003: Identifier expected.
+jsdocDisallowedInTypescript.ts(20,23): error TS1005: ',' expected.
+jsdocDisallowedInTypescript.ts(21,16): error TS2304: Cannot find name ''.
+jsdocDisallowedInTypescript.ts(21,16): error TS1003: Identifier expected.
+jsdocDisallowedInTypescript.ts(21,16): suggestion TS7027: Unreachable code detected.
+jsdocDisallowedInTypescript.ts(21,24): error TS1109: Expression expected.
+jsdocDisallowedInTypescript.ts(22,17): error TS2304: Cannot find name ''.
+jsdocDisallowedInTypescript.ts(22,17): error TS1003: Identifier expected.
+jsdocDisallowedInTypescript.ts(22,18): error TS1134: Variable declaration expected.

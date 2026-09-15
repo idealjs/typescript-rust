@@ -1,0 +1,2 @@
+expandoFunctionExpressionsWithDynamicNames2.ts(6,7): error TS2741: Property '[mySymbol]' is missing in type '() => void' but required in type 'Foo'.
+expandoFunctionExpressionsWithDynamicNames2.ts(14,7): error TS2741: Property 'test' is missing in type '() => void' but required in type 'Bar'.

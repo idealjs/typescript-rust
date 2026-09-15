@@ -1,0 +1,1 @@
+genericConstraint2.ts(11,1): error TS2420: Class 'ComparableString' incorrectly implements interface 'Comparable<string>'.

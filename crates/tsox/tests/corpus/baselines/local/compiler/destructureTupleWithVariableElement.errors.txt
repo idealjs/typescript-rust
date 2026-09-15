@@ -1,0 +1,2 @@
+destructureTupleWithVariableElement.ts(9,4): error TS2339: Property 'toUpperCase' does not exist on type 'Array<string>[]'.
+destructureTupleWithVariableElement.ts(17,4): error TS2339: Property 'toUpperCase' does not exist on type 'Array<string>[]'.

@@ -1,0 +1,1 @@
+spyComparisonChecking.ts(19,30): error TS2495: Type 'Array<keyof T>' is not an array type or a string type.

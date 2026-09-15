@@ -1,0 +1,12 @@
+staticIndexSignature4.ts(2,5): error TS1071: 'static' modifier cannot appear on an index signature.
+staticIndexSignature4.ts(3,5): error TS1071: 'static' modifier cannot appear on an index signature.
+staticIndexSignature4.ts(7,5): error TS1071: 'static' modifier cannot appear on an index signature.
+staticIndexSignature4.ts(8,5): error TS1071: 'static' modifier cannot appear on an index signature.
+staticIndexSignature4.ts(19,7): error TS2339: Property 'a' does not exist on type 'typeof B'.
+staticIndexSignature4.ts(19,13): error TS2339: Property 'a' does not exist on type 'typeof D'.
+staticIndexSignature4.ts(22,7): error TS2339: Property 'a' does not exist on type 'typeof D'.
+staticIndexSignature4.ts(22,13): error TS2339: Property 'a' does not exist on type 'typeof B'.
+staticIndexSignature4.ts(25,7): error TS2339: Property 'a' does not exist on type 'typeof B'.
+staticIndexSignature4.ts(27,7): error TS2339: Property 'a' does not exist on type 'typeof D'.
+staticIndexSignature4.ts(30,13): error TS2339: Property 'a' does not exist on type 'typeof B'.
+staticIndexSignature4.ts(33,13): error TS2339: Property 'a' does not exist on type 'typeof D'.

@@ -1,0 +1,2 @@
+FunctionDeclaration10_es6.ts(1,20): error TS1212: Identifier expected. 'yield' is a reserved word in strict mode.
+FunctionDeclaration10_es6.ts(1,29): error TS1212: Identifier expected. 'yield' is a reserved word in strict mode.

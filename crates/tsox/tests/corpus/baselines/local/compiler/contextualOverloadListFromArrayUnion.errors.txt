@@ -1,0 +1,18 @@
+three.ts(47,37): error TS2769: No overload matches this call.
+  Overload 1 of 2, '(error: null, result: T): unknown', gave the following error.
+    Argument of type '1' is not assignable to parameter of type 'T'.
+      'T' could be instantiated with an arbitrary type which could be unrelated to '1'.
+  Overload 2 of 2, '(error: Error, result: null): unknown', gave the following error.
+    Argument of type 'null' is not assignable to parameter of type 'Error'.
+three.ts(48,37): error TS2769: No overload matches this call.
+  Overload 1 of 2, '(error: null, result: T): unknown', gave the following error.
+    Argument of type '2' is not assignable to parameter of type 'T'.
+      'T' could be instantiated with an arbitrary type which could be unrelated to '2'.
+  Overload 2 of 2, '(error: Error, result: null): unknown', gave the following error.
+    Argument of type 'null' is not assignable to parameter of type 'Error'.
+three.ts(49,37): error TS2769: No overload matches this call.
+  Overload 1 of 2, '(error: null, result: T): unknown', gave the following error.
+    Argument of type '3' is not assignable to parameter of type 'T'.
+      'T' could be instantiated with an arbitrary type which could be unrelated to '3'.
+  Overload 2 of 2, '(error: Error, result: null): unknown', gave the following error.
+    Argument of type 'null' is not assignable to parameter of type 'Error'.

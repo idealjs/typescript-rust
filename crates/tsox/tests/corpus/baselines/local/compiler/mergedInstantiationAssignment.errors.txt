@@ -1,0 +1,4 @@
+mergedInstantiationAssignment.ts(9,1): error TS2322: Type '432' is not assignable to type 'T'.
+  'T' could be instantiated with an arbitrary type which could be unrelated to '432'.
+mergedInstantiationAssignment.ts(17,1): error TS2322: Type '42' is not assignable to type 'T'.
+  'T' could be instantiated with an arbitrary type which could be unrelated to '42'.

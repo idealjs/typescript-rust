@@ -1,0 +1,10 @@
+genericCallWithTupleType.ts(10,1): error TS2454: Variable 'i1' is used before being assigned.
+genericCallWithTupleType.ts(11,10): error TS2454: Variable 'i1' is used before being assigned.
+genericCallWithTupleType.ts(12,10): error TS2454: Variable 'i1' is used before being assigned.
+genericCallWithTupleType.ts(13,1): error TS2454: Variable 'i1' is used before being assigned.
+genericCallWithTupleType.ts(14,10): error TS2454: Variable 'i1' is used before being assigned.
+genericCallWithTupleType.ts(15,1): error TS2454: Variable 'i1' is used before being assigned.
+genericCallWithTupleType.ts(15,1): error TS2322: Type '{ a: string; }' is not assignable to type 'string | number'.
+genericCallWithTupleType.ts(16,10): error TS2454: Variable 'i1' is used before being assigned.
+genericCallWithTupleType.ts(23,1): error TS2454: Variable 'i1' is used before being assigned.
+genericCallWithTupleType.ts(24,1): error TS2454: Variable 'i1' is used before being assigned.

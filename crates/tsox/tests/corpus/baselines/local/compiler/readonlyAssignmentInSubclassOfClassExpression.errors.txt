@@ -1,0 +1,1 @@
+readonlyAssignmentInSubclassOfClassExpression.ts(4,14): error TS2339: Property 'attrib' does not exist on type 'this'.

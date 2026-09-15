@@ -1,0 +1,2 @@
+interMixingModulesInterfaces3.ts(5,13): error TS2322: Type 'null' is not assignable to type 'typeof B'.
+interMixingModulesInterfaces3.ts(15,10): error TS2694: Namespace 'A' has no exported member 'B'.

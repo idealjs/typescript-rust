@@ -1,0 +1,3 @@
+narrowingTypeofDiscriminant.ts(27,12): error TS18047: 'wrapped' is possibly 'null'.
+narrowingTypeofDiscriminant.ts(34,12): error TS18047: 'wrapped' is possibly 'null'.
+narrowingTypeofDiscriminant.ts(41,12): error TS18047: 'wrapped' is possibly 'null'.

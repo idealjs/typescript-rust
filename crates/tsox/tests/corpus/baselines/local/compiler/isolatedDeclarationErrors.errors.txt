@@ -1,0 +1,2 @@
+isolatedDeclarationErrors.ts(5,24): error TS2339: Property 'a' does not exist on type '() => void'.
+isolatedDeclarationErrors.ts(8,22): error TS2339: Property 'a' does not exist on type '() => void'.

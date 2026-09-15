@@ -1,0 +1,2 @@
+decl.d.ts(5,16): error TS2664: Invalid module name in augmentation, module 'alsogood' cannot be found.
+foo.ts(8,16): error TS2664: Invalid module name in augmentation, module 'good' cannot be found.

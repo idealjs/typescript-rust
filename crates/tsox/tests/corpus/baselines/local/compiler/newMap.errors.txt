@@ -1,0 +1,2 @@
+newMap.ts(1,9): error TS2558: Expected 2 type arguments, but got 1.
+newMap.ts(2,13): error TS2558: Expected 2 type arguments, but got 1.

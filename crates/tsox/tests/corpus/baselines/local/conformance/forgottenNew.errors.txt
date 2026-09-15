@@ -1,0 +1,2 @@
+forgottenNew.ts(5,14): error TS2349: This expression is not callable.
+  Type 'typeof Tools.NullLogger' has no call signatures.

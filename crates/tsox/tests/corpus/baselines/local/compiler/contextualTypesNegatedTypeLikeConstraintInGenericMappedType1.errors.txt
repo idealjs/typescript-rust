@@ -1,0 +1,1 @@
+contextualTypesNegatedTypeLikeConstraintInGenericMappedType1.ts(41,14): error TS7006: Parameter 'index' implicitly has an 'any' type.

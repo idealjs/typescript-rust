@@ -1,0 +1,4 @@
+file2.ts(3,3): error TS2339: Property 'b' does not exist on type 'typeof foo'.
+file3.ts(2,8): error TS2307: Cannot find module 'file2' or its corresponding type declarations.
+file3.ts(3,10): error TS2694: Namespace 'file1' has no exported member 'A'.
+file3.ts(4,11): error TS2339: Property 'b' does not exist on type 'typeof import("file1")'.

@@ -1,0 +1,19 @@
+newOperator.ts(10,14): error TS2351: This expression is not constructable.
+  Type 'Number' has no construct signatures.
+newOperator.ts(11,14): error TS2351: This expression is not constructable.
+  Type 'String' has no construct signatures.
+newOperator.ts(12,5): error TS2693: 'string' only refers to a type, but is being used as a value here.
+newOperator.ts(18,14): error TS2693: 'string' only refers to a type, but is being used as a value here.
+newOperator.ts(18,21): error TS1109: Expression expected.
+newOperator.ts(21,1): error TS2693: 'string' only refers to a type, but is being used as a value here.
+newOperator.ts(23,5): error TS1109: Expression expected.
+newOperator.ts(28,13): error TS2304: Cannot find name 'q'.
+newOperator.ts(31,14): error TS2351: This expression is not constructable.
+  Type 'Date' has no construct signatures.
+newOperator.ts(38,5): error TS2351: This expression is not constructable.
+  No constituent of type '{ a: string; } | { b: string; }' is constructable.
+newOperator.ts(42,5): error TS2351: This expression is not constructable.
+  Not all constituents of type '{ a: string; } | () => unknown' are constructable.
+    Type '{ a: string; }' has no construct signatures.
+newOperator.ts(50,9): error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
+newOperator.ts(56,24): error TS1109: Expression expected.

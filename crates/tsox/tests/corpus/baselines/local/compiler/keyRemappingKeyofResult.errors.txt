@@ -1,0 +1,6 @@
+keyRemappingKeyofResult.ts(16,1): error TS2322: Type 'symbol' is not assignable to type 'Exclude<ArrayBufferView<ArrayBuffer> | ArrayBuffer, ArrayBuffer>'.
+keyRemappingKeyofResult.ts(17,1): error TS2322: Type '"str"' is not assignable to type 'Exclude<ArrayBufferView<ArrayBuffer> | ArrayBuffer, ArrayBuffer>'.
+keyRemappingKeyofResult.ts(27,5): error TS2322: Type 'symbol' is not assignable to type 'string | number | keyof T'.
+keyRemappingKeyofResult.ts(40,5): error TS2322: Type 'symbol' is not assignable to type 'string | number | keyof T'.
+keyRemappingKeyofResult.ts(51,5): error TS2322: Type 'symbol' is not assignable to type 'string | number | keyof T'.
+keyRemappingKeyofResult.ts(67,5): error TS2322: Type 'symbol' is not assignable to type 'string | number | keyof T'.

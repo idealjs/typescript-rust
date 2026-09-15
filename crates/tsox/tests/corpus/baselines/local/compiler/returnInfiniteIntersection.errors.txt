@@ -1,0 +1,2 @@
+returnInfiniteIntersection.ts(6,14): error TS2349: This expression is not callable.
+  Type 'any & { p: any; }' has no call signatures.

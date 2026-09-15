@@ -1,0 +1,4 @@
+instanceofOperatorWithRHSIsSubtypeOfFunction.ts(9,23): error TS2454: Variable 'f1' is used before being assigned.
+instanceofOperatorWithRHSIsSubtypeOfFunction.ts(10,23): error TS2454: Variable 'f2' is used before being assigned.
+instanceofOperatorWithRHSIsSubtypeOfFunction.ts(11,23): error TS2454: Variable 'f3' is used before being assigned.
+instanceofOperatorWithRHSIsSubtypeOfFunction.ts(12,23): error TS2454: Variable 'f4' is used before being assigned.

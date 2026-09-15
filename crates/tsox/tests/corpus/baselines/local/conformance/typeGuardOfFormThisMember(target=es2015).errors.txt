@@ -1,0 +1,11 @@
+typeGuardOfFormThisMember.ts(4,3): error TS2564: Property 'isFSO' has no initializer and is not definitely assigned in the constructor.
+typeGuardOfFormThisMember.ts(14,3): error TS2564: Property 'isNetworked' has no initializer and is not definitely assigned in the constructor.
+typeGuardOfFormThisMember.ts(22,3): error TS2564: Property 'children' has no initializer and is not definitely assigned in the constructor.
+typeGuardOfFormThisMember.ts(34,8): error TS2339: Property 'content' does not exist on type 'Test.FileSystemObject'.
+typeGuardOfFormThisMember.ts(36,9): error TS2339: Property 'host' does not exist on type 'Test.FileSystemObject'.
+typeGuardOfFormThisMember.ts(37,9): error TS2339: Property 'content' does not exist on type 'Test.FileSystemObject'.
+typeGuardOfFormThisMember.ts(41,8): error TS2339: Property 'children' does not exist on type 'Test.FileSystemObject'.
+typeGuardOfFormThisMember.ts(44,8): error TS2339: Property 'host' does not exist on type 'Test.FileSystemObject'.
+typeGuardOfFormThisMember.ts(63,9): error TS2339: Property 'lead' does not exist on type 'Test.GenericGuard<Test.File>'.
+typeGuardOfFormThisMember.ts(66,9): error TS2339: Property 'follow' does not exist on type 'Test.GenericGuard<Test.File>'.
+typeGuardOfFormThisMember.ts(79,11): error TS2339: Property 'do' does not exist on type 'Test.SpecificGuard'.

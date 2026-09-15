@@ -1,0 +1,24 @@
+main.ts(21,4): error TS2339: Property 'a' does not exist on type '() => any'.
+main.ts(23,4): error TS2339: Property 'a' does not exist on type 'typeof Foo'.
+main.ts(50,4): error TS2339: Property 'a' does not exist on type 'typeof import("interface")'.
+main.ts(51,4): error TS2339: Property 'a' does not exist on type 'typeof import("variable")'.
+main.ts(52,4): error TS2339: Property 'a' does not exist on type 'typeof import("interface-variable")'.
+main.ts(53,4): error TS2339: Property 'a' does not exist on type 'typeof import("module")'.
+main.ts(54,4): error TS2339: Property 'a' does not exist on type 'typeof import("interface-module")'.
+main.ts(55,4): error TS2339: Property 'a' does not exist on type 'typeof import("variable-module")'.
+main.ts(56,4): error TS2339: Property 'a' does not exist on type 'typeof import("function")'.
+main.ts(57,4): error TS2339: Property 'a' does not exist on type 'typeof import("function-module")'.
+main.ts(58,4): error TS2339: Property 'a' does not exist on type 'typeof import("class")'.
+main.ts(59,4): error TS2339: Property 'a' does not exist on type 'typeof import("class-module")'.
+main.ts(62,10): error TS2305: Module '"interface"' has no exported member 'a'.
+main.ts(63,10): error TS2305: Module '"variable"' has no exported member 'a'.
+main.ts(64,10): error TS2305: Module '"interface-variable"' has no exported member 'a'.
+main.ts(67,10): error TS2305: Module '"variable-module"' has no exported member 'a'.
+main.ts(68,10): error TS2305: Module '"function"' has no exported member 'a'.
+main.ts(70,10): error TS2305: Module '"class"' has no exported member 'a'.
+main.ts(85,10): error TS2305: Module '"interface"' has no exported member 'a'.
+main.ts(86,10): error TS2305: Module '"variable"' has no exported member 'a'.
+main.ts(87,10): error TS2305: Module '"interface-variable"' has no exported member 'a'.
+main.ts(90,10): error TS2305: Module '"variable-module"' has no exported member 'a'.
+main.ts(91,10): error TS2305: Module '"function"' has no exported member 'a'.
+main.ts(93,10): error TS2305: Module '"class"' has no exported member 'a'.

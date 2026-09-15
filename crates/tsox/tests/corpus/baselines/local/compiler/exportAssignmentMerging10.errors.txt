@@ -1,0 +1,5 @@
+a.ts(7,16): error TS2437: Module 'Base' is hidden by a local declaration with the same name.
+a.ts(7,16): error TS2437: Module 'Base' is hidden by a local declaration with the same name.
+a.ts(10,26): error TS2437: Module '_Base' is hidden by a local declaration with the same name.
+a.ts(10,26): error TS2437: Module '_Base' is hidden by a local declaration with the same name.
+a.ts(13,1): error TS2309: An export assignment cannot be used in a module with other exported elements.

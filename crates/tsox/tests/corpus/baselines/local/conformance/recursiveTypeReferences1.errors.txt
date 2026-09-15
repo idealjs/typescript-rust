@@ -1,0 +1,18 @@
+recursiveTypeReferences1.ts(8,7): error TS2322: Type '(string | { id: string; } | (string | { id: string; })[])[]' is not assignable to type 'string | [string, { [key: string]: unknown; }, ...any[][]]'.
+recursiveTypeReferences1.ts(40,7): error TS2322: Type '{ value: number; }' is not assignable to type 'number | Box<any>'.
+  Types of property 'value' are incompatible.
+    Type 'number' is not assignable to type 'T'.
+recursiveTypeReferences1.ts(41,7): error TS2322: Type '{ value: { value: { value: number; }; }; }' is not assignable to type 'number | Box<any>'.
+  Types of property 'value' are incompatible.
+    Type '{ value: { value: 42; }; }' is not assignable to type 'T'.
+recursiveTypeReferences1.ts(45,7): error TS2322: Type 'number' is not assignable to type 'Box<any | number>'.
+recursiveTypeReferences1.ts(66,8): error TS2322: Type 'number' is not assignable to type 'string | Array<string>'.
+recursiveTypeReferences1.ts(72,8): error TS2322: Type 'number' is not assignable to type 'string | Array<string | Array<string>>'.
+recursiveTypeReferences1.ts(102,10): error TS2304: Cannot find name 'html'.
+recursiveTypeReferences1.ts(116,11): error TS2304: Cannot find name 'concat'.
+recursiveTypeReferences1.ts(116,24): error TS2304: Cannot find name 'concat'.
+recursiveTypeReferences1.ts(117,11): error TS2304: Cannot find name 'concat'.
+recursiveTypeReferences1.ts(122,11): error TS2304: Cannot find name 'concat'.
+recursiveTypeReferences1.ts(127,3): error TS2304: Cannot find name 'assert'.
+recursiveTypeReferences1.ts(127,22): error TS2339: Property 'tagName' does not exist on type 'HTMLHeadingElement'.
+recursiveTypeReferences1.ts(128,13): error TS2339: Property 'tagName' does not exist on type 'HTMLHeadingElement'.

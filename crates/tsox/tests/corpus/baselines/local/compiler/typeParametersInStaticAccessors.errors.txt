@@ -1,0 +1,1 @@
+typeParametersInStaticAccessors.ts(2,33): error TS2322: Type 'null' is not assignable to type '() => T'.

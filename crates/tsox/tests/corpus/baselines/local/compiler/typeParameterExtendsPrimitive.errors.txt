@@ -1,0 +1,4 @@
+typeParameterExtendsPrimitive.ts(5,10): error TS2454: Variable 't' is used before being assigned.
+typeParameterExtendsPrimitive.ts(7,12): error TS2454: Variable 't' is used before being assigned.
+typeParameterExtendsPrimitive.ts(7,12): error TS2365: Operator '+' cannot be applied to types 'T' and 'T'.
+typeParameterExtendsPrimitive.ts(7,16): error TS2454: Variable 't' is used before being assigned.

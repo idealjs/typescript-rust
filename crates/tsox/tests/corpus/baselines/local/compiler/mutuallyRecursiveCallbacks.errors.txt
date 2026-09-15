@@ -1,0 +1,4 @@
+mutuallyRecursiveCallbacks.ts(7,1): error TS2322: Type '<T>(bar: Bar<T>) => void' is not assignable to type '(foo: Foo<{}>) => Foo<{}>'.
+  Types of parameters 'bar' and 'foo' are incompatible.
+    Type 'Foo<{}>' is not assignable to type '(foo: Foo<unknown>) => Foo<unknown>'.
+      Type 'Foo<{}>' provides no match for the signature '(foo: Foo<unknown>): Foo<unknown>'.

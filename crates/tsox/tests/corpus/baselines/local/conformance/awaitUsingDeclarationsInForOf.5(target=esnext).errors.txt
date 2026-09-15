@@ -1,0 +1,2 @@
+awaitUsingDeclarationsInForOf.5.ts(5,12): error TS2304: Cannot find name 'using'.
+awaitUsingDeclarationsInForOf.5.ts(8,14): error TS2304: Cannot find name 'using'.

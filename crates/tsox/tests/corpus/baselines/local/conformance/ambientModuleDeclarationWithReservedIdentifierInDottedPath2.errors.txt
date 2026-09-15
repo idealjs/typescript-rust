@@ -1,0 +1,11 @@
+ambientModuleDeclarationWithReservedIdentifierInDottedPath2.ts(1,26): error TS2591: Cannot find name 'module'. Do you need to install type definitions for node? Try `npm i --save-dev @types/node` and then add 'node' to the types field in your tsconfig.
+ambientModuleDeclarationWithReservedIdentifierInDottedPath2.ts(1,26): error TS1003: Identifier expected.
+ambientModuleDeclarationWithReservedIdentifierInDottedPath2.ts(1,35): error TS1005: ';' expected.
+ambientModuleDeclarationWithReservedIdentifierInDottedPath2.ts(2,17): error TS2451: Cannot redeclare block-scoped variable 'tabId'.
+ambientModuleDeclarationWithReservedIdentifierInDottedPath2.ts(5,14): error TS2451: Cannot redeclare block-scoped variable 'tabId'.
+ambientModuleDeclarationWithReservedIdentifierInDottedPath2.ts(5,29): error TS2339: Property 'debugger' does not exist on type 'typeof chrome'.
+ambientModuleDeclarationWithReservedIdentifierInDottedPath2.ts(7,24): error TS2591: Cannot find name 'module'. Do you need to install type definitions for node? Try `npm i --save-dev @types/node` and then add 'node' to the types field in your tsconfig.
+ambientModuleDeclarationWithReservedIdentifierInDottedPath2.ts(7,24): error TS1003: Identifier expected.
+ambientModuleDeclarationWithReservedIdentifierInDottedPath2.ts(9,1): error TS2591: Cannot find name 'module'. Do you need to install type definitions for node? Try `npm i --save-dev @types/node` and then add 'node' to the types field in your tsconfig.
+ambientModuleDeclarationWithReservedIdentifierInDottedPath2.ts(9,19): error TS1003: Identifier expected.
+ambientModuleDeclarationWithReservedIdentifierInDottedPath2.ts(9,28): error TS1005: ';' expected.

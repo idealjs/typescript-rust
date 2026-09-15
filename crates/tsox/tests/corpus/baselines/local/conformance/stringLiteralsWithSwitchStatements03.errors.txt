@@ -1,0 +1,6 @@
+stringLiteralsWithSwitchStatements03.ts(10,34): error TS2872: This kind of expression is always truthy.
+stringLiteralsWithSwitchStatements03.ts(14,11): error TS2695: Left side of comma operator is unused and has no side effects.
+stringLiteralsWithSwitchStatements03.ts(14,11): error TS2695: Left side of comma operator is unused and has no side effects.
+stringLiteralsWithSwitchStatements03.ts(18,12): error TS2872: This kind of expression is always truthy.
+stringLiteralsWithSwitchStatements03.ts(20,12): error TS2872: This kind of expression is always truthy.
+stringLiteralsWithSwitchStatements03.ts(23,10): error TS2872: This kind of expression is always truthy.

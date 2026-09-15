@@ -1,0 +1,10 @@
+duplicatePropertyNames.ts(4,5): error TS2300: Duplicate identifier 'foo'.
+duplicatePropertyNames.ts(5,5): error TS2300: Duplicate identifier 'foo'.
+duplicatePropertyNames.ts(14,5): error TS2300: Duplicate identifier 'foo'.
+duplicatePropertyNames.ts(15,5): error TS2300: Duplicate identifier 'foo'.
+duplicatePropertyNames.ts(20,5): error TS2300: Duplicate identifier 'foo'.
+duplicatePropertyNames.ts(26,5): error TS2300: Duplicate identifier 'baz'.
+duplicatePropertyNames.ts(30,5): error TS2300: Duplicate identifier 'foo'.
+duplicatePropertyNames.ts(31,5): error TS2300: Duplicate identifier 'foo'.
+duplicatePropertyNames.ts(44,5): error TS1117: An object literal cannot have multiple properties with the same name.
+duplicatePropertyNames.ts(46,5): error TS1117: An object literal cannot have multiple properties with the same name.

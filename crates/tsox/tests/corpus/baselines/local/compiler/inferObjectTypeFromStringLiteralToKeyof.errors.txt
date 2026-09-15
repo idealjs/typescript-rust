@@ -1,0 +1,2 @@
+inferObjectTypeFromStringLiteralToKeyof.ts(4,22): error TS2345: Argument of type '"a" | "d"' is not assignable to parameter of type 'never'.
+  Type 'string' is not assignable to type 'never'.

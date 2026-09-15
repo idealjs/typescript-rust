@@ -1,0 +1,4 @@
+freshObjectLiteralSubtype.ts(10,6): error TS2339: Property 'msg' does not exist on type '{ valid: boolean; } | { valid: boolean; msg?: undefined; }'.
+freshObjectLiteralSubtype.ts(30,12): error TS2339: Property 'msg' does not exist on type '{ valid: boolean; msg?: undefined; } | { valid: boolean; msg: string; } | { valid: boolean; }'.
+freshObjectLiteralSubtype.ts(36,40): error TS2339: Property 'includes' does not exist on type 'never'.
+freshObjectLiteralSubtype.ts(37,49): error TS2339: Property 'includes' does not exist on type 'never'.

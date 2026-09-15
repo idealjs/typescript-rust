@@ -1,0 +1,1 @@
+classAbstractInheritance2.ts(10,7): error TS2654: Non-abstract class 'B' is missing implementations for the following members of 'A': 'm1', 'm2', 'm3', 'm4', 'm5', 'm6'.

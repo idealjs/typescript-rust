@@ -1,0 +1,2 @@
+privateNameInInExpressionTransform.ts(29,9): error TS2364: The left-hand side of an assignment expression must be a variable or a property access.
+privateNameInInExpressionTransform.ts(30,9): error TS2364: The left-hand side of an assignment expression must be a variable or a property access.

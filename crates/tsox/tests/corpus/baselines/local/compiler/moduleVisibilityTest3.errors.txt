@@ -1,0 +1,2 @@
+moduleVisibilityTest3.ts(20,39): error TS2694: Namespace '_modes' has no exported member 'Mode'.
+moduleVisibilityTest3.ts(21,22): error TS2694: Namespace '_modes' has no exported member 'Mode'.

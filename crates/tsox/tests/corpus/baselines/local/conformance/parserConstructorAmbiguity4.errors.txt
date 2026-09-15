@@ -1,0 +1,4 @@
+parserConstructorAmbiguity4.ts(1,10): error TS2558: Expected 0 type arguments, but got 1.
+parserConstructorAmbiguity4.ts(1,12): error TS1005: '>' expected.
+parserConstructorAmbiguity4.ts(1,14): error TS2304: Cannot find name 'B'.
+parserConstructorAmbiguity4.ts(1,18): error TS2304: Cannot find name 'C'.

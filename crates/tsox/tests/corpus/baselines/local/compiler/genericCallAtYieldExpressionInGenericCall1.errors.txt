@@ -1,0 +1,14 @@
+genericCallAtYieldExpressionInGenericCall1.ts(12,7): error TS2345: Argument of type '(value: unknown) => void' is not assignable to parameter of type '(value: unknown) => Generator<any, any, any>'.
+  Type 'void' is not assignable to type 'Generator<any, any, any>'.
+genericCallAtYieldExpressionInGenericCall1.ts(16,7): error TS2345: Argument of type '(value: unknown) => void' is not assignable to parameter of type '(value: unknown) => Generator<any, any, any>'.
+  Type 'void' is not assignable to type 'Generator<any, any, any>'.
+genericCallAtYieldExpressionInGenericCall1.ts(25,7): error TS2345: Argument of type '(value: unknown) => void' is not assignable to parameter of type '(value: unknown) => Generator<any, any, any>'.
+  Type 'void' is not assignable to type 'Generator<any, any, any>'.
+genericCallAtYieldExpressionInGenericCall1.ts(41,24): error TS2345: Argument of type '(value: unknown) => void' is not assignable to parameter of type '(value: unknown) => Generator<unknown, any, any>'.
+  Type 'void' is not assignable to type 'Generator<unknown, any, any>'.
+genericCallAtYieldExpressionInGenericCall1.ts(46,24): error TS2345: Argument of type '(value: unknown) => void' is not assignable to parameter of type '(value: unknown) => Generator<unknown, any, any>'.
+  Type 'void' is not assignable to type 'Generator<unknown, any, any>'.
+genericCallAtYieldExpressionInGenericCall1.ts(56,8): error TS2345: Argument of type '(value: unknown) => void' is not assignable to parameter of type '(value: unknown) => Generator<never, unknown, unknown>'.
+  Type 'void' is not assignable to type 'Generator<never, unknown, unknown>'.
+genericCallAtYieldExpressionInGenericCall1.ts(61,8): error TS2345: Argument of type '(value: unknown) => void' is not assignable to parameter of type '(value: unknown) => Generator<never, unknown, unknown>'.
+  Type 'void' is not assignable to type 'Generator<never, unknown, unknown>'.

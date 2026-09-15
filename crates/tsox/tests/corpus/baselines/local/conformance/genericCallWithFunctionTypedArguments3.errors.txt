@@ -1,0 +1,8 @@
+genericCallWithFunctionTypedArguments3.ts(10,12): error TS2454: Variable 'u' is used before being assigned.
+genericCallWithFunctionTypedArguments3.ts(13,14): error TS2345: Argument of type '{ (x: boolean): boolean; (x: string): any; }' is not assignable to parameter of type '(x: unknown) => unknown'.
+  Types of parameters 'x' and 'x' are incompatible.
+    Type 'unknown' is not assignable to type 'string'.
+      Types of parameters 'x' and 'x' are incompatible.
+        Type 'unknown' is not assignable to type 'boolean'.
+genericCallWithFunctionTypedArguments3.ts(13,14): error TS2454: Variable 'a' is used before being assigned.
+genericCallWithFunctionTypedArguments3.ts(20,15): error TS2454: Variable 'b' is used before being assigned.

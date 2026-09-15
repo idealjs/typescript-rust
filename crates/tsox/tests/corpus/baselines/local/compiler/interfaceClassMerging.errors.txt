@@ -1,0 +1,8 @@
+interfaceClassMerging.ts(9,5): error TS2564: Property 'additionalProperty' has no initializer and is not definitely assigned in the constructor.
+interfaceClassMerging.ts(12,21): error TS2339: Property 'method' does not exist on type 'this'.
+interfaceClassMerging.ts(18,21): error TS2339: Property 'optionalProperty' does not exist on type 'this'.
+interfaceClassMerging.ts(25,5): error TS2339: Property 'optionalMethod' does not exist on type 'Bar'.
+interfaceClassMerging.ts(26,5): error TS2339: Property 'property' does not exist on type 'Bar'.
+interfaceClassMerging.ts(27,5): error TS2551: Property 'optionalProperty' does not exist on type 'Bar'. Did you mean 'additionalProperty'?
+interfaceClassMerging.ts(38,7): error TS2454: Variable 'obj' is used before being assigned.
+interfaceClassMerging.ts(39,1): error TS2741: Property 'property' is missing in type 'Bar' but required in type '{ method: (a: number) => string; property: string; additionalProperty: string; additionalMethod: (a: number) => string; }'.

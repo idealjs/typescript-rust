@@ -1,0 +1,2 @@
+mergedInheritedMembersSatisfyAbstractBase.ts(5,7): error TS2654: Non-abstract class 'Broken' is missing implementations for the following members of 'BaseClass': 'bar'.
+mergedInheritedMembersSatisfyAbstractBase.ts(15,7): error TS2654: Non-abstract class 'IncorrectlyExtends' is missing implementations for the following members of 'BaseClass': 'bar'.

@@ -1,0 +1,2 @@
+main.ts(5,5): error TS2322: Type 'CamelCase<T, {}>' is not assignable to type 'CamelCase<T>'.
+main.ts(6,5): error TS2322: Type 'CamelCase<T>' is not assignable to type 'CamelCase<T, {}>'.

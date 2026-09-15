@@ -1,0 +1,1 @@
+thisTypeInFunctions4.ts(13,14): error TS2339: Property 'name' does not exist on type '{ name: string; } | { value: number; }'.

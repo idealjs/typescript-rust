@@ -1,0 +1,10 @@
+classStaticBlock6.ts(13,9): suggestion TS7028: Unused label.
+classStaticBlock6.ts(17,9): error TS2304: Cannot find name 'arguments'.
+classStaticBlock6.ts(18,9): error TS2304: Cannot find name 'await'.
+classStaticBlock6.ts(41,13): error TS2815: 'arguments' cannot be referenced in property initializers or class static initialization blocks.
+classStaticBlock6.ts(42,18): error TS1109: Expression expected.
+classStaticBlock6.ts(46,22): error TS1109: Expression expected.
+classStaticBlock6.ts(55,13): error TS2815: 'arguments' cannot be referenced in property initializers or class static initialization blocks.
+classStaticBlock6.ts(66,14): error TS2339: Property 'b' does not exist on type 'this'.
+classStaticBlock6.ts(67,23): error TS2304: Cannot find name ''.
+classStaticBlock6.ts(69,18): error TS2339: Property 'b' does not exist on type 'this'.

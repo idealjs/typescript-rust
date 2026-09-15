@@ -1,0 +1,13 @@
+interfaceExtendsObjectIntersectionErrors.ts(7,11): error TS2430: Interface 'I1' incorrectly extends interface ''.
+  Types of property 'a' are incompatible.
+    Type 'string' is not assignable to type 'number'.
+interfaceExtendsObjectIntersectionErrors.ts(11,11): error TS2430: Interface 'I5' incorrectly extends interface ''.
+  Types of property 'c' are incompatible.
+    Type 'number' is not assignable to type 'string'.
+interfaceExtendsObjectIntersectionErrors.ts(33,29): error TS2411: Property 'a' of type 'string' is not assignable to 'string' index type 'number'.
+interfaceExtendsObjectIntersectionErrors.ts(39,11): error TS2430: Interface 'I20' incorrectly extends interface ''.
+  Types of property 'a' are incompatible.
+    Type 'string' is not assignable to type 'number | undefined'.
+interfaceExtendsObjectIntersectionErrors.ts(40,11): error TS2430: Interface 'I21' incorrectly extends interface ''.
+  Types of property 'a' are incompatible.
+    Type 'string' is not assignable to type 'number'.

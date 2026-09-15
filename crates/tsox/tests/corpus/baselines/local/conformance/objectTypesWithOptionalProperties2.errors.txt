@@ -1,0 +1,15 @@
+objectTypesWithOptionalProperties2.ts(4,8): error TS1131: Property or signature expected.
+objectTypesWithOptionalProperties2.ts(4,9): error TS1131: Property or signature expected.
+objectTypesWithOptionalProperties2.ts(8,8): error TS1131: Property or signature expected.
+objectTypesWithOptionalProperties2.ts(8,9): error TS1131: Property or signature expected.
+objectTypesWithOptionalProperties2.ts(12,5): error TS2391: Function implementation is missing or not immediately following the declaration.
+objectTypesWithOptionalProperties2.ts(12,8): error TS1005: ';' expected.
+objectTypesWithOptionalProperties2.ts(12,9): error TS1068: Unexpected token. A constructor, method, accessor, or property was expected.
+objectTypesWithOptionalProperties2.ts(16,8): error TS1131: Property or signature expected.
+objectTypesWithOptionalProperties2.ts(16,9): error TS1131: Property or signature expected.
+objectTypesWithOptionalProperties2.ts(20,5): error TS2391: Function implementation is missing or not immediately following the declaration.
+objectTypesWithOptionalProperties2.ts(20,8): error TS1005: ';' expected.
+objectTypesWithOptionalProperties2.ts(20,9): error TS1068: Unexpected token. A constructor, method, accessor, or property was expected.
+objectTypesWithOptionalProperties2.ts(25,8): error TS1005: '{' expected.
+objectTypesWithOptionalProperties2.ts(25,9): error TS1117: An object literal cannot have multiple properties with the same name.
+objectTypesWithOptionalProperties2.ts(25,9): error TS1005: 'identifier' expected.

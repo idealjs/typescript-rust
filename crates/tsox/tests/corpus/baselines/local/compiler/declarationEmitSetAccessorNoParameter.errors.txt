@@ -1,0 +1,1 @@
+declarationEmitSetAccessorNoParameter.ts(2,7): error TS1049: A 'set' accessor must have exactly one parameter.

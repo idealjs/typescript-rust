@@ -1,0 +1,2 @@
+mappedTypeOverlappingStringEnumKeys.ts(32,5): error TS2322: Type '{ type: "cat"; address: ""; }' is not assignable to type 'Extract<TerrestrialCat | AlienCat, { type: "cat"; }>'.
+mappedTypeOverlappingStringEnumKeys.ts(33,5): error TS2322: Type '{ type: "cat"; planet: ""; }' is not assignable to type 'Extract<TerrestrialCat | AlienCat, { type: "cat"; }>'.

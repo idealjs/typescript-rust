@@ -1,0 +1,2 @@
+typeSatisfaction_contextualTyping1.ts(4,13): error TS7006: Parameter 'n' implicitly has an 'any' type.
+typeSatisfaction_contextualTyping1.ts(5,12): error TS7006: Parameter 'n' implicitly has an 'any' type.

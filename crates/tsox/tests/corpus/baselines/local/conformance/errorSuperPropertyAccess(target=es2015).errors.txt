@@ -1,0 +1,12 @@
+errorSuperPropertyAccess.ts(6,23): error TS2339: Property 'prototype' does not exist on type 'NoBase'.
+errorSuperPropertyAccess.ts(11,23): error TS2339: Property 'prototype' does not exist on type 'NoBase'.
+errorSuperPropertyAccess.ts(87,15): error TS2341: Property 'privateMember' is private and only accessible within class 'SomeBase'.
+errorSuperPropertyAccess.ts(91,23): error TS2341: Property 'privateMember' is private and only accessible within class 'SomeBase'.
+errorSuperPropertyAccess.ts(95,23): error TS2341: Property 'privateMember' is private and only accessible within class 'SomeBase'.
+errorSuperPropertyAccess.ts(99,19): error TS2341: Property 'privateMember' is private and only accessible within class 'SomeBase'.
+errorSuperPropertyAccess.ts(110,15): error TS2341: Property 'privateStaticMember' is private and only accessible within class 'SomeBase'.
+errorSuperPropertyAccess.ts(111,15): error TS2341: Property 'privateStaticFunc' is private and only accessible within class 'SomeBase'.
+errorSuperPropertyAccess.ts(115,15): error TS2341: Property 'privateStaticMember' is private and only accessible within class 'SomeBase'.
+errorSuperPropertyAccess.ts(116,15): error TS2341: Property 'privateStaticFunc' is private and only accessible within class 'SomeBase'.
+errorSuperPropertyAccess.ts(121,15): error TS2341: Property 'privateStaticMember' is private and only accessible within class 'SomeBase'.
+errorSuperPropertyAccess.ts(122,15): error TS2341: Property 'privateStaticFunc' is private and only accessible within class 'SomeBase'.

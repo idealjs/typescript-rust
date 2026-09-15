@@ -1,0 +1,2 @@
+superPropertyAccess.ts(23,15): error TS2341: Property 'p1' is private and only accessible within class 'MyBase'.
+superPropertyAccess.ts(27,24): error TS2341: Property 'd2' is private and only accessible within class 'MyBase'.

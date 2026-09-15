@@ -1,0 +1,2 @@
+overloadErrorMatchesImplementationElaboaration.ts(3,5): error TS2394: This overload signature is not compatible with its implementation signature.
+overloadErrorMatchesImplementationElaboaration.ts(8,12): error TS2345: Argument of type 'number[]' is not assignable to parameter of type 'string'.

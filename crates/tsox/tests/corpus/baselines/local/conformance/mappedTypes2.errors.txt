@@ -1,0 +1,12 @@
+mappedTypes2.ts(58,16): error TS2345: Argument of type '{ name: string; }' is not assignable to parameter of type '{ name?: T["name"]; width?: T["width"]; height?: T["height"]; location?: T["location"]; }'.
+  Types of property 'name' are incompatible.
+    Type 'string' is not assignable to type 'T["name"] | undefined'.
+mappedTypes2.ts(59,16): error TS2345: Argument of type '{ width: number; height: number; }' is not assignable to parameter of type '{ name?: T["name"]; width?: T["width"]; height?: T["height"]; location?: T["location"]; }'.
+  Types of property 'width' are incompatible.
+    Type 'number' is not assignable to type 'T["width"] | undefined'.
+mappedTypes2.ts(75,27): error TS2345: Argument of type 'string' is not assignable to parameter of type 'keyof T'.
+mappedTypes2.ts(80,31): error TS2345: Argument of type '{ foo: string; bar: string; baz: string; }' is not assignable to parameter of type '{ foo: T; bar: T; baz: T; }'.
+  Types of property 'foo' are incompatible.
+    Type 'string' is not assignable to type 'T'.
+mappedTypes2.ts(86,17): error TS2345: Argument of type '42' is not assignable to parameter of type 'T["width"]'.
+  'T["width"]' could be instantiated with an arbitrary type which could be unrelated to '42'.

@@ -1,0 +1,4 @@
+unaryOperatorsInStrictMode.ts(5,3): error TS2304: Cannot find name 'arguments'.
+unaryOperatorsInStrictMode.ts(6,3): error TS2304: Cannot find name 'arguments'.
+unaryOperatorsInStrictMode.ts(9,1): error TS2304: Cannot find name 'arguments'.
+unaryOperatorsInStrictMode.ts(10,1): error TS2304: Cannot find name 'arguments'.

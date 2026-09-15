@@ -1,0 +1,1 @@
+c:/app/main.ts(1,8): error TS2307: Cannot find module 'test' or its corresponding type declarations.

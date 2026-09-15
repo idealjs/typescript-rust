@@ -1,0 +1,5 @@
+privateNameAndAny.ts(20,15): error TS2339: Property '#foo' does not exist on type 'never'.
+privateNameAndAny.ts(21,15): error TS2339: Property '#m' does not exist on type 'never'.
+privateNameAndAny.ts(22,15): error TS2339: Property '#baz' does not exist on type 'never'.
+privateNameAndAny.ts(23,15): error TS2339: Property '#bar' does not exist on type 'never'.
+privateNameAndAny.ts(24,15): error TS2339: Property '#foo' does not exist on type 'never'.

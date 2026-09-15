@@ -1,0 +1,4 @@
+16.ts(1,12): error TS1508: Unexpected '{0}'. Did you mean to escape it with backslash?
+28.ts(1,12): error TS1508: Unexpected '{0}'. Did you mean to escape it with backslash?
+4.ts(1,12): error TS1508: Unexpected '{0}'. Did you mean to escape it with backslash?
+40.ts(1,13): error TS1508: Unexpected '{0}'. Did you mean to escape it with backslash?

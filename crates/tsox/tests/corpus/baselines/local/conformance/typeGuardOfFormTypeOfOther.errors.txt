@@ -1,0 +1,36 @@
+typeGuardOfFormTypeOfOther.ts(1,19): error TS2564: Property 'p' has no initializer and is not definitely assigned in the constructor.
+typeGuardOfFormTypeOfOther.ts(22,5): error TS2322: Type 'string | C' is not assignable to type 'C'.
+  Type 'string' is not assignable to type 'C'.
+typeGuardOfFormTypeOfOther.ts(25,9): error TS2322: Type 'string | C' is not assignable to type 'string'.
+  Type 'C' is not assignable to type 'string'.
+typeGuardOfFormTypeOfOther.ts(28,5): error TS2322: Type 'number | C' is not assignable to type 'C'.
+  Type 'number' is not assignable to type 'C'.
+typeGuardOfFormTypeOfOther.ts(31,9): error TS2322: Type 'number | C' is not assignable to type 'number'.
+  Type 'C' is not assignable to type 'number'.
+typeGuardOfFormTypeOfOther.ts(34,5): error TS2322: Type 'boolean | C' is not assignable to type 'C'.
+  Type 'boolean' is not assignable to type 'C'.
+typeGuardOfFormTypeOfOther.ts(37,9): error TS2322: Type 'boolean | C' is not assignable to type 'boolean'.
+  Type 'C' is not assignable to type 'boolean'.
+typeGuardOfFormTypeOfOther.ts(39,5): error TS2352: Conversion of type 'boolean' to type 'string' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+typeGuardOfFormTypeOfOther.ts(40,5): error TS2322: Type 'string | C' is not assignable to type 'C'.
+  Type 'string' is not assignable to type 'C'.
+typeGuardOfFormTypeOfOther.ts(43,9): error TS2322: Type 'string | C' is not assignable to type 'string'.
+  Type 'C' is not assignable to type 'string'.
+typeGuardOfFormTypeOfOther.ts(46,12): error TS2454: Variable 'strOrNumOrBool' is used before being assigned.
+typeGuardOfFormTypeOfOther.ts(47,18): error TS2454: Variable 'strOrNumOrBool' is used before being assigned.
+typeGuardOfFormTypeOfOther.ts(50,41): error TS2454: Variable 'strOrNumOrBool' is used before being assigned.
+typeGuardOfFormTypeOfOther.ts(57,9): error TS2322: Type 'string | C' is not assignable to type 'string'.
+  Type 'C' is not assignable to type 'string'.
+typeGuardOfFormTypeOfOther.ts(60,5): error TS2322: Type 'string | C' is not assignable to type 'C'.
+  Type 'string' is not assignable to type 'C'.
+typeGuardOfFormTypeOfOther.ts(63,9): error TS2322: Type 'number | C' is not assignable to type 'number'.
+  Type 'C' is not assignable to type 'number'.
+typeGuardOfFormTypeOfOther.ts(66,5): error TS2322: Type 'number | C' is not assignable to type 'C'.
+  Type 'number' is not assignable to type 'C'.
+typeGuardOfFormTypeOfOther.ts(69,9): error TS2322: Type 'boolean | C' is not assignable to type 'boolean'.
+  Type 'C' is not assignable to type 'boolean'.
+typeGuardOfFormTypeOfOther.ts(72,5): error TS2322: Type 'boolean | C' is not assignable to type 'C'.
+  Type 'boolean' is not assignable to type 'C'.
+typeGuardOfFormTypeOfOther.ts(75,12): error TS2454: Variable 'strOrNumOrBool' is used before being assigned.
+typeGuardOfFormTypeOfOther.ts(76,41): error TS2454: Variable 'strOrNumOrBool' is used before being assigned.
+typeGuardOfFormTypeOfOther.ts(79,18): error TS2454: Variable 'strOrNumOrBool' is used before being assigned.

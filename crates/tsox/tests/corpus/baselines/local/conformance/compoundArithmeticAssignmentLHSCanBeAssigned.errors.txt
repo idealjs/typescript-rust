@@ -1,0 +1,10 @@
+compoundArithmeticAssignmentLHSCanBeAssigned.ts(11,7): error TS18050: The value 'null' cannot be used here.
+compoundArithmeticAssignmentLHSCanBeAssigned.ts(12,7): error TS18050: The value 'undefined' cannot be used here.
+compoundArithmeticAssignmentLHSCanBeAssigned.ts(18,1): error TS2322: Type 'null' is not assignable to type 'number'.
+compoundArithmeticAssignmentLHSCanBeAssigned.ts(18,7): error TS18050: The value 'null' cannot be used here.
+compoundArithmeticAssignmentLHSCanBeAssigned.ts(19,1): error TS2322: Type 'undefined' is not assignable to type 'number'.
+compoundArithmeticAssignmentLHSCanBeAssigned.ts(19,7): error TS18050: The value 'undefined' cannot be used here.
+compoundArithmeticAssignmentLHSCanBeAssigned.ts(25,1): error TS2322: Type 'null' is not assignable to type '0 | 1 | 2'.
+compoundArithmeticAssignmentLHSCanBeAssigned.ts(25,7): error TS18050: The value 'null' cannot be used here.
+compoundArithmeticAssignmentLHSCanBeAssigned.ts(26,1): error TS2322: Type 'undefined' is not assignable to type '0 | 1 | 2'.
+compoundArithmeticAssignmentLHSCanBeAssigned.ts(26,7): error TS18050: The value 'undefined' cannot be used here.

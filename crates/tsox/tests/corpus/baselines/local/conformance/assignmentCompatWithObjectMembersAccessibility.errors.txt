@@ -1,0 +1,48 @@
+assignmentCompatWithObjectMembersAccessibility.ts(31,5): error TS2322: Type 'TargetIsPublic.E' is not assignable to type '{ foo: string; }'.
+  Property 'foo' is private in type 'TargetIsPublic.E' but not in type '{ foo: string; }'.
+assignmentCompatWithObjectMembersAccessibility.ts(36,5): error TS2322: Type 'TargetIsPublic.E' is not assignable to type 'TargetIsPublic.Base'.
+  Property 'foo' is private in type 'TargetIsPublic.E' but not in type 'TargetIsPublic.Base'.
+assignmentCompatWithObjectMembersAccessibility.ts(41,5): error TS2322: Type 'TargetIsPublic.E' is not assignable to type 'TargetIsPublic.I'.
+  Property 'foo' is private in type 'TargetIsPublic.E' but not in type 'TargetIsPublic.I'.
+assignmentCompatWithObjectMembersAccessibility.ts(46,5): error TS2322: Type 'TargetIsPublic.E' is not assignable to type 'TargetIsPublic.D'.
+  Property 'foo' is private in type 'TargetIsPublic.E' but not in type 'TargetIsPublic.D'.
+assignmentCompatWithObjectMembersAccessibility.ts(48,5): error TS2322: Type '{ foo: string; }' is not assignable to type 'TargetIsPublic.E'.
+  Property 'foo' is private in type 'TargetIsPublic.E' but not in type '{ foo: string; }'.
+assignmentCompatWithObjectMembersAccessibility.ts(49,5): error TS2322: Type 'TargetIsPublic.Base' is not assignable to type 'TargetIsPublic.E'.
+  Property 'foo' is private in type 'TargetIsPublic.E' but not in type 'TargetIsPublic.Base'.
+assignmentCompatWithObjectMembersAccessibility.ts(50,5): error TS2322: Type 'TargetIsPublic.I' is not assignable to type 'TargetIsPublic.E'.
+  Property 'foo' is private in type 'TargetIsPublic.E' but not in type 'TargetIsPublic.I'.
+assignmentCompatWithObjectMembersAccessibility.ts(51,5): error TS2322: Type 'TargetIsPublic.D' is not assignable to type 'TargetIsPublic.E'.
+  Property 'foo' is private in type 'TargetIsPublic.E' but not in type 'TargetIsPublic.D'.
+assignmentCompatWithObjectMembersAccessibility.ts(81,5): error TS2322: Type 'TargetIsPublic.Base' is not assignable to type '{ foo: string; }'.
+  Property 'foo' is private in type 'TargetIsPublic.Base' but not in type '{ foo: string; }'.
+assignmentCompatWithObjectMembersAccessibility.ts(82,5): error TS2322: Type 'TargetIsPublic.I' is not assignable to type '{ foo: string; }'.
+  Property 'foo' is private in type 'TargetIsPublic.I' but not in type '{ foo: string; }'.
+assignmentCompatWithObjectMembersAccessibility.ts(84,5): error TS2322: Type 'TargetIsPublic.E' is not assignable to type '{ foo: string; }'.
+  Property 'foo' is private in type 'TargetIsPublic.E' but not in type '{ foo: string; }'.
+assignmentCompatWithObjectMembersAccessibility.ts(86,5): error TS2322: Type '{ foo: string; }' is not assignable to type 'TargetIsPublic.Base'.
+  Property 'foo' is private in type 'TargetIsPublic.Base' but not in type '{ foo: string; }'.
+assignmentCompatWithObjectMembersAccessibility.ts(88,5): error TS2322: Type 'TargetIsPublic.D' is not assignable to type 'TargetIsPublic.Base'.
+  Property 'foo' is private in type 'TargetIsPublic.Base' but not in type 'TargetIsPublic.D'.
+assignmentCompatWithObjectMembersAccessibility.ts(89,5): error TS2322: Type 'TargetIsPublic.E' is not assignable to type 'TargetIsPublic.Base'.
+  Types have separate declarations of a private property 'foo'.
+assignmentCompatWithObjectMembersAccessibility.ts(92,5): error TS2322: Type '{ foo: string; }' is not assignable to type 'TargetIsPublic.I'.
+  Property 'foo' is private in type 'TargetIsPublic.I' but not in type '{ foo: string; }'.
+assignmentCompatWithObjectMembersAccessibility.ts(94,5): error TS2322: Type 'TargetIsPublic.D' is not assignable to type 'TargetIsPublic.I'.
+  Property 'foo' is private in type 'TargetIsPublic.I' but not in type 'TargetIsPublic.D'.
+assignmentCompatWithObjectMembersAccessibility.ts(95,5): error TS2322: Type 'TargetIsPublic.E' is not assignable to type 'TargetIsPublic.I'.
+  Types have separate declarations of a private property 'foo'.
+assignmentCompatWithObjectMembersAccessibility.ts(99,5): error TS2322: Type 'TargetIsPublic.Base' is not assignable to type 'TargetIsPublic.D'.
+  Property 'foo' is private in type 'TargetIsPublic.Base' but not in type 'TargetIsPublic.D'.
+assignmentCompatWithObjectMembersAccessibility.ts(100,5): error TS2322: Type 'TargetIsPublic.I' is not assignable to type 'TargetIsPublic.D'.
+  Property 'foo' is private in type 'TargetIsPublic.I' but not in type 'TargetIsPublic.D'.
+assignmentCompatWithObjectMembersAccessibility.ts(101,5): error TS2322: Type 'TargetIsPublic.E' is not assignable to type 'TargetIsPublic.D'.
+  Property 'foo' is private in type 'TargetIsPublic.E' but not in type 'TargetIsPublic.D'.
+assignmentCompatWithObjectMembersAccessibility.ts(103,5): error TS2322: Type '{ foo: string; }' is not assignable to type 'TargetIsPublic.E'.
+  Property 'foo' is private in type 'TargetIsPublic.E' but not in type '{ foo: string; }'.
+assignmentCompatWithObjectMembersAccessibility.ts(104,5): error TS2322: Type 'TargetIsPublic.Base' is not assignable to type 'TargetIsPublic.E'.
+  Types have separate declarations of a private property 'foo'.
+assignmentCompatWithObjectMembersAccessibility.ts(105,5): error TS2322: Type 'TargetIsPublic.I' is not assignable to type 'TargetIsPublic.E'.
+  Types have separate declarations of a private property 'foo'.
+assignmentCompatWithObjectMembersAccessibility.ts(106,5): error TS2322: Type 'TargetIsPublic.D' is not assignable to type 'TargetIsPublic.E'.
+  Property 'foo' is private in type 'TargetIsPublic.E' but not in type 'TargetIsPublic.D'.

@@ -1,0 +1,15 @@
+strictFunctionTypes1.ts(13,19): error TS2345: Argument of type '(x: string) => void' is not assignable to parameter of type '(x: Object) => void'.
+  Types of parameters 'x' and 'x' are incompatible.
+    Type 'Object' is not assignable to type 'string'.
+strictFunctionTypes1.ts(14,22): error TS2345: Argument of type '(x: Object) => void' is not assignable to parameter of type '(x: "abc") => void'.
+  Types of parameters 'x' and 'x' are incompatible.
+    Type '"abc"' is not assignable to type 'Object'.
+strictFunctionTypes1.ts(15,15): error TS2345: Argument of type 'string' is not assignable to parameter of type 'Object'.
+strictFunctionTypes1.ts(20,27): error TS2345: Argument of type '(x: string) => void' is not assignable to parameter of type '(x: Object) => void'.
+  Types of parameters 'x' and 'x' are incompatible.
+    Type 'Object' is not assignable to type 'string'.
+strictFunctionTypes1.ts(21,27): error TS2345: Argument of type '(f: (x: "def") => void) => void' is not assignable to parameter of type '(f: (x: Object) => void) => void'.
+  Types of parameters 'f' and 'f' are incompatible.
+    Type '(x: Object) => void' is not assignable to type '(x: "def") => void'.
+      Types of parameters 'x' and 'x' are incompatible.
+        Type '"def"' is not assignable to type 'Object'.

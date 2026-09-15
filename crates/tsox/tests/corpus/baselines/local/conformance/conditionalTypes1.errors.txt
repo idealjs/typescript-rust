@@ -1,0 +1,57 @@
+conditionalTypes1.ts(12,5): error TS2322: Type 'T' is not assignable to type 'T & {}'.
+conditionalTypes1.ts(17,5): error TS2322: Type 'T' is not assignable to type 'T & {}'.
+  Type 'undefined' is not assignable to type '{}'.
+    Type 'undefined' is not assignable to type 'T & {}'.
+conditionalTypes1.ts(18,9): error TS2322: Type 'T' is not assignable to type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+conditionalTypes1.ts(19,9): error TS2322: Type 'T & {}' is not assignable to type 'string'.
+conditionalTypes1.ts(24,5): error TS2322: Type '(Partial<T>)[keyof T]' is not assignable to type '(Partial<T>)[keyof T] & {}'.
+conditionalTypes1.ts(29,5): error TS2322: Type 'T["x"]' is not assignable to type 'T["x"] & {}'.
+  Type 'undefined' is not assignable to type '{}'.
+    Type 'undefined' is not assignable to type 'T["x"] & {}'.
+conditionalTypes1.ts(30,9): error TS2322: Type 'T["x"]' is not assignable to type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+conditionalTypes1.ts(31,9): error TS2322: Type 'T["x"] & {}' is not assignable to type 'string'.
+conditionalTypes1.ts(103,5): error TS2322: Type 'FunctionProperties<T>' is not assignable to type 'T'.
+  'T' could be instantiated with an arbitrary type which could be unrelated to 'FunctionProperties<T>'.
+conditionalTypes1.ts(104,5): error TS2322: Type 'NonFunctionProperties<T>' is not assignable to type 'T'.
+  'T' could be instantiated with an arbitrary type which could be unrelated to 'NonFunctionProperties<T>'.
+conditionalTypes1.ts(105,5): error TS2322: Type 'T' is not assignable to type 'FunctionProperties<T>'.
+conditionalTypes1.ts(107,5): error TS2322: Type 'T' is not assignable to type 'NonFunctionProperties<T>'.
+conditionalTypes1.ts(114,5): error TS2322: Type 'keyof T' is not assignable to type 'FunctionPropertyNames<T>'.
+conditionalTypes1.ts(115,5): error TS2322: Type 'NonFunctionPropertyNames<T>' is not assignable to type 'FunctionPropertyNames<T>'.
+conditionalTypes1.ts(116,5): error TS2322: Type 'keyof T' is not assignable to type 'NonFunctionPropertyNames<T>'.
+conditionalTypes1.ts(117,5): error TS2322: Type 'FunctionPropertyNames<T>' is not assignable to type 'NonFunctionPropertyNames<T>'.
+conditionalTypes1.ts(132,9): error TS2322: Type 'DeepReadonly<T["name"]>' is not assignable to type 'string'.
+  Type 'DeepReadonlyArray<T["name"][number]>' is not assignable to type 'string'.
+conditionalTypes1.ts(137,5): error TS2349: This expression is not callable.
+  No constituent of type 'DeepReadonlyArray<T["updatePart"][number]> | T["updatePart"] extends object ? DeepReadonlyObject<T> : T' is callable.
+conditionalTypes1.ts(157,9): error TS2322: Type 'ZeroOf<T>' is not assignable to type 'string | number'.
+  Type 'T extends string ? "" : false' is not assignable to type 'string | number'.
+    Type 'boolean' is not assignable to type 'string | number'.
+      Type 'boolean' is not assignable to type 'string'.
+        Type 'T extends string ? "" : false' is not assignable to type 'number'.
+          Type 'string' is not assignable to type 'number'.
+conditionalTypes1.ts(158,9): error TS2322: Type 'ZeroOf<T>' is not assignable to type '"" | 0'.
+  Type 'T extends string ? "" : false' is not assignable to type '"" | 0'.
+    Type 'false' is not assignable to type '"" | 0'.
+      Type 'false' is not assignable to type '""'.
+        Type 'T extends string ? "" : false' is not assignable to type '0'.
+          Type '""' is not assignable to type '0'.
+conditionalTypes1.ts(159,5): error TS2322: Type 'ZeroOf<T>' is not assignable to type 'T'.
+  'T' could be instantiated with an arbitrary type which could be unrelated to 'ZeroOf<T>'.
+conditionalTypes1.ts(160,5): error TS2322: Type 'T' is not assignable to type 'ZeroOf<T>'.
+  Type 'string' is not assignable to type '0'.
+    Type 'string' is not assignable to type '0'.
+      Type 'string' is not assignable to type 'ZeroOf<T>'.
+conditionalTypes1.ts(247,47): error TS2322: Type 'Foo<U>' is not assignable to type 'Bar<U>'.
+conditionalTypes1.ts(250,48): error TS2322: Type 'Foo<T>' is not assignable to type 'Foo<T>'.
+conditionalTypes1.ts(277,39): error TS2322: Type 'T90<U>' is not assignable to type 'T91<U>'.
+conditionalTypes1.ts(278,39): error TS2322: Type 'T91<U>' is not assignable to type 'T90<U>'.
+conditionalTypes1.ts(282,39): error TS2322: Type 'T92<U>' is not assignable to type 'T93<U>'.
+conditionalTypes1.ts(283,39): error TS2322: Type 'T93<U>' is not assignable to type 'T92<U>'.
+conditionalTypes1.ts(287,43): error TS2322: Type 'T94<U>' is not assignable to type 'T95<U>'.
+conditionalTypes1.ts(288,43): error TS2322: Type 'T95<U>' is not assignable to type 'T94<U>'.
+conditionalTypes1.ts(352,11): error TS2345: Argument of type '{ o: number; c: { 0: { a: number; c: string; }; }; }' is not assignable to parameter of type '{ o?: T["o"] extends Array<any> ? { [index: number]: RecursivePartial<T[P][0]>; } : T[P] extends object ? RecursivePartial<T[P]> : T[P]; b?: T["b"] extends Array<any> ? { [index: number]: RecursivePartial<T[P][0]>; } : T[P] extends object ? RecursivePartial<T[P]> : T[P]; c?: T["c"] extends Array<any> ? { [index: number]: RecursivePartial<T[P][0]>; } : T[P] extends object ? RecursivePartial<T[P]> : T[P]; }'.
+  Types of property 'o' are incompatible.
+    Type 'number' is not assignable to type 'T["o"] extends Array<any> ? { [index: number]: RecursivePartial<T[P][0]>; } : T[P] extends object ? RecursivePartial<T[P]> : T[P] | undefined'.

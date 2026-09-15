@@ -1,0 +1,1 @@
+longObjectInstantiationChain2.ts(61,10): error TS2339: Property 'p51' does not exist on type '{ p1: 1; }'.

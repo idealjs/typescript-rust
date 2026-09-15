@@ -1,0 +1,1 @@
+objectFreezeLiteralsDontWiden.ts(7,1): error TS2322: Type 'T["firefox"]' is not assignable to type 'T["chromium"]'.

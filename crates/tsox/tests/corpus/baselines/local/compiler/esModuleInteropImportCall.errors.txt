@@ -1,0 +1,1 @@
+index.ts(1,22): error TS7006: Parameter 'f' implicitly has an 'any' type.

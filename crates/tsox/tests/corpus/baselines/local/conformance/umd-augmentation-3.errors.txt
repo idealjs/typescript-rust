@@ -1,0 +1,4 @@
+b.ts(3,15): error TS2339: Property 'Vector' does not exist on type 'typeof import("math2d")'.
+b.ts(4,19): error TS2339: Property 'getLength' does not exist on type 'typeof import("math2d")'.
+b.ts(5,10): error TS2694: Namespace 'node_modules/math2d/index.d.ts' has no exported member 'Point'.
+math2d-augment.d.ts(6,14): error TS2503: Cannot find namespace 'Math2d'.

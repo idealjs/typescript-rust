@@ -1,0 +1,2 @@
+c.ts(7,5): error TS2367: This comparison appears to be unintentional because the types 'F' and 'F' have no overlap.
+c.ts(11,1): error TS2741: Property 'foo1' is missing in type 'F' but required in type 'F'.

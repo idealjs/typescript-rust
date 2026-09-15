@@ -1,0 +1,1 @@
+reactNamespaceMissingDeclaration.tsx(2,2): error TS2874: This JSX tag requires 'myReactLib' to be in scope, but it could not be found.

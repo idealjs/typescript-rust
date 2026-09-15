@@ -1,0 +1,5 @@
+exportAssignmentInNamespace.ts(3,14): error TS2304: Cannot find name 'exportOperandName'.
+returnInStaticBlock.ts(4,9): error TS1108: A 'return' statement can only be used within a function body.
+returnInStaticBlock.ts(4,16): error TS2304: Cannot find name 'returnOperandName'.
+yieldOutsideGenerator.ts(3,5): error TS1163: A 'yield' expression is only allowed in a generator body.
+yieldOutsideGenerator.ts(3,11): error TS2304: Cannot find name 'yieldOperandName'.

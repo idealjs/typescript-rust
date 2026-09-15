@@ -1,0 +1,13 @@
+/index.ts(1,28): error TS2307: Cannot find module 'plain.style' or its corresponding type declarations.
+/index.ts(1,42): error TS2857: Import attributes cannot be used with type-only imports or exports.
+/index.ts(2,37): error TS2307: Cannot find module 'formatted/import.style' or its corresponding type declarations.
+/index.ts(2,62): error TS1464: Type import attributes should have exactly one key - 'resolution-mode' - with value 'import' or 'require'.
+/index.ts(2,62): error TS2857: Import attributes cannot be used with type-only imports or exports.
+/index.ts(7,28): error TS2307: Cannot find module 'reexport.style' or its corresponding type declarations.
+/index.ts(7,45): error TS2857: Import attributes cannot be used with type-only imports or exports.
+/index.ts(8,37): error TS2307: Cannot find module 'formatted/reexport.style' or its corresponding type declarations.
+/index.ts(8,64): error TS1464: Type import attributes should have exactly one key - 'resolution-mode' - with value 'import' or 'require'.
+/index.ts(8,64): error TS2857: Import attributes cannot be used with type-only imports or exports.
+/index.ts(10,34): error TS2307: Cannot find module 'inline.style' or its corresponding type declarations.
+/index.ts(11,43): error TS2307: Cannot find module 'formatted/inline.style' or its corresponding type declarations.
+/index.ts(11,77): error TS1464: Type import attributes should have exactly one key - 'resolution-mode' - with value 'import' or 'require'.

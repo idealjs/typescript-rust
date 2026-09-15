@@ -1,0 +1,10 @@
+genericAssignmentCompatOfFunctionSignatures1.ts(4,1): error TS2719: Type '<T, U>(x: T, z: U) => void' is not assignable to type '<T, U>(x: T, z: U) => void'. Two different types with this name exist, but they are unrelated.
+  Types of parameters 'z' and 'z' are incompatible.
+    Type 'U' is not assignable to type '{ a: T; b: number; }'.
+      The types of 'a.a' are incompatible between these types.
+        Type 'T' is not assignable to type 'T'.
+genericAssignmentCompatOfFunctionSignatures1.ts(5,1): error TS2719: Type '<T, U>(x: T, z: U) => void' is not assignable to type '<T, U>(x: T, z: U) => void'. Two different types with this name exist, but they are unrelated.
+  Types of parameters 'z' and 'z' are incompatible.
+    Type 'U' is not assignable to type '{ a: T; b: string; }'.
+      The types of 'a.a' are incompatible between these types.
+        Type 'T' is not assignable to type 'T'.

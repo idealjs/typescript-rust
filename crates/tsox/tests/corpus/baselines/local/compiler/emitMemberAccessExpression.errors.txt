@@ -1,0 +1,1 @@
+emitMemberAccessExpression_file2.ts(6,29): error TS2339: Property 'KnockoutExtentions' does not exist on type 'typeof Model'.

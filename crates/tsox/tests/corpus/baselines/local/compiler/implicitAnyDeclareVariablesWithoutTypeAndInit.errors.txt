@@ -1,0 +1,1 @@
+implicitAnyDeclareVariablesWithoutTypeAndInit.ts(5,15): error TS7006: Parameter 'k' implicitly has an 'any' type.

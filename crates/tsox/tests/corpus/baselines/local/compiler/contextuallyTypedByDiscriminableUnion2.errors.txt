@@ -1,0 +1,6 @@
+contextuallyTypedByDiscriminableUnion2.ts(44,13): error TS2345: Argument of type '{ enableD: true; value: string | null; setItem: (item: { id: string; }) => void; }' is not assignable to parameter of type 'EnableA | DisableA & EnableB | DisableB & DisableD<{ id: string; }> | EnableD<{ id: string; }>'.
+  Types of property 'setItem' are incompatible.
+    Type '(item: { id: string; }) => void' is not assignable to type '(item: { id: string; } | null) => void'.
+      Types of parameters 'item' and 'item' are incompatible.
+        Type '{ id: string; } | null' is not assignable to type '{ id: string; }'.
+          Type 'null' is not assignable to type '{ id: string; }'.

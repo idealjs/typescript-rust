@@ -1,0 +1,11 @@
+flatArrayNoExcessiveStackDepth.ts(4,25): error TS2345: Argument of type '(bar: unknown) => Foo' is not assignable to parameter of type '(value: unknown, index: number, array: unknown[]) => string | ReadonlyArray<string>'.
+  Type 'Foo' is not assignable to type 'string | ReadonlyArray<string>'.
+    Types of property 'flatMap' are incompatible.
+      Type '<U, This>(callback: (value: string, index: number, array: string[]) => U | ReadonlyArray<U>, thisArg: This | undefined) => U[]' is not assignable to type '<U, This>(callback: (value: string, index: number, array: string[]) => U | readonly U[], thisArg: This | undefined) => U[]'.
+        Types of parameters 'callback' and 'callback' are incompatible.
+          Type '(value: string, index: number, array: string[]) => U | readonly U[]' is not assignable to type '(value: string, index: number, array: string[]) => U | ReadonlyArray<U>'.
+            Type 'string' is not assignable to type 'ConcatArray<string>'.
+flatArrayNoExcessiveStackDepth.ts(14,25): error TS2339: Property 'match' does not exist on type 'never'.
+flatArrayNoExcessiveStackDepth.ts(19,5): error TS2322: Type '{ done: Arr; recur: Arr extends ReadonlyArray<InnerArr> ? { done: InnerArr; recur: Arr extends ReadonlyArray<InnerArr> ? ... : Arr; }[Depth extends 1 ? "done" : "recur"] : Arr; }[Depth extends 1 ? "done" : "recur"]' is not assignable to type 'Arr | Arr extends ReadonlyArray<InnerArr> ? { done: InnerArr; recur: Arr extends ReadonlyArray<InnerArr> ? ... : Arr; }[Depth extends 1 ? "done" : "recur"] : Arr'.
+flatArrayNoExcessiveStackDepth.ts(20,5): error TS2322: Type 'Arr | Arr extends ReadonlyArray<InnerArr> ? { done: InnerArr; recur: Arr extends ReadonlyArray<InnerArr> ? ... : Arr; }[Depth extends 1 ? "done" : "recur"] : Arr' is not assignable to type '{ done: Arr; recur: Arr extends ReadonlyArray<InnerArr> ? { done: InnerArr; recur: Arr extends ReadonlyArray<InnerArr> ? ... : Arr; }[Depth extends 1 ? "done" : "recur"] : Arr; }[Depth extends 1 ? "done" : "recur"]'.
+  Type 'Arr' is not assignable to type '{ done: Arr; recur: Arr extends ReadonlyArray<InnerArr> ? { done: InnerArr; recur: Arr extends ReadonlyArray<InnerArr> ? ... : Arr; }[Depth extends 1 ? "done" : "recur"] : Arr; }[Depth extends 1 ? "done" : "recur"]'.

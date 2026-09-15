@@ -1,0 +1,12 @@
+invalidMultipleVariableDeclarations.ts(6,5): error TS2564: Property 'id' has no initializer and is not definitely assigned in the constructor.
+invalidMultipleVariableDeclarations.ts(7,5): error TS2564: Property 'valid' has no initializer and is not definitely assigned in the constructor.
+invalidMultipleVariableDeclarations.ts(11,5): error TS2564: Property 'name' has no initializer and is not definitely assigned in the constructor.
+invalidMultipleVariableDeclarations.ts(15,5): error TS2564: Property 'source' has no initializer and is not definitely assigned in the constructor.
+invalidMultipleVariableDeclarations.ts(16,5): error TS2564: Property 'recurse' has no initializer and is not definitely assigned in the constructor.
+invalidMultipleVariableDeclarations.ts(17,5): error TS2564: Property 'wrapped' has no initializer and is not definitely assigned in the constructor.
+invalidMultipleVariableDeclarations.ts(24,9): error TS2564: Property 'name' has no initializer and is not definitely assigned in the constructor.
+invalidMultipleVariableDeclarations.ts(32,5): error TS2403: Subsequent variable declarations must have the same type.  Variable 'a' must be of type 'any', but here has type 'number'.
+invalidMultipleVariableDeclarations.ts(33,5): error TS2403: Subsequent variable declarations must have the same type.  Variable 'a' must be of type 'any', but here has type 'string'.
+invalidMultipleVariableDeclarations.ts(34,5): error TS2403: Subsequent variable declarations must have the same type.  Variable 'a' must be of type 'any', but here has type 'C'.
+invalidMultipleVariableDeclarations.ts(35,5): error TS2403: Subsequent variable declarations must have the same type.  Variable 'a' must be of type 'any', but here has type 'D<string>'.
+invalidMultipleVariableDeclarations.ts(36,5): error TS2403: Subsequent variable declarations must have the same type.  Variable 'a' must be of type 'any', but here has type 'typeof M'.

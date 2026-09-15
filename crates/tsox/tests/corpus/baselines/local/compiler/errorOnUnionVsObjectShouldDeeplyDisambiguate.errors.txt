@@ -1,0 +1,6 @@
+errorOnUnionVsObjectShouldDeeplyDisambiguate.ts(16,5): error TS2322: Type '{ a: () => number[]; b: () => string; c: () => string; d: () => string; e: () => string; f: () => string; g: () => string; h: () => string; i: () => string; j: () => string; k: () => number; }' is not assignable to type 'string | Stuff'.
+  Types of property 'a' are incompatible.
+    Type '() => number[]' is not assignable to type '(() => Promise<number[]>) | undefined'.
+      Type '() => number[]' is not assignable to type '() => Promise<number[]>'.
+        Type 'number[]' is not assignable to type 'Promise<number[]>'.
+          Type 'Array<number>' is missing the following properties from type 'Promise<number[]>': then, catch, __@toStringTag

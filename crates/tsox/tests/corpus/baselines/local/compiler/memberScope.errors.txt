@@ -1,0 +1,1 @@
+memberScope.ts(4,17): error TS2339: Property 'Pepper' does not exist on type 'Salt.Basil'.

@@ -1,0 +1,16 @@
+keyofAndIndexedAccess2.ts(4,5): error TS2322: Type 'string' is not assignable to type 'number'.
+keyofAndIndexedAccess2.ts(7,5): error TS2322: Type 'string' is not assignable to type 'number'.
+keyofAndIndexedAccess2.ts(14,5): error TS2739: Type '{ [key: string]: number; }' is missing the following properties from type '{ x: number; y: number; }': x, y
+keyofAndIndexedAccess2.ts(15,5): error TS2322: Type 'T' is not assignable to type '{ x: number; y: number; }'.
+  Type '{ [key: string]: number; }' is missing the following properties from type '{ x: number; y: number; }': x, y
+keyofAndIndexedAccess2.ts(87,35): error TS2538: Type 'E["id"]' cannot be used as an index type.
+keyofAndIndexedAccess2.ts(87,35): error TS2538: Type 'E["id"]' cannot be used as an index type.
+keyofAndIndexedAccess2.ts(87,35): error TS2538: Type 'E["id"]' cannot be used as an index type.
+keyofAndIndexedAccess2.ts(97,21): error TS2538: Type 'E["id"]' cannot be used as an index type.
+keyofAndIndexedAccess2.ts(121,8): error TS2345: Argument of type 'string | number' is not assignable to parameter of type 'T["elements"][number]'.
+  Type 'string' is not assignable to type 'T["elements"][number]'.
+keyofAndIndexedAccess2.ts(135,9): error TS2322: Type '"abc"' is not assignable to type 'Array<string>[K]'.
+keyofAndIndexedAccess2.ts(136,9): error TS2322: Type '"abc"' is not assignable to type 'ReadonlyArray<string>[K]'.
+keyofAndIndexedAccess2.ts(144,10): error TS2339: Property 'a' does not exist on type 'this'.
+keyofAndIndexedAccess2.ts(163,20): error TS7006: Parameter 'x' implicitly has an 'any' type.
+keyofAndIndexedAccess2.ts(163,23): error TS7006: Parameter 'y' implicitly has an 'any' type.

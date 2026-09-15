@@ -1,0 +1,2 @@
+stringLiteralTypesAsTypeParameterConstraint02.ts(5,13): error TS2345: Argument of type '(y: "foo" | "bar") => string' is not assignable to parameter of type '(x: "foo") => "foo"'.
+  Type 'string' is not assignable to type '"foo"'.

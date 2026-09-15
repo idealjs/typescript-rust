@@ -1,0 +1,9 @@
+taggedTemplateContextualTyping1.ts(6,5): error TS2322: Type 'undefined' is not assignable to type 'T'.
+  'T' could be instantiated with an arbitrary type which could be unrelated to 'undefined'.
+taggedTemplateContextualTyping1.ts(13,14): error TS7006: Parameter 'x' implicitly has an 'any' type.
+taggedTemplateContextualTyping1.ts(14,14): error TS7006: Parameter 'x' implicitly has an 'any' type.
+taggedTemplateContextualTyping1.ts(14,77): error TS7006: Parameter 'y' implicitly has an 'any' type.
+taggedTemplateContextualTyping1.ts(15,14): error TS7006: Parameter 'x' implicitly has an 'any' type.
+taggedTemplateContextualTyping1.ts(15,112): error TS2345: Argument of type 'undefined' is not assignable to parameter of type 'number'.
+taggedTemplateContextualTyping1.ts(16,49): error TS2345: Argument of type 'undefined' is not assignable to parameter of type 'number'.
+taggedTemplateContextualTyping1.ts(16,77): error TS7006: Parameter 'y' implicitly has an 'any' type.

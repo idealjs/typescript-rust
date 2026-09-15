@@ -1,0 +1,8 @@
+subtypingWithObjectMembers5.ts(16,5): error TS2420: Class 'B' incorrectly implements interface 'NotOptional.A'.
+subtypingWithObjectMembers5.ts(17,9): error TS2564: Property 'fooo' has no initializer and is not definitely assigned in the constructor.
+subtypingWithObjectMembers5.ts(24,5): error TS2420: Class 'B2' incorrectly implements interface 'NotOptional.A2'.
+subtypingWithObjectMembers5.ts(32,5): error TS2420: Class 'B3' incorrectly implements interface 'NotOptional.A3'.
+subtypingWithObjectMembers5.ts(43,5): error TS2420: Class 'B' incorrectly implements interface 'Optional.A'.
+subtypingWithObjectMembers5.ts(44,9): error TS2564: Property 'fooo' has no initializer and is not definitely assigned in the constructor.
+subtypingWithObjectMembers5.ts(51,5): error TS2420: Class 'B2' incorrectly implements interface 'Optional.A2'.
+subtypingWithObjectMembers5.ts(59,5): error TS2420: Class 'B3' incorrectly implements interface 'Optional.A3'.

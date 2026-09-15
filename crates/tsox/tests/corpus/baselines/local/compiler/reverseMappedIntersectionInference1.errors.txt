@@ -1,0 +1,2 @@
+reverseMappedIntersectionInference1.ts(26,15): error TS7006: Parameter 'errorArg' implicitly has an 'any' type.
+reverseMappedIntersectionInference1.ts(36,15): error TS7006: Parameter 'errorArg' implicitly has an 'any' type.

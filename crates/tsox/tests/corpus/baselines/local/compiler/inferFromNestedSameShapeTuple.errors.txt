@@ -1,0 +1,1 @@
+inferFromNestedSameShapeTuple.ts(42,5): error TS2322: Type '[number, any]' is not assignable to type '[42, any]'.

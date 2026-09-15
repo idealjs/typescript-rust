@@ -1,0 +1,1 @@
+interfaceExtendingClassWithPrivates.ts(15,12): error TS2341: Property 'x' is private and only accessible within class 'Foo'.

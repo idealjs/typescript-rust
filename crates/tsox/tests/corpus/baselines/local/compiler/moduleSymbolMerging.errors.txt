@@ -1,0 +1,1 @@
+B.ts(4,25): error TS2694: Namespace 'A' has no exported member 'I'.

@@ -1,0 +1,8 @@
+error TS6053: File '/.lib/react16.d.ts' not found.
+tsxReactPropsInferenceSucceedsOnIntersections.tsx(3,19): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+tsxReactPropsInferenceSucceedsOnIntersections.tsx(5,35): error TS2503: Cannot find namespace 'React'.
+tsxReactPropsInferenceSucceedsOnIntersections.tsx(15,21): error TS2503: Cannot find namespace 'React'.
+tsxReactPropsInferenceSucceedsOnIntersections.tsx(15,52): error TS7006: Parameter 'props' implicitly has an 'any' type.
+
+
+!!! error TS6053: File '/.lib/react16.d.ts' not found.

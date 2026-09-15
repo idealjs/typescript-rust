@@ -1,0 +1,3 @@
+assertionFunctionsCanNarrowByDiscriminant.ts(18,8): error TS2339: Property 'canMeow' does not exist on type 'Cat | Dog'.
+assertionFunctionsCanNarrowByDiscriminant.ts(23,1): error TS18048: 'animalOrUndef' is possibly 'undefined'.
+assertionFunctionsCanNarrowByDiscriminant.ts(23,15): error TS2339: Property 'canMeow' does not exist on type 'Cat | Dog'.

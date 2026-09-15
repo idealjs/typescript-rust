@@ -1,0 +1,2 @@
+main.ts(2,27): error TS2694: Namespace 'intermediate.ts' has no exported member 'Ghost'.
+main.ts(2,52): error TS2339: Property 'Ghost' does not exist on type 'typeof import("./intermediate")'.

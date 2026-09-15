@@ -1,0 +1,8 @@
+destructuringTypeGuardFlow.ts(15,9): error TS2322: Type 'number | null' is not assignable to type 'number'.
+  Type 'null' is not assignable to type 'number'.
+destructuringTypeGuardFlow.ts(18,9): error TS2322: Type 'string | null' is not assignable to type 'string'.
+  Type 'null' is not assignable to type 'string'.
+destructuringTypeGuardFlow.ts(31,9): error TS2322: Type 'number | null' is not assignable to type 'number'.
+  Type 'null' is not assignable to type 'number'.
+destructuringTypeGuardFlow.ts(34,9): error TS2322: Type 'string | null' is not assignable to type 'string'.
+  Type 'null' is not assignable to type 'string'.

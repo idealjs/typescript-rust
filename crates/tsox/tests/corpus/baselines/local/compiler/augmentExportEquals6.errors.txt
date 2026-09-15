@@ -1,0 +1,2 @@
+file3.ts(3,10): error TS2694: Namespace 'file1.ts' has no exported member 'A'.
+file3.ts(5,11): error TS2339: Property 'B' does not exist on type 'typeof import("./file1")'.

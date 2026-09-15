@@ -1,0 +1,2 @@
+extendedInterfaceGenericType.ts(9,20): error TS2454: Variable 'alpha' is used before being assigned.
+extendedInterfaceGenericType.ts(10,14): error TS2339: Property 'takesArgOfT' does not exist on type 'Beta<number>'.

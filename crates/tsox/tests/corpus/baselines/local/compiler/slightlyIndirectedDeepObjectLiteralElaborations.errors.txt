@@ -1,0 +1,6 @@
+slightlyIndirectedDeepObjectLiteralElaborations.ts(12,7): error TS2322: Type '{ a: { b: { c: { d: number; }; }; }; }' is not assignable to type 'Foo'.
+  The types of 'a.b.c.d' are incompatible between these types.
+    Type 'number' is not assignable to type 'string'.
+slightlyIndirectedDeepObjectLiteralElaborations.ts(13,8): error TS2322: Type '{ b: { c: { d: number; }; }; }' is not assignable to type '{ b: { c: { d: string; }; }; } | undefined'.
+  The types of 'b.c.d' are incompatible between these types.
+    Type 'number' is not assignable to type 'string'.

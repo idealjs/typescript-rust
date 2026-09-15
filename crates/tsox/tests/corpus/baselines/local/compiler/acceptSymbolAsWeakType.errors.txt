@@ -1,0 +1,14 @@
+acceptSymbolAsWeakType.ts(8,24): error TS2769: No overload matches this call.
+  Overload 1 of 2, '<K, V>(entries?: readonly [K, V][] | null | undefined): WeakMap<K, V>', gave the following error.
+    Argument of type '(boolean | symbol)[][]' is not assignable to parameter of type '[symbol | object, unknown][] | null'.
+      Type '(boolean | symbol)[][]' is not assignable to type '[symbol | object, unknown][]'.
+  Overload 2 of 2, '<K, V>(iterable?: Iterable<readonly [K, V]> | null | undefined): WeakMap<K, V>', gave the following error.
+    Argument of type '(boolean | symbol)[][]' is not assignable to parameter of type 'Iterable<[symbol | object, unknown]> | null'.
+      The types returned by '__@iterator()' are incompatible between these types.
+        Type 'ArrayIterator<(boolean | symbol)[]>' is not assignable to type 'Iterator<[symbol | object, unknown], TReturn, TNext>'.
+          The types returned by 'next(...)' are incompatible between these types.
+            Type 'IteratorYieldResult<(boolean | symbol)[]> | IteratorReturnResult<any>' is not assignable to type 'IteratorYieldResult<[symbol | object, unknown]> | IteratorReturnResult<TReturn>'.
+              Type 'IteratorYieldResult<(boolean | symbol)[]>' is not assignable to type 'IteratorYieldResult<[symbol | object, unknown]> | IteratorReturnResult<TReturn>'.
+                Types of property 'done' are incompatible.
+                  Type 'false | undefined' is not assignable to type 'true'.
+                    Type 'undefined' is not assignable to type 'true'.

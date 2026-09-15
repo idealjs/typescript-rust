@@ -1,0 +1,2 @@
+unionOfArraysFilterCall.ts(25,35): error TS2339: Property 'filter' does not exist on type '[Fizz] | readonly [Buzz | undefined?]'.
+unionOfArraysFilterCall.ts(25,42): error TS7006: Parameter 'item' implicitly has an 'any' type.

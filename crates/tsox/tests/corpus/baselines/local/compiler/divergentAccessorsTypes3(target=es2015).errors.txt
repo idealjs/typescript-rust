@@ -1,0 +1,3 @@
+divergentAccessorsTypes3.ts(8,3): error TS2564: Property 'prop3' has no initializer and is not definitely assigned in the constructor.
+divergentAccessorsTypes3.ts(38,1): error TS2322: Type 'boolean' is not assignable to type 'string | number'.
+divergentAccessorsTypes3.ts(42,1): error TS2322: Type 'boolean' is not assignable to type 'string | number'.

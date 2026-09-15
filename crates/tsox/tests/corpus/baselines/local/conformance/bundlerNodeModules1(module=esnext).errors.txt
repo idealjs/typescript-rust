@@ -1,0 +1,3 @@
+/main.cts(1,15): error TS2305: Module '"dual"' has no exported member 'cjs'.
+/main.mts(1,15): error TS2305: Module '"dual"' has no exported member 'cjs'.
+/main.ts(1,15): error TS2305: Module '"dual"' has no exported member 'cjs'.

@@ -1,0 +1,2 @@
+classAbstractAccessor.ts(3,4): error TS1318: An abstract accessor cannot have an implementation.
+classAbstractAccessor.ts(5,4): error TS1318: An abstract accessor cannot have an implementation.

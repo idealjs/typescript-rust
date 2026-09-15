@@ -1,0 +1,8 @@
+genericDefaultsErrors.ts(10,5): error TS2558: Expected 3 type arguments, but got 1.
+genericDefaultsErrors.ts(11,5): error TS2558: Expected 3 type arguments, but got 2.
+genericDefaultsErrors.ts(13,5): error TS2558: Expected 3 type arguments, but got 4.
+genericDefaultsErrors.ts(16,5): error TS2558: Expected 2 type arguments, but got 1.
+genericDefaultsErrors.ts(17,5): error TS2558: Expected 2 type arguments, but got 1.
+genericDefaultsErrors.ts(32,15): error TS2314: Generic type 'i09<T, U, V>' requires 3 type argument(s).
+genericDefaultsErrors.ts(33,15): error TS2314: Generic type 'i09<T, U, V>' requires 3 type argument(s).
+genericDefaultsErrors.ts(36,15): error TS2314: Generic type 'i09<T, U, V>' requires 3 type argument(s).

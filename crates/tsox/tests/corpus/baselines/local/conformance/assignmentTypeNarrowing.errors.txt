@@ -1,0 +1,7 @@
+assignmentTypeNarrowing.ts(18,5): error TS1005: ',' expected.
+assignmentTypeNarrowing.ts(26,11): error TS2454: Variable 'a' is used before being assigned.
+assignmentTypeNarrowing.ts(33,7): error TS2322: Type '{ x: string; }[]' is not assignable to type '{ x?: "ok"; } | { x?: "ok"; }[]'.
+  Type '{ x: string; }[]' is not assignable to type '{ x?: "ok"; }[]'.
+    The types of 'x.x' are incompatible between these types.
+      Type 'string' is not assignable to type '"ok" | undefined'.
+assignmentTypeNarrowing.ts(34,5): error TS2339: Property 'push' does not exist on type '{ x?: "ok"; } | { x?: "ok"; }[]'.

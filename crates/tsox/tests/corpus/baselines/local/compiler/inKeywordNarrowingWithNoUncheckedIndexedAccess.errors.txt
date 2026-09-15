@@ -1,0 +1,2 @@
+inKeywordNarrowingWithNoUncheckedIndexedAccess.ts(27,9): error TS2349: This expression is not callable.
+  Type 'String' has no call signatures.

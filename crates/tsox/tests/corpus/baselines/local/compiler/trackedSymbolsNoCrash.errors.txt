@@ -1,0 +1,20 @@
+index.ts(1,8): error TS2440: Import declaration conflicts with local declaration of 'ast'.
+index.ts(6,5): error TS2552: Cannot find name 'node'. Did you mean 'Node'?
+index.ts(6,9): error TS1005: ')' expected.
+index.ts(6,11): error TS1155: 'const' declarations must be initialized.
+index.ts(6,14): error TS1005: ',' expected.
+index.ts(6,15): error TS1155: 'const' declarations must be initialized.
+index.ts(6,20): error TS1005: ',' expected.
+index.ts(6,22): error TS1389: 'null' is not allowed as a variable declaration name.
+index.ts(6,22): error TS18050: The value 'null' cannot be used here.
+index.ts(6,22): error TS2695: Left side of comma operator is unused and has no side effects.
+index.ts(6,29): error TS18050: The value 'undefined' cannot be used here.
+index.ts(7,3): error TS1109: Expression expected.
+index.ts(7,4): error TS1128: Declaration or statement expected.
+index.ts(7,6): error TS1434: Unexpected keyword or identifier.
+index.ts(7,6): error TS2552: Cannot find name 'node'. Did you mean 'Node'?
+index.ts(7,11): error TS2304: Cannot find name 'is'.
+index.ts(7,11): error TS1228: A type predicate is only allowed in return type position for functions and methods.
+index.ts(7,52): error TS1005: ';' expected.
+index.ts(8,5): error TS2552: Cannot find name 'node'. Did you mean 'Node'?
+index.ts(8,20): error TS2304: Cannot find name 'nodeType'.

@@ -1,0 +1,4 @@
+genericClassesRedeclaration.ts(16,11): error TS2300: Duplicate identifier 'StringHashTable'.
+genericClassesRedeclaration.ts(29,11): error TS2300: Duplicate identifier 'IdentifierNameHashTable'.
+genericClassesRedeclaration.ts(55,11): error TS2300: Duplicate identifier 'StringHashTable'.
+genericClassesRedeclaration.ts(68,11): error TS2300: Duplicate identifier 'IdentifierNameHashTable'.

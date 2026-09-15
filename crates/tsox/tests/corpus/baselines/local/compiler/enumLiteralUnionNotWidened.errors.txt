@@ -1,0 +1,3 @@
+enumLiteralUnionNotWidened.ts(13,39): error TS2322: Type 'List<unknown>' is not assignable to type 'List<T>'.
+  Types of property 'items' are incompatible.
+    Type 'unknown[]' is not assignable to type 'T[]'.

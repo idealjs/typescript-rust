@@ -1,0 +1,1 @@
+/a/b/main.ts(2,16): error TS2339: Property 'constants' does not exist on type 'typeof import("node:ph")'.

@@ -1,0 +1,2 @@
+index.ts(2,23): error TS2694: Namespace 'reexport.ts' has no exported member 'ConstFooEnum'.
+index.ts(4,14): error TS2339: Property 'ConstFooEnum' does not exist on type 'typeof import("reexport")'.

@@ -1,0 +1,4 @@
+exportAssignmentWithExportModifier.ts(2,8): error TS1005: '{' expected.
+exportAssignmentWithExportModifier.ts(2,15): error TS1003: Identifier expected.
+exportAssignmentWithExportModifier.ts(2,18): error TS1003: Identifier expected.
+exportAssignmentWithExportModifier.ts(2,19): error TS1005: '}' expected.

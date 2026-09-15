@@ -1,0 +1,27 @@
+main.ts(55,1): error TS2420: Class 'T13' incorrectly implements interface 'T2'.
+main.ts(96,6): error TS2454: Variable 't1' is used before being assigned.
+main.ts(96,15): error TS2454: Variable 't2' is used before being assigned.
+main.ts(96,24): error TS2454: Variable 't3' is used before being assigned.
+main.ts(96,42): error TS2454: Variable 't2' is used before being assigned.
+main.ts(96,51): error TS2454: Variable 't3' is used before being assigned.
+main.ts(96,78): error TS2454: Variable 't3' is used before being assigned.
+main.ts(97,6): error TS2454: Variable 't5' is used before being assigned.
+main.ts(97,15): error TS2454: Variable 't6' is used before being assigned.
+main.ts(97,24): error TS2454: Variable 't7' is used before being assigned.
+main.ts(97,42): error TS2454: Variable 't6' is used before being assigned.
+main.ts(97,51): error TS2454: Variable 't7' is used before being assigned.
+main.ts(97,78): error TS2454: Variable 't7' is used before being assigned.
+main.ts(98,1): error TS2739: Type 'T12' is missing the following properties from type 'T0': [c0], [c1], [s0]
+main.ts(98,6): error TS2454: Variable 't12' is used before being assigned.
+main.ts(98,11): error TS2739: Type 'T13' is missing the following properties from type 'T0': [c0], [c1], [s0]
+main.ts(98,16): error TS2454: Variable 't13' is used before being assigned.
+main.ts(98,21): error TS2739: Type 'T14' is missing the following properties from type 'T0': [c0], [c1], [s0]
+main.ts(98,26): error TS2454: Variable 't14' is used before being assigned.
+main.ts(98,31): error TS2739: Type '{ a: number; 1: string; [s2]: boolean; }' is missing the following properties from type 'T0': [c0], [c1], [s0]
+main.ts(98,36): error TS2454: Variable 't15' is used before being assigned.
+main.ts(98,41): error TS2739: Type 'T0' is missing the following properties from type 'T12': a, 1, [s2]
+main.ts(98,51): error TS2739: Type 'T0' is missing the following properties from type 'T13': a, 1, [s2]
+main.ts(98,61): error TS2739: Type 'T0' is missing the following properties from type 'T14': a, 1, [s2]
+main.ts(98,71): error TS2739: Type 'T0' is missing the following properties from type '{ a: number; 1: string; [s2]: boolean; }': a, 1, [s2]
+main.ts(99,1): error TS2739: Type 'typeof C' is missing the following properties from type 'T0': [c0], [c1], [s0]
+main.ts(113,14): error TS2353: Object literal may only specify known properties, and '[c4]' does not exist in type 'T0'.

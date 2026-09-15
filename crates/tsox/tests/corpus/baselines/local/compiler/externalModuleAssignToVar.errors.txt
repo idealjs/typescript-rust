@@ -1,0 +1,4 @@
+externalModuleAssignToVar_core.ts(2,22): error TS2307: Cannot find module 'externalModuleAssignToVar_core_require' or its corresponding type declarations.
+externalModuleAssignToVar_core.ts(6,23): error TS2307: Cannot find module 'externalModuleAssignToVar_core_require2' or its corresponding type declarations.
+externalModuleAssignToVar_core.ts(10,23): error TS2307: Cannot find module 'externalModuleAssignToVar_ext' or its corresponding type declarations.
+externalModuleAssignToVar_core_require.ts(1,18): error TS2564: Property 'bar' has no initializer and is not definitely assigned in the constructor.

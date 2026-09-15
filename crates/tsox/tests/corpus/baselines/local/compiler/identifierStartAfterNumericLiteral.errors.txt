@@ -1,0 +1,22 @@
+identifierStartAfterNumericLiteral.ts(3,2): error TS1005: ';' expected.
+identifierStartAfterNumericLiteral.ts(3,2): error TS2304: Cannot find name 'a'.
+identifierStartAfterNumericLiteral.ts(4,4): error TS1005: ';' expected.
+identifierStartAfterNumericLiteral.ts(4,4): error TS2304: Cannot find name 'a'.
+identifierStartAfterNumericLiteral.ts(11,2): error TS1005: ';' expected.
+identifierStartAfterNumericLiteral.ts(11,2): error TS2304: Cannot find name 'a'.
+identifierStartAfterNumericLiteral.ts(12,4): error TS1005: ';' expected.
+identifierStartAfterNumericLiteral.ts(12,4): error TS2304: Cannot find name 'a'.
+identifierStartAfterNumericLiteral.ts(13,4): error TS1005: ';' expected.
+identifierStartAfterNumericLiteral.ts(13,4): error TS2304: Cannot find name 'abc'.
+identifierStartAfterNumericLiteral.ts(18,3): error TS1005: ';' expected.
+identifierStartAfterNumericLiteral.ts(18,3): error TS2304: Cannot find name 'e'.
+identifierStartAfterNumericLiteral.ts(19,5): error TS1005: ';' expected.
+identifierStartAfterNumericLiteral.ts(19,5): error TS2304: Cannot find name 'e'.
+identifierStartAfterNumericLiteral.ts(22,3): error TS1005: ';' expected.
+identifierStartAfterNumericLiteral.ts(23,5): error TS1005: ';' expected.
+identifierStartAfterNumericLiteral.ts(24,3): error TS1005: ';' expected.
+identifierStartAfterNumericLiteral.ts(24,3): error TS2304: Cannot find name 'a'.
+identifierStartAfterNumericLiteral.ts(25,5): error TS1005: ';' expected.
+identifierStartAfterNumericLiteral.ts(25,5): error TS2304: Cannot find name 'a'.
+identifierStartAfterNumericLiteral.ts(26,5): error TS1005: ';' expected.
+identifierStartAfterNumericLiteral.ts(26,5): error TS2304: Cannot find name 'abc'.

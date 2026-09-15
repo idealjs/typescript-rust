@@ -1,0 +1,6 @@
+types.forAwait.es2018.2.ts(8,16): error TS2454: Variable 'y' is used before being assigned.
+types.forAwait.es2018.2.ts(10,16): error TS2454: Variable 'z' is used before being assigned.
+types.forAwait.es2018.2.ts(12,16): error TS2454: Variable 'z' is used before being assigned.
+types.forAwait.es2018.2.ts(14,21): error TS2495: Type 'AsyncIterable<number>' is not an array type or a string type.
+types.forAwait.es2018.2.ts(16,10): error TS2454: Variable 'y' is used before being assigned.
+types.forAwait.es2018.2.ts(16,15): error TS2495: Type 'AsyncIterable<number>' is not an array type or a string type.

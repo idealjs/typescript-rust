@@ -1,0 +1,7 @@
+instantiateContextualTypes.ts(25,55): error TS7006: Parameter 'val' implicitly has an 'any' type.
+instantiateContextualTypes.ts(116,38): error TS7006: Parameter 'foo' implicitly has an 'any' type.
+instantiateContextualTypes.ts(147,28): error TS2339: Property 'then' does not exist on type 'Promise<void>'.
+instantiateContextualTypes.ts(155,28): error TS2339: Property 'then' does not exist on type 'Promise<void>'.
+instantiateContextualTypes.ts(160,28): error TS2339: Property 'then' does not exist on type 'Promise<void>'.
+instantiateContextualTypes.ts(173,5): error TS2322: Type 'number' is not assignable to type '0 | 1 | 2'.
+instantiateContextualTypes.ts(183,26): error TS7019: Rest parameter 'args' implicitly has an 'any[]' type.

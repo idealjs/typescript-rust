@@ -1,0 +1,2 @@
+classExpression3.ts(3,3): error TS2339: Property 'a' does not exist on type 'þclass'.
+classExpression3.ts(4,3): error TS2339: Property 'b' does not exist on type 'þclass'.

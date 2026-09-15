@@ -1,0 +1,2 @@
+parserInterfaceDeclaration6.ts(1,8): error TS1005: '{' expected.
+parserInterfaceDeclaration6.ts(1,27): error TS1003: Identifier expected.

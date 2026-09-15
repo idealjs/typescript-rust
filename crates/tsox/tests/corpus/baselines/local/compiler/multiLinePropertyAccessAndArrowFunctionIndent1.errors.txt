@@ -1,0 +1,6 @@
+multiLinePropertyAccessAndArrowFunctionIndent1.ts(1,1): error TS1108: A 'return' statement can only be used within a function body.
+multiLinePropertyAccessAndArrowFunctionIndent1.ts(1,13): error TS2339: Property 'edit' does not exist on type 'typeof globalThis'.
+multiLinePropertyAccessAndArrowFunctionIndent1.ts(1,18): error TS2304: Cannot find name 'role'.
+multiLinePropertyAccessAndArrowFunctionIndent1.ts(2,18): error TS2304: Cannot find name 'Role'.
+multiLinePropertyAccessAndArrowFunctionIndent1.ts(3,14): error TS2339: Property 'roleService' does not exist on type 'typeof globalThis'.
+multiLinePropertyAccessAndArrowFunctionIndent1.ts(4,26): error TS2503: Cannot find namespace 'ng'.

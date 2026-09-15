@@ -1,0 +1,1 @@
+classImplementsClass2.ts(2,1): error TS2420: Class 'C' incorrectly implements interface 'A'.

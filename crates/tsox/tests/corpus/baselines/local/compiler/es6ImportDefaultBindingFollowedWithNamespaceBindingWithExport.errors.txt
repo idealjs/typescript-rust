@@ -1,0 +1,9 @@
+client.ts(1,29): error TS1005: '=' expected.
+client.ts(1,31): error TS1128: Declaration or statement expected.
+client.ts(1,33): error TS1434: Unexpected keyword or identifier.
+client.ts(1,33): error TS2304: Cannot find name 'as'.
+client.ts(1,36): error TS1434: Unexpected keyword or identifier.
+client.ts(1,36): error TS2304: Cannot find name 'nameSpaceBinding'.
+client.ts(1,54): error TS1434: Unexpected keyword or identifier.
+client.ts(1,54): error TS2304: Cannot find name 'from'.
+client.ts(2,24): error TS2304: Cannot find name 'nameSpaceBinding'.

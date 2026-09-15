@@ -1,0 +1,5 @@
+quickIntersectionCheckCorrectlyCachesErrors.tsx(9,15): error TS2345: Argument of type 'F<CP>' is not assignable to parameter of type 'F<unknown>'.
+  Types of parameters 'props' and 'props' are incompatible.
+    Type 'unknown & { children?: boolean; }' is not assignable to type 'CP & { children?: boolean; }'.
+      Property 'o' is missing in type 'unknown & { children?: boolean; }' but required in type '{ o: object; }'.
+quickIntersectionCheckCorrectlyCachesErrors.tsx(10,21): error TS2874: This JSX tag requires 'React' to be in scope, but it could not be found.

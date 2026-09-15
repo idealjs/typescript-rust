@@ -1,0 +1,25 @@
+declarationEmitPrivateNameInTypeQuery.ts(16,15): error TS2304: Cannot find name ''.
+declarationEmitPrivateNameInTypeQuery.ts(16,20): error TS18016: Private identifiers are not allowed outside class bodies.
+declarationEmitPrivateNameInTypeQuery.ts(19,15): error TS1155: 'const' declarations must be initialized.
+declarationEmitPrivateNameInTypeQuery.ts(19,25): error TS2304: Cannot find name ''.
+declarationEmitPrivateNameInTypeQuery.ts(19,27): error TS1155: 'const' declarations must be initialized.
+declarationEmitPrivateNameInTypeQuery.ts(19,27): error TS18016: Private identifiers are not allowed outside class bodies.
+declarationEmitPrivateNameInTypeQuery.ts(19,30): error TS1134: Variable declaration expected.
+declarationEmitPrivateNameInTypeQuery.ts(19,32): error TS1134: Variable declaration expected.
+declarationEmitPrivateNameInTypeQuery.ts(20,15): error TS1155: 'const' declarations must be initialized.
+declarationEmitPrivateNameInTypeQuery.ts(20,28): error TS1155: 'const' declarations must be initialized.
+declarationEmitPrivateNameInTypeQuery.ts(20,28): error TS18016: Private identifiers are not allowed outside class bodies.
+declarationEmitPrivateNameInTypeQuery.ts(20,31): error TS1134: Variable declaration expected.
+declarationEmitPrivateNameInTypeQuery.ts(20,33): error TS1134: Variable declaration expected.
+declarationEmitPrivateNameInTypeQuery.ts(31,26): error TS2304: Cannot find name ''.
+declarationEmitPrivateNameInTypeQuery.ts(31,29): error TS18016: Private identifiers are not allowed outside class bodies.
+declarationEmitPrivateNameInTypeQuery.ts(31,29): error TS2804: Duplicate identifier '#b'. Static and instance elements cannot share the same private name.
+declarationEmitPrivateNameInTypeQuery.ts(35,13): error TS2391: Function implementation is missing or not immediately following the declaration.
+declarationEmitPrivateNameInTypeQuery.ts(35,34): error TS2304: Cannot find name ''.
+declarationEmitPrivateNameInTypeQuery.ts(35,36): error TS18016: Private identifiers are not allowed outside class bodies.
+declarationEmitPrivateNameInTypeQuery.ts(35,39): error TS1005: ';' expected.
+declarationEmitPrivateNameInTypeQuery.ts(39,9): error TS1068: Unexpected token. A constructor, method, accessor, or property was expected.
+declarationEmitPrivateNameInTypeQuery.ts(39,9): error TS1108: A 'return' statement can only be used within a function body.
+declarationEmitPrivateNameInTypeQuery.ts(39,20): error TS2304: Cannot find name 'C'.
+declarationEmitPrivateNameInTypeQuery.ts(40,5): error TS1128: Declaration or statement expected.
+declarationEmitPrivateNameInTypeQuery.ts(41,1): error TS1128: Declaration or statement expected.

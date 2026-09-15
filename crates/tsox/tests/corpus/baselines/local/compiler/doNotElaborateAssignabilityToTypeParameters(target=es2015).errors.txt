@@ -1,0 +1,2 @@
+doNotElaborateAssignabilityToTypeParameters.ts(3,3): error TS2322: Type 'T | Yadda' is not assignable to type 'T'.
+  'T' could be instantiated with an arbitrary type which could be unrelated to 'T | Yadda'.

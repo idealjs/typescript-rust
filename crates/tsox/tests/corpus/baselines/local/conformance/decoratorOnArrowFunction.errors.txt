@@ -1,0 +1,2 @@
+decoratorOnArrowFunction.ts(3,9): error TS1109: Expression expected.
+decoratorOnArrowFunction.ts(3,17): error TS1146: Declaration expected.

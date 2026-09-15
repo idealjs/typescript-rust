@@ -1,0 +1,3 @@
+declarationEmitUnknownImport2.ts(1,12): error TS1005: '=' expected.
+declarationEmitUnknownImport2.ts(1,12): error TS2503: Cannot find namespace 'From'.
+declarationEmitUnknownImport2.ts(1,17): error TS1005: ';' expected.

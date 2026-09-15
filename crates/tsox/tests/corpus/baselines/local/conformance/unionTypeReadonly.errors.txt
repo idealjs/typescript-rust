@@ -1,0 +1,2 @@
+unionTypeReadonly.ts(17,6): error TS2540: Cannot assign to 'value' because it is a read-only property.
+unionTypeReadonly.ts(25,15): error TS2339: Property 'value' does not exist on type 'Base | DifferentName'.

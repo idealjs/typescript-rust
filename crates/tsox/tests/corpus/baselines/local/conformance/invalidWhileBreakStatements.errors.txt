@@ -1,0 +1,9 @@
+invalidWhileBreakStatements.ts(4,1): error TS1105: A 'break' statement can only be used within an enclosing iteration or switch statement.
+invalidWhileBreakStatements.ts(7,1): suggestion TS7028: Unused label.
+invalidWhileBreakStatements.ts(7,1): suggestion TS7027: Unreachable code detected.
+invalidWhileBreakStatements.ts(8,14): error TS1116: A 'break' statement can only jump to a label of an enclosing statement.
+invalidWhileBreakStatements.ts(27,5): error TS1116: A 'break' statement can only jump to a label of an enclosing statement.
+invalidWhileBreakStatements.ts(28,5): suggestion TS7028: Unused label.
+invalidWhileBreakStatements.ts(28,5): suggestion TS7027: Unreachable code detected.
+invalidWhileBreakStatements.ts(33,1): suggestion TS7028: Unused label.
+invalidWhileBreakStatements.ts(37,5): error TS1116: A 'break' statement can only jump to a label of an enclosing statement.

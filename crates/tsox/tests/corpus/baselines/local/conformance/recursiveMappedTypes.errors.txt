@@ -1,0 +1,1 @@
+recursiveMappedTypes.ts(21,3): error TS2322: Type '[]' is not assignable to type '[number, number, number, number]'.

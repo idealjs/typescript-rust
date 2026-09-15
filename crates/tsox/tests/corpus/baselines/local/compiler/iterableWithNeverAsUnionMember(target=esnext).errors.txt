@@ -1,0 +1,1 @@
+iterableWithNeverAsUnionMember.ts(8,20): error TS2495: Type 'number[] | { t: "a"; } & { t: "b"; }' is not an array type or a string type.

@@ -1,0 +1,2 @@
+deeplyNestedAssignabilityIssue.ts(22,17): error TS2741: Property 'a' is missing in type '{}' but required in type 'A'.
+deeplyNestedAssignabilityIssue.ts(25,17): error TS2741: Property 'a' is missing in type '{}' but required in type 'A'.

@@ -1,0 +1,2 @@
+interfaceExtendingClassWithPrivates2.ts(26,12): error TS2341: Property 'x' is private and only accessible within class 'Foo'.
+interfaceExtendingClassWithPrivates2.ts(27,12): error TS2341: Property 'y' is private and only accessible within class 'Baz'.

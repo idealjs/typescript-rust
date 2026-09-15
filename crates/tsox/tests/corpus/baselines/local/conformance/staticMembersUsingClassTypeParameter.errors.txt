@@ -1,0 +1,3 @@
+staticMembersUsingClassTypeParameter.ts(3,15): error TS2302: Static members cannot reference class type parameters.
+staticMembersUsingClassTypeParameter.ts(8,15): error TS2302: Static members cannot reference class type parameters.
+staticMembersUsingClassTypeParameter.ts(13,15): error TS2302: Static members cannot reference class type parameters.

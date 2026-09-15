@@ -1,0 +1,4 @@
+index.ts(5,4): error TS2339: Property 'readFile' does not exist on type 'typeof import("fs")'.
+subfolder/index.ts(2,9): error TS2343: This syntax requires an imported helper named '__importDefault' which does not exist in 'tslib'. Consider upgrading your version of 'tslib'.
+subfolder/index.ts(4,1): error TS2343: This syntax requires an imported helper named '__importStar' which does not exist in 'tslib'. Consider upgrading your version of 'tslib'.
+subfolder/index.ts(5,4): error TS2339: Property 'readFile' does not exist on type 'typeof import("fs")'.

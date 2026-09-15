@@ -1,0 +1,9 @@
+excessPropertyCheckWithMultipleDiscriminants.ts(54,7): error TS2322: Type '{ p1: "right"; p2: boolean; p3: number; p4: string; }' is not assignable to type '{ p1: "left"; p2: true; p3: number; } | { p1: "right"; p2: false; p4: string; } | { p1: "left"; p2: boolean; }'.
+  Types of property 'p1' are incompatible.
+    Type '"right"' is not assignable to type '"left"'.
+excessPropertyCheckWithMultipleDiscriminants.ts(129,7): error TS2322: Type '{ type: string; autoIncrement: boolean; required: boolean; }' is not assignable to type 'string | { type?: string; required?: boolean; defaultsTo?: string; } & { type: "string"; } | { type?: string; required?: boolean; defaultsTo?: number; } & { type: "number"; autoIncrement?: boolean; } | { type?: string; required?: boolean; defaultsTo?: any; } & { model: string; }'.
+  Types of property 'type' are incompatible.
+    Type 'string' is not assignable to type '"string"'.
+excessPropertyCheckWithMultipleDiscriminants.ts(135,7): error TS2322: Type '{ type: string; autoIncrement: boolean; required: boolean; }' is not assignable to type 'string | { type?: string; required?: boolean; defaultsTo?: string; } & { type: "string"; } | { type?: string; required?: boolean; defaultsTo?: number; } & { type: "number"; autoIncrement?: boolean; }'.
+  Types of property 'type' are incompatible.
+    Type 'string' is not assignable to type '"string"'.

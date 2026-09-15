@@ -1,0 +1,9 @@
+BaseClass.ts(4,5): error TS2564: Property 'baseProperty' has no initializer and is not definitely assigned in the constructor.
+FinalClass.ts(5,5): error TS2564: Property 'extendedClassProperty' has no initializer and is not definitely assigned in the constructor.
+Main.ts(4,45): error TS2554: Expected 0 arguments, but got 1.
+Main.ts(6,35): error TS2345: Argument of type 'typeof MyExtendedClass' is not assignable to parameter of type '() => unknown'.
+  Type 'MyExtendedClass' is not assignable to type 'MyBaseClass<any>'.
+    Property 'baseProperty' is missing in type 'MyExtendedClass' but required in type 'MyBaseClass<any>'.
+MixinClass.ts(8,5): error TS2322: Type 'typeof þclass' is not assignable to type 'T & () => unknown'.
+  Type 'þclass' is not assignable to type 'MyBaseClass<any>'.
+    Property 'baseProperty' is missing in type 'þclass' but required in type 'MyBaseClass<any>'.

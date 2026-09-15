@@ -1,0 +1,4 @@
+varianceAnnotationsWithCircularlyReferencesError.ts(1,12): error TS2300: Duplicate identifier ''.
+varianceAnnotationsWithCircularlyReferencesError.ts(1,12): error TS1003: Identifier expected.
+varianceAnnotationsWithCircularlyReferencesError.ts(1,18): error TS2314: Generic type 'T1<, >' requires 2 type argument(s).
+varianceAnnotationsWithCircularlyReferencesError.ts(2,20): error TS2314: Generic type 'T2<out>' requires 1 type argument(s).

@@ -1,0 +1,1 @@
+a.tsx(5,12): error TS2639: React components cannot include JSX namespace names

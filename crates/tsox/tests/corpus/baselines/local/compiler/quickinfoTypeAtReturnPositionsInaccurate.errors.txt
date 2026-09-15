@@ -1,0 +1,4 @@
+quickinfoTypeAtReturnPositionsInaccurate.ts(101,11): error TS2322: Type 'T | Program' is not assignable to type 'Program'.
+  Type 'T' is not assignable to type 'Program'.
+    Property 'state' is missing in type 'BuilderProgram' but required in type 'Program'.
+quickinfoTypeAtReturnPositionsInaccurate.ts(101,60): error TS2339: Property 'getProgram' does not exist on type 'T | Program'.

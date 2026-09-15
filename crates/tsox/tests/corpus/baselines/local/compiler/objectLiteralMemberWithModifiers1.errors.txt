@@ -1,0 +1,2 @@
+objectLiteralMemberWithModifiers1.ts(1,11): error TS2304: Cannot find name 'public'.
+objectLiteralMemberWithModifiers1.ts(1,18): error TS1005: ',' expected.

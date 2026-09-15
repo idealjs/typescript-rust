@@ -1,0 +1,5 @@
+contextualTyping.ts(36,5): error TS2322: Type '(n: number) => number' is not assignable to type '{ (n: number): number; (s1: string): number; }'.
+  Types of parameters 'n' and 's1' are incompatible.
+    Type 'string' is not assignable to type 'number'.
+contextualTyping.ts(189,18): error TS2384: Overload signatures must all be ambient or non-ambient.
+contextualTyping.ts(223,5): error TS2741: Property 'x' is missing in type '{}' but required in type 'B'.

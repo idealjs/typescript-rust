@@ -1,0 +1,2 @@
+nestedExcessPropertyChecking.ts(17,5): error TS2322: Type 'string' is not assignable to type '{ nope?: any; }'.
+nestedExcessPropertyChecking.ts(18,5): error TS2322: Type 'string' is not assignable to type '{ nope?: any; }'.

@@ -1,0 +1,1 @@
+exportAssignmentWithDeclareAndExportModifiers.ts(2,16): error TS1146: Declaration expected.

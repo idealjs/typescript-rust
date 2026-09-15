@@ -1,0 +1,9 @@
+narrowByClauseExpressionInSwitchTrue7.ts(28,25): error TS2339: Property 'd' does not exist on type 'never'.
+narrowByClauseExpressionInSwitchTrue7.ts(53,25): error TS2339: Property 'd' does not exist on type 'never'.
+narrowByClauseExpressionInSwitchTrue7.ts(54,25): error TS2339: Property 'other' does not exist on type 'never'.
+narrowByClauseExpressionInSwitchTrue7.ts(65,25): error TS2339: Property 'd' does not exist on type 'never'.
+narrowByClauseExpressionInSwitchTrue7.ts(66,25): error TS2339: Property 'other' does not exist on type 'never'.
+narrowByClauseExpressionInSwitchTrue7.ts(75,25): error TS2339: Property 'd' does not exist on type 'never'.
+narrowByClauseExpressionInSwitchTrue7.ts(76,25): error TS2339: Property 'other' does not exist on type 'never'.
+narrowByClauseExpressionInSwitchTrue7.ts(78,25): error TS2339: Property 'd' does not exist on type 'never'.
+narrowByClauseExpressionInSwitchTrue7.ts(79,25): error TS2339: Property 'other' does not exist on type 'never'.

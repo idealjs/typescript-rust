@@ -1,0 +1,3 @@
+/src/app.ts(5,8): error TS2749: 'MyClass2' refers to a value, but is being used as a type here. Did you mean 'typeof MyClass2'?
+/src/library-a/index.ts(1,32): error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
+/src/library-b/index.ts(1,23): error TS2307: Cannot find module 'library-a' or its corresponding type declarations.

@@ -1,0 +1,4 @@
+derivedClassWithPrivateStaticShadowingPublicStatic.ts(24,18): error TS2341: Property 'x' is private and only accessible within class 'Derived'.
+derivedClassWithPrivateStaticShadowingPublicStatic.ts(27,18): error TS2341: Property 'fn' is private and only accessible within class 'Derived'.
+derivedClassWithPrivateStaticShadowingPublicStatic.ts(32,18): error TS2341: Property 'a' is private and only accessible within class 'Derived'.
+derivedClassWithPrivateStaticShadowingPublicStatic.ts(33,9): error TS2341: Property 'a' is private and only accessible within class 'Derived'.

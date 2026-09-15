@@ -1,0 +1,10 @@
+privateIndexer2.ts(4,5): error TS2304: Cannot find name 'private'.
+privateIndexer2.ts(4,13): error TS1005: ',' expected.
+privateIndexer2.ts(4,15): error TS1005: ']' expected.
+privateIndexer2.ts(4,17): error TS2693: 'string' only refers to a type, but is being used as a value here.
+privateIndexer2.ts(4,23): error TS1005: ',' expected.
+privateIndexer2.ts(4,24): error TS1117: An object literal cannot have multiple properties with the same name.
+privateIndexer2.ts(4,24): error TS1005: 'identifier' expected.
+privateIndexer2.ts(4,26): error TS2693: 'string' only refers to a type, but is being used as a value here.
+privateIndexer2.ts(4,32): error TS1117: An object literal cannot have multiple properties with the same name.
+privateIndexer2.ts(4,32): error TS1005: ',' expected.

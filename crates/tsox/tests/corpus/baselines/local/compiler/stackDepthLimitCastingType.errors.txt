@@ -1,0 +1,2 @@
+index.ts(5,27): error TS2339: Property 'Model' does not exist on type 'typeof import("backbone")'.
+index.ts(5,47): error TS2694: Namespace 'node_modules/backbone/index.d.ts' has no exported member 'ModelWithCache'.

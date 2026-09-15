@@ -1,0 +1,5 @@
+contextualParamTypeVsNestedReturnTypeInference2.ts(81,13): error TS2345: Argument of type '() => { fn: (a: any) => Effect<unknown, any, any>; }' is not assignable to parameter of type '() => Generator<Effect<any, any, any>, unknown, never>'.
+  Type '{ fn: (a: any) => Effect<unknown, any, any>; }' is not assignable to type 'Generator<Effect<any, any, any>, unknown, never>'.
+    Type '{ fn: (a: any) => Effect<unknown, any, any>; }' is missing the following properties from type 'Generator<Effect<any, any, any>, unknown, never>': next, return, throw, __@iterator, and 13 more.
+contextualParamTypeVsNestedReturnTypeInference2.ts(83,20): error TS2345: Argument of type '(a: any) => void' is not assignable to parameter of type '(a: any) => Generator<Effect<any, any, any>, unknown, never>'.
+  Type 'void' is not assignable to type 'Generator<Effect<any, any, any>, unknown, never>'.

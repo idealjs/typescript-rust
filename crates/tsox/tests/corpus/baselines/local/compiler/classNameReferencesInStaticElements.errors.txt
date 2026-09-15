@@ -1,0 +1,5 @@
+classNameReferencesInStaticElements.ts(4,12): error TS2300: Duplicate identifier 'x'.
+classNameReferencesInStaticElements.ts(4,12): error TS2300: Duplicate identifier 'x'.
+classNameReferencesInStaticElements.ts(8,5): error TS2300: Duplicate identifier 'x'.
+classNameReferencesInStaticElements.ts(8,5): error TS2300: Duplicate identifier 'x'.
+classNameReferencesInStaticElements.ts(12,1): error TS2364: The left-hand side of an assignment expression must be a variable or a property access.

@@ -1,0 +1,2 @@
+/a.ts(4,1): error TS2304: Cannot find name 'mangledNodeModules'.
+/a.ts(5,1): error TS2552: Cannot find name 'atTypesCache'. Did you mean 'typesCache'?

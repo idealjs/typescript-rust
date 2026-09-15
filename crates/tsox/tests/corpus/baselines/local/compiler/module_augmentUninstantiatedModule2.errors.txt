@@ -1,0 +1,1 @@
+app.ts(4,20): error TS2339: Property 'getNumber' does not exist on type 'IAngularStatic'.

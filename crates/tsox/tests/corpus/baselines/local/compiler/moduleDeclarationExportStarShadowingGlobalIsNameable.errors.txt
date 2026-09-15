@@ -1,0 +1,2 @@
+index.ts(10,37): error TS2694: Namespace 'model/index.ts' has no exported member 'Account'.
+index.ts(10,58): error TS2694: Namespace 'model/index.ts' has no exported member 'Acc'.

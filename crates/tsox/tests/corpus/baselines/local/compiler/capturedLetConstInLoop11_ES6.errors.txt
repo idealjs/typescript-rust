@@ -1,0 +1,1 @@
+capturedLetConstInLoop11_ES6.ts(6,1): suggestion TS7027: Unreachable code detected.

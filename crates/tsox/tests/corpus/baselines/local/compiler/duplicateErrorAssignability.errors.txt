@@ -1,0 +1,1 @@
+duplicateErrorAssignability.ts(10,11): error TS2741: Property 'x' is missing in type 'B' but required in type 'A'.

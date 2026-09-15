@@ -1,0 +1,9 @@
+error TS6053: File '/.lib/react16.d.ts' not found.
+contextuallyTypedJsxAttribute2.tsx(3,19): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+contextuallyTypedJsxAttribute2.tsx(4,52): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+contextuallyTypedJsxAttribute2.tsx(12,26): error TS7006: Parameter 'e' implicitly has an 'any' type.
+contextuallyTypedJsxAttribute2.tsx(22,27): error TS7006: Parameter 'e' implicitly has an 'any' type.
+contextuallyTypedJsxAttribute2.tsx(23,39): error TS7006: Parameter 'e' implicitly has an 'any' type.
+
+
+!!! error TS6053: File '/.lib/react16.d.ts' not found.

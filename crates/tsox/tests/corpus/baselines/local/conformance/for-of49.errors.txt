@@ -1,0 +1,5 @@
+for-of49.ts(2,19): error TS2345: Argument of type '(string | boolean)[][]' is not assignable to parameter of type '[unknown, unknown][] | null'.
+  Type '(string | boolean)[][]' is not assignable to type '[unknown, unknown][]'.
+for-of49.ts(3,7): error TS2454: Variable 'k' is used before being assigned.
+for-of49.ts(3,14): error TS2454: Variable 'v' is used before being assigned.
+for-of49.ts(3,21): error TS2495: Type 'Map<unknown, unknown>' is not an array type or a string type.

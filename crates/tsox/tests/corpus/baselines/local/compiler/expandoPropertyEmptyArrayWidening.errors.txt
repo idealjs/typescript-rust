@@ -1,0 +1,4 @@
+expandoPropertyEmptyArrayWidening.ts(13,4): error TS2339: Property 'a' does not exist on type '() => void'.
+expandoPropertyEmptyArrayWidening.ts(16,4): error TS2339: Property 'a' does not exist on type '() => void'.
+expandoPropertyEmptyArrayWidening.ts(18,7): error TS2741: Property 'a' is missing in type '() => void' but required in type '{ (): void; a: string[]; }'.
+expandoPropertyEmptyArrayWidening.ts(21,7): error TS2741: Property 'a' is missing in type '() => void' but required in type '{ (): void; a: string[]; }'.

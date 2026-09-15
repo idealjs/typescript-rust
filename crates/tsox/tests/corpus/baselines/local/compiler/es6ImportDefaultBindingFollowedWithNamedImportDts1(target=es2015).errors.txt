@@ -1,0 +1,6 @@
+client.ts(3,27): error TS2459: Module '"./server"' declares 'a' locally, but it is not exported.
+client.ts(5,27): error TS2459: Module '"./server"' declares 'a' locally, but it is not exported.
+client.ts(7,27): error TS2305: Module '"./server"' has no exported member 'x'.
+client.ts(7,30): error TS2459: Module '"./server"' declares 'a' locally, but it is not exported.
+client.ts(9,27): error TS2305: Module '"./server"' has no exported member 'x'.
+client.ts(11,27): error TS2305: Module '"./server"' has no exported member 'm'.

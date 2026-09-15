@@ -1,0 +1,1 @@
+useBeforeDeclaration_destructuring.ts(1,1): error TS2448: Block-scoped variable 'a' used before its declaration.

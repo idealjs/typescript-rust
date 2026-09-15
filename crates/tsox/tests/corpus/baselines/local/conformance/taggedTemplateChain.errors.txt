@@ -1,0 +1,2 @@
+taggedTemplateChain.ts(2,4): error TS1005: 'identifier' expected.
+taggedTemplateChain.ts(4,4): error TS1005: 'identifier' expected.

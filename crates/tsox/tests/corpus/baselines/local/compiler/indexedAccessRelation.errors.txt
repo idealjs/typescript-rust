@@ -1,0 +1,1 @@
+indexedAccessRelation.ts(16,14): error TS2339: Property 'setState' does not exist on type 'this'.

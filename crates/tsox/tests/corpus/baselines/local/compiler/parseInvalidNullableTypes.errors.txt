@@ -1,0 +1,44 @@
+parseInvalidNullableTypes.ts(1,10): error TS2391: Function implementation is missing or not immediately following the declaration.
+parseInvalidNullableTypes.ts(1,30): error TS1003: Identifier expected.
+parseInvalidNullableTypes.ts(1,31): error TS1434: Unexpected keyword or identifier.
+parseInvalidNullableTypes.ts(1,31): error TS2693: 'string' only refers to a type, but is being used as a value here.
+parseInvalidNullableTypes.ts(2,5): error TS1108: A 'return' statement can only be used within a function body.
+parseInvalidNullableTypes.ts(5,1): suggestion TS7027: Unreachable code detected.
+parseInvalidNullableTypes.ts(5,22): error TS7006: Parameter '' implicitly has an 'any' type.
+parseInvalidNullableTypes.ts(5,22): error TS1005: ',' expected.
+parseInvalidNullableTypes.ts(6,22): error TS7006: Parameter '' implicitly has an 'any' type.
+parseInvalidNullableTypes.ts(6,22): error TS1005: ',' expected.
+parseInvalidNullableTypes.ts(8,16): error TS2749: '' refers to a value, but is being used as a type here. Did you mean 'typeof '?
+parseInvalidNullableTypes.ts(8,16): error TS7006: Parameter '' implicitly has an 'any' type.
+parseInvalidNullableTypes.ts(8,16): error TS1003: Identifier expected.
+parseInvalidNullableTypes.ts(8,17): error TS1005: ',' expected.
+parseInvalidNullableTypes.ts(8,17): error TS7006: Parameter 'string' implicitly has an 'any' type.
+parseInvalidNullableTypes.ts(9,16): error TS2749: '' refers to a value, but is being used as a type here. Did you mean 'typeof '?
+parseInvalidNullableTypes.ts(9,16): error TS7006: Parameter '' implicitly has an 'any' type.
+parseInvalidNullableTypes.ts(9,16): error TS1003: Identifier expected.
+parseInvalidNullableTypes.ts(9,17): error TS1005: ',' expected.
+parseInvalidNullableTypes.ts(9,17): error TS7006: Parameter 'number' implicitly has an 'any' type.
+parseInvalidNullableTypes.ts(11,10): error TS2391: Function implementation is missing or not immediately following the declaration.
+parseInvalidNullableTypes.ts(11,25): error TS2304: Cannot find name ''.
+parseInvalidNullableTypes.ts(11,25): error TS1003: Identifier expected.
+parseInvalidNullableTypes.ts(11,26): error TS1434: Unexpected keyword or identifier.
+parseInvalidNullableTypes.ts(11,26): error TS2693: 'string' only refers to a type, but is being used as a value here.
+parseInvalidNullableTypes.ts(12,5): error TS1108: A 'return' statement can only be used within a function body.
+parseInvalidNullableTypes.ts(12,5): suggestion TS7027: Unreachable code detected.
+parseInvalidNullableTypes.ts(15,1): suggestion TS7027: Unreachable code detected.
+parseInvalidNullableTypes.ts(15,20): error TS1109: Expression expected.
+parseInvalidNullableTypes.ts(16,7): error TS1155: 'const' declarations must be initialized.
+parseInvalidNullableTypes.ts(16,16): error TS1005: ',' expected.
+parseInvalidNullableTypes.ts(16,18): error TS1134: Variable declaration expected.
+parseInvalidNullableTypes.ts(16,20): error TS1134: Variable declaration expected.
+parseInvalidNullableTypes.ts(18,16): error TS2304: Cannot find name ''.
+parseInvalidNullableTypes.ts(18,16): error TS1003: Identifier expected.
+parseInvalidNullableTypes.ts(18,17): error TS2693: 'any' only refers to a type, but is being used as a value here.
+parseInvalidNullableTypes.ts(18,20): error TS1005: ':' expected.
+parseInvalidNullableTypes.ts(19,7): error TS1155: 'const' declarations must be initialized.
+parseInvalidNullableTypes.ts(19,10): error TS2304: Cannot find name ''.
+parseInvalidNullableTypes.ts(19,10): error TS1003: Identifier expected.
+parseInvalidNullableTypes.ts(21,15): error TS1005: ',' expected.
+parseInvalidNullableTypes.ts(22,13): error TS1005: ',' expected.
+parseInvalidNullableTypes.ts(23,12): error TS1005: ',' expected.
+parseInvalidNullableTypes.ts(24,17): error TS1005: ',' expected.

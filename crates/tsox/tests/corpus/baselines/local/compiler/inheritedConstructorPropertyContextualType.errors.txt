@@ -1,0 +1,2 @@
+inheritedConstructorPropertyContextualType.ts(10,9): error TS2322: Type '{ version: 2; }' is not assignable to type 'S'.
+  'S' could be instantiated with an arbitrary type which could be unrelated to '{ version: 2; }'.

@@ -1,0 +1,2 @@
+/index.ts(4,20): error TS2351: This expression is not constructable.
+  Type 'any & { enhanced: unknown; }' has no construct signatures.

@@ -1,0 +1,2 @@
+narrowByParenthesizedSwitchExpression.ts(23,7): error TS2339: Property 'bar' does not exist on type 'Foo | Bar'.
+narrowByParenthesizedSwitchExpression.ts(27,7): error TS2339: Property 'foo' does not exist on type 'Foo | Bar'.

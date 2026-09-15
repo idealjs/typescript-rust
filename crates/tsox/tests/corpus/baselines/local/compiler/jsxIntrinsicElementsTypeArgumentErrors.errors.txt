@@ -1,0 +1,15 @@
+error TS6053: File '/.lib/react16.d.ts' not found.
+jsxIntrinsicElementsTypeArgumentErrors.tsx(2,24): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+jsxIntrinsicElementsTypeArgumentErrors.tsx(7,11): error TS2558: Expected 0 type arguments, but got 1.
+jsxIntrinsicElementsTypeArgumentErrors.tsx(9,11): error TS2558: Expected 0 type arguments, but got 1.
+jsxIntrinsicElementsTypeArgumentErrors.tsx(11,11): error TS2558: Expected 0 type arguments, but got 1.
+jsxIntrinsicElementsTypeArgumentErrors.tsx(13,11): error TS2558: Expected 0 type arguments, but got 1.
+jsxIntrinsicElementsTypeArgumentErrors.tsx(15,11): error TS2558: Expected 0 type arguments, but got 1.
+jsxIntrinsicElementsTypeArgumentErrors.tsx(20,11): error TS2558: Expected 0 type arguments, but got 1.
+jsxIntrinsicElementsTypeArgumentErrors.tsx(22,11): error TS2558: Expected 0 type arguments, but got 1.
+jsxIntrinsicElementsTypeArgumentErrors.tsx(24,11): error TS2558: Expected 0 type arguments, but got 1.
+jsxIntrinsicElementsTypeArgumentErrors.tsx(26,11): error TS2558: Expected 0 type arguments, but got 1.
+jsxIntrinsicElementsTypeArgumentErrors.tsx(28,11): error TS2558: Expected 0 type arguments, but got 1.
+
+
+!!! error TS6053: File '/.lib/react16.d.ts' not found.

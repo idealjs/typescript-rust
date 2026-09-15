@@ -1,0 +1,2 @@
+typeInterfaceDeclarationsInBlockStatements1.ts(12,21): error TS2304: Cannot find name 's'.
+typeInterfaceDeclarationsInBlockStatements1.ts(29,21): error TS2304: Cannot find name 's'.

@@ -1,0 +1,1 @@
+file3.ts(3,10): error TS2694: Namespace 'file1.ts' has no exported member 'A'.

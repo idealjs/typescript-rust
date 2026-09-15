@@ -1,0 +1,8 @@
+error TS6053: File '/.lib/react.d.ts' not found.
+0.tsx(4,24): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+0.tsx(7,21): error TS2454: Variable 'buttonProps' is used before being assigned.
+0.tsx(8,30): error TS2349: This expression is not callable.
+  Type 'typeof import("classnames")' has no call signatures.
+
+
+!!! error TS6053: File '/.lib/react.d.ts' not found.

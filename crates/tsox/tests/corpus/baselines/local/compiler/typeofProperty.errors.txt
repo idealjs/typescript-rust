@@ -1,0 +1,8 @@
+typeofProperty.ts(16,5): error TS2564: Property 'a' has no initializer and is not definitely assigned in the constructor.
+typeofProperty.ts(17,15): error TS2304: Cannot find name 'a'.
+typeofProperty.ts(22,15): error TS2304: Cannot find name 'd'.
+typeofProperty.ts(23,5): error TS2564: Property 'd' has no initializer and is not definitely assigned in the constructor.
+typeofProperty.ts(27,15): error TS2304: Cannot find name 'e'.
+typeofProperty.ts(37,5): error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
+typeofProperty.ts(43,16): error TS2304: Cannot find name ''.
+typeofProperty.ts(44,16): error TS2304: Cannot find name ''.

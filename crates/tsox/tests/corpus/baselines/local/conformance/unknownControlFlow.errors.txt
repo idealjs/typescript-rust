@@ -1,0 +1,11 @@
+unknownControlFlow.ts(18,9): error TS2322: Type 'unknown' is not assignable to type '{}'.
+unknownControlFlow.ts(19,9): error TS2322: Type 'unknown' is not assignable to type '{} | null | undefined'.
+unknownControlFlow.ts(20,9): error TS2322: Type 'unknown' is not assignable to type '{} | { x: string; } | null | undefined'.
+unknownControlFlow.ts(21,9): error TS2322: Type 'unknown' is not assignable to type '{} | {} | null | undefined'.
+unknownControlFlow.ts(290,11): error TS2345: Argument of type 'string' is not assignable to parameter of type 'never'.
+unknownControlFlow.ts(291,5): error TS2345: Argument of type 'null' is not assignable to parameter of type 'null & {}'.
+unknownControlFlow.ts(292,11): error TS2345: Argument of type 'string' is not assignable to parameter of type 'never'.
+unknownControlFlow.ts(293,5): error TS2345: Argument of type 'null' is not assignable to parameter of type 'null & {}'.
+unknownControlFlow.ts(305,9): error TS2367: This comparison appears to be unintentional because the types 'T & {} | null' and '42' have no overlap.
+unknownControlFlow.ts(427,9): error TS2322: Type 'T_AB & undefined' is not assignable to type 'never'.
+unknownControlFlow.ts(448,21): error TS2345: Argument of type '"right" & { right: "right"; }' is not assignable to parameter of type 'never'.

@@ -1,0 +1,7 @@
+stringEnumLiteralTypes2.ts(61,24): error TS2345: Argument of type 'any' is not assignable to parameter of type 'never'.
+stringEnumLiteralTypes2.ts(88,35): error TS2339: Property 'a' does not exist on type 'never'.
+stringEnumLiteralTypes2.ts(89,34): error TS2339: Property 'b' does not exist on type 'never'.
+stringEnumLiteralTypes2.ts(95,35): error TS2339: Property 'a' does not exist on type 'never'.
+stringEnumLiteralTypes2.ts(96,34): error TS2339: Property 'b' does not exist on type 'never'.
+stringEnumLiteralTypes2.ts(98,24): error TS2345: Argument of type '{ kind: any; a: string; } | { kind: any; b: string; }' is not assignable to parameter of type 'never'.
+  Type '{ kind: any; a: string; }' is not assignable to type 'never'.

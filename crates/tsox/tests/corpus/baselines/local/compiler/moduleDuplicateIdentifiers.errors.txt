@@ -1,0 +1,2 @@
+moduleDuplicateIdentifiers.ts(20,14): error TS2300: Duplicate identifier 'Kettle'.
+moduleDuplicateIdentifiers.ts(24,14): error TS2300: Duplicate identifier 'Kettle'.

@@ -1,0 +1,8 @@
+modifiersInObjectLiterals.ts(2,2): error TS2304: Cannot find name 'public'.
+modifiersInObjectLiterals.ts(2,9): error TS1005: ',' expected.
+modifiersInObjectLiterals.ts(3,2): error TS2304: Cannot find name 'private'.
+modifiersInObjectLiterals.ts(3,10): error TS1005: ',' expected.
+modifiersInObjectLiterals.ts(4,2): error TS2304: Cannot find name 'protected'.
+modifiersInObjectLiterals.ts(4,12): error TS1005: ',' expected.
+modifiersInObjectLiterals.ts(5,2): error TS2304: Cannot find name 'abstract'.
+modifiersInObjectLiterals.ts(5,11): error TS1005: ',' expected.

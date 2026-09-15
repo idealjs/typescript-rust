@@ -1,0 +1,28 @@
+contextualTypeIterableUnions.ts(4,10): error TS2345: Argument of type '(string | number)[][]' is not assignable to parameter of type 'Iterable<[unknown, unknown]> | undefined'.
+  The types returned by '__@iterator()' are incompatible between these types.
+    Type 'ArrayIterator<(string | number)[]>' is not assignable to type 'Iterator<[unknown, unknown], TReturn, TNext>'.
+      The types returned by 'next(...)' are incompatible between these types.
+        Type 'IteratorYieldResult<(string | number)[]> | IteratorReturnResult<any>' is not assignable to type 'IteratorYieldResult<[unknown, unknown]> | IteratorReturnResult<TReturn>'.
+          Type 'IteratorYieldResult<(string | number)[]>' is not assignable to type 'IteratorYieldResult<[unknown, unknown]> | IteratorReturnResult<TReturn>'.
+            Types of property 'done' are incompatible.
+              Type 'false | undefined' is not assignable to type 'true'.
+                Type 'undefined' is not assignable to type 'true'.
+contextualTypeIterableUnions.ts(6,7): error TS2322: Type '{ a: boolean; }[]' is not assignable to type 'Iterable<{ a: true; }> | undefined'.
+  The types returned by '__@iterator()' are incompatible between these types.
+    Type 'ArrayIterator<{ a: boolean; }>' is not assignable to type 'Iterator<{ a: true; }, TReturn, TNext>'.
+      The types returned by 'next(...)' are incompatible between these types.
+        Type 'IteratorYieldResult<{ a: boolean; }> | IteratorReturnResult<any>' is not assignable to type 'IteratorYieldResult<{ a: true; }> | IteratorReturnResult<TReturn>'.
+          Type 'IteratorYieldResult<{ a: boolean; }>' is not assignable to type 'IteratorYieldResult<{ a: true; }> | IteratorReturnResult<TReturn>'.
+            Types of property 'done' are incompatible.
+              Type 'false | undefined' is not assignable to type 'true'.
+                Type 'undefined' is not assignable to type 'true'.
+contextualTypeIterableUnions.ts(7,7): error TS2322: Type '{ b: boolean; }[]' is not assignable to type 'Iterable<{ a: true; }> | Iterable<{ b: false; }>'.
+  The types returned by '__@iterator()' are incompatible between these types.
+    Type 'ArrayIterator<{ b: boolean; }>' is not assignable to type 'Iterator<{ a: true; }, TReturn, TNext>'.
+      The types returned by 'next(...)' are incompatible between these types.
+        Type 'IteratorYieldResult<{ b: boolean; }> | IteratorReturnResult<any>' is not assignable to type 'IteratorYieldResult<{ a: true; }> | IteratorReturnResult<TReturn>'.
+          Type 'IteratorYieldResult<{ b: boolean; }>' is not assignable to type 'IteratorYieldResult<{ a: true; }> | IteratorReturnResult<TReturn>'.
+            Types of property 'value' are incompatible.
+              Type '{ b: boolean; }' is not assignable to type '{ a: true; }'.
+                Property 'a' is missing in type '{ b: boolean; }' but required in type '{ a: true; }'.
+                  Property 'a' is missing in type '{ b: boolean; }' but required in type '{ a: true; }'.

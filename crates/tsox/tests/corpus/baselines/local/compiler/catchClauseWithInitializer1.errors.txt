@@ -1,0 +1,2 @@
+catchClauseWithInitializer1.ts(3,10): error TS1005: ')' expected.
+catchClauseWithInitializer1.ts(3,13): error TS1005: ';' expected.

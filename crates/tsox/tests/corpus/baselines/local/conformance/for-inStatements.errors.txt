@@ -1,0 +1,13 @@
+for-inStatements.ts(2,19): error TS1005: ';' expected.
+for-inStatements.ts(5,1): suggestion TS7027: Unreachable code detected.
+for-inStatements.ts(5,17): error TS1005: ';' expected.
+for-inStatements.ts(12,15): error TS2349: This expression is not callable.
+  Type 'never' has no call signatures.
+for-inStatements.ts(15,19): error TS2351: This expression is not constructable.
+  Type 'never' has no construct signatures.
+for-inStatements.ts(19,1): suggestion TS7027: Unreachable code detected.
+for-inStatements.ts(21,15): error TS2872: This kind of expression is always truthy.
+for-inStatements.ts(22,15): error TS2873: This kind of expression is always falsy.
+for-inStatements.ts(23,15): error TS2872: This kind of expression is always truthy.
+for-inStatements.ts(64,1): suggestion TS7027: Unreachable code detected.
+for-inStatements.ts(79,21): error TS2339: Property 'Blue' does not exist on type 'never'.

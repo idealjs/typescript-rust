@@ -1,0 +1,2 @@
+for-of9.ts(2,6): error TS2454: Variable 'v' is used before being assigned.
+for-of9.ts(3,6): error TS2454: Variable 'v' is used before being assigned.

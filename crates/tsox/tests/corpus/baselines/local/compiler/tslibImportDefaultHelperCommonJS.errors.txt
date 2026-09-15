@@ -1,0 +1,1 @@
+/combined.ts(4,44): error TS2339: Property 'default' does not exist on type 'typeof import("./dependency")'.

@@ -1,0 +1,2 @@
+optionalBindingParameters1.ts(5,5): error TS2345: Argument of type '(string | number | boolean)[]' is not assignable to parameter of type '[string, number, boolean]'.
+optionalBindingParameters1.ts(7,5): error TS2345: Argument of type '(string | number | boolean)[]' is not assignable to parameter of type '[string, number, boolean]'.

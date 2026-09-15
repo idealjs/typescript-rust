@@ -1,0 +1,6 @@
+signatureCombiningRestParameters5.ts(5,11): error TS2345: Argument of type 'boolean' is not assignable to parameter of type 'string | number'.
+signatureCombiningRestParameters5.ts(6,11): error TS2769: No overload matches this call.
+  Overload 1 of 2, '(a: string | number, b: number | boolean): void', gave the following error.
+    Argument of type 'boolean[]' is not assignable to parameter of type 'string | number'.
+  Overload 2 of 2, '(c: number | boolean, d: string | boolean): void', gave the following error.
+    Argument of type 'boolean[]' is not assignable to parameter of type 'number | boolean'.

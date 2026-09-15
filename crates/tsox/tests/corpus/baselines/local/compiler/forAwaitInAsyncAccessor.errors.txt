@@ -1,0 +1,2 @@
+a.ts(2,5): error TS1042: 'async' modifier cannot be used here.
+a.ts(2,15): error TS2378: A 'get' accessor must return a value.

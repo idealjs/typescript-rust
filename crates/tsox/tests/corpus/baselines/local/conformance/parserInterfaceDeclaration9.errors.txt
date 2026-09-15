@@ -1,0 +1,2 @@
+parserInterfaceDeclaration9.ts(2,22): error TS1005: ';' expected.
+parserInterfaceDeclaration9.ts(3,27): error TS1005: ';' expected.

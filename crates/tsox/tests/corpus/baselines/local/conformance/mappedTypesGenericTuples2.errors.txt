@@ -1,0 +1,2 @@
+mappedTypesGenericTuples2.ts(5,47): error TS2339: Property 'then' does not exist on type 'Promise<{ [P in keyof T]: any; }>'.
+mappedTypesGenericTuples2.ts(5,53): error TS7006: Parameter 'result' implicitly has an 'any' type.

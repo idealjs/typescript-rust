@@ -1,0 +1,4 @@
+Error1.tsx(4,1): error TS1005: '' expected.
+Error3.tsx(4,1): error TS1005: '' expected.
+Error4.tsx(3,1): error TS1005: '' expected.
+Error5.tsx(3,1): error TS1005: '' expected.

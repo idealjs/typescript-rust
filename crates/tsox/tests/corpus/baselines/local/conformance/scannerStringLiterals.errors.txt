@@ -1,0 +1,2 @@
+scannerStringLiterals.ts(10,1): error TS1002: Unterminated string literal.
+scannerStringLiterals.ts(11,1): error TS1002: Unterminated string literal.

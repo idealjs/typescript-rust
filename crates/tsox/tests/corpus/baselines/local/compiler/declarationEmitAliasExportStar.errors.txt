@@ -1,0 +1,1 @@
+index.ts(2,38): error TS2694: Namespace 'things.ts' has no exported member 'ThingB'.

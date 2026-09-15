@@ -1,0 +1,9 @@
+voidOperatorWithAnyOtherType.ts(46,27): error TS18050: The value 'null' cannot be used here.
+voidOperatorWithAnyOtherType.ts(46,27): error TS2365: Operator '+' cannot be applied to types 'null' and 'undefined'.
+voidOperatorWithAnyOtherType.ts(46,34): error TS18050: The value 'undefined' cannot be used here.
+voidOperatorWithAnyOtherType.ts(47,27): error TS18050: The value 'null' cannot be used here.
+voidOperatorWithAnyOtherType.ts(47,27): error TS2365: Operator '+' cannot be applied to types 'null' and 'null'.
+voidOperatorWithAnyOtherType.ts(47,34): error TS18050: The value 'null' cannot be used here.
+voidOperatorWithAnyOtherType.ts(48,27): error TS18050: The value 'undefined' cannot be used here.
+voidOperatorWithAnyOtherType.ts(48,27): error TS2365: Operator '+' cannot be applied to types 'undefined' and 'undefined'.
+voidOperatorWithAnyOtherType.ts(48,39): error TS18050: The value 'undefined' cannot be used here.

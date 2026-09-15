@@ -1,0 +1,19 @@
+thislessFunctionsNotContextSensitive1.ts(25,3): error TS2345: Argument of type 'false' is not assignable to parameter of type 'true'.
+thislessFunctionsNotContextSensitive1.ts(73,22): error TS7006: Parameter 'state123' implicitly has an 'any' type.
+thislessFunctionsNotContextSensitive1.ts(79,26): error TS7006: Parameter 'state' implicitly has an 'any' type.
+thislessFunctionsNotContextSensitive1.ts(94,12): error TS7006: Parameter 'methods' implicitly has an 'any' type.
+thislessFunctionsNotContextSensitive1.ts(103,12): error TS7006: Parameter 'methods' implicitly has an 'any' type.
+thislessFunctionsNotContextSensitive1.ts(126,11): error TS7006: Parameter 'state' implicitly has an 'any' type.
+thislessFunctionsNotContextSensitive1.ts(126,18): error TS7006: Parameter 'data' implicitly has an 'any' type.
+thislessFunctionsNotContextSensitive1.ts(143,13): error TS2345: Argument of type 'string' is not assignable to parameter of type 'never'.
+thislessFunctionsNotContextSensitive1.ts(144,13): error TS2345: Argument of type 'string[]' is not assignable to parameter of type 'never'.
+thislessFunctionsNotContextSensitive1.ts(145,13): error TS2345: Argument of type '{ foo: () => void; }[]' is not assignable to parameter of type 'never'.
+thislessFunctionsNotContextSensitive1.ts(146,13): error TS2345: Argument of type '{ foo: () => void; }[]' is not assignable to parameter of type 'never'.
+thislessFunctionsNotContextSensitive1.ts(162,11): error TS2345: Argument of type '{ target: string; data1: { $test1: number; $test2: null; }; data2: { $test3: {}; $test4: () => void; $test5: () => void; }; }' is not assignable to parameter of type '{ target?: Values<{ [K in keyof Options]: any; }>; [key: string]: any; }'.
+  Types of property 'target' are incompatible.
+    Type 'string' is not assignable to type 'Values<{ [K in keyof Options]: any; }> | undefined'.
+thislessFunctionsNotContextSensitive1.ts(175,11): error TS2345: Argument of type '{ target: string; data1: { $test1: number; $test2: null; }; data2: { $test3: {}; $test4: () => void; $test5: () => void; }; }' is not assignable to parameter of type '{ target?: Values<{ [K in keyof Options]: any; }>; [key: string]: any; }'.
+  Types of property 'target' are incompatible.
+    Type 'string' is not assignable to type 'Values<{ [K in keyof Options]: any; }> | undefined'.
+thislessFunctionsNotContextSensitive1.ts(209,5): error TS7006: Parameter 'c' implicitly has an 'any' type.
+thislessFunctionsNotContextSensitive1.ts(215,5): error TS7006: Parameter 'c' implicitly has an 'any' type.

@@ -1,0 +1,2 @@
+errorOnContextuallyTypedReturnType.ts(1,5): error TS2322: Type '() => void' is not assignable to type '() => boolean'.
+  Type 'void' is not assignable to type 'boolean'.

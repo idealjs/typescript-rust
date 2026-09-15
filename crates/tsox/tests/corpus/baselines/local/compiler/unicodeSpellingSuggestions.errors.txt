@@ -1,0 +1,6 @@
+unicodeSpellingSuggestions.ts(3,1): error TS1434: Unexpected keyword or identifier.
+unicodeSpellingSuggestions.ts(3,1): error TS2304: Cannot find name 'classAé'.
+unicodeSpellingSuggestions.ts(6,1): error TS1434: Unexpected keyword or identifier.
+unicodeSpellingSuggestions.ts(6,1): error TS2304: Cannot find name 'classAéé'.
+unicodeSpellingSuggestions.ts(9,1): error TS1434: Unexpected keyword or identifier.
+unicodeSpellingSuggestions.ts(9,1): error TS2304: Cannot find name 'classAééé'.

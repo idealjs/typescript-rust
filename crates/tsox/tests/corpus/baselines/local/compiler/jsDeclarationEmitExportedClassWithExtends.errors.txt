@@ -1,0 +1,6 @@
+error TS6053: File 'node_modules/lit-element/development/lit-element.d.ts' not found.
+node_modules/lit-element/development/index.d.ts(1,15): error TS2307: Cannot find module './lit-element.js' or its corresponding type declarations.
+node_modules/lit/development/index.d.ts(1,15): error TS2307: Cannot find module 'lit-element/lit-element.js' or its corresponding type declarations.
+
+
+!!! error TS6053: File 'node_modules/lit-element/development/lit-element.d.ts' not found.

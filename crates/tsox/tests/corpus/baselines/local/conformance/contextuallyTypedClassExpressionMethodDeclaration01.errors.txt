@@ -1,0 +1,6 @@
+contextuallyTypedClassExpressionMethodDeclaration01.ts(16,24): error TS7006: Parameter 'arg' implicitly has an 'any' type.
+contextuallyTypedClassExpressionMethodDeclaration01.ts(19,24): error TS7006: Parameter 'arg' implicitly has an 'any' type.
+contextuallyTypedClassExpressionMethodDeclaration01.ts(27,27): error TS7006: Parameter 'arg' implicitly has an 'any' type.
+contextuallyTypedClassExpressionMethodDeclaration01.ts(30,27): error TS7006: Parameter 'arg' implicitly has an 'any' type.
+contextuallyTypedClassExpressionMethodDeclaration01.ts(38,36): error TS7006: Parameter 'arg' implicitly has an 'any' type.
+contextuallyTypedClassExpressionMethodDeclaration01.ts(41,36): error TS7006: Parameter 'arg' implicitly has an 'any' type.

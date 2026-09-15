@@ -1,0 +1,4 @@
+cloduleWithDuplicateMember1.ts(2,9): error TS2300: Duplicate identifier 'x'.
+cloduleWithDuplicateMember1.ts(3,16): error TS2300: Duplicate identifier 'x'.
+cloduleWithDuplicateMember1.ts(10,16): error TS2300: Duplicate identifier 'x'.
+cloduleWithDuplicateMember1.ts(14,21): error TS2300: Duplicate identifier 'x'.

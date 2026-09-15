@@ -1,0 +1,2 @@
+declarationEmitExpressionInExtends.ts(6,5): error TS2564: Property 's' has no initializer and is not definitely assigned in the constructor.
+declarationEmitExpressionInExtends.ts(13,1): error TS2454: Variable 'q' is used before being assigned.

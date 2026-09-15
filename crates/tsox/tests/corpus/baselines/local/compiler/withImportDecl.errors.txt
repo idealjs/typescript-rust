@@ -1,0 +1,1 @@
+withImportDecl_1.ts(35,21): error TS2307: Cannot find module 'withImportDecl_0' or its corresponding type declarations.

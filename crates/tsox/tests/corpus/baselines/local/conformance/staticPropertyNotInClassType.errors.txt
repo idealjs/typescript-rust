@@ -1,0 +1,4 @@
+staticPropertyNotInClassType.ts(16,16): error TS2339: Property 'foo' does not exist on type 'NonGeneric.C'.
+staticPropertyNotInClassType.ts(17,16): error TS2339: Property 'bar' does not exist on type 'NonGeneric.C'.
+staticPropertyNotInClassType.ts(18,16): error TS2339: Property 'x' does not exist on type 'NonGeneric.C'.
+staticPropertyNotInClassType.ts(27,21): error TS2302: Static members cannot reference class type parameters.

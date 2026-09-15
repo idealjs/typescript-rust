@@ -1,0 +1,7 @@
+mappedTypeConstraints2.ts(10,29): error TS2538: Type '`get${K}`' cannot be used as an index type.
+mappedTypeConstraints2.ts(73,45): error TS2769: No overload matches this call.
+  Overload 1 of 2, '<T>(o: { [s: string]: T; } | ArrayLike<T>): [string, T][]', gave the following error.
+    Argument of type 'T' is not assignable to parameter of type '{ [s: string]: unknown; } | ArrayLike<unknown>'.
+  Overload 2 of 2, '(o: {}): [string, any][]', gave the following error.
+    Argument of type 'T' is not assignable to parameter of type '{}'.
+mappedTypeConstraints2.ts(74,37): error TS2538: Type 'keyof T' cannot be used as an index type.

@@ -1,0 +1,10 @@
+constAssertions.ts(57,11): error TS2304: Cannot find name 'const'.
+constAssertions.ts(61,10): error TS1355: A 'const' assertion can only be applied to references to enum members, or string, number, boolean, array, or object literals.
+constAssertions.ts(62,10): error TS1355: A 'const' assertion can only be applied to references to enum members, or string, number, boolean, array, or object literals.
+constAssertions.ts(63,10): error TS1355: A 'const' assertion can only be applied to references to enum members, or string, number, boolean, array, or object literals.
+constAssertions.ts(91,11): error TS2322: Type 'string' is not assignable to type '"verify" | "write"'.
+constAssertions.ts(92,11): error TS2322: Type 'string' is not assignable to type '"match" | "nonMatch"'.
+constAssertions.ts(93,11): error TS2322: Type 'string' is not assignable to type '`${"verify" | "write"}_${"match" | "nonMatch"}`'.
+constAssertions.ts(116,7): error TS2322: Type '{ a: number; b: number; }' is not assignable to type 'Foo54374'.
+  Types of property 'b' are incompatible.
+    Type '3' is not assignable to type '2'.

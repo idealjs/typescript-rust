@@ -1,0 +1,8 @@
+incompatibleGenericTypes.ts(9,5): error TS2322: Type 'I1<boolean>' is not assignable to type 'I1<number>'.
+  Types of property 'm1' are incompatible.
+    Type '<U>(callback: (p: boolean) => U) => I1<U>' is not assignable to type '<U>(callback: (p: number) => U) => I1<U>'.
+      Types of parameters 'callback' and 'callback' are incompatible.
+        Type '(p: number) => U' is not assignable to type '(p: boolean) => U'.
+          Types of parameters 'p' and 'p' are incompatible.
+            Type 'boolean' is not assignable to type 'number'.
+incompatibleGenericTypes.ts(9,22): error TS2454: Variable 'v1' is used before being assigned.

@@ -1,0 +1,1 @@
+typePredicatesOptionalChaining3.ts(20,12): error TS18048: 'animal.breed' is possibly 'undefined'.

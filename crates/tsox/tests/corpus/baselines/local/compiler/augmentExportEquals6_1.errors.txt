@@ -1,0 +1,2 @@
+file3.ts(2,8): error TS2307: Cannot find module 'file2' or its corresponding type declarations.
+file3.ts(4,11): error TS2339: Property 'a' does not exist on type 'foo.A'.

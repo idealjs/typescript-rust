@@ -1,0 +1,1 @@
+/a.ts(3,26): error TS2304: Cannot find name 'T'.

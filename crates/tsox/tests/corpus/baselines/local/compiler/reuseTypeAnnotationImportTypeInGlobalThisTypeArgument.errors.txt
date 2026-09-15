@@ -1,0 +1,2 @@
+/contractHelper.d.ts(3,41): error TS2694: Namespace 'globalThis' has no exported member 'ERef'.
+/exported.d.ts(2,10): error TS2305: Module '"./types.js"' has no exported member 'ParamStateRecord'.

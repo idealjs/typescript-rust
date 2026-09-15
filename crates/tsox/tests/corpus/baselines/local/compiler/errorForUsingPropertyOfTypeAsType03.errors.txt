@@ -1,0 +1,5 @@
+errorForUsingPropertyOfTypeAsType03.ts(11,23): error TS2694: Namespace 'Red' has no exported member 'toString'.
+errorForUsingPropertyOfTypeAsType03.ts(19,13): error TS2702: 'C1' only refers to a type, but is being used as a namespace here.
+errorForUsingPropertyOfTypeAsType03.ts(20,13): error TS2702: 'C1' only refers to a type, but is being used as a namespace here.
+errorForUsingPropertyOfTypeAsType03.ts(23,13): error TS2702: 'C2' only refers to a type, but is being used as a namespace here.
+errorForUsingPropertyOfTypeAsType03.ts(24,13): error TS2702: 'C2' only refers to a type, but is being used as a namespace here.

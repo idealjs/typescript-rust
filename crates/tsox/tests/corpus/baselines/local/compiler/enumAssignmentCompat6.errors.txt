@@ -1,0 +1,16 @@
+a.ts(36,5): error TS2322: Type '"Warning" | "Error" | "Suggestion" | "Message"' is not assignable to type '0 | 1 | 2 | 3'.
+  Type '"Warning"' is not assignable to type '0 | 1 | 2 | 3'.
+a.ts(37,5): error TS2322: Type '0 | 1 | 2 | 3' is not assignable to type '"Warning" | "Error" | "Suggestion" | "Message"'.
+  Type '0' is not assignable to type '"Warning" | "Error" | "Suggestion" | "Message"'.
+a.ts(41,5): error TS2322: Type '"Warning" | "Error" | "Suggestion" | "Message"' is not assignable to type '0 | 1 | 2 | 3'.
+  Type '"Warning"' is not assignable to type '0 | 1 | 2 | 3'.
+a.ts(42,5): error TS2322: Type '0 | 1 | 2 | 3' is not assignable to type '"Warning" | "Error" | "Suggestion" | "Message"'.
+  Type '0' is not assignable to type '"Warning" | "Error" | "Suggestion" | "Message"'.
+a.ts(51,5): error TS2322: Type '0 | 1 | 2 | 3' is not assignable to type '"Warning" | "Error" | "Suggestion" | "Message"'.
+  Type '0' is not assignable to type '"Warning" | "Error" | "Suggestion" | "Message"'.
+a.ts(52,5): error TS2322: Type '"Warning" | "Error" | "Suggestion" | "Message"' is not assignable to type '0 | 1 | 2 | 3'.
+  Type '"Warning"' is not assignable to type '0 | 1 | 2 | 3'.
+f.ts(18,9): error TS2322: Type '"Warning" | "Error" | "Suggestion" | "Message"' is not assignable to type '0 | 1 | 2 | 3'.
+  Type '"Warning"' is not assignable to type '0 | 1 | 2 | 3'.
+f.ts(19,9): error TS2322: Type '0 | 1 | 2 | 3' is not assignable to type '"Warning" | "Error" | "Suggestion" | "Message"'.
+  Type '0' is not assignable to type '"Warning" | "Error" | "Suggestion" | "Message"'.

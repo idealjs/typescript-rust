@@ -54,15 +54,14 @@
 - 多进程编排（需要启动外部服务，无浏览器）→ CI 中的集成 job
 - 浏览器 UI 端到端 → 独立的 Playwright 工程
 
-### 测试运行内存兜底
+### 测试运行规范
 
-语料测试（fourslash 全量、解析器错误恢复路径等）可能因死循环或内存泄漏耗尽宿主内存，波及同机的其他进程。任何测试命令必须在内存受限环境中执行：
+- Rust 全量/批量测试：`(ulimit -v 8388608; cargo test --release --no-fail-fast)`，内存限制必须保留（RLIMIT_AS 8GB，防止 OOM 波及宿主其他进程）；release 相对 debug 有 5 倍执行提速（fourslash 4471 用例单二进制约 60s，构建成本远小于收益）
+- Rust 单条用例调试迭代：debug 构建可接受（编译快，单条秒级），同样保留内存限制
+- Go oracle：`GOMEMLIMIT=4GiB go test -count=1 ./...`（Go 运行时对 RLIMIT_AS 敏感，用软限）
+- 全量语料的内存护栏脚本 `tools/fourslash_shard.py`（分片 + 单线程 + RSS 采样 + 断点续跑），批量回归异常排查时启用
 
-- Rust：`(ulimit -v 8388608; cargo test ...)`，RLIMIT_AS 8GB 由子进程继承
-- Go oracle：`GOMEMLIMIT=4GiB go test ...`（Go 运行时对 RLIMIT_AS 敏感，用软限）
-- 全量语料：`tools/fourslash_shard.py`（分片 + RLIMIT_AS + RSS 采样 + 断点续跑）
-
-超限的表现是进程被提前杀死或输出不完整；此时按内存根因排查（受控探针测斜率、变体二分），不得放开上限硬跑。
+超限的表现是进程被提前杀死或输出不完整；此时按内存/死循环根因排查（受控探针测斜率、变体二分）。
 
 ## 文档规范
 

@@ -1,0 +1,13 @@
+classExtendingPrimitive.ts(3,17): error TS2304: Cannot find name 'number'.
+classExtendingPrimitive.ts(4,18): error TS2304: Cannot find name 'string'.
+classExtendingPrimitive.ts(5,18): error TS2304: Cannot find name 'boolean'.
+classExtendingPrimitive.ts(6,18): error TS2304: Cannot find name 'Void'.
+classExtendingPrimitive.ts(7,19): error TS1109: Expression expected.
+classExtendingPrimitive.ts(8,18): error TS2304: Cannot find name 'Null'.
+classExtendingPrimitive.ts(11,18): error TS2304: Cannot find name 'Undefined'.
+classExtendingPrimitive.ts(16,26): error TS2304: Cannot find name 'number'.
+classExtendingPrimitive.ts(17,27): error TS2304: Cannot find name 'string'.
+classExtendingPrimitive.ts(18,27): error TS2304: Cannot find name 'boolean'.
+classExtendingPrimitive.ts(20,29): error TS2304: Cannot find name 'number'.
+classExtendingPrimitive.ts(21,29): error TS2304: Cannot find name 'string'.
+classExtendingPrimitive.ts(22,29): error TS2304: Cannot find name 'boolean'.

@@ -1,0 +1,6 @@
+destructuringControlFlowNoCrash.ts(11,6): error TS2304: Cannot find name 'inspectedElement'.
+destructuringControlFlowNoCrash.ts(11,22): error TS1005: ')' expected.
+destructuringControlFlowNoCrash.ts(11,24): error TS1155: 'const' declarations must be initialized.
+destructuringControlFlowNoCrash.ts(11,27): error TS1005: ',' expected.
+destructuringControlFlowNoCrash.ts(11,28): error TS1134: Variable declaration expected.
+destructuringControlFlowNoCrash.ts(11,29): error TS1155: 'const' declarations must be initialized.

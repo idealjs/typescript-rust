@@ -1,0 +1,8 @@
+typePredicateStructuralMatch.ts(17,29): error TS2345: Argument of type '{ value: string; }[] | { data: { value: string; }[]; }' is not assignable to parameter of type '{ data: { value: string; }[]; } | { data: { data: { value: string; }[]; }; }'.
+  Type '{ value: string; }[]' is not assignable to type '{ data: { value: string; }[]; } | { data: { data: { value: string; }[]; }; }'.
+    Property 'data' is missing in type 'Array<{ value: string; }>' but required in type '{ data: { value: string; }[]; }'.
+typePredicateStructuralMatch.ts(17,44): error TS2339: Property 'data' does not exist on type '{ value: string; }[] | { data: { value: string; }[]; }'.
+typePredicateStructuralMatch.ts(25,28): error TS2345: Argument of type '{ value: string; }[] | { data: { value: string; }[]; }' is not assignable to parameter of type '{ data: { value: string; }[]; } | { data: { data: { value: string; }[]; }; }'.
+  Type '{ value: string; }[]' is not assignable to type '{ data: { value: string; }[]; } | { data: { data: { value: string; }[]; }; }'.
+    Property 'data' is missing in type 'Array<{ value: string; }>' but required in type '{ data: { value: string; }[]; }'.
+typePredicateStructuralMatch.ts(25,51): error TS2339: Property 'data' does not exist on type '{ value: string; }[] | { data: { value: string; }[]; }'.

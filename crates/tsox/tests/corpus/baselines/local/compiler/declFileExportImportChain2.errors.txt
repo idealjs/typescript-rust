@@ -1,0 +1,1 @@
+declFileExportImportChain2_d.ts(1,20): error TS2307: Cannot find module 'declFileExportImportChain2_c' or its corresponding type declarations.

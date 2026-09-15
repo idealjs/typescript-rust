@@ -1,0 +1,3 @@
+file.tsx(9,7): error TS1005: '>' expected.
+file.tsx(9,7): error TS2304: Cannot find name 'div'.
+file.tsx(11,17): error TS1005: '' expected.

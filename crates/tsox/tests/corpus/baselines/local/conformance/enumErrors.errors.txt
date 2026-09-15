@@ -1,0 +1,11 @@
+enumErrors.ts(2,6): error TS2431: Enum name cannot be 'any'.
+enumErrors.ts(3,6): error TS2431: Enum name cannot be 'number'.
+enumErrors.ts(4,6): error TS2431: Enum name cannot be 'string'.
+enumErrors.ts(5,6): error TS2431: Enum name cannot be 'boolean'.
+enumErrors.ts(48,18): error TS1005: ',' expected.
+enumErrors.ts(49,24): error TS1005: ',' expected.
+enumErrors.ts(50,28): error TS1005: ',' expected.
+enumErrors.ts(50,31): error TS1005: ',' expected.
+enumErrors.ts(53,16): error TS1005: ',' expected.
+enumErrors.ts(53,22): error TS1005: ',' expected.
+enumErrors.ts(53,30): error TS1005: ',' expected.

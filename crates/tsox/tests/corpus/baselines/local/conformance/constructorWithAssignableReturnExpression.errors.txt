@@ -1,0 +1,5 @@
+constructorWithAssignableReturnExpression.ts(10,5): error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
+constructorWithAssignableReturnExpression.ts(17,5): error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
+constructorWithAssignableReturnExpression.ts(24,5): error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
+constructorWithAssignableReturnExpression.ts(31,5): error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
+constructorWithAssignableReturnExpression.ts(33,21): error TS2352: Conversion of type 'null' to type 'T' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.

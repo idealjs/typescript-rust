@@ -1,0 +1,17 @@
+controlFlowFunctionLikeCircular_1.ts(1,1): error TS2448: Block-scoped variable 'unionOfDifferentReturnType1' used before its declaration.
+controlFlowFunctionLikeCircular_1.ts(1,1): error TS2454: Variable 'unionOfDifferentReturnType1' is used before being assigned.
+controlFlowFunctionLikeCircular_1.ts(2,7): error TS1155: 'const' declarations must be initialized.
+controlFlowFunctionLikeCircular_10.ts(3,5): error TS2454: Variable 'o' is used before being assigned.
+controlFlowFunctionLikeCircular_2.ts(1,1): error TS2454: Variable 'unionOfDifferentReturnType1' is used before being assigned.
+controlFlowFunctionLikeCircular_3.ts(2,3): error TS2448: Block-scoped variable 'fn' used before its declaration.
+controlFlowFunctionLikeCircular_3.ts(3,58): error TS2749: 'arg' refers to a value, but is being used as a type here. Did you mean 'typeof arg'?
+controlFlowFunctionLikeCircular_4.ts(2,3): error TS2454: Variable 'fn' is used before being assigned.
+controlFlowFunctionLikeCircular_4.ts(3,47): error TS2749: 'arg' refers to a value, but is being used as a type here. Did you mean 'typeof arg'?
+controlFlowFunctionLikeCircular_5.ts(3,5): error TS2448: Block-scoped variable 'fn' used before its declaration.
+controlFlowFunctionLikeCircular_5.ts(3,5): error TS2454: Variable 'fn' is used before being assigned.
+controlFlowFunctionLikeCircular_6.ts(3,5): error TS2454: Variable 'fn' is used before being assigned.
+controlFlowFunctionLikeCircular_7.ts(3,5): error TS2454: Variable 'fn' is used before being assigned.
+controlFlowFunctionLikeCircular_8.ts(3,5): error TS2448: Block-scoped variable 'b' used before its declaration.
+controlFlowFunctionLikeCircular_8.ts(3,5): error TS2454: Variable 'b' is used before being assigned.
+controlFlowFunctionLikeCircular_8.ts(3,5): error TS2554: Expected 1 arguments, but got 0.
+controlFlowFunctionLikeCircular_9.ts(3,5): error TS2454: Variable 'o' is used before being assigned.

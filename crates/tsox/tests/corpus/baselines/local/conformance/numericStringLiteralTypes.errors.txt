@@ -1,0 +1,4 @@
+numericStringLiteralTypes.ts(8,15): error TS2538: Type '`${number}`' cannot be used as an index type.
+numericStringLiteralTypes.ts(12,15): error TS2538: Type '`${number}`' cannot be used as an index type.
+numericStringLiteralTypes.ts(15,12): error TS2536: Type '`${number}`' cannot be used to index type 'boolean[]'.
+numericStringLiteralTypes.ts(16,12): error TS2536: Type 'number | `${number}`' cannot be used to index type 'boolean[]'.

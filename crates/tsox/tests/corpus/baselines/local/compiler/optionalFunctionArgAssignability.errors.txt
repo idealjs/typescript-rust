@@ -1,0 +1,9 @@
+optionalFunctionArgAssignability.ts(5,105): error TS2322: Type 'null' is not assignable to type 'Promise<U>'.
+optionalFunctionArgAssignability.ts(6,105): error TS2322: Type 'null' is not assignable to type 'Promise<U>'.
+optionalFunctionArgAssignability.ts(7,1): error TS2322: Type '<U>(onFulFill: ((value: number) => U) | undefined, onReject: ((reason: any) => U) | undefined) => Promise<U>' is not assignable to type '<U>(onFulfill: ((value: string) => U) | undefined, onReject: ((reason: any) => U) | undefined) => Promise<U>'.
+  Types of parameters 'onFulFill' and 'onFulfill' are incompatible.
+    Type '((value: string) => U) | undefined' is not assignable to type '((value: number) => U) | undefined'.
+      Type '(value: string) => U' is not assignable to type '((value: number) => U) | undefined'.
+        Type '(value: string) => U' is not assignable to type '(value: number) => U'.
+          Types of parameters 'value' and 'value' are incompatible.
+            Type 'number' is not assignable to type 'string'.

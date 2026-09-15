@@ -1,0 +1,21 @@
+mixinAccessModifiers.ts(5,10): error TS2564: Property 'p' has no initializer and is not definitely assigned in the constructor.
+mixinAccessModifiers.ts(10,10): error TS2564: Property 'p' has no initializer and is not definitely assigned in the constructor.
+mixinAccessModifiers.ts(15,12): error TS2564: Property 'p' has no initializer and is not definitely assigned in the constructor.
+mixinAccessModifiers.ts(21,12): error TS2564: Property 'p' has no initializer and is not definitely assigned in the constructor.
+mixinAccessModifiers.ts(27,9): error TS2564: Property 'p' has no initializer and is not definitely assigned in the constructor.
+mixinAccessModifiers.ts(33,9): error TS2564: Property 'p' has no initializer and is not definitely assigned in the constructor.
+mixinAccessModifiers.ts(71,6): error TS2339: Property 'p' does not exist on type 'C4'.
+mixinAccessModifiers.ts(72,6): error TS2339: Property 'p' does not exist on type 'C5'.
+mixinAccessModifiers.ts(73,6): error TS2339: Property 'p' does not exist on type 'C6'.
+mixinAccessModifiers.ts(76,6): error TS2339: Property 's' does not exist on type 'typeof C4'.
+mixinAccessModifiers.ts(77,6): error TS2339: Property 's' does not exist on type 'typeof C5'.
+mixinAccessModifiers.ts(78,6): error TS2339: Property 's' does not exist on type 'typeof C6'.
+mixinAccessModifiers.ts(84,6): error TS2339: Property 'p' does not exist on type 'C4'.
+mixinAccessModifiers.ts(86,6): error TS2339: Property 'p' does not exist on type 'C6'.
+mixinAccessModifiers.ts(89,6): error TS2339: Property 's' does not exist on type 'typeof C4'.
+mixinAccessModifiers.ts(90,6): error TS2339: Property 's' does not exist on type 'typeof C5'.
+mixinAccessModifiers.ts(91,6): error TS2339: Property 's' does not exist on type 'typeof C6'.
+mixinAccessModifiers.ts(97,6): error TS2339: Property 'p' does not exist on type 'C4'.
+mixinAccessModifiers.ts(102,6): error TS2339: Property 's' does not exist on type 'typeof C4'.
+mixinAccessModifiers.ts(103,6): error TS2339: Property 's' does not exist on type 'typeof C5'.
+mixinAccessModifiers.ts(104,6): error TS2339: Property 's' does not exist on type 'typeof C6'.

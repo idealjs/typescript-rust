@@ -1,0 +1,6 @@
+baseTypeWrappingInstantiationChain.ts(14,5): error TS2564: Property 'property' has no initializer and is not definitely assigned in the constructor.
+baseTypeWrappingInstantiationChain.ts(22,23): error TS2345: Argument of type 'this' is not assignable to parameter of type 'Parameter<T3>'.
+  Types of property 'method' are incompatible.
+    Type '(t: Wrapper<any>) => void' is not assignable to type '(t: T3) => void'.
+      Types of parameters 't' and 't' are incompatible.
+        Type 'T3' is not assignable to type 'Wrapper<any>'.

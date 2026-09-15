@@ -1,0 +1,2 @@
+negateOperatorWithAnyOtherType.ts(30,24): error TS2454: Variable 'obj' is used before being assigned.
+negateOperatorWithAnyOtherType.ts(51,1): error TS2695: Left side of comma operator is unused and has no side effects.

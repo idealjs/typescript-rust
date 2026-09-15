@@ -1,0 +1,2 @@
+privateNameConstructorSignature.ts(9,23): error TS2351: This expression is not constructable.
+  Type 'C' has no construct signatures.

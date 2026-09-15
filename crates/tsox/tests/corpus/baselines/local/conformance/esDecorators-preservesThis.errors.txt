@@ -1,0 +1,4 @@
+esDecorators-preservesThis.ts(14,15): error TS1005: ')' expected.
+esDecorators-preservesThis.ts(14,27): error TS1005: ';' expected.
+esDecorators-preservesThis.ts(29,20): error TS1005: ')' expected.
+esDecorators-preservesThis.ts(29,32): error TS1005: ';' expected.

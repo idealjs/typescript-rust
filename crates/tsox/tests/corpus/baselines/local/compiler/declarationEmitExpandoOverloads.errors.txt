@@ -1,0 +1,1 @@
+declarationEmitExpandoOverloads.ts(4,3): error TS2339: Property 'a' does not exist on type '{ (a: number): void; (a: string): void; }'.

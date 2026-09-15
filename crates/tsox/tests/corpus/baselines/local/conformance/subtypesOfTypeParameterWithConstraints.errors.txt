@@ -1,0 +1,59 @@
+subtypesOfTypeParameterWithConstraints.ts(4,5): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
+subtypesOfTypeParameterWithConstraints.ts(9,5): error TS2416: Property 'foo' in type 'D1' is not assignable to the same property in base type 'C3'.
+subtypesOfTypeParameterWithConstraints.ts(9,5): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
+subtypesOfTypeParameterWithConstraints.ts(14,5): error TS2416: Property 'foo' in type 'D2' is not assignable to the same property in base type 'C3'.
+subtypesOfTypeParameterWithConstraints.ts(14,5): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
+subtypesOfTypeParameterWithConstraints.ts(19,5): error TS2416: Property 'foo' in type 'D3' is not assignable to the same property in base type 'C3'.
+subtypesOfTypeParameterWithConstraints.ts(19,5): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
+subtypesOfTypeParameterWithConstraints.ts(24,5): error TS2416: Property 'foo' in type 'D4' is not assignable to the same property in base type 'C3'.
+subtypesOfTypeParameterWithConstraints.ts(24,5): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
+subtypesOfTypeParameterWithConstraints.ts(33,5): error TS2416: Property 'foo' in type 'D5' is not assignable to the same property in base type 'C3'.
+subtypesOfTypeParameterWithConstraints.ts(33,5): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
+subtypesOfTypeParameterWithConstraints.ts(38,5): error TS2416: Property 'foo' in type 'D6' is not assignable to the same property in base type 'C3'.
+subtypesOfTypeParameterWithConstraints.ts(38,5): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
+subtypesOfTypeParameterWithConstraints.ts(43,5): error TS2416: Property 'foo' in type 'D7' is not assignable to the same property in base type 'C3'.
+subtypesOfTypeParameterWithConstraints.ts(43,5): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
+subtypesOfTypeParameterWithConstraints.ts(50,5): error TS2416: Property 'foo' in type 'D8' is not assignable to the same property in base type 'C3'.
+subtypesOfTypeParameterWithConstraints.ts(50,5): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
+subtypesOfTypeParameterWithConstraints.ts(55,5): error TS2416: Property 'foo' in type 'D9' is not assignable to the same property in base type 'C3'.
+subtypesOfTypeParameterWithConstraints.ts(55,5): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
+subtypesOfTypeParameterWithConstraints.ts(60,5): error TS2416: Property 'foo' in type 'D10' is not assignable to the same property in base type 'C3'.
+subtypesOfTypeParameterWithConstraints.ts(60,5): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
+subtypesOfTypeParameterWithConstraints.ts(67,5): error TS2416: Property 'foo' in type 'D11' is not assignable to the same property in base type 'C3'.
+subtypesOfTypeParameterWithConstraints.ts(67,5): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
+subtypesOfTypeParameterWithConstraints.ts(72,5): error TS2416: Property 'foo' in type 'D12' is not assignable to the same property in base type 'C3'.
+subtypesOfTypeParameterWithConstraints.ts(72,5): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
+subtypesOfTypeParameterWithConstraints.ts(77,5): error TS2416: Property 'foo' in type 'D13' is not assignable to the same property in base type 'C3'.
+subtypesOfTypeParameterWithConstraints.ts(77,5): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
+subtypesOfTypeParameterWithConstraints.ts(85,5): error TS2416: Property 'foo' in type 'D14' is not assignable to the same property in base type 'C3'.
+subtypesOfTypeParameterWithConstraints.ts(85,5): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
+subtypesOfTypeParameterWithConstraints.ts(90,5): error TS2416: Property 'foo' in type 'D15' is not assignable to the same property in base type 'C3'.
+subtypesOfTypeParameterWithConstraints.ts(90,5): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
+subtypesOfTypeParameterWithConstraints.ts(95,5): error TS2416: Property 'foo' in type 'D16' is not assignable to the same property in base type 'C3'.
+subtypesOfTypeParameterWithConstraints.ts(95,5): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
+subtypesOfTypeParameterWithConstraints.ts(100,5): error TS2416: Property 'foo' in type 'D17' is not assignable to the same property in base type 'C3'.
+subtypesOfTypeParameterWithConstraints.ts(100,5): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
+subtypesOfTypeParameterWithConstraints.ts(107,5): error TS2416: Property 'foo' in type 'D18' is not assignable to the same property in base type 'C3'.
+subtypesOfTypeParameterWithConstraints.ts(107,5): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
+subtypesOfTypeParameterWithConstraints.ts(112,5): error TS2416: Property 'foo' in type 'D19' is not assignable to the same property in base type 'C3'.
+subtypesOfTypeParameterWithConstraints.ts(112,5): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
+subtypesOfTypeParameterWithConstraints.ts(117,5): error TS2416: Property 'foo' in type 'D20' is not assignable to the same property in base type 'C3'.
+subtypesOfTypeParameterWithConstraints.ts(117,5): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
+subtypesOfTypeParameterWithConstraints.ts(122,5): error TS2416: Property 'foo' in type 'D21' is not assignable to the same property in base type 'C3'.
+subtypesOfTypeParameterWithConstraints.ts(122,5): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
+subtypesOfTypeParameterWithConstraints.ts(129,5): error TS2416: Property 'foo' in type 'D22' is not assignable to the same property in base type 'C3'.
+subtypesOfTypeParameterWithConstraints.ts(129,5): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
+subtypesOfTypeParameterWithConstraints.ts(134,5): error TS2416: Property 'foo' in type 'D23' is not assignable to the same property in base type 'C3'.
+subtypesOfTypeParameterWithConstraints.ts(134,5): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
+subtypesOfTypeParameterWithConstraints.ts(139,5): error TS2416: Property 'foo' in type 'D24' is not assignable to the same property in base type 'C3'.
+subtypesOfTypeParameterWithConstraints.ts(139,5): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
+subtypesOfTypeParameterWithConstraints.ts(144,5): error TS2416: Property 'foo' in type 'D25' is not assignable to the same property in base type 'C3'.
+subtypesOfTypeParameterWithConstraints.ts(144,5): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
+subtypesOfTypeParameterWithConstraints.ts(151,5): error TS2416: Property 'foo' in type 'D26' is not assignable to the same property in base type 'C3'.
+subtypesOfTypeParameterWithConstraints.ts(151,5): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
+subtypesOfTypeParameterWithConstraints.ts(156,5): error TS2416: Property 'foo' in type 'D27' is not assignable to the same property in base type 'C3'.
+subtypesOfTypeParameterWithConstraints.ts(156,5): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
+subtypesOfTypeParameterWithConstraints.ts(161,5): error TS2416: Property 'foo' in type 'D28' is not assignable to the same property in base type 'C3'.
+subtypesOfTypeParameterWithConstraints.ts(161,5): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
+subtypesOfTypeParameterWithConstraints.ts(166,5): error TS2416: Property 'foo' in type 'D29' is not assignable to the same property in base type 'C3'.
+subtypesOfTypeParameterWithConstraints.ts(166,5): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.

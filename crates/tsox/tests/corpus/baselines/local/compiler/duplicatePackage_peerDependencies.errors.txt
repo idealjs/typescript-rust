@@ -1,0 +1,2 @@
+/src/a.ts(5,8): error TS2749: 'FooA' refers to a value, but is being used as a type here. Did you mean 'typeof FooA'?
+/src/a.ts(6,8): error TS2749: 'FooB' refers to a value, but is being used as a type here. Did you mean 'typeof FooB'?

@@ -1,0 +1,1 @@
+/index.ts(2,14): error TS2883: The inferred type of 'c' cannot be named without a reference to 'C' from './node_modules/pkg/index.d.ts'. This is likely not portable. A type annotation is necessary.

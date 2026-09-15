@@ -1,0 +1,12 @@
+reverseMappedPartiallyInferableTypes.ts(32,18): error TS2345: Argument of type '{ props: { notResolved: { type: () => MyType; validator: (x: any) => any; }; explicit: { type: () => MyType; validator: (x: MyType) => boolean; }; }; }' is not assignable to parameter of type '{ props: { notResolved: { type: () => T["notResolved"]; value?: T["notResolved"]; required?: boolean; validator?: (value: T["notResolved"]) => boolean; }; explicit: { type: () => T["notResolved"]; value?: T["notResolved"]; required?: boolean; validator?: (value: T["notResolved"]) => boolean; }; }; }'.
+  The types of 'props.notResolved.type()' are incompatible between these types.
+    Type 'MyType' is not assignable to type 'T["notResolved"]'.
+      'T["notResolved"]' could be instantiated with an arbitrary type which could be unrelated to 'MyType'.
+reverseMappedPartiallyInferableTypes.ts(69,17): error TS2345: Argument of type '{ foo: { contents: string; }; }' is not assignable to parameter of type '{ foo: { contents?: T["foo"]; contains: (content: T["foo"]) => boolean; }; }'.
+  The types of 'foo.contents' are incompatible between these types.
+    Type '""' is not assignable to type 'T["foo"] | undefined'.
+reverseMappedPartiallyInferableTypes.ts(80,18): error TS7006: Parameter 'k' implicitly has an 'any' type.
+reverseMappedPartiallyInferableTypes.ts(90,18): error TS7006: Parameter 'k' implicitly has an 'any' type.
+reverseMappedPartiallyInferableTypes.ts(105,14): error TS7006: Parameter 'arg' implicitly has an 'any' type.
+reverseMappedPartiallyInferableTypes.ts(115,14): error TS7006: Parameter 'arg' implicitly has an 'any' type.
+reverseMappedPartiallyInferableTypes.ts(125,14): error TS7006: Parameter 'arg' implicitly has an 'any' type.

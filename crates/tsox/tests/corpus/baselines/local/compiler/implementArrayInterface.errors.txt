@@ -1,0 +1,1 @@
+implementArrayInterface.ts(1,1): error TS2420: Class 'MyArray' incorrectly implements interface 'Array<T>'.

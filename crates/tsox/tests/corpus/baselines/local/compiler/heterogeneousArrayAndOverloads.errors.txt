@@ -1,0 +1,2 @@
+heterogeneousArrayAndOverloads.ts(7,20): error TS2322: Type 'string' is not assignable to type 'number'.
+heterogeneousArrayAndOverloads.ts(9,26): error TS2322: Type 'string' is not assignable to type 'number'.

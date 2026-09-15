@@ -1,0 +1,1 @@
+literalTypesAndDestructuring.ts(11,10): error TS1355: A 'const' assertion can only be applied to references to enum members, or string, number, boolean, array, or object literals.

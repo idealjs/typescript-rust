@@ -1,0 +1,1 @@
+checkingObjectWithThisInNamePositionNoCrash.ts(4,19): error TS2339: Property 'a' does not exist on type '{ doit: () => { [this.a]: string; }; }'.

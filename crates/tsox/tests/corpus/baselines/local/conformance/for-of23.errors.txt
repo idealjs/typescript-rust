@@ -1,0 +1,1 @@
+for-of23.ts(14,17): error TS2495: Type 'FooIterator' is not an array type or a string type.

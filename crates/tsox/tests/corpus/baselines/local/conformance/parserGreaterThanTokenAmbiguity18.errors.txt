@@ -1,0 +1,2 @@
+parserGreaterThanTokenAmbiguity18.ts(1,1): error TS2364: The left-hand side of an assignment expression must be a variable or a property access.
+parserGreaterThanTokenAmbiguity18.ts(1,10): error TS1109: Expression expected.

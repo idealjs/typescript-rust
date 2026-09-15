@@ -1,0 +1,2 @@
+/a.ts(1,16): error TS2304: Cannot find name 'abstract'.
+/a.ts(1,25): error TS1005: ';' expected.

@@ -1,0 +1,10 @@
+/main1.ts(1,13): error TS2305: Module '"./a"' has no exported member 'y'.
+/main1.ts(3,12): error TS2591: Cannot find name 'require'. Do you need to install type definitions for node? Try `npm i --save-dev @types/node` and then add 'node' to the types field in your tsconfig.
+/main1.ts(15,4): error TS2339: Property 'default' does not exist on type 'typeof import("c")'.
+/main1.ts(18,1): error TS2349: This expression is not callable.
+  Type 'typeof import("d")' has no call signatures.
+/main1.ts(19,4): error TS2339: Property 'default' does not exist on type 'typeof import("d")'.
+/main1.ts(21,4): error TS2339: Property 'default' does not exist on type 'typeof import("d")'.
+/main2.mts(1,13): error TS2305: Module '"./a"' has no exported member 'y'.
+/main2.mts(4,4): error TS2339: Property 'default' does not exist on type 'typeof import("a")'.
+/main2.mts(5,12): error TS2591: Cannot find name 'require'. Do you need to install type definitions for node? Try `npm i --save-dev @types/node` and then add 'node' to the types field in your tsconfig.

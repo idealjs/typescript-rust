@@ -1,0 +1,2 @@
+noUncheckedIndexedAccess.ts(38,1): error TS2322: Type 'undefined' is not assignable to type 'boolean'.
+noUncheckedIndexedAccess.ts(90,7): error TS2322: Type 'string[][]' is not assignable to type 'string'.

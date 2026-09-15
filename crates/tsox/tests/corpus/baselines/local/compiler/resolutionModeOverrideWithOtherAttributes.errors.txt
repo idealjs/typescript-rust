@@ -1,0 +1,3 @@
+/app.ts(1,34): error TS1464: Type import attributes should have exactly one key - 'resolution-mode' - with value 'import' or 'require'.
+/app.ts(1,34): error TS2857: Import attributes cannot be used with type-only imports or exports.
+/app.ts(4,7): error TS2322: Type '"require"' is not assignable to type '"import"'.

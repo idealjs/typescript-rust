@@ -1,0 +1,2 @@
+asyncAwaitIsolatedModules_es5.ts(1,27): error TS2307: Cannot find module 'missing' or its corresponding type declarations.
+asyncAwaitIsolatedModules_es5.ts(24,14): error TS2355: A function whose declared type is neither 'undefined', 'void', nor 'any' must return a value.

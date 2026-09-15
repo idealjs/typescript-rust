@@ -1,0 +1,1 @@
+src/main.ts(1,8): error TS2307: Cannot find module 'someModule' or its corresponding type declarations.

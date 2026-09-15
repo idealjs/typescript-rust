@@ -1,0 +1,2 @@
+override9.ts(8,5): error TS2300: Duplicate identifier 'override'.
+override9.ts(10,5): error TS2300: Duplicate identifier 'override'.

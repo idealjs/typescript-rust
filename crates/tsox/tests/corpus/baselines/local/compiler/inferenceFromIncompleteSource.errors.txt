@@ -1,0 +1,1 @@
+inferenceFromIncompleteSource.ts(11,11): error TS2741: Property 'prop' is missing in type '{ items: { name: string; }[]; itemKey: "name"; }' but required in type 'ListProps<{ name: string; }, keyof T>'.

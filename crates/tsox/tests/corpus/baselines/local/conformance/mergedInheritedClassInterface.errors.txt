@@ -1,0 +1,22 @@
+mergedInheritedClassInterface.ts(8,5): error TS2564: Property 'baseNumber' has no initializer and is not definitely assigned in the constructor.
+mergedInheritedClassInterface.ts(16,5): error TS2564: Property 'classNumber' has no initializer and is not definitely assigned in the constructor.
+mergedInheritedClassInterface.ts(24,5): error TS2564: Property 'classString' has no initializer and is not definitely assigned in the constructor.
+mergedInheritedClassInterface.ts(32,1): error TS2454: Variable 'child' is used before being assigned.
+mergedInheritedClassInterface.ts(33,1): error TS2454: Variable 'child' is used before being assigned.
+mergedInheritedClassInterface.ts(34,1): error TS2454: Variable 'child' is used before being assigned.
+mergedInheritedClassInterface.ts(35,1): error TS2454: Variable 'child' is used before being assigned.
+mergedInheritedClassInterface.ts(35,7): error TS2339: Property 'baseNumber' does not exist on type 'Child'.
+mergedInheritedClassInterface.ts(36,1): error TS2454: Variable 'child' is used before being assigned.
+mergedInheritedClassInterface.ts(36,7): error TS2339: Property 'classNumber' does not exist on type 'Child'.
+mergedInheritedClassInterface.ts(37,1): error TS2454: Variable 'child' is used before being assigned.
+mergedInheritedClassInterface.ts(37,7): error TS2339: Property 'baseMethod' does not exist on type 'Child'.
+mergedInheritedClassInterface.ts(38,1): error TS2454: Variable 'child' is used before being assigned.
+mergedInheritedClassInterface.ts(38,7): error TS2339: Property 'method' does not exist on type 'Child'.
+mergedInheritedClassInterface.ts(41,1): error TS2454: Variable 'grandchild' is used before being assigned.
+mergedInheritedClassInterface.ts(41,12): error TS2339: Property 'required' does not exist on type 'Grandchild'.
+mergedInheritedClassInterface.ts(42,1): error TS2454: Variable 'grandchild' is used before being assigned.
+mergedInheritedClassInterface.ts(42,12): error TS2339: Property 'optional' does not exist on type 'Grandchild'.
+mergedInheritedClassInterface.ts(43,1): error TS2454: Variable 'grandchild' is used before being assigned.
+mergedInheritedClassInterface.ts(43,12): error TS2339: Property 'additional2' does not exist on type 'Grandchild'.
+mergedInheritedClassInterface.ts(44,1): error TS2454: Variable 'grandchild' is used before being assigned.
+mergedInheritedClassInterface.ts(45,1): error TS2454: Variable 'grandchild' is used before being assigned.

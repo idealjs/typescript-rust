@@ -1,0 +1,13 @@
+objectRestSpread.ts(13,2): error TS2695: Left side of comma operator is unused and has no side effects.
+objectRestSpread.ts(14,10): error TS1005: ',' expected.
+objectRestSpread.ts(14,12): error TS1117: An object literal cannot have multiple properties with the same name.
+objectRestSpread.ts(14,12): error TS1005: 'identifier' expected.
+objectRestSpread.ts(15,19): error TS1005: ')' expected.
+objectRestSpread.ts(16,5): error TS1109: Expression expected.
+objectRestSpread.ts(17,1): error TS1128: Declaration or statement expected.
+objectRestSpread.ts(17,3): error TS1128: Declaration or statement expected.
+objectRestSpread.ts(17,8): error TS1434: Unexpected keyword or identifier.
+objectRestSpread.ts(17,8): error TS2304: Cannot find name 'as'.
+objectRestSpread.ts(17,11): error TS1434: Unexpected keyword or identifier.
+objectRestSpread.ts(17,11): error TS2693: 'any' only refers to a type, but is being used as a value here.
+objectRestSpread.ts(17,14): error TS1128: Declaration or statement expected.

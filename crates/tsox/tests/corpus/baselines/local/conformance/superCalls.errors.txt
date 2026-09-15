@@ -1,0 +1,1 @@
+superCalls.ts(16,13): error TS2403: Subsequent variable declarations must have the same type.  Variable 'p' must be of type 'any', but here has type 'void'.

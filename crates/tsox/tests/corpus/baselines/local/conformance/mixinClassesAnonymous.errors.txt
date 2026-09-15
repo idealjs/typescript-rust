@@ -1,0 +1,7 @@
+mixinClassesAnonymous.ts(16,29): error TS2339: Property 'x' does not exist on type 'this'.
+mixinClassesAnonymous.ts(16,44): error TS2339: Property 'y' does not exist on type 'this'.
+mixinClassesAnonymous.ts(33,8): error TS2339: Property 'message' does not exist on type 'Tagged<typeof Derived>.C'.
+mixinClassesAnonymous.ts(37,11): error TS2339: Property 'x' does not exist on type 'C'.
+mixinClassesAnonymous.ts(43,11): error TS2339: Property 'x' does not exist on type 'C'.
+mixinClassesAnonymous.ts(45,11): error TS2339: Property 'print' does not exist on type 'C'.
+mixinClassesAnonymous.ts(54,14): error TS2339: Property 'print' does not exist on type 'this'.

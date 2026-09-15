@@ -1,0 +1,1 @@
+mappedTypeModifiers.ts(90,7): error TS2339: Property 'prop' does not exist on type '{ a: { x: number; }; b: { x: string; }; }'.

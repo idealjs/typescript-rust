@@ -1,0 +1,21 @@
+indexSignatures1.ts(6,5): error TS2322: Type '{ [sym]: number; }' is not assignable to type '{ [key: string]: string; }'.
+  Index signature for type 'string' is missing in type '{ [sym]: number; }'.
+indexSignatures1.ts(63,11): error TS7006: Parameter 'x' implicitly has an 'any' type.
+indexSignatures1.ts(64,11): error TS7006: Parameter 'x' implicitly has an 'any' type.
+indexSignatures1.ts(246,24): error TS2344: Type 'symbol' does not satisfy the constraint 'string'.
+indexSignatures1.ts(254,17): error TS2345: Argument of type '{ [directive]: (x: string) => string; addOne: (x: number) => number; double: (x: number) => number; }' is not assignable to parameter of type '{ [x: string]: (arg: TArg) => TRet; } & { [directive]?: unknown; }'.
+  Index signature for type 'string' is missing in type '{ [directive]: (x: string) => string; addOne: (x: number) => number; double: (x: number) => number; }'.
+    Types of parameters 'x' and 'arg' are incompatible.
+      Type 'TArg' is not assignable to type 'string'.
+indexSignatures1.ts(260,17): error TS2345: Argument of type '{ addOne: (x: number) => number; double: (x: number) => number; [directive]: (x: string) => string; }' is not assignable to parameter of type '{ [x: string]: (arg: TArg) => TRet; } & { [directive]?: unknown; }'.
+  Index signature for type 'string' is missing in type '{ addOne: (x: number) => number; double: (x: number) => number; [directive]: (x: string) => string; }'.
+    Types of parameters 'x' and 'arg' are incompatible.
+      Type 'TArg' is not assignable to type 'number'.
+indexSignatures1.ts(266,17): error TS2345: Argument of type '{ [directive]: string; addOne: (x: number) => number; double: (x: number) => number; }' is not assignable to parameter of type '{ [x: string]: (arg: TArg) => TRet; } & { [directive]?: unknown; }'.
+  Index signature for type 'string' is missing in type '{ [directive]: string; addOne: (x: number) => number; double: (x: number) => number; }'.
+indexSignatures1.ts(276,7): error TS2322: Type 'string' is not assignable to type '`&:${string}`'.
+indexSignatures1.ts(277,7): error TS2322: Type 'string' is not assignable to type '`&:${string}`'.
+indexSignatures1.ts(285,7): error TS2322: Type 'string' is not assignable to type '`/${string}`'.
+indexSignatures1.ts(286,7): error TS2322: Type 'string' is not assignable to type '`/${string}`'.
+indexSignatures1.ts(292,7): error TS2322: Type 'string' is not assignable to type '`${number}-${number}-${number}-${number}`'.
+indexSignatures1.ts(298,13): error TS2538: Type '`${number}-${number}-${number}-${number}`' cannot be used as an index type.

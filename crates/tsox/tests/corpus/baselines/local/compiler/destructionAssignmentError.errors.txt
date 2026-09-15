@@ -1,0 +1,4 @@
+destructionAssignmentError.ts(6,3): error TS2695: Left side of comma operator is unused and has no side effects.
+destructionAssignmentError.ts(6,10): error TS1128: Declaration or statement expected.
+destructionAssignmentError.ts(11,3): error TS2695: Left side of comma operator is unused and has no side effects.
+destructionAssignmentError.ts(12,1): error TS1128: Declaration or statement expected.

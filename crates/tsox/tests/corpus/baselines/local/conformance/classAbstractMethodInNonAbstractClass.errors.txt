@@ -1,0 +1,2 @@
+classAbstractMethodInNonAbstractClass.ts(2,5): error TS1244: Abstract methods can only appear within an abstract class.
+classAbstractMethodInNonAbstractClass.ts(6,5): error TS1244: Abstract methods can only appear within an abstract class.

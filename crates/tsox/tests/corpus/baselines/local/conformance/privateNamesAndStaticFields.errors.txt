@@ -1,0 +1,1 @@
+privateNamesAndStaticFields.ts(6,11): error TS18013: Property '#foo' is not accessible outside class 'B' because it has a private identifier.

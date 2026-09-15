@@ -1,0 +1,4 @@
+parserForInStatement7.ts(1,25): error TS2322: Type 'boolean' is not assignable to type 'string'.
+parserForInStatement7.ts(1,43): error TS2304: Cannot find name 'X'.
+parserForInStatement7.ts(1,44): error TS1005: ',' expected.
+parserForInStatement7.ts(2,2): error TS1005: ';' expected.

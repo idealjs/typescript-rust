@@ -1,0 +1,4 @@
+contextualTypingWithGenericAndNonGenericSignature.ts(15,1): error TS2322: Type '(x: T, y: U) => T' is not assignable to type '{ <T, U>(x: T, y: U): T; (x: string, y: number): string; }'.
+  Types of parameters 'x' and 'x' are incompatible.
+    Type 'string' is not assignable to type 'T'.
+      'T' could be instantiated with an arbitrary type which could be unrelated to 'string'.

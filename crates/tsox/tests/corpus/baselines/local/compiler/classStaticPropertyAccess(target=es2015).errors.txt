@@ -1,0 +1,3 @@
+classStaticPropertyAccess.ts(12,3): error TS2339: Property 'y' does not exist on type 'A'.
+classStaticPropertyAccess.ts(13,3): error TS2341: Property '_b' is private and only accessible within class 'A'.
+classStaticPropertyAccess.ts(14,3): error TS2339: Property 'a' does not exist on type 'typeof A'.

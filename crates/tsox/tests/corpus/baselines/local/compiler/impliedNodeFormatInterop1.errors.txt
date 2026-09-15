@@ -1,0 +1,1 @@
+/node_modules/highlight.js/index.d.ts(6,18): error TS2454: Variable 'hljs' is used before being assigned.

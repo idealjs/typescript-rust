@@ -1,0 +1,10 @@
+typeMatch2.ts(3,2): error TS2739: Type '{}' is missing the following properties from type '{ x: number; y: number; }': x, y
+typeMatch2.ts(4,5): error TS2741: Property 'y' is missing in type '{ x: number; }' but required in type '{ x: number; y: number; }'.
+typeMatch2.ts(6,5): error TS2322: Type '{ x: number; z: number; }' is not assignable to type '{ x: number; y: number; }'.
+  Property 'y' is missing in type '{ x: number; z: 3; }' but required in type '{ x: number; y: number; }'.
+typeMatch2.ts(22,5): error TS2322: Type '{ f1: number; f2: Animal[]; }' is not assignable to type '{ f1: number; f2: Giraffe[]; }'.
+  Types of property 'f2' are incompatible.
+    Type 'Animal[]' is not assignable to type 'Giraffe[]'.
+      Property 'g' is missing in type 'Animal' but required in type 'Giraffe'.
+        Property 'g' is missing in type 'Animal' but required in type 'Giraffe'.
+typeMatch2.ts(35,5): error TS2741: Property 'y' is missing in type '{ x: number; }' but required in type '{ x: number; y: number; }'.

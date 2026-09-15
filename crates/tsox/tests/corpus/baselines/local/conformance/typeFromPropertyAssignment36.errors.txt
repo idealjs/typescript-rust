@@ -1,0 +1,6 @@
+typeFromPropertyAssignment36.ts(32,20): error TS2339: Property 's' does not exist on type '(() => void) & d'.
+typeFromPropertyAssignment36.ts(62,7): error TS2339: Property 'expando' does not exist on type '() => void'.
+typeFromPropertyAssignment36.ts(64,3): error TS2339: Property 'expando' does not exist on type '() => void'.
+typeFromPropertyAssignment36.ts(67,7): error TS2339: Property 'both' does not exist on type '() => void'.
+typeFromPropertyAssignment36.ts(70,7): error TS2339: Property 'both' does not exist on type '() => void'.
+typeFromPropertyAssignment36.ts(72,3): error TS2339: Property 'both' does not exist on type '() => void'.

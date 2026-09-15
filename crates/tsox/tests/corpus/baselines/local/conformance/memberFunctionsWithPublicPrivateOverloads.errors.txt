@@ -1,0 +1,8 @@
+memberFunctionsWithPublicPrivateOverloads.ts(4,13): error TS2391: Function implementation is missing or not immediately following the declaration.
+memberFunctionsWithPublicPrivateOverloads.ts(9,13): error TS2391: Function implementation is missing or not immediately following the declaration.
+memberFunctionsWithPublicPrivateOverloads.ts(17,13): error TS2391: Function implementation is missing or not immediately following the declaration.
+memberFunctionsWithPublicPrivateOverloads.ts(33,13): error TS2391: Function implementation is missing or not immediately following the declaration.
+memberFunctionsWithPublicPrivateOverloads.ts(38,13): error TS2391: Function implementation is missing or not immediately following the declaration.
+memberFunctionsWithPublicPrivateOverloads.ts(42,13): error TS2391: Function implementation is missing or not immediately following the declaration.
+memberFunctionsWithPublicPrivateOverloads.ts(59,11): error TS2341: Property 'foo' is private and only accessible within class 'C'.
+memberFunctionsWithPublicPrivateOverloads.ts(62,12): error TS2341: Property 'foo' is private and only accessible within class 'D'.

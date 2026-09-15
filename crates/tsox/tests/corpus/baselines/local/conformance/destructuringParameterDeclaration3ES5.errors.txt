@@ -1,0 +1,1 @@
+destructuringParameterDeclaration3ES5.ts(12,13): error TS7019: Rest parameter 'a' implicitly has an 'any[]' type.

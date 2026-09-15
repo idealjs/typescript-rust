@@ -1,0 +1,1 @@
+parserParameterList11.ts(1,2): error TS7019: Rest parameter 'arg' implicitly has an 'any[]' type.

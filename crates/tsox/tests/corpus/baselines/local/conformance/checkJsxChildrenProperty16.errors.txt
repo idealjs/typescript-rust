@@ -1,0 +1,7 @@
+error TS6053: File '/.lib/react16.d.ts' not found.
+checkJsxChildrenProperty16.tsx(5,24): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+checkJsxChildrenProperty16.tsx(19,14): error TS7006: Parameter 'value' implicitly has an 'any' type.
+checkJsxChildrenProperty16.tsx(20,27): error TS7006: Parameter 'value' implicitly has an 'any' type.
+
+
+!!! error TS6053: File '/.lib/react16.d.ts' not found.

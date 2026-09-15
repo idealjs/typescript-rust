@@ -1,0 +1,3 @@
+passport.d.ts(13,14): error TS2454: Variable 'passport' is used before being assigned.
+test.ts(4,8): error TS2749: 'Passport' refers to a value, but is being used as a type here. Did you mean 'typeof Passport'?
+test.ts(4,28): error TS2339: Property 'use' does not exist on type 'typeof import("passport")'.

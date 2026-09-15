@@ -1,0 +1,1 @@
+classExpressionWithResolutionOfNamespaceOfSameName01.ts(7,11): error TS2702: 'C' only refers to a type, but is being used as a namespace here.

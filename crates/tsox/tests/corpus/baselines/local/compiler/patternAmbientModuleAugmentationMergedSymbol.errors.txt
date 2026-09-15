@@ -1,0 +1,4 @@
+/augmentation.ts(3,16): error TS2664: Invalid module name in augmentation, module 'augmented.asset' cannot be found.
+/index.ts(1,28): error TS2307: Cannot find module 'augmented.asset' or its corresponding type declarations.
+/index.ts(7,24): error TS2307: Cannot find module 'other.asset' or its corresponding type declarations.
+/index.ts(13,34): error TS2307: Cannot find module 'other.asset' or its corresponding type declarations.

@@ -1,0 +1,6 @@
+jsxAndTypeAssertion.tsx(6,13): error TS2304: Cannot find name 'test'.
+jsxAndTypeAssertion.tsx(6,17): error TS1005: '}' expected.
+jsxAndTypeAssertion.tsx(10,32): error TS1005: '}' expected.
+jsxAndTypeAssertion.tsx(12,36): error TS1005: '}' expected.
+jsxAndTypeAssertion.tsx(14,45): error TS1005: '}' expected.
+jsxAndTypeAssertion.tsx(21,1): error TS1005: ':' expected.

@@ -1,0 +1,13 @@
+keyofAndForIn.ts(6,10): error TS2454: Variable 'k1' is used before being assigned.
+keyofAndForIn.ts(6,19): error TS1005: ';' expected.
+keyofAndForIn.ts(7,22): error TS2454: Variable 'k1' is used before being assigned.
+keyofAndForIn.ts(9,5): suggestion TS7027: Unreachable code detected.
+keyofAndForIn.ts(17,10): error TS2454: Variable 'k1' is used before being assigned.
+keyofAndForIn.ts(17,19): error TS1005: ';' expected.
+keyofAndForIn.ts(18,22): error TS2454: Variable 'k1' is used before being assigned.
+keyofAndForIn.ts(18,22): error TS2538: Type 'keyof T' cannot be used as an index type.
+keyofAndForIn.ts(20,5): suggestion TS7027: Unreachable code detected.
+keyofAndForIn.ts(28,10): error TS2454: Variable 'k1' is used before being assigned.
+keyofAndForIn.ts(28,19): error TS1005: ';' expected.
+keyofAndForIn.ts(29,22): error TS2454: Variable 'k1' is used before being assigned.
+keyofAndForIn.ts(31,5): suggestion TS7027: Unreachable code detected.

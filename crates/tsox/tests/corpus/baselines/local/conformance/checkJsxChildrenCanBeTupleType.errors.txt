@@ -1,0 +1,7 @@
+error TS6053: File '/.lib/react16.d.ts' not found.
+checkJsxChildrenCanBeTupleType.tsx(3,19): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+checkJsxChildrenCanBeTupleType.tsx(6,14): error TS2503: Cannot find namespace 'React'.
+checkJsxChildrenCanBeTupleType.tsx(6,31): error TS2503: Cannot find namespace 'React'.
+
+
+!!! error TS6053: File '/.lib/react16.d.ts' not found.

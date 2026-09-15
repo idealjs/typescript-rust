@@ -1,0 +1,1 @@
+projC/index.d.ts(2,21): error TS2307: Cannot find module '../projA' or its corresponding type declarations.

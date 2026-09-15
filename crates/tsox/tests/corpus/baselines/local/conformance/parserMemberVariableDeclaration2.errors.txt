@@ -1,0 +1,1 @@
+parserMemberVariableDeclaration2.ts(2,10): error TS1030: 'static' modifier already seen.

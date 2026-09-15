@@ -1,0 +1,47 @@
+jsxParserRecovery.tsx(2,1): error TS2552: Cannot find name 'noName'. Did you mean 'name'?
+jsxParserRecovery.tsx(2,11): error TS2552: Cannot find name 'noClose'. Did you mean 'close'?
+jsxParserRecovery.tsx(2,22): error TS2304: Cannot find name 'noCloseTypeArg'.
+jsxParserRecovery.tsx(2,40): error TS2304: Cannot find name 'noCloseAttrs'.
+jsxParserRecovery.tsx(2,56): error TS2304: Cannot find name 'noCloseTypeArgAttrs'.
+jsxParserRecovery.tsx(2,79): error TS2304: Cannot find name 'noCloseBracket'.
+jsxParserRecovery.tsx(2,97): error TS2304: Cannot find name 'noCloseBracketTypeArgAttrs'.
+jsxParserRecovery.tsx(2,127): error TS2304: Cannot find name 'noSelfclose'.
+jsxParserRecovery.tsx(2,142): error TS2304: Cannot find name 'noSelfcloseTypeArgAttrs'.
+jsxParserRecovery.tsx(3,1): error TS2304: Cannot find name 'noNameTrailingTag'.
+jsxParserRecovery.tsx(3,22): error TS2304: Cannot find name 'noCloseTrailingTag'.
+jsxParserRecovery.tsx(3,44): error TS2304: Cannot find name 'noCloseTypeArgTrailingTag'.
+jsxParserRecovery.tsx(3,73): error TS2304: Cannot find name 'noCloseAttrsTrailingTag'.
+jsxParserRecovery.tsx(3,100): error TS2304: Cannot find name 'noCloseTypeArgAttrsTrailingTag'.
+jsxParserRecovery.tsx(3,134): error TS2304: Cannot find name 'noCloseBracketTrailingTag'.
+jsxParserRecovery.tsx(3,163): error TS2304: Cannot find name 'noCloseBracketTypeArgAttrsTrailingTag'.
+jsxParserRecovery.tsx(4,1): error TS2304: Cannot find name 'noNameTrailingText'.
+jsxParserRecovery.tsx(4,23): error TS2304: Cannot find name 'noCloseTrailingText'.
+jsxParserRecovery.tsx(4,46): error TS2304: Cannot find name 'noCloseTypeArgTrailingText'.
+jsxParserRecovery.tsx(4,76): error TS2304: Cannot find name 'noCloseAttrsTrailingText'.
+jsxParserRecovery.tsx(4,104): error TS2304: Cannot find name 'noCloseTypeArgAttrsTrailingText'.
+jsxParserRecovery.tsx(4,139): error TS2304: Cannot find name 'noCloseBracketTrailingText'.
+jsxParserRecovery.tsx(4,169): error TS2304: Cannot find name 'noCloseBracketTypeArgAttrsTrailingText'.
+jsxParserRecovery.tsx(12,1): error TS1005: 'identifier' expected.
+jsxParserRecovery.tsx(16,1): error TS1003: Identifier expected.
+jsxParserRecovery.tsx(20,1): error TS1003: Identifier expected.
+jsxParserRecovery.tsx(24,1): error TS1003: Identifier expected.
+jsxParserRecovery.tsx(28,1): error TS1003: Identifier expected.
+jsxParserRecovery.tsx(32,1): error TS1005: '>' expected.
+jsxParserRecovery.tsx(36,1): error TS1005: '>' expected.
+jsxParserRecovery.tsx(49,5): error TS1005: 'identifier' expected.
+jsxParserRecovery.tsx(49,11): error TS1005: '>' expected.
+jsxParserRecovery.tsx(54,11): error TS1005: '>' expected.
+jsxParserRecovery.tsx(59,5): error TS1003: Identifier expected.
+jsxParserRecovery.tsx(64,5): error TS1003: Identifier expected.
+jsxParserRecovery.tsx(69,5): error TS1003: Identifier expected.
+jsxParserRecovery.tsx(74,5): error TS1005: '>' expected.
+jsxParserRecovery.tsx(79,5): error TS1005: '>' expected.
+jsxParserRecovery.tsx(95,5): error TS2304: Cannot find name 'Cranky'.
+jsxParserRecovery.tsx(96,1): error TS1003: Identifier expected.
+jsxParserRecovery.tsx(101,1): error TS1003: Identifier expected.
+jsxParserRecovery.tsx(106,1): error TS1003: Identifier expected.
+jsxParserRecovery.tsx(111,1): error TS1003: Identifier expected.
+jsxParserRecovery.tsx(116,1): error TS1003: Identifier expected.
+jsxParserRecovery.tsx(120,5): error TS1005: '>' expected.
+jsxParserRecovery.tsx(125,5): error TS1005: '>' expected.
+jsxParserRecovery.tsx(138,1): error TS1005: '' expected.

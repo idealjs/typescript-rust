@@ -1,0 +1,3 @@
+contextualTypeOnYield2.ts(2,7): error TS2322: Type '() => (num: any) => void' is not assignable to type '() => number | Generator<string, (arg: number) => void, undefined>'.
+  Type '(num: any) => void' is not assignable to type 'number | Generator<string, (arg: number) => void, undefined>'.
+contextualTypeOnYield2.ts(3,13): error TS7006: Parameter 'num' implicitly has an 'any' type.

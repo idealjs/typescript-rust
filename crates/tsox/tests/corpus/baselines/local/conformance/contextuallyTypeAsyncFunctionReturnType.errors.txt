@@ -1,0 +1,4 @@
+contextuallyTypeAsyncFunctionReturnType.ts(9,19): error TS2353: Object literal may only specify known properties, and 'key' does not exist in type 'unknown | PromiseLike<unknown>'.
+contextuallyTypeAsyncFunctionReturnType.ts(18,5): error TS2322: Type 'unknown' is not assignable to type 'Obj'.
+contextuallyTypeAsyncFunctionReturnType.ts(19,19): error TS2353: Object literal may only specify known properties, and 'key' does not exist in type 'unknown | PromiseLike<unknown>'.
+contextuallyTypeAsyncFunctionReturnType.ts(56,9): error TS2554: Expected 1 arguments, but got 0.

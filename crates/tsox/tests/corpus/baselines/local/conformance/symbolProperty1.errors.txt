@@ -1,0 +1,3 @@
+symbolProperty1.ts(3,6): error TS2454: Variable 's' is used before being assigned.
+symbolProperty1.ts(4,5): error TS1117: An object literal cannot have multiple properties with the same name.
+symbolProperty1.ts(5,9): error TS1117: An object literal cannot have multiple properties with the same name.

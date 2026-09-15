@@ -1,0 +1,5 @@
+invalidUndefinedAssignments.ts(4,1): error TS2628: Cannot assign to 'E' because it is an enum.
+invalidUndefinedAssignments.ts(5,3): error TS2540: Cannot assign to 'A' because it is a read-only property.
+invalidUndefinedAssignments.ts(7,11): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
+invalidUndefinedAssignments.ts(9,1): error TS2629: Cannot assign to 'C' because it is a class.
+invalidUndefinedAssignments.ts(21,1): error TS2630: Cannot assign to 'i' because it is a function.

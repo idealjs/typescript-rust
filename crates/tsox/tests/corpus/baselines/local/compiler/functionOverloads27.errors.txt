@@ -1,0 +1,1 @@
+functionOverloads27.ts(4,13): error TS2554: Expected 0 arguments, but got 1.

@@ -1,0 +1,53 @@
+compoundAdditionAssignmentWithInvalidOperands.ts(6,1): error TS2322: Type 'void' is not assignable to type 'boolean'.
+compoundAdditionAssignmentWithInvalidOperands.ts(6,1): error TS2365: Operator '+' cannot be applied to types 'boolean' and 'void'.
+compoundAdditionAssignmentWithInvalidOperands.ts(7,1): error TS2365: Operator '+' cannot be applied to types 'boolean' and 'true'.
+compoundAdditionAssignmentWithInvalidOperands.ts(8,1): error TS2322: Type 'number' is not assignable to type 'boolean'.
+compoundAdditionAssignmentWithInvalidOperands.ts(8,1): error TS2365: Operator '+' cannot be applied to types 'boolean' and '0'.
+compoundAdditionAssignmentWithInvalidOperands.ts(9,1): error TS2322: Type 'number' is not assignable to type 'boolean'.
+compoundAdditionAssignmentWithInvalidOperands.ts(9,1): error TS2365: Operator '+' cannot be applied to types 'boolean' and '0'.
+compoundAdditionAssignmentWithInvalidOperands.ts(10,1): error TS2322: Type '{}' is not assignable to type 'boolean'.
+compoundAdditionAssignmentWithInvalidOperands.ts(10,1): error TS2365: Operator '+' cannot be applied to types 'boolean' and '{}'.
+compoundAdditionAssignmentWithInvalidOperands.ts(11,1): error TS2322: Type 'null' is not assignable to type 'boolean'.
+compoundAdditionAssignmentWithInvalidOperands.ts(11,1): error TS2365: Operator '+' cannot be applied to types 'boolean' and 'null'.
+compoundAdditionAssignmentWithInvalidOperands.ts(11,7): error TS18050: The value 'null' cannot be used here.
+compoundAdditionAssignmentWithInvalidOperands.ts(12,1): error TS2322: Type 'undefined' is not assignable to type 'boolean'.
+compoundAdditionAssignmentWithInvalidOperands.ts(12,1): error TS2365: Operator '+' cannot be applied to types 'boolean' and 'undefined'.
+compoundAdditionAssignmentWithInvalidOperands.ts(12,7): error TS18050: The value 'undefined' cannot be used here.
+compoundAdditionAssignmentWithInvalidOperands.ts(15,1): error TS2322: Type 'void' is not assignable to type '{}'.
+compoundAdditionAssignmentWithInvalidOperands.ts(15,1): error TS2365: Operator '+' cannot be applied to types '{}' and 'void'.
+compoundAdditionAssignmentWithInvalidOperands.ts(16,1): error TS2365: Operator '+' cannot be applied to types '{}' and 'true'.
+compoundAdditionAssignmentWithInvalidOperands.ts(17,1): error TS2365: Operator '+' cannot be applied to types '{}' and '0'.
+compoundAdditionAssignmentWithInvalidOperands.ts(18,1): error TS2365: Operator '+' cannot be applied to types '{}' and '0'.
+compoundAdditionAssignmentWithInvalidOperands.ts(19,1): error TS2365: Operator '+' cannot be applied to types '{}' and '{}'.
+compoundAdditionAssignmentWithInvalidOperands.ts(20,1): error TS2322: Type 'null' is not assignable to type '{}'.
+compoundAdditionAssignmentWithInvalidOperands.ts(20,1): error TS2365: Operator '+' cannot be applied to types '{}' and 'null'.
+compoundAdditionAssignmentWithInvalidOperands.ts(20,7): error TS18050: The value 'null' cannot be used here.
+compoundAdditionAssignmentWithInvalidOperands.ts(21,1): error TS2322: Type 'undefined' is not assignable to type '{}'.
+compoundAdditionAssignmentWithInvalidOperands.ts(21,1): error TS2365: Operator '+' cannot be applied to types '{}' and 'undefined'.
+compoundAdditionAssignmentWithInvalidOperands.ts(21,7): error TS18050: The value 'undefined' cannot be used here.
+compoundAdditionAssignmentWithInvalidOperands.ts(24,1): error TS2365: Operator '+' cannot be applied to types 'void' and 'void'.
+compoundAdditionAssignmentWithInvalidOperands.ts(25,1): error TS2322: Type 'boolean' is not assignable to type 'void'.
+compoundAdditionAssignmentWithInvalidOperands.ts(25,1): error TS2365: Operator '+' cannot be applied to types 'void' and 'true'.
+compoundAdditionAssignmentWithInvalidOperands.ts(26,1): error TS2322: Type 'number' is not assignable to type 'void'.
+compoundAdditionAssignmentWithInvalidOperands.ts(26,1): error TS2365: Operator '+' cannot be applied to types 'void' and '0'.
+compoundAdditionAssignmentWithInvalidOperands.ts(27,1): error TS2322: Type 'number' is not assignable to type 'void'.
+compoundAdditionAssignmentWithInvalidOperands.ts(27,1): error TS2365: Operator '+' cannot be applied to types 'void' and '0'.
+compoundAdditionAssignmentWithInvalidOperands.ts(28,1): error TS2322: Type '{}' is not assignable to type 'void'.
+compoundAdditionAssignmentWithInvalidOperands.ts(28,1): error TS2365: Operator '+' cannot be applied to types 'void' and '{}'.
+compoundAdditionAssignmentWithInvalidOperands.ts(29,1): error TS2322: Type 'null' is not assignable to type 'void'.
+compoundAdditionAssignmentWithInvalidOperands.ts(29,1): error TS2365: Operator '+' cannot be applied to types 'void' and 'null'.
+compoundAdditionAssignmentWithInvalidOperands.ts(29,7): error TS18050: The value 'null' cannot be used here.
+compoundAdditionAssignmentWithInvalidOperands.ts(30,1): error TS2365: Operator '+' cannot be applied to types 'void' and 'undefined'.
+compoundAdditionAssignmentWithInvalidOperands.ts(30,7): error TS18050: The value 'undefined' cannot be used here.
+compoundAdditionAssignmentWithInvalidOperands.ts(33,1): error TS2322: Type 'void' is not assignable to type 'number'.
+compoundAdditionAssignmentWithInvalidOperands.ts(33,1): error TS2365: Operator '+' cannot be applied to types 'number' and 'void'.
+compoundAdditionAssignmentWithInvalidOperands.ts(34,1): error TS2322: Type 'boolean' is not assignable to type 'number'.
+compoundAdditionAssignmentWithInvalidOperands.ts(34,1): error TS2365: Operator '+' cannot be applied to types 'number' and 'true'.
+compoundAdditionAssignmentWithInvalidOperands.ts(35,1): error TS2322: Type '{}' is not assignable to type 'number'.
+compoundAdditionAssignmentWithInvalidOperands.ts(35,1): error TS2365: Operator '+' cannot be applied to types 'number' and '{}'.
+compoundAdditionAssignmentWithInvalidOperands.ts(38,1): error TS2322: Type 'void' is not assignable to type '0 | 1'.
+compoundAdditionAssignmentWithInvalidOperands.ts(38,1): error TS2365: Operator '+' cannot be applied to types '0 | 1' and 'void'.
+compoundAdditionAssignmentWithInvalidOperands.ts(39,1): error TS2322: Type 'true' is not assignable to type '0 | 1'.
+compoundAdditionAssignmentWithInvalidOperands.ts(39,1): error TS2365: Operator '+' cannot be applied to types '0 | 1' and 'true'.
+compoundAdditionAssignmentWithInvalidOperands.ts(40,1): error TS2322: Type '{}' is not assignable to type '0 | 1'.
+compoundAdditionAssignmentWithInvalidOperands.ts(40,1): error TS2365: Operator '+' cannot be applied to types '0 | 1' and '{}'.

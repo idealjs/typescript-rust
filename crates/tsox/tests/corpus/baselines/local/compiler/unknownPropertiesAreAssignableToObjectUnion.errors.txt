@@ -1,0 +1,2 @@
+unknownPropertiesAreAssignableToObjectUnion.ts(1,30): error TS2353: Object literal may only specify known properties, and 'x' does not exist in type 'string | Object'.
+unknownPropertiesAreAssignableToObjectUnion.ts(2,33): error TS2353: Object literal may only specify known properties, and 'x' does not exist in type 'Object | undefined'.

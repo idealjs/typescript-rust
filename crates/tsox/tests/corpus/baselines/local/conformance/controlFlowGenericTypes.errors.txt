@@ -1,0 +1,26 @@
+controlFlowGenericTypes.ts(5,9): error TS2322: Type 'T' is not assignable to type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+controlFlowGenericTypes.ts(9,9): error TS2322: Type 'T' is not assignable to type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+controlFlowGenericTypes.ts(13,9): error TS2322: Type 'T' is not assignable to type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+controlFlowGenericTypes.ts(22,9): error TS2322: Type 'Extract<T, string | undefined>' is not assignable to type 'string'.
+controlFlowGenericTypes.ts(43,15): error TS2345: Argument of type 'T' is not assignable to parameter of type 'Box<unknown>'.
+  Type 'undefined' is not assignable to type 'Box<unknown>'.
+controlFlowGenericTypes.ts(49,15): error TS2345: Argument of type 'T' is not assignable to parameter of type 'Box<unknown>'.
+  Type 'undefined' is not assignable to type 'Box<unknown>'.
+controlFlowGenericTypes.ts(55,15): error TS2345: Argument of type 'undefined' is not assignable to parameter of type 'Box<unknown>'.
+controlFlowGenericTypes.ts(64,15): error TS2345: Argument of type 'AB' is not assignable to parameter of type '"A"'.
+  Type '"B"' is not assignable to type '"A"'.
+controlFlowGenericTypes.ts(81,11): error TS2339: Property 'foo' does not exist on type '{ tag: "A"; id: number; } | { tag: "B"; id: number; foo: number; }'.
+controlFlowGenericTypes.ts(91,11): error TS2339: Property 'foo' does not exist on type 'T'.
+controlFlowGenericTypes.ts(93,15): error TS2339: Property 'foo' does not exist on type 'never'.
+controlFlowGenericTypes.ts(96,15): error TS2339: Property 'foo' does not exist on type 'T'.
+controlFlowGenericTypes.ts(114,12): error TS2339: Property 'doTest' does not exist on type 'T'.
+controlFlowGenericTypes.ts(180,5): error TS2322: Type 'T' is not assignable to type 'Partial<T>'.
+  Type 'undefined' is not assignable to type 'keyof T'.
+    Type 'undefined' is not assignable to type 'Partial<T>'.
+controlFlowGenericTypes.ts(189,26): error TS2345: Argument of type 'SqlInsertSet<T>' is not assignable to parameter of type '{ [P in keyof T]: any; }'.
+  Type 'object' is not assignable to type '{ [P in keyof T]: any; }'.
+    Type 'object' is not assignable to type 'keyof SqlInsertSet<T>'.
+controlFlowGenericTypes.ts(218,17): error TS2538: Type 'keyof keyof T extends never ? { id?: string | number; } : { id: T; }' cannot be used as an index type.

@@ -1,0 +1,2 @@
+helper.ts(8,5): error TS2322: Type '(w: Widget) => string' is not assignable to type '(w: Widget) => "id" | "name"'.
+  Type 'string' is not assignable to type '"id" | "name"'.

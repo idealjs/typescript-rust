@@ -1,0 +1,4 @@
+awaitUsingDeclarationsInForIn.ts(2,16): error TS2304: Cannot find name 'using'.
+awaitUsingDeclarationsInForIn.ts(2,22): error TS1005: ';' expected.
+awaitUsingDeclarationsInForIn.ts(2,22): error TS2304: Cannot find name 'x'.
+awaitUsingDeclarationsInForIn.ts(2,29): error TS1005: ';' expected.

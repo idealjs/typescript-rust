@@ -1,0 +1,1 @@
+sensmap.ts(2,27): error TS2694: Namespace 'OnRtls' has no exported member 'Mappa'.

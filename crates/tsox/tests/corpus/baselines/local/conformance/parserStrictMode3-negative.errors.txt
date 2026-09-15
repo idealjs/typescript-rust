@@ -1,0 +1,1 @@
+parserStrictMode3-negative.ts(1,1): error TS2630: Cannot assign to 'eval' because it is a function.

@@ -1,0 +1,1 @@
+moduleImportedForTypeArgumentPosition_1.ts(2,21): error TS2307: Cannot find module 'moduleImportedForTypeArgumentPosition_0' or its corresponding type declarations.

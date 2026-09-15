@@ -1,0 +1,5 @@
+classStaticBlock26.ts(3,9): error TS2304: Cannot find name 'await'.
+classStaticBlock26.ts(6,9): error TS2304: Cannot find name 'await'.
+classStaticBlock26.ts(9,13): error TS2304: Cannot find name 'await'.
+classStaticBlock26.ts(13,14): error TS2304: Cannot find name 'await'.
+classStaticBlock26.ts(17,12): error TS2304: Cannot find name 'await'.

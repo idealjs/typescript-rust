@@ -1,0 +1,1 @@
+/src/main.ts(2,27): error TS2307: Cannot find module 'pkg/indirect2.js' or its corresponding type declarations.

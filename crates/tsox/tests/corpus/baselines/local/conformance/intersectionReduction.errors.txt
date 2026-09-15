@@ -1,0 +1,11 @@
+intersectionReduction.ts(41,5): error TS2322: Type '{ kind: "a"; foo: string; } | { kind: "b"; foo: number; } & { kind: "c"; foo: number; }' is not assignable to type '{ kind: "a"; foo: string; }'.
+  Type '{ kind: "b"; foo: number; } & { kind: "c"; foo: number; }' is not assignable to type '{ kind: "a"; foo: string; }'.
+    Types of property 'kind' are incompatible.
+      Type '"b"' is not assignable to type '"a"'.
+intersectionReduction.ts(71,14): error TS2345: Argument of type '{ kind: "a"; foo: string; } | { kind: "d"; foo: unknown; } & { kind: "e"; foo: unknown; }' is not assignable to parameter of type '{ foo: string; }'.
+  Type '{ kind: "d"; foo: unknown; } & { kind: "e"; foo: unknown; }' is not assignable to type '{ foo: string; }'.
+    Types of property 'foo' are incompatible.
+      Type 'unknown' is not assignable to type 'string'.
+intersectionReduction.ts(100,43): error TS2322: Type '"a" | "b" & "c"' is not assignable to type '"a"'.
+intersectionReduction.ts(106,87): error TS2322: Type '{ type: "a"; } | { type: "b"; } & { type: "c"; }' is not assignable to type '{ type: "a"; }'.
+intersectionReduction.ts(108,92): error TS2322: Type 'number | { type: "b"; } & { dataB: boolean; } & { type: "a"; }' is not assignable to type 'number'.

@@ -1,0 +1,2 @@
+privateInstanceMemberAccessibility.ts(10,15): error TS2304: Cannot find name ''.
+privateInstanceMemberAccessibility.ts(12,12): error TS1442: Expected '=' for property initializer.

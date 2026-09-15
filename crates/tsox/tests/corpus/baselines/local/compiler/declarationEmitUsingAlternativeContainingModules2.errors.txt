@@ -1,0 +1,8 @@
+src/index.mts(30,19): error TS2345: Argument of type '{ queryKey: [any, "list"]; queryFn: () => Promise<IEntry[]>; select: (data: IEntry[]) => IEntry[]; }' is not assignable to parameter of type '{ enabled: boolean | undefined; refetchInterval: number | undefined; select: ((data: IEntry[]) => IEntry[]) | undefined; retry: number | boolean | ((failureCount: number, error: unknown) => boolean) | undefined; queryFn: ((context: { queryKey: ReadonlyArray<unknown>; pageParam: TPageParam; }) => IEntry[] | Promise<IEntry[]>) | undefined; queryKey: ReadonlyArray<unknown> | undefined; initialData: IEntry[] | undefined; initialDataUpdatedAt: number | (() => number | undefined) | undefined; } & { initialData?: undefined; }'.
+  The types of 'queryKey.flatMap' are incompatible between these types.
+    Type '<U, This>(callback: (this: This, value: T, index: number, array: T[]) => U | ReadonlyArray<U>, thisArg: This | undefined) => U[]' is not assignable to type '<U, This>(callback: (value: unknown, index: number, array: unknown[]) => U | ReadonlyArray<U>, thisArg: This | undefined) => U[]'.
+      Types of parameters 'callback' and 'callback' are incompatible.
+        Type '(value: unknown, index: number, array: unknown[]) => U | ReadonlyArray<U>' is not assignable to type '(value: T, index: number, array: T[]) => U | ReadonlyArray<U>'.
+          Type 'unknown' is not assignable to type 'ConcatArray<T>'.
+            The types returned by 'slice(...)' are incompatible between these types.
+              Type 'unknown[]' is not assignable to type 'T[]'.

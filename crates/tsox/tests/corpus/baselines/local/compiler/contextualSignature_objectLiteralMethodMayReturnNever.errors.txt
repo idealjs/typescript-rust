@@ -1,0 +1,2 @@
+contextualSignature_objectLiteralMethodMayReturnNever.ts(2,16): error TS2322: Type '() => void' is not assignable to type '() => number'.
+  Type 'void' is not assignable to type 'number'.
