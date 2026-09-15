@@ -15,6 +15,26 @@ impl Checker {
         if type_name.kind == SyntaxKind::Identifier && type_name.text() == "intrinsic" {
             return self.error_type();
         }
+        // Go checkGrammarForAtLeastOneTypeArgument：`C<>` 空实参列表报 1099
+        // （解析重入会多次到达此处，按位置去重）
+        if let Some(args) = &type_arguments
+            && args.nodes.is_empty()
+            && !self
+                .diagnostics
+                .get_all()
+                .iter()
+                .any(|d| d.code == 1099 && d.loc.pos() == args.loc.pos())
+        {
+            let file = self
+                .get_source_file_of_node(node)
+                .or_else(|| self.current_file.clone());
+            self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                file,
+                args.loc,
+                tsox_core::diagnostics::messages_generated::TYPE_ARGUMENT_LIST_CANNOT_BE_EMPTY,
+                vec![],
+            ));
+        }
         let mut symbol = if type_name.kind == SyntaxKind::Identifier {
             match self.resolve_identifier(type_name) {
                 Some(s) => s,

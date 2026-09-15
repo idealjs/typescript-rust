@@ -136,7 +136,14 @@ impl Parser {
 
     pub(crate) fn parse_parameter_list(&mut self) -> Arc<NodeList> {
         let pos = self.token_pos();
-        self.expect(SyntaxKind::OpenParenToken);
+        // Go parseParameters：'(' 缺失时参数为缺失列表，不解析（防止
+        // 后续语句被当参数吞掉）
+        if !self.expect_report(SyntaxKind::OpenParenToken) {
+            return Arc::new(NodeList {
+                loc: TextRange::new(pos, pos),
+                nodes: Vec::new(),
+            });
+        }
         let params = self.parse_delimited_list(ParsingContext::Parameters, Parser::parse_parameter);
         self.expect(SyntaxKind::CloseParenToken);
         let end = self.node_pos();

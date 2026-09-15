@@ -110,12 +110,6 @@ impl Checker {
                 let sibling_args: Vec<Arc<tsox_frontend::ast::Node>> = args
                     .iter()
                     .enumerate()
-                    .filter(|(_, a)| {
-                        !matches!(
-                            a.kind,
-                            SyntaxKind::ArrowFunction | SyntaxKind::FunctionExpression
-                        )
-                    })
                     .filter(|(_, a)| !(ignore_node && Arc::ptr_eq(a, arg_node)))
                     .map(|(_, a)| Arc::clone(a))
                     .collect();
@@ -198,6 +192,18 @@ impl Checker {
             NodeData::PropertyAssignment(data) => match &data.name.data {
                 NodeData::Identifier(id) => Some(id.text.clone()),
                 NodeData::StringLiteral(s) => Some(s.text.clone()),
+                // 计算属性名 `[Foo]`：按标识符文本查上下文成员
+                //（Go getContextualTypeForObjectLiteralElement 的
+                // getLiteralTypeFromPropertyName + findApplicableIndexInfo 通道，
+                // 映射型成员经索引信息命中；此处以文本键等价）
+                NodeData::ComputedPropertyName(cd)
+                    if matches!(&cd.expression.data, NodeData::Identifier(_)) =>
+                {
+                    match &cd.expression.data {
+                        NodeData::Identifier(id) => Some(id.text.clone()),
+                        _ => None,
+                    }
+                }
                 _ => None,
             },
             NodeData::ShorthandPropertyAssignment(data) => match &data.name.data {

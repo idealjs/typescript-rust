@@ -9,6 +9,17 @@ impl Checker {
         target: &Arc<Type>,
         relation: RelationKind,
     ) -> bool {
+        if std::env::var_os("TSOX_DEBUG_RELATE").is_some() {
+            let t_name = self.type_to_string(target);
+            if t_name.contains("IPromise") {
+                eprintln!(
+                    "[relate] src={} target={} rel={:?}",
+                    self.type_to_string(source),
+                    t_name,
+                    relation
+                );
+            }
+        }
         if relation == RelationKind::Comparable
             && !target.flags.contains(TypeFlags::Never)
             && self.is_simple_type_related_to(target, source, relation)

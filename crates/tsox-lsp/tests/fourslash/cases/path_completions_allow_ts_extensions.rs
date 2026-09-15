@@ -12,6 +12,7 @@ export const foo = 0;
 import {} from ".//**/""#;
     let mut s = Session::new_for_test("pathCompletionsAllowTsExtensions", content);
     fourslash::verify_completions_exact_at(&mut s, Some(""), &["foo"]);
+    fourslash::set_user_preference(&mut s, "importModuleSpecifierEnding", "js");
     fourslash::verify_completions_exact_at(&mut s, Some(""), &["foo.ts"]);
     fourslash::insert(&mut s, "foo.ts\"\nimport {} from \"./");
     fourslash::verify_completions_exact_at(&mut s, Some(""), &["foo.ts"]);

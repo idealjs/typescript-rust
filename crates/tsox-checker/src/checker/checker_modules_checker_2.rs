@@ -13,6 +13,7 @@ impl Checker {
                     SyntaxKind::NamespaceImport
                         | SyntaxKind::ImportSpecifier
                         | SyntaxKind::NamespaceExport
+                        | SyntaxKind::ExportSpecifier
                 )
             })?
             .clone();

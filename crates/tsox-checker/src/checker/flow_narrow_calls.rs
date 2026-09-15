@@ -46,23 +46,33 @@ impl Checker {
                     if !self.expr_matches_target(receiver, target) {
                         continue;
                     }
-                    let Some(callback_arg) = call.arguments.nodes.first() else {
-                        continue;
-                    };
-                    let Some(u) = self.callback_predicate_type(callback_arg) else {
-                        continue;
-                    };
-
-                    let instantiated = if sig.type_parameters.is_empty() {
-                        Arc::clone(pred_type)
-                    } else {
-                        let args: Vec<Arc<Type>> =
-                            sig.type_parameters.iter().map(|_| Arc::clone(&u)).collect();
-                        self.substitute_infer_type_parameters(
-                            pred_type,
-                            &sig.type_parameters,
-                            &args,
-                        )
+                    // 有回调实参（Array.filter 谓词回灌类型参数 U）时经回调
+                    // 谓词定型；无参直谓词（isSundries(): this is X）按原样。
+                    // 谓词中的多态 this 按接收者当前型实例化（Go 经调用签名
+                    // 实例化后 this 已定型；`this is (this & {...})` 不替换
+                    // 会让交集中的 this 悬空，后续联合归并无法收纳）
+                    let instantiated = match call.arguments.nodes.first() {
+                        Some(callback_arg) => {
+                            let Some(u) = self.callback_predicate_type(callback_arg) else {
+                                continue;
+                            };
+                            if sig.type_parameters.is_empty() {
+                                substitute_this_type(self, pred_type, type_)
+                            } else {
+                                let args: Vec<Arc<Type>> = sig
+                                    .type_parameters
+                                    .iter()
+                                    .map(|_| Arc::clone(&u))
+                                    .collect();
+                                let substed = self.substitute_infer_type_parameters(
+                                    pred_type,
+                                    &sig.type_parameters,
+                                    &args,
+                                );
+                                substitute_this_type(self, &substed, type_)
+                            }
+                        }
+                        None => substitute_this_type(self, pred_type, type_),
                     };
                     return self.narrow_by_type_predicate(type_, &instantiated, assume_true);
                 }
@@ -297,5 +307,41 @@ impl Checker {
         }
 
         Arc::clone(type_)
+    }
+}
+
+/// 谓词型中的多态 this 按接收者当前型替换（Go 调用签名实例化后的形态）
+fn substitute_this_type(
+    checker: &mut Checker,
+    t: &Arc<Type>,
+    replacement: &Arc<Type>,
+) -> Arc<Type> {
+    if let Some(tp) = match &t.data {
+        TypeData::TypeParameter(tp) if tp.is_this_type => Some(()),
+        _ => None,
+    } {
+        let _ = tp;
+        return Arc::clone(replacement);
+    }
+    match &t.data {
+        TypeData::Union(u) => {
+            let parts: Vec<Arc<Type>> = u
+                .union_or_intersection
+                .types
+                .iter()
+                .map(|inner| substitute_this_type(checker, inner, replacement))
+                .collect();
+            checker.get_union_type(parts)
+        }
+        TypeData::Intersection(i) => {
+            let parts: Vec<Arc<Type>> = i
+                .union_or_intersection
+                .types
+                .iter()
+                .map(|inner| substitute_this_type(checker, inner, replacement))
+                .collect();
+            checker.get_intersection_type(parts)
+        }
+        _ => Arc::clone(t),
     }
 }

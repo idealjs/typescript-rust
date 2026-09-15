@@ -200,10 +200,27 @@ impl Checker {
                         self.auto_array_type()
                     } else {
                         let init_type = self.get_type_of_node(init);
-                        let widened_literal =
-                            self.get_widened_literal_type_for_initializer(node, &init_type);
-                        let regularized = self.get_regular_type_of_literal_type(&widened_literal);
-                        self.widen_initializer_type(&regularized)
+                        // 自引用初始化式（var a = { f: a }）：环期成员类型为
+                        // in-flight error 时整体回退 any（Go 循环初始化的隐式 any）
+                        let circular = init_type.as_structured().is_some_and(|s| {
+                            s.properties.iter().any(|p| {
+                                self.value_symbol_links
+                                    .get(p)
+                                    .and_then(|l| l.resolved_type.clone())
+                                    .is_some_and(|t| {
+                                        crate::checker::utilities::is_type_error(&t)
+                                    })
+                            })
+                        });
+                        if circular {
+                            self.get_any_type()
+                        } else {
+                            let widened_literal =
+                                self.get_widened_literal_type_for_initializer(node, &init_type);
+                            let regularized =
+                                self.get_regular_type_of_literal_type(&widened_literal);
+                            self.widen_initializer_type(&regularized)
+                        }
                     }
                 }
                 (None, None) => match self.initial_type_of_declaration(node) {

@@ -209,7 +209,24 @@ impl Parser {
             }
             _ => {}
         }
-        let mut left = self.parse_identifier();
+        // Go parseIdentifierName：类型位的实体名接受任何关键字作名字
+        //（`<const>expr` 的 const 即此形态，checker isConstTypeReference 特判）
+        let mut left = if self.is_identifier() {
+            self.parse_identifier()
+        } else if is_keyword(self.token) {
+            let text = self.scanner.token_text().to_string();
+            let pos = self.token_pos();
+            self.next_token();
+            Arc::new(Node::with_loc(
+                SyntaxKind::Identifier,
+                NodeData::Identifier(crate::ast::IdentifierData {
+                    text,
+                }),
+                TextRange::new(pos, self.token_pos()),
+            ))
+        } else {
+            self.parse_identifier()
+        };
         while self.parse_optional(SyntaxKind::DotToken) {
             let right = self.parse_identifier();
             let end = right.end();

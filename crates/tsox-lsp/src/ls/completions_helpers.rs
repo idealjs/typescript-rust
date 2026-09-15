@@ -222,15 +222,22 @@ pub(super) fn find_deepest_node(node: &Arc<Node>, offset: usize) -> Arc<Node> {
     loop {
         let current = Arc::clone(&deepest);
         let mut next: Option<Arc<Node>> = None;
+        let mut zero_width: Option<Arc<Node>> = None;
         for_each_child(&current, |child| {
-            if child.pos() <= offset && offset < child.end() {
+            let (s, e) = (child.pos(), child.end());
+            if s <= offset && offset < e {
                 next = Some(Arc::clone(child));
                 true
             } else {
+                // parser 缺失名等零宽节点（Go GetTokenAtPosition 端点含）：
+                // 无严格包含子节点时下沉
+                if s == offset && e == offset {
+                    zero_width = Some(Arc::clone(child));
+                }
                 false
             }
         });
-        match next {
+        match next.or(zero_width) {
             Some(child) => deepest = child,
             None => break,
         }

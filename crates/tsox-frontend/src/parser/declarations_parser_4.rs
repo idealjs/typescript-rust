@@ -22,7 +22,7 @@ impl Parser {
     pub(crate) fn parse_identifier_name_or_keyword(&mut self) -> Arc<Node> {
         if self.is_identifier() {
             self.parse_identifier()
-        } else {
+        } else if is_keyword(self.token) {
             let text = format!("{:?}", self.token)
                 .trim_end_matches("Keyword")
                 .to_lowercase();
@@ -34,6 +34,14 @@ impl Parser {
                 NodeData::Identifier(IdentifierData { text }),
                 TextRange::new(pos, end),
             ))
+        } else {
+            // Go createIdentifierWithDiagnostic：报 Identifier expected，
+            // 给缺失名且不消费当前 token（吞掉会破坏语句边界恢复）
+            self.parse_error_at_current_token(
+                tsox_core::diagnostics::X_0_EXPECTED,
+                &[token_to_string(SyntaxKind::Identifier)],
+            );
+            self.missing_identifier_expression()
         }
     }
 

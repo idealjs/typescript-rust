@@ -243,9 +243,14 @@ impl Parser {
             let question_token = self.create_token_node();
             self.next_token();
             let when_true = self.parse_expression();
-            let colon_token = self.create_token_node();
-            self.expect(SyntaxKind::ColonToken);
-            let when_false = self.parse_assignment_expression();
+            // Go parseConditionalExpressionRest：冒号缺失时报错并给缺失
+            // token，false 分支用缺失标识符（不吞后续语句）
+            let colon_token = self.parse_expected_token_colon();
+            let when_false = if colon_token.end() > colon_token.pos() {
+                self.parse_assignment_expression()
+            } else {
+                self.missing_identifier_expression()
+            };
             let end = when_false.end();
             expr = Arc::new(Node::with_loc(
                 SyntaxKind::ConditionalExpression,

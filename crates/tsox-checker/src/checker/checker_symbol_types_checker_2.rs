@@ -13,9 +13,25 @@ impl Checker {
         symbol: &Arc<Symbol>,
     ) -> Option<Arc<Type>> {
         use tsox_frontend::ast::NodeData;
+        // 合并符号（UMD 全局 export as namespace + declare global 变量）声明
+        // 列表混有非变量声明：优先取变量/属性/参数类声明
         let decl = symbol
-            .value_declaration
-            .clone()
+            .declarations
+            .iter()
+            .find(|d| {
+                matches!(
+                    d.data,
+                    NodeData::VariableDeclaration(_)
+                        | NodeData::PropertyDeclaration(_)
+                        | NodeData::PropertySignatureDeclaration(_)
+                        | NodeData::ParameterDeclaration(_)
+                        | NodeData::BindingElement(_)
+                        | NodeData::EnumMember(_)
+                        | NodeData::JsxAttribute(_)
+                )
+            })
+            .cloned()
+            .or_else(|| symbol.value_declaration.clone())
             .or_else(|| symbol.declarations.first().cloned())?;
         let type_node_and_init: (Option<Arc<Node>>, Option<Arc<Node>>) = match &decl.data {
             // 函数表达式/箭头函数变量（const getProps = () => {}）：按需建型并挂 expando
@@ -99,7 +115,7 @@ impl Checker {
                         Some(Arc::clone(&t));
                     return Some(t);
                 }
-                let placeholder = self.get_any_type();
+                let placeholder = self.error_type();
                 let existing = self
                     .value_symbol_links
                     .get_or_default(symbol)
@@ -136,7 +152,7 @@ impl Checker {
                 return Some(self.get_unknown_type());
             }
             if decl.kind == SyntaxKind::VariableDeclaration {
-                let placeholder = self.get_any_type();
+                let placeholder = self.error_type();
                 let existing = self
                     .value_symbol_links
                     .get_or_default(symbol)
@@ -159,6 +175,20 @@ impl Checker {
                         t
                     }
                 });
+                // 环污染：结果成员含 error 标记（重入产物）→ 整体丢弃返 any
+                let polluted = t.as_ref().is_some_and(|t| {
+                    t.as_structured().is_some_and(|s| {
+                        s.properties.iter().any(|p| {
+                            self.value_symbol_links
+                                .get(p)
+                                .and_then(|l| l.resolved_type.as_ref())
+                                .is_some_and(|t| crate::checker::utilities::is_type_error(t))
+                        })
+                    })
+                });
+                if polluted {
+                    return Some(self.get_any_type());
+                }
                 match &t {
                     Some(t) => {
                         self.value_symbol_links.get_or_default(symbol).resolved_type =
@@ -173,7 +203,7 @@ impl Checker {
             return None;
         }
 
-        let placeholder = self.get_any_type();
+        let placeholder = self.error_type();
         let existing = self
             .value_symbol_links
             .get_or_default(symbol)
@@ -262,10 +292,13 @@ impl Checker {
         match &result {
             Some(t) => {
                 // 递归类型在构建窗口内经环断路器拿到 in-flight error：不驻留，
-                // 留 None 待窗口关闭后重试（节点缓存届时为完整结果）
+                // 恢复窗口前状态（占位 any 泄漏会把合并符号永久定格为 any，
+                // 如 UMD 全局 + declare global const 的 typeof 链）
                 if !crate::checker::utilities::is_type_error(t) {
                     self.value_symbol_links.get_or_default(symbol).resolved_type =
                         Some(Arc::clone(t));
+                } else {
+                    self.value_symbol_links.get_or_default(symbol).resolved_type = existing;
                 }
             }
             None => {

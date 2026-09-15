@@ -31,7 +31,29 @@ impl Binder {
             NodeData::InterfaceDeclaration(data) => self.node_text(&data.name),
             NodeData::TypeAliasDeclaration(data) => self.node_text(&data.name),
             NodeData::EnumDeclaration(data) => self.node_text(&data.name),
-            NodeData::ModuleDeclaration(data) => self.node_text(&data.name),
+            NodeData::ModuleDeclaration(data) => {
+                let name_text = self.node_text(&data.name);
+                // Go getDeclarationName：带 import attributes 的 pattern ambient 模块
+                // 用唯一名（~pattern@id）避免同名 pattern 在 bind 期合并
+                let file_text = self
+                    .current_source_file
+                    .as_ref()
+                    .map(|f| f.text.as_str())
+                    .unwrap_or("");
+                if data.name.kind == SyntaxKind::StringLiteral
+                    && name_text.matches('*').count() == 1
+                    && module_declaration_has_with_clause(
+                        file_text,
+                        node,
+                        &data.name,
+                        data.body.as_ref(),
+                    )
+                {
+                    format!("~{name_text}@pattern@{}", node.id())
+                } else {
+                    name_text
+                }
+            }
             NodeData::ParameterDeclaration(data) => {
                 if data.name.kind == SyntaxKind::ThisKeyword {
                     "this".to_string()
@@ -54,19 +76,19 @@ impl Binder {
                 },
                 |n| self.node_text(n),
             ),
-            NodeData::PropertyDeclaration(data) => self.node_text(&data.name),
             NodeData::JsxAttribute(data) => data
                 .name
                 .jsx_namespaced_name_text()
                 .unwrap_or_else(|| self.node_text(&data.name)),
-            NodeData::MethodDeclaration(data) => self.node_text(&data.name),
-            NodeData::MethodSignatureDeclaration(data) => self.node_text(&data.name),
-            NodeData::PropertySignatureDeclaration(data) => self.node_text(&data.name),
-            NodeData::PropertyAssignment(data) => self.node_text(&data.name),
+            NodeData::MethodDeclaration(data) => self.member_name_text(&data.name),
+            NodeData::MethodSignatureDeclaration(data) => self.member_name_text(&data.name),
+            NodeData::PropertySignatureDeclaration(data) => self.member_name_text(&data.name),
+            NodeData::PropertyAssignment(data) => self.member_name_text(&data.name),
             NodeData::ShorthandPropertyAssignment(data) => self.node_text(&data.name),
             NodeData::EnumMember(data) => self.node_text(&data.name),
-            NodeData::GetAccessorDeclaration(data) => self.node_text(&data.name),
-            NodeData::SetAccessorDeclaration(data) => self.node_text(&data.name),
+            NodeData::GetAccessorDeclaration(data) => self.member_name_text(&data.name),
+            NodeData::SetAccessorDeclaration(data) => self.member_name_text(&data.name),
+            NodeData::PropertyDeclaration(data) => self.member_name_text(&data.name),
             NodeData::TypeParameterDeclaration(data) => self.node_text(&data.name),
 
             NodeData::ImportEqualsDeclaration(data) => self.node_text(&data.name),
@@ -128,4 +150,67 @@ impl Binder {
             _ => String::new(),
         }
     }
+
+    /// 成员声明名：计算属性名为 `Symbol.<知名符号>` 形态时用内部名
+    /// `__@<name>`（Go getDeclarationName 的 well-known symbol 分支等价，
+    /// 去掉 Go 的 @symbolId 后缀，两端一致即可命中）
+    pub(crate) fn member_name_text(&self, name: &Arc<Node>) -> String {
+        if name.kind == SyntaxKind::ComputedPropertyName
+            && let NodeData::ComputedPropertyName(cd) = &name.data
+            && let Some(internal) = well_known_symbol_member_name(&cd.expression)
+        {
+            return internal;
+        }
+        self.node_text(name)
+    }
+}
+
+pub(crate) fn well_known_symbol_member_name(expr: &Arc<Node>) -> Option<String> {
+    if let NodeData::PropertyAccessExpression(pa) = &expr.data
+        && let NodeData::Identifier(base) = &pa.expression.data
+        && base.text == "Symbol"
+        && pa.name.kind == SyntaxKind::Identifier
+    {
+        let prop = match &pa.name.data {
+            NodeData::Identifier(id) => id.text.as_str(),
+            _ => return None,
+        };
+        if matches!(
+            prop,
+            "iterator"
+                | "asyncIterator"
+                | "custom"
+                | "dispose"
+                | "asyncDispose"
+                | "hasInstance"
+                | "isConcatSpreadable"
+                | "match"
+                | "matchAll"
+                | "replace"
+                | "search"
+                | "species"
+                | "split"
+                | "toPrimitive"
+                | "toStringTag"
+                | "unscopables"
+        ) {
+            return Some(format!("__@{prop}"));
+        }
+    }
+    None
+}
+
+pub(crate) fn module_declaration_has_with_clause(
+    source_text: &str,
+    node: &Arc<Node>,
+    name: &Arc<Node>,
+    body: Option<&Arc<Node>>,
+) -> bool {
+    let start = name.loc.end().min(source_text.len());
+    let end = body
+        .map(|b| b.loc.pos())
+        .unwrap_or(node.loc.end())
+        .max(start)
+        .min(source_text.len());
+    source_text[start..end].trim_start().starts_with("with")
 }

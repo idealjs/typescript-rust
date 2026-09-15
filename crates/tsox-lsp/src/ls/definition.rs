@@ -112,6 +112,11 @@ pub fn get_declarations_from_type(ty: &tsox_checker::checker::Type) -> Vec<Arc<N
     Vec::new()
 }
 
+#[doc(hidden)]
+pub fn find_deepest_node_for_probe(node: &Arc<Node>, offset: usize) -> Arc<Node> {
+    find_deepest_node(node, offset)
+}
+
 fn find_deepest_node(node: &Arc<Node>, offset: usize) -> Arc<Node> {
     let mut deepest = Arc::clone(node);
     loop {

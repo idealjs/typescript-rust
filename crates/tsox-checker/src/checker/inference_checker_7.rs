@@ -200,6 +200,11 @@ impl Checker {
         if self.is_from_inference_blocked_source(source) {
             return;
         }
+        // NoInfer 形态不产候选：Go 检查期对 NoInfer 包裹的上下文成员解析为
+        // never/零候选（终值回退约束或 unknown），此处按形态守卫等价实现
+        if self.is_no_infer_type(source) {
+            return;
+        }
 
         let inference_idx = state.inferences.iter().position(|info| {
             crate::checker::utilities::type_parameters_match(&info.type_parameter, target)

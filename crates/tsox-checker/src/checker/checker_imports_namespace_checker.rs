@@ -87,7 +87,14 @@ impl Checker {
             NodeData::Identifier(id) => id.text.clone(),
             NodeData::StringLiteral(s) => s.text.clone(),
             NodeData::NumericLiteral(n) => n.text.clone(),
-            NodeData::ComputedPropertyName(_) => {
+            NodeData::ComputedPropertyName(cd) => {
+                // `Symbol.<知名符号>` 计算成员用内部名 `__@<name>`
+                //（与 binder member_name_text 一致，两侧命中同一键）
+                if let Some(internal) =
+                    crate::binder::symbols_binder_4::well_known_symbol_member_name(&cd.expression)
+                {
+                    return internal;
+                }
                 let file = self
                     .get_source_file_of_node(node)
                     .or_else(|| self.current_file.clone());

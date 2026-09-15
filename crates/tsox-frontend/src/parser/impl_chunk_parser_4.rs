@@ -14,7 +14,7 @@ impl Parser {
             ParsingContext::SwitchClauses => {
                 self.token == SyntaxKind::CaseKeyword || self.token == SyntaxKind::DefaultKeyword
             }
-            ParsingContext::TypeMembers => !self.is_list_terminator(context),
+            ParsingContext::TypeMembers => self.look_ahead_type_member_start(),
             ParsingContext::ClassMembers => {
                 self.look_ahead_class_member_start()
                     || (self.token == SyntaxKind::SemicolonToken && !in_error_recovery)
@@ -225,6 +225,7 @@ impl Parser {
                 | SyntaxKind::SlashEqualsToken
                 | SyntaxKind::Identifier
         ) || self.token == SyntaxKind::ImportKeyword
+        || self.is_identifier()
     }
 
     #[allow(dead_code)]

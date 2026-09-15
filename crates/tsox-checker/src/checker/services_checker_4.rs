@@ -36,8 +36,88 @@ impl Checker {
     // Go getExportsOfModuleWorker：export= 先归一，visit 递归展开 export * 链
     fn get_exports_of_module_worker(&mut self, module_symbol: &Arc<Symbol>) -> SymbolTable {
         let module_symbol = self.resolve_external_module_symbol(module_symbol, false);
+        if let Some(t) = self.json_module_exports(&module_symbol) {
+            return t;
+        }
+        if let Some(t) = self.js_module_exports(&module_symbol) {
+            return t;
+        }
         let mut visited: Vec<Arc<Symbol>> = Vec::new();
         self.visit_module_exports(&module_symbol, &mut visited)
+    }
+
+    /// JS 模块 `module.exports = <非实体表达式>`（foo() 调用等）：named
+    /// exports = 右侧表达式类型的属性成员（Go 对 js export= 非别名右侧
+    /// 经其类型暴露成员；实体右侧仍走符号归一路径）
+    pub(crate) fn js_module_exports(&mut self, module_symbol: &Arc<Symbol>) -> Option<SymbolTable> {
+        let file_node = module_symbol
+            .declarations
+            .iter()
+            .find(|d| d.kind == SyntaxKind::SourceFile)?;
+        let file = self.get_source_file_of_node(file_node)?;
+        if !tsox_frontend::ast::is_source_file_js(&file) {
+            return None;
+        }
+        let ee = module_symbol
+            .exports
+            .get(tsox_frontend::ast::INTERNAL_SYMBOL_NAME_EXPORT_EQUALS)?;
+        let right = ee.declarations.iter().find_map(|d| match &d.data {
+            NodeData::BinaryExpression(be) => Some(Arc::clone(&be.right)),
+            NodeData::ExportAssignment(ea) => Some(Arc::clone(&ea.expression)),
+            _ => None,
+        })?;
+        if matches!(
+            right.kind,
+            SyntaxKind::Identifier | SyntaxKind::QualifiedName | SyntaxKind::PropertyAccessExpression
+        ) {
+            return None;
+        }
+        let t = self.get_type_of_node(&right);
+        let mut table = SymbolTable::default();
+        for p in self.get_apparent_properties(&t) {
+            table.entries.insert(p.name.clone(), Arc::clone(&p));
+        }
+        if table.entries.is_empty() {
+            return None;
+        }
+        Some(table)
+    }
+
+    /// Go：resolveJsonModule 下 json 模块的 named exports = 顶层对象属性
+    ///（`import { j } from "./j.json"`；node16/next ESM 除外）。
+    /// 实现取 export= 目标类型的属性成员并驻 exports
+    pub(crate) fn json_module_exports(&mut self, module_symbol: &Arc<Symbol>) -> Option<SymbolTable> {
+        let file_node = module_symbol
+            .declarations
+            .iter()
+            .find(|d| d.kind == SyntaxKind::SourceFile)?;
+        let file = self.get_source_file_of_node(file_node)?;
+        if !tsox_frontend::ast::is_json_source_file(&file) {
+            return None;
+        }
+        let target = self.resolve_external_module_symbol_go(module_symbol);
+        // json 文件无 export= 声明：顶层对象字面量表达式即模块的值，
+        // named exports = 其属性成员
+        let t = if Arc::ptr_eq(&target, module_symbol) {
+            let obj = match &file_node.data {
+                NodeData::SourceFile(sf) => sf.statements.iter().find_map(|s| match &s.data {
+                    NodeData::ExpressionStatement(es) => Some(Arc::clone(&es.expression)),
+                    _ => None,
+                }),
+                _ => None,
+            }?;
+            self.get_type_of_node(&obj)
+        } else {
+            self.get_type_of_symbol(&target)
+        };
+        let mut table = SymbolTable::default();
+        for p in self.get_apparent_properties(&t) {
+            table.entries.insert(p.name.clone(), Arc::clone(&p));
+        }
+        if table.entries.is_empty() {
+            return None;
+        }
+        Some(table)
     }
 
     fn visit_module_exports(
@@ -97,7 +177,6 @@ impl Checker {
         if Arc::ptr_eq(&export_equals, module_symbol) {
             return;
         }
-
         let type_of_symbol = self.get_type_of_symbol(&export_equals);
         if !self.should_treat_properties_of_external_module_as_exports(&type_of_symbol) {
             return;

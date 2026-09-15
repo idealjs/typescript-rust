@@ -166,6 +166,26 @@ impl Checker {
             let mut symbol = self.resolve_qualified_symbol_traced(left)?;
             let path_so_far = qualified_name_text(left);
             symbol = self.resolve_alias_base(symbol);
+            // re-export 链（import { foo } → export { foo } → import * as foo）
+            // 需循环 follow 到终点（namespace import 符号）才能查成员
+            let mut alias_guard = 0;
+            while symbol.flags == SymbolFlags::Alias && alias_guard < 10 {
+                let next = self.resolve_alias_base(Arc::clone(&symbol));
+                if !Arc::ptr_eq(&next, &symbol) {
+                    symbol = next;
+                    alias_guard += 1;
+                    continue;
+                }
+                // binder 未挂 export_symbol 的 import 别名：检查期解析成员
+                //（import {P as Q} from "a" → a 的导出 P → 其命名空间导入模块）
+                match self.resolve_import_alias_target_symbol(&symbol) {
+                    Some(resolved) if !Arc::ptr_eq(&resolved, &symbol) => {
+                        symbol = resolved;
+                        alias_guard += 1;
+                    }
+                    _ => break,
+                }
+            }
 
             if symbol.flags == SymbolFlags::Alias
                 && let Some(module_sym) = self.resolve_import_alias_module(&symbol)
@@ -205,7 +225,11 @@ impl Checker {
                     let target = self.resolve_identifier(&ea.expression);
                     self.pop_scope();
                     if let Some(target) = target
-                        && target.flags.contains(SymbolFlags::ValueModule)
+                        // Go getExportsOfSymbol：export= 目标不论实例化状态
+                        // （纯类型命名空间 NamespaceModule 同样可被穿透查找）
+                        && target.flags.intersects(
+                            SymbolFlags::ValueModule | SymbolFlags::NamespaceModule,
+                        )
                     {
                         next = target
                             .exports

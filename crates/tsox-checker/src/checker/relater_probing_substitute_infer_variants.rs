@@ -112,8 +112,11 @@ impl Checker {
             return Arc::clone(t);
         };
         let new_check = self.substitute_infer_type_parameters(&old_check, params, substitutions);
-        if Arc::ptr_eq(&new_check, &old_check) || type_contains_type_parameter(&new_check) {
+        if Arc::ptr_eq(&new_check, &old_check) {
             return Arc::clone(t);
+        }
+        if type_contains_type_parameter(&new_check) {
+            return self.rebuild_deferred_conditional(t, ct, new_check, params, substitutions);
         }
         // Go getConditionalType：分支结果 = instantiateType(branchNode, trueMapper)，
         // 解析出的分支再用 mapper 实例化（T→实参）；嵌套别名引用在实例化中
@@ -138,5 +141,57 @@ impl Checker {
             Some(branch) => self.substitute_infer_type_parameters(&branch, params, substitutions),
             None => Arc::clone(t),
         }
+    }
+
+    /// 挂起条件型代入后仍含类型参数（别名体 T→TActor 这类外层形参）：Go
+    /// instantiateType 对 deferred conditional 实例化 check/extends 并携带
+    /// mapper；这里重建携带代入映射的新挂起条件，映射并入
+    /// creation_type_argument_stack 供后续分支解析时回放
+    fn rebuild_deferred_conditional(
+        &mut self,
+        t: &Arc<Type>,
+        ct: &ConditionalTypeData,
+        new_check: Arc<Type>,
+        params: &[Arc<Type>],
+        substitutions: &[Arc<Type>],
+    ) -> Arc<Type> {
+        let new_extends = ct
+            .extends_type
+            .as_ref()
+            .map(|e| self.substitute_infer_type_parameters(e, params, substitutions));
+        let mut creation_stack = ct.creation_type_argument_stack.clone();
+        let mut frame: HashMap<usize, Arc<Type>> = HashMap::new();
+        for (i, p) in params.iter().enumerate() {
+            if let Some(sym) = &p.symbol {
+                frame.insert(
+                    Arc::as_ptr(sym) as usize,
+                    Arc::clone(&substitutions[i.min(substitutions.len() - 1)]),
+                );
+            }
+        }
+        if !frame.is_empty() {
+            creation_stack.push(frame);
+        }
+        let mut rebuilt = Type::new(
+            t.flags,
+            TypeData::Conditional(ConditionalTypeData {
+                constrained: ConstrainedTypeData::default(),
+                root: ct.root.clone(),
+                check_type: Some(new_check),
+                extends_type: new_extends,
+                resolved_true_type: OnceLock::new(),
+                resolved_false_type: OnceLock::new(),
+                resolved_inferred_true_type: OnceLock::new(),
+                resolved_default_constraint: OnceLock::new(),
+                resolved_constraint_of_distributive: OnceLock::new(),
+                mapper: ct.mapper.clone(),
+                combined_mapper: ct.combined_mapper.clone(),
+                creation_type_argument_stack: creation_stack,
+            }),
+        );
+        rebuilt.symbol = t.symbol.clone();
+        rebuilt.alias = t.alias.clone();
+        rebuilt.object_flags = t.object_flags;
+        Arc::new(rebuilt)
     }
 }

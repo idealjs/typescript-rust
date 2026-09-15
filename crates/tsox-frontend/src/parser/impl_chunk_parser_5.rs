@@ -252,16 +252,26 @@ impl Parser {
             && (self.token == SyntaxKind::Identifier || is_keyword(self.token))
             && self.next_token_is_identifier_or_keyword_on_same_line()
         {
-            let pos = self.token_pos();
-            return Arc::new(Node::with_loc(
-                SyntaxKind::Identifier,
-                NodeData::Identifier(IdentifierData {
-                    text: String::new(),
-                }),
-                TextRange::new(pos, pos),
-            ));
+            return self.missing_identifier_at_current();
         }
-        self.parse_property_name()
+        if self.token == SyntaxKind::PrivateIdentifier
+            || self.token == SyntaxKind::Identifier
+            || is_keyword(self.token)
+        {
+            return self.parse_property_name();
+        }
+        self.missing_identifier_at_current()
+    }
+
+    fn missing_identifier_at_current(&self) -> Arc<Node> {
+        let pos = self.token_pos();
+        Arc::new(Node::with_loc(
+            SyntaxKind::Identifier,
+            NodeData::Identifier(IdentifierData {
+                text: String::new(),
+            }),
+            TextRange::new(pos, pos),
+        ))
     }
 
     pub(crate) fn next_token_is_identifier_or_keyword_on_same_line(&self) -> bool {

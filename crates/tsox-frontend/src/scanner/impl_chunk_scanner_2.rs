@@ -271,10 +271,11 @@ impl Scanner {
         self.token_pos = self.pos;
         self.full_start_pos = self.pos;
 
-        let mut has_substitution = false;
+        // Go ReScanTemplateToken：段落类型只由结束原因决定——闭反引号=Tail，
+        // `${`=Middle；前导 `}` 只是「来自替换」的起点，不决定段落类型
+        let mut ended_at_substitution = false;
         if self.pos < self.end && self.text.as_bytes()[self.pos] == b'}' {
             self.pos += 1;
-            has_substitution = true;
         }
         while self.pos < self.end {
             let c = self.text.as_bytes()[self.pos] as char;
@@ -287,7 +288,7 @@ impl Scanner {
                 && self.text.as_bytes()[self.pos + 1] as char == '{'
             {
                 self.pos += 2;
-                has_substitution = true;
+                ended_at_substitution = true;
                 break;
             }
             if c == '\n' || c == '\r' {
@@ -301,7 +302,7 @@ impl Scanner {
         }
 
         self.token_end = self.pos;
-        self.token = if has_substitution {
+        self.token = if ended_at_substitution {
             SyntaxKind::TemplateMiddle
         } else {
             SyntaxKind::TemplateTail

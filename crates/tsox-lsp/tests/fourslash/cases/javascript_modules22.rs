@@ -24,7 +24,7 @@ import def, {sausages} from "./mod2"
 a./**/"#;
     let mut s = Session::new_for_test("javascriptModules22", content);
     fourslash::verify_completions_include_exclude_at(&mut s, Some(""), &["toString"], &[]);
-    // TODO: f.Backspace(t, 2)
+    fourslash::backspace(&mut s, 2);
     fourslash::insert(&mut s, "def.");
     fourslash::verify_completions_include_exclude_at(&mut s, None, &["name"], &[]);
     fourslash::insert(&mut s, "name;\nsausages.");

@@ -47,6 +47,7 @@ pub(crate) mod completions_definition_solely;
 pub(crate) mod completions_helpers;
 pub(crate) mod completions_import_export_clause;
 pub(crate) mod completions_jsdoc;
+pub(crate) mod completions_jsdoc_params;
 pub(crate) mod completions_jsx_attributes;
 pub(crate) mod completions_jsx_children;
 pub(crate) mod completions_jsx_closing_tag;

@@ -13,6 +13,6 @@ await(1);
     fourslash::go_to_marker(&mut s, "1");
     fourslash::insert(&mut s, "export {};");
     fourslash::verify_number_of_errors_in_current_file(&mut s, 0);
-    // TODO: f.ReplaceLine(t, 1, "")
+    fourslash::replace_line(&mut s, 1, "");
     fourslash::verify_number_of_errors_in_current_file(&mut s, 1);
 }

@@ -210,4 +210,12 @@ impl Checker {
         }
         self.type_node_links.get_or_default(node).resolved_type = Some(t);
     }
+
+    /// 环断路窗口内预缓存的 error 会永久掩盖窗口外的正确重解析；
+    /// 别名/接口解析层发现 error 结果时清节点缓存放行后续重算
+    pub(crate) fn uncache_type_node(&mut self, node: &Arc<Node>) {
+        if let Some(links) = self.type_node_links.get_mut(node) {
+            links.resolved_type = None;
+        }
+    }
 }

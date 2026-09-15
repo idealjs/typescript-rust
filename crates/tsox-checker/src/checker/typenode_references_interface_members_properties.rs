@@ -13,7 +13,8 @@ impl Checker {
             unreachable!()
         };
         let name = self.get_property_name_from_node(&data.name);
-        if name.is_empty() {
+        // 空串字面量名 `"": any` 是合法属性；仅计算属性取名失败才跳过
+        if name.is_empty() && matches!(&data.name.data, NodeData::ComputedPropertyName(_)) {
             return;
         }
         let mut prop_type = self.get_type_from_type_node(&data.type_node);
@@ -69,7 +70,8 @@ impl Checker {
             unreachable!()
         };
         let name = self.get_property_name_from_node(&data.name);
-        if name.is_empty() {
+        // 空串字面量名 `"": any` 是合法属性；仅计算属性取名失败才跳过
+        if name.is_empty() && matches!(&data.name.data, NodeData::ComputedPropertyName(_)) {
             return;
         }
 
@@ -137,7 +139,8 @@ impl Checker {
             return;
         }
         let name = self.get_property_name_from_node(&data.name);
-        if name.is_empty() {
+        // 空串字面量名 `"": any` 是合法属性；仅计算属性取名失败才跳过
+        if name.is_empty() && matches!(&data.name.data, NodeData::ComputedPropertyName(_)) {
             return;
         }
         let mut prop_type = match data.type_node.as_ref() {
@@ -233,7 +236,8 @@ impl Checker {
             return;
         }
         let name = self.get_property_name_from_node(&data.name);
-        if name.is_empty() {
+        // 空串字面量名 `"": any` 是合法属性；仅计算属性取名失败才跳过
+        if name.is_empty() && matches!(&data.name.data, NodeData::ComputedPropertyName(_)) {
             return;
         }
 

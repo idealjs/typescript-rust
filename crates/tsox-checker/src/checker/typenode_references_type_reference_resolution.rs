@@ -110,8 +110,12 @@ impl Checker {
                 self.in_static_member_type = false;
                 let found = self.resolve_alias_body(symbol);
                 self.in_static_member_type = saved_static;
-                self.type_alias_links.get_or_default(symbol).declared_type =
-                    Some(Arc::clone(&found));
+                // 环窗口内解析出的 error 不驻留声明型缓存（Go 仅缓存完成的
+                // 别名解析；error 驻留会永久掩盖窗口外的正确结果）
+                if !crate::checker::utilities::is_type_error(&found) {
+                    self.type_alias_links.get_or_default(symbol).declared_type =
+                        Some(Arc::clone(&found));
+                }
                 found
             })
         } else {
@@ -146,8 +150,10 @@ impl Checker {
                     self.in_static_member_type = false;
                     let found = self.resolve_alias_body(symbol);
                     self.in_static_member_type = saved_static;
-                    self.type_alias_links.get_or_default(symbol).declared_type =
-                        Some(Arc::clone(&found));
+                    if !crate::checker::utilities::is_type_error(&found) {
+                        self.type_alias_links.get_or_default(symbol).declared_type =
+                            Some(Arc::clone(&found));
+                    }
                     found
                 })
             };

@@ -43,6 +43,51 @@ pub struct CompletionDataData {
 }
 
 impl LanguageService {
+    #[doc(hidden)]
+    pub fn debug_completion_labels(&self, file_name: &str, offset: usize) -> Vec<String> {
+        let path = crate::fourslash::session::project_path(file_name);
+        let uri = crate::lsp::lsproto_lsp_uri::DocumentUri(format!("file://{path}"));
+        let (_, source_file) = self.get_program_and_file(&uri);
+        let (line, character) = crate::ls::folding::offset_to_line_col_pub(&source_file.line_map, offset);
+        self.provide_completion(&uri, crate::lsp::lsproto_lsp_basic::Position { line, character }, &crate::ls::types_completion::CompletionContext::default()).items.into_iter().map(|i| i.label).collect()
+    }
+
+    #[doc(hidden)]
+    pub fn debug_quick_info(&self, file_name: &str, offset: usize) -> Option<String> {
+        let path = crate::fourslash::session::project_path(file_name);
+        let uri = crate::lsp::lsproto_lsp_uri::DocumentUri(format!("file://{path}"));
+        let (_, source_file) = self.get_program_and_file(&uri);
+        let (line, character) = crate::ls::folding::offset_to_line_col_pub(&source_file.line_map, offset);
+        let hover = self.provide_hover(&uri, crate::lsp::lsproto_lsp_basic::Position { line, character })?;
+        hover.contents.markup_content.map(|c| c.value)
+    }
+
+    #[doc(hidden)]
+    pub fn debug_contextual_type(&self, file_name: &str, offset: usize, ignore_node_inferences: bool) -> Option<String> {
+        let path = crate::fourslash::session::project_path(file_name);
+        let uri = crate::lsp::lsproto_lsp_uri::DocumentUri(format!("file://{path}"));
+        let (program, source_file) = self.get_program_and_file(&uri);
+        let node = super::definition::find_deepest_node_for_probe(&source_file.node, offset);
+        let mut checker = super::completions_helpers::program_build_checker(&program);
+        let flags = if ignore_node_inferences {
+            tsox_checker::checker::types::ContextFlags::IgnoreNodeInferences
+        } else {
+            tsox_checker::checker::types::ContextFlags::None
+        };
+        checker.get_contextual_type(&node, flags).map(|t| checker.type_to_string(&t))
+    }
+
+    #[doc(hidden)]
+    pub fn debug_scan_tokens(&self, file_name: &str, from: usize, to: usize) -> Vec<(String, usize, usize)> {
+        let path = crate::fourslash::session::project_path(file_name);
+        let uri = crate::lsp::lsproto_lsp_uri::DocumentUri(format!("file://{path}"));
+        let (_, source_file) = self.get_program_and_file(&uri);
+        super::completions_context::scan_tokens(&source_file.text, false, from, to)
+            .into_iter()
+            .map(|t| (format!("{:?}", t.kind), t.pos, t.end))
+            .collect()
+    }
+
     pub fn provide_completion(
         &self,
         document_uri: &DocumentUri,
@@ -51,7 +96,16 @@ impl LanguageService {
     ) -> CompletionList {
         let (_program, source_file) = self.get_program_and_file(document_uri);
         let offset = lsp_position_to_offset(&source_file.line_map, &position);
-        match self.get_completions_at_position(&source_file, offset, None, false) {
+        let result = self.get_completions_at_position(&source_file, offset, None, false);
+        if std::env::var_os("TSOX_DEBUG_CMP").is_some() {
+            eprintln!(
+                "[pc] offset={} items={} err={:?}",
+                offset,
+                result.as_ref().map(|l| l.items.len()).unwrap_or(0),
+                result.as_ref().err()
+            );
+        }
+        match result {
             Ok(list) => ensure_item_data(&source_file.file_name, offset, list),
             Err(_) => CompletionList::default(),
         }
@@ -66,8 +120,14 @@ impl LanguageService {
     ) -> Result<CompletionList, String> {
         let mut node = find_deepest_node(&file.node, position);
         // EOF 边界（未闭合串跨到文件尾）：offset==全部节点 end 时 deepest 退化
-        // 为 SourceFile；按 Go preceding-token 语义回看 offset-1 定位 token
-        if node.kind == tsox_frontend::ast::SyntaxKind::SourceFile && position > 0 {
+        // 为 SourceFile/EndOfFile；按 Go preceding-token 语义回看 offset-1 定位
+        // token（IsInString：position==未闭合 token end 仍算串内）
+        if matches!(
+            node.kind,
+            tsox_frontend::ast::SyntaxKind::SourceFile
+                | tsox_frontend::ast::SyntaxKind::EndOfFile
+        ) && position > 0
+        {
             let boundary = find_deepest_node(&file.node, position - 1);
             // EOF 回看仅用于 token 恢复（未闭合串/点）；回看命中标识符等
             // 正常 token 时保持原位（extends 子句 EOF 补全仍走 scope 路径）
@@ -124,7 +184,7 @@ impl LanguageService {
 
         // Go isInComment 的 JSDoc 通道：标签名位只出标签补全；import tag 内
         // 出说明符/属性值字符串补全；类型表达式内继续常规管线；其余空
-        match crate::ls::completions_jsdoc::jsdoc_position_completions(&file, jsx, position) {
+        match crate::ls::completions_jsdoc::jsdoc_position_completions(&mut checker, &file, jsx, position) {
             crate::ls::completions_jsdoc::JsDocPosition::Labels(labels) => {
                 let items = labels
                     .into_iter()
@@ -162,6 +222,35 @@ impl LanguageService {
                     items,
                 });
             }
+            crate::ls::completions_jsdoc::JsDocPosition::TypeDotMember(te) => {
+                let text = &file.text;
+                let mut q = position.min(text.len());
+                while q > 0 && text[..q].chars().last().is_some_and(|c| c.is_whitespace()) {
+                    q -= text[..q].chars().last().unwrap().len_utf8();
+                }
+                if q > 0 && &text[q - 1..q] == "." {
+                    // jsdoc 类型树是离体子树（无 SourceFile 父链）：临时以
+                    // 请求文件为当前文件，相对说明符解析才有目录基准
+                    let saved_file = checker.current_file.replace(Arc::clone(&file));
+                    let symbols =
+                        crate::ls::completions_members::jsdoc_type_dot_members(&mut checker, &te, q - 1);
+                    checker.current_file = saved_file;
+                    let items = symbols
+                        .iter()
+                        .filter(|s| !s.name.is_empty() && !s.name.starts_with('\u{FE}'))
+                        .map(|s| {
+                            let mut item = symbol_to_completion_item(s);
+                            item.label = member_completion_label(s, text);
+                            item
+                        })
+                        .collect();
+                    return Ok(CompletionList {
+                        is_incomplete: false,
+                        items,
+                    });
+                }
+                return Ok(CompletionList::default());
+            }
             crate::ls::completions_jsdoc::JsDocPosition::Blocked => {
                 return Ok(CompletionList::default());
             }
@@ -174,6 +263,43 @@ impl LanguageService {
                         ..Default::default()
                     })
                     .collect();
+                return Ok(CompletionList {
+                    is_incomplete: false,
+                    items,
+                });
+            }
+            // Go insideJSDocTagTypeExpression：类型位全局符号 + 类型关键字
+            // （KeywordCompletionFiltersTypeKeywords）
+            crate::ls::completions_jsdoc::JsDocPosition::TypeExpression => {
+                let mut symbols = checker.get_symbols_in_scope(
+                    &node,
+                    SymbolFlags::TYPE.union(SymbolFlags::NAMESPACE),
+                );
+                let mut seen: std::collections::HashSet<u64> = std::collections::HashSet::new();
+                symbols.retain(|s| seen.insert(s.id()));
+                let mut items: Vec<CompletionItem> = symbols
+                    .iter()
+                    .filter(|s| !s.name.is_empty() && !s.name.starts_with('\u{FE}'))
+                    .map(|s| symbol_to_completion_item(s))
+                    .collect();
+                let names: std::collections::HashSet<&str> =
+                    symbols.iter().map(|s| s.name.as_str()).collect();
+                for kw in [
+                    "any", "asserts", "bigint", "boolean", "false", "infer", "keyof",
+                    "never", "null", "number", "object", "readonly", "string", "symbol",
+                    "typeof", "true", "undefined", "unique", "unknown", "void",
+                ] {
+                    if !names.contains(kw) {
+                        items.push(CompletionItem {
+                            label: kw.to_string(),
+                            kind: Some(14), // Keyword
+                            sort_text: Some("15".to_string()),
+                            insert_text: Some(kw.to_string()),
+                            insert_text_format: Some(1),
+                            ..Default::default()
+                        });
+                    }
+                }
                 return Ok(CompletionList {
                     is_incomplete: false,
                     items,
@@ -201,7 +327,15 @@ impl LanguageService {
         // Go right-of-dot：位置在 '.'（或 '?.'）之后的成员补全，优先于全局
         // scope 符号（completions.go getTypeScriptMemberSymbols）；点后语境
         // 无成员即空列表，不回退 scope
-        match member_symbols_after_dot(&mut checker, &node, position) {
+        let member_dot = member_symbols_after_dot(&mut checker, &node, position);
+        if std::env::var_os("TSOX_DEBUG_CMP").is_some() {
+            let (kind, cnt) = match &member_dot {
+                MemberDotResult::Dot(s) => ("Dot", s.len()),
+                MemberDotResult::NotDot => ("NotDot", 0),
+            };
+            eprintln!("[md] pos={} node_kind={:?} -> {} {}", position, node.kind, kind, cnt);
+        }
+        match member_dot {
             MemberDotResult::Dot(symbols) => {
                 let items = symbols
                     .iter()

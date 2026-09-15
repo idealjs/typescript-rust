@@ -14,6 +14,7 @@ impl Checker {
         let legacy_decorators = compiler_options.experimental_decorators.is_true();
         let emit_standard_class_fields = compiler_options.get_emit_standard_class_fields();
         let allow_unreachable_code = compiler_options.allow_unreachable_code;
+        let allow_unused_labels = compiler_options.allow_unused_labels;
         let strict_null_checks =
             compiler_options.get_strict_option_value(compiler_options.strict_null_checks);
         let strict_function_types =
@@ -55,6 +56,7 @@ impl Checker {
             instantiation_count: 0,
             instantiation_depth: 0,
             imported_type_resolution: Vec::new(),
+            alias_type_resolution_stack: Vec::new(),
 
             language_version,
             module_kind,
@@ -79,7 +81,10 @@ impl Checker {
                 SymbolFlags::Property.union(SymbolFlags::Transient),
                 "arguments",
             ))),
-            require_symbol: None,
+            require_symbol: Some(Arc::new(Symbol::new(
+                SymbolFlags::Property.union(SymbolFlags::Transient),
+                "require",
+            ))),
             unknown_symbol: None,
             global_this_symbol: None,
 
@@ -201,6 +206,7 @@ impl Checker {
             es_symbol_type: OnceLock::new(),
             void_type: OnceLock::new(),
             never_type: OnceLock::new(),
+            silent_never_type: OnceLock::new(),
             non_primitive_type: OnceLock::new(),
             true_type: OnceLock::new(),
             false_type: OnceLock::new(),
@@ -232,8 +238,13 @@ impl Checker {
             array_type_cache: std::collections::HashMap::new(),
             interface_instantiation_cache: std::collections::HashMap::new(),
             pending_interface_shells: std::collections::HashMap::new(),
+            allow_unused_labels,
+            within_unreachable_code: false,
+            interface_build_depth: 0,
+            reported_unreachable_nodes: std::collections::HashSet::new(),
             typequery_instantiation_cache: std::collections::HashMap::new(),
             attached_type_args_cache: std::collections::HashMap::new(),
+            filling_class_members: std::collections::HashSet::new(),
             array_type_parameter_symbols: None,
             array_member_type_cache: std::collections::HashMap::new(),
             instantiated_member_type_cache: std::collections::HashMap::new(),

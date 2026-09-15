@@ -261,34 +261,48 @@ impl Checker {
         }
 
         let sig = &sigs[0];
-        let params: Vec<String> = sig
-            .parameters
-            .iter()
-            .enumerate()
-            .map(|(i, param)| {
-                let name = param.name.clone();
+        // Go getExpandedParameters：末参是 rest 且其类型为元组时，按元组
+        // 元素展开为具名参数序列（标签取元素 label，回退 rest 符号名_i）
+        let expanded_params = self.tuple_expanded_params(sig);
+        let params: Vec<String> = if let Some(expanded) = expanded_params {
+            expanded
+                .iter()
+                .map(|(name, ty, optional, variadic)| {
+                    let type_str = self.type_to_string_ex(ty, flags);
+                    let prefix = if *variadic { "..." } else { "" };
+                    let question = if *optional { "?" } else { "" };
+                    format!("{prefix}{name}{question}: {type_str}")
+                })
+                .collect()
+        } else {
+            sig.parameters
+                .iter()
+                .enumerate()
+                .map(|(i, param)| {
+                    let name = param.name.clone();
 
-                let param_type = self
-                    .signature_instantiated_param_type(sig, i)
-                    .unwrap_or_else(|| self.get_type_of_symbol(param));
-                let type_str = self
-                    .annotated_param_type_text(param, &param_type)
-                    .unwrap_or_else(|| self.type_to_string_ex(&param_type, flags));
-                let prefix = if i + 1 == sig.parameters.len() && sig.has_rest_parameter() {
-                    "..."
-                } else {
-                    ""
-                };
-                if param
-                    .flags
-                    .contains(tsox_frontend::ast::SymbolFlags::Optional)
-                {
-                    format!("{prefix}{name}?: {type_str}")
-                } else {
-                    format!("{prefix}{name}: {type_str}")
-                }
-            })
-            .collect();
+                    let param_type = self
+                        .signature_instantiated_param_type(sig, i)
+                        .unwrap_or_else(|| self.get_type_of_symbol(param));
+                    let type_str = self
+                        .annotated_param_type_text(param, &param_type)
+                        .unwrap_or_else(|| self.type_to_string_ex(&param_type, flags));
+                    let prefix = if i + 1 == sig.parameters.len() && sig.has_rest_parameter() {
+                        "..."
+                    } else {
+                        ""
+                    };
+                    if param
+                        .flags
+                        .contains(tsox_frontend::ast::SymbolFlags::Optional)
+                    {
+                        format!("{prefix}{name}?: {type_str}")
+                    } else {
+                        format!("{prefix}{name}: {type_str}")
+                    }
+                })
+                .collect()
+        };
         let ret_type = sig
             .resolved_return_type
             .get()

@@ -154,8 +154,17 @@ impl Checker {
 
     pub(crate) fn cannot_find_name_message_for(
         name: &str,
+        node: Option<&Arc<Node>>,
     ) -> Option<&'static tsox_core::diagnostics::Message> {
         use tsox_core::diagnostics::messages_generated as mg;
+        if name == "await"
+            && node.is_some_and(|n| {
+                n.parent()
+                    .is_some_and(|p| p.kind == SyntaxKind::CallExpression)
+            })
+        {
+            return Some(&mg::CANNOT_FIND_NAME_0_DID_YOU_MEAN_TO_WRITE_THIS_IN_AN_ASYNC_FUNCTION);
+        }
         match name {
             "document" | "console" => Some(
                 &mg::CANNOT_FIND_NAME_0_DO_YOU_NEED_TO_CHANGE_YOUR_TARGET_LIBRARY_TRY_CHANGING_THE_LIB_COMPILER_OPTION_TO_INCLUDE_DOM,

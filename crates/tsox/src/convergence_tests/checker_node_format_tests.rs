@@ -48,6 +48,9 @@ pub(crate) fn check_files(
     }
     let fs = Arc::new(BundledFS::new(inner));
     let mut options = CompilerOptions::default();
+    // Go fourslash 基底默认：skipDefaultLibCheck（lib 只作类型来源，
+    // 不对其本身出诊断；避免 lib 全量检查期的解析重入壳污染）
+    options.skip_default_lib_check = tsox_core::core::tristate::Tristate::True;
     configure(&mut options);
     let parsed = ParsedCommandLine {
         file_names: vec![root.to_string()],

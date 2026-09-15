@@ -216,13 +216,19 @@ impl Checker {
                 }
                 Arc::clone(member_sym)
             };
-            self.value_symbol_links.insert(
-                &prop_sym,
-                ValueSymbolLinks {
-                    resolved_type: Some(member_type),
-                    ..Default::default()
-                },
-            );
+            // 环期产物（error）不驻留成员链接（外层 typeof import 链完成后的
+            // 重取才是完整结果）；已有有效值不覆盖（get_type_of_symbol 的
+            // in-flight 占位会被这里无条件清掉）
+            let existing_ok = self
+                .value_symbol_links
+                .get(&prop_sym)
+                .and_then(|l| l.resolved_type.clone())
+                .is_some_and(|t| !crate::checker::utilities::is_type_error(&t));
+            if !existing_ok && !crate::checker::utilities::is_type_error(&member_type) {
+                self.value_symbol_links
+                    .get_or_default(&prop_sym)
+                    .resolved_type = Some(member_type);
+            }
             symbol_table.insert(name.clone(), Arc::clone(&prop_sym));
             props.push(prop_sym);
         }

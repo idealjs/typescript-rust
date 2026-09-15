@@ -35,6 +35,6 @@ export class TransparentCrypto implements ISecretStorageCrypto {
     fourslash::insert(&mut s, "throw new Error('foo');\n");
     fourslash::verify_number_of_errors_in_current_file(&mut s, 1);
     fourslash::go_to_marker(&mut s, "before");
-    // TODO: f.DeleteAtCaret(t, 24)
+    fourslash::delete_at_caret(&mut s, 24);
     fourslash::verify_number_of_errors_in_current_file(&mut s, 0);
 }

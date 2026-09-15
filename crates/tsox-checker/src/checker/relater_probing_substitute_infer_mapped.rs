@@ -70,6 +70,17 @@ impl Checker {
             .as_ref()
             .zip(old_constraint.as_ref())
             .is_some_and(|(n, o)| !Arc::ptr_eq(n, o));
+        if std::env::var_os("TSOX_DEBUG_MAPPED").is_some() && constraint_changed {
+            eprintln!(
+                "[mapped] constraint: {} -> {} (flags {:?})",
+                self.type_to_string(old_constraint.as_ref().unwrap()),
+                new_constraint
+                    .as_ref()
+                    .map(|c| self.type_to_string(c))
+                    .unwrap_or_else(|| "<none>".into()),
+                new_constraint.as_ref().map(|c| c.flags)
+            );
+        }
 
         // Go instantiateMappedType 同态分支：{[P in keyof T]: X} 以 T 的实参分发应用
         if let Some(applied) = self.apply_homomorphic_if_concrete(t, m, params, substitutions) {

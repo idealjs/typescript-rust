@@ -60,8 +60,14 @@ impl Parser {
         };
         let mut parser = Parser::new_with_language_variant(text.clone(), language_variant);
         parser.set_javascript_file(matches!(script_kind, ScriptKind::Js | ScriptKind::Jsx));
-        let statements = parser.parse_list(ParsingContext::SourceElements, Parser::parse_statement);
-        let end_of_file = parser.create_token_node();
+        let (statements, end_of_file) = if matches!(script_kind, ScriptKind::Json) {
+            parser.parse_json_text()
+        } else {
+            let statements =
+                parser.parse_list(ParsingContext::SourceElements, Parser::parse_statement);
+            let end_of_file = parser.create_token_node();
+            (statements, end_of_file)
+        };
         let pos = 0usize;
         let end = end_of_file.end();
 
@@ -126,6 +132,7 @@ impl Parser {
         };
 
         references::set_external_module_indicator(&mut file);
+        crate::parser::reparse_await::reparse_top_level_await(&mut file, &mut parser.diagnostics);
         references::collect_external_module_references(&mut file);
 
         Self::apply_jsdoc_reparser(&mut file);

@@ -272,7 +272,7 @@ impl Checker {
                 if let tsox_frontend::ast::NodeData::ReturnStatement(data) = &node.data {
                     if let Some(expr) = &data.expression {
                         let t = self.get_type_of_node(expr);
-                                                types.push(t);
+                        types.push(t);
                     }
                 }
                 return;

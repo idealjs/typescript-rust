@@ -2,6 +2,55 @@
 
 use crate::checker::checker_impl_chunk_5::*;
 
+fn intersection_properties(checker: &Checker, t: &Arc<Type>) -> Vec<Arc<Symbol>> {
+    let Some(members) = t.types() else {
+        return Vec::new();
+    };
+    let mut order: Vec<String> = Vec::new();
+    let mut by_name: std::collections::HashMap<String, Vec<Arc<Symbol>>> =
+        std::collections::HashMap::new();
+    for m in members {
+        for p in checker.get_properties_of_type(m) {
+            let entry = by_name.entry(p.name.clone()).or_default();
+            if entry.is_empty() {
+                order.push(p.name.clone());
+            }
+            if !entry.iter().any(|x| Arc::ptr_eq(x, &p)) {
+                entry.push(Arc::clone(&p));
+            }
+        }
+    }
+    order
+        .into_iter()
+        .filter_map(|name| {
+            let syms = by_name.get(&name)?;
+            match syms.len() {
+                1 => Some(Arc::clone(&syms[0])),
+                _ => Some(merged_intersection_property(syms)),
+            }
+        })
+        .collect()
+}
+
+fn merged_intersection_property(syms: &[Arc<Symbol>]) -> Arc<Symbol> {
+    let first = &syms[0];
+    let mut merged = Symbol::new(first.flags, first.name.clone());
+    merged.check_flags = first.check_flags;
+    merged.value_declaration = first.value_declaration.clone();
+    let mut seen: std::collections::HashSet<*const Node> = std::collections::HashSet::new();
+    for s in syms {
+        for d in &s.declarations {
+            if seen.insert(Arc::as_ptr(d)) {
+                merged.declarations.push(Arc::clone(d));
+            }
+        }
+    }
+    if let Some(parent) = first.parent() {
+        merged.set_parent(&parent);
+    }
+    Arc::new(merged)
+}
+
 impl Checker {
     pub fn get_string_type(&self) -> Arc<Type> {
         self.string_type()
@@ -73,29 +122,29 @@ impl Checker {
             }
             return props;
         }
-        // Go getPropertiesOfType：交集成员属性合并（同名属性取首个声明，
-        // 完整交集属性合成走 getUnionOrIntersectionProperty）
+        // Go getPropertiesOfType → createUnionOrIntersectionProperty：交集
+        // 同名属性出现在多个成分时合成携带声明并集的符号（服务层按声明
+        // 判「自身以外声明」），单一成分原样返回；结果驻交集缓存
         if t.is_intersection()
-            && let Some(members) = t.types()
+            && let TypeData::Intersection(idata) = &t.data
         {
-            let mut merged: Vec<Arc<Symbol>> = Vec::new();
-            for m in members {
-                for p in self.get_properties_of_type(m) {
-                    if !merged.iter().any(|x| x.name == p.name) {
-                        merged.push(Arc::clone(&p));
-                    }
+            return match idata.resolved_properties.get() {
+                Some(cached) => cached.clone(),
+                None => {
+                    let computed = intersection_properties(self, t);
+                    let _ = idata.resolved_properties.set(computed.clone());
+                    computed
                 }
-            }
-            if !merged.is_empty() {
-                return merged;
-            }
+            };
         }
         if let Some(structured) = t.as_structured() {
-            if !structured.properties.is_empty() {
+            if !structured.properties.is_empty() && !t.object_flags.contains(ObjectFlags::Reference) {
                 return structured.properties.clone();
             }
             // 空壳再水化：递归接口构建窗口内嵌出的 shell 无成员，经符号的
-            // 完整声明型回取（Go deferred 引用的查询期等价）
+            // 完整声明型回取（Go deferred 引用的查询期等价）；引用型
+            //（attach 快照）成员少于声明型时同样回取——填充窗口内的
+            // 中途快照成员残缺
             if let Some(sym) = &t.symbol
                 && sym.flags.intersects(
                     SymbolFlags::Interface | SymbolFlags::Class | SymbolFlags::TypeLiteral,
@@ -107,7 +156,7 @@ impl Checker {
                 && !Arc::ptr_eq(&declared, t)
                 && !crate::checker::utilities::is_type_error(&declared)
                 && let Some(ds) = declared.as_structured()
-                && !ds.properties.is_empty()
+                && ds.properties.len() > structured.properties.len()
             {
                 return ds.properties.clone();
             }

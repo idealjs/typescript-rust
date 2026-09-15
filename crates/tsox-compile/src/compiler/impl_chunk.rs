@@ -169,6 +169,65 @@ pub(crate) fn ambient_module_exists(
     false
 }
 
+/// NodeNext/Node16 下 ESM 文件的无扩展名相对导入由 checker 侧 TS2834 报告，
+/// 加载期的 module-not-found 让位（tsc 同场景只报一条）
+pub(crate) fn node_next_needs_extension(
+    options: &CompilerOptions,
+    file_name: &str,
+    spec: &str,
+    read_file: &dyn Fn(&str) -> Option<String>,
+) -> bool {
+    use tsox_core::core::compiler_options::ModuleKind;
+    if !matches!(
+        options.module,
+        ModuleKind::Node16 | ModuleKind::Node18 | ModuleKind::Node20 | ModuleKind::NodeNext
+    ) {
+        return false;
+    }
+    if tsox_core::tspath::has_extension(spec) {
+        return false;
+    }
+    tsox_tsoptions::tsoptions::implied_node_format_of_file(file_name, read_file)
+        == ModuleKind::ESNext
+}
+
+/// Go TryParsePattern/isPatternMatch：单星号 pattern（"*.asset"）匹配模块说明符
+pub(crate) fn pattern_ambient_module_exists(
+    source_files: &[Arc<tsox_frontend::ast::SourceFile>],
+    name: &str,
+) -> bool {
+    for file in source_files {
+        if file.external_module_indicator.is_some() {
+            continue;
+        }
+        if let tsox_frontend::ast::NodeData::SourceFile(sf) = &file.node.data {
+            for stmt in sf.statements.iter() {
+                let tsox_frontend::ast::NodeData::ModuleDeclaration(md) = &stmt.data else {
+                    continue;
+                };
+                if md.name.kind != tsox_frontend::ast::SyntaxKind::StringLiteral {
+                    continue;
+                }
+                let pattern = strip_quotes(md.name.text());
+                let Some(star) = pattern.find('*') else {
+                    continue;
+                };
+                if pattern[star + 1..].contains('*') {
+                    continue;
+                }
+                let (prefix, suffix) = (&pattern[..star], &pattern[star + 1..]);
+                if name.len() >= prefix.len() + suffix.len()
+                    && name.starts_with(prefix)
+                    && name.ends_with(suffix)
+                {
+                    return true;
+                }
+            }
+        }
+    }
+    false
+}
+
 pub(crate) fn strip_quotes(s: &str) -> &str {
     let b = s.as_bytes();
     if b.len() >= 2

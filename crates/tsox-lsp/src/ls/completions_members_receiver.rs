@@ -54,6 +54,34 @@ pub(super) fn deepest_node_ending_at(root: &Arc<Node>, end: usize) -> Option<Arc
     best
 }
 
+/// 包含 dot 的最深 PAE/QN：恢复路径的名段缺失使节点 end 越过点，
+/// 无 end==dot 的节点可取时回源接收者表达式
+pub(super) fn deepest_access_containing(root: &Arc<Node>, dot: usize) -> Option<Arc<Node>> {
+    use tsox_frontend::ast::node_data_generated::for_each_child;
+    use tsox_frontend::ast::SyntaxKind;
+    let mut best: Option<Arc<Node>> = None;
+    fn visit(n: &Arc<Node>, dot: usize, best: &mut Option<Arc<Node>>) {
+        let mut children = Vec::new();
+        for_each_child(n, |c| {
+            children.push(Arc::clone(c));
+            false
+        });
+        for c in children {
+            if c.pos() <= dot && dot < c.end() {
+                if matches!(
+                    c.kind,
+                    SyntaxKind::PropertyAccessExpression | SyntaxKind::QualifiedName
+                ) {
+                    *best = Some(Arc::clone(&c));
+                }
+                visit(&c, dot, best);
+            }
+        }
+    }
+    visit(root, dot, &mut best);
+    best
+}
+
 pub(super) fn base_identifier(node: &Arc<Node>) -> Option<Arc<Node>> {
     use tsox_frontend::ast::NodeData;
     match &node.data {

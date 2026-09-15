@@ -190,3 +190,54 @@ impl Parser {
         }
     }
 }
+
+impl Parser {
+    /// Go parseExpectedToken：匹配时消费并给 token 节点；失败时报错并给
+    /// 零宽缺失 token（不消费当前 token）
+    pub(crate) fn parse_expected_token_colon(&mut self) -> Arc<Node> {
+        if self.token == SyntaxKind::ColonToken {
+            let node = self.create_token_node();
+            self.next_token();
+            node
+        } else {
+            self.parse_error_at_current_token(
+                tsox_core::diagnostics::X_0_EXPECTED,
+                &[token_to_string(SyntaxKind::ColonToken)],
+            );
+            let pos = self.token_pos();
+            Arc::new(Node::with_loc(
+                SyntaxKind::ColonToken,
+                NodeData::Token,
+                TextRange::new(pos, pos),
+            ))
+        }
+    }
+
+    /// Go createMissingIdentifier：零宽空名标识符
+    pub(crate) fn missing_identifier_expression(&self) -> Arc<Node> {
+        let pos = self.token_pos();
+        Arc::new(Node::with_loc(
+            SyntaxKind::Identifier,
+            NodeData::Identifier(IdentifierData {
+                text: String::new(),
+            }),
+            TextRange::new(pos, pos),
+        ))
+    }
+}
+
+impl Parser {
+    /// Go parseExpected：匹配时消费；失败时报错返回 false（不消费）
+    pub(crate) fn expect_report(&mut self, expected: SyntaxKind) -> bool {
+        if self.token == expected {
+            self.next_token();
+            true
+        } else {
+            self.parse_error_at_current_token(
+                tsox_core::diagnostics::X_0_EXPECTED,
+                &[token_to_string(expected)],
+            );
+            false
+        }
+    }
+}

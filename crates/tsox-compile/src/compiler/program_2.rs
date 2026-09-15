@@ -210,8 +210,16 @@ impl Program {
                             );
                             stack.extend(source_files[pre..].iter().cloned());
                         }
-                    } else if module_spec.starts_with('.')
-                        || !ambient_module_exists(&source_files, module_spec)
+                    } else if (module_spec.starts_with('.')
+                        && !pattern_ambient_module_exists(&source_files, module_spec)
+                        && !node_next_needs_extension(
+                            &options,
+                            &file.file_name,
+                            module_spec,
+                            &|p| host.fs().read_file(p),
+                        ))
+                        || (!module_spec.starts_with('.')
+                            && !ambient_module_exists(&source_files, module_spec))
                     {
                         let mut module_not_found = Diagnostic::new(
                             Some(file.clone()),

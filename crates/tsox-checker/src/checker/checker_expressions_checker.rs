@@ -87,6 +87,9 @@ impl Checker {
             SyntaxKind::NewExpression => {
                 self.check_new_expression(node);
             }
+            SyntaxKind::QualifiedName => {
+                self.check_qualified_name_expression(node);
+            }
             SyntaxKind::PropertyAccessExpression => {
                 if let tsox_frontend::ast::NodeData::PropertyAccessExpression(data) = &node.data {
                     self.check_expression(&data.expression);
@@ -136,6 +139,7 @@ impl Checker {
             }
             SyntaxKind::AwaitExpression => {
                 if let tsox_frontend::ast::NodeData::AwaitExpression(data) = &node.data {
+                    self.check_await_expression_grammar(node);
                     self.check_expression(&data.expression);
                 }
             }
@@ -183,7 +187,10 @@ impl Checker {
             SyntaxKind::TypeAssertionExpression => {
                 if let tsox_frontend::ast::NodeData::TypeAssertion(data) = &node.data {
                     self.check_expression(&data.expression);
-                    self.check_assertion_overlap(node, &data.expression, &data.type_node);
+                    // isConstTypeReference：不做 overlap 检查（Go 同）
+                    if !crate::checker::utilities_has_only_expression_initialization::is_const_type_reference(&data.type_node) {
+                        self.check_assertion_overlap(node, &data.expression, &data.type_node);
+                    }
                 }
             }
             SyntaxKind::NonNullExpression => {
@@ -266,5 +273,91 @@ impl Checker {
             }
         }
         self.current_node = None;
+    }
+}
+
+impl Checker {
+    /// Go checkQualifiedName（值位限定名）：限定链解析失败时在右段报
+    /// TS2339（`new multiM.c()` 的 c 不存在于 multiM）
+    pub(crate) fn check_qualified_name_expression(&mut self, node: &Arc<Node>) {
+        if let Err((right, ns_path, text)) = self.resolve_qualified_symbol_traced(node) {
+            let file = self.current_file.clone();
+            self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                file,
+                right.loc,
+                tsox_core::diagnostics::messages_generated::PROPERTY_0_DOES_NOT_EXIST_ON_TYPE_1,
+                vec![text, format!("typeof {ns_path}")],
+            ));
+        }
+    }
+
+    /// Go checkGrammarAwaitExpression（IsInTopLevelContext 分支）：顶层 await
+    /// 在非模块文件报「文件无 import/export，考虑加空 export」（TS1375）；
+    /// 模块文件按 module/target 组合报 TS1378（es2022+ 模块且 es2017+ 目标
+    /// 才允许）
+    pub(crate) fn check_await_expression_grammar(&mut self, node: &Arc<Node>) {
+        if node.flags.contains(NodeFlags::AwaitContext) {
+            return;
+        }
+        if self.is_within_function_like(node) {
+            return;
+        }
+        let Some(file) = self.get_source_file_of_node(node) else {
+            return;
+        };
+        let is_module = tsox_frontend::ast::is_external_module(&file);
+        if !is_module {
+            let file = self.current_file.clone();
+            self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                file,
+                node.loc,
+                tsox_core::diagnostics::messages_generated::
+                    X_AWAIT_EXPRESSIONS_ARE_ONLY_ALLOWED_AT_THE_TOP_LEVEL_OF_A_FILE_WHEN_THAT_FILE_IS_A_MODULE_BUT_THIS_FILE_HAS_NO_IMPORTS_OR_EXPORTS_CONSIDER_ADDING_AN_EMPTY_EXPORT_TO_MAKE_THIS_FILE_A_MODULE,
+                vec![],
+            ));
+            return;
+        }
+        let module_ok = matches!(
+            self.compiler_options.module,
+            tsox_core::core::compiler_options::ModuleKind::ES2022
+                | tsox_core::core::compiler_options::ModuleKind::ESNext
+                | tsox_core::core::compiler_options::ModuleKind::System
+                | tsox_core::core::compiler_options::ModuleKind::Node16
+                | tsox_core::core::compiler_options::ModuleKind::Node18
+                | tsox_core::core::compiler_options::ModuleKind::Node20
+                | tsox_core::core::compiler_options::ModuleKind::NodeNext
+                | tsox_core::core::compiler_options::ModuleKind::Preserve
+        );
+        let target_ok = self.compiler_options.target
+            >= tsox_core::core::compiler_options::ScriptTarget::ES2017;
+        if !(module_ok && target_ok) {
+            let file = self.current_file.clone();
+            self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                file,
+                node.loc,
+                tsox_core::diagnostics::messages_generated::
+                    TOP_LEVEL_AWAIT_EXPRESSIONS_ARE_ONLY_ALLOWED_WHEN_THE_MODULE_OPTION_IS_SET_TO_ES2022_ESNEXT_SYSTEM_NODE16_NODE18_NODE20_NODENEXT_OR_PRESERVE_AND_THE_TARGET_OPTION_IS_SET_TO_ES2017_OR_HIGHER,
+                vec![],
+            ));
+        }
+    }
+
+    fn is_within_function_like(&self, node: &Arc<Node>) -> bool {
+        let mut cur = node.parent();
+        while let Some(n) = cur {
+            match n.kind {
+                SyntaxKind::FunctionDeclaration
+                | SyntaxKind::FunctionExpression
+                | SyntaxKind::ArrowFunction
+                | SyntaxKind::MethodDeclaration
+                | SyntaxKind::Constructor
+                | SyntaxKind::GetAccessor
+                | SyntaxKind::SetAccessor => return true,
+                SyntaxKind::SourceFile => return false,
+                _ => {}
+            }
+            cur = n.parent();
+        }
+        false
     }
 }

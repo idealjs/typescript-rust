@@ -128,6 +128,100 @@ impl Binder {
                     DeclareTarget::Exports(parent_sym),
                 );
             }
+            Some(clause) if clause.kind == SyntaxKind::NamedExports => {
+                // Go bindExportSpecifier：`export { foo }` / `export { foo as bar }`
+                // 逐 element 在文件模块 exports 建别名符号。无 from 的目标是
+                // 文件 locals 绑定（export_symbol 直连，follow_alias 可达）；
+                // 带 from 的建纯 alias，由 checker 按模块说明符解析
+                let has_module_specifier = match &node.data {
+                    NodeData::ExportDeclaration(d) => d.module_specifier.is_some(),
+                    _ => false,
+                };
+                if let NodeData::NamedExports(ne) = &clause.data {
+                    // 目标查找的容器链：文件 + 祖先 declare module（ambient 模块
+                    // 内 `export { O as P }` 的 O 在模块 locals）
+                    let mut scope_nodes: Vec<Arc<Node>> = Vec::new();
+                    {
+                        let mut cur = Some(Arc::clone(&node));
+                        while let Some(n) = cur {
+                            if matches!(
+                                n.kind,
+                                SyntaxKind::SourceFile | SyntaxKind::ModuleDeclaration
+                            ) {
+                                scope_nodes.push(Arc::clone(&n));
+                                if n.kind == SyntaxKind::SourceFile {
+                                    break;
+                                }
+                            }
+                            cur = n.parent();
+                        }
+                    }
+                    let file_node = scope_nodes
+                        .iter()
+                        .find(|n| n.kind == SyntaxKind::SourceFile)
+                        .cloned()
+                        .unwrap_or_else(|| Arc::clone(&node));
+                        for el in ne.elements.iter() {
+                            let NodeData::ExportSpecifier(spec) = &el.data else { continue };
+                            // `export { O as P }`：name=P 是导出名，
+                            // property_name=O 是本地原始名
+                            let exported = spec
+                                .name
+                                .text()
+                                .trim_matches(['"', '\'', '`'])
+                                .to_string();
+                            let local_name = spec
+                                .property_name
+                                .as_ref()
+                                .unwrap_or(&spec.name)
+                                .text()
+                                .to_string();
+                        if has_module_specifier {
+                            // re-export：建纯 alias，checker 按模块说明符解析
+                            if parent_sym.exports.get(&exported).is_none() {
+                                let sym = self.new_symbol(SymbolFlags::Alias, exported.clone());
+                                let sym_mut = Arc::as_ptr(&sym) as *mut Symbol;
+                                unsafe {
+                                    (*sym_mut).declarations.push(Arc::clone(el));
+                                }
+                                let parent_mut = Arc::as_ptr(&parent_sym) as *mut Symbol;
+                                unsafe {
+                                    (*parent_mut)
+                                        .exports
+                                        .insert(exported.clone(), Arc::clone(&sym));
+                                }
+                                self.symbol_map.set_symbol(el, sym);
+                            }
+                            continue;
+                        }
+                        // 无 from：目标是本容器链绑定——直接把绑定符号放入
+                        // exports（不建新符号，避免 Duplicate identifier）
+                        let target = scope_nodes.iter().find_map(|scope| {
+                            self.symbol_map
+                                .locals
+                                .get(&scope.id())
+                                .and_then(|l| l.get(&local_name).cloned())
+                                .or_else(|| {
+                                    self.symbol_map
+                                        .symbol_of(scope)
+                                        .and_then(|sf| sf.members.get(&local_name).cloned())
+                                })
+                        });
+                        let Some(target) = target else { continue };
+                        let target_mut = Arc::as_ptr(&target) as *mut Symbol;
+                        unsafe {
+                            (*target_mut).declarations.push(Arc::clone(el));
+                        }
+                        if parent_sym.exports.get(&exported).is_none() {
+                            let parent_mut = Arc::as_ptr(&parent_sym) as *mut Symbol;
+                            unsafe {
+                                (*parent_mut).exports.insert(exported, Arc::clone(&target));
+                            }
+                        }
+                        self.symbol_map.set_symbol(el, Arc::clone(&target));
+                    }
+                }
+            }
             _ => {}
         }
     }

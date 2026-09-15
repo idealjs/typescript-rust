@@ -13,7 +13,7 @@ x"#;
     let mut s = Session::new_for_test("importNameCodeFix_require_importVsRequire_moduleTarget", content);
     fourslash::go_to_file(&mut s, "index.js");
     // TODO: f.VerifyCodeFix(t, fourslash.VerifyCodeFixOptions{
-    // TODO: f.GoToPosition(t, 0)
+    fourslash::go_to_position(&mut s, 0);
     fourslash::insert_line(&mut s, "const fs = require('fs');\n");
     // TODO: f.VerifyCodeFix(t, fourslash.VerifyCodeFixOptions{
 }

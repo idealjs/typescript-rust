@@ -82,7 +82,11 @@ fn opening_like_element_of(
             continue;
         }
         let attrs = match n.kind {
-            SyntaxKind::JsxAttribute | SyntaxKind::JsxSpreadAttribute => n.parent(),
+            // spread 表达式位（`{...|`）是表达式补全位（Go contextToken=
+            // `...` 非属性名），不走属性名补全；属性表其余语境经下方
+            // Opening/SelfClosing 臂取得
+            SyntaxKind::JsxSpreadAttribute => return None,
+            SyntaxKind::JsxAttribute => n.parent(),
             // 仅属性初始化器里的 JsxExpression 算属性语境；children 位置
             // （父为 JsxElement/JsxFragment）不算
             SyntaxKind::JsxExpression => n

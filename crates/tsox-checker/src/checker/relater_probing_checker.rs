@@ -92,7 +92,9 @@ impl Checker {
             None => ct.check_type.clone()?,
         };
         let cond_node = ct.root.as_ref().and_then(|r| r.node.clone());
-        let extends_type = if check_override.is_some() {
+        let extends_type = if let Some(e) = ct.extends_type.clone() {
+            e
+        } else if check_override.is_some() {
             let extends_node = match cond_node.as_ref().and_then(|n| match &n.data {
                 NodeData::ConditionalTypeNode(data) => Some(Arc::clone(&data.extends_type)),
                 _ => None,
@@ -102,7 +104,7 @@ impl Checker {
             };
             self.get_type_from_type_node(&extends_node)
         } else {
-            ct.extends_type.clone()?
+            return None;
         };
 
         if type_contains_type_parameter(&check_type) {

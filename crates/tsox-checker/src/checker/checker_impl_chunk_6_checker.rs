@@ -118,6 +118,11 @@ impl Checker {
             }
             SyntaxKind::TypeAssertionExpression => {
                 if let tsox_frontend::ast::NodeData::TypeAssertion(data) = &node.data {
+                    // Go getTypeOfExpressionOfTypeAssertion：isConstTypeReference
+                    // 不解析类型名，取表达式类型并保留字面量（const 断言）
+                    if crate::checker::utilities_has_only_expression_initialization::is_const_type_reference(&data.type_node) {
+                        return self.get_type_of_node(&data.expression);
+                    }
                     return self.get_type_from_type_node(&data.type_node);
                 }
                 self.get_any_type()
@@ -163,6 +168,19 @@ impl Checker {
             }
             SyntaxKind::DeleteExpression => self.boolean_type(),
             SyntaxKind::VoidExpression => self.undefined_type(),
+            SyntaxKind::YieldExpression => {
+                // Go checkYieldExpression：yield* 的类型 = 操作数迭代器的 TReturn
+                if let tsox_frontend::ast::NodeData::YieldExpression(data) = &node.data
+                    && data.asterisk_token.is_some()
+                    && let Some(expr) = &data.expression
+                {
+                    let operand_type = self.get_type_of_node(expr);
+                    if let Some(t) = self.get_yield_star_return_type(&operand_type) {
+                        return t;
+                    }
+                }
+                self.get_any_type()
+            }
             SyntaxKind::AwaitExpression => {
                 if let tsox_frontend::ast::NodeData::AwaitExpression(data) = &node.data {
                     let operand = Arc::clone(&data.expression);

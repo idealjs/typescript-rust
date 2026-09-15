@@ -1,7 +1,7 @@
 //! fourslash 会话：解析结果 + 内存文件状态 + 真实 LanguageService。
 //! 框架操作以自由函数形式提供（见 api 模块），Session 只承载数据。
 
-use crate::fourslash::parse::{Marker, RangeMarker, TestData, parse_test_data};
+use crate::fourslash::parse::{Marker, RangeMarker, TestData, TestFileInfo, parse_test_data};
 use crate::ls::host::{AutoImportRegistry, EcmaLineInfo, Host};
 use crate::ls::language_service::LanguageService;
 use crate::ls::lsconv_converters::{Converters, PositionEncodingKind};
@@ -141,6 +141,44 @@ impl Host for FourslashHost {
     }
 }
 
+/// Go fourslash 项目系统会把测试内嵌的 tsconfig.json/jsconfig.json 当作工程配置；
+/// 会话层等价实现：其 compilerOptions 合入编译选项（显式 @options 优先）
+fn merge_tsconfig_compiler_options(
+    files: &[TestFileInfo],
+    merged_options: &mut std::collections::BTreeMap<String, String>,
+) {
+    for f in files {
+        let base = f.file_name.rsplit('/').next().unwrap_or("");
+        if !matches!(base, "tsconfig.json" | "jsconfig.json") {
+            continue;
+        }
+        let Ok(v) = serde_json::from_str::<serde_json::Value>(&f.content) else {
+            continue;
+        };
+        let Some(co) = v.get("compilerOptions").and_then(|c| c.as_object()) else {
+            continue;
+        };
+        for (k, val) in co {
+            if merged_options.contains_key(k) {
+                continue;
+            }
+            let s = match val {
+                serde_json::Value::Bool(true) => String::new(),
+                serde_json::Value::Bool(false) => "false".to_string(),
+                serde_json::Value::String(s) => s.clone(),
+                serde_json::Value::Number(n) => n.to_string(),
+                serde_json::Value::Array(a) => a
+                    .iter()
+                    .filter_map(|x| x.as_str())
+                    .collect::<Vec<_>>()
+                    .join(","),
+                _ => continue,
+            };
+            merged_options.insert(k.clone(), s);
+        }
+    }
+}
+
 pub struct Session {
     pub data: TestData,
     pub active_file: String,
@@ -179,6 +217,15 @@ impl Session {
             contents.insert(f.file_name.clone(), f.content.clone());
             file_names.push(path);
         }
+        // Go vfstest.Symlink：symlink 路径展开为指向文件的副本（模块解析
+        // 只需要 file_exists/read 命中；map FS 本无真 symlink 语义）
+        for (real, link) in &data.symlinks {
+            let link_path = project_path(link);
+            let real_path = project_path(real);
+            if let Some(content) = inner_fs.read_file(&real_path) {
+                inner_fs.insert_file(&link_path, &content);
+            }
+        }
         let active_file = data
             .files
             .first()
@@ -210,6 +257,7 @@ impl Session {
                 merged_options.insert(k.clone(), v.clone());
             }
         }
+        merge_tsconfig_compiler_options(&self.data.files, &mut merged_options);
         // Go fourslash 基底默认（fourslash.go:205）：skipDefaultLibCheck /
         // target=latest / jsx=preserve，可被 @options 覆盖
         merged_options
@@ -255,15 +303,18 @@ impl Session {
 
     pub fn file_content(&self, name: &str) -> &str {
         self.contents.get(name).unwrap_or_else(|| {
-            // 用例代码可能用 @Filename 原样名（无 / 前缀）查文件：按解析侧
-            // 的规范化（GetNormalizedAbsolutePath(x, "/")）兜底
+            // 用例代码可能用 @Filename 原样名（无 / 前缀）或带 ./ 段查文件：
+            // 按解析侧的规范化（GetNormalizedAbsolutePath(x, "/")）兜底
             let normalized = if name.starts_with('/') {
                 name.to_string()
             } else {
                 format!("/{name}")
             };
+            let normalized =
+                tsox_core::tspath::get_normalized_absolute_path(&normalized, "/");
             self.contents
                 .get(&normalized)
+                .or_else(|| self.contents.get(name))
                 .unwrap_or_else(|| panic!("文件不存在: {name}"))
         })
     }

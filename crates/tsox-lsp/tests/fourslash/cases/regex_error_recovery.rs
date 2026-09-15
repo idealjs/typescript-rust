@@ -10,5 +10,6 @@ fn regex_error_recovery() {
 verify.quickInfoIs("RegExp");
 verify.not.errorExistsAfterMarker("1");"#;
     let mut s = Session::new_for_test("regexErrorRecovery", content);
+    fourslash::go_to_position(&mut s, 0);
     fourslash::insert(&mut s, "(");
 }

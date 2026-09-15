@@ -17,7 +17,10 @@ pub(super) fn jsx_closing_tag_completion(
     node_at_position: &Arc<Node>,
     position: usize,
 ) -> Option<CompletionItem> {
-    let closing = find_jsx_closing_element(text, node_at_position, position)?;
+    let closing = match find_jsx_closing_element(text, node_at_position, position) {
+        Some(c) => c,
+        None => find_jsx_closing_element_at_eof(text, node_at_position, position)?,
+    };
     let element = closing.parent()?;
     let opening = match &element.data {
         NodeData::JsxElement(d) => Arc::clone(&d.opening_element),
@@ -72,6 +75,50 @@ fn find_jsx_closing_element(
         current = n.parent();
     }
     None
+}
+
+/// 沿 end==position 的孩子下降到底（deepest_node_ending_at 取最浅命中，
+/// 此处需要最深：闭合元素在语句内层）
+pub(super) fn deepest_node_ending_at_deep(root: &Arc<Node>, position: usize) -> Arc<Node> {
+    use tsox_frontend::ast::node_data_generated::for_each_child;
+    let mut cur = Arc::clone(root);
+    'outer: loop {
+        let mut children = Vec::new();
+        for_each_child(&cur, |c| {
+            children.push(Arc::clone(c));
+            false
+        });
+        for c in children {
+            if c.pos() < position && c.end() == position {
+                cur = c;
+                continue 'outer;
+            }
+        }
+        return cur;
+    }
+}
+
+/// EOF 语境：位置节点是 EndOfFile，上行不可达闭合元素；Go 的
+/// contextToken（`</`）沿 parent 命中 JsxClosingElement，等价取
+/// 以位置结尾的最深节点重走上行链
+fn find_jsx_closing_element_at_eof(
+    text: &str,
+    node_at_position: &Arc<Node>,
+    position: usize,
+) -> Option<Arc<Node>> {
+    let mut root = node_at_position.parent();
+    while let Some(r) = root.as_ref().and_then(|r| r.parent()) {
+        root = Some(r);
+    }
+    let root = root?;
+    let ending = deepest_node_ending_at_deep(&root, position);
+    if ending.pos() >= position {
+        return None;
+    }
+    if Arc::ptr_eq(&ending, node_at_position) {
+        return None;
+    }
+    find_jsx_closing_element(text, &ending, position)
 }
 
 /// 闭合标签区间内 `>` 的结尾位置（token 不在 AST 上，扫描判定）

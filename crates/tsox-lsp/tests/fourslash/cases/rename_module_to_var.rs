@@ -14,7 +14,7 @@ namespace Y {
 }"#;
     let mut s = Session::new_for_test("renameModuleToVar", content);
     fourslash::go_to_marker(&mut s, "");
-    // TODO: f.Backspace(t, 6)
+    fourslash::backspace(&mut s, 6);
     fourslash::insert(&mut s, "var");
     fourslash::verify_no_errors(&mut s, );
     // TODO: }

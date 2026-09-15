@@ -18,17 +18,65 @@ fn new_scanner(text: &str, jsx: bool) -> Scanner {
     scanner
 }
 
-/// 扫描从 from 起、token 起点 < to 的 token
+/// 扫描从 from 起、token 起点 < to 的 token。
+/// 裸扫描无 parser 驱动，模板续段须自管：TemplateHead（`${` 收尾）入栈，
+/// 栈顶表达式括号深度归零时遇 `}` 重扫为 TemplateMiddle/Tail
+/// （Go 走语法树 FindPrecedingToken 无此问题）
 pub(super) fn scan_tokens(text: &str, jsx: bool, from: usize, to: usize) -> Vec<ScanToken> {
     let mut scanner = new_scanner(text, jsx);
     let limit = to.min(text.len());
     scanner.set_range(from.min(text.len()), text.len());
     let mut out: Vec<ScanToken> = Vec::new();
     let mut guard = 0usize;
+    let mut templates: Vec<[i32; 3]> = Vec::new();
     loop {
-        let kind = scanner.scan();
+        let mut kind = scanner.scan();
         if kind == SyntaxKind::EndOfFile {
             break;
+        }
+        match kind {
+            SyntaxKind::TemplateHead | SyntaxKind::TemplateMiddle => {
+                templates.push([0, 0, 0]);
+            }
+            SyntaxKind::OpenBraceToken => {
+                if let Some(top) = templates.last_mut() {
+                    top[0] += 1;
+                }
+            }
+            SyntaxKind::OpenBracketToken => {
+                if let Some(top) = templates.last_mut() {
+                    top[1] += 1;
+                }
+            }
+            SyntaxKind::OpenParenToken => {
+                if let Some(top) = templates.last_mut() {
+                    top[2] += 1;
+                }
+            }
+            SyntaxKind::CloseBracketToken => {
+                if let Some(top) = templates.last_mut() {
+                    top[1] -= 1;
+                }
+            }
+            SyntaxKind::CloseParenToken => {
+                if let Some(top) = templates.last_mut() {
+                    top[2] -= 1;
+                }
+            }
+            SyntaxKind::CloseBraceToken => {
+                let at_zero = templates
+                    .last()
+                    .is_some_and(|top| top.iter().all(|d| *d == 0));
+                if at_zero {
+                    kind = scanner.re_scan_template_token();
+                    if kind == SyntaxKind::TemplateTail {
+                        templates.pop();
+                    }
+                } else if let Some(top) = templates.last_mut() {
+                    top[0] -= 1;
+                }
+            }
+            _ => {}
         }
         let pos = scanner.token_pos();
         let end = scanner.token_end();

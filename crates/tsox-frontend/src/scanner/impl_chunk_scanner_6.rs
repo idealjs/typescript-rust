@@ -58,6 +58,52 @@ impl Scanner {
 
         if unterminated || p >= self.end {
             self.token_flags |= TOKEN_FLAGS_UNTERMINATED;
+            // Go ReScanSlashToken 恢复：找最近失衡括号，再回缩尾随空白/分号
+            //（"Whitespaces and semicolons at the end are not likely to be part
+            // of the regex"），token 收在回缩点
+            let mut rp = start_of_regex_body;
+            let mut r_escape = false;
+            let mut character_class_depth = 0i32;
+            let mut in_decimal_quantifier = false;
+            let mut group_depth = 0i32;
+            while rp < end_of_regex_body {
+                let ch = self.text.as_bytes()[rp] as char;
+                if r_escape {
+                    r_escape = false;
+                } else if ch == '\\' {
+                    r_escape = true;
+                } else if ch == '[' {
+                    character_class_depth += 1;
+                } else if ch == ']' && character_class_depth != 0 {
+                    character_class_depth -= 1;
+                } else if character_class_depth == 0 {
+                    if ch == '{' {
+                        in_decimal_quantifier = true;
+                    } else if ch == '}' && in_decimal_quantifier {
+                        in_decimal_quantifier = false;
+                    } else if !in_decimal_quantifier {
+                        if ch == '(' {
+                            group_depth += 1;
+                        } else if ch == ')' && group_depth != 0 {
+                            group_depth -= 1;
+                        } else if ch == ')' || ch == ']' || ch == '}' {
+                            break;
+                        }
+                    }
+                }
+                rp += 1;
+            }
+            while rp > start_of_regex_body {
+                let Some(c) = self.text[..rp].chars().next_back() else {
+                    break;
+                };
+                if c.is_whitespace() || c == ';' {
+                    rp -= c.len_utf8();
+                } else {
+                    break;
+                }
+            }
+            p = rp;
             self.report_error(
                 DiagnosticKind::UnterminatedRegularExpression,
                 self.token_pos,
@@ -264,7 +310,7 @@ impl Scanner {
 
         let c = self.text.as_bytes()[self.pos] as char;
         if c == '"' || c == '\'' {
-            return self.scan_string(c);
+            return self.scan_string_ex(c, true);
         }
 
         self.scan()

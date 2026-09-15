@@ -18,11 +18,11 @@ namespace MM {
     let mut s = Session::new_for_test("quickInfoOnMergedInterfacesWithIncrementalEdits", content);
     fourslash::go_to_marker(&mut s, "1");
     // TODO: f.VerifyQuickInfoIs(t, "(property) B<string>.bar: string", "")
-    // TODO: f.DeleteAtCaret(t, 1)
+    fourslash::delete_at_caret(&mut s, 1);
     fourslash::insert(&mut s, "z");
     // TODO: f.VerifyQuickInfoIs(t, "any", "")
     fourslash::verify_number_of_errors_in_current_file(&mut s, 1);
-    // TODO: f.Backspace(t, 1)
+    fourslash::backspace(&mut s, 1);
     fourslash::insert(&mut s, "a");
     // TODO: f.VerifyQuickInfoIs(t, "(property) B<string>.bar: string", "")
     fourslash::go_to_marker(&mut s, "2");

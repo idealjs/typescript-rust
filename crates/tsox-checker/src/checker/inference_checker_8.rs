@@ -20,6 +20,27 @@ impl Checker {
             }
         }
 
+        // Go inferFromObjectTypes 的元组分支：元组对元组按元素位推断
+        //（元素存于 element_infos，get_type_arguments 不覆盖 Tuple 形态）
+        if let (TypeData::Tuple(st), TypeData::Tuple(tt)) = (&source.data, &target.data) {
+            let src_elems: Vec<Arc<Type>> = st
+                .element_infos
+                .iter()
+                .filter_map(|e| e.type_.clone())
+                .collect();
+            let tgt_elems: Vec<Arc<Type>> = tt
+                .element_infos
+                .iter()
+                .filter_map(|e| e.type_.clone())
+                .collect();
+            if src_elems.len() == tgt_elems.len() && !tgt_elems.is_empty() {
+                for (s, t) in src_elems.into_iter().zip(tgt_elems) {
+                    self.infer_from_types(state, &s, &t);
+                }
+                return;
+            }
+        }
+
         let source_args = self.get_type_arguments(source);
         let target_args = self.get_type_arguments(target);
 
@@ -32,9 +53,18 @@ impl Checker {
             (Some(st), Some(tt)) => Arc::ptr_eq(st, tt),
             _ => false,
         };
-        if source.object_flags.contains(ObjectFlags::Reference)
+        // 实例化引用可能丢 Reference 标志：同 symbol 且双侧带类型实参时视作
+        // 同目标泛型引用（Go inferTo 的 reference-vs-reference 分支，只推
+        // 类型实参并提前返回，不做成员推断——成员的声明型类型参数未替换，
+        // 会以外层类型参数污染候选集）
+        let same_symbol = match (source.symbol.as_ref(), target.symbol.as_ref()) {
+            (Some(a), Some(b)) => Arc::ptr_eq(a, b),
+            _ => false,
+        };
+        if (source.object_flags.contains(ObjectFlags::Reference)
             && target.object_flags.contains(ObjectFlags::Reference)
-            && (same_target || self.is_array_type(source) && self.is_array_type(target))
+            && (same_target || self.is_array_type(source) && self.is_array_type(target)))
+            || (same_symbol && !source_args.is_empty() && !target_args.is_empty())
         {
             self.infer_from_type_arguments(state, &source_args, &target_args, &[]);
             return;
@@ -265,7 +295,40 @@ impl Checker {
             || t.flags.intersects(TypeFlags::Conditional)
             || t.flags.intersects(TypeFlags::Substitution)
     }
-    pub(crate) fn is_no_infer_type(&self, _t: &Type) -> bool {
+    pub(crate) fn is_no_infer_type(&self, t: &Type) -> bool {
+        // Go isNoInferType：内置 NoInfer 表示为 unknown 约束的 Substitution
+        if t.flags.contains(TypeFlags::Substitution)
+            && let TypeData::Substitution(sub) = &t.data
+            && sub
+                .constraint
+                .as_ref()
+                .is_some_and(|c| c.flags.contains(TypeFlags::Unknown))
+        {
+            return true;
+        }
+        // 用户自定义形态 [T][T extends any ? 0 : never]：延迟 IndexedAccess，
+        // 索引为 extends any 的条件型，对象元组恰好含该条件型的 checkType
+        if t.flags.contains(TypeFlags::IndexedAccess)
+            && let TypeData::IndexedAccess(ia) = &t.data
+            && let Some(index) = &ia.index_type
+            && index.flags.contains(TypeFlags::Conditional)
+            && let TypeData::Conditional(cond) = &index.data
+            && cond
+                .extends_type
+                .as_ref()
+                .is_some_and(|e| e.flags.contains(TypeFlags::Any))
+            && let Some(check) = &cond.check_type
+            && check.flags.contains(TypeFlags::TypeParameter)
+            && let Some(object) = &ia.object_type
+            && let TypeData::Tuple(tuple) = &object.data
+            && tuple.element_infos.len() == 1
+            && tuple.element_infos[0]
+                .type_
+                .as_ref()
+                .is_some_and(|e| e.id == check.id)
+        {
+            return true;
+        }
         false
     }
 
@@ -280,11 +343,23 @@ impl Checker {
         node: &Arc<tsox_frontend::ast::Node>,
         ctx_type: &Arc<Type>,
     ) -> Arc<Type> {
-        let Some(ctx_sig) = self
-            .get_signatures_of_type(ctx_type, SignatureKind::Call)
-            .into_iter()
-            .next()
-        else {
+        // Go getContextualSignature：联合上下文逐成分取调用签名（跳过
+        // undefined 等无签名成分），单一命中即用
+        let ctx_sig = if let Some(members) = ctx_type.types().filter(|_| ctx_type.is_union()) {
+            members
+                .iter()
+                .filter_map(|m| {
+                    self.get_signatures_of_type(m, SignatureKind::Call)
+                        .into_iter()
+                        .next()
+                })
+                .next()
+        } else {
+            self.get_signatures_of_type(ctx_type, SignatureKind::Call)
+                .into_iter()
+                .next()
+        };
+        let Some(ctx_sig) = ctx_sig else {
             // 无上下文签名（callee 尚未定型等）：结果劣化，不冻结子树缓存，
             // 后续推断轮次用更好的上下文重算
             let t = self.get_type_of_node(node);
@@ -376,9 +451,26 @@ impl Checker {
             if let Some(contextual_type) = self.get_contextual_type_for_call_or_new(node) {
                 if let Some(return_type) = self.get_return_type_of_signature(signature) {
                     if self.could_contain_type_variables(&return_type) {
+                        // Go createOuterReturnMapper：返回位推断前用外层推断语境的
+                        // NoDefault 映射擦掉外层类型参数（→silentNever，不可推断），
+                        // 使 NoInfer<T> 等外层包裹形态不向本签名泄漏候选
+                        let own: Vec<Arc<Type>> = context
+                            .inferences
+                            .iter()
+                            .map(|i| Arc::clone(&i.type_parameter))
+                            .collect();
+                        let mut outer: Vec<Arc<Type>> = Vec::new();
+                        self.collect_outer_type_params(&contextual_type, &own, &mut outer, 0);
+                        let inference_source = if outer.is_empty() {
+                            contextual_type
+                        } else {
+                            let eraser = self.silent_never_type();
+                            let subs = vec![eraser; outer.len()];
+                            self.substitute_infer_type_parameters(&contextual_type, &outer, &subs)
+                        };
                         self.infer_types(
                             &mut context.inferences,
-                            Some(contextual_type),
+                            Some(inference_source),
                             Some(return_type),
                             InferencePriority::ReturnType,
                             false,
@@ -461,6 +553,13 @@ impl Checker {
                         &partial,
                     );
                     let arg_type = self.type_of_context_sensitive_arg(&args[i], &inst_param);
+                    if std::env::var_os("TSOX_DEBUG_HOVER").is_some() {
+                        eprintln!(
+                            "[infer-cs] inst_param={} arg_type={}",
+                            self.type_to_string(&inst_param),
+                            self.type_to_string(&arg_type)
+                        );
+                    }
                     self.infer_types(
                         &mut context.inferences,
                         Some(arg_type),
@@ -468,17 +567,28 @@ impl Checker {
                         InferencePriority::None,
                         false,
                     );
-                    // 固定结果为最终值：二阶段候选仅补充尚无推断值的类型参数
+                    // 固定结果为最终值：仅锁定快照时已有候选（is_fixed）的类型参数；
+                    // 快照时无候选的（约束回退是占位）由本阶段新候选参与最终推断
                     let fixed = cs_fixed.as_ref().expect("fixed types exist");
                     for (info, t) in context.inferences.iter_mut().zip(fixed.iter()) {
-                        if !self.is_uninferred_type(t) {
+                        if info.is_fixed && !self.is_uninferred_type(t) {
                             info.candidates = Vec::new();
                             info.contra_candidates = Vec::new();
                             info.inferred_type = Some(Arc::clone(t));
                         }
                     }
                 } else {
-                    let arg_type = self.get_type_of_node(&args[i]);
+                    let mut arg_type = self.get_type_of_node(&args[i]);
+                    // Go checkExpressionWithContextualType 尾部：字面量是其
+                    // 上下文型（含类型参数约束）的成员时剥 fresh 标记，
+                    // 候选保留字面量（createColor('rgb', …) → T='rgb'）
+                    if arg_type
+                        .flags
+                        .intersects(crate::checker::types::TYPE_FLAGS_LITERAL)
+                        && self.is_literal_of_contextual_type(&arg_type, &param_type)
+                    {
+                        arg_type = self.get_regular_type_of_literal_type(&arg_type);
+                    }
                     self.infer_types(
                         &mut context.inferences,
                         Some(arg_type),
@@ -489,7 +599,8 @@ impl Checker {
                 }
             }
         }
-        self.get_inferred_types(context)
+        let result = self.get_inferred_types(context);
+        result
     }
 }
 
@@ -503,7 +614,7 @@ impl Checker {
 impl Checker {
     /// Go getRestTypeAtPosition 的目标 rest 对位：pos 超出固定参数时，
     /// rest 数组按元素展开（泛型 T 保持延迟 T[number]，具体类型则解析）
-    fn source_rest_type_at(&mut self, sig: &Arc<Signature>, pos: usize) -> Arc<Type> {
+    pub(crate) fn source_rest_type_at(&mut self, sig: &Arc<Signature>, pos: usize) -> Arc<Type> {
         let parameter_count = self.get_parameter_count(sig);
         if let Some(rest) = self.get_effective_rest_type(sig) {
             if pos >= parameter_count.saturating_sub(1) {
@@ -531,11 +642,123 @@ impl Checker {
         }
         let length = parameter_count.saturating_sub(pos);
         if length == 0 {
-            return self.create_tuple_type(Vec::new());
+            return self.create_tuple_type_ex(Vec::new(), Vec::new(), false);
         }
-        let elems: Vec<Arc<Type>> = (pos..parameter_count)
-            .map(|i| self.get_type_at_position(sig, i))
-            .collect();
-        self.create_tuple_type(elems)
+        // Go getRestTypeAtPosition：元素带标签（源参数名）与 Required/
+        // Optional/Variadic 标志，签名的 rest 元组展示为具名参数序列
+        let min_argument_count = self.get_min_argument_count(sig);
+        let rest = self.get_effective_rest_type(sig);
+        let mut types: Vec<Arc<Type>> = Vec::with_capacity(length);
+        let mut infos: Vec<crate::checker::types::TupleElementInfo> = Vec::with_capacity(length);
+        for i in 0..length {
+            let p = i + pos;
+            if rest.is_some() && i == length - 1 {
+                types.push(rest.clone().expect("checked above"));
+                let label = sig.parameters.get(p).map(|s| s.name.clone());
+                infos.push(crate::checker::types::TupleElementInfo {
+                    label,
+                    flags: ElementFlags::Variadic,
+                    labeled_declaration: None,
+                    type_: None,
+                });
+            } else {
+                types.push(self.get_type_at_position(sig, p));
+                let flags = if p < min_argument_count {
+                    ElementFlags::Required
+                } else {
+                    ElementFlags::Optional
+                };
+                let label = sig.parameters.get(p).map(|s| s.name.clone());
+                infos.push(crate::checker::types::TupleElementInfo {
+                    label,
+                    flags,
+                    labeled_declaration: None,
+                    type_: None,
+                });
+            }
+        }
+        self.create_tuple_type_ex(types, infos, false)
+    }
+}
+
+impl Checker {
+    /// 收集类型中不属于本签名推断列表的类型参数（外层类型参数）
+    pub(crate) fn collect_outer_type_params(
+        &mut self,
+        t: &Arc<Type>,
+        own: &[Arc<Type>],
+        out: &mut Vec<Arc<Type>>,
+        depth: usize,
+    ) {
+        if depth > 6 {
+            return;
+        }
+        let is_own = |c: &Arc<Type>| {
+            own.iter()
+                .any(|p| crate::checker::utilities::type_parameters_match(p, c))
+        };
+        match &t.data {
+            TypeData::TypeParameter(_) => {
+                if !is_own(t) && !out.iter().any(|p| p.id == t.id) {
+                    out.push(Arc::clone(t));
+                }
+            }
+            TypeData::Union(_) | TypeData::Intersection(_) => {
+                let members: Vec<Arc<Type>> = t
+                    .types()
+                    .map(|ms| ms.to_vec())
+                    .unwrap_or_default();
+                for m in members {
+                    self.collect_outer_type_params(&m, own, out, depth + 1);
+                }
+            }
+            TypeData::Tuple(tup) => {
+                for elem in &tup.element_infos {
+                    if let Some(e) = &elem.type_ {
+                        self.collect_outer_type_params(e, own, out, depth + 1);
+                    }
+                }
+            }
+            TypeData::IndexedAccess(ia) => {
+                if let Some(o) = &ia.object_type {
+                    self.collect_outer_type_params(o, own, out, depth + 1);
+                }
+                if let Some(idx) = &ia.index_type {
+                    self.collect_outer_type_params(idx, own, out, depth + 1);
+                }
+            }
+            TypeData::Conditional(c) => {
+                if let Some(chk) = &c.check_type {
+                    self.collect_outer_type_params(chk, own, out, depth + 1);
+                }
+                if let Some(ext) = &c.extends_type {
+                    self.collect_outer_type_params(ext, own, out, depth + 1);
+                }
+                if let Some(root) = &c.root {
+                    if let Some(chk) = &root.check_type {
+                        self.collect_outer_type_params(chk, own, out, depth + 1);
+                    }
+                    if let Some(ext) = &root.extends_type {
+                        self.collect_outer_type_params(ext, own, out, depth + 1);
+                    }
+                }
+            }
+            TypeData::Object(o) => {
+                for arg in &o.type_arguments {
+                    self.collect_outer_type_params(arg, own, out, depth + 1);
+                }
+                for info in &o.structured.index_infos {
+                    if let Some(v) = &info.value_type {
+                        self.collect_outer_type_params(v, own, out, depth + 1);
+                    }
+                }
+                let props = self.get_properties_of_type(t);
+                for p in props.into_iter().take(32) {
+                    let pt = self.get_type_of_symbol(&p);
+                    self.collect_outer_type_params(&pt, own, out, depth + 1);
+                }
+            }
+            _ => {}
+        }
     }
 }

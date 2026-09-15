@@ -225,7 +225,11 @@ impl Checker {
             push_punctuation(&mut parts, ">");
         }
         push_punctuation(&mut parts, ".");
-        push_part(&mut parts, &node.text(), DisplayPartKind::PropertyName);
+        // Go writeSymbol 用符号声明形态名：字符串字面量名带引号（"__proto__"）
+        let member_display =
+            self.symbol_name_as_written(&prop_sym)
+                .unwrap_or_else(|| node.text().to_string());
+        push_part(&mut parts, &member_display, DisplayPartKind::PropertyName);
         if is_method {
             if let Some(sig) = &sig {
                 if !inferred.is_empty() {
@@ -419,12 +423,19 @@ impl Checker {
                 return None;
             }
         };
-        let prop_type = self.get_type_of_symbol(&prop);
+        // Go writeSymbol 属性链限定（Foo.#privateProperty）+ 流收窄后的型
+        let display_name = self.qualified_symbol_name(&prop);
+        let declared = self.get_type_of_symbol(&prop);
+        let prop_type = if p.kind == SyntaxKind::PropertyAccessExpression {
+            self.flow_type_of_access_expression(&p, Some(&prop), declared)
+        } else {
+            declared
+        };
         let mut parts = Vec::new();
         push_punctuation(&mut parts, "(");
         push_part(&mut parts, "property", DisplayPartKind::Text);
         push_punctuation(&mut parts, ") ");
-        push_part(&mut parts, &name_text, DisplayPartKind::PropertyName);
+        push_part(&mut parts, &display_name, DisplayPartKind::PropertyName);
         push_space(&mut parts, ": ");
         parts.extend(self.type_to_display_parts(&prop_type));
         Some(parts)
@@ -459,10 +470,18 @@ impl Checker {
         }
         let class_sym = self.resolve_identifier(&tag_name)?;
         let ctor_type = self.get_type_of_symbol(&class_sym);
+        // 函数组件（declare function Opt(attrs: Bag)）属性上下文 = 首个调用
+        // 签名第 0 参（Go getContextualTypeForArgumentAtIndex）；类组件为构造
+        // 签名第 0 参
         let sig = self
-            .get_signatures_of_type(&ctor_type, SignatureKind::Construct)
+            .get_signatures_of_type(&ctor_type, SignatureKind::Call)
             .first()
-            .cloned()?;
+            .cloned()
+            .or_else(|| {
+                self.get_signatures_of_type(&ctor_type, SignatureKind::Construct)
+                    .first()
+                    .cloned()
+            })?;
         if sig.parameters.is_empty() {
             return None;
         }
@@ -1816,15 +1835,44 @@ impl Checker {
             }
             _ => None,
         }) {
-            let names: Vec<String> = tps
-                .iter()
-                .filter_map(|tp| match &tp.data {
-                    crate::checker::nodebuilder::NodeData::TypeParameterDeclaration(tpd) => {
-                        Some(tpd.name.text().to_string())
+            // Go typeParameterToNode：链段容器的类型参数按声明形态显示
+            //（含约束与默认值，`D extends AMap.MassMarks.Data = AMap.MassMarks.Data`）
+            let mut names: Vec<String> = Vec::new();
+            for tp in tps.iter() {
+                let crate::checker::nodebuilder::NodeData::TypeParameterDeclaration(tpd) = &tp.data
+                else {
+                    continue;
+                };
+                let mut seg = tpd.name.text().to_string();
+                // Go symbolToTypeNode：约束/默认值里的类型引用按其符号的
+                // 命名空间限定名显示（AMap.MassMarks.Data）
+                let render_ref = |checker: &mut Self, node: &Arc<tsox_frontend::ast::Node>| -> String {
+                    let t = checker.get_type_from_type_node(node);
+                    if let Some(sym) = &t.symbol
+                        && sym.flags.intersects(
+                            SymbolFlags::Interface
+                                | SymbolFlags::Class
+                                | SymbolFlags::TypeAlias
+                                | SymbolFlags::ENUM,
+                        )
+                    {
+                        checker.namespace_qualified_display_name(sym)
+                    } else {
+                        checker.type_to_string(&t)
                     }
-                    _ => None,
-                })
-                .collect();
+                };
+                if let Some(c) = &tpd.constraint {
+                    let s = render_ref(self, c);
+                    seg.push_str(" extends ");
+                    seg.push_str(&s);
+                }
+                if let Some(d) = &tpd.default_type {
+                    let s = render_ref(self, d);
+                    seg.push_str(" = ");
+                    seg.push_str(&s);
+                }
+                names.push(seg);
+            }
             if !names.is_empty() {
                 q.push('<');
                 q.push_str(&names.join(", "));
@@ -2028,6 +2076,19 @@ impl Checker {
         } else {
             self.qualified_symbol_name(symbol)
         };
+        // Go writeSymbol：字符串字面量声明名按书写形态带引号（"__proto__"）
+        let display_name = if name_kind == DisplayPartKind::PropertyName
+            && symbol
+                .declarations
+                .first()
+                .and_then(|d| tsox_frontend::ast::node_data_generated::node_name(d))
+                .is_some_and(|n| n.kind == SyntaxKind::StringLiteral)
+        {
+            self.symbol_name_as_written(symbol)
+                .unwrap_or(display_name)
+        } else {
+            display_name
+        };
         push_part(&mut parts, &display_name, name_kind);
         if symbol.flags.contains(SymbolFlags::Optional) {
             push_punctuation(&mut parts, "?");
@@ -2053,6 +2114,25 @@ impl Checker {
         parts: &mut Vec<SymbolDisplayPart>,
         sig: &Signature,
     ) {
+        // Go getExpandedParameters：rest 参数类型为元组时按元素展开为具名
+        // 参数序列（标签取元素 label，回退 rest 符号名_i）
+        if let Some(expanded) = self.tuple_expanded_params(sig) {
+            for (i, (name, ty, optional, variadic)) in expanded.iter().enumerate() {
+                if i > 0 {
+                    push_space(parts, ", ");
+                }
+                if *variadic {
+                    push_punctuation(parts, "...");
+                }
+                push_part(parts, name, DisplayPartKind::ParameterName);
+                if *optional {
+                    push_punctuation(parts, "?");
+                }
+                push_space(parts, ": ");
+                parts.extend(self.type_to_display_parts(ty));
+            }
+            return;
+        }
         for (i, param) in sig.parameters.iter().enumerate() {
             if i > 0 {
                 push_space(parts, ", ");

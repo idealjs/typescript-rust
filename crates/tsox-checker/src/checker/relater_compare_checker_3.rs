@@ -18,11 +18,11 @@ impl Checker {
             let tp = target.id;
             if source.flags.contains(TypeFlags::Object)
                 && target.flags.contains(TypeFlags::Object)
-                && (self.degraded_type_ptrs.contains(&sp) || self.degraded_type_ptrs.contains(&tp))
-                // 有成员的完整实例照常结构比较（degraded 仅因嵌套自引用触发，
-                // 壳（成员空）才放行；递归由 relation_in_progress 兜底）
-                && source.as_structured().is_some_and(|s| s.members.entries.is_empty())
-                && target.as_structured().is_some_and(|t| t.members.entries.is_empty())
+                // 任一方是「空成员且带符号」的壳型（lib 解析重入期的未完成实例）
+                // 即放行：带符号才免于误放 `{}` 字面量；有成员的完整实例照常
+                // 结构比较（递归由 relation_in_progress 兜底）
+                && self.side_is_incomplete_shell(source, sp)
+                || self.side_is_incomplete_shell(target, tp)
             {
                 return true;
             }

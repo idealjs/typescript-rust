@@ -39,7 +39,40 @@ impl Checker {
             }
             return;
         }
-        // 构造位：旧 constructor_display_parts（含 new C<any> 显式类型实参形态）
+        // Go：类符号在调用/构造位 → getSignaturesAtLocation(Construct)，
+        // 单签名时收敛为已解析签名（含实参推断/显式实参代入）
+        let call = self.hover_call_or_new_expression(node);
+        if is_class && let Some(ref call_node) = call {
+            let t = self.get_type_of_symbol(symbol);
+            let ctors = t
+                .as_structured()
+                .map(|s| s.construct_signatures().to_vec())
+                .unwrap_or_default();
+            if !ctors.is_empty() {
+                let use_resolved =
+                    ctors.len() > 1 || !ctors[0].type_parameters.is_empty();
+                let sigs: Vec<_> = if use_resolved {
+                    match self.resolved_call_signature(call_node) {
+                        Some(s) => vec![s],
+                        None => ctors,
+                    }
+                } else {
+                    ctors
+                };
+                if sigs.len() == 1 {
+                    self.hover_write_signatures(
+                        b, &sigs, "constructor ", false, symbol, Some(call_node),
+                    );
+                    let doc = self.constructor_jsdoc_documentation(symbol);
+                    if !doc.is_empty() {
+                        b.write_space("\n\n");
+                        b.write_text(&doc, DisplayPartKind::Text);
+                    }
+                    return;
+                }
+            }
+        }
+        // 构造位：旧 constructor_display_parts（类型实参位等 new 内非表达式名位置）
         if let Some(parts) = self.constructor_display_parts(symbol, node) {
             b.extend(parts);
             let doc = self.constructor_jsdoc_documentation(symbol);
@@ -48,28 +81,6 @@ impl Checker {
                 b.write_text(&doc, DisplayPartKind::Text);
             }
             return;
-        }
-        // 构造位：new C() 的 C → 构造签名
-        let call = self.hover_call_or_new_expression(node);
-        if is_class && let Some(call) = &call {
-            let t = self.get_type_of_symbol(symbol);
-            let ctors = t
-                .as_structured()
-                .map(|s| s.construct_signatures().to_vec())
-                .unwrap_or_default();
-            if !ctors.is_empty()
-                && let Some(resolved) = self.resolved_call_signature(call)
-            {
-                self.hover_write_signatures(
-                    b, &[resolved], "constructor ", false, symbol, Some(call),
-                );
-                let doc = self.constructor_jsdoc_documentation(symbol);
-                if !doc.is_empty() {
-                    b.write_space("\n\n");
-                    b.write_text(&doc, DisplayPartKind::Text);
-                }
-                return;
-            }
         }
         b.write_new_line();
         if is_class {

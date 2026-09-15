@@ -205,7 +205,7 @@ impl Checker {
                     vec![name.to_string()],
                 )
             }
-        } else if let Some(msg) = Self::cannot_find_name_message_for(name) {
+        } else if let Some(msg) = Self::cannot_find_name_message_for(name, Some(node)) {
             tsox_frontend::ast::Diagnostic::new(file, node.loc, *msg, vec![name.to_string()])
         } else if let Some(suggestion) = self.find_name_suggestion(name, SymbolFlags::VALUE) {
             tsox_frontend::ast::Diagnostic::new(
@@ -218,7 +218,7 @@ impl Checker {
             tsox_frontend::ast::Diagnostic::new(
                 file,
                 node.loc,
-                *Self::cannot_find_name_message_for(name).unwrap_or(&CANNOT_FIND_NAME_0),
+                *Self::cannot_find_name_message_for(name, Some(node)).unwrap_or(&CANNOT_FIND_NAME_0),
                 vec![name.to_string()],
             )
         };

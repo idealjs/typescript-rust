@@ -8,7 +8,9 @@ pub use impl_chunk::*;
 #[allow(unused_imports)]
 pub use parsing_context::*;
 pub(crate) mod jsdoc;
+pub(crate) mod parser_json;
 pub(crate) mod references;
+pub(crate) mod reparse_await;
 pub(crate) mod reparser;
 
 pub use jsdoc::{parse_jsdoc_comment_range, parse_jsdoc_for_node};

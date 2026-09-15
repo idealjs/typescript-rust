@@ -297,10 +297,19 @@ impl Checker {
         }
 
         if let Some(structured) = t.as_structured() {
+            if std::env::var("TSOX_DEBUG_KEYOF").is_ok() {
+                eprintln!("[keyof] names={:?} idx={}", structured.properties.iter().map(|p| p.name.clone()).collect::<Vec<_>>(), structured.index_infos.len());
+            }
             let mut keys: Vec<Arc<Type>> = structured
                 .properties
                 .iter()
-                .filter(|p| !p.name.starts_with('#'))
+                .filter(|p| {
+                    !p.name.starts_with('#')
+                        && !crate::checker::exports::get_declaration_modifier_flags_from_symbol(p)
+                            .intersects(
+                                tsox_frontend::ast::ModifierFlags::NonPublicAccessibilityModifier,
+                            )
+                })
                 .map(|p| self.get_string_literal_type(&p.name))
                 .collect();
             for info in &structured.index_infos {

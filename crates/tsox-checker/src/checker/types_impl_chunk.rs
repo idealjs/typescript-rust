@@ -92,7 +92,7 @@ impl std::ops::Not for Ternary {
 
 pub type TypeComparer = fn(&Type, &Type, bool) -> Ternary;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct TypeAlias {
     pub symbol: Option<Arc<Symbol>>,
     pub type_arguments: Vec<Arc<Type>>,

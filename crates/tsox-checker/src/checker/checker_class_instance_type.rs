@@ -35,6 +35,7 @@ impl Checker {
 
         {
             let own_mut = Arc::as_ptr(&own_type) as *mut crate::checker::types::Type;
+            self.filling_class_members.insert(node_id);
             unsafe {
                 if let TypeData::Object(obj) = &mut (*own_mut).data {
                     let sink = MemberSink {
@@ -44,6 +45,7 @@ impl Checker {
                     self.fill_members_into(sink, members);
                 }
             }
+            self.filling_class_members.remove(&node_id);
         }
 
         let mut base_type: Option<Arc<Type>> = None;

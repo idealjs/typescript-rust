@@ -213,7 +213,7 @@ impl Parser {
         self.next_token();
         let name = self.parse_identifier();
         let type_parameters = self.parse_optional_type_parameters();
-        let heritage_clauses = self.parse_heritage_clauses();
+        let heritage_clauses = self.parse_heritage_clauses_is_interface(true);
         self.expect(SyntaxKind::OpenBraceToken);
         let members = self.parse_list(ParsingContext::TypeMembers, Parser::parse_type_member);
         self.expect(SyntaxKind::CloseBraceToken);

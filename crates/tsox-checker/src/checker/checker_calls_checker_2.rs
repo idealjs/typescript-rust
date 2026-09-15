@@ -9,6 +9,19 @@ impl Checker {
         callee_type: &Arc<Type>,
         is_new: bool,
     ) {
+        if std::env::var_os("TSOX_DEBUG_CALL").is_some() {
+            let s = callee_type.as_structured();
+            eprintln!(
+                "[2349] callee={} type={} flags={:?} props={} sigs={} ref={} sym={:?}",
+                callee_expr.text(),
+                self.type_to_string(callee_type),
+                callee_type.flags,
+                s.map(|x| x.properties.len()).unwrap_or(0),
+                s.map(|x| x.call_signatures().len()).unwrap_or(0),
+                callee_type.object_flags.contains(crate::checker::types::ObjectFlags::Reference),
+                callee_type.symbol.as_ref().map(|x| x.name.clone())
+            );
+        }
         let head = if is_new {
             THIS_EXPRESSION_IS_NOT_CONSTRUCTABLE
         } else {

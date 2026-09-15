@@ -179,39 +179,77 @@ impl Checker {
         }
 
         for member in data.members.iter() {
-            let (name_node, own_type): (&Arc<Node>, Option<Arc<Type>>) = match &member.data {
+            // 候选成员名/类型：直接属性成员 + 构造器参数属性
+            //（constructor(public xyz: number)，带可访问性修饰的形参即类成员）
+            let mut candidates: Vec<(&Arc<Node>, Option<Arc<Type>>)> = Vec::new();
+            match &member.data {
                 tsox_frontend::ast::NodeData::PropertyDeclaration(pd) => {
-                    if pd.name.kind != SyntaxKind::Identifier {
-                        continue;
+                    if pd.name.kind == SyntaxKind::Identifier {
+                        let t = if let Some(tn) = &pd.type_node {
+                            Some(self.get_type_from_type_node(tn))
+                        } else {
+                            pd.initializer
+                                .as_ref()
+                                .map(|init| self.get_type_of_node(init))
+                        };
+                        candidates.push((&pd.name, t));
                     }
-                    let t = if let Some(tn) = &pd.type_node {
-                        Some(self.get_type_from_type_node(tn))
-                    } else {
-                        pd.initializer
-                            .as_ref()
-                            .map(|init| self.get_type_of_node(init))
-                    };
-                    (&pd.name, t)
                 }
                 tsox_frontend::ast::NodeData::GetAccessorDeclaration(gd) => {
-                    if gd.name.kind != SyntaxKind::Identifier {
-                        continue;
+                    if gd.name.kind == SyntaxKind::Identifier {
+                        let t = if let Some(tn) = &gd.type_node {
+                            Some(self.get_type_from_type_node(tn))
+                        } else {
+                            Self::first_return_expression(gd.body.as_ref())
+                                .map(|e| self.get_type_of_node(&e))
+                        };
+                        candidates.push((&gd.name, t));
                     }
-
-                    let t = if let Some(tn) = &gd.type_node {
-                        Some(self.get_type_from_type_node(tn))
-                    } else {
-                        Self::first_return_expression(gd.body.as_ref())
-                            .map(|e| self.get_type_of_node(&e))
-                    };
-                    (&gd.name, t)
                 }
-                _ => continue,
-            };
-            let Some(own_type) = own_type else { continue };
+                tsox_frontend::ast::NodeData::ConstructorDeclaration(cd) => {
+                    for p in cd.parameters.iter() {
+                        if let tsox_frontend::ast::NodeData::ParameterDeclaration(pdd) = &p.data
+                            && pdd.name.kind == SyntaxKind::Identifier
+                            && pdd
+                                .modifiers
+                                .as_ref()
+                                .is_some_and(|m| !m.list.nodes.is_empty())
+                        {
+                            let t = pdd
+                                .type_node
+                                .as_ref()
+                                .map(|tn| self.get_type_from_type_node(tn));
+                            candidates.push((&pdd.name, t));
+                        }
+                    }
+                }
+                _ => {}
+            }
+            for (name_node, own_type) in candidates {
+                self.check_member_override_compatibility(
+                    name_node,
+                    own_type,
+                    &base_node,
+                    &class_name,
+                    &base_name,
+                );
+            }
+        }
+    }
+
+    fn check_member_override_compatibility(
+        &mut self,
+        name_node: &Arc<Node>,
+        own_type: Option<Arc<Type>>,
+        base_node: &Arc<Node>,
+        class_name: &str,
+        base_name: &str,
+    ) {
+        let Some(own_type) = own_type else { return };
+        {
             let prop_name = name_node.text().to_string();
             let Some(base_member) = Self::find_class_member_by_name(&base_node, &prop_name) else {
-                continue;
+                return;
             };
             let base_tn = match &base_member.data {
                 tsox_frontend::ast::NodeData::PropertyDeclaration(pd) => pd.type_node.clone(),
@@ -228,7 +266,7 @@ impl Checker {
                 _ => None,
             };
             let Some(base_tn) = base_tn else {
-                continue;
+                return;
             };
             let base_type = self.get_type_from_type_node(&base_tn);
             if !own_type.flags.contains(TypeFlags::Any)
@@ -242,8 +280,8 @@ impl Checker {
                         PROPERTY_0_IN_TYPE_1_IS_NOT_ASSIGNABLE_TO_THE_SAME_PROPERTY_IN_BASE_TYPE_2,
                     vec![
                         prop_name,
-                        class_name.clone(),
-                        base_name.clone(),
+                        class_name.to_string(),
+                        base_name.to_string(),
                     ],
                 ));
             }

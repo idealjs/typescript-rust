@@ -10,6 +10,14 @@ impl Checker {
     ) -> ModuleMemberLookup {
         use ModuleMemberLookup as M;
 
+        // resolveJsonModule：json 模块 named exports = 顶层对象属性
+        if self.module_is_json_source_file(module_symbol) {
+            if let Some(t) = self.json_module_exports(module_symbol)
+                && t.entries.contains_key(name)
+            {
+                return M::Found;
+            }
+        }
         if let Some(export_equals) = module_symbol.exports.get("export=") {
             let target = self.resolve_export_equals_target(export_equals);
             if std::env::var_os("TSOX_DEBUG_MODULE").is_some() {
@@ -103,5 +111,19 @@ impl Checker {
             return M::Found;
         }
         M::Missing
+    }
+}
+
+impl Checker {
+    pub(crate) fn module_is_json_source_file(&mut self, module_symbol: &Arc<Symbol>) -> bool {
+        let file_node = module_symbol
+            .declarations
+            .iter()
+            .find(|d| d.kind == SyntaxKind::SourceFile);
+        let Some(file_node) = file_node else {
+            return false;
+        };
+        self.get_source_file_of_node(file_node)
+            .is_some_and(|f| tsox_frontend::ast::is_json_source_file(&f))
     }
 }

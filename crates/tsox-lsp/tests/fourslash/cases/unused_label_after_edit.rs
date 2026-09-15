@@ -12,11 +12,11 @@ myLabel: while (true) {
     let mut s = Session::new_for_test("unusedLabelAfterEdit", content);
     fourslash::verify_number_of_errors_in_current_file(&mut s, 0);
     fourslash::go_to_marker(&mut s, "marker");
-    // TODO: f.DeleteAtCaret(t, 14)
+    fourslash::delete_at_caret(&mut s, 14);
     fourslash::insert(&mut s, "break;");
     fourslash::verify_number_of_errors_in_current_file(&mut s, 1);
     fourslash::go_to_marker(&mut s, "marker");
-    // TODO: f.DeleteAtCaret(t, 6)
+    fourslash::delete_at_caret(&mut s, 6);
     fourslash::insert(&mut s, "break myLabel;");
     fourslash::verify_number_of_errors_in_current_file(&mut s, 0);
 }

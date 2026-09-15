@@ -4,6 +4,17 @@ use crate::binder::bind_walk::*;
 
 impl Binder {
     pub(crate) fn bind(&mut self, node: &Arc<Node>) {
+        // Go bindChildren 前奏：flow 已不可达时节点打 Unreachable 旗标
+        //（子嗣仍走 bind 声明符号；kind 专属 flow 管理在其后，见各 arm）
+        if self.current_flow.as_ref().zip(self.unreachable_flow.as_ref()).is_some_and(
+            |(cur, unreach)| Arc::ptr_eq(cur, unreach),
+        ) && tsox_frontend::ast::is_potentially_executable_node(node)
+        {
+            let ptr = Arc::as_ptr(node) as *mut tsox_frontend::ast::Node;
+            unsafe {
+                (*ptr).flags |= tsox_frontend::ast::NodeFlags::Unreachable;
+            }
+        }
         match node.kind {
             SyntaxKind::Identifier => {
                 if let Some(flow) = &self.current_flow {
@@ -171,10 +182,11 @@ impl Binder {
             }
             SyntaxKind::ImportEqualsDeclaration
             | SyntaxKind::NamespaceImport
-            | SyntaxKind::ImportSpecifier
-            | SyntaxKind::ExportSpecifier => {
+            | SyntaxKind::ImportSpecifier => {
                 self.declare_symbol(node, SymbolFlags::Alias, SymbolFlags::Alias);
             }
+            // ExportSpecifier 由 bind_export_declaration 的 NamedExports
+            // 分支统一绑定（否则双重 declare_symbol 报 Duplicate identifier）
 
             SyntaxKind::ImportClause => {
                 self.bind_import_clause(node);

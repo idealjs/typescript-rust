@@ -153,20 +153,11 @@ impl Parser {
 
     pub(crate) fn parse_jsx_attributes(&mut self) -> Arc<Node> {
         let pos = self.token_pos();
-        let mut properties = Vec::new();
-        while self.token != SyntaxKind::GreaterThanToken
-            && self.token != SyntaxKind::SlashToken
-            && self.token != SyntaxKind::EndOfFile
-        {
-            properties.push(self.parse_jsx_attribute());
-        }
+        let list = self.parse_list(ParsingContext::JsxAttributes, Parser::parse_jsx_attribute);
         Arc::new(Node::with_loc(
             SyntaxKind::JsxAttributes,
             NodeData::JsxAttributes(JsxAttributesData {
-                properties: Arc::new(NodeList {
-                    loc: TextRange::new(pos, self.token_pos()),
-                    nodes: properties,
-                }),
+                properties: Arc::new(list),
             }),
             TextRange::new(pos, self.token_pos()),
         ))
@@ -204,8 +195,11 @@ impl Parser {
         } else {
             name
         };
-        let initializer = if self.parse_optional(SyntaxKind::EqualsToken) {
-            if self.token == SyntaxKind::StringLiteral {
+        let initializer = if self.token == SyntaxKind::EqualsToken {
+            // Go parseJsxAttributeValue：token 停在 = 时经 scanJsxAttributeValue
+            // 取值（引号串跨行合法，普通扫描会在换行处截断；不能先 next_token
+            // 预扫——那会把 { 表达式开括号吞进 jsx 语义扫描）
+            if self.scan_jsx_attribute_value() == SyntaxKind::StringLiteral {
                 Some(self.parse_string_literal_node())
             } else if self.token == SyntaxKind::OpenBraceToken {
                 Some(self.parse_jsx_expression(true))

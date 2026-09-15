@@ -102,11 +102,17 @@ pub enum JsDocPosition {
     /// Go completionDataJSDocParameterName：@param 名字位（名 missing 或
     /// 光标在名区间）给未标注的函数形参名
     ParameterNames(Vec<String>),
+    /// Go insideJSDocTagTypeExpression：标签类型表达式内的纯类型位
+    TypeExpression,
+    /// 类型表达式内的点成员位（import("./m"). 等）：携带 JSDocTypeExpression
+    /// 子树根，成员补全在 jsdoc 类型树内找接收者
+    TypeDotMember(Arc<Node>),
     ContinuePipeline,
     Blocked,
 }
 
 pub fn jsdoc_position_completions(
+    checker: &mut tsox_checker::checker::Checker,
     file: &Arc<SourceFile>,
     jsx: bool,
     position: usize,
@@ -123,6 +129,24 @@ pub fn jsdoc_position_completions(
     let NodeData::JSDoc(d) = &doc.data else {
         return JsDocPosition::Blocked;
     };
+
+    // Go：position 前一字节是 '@'（tag 名未打）→ 直接给全量标签名 +
+    // 智能参数补全（tagNameOnly 语义，剥前导 @）
+    if position > 0 && file.text.as_bytes()[position - 1] == b'@' {
+        let mut labels: Vec<String> = JSDOC_TAG_NAMES.iter().map(|s| s.to_string()).collect();
+        let empty: Vec<Arc<Node>> = Vec::new();
+        let tags_slice = d.tags.as_ref().map(|t| t.nodes.as_slice()).unwrap_or(&empty);
+        labels.extend(super::completions_jsdoc_params::jsdoc_parameter_completions(
+            checker,
+            file,
+            range.pos,
+            range.end,
+            tags_slice,
+            position,
+            true,
+        ));
+        return JsDocPosition::Labels(labels);
+    }
 
     if let Some(tags) = &d.tags {
         let n = tags.nodes.len();
@@ -142,9 +166,20 @@ pub fn jsdoc_position_completions(
                 && name.pos() <= position
                 && position <= name.end()
             {
-                return JsDocPosition::Labels(
-                    JSDOC_TAG_NAMES.iter().map(|s| s.to_string()).collect(),
-                );
+                let mut labels: Vec<String> = JSDOC_TAG_NAMES
+                    .iter()
+                    .map(|s| s.to_string())
+                    .collect();
+                labels.extend(super::completions_jsdoc_params::jsdoc_parameter_completions(
+                    checker,
+                    file,
+                    range.pos,
+                    range.end,
+                    tags.nodes.as_slice(),
+                    position,
+                    true,
+                ));
+                return JsDocPosition::Labels(labels);
             }
             // import tag 内（说明符/属性值串）走字符串补全
             if tag.kind == SyntaxKind::JSDocImportTag {
@@ -170,7 +205,22 @@ pub fn jsdoc_position_completions(
                 if nested_object_literal {
                     return JsDocPosition::Blocked;
                 }
-                return JsDocPosition::ContinuePipeline;
+                // 点后是成员补全位（import("./m"). 等）：在 jsdoc 类型树内
+                // 解析；其余类型位给全局类型符号 + 类型关键字
+                // （Go insideJSDocTagTypeExpression）
+                if file.text[s..position].contains('.') {
+                    let mut type_expr: Option<Arc<Node>> = None;
+                    tsox_frontend::ast::node_data_generated::for_each_child(tag, |c| {
+                        if c.kind == SyntaxKind::JSDocTypeExpression && type_expr.is_none() {
+                            type_expr = Some(Arc::clone(c));
+                        }
+                        type_expr.is_some()
+                    });
+                    if let Some(te) = type_expr {
+                        return JsDocPosition::TypeDotMember(te);
+                    }
+                }
+                return JsDocPosition::TypeExpression;
             }
             // Go IsJSDocParameterTag：名字 missing（类型在前、名未打）或光标
             // 在名区间 → 形参名补全
@@ -200,9 +250,21 @@ pub fn jsdoc_position_completions(
         .chars()
         .all(|c| c.is_whitespace() || matches!(c, '*' | '/' | '(' | ')' | '|'));
     if margin_only {
-        return JsDocPosition::Labels(
-            JSDOC_TAG_NAMES.iter().map(|s| format!("@{s}")).collect(),
-        );
+        let mut labels: Vec<String> = JSDOC_TAG_NAMES
+            .iter()
+            .map(|s| format!("@{s}"))
+            .collect();
+        let empty: Vec<Arc<Node>> = Vec::new();
+        labels.extend(super::completions_jsdoc_params::jsdoc_parameter_completions(
+            checker,
+            file,
+            range.pos,
+            range.end,
+            d.tags.as_ref().map(|t| t.nodes.as_slice()).unwrap_or(&empty),
+            position,
+            false,
+        ));
+        return JsDocPosition::Labels(labels);
     }
     JsDocPosition::Blocked
 }

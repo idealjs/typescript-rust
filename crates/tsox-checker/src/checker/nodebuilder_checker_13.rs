@@ -284,7 +284,10 @@ impl Checker {
     ) -> Option<Arc<Type>> {
         if let Some(links) = self.type_alias_links.get(symbol) {
             if let Some(t) = &links.declared_type {
-                return Some(Arc::clone(t));
+                // 环窗口期的 error 驻留视为未解析，触发窗口外重算
+                if !crate::checker::utilities::is_type_error(t) {
+                    return Some(Arc::clone(t));
+                }
             }
         }
 
@@ -295,7 +298,9 @@ impl Checker {
         let result = self.resolve_alias_body(symbol);
         self.pop_type_resolution();
 
-        self.type_alias_links.get_or_default(symbol).declared_type = Some(Arc::clone(&result));
+        if !crate::checker::utilities::is_type_error(&result) {
+            self.type_alias_links.get_or_default(symbol).declared_type = Some(Arc::clone(&result));
+        }
         Some(result)
     }
 

@@ -28,7 +28,7 @@ pub fn insert(s: &mut Session, text: &str) {
         if s.enable_formatting {
             let edits = on_type_formatting(s, offset, &ch_text);
             if !edits.is_empty() {
-                offset += apply_text_edits(s, &edits);
+                offset = (offset as isize + apply_text_edits(s, &edits)).max(0) as usize;
                 s.cursor = Some(offset);
             }
         }
@@ -98,6 +98,26 @@ pub fn go_to_eof(s: &mut Session) {
     s.cursor = Some(content.chars().count());
 }
 
+/// Go SetPreference：按原始键名改写用户偏好
+pub fn set_user_preference(s: &mut Session, name: &str, value: &str) {
+    {
+        let mut prefs = s.prefs.lock().unwrap();
+        crate::ls::lsutil_user_preferences::set_user_preference_raw(&mut prefs, name, value);
+    }
+    let file_names: Vec<String> = s
+        .data
+        .files
+        .iter()
+        .map(|f| super::session::project_path(&f.file_name))
+        .collect();
+    s.rebuild_service(file_names);
+}
+
+/// Go GoToPosition：光标移到活动文件绝对偏移处
+pub fn go_to_position(s: &mut Session, offset: usize) {
+    s.cursor = Some(offset);
+}
+
 /// Go DeleteAtCaret：在光标处向后删除 count 个字符（光标不动）
 pub fn delete_at_caret(s: &mut Session, count: usize) {
     for _ in 0..count {
@@ -106,6 +126,39 @@ pub fn delete_at_caret(s: &mut Session, count: usize) {
             .unwrap_or_else(|| panic!("delete_at_caret 前无光标（go_to_marker）"));
         edit_script(s, pos, pos + 1, "");
     }
+}
+
+/// Go Backspace：删除光标前一字符并回退光标
+pub fn backspace(s: &mut Session, count: usize) {
+    for _ in 0..count {
+        let pos = s
+            .cursor
+            .unwrap_or_else(|| panic!("backspace 前无光标（go_to_marker）"))
+            .checked_sub(1)
+            .unwrap_or_else(|| panic!("backspace 越过文件头"));
+        edit_script(s, pos, pos + 1, "");
+        s.cursor = Some(pos);
+    }
+}
+
+/// Go ReplaceLine：选中整行（不含换行符）后键入 text 替换
+pub fn replace_line(s: &mut Session, line_index: usize, text: &str) {
+    let content = s.file_content(&s.active_file).to_string();
+    let mut line_starts: Vec<usize> = vec![0];
+    for (i, ch) in content.chars().enumerate() {
+        if ch == '\n' {
+            line_starts.push(i + 1);
+        }
+    }
+    let Some(&start) = line_starts.get(line_index) else {
+        panic!("replace_line 行号越界: {line_index}");
+    };
+    let end = line_starts
+        .get(line_index + 1)
+        .map(|&next_start| next_start - 1)
+        .unwrap_or(content.chars().count());
+    edit_script(s, start, end, text);
+    s.cursor = Some(start + text.chars().count());
 }
 
 fn edit_script(s: &mut Session, start: usize, end: usize, new_text: &str) {
@@ -156,8 +209,8 @@ fn shift_positions(s: &mut Session, file: &str, start: usize, end: usize, new_te
 }
 
 /// Go applyTextEdits：按起点升序排序后逆序应用，同步光标；
-/// 返回净偏移。
-fn apply_text_edits(s: &mut Session, edits: &[crate::lsp::lsproto_lsp::TextEdit]) -> usize {
+/// 返回净偏移（带符号，删除多于插入可为负）。
+fn apply_text_edits(s: &mut Session, edits: &[crate::lsp::lsproto_lsp::TextEdit]) -> isize {
     let file = s.active_file.clone();
     let content = s.file_content(&file).to_string();
     let mut starts: Vec<(usize, usize, &str)> = edits
@@ -184,7 +237,7 @@ fn apply_text_edits(s: &mut Session, edits: &[crate::lsp::lsproto_lsp::TextEdit]
         })
         .collect();
 
-    let mut total_offset = 0usize;
+    let mut total_offset: isize = 0;
     let mut buffer = content.clone();
     for (start, end, text) in edits_char.iter().rev() {
         // 逆序（高位置先拼接）下，低位置编辑的 char/byte 下标不受
@@ -203,7 +256,7 @@ fn apply_text_edits(s: &mut Session, edits: &[crate::lsp::lsproto_lsp::TextEdit]
                 caret = *start;
             }
         }
-        total_offset += delta.unsigned_abs();
+        total_offset += delta;
     }
     if buffer != content {
         s.set_file_content(&file, buffer);
@@ -323,6 +376,16 @@ fn diagnostics_of(s: &Session, file: &str) -> Vec<crate::ls::types::Diagnostic> 
 pub fn verify_no_errors(s: &Session) {
     for f in &s.data.files {
         for d in diagnostics_of(s, &f.file_name) {
+            if d.severity.unwrap_or(0) == 1 {
+                eprintln!(
+                    "[no-err] {} line={}:{} code={:?} {}",
+                    f.file_name,
+                    d.range.start.line,
+                    d.range.start.character,
+                    d.code,
+                    d.message
+                );
+            }
             assert!(
                 d.severity.unwrap_or(0) != 1,
                 "{} 出现错误诊断: {}",
@@ -351,10 +414,14 @@ pub fn list_diagnostics(s: &Session, file: &str) -> Vec<String> {
 }
 
 pub fn verify_number_of_errors_in_current_file(s: &Session, expected: usize) {
-    let n = diagnostics_of(s, &s.active_file)
-        .iter()
-        .filter(|d| d.severity.unwrap_or(0) == 1)
-        .count();
+    let all = diagnostics_of(s, &s.active_file);
+    let n = all.iter().filter(|d| d.severity.unwrap_or(0) == 1).count();
+    if n != expected {
+        for d in &all {
+            eprintln!("[diag] sev={} code={:?} line={}:{}..{}: {}", d.severity.unwrap_or(0), d.code, d.range.start.line, d.range.start.character, d.range.end.character, d.message);
+        }
+        eprintln!("[file-content] {:?}", s.file_content(&s.active_file));
+    }
     assert_eq!(n, expected, "{} 错误数不符", s.active_file);
 }
 
@@ -494,4 +561,17 @@ fn line_col_to_offset(text: &str, line: usize, character: usize) -> usize {
         }
     }
     text.len()
+}
+
+#[doc(hidden)]
+pub fn debug_dump_diagnostics(s: &Session, file: &str) {
+    let ds = diagnostics_of_pub(s, file);
+    for d in &ds {
+        eprintln!("diag sev={:?} msg={}", d.severity, d.message);
+    }
+    eprintln!("count={}", ds.len());
+}
+
+fn diagnostics_of_pub(s: &Session, file: &str) -> Vec<crate::ls::types::Diagnostic> {
+    diagnostics_of(s, file)
 }

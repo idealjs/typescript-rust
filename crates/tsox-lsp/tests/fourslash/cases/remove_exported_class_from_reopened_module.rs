@@ -11,8 +11,8 @@ namespace multiM {
 "#;
     let mut s = Session::new_for_test("removeExportedClassFromReopenedModule", content);
     fourslash::go_to_marker(&mut s, "1");
-    // TODO: f.DeleteAtCaret(t, 18)
-    fourslash::go_to_eof(&mut s, );
+    fourslash::delete_at_caret(&mut s, 18);
+    fourslash::go_to_eof(&mut s);
     fourslash::insert(&mut s, "new multiM.c();");
     fourslash::verify_number_of_errors_in_current_file(&mut s, 1);
 }

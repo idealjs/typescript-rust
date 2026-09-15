@@ -68,12 +68,15 @@ impl Checker {
                         ));
                     }
                 } else {
+                    if std::env::var_os("TSOX_DEBUG_DOM").is_some() {
+                        eprintln!("[2694] ns={} member={}", ns_path, member);
+                    }
                     self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
                                 file,
                                 segment.loc,
                                 tsox_core::diagnostics::messages_generated::
                                     NAMESPACE_0_HAS_NO_EXPORTED_MEMBER_1,
-                                vec![ns_path, member],
+                                vec![ns_path.clone(), member.clone()],
                             ));
                 }
             }

@@ -132,6 +132,14 @@ impl FormattingScanner {
         let expected_scan_action = n
             .map(|n| expected_scan_action_for(n, last_kind))
             .unwrap_or(ScanAction::Scan);
+        if std::env::var_os("TSOX_DEBUG_FMT").is_some() {
+            eprintln!(
+                "[rti] n={:?} act={:?} last_act={:?}",
+                n.map(|n| n.kind),
+                expected_scan_action,
+                self.last_scan_action
+            );
+        }
 
         if self.has_last_token_info && expected_scan_action == self.last_scan_action {
             let mut info = self.last_token_info.clone();
@@ -153,6 +161,12 @@ impl FormattingScanner {
         let current_token = self.get_next_token(n, expected_scan_action);
 
         let token = TextRangeWithKind::new(self.s.full_start_pos(), self.s.token_end(), current_token);
+        if std::env::var_os("TSOX_DEBUG_FMT").is_some() {
+            eprintln!(
+                "[fmt-tok] {:?} [{}..{}]",
+                token.kind, token.loc.pos(), token.loc.end()
+            );
+        }
 
         // 消费 trailing trivia
         self.trailing_trivia = Vec::new();

@@ -64,9 +64,11 @@ impl Checker {
                 let shell = Arc::clone(shell);
                 let args = type_args.unwrap_or_default();
                 // 壳让外层构建不完整：标记 degraded 使其不进缓存（重试拿完整版），
-                // relater 对 degraded 放行
+                // relater 对 degraded 放行；空壳型自身也标 degraded
                 self.heritage_degraded_events += 1;
-                return self.rebuild_with_type_arguments(&shell, args);
+                let rebuilt = self.rebuild_with_type_arguments(&shell, args);
+                self.degraded_type_ptrs.insert(rebuilt.id);
+                return rebuilt;
             }
             self.heritage_degraded_events += 1;
             return self.error_type();
@@ -157,7 +159,12 @@ impl Checker {
                 let mut heritage_base_degraded = false;
                 let base_types = self
                     .collect_interface_base_types(&interface_decls, &mut heritage_base_degraded);
-                if heritage_base_degraded {
+                // 基类是空壳（解析重入期产物）时合并结果只有自有成员：按 degraded
+                // 处理——结果不进缓存、标 degraded，后续引用重建拿完整版
+                let base_shell = base_types.iter().any(|(_, bt)| {
+                    bt.as_structured().is_some_and(|s| s.members.entries.is_empty())
+                });
+                if heritage_base_degraded || base_shell {
                     heritage_degraded = true;
                 }
                 self.pop_scope();

@@ -280,8 +280,14 @@ impl Checker {
             return Arc::clone(&cached.2);
         }
         let rebuilt = attach_explicit_type_arguments(t, args.clone());
-        self.attached_type_args_cache
-            .insert(key, (Arc::clone(t), args, Arc::clone(&rebuilt)));
+        // 类成员填充窗口内的 attach 源是半成品（成员解析中途的重入约束
+        // 解析），快照驻留会把残缺成员钉死，不缓存待后续完整重算
+        // 类成员填充窗口内的 attach 源是半成品（成员解析中途的重入约束
+        // 解析），快照驻留会把残缺成员钉死，不缓存待后续完整重算
+        if self.filling_class_members.is_empty() {
+            self.attached_type_args_cache
+                .insert(key, (Arc::clone(t), args, Arc::clone(&rebuilt)));
+        }
         rebuilt
     }
 }

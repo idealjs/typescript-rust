@@ -44,8 +44,30 @@ impl Checker {
             if let Some(target) = self.resolve_export_assignment_target(ee) {
                 return self.get_merged_symbol(&target);
             }
+            // js 的 export= 声明是 `module.exports = X` BinaryExpression，其
+            // parent 链可能未接：目标类/typedef 直接在模块 exports 表
+            // （Go resolveAlias 对 js export= alias 解析到右侧符号）
+            if let Some(right) = ee.declarations.iter().find_map(|d| match &d.data {
+                NodeData::BinaryExpression(be) => Some(Arc::clone(&be.right)),
+                _ => None,
+            }) && let Some(target) = self.resolve_entity_symbol_in(&right, module_symbol) {
+                return self.get_merged_symbol(&target);
+            }
         }
         Arc::clone(module_symbol)
+    }
+
+    fn resolve_entity_symbol_in(&self, expr: &Arc<Node>, module_symbol: &Arc<Symbol>) -> Option<Arc<Symbol>> {
+        if expr.kind != SyntaxKind::Identifier {
+            return None;
+        }
+        let name = expr.text().to_string();
+        module_symbol
+            .exports
+            .entries
+            .get(&name)
+            .cloned()
+            .or_else(|| module_symbol.members.entries.get(&name).cloned())
     }
 
     fn resolve_export_assignment_target(&self, ee: &Arc<Symbol>) -> Option<Arc<Symbol>> {
@@ -259,10 +281,29 @@ impl Checker {
                             .cloned()
                     })
             } else {
+                // Go getSymbol：取到符号后先 resolveSymbol 再验 meaning
+                //（re-export 的 alias 符号需 follow 到 namespace/类型终点）
                 self.get_exports_of_symbol(&merged)
                     .get(&name)
+                    .map(|s| {
+                        // Go resolveSymbol：alias 链循环展开到 meaning 命中
+                        //（re-export 的 namespace import 解到模块符号）
+                        let mut cur = self
+                            .follow_alias(s)
+                            .unwrap_or_else(|| Arc::clone(s));
+                        for _ in 0..10 {
+                            if cur.flags.intersects(meaning) {
+                                break;
+                            }
+                            let next = self.resolve_alias_base(Arc::clone(&cur));
+                            if std::sync::Arc::ptr_eq(&next, &cur) {
+                                break;
+                            }
+                            cur = next;
+                        }
+                        cur
+                    })
                     .filter(|s| s.flags.intersects(meaning))
-                    .cloned()
                     .or_else(|| {
                         self.get_exports_of_symbol(&merged)
                             .get(&name)
@@ -270,6 +311,16 @@ impl Checker {
                             .cloned()
                     })
             };
+            if std::env::var_os("TSOX_DEBUG_QN").is_some() {
+                let raw = self
+                    .get_exports_of_symbol(&merged)
+                    .get(&name)
+                    .cloned();
+                eprintln!("[it-chain] seg={} raw={:?} next={:?}",
+                    name,
+                    raw.as_ref().map(|s| (s.flags, s.export_symbol.as_ref().map(|e| e.name.clone()))),
+                    next.as_ref().map(|s| s.name.clone()));
+            }
             let Some(next) = next else {
                 let file = self
                     .get_source_file_of_node(segment)

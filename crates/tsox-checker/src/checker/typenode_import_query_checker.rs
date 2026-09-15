@@ -24,6 +24,11 @@ impl Checker {
     }
 
     fn resolve_module_file_symbol_relative(&self, spec: &str) -> Option<Arc<Symbol>> {
+        // Go moduleSpecifierIsRelative：目录级文件解析只对相对说明符，
+        // 裸说明符仅走 ambient/node_modules（否则同目录文件按基名误命中）
+        if !(spec.starts_with("./") || spec.starts_with("../")) {
+            return None;
+        }
         let file = self.display_enclosing_file.clone().or_else(|| self.current_file.clone())?;
         let dir = match file.file_name.rfind('/') {
             Some(i) => file.file_name[..i].to_string(),
@@ -82,25 +87,31 @@ impl Checker {
                 return Some(module_sym);
             }
         }
-        let (member_name, import_decl): (String, Arc<Node>) = {
+        let (member_name, import_decl): (Option<String>, Arc<Node>) = {
             let decl = alias
                 .declarations
                 .iter()
                 .find(|d| {
                     matches!(
                         d.kind,
-                        SyntaxKind::ImportClause | SyntaxKind::ImportSpecifier
+                        SyntaxKind::ImportClause
+                            | SyntaxKind::ImportSpecifier
+                            | SyntaxKind::NamespaceImport
                     )
                 })?
                 .clone();
             match &decl.data {
-                NodeData::ImportClause(_) => ("default".to_string(), decl),
+                NodeData::ImportClause(_) => (Some("default".to_string()), decl),
                 NodeData::ImportSpecifier(d) => (
-                    d.property_name
-                        .as_ref()
-                        .map_or_else(|| d.name.text().to_string(), |p| p.text().to_string()),
+                    Some(
+                        d.property_name
+                            .as_ref()
+                            .map_or_else(|| d.name.text().to_string(), |p| p.text().to_string()),
+                    ),
                     decl,
                 ),
+                // import * as N：目标 = 模块符号整体（无成员名）
+                NodeData::NamespaceImport(_) => (None, decl),
                 _ => return None,
             }
         };
@@ -122,7 +133,13 @@ impl Checker {
             )?;
             let sf = self.program.get_source_file(&path)?;
             self.program.symbol_map().symbol_of(&sf.node).cloned()
-        })?;
+        });
+        let module_sym = module_sym?;
+        // import * as N：别名目标即模块符号
+        if member_name.is_none() {
+            return Some(module_sym);
+        }
+        let member_name = member_name.unwrap_or_default();
         let resolved = self
             .resolve_module_member_symbol(&module_sym, &member_name, 8)
             .or_else(|| self.file_module_exported_member(&module_sym, &member_name));

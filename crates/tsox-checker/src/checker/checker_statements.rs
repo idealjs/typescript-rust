@@ -29,3 +29,5 @@ pub(crate) use tsox_frontend::ast::NodeData;
 pub(crate) use tsox_frontend::ast::NodeFlags;
 pub(crate) use tsox_frontend::ast::SymbolFlags;
 pub(crate) use tsox_frontend::ast::SyntaxKind;
+
+pub(crate) use tsox_core::diagnostics::messages_generated::UNUSED_LABEL;

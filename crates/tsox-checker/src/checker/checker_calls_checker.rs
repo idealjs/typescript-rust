@@ -185,8 +185,26 @@ impl Checker {
             if param_type.flags.contains(TypeFlags::Any) {
                 continue;
             }
-            let arg_type = self.get_type_of_node(arg);
-            if !self.is_type_assignable_to(&arg_type, &param_type) {
+            // Go chooseOverload 候选检查按上下文定型实参：上下文敏感函数
+            // 表达式以参数型为上下文重定型（返回位参与判定，`return "hello"`
+            // 否决 (value:T)=>IPromise<U> 过载），裸 get_type_of_node 会以
+            // any 放行全部过载
+            let arg_type = if self.is_context_sensitive(arg) {
+                self.type_of_context_sensitive_arg(arg, &param_type)
+            } else {
+                self.get_type_of_node(arg)
+            };
+            let verdict = self.is_type_assignable_to(&arg_type, &param_type);
+            if std::env::var_os("TSOX_DEBUG_HOVER").is_some() {
+                eprintln!(
+                    "[applicable] arg_kind={:?} arg={} param={} -> {}",
+                    arg.kind,
+                    self.type_to_string(&arg_type),
+                    self.type_to_string(&param_type),
+                    verdict
+                );
+            }
+            if !verdict {
                 return false;
             }
         }
@@ -214,7 +232,18 @@ impl Checker {
         self.speculation_depth += 1;
         let result = (|| {
             for (idx, sig) in signatures.iter().enumerate() {
-                if self.signature_accepts_arguments(node, sig, arguments) {
+                // Go chooseOverload 逐候选独立推测：relater_overflow 是深层
+                // 递归护栏的粘滞放行标志，外层关系一旦触发会让后续全部
+                // 候选被放行（首候选胜出）。逐候选隔离，检查自身溢出仍
+                // 保守放行（护栏语义不变），只不外泄、不内渗
+                let saved_overflow = self.relater_overflow;
+                self.relater_overflow = false;
+                let accepts = self.signature_accepts_arguments(node, sig, arguments);
+                self.relater_overflow |= saved_overflow;
+                if accepts {
+                    if std::env::var_os("TSOX_DEBUG_HOVER").is_some() {
+                        eprintln!("[overload] {} of {} picked", idx, signatures.len());
+                    }
                     return Some(idx);
                 }
             }

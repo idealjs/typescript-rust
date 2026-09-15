@@ -29,7 +29,12 @@ impl Parser {
 
         let mut p = self.clone_state();
         p.next_token();
-        !p.has_preceding_line_break() && p.is_start_of_expression()
+        let candidate = crate::parser::binary_precedence::is_identifier_or_keyword(p.token)
+            || matches!(
+                p.token,
+                SyntaxKind::NumericLiteral | SyntaxKind::BigIntLiteral | SyntaxKind::StringLiteral
+            );
+        candidate && !p.has_preceding_line_break()
     }
 
     pub(crate) fn parse_yield_expression(&mut self) -> Arc<Node> {

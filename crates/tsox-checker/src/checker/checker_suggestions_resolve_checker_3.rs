@@ -44,14 +44,92 @@ impl Checker {
             return symbol;
         }
 
+        // binder 对 export/import specifier 已设 export_symbol 直连目标
+        //（`export { foo }` → 文件 locals 的绑定）
+        if let Some(target) = symbol.export_symbol.as_ref() {
+            if !std::ptr::eq(
+                std::sync::Arc::as_ptr(target) as *const u8,
+                std::sync::Arc::as_ptr(&symbol) as *const u8,
+            ) {
+                return Arc::clone(target);
+            }
+        }
+
         if symbol.declarations.iter().any(|d| {
             matches!(
                 d.kind,
-                SyntaxKind::NamespaceImport | SyntaxKind::NamespaceExport
+                SyntaxKind::NamespaceImport
+                    | SyntaxKind::NamespaceExport
+                    | SyntaxKind::ImportSpecifier
+                    | SyntaxKind::ExportSpecifier
             )
-        }) && let Some(module_sym) = self.resolve_import_alias_module(&symbol)
+        }) {
+            if let Some(module_sym) = self.resolve_import_alias_module(&symbol) {
+                // Go resolveEntityName：named import 的 alias 目标 = 模块内同名
+                // 导出（namespace import 才是模块符号本身）
+                if symbol.declarations.iter().any(|d| {
+                    matches!(d.kind, SyntaxKind::ImportSpecifier | SyntaxKind::ExportSpecifier)
+                }) {
+                    // import { P as Q } / export { x as y } from "m"：模块侧名是
+                    // property_name，不是本地绑定/导出名
+                    let import_name = symbol
+                        .declarations
+                        .iter()
+                        .find_map(|d| match &d.data {
+                            NodeData::ImportSpecifier(is) => Some(
+                                is.property_name
+                                    .as_ref()
+                                    .unwrap_or(&is.name)
+                                    .text()
+                                    .to_string(),
+                            ),
+                            NodeData::ExportSpecifier(es) => Some(
+                                es.property_name
+                                    .as_ref()
+                                    .unwrap_or(&es.name)
+                                    .text()
+                                    .to_string(),
+                            ),
+                            _ => None,
+                        })
+                        .unwrap_or_else(|| symbol.name.clone());
+                    if let Some(named) = module_sym
+                        .exports
+                        .get(&import_name)
+                        .cloned()
+                        .or_else(|| module_sym.members.get(&import_name).cloned())
+                    {
+                        return named;
+                    }
+                }
+                return module_sym;
+            }
+        }
+        // `export { foo }`（无 from）：目标 = 所在文件符号的局部绑定
+        //（index.ts 的 import * as foo 的 NamespaceImport alias）
+        if let Some(decl) = symbol
+            .declarations
+            .iter()
+            .find(|d| d.kind == SyntaxKind::ExportSpecifier)
         {
-            return module_sym;
+            let mut cur = Arc::clone(decl);
+            for _ in 0..6 {
+                let Some(parent) = cur.parent() else { break };
+                if parent.kind == SyntaxKind::SourceFile {
+                    if let Some(locals) = self.program.symbol_map().locals.get(&parent.id())
+                        && let Some(target) = locals.get(&symbol.name).cloned()
+                    {
+                        return target;
+                    }
+                    if let Some(sf_sym) = self.program.symbol_map().symbol_of(&parent)
+                        && let Some(target) = sf_sym.exports.get(&symbol.name).cloned()
+                    {
+                        return target;
+                    }
+                    break;
+                }
+                cur = parent;
+            }
         }
         if let Some(decl) = symbol
             .declarations
@@ -166,6 +244,21 @@ impl Checker {
                 let pkg_dir = format!("{dir}/node_modules/{specifier}");
                 for index in ["./index.d.ts", "./index.ts", "./index.tsx"] {
                     if let Some(sym) = self.resolve_module_file_symbol_in(&pkg_dir, index) {
+                        return Some(sym);
+                    }
+                }
+                // Go loadModuleFromImmediateNodeModulesDirectory：实现包未命中
+                // 时回退 @types 包（declaration-only；@scope/name → scope__name）
+                let mangled = if let Some(rest) = specifier.strip_prefix('@') {
+                    rest.split_once('/')
+                        .map(|(scope, pkg)| format!("{scope}__{pkg}"))
+                        .unwrap_or_else(|| rest.to_string())
+                } else {
+                    specifier.to_string()
+                };
+                let types_dir = format!("{dir}/node_modules/@types/{mangled}");
+                for index in ["./index.d.ts", "./index.ts", "./index.tsx"] {
+                    if let Some(sym) = self.resolve_module_file_symbol_in(&types_dir, index) {
                         return Some(sym);
                     }
                 }

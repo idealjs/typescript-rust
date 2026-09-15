@@ -111,6 +111,19 @@ impl Binder {
 
         self.bind_children(&file.node);
 
+        // Go binder：JS 文件存在 CommonJS 指示时声明 module/exports 文件
+        // 局部符号（FunctionScopedVariable|ModuleExports；module 带 exports
+        // 成员属性）
+        if file.common_js_module_indicator.is_some()
+            && matches!(
+                file.script_kind,
+                tsox_frontend::ast::ScriptKind::Js | tsox_frontend::ast::ScriptKind::Jsx
+            )
+        {
+            self.declare_common_js_variable(&file.node, "module");
+            self.declare_common_js_variable(&file.node, "exports");
+        }
+
         self.process_expando_assignments();
 
         self.container = prev_container;
@@ -118,6 +131,53 @@ impl Binder {
         self.parent_symbol = prev_parent;
 
         &self.symbol_map
+    }
+
+    fn declare_common_js_variable(&mut self, file_node: &Arc<Node>, name: &str) {
+        if self
+            .symbol_map
+            .locals
+            .get(&file_node.id())
+            .is_some_and(|l| l.get(name).is_some())
+        {
+            return;
+        }
+        let symbol = Arc::new(Symbol::new(
+            SymbolFlags::FunctionScopedVariable.union(SymbolFlags::ModuleExports),
+            name.to_string(),
+        ));
+        {
+            let symbol_mut = Arc::as_ptr(&symbol) as *mut Symbol;
+            unsafe {
+                (*symbol_mut).declarations.push(Arc::clone(file_node));
+                (*symbol_mut).value_declaration = Some(Arc::clone(file_node));
+            }
+        }
+        if name == "module" {
+            let exports_property = Arc::new(Symbol::new(
+                SymbolFlags::ModuleExports.union(SymbolFlags::Property),
+                "exports",
+            ));
+            {
+                let prop_mut = Arc::as_ptr(&exports_property) as *mut Symbol;
+                unsafe {
+                    (*prop_mut).declarations.push(Arc::clone(file_node));
+                    (*prop_mut).value_declaration = Some(Arc::clone(file_node));
+                    (*prop_mut).set_parent(&symbol);
+                }
+            }
+            let symbol_mut = Arc::as_ptr(&symbol) as *mut Symbol;
+            unsafe {
+                (*symbol_mut)
+                    .members
+                    .insert("exports", exports_property);
+            }
+        }
+        self.symbol_map
+            .locals
+            .entry(file_node.id())
+            .or_default()
+            .insert(name.to_string(), symbol);
     }
 
     pub(crate) fn set_parent_pointers(&mut self, node: &Arc<Node>) {

@@ -89,6 +89,16 @@ impl Checker {
                         }
                     }
 
+                    // Go resolver：declare module "foo" 增强块内的名字可见性
+                    // 延伸到被增强模块的 exports
+                    if let Some(sym) = self.augmentation_target_member(container_sym, name) {
+                        if sym.flags.intersects(meaning)
+                            || self.alias_chain_hits_meaning(&sym, meaning)
+                        {
+                            return self.follow_alias(&sym);
+                        }
+                    }
+
                     if let Some(merged) = self.globals.get(container_sym.name.as_str()) {
                         if !Arc::ptr_eq(merged, container_sym)
                             && merged.flags.intersects(SymbolFlags::MODULE)
@@ -243,6 +253,14 @@ impl Checker {
             }
         }
 
+        // Go NameResolver：JS 文件中 require 调用的 callee 解析失败时回退
+        // 到 requireSymbol（类型 any），避免报 cannot-find-name
+        if name == "require" && node_parent_is_require_call(node) {
+            if let Some(ref sym) = self.require_symbol {
+                return Some(Arc::clone(sym));
+            }
+        }
+
         None
     }
 
@@ -290,4 +308,60 @@ impl Checker {
             }
         }
     }
+}
+
+impl Checker {
+    /// Go getVisibleSymbolInAugmentationScope：declare module "foo"（augmentation）
+    /// 块内的裸名查找延伸到被增强模块的 exports
+    pub(crate) fn augmentation_target_member(
+        &self,
+        container_sym: &Arc<Symbol>,
+        name: &str,
+    ) -> Option<Arc<Symbol>> {
+        let decl = container_sym
+            .declarations
+            .iter()
+            .find(|d| d.kind == SyntaxKind::ModuleDeclaration)?;
+        let tsox_frontend::ast::NodeData::ModuleDeclaration(md) = &decl.data else {
+            return None;
+        };
+        if md.name.kind != SyntaxKind::StringLiteral {
+            return None;
+        }
+        let spec = md.name.text().trim_matches(['"', '\'']).to_string();
+        let resolved = self.resolve_module_file_symbol(&spec)?;
+        let target = if Arc::ptr_eq(&resolved, container_sym) {
+            return None;
+        } else {
+            resolved
+        };
+        target
+            .exports
+            .get(name)
+            .cloned()
+            .or_else(|| target.members.get(name).cloned())
+    }
+}
+
+fn node_parent_is_require_call(node: &Arc<Node>) -> bool {
+    let Some(parent) = node.parent() else {
+        return false;
+    };
+    if let tsox_frontend::ast::NodeData::CallExpression(call) = &parent.data
+        && call.expression.kind == SyntaxKind::Identifier
+        && call.expression.text() == "require"
+        && call.arguments.len() == 1
+    {} else {
+        return false;
+    }
+    let mut ancestor = Some(Arc::clone(node));
+    while let Some(a) = ancestor {
+        if a.kind == SyntaxKind::SourceFile {
+            return a
+                .flags
+                .contains(tsox_frontend::ast::NodeFlags::JavaScriptFile);
+        }
+        ancestor = a.parent();
+    }
+    false
 }

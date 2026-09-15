@@ -183,6 +183,11 @@ fn offset_to_line_col(line_map: &LineMap, offset: usize) -> (u32, u32) {
     (line as u32, offset.saturating_sub(line_start) as u32)
 }
 
+#[doc(hidden)]
+pub fn offset_to_line_col_pub(line_map: &LineMap, offset: usize) -> (u32, u32) {
+    offset_to_line_col(line_map, offset)
+}
+
 fn get_line_end(text: &str, line_start: usize) -> usize {
     match text[line_start..].find('\n') {
         Some(idx) => line_start + idx,

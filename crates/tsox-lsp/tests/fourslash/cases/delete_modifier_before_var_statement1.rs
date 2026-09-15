@@ -24,11 +24,10 @@ declare var WScript: {
 }
 "#;
     let mut s = Session::new_for_test("deleteModifierBeforeVarStatement1", content);
-    // TODO: f.GoToFileNumber(t, 0)
-    // TODO: f.GoToPosition(t, 0)
-    // TODO: f.DeleteAtCaret(t, 100)
-    // TODO: f.GoToPosition(t, 198)
-    // TODO: f.DeleteAtCaret(t, 16)
-    // TODO: f.GoToPosition(t, 198)
+    fourslash::go_to_position(&mut s, 0);
+    fourslash::delete_at_caret(&mut s, 100);
+    fourslash::go_to_position(&mut s, 198);
+    fourslash::delete_at_caret(&mut s, 16);
+    fourslash::go_to_position(&mut s, 198);
     fourslash::insert(&mut s, "Item(): string; ");
 }

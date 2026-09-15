@@ -13,6 +13,63 @@ impl Checker {
         format!("({}) => {}", params.join(", "), return_str)
     }
 
+    /// Go getExpandedParameters：末参是 rest 且其类型为元组时，按元组元素
+    /// 展开为具名参数序列（标签取元素 label，回退 rest 符号名_i）；其余
+    /// 形态返回 None
+    pub(crate) fn tuple_expanded_params(
+        &mut self,
+        sig: &Signature,
+    ) -> Option<Vec<(String, Arc<Type>, bool, bool)>> {
+        if !sig.has_rest_parameter() || sig.parameters.is_empty() {
+            return None;
+        }
+        let rest_idx = sig.parameters.len() - 1;
+        let rest_sym = &sig.parameters[rest_idx];
+        let rest_type = self
+            .signature_instantiated_param_type(sig, rest_idx)
+            .unwrap_or_else(|| self.get_type_of_symbol(rest_sym));
+        let crate::checker::types::TypeData::Tuple(tup) = &rest_type.data else {
+            return None;
+        };
+        let mut out: Vec<(String, Arc<Type>, bool, bool)> = sig.parameters[..rest_idx]
+            .iter()
+            .map(|p| {
+                (
+                    p.name.clone(),
+                    self.get_type_of_symbol(p),
+                    p.flags.contains(SymbolFlags::Optional),
+                    false,
+                )
+            })
+            .collect();
+        for (i, info) in tup.element_infos.iter().enumerate() {
+            let ty = info.type_.clone().unwrap_or_else(|| self.any_type());
+            let variadic = info
+                .flags
+                .contains(crate::checker::types::ElementFlags::Variadic);
+            // Go expandSignatureParametersWithTupleMembers 仅对 Rest 元素再包
+            // 数组；Variadic（...T）元素类型已是数组形态
+            let ty = if info
+                .flags
+                .contains(crate::checker::types::ElementFlags::Rest)
+            {
+                self.create_array_type(ty)
+            } else {
+                ty
+            };
+            let label = info.label.clone().unwrap_or_else(|| {
+                let n = rest_sym.name.trim_start_matches("...");
+                let root = if n.is_empty() { "arg" } else { n };
+                format!("{root}_{i}")
+            });
+            let optional = info
+                .flags
+                .contains(crate::checker::types::ElementFlags::Optional);
+            out.push((label, ty, optional, variadic));
+        }
+        Some(out)
+    }
+
     pub(crate) fn is_call_signatures_related_to(
         &mut self,
         source: &Arc<Type>,
@@ -60,40 +117,51 @@ impl Checker {
         prefix: &str,
         sep: &str,
     ) -> String {
-        let params: Vec<String> = sig
-            .parameters
-            .iter()
-            .enumerate()
-            .map(|(i, param)| {
-                let param_type = self
-                    .signature_instantiated_param_type(sig, i)
-                    .unwrap_or_else(|| self.get_type_of_symbol(param));
+        let params: Vec<String> = if let Some(expanded) = self.tuple_expanded_params(sig) {
+            expanded
+                .iter()
+                .map(|(name, ty, optional, variadic)| {
+                    let type_str = self.type_to_string(ty);
+                    let prefix = if *variadic { "..." } else { "" };
+                    let question = if *optional { "?" } else { "" };
+                    format!("{prefix}{name}{question}: {type_str}")
+                })
+                .collect()
+        } else {
+            sig.parameters
+                .iter()
+                .enumerate()
+                .map(|(i, param)| {
+                    let param_type = self
+                        .signature_instantiated_param_type(sig, i)
+                        .unwrap_or_else(|| self.get_type_of_symbol(param));
 
-                let optional = param.flags.contains(SymbolFlags::Optional)
-                    || param.declarations.iter().any(|d| {
-                        matches!(
-                            &d.data,
-                            tsox_frontend::ast::NodeData::ParameterDeclaration(pd)
-                                if pd.question_token.is_some() || pd.initializer.is_some()
+                    let optional = param.flags.contains(SymbolFlags::Optional)
+                        || param.declarations.iter().any(|d| {
+                            matches!(
+                                &d.data,
+                                tsox_frontend::ast::NodeData::ParameterDeclaration(pd)
+                                    if pd.question_token.is_some() || pd.initializer.is_some()
+                            )
+                        });
+                    let is_rest = sig.has_rest_parameter() && i == sig.parameters.len() - 1;
+                    let prefix = if is_rest { "..." } else { "" };
+                    if optional {
+                        format!(
+                            "{prefix}{}?: {}",
+                            param.name,
+                            self.type_to_string(&param_type)
                         )
-                    });
-                let is_rest = sig.has_rest_parameter() && i == sig.parameters.len() - 1;
-                let prefix = if is_rest { "..." } else { "" };
-                if optional {
-                    format!(
-                        "{prefix}{}?: {}",
-                        param.name,
-                        self.type_to_string(&param_type)
-                    )
-                } else {
-                    format!(
-                        "{prefix}{}: {}",
-                        param.name,
-                        self.type_to_string(&param_type)
-                    )
-                }
-            })
-            .collect();
+                    } else {
+                        format!(
+                            "{prefix}{}: {}",
+                            param.name,
+                            self.type_to_string(&param_type)
+                        )
+                    }
+                })
+                .collect()
+        };
         let ret = sig
             .resolved_return_type
             .get()

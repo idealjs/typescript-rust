@@ -104,6 +104,7 @@ pub struct IntersectionTypeData {
     pub union_or_intersection: UnionOrIntersectionTypeData,
     pub resolved_apparent_type: OnceLock<Arc<Type>>,
     pub unique_literal_filled_instantiation: OnceLock<Arc<Type>>,
+    pub resolved_properties: OnceLock<Vec<Arc<Symbol>>>,
 }
 
 #[derive(Debug)]
@@ -151,7 +152,7 @@ pub struct SubstitutionTypeData {
     pub constraint: Option<Arc<Type>>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct ConditionalRoot {
     pub node: Option<Arc<Node>>,
     pub check_type: Option<Arc<Type>>,

@@ -19,7 +19,11 @@ addListener("/*ts*/");
 // @Filename: /b.js
 addListener("/*js*/");"#;
     let mut s = Session::new_for_test("completionsLiteralOverload", content);
-    // TODO: f.VerifyCompletions(t, []string{"ts", "tsx", "js"}, &fourslash.CompletionsExpectedList{
+    for m in ["ts", "tsx", "js"] {
+        fourslash::verify_completions_exact_at(&mut s, Some(m), &["", "drag", "dragenter"]);
+    }
     fourslash::insert(&mut s, "drag");
-    // TODO: f.VerifyCompletions(t, []string{"ts", "tsx", "js"}, &fourslash.CompletionsExpectedList{
+    for m in ["ts", "tsx", "js"] {
+        fourslash::verify_completions_exact_at(&mut s, Some(m), &["", "drag", "dragenter"]);
+    }
 }

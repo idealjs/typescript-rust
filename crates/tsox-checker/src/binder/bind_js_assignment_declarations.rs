@@ -197,12 +197,18 @@ fn is_bindable_static_name_expression(node: &Arc<Node>) -> bool {
 
 impl Binder {
     /// Go bindModuleExportsAssignment：module.exports = expr 在文件模块的
-    /// exports 表里声明 "export=" 符号
+    /// exports 表里声明 "export=" 符号（container 固定取文件符号——嵌套在
+    /// IIFE 等函数体内的赋值同样落到文件 exports）
     pub(crate) fn bind_module_exports_assignment(&mut self, node: &Arc<Node>) {
         if !self.set_common_js_module_indicator(node) {
             return;
         }
-        let Some(file_sym) = self.parent_symbol.clone() else {
+        let file_sym = self
+            .current_source_file
+            .as_ref()
+            .and_then(|f| self.symbol_map.symbol_of(&f.node).cloned())
+            .or_else(|| self.parent_symbol.clone());
+        let Some(file_sym) = file_sym else {
             return;
         };
         let NodeData::BinaryExpression(bin) = &node.data else {

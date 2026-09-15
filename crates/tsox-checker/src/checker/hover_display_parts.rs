@@ -115,6 +115,19 @@ impl Checker {
         if let Some(call) = call
             && !sig.type_parameters.is_empty()
         {
+            let explicit: Vec<Arc<Node>> = match &call.data {
+                tsox_frontend::ast::NodeData::CallExpression(d) => d
+                    .type_arguments
+                    .as_ref()
+                    .map(|a| a.nodes.clone())
+                    .unwrap_or_default(),
+                tsox_frontend::ast::NodeData::NewExpression(d) => d
+                    .type_arguments
+                    .as_ref()
+                    .map(|a| a.nodes.clone())
+                    .unwrap_or_default(),
+                _ => Vec::new(),
+            };
             let args: Vec<Arc<Node>> = match &call.data {
                 tsox_frontend::ast::NodeData::CallExpression(d) => {
                     d.arguments.iter().cloned().collect()
@@ -126,7 +139,20 @@ impl Checker {
                     .unwrap_or_default(),
                 _ => Vec::new(),
             };
-            let inferred = self.infer_call_type_arguments(call, &sig, &args);
+            let inferred: Vec<Arc<Type>> =
+                if explicit.len() == sig.type_parameters.len() {
+                    explicit
+                        .iter()
+                        .map(|t| self.get_type_from_type_node(t))
+                        .collect()
+                } else {
+                    let inferred = self.infer_call_type_arguments(call, &sig, &args);
+                    if !inferred.is_empty() {
+                        inferred
+                    } else {
+                        Vec::new()
+                    }
+                };
             if !inferred.is_empty() {
                 let names: Vec<String> = inferred
                     .iter()

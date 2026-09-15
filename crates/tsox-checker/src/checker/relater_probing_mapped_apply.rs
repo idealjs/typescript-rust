@@ -106,11 +106,16 @@ impl Checker {
             if is_optional {
                 prop_type = self.get_optional_type(prop_type);
             }
+            // `as` 改名（Go getPropertyNameOfMismatchedAccessor 类似：name
+            // 型实例化）：name_type 在 K→key 帧下解析，归约为字符串字面量
+            let name = self
+                .mapped_member_name(m, &key_type, chain)
+                .unwrap_or_else(|| key.clone());
             let mut flags = tsox_frontend::ast::SymbolFlags::Property;
             if is_optional {
                 flags |= tsox_frontend::ast::SymbolFlags::Optional;
             }
-            let symbol = Arc::new(Symbol::new(flags, key.clone()));
+            let symbol = Arc::new(Symbol::new(flags, name.clone()));
             self.value_symbol_links.insert(
                 &symbol,
                 crate::checker::types::ValueSymbolLinks {
@@ -118,7 +123,7 @@ impl Checker {
                     ..Default::default()
                 },
             );
-            members.insert(key.clone(), Arc::clone(&symbol));
+            members.insert(name, Arc::clone(&symbol));
             props.push(symbol);
         }
         let obj = Type::new(
@@ -151,14 +156,43 @@ impl Checker {
         let Some(template_node) = md.type_node.clone() else {
             return self.any_type();
         };
-        let Some(tp_node) = Some(Arc::clone(&md.type_parameter)) else {
-            return self.any_type();
+        self.resolve_mapped_node(m, &template_node, key, chain)
+    }
+
+    /// `as` 改名后的成员名：name_type 节点在 K→key 帧下解析，字符串
+    /// 字面量取其值；非字面量（仍泛型）回落原键名
+    fn mapped_member_name(
+        &mut self,
+        m: &crate::checker::types::MappedTypeData,
+        key: &Arc<Type>,
+        chain: &[(Vec<Arc<Type>>, Vec<Arc<Type>>)],
+    ) -> Option<String> {
+        let decl = m.declaration.clone()?;
+        let NodeData::MappedTypeNode(md) = &decl.data else {
+            return None;
         };
-        let tp_sym = self
-            .program
-            .symbol_map()
-            .symbol_of(&tp_node)
-            .cloned();
+        let name_node = md.name_type.clone()?;
+        let t = self.resolve_mapped_node(m, &name_node, key, chain);
+        match t.literal_value() {
+            Some(crate::checker::types::LiteralValue::String(s)) => Some(s.clone()),
+            _ => None,
+        }
+    }
+
+    /// K→key + 替换链帧下解析映射型声明内的类型节点
+    fn resolve_mapped_node(
+        &mut self,
+        m: &crate::checker::types::MappedTypeData,
+        node: &Arc<tsox_frontend::ast::Node>,
+        key: &Arc<Type>,
+        chain: &[(Vec<Arc<Type>>, Vec<Arc<Type>>)],
+    ) -> Arc<Type> {
+        let decl = m.declaration.clone();
+        let tp_node = decl.as_ref().and_then(|d| match &d.data {
+            NodeData::MappedTypeNode(md) => Some(Arc::clone(&md.type_parameter)),
+            _ => None,
+        });
+        let tp_sym = tp_node.and_then(|tp| self.program.symbol_map().symbol_of(&tp).cloned());
         let mut pushed = 0usize;
         if let Some(sym) = tp_sym.as_ref() {
             let mut mapping = HashMap::new();
@@ -185,14 +219,14 @@ impl Checker {
         // 调用现场栈（如 objWrapper 约束解析）含无关同名类型参数，不得泄漏
         let saved_scopes = std::mem::take(&mut self.scope_stack);
         let mut scope_chain: Vec<u64> = Vec::new();
-        let mut cur = template_node.parent();
+        let mut cur = node.parent();
         while let Some(c) = cur {
             scope_chain.push(c.id());
             cur = c.parent();
         }
         scope_chain.reverse();
         self.scope_stack = scope_chain;
-        let resolved = self.get_type_from_type_node(&template_node);
+        let resolved = self.get_type_from_type_node(node);
         self.scope_stack = saved_scopes;
         for _ in 0..pushed {
             self.type_argument_stack.pop();

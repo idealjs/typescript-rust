@@ -10,7 +10,7 @@ impl Checker {
             && data.name.kind == SyntaxKind::Identifier
             && !is_valid_identifier_text(data.name.text())
         {
-            if let Some(msg) = Self::cannot_find_name_message_for("module") {
+            if let Some(msg) = Self::cannot_find_name_message_for("module", None) {
                 let file = self.current_file.clone();
                 let kw = tsox_core::core::text::TextRange::new(
                     node.loc.pos(),

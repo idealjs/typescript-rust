@@ -55,6 +55,25 @@ impl Checker {
             .clone()
     }
 
+    /// Go silentNeverType：无候选推断的通配（NoDefault 语境），
+    /// NonInferrable 使其不进入候选
+    pub fn silent_never_type(&self) -> Arc<Type> {
+        self.silent_never_type
+            .get_or_init(|| {
+                Arc::new(Type {
+                    flags: TypeFlags::Never,
+                    object_flags: ObjectFlags::NonInferrableType,
+                    id: crate::checker::types::next_type_id(),
+                    symbol: None,
+                    alias: None,
+                    data: TypeData::Intrinsic(IntrinsicTypeData {
+                        intrinsic_name: "never".to_string(),
+                    }),
+                })
+            })
+            .clone()
+    }
+
     pub fn auto_type(&self) -> Arc<Type> {
         self.auto_type
             .get_or_init(|| {

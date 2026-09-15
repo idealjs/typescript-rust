@@ -240,7 +240,24 @@ impl Checker {
             return t;
         }
         let result = self.resolve_type_reference(node);
-        self.cache_type(node, result.clone());
+        // 解析重入期返回的空壳（接口/类符号在册但成员空）不进节点缓存：
+        // 缓存会把残缺型钉死，后续引用全部拿到幻影（tsc 重试拿完整版）
+        let incomplete = result.as_structured().is_some_and(|s| {
+            s.members.entries.is_empty()
+        }) && result
+            .symbol
+            .as_ref()
+            .is_some_and(|sym| {
+                sym.flags.intersects(
+                    tsox_frontend::ast::SymbolFlags::Interface
+                        | tsox_frontend::ast::SymbolFlags::Class,
+                ) && !sym.declarations.is_empty()
+            });
+        // 类成员填充窗口内的解析结果可能取到半成品 attach 快照，同样不缓存
+        // 类成员填充窗口内的解析结果可能取到半成品 attach 快照，同样不缓存
+        if !incomplete && self.filling_class_members.is_empty() {
+            self.cache_type(node, result.clone());
+        }
         result
     }
 }

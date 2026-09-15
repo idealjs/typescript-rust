@@ -20,13 +20,13 @@ new /*Dsig*/D<string>();"#;
     fourslash::verify_quick_info_at(&mut s, "Csig", "constructor C<string>(val: string): C<string>", "");
     fourslash::verify_quick_info_at(&mut s, "Dsig", "constructor D<string>(val: string): D<string>", "");
     fourslash::go_to_marker(&mut s, "C");
-    // TODO: f.DeleteAtCaret(t, 23)
+    fourslash::delete_at_caret(&mut s, 23);
     fourslash::verify_quick_info_at(&mut s, "Asig", "constructor A<string>(): A<string>", "");
     fourslash::verify_quick_info_at(&mut s, "Bsig", "constructor B<string>(val: string): B<string>", "");
     fourslash::verify_quick_info_at(&mut s, "Csig", "constructor C<unknown>(): C<unknown>", "");
     fourslash::verify_quick_info_at(&mut s, "Dsig", "constructor D<string>(val: string): D<string>", "");
     fourslash::go_to_marker(&mut s, "D");
-    // TODO: f.DeleteAtCaret(t, 6)
+    fourslash::delete_at_caret(&mut s, 6);
     fourslash::verify_quick_info_at(&mut s, "Asig", "constructor A<string>(): A<string>", "");
     fourslash::verify_quick_info_at(&mut s, "Bsig", "constructor B<string>(val: string): B<string>", "");
     fourslash::verify_quick_info_at(&mut s, "Csig", "constructor C<unknown>(): C<unknown>", "");

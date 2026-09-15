@@ -111,6 +111,11 @@ impl Scanner {
     }
 
     pub(crate) fn scan_string(&mut self, quote: char) -> SyntaxKind {
+        self.scan_string_ex(quote, false)
+    }
+
+    /// Go scanString(jsxAttributeString)：JSX 属性值字符串允许裸换行
+    pub(crate) fn scan_string_ex(&mut self, quote: char, jsx_attribute: bool) -> SyntaxKind {
         if quote == '\'' {
             self.token_flags |= TOKEN_FLAGS_SINGLE_QUOTE;
         }
@@ -128,6 +133,10 @@ impl Scanner {
                 continue;
             }
             if c == '\n' || c == '\r' {
+                if jsx_attribute {
+                    self.pos += 1;
+                    continue;
+                }
                 break;
             }
             self.pos += 1;

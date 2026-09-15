@@ -4,6 +4,39 @@ use crate::checker::checker_symbol_types::*;
 
 impl Checker {
     pub fn get_type_of_symbol(&mut self, symbol: &Arc<Symbol>) -> Arc<Type> {
+        // CommonJS require 符号类型为 any（Go getTypeOfVariableOrParameterOrPropertyWorker）
+        if self
+            .require_symbol
+            .as_ref()
+            .is_some_and(|s| Arc::ptr_eq(s, symbol))
+        {
+            return self.get_any_type();
+        }
+        // js export=（`module.exports = <表达式>`，BinaryExpression 声明）：
+        // 符号类型 = 右侧表达式类型（具名导入经 tryGetMemberInModuleExports
+        // AndProperties 取该类型的属性）
+        if let Some(right) = symbol.declarations.iter().find_map(|d| match &d.data {
+            tsox_frontend::ast::NodeData::BinaryExpression(be)
+                if matches!(&be.left.data, tsox_frontend::ast::NodeData::PropertyAccessExpression(pa)
+                    if pa.expression.text() == "module" && pa.name.text() == "exports") =>
+            {
+                Some(Arc::clone(&be.right))
+            }
+            _ => None,
+        }) {
+            if let Some(existing) = self
+                .value_symbol_links
+                .get(symbol)
+                .and_then(|l| l.resolved_type.clone())
+            {
+                return existing;
+            }
+            let t = self.get_type_of_node(&right);
+            self.value_symbol_links
+                .get_or_default(symbol)
+                .resolved_type = Some(Arc::clone(&t));
+            return t;
+        }
         // Go getTypeOfReverseMappedSymbol：反向映射符号类型经
         // inferReverseMappedType(propertyType, mappedType, constraintType) 惰性求值
         if let Some(links) = self.reverse_mapped_symbol_links.get(symbol)
@@ -35,20 +68,17 @@ impl Checker {
             return t;
         }
         if symbol.flags.contains(SymbolFlags::Alias) {
-            let target = self.follow_alias(symbol);
-            if let Some(target) = target
-                && !Arc::ptr_eq(&target, symbol)
-            {
-                let t = self.get_type_of_symbol(&target);
-                self.value_symbol_links.get_or_default(symbol).resolved_type = Some(Arc::clone(&t));
-                return t;
-            }
-            // 合并符号（re-export 局部符号带 Alias 位）：按非 alias 意义继续解析
-            if !symbol
-                .flags
-                .intersects(SymbolFlags::VALUE | SymbolFlags::TYPE | SymbolFlags::NAMESPACE)
-            {
+            // 环守卫：`export import A = require(./b)` 与 b 的 `export import
+            // B = require(./a)` 互指时，别名类型解析经模块命名空间成员枚举
+            // 形成无限递归；in-flight 符号重入返回 any
+            if self.alias_type_resolution_stack.contains(&symbol.id()) {
                 return self.get_any_type();
+            }
+            self.alias_type_resolution_stack.push(symbol.id());
+            let result = self.get_type_of_symbol_alias_inner(symbol);
+            self.alias_type_resolution_stack.pop();
+            if let Some(t) = result {
+                return t;
             }
         }
 
@@ -163,7 +193,10 @@ impl Checker {
                 return t;
             }
             self.get_any_type()
-        } else if symbol.flags.contains(SymbolFlags::ValueModule) {
+        } else if symbol.flags.intersects(SymbolFlags::ValueModule | SymbolFlags::NamespaceModule) {
+            // 脚本级 namespace 声明在 binder 中为 NamespaceModule，但值位
+            // 引用（new multiM.c()）同样取模块成员型（Go NamespaceModule
+            // 与 ValueModule 的 getTypeOfFuncClassEnumModule 同路）
             self.resolve_namespace_type(symbol)
         } else if symbol.flags.intersects(SymbolFlags::ENUM) {
             self.resolve_enum_value_type(symbol)
@@ -310,5 +343,36 @@ impl Checker {
             }
         }
         Arc::clone(t)
+    }
+}
+impl Checker {
+    /// None = 纯 alias 语义已消费完毕，调用方按合并符号的非 alias 意义继续
+    fn get_type_of_symbol_alias_inner(&mut self, symbol: &Arc<Symbol>) -> Option<Arc<Type>> {
+        let target = self.follow_alias(symbol);
+        if let Some(target) = target
+            && !Arc::ptr_eq(&target, symbol)
+            && !target.flags.contains(SymbolFlags::Alias)
+        {
+            let t = self.get_type_of_symbol(&target);
+            self.value_symbol_links.get_or_default(symbol).resolved_type = Some(Arc::clone(&t));
+            return Some(t);
+        }
+        // binder 未挂 export_symbol 的 import 别名（ImportClause default、
+        // js export= 成员）：检查期解析目标符号
+        if let Some(resolved) = self.resolve_import_alias_target_symbol(symbol)
+            && !Arc::ptr_eq(&resolved, symbol)
+        {
+            let t = self.get_type_of_symbol(&resolved);
+            self.value_symbol_links.get_or_default(symbol).resolved_type = Some(Arc::clone(&t));
+            return Some(t);
+        }
+        // 合并符号（re-export 局部符号带 Alias 位）无值/类型意义：any
+        if !symbol
+            .flags
+            .intersects(SymbolFlags::VALUE | SymbolFlags::TYPE | SymbolFlags::NAMESPACE)
+        {
+            return Some(self.get_any_type());
+        }
+        None
     }
 }

@@ -288,3 +288,20 @@ pub fn get_assignment_target_kind(node: &Arc<Node>) -> AssignmentKind {
         _ => AssignmentKind::None,
     }
 }
+
+/// Go isConstTypeReference：`<const>expr` 的断言类型是无实参的
+/// `const` 标识符引用（parseIdentifierName 接受关键字作类型名）
+pub fn is_const_type_reference(type_node: &Node) -> bool {
+    if type_node.kind != tsox_frontend::ast::SyntaxKind::TypeReference {
+        return false;
+    }
+    if let tsox_frontend::ast::NodeData::TypeReferenceNode(d) = &type_node.data {
+        if d.type_arguments.is_some() {
+            return false;
+        }
+        if let tsox_frontend::ast::NodeData::Identifier(id) = &d.type_name.data {
+            return id.text == "const";
+        }
+    }
+    false
+}

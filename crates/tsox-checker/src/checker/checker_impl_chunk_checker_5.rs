@@ -55,7 +55,14 @@ impl Checker {
             return false;
         }
         if contextual.flags.intersects(TypeFlags::TypeParameter) {
-            if let Some(constraint) = self.get_base_constraint_of_type(contextual) {
+            // base 约束缓存惰性填充，推断期可能未算：回落到声明约束
+            //（Go getBaseConstraintOfType 对带约束 tp 即返回约束）
+            // base 约束缓存惰性填充，推断期可能未算：回落到声明约束
+            //（Go getBaseConstraintOfType 对带约束 tp 即返回约束）
+            if let Some(constraint) = self
+                .get_base_constraint_of_type(contextual)
+                .or_else(|| self.get_constraint_of_type_parameter(contextual))
+            {
                 return (constraint.flags.intersects(TypeFlags::String)
                     && candidate.flags.intersects(TypeFlags::StringLiteral))
                     || (constraint.flags.intersects(TypeFlags::Number)

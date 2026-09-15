@@ -14,6 +14,7 @@ pub struct Checker {
     pub instantiation_depth: u32,
     /// type_of_imported_symbol 访问中环守卫（Go symbolLinks 解析中缓存）
     pub imported_type_resolution: Vec<u64>,
+    pub alias_type_resolution_stack: Vec<u64>,
     pub language_version: ScriptTarget,
     pub module_kind: ModuleKind,
     pub module_resolution_kind: ModuleResolutionKind,
@@ -21,6 +22,10 @@ pub struct Checker {
     pub emit_standard_class_fields: bool,
     pub strict_null_checks: bool,
     pub allow_unreachable_code: tsox_core::core::tristate::Tristate,
+    pub allow_unused_labels: tsox_core::core::tristate::Tristate,
+    pub within_unreachable_code: bool,
+    pub interface_build_depth: usize,
+    pub reported_unreachable_nodes: std::collections::HashSet<usize>,
     pub strict_function_types: bool,
     pub strict_bind_call_apply: bool,
     pub strict_property_initialization: bool,
@@ -151,6 +156,7 @@ pub struct Checker {
     pub es_symbol_type: OnceLock<Arc<Type>>,
     pub void_type: OnceLock<Arc<Type>>,
     pub never_type: OnceLock<Arc<Type>>,
+    pub silent_never_type: OnceLock<Arc<Type>>,
     pub non_primitive_type: OnceLock<Arc<Type>>,
     pub true_type: OnceLock<Arc<Type>>,
     pub false_type: OnceLock<Arc<Type>>,
@@ -181,6 +187,7 @@ pub struct Checker {
     pub pending_interface_shells: std::collections::HashMap<usize, Arc<Type>>,
     pub attached_type_args_cache:
         std::collections::HashMap<Vec<usize>, (Arc<Type>, Vec<Arc<Type>>, Arc<Type>)>,
+    pub filling_class_members: std::collections::HashSet<u64>,
     pub typequery_instantiation_cache:
         std::collections::HashMap<Vec<usize>, (Vec<Arc<Type>>, Arc<Type>)>,
     pub array_type_parameter_symbols: Option<Vec<Arc<tsox_frontend::ast::Symbol>>>,

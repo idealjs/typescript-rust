@@ -44,7 +44,10 @@ pub fn string_literal_completion_labels(
     node: &Arc<Node>,
     position: usize,
 ) -> Option<Vec<String>> {
-    let lit = innermost_string_literal(node, position)?;
+    let lit = match innermost_string_literal(node, position) {
+        Some(l) => l,
+        None => return None,
+    };
     // case ('...') 等括号包裹：字面量的直接父是括号，上跳到语法父
     let mut parent = lit.parent()?;
     while parent.kind == SyntaxKind::ParenthesizedExpression {
@@ -90,8 +93,18 @@ pub fn string_literal_completion_labels(
                 let per_sig: Vec<String> = if !sig.type_parameters.is_empty() {
                     let param = sig.parameters.get(idx).cloned()?;
                     let t = checker.get_type_of_symbol(&param);
+                    // Go：编辑中的实参不参与推断（以 any 计）——从推断输入
+                    // 中剔除，K 无候选时由约束回退兜底
+                    let infer_args: Vec<Arc<tsox_frontend::ast::Node>> = d
+                        .arguments
+                        .nodes
+                        .iter()
+                        .enumerate()
+                        .filter(|(i, a)| *i != idx || !Arc::ptr_eq(*a, &lit))
+                        .map(|(_, a)| Arc::clone(a))
+                        .collect();
                     let mut inferred =
-                        checker.infer_call_type_arguments(&parent, &sig, &d.arguments.nodes);
+                        checker.infer_call_type_arguments(&parent, &sig, &infer_args);
                     // 推断值可含未回填的其它类型参数（K=keyof T）：对推断结果
                     // 自身再过一遍替换链闭环
                     for _ in 0..2 {
@@ -112,7 +125,13 @@ pub fn string_literal_completion_labels(
                         &sig.type_parameters,
                         &inferred,
                     );
-                    literal_union_labels(checker, &inst)
+                    let mut labels_here = literal_union_labels(checker, &inst);
+                    if labels_here.is_empty()
+                        && let Some(constraint) = checker.get_constraint_of_type_parameter(&t)
+                    {
+                        labels_here = literal_union_labels(checker, &constraint);
+                    }
+                    labels_here
                 } else {
                     let t = checker.get_type_parameter_at_position(&sig, idx);
                     literal_union_labels(checker, &t)
@@ -132,8 +151,34 @@ pub fn string_literal_completion_labels(
             let props = checker.get_apparent_properties(&obj_t);
             Some(props.into_iter().map(|p| p.name.clone()).collect())
         }
-        // a === '...'：Go getContextualTypeFromParent——等值比较取另一侧类型
+        // a === '...'：Go getContextualTypeFromParent——等值比较取另一侧类型；
+        // "..." in x：Go KindInKeyword——右侧类型属性名集（排除 # 私有名）
         NodeData::BinaryExpression(d) => {
+            if d.operator_token.kind == SyntaxKind::InKeyword {
+                let t = checker.get_type_of_node(&skip_parens(Arc::clone(&d.right)));
+                // Go getPropertiesForCompletion：联合=GetAllPossiblePropertiesOfTypes
+                //（各成员属性并集）；其余=GetApparentProperties
+                let props = if t.is_union()
+                    && let Some(members) = t.types()
+                {
+                    checker.get_all_possible_properties_of_types(members)
+                } else {
+                    checker.get_apparent_properties(&t)
+                };
+                let mut names: Vec<String> = props
+                    .into_iter()
+                    .filter(|s| {
+                        !s.name.starts_with('#')
+                            && !s.value_declaration
+                                .as_ref()
+                                .and_then(tsox_frontend::ast::get_name_of_declaration)
+                                .is_some_and(|n| n.kind == SyntaxKind::PrivateIdentifier)
+                    })
+                    .map(|s| s.name.clone())
+                    .collect();
+                names.sort();
+                return Some(names);
+            }
             if !matches!(
                 d.operator_token.kind,
                 SyntaxKind::EqualsEqualsEqualsToken
@@ -172,10 +217,61 @@ pub fn string_literal_completion_labels(
                 _ => false,
             };
             if !is_name {
-                // IgnoreNodeInferences：正在编辑的实参从推断源剔除，
-                // 泛型回落返回位推断（Go completions 探针语义）
-                let t = checker.get_contextual_type(&lit, ContextFlags::IgnoreNodeInferences);
-                return t.map(|t| literal_union_labels(checker, &t));
+                // Go：有 CallLike 祖先时取 None 与 IgnoreNodeInferences 两个
+                // 上下文型的字面量并集（编辑节点参与推断的贡献 + 剔除后
+                // 上下文返回型驱动的贡献）；无调用祖先只取 None
+                let has_call_ancestor = (|| {
+                    let mut cur = parent.parent()?;
+                    loop {
+                        if matches!(
+                            cur.kind,
+                            SyntaxKind::CallExpression
+                                | SyntaxKind::NewExpression
+                                | SyntaxKind::TaggedTemplateExpression
+                                | SyntaxKind::JsxOpeningElement
+                                | SyntaxKind::JsxSelfClosingElement
+                        ) {
+                            return Some(true);
+                        }
+                        cur = cur.parent()?;
+                    }
+                })()
+                .unwrap_or(false);
+                let mut labels: Vec<String> = Vec::new();
+                let mut none_pass_empty = true;
+                if let Some(t) = checker.get_contextual_type(&lit, ContextFlags::None) {
+                    let none_labels = literal_union_labels(checker, &t);
+                    none_pass_empty = none_labels.is_empty();
+                    labels.extend(none_labels);
+                }
+                if has_call_ancestor {
+                    let mut ignore_labels: Vec<String> = Vec::new();
+                    if let Some(t) =
+                        checker.get_contextual_type(&lit, ContextFlags::IgnoreNodeInferences)
+                    {
+                        ignore_labels = literal_union_labels(checker, &t);
+                    }
+                    // Go None 通道对编辑中的泛型调用实参以 fresh 字面量推断
+                    // （TEvent ← {type:"ALOHAx"}），当前字面量本身进入候选；
+                    // 我们的推断在自引用守卫下落回约束，此处按可观测行为补齐：
+                    // 仅当 ignore 通道给出候选而 none 通道无贡献时
+                    if !ignore_labels.is_empty() && none_pass_empty {
+                        let current = lit
+                            .text()
+                            .trim_matches(['"', '\'', '`'])
+                            .to_string();
+                        if !current.is_empty() && !ignore_labels.contains(&current) {
+                            labels.push(current);
+                        }
+                    }
+                    labels.extend(ignore_labels);
+                }
+                labels.sort();
+                labels.dedup();
+                if labels.is_empty() {
+                    return None;
+                }
+                return Some(labels);
             }
             let Some(grand) = parent.parent() else {
                 return None;
@@ -202,6 +298,30 @@ pub fn string_literal_completion_labels(
             let tn = d.type_node.as_ref()?;
             let t = checker.get_type_from_type_node(tn);
             Some(literal_union_labels(checker, &t))
+        }
+        // <Comp attr="...">：组件签名 props 型中该属性的类型（Go
+        // KindJsxAttribute → getStringLiteralCompletionsFromSignature）
+        NodeData::JsxAttribute(_) => {
+            let attrs = parent.parent()?;
+            let open = attrs.parent()?;
+            let tag = match &open.data {
+                NodeData::JsxOpeningElement(d) => Arc::clone(&d.tag_name),
+                NodeData::JsxSelfClosingElement(d) => Arc::clone(&d.tag_name),
+                _ => return None,
+            };
+            let attr_name = match &parent.data {
+                NodeData::JsxAttribute(d) => d.name.text().to_string(),
+                _ => return None,
+            };
+            let comp_type = checker.get_type_of_node(&tag);
+            let structured = comp_type.as_structured()?;
+            let sig = structured.call_signatures().first().cloned()?;
+            if sig.parameters.is_empty() {
+                return None;
+            }
+            let props_type = checker.get_type_of_symbol(&sig.parameters[0]);
+            let prop_type = checker.get_type_of_property_of_type(&props_type, &attr_name)?;
+            Some(literal_union_labels(checker, &prop_type))
         }
         // case '...'：switch 表达式类型（Go KindCaseClause → getSwitchedType），
         // 已用的 case 字面量排除（Go newCaseClauseTracker）
@@ -234,9 +354,11 @@ pub fn string_literal_completion_labels(
                 .get_apparent_properties(&t)
                 .into_iter()
                 .filter(|s| {
-                    !s.value_declaration
-                        .as_ref()
-                        .is_some_and(|decl| decl.kind == SyntaxKind::PrivateIdentifier)
+                    !s.name.starts_with('#')
+                        && !s.value_declaration
+                            .as_ref()
+                            .and_then(tsox_frontend::ast::get_name_of_declaration)
+                            .is_some_and(|n| n.kind == SyntaxKind::PrivateIdentifier)
                 })
                 .map(|s| s.name.clone())
                 .collect();
@@ -489,7 +611,23 @@ pub fn relative_module_specifier_labels(
         }
         match rest.find('/') {
             Some(idx) => labels.push(rest[..idx].to_string()),
-            None => labels.push(strip_module_extension(rest).to_string()),
+            None => {
+                // Go getModuleSpecifierEndingPreference：ending=js 且
+                // allowImportingTsExtensions 时保留 .ts/.tsx（无 .js 产物）
+                let ending = service
+                    .user_preferences()
+                    .import_module_specifier_ending
+                    .to_ascii_lowercase();
+                let keep_ts = ending == "js"
+                    && program.options().allow_importing_ts_extensions.is_true()
+                    && (rest.ends_with(".ts") || rest.ends_with(".tsx"))
+                    && !rest.ends_with(".d.ts");
+                if keep_ts {
+                    labels.push(rest.to_string());
+                } else {
+                    labels.push(strip_module_extension(rest).to_string());
+                }
+            }
         }
     }
     labels.sort();

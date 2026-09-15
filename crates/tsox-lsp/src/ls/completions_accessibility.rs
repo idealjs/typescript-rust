@@ -10,6 +10,24 @@ pub(super) fn is_property_accessible(
     containing_type: &Arc<Type>,
     property: &Arc<Symbol>,
 ) -> bool {
+    let verdict = is_property_accessible_inner(node, containing_type, property);
+    if std::env::var_os("TSOX_DEBUG_CMP").is_some() {
+        eprintln!(
+            "[acc] {} -> {} (decls={} private={})",
+            property.name,
+            verdict,
+            property.declarations.len(),
+            is_private_identifier_member(property)
+        );
+    }
+    verdict
+}
+
+fn is_property_accessible_inner(
+    node: &Arc<Node>,
+    containing_type: &Arc<Type>,
+    property: &Arc<Symbol>,
+) -> bool {
     if containing_type.flags.contains(TypeFlags::Any) {
         return true;
     }

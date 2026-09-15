@@ -335,13 +335,23 @@ fn format_on_enter_inner(
         return Vec::new();
     }
 
-    format_span(
+    if std::env::var_os("TSOX_DEBUG_FMT").is_some() {
+        eprintln!("[on-enter] pos={} line={} span={}..{}", position, line, start_pos, span_end);
+    }
+    let edits = format_span(
         TextRange::new(start_pos, span_end as usize),
         file,
         FormatRequestKind::FormatOnEnter,
         options.clone(),
         new_line_character,
-    )
+    );
+    if std::env::var_os("TSOX_DEBUG_FMT").is_some() {
+        eprintln!("[on-enter] edits={}", edits.len());
+        for e in &edits {
+            eprintln!("[on-enter-edit] {}..{} -> {:?}", e.pos, e.end, e.new_text);
+        }
+    }
+    edits
 }
 
 /// Go findOutermostNodeWithinListLevel

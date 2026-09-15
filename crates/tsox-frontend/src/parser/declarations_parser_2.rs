@@ -97,6 +97,12 @@ impl Parser {
         } else {
             self.parse_string_literal_name()
         };
+        // Go parseModuleDeclaration：`declare module "x" with { type: "css" }`
+        // 的 attributes（AST 无对应字段，浅消费平衡块保跨度正确）
+        if self.token == SyntaxKind::WithKeyword {
+            self.next_token();
+            self.skip_balanced_brace_block();
+        }
         let body = if self.token == SyntaxKind::OpenBraceToken {
             let body_pos = self.token_pos();
             self.next_token();
@@ -255,5 +261,30 @@ impl Parser {
         is_type_only: bool,
     ) -> Arc<Node> {
         self.parse_import_equals_tail(pos, None, name, is_type_only)
+    }
+}
+
+impl Parser {
+    /// 浅消费一个平衡的 `{ ... }` 块（module attributes 等不求值场景）
+    pub(crate) fn skip_balanced_brace_block(&mut self) {
+        if self.token != SyntaxKind::OpenBraceToken {
+            return;
+        }
+        let mut depth = 0usize;
+        loop {
+            let kind = self.token;
+            if kind == SyntaxKind::OpenBraceToken {
+                depth += 1;
+            } else if kind == SyntaxKind::CloseBraceToken {
+                depth = depth.saturating_sub(1);
+                if depth == 0 {
+                    self.next_token();
+                    return;
+                }
+            } else if kind == SyntaxKind::EndOfFile {
+                return;
+            }
+            self.next_token();
+        }
     }
 }

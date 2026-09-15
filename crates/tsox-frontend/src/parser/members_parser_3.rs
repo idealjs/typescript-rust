@@ -84,7 +84,21 @@ impl Parser {
         }
         let type_parameters = self.parse_optional_type_parameters();
         let parameters = self.parse_parameter_list();
-        let type_node = self.parse_optional_return_type();
+        // Go shouldParseReturnType(isType=true)：类型位返回型分隔符易把
+        // ':' 写反成 '=>'，报 ':' expected 后照常取类型（JSDoc 调用签名
+        // `() => string`）
+        let type_node = if self.parse_optional(SyntaxKind::ColonToken) {
+            Some(self.parse_type_or_type_predicate())
+        } else if self.token == SyntaxKind::EqualsGreaterThanToken {
+            self.parse_error_at_current_token(
+                tsox_core::diagnostics::X_0_EXPECTED,
+                &[crate::parser::token_to_string(SyntaxKind::ColonToken)],
+            );
+            self.next_token();
+            Some(self.parse_type_or_type_predicate())
+        } else {
+            None
+        };
         self.parse_type_member_semicolon();
         let end = self.node_pos();
         if kind == SyntaxKind::CallSignature {
@@ -117,9 +131,14 @@ impl Parser {
     }
 
     pub(crate) fn parse_class_members(&mut self) -> NodeList {
-        self.expect(SyntaxKind::OpenBraceToken);
-        let members = self.parse_list(ParsingContext::ClassMembers, Parser::parse_class_member);
-        self.expect(SyntaxKind::CloseBraceToken);
-        members
+        // Go parseClassDeclaration：缺 '{' 时不解析类体，成员为缺失列表
+        //（后续语句不被类体吞掉）
+        if self.expect_report(SyntaxKind::OpenBraceToken) {
+            let members = self.parse_list(ParsingContext::ClassMembers, Parser::parse_class_member);
+            self.expect(SyntaxKind::CloseBraceToken);
+            members
+        } else {
+            NodeList::new(Vec::new())
+        }
     }
 }

@@ -21,6 +21,9 @@ pub(super) fn try_get_object_like_container(
 ) -> Option<Arc<Node>> {
     let context = context_token?;
     let parent = token_parent(root, context)?;
+    if std::env::var_os("TSOX_DEBUG_OBJ").is_some() {
+        eprintln!("[obj] ctx={:?} parent={:?}", context.kind, parent.kind);
+    }
     match context.kind {
         SyntaxKind::OpenBraceToken | SyntaxKind::CommaToken => {
             if matches!(
@@ -33,16 +36,19 @@ pub(super) fn try_get_object_like_container(
             }
         }
         SyntaxKind::AsteriskToken => {
-            if parent.kind == SyntaxKind::MethodDeclaration
-                && parent
-                    .parent()
-                    .as_ref()
-                    .is_some_and(|p| p.kind == SyntaxKind::ObjectLiteralExpression)
-            {
-                parent.parent()
-            } else {
-                None
+            // `{ *` 缺名 generator 方法：context token 节点可能是星标本身
+            // （Go parent=MethodDeclaration → parent.Parent）
+            let mut cur = Some(parent);
+            while let Some(n) = cur {
+                match n.kind {
+                    SyntaxKind::ObjectLiteralExpression => return Some(n),
+                    SyntaxKind::MethodDeclaration | SyntaxKind::AsteriskToken => {
+                        cur = n.parent()
+                    }
+                    _ => return None,
+                }
             }
+            None
         }
         SyntaxKind::AsyncKeyword => parent
             .parent()
@@ -127,6 +133,10 @@ pub(super) fn object_like_completion(
     text: &str,
     position: usize,
 ) -> Option<Vec<Arc<Symbol>>> {
+    if std::env::var_os("TSOX_DEBUG_OBJ").is_some() {
+        let ct = checker.get_contextual_type(container, ContextFlags::None);
+        eprintln!("[obj-oc] ct={}", ct.as_ref().map(|t| checker.type_to_string(t)).unwrap_or_else(|| "<none>".into()));
+    }
     let type_members = if container.kind == SyntaxKind::ObjectLiteralExpression {
         object_literal_type_members(checker, container)?
     } else {
@@ -247,7 +257,18 @@ pub(super) fn properties_for_object_expression(
     }
     for t in &constituents {
         let t_props = checker.get_augmented_properties_of_type(t);
-        for p in t_props {            if has_completions_type && !declared_elsewhere(&p) {
+        for p in t_props {
+            if std::env::var_os("TSOX_DEBUG_OBJP").is_some() {
+                eprintln!(
+                    "[objp] {} decls={} parent_is_obj={}",
+                    p.name,
+                    p.declarations.len(),
+                    p.declarations
+                        .iter()
+                        .any(|d| d.parent().as_ref().is_some_and(|pp| Arc::ptr_eq(pp, obj)))
+                );
+            }
+            if has_completions_type && !declared_elsewhere(&p) {
                 continue;
             }
             if seen.insert(p.name.clone()) {

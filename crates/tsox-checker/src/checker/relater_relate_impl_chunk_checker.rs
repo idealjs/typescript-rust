@@ -49,6 +49,37 @@ impl Checker {
         self.is_type_comparable_to(type1, type2) || self.is_type_comparable_to(type2, type1)
     }
 
+    // 空成员且带接口/类符号：解析重入期返回的未完成实例（非 `{}` 字面量）
+    pub(crate) fn side_is_incomplete_shell(&self, t: &Arc<Type>, _id: u32) -> bool {
+        let r = t.as_structured().is_some_and(|s| {
+            if std::env::var_os("TSOX_DEBUG_DOM").is_some() {
+                let n = t.symbol.as_ref().map(|s| s.name.clone()).unwrap_or_default();
+                if n == "Element" || n == "HTMLElement" {
+                    eprintln!("[shell?] {} props={} members_empty={} sym_decls={} ref={}",
+                        n, s.properties.len(), s.members.entries.is_empty(),
+                        t.symbol.as_ref().map(|x| x.declarations.len()).unwrap_or(0),
+                        t.object_flags.contains(ObjectFlags::Reference));
+                }
+            }
+            s.members.entries.is_empty()
+                && t.symbol
+                    .as_ref()
+                    .is_some_and(|sym| {
+                        sym.flags.intersects(
+                            tsox_frontend::ast::SymbolFlags::Interface
+                                | tsox_frontend::ast::SymbolFlags::Class,
+                        ) && !sym.declarations.is_empty()
+                    })
+        });
+        if std::env::var_os("TSOX_DEBUG_DOM").is_some() {
+            let n = t.symbol.as_ref().map(|s| s.name.clone()).unwrap_or_default();
+            if n == "Element" || n == "HTMLElement" {
+                eprintln!("[shell?] -> {}", r);
+            }
+        }
+        r
+    }
+
     pub(crate) fn is_type_related_to(
         &mut self,
         source: &Arc<Type>,
@@ -75,11 +106,14 @@ impl Checker {
             let tp = target.id;
             if source.flags.contains(TypeFlags::Object)
                 && target.flags.contains(TypeFlags::Object)
-                && (self.degraded_type_ptrs.contains(&sp) || self.degraded_type_ptrs.contains(&tp))
-                // 有成员的完整实例照常结构比较（degraded 仅因嵌套自引用触发，
-                // 壳（成员空）才放行；递归由 relation_in_progress 兜底）
-                && source.as_structured().is_some_and(|s| s.members.entries.is_empty())
-                && target.as_structured().is_some_and(|t| t.members.entries.is_empty())
+                // 任一方是「空成员且带符号」的壳型（lib 解析重入期的未完成实例）
+                // 即放行：带符号才免于误放 `{}` 字面量；有成员的完整实例照常
+                // 结构比较（递归由 relation_in_progress 兜底）。仅解析重入
+                // 真在进行时（pending 壳未清）生效，常态检查期的惰性空壳
+                // 引用（如未水化的 IPromise<unknown>）走正常结构比较
+                && !self.pending_interface_shells.is_empty()
+                && (self.side_is_incomplete_shell(&source, sp)
+                    || self.side_is_incomplete_shell(&target, tp))
             {
                 return true;
             }

@@ -126,7 +126,10 @@ impl Checker {
 
         let mut missing_props: Vec<String> = Vec::new();
 
+        // Go 元组的表面成员含 Array<any> 的 length/push 等（getPropertiesOfType
+        // 对元组并入数组接口成员）；裸元组（members 空）与裸数组同样回退
         let source_is_bare_array = (self.is_array_type(source)
+            || self.is_tuple_type(source)
             || source.object_flags.contains(ObjectFlags::EvolvingArray))
             && source_struct.members.is_empty();
         for target_prop in &target_struct.properties {

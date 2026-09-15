@@ -231,7 +231,17 @@ impl Checker {
                 return Some(self.resolve_namespace_type(&module_sym));
             }
 
+            // import v = M.V：实体名解析到符号取声明型（Go
+            // getTypeOfNode 的 QualifiedName → resolveEntityName）
             let target = &ied.module_reference;
+            match &target.data {
+                NodeData::Identifier(_) | NodeData::QualifiedName(_) => {
+                    if let Some(sym) = self.resolve_qualified_symbol(target) {
+                        return Some(self.get_type_of_symbol(&sym));
+                    }
+                }
+                _ => {}
+            }
             let t = self.get_type_of_node(target);
             if t.flags.contains(TypeFlags::Any)
                 && t.intrinsic_name() == Some("any")

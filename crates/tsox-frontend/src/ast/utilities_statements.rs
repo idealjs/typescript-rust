@@ -110,3 +110,58 @@ pub fn is_prologue_directive(node: &Node) -> bool {
         None => false,
     }
 }
+
+/// Go IsPotentiallyExecutableNode：语句（var 须有初始化或块级绑定）或
+/// class/enum/module 声明；其余（如 import）不算可执行
+pub fn is_potentially_executable_node(node: &Node) -> bool {
+    match node.kind {
+        SyntaxKind::BreakStatement
+        | SyntaxKind::ContinueStatement
+        | SyntaxKind::DebuggerStatement
+        | SyntaxKind::DoStatement
+        | SyntaxKind::ExpressionStatement
+        | SyntaxKind::EmptyStatement
+        | SyntaxKind::ForInStatement
+        | SyntaxKind::ForOfStatement
+        | SyntaxKind::ForStatement
+        | SyntaxKind::IfStatement
+        | SyntaxKind::LabeledStatement
+        | SyntaxKind::ReturnStatement
+        | SyntaxKind::SwitchStatement
+        | SyntaxKind::ThrowStatement
+        | SyntaxKind::TryStatement
+        | SyntaxKind::WhileStatement
+        | SyntaxKind::WithStatement
+        | SyntaxKind::NotEmittedStatement
+        | SyntaxKind::ImportDeclaration
+        | SyntaxKind::ImportEqualsDeclaration
+        | SyntaxKind::ExportDeclaration
+        | SyntaxKind::ExportAssignment
+        | SyntaxKind::NamespaceExportDeclaration
+        | SyntaxKind::ClassDeclaration
+        | SyntaxKind::EnumDeclaration
+        | SyntaxKind::ModuleDeclaration
+        | SyntaxKind::FunctionDeclaration
+        | SyntaxKind::InterfaceDeclaration
+        | SyntaxKind::TypeAliasDeclaration => true,
+        SyntaxKind::VariableStatement => {
+            let Some(crate::ast::node_data_generated::NodeData::VariableStatement(data)) =
+                Some(&node.data)
+            else {
+                return false;
+            };
+            let list_node = &data.declaration_list;
+            let Some(crate::ast::node_data_generated::NodeData::VariableDeclarationList(list)) = Some(&list_node.data)
+            else {
+                return false;
+            };
+            if list_node.flags.intersects(NodeFlags::BlockScoped) {
+                return true;
+            }
+            list.declarations.iter().any(|d| {
+                matches!(&d.data, NodeData::VariableDeclaration(vd) if vd.initializer.is_some())
+            })
+        }
+        _ => false,
+    }
+}

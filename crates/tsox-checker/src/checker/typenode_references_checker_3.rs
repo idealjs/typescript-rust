@@ -21,6 +21,11 @@ impl Checker {
                 let result = self.get_type_from_type_node(&data.type_node);
                 self.pop_scope();
                 self.scope_stack = saved_scopes;
+                // 环窗口内的 error（别名自引用经预缓存环断路）不得驻留节点
+                // 缓存：窗口外的解析会拿到同一份 error 而永不重算
+                if crate::checker::utilities::is_type_error(&result) {
+                    self.uncache_type_node(&data.type_node);
+                }
                 return result;
             }
         }

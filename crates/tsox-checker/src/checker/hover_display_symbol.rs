@@ -48,7 +48,7 @@ impl Checker {
                 b.extend(self.type_to_display_parts(&with_undef));
                 return;
             }
-            self.hover_write_variable(b, symbol, container);
+            self.hover_write_variable(b, symbol, container, node);
         }
         if flags.intersects(SymbolFlags::EnumMember) {
             self.hover_write_enum_member(b, symbol);
@@ -101,7 +101,13 @@ impl Checker {
         self.qualified_symbol_name(symbol)
     }
 
-    fn hover_write_variable(&mut self, b: &mut HoverPartsBuilder, symbol: &Arc<Symbol>, container: &Option<Arc<Node>>) {
+    fn hover_write_variable(
+        &mut self,
+        b: &mut HoverPartsBuilder,
+        symbol: &Arc<Symbol>,
+        container: &Option<Arc<Node>>,
+        node: &Arc<Node>,
+    ) {
         b.write_new_line();
         if symbol
             .check_flags
@@ -115,7 +121,60 @@ impl Checker {
         let prefix = self.variable_prefix_and_name_parts(symbol);
         b.extend(prefix);
         // shorthand 成员类型 = 引用变量类型的 widen
-        let mut t = shorthand_widen_type(self, symbol).unwrap_or_else(|| self.get_type_of_symbol(symbol));
+        // Go getQuickInfoAtPosition 用 getTypeOfSymbolAtLocation：引用位取流
+        // 收窄后的型（typeof/相等判定后的分支位），声明位与无流引用保持
+        // 符号声明型
+        let reference_narrowed: Option<Arc<Type>> = (|| {
+            let is_ref_name = matches!(
+                node.kind,
+                SyntaxKind::Identifier | SyntaxKind::PrivateIdentifier
+            ) && !symbol
+                .declarations
+                .iter()
+                .any(|d| d.parent().is_some_and(|p| Arc::ptr_eq(&p, node)));
+            if !is_ref_name {
+                return None;
+            }
+            // 属性访问名位：Go getTypeOfSymbolAtLocation 以访问表达式为引用
+            // 走 getFlowTypeOfReference（null 检查收窄在访问节点上）
+            if let Some(parent) = node.parent()
+                && matches!(
+                    parent.kind,
+                    SyntaxKind::PropertyAccessExpression | SyntaxKind::QualifiedName
+                )
+            {
+                let is_name = match &parent.data {
+                    crate::checker::nodebuilder::NodeData::PropertyAccessExpression(d) => {
+                        Arc::ptr_eq(&d.name, node)
+                    }
+                    crate::checker::nodebuilder::NodeData::QualifiedName(d) => {
+                        Arc::ptr_eq(&d.right, node)
+                    }
+                    _ => false,
+                };
+                if is_name {
+                    let declared = self.get_type_of_symbol(symbol);
+                    let narrowed = self.get_flow_type_of_reference(&parent, &declared);
+                    if crate::checker::utilities::is_type_error(&narrowed) {
+                        return None;
+                    }
+                    return Some(narrowed);
+                }
+            }
+            let flow = self.program.symbol_map().flow_node_of(node).cloned()?;
+            let narrowed = self.get_narrowed_type_of_symbol(symbol, Some(&flow));
+            if crate::checker::utilities::is_type_error(&narrowed) {
+                return None;
+            }
+            Some(narrowed)
+        })();
+        let mut t = match shorthand_widen_type(self, symbol) {
+            Some(t) => t,
+            None => match reference_narrowed {
+                Some(t) => t,
+                None => self.get_type_of_symbol(symbol),
+            },
+        };
         // Go hover.go:741：类型是带约束的类型参数 → 显示 "T extends 约束"
         //（TypeParameterToDeclaration 渲染）
         if let TypeData::TypeParameter(tp) = &t.data

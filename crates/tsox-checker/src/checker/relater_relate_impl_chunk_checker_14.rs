@@ -54,7 +54,10 @@ impl Checker {
             );
         }
         if let Some(generic_rest) = generic_rest {
-            let s = self.get_type_at_position(contextual, param_count);
+            // Go applyToParameterTypes：目标带 rest 时，源在 rest 起点按
+            // getRestTypeAtPosition 展开为元组再对位（(...a: A) 的 A ←
+            // [string, number] 这类实参元组），不能只取单个参数位类型
+            let s = self.source_rest_type_at(contextual, param_count);
             self.infer_types(
                 &mut context.inferences,
                 Some(s),

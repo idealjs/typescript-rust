@@ -25,6 +25,21 @@ pub(crate) fn apply_options(options: &HashMap<String, OptValue>, out: &mut Compi
                     out.resolve_json_module = Tristate::from(b);
                 }
             }
+            "allowImportingTsExtensions" => {
+                if let Some(b) = value.as_bool() {
+                    out.allow_importing_ts_extensions = Tristate::from(b);
+                }
+            }
+            "allowUnreachableCode" => {
+                if let Some(b) = value.as_bool() {
+                    out.allow_unreachable_code = Tristate::from(b);
+                }
+            }
+            "allowUnusedLabels" => {
+                if let Some(b) = value.as_bool() {
+                    out.allow_unused_labels = Tristate::from(b);
+                }
+            }
             "jsx" => {
                 if let Some(s) = value.as_str() {
                     out.jsx = parse_jsx_emit(s);

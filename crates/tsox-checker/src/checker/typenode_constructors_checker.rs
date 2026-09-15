@@ -128,6 +128,7 @@ impl Checker {
                 },
                 resolved_apparent_type: std::sync::OnceLock::new(),
                 unique_literal_filled_instantiation: std::sync::OnceLock::new(),
+                resolved_properties: std::sync::OnceLock::new(),
             }),
         ))
     }
