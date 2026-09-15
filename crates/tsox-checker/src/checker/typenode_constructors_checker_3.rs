@@ -18,6 +18,18 @@ impl Checker {
             return self.any_type();
         }
 
+        // Go getIndexedAccessTypeWorker：对象为联合时按成分分发取并集
+        //（如 ({type:"FOO"}|{type:"BAR"})["type"] → "FOO"|"BAR"）
+        if object_type.is_union() {
+            if let Some(members) = object_type.types() {
+                let parts: Vec<Arc<Type>> = members
+                    .iter()
+                    .map(|c| self.get_indexed_access_type(c, index_type))
+                    .collect();
+                return self.get_union_type(parts);
+            }
+        }
+
         if index_type.flags.contains(TypeFlags::Union) {
             if let TypeData::Union(u) = &index_type.data {
                 let prop_types: Vec<Arc<Type>> = u

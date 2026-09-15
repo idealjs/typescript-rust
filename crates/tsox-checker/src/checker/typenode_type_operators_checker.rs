@@ -175,11 +175,21 @@ impl Checker {
     }
 
     pub(crate) fn get_type_from_mapped_type_node(&mut self, node: &Arc<Node>) -> Arc<Type> {
-        if let Some(t) = self.get_cached_type(node) {
-            return t;
+        // mapped 实例随类型实参语境变化（接口成员在声明期解析为裸类型参数
+        // 版本，实例化期必须重解析），缓存按 (节点, 栈哈希) 区分；无栈语境
+        // 的结果才写入免哈希节点缓存
+        let key = (node.id() as usize, self.type_argument_stack_hash());
+        if let Some(t) = self.type_node_subst_cache.get(&key) {
+            return Arc::clone(t);
         }
         let result = self.build_mapped_type(node);
-        self.cache_type(node, result.clone());
+        if self.type_argument_stack.is_empty() {
+            self.cache_type(node, result.clone());
+        }
+        if self.type_node_subst_cache.len() >= self.type_node_subst_cache_limit {
+            self.type_node_subst_cache.clear();
+        }
+        self.type_node_subst_cache.insert(key, Arc::clone(&result));
         result
     }
 

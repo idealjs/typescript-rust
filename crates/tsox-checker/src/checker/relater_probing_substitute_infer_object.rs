@@ -196,6 +196,46 @@ impl Checker {
             if !changed {
                 return Arc::clone(t);
             }
+            // 匿名对象同时带属性/索引成员（如 { (...) => void; _out?: T }）时
+            // 保持对象形态：签名代入 + 属性深代入合成（Go instantiateType
+            // 对成员全量实例化，坍缩成纯函数型会丢属性推断通道）
+            if !o.structured.properties.is_empty() || !o.structured.index_infos.is_empty() {
+                let fresh = self.subst_object_in_progress.is_empty();
+                let with_props = self.substitute_object_properties_deep(t, params, substitutions);
+                if fresh {
+                    self.subst_object_in_progress.clear();
+                }
+                let props_changed = !Arc::ptr_eq(&with_props, t);
+                let shell = if props_changed {
+                    with_props
+                } else {
+                    Arc::new(Type::new(
+                        t.flags,
+                        TypeData::Object(ObjectTypeData {
+                            structured: StructuredTypeData {
+                                members: o.structured.members.clone(),
+                                properties: o.structured.properties.clone(),
+                                call_signature_count: o.structured.call_signature_count,
+                                index_infos: o.structured.index_infos.clone(),
+                                ..Default::default()
+                            },
+                            target: o.target.clone(),
+                            mapper: o.mapper.clone(),
+                            type_arguments: o.type_arguments.clone(),
+                        }),
+                    ))
+                };
+                {
+                    let shell_mut = Arc::as_ptr(&shell) as *mut Type;
+                    unsafe {
+                        if let TypeData::Object(so) = &mut (*shell_mut).data {
+                            so.structured.signatures = new_sigs;
+                            so.structured.call_signature_count = o.structured.call_signature_count;
+                        }
+                    }
+                }
+                return shell;
+            }
             let is_construct = call_signature_count == 0;
             return self.create_function_or_constructor_type(new_sigs, is_construct);
         }

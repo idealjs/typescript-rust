@@ -73,6 +73,41 @@ impl Checker {
         symbol: &Arc<Symbol>,
         type_arguments: Option<Arc<NodeList>>,
     ) -> Arc<Type> {
+        // Go getNoInferType（checker.go 27744）：NoInfer 实参含类型参数时包装为
+        // unknown 约束的 Substitution（推断期候选被 is_no_infer_type 拦截，
+        // 关系/显示按 base 展开）；实参具体时走常规别名展开。base 取当前语境
+        // 解析值（实例化时已代入），包装是否保留按清栈后是否仍含类型参数判定
+        if symbol.name == "NoInfer"
+            && let Some(args) = &type_arguments
+            && args.len() == 1
+        {
+            let arg_node = args.iter().next().expect("checked len").clone();
+            let stacked = self.get_type_from_type_node(&arg_node);
+            let saved_stack = std::mem::take(&mut self.type_argument_stack);
+            let saved_frames = std::mem::take(&mut self.type_argument_name_frames);
+            let unmapped = self.get_type_from_type_node(&arg_node);
+            self.type_argument_stack = saved_stack;
+            self.type_argument_name_frames = saved_frames;
+            if crate::checker::type_contains_type_parameter(&unmapped) {
+                let base = if crate::checker::type_contains_type_parameter(&stacked) {
+                    unmapped
+                } else {
+                    stacked
+                };
+                return Arc::new(Type {
+                    flags: TypeFlags::Substitution,
+                    object_flags: ObjectFlags::None,
+                    id: crate::checker::types::next_type_id(),
+                    symbol: None,
+                    alias: None,
+                    data: TypeData::Substitution(SubstitutionTypeData {
+                        constrained: ConstrainedTypeData::default(),
+                        base_type: Some(base),
+                        constraint: Some(self.unknown_type()),
+                    }),
+                });
+            }
+        }
         let key = Arc::as_ptr(symbol) as *const tsox_frontend::ast::Symbol;
         // Go getTypeAliasInstantiation：带实参引用的循环按 (符号, 实参) 判定，
         // 嵌套的不同实参（Deep<T> 内解析 Deep<T[K]>）不受外层守卫影响

@@ -32,6 +32,30 @@ impl Checker {
         }
 
         match &t.data {
+            TypeData::Substitution(sub) => {
+                let new_base = sub
+                    .base_type
+                    .as_ref()
+                    .map(|b| self.substitute_infer_type_parameters(b, params, substitutions));
+                let changed = new_base
+                    .as_ref()
+                    .zip(sub.base_type.as_ref())
+                    .is_some_and(|(n, o)| !Arc::ptr_eq(n, o));
+                if !changed {
+                    return Arc::clone(t);
+                }
+                let mut rebuilt = Type::new(
+                    t.flags,
+                    TypeData::Substitution(SubstitutionTypeData {
+                        constrained: ConstrainedTypeData::default(),
+                        base_type: new_base.or_else(|| sub.base_type.clone()),
+                        constraint: sub.constraint.clone(),
+                    }),
+                );
+                rebuilt.object_flags = t.object_flags;
+                rebuilt.symbol = t.symbol.clone();
+                Arc::new(rebuilt)
+            }
             TypeData::Union(u) => {
                 let new_types: Vec<Arc<Type>> = u
                     .union_or_intersection

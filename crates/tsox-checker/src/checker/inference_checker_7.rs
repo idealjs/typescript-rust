@@ -114,7 +114,13 @@ impl Checker {
                 return;
             }
             let source = self.get_union_type(temp_sources);
-            self.infer_from_types_union(state, &source, &target);
+            if target.flags.contains(TypeFlags::Union) {
+                self.infer_from_types_union(state, &source, &target);
+            } else {
+                // 匹配消去后归约为单成分：继续主流程（Go 分支重赋值
+                // source/target 后继续执行，走 TypeVariable 登记）
+                self.infer_from_types_inner(state, &source, &target);
+            }
             return;
         }
 
@@ -131,6 +137,18 @@ impl Checker {
         {
             self.infer_to_type_variable(state, source, target);
             return;
+        }
+
+        // Go inferFromTypes switch 的 source-union 分发：source 为联合而
+        // target 非联合时按成分推断（如 ActionFunction<X> | undefined →
+        // 带调用签名的结构目标）
+        if source.flags.contains(TypeFlags::Union) {
+            if let Some(members) = source.types() {
+                for m in members {
+                    self.infer_from_types(state, m, target);
+                }
+                return;
+            }
         }
 
         if target.flags.contains(TypeFlags::Object) {
@@ -162,8 +180,14 @@ impl Checker {
             return;
         }
         let source = self.get_union_type(sources);
-        for t in target.types().unwrap_or(&[]) {
-            self.infer_from_types(state, &source, t);
+        if target.flags.contains(TypeFlags::Union) {
+            for t in target.types().unwrap_or(&[]) {
+                self.infer_from_types(state, &source, t);
+            }
+        } else {
+            // 匹配消去后归约为单成分（如裸类型参数）：继续主流程
+            //（Go 联合分支重赋值 source/target 后继续执行，走 TypeVariable 登记）
+            self.infer_from_types(state, &source, &target);
         }
     }
 

@@ -101,6 +101,11 @@ impl Checker {
             return true;
         };
 
+        // Substitution（NoInfer 包装）关系期按 base 展开（Go substitution
+        // 类型的 constraint 仅推断期参与，关系判定由 base 承担）
+        let source = substitution_base_or_self(&source);
+        let target = substitution_base_or_self(&target);
+
         {
             let sp = source.id;
             let tp = target.id;
@@ -329,4 +334,14 @@ impl Checker {
         }
         Some(&self.relater_error_chain[len - 1 - index].args)
     }
+}
+
+fn substitution_base_or_self(t: &Arc<Type>) -> Arc<Type> {
+    if t.flags.contains(TypeFlags::Substitution)
+        && let TypeData::Substitution(sub) = &t.data
+        && let Some(base) = &sub.base_type
+    {
+        return Arc::clone(base);
+    }
+    Arc::clone(t)
 }
