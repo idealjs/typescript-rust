@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -18,6 +18,6 @@ export function App() {
     </div>
   )
 }"#;
-    let mut s = Session::new_for_test("completionsImportFromJSXTag", content);
+    let _s = Session::new_for_test("completionsImportFromJSXTag", content);
     // TODO: f.VerifyApplyCodeActionFromCompletion(t, new(""), &fourslash.ApplyCodeActionFromCompletionOptions{
 }

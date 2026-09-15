@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -47,6 +47,6 @@ export [|{
   b4,
 }|] from "b";
 ;"#;
-    let mut s = Session::new_for_test("outliningSpansForImportsAndExports", content);
+    let _s = Session::new_for_test("outliningSpansForImportsAndExports", content);
     // TODO: f.VerifyOutliningSpans(t)
 }

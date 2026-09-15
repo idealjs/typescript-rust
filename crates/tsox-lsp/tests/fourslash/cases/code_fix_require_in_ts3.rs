@@ -1,10 +1,10 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
 fn code_fix_require_in_ts3() {
     let content = r#"// @Filename: /a.ts
 const { a, b: { c } } = [|require("a")|];"#;
-    let mut s = Session::new_for_test("codeFixRequireInTs3", content);
+    let _s = Session::new_for_test("codeFixRequireInTs3", content);
     // TODO: f.VerifyCodeFixNotAvailable(t)
 }

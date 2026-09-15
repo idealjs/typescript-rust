@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -7,6 +7,6 @@ fn code_fix_add_void_to_promise5() {
 // @lib: es2015
 // @strict: true
 const p4: Promise<number> = new Promise(resolve => resolve());"#;
-    let mut s = Session::new_for_test("codeFixAddVoidToPromise5", content);
+    let _s = Session::new_for_test("codeFixAddVoidToPromise5", content);
     // TODO: f.VerifyCodeFixNotAvailable(t)
 }

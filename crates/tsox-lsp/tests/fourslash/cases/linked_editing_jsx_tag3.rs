@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -12,6 +12,6 @@ fn linked_editing_jsx_tag3() {
      /*10*/ </p>/*11*/
    /*12*/</div>
 /*13*/)/*14*/;/*15*/"#;
-    let mut s = Session::new_for_test("linkedEditingJsxTag3", content);
+    let _s = Session::new_for_test("linkedEditingJsxTag3", content);
     // TODO: f.VerifyLinkedEditing(t, map[string][]lsproto.Range{
 }

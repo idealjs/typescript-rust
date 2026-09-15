@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -6,7 +6,7 @@ fn completions_for_latter_type_parameters_in_constraints1() {
     let content = r#"// https://github.com/microsoft/TypeScript/issues/56474
 function test<First extends S/*1*/, Second>(a: First, b: Second) {}
 type A1<K extends /*2*/, L> = K"#;
-    let mut s = Session::new_for_test("completionsForLatterTypeParametersInConstraints1", content);
+    let _s = Session::new_for_test("completionsForLatterTypeParametersInConstraints1", content);
     // TODO: f.VerifyCompletions(t, []string{"1"}, &fourslash.CompletionsExpectedList{
     // TODO: f.VerifyCompletions(t, []string{"2"}, &fourslash.CompletionsExpectedList{
 }

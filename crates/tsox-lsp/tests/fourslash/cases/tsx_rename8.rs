@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -23,6 +23,6 @@ let opt1 = <Opt propx={100} propString />;
 let opt2 = <Opt propx={100} optional/>;
 let opt3 = <Opt [|wrong|] />;
 let opt4 = <Opt propx={100} propString="hi" />;"#;
-    let mut s = Session::new_for_test("tsxRename8", content);
+    let _s = Session::new_for_test("tsxRename8", content);
     // TODO: f.VerifyBaselineRename(t, nil /*preferences*/)
 }

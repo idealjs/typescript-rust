@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -11,6 +11,6 @@ fn rename_function_parameter1() {
         return p;
     }
 }"#;
-    let mut s = Session::new_for_test("renameFunctionParameter1", content);
+    let _s = Session::new_for_test("renameFunctionParameter1", content);
     // TODO: f.VerifyBaselineRename(t, nil /*preferences*/, "")
 }

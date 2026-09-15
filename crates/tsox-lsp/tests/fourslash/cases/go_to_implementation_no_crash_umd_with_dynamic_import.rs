@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -8,6 +8,6 @@ export as namespace Lib;
 export interface /*1*/IFoo {}
 // @Filename: /user.ts
 const p = import('./lib');"#;
-    let mut s = Session::new_for_test("goToImplementationNoCrashUMDWithDynamicImport", content);
+    let _s = Session::new_for_test("goToImplementationNoCrashUMDWithDynamicImport", content);
     // TODO: f.VerifyBaselineGoToImplementation(t, "1")
 }

@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -16,6 +16,6 @@ fn references_for_merged_declarations() {
 var f1: /*7*/Foo.Bar;
 var f2: /*8*/Foo;
 /*9*/Foo.bind(this);"#;
-    let mut s = Session::new_for_test("referencesForMergedDeclarations", content);
+    let _s = Session::new_for_test("referencesForMergedDeclarations", content);
     // TODO: f.VerifyBaselineFindAllReferences(t, "1", "2", "3", "4", "5", "6", "7", "8", "9")
 }

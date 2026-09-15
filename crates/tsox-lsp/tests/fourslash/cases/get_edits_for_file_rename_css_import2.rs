@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -16,6 +16,6 @@ declare const css: {
 export default css;
 // @Filename: /a.ts
 import styles from "./app.css";"#;
-    let mut s = Session::new_for_test("getEditsForFileRename_cssImport2", content);
+    let _s = Session::new_for_test("getEditsForFileRename_cssImport2", content);
     // TODO: f.VerifyWillRenameFilesEdits(t, "/app.d.css.ts", "/app2.d.css.ts", map[string]string{
 }

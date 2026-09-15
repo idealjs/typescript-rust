@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -7,6 +7,6 @@ fn completion_as_keyword() {
 function foo() {
     const x = this /*2*/
 }"#;
-    let mut s = Session::new_for_test("completionAsKeyword", content);
+    let _s = Session::new_for_test("completionAsKeyword", content);
     // TODO: f.VerifyCompletions(t, []string{"1", "2"}, &fourslash.CompletionsExpectedList{
 }

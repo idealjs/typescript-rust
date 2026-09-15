@@ -401,25 +401,6 @@ pub(super) fn union_member_types(t: &Arc<Type>) -> Vec<Arc<Type>> {
     }
 }
 
-pub(super) fn enclosing_binding_element(node: &Arc<Node>) -> bool {
-    let mut current = Some(Arc::clone(node));
-    while let Some(n) = current {
-        if n.kind == SyntaxKind::BindingElement {
-            return true;
-        }
-        if matches!(
-            n.kind,
-            SyntaxKind::ObjectBindingPattern
-                | SyntaxKind::ArrayBindingPattern
-                | SyntaxKind::VariableDeclaration
-                | SyntaxKind::SourceFile
-        ) {
-            return false;
-        }
-        current = n.parent();
-    }
-    false
-}
 
 /// Go NodeFlagsInWithStatement：对象字面量位于 with 语句内
 pub(super) fn in_with_statement(container: &Arc<Node>) -> bool {

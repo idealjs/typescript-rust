@@ -260,6 +260,7 @@ impl Checker {
 
     // 类型成员限定名：只收集命名空间段（ValueModule 且非文件模块），不使用 alias 前缀
     // （tsc getSymbolChain：外部模块 root 的链段被跳过；值成员才经 alias 显示）
+    #[allow(dead_code)]
     pub(crate) fn namespace_only_qualifier_of(&mut self, symbol: &Arc<Symbol>) -> Option<String> {
         let mut parts: Vec<String> = Vec::new();
         let mut cur = symbol.parent().clone();
@@ -447,7 +448,7 @@ impl Checker {
             tables.push(module_sym.exports.clone());
         }
         for table in tables {
-            for (name, sym) in table.iter() {
+            for (_name, sym) in table.iter() {
                 if !sym.flags.contains(SymbolFlags::Alias) {
                     continue;
                 }

@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -10,6 +10,6 @@ interface FC<P = {}> {
 
 const Thing: FC = (props) => <div></div>;
 const HelloWorld = () => <[|/**/Thing|] />;"#;
-    let mut s = Session::new_for_test("goToDefinitionJsxCall", content);
+    let _s = Session::new_for_test("goToDefinitionJsxCall", content);
     // TODO: f.VerifyBaselineGoToDefinition(t, true, "")
 }

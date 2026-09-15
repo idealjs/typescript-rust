@@ -3,7 +3,6 @@ use crate::ls::lsutil_organize_imports_compare_strings::compare_booleans;
 use crate::ls::lsutil_organize_imports_comparers::StatementComparer;
 use crate::ls::lsutil_organize_imports_comparers::StringComparer;
 use std::sync::Arc;
-use tsox_core::tspath;
 use tsox_frontend::ast::Node;
 
 use crate::ls::lsutil_user_preferences::OrganizeImportsTypeOrder;
@@ -58,12 +57,17 @@ fn compare_import_kind(s1: &Arc<Node>, s2: &Arc<Node>) -> i32 {
     cmp_compare_i32(get_import_kind_order(s1), get_import_kind_order(s2))
 }
 
+#[allow(dead_code)]
 const IMPORT_KIND_ORDER_SIDE_EFFECT: i32 = 0;
+#[allow(dead_code)]
 const IMPORT_KIND_ORDER_TYPE_ONLY: i32 = 1;
+#[allow(dead_code)]
 const IMPORT_KIND_ORDER_NAMESPACE: i32 = 2;
+#[allow(dead_code)]
 const IMPORT_KIND_ORDER_DEFAULT: i32 = 3;
 const IMPORT_KIND_ORDER_NAMED: i32 = 4;
 const IMPORT_KIND_ORDER_IMPORT_EQUALS: i32 = 5;
+#[allow(dead_code)]
 const IMPORT_KIND_ORDER_REQUIRE: i32 = 6;
 const IMPORT_KIND_ORDER_UNKNOWN: i32 = 7;
 

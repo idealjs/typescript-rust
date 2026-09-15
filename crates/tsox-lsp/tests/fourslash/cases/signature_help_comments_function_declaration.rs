@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -20,6 +20,6 @@ fooWithParameters(/*10*/"a",/*11*/10);
 */
 declare function fn(a: string);
 fn(/*12*/"hello");"#;
-    let mut s = Session::new_for_test("signatureHelpCommentsFunctionDeclaration", content);
+    let _s = Session::new_for_test("signatureHelpCommentsFunctionDeclaration", content);
     // TODO: f.VerifyBaselineSignatureHelp(t)
 }

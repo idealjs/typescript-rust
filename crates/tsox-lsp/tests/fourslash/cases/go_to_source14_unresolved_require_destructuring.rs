@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -7,7 +7,7 @@ fn go_to_source14_unresolved_require_destructuring() {
 // @allowJs: true
 // @Filename: /home/src/workspaces/project/index.js
 const { blah/**/ } = require("unresolved");"#;
-    let mut s = Session::new_for_test("goToSource14_unresolvedRequireDestructuring", content);
+    let _s = Session::new_for_test("goToSource14_unresolvedRequireDestructuring", content);
     // TODO: f.MarkTestAsStradaServer()
     // TODO: f.VerifyBaselineGoToSourceDefinition(t, "")
 }

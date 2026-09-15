@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -9,6 +9,6 @@ x.hello();
 
 hello = {};
 "#;
-    let mut s = Session::new_for_test("goToImplementationLocal_03", content);
+    let _s = Session::new_for_test("goToImplementationLocal_03", content);
     // TODO: f.VerifyBaselineGoToImplementation(t, "local_var")
 }

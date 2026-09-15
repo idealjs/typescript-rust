@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -11,6 +11,6 @@ fn navigation_bar_function_like_property_assignments() {
     e: y(),
     f() { }
 };"#;
-    let mut s = Session::new_for_test("navigationBarFunctionLikePropertyAssignments", content);
+    let _s = Session::new_for_test("navigationBarFunctionLikePropertyAssignments", content);
     // TODO: f.VerifyBaselineDocumentSymbol(t)
 }

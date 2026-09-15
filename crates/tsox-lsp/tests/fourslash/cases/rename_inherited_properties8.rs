@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -13,6 +13,6 @@ interface D extends C {
 
 var c: C;
 c.[|prop1|];"#;
-    let mut s = Session::new_for_test("renameInheritedProperties8", content);
+    let _s = Session::new_for_test("renameInheritedProperties8", content);
     // TODO: f.VerifyBaselineRenameAtRangesWithText(t, nil /*preferences*/, "prop1")
 }

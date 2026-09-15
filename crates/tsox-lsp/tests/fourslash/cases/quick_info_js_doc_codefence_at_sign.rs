@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -25,6 +25,6 @@ const /*1*/x = 1;
  */
 function /*2*/foo(y: number) {}
 "#;
-    let mut s = Session::new_for_test("quickInfoJSDocCodefenceAtSign", content);
+    let _s = Session::new_for_test("quickInfoJSDocCodefenceAtSign", content);
     // TODO: f.VerifyBaselineHover(t)
 }

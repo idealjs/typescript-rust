@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -25,6 +25,6 @@ class C3 extends Base {
 
 Base./*1*/;
 C3./*2*/;"#;
-    let mut s = Session::new_for_test("completionListStaticProtectedMembers3", content);
+    let _s = Session::new_for_test("completionListStaticProtectedMembers3", content);
     // TODO: f.VerifyCompletions(t, []string{"1", "2"}, &fourslash.CompletionsExpectedList{
 }

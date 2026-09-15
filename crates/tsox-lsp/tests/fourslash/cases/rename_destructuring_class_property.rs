@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -18,6 +18,6 @@ class B {
         [|foo|] = "newString";
     }
 }"#;
-    let mut s = Session::new_for_test("renameDestructuringClassProperty", content);
+    let _s = Session::new_for_test("renameDestructuringClassProperty", content);
     // TODO: f.VerifyBaselineRename(t, nil /*preferences*/, f.Ranges()[1], f.Ranges()[5], f.Ranges()[3], f.Ranges
 }

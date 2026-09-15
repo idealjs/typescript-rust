@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -11,6 +11,6 @@ a = { [|e|] };
 // @Filename: /b.ts
 [|import { [|{| "contextRangeIndex": 6 |}e|] } from "./a";|]
 [|export { [|{| "contextRangeIndex": 8 |}e|] };|]"#;
-    let mut s = Session::new_for_test("renameImportRequire", content);
+    let _s = Session::new_for_test("renameImportRequire", content);
     // TODO: f.VerifyBaselineRename(t, nil /*preferences*/, f.Ranges()[1], f.Ranges()[2], f.Ranges()[3], f.Ranges
 }

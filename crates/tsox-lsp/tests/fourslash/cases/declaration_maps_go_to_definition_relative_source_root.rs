@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -41,7 +41,7 @@ export interface SomeType {
 import * as mod from "./out/indexdef";
 const instance = new mod.Foo();
 instance.[|/*1*/methodName|]({member: 12});"#;
-    let mut s = Session::new_for_test("declarationMapsGoToDefinitionRelativeSourceRoot", content);
+    let _s = Session::new_for_test("declarationMapsGoToDefinitionRelativeSourceRoot", content);
     // TODO: f.MarkTestAsStradaServer()
     // TODO: f.VerifyBaselineGoToDefinition(t, true, "1")
 }

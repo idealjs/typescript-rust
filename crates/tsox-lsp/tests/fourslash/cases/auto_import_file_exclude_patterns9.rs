@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[ignore = "go: t.Skip('Known failing fourslash test')"]
@@ -22,6 +22,6 @@ export { Event };
 // @Filename: /src/vs/test.ts
 import { Event } from './event/event';
 export { Event };"#;
-    let mut s = Session::new_for_test("autoImportFileExcludePatterns9", content);
+    let _s = Session::new_for_test("autoImportFileExcludePatterns9", content);
     // TODO: f.VerifyCodeFix(t, fourslash.VerifyCodeFixOptions{
 }

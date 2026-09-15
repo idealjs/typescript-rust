@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -11,6 +11,6 @@ fn smart_selection_simple1() {
       return false;
   }
 }"#;
-    let mut s = Session::new_for_test("smartSelection_simple1", content);
+    let _s = Session::new_for_test("smartSelection_simple1", content);
     // TODO: f.VerifyBaselineSelectionRanges(t)
 }

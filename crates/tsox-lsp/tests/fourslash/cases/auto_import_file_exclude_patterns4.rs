@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -18,6 +18,6 @@ export interface Parts {
 // @Filename: /src/vs/workbench/workbench.ts
 import { Event } from '../event/event';
 export { Event };"#;
-    let mut s = Session::new_for_test("autoImportFileExcludePatterns4", content);
+    let _s = Session::new_for_test("autoImportFileExcludePatterns4", content);
     // TODO: f.VerifyCodeFix(t, fourslash.VerifyCodeFixOptions{
 }

@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -10,7 +10,7 @@ class bar3{ constructor(a, /*3*/
 class bar4{ constructor(a, b/*4*/
 class bar6{ constructor(public a, /*5*/
 class bar7{ constructor(private a, /*6*/"#;
-    let mut s = Session::new_for_test("completionListBuilderLocations_parameters", content);
+    let _s = Session::new_for_test("completionListBuilderLocations_parameters", content);
     // TODO: f.VerifyCompletions(t, f.Markers(), &fourslash.CompletionsExpectedList{
     // TODO: }
 }

@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -21,7 +21,7 @@ namespace JSX {
 const x = [|<[|/*7*/Comp|]>
     Content
 </[|/*8*/Comp|]>|];"#;
-    let mut s = Session::new_for_test("findReferencesJSXTagName3", content);
+    let _s = Session::new_for_test("findReferencesJSXTagName3", content);
     // TODO: f.VerifyBaselineFindAllReferences(t, "1", "2", "3", "4", "5", "6", "7", "8")
     // TODO: f.VerifyBaselineDocumentHighlights(t, nil /*preferences*/, f.Ranges()[1], f.Ranges()[5], f.Ranges()[
     // TODO: f.VerifyBaselineDocumentHighlights(t, nil /*preferences*/, f.Ranges()[3], f.Ranges()[11], f.Ranges()

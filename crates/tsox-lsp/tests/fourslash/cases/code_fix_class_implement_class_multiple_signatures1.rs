@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -8,6 +8,6 @@ fn code_fix_class_implement_class_multiple_signatures1() {
     method(a: string | number, b?: string | number): boolean | Function { return a + b as any; }
 }
 class C implements A {}"#;
-    let mut s = Session::new_for_test("codeFixClassImplementClassMultipleSignatures1", content);
+    let _s = Session::new_for_test("codeFixClassImplementClassMultipleSignatures1", content);
     // TODO: f.VerifyCodeFix(t, fourslash.VerifyCodeFixOptions{
 }

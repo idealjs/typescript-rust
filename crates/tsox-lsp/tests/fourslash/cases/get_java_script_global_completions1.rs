@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[ignore = "go: t.Skip('Known failing fourslash test')"]
@@ -15,6 +15,6 @@ function f() {
 }
 
 hello/**/"#;
-    let mut s = Session::new_for_test("getJavaScriptGlobalCompletions1", content);
+    let _s = Session::new_for_test("getJavaScriptGlobalCompletions1", content);
     // TODO: f.VerifyCompletions(t, nil, &fourslash.CompletionsExpectedList{
 }

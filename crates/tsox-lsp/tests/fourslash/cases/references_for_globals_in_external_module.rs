@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -18,6 +18,6 @@ var i: /*9*/topLevelInterface;
 var x = /*12*/topLevelModule.x;
 
 export = x;"#;
-    let mut s = Session::new_for_test("referencesForGlobalsInExternalModule", content);
+    let _s = Session::new_for_test("referencesForGlobalsInExternalModule", content);
     // TODO: f.VerifyBaselineFindAllReferences(t, "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12")
 }

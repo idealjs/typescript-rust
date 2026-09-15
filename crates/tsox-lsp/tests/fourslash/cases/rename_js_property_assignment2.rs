@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -9,6 +9,6 @@ class Minimatch {
 }
 [|Minimatch.[|{| "contextRangeIndex": 0 |}staticProperty|] = "string";|]
 console.log(Minimatch.[|staticProperty|]);"#;
-    let mut s = Session::new_for_test("renameJsPropertyAssignment2", content);
+    let _s = Session::new_for_test("renameJsPropertyAssignment2", content);
     // TODO: f.VerifyBaselineRenameAtRangesWithText(t, nil /*preferences*/, "staticProperty")
 }

@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -7,6 +7,6 @@ fn document_highlight_nested_require_destructure_no_crash1() {
 // @Filename: /bar.js
 const { a: { b } } = require('./foo');
 /**/b;"#;
-    let mut s = Session::new_for_test("documentHighlightNestedRequireDestructureNoCrash1", content);
+    let _s = Session::new_for_test("documentHighlightNestedRequireDestructureNoCrash1", content);
     // TODO: f.VerifyBaselineDocumentHighlights(t, nil /*preferences*/, "")
 }

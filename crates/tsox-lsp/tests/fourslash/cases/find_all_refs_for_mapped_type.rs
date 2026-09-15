@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -8,6 +8,6 @@ type U = { [K in keyof T]: string };
 type V = { [K in keyof U]: boolean };
 const u: U = { a: "" }
 const v: V = { a: true }"#;
-    let mut s = Session::new_for_test("findAllRefsForMappedType", content);
+    let _s = Session::new_for_test("findAllRefsForMappedType", content);
     // TODO: f.VerifyBaselineFindAllReferences(t, "1")
 }

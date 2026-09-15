@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -7,6 +7,6 @@ fn quick_info_on_private_constructor_call() {
     private constructor() {}
 }
 var x = new A(/*1*/"#;
-    let mut s = Session::new_for_test("quickInfoOnPrivateConstructorCall", content);
+    let _s = Session::new_for_test("quickInfoOnPrivateConstructorCall", content);
     // TODO: f.VerifyNoSignatureHelpForMarkers(t, "1")
 }

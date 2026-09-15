@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -10,6 +10,6 @@ interface Test {
   /*destination*/prop2: number
 }
 bar<Test>(({[|pr/*goto*/op2|]})=>{});"#;
-    let mut s = Session::new_for_test("gotoDefinitionInObjectBindingPattern1", content);
+    let _s = Session::new_for_test("gotoDefinitionInObjectBindingPattern1", content);
     // TODO: f.VerifyBaselineGoToDefinition(t, true, "goto")
 }

@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -21,6 +21,6 @@ declare module "./test" {
 }
 
 Abcde/**/"#;
-    let mut s = Session::new_for_test("completionsImportModuleAugmentationWithJS", content);
+    let _s = Session::new_for_test("completionsImportModuleAugmentationWithJS", content);
     // TODO: f.VerifyApplyCodeActionFromCompletion(t, new(""), &fourslash.ApplyCodeActionFromCompletionOptions{
 }

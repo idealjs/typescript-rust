@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -10,7 +10,7 @@ fn get_occurrences_if_else_broken() {
 [|else if|]
 [|else|]  /*  whar garbl   */   [|if|] (i/**/f (true) { } else { })
 else"#;
-    let mut s = Session::new_for_test("getOccurrencesIfElseBroken", content);
+    let _s = Session::new_for_test("getOccurrencesIfElseBroken", content);
     // TODO: f.VerifyBaselineDocumentHighlights(t, nil /*preferences*/, ToAny(f.Ranges())...)
     // TODO: f.VerifyBaselineDocumentHighlights(t, nil /*preferences*/, "")
 }

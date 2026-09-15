@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -9,7 +9,7 @@ class B<T, /*genericName3*/
 class A{
      f</*genericName4*/
 function A</*genericName5*/"#;
-    let mut s = Session::new_for_test("completionListAtIdentifierDefinitionLocations_Generics", content);
+    let _s = Session::new_for_test("completionListAtIdentifierDefinitionLocations_Generics", content);
     // TODO: f.VerifyCompletions(t, f.Markers(), nil)
     // TODO: }
 }

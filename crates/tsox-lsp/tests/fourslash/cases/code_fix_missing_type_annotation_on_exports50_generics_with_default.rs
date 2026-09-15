@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -8,6 +8,6 @@ fn code_fix_missing_type_annotation_on_exports50_generics_with_default() {
 // @lib: es2015
 let x: Iterator<number>;
 export const y = x;"#;
-    let mut s = Session::new_for_test("codeFixMissingTypeAnnotationOnExports50_generics_with_default", content);
+    let _s = Session::new_for_test("codeFixMissingTypeAnnotationOnExports50_generics_with_default", content);
     // TODO: f.VerifyCodeFix(t, fourslash.VerifyCodeFixOptions{
 }

@@ -44,9 +44,9 @@ pub struct EmitContextStub;
 pub struct PseudoCheckerStub;
 
 impl EmitContextStub {
-    pub fn set_original(&self, node: &Arc<Node>, original: Option<&Arc<Node>>) {}
+    pub fn set_original(&self, _node: &Arc<Node>, _original: Option<&Arc<Node>>) {}
 
-    pub fn add_emit_flags(&self, node: &Arc<Node>, flags: u32) {}
+    pub fn add_emit_flags(&self, _node: &Arc<Node>, _flags: u32) {}
 
     pub fn most_original(&self, node: &Arc<Node>) -> Arc<Node> {
         Arc::clone(node)
@@ -75,7 +75,7 @@ impl<'a> NodeBuilderImpl<'a> {
         self.reuse_node(node)
     }
 
-    pub fn reuse_name(&mut self, node: Option<&Arc<Node>>, is_method: bool) -> Option<Arc<Node>> {
+    pub fn reuse_name(&mut self, node: Option<&Arc<Node>>, _is_method: bool) -> Option<Arc<Node>> {
         let res = self.reuse_node(node)?;
 
         Some(res)
@@ -96,7 +96,7 @@ impl<'a> NodeBuilderImpl<'a> {
         None
     }
 
-    pub fn walk_node_for_expandability(&mut self, node: &Arc<Node>) {
+    pub fn walk_node_for_expandability(&mut self, _node: &Arc<Node>) {
         let can_increase = self.ctx.borrow().can_increase_expansion_depth;
         if can_increase {
             return;
@@ -142,14 +142,14 @@ impl<'a> NodeBuilderImpl<'a> {
         true
     }
 
-    pub fn try_reuse_existing_node_helper(&mut self, existing: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn try_reuse_existing_node_helper(&mut self, _existing: &Arc<Node>) -> Option<Arc<Node>> {
         let bound = self.create_recovery_boundary();
 
         self.finalize_boundary(&bound);
         None
     }
 
-    pub fn get_module_specifier_override(&mut self, parent: &Arc<Node>, lit: &Arc<Node>) -> String {
+    pub fn get_module_specifier_override(&mut self, _parent: &Arc<Node>, _lit: &Arc<Node>) -> String {
         String::new()
     }
 
@@ -168,11 +168,11 @@ impl<'a> NodeBuilderImpl<'a> {
         enc
     }
 
-    pub fn set_text_range(&self, node: Arc<Node>, range_node: &Arc<Node>) -> Arc<Node> {
+    pub fn set_text_range(&self, node: Arc<Node>, _range_node: &Arc<Node>) -> Arc<Node> {
         node
     }
 
-    pub fn new_identifier(&mut self, text: &str, symbol: Option<&Arc<Symbol>>) -> Arc<Node> {
+    pub fn new_identifier(&mut self, _text: &str, symbol: Option<&Arc<Symbol>>) -> Arc<Node> {
         let node = Node::new(SyntaxKind::Identifier, tsox_frontend::ast::NodeData::Token);
         if let Some(sym) = symbol {
             let _ = sym;
@@ -197,13 +197,13 @@ impl<'a> NodeBuilderImpl<'a> {
 
     pub fn get_type_from_type_node(
         &mut self,
-        node: &Arc<Node>,
+        _node: &Arc<Node>,
         _ignore_errors: bool,
     ) -> Option<Arc<Type>> {
         None
     }
 
-    pub fn type_to_type_node(&mut self, t: &Arc<Type>) -> Option<Arc<Node>> {
+    pub fn type_to_type_node(&mut self, _t: &Arc<Type>) -> Option<Arc<Node>> {
         None
     }
 
@@ -218,13 +218,13 @@ impl<'a> NodeBuilderImpl<'a> {
 
     pub fn can_reuse_existing_js_type_node(
         &mut self,
-        node: &Arc<Node>,
-        t: Option<&Arc<Type>>,
+        _node: &Arc<Node>,
+        _t: Option<&Arc<Type>>,
     ) -> bool {
         true
     }
 
-    pub fn check_type_expandability(&mut self, t: &Arc<Type>) {}
+    pub fn check_type_expandability(&mut self, _t: &Arc<Type>) {}
 
     pub fn enter_new_scope(
         &mut self,
@@ -237,14 +237,14 @@ impl<'a> NodeBuilderImpl<'a> {
         || {}
     }
 
-    pub fn type_parameter_to_name(&mut self, t: &Arc<Type>) -> Arc<Node> {
+    pub fn type_parameter_to_name(&mut self, _t: &Arc<Type>) -> Arc<Node> {
         let node = Node::new(SyntaxKind::Identifier, tsox_frontend::ast::NodeData::Token);
         Arc::new(node)
     }
 
     pub fn try_get_resolved_symbol_from_type_node(
         &mut self,
-        node: &Arc<Node>,
+        _node: &Arc<Node>,
     ) -> Option<Arc<Symbol>> {
         None
     }
@@ -258,7 +258,7 @@ impl<'a> NodeBuilderImpl<'a> {
         vec![Arc::clone(symbol)]
     }
 
-    pub fn get_specifier_for_module_symbol(&mut self, symbol: &Arc<Symbol>, _mode: u32) -> String {
+    pub fn get_specifier_for_module_symbol(&mut self, _symbol: &Arc<Symbol>, _mode: u32) -> String {
         String::new()
     }
 }

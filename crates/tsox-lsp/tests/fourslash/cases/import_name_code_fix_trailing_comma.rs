@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -14,6 +14,6 @@ const x: T3/**/
 export type T1 = 0;
 export type T2 = 0;
 export type T3 = 0;"#;
-    let mut s = Session::new_for_test("importNameCodeFix_trailingComma", content);
+    let _s = Session::new_for_test("importNameCodeFix_trailingComma", content);
     // TODO: f.VerifyImportFixAtPosition(t, []string{
 }

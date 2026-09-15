@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[ignore = "go: t.Skip('Known failing fourslash test')"]
@@ -14,6 +14,6 @@ class C extends Base{
     |]}
     m() { this.a; } // avoid unused 'a'
 }"#;
-    let mut s = Session::new_for_test("codeFixClassSuperMustPrecedeThisAccess", content);
+    let _s = Session::new_for_test("codeFixClassSuperMustPrecedeThisAccess", content);
     // TODO: f.VerifyRangeAfterCodeFix(t, `
 }

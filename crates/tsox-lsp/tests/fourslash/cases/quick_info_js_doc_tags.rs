@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -61,6 +61,6 @@ foo./*7*/property1;
 foo./*8*/property2;
 foo./*9*/method5();
 foo.newMet/*14*/"#;
-    let mut s = Session::new_for_test("quickInfoJSDocTags", content);
+    let _s = Session::new_for_test("quickInfoJSDocTags", content);
     // TODO: f.VerifyBaselineHover(t)
 }

@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[ignore = "go: t.Skip()"]
@@ -22,6 +22,6 @@ export function foo() {};
  }
 // @Filename: /index.ts
 foo/**/"#;
-    let mut s = Session::new_for_test("autoImportPackageRootPathTypeModule", content);
+    let _s = Session::new_for_test("autoImportPackageRootPathTypeModule", content);
     // TODO: f.VerifyImportFixModuleSpecifiers(t, "", []string{"pkg"}, nil /*preferences*/)
 }

@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -9,6 +9,6 @@ fn code_fix_missing_type_annotation_on_exports19() {
 export const a = {
     z: Symbol()
 } as const;"#;
-    let mut s = Session::new_for_test("codeFixMissingTypeAnnotationOnExports19", content);
+    let _s = Session::new_for_test("codeFixMissingTypeAnnotationOnExports19", content);
     // TODO: f.VerifyCodeFix(t, fourslash.VerifyCodeFixOptions{
 }

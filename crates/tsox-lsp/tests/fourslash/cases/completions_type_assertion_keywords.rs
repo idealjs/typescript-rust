@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -13,6 +13,6 @@ const a = {
 const b = 42 as /*2*/
 
 var c = </*3*/>42"#;
-    let mut s = Session::new_for_test("completionsTypeAssertionKeywords", content);
+    let _s = Session::new_for_test("completionsTypeAssertionKeywords", content);
     // TODO: f.VerifyCompletions(t, f.Markers(), &fourslash.CompletionsExpectedList{
 }

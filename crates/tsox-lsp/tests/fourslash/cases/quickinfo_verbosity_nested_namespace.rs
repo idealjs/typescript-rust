@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -12,6 +12,6 @@ declare namespace Outer/*1*/ {
     const outerVal: boolean;
 }
 "#;
-    let mut s = Session::new_for_test("quickinfoVerbosityNestedNamespace", content);
+    let _s = Session::new_for_test("quickinfoVerbosityNestedNamespace", content);
     // TODO: f.VerifyBaselineHoverWithVerbosity(t, map[string][]int{"1": {0, 1}})
 }

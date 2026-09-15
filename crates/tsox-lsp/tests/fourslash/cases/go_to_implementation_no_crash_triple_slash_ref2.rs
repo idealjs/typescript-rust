@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -12,6 +12,6 @@ export type JSX = {};
 // @Filename: /index.ts
 import type {JSX} from '/*m*/react';
 "#;
-    let mut s = Session::new_for_test("goToImplementationNoCrashTripleSlashRef2", content);
+    let _s = Session::new_for_test("goToImplementationNoCrashTripleSlashRef2", content);
     // TODO: f.VerifyBaselineGoToImplementation(t, "m")
 }

@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -9,6 +9,6 @@ fn code_fix_class_implement_interface_index_signatures_both() {
 }
 
 class C implements I {}"#;
-    let mut s = Session::new_for_test("codeFixClassImplementInterfaceIndexSignaturesBoth", content);
+    let _s = Session::new_for_test("codeFixClassImplementInterfaceIndexSignaturesBoth", content);
     // TODO: f.VerifyCodeFix(t, fourslash.VerifyCodeFixOptions{
 }

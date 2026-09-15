@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -13,7 +13,7 @@ type Y = X & { a: {} }
 
 declare function f({ /*1*/a }: Y): void
 "#;
-    let mut s = Session::new_for_test("destructuredIntersectionJSDoc", content);
+    let _s = Session::new_for_test("destructuredIntersectionJSDoc", content);
     // TODO: f.VerifyBaselineHover(t)
 }
 
@@ -30,6 +30,6 @@ type Y = X & { a: {} }
 declare const y: Y;
 const { /*1*/a } = y;
 "#;
-    let mut s = Session::new_for_test("destructuredIntersectionJSDocVariable", content);
+    let _s = Session::new_for_test("destructuredIntersectionJSDocVariable", content);
     // TODO: f.VerifyBaselineHover(t)
 }

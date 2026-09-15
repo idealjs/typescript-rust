@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -17,7 +17,7 @@ export function /*target*/bar() { return "hello"; }
 // @Filename: /home/src/workspaces/project/index.ts
 import { bar } from "foo";
 bar/*usage*/();"#;
-    let mut s = Session::new_for_test("goToSourceAtTypesPackage", content);
+    let _s = Session::new_for_test("goToSourceAtTypesPackage", content);
     // TODO: f.VerifyBaselineGoToSourceDefinition(t, "usage")
 }
 
@@ -35,7 +35,7 @@ export function /*target*/greet() { return "hi"; }
 // @Filename: /home/src/workspaces/project/index.ts
 import { greet } from "pkg";
 greet/*usage*/();"#;
-    let mut s = Session::new_for_test("goToSourcePackageIndexDts", content);
+    let _s = Session::new_for_test("goToSourcePackageIndexDts", content);
     // TODO: f.VerifyBaselineGoToSourceDefinition(t, "usage")
 }
 
@@ -53,7 +53,7 @@ export function /*target*/work() {}
 // @Filename: /home/src/workspaces/project/index.ts
 import { work } from "pkg";
 work/*usage*/();"#;
-    let mut s = Session::new_for_test("goToSourcePackageRootThenSubpath", content);
+    let _s = Session::new_for_test("goToSourcePackageRootThenSubpath", content);
     // TODO: f.VerifyBaselineGoToSourceDefinition(t, "usage")
 }
 
@@ -71,7 +71,7 @@ export function /*target*/work() {}
 // @Filename: /home/src/workspaces/project/index.ts
 import { work } from "pkg";
 work/*usage*/();"#;
-    let mut s = Session::new_for_test("goToSourcePackageRootFallsBackToSubpath", content);
+    let _s = Session::new_for_test("goToSourcePackageRootFallsBackToSubpath", content);
     // TODO: f.VerifyBaselineGoToSourceDefinition(t, "usage")
 }
 
@@ -88,6 +88,6 @@ export function /*target*/util() {}
 // @Filename: /home/src/workspaces/project/index.ts
 import { util } from "pkg";
 util/*usage*/();"#;
-    let mut s = Session::new_for_test("goToSourceSubpathNotIndex", content);
+    let _s = Session::new_for_test("goToSourceSubpathNotIndex", content);
     // TODO: f.VerifyBaselineGoToSourceDefinition(t, "usage")
 }

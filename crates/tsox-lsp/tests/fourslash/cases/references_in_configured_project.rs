@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -11,7 +11,7 @@ class /*0*/globalClass {
 var c = /*1*/globalClass();
 // @Filename: /home/src/workspaces/project/tsconfig.json
 { "files": ["referencesForGlobals_1.ts", "referencesForGlobals_2.ts"], "compilerOptions": { "lib": ["es5"] } }"#;
-    let mut s = Session::new_for_test("referencesInConfiguredProject", content);
+    let _s = Session::new_for_test("referencesInConfiguredProject", content);
     // TODO: f.MarkTestAsStradaServer()
     // TODO: f.VerifyBaselineFindAllReferences(t, "1")
 }

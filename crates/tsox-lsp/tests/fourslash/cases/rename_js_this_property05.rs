@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -13,6 +13,6 @@ class C {
 [|C.prototype.[|{| "contextRangeIndex": 0 |}z|] = 1;|]
 var t = new C(12);
 [|t.[|{| "contextRangeIndex": 2 |}z|] = 11;|]"#;
-    let mut s = Session::new_for_test("renameJsThisProperty05", content);
+    let _s = Session::new_for_test("renameJsThisProperty05", content);
     // TODO: f.VerifyBaselineRenameAtRangesWithText(t, nil /*preferences*/, "z")
 }

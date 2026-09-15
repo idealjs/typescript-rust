@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -19,6 +19,6 @@ class Foo {
         this.[|protectedParam|] = false;
     }
 }"#;
-    let mut s = Session::new_for_test("documentHighlightAtParameterPropertyDeclaration1", content);
+    let _s = Session::new_for_test("documentHighlightAtParameterPropertyDeclaration1", content);
     // TODO: f.VerifyBaselineDocumentHighlights(t, nil /*preferences*/, ToAny(f.Ranges())...)
 }

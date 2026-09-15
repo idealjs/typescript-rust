@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[ignore = "go: t.Skip('Known failing fourslash test')"]
@@ -38,6 +38,6 @@ export class Home extends Component[| {
     )|];
   }|]
 }|]"#;
-    let mut s = Session::new_for_test("getJSXOutliningSpans", content);
+    let _s = Session::new_for_test("getJSXOutliningSpans", content);
     // TODO: f.VerifyOutliningSpans(t)
 }

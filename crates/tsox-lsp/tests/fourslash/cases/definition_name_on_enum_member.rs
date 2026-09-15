@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -9,6 +9,6 @@ fn definition_name_on_enum_member() {
     thirdMember
 }
 var enumMember = e.[|/*1*/thirdMember|];"#;
-    let mut s = Session::new_for_test("definitionNameOnEnumMember", content);
+    let _s = Session::new_for_test("definitionNameOnEnumMember", content);
     // TODO: f.VerifyBaselineGoToDefinition(t, false, "1")
 }

@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -24,6 +24,6 @@ class Foo {
         type X = typeof th/*6*/is;
     }
 }"#;
-    let mut s = Session::new_for_test("quickInfoOnThis5", content);
+    let _s = Session::new_for_test("quickInfoOnThis5", content);
     // TODO: f.VerifyBaselineHover(t)
 }

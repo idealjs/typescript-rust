@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -10,6 +10,6 @@ class /*definition*/C {
 var c: C;
 // @Filename: goToTypeDefinition_Consumption.ts
 /*reference*/c = undefined;"#;
-    let mut s = Session::new_for_test("goToTypeDefinition", content);
+    let _s = Session::new_for_test("goToTypeDefinition", content);
     // TODO: f.VerifyBaselineGoToTypeDefinition(t, "reference")
 }

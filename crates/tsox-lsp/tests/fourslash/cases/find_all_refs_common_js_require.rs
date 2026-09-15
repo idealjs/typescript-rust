@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -10,6 +10,6 @@ export { f }
 // @Filename: /b.js
 const { f } = require('./a')
 /**/f"#;
-    let mut s = Session::new_for_test("findAllRefsCommonJsRequire", content);
+    let _s = Session::new_for_test("findAllRefsCommonJsRequire", content);
     // TODO: f.VerifyBaselineFindAllReferences(t, "")
 }

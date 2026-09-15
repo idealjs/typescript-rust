@@ -5,8 +5,6 @@ use std::sync::Arc;
 use crate::lsp::lsproto_lsp::DocumentUri;
 use crate::lsp::lsproto_lsp::Location;
 use crate::lsp::lsproto_lsp::Position;
-use tsox_compile::compiler;
-use tsox_core::tspath;
 
 use super::language_service::LanguageService;
 

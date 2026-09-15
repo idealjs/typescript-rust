@@ -88,7 +88,7 @@ pub fn verify_completions_exact_at(s: &mut Session, marker: Option<&str>, expect
 /// Go Items.Unsorted：无序集合精确等价（存在性 + 总数）
 pub fn verify_completions_unsorted_at(s: &mut Session, marker: Option<&str>, expected: &[&str]) {
     let labels = completion_labels_at(s, marker, "unsorted");
-    let mut actual: Vec<String> = labels.clone();
+    let actual: Vec<String> = labels.clone();
     let mut remaining: Vec<String> = labels;
     for want in expected {
         let idx = remaining.iter().position(|l| l == want);

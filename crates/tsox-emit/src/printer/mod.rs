@@ -1,7 +1,6 @@
 pub(crate) use std::collections::{HashMap, HashSet};
 pub(crate) use std::sync::Arc;
 pub(crate) use std::sync::atomic::{AtomicU32, Ordering};
-pub(crate) use tsox_core::stringutil;
 pub(crate) use tsox_frontend::ast::Node;
 pub(crate) use tsox_frontend::ast::SyntaxKind;
 pub(crate) use tsox_frontend::scanner::CommentRange;

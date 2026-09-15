@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -11,6 +11,6 @@ match({ other });
 interface B = { (): string; }; var b: B
 var s: String;
 var t: { (): string; foo: string};"#;
-    let mut s = Session::new_for_test("semanticModernClassificationCallableVariables", content);
+    let _s = Session::new_for_test("semanticModernClassificationCallableVariables", content);
     // TODO: f.VerifySemanticTokens(t, []fourslash.SemanticToken{
 }

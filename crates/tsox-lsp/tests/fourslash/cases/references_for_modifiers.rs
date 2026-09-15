@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -15,6 +15,6 @@ fn references_for_modifiers() {
 }|]
 [|/*asyncModifier*/async function fn() {}|]
 [|/*exportModifier*/export /*defaultModifier*/default class C2 {}|]"#;
-    let mut s = Session::new_for_test("referencesForModifiers", content);
+    let _s = Session::new_for_test("referencesForModifiers", content);
     // TODO: f.VerifyBaselineFindAllReferences(t, "declareModifier", "abstractModifier", "staticModifier", "reado
 }

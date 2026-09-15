@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -9,6 +9,6 @@ class Test {
     constructor(public [|search2|]: boolean, readonly [|search3|]: string, search4: string) {
     }
 }"#;
-    let mut s = Session::new_for_test("navigationItemsInConstructorsExactMatch", content);
+    let _s = Session::new_for_test("navigationItemsInConstructorsExactMatch", content);
     // TODO: f.VerifyWorkspaceSymbol(t, []*fourslash.VerifyWorkspaceSymbolCase{
 }

@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -13,7 +13,7 @@ interface Events {
 declare function addListener<K extends keyof Events>(type: K, listener: (ev: Events[K]) => any): void;
 
 /*1*/addListener/*2*/("/*3*/")"#;
-    let mut s = Session::new_for_test("arityErrorAfterStringCompletions", content);
+    let _s = Session::new_for_test("arityErrorAfterStringCompletions", content);
     // TODO: f.VerifyCompletions(t, []string{"3"}, &fourslash.CompletionsExpectedList{
     // TODO: f.VerifyErrorExistsBetweenMarkers(t, "1", "2")
 }

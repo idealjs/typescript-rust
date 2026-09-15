@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -10,6 +10,6 @@ let foo1, {a, b}
 const bar1, [c, d]
 var {e, x: [f, g]} = {a:1, x:[]};
 var { h: i = function j() {} } = obj;"#;
-    let mut s = Session::new_for_test("navigationBarItemsBindingPatterns", content);
+    let _s = Session::new_for_test("navigationBarItemsBindingPatterns", content);
     // TODO: f.VerifyBaselineDocumentSymbol(t)
 }

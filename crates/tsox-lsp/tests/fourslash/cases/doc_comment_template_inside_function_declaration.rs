@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -7,6 +7,6 @@ fn doc_comment_template_inside_function_declaration() {
 f/*0*/unction /*1*/foo/*2*/(/*3*/) /*4*/{ /*5*/}"#;
     // TODO: capabilities := fourslash.GetDefaultCapabilities()
     // TODO: capabilities.TextDocument.Completion.CompletionItem.SnippetSupport = new(false)
-    let mut s = Session::new_with_capabilities(content, None);
+    let _s = Session::new_with_capabilities(content, None);
     // TODO: for _, marker := range f.Markers() {
 }

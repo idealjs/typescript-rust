@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -9,6 +9,6 @@ function foo() {
 }
 class C extends (foo()).[|B|] {}
 class C1 extends foo().[|B|] {}"#;
-    let mut s = Session::new_for_test("renamePropertyAccessExpressionHeritageClause", content);
+    let _s = Session::new_for_test("renamePropertyAccessExpressionHeritageClause", content);
     // TODO: f.VerifyBaselineRenameAtRangesWithText(t, nil /*preferences*/, "B")
 }

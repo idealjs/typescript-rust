@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -11,6 +11,6 @@ function blah() { return (container[42]) === 2;  };
 function blah2() { container["42"] };
 // @Filename: redeclaration.ts
 container = { "42" : 18 };"#;
-    let mut s = Session::new_for_test("referencesBloomFilters2", content);
+    let _s = Session::new_for_test("referencesBloomFilters2", content);
     // TODO: f.VerifyBaselineFindAllReferences(t, "1")
 }

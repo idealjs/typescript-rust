@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -13,6 +13,6 @@ function b(class: /*b*/) {}
 // @filename: /c.ts
 function c(enum: /*c*/) {}
 "#;
-    let mut s = Session::new_for_test("completionColonToken", content);
+    let _s = Session::new_for_test("completionColonToken", content);
     // TODO: for _, marker := range f.Ranges() {
 }

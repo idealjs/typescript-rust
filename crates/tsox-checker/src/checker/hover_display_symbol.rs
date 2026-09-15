@@ -105,7 +105,7 @@ impl Checker {
         &mut self,
         b: &mut HoverPartsBuilder,
         symbol: &Arc<Symbol>,
-        container: &Option<Arc<Node>>,
+        _container: &Option<Arc<Node>>,
         node: &Arc<Node>,
     ) {
         b.write_new_line();

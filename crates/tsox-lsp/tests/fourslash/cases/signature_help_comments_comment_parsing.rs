@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -204,7 +204,7 @@ jsDocCommentAlignmentTest3(/*47*/"hello",/*48*/1, /*49*/2);
 /**/
 class NoQuickInfoClass {
 }"#;
-    let mut s = Session::new_for_test("signatureHelpCommentsCommentParsing", content);
+    let _s = Session::new_for_test("signatureHelpCommentsCommentParsing", content);
     // TODO: f.VerifyBaselineSignatureHelp(t)
     // TODO: }
 }

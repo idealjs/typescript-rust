@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -21,6 +21,6 @@ fn triple_slash_ref_path_completion_extensions_allow_js_false() {
 
 // @Filename: f1.cs
 "#;
-    let mut s = Session::new_for_test("tripleSlashRefPathCompletionExtensionsAllowJSFalse", content);
+    let _s = Session::new_for_test("tripleSlashRefPathCompletionExtensionsAllowJSFalse", content);
     // TODO: f.VerifyCompletions(t, f.Markers(), &fourslash.CompletionsExpectedList{
 }

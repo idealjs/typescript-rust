@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -19,6 +19,6 @@ var y = /*4*/[|f|]();
 [|namespace /*5*/[|{| "contextRangeIndex": 7 |}f|] {
     var local = 100;
 }|]"#;
-    let mut s = Session::new_for_test("renameForDefaultExport03", content);
+    let _s = Session::new_for_test("renameForDefaultExport03", content);
     // TODO: f.VerifyBaselineRename(t, nil /*preferences*/, ToAny(core.Filter(f.GetRangesByText().Get("f"), func(
 }

@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[ignore = "go: t.Skip('Known failing fourslash test')"]
@@ -8,6 +8,6 @@ fn unused_locals_in_function1() {
  [| function greeter() {
     var x = 0;
 } |]"#;
-    let mut s = Session::new_for_test("unusedLocalsInFunction1", content);
+    let _s = Session::new_for_test("unusedLocalsInFunction1", content);
     // TODO: f.VerifyRangeAfterCodeFix(t, `
 }

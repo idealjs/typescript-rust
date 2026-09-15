@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -18,7 +18,7 @@ export function /*targetHelper*/helper() {}
 import /*importDefault*/Widget, { /*importHelper*/helper } from "pkg";
 Widget;
 helper();"#;
-    let mut s = Session::new_for_test("goToSourceNamedAndDefaultExport", content);
+    let _s = Session::new_for_test("goToSourceNamedAndDefaultExport", content);
     // TODO: f.VerifyBaselineGoToSourceDefinition(t, "importDefault", "importHelper")
 }
 
@@ -38,7 +38,7 @@ export default class /*targetWidget*/Widget {}
 // @Filename: /home/src/workspaces/project/index.ts
 import /*importDefault*/Widget from "pkg";
 Widget;"#;
-    let mut s = Session::new_for_test("goToSourceDefaultImportNotFirstStatement", content);
+    let _s = Session::new_for_test("goToSourceDefaultImportNotFirstStatement", content);
     // TODO: f.VerifyBaselineGoToSourceDefinition(t, "importDefault")
 }
 
@@ -54,7 +54,7 @@ export default /*targetDefault*/function() { return "ok"; }
 // @Filename: /home/src/workspaces/project/index.ts
 import /*importDefault*/myFunc from "pkg";
 myFunc/*usage*/();"#;
-    let mut s = Session::new_for_test("goToSourceUnnamedDefaultExport", content);
+    let _s = Session::new_for_test("goToSourceUnnamedDefaultExport", content);
     // TODO: f.VerifyBaselineGoToSourceDefinition(t, "importDefault", "usage")
 }
 
@@ -73,7 +73,7 @@ export default { run() {} };
 // @Filename: /home/src/workspaces/project/index.ts
 import /*defaultImport*/pkg from "pkg";
 pkg.run();"#;
-    let mut s = Session::new_for_test("goToSourceEmptyNamesEntryFallback", content);
+    let _s = Session::new_for_test("goToSourceEmptyNamesEntryFallback", content);
     // TODO: f.VerifyBaselineGoToSourceDefinition(t, "defaultImport")
 }
 
@@ -92,7 +92,7 @@ export default _default;
 // @Filename: /home/src/workspaces/project/index.ts
 import pkg from "pkg";
 pkg/*usage*/;"#;
-    let mut s = Session::new_for_test("goToSourceExportAssignmentDefault", content);
+    let _s = Session::new_for_test("goToSourceExportAssignmentDefault", content);
     // TODO: f.VerifyBaselineGoToSourceDefinition(t, "usage")
 }
 
@@ -112,7 +112,7 @@ module.exports = legacyFn;
 // @Filename: /home/src/workspaces/project/index.ts
 import /*importName*/legacyFn from "legacy";
 legacyFn();"#;
-    let mut s = Session::new_for_test("goToSourceExportAssignment", content);
+    let _s = Session::new_for_test("goToSourceExportAssignment", content);
     // TODO: f.VerifyBaselineGoToSourceDefinition(t, "importName")
 }
 
@@ -128,6 +128,6 @@ export default function createThing() { return { value: 42 }; }
 // @Filename: /home/src/workspaces/project/index.ts
 import /*defaultName*/createThing from "pkg";
 createThing/*callDefault*/();"#;
-    let mut s = Session::new_for_test("goToSourceExportAssignmentExpression", content);
+    let _s = Session::new_for_test("goToSourceExportAssignmentExpression", content);
     // TODO: f.VerifyBaselineGoToSourceDefinition(t, "defaultName", "callDefault")
 }

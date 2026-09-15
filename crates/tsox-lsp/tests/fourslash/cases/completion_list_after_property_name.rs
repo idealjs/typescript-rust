@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -59,7 +59,7 @@ class Test13 {
 class Test14 {
 	constructor(public a, /*afterConstructorParameterComma*/
 }"#;
-    let mut s = Session::new_for_test("completionListAfterPropertyName", content);
+    let _s = Session::new_for_test("completionListAfterPropertyName", content);
     // TODO: f.VerifyCompletions(t, []string{"afterPropertyName", "inMethodParameter", "atMethodParameter", "afte
     // TODO: f.VerifyCompletions(t, []string{"inConstructorParameter", "inConstructorParameterAfterModifier", "at
 }

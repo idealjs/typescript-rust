@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -24,6 +24,6 @@ const /*12*/h: { (a: string): number; (a: number): string; } = a => a;
 const /*13*/i = /*14*/h;
 /*15*/h(10);
 /*16*/h("hello");"#;
-    let mut s = Session::new_for_test("quickInfoDisplayPartsConst", content);
+    let _s = Session::new_for_test("quickInfoDisplayPartsConst", content);
     // TODO: f.VerifyBaselineHover(t)
 }

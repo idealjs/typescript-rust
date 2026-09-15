@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -13,6 +13,6 @@ import { Y } from "./a"   with{ type: "b" /* comment*/};
 import { B } from "./a";
 
 export type G = A | B | C | D | E | F | Y | Z;"#;
-    let mut s = Session::new_for_test("organizeImportsAttributes3", content);
+    let _s = Session::new_for_test("organizeImportsAttributes3", content);
     // TODO: f.VerifyOrganizeImports(t,
 }

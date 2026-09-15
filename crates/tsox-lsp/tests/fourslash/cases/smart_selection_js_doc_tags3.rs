@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -7,6 +7,6 @@ fn smart_selection_js_doc_tags3() {
  * @param {/**/string} x
  */
 function foo(x) {}"#;
-    let mut s = Session::new_for_test("smartSelection_JSDocTags3", content);
+    let _s = Session::new_for_test("smartSelection_JSDocTags3", content);
     // TODO: f.VerifyBaselineSelectionRanges(t)
 }

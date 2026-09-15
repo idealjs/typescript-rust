@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -23,6 +23,6 @@ const u2: U = {
   [|/*kindBogus*/kind|]: "bogus",
   [|/*propBogus*/prop|]: 0,
 };"#;
-    let mut s = Session::new_for_test("goToDefinitionUnionTypeProperty_discriminated", content);
+    let _s = Session::new_for_test("goToDefinitionUnionTypeProperty_discriminated", content);
     // TODO: f.VerifyBaselineGoToDefinition(t, true, "kind", "prop", "kindBogus", "propBogus")
 }

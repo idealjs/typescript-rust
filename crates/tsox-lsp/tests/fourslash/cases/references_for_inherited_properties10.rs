@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -24,6 +24,6 @@ function foo(handler: IFeedbackHandler) {
   handler./*3*/handleAccept?.();
   handler.handleReject?.();
 }"#;
-    let mut s = Session::new_for_test("referencesForInheritedProperties10", content);
+    let _s = Session::new_for_test("referencesForInheritedProperties10", content);
     // TODO: f.VerifyBaselineFindAllReferences(t, "1", "2", "3")
 }

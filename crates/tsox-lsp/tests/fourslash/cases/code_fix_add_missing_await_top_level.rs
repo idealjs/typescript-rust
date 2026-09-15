@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -9,7 +9,7 @@ while (true) {
   p/*0*/.toLowerCase();
   getPromise()/*1*/.toLowerCase();
 }"#;
-    let mut s = Session::new_for_test("codeFixAddMissingAwait_topLevel", content);
+    let _s = Session::new_for_test("codeFixAddMissingAwait_topLevel", content);
     // TODO: f.VerifyCodeFixNotAvailable(t, "addMissingAwait")
     // TODO: f.VerifyCodeFixNotAvailable(t, "addMissingAwaitToInitializer")
 }

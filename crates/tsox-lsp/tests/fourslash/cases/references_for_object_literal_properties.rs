@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -8,6 +8,6 @@ x["/*2*/add"];
 x./*3*/add;
 var y = x;
 y./*4*/add;"#;
-    let mut s = Session::new_for_test("referencesForObjectLiteralProperties", content);
+    let _s = Session::new_for_test("referencesForObjectLiteralProperties", content);
     // TODO: f.VerifyBaselineFindAllReferences(t, "1", "2", "3", "4")
 }

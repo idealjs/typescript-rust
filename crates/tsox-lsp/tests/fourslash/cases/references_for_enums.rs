@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -13,6 +13,6 @@ E./*6*/value1;
 E["/*7*/value2"];
 E./*8*/value2;
 E[/*9*/111];"#;
-    let mut s = Session::new_for_test("referencesForEnums", content);
+    let _s = Session::new_for_test("referencesForEnums", content);
     // TODO: f.VerifyBaselineFindAllReferences(t, "1", "2", "3", "4", "5", "6", "7", "8", "9")
 }

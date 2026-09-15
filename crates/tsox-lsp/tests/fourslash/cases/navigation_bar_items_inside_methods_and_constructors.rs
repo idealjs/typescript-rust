@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -20,6 +20,6 @@ fn navigation_bar_items_inside_methods_and_constructors() {
 
     emptyMethod() { } // Non child functions method should not be duplicated
 }"#;
-    let mut s = Session::new_for_test("navigationBarItemsInsideMethodsAndConstructors", content);
+    let _s = Session::new_for_test("navigationBarItemsInsideMethodsAndConstructors", content);
     // TODO: f.VerifyBaselineDocumentSymbol(t)
 }

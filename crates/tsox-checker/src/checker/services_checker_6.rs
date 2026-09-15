@@ -332,7 +332,7 @@ impl Checker {
                 }
                 _ => self.get_any_type(),
             };
-            let symbol = Arc::new(Symbol::new(SymbolFlags::Property, prop_name.clone()));
+            let symbol = Arc::new(Symbol::new(SymbolFlags::Property, prop_name));
             self.value_symbol_links
                 .get_or_default(&symbol)
                 .resolved_type = Some(Arc::clone(&elem_type));

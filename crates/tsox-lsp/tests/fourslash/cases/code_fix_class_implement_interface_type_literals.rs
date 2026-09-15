@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -18,6 +18,6 @@ interface Foo {
     request(): DeepPartial<{ nested1: Nested; test2: Nested }>;
 }
 [|export class C implements Foo {}|]"#;
-    let mut s = Session::new_for_test("codeFixClassImplementInterfaceTypeLiterals", content);
+    let _s = Session::new_for_test("codeFixClassImplementInterfaceTypeLiterals", content);
     // TODO: f.VerifyCodeFix(t, fourslash.VerifyCodeFixOptions{
 }

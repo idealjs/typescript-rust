@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -12,6 +12,6 @@ type ListenActionable<E> = ListenerTemplate<E, "add*Listener" | "remove*Listener
 type ClickEventSupport = ListenActionable<{ Click: 'some-click-event-payload' }>;
 
 [|class C implements ClickEventSupport { }|]"#;
-    let mut s = Session::new_for_test("codeFixClassImplementInterfaceMappedType2", content);
+    let _s = Session::new_for_test("codeFixClassImplementInterfaceMappedType2", content);
     // TODO: f.VerifyCodeFix(t, fourslash.VerifyCodeFixOptions{
 }

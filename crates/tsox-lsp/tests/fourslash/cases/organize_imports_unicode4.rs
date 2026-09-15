@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -11,7 +11,7 @@ fn organize_imports_unicode4() {
 } from './foo';
 
 console.log(_aB, _Ab, aB, Ab);"#;
-    let mut s = Session::new_for_test("organizeImportsUnicode4", content);
+    let _s = Session::new_for_test("organizeImportsUnicode4", content);
     // TODO: f.VerifyOrganizeImports(t,
     // TODO: f.VerifyOrganizeImports(t,
 }

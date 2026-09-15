@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -21,6 +21,6 @@ function someFun(a: SomeType): SomeType {
     return a;
 }
 someFun/*s*/.what = 'what';"#;
-    let mut s = Session::new_for_test("quickinfoVerbosityFunction", content);
+    let _s = Session::new_for_test("quickinfoVerbosityFunction", content);
     // TODO: f.VerifyBaselineHoverWithVerbosity(t, map[string][]int{"o": {0, 1, 2}, "f": {0, 1}, "s": {0, 1}})
 }

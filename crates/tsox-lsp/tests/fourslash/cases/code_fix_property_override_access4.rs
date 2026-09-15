@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -14,6 +14,6 @@ class A {
 class B extends A {
     get [prop]() { return 2; }
 }"#;
-    let mut s = Session::new_for_test("codeFixPropertyOverrideAccess4", content);
+    let _s = Session::new_for_test("codeFixPropertyOverrideAccess4", content);
     // TODO: f.VerifyCodeFixNotAvailable(t, "fixPropertyOverrideAccessor")
 }

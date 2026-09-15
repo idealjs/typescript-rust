@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -35,6 +35,6 @@ fn navigation_bar_property_declarations() {
 
     public [1 + 1] = 1;
 }"#;
-    let mut s = Session::new_for_test("navigationBarPropertyDeclarations", content);
+    let _s = Session::new_for_test("navigationBarPropertyDeclarations", content);
     // TODO: f.VerifyBaselineDocumentSymbol(t)
 }

@@ -93,6 +93,7 @@ pub(crate) fn format_span(
     )
 }
 
+#[allow(dead_code)]
 pub(super) type ScannerRef<'a> = &'a mut FormattingScanner;
 
 /// Go getNonDecoratorTokenPosOfNode

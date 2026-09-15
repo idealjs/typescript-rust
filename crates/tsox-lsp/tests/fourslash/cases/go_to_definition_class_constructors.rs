@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -29,6 +29,6 @@ class HasConstructor extends Base {
     readonly name: string = '';
 }
 const hasConstructor = new [|/*HasConstructor*/HasConstructor|](cArg)"#;
-    let mut s = Session::new_for_test("goToDefinitionClassConstructors", content);
+    let _s = Session::new_for_test("goToDefinitionClassConstructors", content);
     // TODO: f.VerifyBaselineGoToDefinition(t, true, "Derived", "SameFile", "HasConstructor", "Base")
 }

@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -11,6 +11,6 @@ declare const user: Pick<User, "name">
 type PickedUser = Pick<User, "name">
 declare const user2: PickedUser
 /*reference2*/user2"#;
-    let mut s = Session::new_for_test("goToTypeDefinition_Pick", content);
+    let _s = Session::new_for_test("goToTypeDefinition_Pick", content);
     // TODO: f.VerifyBaselineGoToTypeDefinition(t, "reference", "reference2")
 }

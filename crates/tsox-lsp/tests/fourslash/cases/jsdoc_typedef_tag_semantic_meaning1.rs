@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -9,6 +9,6 @@ fn jsdoc_typedef_tag_semantic_meaning1() {
 /*1*/const /*2*/T = 1;
 /** @type {/*3*/T} */
 const n = /*4*/T;"#;
-    let mut s = Session::new_for_test("jsdocTypedefTagSemanticMeaning1", content);
+    let _s = Session::new_for_test("jsdocTypedefTagSemanticMeaning1", content);
     // TODO: f.VerifyBaselineFindAllReferences(t, "1", "2", "3", "4")
 }

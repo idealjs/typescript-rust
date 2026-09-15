@@ -30,7 +30,6 @@ pub(crate) use tsox_core::core::compiler_options::CompilerOptions;
 pub(crate) use tsox_core::core::compiler_options::ModuleKind;
 pub(crate) use tsox_core::core::compiler_options::ModuleResolutionKind;
 pub(crate) use tsox_core::core::compiler_options::ScriptTarget;
-pub(crate) use tsox_core::jsnum;
 pub(crate) use tsox_frontend::ast::CheckFlags;
 pub(crate) use tsox_frontend::ast::DiagnosticsCollection;
 pub(crate) use tsox_frontend::ast::ModifierFlags;

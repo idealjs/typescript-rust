@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -12,6 +12,6 @@ interface B extends A {
 }
 const a: A = { /*2*/x: 0 };
 const b: B = { /*3*/x: 0 };"#;
-    let mut s = Session::new_for_test("findAllRefsRedeclaredPropertyInDerivedInterface", content);
+    let _s = Session::new_for_test("findAllRefsRedeclaredPropertyInDerivedInterface", content);
     // TODO: f.VerifyBaselineFindAllReferences(t, "0", "1", "2", "3")
 }

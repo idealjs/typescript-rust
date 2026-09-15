@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -22,6 +22,6 @@ const instance = f/*callF*/("hello");
 const b1/*b1*/ = new Box/*newBox*/(instance);
 declare const b2/*b2*/: Box<typeof instance>;
 "#;
-    let mut s = Session::new_for_test("quickInfoGenericTypePath", content);
+    let _s = Session::new_for_test("quickInfoGenericTypePath", content);
     // TODO: f.VerifyBaselineHover(t)
 }

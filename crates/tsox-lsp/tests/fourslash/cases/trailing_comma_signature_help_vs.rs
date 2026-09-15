@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -15,6 +15,6 @@ str(1, /*a*/)
 
 declare function f<T>(a: T): T;
 f(2, /*b*/);"#;
-    let mut s = Session::new_with_capabilities(content, None);
+    let _s = Session::new_with_capabilities(content, None);
     // TODO: f.VerifyBaselineSignatureHelp(t)
 }

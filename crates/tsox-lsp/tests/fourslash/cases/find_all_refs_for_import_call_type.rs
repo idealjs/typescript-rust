@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -11,6 +11,6 @@ export type app = typeof import("./app")
 import type { app } from "./re-export";
 declare const app: app
 app.hello();"#;
-    let mut s = Session::new_for_test("findAllRefsForImportCallType", content);
+    let _s = Session::new_for_test("findAllRefsForImportCallType", content);
     // TODO: f.VerifyBaselineFindAllReferences(t, "")
 }

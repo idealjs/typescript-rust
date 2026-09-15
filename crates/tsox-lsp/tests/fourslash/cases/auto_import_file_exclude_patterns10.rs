@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[ignore = "go: t.Skip('Known failing fourslash test')"]
@@ -28,6 +28,6 @@ declare module './thing' {
 		c: string;
 	}
 }"#;
-    let mut s = Session::new_for_test("autoImportFileExcludePatterns10", content);
+    let _s = Session::new_for_test("autoImportFileExcludePatterns10", content);
     // TODO: f.VerifyCodeFix(t, fourslash.VerifyCodeFixOptions{
 }

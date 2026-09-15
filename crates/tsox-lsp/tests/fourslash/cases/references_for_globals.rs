@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -24,6 +24,6 @@ class bar {
 var k = /*4*/global;
 // @Filename: referencesForGlobals_2.ts
 var m = /*5*/global;"#;
-    let mut s = Session::new_for_test("referencesForGlobals", content);
+    let _s = Session::new_for_test("referencesForGlobals", content);
     // TODO: f.VerifyBaselineFindAllReferences(t, "1", "2", "3", "4", "5")
 }

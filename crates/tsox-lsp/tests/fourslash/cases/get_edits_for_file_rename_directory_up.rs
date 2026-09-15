@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -28,6 +28,6 @@ export default 0;
 export default 0;
 // @Filename: /tsconfig.json
 { "files": ["a.ts", "src/b.ts", "src/foo/c.ts", "src/old/index.ts", "src/old/file.ts"] }"#;
-    let mut s = Session::new_for_test("getEditsForFileRename_directory_up", content);
+    let _s = Session::new_for_test("getEditsForFileRename_directory_up", content);
     // TODO: f.VerifyWillRenameFilesEdits(t, "/src/old", "/newDir/new", map[string]string{
 }

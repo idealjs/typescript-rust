@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -9,6 +9,6 @@ export interface Foo<T, U = T[]> {}
 export function foo(x: Foo<string, string[]>) {
     return x;
 }"#;
-    let mut s = Session::new_for_test("codeFixMissingTypeAnnotationOnExports52_generics_oversimplification", content);
+    let _s = Session::new_for_test("codeFixMissingTypeAnnotationOnExports52_generics_oversimplification", content);
     // TODO: f.VerifyCodeFix(t, fourslash.VerifyCodeFixOptions{
 }

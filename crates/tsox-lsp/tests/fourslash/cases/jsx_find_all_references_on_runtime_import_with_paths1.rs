@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -30,6 +30,6 @@ export {}
         }
     }
 }"#;
-    let mut s = Session::new_for_test("jsxFindAllReferencesOnRuntimeImportWithPaths1", content);
+    let _s = Session::new_for_test("jsxFindAllReferencesOnRuntimeImportWithPaths1", content);
     // TODO: f.VerifyBaselineFindAllReferences(t, "")
 }

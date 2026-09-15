@@ -252,6 +252,7 @@ impl Checker {
         related
     }
 
+    #[allow(dead_code)]
     pub(crate) fn is_function_type_related_to(
         &mut self,
         source: &Arc<Type>,

@@ -1,6 +1,5 @@
 use crate::scanner::regexp::RegExpParser;
 use crate::scanner::{DiagnosticKind, ScannerError};
-use tsox_core::diagnostics;
 
 impl<'a> RegExpParser<'a> {
     pub(super) fn inc_pos(&mut self, n: i32) {

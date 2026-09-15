@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -17,6 +17,6 @@ var /*def4*/x: number;
 /// <reference path="c.ts" />
 /// <reference path="d.ts" />
 [|/*use*/x|]++;"#;
-    let mut s = Session::new_for_test("goToDefinitionAcrossMultipleProjects", content);
+    let _s = Session::new_for_test("goToDefinitionAcrossMultipleProjects", content);
     // TODO: f.VerifyBaselineGoToDefinition(t, true, "use")
 }

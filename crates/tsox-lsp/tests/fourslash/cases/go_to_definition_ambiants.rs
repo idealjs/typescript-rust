@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -16,6 +16,6 @@ declare class ambientClass {
 var ambientClassVariable = new /*constructorReference*/ambientClass();
 ambientClass./*staticMethodReference*/method();
 ambientClassVariable./*instanceMethodReference*/method();"#;
-    let mut s = Session::new_for_test("goToDefinitionAmbiants", content);
+    let _s = Session::new_for_test("goToDefinitionAmbiants", content);
     // TODO: f.VerifyBaselineGoToDefinition(t, false, "ambientVariableReference", "ambientFunctionReference", "co
 }

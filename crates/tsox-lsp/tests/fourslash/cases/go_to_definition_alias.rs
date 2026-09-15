@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -23,6 +23,6 @@ export class Foo {
 export interface IFoo {
     x;
 }"#;
-    let mut s = Session::new_for_test("goToDefinitionAlias", content);
+    let _s = Session::new_for_test("goToDefinitionAlias", content);
     // TODO: f.VerifyBaselineGoToDefinition(t, true, "alias1Type", "alias1Value", "alias2Type", "alias2Value")
 }

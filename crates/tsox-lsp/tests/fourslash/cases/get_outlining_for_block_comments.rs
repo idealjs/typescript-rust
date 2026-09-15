@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -334,6 +334,6 @@ interface I4[| {
      * comment
      */|]
 }|]"#;
-    let mut s = Session::new_for_test("getOutliningForBlockComments", content);
+    let _s = Session::new_for_test("getOutliningForBlockComments", content);
     // TODO: f.VerifyOutliningSpans(t)
 }

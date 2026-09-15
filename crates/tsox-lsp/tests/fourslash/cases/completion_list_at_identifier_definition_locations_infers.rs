@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -7,6 +7,6 @@ fn completion_list_at_identifier_definition_locations_infers() {
 type Bar<T> = T extends { a: (x: infer /*1*/) => void; b: (x: infer U/*2*/) => void }
    ? U
    : never;"#;
-    let mut s = Session::new_for_test("completionListAtIdentifierDefinitionLocations_infers", content);
+    let _s = Session::new_for_test("completionListAtIdentifierDefinitionLocations_infers", content);
     // TODO: f.VerifyCompletions(t, f.Markers(), nil)
 }

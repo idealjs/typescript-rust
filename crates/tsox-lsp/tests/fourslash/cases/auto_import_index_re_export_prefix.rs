@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -12,6 +12,6 @@ export { sum } from "./sum.js";
 export const sum = 0;
 // @Filename: /utils/sumAB.ts
 sum/**/"#;
-    let mut s = Session::new_for_test("autoImportIndexReExportPrefix", content);
+    let _s = Session::new_for_test("autoImportIndexReExportPrefix", content);
     // TODO: f.VerifyImportFixModuleSpecifiers(t, "", []string{"./sum/index.js", "./sum/sum.js"}, &lsutil.UserPre
 }

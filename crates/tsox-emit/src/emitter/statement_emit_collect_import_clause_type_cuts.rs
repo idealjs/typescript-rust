@@ -4,7 +4,6 @@ use crate::emitter::commonjs::*;
 use crate::emitter::*;
 use tsox_core::core::compiler_options::CompilerOptions;
 use tsox_core::core::compiler_options::JsxEmit;
-use tsox_core::tspath;
 use tsox_frontend::ast::Node;
 use tsox_frontend::ast::SourceFile;
 use tsox_frontend::ast::SyntaxKind;

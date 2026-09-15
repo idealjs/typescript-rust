@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -9,6 +9,6 @@ fn code_fix_missing_type_annotation_on_exports54_generator_generics() {
 export function foo(x: Generator<number>) {
     return x;
 }"#;
-    let mut s = Session::new_for_test("codeFixMissingTypeAnnotationOnExports54_generator_generics", content);
+    let _s = Session::new_for_test("codeFixMissingTypeAnnotationOnExports54_generator_generics", content);
     // TODO: f.VerifyCodeFix(t, fourslash.VerifyCodeFixOptions{
 }

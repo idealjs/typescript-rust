@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -12,6 +12,6 @@ module.exports = {
 };
 // @Filename: bar.js
 const { /*1*/foo: bar } = require('./foo');"#;
-    let mut s = Session::new_for_test("findAllReferencesJsRequireDestructuring", content);
+    let _s = Session::new_for_test("findAllReferencesJsRequireDestructuring", content);
     // TODO: f.VerifyBaselineFindAllReferences(t, "1")
 }

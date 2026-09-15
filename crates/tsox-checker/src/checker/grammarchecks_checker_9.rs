@@ -174,25 +174,5 @@ pub(crate) fn is_comma_sequence(node: &Arc<Node>) -> bool {
     }
 }
 
-pub(crate) fn get_identifier_from_entity_name_expression(node: &Arc<Node>) -> Option<Arc<Node>> {
-    match node.kind {
-        SyntaxKind::Identifier => Some(Arc::clone(node)),
-        SyntaxKind::PropertyAccessExpression => None,
-        _ => None,
-    }
-}
 
-pub(crate) fn is_initializer_string_or_number_literal_expression(expr: &Arc<Node>) -> bool {
-    matches!(
-        expr.kind,
-        SyntaxKind::StringLiteral | SyntaxKind::NumericLiteral
-    )
-}
 
-pub(crate) fn is_initializer_big_int_literal_expression(expr: &Arc<Node>) -> bool {
-    if expr.kind == SyntaxKind::BigIntLiteral {
-        return true;
-    }
-
-    false
-}

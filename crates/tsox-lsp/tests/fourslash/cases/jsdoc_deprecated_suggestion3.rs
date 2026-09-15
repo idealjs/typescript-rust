@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -12,6 +12,6 @@ declare function request(url: string, opts: RequestOptions): void;
 request("/api", { [|timeout|]: 5000 });
 declare const opts: RequestOptions;
 opts.[|timeout|];"#;
-    let mut s = Session::new_for_test("jsdocDeprecated_suggestion3", content);
+    let _s = Session::new_for_test("jsdocDeprecated_suggestion3", content);
     // TODO: f.VerifySuggestionDiagnostics(t, []*lsproto.Diagnostic{
 }

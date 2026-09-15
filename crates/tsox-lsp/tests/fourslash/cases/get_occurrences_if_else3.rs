@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -24,6 +24,6 @@ else
 if (false) {
 }
 else { }"#;
-    let mut s = Session::new_for_test("getOccurrencesIfElse3", content);
+    let _s = Session::new_for_test("getOccurrencesIfElse3", content);
     // TODO: f.VerifyBaselineDocumentHighlights(t, nil /*preferences*/, ToAny(f.Ranges())...)
 }

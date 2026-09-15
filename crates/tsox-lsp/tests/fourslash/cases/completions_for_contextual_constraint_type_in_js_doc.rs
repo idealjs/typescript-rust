@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -20,7 +20,7 @@ let x;
 
 /** @type {a.Blah<{ a: /*2*/ }>} */
 "#;
-    let mut s = Session::new_for_test("completionsForContextualConstraintTypeInJsDoc", content);
+    let _s = Session::new_for_test("completionsForContextualConstraintTypeInJsDoc", content);
     // TODO: // These examples both would panic in retrieving the symbols
     // TODO: // of property signature nodes within JSDoc types.
     // TODO: // In both cases, we'd have a JSDoc property signature that has no symbol.

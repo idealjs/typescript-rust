@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -11,6 +11,6 @@ fn double_underscore_renames() {
 [|import { [|{| "contextRangeIndex": 2 |}__foo|] as bar } from "./fileA";|]
 
 bar();"#;
-    let mut s = Session::new_for_test("doubleUnderscoreRenames", content);
+    let _s = Session::new_for_test("doubleUnderscoreRenames", content);
     // TODO: f.VerifyBaselineRenameAtRangesWithText(t, nil /*preferences*/, "__foo")
 }

@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -29,6 +29,6 @@ var /*19*/cWithMultipleOverloadsInstance = new /*20*/cWithMultipleOverloads("hel
 var /*21*/cWithMultipleOverloadsInstance2 = new /*22*/cWithMultipleOverloads(10);
 var /*23*/cWithMultipleOverloadsInstance3 = new /*24*/cWithMultipleOverloads(true);
 var /*25*/cWithMultipleOverloadsVal = /*26*/cWithMultipleOverloads;"#;
-    let mut s = Session::new_for_test("quickInfoDisplayPartsClassConstructor", content);
+    let _s = Session::new_for_test("quickInfoDisplayPartsClassConstructor", content);
     // TODO: f.VerifyBaselineHover(t)
 }

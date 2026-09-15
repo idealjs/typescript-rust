@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -23,6 +23,6 @@ export declare class Bar {
 import { Bar } from './combined';
 declare const bar: Bar;
 bar./*impl*/method();"#;
-    let mut s = Session::new_for_test("goToImplementationNoCrashMultiSourceDts", content);
+    let _s = Session::new_for_test("goToImplementationNoCrashMultiSourceDts", content);
     // TODO: f.VerifyBaselineGoToImplementation(t, "impl")
 }

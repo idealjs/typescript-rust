@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -7,6 +7,6 @@ fn navigation_bar_items_class4() {
 // @filename: /foo.js
 class Foo {}
 function Foo() {}"#;
-    let mut s = Session::new_for_test("navigationBarItemsClass4", content);
+    let _s = Session::new_for_test("navigationBarItemsClass4", content);
     // TODO: f.VerifyBaselineDocumentSymbol(t)
 }

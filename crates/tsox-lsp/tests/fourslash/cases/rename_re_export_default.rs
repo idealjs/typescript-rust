@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -13,6 +13,6 @@ import { default as bee } from "./b";
 // @Filename: /b.ts
 [|const [|{| "contextRangeIndex": 6 |}b|] = 0;|]
 [|export default [|{| "contextRangeIndex": 8 |}b|];|]"#;
-    let mut s = Session::new_for_test("renameReExportDefault", content);
+    let _s = Session::new_for_test("renameReExportDefault", content);
     // TODO: f.VerifyBaselineRename(t, nil /*preferences*/, f.Ranges()[1], f.Ranges()[3], f.Ranges()[5], f.Ranges
 }

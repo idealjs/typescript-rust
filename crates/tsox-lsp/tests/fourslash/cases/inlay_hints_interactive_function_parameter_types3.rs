@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -17,6 +17,6 @@ class Foo {
     get foo(): number { return this.#value; }
     set foo(value) { this.#value = value; }
 }"#;
-    let mut s = Session::new_for_test("inlayHintsInteractiveFunctionParameterTypes3", content);
+    let _s = Session::new_for_test("inlayHintsInteractiveFunctionParameterTypes3", content);
     // TODO: f.VerifyBaselineInlayHints(t, nil /*span*/, &lsutil.UserPreferences{InlayHints: lsutil.InlayHintsPre
 }

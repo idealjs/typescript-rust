@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -28,7 +28,7 @@ class A {
     ret/*3*/urn;
     r/*4*/eturn 8675309;
 }"#;
-    let mut s = Session::new_for_test("getOccurrencesReturnBroken", content);
+    let _s = Session::new_for_test("getOccurrencesReturnBroken", content);
     // TODO: f.VerifyBaselineDocumentHighlights(t, nil /*preferences*/, ToAny(f.Ranges())...)
     // TODO: f.VerifyBaselineDocumentHighlights(t, nil /*preferences*/, ToAny(f.Markers())...)
 }

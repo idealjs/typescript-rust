@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -11,6 +11,6 @@ declare module "node:fs" { export * from "fs"; }
 declare module "node:fs/promises" { export * from "fs/promises"; }
 // @Filename: /index.ts
 writeFile/**/"#;
-    let mut s = Session::new_for_test("importNameCodeFix_uriStyleNodeCoreModules1", content);
+    let _s = Session::new_for_test("importNameCodeFix_uriStyleNodeCoreModules1", content);
     // TODO: f.VerifyImportFixModuleSpecifiers(t, "", []string{"fs", "node:fs", "fs/promises", "node:fs/promises"
 }

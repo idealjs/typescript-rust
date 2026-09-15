@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -22,6 +22,6 @@ export function foo(): void;
  }
 // @Filename: /index.ts
 foo/**/"#;
-    let mut s = Session::new_for_test("autoImportPackageJsonExportsSpecifierEndsInTs", content);
+    let _s = Session::new_for_test("autoImportPackageJsonExportsSpecifierEndsInTs", content);
     // TODO: f.VerifyImportFixModuleSpecifiers(t, "", []string{"pkg/something.ts"}, nil /*preferences*/)
 }

@@ -1,9 +1,9 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
 fn smart_selection_behind_caret() {
     let content = r#"let/**/ x: string"#;
-    let mut s = Session::new_for_test("smartSelection_behindCaret", content);
+    let _s = Session::new_for_test("smartSelection_behindCaret", content);
     // TODO: f.VerifyBaselineSelectionRanges(t)
 }

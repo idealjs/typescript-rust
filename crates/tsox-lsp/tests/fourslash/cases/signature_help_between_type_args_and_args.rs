@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -10,6 +10,6 @@ function foo<T, U>(x: string, y: T, z: U) {
 
 foo<number,number>/*1*/("hello", 123,456)
 "#;
-    let mut s = Session::new_for_test("signatureHelpTokenCrash2", content);
+    let _s = Session::new_for_test("signatureHelpTokenCrash2", content);
     // TODO: f.VerifySignatureHelpWithCases(t, &fourslash.SignatureHelpCase{
 }

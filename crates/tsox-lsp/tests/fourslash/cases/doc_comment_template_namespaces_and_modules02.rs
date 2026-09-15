@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -10,7 +10,7 @@ namespace n1.
 }"#;
     // TODO: capabilities := fourslash.GetDefaultCapabilities()
     // TODO: capabilities.TextDocument.Completion.CompletionItem.SnippetSupport = new(false)
-    let mut s = Session::new_with_capabilities(content, None);
+    let _s = Session::new_with_capabilities(content, None);
     // TODO: f.VerifyJSDocCompletion(t, "top", 3, `/** */`, nil)
     // TODO: f.VerifyNoJSDocCompletion(t, "n2")
     // TODO: f.VerifyNoJSDocCompletion(t, "n3")

@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -21,6 +21,6 @@ fn go_to_type_definition_modifiers() {
 }
 
 exp/*exportFunction*/ort function foo/*foo*/() { }"#;
-    let mut s = Session::new_for_test("goToTypeDefinitionModifiers", content);
+    let _s = Session::new_for_test("goToTypeDefinitionModifiers", content);
     // TODO: f.VerifyBaselineGoToTypeDefinition(t, "export", "A", "private", "z", "private2", "y", "readonly", "x
 }

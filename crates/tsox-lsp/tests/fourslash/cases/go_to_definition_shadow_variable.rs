@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -8,6 +8,6 @@ function shadowVariableTestModule() {
     var /*shadowVariableDefinition*/shadowVariable;
     /*shadowVariableReference*/shadowVariable = 1;
 }"#;
-    let mut s = Session::new_for_test("goToDefinitionShadowVariable", content);
+    let _s = Session::new_for_test("goToDefinitionShadowVariable", content);
     // TODO: f.VerifyBaselineGoToDefinition(t, false, "shadowVariableReference")
 }

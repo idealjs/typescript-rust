@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -7,6 +7,6 @@ fn is_definition_single_import() {
 export function /*1*/f() {}
 // @filename: b.ts
 import { /*2*/f } from "./a";"#;
-    let mut s = Session::new_for_test("isDefinitionSingleImport", content);
+    let _s = Session::new_for_test("isDefinitionSingleImport", content);
     // TODO: f.VerifyBaselineFindAllReferences(t, "1", "2")
 }

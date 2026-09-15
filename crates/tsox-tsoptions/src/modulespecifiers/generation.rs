@@ -2,7 +2,6 @@ use super::types::*;
 use std::sync::Arc;
 use tsox_core::core::compiler_options::CompilerOptions;
 use tsox_core::core::compiler_options::ResolutionMode;
-use tsox_core::tspath;
 use tsox_frontend::ast::Symbol;
 
 pub fn get_each_file_name_of_module(

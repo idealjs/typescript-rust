@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -10,6 +10,6 @@ export function f1() {}
 export var v1 = 5;
 // @Filename: tripleSlashReference.ts
 var x = 5;/*dummy*/"#;
-    let mut s = Session::new_for_test("importNameCodeFixNewImportFile1", content);
+    let _s = Session::new_for_test("importNameCodeFixNewImportFile1", content);
     // TODO: f.VerifyImportFixAtPosition(t, []string{
 }

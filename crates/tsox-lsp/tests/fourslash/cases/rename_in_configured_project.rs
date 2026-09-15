@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -9,7 +9,7 @@ fn rename_in_configured_project() {
 var y = [|globalName|];
 // @Filename: tsconfig.json
 { "files": ["referencesForGlobals_1.ts", "referencesForGlobals_2.ts"], "compilerOptions": { "lib": ["es5"] } }"#;
-    let mut s = Session::new_for_test("renameInConfiguredProject", content);
+    let _s = Session::new_for_test("renameInConfiguredProject", content);
     // TODO: f.MarkTestAsStradaServer()
     // TODO: f.VerifyBaselineRename(t, nil /*preferences*/, ToAny(f.Ranges()[1:])...)
 }

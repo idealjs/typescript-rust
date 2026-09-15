@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -31,6 +31,6 @@ function foo1(/*2*/opts1) {
     opts1.x;
 }
 foo1({x: 'abc'});"#;
-    let mut s = Session::new_for_test("jsDocTypedefQuickInfo1", content);
+    let _s = Session::new_for_test("jsDocTypedefQuickInfo1", content);
     // TODO: f.VerifyBaselineHover(t)
 }

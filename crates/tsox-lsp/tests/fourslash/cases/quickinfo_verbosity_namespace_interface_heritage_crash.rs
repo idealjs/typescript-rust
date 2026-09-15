@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -8,6 +8,6 @@ declare namespace NS/*1*/ {
     interface Config extends Record<string, any> {}
 }
 "#;
-    let mut s = Session::new_for_test("quickinfoVerbosityNamespaceInterfaceHeritageCrash", content);
+    let _s = Session::new_for_test("quickinfoVerbosityNamespaceInterfaceHeritageCrash", content);
     // TODO: f.VerifyBaselineHoverWithVerbosity(t, map[string][]int{"1": {0, 1}})
 }

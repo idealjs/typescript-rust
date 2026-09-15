@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -21,6 +21,6 @@ class Bar implements Foo {
         throw new Error("Method not implemented.");
     }
 }"#;
-    let mut s = Session::new_for_test("quickInfoJsDocTags3", content);
+    let _s = Session::new_for_test("quickInfoJsDocTags3", content);
     // TODO: f.VerifyBaselineHover(t)
 }

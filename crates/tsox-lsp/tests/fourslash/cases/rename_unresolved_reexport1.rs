@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -8,6 +8,6 @@ export { [|jsonSchema|] } from "@internal/ai-sdk-v4";
 // @Filename: /b.ts
 import { jsonSchema } from "./a";
 "#;
-    let mut s = Session::new_for_test("renameUnresolvedReexport1", content);
+    let _s = Session::new_for_test("renameUnresolvedReexport1", content);
     // TODO: f.VerifyBaselineRename(t, nil /*preferences*/, f.Ranges()[0])
 }

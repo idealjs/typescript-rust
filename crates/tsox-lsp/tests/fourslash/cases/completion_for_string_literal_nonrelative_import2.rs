@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -23,6 +23,6 @@ var foo3 = require("fake-module//*require0*/
 /*unlisted-module*/
 // @Filename: ambient.ts
 declare module "fake-module/other""#;
-    let mut s = Session::new_for_test("completionForStringLiteralNonrelativeImport2", content);
+    let _s = Session::new_for_test("completionForStringLiteralNonrelativeImport2", content);
     // TODO: f.VerifyCompletions(t, []string{"import_as0", "import_equals0", "require0"}, &fourslash.CompletionsE
 }

@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -26,6 +26,6 @@ class C {
 // These are *not* real uses of the 'this' keyword, they are identifiers.
 const x = { /*10*/this: 0 }
 x./*11*/this;"#;
-    let mut s = Session::new_for_test("findAllRefsThisKeyword", content);
+    let _s = Session::new_for_test("findAllRefsThisKeyword", content);
     // TODO: f.VerifyBaselineFindAllReferences(t, "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11")
 }

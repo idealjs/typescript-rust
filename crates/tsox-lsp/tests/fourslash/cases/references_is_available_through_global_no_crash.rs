@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -16,6 +16,6 @@ declare namespace debug {
 { "types": "index.d.ts" }
 // @Filename: /packages/playwright-core/src/index.ts
 export const debug: typeof import('../bundles/utils/node_modules//*1*/@types/debug') = require('./utilsBundleImpl').debug;"#;
-    let mut s = Session::new_for_test("referencesIsAvailableThroughGlobalNoCrash", content);
+    let _s = Session::new_for_test("referencesIsAvailableThroughGlobalNoCrash", content);
     // TODO: f.VerifyBaselineFindAllReferences(t, "1")
 }

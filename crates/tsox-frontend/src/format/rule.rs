@@ -26,6 +26,7 @@ impl RuleAction {
     pub(crate) const MODIFY_TOKEN_ACTION: Self =
         Self(Self::DELETE_TOKEN.0 | Self::INSERT_TRAILING_SEMICOLON.0);
 
+    #[allow(dead_code)]
     pub(crate) fn contains(self, other: Self) -> bool {
         self.0 & other.0 == other.0
     }
@@ -42,6 +43,7 @@ pub(crate) enum RuleFlags {
 
 #[derive(Clone)]
 pub(crate) struct RuleImpl {
+    #[allow(dead_code)]
     pub(crate) debug_name: &'static str,
     pub(crate) context: Vec<ContextPredicate>,
     pub(crate) action: RuleAction,
@@ -57,6 +59,7 @@ pub(crate) struct TokenRange {
 }
 
 impl TokenRange {
+    #[allow(dead_code)]
     pub(crate) fn contains(&self, kind: SyntaxKind) -> bool {
         self.tokens.contains(&kind)
     }

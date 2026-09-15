@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -29,6 +29,6 @@ class foo2 {
 }
 // @Filename: referencesOnStatic_2.ts
 var q = foo./*9*/n;"#;
-    let mut s = Session::new_for_test("referencesForStatic", content);
+    let _s = Session::new_for_test("referencesForStatic", content);
     // TODO: f.VerifyBaselineFindAllReferences(t, "1", "2", "3", "4", "5", "6", "7", "8", "9")
 }

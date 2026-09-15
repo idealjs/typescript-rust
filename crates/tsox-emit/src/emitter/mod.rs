@@ -4,8 +4,6 @@ pub(crate) use tsox_core::core::compiler_options::CompilerOptions;
 #[cfg(test)]
 pub(crate) use tsox_core::core::compiler_options::JsxEmit;
 pub(crate) use tsox_core::core::compiler_options::ModuleKind;
-pub(crate) use tsox_core::core::compiler_options::ScriptTarget;
-pub(crate) use tsox_core::tspath;
 pub(crate) use tsox_core::tspath::ComparePathsOptions;
 pub(crate) use tsox_frontend::ast::Node;
 pub(crate) use tsox_frontend::ast::NodeList;
@@ -36,8 +34,6 @@ pub(crate) use decl_emit::*;
 pub(crate) use sourcemap::*;
 pub(crate) use statement_emit::JsxRuntimeUsage;
 pub(crate) use statement_emit::*;
-pub(crate) use text_ranges::*;
-pub(crate) use text_transform::*;
 pub(crate) mod commonjs_rewrite_import_extensions;
 pub(crate) mod commonjs_transform_commonjs_import;
 pub(crate) mod decl_emit_classify;

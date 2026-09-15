@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -18,6 +18,6 @@ declare namespace A {
 // @filename: b.js
 let foo = new A.Foo();
 foo./**/"#;
-    let mut s = Session::new_for_test("completionsPrivateProperties_Js", content);
+    let _s = Session::new_for_test("completionsPrivateProperties_Js", content);
     // TODO: f.VerifyCompletions(t, []string{""}, &fourslash.CompletionsExpectedList{
 }

@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -14,6 +14,6 @@ export { [|A|] as [|B|] };
 type [|A|] = 1;
 let [|A|]: [|A|] = 1;
 export type { [|A|] as [|B|] };"#;
-    let mut s = Session::new_for_test("documentHighlightInTypeExport", content);
+    let _s = Session::new_for_test("documentHighlightInTypeExport", content);
     // TODO: f.VerifyBaselineDocumentHighlights(t, nil /*preferences*/, ToAny(f.Ranges())...)
 }

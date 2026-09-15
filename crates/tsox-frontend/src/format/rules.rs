@@ -182,7 +182,7 @@ fn control_open_brace_left() -> TokenRange {
 }
 
 pub(crate) fn get_all_rules() -> Vec<RuleSpec> {
-    use SyntaxKind::*;
+    
     let mut rules: Vec<RuleSpec> = Vec::new();
 
     let mut add = |name: &'static str,

@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -24,7 +24,7 @@ test({
     b: /*ts2*/,
   },
 });"#;
-    let mut s = Session::new_for_test("completionsLiteralFromInferenceWithinInferredType1", content);
+    let _s = Session::new_for_test("completionsLiteralFromInferenceWithinInferredType1", content);
     // TODO: f.VerifyCompletions(t, []string{"ts"}, &fourslash.CompletionsExpectedList{
     // TODO: f.VerifyCompletions(t, []string{"ts2"}, &fourslash.CompletionsExpectedList{
 }

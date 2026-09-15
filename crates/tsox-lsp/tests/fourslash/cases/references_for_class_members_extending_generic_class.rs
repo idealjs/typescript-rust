@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -15,6 +15,6 @@ class MyClass extends Base<number> {
 var c: MyClass;
 c./*a3*/a;
 c./*method3*/method();"#;
-    let mut s = Session::new_for_test("referencesForClassMembersExtendingGenericClass", content);
+    let _s = Session::new_for_test("referencesForClassMembersExtendingGenericClass", content);
     // TODO: f.VerifyBaselineFindAllReferences(t, "a1", "a2", "a3", "method1", "method2", "method3")
 }

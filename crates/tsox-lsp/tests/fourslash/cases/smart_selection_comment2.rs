@@ -1,9 +1,9 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
 fn smart_selection_comment2() {
     let content = r#"const a = 1; //a b/**/c d"#;
-    let mut s = Session::new_for_test("smartSelection_comment2", content);
+    let _s = Session::new_for_test("smartSelection_comment2", content);
     // TODO: f.VerifyBaselineSelectionRanges(t)
 }

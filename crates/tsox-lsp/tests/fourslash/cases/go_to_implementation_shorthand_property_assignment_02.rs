@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -18,6 +18,6 @@ function createFoo(): Foo {
 function whatever(x: Foo) {
      x.h/*function_call*/ello();
 }"#;
-    let mut s = Session::new_for_test("goToImplementationShorthandPropertyAssignment_02", content);
+    let _s = Session::new_for_test("goToImplementationShorthandPropertyAssignment_02", content);
     // TODO: f.VerifyBaselineGoToImplementation(t, "function_call")
 }

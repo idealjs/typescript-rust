@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -21,6 +21,6 @@ const tf2/*f2*/: [Orange, Apple] = [
 ];
 type ManyFruits/*m*/ = (Orange | Apple)[];
 const mf/*mf*/: ManyFruits = [];"#;
-    let mut s = Session::new_for_test("quickinfoVerbosityTuple", content);
+    let _s = Session::new_for_test("quickinfoVerbosityTuple", content);
     // TODO: f.VerifyBaselineHoverWithVerbosity(t, map[string][]int{"T": {0, 1, 2}, "f": {0, 1, 2, 3}, "f2": {0, 
 }

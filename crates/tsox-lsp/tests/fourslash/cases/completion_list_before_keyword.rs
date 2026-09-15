@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -18,6 +18,6 @@ TypeModule1./*ValueReference*/
 namespace TypeModule3 {
     export class Test3 {}
 }"#;
-    let mut s = Session::new_for_test("completionListBeforeKeyword", content);
+    let _s = Session::new_for_test("completionListBeforeKeyword", content);
     // TODO: f.VerifyCompletions(t, f.Markers(), &fourslash.CompletionsExpectedList{
 }

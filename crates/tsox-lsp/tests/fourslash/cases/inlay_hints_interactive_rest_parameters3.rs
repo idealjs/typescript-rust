@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -8,6 +8,6 @@ fn inlay_hints_interactive_rest_parameters3() {
 }
 const foo: [x: number, y: number] = [1, 2];
 fn(...foo, 3, 4);"#;
-    let mut s = Session::new_for_test("inlayHintsInteractiveRestParameters3", content);
+    let _s = Session::new_for_test("inlayHintsInteractiveRestParameters3", content);
     // TODO: f.VerifyBaselineInlayHints(t, nil /*span*/, &lsutil.UserPreferences{InlayHints: lsutil.InlayHintsPre
 }

@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -19,7 +19,7 @@ function foo()[| {
 function bar()[| { }|]
 
 //#endregion|]"#;
-    let mut s = Session::new_for_test("getOutliningSpansForRegionsNoSingleLineFolds", content);
+    let _s = Session::new_for_test("getOutliningSpansForRegionsNoSingleLineFolds", content);
     // TODO: f.MarkTestAsStradaServer()
     // TODO: f.VerifyOutliningSpans(t)
 }

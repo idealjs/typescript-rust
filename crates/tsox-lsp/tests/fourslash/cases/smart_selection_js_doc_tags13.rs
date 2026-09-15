@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -10,6 +10,6 @@ let b: {
     /** Comment */ /*3*/p2: number
 };
 let c;"#;
-    let mut s = Session::new_for_test("smartSelection_JSDocTags13", content);
+    let _s = Session::new_for_test("smartSelection_JSDocTags13", content);
     // TODO: f.VerifyBaselineSelectionRanges(t)
 }

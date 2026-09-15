@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -13,6 +13,6 @@ export function helper(): string { return ""; }
 // @Filename: /index.ts
 import { /*usage*/helper } from "./lib/helper";
 helper();"#;
-    let mut s = Session::new_for_test("goToSourceDefinitionExtensionlessMappedSource", content);
+    let _s = Session::new_for_test("goToSourceDefinitionExtensionlessMappedSource", content);
     // TODO: f.VerifyBaselineGoToSourceDefinition(t, "usage")
 }

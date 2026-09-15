@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -7,6 +7,6 @@ fn code_fix_class_implement_interface_construct_signature() {
     new (x: number, b: string);
 }
 class C implements I {[| |]}"#;
-    let mut s = Session::new_for_test("codeFixClassImplementInterfaceConstructSignature", content);
+    let _s = Session::new_for_test("codeFixClassImplementInterfaceConstructSignature", content);
     // TODO: f.VerifyCodeFixNotAvailable(t)
 }

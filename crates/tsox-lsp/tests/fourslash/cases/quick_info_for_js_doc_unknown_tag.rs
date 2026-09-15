@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -49,6 +49,6 @@ function b/*4*/oo() {
 function go/*5*/o() {
     return '2';
 }"#;
-    let mut s = Session::new_for_test("quickInfoForJSDocUnknownTag", content);
+    let _s = Session::new_for_test("quickInfoForJSDocUnknownTag", content);
     // TODO: f.VerifyBaselineHover(t)
 }

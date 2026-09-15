@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -13,6 +13,6 @@ fn quick_info_js_doc_tags14() {
  * @returns {number}
  */
 function /**/fn(options, callback = null) { }"#;
-    let mut s = Session::new_for_test("quickInfoJsDocTags14", content);
+    let _s = Session::new_for_test("quickInfoJsDocTags14", content);
     // TODO: f.VerifyBaselineHover(t)
 }

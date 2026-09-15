@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -25,6 +25,6 @@ function createFooLike() {
         hello() {}
     };
 }"#;
-    let mut s = Session::new_for_test("goToImplementationInterface_02", content);
+    let _s = Session::new_for_test("goToImplementationInterface_02", content);
     // TODO: f.VerifyBaselineGoToImplementation(t, "interface_definition")
 }

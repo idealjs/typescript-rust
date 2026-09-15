@@ -1,6 +1,5 @@
 use crate::scanner::regexp::RegExpParser;
 use crate::scanner::unicode_properties;
-use tsox_core::diagnostics;
 
 impl<'a> RegExpParser<'a> {
     pub(super) fn scan_character_class_escape(&mut self) -> bool {

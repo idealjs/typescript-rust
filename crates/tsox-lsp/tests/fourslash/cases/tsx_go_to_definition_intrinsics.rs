@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -17,6 +17,6 @@ declare namespace JSX {
 var x = <[|di/*ds*/v|] />;
 var y = <[|s/*ss*/pan|] />;
 var z = <div [|na/*ps*/me|]='hello' />;"#;
-    let mut s = Session::new_for_test("tsxGoToDefinitionIntrinsics", content);
+    let _s = Session::new_for_test("tsxGoToDefinitionIntrinsics", content);
     // TODO: f.VerifyBaselineGoToDefinition(t, true, "ds", "ss", "ps")
 }

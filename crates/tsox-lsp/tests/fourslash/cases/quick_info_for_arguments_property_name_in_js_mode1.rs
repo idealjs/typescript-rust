@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -14,6 +14,6 @@ function /*1*/f2(x) {
 }
 
 /*2*/f2('');"#;
-    let mut s = Session::new_for_test("quickInfoForArgumentsPropertyNameInJsMode1", content);
+    let _s = Session::new_for_test("quickInfoForArgumentsPropertyNameInJsMode1", content);
     // TODO: f.VerifyBaselineHover(t)
 }

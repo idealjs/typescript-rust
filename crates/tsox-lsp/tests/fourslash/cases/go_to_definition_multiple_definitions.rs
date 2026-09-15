@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -27,6 +27,6 @@ module /*moduleDefinition2*/Module {
 }
 // @Filename: e.ts
 [|Modul/*moduleReference*/e|];"#;
-    let mut s = Session::new_for_test("goToDefinitionMultipleDefinitions", content);
+    let _s = Session::new_for_test("goToDefinitionMultipleDefinitions", content);
     // TODO: f.VerifyBaselineGoToDefinition(t, true, "interfaceReference", "moduleReference")
 }

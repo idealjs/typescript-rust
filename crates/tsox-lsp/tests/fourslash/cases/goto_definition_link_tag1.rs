@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -27,6 +27,6 @@ function foo(x) { }
 // @Filename: bar.ts
 /** {@link /*use7*/[|Foo|] }dd*/
 const f = """#;
-    let mut s = Session::new_for_test("gotoDefinitionLinkTag1", content);
+    let _s = Session::new_for_test("gotoDefinitionLinkTag1", content);
     // TODO: f.VerifyBaselineGoToDefinition(t, false, "use1", "use2", "use3", "use4", "use5", "use6", "use7")
 }

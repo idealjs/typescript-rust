@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -21,6 +21,6 @@ fn find_all_references_js_overloaded_function_parameter() {
 function foo(x/*1*/) {
   return x;
 }"#;
-    let mut s = Session::new_for_test("findAllReferencesJsOverloadedFunctionParameter", content);
+    let _s = Session::new_for_test("findAllReferencesJsOverloadedFunctionParameter", content);
     // TODO: f.VerifyBaselineFindAllReferences(t, "1")
 }

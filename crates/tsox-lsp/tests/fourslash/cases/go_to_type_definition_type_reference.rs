@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -7,6 +7,6 @@ fn go_to_type_definition_type_reference() {
 type Box<T> = { value: T };
 declare const boxedUser: Box<User>
 /*reference*/boxedUser"#;
-    let mut s = Session::new_for_test("goToTypeDefinition_typeReference", content);
+    let _s = Session::new_for_test("goToTypeDefinition_typeReference", content);
     // TODO: f.VerifyBaselineGoToTypeDefinition(t, "reference")
 }

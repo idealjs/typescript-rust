@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -11,6 +11,6 @@ function /*7*/foo2</*8*/U extends string>(/*9*/a: /*10*/U) {
     return /*11*/a;
 }
 /*12*/foo2("hello");"#;
-    let mut s = Session::new_for_test("quickInfoDisplayPartsTypeParameterInFunction", content);
+    let _s = Session::new_for_test("quickInfoDisplayPartsTypeParameterInFunction", content);
     // TODO: f.VerifyBaselineHover(t)
 }

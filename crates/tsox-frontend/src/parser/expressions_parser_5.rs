@@ -299,6 +299,7 @@ impl Parser {
         }))
     }
 
+    #[allow(dead_code)]
     pub(crate) fn try_parse_type_arguments(
         &mut self,
         require_following_paren: bool,

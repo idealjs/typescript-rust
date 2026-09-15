@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -9,7 +9,7 @@ fn rename01() {
     // This is a reference to [|Bar|] in a comment.
     "this is a reference to [|Bar|] in a string"
 }|]"#;
-    let mut s = Session::new_for_test("rename01", content);
+    let _s = Session::new_for_test("rename01", content);
     // TODO: f.MarkTestAsStradaServer()
     // TODO: f.VerifyBaselineRename(t, nil /*preferences*/, f.Ranges()[1])
 }

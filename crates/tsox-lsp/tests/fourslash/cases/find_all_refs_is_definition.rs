@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -28,6 +28,6 @@ class Foo implements IFoo {
     foo/*6*/(): void { }
     static init() { return new this() }
 }"#;
-    let mut s = Session::new_for_test("findAllRefsIsDefinition", content);
+    let _s = Session::new_for_test("findAllRefsIsDefinition", content);
     // TODO: f.VerifyBaselineFindAllReferences(t, "1", "2", "3", "4", "5", "6")
 }

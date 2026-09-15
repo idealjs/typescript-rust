@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -12,7 +12,7 @@ const [|weirdName|]: number = 1;
 export const [|weirdName|];
 // @filename: /node_modules/bar/package.json
 {}"#;
-    let mut s = Session::new_for_test("navto_excludeLib1", content);
+    let _s = Session::new_for_test("navto_excludeLib1", content);
     // TODO: f.VerifyWorkspaceSymbol(t, []*fourslash.VerifyWorkspaceSymbolCase{
     // TODO: f.VerifyWorkspaceSymbol(t, []*fourslash.VerifyWorkspaceSymbolCase{
 }

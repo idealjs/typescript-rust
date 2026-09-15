@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -15,6 +15,6 @@ import Second = require("./findAllRefsOnDefinition2-import");
 
 var start: Second.Test./*3*/start;
 var stop: Second.Test.stop;"#;
-    let mut s = Session::new_for_test("findAllRefsOnDefinition2", content);
+    let _s = Session::new_for_test("findAllRefsOnDefinition2", content);
     // TODO: f.VerifyBaselineFindAllReferences(t, "1", "2", "3")
 }

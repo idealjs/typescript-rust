@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -11,7 +11,7 @@ declare function getTemplateLiteral3(): `start${string}\${,$${string}end`;
 const lit3 = getTemplateLiteral3();
 declare function getTemplateLiteral4(): `${string}\`,${string}`;
 const lit4 = getTemplateLiteral4();"#;
-    let mut s = Session::new_for_test("inlayHintsInteractiveTemplateLiteralTypes", content);
+    let _s = Session::new_for_test("inlayHintsInteractiveTemplateLiteralTypes", content);
     // TODO: f.VerifyBaselineInlayHints(t, nil /*span*/, &lsutil.UserPreferences{InlayHints: lsutil.InlayHintsPre
     // TODO: }
 }

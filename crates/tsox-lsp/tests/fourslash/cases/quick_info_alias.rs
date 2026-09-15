@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -25,6 +25,6 @@ import {
     x
 } from "./a";
 x/*c*/;"#;
-    let mut s = Session::new_for_test("quickInfoAlias", content);
+    let _s = Session::new_for_test("quickInfoAlias", content);
     // TODO: f.VerifyBaselineHover(t)
 }

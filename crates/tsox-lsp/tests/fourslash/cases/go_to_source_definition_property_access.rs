@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -19,7 +19,7 @@ export const obj = { /*targetA*/a: 1, /*targetB*/b: 2 };
 import { obj } from "pkg";
 obj./*propA*/a;
 obj./*propB*/b;"#;
-    let mut s = Session::new_for_test("goToSourceMappedTypePropertyWithMatch", content);
+    let _s = Session::new_for_test("goToSourceMappedTypePropertyWithMatch", content);
     // TODO: f.VerifyBaselineGoToSourceDefinition(t, "propA", "propB")
 }
 
@@ -40,6 +40,6 @@ export const /*targetValue*/value = 42;
 import * as pkg from "pkg";
 pkg./*helperAccess*/helper();
 pkg./*valueAccess*/value;"#;
-    let mut s = Session::new_for_test("goToSourceNamespaceImportProperty", content);
+    let _s = Session::new_for_test("goToSourceNamespaceImportProperty", content);
     // TODO: f.VerifyBaselineGoToSourceDefinition(t, "helperAccess", "valueAccess")
 }

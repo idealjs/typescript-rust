@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -36,6 +36,6 @@ let v = new /*3*/THREE.Vector2();
  	},
     "files": ["/src/index.ts", "typings/global.d.ts"]
 }"#;
-    let mut s = Session::new_for_test("findAllReferencesUmdModuleAsGlobalConst", content);
+    let _s = Session::new_for_test("findAllReferencesUmdModuleAsGlobalConst", content);
     // TODO: f.VerifyBaselineFindAllReferences(t, "0", "1", "2", "3")
 }

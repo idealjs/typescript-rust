@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -23,6 +23,6 @@ function bar(x, y) {}
  */
 function baz(y) {}
 "#;
-    let mut s = Session::new_for_test("completionAfterTrailingAtInJSDoc1", content);
+    let _s = Session::new_for_test("completionAfterTrailingAtInJSDoc1", content);
     // TODO: f.VerifyCompletions(t, []string{"1", "2", "3"}, &fourslash.CompletionsExpectedList{
 }

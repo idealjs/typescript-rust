@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -11,6 +11,6 @@ import * as somethingElse from "anotherpath";
 
 something;
 somethingElse;"#;
-    let mut s = Session::new_for_test("organizeImports7", content);
+    let _s = Session::new_for_test("organizeImports7", content);
     // TODO: f.VerifyOrganizeImports(t,
 }

@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -18,6 +18,6 @@ foo("hello");
 // but is really just here to test how it affects how code lens.
 foo(Math.random() ? 1 : "hello");
 "#;
-    let mut s = Session::new_for_test("codeLensOverloads01", content);
+    let _s = Session::new_for_test("codeLensOverloads01", content);
     // TODO: f.VerifyBaselineCodeLens(t, &lsutil.UserPreferences{
 }

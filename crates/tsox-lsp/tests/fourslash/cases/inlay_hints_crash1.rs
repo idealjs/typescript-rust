@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -12,6 +12,6 @@ fn inlay_hints_crash1() {
 function doThing(f) {
     f(100)
 }"#;
-    let mut s = Session::new_for_test("inlayHintsCrash1", content);
+    let _s = Session::new_for_test("inlayHintsCrash1", content);
     // TODO: f.VerifyBaselineInlayHints(t, nil /*span*/, &lsutil.UserPreferences{InlayHints: lsutil.InlayHintsPre
 }

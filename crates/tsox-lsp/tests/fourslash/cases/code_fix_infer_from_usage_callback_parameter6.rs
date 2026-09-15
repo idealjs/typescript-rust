@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -8,6 +8,6 @@ fn code_fix_infer_from_usage_callback_parameter6() {
 // @noImplicitAny: false
 // @filename: /foo.js
 const foo = [(/** @type {number} */ x) => x + 1];"#;
-    let mut s = Session::new_for_test("codeFixInferFromUsageCallbackParameter6", content);
+    let _s = Session::new_for_test("codeFixInferFromUsageCallbackParameter6", content);
     // TODO: f.VerifyCodeFixNotAvailable(t)
 }

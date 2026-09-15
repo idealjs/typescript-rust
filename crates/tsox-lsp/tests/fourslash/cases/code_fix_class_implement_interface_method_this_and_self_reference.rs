@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -8,6 +8,6 @@ fn code_fix_class_implement_interface_method_this_and_self_reference() {
 }
 
 class C implements I {[| |]}"#;
-    let mut s = Session::new_for_test("codeFixClassImplementInterfaceMethodThisAndSelfReference", content);
+    let _s = Session::new_for_test("codeFixClassImplementInterfaceMethodThisAndSelfReference", content);
     // TODO: f.VerifyCodeFix(t, fourslash.VerifyCodeFixOptions{
 }

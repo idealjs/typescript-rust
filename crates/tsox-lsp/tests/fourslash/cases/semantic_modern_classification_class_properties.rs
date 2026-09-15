@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -9,6 +9,6 @@ fn semantic_modern_classification_class_properties() {
   get z() : number { return this.x + this.y; }
   set a(v: number) { }
 }"#;
-    let mut s = Session::new_for_test("semanticModernClassificationClassProperties", content);
+    let _s = Session::new_for_test("semanticModernClassificationClassProperties", content);
     // TODO: f.VerifySemanticTokens(t, []fourslash.SemanticToken{
 }

@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -7,6 +7,6 @@ fn code_fix_class_implement_interface_constructor_name1() {
     constructor: number;
 }
 class C implements I {}"#;
-    let mut s = Session::new_for_test("codeFixClassImplementInterfaceConstructorName1", content);
+    let _s = Session::new_for_test("codeFixClassImplementInterfaceConstructorName1", content);
     // TODO: f.VerifyCodeFix(t, fourslash.VerifyCodeFixOptions{
 }

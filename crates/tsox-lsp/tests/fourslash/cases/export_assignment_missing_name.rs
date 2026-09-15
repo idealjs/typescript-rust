@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -7,6 +7,6 @@ fn export_assignment_missing_name() {
     // TODO: // (e.g. "export = " with a trailing space). The SelectionRange must not fall
     // TODO: // outside the document symbol's Range.
     let content = r#"export = "#;
-    let mut s = Session::new_for_test("exportAssignmentMissingName", content);
+    let _s = Session::new_for_test("exportAssignmentMissingName", content);
     // TODO: f.VerifyBaselineDocumentSymbol(t)
 }

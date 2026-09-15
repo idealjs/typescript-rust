@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -13,6 +13,6 @@ const foo: {
 } = (a: string, b: string | number) => a + b;
 
 [|foo|](1, 1);"#;
-    let mut s = Session::new_for_test("jsdocDeprecated_suggestion22", content);
+    let _s = Session::new_for_test("jsdocDeprecated_suggestion22", content);
     // TODO: f.VerifySuggestionDiagnostics(t, nil)
 }

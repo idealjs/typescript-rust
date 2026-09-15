@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -10,6 +10,6 @@ export { b as B } from "a"
 export import e = require("a");
 
 export * from "a"; // no bindings here"#;
-    let mut s = Session::new_for_test("navigationBarItemsExports", content);
+    let _s = Session::new_for_test("navigationBarItemsExports", content);
     // TODO: f.VerifyBaselineDocumentSymbol(t)
 }

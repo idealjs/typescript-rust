@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -7,6 +7,6 @@ fn export_in_object_literal() {
 const k = {
     [|export|] f() { }
 }"#;
-    let mut s = Session::new_for_test("exportInObjectLiteral", content);
+    let _s = Session::new_for_test("exportInObjectLiteral", content);
     // TODO: f.VerifyBaselineDocumentHighlightsWithOptions(t, nil /*preferences*/, []string{f.Ranges()[0].FileNam
 }

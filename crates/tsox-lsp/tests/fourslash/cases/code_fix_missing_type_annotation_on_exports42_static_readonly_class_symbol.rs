@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -10,6 +10,6 @@ fn code_fix_missing_type_annotation_on_exports42_static_readonly_class_symbol() 
 class A {
     static readonly p1 = Symbol();
 }"#;
-    let mut s = Session::new_for_test("codeFixMissingTypeAnnotationOnExports42_static_readonly_class_symbol", content);
+    let _s = Session::new_for_test("codeFixMissingTypeAnnotationOnExports42_static_readonly_class_symbol", content);
     // TODO: f.VerifyCodeFix(t, fourslash.VerifyCodeFixOptions{
 }

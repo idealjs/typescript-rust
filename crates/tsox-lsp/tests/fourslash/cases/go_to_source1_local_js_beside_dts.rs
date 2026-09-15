@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -11,7 +11,7 @@ export declare const a: string;
 // @Filename: /home/src/workspaces/project/index.ts
 import { a } from [|"./a"/*moduleSpecifier*/|];
 [|a/*identifier*/|]"#;
-    let mut s = Session::new_for_test("goToSource1_localJsBesideDts", content);
+    let _s = Session::new_for_test("goToSource1_localJsBesideDts", content);
     // TODO: f.MarkTestAsStradaServer()
     // TODO: f.VerifyBaselineGoToSourceDefinition(t, "identifier", "moduleSpecifier")
 }

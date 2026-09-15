@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -13,6 +13,6 @@ fn go_to_definition_function_overloads_in_class() {
 
     constructor() { }
 }"#;
-    let mut s = Session::new_for_test("goToDefinitionFunctionOverloadsInClass", content);
+    let _s = Session::new_for_test("goToDefinitionFunctionOverloadsInClass", content);
     // TODO: f.VerifyBaselineGoToDefinition(t, true, "staticFunctionOverload", "functionOverload")
 }

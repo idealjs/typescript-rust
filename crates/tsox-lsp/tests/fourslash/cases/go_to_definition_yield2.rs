@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -9,6 +9,6 @@ fn go_to_definition_yield2() {
     }
     return gen
 }"#;
-    let mut s = Session::new_for_test("goToDefinitionYield2", content);
+    let _s = Session::new_for_test("goToDefinitionYield2", content);
     // TODO: f.VerifyBaselineGoToDefinition(t, true, "start")
 }

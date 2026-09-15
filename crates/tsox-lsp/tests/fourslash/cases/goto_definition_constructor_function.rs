@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -15,6 +15,6 @@ StringStreamm.prototype = {
 function runMode () {
 new [|/*start*/StringStreamm|]()
 };"#;
-    let mut s = Session::new_for_test("gotoDefinitionConstructorFunction", content);
+    let _s = Session::new_for_test("gotoDefinitionConstructorFunction", content);
     // TODO: f.VerifyBaselineGoToDefinition(t, true, "start")
 }

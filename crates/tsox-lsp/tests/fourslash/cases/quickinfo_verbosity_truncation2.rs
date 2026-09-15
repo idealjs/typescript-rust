@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -303,6 +303,6 @@ fn quickinfo_verbosity_truncation2() {
     prop297: any;
     prop298: any;
 }"#;
-    let mut s = Session::new_for_test("quickinfoVerbosityTruncation2", content);
+    let _s = Session::new_for_test("quickinfoVerbosityTruncation2", content);
     // TODO: f.VerifyBaselineHoverWithVerbosity(t, map[string][]int{"o1": {0, 1}})
 }

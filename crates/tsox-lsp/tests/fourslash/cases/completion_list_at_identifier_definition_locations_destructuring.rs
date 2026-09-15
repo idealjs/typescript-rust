@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -19,7 +19,7 @@ var {x, y/*variable6*/
 function func1({ a/*parameter1*/
 // @Filename: h.ts
 function func2({ a, b/*parameter2*/"#;
-    let mut s = Session::new_for_test("completionListAtIdentifierDefinitionLocations_destructuring", content);
+    let _s = Session::new_for_test("completionListAtIdentifierDefinitionLocations_destructuring", content);
     // TODO: f.VerifyCompletions(t, f.Markers(), nil)
     // TODO: }
 }

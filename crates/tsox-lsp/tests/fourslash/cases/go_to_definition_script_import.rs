@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -12,6 +12,6 @@ fn go_to_definition_script_import() {
 // @filename: moduleThing.ts
 import [|/*1*/"./scriptThing"|];
 import [|/*2*/"./stylez.css"|];"#;
-    let mut s = Session::new_for_test("goToDefinitionScriptImport", content);
+    let _s = Session::new_for_test("goToDefinitionScriptImport", content);
     // TODO: f.VerifyBaselineGoToDefinition(t, true, "1", "2")
 }

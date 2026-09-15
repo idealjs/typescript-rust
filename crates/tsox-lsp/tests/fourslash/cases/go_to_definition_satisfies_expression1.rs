@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -9,6 +9,6 @@ fn go_to_definition_satisfies_expression1() {
 
 //somewhere in app
 STRINGS.[|/*usage*/title|]"#;
-    let mut s = Session::new_for_test("goToDefinitionSatisfiesExpression1", content);
+    let _s = Session::new_for_test("goToDefinitionSatisfiesExpression1", content);
     // TODO: f.VerifyBaselineGoToDefinition(t, true, "definition", "usage")
 }

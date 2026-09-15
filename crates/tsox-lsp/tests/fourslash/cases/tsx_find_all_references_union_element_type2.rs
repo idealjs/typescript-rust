@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -19,6 +19,6 @@ class RC2 extends React.Component<{}, {}> {
 }
 /*1*/var /*2*/RCComp = RC1 || RC2;
 /*3*/</*4*/RCComp />"#;
-    let mut s = Session::new_for_test("tsxFindAllReferencesUnionElementType2", content);
+    let _s = Session::new_for_test("tsxFindAllReferencesUnionElementType2", content);
     // TODO: f.VerifyBaselineFindAllReferences(t, "1", "2", "3", "4")
 }

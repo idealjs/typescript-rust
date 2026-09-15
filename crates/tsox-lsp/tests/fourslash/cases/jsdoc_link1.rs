@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -15,6 +15,6 @@ fn jsdoc_link1() {
  */
 function /**/CC() {
 }"#;
-    let mut s = Session::new_for_test("jsdocLink1", content);
+    let _s = Session::new_for_test("jsdocLink1", content);
     // TODO: f.VerifyBaselineHover(t)
 }

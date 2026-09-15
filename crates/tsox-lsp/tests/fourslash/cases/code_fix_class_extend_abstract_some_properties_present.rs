@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[ignore = "go: t.Skip('Known failing fourslash test')"]
@@ -16,6 +16,6 @@ class C extends A {[|
    |]constructor(public x: number) { super(); }
    y: number;
 }"#;
-    let mut s = Session::new_for_test("codeFixClassExtendAbstractSomePropertiesPresent", content);
+    let _s = Session::new_for_test("codeFixClassExtendAbstractSomePropertiesPresent", content);
     // TODO: f.VerifyRangeAfterCodeFix(t, `
 }

@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -15,6 +15,6 @@ fn outlining_hint_spans_for_function() {
         return x + y;
     }|]
 }|]"#;
-    let mut s = Session::new_for_test("outliningHintSpansForFunction", content);
+    let _s = Session::new_for_test("outliningHintSpansForFunction", content);
     // TODO: f.VerifyOutliningSpans(t)
 }

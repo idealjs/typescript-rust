@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -23,6 +23,6 @@ declare const asyncGenerator: AsyncGenerator<string, void, number>;
 
 asyncGenerator.next(/*7*/);
 asyncGenerator.next(/*8*/ 0);"#;
-    let mut s = Session::new_for_test("signatureHelpIteratorNext", content);
+    let _s = Session::new_for_test("signatureHelpIteratorNext", content);
     // TODO: f.VerifyBaselineSignatureHelp(t)
 }

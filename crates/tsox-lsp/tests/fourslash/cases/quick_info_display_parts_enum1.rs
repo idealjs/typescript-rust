@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -21,6 +21,6 @@ var /*20*/eInstance1: /*21*/constE;
 /*22*/eInstance1 = /*23*/constE./*24*/e1;
 /*25*/eInstance1 = /*26*/constE./*27*/e2;
 /*28*/eInstance1 = /*29*/constE./*30*/e3;"#;
-    let mut s = Session::new_for_test("quickInfoDisplayPartsEnum1", content);
+    let _s = Session::new_for_test("quickInfoDisplayPartsEnum1", content);
     // TODO: f.VerifyBaselineHover(t)
 }

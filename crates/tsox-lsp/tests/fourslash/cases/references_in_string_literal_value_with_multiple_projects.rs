@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -12,7 +12,7 @@ const str: string = "hello/*1*/";
 { "files": ["b.ts"], "compilerOptions": { "lib": ["es5"] } }
 // @Filename: /home/src/workspaces/project/b/b.ts
 const str2: string = "hello/*2*/";"#;
-    let mut s = Session::new_for_test("referencesInStringLiteralValueWithMultipleProjects", content);
+    let _s = Session::new_for_test("referencesInStringLiteralValueWithMultipleProjects", content);
     // TODO: f.MarkTestAsStradaServer()
     // TODO: f.VerifyBaselineFindAllReferences(t, "1", "2")
 }

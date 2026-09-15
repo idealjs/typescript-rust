@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -10,6 +10,6 @@ const /*2*/foo = 1;
 let x: Foo = {
     [|f/*1*/oo|]
 }"#;
-    let mut s = Session::new_for_test("goToDefinitionShorthandProperty05", content);
+    let _s = Session::new_for_test("goToDefinitionShorthandProperty05", content);
     // TODO: f.VerifyBaselineGoToDefinition(t, true, "1")
 }

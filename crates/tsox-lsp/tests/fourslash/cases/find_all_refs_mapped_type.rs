@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -9,6 +9,6 @@ declare const t: T;
 t./*2*/a;
 declare const u: U;
 u./*3*/a;"#;
-    let mut s = Session::new_for_test("findAllRefsMappedType", content);
+    let _s = Session::new_for_test("findAllRefsMappedType", content);
     // TODO: f.VerifyBaselineFindAllReferences(t, "1", "2", "3")
 }

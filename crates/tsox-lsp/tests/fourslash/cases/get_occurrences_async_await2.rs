@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -10,6 +10,6 @@ fn get_occurrences_async_await2() {
    await 300;
  }
 }"#;
-    let mut s = Session::new_for_test("getOccurrencesAsyncAwait2", content);
+    let _s = Session::new_for_test("getOccurrencesAsyncAwait2", content);
     // TODO: f.VerifyBaselineDocumentHighlights(t, nil /*preferences*/, ToAny(f.Ranges())...)
 }

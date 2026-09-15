@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -28,6 +28,6 @@ fn quick_info_on_union_properties_with_identical_js_doc_comments01() {
 
 declare let x: DocumentFilter;
 x./**/language"#;
-    let mut s = Session::new_for_test("quickInfoOnUnionPropertiesWithIdenticalJSDocComments01", content);
+    let _s = Session::new_for_test("quickInfoOnUnionPropertiesWithIdenticalJSDocComments01", content);
     // TODO: f.VerifyBaselineHover(t)
 }

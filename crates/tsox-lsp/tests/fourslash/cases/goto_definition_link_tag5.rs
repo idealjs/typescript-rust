@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -8,6 +8,6 @@ fn goto_definition_link_tag5() {
     A,
     [|/*2*/B|]
 }"#;
-    let mut s = Session::new_for_test("gotoDefinitionLinkTag5", content);
+    let _s = Session::new_for_test("gotoDefinitionLinkTag5", content);
     // TODO: f.VerifyBaselineGoToDefinition(t, false, "1")
 }

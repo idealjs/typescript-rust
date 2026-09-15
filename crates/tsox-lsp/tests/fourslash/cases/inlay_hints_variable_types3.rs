@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -15,6 +15,6 @@ interface ElementMap {
 }
 declare function getCtor<K extends keyof ElementMap>(tagName: K): ElementMap[K] | undefined;
 const div = getCtor("div");"#;
-    let mut s = Session::new_for_test("inlayHintsVariableTypes3", content);
+    let _s = Session::new_for_test("inlayHintsVariableTypes3", content);
     // TODO: f.VerifyBaselineInlayHints(t, nil /*span*/, &lsutil.UserPreferences{InlayHints: lsutil.InlayHintsPre
 }

@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -17,7 +17,7 @@ declare const fubar: FooBar;
 
 const {/*1*/foo, /*2*/bar, /*3*/baz: /*4*/biz} = fubar;
 "#;
-    let mut s = Session::new_for_test("destructuredInterfaceJSDoc", content);
+    let _s = Session::new_for_test("destructuredInterfaceJSDoc", content);
     // TODO: f.VerifyBaselineHover(t)
 }
 
@@ -35,7 +35,7 @@ declare const fubar: FooBar;
 
 const {foo: /*1*/myFoo, bar: /*2*/myBar} = fubar;
 "#;
-    let mut s = Session::new_for_test("destructuredInterfaceJSDocWithRename", content);
+    let _s = Session::new_for_test("destructuredInterfaceJSDocWithRename", content);
     // TODO: f.VerifyBaselineHover(t)
 }
 
@@ -57,6 +57,6 @@ const {
     /** Comment on baz destructuring. */ /*2*/baz
 } = foo;
 "#;
-    let mut s = Session::new_for_test("destructuredWithOwnJSDoc", content);
+    let _s = Session::new_for_test("destructuredWithOwnJSDoc", content);
     // TODO: f.VerifyBaselineHover(t)
 }

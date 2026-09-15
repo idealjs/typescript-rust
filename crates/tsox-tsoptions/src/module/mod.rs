@@ -6,7 +6,6 @@ pub use resolver::{
 };
 
 pub(crate) use bitflags::bitflags;
-pub(crate) use tsox_core::tspath;
 
 #[derive(Clone, Debug, Default)]
 pub struct ResolvedModule {

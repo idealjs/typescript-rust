@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -20,6 +20,6 @@ o[`num`] = 3;
 
 o['num'];
 o[`num`];"#;
-    let mut s = Session::new_for_test("findAllRefsWriteAccess", content);
+    let _s = Session::new_for_test("findAllRefsWriteAccess", content);
     // TODO: f.VerifyBaselineFindAllReferences(t, "1")
 }

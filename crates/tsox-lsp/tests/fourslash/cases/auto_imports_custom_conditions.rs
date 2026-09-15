@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -20,6 +20,6 @@ fn auto_imports_custom_conditions() {
 export const dep: number;
 // @Filename: /index.ts
 dep/**/"#;
-    let mut s = Session::new_for_test("autoImportsCustomConditions", content);
+    let _s = Session::new_for_test("autoImportsCustomConditions", content);
     // TODO: f.VerifyImportFixModuleSpecifiers(t, "", []string{"dep"}, nil /*preferences*/)
 }

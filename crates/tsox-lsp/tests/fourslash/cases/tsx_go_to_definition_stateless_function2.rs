@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -31,6 +31,6 @@ let opt = <[|Main/*thirdTarget*/Button|] onClick={()=>{}} />;
 let opt = <[|Main/*fourthTarget*/Button|] onClick={()=>{}} ignore-prop />;
 let opt = <[|Main/*fifthTarget*/Button|] goTo="goTo" />;
 let opt = <[|Main/*sixthTarget*/Button|] wrong />;"#;
-    let mut s = Session::new_for_test("tsxGoToDefinitionStatelessFunction2", content);
+    let _s = Session::new_for_test("tsxGoToDefinitionStatelessFunction2", content);
     // TODO: f.VerifyBaselineGoToDefinition(t, true, "firstTarget", "secondTarget", "thirdTarget", "fourthTarget"
 }

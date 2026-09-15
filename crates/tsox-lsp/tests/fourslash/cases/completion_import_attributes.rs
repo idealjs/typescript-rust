@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -14,6 +14,6 @@ import yadda3 from "yadda" with {attr: /*attrValue*/}
 // @filename: yadda
 export default {};
 "#;
-    let mut s = Session::new_for_test("completionImportAttributes", content);
+    let _s = Session::new_for_test("completionImportAttributes", content);
     // TODO: f.GoToEachMarker(t, nil, func(marker *fourslash.Marker, index int) {
 }

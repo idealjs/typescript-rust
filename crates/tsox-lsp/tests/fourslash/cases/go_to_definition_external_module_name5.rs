@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -7,6 +7,6 @@ fn go_to_definition_external_module_name5() {
 declare module /*2*/[|"external/*1*/"|] {
     class Foo { }
 }"#;
-    let mut s = Session::new_for_test("goToDefinitionExternalModuleName5", content);
+    let _s = Session::new_for_test("goToDefinitionExternalModuleName5", content);
     // TODO: f.VerifyBaselineGoToDefinition(t, true, "1")
 }

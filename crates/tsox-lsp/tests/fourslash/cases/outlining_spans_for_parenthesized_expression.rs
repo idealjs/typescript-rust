@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -32,6 +32,6 @@ const c = [|(
         ( 1 )
     )|]
 )|];"#;
-    let mut s = Session::new_for_test("outliningSpansForParenthesizedExpression", content);
+    let _s = Session::new_for_test("outliningSpansForParenthesizedExpression", content);
     // TODO: f.VerifyOutliningSpans(t)
 }

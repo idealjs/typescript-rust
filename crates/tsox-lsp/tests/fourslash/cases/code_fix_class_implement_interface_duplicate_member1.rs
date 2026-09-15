@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -11,6 +11,6 @@ interface I2 {
 }
 
 class C implements I1,I2 {[| |]}"#;
-    let mut s = Session::new_for_test("codeFixClassImplementInterfaceDuplicateMember1", content);
+    let _s = Session::new_for_test("codeFixClassImplementInterfaceDuplicateMember1", content);
     // TODO: f.VerifyCodeFixAvailable(t, []string{"Implement interface 'I1'", "Implement interface 'I2'"})
 }

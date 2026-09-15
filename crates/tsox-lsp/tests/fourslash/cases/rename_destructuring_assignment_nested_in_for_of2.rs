@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -17,6 +17,6 @@ for ([|{ skills: { [|{| "contextRangeIndex": 4 |}primary|]: primaryA, secondary:
 for ([|{ skills: { [|{| "contextRangeIndex": 6 |}primary|], secondary } } of multiRobots|]) {
     console.log([|primary|]);
 }"#;
-    let mut s = Session::new_for_test("renameDestructuringAssignmentNestedInForOf2", content);
+    let _s = Session::new_for_test("renameDestructuringAssignmentNestedInForOf2", content);
     // TODO: f.VerifyBaselineRename(t, nil /*preferences*/, f.Ranges()[1], f.Ranges()[5], f.Ranges()[3], f.Ranges
 }

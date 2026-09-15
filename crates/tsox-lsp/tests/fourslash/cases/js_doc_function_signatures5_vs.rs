@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -18,6 +18,6 @@ function pathFilter(basePath, pattern, type, options){
 //...
 }
 pathFilter(/**/'foo', 'bar', 'baz', {});"#;
-    let mut s = Session::new_with_capabilities(content, None);
+    let _s = Session::new_with_capabilities(content, None);
     // TODO: f.VerifyBaselineSignatureHelp(t)
 }

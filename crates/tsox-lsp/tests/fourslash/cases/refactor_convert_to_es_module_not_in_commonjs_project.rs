@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -7,6 +7,6 @@ fn refactor_convert_to_es_module_not_in_commonjs_project() {
 // @target: es5
 // @Filename: /a.js
 exports.x = 0;"#;
-    let mut s = Session::new_for_test("refactorConvertToEsModule_notInCommonjsProject", content);
+    let _s = Session::new_for_test("refactorConvertToEsModule_notInCommonjsProject", content);
     // TODO: f.VerifySuggestionDiagnostics(t, nil)
 }

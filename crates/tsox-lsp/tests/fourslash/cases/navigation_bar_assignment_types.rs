@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -9,6 +9,6 @@ const a = {
     c,
     d: 0
 };"#;
-    let mut s = Session::new_for_test("navigationBarAssignmentTypes", content);
+    let _s = Session::new_for_test("navigationBarAssignmentTypes", content);
     // TODO: f.VerifyBaselineDocumentSymbol(t)
 }

@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -9,7 +9,7 @@ export const /*def1*/T = "";
 // @Filename: bar.ts
 import { T } from "./foo";
 let x: [|/*reference*/T|];"#;
-    let mut s = Session::new_for_test("goToTypeDefinition4", content);
+    let _s = Session::new_for_test("goToTypeDefinition4", content);
     // TODO: f.VerifyBaselineGoToTypeDefinition(t, "reference")
     // TODO: f.VerifyBaselineGoToDefinition(t, true, "reference")
 }

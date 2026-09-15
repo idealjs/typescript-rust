@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -10,6 +10,6 @@ function foo() {
     return { x: 1, y: 1 } as const;
 }
 export const { x, y = 0 } = foo();"#;
-    let mut s = Session::new_for_test("codeFixMissingTypeAnnotationOnExports15", content);
+    let _s = Session::new_for_test("codeFixMissingTypeAnnotationOnExports15", content);
     // TODO: f.VerifyCodeFix(t, fourslash.VerifyCodeFixOptions{
 }

@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -15,6 +15,6 @@ fn code_fix_class_implement_class_abstract_getters_and_setters() {
 }
 
 class C implements A {}"#;
-    let mut s = Session::new_for_test("codeFixClassImplementClassAbstractGettersAndSetters", content);
+    let _s = Session::new_for_test("codeFixClassImplementClassAbstractGettersAndSetters", content);
     // TODO: f.VerifyCodeFix(t, fourslash.VerifyCodeFixOptions{
 }

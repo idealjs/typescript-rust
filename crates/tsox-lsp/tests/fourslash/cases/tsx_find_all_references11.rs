@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -26,6 +26,6 @@ declare function MainButton(buttonProps: ButtonProps): JSX.Element;
 declare function MainButton(linkProps: LinkProps): JSX.Element;
 declare function MainButton(props: ButtonProps | LinkProps): JSX.Element;
 let opt = <MainButton /*1*/wrong />;"#;
-    let mut s = Session::new_for_test("tsxFindAllReferences11", content);
+    let _s = Session::new_for_test("tsxFindAllReferences11", content);
     // TODO: f.VerifyBaselineFindAllReferences(t, "1")
 }

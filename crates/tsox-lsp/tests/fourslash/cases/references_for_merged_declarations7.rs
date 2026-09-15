@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -12,6 +12,6 @@ namespace Foo {
 
 // module, value and type
 import a2 = Foo./*4*/Bar;"#;
-    let mut s = Session::new_for_test("referencesForMergedDeclarations7", content);
+    let _s = Session::new_for_test("referencesForMergedDeclarations7", content);
     // TODO: f.VerifyBaselineFindAllReferences(t, "1", "2", "3", "4")
 }

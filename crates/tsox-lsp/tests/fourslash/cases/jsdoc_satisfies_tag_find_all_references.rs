@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -14,6 +14,6 @@ fn jsdoc_satisfies_tag_find_all_references() {
 
 /** @satisfies {/**/T} comment */
 const foo = { a: 1 };"#;
-    let mut s = Session::new_for_test("jsdocSatisfiesTagFindAllReferences", content);
+    let _s = Session::new_for_test("jsdocSatisfiesTagFindAllReferences", content);
     // TODO: f.VerifyBaselineFindAllReferences(t, "")
 }

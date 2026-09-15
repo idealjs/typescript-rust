@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -13,6 +13,6 @@ export {};
         "module": "commonjs"
     }
 }"#;
-    let mut s = Session::new_for_test("codeFixTopLevelForAwait_module_missingCompilerOptionsInTsConfig", content);
+    let _s = Session::new_for_test("codeFixTopLevelForAwait_module_missingCompilerOptionsInTsConfig", content);
     // TODO: f.VerifyCodeFixNotAvailable(t, "fixModuleOption")
 }

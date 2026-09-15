@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -51,7 +51,7 @@ test // #endregion
 /*
 // #endregion
 */"#;
-    let mut s = Session::new_for_test("getOutliningSpansForRegions", content);
+    let _s = Session::new_for_test("getOutliningSpansForRegions", content);
     // TODO: f.MarkTestAsStradaServer()
     // TODO: f.VerifyOutliningSpans(t, lsproto.FoldingRangeKindRegion)
 }

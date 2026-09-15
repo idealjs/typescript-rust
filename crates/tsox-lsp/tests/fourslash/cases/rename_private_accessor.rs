@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -10,6 +10,6 @@ fn rename_private_accessor() {
        return this.[|#foo|];
    }
 }"#;
-    let mut s = Session::new_for_test("renamePrivateAccessor", content);
+    let _s = Session::new_for_test("renamePrivateAccessor", content);
     // TODO: f.VerifyBaselineRename(t, nil /*preferences*/, ToAny(f.GetRangesByText().Get("#foo"))...)
 }

@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -13,6 +13,6 @@ module.exports = { Util };
 // @Filename: index.js
 const { Util } = require('./reexport');
 new [|Util/*1*/|]()"#;
-    let mut s = Session::new_for_test("goToDefinitionDestructuredRequire2", content);
+    let _s = Session::new_for_test("goToDefinitionDestructuredRequire2", content);
     // TODO: f.VerifyBaselineGoToDefinition(t, true, "1")
 }

@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -29,6 +29,6 @@ export enum Color {
 // @filename: c.ts
 import { Color } from "./b";
 const c: Color/*a*/ = Color.Red;"#;
-    let mut s = Session::new_for_test("quickinfoVerbosityEnum", content);
+    let _s = Session::new_for_test("quickinfoVerbosityEnum", content);
     // TODO: f.VerifyBaselineHoverWithVerbosity(t, map[string][]int{"c": {0, 1}, "x": {0, 1}, "d": {0, 1}, "y": {
 }

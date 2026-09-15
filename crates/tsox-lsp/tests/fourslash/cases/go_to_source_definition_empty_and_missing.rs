@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -14,7 +14,7 @@ export declare function foo(): void;
 // @Filename: /home/src/workspaces/project/index.ts
 import { foo } from /*specifier*/"pkg";
 foo();"#;
-    let mut s = Session::new_for_test("goToSourceDefinitionEmptyJsFile", content);
+    let _s = Session::new_for_test("goToSourceDefinitionEmptyJsFile", content);
     // TODO: f.VerifyBaselineGoToSourceDefinition(t, "specifier")
 }
 
@@ -33,6 +33,6 @@ module.exports = { create: internalCreate };
 // @Filename: /home/src/workspaces/project/index.ts
 import /*importDefault*/create from "pkg";
 create();"#;
-    let mut s = Session::new_for_test("goToSourceDefaultImportNoDefaultInJs", content);
+    let _s = Session::new_for_test("goToSourceDefaultImportNoDefaultInJs", content);
     // TODO: f.VerifyBaselineGoToSourceDefinition(t, "importDefault")
 }

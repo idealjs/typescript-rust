@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -31,6 +31,6 @@ class Bar implements Foo {
         return this;
     }
 }"#;
-    let mut s = Session::new_for_test("navigationBarItemsMultilineStringIdentifiers1", content);
+    let _s = Session::new_for_test("navigationBarItemsMultilineStringIdentifiers1", content);
     // TODO: f.VerifyBaselineDocumentSymbol(t)
 }

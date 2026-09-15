@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -12,6 +12,6 @@ fn rename_string_literal_types1() {
 function animate(o: AnimationOptions) { }
 
 animate({ deltaX: 100, deltaY: 100, easing: "[|ease-in-out|]" });"#;
-    let mut s = Session::new_for_test("renameStringLiteralTypes1", content);
+    let _s = Session::new_for_test("renameStringLiteralTypes1", content);
     // TODO: f.VerifyBaselineRenameAtRangesWithText(t, nil /*preferences*/, "ease-in-out")
 }

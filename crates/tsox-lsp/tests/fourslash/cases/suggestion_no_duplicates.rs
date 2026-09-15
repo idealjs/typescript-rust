@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -9,7 +9,7 @@ import { f } from [|'m'|]
 f
 // @Filename: node_modules/m/index.js
 module.exports.f = function (x) { return x }"#;
-    let mut s = Session::new_for_test("suggestionNoDuplicates", content);
+    let _s = Session::new_for_test("suggestionNoDuplicates", content);
     // TODO: f.VerifyNonSuggestionDiagnostics(t, nil)
     // TODO: f.VerifySuggestionDiagnostics(t, []*lsproto.Diagnostic{
 }

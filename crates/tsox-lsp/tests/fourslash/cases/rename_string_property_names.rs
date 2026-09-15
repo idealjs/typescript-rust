@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -14,6 +14,6 @@ o = {
 o["[|prop|]"];
 o['[|prop|]'];
 o.[|prop|];"#;
-    let mut s = Session::new_for_test("renameStringPropertyNames", content);
+    let _s = Session::new_for_test("renameStringPropertyNames", content);
     // TODO: f.VerifyBaselineRenameAtRangesWithText(t, nil /*preferences*/, "prop")
 }

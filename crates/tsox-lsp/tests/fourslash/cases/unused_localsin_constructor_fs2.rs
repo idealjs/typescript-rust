@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[ignore = "go: t.Skip('Known failing fourslash test')"]
@@ -13,6 +13,6 @@ class greeter {
         used = used + "second part";
     }|]
 }"#;
-    let mut s = Session::new_for_test("unusedLocalsinConstructorFS2", content);
+    let _s = Session::new_for_test("unusedLocalsinConstructorFS2", content);
     // TODO: f.VerifyRangeAfterCodeFix(t, `
 }

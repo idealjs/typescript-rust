@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -24,6 +24,6 @@ class Class {
 }
 new Class(1)
 new Class(1, 2)"#;
-    let mut s = Session::new_for_test("inlayHintsInteractiveOverloadCall", content);
+    let _s = Session::new_for_test("inlayHintsInteractiveOverloadCall", content);
     // TODO: f.VerifyBaselineInlayHints(t, nil /*span*/, &lsutil.UserPreferences{InlayHints: lsutil.InlayHintsPre
 }

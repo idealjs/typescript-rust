@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -8,7 +8,7 @@ fn private_property_of_undefined_this1() {
 this.#a = {};
 export {};
 "#;
-    let mut s = Session::new_for_test("privatePropertyOfUndefinedThis1", content);
+    let _s = Session::new_for_test("privatePropertyOfUndefinedThis1", content);
     // TODO: f.VerifyBaselineNonSuggestionDiagnostics(t)
 }
 
@@ -22,6 +22,6 @@ export class C {
     }
 }
 "#;
-    let mut s = Session::new_for_test("privatePropertyOfUndefinedThis2", content);
+    let _s = Session::new_for_test("privatePropertyOfUndefinedThis2", content);
     // TODO: f.VerifyBaselineNonSuggestionDiagnostics(t)
 }

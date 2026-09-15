@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -27,6 +27,6 @@ const obj2 = {
 
 obj2.Infinity;
 obj2.NaN;"#;
-    let mut s = Session::new_for_test("semanticModernClassificationInfinityAndNaN", content);
+    let _s = Session::new_for_test("semanticModernClassificationInfinityAndNaN", content);
     // TODO: f.VerifySemanticTokens(t, []fourslash.SemanticToken{
 }

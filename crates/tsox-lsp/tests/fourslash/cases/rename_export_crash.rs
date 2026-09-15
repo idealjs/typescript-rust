@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -8,6 +8,6 @@ fn rename_export_crash() {
 let a;
 module.exports = /**/a;
 exports["foo"] = a;"#;
-    let mut s = Session::new_for_test("renameExportCrash", content);
+    let _s = Session::new_for_test("renameExportCrash", content);
     // TODO: f.VerifyBaselineRename(t, nil /*preferences*/, "")
 }

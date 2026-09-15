@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -7,6 +7,6 @@ fn quick_info_display_parts_arrow_function_expression() {
 var /*2*/y = (/*6*/a, /*7*/b) => 10;
 var /*3*/z = (/*8*/a: number) => 10;
 var /*4*/z2 = () => 10;"#;
-    let mut s = Session::new_for_test("quickInfoDisplayPartsArrowFunctionExpression", content);
+    let _s = Session::new_for_test("quickInfoDisplayPartsArrowFunctionExpression", content);
     // TODO: f.VerifyBaselineHover(t)
 }

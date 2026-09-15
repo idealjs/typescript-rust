@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -7,6 +7,6 @@ fn get_edits_for_file_rename_sub_dir() {
 
 // @Filename: /src/old.ts
 import a from "./foo/a";"#;
-    let mut s = Session::new_for_test("getEditsForFileRename_subDir", content);
+    let _s = Session::new_for_test("getEditsForFileRename_subDir", content);
     // TODO: f.VerifyWillRenameFilesEdits(t, "/src/old.ts", "/src/dir/new.ts", map[string]string{
 }

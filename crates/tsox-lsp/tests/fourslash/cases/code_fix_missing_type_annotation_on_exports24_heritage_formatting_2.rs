@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -12,7 +12,7 @@ class Point2D { x = 0; y = 0; }
 export class Point3D2 extends mixin(Point2D) {
     z = 0;
 }"#;
-    let mut s = Session::new_for_test("codeFixMissingTypeAnnotationOnExports24_heritage_formatting_2", content);
+    let _s = Session::new_for_test("codeFixMissingTypeAnnotationOnExports24_heritage_formatting_2", content);
     // TODO: f.VerifyCodeFixAvailable(t, []string{"Extract base class to variable"})
     // TODO: f.VerifyCodeFix(t, fourslash.VerifyCodeFixOptions{
 }

@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -13,6 +13,6 @@ class D extends C {
 		super(/*3*/x);
 	}
 }"#;
-    let mut s = Session::new_for_test("findAllRefsParameterPropertyDeclaration_inheritance", content);
+    let _s = Session::new_for_test("findAllRefsParameterPropertyDeclaration_inheritance", content);
     // TODO: f.VerifyBaselineFindAllReferences(t, "0", "1", "2", "3")
 }

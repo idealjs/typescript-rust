@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -16,6 +16,6 @@ function fn1<T extends T1>(obj: T, key: keyof T, k2: keyof T1) {
 	}
 	return key;
 }"#;
-    let mut s = Session::new_for_test("quickinfoVerbosityIndexType", content);
+    let _s = Session::new_for_test("quickinfoVerbosityIndexType", content);
     // TODO: f.VerifyBaselineHoverWithVerbosity(t, map[string][]int{"x1": {0, 1}, "x2": {0}, "k2": {0, 1}, "key":
 }

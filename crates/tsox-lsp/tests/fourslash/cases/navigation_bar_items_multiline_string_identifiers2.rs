@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -16,6 +16,6 @@ class c1 {
 f(() => { }, `unterminated backtick 1
 unterminated backtick 2
 unterminated backtick 3"#;
-    let mut s = Session::new_for_test("navigationBarItemsMultilineStringIdentifiers2", content);
+    let _s = Session::new_for_test("navigationBarItemsMultilineStringIdentifiers2", content);
     // TODO: f.VerifyBaselineDocumentSymbol(t)
 }

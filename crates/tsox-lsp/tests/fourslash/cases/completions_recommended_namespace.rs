@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[ignore = "go: t.Skip('Known failing fourslash test')"]
@@ -20,7 +20,7 @@ f(new /*b1*/);
 import * as alpha from "./a";
 alpha.f(new a/*c0*/);
 alpha.f(new /*c1*/);"#;
-    let mut s = Session::new_for_test("completionsRecommended_namespace", content);
+    let _s = Session::new_for_test("completionsRecommended_namespace", content);
     // TODO: f.VerifyCompletions(t, []string{"a0", "a1"}, &fourslash.CompletionsExpectedList{
     // TODO: f.VerifyCompletions(t, []string{"b0", "b1"}, &fourslash.CompletionsExpectedList{
     // TODO: f.VerifyCompletions(t, []string{"c0", "c1"}, &fourslash.CompletionsExpectedList{

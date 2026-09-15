@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -9,6 +9,6 @@ fn navigation_bar_items_missing_name2() {
 class /* But it has no name! */ {
     foo() {}
 }"#;
-    let mut s = Session::new_for_test("navigationBarItemsMissingName2", content);
+    let _s = Session::new_for_test("navigationBarItemsMissingName2", content);
     // TODO: f.VerifyBaselineDocumentSymbol(t)
 }

@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -10,6 +10,6 @@ f1/*0*/();
 // @Filename: ../node_modules/fake-module/index.ts
 export var v1 = 5;
 export function f1();"#;
-    let mut s = Session::new_for_test("importNameCodeFixExistingImport6", content);
+    let _s = Session::new_for_test("importNameCodeFixExistingImport6", content);
     // TODO: f.VerifyImportFixAtPosition(t, []string{
 }

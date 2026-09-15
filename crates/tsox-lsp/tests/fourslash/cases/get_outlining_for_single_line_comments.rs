@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -87,6 +87,6 @@ function Foo()[| {
     function method(param)[| {
     }|]
 }|]"#;
-    let mut s = Session::new_for_test("getOutliningForSingleLineComments", content);
+    let _s = Session::new_for_test("getOutliningForSingleLineComments", content);
     // TODO: f.VerifyOutliningSpans(t)
 }

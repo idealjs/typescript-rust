@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -8,6 +8,6 @@ fn get_edits_for_file_rename_resolve_json_module() {
 import text from "./message.json";
 // @Filename: /message.json
 {}"#;
-    let mut s = Session::new_for_test("getEditsForFileRename_resolveJsonModule", content);
+    let _s = Session::new_for_test("getEditsForFileRename_resolveJsonModule", content);
     // TODO: f.VerifyWillRenameFilesEdits(t, "/a.ts", "/src/a.ts", map[string]string{
 }

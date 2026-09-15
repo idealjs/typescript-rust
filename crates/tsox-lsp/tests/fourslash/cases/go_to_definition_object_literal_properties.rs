@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -16,6 +16,6 @@ o./*getterReference*/getter;
 o./*setterReference*/setter;
 o./*methodReference*/method;
 o./*es6StyleMethodReference*/es6StyleMethod;"#;
-    let mut s = Session::new_for_test("goToDefinitionObjectLiteralProperties", content);
+    let _s = Session::new_for_test("goToDefinitionObjectLiteralProperties", content);
     // TODO: f.VerifyBaselineGoToDefinition(t, false, "valueReference", "getterReference", "setterReference", "me
 }

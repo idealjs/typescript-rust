@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -8,6 +8,6 @@ const foo = 'foo'
 export { foo as default }
 // @Filename: /index.ts
  foo/**/"#;
-    let mut s = Session::new_for_test("importNameCodeFixExportAsDefault", content);
+    let _s = Session::new_for_test("importNameCodeFixExportAsDefault", content);
     // TODO: f.VerifyApplyCodeActionFromCompletion(t, new(""), &fourslash.ApplyCodeActionFromCompletionOptions{
 }

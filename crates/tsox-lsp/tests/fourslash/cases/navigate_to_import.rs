@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -9,6 +9,6 @@ export function [|foo|]() {}
 export function [|bar|]() {}
 // @Filename: user.ts
 import {foo, bar as [|baz|]} from './library';"#;
-    let mut s = Session::new_for_test("navigateToImport", content);
+    let _s = Session::new_for_test("navigateToImport", content);
     // TODO: f.VerifyWorkspaceSymbol(t, []*fourslash.VerifyWorkspaceSymbolCase{
 }

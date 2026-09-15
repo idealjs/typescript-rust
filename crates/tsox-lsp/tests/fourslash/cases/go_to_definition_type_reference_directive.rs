@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -9,6 +9,6 @@ fn go_to_definition_type_reference_directive() {
 // @Filename: src/app.ts
  /// <reference types="[|lib/*1*/|]"/>
  $.x;"#;
-    let mut s = Session::new_for_test("goToDefinitionTypeReferenceDirective", content);
+    let _s = Session::new_for_test("goToDefinitionTypeReferenceDirective", content);
     // TODO: f.VerifyBaselineGoToDefinition(t, true, "1")
 }

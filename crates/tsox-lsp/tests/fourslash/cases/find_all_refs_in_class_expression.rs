@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -7,6 +7,6 @@ fn find_all_refs_in_class_expression() {
 new class C implements I {
    /*1*/boom(){}
 }"#;
-    let mut s = Session::new_for_test("findAllRefsInClassExpression", content);
+    let _s = Session::new_for_test("findAllRefsInClassExpression", content);
     // TODO: f.VerifyBaselineFindAllReferences(t, "0", "1")
 }

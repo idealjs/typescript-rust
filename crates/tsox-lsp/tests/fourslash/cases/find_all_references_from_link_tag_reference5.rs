@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -7,6 +7,6 @@ fn find_all_references_from_link_tag_reference5() {
     /** {@link E./**/A} */
     A
 }"#;
-    let mut s = Session::new_for_test("findAllReferencesFromLinkTagReference5", content);
+    let _s = Session::new_for_test("findAllReferencesFromLinkTagReference5", content);
     // TODO: f.VerifyBaselineFindAllReferences(t, "")
 }

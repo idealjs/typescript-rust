@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -13,7 +13,7 @@ interface K { f; /*k*/ }
 type T = { fo/*t*/ };
 type U = { /*u*/ };
 interface EndOfFile { f; /*e*/"#;
-    let mut s = Session::new_for_test("completionsInterfaceElement", content);
+    let _s = Session::new_for_test("completionsInterfaceElement", content);
     // TODO: f.VerifyCompletions(t, f.Markers(), &fourslash.CompletionsExpectedList{
     // TODO: }
 }

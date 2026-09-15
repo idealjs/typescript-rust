@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -13,6 +13,6 @@ interface I {
 }
 const foo: I = { [|x|]: 1, y: 1 };
 foo.[|x|];"#;
-    let mut s = Session::new_for_test("jsdocDeprecated_suggestion19", content);
+    let _s = Session::new_for_test("jsdocDeprecated_suggestion19", content);
     // TODO: f.VerifySuggestionDiagnostics(t, []*lsproto.Diagnostic{
 }

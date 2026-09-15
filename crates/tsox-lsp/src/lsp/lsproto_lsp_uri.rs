@@ -2,7 +2,6 @@ use std::fmt;
 
 use serde::{Deserialize, Serialize};
 
-use tsox_core::tspath;
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, Hash, Serialize, Deserialize)]
 #[serde(transparent)]

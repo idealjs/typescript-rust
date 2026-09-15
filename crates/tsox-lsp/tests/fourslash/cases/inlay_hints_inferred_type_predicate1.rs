@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -7,6 +7,6 @@ fn inlay_hints_inferred_type_predicate1() {
 function test(x: unknown) {
   return typeof x === 'number';
 }"#;
-    let mut s = Session::new_for_test("inlayHintsInferredTypePredicate1", content);
+    let _s = Session::new_for_test("inlayHintsInferredTypePredicate1", content);
     // TODO: f.VerifyBaselineInlayHints(t, nil /*span*/, &lsutil.UserPreferences{InlayHints: lsutil.InlayHintsPre
 }

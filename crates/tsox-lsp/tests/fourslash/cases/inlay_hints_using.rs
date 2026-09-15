@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -7,6 +7,6 @@ fn inlay_hints_using() {
 using _defer = {
 	[Symbol.dispose]() {},
 };"#;
-    let mut s = Session::new_for_test("inlayHintsUsing", content);
+    let _s = Session::new_for_test("inlayHintsUsing", content);
     // TODO: f.VerifyBaselineInlayHints(t, nil /*span*/, &lsutil.UserPreferences{InlayHints: lsutil.InlayHintsPre
 }

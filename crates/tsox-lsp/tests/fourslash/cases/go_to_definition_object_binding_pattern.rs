@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -19,7 +19,7 @@ let { /*2*/targetProperty }: SomeType = { /*3*/targetProperty: 42 };
 let { /*5*/targetProperty: /*6*/alias_1 }: SomeType = { targetProperty: 42 };
 
 let { x: { /*7*/targetProperty: /*8*/{} } }: { x: SomeType } = { x: { targetProperty: 42 } };"#;
-    let mut s = Session::new_for_test("goToDefinitionObjectBindingPattern", content);
+    let _s = Session::new_for_test("goToDefinitionObjectBindingPattern", content);
     // TODO: f.VerifyBaselineGoToDefinition(t, true, f.MarkerNames()...)
 }
 
@@ -31,6 +31,6 @@ interface SomeType {
 }
 
 let { .../*1*/rest }: SomeType = { targetProperty: 42 };"#;
-    let mut s = Session::new_for_test("goToDefinitionObjectBindingPatternRest", content);
+    let _s = Session::new_for_test("goToDefinitionObjectBindingPatternRest", content);
     // TODO: f.VerifyBaselineGoToDefinition(t, true, f.MarkerNames()...)
 }

@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -20,7 +20,7 @@ export function /*target*/original() { return "ok"; }
 // @Filename: /home/src/workspaces/project/index.ts
 import { original as renamed } from "pkg";
 renamed/*usage*/();"#;
-    let mut s = Session::new_for_test("goToSourceAliasedImportAtUsageSite", content);
+    let _s = Session::new_for_test("goToSourceAliasedImportAtUsageSite", content);
     // TODO: f.VerifyBaselineGoToSourceDefinition(t, "usage")
 }
 
@@ -39,6 +39,6 @@ export function /*target*/helper() { return "ok"; }
 // @Filename: /home/src/workspaces/project/index.ts
 import * as ns from "pkg";
 ns./*usage*/helper();"#;
-    let mut s = Session::new_for_test("goToSourceAliasedImportAtUsageSiteNamespaceImport", content);
+    let _s = Session::new_for_test("goToSourceAliasedImportAtUsageSiteNamespaceImport", content);
     // TODO: f.VerifyBaselineGoToSourceDefinition(t, "usage")
 }

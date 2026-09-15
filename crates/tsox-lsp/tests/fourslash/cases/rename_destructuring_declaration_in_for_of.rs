@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -14,6 +14,6 @@ for ([|let { [|{| "contextRangeIndex": 2 |}property1|] } of elems|]) {
 }
 for ([|let { [|{| "contextRangeIndex": 5 |}property1|]: p2 } of elems|]) {
 }"#;
-    let mut s = Session::new_for_test("renameDestructuringDeclarationInForOf", content);
+    let _s = Session::new_for_test("renameDestructuringDeclarationInForOf", content);
     // TODO: f.VerifyBaselineRename(t, nil /*preferences*/, f.Ranges()[1], f.Ranges()[6], f.Ranges()[3], f.Ranges
 }

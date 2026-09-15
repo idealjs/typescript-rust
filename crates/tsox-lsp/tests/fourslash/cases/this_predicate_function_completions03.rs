@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -46,7 +46,7 @@ function isLeaderGuard(g: RoyalGuard) {
    return g.isLeader();
 }
 let checked/*14*/LeaderStatus = isLeader/*15*/Guard(a);"#;
-    let mut s = Session::new_for_test("thisPredicateFunctionCompletions03", content);
+    let _s = Session::new_for_test("thisPredicateFunctionCompletions03", content);
     // TODO: f.VerifyCompletions(t, []string{"2", "6"}, &fourslash.CompletionsExpectedList{
     // TODO: f.VerifyCompletions(t, []string{"4", "8"}, &fourslash.CompletionsExpectedList{
 }

@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -21,7 +21,7 @@ var person; person.[|personName/*3*/|]
 
 /** @type {Animal} */
 var animal; animal.[|animalName/*4*/|]"#;
-    let mut s = Session::new_for_test("jsdocTypedefTagGoToDefinition", content);
+    let _s = Session::new_for_test("jsdocTypedefTagGoToDefinition", content);
     // TODO: f.MarkTestAsStradaServer()
     // TODO: f.VerifyBaselineGoToDefinition(t, true, "3", "4")
 }

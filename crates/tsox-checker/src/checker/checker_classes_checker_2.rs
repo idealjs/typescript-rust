@@ -63,7 +63,7 @@ impl Checker {
                                     _ => Vec::new(),
                                 };
                             let mut pushed_args: Option<Vec<Arc<Type>>> = None;
-                            let pushed = if let Some(args) = &heritage_args
+                            let _pushed = if let Some(args) = &heritage_args
                                 && !base_tps.is_empty()
                             {
                                 let arg_types: Vec<Arc<Type>> = args

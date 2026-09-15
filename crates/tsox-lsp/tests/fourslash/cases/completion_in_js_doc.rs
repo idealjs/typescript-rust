@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -60,7 +60,7 @@ var v8;
 /**
   * jsdoc inline tag {@/*17*/}
   */"#;
-    let mut s = Session::new_for_test("completionInJsDoc", content);
+    let _s = Session::new_for_test("completionInJsDoc", content);
     // TODO: f.VerifyCompletions(t, []string{"1", "2"}, &fourslash.CompletionsExpectedList{
     // TODO: f.VerifyCompletions(t, []string{"3", "15", "16"}, &fourslash.CompletionsExpectedList{
     // TODO: f.VerifyCompletions(t, []string{"4", "5", "8"}, &fourslash.CompletionsExpectedList{

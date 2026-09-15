@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -17,6 +17,6 @@ class /*ct*/MyClass {
 var x = <[|My/*c*/Class|] />;
 var y = <MyClass [|f/*p*/oo|]= 'hello' />;
 var z = <[|MyCl/*w*/ass|] wrong= 'hello' />;"#;
-    let mut s = Session::new_for_test("tsxGoToDefinitionClasses", content);
+    let _s = Session::new_for_test("tsxGoToDefinitionClasses", content);
     // TODO: f.VerifyBaselineGoToDefinition(t, true, "c", "p", "w")
 }

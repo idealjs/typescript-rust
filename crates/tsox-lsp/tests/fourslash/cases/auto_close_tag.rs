@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -48,6 +48,6 @@ const x = <p>
         <div>/*9*/
     </div>
 </p>"#;
-    let mut s = Session::new_for_test("autoCloseTag", content);
+    let _s = Session::new_for_test("autoCloseTag", content);
     // TODO: f.VerifyJsxClosingTag(t, map[string]*string{
 }

@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -14,6 +14,6 @@ class C {
 class C {
     x: number; // Types not allowed
 }"#;
-    let mut s = Session::new_for_test("getJavaScriptSyntacticDiagnostics18", content);
+    let _s = Session::new_for_test("getJavaScriptSyntacticDiagnostics18", content);
     // TODO: f.VerifyBaselineNonSuggestionDiagnostics(t)
 }

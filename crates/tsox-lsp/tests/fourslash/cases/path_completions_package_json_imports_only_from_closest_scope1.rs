@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -18,7 +18,7 @@ export function something(name: string): any;
 import {} from "/*1*/";
 // @Filename: /a.ts
 import {} from "/*2*/";"##;
-    let mut s = Session::new_for_test("pathCompletionsPackageJsonImportsOnlyFromClosestScope1", content);
+    let _s = Session::new_for_test("pathCompletionsPackageJsonImportsOnlyFromClosestScope1", content);
     // TODO: f.VerifyCompletions(t, []string{"1"}, &fourslash.CompletionsExpectedList{
     // TODO: f.VerifyCompletions(t, []string{"2"}, &fourslash.CompletionsExpectedList{
 }

@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -10,6 +10,6 @@ var /*5*/see2 = true
 
 /** {@link https://hvaD} */
 var /*6*/see3 = true"#;
-    let mut s = Session::new_for_test("quickInfoForJSDocWithUnresolvedHttpLinks", content);
+    let _s = Session::new_for_test("quickInfoForJSDocWithUnresolvedHttpLinks", content);
     // TODO: f.VerifyBaselineHover(t)
 }

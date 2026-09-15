@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -21,6 +21,6 @@ declare const k: K;
 k.[|/*usea*/a|];
 k.[|/*useb*/b|];
 k.[|/*useab*/ab|];"#;
-    let mut s = Session::new_for_test("goToDefinitionIndexSignature", content);
+    let _s = Session::new_for_test("goToDefinitionIndexSignature", content);
     // TODO: f.VerifyBaselineGoToDefinition(t, true, "useI", "useIJ", "usea", "useb", "useab")
 }

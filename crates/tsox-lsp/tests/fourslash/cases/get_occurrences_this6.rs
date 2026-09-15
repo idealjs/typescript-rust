@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -178,6 +178,6 @@ var x = {
     },
 };
 "#;
-    let mut s = Session::new_for_test("getOccurrencesThis6", content);
+    let _s = Session::new_for_test("getOccurrencesThis6", content);
     // TODO: f.VerifyBaselineDocumentHighlights(t, nil /*preferences*/, ToAny(f.Markers())...)
 }

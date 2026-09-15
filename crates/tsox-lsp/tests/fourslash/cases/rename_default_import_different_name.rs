@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -12,7 +12,7 @@ fn rename_default_import_different_name() {
 [|import /*2*/[|{| "isWriteAccess": true, "isDefinition": true, "contextRangeIndex": 2 |}B|] from "./B";|]
 let b = new [|B|]();
 b.test();"#;
-    let mut s = Session::new_for_test("renameDefaultImportDifferentName", content);
+    let _s = Session::new_for_test("renameDefaultImportDifferentName", content);
     // TODO: f.VerifyBaselineFindAllReferences(t, "1", "2")
     // TODO: f.VerifyBaselineRename(t, nil /*preferences*/, f.Ranges()[1])
     // TODO: f.VerifyBaselineRename(t, nil /*preferences*/, f.Ranges()[3], f.Ranges()[4])

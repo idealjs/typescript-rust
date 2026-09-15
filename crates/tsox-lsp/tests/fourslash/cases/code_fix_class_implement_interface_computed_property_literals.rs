@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -11,6 +11,6 @@ fn code_fix_class_implement_interface_computed_property_literals() {
 }
 
 class C implements I {}"#;
-    let mut s = Session::new_for_test("codeFixClassImplementInterfaceComputedPropertyLiterals", content);
+    let _s = Session::new_for_test("codeFixClassImplementInterfaceComputedPropertyLiterals", content);
     // TODO: f.VerifyCodeFix(t, fourslash.VerifyCodeFixOptions{
 }

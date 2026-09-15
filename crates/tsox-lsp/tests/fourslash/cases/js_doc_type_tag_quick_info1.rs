@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -33,6 +33,6 @@ var /*11*/AnyType;
 var /*12*/QType;
 /** @type {String|Number} */
 var /*13*/SOrN;"#;
-    let mut s = Session::new_for_test("jsDocTypeTagQuickInfo1", content);
+    let _s = Session::new_for_test("jsDocTypeTagQuickInfo1", content);
     // TODO: f.VerifyBaselineHover(t)
 }

@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -23,6 +23,6 @@ let opt1 = [|<[|{| "contextRangeIndex": 4 |}Opt|] propx={100} propString />|];
 let opt2 = [|<[|{| "contextRangeIndex": 6 |}Opt|] propx={100} optional/>|];
 let opt3 = [|<[|{| "contextRangeIndex": 8 |}Opt|] wrong />|];
 let opt4 = [|<[|{| "contextRangeIndex": 10 |}Opt|] propx={100} propString="hi" />|];"#;
-    let mut s = Session::new_for_test("tsxRename6", content);
+    let _s = Session::new_for_test("tsxRename6", content);
     // TODO: f.VerifyBaselineRenameAtRangesWithText(t, nil /*preferences*/, "Opt")
 }

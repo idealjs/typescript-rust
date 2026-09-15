@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -43,6 +43,6 @@ function someFunction(x: Foo | Bar) {
 function anotherFunction(x: Foo & Bar) {
 	 x.he/*function_call1*/llo();
 }"#;
-    let mut s = Session::new_for_test("goToImplementationInterfaceMethod_10", content);
+    let _s = Session::new_for_test("goToImplementationInterfaceMethod_10", content);
     // TODO: f.VerifyBaselineGoToImplementation(t, "function_call0", "function_call1")
 }

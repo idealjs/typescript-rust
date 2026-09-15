@@ -214,7 +214,7 @@ impl Checker {
             let enclosing_is_external_module = ctx
                 .enclosing_declaration
                 .as_ref()
-                .map(|n| false)
+                .map(|_n| false)
                 .unwrap_or(false);
 
             if symbol_from_symbol_table.name != INTERNAL_SYMBOL_NAME_EXPORT_EQUALS

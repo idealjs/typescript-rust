@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -8,6 +8,6 @@ fn get_edits_for_file_rename_amd() {
 import { x } from "old";
 // @Filename: /src/old.ts
 export const x = 0;"#;
-    let mut s = Session::new_for_test("getEditsForFileRename_amd", content);
+    let _s = Session::new_for_test("getEditsForFileRename_amd", content);
     // TODO: f.VerifyWillRenameFilesEdits(t, "/src/old.ts", "/src/new.ts", map[string]string{
 }

@@ -6,7 +6,7 @@ use tsox_frontend::ast::{Node, SyntaxKind};
 
 /// 对象字面量处于赋值表达式左侧（解构赋值目标）的位置判定（旧管线同款）
 pub(crate) fn is_assignment_target_literal(obj: &Arc<Node>) -> bool {
-    let target = match assignment_target_expr(obj) {
+    let _target = match assignment_target_expr(obj) {
         Some(t) => t,
         None => return false,
     };

@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -8,6 +8,6 @@ enum Degree {}
 
 declare const e/*0*/: Degree;
 "#;
-    let mut s = Session::new_for_test("quickinfoVerbosityEmptyEnum", content);
+    let _s = Session::new_for_test("quickinfoVerbosityEmptyEnum", content);
     // TODO: f.VerifyBaselineHoverWithVerbosity(t, map[string][]int{"0": {0, 1}})
 }

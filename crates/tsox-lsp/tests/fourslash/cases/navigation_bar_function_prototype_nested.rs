@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -13,6 +13,6 @@ Object.defineProperty(A.B.prototype, "x", {
 })
 A.prototype.D = function () {  } 
 A.prototype.D.prototype.d = function () {  } "#;
-    let mut s = Session::new_for_test("navigationBarFunctionPrototypeNested", content);
+    let _s = Session::new_for_test("navigationBarFunctionPrototypeNested", content);
     // TODO: f.VerifyBaselineDocumentSymbol(t)
 }

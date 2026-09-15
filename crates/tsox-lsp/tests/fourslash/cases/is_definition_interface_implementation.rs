@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -13,6 +13,6 @@ class C implements I {
 
 ({} as I).M();
 ({} as C).M();"#;
-    let mut s = Session::new_for_test("isDefinitionInterfaceImplementation", content);
+    let _s = Session::new_for_test("isDefinitionInterfaceImplementation", content);
     // TODO: f.VerifyBaselineFindAllReferences(t, "1", "2")
 }

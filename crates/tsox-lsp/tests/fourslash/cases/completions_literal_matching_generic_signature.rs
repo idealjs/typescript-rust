@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -8,6 +8,6 @@ declare function bar1<P extends "" | "bar" | "baz">(p: P): void;
 
 bar1("/*ts*/")
 "#;
-    let mut s = Session::new_for_test("completionsLiteralMatchingGenericSignature", content);
+    let _s = Session::new_for_test("completionsLiteralMatchingGenericSignature", content);
     // TODO: f.VerifyCompletions(t, []string{"ts"}, &fourslash.CompletionsExpectedList{
 }

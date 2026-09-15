@@ -21,6 +21,6 @@ class B {
     method() {}
 }
 class C implements B {[| |]}"#;
-    let mut s = Session::new_for_test("implementClassFixDoesNotAddInvalidOverride", content);
+    let _s = Session::new_for_test("implementClassFixDoesNotAddInvalidOverride", content);
     // TODO: f.VerifyCodeFix(t, fourslash.VerifyCodeFixOptions{
 }

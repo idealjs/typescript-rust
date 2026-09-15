@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -25,6 +25,6 @@ fn quick_info_display_parts_local_function() {
     /*15*/foowith3overload(true);
 }
 /*16*/outerFoo();"#;
-    let mut s = Session::new_for_test("quickInfoDisplayPartsLocalFunction", content);
+    let _s = Session::new_for_test("quickInfoDisplayPartsLocalFunction", content);
     // TODO: f.VerifyBaselineHover(t)
 }

@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -20,7 +20,7 @@ export {};
 A/*parent*/
 // @Filename: /src/index.ts
 export * from "./a";"#;
-    let mut s = Session::new_for_test("importNameCodeFix_barrelExport", content);
+    let _s = Session::new_for_test("importNameCodeFix_barrelExport", content);
     // TODO: f.VerifyImportFixModuleSpecifiers(t, "sibling", []string{"./a", ".", ".."}, nil /*preferences*/)
     // TODO: f.VerifyImportFixModuleSpecifiers(t, "parent", []string{"../foo", "../foo/a", ".."}, nil /*preferenc
 }

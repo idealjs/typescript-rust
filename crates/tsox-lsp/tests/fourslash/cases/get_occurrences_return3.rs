@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -21,6 +21,6 @@ fn get_occurrences_return3() {
     return;
     return true;
 }"#;
-    let mut s = Session::new_for_test("getOccurrencesReturn3", content);
+    let _s = Session::new_for_test("getOccurrencesReturn3", content);
     // TODO: f.VerifyBaselineDocumentHighlights(t, nil /*preferences*/, ToAny(f.Ranges())...)
 }

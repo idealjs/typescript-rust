@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -16,7 +16,7 @@ module "ambientModule" {
 }"#;
     // TODO: capabilities := fourslash.GetDefaultCapabilities()
     // TODO: capabilities.TextDocument.Completion.CompletionItem.SnippetSupport = new(false)
-    let mut s = Session::new_with_capabilities(content, None);
+    let _s = Session::new_with_capabilities(content, None);
     // TODO: f.VerifyJSDocCompletion(t, "namespaceN", 3, `/** */`, nil)
     // TODO: f.VerifyJSDocCompletion(t, "namespaceM", 3, `/** */`, nil)
     // TODO: f.VerifyJSDocCompletion(t, "ambientModule", 3, `/** */`, nil)

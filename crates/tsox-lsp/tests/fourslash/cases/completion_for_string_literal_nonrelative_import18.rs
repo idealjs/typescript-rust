@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -15,6 +15,6 @@ fn completion_for_string_literal_nonrelative_import18() {
 import * as foo1 from "/path/w/*first*/
 // @Filename: path/whatever.ts
 export {}"#;
-    let mut s = Session::new_for_test("completionForStringLiteralNonrelativeImport18", content);
+    let _s = Session::new_for_test("completionForStringLiteralNonrelativeImport18", content);
     // TODO: f.VerifyCompletions(t, []string{"first"}, &fourslash.CompletionsExpectedList{
 }

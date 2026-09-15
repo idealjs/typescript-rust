@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -30,6 +30,6 @@ function myFunction2<K extends keyof typeof myEnum>(
 
 myFunction2("valA", { b: "/*ts3*/" });
 myFunction2("valA", { b: `/*ts4*/` });"#;
-    let mut s = Session::new_for_test("stringLiteralCompletionsInArgUsingInferenceResultFromPreviousArg", content);
+    let _s = Session::new_for_test("stringLiteralCompletionsInArgUsingInferenceResultFromPreviousArg", content);
     // TODO: f.VerifyCompletions(t, []string{"ts1", "ts2", "ts3", "ts4"}, &fourslash.CompletionsExpectedList{
 }

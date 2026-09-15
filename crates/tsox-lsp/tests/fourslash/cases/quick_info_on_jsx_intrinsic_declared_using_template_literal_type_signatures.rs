@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -13,6 +13,6 @@ declare namespace JSX {
 }
 </*1*/foobaz />;
 </*2*/foobarbaz />;"#;
-    let mut s = Session::new_for_test("quickInfoOnJsxIntrinsicDeclaredUsingTemplateLiteralTypeSignatures", content);
+    let _s = Session::new_for_test("quickInfoOnJsxIntrinsicDeclaredUsingTemplateLiteralTypeSignatures", content);
     // TODO: f.VerifyBaselineHover(t)
 }

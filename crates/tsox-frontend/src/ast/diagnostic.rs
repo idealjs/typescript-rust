@@ -1,7 +1,6 @@
 use std::sync::Mutex;
 
 use tsox_core::core::text::TextRange;
-use tsox_core::diagnostics;
 use tsox_core::diagnostics::Category;
 use tsox_core::diagnostics::Message;
 

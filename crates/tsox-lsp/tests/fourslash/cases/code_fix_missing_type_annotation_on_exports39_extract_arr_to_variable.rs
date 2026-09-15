@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -13,7 +13,7 @@ export let o = {
         ...c
     ]
 }"#;
-    let mut s = Session::new_for_test("codeFixMissingTypeAnnotationOnExports39_extract_arr_to_variable", content);
+    let _s = Session::new_for_test("codeFixMissingTypeAnnotationOnExports39_extract_arr_to_variable", content);
     // TODO: f.VerifyCodeFix(t, fourslash.VerifyCodeFixOptions{
     // TODO: f.VerifyCodeFix(t, fourslash.VerifyCodeFixOptions{
     // TODO: f.VerifyCodeFix(t, fourslash.VerifyCodeFixOptions{

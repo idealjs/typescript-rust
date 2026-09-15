@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -10,6 +10,6 @@ fn find_all_refs_js_enum() {
 /*3*/E["A"];
 /** @type {/*4*/E} */
 const e = /*5*/E.A;"#;
-    let mut s = Session::new_for_test("findAllRefs_jsEnum", content);
+    let _s = Session::new_for_test("findAllRefs_jsEnum", content);
     // TODO: f.VerifyBaselineFindAllReferences(t, "1", "2", "3", "4", "5")
 }

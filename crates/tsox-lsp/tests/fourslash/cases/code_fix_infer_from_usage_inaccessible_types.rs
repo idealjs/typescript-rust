@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -20,6 +20,6 @@ function h2() {
     f2(false);
 }
 "#;
-    let mut s = Session::new_for_test("codeFixInferFromUsageInaccessibleTypes", content);
+    let _s = Session::new_for_test("codeFixInferFromUsageInaccessibleTypes", content);
     // TODO: f.VerifyCodeFixNotAvailable(t)
 }

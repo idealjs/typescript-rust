@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -13,6 +13,6 @@ class Foo {
 }
 
 var x = new [|/*usage*/Foo|]();"#;
-    let mut s = Session::new_for_test("goToDefinitionConstructorOfClassWhenClassIsPrecededByNamespace01", content);
+    let _s = Session::new_for_test("goToDefinitionConstructorOfClassWhenClassIsPrecededByNamespace01", content);
     // TODO: f.VerifyBaselineGoToDefinition(t, true, "usage")
 }

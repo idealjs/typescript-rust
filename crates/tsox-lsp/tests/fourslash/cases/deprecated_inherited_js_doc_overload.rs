@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -29,6 +29,6 @@ declare const a: ThingWithDeprecations<void>
 a.subscribe/**/(() => {
   console.log('something happened');
 });"#;
-    let mut s = Session::new_for_test("deprecatedInheritedJSDocOverload", content);
+    let _s = Session::new_for_test("deprecatedInheritedJSDocOverload", content);
     // TODO: f.VerifyBaselineHover(t)
 }

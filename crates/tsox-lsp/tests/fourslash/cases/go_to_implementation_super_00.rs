@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -12,6 +12,6 @@ class Bar extends Foo {
         su/*super_call*/per();
     }
 }"#;
-    let mut s = Session::new_for_test("goToImplementationSuper_00", content);
+    let _s = Session::new_for_test("goToImplementationSuper_00", content);
     // TODO: f.VerifyBaselineGoToImplementation(t, "super_call")
 }

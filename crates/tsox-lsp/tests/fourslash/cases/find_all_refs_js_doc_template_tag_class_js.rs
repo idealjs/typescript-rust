@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -12,6 +12,6 @@ class C {
         this.x = null;
     }
 }"#;
-    let mut s = Session::new_for_test("findAllRefsJsDocTemplateTag_class_js", content);
+    let _s = Session::new_for_test("findAllRefsJsDocTemplateTag_class_js", content);
     // TODO: f.VerifyBaselineFindAllReferences(t, "1", "2")
 }

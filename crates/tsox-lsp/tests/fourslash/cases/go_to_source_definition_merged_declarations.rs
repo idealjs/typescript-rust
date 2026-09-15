@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -23,6 +23,6 @@ Util.version = "1.0";
 // @Filename: /home/src/workspaces/project/index.ts
 import { /*importUtil*/Util } from "pkg";
 const u: /*typeRef*/Util = new Util();"#;
-    let mut s = Session::new_for_test("goToSourceMergedDeclarationDedup", content);
+    let _s = Session::new_for_test("goToSourceMergedDeclarationDedup", content);
     // TODO: f.VerifyBaselineGoToSourceDefinition(t, "importUtil", "typeRef")
 }

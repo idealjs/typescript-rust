@@ -149,7 +149,7 @@ impl Checker {
             return None;
         }
         let first_decl = &symbol.declarations[0];
-        let parent = first_decl.parent().as_ref()?;
+        let _parent = first_decl.parent().as_ref()?;
 
         None
     }

@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -10,7 +10,7 @@ import /*deg*/g from "./a";
 [|/*ref*/g|]();
 // @Filename: c.ts
 import { f } from "./a";"#;
-    let mut s = Session::new_for_test("findAllRefsForDefaultExport", content);
+    let _s = Session::new_for_test("findAllRefsForDefaultExport", content);
     // TODO: f.VerifyBaselineFindAllReferences(t, "def", "deg")
     // TODO: f.VerifyBaselineGoToDefinition(t, true, "ref")
 }

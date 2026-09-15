@@ -154,8 +154,6 @@ impl Checker {
         let module_symbol = self.resolve_external_module_symbol_go(&inner_module);
         let qualifier = d.qualifier.clone();
         let is_type_of = d.is_type_of;
-        // 借用检查：拆出字段后不再持有 d
-        drop(d);
 
         // Go NodeIsMissing(Qualifier)：尾部点的零宽 missing qualifier 视同无
         // qualifier（不参与链解析）

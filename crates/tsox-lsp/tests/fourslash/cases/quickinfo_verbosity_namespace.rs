@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -51,6 +51,6 @@ namespace OnlyLocal/*4*/ {
 export function foo() { return "foo"; }
 import("/*5*/./foo")
 var x = import("./foo")"#;
-    let mut s = Session::new_for_test("quickinfoVerbosityNamespace", content);
+    let _s = Session::new_for_test("quickinfoVerbosityNamespace", content);
     // TODO: f.VerifyBaselineHoverWithVerbosity(t, map[string][]int{"1": {0, 1}, "2": {0, 1, 2}, "3": {0, 1, 2}, 
 }

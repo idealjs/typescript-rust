@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -10,6 +10,6 @@ export as namespace abc;
 // @Filename: /b.ts
 import a from "./a";
 a./*3*/x;"#;
-    let mut s = Session::new_for_test("esModuleInteropFindAllReferences2", content);
+    let _s = Session::new_for_test("esModuleInteropFindAllReferences2", content);
     // TODO: f.VerifyBaselineFindAllReferences(t, "1", "2", "3")
 }

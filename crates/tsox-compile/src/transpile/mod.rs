@@ -4,7 +4,6 @@ use crate::compiler::{CompilerHostImpl, Program, ProgramOptions};
 use tsox_core::core::compiler_options::CompilerOptions;
 use tsox_core::core::compiler_options::JsxEmit;
 use tsox_core::core::tristate::Tristate;
-use tsox_core::tspath;
 use tsox_frontend::ast::Diagnostic;
 use tsox_tsoptions::tsoptions::ParsedCommandLine;
 use tsox_tsoptions::vfs::InMemoryFS;

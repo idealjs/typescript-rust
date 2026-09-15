@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -21,6 +21,6 @@ function fo/*1*/o() {
 function bo/*2*/o() {
     return '2';
 }"#;
-    let mut s = Session::new_for_test("quickInfoForJSDocCodefence", content);
+    let _s = Session::new_for_test("quickInfoForJSDocCodefence", content);
     // TODO: f.VerifyBaselineHover(t)
 }

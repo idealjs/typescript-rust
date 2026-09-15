@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -16,6 +16,6 @@ new [|/*importUsage*/BlahModule|].Blah()
 // @Filename: /barTs.ts
 import [|/*importDefTs*/BlahModule|] = require("./foo.js");
 new [|/*importUsageTs*/BlahModule|].Blah()"#;
-    let mut s = Session::new_for_test("goToDefinitionJsModuleNameAtImportName", content);
+    let _s = Session::new_for_test("goToDefinitionJsModuleNameAtImportName", content);
     // TODO: f.VerifyBaselineGoToDefinition(t, true, "importDef", "importUsage", "importDefTs", "importUsageTs")
 }

@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -10,6 +10,6 @@ const d: 'foo' = 'foo'
 declare const f: Foo
 f.f = '[|foo|]'
 f.f = `[|foo|]`"#;
-    let mut s = Session::new_for_test("renameStringLiteralOk", content);
+    let _s = Session::new_for_test("renameStringLiteralOk", content);
     // TODO: f.VerifyBaselineRenameAtRangesWithText(t, nil /*preferences*/, "foo")
 }

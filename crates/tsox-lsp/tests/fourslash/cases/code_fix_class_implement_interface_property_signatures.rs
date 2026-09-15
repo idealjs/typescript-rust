@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -21,6 +21,6 @@ fn code_fix_class_implement_interface_property_signatures() {
     a10: { (b10: number, c10: string): number; [d10: string]: I };
 }
 class C implements I {}"#;
-    let mut s = Session::new_for_test("codeFixClassImplementInterfacePropertySignatures", content);
+    let _s = Session::new_for_test("codeFixClassImplementInterfacePropertySignatures", content);
     // TODO: f.VerifyCodeFix(t, fourslash.VerifyCodeFixOptions{
 }

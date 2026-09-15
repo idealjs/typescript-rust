@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -15,6 +15,6 @@ var a = 10;
 // @filename: node_modules/c.js
 exports.a = 10;
 c = 10;"#;
-    let mut s = Session::new_for_test("sideEffectImportsSuggestion1", content);
+    let _s = Session::new_for_test("sideEffectImportsSuggestion1", content);
     // TODO: f.VerifySuggestionDiagnostics(t, nil)
 }

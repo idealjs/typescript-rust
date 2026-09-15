@@ -11,7 +11,6 @@ use tsox_frontend::ast::SourceFile;
 use tsox_frontend::ast::SyntaxKind;
 use tsox_frontend::ast::node::LineMap;
 use tsox_frontend::ast::node_data_generated::NodeData;
-use tsox_frontend::scanner;
 
 use super::language_service::LanguageService;
 

@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -28,6 +28,6 @@ export const All = [
   ...End,
   1,
 ] as const;"#;
-    let mut s = Session::new_for_test("codeFixMissingTypeAnnotationOnExports37_array_spread", content);
+    let _s = Session::new_for_test("codeFixMissingTypeAnnotationOnExports37_array_spread", content);
     // TODO: f.VerifyCodeFix(t, fourslash.VerifyCodeFixOptions{
 }

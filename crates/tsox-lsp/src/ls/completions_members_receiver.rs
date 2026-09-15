@@ -82,12 +82,3 @@ pub(super) fn deepest_access_containing(root: &Arc<Node>, dot: usize) -> Option<
     best
 }
 
-pub(super) fn base_identifier(node: &Arc<Node>) -> Option<Arc<Node>> {
-    use tsox_frontend::ast::NodeData;
-    match &node.data {
-        NodeData::Identifier(_) => Some(Arc::clone(node)),
-        NodeData::QualifiedName(d) => base_identifier(&d.left),
-        NodeData::PropertyAccessExpression(d) => base_identifier(&d.expression),
-        _ => None,
-    }
-}

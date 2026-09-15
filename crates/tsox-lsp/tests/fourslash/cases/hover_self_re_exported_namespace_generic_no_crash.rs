@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -12,7 +12,7 @@ import { Box } from "./mod"
 declare const b: Box<string>
 const x = b./*1*/content
 "#;
-    let mut s = Session::new_for_test("hoverSelfReExportedNamespaceGenericNoCrash", content);
+    let _s = Session::new_for_test("hoverSelfReExportedNamespaceGenericNoCrash", content);
     // TODO: f.VerifyBaselineHover(t)
 }
 
@@ -26,7 +26,7 @@ import { Box } from "./mod"
 declare const b: Box<string>
 const x = b./*1*/content
 "#;
-    let mut s = Session::new_for_test("hoverSelfReExportedNamespaceGenericClassNoCrash", content);
+    let _s = Session::new_for_test("hoverSelfReExportedNamespaceGenericClassNoCrash", content);
     // TODO: f.VerifyBaselineHover(t)
 }
 
@@ -40,6 +40,6 @@ import { Box } from "./mod"
 declare const b: Box<string>
 const x = b./*1*/content
 "#;
-    let mut s = Session::new_for_test("hoverNamespaceExportGenericNonColliding", content);
+    let _s = Session::new_for_test("hoverNamespaceExportGenericNonColliding", content);
     // TODO: f.VerifyBaselineHover(t)
 }

@@ -1,4 +1,3 @@
-use tsox_tsoptions::modulespecifiers;
 
 use crate::ls::autoimport_export::Export;
 use crate::ls::autoimport_view::View;

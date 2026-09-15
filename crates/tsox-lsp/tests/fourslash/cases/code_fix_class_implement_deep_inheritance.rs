@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -29,6 +29,6 @@ class C4 extends C3 implements I0, I4, I5 {
 
 interface I6 extends C4 {}
 class C5 implements I6 {}"#;
-    let mut s = Session::new_for_test("codeFixClassImplementDeepInheritance", content);
+    let _s = Session::new_for_test("codeFixClassImplementDeepInheritance", content);
     // TODO: f.VerifyCodeFix(t, fourslash.VerifyCodeFixOptions{
 }

@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -9,6 +9,6 @@ fn rename_alias_external_module2() {
 // @Filename: b.ts
 [|import [|{| "contextRangeIndex": 4 |}M|] = require("./a");|]
 import C = [|M|].SomeClass;"#;
-    let mut s = Session::new_for_test("renameAliasExternalModule2", content);
+    let _s = Session::new_for_test("renameAliasExternalModule2", content);
     // TODO: f.VerifyBaselineRename(t, nil /*preferences*/, f.Ranges()[1], f.Ranges()[3], f.Ranges()[5], f.Ranges
 }

@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -14,6 +14,6 @@ declare module 'styled-components' {
 // @Filename: /node_modules/styled-components/index.d.ts
 export interface Keyframes {}
 export interface ThemedStyledComponentsModule {}"#;
-    let mut s = Session::new_for_test("organizeImports_dtsUnusedImportWithAugmentation", content);
+    let _s = Session::new_for_test("organizeImports_dtsUnusedImportWithAugmentation", content);
     // TODO: f.VerifyOrganizeImports(
 }

@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[ignore = "go: t.Skip('Known failing fourslash test')"]
@@ -8,6 +8,6 @@ fn completion_entry_for_argument_constrained_to_string() {
 
 test(/*ts*/)
 "#;
-    let mut s = Session::new_for_test("completionEntryForArgumentConstrainedToString", content);
+    let _s = Session::new_for_test("completionEntryForArgumentConstrainedToString", content);
     // TODO: f.VerifyCompletions(t, []string{"ts"}, &fourslash.CompletionsExpectedList{
 }

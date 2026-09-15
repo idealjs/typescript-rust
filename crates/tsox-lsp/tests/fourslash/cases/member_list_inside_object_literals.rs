@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -26,7 +26,7 @@ fn member_list_inside_object_literals() {
         /*4*/y1
     };
 }"#;
-    let mut s = Session::new_for_test("memberListInsideObjectLiterals", content);
+    let _s = Session::new_for_test("memberListInsideObjectLiterals", content);
     // TODO: f.VerifyCompletions(t, []string{"1", "3", "4"}, &fourslash.CompletionsExpectedList{
     // TODO: f.VerifyCompletions(t, []string{"2"}, &fourslash.CompletionsExpectedList{
 }

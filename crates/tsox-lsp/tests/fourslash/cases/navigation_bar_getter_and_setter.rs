@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -10,6 +10,6 @@ fn navigation_bar_getter_and_setter() {
         function f() {}
     }
 }"#;
-    let mut s = Session::new_for_test("navigationBarGetterAndSetter", content);
+    let _s = Session::new_for_test("navigationBarGetterAndSetter", content);
     // TODO: f.VerifyBaselineDocumentSymbol(t)
 }

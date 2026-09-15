@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -57,6 +57,6 @@ var o10: I = {
     set ["prop1"](v) { },
     [|set ["[|{| "contextRangeIndex": 20 |}prop2|]"](v) { }|]
 };"#;
-    let mut s = Session::new_for_test("renameContextuallyTypedProperties2", content);
+    let _s = Session::new_for_test("renameContextuallyTypedProperties2", content);
     // TODO: f.VerifyBaselineRenameAtRangesWithText(t, nil /*preferences*/, "prop2")
 }

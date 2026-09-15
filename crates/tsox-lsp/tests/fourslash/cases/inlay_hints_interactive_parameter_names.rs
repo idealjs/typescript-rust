@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -42,6 +42,6 @@ foo5(
 function trace(message: string) {}
 trace(`${1}`);
 trace(``);"#;
-    let mut s = Session::new_for_test("inlayHintsInteractiveParameterNames", content);
+    let _s = Session::new_for_test("inlayHintsInteractiveParameterNames", content);
     // TODO: f.VerifyBaselineInlayHints(t, nil /*span*/, &lsutil.UserPreferences{InlayHints: lsutil.InlayHintsPre
 }

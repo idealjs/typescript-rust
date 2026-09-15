@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -18,6 +18,6 @@ fn rename_declaration_keywords() {
 [|{| "id": "varDecl" |}[|var|] [|{| "isWriteAccess": false, "isDefinition": true, "contextRangeId": "varDecl" |}x|];|]
 [|{| "id": "letDecl" |}[|let|] [|{| "isWriteAccess": false, "isDefinition": true, "contextRangeId": "letDecl" |}y|];|]
 [|{| "id": "constDecl" |}[|const|] [|{| "isWriteAccess": true, "isDefinition": true, "contextRangeId": "constDecl" |}z|] = 1;|]"#;
-    let mut s = Session::new_for_test("renameDeclarationKeywords", content);
+    let _s = Session::new_for_test("renameDeclarationKeywords", content);
     // TODO: f.VerifyBaselineRename(t, nil /*preferences*/, f.Ranges()[5], f.Ranges()[7], f.Ranges()[9], f.Ranges
 }

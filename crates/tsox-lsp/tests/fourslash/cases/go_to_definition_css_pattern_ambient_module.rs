@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -13,6 +13,6 @@ declare module /*2b*/"*.css" {
 }
 // @Filename: index.ts
 import styles from [|/*1*/"./index.css"|];"#;
-    let mut s = Session::new_for_test("goToDefinitionCSSPatternAmbientModule", content);
+    let _s = Session::new_for_test("goToDefinitionCSSPatternAmbientModule", content);
     // TODO: f.VerifyBaselineGoToDefinition(t, true, "1")
 }

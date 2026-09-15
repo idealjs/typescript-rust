@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -9,6 +9,6 @@ function foo() {
 }
 class C extends (foo()).[|/*B*/B|] {}
 class C1 extends foo().[|/*B1*/B|] {}"#;
-    let mut s = Session::new_for_test("gotoDefinitionPropertyAccessExpressionHeritageClause", content);
+    let _s = Session::new_for_test("gotoDefinitionPropertyAccessExpressionHeritageClause", content);
     // TODO: f.VerifyBaselineGoToDefinition(t, true, "B", "B1")
 }

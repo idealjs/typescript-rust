@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -50,6 +50,6 @@ const JobsStateToColor/*a*/: Record<
     labelPlural: "Понављају се",
   },
 }"#;
-    let mut s = Session::new_for_test("quickinfoVerbosityIncreaseDecrease", content);
+    let _s = Session::new_for_test("quickinfoVerbosityIncreaseDecrease", content);
     // TODO: f.VerifyBaselineHoverWithVerbosity(t, map[string][]int{"a": {0, 1, 0}})
 }

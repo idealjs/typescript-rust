@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -8,6 +8,6 @@ fn navigation_bar_items_symbols1() {
     [Symbol.iterator]() { }
     get [Symbol.isConcatSpreadable]() { }
 }"#;
-    let mut s = Session::new_for_test("navigationBarItemsSymbols1", content);
+    let _s = Session::new_for_test("navigationBarItemsSymbols1", content);
     // TODO: f.VerifyBaselineDocumentSymbol(t)
 }

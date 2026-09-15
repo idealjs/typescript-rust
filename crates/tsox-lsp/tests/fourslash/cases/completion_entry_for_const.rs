@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -9,7 +9,7 @@ const d = 1
 d/*2*/
 const e = 1
 /*3*/"#;
-    let mut s = Session::new_for_test("completionEntryForConst", content);
+    let _s = Session::new_for_test("completionEntryForConst", content);
     // TODO: f.VerifyCompletions(t, []string{"1"}, &fourslash.CompletionsExpectedList{
     // TODO: f.VerifyCompletions(t, []string{"2"}, &fourslash.CompletionsExpectedList{
     // TODO: f.VerifyCompletions(t, []string{"3"}, &fourslash.CompletionsExpectedList{

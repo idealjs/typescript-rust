@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -9,6 +9,6 @@ fn code_fix_missing_type_annotation_on_exports_type_predicate1() {
 export function isString(value: unknown) {
   return typeof value === "string";
 }"#;
-    let mut s = Session::new_for_test("codeFixMissingTypeAnnotationOnExportsTypePredicate1", content);
+    let _s = Session::new_for_test("codeFixMissingTypeAnnotationOnExportsTypePredicate1", content);
     // TODO: f.VerifyCodeFix(t, fourslash.VerifyCodeFixOptions{
 }

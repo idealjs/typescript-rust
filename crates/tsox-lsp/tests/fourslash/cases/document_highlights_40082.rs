@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -8,6 +8,6 @@ export = (state, messages) => {
    export [|default|] {
    }
 }"#;
-    let mut s = Session::new_for_test("documentHighlights_40082", content);
+    let _s = Session::new_for_test("documentHighlights_40082", content);
     // TODO: f.VerifyBaselineDocumentHighlights(t, nil /*preferences*/, f.Ranges()[0])
 }

@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -14,6 +14,6 @@ interface I2 {
 // @Filename: goToTypeDefinition2_Consumption.ts
 var i2: I2;
 i2.prop/*reference*/erty;"#;
-    let mut s = Session::new_for_test("goToTypeDefinition2", content);
+    let _s = Session::new_for_test("goToTypeDefinition2", content);
     // TODO: f.VerifyBaselineGoToTypeDefinition(t, "reference")
 }

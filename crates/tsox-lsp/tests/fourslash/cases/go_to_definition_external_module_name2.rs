@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -9,6 +9,6 @@ var x = new n.Foo();
 // @Filename: a.ts
 /*2*/class Foo {}
 export var x = 0;"#;
-    let mut s = Session::new_for_test("goToDefinitionExternalModuleName2", content);
+    let _s = Session::new_for_test("goToDefinitionExternalModuleName2", content);
     // TODO: f.VerifyBaselineGoToDefinition(t, true, "1")
 }

@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -15,6 +15,6 @@ switch (0) {
     default:
         [|abstract|] class B { [|abstract|] m(): void; }
 }"#;
-    let mut s = Session::new_for_test("getOccurrencesAbstract03", content);
+    let _s = Session::new_for_test("getOccurrencesAbstract03", content);
     // TODO: f.VerifyBaselineDocumentHighlights(t, nil /*preferences*/, ToAny(f.Ranges())...)
 }

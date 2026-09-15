@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -8,6 +8,6 @@ fn get_occurrences_const04() {
     constructor(public con/*3*/st foo) {
     }
 }"#;
-    let mut s = Session::new_for_test("getOccurrencesConst04", content);
+    let _s = Session::new_for_test("getOccurrencesConst04", content);
     // TODO: f.VerifyBaselineDocumentHighlights(t, nil /*preferences*/, "1", "2", "3")
 }

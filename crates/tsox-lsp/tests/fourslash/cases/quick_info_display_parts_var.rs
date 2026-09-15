@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -18,6 +18,6 @@ var /*10*/h: { (a: string): number; (a: number): string; };
 var /*11*/i = /*12*/h;
 /*13*/h(10);
 /*14*/h("hello");"#;
-    let mut s = Session::new_for_test("quickInfoDisplayPartsVar", content);
+    let _s = Session::new_for_test("quickInfoDisplayPartsVar", content);
     // TODO: f.VerifyBaselineHover(t)
 }

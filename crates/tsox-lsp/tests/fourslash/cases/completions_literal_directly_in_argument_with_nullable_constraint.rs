@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -10,6 +10,6 @@ declare function func<
 >(arg?: T): string;
 
 func('/*1*/');"#;
-    let mut s = Session::new_for_test("completionsLiteralDirectlyInArgumentWithNullableConstraint", content);
+    let _s = Session::new_for_test("completionsLiteralDirectlyInArgumentWithNullableConstraint", content);
     // TODO: f.VerifyCompletions(t, []string{"1"}, &fourslash.CompletionsExpectedList{
 }

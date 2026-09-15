@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -17,6 +17,6 @@ fn references_for_expression_keywords() {
 "x" /*in*/in C;
 undefined /*instanceof*/instanceof C;
 undefined /*as*/as C;"#;
-    let mut s = Session::new_for_test("referencesForExpressionKeywords", content);
+    let _s = Session::new_for_test("referencesForExpressionKeywords", content);
     // TODO: f.VerifyBaselineFindAllReferences(t, "new", "void", "typeof", "yield", "await", "in", "instanceof", 
 }

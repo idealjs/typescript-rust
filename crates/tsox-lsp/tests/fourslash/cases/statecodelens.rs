@@ -153,6 +153,6 @@ aaa();
 import * as foo from '../../a/dist/foo.js';
 foo.aaa();
 "#;
-    let mut s = Session::new_for_test("codeLensOnFunctionAcrossProjects1", content);
+    let _s = Session::new_for_test("codeLensOnFunctionAcrossProjects1", content);
     // TODO: f.VerifyBaselineCodeLens(t, &lsutil.UserPreferences{
 }

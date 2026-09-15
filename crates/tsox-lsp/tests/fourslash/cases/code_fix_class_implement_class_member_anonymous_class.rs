@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -13,6 +13,6 @@ class A {
     }
 }
 class C implements A {[| |]}"#;
-    let mut s = Session::new_for_test("codeFixClassImplementClassMemberAnonymousClass", content);
+    let _s = Session::new_for_test("codeFixClassImplementClassMemberAnonymousClass", content);
     // TODO: f.VerifyCodeFixNotAvailable(t)
 }

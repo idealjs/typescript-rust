@@ -2,13 +2,13 @@ use std::sync::Arc;
 
 use tsox_checker::checker::Checker;
 use tsox_checker::checker::types::Type;
-use tsox_frontend::ast::{ModifierFlags, Node, NodeData, Symbol, SymbolFlags, SyntaxKind};
+use tsox_frontend::ast::{Node, NodeData, Symbol, SymbolFlags, SyntaxKind};
 
 use super::completions_accessibility::{
     class_named_like, enclosing_class_of, is_property_accessible,
 };
 use super::completions_members_receiver::{
-    base_identifier, deepest_access_containing, deepest_node_ending_at, primitive_interface_of,
+    deepest_access_containing, deepest_node_ending_at, primitive_interface_of,
     source_text_of,
 };
 
@@ -343,24 +343,6 @@ pub(super) fn member_symbols_after_dot(
     )
 }
 
-fn kind_contains(root: &Arc<Node>, kind: SyntaxKind, pos: usize) -> bool {
-    fn dfs(n: &Arc<Node>, kind: SyntaxKind, pos: usize, hit: &mut bool) {
-        if *hit || n.pos() > pos {
-            return;
-        }
-        if n.kind == kind && pos <= n.end() {
-            *hit = true;
-            return;
-        }
-        tsox_frontend::ast::node_data_generated::for_each_child(n, |c| {
-            dfs(c, kind, pos, hit);
-            *hit
-        });
-    }
-    let mut hit = false;
-    dfs(root, kind, pos, &mut hit);
-    hit
-}
 
 pub(super) enum MemberDotResult {
     Dot(Vec<Arc<Symbol>>),

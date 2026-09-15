@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -15,7 +15,7 @@ export function /*target*/scopedHelper() { return "scoped"; }
 // @Filename: /home/src/workspaces/project/index.ts
 import { /*importName*/scopedHelper } from "@myscope/mylib";
 scopedHelper/*usage*/();"#;
-    let mut s = Session::new_for_test("goToSourceScopedPackage", content);
+    let _s = Session::new_for_test("goToSourceScopedPackage", content);
     // TODO: f.VerifyBaselineGoToSourceDefinition(t, "importName", "usage")
 }
 
@@ -34,6 +34,6 @@ export function /*target*/nsHelper() { return 42; }
 // @Filename: /home/src/workspaces/project/index.ts
 import { nsHelper } from "@myns/mylib";
 nsHelper/*usage*/();"#;
-    let mut s = Session::new_for_test("goToSourceScopedAtTypesPackage", content);
+    let _s = Session::new_for_test("goToSourceScopedAtTypesPackage", content);
     // TODO: f.VerifyBaselineGoToSourceDefinition(t, "usage")
 }

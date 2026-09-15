@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -9,6 +9,6 @@ function f(a: string, b?: number): string {
     return "";
 }
 f("", "", 1);"#;
-    let mut s = Session::new_for_test("codeFixAddOptionalParam14", content);
+    let _s = Session::new_for_test("codeFixAddOptionalParam14", content);
     // TODO: f.VerifyCodeFixNotAvailable(t, "addOptionalParam")
 }

@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -11,6 +11,6 @@ foo2(1, 2, 3)
 type Args3 = [number, number]
 declare function foo3(c: number, ...args: Args3);
 foo3(1, 2, 3)"#;
-    let mut s = Session::new_for_test("inlayHintsInteractiveRestParameters1", content);
+    let _s = Session::new_for_test("inlayHintsInteractiveRestParameters1", content);
     // TODO: f.VerifyBaselineInlayHints(t, nil /*span*/, &lsutil.UserPreferences{InlayHints: lsutil.InlayHintsPre
 }

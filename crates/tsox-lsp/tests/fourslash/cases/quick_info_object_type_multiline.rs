@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -11,6 +11,6 @@ type X/*1*/ = {
 }
 type C = {}
 "#;
-    let mut s = Session::new_for_test("quickInfoObjectTypeMultiline", content);
+    let _s = Session::new_for_test("quickInfoObjectTypeMultiline", content);
     // TODO: f.VerifyBaselineHoverWithVerbosity(t, map[string][]int{"1": {0, 1}})
 }

@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -17,6 +17,6 @@ import b = require("./b");
 [|/*xUse*/x|];
 [|/*aUse*/a|];
 [|/*bUse*/b|];"#;
-    let mut s = Session::new_for_test("goToDefinitionImports", content);
+    let _s = Session::new_for_test("goToDefinitionImports", content);
     // TODO: f.VerifyBaselineGoToDefinition(t, true, "aUse", "fUse", "xUse", "bUse")
 }

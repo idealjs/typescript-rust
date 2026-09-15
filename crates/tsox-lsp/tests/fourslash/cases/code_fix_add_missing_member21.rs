@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -7,6 +7,6 @@ fn code_fix_add_missing_member21() {
 async function f() {
     p.toLowerCase();
 }"#;
-    let mut s = Session::new_for_test("codeFixAddMissingMember21", content);
+    let _s = Session::new_for_test("codeFixAddMissingMember21", content);
     // TODO: f.VerifyCodeFixNotAvailable(t, "fixMissingMember")
 }

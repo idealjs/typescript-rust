@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -9,6 +9,6 @@ fn quick_info_satisfies_tag() {
 // @filename: /a.js
 /** @satisfies {number} comment */
 const /*1*/a = 1;"#;
-    let mut s = Session::new_for_test("quickInfoSatisfiesTag", content);
+    let _s = Session::new_for_test("quickInfoSatisfiesTag", content);
     // TODO: f.VerifyBaselineHover(t)
 }

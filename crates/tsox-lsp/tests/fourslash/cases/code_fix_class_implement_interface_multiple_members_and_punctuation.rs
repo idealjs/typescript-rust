@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -13,6 +13,6 @@ fn code_fix_class_implement_interface_multiple_members_and_punctuation() {
 }
 
 class C1 implements I1 {}"#;
-    let mut s = Session::new_for_test("codeFixClassImplementInterfaceMultipleMembersAndPunctuation", content);
+    let _s = Session::new_for_test("codeFixClassImplementInterfaceMultipleMembersAndPunctuation", content);
     // TODO: f.VerifyCodeFix(t, fourslash.VerifyCodeFixOptions{
 }

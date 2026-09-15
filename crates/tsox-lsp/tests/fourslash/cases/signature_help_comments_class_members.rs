@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -134,6 +134,6 @@ class cWithConstructorProperty {
         this.a = a + 2 + bbbb;
     }
 }"#;
-    let mut s = Session::new_for_test("signatureHelpCommentsClassMembers", content);
+    let _s = Session::new_for_test("signatureHelpCommentsClassMembers", content);
     // TODO: f.VerifyBaselineSignatureHelp(t)
 }

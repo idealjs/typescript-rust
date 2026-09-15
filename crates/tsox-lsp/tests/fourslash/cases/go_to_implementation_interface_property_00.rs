@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -19,6 +19,6 @@ class Bar {
 
     constructor(public f: Foo = { [|hello|]: 7 } ) {}
 }"#;
-    let mut s = Session::new_for_test("goToImplementationInterfaceProperty_00", content);
+    let _s = Session::new_for_test("goToImplementationInterfaceProperty_00", content);
     // TODO: f.VerifyBaselineGoToImplementation(t, "reference")
 }

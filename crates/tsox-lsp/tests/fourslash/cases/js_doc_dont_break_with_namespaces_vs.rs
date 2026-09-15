@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -20,6 +20,6 @@ bar(''/*bar*/);
 /** @type {function(module:xxxx, module:xxxx): module:xxxxx} */
 function zee() { }
 zee(''/*zee*/);"#;
-    let mut s = Session::new_with_capabilities(content, None);
+    let _s = Session::new_with_capabilities(content, None);
     // TODO: f.VerifyBaselineSignatureHelp(t)
 }

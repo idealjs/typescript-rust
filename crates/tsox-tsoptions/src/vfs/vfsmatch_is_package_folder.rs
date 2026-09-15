@@ -1,6 +1,5 @@
 use crate::vfs::FS;
 use std::collections::HashSet;
-use tsox_core::tspath;
 
 use crate::vfs::vfsmatch::*;
 

@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -20,6 +20,6 @@ namespace M {
 var x: C | I | M.I;
 
 /*reference*/x;"#;
-    let mut s = Session::new_for_test("goToTypeDefinitionUnionType", content);
+    let _s = Session::new_for_test("goToTypeDefinitionUnionType", content);
     // TODO: f.VerifyBaselineGoToTypeDefinition(t, "reference")
 }

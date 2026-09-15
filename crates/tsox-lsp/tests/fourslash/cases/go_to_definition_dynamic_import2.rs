@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -9,6 +9,6 @@ var x = import("./foo");
 x.then(foo => {
     foo.[|b/*1*/ar|](); 
 })"#;
-    let mut s = Session::new_for_test("goToDefinitionDynamicImport2", content);
+    let _s = Session::new_for_test("goToDefinitionDynamicImport2", content);
     // TODO: f.VerifyBaselineGoToDefinition(t, true, "1")
 }

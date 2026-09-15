@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -12,6 +12,6 @@ x.ss;
 x["ss"];
 x = { "ss": 0 };
 x = { ss: 0 };"#;
-    let mut s = Session::new_for_test("referencesForStringLiteralPropertyNames", content);
+    let _s = Session::new_for_test("referencesForStringLiteralPropertyNames", content);
     // TODO: f.VerifyBaselineFindAllReferences(t, "1")
 }

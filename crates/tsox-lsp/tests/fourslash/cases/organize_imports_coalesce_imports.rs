@@ -1,11 +1,11 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
 fn organize_imports_coalesce_imports_sort_specifiers_case_insensitive() {
     let content = r#"import { default as M, a as n, B, y, Z as O } from "lib";
 M; n; B; y; O;"#;
-    let mut s = Session::new_for_test("organizeImports_coalesceImports_sortSpecifiersCaseInsensitive", content);
+    let _s = Session::new_for_test("organizeImports_coalesceImports_sortSpecifiersCaseInsensitive", content);
     // TODO: f.VerifyOrganizeImports(
 }
 
@@ -14,7 +14,7 @@ fn organize_imports_coalesce_imports_combine_side_effect_only() {
     let content = r#"import "lib";
 import "lib";
 void 0;"#;
-    let mut s = Session::new_for_test("organizeImports_coalesceImports_combineSideEffectOnly", content);
+    let _s = Session::new_for_test("organizeImports_coalesceImports_combineSideEffectOnly", content);
     // TODO: f.VerifyOrganizeImports(
 }
 
@@ -25,7 +25,7 @@ fn organize_imports_coalesce_imports_combine_namespace_imports_not_merged() {
 import * as y from "lib";
 import { z } from "aaa";
 x; y; z;"#;
-    let mut s = Session::new_for_test("organizeImports_coalesceImports_combineNamespaceImportsNotMerged", content);
+    let _s = Session::new_for_test("organizeImports_coalesceImports_combineNamespaceImportsNotMerged", content);
     // TODO: f.VerifyOrganizeImports(
 }
 
@@ -34,7 +34,7 @@ fn organize_imports_coalesce_imports_combine_default_imports() {
     let content = r#"import x from "lib";
 import y from "lib";
 x; y;"#;
-    let mut s = Session::new_for_test("organizeImports_coalesceImports_combineDefaultImports", content);
+    let _s = Session::new_for_test("organizeImports_coalesceImports_combineDefaultImports", content);
     // TODO: f.VerifyOrganizeImports(
 }
 
@@ -43,7 +43,7 @@ fn organize_imports_coalesce_imports_combine_property_imports() {
     let content = r#"import { x } from "lib";
 import { y as z } from "lib";
 x; z;"#;
-    let mut s = Session::new_for_test("organizeImports_coalesceImports_combinePropertyImports", content);
+    let _s = Session::new_for_test("organizeImports_coalesceImports_combinePropertyImports", content);
     // TODO: f.VerifyOrganizeImports(
 }
 
@@ -54,7 +54,7 @@ fn organize_imports_coalesce_imports_side_effect_with_namespace() {
 import * as x from "lib";
 import { z } from "aaa";
 x; z;"#;
-    let mut s = Session::new_for_test("organizeImports_coalesceImports_sideEffectWithNamespace", content);
+    let _s = Session::new_for_test("organizeImports_coalesceImports_sideEffectWithNamespace", content);
     // TODO: f.VerifyOrganizeImports(
 }
 
@@ -65,7 +65,7 @@ fn organize_imports_coalesce_imports_side_effect_with_default() {
 import x from "lib";
 import { z } from "aaa";
 x; z;"#;
-    let mut s = Session::new_for_test("organizeImports_coalesceImports_sideEffectWithDefault", content);
+    let _s = Session::new_for_test("organizeImports_coalesceImports_sideEffectWithDefault", content);
     // TODO: f.VerifyOrganizeImports(
 }
 
@@ -76,7 +76,7 @@ fn organize_imports_coalesce_imports_side_effect_with_property() {
 import { x } from "lib";
 import { z } from "aaa";
 x; z;"#;
-    let mut s = Session::new_for_test("organizeImports_coalesceImports_sideEffectWithProperty", content);
+    let _s = Session::new_for_test("organizeImports_coalesceImports_sideEffectWithProperty", content);
     // TODO: f.VerifyOrganizeImports(
 }
 
@@ -86,7 +86,7 @@ fn organize_imports_coalesce_imports_namespace_with_default() {
     let content = r#"import * as x from "lib";
 import y from "lib";
 x; y;"#;
-    let mut s = Session::new_for_test("organizeImports_coalesceImports_namespaceWithDefault", content);
+    let _s = Session::new_for_test("organizeImports_coalesceImports_namespaceWithDefault", content);
     // TODO: f.VerifyOrganizeImports(
 }
 
@@ -97,7 +97,7 @@ fn organize_imports_coalesce_imports_namespace_with_property() {
 import { y } from "lib";
 import { z } from "aaa";
 x; y; z;"#;
-    let mut s = Session::new_for_test("organizeImports_coalesceImports_namespaceWithProperty", content);
+    let _s = Session::new_for_test("organizeImports_coalesceImports_namespaceWithProperty", content);
     // TODO: f.VerifyOrganizeImports(
 }
 
@@ -107,7 +107,7 @@ fn organize_imports_coalesce_imports_default_with_property() {
     let content = r#"import x from "lib";
 import { y } from "lib";
 x; y;"#;
-    let mut s = Session::new_for_test("organizeImports_coalesceImports_defaultWithProperty", content);
+    let _s = Session::new_for_test("organizeImports_coalesceImports_defaultWithProperty", content);
     // TODO: f.VerifyOrganizeImports(
 }
 
@@ -122,7 +122,7 @@ import * as x from "lib";
 import z from "lib";
 import { a } from "lib";
 w; x; y; z; a; b;"#;
-    let mut s = Session::new_for_test("organizeImports_coalesceImports_combineMany", content);
+    let _s = Session::new_for_test("organizeImports_coalesceImports_combineMany", content);
     // TODO: f.VerifyOrganizeImports(
 }
 
@@ -134,7 +134,7 @@ import * as y from "lib";
 import z from "lib";
 import { w } from "aaa";
 x; y; z; w;"#;
-    let mut s = Session::new_for_test("organizeImports_coalesceImports_twoNamespacesOneDefault", content);
+    let _s = Session::new_for_test("organizeImports_coalesceImports_twoNamespacesOneDefault", content);
     // TODO: f.VerifyOrganizeImports(
 }
 
@@ -145,7 +145,7 @@ fn organize_imports_coalesce_imports_type_only_separate() {
 import type { y } from "lib";
 import { z } from "lib";
 x; y; z;"#;
-    let mut s = Session::new_for_test("organizeImports_coalesceImports_typeOnlySeparate", content);
+    let _s = Session::new_for_test("organizeImports_coalesceImports_typeOnlySeparate", content);
     // TODO: f.VerifyOrganizeImports(
 }
 
@@ -156,7 +156,7 @@ fn organize_imports_coalesce_imports_type_only_kinds_not_combined() {
 import type * as y from "lib";
 import type z from "lib";
 x; y; z;"#;
-    let mut s = Session::new_for_test("organizeImports_coalesceImports_typeOnlyKindsNotCombined", content);
+    let _s = Session::new_for_test("organizeImports_coalesceImports_typeOnlyKindsNotCombined", content);
     // TODO: f.VerifyOrganizeImports(
 }
 
@@ -164,6 +164,6 @@ x; y; z;"#;
 fn organize_imports_coalesce_imports_sort_specifiers_type_only_inline() {
     let content = r#"import { type z, y, type x, c, type b, a } from "lib";
 z; y; x; c; b; a;"#;
-    let mut s = Session::new_for_test("organizeImports_coalesceImports_sortSpecifiersTypeOnlyInline", content);
+    let _s = Session::new_for_test("organizeImports_coalesceImports_sortSpecifiersTypeOnlyInline", content);
     // TODO: f.VerifyOrganizeImports(
 }

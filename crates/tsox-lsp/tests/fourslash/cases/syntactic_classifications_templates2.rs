@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -6,6 +6,6 @@ fn syntactic_classifications_templates2() {
     let content = r#"var tiredOfCanonicalExamples =
 `goodbye "${ `hello world` }" 
 and ${ `good${ " " }riddance` }`;"#;
-    let mut s = Session::new_for_test("syntacticClassificationsTemplates2", content);
+    let _s = Session::new_for_test("syntacticClassificationsTemplates2", content);
     // TODO: f.VerifySemanticTokens(t, []fourslash.SemanticToken{
 }

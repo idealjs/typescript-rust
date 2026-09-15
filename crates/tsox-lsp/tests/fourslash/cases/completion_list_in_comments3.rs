@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -10,7 +10,7 @@ fn completion_list_in_comments3() {
  /*  */{| "name": "4" |}
  {| "name": "5" |}/*  */
 /* {| "name": "6" |}"#;
-    let mut s = Session::new_for_test("completionListInComments3", content);
+    let _s = Session::new_for_test("completionListInComments3", content);
     // TODO: f.VerifyCompletions(t, []string{"1", "2", "3", "6"}, nil)
     // TODO: f.VerifyCompletions(t, []string{"4", "5"}, &fourslash.CompletionsExpectedList{
 }

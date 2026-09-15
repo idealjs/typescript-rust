@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -12,6 +12,6 @@ const out = foo(a);
 out./*1*/a
 out.a./*2*/a
 out.a.a./*3*/a"#;
-    let mut s = Session::new_for_test("completionEntryForDeferredMappedTypeMembers", content);
+    let _s = Session::new_for_test("completionEntryForDeferredMappedTypeMembers", content);
     // TODO: f.VerifyCompletions(t, f.Markers(), &fourslash.CompletionsExpectedList{
 }

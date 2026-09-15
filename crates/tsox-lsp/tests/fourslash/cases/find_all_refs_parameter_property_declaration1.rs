@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -9,6 +9,6 @@ fn find_all_refs_parameter_property_declaration1() {
         this.privateParam += 10;
     }
 }"#;
-    let mut s = Session::new_for_test("findAllRefsParameterPropertyDeclaration1", content);
+    let _s = Session::new_for_test("findAllRefsParameterPropertyDeclaration1", content);
     // TODO: f.VerifyBaselineFindAllReferences(t, "1")
 }

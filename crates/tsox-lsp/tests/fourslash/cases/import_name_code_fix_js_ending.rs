@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -13,6 +13,6 @@ import "./decorators";
 export declare function customElement(name: string): any;
 // @Filename: /a.ts
 customElement/**/"#;
-    let mut s = Session::new_for_test("importNameCodeFixJsEnding", content);
+    let _s = Session::new_for_test("importNameCodeFixJsEnding", content);
     // TODO: f.VerifyImportFixModuleSpecifiers(t, "", []string{"lit/decorators.js"}, &lsutil.UserPreferences{Impo
 }

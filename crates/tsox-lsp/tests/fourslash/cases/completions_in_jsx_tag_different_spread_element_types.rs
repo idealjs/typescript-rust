@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -48,6 +48,6 @@ export function ComponentNumber(props: number) {
     return <SomeComponent {...props} /*number*//>;
 }
 "#;
-    let mut s = Session::new_for_test("completionsInJsxTagDifferentSpreadElementTypes", content);
+    let _s = Session::new_for_test("completionsInJsxTagDifferentSpreadElementTypes", content);
     // TODO: f.GoToEachMarker(t, nil, func(marker *fourslash.Marker, index int) {
 }

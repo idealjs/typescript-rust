@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -8,6 +8,6 @@ class C {}
 export const /*0*/D = C;
 // @Filename: /b.ts
 import { /*1*/D } from "./a";"#;
-    let mut s = Session::new_for_test("findAllRefsExportConstEqualToClass", content);
+    let _s = Session::new_for_test("findAllRefsExportConstEqualToClass", content);
     // TODO: f.VerifyBaselineFindAllReferences(t, "0", "1")
 }

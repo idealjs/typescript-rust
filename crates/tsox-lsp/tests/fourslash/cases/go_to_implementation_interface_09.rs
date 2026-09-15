@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -8,6 +8,6 @@ export interface Interface { P: number }
 // @Filename: ref.ts
 import { Interface } from "./def";
 const c: I/*ref*/nterface = [|{ P: 2 }|];"#;
-    let mut s = Session::new_for_test("goToImplementationInterface_09", content);
+    let _s = Session::new_for_test("goToImplementationInterface_09", content);
     // TODO: f.VerifyBaselineGoToImplementation(t, "ref")
 }

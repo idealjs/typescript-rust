@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -11,6 +11,6 @@ function myFunction(/* x */ x: any) {
     var y = x ? x++ : ++x;
 }
 // end of file"#;
-    let mut s = Session::new_for_test("syntacticClassificationsFunctionWithComments", content);
+    let _s = Session::new_for_test("syntacticClassificationsFunctionWithComments", content);
     // TODO: f.VerifySemanticTokens(t, []fourslash.SemanticToken{
 }

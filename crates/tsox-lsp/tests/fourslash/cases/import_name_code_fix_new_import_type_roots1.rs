@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[ignore = "go: t.Skip('Known failing fourslash test')"]
@@ -17,6 +17,6 @@ export function foo() {};
         ]
     }
 }"#;
-    let mut s = Session::new_for_test("importNameCodeFixNewImportTypeRoots1", content);
+    let _s = Session::new_for_test("importNameCodeFixNewImportTypeRoots1", content);
     // TODO: f.VerifyImportFixAtPosition(t, []string{
 }

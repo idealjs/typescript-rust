@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -32,6 +32,6 @@ y = /*7g*/cInstance./*8g*/publicProperty;
 y = /*9g*/c./*10g*/staticProperty;
 /*7s*/cInstance./*8s*/publicProperty = y;
 /*9s*/c./*10s*/staticProperty = y;"#;
-    let mut s = Session::new_for_test("quickInfoDisplayPartsClassAutoAccessors", content);
+    let _s = Session::new_for_test("quickInfoDisplayPartsClassAutoAccessors", content);
     // TODO: f.VerifyBaselineHover(t)
 }

@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -28,7 +28,7 @@ var t;
  */
 var t2;
 t(/*4*/"!", /*5*/12, /*6*/false);"#;
-    let mut s = Session::new_for_test("signatureHelpJSDocCallbackTag", content);
+    let _s = Session::new_for_test("signatureHelpJSDocCallbackTag", content);
     // TODO: f.MarkTestAsStradaServer()
     // TODO: f.VerifyBaselineSignatureHelp(t)
 }

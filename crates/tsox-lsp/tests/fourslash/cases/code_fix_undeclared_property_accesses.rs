@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[ignore = "go: t.Skip('Known failing fourslash test')"]
@@ -17,6 +17,6 @@ obj.c;
 type T<U> = I | U;
 let t: T<number>;
 t.x;"#;
-    let mut s = Session::new_for_test("codeFixUndeclaredPropertyAccesses", content);
+    let _s = Session::new_for_test("codeFixUndeclaredPropertyAccesses", content);
     // TODO: f.VerifyCodeFixAvailable(t, nil)
 }

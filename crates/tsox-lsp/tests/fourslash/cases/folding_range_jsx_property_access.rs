@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -12,6 +12,6 @@ const Components =[| {
 export const Test = () =>[| {
   return [|<Components.Nested></Components.Nested>|];
 }|];"#;
-    let mut s = Session::new_for_test("foldingRangeJSXPropertyAccess", content);
+    let _s = Session::new_for_test("foldingRangeJSXPropertyAccess", content);
     // TODO: f.VerifyOutliningSpans(t)
 }

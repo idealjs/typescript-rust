@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -18,6 +18,6 @@ const A = ({ a, b, c, d }: P) =>
 const props = { a: 1, b: "", c: [], d: undefined };
 const Bar = () =>
     [|<A {...props}></A>|]"#;
-    let mut s = Session::new_for_test("codeFixAddMissingAttributes6", content);
+    let _s = Session::new_for_test("codeFixAddMissingAttributes6", content);
     // TODO: f.VerifyCodeFixNotAvailable(t, "fixMissingAttributes")
 }

@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[ignore = "go: t.Skip('Known failing fourslash test')"]
@@ -9,6 +9,6 @@ function inferAny( [| app |] ) {
     const result = app.use('hi')
     return result
 }"#;
-    let mut s = Session::new_for_test("codeFixInferFromCallInAssignment", content);
+    let _s = Session::new_for_test("codeFixInferFromCallInAssignment", content);
     // TODO: f.VerifyRangeAfterCodeFix(t, `app: { use: (arg0: string) => any }`, false, 0, 0)
 }

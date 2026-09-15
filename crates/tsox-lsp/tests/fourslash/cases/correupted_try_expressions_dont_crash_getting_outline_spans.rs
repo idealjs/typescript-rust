@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -10,6 +10,6 @@ fn correupted_try_expressions_dont_crash_getting_outline_spans() {
 } catch (e)[| {
   
 }|]"#;
-    let mut s = Session::new_for_test("correuptedTryExpressionsDontCrashGettingOutlineSpans", content);
+    let _s = Session::new_for_test("correuptedTryExpressionsDontCrashGettingOutlineSpans", content);
     // TODO: f.VerifyOutliningSpans(t)
 }

@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -14,6 +14,6 @@ fn auto_import_root_dirs() {
 export type Something = {};
 // @Filename: /index.ts
 const s: Something/**/"#;
-    let mut s = Session::new_for_test("autoImportRootDirs", content);
+    let _s = Session::new_for_test("autoImportRootDirs", content);
     // TODO: f.VerifyImportFixModuleSpecifiers(t, "", []string{"./types"}, nil /*preferences*/)
 }

@@ -10,7 +10,6 @@ use tsox_frontend::ast::Node;
 use tsox_frontend::ast::SourceFile;
 use tsox_frontend::ast::node::LineMap;
 use tsox_frontend::ast::node_data_generated::for_each_child;
-use tsox_frontend::scanner;
 
 use super::language_service::LanguageService;
 use super::types::LocationLink;

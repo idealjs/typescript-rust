@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -8,6 +8,6 @@ export var /*1*/x = 12;
 // @Filename: main.ts
 import { /*2*/x } from "./m";
 const y = x;"#;
-    let mut s = Session::new_for_test("getOccurrencesIsDefinitionOfExport", content);
+    let _s = Session::new_for_test("getOccurrencesIsDefinitionOfExport", content);
     // TODO: f.VerifyBaselineFindAllReferences(t, "1", "2")
 }

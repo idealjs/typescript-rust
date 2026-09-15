@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -14,6 +14,6 @@ b = 2
 A.prototype.c = function() { }
 var b = 2
 A.prototype.d = function() { }"#;
-    let mut s = Session::new_for_test("navigationBarFunctionPrototypeInterlaced", content);
+    let _s = Session::new_for_test("navigationBarFunctionPrototypeInterlaced", content);
     // TODO: f.VerifyBaselineDocumentSymbol(t)
 }

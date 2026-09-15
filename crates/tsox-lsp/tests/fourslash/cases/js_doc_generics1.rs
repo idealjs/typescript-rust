@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -23,7 +23,7 @@ w.x[0][0]./*2*/
 /** @type {Array<Thing.Thung>} */
 var x;
 x[0].a./*3*/"#;
-    let mut s = Session::new_for_test("jsDocGenerics1", content);
+    let _s = Session::new_for_test("jsDocGenerics1", content);
     // TODO: f.VerifyCompletions(t, f.Markers(), &fourslash.CompletionsExpectedList{
     // TODO: }
 }

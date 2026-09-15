@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -20,6 +20,6 @@ var postDecrement = /*14*/x--;
 
 /*15*/x += 1;
 /*16*/x <<= 1;"#;
-    let mut s = Session::new_for_test("getOccurrencesIsDefinitionOfVariable", content);
+    let _s = Session::new_for_test("getOccurrencesIsDefinitionOfVariable", content);
     // TODO: f.VerifyBaselineFindAllReferences(t, "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", 
 }

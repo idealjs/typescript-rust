@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -12,6 +12,6 @@ import { MyInterface } from "./file1";
 
 const x: /*impl*/MyInterface = { P: 2 };
 "#;
-    let mut s = Session::new_for_test("goToImplementationInterfaceObjectLiteral", content);
+    let _s = Session::new_for_test("goToImplementationInterfaceObjectLiteral", content);
     // TODO: f.VerifyBaselineGoToImplementation(t, "impl")
 }

@@ -14,7 +14,6 @@ mod visit_generated;
 
 pub(crate) use crate::ast::SourceFile;
 pub use rule_context::Tristate;
-pub(crate) use crate::ast::node::Node;
 pub(crate) use std::sync::Arc;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

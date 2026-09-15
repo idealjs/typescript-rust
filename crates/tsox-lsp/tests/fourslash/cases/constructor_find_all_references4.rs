@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -9,6 +9,6 @@ fn constructor_find_all_references4() {
 }
 
 new C().foo();"#;
-    let mut s = Session::new_for_test("constructorFindAllReferences4", content);
+    let _s = Session::new_for_test("constructorFindAllReferences4", content);
     // TODO: f.VerifyBaselineFindAllReferences(t, "")
 }

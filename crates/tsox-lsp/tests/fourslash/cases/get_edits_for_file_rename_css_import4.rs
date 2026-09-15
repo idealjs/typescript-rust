@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -19,6 +19,6 @@ export default css;
 import styles from ".//*rename*/app.css";"#;
     // TODO: capabilities := fourslash.GetDefaultCapabilities()
     // TODO: capabilities.Workspace.FileOperations.WillRename = new(false)
-    let mut s = Session::new_with_capabilities(content, None);
+    let _s = Session::new_with_capabilities(content, None);
     // TODO: f.VerifyRename(t, "rename", "app2.css", map[string]string{
 }

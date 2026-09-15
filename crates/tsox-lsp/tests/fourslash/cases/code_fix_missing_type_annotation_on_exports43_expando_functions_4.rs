@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -11,6 +11,6 @@ function foo(): void {}
 // cannot name this property because it's an invalid variable name.
 foo["@bar"] = 42;
 foo.x = 1;"#;
-    let mut s = Session::new_for_test("codeFixMissingTypeAnnotationOnExports43_expando_functions_4", content);
+    let _s = Session::new_for_test("codeFixMissingTypeAnnotationOnExports43_expando_functions_4", content);
     // TODO: f.VerifyCodeFix(t, fourslash.VerifyCodeFixOptions{
 }

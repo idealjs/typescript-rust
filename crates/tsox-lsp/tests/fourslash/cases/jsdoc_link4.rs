@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -17,6 +17,6 @@ function f(x) {
 }
 f/*3*/()
 type Pos = [number, number]"#;
-    let mut s = Session::new_for_test("jsdocLink4", content);
+    let _s = Session::new_for_test("jsdocLink4", content);
     // TODO: f.VerifyBaselineHover(t)
 }

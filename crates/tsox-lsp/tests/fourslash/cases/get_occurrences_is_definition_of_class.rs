@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -10,6 +10,6 @@ fn get_occurrences_is_definition_of_class() {
     }
 }
 let c = new /*3*/C();"#;
-    let mut s = Session::new_for_test("getOccurrencesIsDefinitionOfClass", content);
+    let _s = Session::new_for_test("getOccurrencesIsDefinitionOfClass", content);
     // TODO: f.VerifyBaselineFindAllReferences(t, "1", "2", "3")
 }

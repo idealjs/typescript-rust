@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -7,6 +7,6 @@ fn navigation_bar_items_named_arrow_functions() {
 export const func = () => 2;
 export const func2 = function() { };
 export function exportedFunction() { }"#;
-    let mut s = Session::new_for_test("navigationBarItemsNamedArrowFunctions", content);
+    let _s = Session::new_for_test("navigationBarItemsNamedArrowFunctions", content);
     // TODO: f.VerifyBaselineDocumentSymbol(t)
 }

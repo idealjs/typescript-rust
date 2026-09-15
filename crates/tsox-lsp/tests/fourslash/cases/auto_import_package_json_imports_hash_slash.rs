@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -24,7 +24,7 @@ fn auto_import_package_json_imports_hash_slash_nodenext() {
 export const entity = 1;
 // @Filename: /src/features/deep/consumer.ts
 entit/**/"##;
-    let mut s = Session::new_for_test("autoImportPackageJsonImportsHashSlashNodenext", content);
+    let _s = Session::new_for_test("autoImportPackageJsonImportsHashSlashNodenext", content);
     // TODO: f.BaselineAutoImportsCompletions(t, []string{""})
 }
 
@@ -46,6 +46,6 @@ fn auto_import_package_json_imports_hash_slash_node16() {
 export const entity = 1;
 // @Filename: /src/consumer.ts
 entit/**/"##;
-    let mut s = Session::new_for_test("autoImportPackageJsonImportsHashSlashNode16", content);
+    let _s = Session::new_for_test("autoImportPackageJsonImportsHashSlashNode16", content);
     // TODO: f.BaselineAutoImportsCompletions(t, []string{""})
 }

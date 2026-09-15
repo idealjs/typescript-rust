@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -9,6 +9,6 @@ Component./*PropertyResult*/displayName = 'Component'
 [|/*FunctionClick*/Component|]
 
 Component.[|/*PropertyClick*/displayName|]"#;
-    let mut s = Session::new_for_test("goToDefinitionPropertyAssignment", content);
+    let _s = Session::new_for_test("goToDefinitionPropertyAssignment", content);
     // TODO: f.VerifyBaselineGoToDefinition(t, true, "FunctionClick", "PropertyClick")
 }

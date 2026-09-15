@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -9,6 +9,6 @@ exports./*0*/A = class {};
 // @Filename: /b.js
 import { /*1*/A } from "./a";
 /*2*/A;"#;
-    let mut s = Session::new_for_test("findAllRefsClassExpression2", content);
+    let _s = Session::new_for_test("findAllRefsClassExpression2", content);
     // TODO: f.VerifyBaselineFindAllReferences(t, "0", "1", "2")
 }

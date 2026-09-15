@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -17,6 +17,6 @@ enum NumericEnum/*2*/ {
     C,
 }
 "#;
-    let mut s = Session::new_for_test("quickinfoVerbosityConstEnum", content);
+    let _s = Session::new_for_test("quickinfoVerbosityConstEnum", content);
     // TODO: f.VerifyBaselineHoverWithVerbosity(t, map[string][]int{
 }

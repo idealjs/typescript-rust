@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -20,6 +20,6 @@ const k = { a: 1, b: 1 };
 const l = ((({ a: 1, b: 1 })));
  const m = () => 123;
  const n;"#;
-    let mut s = Session::new_for_test("inlayHintsVariableTypes1", content);
+    let _s = Session::new_for_test("inlayHintsVariableTypes1", content);
     // TODO: f.VerifyBaselineInlayHints(t, nil /*span*/, &lsutil.UserPreferences{InlayHints: lsutil.InlayHintsPre
 }

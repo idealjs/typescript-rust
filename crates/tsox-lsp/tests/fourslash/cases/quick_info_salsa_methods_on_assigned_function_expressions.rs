@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -15,6 +15,6 @@ C.prototype.m = f;
 
 var x = new C();
 x/*1*/.m();"#;
-    let mut s = Session::new_for_test("quickInfoSalsaMethodsOnAssignedFunctionExpressions", content);
+    let _s = Session::new_for_test("quickInfoSalsaMethodsOnAssignedFunctionExpressions", content);
     // TODO: f.VerifyBaselineHover(t)
 }

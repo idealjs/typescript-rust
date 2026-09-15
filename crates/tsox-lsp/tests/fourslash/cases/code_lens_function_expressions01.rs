@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -32,6 +32,6 @@ namedFn2();
 let namedFn3 = function namedFn3() {};
 const namedFn4 = function namedFn4() {};
 "#;
-    let mut s = Session::new_for_test("codeLensFunctionExpressions01", content);
+    let _s = Session::new_for_test("codeLensFunctionExpressions01", content);
     // TODO: f.VerifyBaselineCodeLens(t, &lsutil.UserPreferences{
 }

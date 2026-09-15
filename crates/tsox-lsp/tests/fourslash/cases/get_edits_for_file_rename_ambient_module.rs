@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -15,6 +15,6 @@ declare module "sub" {
 { "types": "types.d.ts" }
 // @Filename: /a.ts
 import { abc } from "sub";"#;
-    let mut s = Session::new_for_test("getEditsForFileRename_ambientModule", content);
+    let _s = Session::new_for_test("getEditsForFileRename_ambientModule", content);
     // TODO: f.VerifyWillRenameFilesEdits(t, "/a.ts", "/b.ts", map[string]string{}, nil /*preferences*/)
 }

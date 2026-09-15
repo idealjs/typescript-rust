@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -7,6 +7,6 @@ fn signature_help_in_function_call() {
 items.forEach(item => {
     for (/**/
 });"#;
-    let mut s = Session::new_for_test("signatureHelpInFunctionCall", content);
+    let _s = Session::new_for_test("signatureHelpInFunctionCall", content);
     // TODO: f.VerifyNoSignatureHelpForMarkers(t, "")
 }

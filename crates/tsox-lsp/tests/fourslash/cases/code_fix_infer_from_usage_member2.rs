@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[ignore = "go: t.Skip('Known failing fourslash test')"]
@@ -10,6 +10,6 @@ interface I {
 }
 var i: I;
 i.p = 0;"#;
-    let mut s = Session::new_for_test("codeFixInferFromUsageMember2", content);
+    let _s = Session::new_for_test("codeFixInferFromUsageMember2", content);
     // TODO: f.VerifyRangeAfterCodeFix(t, `p: number;`, false, 0, 0)
 }

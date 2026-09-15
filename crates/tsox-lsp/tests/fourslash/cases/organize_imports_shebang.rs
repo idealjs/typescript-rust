@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -10,6 +10,6 @@ import Bar from "bar";
 import Foobar from "foobar";
 
 console.log(Foo, Bar, Foobar);"#;
-    let mut s = Session::new_for_test("organizeImports_Shebang_PreserveAndSort", content);
+    let _s = Session::new_for_test("organizeImports_Shebang_PreserveAndSort", content);
     // TODO: f.VerifyOrganizeImports(
 }

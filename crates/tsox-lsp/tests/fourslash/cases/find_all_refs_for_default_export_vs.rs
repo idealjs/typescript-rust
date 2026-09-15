@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -10,6 +10,6 @@ import /*deg*/g from "./a";
 [|/*ref*/g|]();
 // @Filename: c.ts
 import { f } from "./a";"#;
-    let mut s = Session::new_with_capabilities(content, None);
+    let _s = Session::new_with_capabilities(content, None);
     // TODO: f.VerifyBaselineVSFindAllReferences(t, "def", "deg")
 }

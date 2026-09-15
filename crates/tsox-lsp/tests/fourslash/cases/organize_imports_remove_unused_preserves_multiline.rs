@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -10,7 +10,7 @@ fn organize_imports_remove_unused_preserves_multiline() {
 } from "module";
 
 export { a, b, c };"#;
-    let mut s = Session::new_for_test("organizeImports_removeUnused_preservesMultiline", content);
+    let _s = Session::new_for_test("organizeImports_removeUnused_preservesMultiline", content);
     // TODO: f.VerifyOrganizeImports(
 }
 
@@ -23,7 +23,7 @@ fn organize_imports_remove_unused_preserves_multiline_with_removal() {
 } from "module";
 
 export { a, c };"#;
-    let mut s = Session::new_for_test("organizeImports_removeUnused_preservesMultilineWithRemoval", content);
+    let _s = Session::new_for_test("organizeImports_removeUnused_preservesMultilineWithRemoval", content);
     // TODO: f.VerifyOrganizeImports(
 }
 
@@ -36,7 +36,7 @@ fn organize_imports_remove_unused_uses_language_service_format_options() {
 } from "module";
 
 export { a, c };"#;
-    let mut s = Session::new_for_test("organizeImports_removeUnusedUsesLanguageServiceFormatOptions", content);
+    let _s = Session::new_for_test("organizeImports_removeUnusedUsesLanguageServiceFormatOptions", content);
     // TODO: preferences := lsutil.ParseUserPreferences(map[string]any{
     // TODO: f.VerifyOrganizeImports(
 }

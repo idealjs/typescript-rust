@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -10,6 +10,6 @@ fn semantic_classification_uninstantiated_module_with_variable_of_same_name1() {
 }
 
 var M = { I: 10 };"#;
-    let mut s = Session::new_for_test("semanticClassificationUninstantiatedModuleWithVariableOfSameName1", content);
+    let _s = Session::new_for_test("semanticClassificationUninstantiatedModuleWithVariableOfSameName1", content);
     // TODO: f.VerifySemanticTokens(t, []fourslash.SemanticToken{
 }

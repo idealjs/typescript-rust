@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -8,6 +8,6 @@ fn find_references_see_tag_in_ts() {
 declare const stuff: { quantity: number };
 /** @see {doStuffWithStuff} */
 if (stuff.quantity) {}"#;
-    let mut s = Session::new_for_test("findReferencesSeeTagInTs", content);
+    let _s = Session::new_for_test("findReferencesSeeTagInTs", content);
     // TODO: f.VerifyBaselineFindAllReferences(t, "1")
 }

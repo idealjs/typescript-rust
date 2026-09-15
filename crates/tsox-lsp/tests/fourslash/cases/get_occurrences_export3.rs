@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -63,6 +63,6 @@ namespace m {
 declare [|export|] var v1, v2;
 declare namespace dm { }
 [|export|] class EC { }"#;
-    let mut s = Session::new_for_test("getOccurrencesExport3", content);
+    let _s = Session::new_for_test("getOccurrencesExport3", content);
     // TODO: f.VerifyBaselineDocumentHighlights(t, nil /*preferences*/, ToAny(f.Ranges())...)
 }

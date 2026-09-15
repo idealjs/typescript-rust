@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -19,6 +19,6 @@ namespace N {
         /**close-brace prefix*/ }
 /**close-brace prefix*/ }
 class C implements N.I {}"#;
-    let mut s = Session::new_for_test("codeFixClassImplementInterfaceComments", content);
+    let _s = Session::new_for_test("codeFixClassImplementInterfaceComments", content);
     // TODO: f.VerifyCodeFix(t, fourslash.VerifyCodeFixOptions{
 }

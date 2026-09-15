@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -9,6 +9,6 @@ abstract class C2 {
 }
 interface I1 extends C1, C2 { }
 class C3 implements I1 {[| |]}"#;
-    let mut s = Session::new_for_test("codeFixClassImplementInterfaceInheritsAbstractMethod", content);
+    let _s = Session::new_for_test("codeFixClassImplementInterfaceInheritsAbstractMethod", content);
     // TODO: f.VerifyCodeFix(t, fourslash.VerifyCodeFixOptions{
 }

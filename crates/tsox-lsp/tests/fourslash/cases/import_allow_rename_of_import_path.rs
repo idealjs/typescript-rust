@@ -14,7 +14,7 @@ import * as dir2 from "./dir/[|index|]";
 // @Filename: /c.js
 const a = require("./[|a|]");
 "#;
-    let mut s = Session::new_for_test("allowRenameOfImportPath", content);
+    let _s = Session::new_for_test("allowRenameOfImportPath", content);
     // TODO: prefsTrue := lsutil.UserPreferences{
     // TODO: prefsFalse := lsutil.UserPreferences{
     // TODO: markers := []string{"a", "dir", "index"}

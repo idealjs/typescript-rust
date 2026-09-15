@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -23,6 +23,6 @@ class /*19*/c2</*20*/T extends /*21*/c<string>> {
 var /*33*/cInstance1 = new /*34*/c2(/*35*/cInstance);
 var /*36*/cVal2 = /*37*/c2;
 /*38*/cInstance1./*39*/method(/*40*/cInstance, /*41*/cInstance);"#;
-    let mut s = Session::new_for_test("quickInfoDisplayPartsTypeParameterInClass", content);
+    let _s = Session::new_for_test("quickInfoDisplayPartsTypeParameterInClass", content);
     // TODO: f.VerifyBaselineHover(t)
 }

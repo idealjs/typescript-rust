@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -11,6 +11,6 @@ let { foo }: Props = null as any;
 foo;
 
 let asd: Props = { "foo"/**/: true }; // rename foo here"#;
-    let mut s = Session::new_for_test("renameStringPropertyNames2", content);
+    let _s = Session::new_for_test("renameStringPropertyNames2", content);
     // TODO: f.VerifyBaselineRename(t, nil /*preferences*/, "")
 }

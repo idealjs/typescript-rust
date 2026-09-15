@@ -118,7 +118,7 @@ export declare function f(): void;
 	"names":[],
 	"mappings":"AAAA,wBAAgB,CAAC,SAAK"
 }"#;
-    let mut s = Session::new_for_test("declarationMapsFindAllRefsDefinitionInMappedFile", content);
+    let _s = Session::new_for_test("declarationMapsFindAllRefsDefinitionInMappedFile", content);
     // TODO: f.VerifyBaselineFindAllReferences(t, "1")
 }
 
@@ -154,6 +154,6 @@ import { a, b } from "./indexdef";
 /*2*/b();
 // @Filename: /src/tsconfig.json
 {}"#;
-    let mut s = Session::new_for_test("declarationMapsNonMonotonicMappings", content);
+    let _s = Session::new_for_test("declarationMapsNonMonotonicMappings", content);
     // TODO: f.VerifyBaselineGoToDefinition(t, true, "1", "2")
 }

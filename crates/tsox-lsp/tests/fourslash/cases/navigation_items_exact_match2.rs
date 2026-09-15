@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -19,6 +19,6 @@ var [|point|] = new Shapes.Point();
 function [|distance2|](distanceParam1): void {
     var [|distanceLocal1|];
 }"#;
-    let mut s = Session::new_for_test("navigationItemsExactMatch2", content);
+    let _s = Session::new_for_test("navigationItemsExactMatch2", content);
     // TODO: f.VerifyWorkspaceSymbol(t, []*fourslash.VerifyWorkspaceSymbolCase{
 }

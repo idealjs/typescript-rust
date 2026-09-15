@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -15,6 +15,6 @@ fn find_all_references_js_doc_type_literal() {
  * @param {number} o.nested.times - twice? probably!??
  */
  function f(o) { return o.nested./*2*/great; }"#;
-    let mut s = Session::new_for_test("findAllReferencesJsDocTypeLiteral", content);
+    let _s = Session::new_for_test("findAllReferencesJsDocTypeLiteral", content);
     // TODO: f.VerifyBaselineFindAllReferences(t, "1", "2")
 }

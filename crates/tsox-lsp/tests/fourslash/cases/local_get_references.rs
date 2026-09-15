@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -186,6 +186,6 @@ namespace remotemodTest {
 		var remoteboo = remotefoo;
 	}
 }"#;
-    let mut s = Session::new_for_test("localGetReferences", content);
+    let _s = Session::new_for_test("localGetReferences", content);
     // TODO: f.VerifyBaselineFindAllReferences(t, "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", 
 }

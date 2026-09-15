@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -23,6 +23,6 @@ let opt1 = /*5*/</*6*/Opt propx={100} propString />;
 let opt2 = /*7*/</*8*/Opt propx={100} optional/>;
 let opt3 = /*9*/</*10*/Opt wrong />;
 let opt4 = /*11*/</*12*/Opt propx={100} propString="hi" />;"#;
-    let mut s = Session::new_for_test("tsxFindAllReferences5", content);
+    let _s = Session::new_for_test("tsxFindAllReferences5", content);
     // TODO: f.VerifyBaselineFindAllReferences(t, "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12")
 }

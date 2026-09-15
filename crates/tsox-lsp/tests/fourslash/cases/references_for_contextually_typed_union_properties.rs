@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -36,6 +36,6 @@ var w: A|B = { a:0, /*10*/common: undefined };
 // Untped -- should not be included
 var u1 = { a: 0, b: 0, common: "" };
 var u2 = { b: 0, common: 0 };"#;
-    let mut s = Session::new_for_test("referencesForContextuallyTypedUnionProperties", content);
+    let _s = Session::new_for_test("referencesForContextuallyTypedUnionProperties", content);
     // TODO: f.VerifyBaselineFindAllReferences(t, "1", "2", "3", "4", "5", "6", "7", "8", "9", "10")
 }

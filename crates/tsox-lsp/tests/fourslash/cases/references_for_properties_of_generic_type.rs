@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -12,6 +12,6 @@ x./*2*/doSomething("ss");
 
 var y: IFoo<number>;
 y./*3*/doSomething(12);"#;
-    let mut s = Session::new_for_test("referencesForPropertiesOfGenericType", content);
+    let _s = Session::new_for_test("referencesForPropertiesOfGenericType", content);
     // TODO: f.VerifyBaselineFindAllReferences(t, "1", "2", "3")
 }

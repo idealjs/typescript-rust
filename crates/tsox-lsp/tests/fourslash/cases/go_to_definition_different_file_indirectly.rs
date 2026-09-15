@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -21,6 +21,6 @@ namespace remMod { export var foo; }
 var rem2foo = new /*remoteClassReference*/rem2Cls();
 class rem2fooCls implements /*remoteInterfaceReference*/rem2Int { }
 var rem2fooVar = /*remoteModuleReference*/rem2Mod.foo;"#;
-    let mut s = Session::new_for_test("goToDefinitionDifferentFileIndirectly", content);
+    let _s = Session::new_for_test("goToDefinitionDifferentFileIndirectly", content);
     // TODO: f.VerifyBaselineGoToDefinition(t, false, "remoteVariableReference", "remoteFunctionReference", "remo
 }

@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -13,6 +13,6 @@ function ATest() { }
 
 var a: /*3*/alias.Bar; // namespace
 /*4*/alias.call(this); // value"#;
-    let mut s = Session::new_for_test("referencesForMergedDeclarations2", content);
+    let _s = Session::new_for_test("referencesForMergedDeclarations2", content);
     // TODO: f.VerifyBaselineFindAllReferences(t, "1", "2", "3", "4")
 }

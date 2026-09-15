@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -66,6 +66,6 @@ function nestor() {
     function d3() { }
     function r2/*6*/() { }
 }"#;
-    let mut s = Session::new_for_test("findAllReferencesLinkTag1", content);
+    let _s = Session::new_for_test("findAllReferencesLinkTag1", content);
     // TODO: f.VerifyBaselineFindAllReferences(t, "1", "2", "3", "4", "5", "6", "7", "8")
 }

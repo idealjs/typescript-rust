@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -12,6 +12,6 @@ class Foo {}
 // @filename: /c.ts
 import x =/*3*/
 "#;
-    let mut s = Session::new_for_test("completionsAtTopLevelImportAssignmentNoCrash1", content);
+    let _s = Session::new_for_test("completionsAtTopLevelImportAssignmentNoCrash1", content);
     // TODO: f.VerifyCompletions(t, []string{"1", "2", "3"}, &fourslash.CompletionsExpectedList{
 }

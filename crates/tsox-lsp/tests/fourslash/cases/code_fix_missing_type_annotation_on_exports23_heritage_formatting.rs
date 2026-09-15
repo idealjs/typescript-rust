@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[ignore = "go: t.Skip('Known failing fourslash test')"]
@@ -19,7 +19,7 @@ export class Point3D extends
     {
               z = 0;
 }"#;
-    let mut s = Session::new_for_test("codeFixMissingTypeAnnotationOnExports23_heritage_formatting", content);
+    let _s = Session::new_for_test("codeFixMissingTypeAnnotationOnExports23_heritage_formatting", content);
     // TODO: f.VerifyCodeFixAvailable(t, []string{"Extract base class to variable"})
     // TODO: f.VerifyCodeFix(t, fourslash.VerifyCodeFixOptions{
 }

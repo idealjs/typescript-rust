@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -19,7 +19,7 @@ export function /*target*/original() { return "ok"; }
 // @Filename: /home/src/workspaces/project/index.ts
 import { original as /*aliasedImport*/renamed } from "pkg";
 renamed();"#;
-    let mut s = Session::new_for_test("goToSourceAliasedImportWithPrecedingExports", content);
+    let _s = Session::new_for_test("goToSourceAliasedImportWithPrecedingExports", content);
     // TODO: f.VerifyBaselineGoToSourceDefinition(t, "aliasedImport")
 }
 
@@ -38,6 +38,6 @@ export function unrelated() {}
 export function /*target*/original() { return "ok"; }
 // @Filename: /home/src/workspaces/project/reexport.ts
 export { original as /*reExportAlias*/renamed } from "pkg";"#;
-    let mut s = Session::new_for_test("goToSourceReExportAliasWithPrecedingExports", content);
+    let _s = Session::new_for_test("goToSourceReExportAliasWithPrecedingExports", content);
     // TODO: f.VerifyBaselineGoToSourceDefinition(t, "reExportAlias")
 }

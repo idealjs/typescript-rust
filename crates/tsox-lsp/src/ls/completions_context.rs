@@ -1,6 +1,5 @@
-use std::sync::Arc;
 
-use tsox_frontend::ast::{Node, SourceFile, SyntaxKind, is_function_like_kind, is_keyword_kind};
+use tsox_frontend::ast::{SourceFile, SyntaxKind, is_keyword_kind};
 use tsox_frontend::scanner::{CommentRange, CommentRangeKind, Scanner, get_leading_comment_ranges};
 
 #[derive(Debug, Clone, Copy)]

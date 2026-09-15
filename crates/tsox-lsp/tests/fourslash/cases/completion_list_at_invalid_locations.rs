@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -23,7 +23,7 @@ type htm/*inTypeAlias*/
 //  /*inComment5*/
 foo;
 var v10 = /reg/*inRegExp1*/ex/;"#;
-    let mut s = Session::new_for_test("completionListAtInvalidLocations", content);
+    let _s = Session::new_for_test("completionListAtInvalidLocations", content);
     // TODO: f.VerifyCompletions(t, []string{"openString1", "openString2", "openString3"}, &fourslash.Completions
     // TODO: f.VerifyCompletions(t, []string{"inComment1", "inComment2", "inComment3", "inComment4", "inTypeAlias
 }

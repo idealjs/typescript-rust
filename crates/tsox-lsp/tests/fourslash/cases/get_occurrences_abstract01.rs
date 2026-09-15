@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -14,6 +14,6 @@ abstract class Foo {
     abstract foo(): void;
     abstract bar(): void;
 }"#;
-    let mut s = Session::new_for_test("getOccurrencesAbstract01", content);
+    let _s = Session::new_for_test("getOccurrencesAbstract01", content);
     // TODO: f.VerifyBaselineDocumentHighlights(t, nil /*preferences*/, ToAny(f.Ranges())...)
 }

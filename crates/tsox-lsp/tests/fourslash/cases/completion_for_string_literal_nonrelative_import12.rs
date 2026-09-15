@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -14,6 +14,6 @@ var foo3 = require("m/*require0*/
     "optionalDependencies": { "optional-module": "latest" },
     "peerDependencies": { "peer-module": "latest" }
 }"#;
-    let mut s = Session::new_for_test("completionForStringLiteralNonrelativeImport12", content);
+    let _s = Session::new_for_test("completionForStringLiteralNonrelativeImport12", content);
     // TODO: f.VerifyCompletions(t, f.Markers(), &fourslash.CompletionsExpectedList{
 }

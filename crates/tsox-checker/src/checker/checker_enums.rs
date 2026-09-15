@@ -1,6 +1,5 @@
 use std::sync::Arc;
 
-use tsox_core::jsnum;
 use tsox_frontend::ast::ModifierFlags;
 use tsox_frontend::ast::Node;
 use tsox_frontend::ast::NodeData;

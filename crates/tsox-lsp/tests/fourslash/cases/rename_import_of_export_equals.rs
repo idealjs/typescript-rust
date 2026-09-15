@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -17,7 +17,7 @@ declare module "b" {
     [|import { /*b*/[|{| "isWriteAccess": true, "isDefinition": true, "contextRangeIndex": 10 |}N|] } from "a";|]
     export const y: typeof [|N|].[|x|];
 }"#;
-    let mut s = Session::new_for_test("renameImportOfExportEquals", content);
+    let _s = Session::new_for_test("renameImportOfExportEquals", content);
     // TODO: f.VerifyBaselineFindAllReferences(t, "N", "a", "b", "x")
     // TODO: f.VerifyBaselineRename(t, nil /*preferences*/, f.Ranges()[1], f.Ranges()[5])
     // TODO: f.VerifyBaselineRename(t, nil /*preferences*/, f.Ranges()[7])

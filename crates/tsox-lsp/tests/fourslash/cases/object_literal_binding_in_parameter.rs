@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -18,6 +18,6 @@ let x: Foo = {
     set prop({ /*4*/ }) {
     }
 };"#;
-    let mut s = Session::new_for_test("objectLiteralBindingInParameter", content);
+    let _s = Session::new_for_test("objectLiteralBindingInParameter", content);
     // TODO: f.VerifyCompletions(t, f.Markers(), &fourslash.CompletionsExpectedList{
 }

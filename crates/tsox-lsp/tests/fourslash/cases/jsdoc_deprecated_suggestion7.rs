@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -12,6 +12,6 @@ type T = Direction.Left
 const x = 1
 type x = string
 var y: x = 'hi'"#;
-    let mut s = Session::new_for_test("jsdocDeprecated_suggestion7", content);
+    let _s = Session::new_for_test("jsdocDeprecated_suggestion7", content);
     // TODO: f.VerifySuggestionDiagnostics(t, nil)
 }

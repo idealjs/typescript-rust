@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -9,6 +9,6 @@ fn quick_info_display_parts_enum4() {
 }
 Foo[/*1*/"\t"]
 Foo[/*2*/"\u007f"]"#;
-    let mut s = Session::new_for_test("quickInfoDisplayPartsEnum4", content);
+    let _s = Session::new_for_test("quickInfoDisplayPartsEnum4", content);
     // TODO: f.VerifyBaselineHover(t)
 }

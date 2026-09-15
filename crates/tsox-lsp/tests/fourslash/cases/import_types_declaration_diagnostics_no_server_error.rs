@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -12,7 +12,7 @@ export interface I {
 // @Filename: a.ts
 import { f } from "foo";
 export const x = f();"#;
-    let mut s = Session::new_for_test("importTypesDeclarationDiagnosticsNoServerError", content);
+    let _s = Session::new_for_test("importTypesDeclarationDiagnosticsNoServerError", content);
     // TODO: f.GoToFileNumber(t, 1)
     // TODO: f.VerifyNonSuggestionDiagnostics(t, nil)
 }

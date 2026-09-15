@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -21,6 +21,6 @@ type F2 = (a: {
     b: string
 }) => void
 const foo5: F2 = (a) => { }"#;
-    let mut s = Session::new_for_test("inlayHintsFunctionParameterTypes1", content);
+    let _s = Session::new_for_test("inlayHintsFunctionParameterTypes1", content);
     // TODO: f.VerifyBaselineInlayHints(t, nil /*span*/, &lsutil.UserPreferences{InlayHints: lsutil.InlayHintsPre
 }

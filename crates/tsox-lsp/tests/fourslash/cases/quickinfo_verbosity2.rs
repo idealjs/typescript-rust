@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -9,6 +9,6 @@ type Sym = symbol | (() => void);
 type BarType = Sym | boolean;
 type BothType = FooType | BarType;
 const both/*b*/: BothType = 1;"#;
-    let mut s = Session::new_for_test("quickinfoVerbosity2", content);
+    let _s = Session::new_for_test("quickinfoVerbosity2", content);
     // TODO: f.VerifyBaselineHoverWithVerbosity(t, map[string][]int{"b": {0, 1, 2, 3}})
 }

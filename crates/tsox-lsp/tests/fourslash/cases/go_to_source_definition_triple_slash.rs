@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -18,7 +18,7 @@ export function /*target*/bar() { return "hello"; }
 /// <reference types="[|foo/*refTypes*/|]" />
 import { bar } from "foo";
 bar();"#;
-    let mut s = Session::new_for_test("goToSourceReferenceTypesToJS", content);
+    let _s = Session::new_for_test("goToSourceReferenceTypesToJS", content);
     // TODO: f.VerifyBaselineGoToSourceDefinition(t, "refTypes")
 }
 
@@ -41,6 +41,6 @@ export function main() {}
 // @Filename: /home/src/workspaces/project/index.ts
 /// <reference path="./node_modules/pkg/[|lib.d.ts/*refPath*/|]" />
 declare function helper(): string;"#;
-    let mut s = Session::new_for_test("goToSourceReferencePathToDts", content);
+    let _s = Session::new_for_test("goToSourceReferencePathToDts", content);
     // TODO: f.VerifyBaselineGoToSourceDefinition(t, "refPath")
 }

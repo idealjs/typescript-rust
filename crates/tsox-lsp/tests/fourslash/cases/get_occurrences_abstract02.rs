@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -13,7 +13,7 @@ let c = /*1*/abstract class Foo {
     /*2*/abstract foo(): void;
     abstract bar(): void;
 }"#;
-    let mut s = Session::new_for_test("getOccurrencesAbstract02", content);
+    let _s = Session::new_for_test("getOccurrencesAbstract02", content);
     // TODO: f.VerifyBaselineDocumentHighlights(t, nil /*preferences*/, "1", "2")
     // TODO: f.VerifyBaselineDocumentHighlights(t, nil /*preferences*/, ToAny(f.Ranges())...)
 }

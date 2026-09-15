@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -16,6 +16,6 @@ fn get_occurrences_is_definition_of_interface_class_merge() {
 }
 let i: /*7*/Numbers = new /*8*/Numbers();
 let x = i.f(i.p + i.m);"#;
-    let mut s = Session::new_for_test("getOccurrencesIsDefinitionOfInterfaceClassMerge", content);
+    let _s = Session::new_for_test("getOccurrencesIsDefinitionOfInterfaceClassMerge", content);
     // TODO: f.VerifyBaselineFindAllReferences(t, "1", "2", "3", "4", "5", "6", "7", "8")
 }

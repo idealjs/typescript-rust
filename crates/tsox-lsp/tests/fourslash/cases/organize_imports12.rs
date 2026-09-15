@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -8,6 +8,6 @@ fn organize_imports12() {
 declare export default class A {}
 declare export { a, b };
 declare export * from "foo";"#;
-    let mut s = Session::new_for_test("organizeImports12", content);
+    let _s = Session::new_for_test("organizeImports12", content);
     // TODO: f.VerifyOrganizeImports(t,
 }

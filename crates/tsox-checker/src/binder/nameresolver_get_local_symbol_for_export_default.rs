@@ -3,7 +3,6 @@
 use std::sync::Arc;
 use tsox_frontend::ast::*;
 
-use crate::binder::nameresolver::*;
 
 pub fn get_local_symbol_for_export_default(symbol: &Arc<Symbol>) -> Option<Arc<Symbol>> {
     if !is_export_default_symbol(symbol) || symbol.declarations.is_empty() {

@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -16,6 +16,6 @@ fn find_all_refs_js_doc_namespaced_typedef() {
 // Namespaced typedef aliased to implicitly-resolved typedef.
 /** @typedef {U} NS.[|V|] */
 "#;
-    let mut s = Session::new_for_test("findAllRefsJSDocNamespacedTypedef", content);
+    let _s = Session::new_for_test("findAllRefsJSDocNamespacedTypedef", content);
     // TODO: f.VerifyBaselineFindAllReferences(t)
 }

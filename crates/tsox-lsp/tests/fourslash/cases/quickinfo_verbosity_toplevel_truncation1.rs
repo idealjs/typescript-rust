@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -52,6 +52,6 @@ export interface LargeInterface/*2*/ {
     property19: { nestedProp3: boolean; nestedProp4: Date };
     property20: () => void;
 }"#;
-    let mut s = Session::new_for_test("quickinfoVerbosityToplevelTruncation1", content);
+    let _s = Session::new_for_test("quickinfoVerbosityToplevelTruncation1", content);
     // TODO: f.VerifyBaselineHoverWithVerbosity(t, map[string][]int{"1": {1}, "2": {1}})
 }

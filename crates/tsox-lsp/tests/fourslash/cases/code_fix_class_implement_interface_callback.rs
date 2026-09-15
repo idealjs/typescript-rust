@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -30,6 +30,6 @@ interface IFoo4 {
 
 class Foo4 implements IFoo4 {
 }"#;
-    let mut s = Session::new_for_test("codeFixClassImplementInterfaceCallback", content);
+    let _s = Session::new_for_test("codeFixClassImplementInterfaceCallback", content);
     // TODO: f.VerifyCodeFixAll(t, fourslash.VerifyCodeFixAllOptions{
 }

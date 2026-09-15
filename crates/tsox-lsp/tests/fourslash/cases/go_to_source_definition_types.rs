@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -15,7 +15,7 @@ exports.makeConfig = () => ({ enabled: true });
 // @Filename: /home/src/workspaces/project/index.ts
 import type { /*importName*/Config } from "pkg";
 let value: /*typeRef*/Config;"#;
-    let mut s = Session::new_for_test("goToSourceFallbacksToDefinitionForInterface", content);
+    let _s = Session::new_for_test("goToSourceFallbacksToDefinitionForInterface", content);
     // TODO: f.VerifyBaselineGoToSourceDefinition(t, "importName", "typeRef")
 }
 
@@ -41,7 +41,7 @@ export function makeConfig() { return { enabled: true }; }
 import { Config, makeConfig } from "pkg";
 let c: /*typeRef*/Config;
 makeConfig/*callRef*/();"#;
-    let mut s = Session::new_for_test("goToSourceTypeOnlySymbolFallback", content);
+    let _s = Session::new_for_test("goToSourceTypeOnlySymbolFallback", content);
     // TODO: f.VerifyBaselineGoToSourceDefinition(t, "typeRef", "callRef")
 }
 
@@ -65,6 +65,6 @@ export { Config } from "./types.js";
 // @Filename: /home/src/workspaces/project/index.ts
 import { /*importName*/Config } from "pkg";
 let c: Config;"#;
-    let mut s = Session::new_for_test("goToSourceForwardedNonConcreteMerge", content);
+    let _s = Session::new_for_test("goToSourceForwardedNonConcreteMerge", content);
     // TODO: f.VerifyBaselineGoToSourceDefinition(t, "importName")
 }

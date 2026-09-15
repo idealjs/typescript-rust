@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -24,6 +24,6 @@ y./*5*/foo;
 z./*6*/foo;
 Y./*7*/foo;
 Z./*8*/foo;"#;
-    let mut s = Session::new_for_test("findAllRefsForStaticInstancePropertyInheritance", content);
+    let _s = Session::new_for_test("findAllRefsForStaticInstancePropertyInheritance", content);
     // TODO: f.VerifyBaselineFindAllReferences(t, "0", "1", "2", "3", "4", "5", "6", "7", "8")
 }

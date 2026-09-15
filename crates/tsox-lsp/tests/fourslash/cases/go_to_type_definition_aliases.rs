@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -15,6 +15,6 @@ export {v1 as v2};
 // @Filename: goToTypeDefinitioAliases_module3.ts
 import {/*reference1*/v2 as v3} from "./goToTypeDefinitioAliases_module2";
 /*reference2*/v3;"#;
-    let mut s = Session::new_for_test("goToTypeDefinitionAliases", content);
+    let _s = Session::new_for_test("goToTypeDefinitionAliases", content);
     // TODO: f.VerifyBaselineGoToTypeDefinition(t, "reference1", "reference2")
 }

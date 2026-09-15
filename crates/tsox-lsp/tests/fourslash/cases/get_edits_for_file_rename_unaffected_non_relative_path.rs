@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -9,6 +9,6 @@ export const a = 1;
 import { a } from "sub/a";
 // @Filename: /tsconfig.json
 {"compilerOptions":{"paths":{"*":["*"]}}}"#;
-    let mut s = Session::new_for_test("getEditsForFileRename_unaffectedNonRelativePath", content);
+    let _s = Session::new_for_test("getEditsForFileRename_unaffectedNonRelativePath", content);
     // TODO: f.VerifyWillRenameFilesEdits(t, "/sub/b.ts", "/sub/c/d.ts", map[string]string{}, nil /*preferences*/
 }

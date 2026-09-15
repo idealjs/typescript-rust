@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -12,7 +12,7 @@ fn tsconfig_computed_property_error() {
     ],
     "compileOnSave": true
 }"#;
-    let mut s = Session::new_for_test("tsconfigComputedPropertyError", content);
+    let _s = Session::new_for_test("tsconfigComputedPropertyError", content);
     // TODO: f.MarkTestAsStradaServer()
     // TODO: f.VerifyNonSuggestionDiagnostics(t, []*lsproto.Diagnostic{
 }

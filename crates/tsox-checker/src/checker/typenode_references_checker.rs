@@ -32,6 +32,7 @@ impl Checker {
         self.get_any_type()
     }
 
+    #[allow(dead_code)]
     pub(crate) fn polymorphic_this_of(&mut self, node: &Arc<Node>) -> Option<Arc<Type>> {
         let mut cur = node.parent();
         while let Some(n) = cur {
@@ -65,6 +66,7 @@ impl Checker {
 
     // 对象字面量方法的 this：取上下文签名 this 参数类型（Go getContextualThisParameterType 上下文敏感分支）；
     // 多态 this 只在接口声明内有意义，字面量方法中转为其约束
+    #[allow(dead_code)]
     pub(crate) fn object_literal_method_contextual_this(
         &mut self,
         node: &Arc<Node>,
@@ -155,6 +157,7 @@ impl Checker {
         self.get_any_type()
     }
 
+    #[allow(dead_code)]
     pub(crate) fn explicit_this_parameter_type(&mut self, node: &Arc<Node>) -> Option<Arc<Type>> {
         let mut cur = node.parent();
         while let Some(n) = cur {

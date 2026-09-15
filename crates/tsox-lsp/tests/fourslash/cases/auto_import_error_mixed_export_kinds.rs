@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -14,7 +14,7 @@ export { bar as foo };
 // @Filename: b.ts
 foo/**/
 "#;
-    let mut s = Session::new_for_test("autoImportErrorMixedExportKinds", content);
+    let _s = Session::new_for_test("autoImportErrorMixedExportKinds", content);
     // TODO: // Verify we don't crash from the mixed exports
     // TODO: f.BaselineAutoImportsCompletions(t, []string{""})
 }

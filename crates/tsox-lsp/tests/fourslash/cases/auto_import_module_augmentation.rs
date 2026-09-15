@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -17,6 +17,6 @@ declare module "./a" {
 // @Filename: /c.ts
 Foo/**/
 "#;
-    let mut s = Session::new_for_test("autoImportModuleAugmentation", content);
+    let _s = Session::new_for_test("autoImportModuleAugmentation", content);
     // TODO: f.BaselineAutoImportsCompletions(t, []string{""})
 }

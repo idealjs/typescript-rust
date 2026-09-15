@@ -3,10 +3,9 @@
 use std::sync::Arc;
 
 use crate::ast::SyntaxKind;
-use tsox_core::core::text::TextRange;
 
 use crate::format::scanner::FormattingScanner;
-use crate::format::span::{FormatSpanWorker, LineAction};
+use crate::format::span::FormatSpanWorker;
 
 use super::super::util;
 

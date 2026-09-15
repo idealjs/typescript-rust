@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[ignore = "go: t.Skip('Known failing fourslash test')"]
@@ -14,6 +14,6 @@ namespace A {
 namespace B {
     [|import a = A;|]
 }"#;
-    let mut s = Session::new_for_test("unusedImports10FS", content);
+    let _s = Session::new_for_test("unusedImports10FS", content);
     // TODO: f.VerifyRangeAfterCodeFix(t, ``, false, 0, 0)
 }

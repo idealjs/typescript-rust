@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -11,6 +11,6 @@ declare namespace JSX {
     }
 }
 var x = <div /*1*/ autoComplete /*2*/ />;"#;
-    let mut s = Session::new_for_test("tsxCompletion8", content);
+    let _s = Session::new_for_test("tsxCompletion8", content);
     // TODO: f.VerifyCompletions(t, []string{"1", "2"}, &fourslash.CompletionsExpectedList{
 }

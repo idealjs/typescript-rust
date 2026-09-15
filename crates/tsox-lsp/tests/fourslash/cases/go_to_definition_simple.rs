@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -8,6 +8,6 @@ class /*2*/c { }
 // @Filename: Consumption.ts
  var n = new [|/*1*/c|]();
  var n = new [|c/*3*/|]();"#;
-    let mut s = Session::new_for_test("goToDefinitionSimple", content);
+    let _s = Session::new_for_test("goToDefinitionSimple", content);
     // TODO: f.VerifyBaselineGoToDefinition(t, true, "1", "3")
 }

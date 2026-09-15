@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -10,7 +10,7 @@ export class Foo {
   m() {
   }
 }"#;
-    let mut s = Session::new_for_test("codeFixMissingTypeAnnotationOnExports33_methods", content);
+    let _s = Session::new_for_test("codeFixMissingTypeAnnotationOnExports33_methods", content);
     // TODO: f.VerifyCodeFixAvailable(t, []string{"Add return type 'void'"})
     // TODO: f.VerifyCodeFix(t, fourslash.VerifyCodeFixOptions{
 }

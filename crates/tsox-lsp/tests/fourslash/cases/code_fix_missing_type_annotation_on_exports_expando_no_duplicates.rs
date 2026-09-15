@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -10,7 +10,7 @@ export function foo(): void {
 }
 
 foo.blah = 123;"#;
-    let mut s = Session::new_for_test("codeFixMissingTypeAnnotationOnExports_expandoNoDuplicates", content);
+    let _s = Session::new_for_test("codeFixMissingTypeAnnotationOnExports_expandoNoDuplicates", content);
     // TODO: // Verify that only one code fix action is returned, not three identical ones.
     // TODO: f.VerifyCodeFixAvailableExact(t, []string{
     // TODO: f.VerifyCodeFix(t, fourslash.VerifyCodeFixOptions{

@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -55,6 +55,6 @@ fn get_occurrences_export1() {
     [|export|] var exportedThing = 10;
     declare function foo(): string;
 }"#;
-    let mut s = Session::new_for_test("getOccurrencesExport1", content);
+    let _s = Session::new_for_test("getOccurrencesExport1", content);
     // TODO: f.VerifyBaselineDocumentHighlights(t, nil /*preferences*/, ToAny(f.Ranges())...)
 }

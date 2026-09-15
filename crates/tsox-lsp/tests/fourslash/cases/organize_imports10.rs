@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -11,6 +11,6 @@ export function fun() { /* ... */ }
 // @Filename: /declaration.ts
  type ZodType = {};
  export type { ZodType }"#;
-    let mut s = Session::new_for_test("organizeImports10", content);
+    let _s = Session::new_for_test("organizeImports10", content);
     // TODO: f.VerifyOrganizeImports(t,
 }

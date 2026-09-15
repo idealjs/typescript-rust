@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -8,6 +8,6 @@ const Foo = {
     x: 0,
     y: 1,
 };"#;
-    let mut s = Session::new_for_test("smartSelection_JSDocTags9", content);
+    let _s = Session::new_for_test("smartSelection_JSDocTags9", content);
     // TODO: f.VerifyBaselineSelectionRanges(t)
 }

@@ -72,6 +72,7 @@ pub(crate) fn format_span(
     )
 }
 
+#[allow(dead_code)]
 fn default_options() -> super::FormatCodeSettings {
     super::get_default_format_code_settings()
 }
@@ -106,6 +107,7 @@ pub(crate) fn format_selection_with(
 }
 
 /// Go FormatDocument（引擎内部默认设置版本）
+#[allow(dead_code)]
 pub(crate) fn format_document(file: &Arc<SourceFile>, new_line_character: &str) -> Vec<TextChange> {
     format_span(
         TextRange::new(0, file.text.len()),
@@ -117,6 +119,7 @@ pub(crate) fn format_document(file: &Arc<SourceFile>, new_line_character: &str) 
 }
 
 /// Go FormatSelection：起点对齐到行首
+#[allow(dead_code)]
 pub(crate) fn format_selection(
     file: &Arc<SourceFile>,
     start: usize,

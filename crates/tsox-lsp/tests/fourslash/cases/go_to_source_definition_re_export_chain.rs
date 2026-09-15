@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -17,6 +17,6 @@ export function /*targetHelper*/helper() { return "ok"; }
 // @Filename: /home/src/workspaces/project/index.ts
 import { /*importHelper*/helper } from "pkg";
 helper();"#;
-    let mut s = Session::new_for_test("goToSourceForwardedReExportChain", content);
+    let _s = Session::new_for_test("goToSourceForwardedReExportChain", content);
     // TODO: f.VerifyBaselineGoToSourceDefinition(t, "importHelper")
 }

@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -13,7 +13,7 @@ const a2 = <Foo b="/*2*/" />
 const a3 = <Foo b="somethingelse"/*3*/ />
 const a4 = <Foo b={"somethingelse"} /*4*/ />
 const a5 = <Foo b={"somethingelse"} c={0} /*5*/ />"#;
-    let mut s = Session::new_for_test("stringLiteralCompletionsInJsxAttributeInitializer", content);
+    let _s = Session::new_for_test("stringLiteralCompletionsInJsxAttributeInitializer", content);
     // TODO: f.VerifyCompletions(t, []string{"1", "2"}, &fourslash.CompletionsExpectedList{
     // TODO: f.VerifyCompletions(t, []string{"3", "4"}, &fourslash.CompletionsExpectedList{
     // TODO: f.VerifyCompletions(t, []string{"5"}, &fourslash.CompletionsExpectedList{

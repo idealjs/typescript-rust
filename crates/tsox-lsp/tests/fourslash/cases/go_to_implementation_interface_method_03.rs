@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -21,6 +21,6 @@ class OtherBar implements Foo {
 
 new Bar().hel/*function_call*/lo();
 new Bar()["hello"]();"#;
-    let mut s = Session::new_for_test("goToImplementationInterfaceMethod_03", content);
+    let _s = Session::new_for_test("goToImplementationInterfaceMethod_03", content);
     // TODO: f.VerifyBaselineGoToImplementation(t, "function_call")
 }

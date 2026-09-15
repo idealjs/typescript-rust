@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -10,6 +10,6 @@ export namespace A {
        export interface I { }
    }
 }"#;
-    let mut s = Session::new_for_test("importNameCodeFixNewImportFile4", content);
+    let _s = Session::new_for_test("importNameCodeFixNewImportFile4", content);
     // TODO: f.VerifyImportFixAtPosition(t, []string{
 }

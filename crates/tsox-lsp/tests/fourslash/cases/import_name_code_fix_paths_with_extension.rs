@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -21,6 +21,6 @@ fn import_name_code_fix_paths_with_extension() {
 export function helloWorld() {}
 // @Filename: /src/index.ts
 helloWorld/**/"##;
-    let mut s = Session::new_for_test("importNameCodeFix_pathsWithExtension", content);
+    let _s = Session::new_for_test("importNameCodeFix_pathsWithExtension", content);
     // TODO: f.VerifyImportFixModuleSpecifiers(t, "", []string{"#internals/example"}, &lsutil.UserPreferences{Imp
 }

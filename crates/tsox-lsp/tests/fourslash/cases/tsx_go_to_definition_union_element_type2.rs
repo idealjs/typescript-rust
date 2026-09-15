@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -19,6 +19,6 @@ class RC2 extends React.Component<{}, {}> {
 }
 var /*pt1*/RCComp = RC1 || RC2;
 <[|RC/*one*/Comp|] />"#;
-    let mut s = Session::new_for_test("tsxGoToDefinitionUnionElementType2", content);
+    let _s = Session::new_for_test("tsxGoToDefinitionUnionElementType2", content);
     // TODO: f.VerifyBaselineGoToDefinition(t, true, "one")
 }

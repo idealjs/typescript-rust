@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -65,6 +65,6 @@ label1: for (var n in arr) {
 label5: while (true) break label5;
 
 label7: while (true) co/*10*/ntinue label5;"#;
-    let mut s = Session::new_for_test("getOccurrencesLoopBreakContinueNegatives", content);
+    let _s = Session::new_for_test("getOccurrencesLoopBreakContinueNegatives", content);
     // TODO: f.VerifyBaselineDocumentHighlights(t, nil /*preferences*/, ToAny(f.Markers())...)
 }

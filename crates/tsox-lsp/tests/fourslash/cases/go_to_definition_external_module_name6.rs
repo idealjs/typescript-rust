@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -9,6 +9,6 @@ import * from [|'e/*1*/'|];
 declare module /*2*/"e" {
     class Foo { }
 }"#;
-    let mut s = Session::new_for_test("goToDefinitionExternalModuleName6", content);
+    let _s = Session::new_for_test("goToDefinitionExternalModuleName6", content);
     // TODO: f.VerifyBaselineGoToDefinition(t, true, "1")
 }

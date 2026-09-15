@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -7,6 +7,6 @@ fn special_intersections_order_independent() {
 a('/*1*/')
 declare function b(arg: 'test' | ({} & string)): void
 b('/*2*/')"#;
-    let mut s = Session::new_for_test("specialIntersectionsOrderIndependent", content);
+    let _s = Session::new_for_test("specialIntersectionsOrderIndependent", content);
     // TODO: f.VerifyCompletions(t, []string{"1", "2"}, &fourslash.CompletionsExpectedList{
 }

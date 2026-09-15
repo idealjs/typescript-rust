@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -32,6 +32,6 @@ export default (class {
 export default (class Cls {
   prop = 42;
 });"#;
-    let mut s = Session::new_for_test("navigationItemsExportDefaultExpression2", content);
+    let _s = Session::new_for_test("navigationItemsExportDefaultExpression2", content);
     // TODO: f.VerifyBaselineDocumentSymbol(t)
 }

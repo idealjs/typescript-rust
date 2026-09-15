@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -12,6 +12,6 @@ interface Foo<T extends string> {
     
 class Bar implements Foo<manyprops> {
 }"#;
-    let mut s = Session::new_for_test("codeFixClassImplementInterfaceNoTruncationProperties", content);
+    let _s = Session::new_for_test("codeFixClassImplementInterfaceNoTruncationProperties", content);
     // TODO: f.VerifyCodeFix(t, fourslash.VerifyCodeFixOptions{
 }

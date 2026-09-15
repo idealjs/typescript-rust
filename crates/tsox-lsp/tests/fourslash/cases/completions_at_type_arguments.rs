@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -9,6 +9,6 @@ fn completions_at_type_arguments() {
 }
 type T1 = Pick<I, "/*1*/">;
 interface T2 extends Pick<I, "/*2*/"> {}"#;
-    let mut s = Session::new_for_test("completionsAtTypeArguments", content);
+    let _s = Session::new_for_test("completionsAtTypeArguments", content);
     // TODO: f.VerifyCompletions(t, []string{"1", "2"}, &fourslash.CompletionsExpectedList{
 }

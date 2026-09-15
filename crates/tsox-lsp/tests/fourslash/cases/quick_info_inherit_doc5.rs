@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -16,6 +16,6 @@ class B extends A {
         return undefined;
     }
 }"#;
-    let mut s = Session::new_for_test("quickInfoInheritDoc5", content);
+    let _s = Session::new_for_test("quickInfoInheritDoc5", content);
     // TODO: f.VerifyBaselineHover(t)
 }

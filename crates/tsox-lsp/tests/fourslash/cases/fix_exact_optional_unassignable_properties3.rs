@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -18,6 +18,6 @@ console.log(inm)
 export interface INodeModules {
     a?: number
 }"#;
-    let mut s = Session::new_for_test("fixExactOptionalUnassignableProperties3", content);
+    let _s = Session::new_for_test("fixExactOptionalUnassignableProperties3", content);
     // TODO: f.VerifyCodeFixNotAvailable(t)
 }

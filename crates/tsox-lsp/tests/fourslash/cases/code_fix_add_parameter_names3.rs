@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[ignore = "go: t.Skip('Known failing fourslash test')"]
@@ -6,6 +6,6 @@ use tsox_lsp::fourslash::{self, Session};
 fn code_fix_add_parameter_names3() {
     let content = r#"// @noImplicitAny: true
 type Rest = ([|public string|]) => void;"#;
-    let mut s = Session::new_for_test("codeFixAddParameterNames3", content);
+    let _s = Session::new_for_test("codeFixAddParameterNames3", content);
     // TODO: f.VerifyRangeAfterCodeFix(t, `public arg0: string`, false, 0, 0)
 }

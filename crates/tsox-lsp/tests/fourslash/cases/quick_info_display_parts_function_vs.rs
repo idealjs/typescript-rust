@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -22,6 +22,6 @@ function /*8*/foowith3overload(a: any): any {
 /*12*/foowith3overload("hello");
 /*13*/foowith3overload(10);
 /*14*/foowith3overload(true);"#;
-    let mut s = Session::new_with_capabilities(content, None);
+    let _s = Session::new_with_capabilities(content, None);
     // TODO: f.VerifyBaselineVSHover(t)
 }

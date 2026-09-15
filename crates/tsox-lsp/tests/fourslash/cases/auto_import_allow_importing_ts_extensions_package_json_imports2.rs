@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -30,6 +30,6 @@ export function add(a: number, b: number) {}
 // @Filename: /src/index.ts
 add/*imports*/;
 external/*exports*/;"##;
-    let mut s = Session::new_for_test("autoImportAllowImportingTsExtensionsPackageJsonImports2", content);
+    let _s = Session::new_for_test("autoImportAllowImportingTsExtensionsPackageJsonImports2", content);
     // TODO: f.VerifyImportFixModuleSpecifiers(t, "imports", []string{"#add.js"}, nil /*preferences*/)
 }

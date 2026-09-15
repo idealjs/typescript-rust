@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -34,6 +34,6 @@ import { f } from "./a";
 // @Filename: c.ts
  class c5b { public foo() { } }
  namespace c5b/*5*/ { export var y = 2; }"#;
-    let mut s = Session::new_for_test("quickinfoVerbosity3", content);
+    let _s = Session::new_for_test("quickinfoVerbosity3", content);
     // TODO: f.VerifyBaselineHoverWithVerbosity(t, map[string][]int{"1": {0, 1}, "2": {0, 1, 2}, "3": {0, 1}, "4"
 }

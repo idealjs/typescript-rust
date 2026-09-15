@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -39,6 +39,6 @@ obj[`[|num|]`];
 
 obj.[|bool|];
 obj[`[|bool|]`];"#;
-    let mut s = Session::new_for_test("renameTemplateLiteralsComputedProperties", content);
+    let _s = Session::new_for_test("renameTemplateLiteralsComputedProperties", content);
     // TODO: f.VerifyBaselineRenameAtRangesWithText(t, nil /*preferences*/, "num", "bool")
 }

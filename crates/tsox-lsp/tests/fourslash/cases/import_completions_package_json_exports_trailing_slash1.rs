@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -24,7 +24,7 @@ export function foo(): void;
 // @Filename: /index.ts
 import {} from "pkg//*1*/";
 import {} from "pkg/test//*2*/";"#;
-    let mut s = Session::new_for_test("importCompletionsPackageJsonExportsTrailingSlash1", content);
+    let _s = Session::new_for_test("importCompletionsPackageJsonExportsTrailingSlash1", content);
     // TODO: f.VerifyCompletions(t, []string{"1"}, &fourslash.CompletionsExpectedList{
     // TODO: f.VerifyCompletions(t, []string{"2"}, &fourslash.CompletionsExpectedList{
 }

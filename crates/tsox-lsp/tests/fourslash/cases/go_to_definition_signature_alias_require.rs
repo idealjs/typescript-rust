@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -12,6 +12,6 @@ const f = require("./a");
 // @Filename: /bar.ts
 import f = require("./a");
 [|/*useTs*/f|]();"#;
-    let mut s = Session::new_for_test("goToDefinitionSignatureAlias_require", content);
+    let _s = Session::new_for_test("goToDefinitionSignatureAlias_require", content);
     // TODO: f.VerifyBaselineGoToDefinition(t, true, "use", "useTs")
 }

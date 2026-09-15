@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -19,6 +19,6 @@ interface OptionPropBag {
 }
 declare function Opt(attributes: OptionPropBag): JSX.Element;
 let opt = <Opt /*1*/wrong />;"#;
-    let mut s = Session::new_for_test("tsxFindAllReferences6", content);
+    let _s = Session::new_for_test("tsxFindAllReferences6", content);
     // TODO: f.VerifyBaselineFindAllReferences(t, "1")
 }

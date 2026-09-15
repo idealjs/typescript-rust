@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -21,6 +21,6 @@ const c = ""
 const [|/*def3*/d|] = ""
 /** @see /*use5*/[|d|] dd*/
 const e = """#;
-    let mut s = Session::new_for_test("jsDocSee1", content);
+    let _s = Session::new_for_test("jsDocSee1", content);
     // TODO: f.VerifyBaselineGoToDefinition(t, false, "use1", "use2", "use3", "use4", "use5")
 }

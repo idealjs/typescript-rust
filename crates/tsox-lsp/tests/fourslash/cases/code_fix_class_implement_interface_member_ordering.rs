@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -32,6 +32,6 @@ interface I {
     23;
 }
 class C implements I {}"#;
-    let mut s = Session::new_for_test("codeFixClassImplementInterfaceMemberOrdering", content);
+    let _s = Session::new_for_test("codeFixClassImplementInterfaceMemberOrdering", content);
     // TODO: f.VerifyCodeFix(t, fourslash.VerifyCodeFixOptions{
 }

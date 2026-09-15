@@ -2,7 +2,6 @@ pub(crate) use std::collections::HashSet;
 pub(crate) use std::io::{IsTerminal, Write};
 pub(crate) use std::sync::Arc;
 pub(crate) use std::time::Instant;
-pub(crate) use tsox_checker::bundled;
 pub(crate) use tsox_checker::bundled::BundledFS;
 pub(crate) use tsox_compile::compiler::CompilerHost;
 pub(crate) use tsox_compile::compiler::CompilerHostImpl;
@@ -24,7 +23,6 @@ pub(crate) use tsox_core::diagnostics::PROJECT_REFERENCES_MAY_NOT_FORM_A_CIRCULA
 pub(crate) use tsox_core::diagnostics::THE_SPECIFIED_PATH_DOES_NOT_EXIST_COLON_0;
 pub(crate) use tsox_core::diagnostics::X_TSCONFIG_JSON_IS_PRESENT_BUT_WILL_NOT_BE_LOADED_IF_FILES_ARE_SPECIFIED_ON_COMMANDLINE_USE_IGNORECONFIG_TO_SKIP_THIS_ERROR;
 pub(crate) use tsox_core::locale::Locale;
-pub(crate) use tsox_core::tspath;
 pub(crate) use tsox_frontend::ast::diagnostic::Diagnostic;
 pub(crate) use tsox_frontend::diagnosticwriter::format_diagnostic;
 pub(crate) use tsox_frontend::diagnosticwriter::report_diagnostics;

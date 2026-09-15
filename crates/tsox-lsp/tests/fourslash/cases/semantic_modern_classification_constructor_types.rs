@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -7,6 +7,6 @@ fn semantic_modern_classification_constructor_types() {
 Object.create(null);
 const x = Promise.resolve(Number.MAX_VALUE);
 if (x instanceof Promise) {}"#;
-    let mut s = Session::new_for_test("semanticModernClassificationConstructorTypes", content);
+    let _s = Session::new_for_test("semanticModernClassificationConstructorTypes", content);
     // TODO: f.VerifySemanticTokens(t, []fourslash.SemanticToken{
 }

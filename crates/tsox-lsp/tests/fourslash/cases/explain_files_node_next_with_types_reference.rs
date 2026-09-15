@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -39,6 +39,6 @@ declare namespace React { export interface Whatever {} }
 }
 // @Filename: /index.ts
 import { useForm } from "react-hook-form";"#;
-    let mut s = Session::new_for_test("explainFilesNodeNextWithTypesReference", content);
+    let _s = Session::new_for_test("explainFilesNodeNextWithTypesReference", content);
     // TODO: f.VerifyBaselineFindAllReferences(t, "")
 }

@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -7,6 +7,6 @@ fn signature_help_tagged_templates_negatives5() {
 }
 
 /*1*/fo/*2*/o /*3*/`abcd`/*4*/"#;
-    let mut s = Session::new_for_test("signatureHelpTaggedTemplatesNegatives5", content);
+    let _s = Session::new_for_test("signatureHelpTaggedTemplatesNegatives5", content);
     // TODO: f.VerifyNoSignatureHelpForMarkers(t, f.MarkerNames()...)
 }

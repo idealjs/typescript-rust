@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -10,7 +10,7 @@ const x = 1;
 export default {
   x
 };"#;
-    let mut s = Session::new_for_test("codeFixMissingTypeAnnotationOnExports32_inline_short_hand", content);
+    let _s = Session::new_for_test("codeFixMissingTypeAnnotationOnExports32_inline_short_hand", content);
     // TODO: f.VerifyCodeFix(t, fourslash.VerifyCodeFixOptions{
     // TODO: f.VerifyCodeFix(t, fourslash.VerifyCodeFixOptions{
 }

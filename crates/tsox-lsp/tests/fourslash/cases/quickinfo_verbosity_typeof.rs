@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -16,6 +16,6 @@ class Banana {
     }
 }
 const c/*c*/: typeof Banana = Banana;"#;
-    let mut s = Session::new_for_test("quickinfoVerbosityTypeof", content);
+    let _s = Session::new_for_test("quickinfoVerbosityTypeof", content);
     // TODO: f.VerifyBaselineHoverWithVerbosity(t, map[string][]int{"b": {0, 1}, "c": {0, 1}})
 }

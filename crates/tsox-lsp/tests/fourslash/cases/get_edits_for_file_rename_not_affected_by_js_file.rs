@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -9,6 +9,6 @@ export const x = 0;
 exports.x = 0;
 // @Filename: /b.ts
 import { x } from "./a";"#;
-    let mut s = Session::new_for_test("getEditsForFileRename_notAffectedByJsFile", content);
+    let _s = Session::new_for_test("getEditsForFileRename_notAffectedByJsFile", content);
     // TODO: f.VerifyWillRenameFilesEdits(t, "/a.ts", "/a2.ts", map[string]string{
 }

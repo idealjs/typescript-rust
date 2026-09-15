@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[ignore = "go: t.Skip('Known failing fourslash test')"]
@@ -11,6 +11,6 @@ function f([|a? |]){
 }
 f();
 f(1);"#;
-    let mut s = Session::new_for_test("codeFixInferFromUsageOptionalParam", content);
+    let _s = Session::new_for_test("codeFixInferFromUsageOptionalParam", content);
     // TODO: f.VerifyRangeAfterCodeFix(t, `a?: number`, false, 0, 0)
 }

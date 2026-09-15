@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -12,6 +12,6 @@ const b = 2;
 describe('foo', () => {
     test(`a ${a} b {b}`, () => {})
 })"#;
-    let mut s = Session::new_for_test("navigationBarAnonymousClassAndFunctionExpressions3", content);
+    let _s = Session::new_for_test("navigationBarAnonymousClassAndFunctionExpressions3", content);
     // TODO: f.VerifyBaselineDocumentSymbol(t)
 }

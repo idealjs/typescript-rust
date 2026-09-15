@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -10,6 +10,6 @@ async function /*reference*/getUser() { return { name: "Bob" } satisfies User as
 const /*reference2*/promisedBob = getUser() 
 
 export {}"#;
-    let mut s = Session::new_for_test("goToTypeDefinition_promiseType", content);
+    let _s = Session::new_for_test("goToTypeDefinition_promiseType", content);
     // TODO: f.VerifyBaselineGoToTypeDefinition(t, "reference", "reference2")
 }

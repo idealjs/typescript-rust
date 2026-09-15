@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -12,7 +12,7 @@ function f3(a) {
 const f5 = (a, b = (c = /*7*/, e) => { }, d = b) => { }
 
 type A1<K = /*T1*/, L> = K"#;
-    let mut s = Session::new_for_test("noCompletionsForCurrentOrLaterParametersInDefaults", content);
+    let _s = Session::new_for_test("noCompletionsForCurrentOrLaterParametersInDefaults", content);
     // TODO: f.VerifyCompletions(t, []string{"1", "2"}, &fourslash.CompletionsExpectedList{
     // TODO: f.VerifyCompletions(t, []string{"3"}, &fourslash.CompletionsExpectedList{
     // TODO: f.VerifyCompletions(t, []string{"4"}, &fourslash.CompletionsExpectedList{

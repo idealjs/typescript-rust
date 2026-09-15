@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -204,7 +204,7 @@ jsDocComme/*47q*/ntAlignmentTest3("hello",1, 2);
 /**/
 class NoQuic/*50q*/kInfoClass {
 }"#;
-    let mut s = Session::new_for_test("quickInfoCommentsCommentParsing", content);
+    let _s = Session::new_for_test("quickInfoCommentsCommentParsing", content);
     // TODO: f.VerifyBaselineHover(t)
     // TODO: }
 }

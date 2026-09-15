@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[ignore = "go: t.Skip('Known failing fourslash test')"]
@@ -27,6 +27,6 @@ export = $;
 module.exports = {};
 // @Filename: /index.ts
 filter/**/"#;
-    let mut s = Session::new_for_test("importNameCodeFix_noDestructureNonObjectLiteral", content);
+    let _s = Session::new_for_test("importNameCodeFix_noDestructureNonObjectLiteral", content);
     // TODO: f.VerifyImportFixModuleSpecifiers(t, "", []string{"./object-literal", "./jquery"}, nil /*preferences
 }

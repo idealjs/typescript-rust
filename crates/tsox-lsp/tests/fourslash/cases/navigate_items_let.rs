@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -8,6 +8,6 @@ let [|c|] = 10;
 function foo() {
     let [|d|] = 10;
 }"#;
-    let mut s = Session::new_for_test("navigateItemsLet", content);
+    let _s = Session::new_for_test("navigateItemsLet", content);
     // TODO: f.VerifyWorkspaceSymbol(t, []*fourslash.VerifyWorkspaceSymbolCase{
 }

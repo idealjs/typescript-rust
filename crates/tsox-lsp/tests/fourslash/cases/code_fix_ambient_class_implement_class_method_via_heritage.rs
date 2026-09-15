@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -14,6 +14,6 @@ class C2 extends C1 {
 declare class C3 implements C2 {[|
     |]f2();
 }"#;
-    let mut s = Session::new_for_test("codeFixAmbientClassImplementClassMethodViaHeritage", content);
+    let _s = Session::new_for_test("codeFixAmbientClassImplementClassMethodViaHeritage", content);
     // TODO: f.VerifyRangeAfterCodeFix(t, `f1(): void;
 }

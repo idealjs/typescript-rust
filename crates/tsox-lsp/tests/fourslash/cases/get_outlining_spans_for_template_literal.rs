@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -19,6 +19,6 @@ const h = tag[|`multi
 ${1}
 line`|]
 const i = ``"#;
-    let mut s = Session::new_for_test("getOutliningSpansForTemplateLiteral", content);
+    let _s = Session::new_for_test("getOutliningSpansForTemplateLiteral", content);
     // TODO: f.VerifyOutliningSpans(t)
 }

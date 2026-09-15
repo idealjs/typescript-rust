@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -22,7 +22,7 @@ class Foo {
         <div  /*2*/ />
     }
 }"#;
-    let mut s = Session::new_for_test("completionsInJsxTag", content);
+    let _s = Session::new_for_test("completionsInJsxTag", content);
     // TODO: f.VerifyCompletions(t, []string{"1", "2"}, &fourslash.CompletionsExpectedList{
 }
 
@@ -45,6 +45,6 @@ declare namespace JSX {
 }
 <foo:bar /*1*/ />
 <foo:bar  /*2*/></foo:bar>"#;
-    let mut s = Session::new_for_test("completionsInJsxNamespacedIntrinsicTag", content);
+    let _s = Session::new_for_test("completionsInJsxNamespacedIntrinsicTag", content);
     // TODO: f.VerifyCompletions(t, []string{"1", "2"}, &fourslash.CompletionsExpectedList{
 }

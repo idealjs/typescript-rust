@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -34,6 +34,6 @@ export class MyClass {
  export type TypeA = string;
  export class TypeB { }
  export type TypeC = () => string;"#;
-    let mut s = Session::new_for_test("organizeImports11", content);
+    let _s = Session::new_for_test("organizeImports11", content);
     // TODO: f.VerifyOrganizeImports(t,
 }

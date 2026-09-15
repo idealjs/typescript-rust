@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[ignore = "go: t.Skip('Known failing fourslash test')"]
@@ -15,7 +15,7 @@ function excludesTypes1() {
 function excludesTypes2() {
     1</*3*/
 }"#;
-    let mut s = Session::new_for_test("completionInFunctionLikeBody_includesPrimitiveTypes", content);
+    let _s = Session::new_for_test("completionInFunctionLikeBody_includesPrimitiveTypes", content);
     // TODO: f.VerifyCompletions(t, []string{"1"}, &fourslash.CompletionsExpectedList{
     // TODO: f.VerifyCompletions(t, []string{"2", "3"}, &fourslash.CompletionsExpectedList{
 }

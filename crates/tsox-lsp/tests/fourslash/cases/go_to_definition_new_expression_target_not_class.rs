@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -12,6 +12,6 @@ new [|/*invokeExpression1*/I|]();
 let /*symbolDeclaration*/I2: {
 };
 new [|/*invokeExpression2*/I2|]();"#;
-    let mut s = Session::new_for_test("goToDefinitionNewExpressionTargetNotClass", content);
+    let _s = Session::new_for_test("goToDefinitionNewExpressionTargetNotClass", content);
     // TODO: f.VerifyBaselineGoToDefinition(t, true, "invokeExpression1", "invokeExpression2")
 }

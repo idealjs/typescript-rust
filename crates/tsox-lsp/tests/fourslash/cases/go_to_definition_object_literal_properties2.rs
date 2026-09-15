@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -22,6 +22,6 @@ const result = fn({
 
 // this one shouldn't go to the constraint type
 result.foo/*5*/;"#;
-    let mut s = Session::new_for_test("goToDefinitionObjectLiteralProperties2", content);
+    let _s = Session::new_for_test("goToDefinitionObjectLiteralProperties2", content);
     // TODO: f.VerifyBaselineGoToDefinition(t, true, "1", "2", "3", "4", "5")
 }

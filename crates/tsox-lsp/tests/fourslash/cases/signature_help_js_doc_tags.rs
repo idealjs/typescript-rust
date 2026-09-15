@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -61,6 +61,6 @@ foo.property1;
 foo.property2;
 foo.method5();
 foo.newMet"#;
-    let mut s = Session::new_for_test("signatureHelpJSDocTags", content);
+    let _s = Session::new_for_test("signatureHelpJSDocTags", content);
     // TODO: f.VerifyBaselineSignatureHelp(t)
 }

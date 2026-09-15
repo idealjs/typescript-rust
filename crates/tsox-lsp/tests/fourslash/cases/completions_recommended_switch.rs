@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -9,6 +9,6 @@ switch (e) {
     case E/*0*/:
     case /*1*/:
 }"#;
-    let mut s = Session::new_for_test("completionsRecommended_switch", content);
+    let _s = Session::new_for_test("completionsRecommended_switch", content);
     // TODO: f.VerifyCompletions(t, f.Markers(), &fourslash.CompletionsExpectedList{
 }

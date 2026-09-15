@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -18,7 +18,7 @@ export const a = 'a';
 // @Filename: /home/src/workspaces/project/b.ts
 import { a } from 'foo/a';
 [|a/*start*/|]"#;
-    let mut s = Session::new_for_test("goToSource6_sameAsGoToDef2", content);
+    let _s = Session::new_for_test("goToSource6_sameAsGoToDef2", content);
     // TODO: f.MarkTestAsStradaServer()
     // TODO: f.VerifyBaselineGoToSourceDefinition(t, "start")
     // TODO: f.VerifyBaselineGoToDefinition(t, true, "start")

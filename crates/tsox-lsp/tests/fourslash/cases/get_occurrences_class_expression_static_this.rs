@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -48,6 +48,6 @@ fn get_occurrences_class_expression_static_this() {
         }
     }
 }"#;
-    let mut s = Session::new_for_test("getOccurrencesClassExpressionStaticThis", content);
+    let _s = Session::new_for_test("getOccurrencesClassExpressionStaticThis", content);
     // TODO: f.VerifyBaselineDocumentHighlights(t, nil /*preferences*/, ToAny(f.Ranges())...)
 }

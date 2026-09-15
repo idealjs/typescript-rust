@@ -10,7 +10,7 @@ const type: MyTypeA = { foo: "bar" };
 export interface MyTypeA {
     foo: string;
 }"#;
-    let mut s = Session::new_for_test("renameNamedImportUseAliasesForRenames", content);
+    let _s = Session::new_for_test("renameNamedImportUseAliasesForRenames", content);
     // TODO: f.VerifyBaselineRename(t, &lsutil.UserPreferences{UseAliasesForRename: core.TSFalse}, "import")
     // TODO: f.VerifyBaselineRename(t, &lsutil.UserPreferences{UseAliasesForRename: core.TSTrue}, "import")
 }

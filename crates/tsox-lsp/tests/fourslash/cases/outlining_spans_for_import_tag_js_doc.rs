@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -17,6 +17,6 @@ fn outlining_spans_for_import_tag_js_doc() {
  */|]
 
 "#;
-    let mut s = Session::new_for_test("outliningSpansForImportTagJSDoc", content);
+    let _s = Session::new_for_test("outliningSpansForImportTagJSDoc", content);
     // TODO: f.VerifyOutliningSpans(t)
 }

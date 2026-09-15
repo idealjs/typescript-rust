@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -12,6 +12,6 @@ fn semantic_classification_in_template_expressions() {
     }
 }
 `abcd${ /*3*/M./*4*/C.x + /*5*/M./*6*/E.E1}efg`"#;
-    let mut s = Session::new_for_test("semanticClassificationInTemplateExpressions", content);
+    let _s = Session::new_for_test("semanticClassificationInTemplateExpressions", content);
     // TODO: f.VerifySemanticTokens(t, []fourslash.SemanticToken{
 }

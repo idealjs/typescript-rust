@@ -21,15 +21,3 @@ pub(crate) fn lsp_position_to_offset(
     offset
 }
 
-pub(crate) fn offset_to_lsp_line_char(
-    text: &str,
-    line_map: &LineMap,
-    offset: usize,
-) -> (usize, usize) {
-    let line = match line_map.line_starts.binary_search(&(offset as u32)) {
-        Ok(idx) => idx,
-        Err(idx) => idx.saturating_sub(1),
-    };
-    let line_start = line_map.line_starts.get(line).copied().unwrap_or(0) as usize;
-    (line, line_map.utf16_column_at(text, offset) - line_map.utf16_column_at(text, line_start))
-}

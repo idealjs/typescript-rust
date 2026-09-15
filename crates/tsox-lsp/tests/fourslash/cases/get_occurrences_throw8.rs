@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -21,6 +21,6 @@ finally {
 }
 
 throw 10;"#;
-    let mut s = Session::new_for_test("getOccurrencesThrow8", content);
+    let _s = Session::new_for_test("getOccurrencesThrow8", content);
     // TODO: f.VerifyBaselineDocumentHighlights(t, nil /*preferences*/, ToAny(f.Ranges())...)
 }

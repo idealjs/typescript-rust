@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -27,7 +27,7 @@ import { command } from "yargs";
 command("foo", yargs => {
     yargs.[|/*start*/positional|]();
 });"#;
-    let mut s = Session::new_for_test("goToSource12_callbackParam", content);
+    let _s = Session::new_for_test("goToSource12_callbackParam", content);
     // TODO: f.MarkTestAsStradaServer()
     // TODO: f.VerifyBaselineGoToSourceDefinition(t, "start")
 }

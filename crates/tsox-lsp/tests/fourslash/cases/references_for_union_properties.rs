@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -24,6 +24,6 @@ interface Two {
 var x : One | Two;
 
 x.common./*x*/a;"#;
-    let mut s = Session::new_for_test("referencesForUnionProperties", content);
+    let _s = Session::new_for_test("referencesForUnionProperties", content);
     // TODO: f.VerifyBaselineFindAllReferences(t, "one", "base", "x")
 }

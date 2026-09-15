@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -7,6 +7,6 @@ fn go_to_definition_built_in_types() {
 var s: /*string*/string;
 var b: /*boolean*/boolean;
 var v: /*void*/void;"#;
-    let mut s = Session::new_for_test("goToDefinitionBuiltInTypes", content);
+    let _s = Session::new_for_test("goToDefinitionBuiltInTypes", content);
     // TODO: f.VerifyBaselineGoToDefinition(t, true, f.MarkerNames()...)
 }

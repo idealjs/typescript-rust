@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -16,6 +16,6 @@ obj¬
 for (obj/**/.prop of arr) {
 
 }"#;
-    let mut s = Session::new_for_test("processInvalidSyntax1", content);
+    let _s = Session::new_for_test("processInvalidSyntax1", content);
     // TODO: f.VerifyBaselineRename(t, nil /*preferences*/, "")
 }

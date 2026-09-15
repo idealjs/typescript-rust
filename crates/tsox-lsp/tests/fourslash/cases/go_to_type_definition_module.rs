@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -11,6 +11,6 @@ var m: typeof M;
 // @Filename: module3.ts
 /*reference1*/M;
 /*reference2*/m;"#;
-    let mut s = Session::new_for_test("goToTypeDefinitionModule", content);
+    let _s = Session::new_for_test("goToTypeDefinitionModule", content);
     // TODO: f.VerifyBaselineGoToTypeDefinition(t, "reference1", "reference2")
 }

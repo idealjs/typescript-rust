@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -18,6 +18,6 @@ catch/*6*/ (e) {
 }
 finally/*7*/ {
 }"#;
-    let mut s = Session::new_for_test("getOccurrencesTryCatchFinally4", content);
+    let _s = Session::new_for_test("getOccurrencesTryCatchFinally4", content);
     // TODO: f.VerifyBaselineDocumentHighlights(t, nil /*preferences*/, ToAny(f.Markers())...)
 }

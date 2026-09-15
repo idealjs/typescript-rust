@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -21,6 +21,6 @@ function f(): Foo {
 
 const { isBaz: isBar } = f();
 isBar/**/;"#;
-    let mut s = Session::new_for_test("quickInfoForObjectBindingElementName06", content);
+    let _s = Session::new_for_test("quickInfoForObjectBindingElementName06", content);
     // TODO: f.VerifyBaselineHover(t)
 }

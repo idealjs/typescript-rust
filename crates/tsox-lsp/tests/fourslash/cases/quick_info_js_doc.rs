@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -61,6 +61,6 @@ class C {
         fn/*11*/();
     }
 }"#;
-    let mut s = Session::new_for_test("quickInfoJsDoc", content);
+    let _s = Session::new_for_test("quickInfoJsDoc", content);
     // TODO: f.VerifyBaselineHover(t)
 }

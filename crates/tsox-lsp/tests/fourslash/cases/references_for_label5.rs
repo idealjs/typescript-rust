@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -12,6 +12,6 @@ fn references_for_label5() {
             }
             if (false) /*7*/break /*8*/label;
         }"#;
-    let mut s = Session::new_for_test("referencesForLabel5", content);
+    let _s = Session::new_for_test("referencesForLabel5", content);
     // TODO: f.VerifyBaselineFindAllReferences(t, "1", "2", "3", "4", "5", "6", "7", "8")
 }

@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -10,6 +10,6 @@ declare namespace JSX {
 }
 // @filename: /a.tsx
 </**/a:b a="accepted" b="rejected" />;"#;
-    let mut s = Session::new_for_test("quickInfoOnJsxNamespacedName", content);
+    let _s = Session::new_for_test("quickInfoOnJsxNamespacedName", content);
     // TODO: f.VerifyBaselineHover(t)
 }

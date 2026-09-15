@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -52,6 +52,6 @@ class SubType extends SuperType {
     super = 10;
     static super = 20;
 }"#;
-    let mut s = Session::new_for_test("getOccurrencesSuper2", content);
+    let _s = Session::new_for_test("getOccurrencesSuper2", content);
     // TODO: f.VerifyBaselineDocumentHighlights(t, nil /*preferences*/, ToAny(f.Ranges())...)
 }

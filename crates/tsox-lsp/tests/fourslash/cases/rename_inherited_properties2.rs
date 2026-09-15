@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -9,6 +9,6 @@ fn rename_inherited_properties2() {
 
 var v: class1;
 v.[|doStuff|]();"#;
-    let mut s = Session::new_for_test("renameInheritedProperties2", content);
+    let _s = Session::new_for_test("renameInheritedProperties2", content);
     // TODO: f.VerifyBaselineRenameAtRangesWithText(t, nil /*preferences*/, "doStuff")
 }

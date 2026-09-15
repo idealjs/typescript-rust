@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -12,6 +12,6 @@ function displaySubreddit(subreddit: string) {
 // @Filename: RedditSubmission.ts
 export const /*2*/SubmissionComp = (submission: SubmissionProps) =>
     <div style={{ fontFamily: "sans-serif" }}></div>;"#;
-    let mut s = Session::new_for_test("findReferencesJSXTagName", content);
+    let _s = Session::new_for_test("findReferencesJSXTagName", content);
     // TODO: f.VerifyBaselineFindAllReferences(t, "1", "2")
 }

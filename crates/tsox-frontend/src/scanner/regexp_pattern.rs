@@ -8,7 +8,6 @@ use crate::scanner::regexp::is_digit;
 use crate::scanner::regexp::is_word_character;
 use std::collections::HashSet;
 use tsox_core::core::compiler_options::ScriptTarget;
-use tsox_core::diagnostics;
 
 impl<'a> RegExpParser<'a> {
     pub(super) fn scan_disjunction(&mut self, is_in_group: bool) {

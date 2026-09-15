@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -23,6 +23,6 @@ type B =[| {
        x: number;
    }|]
 }|]"#;
-    let mut s = Session::new_for_test("getOutliningForTypeLiteral", content);
+    let _s = Session::new_for_test("getOutliningForTypeLiteral", content);
     // TODO: f.VerifyOutliningSpans(t)
 }

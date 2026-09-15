@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -19,7 +19,7 @@ class MyClass {
 
 [|var [|/*dst*/{| "contextRangeIndex": 0 |}nn|]: {name?: string; size?: number};|]
 var x = <MyClass {...[|n/*src*/n|]}></MyClass>;"#;
-    let mut s = Session::new_for_test("jsxSpreadReference", content);
+    let _s = Session::new_for_test("jsxSpreadReference", content);
     // TODO: f.VerifyBaselineRenameAtRangesWithText(t, nil /*preferences*/, "nn")
     // TODO: f.VerifyBaselineGoToDefinition(t, true, "src")
 }

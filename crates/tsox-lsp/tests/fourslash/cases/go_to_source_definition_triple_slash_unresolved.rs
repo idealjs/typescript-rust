@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -8,6 +8,6 @@ fn go_to_source_definition_unresolved_triple_slash() {
     let content = r#"// @Filename: /home/src/workspaces/project/index.ts
 /// <reference /*marker*/path="nonexistent.ts" />
 export {};"#;
-    let mut s = Session::new_for_test("goToSourceDefinitionUnresolvedTripleSlash", content);
+    let _s = Session::new_for_test("goToSourceDefinitionUnresolvedTripleSlash", content);
     // TODO: f.VerifyBaselineGoToSourceDefinition(t, "marker")
 }

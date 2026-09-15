@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -15,6 +15,6 @@ fn(foo, {
 fn({ a: "a", b: "b" }, {
     /*2*/
 })"#;
-    let mut s = Session::new_for_test("completionListInObjectLiteral6", content);
+    let _s = Session::new_for_test("completionListInObjectLiteral6", content);
     // TODO: f.VerifyCompletions(t, []string{"1", "2"}, &fourslash.CompletionsExpectedList{
 }

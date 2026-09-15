@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -16,6 +16,6 @@ class C {
     @[|/*useDecString*/dec|] f() {}
     @[|/*useDecSymbol*/dec|] [s]() {}
 }"#;
-    let mut s = Session::new_for_test("goToDefinitionDecoratorOverloads", content);
+    let _s = Session::new_for_test("goToDefinitionDecoratorOverloads", content);
     // TODO: f.VerifyBaselineGoToDefinition(t, true, "useDecString", "useDecSymbol")
 }

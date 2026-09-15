@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -18,6 +18,6 @@ var x = 0;
 import d from "mod";
 import { a, b, c } from "mod";
 import r = require("mod");|]"#;
-    let mut s = Session::new_for_test("getOutliningSpansForImports", content);
+    let _s = Session::new_for_test("getOutliningSpansForImports", content);
     // TODO: f.VerifyOutliningSpans(t, lsproto.FoldingRangeKindImports)
 }

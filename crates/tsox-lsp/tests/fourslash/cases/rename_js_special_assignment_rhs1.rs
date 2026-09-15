@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -13,6 +13,6 @@ const foo = {
         this._x = [|x|].prop;
     }
 };"#;
-    let mut s = Session::new_for_test("renameJsSpecialAssignmentRhs1", content);
+    let _s = Session::new_for_test("renameJsSpecialAssignmentRhs1", content);
     // TODO: f.VerifyBaselineRename(t, nil /*preferences*/)
 }

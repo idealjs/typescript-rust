@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -14,7 +14,7 @@ interface I2 {
 class C implements I1,I2 {[|
     |]x: number;
 }"#;
-    let mut s = Session::new_for_test("codeFixClassImplementInterfaceMultipleImplements2", content);
+    let _s = Session::new_for_test("codeFixClassImplementInterfaceMultipleImplements2", content);
     // TODO: f.VerifyRangeAfterCodeFix(t, `
     // TODO: f.VerifyCodeFixNotAvailable(t)
 }

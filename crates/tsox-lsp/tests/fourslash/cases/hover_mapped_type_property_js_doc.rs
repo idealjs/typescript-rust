@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -24,7 +24,7 @@ import { A } from './a';
 
 A.X/*2*/;
 "#;
-    let mut s = Session::new_for_test("hoverMappedTypePropertyJSDoc", content);
+    let _s = Session::new_for_test("hoverMappedTypePropertyJSDoc", content);
     // TODO: f.VerifyBaselineHover(t)
 }
 
@@ -33,6 +33,6 @@ fn hover_mapped_type_without_property_type() {
     let content = r#"
 declare function uhoh/*1*/<T>(x: { [K in keyof T] }): void;
 "#;
-    let mut s = Session::new_for_test("hoverMappedTypeWithoutPropertyType", content);
+    let _s = Session::new_for_test("hoverMappedTypeWithoutPropertyType", content);
     // TODO: f.VerifyBaselineHover(t)
 }

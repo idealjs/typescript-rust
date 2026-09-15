@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -23,6 +23,6 @@ class class2 extends class1 {
 
 var v: class2;
 v./*4*/doStuff();"#;
-    let mut s = Session::new_for_test("referencesForInheritedProperties", content);
+    let _s = Session::new_for_test("referencesForInheritedProperties", content);
     // TODO: f.VerifyBaselineFindAllReferences(t, "1", "2", "3", "4")
 }

@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -20,6 +20,6 @@ class Foo {
         Foo./*4*/
     }
 }"#;
-    let mut s = Session::new_for_test("completionListInClassStaticBlocks", content);
+    let _s = Session::new_for_test("completionListInClassStaticBlocks", content);
     // TODO: f.VerifyCompletions(t, []string{"1", "2", "3", "4"}, &fourslash.CompletionsExpectedList{
 }

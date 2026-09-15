@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -7,6 +7,6 @@ fn navigation_bar_initializer_spans() {
 const [|[|x|] = () => { var [|a|]; }|];
 const [|[|f|] = function f() { var [|b|]; }|];
 const [|[|y|] = { [|[|z|]: function z() { var [|c|]; }|] }|];"#;
-    let mut s = Session::new_for_test("navigationBarInitializerSpans", content);
+    let _s = Session::new_for_test("navigationBarInitializerSpans", content);
     // TODO: f.VerifyBaselineDocumentSymbol(t)
 }

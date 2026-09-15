@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -10,6 +10,6 @@ class E { }
 =======
 class D { }
 >>>>>>> Branch - a"#;
-    let mut s = Session::new_for_test("syntacticClassificationsConflictDiff3Markers2", content);
+    let _s = Session::new_for_test("syntacticClassificationsConflictDiff3Markers2", content);
     // TODO: f.VerifySemanticTokens(t, []fourslash.SemanticToken{
 }

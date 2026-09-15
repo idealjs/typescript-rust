@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -33,7 +33,7 @@ const g = ((class G {
 }))"#;
     // TODO: capabilities := fourslash.GetDefaultCapabilities()
     // TODO: capabilities.TextDocument.Completion.CompletionItem.SnippetSupport = new(false)
-    let mut s = Session::new_with_capabilities(content, None);
+    let _s = Session::new_with_capabilities(content, None);
     // TODO: f.VerifyJSDocCompletion(t, "a", 7, `/**
     // TODO: f.VerifyJSDocCompletion(t, "b", 7, `/**
     // TODO: f.VerifyJSDocCompletion(t, "c", 7, `/**

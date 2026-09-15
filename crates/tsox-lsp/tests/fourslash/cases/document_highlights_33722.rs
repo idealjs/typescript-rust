@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -14,6 +14,6 @@ export default f;
 import y from "./y";
 
 y().[|foo|]();"#;
-    let mut s = Session::new_for_test("documentHighlights_33722", content);
+    let _s = Session::new_for_test("documentHighlights_33722", content);
     // TODO: f.VerifyBaselineDocumentHighlightsWithOptions(t, nil /*preferences*/, []string{"/x.ts"}, f.Ranges()[
 }

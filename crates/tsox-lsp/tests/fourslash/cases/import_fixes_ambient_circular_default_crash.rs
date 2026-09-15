@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -17,7 +17,7 @@ declare module "mymod" {
 }
 // @Filename: /home/src/workspaces/project/index.ts
 my/**/"#;
-    let mut s = Session::new_for_test("importFixes_ambientCircularDefaultCrash", content);
+    let _s = Session::new_for_test("importFixes_ambientCircularDefaultCrash", content);
     // TODO: f.MarkTestAsStradaServer()
     // TODO: f.VerifyImportFixModuleSpecifiers(t, "", []string{}, nil /*preferences*/)
 }

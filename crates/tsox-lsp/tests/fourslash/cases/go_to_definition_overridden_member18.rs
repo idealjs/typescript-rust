@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -15,6 +15,6 @@ abstract class MySqlColumn {
 export class MySqlVarBinary extends MySqlColumn {
   [|/*1*/override|] readonly [entityKind]: string = "MySqlVarBinary";
 }"#;
-    let mut s = Session::new_for_test("goToDefinitionOverriddenMember18", content);
+    let _s = Session::new_for_test("goToDefinitionOverriddenMember18", content);
     // TODO: f.VerifyBaselineGoToDefinition(t, true, "1")
 }

@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -7,6 +7,6 @@ fn code_fix_missing_type_annotation_on_exports7() {
 // @declaration: true
 function foo(): number[] { return [42]; }
 export const c = { foo: foo() };"#;
-    let mut s = Session::new_for_test("codeFixMissingTypeAnnotationOnExports7", content);
+    let _s = Session::new_for_test("codeFixMissingTypeAnnotationOnExports7", content);
     // TODO: f.VerifyCodeFix(t, fourslash.VerifyCodeFixOptions{
 }

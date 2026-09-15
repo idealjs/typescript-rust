@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -63,7 +63,7 @@ declare namespace _ {
 }
 // @Filename: /home/src/workspaces/project/index.ts
 import { [|/*start*/add|] } from 'lodash';"#;
-    let mut s = Session::new_for_test("goToSource10_mapFromAtTypes3", content);
+    let _s = Session::new_for_test("goToSource10_mapFromAtTypes3", content);
     // TODO: f.MarkTestAsStradaServer()
     // TODO: f.VerifyBaselineGoToSourceDefinition(t, "start")
 }

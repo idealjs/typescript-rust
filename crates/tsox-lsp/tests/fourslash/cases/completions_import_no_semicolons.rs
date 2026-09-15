@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[ignore = "go: t.Skip('Known failing fourslash test')"]
@@ -10,6 +10,6 @@ export function foo() {}
 const x = 0
 const y = 1
 const z = fo/**/"#;
-    let mut s = Session::new_for_test("completionsImport_noSemicolons", content);
+    let _s = Session::new_for_test("completionsImport_noSemicolons", content);
     // TODO: f.VerifyApplyCodeActionFromCompletion(t, new(""), &fourslash.ApplyCodeActionFromCompletionOptions{
 }

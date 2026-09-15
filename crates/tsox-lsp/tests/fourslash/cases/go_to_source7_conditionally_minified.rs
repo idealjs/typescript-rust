@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -28,7 +28,7 @@ if (process.env.NODE_ENV !== 'production') {
 }
 // @Filename: /home/src/workspaces/project/index.ts
 import { [|/*start*/useState|] } from 'react';"#;
-    let mut s = Session::new_for_test("goToSource7_conditionallyMinified", content);
+    let _s = Session::new_for_test("goToSource7_conditionallyMinified", content);
     // TODO: f.MarkTestAsStradaServer()
     // TODO: f.VerifyBaselineGoToSourceDefinition(t, "start")
 }

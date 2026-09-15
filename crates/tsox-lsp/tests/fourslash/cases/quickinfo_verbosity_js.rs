@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -32,6 +32,6 @@ class SomeClass/*5*/ {
     /** @type {SomeType2} */
     b;
 }"#;
-    let mut s = Session::new_for_test("quickinfoVerbosityJs", content);
+    let _s = Session::new_for_test("quickinfoVerbosityJs", content);
     // TODO: f.VerifyBaselineHoverWithVerbosity(t, map[string][]int{"1": {0, 1}, "2": {0, 1}, "3": {0, 1}, "4": {
 }

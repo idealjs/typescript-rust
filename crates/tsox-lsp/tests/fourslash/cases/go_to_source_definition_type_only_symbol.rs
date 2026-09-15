@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -21,7 +21,7 @@ export function create(config) { return config; }
 import { /*importConfig*/Config, create } from "pkg";
 const c: Config = { name: "test", value: 1 };
 create(c);"#;
-    let mut s = Session::new_for_test("goToSourceDefinitionTypeOnlyImportFallsBackToDeclaration", content);
+    let _s = Session::new_for_test("goToSourceDefinitionTypeOnlyImportFallsBackToDeclaration", content);
     // TODO: f.VerifyBaselineGoToSourceDefinition(t, "importConfig")
 }
 
@@ -45,7 +45,7 @@ export function create(config) { return config; }
 import { Config, create } from "pkg";
 const c: /*usageSite*/Config = { name: "test" };
 create(c);"#;
-    let mut s = Session::new_for_test("goToSourceDefinitionTypeOnlyUsageFallsBackToDeclaration", content);
+    let _s = Session::new_for_test("goToSourceDefinitionTypeOnlyUsageFallsBackToDeclaration", content);
     // TODO: f.VerifyBaselineGoToSourceDefinition(t, "usageSite")
 }
 
@@ -63,6 +63,6 @@ export function /*targetCreate*/create() {}
 // @Filename: /home/src/workspaces/project/index.ts
 import { /*importCreate*/create } from "pkg";
 create();"#;
-    let mut s = Session::new_for_test("goToSourceDefinitionValueImportStillWorks", content);
+    let _s = Session::new_for_test("goToSourceDefinitionValueImportStillWorks", content);
     // TODO: f.VerifyBaselineGoToSourceDefinition(t, "importCreate")
 }

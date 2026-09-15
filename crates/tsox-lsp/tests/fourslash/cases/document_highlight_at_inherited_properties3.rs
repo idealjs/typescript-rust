@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -12,6 +12,6 @@ interface interface1 extends interface1 {
 var v: interface1;
 v.[|propName|];
 v.[|doStuff|]();"#;
-    let mut s = Session::new_for_test("documentHighlightAtInheritedProperties3", content);
+    let _s = Session::new_for_test("documentHighlightAtInheritedProperties3", content);
     // TODO: f.VerifyBaselineDocumentHighlights(t, nil /*preferences*/, ToAny(f.Ranges())...)
 }

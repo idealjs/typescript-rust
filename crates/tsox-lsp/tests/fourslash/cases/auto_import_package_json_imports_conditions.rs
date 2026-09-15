@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -17,6 +17,6 @@ fn auto_import_package_json_imports_conditions() {
 something/*a*/
 // @Filename: /types/thing.d.ts
 export function something(name: string): any;"##;
-    let mut s = Session::new_for_test("autoImportPackageJsonImportsConditions", content);
+    let _s = Session::new_for_test("autoImportPackageJsonImportsConditions", content);
     // TODO: f.VerifyImportFixModuleSpecifiers(t, "a", []string{"#thing"}, nil /*preferences*/)
 }

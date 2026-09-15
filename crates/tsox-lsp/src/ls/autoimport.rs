@@ -3,7 +3,6 @@
 pub(crate) use std::collections::HashMap;
 
 pub(crate) use tsox_core::collections::set::Set;
-pub(crate) use tsox_core::tspath;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum AutoImportFixKind {

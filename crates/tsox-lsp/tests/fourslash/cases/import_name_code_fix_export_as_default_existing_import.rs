@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -11,6 +11,6 @@ export { v4 as default };
 export const v1 = 5;
 export const v2 = 5;
 export const v3 = 5;"#;
-    let mut s = Session::new_for_test("importNameCodeFixExportAsDefaultExistingImport", content);
+    let _s = Session::new_for_test("importNameCodeFixExportAsDefaultExistingImport", content);
     // TODO: f.VerifyImportFixAtPosition(t, []string{
 }

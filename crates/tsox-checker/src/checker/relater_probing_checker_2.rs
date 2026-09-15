@@ -287,30 +287,6 @@ impl Checker {
                 rebuilt.object_flags = t.object_flags;
                 Arc::new(rebuilt)
             }
-            TypeData::IndexedAccess(ia) => {
-                let (Some(old_obj), Some(old_idx)) =
-                    (ia.object_type.as_ref(), ia.index_type.as_ref())
-                else {
-                    return Arc::clone(t);
-                };
-                let new_obj = self.instantiate_probing(old_obj, mode);
-                let new_idx = self.instantiate_probing(old_idx, mode);
-                if Arc::ptr_eq(&new_obj, old_obj) && Arc::ptr_eq(&new_idx, old_idx) {
-                    return Arc::clone(t);
-                }
-                let mut rebuilt = Type::new(
-                    t.flags,
-                    TypeData::IndexedAccess(IndexedAccessTypeData {
-                        constrained: ConstrainedTypeData::default(),
-                        object_type: Some(new_obj),
-                        index_type: Some(new_idx),
-                        access_flags: ia.access_flags,
-                    }),
-                );
-                rebuilt.symbol = t.symbol.clone();
-                rebuilt.object_flags = t.object_flags;
-                Arc::new(rebuilt)
-            }
             _ => Arc::clone(t),
         }
     }
@@ -346,6 +322,7 @@ impl Checker {
         }
     }
 
+    #[allow(dead_code)]
     pub(crate) fn type_param_symbols_share_container(
         &self,
         a: &Arc<Symbol>,

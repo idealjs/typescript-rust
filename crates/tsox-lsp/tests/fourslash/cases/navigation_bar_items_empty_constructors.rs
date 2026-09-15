@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -7,6 +7,6 @@ fn navigation_bar_items_empty_constructors() {
     constructor() {
     }
 }"#;
-    let mut s = Session::new_for_test("navigationBarItemsEmptyConstructors", content);
+    let _s = Session::new_for_test("navigationBarItemsEmptyConstructors", content);
     // TODO: f.VerifyBaselineDocumentSymbol(t)
 }

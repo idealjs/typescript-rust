@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -9,6 +9,6 @@ fn references_for_globals3() {
 }
 // @Filename: referencesForGlobals_2.ts
 var i: /*3*/globalInterface;"#;
-    let mut s = Session::new_for_test("referencesForGlobals3", content);
+    let _s = Session::new_for_test("referencesForGlobals3", content);
     // TODO: f.VerifyBaselineFindAllReferences(t, "1", "2", "3")
 }

@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -16,6 +16,6 @@ fn quick_info_verbosity_js_doc_namespaced_typedef() {
 // Namespaced typedef aliased to implicitly-resolved typedef.
 /** @typedef {U} NS./*v*/V */
 "#;
-    let mut s = Session::new_for_test("quickInfoVerbosityJSDocNamespacedTypedef", content);
+    let _s = Session::new_for_test("quickInfoVerbosityJSDocNamespacedTypedef", content);
     // TODO: f.VerifyBaselineHoverWithVerbosity(t, map[string][]int{
 }

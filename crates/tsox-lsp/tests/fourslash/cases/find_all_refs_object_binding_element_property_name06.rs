@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -18,6 +18,6 @@ for (var { /*3*/property1: p1 } of elems) {
 var p2;
 for ({ /*4*/property1 : p2 } of elems) {
 }"#;
-    let mut s = Session::new_for_test("findAllRefsObjectBindingElementPropertyName06", content);
+    let _s = Session::new_for_test("findAllRefsObjectBindingElementPropertyName06", content);
     // TODO: f.VerifyBaselineFindAllReferences(t, "0", "1", "3", "4", "2")
 }

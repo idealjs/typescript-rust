@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -11,6 +11,6 @@ class /*classDefinition*/Class {
     private f;
 }
  export { Class };"#;
-    let mut s = Session::new_for_test("goToDefinitionImportedNames8", content);
+    let _s = Session::new_for_test("goToDefinitionImportedNames8", content);
     // TODO: f.VerifyBaselineGoToDefinition(t, true, "classAliasDefinition")
 }

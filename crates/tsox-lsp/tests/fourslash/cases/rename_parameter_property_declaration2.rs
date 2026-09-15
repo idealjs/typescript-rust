@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -9,6 +9,6 @@ fn rename_parameter_property_declaration2() {
         this.[|publicParam|] += 10;
     }
 }"#;
-    let mut s = Session::new_for_test("renameParameterPropertyDeclaration2", content);
+    let _s = Session::new_for_test("renameParameterPropertyDeclaration2", content);
     // TODO: f.VerifyBaselineRenameAtRangesWithText(t, nil /*preferences*/, "publicParam")
 }

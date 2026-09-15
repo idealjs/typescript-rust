@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -31,6 +31,6 @@ sw/*6*/itch (10) {
     case 16:
         () => bre/*10*/ak;
 }"#;
-    let mut s = Session::new_for_test("getOccurrencesSwitchCaseDefaultBroken", content);
+    let _s = Session::new_for_test("getOccurrencesSwitchCaseDefaultBroken", content);
     // TODO: f.VerifyBaselineDocumentHighlights(t, nil /*preferences*/, ToAny(f.Markers())...)
 }

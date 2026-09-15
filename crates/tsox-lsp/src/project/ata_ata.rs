@@ -4,8 +4,6 @@ use std::sync::{Arc, Mutex, Once};
 
 use tsox_core::collections::syncmap::SyncMap;
 use tsox_core::core::compiler_options::CompilerOptions;
-use tsox_core::tspath;
-use tsox_tsoptions::module;
 use tsox_tsoptions::vfs::FS;
 
 use crate::project::ata_discover_typings::AtaLogger;
@@ -56,6 +54,7 @@ pub struct TypingsInstaller {
     package_name_to_typing_location: SyncMap<String, Arc<CachedTyping>>,
     missing_typings_set: SyncMap<String, bool>,
     types_registry: Mutex<HashMap<String, HashMap<String, String>>>,
+    #[allow(dead_code)]
     install_run_count: AtomicI32,
 }
 

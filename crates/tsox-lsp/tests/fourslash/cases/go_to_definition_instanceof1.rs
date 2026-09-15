@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -8,6 +8,6 @@ class /*end*/ C {
 }
 declare var obj: any;
 obj [|/*start*/instanceof|] C;"#;
-    let mut s = Session::new_for_test("goToDefinitionInstanceof1", content);
+    let _s = Session::new_for_test("goToDefinitionInstanceof1", content);
     // TODO: f.VerifyBaselineGoToDefinition(t, true, "start")
 }

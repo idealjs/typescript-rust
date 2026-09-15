@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -12,6 +12,6 @@ type T1<T extends Apple | Apple[]> = T extends { color: string } ? "one apple" :
 function f<T extends Apple | Apple[]>(x: T1<T>): void {
     x/*x*/;
 }"#;
-    let mut s = Session::new_for_test("quickinfoVerbosityConditionalType", content);
+    let _s = Session::new_for_test("quickinfoVerbosityConditionalType", content);
     // TODO: f.VerifyBaselineHoverWithVerbosity(t, map[string][]int{"x": {0, 1, 2}})
 }

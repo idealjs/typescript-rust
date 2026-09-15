@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -17,7 +17,7 @@ export function three() {
     type Z = string;
     return {} as Z;
 }"#;
-    let mut s = Session::new_for_test("codeFixMissingTypeAnnotationOnExports49_private_name", content);
+    let _s = Session::new_for_test("codeFixMissingTypeAnnotationOnExports49_private_name", content);
     // TODO: f.VerifyCodeFix(t, fourslash.VerifyCodeFixOptions{
     // TODO: f.VerifyCodeFix(t, fourslash.VerifyCodeFixOptions{
 }

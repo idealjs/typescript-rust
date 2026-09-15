@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -7,6 +7,6 @@ fn get_occurrences_async_await3() {
 async function f() {
     await 300;
 }"#;
-    let mut s = Session::new_for_test("getOccurrencesAsyncAwait3", content);
+    let _s = Session::new_for_test("getOccurrencesAsyncAwait3", content);
     // TODO: f.VerifyBaselineDocumentHighlights(t, nil /*preferences*/, "")
 }

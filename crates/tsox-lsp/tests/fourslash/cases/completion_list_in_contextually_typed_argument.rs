@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -19,6 +19,6 @@ class test {
 var t = new test((e) => {
     e./*2*/
 } );"#;
-    let mut s = Session::new_for_test("completionListInContextuallyTypedArgument", content);
+    let _s = Session::new_for_test("completionListInContextuallyTypedArgument", content);
     // TODO: f.VerifyCompletions(t, []string{"1", "2"}, &fourslash.CompletionsExpectedList{
 }

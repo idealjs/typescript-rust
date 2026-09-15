@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -7,6 +7,6 @@ fn find_all_refs_catch_clause() {
 catch (/*1*/err) {
     /*2*/err;
 }"#;
-    let mut s = Session::new_for_test("findAllRefsCatchClause", content);
+    let _s = Session::new_for_test("findAllRefsCatchClause", content);
     // TODO: f.VerifyBaselineFindAllReferences(t, "1", "2")
 }

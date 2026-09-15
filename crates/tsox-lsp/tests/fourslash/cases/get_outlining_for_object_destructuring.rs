@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -37,6 +37,6 @@ const[| {
     b: 2,
     c: 3
 }|]"#;
-    let mut s = Session::new_for_test("getOutliningForObjectDestructuring", content);
+    let _s = Session::new_for_test("getOutliningForObjectDestructuring", content);
     // TODO: f.VerifyOutliningSpans(t)
 }

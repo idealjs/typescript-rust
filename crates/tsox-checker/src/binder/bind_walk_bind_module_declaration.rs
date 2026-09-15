@@ -105,7 +105,7 @@ impl Binder {
             }
 
             let last = parts[parts.len() - 1];
-            let (includes, excludes) = Self::module_symbol_flags(node);
+            let (includes, _excludes) = Self::module_symbol_flags(node);
             let symbol = Arc::new(Symbol::new(includes, last.to_string()));
             {
                 let symbol_mut = Arc::as_ptr(&symbol) as *mut Symbol;

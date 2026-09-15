@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -7,6 +7,6 @@ fn quick_info_display_parts_class() {
 }
 var /*2*/cInstance = new /*3*/c();
 var /*4*/cVal = /*5*/c;"#;
-    let mut s = Session::new_for_test("quickInfoDisplayPartsClass", content);
+    let _s = Session::new_for_test("quickInfoDisplayPartsClass", content);
     // TODO: f.VerifyBaselineHover(t)
 }

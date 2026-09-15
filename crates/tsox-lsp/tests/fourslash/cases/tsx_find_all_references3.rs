@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -18,7 +18,7 @@ class MyClass {
 
 
 var x = <MyClass name='hello'/>;"#;
-    let mut s = Session::new_for_test("tsxFindAllReferences3", content);
+    let _s = Session::new_for_test("tsxFindAllReferences3", content);
     // TODO: f.VerifyBaselineFindAllReferences(t, "1")
     // TODO: }
 }

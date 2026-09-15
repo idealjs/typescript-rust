@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -16,6 +16,6 @@ import {} from "./a.mjs";
 import {} from "./b";
 
 c/**/;"#;
-    let mut s = Session::new_for_test("importNameCodeFixInferEndingPreference", content);
+    let _s = Session::new_for_test("importNameCodeFixInferEndingPreference", content);
     // TODO: f.VerifyImportFixModuleSpecifiers(t, "", []string{"./c"}, nil /*preferences*/)
 }

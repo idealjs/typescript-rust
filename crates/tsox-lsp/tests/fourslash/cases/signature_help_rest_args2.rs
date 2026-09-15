@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -15,6 +15,6 @@ const promisify = function (thisArg, fnName) {
         });
     };
 };"#;
-    let mut s = Session::new_for_test("signatureHelpRestArgs2", content);
+    let _s = Session::new_for_test("signatureHelpRestArgs2", content);
     // TODO: f.VerifyBaselineSignatureHelp(t)
 }

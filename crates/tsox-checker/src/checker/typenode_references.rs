@@ -30,7 +30,6 @@ pub use crate::checker::typenode_references_qualified_name_diagnostics::*;
 pub use crate::checker::typenode_references_type_reference_resolution::*;
 pub(crate) use std::collections::HashMap;
 pub(crate) use std::sync::{Arc, OnceLock};
-pub(crate) use tsox_core::jsnum;
 pub(crate) use tsox_frontend::ast::CheckFlags;
 pub(crate) use tsox_frontend::ast::ModifierFlags;
 pub(crate) use tsox_frontend::ast::Node;

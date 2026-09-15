@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -15,6 +15,6 @@ class Foo {
 var x = new Foo();
 x.[|alpha/*src1*/|];
 x.[|beta/*src2*/|];"#;
-    let mut s = Session::new_for_test("javaScriptClass3", content);
+    let _s = Session::new_for_test("javaScriptClass3", content);
     // TODO: f.VerifyBaselineGoToDefinition(t, true, "src1", "src2")
 }

@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -14,6 +14,6 @@ class Bar extends AbstractBar{
 function whatever(x: AbstractBar) {
     x.he/*reference*/llo();
 }"#;
-    let mut s = Session::new_for_test("goToImplementationClassMethod_01", content);
+    let _s = Session::new_for_test("goToImplementationClassMethod_01", content);
     // TODO: f.VerifyBaselineGoToImplementation(t, "reference", "declaration")
 }

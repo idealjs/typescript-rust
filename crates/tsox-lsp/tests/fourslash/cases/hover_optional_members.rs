@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -74,6 +74,6 @@ foo3./*3i*/m
 foo3./*3j*/m?.(42)
 foo3./*3k*/m?.("abc")
 "#;
-    let mut s = Session::new_for_test("hoverOptionalMembers", content);
+    let _s = Session::new_for_test("hoverOptionalMembers", content);
     // TODO: f.VerifyBaselineHover(t)
 }

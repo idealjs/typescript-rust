@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -23,7 +23,7 @@ var x : Module./*TypeReference*/
 class TestClass extends Module./*TypeReferenceInExtendsList*/ { }
 
 interface TestInterface implements Module./*TypeReferenceInImplementsList*/ { }"#;
-    let mut s = Session::new_for_test("completionListModuleMembers", content);
+    let _s = Session::new_for_test("completionListModuleMembers", content);
     // TODO: f.VerifyCompletions(t, []string{"ValueReference", "TypeReferenceInExtendsList"}, &fourslash.Completi
     // TODO: f.VerifyCompletions(t, []string{"TypeReference", "TypeReferenceInImplementsList"}, &fourslash.Comple
 }

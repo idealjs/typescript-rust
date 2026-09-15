@@ -14,7 +14,7 @@ fn quick_info_pattern_ambient_module_with_import_attributes() {
     const styles: { readonly [className: string]: string };
     export default styles;
 }"#;
-    let mut s = Session::new_for_test("quickInfoPatternAmbientModuleWithImportAttributes", content);
+    let _s = Session::new_for_test("quickInfoPatternAmbientModuleWithImportAttributes", content);
     // TODO: f.VerifyBaselineHoverWithVerbosity(t, map[string][]int{"1": {0, 1}})
 }
 
@@ -35,6 +35,6 @@ declare module "*.asset" with { type: "css" } {
 declare module "*.asset" with { type: "text" } {
     export const textAlso: "text-also";
 }"#;
-    let mut s = Session::new_for_test("quickInfoMergedPatternAmbientModuleWithImportAttributes", content);
+    let _s = Session::new_for_test("quickInfoMergedPatternAmbientModuleWithImportAttributes", content);
     // TODO: f.VerifyBaselineHoverWithVerbosity(t, map[string][]int{"css": {0, 1}, "text": {0, 1}})
 }

@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -6,6 +6,6 @@ fn code_fix_class_implement_interface_member_type_alias() {
     let content = r#"type MyType = [string, number];
 interface I { x: MyType; test(a: MyType): void; }
 class C implements I {}"#;
-    let mut s = Session::new_for_test("codeFixClassImplementInterfaceMemberTypeAlias", content);
+    let _s = Session::new_for_test("codeFixClassImplementInterfaceMemberTypeAlias", content);
     // TODO: f.VerifyCodeFix(t, fourslash.VerifyCodeFixOptions{
 }

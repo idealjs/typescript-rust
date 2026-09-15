@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -12,6 +12,6 @@ fn references_for_exported_values() {
 
 // external use
 M./*4*/variable"#;
-    let mut s = Session::new_for_test("referencesForExportedValues", content);
+    let _s = Session::new_for_test("referencesForExportedValues", content);
     // TODO: f.VerifyBaselineFindAllReferences(t, "1", "2", "3", "4")
 }

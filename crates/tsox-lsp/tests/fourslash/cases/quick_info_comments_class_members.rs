@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -134,6 +134,6 @@ class cWithConstructorProperty {
         th/*116*/is./*114*/a = /*115*/a + 2 + bb/*117*/bb;
     }
 }"#;
-    let mut s = Session::new_for_test("quickInfoCommentsClassMembers", content);
+    let _s = Session::new_for_test("quickInfoCommentsClassMembers", content);
     // TODO: f.VerifyBaselineHover(t)
 }

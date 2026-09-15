@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -16,6 +16,6 @@ interface Func {
 declare const func: Func;
 
 func("/*1*/");"#;
-    let mut s = Session::new_for_test("completionsLiteralDirectlyInRestConstrainedToTupleType", content);
+    let _s = Session::new_for_test("completionsLiteralDirectlyInRestConstrainedToTupleType", content);
     // TODO: f.VerifyCompletions(t, []string{"1"}, &fourslash.CompletionsExpectedList{
 }

@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -11,6 +11,6 @@ fn go_to_definition_overloads_in_multiple_property_accesses() {
     }
 }
 A.B.[|/*2*/f|]("");"#;
-    let mut s = Session::new_for_test("goToDefinitionOverloadsInMultiplePropertyAccesses", content);
+    let _s = Session::new_for_test("goToDefinitionOverloadsInMultiplePropertyAccesses", content);
     // TODO: f.VerifyBaselineGoToDefinition(t, true, "2")
 }

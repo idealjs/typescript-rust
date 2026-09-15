@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -23,6 +23,6 @@ interface [|OriginI|] {
     [|origin1|];
     public [|_distance|](distanceParam): void;
 }"#;
-    let mut s = Session::new_for_test("navigationItemsPrefixMatch2", content);
+    let _s = Session::new_for_test("navigationItemsPrefixMatch2", content);
     // TODO: f.VerifyWorkspaceSymbol(t, []*fourslash.VerifyWorkspaceSymbolCase{
 }

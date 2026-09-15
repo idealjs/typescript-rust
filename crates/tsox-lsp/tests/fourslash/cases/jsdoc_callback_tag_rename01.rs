@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -14,7 +14,7 @@ fn jsdoc_callback_tag_rename01() {
 
 /** @type {/*1*/[|FooCallback|]} */
 var t;"#;
-    let mut s = Session::new_for_test("jsdocCallbackTagRename01", content);
+    let _s = Session::new_for_test("jsdocCallbackTagRename01", content);
     // TODO: f.MarkTestAsStradaServer()
     // TODO: f.VerifyBaselineRename(t, nil /*preferences*/, f.Ranges()[1])
 }

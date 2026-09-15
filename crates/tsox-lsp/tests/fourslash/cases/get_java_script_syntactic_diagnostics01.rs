@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -7,7 +7,7 @@ fn get_java_script_syntactic_diagnostics01() {
 // @allowJs: true
 // @Filename: a.js
 var ===;"#;
-    let mut s = Session::new_for_test("getJavaScriptSyntacticDiagnostics01", content);
+    let _s = Session::new_for_test("getJavaScriptSyntacticDiagnostics01", content);
     // TODO: f.MarkTestAsStradaServer()
     // TODO: f.VerifyBaselineNonSuggestionDiagnostics(t)
 }

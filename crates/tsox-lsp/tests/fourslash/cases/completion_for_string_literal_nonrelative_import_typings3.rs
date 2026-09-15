@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -16,6 +16,6 @@ export var x = 9;
 export var y = 9;
 // @Filename: package.json
 { "dependencies": { "@types/module-y": "latest" } }"#;
-    let mut s = Session::new_for_test("completionForStringLiteralNonrelativeImportTypings3", content);
+    let _s = Session::new_for_test("completionForStringLiteralNonrelativeImportTypings3", content);
     // TODO: f.VerifyCompletions(t, []string{"types_ref0", "import_as0", "import_equals0", "require0"}, &fourslas
 }

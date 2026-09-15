@@ -1,11 +1,11 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
 fn organize_imports_type8() {
     let content = r#"import { type A, type a, b, B } from "foo";
 console.log(a, b, A, B);"#;
-    let mut s = Session::new_for_test("organizeImportsType8", content);
+    let _s = Session::new_for_test("organizeImportsType8", content);
     // TODO: f.VerifyOrganizeImports(t,
     // TODO: f.ReplaceLine(t, 0, "import { type A, type a, b, B } from \"foo1\";")
     // TODO: f.VerifyOrganizeImports(t,

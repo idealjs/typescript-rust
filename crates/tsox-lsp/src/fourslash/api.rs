@@ -226,7 +226,7 @@ fn apply_text_edits(s: &mut Session, edits: &[crate::lsp::lsproto_lsp::TextEdit]
     starts.sort_by_key(|(start, _, _)| *start);
 
     let mut caret = s.cursor.unwrap_or(0);
-    let mut edits_char: Vec<(usize, usize, String)> = starts
+    let edits_char: Vec<(usize, usize, String)> = starts
         .into_iter()
         .map(|(b_start, b_end, text)| {
             (
@@ -523,6 +523,7 @@ pub fn format_selection(s: &mut Session, start_marker: &str, end_marker: &str) {
     apply_text_edits_lsp(s, &edits);
 }
 
+#[allow(dead_code)]
 fn apply_edits(s: &mut Session, file: &str, edits: &[crate::lsp::lsproto_lsp::TextEdit]) {
     if edits.is_empty() {
         return;
@@ -548,13 +549,11 @@ fn apply_edits(s: &mut Session, file: &str, edits: &[crate::lsp::lsproto_lsp::Te
 }
 
 fn line_col_to_offset(text: &str, line: usize, character: usize) -> usize {
-    let mut offset = 0usize;
     let mut cur_line = 0usize;
     for (i, b) in text.as_bytes().iter().enumerate() {
         if cur_line == line {
-            offset = i;
             // character 按 UTF-16 码元计；ASCII 场景逐字节即可
-            return (offset + character).min(text.len());
+            return (i + character).min(text.len());
         }
         if *b == b'\n' {
             cur_line += 1;

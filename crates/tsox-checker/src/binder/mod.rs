@@ -10,10 +10,7 @@ pub mod referenceresolver;
 pub(crate) use container_flags::*;
 pub(crate) use flow_label::{ActiveLabel, FlowLabel};
 pub(crate) use helpers::*;
-pub(crate) use bind_js_assignment_declarations::{
-    get_assignment_declaration_kind, expression_is_alias, is_module_exports_access_expression,
-    is_exports_identifier,
-};
+pub(crate) use bind_js_assignment_declarations::get_assignment_declaration_kind;
 
 pub(crate) use std::sync::Arc;
 pub(crate) use tsox_core::diagnostics::messages_generated::A_PARAMETER_INITIALIZER_IS_ONLY_ALLOWED_IN_A_FUNCTION_OR_CONSTRUCTOR_IMPLEMENTATION;

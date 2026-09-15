@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -9,6 +9,6 @@ class C {
     m() { this.x * 2; }
     get x { return null; }
 }"#;
-    let mut s = Session::new_for_test("codeFixInferFromUsage_noCrashOnMissingParens", content);
+    let _s = Session::new_for_test("codeFixInferFromUsage_noCrashOnMissingParens", content);
     // TODO: f.VerifyCodeFixNotAvailable(t)
 }

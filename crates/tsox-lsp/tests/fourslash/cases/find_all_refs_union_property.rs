@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -16,6 +16,6 @@ if (t./*t3*/type === "a") {
 } else {
     t./*t5*/type;
 }"#;
-    let mut s = Session::new_for_test("findAllRefsUnionProperty", content);
+    let _s = Session::new_for_test("findAllRefsUnionProperty", content);
     // TODO: f.VerifyBaselineFindAllReferences(t, "t0", "t1", "t3", "t4", "t5", "t2", "p0", "p1", "p2")
 }

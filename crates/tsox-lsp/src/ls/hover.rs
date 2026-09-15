@@ -9,7 +9,6 @@ use crate::lsp::lsproto_lsp::Range;
 use tsox_checker::checker::nodebuilder::SymbolDisplayPart;
 use tsox_frontend::ast::Node;
 use tsox_frontend::ast::node::LineMap;
-use tsox_frontend::ast::node_data_generated::for_each_child;
 
 use super::language_service::LanguageService;
 use super::types::{Hover, HoverContent};
@@ -61,7 +60,7 @@ impl LanguageService {
         if parts.is_empty() {
             parts = checker.get_quick_info_display_parts(&node);
         }
-        let mut type_str = if parts.is_empty() {
+        let type_str = if parts.is_empty() {
             checker.get_quick_info_text(&node)
         } else {
             display_parts_to_string(&parts)

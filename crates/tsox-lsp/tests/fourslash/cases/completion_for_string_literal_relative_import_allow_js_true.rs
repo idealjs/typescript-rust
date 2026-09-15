@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -27,6 +27,6 @@ var foo6 = require("./f/*require1*/
 
 // @Filename: g2.js
 "#;
-    let mut s = Session::new_for_test("completionForStringLiteralRelativeImportAllowJSTrue", content);
+    let _s = Session::new_for_test("completionForStringLiteralRelativeImportAllowJSTrue", content);
     // TODO: f.VerifyCompletions(t, f.Markers(), &fourslash.CompletionsExpectedList{
 }

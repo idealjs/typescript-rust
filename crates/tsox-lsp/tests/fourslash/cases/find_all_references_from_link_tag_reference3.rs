@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -12,6 +12,6 @@ enum E {
     /** {@link /**/Foo} */
     Foo
 }"#;
-    let mut s = Session::new_for_test("findAllReferencesFromLinkTagReference3", content);
+    let _s = Session::new_for_test("findAllReferencesFromLinkTagReference3", content);
     // TODO: f.VerifyBaselineFindAllReferences(t, "")
 }

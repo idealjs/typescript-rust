@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -13,6 +13,6 @@ interface D extends C {
 var d: D;
 d.propD;
 d.propC;"#;
-    let mut s = Session::new_for_test("referencesForInheritedProperties8", content);
+    let _s = Session::new_for_test("referencesForInheritedProperties8", content);
     // TODO: f.VerifyBaselineFindAllReferences(t, "d", "c")
 }

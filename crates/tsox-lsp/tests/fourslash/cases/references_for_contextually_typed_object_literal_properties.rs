@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -27,6 +27,6 @@ var w: IFoo = { xy: undefined };
 
 // Untped -- should not be included
 var u = { xy: 0 };"#;
-    let mut s = Session::new_for_test("referencesForContextuallyTypedObjectLiteralProperties", content);
+    let _s = Session::new_for_test("referencesForContextuallyTypedObjectLiteralProperties", content);
     // TODO: f.VerifyBaselineFindAllReferences(t, "xy")
 }

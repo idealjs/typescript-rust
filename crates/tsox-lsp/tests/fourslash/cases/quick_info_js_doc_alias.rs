@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -13,6 +13,6 @@ export declare const A: T;
 // @filename: /b.ts
 import { A } from "./a";
 A/**/()"#;
-    let mut s = Session::new_for_test("quickInfoJsDocAlias", content);
+    let _s = Session::new_for_test("quickInfoJsDocAlias", content);
     // TODO: f.VerifyBaselineHover(t)
 }

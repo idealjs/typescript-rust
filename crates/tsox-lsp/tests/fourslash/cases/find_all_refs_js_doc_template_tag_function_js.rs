@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -10,6 +10,6 @@ fn find_all_refs_js_doc_template_tag_function_js() {
  * @return {/*2*/T}
  */
 function f() {}"#;
-    let mut s = Session::new_for_test("findAllRefsJsDocTemplateTag_function_js", content);
+    let _s = Session::new_for_test("findAllRefsJsDocTemplateTag_function_js", content);
     // TODO: f.VerifyBaselineFindAllReferences(t, "1", "2")
 }

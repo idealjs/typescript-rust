@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -11,6 +11,6 @@ fn references_for_inherited_properties3() {
 var v: interface1;
 v./*3*/propName;
 v./*4*/doStuff();"#;
-    let mut s = Session::new_for_test("referencesForInheritedProperties3", content);
+    let _s = Session::new_for_test("referencesForInheritedProperties3", content);
     // TODO: f.VerifyBaselineFindAllReferences(t, "1", "2", "3", "4")
 }

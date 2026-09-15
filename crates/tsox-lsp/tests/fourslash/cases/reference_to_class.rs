@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -19,6 +19,6 @@ namespace mod {
 }
 // @Filename: referenceToClass_2.ts
 var k: /*6*/foo;"#;
-    let mut s = Session::new_for_test("referenceToClass", content);
+    let _s = Session::new_for_test("referenceToClass", content);
     // TODO: f.VerifyBaselineFindAllReferences(t, "1", "2", "3", "4", "5", "6")
 }

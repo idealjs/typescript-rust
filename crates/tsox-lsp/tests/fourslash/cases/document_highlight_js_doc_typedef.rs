@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -18,6 +18,6 @@ const x = {
   [|foo|]: "",
   [|bar|]: 42,
 };"#;
-    let mut s = Session::new_for_test("documentHighlightJSDocTypedef", content);
+    let _s = Session::new_for_test("documentHighlightJSDocTypedef", content);
     // TODO: f.VerifyBaselineDocumentHighlights(t, nil /*preferences*/, ToAny(f.Ranges())...)
 }

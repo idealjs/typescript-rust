@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -14,7 +14,7 @@ export const /*targetObj*/obj = { /*targetGreet*/greet(name) { return name; }, /
 import { obj } from "pkg";
 obj./*propAccess*/greet("world");
 obj./*propAccess2*/count;"#;
-    let mut s = Session::new_for_test("goToSourceAccessExpressionProperty", content);
+    let _s = Session::new_for_test("goToSourceAccessExpressionProperty", content);
     // TODO: f.VerifyBaselineGoToSourceDefinition(t, "propAccess", "propAccess2")
 }
 
@@ -28,7 +28,7 @@ export declare const a: { a: string };
 // @Filename: /home/src/workspaces/project/b.ts
 import { a } from './a';
 a.[|a/*start*/|]"#;
-    let mut s = Session::new_for_test("goToSourcePropertyOfAlias", content);
+    let _s = Session::new_for_test("goToSourcePropertyOfAlias", content);
     // TODO: f.VerifyBaselineGoToSourceDefinition(t, "start")
 }
 
@@ -46,7 +46,7 @@ export const config = { /*targetName*/name: "test" };
 // @Filename: /home/src/workspaces/project/index.ts
 import { config } from "pkg";
 config./*propAccess*/name;"#;
-    let mut s = Session::new_for_test("goToSourceIndexSignatureProperty", content);
+    let _s = Session::new_for_test("goToSourceIndexSignatureProperty", content);
     // TODO: f.VerifyBaselineGoToSourceDefinition(t, "propAccess")
 }
 
@@ -65,7 +65,7 @@ export const obj = { a: 1, /*target*/b: 2 };
 // @Filename: /home/src/workspaces/project/index.ts
 import { obj } from "pkg";
 obj./*propAccess*/b;"#;
-    let mut s = Session::new_for_test("goToSourceMappedTypeProperty", content);
+    let _s = Session::new_for_test("goToSourceMappedTypeProperty", content);
     // TODO: f.VerifyBaselineGoToSourceDefinition(t, "propAccess")
 }
 
@@ -95,6 +95,6 @@ var TargetPopulation;
 // @Filename: /home/src/workspaces/project/index.ts
 import * as tas from "pkg";
 tas./*start*/TargetPopulation.Public;"#;
-    let mut s = Session::new_for_test("goToSourceCommonJSAliasPrefersDeclaration", content);
+    let _s = Session::new_for_test("goToSourceCommonJSAliasPrefersDeclaration", content);
     // TODO: f.VerifyBaselineGoToSourceDefinition(t, "start")
 }

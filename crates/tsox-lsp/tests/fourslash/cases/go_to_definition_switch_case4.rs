@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -10,6 +10,6 @@ fn go_to_definition_switch_case4() {
      switch (null) {
         [|/*start*/case|] null: break;
      }"#;
-    let mut s = Session::new_for_test("goToDefinitionSwitchCase4", content);
+    let _s = Session::new_for_test("goToDefinitionSwitchCase4", content);
     // TODO: f.VerifyBaselineGoToDefinition(t, true, "start")
 }

@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -15,6 +15,6 @@ b = {
         var d;
     }
 };"#;
-    let mut s = Session::new_for_test("navigationBarFunctionIndirectlyInVariableDeclaration", content);
+    let _s = Session::new_for_test("navigationBarFunctionIndirectlyInVariableDeclaration", content);
     // TODO: f.VerifyBaselineDocumentSymbol(t)
 }

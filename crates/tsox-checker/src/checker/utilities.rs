@@ -3,6 +3,7 @@ pub(crate) use super::types::*;
 #[allow(unused_imports)]
 pub use crate::checker::utilities_get_assignment_target::*;
 #[allow(unused_imports)]
+pub use crate::checker::utilities_get_assignment_target::is_const_type_reference;
 pub use crate::checker::utilities_has_only_expression_initialization::*;
 #[allow(unused_imports)]
 pub use crate::checker::utilities_is_optional_symbol::*;

@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -30,7 +30,7 @@ export declare const component: ComponentProps;
 import { component } from "component";
 /*use*/component.label;
 "#;
-    let mut s = Session::new_for_test("contentMapperDeclarationMapNavigation", content);
+    let _s = Session::new_for_test("contentMapperDeclarationMapNavigation", content);
     // TODO: f.MarkTestAsStradaServer()
     // TODO: f.VerifyBaselineGoToDefinition(t, true, "use")
     // TODO: f.VerifyBaselineFindAllReferences(t, "use")

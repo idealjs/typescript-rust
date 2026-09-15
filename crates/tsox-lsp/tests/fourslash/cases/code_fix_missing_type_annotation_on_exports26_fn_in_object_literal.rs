@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -15,6 +15,6 @@ export const extensions = {
        return actualValue === expectedValue
     }
 }"#;
-    let mut s = Session::new_for_test("codeFixMissingTypeAnnotationOnExports26_fn_in_object_literal", content);
+    let _s = Session::new_for_test("codeFixMissingTypeAnnotationOnExports26_fn_in_object_literal", content);
     // TODO: f.VerifyCodeFixAll(t, fourslash.VerifyCodeFixAllOptions{
 }

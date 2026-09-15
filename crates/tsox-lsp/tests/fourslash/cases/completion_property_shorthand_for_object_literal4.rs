@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -8,7 +8,7 @@ const foo = 1;
 const bar = 2;
 const obj: any = {
   foo b/*1*/"#;
-    let mut s = Session::new_for_test("completionPropertyShorthandForObjectLiteral4", content);
+    let _s = Session::new_for_test("completionPropertyShorthandForObjectLiteral4", content);
     // TODO: f.VerifyCompletions(t, []string{"1"}, &fourslash.CompletionsExpectedList{
     // TODO: }
 }

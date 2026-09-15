@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -21,6 +21,6 @@ class D {
         /*superBroken*/super();
     }
 }"#;
-    let mut s = Session::new_for_test("goToDefinition_super", content);
+    let _s = Session::new_for_test("goToDefinition_super", content);
     // TODO: f.VerifyBaselineGoToDefinition(t, true, "super", "superExpression", "superBroken")
 }

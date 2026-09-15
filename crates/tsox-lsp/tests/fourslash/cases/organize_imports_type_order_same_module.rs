@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -19,7 +19,7 @@ export declare const foo: Foo;
 export declare function fn(): void;
 export default class Default {}
 export as namespace Package;"#;
-    let mut s = Session::new_for_test("organizeImports_importKindOrder", content);
+    let _s = Session::new_for_test("organizeImports_importKindOrder", content);
     // TODO: f.VerifyOrganizeImports(
 }
 
@@ -43,6 +43,6 @@ export declare const a: TypeA;
 // @Filename: /b.d.ts
 export type TypeB = string;
 export declare const b: TypeB;"#;
-    let mut s = Session::new_for_test("organizeImports_importKindOrderMultipleModules", content);
+    let _s = Session::new_for_test("organizeImports_importKindOrderMultipleModules", content);
     // TODO: f.VerifyOrganizeImports(
 }

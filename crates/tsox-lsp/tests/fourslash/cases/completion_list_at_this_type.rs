@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -16,6 +16,6 @@ class Test {
 
     baz<T>(a: T, k: keyof T) {}
 }"#;
-    let mut s = Session::new_for_test("completionListAtThisType", content);
+    let _s = Session::new_for_test("completionListAtThisType", content);
     // TODO: f.VerifyCompletions(t, []string{"1", "2"}, &fourslash.CompletionsExpectedList{
 }

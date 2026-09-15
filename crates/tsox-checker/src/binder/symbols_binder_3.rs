@@ -144,7 +144,7 @@ impl Binder {
         let new_interface = new_flags.contains(SymbolFlags::Interface);
         let existing_type_alias = existing_flags.contains(SymbolFlags::TypeAlias);
         let new_type_alias = new_flags.contains(SymbolFlags::TypeAlias);
-        let class_side = SymbolFlags::Class;
+        let _class_side = SymbolFlags::Class;
 
         // Go TypeAliasExcludes = SymbolFlagsType（仅类型意义 class/interface/enum）：
         // type alias 与 class/interface/enum 相遇是 TS2300；与纯值声明（var/let/const/

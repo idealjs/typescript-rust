@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -17,7 +17,7 @@ const jsx = (
          </*16*/p />
    <//*17*/div>
 );"#;
-    let mut s = Session::new_for_test("linkedEditingJsxTag2", content);
+    let _s = Session::new_for_test("linkedEditingJsxTag2", content);
     // TODO: // Test file content (for readability):
     // TODO: // const jsx = (
     // TODO: linkedCursors := []lsproto.Range{

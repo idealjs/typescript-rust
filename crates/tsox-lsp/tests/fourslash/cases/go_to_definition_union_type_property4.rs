@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -20,6 +20,6 @@ var magnitude: Magnitude;
 var snapcrackle: SnapCrackle;
 
 var x = (snapcrackle || magnitude || art).[|/*usage*/pop|];"#;
-    let mut s = Session::new_for_test("goToDefinitionUnionTypeProperty4", content);
+    let _s = Session::new_for_test("goToDefinitionUnionTypeProperty4", content);
     // TODO: f.VerifyBaselineGoToDefinition(t, true, "usage")
 }

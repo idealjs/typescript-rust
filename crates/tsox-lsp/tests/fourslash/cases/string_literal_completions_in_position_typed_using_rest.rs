@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -14,7 +14,7 @@ class Q<T> {
   public select<Keys extends keyof T>(...args: Keys[]) {}
 }
 new Q<{ id: string; name: string }>().select("name", "/*ts3*/");"#;
-    let mut s = Session::new_for_test("stringLiteralCompletionsInPositionTypedUsingRest", content);
+    let _s = Session::new_for_test("stringLiteralCompletionsInPositionTypedUsingRest", content);
     // TODO: f.VerifyCompletions(t, []string{"ts1", "ts2"}, &fourslash.CompletionsExpectedList{
     // TODO: f.VerifyCompletions(t, []string{"ts3"}, &fourslash.CompletionsExpectedList{
 }

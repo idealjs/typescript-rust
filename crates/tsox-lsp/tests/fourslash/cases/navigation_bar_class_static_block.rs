@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -8,6 +8,6 @@ fn navigation_bar_class_static_block() {
     let x;
   }
 }"#;
-    let mut s = Session::new_for_test("navigationBarClassStaticBlock", content);
+    let _s = Session::new_for_test("navigationBarClassStaticBlock", content);
     // TODO: f.VerifyBaselineDocumentSymbol(t)
 }

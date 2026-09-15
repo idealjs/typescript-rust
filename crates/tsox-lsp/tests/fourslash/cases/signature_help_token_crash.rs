@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -13,7 +13,7 @@ foo((/*1*/
 /** This is a JSDoc comment */
 foo/** More comments*/((/*2*/
 "#;
-    let mut s = Session::new_for_test("signatureHelpTokenCrash", content);
+    let _s = Session::new_for_test("signatureHelpTokenCrash", content);
     // TODO: f.VerifySignatureHelpWithCases(t, &fourslash.SignatureHelpCase{
     // TODO: f.VerifySignatureHelpWithCases(t, &fourslash.SignatureHelpCase{
 }

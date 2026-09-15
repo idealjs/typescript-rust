@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -28,6 +28,6 @@ export default class {
 // @filename: /4.ts
 import Foo/*d*/ from "./3";
 const f/*e*/ = new Foo/*f*/();"#;
-    let mut s = Session::new_for_test("quickinfoVerbosityImport", content);
+    let _s = Session::new_for_test("quickinfoVerbosityImport", content);
     // TODO: f.VerifyBaselineHoverWithVerbosity(t, map[string][]int{"b": {0, 1, 2}, "a": {0, 1}, "c": {0, 1}, "d"
 }

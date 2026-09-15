@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -12,7 +12,7 @@ function f() {
     let g = () => /*4*/
 }
 let g = () => /*5*/"#;
-    let mut s = Session::new_for_test("completionInsideFunctionContainsArguments", content);
+    let _s = Session::new_for_test("completionInsideFunctionContainsArguments", content);
     // TODO: f.VerifyCompletions(t, []string{"1", "3", "4"}, &fourslash.CompletionsExpectedList{
     // TODO: f.VerifyCompletions(t, []string{"2", "5"}, &fourslash.CompletionsExpectedList{
 }

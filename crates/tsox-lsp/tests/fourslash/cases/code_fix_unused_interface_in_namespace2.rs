@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[ignore = "go: t.Skip('Known failing fourslash test')"]
@@ -11,6 +11,6 @@ namespace greeter {
     interface interface1 {
     } |]
 }"#;
-    let mut s = Session::new_for_test("codeFixUnusedInterfaceInNamespace2", content);
+    let _s = Session::new_for_test("codeFixUnusedInterfaceInNamespace2", content);
     // TODO: f.VerifyRangeAfterCodeFix(t, `export interface interface2 {
 }

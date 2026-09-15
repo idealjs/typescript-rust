@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -10,6 +10,6 @@ function /*functionOverloadDefinition*/functionOverload() {}
 [|/*functionOverloadReference1*/functionOverload|](123);
 [|/*functionOverloadReference2*/functionOverload|]("123");
 [|/*brokenOverload*/functionOverload|]({});"#;
-    let mut s = Session::new_for_test("goToDefinitionFunctionOverloads", content);
+    let _s = Session::new_for_test("goToDefinitionFunctionOverloads", content);
     // TODO: f.VerifyBaselineGoToDefinition(t, true, "functionOverloadReference1", "functionOverloadReference2", 
 }

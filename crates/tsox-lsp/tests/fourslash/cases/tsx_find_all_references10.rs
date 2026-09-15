@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -31,6 +31,6 @@ let opt = <MainButton onClick={()=>{}} />;
 let opt = <MainButton onClick={()=>{}} ignore-prop />;
 let opt = <MainButton goTo="goTo" />;
 let opt = <MainButton wrong />;"#;
-    let mut s = Session::new_for_test("tsxFindAllReferences10", content);
+    let _s = Session::new_for_test("tsxFindAllReferences10", content);
     // TODO: f.VerifyBaselineFindAllReferences(t, "1")
 }

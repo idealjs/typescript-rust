@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -9,6 +9,6 @@ fn semantic_classification2() {
 
 var Thing = 0;
 Thing.toExponential();"#;
-    let mut s = Session::new_for_test("semanticClassification2", content);
+    let _s = Session::new_for_test("semanticClassification2", content);
     // TODO: f.VerifySemanticTokens(t, []fourslash.SemanticToken{
 }

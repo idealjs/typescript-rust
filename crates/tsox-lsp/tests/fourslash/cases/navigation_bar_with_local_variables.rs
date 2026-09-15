@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -7,6 +7,6 @@ fn navigation_bar_with_local_variables() {
 	const x = Object()
 	x.foo = ""
 }"#;
-    let mut s = Session::new_for_test("navigationBarWithLocalVariables", content);
+    let _s = Session::new_for_test("navigationBarWithLocalVariables", content);
     // TODO: f.VerifyBaselineDocumentSymbol(t)
 }

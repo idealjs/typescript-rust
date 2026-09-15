@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[ignore = "go: t.Skip('Known failing fourslash test')"]
@@ -20,6 +20,6 @@ function returnThisMember([| |]suffix: string) {
  };
 
  container.returnThisMember("");"#;
-    let mut s = Session::new_for_test("codeFixInferFromFunctionThisUsageObjectPropertyParameter", content);
+    let _s = Session::new_for_test("codeFixInferFromFunctionThisUsageObjectPropertyParameter", content);
     // TODO: f.VerifyRangeAfterCodeFix(t, `this: Container, `, false, 0, 0)
 }

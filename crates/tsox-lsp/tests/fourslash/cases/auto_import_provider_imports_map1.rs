@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -28,7 +28,7 @@ export const isBrowser = true;
 export const isBrowser = false;
 // @Filename: /home/src/workspaces/project/src/a.ts
 isBrowser/**/"##;
-    let mut s = Session::new_for_test("autoImportProvider_importsMap1", content);
+    let _s = Session::new_for_test("autoImportProvider_importsMap1", content);
     // TODO: f.MarkTestAsStradaServer()
     // TODO: f.VerifyImportFixModuleSpecifiers(t, "", []string{"#is-browser", "./env/browser.js"}, nil /*preferen
 }

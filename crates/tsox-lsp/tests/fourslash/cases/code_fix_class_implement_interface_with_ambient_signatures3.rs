@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -7,6 +7,6 @@ fn code_fix_class_implement_interface_with_ambient_signatures3() {
     abstract method(): void;
 }
 class B implements A {}"#;
-    let mut s = Session::new_for_test("codeFixClassImplementInterfaceWithAmbientSignatures3", content);
+    let _s = Session::new_for_test("codeFixClassImplementInterfaceWithAmbientSignatures3", content);
     // TODO: f.VerifyCodeFix(t, fourslash.VerifyCodeFixOptions{
 }

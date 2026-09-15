@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -34,6 +34,6 @@ export = {
 
 function foo(props: { x: number; y: number }) {}
 export = foo({ x: 1, y: 1 });"#;
-    let mut s = Session::new_for_test("navigationItemsExportEqualsExpression", content);
+    let _s = Session::new_for_test("navigationItemsExportEqualsExpression", content);
     // TODO: f.VerifyBaselineDocumentSymbol(t)
 }

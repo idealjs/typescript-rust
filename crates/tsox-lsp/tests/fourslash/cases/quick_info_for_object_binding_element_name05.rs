@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -16,6 +16,6 @@ interface B {
 function f({ a }: A | B) {
     a/**/;
 }"#;
-    let mut s = Session::new_for_test("quickInfoForObjectBindingElementName05", content);
+    let _s = Session::new_for_test("quickInfoForObjectBindingElementName05", content);
     // TODO: f.VerifyBaselineHover(t)
 }

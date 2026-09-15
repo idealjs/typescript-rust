@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -8,6 +8,6 @@ export class /*2*/Foo {}
 // @Filename: b.ts
  import /*3*/n = require('a');
  var x = new [|/*1*/n|].Foo();"#;
-    let mut s = Session::new_for_test("goToModuleAliasDefinition", content);
+    let _s = Session::new_for_test("goToModuleAliasDefinition", content);
     // TODO: f.VerifyBaselineGoToDefinition(t, true, "1")
 }

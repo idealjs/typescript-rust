@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -12,6 +12,6 @@ let myOption: Options = "option 1";
 
 some/*4*/Label:
 break someLabel;"#;
-    let mut s = Session::new_for_test("findReferencesDefinitionDisplayParts", content);
+    let _s = Session::new_for_test("findReferencesDefinitionDisplayParts", content);
     // TODO: f.VerifyBaselineFindAllReferences(t, "1", "2", "3", "4")
 }

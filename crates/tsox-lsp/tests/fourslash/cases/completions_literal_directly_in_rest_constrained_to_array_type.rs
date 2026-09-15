@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -9,6 +9,6 @@ function fn<T extends ('value1' | 'value2' | 'value3')[]>(...values: T): T { ret
 
 const value1 = fn('/*1*/');
 const value2 = fn('value1', '/*2*/');"#;
-    let mut s = Session::new_for_test("completionsLiteralDirectlyInRestConstrainedToArrayType", content);
+    let _s = Session::new_for_test("completionsLiteralDirectlyInRestConstrainedToArrayType", content);
     // TODO: f.VerifyCompletions(t, []string{"1", "2"}, &fourslash.CompletionsExpectedList{
 }

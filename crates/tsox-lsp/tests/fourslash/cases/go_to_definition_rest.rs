@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -11,6 +11,6 @@ fn go_to_definition_rest() {
 let t: Gen;
 var { x, ...rest } = t;
 rest.[|/*2*/parent|];"#;
-    let mut s = Session::new_for_test("goToDefinitionRest", content);
+    let _s = Session::new_for_test("goToDefinitionRest", content);
     // TODO: f.VerifyBaselineGoToDefinition(t, true, "2")
 }

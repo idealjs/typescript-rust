@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -11,6 +11,6 @@ with ({}) {
 }
 
 /*3*/x = /*4*/x + 1;"#;
-    let mut s = Session::new_for_test("findAllRefsInsideWithBlock", content);
+    let _s = Session::new_for_test("findAllRefsInsideWithBlock", content);
     // TODO: f.VerifyBaselineFindAllReferences(t, "1", "2", "3", "4")
 }

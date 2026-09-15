@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -10,6 +10,6 @@ class A {
 class B extends A {
     [|static foo() {}|]
 }"#;
-    let mut s = Session::new_for_test("codeFixOverrideModifier18", content);
+    let _s = Session::new_for_test("codeFixOverrideModifier18", content);
     // TODO: f.VerifyCodeFixNotAvailable(t, "fixAddOverrideModifier")
 }

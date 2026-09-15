@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -7,6 +7,6 @@ fn navigation_bar_items_static_and_non_static_no_merge() {
     static x;
     x;
 }"#;
-    let mut s = Session::new_for_test("navigationBarItemsStaticAndNonStaticNoMerge", content);
+    let _s = Session::new_for_test("navigationBarItemsStaticAndNonStaticNoMerge", content);
     // TODO: f.VerifyBaselineDocumentSymbol(t)
 }

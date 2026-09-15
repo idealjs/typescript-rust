@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -29,6 +29,6 @@ var assigned = /**
   return s.length;
 }
 assigned(/*18*/"hey");"#;
-    let mut s = Session::new_for_test("signatureHelpCommentsFunctionExpression", content);
+    let _s = Session::new_for_test("signatureHelpCommentsFunctionExpression", content);
     // TODO: f.VerifyBaselineSignatureHelp(t)
 }

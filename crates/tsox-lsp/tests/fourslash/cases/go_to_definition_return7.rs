@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -8,6 +8,6 @@ function foo(a: number, b: number): number;
 function /*end*/foo(a: any, b: any): any {
     [|/*start*/return|] a + b;
 }"#;
-    let mut s = Session::new_for_test("goToDefinitionReturn7", content);
+    let _s = Session::new_for_test("goToDefinitionReturn7", content);
     // TODO: f.VerifyBaselineGoToDefinition(t, true, "start")
 }

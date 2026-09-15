@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -14,6 +14,6 @@ function bar(firstarg: boolean, secondarg: PropsBag) {}
 bar(true, {
    [|pr/*p2*/opx|]: 10
 })"#;
-    let mut s = Session::new_for_test("goToDefinitionObjectLiteralProperties1", content);
+    let _s = Session::new_for_test("goToDefinitionObjectLiteralProperties1", content);
     // TODO: f.VerifyBaselineGoToDefinition(t, true, "p1", "p2")
 }

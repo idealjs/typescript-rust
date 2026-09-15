@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -9,6 +9,6 @@ fn code_fix_missing_type_annotation_on_exports59_drops_unneeded_after_unknown() 
 export interface Foo<S = string, T = unknown, U = number> {}
 export function g(x: Foo<number, unknown, number>) { return x; }
 "#;
-    let mut s = Session::new_for_test("codeFixMissingTypeAnnotationOnExports59_drops_unneeded_after_unknown", content);
+    let _s = Session::new_for_test("codeFixMissingTypeAnnotationOnExports59_drops_unneeded_after_unknown", content);
     // TODO: f.VerifyCodeFix(t, fourslash.VerifyCodeFixOptions{
 }

@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -36,6 +36,6 @@ function /*f8Def*/f8(ij: any): any { return ij; }
 /*f6*/f6();
 /*f7*/f7();
 /*f8*/f8();"#;
-    let mut s = Session::new_for_test("goToTypeDefinition_returnType", content);
+    let _s = Session::new_for_test("goToTypeDefinition_returnType", content);
     // TODO: f.VerifyBaselineGoToTypeDefinition(t, "f0", "f1", "f2", "f3", "f4", "f5", "f6", "f7", "f8")
 }

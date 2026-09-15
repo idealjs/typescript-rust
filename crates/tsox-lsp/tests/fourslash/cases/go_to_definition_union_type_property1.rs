@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -17,6 +17,6 @@ var x : One | Two;
 
 x.[|/*propertyReference*/commonProperty|];
 x./*3*/commonFunction;"#;
-    let mut s = Session::new_for_test("goToDefinitionUnionTypeProperty1", content);
+    let _s = Session::new_for_test("goToDefinitionUnionTypeProperty1", content);
     // TODO: f.VerifyBaselineGoToDefinition(t, true, "propertyReference")
 }

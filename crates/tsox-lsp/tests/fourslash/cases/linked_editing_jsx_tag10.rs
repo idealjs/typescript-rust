@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -35,6 +35,6 @@ const jsx = </*13*/> //*13a*/>;
 const jsx = </*14*/> </*14a*/div> <//*14b*/> <//*14c*/div>;
 // @Filename: /jsx15.tsx
 const jsx = </*15*/div> </*15a*/> <//*15b*/div> <//*15c*/>;"#;
-    let mut s = Session::new_for_test("linkedEditingJsxTag10", content);
+    let _s = Session::new_for_test("linkedEditingJsxTag10", content);
     // TODO: f.VerifyBaselineLinkedEditing(t)
 }

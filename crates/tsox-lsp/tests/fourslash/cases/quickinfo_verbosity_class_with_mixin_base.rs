@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -10,6 +10,6 @@ declare const Mixin: new () => Base & { mixed: string };
 
 class Derived/*1*/ extends Mixin {}
 "#;
-    let mut s = Session::new_for_test("quickinfoVerbosityClassWithMixinBase", content);
+    let _s = Session::new_for_test("quickinfoVerbosityClassWithMixinBase", content);
     // TODO: f.VerifyBaselineHoverWithVerbosity(t, map[string][]int{"1": {0, 1}})
 }

@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -14,6 +14,6 @@ export var x = 5;
 { "dependencies": { "module-from-node": "latest" } }
 // @Filename: node_modules/module-from-node/index.ts
 "#;
-    let mut s = Session::new_for_test("completionForStringLiteralNonrelativeImport7", content);
+    let _s = Session::new_for_test("completionForStringLiteralNonrelativeImport7", content);
     // TODO: f.VerifyCompletions(t, f.Markers(), &fourslash.CompletionsExpectedList{
 }

@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -12,7 +12,7 @@ export declare const a: { a: string };
 // @Filename: /home/src/workspaces/project/b.ts
 import { a } from './a';
 a.[|a/*start*/|]"#;
-    let mut s = Session::new_for_test("goToSource11_propertyOfAlias", content);
+    let _s = Session::new_for_test("goToSource11_propertyOfAlias", content);
     // TODO: f.MarkTestAsStradaServer()
     // TODO: f.VerifyBaselineGoToSourceDefinition(t, "start")
 }

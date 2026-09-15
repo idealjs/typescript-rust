@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -10,6 +10,6 @@ declare module "m" {
 }
 // @Filename: /b.ts
 /**/"#;
-    let mut s = Session::new_for_test("completionsImport_fromAmbientModule", content);
+    let _s = Session::new_for_test("completionsImport_fromAmbientModule", content);
     // TODO: f.VerifyApplyCodeActionFromCompletion(t, new(""), &fourslash.ApplyCodeActionFromCompletionOptions{
 }

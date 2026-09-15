@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -20,6 +20,6 @@ var c2: [|testClass|].Bar;
 [|testClass|].prototype.method();
 [|testClass|].bind(this);
 new [|testClass|]();"#;
-    let mut s = Session::new_for_test("referencesForMergedDeclarations3", content);
+    let _s = Session::new_for_test("referencesForMergedDeclarations3", content);
     // TODO: f.VerifyBaselineFindAllReferences(t, "module", "class")
 }

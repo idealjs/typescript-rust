@@ -10,4 +10,3 @@ pub(crate) use std::sync::Arc;
 pub(crate) use tsox_core::core::compiler_options::ScriptTarget;
 pub(crate) use tsox_core::core::tristate::Tristate;
 pub(crate) use tsox_core::diagnostics::Message;
-pub(crate) use tsox_frontend::ast::*;

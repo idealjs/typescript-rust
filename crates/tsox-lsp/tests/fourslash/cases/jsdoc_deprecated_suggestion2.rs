@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -62,6 +62,6 @@ cb;
 cb();
 new ca();
 new [|cb|]();"#;
-    let mut s = Session::new_for_test("jsdocDeprecated_suggestion2", content);
+    let _s = Session::new_for_test("jsdocDeprecated_suggestion2", content);
     // TODO: f.VerifySuggestionDiagnostics(t, []*lsproto.Diagnostic{
 }

@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -18,7 +18,7 @@ class MyClass {
 
 [|var [|{| "contextRangeIndex": 0 |}nn|]: string;|]
 var x = <MyClass name={[|nn|]}></MyClass>;"#;
-    let mut s = Session::new_for_test("tsxRename5", content);
+    let _s = Session::new_for_test("tsxRename5", content);
     // TODO: f.VerifyBaselineRenameAtRangesWithText(t, nil /*preferences*/, "nn")
     // TODO: }
 }

@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -59,7 +59,7 @@ class Button extends [|/*1*/Control|] {
         }
     }
 }"#;
-    let mut s = Session::new_for_test("declarationMapsGoToDefinitionSameNameDifferentDirectory", content);
+    let _s = Session::new_for_test("declarationMapsGoToDefinitionSameNameDifferentDirectory", content);
     // TODO: f.MarkTestAsStradaServer()
     // TODO: f.VerifyBaselineGoToDefinition(t, true, "1", "3")
 }

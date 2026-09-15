@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -21,6 +21,6 @@ class /*selfDefinition*/Bar {
     constructor(public _inConstructor: [|IFo/*interfaceReferenceInConstructor*/o|]) {
     }
 }"#;
-    let mut s = Session::new_for_test("goToDefinitionInMemberDeclaration", content);
+    let _s = Session::new_for_test("goToDefinitionInMemberDeclaration", content);
     // TODO: f.VerifyBaselineGoToDefinition(t, true, "interfaceReference", "interfaceReferenceInList", "interface
 }

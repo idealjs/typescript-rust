@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -8,6 +8,6 @@ var /*varName1*/
 var a/*varName2*/
 var a2,/*varName3*/
 var a2, a/*varName4*/"#;
-    let mut s = Session::new_for_test("completionListAtIdentifierDefinitionLocations_varDeclarations", content);
+    let _s = Session::new_for_test("completionListAtIdentifierDefinitionLocations_varDeclarations", content);
     // TODO: f.VerifyCompletions(t, f.Markers(), nil)
 }

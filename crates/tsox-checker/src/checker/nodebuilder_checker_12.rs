@@ -130,7 +130,7 @@ impl Checker {
         };
         let obj_data = obj_type.as_object()?;
         let call = p.parent().filter(|c| c.kind == SyntaxKind::CallExpression);
-                let mut class_sym = obj_type.symbol.clone();
+                let class_sym = obj_type.symbol.clone();
         let mut from_call_return = false;
         if !class_sym
             .as_ref()
@@ -258,6 +258,7 @@ impl Checker {
     }
 
     /// 泛型调用返回的局部函数符号：解析调用签名声明体内 return 的标识符
+    #[allow(dead_code)]
     pub(crate) fn call_return_function_symbol(
         &mut self,
         call: &Arc<Node>,
@@ -284,6 +285,7 @@ impl Checker {
             .then(|| sym)
     }
 
+    #[allow(dead_code)]
     fn find_first_return_expression(
         &self,
         node: &Arc<Node>,
@@ -550,9 +552,9 @@ impl Checker {
     /// union 按 name 判别式收窄（Go GetPropertySymbolsFromContextualType）
     fn jsx_attribute_symbol_from_construct_signature(
         &mut self,
-        class_sym: &Arc<Symbol>,
+        _class_sym: &Arc<Symbol>,
         attr_node: &Arc<Node>,
-        name: &str,
+        _name: &str,
     ) -> Option<Arc<Symbol>> {
         let attrs = attr_node.parent()?;
         let elem = attrs.parent()?;
@@ -666,9 +668,9 @@ impl Checker {
             None
         };
         let jsx_sym = find_jsx(self).or_else(|| self.globals.get("JSX").cloned())?;
-        let jsx_type = self.get_type_of_symbol(&jsx_sym);
+        let _jsx_type = self.get_type_of_symbol(&jsx_sym);
         // declare namespace 的成员在 locals（ambient 不进 exports），沿声明手工下钻
-        let find_member = |checker: &Checker, sym: &Arc<Symbol>, member: &str| -> Option<Arc<Symbol>> {
+        let _find_member = |checker: &Checker, sym: &Arc<Symbol>, member: &str| -> Option<Arc<Symbol>> {
             for d in &sym.declarations {
                 if let Some(locals) = checker.program.symbol_map().locals.get(&d.id())
                     && let Some(m) = locals.get(member)
@@ -2202,6 +2204,7 @@ impl Checker {
     }
 
     /// 变量/属性声明注解与解析类型等价时返回注解源文本
+    #[allow(dead_code)]
     pub(crate) fn annotated_decl_type_text(
         &mut self,
         symbol: &Arc<Symbol>,
@@ -2308,16 +2311,6 @@ impl Checker {
     }
 }
 
-fn node_is_descendant_of_expr(node: &Arc<Node>, ancestor: &Arc<Node>) -> bool {
-    let mut cur = node.parent();
-    while let Some(n) = cur {
-        if Arc::ptr_eq(&n, ancestor) {
-            return true;
-        }
-        cur = n.parent();
-    }
-    false
-}
 
 fn assignment_target_expr(obj: &Arc<Node>) -> Arc<Node> {
     // 向上找最近的 BinaryExpression=，返回其左操作数；找不到返回 obj 自身

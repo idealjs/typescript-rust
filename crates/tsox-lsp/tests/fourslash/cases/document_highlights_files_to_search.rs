@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -7,6 +7,6 @@ fn document_highlights_files_to_search() {
 export const [|x|] = 0;
 // @Filename: /b.ts
 import { [|x|] } from "./a";"#;
-    let mut s = Session::new_for_test("documentHighlights_filesToSearch", content);
+    let _s = Session::new_for_test("documentHighlights_filesToSearch", content);
     // TODO: f.VerifyBaselineDocumentHighlights(t, nil /*preferences*/, ToAny(f.Ranges())...)
 }

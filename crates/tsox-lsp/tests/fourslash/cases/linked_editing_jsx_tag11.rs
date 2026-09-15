@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -16,6 +16,6 @@ const standardElement =
            Next
        </Button>
    </Link>;"#;
-    let mut s = Session::new_for_test("linkedEditingJsxTag11", content);
+    let _s = Session::new_for_test("linkedEditingJsxTag11", content);
     // TODO: f.VerifyBaselineLinkedEditing(t)
 }

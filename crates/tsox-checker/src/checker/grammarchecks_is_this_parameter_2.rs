@@ -32,37 +32,7 @@ pub(crate) fn is_parent_class_like(node: &Arc<Node>) -> bool {
     }
 }
 
-pub(crate) fn is_iteration_statement(node: &Arc<Node>, look_in_labeled: bool) -> bool {
-    match node.kind {
-        SyntaxKind::ForStatement
-        | SyntaxKind::ForInStatement
-        | SyntaxKind::ForOfStatement
-        | SyntaxKind::WhileStatement
-        | SyntaxKind::DoStatement => true,
-        SyntaxKind::LabeledStatement if look_in_labeled => {
-            if let NodeData::LabeledStatement(data) = &node.data {
-                is_iteration_statement(&data.statement, false)
-            } else {
-                false
-            }
-        }
-        _ => false,
-    }
-}
 
-pub(crate) fn is_function_like_or_class_static_block(node: &Arc<Node>) -> bool {
-    matches!(
-        node.kind,
-        SyntaxKind::FunctionDeclaration
-            | SyntaxKind::FunctionExpression
-            | SyntaxKind::ArrowFunction
-            | SyntaxKind::MethodDeclaration
-            | SyntaxKind::Constructor
-            | SyntaxKind::GetAccessor
-            | SyntaxKind::SetAccessor
-            | SyntaxKind::ClassStaticBlockDeclaration
-    )
-}
 
 pub(crate) fn is_optional_declaration(node: &Arc<Node>) -> bool {
     if node.kind != SyntaxKind::Parameter {

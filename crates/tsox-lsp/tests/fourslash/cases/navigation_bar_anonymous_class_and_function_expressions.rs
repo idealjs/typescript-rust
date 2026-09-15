@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -30,6 +30,6 @@ fn navigation_bar_anonymous_class_and_function_expressions() {
     console.log(class cls3 {});
     (class { });
 })"#;
-    let mut s = Session::new_for_test("navigationBarAnonymousClassAndFunctionExpressions", content);
+    let _s = Session::new_for_test("navigationBarAnonymousClassAndFunctionExpressions", content);
     // TODO: f.VerifyBaselineDocumentSymbol(t)
 }

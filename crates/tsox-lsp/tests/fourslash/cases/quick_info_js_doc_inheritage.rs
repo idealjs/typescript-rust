@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -107,6 +107,6 @@ new Drived3()./*21*/foo1;
 new Drived3()./*22*/foo2;
 new Drived4()./*23*/foo1;
 new Drived4()./*24*/foo2;"#;
-    let mut s = Session::new_for_test("quickInfoJsDocInheritage", content);
+    let _s = Session::new_for_test("quickInfoJsDocInheritage", content);
     // TODO: f.VerifyBaselineHover(t)
 }

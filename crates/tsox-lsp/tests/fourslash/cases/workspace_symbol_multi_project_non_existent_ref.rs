@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -22,7 +22,7 @@ export const [|myValueA|]: number = 1;
 // @Filename: /home/src/projects/project-b/index.ts
 export const [|myValueB|]: string = "hello";
 "#;
-    let mut s = Session::new_for_test("workspaceSymbolMultiProjectNonExistentRef", content);
+    let _s = Session::new_for_test("workspaceSymbolMultiProjectNonExistentRef", content);
     // TODO: // Verify we can find symbols from both projects with a single pattern
     // TODO: f.VerifyWorkspaceSymbol(t, []*fourslash.VerifyWorkspaceSymbolCase{
 }

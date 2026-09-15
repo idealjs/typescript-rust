@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -13,6 +13,6 @@ let foo = {
 	[mySymbol["my dispose"]]: () => {}
 }
 "#;
-    let mut s = Session::new_for_test("inlayHintsElementAccess", content);
+    let _s = Session::new_for_test("inlayHintsElementAccess", content);
     // TODO: f.VerifyBaselineInlayHints(t, nil /*span*/, &lsutil.UserPreferences{InlayHints: lsutil.InlayHintsPre
 }

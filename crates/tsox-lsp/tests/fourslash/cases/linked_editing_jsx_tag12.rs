@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -51,7 +51,7 @@ function Test() {
         </div>
     </div>
 }"#;
-    let mut s = Session::new_for_test("linkedEditingJsxTag12", content);
+    let _s = Session::new_for_test("linkedEditingJsxTag12", content);
     // TODO: f.VerifyLinkedEditing(t, map[string][]lsproto.Range{"0": nil})
     // TODO: f.VerifyBaselineLinkedEditing(t)
 }

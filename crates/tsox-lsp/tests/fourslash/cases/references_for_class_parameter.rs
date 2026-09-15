@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -19,6 +19,6 @@ class foo {
 
 var n = new foo(undefined);
 n./*4*/p = null;"#;
-    let mut s = Session::new_for_test("referencesForClassParameter", content);
+    let _s = Session::new_for_test("referencesForClassParameter", content);
     // TODO: f.VerifyBaselineFindAllReferences(t, "1", "2", "3", "4")
 }

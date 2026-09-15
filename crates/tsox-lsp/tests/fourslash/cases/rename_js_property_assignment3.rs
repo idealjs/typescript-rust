@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -9,6 +9,6 @@ var C = class  {
 }
 [|C.[|{| "contextRangeIndex": 0 |}staticProperty|] = "string";|]
 console.log(C.[|staticProperty|]);"#;
-    let mut s = Session::new_for_test("renameJsPropertyAssignment3", content);
+    let _s = Session::new_for_test("renameJsPropertyAssignment3", content);
     // TODO: f.VerifyBaselineRenameAtRangesWithText(t, nil /*preferences*/, "staticProperty")
 }

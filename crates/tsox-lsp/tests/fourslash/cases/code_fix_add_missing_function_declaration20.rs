@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -7,6 +7,6 @@ fn code_fix_add_missing_function_declaration20() {
    b: { f(x: number) {} }
 }
 a.b.f(foo);"#;
-    let mut s = Session::new_for_test("codeFixAddMissingFunctionDeclaration20", content);
+    let _s = Session::new_for_test("codeFixAddMissingFunctionDeclaration20", content);
     // TODO: f.VerifyCodeFixNotAvailable(t, "fixMissingFunctionDeclaration")
 }

@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -13,6 +13,6 @@ fakeTest(() => {
     /*a*/
   };
 });"#;
-    let mut s = Session::new_for_test("completionsPropertiesWithPromiseUnionType", content);
+    let _s = Session::new_for_test("completionsPropertiesWithPromiseUnionType", content);
     // TODO: f.VerifyCompletions(t, []string{"a"}, &fourslash.CompletionsExpectedList{
 }

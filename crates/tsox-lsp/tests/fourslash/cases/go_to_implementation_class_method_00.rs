@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -8,6 +8,6 @@ fn go_to_implementation_class_method_00() {
 }
 
 new Bar().hel/*reference*/lo;"#;
-    let mut s = Session::new_for_test("goToImplementationClassMethod_00", content);
+    let _s = Session::new_for_test("goToImplementationClassMethod_00", content);
     // TODO: f.VerifyBaselineGoToImplementation(t, "reference")
 }

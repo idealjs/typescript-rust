@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -30,6 +30,6 @@ class ABC {
 namespace ABC {
     export var x = 3;
 }"#;
-    let mut s = Session::new_for_test("navbar_contains_no_duplicates", content);
+    let _s = Session::new_for_test("navbar_contains_no_duplicates", content);
     // TODO: f.VerifyBaselineDocumentSymbol(t)
 }

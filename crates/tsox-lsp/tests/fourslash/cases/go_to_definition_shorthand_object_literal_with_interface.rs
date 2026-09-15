@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -10,6 +10,6 @@ fn go_to_definition_shorthand_object_literal_with_interface() {
 function makeSomething([|foo|]: string): Something {
     return { [|f/*1*/oo|] };
 }"#;
-    let mut s = Session::new_for_test("goToDefinitionShorthandObjectLiteralWithInterface", content);
+    let _s = Session::new_for_test("goToDefinitionShorthandObjectLiteralWithInterface", content);
     // TODO: f.VerifyBaselineGoToDefinition(t, true, "1")
 }

@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -10,7 +10,7 @@ export const MyValue = 123;
 let x: MyT/*type*/;
 let y = MyV/*value*/;
 "#;
-    let mut s = Session::new_for_test("preferTypeOnlyAutoImports", content);
+    let _s = Session::new_for_test("preferTypeOnlyAutoImports", content);
     // TODO: f.Configure(t, lsutil.UserPreferences{
     // TODO: // Baseline auto-import completions at both markers
     // TODO: f.BaselineAutoImportsCompletions(t, []string{"type", "value"})

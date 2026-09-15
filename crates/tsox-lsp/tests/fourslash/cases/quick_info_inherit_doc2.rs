@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -20,6 +20,6 @@ class SubClass<T> extends Base<T> {
      */
     /*1*/prop: T | undefined;
 }"#;
-    let mut s = Session::new_for_test("quickInfoInheritDoc2", content);
+    let _s = Session::new_for_test("quickInfoInheritDoc2", content);
     // TODO: f.VerifyBaselineHover(t)
 }

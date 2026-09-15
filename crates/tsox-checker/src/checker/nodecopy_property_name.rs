@@ -50,7 +50,7 @@ pub fn is_external_module_symbol(symbol: &Symbol) -> bool {
     symbol.is_external_module()
 }
 
-pub fn get_meaning_of_entity_name_reference(node: &Arc<Node>) -> SymbolFlags {
+pub fn get_meaning_of_entity_name_reference(_node: &Arc<Node>) -> SymbolFlags {
     SymbolFlags::TYPE
 }
 

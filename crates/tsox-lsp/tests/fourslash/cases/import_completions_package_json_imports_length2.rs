@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -18,7 +18,7 @@ import {} from "#a//*2*/";
 import {} from "#a/b//*3*/";
 import {} from "#a/b/c//*4*/";
 import {} from "#a/b/c/something//*5*/";"##;
-    let mut s = Session::new_for_test("importCompletionsPackageJsonImportsLength2", content);
+    let _s = Session::new_for_test("importCompletionsPackageJsonImportsLength2", content);
     // TODO: f.VerifyCompletions(t, []string{"1"}, &fourslash.CompletionsExpectedList{
     // TODO: f.VerifyCompletions(t, []string{"2"}, &fourslash.CompletionsExpectedList{
     // TODO: f.VerifyCompletions(t, []string{"3"}, &fourslash.CompletionsExpectedList{

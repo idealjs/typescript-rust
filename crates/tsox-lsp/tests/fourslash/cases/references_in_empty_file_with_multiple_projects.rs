@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -12,7 +12,7 @@ fn references_in_empty_file_with_multiple_projects() {
 { "files": ["b.ts"], "compilerOptions": { "lib": ["es5"] } }
 // @Filename: /home/src/workspaces/project/b/b.ts
 /*2*/;"#;
-    let mut s = Session::new_for_test("referencesInEmptyFileWithMultipleProjects", content);
+    let _s = Session::new_for_test("referencesInEmptyFileWithMultipleProjects", content);
     // TODO: f.MarkTestAsStradaServer()
     // TODO: f.VerifyBaselineFindAllReferences(t, "1", "2")
 }

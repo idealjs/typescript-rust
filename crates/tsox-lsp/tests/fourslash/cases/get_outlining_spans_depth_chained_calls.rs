@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -113,6 +113,6 @@ router
     .post[|("/a", async(ctx) =>[|{
         //a
     }|])|]"#;
-    let mut s = Session::new_for_test("getOutliningSpansDepthChainedCalls", content);
+    let _s = Session::new_for_test("getOutliningSpansDepthChainedCalls", content);
     // TODO: f.VerifyOutliningSpans(t)
 }

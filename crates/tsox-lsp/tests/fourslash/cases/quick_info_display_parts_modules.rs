@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -15,6 +15,6 @@ namespace /*8*/m1./*9*/m2 {
 }
 var /*12*/x = /*13*/m1./*14*/m2;
 var /*15*/y: typeof /*16*/m1./*17*/m2;"#;
-    let mut s = Session::new_for_test("quickInfoDisplayPartsModules", content);
+    let _s = Session::new_for_test("quickInfoDisplayPartsModules", content);
     // TODO: f.VerifyBaselineHover(t)
 }

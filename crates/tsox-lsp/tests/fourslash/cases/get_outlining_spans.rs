@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -127,6 +127,6 @@ class D<T> extends C<T>[| {
         super<T>(x);
     }|]
 }|]"#;
-    let mut s = Session::new_for_test("getOutliningSpans", content);
+    let _s = Session::new_for_test("getOutliningSpans", content);
     // TODO: f.VerifyOutliningSpans(t)
 }

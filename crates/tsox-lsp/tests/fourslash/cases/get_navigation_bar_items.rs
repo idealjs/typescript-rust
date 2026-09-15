@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -7,6 +7,6 @@ fn get_navigation_bar_items() {
     foo;
     ["bar"]: string;
 }"#;
-    let mut s = Session::new_for_test("getNavigationBarItems", content);
+    let _s = Session::new_for_test("getNavigationBarItems", content);
     // TODO: f.VerifyBaselineDocumentSymbol(t)
 }

@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -10,6 +10,6 @@ type DoubleTupleTrouble<T> = [T, T];
 
 export let y/*2*/: DoubleTupleTrouble<number> = [1, 2];
 "#;
-    let mut s = Session::new_for_test("goToTypeWithTupleTypes1", content);
+    let _s = Session::new_for_test("goToTypeWithTupleTypes1", content);
     // TODO: f.VerifyBaselineGoToTypeDefinition(t, f.MarkerNames()...)
 }

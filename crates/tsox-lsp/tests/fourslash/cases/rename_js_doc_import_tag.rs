@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -16,6 +16,6 @@ export interface A { }
  * @param { [|A/**/|] } a
  */
 function f(a) {}"#;
-    let mut s = Session::new_for_test("renameJsDocImportTag", content);
+    let _s = Session::new_for_test("renameJsDocImportTag", content);
     // TODO: f.VerifyBaselineRename(t, nil /*preferences*/, "")
 }

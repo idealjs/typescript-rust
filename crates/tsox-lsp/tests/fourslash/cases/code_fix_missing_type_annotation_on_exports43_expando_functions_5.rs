@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -14,6 +14,6 @@ foo.y = 1;
 namespace foo {
   export let x = 42;
 }"#;
-    let mut s = Session::new_for_test("codeFixMissingTypeAnnotationOnExports43_expando_functions_5", content);
+    let _s = Session::new_for_test("codeFixMissingTypeAnnotationOnExports43_expando_functions_5", content);
     // TODO: f.VerifyCodeFix(t, fourslash.VerifyCodeFixOptions{
 }

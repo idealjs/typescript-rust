@@ -31,6 +31,29 @@ impl Checker {
                 return self.is_object_type_related_to(source, &resolved, relation);
             }
         }
+        // 源侧接口实例同样可能带退化构建窗口的残缺成员表（部分基类尚为壳时
+        // 合并的实例被调用方缓存）：重新解析取完整实例再比较（与上方 target
+        // 侧对称，Go 成员解析同步幂等无此问题）
+        if let Some(sym) = source.symbol.as_ref()
+            && sym
+                .declarations
+                .iter()
+                .any(|d| matches!(d.data, tsox_frontend::ast::NodeData::InterfaceDeclaration(_)))
+            && !self
+                .pending_interface_shells
+                .contains_key(&(Arc::as_ptr(sym) as *const tsox_frontend::ast::Symbol as usize))
+        {
+            let args = source.as_object().map(|o| o.type_arguments.clone());
+            let resolved = self.resolve_interface_type_ex(sym, args);
+            let src_members = source.as_structured().map(|s| s.members.entries.len()).unwrap_or(0);
+            if !Arc::ptr_eq(&resolved, source)
+                && resolved
+                    .as_structured()
+                    .is_some_and(|s| s.members.entries.len() > src_members)
+            {
+                return self.is_object_type_related_to(&resolved, target, relation);
+            }
+        }
         let source_struct = match source.as_structured() {
             Some(s) => s,
             None => return false,

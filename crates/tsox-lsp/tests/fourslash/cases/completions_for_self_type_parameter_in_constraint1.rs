@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -10,6 +10,6 @@ fn completions_for_self_type_parameter_in_constraint1() {
 declare function createMachine<Config extends StateMachine</*1*/>>(
   config: Config,
 ): void;"#;
-    let mut s = Session::new_for_test("completionsForSelfTypeParameterInConstraint1", content);
+    let _s = Session::new_for_test("completionsForSelfTypeParameterInConstraint1", content);
     // TODO: f.VerifyCompletions(t, []string{"1"}, &fourslash.CompletionsExpectedList{
 }

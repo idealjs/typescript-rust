@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -15,6 +15,6 @@ export class [|C|] implements B {
 	bar = true;
 }
 export class [|D|] extends C { }"#;
-    let mut s = Session::new_for_test("goToImplementationInterface_10", content);
+    let _s = Session::new_for_test("goToImplementationInterface_10", content);
     // TODO: f.VerifyBaselineGoToImplementation(t, "def")
 }

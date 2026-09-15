@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -7,6 +7,6 @@ fn outline_spans_trailing_block_comments_after_statements() {
 [|/*
 / * Some text
   */|]"#;
-    let mut s = Session::new_for_test("outlineSpansTrailingBlockCommentsAfterStatements", content);
+    let _s = Session::new_for_test("outlineSpansTrailingBlockCommentsAfterStatements", content);
     // TODO: f.VerifyOutliningSpans(t)
 }

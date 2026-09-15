@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[ignore = "go: t.Skip('Known failing fourslash test')"]
@@ -13,6 +13,6 @@ function foo3(): "42" {
     return "42";
 }
 export const { x: a , y: { [foo3()]: {dd: e} } } = foo();"#;
-    let mut s = Session::new_for_test("codeFixMissingTypeAnnotationOnExports16", content);
+    let _s = Session::new_for_test("codeFixMissingTypeAnnotationOnExports16", content);
     // TODO: f.VerifyCodeFix(t, fourslash.VerifyCodeFixOptions{
 }

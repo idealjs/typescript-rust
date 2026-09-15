@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -8,6 +8,6 @@ class A {
     A: typeof A;
 }
 class D implements A {[| |]}"#;
-    let mut s = Session::new_for_test("codeFixClassImplementClassPropertyTypeQuery", content);
+    let _s = Session::new_for_test("codeFixClassImplementClassPropertyTypeQuery", content);
     // TODO: f.VerifyCodeFix(t, fourslash.VerifyCodeFixOptions{
 }

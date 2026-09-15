@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -16,7 +16,7 @@ fn auto_import_specifier_exclude_regexes2() {
 export function add(a: number, b: number) {}
 // @Filename: /src/index.ts
 add/**/"#;
-    let mut s = Session::new_for_test("autoImportSpecifierExcludeRegexes2", content);
+    let _s = Session::new_for_test("autoImportSpecifierExcludeRegexes2", content);
     // TODO: f.VerifyImportFixModuleSpecifiers(t, "", []string{"./utils"}, nil /*preferences*/)
     // TODO: f.VerifyImportFixModuleSpecifiers(t, "", []string{"@app/utils"}, &lsutil.UserPreferences{AutoImportS
     // TODO: f.VerifyImportFixModuleSpecifiers(t, "", []string{"@app/utils"}, &lsutil.UserPreferences{ImportModul

@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -19,7 +19,7 @@ export function add(a: number, b: number) {}
 export * from "./utils";
 // @Filename: /src/index.ts
 add/**/"#;
-    let mut s = Session::new_for_test("autoImportSpecifierExcludeRegexes3", content);
+    let _s = Session::new_for_test("autoImportSpecifierExcludeRegexes3", content);
     // TODO: f.VerifyImportFixModuleSpecifiers(t, "", []string{"pkg", "pkg/utils"}, nil /*preferences*/)
     // TODO: f.VerifyImportFixModuleSpecifiers(t, "", []string{"pkg/utils"}, &lsutil.UserPreferences{AutoImportSp
 }

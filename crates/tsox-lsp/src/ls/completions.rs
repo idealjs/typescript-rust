@@ -1,6 +1,6 @@
 #![allow(dead_code)]
 
-pub(crate) use crate::ls::completions_helpers::*;
+use crate::ls::completions_helpers::*;
 pub(crate) use crate::ls::{
     completions_context, completions_object_like, completions_object_like_types,
 };

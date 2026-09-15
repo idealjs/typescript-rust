@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -11,7 +11,7 @@ fn jsdoc_typedef_tag_rename02() {
 
 /** @type {[|NumberLike|]} */
 var numberLike;"#;
-    let mut s = Session::new_for_test("jsdocTypedefTagRename02", content);
+    let _s = Session::new_for_test("jsdocTypedefTagRename02", content);
     // TODO: f.MarkTestAsStradaServer()
     // TODO: f.VerifyBaselineRename(t, nil /*preferences*/, ToAny(f.Ranges()[1:])...)
 }

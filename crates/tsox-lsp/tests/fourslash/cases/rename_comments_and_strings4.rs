@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -13,6 +13,6 @@ fn rename_comments_and_strings4() {
         `[|Bar|] ba ${Bar} bara [|Bar|] berbobo ${Bar} araura [|Bar|] ara!`;
     }
 }|]"#;
-    let mut s = Session::new_for_test("renameCommentsAndStrings4", content);
+    let _s = Session::new_for_test("renameCommentsAndStrings4", content);
     // TODO: f.VerifyBaselineRename(t, nil /*preferences*/, f.Ranges()[1])
 }

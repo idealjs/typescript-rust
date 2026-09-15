@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -27,6 +27,6 @@ class SuperBar extends MegaBar {
 class MegaBar implements Foo {
     hello() {}
 }"#;
-    let mut s = Session::new_for_test("goToImplementationInterfaceMethod_09", content);
+    let _s = Session::new_for_test("goToImplementationInterfaceMethod_09", content);
     // TODO: f.VerifyBaselineGoToImplementation(t, "function_call", "element_access")
 }

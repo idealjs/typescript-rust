@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -10,6 +10,6 @@ class /*cls*/C {
     constructor() { type X = typeof [|/*clsUse*/this|]; }
     get self(/*getterDecl*/this: number) { type X = typeof [|/*getterUse*/this|]; }
 }"#;
-    let mut s = Session::new_for_test("goToDefinitionTypeofThis", content);
+    let _s = Session::new_for_test("goToDefinitionTypeofThis", content);
     // TODO: f.VerifyBaselineGoToDefinition(t, true, "fnUse", "clsUse", "getterUse")
 }

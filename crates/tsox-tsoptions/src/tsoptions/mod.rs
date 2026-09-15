@@ -34,7 +34,6 @@ pub(crate) use tsox_core::diagnostics::UNTERMINATED_QUOTED_STRING_IN_RESPONSE_FI
 pub(crate) use tsox_core::diagnostics::WATCH_OPTION_0_REQUIRES_A_VALUE_OF_TYPE_1;
 pub(crate) use tsox_core::diagnostics::new_ad_hoc_message;
 pub(crate) use tsox_core::glob::Glob;
-pub(crate) use tsox_core::tspath;
 pub(crate) use tsox_frontend::ast::diagnostic::Diagnostic;
 pub(crate) mod apply_options;
 pub(crate) mod build_options;

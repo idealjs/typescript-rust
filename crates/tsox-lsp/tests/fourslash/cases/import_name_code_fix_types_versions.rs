@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -25,6 +25,6 @@ export declare const x: number;
 import {} from "unified";
 // @Filename: /index.js
 x/**/"#;
-    let mut s = Session::new_for_test("importNameCodeFix_typesVersions", content);
+    let _s = Session::new_for_test("importNameCodeFix_typesVersions", content);
     // TODO: f.VerifyImportFixModuleSpecifiers(t, "", []string{"unified", "unified/types/ts3.444/index.js"}, &lsu
 }

@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -20,6 +20,6 @@ export function foo() {};
     "extends": "./tsconfig.path",
     "compilerOptions": { }
 }"#;
-    let mut s = Session::new_for_test("importNameCodeFixNewImportPaths2", content);
+    let _s = Session::new_for_test("importNameCodeFixNewImportPaths2", content);
     // TODO: f.VerifyImportFixAtPosition(t, []string{
 }

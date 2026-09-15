@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -11,6 +11,6 @@ fn references_for_index_property() {
 var f: Foo;
 f["/*3*/property"];
 f["/*4*/method"];"#;
-    let mut s = Session::new_for_test("referencesForIndexProperty", content);
+    let _s = Session::new_for_test("referencesForIndexProperty", content);
     // TODO: f.VerifyBaselineFindAllReferences(t, "1", "2", "3", "4")
 }

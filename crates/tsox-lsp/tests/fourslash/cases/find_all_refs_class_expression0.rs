@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -10,6 +10,6 @@ export = class /*0*/A {
 // @Filename: /b.ts
 import /*2*/A = require("./a");
 /*3*/A;"#;
-    let mut s = Session::new_for_test("findAllRefsClassExpression0", content);
+    let _s = Session::new_for_test("findAllRefsClassExpression0", content);
     // TODO: f.VerifyBaselineFindAllReferences(t, "0", "1", "2", "3")
 }

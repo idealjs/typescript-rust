@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -12,6 +12,6 @@ bar/*0*/();|]
 declare function bar(): number;
 export = bar;
 export as namespace bar;"#;
-    let mut s = Session::new_for_test("importNameCodeFixNewImportAllowSyntheticDefaultImports3", content);
+    let _s = Session::new_for_test("importNameCodeFixNewImportAllowSyntheticDefaultImports3", content);
     // TODO: f.VerifyImportFixAtPosition(t, []string{
 }

@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -11,6 +11,6 @@ import a from "A";
 import b from "B";
 
 console.log(a, b, c, d)"#;
-    let mut s = Session::new_for_test("organizeImportsGroup_MultiNewlines", content);
+    let _s = Session::new_for_test("organizeImportsGroup_MultiNewlines", content);
     // TODO: f.VerifyOrganizeImports(t,
 }

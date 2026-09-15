@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -14,6 +14,6 @@ class C {
         this./*propReference*/prop();
     }
 }"#;
-    let mut s = Session::new_for_test("goToDefinitionFunctionType", content);
+    let _s = Session::new_for_test("goToDefinitionFunctionType", content);
     // TODO: f.VerifyBaselineGoToDefinition(t, false, "constReference", "cbReference", "propReference")
 }

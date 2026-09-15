@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -51,6 +51,6 @@ const z =[| [
         [|{ hello: 7 }|]
     ]|]
 ]|];"#;
-    let mut s = Session::new_for_test("getOutliningForObjectsInArray", content);
+    let _s = Session::new_for_test("getOutliningForObjectsInArray", content);
     // TODO: f.VerifyOutliningSpans(t)
 }

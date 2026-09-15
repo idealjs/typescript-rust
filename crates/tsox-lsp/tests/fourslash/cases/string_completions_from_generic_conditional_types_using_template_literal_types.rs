@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -31,7 +31,7 @@ type validate<def> = def extends string
 const parse = <def>(def: validate<def>) => def
 const shallowExpression = parse("foo|/*ts*/")
 const nestedExpression = parse({ prop: "foo|/*ts2*/" })"#;
-    let mut s = Session::new_for_test("stringCompletionsFromGenericConditionalTypesUsingTemplateLiteralTypes", content);
+    let _s = Session::new_for_test("stringCompletionsFromGenericConditionalTypesUsingTemplateLiteralTypes", content);
     // TODO: f.VerifyCompletions(t, []string{"ts"}, &fourslash.CompletionsExpectedList{
     // TODO: f.VerifyCompletions(t, []string{"ts2"}, &fourslash.CompletionsExpectedList{
 }

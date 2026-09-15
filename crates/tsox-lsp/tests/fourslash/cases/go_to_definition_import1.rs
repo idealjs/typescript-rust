@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -7,6 +7,6 @@ fn go_to_definition_import1() {
 /*2*/export const foo = 1;
 // @Filename: /a.ts
 import { foo } from      [|"./b/*1*/"|];"#;
-    let mut s = Session::new_for_test("goToDefinitionImport1", content);
+    let _s = Session::new_for_test("goToDefinitionImport1", content);
     // TODO: f.VerifyBaselineGoToDefinition(t, true, "1")
 }

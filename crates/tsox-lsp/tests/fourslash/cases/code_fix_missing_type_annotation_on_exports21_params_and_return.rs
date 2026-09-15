@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -16,7 +16,7 @@ export function foo(): number { return 0; }
 export const bar = (a = foo()) =>
    a;
 // Trivia"#;
-    let mut s = Session::new_for_test("codeFixMissingTypeAnnotationOnExports21_params_and_return", content);
+    let _s = Session::new_for_test("codeFixMissingTypeAnnotationOnExports21_params_and_return", content);
     // TODO: f.VerifyCodeFix(t, fourslash.VerifyCodeFixOptions{
     // TODO: f.VerifyCodeFix(t, fourslash.VerifyCodeFixOptions{
 }

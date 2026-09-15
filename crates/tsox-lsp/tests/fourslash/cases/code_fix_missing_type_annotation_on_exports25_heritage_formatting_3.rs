@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[ignore = "go: t.Skip('Known failing fourslash test')"]
@@ -13,7 +13,7 @@ class Point2D { x = 0; y = 0; }
 export class Point3D3 extends mixin(Point2D) /* DD*/ {
     z = 0;
 }"#;
-    let mut s = Session::new_for_test("codeFixMissingTypeAnnotationOnExports25_heritage_formatting_3", content);
+    let _s = Session::new_for_test("codeFixMissingTypeAnnotationOnExports25_heritage_formatting_3", content);
     // TODO: f.VerifyCodeFixAvailable(t, []string{"Extract base class to variable"})
     // TODO: f.VerifyCodeFix(t, fourslash.VerifyCodeFixOptions{
 }

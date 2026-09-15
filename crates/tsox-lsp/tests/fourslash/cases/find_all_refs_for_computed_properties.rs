@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -14,6 +14,6 @@ class C implements I {
 var x: I = {
     ["/*2*/prop1"]: function () { },
 }"#;
-    let mut s = Session::new_for_test("findAllRefsForComputedProperties", content);
+    let _s = Session::new_for_test("findAllRefsForComputedProperties", content);
     // TODO: f.VerifyBaselineFindAllReferences(t, "0", "1", "2")
 }

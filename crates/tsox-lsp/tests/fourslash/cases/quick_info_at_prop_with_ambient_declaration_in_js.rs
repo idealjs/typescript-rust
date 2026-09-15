@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -14,6 +14,6 @@ class C {
         this.prop.foo/**/
     }
 }"#;
-    let mut s = Session::new_for_test("quickInfoAtPropWithAmbientDeclarationInJs", content);
+    let _s = Session::new_for_test("quickInfoAtPropWithAmbientDeclarationInJs", content);
     // TODO: f.VerifyBaselineHover(t)
 }

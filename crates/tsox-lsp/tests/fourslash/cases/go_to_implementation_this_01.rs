@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -8,6 +8,6 @@ fn go_to_implementation_this_01() {
         return this;
     }
 }"#;
-    let mut s = Session::new_for_test("goToImplementationThis_01", content);
+    let _s = Session::new_for_test("goToImplementationThis_01", content);
     // TODO: f.VerifyBaselineGoToImplementation(t, "this_type")
 }

@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -8,6 +8,6 @@ type Bar = {};
 
 let x: Foo<"/*1*/">;
 let y: Bar<"/*2*/">;"#;
-    let mut s = Session::new_for_test("stringLiteralTypeCompletionsInTypeArgForNonGeneric1", content);
+    let _s = Session::new_for_test("stringLiteralTypeCompletionsInTypeArgForNonGeneric1", content);
     // TODO: f.VerifyCompletions(t, f.Markers(), &fourslash.CompletionsExpectedList{
 }

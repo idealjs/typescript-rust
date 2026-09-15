@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -7,6 +7,6 @@ fn go_to_type_definition5() {
 let Foo: /*definition*/unresolved;
 type Foo = { x: string };
 /*reference*/Foo;"#;
-    let mut s = Session::new_for_test("goToTypeDefinition5", content);
+    let _s = Session::new_for_test("goToTypeDefinition5", content);
     // TODO: f.VerifyBaselineGoToTypeDefinition(t, "reference")
 }

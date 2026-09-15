@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -9,6 +9,6 @@ var /*0*/name = "Foo";
 var obj = { /*1*/name };
 var obj1 = { /*2*/name: /*3*/name };
 obj./*4*/name;"#;
-    let mut s = Session::new_for_test("findAllRefsWithShorthandPropertyAssignment", content);
+    let _s = Session::new_for_test("findAllRefsWithShorthandPropertyAssignment", content);
     // TODO: f.VerifyBaselineFindAllReferences(t, "0", "3", "1", "2", "4")
 }

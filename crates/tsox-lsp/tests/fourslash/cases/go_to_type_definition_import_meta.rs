@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -11,6 +11,6 @@ import.me/*reference*/ta;
 //@Filename: bar.d.ts
 interface /*definition*/ImportMeta {
 }"#;
-    let mut s = Session::new_for_test("goToTypeDefinitionImportMeta", content);
+    let _s = Session::new_for_test("goToTypeDefinitionImportMeta", content);
     // TODO: f.VerifyBaselineGoToTypeDefinition(t, "reference")
 }

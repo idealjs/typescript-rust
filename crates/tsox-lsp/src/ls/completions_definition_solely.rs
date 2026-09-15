@@ -1,8 +1,8 @@
 use std::sync::Arc;
 
 use tsox_frontend::ast::{
-    Node, NodeData, SyntaxKind, is_class_element, is_class_like, is_declaration,
-    is_function_like_kind, is_keyword_kind, is_type_element, node_name,
+    Node, SyntaxKind, is_class_like,
+    is_function_like_kind, is_keyword_kind, node_name,
 };
 
 use super::completions_context::{ScanToken, line_of_position};

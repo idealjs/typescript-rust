@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -21,6 +21,6 @@ let B = class D {
     private static test() {}
     public static test2() {}
 }"#;
-    let mut s = Session::new_for_test("getOccurrencesClassExpressionStatic", content);
+    let _s = Session::new_for_test("getOccurrencesClassExpressionStatic", content);
     // TODO: f.VerifyBaselineDocumentHighlights(t, nil /*preferences*/, ToAny(f.Ranges())...)
 }

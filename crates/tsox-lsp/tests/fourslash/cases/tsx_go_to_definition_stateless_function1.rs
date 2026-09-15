@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -22,6 +22,6 @@ let opt = <[|O/*one*/pt|] />;
 let opt1 = <[|Op/*two*/t|] [|pr/*p1*/opx|]={100} />;
 let opt2 = <[|Op/*three*/t|] propx={100} [|opt/*p2*/ional|] />;
 let opt3 = <[|Op/*four*/t|] wr/*p3*/ong />;"#;
-    let mut s = Session::new_for_test("tsxGoToDefinitionStatelessFunction1", content);
+    let _s = Session::new_for_test("tsxGoToDefinitionStatelessFunction1", content);
     // TODO: f.VerifyBaselineGoToDefinition(t, true, "one", "two", "three", "four", "p1", "p2")
 }

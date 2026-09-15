@@ -431,7 +431,7 @@ fn literal_union_labels(
     checker: &mut Checker,
     t: &Arc<tsox_checker::checker::types::Type>,
 ) -> Vec<String> {
-    use tsox_checker::checker::types::TypeFlags;
+    
     let mut out = Vec::new();
     collect_string_literals(checker, t, &mut out, 0);
     // Go 补全项按 sortText（名称）排序输出

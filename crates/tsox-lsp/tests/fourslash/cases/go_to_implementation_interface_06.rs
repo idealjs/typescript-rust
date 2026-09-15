@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -11,6 +11,6 @@ interface SomeOtherType {}
 
 let x: Foo = [|class { constructor (a: number) {} }|];
 let y = <Foo> [|class { constructor (a: number) {} }|];"#;
-    let mut s = Session::new_for_test("goToImplementationInterface_06", content);
+    let _s = Session::new_for_test("goToImplementationInterface_06", content);
     // TODO: f.VerifyBaselineGoToImplementation(t, "interface_definition")
 }

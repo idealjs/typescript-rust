@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -20,6 +20,6 @@ fooWithParam/*8*/eters("a",10);
 */
 declare function fn(a: string);
 fn("hello");"#;
-    let mut s = Session::new_for_test("quickInfoCommentsFunctionDeclaration", content);
+    let _s = Session::new_for_test("quickInfoCommentsFunctionDeclaration", content);
     // TODO: f.VerifyBaselineHover(t)
 }

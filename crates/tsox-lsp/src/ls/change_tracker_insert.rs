@@ -6,6 +6,7 @@ use tsox_frontend::ast::Node;
 use tsox_frontend::ast::NodeList;
 use tsox_frontend::ast::SourceFile;
 
+#[allow(dead_code)]
 impl Tracker {
     pub fn insert_node_in_list_after(
         &mut self,

@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -9,6 +9,6 @@ interface Container<C = ContainerChild> {
 }
 declare const x: Container;
 x/*1*/;"#;
-    let mut s = Session::new_for_test("quickinfoVerbositySelfReferentialTypeArg", content);
+    let _s = Session::new_for_test("quickinfoVerbositySelfReferentialTypeArg", content);
     // TODO: f.VerifyBaselineHoverWithVerbosity(t, map[string][]int{"1": {3}})
 }

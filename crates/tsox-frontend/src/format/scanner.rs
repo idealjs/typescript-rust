@@ -325,6 +325,7 @@ impl FormattingScanner {
         self.s.full_start_pos()
     }
 
+    #[allow(dead_code)]
     pub(crate) fn get_token_end(&self) -> usize {
         if self.has_last_token_info {
             if let Some(tok) = &self.last_token_info.token {

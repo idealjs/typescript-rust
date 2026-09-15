@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -28,6 +28,6 @@ interface LotsOfProps {
     someLongMethodName2(a: FooType, b: BarType): Sym;
 }
 const obj1/*o1*/: LotsOfProps = undefined as any as LotsOfProps;"#;
-    let mut s = Session::new_for_test("quickinfoVerbosityTruncation1", content);
+    let _s = Session::new_for_test("quickinfoVerbosityTruncation1", content);
     // TODO: f.VerifyBaselineHoverWithVerbosity(t, map[string][]int{"o1": {0, 1}})
 }

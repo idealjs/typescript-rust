@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -9,6 +9,6 @@ declare module "jquery";
 import {/*1*/x} from "jquery";
 // @Filename: user2.ts
 import {/*2*/x} from "jquery";"#;
-    let mut s = Session::new_for_test("ambientShorthandFindAllRefs", content);
+    let _s = Session::new_for_test("ambientShorthandFindAllRefs", content);
     // TODO: f.VerifyBaselineFindAllReferences(t, "1", "2")
 }

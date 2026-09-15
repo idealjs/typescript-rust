@@ -5,9 +5,8 @@ use std::sync::Arc;
 use crate::ast::node::Node;
 use crate::ast::SyntaxKind;
 use crate::format::scanner::TextRangeWithKind;
-use tsox_core::core::text::TextRange;
 use crate::format::rule_context::{FormattingContext, FormatRequestKind, Tristate};
-use crate::format::{FormatCodeSettings, SemicolonPreference};
+use crate::format::SemicolonPreference;
 
 // ---- 选项选择器（fn 指针友好：每个 (选项, 变体) 一个具名谓词） ----
 

@@ -1,7 +1,6 @@
 #![allow(dead_code)]
 
 use crate::lsp::lsproto;
-use tsox_core::diagnostics;
 
 use super::watch::WatcherID;
 

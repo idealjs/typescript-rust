@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -11,6 +11,6 @@ function getString() {
 export const exp = {
     prop: getString()
 };"#;
-    let mut s = Session::new_for_test("codeFixMissingTypeAnnotationOnExports29_inline", content);
+    let _s = Session::new_for_test("codeFixMissingTypeAnnotationOnExports29_inline", content);
     // TODO: f.VerifyCodeFix(t, fourslash.VerifyCodeFixOptions{
 }

@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -10,6 +10,6 @@ fn find_all_refs_for_object_literal_properties() {
 x./*2*/property;
 
 /*3*/let {/*4*/property: pVar} = x;"#;
-    let mut s = Session::new_for_test("findAllRefsForObjectLiteralProperties", content);
+    let _s = Session::new_for_test("findAllRefsForObjectLiteralProperties", content);
     // TODO: f.VerifyBaselineFindAllReferences(t, "1", "2", "3", "4")
 }

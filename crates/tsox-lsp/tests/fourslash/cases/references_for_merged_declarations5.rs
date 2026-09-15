@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -8,6 +8,6 @@ module /*2*/Foo { export interface Bar { } }
 function /*3*/Foo() { }
 
 export = /*4*/Foo;"#;
-    let mut s = Session::new_for_test("referencesForMergedDeclarations5", content);
+    let _s = Session::new_for_test("referencesForMergedDeclarations5", content);
     // TODO: f.VerifyBaselineFindAllReferences(t, "1", "2", "3", "4")
 }

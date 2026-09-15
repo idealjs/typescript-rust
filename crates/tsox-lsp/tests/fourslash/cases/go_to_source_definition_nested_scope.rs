@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -21,7 +21,7 @@ function unrelated() {
 // @Filename: /home/src/workspaces/project/index.ts
 import { /*importHelper*/helper } from "pkg";
 helper/*usage*/();"#;
-    let mut s = Session::new_for_test("goToSourceNestedScopeShadowing", content);
+    let _s = Session::new_for_test("goToSourceNestedScopeShadowing", content);
     // TODO: f.VerifyBaselineGoToSourceDefinition(t, "importHelper", "usage")
 }
 
@@ -43,6 +43,6 @@ function factory() {
 // @Filename: /home/src/workspaces/project/index.ts
 import { /*importWidget*/Widget } from "pkg";
 new Widget();"#;
-    let mut s = Session::new_for_test("goToSourceNestedClassShadowing", content);
+    let _s = Session::new_for_test("goToSourceNestedClassShadowing", content);
     // TODO: f.VerifyBaselineGoToSourceDefinition(t, "importWidget")
 }

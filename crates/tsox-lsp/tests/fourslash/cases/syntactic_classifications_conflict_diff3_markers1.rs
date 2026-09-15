@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -12,6 +12,6 @@ fn syntactic_classifications_conflict_diff3_markers1() {
     v = 2;
 >>>>>>> Branch - a
 }"#;
-    let mut s = Session::new_for_test("syntacticClassificationsConflictDiff3Markers1", content);
+    let _s = Session::new_for_test("syntacticClassificationsConflictDiff3Markers1", content);
     // TODO: f.VerifySemanticTokens(t, []fourslash.SemanticToken{
 }

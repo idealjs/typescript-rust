@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -16,6 +16,6 @@ function /*decoratorDefinition*/decorator(target) {
 function /*decoratorFactoryDefinition*/decoratorFactory(...args) {
     return target => target;
 }"#;
-    let mut s = Session::new_for_test("goToDefinitionDecorator", content);
+    let _s = Session::new_for_test("goToDefinitionDecorator", content);
     // TODO: f.VerifyBaselineGoToDefinition(t, true, "decoratorUse", "decoratorFactoryUse")
 }

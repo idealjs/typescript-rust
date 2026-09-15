@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -15,6 +15,6 @@ f</*f0*/;
 f<number, /*f1*/;
 f<number, string, /*f2*/;
 f<number, string, boolean, /*f3*/;"#;
-    let mut s = Session::new_for_test("signatureHelpTypeArguments2", content);
+    let _s = Session::new_for_test("signatureHelpTypeArguments2", content);
     // TODO: f.VerifyBaselineSignatureHelp(t)
 }

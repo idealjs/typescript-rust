@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -16,6 +16,6 @@ import old from "../old";
 
 // @Filename: /tsconfig.json
 { "files": ["a.ts", "src/a.ts", "src/foo/a.ts", "src/old.ts"] }"#;
-    let mut s = Session::new_for_test("getEditsForFileRename_renameToIndex", content);
+    let _s = Session::new_for_test("getEditsForFileRename_renameToIndex", content);
     // TODO: f.VerifyWillRenameFilesEdits(t, "/src/old.ts", "/src/index.ts", map[string]string{
 }

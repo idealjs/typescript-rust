@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -9,6 +9,6 @@ fn go_to_implementation_local_05() {
 
 var [|someVar|] = new Bar();
 someVa/*reference*/r.hello();"#;
-    let mut s = Session::new_for_test("goToImplementationLocal_05", content);
+    let _s = Session::new_for_test("goToImplementationLocal_05", content);
     // TODO: f.VerifyBaselineGoToImplementation(t, "reference")
 }

@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -9,6 +9,6 @@ let c: /*a2*/Bar<string, number>;
 let d: /*b0*/Bar./*c0*/X;
 let e: /*b1*/Bar./*c1*/X<string>;
 let f: /*b2*/Bar./*d0*/X./*e0*/Y;"#;
-    let mut s = Session::new_for_test("findAllRefsUnresolvedSymbols1", content);
+    let _s = Session::new_for_test("findAllRefsUnresolvedSymbols1", content);
     // TODO: f.VerifyBaselineFindAllReferences(t, "a0", "a1", "a2", "b0", "b1", "b2", "c0", "c1", "d0", "e0")
 }

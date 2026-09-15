@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -10,6 +10,6 @@ declare const v: any;
 foo(v.a, v.a);
 foo(v.b, v.b);
 foo(v.c, v.c);"#;
-    let mut s = Session::new_for_test("inlayHintsNoHintWhenArgumentMatchesName", content);
+    let _s = Session::new_for_test("inlayHintsNoHintWhenArgumentMatchesName", content);
     // TODO: f.VerifyBaselineInlayHints(t, nil /*span*/, &lsutil.UserPreferences{InlayHints: lsutil.InlayHintsPre
 }

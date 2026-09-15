@@ -31,7 +31,7 @@ b;
 
 // @Filename: /src/b.ts
 export const b = 0;"#;
-    let mut s = Session::new_for_test("getEditsForFileRenameWithSolutionConfigFile", content);
+    let _s = Session::new_for_test("getEditsForFileRenameWithSolutionConfigFile", content);
     // TODO: f.VerifyWillRenameFilesEdits(t, "/src/b.ts", "/src/c.ts", map[string]string{
 }
 

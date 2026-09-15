@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -22,7 +22,7 @@ import { f1 } from "myLib";
 f1();
 // @Filename: /index.ts
 [|f2/*0*/();|]"#;
-    let mut s = Session::new_for_test("importFixFromAtTypesWithRealPackage", content);
+    let _s = Session::new_for_test("importFixFromAtTypesWithRealPackage", content);
     // TODO: f.VerifyImportFixModuleSpecifiers(t, "0", []string{"myLib"}, nil /*preferences*/)
 }
 
@@ -46,6 +46,6 @@ import { f1 } from "myLib";
 f1();
 // @Filename: /index.ts
 [|f2/*0*/();|]"#;
-    let mut s = Session::new_for_test("importFixFromAtTypesWithRealPackageExports", content);
+    let _s = Session::new_for_test("importFixFromAtTypesWithRealPackageExports", content);
     // TODO: f.VerifyImportFixModuleSpecifiers(t, "0", []string{"myLib"}, nil /*preferences*/)
 }

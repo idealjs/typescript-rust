@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -9,6 +9,6 @@ interface I {
     foo(x: Either<Either<string>>): void;
 }
 class C implements I {}"#;
-    let mut s = Session::new_for_test("codeFixClassImplementInterfaceMemberNestedTypeAlias", content);
+    let _s = Session::new_for_test("codeFixClassImplementInterfaceMemberNestedTypeAlias", content);
     // TODO: f.VerifyCodeFix(t, fourslash.VerifyCodeFixOptions{
 }

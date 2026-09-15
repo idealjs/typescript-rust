@@ -1,16 +1,9 @@
 #[allow(unused_imports)]
 use std::sync::Arc;
-use tsox_checker::checker::Checker;
 use tsox_checker::checker::NodeLinks;
 use tsox_checker::checker::Ternary;
 use tsox_checker::checker::checker::*;
-use tsox_core::core::compiler_options::CompilerOptions;
-use tsox_core::core::compiler_options::ModuleKind;
-use tsox_core::core::compiler_options::ModuleResolutionKind;
 use tsox_frontend::ast::Node;
-use tsox_frontend::ast::NodeData;
-use tsox_frontend::ast::Symbol;
-use tsox_frontend::ast::SyntaxKind;
 
 #[test]
 fn link_store_basic() {

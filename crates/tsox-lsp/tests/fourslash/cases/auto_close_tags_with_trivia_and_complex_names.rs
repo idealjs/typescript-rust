@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -84,6 +84,6 @@ const x = <SomeComponent<number>>/*9*/
 // Tag name containing $ (must be snippet-escaped)
 const x = <$Foo>/*10*/
 "#;
-    let mut s = Session::new_for_test("autoCloseTagsWithTriviaAndComplexNames", content);
+    let _s = Session::new_for_test("autoCloseTagsWithTriviaAndComplexNames", content);
     // TODO: f.VerifyBaselineClosingTags(t)
 }

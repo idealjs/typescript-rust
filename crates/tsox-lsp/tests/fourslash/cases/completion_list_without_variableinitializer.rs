@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[ignore = "go: t.Skip('Known failing fourslash test')"]
@@ -17,7 +17,7 @@ const { a1 } = a/*10*/;
 const { a2 } = fn({a: a/*11*/});
 const [ a3 ] = a/*12*/;
 const [ a4 ] = fn([a/*13*/]);"#;
-    let mut s = Session::new_for_test("completionListWithoutVariableinitializer", content);
+    let _s = Session::new_for_test("completionListWithoutVariableinitializer", content);
     // TODO: f.VerifyCompletions(t, []string{"1"}, &fourslash.CompletionsExpectedList{
     // TODO: f.VerifyCompletions(t, []string{"2"}, &fourslash.CompletionsExpectedList{
     // TODO: f.VerifyCompletions(t, []string{"3"}, &fourslash.CompletionsExpectedList{

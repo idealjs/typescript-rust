@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -11,6 +11,6 @@ export type { SyntaxKind }
 // @Filename: /c.ts
 import type { SyntaxKind } from './b';
 let kind: [|/*2*/SyntaxKind|];"#;
-    let mut s = Session::new_for_test("goToDefinitionTypeOnlyImport", content);
+    let _s = Session::new_for_test("goToDefinitionTypeOnlyImport", content);
     // TODO: f.VerifyBaselineGoToDefinition(t, true, "2")
 }

@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -16,6 +16,6 @@ var y = /*6*/f();
 /*7*/namespace /*8*/f {
     var local = 100;
 }"#;
-    let mut s = Session::new_for_test("findAllRefsForDefaultExport03", content);
+    let _s = Session::new_for_test("findAllRefsForDefaultExport03", content);
     // TODO: f.VerifyBaselineFindAllReferences(t, "1", "2", "3", "4", "5", "6", "7", "8")
 }

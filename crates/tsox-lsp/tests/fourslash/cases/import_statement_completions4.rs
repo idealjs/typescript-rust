@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -12,6 +12,6 @@ function fromBar() {}
 import Foo /*b*/
 
 function fromBar() {}"#;
-    let mut s = Session::new_for_test("importStatementCompletions4", content);
+    let _s = Session::new_for_test("importStatementCompletions4", content);
     // TODO: f.VerifyCompletions(t, []string{"a", "b"}, &fourslash.CompletionsExpectedList{
 }

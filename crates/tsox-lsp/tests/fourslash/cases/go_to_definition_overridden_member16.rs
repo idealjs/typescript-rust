@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -15,6 +15,6 @@ export class C extends CompletelyUndefined {
         return {}
     }
 }"#;
-    let mut s = Session::new_for_test("goToDefinitionOverriddenMember16", content);
+    let _s = Session::new_for_test("goToDefinitionOverriddenMember16", content);
     // TODO: f.VerifyBaselineGoToDefinition(t, true, "1")
 }

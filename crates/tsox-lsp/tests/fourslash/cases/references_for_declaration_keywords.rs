@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -22,6 +22,6 @@ interface Implemented2 {}
 interface Implemented3 {}
 class C2 /*classDecl2_implementsKeyword*/implements Implemented2, Implemented3 {}
 interface I2 /*interfaceDecl2_extendsKeyword*/extends Implemented2, Implemented3 {}"#;
-    let mut s = Session::new_for_test("referencesForDeclarationKeywords", content);
+    let _s = Session::new_for_test("referencesForDeclarationKeywords", content);
     // TODO: f.VerifyBaselineFindAllReferences(t, "classDecl1_classKeyword", "classDecl1_extendsKeyword", "classD
 }

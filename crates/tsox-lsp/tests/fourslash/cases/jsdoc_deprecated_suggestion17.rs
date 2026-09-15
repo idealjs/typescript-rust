@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -16,6 +16,6 @@ function f(foo: Foo) {
     foo.[|y|];
     foo.[|z|];
 }"#;
-    let mut s = Session::new_for_test("jsdocDeprecated_suggestion17", content);
+    let _s = Session::new_for_test("jsdocDeprecated_suggestion17", content);
     // TODO: f.VerifySuggestionDiagnostics(t, []*lsproto.Diagnostic{
 }

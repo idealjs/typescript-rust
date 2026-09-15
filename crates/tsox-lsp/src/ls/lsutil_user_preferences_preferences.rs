@@ -3,7 +3,6 @@ use crate::ls::lsutil_user_preferences_enums::*;
 use crate::ls::lsutil_user_preferences_raw_fields::apply_raw_fields;
 
 use tsox_core::core::tristate::Tristate;
-use tsox_tsoptions::modulespecifiers;
 
 use crate::ls::lsutil_format_code_options::FormatCodeSettings;
 use crate::ls::lsutil_format_code_options::get_default_format_code_settings;

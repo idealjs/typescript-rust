@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -55,6 +55,6 @@ fn quickinfo_verbosity_class1() {
     };
     const k/*k1*/ = new klass();
 }"#;
-    let mut s = Session::new_for_test("quickinfoVerbosityClass1", content);
+    let _s = Session::new_for_test("quickinfoVerbosityClass1", content);
     // TODO: f.VerifyBaselineHoverWithVerbosity(t, map[string][]int{"f1": {0, 1}, "f2": {0, 1, 2}, "f3": {0, 1}, 
 }

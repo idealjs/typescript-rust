@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -10,6 +10,6 @@ declare namespace create/*2*/ {
     function reset(): void;
 }
 "#;
-    let mut s = Session::new_for_test("quickinfoVerbosityConstMergedWithNamespace", content);
+    let _s = Session::new_for_test("quickinfoVerbosityConstMergedWithNamespace", content);
     // TODO: f.VerifyBaselineHoverWithVerbosity(t, map[string][]int{
 }

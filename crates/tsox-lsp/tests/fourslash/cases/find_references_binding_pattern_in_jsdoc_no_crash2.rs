@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -29,6 +29,6 @@ interface BottomSheetModalProps {
 // @Filename: src/index.ts
 import { useQuery } from "use-query";
 const { /*1*/data } = useQuery();"#;
-    let mut s = Session::new_for_test("findReferencesBindingPatternInJsdocNoCrash2", content);
+    let _s = Session::new_for_test("findReferencesBindingPatternInJsdocNoCrash2", content);
     // TODO: f.VerifyBaselineFindAllReferences(t, "1")
 }

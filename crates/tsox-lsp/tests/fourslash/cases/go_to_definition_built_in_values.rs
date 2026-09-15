@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -8,6 +8,6 @@ var n = /*null*/null;
 var a = function() { return /*arguments*/arguments; };
 var t = /*true*/true;
 var f = /*false*/false;"#;
-    let mut s = Session::new_for_test("goToDefinitionBuiltInValues", content);
+    let _s = Session::new_for_test("goToDefinitionBuiltInValues", content);
     // TODO: f.VerifyBaselineGoToDefinition(t, true, f.MarkerNames()...)
 }

@@ -185,7 +185,7 @@ impl Checker {
             // 全重载不可适用：Go getCandidateForOverloadFailure 给联合签名
             //（参数位并集/返回交集）
             let combined: Option<Arc<Signature>> = match matching_idx {
-                Some(idx) => None,
+                Some(_idx) => None,
                 None => self.candidate_for_overload_failure(node, signatures, &callee.1),
             };
             let sig: &Arc<Signature> = match &combined {

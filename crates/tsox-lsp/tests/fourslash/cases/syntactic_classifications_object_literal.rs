@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -13,6 +13,6 @@ var x = {
     void: void 0,
     v: v += v,
 };"#;
-    let mut s = Session::new_for_test("syntacticClassificationsObjectLiteral", content);
+    let _s = Session::new_for_test("syntacticClassificationsObjectLiteral", content);
     // TODO: f.VerifySemanticTokens(t, []fourslash.SemanticToken{
 }

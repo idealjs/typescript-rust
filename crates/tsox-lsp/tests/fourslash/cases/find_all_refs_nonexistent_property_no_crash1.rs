@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -48,6 +48,6 @@ const Parser = function Parser(context, imports, fileInfo, currentIndex) {
 };
 
 export default Parser;"#;
-    let mut s = Session::new_for_test("findAllRefsNonexistentPropertyNoCrash1", content);
+    let _s = Session::new_for_test("findAllRefsNonexistentPropertyNoCrash1", content);
     // TODO: f.VerifyBaselineFindAllReferences(t, "1")
 }

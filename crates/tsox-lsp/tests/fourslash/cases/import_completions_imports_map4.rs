@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -26,7 +26,7 @@ fn import_completions_imports_map4() {
 export const isBrowser = true;
 // @Filename: /home/src/workspaces/project/src/a.ts
 import {} from "/*1*/";"##;
-    let mut s = Session::new_for_test("importCompletions_importsMap4", content);
+    let _s = Session::new_for_test("importCompletions_importsMap4", content);
     // TODO: f.MarkTestAsStradaServer()
     // TODO: f.VerifyCompletions(t, []string{"1"}, &fourslash.CompletionsExpectedList{
 }

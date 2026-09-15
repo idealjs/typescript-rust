@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -66,6 +66,6 @@ logFruitTuple11("apple", { color: "red" }, /*26*/);
 function withPair(...[first, second]: [number, named: string]) {}
 withPair(/*27*/);
 withPair(101, /*28*/);"#;
-    let mut s = Session::new_for_test("signatureHelpExpandedRestTuplesLocalLabels1", content);
+    let _s = Session::new_for_test("signatureHelpExpandedRestTuplesLocalLabels1", content);
     // TODO: f.VerifyBaselineSignatureHelp(t)
 }

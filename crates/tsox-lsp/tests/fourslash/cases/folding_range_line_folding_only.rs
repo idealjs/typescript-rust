@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -18,7 +18,7 @@ export function use<T>(ctx: any): T | undefined {
 }"#;
     // TODO: ptrTrue := true
     // TODO: capabilities := &lsproto.ClientCapabilities{
-    let mut s = Session::new_with_capabilities(content, None);
+    let _s = Session::new_with_capabilities(content, None);
     // TODO: // With lineFoldingOnly, end lines should be adjusted so closing brackets stay visible.
     // TODO: // Line 0: if (EMPTY_TAGs.has(tag)) {
     // TODO: // Line 9:
@@ -43,7 +43,7 @@ const z = 3;
 // #endregion"#;
     // TODO: ptrTrue := true
     // TODO: capabilities := &lsproto.ClientCapabilities{
-    let mut s = Session::new_with_capabilities(content, None);
+    let _s = Session::new_with_capabilities(content, None);
     // TODO: // Line 0: // #region MyRegion
     // TODO: // Line 1: const x = 1;
     // TODO: // Line 2: function foo() {

@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -24,6 +24,6 @@ y.foo();
 z.foo();
 Y.foo();
 Z.foo();"#;
-    let mut s = Session::new_for_test("findAllRefsForStaticInstanceMethodInheritance", content);
+    let _s = Session::new_for_test("findAllRefsForStaticInstanceMethodInheritance", content);
     // TODO: f.VerifyBaselineFindAllReferences(t, "0", "1", "2", "3")
 }

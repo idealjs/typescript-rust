@@ -1,7 +1,6 @@
 use crate::emitter::*;
 use tsox_frontend::ast::Node;
 
-use crate::emitter::statement_emit::*;
 
 pub(crate) fn emit_statement<S: EmitSink>(
     node: &Node,

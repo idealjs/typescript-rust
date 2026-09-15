@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -13,7 +13,7 @@ export declare const a: string;
 // @Filename: /home/src/workspaces/project/index.ts
 import { a } from "foo";
 [|a/*start*/|]"#;
-    let mut s = Session::new_for_test("goToSourceNodeModulesWithTypes", content);
+    let _s = Session::new_for_test("goToSourceNodeModulesWithTypes", content);
     // TODO: f.VerifyBaselineGoToSourceDefinition(t, "start")
 }
 
@@ -26,7 +26,7 @@ export declare const a: string;
 // @Filename: /home/src/workspaces/project/index.ts
 import { a } from [|"./a"/*moduleSpecifier*/|];
 [|a/*identifier*/|]"#;
-    let mut s = Session::new_for_test("goToSourceLocalJsBesideDts", content);
+    let _s = Session::new_for_test("goToSourceLocalJsBesideDts", content);
     // TODO: f.VerifyBaselineGoToSourceDefinition(t, "identifier", "moduleSpecifier")
 }
 
@@ -40,7 +40,7 @@ export function /*target*/helper() { return 1; }
 // @Filename: /home/src/workspaces/project/index.ts
 import { helper } from "./utils";
 helper/*usage*/();"#;
-    let mut s = Session::new_for_test("goToSourceNonDeclarationFile", content);
+    let _s = Session::new_for_test("goToSourceNonDeclarationFile", content);
     // TODO: f.VerifyBaselineGoToSourceDefinition(t, "usage")
 }
 
@@ -55,7 +55,7 @@ export declare function typesOnly(): void;
 // @Filename: /home/src/workspaces/project/index.ts
 import { /*importName*/typesOnly } from "pkg";
 typesOnly/*callSite*/();"#;
-    let mut s = Session::new_for_test("goToSourceNoImplementationFile", content);
+    let _s = Session::new_for_test("goToSourceNoImplementationFile", content);
     // TODO: f.VerifyBaselineGoToSourceDefinition(t, "importName", "callSite")
 }
 
@@ -80,7 +80,7 @@ function greet() { return "hi"; }
 // @Filename: /home/src/workspaces/project/index.ts
 import { greet } from "pkg";
 greet/*usage*/();"#;
-    let mut s = Session::new_for_test("goToSourceDeclarationMapSourceMap", content);
+    let _s = Session::new_for_test("goToSourceDeclarationMapSourceMap", content);
     // TODO: f.VerifyBaselineGoToSourceDefinition(t, "usage")
 }
 
@@ -109,7 +109,7 @@ function greet() { return "hi"; }
 // @Filename: /home/src/workspaces/project/index.ts
 import { greet } from "pkg";
 greet/*usage*/();"#;
-    let mut s = Session::new_for_test("goToSourceDeclarationMapFallback", content);
+    let _s = Session::new_for_test("goToSourceDeclarationMapFallback", content);
     // TODO: f.VerifyBaselineGoToSourceDefinition(t, "usage")
 }
 
@@ -125,7 +125,7 @@ export function /*target*/foo() { return "ok"; }
 // @Filename: /home/src/workspaces/project/index.ts
 import { foo } from "pkg";
 const result = foo/*valueUsage*/();"#;
-    let mut s = Session::new_for_test("goToSourceNamedExportsSpecifier", content);
+    let _s = Session::new_for_test("goToSourceNamedExportsSpecifier", content);
     // TODO: f.VerifyBaselineGoToSourceDefinition(t, "valueUsage")
 }
 
@@ -139,7 +139,7 @@ fn go_to_source_triple_slash_reference() {
 /// <reference path="./[|helper.js/*refPath*/|]" />
 declare function helper(): number;
 helper();"#;
-    let mut s = Session::new_for_test("goToSourceTripleSlashReference", content);
+    let _s = Session::new_for_test("goToSourceTripleSlashReference", content);
     // TODO: f.VerifyBaselineGoToSourceDefinition(t, "refPath")
 }
 
@@ -158,7 +158,7 @@ export declare function internalHelper(): void;
 /*entryPoint*/Object.defineProperty(exports, "internalHelper", { value: function() {} });
 // @Filename: /home/src/workspaces/project/index.ts
 import { /*importName*/internalHelper } from "pkg";"#;
-    let mut s = Session::new_for_test("goToSourceFallbackToModuleSpecifier", content);
+    let _s = Session::new_for_test("goToSourceFallbackToModuleSpecifier", content);
     // TODO: f.VerifyBaselineGoToSourceDefinition(t, "importName")
 }
 
@@ -182,6 +182,6 @@ export const /*target*/value = 42;
 // @Filename: /home/src/workspaces/project/index.ts
 import { /*importName*/value } from "pkg";
 console.log(value);"#;
-    let mut s = Session::new_for_test("goToSourceFilterPreferredFallbackAll", content);
+    let _s = Session::new_for_test("goToSourceFilterPreferredFallbackAll", content);
     // TODO: f.VerifyBaselineGoToSourceDefinition(t, "importName")
 }

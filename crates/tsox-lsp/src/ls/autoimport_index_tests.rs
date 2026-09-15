@@ -1,6 +1,7 @@
 use crate::ls::autoimport_index::*;
 
 #[derive(Debug, Clone)]
+#[allow(dead_code)]
 struct TestEntry {
     name: String,
 }

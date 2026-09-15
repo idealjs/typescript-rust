@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -20,6 +20,6 @@ fn get_edits_for_file_rename_unresolvable_import() {
 import "@local/some-other-import";
 // @Filename: /modules/@local/index.js
 import "@local/some-other-import";"#;
-    let mut s = Session::new_for_test("getEditsForFileRename_unresolvableImport", content);
+    let _s = Session::new_for_test("getEditsForFileRename_unresolvableImport", content);
     // TODO: f.VerifyWillRenameFilesEdits(t, "/modules/@app/something", "/modules/@app/something-2", map[string]s
 }

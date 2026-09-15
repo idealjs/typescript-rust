@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -18,6 +18,6 @@ fn get_occurrences_try_catch_finally() {
 }
 [|fina/*3*/lly|] {
 }"#;
-    let mut s = Session::new_for_test("getOccurrencesTryCatchFinally", content);
+    let _s = Session::new_for_test("getOccurrencesTryCatchFinally", content);
     // TODO: f.VerifyBaselineDocumentHighlights(t, nil /*preferences*/, ToAny(f.Markers())...)
 }

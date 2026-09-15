@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -7,6 +7,6 @@ fn code_fix_class_implement_interface_qualified_name() {
     export interface I { y: I; }
 }
 class C1 implements N.I {}"#;
-    let mut s = Session::new_for_test("codeFixClassImplementInterfaceQualifiedName", content);
+    let _s = Session::new_for_test("codeFixClassImplementInterfaceQualifiedName", content);
     // TODO: f.VerifyCodeFix(t, fourslash.VerifyCodeFixOptions{
 }

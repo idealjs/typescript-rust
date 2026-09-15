@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -14,6 +14,6 @@ function f({ /*1*/property1: p1 }: I,
 
     return /*3*/property1 + 1;
 }"#;
-    let mut s = Session::new_for_test("findAllRefsObjectBindingElementPropertyName04", content);
+    let _s = Session::new_for_test("findAllRefsObjectBindingElementPropertyName04", content);
     // TODO: f.VerifyBaselineFindAllReferences(t, "0", "1", "2", "3")
 }

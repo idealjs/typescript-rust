@@ -16,8 +16,8 @@ impl Checker {
     pub fn get_global_symbol(
         &self,
         name: &str,
-        meaning: SymbolFlags,
-        diagnostic: Option<&Message>,
+        _meaning: SymbolFlags,
+        _diagnostic: Option<&Message>,
     ) -> Option<Arc<Symbol>> {
         self.globals.get(name).cloned()
     }
@@ -25,7 +25,7 @@ impl Checker {
     pub fn get_global_symbol_by_name(
         &self,
         name: &str,
-        meaning: SymbolFlags,
+        _meaning: SymbolFlags,
     ) -> Option<Arc<Symbol>> {
         self.globals.get(name).cloned()
     }
@@ -35,7 +35,7 @@ impl Checker {
         None
     }
 
-    pub fn get_symbol_by_name(&self, name: &str, meaning: SymbolFlags) -> Option<Arc<Symbol>> {
+    pub fn get_symbol_by_name(&self, name: &str, _meaning: SymbolFlags) -> Option<Arc<Symbol>> {
         self.globals.get(name).cloned()
     }
 
@@ -43,26 +43,26 @@ impl Checker {
         Some(Arc::clone(symbol))
     }
 
-    pub fn try_find_ambient_module(&self, module_name: &str) -> Option<Arc<Symbol>> {
+    pub fn try_find_ambient_module(&self, _module_name: &str) -> Option<Arc<Symbol>> {
         None
     }
 
-    pub fn get_immediate_aliased_symbol(&self, symbol: &Arc<Symbol>) -> Option<Arc<Symbol>> {
+    pub fn get_immediate_aliased_symbol(&self, _symbol: &Arc<Symbol>) -> Option<Arc<Symbol>> {
         None
     }
 
-    pub fn get_type_only_alias_declaration(&self, symbol: &Arc<Symbol>) -> Option<Arc<Node>> {
+    pub fn get_type_only_alias_declaration(&self, _symbol: &Arc<Symbol>) -> Option<Arc<Node>> {
         None
     }
 
     pub fn resolve_external_module_name(
         &self,
-        module_specifier: &Arc<Node>,
+        _module_specifier: &Arc<Node>,
     ) -> Option<Arc<Symbol>> {
         None
     }
 
-    pub fn get_declared_type_of_symbol(&self, symbol: &Arc<Symbol>) -> Arc<Type> {
+    pub fn get_declared_type_of_symbol(&self, _symbol: &Arc<Symbol>) -> Arc<Type> {
         self.any_type()
     }
 
@@ -142,48 +142,48 @@ impl Checker {
         }
     }
 
-    pub fn type_predicate_to_string(&self, t: &TypePredicate) -> String {
+    pub fn type_predicate_to_string(&self, _t: &TypePredicate) -> String {
         String::new()
     }
 
     pub fn get_expanded_parameters(
         &self,
-        signature: &Arc<Signature>,
-        skip_union_expanding: bool,
+        _signature: &Arc<Signature>,
+        _skip_union_expanding: bool,
     ) -> Vec<Vec<Arc<Symbol>>> {
         Vec::new()
     }
 
-    pub fn get_resolved_signature(&self, node: &Arc<Node>) -> Option<Arc<Signature>> {
+    pub fn get_resolved_signature(&self, _node: &Arc<Node>) -> Option<Arc<Signature>> {
         None
     }
 
     pub fn get_contextual_type_for_argument_at_index(
         &self,
-        node: &Arc<Node>,
-        arg_index: usize,
+        _node: &Arc<Node>,
+        _arg_index: usize,
     ) -> Option<Arc<Type>> {
         None
     }
 
-    pub fn get_index_signatures_at_location(&self, node: &Arc<Node>) -> Vec<Arc<Node>> {
+    pub fn get_index_signatures_at_location(&self, _node: &Arc<Node>) -> Vec<Arc<Node>> {
         Vec::new()
     }
 
-    pub fn get_resolved_symbol(&self, node: &Arc<Node>) -> Option<Arc<Symbol>> {
+    pub fn get_resolved_symbol(&self, _node: &Arc<Node>) -> Option<Arc<Symbol>> {
         None
     }
 
-    pub fn get_jsx_fragment_factory(&self, location: &Arc<Node>) -> String {
+    pub fn get_jsx_fragment_factory(&self, _location: &Arc<Node>) -> String {
         String::new()
     }
 
     pub fn resolve_name(
         &self,
-        name: &str,
-        location: &Arc<Node>,
-        meaning: SymbolFlags,
-        exclude_globals: bool,
+        _name: &str,
+        _location: &Arc<Node>,
+        _meaning: SymbolFlags,
+        _exclude_globals: bool,
     ) -> Option<Arc<Symbol>> {
         None
     }
@@ -222,11 +222,11 @@ impl Checker {
         result
     }
 
-    pub fn get_base_constructor_type_of_class(&self, t: &Arc<Type>) -> Option<Arc<Type>> {
+    pub fn get_base_constructor_type_of_class(&self, _t: &Arc<Type>) -> Option<Arc<Type>> {
         None
     }
 
-    pub fn get_rest_type_of_signature(&self, sig: &Arc<Signature>) -> Option<Arc<Type>> {
+    pub fn get_rest_type_of_signature(&self, _sig: &Arc<Signature>) -> Option<Arc<Type>> {
         None
     }
 
@@ -329,9 +329,9 @@ impl Checker {
     pub fn fill_missing_type_arguments(
         &self,
         type_arguments: &[Arc<Type>],
-        type_parameters: &[Arc<Type>],
-        min_type_argument_count: usize,
-        is_java_script_implicit_any: bool,
+        _type_parameters: &[Arc<Type>],
+        _min_type_argument_count: usize,
+        _is_java_script_implicit_any: bool,
     ) -> Vec<Arc<Type>> {
         type_arguments.to_vec()
     }
@@ -343,12 +343,12 @@ impl Checker {
     pub fn get_union_type_ex(
         &self,
         types: Vec<Arc<Type>>,
-        union_reduction: UnionReduction,
+        _union_reduction: UnionReduction,
     ) -> Arc<Type> {
         self.build_union_from_types(types)
     }
 
-    pub fn requires_adding_implicit_undefined(&self, node: &Arc<Node>) -> bool {
+    pub fn requires_adding_implicit_undefined(&self, _node: &Arc<Node>) -> bool {
         false
     }
 
@@ -356,7 +356,7 @@ impl Checker {
         Arc::clone(t)
     }
 
-    pub fn compare_symbols(&self, s1: &Arc<Symbol>, s2: &Arc<Symbol>) -> i32 {
+    pub fn compare_symbols(&self, _s1: &Arc<Symbol>, _s2: &Arc<Symbol>) -> i32 {
         0
     }
 

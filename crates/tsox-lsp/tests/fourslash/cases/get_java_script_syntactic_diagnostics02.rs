@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -10,7 +10,7 @@ var a = "a";
 var b: boolean = true;
 function foo(): string { }
 var var = "c";"#;
-    let mut s = Session::new_for_test("getJavaScriptSyntacticDiagnostics02", content);
+    let _s = Session::new_for_test("getJavaScriptSyntacticDiagnostics02", content);
     // TODO: f.MarkTestAsStradaServer()
     // TODO: f.VerifyBaselineNonSuggestionDiagnostics(t)
 }

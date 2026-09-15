@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -10,6 +10,6 @@ require.resolve.paths;
 interface LanguageMode { getFoldingRanges?: (d: string) => number[]; };
 function (mode: LanguageMode | undefined) { if (mode && mode.getFoldingRanges) { return mode.getFoldingRanges('a'); }};
 function b(a: () => void) { a(); };"#;
-    let mut s = Session::new_for_test("semanticModernClassificationCallableVariables2", content);
+    let _s = Session::new_for_test("semanticModernClassificationCallableVariables2", content);
     // TODO: f.VerifySemanticTokens(t, []fourslash.SemanticToken{
 }

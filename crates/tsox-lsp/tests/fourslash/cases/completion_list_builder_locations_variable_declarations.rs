@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[ignore = "go: t.Skip('Known failing fourslash test')"]
@@ -19,7 +19,7 @@ var y = [0, /*var9*/
 var y = `${/*var10*/
 var y = `${10} dd ${ /*var11*/
 var y = 10; y=/*var12*/"#;
-    let mut s = Session::new_for_test("completionListBuilderLocations_VariableDeclarations", content);
+    let _s = Session::new_for_test("completionListBuilderLocations_VariableDeclarations", content);
     // TODO: f.VerifyCompletions(t, []string{"var1"}, &fourslash.CompletionsExpectedList{
     // TODO: f.VerifyCompletions(t, []string{"var2", "var3", "var4", "var5", "var6", "var7", "var8", "var9", "var
     // TODO: }

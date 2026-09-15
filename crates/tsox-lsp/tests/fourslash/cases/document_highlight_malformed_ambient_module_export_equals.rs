@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -9,6 +9,6 @@ declare moduleu "m" {
   function f(): A[];
   /*m*/export = f;
 }"#;
-    let mut s = Session::new_for_test("documentHighlightMalformedAmbientModuleExportEquals", content);
+    let _s = Session::new_for_test("documentHighlightMalformedAmbientModuleExportEquals", content);
     // TODO: f.VerifyBaselineDocumentHighlights(t, nil /*preferences*/, "m")
 }

@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -7,6 +7,6 @@ fn code_fix_class_implement_interface_index_type() {
     x: keyof X;
 }
 class C<Y> implements I<Y> {[| |]}"#;
-    let mut s = Session::new_for_test("codeFixClassImplementInterfaceIndexType", content);
+    let _s = Session::new_for_test("codeFixClassImplementInterfaceIndexType", content);
     // TODO: f.VerifyCodeFix(t, fourslash.VerifyCodeFixOptions{
 }

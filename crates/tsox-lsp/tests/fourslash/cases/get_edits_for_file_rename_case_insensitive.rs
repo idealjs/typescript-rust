@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -8,6 +8,6 @@ fn get_edits_for_file_rename_case_insensitive() {
 export const a = 0;
 // @Filename: /b.ts
 import { a } from "./A";"#;
-    let mut s = Session::new_for_test("getEditsForFileRename_caseInsensitive", content);
+    let _s = Session::new_for_test("getEditsForFileRename_caseInsensitive", content);
     // TODO: f.VerifyWillRenameFilesEdits(t, "/a.ts", "/eh.ts", map[string]string{
 }

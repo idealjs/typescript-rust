@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -21,6 +21,6 @@ class MyClass {
         const x = this[_sym];
     }
 }"#;
-    let mut s = Session::new_for_test("navigationBarItemsSymbols4", content);
+    let _s = Session::new_for_test("navigationBarItemsSymbols4", content);
     // TODO: f.VerifyBaselineDocumentSymbol(t)
 }

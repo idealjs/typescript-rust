@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -9,6 +9,6 @@ fn find_all_refs_with_leading_underscore_names2() {
 
 var x: Foo;
 x./*3*/__bar;"#;
-    let mut s = Session::new_for_test("findAllRefsWithLeadingUnderscoreNames2", content);
+    let _s = Session::new_for_test("findAllRefsWithLeadingUnderscoreNames2", content);
     // TODO: f.VerifyBaselineFindAllReferences(t, "1", "2", "3")
 }

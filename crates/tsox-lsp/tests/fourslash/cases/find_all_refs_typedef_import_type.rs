@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -11,6 +11,6 @@ const dummy = 0;
 // @Filename: /b.js
 /** @type {import('./a')./*3*/Foo} */
 const x = 0;"#;
-    let mut s = Session::new_for_test("findAllRefsTypedef_importType", content);
+    let _s = Session::new_for_test("findAllRefsTypedef_importType", content);
     // TODO: f.VerifyBaselineFindAllReferences(t, "1", "2", "3")
 }

@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[ignore = "go: t.Skip('Known failing fourslash test')"]
@@ -10,7 +10,7 @@ fn doc_comment_template_indentation() {
 /*0*/        function foo() { }"#;
     // TODO: capabilities := fourslash.GetDefaultCapabilities()
     // TODO: capabilities.TextDocument.Completion.CompletionItem.SnippetSupport = new(false)
-    let mut s = Session::new_with_capabilities(content, None);
+    let _s = Session::new_with_capabilities(content, None);
     // TODO: f.VerifyJSDocCompletion(t, "0", 3, `/** */`, nil)
     // TODO: f.VerifyJSDocCompletion(t, "1", 3, `/** */`, nil)
     // TODO: f.VerifyJSDocCompletion(t, "2", 3, `/** */`, nil)

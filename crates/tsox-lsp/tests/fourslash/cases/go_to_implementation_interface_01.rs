@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -23,6 +23,6 @@ class [|NotAbstractBar|] extends AbstractBar {
 var x = new SuperBar();
 var y: SuperBar = new SuperBar();
 var z: AbstractBar = new NotAbstractBar();"#;
-    let mut s = Session::new_for_test("goToImplementationInterface_01", content);
+    let _s = Session::new_for_test("goToImplementationInterface_01", content);
     // TODO: f.VerifyBaselineGoToImplementation(t, "interface_definition")
 }

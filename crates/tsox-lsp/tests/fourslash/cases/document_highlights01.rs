@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -8,7 +8,7 @@ fn document_highlights01() {
 function [|f|](x: typeof [|f|]) {
     [|f|]([|f|]);
 }"#;
-    let mut s = Session::new_for_test("documentHighlights01", content);
+    let _s = Session::new_for_test("documentHighlights01", content);
     // TODO: f.MarkTestAsStradaServer()
     // TODO: f.VerifyBaselineDocumentHighlights(t, nil /*preferences*/, ToAny(f.Ranges())...)
 }

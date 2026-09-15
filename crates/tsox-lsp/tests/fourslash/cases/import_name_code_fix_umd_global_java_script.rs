@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -13,6 +13,6 @@ bar1/*0*/.bar;|]
 // @Filename: a/foo.d.ts
 export declare function bar(): number;
 export as namespace bar1; "#;
-    let mut s = Session::new_for_test("importNameCodeFixUMDGlobalJavaScript", content);
+    let _s = Session::new_for_test("importNameCodeFixUMDGlobalJavaScript", content);
     // TODO: f.VerifyImportFixAtPosition(t, []string{
 }

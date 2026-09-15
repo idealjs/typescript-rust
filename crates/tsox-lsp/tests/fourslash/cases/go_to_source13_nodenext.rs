@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -31,7 +31,7 @@ function /*end*/leftPad(str, len, ch) {}
 // @Filename: /home/src/workspaces/project/index.mts
 import leftPad = require("left-pad");
 /*start*/leftPad("", 4);"#;
-    let mut s = Session::new_for_test("goToSource13_nodenext", content);
+    let _s = Session::new_for_test("goToSource13_nodenext", content);
     // TODO: f.MarkTestAsStradaServer()
     // TODO: f.VerifyBaselineGoToSourceDefinition(t, "start")
 }

@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -14,7 +14,7 @@ import { type E } from "foo";
 import { D } from "foo";
 
 console.log(A, B, C, D, E);"#;
-    let mut s = Session::new_for_test("organizeImportsType1", content);
+    let _s = Session::new_for_test("organizeImportsType1", content);
     // TODO: f.VerifyOrganizeImports(t,
     // TODO: f.VerifyOrganizeImports(t,
     // TODO: f.VerifyOrganizeImports(t,

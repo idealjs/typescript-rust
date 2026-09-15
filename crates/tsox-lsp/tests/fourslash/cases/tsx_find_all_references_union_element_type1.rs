@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -20,6 +20,6 @@ function SFC2(prop: { x: boolean }) {
 }
 /*1*/var /*2*/SFCComp = SFC1 || SFC2;
 /*3*/</*4*/SFCComp x={ "hi" } />"#;
-    let mut s = Session::new_for_test("tsxFindAllReferencesUnionElementType1", content);
+    let _s = Session::new_for_test("tsxFindAllReferencesUnionElementType1", content);
     // TODO: f.VerifyBaselineFindAllReferences(t, "1", "2", "3", "4")
 }

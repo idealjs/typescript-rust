@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -10,6 +10,6 @@ abstract class A {
 }
 
 class C extends A {[| |]}"#;
-    let mut s = Session::new_for_test("codeFixClassExtendAbstractPrivateProperty", content);
+    let _s = Session::new_for_test("codeFixClassExtendAbstractPrivateProperty", content);
     // TODO: f.VerifyCodeFixNotAvailable(t)
 }

@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -9,6 +9,6 @@ fn goto_definition_throws_tag() {
  * @throws {/*use*/[|E|]}
  */
 function f() {}"#;
-    let mut s = Session::new_for_test("gotoDefinitionThrowsTag", content);
+    let _s = Session::new_for_test("gotoDefinitionThrowsTag", content);
     // TODO: f.VerifyBaselineGoToDefinition(t, false, "use")
 }

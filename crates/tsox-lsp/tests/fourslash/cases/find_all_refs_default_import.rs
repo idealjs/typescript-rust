@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -7,6 +7,6 @@ fn find_all_refs_default_import() {
 export default function /*0*/a() {}
 // @Filename: /b.ts
 import /*1*/a, * as ns from "./a";"#;
-    let mut s = Session::new_for_test("findAllRefsDefaultImport", content);
+    let _s = Session::new_for_test("findAllRefsDefaultImport", content);
     // TODO: f.VerifyBaselineFindAllReferences(t, "0", "1")
 }

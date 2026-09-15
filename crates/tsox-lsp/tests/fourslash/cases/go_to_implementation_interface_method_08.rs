@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -18,6 +18,6 @@ class Bar extends SuperBar {
 class SubBar extends Bar {
    [|hello|]() {}
 }"#;
-    let mut s = Session::new_for_test("goToImplementationInterfaceMethod_08", content);
+    let _s = Session::new_for_test("goToImplementationInterfaceMethod_08", content);
     // TODO: f.VerifyBaselineGoToImplementation(t, "function_call")
 }

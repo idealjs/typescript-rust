@@ -5,7 +5,6 @@ use std::sync::Arc;
 use crate::lsp::lsproto_lsp::DocumentUri;
 use crate::lsp::lsproto_lsp::Position;
 use crate::lsp::lsproto_lsp::Range;
-use tsox_compile::compiler;
 use tsox_core::diagnostics::Category;
 use tsox_frontend::ast::Diagnostic as AstDiagnostic;
 use tsox_frontend::ast::SourceFile;

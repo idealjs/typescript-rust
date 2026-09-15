@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -63,6 +63,6 @@ class SubClass extends BaseClass {
      */
     public static readonly /*3*/someProperty: string = 'specific to this class value'
 }"#;
-    let mut s = Session::new_for_test("quickInfoInheritDoc", content);
+    let _s = Session::new_for_test("quickInfoInheritDoc", content);
     // TODO: f.VerifyBaselineHover(t)
 }

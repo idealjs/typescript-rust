@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -19,6 +19,6 @@ fn quickinfo_verbosity_intersection1() {
     type Never = Foo & Bar;
     const obj/*o3*/: Never = { a: "" };
 }"#;
-    let mut s = Session::new_for_test("quickinfoVerbosityIntersection1", content);
+    let _s = Session::new_for_test("quickinfoVerbosityIntersection1", content);
     // TODO: f.VerifyBaselineHoverWithVerbosity(t, map[string][]int{"o1": {0, 1}, "o2": {0}, "o3": {0}})
 }

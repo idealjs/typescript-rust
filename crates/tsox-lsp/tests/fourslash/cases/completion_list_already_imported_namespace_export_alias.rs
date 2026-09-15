@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -17,7 +17,7 @@ export { Group };
 import { Group } from "./namespace.js";
 
 console.log(Grou/**/);"#;
-    let mut s = Session::new_for_test("completionListAlreadyImportedNamespaceExportAlias", content);
+    let _s = Session::new_for_test("completionListAlreadyImportedNamespaceExportAlias", content);
     // TODO: result := f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
     // TODO: result.AndHasNoCodeAction(t, &fourslash.CompletionsExpectedCodeAction{
 }

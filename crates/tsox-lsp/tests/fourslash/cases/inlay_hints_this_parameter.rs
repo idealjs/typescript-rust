@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -14,6 +14,6 @@ declare function fn(
 
 fn(function (this, a, b) { });
 fn(function (this: I, a, b) { });"#;
-    let mut s = Session::new_for_test("inlayHintsThisParameter", content);
+    let _s = Session::new_for_test("inlayHintsThisParameter", content);
     // TODO: f.VerifyBaselineInlayHints(t, nil /*span*/, &lsutil.UserPreferences{InlayHints: lsutil.InlayHintsPre
 }

@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -14,6 +14,6 @@ fn auto_import_package_json_imports_pattern_ts_ts() {
 export function something(name: string): any;
 // @Filename: /a.ts
 something/**/"##;
-    let mut s = Session::new_for_test("autoImportPackageJsonImportsPattern_ts_ts", content);
+    let _s = Session::new_for_test("autoImportPackageJsonImportsPattern_ts_ts", content);
     // TODO: f.VerifyImportFixModuleSpecifiers(t, "", []string{"#something.ts"}, nil /*preferences*/)
 }

@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -16,7 +16,7 @@ foo3(/*e*/1, /*f*/2);
 foo4(/*g*/1, /*h*/2);
 foo5(/*i*/1, /*j*/2);
 foo6(/*k*/1, /*l*/2);"#;
-    let mut s = Session::new_for_test("inlayHintsInteractiveParameterNamesInSpan2", content);
+    let _s = Session::new_for_test("inlayHintsInteractiveParameterNamesInSpan2", content);
     // TODO: start := f.MarkerByName(t, "c")
     // TODO: end := f.MarkerByName(t, "h")
     // TODO: span := &lsproto.Range{Start: start.LSPosition, End: end.LSPosition}

@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -13,7 +13,7 @@ var NumberLike2;
 
 /** @type {/*1*/NumberLike} */
 var numberLike;"#;
-    let mut s = Session::new_for_test("jsdocTypedefTagNavigateTo", content);
+    let _s = Session::new_for_test("jsdocTypedefTagNavigateTo", content);
     // TODO: f.MarkTestAsStradaServer()
     // TODO: f.VerifyBaselineDocumentSymbol(t)
 }

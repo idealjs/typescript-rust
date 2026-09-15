@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -8,6 +8,6 @@ throw new Error();
 	
 (() => {})();
 	"#;
-    let mut s = Session::new_for_test("unreachableCodeDiagnostics", content);
+    let _s = Session::new_for_test("unreachableCodeDiagnostics", content);
     // TODO: f.VerifyBaselineNonSuggestionDiagnostics(t)
 }

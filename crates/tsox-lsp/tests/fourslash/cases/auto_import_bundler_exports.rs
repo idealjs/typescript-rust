@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -17,6 +17,6 @@ fn auto_import_bundler_exports() {
 export const dep: number;
 // @Filename: /index.ts
 dep/**/"#;
-    let mut s = Session::new_for_test("autoImportBundlerExports", content);
+    let _s = Session::new_for_test("autoImportBundlerExports", content);
     // TODO: f.VerifyImportFixModuleSpecifiers(t, "", []string{"dep"}, nil /*preferences*/)
 }

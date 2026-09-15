@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -10,6 +10,6 @@ class /*cls*/C {
     constructor() { return [|/*clsUse*/this|]; }
     get self(/*getterDecl*/this: number) { return [|/*getterUse*/this|]; }
 }"#;
-    let mut s = Session::new_for_test("goToDefinitionThis", content);
+    let _s = Session::new_for_test("goToDefinitionThis", content);
     // TODO: f.VerifyBaselineGoToDefinition(t, true, "fnUse", "clsUse", "getterUse")
 }

@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -29,6 +29,6 @@ import { foo, bar } from "./exports";
 foo(5);
 console.log(bar);
 "#;
-    let mut s = Session::new_for_test("codeLensFunctionsAndConstants01", content);
+    let _s = Session::new_for_test("codeLensFunctionsAndConstants01", content);
     // TODO: f.VerifyBaselineCodeLens(t, &lsutil.UserPreferences{
 }

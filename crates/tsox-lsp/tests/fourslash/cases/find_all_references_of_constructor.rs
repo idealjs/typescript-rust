@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -35,7 +35,7 @@ class E implements C {
 import * as a from "./a";
 new a.C();
 class d extends a.C { constructor() { super(); }"#;
-    let mut s = Session::new_for_test("findAllReferencesOfConstructor", content);
+    let _s = Session::new_for_test("findAllReferencesOfConstructor", content);
     // TODO: f.VerifyBaselineFindAllReferences(t, "0", "1", "2")
     // TODO: }
 }

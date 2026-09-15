@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -12,6 +12,6 @@ foo.[|x|];
 import { [|x|] } from "foo";
 // @Filename: /c.ts
 import { x } from "foo";"#;
-    let mut s = Session::new_for_test("documentHighlights_moduleImport_filesToSearchWithInvalidFile", content);
+    let _s = Session::new_for_test("documentHighlights_moduleImport_filesToSearchWithInvalidFile", content);
     // TODO: f.VerifyBaselineDocumentHighlightsWithOptions(t, nil /*preferences*/, []string{"/a.ts", "/b.ts", "/u
 }

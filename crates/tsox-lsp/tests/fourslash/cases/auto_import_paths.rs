@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -22,6 +22,6 @@ fn auto_import_paths() {
 bar/**/
 // @Filename: /package2/file1.js
 export const bar = 0;"#;
-    let mut s = Session::new_for_test("autoImportPaths", content);
+    let _s = Session::new_for_test("autoImportPaths", content);
     // TODO: f.VerifyImportFixModuleSpecifiers(t, "", []string{"package2/file1"}, &lsutil.UserPreferences{ImportM
 }

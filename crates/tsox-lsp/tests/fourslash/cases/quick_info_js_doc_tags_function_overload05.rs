@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -10,6 +10,6 @@ declare function /*1*/foo(): void;
  * @tag Tag text
  */
 declare function /*2*/foo(x: number): void"#;
-    let mut s = Session::new_for_test("quickInfoJsDocTagsFunctionOverload05", content);
+    let _s = Session::new_for_test("quickInfoJsDocTagsFunctionOverload05", content);
     // TODO: f.VerifyBaselineHover(t)
 }

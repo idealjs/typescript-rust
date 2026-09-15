@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -18,6 +18,6 @@ type G<T> = {
 	[K in keyof T]: T[K] & Apple
 };
 const z: G/*G*/<Bar> = { banana: 'hello', apple: true };"#;
-    let mut s = Session::new_for_test("quickinfoVerbosityMappedType", content);
+    let _s = Session::new_for_test("quickinfoVerbosityMappedType", content);
     // TODO: f.VerifyBaselineHoverWithVerbosity(t, map[string][]int{"x": {0, 1}, "y": {0}, "F": {0, 1}, "G": {0, 
 }

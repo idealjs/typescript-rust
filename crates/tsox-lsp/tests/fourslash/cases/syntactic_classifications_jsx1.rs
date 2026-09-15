@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -9,6 +9,6 @@ let x  = <div a = "some-value" b = {1}>
 </div>;
 
 let y = <element attr="123"/>"#;
-    let mut s = Session::new_for_test("syntacticClassificationsJsx1", content);
+    let _s = Session::new_for_test("syntacticClassificationsJsx1", content);
     // TODO: f.VerifySemanticTokens(t, []fourslash.SemanticToken{
 }

@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -13,6 +13,6 @@ declare namespace API/*1*/ {
     const defaultConfig: InternalConfig;
 }
 "#;
-    let mut s = Session::new_for_test("quickinfoVerbosityNamespacePrivateTypes", content);
+    let _s = Session::new_for_test("quickinfoVerbosityNamespacePrivateTypes", content);
     // TODO: f.VerifyBaselineHoverWithVerbosity(t, map[string][]int{"1": {0, 1}})
 }

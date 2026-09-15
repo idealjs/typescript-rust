@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -12,6 +12,6 @@ enum E {
     /** {@link /*1*/[|Foo|]} */
     Foo
 }"#;
-    let mut s = Session::new_for_test("gotoDefinitionLinkTag4", content);
+    let _s = Session::new_for_test("gotoDefinitionLinkTag4", content);
     // TODO: f.VerifyBaselineGoToDefinition(t, false, "1")
 }

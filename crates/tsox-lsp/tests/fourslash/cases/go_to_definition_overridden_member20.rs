@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -15,6 +15,6 @@ abstract class A {
 export class B extends A {
   [|/*1*/override|] readonly [prop] = "B";
 }"#;
-    let mut s = Session::new_for_test("goToDefinitionOverriddenMember20", content);
+    let _s = Session::new_for_test("goToDefinitionOverriddenMember20", content);
     // TODO: f.VerifyBaselineGoToDefinition(t, true, "1")
 }

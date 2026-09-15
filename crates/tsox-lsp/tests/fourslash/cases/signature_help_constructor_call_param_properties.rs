@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -12,6 +12,6 @@ fn signature_help_constructor_call_param_properties() {
     }
 }
 var a = new Circle(/**/"#;
-    let mut s = Session::new_for_test("signatureHelpConstructorCallParamProperties", content);
+    let _s = Session::new_for_test("signatureHelpConstructorCallParamProperties", content);
     // TODO: f.VerifyBaselineSignatureHelp(t)
 }

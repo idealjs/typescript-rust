@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -34,6 +34,6 @@ class NotBar extends SuperBar {
 function whatever(x: Bar) {
     x.he/*function_call*/llo()
 }"#;
-    let mut s = Session::new_for_test("goToImplementationInterfaceMethod_05", content);
+    let _s = Session::new_for_test("goToImplementationInterfaceMethod_05", content);
     // TODO: f.VerifyBaselineGoToImplementation(t, "function_call")
 }

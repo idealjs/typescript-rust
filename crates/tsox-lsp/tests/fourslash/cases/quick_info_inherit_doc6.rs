@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -14,6 +14,6 @@ class B extends UNRESOLVED_VALUE_DEFINITELY_DOES_NOT_EXIST {
         return undefined;
     }
 }"#;
-    let mut s = Session::new_for_test("quickInfoInheritDoc6", content);
+    let _s = Session::new_for_test("quickInfoInheritDoc6", content);
     // TODO: f.VerifyBaselineHover(t)
 }

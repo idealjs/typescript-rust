@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -10,6 +10,6 @@ fn rename_namespace() {
 }
 
 const a: NS.E = NS.E.A;"#;
-    let mut s = Session::new_for_test("renameNamespace", content);
+    let _s = Session::new_for_test("renameNamespace", content);
     // TODO: f.VerifyBaselineRename(t, nil /*preferences*/, "")
 }

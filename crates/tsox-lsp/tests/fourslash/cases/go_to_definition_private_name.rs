@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -14,6 +14,6 @@ fn go_to_definition_private_name() {
         this.[|/*pnPropUse*/#prop|]
     }
 }"#;
-    let mut s = Session::new_for_test("goToDefinitionPrivateName", content);
+    let _s = Session::new_for_test("goToDefinitionPrivateName", content);
     // TODO: f.VerifyBaselineGoToDefinition(t, true, "pnFieldUse", "pnMethodUse", "pnPropUse")
 }

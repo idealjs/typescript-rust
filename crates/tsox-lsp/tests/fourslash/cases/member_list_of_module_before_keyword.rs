@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -16,6 +16,6 @@ TypeModule1./*dottedExpression*/
 namespace TypeModule3 {
     export class Test3 {}
 }"#;
-    let mut s = Session::new_for_test("memberListOfModuleBeforeKeyword", content);
+    let _s = Session::new_for_test("memberListOfModuleBeforeKeyword", content);
     // TODO: f.VerifyCompletions(t, f.Markers(), &fourslash.CompletionsExpectedList{
 }

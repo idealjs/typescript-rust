@@ -149,7 +149,7 @@ impl Checker {
     ) -> Option<Arc<Symbol>> {
         if let Some(loc) = location {
             if loc.kind == SyntaxKind::ShorthandPropertyAssignment {
-                if let Some(name) = loc.name() {
+                if let Some(_name) = loc.name() {
                     return None;
                 }
             }

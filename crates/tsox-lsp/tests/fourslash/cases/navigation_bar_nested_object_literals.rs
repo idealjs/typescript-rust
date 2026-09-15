@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -16,6 +16,6 @@ fn navigation_bar_nested_object_literals() {
         },
     },
 }"#;
-    let mut s = Session::new_for_test("navigationBarNestedObjectLiterals", content);
+    let _s = Session::new_for_test("navigationBarNestedObjectLiterals", content);
     // TODO: f.VerifyBaselineDocumentSymbol(t)
 }

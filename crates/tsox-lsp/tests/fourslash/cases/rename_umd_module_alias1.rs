@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -10,6 +10,6 @@ export function doTheOtherThing(): void;
 // @Filename: 1.ts
 /// <reference path="0.d.ts" />
 [|myLib|].doThing();"#;
-    let mut s = Session::new_for_test("renameUMDModuleAlias1", content);
+    let _s = Session::new_for_test("renameUMDModuleAlias1", content);
     // TODO: f.VerifyBaselineRenameAtRangesWithText(t, nil /*preferences*/, "myLib")
 }

@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -15,6 +15,6 @@ console.log("./script/*3*/");
 /// <reference path="script.ts" />
 // @Filename: /stringLiteral.ts
 console.log("./script");"#;
-    let mut s = Session::new_for_test("findAllRefsNonModule", content);
+    let _s = Session::new_for_test("findAllRefsNonModule", content);
     // TODO: f.VerifyBaselineFindAllReferences(t, "1", "2", "3")
 }

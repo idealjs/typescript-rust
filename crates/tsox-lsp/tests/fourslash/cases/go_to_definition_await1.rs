@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -9,6 +9,6 @@ fn go_to_definition_await1() {
 function notAsync() {
     [|/*start2*/await|] Promise.resolve(0);
 }"#;
-    let mut s = Session::new_for_test("goToDefinitionAwait1", content);
+    let _s = Session::new_for_test("goToDefinitionAwait1", content);
     // TODO: f.VerifyBaselineGoToDefinition(t, true, "start1", "start2")
 }

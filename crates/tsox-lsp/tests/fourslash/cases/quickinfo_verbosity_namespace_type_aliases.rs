@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -12,6 +12,6 @@ declare namespace Config/*1*/ {
     type ServerConfig = Readonly<BaseConfig>;
 }
 "#;
-    let mut s = Session::new_for_test("quickinfoVerbosityNamespaceTypeAliases", content);
+    let _s = Session::new_for_test("quickinfoVerbosityNamespaceTypeAliases", content);
     // TODO: f.VerifyBaselineHoverWithVerbosity(t, map[string][]int{"1": {0, 1}})
 }

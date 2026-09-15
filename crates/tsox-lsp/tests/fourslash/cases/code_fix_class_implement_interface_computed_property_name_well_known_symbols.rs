@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -21,6 +21,6 @@ interface I<Species> {
     [Symbol.unscopables]: any;
 }
 class C implements I<number> {}"#;
-    let mut s = Session::new_for_test("codeFixClassImplementInterfaceComputedPropertyNameWellKnownSymbols", content);
+    let _s = Session::new_for_test("codeFixClassImplementInterfaceComputedPropertyNameWellKnownSymbols", content);
     // TODO: f.VerifyCodeFix(t, fourslash.VerifyCodeFixOptions{
 }

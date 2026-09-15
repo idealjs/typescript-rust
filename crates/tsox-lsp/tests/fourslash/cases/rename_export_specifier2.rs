@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -9,6 +9,6 @@ export { name/**/ };
 // @Filename: b.ts
 import { name } from './a';
 const x = name.toString();"#;
-    let mut s = Session::new_for_test("renameExportSpecifier2", content);
+    let _s = Session::new_for_test("renameExportSpecifier2", content);
     // TODO: f.VerifyBaselineRename(t, &lsutil.UserPreferences{UseAliasesForRename: core.TSFalse}, "")
 }

@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -19,7 +19,7 @@ export const config = { /*targetAlpha*/alpha: "a", /*targetBeta*/beta: "b" };
 import { config } from "pkg";
 config./*accessAlpha*/alpha;
 config./*accessBeta*/beta;"#;
-    let mut s = Session::new_for_test("goToSourcePropertyAccessNoDeclaration", content);
+    let _s = Session::new_for_test("goToSourcePropertyAccessNoDeclaration", content);
     // TODO: f.VerifyBaselineGoToSourceDefinition(t, "accessAlpha", "accessBeta")
 }
 
@@ -38,7 +38,7 @@ export const nested = { inner: { /*targetValue*/value: 42 } };
 // @Filename: /home/src/workspaces/project/index.ts
 import { nested } from "pkg";
 nested.inner./*accessValue*/value;"#;
-    let mut s = Session::new_for_test("goToSourcePropertyAccessDeepChain", content);
+    let _s = Session::new_for_test("goToSourcePropertyAccessDeepChain", content);
     // TODO: f.VerifyBaselineGoToSourceDefinition(t, "accessValue")
 }
 
@@ -58,6 +58,6 @@ export const coords = { /*targetX*/x: 10, /*targetY*/y: 20 };
 import { coords } from "pkg";
 coords./*accessX*/x;
 coords./*accessY*/y;"#;
-    let mut s = Session::new_for_test("goToSourcePropertyAccessNamespaceImport", content);
+    let _s = Session::new_for_test("goToSourcePropertyAccessNamespaceImport", content);
     // TODO: f.VerifyBaselineGoToSourceDefinition(t, "accessX", "accessY")
 }

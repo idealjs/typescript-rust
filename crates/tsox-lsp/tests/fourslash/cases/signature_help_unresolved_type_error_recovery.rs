@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -8,6 +8,6 @@ fn signature_help_unresolved_type_in_error_recovered_signature() {
     b?: (p: U) => void
 }) {}
 f(/*a*/);"#;
-    let mut s = Session::new_for_test("signatureHelpUnresolvedTypeInErrorRecoveredSignature", content);
+    let _s = Session::new_for_test("signatureHelpUnresolvedTypeInErrorRecoveredSignature", content);
     // TODO: f.VerifyBaselineSignatureHelp(t)
 }

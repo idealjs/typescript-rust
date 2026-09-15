@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -9,6 +9,6 @@ fn semantic_modern_classification_variables() {
   } catch (e) {
     throw y1;
   }"#;
-    let mut s = Session::new_for_test("semanticModernClassificationVariables", content);
+    let _s = Session::new_for_test("semanticModernClassificationVariables", content);
     // TODO: f.VerifySemanticTokens(t, []fourslash.SemanticToken{
 }

@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -9,6 +9,6 @@ x./*def*/test = () => { }
 x.[|/*ref*/test|]();
 x./*defFn*/test3 = function () { }
 x.[|/*refFn*/test3|]();"#;
-    let mut s = Session::new_for_test("goToDefinitionJsModuleExports", content);
+    let _s = Session::new_for_test("goToDefinitionJsModuleExports", content);
     // TODO: f.VerifyBaselineGoToDefinition(t, true, "ref", "refFn")
 }

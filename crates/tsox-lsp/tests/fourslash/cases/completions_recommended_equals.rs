@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -7,6 +7,6 @@ fn completions_recommended_equals() {
 declare const e: Enu;
 e === /*a*/;
 e === E/*b*/"#;
-    let mut s = Session::new_for_test("completionsRecommended_equals", content);
+    let _s = Session::new_for_test("completionsRecommended_equals", content);
     // TODO: f.VerifyCompletions(t, []string{"a", "b"}, &fourslash.CompletionsExpectedList{
 }

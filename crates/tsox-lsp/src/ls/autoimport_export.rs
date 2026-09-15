@@ -1,8 +1,6 @@
 use crate::ls::lsutil_symbol_display::ScriptElementKind;
 use crate::ls::lsutil_symbol_display::ScriptElementKindModifier;
 use tsox_checker::checker::Checker;
-use tsox_core::tspath;
-use tsox_frontend::ast::Node;
 use tsox_frontend::ast::Symbol;
 use tsox_frontend::ast::SymbolFlags;
 
@@ -135,24 +133,4 @@ pub fn symbol_to_export(_symbol: &Symbol, _ch: &Checker) -> Option<Export> {
     todo!("symbol_to_export requires checker.IsExternalModuleSymbol and ast helpers")
 }
 
-fn try_get_module_export(
-    _export_name: &str,
-    _target: &Symbol,
-    _module_symbol: &Symbol,
-    _ch: &Checker,
-    _module_id: ModuleID,
-    _module_file_name: &str,
-    _file: &Node,
-) -> Option<Export> {
-    todo!("try_get_module_export requires checker.TryGetMemberInModuleExportsAndProperties")
-}
 
-fn extract_first_export(
-    _symbol: &Symbol,
-    _ch: &Checker,
-    _module_id: ModuleID,
-    _module_file_name: &str,
-    _file: &Node,
-) -> Option<Export> {
-    todo!("extractFirstExport requires symbolExtractor (see extract.rs)")
-}

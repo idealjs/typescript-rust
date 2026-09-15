@@ -3,9 +3,7 @@ use std::collections::HashMap;
 use tsox_checker::checker::Checker;
 use tsox_compile::compiler::Program;
 use tsox_core::collections::set::Set;
-use tsox_core::tspath;
 use tsox_frontend::ast::Symbol;
-use tsox_tsoptions::module;
 use tsox_tsoptions::vfs::FS;
 
 use crate::ls::autoimport_export::ModuleID;

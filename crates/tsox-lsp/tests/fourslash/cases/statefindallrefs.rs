@@ -504,7 +504,7 @@ import { I } from "../a";
 import { C } from "../c";
 export const D: I = C;
 "#;
-    let mut s = Session::new_for_test("findAllRefsOverlappingProjects", content);
+    let _s = Session::new_for_test("findAllRefsOverlappingProjects", content);
     // TODO: // The first search will trigger project loads
     // TODO: f.VerifyBaselineFindAllReferences(t, "")
     // TODO: // The second search starts with the projects already loaded
@@ -792,7 +792,7 @@ import { /*symbolAUsage*/symbolA } from '../project-a/public';
 console.log(symbolB);
 console.log(symbolA);
 "#;
-    let mut s = Session::new_for_test("findAllRefsReExportInMultiProjectSolution", content);
+    let _s = Session::new_for_test("findAllRefsReExportInMultiProjectSolution", content);
     // TODO: // Find all refs for symbolA - should find definition in private.ts, re-export in public.ts, and usa
     // TODO: f.VerifyBaselineFindAllReferences(t, "symbolA")
     // TODO: // Find all refs for symbolB - should find definition and usage (no re-export involved)

@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -27,6 +27,6 @@ let x11 = class [|{|"parts": ["(","local class",")"," ","C"], "kind": "local cla
 function isFoo(a: any): a is Foo {
     return true;
 }"#;
-    let mut s = Session::new_for_test("goToImplementationInterface_07", content);
+    let _s = Session::new_for_test("goToImplementationInterface_07", content);
     // TODO: f.VerifyBaselineGoToImplementation(t, "interface_definition")
 }

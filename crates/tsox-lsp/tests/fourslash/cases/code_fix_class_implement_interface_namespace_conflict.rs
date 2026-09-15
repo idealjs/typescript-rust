@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -10,6 +10,6 @@ interface I1 {
     f1();
 }
 class C1 implements N1.I1 {}"#;
-    let mut s = Session::new_for_test("codeFixClassImplementInterfaceNamespaceConflict", content);
+    let _s = Session::new_for_test("codeFixClassImplementInterfaceNamespaceConflict", content);
     // TODO: f.VerifyCodeFix(t, fourslash.VerifyCodeFixOptions{
 }

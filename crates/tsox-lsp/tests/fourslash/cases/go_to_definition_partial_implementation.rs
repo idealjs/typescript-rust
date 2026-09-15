@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -17,6 +17,6 @@ namespace A {
 
     var x: [|/*Part2Use*/IA|];
 }"#;
-    let mut s = Session::new_for_test("goToDefinitionPartialImplementation", content);
+    let _s = Session::new_for_test("goToDefinitionPartialImplementation", content);
     // TODO: f.VerifyBaselineGoToDefinition(t, true, "Part2Use")
 }

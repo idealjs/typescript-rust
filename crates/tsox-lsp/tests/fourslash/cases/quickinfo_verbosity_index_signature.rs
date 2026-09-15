@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -11,6 +11,6 @@ interface Foo {
     [a/*a*/: Key]: Apple;
 }
 const f/*f*/: Foo = {};"#;
-    let mut s = Session::new_for_test("quickinfoVerbosityIndexSignature", content);
+    let _s = Session::new_for_test("quickinfoVerbosityIndexSignature", content);
     // TODO: f.VerifyBaselineHoverWithVerbosity(t, map[string][]int{"a": {0, 1}, "f": {0, 1, 2}})
 }

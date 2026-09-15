@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -9,6 +9,6 @@ fn rename_parameter_property_declaration3() {
         this.[|protectedParam|] += 10;
     }
 }"#;
-    let mut s = Session::new_for_test("renameParameterPropertyDeclaration3", content);
+    let _s = Session::new_for_test("renameParameterPropertyDeclaration3", content);
     // TODO: f.VerifyBaselineRenameAtRangesWithText(t, nil /*preferences*/, "protectedParam")
 }

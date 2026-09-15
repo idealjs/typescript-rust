@@ -171,7 +171,7 @@ impl Checker {
         constraint: &Arc<Type>,
     ) -> Option<Arc<Type>> {
         let key = (source.id, target.id, constraint.id);
-        let cached = self.reverse_mapped_cache.get(&key).cloned();
+        let _cached = self.reverse_mapped_cache.get(&key).cloned();
 
         // Go inferReverseMappedType：仅当源与目标都深层嵌套（ExpandingFlagsBoth）才跳过；
         // 目标每层为新鲜实例时链持续生长，终止由显示层省略承担

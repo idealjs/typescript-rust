@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -18,7 +18,7 @@ declare module "m";
 // line 3
 // line 4|]
 declare module "n";"#;
-    let mut s = Session::new_for_test("getOutliningSpansForComments", content);
+    let _s = Session::new_for_test("getOutliningSpansForComments", content);
     // TODO: f.MarkTestAsStradaServer()
     // TODO: f.VerifyOutliningSpans(t, lsproto.FoldingRangeKindComment)
 }

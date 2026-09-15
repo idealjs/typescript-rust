@@ -107,6 +107,7 @@ pub enum JsDocPosition {
     /// 类型表达式内的点成员位（import("./m"). 等）：携带 JSDocTypeExpression
     /// 子树根，成员补全在 jsdoc 类型树内找接收者
     TypeDotMember(Arc<Node>),
+    #[allow(dead_code)]
     ContinuePipeline,
     Blocked,
 }
@@ -149,7 +150,7 @@ pub fn jsdoc_position_completions(
     }
 
     if let Some(tags) = &d.tags {
-        let n = tags.nodes.len();
+        let _n = tags.nodes.len();
         for (idx, tag) in tags.nodes.iter().enumerate() {
             // Go JSDocTag 的 span 含尾随 comment 区（到下一 tag/注释尾）：
             // 间隔归属前一 tag

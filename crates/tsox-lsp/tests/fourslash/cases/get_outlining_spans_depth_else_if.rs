@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -86,6 +86,6 @@ fn get_outlining_spans_depth_else_if() {
 }|] else[| {
     1;
 }|]"#;
-    let mut s = Session::new_for_test("getOutliningSpansDepthElseIf", content);
+    let _s = Session::new_for_test("getOutliningSpansDepthElseIf", content);
     // TODO: f.VerifyOutliningSpans(t)
 }

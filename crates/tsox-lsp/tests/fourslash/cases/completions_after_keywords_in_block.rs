@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -43,7 +43,7 @@ class C4 {
         }
     }
 }"#;
-    let mut s = Session::new_for_test("completionsAfterKeywordsInBlock", content);
+    let _s = Session::new_for_test("completionsAfterKeywordsInBlock", content);
     // TODO: f.VerifyCompletions(t, []string{"1", "2"}, &fourslash.CompletionsExpectedList{
     // TODO: f.VerifyCompletions(t, []string{"3", "4"}, &fourslash.CompletionsExpectedList{
 }

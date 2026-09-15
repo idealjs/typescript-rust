@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -32,6 +32,6 @@ namespace foo/*8*/ {
 foo/*9*/()
 let x1: foo/*10*/;
 let x2: foo/*11*/.bar;"#;
-    let mut s = Session::new_for_test("quickInfoMergedAlias", content);
+    let _s = Session::new_for_test("quickInfoMergedAlias", content);
     // TODO: f.VerifyBaselineHover(t)
 }

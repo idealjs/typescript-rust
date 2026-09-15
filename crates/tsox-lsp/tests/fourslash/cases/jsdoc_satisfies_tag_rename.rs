@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -14,6 +14,6 @@ fn jsdoc_satisfies_tag_rename() {
 
 /** @satisfies {/**/T} comment */
 const foo = { a: 1 };"#;
-    let mut s = Session::new_for_test("jsdocSatisfiesTagRename", content);
+    let _s = Session::new_for_test("jsdocSatisfiesTagRename", content);
     // TODO: f.VerifyBaselineRename(t, nil /*preferences*/, "")
 }

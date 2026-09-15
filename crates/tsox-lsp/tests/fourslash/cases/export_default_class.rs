@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[ignore = "go: t.Skip('Known failing fourslash test')"]
@@ -8,6 +8,6 @@ fn export_default_class() {
     method() { /*1*/ }
 }
  /*2*/"#;
-    let mut s = Session::new_for_test("exportDefaultClass", content);
+    let _s = Session::new_for_test("exportDefaultClass", content);
     // TODO: f.VerifyCompletions(t, f.Markers(), &fourslash.CompletionsExpectedList{
 }

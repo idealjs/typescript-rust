@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -7,6 +7,6 @@ fn navigation_bar_items_symbols3() {
     // No nav bar entry for this
     [Symbol.isRegExp] = 0
 }"#;
-    let mut s = Session::new_for_test("navigationBarItemsSymbols3", content);
+    let _s = Session::new_for_test("navigationBarItemsSymbols3", content);
     // TODO: f.VerifyBaselineDocumentSymbol(t)
 }

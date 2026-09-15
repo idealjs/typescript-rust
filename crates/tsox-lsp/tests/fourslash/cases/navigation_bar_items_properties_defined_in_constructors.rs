@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -8,6 +8,6 @@ fn navigation_bar_items_properties_defined_in_constructors() {
         var local = 0;
     }
 }"#;
-    let mut s = Session::new_for_test("navigationBarItemsPropertiesDefinedInConstructors", content);
+    let _s = Session::new_for_test("navigationBarItemsPropertiesDefinedInConstructors", content);
     // TODO: f.VerifyBaselineDocumentSymbol(t)
 }

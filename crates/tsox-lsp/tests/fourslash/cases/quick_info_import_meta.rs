@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -16,6 +16,6 @@ im/*1*/port.me/*2*/ta;
  */
  interface ImportMeta {
 }"#;
-    let mut s = Session::new_for_test("quickInfoImportMeta", content);
+    let _s = Session::new_for_test("quickInfoImportMeta", content);
     // TODO: f.VerifyBaselineHover(t)
 }

@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -9,6 +9,6 @@ export function a() {}
 function *f() {
   yield a/**/
 }"#;
-    let mut s = Session::new_for_test("completionsImportYieldExpression", content);
+    let _s = Session::new_for_test("completionsImportYieldExpression", content);
     // TODO: f.VerifyApplyCodeActionFromCompletion(t, new(""), &fourslash.ApplyCodeActionFromCompletionOptions{
 }

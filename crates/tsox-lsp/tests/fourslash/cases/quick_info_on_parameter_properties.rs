@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -28,6 +28,6 @@ class Foo2 implements IFoo {
   ) {
   }
 }"#;
-    let mut s = Session::new_for_test("quickInfoOnParameterProperties", content);
+    let _s = Session::new_for_test("quickInfoOnParameterProperties", content);
     // TODO: f.VerifyBaselineHover(t)
 }

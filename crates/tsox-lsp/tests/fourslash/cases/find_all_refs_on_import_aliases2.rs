@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -10,7 +10,7 @@ fn find_all_refs_on_import_aliases2() {
 var c = new /*c2_1*/[|C2|]();
 //@Filename: c.ts
 [|export { /*class2*/[|{| "contextRangeIndex": 6 |}Class|] as /*c3*/[|{| "isWriteAccess": true, "isDefinition": true, "contextRangeIndex": 6 |}C3|] } from "./a";|]"#;
-    let mut s = Session::new_for_test("findAllRefsOnImportAliases2", content);
+    let _s = Session::new_for_test("findAllRefsOnImportAliases2", content);
     // TODO: f.VerifyBaselineFindAllReferences(t, "class0", "class1", "class2", "c2_0", "c2_1", "c3")
     // TODO: f.VerifyBaselineRenameAtRangesWithText(t, nil /*preferences*/, "Class", "C2", "C3")
 }

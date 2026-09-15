@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -16,6 +16,6 @@ export function foo() {};
         }
     }
 }"#;
-    let mut s = Session::new_for_test("importNameCodeFixNewImportPaths_withExtension", content);
+    let _s = Session::new_for_test("importNameCodeFixNewImportPaths_withExtension", content);
     // TODO: f.VerifyImportFixAtPosition(t, []string{
 }

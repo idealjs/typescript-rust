@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -16,6 +16,6 @@ function f(obj) { return 0; }
  * @return {/*4*/T}
  */
 function f2(obj) { return 0; }"#;
-    let mut s = Session::new_for_test("findAllRefsJsDocTypeDef_js", content);
+    let _s = Session::new_for_test("findAllRefsJsDocTypeDef_js", content);
     // TODO: f.VerifyBaselineFindAllReferences(t, "1", "2", "3", "4")
 }

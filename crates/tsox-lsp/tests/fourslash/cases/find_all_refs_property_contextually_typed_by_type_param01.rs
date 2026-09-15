@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -19,6 +19,6 @@ class C<T extends IFoo> {
 var x: IFoo = {
     a: "ss"
 };"#;
-    let mut s = Session::new_for_test("findAllRefsPropertyContextuallyTypedByTypeParam01", content);
+    let _s = Session::new_for_test("findAllRefsPropertyContextuallyTypedByTypeParam01", content);
     // TODO: f.VerifyBaselineFindAllReferences(t, "1")
 }

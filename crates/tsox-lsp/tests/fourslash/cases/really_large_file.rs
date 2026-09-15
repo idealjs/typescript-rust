@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -583710,6 +583710,6 @@ namespace /*1*/Foo {
 
 
 }"#;
-    let mut s = Session::new_for_test("reallyLargeFile", content);
+    let _s = Session::new_for_test("reallyLargeFile", content);
     // TODO: f.VerifyBaselineGoToDefinition(t, false, "1")
 }

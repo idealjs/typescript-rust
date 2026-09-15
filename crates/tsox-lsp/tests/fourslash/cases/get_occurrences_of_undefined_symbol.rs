@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -16,6 +16,6 @@ class cls3 {
     super.ceFun/**/c();
 }
 }"#;
-    let mut s = Session::new_for_test("getOccurrencesOfUndefinedSymbol", content);
+    let _s = Session::new_for_test("getOccurrencesOfUndefinedSymbol", content);
     // TODO: f.VerifyBaselineDocumentHighlights(t, nil /*preferences*/, "")
 }

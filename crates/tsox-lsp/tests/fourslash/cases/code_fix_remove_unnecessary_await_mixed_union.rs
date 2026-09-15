@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -11,6 +11,6 @@ async function fn1(a: Promise<void> | void) {
 async function fn2<T extends Promise<void> | void>(a: T) {
   await a;
 }"#;
-    let mut s = Session::new_for_test("codeFixRemoveUnnecessaryAwait_mixedUnion", content);
+    let _s = Session::new_for_test("codeFixRemoveUnnecessaryAwait_mixedUnion", content);
     // TODO: f.VerifySuggestionDiagnostics(t, nil)
 }

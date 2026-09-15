@@ -2,7 +2,6 @@ use std::sync::Arc;
 
 use tsox_frontend::ast::Node;
 use tsox_frontend::ast::NodeData;
-use tsox_frontend::scanner;
 
 pub(super) fn get_node_name(node: &Arc<Node>, text: &str) -> Option<String> {
     match &node.data {

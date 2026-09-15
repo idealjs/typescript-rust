@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -20,6 +20,6 @@ var postDecrement = [|{| "isWriteAccess": true |}x|]--;
 
 [|{| "isWriteAccess": true |}x|] += 1;
 [|{| "isWriteAccess": true |}x|] <<= 1;"#;
-    let mut s = Session::new_for_test("getOccurrencesIsWriteAccess", content);
+    let _s = Session::new_for_test("getOccurrencesIsWriteAccess", content);
     // TODO: f.VerifyBaselineDocumentHighlights(t, nil /*preferences*/, f.Ranges()[0])
 }

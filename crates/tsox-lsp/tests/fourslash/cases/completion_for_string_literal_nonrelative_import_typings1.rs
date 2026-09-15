@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -17,6 +17,6 @@ export var w = 9;
 export var y = 9;
 // @Filename: my_other_typings/module-z/index.d.ts
 export var z = 9;"#;
-    let mut s = Session::new_for_test("completionForStringLiteralNonrelativeImportTypings1", content);
+    let _s = Session::new_for_test("completionForStringLiteralNonrelativeImportTypings1", content);
     // TODO: f.VerifyCompletions(t, f.Markers(), &fourslash.CompletionsExpectedList{
 }

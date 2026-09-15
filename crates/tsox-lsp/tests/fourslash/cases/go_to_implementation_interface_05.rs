@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -9,6 +9,6 @@ fn go_to_implementation_interface_05() {
 
 let bar2 = <Foo> [|function(a) {}|];
 "#;
-    let mut s = Session::new_for_test("goToImplementationInterface_05", content);
+    let _s = Session::new_for_test("goToImplementationInterface_05", content);
     // TODO: f.VerifyBaselineGoToImplementation(t, "interface_definition")
 }

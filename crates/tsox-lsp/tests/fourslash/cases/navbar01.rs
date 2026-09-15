@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -41,7 +41,7 @@ namespace Shapes {
 // Local variables
 var p: IPoint = new Shapes.Point(3, 4);
 var dist = p.getDist();"#;
-    let mut s = Session::new_for_test("navbar01", content);
+    let _s = Session::new_for_test("navbar01", content);
     // TODO: f.MarkTestAsStradaServer()
     // TODO: f.VerifyBaselineDocumentSymbol(t)
 }

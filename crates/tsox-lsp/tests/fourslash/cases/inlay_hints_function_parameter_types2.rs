@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -18,6 +18,6 @@ function f9(a = new N.C()) {}
 function f10(a = ((((new C()))))) {}
 function f11(a = { a: 1, b: 1 }) {}
 function f12(a = ((({ a: 1, b: 1 })))) {}"#;
-    let mut s = Session::new_for_test("inlayHintsFunctionParameterTypes2", content);
+    let _s = Session::new_for_test("inlayHintsFunctionParameterTypes2", content);
     // TODO: f.VerifyBaselineInlayHints(t, nil /*span*/, &lsutil.UserPreferences{InlayHints: lsutil.InlayHintsPre
 }

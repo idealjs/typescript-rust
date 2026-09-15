@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -11,6 +11,6 @@ namespace M {
    export var y = { /*2*/dx, z };
 }
 M.y./*3*/dx;"#;
-    let mut s = Session::new_for_test("findAllRefsWithShorthandPropertyAssignment2", content);
+    let _s = Session::new_for_test("findAllRefsWithShorthandPropertyAssignment2", content);
     // TODO: f.VerifyBaselineFindAllReferences(t, "0", "1", "2", "3")
 }

@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -19,6 +19,6 @@ import {} from "./[|/*1*/|]";
         }
     }
 }"#;
-    let mut s = Session::new_for_test("completionsPaths_kinds", content);
+    let _s = Session::new_for_test("completionsPaths_kinds", content);
     // TODO: f.VerifyCompletions(t, []string{"0", "1"}, &fourslash.CompletionsExpectedList{
 }

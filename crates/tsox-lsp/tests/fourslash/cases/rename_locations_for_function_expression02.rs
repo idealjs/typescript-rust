@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -12,6 +12,6 @@ var x = [|function [|{| "contextRangeIndex": 0 |}f|](g: any, h: any) {
 
     let foo = () => [|f|]([|f|], g);
 }|]"#;
-    let mut s = Session::new_for_test("renameLocationsForFunctionExpression02", content);
+    let _s = Session::new_for_test("renameLocationsForFunctionExpression02", content);
     // TODO: f.VerifyBaselineRenameAtRangesWithText(t, nil /*preferences*/, "f")
 }

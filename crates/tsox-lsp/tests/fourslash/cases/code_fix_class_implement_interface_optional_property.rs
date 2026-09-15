@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -9,6 +9,6 @@ interface IPerson {
     birthday?: string;
 }
 class Person implements IPerson {}"#;
-    let mut s = Session::new_for_test("codeFixClassImplementInterfaceOptionalProperty", content);
+    let _s = Session::new_for_test("codeFixClassImplementInterfaceOptionalProperty", content);
     // TODO: f.VerifyCodeFix(t, fourslash.VerifyCodeFixOptions{
 }

@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -8,6 +8,6 @@ using a/*a*/ = "a";
 const f = async () => {
     await using /*b*/b = { async [Symbol.asyncDispose]() {} };
 };"#;
-    let mut s = Session::new_for_test("quickInfoDisplayPartsUsing", content);
+    let _s = Session::new_for_test("quickInfoDisplayPartsUsing", content);
     // TODO: f.VerifyBaselineHover(t)
 }

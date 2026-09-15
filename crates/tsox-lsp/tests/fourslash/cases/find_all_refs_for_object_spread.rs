@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -10,6 +10,6 @@ let a2: A2;
 let a12 = { ...a1, ...a2 };
 a12./*2*/a;
 a1./*3*/a;"#;
-    let mut s = Session::new_for_test("findAllRefsForObjectSpread", content);
+    let _s = Session::new_for_test("findAllRefsForObjectSpread", content);
     // TODO: f.VerifyBaselineFindAllReferences(t, "0", "1", "2", "3")
 }

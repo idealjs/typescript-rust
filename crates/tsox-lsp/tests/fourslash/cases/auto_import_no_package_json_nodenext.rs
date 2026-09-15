@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -9,7 +9,7 @@ fn auto_import_no_package_json_nodenext() {
 export declare function customElement(name: string): any;
 // @Filename: /a.ts
 customElement/**/"#;
-    let mut s = Session::new_for_test("autoImportNoPackageJson_nodenext", content);
+    let _s = Session::new_for_test("autoImportNoPackageJson_nodenext", content);
     // TODO: f.Configure(t, lsutil.UserPreferences{AutoImportEntrypointDirectorySearch: core.TSTrue})
     // TODO: f.VerifyImportFixModuleSpecifiers(t, "", []string{"lit/index.cjs"}, nil /*preferences*/)
 }

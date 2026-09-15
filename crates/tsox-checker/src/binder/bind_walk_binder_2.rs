@@ -156,7 +156,7 @@ impl Binder {
                             cur = n.parent();
                         }
                     }
-                    let file_node = scope_nodes
+                    let _file_node = scope_nodes
                         .iter()
                         .find(|n| n.kind == SyntaxKind::SourceFile)
                         .cloned()

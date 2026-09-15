@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -13,7 +13,7 @@ foo: [|switch|] (10) {
         continue;
         continue foo;
 }"#;
-    let mut s = Session::new_for_test("occurrences01", content);
+    let _s = Session::new_for_test("occurrences01", content);
     // TODO: f.MarkTestAsStradaServer()
     // TODO: f.VerifyBaselineDocumentHighlights(t, nil /*preferences*/, ToAny(f.Ranges())...)
 }

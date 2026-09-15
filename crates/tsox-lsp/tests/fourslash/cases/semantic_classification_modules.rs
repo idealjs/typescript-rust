@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -11,6 +11,6 @@ fn semantic_classification_modules() {
 
 var x: /*2*/M./*3*/I = /*4*/M.v;
 var y = /*5*/M;"#;
-    let mut s = Session::new_for_test("semanticClassificationModules", content);
+    let _s = Session::new_for_test("semanticClassificationModules", content);
     // TODO: f.VerifySemanticTokens(t, []fourslash.SemanticToken{
 }

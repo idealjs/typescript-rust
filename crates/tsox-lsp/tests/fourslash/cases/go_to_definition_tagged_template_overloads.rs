@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -9,6 +9,6 @@ function f(strs: TemplateStringsArray, x: number | boolean) {}
 
 [|/*useFNumber*/f|]`${0}`;
 [|/*useFBool*/f|]`${false}`;"#;
-    let mut s = Session::new_for_test("goToDefinitionTaggedTemplateOverloads", content);
+    let _s = Session::new_for_test("goToDefinitionTaggedTemplateOverloads", content);
     // TODO: f.VerifyBaselineGoToDefinition(t, true, "useFNumber", "useFBool")
 }

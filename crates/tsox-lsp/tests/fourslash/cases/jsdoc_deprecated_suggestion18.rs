@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -16,6 +16,6 @@ function A(props: Props) {
 function B() {
     return <A [|x|]={1} [|y|]={1} />
 }"#;
-    let mut s = Session::new_for_test("jsdocDeprecated_suggestion18", content);
+    let _s = Session::new_for_test("jsdocDeprecated_suggestion18", content);
     // TODO: f.VerifySuggestionDiagnostics(t, []*lsproto.Diagnostic{
 }

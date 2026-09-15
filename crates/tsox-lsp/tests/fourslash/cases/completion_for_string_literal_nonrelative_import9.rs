@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -21,6 +21,6 @@ var foo3 = require("m/*require0*/
 export var x = 9;
 // @Filename: some/other/path.ts
 export var y = 10;"#;
-    let mut s = Session::new_for_test("completionForStringLiteralNonrelativeImport9", content);
+    let _s = Session::new_for_test("completionForStringLiteralNonrelativeImport9", content);
     // TODO: f.VerifyCompletions(t, f.Markers(), &fourslash.CompletionsExpectedList{
 }

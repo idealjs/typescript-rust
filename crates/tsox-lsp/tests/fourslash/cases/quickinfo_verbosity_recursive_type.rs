@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -29,6 +29,6 @@ const m/*m*/: TreeNode<number> = {
     right: undefined,
     orange: { name: "orange" },
 }"#;
-    let mut s = Session::new_for_test("quickinfoVerbosityRecursiveType", content);
+    let _s = Session::new_for_test("quickinfoVerbosityRecursiveType", content);
     // TODO: f.VerifyBaselineHoverWithVerbosity(t, map[string][]int{"N": {0}, "n": {0, 1}, "t": {0, 1}, "m": {0, 
 }

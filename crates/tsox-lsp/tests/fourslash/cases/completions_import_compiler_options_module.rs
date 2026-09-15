@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -27,6 +27,6 @@ fo/*dcheck*/
 // @Filename: /d2.ts
 const a = import("./a"); // Does not make this an external module
 fo/*dts*/"#;
-    let mut s = Session::new_for_test("completionsImport_compilerOptionsModule", content);
+    let _s = Session::new_for_test("completionsImport_compilerOptionsModule", content);
     // TODO: f.VerifyCompletions(t, []string{"b", "c", "ccheck", "cts", "d", "dcheck", "dts"}, &fourslash.Complet
 }

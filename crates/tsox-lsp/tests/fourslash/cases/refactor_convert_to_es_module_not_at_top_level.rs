@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -9,6 +9,6 @@ fn refactor_convert_to_es_module_not_at_top_level() {
 (function() {
     module.exports = 0;
 })();"#;
-    let mut s = Session::new_for_test("refactorConvertToEsModule_notAtTopLevel", content);
+    let _s = Session::new_for_test("refactorConvertToEsModule_notAtTopLevel", content);
     // TODO: f.VerifySuggestionDiagnostics(t, nil)
 }

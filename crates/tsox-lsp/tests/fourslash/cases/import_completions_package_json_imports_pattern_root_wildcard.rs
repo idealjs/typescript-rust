@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[ignore = "go: t.Skip('Known failing fourslash test')"]
@@ -17,6 +17,6 @@ export function something(name: string): any;
 export function bar(): any;
 // @Filename: /a.ts
 import {} from "#//*1*/";"##;
-    let mut s = Session::new_for_test("importCompletionsPackageJsonImportsPatternRootWildcard", content);
+    let _s = Session::new_for_test("importCompletionsPackageJsonImportsPatternRootWildcard", content);
     // TODO: f.VerifyCompletions(t, []string{"1"}, &fourslash.CompletionsExpectedList{
 }

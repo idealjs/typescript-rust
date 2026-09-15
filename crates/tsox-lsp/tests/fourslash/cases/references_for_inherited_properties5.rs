@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -15,6 +15,6 @@ interface interface2 extends interface1 {
 var v: interface1;
 v.propName;
 v.doStuff();"#;
-    let mut s = Session::new_for_test("referencesForInheritedProperties5", content);
+    let _s = Session::new_for_test("referencesForInheritedProperties5", content);
     // TODO: f.VerifyBaselineFindAllReferences(t, "1", "2")
 }

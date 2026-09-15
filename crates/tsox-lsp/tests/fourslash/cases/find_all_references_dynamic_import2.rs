@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -9,7 +9,7 @@ var x = import("./foo");
 x.then(foo => {
     foo./*2*/[|bar|]();
 })"#;
-    let mut s = Session::new_for_test("findAllReferencesDynamicImport2", content);
+    let _s = Session::new_for_test("findAllReferencesDynamicImport2", content);
     // TODO: f.VerifyBaselineFindAllReferences(t, "1", "2")
     // TODO: f.VerifyBaselineRenameAtRangesWithText(t, nil /*preferences*/, "bar")
 }

@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -24,7 +24,7 @@ export function util() { return "util"; }
 export { A } from "../foo/a";
 // @Filename: /proj/src/index.ts
 export * from "./a";"#;
-    let mut s = Session::new_for_test("importNameCodeFix_barrelExport2", content);
+    let _s = Session::new_for_test("importNameCodeFix_barrelExport2", content);
     // TODO: f.VerifyImportFixModuleSpecifiers(t, "sibling", []string{"proj/foo/a", "proj/src/utils", "proj", "pr
     // TODO: f.VerifyImportFixModuleSpecifiers(t, "parent", []string{"proj/foo", "proj/foo/a", "proj/src/utils", 
 }

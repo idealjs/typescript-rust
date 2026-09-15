@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -10,6 +10,6 @@ fn rename_string_literal_types4() {
 declare const fn: <K extends keyof I>(p: K) => void
 
 fn("Prop 1"/**/)"#;
-    let mut s = Session::new_for_test("renameStringLiteralTypes4", content);
+    let _s = Session::new_for_test("renameStringLiteralTypes4", content);
     // TODO: f.VerifyBaselineRename(t, nil /*preferences*/, "")
 }

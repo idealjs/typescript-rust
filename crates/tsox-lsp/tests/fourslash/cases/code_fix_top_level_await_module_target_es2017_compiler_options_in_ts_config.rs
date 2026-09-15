@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[ignore = "go: t.Skip('Known failing fourslash test')"]
@@ -14,7 +14,7 @@ export {};
         "target": "es2017"
     }
 }"#;
-    let mut s = Session::new_for_test("codeFixTopLevelAwait_module_targetES2017CompilerOptionsInTsConfig", content);
+    let _s = Session::new_for_test("codeFixTopLevelAwait_module_targetES2017CompilerOptionsInTsConfig", content);
     // TODO: f.VerifyCodeFixNotAvailable(t, "fixTargetOption")
     // TODO: f.VerifyCodeFixAvailable(t, nil)
 }

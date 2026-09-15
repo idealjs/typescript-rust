@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -10,6 +10,6 @@ declare var /*valueDeclaration3*/id;
 var obj = {[|/*valueDefinition1*/name|], [|/*valueDefinition2*/id|]};
 obj.[|/*valueReference1*/name|];
 obj.[|/*valueReference2*/id|];"#;
-    let mut s = Session::new_for_test("goToDefinitionShorthandProperty01", content);
+    let _s = Session::new_for_test("goToDefinitionShorthandProperty01", content);
     // TODO: f.VerifyBaselineGoToDefinition(t, true, "valueDefinition1", "valueDefinition2", "valueReference1", "
 }

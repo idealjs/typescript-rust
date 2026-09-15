@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -14,6 +14,6 @@ function Cls() {
 Cls.[|staticMethod|] = function() {};
 Cls.[|staticProperty|] = 0;
 Cls.prototype.[|instanceMethod|] = function() {};"#;
-    let mut s = Session::new_for_test("navigationItemsSpecialPropertyAssignment", content);
+    let _s = Session::new_for_test("navigationItemsSpecialPropertyAssignment", content);
     // TODO: f.VerifyWorkspaceSymbol(t, []*fourslash.VerifyWorkspaceSymbolCase{
 }

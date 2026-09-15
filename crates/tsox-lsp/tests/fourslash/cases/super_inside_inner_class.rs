@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -14,6 +14,6 @@ class Derived extends Base {
 		}
 	}
 }"#;
-    let mut s = Session::new_for_test("superInsideInnerClass", content);
+    let _s = Session::new_for_test("superInsideInnerClass", content);
     // TODO: f.VerifyNoSignatureHelpForMarkers(t, "1")
 }

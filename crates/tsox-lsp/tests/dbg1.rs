@@ -15,7 +15,7 @@ const o: I = {
     */*e*/
 };
 1 * /*f*/"#;
-    let mut s = Session::new_for_test("dbg", content);
+    let s = Session::new_for_test("dbg", content);
     let m = s.marker("e").clone();
     let service = s.service.as_ref().unwrap();
     let list = service.debug_completion_labels(&m.file_name, m.position);
@@ -54,7 +54,7 @@ createMachine<{
 }>({
   entry: sendTo((ctx) => ctx.child, { type: "/*2*/" }),
 });"#;
-    let mut s = Session::new_for_test("completionsForStringDependingOnContexSensitiveSignature", content);
+    let s = Session::new_for_test("completionsForStringDependingOnContexSensitiveSignature", content);
     let m = s.marker("2").clone();
     let service = s.service.as_ref().unwrap();
     let file = m.file_name.clone();
@@ -75,7 +75,7 @@ fn probe_recursive_generic_members() {
         t./**/
     }
 }"#;
-    let mut s = Session::new_for_test("completionsForRecursiveGenericTypesMember", content);
+    let s = Session::new_for_test("completionsForRecursiveGenericTypesMember", content);
     let m = s.marker("").clone();
     let service = s.service.as_ref().unwrap();
     eprintln!("labels-plain={:?}", service.debug_completion_labels(&m.file_name, m.position));
@@ -89,7 +89,7 @@ fn probe_recursive_generic_members() {
         t./**/
     }
 }"#;
-    let mut s2 = Session::new_for_test("completionsForRecursiveGenericTypesMember2", content2);
+    let s2 = Session::new_for_test("completionsForRecursiveGenericTypesMember2", content2);
     let m2 = s2.marker("").clone();
     let service2 = s2.service.as_ref().unwrap();
     eprintln!("labels-rec={:?}", service2.debug_completion_labels(&m2.file_name, m2.position));
@@ -116,7 +116,7 @@ fn probe_mapped_parse() {
     }
     let _ = &file.node;
     let content = "type Wrap<T> = { [K in Extract<keyof T, string> as `${K}Wrapped`]: T[K]; };\nlet x: Wrap<{ a: 1 }>;\n";
-    let mut s = Session::new_for_test("mappedMin", content);
+    let s = Session::new_for_test("mappedMin", content);
     let service = s.service.as_ref().unwrap();
     eprintln!("labels={:?}", service.debug_completion_labels("mappedMin.ts", content.len() - 1));
 }
@@ -129,14 +129,10 @@ fn probe_namespace_merged_value() {
 const N = { m() {} };
 let x: N./*type*/;
 N./*value*/;"#;
-    let mut s = Session::new_for_test("completionsNamespaceMergedWithObject", content);
+    let s = Session::new_for_test("completionsNamespaceMergedWithObject", content);
     let m = s.marker("value").clone();
     let service = s.service.as_ref().unwrap();
     eprintln!("labels={:?}", service.debug_completion_labels(&m.file_name, m.position));
-    let contents_pos = content.find("crate.contents.").unwrap() + 6;
-    eprintln!("contents-qic={:?}", service.debug_quick_info(&m.file_name, contents_pos));
-    let crate_pos = content.find("crate.contents.").unwrap();
-    eprintln!("crate-qic={:?}", service.debug_quick_info(&m.file_name, crate_pos + 1));
 }
 
 #[test]
@@ -155,14 +151,10 @@ class Service {
         const { /*a*/ } = service;
     }
 }"#;
-    let mut s = Session::new_for_test("completionsWrappedClass", content);
+    let s = Session::new_for_test("completionsWrappedClass", content);
     let m = s.marker("a").clone();
     let service = s.service.as_ref().unwrap();
     eprintln!("labels={:?}", service.debug_completion_labels(&m.file_name, m.position));
-    let contents_pos = content.find("crate.contents.").unwrap() + 6;
-    eprintln!("contents-qic={:?}", service.debug_quick_info(&m.file_name, contents_pos));
-    let crate_pos = content.find("crate.contents.").unwrap();
-    eprintln!("crate-qic={:?}", service.debug_quick_info(&m.file_name, crate_pos + 1));
 }
 
 #[test]
@@ -192,14 +184,10 @@ abstract class RightSideNode extends TreeNode {
 
 var obj = new (merge(LeftSideNode, RightSideNode))();
 obj./**/"#;
-    let mut s = Session::new_for_test("mixinCtorProbe", content);
+    let s = Session::new_for_test("mixinCtorProbe", content);
     let service = s.service.as_ref().unwrap();
     let m = s.marker("").clone();
     eprintln!("labels={:?}", service.debug_completion_labels(&m.file_name, m.position));
-    let contents_pos = content.find("crate.contents.").unwrap() + 6;
-    eprintln!("contents-qic={:?}", service.debug_quick_info(&m.file_name, contents_pos));
-    let crate_pos = content.find("crate.contents.").unwrap();
-    eprintln!("crate-qic={:?}", service.debug_quick_info(&m.file_name, crate_pos + 1));
     eprintln!("ctx={:?}", service.debug_contextual_type(&m.file_name, m.position, false));
     let obj_pos = content.find("obj.").unwrap();
     eprintln!("obj-qic={:?}", service.debug_quick_info(&m.file_name, obj_pos));
@@ -212,7 +200,7 @@ obj./**/"#;
     let alias_decl_pos = content.find("type MixinCtor").unwrap() + 5;
     eprintln!("aliasdecl-qic={:?}", service.debug_quick_info(&m.file_name, alias_decl_pos));
     let content2 = content.replace("{ constructor: MixinCtor<A, B> }", "{ }");
-    let mut s2 = Session::new_for_test("mixinCtorProbe2", &content2);
+    let s2 = Session::new_for_test("mixinCtorProbe2", &content2);
     let service2 = s2.service.as_ref().unwrap();
     let merge_pos2 = content2.find("merge(LeftSideNode").unwrap();
     eprintln!("merge2-qic={:?}", service2.debug_quick_info("mixinCtorProbe2.ts", merge_pos2));
@@ -235,7 +223,7 @@ if (crate.isPackedTight()) {
 if (crate.isSundries()) {
     crate.contents./**/;
 }"#;
-    let mut s = Session::new_for_test("thisPred", content);
+    let s = Session::new_for_test("thisPred", content);
     let service = s.service.as_ref().unwrap();
     let text = "const crate: Crate<any>;\nif (crate.isSundries()) {\n    crate.contents.;\n}";
     let file = tsox_frontend::parser::Parser::parse_source_file_text("probe.ts", text.to_string());    fn walk(n: &tsox_frontend::ast::Node, text: &str, depth: usize) {
@@ -246,12 +234,6 @@ if (crate.isSundries()) {
     walk(&file.node, text, 0);
     let m = s.marker("").clone();
     eprintln!("labels={:?}", service.debug_completion_labels(&m.file_name, m.position));
-    let contents_pos = content.find("crate.contents.").unwrap() + 6;
-    eprintln!("contents-qic={:?}", service.debug_quick_info(&m.file_name, contents_pos));
-    let crate_pos = content.find("crate.contents.").unwrap();
-    eprintln!("crate-qic={:?}", service.debug_quick_info(&m.file_name, crate_pos + 1));
-    let m2 = s.marker("2").clone();
-    eprintln!("labels2={:?}", service.debug_completion_labels(&m2.file_name, m2.position));
 }
 
 #[test]
@@ -273,7 +255,7 @@ f4({
     kind: "a",
     /*6*/
 })"#;
-    let mut s = Session::new_for_test("completionsObjectLiteralWithPartialConstraint", content);
+    let s = Session::new_for_test("completionsObjectLiteralWithPartialConstraint", content);
     for name in ["3", "6"] {
         let m = s.marker(name).clone();
         let service = s.service.as_ref().unwrap();
@@ -302,7 +284,7 @@ import {/*a*/a} from "./mod"
 import def, {sausages} from "./mod2"
 const d2 = /*d*/def;
 def./**/"#;
-    let mut s = Session::new_for_test("jsModProbe", content);
+    let s = Session::new_for_test("jsModProbe", content);
     let service = s.service.as_ref().unwrap();
     let m = s.marker("").clone();
     eprintln!("labels={:?}", service.debug_completion_labels(&m.file_name, m.position));
@@ -325,7 +307,7 @@ declare global {
 // @Filename: /index.ts
 let v = new /*1*/THREE.Vector3();
 const w = /*2*/_THREE;"#;
-    let mut s = Session::new_for_test("typeofModProbe", content);
+    let s = Session::new_for_test("typeofModProbe", content);
     let service = s.service.as_ref().unwrap();
     let m1 = s.marker("1").clone();
     eprintln!("three-qic={:?}", service.debug_quick_info(&m1.file_name, m1.position));
@@ -352,7 +334,7 @@ import { x as x1 } from "./index";
 import { x as x2 } from "./index.js";
 import { y } from "./jsx.jsx";
 import { j } from "./j.jonah.json";"#;
-    let mut s = Session::new_for_test("jsonKindProbe", content);
+    let s = Session::new_for_test("jsonKindProbe", content);
     let service = s.service.as_ref().unwrap();
     fourslash::debug_dump_diagnostics(&s, "/a.js");
     let program = service.get_program();
@@ -369,11 +351,7 @@ fn probe_fmt_scanner_jsx() {
     let (file, diags) = tsox_frontend::parser::Parser::parse_source_file_text_with_diagnostics("p.tsx", text.to_string());
     eprintln!("diags={}", diags.len());
     let file = std::sync::Arc::new(file);
-    let service_opts = tsox_lsp::ls::lsutil::FormatCodeSettings::default();
-    let ctx_opts = {
-        // 与 ls::format::to_engine_settings 同构的最小默认
-        tsox_frontend::format::FormatCodeSettings::default_or(service_opts)
-    };
+    let ctx_opts = tsox_frontend::format::get_default_format_code_settings();
     let ctx = tsox_frontend::format::with_format_code_settings(ctx_opts, "\n");
     let changes = tsox_frontend::format::format_document(&ctx, &file);
     for c in &changes {

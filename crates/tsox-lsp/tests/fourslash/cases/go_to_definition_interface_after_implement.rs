@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -13,6 +13,6 @@ class iClass implements /*interfaceReference*/sInt {
     public sFn() {
     }
 }"#;
-    let mut s = Session::new_for_test("goToDefinitionInterfaceAfterImplement", content);
+    let _s = Session::new_for_test("goToDefinitionInterfaceAfterImplement", content);
     // TODO: f.VerifyBaselineGoToDefinition(t, false, "interfaceReference")
 }

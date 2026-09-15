@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -9,6 +9,6 @@ fn go_to_implementation_enum_00() {
 }
 
 Foo.Fo/*reference*/o1;"#;
-    let mut s = Session::new_for_test("goToImplementationEnum_00", content);
+    let _s = Session::new_for_test("goToImplementationEnum_00", content);
     // TODO: f.VerifyBaselineGoToImplementation(t, "reference")
 }

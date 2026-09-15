@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -11,6 +11,6 @@ interface J {
     a: I[/*3*/0],
     b: I["/*4*/s"],
 }"#;
-    let mut s = Session::new_for_test("findAllRefsIndexedAccessTypes", content);
+    let _s = Session::new_for_test("findAllRefsIndexedAccessTypes", content);
     // TODO: f.VerifyBaselineFindAllReferences(t, "1", "2", "3", "4")
 }

@@ -76,6 +76,7 @@ impl Checker {
     }
 
     /// alias 目标声明文档（Go documentationFromAlias）
+    #[allow(dead_code)]
     fn hover_doc_from_alias(&mut self, symbol: &Arc<Symbol>) -> String {
         if !symbol.flags.intersects(tsox_frontend::ast::SymbolFlags::Alias) {
             return String::new();
@@ -102,6 +103,7 @@ impl Checker {
         String::new()
     }
 
+    #[allow(dead_code)]
     fn declaration_has_typedef_tag(&self, decl: &Arc<Node>) -> bool {
         let file = match self.get_source_file_of_node(decl) {
             Some(f) => f,

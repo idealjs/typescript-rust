@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -10,6 +10,6 @@ namespace NS/*1*/ {
     }
 }
 "#;
-    let mut s = Session::new_for_test("quickinfoVerbosityNamespaceErrorClassHeritage1", content);
+    let _s = Session::new_for_test("quickinfoVerbosityNamespaceErrorClassHeritage1", content);
     // TODO: f.VerifyBaselineHoverWithVerbosity(t, map[string][]int{"1": {0, 1}})
 }

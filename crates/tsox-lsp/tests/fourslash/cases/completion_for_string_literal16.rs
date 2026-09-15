@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -18,6 +18,6 @@ f1<Foo>("/*3*/",,,);
 f2<Foo>("/*4*/", "/*5*/",);
 f2<Foo>("/*6*/", "/*7*/");
 f2<Foo>("/*8*/", "/*9*/",,,);"#;
-    let mut s = Session::new_for_test("completionForStringLiteral16", content);
+    let _s = Session::new_for_test("completionForStringLiteral16", content);
     // TODO: f.VerifyCompletions(t, f.Markers(), &fourslash.CompletionsExpectedList{
 }

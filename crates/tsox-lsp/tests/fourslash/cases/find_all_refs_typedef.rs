@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -13,6 +13,6 @@ fn find_all_refs_typedef() {
 /** @type {I} */
 let x;
 x./*3*/p;"#;
-    let mut s = Session::new_for_test("findAllRefsTypedef", content);
+    let _s = Session::new_for_test("findAllRefsTypedef", content);
     // TODO: f.VerifyBaselineFindAllReferences(t, "1", "2", "3")
 }

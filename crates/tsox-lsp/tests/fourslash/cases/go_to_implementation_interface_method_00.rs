@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -21,6 +21,6 @@ class Bar {
 
     constructor(public f: Foo = { [|hello|]() {/**3*/} } ) {}
 }"#;
-    let mut s = Session::new_for_test("goToImplementationInterfaceMethod_00", content);
+    let _s = Session::new_for_test("goToImplementationInterfaceMethod_00", content);
     // TODO: f.VerifyBaselineGoToImplementation(t, "function_call", "declaration")
 }

@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -13,6 +13,6 @@ const [ first, second ] = array;
 const [] = array;
 declare function foo<T extends number>(t: T): T
 const x = foo(1)"#;
-    let mut s = Session::new_for_test("inlayHintsInteractiveVariableTypes2", content);
+    let _s = Session::new_for_test("inlayHintsInteractiveVariableTypes2", content);
     // TODO: f.VerifyBaselineInlayHints(t, nil /*span*/, &lsutil.UserPreferences{InlayHints: lsutil.InlayHintsPre
 }

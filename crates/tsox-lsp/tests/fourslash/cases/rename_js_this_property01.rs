@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -10,6 +10,6 @@ function bar() {
 }
 var t = new bar();
 [|t.[|{| "contextRangeIndex": 2 |}x|] = 11;|]"#;
-    let mut s = Session::new_for_test("renameJsThisProperty01", content);
+    let _s = Session::new_for_test("renameJsThisProperty01", content);
     // TODO: f.VerifyBaselineRenameAtRangesWithText(t, nil /*preferences*/, "x")
 }

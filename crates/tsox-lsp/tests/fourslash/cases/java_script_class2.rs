@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -14,6 +14,6 @@ class Foo {
 }
 var x = new Foo();
 x.[|union|];"#;
-    let mut s = Session::new_for_test("javaScriptClass2", content);
+    let _s = Session::new_for_test("javaScriptClass2", content);
     // TODO: f.VerifyBaselineRenameAtRangesWithText(t, nil /*preferences*/, "union")
 }

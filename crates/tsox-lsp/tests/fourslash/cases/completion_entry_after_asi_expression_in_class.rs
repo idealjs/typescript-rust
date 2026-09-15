@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -20,6 +20,6 @@ class ChildTwo extends Parent {
   x = () => 1
   /*root*/ //nothing
 }"#;
-    let mut s = Session::new_for_test("completionEntryAfterASIExpressionInClass", content);
+    let _s = Session::new_for_test("completionEntryAfterASIExpressionInClass", content);
     // TODO: f.VerifyCompletions(t, []string{"insideid", "root"}, &fourslash.CompletionsExpectedList{
 }

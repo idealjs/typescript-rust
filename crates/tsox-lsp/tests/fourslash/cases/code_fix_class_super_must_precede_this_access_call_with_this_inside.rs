@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -11,6 +11,6 @@ class C extends Base{
         super(this.a);
     }
 }"#;
-    let mut s = Session::new_for_test("codeFixClassSuperMustPrecedeThisAccess_callWithThisInside", content);
+    let _s = Session::new_for_test("codeFixClassSuperMustPrecedeThisAccess_callWithThisInside", content);
     // TODO: f.VerifyCodeFixNotAvailable(t)
 }

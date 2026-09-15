@@ -29,9 +29,9 @@ pub(crate) enum Field {
 
 fn list_fields(parent: &Arc<Node>) -> Vec<(Field, Arc<NodeList>)> {
     use Field::*;
-    use SyntaxKind::*;
+    
     let data = &parent.data;
-    let list = |l: &Arc<NodeList>| (l.clone());
+    let list = |l: &Arc<NodeList>| l.clone();
     let opt = |l: &Option<Arc<NodeList>>| l.as_ref().map(|l| l.clone());
     match &*data {
         crate::ast::node_data_generated::NodeData::FunctionDeclaration(d) => {

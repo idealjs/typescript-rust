@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -20,6 +20,6 @@ class Self {
         this.other.p/*3*/.toString();
     }
 }"#;
-    let mut s = Session::new_for_test("completionListPrivateMembers3", content);
+    let _s = Session::new_for_test("completionListPrivateMembers3", content);
     // TODO: f.VerifyCompletions(t, []string{"1", "2", "3"}, &fourslash.CompletionsExpectedList{
 }

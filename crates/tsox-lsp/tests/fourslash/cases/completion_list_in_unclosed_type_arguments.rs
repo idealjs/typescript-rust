@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -25,6 +25,6 @@ f2<typeof /*1uValueOnly*/x, {| "newId": true |}T{| "newId": true |}y{| "newId": 
 f2</*1x*/T/*2x*/y/*3x*/, () =>/*4x*/T/*5x*/y/*6x*/
 f2<() =>/*1y*/T/*2y*/y/*3y*/, () =>/*4y*/T/*5y*/y/*6y*/
 f2<any, () =>/*1z*/T/*2z*/y/*3z*/"#;
-    let mut s = Session::new_for_test("completionListInUnclosedTypeArguments", content);
+    let _s = Session::new_for_test("completionListInUnclosedTypeArguments", content);
     // TODO: f.GoToEachMarker(t, nil, func(marker *fourslash.Marker, index int) {
 }

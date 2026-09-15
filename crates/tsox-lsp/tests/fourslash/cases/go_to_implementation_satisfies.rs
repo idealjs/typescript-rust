@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -11,6 +11,6 @@ interface /*def*/I {
 function f() {
     const foo = { foo: '' } satisfies [|I|];
 }"#;
-    let mut s = Session::new_for_test("goToImplementation_satisfies", content);
+    let _s = Session::new_for_test("goToImplementation_satisfies", content);
     // TODO: f.VerifyBaselineGoToImplementation(t, "def")
 }

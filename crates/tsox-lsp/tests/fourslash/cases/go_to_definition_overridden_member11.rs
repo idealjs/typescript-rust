@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -15,6 +15,6 @@ class Bar extends Foo {
     /** @[|over{|"name": "1"|}ride|][| se{|"name": "2"|}e {@li{|"name": "3"|}nk https://test.c{|"name": "4"|}om} {|"name": "5"|}description |]*/
     m() {}
 }"#;
-    let mut s = Session::new_for_test("goToDefinitionOverriddenMember11", content);
+    let _s = Session::new_for_test("goToDefinitionOverriddenMember11", content);
     // TODO: f.VerifyBaselineGoToDefinition(t, true, "1", "2", "3", "4", "5")
 }

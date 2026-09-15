@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[ignore = "go: t.Skip('Known failing fourslash test')"]
@@ -36,7 +36,7 @@ export function add(a: number, b: number) {}
 // @Filename: /src/index.ts
 add/*imports*/;
 external/*exports*/;"##;
-    let mut s = Session::new_for_test("autoImportAllowImportingTsExtensionsPackageJsonImports1", content);
+    let _s = Session::new_for_test("autoImportAllowImportingTsExtensionsPackageJsonImports1", content);
     // TODO: f.VerifyImportFixModuleSpecifiers(t, "imports", []string{"#add.ts"}, nil /*preferences*/)
     // TODO: f.VerifyImportFixModuleSpecifiers(t, "exports", []string{"pkg/external.js"}, nil /*preferences*/)
 }

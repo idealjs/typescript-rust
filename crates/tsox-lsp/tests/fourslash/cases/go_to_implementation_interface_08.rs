@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -18,6 +18,6 @@ class X implements B {
 function someFunction(d : A) {
     d.he/*function_call*/llo();
 }"#;
-    let mut s = Session::new_for_test("goToImplementationInterface_08", content);
+    let _s = Session::new_for_test("goToImplementationInterface_08", content);
     // TODO: f.VerifyBaselineGoToImplementation(t, "function_call")
 }

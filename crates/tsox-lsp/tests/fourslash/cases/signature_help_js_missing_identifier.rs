@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -7,6 +7,6 @@ fn signature_help_js_missing_identifier() {
 // @checkJs: true
 // @Filename: test.js
 log(/**/)"#;
-    let mut s = Session::new_for_test("signatureHelpJSMissingIdentifier", content);
+    let _s = Session::new_for_test("signatureHelpJSMissingIdentifier", content);
     // TODO: f.VerifyNoSignatureHelpForMarkers(t, "")
 }

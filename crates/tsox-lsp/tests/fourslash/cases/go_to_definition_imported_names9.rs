@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -12,6 +12,6 @@ class /*classDefinition*/Class {
 // @Filename: b.js
 const { Class } = require("./a");
  [|/*classAliasDefinition*/Class|];"#;
-    let mut s = Session::new_for_test("goToDefinitionImportedNames9", content);
+    let _s = Session::new_for_test("goToDefinitionImportedNames9", content);
     // TODO: f.VerifyBaselineGoToDefinition(t, true, "classAliasDefinition")
 }

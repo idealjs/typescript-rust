@@ -1,9 +1,9 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
 fn smart_selection_punctuation_priority() {
     let content = r#"console/**/.log();"#;
-    let mut s = Session::new_for_test("smartSelection_punctuationPriority", content);
+    let _s = Session::new_for_test("smartSelection_punctuationPriority", content);
     // TODO: f.VerifyBaselineSelectionRanges(t)
 }

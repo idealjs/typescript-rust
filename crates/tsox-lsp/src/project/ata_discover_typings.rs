@@ -2,8 +2,6 @@ pub(crate) use std::collections::HashMap;
 
 pub(crate) use tsox_core::collections::set::Set;
 pub(crate) use tsox_core::core::compiler_options::CompilerOptions;
-pub(crate) use tsox_core::semver;
-pub(crate) use tsox_core::tspath;
 pub(crate) use tsox_tsoptions::vfs::FS;
 
 pub(crate) use crate::project::ata_types_map::lookup_type_name;

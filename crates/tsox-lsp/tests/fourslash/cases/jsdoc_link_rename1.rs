@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -8,6 +8,6 @@ fn jsdoc_link_rename1() {
  * {@link A()} is ok
  */
 declare const a: A"#;
-    let mut s = Session::new_for_test("jsdocLink_rename1", content);
+    let _s = Session::new_for_test("jsdocLink_rename1", content);
     // TODO: f.VerifyBaselineRename(t, nil /*preferences*/, "")
 }

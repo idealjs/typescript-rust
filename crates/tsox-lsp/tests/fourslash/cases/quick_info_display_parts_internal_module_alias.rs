@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -17,6 +17,6 @@ namespace m2 {
     export import /*7*/a4 = m.m1;
     new /*8*/a4.c();
 }"#;
-    let mut s = Session::new_for_test("quickInfoDisplayPartsInternalModuleAlias", content);
+    let _s = Session::new_for_test("quickInfoDisplayPartsInternalModuleAlias", content);
     // TODO: f.VerifyBaselineHover(t)
 }

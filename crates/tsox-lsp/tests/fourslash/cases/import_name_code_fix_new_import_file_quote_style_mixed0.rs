@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -13,6 +13,6 @@ export function f1() {}
 export var v2 = 6;
 // @Filename: module3.ts
 export var v3 = 6;"#;
-    let mut s = Session::new_for_test("importNameCodeFixNewImportFileQuoteStyleMixed0", content);
+    let _s = Session::new_for_test("importNameCodeFixNewImportFileQuoteStyleMixed0", content);
     // TODO: f.VerifyImportFixAtPosition(t, []string{
 }

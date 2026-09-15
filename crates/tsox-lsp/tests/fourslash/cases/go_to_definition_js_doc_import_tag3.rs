@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -11,6 +11,6 @@ fn go_to_definition_js_doc_import_tag3() {
 /**
  * @import { A } [|from     /*1*/|] "./b";
  */"#;
-    let mut s = Session::new_for_test("goToDefinitionJsDocImportTag3", content);
+    let _s = Session::new_for_test("goToDefinitionJsDocImportTag3", content);
     // TODO: f.VerifyBaselineGoToDefinition(t, true, "1")
 }

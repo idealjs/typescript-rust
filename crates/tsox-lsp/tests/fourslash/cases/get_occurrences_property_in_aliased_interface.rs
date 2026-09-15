@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -20,6 +20,6 @@ class C implements Bar {
 }
 
 (new C()).[|abc|];"#;
-    let mut s = Session::new_for_test("getOccurrencesPropertyInAliasedInterface", content);
+    let _s = Session::new_for_test("getOccurrencesPropertyInAliasedInterface", content);
     // TODO: f.VerifyBaselineDocumentHighlights(t, nil /*preferences*/, ToAny(f.Ranges())...)
 }

@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -9,6 +9,6 @@ fn organize_imports2() {
 } from "foo"
 
 console.log(Foo, Bar);"#;
-    let mut s = Session::new_for_test("organizeImports2", content);
+    let _s = Session::new_for_test("organizeImports2", content);
     // TODO: f.VerifyOrganizeImports(t,
 }

@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -24,6 +24,6 @@ var foo3 = require("fake-module//*require0*/
 /*repeatedjs*/
 // @Filename: node_modules/fake-module/repeated.jsx
 /*repeatedjsx*/"#;
-    let mut s = Session::new_for_test("completionForStringLiteralNonrelativeImport3", content);
+    let _s = Session::new_for_test("completionForStringLiteralNonrelativeImport3", content);
     // TODO: f.VerifyCompletions(t, []string{"import_as0", "import_equals0", "require0"}, &fourslash.CompletionsE
 }

@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -12,6 +12,6 @@ class C {
 function decorator(target) {
     return target;
 }"#;
-    let mut s = Session::new_for_test("getOccurrencesOfDecorators", content);
+    let _s = Session::new_for_test("getOccurrencesOfDecorators", content);
     // TODO: f.VerifyBaselineDocumentHighlights(t, nil /*preferences*/, "1")
 }

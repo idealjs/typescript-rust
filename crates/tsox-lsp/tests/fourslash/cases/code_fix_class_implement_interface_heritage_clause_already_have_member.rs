@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -19,6 +19,6 @@ interface I {
 }
 
 class C extends D implements I { }"#;
-    let mut s = Session::new_for_test("codeFixClassImplementInterfaceHeritageClauseAlreadyHaveMember", content);
+    let _s = Session::new_for_test("codeFixClassImplementInterfaceHeritageClauseAlreadyHaveMember", content);
     // TODO: f.VerifyCodeFix(t, fourslash.VerifyCodeFixOptions{
 }

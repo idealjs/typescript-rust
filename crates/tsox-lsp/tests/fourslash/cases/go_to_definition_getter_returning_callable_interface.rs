@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -18,6 +18,6 @@ import { TextDocuments } from "./type";
 declare const documents: TextDocuments | undefined;
 
 documents!./*usage*/onDidChangeContent()"#;
-    let mut s = Session::new_for_test("goToDefinitionGetterReturningCallableInterface", content);
+    let _s = Session::new_for_test("goToDefinitionGetterReturningCallableInterface", content);
     // TODO: f.VerifyBaselineGoToDefinition(t, false /*includeOriginalSelectionRange*/, "usage")
 }

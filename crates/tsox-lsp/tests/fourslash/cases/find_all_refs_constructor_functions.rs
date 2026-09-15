@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -12,6 +12,6 @@ f.prototype.setX = function() {
     /*3*/this./*4*/x = 1;
 }
 f.prototype.useX = function() { this./*5*/x; }"#;
-    let mut s = Session::new_for_test("findAllRefsConstructorFunctions", content);
+    let _s = Session::new_for_test("findAllRefsConstructorFunctions", content);
     // TODO: f.VerifyBaselineFindAllReferences(t, "1", "2", "3", "4", "5")
 }

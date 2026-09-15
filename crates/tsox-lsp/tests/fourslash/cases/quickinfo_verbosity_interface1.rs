@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -63,6 +63,6 @@ fn quickinfo_verbosity_interface1() {
     }
     const f/*f5*/: Foo = { a: "a", b: "b" };
 }"#;
-    let mut s = Session::new_for_test("quickinfoVerbosityInterface1", content);
+    let _s = Session::new_for_test("quickinfoVerbosityInterface1", content);
     // TODO: f.VerifyBaselineHoverWithVerbosity(t, map[string][]int{"f1": {0, 1}, "f2": {0, 1}, "f3": {0, 1, 2, 3
 }

@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -9,6 +9,6 @@ fn find_all_refs_import_type_named() {
 // @Filename: /b.ts
 const x: import("./a")./*5*/T = 0;
 const x: import("./a")./*6*/U = 0;"#;
-    let mut s = Session::new_for_test("findAllRefs_importType_named", content);
+    let _s = Session::new_for_test("findAllRefs_importType_named", content);
     // TODO: f.VerifyBaselineFindAllReferences(t, "1", "2", "3", "4", "5", "6")
 }

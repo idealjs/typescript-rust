@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -71,7 +71,7 @@ declare module "../index" {
 }
 // @Filename: /home/src/workspaces/project/index.ts
 import { [|/*start*/add|] } from 'lodash';"#;
-    let mut s = Session::new_for_test("goToSource8_mapFromAtTypes", content);
+    let _s = Session::new_for_test("goToSource8_mapFromAtTypes", content);
     // TODO: f.MarkTestAsStradaServer()
     // TODO: f.VerifyBaselineGoToSourceDefinition(t, "start")
 }

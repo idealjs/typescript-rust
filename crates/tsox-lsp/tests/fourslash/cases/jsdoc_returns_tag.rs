@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -15,6 +15,6 @@ fn jsdoc_returns_tag() {
 function find(l, x) {
 }
 find(''/**/);"#;
-    let mut s = Session::new_for_test("jsdocReturnsTag", content);
+    let _s = Session::new_for_test("jsdocReturnsTag", content);
     // TODO: f.VerifyBaselineSignatureHelp(t)
 }

@@ -1,11 +1,11 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
 fn organize_imports_coalesce_exports_sort_specifiers_case_insensitive() {
     let content = r#"export { default as M, a as n, B, y, Z as O } from "lib";
 void 0;"#;
-    let mut s = Session::new_for_test("organizeImports_coalesceExports_sortSpecifiersCaseInsensitive", content);
+    let _s = Session::new_for_test("organizeImports_coalesceExports_sortSpecifiersCaseInsensitive", content);
     // TODO: f.VerifyOrganizeImports(
 }
 
@@ -14,7 +14,7 @@ fn organize_imports_coalesce_exports_combine_namespace_re_exports() {
     let content = r#"export * from "lib";
 export * from "lib";
 void 0;"#;
-    let mut s = Session::new_for_test("organizeImports_coalesceExports_combineNamespaceReExports", content);
+    let _s = Session::new_for_test("organizeImports_coalesceExports_combineNamespaceReExports", content);
     // TODO: f.VerifyOrganizeImports(
 }
 
@@ -24,7 +24,7 @@ fn organize_imports_coalesce_exports_combine_property_exports() {
 export { x };
 export { z as y };
 void 0;"#;
-    let mut s = Session::new_for_test("organizeImports_coalesceExports_combinePropertyExports", content);
+    let _s = Session::new_for_test("organizeImports_coalesceExports_combinePropertyExports", content);
     // TODO: f.VerifyOrganizeImports(
 }
 
@@ -33,7 +33,7 @@ fn organize_imports_coalesce_exports_combine_property_re_exports() {
     let content = r#"export { x } from "lib";
 export { y as z } from "lib";
 void 0;"#;
-    let mut s = Session::new_for_test("organizeImports_coalesceExports_combinePropertyReExports", content);
+    let _s = Session::new_for_test("organizeImports_coalesceExports_combinePropertyReExports", content);
     // TODO: f.VerifyOrganizeImports(
 }
 
@@ -44,7 +44,7 @@ fn organize_imports_coalesce_exports_namespace_with_property_re_export() {
 export { y } from "lib";
 export { z } from "aaa";
 void 0;"#;
-    let mut s = Session::new_for_test("organizeImports_coalesceExports_namespaceWithPropertyReExport", content);
+    let _s = Session::new_for_test("organizeImports_coalesceExports_namespaceWithPropertyReExport", content);
     // TODO: f.VerifyOrganizeImports(
 }
 
@@ -55,7 +55,7 @@ export { x };
 export { w as y, z as default };
 export { q as w };
 void 0;"#;
-    let mut s = Session::new_for_test("organizeImports_coalesceExports_combineMany", content);
+    let _s = Session::new_for_test("organizeImports_coalesceExports_combineMany", content);
     // TODO: f.VerifyOrganizeImports(
 }
 
@@ -65,7 +65,7 @@ fn organize_imports_coalesce_exports_combine_many_re_exports() {
 export * from "lib";
 export { z as b } from "lib";
 void 0;"#;
-    let mut s = Session::new_for_test("organizeImports_coalesceExports_combineManyReExports", content);
+    let _s = Session::new_for_test("organizeImports_coalesceExports_combineManyReExports", content);
     // TODO: f.VerifyOrganizeImports(
 }
 
@@ -78,7 +78,7 @@ export { x };
 export type { y };
 export { z } from "aaa";
 void 0;"#;
-    let mut s = Session::new_for_test("organizeImports_coalesceExports_keepTypeOnlySeparate", content);
+    let _s = Session::new_for_test("organizeImports_coalesceExports_keepTypeOnlySeparate", content);
     // TODO: f.VerifyOrganizeImports(
 }
 
@@ -89,6 +89,6 @@ type y = number;
 export type { x };
 export type { y };
 void 0;"#;
-    let mut s = Session::new_for_test("organizeImports_coalesceExports_combineTypeOnly", content);
+    let _s = Session::new_for_test("organizeImports_coalesceExports_combineTypeOnly", content);
     // TODO: f.VerifyOrganizeImports(
 }

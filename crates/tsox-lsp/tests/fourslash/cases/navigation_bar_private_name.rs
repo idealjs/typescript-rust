@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -13,6 +13,6 @@ fn navigation_bar_private_name() {
     }
   }
 }"#;
-    let mut s = Session::new_for_test("navigationBarPrivateName", content);
+    let _s = Session::new_for_test("navigationBarPrivateName", content);
     // TODO: f.VerifyBaselineDocumentSymbol(t)
 }

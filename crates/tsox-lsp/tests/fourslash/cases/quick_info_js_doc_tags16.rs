@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -19,6 +19,6 @@ class B extends A {
 class C extends B {
     override /*2*/foo() { }
 }"#;
-    let mut s = Session::new_for_test("quickInfoJsDocTags16", content);
+    let _s = Session::new_for_test("quickInfoJsDocTags16", content);
     // TODO: f.VerifyBaselineHover(t)
 }

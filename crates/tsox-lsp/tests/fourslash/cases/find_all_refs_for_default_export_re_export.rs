@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -10,6 +10,6 @@ export default /*1*/foo;
 export { /*2*/default } from "./export";
 // @Filename: /re-export-dep.ts
 import /*3*/fooDefault from "./re-export";"#;
-    let mut s = Session::new_for_test("findAllRefsForDefaultExport_reExport", content);
+    let _s = Session::new_for_test("findAllRefsForDefaultExport_reExport", content);
     // TODO: f.VerifyBaselineFindAllReferences(t, "0", "1", "2", "3")
 }

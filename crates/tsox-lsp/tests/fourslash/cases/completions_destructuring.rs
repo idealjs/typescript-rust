@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -7,6 +7,6 @@ fn completions_destructuring() {
 points.forEach(({ /*a*/ }) => { });
 const { /*b*/ } = points[0];
 for (const { /*c*/ } of points) {}"#;
-    let mut s = Session::new_for_test("completionsDestructuring", content);
+    let _s = Session::new_for_test("completionsDestructuring", content);
     // TODO: f.VerifyCompletions(t, f.Markers(), &fourslash.CompletionsExpectedList{
 }

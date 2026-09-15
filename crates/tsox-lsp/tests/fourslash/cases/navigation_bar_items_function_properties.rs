@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -8,6 +8,6 @@ var A;
 A/*1*/
 .a = function() { };
 })();"#;
-    let mut s = Session::new_for_test("navigationBarItemsFunctionProperties", content);
+    let _s = Session::new_for_test("navigationBarItemsFunctionProperties", content);
     // TODO: f.VerifyBaselineDocumentSymbol(t)
 }

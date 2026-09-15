@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -33,6 +33,6 @@ export class A {
   set a(value) {}
   @fieldDecorator() classProp = foo();
 }"#;
-    let mut s = Session::new_for_test("codeFixMissingTypeAnnotationOnExports46_decorators_experimental", content);
+    let _s = Session::new_for_test("codeFixMissingTypeAnnotationOnExports46_decorators_experimental", content);
     // TODO: f.VerifyCodeFixAll(t, fourslash.VerifyCodeFixAllOptions{
 }

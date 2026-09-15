@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -17,6 +17,6 @@ class Extended extends ConstructorOverload {
 }
 var extended1 = new [|/*extendedRef1*/Extended|]();
 var extended2 = new [|/*extendedRef2*/Extended|]("foo");"#;
-    let mut s = Session::new_for_test("goToDefinitionConstructorOverloads", content);
+    let _s = Session::new_for_test("goToDefinitionConstructorOverloads", content);
     // TODO: f.VerifyBaselineGoToDefinition(t, true, "constructorOverloadReference1", "constructorOverloadReferen
 }

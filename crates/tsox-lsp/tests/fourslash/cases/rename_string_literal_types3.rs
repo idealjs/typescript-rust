@@ -1,4 +1,4 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
 
 #[test]
@@ -16,6 +16,6 @@ class C {
         }
     }
 }"#;
-    let mut s = Session::new_for_test("renameStringLiteralTypes3", content);
+    let _s = Session::new_for_test("renameStringLiteralTypes3", content);
     // TODO: f.VerifyBaselineRenameAtRangesWithText(t, nil /*preferences*/, "a")
 }
