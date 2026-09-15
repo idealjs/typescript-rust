@@ -1,3 +1,0 @@
-discriminatedUnionErrorMessage.ts(8,5): error TS2322: Type '{ kind: "sq"; x: number; y: number; }' is not assignable to type '{ kind: "sq"; size: number; } | { kind: "rt"; x: number; y: number; } | { kind: "cr"; radius: number; }'.
-  Types of property 'kind' are incompatible.
-    Type '"sq"' is not assignable to type '"rt"'.

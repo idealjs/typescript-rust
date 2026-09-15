@@ -1,2 +1,0 @@
-implicitAnyFunctionInvocationWithAnyArguements.ts(6,16): error TS7006: Parameter 'arg1' implicitly has an 'any' type.
-implicitAnyFunctionInvocationWithAnyArguements.ts(10,36): error TS7006: Parameter 'y2' implicitly has an 'any' type.

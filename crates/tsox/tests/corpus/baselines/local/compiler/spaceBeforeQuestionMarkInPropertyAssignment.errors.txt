@@ -1,3 +1,0 @@
-spaceBeforeQuestionMarkInPropertyAssignment.ts(1,12): error TS1005: ',' expected.
-spaceBeforeQuestionMarkInPropertyAssignment.ts(1,13): error TS1117: An object literal cannot have multiple properties with the same name.
-spaceBeforeQuestionMarkInPropertyAssignment.ts(1,13): error TS1005: 'identifier' expected.

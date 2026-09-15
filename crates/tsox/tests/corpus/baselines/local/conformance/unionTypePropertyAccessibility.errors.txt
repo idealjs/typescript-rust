@@ -1,5 +1,0 @@
-unionTypePropertyAccessibility.ts(2,5): error TS2564: Property 'member' has no initializer and is not definitely assigned in the constructor.
-unionTypePropertyAccessibility.ts(6,12): error TS2564: Property 'member' has no initializer and is not definitely assigned in the constructor.
-unionTypePropertyAccessibility.ts(10,15): error TS2564: Property 'member' has no initializer and is not definitely assigned in the constructor.
-unionTypePropertyAccessibility.ts(14,13): error TS2564: Property 'member' has no initializer and is not definitely assigned in the constructor.
-unionTypePropertyAccessibility.ts(36,4): error TS2341: Property 'member' is private and only accessible within class 'Private'.

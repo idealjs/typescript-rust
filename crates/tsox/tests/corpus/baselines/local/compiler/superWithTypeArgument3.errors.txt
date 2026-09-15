@@ -1,2 +1,0 @@
-superWithTypeArgument3.ts(2,5): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
-superWithTypeArgument3.ts(11,22): error TS2554: Expected 0 arguments, but got 1.

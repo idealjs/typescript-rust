@@ -1,2 +1,0 @@
-constructorWithParameterPropertiesAndPrivateFields.es2015.ts(4,12): error TS2564: Property '#privateField' has no initializer and is not definitely assigned in the constructor.
-constructorWithParameterPropertiesAndPrivateFields.es2015.ts(17,12): error TS2564: Property '#privateField' has no initializer and is not definitely assigned in the constructor.

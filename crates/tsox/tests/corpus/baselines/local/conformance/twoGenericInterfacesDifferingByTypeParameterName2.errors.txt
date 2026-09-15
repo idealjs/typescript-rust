@@ -1,1 +1,0 @@
-twoGenericInterfacesDifferingByTypeParameterName2.ts(8,8): error TS2304: Cannot find name 'V'.

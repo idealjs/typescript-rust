@@ -1,2 +1,0 @@
-classImplementsClass4.ts(5,1): error TS2420: Class 'C' incorrectly implements interface 'A'.
-classImplementsClass4.ts(16,1): error TS2741: Property 'x' is missing in type 'C' but required in type 'C2'.

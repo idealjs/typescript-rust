@@ -1,3 +1,0 @@
-parserForStatement4.ts(1,6): error TS2304: Cannot find name 'a'.
-parserForStatement4.ts(1,15): error TS2304: Cannot find name 'b'.
-parserForStatement4.ts(1,16): error TS1005: ';' expected.

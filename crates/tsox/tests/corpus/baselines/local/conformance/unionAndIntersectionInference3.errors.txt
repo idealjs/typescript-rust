@@ -1,8 +1,0 @@
-unionAndIntersectionInference3.ts(77,12): error TS2345: Argument of type '((props: Props) => null) | () => unknown' is not assignable to parameter of type '((props: P) => null) | () => unknown & ((props: Props) => null) | () => unknown'.
-  Type '(props: Props) => null' is not assignable to type '((props: P) => null) | () => unknown & ((props: Props) => null) | () => unknown'.
-    Type '(props: Props) => null' is not assignable to type '(props: P) => null'.
-      Types of parameters 'props' and 'props' are incompatible.
-        Type 'P' is not assignable to type 'Props'.
-          Property 'username' is missing in type 'RouteComponentProps' but required in type 'Props'.
-unionAndIntersectionInference3.ts(93,1): error TS2322: Type '<T>() => false & boolean' is not assignable to type '<T>() => T extends true ? true : false & boolean'.
-  Type 'false & boolean' is not assignable to type 'T extends true ? true : false & boolean'.

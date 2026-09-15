@@ -1,9 +1,0 @@
-intersectionWithUnionConstraint.ts(7,9): error TS2322: Type 'T & U' is not assignable to type 'string | number'.
-intersectionWithUnionConstraint.ts(8,9): error TS2322: Type 'T & U' is not assignable to type 'string | null'.
-intersectionWithUnionConstraint.ts(9,9): error TS2322: Type 'T & U' is not assignable to type 'string | undefined'.
-intersectionWithUnionConstraint.ts(10,9): error TS2322: Type 'T & U' is not assignable to type 'number | null'.
-intersectionWithUnionConstraint.ts(11,9): error TS2322: Type 'T & U' is not assignable to type 'number | undefined'.
-intersectionWithUnionConstraint.ts(12,9): error TS2322: Type 'T & U' is not assignable to type 'null | undefined'.
-intersectionWithUnionConstraint.ts(18,11): error TS2322: Type 'T & number | object | undefined' is not assignable to type 'number | undefined'.
-intersectionWithUnionConstraint.ts(22,11): error TS2322: Type 'T & number | object' is not assignable to type 'number'.
-intersectionWithUnionConstraint.ts(26,9): error TS2322: Type 'keyof T & U' is not assignable to type 'string'.

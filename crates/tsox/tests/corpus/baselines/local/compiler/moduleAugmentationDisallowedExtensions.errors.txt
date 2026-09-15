@@ -1,5 +1,0 @@
-x.ts(9,9): error TS1182: A destructuring declaration must have an initializer.
-x.ts(17,5): error TS2439: Import or export declaration in an ambient module declaration cannot reference module through relative module name.
-x.ts(17,26): error TS2307: Cannot find module './x0' or its corresponding type declarations.
-x.ts(18,5): error TS2439: Import or export declaration in an ambient module declaration cannot reference module through relative module name.
-x.ts(18,21): error TS2307: Cannot find module './x0' or its corresponding type declarations.

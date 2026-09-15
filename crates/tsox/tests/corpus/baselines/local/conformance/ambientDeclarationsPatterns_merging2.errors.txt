@@ -1,4 +1,0 @@
-testA.ts(1,50): error TS2307: Cannot find module 'a.foo' or its corresponding type declarations.
-testA.ts(2,16): error TS2664: Invalid module name in augmentation, module 'a.foo' cannot be found.
-testB.ts(1,50): error TS2307: Cannot find module 'b.foo' or its corresponding type declarations.
-testB.ts(2,16): error TS2664: Invalid module name in augmentation, module 'a.foo' cannot be found.

@@ -1,2 +1,0 @@
-moduleAndInterfaceSharingName2.ts(2,22): error TS2300: Duplicate identifier 'Y'.
-moduleAndInterfaceSharingName2.ts(5,22): error TS2300: Duplicate identifier 'Y'.

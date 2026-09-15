@@ -1,6 +1,0 @@
-error TS6053: File '/.lib/react.d.ts' not found.
-file.tsx(3,24): error TS2307: Cannot find module 'react' or its corresponding type declarations.
-file.tsx(11,39): error TS2339: Property 'props' does not exist on type 'this'.
-
-
-!!! error TS6053: File '/.lib/react.d.ts' not found.

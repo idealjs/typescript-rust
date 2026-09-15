@@ -1,5 +1,0 @@
-assignSharedArrayBufferToArrayBuffer.ts(1,5): error TS2322: Type 'SharedArrayBuffer' is not assignable to type 'ArrayBuffer'.
-  The types returned by 'slice(...)' are incompatible between these types.
-    Type 'SharedArrayBuffer' is not assignable to type 'ArrayBuffer'.
-      Types of property '__@toStringTag' are incompatible.
-        Type '"SharedArrayBuffer"' is not assignable to type '"ArrayBuffer"'.

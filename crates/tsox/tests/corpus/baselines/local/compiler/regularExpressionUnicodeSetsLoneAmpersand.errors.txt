@@ -1,2 +1,0 @@
-regularExpressionUnicodeSetsLoneAmpersand.ts(2,5): error TS1508: Unexpected '{0}'. Did you mean to escape it with backslash?
-regularExpressionUnicodeSetsLoneAmpersand.ts(3,5): error TS1508: Unexpected '{0}'. Did you mean to escape it with backslash?

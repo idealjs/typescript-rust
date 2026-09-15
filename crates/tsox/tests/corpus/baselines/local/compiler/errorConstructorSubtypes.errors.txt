@@ -1,2 +1,0 @@
-errorConstructorSubtypes.ts(9,5): error TS2351: This expression is not constructable.
-  Type 'ErrorConstructor' has no construct signatures.

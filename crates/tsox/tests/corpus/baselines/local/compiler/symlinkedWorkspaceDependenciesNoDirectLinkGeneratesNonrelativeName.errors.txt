@@ -1,2 +1,0 @@
-workspace/packageB/index.d.ts(1,21): error TS2307: Cannot find module 'package-a' or its corresponding type declarations.
-workspace/packageC/index.ts(1,22): error TS2307: Cannot find module 'package-b' or its corresponding type declarations.

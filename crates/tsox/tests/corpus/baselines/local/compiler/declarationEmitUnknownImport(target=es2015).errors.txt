@@ -1,1 +1,0 @@
-declarationEmitUnknownImport.ts(1,14): error TS2503: Cannot find namespace 'SomeNonExistingName'.

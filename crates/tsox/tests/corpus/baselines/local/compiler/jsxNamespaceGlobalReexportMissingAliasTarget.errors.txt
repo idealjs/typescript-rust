@@ -1,3 +1,0 @@
-/index.tsx(1,27): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
-/index.tsx(1,32): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
-/node_modules/preact/jsx-runtime/index.d.ts(52,25): error TS2503: Cannot find namespace 'NotFound'.

@@ -1,1 +1,0 @@
-exportAssignmentInterface_B.ts(1,21): error TS2307: Cannot find module 'exportAssignmentInterface_A' or its corresponding type declarations.

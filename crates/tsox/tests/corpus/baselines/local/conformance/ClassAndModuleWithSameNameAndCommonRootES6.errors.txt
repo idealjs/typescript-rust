@@ -1,5 +1,0 @@
-module.ts(3,33): error TS2351: This expression is not constructable.
-  Type 'typeof Point' has no construct signatures.
-simple.ts(2,5): error TS2564: Property 'id' has no initializer and is not definitely assigned in the constructor.
-test.ts(2,14): error TS2304: Cannot find name 'X'.
-test.ts(3,10): error TS2304: Cannot find name 'X'.

@@ -1,2 +1,0 @@
-typeParameterArgumentEquivalence3.ts(5,5): error TS2322: Type '(item: any) => T' is not assignable to type '(item: any) => boolean'.
-  Type 'T' is not assignable to type 'boolean'.

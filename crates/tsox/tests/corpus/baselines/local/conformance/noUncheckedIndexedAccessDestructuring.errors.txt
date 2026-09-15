@@ -1,2 +1,0 @@
-noUncheckedIndexedAccessDestructuring.ts(12,4): error TS2339: Property 'push' does not exist on type 'string'.
-noUncheckedIndexedAccessDestructuring.ts(16,4): error TS2339: Property 'push' does not exist on type 'string'.

@@ -1,1 +1,0 @@
-exportImportAlias.ts(65,5): error TS2403: Subsequent variable declarations must have the same type.  Variable 'o' must be of type '{ name: string; }', but here has type 'any'.

@@ -1,1 +1,0 @@
-propertyParameterWithQuestionMark.ts(6,5): error TS2741: Property 'x' is missing in type '{}' but required in type 'C'.

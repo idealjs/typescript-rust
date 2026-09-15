@@ -1,7 +1,0 @@
-badInferenceLowerPriorityThanGoodInference.ts(10,32): error TS2345: Argument of type '() => { a: { BLAH: number; }; b: (x: A) => void; }' is not assignable to parameter of type '() => Foo<{ BLAH: number; }>'.
-  Type '{ a: { BLAH: number; }; b: (x: A) => void; }' is not assignable to type 'Foo<{ BLAH: number; }>'.
-    Types of property 'b' are incompatible.
-      Type '(x: A) => void' is not assignable to type '(x: { BLAH: number; }) => void'.
-        Types of parameters 'x' and 'x' are incompatible.
-          Type '{ BLAH: number; }' is not assignable to type 'A'.
-            'A' could be instantiated with an arbitrary type which could be unrelated to '{ BLAH: number; }'.

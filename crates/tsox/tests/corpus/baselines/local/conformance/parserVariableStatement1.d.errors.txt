@@ -1,1 +1,0 @@
-parserVariableStatement1.d.ts(1,9): error TS1039: Initializers are not allowed in ambient contexts.

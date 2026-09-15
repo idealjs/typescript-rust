@@ -1,5 +1,0 @@
-promiseVoidErrorCallback.ts(25,11): error TS2345: Argument of type '(x: T2) => { __t3: string; }' is not assignable to parameter of type '((value: void | T2) => { __t3: string; } | PromiseLike<{ __t3: string; }>) | null'.
-  Type '(x: T2) => { __t3: string; }' is not assignable to type '(value: void | T2) => { __t3: string; } | PromiseLike<{ __t3: string; }>'.
-    Types of parameters 'x' and 'value' are incompatible.
-      Type 'void | T2' is not assignable to type 'T2'.
-        Type 'void' is not assignable to type 'T2'.

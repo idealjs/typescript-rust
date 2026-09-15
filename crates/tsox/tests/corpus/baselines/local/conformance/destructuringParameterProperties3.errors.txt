@@ -1,6 +1,0 @@
-destructuringParameterProperties3.ts(3,59): error TS2339: Property 'b' does not exist on type 'this'.
-destructuringParameterProperties3.ts(3,83): error TS2339: Property 'c' does not exist on type 'this'.
-destructuringParameterProperties3.ts(4,18): error TS2339: Property 'a' does not exist on type 'this'.
-destructuringParameterProperties3.ts(9,21): error TS2339: Property 'a' does not exist on type 'this'.
-destructuringParameterProperties3.ts(13,21): error TS2339: Property 'b' does not exist on type 'this'.
-destructuringParameterProperties3.ts(17,21): error TS2339: Property 'c' does not exist on type 'this'.

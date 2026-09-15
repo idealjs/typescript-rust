@@ -1,2 +1,0 @@
-genericIndexedAccessMethodIntersectionCanBeAccessed.ts(16,37): error TS2352: Conversion of type 'string' to type 'keyof T' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
-genericIndexedAccessMethodIntersectionCanBeAccessed.ts(16,37): error TS2538: Type 'keyof T' cannot be used as an index type.

@@ -1,4 +1,0 @@
-controlFlowElementAccessNoCrash1.ts(25,18): error TS2345: Argument of type '{ subScenario: string; commandLineArgs: string[] | undefined; }' is not assignable to parameter of type 'TestTscCompile'.
-  Types of property 'commandLineArgs' are incompatible.
-    Type 'string[] | undefined' is not assignable to type 'string[]'.
-      Type 'undefined' is not assignable to type 'string[]'.

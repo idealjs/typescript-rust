@@ -1,3 +1,0 @@
-decoratorOnUsing.ts(4,1): error TS1146: Declaration expected.
-decoratorOnUsing.ts(4,1): error TS2304: Cannot find name 'using'.
-decoratorOnUsing.ts(7,1): error TS1146: Declaration expected.

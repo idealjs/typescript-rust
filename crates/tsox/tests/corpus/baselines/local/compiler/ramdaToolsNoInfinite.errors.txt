@@ -1,5 +1,0 @@
-ramdaToolsNoInfinite.ts(20,34): error TS2536: Type 'HasTail<T> extends true ? 0 : 1' cannot be used to index type '{ 0: any; 1: Head<T>; }'.
-ramdaToolsNoInfinite.ts(37,74): error TS2536: Type 'I["length"] extends N ? 1 : 0' cannot be used to index type '{ 0: any; 1: T; }'.
-ramdaToolsNoInfinite.ts(57,94): error TS2536: Type 'I["length"] extends Index ? 1 : 0' cannot be used to index type '{ 0: { 0: ...; 1: From; }[I["length"] extends Index ? 1 : 0]; 1: From; }'.
-ramdaToolsNoInfinite.ts(66,81): error TS2536: Type 'I["length"] extends T["length"] ? 1 : 0' cannot be used to index type '{ 0: any; 1: R; }'.
-ramdaToolsNoInfinite.ts(98,100): error TS2536: Type 'I["length"] extends T1["length"] ? 1 : 0' cannot be used to index type 'Curry.GapsOfWorker<T1, T2, TN, I>'.

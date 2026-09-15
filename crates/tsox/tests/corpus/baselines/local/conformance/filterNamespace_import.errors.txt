@@ -1,3 +1,0 @@
-/a.ts(4,8): error TS2503: Cannot find namespace 'ns'.
-/a.ts(5,8): error TS2503: Cannot find namespace 'ns'.
-/a.ts(6,8): error TS2503: Cannot find namespace 'ns'.

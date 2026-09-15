@@ -1,4 +1,0 @@
-reverseMappedTypeContextualTypesPerElementOfTupleConstraint.ts(18,9): error TS2345: Argument of type 'HTMLButtonElement' is not assignable to parameter of type 'EventTarget'.
-  Property 'dispatchEvent' is missing in type 'HTMLButtonElement' but required in type 'EventTarget'.
-reverseMappedTypeContextualTypesPerElementOfTupleConstraint.ts(21,16): error TS7006: Parameter 'event' implicitly has an 'any' type.
-reverseMappedTypeContextualTypesPerElementOfTupleConstraint.ts(25,16): error TS7006: Parameter 'event' implicitly has an 'any' type.

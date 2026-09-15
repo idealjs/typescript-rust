@@ -1,2 +1,0 @@
-defaultArgsInFunctionExpressions.ts(11,1): error TS2322: Type 'string' is not assignable to type 'number'.
-defaultArgsInFunctionExpressions.ts(14,51): error TS2352: Conversion of type 'string' to type 'number' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.

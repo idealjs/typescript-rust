@@ -1,2 +1,0 @@
-letInLetDeclarations_ES5.ts(2,13): error TS1212: Identifier expected. 'let' is a reserved word in strict mode.
-letInLetDeclarations_ES5.ts(5,17): error TS1212: Identifier expected. 'let' is a reserved word in strict mode.

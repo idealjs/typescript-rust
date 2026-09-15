@@ -1,3 +1,0 @@
-parserUnfinishedTypeNameBeforeKeyword1.ts(1,8): error TS2503: Cannot find namespace 'TypeModule1'.
-parserUnfinishedTypeNameBeforeKeyword1.ts(2,11): error TS1005: ',' expected.
-parserUnfinishedTypeNameBeforeKeyword1.ts(2,23): error TS1005: ',' expected.

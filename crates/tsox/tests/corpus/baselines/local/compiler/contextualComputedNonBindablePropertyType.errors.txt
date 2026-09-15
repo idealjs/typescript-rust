@@ -1,3 +1,0 @@
-contextualComputedNonBindablePropertyType.ts(14,38): error TS2749: 'key' refers to a value, but is being used as a type here. Did you mean 'typeof key'?
-contextualComputedNonBindablePropertyType.ts(34,3): error TS2353: Object literal may only specify known properties, and '[propSelector('bar')]' does not exist in type '{ foo: (arg: "expects a string literal") => "expects a string literal"; baz: (arg: boolean) => boolean; bar: (arg: number) => number; }'.
-contextualComputedNonBindablePropertyType.ts(34,27): error TS7006: Parameter 'arg' implicitly has an 'any' type.

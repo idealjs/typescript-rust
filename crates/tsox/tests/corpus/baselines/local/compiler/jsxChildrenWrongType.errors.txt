@@ -1,8 +1,0 @@
-error TS6053: File '/.lib/react18/react18.d.ts' not found.
-error TS6053: File '/.lib/react18/global.d.ts' not found.
-other.tsx(10,6): error TS2874: This JSX tag requires 'React' to be in scope, but it could not be found.
-other.tsx(11,11): error TS2874: This JSX tag requires 'React' to be in scope, but it could not be found.
-
-
-!!! error TS6053: File '/.lib/react18/react18.d.ts' not found.
-!!! error TS6053: File '/.lib/react18/global.d.ts' not found.

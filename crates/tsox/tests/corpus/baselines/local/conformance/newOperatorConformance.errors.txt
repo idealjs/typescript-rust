@@ -1,8 +1,0 @@
-newOperatorConformance.ts(43,17): error TS2351: This expression is not constructable.
-  Type 'T' has no construct signatures.
-newOperatorConformance.ts(44,9): error TS2403: Subsequent variable declarations must have the same type.  Variable 'p' must be of type 'any', but here has type 'number'.
-newOperatorConformance.ts(49,17): error TS2351: This expression is not constructable.
-  Type 'T' has no construct signatures.
-newOperatorConformance.ts(50,9): error TS2403: Subsequent variable declarations must have the same type.  Variable 'p' must be of type 'any', but here has type 'string'.
-newOperatorConformance.ts(59,23): error TS2351: This expression is not constructable.
-  Type 'nestedCtor' has no construct signatures.

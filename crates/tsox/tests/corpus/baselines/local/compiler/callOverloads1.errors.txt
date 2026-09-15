@@ -1,5 +1,0 @@
-callOverloads1.ts(1,7): error TS2813: Class declaration cannot implement overload list for 'Foo'.
-callOverloads1.ts(9,10): error TS2391: Function implementation is missing or not immediately following the declaration.
-callOverloads1.ts(9,10): error TS2814: Function with bodies can only merge with classes that are ambient.
-callOverloads1.ts(13,10): error TS2350: Only a void function can be called with the 'new' keyword.
-callOverloads1.ts(13,18): error TS2554: Expected 0 arguments, but got 1.

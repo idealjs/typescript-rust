@@ -1,1 +1,0 @@
-assignmentCompatWithEnumIndexer.ts(5,17): error TS2344: Type '0' does not satisfy the constraint 'string'.

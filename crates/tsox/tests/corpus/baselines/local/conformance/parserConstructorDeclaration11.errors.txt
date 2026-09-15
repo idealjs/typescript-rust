@@ -1,1 +1,0 @@
-parserConstructorDeclaration11.ts(2,14): error TS1098: Type parameter list cannot be empty.

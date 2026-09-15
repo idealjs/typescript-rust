@@ -1,1 +1,0 @@
-typeParameterConstModifiersWithIntersection.ts(19,3): error TS2353: Object literal may only specify known properties, and 'extra' does not exist in type '{ produceThing: { type: "foo"; }; } & Config<T1>'.

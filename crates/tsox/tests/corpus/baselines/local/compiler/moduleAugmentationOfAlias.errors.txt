@@ -1,1 +1,0 @@
-/c.ts(3,7): error TS2339: Property 'x' does not exist on type 'I'.

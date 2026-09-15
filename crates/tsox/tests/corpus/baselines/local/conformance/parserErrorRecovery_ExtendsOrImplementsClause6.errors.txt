@@ -1,1 +1,0 @@
-parserErrorRecovery_ExtendsOrImplementsClause6.ts(1,24): error TS1005: '{' expected.

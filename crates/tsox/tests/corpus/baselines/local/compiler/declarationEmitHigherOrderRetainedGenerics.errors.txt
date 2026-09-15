@@ -1,9 +1,0 @@
-declarationEmitHigherOrderRetainedGenerics.ts(77,51): error TS1005: '?' expected.
-declarationEmitHigherOrderRetainedGenerics.ts(77,99): error TS1005: '?' expected.
-declarationEmitHigherOrderRetainedGenerics.ts(79,15): error TS2304: Cannot find name 'DataFirst'.
-declarationEmitHigherOrderRetainedGenerics.ts(80,8): error TS2304: Cannot find name 'DataLast'.
-declarationEmitHigherOrderRetainedGenerics.ts(80,19): error TS2304: Cannot find name 'DataFirst'.
-declarationEmitHigherOrderRetainedGenerics.ts(100,61): error TS2339: Property 'product' does not exist on type 'SemiApplicative<F>'.
-declarationEmitHigherOrderRetainedGenerics.ts(116,60): error TS2345: Argument of type 'Kind<F, R1, O1, E1, _>' is not assignable to parameter of type 'Kind<F, R1, O1, E1, A>'.
-  Type '{ readonly F: F; readonly In: (_: R1) => void; readonly Out2: (_: never) => O1; readonly Out1: (_: never) => E1; readonly Target: (_: _) => _; }' is not assignable to type 'F & { readonly In: R1; readonly Out2: O1; readonly Out1: E1; readonly Target: A; }["type"]'.
-    Type '{ readonly F: F; readonly In: (_: R1) => void; readonly Out2: (_: never) => O1; readonly Out1: (_: never) => E1; readonly Target: (_: _) => _; }' is not assignable to type 'Kind<F, R1, O1, E1, A>'.

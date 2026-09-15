@@ -1,2 +1,0 @@
-foo_1.ts(3,14): error TS2351: This expression is not constructable.
-  Type 'Foo' has no construct signatures.

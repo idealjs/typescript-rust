@@ -1,2 +1,0 @@
-typeGuardsInGlobal.ts(7,12): error TS2454: Variable 'var1' is used before being assigned.
-typeGuardsInGlobal.ts(11,11): error TS2454: Variable 'var1' is used before being assigned.

@@ -1,2 +1,0 @@
-crash.ts(2,17): error TS2749: 'Component' refers to a value, but is being used as a type here. Did you mean 'typeof Component'?
-second.d.ts(1,27): error TS2503: Cannot find namespace 'CompletelyMissing'.

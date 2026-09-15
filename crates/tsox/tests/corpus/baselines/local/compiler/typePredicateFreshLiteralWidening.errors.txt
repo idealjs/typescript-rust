@@ -1,3 +1,0 @@
-typePredicateFreshLiteralWidening.ts(20,33): error TS2345: Argument of type '{ value: null; }' is not assignable to parameter of type '{ value: { [K in keyof A]: any; } | A extends string | number | bigint | boolean ? A : never; }'.
-  Types of property 'value' are incompatible.
-    Type 'null' is not assignable to type '{ [K in keyof A]: any; } | A extends string | number | bigint | boolean ? A : never'.

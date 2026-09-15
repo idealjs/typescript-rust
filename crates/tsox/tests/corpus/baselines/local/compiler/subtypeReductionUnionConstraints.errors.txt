@@ -1,1 +1,0 @@
-subtypeReductionUnionConstraints.ts(25,36): error TS2339: Property 'children' does not exist on type 'never'.

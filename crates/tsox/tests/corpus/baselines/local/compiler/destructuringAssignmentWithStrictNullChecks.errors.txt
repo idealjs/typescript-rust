@@ -1,1 +1,0 @@
-destructuringAssignmentWithStrictNullChecks.ts(2,7): error TS2454: Variable 'bar' is used before being assigned.

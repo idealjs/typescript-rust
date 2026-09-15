@@ -1,7 +1,0 @@
-error TS6053: File '/.lib/react16.d.ts' not found.
-jsxExcessPropsAndAssignability.tsx(3,24): error TS2307: Cannot find module 'react' or its corresponding type declarations.
-jsxExcessPropsAndAssignability.tsx(6,24): error TS2503: Cannot find namespace 'React'.
-jsxExcessPropsAndAssignability.tsx(9,29): error TS2503: Cannot find namespace 'React'.
-
-
-!!! error TS6053: File '/.lib/react16.d.ts' not found.

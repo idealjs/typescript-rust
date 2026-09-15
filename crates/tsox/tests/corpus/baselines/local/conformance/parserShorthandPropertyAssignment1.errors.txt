@@ -1,5 +1,0 @@
-parserShorthandPropertyAssignment1.ts(3,11): error TS1005: ',' expected.
-parserShorthandPropertyAssignment1.ts(3,12): error TS1117: An object literal cannot have multiple properties with the same name.
-parserShorthandPropertyAssignment1.ts(3,12): error TS1005: 'identifier' expected.
-parserShorthandPropertyAssignment1.ts(3,16): error TS1117: An object literal cannot have multiple properties with the same name.
-parserShorthandPropertyAssignment1.ts(3,16): error TS1005: ',' expected.

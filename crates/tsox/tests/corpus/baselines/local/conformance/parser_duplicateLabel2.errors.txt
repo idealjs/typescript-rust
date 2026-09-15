@@ -1,2 +1,0 @@
-parser_duplicateLabel2.ts(1,1): suggestion TS7028: Unused label.
-parser_duplicateLabel2.ts(3,3): suggestion TS7028: Unused label.

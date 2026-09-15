@@ -1,8 +1,0 @@
-contextualPropertyOfGenericFilteringMappedType.ts(12,11): error TS7006: Parameter 'value' implicitly has an 'any' type.
-contextualPropertyOfGenericFilteringMappedType.ts(12,18): error TS7006: Parameter 'key' implicitly has an 'any' type.
-contextualPropertyOfGenericFilteringMappedType.ts(13,11): error TS7006: Parameter 'value' implicitly has an 'any' type.
-contextualPropertyOfGenericFilteringMappedType.ts(13,18): error TS7006: Parameter 'key' implicitly has an 'any' type.
-contextualPropertyOfGenericFilteringMappedType.ts(28,11): error TS7006: Parameter 'value' implicitly has an 'any' type.
-contextualPropertyOfGenericFilteringMappedType.ts(28,18): error TS7006: Parameter 'key' implicitly has an 'any' type.
-contextualPropertyOfGenericFilteringMappedType.ts(38,11): error TS7006: Parameter 'value' implicitly has an 'any' type.
-contextualPropertyOfGenericFilteringMappedType.ts(38,18): error TS7006: Parameter 'key' implicitly has an 'any' type.

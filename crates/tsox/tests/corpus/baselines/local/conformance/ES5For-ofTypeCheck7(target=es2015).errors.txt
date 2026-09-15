@@ -1,1 +1,0 @@
-ES5For-ofTypeCheck7.ts(2,15): error TS2495: Type 'string | number' is not an array type or a string type.

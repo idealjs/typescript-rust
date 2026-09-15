@@ -1,2 +1,0 @@
-awaitUsingDeclarationsInForAwaitOf.3.ts(5,18): error TS2304: Cannot find name 'using'.
-awaitUsingDeclarationsInForAwaitOf.3.ts(8,20): error TS2304: Cannot find name 'using'.

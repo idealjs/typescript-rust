@@ -1,1 +1,0 @@
-iteratorExtraParameters.ts(11,21): error TS2495: Type '{ __@iterator: (_: number) => void; }' is not an array type or a string type.

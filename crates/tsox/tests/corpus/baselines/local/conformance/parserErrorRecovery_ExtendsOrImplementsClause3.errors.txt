@@ -1,3 +1,0 @@
-parserErrorRecovery_ExtendsOrImplementsClause3.ts(1,17): error TS2304: Cannot find name 'implements'.
-parserErrorRecovery_ExtendsOrImplementsClause3.ts(1,28): error TS1005: ',' expected.
-parserErrorRecovery_ExtendsOrImplementsClause3.ts(1,28): error TS1174: Classes can only extend a single class.

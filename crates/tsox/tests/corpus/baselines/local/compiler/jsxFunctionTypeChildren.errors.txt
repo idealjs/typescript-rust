@@ -1,7 +1,0 @@
-error TS6053: File '/.lib/react.d.ts' not found.
-jsxFunctionTypeChildren.tsx(5,24): error TS2307: Cannot find module 'react' or its corresponding type declarations.
-jsxFunctionTypeChildren.tsx(10,29): error TS2503: Cannot find namespace 'React'.
-jsxFunctionTypeChildren.tsx(19,28): error TS7006: Parameter 'props' implicitly has an 'any' type.
-
-
-!!! error TS6053: File '/.lib/react.d.ts' not found.

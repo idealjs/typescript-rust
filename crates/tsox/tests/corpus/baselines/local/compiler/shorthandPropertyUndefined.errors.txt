@@ -1,1 +1,0 @@
-shorthandPropertyUndefined.ts(1,11): error TS2304: Cannot find name 'b'.

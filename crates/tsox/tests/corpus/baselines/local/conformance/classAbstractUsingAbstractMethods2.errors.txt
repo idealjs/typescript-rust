@@ -1,3 +1,0 @@
-classAbstractUsingAbstractMethods2.ts(2,5): error TS1244: Abstract methods can only appear within an abstract class.
-classAbstractUsingAbstractMethods2.ts(5,7): error TS2654: Non-abstract class 'B' is missing implementations for the following members of 'A': 'foo'.
-classAbstractUsingAbstractMethods2.ts(21,7): error TS2654: Non-abstract class 'BB' is missing implementations for the following members of 'AA': 'foo'.

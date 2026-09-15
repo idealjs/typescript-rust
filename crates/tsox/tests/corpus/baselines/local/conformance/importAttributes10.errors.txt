@@ -1,4 +1,0 @@
-error TS6053: File 'b.ts' not found.
-
-
-!!! error TS6053: File 'b.ts' not found.

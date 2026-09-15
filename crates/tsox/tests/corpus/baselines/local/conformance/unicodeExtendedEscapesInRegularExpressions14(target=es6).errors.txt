@@ -1,1 +1,0 @@
-unicodeExtendedEscapesInRegularExpressions14.ts(2,18): error TS1508: Unexpected '{0}'. Did you mean to escape it with backslash?

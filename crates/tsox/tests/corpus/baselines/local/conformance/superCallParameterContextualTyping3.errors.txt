@@ -1,2 +1,0 @@
-superCallParameterContextualTyping3.ts(18,20): error TS7006: Parameter 'p' implicitly has an 'any' type.
-superCallParameterContextualTyping3.ts(26,20): error TS7006: Parameter 'p' implicitly has an 'any' type.

@@ -1,3 +1,0 @@
-emitArrowFunctionThisCapturingES6.ts(2,10): error TS2339: Property 'age' does not exist on type 'typeof globalThis'.
-emitArrowFunctionThisCapturingES6.ts(6,10): error TS2339: Property 'name' does not exist on type 'typeof globalThis'.
-emitArrowFunctionThisCapturingES6.ts(11,10): error TS2339: Property 'age' does not exist on type 'typeof globalThis'.

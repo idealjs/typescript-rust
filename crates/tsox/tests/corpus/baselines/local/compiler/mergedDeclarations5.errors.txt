@@ -1,1 +1,0 @@
-b.ts(3,17): error TS2689: Cannot extend an interface 'A'. Did you mean 'implements'?

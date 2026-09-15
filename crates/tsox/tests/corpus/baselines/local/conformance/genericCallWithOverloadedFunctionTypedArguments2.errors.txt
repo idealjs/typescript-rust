@@ -1,9 +1,0 @@
-genericCallWithOverloadedFunctionTypedArguments2.ts(14,19): error TS2345: Argument of type '(x: boolean) => boolean' is not assignable to parameter of type '{ (x: boolean): boolean; (x: string): string; }'.
-  Types of parameters 'x' and 'x' are incompatible.
-    Type 'string' is not assignable to type 'boolean'.
-genericCallWithOverloadedFunctionTypedArguments2.ts(22,19): error TS2345: Argument of type '(x: unknown) => unknown' is not assignable to parameter of type '{ (x: unknown): string; (x: number): unknown; }'.
-  Type 'unknown' is not assignable to type 'string'.
-genericCallWithOverloadedFunctionTypedArguments2.ts(28,20): error TS2345: Argument of type '(x: unknown, y: unknown) => string' is not assignable to parameter of type '{ (x: unknown): string; (x: unknown, y: unknown): string; }'.
-  Target signature provides too few arguments. Expected 2 or more, but got 1.
-genericCallWithOverloadedFunctionTypedArguments2.ts(34,23): error TS2345: Argument of type '(x: number) => number' is not assignable to parameter of type '{ (x: number): string; (x: number, y: number): string; }'.
-  Type 'number' is not assignable to type 'string'.

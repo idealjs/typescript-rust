@@ -1,6 +1,0 @@
-jsxAttributeWithoutExpressionReact.tsx(2,2): error TS2304: Cannot find name 'View'.
-jsxAttributeWithoutExpressionReact.tsx(3,6): error TS2304: Cannot find name 'ListView'.
-jsxAttributeWithoutExpressionReact.tsx(4,10): error TS2304: Cannot find name 'RefreshControl'.
-jsxAttributeWithoutExpressionReact.tsx(4,35): error TS17000: JSX attributes must only be assigned a non-empty 'expression'.
-jsxAttributeWithoutExpressionReact.tsx(5,24): error TS2339: Property 'state' does not exist on type 'typeof globalThis'.
-jsxAttributeWithoutExpressionReact.tsx(5,44): error TS17000: JSX attributes must only be assigned a non-empty 'expression'.

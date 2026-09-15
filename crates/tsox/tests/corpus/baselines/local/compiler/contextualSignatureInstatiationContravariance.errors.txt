@@ -1,7 +1,0 @@
-contextualSignatureInstatiationContravariance.ts(8,1): error TS2322: Type '<T>(x: T, y: T) => void' is not assignable to type '(g: Giraffe, e: Elephant) => void'.
-  Types of parameters 'y' and 'e' are incompatible.
-    Type 'Elephant' is not assignable to type 'Giraffe'.
-      Property 'y' is missing in type 'Elephant' but required in type 'Giraffe'.
-        Property 'y2' is missing in type 'Giraffe' but required in type 'Elephant'.
-          Property 'y2' is missing in type 'Giraffe' but required in type 'Elephant'.
-            Property 'y2' is missing in type 'Giraffe' but required in type 'Elephant'.

@@ -1,2 +1,0 @@
-exportEqualsClassRedeclarationError.ts(6,16): error TS2300: Duplicate identifier 'someProp'.
-exportEqualsClassRedeclarationError.ts(7,16): error TS2300: Duplicate identifier 'someProp'.

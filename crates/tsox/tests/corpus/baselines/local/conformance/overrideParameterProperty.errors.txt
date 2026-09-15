@@ -1,1 +1,0 @@
-overrideParameterProperty.ts(20,24): error TS1029: 'public' modifier must precede 'override' modifier.

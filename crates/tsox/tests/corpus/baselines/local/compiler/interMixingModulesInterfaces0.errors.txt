@@ -1,2 +1,0 @@
-interMixingModulesInterfaces0.ts(5,13): error TS2322: Type 'null' is not assignable to type 'typeof B'.
-interMixingModulesInterfaces0.ts(15,18): error TS2339: Property 'createB' does not exist on type 'typeof B'.

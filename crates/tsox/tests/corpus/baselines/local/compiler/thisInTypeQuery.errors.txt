@@ -1,2 +1,0 @@
-thisInTypeQuery.ts(17,33): error TS2304: Cannot find name ''.
-thisInTypeQuery.ts(26,24): error TS2304: Cannot find name 'this'.

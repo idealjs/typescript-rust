@@ -1,9 +1,0 @@
-declFileGenericType2.ts(10,59): error TS2694: Namespace 'templa.mvc' has no exported member 'IModel'.
-declFileGenericType2.ts(14,53): error TS2694: Namespace 'templa.mvc' has no exported member 'IModel'.
-declFileGenericType2.ts(15,31): error TS2694: Namespace 'templa.mvc' has no exported member 'IController'.
-declFileGenericType2.ts(19,70): error TS2694: Namespace 'templa.mvc' has no exported member 'IModel'.
-declFileGenericType2.ts(19,97): error TS2694: Namespace 'templa.mvc' has no exported member 'IController'.
-declFileGenericType2.ts(19,97): error TS2694: Namespace 'templa.mvc' has no exported member 'IController'.
-declFileGenericType2.ts(25,73): error TS2694: Namespace 'templa.mvc' has no exported member 'IModel'.
-declFileGenericType2.ts(33,92): error TS2694: Namespace 'templa.mvc.composite' has no exported member 'ICompositeControllerModel'.
-declFileGenericType2.ts(34,41): error TS2694: Namespace 'templa.mvc' has no exported member 'IController'.

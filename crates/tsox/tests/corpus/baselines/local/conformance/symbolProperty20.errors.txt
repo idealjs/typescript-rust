@@ -1,2 +1,0 @@
-symbolProperty20.ts(7,24): error TS7006: Parameter 's' implicitly has an 'any' type.
-symbolProperty20.ts(8,26): error TS7006: Parameter 'n' implicitly has an 'any' type.

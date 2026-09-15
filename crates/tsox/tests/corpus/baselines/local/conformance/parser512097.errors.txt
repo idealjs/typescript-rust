@@ -1,2 +1,0 @@
-parser512097.ts(1,12): error TS2304: Cannot find name 'aa'.
-parser512097.ts(1,14): error TS1005: ',' expected.

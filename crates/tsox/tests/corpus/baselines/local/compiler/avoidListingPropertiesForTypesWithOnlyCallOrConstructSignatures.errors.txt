@@ -1,1 +1,0 @@
-avoidListingPropertiesForTypesWithOnlyCallOrConstructSignatures.ts(7,12): error TS2322: Type '() => Dog' is not assignable to type 'Dog'.

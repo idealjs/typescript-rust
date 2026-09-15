@@ -1,1 +1,0 @@
-exportAssignmentInternalModule_B.ts(1,23): error TS2307: Cannot find module 'exportAssignmentInternalModule_A' or its corresponding type declarations.

@@ -1,1 +1,0 @@
-consumer.ts(14,5): error TS2353: Object literal may only specify known properties, and 'answer' does not exist in type 'Object'.

@@ -1,2 +1,0 @@
-classExtendsEveryObjectType.ts(4,17): error TS2689: Cannot extend an interface 'I'. Did you mean 'implements'?
-classExtendsEveryObjectType.ts(6,31): error TS1005: ',' expected.

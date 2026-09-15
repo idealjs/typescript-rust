@@ -1,2 +1,0 @@
-forwardRefInClassProperties.ts(11,17): error TS2448: Block-scoped variable 'b' used before its declaration.
-forwardRefInClassProperties.ts(11,17): error TS2454: Variable 'b' is used before being assigned.

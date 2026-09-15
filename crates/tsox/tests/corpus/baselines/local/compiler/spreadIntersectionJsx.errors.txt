@@ -1,1 +1,0 @@
-spreadIntersectionJsx.tsx(5,25): error TS2454: Variable 'intersected' is used before being assigned.

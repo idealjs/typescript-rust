@@ -1,1 +1,0 @@
-declarationEmitExpandoWithGenericConstraint.ts(14,7): error TS2339: Property 'zero' does not exist on type '(x: number, y: number) => Point'.

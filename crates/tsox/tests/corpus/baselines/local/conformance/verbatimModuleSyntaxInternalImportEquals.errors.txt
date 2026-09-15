@@ -1,1 +1,0 @@
-verbatimModuleSyntaxInternalImportEquals.ts(2,13): error TS2503: Cannot find namespace 'NonExistent'.

@@ -1,6 +1,0 @@
-genericCallWithObjectLiteralArgs.ts(5,13): error TS2345: Argument of type '{ bar: number; baz: string; }' is not assignable to parameter of type '{ bar: number; baz: number; }'.
-  Types of property 'baz' are incompatible.
-    Type 'string' is not assignable to type 'number'.
-genericCallWithObjectLiteralArgs.ts(8,22): error TS2345: Argument of type '{ bar: number; baz: string; }' is not assignable to parameter of type '{ bar: Object; baz: Object; }'.
-  Types of property 'bar' are incompatible.
-    Type 'number' is not assignable to type 'Object'.

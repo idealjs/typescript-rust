@@ -1,1 +1,0 @@
-infiniteConstraints2.ts(9,23): error TS2536: Type 'U extends T ? 0 : 1' cannot be used to index type '{ 0: [T]; 1: never; }'.

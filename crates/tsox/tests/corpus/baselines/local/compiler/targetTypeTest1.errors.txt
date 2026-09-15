@@ -1,2 +1,0 @@
-targetTypeTest1.ts(19,18): error TS2384: Overload signatures must all be ambient or non-ambient.
-targetTypeTest1.ts(26,7): error TS2339: Property 'origin' does not exist on type '(x: any, y: any) => void'.

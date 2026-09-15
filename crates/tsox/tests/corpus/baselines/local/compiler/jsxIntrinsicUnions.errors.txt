@@ -1,6 +1,0 @@
-error TS6053: File '/.lib/react16.d.ts' not found.
-jsxIntrinsicUnions.tsx(3,24): error TS2307: Cannot find module 'react' or its corresponding type declarations.
-jsxIntrinsicUnions.tsx(7,14): error TS2604: JSX element type 'El' does not have any construct or call signatures.
-
-
-!!! error TS6053: File '/.lib/react16.d.ts' not found.

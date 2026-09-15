@@ -1,2 +1,0 @@
-objectCreate.ts(4,25): error TS2353: Object literal may only specify known properties, and 'a' does not exist in type 'object | null'.
-objectCreate.ts(10,25): error TS2353: Object literal may only specify known properties, and 'a' does not exist in type 'object | null'.

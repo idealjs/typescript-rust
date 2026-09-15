@@ -1,2 +1,0 @@
-isArray.ts(4,19): error TS2454: Variable 'maybeArray' is used before being assigned.
-isArray.ts(8,5): error TS2454: Variable 'maybeArray' is used before being assigned.

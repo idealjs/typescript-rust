@@ -1,2 +1,0 @@
-classMemberWithMissingIdentifier.ts(2,12): error TS1005: 'identifier' expected.
-classMemberWithMissingIdentifier.ts(3,1): error TS1128: Declaration or statement expected.

@@ -1,2 +1,0 @@
-index.ts(1,8): error TS2307: Cannot find module './extention' or its corresponding type declarations.
-index.ts(3,12): error TS2551: Property 'tests' does not exist on type 'typeof globalThis'. Did you mean 'test'?

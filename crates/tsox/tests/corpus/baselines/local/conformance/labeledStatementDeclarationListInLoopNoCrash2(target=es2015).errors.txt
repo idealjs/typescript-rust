@@ -1,1 +1,0 @@
-labeledStatementDeclarationListInLoopNoCrash2.ts(3,3): suggestion TS7028: Unused label.

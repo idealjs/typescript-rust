@@ -1,3 +1,0 @@
-strictTupleLength.ts(6,18): error TS2339: Property 'length' does not exist on type '[]'.
-strictTupleLength.ts(7,18): error TS2339: Property 'length' does not exist on type '[number]'.
-strictTupleLength.ts(8,18): error TS2339: Property 'length' does not exist on type '[number, number]'.

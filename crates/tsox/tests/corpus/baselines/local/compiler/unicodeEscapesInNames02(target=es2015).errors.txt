@@ -1,1 +1,0 @@
-astralAsSurrogatePair.ts(1,23): error TS2305: Module '"./extendedEscapesForAstralsInVarsAndClasses.js"' has no exported member '\uDEA7'.

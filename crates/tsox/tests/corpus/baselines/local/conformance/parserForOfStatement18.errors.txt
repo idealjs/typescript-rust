@@ -1,1 +1,0 @@
-parserForOfStatement18.ts(1,16): error TS2495: Type 'any' is not an array type or a string type.

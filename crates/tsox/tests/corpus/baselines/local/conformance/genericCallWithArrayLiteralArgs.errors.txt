@@ -1,2 +1,0 @@
-genericCallWithArrayLiteralArgs.ts(12,25): error TS2322: Type 'number' is not assignable to type 'Object'.
-genericCallWithArrayLiteralArgs.ts(12,28): error TS2322: Type 'string' is not assignable to type 'Object'.

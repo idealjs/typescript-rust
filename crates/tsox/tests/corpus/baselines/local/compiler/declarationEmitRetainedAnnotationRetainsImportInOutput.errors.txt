@@ -1,2 +1,0 @@
-index.ts(3,33): error TS2702: 'E' only refers to a type, but is being used as a namespace here.
-index.ts(3,49): error TS2702: 'E' only refers to a type, but is being used as a namespace here.

@@ -1,1 +1,0 @@
-forInStatement5.ts(3,15): error TS1005: ';' expected.

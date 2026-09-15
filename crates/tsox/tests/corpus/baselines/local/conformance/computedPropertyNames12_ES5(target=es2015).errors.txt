@@ -1,4 +1,0 @@
-computedPropertyNames12_ES5.ts(5,5): error TS2564: Property '[s]' has no initializer and is not definitely assigned in the constructor.
-computedPropertyNames12_ES5.ts(9,5): error TS2564: Property '[+s]' has no initializer and is not definitely assigned in the constructor.
-computedPropertyNames12_ES5.ts(11,5): error TS2564: Property '[0]' has no initializer and is not definitely assigned in the constructor.
-computedPropertyNames12_ES5.ts(12,5): error TS2564: Property '[a]' has no initializer and is not definitely assigned in the constructor.

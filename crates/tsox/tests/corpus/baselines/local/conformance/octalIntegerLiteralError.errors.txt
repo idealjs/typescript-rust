@@ -1,3 +1,0 @@
-octalIntegerLiteralError.ts(2,19): error TS1005: ',' expected.
-octalIntegerLiteralError.ts(3,18): error TS1005: ',' expected.
-octalIntegerLiteralError.ts(8,5): error TS1117: An object literal cannot have multiple properties with the same name.

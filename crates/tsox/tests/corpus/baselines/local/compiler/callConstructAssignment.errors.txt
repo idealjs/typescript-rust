@@ -1,4 +1,0 @@
-callConstructAssignment.ts(5,1): error TS2322: Type '() => unknown' is not assignable to type '() => void'.
-  Type '() => unknown' provides no match for the signature '(): void'.
-callConstructAssignment.ts(6,1): error TS2322: Type '() => void' is not assignable to type '() => unknown'.
-  Type '() => void' provides no match for the signature 'new (): any'.

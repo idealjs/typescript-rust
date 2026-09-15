@@ -1,1 +1,0 @@
-for-of24.ts(2,15): error TS2495: Type 'any' is not an array type or a string type.

@@ -1,1 +1,0 @@
-index.ts(4,30): error TS2694: Namespace 'knex.Knex' has no exported member 'Interface'.

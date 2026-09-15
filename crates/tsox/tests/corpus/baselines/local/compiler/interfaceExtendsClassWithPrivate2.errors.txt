@@ -1,2 +1,0 @@
-interfaceExtendsClassWithPrivate2.ts(10,1): error TS2420: Class 'D' incorrectly implements interface 'I'.
-interfaceExtendsClassWithPrivate2.ts(20,13): error TS2416: Property 'x' in type 'D2' is not assignable to the same property in base type 'I'.

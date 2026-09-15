@@ -1,6 +1,0 @@
-awaitUsingDeclarationsInForOf.3.ts(2,16): error TS2304: Cannot find name 'using'.
-awaitUsingDeclarationsInForOf.3.ts(2,22): error TS1005: ';' expected.
-awaitUsingDeclarationsInForOf.3.ts(2,22): error TS2872: This kind of expression is always truthy.
-awaitUsingDeclarationsInForOf.3.ts(2,25): error TS1005: ';' expected.
-awaitUsingDeclarationsInForOf.3.ts(2,25): error TS2304: Cannot find name 'of'.
-awaitUsingDeclarationsInForOf.3.ts(2,29): error TS1109: Expression expected.

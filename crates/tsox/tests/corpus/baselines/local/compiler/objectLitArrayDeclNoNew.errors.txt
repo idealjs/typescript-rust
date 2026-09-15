@@ -1,2 +1,0 @@
-objectLitArrayDeclNoNew.ts(22,20): error TS1109: Expression expected.
-objectLitArrayDeclNoNew.ts(27,1): error TS1128: Declaration or statement expected.

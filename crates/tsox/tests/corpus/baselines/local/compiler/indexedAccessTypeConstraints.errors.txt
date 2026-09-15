@@ -1,6 +1,0 @@
-indexedAccessTypeConstraints.ts(20,9): error TS2322: Type 'M[keyof T]' is not assignable to type 'C'.
-  'C' could be instantiated with an arbitrary type which could be unrelated to 'M[keyof T]'.
-indexedAccessTypeConstraints.ts(20,35): error TS2345: Argument of type 'string' is not assignable to parameter of type 'keyof T'.
-indexedAccessTypeConstraints.ts(26,9): error TS2322: Type 'M[keyof T]' is not assignable to type 'C'.
-  'C' could be instantiated with an arbitrary type which could be unrelated to 'M[keyof T]'.
-indexedAccessTypeConstraints.ts(26,35): error TS2345: Argument of type 'string' is not assignable to parameter of type 'keyof T'.

@@ -1,3 +1,0 @@
-excessPropertyCheckIntersectionWithIndexSignature.ts(5,1): error TS2322: Type '{ y: { a: number; }; }' is not assignable to type '{ [x: string]: { a: 0; }; } & { [x: string]: { b: 0; }; }'.
-  Index signature for type 'string' is missing in type '{ y: { a: 0; }; }'.
-    Property 'b' is missing in type '{ a: 0; }' but required in type '{ b: 0; }'.

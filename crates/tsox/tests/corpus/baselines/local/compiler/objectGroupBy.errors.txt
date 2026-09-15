@@ -1,4 +1,0 @@
-objectGroupBy.ts(3,42): error TS2345: Argument of type '(c: unknown) => unknown' is not assignable to parameter of type '(item: unknown, index: number) => string | number | symbol'.
-  Type 'unknown' is not assignable to type 'string | number | symbol'.
-objectGroupBy.ts(9,44): error TS2345: Argument of type '(x: { name: string; role: "ic" | "manager"; }) => { name: string; role: "ic" | "manager"; }' is not assignable to parameter of type '(item: { name: string; role: "ic" | "manager"; }, index: number) => string | number | symbol'.
-  Type '{ name: string; role: "ic" | "manager"; }' is not assignable to type 'string | number | symbol'.

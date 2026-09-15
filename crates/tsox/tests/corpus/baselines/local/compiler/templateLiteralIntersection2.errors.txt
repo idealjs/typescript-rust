@@ -1,7 +1,0 @@
-templateLiteralIntersection2.ts(7,12): error TS2345: Argument of type 'string' is not assignable to parameter of type '`${string & { _pathBrand: any; }}/${string & { _pathBrand: any; }}`'.
-templateLiteralIntersection2.ts(11,12): error TS2345: Argument of type 'string' is not assignable to parameter of type '`${string & { _pathBrand: any; }}/${string & { _pathBrand: any; }}`'.
-templateLiteralIntersection2.ts(20,10): error TS2345: Argument of type 'string' is not assignable to parameter of type '`a${string}` & `${string}a`'.
-templateLiteralIntersection2.ts(21,10): error TS2345: Argument of type 'string' is not assignable to parameter of type '`a${string}` & `${string}a`'.
-templateLiteralIntersection2.ts(22,10): error TS2345: Argument of type 'string' is not assignable to parameter of type '`a${string}` & `${string}a`'.
-templateLiteralIntersection2.ts(23,10): error TS2345: Argument of type 'string' is not assignable to parameter of type '`a${string}` & `${string}a`'.
-templateLiteralIntersection2.ts(24,10): error TS2345: Argument of type 'string' is not assignable to parameter of type '`a${string}` & `${string}a`'.

@@ -1,1 +1,0 @@
-/node_modules/@types/lib-extender/index.d.ts(2,16): error TS2664: Invalid module name in augmentation, module 'lib' cannot be found.

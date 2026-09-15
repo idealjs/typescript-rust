@@ -1,2 +1,0 @@
-globalThisUnknown.ts(6,6): error TS2339: Property 'hi' does not exist on type 'typeof globalThis'.
-globalThisUnknown.ts(7,12): error TS2339: Property 'hi' does not exist on type 'typeof globalThis'.

@@ -1,4 +1,0 @@
-emitCapturingThisInTupleDestructuring1.ts(1,18): error TS7010: 'wrapper', which lacks return-type annotation, implicitly has an 'any' return type.
-emitCapturingThisInTupleDestructuring1.ts(3,11): error TS2339: Property 'test' does not exist on type 'typeof globalThis'.
-emitCapturingThisInTupleDestructuring1.ts(3,22): error TS2339: Property 'test1' does not exist on type 'typeof globalThis'.
-emitCapturingThisInTupleDestructuring1.ts(3,34): error TS2339: Property 'test2' does not exist on type 'typeof globalThis'.

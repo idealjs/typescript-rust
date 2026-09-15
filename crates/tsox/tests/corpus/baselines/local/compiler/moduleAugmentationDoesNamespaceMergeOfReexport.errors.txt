@@ -1,1 +1,0 @@
-augment.ts(13,3): error TS2339: Property 'x' does not exist on type 'Foo'.

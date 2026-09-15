@@ -1,2 +1,0 @@
-/main.ts(6,19): error TS2307: Cannot find module './redirect' or its corresponding type declarations.
-/main.ts(7,16): error TS2307: Cannot find module './redirect/index' or its corresponding type declarations.

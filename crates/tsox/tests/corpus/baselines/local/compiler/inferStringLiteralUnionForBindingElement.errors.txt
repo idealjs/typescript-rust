@@ -1,3 +1,0 @@
-inferStringLiteralUnionForBindingElement.ts(5,11): error TS2322: Type 'string' is not assignable to type '"aa" | "bb"'.
-inferStringLiteralUnionForBindingElement.ts(13,11): error TS2322: Type 'string' is not assignable to type '"aa" | "bb"'.
-inferStringLiteralUnionForBindingElement.ts(19,11): error TS2322: Type 'string' is not assignable to type '"aa" | "bb"'.

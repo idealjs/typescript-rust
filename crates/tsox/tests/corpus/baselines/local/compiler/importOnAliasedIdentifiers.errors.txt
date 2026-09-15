@@ -1,1 +1,0 @@
-importOnAliasedIdentifiers.ts(8,18): error TS2694: Namespace 'A' has no exported member 'X'.

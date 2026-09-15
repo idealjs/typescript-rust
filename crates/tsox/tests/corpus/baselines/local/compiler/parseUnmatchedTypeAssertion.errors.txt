@@ -1,4 +1,0 @@
-parseUnmatchedTypeAssertion.ts(1,2): error TS1109: Expression expected.
-parseUnmatchedTypeAssertion.ts(1,12): error TS1141: String literal expected.
-parseUnmatchedTypeAssertion.ts(2,1): error TS1464: Type import attributes should have exactly one key - 'resolution-mode' - with value 'import' or 'require'.
-parseUnmatchedTypeAssertion.ts(2,1): error TS1005: '{' expected.

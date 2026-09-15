@@ -1,1 +1,0 @@
-moduleVariableArrayIndexer.ts(3,13): error TS2532: Object is possibly 'undefined'.

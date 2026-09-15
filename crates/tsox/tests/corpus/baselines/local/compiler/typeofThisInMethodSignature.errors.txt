@@ -1,1 +1,0 @@
-typeofThisInMethodSignature.ts(5,14): error TS2304: Cannot find name ''.

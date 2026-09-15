@@ -1,6 +1,0 @@
-partialDiscriminatedUnionMemberHasGoodError.ts(19,10): error TS2345: Argument of type '{ types: { type: "A"; }[]; }' is not assignable to parameter of type 'Wrapper'.
-  Types of property 'types' are incompatible.
-    Type '{ type: "A"; }[]' is not assignable to type '(TypeA | TypeB)[]'.
-      Property 'param' is missing in type '{ type: "A"; }' but required in type 'TypeA'.
-        Types of property 'type' are incompatible.
-          Type '"A"' is not assignable to type '"B"'.

@@ -1,1 +1,0 @@
-errorForUsingPropertyOfTypeAsType02.ts(3,16): error TS2702: 'T' only refers to a type, but is being used as a namespace here.

@@ -1,5 +1,0 @@
-awaitUsingDeclarationsInForAwaitOf.2.ts(4,20): error TS2304: Cannot find name 'using'.
-awaitUsingDeclarationsInForAwaitOf.2.ts(4,29): error TS2304: Cannot find name 'of'.
-awaitUsingDeclarationsInForAwaitOf.2.ts(4,32): error TS1005: ')' expected.
-awaitUsingDeclarationsInForAwaitOf.2.ts(4,32): error TS2304: Cannot find name 'of'.
-awaitUsingDeclarationsInForAwaitOf.2.ts(4,34): error TS1128: Declaration or statement expected.

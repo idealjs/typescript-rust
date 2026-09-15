@@ -1,8 +1,0 @@
-error TS6053: File '/.lib/react.d.ts' not found.
-file.tsx(3,24): error TS2307: Cannot find module 'react' or its corresponding type declarations.
-file.tsx(9,5): error TS2564: Property 'greeting' has no initializer and is not definitely assigned in the constructor.
-file.tsx(16,27): error TS7006: Parameter 'input' implicitly has an 'any' type.
-file.tsx(16,39): error TS2532: Object is possibly 'undefined'.
-
-
-!!! error TS6053: File '/.lib/react.d.ts' not found.

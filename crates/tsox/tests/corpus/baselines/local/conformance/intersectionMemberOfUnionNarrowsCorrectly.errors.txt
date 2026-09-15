@@ -1,1 +1,0 @@
-intersectionMemberOfUnionNarrowsCorrectly.ts(4,3): error TS2339: Property 'a' does not exist on type '{ kind?: "A"; a: string; } | { kind?: "B"; } & { b: string; }'.

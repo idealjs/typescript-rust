@@ -1,1 +1,0 @@
-test.ts(5,15): error TS2345: Argument of type '"default"' is not assignable to parameter of type '"add"'.

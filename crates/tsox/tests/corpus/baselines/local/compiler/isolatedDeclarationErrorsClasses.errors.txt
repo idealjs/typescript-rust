@@ -1,3 +1,0 @@
-isolatedDeclarationErrorsClasses.ts(8,18): error TS7006: Parameter 'p' implicitly has an 'any' type.
-isolatedDeclarationErrorsClasses.ts(36,6): error TS2304: Cannot find name 'missing'.
-isolatedDeclarationErrorsClasses.ts(44,35): error TS7006: Parameter 'v' implicitly has an 'any' type.

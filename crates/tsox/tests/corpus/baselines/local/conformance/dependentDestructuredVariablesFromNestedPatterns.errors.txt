@@ -1,2 +1,0 @@
-dependentDestructuredVariablesFromNestedPatterns.ts(20,34): error TS2339: Property 'allSettled' does not exist on type 'PromiseConstructor'.
-dependentDestructuredVariablesFromNestedPatterns.ts(22,24): error TS7006: Parameter 'result' implicitly has an 'any' type.

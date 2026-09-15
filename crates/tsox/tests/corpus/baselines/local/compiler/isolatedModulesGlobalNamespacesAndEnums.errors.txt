@@ -1,4 +1,0 @@
-enum2.ts(3,9): error TS2304: Cannot find name 'A'.
-enum2.ts(4,9): error TS2304: Cannot find name 'X'.
-enum2.ts(5,14): error TS2339: Property 'A' does not exist on type 'Enum'.
-enum2.ts(9,9): error TS2304: Cannot find name 'A'.

@@ -1,1 +1,0 @@
-inheritanceStaticMembersIncompatible.ts(6,12): error TS2416: Property 'x' in type 'b' is not assignable to the same property in base type 'a'.

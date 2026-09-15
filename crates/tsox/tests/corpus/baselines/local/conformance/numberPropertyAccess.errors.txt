@@ -1,1 +1,0 @@
-numberPropertyAccess.ts(3,11): error TS2339: Property 'hasOwnProperty' does not exist on type 'number'.

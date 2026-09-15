@@ -1,2 +1,0 @@
-throwWithoutNewLine2.ts(2,1): error TS2304: Cannot find name 'a'.
-throwWithoutNewLine2.ts(2,1): suggestion TS7027: Unreachable code detected.

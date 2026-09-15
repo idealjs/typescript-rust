@@ -1,6 +1,0 @@
-requiredMappedTypeModifierTrumpsVariance.ts(5,1): error TS2741: Property 'a' is missing in type '{ b: 1 | undefined; x: 1; }' but required in type '{ a: 1 | undefined; x: 1; }'.
-requiredMappedTypeModifierTrumpsVariance.ts(6,1): error TS2741: Property 'b' is missing in type '{ a: 1 | undefined; x: 1; }' but required in type '{ b: 1 | undefined; x: 1; }'.
-requiredMappedTypeModifierTrumpsVariance.ts(8,3): error TS2339: Property 'b' does not exist on type '{ a: 1 | undefined; x: 1; }'.
-requiredMappedTypeModifierTrumpsVariance.ts(9,3): error TS2339: Property 'a' does not exist on type '{ b: 1 | undefined; x: 1; }'.
-requiredMappedTypeModifierTrumpsVariance.ts(21,6): error TS2339: Property 'b' does not exist on type '{ a: 1 | undefined; x: 1; }'.
-requiredMappedTypeModifierTrumpsVariance.ts(22,6): error TS2339: Property 'a' does not exist on type '{ b: 1 | undefined; x: 1; }'.

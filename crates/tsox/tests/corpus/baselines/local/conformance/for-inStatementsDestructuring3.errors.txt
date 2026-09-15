@@ -1,1 +1,0 @@
-for-inStatementsDestructuring3.ts(2,18): error TS1005: ';' expected.

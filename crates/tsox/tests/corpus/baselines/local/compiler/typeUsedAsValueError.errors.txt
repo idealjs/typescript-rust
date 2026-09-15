@@ -1,3 +1,0 @@
-typeUsedAsValueError.ts(17,11): error TS2304: Cannot find name 'InterfaceNotFound'.
-typeUsedAsValueError.ts(20,16): error TS2304: Cannot find name 'TypeAliasForSomeClassNotFound'.
-typeUsedAsValueError.ts(23,17): error TS2304: Cannot find name 'someTypeNotFound'.

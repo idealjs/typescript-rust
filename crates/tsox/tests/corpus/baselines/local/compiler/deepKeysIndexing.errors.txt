@@ -1,3 +1,0 @@
-deepKeysIndexing.ts(53,17): error TS2345: Argument of type '"1"' is not assignable to parameter of type 'keys2broken<O, K1>'.
-deepKeysIndexing.ts(54,18): error TS2345: Argument of type '"1"' is not assignable to parameter of type 'keys2working<O, K1>'.
-deepKeysIndexing.ts(55,21): error TS2345: Argument of type '"1"' is not assignable to parameter of type 'Extract<O[K1] extends object ? keyof O[K1] : never, string>'.

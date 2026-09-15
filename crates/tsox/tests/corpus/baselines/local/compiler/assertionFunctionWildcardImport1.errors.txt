@@ -1,1 +1,0 @@
-src/other/bar.ts(4,4): error TS2339: Property 'Debug' does not exist on type 'typeof import("./_namespaces/ts")'.

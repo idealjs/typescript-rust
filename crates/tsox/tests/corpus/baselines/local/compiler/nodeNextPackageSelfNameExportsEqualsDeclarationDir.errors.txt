@@ -1,1 +1,0 @@
-/main.cts(1,20): error TS2307: Cannot find module 'self' or its corresponding type declarations.

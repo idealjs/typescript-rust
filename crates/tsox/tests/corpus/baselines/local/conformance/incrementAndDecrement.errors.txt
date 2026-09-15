@@ -1,4 +1,0 @@
-incrementAndDecrement.ts(8,1): error TS2364: The left-hand side of an assignment expression must be a variable or a property access.
-incrementAndDecrement.ts(11,1): error TS2364: The left-hand side of an assignment expression must be a variable or a property access.
-incrementAndDecrement.ts(14,1): error TS2364: The left-hand side of an assignment expression must be a variable or a property access.
-incrementAndDecrement.ts(17,1): error TS2364: The left-hand side of an assignment expression must be a variable or a property access.

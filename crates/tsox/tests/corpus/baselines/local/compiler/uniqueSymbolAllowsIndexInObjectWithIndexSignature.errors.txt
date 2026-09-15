@@ -1,2 +1,0 @@
-uniqueSymbolAllowsIndexInObjectWithIndexSignature.ts(9,5): error TS2322: Type '{ [SYM]: "sym"; }' is not assignable to type 'I'.
-  Index signature for type 'string' is missing in type '{ [SYM]: "sym"; }'.

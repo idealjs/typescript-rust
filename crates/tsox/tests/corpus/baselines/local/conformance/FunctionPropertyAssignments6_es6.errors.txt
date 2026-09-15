@@ -1,1 +1,0 @@
-FunctionPropertyAssignments6_es6.ts(1,12): error TS1005: 'identifier' expected.

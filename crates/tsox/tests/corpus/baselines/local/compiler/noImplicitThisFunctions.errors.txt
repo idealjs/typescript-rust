@@ -1,1 +1,0 @@
-noImplicitThisFunctions.ts(17,43): error TS2339: Property 'c' does not exist on type 'typeof globalThis'.

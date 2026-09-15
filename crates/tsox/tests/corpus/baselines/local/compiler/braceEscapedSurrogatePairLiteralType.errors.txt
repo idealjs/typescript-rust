@@ -1,2 +1,0 @@
-braceEscapedSurrogatePairLiteralType.ts(7,7): error TS2322: Type '"��"' is not assignable to type '"😀"'.
-braceEscapedSurrogatePairLiteralType.ts(8,7): error TS2322: Type '"��"' is not assignable to type '"😀"'.

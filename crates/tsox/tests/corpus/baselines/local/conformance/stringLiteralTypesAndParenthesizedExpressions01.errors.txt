@@ -1,2 +1,0 @@
-stringLiteralTypesAndParenthesizedExpressions01.ts(5,5): error TS2322: Type 'string' is not assignable to type '"foo"'.
-stringLiteralTypesAndParenthesizedExpressions01.ts(6,5): error TS2322: Type 'string' is not assignable to type '"foo" | "bar"'.

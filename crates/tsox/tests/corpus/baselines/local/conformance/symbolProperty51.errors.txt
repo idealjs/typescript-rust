@@ -1,1 +1,0 @@
-symbolProperty51.ts(5,17): error TS2339: Property 'iterator' does not exist on type 'M.Symbol'.

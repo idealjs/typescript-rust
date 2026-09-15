@@ -1,8 +1,0 @@
-consistentAliasVsNonAliasRecordBehavior.ts(10,5): error TS2741: Property 'a' is missing in type '{ [x: string]: string; }' but required in type '{ a: string; }'.
-consistentAliasVsNonAliasRecordBehavior.ts(14,5): error TS2741: Property 'a' is missing in type '{ [x: string]: string; }' but required in type '{ a: string; }'.
-consistentAliasVsNonAliasRecordBehavior.ts(18,5): error TS2741: Property 'a' is missing in type '{ [x: string]: string; }' but required in type '{ a: string; }'.
-consistentAliasVsNonAliasRecordBehavior.ts(22,5): error TS2741: Property 'a' is missing in type '{ [x: string]: string; }' but required in type '{ a: string; }'.
-consistentAliasVsNonAliasRecordBehavior.ts(26,5): error TS2741: Property 'a' is missing in type '{ [x: string]: T; }' but required in type '{ a: T; }'.
-consistentAliasVsNonAliasRecordBehavior.ts(30,5): error TS2741: Property 'a' is missing in type '{ [x: string]: T; }' but required in type '{ a: T; }'.
-consistentAliasVsNonAliasRecordBehavior.ts(34,5): error TS2741: Property 'a' is missing in type '{ [x: string]: T; }' but required in type '{ a: T; }'.
-consistentAliasVsNonAliasRecordBehavior.ts(38,5): error TS2741: Property 'a' is missing in type '{ [x: string]: T; }' but required in type '{ a: T; }'.

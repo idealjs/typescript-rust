@@ -1,3 +1,0 @@
-inferenceOuterResultNotIncorrectlyInstantiatedWithInnerResult.ts(35,59): error TS2345: Argument of type 'T' is not assignable to parameter of type '{}'.
-inferenceOuterResultNotIncorrectlyInstantiatedWithInnerResult.ts(36,24): error TS2345: Argument of type '{ [P in K]: any; } & { x: number; }' is not assignable to parameter of type 'T'.
-  'T' could be instantiated with an arbitrary type which could be unrelated to '{ [P in K]: any; } & { x: number; }'.

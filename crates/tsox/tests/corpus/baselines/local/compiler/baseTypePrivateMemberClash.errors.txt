@@ -1,2 +1,0 @@
-baseTypePrivateMemberClash.ts(2,13): error TS2564: Property 'm' has no initializer and is not definitely assigned in the constructor.
-baseTypePrivateMemberClash.ts(5,13): error TS2564: Property 'm' has no initializer and is not definitely assigned in the constructor.

@@ -1,1 +1,0 @@
-deleteReadonlyInStrictNullChecks.ts(3,12): error TS2339: Property 'name' does not exist on type 'typeof Foo'.

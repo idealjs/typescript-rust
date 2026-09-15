@@ -1,1 +1,0 @@
-parserStrictMode14.ts(2,7): error TS2304: Cannot find name 'a'.

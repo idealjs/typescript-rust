@@ -1,1 +1,0 @@
-excessPropertyCheckIntersectionWithRecursiveType.ts(67,66): error TS2536: Type 'I["length"] extends N ? 1 : 0' cannot be used to index type '{ 1: T; 0: T & { children: any[]; }; }'.

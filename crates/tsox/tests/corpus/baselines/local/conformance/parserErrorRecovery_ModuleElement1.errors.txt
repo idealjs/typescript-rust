@@ -1,7 +1,0 @@
-parserErrorRecovery_ModuleElement1.ts(1,1): error TS1108: A 'return' statement can only be used within a function body.
-parserErrorRecovery_ModuleElement1.ts(1,8): error TS2304: Cannot find name 'foo'.
-parserErrorRecovery_ModuleElement1.ts(2,1): error TS1128: Declaration or statement expected.
-parserErrorRecovery_ModuleElement1.ts(3,1): error TS1108: A 'return' statement can only be used within a function body.
-parserErrorRecovery_ModuleElement1.ts(3,1): suggestion TS7027: Unreachable code detected.
-parserErrorRecovery_ModuleElement1.ts(3,8): error TS2304: Cannot find name 'bar'.
-parserErrorRecovery_ModuleElement1.ts(4,1): error TS1128: Declaration or statement expected.

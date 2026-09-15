@@ -1,3 +1,0 @@
-jsxReactTestSuite.tsx(17,9): error TS2339: Property 'props' does not exist on type 'typeof globalThis'.
-jsxReactTestSuite.tsx(28,11): error TS2339: Property 'props' does not exist on type 'typeof globalThis'.
-jsxReactTestSuite.tsx(94,14): error TS2339: Property 'props' does not exist on type 'typeof globalThis'.

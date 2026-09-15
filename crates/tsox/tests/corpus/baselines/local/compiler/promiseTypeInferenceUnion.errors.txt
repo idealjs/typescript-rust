@@ -1,6 +1,0 @@
-promiseTypeInferenceUnion.ts(2,3): error TS2322: Type 'Promise<number>' is not assignable to type 'number | Promise<number>'.
-  Type 'Promise<number>' is missing the following properties from type 'Promise<number>': then, catch, __@toStringTag, finally
-promiseTypeInferenceUnion.ts(6,3): error TS2322: Type 'Promise<number>' is not assignable to type 'number | PromiseLike<number>'.
-  Property 'then' is missing in type 'Promise<number>' but required in type 'PromiseLike<number>'.
-promiseTypeInferenceUnion.ts(10,3): error TS2322: Type 'Promise<number>' is not assignable to type 'number | Promise<number> | PromiseLike<number>'.
-  Type 'Promise<number>' is missing the following properties from type 'Promise<number>': then, catch, __@toStringTag, finally

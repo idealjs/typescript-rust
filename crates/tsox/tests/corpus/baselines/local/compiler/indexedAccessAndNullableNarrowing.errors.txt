@@ -1,8 +1,0 @@
-indexedAccessAndNullableNarrowing.ts(16,5): error TS2322: Type '(Partial<T>)[K] & {}' is not assignable to type 'T[K]'.
-  'T[K]' could be instantiated with an arbitrary type which could be unrelated to '(Partial<T>)[K] & {}'.
-indexedAccessAndNullableNarrowing.ts(17,5): error TS2322: Type '(Partial<T>)[K] & {} | null' is not assignable to type 'T[K]'.
-  'T[K]' could be instantiated with an arbitrary type which could be unrelated to '(Partial<T>)[K] & {} | null'.
-indexedAccessAndNullableNarrowing.ts(41,20): error TS2345: Argument of type 'K' is not assignable to parameter of type 'keyof S'.
-  Type 'string' is not assignable to type 'keyof S'.
-indexedAccessAndNullableNarrowing.ts(43,20): error TS2345: Argument of type 'K' is not assignable to parameter of type 'keyof S'.
-  Type 'string' is not assignable to type 'keyof S'.

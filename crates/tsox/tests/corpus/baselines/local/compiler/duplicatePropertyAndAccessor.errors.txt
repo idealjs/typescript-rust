@@ -1,1 +1,0 @@
-duplicatePropertyAndAccessor.ts(5,12): error TS2300: Duplicate identifier 'y'.

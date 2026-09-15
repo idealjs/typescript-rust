@@ -1,1 +1,0 @@
-constructorFunctionTypeIsAssignableToBaseType.ts(9,12): error TS2416: Property 'foo' in type 'Derived' is not assignable to the same property in base type 'Base'.

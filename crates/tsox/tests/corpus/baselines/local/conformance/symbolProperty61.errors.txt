@@ -1,3 +1,0 @@
-symbolProperty61.ts(7,26): error TS2304: Cannot find name ''.
-symbolProperty61.ts(29,6): error TS2345: Argument of type 'MyObservable<number>' is not assignable to parameter of type '{ [Symbol.obs]: () => { subscribe: (next: (val: unknown) => void) => void; }; }'.
-  Property '[Symbol.obs]' is missing in type 'MyObservable<number>' but required in type '{ [Symbol.obs]: () => { subscribe: (next: (val: unknown) => void) => void; }; }'.

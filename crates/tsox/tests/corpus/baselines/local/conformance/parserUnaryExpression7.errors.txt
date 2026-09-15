@@ -1,1 +1,0 @@
-parserUnaryExpression7.ts(1,8): error TS2304: Cannot find name 'Foo'.

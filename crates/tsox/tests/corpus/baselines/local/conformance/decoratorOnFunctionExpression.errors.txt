@@ -1,1 +1,0 @@
-decoratorOnFunctionExpression.ts(3,9): error TS1109: Expression expected.

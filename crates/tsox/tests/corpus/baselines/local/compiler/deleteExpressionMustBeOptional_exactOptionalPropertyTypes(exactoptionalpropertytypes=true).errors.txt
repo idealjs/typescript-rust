@@ -1,6 +1,0 @@
-deleteExpressionMustBeOptional_exactOptionalPropertyTypes.ts(26,8): error TS2790: The operand of a 'delete' operator must be optional.
-deleteExpressionMustBeOptional_exactOptionalPropertyTypes.ts(28,8): error TS2790: The operand of a 'delete' operator must be optional.
-deleteExpressionMustBeOptional_exactOptionalPropertyTypes.ts(35,10): error TS2339: Property 'j' does not exist on type 'Foo'.
-deleteExpressionMustBeOptional_exactOptionalPropertyTypes.ts(46,10): error TS2339: Property 'j' does not exist on type '{ a?: number; b?: number; c?: number | null; d?: number; e?: number | null; f?: number | null; g?: unknown; h?: any; i?: never; }'.
-deleteExpressionMustBeOptional_exactOptionalPropertyTypes.ts(51,8): error TS2790: The operand of a 'delete' operator must be optional.
-deleteExpressionMustBeOptional_exactOptionalPropertyTypes.ts(52,8): error TS2790: The operand of a 'delete' operator must be optional.

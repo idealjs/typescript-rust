@@ -1,4 +1,0 @@
-accessorWithRestParam.ts(2,9): error TS2300: Duplicate identifier 'X'.
-accessorWithRestParam.ts(2,11): error TS1053: A 'set' accessor cannot have rest parameter.
-accessorWithRestParam.ts(3,16): error TS2300: Duplicate identifier 'X'.
-accessorWithRestParam.ts(3,18): error TS1053: A 'set' accessor cannot have rest parameter.

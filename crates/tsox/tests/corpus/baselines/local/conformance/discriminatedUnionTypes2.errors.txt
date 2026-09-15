@@ -1,3 +1,0 @@
-discriminatedUnionTypes2.ts(115,17): error TS2339: Property 'name' does not exist on type '{ type: "a"; data: string; } | { type: "b"; name: string; } | { type: "c"; other: string; } & { type: "b"; name: string; } | { type: "c"; other: string; }'.
-discriminatedUnionTypes2.ts(118,17): error TS2339: Property 'other' does not exist on type '{ type: "a"; data: string; } | { type: "b"; name: string; } | { type: "c"; other: string; } & { type: "b"; name: string; } | { type: "c"; other: string; }'.
-discriminatedUnionTypes2.ts(132,11): error TS2339: Property 'value' does not exist on type 'never'.

@@ -1,4 +1,0 @@
-error TS6053: File '/.lib/react.d.ts' not found.
-
-
-!!! error TS6053: File '/.lib/react.d.ts' not found.

@@ -1,4 +1,0 @@
-moduleVisibilityTest4.ts(9,11): error TS2694: Namespace 'M' has no exported member 'num'.
-moduleVisibilityTest4.ts(11,11): error TS2694: Namespace 'M' has no exported member 'bar'.
-moduleVisibilityTest4.ts(13,11): error TS2694: Namespace 'N' has no exported member 'num'.
-moduleVisibilityTest4.ts(15,11): error TS2694: Namespace 'N' has no exported member 'bar'.

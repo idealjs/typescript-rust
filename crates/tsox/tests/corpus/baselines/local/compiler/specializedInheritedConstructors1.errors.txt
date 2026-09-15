@@ -1,4 +1,0 @@
-specializedInheritedConstructors1.ts(7,5): error TS2564: Property 'model' has no initializer and is not definitely assigned in the constructor.
-specializedInheritedConstructors1.ts(16,25): error TS2345: Argument of type 'ViewOptions<Model>' is not assignable to parameter of type 'ViewOptions<TModel>'.
-  Types of property 'model' are incompatible.
-    Type 'Model' is not assignable to type 'TModel'.

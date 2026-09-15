@@ -1,1 +1,0 @@
-symbolProperty25.ts(5,1): error TS2420: Class 'C' incorrectly implements interface 'I'.

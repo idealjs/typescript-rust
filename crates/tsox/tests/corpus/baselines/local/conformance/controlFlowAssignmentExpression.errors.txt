@@ -1,2 +1,0 @@
-controlFlowAssignmentExpression.ts(17,11): error TS2322: Type '1 | 2' is not assignable to type '1'.
-  Type '2' is not assignable to type '1'.

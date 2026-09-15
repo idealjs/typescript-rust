@@ -1,1 +1,0 @@
-literalIntersectionYieldsLiteral.ts(1,52): error TS2322: Type 'string' is not assignable to type 'string & "string"'.

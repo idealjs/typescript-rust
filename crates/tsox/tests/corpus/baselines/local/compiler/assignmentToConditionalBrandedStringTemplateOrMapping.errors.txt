@@ -1,2 +1,0 @@
-assignmentToConditionalBrandedStringTemplateOrMapping.ts(4,1): error TS2322: Type '<T>() => 2' is not assignable to type '<T>() => T extends `${"a" & { a: 1; }}` ? 1 : 2'.
-  Type '2' is not assignable to type 'T extends `${"a" & { a: 1; }}` ? 1 : 2'.

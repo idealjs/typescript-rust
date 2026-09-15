@@ -1,2 +1,0 @@
-objectFromEntries.ts(3,39): error TS2345: Argument of type '(string | symbol)[][]' is not assignable to parameter of type '[any[], unknown][] | null'.
-  Type '(string | symbol)[][]' is not assignable to type '[any[], unknown][]'.

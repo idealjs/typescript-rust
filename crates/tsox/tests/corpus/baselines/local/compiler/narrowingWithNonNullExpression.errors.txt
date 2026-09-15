@@ -1,1 +1,0 @@
-narrowingWithNonNullExpression.ts(2,7): error TS18047: 'm' is possibly 'null'.

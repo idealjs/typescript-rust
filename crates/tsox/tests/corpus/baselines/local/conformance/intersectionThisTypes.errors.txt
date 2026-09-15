@@ -1,6 +1,0 @@
-intersectionThisTypes.ts(15,5): error TS2322: Type 'this' is not assignable to type 'Thing1 & Thing2'.
-  Type 'Thing1' is missing the following properties from type 'Thing2': b, me
-    Type 'Thing1' is missing the following properties from type 'Thing2': b, me
-intersectionThisTypes.ts(24,11): error TS2339: Property 'self' does not exist on type 'Thing5'.
-intersectionThisTypes.ts(25,11): error TS2339: Property 'me' does not exist on type 'Thing5'.
-intersectionThisTypes.ts(38,14): error TS2339: Property 'id' does not exist on type 'this & { tag: string; }'.

@@ -1,1 +1,0 @@
-objectFreeze.ts(12,11): error TS2339: Property 'toString' does not exist on type 'object | U | null | undefined'.

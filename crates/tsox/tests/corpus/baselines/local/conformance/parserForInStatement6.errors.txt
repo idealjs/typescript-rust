@@ -1,3 +1,0 @@
-parserForInStatement6.ts(1,26): error TS2304: Cannot find name 'X'.
-parserForInStatement6.ts(1,27): error TS1005: ',' expected.
-parserForInStatement6.ts(2,2): error TS1005: ';' expected.

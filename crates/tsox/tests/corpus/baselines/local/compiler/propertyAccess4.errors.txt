@@ -1,1 +1,0 @@
-propertyAccess4.ts(1,1): error TS2531: Object is possibly 'null'.

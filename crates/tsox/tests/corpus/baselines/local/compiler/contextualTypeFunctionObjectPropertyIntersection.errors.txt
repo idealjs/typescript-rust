@@ -1,3 +1,0 @@
-contextualTypeFunctionObjectPropertyIntersection.ts(99,5): error TS7006: Parameter 'a' implicitly has an 'any' type.
-contextualTypeFunctionObjectPropertyIntersection.ts(108,8): error TS7006: Parameter 's' implicitly has an 'any' type.
-contextualTypeFunctionObjectPropertyIntersection.ts(141,25): error TS7006: Parameter 'state' implicitly has an 'any' type.

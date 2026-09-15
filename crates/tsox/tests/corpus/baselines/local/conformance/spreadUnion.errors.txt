@@ -1,7 +1,0 @@
-spreadUnion.ts(4,5): error TS2403: Subsequent variable declarations must have the same type.  Variable 'o3' must be of type '{ a: number; } | { b: string; }', but here has type 'any'.
-spreadUnion.ts(4,16): error TS2454: Variable 'union' is used before being assigned.
-spreadUnion.ts(7,5): error TS2403: Subsequent variable declarations must have the same type.  Variable 'o4' must be of type '{ a: boolean; } | { b: string; a: boolean; }', but here has type 'any'.
-spreadUnion.ts(7,16): error TS2454: Variable 'union' is used before being assigned.
-spreadUnion.ts(10,5): error TS2403: Subsequent variable declarations must have the same type.  Variable 'o5' must be of type '{ a: number; } | { b: string; } | { a: number; b: string; }', but here has type 'any'.
-spreadUnion.ts(10,16): error TS2454: Variable 'union' is used before being assigned.
-spreadUnion.ts(10,26): error TS2454: Variable 'union' is used before being assigned.

@@ -1,3 +1,0 @@
-f3.ts(3,13): error TS2339: Property 'foo' does not exist on type 'A'.
-f3.ts(11,5): error TS2439: Import or export declaration in an ambient module declaration cannot reference module through relative module name.
-f3.ts(11,21): error TS2307: Cannot find module './f2' or its corresponding type declarations.

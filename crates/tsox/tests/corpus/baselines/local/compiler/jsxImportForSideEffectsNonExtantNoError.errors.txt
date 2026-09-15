@@ -1,6 +1,0 @@
-error TS6053: File '/.lib/react16.d.ts' not found.
-jsxImportForSideEffectsNonExtantNoError.tsx(2,24): error TS2307: Cannot find module 'react' or its corresponding type declarations.
-jsxImportForSideEffectsNonExtantNoError.tsx(4,8): error TS2307: Cannot find module './App.css' or its corresponding type declarations.
-
-
-!!! error TS6053: File '/.lib/react16.d.ts' not found.

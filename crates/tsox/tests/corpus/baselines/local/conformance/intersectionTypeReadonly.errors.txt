@@ -1,1 +1,0 @@
-intersectionTypeReadonly.ts(17,6): error TS2540: Cannot assign to 'value' because it is a read-only property.

@@ -1,4 +1,0 @@
-conflictMarkerTrivia3.tsx(2,2): error TS1005: 'identifier' expected.
-conflictMarkerTrivia3.tsx(2,4): error TS1003: Identifier expected.
-conflictMarkerTrivia3.tsx(2,6): error TS1003: Identifier expected.
-conflictMarkerTrivia3.tsx(2,13): error TS1005: '>' expected.

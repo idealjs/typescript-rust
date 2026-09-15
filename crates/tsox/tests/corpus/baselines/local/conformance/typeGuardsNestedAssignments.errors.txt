@@ -1,5 +1,0 @@
-typeGuardsNestedAssignments.ts(26,10): error TS2322: Type 'Foo | null' is not assignable to type 'Object | null'.
-  Type 'Foo' is not assignable to type 'Object | null'.
-    Type 'Foo' is missing the following properties from type 'Object': constructor, toString, toLocaleString, valueOf, and 3 more.
-typeGuardsNestedAssignments.ts(44,20): error TS18047: 'match' is possibly 'null'.
-typeGuardsNestedAssignments.ts(44,38): error TS18047: 'match' is possibly 'null'.

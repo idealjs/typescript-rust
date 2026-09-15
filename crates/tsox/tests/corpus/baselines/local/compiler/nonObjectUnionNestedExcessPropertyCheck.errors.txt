@@ -1,5 +1,0 @@
-nonObjectUnionNestedExcessPropertyCheck.ts(13,35): error TS2353: Object literal may only specify known properties, and 'INVALID_PROP_NAME' does not exist in type 'number | IProps'.
-nonObjectUnionNestedExcessPropertyCheck.ts(16,7): error TS2322: Type '{ nestedProp: { asdfasdf: string; }; iconProp: string; }' is not assignable to type 'number | IProps'.
-  Types of property 'nestedProp' are incompatible.
-    Type '{ asdfasdf: "test"; }' is not assignable to type '{ testBool?: boolean; } | undefined'.
-      Type '{ asdfasdf: "test"; }' has no properties in common with type '{ testBool?: boolean; }'.

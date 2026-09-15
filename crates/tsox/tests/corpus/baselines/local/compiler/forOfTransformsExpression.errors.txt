@@ -1,1 +1,0 @@
-forOfTransformsExpression.ts(3,18): error TS2495: Type 'this' is not an array type or a string type.

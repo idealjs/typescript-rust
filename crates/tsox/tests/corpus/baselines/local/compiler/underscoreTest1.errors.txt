@@ -1,5 +1,0 @@
-underscoreTest1_underscoreTests.ts(22,24): error TS2353: Object literal may only specify known properties, and 'author' does not exist in type 'Object'.
-underscoreTest1_underscoreTests.ts(95,1): error TS2349: This expression is not callable.
-  Type 'Function' has no call signatures.
-underscoreTest1_underscoreTests.ts(139,1): error TS2349: This expression is not callable.
-  Type 'Function' has no call signatures.

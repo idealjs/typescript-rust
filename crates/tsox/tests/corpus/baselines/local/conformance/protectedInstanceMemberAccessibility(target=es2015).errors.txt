@@ -1,6 +1,0 @@
-protectedInstanceMemberAccessibility.ts(14,23): error TS2339: Property 'z' does not exist on type 'this'.
-protectedInstanceMemberAccessibility.ts(19,24): error TS2339: Property 'z' does not exist on type 'B'.
-protectedInstanceMemberAccessibility.ts(24,20): error TS2339: Property 'y' does not exist on type 'A'.
-protectedInstanceMemberAccessibility.ts(25,20): error TS2339: Property 'z' does not exist on type 'A'.
-protectedInstanceMemberAccessibility.ts(31,20): error TS2339: Property 'z' does not exist on type 'B'.
-protectedInstanceMemberAccessibility.ts(36,20): error TS2339: Property 'y' does not exist on type 'C'.

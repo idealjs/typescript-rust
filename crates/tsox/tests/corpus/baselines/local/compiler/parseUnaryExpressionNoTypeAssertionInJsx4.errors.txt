@@ -1,2 +1,0 @@
-index.tsx(5,14): error TS1005: 'identifier' expected.
-index.tsx(6,1): error TS1005: '' expected.

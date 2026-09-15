@@ -1,4 +1,0 @@
-mappedTypeInferenceErrors.ts(9,5): error TS2345: Argument of type '{ props: { x: number; y: number; }; computed: { bar: () => number; baz: number; }; }' is not assignable to parameter of type '{ props: { x: number; y: number; }; computed: { bar: () => C["bar"]; baz: () => C["baz"]; }; } & ThisType<{ x: number; y: number; } & { bar: number; baz: unknown; }>'.
-  The types of 'computed.bar()' are incompatible between these types.
-    Type 'number' is not assignable to type 'C["bar"]'.
-      'C["bar"]' could be instantiated with an arbitrary type which could be unrelated to 'number'.

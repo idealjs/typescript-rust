@@ -1,6 +1,0 @@
-autoAccessorDisallowedModifiers.ts(34,17): error TS1003: Identifier expected.
-autoAccessorDisallowedModifiers.ts(35,17): error TS1003: Identifier expected.
-autoAccessorDisallowedModifiers.ts(35,20): error TS1434: Unexpected keyword or identifier.
-autoAccessorDisallowedModifiers.ts(35,20): error TS2304: Cannot find name 'from'.
-autoAccessorDisallowedModifiers.ts(36,17): error TS1146: Declaration expected.
-autoAccessorDisallowedModifiers.ts(37,25): error TS1146: Declaration expected.

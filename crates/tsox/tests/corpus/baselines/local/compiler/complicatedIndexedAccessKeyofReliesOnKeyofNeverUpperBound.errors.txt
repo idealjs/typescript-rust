@@ -1,3 +1,0 @@
-complicatedIndexedAccessKeyofReliesOnKeyofNeverUpperBound.ts(33,14): error TS2322: Type 'T' is not assignable to type '(ChannelOfType<T>)["type"] & any'.
-  Type '"text"' is not assignable to type '(ChannelOfType<T>)["type"]'.
-    Type 'string' is not assignable to type '(ChannelOfType<T>)["type"] & any'.

@@ -1,1 +1,0 @@
-renamingDestructuredPropertyInFunctionType3.ts(2,17): error TS2344: Type 'symbol' does not satisfy the constraint 'string'.

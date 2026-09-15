@@ -1,1 +1,0 @@
-file1.d.ts(3,13): error TS1182: A destructuring declaration must have an initializer.

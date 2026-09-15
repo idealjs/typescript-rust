@@ -1,1 +1,0 @@
-parserComputedPropertyName26.ts(4,6): error TS2304: Cannot find name 'e2'.

@@ -1,8 +1,0 @@
-typeGuardOfFormTypeOfIsOrderIndependent.ts(10,25): error TS2454: Variable 'strOrNum' is used before being assigned.
-typeGuardOfFormTypeOfIsOrderIndependent.ts(14,11): error TS2454: Variable 'strOrNum' is used before being assigned.
-typeGuardOfFormTypeOfIsOrderIndependent.ts(16,27): error TS2454: Variable 'strOrFunc' is used before being assigned.
-typeGuardOfFormTypeOfIsOrderIndependent.ts(20,11): error TS2454: Variable 'strOrFunc' is used before being assigned.
-typeGuardOfFormTypeOfIsOrderIndependent.ts(22,25): error TS2454: Variable 'numOrBool' is used before being assigned.
-typeGuardOfFormTypeOfIsOrderIndependent.ts(26,12): error TS2454: Variable 'numOrBool' is used before being assigned.
-typeGuardOfFormTypeOfIsOrderIndependent.ts(28,26): error TS2454: Variable 'strOrBool' is used before being assigned.
-typeGuardOfFormTypeOfIsOrderIndependent.ts(32,11): error TS2454: Variable 'strOrBool' is used before being assigned.

@@ -1,8 +1,0 @@
-controlFlowIIFE.ts(7,22): error TS2339: Property 'length' does not exist on type 'string | number'.
-controlFlowIIFE.ts(16,22): error TS2339: Property 'length' does not exist on type 'string | number'.
-controlFlowIIFE.ts(25,18): error TS7006: Parameter 'z' implicitly has an 'any' type.
-controlFlowIIFE.ts(25,25): error TS2339: Property 'length' does not exist on type 'string | number'.
-controlFlowIIFE.ts(45,5): error TS18048: 'test' is possibly 'undefined'.
-controlFlowIIFE.ts(55,5): error TS2454: Variable 'v' is used before being assigned.
-controlFlowIIFE.ts(64,5): error TS2454: Variable 'v' is used before being assigned.
-controlFlowIIFE.ts(72,5): error TS2454: Variable 'v' is used before being assigned.

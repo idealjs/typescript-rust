@@ -1,2 +1,0 @@
-recursiveUnionTypeInference.ts(6,5): error TS2322: Type 'unknown' is not assignable to type 'T'.
-  'T' could be instantiated with an arbitrary type which could be unrelated to 'unknown'.

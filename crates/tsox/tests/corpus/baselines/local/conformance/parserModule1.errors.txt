@@ -1,1 +1,0 @@
-parserModule1.ts(7,20): error TS2322: Type 'null' is not assignable to type 'CompilerDiagnostics.IDiagnosticWriter'.

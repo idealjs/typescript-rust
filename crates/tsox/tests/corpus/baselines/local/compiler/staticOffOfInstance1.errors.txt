@@ -1,1 +1,0 @@
-staticOffOfInstance1.ts(3,10): error TS2339: Property 'Foo' does not exist on type 'this'.

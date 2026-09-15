@@ -20,9 +20,12 @@ impl Checker {
                 && target.flags.contains(TypeFlags::Object)
                 // 任一方是「空成员且带符号」的壳型（lib 解析重入期的未完成实例）
                 // 即放行：带符号才免于误放 `{}` 字面量；有成员的完整实例照常
-                // 结构比较（递归由 relation_in_progress 兜底）
-                && self.side_is_incomplete_shell(source, sp)
-                || self.side_is_incomplete_shell(target, tp)
+                // 结构比较（递归由 relation_in_progress 兜底）。
+                // 注意：`&&…||…` 必须括号——无括号时 `|| target_shell` 会脱离
+                // Object 守卫与 pending 门，target 空壳即无条件放行吞诊断
+                && !self.pending_interface_shells.is_empty()
+                && (self.side_is_incomplete_shell(source, sp)
+                    || self.side_is_incomplete_shell(target, tp))
             {
                 return true;
             }

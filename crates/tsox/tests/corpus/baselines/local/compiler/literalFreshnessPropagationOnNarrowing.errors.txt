@@ -1,6 +1,0 @@
-literalFreshnessPropagationOnNarrowing.ts(22,9): error TS2322: Type 'string | false | (string | false)[] | (string | false | (string | false)[])[]' is not assignable to type 'string | false | (string | false)[]'.
-  Type '(string | false | (string | false)[])[]' is not assignable to type 'string | false | (string | false)[]'.
-    Type '(string | false | (string | false)[])[]' is not assignable to type '(string | false)[]'.
-      Type '(string | false)[]' is not assignable to type 'string | false'.
-        Type '(string | false)[]' is not assignable to type 'string | false'.
-literalFreshnessPropagationOnNarrowing.ts(37,5): error TS2322: Type '"y"' is not assignable to type '"x"'.

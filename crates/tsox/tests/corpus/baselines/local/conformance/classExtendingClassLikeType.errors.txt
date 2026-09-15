@@ -1,7 +1,0 @@
-classExtendingClassLikeType.ts(7,18): error TS2689: Cannot extend an interface 'Base'. Did you mean 'implements'?
-classExtendingClassLikeType.ts(22,14): error TS2339: Property 'x' does not exist on type 'this'.
-classExtendingClassLikeType.ts(23,14): error TS2339: Property 'y' does not exist on type 'this'.
-classExtendingClassLikeType.ts(31,14): error TS2339: Property 'x' does not exist on type 'this'.
-classExtendingClassLikeType.ts(32,14): error TS2339: Property 'y' does not exist on type 'this'.
-classExtendingClassLikeType.ts(39,14): error TS2339: Property 'x' does not exist on type 'this'.
-classExtendingClassLikeType.ts(40,14): error TS2339: Property 'y' does not exist on type 'this'.

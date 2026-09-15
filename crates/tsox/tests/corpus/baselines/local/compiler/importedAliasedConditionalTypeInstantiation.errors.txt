@@ -1,2 +1,0 @@
-index.ts(4,28): error TS2694: Namespace 'node_modules/lambda-tester/index.d.ts' has no exported member 'Verifier'.
-index.ts(5,30): error TS2694: Namespace 'node_modules/lambda-tester/index.d.ts' has no exported member 'Verifier'.

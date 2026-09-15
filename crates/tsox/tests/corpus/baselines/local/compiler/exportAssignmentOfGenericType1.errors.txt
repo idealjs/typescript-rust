@@ -1,5 +1,0 @@
-exportAssignmentOfGenericType1_0.ts(1,10): error TS2449: Class 'T' used before its declaration.
-exportAssignmentOfGenericType1_0.ts(2,14): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
-exportAssignmentOfGenericType1_1.ts(2,20): error TS2307: Cannot find module 'exportAssignmentOfGenericType1_0' or its corresponding type declarations.
-exportAssignmentOfGenericType1_1.ts(6,17): error TS2454: Variable 'm' is used before being assigned.
-exportAssignmentOfGenericType1_1.ts(6,19): error TS2339: Property 'foo' does not exist on type 'M'.

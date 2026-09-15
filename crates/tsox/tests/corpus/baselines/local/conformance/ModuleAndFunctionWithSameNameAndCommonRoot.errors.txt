@@ -1,2 +1,0 @@
-module.ts(2,22): error TS2434: A namespace declaration cannot be located prior to a class or function with which it is merged.
-simple.ts(3,22): error TS2434: A namespace declaration cannot be located prior to a class or function with which it is merged.

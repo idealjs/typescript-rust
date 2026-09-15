@@ -1,3 +1,0 @@
-importDeclWithClassModifiers.ts(5,28): error TS2694: Namespace 'x' has no exported member 'c'.
-importDeclWithClassModifiers.ts(6,29): error TS2694: Namespace 'x' has no exported member 'c'.
-importDeclWithClassModifiers.ts(7,28): error TS2694: Namespace 'x' has no exported member 'c'.

@@ -1,8 +1,0 @@
-functionParameterArityMismatch.ts(3,1): error TS2554: Expected 1 arguments, but got 0.
-functionParameterArityMismatch.ts(4,7): error TS2554: Expected 1 arguments, but got 2.
-functionParameterArityMismatch.ts(5,7): error TS2554: Expected 1 arguments, but got 4.
-functionParameterArityMismatch.ts(11,4): error TS2554: Expected 0 arguments, but got 1.
-functionParameterArityMismatch.ts(12,4): error TS2554: Expected 0 arguments, but got 3.
-functionParameterArityMismatch.ts(13,4): error TS2554: Expected 0 arguments, but got 5.
-functionParameterArityMismatch.ts(14,4): error TS2554: Expected 0 arguments, but got 7.
-functionParameterArityMismatch.ts(15,22): error TS2556: A spread argument must either have a tuple type or be passed to a rest parameter.

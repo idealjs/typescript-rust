@@ -1,3 +1,0 @@
-computedPropertyNames49_ES6.ts(9,9): error TS1049: A 'set' accessor must have exactly one parameter.
-computedPropertyNames49_ES6.ts(13,9): error TS2300: Duplicate identifier 'foo'.
-computedPropertyNames49_ES6.ts(18,9): error TS2300: Duplicate identifier 'foo'.

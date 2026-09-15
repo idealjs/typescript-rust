@@ -1,1 +1,0 @@
-classAbstractInheritance1.ts(13,7): error TS2654: Non-abstract class 'CC' is missing implementations for the following members of 'AA': 'foo'.

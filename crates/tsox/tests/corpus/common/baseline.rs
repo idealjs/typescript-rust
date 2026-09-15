@@ -19,8 +19,9 @@ pub fn flavor() -> Flavor {
 
 pub fn reference_root() -> &'static str {
     match flavor() {
-        Flavor::Go => "tests/corpus/testdata/baselines/reference-go",
-        Flavor::Upstream => "tests/corpus/testdata/baselines/reference",
+        // 语料与基线同源（Go 仓 tsc/testdata，版本匹配），
+        // Go/Upstream 两种 flavor 统一指到同一份 reference
+        Flavor::Go | Flavor::Upstream => "tests/corpus/testdata/baselines/reference",
     }
 }
 

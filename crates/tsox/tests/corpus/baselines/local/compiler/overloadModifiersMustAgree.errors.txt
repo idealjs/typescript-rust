@@ -1,1 +1,0 @@
-overloadModifiersMustAgree.ts(6,18): error TS2384: Overload signatures must all be ambient or non-ambient.

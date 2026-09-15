@@ -1,3 +1,0 @@
-parserAccessors10.ts(2,3): error TS2304: Cannot find name 'public'.
-parserAccessors10.ts(2,10): error TS1005: ',' expected.
-parserAccessors10.ts(2,14): error TS2378: A 'get' accessor must return a value.

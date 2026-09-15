@@ -1,1 +1,0 @@
-parserSymbolIndexer3.ts(2,5): error TS1071: 'static' modifier cannot appear on an index signature.

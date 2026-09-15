@@ -1,4 +1,0 @@
-parserUnterminatedGeneric1.ts(2,23): error TS2304: Cannot find name 'IPromise'.
-parserUnterminatedGeneric1.ts(2,45): error TS2304: Cannot find name 'IPromise'.
-parserUnterminatedGeneric1.ts(2,53): error TS1099: Type argument list cannot be empty.
-parserUnterminatedGeneric1.ts(2,54): error TS1005: '>' expected.

@@ -1,3 +1,0 @@
-/a.d.ts(1,33): error TS2440: Import declaration conflicts with local declaration of 'foo'.
-/index.ts(2,19): error TS2339: Property 'items' does not exist on type 'typeof import("foo")'.
-/index.ts(6,31): error TS2339: Property 'customMethod' does not exist on type 'string[]'.

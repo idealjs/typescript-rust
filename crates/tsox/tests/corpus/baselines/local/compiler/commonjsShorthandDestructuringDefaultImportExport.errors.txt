@@ -1,2 +1,0 @@
-/a.ts(4,6): error TS1005: ',' expected.
-/a.ts(4,20): error TS1005: ',' expected.

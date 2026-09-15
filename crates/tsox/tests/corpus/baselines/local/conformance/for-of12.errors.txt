@@ -1,2 +1,0 @@
-for-of12.ts(2,6): error TS2454: Variable 'v' is used before being assigned.
-for-of12.ts(2,11): error TS2495: Type 'ArrayIterator<string | number>' is not an array type or a string type.

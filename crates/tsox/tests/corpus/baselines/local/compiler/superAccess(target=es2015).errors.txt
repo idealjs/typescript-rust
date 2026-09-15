@@ -1,2 +1,0 @@
-superAccess.ts(9,24): error TS2339: Property 'S1' does not exist on type 'MyDerived'.
-superAccess.ts(10,24): error TS2341: Property 'S2' is private and only accessible within class 'MyBase'.

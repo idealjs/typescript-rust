@@ -1,5 +1,0 @@
-primitiveMembers.ts(5,3): error TS2339: Property 'toBAZ' does not exist on type 'number'.
-primitiveMembers.ts(11,1): error TS2322: Type 'Number' is not assignable to type 'number'.
-  'number' is a primitive, but 'Number' is a wrapper object. Prefer using 'number' when possible.
-primitiveMembers.ts(14,5): error TS2740: Type '{}' is missing the following properties from type 'Object': constructor, toString, toLocaleString, valueOf, and 3 more.
-primitiveMembers.ts(21,10): error TS2872: This kind of expression is always truthy.

@@ -1,1 +1,0 @@
-knockout.ts(21,20): error TS2339: Property 'd' does not exist on type 'ko.Observable<string>'.

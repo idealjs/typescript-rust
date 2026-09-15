@@ -1,1 +1,0 @@
-parseErrorDoubleCommaInCall.ts(2,10): error TS1005: 'identifier' expected.

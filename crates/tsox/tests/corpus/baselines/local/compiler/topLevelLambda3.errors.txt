@@ -1,1 +1,0 @@
-topLevelLambda3.ts(1,21): error TS2339: Property 'window' does not exist on type 'typeof globalThis'.

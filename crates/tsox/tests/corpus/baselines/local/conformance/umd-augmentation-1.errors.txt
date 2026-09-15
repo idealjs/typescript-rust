@@ -1,2 +1,0 @@
-b.ts(6,7): error TS2339: Property 'reverse' does not exist on type 'Vector'.
-math2d-augment.d.ts(6,14): error TS2503: Cannot find namespace 'Math2d'.

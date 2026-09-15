@@ -1,3 +1,0 @@
-implementClausePrecedingExtends.ts(1,11): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
-implementClausePrecedingExtends.ts(2,22): error TS1005: '{' expected.
-implementClausePrecedingExtends.ts(2,30): error TS1434: Unexpected keyword or identifier.

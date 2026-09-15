@@ -1,2 +1,0 @@
-exportDefaultClassInNamespace.ts(6,20): error TS2304: Cannot find name 'abstract'.
-exportDefaultClassInNamespace.ts(6,29): error TS1005: ';' expected.

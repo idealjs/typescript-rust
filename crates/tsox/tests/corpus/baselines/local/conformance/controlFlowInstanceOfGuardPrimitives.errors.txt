@@ -1,2 +1,0 @@
-controlFlowInstanceOfGuardPrimitives.ts(3,53): error TS2339: Property 'getFullYear' does not exist on type 'never'.
-controlFlowInstanceOfGuardPrimitives.ts(7,54): error TS2339: Property 'toPrecision' does not exist on type 'number | Date'.

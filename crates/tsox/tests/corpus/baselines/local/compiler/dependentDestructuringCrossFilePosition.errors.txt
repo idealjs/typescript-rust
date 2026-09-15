@@ -1,1 +1,0 @@
-b.ts(1,27): error TS2339: Property 'toFixed' does not exist on type 'string | number'.

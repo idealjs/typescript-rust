@@ -1,2 +1,0 @@
-mappedTypeGenericIndexedAccess.ts(38,11): error TS7006: Parameter 'p' implicitly has an 'any' type.
-mappedTypeGenericIndexedAccess.ts(39,11): error TS7006: Parameter 'p' implicitly has an 'any' type.

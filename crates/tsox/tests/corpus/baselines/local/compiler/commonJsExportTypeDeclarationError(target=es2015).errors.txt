@@ -1,8 +1,0 @@
-error TS6053: File 'types1.ts' not found.
-error TS6053: File 'types2.ts' not found.
-error TS6053: File 'types3.ts' not found.
-
-
-!!! error TS6053: File 'types1.ts' not found.
-!!! error TS6053: File 'types2.ts' not found.
-!!! error TS6053: File 'types3.ts' not found.

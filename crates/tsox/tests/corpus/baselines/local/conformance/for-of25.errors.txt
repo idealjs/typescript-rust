@@ -1,1 +1,0 @@
-for-of25.ts(8,15): error TS2495: Type 'MyStringIterator' is not an array type or a string type.

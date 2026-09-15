@@ -1,1 +1,0 @@
-test.tsx(9,17): error TS2874: This JSX tag requires 'createElement' to be in scope, but it could not be found.

@@ -1,7 +1,0 @@
-deeplyNestedCheck.ts(7,11): error TS2430: Interface 'Snapshot' incorrectly extends interface 'DataSnapshot'.
-  Types of property 'child' are incompatible.
-    Type '<U>(path: U) => Snapshot<T[U]>' is not assignable to type '(path: string) => DataSnapshot<{}>'.
-      Types of parameters 'path' and 'path' are incompatible.
-        Type 'string' is not assignable to type 'Extract<keyof T, string>'.
-deeplyNestedCheck.ts(52,35): error TS2322: Type 'number' is not assignable to type 'string'.
-deeplyNestedCheck.ts(53,50): error TS2322: Type 'number' is not assignable to type 'string'.

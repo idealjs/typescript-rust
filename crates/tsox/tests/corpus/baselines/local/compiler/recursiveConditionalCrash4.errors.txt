@@ -1,1 +1,0 @@
-recursiveConditionalCrash4.ts(7,16): error TS2503: Cannot find namespace 'StrIter'.

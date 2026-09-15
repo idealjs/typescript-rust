@@ -1,4 +1,0 @@
-reverseMappedTypeContextualTypeNotCircular.ts(9,50): error TS2345: Argument of type '{ editable: (state: any, props: any) => {}; }' is not assignable to parameter of type '{ editable: (state: unknown) => unknown; }'.
-  Types of property 'editable' are incompatible.
-    Type '(state: any, props: any) => {}' is not assignable to type '(state: unknown) => unknown'.
-      Target signature provides too few arguments. Expected 2 or more, but got 1.

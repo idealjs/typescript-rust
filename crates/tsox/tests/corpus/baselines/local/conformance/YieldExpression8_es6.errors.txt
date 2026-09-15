@@ -1,1 +1,0 @@
-YieldExpression8_es6.ts(1,1): error TS1163: A 'yield' expression is only allowed in a generator body.

@@ -1,2 +1,0 @@
-functionArgShadowing.ts(12,7): error TS2322: Type 'string' is not assignable to type 'number'.
-functionArgShadowing.ts(12,19): error TS2454: Variable 'p' is used before being assigned.

@@ -1,1 +1,0 @@
-regexNamedGroupDuplicateNestedInGroup.ts(2,12): error TS1515: Named capturing groups with the same name must be mutually exclusive to each other.

@@ -1,1 +1,0 @@
-taggedTemplatesWithIncompleteTemplateExpressions5.ts(5,30): error TS1109: Expression expected.

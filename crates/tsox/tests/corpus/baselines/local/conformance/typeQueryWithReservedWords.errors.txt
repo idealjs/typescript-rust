@@ -1,9 +1,0 @@
-typeQueryWithReservedWords.ts(11,20): error TS2304: Cannot find name ''.
-typeQueryWithReservedWords.ts(12,5): error TS2300: Duplicate identifier 'delete'.
-typeQueryWithReservedWords.ts(12,20): error TS2304: Cannot find name ''.
-typeQueryWithReservedWords.ts(12,41): error TS1003: Identifier expected.
-typeQueryWithReservedWords.ts(12,41): error TS2300: Duplicate identifier 'delete'.
-typeQueryWithReservedWords.ts(13,5): error TS2300: Duplicate identifier 'var'.
-typeQueryWithReservedWords.ts(13,17): error TS2304: Cannot find name ''.
-typeQueryWithReservedWords.ts(13,38): error TS1003: Identifier expected.
-typeQueryWithReservedWords.ts(13,38): error TS2300: Duplicate identifier 'var'.

@@ -1,1 +1,0 @@
-inheritedGenericCallSignature.ts(24,9): error TS2454: Variable 'x' is used before being assigned.

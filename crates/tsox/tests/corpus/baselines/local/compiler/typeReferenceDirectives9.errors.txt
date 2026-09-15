@@ -1,2 +1,0 @@
-/mod1.ts(4,15): error TS2339: Property 'foo' does not exist on type 'Cls'.
-/mod2.ts(5,30): error TS2339: Property 'foo' does not exist on type 'Cls'.

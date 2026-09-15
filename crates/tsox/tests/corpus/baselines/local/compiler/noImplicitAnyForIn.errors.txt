@@ -1,2 +1,0 @@
-noImplicitAnyForIn.ts(28,9): error TS2872: This kind of expression is always truthy.
-noImplicitAnyForIn.ts(30,19): error TS1005: ';' expected.

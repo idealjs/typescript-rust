@@ -1,1 +1,0 @@
-f.ts(5,11): error TS2339: Property 'getA' does not exist on type 'number[]'.

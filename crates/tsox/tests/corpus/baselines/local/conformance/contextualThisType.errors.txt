@@ -1,1 +1,0 @@
-contextualThisType.ts(9,7): error TS7006: Parameter 'p' implicitly has an 'any' type.

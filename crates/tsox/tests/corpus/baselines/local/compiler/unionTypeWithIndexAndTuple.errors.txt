@@ -1,2 +1,0 @@
-unionTypeWithIndexAndTuple.ts(6,3): error TS2345: Argument of type 'string[]' is not assignable to parameter of type '["a"] | I'.
-  Property 'someOtherProperty' is missing in type 'Array<string>' but required in type 'I'.

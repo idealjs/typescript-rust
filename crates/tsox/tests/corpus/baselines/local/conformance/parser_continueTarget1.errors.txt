@@ -1,2 +1,0 @@
-parser_continueTarget1.ts(1,1): suggestion TS7028: Unused label.
-parser_continueTarget1.ts(2,3): error TS1115: A 'continue' statement can only jump to a label of an enclosing iteration statement.

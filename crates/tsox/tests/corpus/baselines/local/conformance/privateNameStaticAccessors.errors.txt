@@ -1,1 +1,0 @@
-privateNameStaticAccessors.ts(10,21): error TS2806: Private accessor was defined without a getter.

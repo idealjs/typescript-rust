@@ -1,6 +1,0 @@
-declarations.d.ts(6,16): error TS2664: Invalid module name in augmentation, module 'foobar' cannot be found.
-declarations.d.ts(10,16): error TS2664: Invalid module name in augmentation, module 'foobarx' cannot be found.
-index.ts(2,20): error TS2307: Cannot find module 'foobar' or its corresponding type declarations.
-index.ts(3,19): error TS2694: Namespace 'fooBar' has no exported member 'X'.
-index.ts(4,16): error TS2307: Cannot find module 'foobarx' or its corresponding type declarations.
-index.ts(9,10): error TS2749: 'B' refers to a value, but is being used as a type here. Did you mean 'typeof B'?

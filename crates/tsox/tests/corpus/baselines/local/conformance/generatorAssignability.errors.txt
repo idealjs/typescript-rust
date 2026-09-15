@@ -1,4 +1,0 @@
-generatorAssignability.ts(30,11): error TS2495: Type 'Generator<number, void, string>' is not an array type or a string type.
-generatorAssignability.ts(31,11): error TS2495: Type 'Generator<number, void, undefined>' is not an array type or a string type.
-generatorAssignability.ts(43,17): error TS2355: A function whose declared type is neither 'undefined', 'void', nor 'any' must return a value.
-generatorAssignability.ts(49,23): error TS2355: A function whose declared type is neither 'undefined', 'void', nor 'any' must return a value.

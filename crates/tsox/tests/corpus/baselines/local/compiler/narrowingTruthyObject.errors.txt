@@ -1,8 +1,0 @@
-narrowingTruthyObject.ts(3,11): error TS2339: Property 'toString' does not exist on type 'never'.
-narrowingTruthyObject.ts(6,11): error TS2339: Property 'toString' does not exist on type 'never'.
-narrowingTruthyObject.ts(9,11): error TS2339: Property 'toString' does not exist on type 'never'.
-narrowingTruthyObject.ts(12,11): error TS2339: Property 'toString' does not exist on type 'never'.
-narrowingTruthyObject.ts(15,11): error TS2339: Property 'toString' does not exist on type 'never'.
-narrowingTruthyObject.ts(18,11): error TS2339: Property 'toString' does not exist on type 'never'.
-narrowingTruthyObject.ts(21,11): error TS2339: Property 'toString' does not exist on type 'never'.
-narrowingTruthyObject.ts(28,44): error TS2339: Property 'hasOwnProperty' does not exist on type 'never'.

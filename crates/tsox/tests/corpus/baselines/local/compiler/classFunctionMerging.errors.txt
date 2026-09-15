@@ -1,1 +1,0 @@
-classFunctionMerging.ts(12,11): error TS2348: Value of type 'typeof Foo' is not callable. Did you mean to include 'new'?

@@ -1,2 +1,0 @@
-recursiveTypeRelations.ts(8,5): error TS2391: Function implementation is missing or not immediately following the declaration.
-recursiveTypeRelations.ts(27,38): error TS2304: Cannot find name 'ClassNameObject'.

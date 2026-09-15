@@ -1,2 +1,0 @@
-node_modules/@types/react/jsx-dev-runtime.d.ts(1,8): error TS2307: Cannot find module './' or its corresponding type declarations.
-node_modules/@types/react/jsx-runtime.d.ts(1,8): error TS2307: Cannot find module './' or its corresponding type declarations.

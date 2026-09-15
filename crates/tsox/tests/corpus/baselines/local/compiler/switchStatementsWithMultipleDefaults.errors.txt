@@ -1,3 +1,0 @@
-switchStatementsWithMultipleDefaults.ts(25,13): suggestion TS7028: Unused label.
-switchStatementsWithMultipleDefaults.ts(27,13): error TS1109: Expression expected.
-switchStatementsWithMultipleDefaults.ts(27,22): error TS1108: A 'return' statement can only be used within a function body.

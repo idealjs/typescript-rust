@@ -1,2 +1,0 @@
-genericClassWithStaticsUsingTypeArguments.ts(5,15): error TS2302: Static members cannot reference class type parameters.
-genericClassWithStaticsUsingTypeArguments.ts(7,15): error TS2302: Static members cannot reference class type parameters.

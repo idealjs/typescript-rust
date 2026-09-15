@@ -1,2 +1,0 @@
-classStaticBlock8.ts(39,21): error TS2367: This comparison appears to be unintentional because the types '5 | 3 | 7' and '2' have no overlap.
-classStaticBlock8.ts(41,21): error TS2367: This comparison appears to be unintentional because the types '5 | 7' and '4' have no overlap.

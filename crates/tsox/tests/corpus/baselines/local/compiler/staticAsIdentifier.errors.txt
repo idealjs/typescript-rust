@@ -1,3 +1,0 @@
-staticAsIdentifier.ts(12,12): error TS1030: 'static' modifier already seen.
-staticAsIdentifier.ts(16,12): error TS1030: 'static' modifier already seen.
-staticAsIdentifier.ts(25,5): error TS2300: Duplicate identifier 'static'.

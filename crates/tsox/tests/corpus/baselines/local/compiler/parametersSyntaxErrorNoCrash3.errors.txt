@@ -1,4 +1,0 @@
-parametersSyntaxErrorNoCrash3.ts(3,17): error TS2391: Function implementation is missing or not immediately following the declaration.
-parametersSyntaxErrorNoCrash3.ts(4,13): error TS1005: ':' expected.
-parametersSyntaxErrorNoCrash3.ts(5,1): error TS1005: ':' expected.
-parametersSyntaxErrorNoCrash3.ts(5,2): error TS1005: ')' expected.

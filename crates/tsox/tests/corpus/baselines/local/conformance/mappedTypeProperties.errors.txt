@@ -1,3 +1,0 @@
-mappedTypeProperties.ts(40,6): error TS2304: Cannot find name 'P'.
-mappedTypeProperties.ts(40,6): error TS2362: The left-hand side of an arithmetic operation must be of type 'any', 'number', 'bigint' or an enum type.
-mappedTypeProperties.ts(40,17): error TS2363: The right-hand side of an arithmetic operation must be of type 'any', 'number', 'bigint' or an enum type.

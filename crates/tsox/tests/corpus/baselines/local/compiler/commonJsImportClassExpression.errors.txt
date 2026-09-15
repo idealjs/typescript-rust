@@ -1,1 +1,0 @@
-use.ts(2,16): error TS2749: 'Chunk' refers to a value, but is being used as a type here. Did you mean 'typeof Chunk'?

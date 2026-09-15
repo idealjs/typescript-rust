@@ -1,3 +1,0 @@
-deeplyNestedTupleTypes.ts(34,3): error TS2322: Type '{ inners: [{ mids: [{ leaves: [{ id: number; }]; }]; }]; }' is not assignable to type '{ inners: [{ mids: [{ leaves: [{ id: string; }]; }]; }]; }'.
-  The types of 'inners.mids.leaves.id' are incompatible between these types.
-    Type 'number' is not assignable to type 'string'.

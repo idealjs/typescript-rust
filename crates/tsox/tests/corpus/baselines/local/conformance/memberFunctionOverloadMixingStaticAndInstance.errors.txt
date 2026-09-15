@@ -1,4 +1,0 @@
-memberFunctionOverloadMixingStaticAndInstance.ts(3,12): error TS2391: Function implementation is missing or not immediately following the declaration.
-memberFunctionOverloadMixingStaticAndInstance.ts(8,5): error TS2391: Function implementation is missing or not immediately following the declaration.
-memberFunctionOverloadMixingStaticAndInstance.ts(13,12): error TS2391: Function implementation is missing or not immediately following the declaration.
-memberFunctionOverloadMixingStaticAndInstance.ts(18,5): error TS2391: Function implementation is missing or not immediately following the declaration.

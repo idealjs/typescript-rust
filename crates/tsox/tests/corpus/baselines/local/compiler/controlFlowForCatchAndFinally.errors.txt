@@ -1,2 +1,0 @@
-controlFlowForCatchAndFinally.ts(5,24): error TS2366: Function lacks ending return statement and return type does not include 'undefined'.
-controlFlowForCatchAndFinally.ts(11,37): suggestion TS7027: Unreachable code detected.

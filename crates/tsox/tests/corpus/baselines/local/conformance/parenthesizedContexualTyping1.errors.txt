@@ -1,5 +1,0 @@
-parenthesizedContexualTyping1.ts(2,10): error TS2394: This overload signature is not compatible with its implementation signature.
-parenthesizedContexualTyping1.ts(27,32): error TS2695: Left side of comma operator is unused and has no side effects.
-parenthesizedContexualTyping1.ts(27,56): error TS2695: Left side of comma operator is unused and has no side effects.
-parenthesizedContexualTyping1.ts(28,33): error TS2695: Left side of comma operator is unused and has no side effects.
-parenthesizedContexualTyping1.ts(28,57): error TS2695: Left side of comma operator is unused and has no side effects.

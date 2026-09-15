@@ -1,2 +1,0 @@
-foo_1.ts(3,10): error TS2349: This expression is not callable.
-  Type 'typeof foo' has no call signatures.

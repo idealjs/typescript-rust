@@ -1,7 +1,0 @@
-readonlyTupleAndArrayElaboration.ts(16,9): error TS2345: Argument of type '[3, 4]' is not assignable to parameter of type 'Array<number>'.
-  The types returned by 'pop()' are incompatible between these types.
-    Type 'T | undefined' is not assignable to type 'number | undefined'.
-      Type 'T' is not assignable to type 'number | undefined'.
-readonlyTupleAndArrayElaboration.ts(24,9): error TS2345: Argument of type 'ReadonlyArray<number>' is not assignable to parameter of type 'Array<number>'.
-  Type 'ReadonlyArray<number>' is missing the following properties from type 'Array<number>': pop, push, reverse, shift, and 5 more.
-    Type 'number' is not assignable to type 'ConcatArray<number>'.

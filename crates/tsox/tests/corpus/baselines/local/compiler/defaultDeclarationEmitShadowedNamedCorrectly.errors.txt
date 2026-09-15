@@ -1,2 +1,0 @@
-this.ts(14,5): error TS2564: Property 'props' has no initializer and is not definitely assigned in the constructor.
-this.ts(18,35): error TS2339: Property 'default' does not exist on type 'typeof import("./this")'.

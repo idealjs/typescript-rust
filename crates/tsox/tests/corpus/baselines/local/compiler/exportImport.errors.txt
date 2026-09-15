@@ -1,1 +1,0 @@
-w1.ts(1,10): error TS2449: Class 'Widget1' used before its declaration.

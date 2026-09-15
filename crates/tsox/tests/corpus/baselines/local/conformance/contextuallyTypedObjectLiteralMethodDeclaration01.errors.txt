@@ -1,2 +1,0 @@
-contextuallyTypedObjectLiteralMethodDeclaration01.ts(16,17): error TS7006: Parameter 'arg' implicitly has an 'any' type.
-contextuallyTypedObjectLiteralMethodDeclaration01.ts(19,17): error TS7006: Parameter 'arg' implicitly has an 'any' type.

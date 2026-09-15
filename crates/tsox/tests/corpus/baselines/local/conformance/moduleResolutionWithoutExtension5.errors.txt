@@ -1,1 +1,0 @@
-/src/buzz.mts(2,22): error TS7006: Parameter 'x' implicitly has an 'any' type.

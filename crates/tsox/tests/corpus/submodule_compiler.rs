@@ -793,9 +793,31 @@ fn submodule_compiler_cases() {
 
     let filter = std::env::var("TSOX_SUBMODULE_FILTER").unwrap_or_default();
     let filter_lc = filter.to_lowercase();
-    let selected: Vec<&std::path::PathBuf> = cases[start..end]
+    // 修复批清单模式：TSOX_SUBMODULE_CASES_FILE 指向逐行用例基名清单，
+    // 精确匹配并绕过 LIMIT/START/END 窗口（修复迭代跑指定批次用）
+    let batch_file = std::env::var("TSOX_SUBMODULE_CASES_FILE").unwrap_or_default();
+    let batch_set: std::collections::HashSet<String> = if batch_file.is_empty() {
+        Default::default()
+    } else {
+        std::fs::read_to_string(&batch_file)
+            .unwrap_or_else(|e| panic!("cannot read cases file {batch_file}: {e}"))
+            .lines()
+            .map(|l| l.trim().to_string())
+            .filter(|l| !l.is_empty() && !l.starts_with('#'))
+            .collect()
+    };
+    let (scan_range, desc) = if batch_set.is_empty() {
+        (start..end, desc)
+    } else {
+        (0..total, format!("batch file {batch_file} ({} names)", batch_set.len()))
+    };
+    let selected: Vec<&std::path::PathBuf> = cases[scan_range.clone()]
         .iter()
         .filter(|p| {
+            if !batch_set.is_empty() {
+                let base = p.file_name().and_then(|n| n.to_str()).unwrap_or("");
+                return batch_set.contains(base);
+            }
             filter_lc.is_empty()
                 || p.file_name()
                     .and_then(|n| n.to_str())

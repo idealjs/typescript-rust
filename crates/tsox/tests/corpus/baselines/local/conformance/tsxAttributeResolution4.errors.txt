@@ -1,2 +1,0 @@
-file.tsx(12,18): error TS7006: Parameter 'n' implicitly has an 'any' type.
-file.tsx(15,18): error TS7006: Parameter 'n' implicitly has an 'any' type.

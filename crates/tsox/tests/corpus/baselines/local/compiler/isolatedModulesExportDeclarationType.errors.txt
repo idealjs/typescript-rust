@@ -1,3 +1,0 @@
-/test1.ts(1,10): error TS2865: Import 'T' conflicts with local value, so must be declared with a type-only import when 'isolatedModules' is enabled.
-/test2.ts(1,10): error TS2440: Import declaration conflicts with local declaration of 'T'.
-/test4.ts(2,24): error TS2307: Cannot find module './doesntexist' or its corresponding type declarations.

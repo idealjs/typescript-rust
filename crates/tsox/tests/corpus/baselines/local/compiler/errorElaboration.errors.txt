@@ -1,7 +1,0 @@
-errorElaboration.ts(10,18): error TS2300: Duplicate identifier 'foo'.
-errorElaboration.ts(12,5): error TS2345: Argument of type '() => Container<Ref<string>>' is not assignable to parameter of type '() => Container<Ref<number>>'.
-  Type 'Container<Ref<string>>' is not assignable to type 'Container<Ref<number>>'.
-    The types of 'm1.m1.m2.prop.prop.prop.prop.prop.prop.prop.prop.prop.prop.prop.prop.prop.prop.prop.prop.prop.prop' are incompatible between these types.
-      Type 'string' is not assignable to type 'number'.
-errorElaboration.ts(17,11): error TS2322: Type '"bar"' is not assignable to type '"foo"'.
-errorElaboration.ts(22,7): error TS2300: Duplicate identifier 'foo'.

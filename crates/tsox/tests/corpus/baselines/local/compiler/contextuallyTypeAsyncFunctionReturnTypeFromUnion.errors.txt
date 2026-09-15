@@ -1,9 +1,0 @@
-contextuallyTypeAsyncFunctionReturnTypeFromUnion.ts(11,34): error TS2345: Argument of type '{ services: { test: () => Promise<unknown>; test2: () => Promise<unknown>; }; }' is not assignable to parameter of type '{ services: { [x: string]: () => Promise<{ count: number; }> | StateMachine<{ count: number; }>; }; }'.
-  Types of property 'services' are incompatible.
-    Type '{ test: () => Promise<unknown>; test2: () => Promise<unknown>; }' is not assignable to type '{ [x: string]: () => Promise<{ count: number; }> | StateMachine<{ count: number; }>; }'.
-      Index signature for type 'string' is missing in type '{ test: () => Promise<unknown>; test2: () => Promise<unknown>; }'.
-        Type 'Promise<unknown>' is not assignable to type 'Promise<{ count: number; }> | StateMachine<{ count: number; }>'.
-          Type 'Promise<unknown>' is missing the following properties from type 'Promise<{ count: number; }>': then, catch, __@toStringTag, finally
-contextuallyTypeAsyncFunctionReturnTypeFromUnion.ts(21,3): error TS2322: Type '() => Promise<{ count: number; }>' is not assignable to type '() => Promise<{ count: number; }> | StateMachine<{ count: number; }>'.
-  Type 'Promise<{ count: number; }>' is not assignable to type 'Promise<{ count: number; }> | StateMachine<{ count: number; }>'.
-    Type 'Promise<{ count: number; }>' is missing the following properties from type 'Promise<{ count: number; }>': then, catch, __@toStringTag, finally

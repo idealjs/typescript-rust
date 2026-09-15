@@ -1,2 +1,0 @@
-file.ts(53,7): error TS2322: Type '{ [K in keyof V]: any; } & { [P in keyof T]: any; } extends { [K in keyof V]: any; } & { [P in keyof T]: any; } ? true : false' is not assignable to type 'true'.
-  Type 'false' is not assignable to type 'true'.

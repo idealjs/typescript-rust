@@ -1,1 +1,0 @@
-requireEmitSemicolon_1.ts(2,20): error TS2307: Cannot find module 'requireEmitSemicolon_0' or its corresponding type declarations.

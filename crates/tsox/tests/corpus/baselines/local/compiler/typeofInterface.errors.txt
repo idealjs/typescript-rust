@@ -1,1 +1,0 @@
-typeofInterface.ts(9,15): error TS2304: Cannot find name ''.

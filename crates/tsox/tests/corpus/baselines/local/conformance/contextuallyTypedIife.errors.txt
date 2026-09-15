@@ -1,3 +1,0 @@
-contextuallyTypedIife.ts(18,26): error TS2339: Property 'every' does not exist on type 'number'.
-contextuallyTypedIife.ts(19,22): error TS2339: Property 'every' does not exist on type 'number'.
-contextuallyTypedIife.ts(21,40): error TS2339: Property 'map' does not exist on type 'number'.

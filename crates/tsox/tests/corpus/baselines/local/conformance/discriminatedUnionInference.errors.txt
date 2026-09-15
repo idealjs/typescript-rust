@@ -1,3 +1,0 @@
-discriminatedUnionInference.ts(19,14): error TS2345: Argument of type '{ kind: "b"; data: number[]; }' is not assignable to parameter of type '{ kind: "a"; data: number[]; } | { kind: "b"; data: number[][]; }'.
-  Types of property 'kind' are incompatible.
-    Type '"b"' is not assignable to type '"a"'.

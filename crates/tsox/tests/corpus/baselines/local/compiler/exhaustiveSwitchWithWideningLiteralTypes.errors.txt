@@ -1,1 +1,0 @@
-exhaustiveSwitchWithWideningLiteralTypes.ts(11,27): error TS2366: Function lacks ending return statement and return type does not include 'undefined'.

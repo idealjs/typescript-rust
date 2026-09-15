@@ -1,2 +1,0 @@
-numericIndexerConstraint2.ts(4,1): error TS2322: Type '{ one: number; }' is not assignable to type '{ [index: string]: Foo; }'.
-  Index signature for type 'string' is missing in type '{ one: number; }'.

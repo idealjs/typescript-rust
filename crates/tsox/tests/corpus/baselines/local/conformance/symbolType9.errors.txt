@@ -1,4 +1,0 @@
-symbolType9.ts(3,1): error TS2367: This comparison appears to be unintentional because the types 'symbol' and 'true' have no overlap.
-symbolType9.ts(5,1): error TS2367: This comparison appears to be unintentional because the types '0' and 'symbol' have no overlap.
-symbolType9.ts(7,1): error TS2367: This comparison appears to be unintentional because the types 'symbol' and '1' have no overlap.
-symbolType9.ts(9,1): error TS2367: This comparison appears to be unintentional because the types 'false' and 'symbol' have no overlap.

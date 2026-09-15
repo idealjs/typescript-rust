@@ -1,2 +1,0 @@
-narrowedConstInMethod.ts(6,28): error TS18047: 'x' is possibly 'null'.
-narrowedConstInMethod.ts(15,28): error TS18047: 'x' is possibly 'null'.

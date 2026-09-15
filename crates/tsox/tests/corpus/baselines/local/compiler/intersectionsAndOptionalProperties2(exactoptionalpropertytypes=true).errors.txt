@@ -1,4 +1,0 @@
-intersectionsAndOptionalProperties2.ts(21,1): error TS2322: Type 'undefined' is not assignable to type 'boolean & boolean | undefined'.
-intersectionsAndOptionalProperties2.ts(22,1): error TS2322: Type 'undefined' is not assignable to type 'boolean'.
-intersectionsAndOptionalProperties2.ts(46,1): error TS2322: Type 'undefined' is not assignable to type '{ prop: boolean; } & { prop: boolean; } | undefined'.
-intersectionsAndOptionalProperties2.ts(47,1): error TS2322: Type 'undefined' is not assignable to type '{ prop: boolean; }'.

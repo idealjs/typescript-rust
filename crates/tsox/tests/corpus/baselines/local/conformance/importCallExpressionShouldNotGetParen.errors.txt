@@ -1,2 +1,0 @@
-importCallExpressionShouldNotGetParen.ts(2,43): error TS7006: Parameter 'bar' implicitly has an 'any' type.
-importCallExpressionShouldNotGetParen.ts(6,48): error TS7006: Parameter 'bar' implicitly has an 'any' type.

@@ -1,1 +1,0 @@
-ambientExternalModuleInsideNonAmbientExternalModule.ts(1,23): error TS2664: Invalid module name in augmentation, module 'M' cannot be found.

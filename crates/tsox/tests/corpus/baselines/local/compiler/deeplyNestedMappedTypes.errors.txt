@@ -1,7 +1,0 @@
-deeplyNestedMappedTypes.ts(45,7): error TS2322: Type '{ x.y.z.a.b.c: number; }' is not assignable to type '{ x.y.z.a.b.c: string; }'.
-  Types of property 'x.y.z.a.b.c' are incompatible.
-    Type 'number' is not assignable to type 'string'.
-deeplyNestedMappedTypes.ts(76,44): error TS2304: Cannot find name ''.
-deeplyNestedMappedTypes.ts(92,6): error TS2749: 'Optional' refers to a value, but is being used as a type here. Did you mean 'typeof Optional'?
-deeplyNestedMappedTypes.ts(92,15): error TS1131: Property or signature expected.
-deeplyNestedMappedTypes.ts(92,16): error TS1131: Property or signature expected.

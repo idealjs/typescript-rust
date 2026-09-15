@@ -1,1 +1,0 @@
-main.ts(5,7): error TS2322: Type '"default b"' is not assignable to type '"ts3.1 b"'.

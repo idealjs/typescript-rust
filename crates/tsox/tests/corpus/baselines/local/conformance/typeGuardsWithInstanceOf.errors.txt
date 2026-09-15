@@ -1,2 +1,0 @@
-typeGuardsWithInstanceOf.ts(36,11): error TS2339: Property 'onChanges' does not exist on type 'C'.
-typeGuardsWithInstanceOf.ts(37,11): error TS2339: Property 'onChanges' does not exist on type 'C'.

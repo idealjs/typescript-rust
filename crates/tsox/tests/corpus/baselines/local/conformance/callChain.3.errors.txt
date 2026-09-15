@@ -1,2 +1,0 @@
-callChain.3.ts(4,7): error TS2322: Type 'unknown' is not assignable to type 'number'.
-callChain.3.ts(6,7): error TS2322: Type 'unknown' is not assignable to type 'number | undefined'.

@@ -1,4 +1,0 @@
-simple.ts(17,5): error TS2403: Subsequent variable declarations must have the same type.  Variable 'cl' must be of type '{ x: number; y: number; }', but here has type 'any'.
-simple.ts(17,18): error TS2339: Property 'Origin' does not exist on type '() => { x: number; y: number; }'.
-test.ts(6,5): error TS2403: Subsequent variable declarations must have the same type.  Variable 'cl' must be of type '{ x: number; y: number; }', but here has type 'any'.
-test.ts(6,18): error TS2339: Property 'Origin' does not exist on type '() => { x: number; y: number; }'.

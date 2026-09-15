@@ -1,1 +1,0 @@
-/ambient.d.ts(3,14): error TS2454: Variable '_export' is used before being assigned.

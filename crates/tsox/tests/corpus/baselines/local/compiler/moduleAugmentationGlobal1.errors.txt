@@ -1,2 +1,0 @@
-f1.ts(1,17): error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
-f2.ts(11,11): error TS2339: Property 'getA' does not exist on type 'number[]'.

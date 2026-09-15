@@ -1,6 +1,0 @@
-mappedTypeAsClauseRelationships.ts(11,9): error TS2322: Type 'T' is not assignable to type 'Filter<T>'.
-mappedTypeAsClauseRelationships.ts(12,9): error TS2322: Type 'T' is not assignable to type 'Modify<T>'.
-mappedTypeAsClauseRelationships.ts(21,9): error TS2322: Type 'T' is not assignable to type 'FilterInclOpt<T>'.
-mappedTypeAsClauseRelationships.ts(22,9): error TS2322: Type 'T' is not assignable to type 'ModifyInclOpt<T>'.
-mappedTypeAsClauseRelationships.ts(23,9): error TS2322: Type 'T' is not assignable to type 'FilterExclOpt<T>'.
-mappedTypeAsClauseRelationships.ts(24,9): error TS2322: Type 'T' is not assignable to type 'ModifyExclOpt<T>'.

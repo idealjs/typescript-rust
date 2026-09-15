@@ -1,2 +1,0 @@
-extendArray.ts(7,19): error TS2304: Cannot find name '_element'.
-extendArray.ts(7,32): error TS2304: Cannot find name '_element'.

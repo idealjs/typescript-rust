@@ -1,1 +1,0 @@
-staticMemberOfClassAndPublicMemberOfAnotherClassAssignment.ts(13,1): error TS2741: Property 'prop' is missing in type 'typeof B' but required in type 'A'.

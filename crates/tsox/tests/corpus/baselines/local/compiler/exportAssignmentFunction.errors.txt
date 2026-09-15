@@ -1,1 +1,0 @@
-exportAssignmentFunction_B.ts(1,26): error TS2307: Cannot find module 'exportAssignmentFunction_A' or its corresponding type declarations.

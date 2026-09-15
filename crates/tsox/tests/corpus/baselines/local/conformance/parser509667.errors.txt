@@ -1,2 +1,0 @@
-parser509667.ts(4,4): error TS2339: Property '' does not exist on type 'this'.
-parser509667.ts(4,4): error TS1005: ')' expected.

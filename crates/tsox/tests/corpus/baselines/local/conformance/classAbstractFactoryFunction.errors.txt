@@ -1,1 +1,0 @@
-classAbstractFactoryFunction.ts(9,12): error TS2511: Cannot create an instance of an abstract class.

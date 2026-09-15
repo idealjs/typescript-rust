@@ -1,6 +1,0 @@
-error TS6053: File '/.lib/react16.d.ts' not found.
-jsxChildrenSingleChildConfusableWithMultipleChildrenNoError.tsx(3,24): error TS2307: Cannot find module 'react' or its corresponding type declarations.
-jsxChildrenSingleChildConfusableWithMultipleChildrenNoError.tsx(5,21): error TS2503: Cannot find namespace 'React'.
-
-
-!!! error TS6053: File '/.lib/react16.d.ts' not found.

@@ -1,1 +1,0 @@
-interfaceImplementation7.ts(8,12): error TS2416: Property 'name' in type 'C1' is not assignable to the same property in base type 'i4'.

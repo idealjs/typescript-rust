@@ -1,2 +1,0 @@
-errorRecoveryWithDotFollowedByNamespaceKeyword.ts(7,9): error TS2339: Property '' does not exist on type 'typeof B'.
-errorRecoveryWithDotFollowedByNamespaceKeyword.ts(9,2): error TS1005: '}' expected.

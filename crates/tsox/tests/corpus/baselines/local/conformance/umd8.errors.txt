@@ -1,1 +1,0 @@
-a.ts(6,16): error TS2503: Cannot find namespace 'Foo'.

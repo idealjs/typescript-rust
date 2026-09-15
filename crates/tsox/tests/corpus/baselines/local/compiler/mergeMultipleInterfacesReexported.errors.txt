@@ -1,2 +1,0 @@
-test.ts(4,7): error TS2322: Type '"p0" | "p1" | "p2"' is not assignable to type '"p0" | "p1"'.
-  Type '"p2"' is not assignable to type '"p0" | "p1"'.

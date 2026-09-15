@@ -1,2 +1,0 @@
-labeledStatementDeclarationListInLoopNoCrash1.ts(3,3): suggestion TS7028: Unused label.
-labeledStatementDeclarationListInLoopNoCrash1.ts(3,11): error TS1123: Variable declaration list cannot be empty.

@@ -1,2 +1,0 @@
-exportDefaultDuplicateCrash.ts(4,25): error TS2307: Cannot find module './hi' or its corresponding type declarations.
-exportDefaultDuplicateCrash.ts(5,31): error TS2307: Cannot find module './hi' or its corresponding type declarations.

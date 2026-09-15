@@ -1,3 +1,0 @@
-privateNameStaticMethodAsync.ts(5,33): error TS2339: Property 'next' does not exist on type 'void'.
-privateNameStaticMethodAsync.ts(5,74): error TS2339: Property 'next' does not exist on type 'void'.
-privateNameStaticMethodAsync.ts(11,11): error TS1029: 'static' modifier must precede 'async' modifier.

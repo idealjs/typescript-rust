@@ -1,4 +1,0 @@
-parseEntityNameWithReservedWord.ts(2,7): error TS1155: 'const' declarations must be initialized.
-parseEntityNameWithReservedWord.ts(2,15): error TS2694: Namespace 'Bool' has no exported member ''.
-parseEntityNameWithReservedWord.ts(2,15): error TS1003: Identifier expected.
-parseEntityNameWithReservedWord.ts(2,15): error TS2364: The left-hand side of an assignment expression must be a variable or a property access.

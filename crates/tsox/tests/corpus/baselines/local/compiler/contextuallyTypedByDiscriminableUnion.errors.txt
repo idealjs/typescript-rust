@@ -1,2 +1,0 @@
-contextuallyTypedByDiscriminableUnion.ts(21,12): error TS7006: Parameter 'a' implicitly has an 'any' type.
-contextuallyTypedByDiscriminableUnion.ts(29,12): error TS7006: Parameter 'a' implicitly has an 'any' type.

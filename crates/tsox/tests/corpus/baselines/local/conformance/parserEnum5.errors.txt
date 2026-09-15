@@ -1,3 +1,0 @@
-parserEnum5.ts(2,12): error TS1005: ',' expected.
-parserEnum5.ts(3,15): error TS1005: ',' expected.
-parserEnum5.ts(3,24): error TS1005: ',' expected.

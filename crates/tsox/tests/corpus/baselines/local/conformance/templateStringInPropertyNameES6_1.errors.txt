@@ -1,3 +1,0 @@
-templateStringInPropertyNameES6_1.ts(2,5): error TS1005: 'identifier' expected.
-templateStringInPropertyNameES6_1.ts(2,8): error TS1117: An object literal cannot have multiple properties with the same name.
-templateStringInPropertyNameES6_1.ts(2,8): error TS1005: 'identifier' expected.

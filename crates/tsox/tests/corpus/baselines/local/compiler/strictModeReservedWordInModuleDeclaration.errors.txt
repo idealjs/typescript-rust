@@ -1,5 +1,0 @@
-strictModeReservedWordInModuleDeclaration.ts(2,11): error TS1214: Identifier expected. 'public' is a reserved word in strict mode. Modules are automatically in strict mode.
-strictModeReservedWordInModuleDeclaration.ts(3,11): error TS1214: Identifier expected. 'private' is a reserved word in strict mode. Modules are automatically in strict mode.
-strictModeReservedWordInModuleDeclaration.ts(4,11): error TS1214: Identifier expected. 'public' is a reserved word in strict mode. Modules are automatically in strict mode.
-strictModeReservedWordInModuleDeclaration.ts(6,11): error TS1214: Identifier expected. 'private' is a reserved word in strict mode. Modules are automatically in strict mode.
-strictModeReservedWordInModuleDeclaration.ts(6,19): error TS1214: Identifier expected. 'public' is a reserved word in strict mode. Modules are automatically in strict mode.

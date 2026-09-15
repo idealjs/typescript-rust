@@ -1,5 +1,0 @@
-typeInferenceWithTupleType.ts(16,9): error TS2454: Variable 'zipResult' is used before being assigned.
-typeInferenceWithTupleType.ts(16,19): error TS2339: Property 'push' does not exist on type '[[T, U]]'.
-typeInferenceWithTupleType.ts(18,12): error TS2454: Variable 'zipResult' is used before being assigned.
-typeInferenceWithTupleType.ts(31,15): error TS2352: Conversion of type 'undefined' to type '["a"[], "b"[]]' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
-typeInferenceWithTupleType.ts(32,15): error TS2352: Conversion of type 'undefined' to type '["a"[], "b"[]]' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.

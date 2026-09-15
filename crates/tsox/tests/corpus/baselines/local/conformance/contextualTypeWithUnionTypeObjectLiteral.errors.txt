@@ -1,7 +1,0 @@
-contextualTypeWithUnionTypeObjectLiteral.ts(20,5): error TS2322: Type '{ prop: string; }' is not assignable to type '{ prop: string; anotherP: string; } | { prop: number; }'.
-  Types of property 'prop' are incompatible.
-    Type 'string' is not assignable to type 'number'.
-contextualTypeWithUnionTypeObjectLiteral.ts(58,5): error TS2322: Type '(a: string, b: number) => string | number' is not assignable to type '((a: string, b: number) => string) | ((a: string, b: number) => number)'.
-  Type '(a: string, b: number) => string | number' is not assignable to type '(a: string, b: number) => string'.
-    Type 'string | number' is not assignable to type 'string'.
-      Type 'number' is not assignable to type 'string'.

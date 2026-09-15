@@ -1,5 +1,0 @@
-implicitAnyInAmbientDeclaration.ts(6,16): error TS7010: 'publicFunction', which lacks return-type annotation, implicitly has an 'any' return type.
-implicitAnyInAmbientDeclaration.ts(6,31): error TS7006: Parameter 'x' implicitly has an 'any' type.
-implicitAnyInAmbientDeclaration.ts(7,17): error TS7010: 'privateFunction', which lacks return-type annotation, implicitly has an 'any' return type.
-implicitAnyInAmbientDeclaration.ts(7,33): error TS7006: Parameter 'privateParam' implicitly has an 'any' type.
-implicitAnyInAmbientDeclaration.ts(8,29): error TS7006: Parameter 'privateParam' implicitly has an 'any' type.

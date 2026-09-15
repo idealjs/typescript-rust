@@ -1,2 +1,0 @@
-classExtendsNull3.ts(3,11): error TS2339: Property 'oops' does not exist on type 'typeof C1'.
-classExtendsNull3.ts(9,11): error TS2339: Property 'oops' does not exist on type 'C2'.

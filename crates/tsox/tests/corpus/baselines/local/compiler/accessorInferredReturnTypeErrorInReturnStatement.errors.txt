@@ -1,1 +1,0 @@
-accessorInferredReturnTypeErrorInReturnStatement.ts(2,7): error TS7023: 'primaryPath' implicitly has return type 'any' because it does not have a return type annotation and is referenced directly or indirectly in one of its return expressions.

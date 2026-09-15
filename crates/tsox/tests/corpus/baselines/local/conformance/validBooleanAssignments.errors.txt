@@ -1,1 +1,0 @@
-validBooleanAssignments.ts(4,5): error TS2322: Type 'boolean' is not assignable to type 'Object'.

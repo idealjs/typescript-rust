@@ -1,1 +1,0 @@
-b.ts(2,10): error TS2749: 'B' refers to a value, but is being used as a type here. Did you mean 'typeof B'?

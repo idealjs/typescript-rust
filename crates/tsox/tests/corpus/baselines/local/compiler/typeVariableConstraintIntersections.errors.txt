@@ -1,4 +1,0 @@
-typeVariableConstraintIntersections.ts(84,27): error TS2339: Property 's' does not exist on type '{ kind: "one"; s: string; } | { kind: "two"; x: number; y: number; } & { kind: "one"; }'.
-typeVariableConstraintIntersections.ts(85,27): error TS2339: Property 'x' does not exist on type '{ kind: "one"; s: string; } | { kind: "two"; x: number; y: number; } & { kind: "two"; }'.
-typeVariableConstraintIntersections.ts(85,44): error TS2339: Property 'y' does not exist on type '{ kind: "one"; s: string; } | { kind: "two"; x: number; y: number; } & { kind: "two"; }'.
-typeVariableConstraintIntersections.ts(90,34): error TS2538: Type '"one" | "two" & K' cannot be used as an index type.

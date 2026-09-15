@@ -1,2 +1,0 @@
-usage.ts(3,23): error TS2503: Cannot find namespace 'My'.
-usage.ts(5,25): error TS2503: Cannot find namespace 'Internal'.

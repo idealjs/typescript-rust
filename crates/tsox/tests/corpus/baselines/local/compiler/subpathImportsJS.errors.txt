@@ -1,1 +1,0 @@
-/src/index.ts(1,21): error TS2307: Cannot find module '#subpath' or its corresponding type declarations.

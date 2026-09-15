@@ -1,3 +1,0 @@
-foo_1.ts(3,4): error TS2454: Variable 'color' is used before being assigned.
-foo_1.ts(3,18): error TS2339: Property 'green' does not exist on type '0 | 1 | 2'.
-foo_1.ts(4,14): error TS2339: Property 'answer' does not exist on type '0 | 1 | 2'.

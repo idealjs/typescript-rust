@@ -1,2 +1,0 @@
-instanceofOperatorWithInvalidOperands.es2015.ts(17,11): error TS2454: Variable 'a4' is used before being assigned.
-instanceofOperatorWithInvalidOperands.es2015.ts(37,24): error TS2454: Variable 'b4' is used before being assigned.

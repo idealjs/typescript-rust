@@ -121,7 +121,12 @@ impl Checker {
                     }
                 }
             }
-            reported = true;
+            // Go elaborateArrayLiteral：reportedError 仅在逐元素实际报告时为
+            // true；空数组（无元素可 elaborate）返回 false，让外层报告标准
+            // TS2741/2322 缺属性诊断（此前无条件 true 会吞掉整条诊断）
+            if !elements.is_empty() {
+                reported = true;
+            }
         }
         reported
     }

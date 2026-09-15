@@ -1,6 +1,0 @@
-shorthandPropertyAssignmentNoCrash.ts(5,10): error TS1005: ',' expected.
-shorthandPropertyAssignmentNoCrash.ts(5,12): error TS1005: 'identifier' expected.
-shorthandPropertyAssignmentNoCrash.ts(5,29): error TS1005: '{' expected.
-shorthandPropertyAssignmentNoCrash.ts(5,32): error TS2304: Cannot find name 'x'.
-shorthandPropertyAssignmentNoCrash.ts(5,34): error TS1005: ',' expected.
-shorthandPropertyAssignmentNoCrash.ts(5,36): error TS2304: Cannot find name 'y'.

@@ -1,7 +1,0 @@
-error TS6053: File '/.lib/react16.d.ts' not found.
-conditionalTypeVarianceBigArrayConstraintsPerformance.ts(4,21): error TS2503: Cannot find namespace 'JSX'.
-conditionalTypeVarianceBigArrayConstraintsPerformance.ts(5,11): error TS2503: Cannot find namespace 'JSX'.
-conditionalTypeVarianceBigArrayConstraintsPerformance.ts(5,11): error TS2503: Cannot find namespace 'JSX'.
-
-
-!!! error TS6053: File '/.lib/react16.d.ts' not found.

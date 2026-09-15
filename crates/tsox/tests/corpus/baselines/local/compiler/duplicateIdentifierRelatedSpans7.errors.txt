@@ -1,5 +1,0 @@
-error TS6053: File 'file1' not found.
-file2.ts(3,16): error TS2664: Invalid module name in augmentation, module 'someMod' cannot be found.
-
-
-!!! error TS6053: File 'file1' not found.

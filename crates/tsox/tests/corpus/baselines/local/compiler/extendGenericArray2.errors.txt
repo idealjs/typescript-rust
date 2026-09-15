@@ -1,2 +1,0 @@
-extendGenericArray2.ts(8,5): error TS2322: Type 'T' is not assignable to type 'number'.
-extendGenericArray2.ts(8,21): error TS2339: Property 'x' does not exist on type 'string[]'.

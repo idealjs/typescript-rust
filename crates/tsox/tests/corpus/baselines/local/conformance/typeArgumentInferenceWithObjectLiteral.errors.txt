@@ -1,1 +1,0 @@
-typeArgumentInferenceWithObjectLiteral.ts(29,5): error TS2403: Subsequent variable declarations must have the same type.  Variable 'v1' must be of type 'number', but here has type '0'.

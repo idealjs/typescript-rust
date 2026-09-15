@@ -1,1 +1,0 @@
-templateStringUnterminated5.ts(1,1): error TS1160: Unterminated template literal.

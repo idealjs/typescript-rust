@@ -1,7 +1,0 @@
-forAwaitInWithDeclIsError.ts(1,23): error TS2304: Cannot find name 'y'.
-forAwaitInWithExprIsError.ts(1,12): error TS2304: Cannot find name 'x'.
-forAwaitInWithExprIsError.ts(1,17): error TS2304: Cannot find name 'y'.
-forAwaitInWithExprIsError.ts(1,18): error TS1005: ';' expected.
-topLevelWithDeclIsError.ts(1,23): error TS2304: Cannot find name 'y'.
-topLevelWithExprIsError.ts(1,12): error TS2304: Cannot find name 'x'.
-topLevelWithExprIsError.ts(1,17): error TS2304: Cannot find name 'y'.

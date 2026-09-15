@@ -1,1 +1,0 @@
-es5ModuleInternalNamedImports.ts(34,16): error TS2307: Cannot find module 'M3' or its corresponding type declarations.

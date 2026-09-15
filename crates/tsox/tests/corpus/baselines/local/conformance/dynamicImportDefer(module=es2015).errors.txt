@@ -1,1 +1,0 @@
-b.ts(1,29): error TS7006: Parameter 'ns' implicitly has an 'any' type.

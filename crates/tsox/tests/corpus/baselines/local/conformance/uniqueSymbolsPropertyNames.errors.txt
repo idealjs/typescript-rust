@@ -1,2 +1,0 @@
-uniqueSymbolsPropertyNames.ts(27,3): error TS1117: An object literal cannot have multiple properties with the same name.
-uniqueSymbolsPropertyNames.ts(28,3): error TS1117: An object literal cannot have multiple properties with the same name.

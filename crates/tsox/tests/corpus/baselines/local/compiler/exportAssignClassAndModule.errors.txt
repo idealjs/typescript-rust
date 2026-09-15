@@ -1,3 +1,0 @@
-exportAssignClassAndModule_0.ts(2,5): error TS2564: Property 'x' has no initializer and is not definitely assigned in the constructor.
-exportAssignClassAndModule_1.ts(4,12): error TS2694: Namespace 'exportAssignClassAndModule_0.ts' has no exported member 'Bar'.
-exportAssignClassAndModule_1.ts(6,1): error TS2454: Variable 'zz' is used before being assigned.

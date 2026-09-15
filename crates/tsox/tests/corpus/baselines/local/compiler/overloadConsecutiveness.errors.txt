@@ -1,9 +1,0 @@
-overloadConsecutiveness.ts(3,14): error TS1005: ';' expected.
-overloadConsecutiveness.ts(3,25): error TS2391: Function implementation is missing or not immediately following the declaration.
-overloadConsecutiveness.ts(4,14): error TS1005: ';' expected.
-overloadConsecutiveness.ts(5,17): error TS1128: Declaration or statement expected.
-overloadConsecutiveness.ts(5,28): error TS2391: Function implementation is missing or not immediately following the declaration.
-overloadConsecutiveness.ts(8,6): error TS1005: ';' expected.
-overloadConsecutiveness.ts(8,8): error TS2391: Function implementation is missing or not immediately following the declaration.
-overloadConsecutiveness.ts(9,6): error TS1005: ';' expected.
-overloadConsecutiveness.ts(10,9): error TS1068: Unexpected token. A constructor, method, accessor, or property was expected.

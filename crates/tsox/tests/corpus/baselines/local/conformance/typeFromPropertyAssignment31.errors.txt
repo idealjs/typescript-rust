@@ -1,4 +1,0 @@
-typeFromPropertyAssignment31.ts(13,1): error TS2322: Type 'boolean' is not assignable to type 'number'.
-typeFromPropertyAssignment31.ts(25,1): error TS2322: Type 'boolean' is not assignable to type 'number'.
-typeFromPropertyAssignment31.ts(26,192): error TS2349: This expression is not callable.
-  Type 'typeof ExpandoMerge' has no call signatures.

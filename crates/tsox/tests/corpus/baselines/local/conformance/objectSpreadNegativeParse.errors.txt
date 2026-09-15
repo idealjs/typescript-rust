@@ -1,8 +1,0 @@
-objectSpreadNegativeParse.ts(1,15): error TS2304: Cannot find name 'o'.
-objectSpreadNegativeParse.ts(1,18): error TS1109: Expression expected.
-objectSpreadNegativeParse.ts(2,15): error TS1109: Expression expected.
-objectSpreadNegativeParse.ts(2,16): error TS2304: Cannot find name 'o'.
-objectSpreadNegativeParse.ts(3,28): error TS1005: ',' expected.
-objectSpreadNegativeParse.ts(3,31): error TS1128: Declaration or statement expected.
-objectSpreadNegativeParse.ts(4,16): error TS2304: Cannot find name 'get'.
-objectSpreadNegativeParse.ts(4,20): error TS1005: ',' expected.

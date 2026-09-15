@@ -1,2 +1,0 @@
-es6ClassTest2.ts(66,11): error TS2554: Expected 0 arguments, but got 1.
-es6ClassTest2.ts(103,17): error TS2554: Expected 0 arguments, but got 1.

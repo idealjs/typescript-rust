@@ -1,3 +1,0 @@
-symbolType13.ts(4,13): error TS1005: ';' expected.
-symbolType13.ts(5,1): suggestion TS7027: Unreachable code detected.
-symbolType13.ts(5,12): error TS1005: ';' expected.

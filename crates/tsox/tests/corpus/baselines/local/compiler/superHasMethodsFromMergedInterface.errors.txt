@@ -1,1 +1,0 @@
-superHasMethodsFromMergedInterface.ts(5,15): error TS2339: Property 'm2' does not exist on type 'Sub'.

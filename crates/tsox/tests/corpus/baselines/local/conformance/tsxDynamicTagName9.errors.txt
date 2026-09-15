@@ -1,3 +1,0 @@
-app.tsx(8,8): error TS2304: Cannot find name 'this'.
-app.tsx(8,37): error TS1005: '>' expected.
-app.tsx(9,5): error TS1109: Expression expected.

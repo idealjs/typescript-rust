@@ -1,2 +1,0 @@
-superCallArgsMustMatch.ts(3,12): error TS2564: Property 'foo' has no initializer and is not definitely assigned in the constructor.
-superCallArgsMustMatch.ts(19,13): error TS2322: Type 'T' is not assignable to type 'number'.

@@ -1,5 +1,0 @@
-parser618973.ts(1,8): error TS1005: '{' expected.
-parser618973.ts(1,25): error TS1003: Identifier expected.
-parser618973.ts(2,3): error TS1128: Declaration or statement expected.
-parser618973.ts(2,10): error TS2304: Cannot find name 'Bar'.
-parser618973.ts(2,16): error TS1005: ';' expected.

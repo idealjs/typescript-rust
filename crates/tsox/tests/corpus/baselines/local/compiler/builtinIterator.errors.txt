@@ -1,5 +1,0 @@
-builtinIterator.ts(12,40): error TS2353: Object literal may only specify known properties, and 'next' does not exist in type 'any | Iterable<unknown, unknown, undefined>'.
-builtinIterator.ts(26,25): error TS2339: Property 'map' does not exist on type 'void'.
-builtinIterator.ts(26,29): error TS7006: Parameter 'x' implicitly has an 'any' type.
-builtinIterator.ts(38,1): error TS2511: Cannot create an instance of an abstract class.
-builtinIterator.ts(38,14): error TS2558: Expected 3 type arguments, but got 1.

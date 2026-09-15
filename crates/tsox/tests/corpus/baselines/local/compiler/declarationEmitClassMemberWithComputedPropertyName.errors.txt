@@ -1,1 +1,0 @@
-declarationEmitClassMemberWithComputedPropertyName.ts(32,5): error TS2300: Duplicate identifier 'p1'.

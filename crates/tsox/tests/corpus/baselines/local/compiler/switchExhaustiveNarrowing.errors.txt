@@ -1,2 +1,0 @@
-switchExhaustiveNarrowing.ts(18,20): error TS2345: Argument of type 'ClientSource | ServiceSource | undefined' is not assignable to parameter of type 'never'.
-  Type 'undefined' is not assignable to type 'never'.

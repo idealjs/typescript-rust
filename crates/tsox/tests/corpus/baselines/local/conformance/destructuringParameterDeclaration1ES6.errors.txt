@@ -1,9 +1,0 @@
-destructuringParameterDeclaration1ES6.ts(26,5): error TS7010: 'b5', which lacks return-type annotation, implicitly has an 'any' return type.
-destructuringParameterDeclaration1ES6.ts(26,8): error TS7006: Parameter 'z' implicitly has an 'any' type.
-destructuringParameterDeclaration1ES6.ts(26,11): error TS7006: Parameter 'y' implicitly has an 'any' type.
-destructuringParameterDeclaration1ES6.ts(65,5): error TS7010: 'd3', which lacks return-type annotation, implicitly has an 'any' return type.
-destructuringParameterDeclaration1ES6.ts(66,5): error TS7010: 'd4', which lacks return-type annotation, implicitly has an 'any' return type.
-destructuringParameterDeclaration1ES6.ts(67,5): error TS7010: 'e0', which lacks return-type annotation, implicitly has an 'any' return type.
-destructuringParameterDeclaration1ES6.ts(96,18): error TS2451: Cannot redeclare block-scoped variable 'number'.
-destructuringParameterDeclaration1ES6.ts(96,26): error TS2451: Cannot redeclare block-scoped variable 'number'.
-destructuringParameterDeclaration1ES6.ts(96,34): error TS2451: Cannot redeclare block-scoped variable 'number'.

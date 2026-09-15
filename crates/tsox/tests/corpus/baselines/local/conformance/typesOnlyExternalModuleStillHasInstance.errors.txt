@@ -1,5 +1,0 @@
-foo_1.ts(4,5): error TS2739: Type '{}' is missing the following properties from type 'typeof import("foo_0")': Person, M2
-foo_1.ts(5,5): error TS2322: Type 'typeof import("foo_0")' is not assignable to type '{ M2: Object; }'.
-  Types of property 'M2' are incompatible.
-    Type 'M2' is not assignable to type 'Object'.
-      Type 'M2' is missing the following properties from type 'Object': constructor, toString, toLocaleString, valueOf, and 3 more.

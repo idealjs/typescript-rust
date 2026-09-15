@@ -1,8 +1,0 @@
-error TS6053: File '/.lib/react.d.ts' not found.
-file.tsx(3,24): error TS2307: Cannot find module 'react' or its corresponding type declarations.
-file.tsx(6,13): error TS7006: Parameter 'props' implicitly has an 'any' type.
-file.tsx(10,13): error TS7006: Parameter 'props' implicitly has an 'any' type.
-file.tsx(14,13): error TS7006: Parameter 'props' implicitly has an 'any' type.
-
-
-!!! error TS6053: File '/.lib/react.d.ts' not found.

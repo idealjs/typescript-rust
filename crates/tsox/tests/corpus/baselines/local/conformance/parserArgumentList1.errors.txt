@@ -1,7 +1,0 @@
-parserArgumentList1.ts(2,7): error TS2339: Property 'className' does not exist on type 'HTMLElement'.
-parserArgumentList1.ts(2,24): error TS2339: Property 'className' does not exist on type 'HTMLElement'.
-parserArgumentList1.ts(2,42): error TS2304: Cannot find name '_classNameRegexp'.
-parserArgumentList1.ts(2,81): error TS7006: Parameter 'everything' implicitly has an 'any' type.
-parserArgumentList1.ts(2,93): error TS7006: Parameter 'leftDelimiter' implicitly has an 'any' type.
-parserArgumentList1.ts(2,108): error TS7006: Parameter 'name' implicitly has an 'any' type.
-parserArgumentList1.ts(2,114): error TS7006: Parameter 'rightDelimiter' implicitly has an 'any' type.

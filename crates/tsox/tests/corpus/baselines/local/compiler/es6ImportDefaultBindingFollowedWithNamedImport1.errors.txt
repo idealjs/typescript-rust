@@ -1,6 +1,0 @@
-es6ImportDefaultBindingFollowedWithNamedImport1_1.ts(3,27): error TS2459: Module '"./es6ImportDefaultBindingFollowedWithNamedImport1_0"' declares 'a' locally, but it is not exported.
-es6ImportDefaultBindingFollowedWithNamedImport1_1.ts(5,27): error TS2459: Module '"./es6ImportDefaultBindingFollowedWithNamedImport1_0"' declares 'a' locally, but it is not exported.
-es6ImportDefaultBindingFollowedWithNamedImport1_1.ts(7,27): error TS2305: Module '"./es6ImportDefaultBindingFollowedWithNamedImport1_0"' has no exported member 'x'.
-es6ImportDefaultBindingFollowedWithNamedImport1_1.ts(7,30): error TS2459: Module '"./es6ImportDefaultBindingFollowedWithNamedImport1_0"' declares 'a' locally, but it is not exported.
-es6ImportDefaultBindingFollowedWithNamedImport1_1.ts(9,27): error TS2305: Module '"./es6ImportDefaultBindingFollowedWithNamedImport1_0"' has no exported member 'x'.
-es6ImportDefaultBindingFollowedWithNamedImport1_1.ts(11,27): error TS2305: Module '"./es6ImportDefaultBindingFollowedWithNamedImport1_0"' has no exported member 'm'.

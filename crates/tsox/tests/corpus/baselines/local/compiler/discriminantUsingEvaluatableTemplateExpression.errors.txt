@@ -1,3 +1,0 @@
-discriminantUsingEvaluatableTemplateExpression.ts(8,5): error TS2345: Argument of type '{ d: string; cb: (x: string) => void; }' is not assignable to parameter of type '{ d: "s"; cb: (x: string) => void; } | { d: "n"; cb: (x: number) => void; }'.
-  Types of property 'd' are incompatible.
-    Type 'string' is not assignable to type '"s"'.

@@ -1,4 +1,0 @@
-unionTypeWithRecursiveSubtypeReduction2.ts(2,12): error TS2564: Property 'members' has no initializer and is not definitely assigned in the constructor.
-unionTypeWithRecursiveSubtypeReduction2.ts(6,12): error TS2564: Property 'members' has no initializer and is not definitely assigned in the constructor.
-unionTypeWithRecursiveSubtypeReduction2.ts(10,12): error TS2564: Property 'parent' has no initializer and is not definitely assigned in the constructor.
-unionTypeWithRecursiveSubtypeReduction2.ts(14,12): error TS2564: Property 'parent' has no initializer and is not definitely assigned in the constructor.

@@ -1,1 +1,0 @@
-f1.d.ts(11,9): error TS1182: A destructuring declaration must have an initializer.

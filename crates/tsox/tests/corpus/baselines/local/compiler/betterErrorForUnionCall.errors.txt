@@ -1,5 +1,0 @@
-betterErrorForUnionCall.ts(2,1): error TS2349: This expression is not callable.
-  No constituent of type '{ a: string; } | { b: string; }' is callable.
-betterErrorForUnionCall.ts(5,1): error TS2349: This expression is not callable.
-  Not all constituents of type '{ a: string; } | ((a: string) => void)' are callable.
-    Type '{ a: string; }' has no call signatures.

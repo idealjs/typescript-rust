@@ -1,2 +1,0 @@
-es6ImportNamedImportNoNamedExports_1.ts(1,10): error TS2305: Module '"./es6ImportNamedImportNoNamedExports_0"' has no exported member 'a'.
-es6ImportNamedImportNoNamedExports_1.ts(2,10): error TS2305: Module '"./es6ImportNamedImportNoNamedExports_0"' has no exported member 'a'.

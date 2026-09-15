@@ -1,4 +1,0 @@
-usingDeclarationsInForIn.ts(1,6): error TS2304: Cannot find name 'using'.
-usingDeclarationsInForIn.ts(1,12): error TS1005: ';' expected.
-usingDeclarationsInForIn.ts(1,12): error TS2304: Cannot find name 'x'.
-usingDeclarationsInForIn.ts(1,19): error TS1005: ';' expected.

@@ -1,4 +1,0 @@
-consumer.ts(4,11): error TS2454: Variable 'x' is used before being assigned.
-consumer.ts(4,13): error TS2339: Property 'id' does not exist on type 'e.Request'.
-express.d.ts(28,35): error TS2702: 'Express' only refers to a type, but is being used as a namespace here.
-express.d.ts(33,36): error TS2702: 'Express' only refers to a type, but is being used as a namespace here.

@@ -1,4 +1,0 @@
-objectTypeWithConstructSignatureAppearsToBeFunctionType.ts(8,18): error TS2348: Value of type 'I' is not callable. Did you mean to include 'new'?
-objectTypeWithConstructSignatureAppearsToBeFunctionType.ts(10,39): error TS2339: Property 'apply' does not exist on type 'I'.
-objectTypeWithConstructSignatureAppearsToBeFunctionType.ts(16,18): error TS2348: Value of type '() => unknown' is not callable. Did you mean to include 'new'?
-objectTypeWithConstructSignatureAppearsToBeFunctionType.ts(18,39): error TS2339: Property 'apply' does not exist on type '() => unknown'.

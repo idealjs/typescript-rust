@@ -1,4 +1,0 @@
-nestedFreshLiteral.ts(12,3): error TS2322: Type '{ prop: { colour: string; }; }' is not assignable to type 'NestedSelector | undefined'.
-  Types of property 'prop' are incompatible.
-    Type '{ colour: "red"; }' is not assignable to type 'CSSProps'.
-      Type '{ colour: "red"; }' has no properties in common with type 'CSSProps'.

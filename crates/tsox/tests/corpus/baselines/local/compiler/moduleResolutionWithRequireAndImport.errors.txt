@@ -1,1 +1,0 @@
-/index.ts(2,24): error TS2307: Cannot find module './other' or its corresponding type declarations.

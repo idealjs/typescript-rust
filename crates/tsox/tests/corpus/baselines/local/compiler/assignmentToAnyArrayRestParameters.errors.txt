@@ -1,1 +1,0 @@
-assignmentToAnyArrayRestParameters.ts(16,16): error TS2536: Type '"0" | K' cannot be used to index type 'string[]'.

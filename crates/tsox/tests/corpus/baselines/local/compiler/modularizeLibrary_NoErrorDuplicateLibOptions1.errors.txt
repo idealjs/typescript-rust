@@ -1,2 +1,0 @@
-modularizeLibrary_NoErrorDuplicateLibOptions1.ts(53,7): error TS2339: Property 'then' does not exist on type 'Promise<unknown>'.
-modularizeLibrary_NoErrorDuplicateLibOptions1.ts(59,22): error TS2739: Type '{}' is missing the following properties from type 'ProxyHandler<{}>': apply, construct, defineProperty, deleteProperty, get, getOwnPropertyDescriptor, getPrototypeOf, has, isExtensible, ownKeys, preventExtensions, set, setPrototypeOf

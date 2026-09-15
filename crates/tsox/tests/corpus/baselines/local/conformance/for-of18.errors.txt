@@ -1,2 +1,0 @@
-for-of18.ts(14,6): error TS2454: Variable 'v' is used before being assigned.
-for-of18.ts(14,11): error TS2495: Type 'MyStringIterator' is not an array type or a string type.

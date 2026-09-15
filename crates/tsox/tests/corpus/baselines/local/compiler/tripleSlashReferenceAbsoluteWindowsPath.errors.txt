@@ -1,4 +1,0 @@
-error TS6053: File 'C:/a/b/d.ts' not found.
-
-
-!!! error TS6053: File 'C:/a/b/d.ts' not found.

@@ -1,6 +1,0 @@
-staticIndexSignature3.ts(2,5): error TS1071: 'static' modifier cannot appear on an index signature.
-staticIndexSignature3.ts(3,5): error TS1071: 'static' modifier cannot appear on an index signature.
-staticIndexSignature3.ts(7,5): error TS1071: 'static' modifier cannot appear on an index signature.
-staticIndexSignature3.ts(11,5): error TS1071: 'static' modifier cannot appear on an index signature.
-staticIndexSignature3.ts(12,5): error TS1071: 'static' modifier cannot appear on an index signature.
-staticIndexSignature3.ts(16,5): error TS1071: 'static' modifier cannot appear on an index signature.

@@ -1,1 +1,0 @@
-assignToModule.ts(2,1): error TS2322: Type 'undefined' is not assignable to type 'A'.

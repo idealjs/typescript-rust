@@ -1,2 +1,0 @@
-badArrayIndex.ts(1,15): error TS2693: 'number' only refers to a type, but is being used as a value here.
-badArrayIndex.ts(1,22): error TS1109: Expression expected.

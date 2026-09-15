@@ -1,1 +1,0 @@
-usage.ts(3,22): error TS2702: 'Something' only refers to a type, but is being used as a namespace here.

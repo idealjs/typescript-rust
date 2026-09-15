@@ -1,1 +1,0 @@
-staticPrototypeProperty.ts(2,11): error TS2300: Duplicate identifier 'prototype'.

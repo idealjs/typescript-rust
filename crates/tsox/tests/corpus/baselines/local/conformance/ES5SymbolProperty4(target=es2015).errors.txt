@@ -1,1 +1,0 @@
-ES5SymbolProperty4.ts(7,9): error TS2454: Variable 'Symbol' is used before being assigned.

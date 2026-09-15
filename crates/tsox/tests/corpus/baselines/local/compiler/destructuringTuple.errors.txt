@@ -1,8 +1,0 @@
-destructuringTuple.ts(11,60): error TS2769: No overload matches this call.
-  Overload 1 of 2, '(...items: ConcatArray<never>[]): never[]', gave the following error.
-    Argument of type 'number' is not assignable to parameter of type 'ConcatArray<never>'.
-  Overload 2 of 2, '(...items: ConcatArray<never>[]): never[]', gave the following error.
-    Argument of type 'number' is not assignable to parameter of type 'ConcatArray<never>'.
-destructuringTuple.ts(13,34): error TS2345: Argument of type '(acc: number[], e: number) => number[]' is not assignable to parameter of type '(previousValue: number, currentValue: number, currentIndex: number, array: number[]) => number'.
-  Types of parameters 'acc' and 'previousValue' are incompatible.
-    Type 'number' is not assignable to type 'number[]'.

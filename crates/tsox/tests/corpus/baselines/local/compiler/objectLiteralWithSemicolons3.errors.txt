@@ -1,8 +1,0 @@
-objectLiteralWithSemicolons3.ts(2,3): error TS2304: Cannot find name 'a'.
-objectLiteralWithSemicolons3.ts(2,4): error TS1005: ',' expected.
-objectLiteralWithSemicolons3.ts(3,3): error TS2304: Cannot find name 'b'.
-objectLiteralWithSemicolons3.ts(3,4): error TS1117: An object literal cannot have multiple properties with the same name.
-objectLiteralWithSemicolons3.ts(3,4): error TS1005: ',' expected.
-objectLiteralWithSemicolons3.ts(4,3): error TS2304: Cannot find name 'c'.
-objectLiteralWithSemicolons3.ts(4,4): error TS1117: An object literal cannot have multiple properties with the same name.
-objectLiteralWithSemicolons3.ts(4,4): error TS1005: ',' expected.

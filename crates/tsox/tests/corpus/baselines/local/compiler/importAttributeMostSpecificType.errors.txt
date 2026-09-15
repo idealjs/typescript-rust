@@ -1,4 +1,0 @@
-/bun-sqlite.d.ts(6,20): error TS2454: Variable 'database' is used before being assigned.
-/bun-sqlite.d.ts(14,20): error TS2454: Variable 'database' is used before being assigned.
-/index.ts(1,30): error TS2307: Cannot find module 'databases/app.sqlite' or its corresponding type declarations.
-/index.ts(2,30): error TS2307: Cannot find module 'databases/app.sqlite' or its corresponding type declarations.

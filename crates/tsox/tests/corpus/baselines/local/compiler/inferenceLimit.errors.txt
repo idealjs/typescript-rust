@@ -1,2 +1,0 @@
-file1.ts(16,12): error TS2339: Property 'then' does not exist on type 'void'.
-file1.ts(24,8): error TS2339: Property 'then' does not exist on type 'Promise<{ [P in keyof T]: any; }>'.

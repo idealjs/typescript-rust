@@ -1,1 +1,0 @@
-importAsBaseClass_1.ts(2,21): error TS2749: 'Greeter' refers to a value, but is being used as a type here. Did you mean 'typeof Greeter'?

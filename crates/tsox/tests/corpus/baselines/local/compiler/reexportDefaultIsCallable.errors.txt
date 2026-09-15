@@ -1,1 +1,0 @@
-usage.ts(2,35): error TS2749: 'Base' refers to a value, but is being used as a type here. Did you mean 'typeof Base'?

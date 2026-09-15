@@ -1,6 +1,0 @@
-genericInheritedDefaultConstructors.ts(7,14): error TS2564: Property 'a' has no initializer and is not definitely assigned in the constructor.
-genericInheritedDefaultConstructors.ts(8,27): error TS2564: Property 'b' has no initializer and is not definitely assigned in the constructor.
-genericInheritedDefaultConstructors.ts(9,5): error TS2322: Type 'typeof B' is not assignable to type 'Constructor<B<boolean>>'.
-  Type 'B<unknown>' is not assignable to type 'B<boolean>'.
-    Types of property 'b' are incompatible.
-      Type 'unknown' is not assignable to type 'boolean'.

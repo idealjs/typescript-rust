@@ -1,4 +1,0 @@
-privacyCheckExportAssignmentOnExportedGenericInterface1.ts(1,11): error TS2300: Duplicate identifier 'Foo'.
-privacyCheckExportAssignmentOnExportedGenericInterface1.ts(5,11): error TS2300: Duplicate identifier 'Foo'.
-privacyCheckExportAssignmentOnExportedGenericInterface1.ts(7,26): error TS2749: 'Foo' refers to a value, but is being used as a type here. Did you mean 'typeof Foo'?
-privacyCheckExportAssignmentOnExportedGenericInterface1.ts(8,10): error TS2454: Variable 'Foo' is used before being assigned.

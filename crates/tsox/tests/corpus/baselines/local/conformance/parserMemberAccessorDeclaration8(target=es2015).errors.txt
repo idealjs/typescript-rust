@@ -1,2 +1,0 @@
-parserMemberAccessorDeclaration8.ts(2,12): error TS1030: 'static' modifier already seen.
-parserMemberAccessorDeclaration8.ts(2,23): error TS2378: A 'get' accessor must return a value.

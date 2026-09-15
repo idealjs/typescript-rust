@@ -1,8 +1,0 @@
-strictSubtypeAndNarrowing.ts(204,5): error TS2322: Type '{ value: { type: "A"; }; a?: number; } | { value: { type: "B"; }; b?: number; }' is not assignable to type '{ value: { type: "A"; }; a?: number; }'.
-  Type '{ value: { type: "B"; }; b?: number; }' is not assignable to type '{ value: { type: "A"; }; a?: number; }'.
-    The types of 'value.type' are incompatible between these types.
-      Type '"B"' is not assignable to type '"A"'.
-strictSubtypeAndNarrowing.ts(209,5): error TS2322: Type '{ value: { type: "A"; }; a?: number; } | { value: { type: "B"; }; b?: number; }' is not assignable to type '{ value: { type: "A"; }; a?: number; }'.
-  Type '{ value: { type: "B"; }; b?: number; }' is not assignable to type '{ value: { type: "A"; }; a?: number; }'.
-    The types of 'value.type' are incompatible between these types.
-      Type '"B"' is not assignable to type '"A"'.

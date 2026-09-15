@@ -1,1 +1,0 @@
-controlFlowComputedPropertyNames.ts(3,18): error TS2339: Property 'toUpperCase' does not exist on type 'never'.

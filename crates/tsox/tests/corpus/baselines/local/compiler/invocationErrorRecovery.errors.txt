@@ -1,2 +1,0 @@
-index.ts(2,1): error TS2349: This expression is not callable.
-  Type 'typeof import("./foo")' has no call signatures.

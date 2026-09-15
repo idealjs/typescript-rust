@@ -1,5 +1,0 @@
-taggedTemplateStringsWithOverloadResolution1.ts(10,17): error TS2554: Expected 1 arguments, but got 2.
-taggedTemplateStringsWithOverloadResolution1.ts(11,17): error TS2554: Expected 1 arguments, but got 3.
-taggedTemplateStringsWithOverloadResolution1.ts(12,17): error TS2554: Expected 1 arguments, but got 3.
-taggedTemplateStringsWithOverloadResolution1.ts(13,17): error TS2554: Expected 1 arguments, but got 3.
-taggedTemplateStringsWithOverloadResolution1.ts(14,17): error TS2554: Expected 1 arguments, but got 4.

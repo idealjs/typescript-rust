@@ -1,7 +1,0 @@
-error TS6053: File '/.lib/react16.d.ts' not found.
-jsxIntrinsicElementsTypeArgumentErrorSkipsTrivia.tsx(2,24): error TS2307: Cannot find module 'react' or its corresponding type declarations.
-jsxIntrinsicElementsTypeArgumentErrorSkipsTrivia.tsx(4,11): error TS2558: Expected 0 type arguments, but got 1.
-jsxIntrinsicElementsTypeArgumentErrorSkipsTrivia.tsx(6,11): error TS2558: Expected 0 type arguments, but got 1.
-
-
-!!! error TS6053: File '/.lib/react16.d.ts' not found.

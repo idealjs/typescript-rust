@@ -1,1 +1,0 @@
-src/foo.mts(6,4): error TS2339: Property 'default' does not exist on type 'typeof import("./a.cjs")'.

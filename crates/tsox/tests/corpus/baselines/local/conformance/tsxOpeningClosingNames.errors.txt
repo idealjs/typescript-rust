@@ -1,1 +1,0 @@
-file.tsx(9,8): error TS2339: Property 'D' does not exist on type 'typeof C'.

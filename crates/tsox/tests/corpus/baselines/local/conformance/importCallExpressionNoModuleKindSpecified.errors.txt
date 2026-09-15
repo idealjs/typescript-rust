@@ -1,2 +1,0 @@
-2.ts(6,28): error TS7006: Parameter 'Zero' implicitly has an 'any' type.
-2.ts(8,18): error TS7006: Parameter 'err' implicitly has an 'any' type.

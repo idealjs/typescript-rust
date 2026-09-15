@@ -1,5 +1,0 @@
-exponentiationOperatorInTemplateStringWithSyntaxError1.ts(11,4): error TS2362: The left-hand side of an arithmetic operation must be of type 'any', 'number', 'bigint' or an enum type.
-exponentiationOperatorInTemplateStringWithSyntaxError1.ts(17,4): error TS2362: The left-hand side of an arithmetic operation must be of type 'any', 'number', 'bigint' or an enum type.
-exponentiationOperatorInTemplateStringWithSyntaxError1.ts(17,25): error TS2362: The left-hand side of an arithmetic operation must be of type 'any', 'number', 'bigint' or an enum type.
-exponentiationOperatorInTemplateStringWithSyntaxError1.ts(24,4): error TS2362: The left-hand side of an arithmetic operation must be of type 'any', 'number', 'bigint' or an enum type.
-exponentiationOperatorInTemplateStringWithSyntaxError1.ts(24,38): error TS2362: The left-hand side of an arithmetic operation must be of type 'any', 'number', 'bigint' or an enum type.

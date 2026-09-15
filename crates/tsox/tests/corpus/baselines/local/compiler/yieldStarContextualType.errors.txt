@@ -1,2 +1,0 @@
-yieldStarContextualType.ts(3,16): error TS2355: A function whose declared type is neither 'undefined', 'void', nor 'any' must return a value.
-yieldStarContextualType.ts(5,11): error TS2322: Type 'unknown' is not assignable to type 'number'.

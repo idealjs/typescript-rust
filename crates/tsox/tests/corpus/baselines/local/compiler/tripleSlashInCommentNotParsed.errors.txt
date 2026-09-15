@@ -1,4 +1,0 @@
-error TS6053: File 'non-existing-file.d.ts' not found.
-
-
-!!! error TS6053: File 'non-existing-file.d.ts' not found.

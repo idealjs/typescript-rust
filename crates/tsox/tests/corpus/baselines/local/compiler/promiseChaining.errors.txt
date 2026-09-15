@@ -1,2 +1,0 @@
-promiseChaining.ts(6,50): error TS7006: Parameter 'x' implicitly has an 'any' type.
-promiseChaining.ts(6,77): error TS7006: Parameter 'x' implicitly has an 'any' type.

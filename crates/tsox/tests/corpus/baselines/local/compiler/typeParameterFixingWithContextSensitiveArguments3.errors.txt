@@ -1,3 +1,0 @@
-typeParameterFixingWithContextSensitiveArguments3.ts(7,29): error TS2345: Argument of type '(t2: A) => A' is not assignable to parameter of type '(t2: A) => B'.
-  Type 'A' is not assignable to type 'B'.
-    Property 'b' is missing in type 'A' but required in type 'B'.

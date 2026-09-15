@@ -1,7 +1,0 @@
-literalTypes2.ts(36,9): error TS2322: Type 'number' is not assignable to type '123'.
-literalTypes2.ts(41,9): error TS2322: Type 'number' is not assignable to type '123'.
-literalTypes2.ts(138,11): error TS2322: Type '() => string' is not assignable to type '() => "foo" | "bar"'.
-  Type 'string' is not assignable to type '"foo" | "bar"'.
-literalTypes2.ts(139,11): error TS2322: Type '() => string' is not assignable to type '(() => "foo") | (() => "bar")'.
-  Type '() => string' is not assignable to type '() => "foo"'.
-    Type 'string' is not assignable to type '"foo"'.

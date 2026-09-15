@@ -1,1 +1,0 @@
-privateNamesNoDelete.ts(4,16): error TS18011: The operand of a 'delete' operator cannot be a private identifier.

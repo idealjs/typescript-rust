@@ -1,4 +1,0 @@
-typeAssertionsWithIntersectionTypes01.ts(14,5): error TS2353: Object literal may only specify known properties, and 'p2' does not exist in type 'I1 & I3'.
-typeAssertionsWithIntersectionTypes01.ts(15,5): error TS2353: Object literal may only specify known properties, and 'p3' does not exist in type 'I2'.
-typeAssertionsWithIntersectionTypes01.ts(17,9): error TS2352: Conversion of type 'I2' to type 'I1 & I3' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
-typeAssertionsWithIntersectionTypes01.ts(18,9): error TS2352: Conversion of type 'I2' to type 'I3' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.

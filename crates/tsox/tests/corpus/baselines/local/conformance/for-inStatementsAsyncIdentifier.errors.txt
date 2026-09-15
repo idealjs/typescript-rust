@@ -1,1 +1,0 @@
-for-inStatementsAsyncIdentifier.ts(2,29): error TS1005: ';' expected.

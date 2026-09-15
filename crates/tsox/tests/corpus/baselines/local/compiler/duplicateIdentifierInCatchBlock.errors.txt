@@ -1,2 +1,0 @@
-duplicateIdentifierInCatchBlock.ts(6,10): error TS2300: Duplicate identifier 'w'.
-duplicateIdentifierInCatchBlock.ts(8,9): error TS2300: Duplicate identifier 'w'.

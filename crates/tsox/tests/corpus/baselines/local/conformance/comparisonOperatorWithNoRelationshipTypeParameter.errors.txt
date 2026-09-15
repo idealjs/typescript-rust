@@ -1,4 +1,0 @@
-comparisonOperatorWithNoRelationshipTypeParameter.ts(16,14): error TS2367: This comparison appears to be unintentional because the types 'T' and 'U' have no overlap.
-comparisonOperatorWithNoRelationshipTypeParameter.ts(17,14): error TS2367: This comparison appears to be unintentional because the types 'T' and 'U' have no overlap.
-comparisonOperatorWithNoRelationshipTypeParameter.ts(18,14): error TS2367: This comparison appears to be unintentional because the types 'T' and 'U' have no overlap.
-comparisonOperatorWithNoRelationshipTypeParameter.ts(19,14): error TS2367: This comparison appears to be unintentional because the types 'T' and 'U' have no overlap.

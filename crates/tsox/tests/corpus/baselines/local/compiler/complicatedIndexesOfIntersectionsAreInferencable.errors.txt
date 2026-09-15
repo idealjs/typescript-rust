@@ -1,1 +1,0 @@
-complicatedIndexesOfIntersectionsAreInferencable.ts(18,15): error TS7006: Parameter 'props' implicitly has an 'any' type.

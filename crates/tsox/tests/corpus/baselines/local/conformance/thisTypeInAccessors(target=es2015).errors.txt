@@ -1,8 +1,0 @@
-thisTypeInAccessors.ts(8,9): error TS1054: A 'get' accessor cannot have parameters.
-thisTypeInAccessors.ts(9,9): error TS1049: A 'set' accessor must have exactly one parameter.
-thisTypeInAccessors.ts(13,9): error TS1054: A 'get' accessor cannot have parameters.
-thisTypeInAccessors.ts(19,9): error TS1049: A 'set' accessor must have exactly one parameter.
-thisTypeInAccessors.ts(23,9): error TS1054: A 'get' accessor cannot have parameters.
-thisTypeInAccessors.ts(24,9): error TS1049: A 'set' accessor must have exactly one parameter.
-thisTypeInAccessors.ts(29,9): error TS1054: A 'get' accessor cannot have parameters.
-thisTypeInAccessors.ts(30,9): error TS1049: A 'set' accessor must have exactly one parameter.

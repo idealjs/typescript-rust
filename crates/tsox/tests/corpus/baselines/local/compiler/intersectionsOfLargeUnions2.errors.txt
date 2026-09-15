@@ -1,2 +1,0 @@
-intersectionsOfLargeUnions2.ts(14,43): error TS18047: 'node' is possibly 'null'.
-intersectionsOfLargeUnions2.ts(23,17): error TS2367: This comparison appears to be unintentional because the types 'string' and 'T' have no overlap.

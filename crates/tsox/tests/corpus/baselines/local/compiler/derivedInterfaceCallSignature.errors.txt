@@ -1,6 +1,0 @@
-derivedInterfaceCallSignature.ts(11,11): error TS2430: Interface 'D3SvgArea' incorrectly extends interface 'D3SvgPath'.
-  Types of property 'x' are incompatible.
-    Type '(x: (data: any, index?: number) => number) => D3SvgArea' is not assignable to type '() => (data: any, index: number | undefined) => number'.
-      Target signature provides too few arguments. Expected 1 or more, but got 0.
-derivedInterfaceCallSignature.ts(27,1): error TS2349: This expression is not callable.
-  Type 'D3SvgArea' has no call signatures.

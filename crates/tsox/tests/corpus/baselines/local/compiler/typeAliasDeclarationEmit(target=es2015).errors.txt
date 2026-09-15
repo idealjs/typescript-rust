@@ -1,1 +1,0 @@
-typeAliasDeclarationEmit.ts(3,37): error TS2314: Generic type 'callback<T>' requires 1 type argument(s).

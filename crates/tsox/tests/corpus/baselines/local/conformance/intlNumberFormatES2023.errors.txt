@@ -1,9 +1,0 @@
-intlNumberFormatES2023.ts(25,39): error TS2769: No overload matches this call.
-  Overload 1 of 3, '(value: number): string', gave the following error.
-    Argument of type 'string' is not assignable to parameter of type 'number'.
-  Overload 2 of 3, '(value: number | bigint): string', gave the following error.
-    Argument of type 'string' is not assignable to parameter of type 'number | bigint'.
-  Overload 3 of 3, '(value: number | bigint | "Infinity" | "-Infinity" | "+Infinity" | `${number}`): string', gave the following error.
-    Argument of type '"-12.3E-4"' is not assignable to parameter of type 'number | bigint | "Infinity" | "-Infinity" | "+Infinity" | `${number}`'.
-intlNumberFormatES2023.ts(26,44): error TS2345: Argument of type '"123.4"' is not assignable to parameter of type 'number | bigint | "Infinity" | "-Infinity" | "+Infinity" | `${number}`'.
-intlNumberFormatES2023.ts(27,51): error TS2345: Argument of type '"123E-4"' is not assignable to parameter of type 'number | bigint | "Infinity" | "-Infinity" | "+Infinity" | `${number}`'.

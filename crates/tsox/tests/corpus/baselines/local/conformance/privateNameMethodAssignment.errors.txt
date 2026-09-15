@@ -1,4 +1,0 @@
-privateNameMethodAssignment.ts(4,14): error TS2803: Cannot assign to private method '#method'. Private methods are not writable.
-privateNameMethodAssignment.ts(5,11): error TS2803: Cannot assign to private method '#method'. Private methods are not writable.
-privateNameMethodAssignment.ts(6,11): error TS2803: Cannot assign to private method '#method'. Private methods are not writable.
-privateNameMethodAssignment.ts(9,11): error TS2803: Cannot assign to private method '#method'. Private methods are not writable.

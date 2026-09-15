@@ -1,6 +1,0 @@
-predicateSemantics.ts(30,13): error TS2872: This kind of expression is always truthy.
-predicateSemantics.ts(31,13): error TS2872: This kind of expression is always truthy.
-predicateSemantics.ts(50,8): error TS2872: This kind of expression is always truthy.
-predicateSemantics.ts(52,8): error TS2872: This kind of expression is always truthy.
-predicateSemantics.ts(53,8): error TS2872: This kind of expression is always truthy.
-predicateSemantics.ts(71,14): error TS2695: Left side of comma operator is unused and has no side effects.

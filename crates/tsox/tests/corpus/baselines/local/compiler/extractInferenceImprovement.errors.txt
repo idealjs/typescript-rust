@@ -1,7 +1,0 @@
-extractInferenceImprovement.ts(3,16): error TS2538: Type 'Extract<K, string>' cannot be used as an index type.
-extractInferenceImprovement.ts(21,26): error TS2345: Argument of type '"first"' is not assignable to parameter of type 'Extract<K, string>'.
-extractInferenceImprovement.ts(23,1): error TS2322: Type 'StrNum[Extract<keyof T, string>]' is not assignable to type 'string'.
-extractInferenceImprovement.ts(23,26): error TS2345: Argument of type '"first"' is not assignable to parameter of type 'Extract<keyof T, string>'.
-extractInferenceImprovement.ts(26,26): error TS2345: Argument of type 'symbol' is not assignable to parameter of type 'Extract<K, string>'.
-extractInferenceImprovement.ts(28,1): error TS2322: Type 'StrNum[Extract<keyof T, string>]' is not assignable to type 'string'.
-extractInferenceImprovement.ts(28,26): error TS2345: Argument of type 'symbol' is not assignable to parameter of type 'Extract<keyof T, string>'.

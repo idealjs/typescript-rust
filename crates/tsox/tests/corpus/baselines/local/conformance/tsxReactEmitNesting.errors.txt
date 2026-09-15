@@ -1,3 +1,0 @@
-file.tsx(6,15): error TS7006: Parameter 'ctrl' implicitly has an 'any' type.
-file.tsx(6,21): error TS7006: Parameter 'model' implicitly has an 'any' type.
-file.tsx(15,43): error TS7006: Parameter 'todo' implicitly has an 'any' type.

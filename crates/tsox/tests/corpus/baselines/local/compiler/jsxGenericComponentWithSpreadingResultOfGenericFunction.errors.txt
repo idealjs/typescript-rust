@@ -1,4 +1,0 @@
-error TS6053: File '/.lib/react16.d.ts' not found.
-
-
-!!! error TS6053: File '/.lib/react16.d.ts' not found.

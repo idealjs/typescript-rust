@@ -1,8 +1,0 @@
-typeAssignabilityErrorMessage.ts(14,5): error TS2739: Type 'ThroughStream' is missing the following properties from type 'ReadStream': f, g, h, i, j
-typeAssignabilityErrorMessage.ts(17,5): error TS2739: Type 'ThroughStream' is missing the following properties from type 'ReadStream': f, g, h, i, j
-typeAssignabilityErrorMessage.ts(40,5): error TS2322: Type '{ foo: { what: string; }; }' is not assignable to type 'boolean | { foo: { what: number; }; }'.
-  The types of 'foo.what' are incompatible between these types.
-    Type 'string' is not assignable to type 'number'.
-typeAssignabilityErrorMessage.ts(42,5): error TS2345: Argument of type '{ someProp: { foo: { what: string; }; }; }' is not assignable to parameter of type '{ someProp: boolean | { foo: { what: number; }; }; }'.
-  The types of 'someProp.foo.what' are incompatible between these types.
-    Type 'string' is not assignable to type 'number'.

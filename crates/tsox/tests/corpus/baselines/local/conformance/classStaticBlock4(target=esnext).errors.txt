@@ -1,2 +1,0 @@
-classStaticBlock4.ts(5,14): error TS2339: Property 's1' does not exist on type 'this'.
-classStaticBlock4.ts(8,14): error TS2339: Property 's2' does not exist on type 'this'.

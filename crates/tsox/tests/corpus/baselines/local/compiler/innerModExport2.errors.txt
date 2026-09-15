@@ -1,3 +1,0 @@
-innerModExport2.ts(5,5): error TS2591: Cannot find name 'module'. Do you need to install type definitions for node? Try `npm i --save-dev @types/node` and then add 'node' to the types field in your tsconfig.
-innerModExport2.ts(5,12): error TS1437: Namespace must be given a name.
-innerModExport2.ts(20,7): error TS2339: Property 'NonExportFunc' does not exist on type 'typeof Outer'.

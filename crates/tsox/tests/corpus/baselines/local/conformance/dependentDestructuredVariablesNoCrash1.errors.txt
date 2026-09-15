@@ -1,2 +1,0 @@
-dependentDestructuredVariablesNoCrash1.ts(3,10): error TS7010: 'f', which lacks return-type annotation, implicitly has an 'any' return type.
-dependentDestructuredVariablesNoCrash1.ts(5,12): error TS1015: Parameter cannot have question mark and initializer.

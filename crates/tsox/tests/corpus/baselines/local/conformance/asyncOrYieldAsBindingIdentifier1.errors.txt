@@ -1,6 +1,0 @@
-asyncOrYieldAsBindingIdentifier1.ts(26,9): error TS1212: Identifier expected. 'yield' is a reserved word in strict mode.
-asyncOrYieldAsBindingIdentifier1.ts(30,9): error TS1212: Identifier expected. 'yield' is a reserved word in strict mode.
-asyncOrYieldAsBindingIdentifier1.ts(34,11): error TS1212: Identifier expected. 'yield' is a reserved word in strict mode.
-asyncOrYieldAsBindingIdentifier1.ts(38,9): error TS1212: Identifier expected. 'yield' is a reserved word in strict mode.
-asyncOrYieldAsBindingIdentifier1.ts(42,9): error TS1212: Identifier expected. 'yield' is a reserved word in strict mode.
-asyncOrYieldAsBindingIdentifier1.ts(46,11): error TS1212: Identifier expected. 'yield' is a reserved word in strict mode.

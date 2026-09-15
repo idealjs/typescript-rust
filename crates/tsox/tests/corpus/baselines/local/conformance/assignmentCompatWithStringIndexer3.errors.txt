@@ -1,1 +1,0 @@
-assignmentCompatWithStringIndexer3.ts(7,16): error TS2304: Cannot find name 'A'.

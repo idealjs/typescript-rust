@@ -1,7 +1,0 @@
-objectLiteralWithSemicolons5.ts(1,20): error TS1005: ',' expected.
-objectLiteralWithSemicolons5.ts(1,25): error TS2304: Cannot find name 'b'.
-objectLiteralWithSemicolons5.ts(1,26): error TS1117: An object literal cannot have multiple properties with the same name.
-objectLiteralWithSemicolons5.ts(1,26): error TS1005: ',' expected.
-objectLiteralWithSemicolons5.ts(1,32): error TS2378: A 'get' accessor must return a value.
-objectLiteralWithSemicolons5.ts(1,41): error TS1117: An object literal cannot have multiple properties with the same name.
-objectLiteralWithSemicolons5.ts(1,41): error TS1005: ',' expected.

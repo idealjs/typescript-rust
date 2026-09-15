@@ -1,1 +1,0 @@
-moduleReopenedTypeSameBlock.ts(4,32): error TS2322: Type 'null' is not assignable to type 'M.I'.

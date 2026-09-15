@@ -1,1 +1,0 @@
-restInvalidArgumentType.ts(53,20): error TS2454: Variable 'e' is used before being assigned.

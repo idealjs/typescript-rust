@@ -1,6 +1,0 @@
-callOverloads3.ts(1,10): error TS2814: Function with bodies can only merge with classes that are ambient.
-callOverloads3.ts(2,10): error TS2391: Function implementation is missing or not immediately following the declaration.
-callOverloads3.ts(2,10): error TS2814: Function with bodies can only merge with classes that are ambient.
-callOverloads3.ts(3,7): error TS2813: Class declaration cannot implement overload list for 'Foo'.
-callOverloads3.ts(15,1): error TS2348: Value of type 'typeof Foo' is not callable. Did you mean to include 'new'?
-callOverloads3.ts(16,1): error TS2348: Value of type 'typeof Foo' is not callable. Did you mean to include 'new'?

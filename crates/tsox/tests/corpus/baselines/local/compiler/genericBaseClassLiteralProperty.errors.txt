@@ -1,4 +1,0 @@
-genericBaseClassLiteralProperty.ts(2,12): error TS2564: Property '_getValue1' has no initializer and is not definitely assigned in the constructor.
-genericBaseClassLiteralProperty.ts(3,12): error TS2564: Property '_getValue2' has no initializer and is not definitely assigned in the constructor.
-genericBaseClassLiteralProperty.ts(9,13): error TS2322: Type 'T' is not assignable to type 'number'.
-genericBaseClassLiteralProperty.ts(10,13): error TS2322: Type 'T' is not assignable to type 'number'.

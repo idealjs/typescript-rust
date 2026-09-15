@@ -1,2 +1,0 @@
-awaitedTypeStrictNull.ts(61,2): error TS2322: Type 'Promise<unknown>' is not assignable to type 'T extends object ? { [K in keyof T]: any; } : Obj'.
-  Property 'x' is missing in type 'Promise<unknown>' but required in type 'Obj'.

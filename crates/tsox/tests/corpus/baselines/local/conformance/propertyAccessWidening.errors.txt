@@ -1,6 +1,0 @@
-propertyAccessWidening.ts(10,19): error TS2349: This expression is not callable.
-  Type '{ cells: any; }' has no call signatures.
-propertyAccessWidening.ts(16,14): error TS2532: Object is possibly 'undefined'.
-propertyAccessWidening.ts(17,14): error TS2532: Object is possibly 'undefined'.
-propertyAccessWidening.ts(18,5): error TS2532: Object is possibly 'undefined'.
-propertyAccessWidening.ts(19,5): error TS2532: Object is possibly 'undefined'.

@@ -1,1 +1,0 @@
-superWithTypeArgument.ts(7,15): error TS2558: Expected 0 type arguments, but got 1.

@@ -1,2 +1,0 @@
-switchStatements.ts(30,11): error TS2564: Property 'id' has no initializer and is not definitely assigned in the constructor.
-switchStatements.ts(31,21): error TS2564: Property 'name' has no initializer and is not definitely assigned in the constructor.

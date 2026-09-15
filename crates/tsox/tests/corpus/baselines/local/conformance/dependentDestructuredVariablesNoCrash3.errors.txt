@@ -1,7 +1,0 @@
-dependentDestructuredVariablesNoCrash3.ts(3,69): error TS2304: Cannot find name 'test'.
-dependentDestructuredVariablesNoCrash3.ts(3,84): error TS1005: ')' expected.
-dependentDestructuredVariablesNoCrash3.ts(3,95): error TS1005: ',' expected.
-dependentDestructuredVariablesNoCrash3.ts(3,96): error TS1134: Variable declaration expected.
-dependentDestructuredVariablesNoCrash3.ts(3,97): error TS1155: 'const' declarations must be initialized.
-dependentDestructuredVariablesNoCrash3.ts(3,103): error TS1005: ',' expected.
-dependentDestructuredVariablesNoCrash3.ts(3,104): error TS1109: Expression expected.

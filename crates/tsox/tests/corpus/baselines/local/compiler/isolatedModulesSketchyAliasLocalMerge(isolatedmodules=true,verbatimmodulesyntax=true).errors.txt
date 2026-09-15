@@ -1,2 +1,0 @@
-bad.ts(1,10): error TS2865: Import 'FC' conflicts with local value, so must be declared with a type-only import when 'isolatedModules' is enabled.
-good.ts(1,15): error TS2865: Import 'FC' conflicts with local value, so must be declared with a type-only import when 'isolatedModules' is enabled.

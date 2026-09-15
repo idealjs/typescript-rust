@@ -1,1 +1,0 @@
-promiseWithResolvers.ts(2,46): error TS2339: Property 'withResolvers' does not exist on type 'PromiseConstructor'.

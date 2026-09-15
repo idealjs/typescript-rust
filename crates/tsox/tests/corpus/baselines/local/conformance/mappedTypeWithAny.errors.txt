@@ -1,1 +1,0 @@
-mappedTypeWithAny.ts(53,5): error TS2322: Type '{ [K in keyof T]: any; }' is not assignable to type '[any, any]'.

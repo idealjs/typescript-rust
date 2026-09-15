@@ -1,1 +1,0 @@
-computedPropertyNames21_ES5.ts(5,11): error TS2339: Property 'bar' does not exist on type 'typeof globalThis'.

@@ -1,2 +1,0 @@
-discriminantsAndPrimitives.ts(75,7): error TS2339: Property 'alternatives' does not exist on type 'Disjunction | Pattern'.
-discriminantsAndPrimitives.ts(78,7): error TS2339: Property 'elements' does not exist on type 'never'.

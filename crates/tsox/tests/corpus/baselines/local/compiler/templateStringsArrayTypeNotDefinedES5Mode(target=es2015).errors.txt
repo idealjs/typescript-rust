@@ -1,1 +1,0 @@
-templateStringsArrayTypeNotDefinedES5Mode.ts(4,3): error TS2739: Type '{}' is missing the following properties from type 'TemplateStringsArray': raw, length, toString, toLocaleString, concat, join, slice, indexOf, lastIndexOf, every, some, forEach, map, filter, reduce, reduceRight, find, findIndex, __@iterator, entries, keys, values, __@unscopables

@@ -1,3 +1,0 @@
-awaitUsingDeclarations.11.ts(1,1): error TS1128: Declaration or statement expected.
-awaitUsingDeclarations.11.ts(2,1): error TS2304: Cannot find name 'declare'.
-awaitUsingDeclarations.11.ts(2,21): error TS1155: 'const' declarations must be initialized.

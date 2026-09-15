@@ -1,1 +1,0 @@
-index.tsx(1,8): error TS2307: Cannot find module './jsx' or its corresponding type declarations.

@@ -1,4 +1,0 @@
-forStatementInnerComments.ts(3,52): error TS2495: Type 'any' is not an array type or a string type.
-forStatementInnerComments.ts(4,49): error TS1005: ';' expected.
-forStatementInnerComments.ts(5,7): suggestion TS7027: Unreachable code detected.
-forStatementInnerComments.ts(5,42): error TS2495: Type 'never' is not an array type or a string type.

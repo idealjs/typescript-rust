@@ -1,1 +1,0 @@
-react-native.ts(2,16): error TS2664: Invalid module name in augmentation, module 'react-native' cannot be found.

@@ -1,1 +1,0 @@
-user.ts(1,8): error TS2440: Import declaration conflicts with local declaration of 'Obj'.

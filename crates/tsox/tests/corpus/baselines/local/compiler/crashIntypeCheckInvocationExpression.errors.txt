@@ -1,3 +1,0 @@
-crashIntypeCheckInvocationExpression.ts(6,28): error TS2304: Cannot find name 'task'.
-crashIntypeCheckInvocationExpression.ts(8,18): error TS2304: Cannot find name 'path'.
-crashIntypeCheckInvocationExpression.ts(10,50): error TS2304: Cannot find name 'moduleType'.

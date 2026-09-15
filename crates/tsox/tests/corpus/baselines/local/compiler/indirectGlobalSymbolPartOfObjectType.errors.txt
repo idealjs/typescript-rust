@@ -1,1 +1,0 @@
-indirectGlobalSymbolPartOfObjectType.ts(2,27): error TS2339: Property 'Symbol' does not exist on type 'typeof globalThis'.

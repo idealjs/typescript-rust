@@ -1,5 +1,0 @@
-propertyAssignment.ts(12,1): error TS2322: Type '{ x: number; }' is not assignable to type '() => unknown'.
-  Type '{ x: number; }' provides no match for the signature 'new (): any'.
-propertyAssignment.ts(13,1): error TS2741: Property '[index]' is missing in type '{ x: number; }' but required in type '{ [index]: any; }'.
-propertyAssignment.ts(14,1): error TS2322: Type '{ x: number; }' is not assignable to type '() => void'.
-  Type '{ x: number; }' provides no match for the signature '(): void'.

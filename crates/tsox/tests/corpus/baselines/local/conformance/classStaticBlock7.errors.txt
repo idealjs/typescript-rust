@@ -1,4 +1,0 @@
-classStaticBlock7.ts(3,9): error TS1375: 'await' expressions are only allowed at the top level of a file when that file is a module, but this file has no imports or exports. Consider adding an empty 'export {}' to make this file a module.
-classStaticBlock7.ts(4,9): error TS1163: A 'yield' expression is only allowed in a generator body.
-classStaticBlock7.ts(5,9): error TS1108: A 'return' statement can only be used within a function body.
-classStaticBlock7.ts(9,1): suggestion TS7027: Unreachable code detected.

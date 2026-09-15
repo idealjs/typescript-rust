@@ -1,4 +1,0 @@
-parserClassDeclaration3.ts(1,20): error TS2304: Cannot find name 'A'.
-parserClassDeclaration3.ts(1,22): error TS1005: '{' expected.
-parserClassDeclaration3.ts(1,30): error TS1434: Unexpected keyword or identifier.
-parserClassDeclaration3.ts(1,30): error TS2304: Cannot find name 'B'.

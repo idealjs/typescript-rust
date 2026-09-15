@@ -1,4 +1,0 @@
-definiteAssignmentAssertions.ts(5,5): error TS2564: Property 'b' has no initializer and is not definitely assigned in the constructor.
-definiteAssignmentAssertions.ts(69,10): error TS1264: Declarations with definite assignment assertions must also have type annotations.
-definiteAssignmentAssertions.ts(70,10): error TS1263: Declarations with initializers cannot also have definite assignment assertions.
-definiteAssignmentAssertions.ts(71,10): error TS1263: Declarations with initializers cannot also have definite assignment assertions.

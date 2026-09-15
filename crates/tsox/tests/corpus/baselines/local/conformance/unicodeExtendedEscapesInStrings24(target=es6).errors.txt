@@ -1,1 +1,0 @@
-unicodeExtendedEscapesInStrings24.ts(1,9): error TS1002: Unterminated string literal.

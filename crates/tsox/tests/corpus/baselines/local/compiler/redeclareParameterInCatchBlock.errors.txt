@@ -1,2 +1,0 @@
-redeclareParameterInCatchBlock.ts(21,15): error TS2451: Cannot redeclare block-scoped variable 'x'.
-redeclareParameterInCatchBlock.ts(21,21): error TS2451: Cannot redeclare block-scoped variable 'x'.

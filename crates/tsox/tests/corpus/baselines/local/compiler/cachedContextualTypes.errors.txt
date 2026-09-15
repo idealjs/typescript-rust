@@ -1,2 +1,0 @@
-cachedContextualTypes.ts(19,13): error TS7006: Parameter 'bar' implicitly has an 'any' type.
-bundled:///libs/lib.es5.d.ts(1643,127): error TS2304: Cannot find name 'P'.

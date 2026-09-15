@@ -1,6 +1,0 @@
-error TS6053: File '/.lib/react16.d.ts' not found.
-checkJsxSubtleSkipContextSensitiveBug.tsx(2,24): error TS2307: Cannot find module 'react' or its corresponding type declarations.
-checkJsxSubtleSkipContextSensitiveBug.tsx(22,12): error TS7006: Parameter 'result' implicitly has an 'any' type.
-
-
-!!! error TS6053: File '/.lib/react16.d.ts' not found.

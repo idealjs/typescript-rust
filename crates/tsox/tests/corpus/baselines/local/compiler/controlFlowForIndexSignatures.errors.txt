@@ -1,3 +1,0 @@
-controlFlowForIndexSignatures.ts(6,42): error TS2304: Cannot find name ''.
-controlFlowForIndexSignatures.ts(11,41): error TS2304: Cannot find name ''.
-controlFlowForIndexSignatures.ts(14,37): error TS2304: Cannot find name ''.

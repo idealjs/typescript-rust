@@ -1,3 +1,0 @@
-typeGuardsOnClassProperty.ts(7,5): error TS2564: Property 'data' has no initializer and is not definitely assigned in the constructor.
-typeGuardsOnClassProperty.ts(10,55): error TS2339: Property 'join' does not exist on type 'string | string[]'.
-typeGuardsOnClassProperty.ts(14,70): error TS2339: Property 'join' does not exist on type 'string | string[]'.
