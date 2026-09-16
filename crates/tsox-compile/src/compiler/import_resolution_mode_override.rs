@@ -225,9 +225,20 @@ pub(crate) fn load_source_file_with_references(
 
     let text = file.text.as_str();
     let refs = extract_reference_path_directives(text, &normalized);
-    for ref_path in &refs {
+    for ref_dir in &refs {
+        if let Some((message, args)) =
+            check_reference_path_loadable(host, &ref_dir.resolved, &ref_dir.raw, &normalized)
+        {
+            diagnostics.push(Arc::new(Diagnostic::new(
+                Some(Arc::clone(&file)),
+                TextRange::new(ref_dir.value_range.0, ref_dir.value_range.1),
+                message,
+                args,
+            )));
+            continue;
+        }
         load_source_file_with_references(
-            ref_path,
+            &ref_dir.resolved,
             host,
             source_files,
             by_name,
@@ -239,47 +250,123 @@ pub(crate) fn load_source_file_with_references(
     source_files.push(file);
 }
 
-pub(crate) fn extract_reference_path_directives(text: &str, containing_file: &str) -> Vec<String> {
+pub(crate) struct ReferencePathDirective {
+    pub(crate) resolved: String,
+    pub(crate) raw: String,
+    pub(crate) value_range: (usize, usize),
+}
+
+fn supported_reference_extensions() -> &'static [&'static str] {
+    &[".ts", ".tsx", ".d.ts"]
+}
+
+fn has_supported_reference_extension(path: &str) -> bool {
+    supported_reference_extensions()
+        .iter()
+        .any(|ext| path.ends_with(ext))
+}
+
+/// Go getSourceFileFromReference：按引用文本的扩展名形态决定可加载性与失败
+/// 诊断；诊断统一定位在引用文件 directive 的路径串上，参数用原始引用文本
+fn check_reference_path_loadable(
+    host: &dyn CompilerHost,
+    resolved: &str,
+    raw: &str,
+    containing_file: &str,
+) -> Option<(
+    tsox_core::diagnostics::Message,
+    Vec<String>,
+)> {
+    use tsox_core::diagnostics::messages_generated as msg;
+    let has_extension = resolved.rsplit('/').next().unwrap_or("").contains('.');
+    let raw_normalized = raw.replace('\\', "/");
+    if has_extension {
+        if !has_supported_reference_extension(resolved) {
+            if resolved.ends_with(".js") || resolved.ends_with(".jsx") {
+                return Some((msg::FILE_0_IS_A_JAVASCRIPT_FILE_DID_YOU_MEAN_TO_ENABLE_THE_ALLOWJS_OPTION, vec![raw_normalized]));
+            }
+            let joined = supported_reference_extensions()
+                .iter()
+                .map(|e| format!("'{e}'"))
+                .collect::<Vec<_>>()
+                .join(", ");
+            return Some((msg::FILE_0_HAS_AN_UNSUPPORTED_EXTENSION_THE_ONLY_SUPPORTED_EXTENSIONS_ARE_1, vec![raw_normalized, joined]));
+        }
+        if !host.fs().file_exists(resolved) {
+            return Some((tsox_core::diagnostics::FILE_0_NOT_FOUND, vec![raw_normalized]));
+        }
+        let canonical = |p: &str| {
+            p.rsplit('/')
+                .next()
+                .unwrap_or("")
+                .to_ascii_lowercase()
+        };
+        if canonical(resolved) == canonical(containing_file) {
+            return Some((msg::A_FILE_CANNOT_HAVE_A_REFERENCE_TO_ITSELF, Vec::new()));
+        }
+        return None;
+    }
+    for ext in supported_reference_extensions() {
+        let candidate = format!("{resolved}{ext}");
+        if host.fs().file_exists(&candidate) {
+            return None;
+        }
+    }
+    let joined = supported_reference_extensions()
+        .iter()
+        .map(|e| format!("'{e}'"))
+        .collect::<Vec<_>>()
+        .join(", ");
+    Some((msg::COULD_NOT_RESOLVE_THE_PATH_0_WITH_THE_EXTENSIONS_COLON_1, vec![raw_normalized, joined]))
+}
+
+pub(crate) fn extract_reference_path_directives(
+    text: &str,
+    containing_file: &str,
+) -> Vec<ReferencePathDirective> {
     let mut refs = Vec::new();
     let base_dir = tsox_core::tspath::get_directory_path(containing_file);
-    for line in text.lines() {
+    let mut line_start = 0usize;
+    for raw_line in text.split('\n') {
+        let line = raw_line.strip_suffix('\r').unwrap_or(raw_line);
         let trimmed = line.trim_start();
+        let leading = line.len() - trimmed.len();
         let Some(rest) = trimmed.strip_prefix("///") else {
+            line_start += raw_line.len() + 1;
             continue;
         };
-
         if !rest.trim_start().starts_with("<reference") {
+            line_start += raw_line.len() + 1;
             continue;
         }
-        if let Some(start) = rest.find("path=\"") {
-            let after = &rest[start + 6..];
-            if let Some(end) = after.find('"') {
-                let path = &after[..end];
-                let resolved = if tsox_core::tspath::is_rooted_disk_path(path) {
-                    tsox_core::tspath::normalize_path(path)
-                } else {
-                    tsox_core::tspath::normalize_path(&tsox_core::tspath::combine_paths(
-                        &base_dir,
-                        &[path],
-                    ))
-                };
-                refs.push(resolved);
-            }
-        } else if let Some(start) = rest.find("path='") {
-            let after = &rest[start + 6..];
-            if let Some(end) = after.find('\'') {
-                let path = &after[..end];
-                let resolved = if tsox_core::tspath::is_rooted_disk_path(path) {
-                    tsox_core::tspath::normalize_path(path)
-                } else {
-                    tsox_core::tspath::normalize_path(&tsox_core::tspath::combine_paths(
-                        &base_dir,
-                        &[path],
-                    ))
-                };
-                refs.push(resolved);
-            }
+        let Some(prefix_len) = ["path=\"", "path='"]
+            .iter()
+            .find_map(|m| rest.find(*m).map(|i| (i, m.len()))) else
+        {
+            line_start += raw_line.len() + 1;
+            continue;
+        };
+        let (start, marker_len) = prefix_len;
+        let after = &rest[start + marker_len..];
+        let quote = rest[start + 5..].chars().next().unwrap_or('"');
+        if let Some(end) = after.find(quote) {
+            let path = &after[..end];
+            let resolved = if tsox_core::tspath::is_rooted_disk_path(path) {
+                tsox_core::tspath::normalize_path(path)
+            } else {
+                tsox_core::tspath::normalize_path(&tsox_core::tspath::combine_paths(
+                    &base_dir,
+                    &[path],
+                ))
+            };
+            let value_start = line_start + leading + 3 + start + marker_len;
+            refs.push(ReferencePathDirective {
+                resolved,
+                raw: path.to_string(),
+                value_range: (value_start, value_start + end),
+            });
         }
+        line_start += raw_line.len() + 1;
     }
     refs
 }

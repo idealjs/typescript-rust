@@ -46,6 +46,43 @@ impl Checker {
                 }
             }
             self.filling_class_members.remove(&node_id);
+
+            // 同名 interface 声明（同文件或模块增强合并进来）的成员并入实例型
+            // （Go getDeclaredTypeOfClassOrInterface 的 interface declaration 分支）
+            let extra_interface_members: Vec<Arc<Node>> = self
+                .program
+                .symbol_map()
+                .symbol_of(node)
+                .map(|sym| {
+                    sym.declarations
+                        .iter()
+                        .filter(|d| d.kind == SyntaxKind::InterfaceDeclaration && !Arc::ptr_eq(d, node))
+                        .filter_map(|d| match &d.data {
+                            NodeData::InterfaceDeclaration(id) => {
+                                Some(id.members.iter().cloned().collect::<Vec<_>>())
+                            }
+                            _ => None,
+                        })
+                        .flatten()
+                        .collect()
+                })
+                .unwrap_or_default();
+            if !extra_interface_members.is_empty() {
+                let mut nodes = Vec::new();
+                nodes.extend(extra_interface_members);
+                let list = Arc::new(NodeList::new(nodes));
+                self.filling_class_members.insert(node_id);
+                unsafe {
+                    if let TypeData::Object(obj) = &mut (*own_mut).data {
+                        let sink = MemberSink {
+                            members: &mut obj.structured.members,
+                            props: &mut obj.structured.properties,
+                        };
+                        self.fill_members_into(sink, &list);
+                    }
+                }
+                self.filling_class_members.remove(&node_id);
+            }
         }
 
         let mut base_type: Option<Arc<Type>> = None;

@@ -217,7 +217,8 @@ impl Checker {
     }
 
     pub(crate) fn resolve_module_file_symbol(&self, specifier: &str) -> Option<Arc<Symbol>> {
-        if !specifier.starts_with('.') {
+        // 同 isExternalModuleNameRelative 语义：`.prisma/client` 是包名，不是相对路径
+        if !specifier.starts_with("./") && !specifier.starts_with("../") {
             for file in self.program.source_files() {
                 if file.external_module_indicator.is_some() {
                     continue;

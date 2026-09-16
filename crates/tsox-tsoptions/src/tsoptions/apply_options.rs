@@ -84,6 +84,11 @@ pub(crate) fn apply_options(options: &HashMap<String, OptValue>, out: &mut Compi
                     out.root_dirs = list.to_vec();
                 }
             }
+            "moduleSuffixes" => {
+                if let Some(list) = value.as_list() {
+                    out.module_suffixes = list.to_vec();
+                }
+            }
             "outDir" => {
                 if let Some(s) = value.as_str() {
                     out.out_dir = s.to_string();

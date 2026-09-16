@@ -55,7 +55,7 @@ impl Resolver {
             containing_file,
             self.host.fs(),
         );
-        let state = ResolutionState::new(
+        let mut state = ResolutionState::new(
             module_name,
             &containing_directory,
             false,
@@ -65,9 +65,10 @@ impl Resolver {
             self.host.get_current_directory(),
         );
         let result = state.resolve_node_like();
+        let diagnostics = std::mem::take(&mut state.resolution_diagnostics);
         let result_arc = Arc::new(result.clone());
         self.module_cache.set(cache_key, result_arc);
-        (Some(result), Vec::new())
+        (Some(result), diagnostics)
     }
 
     pub fn resolve_type_reference_directive(
@@ -183,4 +184,10 @@ pub(crate) struct ResolutionState<'a> {
     pub(crate) candidate_ending_is_from_config: bool,
 
     pub(crate) export_target_depth: u32,
+
+    pub(crate) resolution_diagnostics: Vec<DiagAndArgs>,
+
+    /// Go unresolved() 终止语义：exports/imports 目标反查已判定终止，
+    /// 不再尝试后续条件/策略
+    pub(crate) unresolved_terminal: bool,
 }

@@ -127,20 +127,14 @@ impl Checker {
         if symbol.flags.contains(SymbolFlags::TypeParameter) {
             return self.resolve_type_parameter_reference(&symbol, type_name);
         }
-        if symbol.flags.contains(SymbolFlags::Interface) {
-            // tsc getTypeFromClassOrInterfaceReference：无实参引用且类型参数带默认值时按默认值实例化
-            if type_arguments.is_none() {
-                let defaults = self.interface_default_type_arguments(&symbol);
-                if !defaults.is_empty() {
-                    return self.resolve_interface_type_ex(&symbol, Some(defaults));
-                }
-            }
-            return self.resolve_interface_type(&symbol, type_arguments);
-        }
-        if symbol.flags.intersects(SymbolFlags::ENUM) {
-            return self.resolve_enum_type(&symbol);
-        }
-        if symbol.flags.contains(SymbolFlags::Class) {
+        // tsc getTypeReferenceType：class+interface 同名合并的符号走 class 引用路径，
+        // interface 声明的成员与基类并入同一声明类型（getDeclaredTypeOfClassOrInterface）
+        if symbol.flags.contains(SymbolFlags::Class)
+            && symbol
+                .declarations
+                .iter()
+                .any(|d| d.kind == SyntaxKind::ClassDeclaration)
+        {
             let key = Arc::as_ptr(&symbol) as *const tsox_frontend::ast::Symbol;
             let merged_with_ns = symbol.flags.contains(SymbolFlags::ValueModule);
             // 声明缓存仅在无类型实参时可直接复用；带实参引用须实例化（attach），
@@ -162,29 +156,86 @@ impl Checker {
                 .iter()
                 .find(|d| d.kind == SyntaxKind::ClassDeclaration)
                 .cloned();
-            let instance_type = match class_node {
-                Some(node) => self.build_class_instance_type_with_base(&node),
-                None => self.error_type(),
-            };
-            self.resolving_type_aliases.remove(&key);
-            if !merged_with_ns {
-                self.type_alias_links.get_or_default(&symbol).declared_type =
-                    Some(Arc::clone(&instance_type));
-            }
-
             let arg_types: Option<Vec<Arc<Type>>> = type_arguments.map(|nodes| {
                 nodes
                     .iter()
                     .map(|a| self.get_type_from_type_node(a))
                     .collect()
             });
+            let class_tps: Vec<Arc<tsox_frontend::ast::Symbol>> = match &class_node {
+                Some(node) => match &node.data {
+                    tsox_frontend::ast::NodeData::ClassDeclaration(cd) => {
+                        match &cd.type_parameters {
+                            Some(tps) => tps
+                                .iter()
+                                .filter_map(|tp| {
+                                    self.program
+                                        .symbol_map()
+                                        .symbol_of(tp)
+                                        .map(Arc::clone)
+                                })
+                                .collect(),
+                            None => Vec::new(),
+                        }
+                    }
+                    _ => Vec::new(),
+                },
+                None => Vec::new(),
+            };
+            let args_match = arg_types
+                .as_ref()
+                .is_some_and(|a| !a.is_empty() && a.len() == class_tps.len());
+            let instance_type = match class_node {
+                Some(node) => {
+                    let class_type = if args_match {
+                        self.instantiate_class_instance_type(
+                            &node,
+                            &symbol,
+                            &class_tps,
+                            arg_types.as_ref().unwrap(),
+                        )
+                    } else {
+                        self.build_class_instance_type_with_base(&node)
+                    };
+                    if symbol.flags.intersects(SymbolFlags::Interface) {
+                        let iface_type =
+                            self.resolve_interface_type_ex(&symbol, arg_types.clone());
+                        self.merge_instance_types(&class_type, &iface_type)
+                    } else {
+                        class_type
+                    }
+                }
+                None => self.error_type(),
+            };
+            self.resolving_type_aliases.remove(&key);
+            if !merged_with_ns && arg_types.is_none() {
+                self.type_alias_links.get_or_default(&symbol).declared_type =
+                    Some(Arc::clone(&instance_type));
+            }
+
             if let Some(arg_types) = arg_types {
+                if args_match {
+                    return instance_type;
+                }
                 let tps = self.declared_type_parameter_types(&symbol);
                 if !tps.is_empty() && tps.len() == arg_types.len() {
                     return self.attach_explicit_type_arguments_cached(&instance_type, arg_types);
                 }
             }
             return instance_type;
+        }
+        if symbol.flags.contains(SymbolFlags::Interface) {
+            // tsc getTypeFromClassOrInterfaceReference：无实参引用且类型参数带默认值时按默认值实例化
+            if type_arguments.is_none() {
+                let defaults = self.interface_default_type_arguments(&symbol);
+                if !defaults.is_empty() {
+                    return self.resolve_interface_type_ex(&symbol, Some(defaults));
+                }
+            }
+            return self.resolve_interface_type(&symbol, type_arguments);
+        }
+        if symbol.flags.intersects(SymbolFlags::ENUM) {
+            return self.resolve_enum_type(&symbol);
         }
         if !symbol.flags.contains(SymbolFlags::TypeAlias) {
             if matches!(&node.data, NodeData::ExpressionWithTypeArguments(_))

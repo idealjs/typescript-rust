@@ -422,6 +422,7 @@ fn process_case(content: &str, basename: &str) -> Vec<ConfigOutcome> {
                             &parsed.units,
                             no_implicit_refs,
                             tsconfig.as_ref().map(|(c, _)| c.file_names.as_slice()),
+                            &parsed.symlinks,
                         );
                         render_errors_baseline(&diags, program_len)
                     }) {
@@ -470,6 +471,11 @@ fn run_case(
     let worker = Command::new(exe)
         .arg("--exact")
         .arg("submodule_compiler::submodule_compiler_cases")
+        .args(if std::env::var_os("TSOX_PROBE_PHASES").is_some() {
+            vec!["--nocapture".to_string()]
+        } else {
+            Vec::new()
+        })
         .env("TSOX_SUBMODULE_WORKER", case_path)
         .env("TSOX_SUBMODULE_OUT", &out_path)
         .stdin(Stdio::null())
@@ -1094,6 +1100,7 @@ fn build_and_check(
     units: &[crate::common::case_parser::TestUnit],
     no_implicit_references: bool,
     tsconfig_file_names: Option<&[String]>,
+    symlinks: &[(String, String)],
 ) -> (Vec<Diagnostic>, usize) {
     let fs = Arc::new(InMemoryFS::new());
     fs.insert_dir("/proj");
@@ -1145,6 +1152,34 @@ fn build_and_check(
         {
             file_names.push(abs);
         }
+    }
+
+    // Go harnessutil：@symlink 路径挂为指向 unit 内容的链接。解析器无
+    // realpath 语义，同一内容插入多个路径即符合「2 个 symlink 视为
+    // 2 个不同文件」的用例语义
+    for (link, unit_name) in symlinks {
+        let Some(content) = units
+            .iter()
+            .find(|u| u.name == *unit_name)
+            .map(|u| u.content.clone())
+        else {
+            continue;
+        };
+        let link_abs = if tsox_core::tspath::is_rooted_disk_path(link) {
+            tsox_core::tspath::normalize_path(link)
+        } else {
+            tsox_core::tspath::normalize_path(&format!("/proj/{link}"))
+        };
+        let mut link_parent = tsox_core::tspath::get_directory_path(&link_abs);
+        while !link_parent.is_empty() {
+            fs.insert_dir(&link_parent);
+            let next = tsox_core::tspath::get_directory_path(&link_parent);
+            if next == link_parent {
+                break;
+            }
+            link_parent = next;
+        }
+        fs.insert_file(&link_abs, &content);
     }
 
     let bf = Arc::new(BundledFS::new(fs.clone()));
@@ -1298,7 +1333,10 @@ fn should_skip(options: &CompilerOptions, unrecognized: &[String]) -> Option<Str
         _ => {}
     }
 
-    if matches!(options.module_resolution, ModuleResolutionKind::Classic) {
+    if matches!(
+        options.module_resolution,
+        ModuleResolutionKind::Classic | ModuleResolutionKind::Node10
+    ) {
         return Some(format!(
             "moduleResolution={:?} not supported",
             options.module_resolution

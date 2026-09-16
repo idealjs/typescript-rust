@@ -69,6 +69,8 @@ impl<'a> ResolutionState<'a> {
             resolved_package_directory: false,
             candidate_ending_is_from_config: false,
             export_target_depth: 0,
+            resolution_diagnostics: Vec::new(),
+            unresolved_terminal: false,
         }
     }
 

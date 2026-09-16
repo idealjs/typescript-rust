@@ -31,11 +31,9 @@ impl Scanner {
         }
         if !terminated {
             self.token_flags |= TOKEN_FLAGS_UNTERMINATED;
-            self.report_error(
-                DiagnosticKind::UnterminatedTemplateLiteral,
-                self.token_pos,
-                self.pos - self.token_pos,
-            );
+            // Go Scanner.error：未终结模板报在扫描终点（s.pos）、零长度，
+            // 不是 token 起点
+            self.report_error(DiagnosticKind::UnterminatedTemplateLiteral, self.pos, 0);
         }
         self.token_end = self.pos;
         self.token = if has_substitution {

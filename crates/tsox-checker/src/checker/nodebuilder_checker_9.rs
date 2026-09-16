@@ -207,6 +207,20 @@ impl Checker {
             .parent()
             .clone()
             .or_else(|| self.namespace_container_from_declarations(symbol));
+        // Go isSymbolAccessible：符号与显示上下文同文件时可无限定访问，
+        // 错误消息等场景（display_enclosing_file 缺失）以 current_file 兜底
+        let enclosing_file = self
+            .display_enclosing_file
+            .clone()
+            .or_else(|| self.current_file.clone());
+        if let Some(enc_file) = enclosing_file
+            && symbol.declarations.iter().any(|d| {
+                tsox_frontend::ast::utilities::get_source_file_of_node(d)
+                    .is_some_and(|sf| Arc::ptr_eq(&sf, &enc_file.node))
+            })
+        {
+            return None;
+        }
         while let Some(ns) = cur {
             if !ns.flags.intersects(SymbolFlags::MODULE) {
                 // Go getSymbolChain：非模块父（脚本文件符号/函数）终止上爬，

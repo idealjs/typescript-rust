@@ -106,6 +106,7 @@ pub(crate) mod checker_imports_namespace_checker_4;
 pub(crate) mod checker_literals;
 pub(crate) mod checker_module_alias_target_state;
 pub(crate) mod checker_modules;
+pub(crate) mod checker_modules_augmentation;
 pub(crate) mod checker_modules_checker;
 pub(crate) mod checker_modules_checker_2;
 pub(crate) mod checker_modules_checker_3;

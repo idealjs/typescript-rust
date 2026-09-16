@@ -18,29 +18,6 @@ impl Program {
             std::collections::HashSet::new();
         let mut diagnostics: Vec<Arc<Diagnostic>> = Vec::new();
 
-        if options.module_resolution == ModuleResolutionKind::Node10 {
-            let mut deprecation = Diagnostic::new(
-                None,
-                TextRange::default(),
-                tsox_core::diagnostics::messages_generated::
-                    OPTION_0_1_IS_DEPRECATED_AND_WILL_STOP_FUNCTIONING_IN_TYPESCRIPT_2_SPECIFY_COMPILEROPTION_IGNOREDEPRECATIONS_COLON_3_TO_SILENCE_THIS_ERROR,
-                vec![
-                    "moduleResolution".to_string(),
-                    "node10".to_string(),
-                    "7.0".to_string(),
-                    "6.0".to_string(),
-                ],
-            );
-            deprecation.message_chain = vec![Diagnostic::new(
-                None,
-                TextRange::default(),
-                tsox_core::diagnostics::messages_generated::
-                    VISIT_HTTPS_COLON_SLASH_SLASHAKA_MS_SLASHTS6_FOR_MIGRATION_INFORMATION,
-                Vec::new(),
-            )];
-            diagnostics.push(Arc::new(deprecation));
-        }
-
         if !options.lib.is_empty() && options.no_lib.is_true() {
             diagnostics.push(Arc::new(Diagnostic::new(
                 None,
@@ -183,17 +160,40 @@ impl Program {
                     }
                 }
 
+                // program 诊断阶段 parent 指针未建，按语句扫描收集
+                // side-effect import（无 import clause）的 specifier 节点 id
+                let side_effect_spec_ids: std::collections::HashSet<u64> = {
+                    let mut ids = std::collections::HashSet::new();
+                    if let tsox_frontend::ast::NodeData::SourceFile(sf) = &file.node.data {
+                        for stmt in sf.statements.iter() {
+                            if let tsox_frontend::ast::NodeData::ImportDeclaration(d) = &stmt.data {
+                                if d.import_clause.is_none() {
+                                    ids.insert(d.module_specifier.id());
+                                }
+                            }
+                        }
+                    }
+                    ids
+                };
                 for import_node in &file.imports {
                     let module_spec = import_node.text();
                     if module_spec.is_empty() {
                         continue;
                     }
-                    let (resolved, _traces) = resolver.resolve_module_name(
+                    let (resolved, resolution_diags) = resolver.resolve_module_name(
                         module_spec,
                         &file.file_name,
                         import_resolution_mode_override(import_node),
                         None,
                     );
+                    for d in resolution_diags {
+                        diagnostics.push(Arc::new(Diagnostic::new(
+                            None,
+                            tsox_core::core::text::TextRange::new(0, 0),
+                            *d.message,
+                            d.args,
+                        )));
+                    }
                     let is_resolved = resolved.as_ref().map(|m| m.is_resolved()).unwrap_or(false);
                     if is_resolved {
                         let resolved_module = resolved.unwrap();
@@ -221,11 +221,29 @@ impl Program {
                         || (!module_spec.starts_with('.')
                             && !ambient_module_exists(&source_files, module_spec))
                     {
+                        // Go checkImportDeclaration：side-effect import（无 import
+                        // clause）且未显式 noUncheckedSideEffectImports=false 时用
+                        // TS2882 专用消息
+                        let is_side_effect = side_effect_spec_ids.contains(&import_node.id());
+                        let (message, args): (_, Vec<String>) = if is_side_effect
+                            && !options.no_unchecked_side_effect_imports.is_false()
+                        {
+                            (
+                                tsox_core::diagnostics::messages_generated::
+                                    CANNOT_FIND_MODULE_OR_TYPE_DECLARATIONS_FOR_SIDE_EFFECT_IMPORT_OF_0,
+                                vec![module_spec.to_string()],
+                            )
+                        } else {
+                            (
+                                tsox_core::diagnostics::CANNOT_FIND_MODULE_0_OR_ITS_CORRESPONDING_TYPE_DECLARATIONS,
+                                vec![module_spec.to_string()],
+                            )
+                        };
                         let mut module_not_found = Diagnostic::new(
                             Some(file.clone()),
                             import_node.loc,
-                            tsox_core::diagnostics::CANNOT_FIND_MODULE_0_OR_ITS_CORRESPONDING_TYPE_DECLARATIONS,
-                            vec![module_spec.to_string()],
+                            message,
+                            args,
                         );
 
                         if let Some(alt) =

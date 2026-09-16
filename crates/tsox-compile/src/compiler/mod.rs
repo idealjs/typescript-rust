@@ -3,7 +3,6 @@ pub(crate) use std::sync::{Arc, Mutex};
 pub(crate) use tsox_checker::binder::Binder;
 pub(crate) use tsox_core::core::compiler_options::CompilerOptions;
 pub(crate) use tsox_core::core::compiler_options::ModuleKind;
-pub(crate) use tsox_core::core::compiler_options::ModuleResolutionKind;
 pub(crate) use tsox_core::core::compiler_options::ScriptTarget;
 pub(crate) use tsox_core::core::text::TextRange;
 pub(crate) use tsox_core::core::tristate::Tristate;

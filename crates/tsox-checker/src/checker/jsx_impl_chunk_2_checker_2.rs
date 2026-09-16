@@ -127,7 +127,15 @@ impl Checker {
         if jsx_expr.kind != SyntaxKind::JsxExpression {
             return None;
         }
-        let attr = jsx_expr.parent()?;
+        let parent = jsx_expr.parent()?;
+        if parent.kind == SyntaxKind::JsxElement {
+            return self.get_contextual_type_for_child_jsx_expression(
+                &parent,
+                &jsx_expr,
+                _context_flags,
+            );
+        }
+        let attr = parent;
         if attr.kind != SyntaxKind::JsxAttribute {
             return None;
         }
@@ -156,11 +164,64 @@ impl Checker {
 
     pub fn get_contextual_type_for_child_jsx_expression(
         &mut self,
-        _node: &Arc<Node>,
-        _child: &Arc<Node>,
+        node: &Arc<Node>,
+        child: &Arc<Node>,
         _context_flags: crate::checker::types::ContextFlags,
     ) -> Option<Arc<crate::checker::types::Type>> {
-        None
+        use crate::checker::types::TypeFlags;
+        // Go getContextualTypeForChildJsxExpression：属性类型的 children 成员
+        // （名字来自 JSX.ElementChildrenAttribute）即 children 位上下文
+        let opening = match &node.data {
+            tsox_frontend::ast::NodeData::JsxElement(d) => Arc::clone(&d.opening_element),
+            _ => return None,
+        };
+        let attributes_type = self.jsx_element_attributes_contextual_type(&opening)?;
+        if attributes_type.flags.contains(TypeFlags::Any) {
+            return None;
+        }
+        let children_name = self
+            .get_jsx_namespace()
+            .and_then(|ns| self.get_jsx_element_children_property_name(&ns))?;
+        if children_name.is_empty() {
+            return None;
+        }
+        let child_field_type = self
+            .get_type_of_property_of_contextual_type(&attributes_type, &children_name)?;
+        let children = match &node.data {
+            tsox_frontend::ast::NodeData::JsxElement(d) => Arc::clone(&d.children),
+            _ => return None,
+        };
+        let semantic: Vec<Arc<Node>> = children
+            .iter()
+            .filter(|c| match &c.data {
+                tsox_frontend::ast::NodeData::JsxExpression(je) => je.expression.is_some(),
+                tsox_frontend::ast::NodeData::JsxText(t) => !t.contains_only_trivia_white_spaces,
+                _ => true,
+            })
+            .cloned()
+            .collect();
+        if semantic.len() <= 1 {
+            return Some(child_field_type);
+        }
+        let child_index = semantic
+            .iter()
+            .position(|c| Arc::ptr_eq(c, child))?;
+        let index_type = self.get_number_literal_type(tsox_core::jsnum::Number::from(
+            child_index as f64,
+        ));
+        let map_one = |checker: &mut Self, t: &Arc<crate::checker::types::Type>| {
+            if checker.is_array_like_type(t) {
+                checker.get_indexed_access_type(t, &index_type)
+            } else {
+                Arc::clone(t)
+            }
+        };
+        if let Some(types) = child_field_type.types() {
+            let mapped: Vec<Arc<crate::checker::types::Type>> =
+                types.iter().map(|t| map_one(self, t)).collect();
+            return Some(self.get_union_type(mapped));
+        }
+        Some(map_one(self, &child_field_type))
     }
 
     pub fn discriminate_contextual_type_by_jsx_attributes(

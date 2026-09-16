@@ -62,7 +62,33 @@ impl Checker {
         None
     }
 
-    pub fn get_declared_type_of_symbol(&self, _symbol: &Arc<Symbol>) -> Arc<Type> {
+    pub fn get_declared_type_of_symbol(&mut self, symbol: &Arc<Symbol>) -> Arc<Type> {
+        // Go tryGetDeclaredTypeOfSymbol 的 Class/Interface/TypeAlias 分支；
+        // TypeParameter/Enum/Alias 等其余形态维持 any（尚未接入）
+        if symbol.flags.contains(tsox_frontend::ast::SymbolFlags::Interface) {
+            return self.resolve_interface_type_ex(symbol, None);
+        }
+        if symbol.flags.contains(tsox_frontend::ast::SymbolFlags::Class) {
+            let class_node = symbol
+                .value_declaration
+                .clone()
+                .or_else(|| symbol.declarations.first().cloned());
+            if let Some(d) = class_node
+                && matches!(
+                    d.kind,
+                    tsox_frontend::ast::SyntaxKind::ClassDeclaration
+                        | tsox_frontend::ast::SyntaxKind::ClassExpression
+                )
+            {
+                return self.build_class_instance_type_with_base(&d);
+            }
+            return self.resolve_interface_type_ex(symbol, None);
+        }
+        if symbol.flags.contains(tsox_frontend::ast::SymbolFlags::TypeAlias) {
+            if let Some(t) = self.type_alias_links.get(symbol).and_then(|l| l.declared_type.clone()) {
+                return t;
+            }
+        }
         self.any_type()
     }
 

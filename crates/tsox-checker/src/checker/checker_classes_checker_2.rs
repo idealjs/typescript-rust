@@ -20,6 +20,56 @@ impl Checker {
         self.extends_base_of(&class_node)
     }
 
+    /// 泛型类引用/继承的实例化：类实例缓存按节点驻留的是裸声明形态，
+    /// 带实参构建须绕开缓存——取出裸缓存、类型实参映射压栈下重建成员，
+    /// 再还原裸缓存（Go 声明类型与 instantiation 分离的等价实现）
+    pub(crate) fn instantiate_class_instance_type(
+        &mut self,
+        class_node: &Arc<Node>,
+        symbol: &Arc<Symbol>,
+        class_tps: &[Arc<tsox_frontend::ast::Symbol>],
+        arg_types: &[Arc<Type>],
+    ) -> Arc<Type> {
+        let node_id = class_node.id();
+        let saved = self.class_instance_type_cache.remove(&node_id);
+
+        let mut mapping = HashMap::new();
+        let mut name_frame: Vec<(Arc<tsox_frontend::ast::Symbol>, Arc<Type>)> = Vec::new();
+        for (i, tp_sym) in class_tps.iter().enumerate() {
+            if let Some(arg) = arg_types.get(i) {
+                mapping.insert(
+                    Arc::as_ptr(tp_sym) as *const tsox_frontend::ast::Symbol,
+                    Arc::clone(arg),
+                );
+                name_frame.push((Arc::clone(tp_sym), Arc::clone(arg)));
+            }
+        }
+        self.type_argument_stack.push(mapping);
+        self.type_argument_name_frames.push(name_frame);
+        self.push_scope(class_node);
+        let instance = self.build_class_instance_type_with_base(class_node);
+        self.pop_scope();
+        self.type_argument_stack.pop();
+        self.type_argument_name_frames.pop();
+
+        self.class_instance_type_cache.remove(&node_id);
+        match saved {
+            Some(raw) => {
+                self.class_instance_type_cache.insert(node_id, raw);
+            }
+            None => {
+                let _ = self.build_class_instance_type_with_base(class_node);
+            }
+        }
+
+        let tp_types: Vec<Arc<Type>> = class_tps
+            .iter()
+            .map(|s| self.get_type_parameter_from_symbol(s))
+            .collect();
+        self.mark_structured_members_instantiated(&instance, symbol, class_tps, &tp_types, arg_types);
+        instance
+    }
+
     pub(crate) fn resolve_base_class_instance_type(&mut self, type_ref: &Arc<Node>) -> Arc<Type> {
         if let tsox_frontend::ast::NodeData::ExpressionWithTypeArguments(data) = &type_ref.data {
             if data.expression.kind == SyntaxKind::Identifier {
@@ -70,47 +120,28 @@ impl Checker {
                                     .iter()
                                     .map(|a| self.get_type_from_type_node(a))
                                     .collect();
-                                let mut mapping = HashMap::new();
-                                let mut name_frame: Vec<(Arc<Symbol>, Arc<Type>)> = Vec::new();
-                                for (i, tp_sym) in base_tps.iter().enumerate() {
-                                    if i < arg_types.len() {
-                                        mapping.insert(
-                                            Arc::as_ptr(tp_sym)
-                                                as *const tsox_frontend::ast::Symbol,
-                                            Arc::clone(&arg_types[i]),
-                                        );
-                                        name_frame
-                                            .push((Arc::clone(tp_sym), Arc::clone(&arg_types[i])));
-                                    }
+                                if arg_types.len() == base_tps.len() {
+                                    pushed_args = Some(arg_types);
+                                    true
+                                } else {
+                                    false
                                 }
-                                self.type_argument_stack.push(mapping);
-                                self.type_argument_name_frames.push(name_frame);
-                                pushed_args = Some(arg_types);
-                                true
                             } else {
                                 false
                             };
-                            let instance = {
+                            let instance = if let Some(arg_types) = pushed_args {
+                                self.instantiate_class_instance_type(
+                                    &class_node,
+                                    &symbol,
+                                    &base_tps,
+                                    &arg_types,
+                                )
+                            } else {
                                 self.push_scope(&class_node);
                                 let i = self.build_class_instance_type_with_base(&class_node);
                                 self.pop_scope();
                                 i
                             };
-                            if let Some(arg_types) = pushed_args {
-                                let tp_types: Vec<Arc<Type>> = base_tps
-                                    .iter()
-                                    .map(|s| self.get_type_parameter_from_symbol(s))
-                                    .collect();
-                                self.mark_structured_members_instantiated(
-                                    &instance,
-                                    &symbol,
-                                    &base_tps,
-                                    &tp_types,
-                                    &arg_types,
-                                );
-                                self.type_argument_stack.pop();
-                                self.type_argument_name_frames.pop();
-                            }
                             self.pop_type_resolution();
                             return instance;
                         }

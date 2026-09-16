@@ -3,6 +3,26 @@
 use crate::checker::grammarchecks::*;
 
 impl Checker {
+    pub fn check_grammar_name_in_let_or_const_declarations(&mut self, name: &Arc<Node>) -> bool {
+        if name.kind == SyntaxKind::Identifier {
+            if name.text() == "let" {
+                return self.grammar_error_on_node(
+                    name,
+                    &X_LET_IS_NOT_ALLOWED_TO_BE_USED_AS_A_NAME_IN_LET_OR_CONST_DECLARATIONS,
+                );
+            }
+        } else if let NodeData::BindingPattern(data) = &name.data {
+            for element in data.elements.iter() {
+                if let NodeData::BindingElement(elem) = &element.data {
+                    if let Some(elem_name) = &elem.name {
+                        self.check_grammar_name_in_let_or_const_declarations(elem_name);
+                    }
+                }
+            }
+        }
+        false
+    }
+
     pub fn check_grammar_for_invalid_question_mark(
         &mut self,
         _postfix_token: &Arc<Node>,
@@ -67,10 +87,6 @@ impl Checker {
         &mut self,
         _name: &Arc<Node>,
     ) -> bool {
-        false
-    }
-
-    pub fn check_grammar_name_in_let_or_const_declarations(&mut self, _name: &Arc<Node>) -> bool {
         false
     }
 

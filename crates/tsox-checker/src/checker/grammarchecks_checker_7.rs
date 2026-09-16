@@ -112,7 +112,7 @@ impl Checker {
             _ => return false,
         };
 
-        let node_flags = node.flags;
+        let node_flags = tsox_frontend::ast::utilities::get_combined_node_flags(node);
         let block_scope_kind = node_flags & NodeFlags::BlockScoped;
 
         if is_binding_pattern(&data.name) {
@@ -146,7 +146,28 @@ impl Checker {
             .unwrap_or(false);
 
         if !in_for_in_or_of {
-            if data.initializer.is_none() {
+            let mut anc_ambient = false;
+            let mut anc = node.parent();
+            while let Some(a) = anc {
+                if a.has_syntactic_modifier(ModifierFlags::Ambient) {
+                    anc_ambient = true;
+                    break;
+                }
+                if matches!(
+                    a.kind,
+                    SyntaxKind::SourceFile | SyntaxKind::Block | SyntaxKind::ModuleBlock
+                ) {
+                    break;
+                }
+                anc = a.parent();
+            }
+            let in_dts = self
+                .current_file
+                .as_ref()
+                .is_some_and(|f| f.is_declaration_file);
+            if node_flags.contains(NodeFlags::Ambient) || anc_ambient || in_dts {
+                self.check_ambient_initializer(node);
+            } else if data.initializer.is_none() {
                 if is_binding_pattern(&data.name) {
                     let parent_is_binding_pattern = node
                         .parent()
@@ -209,6 +230,10 @@ impl Checker {
                 };
                 return self.grammar_error_on_node(excl_token, message);
             }
+        }
+
+        if !block_scope_kind.is_empty() {
+            return self.check_grammar_name_in_let_or_const_declarations(&data.name);
         }
 
         false

@@ -44,7 +44,7 @@ impl Program {
         let skip_default_lib = self.options.skip_default_lib_check.is_true();
 
         let checker = self.build_checker_internal(skip_lib, skip_default_lib);
-        let check_diagnostics = checker.get_semantic_diagnostics();
+        let mut check_diagnostics = checker.get_semantic_diagnostics();
 
         let mut diagnostics: Vec<Diagnostic> = if skip_lib {
             self.symbol_map
@@ -73,6 +73,21 @@ impl Program {
         } else {
             self.symbol_map.binder_diagnostics.iter().cloned().collect()
         };
+        if skip_lib {
+            check_diagnostics.retain(|d| {
+                d.file
+                    .as_ref()
+                    .map(|f| !f.is_declaration_file && !is_external_library_file(&f.file_name))
+                    .unwrap_or(true)
+            });
+        } else if skip_default_lib {
+            check_diagnostics.retain(|d| {
+                d.file
+                    .as_ref()
+                    .map(|f| !self.default_library_file_names.contains(&f.file_name))
+                    .unwrap_or(true)
+            });
+        }
         diagnostics.extend(check_diagnostics);
 
         diagnostics.retain(|d| self.includes_semantic_diagnostic(d));
@@ -113,6 +128,16 @@ impl Program {
         let tracer = Arc::new(tsox_checker::checker::Tracer::new());
         let program: Arc<dyn tsox_checker::checker::Program> = Arc::clone(self) as _;
         let mut checker = tsox_checker::checker::Checker::new(program, tracer);
+        for file in &self.source_files {
+            if skip_lib && (file.is_declaration_file || is_external_library_file(&file.file_name)) {
+                continue;
+            }
+
+            if skip_default_lib && self.default_library_file_names.contains(&file.file_name) {
+                continue;
+            }
+            checker.merge_module_augmentations_in_file(file);
+        }
         for file in &self.source_files {
             if skip_lib && (file.is_declaration_file || is_external_library_file(&file.file_name)) {
                 continue;

@@ -5,11 +5,12 @@ use super::*;
 pub(crate) fn extract_reference_types_directives(text: &str) -> Vec<ReferenceTypesDirective> {
     let mut types = Vec::new();
     let mut line_start = 0usize;
-    for line in text.lines() {
+    for raw_line in text.split('\n') {
+        let line = raw_line.strip_suffix('\r').unwrap_or(raw_line);
         let trimmed = line.trim_start();
         let leading = line.len() - trimmed.len();
         let Some(rest) = trimmed.strip_prefix("///") else {
-            line_start += line.len() + 1;
+            line_start += raw_line.len() + 1;
             continue;
         };
 
@@ -53,7 +54,7 @@ pub(crate) fn extract_reference_types_directives(text: &str) -> Vec<ReferenceTyp
                 }
             }
         }
-        line_start += line.len() + 1;
+        line_start += raw_line.len() + 1;
     }
     types
 }

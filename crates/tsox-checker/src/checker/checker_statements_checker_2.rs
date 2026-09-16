@@ -145,7 +145,27 @@ impl Checker {
             return;
         }
         let t = self.get_type_of_node(expression);
-        if t.flags.contains(TypeFlags::Any | TypeFlags::Never) {
+        // Go checkNonNullExpression → reportObjectPossiblyNullOrUndefinedError：
+        // RHS 为 null/undefined 值时报 TS18050，迭代检查按 errorType 短路
+        let nullish_word = match expression.kind {
+            SyntaxKind::NullKeyword => Some("null"),
+            SyntaxKind::UndefinedKeyword => Some("undefined"),
+            SyntaxKind::Identifier if expression.text() == "undefined" => Some("undefined"),
+            _ => None,
+        };
+        if let Some(word) = nullish_word {
+            self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                self.current_file.clone(),
+                expression.loc,
+                tsox_core::diagnostics::messages_generated::THE_VALUE_0_CANNOT_BE_USED_HERE,
+                vec![word.to_string()],
+            ));
+            return;
+        }
+        if t.flags.contains(TypeFlags::Any | TypeFlags::Never)
+            || self.is_error_type(&t)
+            || t.intrinsic_name() == Some("any")
+        {
             return;
         }
         let mut parts: Vec<Arc<Type>> = Vec::new();
@@ -155,10 +175,19 @@ impl Checker {
             parts.push(t.clone());
         }
         for part in &parts {
-            let is_string_like = part
+            // Go 迭代检查经 iteration protocol 落到 base constraint：this 类型与
+            // 带约束的类型参数按约束判定（如 Array<T>.sort(): this）
+            let effective = match &part.data {
+                crate::checker::types::TypeData::TypeParameter(tp) => tp
+                    .constraint
+                    .clone()
+                    .unwrap_or_else(|| Arc::clone(part)),
+                _ => Arc::clone(part),
+            };
+            let is_string_like = effective
                 .flags
                 .intersects(TypeFlags::String | TypeFlags::StringLiteral);
-            if !(self.is_array_type(part) || self.is_tuple_type(part) || is_string_like) {
+            if !(self.is_array_type(&effective) || self.is_tuple_type(&effective) || is_string_like) {
                 let type_str = self.type_to_string(&t);
                 self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
                     self.current_file.clone(),

@@ -460,14 +460,16 @@ fn include_processor_diagnostics_with_missing_file_casing() {
 fn extract_reference_path_directives_resolves_relative() {
     let text = "/// <reference path='./b/3.ts' />\n/// <reference path='/abs/4.ts' />";
     let refs = extract_reference_path_directives(text, "/dev/src2/a/5.ts");
-    assert_eq!(refs, vec!["/dev/src2/a/b/3.ts", "/abs/4.ts"]);
+    let resolved: Vec<&str> = refs.iter().map(|r| r.resolved.as_str()).collect();
+    assert_eq!(resolved, vec!["/dev/src2/a/b/3.ts", "/abs/4.ts"]);
 }
 
 #[test]
 fn extract_reference_path_directives_single_quotes() {
     let text = "/// <reference path='b/3.ts' />";
     let refs = extract_reference_path_directives(text, "/dev/src2/a/5.ts");
-    assert_eq!(refs, vec!["/dev/src2/a/b/3.ts"]);
+    let resolved: Vec<&str> = refs.iter().map(|r| r.resolved.as_str()).collect();
+    assert_eq!(resolved, vec!["/dev/src2/a/b/3.ts"]);
 }
 
 fn parse_bundled_lib(lib_name: &str) -> Vec<tsox_frontend::parser::ParserDiagnostic> {

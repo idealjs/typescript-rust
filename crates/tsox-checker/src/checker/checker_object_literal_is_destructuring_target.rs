@@ -17,6 +17,40 @@ pub(crate) fn object_literal_is_destructuring_target(literal: &Arc<Node>) -> boo
                 ))
         }
         SyntaxKind::ParenthesizedExpression => object_literal_is_destructuring_target(&parent),
+        SyntaxKind::PropertyAssignment => property_assignment_in_target_pattern(&parent),
+        SyntaxKind::ArrayLiteralExpression => array_literal_is_destructuring_target(&parent),
+        _ => false,
+    }
+}
+
+pub(crate) fn array_literal_is_destructuring_target(literal: &Arc<Node>) -> bool {
+    let Some(parent) = literal.parent() else {
+        return false;
+    };
+    match parent.kind {
+        SyntaxKind::ForInStatement | SyntaxKind::ForOfStatement => true,
+        SyntaxKind::BinaryExpression => {
+            matches!(&parent.data, tsox_frontend::ast::NodeData::BinaryExpression(bin)
+            if bin.operator_token.kind == SyntaxKind::EqualsToken
+                && std::ptr::eq(
+                    bin.left.as_ref() as *const Node,
+                    literal.as_ref() as *const Node
+                ))
+        }
+        SyntaxKind::ParenthesizedExpression => array_literal_is_destructuring_target(&parent),
+        SyntaxKind::PropertyAssignment => property_assignment_in_target_pattern(&parent),
+        SyntaxKind::ArrayLiteralExpression => array_literal_is_destructuring_target(&parent),
+        _ => false,
+    }
+}
+
+fn property_assignment_in_target_pattern(pa: &Arc<Node>) -> bool {
+    let Some(lit) = pa.parent() else {
+        return false;
+    };
+    match lit.kind {
+        SyntaxKind::ObjectLiteralExpression => object_literal_is_destructuring_target(&lit),
+        SyntaxKind::ArrayLiteralExpression => array_literal_is_destructuring_target(&lit),
         _ => false,
     }
 }
@@ -37,6 +71,29 @@ pub(crate) fn is_assignment_target(node: &Arc<Node>) -> bool {
             }
         }
         return false;
+    }
+
+    if parent.kind == SyntaxKind::PropertyAssignment {
+        if let tsox_frontend::ast::NodeData::PropertyAssignment(pa) = &parent.data {
+            let is_value_pos =
+                std::ptr::eq(pa.initializer.as_ref() as *const Node, node.as_ref() as *const Node);
+            if is_value_pos
+                && let Some(lit) = parent.parent().as_ref()
+            {
+                return match lit.kind {
+                    SyntaxKind::ObjectLiteralExpression => {
+                        object_literal_is_destructuring_target(lit)
+                    }
+                    SyntaxKind::ArrayLiteralExpression => array_literal_is_destructuring_target(lit),
+                    _ => false,
+                };
+            }
+        }
+        return false;
+    }
+
+    if parent.kind == SyntaxKind::ArrayLiteralExpression {
+        return array_literal_is_destructuring_target(&parent);
     }
 
     if parent.kind == SyntaxKind::ShorthandPropertyAssignment {

@@ -136,7 +136,21 @@ impl Checker {
         }
         self.this_container_stack.pop();
 
+        // tsgo 对生成器不发 TS2355/TS6039（GetFunctionFlags 对函数声明返回
+        // Invalid 的可观察行为：声明返回类型按生成器语义解包后不再走到
+        // must-return 检查），oracle 实证见 corpus-fix-session-2
+        let is_generator = match &node.data {
+            tsox_frontend::ast::NodeData::FunctionDeclaration(d) => d.asterisk_token.is_some(),
+            _ => false,
+        };
         if let Some(ret_type) = &declared_return {
+            if is_generator {
+                self.return_type_stack.pop();
+                self.in_ctor_body_stack.pop();
+                self.break_continue_context_stack.pop();
+                self.pop_function_scope();
+                return;
+            }
             if !ret_type.flags.contains(TypeFlags::Void)
                 && !ret_type.flags.contains(TypeFlags::Undefined)
                 && !ret_type.flags.contains(TypeFlags::Any)

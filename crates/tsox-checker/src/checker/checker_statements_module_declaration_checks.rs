@@ -6,6 +6,46 @@ impl Checker {
     pub fn check_module_declaration(&mut self, node: &Arc<Node>) {
         self.check_grammar_modifiers(node);
 
+        // Go checkModuleDeclaration：global 增强诊断
+        if tsox_frontend::ast::is_global_scope_augmentation(node) {
+            let in_ambient = node.has_syntactic_modifier(ModifierFlags::Ambient)
+                || self.ambient_context_depth > 0
+                || self
+                    .current_file
+                    .as_ref()
+                    .is_some_and(|f| f.is_declaration_file);
+            let name_loc = match &node.data {
+                tsox_frontend::ast::NodeData::ModuleDeclaration(d) => d.name.loc,
+                _ => node.loc,
+            };
+            if !in_ambient {
+                self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                    self.current_file.clone(),
+                    name_loc,
+                    tsox_core::diagnostics::messages_generated::
+                        AUGMENTATIONS_FOR_THE_GLOBAL_SCOPE_SHOULD_HAVE_DECLARE_MODIFIER_UNLESS_THEY_APPEAR_IN_ALREADY_AMBIENT_CONTEXT,
+                    Vec::new(),
+                ));
+            }
+            let file_is_external = self
+                .current_file
+                .as_ref()
+                .is_some_and(|f| f.external_module_indicator.is_some());
+            let parent_is_source_file = node
+                .parent()
+                .as_ref()
+                .is_some_and(|p| p.kind == SyntaxKind::SourceFile);
+            if !parent_is_source_file || !file_is_external {
+                self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                    self.current_file.clone(),
+                    name_loc,
+                    tsox_core::diagnostics::messages_generated::
+                        AUGMENTATIONS_FOR_THE_GLOBAL_SCOPE_CAN_ONLY_BE_DIRECTLY_NESTED_IN_EXTERNAL_MODULES_OR_AMBIENT_MODULE_DECLARATIONS,
+                    Vec::new(),
+                ));
+            }
+        }
+
         if let tsox_frontend::ast::NodeData::ModuleDeclaration(data) = &node.data
             && data.name.kind == SyntaxKind::Identifier
             && !is_valid_identifier_text(data.name.text())

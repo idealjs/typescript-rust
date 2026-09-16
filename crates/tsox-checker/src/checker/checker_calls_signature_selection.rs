@@ -10,7 +10,23 @@ impl Checker {
         is_new: bool,
     ) -> Option<Vec<Arc<Signature>>> {
         let mut union_signatures: Vec<Arc<Signature>> = Vec::new();
-        let signatures: &[Arc<Signature>] = if callee_type.as_union_or_intersection().is_some() {
+        let sig_kind = if is_new {
+            SignatureKind::Construct
+        } else {
+            SignatureKind::Call
+        };
+        let signatures: &[Arc<Signature>] = if callee_type.is_intersection() {
+            // Go getSignaturesOfStructuredType：交集签名 = 各成分签名拼接，
+            // 不可调用的成分（原始类型等）不贡献签名也不阻断
+            for m in callee_type.types().into_iter().flatten() {
+                union_signatures.extend(self.get_signatures_of_type(m, sig_kind));
+            }
+            if union_signatures.is_empty() {
+                self.report_invocation_error(callee_expr, callee_type, is_new);
+                return None;
+            }
+            &union_signatures
+        } else if callee_type.as_union_or_intersection().is_some() {
             let mut leaves: Vec<&Arc<Type>> = Vec::new();
             flatten_union_leaves(callee_type, &mut leaves);
             if is_new {

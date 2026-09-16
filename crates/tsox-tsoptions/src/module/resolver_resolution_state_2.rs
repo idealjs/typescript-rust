@@ -167,7 +167,7 @@ impl<'a> ResolutionState<'a> {
         CONTINUE_SEARCHING
     }
 
-    pub(crate) fn resolve_node_like(mut self) -> ResolvedModule {
+    pub(crate) fn resolve_node_like(&mut self) -> ResolvedModule {
         let result = self.resolve_node_like_worker();
         if result.is_none() {
             if !tsox_core::tspath::is_external_module_name_relative(&self.name)

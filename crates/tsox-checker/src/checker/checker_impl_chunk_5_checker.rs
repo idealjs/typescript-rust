@@ -170,6 +170,16 @@ impl Checker {
         t: &Arc<Type>,
         kind: SignatureKind,
     ) -> Vec<Arc<Signature>> {
+        // Go resolveStructuredTypeMembers：交集的签名 = 各成分签名拼接
+        if t.is_intersection()
+            && let Some(types) = t.types()
+        {
+            let mut all = Vec::new();
+            for m in types {
+                all.extend(self.get_signatures_of_type(m, kind));
+            }
+            return all;
+        }
         if let Some(structured) = t.as_structured() {
             return match kind {
                 SignatureKind::Call => structured.call_signatures().to_vec(),

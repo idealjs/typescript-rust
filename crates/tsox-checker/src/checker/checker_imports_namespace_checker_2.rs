@@ -188,7 +188,9 @@ impl Checker {
         base_module: &Arc<Symbol>,
         specifier: &str,
     ) -> Option<Arc<Symbol>> {
-        if !specifier.starts_with('.') {
+        // tspath isExternalModuleNameRelative 语义：仅 ./ ../ 开头是相对路径，
+        // `.prisma/client` 这类点前缀包名走 node_modules 解析
+        if !specifier.starts_with("./") && !specifier.starts_with("../") {
             return self.resolve_module_file_symbol(specifier);
         }
         let dir = base_module

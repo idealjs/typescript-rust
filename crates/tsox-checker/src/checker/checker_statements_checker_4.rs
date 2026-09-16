@@ -4,6 +4,7 @@ use crate::checker::checker_statements::*;
 
 impl Checker {
     pub(crate) fn check_variable_declaration(&mut self, node: &Arc<Node>) {
+        self.check_grammar_variable_declaration(node);
         if let tsox_frontend::ast::NodeData::VariableDeclaration(data) = &node.data {
             if data.initializer.is_none() {
                 let is_const = node
@@ -104,6 +105,35 @@ impl Checker {
                             ));
                         }
                     }
+                }
+            }
+
+            // Go checkVariableLikeDeclaration：数组 binding pattern 无命名元素时按
+            // widened 类型做迭代检查，元素类型为 never 报 TS2488；ambient 上下文跳过
+            let in_ambient = self.ambient_context_depth > 0 || node.flags.contains(NodeFlags::Ambient);
+            if !in_ambient && data.name.kind == SyntaxKind::ArrayBindingPattern {
+                let has_named_element = match &data.name.data {
+                    tsox_frontend::ast::NodeData::BindingPattern(bp) => bp
+                        .elements
+                        .nodes
+                        .iter()
+                        .any(|e| {
+                            matches!(&e.data, tsox_frontend::ast::NodeData::BindingElement(be) if be.name.is_some())
+                        }),
+                    _ => false,
+                };
+                if !has_named_element
+                    && let Some(widened) = self.initial_type_of_declaration(node)
+                    && widened.flags.contains(TypeFlags::Never)
+                {
+                    let type_str = self.type_to_string(&widened);
+                    self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                        self.current_file.clone(),
+                        data.name.loc,
+                        tsox_core::diagnostics::messages_generated::
+                            TYPE_0_MUST_HAVE_A_SYMBOL_ITERATOR_METHOD_THAT_RETURNS_AN_ITERATOR,
+                        vec![type_str],
+                    ));
                 }
             }
 

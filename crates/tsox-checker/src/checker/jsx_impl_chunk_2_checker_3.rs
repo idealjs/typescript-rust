@@ -12,17 +12,39 @@ impl Checker {
 
     pub fn get_jsx_element_children_property_name(
         &self,
-        _jsx_namespace: &Arc<tsox_frontend::ast::Symbol>,
+        jsx_namespace: &Arc<tsox_frontend::ast::Symbol>,
     ) -> Option<String> {
-        None
+        // Go getJsxElementChildrenPropertyName：react-jsx 模式固定 'children'
+        if matches!(
+            self.compiler_options.jsx,
+            tsox_core::core::compiler_options::JsxEmit::ReactJSX
+                | tsox_core::core::compiler_options::JsxEmit::ReactJSXDev
+        ) {
+            return Some("children".to_string());
+        }
+        self.get_name_from_jsx_element_attributes_container(
+            crate::checker::jsx_impl_chunk::JsxNames::ELEMENT_CHILDREN_ATTRIBUTE_NAME_CONTAINER,
+            jsx_namespace,
+        )
     }
 
     pub fn get_name_from_jsx_element_attributes_container(
         &self,
-        _name_of_attrib_prop_container: &str,
-        _jsx_namespace: &Arc<tsox_frontend::ast::Symbol>,
+        name_of_attrib_prop_container: &str,
+        jsx_namespace: &Arc<tsox_frontend::ast::Symbol>,
     ) -> Option<String> {
-        None
+        // Go getNameFromJsxElementAttributesContainer：JSX 命名空间导出的
+        // 容器接口（ElementChildrenAttribute 等）的唯一成员名
+        let container = jsx_namespace
+            .exports
+            .get(name_of_attrib_prop_container)
+            .or_else(|| jsx_namespace.members.get(name_of_attrib_prop_container))?;
+        let mut names = container.members.entries.keys().cloned();
+        let first = names.next()?;
+        if names.next().is_some() {
+            return None;
+        }
+        Some(first)
     }
 
     pub fn get_static_type_of_referenced_jsx_constructor(

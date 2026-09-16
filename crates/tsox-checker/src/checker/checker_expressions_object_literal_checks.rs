@@ -52,9 +52,12 @@ impl Checker {
                                 _ => Arc::clone(name_node),
                             };
                             match expr.kind {
-                                SyntaxKind::NumericLiteral
-                                | SyntaxKind::StringLiteral
-                                | SyntaxKind::Identifier => expr.text().to_string(),
+                                // Go getEffectivePropertyNameForPropertyNameNode：
+                                // 普通标识符计算键类型非字面量/唯一符号时不可静态定名，
+                                // 不参与重复名检测
+                                SyntaxKind::NumericLiteral | SyntaxKind::StringLiteral => {
+                                    expr.text().to_string()
+                                }
                                 SyntaxKind::PrefixUnaryExpression => {
                                     let tsox_frontend::ast::NodeData::PrefixUnaryExpression(u) =
                                         &expr.data

@@ -211,16 +211,16 @@ impl Checker {
 
         let symbol_map = self.program.symbol_map();
         if let Some(sym) = symbol_map.symbol_of(node) {
-            let eq = Arc::ptr_eq(sym, symbol);
-            return eq;
+            if Arc::ptr_eq(sym, symbol) {
+                return true;
+            }
         }
 
         let node_name = match &node.data {
             NodeData::Identifier(data) => &data.text,
             _ => return false,
         };
-        let eq = node_name == &symbol.name;
-        eq
+        node_name == &symbol.name
     }
 
     pub(crate) fn expr_matches_target(&self, node: &Arc<Node>, target: &FlowRef) -> bool {

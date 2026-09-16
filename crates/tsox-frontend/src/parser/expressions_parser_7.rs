@@ -130,7 +130,16 @@ impl Parser {
                 TextRange::new(pos, end),
             ))
         } else {
-            let end = name.end();
+            let equals_token = self.parse_optional_token(SyntaxKind::EqualsToken);
+            let object_assignment_initializer = if equals_token.is_some() {
+                Some(self.parse_assignment_expression())
+            } else {
+                None
+            };
+            let end = object_assignment_initializer
+                .as_ref()
+                .map(|e| e.end())
+                .unwrap_or_else(|| name.end());
             Arc::new(Node::with_loc(
                 SyntaxKind::ShorthandPropertyAssignment,
                 NodeData::ShorthandPropertyAssignment(ShorthandPropertyAssignmentData {
@@ -142,8 +151,8 @@ impl Parser {
                         NodeData::Token,
                         TextRange::new(end, end),
                     )),
-                    equals_token: None,
-                    object_assignment_initializer: None,
+                    equals_token,
+                    object_assignment_initializer,
                 }),
                 TextRange::new(pos, end),
             ))

@@ -16,6 +16,9 @@ pub struct ParsedCase {
     pub settings: HashMap<String, String>,
 
     pub current_directory: Option<String>,
+
+    /// `// @symlink: p1,p2`（Go 语义：link 路径 → 出现处的当前 unit 文件）
+    pub symlinks: Vec<(String, String)>,
 }
 
 fn parse_directive_line(line: &str) -> Option<(&str, &str)> {
@@ -77,6 +80,7 @@ pub fn split_units(content: &str, default_name: &str) -> ParsedCase {
 
     let mut current_name: Option<String> = None;
     let mut current_body = String::new();
+    let mut symlinks: Vec<(String, String)> = Vec::new();
 
     let flush = |units: &mut Vec<TestUnit>, name: &mut Option<String>, body: &mut String| {
         if let Some(n) = name.take() {
@@ -103,6 +107,16 @@ pub fn split_units(content: &str, default_name: &str) -> ParsedCase {
                 }
                 "currentdirectory" => {
                     current_directory = Some(value.to_string());
+                }
+                "symlink" => {
+                    if let Some(n) = &current_name {
+                        for link in value.split(',') {
+                            let link = link.trim();
+                            if !link.is_empty() {
+                                symlinks.push((link.to_string(), n.clone()));
+                            }
+                        }
+                    }
                 }
                 _ => {
 
@@ -148,6 +162,7 @@ pub fn split_units(content: &str, default_name: &str) -> ParsedCase {
         units,
         settings,
         current_directory,
+        symlinks,
     }
 }
 
