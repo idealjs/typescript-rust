@@ -486,7 +486,7 @@ impl Checker {
         // Go getSuggestedImportExtension：按存在性探测建议扩展名（.mts→.mjs、
         // .ts→.js、.cts→.cjs、原生 .mjs/.js/.cjs、.tsx→.jsx(preserve)/.js）
         let dir = tsox_core::tspath::get_directory_path(&file.file_name);
-        let absolute = tsox_core::tspath::combine_paths(&dir, &[&text]);
+        let absolute = tsox_core::tspath::get_normalized_absolute_path(&text, &dir);
         let exists = |ext: &str| self.program.read_file(&format!("{absolute}{ext}")).is_some();
         let suggested = if exists(".mts") {
             Some(".mjs")
@@ -528,6 +528,86 @@ impl Checker {
             None => tsox_frontend::ast::Diagnostic::new(
                 file,
                 spec.loc,
+                tsox_core::diagnostics::messages_generated::
+                    RELATIVE_IMPORT_PATHS_NEED_EXPLICIT_FILE_EXTENSIONS_IN_ECMASCRIPT_IMPORTS_WHEN_MODULERESOLUTION_IS_NODE16_OR_NODENEXT_CONSIDER_ADDING_AN_EXTENSION_TO_THE_IMPORT_PATH,
+                vec![],
+            ),
+        };
+        self.diagnostics.add(message);
+    }
+
+    /// 动态 import() 恒以 ESM 模式解析（含 CJS 文件内），node16+ 下相对
+    /// 无扩展名说明符同样报 TS2835/TS2834
+    pub(crate) fn check_dynamic_import_extension_rules(&mut self, node: &Arc<Node>) {
+        use tsox_core::core::compiler_options::ModuleKind;
+        let NodeData::CallExpression(call) = &node.data else {
+            return;
+        };
+        if call.expression.kind != SyntaxKind::ImportKeyword {
+            return;
+        }
+        let Some(arg0) = call.arguments.nodes.first() else {
+            return;
+        };
+        if arg0.kind != SyntaxKind::StringLiteral {
+            return;
+        }
+        let text = arg0.text();
+        if !(text.starts_with("./") || text.starts_with("../")) {
+            return;
+        }
+        if tsox_core::tspath::has_extension(&text) {
+            return;
+        }
+        if !matches!(
+            self.compiler_options.module,
+            ModuleKind::Node16 | ModuleKind::Node18 | ModuleKind::Node20 | ModuleKind::NodeNext
+        ) {
+            return;
+        }
+        let Some(file) = self.current_file.clone() else { return };
+        let dir = tsox_core::tspath::get_directory_path(&file.file_name);
+        let absolute = tsox_core::tspath::get_normalized_absolute_path(&text, &dir);
+        let exists = |ext: &str| self.program.read_file(&format!("{absolute}{ext}")).is_some();
+        let suggested = if exists(".mts") {
+            Some(".mjs")
+        } else if exists(".ts") {
+            Some(".js")
+        } else if exists(".cts") {
+            Some(".cjs")
+        } else if exists(".mjs") {
+            Some(".mjs")
+        } else if exists(".js") {
+            Some(".js")
+        } else if exists(".cjs") {
+            Some(".cjs")
+        } else if exists(".tsx") {
+            Some(if self.compiler_options.jsx == tsox_core::core::compiler_options::JsxEmit::Preserve {
+                ".jsx"
+            } else {
+                ".js"
+            })
+        } else if exists(".jsx") {
+            Some(".jsx")
+        } else if exists(".json") {
+            Some(".json")
+        } else {
+            None
+        };
+        let message = match suggested {
+            Some(ext) => {
+                let args = vec![format!("{text}{ext}")];
+                tsox_frontend::ast::Diagnostic::new(
+                    Some(file),
+                    arg0.loc,
+                    tsox_core::diagnostics::messages_generated::
+                        RELATIVE_IMPORT_PATHS_NEED_EXPLICIT_FILE_EXTENSIONS_IN_ECMASCRIPT_IMPORTS_WHEN_MODULERESOLUTION_IS_NODE16_OR_NODENEXT_DID_YOU_MEAN_0,
+                    args,
+                )
+            }
+            None => tsox_frontend::ast::Diagnostic::new(
+                Some(file),
+                arg0.loc,
                 tsox_core::diagnostics::messages_generated::
                     RELATIVE_IMPORT_PATHS_NEED_EXPLICIT_FILE_EXTENSIONS_IN_ECMASCRIPT_IMPORTS_WHEN_MODULERESOLUTION_IS_NODE16_OR_NODENEXT_CONSIDER_ADDING_AN_EXTENSION_TO_THE_IMPORT_PATH,
                 vec![],

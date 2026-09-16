@@ -14,7 +14,11 @@ pub(crate) mod reparse_await;
 pub(crate) mod reparser;
 
 pub use jsdoc::{parse_jsdoc_comment_range, parse_jsdoc_for_node};
-pub use references::{collect_external_module_references, set_external_module_indicator};
+pub use references::{
+    cannot_resolve_module_error, collect_external_module_references,
+    set_external_module_indicator, EXCLUSIVELY_PREFIXED_NODE_CORE_MODULES,
+    UNPREFIXED_NODE_CORE_MODULES,
+};
 pub use reparser::reparse_tags;
 
 pub(crate) use crate::ast::*;

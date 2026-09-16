@@ -8,7 +8,7 @@ use tsox_frontend::ast::SyntaxKind;
 use crate::checker::checker::*;
 
 impl Checker {
-    fn op_display(kind: tsox_frontend::ast::SyntaxKind) -> &'static str {
+    pub(crate) fn op_display(kind: tsox_frontend::ast::SyntaxKind) -> &'static str {
         use tsox_frontend::ast::SyntaxKind::*;
         match kind {
             AsteriskToken => "*",
@@ -35,6 +35,10 @@ impl Checker {
             CaretEqualsToken => "^=",
             AmpersandToken => "&",
             AmpersandEqualsToken => "&=",
+            LessThanToken => "<",
+            GreaterThanToken => ">",
+            LessThanEqualsToken => "<=",
+            GreaterThanEqualsToken => ">=",
             _ => "?",
         }
     }
@@ -90,6 +94,18 @@ impl Checker {
         let plus = op == PlusToken || op == PlusEqualsToken;
         if !arith_nonplus && !plus {
             return;
+        }
+        // Go plus 分支：任一操作数 string-like 可赋值（非 strict 下含
+        // null/undefined）时跳过 checkNonNullType，18050 不报
+        if plus {
+            let lt = self.get_type_of_node(&data.left);
+            let rt = self.get_type_of_node(&data.right);
+            let s = self.string_type();
+            let skip = self.is_type_assignable_to(&lt, &s)
+                || self.is_type_assignable_to(&rt, &s);
+            if skip {
+                return;
+            }
         }
         for operand in [&data.left, &data.right] {
             if matches!(operand.kind, NullKeyword | UndefinedKeyword) {
@@ -191,8 +207,7 @@ impl Checker {
             .unwrap_or_else(|| self.get_type_of_node(&data.left));
         let rt = self.get_type_of_node(&data.right);
         let number_like = |t: &Arc<Type>| {
-            (!self.strict_null_checks && t.flags.intersects(TypeFlags::Undefined | TypeFlags::Null))
-                || t.flags.contains(TypeFlags::Never)
+            t.flags.contains(TypeFlags::Never)
                 || t.flags.intersects(
                     TypeFlags::Number
                         | TypeFlags::NumberLiteral

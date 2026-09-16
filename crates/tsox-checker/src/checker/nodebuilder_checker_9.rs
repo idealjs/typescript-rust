@@ -118,7 +118,19 @@ impl Checker {
             let readonly = prop
                 .check_flags
                 .contains(tsox_frontend::ast::CheckFlags::Readonly);
-            if prop.flags.contains(SymbolFlags::Optional) {
+            let method_suffix = if use_placeholder {
+                None
+            } else {
+                self.method_form_suffix(prop, &prop_type, flags)
+            };
+            if let Some(suffix) = method_suffix {
+                let ro = if readonly { "readonly " } else { "" };
+                if prop.flags.contains(SymbolFlags::Optional) {
+                    parts.push(format!("{ro}{}?{suffix}", name));
+                } else {
+                    parts.push(format!("{ro}{}{suffix}", name));
+                }
+            } else if prop.flags.contains(SymbolFlags::Optional) {
                 let ro = if readonly { "readonly " } else { "" };
                 parts.push(format!("{ro}{}?: {}", name, type_str));
             } else if readonly {
@@ -486,6 +498,9 @@ impl Checker {
         flags: TypeFormatFlags,
     ) -> String {
         if sym.flags.contains(SymbolFlags::ENUM) {
+            if matches!(&t.data, TypeData::Object(_)) {
+                return format!("typeof {}", sym.name);
+            }
             return sym.name.clone();
         }
 
@@ -647,5 +662,64 @@ impl Checker {
 
     pub fn type_to_type_node(&mut self, t: &Arc<Type>) -> Arc<Node> {
         self.type_to_type_node_worker(t)
+    }
+
+    // 方法形态：声明为 MethodSignature/MethodDeclaration 且类型为裸函数时，
+    // 按方法签名渲染（Go addPropertyToElement 的 FunctionTypeNode 分支）
+    pub(crate) fn method_form_suffix(
+        &mut self,
+        prop: &Arc<Symbol>,
+        prop_type: &Arc<Type>,
+        flags: TypeFormatFlags,
+    ) -> Option<String> {
+        if !prop.declarations.iter().any(|d| {
+            matches!(
+                d.kind,
+                SyntaxKind::MethodSignature | SyntaxKind::MethodDeclaration
+            )
+        }) {
+            return None;
+        }
+        let st = prop_type.as_structured()?;
+        if st.signatures.len() != 1
+            || !st.properties.is_empty()
+            || !st.index_infos.is_empty()
+            || prop_type.symbol.is_some()
+        {
+            return None;
+        }
+        let sig = &st.signatures[0];
+        let params: Vec<String> = sig
+            .parameters
+            .iter()
+            .enumerate()
+            .map(|(i, param)| {
+                let param_type = self
+                    .signature_instantiated_param_type(sig, i)
+                    .unwrap_or_else(|| self.get_type_of_symbol(param));
+                let type_str = self.type_to_string_ex(&param_type, flags);
+                let prefix = if i + 1 == sig.parameters.len() && sig.has_rest_parameter() {
+                    "..."
+                } else {
+                    ""
+                };
+                if param
+                    .flags
+                    .contains(tsox_frontend::ast::SymbolFlags::Optional)
+                {
+                    format!("{prefix}{}?: {}", param.name, type_str)
+                } else {
+                    format!("{prefix}{}: {}", param.name, type_str)
+                }
+            })
+            .collect();
+        let ret_type = sig
+            .resolved_return_type
+            .get()
+            .cloned()
+            .unwrap_or_else(|| self.any_type());
+        let ret_str = self.type_to_string_ex(&ret_type, flags);
+        let tp = self.signature_type_param_prefix(sig);
+        Some(format!("{tp}({}): {}", params.join(", "), ret_str))
     }
 }

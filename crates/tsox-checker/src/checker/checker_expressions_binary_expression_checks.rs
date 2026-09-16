@@ -70,6 +70,7 @@ impl Checker {
                 None => self.check_expression(&data.right),
             }
             self.check_binary_plus_operator_error(node, data);
+            self.check_binary_relational_operator_error(node, data);
             use tsox_frontend::ast::SyntaxKind::*;
 
             if data.operator_token.kind == EqualsToken

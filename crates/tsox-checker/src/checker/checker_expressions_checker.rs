@@ -39,6 +39,7 @@ impl Checker {
                         data.operator,
                         SyntaxKind::PlusPlusToken | SyntaxKind::MinusMinusToken
                     ) {
+                        self.check_unary_arithmetic_operand(&data.operand);
                         self.check_const_assignment_target(&data.operand);
                     }
                 }
@@ -50,6 +51,7 @@ impl Checker {
                         data.operator,
                         SyntaxKind::PlusPlusToken | SyntaxKind::MinusMinusToken
                     ) {
+                        self.check_unary_arithmetic_operand(&data.operand);
                         self.check_const_assignment_target(&data.operand);
                     }
                 }
@@ -83,6 +85,7 @@ impl Checker {
                     }
                 }
                 self.check_call_arguments(node, false);
+                self.check_dynamic_import_extension_rules(node);
             }
             SyntaxKind::NewExpression => {
                 self.check_new_expression(node);

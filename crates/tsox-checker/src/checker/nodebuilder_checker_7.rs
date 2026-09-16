@@ -34,6 +34,17 @@ impl Checker {
             return name.to_string();
         }
 
+        if t.flags.contains(TypeFlags::EnumLiteral)
+            && !t.is_union()
+            && let Some(sym) = &t.symbol
+            && sym
+                .flags
+                .intersects(tsox_frontend::ast::SymbolFlags::EnumMember)
+            && let Some(parent) = sym.parent()
+        {
+            return format!("{}.{}", parent.name, sym.name);
+        }
+
         if let Some(val) = t.literal_value() {
             return self.literal_value_to_string(val);
         }
@@ -49,6 +60,13 @@ impl Checker {
 
         if t.flags.contains(TypeFlags::Never) {
             return "never".to_string();
+        }
+
+        if t.is_union()
+            && let Some(sym) = &t.symbol
+            && sym.flags.intersects(tsox_frontend::ast::SymbolFlags::ENUM)
+        {
+            return sym.name.clone();
         }
 
         if t.is_union() {

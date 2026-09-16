@@ -105,7 +105,9 @@ pub(crate) fn cached_parse(
     if !tsox_checker::bundled::is_bundled(file_name) {
         let (file, diags) =
             Parser::parse_source_file_text_with_diagnostics(file_name, text.to_string());
-        return (Arc::new(file), diags);
+        let file = Arc::new(file);
+        tsox_checker::binder::wire_parent_pointers(&file);
+        return (file, diags);
     }
     static CACHE: std::sync::OnceLock<
         Mutex<
@@ -131,6 +133,7 @@ pub(crate) fn cached_parse(
     let (file, diags) =
         Parser::parse_source_file_text_with_diagnostics(file_name, text.to_string());
     let file = Arc::new(file);
+    tsox_checker::binder::wire_parent_pointers(&file);
     cache
         .lock()
         .unwrap()

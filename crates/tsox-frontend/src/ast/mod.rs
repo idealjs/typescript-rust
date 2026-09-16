@@ -11,6 +11,8 @@ pub mod syntax_kind_generated;
 pub mod utilities;
 
 pub use diagnostic::*;
+pub mod dynamic_imports;
+pub use dynamic_imports::*;
 pub use node::*;
 pub use node_data_generated::*;
 pub use node_flags::*;

@@ -33,11 +33,26 @@ impl Checker {
         let s = source.flags;
         let t = target.flags;
 
+        // 可比性 carve-out：两个裸类型参数互比仅当一方约束是类型参数
+        // （Go relater target TypeParameter 分支的 comparable 特例）
+        if relation == RelationKind::Comparable
+            && s.contains(TypeFlags::TypeParameter)
+            && t.contains(TypeFlags::TypeParameter)
+        {
+            if let Some(constraint) = self.get_constraint_of_type_parameter(source)
+                && some_type_is_type_parameter(&constraint)
+            {
+                return self.is_type_related_to(&constraint, target, relation);
+            }
+            return false;
+        }
+
         if s.contains(TypeFlags::TypeParameter) {
-            if let Some(constraint) = self.get_constraint_of_type_parameter(source) {
-                if self.is_type_related_to(&constraint, target, relation) {
-                    return true;
-                }
+            let constraint = self
+                .get_constraint_of_type_parameter(source)
+                .unwrap_or_else(|| self.unknown_type());
+            if self.is_type_related_to(&constraint, target, relation) {
+                return true;
             }
         }
 
@@ -271,4 +286,15 @@ impl Checker {
         let target_elem = &target_args[0];
         self.is_type_related_to(source_elem, target_elem, relation)
     }
+}
+
+fn some_type_is_type_parameter(t: &Arc<Type>) -> bool {
+    if let TypeData::Union(u) = &t.data {
+        return u
+            .union_or_intersection
+            .types
+            .iter()
+            .any(|m| m.flags.contains(TypeFlags::TypeParameter));
+    }
+    t.flags.contains(TypeFlags::TypeParameter)
 }

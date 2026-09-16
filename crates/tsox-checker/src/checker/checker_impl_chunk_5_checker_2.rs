@@ -89,7 +89,8 @@ impl Checker {
             let b = t.flags.bits();
             b & b.wrapping_neg()
         });
-        Arc::new(Type::new(
+        let enum_symbol = crate::checker::typenode_constructors_checker::uniform_enum_symbol(&seen);
+        let mut union = Type::new(
             TypeFlags::Union,
             TypeData::Union(UnionTypeData {
                 union_or_intersection: UnionOrIntersectionTypeData {
@@ -102,7 +103,9 @@ impl Checker {
                 key_property_name: None,
                 constituent_map: HashMap::new(),
             }),
-        ))
+        );
+        union.symbol = enum_symbol;
+        Arc::new(union)
     }
 
     pub fn get_constraint_of_type_parameter(&self, t: &Arc<Type>) -> Option<Arc<Type>> {

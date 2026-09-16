@@ -116,10 +116,13 @@ impl Checker {
         let NodeData::ImportTypeNode(d) = &node.data else {
             return placeholder;
         };
-        if let Some(attrs) = &d.attributes {
+        let resolution_mode = if let Some(attrs) = &d.attributes {
             let attrs = Arc::clone(attrs);
-            let _ = self.get_resolution_mode_override(&attrs, true);
+            self.get_resolution_mode_override(&attrs, true)
+        } else {
+            None
         }
+        .unwrap_or(tsox_core::core::compiler_options::ModuleKind::None);
         let Some(argument_text) = import_type_argument_text(&d.argument) else {
             let file = self
                 .get_source_file_of_node(node)
@@ -137,17 +140,18 @@ impl Checker {
         } else {
             SymbolFlags::TYPE
         };
-        let inner_module = self.resolve_import_type_module(&argument_text, node);
+        let inner_module = self.resolve_import_type_module(&argument_text, node, resolution_mode);
         let Some(inner_module) = inner_module else {
             let file = self
                 .get_source_file_of_node(node)
                 .or_else(|| self.current_file.clone());
+            let (message, args) =
+                tsox_frontend::parser::cannot_resolve_module_error(&self.compiler_options, &argument_text);
             self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
                 file,
                 d.argument.loc,
-                tsox_core::diagnostics::messages_generated::
-                    CANNOT_FIND_MODULE_0_OR_ITS_CORRESPONDING_TYPE_DECLARATIONS,
-                vec![argument_text],
+                *message,
+                args,
             ));
             return placeholder;
         };
@@ -225,14 +229,26 @@ impl Checker {
     }
 
     /// 模块说明符解析：常规检查流程用 current_file，补全路径（current_file
-    /// 为空）按 location 节点所属文件算相对目录，非相对说明符走 ambient 枚举
+    /// 为空）按 location 节点所属文件算相对目录，非相对说明符走 ambient 枚举。
+    /// 非相对说明符先经 program 的 node_modules 解析（package.json exports/条件），
+    /// 未命中再走 ambient/索引回退
     fn resolve_import_type_module(
         &self,
         specifier: &str,
         location: &Arc<Node>,
+        resolution_mode: tsox_core::core::compiler_options::ModuleKind,
     ) -> Option<Arc<Symbol>> {
+        let program_symbol = |containing: &str| -> Option<Arc<Symbol>> {
+            self.program
+                .resolve_external_module_path(specifier, containing, resolution_mode)
+                .and_then(|path| {
+                    let sf = self.program.get_source_file(&path)?;
+                    self.program.symbol_map().symbol_of(&sf.node).cloned()
+                })
+        };
         if self.current_file.is_some() {
-            return self.resolve_module_file_symbol(specifier);
+            return program_symbol(&self.current_file.as_ref().unwrap().file_name)
+                .or_else(|| self.resolve_module_file_symbol(specifier));
         }
         let file = self.get_source_file_of_node(location);
         file.and_then(|f| {
@@ -240,7 +256,8 @@ impl Checker {
                 Some(i) => f.file_name[..i].to_string(),
                 None => String::new(),
             };
-            self.resolve_module_file_symbol_in(&dir, specifier)
+            program_symbol(&f.file_name)
+                .or_else(|| self.resolve_module_file_symbol_in(&dir, specifier))
         })
         .or_else(|| self.resolve_module_file_symbol(specifier))
     }
@@ -383,7 +400,13 @@ impl Checker {
             SymbolFlags::TYPE
         };
         // 补全路径下 current_file 为空：相对说明符按 ImportType 所属文件算目录
-        let inner_module = self.resolve_import_type_module(&argument_text, &import_node);
+        let resolution_mode = d
+            .attributes
+            .as_ref()
+            .and_then(|attrs| self.get_resolution_mode_override(attrs, false))
+            .unwrap_or(tsox_core::core::compiler_options::ModuleKind::None);
+        let inner_module =
+            self.resolve_import_type_module(&argument_text, &import_node, resolution_mode);
         let Some(inner_module) = inner_module else {
             return None;
         };

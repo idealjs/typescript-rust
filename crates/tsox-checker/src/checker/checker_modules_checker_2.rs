@@ -104,10 +104,14 @@ impl Checker {
             return;
         }
         let read = |p: &str| self.program.read_file(p);
+        // Go checkImportDeclaration 按 getModeForUsageLocation 取模式；
+        // attrs 覆盖已在上方早退，这里用当前文件的默认解析格式
+        let resolution_mode =
+            tsox_tsoptions::tsoptions::implied_node_format_of_file(&file.file_name, &read);
         let target_path = match self.program.resolve_external_module_path(
             &spec_text,
             &file.file_name,
-            ModuleKind::None,
+            resolution_mode,
         ) {
             Some(p) => p,
             None => return,

@@ -139,7 +139,17 @@ impl Checker {
         } else {
             Arc::clone(&obj_type)
         };
-        let type_str = self.type_to_string(&display_type);
+        let mut type_str = self.type_to_string(&display_type);
+        if display_type
+            .symbol
+            .as_ref()
+            .is_some_and(|s| s.flags.intersects(tsox_frontend::ast::SymbolFlags::ENUM))
+        {
+            type_str = format!(
+                "typeof {}",
+                display_type.symbol.as_ref().unwrap().name
+            );
+        }
 
         let suggestion = display_type.as_structured().and_then(|st| {
             let rune_len = name_text.chars().count();

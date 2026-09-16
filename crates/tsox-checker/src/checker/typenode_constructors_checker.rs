@@ -96,7 +96,9 @@ impl Checker {
         if flattened.len() == 1 {
             return flattened.into_iter().next().expect("exactly one");
         }
-        Arc::new(Type::new(
+        // 全体成员都是同一枚举的字面量时，联合型挂枚举符号（消息渲染按符号名）
+        let enum_symbol = uniform_enum_symbol(&flattened);
+        let mut union = Type::new(
             TypeFlags::Union,
             TypeData::Union(UnionTypeData {
                 union_or_intersection: UnionOrIntersectionTypeData {
@@ -109,7 +111,9 @@ impl Checker {
                 key_property_name: None,
                 constituent_map: HashMap::new(),
             }),
-        ))
+        );
+        union.symbol = enum_symbol;
+        Arc::new(union)
     }
 
     pub(crate) fn get_intersection_type(&mut self, types: Vec<Arc<Type>>) -> Arc<Type> {
@@ -335,4 +339,29 @@ impl Checker {
             .as_structured()
             .and_then(|s| s.members.get(member).cloned())
     }
+}
+
+pub(crate) fn uniform_enum_symbol(types: &[Arc<Type>]) -> Option<Arc<Symbol>> {
+    let mut parent: Option<Arc<Symbol>> = None;
+    let uniform = !types.is_empty() && types.iter().all(|t| {
+        let Some(sym) = t
+            .flags
+            .intersects(TypeFlags::EnumLiteral)
+            .then(|| t.symbol.clone())
+            .flatten()
+        else {
+            return false;
+        };
+        let Some(p) = sym.parent() else {
+            return false;
+        };
+        match &parent {
+            None => {
+                parent = Some(Arc::clone(&p));
+                true
+            }
+            Some(prev) => Arc::ptr_eq(&p, prev),
+        }
+    });
+    uniform.then_some(parent).flatten()
 }

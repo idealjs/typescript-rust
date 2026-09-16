@@ -53,7 +53,11 @@ impl Checker {
         }
 
         let declared_type = self.get_type_of_symbol(symbol);
-        if declared_type.flags.contains(TypeFlags::Any) || type_contains_undefined(&declared_type) {
+        if declared_type
+            .flags
+            .intersects(TypeFlags::Any | TypeFlags::Unknown | TypeFlags::Void)
+            || type_contains_undefined(&declared_type)
+        {
             return;
         }
 

@@ -107,6 +107,35 @@ impl Checker {
             }
         }
 
+        if let Some(sym) = obj_type
+            .symbol
+            .as_ref()
+            .filter(|s| s.flags.intersects(tsox_frontend::ast::SymbolFlags::ENUM))
+            .map(Arc::clone)
+        {
+            let all_string_members = !sym.members.is_empty()
+                && sym.members.entries.values().all(|m| {
+                    m.declarations.iter().all(|d| {
+                        matches!(
+                            &d.data,
+                            tsox_frontend::ast::NodeData::EnumMember(em)
+                                if em.initializer.as_ref().is_some_and(|init| {
+                                    init.kind == SyntaxKind::StringLiteral
+                                })
+                        )
+                    })
+                });
+            let arg_is_number = matches!(arg_expr.kind, SyntaxKind::NumericLiteral)
+                || self
+                    .get_type_of_node(arg_expr)
+                    .flags
+                    .intersects(TypeFlags::Number | TypeFlags::NumberLiteral | TypeFlags::EnumLiteral);
+            if arg_is_number && !all_string_members {
+                let s = self.string_type();
+                return self.flow_type_of_access_expression(node, None, s);
+            }
+        }
+
         if let Some(structured) = obj_type.as_structured() {
             for info in &structured.index_infos {
                 if let Some(key_type) = &info.key_type {

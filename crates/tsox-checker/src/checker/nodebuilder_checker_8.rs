@@ -255,12 +255,19 @@ impl Checker {
         structured: &StructuredTypeData,
         flags: TypeFormatFlags,
     ) -> String {
+        let new_prefix;
         let sigs = structured.call_signatures();
-        if sigs.is_empty() {
-            return "() => unknown".to_string();
-        }
-
-        let sig = &sigs[0];
+        let sig = if sigs.is_empty() {
+            let ctors = structured.construct_signatures();
+            if ctors.is_empty() {
+                return "() => unknown".to_string();
+            }
+            new_prefix = "new ";
+            &ctors[0]
+        } else {
+            new_prefix = "";
+            &sigs[0]
+        };
         // Go getExpandedParameters：末参是 rest 且其类型为元组时，按元组
         // 元素展开为具名参数序列（标签取元素 label，回退 rest 符号名_i）
         let expanded_params = self.tuple_expanded_params(sig);
@@ -311,7 +318,7 @@ impl Checker {
         let ret_str = self.type_to_string_ex(&ret_type, flags);
 
         let tp_prefix = self.signature_type_param_prefix(sig);
-        format!("{tp_prefix}({}) => {}", params.join(", "), ret_str)
+        format!("{new_prefix}{tp_prefix}({}) => {}", params.join(", "), ret_str)
     }
 
     pub(crate) fn signature_type_param_prefix(&self, sig: &Arc<Signature>) -> String {

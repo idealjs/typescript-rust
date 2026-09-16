@@ -193,6 +193,10 @@ impl Checker {
             return stripped;
         }
 
+        if self.is_undefined_symbol(&symbol) {
+            return self.undefined_type();
+        }
+
         let value_type = self
             .value_symbol_links
             .get(&symbol)

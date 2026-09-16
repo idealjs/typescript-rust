@@ -67,7 +67,26 @@ impl Binder {
                     .unwrap_or_else(|| Arc::clone(node));
                 push(b, name_node.loc);
             };
-            if both_block_scoped_var {
+            // Go declareSymbol 冲突路径：existing 带 BlockScoped → 2451；
+            // 变量对变量的其余冲突（var-then-let）→ 2300
+            let var_vs_var = existing
+                .flags
+                .intersects(SymbolFlags::FunctionScopedVariable | SymbolFlags::BlockScopedVariable)
+                && includes.intersects(
+                    SymbolFlags::FunctionScopedVariable | SymbolFlags::BlockScopedVariable,
+                );
+            let one_side_block_scoped = existing.flags.contains(SymbolFlags::BlockScopedVariable)
+                || includes.contains(SymbolFlags::BlockScopedVariable);
+            if var_vs_var
+                && one_side_block_scoped
+                && existing.flags.contains(SymbolFlags::BlockScopedVariable)
+            {
+                report_all(self, &CANNOT_REDECLARE_BLOCK_SCOPED_VARIABLE_0);
+                conflicted = true;
+            } else if var_vs_var && one_side_block_scoped {
+                report_all(self, &DUPLICATE_IDENTIFIER_0);
+                conflicted = true;
+            } else if both_block_scoped_var {
                 if Self::is_let_or_const_declaration(node) {
                     report_all(self, &CANNOT_REDECLARE_BLOCK_SCOPED_VARIABLE_0);
 

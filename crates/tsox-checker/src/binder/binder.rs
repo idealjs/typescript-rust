@@ -203,3 +203,10 @@ pub fn bind_source_file(file: &Arc<SourceFile>) -> NodeSymbolMap {
     binder.bind_source_file(file);
     std::mem::take(&mut binder.symbol_map)
 }
+
+/// parse 后立即回填 parent 指针：program 的 import 收集处理期即需父链
+/// （ImportType 来源判定等），binder 后续调用幂等
+pub fn wire_parent_pointers(file: &Arc<SourceFile>) {
+    let mut binder = Binder::new();
+    binder.set_parent_pointers(&file.node);
+}

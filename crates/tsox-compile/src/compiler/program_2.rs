@@ -160,8 +160,8 @@ impl Program {
                     }
                 }
 
-                // program 诊断阶段 parent 指针未建，按语句扫描收集
-                // side-effect import（无 import clause）的 specifier 节点 id
+                // side-effect import（无 import clause）按语句扫描收集
+                // specifier 节点 id
                 let side_effect_spec_ids: std::collections::HashSet<u64> = {
                     let mut ids = std::collections::HashSet::new();
                     if let tsox_frontend::ast::NodeData::SourceFile(sf) = &file.node.data {
@@ -180,10 +180,24 @@ impl Program {
                     if module_spec.is_empty() {
                         continue;
                     }
+                    // Go processImport 经 getModeForUsageLocation 取模式：
+                    // 显式 resolution-mode 覆盖优先，否则用文件默认解析模式
+                    let override_mode = import_resolution_mode_override(import_node);
+                    let resolution_mode = if matches!(
+                        override_mode,
+                        tsox_core::core::compiler_options::ModuleKind::None
+                    ) {
+                        tsox_tsoptions::tsoptions::implied_node_format_of_file(
+                            &file.file_name,
+                            &|p| host.fs().read_file(p),
+                        )
+                    } else {
+                        override_mode
+                    };
                     let (resolved, resolution_diags) = resolver.resolve_module_name(
                         module_spec,
                         &file.file_name,
-                        import_resolution_mode_override(import_node),
+                        resolution_mode,
                         None,
                     );
                     for d in resolution_diags {
@@ -221,43 +235,64 @@ impl Program {
                         || (!module_spec.starts_with('.')
                             && !ambient_module_exists(&source_files, module_spec))
                     {
-                        // Go checkImportDeclaration：side-effect import（无 import
-                        // clause）且未显式 noUncheckedSideEffectImports=false 时用
-                        // TS2882 专用消息
-                        let is_side_effect = side_effect_spec_ids.contains(&import_node.id());
-                        let (message, args): (_, Vec<String>) = if is_side_effect
-                            && !options.no_unchecked_side_effect_imports.is_false()
-                        {
-                            (
-                                tsox_core::diagnostics::messages_generated::
-                                    CANNOT_FIND_MODULE_OR_TYPE_DECLARATIONS_FOR_SIDE_EFFECT_IMPORT_OF_0,
-                                vec![module_spec.to_string()],
-                            )
-                        } else {
-                            (
-                                tsox_core::diagnostics::CANNOT_FIND_MODULE_0_OR_ITS_CORRESPONDING_TYPE_DECLARATIONS,
-                                vec![module_spec.to_string()],
-                            )
+                        // TS2307 报告位：ImportType（含动态 import() 类型位）由
+                        // checker 报，这里跳过避免双报
+                        let from_import_type = {
+                            let mut cur = import_node.parent();
+                            let mut hit = false;
+                            for _ in 0..4 {
+                                match cur {
+                                    Some(p) if p.kind == tsox_frontend::ast::SyntaxKind::ImportType => {
+                                        hit = true;
+                                        break;
+                                    }
+                                    Some(p) => cur = p.parent(),
+                                    None => break,
+                                }
+                            }
+                            hit
                         };
-                        let mut module_not_found = Diagnostic::new(
-                            Some(file.clone()),
-                            import_node.loc,
-                            message,
-                            args,
-                        );
-
-                        if let Some(alt) =
-                            resolved.as_ref().and_then(|m| m.alternate_result.clone())
-                        {
-                            module_not_found.message_chain = vec![Diagnostic::new(
+                        if !from_import_type {
+                            // Go checkImportDeclaration：side-effect import（无 import
+                            // clause）且未显式 noUncheckedSideEffectImports=false 时用
+                            // TS2882 专用消息；常规导入经 node 核心模块专用文案选择
+                            let is_side_effect = side_effect_spec_ids.contains(&import_node.id());
+                            let (message, args): (_, Vec<String>) = if is_side_effect
+                                && !options.no_unchecked_side_effect_imports.is_false()
+                            {
+                                (
+                                    tsox_core::diagnostics::messages_generated::
+                                        CANNOT_FIND_MODULE_OR_TYPE_DECLARATIONS_FOR_SIDE_EFFECT_IMPORT_OF_0,
+                                    vec![module_spec.to_string()],
+                                )
+                            } else {
+                                let (msg, args) =
+                                    tsox_frontend::parser::cannot_resolve_module_error(
+                                        &options,
+                                        &module_spec,
+                                    );
+                                (*msg, args)
+                            };
+                            let mut module_not_found = Diagnostic::new(
                                 Some(file.clone()),
                                 import_node.loc,
-                                tsox_core::diagnostics::messages_generated::
-                                    THERE_ARE_TYPES_AT_0_BUT_THIS_RESULT_COULD_NOT_BE_RESOLVED_UNDER_YOUR_CURRENT_MODULERESOLUTION_SETTING_CONSIDER_UPDATING_TO_NODE16_NODENEXT_OR_BUNDLER,
-                                vec![alt],
-                            )];
+                                message,
+                                args,
+                            );
+
+                            if let Some(alt) =
+                                resolved.as_ref().and_then(|m| m.alternate_result.clone())
+                            {
+                                module_not_found.message_chain = vec![Diagnostic::new(
+                                    Some(file.clone()),
+                                    import_node.loc,
+                                    tsox_core::diagnostics::messages_generated::
+                                        THERE_ARE_TYPES_AT_0_BUT_THIS_RESULT_COULD_NOT_BE_RESOLVED_UNDER_YOUR_CURRENT_MODULERESOLUTION_SETTING_CONSIDER_UPDATING_TO_NODE16_NODENEXT_OR_BUNDLER,
+                                    vec![alt],
+                                )];
+                            }
+                            diagnostics.push(Arc::new(module_not_found));
                         }
-                        diagnostics.push(Arc::new(module_not_found));
                     }
                 }
 

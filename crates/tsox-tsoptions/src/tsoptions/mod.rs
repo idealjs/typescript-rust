@@ -94,14 +94,16 @@ pub fn implied_node_format_of_file(
         return ModuleKind::CommonJS;
     }
 
+    // Go getPackageScopeForPath：向上遍历在第一个含 package.json 的目录停止，
+    // 缺 type 字段即默认 CommonJS，不继承更上层的 type
     let mut dir = tsox_core::tspath::get_directory_path(file_name);
     loop {
         let pkg = tsox_core::tspath::combine_paths(&dir, &["package.json"]);
         if let Some(text) = read_file(&pkg)
             && let Ok(fields) = crate::packagejson::parse(&text)
-            && let Some(ty) = fields.header_fields.r#type.get_value()
         {
-            return if ty == "module" {
+            let ty = fields.header_fields.r#type.get_value();
+            return if ty.is_some_and(|t| t == "module") {
                 ModuleKind::ESNext
             } else {
                 ModuleKind::CommonJS

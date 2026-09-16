@@ -46,8 +46,14 @@ impl Binder {
                 }) && is_variable_declaration_initialized_to_require(node)
                 {
                     self.declare_symbol(node, SymbolFlags::Alias, SymbolFlags::Alias);
-                } else {
+                } else if Self::is_let_or_const_declaration(node) {
                     self.declare_symbol(node, SymbolFlags::BlockScopedVariable, SymbolFlags::VALUE);
+                } else {
+                    self.declare_symbol(
+                        node,
+                        SymbolFlags::FunctionScopedVariable,
+                        SymbolFlags::VALUE,
+                    );
                 }
             }
             SyntaxKind::VariableStatement => {}
@@ -204,7 +210,12 @@ impl Binder {
                 self.bind_namespace_export_declaration(node);
             }
             SyntaxKind::BindingElement => {
-                self.declare_symbol(node, SymbolFlags::BlockScopedVariable, SymbolFlags::VALUE);
+                let includes = if Self::is_let_or_const_declaration(node) {
+                    SymbolFlags::BlockScopedVariable
+                } else {
+                    SymbolFlags::FunctionScopedVariable
+                };
+                self.declare_symbol(node, includes, SymbolFlags::VALUE);
             }
             SyntaxKind::TypeParameter => {
                 if let Some(list) = node.parent().as_ref()

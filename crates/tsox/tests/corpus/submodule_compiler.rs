@@ -1040,7 +1040,7 @@ fn mount_test_lib_fixtures(fs: &Arc<InMemoryFS>) {
         }
     }
     let root = Path::new(env!("CARGO_MANIFEST_DIR"))
-        .join("_submodules/TypeScript/tests/lib");
+        .join("tests/corpus/testdata/tests/lib");
     walk(fs, &root, "/.lib");
 }
 

@@ -31,11 +31,20 @@ impl Checker {
                 .current_file
                 .as_ref()
                 .is_some_and(|f| f.external_module_indicator.is_some());
-            let parent_is_source_file = node
-                .parent()
-                .as_ref()
-                .is_some_and(|p| p.kind == SyntaxKind::SourceFile);
-            if !parent_is_source_file || !file_is_external {
+            // Go IsModuleAugmentationExternal：顶层时文件须为外部模块；
+            // 位于模块块内时，祖父须为顶层 ambient 模块且该文件非外部模块
+            let augmentation_external = match node.parent() {
+                Some(p) if p.kind == SyntaxKind::SourceFile => file_is_external,
+                Some(p) if p.kind == SyntaxKind::ModuleBlock => p.parent().is_some_and(|g| {
+                    g.kind == SyntaxKind::ModuleDeclaration
+                        && tsox_frontend::ast::is_ambient_module(&g)
+                        && g.parent()
+                            .is_some_and(|gg| gg.kind == SyntaxKind::SourceFile)
+                        && !file_is_external
+                }),
+                _ => false,
+            };
+            if !augmentation_external {
                 self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
                     self.current_file.clone(),
                     name_loc,

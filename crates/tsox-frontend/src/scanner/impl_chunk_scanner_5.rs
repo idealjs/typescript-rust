@@ -158,6 +158,15 @@ impl Scanner {
         self.pos = self.token_pos;
     }
 
+    pub fn re_scan_less_than(&mut self) -> SyntaxKind {
+        if self.token == SyntaxKind::LessThanLessThanToken {
+            self.pos = self.token_pos + 1;
+            self.token_end = self.pos;
+            self.token = SyntaxKind::LessThanToken;
+        }
+        self.token
+    }
+
     pub fn re_scan_greater_than(&mut self) -> SyntaxKind {
         let token = self.token;
         if token == SyntaxKind::GreaterThanToken {

@@ -283,6 +283,10 @@ impl Parser {
     }
 
     pub(crate) fn parse_optional_type_arguments(&mut self) -> Option<Arc<NodeList>> {
+        if self.token == SyntaxKind::LessThanLessThanToken {
+            self.token = self.scanner.re_scan_less_than();
+            self.drain_scanner_errors();
+        }
         if self.token != SyntaxKind::LessThanToken {
             return None;
         }

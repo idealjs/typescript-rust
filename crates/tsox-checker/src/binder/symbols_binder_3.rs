@@ -242,14 +242,27 @@ impl Binder {
     }
 
     pub(crate) fn is_let_or_const_declaration(node: &Arc<Node>) -> bool {
-        if node.kind == SyntaxKind::VariableDeclaration {
-            if let Some(parent) = node.parent().as_ref() {
-                if parent.kind == SyntaxKind::VariableDeclarationList {
-                    return parent.flags.intersects(NodeFlags::Let | NodeFlags::Const);
+        // Go IsBlockOrCatchScoped：沿父链找变量声明列表的 let/const 位；
+        // 参数按 IsPartOfParameterDeclaration 归函数作用域，catch 变量按块作用域
+        let mut n = Arc::clone(node);
+        loop {
+            match n.kind {
+                SyntaxKind::VariableDeclaration => {
+                    return match n.parent() {
+                        Some(p) if p.kind == SyntaxKind::VariableDeclarationList => {
+                            p.flags.intersects(NodeFlags::Let | NodeFlags::Const)
+                        }
+                        Some(p) if p.kind == SyntaxKind::CatchClause => true,
+                        _ => false,
+                    };
                 }
+                SyntaxKind::Parameter => return false,
+                _ => match n.parent() {
+                    Some(p) => n = p,
+                    None => return true,
+                },
             }
         }
-        true
     }
 
     pub(crate) fn has_export_declarations(container: &Arc<Node>) -> bool {
@@ -334,3 +347,4 @@ impl Binder {
         flags
     }
 }
+

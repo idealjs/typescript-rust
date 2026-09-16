@@ -14,7 +14,16 @@ impl Parser {
                 let operator = self.token;
                 let op_pos = self.token_pos();
                 self.next_token();
-                let operand = self.parse_unary_expression();
+                // Go parseUpdateExpression：前缀 ++/-- 的操作数是 LHS，
+                // 不含后缀 ++（`++a++` 应在语句层报 1005/1109）
+                let operand = if matches!(
+                    operator,
+                    SyntaxKind::PlusPlusToken | SyntaxKind::MinusMinusToken
+                ) {
+                    self.parse_left_hand_side_expression()
+                } else {
+                    self.parse_unary_expression()
+                };
                 let loc = TextRange::new(op_pos, operand.end());
                 Arc::new(Node::with_loc(
                     SyntaxKind::PrefixUnaryExpression,
