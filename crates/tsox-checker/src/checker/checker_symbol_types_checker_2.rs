@@ -92,6 +92,24 @@ impl Checker {
             }
             NodeData::BindingElement(_) => return self.binding_element_type(&decl),
             NodeData::EnumMember(_) => {
+                // Go getTypeOfEnumMember → getDeclaredTypeOfEnumMember：成员值
+                // 类型是枚举字面型（Foo.a），由枚举声明型解析填充成员链接
+                if let Some(enum_decl) = decl.parent()
+                    && let Some(enum_sym) = self
+                        .program
+                        .symbol_map()
+                        .symbol_of(&enum_decl)
+                        .map(Arc::clone)
+                {
+                    self.resolve_enum_type(&enum_sym);
+                    if let Some(t) = self
+                        .value_symbol_links
+                        .get(symbol)
+                        .and_then(|l| l.resolved_type.clone())
+                    {
+                        return Some(t);
+                    }
+                }
                 let value = self.get_enum_member_value(&decl).value?;
                 let t = match value {
                     tsox_frontend::evaluator::EvalValue::String(s) => {
