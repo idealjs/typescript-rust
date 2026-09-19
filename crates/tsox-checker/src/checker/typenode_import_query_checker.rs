@@ -274,6 +274,21 @@ impl Checker {
                 .find(|d| matches!(d.data, NodeData::ExportAssignment(_)))
                 && let NodeData::ExportAssignment(ea) = &d.data
             {
+                if matches!(
+                    ea.expression.kind,
+                    SyntaxKind::Identifier
+                        | SyntaxKind::QualifiedName
+                        | SyntaxKind::PropertyAccessExpression
+                ) && let Some(sf) = d.parent()
+                {
+                    // export = Foo.Member：限定名/属性访问在所在文件作用域解析
+                    self.push_scope(&sf);
+                    let target = self.resolve_qualified_symbol(&ea.expression);
+                    self.pop_scope();
+                    if let Some(target) = target {
+                        return Some(target);
+                    }
+                }
                 let expr_name = ea.expression.text().to_string();
                 let sym_map = self.program.symbol_map();
                 let file_locals = d

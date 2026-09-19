@@ -225,7 +225,9 @@ impl Checker {
             let Some(main_module) = main_module else {
                 continue;
             };
-            let main_module = self.resolve_external_module_symbol(&main_module, false);
+            // Go mergeModuleAugmentation：resolveExternalModuleSymbol(m, false)
+            // 将 export= 经 resolveAlias 解到目标符号（foo 等）再判 Namespace
+            let main_module = self.resolve_external_module_symbol_go(&main_module);
             if !main_module.flags.intersects(SymbolFlags::NAMESPACE) {
                 continue;
             }

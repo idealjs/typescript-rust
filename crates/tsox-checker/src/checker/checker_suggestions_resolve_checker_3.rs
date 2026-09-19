@@ -129,6 +129,23 @@ impl Checker {
                         return Some(named);
                     }
                 }
+                // Go getTargetOfNamespaceImport → resolveESModuleSymbol：
+                // namespace import 的目标经 export= 解到赋值目标符号
+                if symbol
+                    .declarations
+                    .iter()
+                    .any(|d| d.kind == SyntaxKind::NamespaceImport)
+                    && let Some(ee) =
+                        module_sym.exports.get(tsox_frontend::ast::INTERNAL_SYMBOL_NAME_EXPORT_EQUALS)
+                {
+                    let ee = Arc::clone(ee);
+                    let resolved = self.resolve_alias_base(Arc::clone(&ee));
+                    if !Arc::ptr_eq(&resolved, &ee)
+                        && !self.alias_circular_reported.contains(&ee.id())
+                    {
+                        return Some(resolved);
+                    }
+                }
                 return Some(module_sym);
             }
         }
@@ -160,6 +177,7 @@ impl Checker {
         }
         // Go getTargetOfExportAssignment：export default X / export = X 的
         // 别名目标 = 表达式在所在模块作用域解析出的符号
+        //（含 Foo.Member 属性访问形态，Go getTargetOfAccessExpression）
         if let Some(decl) = symbol
             .declarations
             .iter()
@@ -167,7 +185,9 @@ impl Checker {
             && let tsox_frontend::ast::NodeData::ExportAssignment(ea) = &decl.data
             && matches!(
                 ea.expression.kind,
-                SyntaxKind::Identifier | SyntaxKind::QualifiedName
+                SyntaxKind::Identifier
+                    | SyntaxKind::QualifiedName
+                    | SyntaxKind::PropertyAccessExpression
             )
             && let Some(scope) = decl
                 .parent()

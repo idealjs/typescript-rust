@@ -131,8 +131,15 @@ impl Checker {
                 r
             }
             NodeData::ExportAssignment(d) if d.is_export_equals => {
-                // export = <expr>：别名目标是表达式符号
-                self.resolve_identifier(&d.expression)
+                // export = <expr>：别名目标是表达式符号（含 Foo.Member 形态）
+                match d.expression.kind {
+                    SyntaxKind::Identifier
+                    | SyntaxKind::QualifiedName
+                    | SyntaxKind::PropertyAccessExpression => {
+                        self.resolve_qualified_symbol(&d.expression)
+                    }
+                    _ => None,
+                }
             }
             _ => None,
         }

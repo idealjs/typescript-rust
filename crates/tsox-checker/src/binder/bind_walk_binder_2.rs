@@ -34,8 +34,8 @@ impl Binder {
     }
 
     pub(crate) fn bind_export_assignment(&mut self, node: &Arc<Node>) {
-        let (is_export_equals, expr_kind) = match &node.data {
-            NodeData::ExportAssignment(data) => (data.is_export_equals, data.expression.kind),
+        let (is_export_equals, expression) = match &node.data {
+            NodeData::ExportAssignment(data) => (data.is_export_equals, &data.expression),
             _ => return,
         };
         let parent_sym = match self.parent_symbol.clone() {
@@ -50,10 +50,8 @@ impl Binder {
             }
         };
 
-        let is_alias = matches!(
-            expr_kind,
-            SyntaxKind::Identifier | SyntaxKind::QualifiedName | SyntaxKind::ClassExpression
-        );
+        // Go ExpressionIsAlias：entity name 表达式（含 Foo.Bar 属性访问链）或类表达式
+        let is_alias = Self::expression_is_alias(expression);
         let flags = if is_alias {
             SymbolFlags::Alias
         } else {
@@ -435,6 +433,29 @@ impl Binder {
                 return None;
             }
             current = parent;
+        }
+    }
+
+    fn expression_is_alias(expression: &Arc<Node>) -> bool {
+        let mut cur = expression;
+        loop {
+            match cur.kind {
+                SyntaxKind::Identifier => return true,
+                SyntaxKind::QualifiedName => match &cur.data {
+                    NodeData::QualifiedName(d) => cur = &d.left,
+                    _ => return false,
+                },
+                SyntaxKind::PropertyAccessExpression => match &cur.data {
+                    NodeData::PropertyAccessExpression(d) => cur = &d.expression,
+                    _ => return false,
+                },
+                SyntaxKind::ParenthesizedExpression => match &cur.data {
+                    NodeData::ParenthesizedExpression(d) => cur = &d.expression,
+                    _ => return false,
+                },
+                SyntaxKind::ClassExpression => return true,
+                _ => return false,
+            }
         }
     }
 }

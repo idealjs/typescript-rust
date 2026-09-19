@@ -215,6 +215,15 @@ impl Checker {
                 symbol = module_sym;
             }
 
+            // Go resolveEntityName：import= require 的别名目标经
+            // resolveExternalModuleSymbol 穿透模块 export= 后再查成员
+            if symbol.flags.intersects(SymbolFlags::MODULE) {
+                let through = self.resolve_external_module_symbol_go_mut(&symbol);
+                if !Arc::ptr_eq(&through, &symbol) {
+                    symbol = through;
+                }
+            }
+
             let text = right.text();
             let mut next = symbol
                 .exports
