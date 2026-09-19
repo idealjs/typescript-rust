@@ -42,14 +42,19 @@ impl Checker {
         fn report_unresolved(c: &mut Checker, seg: &Arc<Node>) {
             if c.ts2304_reporting_allowed_for(seg) {
                 use tsox_core::diagnostics::messages_generated::CANNOT_FIND_NAME_0;
+                // Go resolveEntityName：报在最左未解析段（限定名节点本身无文本）
+                let mut target = Arc::clone(seg);
+                while let tsox_frontend::ast::NodeData::QualifiedName(q) = &target.data {
+                    target = Arc::clone(&q.left);
+                }
                 let file = c
-                    .get_source_file_of_node(seg)
+                    .get_source_file_of_node(&target)
                     .or_else(|| c.current_file.clone());
                 c.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
                     file,
-                    seg.loc,
+                    target.loc,
                     CANNOT_FIND_NAME_0,
-                    vec![seg.text().to_string()],
+                    vec![target.text().to_string()],
                 ));
             }
         }
@@ -290,7 +295,15 @@ impl Checker {
         if leftmost.kind != SyntaxKind::Identifier {
             return None;
         }
-        let base = self.resolve_identifier(leftmost)?;
+        let base = match self.resolve_identifier(leftmost) {
+            Some(b) => b,
+            None => {
+                if std::env::var_os("TSOX_DEBUG_TQ").is_some() {
+                    eprintln!("[tq] leftmost unresolved: {}", leftmost.text());
+                }
+                return None;
+            }
+        };
         let base_type = self
             .value_symbol_links
             .get(&base)
@@ -304,12 +317,29 @@ impl Checker {
                 } else {
                     None
                 }
-            })?;
-        let mut t = base_type;
-        for seg in segments.iter().rev() {
+            });
+        if std::env::var_os("TSOX_DEBUG_TQ").is_some() {
+            eprintln!(
+                "[tq] base={} type_flags={:?} ok={}",
+                leftmost.text(),
+                base_type.as_ref().map(|t| t.flags),
+                base_type.is_some()
+            );
+        }
+        let base_type = base_type?;
+        // Go checkExpressionWithTypeArguments：表达式语义求值（含控制流收窄），
+        // 可空基类型在属性查找前取非空视图；末段保留声明类型（含可选 undefined）
+        let mut t = self.get_non_nullable_type_of(&base_type);
+        let seg_count = segments.len();
+        for (i, seg) in segments.iter().rev().enumerate() {
             let name = self.get_property_name_from_node(seg);
             let prop = self.get_property_of_type(&t, &name)?;
-            t = self.get_type_of_symbol(&prop);
+            let prop_t = self.get_type_of_symbol(&prop);
+            t = if i + 1 < seg_count {
+                self.get_non_nullable_type_of(&prop_t)
+            } else {
+                prop_t
+            };
         }
         Some(t)
     }

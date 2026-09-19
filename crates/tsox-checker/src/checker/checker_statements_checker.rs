@@ -416,6 +416,9 @@ impl Checker {
                     }
                 }
             }
+            SyntaxKind::TryStatement => {
+                self.check_try_statement(node, ambient_reported);
+            }
             _ => {
                 self.walk_children_for_expressions(node);
             }

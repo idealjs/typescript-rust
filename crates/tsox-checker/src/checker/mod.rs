@@ -135,6 +135,7 @@ pub(crate) mod checker_resolve_checker_3;
 pub(crate) mod checker_statements;
 pub(crate) mod checker_statements_alias_symbol;
 pub(crate) mod checker_statements_checker;
+pub(crate) mod checker_statements_try;
 pub(crate) mod checker_statements_checker_2;
 pub(crate) mod checker_yield_star;
 pub(crate) mod checker_iteration;
