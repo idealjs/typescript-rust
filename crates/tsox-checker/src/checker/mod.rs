@@ -37,6 +37,7 @@ pub(crate) mod checker_ast_get_combined_modifier_flags;
 pub(crate) mod checker_attach_explicit_type_arguments;
 pub(crate) mod checker_calls;
 pub(crate) mod checker_calls_call_argument_checks;
+pub(crate) mod checker_calls_type_arg_constraints;
 pub(crate) mod checker_calls_checker;
 pub(crate) mod checker_calls_overload_union;
 pub(crate) mod checker_calls_checker_2;

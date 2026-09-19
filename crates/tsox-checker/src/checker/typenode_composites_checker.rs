@@ -127,9 +127,7 @@ impl Checker {
             }
             let arg_type = self.get_type_from_type_node(arg_node);
 
-            if arg_type.flags.intersects(TypeFlags::Any | TypeFlags::Never)
-                || arg_type.is_type_parameter()
-            {
+            if arg_type.flags.intersects(TypeFlags::Any | TypeFlags::Never) {
                 continue;
             }
             let constraint_type = self.get_type_from_type_node(constraint_node);
@@ -169,7 +167,8 @@ impl Checker {
             };
             let clear_cut = (primitive_like(&arg_type)
                 && (primitive_like(&constraint_type) || object_like(&constraint_type)))
-                || (object_like(&arg_type) && object_like(&constraint_type));
+                || (object_like(&arg_type) && object_like(&constraint_type))
+                || (arg_type.is_type_parameter() && primitive_like(&constraint_type));
             if !clear_cut {
                 continue;
             }
