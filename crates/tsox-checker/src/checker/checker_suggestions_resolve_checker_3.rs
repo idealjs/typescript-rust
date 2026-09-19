@@ -66,9 +66,9 @@ impl Checker {
             })
     }
 
-    pub(crate) fn resolve_alias_base(&mut self, symbol: Arc<Symbol>) -> Arc<Symbol> {
+    pub(crate) fn resolve_alias_target(&mut self, symbol: Arc<Symbol>) -> Option<Arc<Symbol>> {
         if !symbol.flags.intersects(SymbolFlags::Alias) {
-            return symbol;
+            return Some(symbol);
         }
 
         // binder 对 export/import specifier 已设 export_symbol 直连目标
@@ -78,7 +78,7 @@ impl Checker {
                 std::sync::Arc::as_ptr(target) as *const u8,
                 std::sync::Arc::as_ptr(&symbol) as *const u8,
             ) {
-                return Arc::clone(target);
+                return Some(Arc::clone(target));
             }
         }
 
@@ -126,10 +126,10 @@ impl Checker {
                         .cloned()
                         .or_else(|| module_sym.members.get(&import_name).cloned())
                     {
-                        return named;
+                        return Some(named);
                     }
                 }
-                return module_sym;
+                return Some(module_sym);
             }
         }
         // `export { foo }`（无 from）：目标 = 所在文件符号的局部绑定
@@ -146,12 +146,12 @@ impl Checker {
                     if let Some(locals) = self.program.symbol_map().locals.get(&parent.id())
                         && let Some(target) = locals.get(&symbol.name).cloned()
                     {
-                        return target;
+                        return Some(target);
                     }
                     if let Some(sf_sym) = self.program.symbol_map().symbol_of(&parent)
                         && let Some(target) = sf_sym.exports.get(&symbol.name).cloned()
                     {
-                        return target;
+                        return Some(target);
                     }
                     break;
                 }
@@ -186,7 +186,7 @@ impl Checker {
             let target = self.resolve_qualified_symbol(&ea.expression);
             self.pop_scope();
             if let Some(target) = target {
-                return target;
+                return Some(target);
             }
         }
         if let Some(decl) = symbol
@@ -201,38 +201,24 @@ impl Checker {
                     && let Some(module_sym) =
                         self.resolve_module_file_symbol(&ext.expression.text())
                 {
+                    // Go getTargetOfImportEqualsDeclaration（外部模块引用）：
+                    // 目标 = 模块 export= 别名符号（dontResolveAlias），别名侧
+                    // 递归由 resolve_alias_base 承担（环检测对齐 Go resolveAlias）
                     if let Some(export_eq) = module_sym
                         .exports
                         .get(tsox_frontend::ast::INTERNAL_SYMBOL_NAME_EXPORT_EQUALS)
                     {
-                        let entity_decl = export_eq
-                            .declarations
-                            .iter()
-                            .find(|d| d.kind == SyntaxKind::ExportAssignment)
-                            .cloned();
-                        let scope_decl = module_sym
-                            .declarations
-                            .iter()
-                            .find(|d| d.kind == SyntaxKind::ModuleDeclaration)
-                            .cloned();
-                        if let (Some(export_decl), Some(scope)) = (entity_decl, scope_decl)
-                            && let tsox_frontend::ast::NodeData::ExportAssignment(ea) =
-                                &export_decl.data
-                            && ea.is_export_equals
-                            && matches!(
-                                ea.expression.kind,
-                                SyntaxKind::Identifier | SyntaxKind::QualifiedName
-                            )
-                        {
-                            self.push_scope(&scope);
-                            let target = self.resolve_qualified_symbol(&ea.expression);
-                            self.pop_scope();
-                            if let Some(target) = target {
-                                return target;
-                            }
+                        let export_eq = Arc::clone(export_eq);
+                        let resolved = self.resolve_alias_base(Arc::clone(&export_eq));
+                        if self.alias_circular_reported.contains(&export_eq.id()) {
+                            return None;
                         }
+                        if Arc::ptr_eq(&resolved, &export_eq) {
+                            return Some(module_sym);
+                        }
+                        return Some(resolved);
                     }
-                    return module_sym;
+                    return Some(module_sym);
                 }
 
                 if matches!(
@@ -264,14 +250,14 @@ impl Checker {
                             None => break,
                         }
                         if !current.flags.intersects(SymbolFlags::Alias) {
-                            return current;
+                            return Some(current);
                         }
                     }
-                    return current;
+                    return Some(current);
                 }
             }
         }
-        symbol
+        Some(symbol)
     }
 
     pub(crate) fn resolve_module_file_symbol(&self, specifier: &str) -> Option<Arc<Symbol>> {

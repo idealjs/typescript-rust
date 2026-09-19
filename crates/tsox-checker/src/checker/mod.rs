@@ -142,6 +142,7 @@ pub(crate) mod checker_destructuring;
 pub(crate) mod checker_export_star_ambiguity;
 pub(crate) mod checker_await_using_grammar;
 pub(crate) mod checker_ambient_context;
+pub(crate) mod checker_alias_resolution;
 pub(crate) mod checker_yield_check;
 pub(crate) mod checker_statements_checker_3;
 pub(crate) mod checker_statements_checker_4;
