@@ -16,7 +16,11 @@ impl Checker {
 
         let mut single_prop: Option<Arc<Symbol>> = None;
         let mut prop_flags = SymbolFlags::Property;
+        let mut optional_flag = SymbolFlags::empty();
         let mut found: Vec<Arc<Symbol>> = Vec::new();
+        let mut index_types: Vec<Arc<Type>> = Vec::new();
+        let mut index_readonly = false;
+        let mut read_partial = false;
         for current in types.iter() {
             let t = self.get_apparent_type(current);
             if self.is_error_type(&t) || t.flags.contains(TypeFlags::Never) {
@@ -36,20 +40,52 @@ impl Checker {
                             SymbolFlags::Property
                         };
                     }
+                    if is_union
+                        && prop.flags.intersects(
+                            SymbolFlags::Property
+                                | SymbolFlags::GetAccessor
+                                | SymbolFlags::SetAccessor
+                                | SymbolFlags::Method,
+                        ) {
+                        optional_flag |= prop.flags & SymbolFlags::Optional;
+                    }
                     if !found.iter().any(|p| Arc::ptr_eq(p, &prop)) {
                         found.push(prop);
                     }
                 }
                 None => {
-                    if is_union {
-                        return None;
+                    if !is_union {
+                        continue;
+                    }
+                    let name_literal = self.get_string_literal_type(name);
+                    if !crate::checker::utilities_is_optional_symbol::is_late_bound_name(name)
+                        && let Some(info) = self.get_applicable_index_info(&t, &name_literal)
+                    {
+                        index_readonly |= info.is_readonly;
+                        let vt = if self.is_tuple_type(&t) {
+                            self.tuple_rest_or_undefined(&t)
+                        } else {
+                            info.value_type
+                                .clone()
+                                .unwrap_or_else(|| self.undefined_type())
+                        };
+                        index_types.push(vt);
+                    } else if t.object_flags.contains(ObjectFlags::ObjectLiteral)
+                        && !t.object_flags.contains(ObjectFlags::ContainsSpread)
+                    {
+                        index_types.push(self.undefined_type());
+                    } else {
+                        read_partial = true;
                     }
                 }
             }
         }
 
         let single = single_prop?;
-        if found.len() == 1 {
+        if read_partial {
+            return None;
+        }
+        if found.len() == 1 && index_types.is_empty() {
             return Some(single);
         }
 
@@ -69,9 +105,13 @@ impl Checker {
             }
             prop_types.push(self.get_type_of_symbol(prop));
         }
+        prop_types.extend(index_types);
 
-        let mut result = Symbol::new(prop_flags, name.to_string());
+        let mut result = Symbol::new(prop_flags | optional_flag, name.to_string());
         result.check_flags = CheckFlags::SyntheticProperty;
+        if index_readonly {
+            result.check_flags |= CheckFlags::Readonly;
+        }
         result.declarations = declarations;
         if let Some(fp) = first_parent {
             result.set_parent(&fp);
@@ -110,6 +150,33 @@ impl Checker {
             .symbol_map()
             .symbol_of(&parent_node)
             .map(Arc::clone)
+    }
+
+    /// Go createUnionOrIntersectionProperty 缺火成分准入：属性命中、适用
+    /// 索引签名、或无 spread 的对象字面量（补 undefined）
+    pub(crate) fn constituent_admits_property(&mut self, ct: &Arc<Type>, name: &str) -> bool {
+        let apparent = self.get_apparent_type(ct);
+        if self.get_property_of_type(&apparent, name).is_some() {
+            return true;
+        }
+        if !crate::checker::utilities_is_optional_symbol::is_late_bound_name(name) {
+            let name_literal = self.get_string_literal_type(name);
+            if self.get_applicable_index_info(&apparent, &name_literal).is_some() {
+                return true;
+            }
+        }
+        apparent.object_flags.contains(ObjectFlags::ObjectLiteral)
+            && !apparent.object_flags.contains(ObjectFlags::ContainsSpread)
+    }
+
+    fn tuple_rest_or_undefined(&mut self, t: &Arc<Type>) -> Arc<Type> {
+        if let TypeData::Tuple(tuple) = &t.data
+            && let Some(info) = tuple.element_infos.get(tuple.fixed_length)
+            && let Some(ty) = &info.type_
+        {
+            return Arc::clone(ty);
+        }
+        self.undefined_type()
     }
 
     pub fn is_error_type(&self, t: &Arc<Type>) -> bool {
