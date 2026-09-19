@@ -267,7 +267,10 @@ impl Parser {
                     [err.pos..(err.pos + err.length).min(self.scanner.text().len())];
                 let octal_digits = token_text.strip_prefix('-').unwrap_or(token_text);
                 let digits = octal_digits.strip_prefix('0').unwrap_or(octal_digits);
-                vec![format!("0o{digits}")]
+                // Go scanner：按八进制解析后重新格式化，去前导零
+                let val = i64::from_str_radix(digits, 8).unwrap_or(0);
+                let sign = if token_text.starts_with('-') { "-" } else { "" };
+                vec![format!("{sign}0o{val:o}")]
             }
             crate::scanner::DiagnosticKind::RegexMessageWithArg(_, arg) => vec![arg.to_string()],
             _ => Vec::new(),

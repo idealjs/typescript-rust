@@ -98,8 +98,24 @@ impl Checker {
         source: &Arc<Type>,
         target: &Arc<Type>,
         relation: RelationKind,
-        out: Option<&mut Vec<tsox_frontend::ast::Diagnostic>>,
+        mut out: Option<&mut Vec<tsox_frontend::ast::Diagnostic>>,
     ) -> bool {
+        // Go elaborateError：目标是（含）泛型条件型时不 elaboration
+        if Self::type_is_or_has_generic_conditional(target) {
+            return false;
+        }
+        for kind in [SignatureKind::Construct, SignatureKind::Call] {
+            if self.elaborate_did_you_mean_to_call_or_construct(
+                expr,
+                source,
+                target,
+                relation,
+                kind,
+                out.as_deref_mut(),
+            ) {
+                return true;
+            }
+        }
         match expr.kind {
             tsox_frontend::ast::SyntaxKind::ParenthesizedExpression => {
                 let inner = match &expr.data {
@@ -119,8 +135,96 @@ impl Checker {
             tsox_frontend::ast::SyntaxKind::ArrowFunction => {
                 self.elaborate_arrow_function(expr, source, target, relation, out)
             }
+            tsox_frontend::ast::SyntaxKind::BinaryExpression => {
+                let (op, right) = match &expr.data {
+                    tsox_frontend::ast::NodeData::BinaryExpression(d) => {
+                        (d.operator_token.kind, Arc::clone(&d.right))
+                    }
+                    _ => return false,
+                };
+                if matches!(
+                    op,
+                    tsox_frontend::ast::SyntaxKind::EqualsToken
+                        | tsox_frontend::ast::SyntaxKind::CommaToken
+                ) {
+                    return self.elaborate_error(&right, source, target, relation, out);
+                }
+                false
+            }
             _ => false,
         }
+    }
+
+    fn type_is_or_has_generic_conditional(t: &Arc<Type>) -> bool {
+        if t.flags.contains(TypeFlags::Conditional) {
+            return true;
+        }
+        if t.flags.contains(TypeFlags::Intersection)
+            && let Some(ui) = t.as_union_or_intersection()
+        {
+            return ui.types.iter().any(Self::type_is_or_has_generic_conditional);
+        }
+        false
+    }
+
+    // Go elaborateDidYouMeanToCallOrConstruct：源的调用/构造签名返回型可
+    // 赋给目标时，在表达式节点上重新报错并附「是否想调用」提示
+    fn elaborate_did_you_mean_to_call_or_construct(
+        &mut self,
+        expr: &Arc<tsox_frontend::ast::Node>,
+        source: &Arc<Type>,
+        target: &Arc<Type>,
+        relation: RelationKind,
+        kind: SignatureKind,
+        out: Option<&mut Vec<tsox_frontend::ast::Diagnostic>>,
+    ) -> bool {
+        let signatures = self.get_signatures_of_type(source, kind);
+        let mut matches = false;
+        for sig in &signatures {
+            let Some(ret) = self.get_return_type_of_signature(sig) else {
+                continue;
+            };
+            if ret.flags.intersects(TypeFlags::Any | TypeFlags::Never) {
+                continue;
+            }
+            if self.is_type_related_to(&ret, target, relation) {
+                matches = true;
+                break;
+            }
+        }
+        if !matches {
+            return false;
+        }
+        let mut diags: Vec<tsox_frontend::ast::Diagnostic> = Vec::new();
+        if !self.check_type_related_to_and_optionally_elaborate(
+            source,
+            target,
+            relation,
+            Some(expr),
+            None,
+            None,
+            Some(&mut diags),
+        ) && let Some(mut diagnostic) = diags.into_iter().next()
+        {
+            let message = if kind == SignatureKind::Construct {
+                tsox_core::diagnostics::messages_generated::DID_YOU_MEAN_TO_USE_NEW_WITH_THIS_EXPRESSION
+            } else {
+                tsox_core::diagnostics::messages_generated::DID_YOU_MEAN_TO_CALL_THIS_EXPRESSION
+            };
+            let file = self.get_source_file_of_node(expr);
+            diagnostic.related_information.push(tsox_frontend::ast::Diagnostic::new(
+                file,
+                expr.loc,
+                message,
+                Vec::new(),
+            ));
+            match out {
+                Some(o) => o.push(diagnostic),
+                None => self.diagnostics.add(diagnostic),
+            }
+            return true;
+        }
+        false
     }
 
     // Go elaborateArrowFunction：表达式体且参数无注解的箭头函数，把返回
