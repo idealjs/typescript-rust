@@ -260,6 +260,39 @@ impl Binder {
                     SymbolFlags::FunctionScopedVariable,
                     SymbolFlags::VALUE,
                 );
+                // Go bindParameter：构造器参数属性（ParameterPropertyModifier）
+                // 同时向所属类 members 表声明 Property 成员（实例表，
+                // Property|Optional，PropertyExcludes）
+                if let Some(parent) = node.parent().as_ref()
+                    && parent.kind == SyntaxKind::Constructor
+                    && node
+                        .syntactic_modifier_flags()
+                        .intersects(tsox_frontend::ast::ModifierFlags::ParameterPropertyModifier)
+                    && node.name().is_some_and(|n| {
+                        !matches!(
+                            n.kind,
+                            SyntaxKind::ObjectBindingPattern
+                                | SyntaxKind::ArrayBindingPattern
+                        )
+                    })
+                    && let Some(class_declaration) = parent.parent().as_ref()
+                    && let Some(class_symbol) = self.symbol_map.symbol_of(class_declaration).cloned()
+                {
+                    let question = matches!(
+                        &node.data,
+                        NodeData::ParameterDeclaration(pd) if pd.question_token.is_some()
+                    );
+                    let mut includes = SymbolFlags::Property;
+                    if question {
+                        includes |= SymbolFlags::Optional;
+                    }
+                    self.declare_symbol_into(
+                        node,
+                        includes,
+                        SymbolFlags::PropertyExcludes,
+                        crate::binder::binder::DeclareTarget::Members(class_symbol),
+                    );
+                }
             }
             SyntaxKind::PropertyDeclaration | SyntaxKind::PropertySignature => {
                 self.declare_symbol(node, SymbolFlags::Property, SymbolFlags::VALUE);

@@ -30,12 +30,36 @@ impl Checker {
                 if Self::is_this_property_access(&data.left, name) {
                     return true;
                 }
+                // 解构赋值目标（Go isPropertyInitializedInConstructor 走流分析，
+                // 模式内任意 this.<name> 出现位即赋值目标）
+                if matches!(
+                    data.left.kind,
+                    SyntaxKind::ObjectLiteralExpression | SyntaxKind::ArrayLiteralExpression
+                ) && Self::contains_this_property_reference(&data.left, name)
+                {
+                    return true;
+                }
             }
         }
 
         let mut found = false;
         tsox_frontend::ast::node_data_generated::for_each_child(node, |child| {
             if Self::node_contains_this_assignment(child, name) {
+                found = true;
+                return true;
+            }
+            false
+        });
+        found
+    }
+
+    fn contains_this_property_reference(node: &Arc<Node>, name: &str) -> bool {
+        if Self::is_this_property_access(node, name) {
+            return true;
+        }
+        let mut found = false;
+        tsox_frontend::ast::node_data_generated::for_each_child(node, |child| {
+            if Self::contains_this_property_reference(child, name) {
                 found = true;
                 return true;
             }
