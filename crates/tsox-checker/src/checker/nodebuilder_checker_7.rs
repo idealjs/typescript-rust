@@ -326,7 +326,11 @@ impl Checker {
         if let Some(structured) = t.as_structured() {
             // Go createTypeNodeFromObjectType：仅当无属性/索引签名且恰好一条调用
             // （或构造）签名时才输出裸函数形态，否则保留完整对象字面量
-            if t.symbol.is_none()
+            let anonymous_symbol = t
+                .symbol
+                .as_ref()
+                .is_none_or(|s| s.name.starts_with('\u{FE}'));
+            if anonymous_symbol
                 && structured.signatures.len() == 1
                 && structured.properties.is_empty()
                 && structured.index_infos.is_empty()
@@ -335,7 +339,11 @@ impl Checker {
             }
         }
 
-        if let Some(sym) = &t.symbol {
+        // Go createAnonymousTypeNodeEx shouldEmitTypeOfSymbol：内部名匿名符号
+        // （对象字面量等）不按符号名显示，走成员展开
+        if let Some(sym) = &t.symbol
+            && !sym.name.starts_with('\u{FE}')
+        {
             return self.symbol_type_to_string(t, sym, flags);
         }
 

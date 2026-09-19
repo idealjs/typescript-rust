@@ -315,6 +315,14 @@ impl Checker {
         if types.is_empty() {
             return self.void_type();
         }
+        // Go checkAndAggregateReturnExpressionTypes：strictNullChecks 下体尾
+        // 可达（隐式 return undefined）时并入 undefined
+        if self.strict_null_checks && !self.function_body_definitely_returns(body) {
+            let undef = self.undefined_type();
+            if !types.iter().any(|t| t.flags.contains(TypeFlags::Undefined)) {
+                types.push(undef);
+            }
+        }
         let inferred = if types.len() == 1 {
             types.into_iter().next().expect("exactly one")
         } else {

@@ -84,6 +84,32 @@ impl Checker {
                             let target = self.get_type_from_type_node(tn);
                             let anchor = data.name.loc;
                             self.check_contextual_elements(init, &target, anchor);
+                            // Go checkVariableLikeDeclaration：声明型属性初始化器
+                            // 对注解型做完整可赋值检查（TS2322 报在属性名位）
+                            let init_type = self.get_type_of_node(init);
+                            let mut init_node: &Arc<Node> = init;
+                            while init_node.kind == SyntaxKind::ParenthesizedExpression {
+                                let inner = match &init_node.data {
+                                    tsox_frontend::ast::NodeData::ParenthesizedExpression(p) => {
+                                        Some(&p.expression)
+                                    }
+                                    _ => None,
+                                };
+                                match inner {
+                                    Some(i) => init_node = i,
+                                    None => break,
+                                }
+                            }
+                            if init_node.kind != SyntaxKind::ObjectLiteralExpression {
+                                self.check_type_assignable_to_and_optionally_elaborate(
+                                    &init_type,
+                                    &target,
+                                    Some(&data.name),
+                                    Some(init),
+                                    None,
+                                    None,
+                                );
+                            }
                         }
                     }
                 }

@@ -172,7 +172,7 @@ impl Checker {
                 &param_type,
                 crate::checker::relater::RelationKind::Assignable,
                 Some(arg),
-                None,
+                Some(arg),
                 Some(&ARGUMENT_OF_TYPE_0_IS_NOT_ASSIGNABLE_TO_PARAMETER_OF_TYPE_1),
                 None,
                 display_param.as_ref(),

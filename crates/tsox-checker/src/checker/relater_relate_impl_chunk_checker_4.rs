@@ -203,6 +203,34 @@ impl Checker {
                     return true;
                 }
             }
+            // Go relater.go keyof 分支：S 可赋给 keyof C 即通过，C 为目标型的
+            // 简化型或约束（无约束类型参数隐含 unknown，keyof unknown =
+            // string | number | symbol）
+            if self.is_tuple_type(target_of) {
+                if let Some(known) = self.get_known_keys_of_tuple_type(target_of)
+                    && self.is_type_related_to(source, &known, relation)
+                {
+                    return true;
+                }
+            } else if let Some(constraint) = self.get_simplified_type_or_constraint(target_of) {
+                // Go getIndexTypeEx：keyof unknown = never、keyof any =
+                // string | number | symbol；never 走下方守卫跳过
+                let keys = if constraint.flags.contains(TypeFlags::Any) {
+                    let parts = vec![
+                        self.string_type(),
+                        self.number_type(),
+                        self.es_symbol_type(),
+                    ];
+                    self.get_union_type(parts)
+                } else {
+                    self.get_index_type(&constraint)
+                };
+                if !keys.flags.contains(TypeFlags::Never)
+                    && self.is_type_related_to(source, &keys, relation)
+                {
+                    return true;
+                }
+            }
         }
 
         if s.contains(TypeFlags::Conditional) {

@@ -264,6 +264,7 @@ pub(crate) mod relater_compare_checker_2;
 pub(crate) mod relater_compare_checker_3;
 pub(crate) mod relater_compare_checker_4;
 pub(crate) mod relater_compare_checker_5;
+pub(crate) mod relater_compare_checker_6;
 pub(crate) mod relater_conditional;
 pub(crate) mod relater_conditional_checker;
 pub(crate) mod relater_conditional_checker_2;
@@ -356,6 +357,7 @@ pub(crate) mod typenode_template_mapped_checker;
 pub(crate) mod typenode_template_mapped_checker_2;
 #[cfg(test)]
 pub(crate) mod typenode_tests;
+pub(crate) mod typenode_type_argument_constraints;
 pub(crate) mod typenode_type_node_references_names;
 pub(crate) mod typenode_type_operators;
 pub(crate) mod typenode_type_operators_checker;

@@ -210,11 +210,14 @@ impl Checker {
             );
             props.push(symbol);
         }
+        // Go checkObjectLiteral createObjectLiteralType：newAnonymousType(node.Symbol())
+        // 挂 binder 对象字面量符号（SymbolFlagsObjectLiteral），索引签名推断依赖它
+        let literal_symbol = self.program.symbol_map().symbol_of(node).map(Arc::clone);
         Arc::new(Type {
             flags: TypeFlags::Object,
             object_flags: ObjectFlags::Anonymous | ObjectFlags::ObjectLiteral,
             id: crate::checker::types::next_type_id(),
-            symbol: None,
+            symbol: literal_symbol,
             alias: None,
             data: TypeData::Object(ObjectTypeData {
                 structured: StructuredTypeData {
@@ -241,12 +244,37 @@ impl Checker {
         if !target_struct.index_infos.is_empty() {
             return None;
         }
+        // Go hasExcessProperties：目标为 globalObjectType 的超集（含 Object 或
+        // object 非原始型成分）时跳过多余属性检查
+        if self.target_admits_any_properties(target) {
+            return None;
+        }
         for prop in &source_struct.properties {
             if !self.target_has_property(target, &prop.name) {
                 return Some(prop.name.clone());
             }
         }
         None
+    }
+
+    // Go isTypeSubsetOf(globalObjectType, target)：Object/object 成分出现即
+    // 视为全局 Object 型的容器
+    fn target_admits_any_properties(&self, t: &Arc<Type>) -> bool {
+        if t.flags.contains(TypeFlags::NonPrimitive) {
+            return true;
+        }
+        if let Some(sym) = &t.symbol
+            && sym.name == "Object"
+            && sym.flags.contains(SymbolFlags::Interface)
+        {
+            return true;
+        }
+        if t.flags.contains(TypeFlags::Union)
+            && let Some(members) = t.types()
+        {
+            return members.iter().any(|m| self.target_admits_any_properties(m));
+        }
+        false
     }
 
 

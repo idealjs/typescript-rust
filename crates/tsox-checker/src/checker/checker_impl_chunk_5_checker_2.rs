@@ -41,11 +41,12 @@ impl Checker {
             );
             props.push(symbol);
         }
+        // Go getWidenedTypeOfObjectLiteral：newAnonymousType(t.symbol, ...) 保留原符号
         Arc::new(Type {
             flags: TypeFlags::Object,
             object_flags: ObjectFlags::Anonymous | ObjectFlags::ObjectLiteral,
             id: crate::checker::types::next_type_id(),
-            symbol: None,
+            symbol: t.symbol.clone(),
             alias: None,
             data: TypeData::Object(ObjectTypeData {
                 structured: StructuredTypeData {

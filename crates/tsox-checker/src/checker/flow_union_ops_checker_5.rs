@@ -378,6 +378,25 @@ impl Checker {
         if let Some(sym) = self.get_property_of_type_cached(t, name) {
             return Some(sym);
         }
+        // Go getPropertyOfObjectType：声明成员未命中时按索引签名合成属性
+        //（数字名配 number 索引，非数字名配 string 索引）
+        if let Some(structured) = t.as_structured()
+            && structured.members.get(name).is_none()
+        {
+            for info in &structured.index_infos {
+                let Some(key) = &info.key_type else { continue };
+                let numeric = name.parse::<f64>().is_ok();
+                let applicable = key.flags.contains(TypeFlags::Number) && numeric;
+                if !applicable {
+                    continue;
+                }
+                let vt = info
+                    .value_type
+                    .clone()
+                    .unwrap_or_else(|| self.any_type());
+                return Some(self.synthetic_property_of_type(name, vt));
+            }
+        }
         if let Some(interface_sym) = self.unresolved_interface_symbol_of(t) {
             // 壳（自引用/实例化重建）：按 owner 的 type_arguments 取实例成员符号，
             // 成员类型已在实例中替换；实例仍为空壳时视为未解析（防重入循环）
@@ -431,6 +450,19 @@ impl Checker {
             return None;
         }
         Some(Arc::clone(sym))
+    }
+
+    // 索引签名命中的合成属性（Go getPropertySymbolForIndexInfo）
+    fn synthetic_property_of_type(&mut self, name: &str, t: Arc<Type>) -> Arc<Symbol> {
+        let sym = Arc::new(Symbol::new(SymbolFlags::Property, name.to_string()));
+        self.value_symbol_links.insert(
+            &sym,
+            crate::checker::types::ValueSymbolLinks {
+                resolved_type: Some(t),
+                ..Default::default()
+            },
+        );
+        sym
     }
 }
 
