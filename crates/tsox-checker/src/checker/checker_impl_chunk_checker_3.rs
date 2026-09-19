@@ -158,32 +158,6 @@ impl Checker {
         }
     }
 
-    pub(crate) fn ensure_jsx_namespace(&mut self) {
-        use crate::checker::jsx::JsxNames;
-        if !self.is_jsx_enabled() || self.get_jsx_namespace().is_some() {
-            return;
-        }
-
-        let mut jsx = Symbol::new(SymbolFlags::NamespaceModule, JsxNames::JSX);
-
-        let element = Symbol::new(SymbolFlags::TypeLiteral, JsxNames::ELEMENT);
-        jsx.members
-            .insert(JsxNames::ELEMENT.to_string(), Arc::new(element));
-
-        let mut intrinsic = Symbol::new(SymbolFlags::TypeLiteral, JsxNames::INTRINSIC_ELEMENTS);
-        intrinsic.members.insert(
-            tsox_frontend::ast::INTERNAL_SYMBOL_NAME_INDEX.to_string(),
-            Arc::new(Symbol::new(SymbolFlags::TypeLiteral, "")),
-        );
-        jsx.members.insert(
-            JsxNames::INTRINSIC_ELEMENTS.to_string(),
-            Arc::new(intrinsic),
-        );
-
-        self.globals
-            .insert(JsxNames::JSX.to_string(), Arc::new(jsx));
-    }
-
     pub fn any_type(&self) -> Arc<Type> {
         self.any_type
             .get_or_init(|| {

@@ -38,13 +38,6 @@ impl Checker {
         if !self.is_jsx_enabled() {
             self.grammar_error_on_node(error_node, &CANNOT_USE_JSX_UNLESS_THE_JSX_FLAG_IS_PROVIDED);
         }
-
-        if self.no_implicit_any && self.get_jsx_namespace().is_none() {
-            self.grammar_error_on_node(
-                error_node,
-                &JSX_ELEMENT_IMPLICITLY_HAS_TYPE_ANY_BECAUSE_THE_GLOBAL_TYPE_JSX_ELEMENT_DOES_NOT_EXIST,
-            );
-        }
     }
 
     pub(crate) fn ensure_jsx_implicit_container(&mut self, error_node: &Arc<Node>) {
@@ -150,12 +143,10 @@ impl Checker {
             .or_else(|| intrinsic_elements.exports.get(&tag_text));
 
         if member.is_none() {
-            let has_index_signature = intrinsic_elements.declarations.iter().any(|d| {
-                matches!(&d.data, tsox_frontend::ast::NodeData::InterfaceDeclaration(id) if id
-                    .members
-                    .iter()
-                    .any(|m| m.kind == SyntaxKind::IndexSignature))
-            });
+            let intrinsic_type = self.get_type_of_symbol(&intrinsic_elements);
+            let has_index_signature = !self
+                .get_index_infos_of_type(&intrinsic_type)
+                .is_empty();
             if intrinsic_elements.members.is_empty()
                 && intrinsic_elements.exports.is_empty()
                 && !has_index_signature

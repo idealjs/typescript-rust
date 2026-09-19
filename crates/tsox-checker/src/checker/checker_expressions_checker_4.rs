@@ -145,6 +145,22 @@ impl Checker {
             self.check_block_scoped_variable_used_before_declaration(node, &symbol, name);
 
             self.check_variable_used_before_assigned(node, &symbol, name);
+
+            let in_bundled_lib = self
+                .get_source_file_of_node(node)
+                .is_some_and(|f| crate::bundled::is_bundled(&f.file_name));
+            if !in_bundled_lib
+                && !is_export_assignment_name
+                && !base.flags.intersects(SymbolFlags::VALUE)
+            {
+                self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                    self.current_file.clone(),
+                    node.loc,
+                    tsox_core::diagnostics::messages_generated::
+                        X_0_ONLY_REFERS_TO_A_TYPE_BUT_IS_BEING_USED_AS_A_VALUE_HERE,
+                    vec![name.to_string()],
+                ));
+            }
             return;
         }
 
@@ -165,10 +181,14 @@ impl Checker {
                 ));
                 true
             } else {
+                let in_bundled_lib = self
+                    .get_source_file_of_node(node)
+                    .is_some_and(|f| crate::bundled::is_bundled(&f.file_name));
                 let type_hit = self
                     .resolve_identifier_with_meaning(node, SymbolFlags::TYPE)
                     .map(|s| self.resolve_alias_base(s));
                 if let Some(sym) = type_hit
+                    && !in_bundled_lib
                     && !sym.flags.intersects(SymbolFlags::VALUE)
                 {
                     self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(

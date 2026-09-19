@@ -69,6 +69,29 @@ impl Checker {
             if self.param_has_typed_jsdoc_tag(node, name.text()) {
                 continue;
             }
+            if self.contextual_type_of_parameter(param).is_some() {
+                continue;
+            }
+            if matches!(
+                node.kind,
+                SyntaxKind::FunctionType | SyntaxKind::MethodSignature | SyntaxKind::CallSignature
+            ) && self.parameter_name_resolves_as_type(name)
+            {
+                let name_text = name.text().to_string();
+                let arg_name = format!("arg{i}");
+                let type_name = format!(
+                    "{name_text}{}",
+                    if pd.dot_dot_dot_token.is_some() { "[]" } else { "" }
+                );
+                self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                    self.current_file.clone(),
+                    param.loc,
+                    tsox_core::diagnostics::messages_generated::
+                        PARAMETER_HAS_A_NAME_BUT_NO_TYPE_DID_YOU_MEAN_0_COLON_1,
+                    vec![arg_name, type_name],
+                ));
+                continue;
+            }
             let file = self.current_file.clone();
             let name_text = name.text().to_string();
             let diagnostic = if pd.dot_dot_dot_token.is_some() {
@@ -89,6 +112,19 @@ impl Checker {
             };
             self.diagnostics.add(diagnostic);
         }
+    }
+
+    fn parameter_name_resolves_as_type(&self, name: &Arc<Node>) -> bool {
+        const TYPE_KEYWORD_NAMES: &[&str] = &[
+            "any", "unknown", "never", "void", "undefined", "string", "number", "boolean",
+            "bigint", "object", "symbol",
+        ];
+        let text = name.text();
+        if TYPE_KEYWORD_NAMES.contains(&text) {
+            return true;
+        }
+        self.resolve_identifier_with_meaning(name, SymbolFlags::TYPE)
+            .is_some()
     }
 
     pub(crate) fn param_has_typed_jsdoc_tag(&self, node: &Arc<Node>, param_name: &str) -> bool {
@@ -206,6 +242,79 @@ impl Checker {
                             && name.kind == SyntaxKind::ComputedPropertyName
                         {
                             self.check_computed_property_name(&name);
+                        }
+                        if let tsox_frontend::ast::NodeData::PropertySignatureDeclaration(psd) =
+                            &member.data
+                            && psd.type_node.kind == SyntaxKind::MissingDeclaration
+                            && self.no_implicit_any
+                        {
+                            self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                                self.current_file.clone(),
+                                member.loc,
+                                tsox_core::diagnostics::messages_generated::
+                                    MEMBER_0_IMPLICITLY_HAS_AN_1_TYPE,
+                                vec![
+                                    member
+                                        .name()
+                                        .map(|n| n.text().to_string())
+                                        .unwrap_or_default(),
+                                    "any".to_string(),
+                                ],
+                            ));
+                        }
+                        let member_params: Option<&NodeList> = match &member.data {
+                            tsox_frontend::ast::NodeData::MethodSignatureDeclaration(md) => {
+                                Some(&md.parameters)
+                            }
+                            tsox_frontend::ast::NodeData::CallSignatureDeclaration(cd) => {
+                                Some(&cd.parameters)
+                            }
+                            tsox_frontend::ast::NodeData::ConstructSignatureDeclaration(cd) => {
+                                Some(&cd.parameters)
+                            }
+                            _ => None,
+                        };
+                        let member_return: Option<&Arc<Node>> = match &member.data {
+                            tsox_frontend::ast::NodeData::CallSignatureDeclaration(cd) => {
+                                cd.type_node.as_ref()
+                            }
+                            tsox_frontend::ast::NodeData::ConstructSignatureDeclaration(cd) => {
+                                cd.type_node.as_ref()
+                            }
+                            _ => None,
+                        };
+                        if let Some(params) = member_params {
+                            self.check_parameter_property_modifiers(params, false);
+                            self.check_parameter_implicit_any(member, params, 0);
+                            for p in params.iter() {
+                                if let tsox_frontend::ast::NodeData::ParameterDeclaration(pd) =
+                                    &p.data
+                                    && let Some(pt) = &pd.type_node
+                                {
+                                    self.check_type_annotation(pt);
+                                }
+                            }
+                            if self.no_implicit_any
+                                && member_return.is_none()
+                                && matches!(
+                                    member.kind,
+                                    SyntaxKind::CallSignature | SyntaxKind::ConstructSignature
+                                )
+                            {
+                                let message = if member.kind == SyntaxKind::ConstructSignature {
+                                    tsox_core::diagnostics::messages_generated::
+                                        CONSTRUCT_SIGNATURE_WHICH_LACKS_RETURN_TYPE_ANNOTATION_IMPLICITLY_HAS_AN_ANY_RETURN_TYPE
+                                } else {
+                                    tsox_core::diagnostics::messages_generated::
+                                        CALL_SIGNATURE_WHICH_LACKS_RETURN_TYPE_ANNOTATION_IMPLICITLY_HAS_AN_ANY_RETURN_TYPE
+                                };
+                                self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                                    self.current_file.clone(),
+                                    member.loc,
+                                    message,
+                                    vec![],
+                                ));
+                            }
                         }
                     }
                 }

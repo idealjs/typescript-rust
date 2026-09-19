@@ -155,8 +155,6 @@ impl Checker {
 
         self.ensure_host_globals();
 
-        self.ensure_jsx_namespace();
-
         self.merge_module_augmentations();
 
         self.report_missing_global_types();

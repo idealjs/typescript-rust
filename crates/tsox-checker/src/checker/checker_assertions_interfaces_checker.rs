@@ -319,6 +319,15 @@ impl Checker {
                         &member.data
                     {
                         self.check_type_annotation(&d.type_node);
+                        if d.type_node.kind == SyntaxKind::MissingDeclaration && self.no_implicit_any {
+                            self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                                self.current_file.clone(),
+                                member.loc,
+                                tsox_core::diagnostics::messages_generated::
+                                    MEMBER_0_IMPLICITLY_HAS_AN_1_TYPE,
+                                vec![member.name().map(|n| n.text().to_string()).unwrap_or_default(), "any".to_string()],
+                            ));
+                        }
                     }
                 }
 

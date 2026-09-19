@@ -446,7 +446,7 @@ impl Checker {
         self.get_signature_instantiation(sig, &args)
     }
 
-    fn contextual_type_of_parameter(
+    pub(crate) fn contextual_type_of_parameter(
         &mut self,
         param: &Arc<Node>,
     ) -> Option<Arc<Type>> {
@@ -516,9 +516,8 @@ impl Checker {
                             let widened = self.widen_argument_type_deep(&raw);
                             return Some(widened);
                         }
-                        if host_params.iter().any(|p| {
-                            matches!(&p.data, NodeData::ParameterDeclaration(pd) if pd.initializer.is_some())
-                        }) {
+                        if matches!(&param.data, NodeData::ParameterDeclaration(pd) if pd.initializer.is_some())
+                        {
                             return None;
                         }
                         Some(self.undefined_type())

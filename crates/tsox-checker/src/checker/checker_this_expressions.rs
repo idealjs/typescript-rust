@@ -11,6 +11,49 @@ use tsox_frontend::ast::{
 };
 
 impl Checker {
+    /// Go checkThisExpression 的检查入口：module/enum 容器报错 + 类型解析（含 TS2683）
+    pub(crate) fn check_this_expression_reference(&mut self, node: &Arc<Node>) {
+        let container = get_this_container(node, false, false);
+        let diagnostic = match container.kind {
+            SyntaxKind::ModuleDeclaration => Some(
+                tsox_core::diagnostics::messages_generated::
+                    X_THIS_CANNOT_BE_REFERENCED_IN_A_MODULE_OR_NAMESPACE_BODY,
+            ),
+            SyntaxKind::EnumDeclaration => Some(
+                tsox_core::diagnostics::messages_generated::
+                    X_THIS_CANNOT_BE_REFERENCED_IN_CURRENT_LOCATION,
+            ),
+            _ => None,
+        };
+        if let Some(msg) = diagnostic {
+            self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                self.current_file.clone(),
+                node.loc,
+                msg,
+                Vec::new(),
+            ));
+        }
+        let t = self.this_expression_type(node);
+        let captured_by_arrow =
+            get_this_container(node, true, true).kind == SyntaxKind::ArrowFunction;
+        if self.no_implicit_this
+            && captured_by_arrow
+            && t.symbol.as_ref().is_some_and(|s| {
+                self.global_this_symbol
+                    .as_ref()
+                    .is_some_and(|g| Arc::ptr_eq(g, s))
+            })
+        {
+            self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                self.current_file.clone(),
+                node.loc,
+                tsox_core::diagnostics::messages_generated::
+                    THE_CONTAINING_ARROW_FUNCTION_CAPTURES_THE_GLOBAL_VALUE_OF_THIS,
+                Vec::new(),
+            ));
+        }
+    }
+
     /// Go checkThisExpression 的类型解析主干（诊断与 flow 收窄不在此层）
     pub(crate) fn this_expression_type(&mut self, node: &Arc<Node>) -> Arc<Type> {
         // Go checkThisInStaticClassFieldInitializerInDecoratedClass：
@@ -65,6 +108,16 @@ impl Checker {
             if let Some(t) = self.global_this_type_value() {
                 return t;
             }
+            return self.get_any_type();
+        }
+        if self.no_implicit_this {
+            self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                self.current_file.clone(),
+                node.loc,
+                tsox_core::diagnostics::messages_generated::
+                    X_THIS_IMPLICITLY_HAS_TYPE_ANY_BECAUSE_IT_DOES_NOT_HAVE_A_TYPE_ANNOTATION,
+                Vec::new(),
+            ));
         }
         self.get_any_type()
     }

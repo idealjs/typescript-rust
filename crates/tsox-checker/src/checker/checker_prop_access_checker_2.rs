@@ -118,6 +118,29 @@ impl Checker {
         }
         let file = self.current_file.clone();
 
+        if obj_type
+            .symbol
+            .as_ref()
+            .is_some_and(|s| self.global_this_symbol.as_ref().is_some_and(|g| Arc::ptr_eq(g, s)))
+        {
+            let block_scoped = self.globals.get(name_text).is_some_and(|sym| {
+                sym.flags
+                    .intersects(tsox_frontend::ast::SymbolFlags::BLOCK_SCOPED)
+            });
+            if !block_scoped {
+                if self.no_implicit_any {
+                    self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                        file,
+                        name.loc,
+                        tsox_core::diagnostics::messages_generated::
+                            ELEMENT_IMPLICITLY_HAS_AN_ANY_TYPE_BECAUSE_TYPE_0_HAS_NO_INDEX_SIGNATURE,
+                        vec!["typeof globalThis".to_string()],
+                    ));
+                }
+                return;
+            }
+        }
+
         let display_type = if obj_type.flags.contains(TypeFlags::IndexedAccess) {
             self.constraint_of_indexed_access(&obj_type)
                 .unwrap_or_else(|| Arc::clone(&obj_type))

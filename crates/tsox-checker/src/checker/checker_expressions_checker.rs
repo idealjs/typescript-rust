@@ -17,9 +17,11 @@ impl Checker {
             | SyntaxKind::TrueKeyword
             | SyntaxKind::FalseKeyword
             | SyntaxKind::NullKeyword
-            | SyntaxKind::ThisKeyword
             | SyntaxKind::RegularExpressionLiteral
             | SyntaxKind::NoSubstitutionTemplateLiteral => {}
+            SyntaxKind::ThisKeyword => {
+                self.check_this_expression_reference(node);
+            }
             SyntaxKind::MetaProperty => {
                 let _ = self.get_type_of_node(node);
             }
