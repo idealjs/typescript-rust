@@ -247,6 +247,20 @@ impl Checker {
                     SyntaxKind::NumericLiteral => {
                         Some(tsox_core::jsnum::Number::from_string(n.text()).to_string())
                     }
+                    SyntaxKind::ComputedPropertyName => {
+                        let tsox_frontend::ast::NodeData::ComputedPropertyName(cd) = &n.data
+                        else {
+                            return None;
+                        };
+                        match cd.expression.kind {
+                            SyntaxKind::StringLiteral | SyntaxKind::NumericLiteral => {
+                                Some(cd.expression.text().to_string())
+                            }
+                            _ => crate::binder::symbols_binder_4::well_known_symbol_member_name(
+                                &cd.expression,
+                            ),
+                        }
+                    }
                     _ => None,
                 })
                 .is_some_and(|n| n == name)
@@ -269,6 +283,17 @@ fn self_member_name_text(m: &Arc<Node>, name: &str, is_static: bool) -> Option<S
     let matched = match n.kind {
         SyntaxKind::Identifier | SyntaxKind::StringLiteral => n.text().to_string(),
         SyntaxKind::NumericLiteral => tsox_core::jsnum::Number::from_string(n.text()).to_string(),
+        SyntaxKind::ComputedPropertyName => {
+            let tsox_frontend::ast::NodeData::ComputedPropertyName(cd) = &n.data else {
+                return None;
+            };
+            match cd.expression.kind {
+                SyntaxKind::StringLiteral | SyntaxKind::NumericLiteral => {
+                    cd.expression.text().to_string()
+                }
+                _ => crate::binder::symbols_binder_4::well_known_symbol_member_name(&cd.expression)?,
+            }
+        }
         _ => return None,
     };
     (matched == name && m.has_syntactic_modifier(ModifierFlags::Static) == is_static)

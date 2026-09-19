@@ -178,6 +178,37 @@ impl Binder {
                                 .to_string();
                         if has_module_specifier {
                             // re-export：建纯 alias，checker 按模块说明符解析
+                            if let Some(existing) = parent_sym.exports.get(&exported)
+                                && existing
+                                    .declarations
+                                    .iter()
+                                    .any(|d| d.kind == SyntaxKind::ExportSpecifier)
+                            {
+                                // Go declareSymbol(AliasExcludes=Alias)：同名
+                                // export specifier 二次声明冲突，报两处 2300
+                                for d in existing.declarations.iter().filter(|d| {
+                                    d.kind == SyntaxKind::ExportSpecifier && !Arc::ptr_eq(d, el)
+                                }) {
+                                    if let Some(n) = d.name() {
+                                        self.symbol_map.binder_diagnostics.push(
+                                            Diagnostic::new(
+                                                self.current_source_file.clone(),
+                                                n.loc,
+                                                DUPLICATE_IDENTIFIER_0,
+                                                vec![exported.clone()],
+                                            ),
+                                        );
+                                    }
+                                }
+                                if let Some(n) = el.name() {
+                                    self.symbol_map.binder_diagnostics.push(Diagnostic::new(
+                                        self.current_source_file.clone(),
+                                        n.loc,
+                                        DUPLICATE_IDENTIFIER_0,
+                                        vec![exported.clone()],
+                                    ));
+                                }
+                            }
                             if parent_sym.exports.get(&exported).is_none() {
                                 let sym = self.new_symbol(SymbolFlags::Alias, exported.clone());
                                 let sym_mut = Arc::as_ptr(&sym) as *mut Symbol;
@@ -195,7 +226,44 @@ impl Binder {
                             continue;
                         }
                         // 无 from：目标是本容器链绑定——直接把绑定符号放入
-                        // exports（不建新符号，避免 Duplicate identifier）
+                        // exports（不建新符号，避免 Duplicate identifier）。
+                        // Go declareSymbol(AliasExcludes)：既有 exports 条目含
+                        // export specifier 声明时，同名 specifier 二次声明冲突
+                        if let Some(existing) = parent_sym.exports.get(&exported)
+                            && existing
+                                .declarations
+                                .iter()
+                                .any(|d| d.kind == SyntaxKind::ExportSpecifier)
+                        {
+                            let prior: Vec<Arc<Node>> = existing
+                                .declarations
+                                .iter()
+                                .filter(|d| {
+                                    d.kind == SyntaxKind::ExportSpecifier && !Arc::ptr_eq(d, el)
+                                })
+                                .cloned()
+                                .collect();
+                            if !prior.is_empty() {
+                                for d in &prior {
+                                    if let Some(n) = d.name() {
+                                        self.symbol_map.binder_diagnostics.push(Diagnostic::new(
+                                            self.current_source_file.clone(),
+                                            n.loc,
+                                            DUPLICATE_IDENTIFIER_0,
+                                            vec![exported.clone()],
+                                        ));
+                                    }
+                                }
+                                if let Some(n) = el.name() {
+                                    self.symbol_map.binder_diagnostics.push(Diagnostic::new(
+                                        self.current_source_file.clone(),
+                                        n.loc,
+                                        DUPLICATE_IDENTIFIER_0,
+                                        vec![exported.clone()],
+                                    ));
+                                }
+                            }
+                        }
                         let target = scope_nodes.iter().find_map(|scope| {
                             self.symbol_map
                                 .locals
