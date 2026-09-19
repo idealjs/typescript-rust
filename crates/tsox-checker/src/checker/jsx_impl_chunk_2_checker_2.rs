@@ -47,6 +47,9 @@ impl Checker {
         if !is_opening_like {
             return;
         }
+        // Go jsxElementLinks 惰性解析命名空间：先建隐式容器缓存，标签检查
+        // 才能命中 jsxFactory 派生的 JSX 命名空间
+        self.ensure_jsx_implicit_container(opening);
         let tag_name = match jsx_tag_name(opening) {
             Some(t) => t,
             None => return,
@@ -57,7 +60,6 @@ impl Checker {
             self.check_jsx_component(opening);
         }
 
-        self.ensure_jsx_implicit_container(opening);
         if let Some((loc, module_ref)) = self.pending_jsx_2875.take() {
             self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
                 self.current_file.clone(),
