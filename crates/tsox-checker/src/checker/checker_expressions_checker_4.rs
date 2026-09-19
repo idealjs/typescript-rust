@@ -149,8 +149,11 @@ impl Checker {
 
             // Go checkAndReportErrorForUsingTypeAsValue：值位按 Value 含义解析失败
             // 而全含义解析到类型符号（interface/type alias 等）报 TS2693；
-            // bundled lib 的同名 var+interface 合并解析有分叉，先不做此检查
-            if !base.flags.intersects(SymbolFlags::VALUE)
+            // bundled lib 的同名 var+interface 合并解析有分叉，先不做此检查。
+            // `export = SomeType` 可合法引用纯类型名，由 checkExportAssignment
+            // 决定是否报错（isExportAssignmentExpressionName 抑制）
+            if !is_export_assignment_name
+                && !base.flags.intersects(SymbolFlags::VALUE)
                 && base.flags.intersects(SymbolFlags::TYPE)
                 && self
                     .current_file

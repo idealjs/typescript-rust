@@ -140,6 +140,16 @@ impl Checker {
             }
         };
 
+        let is_param_prop = |p: &Arc<Node>| {
+            p.syntactic_modifier_flags().intersects(
+                ModifierFlags::Public
+                    | ModifierFlags::Private
+                    | ModifierFlags::Protected
+                    | ModifierFlags::Readonly,
+            ) && p
+                .name()
+                .is_some_and(|n| n.kind == SyntaxKind::Identifier)
+        };
         let param_props: Vec<(String, &Arc<Node>)> = members
             .iter()
             .filter(|m| m.kind == SyntaxKind::Constructor)
@@ -149,16 +159,7 @@ impl Checker {
                 };
                 cd.parameters
                     .iter()
-                    .filter(|p| {
-                        p.syntactic_modifier_flags().intersects(
-                            ModifierFlags::Public
-                                | ModifierFlags::Private
-                                | ModifierFlags::Protected
-                                | ModifierFlags::Readonly,
-                        ) && p
-                            .name()
-                            .is_some_and(|n| n.kind == SyntaxKind::Identifier)
-                    })
+                    .filter(|p| is_param_prop(p))
                     .map(|p| (p.name().unwrap().text().to_string(), p))
                     .collect()
             })
@@ -185,9 +186,16 @@ impl Checker {
 
         for m in members.iter() {
             if m.kind == SyntaxKind::Constructor {
-                for (name, _) in &param_props {
+                let tsox_frontend::ast::NodeData::ConstructorDeclaration(cd) = &m.data else {
+                    continue;
+                };
+                for p in cd.parameters.iter() {
+                    if !is_param_prop(p) {
+                        continue;
+                    }
+                    let name = p.name().unwrap().text().to_string();
                     if record((name.clone(), false), 1, &mut states) {
-                        self.report_duplicate_class_member(members, name, false, &param_props);
+                        self.report_duplicate_class_member(members, &name, false, &param_props);
                     }
                 }
                 continue;
