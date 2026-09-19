@@ -194,4 +194,27 @@ impl Checker {
             None
         }
     }
+
+    // Go getSimplifiedTypeOrConstraint：简化型（条件已解析）优先，否则约束；
+    // 无约束类型参数隐含 unknown（Go getDefaultConstraintOfTypeParameter）
+    pub(crate) fn get_simplified_type_or_constraint(&mut self, t: &Arc<Type>) -> Option<Arc<Type>> {
+        if t.flags.contains(TypeFlags::Conditional)
+            && let Some(simplified) = self.get_resolved_type_of_conditional_type(t)
+            && !Arc::ptr_eq(&simplified, t)
+        {
+            return Some(simplified);
+        }
+        if t.flags.contains(TypeFlags::TypeParameter) {
+            return Some(
+                self.get_constraint_of_type_parameter(t)
+                    .unwrap_or_else(|| self.unknown_type()),
+            );
+        }
+        if t.flags.contains(TypeFlags::IndexedAccess)
+            || matches!(&t.data, TypeData::IndexedAccess(_))
+        {
+            return self.constraint_of_indexed_access(t);
+        }
+        None
+    }
 }
