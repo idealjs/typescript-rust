@@ -407,6 +407,9 @@ impl Checker {
         if node.flags.contains(NodeFlags::AwaitContext) {
             return;
         }
+        if self.check_await_expression_in_non_async_context(node) {
+            return;
+        }
         if self.is_within_function_like(node) {
             return;
         }
@@ -426,7 +429,7 @@ impl Checker {
             return;
         }
         let module_ok = matches!(
-            self.compiler_options.module,
+            self.compiler_options.get_emit_module_kind(),
             tsox_core::core::compiler_options::ModuleKind::ES2022
                 | tsox_core::core::compiler_options::ModuleKind::ESNext
                 | tsox_core::core::compiler_options::ModuleKind::System

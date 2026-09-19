@@ -54,6 +54,10 @@ impl Checker {
         };
         let is_for_of = node.kind == SyntaxKind::ForOfStatement;
 
+        if is_for_of && self.check_for_await_out_of_context(node) {
+            return true;
+        }
+
         if is_for_of
             && !node
                 .flags

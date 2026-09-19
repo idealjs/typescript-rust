@@ -70,10 +70,12 @@ impl Parser {
                 self.next_token();
                 let expression = self.parse_unary_expression();
                 let end = expression.end();
-                Arc::new(Node::with_loc(
+                let flags = self.context_flags_now();
+                Arc::new(Node::with_loc_flags(
                     SyntaxKind::AwaitExpression,
                     NodeData::AwaitExpression(AwaitExpressionData { expression }),
                     TextRange::new(pos, end),
+                    flags,
                 ))
             }
             SyntaxKind::LessThanToken if self.language_variant != LanguageVariant::Jsx => {
