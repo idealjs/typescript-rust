@@ -144,6 +144,7 @@ impl Checker {
             && matches!(node.kind, SyntaxKind::MethodDeclaration)
             && type_node.is_none()
             && body.is_none()
+            && !self.declaration_belongs_to_private_ambient_member(node)
             && !self
                 .current_file
                 .as_ref()

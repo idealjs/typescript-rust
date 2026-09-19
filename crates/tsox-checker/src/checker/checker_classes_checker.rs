@@ -19,6 +19,40 @@ impl Checker {
                 if let tsox_frontend::ast::NodeData::PropertyDeclaration(data) = &node.data {
                     self.check_computed_property_name(&data.name);
 
+                    let ambient = self.ambient_context_depth > 0
+                        || node.has_syntactic_modifier(ModifierFlags::Ambient)
+                        || {
+                            let mut anc = node.parent();
+                            let mut found = false;
+                            while let Some(a) = anc {
+                                if a.has_syntactic_modifier(ModifierFlags::Ambient) {
+                                    found = true;
+                                    break;
+                                }
+                                anc = a.parent();
+                            }
+                            found
+                        }
+                        || self
+                            .current_file
+                            .as_ref()
+                            .is_some_and(|f| f.is_declaration_file);
+                    if ambient
+                        && self.no_implicit_any
+                        && data.type_node.is_none()
+                        && data.initializer.is_none()
+                        && !self.declaration_belongs_to_private_ambient_member(node)
+                        && data.name.kind == SyntaxKind::Identifier
+                    {
+                        self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                            self.current_file.clone(),
+                            data.name.loc,
+                            tsox_core::diagnostics::messages_generated::
+                                MEMBER_0_IMPLICITLY_HAS_AN_1_TYPE,
+                            vec![data.name.text().to_string(), "any".to_string()],
+                        ));
+                    }
+
                     if node.has_syntactic_modifier(ModifierFlags::Abstract)
                         && data.initializer.is_some()
                     {
@@ -38,6 +72,9 @@ impl Checker {
                             let _ = self.get_type_from_type_node(type_node);
                             self.in_static_member_type = prev;
                         }
+                    }
+                    if let Some(tn) = &data.type_node {
+                        self.check_type_annotation(tn);
                     }
                     if let Some(init) = &data.initializer {
                         let is_static = node.has_syntactic_modifier(ModifierFlags::Static);

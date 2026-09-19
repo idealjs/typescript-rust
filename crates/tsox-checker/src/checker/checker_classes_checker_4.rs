@@ -69,6 +69,9 @@ impl Checker {
             if self.param_has_typed_jsdoc_tag(node, name.text()) {
                 continue;
             }
+            if self.declaration_belongs_to_private_ambient_member(param) {
+                continue;
+            }
             if self.contextual_type_of_parameter(param).is_some() {
                 continue;
             }
@@ -112,6 +115,47 @@ impl Checker {
             };
             self.diagnostics.add(diagnostic);
         }
+    }
+
+    pub(crate) fn declaration_belongs_to_private_ambient_member(&self, decl: &Arc<Node>) -> bool {
+        let mut member = Arc::clone(decl);
+        loop {
+            match member.kind {
+                SyntaxKind::BindingElement | SyntaxKind::VariableDeclaration => {
+                    let Some(parent) = member.parent() else { break };
+                    member = parent;
+                }
+                _ => break,
+            }
+        }
+        if member.kind == SyntaxKind::Parameter
+            && let Some(parent) = member.parent()
+        {
+            member = parent;
+        }
+        let is_private = member.has_syntactic_modifier(ModifierFlags::Private)
+            || member
+                .name()
+                .is_some_and(|n| n.kind == SyntaxKind::PrivateIdentifier);
+        let is_ambient = self.ambient_context_depth > 0
+            || member.has_syntactic_modifier(ModifierFlags::Ambient)
+            || {
+                let mut anc = member.parent();
+                let mut found = false;
+                while let Some(a) = anc {
+                    if a.has_syntactic_modifier(ModifierFlags::Ambient) {
+                        found = true;
+                        break;
+                    }
+                    anc = a.parent();
+                }
+                found
+            }
+            || self
+                .current_file
+                .as_ref()
+                .is_some_and(|f| f.is_declaration_file);
+        is_private && is_ambient
     }
 
     fn parameter_name_resolves_as_type(&self, name: &Arc<Node>) -> bool {

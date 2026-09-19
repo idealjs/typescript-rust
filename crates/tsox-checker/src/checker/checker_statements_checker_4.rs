@@ -101,6 +101,19 @@ impl Checker {
                         .current_file
                         .as_ref()
                         .is_some_and(|f| f.is_declaration_file);
+                if is_ambient
+                    && self.no_implicit_any
+                    && data.type_node.is_none()
+                    && data.name.kind == SyntaxKind::Identifier
+                {
+                    self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                        self.current_file.clone(),
+                        data.name.loc,
+                        tsox_core::diagnostics::messages_generated::
+                            VARIABLE_0_IMPLICITLY_HAS_AN_1_TYPE,
+                        vec![data.name.text().to_string(), "any".to_string()],
+                    ));
+                }
                 if is_const && !in_for_in_of && !is_ambient {
                     let file = self.current_file.clone();
                     let name_loc = data.name.loc;
