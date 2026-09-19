@@ -252,8 +252,8 @@ fn export_specifier_has_module_specifier(node: &Arc<Node>) -> bool {
 }
 
 impl Checker {
-    // Go checkExportSpecifier：解析命中 undefined/globalThis 符号，或首声明
-    // 位于非模块文件（全局源文件）顶层
+    // Go checkExportSpecifier：解析命中 undefined/globalThis 符号，或声明的
+    // 声明容器（GetDeclarationContainer）是非模块全局源文件
     fn symbol_is_global_declaration(&self, sym: &Arc<Symbol>) -> bool {
         if self
             .undefined_symbol
@@ -267,8 +267,19 @@ impl Checker {
             return true;
         }
         sym.declarations.first().is_some_and(|d| {
-            self.get_source_file_of_node(d)
-                .is_some_and(|f| f.external_module_indicator.is_none())
+            let mut cur = d.parent();
+            while let Some(anc) = cur {
+                match anc.kind {
+                    SyntaxKind::ModuleDeclaration => return false,
+                    SyntaxKind::SourceFile => {
+                        return self
+                            .get_source_file_of_node(d)
+                            .is_some_and(|f| f.external_module_indicator.is_none());
+                    }
+                    _ => cur = anc.parent(),
+                }
+            }
+            false
         })
     }
 }
