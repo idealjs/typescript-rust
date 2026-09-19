@@ -15,18 +15,8 @@ impl Checker {
         {
             return Some(Arc::clone(s));
         }
-        for d in &namespace.declarations {
-            if d.kind == SyntaxKind::ModuleDeclaration
-                && let Some(s) = self
-                    .program
-                    .symbol_map()
-                    .locals
-                    .get(&d.id())
-                    .and_then(|l| l.get(name))
-            {
-                return Some(Arc::clone(s));
-            }
-        }
+        // Go getExportsOfSymbol：限定名成员查找只看 exports 表，
+        // 非导出局部（如 namespace 内无 export 的 import=）外部不可见
 
         let export_equals = namespace.exports.get("export=")?;
         for d in &export_equals.declarations {

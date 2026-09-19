@@ -268,6 +268,10 @@ impl tsox_checker::checker::Program for Program {
             .collect();
         tsox_emit::emitter::compute_program_common_source_directory(&source_files, &self.options)
     }
+    fn canonicalize_path(&self, path: &str) -> String {
+        self.host.fs().realpath(path)
+    }
+
     fn read_file(&self, file_name: &str) -> Option<String> {
         self.host.fs().read_file(file_name)
     }

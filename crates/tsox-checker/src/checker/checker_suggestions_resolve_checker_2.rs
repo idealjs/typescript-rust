@@ -134,7 +134,7 @@ impl Checker {
                 None => Err((Arc::clone(name), String::new(), String::new())),
             },
             tsox_frontend::ast::NodeData::QualifiedName(data) => {
-                self.resolve_qualified_tail(&data.left, &data.right)
+                self.resolve_qualified_tail(&data.left, &data.right, true)
             }
 
             tsox_frontend::ast::NodeData::PropertyAccessExpression(pa) => {
@@ -148,7 +148,7 @@ impl Checker {
                         | SyntaxKind::QualifiedName
                         | SyntaxKind::PropertyAccessExpression
                 ) {
-                    self.resolve_qualified_tail(base, &pa.name)
+                    self.resolve_qualified_tail(base, &pa.name, false)
                 } else {
                     Err((Arc::clone(name), String::new(), String::new()))
                 }
@@ -161,10 +161,32 @@ impl Checker {
         &mut self,
         left: &Arc<Node>,
         right: &Arc<Node>,
+        entity_name_ctx: bool,
     ) -> Result<Arc<Symbol>, (Arc<Node>, String, String)> {
         {
             let mut symbol = self.resolve_qualified_symbol_traced(left)?;
             let path_so_far = qualified_name_text(left);
+            // Go resolveQualifiedName：限定名左侧一律按 Namespace 含义解析
+            //（Go SymbolFlagsNamespace 含 Enum）。别名链断（对应
+            // unknownSymbol 全含义）整体按 unknown 传播不报错；类型含义命中的
+            // 左侧走 2694 type-as-namespace，其余 2503
+            if entity_name_ctx {
+                let (chain_flags, chain_complete) =
+                    self.symbol_flags_with_alias_chain_ex(&symbol);
+                if !chain_flags.intersects(
+                    tsox_frontend::ast::SymbolFlags::NAMESPACE
+                        | tsox_frontend::ast::SymbolFlags::ENUM,
+                ) {
+                    if !chain_complete {
+                        return Ok(symbol);
+                    }
+                    let leftmost = crate::checker::checker::base_identifier_of(left);
+                    if chain_flags.intersects(tsox_frontend::ast::SymbolFlags::TYPE) {
+                        return Err((leftmost, qualified_name_text(left), String::new()));
+                    }
+                    return Err((leftmost, String::new(), String::new()));
+                }
+            }
             symbol = self.resolve_alias_base(symbol);
             // re-export 链（import { foo } → export { foo } → import * as foo）
             // 需循环 follow 到终点（namespace import 符号）才能查成员
@@ -191,6 +213,15 @@ impl Checker {
                 && let Some(module_sym) = self.resolve_import_alias_module(&symbol)
             {
                 symbol = module_sym;
+            }
+
+            // Go resolveEntityName：import= require 的别名目标经
+            // resolveExternalModuleSymbol 穿透模块 export= 后再查成员
+            if symbol.flags.intersects(SymbolFlags::MODULE) {
+                let through = self.resolve_external_module_symbol_go_mut(&symbol);
+                if !Arc::ptr_eq(&through, &symbol) {
+                    symbol = through;
+                }
             }
 
             let text = right.text();

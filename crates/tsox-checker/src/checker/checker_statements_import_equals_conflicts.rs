@@ -4,6 +4,7 @@ use crate::checker::checker_statements::*;
 
 impl Checker {
     pub fn check_import_equals_conflicts(&mut self, node: &Arc<Node>) {
+        self.check_external_import_in_namespace(node);
         if matches!(
             node.kind,
             SyntaxKind::ImportDeclaration | SyntaxKind::ImportEqualsDeclaration
@@ -223,6 +224,80 @@ impl Checker {
                         );
                     }
                 }
+            }
+        }
+    }
+}
+
+impl Checker {
+    /// Go checkExternalImportOrExportDeclaration：import/export 声明带外部
+    /// 模块名且不在文件顶层、也不在 ambient 模块块内时，import 形态报
+    /// TS1147；嵌套（namespace 内）的 import= 声明不在 program 级扫描
+    /// （collectModuleReferences 仅遍历顶层），此处补报模块不可解析 TS2307
+    fn check_external_import_in_namespace(&mut self, node: &Arc<Node>) {
+        if !matches!(
+            node.kind,
+            SyntaxKind::ImportDeclaration | SyntaxKind::ImportEqualsDeclaration | SyntaxKind::ExportDeclaration
+        ) {
+            return;
+        }
+        let module_name = match &node.data {
+            tsox_frontend::ast::NodeData::ImportDeclaration(d) => Some(d.module_specifier.clone()),
+            tsox_frontend::ast::NodeData::ExportDeclaration(d) => d.module_specifier.clone(),
+            tsox_frontend::ast::NodeData::ImportEqualsDeclaration(d) => {
+                if let tsox_frontend::ast::NodeData::ExternalModuleReference(ext) =
+                    &d.module_reference.data
+                {
+                    Some(ext.expression.clone())
+                } else {
+                    None
+                }
+            }
+            _ => None,
+        };
+        let Some(module_name) = module_name else {
+            return;
+        };
+        if module_name.kind != SyntaxKind::StringLiteral {
+            return;
+        }
+        let parent = node.parent();
+        let in_ambient_external_module = parent.as_ref().is_some_and(|p| {
+            p.kind == SyntaxKind::ModuleBlock
+                && p
+                    .parent()
+                    .is_some_and(|gp| tsox_frontend::ast::is_ambient_module(&gp))
+        });
+        if parent.is_none()
+            || parent.is_some_and(|p| p.kind == SyntaxKind::SourceFile)
+            || in_ambient_external_module
+        {
+            return;
+        }
+        let message = if node.kind == SyntaxKind::ExportDeclaration {
+            tsox_core::diagnostics::messages_generated::
+                EXPORT_DECLARATIONS_ARE_NOT_PERMITTED_IN_A_NAMESPACE
+        } else {
+            tsox_core::diagnostics::messages_generated::
+                IMPORT_DECLARATIONS_IN_A_NAMESPACE_CANNOT_REFERENCE_A_MODULE
+        };
+        self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+            self.current_file.clone(),
+            module_name.loc,
+            message,
+            Vec::new(),
+        ));
+        if node.kind == SyntaxKind::ImportEqualsDeclaration {
+            let spec = module_name.text().trim_matches(['"', '\'', '`']).to_string();
+            if self.resolve_module_file_symbol(&spec).is_none() {
+                let (message, args) =
+                    tsox_frontend::parser::cannot_resolve_module_error(&self.compiler_options, &spec);
+                self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                    self.current_file.clone(),
+                    module_name.loc,
+                    message.clone(),
+                    args,
+                ));
             }
         }
     }

@@ -82,9 +82,24 @@ impl Checker {
                 };
                 self.resolve_module_member_symbol(&module, &name, 8)
             }
-            NodeData::ImportEqualsDeclaration(d) => self
-                .resolve_qualified_symbol_traced(&d.module_reference)
-                .ok(),
+            NodeData::ImportEqualsDeclaration(d) => {
+                // Go getTargetOfImportEqualsDeclaration：外部模块引用经
+                // resolveExternalModuleSymbol 穿透 export=（目标为导出实体
+                // 而非模块符号本身）
+                if let NodeData::ExternalModuleReference(ext) = &d.module_reference.data {
+                    let spec = ext
+                        .expression
+                        .text()
+                        .trim_matches(['"', '\'', '`'])
+                        .to_string();
+                    return self
+                        .resolve_module_file_symbol(&spec)
+                        .and_then(|module_sym| {
+                            self.resolve_import_alias_target_of_module(&module_sym)
+                        });
+                }
+                self.resolve_qualified_symbol_traced(&d.module_reference).ok()
+            }
             // JS 赋值别名（module.exports.x = expr，绑定期 expression_is_alias）：
             // 目标是右侧表达式符号（Go getTargetOfAliasDeclaration 的 Binary 分支）
             NodeData::BinaryExpression(d) => self.resolve_identifier(&d.right),
@@ -116,8 +131,15 @@ impl Checker {
                 r
             }
             NodeData::ExportAssignment(d) if d.is_export_equals => {
-                // export = <expr>：别名目标是表达式符号
-                self.resolve_identifier(&d.expression)
+                // export = <expr>：别名目标是表达式符号（含 Foo.Member 形态）
+                match d.expression.kind {
+                    SyntaxKind::Identifier
+                    | SyntaxKind::QualifiedName
+                    | SyntaxKind::PropertyAccessExpression => {
+                        self.resolve_qualified_symbol(&d.expression)
+                    }
+                    _ => None,
+                }
             }
             _ => None,
         }

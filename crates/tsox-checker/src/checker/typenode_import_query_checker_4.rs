@@ -57,6 +57,25 @@ impl Checker {
         Arc::clone(module_symbol)
     }
 
+    /// 同 resolve_external_module_symbol_go，但经 resolve_alias_base
+    /// （含作用域解析，支持 export = Foo.Member 属性访问形态）
+    pub(crate) fn resolve_external_module_symbol_go_mut(
+        &mut self,
+        module_symbol: &Arc<Symbol>,
+    ) -> Arc<Symbol> {
+        if let Some(ee) = module_symbol
+            .exports
+            .get(tsox_frontend::ast::INTERNAL_SYMBOL_NAME_EXPORT_EQUALS)
+            .cloned()
+        {
+            let resolved = self.resolve_alias_base(Arc::clone(&ee));
+            if !Arc::ptr_eq(&resolved, &ee) && !self.alias_circular_reported.contains(&ee.id()) {
+                return resolved;
+            }
+        }
+        Arc::clone(module_symbol)
+    }
+
     fn resolve_entity_symbol_in(&self, expr: &Arc<Node>, module_symbol: &Arc<Symbol>) -> Option<Arc<Symbol>> {
         if expr.kind != SyntaxKind::Identifier {
             return None;
@@ -82,6 +101,10 @@ impl Checker {
             ea.expression.kind,
             SyntaxKind::Identifier | SyntaxKind::QualifiedName
         ) {
+            // export = Foo.Member：静态表逐段解析（左端在所在作用域 locals）
+            if matches!(ea.expression.kind, SyntaxKind::PropertyAccessExpression) {
+                return self.resolve_entity_segments_in_scope(&ea.expression, decl);
+            }
             return Some(Arc::clone(ee));
         }
         let sym_map = self.program.symbol_map();
@@ -89,12 +112,21 @@ impl Checker {
             return Some(Arc::clone(target));
         }
         let name = ea.expression.text().to_string();
-        decl.parent()
+        // export= 位于 declare module 块内时，作用域是 ModuleDeclaration
+        //（ModuleBlock 的父），foo 这类具名导出在其 exports/locals
+        let scope = decl.parent().and_then(|p| {
+            if p.kind == SyntaxKind::ModuleBlock {
+                p.parent()
+            } else {
+                Some(p)
+            }
+        });
+        scope
             .as_ref()
             .and_then(|sf| sym_map.locals.get(&sf.id()))
             .and_then(|l| l.get(&name).cloned())
             .or_else(|| {
-                decl.parent().and_then(|sf| {
+                scope.and_then(|sf| {
                     let sf_sym = sym_map.symbol_of(&sf)?;
                     sf_sym
                         .members
@@ -103,6 +135,66 @@ impl Checker {
                         .or_else(|| sf_sym.exports.get(&name).cloned())
                 })
             })
+    }
+
+    fn resolve_entity_segments_in_scope(
+        &self,
+        expr: &Arc<Node>,
+        scope_decl: &Arc<Node>,
+    ) -> Option<Arc<Symbol>> {
+        let mut segments: Vec<String> = Vec::new();
+        let mut cur = Arc::clone(expr);
+        loop {
+            match &cur.data {
+                NodeData::Identifier(d) => {
+                    segments.push(d.text.clone());
+                    break;
+                }
+                NodeData::QualifiedName(d) => {
+                    segments.push(d.right.text().to_string());
+                    cur = Arc::clone(&d.left);
+                }
+                NodeData::PropertyAccessExpression(d) => {
+                    segments.push(d.name.text().to_string());
+                    cur = Arc::clone(&d.expression);
+                }
+                _ => return None,
+            }
+        }
+        segments.reverse();
+        let scope = scope_decl.parent().and_then(|p| {
+            if p.kind == SyntaxKind::ModuleBlock {
+                p.parent()
+            } else {
+                Some(p)
+            }
+        })?;
+        let sym_map = self.program.symbol_map();
+        let mut symbol = sym_map
+            .locals
+            .get(&scope.id())
+            .and_then(|l| l.get(&segments[0]).cloned())
+            .or_else(|| {
+                sym_map.symbol_of(&scope).and_then(|s| {
+                    s.members
+                        .get(&segments[0])
+                        .cloned()
+                        .or_else(|| s.exports.get(&segments[0]).cloned())
+                })
+            })?;
+        if let Some(target) = symbol.export_symbol.as_ref() {
+            if !Arc::ptr_eq(target, &symbol) {
+                symbol = Arc::clone(target);
+            }
+        }
+        for seg in &segments[1..] {
+            symbol = symbol
+                .exports
+                .get(seg)
+                .cloned()
+                .or_else(|| symbol.members.get(seg).cloned())?;
+        }
+        Some(symbol)
     }
 
     /// Go getTypeFromImportTypeNode：import("./m") / import("./m").Q 的类型解析

@@ -79,31 +79,39 @@ impl Checker {
         // 模块符号（不含类型含义）报 TS2709，优先于 TS2749/TS2304 兜底
         {
             let alias_decl_is_namespace_form = !symbol.flags.contains(SymbolFlags::Alias)
-                || symbol
-                    .value_declaration
-                    .as_ref()
-                    .is_some_and(|d| match &d.data {
-                        NodeData::ImportEqualsDeclaration(_) => true,
-                        NodeData::ImportDeclaration(id) => id
-                            .import_clause
-                            .as_ref()
-                            .and_then(|c| match &c.data {
-                                NodeData::ImportClause(ic) => ic.named_bindings.as_ref(),
-                                _ => None,
-                            })
-                            .is_some_and(|nb| nb.kind == SyntaxKind::NamespaceImport),
-                        _ => false,
-                    });
-            let effective = if symbol.flags.contains(SymbolFlags::Alias) {
-                self.resolve_alias_base(Arc::clone(&symbol))
-            } else {
-                Arc::clone(&symbol)
-            };
+                || symbol.declarations.iter().any(|d| match &d.data {
+                    NodeData::ImportEqualsDeclaration(_) => true,
+                    NodeData::NamespaceImport(_) => true,
+                    NodeData::ImportDeclaration(id) => id
+                        .import_clause
+                        .as_ref()
+                        .and_then(|c| match &c.data {
+                            NodeData::ImportClause(ic) => ic.named_bindings.as_ref(),
+                            _ => None,
+                        })
+                        .is_some_and(|nb| nb.kind == SyntaxKind::NamespaceImport),
+                    _ => false,
+                });
+            // Go getSymbolFlags：别名链上标志逐级 OR（合并符号如
+            // `import * as B` + `interface B` 的 Interface 位保留在链中）
+            let chain_flags = self.symbol_flags_with_alias_chain(&symbol);
+            // Go 类 extends 子句按 Value 含义解析（ValueModule 命中不失败），
+            // 2507 由基类构造检查裁决；仅 implements/类型位走 2709
+            let in_class_extends_position = node.kind == SyntaxKind::ExpressionWithTypeArguments
+                && node.parent().is_some_and(|cl| {
+                    cl.kind == SyntaxKind::HeritageClause
+                        && matches!(&cl.data, NodeData::HeritageClause(h) if h.token == SyntaxKind::ExtendsKeyword)
+                        && cl.parent().is_some_and(|gp| {
+                            matches!(
+                                gp.kind,
+                                SyntaxKind::ClassDeclaration | SyntaxKind::ClassExpression
+                            )
+                        })
+                });
             if alias_decl_is_namespace_form
-                && effective
-                    .flags
-                    .intersects(SymbolFlags::ValueModule | SymbolFlags::NamespaceModule)
-                && !effective.flags.intersects(SymbolFlags::TYPE)
+                && !in_class_extends_position
+                && chain_flags.intersects(SymbolFlags::ValueModule | SymbolFlags::NamespaceModule)
+                && !chain_flags.intersects(SymbolFlags::TYPE)
                 && type_name.kind == SyntaxKind::Identifier
                 && self.ts2304_reporting_allowed_for(type_name)
                 && self
@@ -137,7 +145,10 @@ impl Checker {
                 if target_has_type_meaning {
                     symbol = target;
                 } else {
+                    // Go 值作类型仅在值含义解析成功而类型含义失败时报；
+                    // 目标仍是纯别名（链断，对应 unknownSymbol 全含义）不报
                     if type_name.kind == SyntaxKind::Identifier
+                        && target.flags.intersects(SymbolFlags::VALUE)
                         && self.ts2304_reporting_allowed_for(type_name)
                         && !self.has_same_named_type_symbol(&alias_name)
                         && self
@@ -182,7 +193,7 @@ impl Checker {
             );
         }
         if symbol.flags.contains(SymbolFlags::TypeParameter) {
-            return self.resolve_type_parameter_reference(&symbol, type_name);
+            return self.resolve_type_parameter_reference(&symbol);
         }
         // tsc getTypeReferenceType：class+interface 同名合并的符号走 class 引用路径，
         // interface 声明的成员与基类并入同一声明类型（getDeclaredTypeOfClassOrInterface）

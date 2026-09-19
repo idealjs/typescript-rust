@@ -3,15 +3,9 @@
 use crate::checker::checker_impl_chunk::*;
 
 impl Checker {
+    // Go ast.IsAmbientModule：名字为字符串字面量或 global 的模块声明
     pub(crate) fn is_ambient_module(node: &Arc<Node>) -> bool {
-        if node.kind != SyntaxKind::ModuleDeclaration {
-            return false;
-        }
-        if let NodeData::ModuleDeclaration(d) = &node.data {
-            d.keyword == SyntaxKind::ModuleKeyword || d.keyword == SyntaxKind::NamespaceKeyword
-        } else {
-            false
-        }
+        tsox_frontend::ast::is_ambient_module(node)
     }
 
     pub(crate) fn is_module_augmentation_external(node: &Arc<Node>) -> bool {

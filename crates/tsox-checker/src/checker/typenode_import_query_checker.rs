@@ -53,38 +53,7 @@ impl Checker {
             if let tsox_frontend::ast::NodeData::ImportEqualsDeclaration(data) = &decl.data {
                 let spec = self.module_specifier_of_external_ref(&data.module_reference)?;
                 let module_sym = self.resolve_module_file_symbol_relative(&spec)?;
-                // export = X：解析 export assignment 指向的符号（export=X 的 X 标识符）
-                let export_equals = module_sym
-                    .exports
-                    .get(tsox_frontend::ast::INTERNAL_SYMBOL_NAME_EXPORT_EQUALS)
-                    .cloned();
-                if std::env::var_os("TSOX_DEBUG_QI").is_some() {
-                    eprintln!("[req-alias] ee_found={}", export_equals.is_some());
-                }
-                if let Some(ee) = export_equals {
-                    if let Some(d) = ee
-                        .declarations
-                        .iter()
-                        .find(|d| matches!(d.data, NodeData::ExportAssignment(_)))
-                        && let NodeData::ExportAssignment(ea) = &d.data
-                    {
-                        // X 在模块文件顶层容器里（file locals / module members）
-                        let expr_name = ea.expression.text().to_string();
-                        let sym_map = self.program.symbol_map();
-                        let file_locals = d
-                            .parent()
-                            .as_ref()
-                            .and_then(|sf| sym_map.locals.get(&sf.id()));
-                        if let Some(cs) = file_locals.and_then(|l| l.get(&expr_name).cloned()) {
-                            return Some(cs);
-                        }
-                        if let Some(cs) = module_sym.members.get(&expr_name).cloned() {
-                            return Some(cs);
-                        }
-                    }
-                    return Some(ee);
-                }
-                return Some(module_sym);
+                return self.resolve_import_alias_target_of_module(&module_sym);
             }
         }
         let (member_name, import_decl): (Option<String>, Arc<Node>) = {
@@ -284,5 +253,57 @@ impl Checker {
             false
         });
         found
+    }
+}
+
+impl Checker {
+    /// Go resolveExternalModuleSymbol：模块带 export= 时目标为导出实体
+    ///（export=X 的 X 符号），否则为模块符号本身
+    pub(crate) fn resolve_import_alias_target_of_module(
+        &mut self,
+        module_sym: &Arc<Symbol>,
+    ) -> Option<Arc<Symbol>> {
+        let export_equals = module_sym
+            .exports
+            .get(tsox_frontend::ast::INTERNAL_SYMBOL_NAME_EXPORT_EQUALS)
+            .cloned();
+        if let Some(ee) = export_equals {
+            if let Some(d) = ee
+                .declarations
+                .iter()
+                .find(|d| matches!(d.data, NodeData::ExportAssignment(_)))
+                && let NodeData::ExportAssignment(ea) = &d.data
+            {
+                if matches!(
+                    ea.expression.kind,
+                    SyntaxKind::Identifier
+                        | SyntaxKind::QualifiedName
+                        | SyntaxKind::PropertyAccessExpression
+                ) && let Some(sf) = d.parent()
+                {
+                    // export = Foo.Member：限定名/属性访问在所在文件作用域解析
+                    self.push_scope(&sf);
+                    let target = self.resolve_qualified_symbol(&ea.expression);
+                    self.pop_scope();
+                    if let Some(target) = target {
+                        return Some(target);
+                    }
+                }
+                let expr_name = ea.expression.text().to_string();
+                let sym_map = self.program.symbol_map();
+                let file_locals = d
+                    .parent()
+                    .as_ref()
+                    .and_then(|sf| sym_map.locals.get(&sf.id()));
+                if let Some(cs) = file_locals.and_then(|l| l.get(&expr_name).cloned()) {
+                    return Some(cs);
+                }
+                if let Some(cs) = module_sym.members.get(&expr_name).cloned() {
+                    return Some(cs);
+                }
+            }
+            return Some(ee);
+        }
+        Some(Arc::clone(module_sym))
     }
 }

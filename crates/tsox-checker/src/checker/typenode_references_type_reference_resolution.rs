@@ -3,41 +3,7 @@
 use crate::checker::typenode_references::*;
 
 impl Checker {
-    pub(crate) fn resolve_type_parameter_reference(
-        &mut self,
-        symbol: &Arc<Symbol>,
-        type_name: &Arc<Node>,
-    ) -> Arc<Type> {
-        if self.in_static_member_type {
-            let tp_decl = symbol
-                .value_declaration
-                .clone()
-                .or_else(|| symbol.declarations.first().cloned());
-            let owned_by_class = tp_decl.is_some_and(|d| {
-                let mut cur = d.parent();
-                while let Some(a) = cur {
-                    match a.kind {
-                        tsox_frontend::ast::SyntaxKind::ClassDeclaration
-                        | tsox_frontend::ast::SyntaxKind::ClassExpression => return true,
-                        tsox_frontend::ast::SyntaxKind::SourceFile => return false,
-                        _ => cur = a.parent(),
-                    }
-                }
-                false
-            });
-            if owned_by_class {
-                use tsox_core::diagnostics::messages_generated::STATIC_MEMBERS_CANNOT_REFERENCE_CLASS_TYPE_PARAMETERS;
-                let file = self.current_file.clone();
-                self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
-                    file,
-                    type_name.loc,
-                    STATIC_MEMBERS_CANNOT_REFERENCE_CLASS_TYPE_PARAMETERS,
-                    Vec::new(),
-                ));
-            }
-        }
-
-
+    pub(crate) fn resolve_type_parameter_reference(&mut self, symbol: &Arc<Symbol>) -> Arc<Type> {
         let key = Arc::as_ptr(symbol) as *const tsox_frontend::ast::Symbol;
         for map in self.type_argument_stack.iter().rev() {
             if let Some(t) = map.get(&key) {
