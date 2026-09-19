@@ -223,15 +223,26 @@ impl Checker {
             t.flags
                 .intersects(TypeFlags::String | TypeFlags::StringLiteral)
         };
-        let valid = (number_like(&lt) && number_like(&rt))
-            || (bigint_like(&lt) && bigint_like(&rt))
-            || string_like(&lt)
-            || string_like(&rt)
-            || lt.flags.contains(TypeFlags::Any)
-            || rt.flags.contains(TypeFlags::Any);
-        if !valid {
-            let lt_str = self.type_to_string(&lt);
-            let rt_str = self.type_to_string(&rt);
+        let valid_pair = |lt: &Arc<Type>, rt: &Arc<Type>| {
+            (number_like(lt) && number_like(rt))
+                || (bigint_like(lt) && bigint_like(rt))
+                || string_like(lt)
+                || string_like(rt)
+                || lt.flags.contains(TypeFlags::Any)
+                || rt.flags.contains(TypeFlags::Any)
+        };
+        if !valid_pair(&lt, &rt) {
+            // Go getBaseTypesIfUnrelated：基类型仍不相关时按基类型展示
+            //（true→boolean、E.a→E 等字面量提升）
+            let base_lt = self.get_base_type_of_literal_type(&lt);
+            let base_rt = self.get_base_type_of_literal_type(&rt);
+            let (el, er) = if valid_pair(&base_lt, &base_rt) {
+                (&lt, &rt)
+            } else {
+                (&base_lt, &base_rt)
+            };
+            let lt_str = self.type_to_string(el);
+            let rt_str = self.type_to_string(er);
             let file = self.current_file.clone();
             self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
                 file,

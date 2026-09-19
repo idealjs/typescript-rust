@@ -124,22 +124,21 @@ impl Checker {
     }
 
     pub(crate) fn namespace_full_path(symbol: &Arc<Symbol>) -> String {
-        let decl = symbol
+        // Go getFullyQualifiedName：沿符号 parent 链拼点分限定名，根为模块
+        // 文件符号时输出带引号 specifier（"mod".Ns 形态）
+        if let Some(parent) = symbol.parent() {
+            return format!("{}.{}", Self::namespace_full_path(&parent), symbol.name);
+        }
+        if symbol
             .declarations
             .iter()
-            .find(|d| d.kind == SyntaxKind::ModuleDeclaration);
-        let Some(decl) = decl else {
-            return symbol.name.clone();
-        };
-        let mut parts: Vec<String> = Vec::new();
-        let mut current: Option<Arc<Node>> = Some(Arc::clone(decl));
-        while let Some(n) = current {
-            if let tsox_frontend::ast::NodeData::ModuleDeclaration(md) = &n.data {
-                parts.push(md.name.text().trim_matches(['"', '\'']).to_string());
-            }
-            current = n.parent();
+            .any(|d| d.kind == SyntaxKind::SourceFile)
+        {
+            return format!(
+                "\"{}\"",
+                crate::checker::nodebuilder::module_specifier_of_name(&symbol.name)
+            );
         }
-        parts.reverse();
-        parts.join(".")
+        symbol.name.clone()
     }
 }

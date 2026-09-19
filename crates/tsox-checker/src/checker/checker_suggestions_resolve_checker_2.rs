@@ -303,7 +303,8 @@ impl Checker {
                     Err((
                         Arc::clone(right),
                         Self::namespace_full_path(&symbol),
-                        text.to_string(),
+                        self.node_source_text(right)
+                            .unwrap_or_else(|| text.to_string()),
                     ))
                 }
             }

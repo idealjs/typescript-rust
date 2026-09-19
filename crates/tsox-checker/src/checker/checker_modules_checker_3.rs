@@ -186,6 +186,10 @@ impl Checker {
                 .trim_matches(['"', '\'', '`'])
                 .to_string();
             let error_node = property_name.clone().unwrap_or_else(|| Arc::clone(&name));
+            // Go DeclarationNameToString：成员名按源文本展示（字符串字面量带引号）
+            let member_display = self
+                .node_source_text(&error_node)
+                .unwrap_or_else(|| member_name.clone());
             match self.module_member_lookup(&module_symbol, &member_name) {
                 ModuleMemberLookup::Found => {}
 
@@ -195,7 +199,7 @@ impl Checker {
                         error_node.loc,
                         tsox_core::diagnostics::messages_generated::
                             MODULE_0_DECLARES_1_LOCALLY_BUT_IT_IS_NOT_EXPORTED,
-                        vec![format!("\"{spec_text}\""), member_name],
+                        vec![format!("\"{spec_text}\""), member_display],
                     ));
                 }
                 ModuleMemberLookup::Missing => {
@@ -203,7 +207,7 @@ impl Checker {
                         Some(file.clone()),
                         error_node.loc,
                         tsox_core::diagnostics::messages_generated::MODULE_0_HAS_NO_EXPORTED_MEMBER_1,
-                        vec![format!("\"{spec_text}\""), member_name],
+                        vec![format!("\"{spec_text}\""), member_display],
                     ));
                 }
             }

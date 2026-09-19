@@ -135,6 +135,96 @@ impl Checker {
     }
 
     pub(crate) fn check_interface_members(&mut self, members: &NodeList) {
+        {
+            let mut seen: std::collections::HashMap<String, Vec<&Arc<Node>>> =
+                std::collections::HashMap::new();
+            for member in members.iter() {
+                if let Some(name_node) = member.name() {
+                    let name = match name_node.kind {
+                        SyntaxKind::StringLiteral
+                        | SyntaxKind::NumericLiteral
+                        | SyntaxKind::Identifier
+                        | SyntaxKind::PrivateIdentifier => name_node.text().to_string(),
+                        // Go getEffectivePropertyNameForPropertyNameNode：仅字面量
+                        // 与 well-known 计算名可作去重键，其余跳过；计算键与恰好
+                        // 同文的转义字面量键分属不同命名空间（Go binder 对计算名
+                        // 走匿名符号，二者不构成重复）
+                        SyntaxKind::ComputedPropertyName => {
+                            let key = match &name_node.data {
+                                tsox_frontend::ast::NodeData::ComputedPropertyName(cd) => {
+                                    crate::binder::symbols_binder_4::well_known_symbol_member_name(
+                                        &cd.expression,
+                                    )
+                                    .map(|internal| format!("c:{internal}"))
+                                    .or_else(|| {
+                                        if matches!(
+                                            cd.expression.kind,
+                                            SyntaxKind::StringLiteral
+                                                | SyntaxKind::NumericLiteral
+                                        ) {
+                                            Some(format!("l:{}", cd.expression.text()))
+                                        } else {
+                                            None
+                                        }
+                                    })
+                                }
+                                _ => None,
+                            };
+                            match key {
+                                Some(k) => k,
+                                None => continue,
+                            }
+                        }
+                        _ => continue,
+                    };
+                    seen.entry(name).or_default().push(member);
+                }
+            }
+            for (_, group) in seen.iter() {
+                let all_methods = group.iter().all(|m| m.kind == SyntaxKind::MethodSignature);
+                let accessor_pair = group
+                    .iter()
+                    .all(|m| matches!(m.kind, SyntaxKind::GetAccessor | SyntaxKind::SetAccessor))
+                    && group.iter().any(|m| m.kind == SyntaxKind::GetAccessor)
+                    && group.iter().any(|m| m.kind == SyntaxKind::SetAccessor);
+                if group.len() > 1 && !all_methods && !accessor_pair {
+                    // Go reportDuplicateMemberErrors：显示名取符号名，字符串字面量
+                    // 名的符号名含引号（按组内首个声明取形）
+                    let display = group.iter().find_map(|m| {
+                        let nn = m.name()?;
+                        Some(
+                            self.node_source_text(&nn)
+                                .unwrap_or_else(|| nn.text().to_string()),
+                        )
+                    });
+                    for m in group {
+                        if let Some(name_node) = m.name() {
+                            let name = match &name_node.data {
+                                tsox_frontend::ast::NodeData::ComputedPropertyName(cd) => {
+                                    crate::binder::symbols_binder_4::well_known_symbol_member_name(
+                                        &cd.expression,
+                                    )
+                                    .map(|internal| {
+                                        crate::checker::property_name_for_display(&internal)
+                                    })
+                                    .unwrap_or_else(|| name_node.text().to_string())
+                                }
+                                _ => display
+                                    .clone()
+                                    .unwrap_or_else(|| name_node.text().to_string()),
+                            };
+                            let file = self.current_file.clone();
+                            self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                                file,
+                                name_node.loc,
+                                tsox_core::diagnostics::messages_generated::DUPLICATE_IDENTIFIER_0,
+                                vec![name],
+                            ));
+                        }
+                    }
+                }
+            }
+        }
         for member in members.iter() {
             // 接口成员的计算名：解析表达式（TS2304）+
             // Go checkGrammarForInvalidDynamicName（TS1166/1169 族）
