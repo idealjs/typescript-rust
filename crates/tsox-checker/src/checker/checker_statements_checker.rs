@@ -250,6 +250,18 @@ impl Checker {
             }
             SyntaxKind::ThrowStatement => {
                 if let tsox_frontend::ast::NodeData::ThrowStatement(data) = &node.data {
+                    use tsox_core::diagnostics::messages_generated as msg;
+                    if !self.check_grammar_statement_in_ambient_context(node)
+                        && data.expression.kind == SyntaxKind::Identifier
+                        && data.expression.text().is_empty()
+                    {
+                        self.grammar_error_at_pos(
+                            node,
+                            data.expression.loc.pos(),
+                            0,
+                            &msg::LINE_BREAK_NOT_PERMITTED_HERE,
+                        );
+                    }
                     self.check_expression(&data.expression);
                 }
             }

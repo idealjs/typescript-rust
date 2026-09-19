@@ -244,6 +244,12 @@ impl Parser {
     ) -> Arc<Node> {
         let pos = Self::declaration_start(&modifiers, self.token_pos());
         self.next_token();
+        if self.has_preceding_line_break() {
+            self.parse_error_at_current_token(
+                tsox_core::diagnostics::LINE_BREAK_NOT_PERMITTED_HERE,
+                &[],
+            );
+        }
         let name = self.parse_identifier();
         let type_parameters = self.parse_optional_type_parameters();
         self.expect(SyntaxKind::EqualsToken);
