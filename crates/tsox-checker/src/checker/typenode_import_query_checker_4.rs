@@ -70,7 +70,7 @@ impl Checker {
             .or_else(|| module_symbol.members.entries.get(&name).cloned())
     }
 
-    fn resolve_export_assignment_target(&self, ee: &Arc<Symbol>) -> Option<Arc<Symbol>> {
+    pub(crate) fn resolve_export_assignment_target(&self, ee: &Arc<Symbol>) -> Option<Arc<Symbol>> {
         let decl = ee
             .declarations
             .iter()

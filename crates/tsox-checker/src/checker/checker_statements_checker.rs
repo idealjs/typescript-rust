@@ -314,6 +314,9 @@ impl Checker {
                 if node.kind == SyntaxKind::ImportDeclaration {
                     self.check_import_declaration_grammar(node);
                 }
+                if node.kind == SyntaxKind::ImportEqualsDeclaration {
+                    self.check_import_equals_esm_grammar(node);
+                }
                 self.check_type_alias_and_specifiers(node);
                 self.check_import_ambient_rules(node);
                 self.check_import_equals_conflicts(node);

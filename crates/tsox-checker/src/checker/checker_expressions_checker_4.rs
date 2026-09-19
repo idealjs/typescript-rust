@@ -181,6 +181,7 @@ impl Checker {
             if !in_bundled_lib
                 && !is_export_assignment_name
                 && !base.flags.intersects(SymbolFlags::VALUE)
+                && base.flags.intersects(SymbolFlags::TYPE)
             {
                 self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
                     self.current_file.clone(),

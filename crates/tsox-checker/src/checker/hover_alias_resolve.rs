@@ -50,7 +50,7 @@ impl Checker {
                 if let Some(default_name) = &d.name
                     && default_name.text() == symbol.name
                 {
-                    return self.resolve_module_member_symbol(&module, "default", 8);
+                    return self.resolve_default_export_target(&module);
                 }
                 let _ = spec;
                 Some(module)
@@ -124,7 +124,7 @@ impl Checker {
     }
 
     /// import 声明上下文：(目标模块符号, 说明符文本)
-    fn import_declaration_context(
+    pub(crate) fn import_declaration_context(
         &mut self,
         decl: &Arc<Node>,
     ) -> Option<(Arc<Symbol>, String)> {

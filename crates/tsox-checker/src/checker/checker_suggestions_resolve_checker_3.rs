@@ -134,6 +134,25 @@ impl Checker {
         }
         // `export { foo }`（无 from）：目标 = 所在文件符号的局部绑定
         //（index.ts 的 import * as foo 的 NamespaceImport alias）
+        // 默认导入绑定（Go getTargetOfImportClause）：目标 = 模块 default 导出
+        if let Some(decl) = symbol
+            .declarations
+            .iter()
+            .find(|d| d.kind == SyntaxKind::ImportClause)
+        {
+            if let NodeData::ImportClause(ic) = &decl.data
+                && ic.name.as_ref().is_some_and(|n| n.text() == symbol.name)
+                && let Some((module, _)) = self.import_declaration_context(decl)
+            {
+                if let Some(target) = self.resolve_default_export_target(&module) {
+                    return target;
+                }
+                return self
+                    .unknown_symbol
+                    .clone()
+                    .unwrap_or_else(|| Arc::clone(&symbol));
+            }
+        }
         if let Some(decl) = symbol
             .declarations
             .iter()
