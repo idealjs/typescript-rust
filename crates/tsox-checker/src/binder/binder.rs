@@ -48,6 +48,8 @@ pub(crate) enum DeclareTarget {
     Exports(Arc<Symbol>),
 
     Locals(Arc<Node>),
+
+    Members(Arc<Symbol>),
 }
 
 impl Binder {

@@ -226,20 +226,8 @@ impl Checker {
             }
             best
         });
-        let static_hit = display_type.symbol.as_ref().and_then(|sym| {
-            sym.declarations.iter().find_map(|d| match &d.data {
-                tsox_frontend::ast::NodeData::ClassDeclaration(cd) => cd.members.iter().find(|m| {
-                    m.name().is_some_and(|n| n.text() == name_text)
-                        && m.has_syntactic_modifier(ModifierFlags::Static)
-                }),
-                tsox_frontend::ast::NodeData::ClassExpression(cd) => cd.members.iter().find(|m| {
-                    m.name().is_some_and(|n| n.text() == name_text)
-                        && m.has_syntactic_modifier(ModifierFlags::Static)
-                }),
-                _ => None,
-            })
-        });
-        if static_hit.is_some() {
+        let static_hit = self.type_has_static_property(name_text, &display_type);
+        if static_hit {
             self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
                 file,
                 name.loc,
@@ -250,6 +238,26 @@ impl Checker {
                     type_str.clone(),
                     format!("{type_str}.{name_text}"),
                 ],
+            ));
+            return;
+        }
+        // Go reportNonexistentProperty：属性名命中 lib 特性表先报 TS2550
+        //（容器取 containingType 的 apparent 符号名，primitive 映射到包装接口）
+        if let Some(lib) = self
+            .lib_suggestion_container_name(&obj_type)
+            .and_then(|container| {
+                crate::checker::checker_lib_feature_map::suggested_lib_for_property(
+                    &container,
+                    name_text,
+                )
+            })
+        {
+            self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                file,
+                name.loc,
+                tsox_core::diagnostics::messages_generated::
+                    PROPERTY_0_DOES_NOT_EXIST_ON_TYPE_1_DO_YOU_NEED_TO_CHANGE_YOUR_TARGET_LIBRARY_TRY_CHANGING_THE_LIB_COMPILER_OPTION_TO_2_OR_LATER,
+                vec![name_text.to_string(), type_str, lib.to_string()],
             ));
             return;
         }

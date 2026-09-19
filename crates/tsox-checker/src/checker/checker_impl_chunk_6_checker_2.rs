@@ -52,11 +52,15 @@ impl Checker {
 
         if t.flags.contains(TypeFlags::Union) {
             if let TypeData::Union(u) = &t.data {
-                for ct in &u.union_or_intersection.types {
-                    if ct.flags.intersects(TypeFlags::Undefined | TypeFlags::Null) {
+                let types = u.union_or_intersection.types.clone();
+                for ct in &types {
+                    if ct
+                        .flags
+                        .intersects(TypeFlags::Undefined | TypeFlags::Null | TypeFlags::Never)
+                    {
                         continue;
                     }
-                    if !self.has_property_of_type(ct, name) {
+                    if !self.constituent_admits_property(ct, name) {
                         return false;
                     }
                 }

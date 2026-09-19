@@ -14,6 +14,7 @@ impl Binder {
 
         let existing: Option<Arc<Symbol>> = match &target {
             DeclareTarget::Exports(parent_sym) => parent_sym.exports.get(&name).cloned(),
+            DeclareTarget::Members(parent_sym) => parent_sym.members.get(&name).cloned(),
             DeclareTarget::Locals(container) => {
                 let locals_hit = || {
                     self.symbol_map
@@ -111,12 +112,18 @@ impl Binder {
         }
 
         match &target {
-            DeclareTarget::Exports(parent_sym) => {
+            DeclareTarget::Exports(parent_sym) | DeclareTarget::Members(parent_sym) => {
                 let parent_mut = Arc::as_ptr(parent_sym) as *mut Symbol;
                 unsafe {
-                    (*parent_mut)
-                        .exports
-                        .insert(name.clone(), Arc::clone(&symbol));
+                    if matches!(target, DeclareTarget::Members(_)) {
+                        (*parent_mut)
+                            .members
+                            .insert(name.clone(), Arc::clone(&symbol));
+                    } else {
+                        (*parent_mut)
+                            .exports
+                            .insert(name.clone(), Arc::clone(&symbol));
+                    }
 
                     let symbol_mut = Arc::as_ptr(&symbol) as *mut Symbol;
                     (*symbol_mut).set_parent(parent_sym);

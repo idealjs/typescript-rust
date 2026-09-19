@@ -91,6 +91,19 @@ impl Checker {
                 };
             }
             NodeData::BindingElement(_) => return self.binding_element_type(&decl),
+            // Go getTypeOfVariableOrParameterOrPropertyWorker：export= 符号
+            // 类型 = 表达式（或注解型）拓宽
+            NodeData::ExportAssignment(d) => {
+                let t = if d.type_node.kind != SyntaxKind::MissingDeclaration {
+                    self.get_type_from_type_node(&d.type_node)
+                } else {
+                    let expr_t = self.get_type_of_node(&d.expression);
+                    self.get_widened_type(&expr_t)
+                };
+                self.value_symbol_links.get_or_default(symbol).resolved_type = Some(Arc::clone(&t));
+                self.type_node_links.get_or_default(&decl).resolved_type = Some(Arc::clone(&t));
+                return Some(t);
+            }
             NodeData::EnumMember(_) => {
                 let value = self.get_enum_member_value(&decl).value?;
                 let t = match value {

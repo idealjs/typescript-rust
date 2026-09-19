@@ -46,12 +46,27 @@ impl Checker {
                         let file = self
                             .get_source_file_of_node(type_name)
                             .or_else(|| self.current_file.clone());
-                        self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
-                            file,
-                            type_name.loc,
-                            CANNOT_FIND_NAME_0,
-                            vec![name_text.to_string()],
-                        ));
+                        // Go onFailedToResolveSymbol：名字命中 lib 特性表先报 TS2583
+                        if let Some(lib) =
+                            crate::checker::checker_lib_feature_map::suggested_lib_for_name(
+                                name_text,
+                            )
+                        {
+                            self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                                file,
+                                type_name.loc,
+                                tsox_core::diagnostics::messages_generated::
+                                    CANNOT_FIND_NAME_0_DO_YOU_NEED_TO_CHANGE_YOUR_TARGET_LIBRARY_TRY_CHANGING_THE_LIB_COMPILER_OPTION_TO_1_OR_LATER,
+                                vec![name_text.to_string(), lib.to_string()],
+                            ));
+                        } else {
+                            self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                                file,
+                                type_name.loc,
+                                CANNOT_FIND_NAME_0,
+                                vec![name_text.to_string()],
+                            ));
+                        }
                     }
                     return self.error_type();
                 }

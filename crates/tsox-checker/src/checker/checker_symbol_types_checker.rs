@@ -393,6 +393,28 @@ impl Checker {
 impl Checker {
     /// None = 纯 alias 语义已消费完毕，调用方按合并符号的非 alias 意义继续
     fn get_type_of_symbol_alias_inner(&mut self, symbol: &Arc<Symbol>) -> Option<Arc<Type>> {
+        // import X = require("./m")：binder export_symbol 指向模块符号，Go
+        // getTargetOfImportEqualsDeclaration 经 resolveExternalModuleSymbol
+        // 再取 export= 符号，优先走该解析
+        let is_require_import_equals = symbol.declarations.iter().any(|d| {
+            matches!(
+                &d.data,
+                tsox_frontend::ast::NodeData::ImportEqualsDeclaration(ied)
+                    if matches!(
+                        &ied.module_reference.data,
+                        tsox_frontend::ast::NodeData::ExternalModuleReference(_)
+                    )
+            )
+        });
+        if is_require_import_equals {
+            if let Some(resolved) = self.resolve_import_alias_target_symbol(symbol)
+                && !Arc::ptr_eq(&resolved, symbol)
+            {
+                let t = self.get_type_of_symbol(&resolved);
+                self.value_symbol_links.get_or_default(symbol).resolved_type = Some(Arc::clone(&t));
+                return Some(t);
+            }
+        }
         let target = self.follow_alias(symbol);
         if let Some(target) = target
             && !Arc::ptr_eq(&target, symbol)

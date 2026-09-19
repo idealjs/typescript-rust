@@ -307,6 +307,26 @@ impl Binder {
             };
 
         let mut conflicted = false;
+        // Go declareModuleMember/declareSourceFileMember：模块容器内本地与导出
+        // 声明分属 locals/exports 两表，同名不同导出性不构成 binder 冲突，
+        // 后续类型一致性/导出性检查（TS2403/TS2395）由 checker 报
+        let mixed_exportness_module_merge = self
+            .container
+            .as_ref()
+            .is_some_and(|c| {
+                matches!(
+                    c.kind,
+                    SyntaxKind::SourceFile | SyntaxKind::ModuleDeclaration
+                )
+            })
+            && !name.is_empty()
+            && existing.as_ref().is_some_and(|e| {
+                let node_exported = self.module_member_is_exported(node);
+                e.declarations
+                    .iter()
+                    .map(|d| self.module_member_is_exported(d))
+                    .any(|d_exported| d_exported != node_exported)
+            });
         if std::env::var_os("TSOX_DEBUG_NS").is_some() && name == "B" {
             eprintln!(
                 "[ns] kind={:?} includes={:?} existing={:?} parent_sym={} parent_flags={:?} container={:?}",
@@ -341,6 +361,7 @@ impl Binder {
                         .flags
                         .contains(SymbolFlags::FunctionScopedVariable));
             if !staticness_split
+                && !mixed_exportness_module_merge
                 && !excludes.is_empty()
                 && !name.is_empty()
                 && comparison_flags.intersects(excludes)
@@ -388,11 +409,21 @@ impl Binder {
                 self.symbol_map.set_symbol(node, Arc::clone(&symbol));
                 return symbol;
             }
-            if let Some(merged) = self.merge_into_existing_symbol(node, &existing, includes) {
+            if let Some(merged) =
+                self.merge_into_existing_symbol(node, &existing, includes)
+                    .or_else(|| {
+                        if mixed_exportness_module_merge {
+                            self.append_declaration_to_existing_symbol(node, &existing, includes)
+                        } else {
+                            None
+                        }
+                    })
+            {
                 return merged;
             }
 
-            conflicted = self.report_symbol_conflict(node, &existing, &name, includes);
+            conflicted = !mixed_exportness_module_merge
+                && self.report_symbol_conflict(node, &existing, &name, includes);
         }
 
         let symbol = self.new_symbol(includes, name.clone());

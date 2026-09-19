@@ -4,6 +4,9 @@ use crate::checker::checker_statements::*;
 
 impl Checker {
     pub(crate) fn check_variable_declaration(&mut self, node: &Arc<Node>) {
+        if node.kind == SyntaxKind::VariableDeclaration {
+            self.check_exports_on_merged_declarations(node);
+        }
         self.check_grammar_variable_declaration(node);
         if let Some(name) = node.name() {
             self.check_cjs_reserved_top_level_name(node, &name);
@@ -12,7 +15,19 @@ impl Checker {
         // 一致（TS2403 + related "'x' was also declared here"）
         {
             let sym = self.program.symbol_map().symbol_of(node).cloned();
+            // Go 模块容器本地/导出分表：不同导出性的声明不经此类型一致性
+            // 检查（TS2395 另行处理）
+            let node_exported = self
+                .get_combined_modifier_flags(node)
+                .contains(ModifierFlags::Export);
+            let mixed_exportness = sym.as_ref().is_some_and(|s| {
+                s.declarations.iter().any(|d| {
+                    self.get_combined_modifier_flags(d).contains(ModifierFlags::Export)
+                        != node_exported
+                })
+            });
             if let Some(sym) = sym
+                && !mixed_exportness
                 && sym.declarations.len() > 1
                 && let Some(primary) = &sym.value_declaration
                 && !Arc::ptr_eq(primary, node)
@@ -375,9 +390,18 @@ impl Checker {
             };
 
             if let Some(symbol) = self.resolve_identifier(&data.name) {
+                // Go 模块容器本地/导出分表：不同导出性的声明不经此类型一致性检查
+                let node_exported = self
+                    .get_combined_modifier_flags(node)
+                    .contains(ModifierFlags::Export);
+                let mixed_exportness = symbol.declarations.iter().any(|d| {
+                    self.get_combined_modifier_flags(d).contains(ModifierFlags::Export)
+                        != node_exported
+                });
                 let primary = symbol.value_declaration.clone();
                 if let Some(primary) = primary
                     && !Arc::ptr_eq(&primary, node)
+                    && !mixed_exportness
                     && symbol.declarations.len() > 1
                     && symbol.flags.intersects(
                         SymbolFlags::FunctionScopedVariable | SymbolFlags::BlockScopedVariable,

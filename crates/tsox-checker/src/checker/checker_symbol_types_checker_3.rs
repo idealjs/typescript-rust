@@ -36,6 +36,7 @@ impl Checker {
         if fn_decl_count > 1
             && let Some(t) = self.build_overload_function_type(symbol)
         {
+            let t = self.attach_function_expando_type(symbol, t);
             self.value_symbol_links.get_or_default(symbol).resolved_type = Some(Arc::clone(&t));
             return t;
         }

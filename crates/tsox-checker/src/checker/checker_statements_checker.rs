@@ -278,12 +278,14 @@ impl Checker {
             }
 
             SyntaxKind::FunctionDeclaration => {
+                self.check_exports_on_merged_declarations(node);
                 self.check_function_declaration(node);
             }
             SyntaxKind::ClassDeclaration => {
                 self.check_class_declaration(node);
             }
             SyntaxKind::InterfaceDeclaration => {
+                self.check_exports_on_merged_declarations(node);
                 if !self.check_grammar_modifiers(node) {
                     self.check_grammar_interface_declaration(node);
                 }
@@ -314,6 +316,9 @@ impl Checker {
                 if node.kind == SyntaxKind::ImportDeclaration {
                     self.check_import_declaration_grammar(node);
                 }
+                if node.kind == SyntaxKind::TypeAliasDeclaration {
+                    self.check_exports_on_merged_declarations(node);
+                }
                 self.check_type_alias_and_specifiers(node);
                 self.check_import_ambient_rules(node);
                 self.check_import_equals_conflicts(node);
@@ -324,6 +329,7 @@ impl Checker {
                 self.check_node_next_extension_rules(node);
             }
             SyntaxKind::EnumDeclaration => {
+                self.check_exports_on_merged_declarations(node);
                 self.check_enum_declaration(node);
             }
             SyntaxKind::ExportAssignment => {
@@ -418,6 +424,9 @@ impl Checker {
                         ));
                     }
                 }
+            }
+            SyntaxKind::TryStatement => {
+                self.check_try_statement(node, ambient_reported);
             }
             _ => {
                 self.walk_children_for_expressions(node);

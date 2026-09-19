@@ -104,7 +104,7 @@ impl Checker {
             if let Some(name) = &data.name {
                 if let Some(symbol) = self.resolve_identifier(name) {
                     let symbol_type = match self.build_overload_function_type(&symbol) {
-                        Some(overload_type) => overload_type,
+                        Some(overload_type) => self.attach_function_expando_type(&symbol, overload_type),
                         None => fn_type.clone(),
                     };
                     self.value_symbol_links
