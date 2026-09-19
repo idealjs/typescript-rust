@@ -28,9 +28,10 @@ import resource
 import subprocess
 import sys
 import time
+from concurrent.futures import ThreadPoolExecutor
 
 BIN_GLOB = "target/debug/deps/fourslash-*"
-OUT_DIR = "/tmp/fourslash_shards"
+OUT_DIR = os.environ.get("TSOX_FOURSLASH_OUT", "/tmp/fourslash_shards")
 SHARD_SIZE = 200
 AS_LIMIT = 6 * 1024**3        # RLIMIT_AS：6GiB 虚拟内存（提前限制）
 KILL_RSS = 4 * 1024**3        # 采样软阈值 4GiB：主动 SIGKILL 并记录
@@ -38,6 +39,9 @@ POLL_SEC = 0.05
 
 
 def test_binary():
+    override = os.environ.get("TSOX_FOURSLASH_BIN")
+    if override:
+        return override
     bins = [b for b in glob.glob(BIN_GLOB) if os.access(b, os.X_OK)]
     if not bins:
         sys.exit("找不到测试二进制，先 cargo build -p tsox-lsp --tests")
@@ -63,7 +67,7 @@ def run_shard(binary, names, log_path, as_limit=AS_LIMIT, kill_rss=KILL_RSS):
         resource.setrlimit(resource.RLIMIT_AS, (as_limit, as_limit))
 
     proc = subprocess.Popen(
-        [binary] + names + ["--test-threads=1", "--nocapture"],
+        [binary] + names + ["--exact", "--test-threads=1", "--nocapture"],
         stdout=open(log_path, "w"), stderr=subprocess.STDOUT,
         preexec_fn=preexec)
     peak = 0
@@ -111,6 +115,8 @@ def main():
     ap.add_argument("--probe", default=None,
                     help="累积性检查：test子串,次数（如 foo,50）")
     ap.add_argument("--shard-size", type=int, default=SHARD_SIZE)
+    ap.add_argument("--parallel", type=int, default=1,
+                    help="并行运行的分片进程数（每片内部仍单线程）")
     args = ap.parse_args()
 
     binary = test_binary()
@@ -153,19 +159,24 @@ def main():
                 done_shards.add(int(parts[0]))
     mf = open(manifest, "a")
     suspects = []
-    for idx, shard in shards:
-        if idx in done_shards:
-            continue
+    pending = [(idx, shard) for idx, shard in shards if idx not in done_shards]
+
+    def run_one(item):
+        idx, shard = item
         log = f"{OUT_DIR}/shard_{idx:04d}.log"
         peak, killed, elapsed = run_shard(binary, shard, log)
-        status = "oom" if killed else "ok"
-        print(f"片 {idx:04d} [{len(shard)} 用例] peak={peak >> 20}MiB "
-              f"{elapsed:.0f}s {status}")
-        mf.write(f"{idx}\t{len(shard)}\t{peak >> 20}MiB\t{status}\t"
-                 f"{shard[0]}\n")
-        mf.flush()
-        if killed:
-            suspects.append((idx, shard))
+        return idx, shard, peak, killed, elapsed
+
+    with ThreadPoolExecutor(max_workers=args.parallel) as pool:
+        for idx, shard, peak, killed, elapsed in pool.map(run_one, pending):
+            status = "oom" if killed else "ok"
+            print(f"片 {idx:04d} [{len(shard)} 用例] peak={peak >> 20}MiB "
+                  f"{elapsed:.0f}s {status}")
+            mf.write(f"{idx}\t{len(shard)}\t{peak >> 20}MiB\t{status}\t"
+                     f"{shard[0]}\n")
+            mf.flush()
+            if killed:
+                suspects.append((idx, shard))
     mf.close()
 
     # 对被限杀的片对半二分，直至单片
