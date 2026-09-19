@@ -5,8 +5,9 @@ pub use crate::checker::checker_prop_access_checker::*;
 pub use crate::checker::checker_prop_access_checker_2::*;
 #[allow(unused_imports)]
 pub use crate::checker::checker_prop_access_checker_3::*;
+#[allow(unused_imports)]
+pub use crate::checker::checker_prop_access_checker_4::*;
 pub(crate) use crate::checker::inference::{InferenceContext, InferenceInfo};
-pub(crate) use crate::checker::utilities::{AssignmentKind, get_assignment_target_kind};
 pub(crate) use std::sync::Arc;
 pub(crate) use tsox_core::diagnostics::messages_generated::*;
 pub(crate) use tsox_frontend::ast::ModifierFlags;

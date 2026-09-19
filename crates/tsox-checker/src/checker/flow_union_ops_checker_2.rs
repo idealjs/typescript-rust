@@ -124,15 +124,22 @@ impl Checker {
         type_: &Arc<Type>,
         value_type: &Arc<Type>,
     ) -> Arc<Type> {
-        if self.is_type_assignable_to(value_type, type_) {
-            return Arc::clone(value_type);
-        }
-
+        // Go getNarrowedTypeWorker：联合先做成分级双向收窄（保留更具体侧），
+        // 不能先按「谓词整体可赋给原类型」短路 —— any[] 谓词（Array.isArray）
+        // 万可赋值，短路会吞掉元组联合（元组成员应保留自身）
         if type_.is_union() {
             let constituents = self.constituent_types(type_);
             let matching: Vec<Arc<Type>> = constituents
                 .into_iter()
-                .filter(|t| self.is_type_assignable_to(value_type, t))
+                .filter_map(|t| {
+                    if self.is_type_assignable_to(&t, value_type) {
+                        Some(t)
+                    } else if self.is_type_assignable_to(value_type, &t) {
+                        Some(Arc::clone(value_type))
+                    } else {
+                        None
+                    }
+                })
                 .collect();
             if matching.len() == 1 {
                 return matching.into_iter().next().expect("exactly one");
@@ -141,6 +148,9 @@ impl Checker {
                 return Arc::clone(value_type);
             }
             return self.get_union_type(matching);
+        }
+        if self.is_type_assignable_to(value_type, type_) {
+            return Arc::clone(value_type);
         }
         Arc::clone(value_type)
     }

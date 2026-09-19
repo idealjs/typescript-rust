@@ -197,6 +197,31 @@ impl Checker {
             }
             other => other,
         };
+        // Go resolveAlias 全链语义：`export { A }` 再导出的 import 别名是
+        // 中间纯 alias，继续递归跟到最终非 alias 目标（环由跳数上限截断）
+        let mut resolved = resolved;
+        for _ in 0..4 {
+            let Some(t) = resolved.clone() else { break };
+            // Go resolveAlias：Alias 位仍在即继续（import 别名与 const 合并的
+            // 双意义符号也须跟到 import 目标定类型意义）
+            if !t.flags.contains(tsox_frontend::ast::SymbolFlags::Alias)
+                || Arc::ptr_eq(&t, alias)
+                || !t.declarations.iter().any(|d| {
+                    matches!(
+                        d.kind,
+                        SyntaxKind::ImportClause
+                            | SyntaxKind::ImportSpecifier
+                            | SyntaxKind::NamespaceImport
+                    )
+                })
+            {
+                break;
+            }
+            match self.resolve_import_alias_target_symbol(&t) {
+                Some(next) if !Arc::ptr_eq(&next, &t) => resolved = Some(next),
+                _ => break,
+            }
+        }
         resolved
     }
 

@@ -98,12 +98,78 @@ impl Checker {
                 }
             }
         }
-        let result = match base_type {
-            Some(base) => self.merge_instance_types(&own_type, &base),
-            None => own_type,
-        };
-        self.class_instance_type_cache.insert(node_id, Arc::clone(&result));
-        result
+        if let Some(base) = base_type {
+            // 就地合并：成员填期的早前引用（自引用返回型等）持有的是壳本身，
+            // 合并结果必须写回同一 Arc，否则早前引用永远看不到基类成员
+            let merged = self.merge_instance_types(&own_type, &base);
+            if !Arc::ptr_eq(&merged, &own_type)
+                && let Some(merged_struct) = merged.as_structured()
+            {
+                unsafe {
+                    let ptr = Arc::as_ptr(&own_type) as *mut crate::checker::types::Type;
+                    if let crate::checker::types::TypeData::Object(obj) = &mut (*ptr).data {
+                        obj.structured.members = merged_struct.members.clone();
+                        obj.structured.properties = merged_struct.properties.clone();
+                        obj.structured.index_infos = merged_struct.index_infos.clone();
+                        obj.structured.signatures = merged_struct.signatures.clone();
+                        obj.structured.call_signature_count = merged_struct.call_signature_count;
+                    }
+                }
+            }
+        }
+        self.class_instance_type_cache.insert(node_id, Arc::clone(&own_type));
+        own_type
+    }
+
+    pub(crate) fn single_base_for_non_augmenting_subtype(&mut self, t: &Arc<Type>) -> Arc<Type> {
+        let mut cur = Arc::clone(t);
+        for _ in 0..32 {
+            let Some(sym) = cur.symbol.clone() else {
+                break;
+            };
+            let Some(node) = sym
+                .declarations
+                .iter()
+                .find(|d| {
+                    matches!(
+                        d.data,
+                        NodeData::ClassDeclaration(_) | NodeData::ClassExpression(_)
+                    )
+                })
+                .cloned()
+            else {
+                break;
+            };
+            let (members, heritage) = match &node.data {
+                NodeData::ClassDeclaration(d) => (&d.members, &d.heritage_clauses),
+                NodeData::ClassExpression(d) => (&d.members, &d.heritage_clauses),
+                _ => break,
+            };
+            if !members.is_empty() {
+                break;
+            }
+            let Some(heritage) = heritage else {
+                break;
+            };
+            let mut base = None;
+            for clause in heritage.iter() {
+                if let NodeData::HeritageClause(hc) = &clause.data
+                    && hc.token == SyntaxKind::ExtendsKeyword
+                {
+                    base = hc.types.iter().next().cloned();
+                    break;
+                }
+            }
+            let Some(type_ref) = base else {
+                break;
+            };
+            let bt = self.resolve_base_class_instance_type(&type_ref);
+            if Arc::ptr_eq(&bt, &cur) || bt.symbol.as_ref().is_none_or(|s| Arc::ptr_eq(s, &sym)) {
+                break;
+            }
+            cur = bt;
+        }
+        cur
     }
 
     pub(crate) fn fill_members_into(&mut self, sink: MemberSink, members: &Arc<NodeList>) {

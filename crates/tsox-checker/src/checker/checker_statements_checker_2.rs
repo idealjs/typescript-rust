@@ -23,9 +23,7 @@ impl Checker {
 
             if matches!(
                 n.kind,
-                SyntaxKind::VariableStatement
-                    | SyntaxKind::ClassDeclaration
-                    | SyntaxKind::FunctionDeclaration
+                SyntaxKind::ClassDeclaration | SyntaxKind::FunctionDeclaration | SyntaxKind::Block
             ) {
                 break;
             }
@@ -130,76 +128,6 @@ impl Checker {
                 vec![module_str],
             ));
         }
-    }
-
-    pub(crate) fn check_for_of_iterated_type(
-        &mut self,
-        statement: &Arc<Node>,
-        expression: &Arc<Node>,
-    ) {
-        let readonly_array_exists = match self.globals.get("ReadonlyArray") {
-            Some(sym) => !sym.members.is_empty(),
-            None => false,
-        };
-        if !readonly_array_exists {
-            return;
-        }
-        let t = self.get_type_of_node(expression);
-        // Go checkNonNullExpression → reportObjectPossiblyNullOrUndefinedError：
-        // RHS 为 null/undefined 值时报 TS18050，迭代检查按 errorType 短路
-        let nullish_word = match expression.kind {
-            SyntaxKind::NullKeyword => Some("null"),
-            SyntaxKind::UndefinedKeyword => Some("undefined"),
-            SyntaxKind::Identifier if expression.text() == "undefined" => Some("undefined"),
-            _ => None,
-        };
-        if let Some(word) = nullish_word {
-            self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
-                self.current_file.clone(),
-                expression.loc,
-                tsox_core::diagnostics::messages_generated::THE_VALUE_0_CANNOT_BE_USED_HERE,
-                vec![word.to_string()],
-            ));
-            return;
-        }
-        if t.flags.contains(TypeFlags::Any | TypeFlags::Never)
-            || self.is_error_type(&t)
-            || t.intrinsic_name() == Some("any")
-        {
-            return;
-        }
-        let mut parts: Vec<Arc<Type>> = Vec::new();
-        if t.is_union() {
-            parts = self.constituent_types(&t);
-        } else {
-            parts.push(t.clone());
-        }
-        for part in &parts {
-            // Go 迭代检查经 iteration protocol 落到 base constraint：this 类型与
-            // 带约束的类型参数按约束判定（如 Array<T>.sort(): this）
-            let effective = match &part.data {
-                crate::checker::types::TypeData::TypeParameter(tp) => tp
-                    .constraint
-                    .clone()
-                    .unwrap_or_else(|| Arc::clone(part)),
-                _ => Arc::clone(part),
-            };
-            let is_string_like = effective
-                .flags
-                .intersects(TypeFlags::String | TypeFlags::StringLiteral);
-            if !(self.is_array_type(&effective) || self.is_tuple_type(&effective) || is_string_like) {
-                let type_str = self.type_to_string(&t);
-                self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
-                    self.current_file.clone(),
-                    expression.loc,
-                    tsox_core::diagnostics::messages_generated::
-                        TYPE_0_IS_NOT_AN_ARRAY_TYPE_OR_A_STRING_TYPE,
-                    vec![type_str],
-                ));
-                return;
-            }
-        }
-        let _ = statement;
     }
 
     pub(crate) fn check_for_initializer(&mut self, node: &Arc<Node>) {

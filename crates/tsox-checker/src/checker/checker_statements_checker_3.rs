@@ -4,6 +4,67 @@ use crate::checker::checker_statements::*;
 
 impl Checker {
     pub(crate) fn check_variable_declaration_list(&mut self, node: &Arc<Node>) {
+        // Go checkGrammarVariableDeclarationList 前段：using/await using 的
+        // for-in / ambient / case-clause 位置限制
+        let block_scope_flags = self.get_combined_node_flags(node) & NodeFlags::BlockScoped;
+        if block_scope_flags == NodeFlags::Using || block_scope_flags == NodeFlags::AwaitUsing {
+            let is_using = block_scope_flags == NodeFlags::Using;
+            let parent_kind = node.parent().as_ref().map(|p| p.kind);
+            if parent_kind == Some(SyntaxKind::ForInStatement) {
+                let message = if is_using {
+                    tsox_core::diagnostics::messages_generated::
+                        THE_LEFT_HAND_SIDE_OF_A_FOR_IN_STATEMENT_CANNOT_BE_A_USING_DECLARATION
+                } else {
+                    tsox_core::diagnostics::messages_generated::
+                        THE_LEFT_HAND_SIDE_OF_A_FOR_IN_STATEMENT_CANNOT_BE_AN_AWAIT_USING_DECLARATION
+                };
+                self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                    self.current_file.clone(),
+                    node.loc,
+                    message,
+                    vec![],
+                ));
+            } else if self.get_combined_node_flags(node).contains(NodeFlags::Ambient) {
+                let message = if is_using {
+                    tsox_core::diagnostics::messages_generated::
+                        X_USING_DECLARATIONS_ARE_NOT_ALLOWED_IN_AMBIENT_CONTEXTS
+                } else {
+                    tsox_core::diagnostics::messages_generated::
+                        X_AWAIT_USING_DECLARATIONS_ARE_NOT_ALLOWED_IN_AMBIENT_CONTEXTS
+                };
+                self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                    self.current_file.clone(),
+                    node.loc,
+                    message,
+                    vec![],
+                ));
+            } else if parent_kind == Some(SyntaxKind::VariableStatement)
+                && node
+                    .parent()
+                    .as_ref()
+                    .and_then(|p| p.parent())
+                    .is_some_and(|g| {
+                        matches!(
+                            g.kind,
+                            SyntaxKind::CaseClause | SyntaxKind::DefaultClause
+                        )
+                    })
+            {
+                let message = if is_using {
+                    tsox_core::diagnostics::messages_generated::
+                        X_USING_DECLARATIONS_ARE_NOT_ALLOWED_IN_CASE_OR_DEFAULT_CLAUSES_UNLESS_CONTAINED_WITHIN_A_BLOCK
+                } else {
+                    tsox_core::diagnostics::messages_generated::
+                        X_AWAIT_USING_DECLARATIONS_ARE_NOT_ALLOWED_IN_CASE_OR_DEFAULT_CLAUSES_UNLESS_CONTAINED_WITHIN_A_BLOCK
+                };
+                self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                    self.current_file.clone(),
+                    node.loc,
+                    message,
+                    vec![],
+                ));
+            }
+        }
         if let tsox_frontend::ast::NodeData::VariableDeclarationList(data) = &node.data {
             for decl in data.declarations.iter() {
                 if let tsox_frontend::ast::NodeData::VariableDeclaration(vd) = &decl.data
@@ -91,6 +152,11 @@ impl Checker {
                     ));
                 }
                 self.check_variable_declaration(decl);
+            }
+            // Go checkGrammarVariableDeclarationList 尾部：await using 的
+            // static block / 顶层 module-target 门槛 / 非 async 容器检查
+            if node.flags.contains(NodeFlags::AwaitUsing) {
+                self.check_grammar_await_or_await_using_declaration_list(node);
             }
         }
     }

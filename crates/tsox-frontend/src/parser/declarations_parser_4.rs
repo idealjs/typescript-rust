@@ -29,10 +29,11 @@ impl Parser {
             let pos = self.token_pos();
             let end = self.token_end();
             self.next_token();
-            Arc::new(Node::with_loc(
+            Arc::new(Node::with_loc_flags(
                 SyntaxKind::Identifier,
                 NodeData::Identifier(IdentifierData { text }),
                 TextRange::new(pos, end),
+                self.context_flags_now(),
             ))
         } else {
             // Go createIdentifierWithDiagnostic：报 Identifier expected，
@@ -85,6 +86,16 @@ impl Parser {
                 | SyntaxKind::ProtectedKeyword
                 | SyntaxKind::StaticKeyword
         ) {
+            return self.parse_declaration_with_modifiers(vec![(
+                SyntaxKind::ExportKeyword,
+                pos,
+                export_end,
+            )]);
+        }
+
+        if self.token == SyntaxKind::UsingKeyword
+            || (self.token == SyntaxKind::AwaitKeyword && self.is_await_using_declaration())
+        {
             return self.parse_declaration_with_modifiers(vec![(
                 SyntaxKind::ExportKeyword,
                 pos,

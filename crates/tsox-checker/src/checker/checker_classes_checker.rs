@@ -5,12 +5,14 @@ use crate::checker::checker_classes::*;
 impl Checker {
     pub(crate) fn check_class_member(&mut self, node: &Arc<Node>) {
         self.check_grammar_modifiers(node);
+        self.check_node_decorators(node);
 
         if node.kind == SyntaxKind::Constructor {
             self.check_multiple_constructor_implementations(node);
         }
 
         self.check_private_name_conflicts(node);
+        self.check_member_dynamic_name_grammar(node);
 
         match node.kind {
             SyntaxKind::PropertyDeclaration => {
@@ -64,6 +66,7 @@ impl Checker {
             SyntaxKind::ClassStaticBlockDeclaration => {
                 if let tsox_frontend::ast::NodeData::ClassStaticBlockDeclaration(data) = &node.data
                 {
+                    self.check_grammar_modifiers(node);
                     self.this_container_stack
                         .push(ThisContainerKind::StaticMember);
                     self.check_statement(&data.body);
@@ -77,6 +80,24 @@ impl Checker {
                 self.check_class_accessor_member(node);
             }
             _ => {}
+        }
+    }
+
+    // Go checkDecorators 的表达式遍历部分（签名检查/emit helpers 不在此层）；
+    // NodeCanBeDecorated 失败的节点跳过（checkGrammarModifiers 已报 TS1206）
+    pub(crate) fn check_node_decorators(&mut self, node: &Arc<Node>) {
+        if !self.node_can_be_decorated(node) {
+            return;
+        }
+        let Some(modifiers) = node.modifiers().cloned() else {
+            return;
+        };
+        for modifier in modifiers.iter() {
+            if modifier.kind == SyntaxKind::Decorator {
+                if let tsox_frontend::ast::NodeData::Decorator(d) = &modifier.data {
+                    self.check_expression(&d.expression);
+                }
+            }
         }
     }
 }

@@ -25,6 +25,31 @@ impl Checker {
                 }
             }
         }
+
+        // 合并 function+namespace 的调用签名来源：未缓存时按需建
+        // 函数型（过载走 build_overload_function_type）
+        let fn_decl_count = symbol
+            .declarations
+            .iter()
+            .filter(|d| d.kind == SyntaxKind::FunctionDeclaration)
+            .count();
+        if fn_decl_count > 1
+            && let Some(t) = self.build_overload_function_type(symbol)
+        {
+            self.value_symbol_links.get_or_default(symbol).resolved_type = Some(Arc::clone(&t));
+            return t;
+        }
+        if let Some(decl) = symbol
+            .declarations
+            .iter()
+            .find(|d| d.kind == SyntaxKind::FunctionDeclaration)
+        {
+            let base = self.get_type_of_function_like(decl);
+            let t = self.attach_function_expando_type(symbol, base);
+            self.value_symbol_links.get_or_default(symbol).resolved_type = Some(Arc::clone(&t));
+            return t;
+        }
+
         self.get_any_type()
     }
 
@@ -120,7 +145,18 @@ impl Checker {
             Some(Arc::clone(node)),
         );
 
-        let return_type = self.infer_function_return_type(body, type_node);
+        let is_generator = match &node.data {
+            tsox_frontend::ast::NodeData::FunctionDeclaration(d) => d.asterisk_token.is_some(),
+            tsox_frontend::ast::NodeData::FunctionExpression(d) => d.asterisk_token.is_some(),
+            tsox_frontend::ast::NodeData::MethodDeclaration(d) => d.asterisk_token.is_some(),
+            _ => false,
+        };
+        let is_async_fn = node.has_syntactic_modifier(ModifierFlags::Async);
+        let return_type = if is_generator && type_node.is_none() && body.is_some() {
+            self.infer_generator_return_type(body.unwrap(), is_async_fn)
+        } else {
+            self.infer_function_return_type(body, type_node)
+        };
         if is_arrow {
             self.pop_arrow_function_scope();
         } else {

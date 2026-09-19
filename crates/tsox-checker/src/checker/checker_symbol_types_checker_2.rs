@@ -5,6 +5,7 @@ use crate::checker::checker_symbol_types::*;
 enum BindingPathSeg {
     Prop(String, bool),
     Index(usize),
+    Rest,
 }
 
 impl Checker {
@@ -333,7 +334,7 @@ impl Checker {
     }
 
     /// 绑定元素类型：沿模式链上行到根声明取类型，再按属性/索引路径逐层查。
-    fn binding_element_type(&mut self, elem: &Arc<Node>) -> Option<Arc<Type>> {
+    pub(crate) fn binding_element_type(&mut self, elem: &Arc<Node>) -> Option<Arc<Type>> {
         use tsox_frontend::ast::NodeData;
         let mut path: Vec<BindingPathSeg> = Vec::new();
         let mut cur = Arc::clone(elem);
@@ -341,7 +342,10 @@ impl Checker {
             match &cur.data {
                 NodeData::BindingElement(d) => {
                     let parent_kind = cur.parent().as_ref().map(|p| p.kind);
-                    if parent_kind == Some(tsox_frontend::ast::SyntaxKind::ArrayBindingPattern) {
+                    if d.dot_dot_dot_token.is_some() {
+                        // rest 元素：类型是模式容器的“剩余部分”，不是属性查找
+                        path.push(BindingPathSeg::Rest);
+                    } else if parent_kind == Some(tsox_frontend::ast::SyntaxKind::ArrayBindingPattern) {
                         let pattern = cur.parent().expect("checked kind above");
                         let index = match &pattern.data {
                             NodeData::BindingPattern(bp) => bp
@@ -391,8 +395,18 @@ impl Checker {
                 NodeData::VariableDeclaration(d) => {
                     let mut t = match (&d.type_node, &d.initializer) {
                         (Some(tn), _) => self.get_type_from_type_node(tn),
-                        (None, Some(init)) => self.get_type_of_node(init),
-                        _ => return None,
+                        (None, Some(init)) => {
+                            let raw = self.get_type_of_node(init);
+                            // Go widenTypeInferredFromInitializer：解构根类型按
+                            // 初始化式拓宽（fresh 字面量 6 → number）
+                            let widened_literal =
+                                self.get_widened_literal_type_for_initializer(&cur, &raw);
+                            let regularized = self.get_regular_type_of_literal_type(&widened_literal);
+                            self.widen_initializer_type(&regularized)
+                        }
+                        // for-in/of 头声明无初始化式：迭代类型即根类型
+                        //（Go getTypeForVariableLikeDeclaration 的 ForIn/ForOf 分支）
+                        (None, None) => self.initial_type_of_declaration(&cur)?,
                     };
                     for seg in path.iter().rev() {
                         t = self.binding_path_step(elem, t, seg)?;
@@ -577,17 +591,98 @@ impl Checker {
         Arc::new(rebuilt)
     }
 
+    /// 元素的 computed 属性名节点（仅显式 property_name 位）
+    pub(crate) fn binding_element_computed_property_name(elem: &Arc<Node>) -> Option<Arc<Node>> {
+        let tsox_frontend::ast::NodeData::BindingElement(be) = &elem.data else {
+            return None;
+        };
+        let pn = be.property_name.as_ref()?;
+        (pn.kind == tsox_frontend::ast::SyntaxKind::ComputedPropertyName)
+            .then(|| Arc::clone(pn))
+    }
+
     fn binding_path_step(
         &mut self,
         elem: &Arc<Node>,
         t: Arc<Type>,
         seg: &BindingPathSeg,
     ) -> Option<Arc<Type>> {
+        // 带默认值的元素（a = expr）：类型由默认值提供，属性缺失不诊断
+        //（Go getTypeForVariableLikeDeclaration 的 hasInitializer 分支）
+        let elem_has_initializer = matches!(
+            &elem.data,
+            NodeData::BindingElement(d) if d.initializer.is_some()
+        );
+        let diagnostics_allowed = !self.in_ambient_declaration_context()
+            && !elem_has_initializer
+            && !t.flags.intersects(TypeFlags::Any | TypeFlags::Unknown | TypeFlags::Never)
+            && !t.is_union()
+            && !crate::checker::utilities::is_type_error(&t);
+        if let BindingPathSeg::Rest = seg {
+            return Some(self.rest_element_type(elem, &t));
+        }
         if let BindingPathSeg::Prop(name, renamed) = seg {
+            // Go isTypeUsableAsPropertyName：computed 名表达式解析失败（error 型，
+            // 如未解析名）时属性查找不可用，错误已由名表达式自身报告
+            if let Some(pn) = Self::binding_element_computed_property_name(elem)
+                && let tsox_frontend::ast::NodeData::ComputedPropertyName(cd) = &pn.data
+            {
+                let name_expr_type = self.get_type_of_node(&cd.expression);
+                if crate::checker::utilities::is_type_error(&name_expr_type)
+                    || (tsox_frontend::ast::is_identifier(&cd.expression)
+                        && self.resolve_identifier(&cd.expression).is_none())
+                {
+                    return None;
+                }
+                // computed string 名走索引签名通道（Go getIndexedAccessTypeEx）：
+                // 无匹配 string 索引签名报 TS2537，命中取值类型
+                if name_expr_type.flags.intersects(TypeFlags::String) {
+                    let structured = t.as_structured();
+                    let match_info = structured.and_then(|s| {
+                        s.index_infos.iter().find(|info| {
+                            info.key_type
+                                .as_ref()
+                                .map(|k| k.flags.intersects(TypeFlags::String))
+                                .unwrap_or(false)
+                        })
+                    });
+                    if let Some(info) = match_info {
+                        return info.value_type.clone();
+                    }
+                    if diagnostics_allowed {
+                        let display = self.boxed_declared_type_for_display(&t);
+                        let type_str = self.type_to_string(&display);
+                        let key_str = self.type_to_string(&name_expr_type);
+                        let name_node = Self::binding_element_name_node(elem)
+                            .unwrap_or_else(|| Arc::clone(elem));
+                        self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                            self.current_file.clone(),
+                            name_node.loc,
+                            tsox_core::diagnostics::messages_generated::
+                                TYPE_0_HAS_NO_MATCHING_INDEX_SIGNATURE_FOR_TYPE_1,
+                            vec![type_str, key_str],
+                        ));
+                    }
+                    return None;
+                }
+            }
             if *renamed {
                 self.link_binding_element_container(elem, &t, name);
             }
-            return self.get_type_of_property_of_type(&t, name);
+            let result = self.get_type_of_property_of_type(&t, name);
+            if result.is_none() && diagnostics_allowed {
+                let display = self.boxed_declared_type_for_display(&t);
+                let type_str = self.type_to_string(&display);
+                let name_node = Self::binding_element_name_node(elem)
+                    .unwrap_or_else(|| Arc::clone(elem));
+                self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                    self.current_file.clone(),
+                    name_node.loc,
+                    tsox_core::diagnostics::messages_generated::PROPERTY_0_DOES_NOT_EXIST_ON_TYPE_1,
+                    vec![name.clone(), type_str],
+                ));
+            }
+            return result;
         }
         let BindingPathSeg::Index(index) = seg else {
             return None;
@@ -608,7 +703,114 @@ impl Checker {
         if let Some(elem) = self.get_array_element_type_of(&t) {
             return Some(elem);
         }
-        self.get_type_of_property_of_type(&t, &index.to_string())
+        if let Some(prop) = self.get_type_of_property_of_type(&t, &index.to_string()) {
+            return Some(prop);
+        }
+        if diagnostics_allowed {
+            let pattern = elem
+                .parent()
+                .filter(|p| p.kind == tsox_frontend::ast::SyntaxKind::ArrayBindingPattern);
+            return Some(self.check_iterated_type_or_element_type(
+                crate::checker::checker_iteration::IterationUse::Destructuring,
+                &t,
+                pattern.as_ref(),
+            ));
+        }
+        None
+    }
+
+    /// rest 绑定元素类型：对象模式取排除同模式其他绑定名后的剩余属性对象；
+    /// 数组模式取剩余元素数组（Go getRestTypeAtObject / getRestTypeAtPosition）。
+    pub(crate) fn rest_element_type(&mut self, elem: &Arc<Node>, t: &Arc<Type>) -> Arc<Type> {
+        let is_array_pattern = elem
+            .parent()
+            .is_some_and(|p| p.kind == tsox_frontend::ast::SyntaxKind::ArrayBindingPattern);
+        if is_array_pattern {
+            if self.is_tuple_type(t) {
+                let index = elem
+                    .parent()
+                    .and_then(|pattern| Self::binding_element_index(&pattern, elem))
+                    .unwrap_or(0);
+                let mut rest: Vec<Arc<Type>> = Vec::new();
+                let mut i = index;
+                while let Some(el) = self.get_tuple_element_type(t, i) {
+                    rest.push(el);
+                    i += 1;
+                }
+                let element_t = if rest.is_empty() {
+                    self.never_type()
+                } else {
+                    self.get_union_type(rest)
+                };
+                return self.create_array_type(element_t);
+            }
+            if let Some(el) = self.get_array_element_type_of(t) {
+                return self.create_array_type(el);
+            }
+            return Arc::clone(t);
+        }
+        let excluded = Self::pattern_excluded_property_names(elem);
+        if let Some(s) = t.as_structured() {
+            let kept: Vec<Arc<Symbol>> = s
+                .properties
+                .iter()
+                .filter(|p| !excluded.contains(&p.name))
+                .cloned()
+                .collect();
+            let mut members = crate::checker::types::SymbolTable::default();
+            for p in &kept {
+                members.insert(p.name.clone(), Arc::clone(p));
+            }
+            let mut rebuilt = Type::new(
+                t.flags,
+                TypeData::Object(ObjectTypeData {
+                    structured: crate::checker::types_impl_chunk::StructuredTypeData {
+                        members,
+                        properties: kept,
+                        ..Default::default()
+                    },
+                    ..Default::default()
+                }),
+            );
+            rebuilt.object_flags = t.object_flags;
+            return Arc::new(rebuilt);
+        }
+        Arc::clone(t)
+    }
+
+    /// 同一对象模式中其他元素绑定的属性名（rest 类型需排除这些属性）
+    fn pattern_excluded_property_names(elem: &Arc<Node>) -> Vec<String> {
+        let mut out = Vec::new();
+        let Some(pattern) = elem
+            .parent()
+            .filter(|p| p.kind == tsox_frontend::ast::SyntaxKind::ObjectBindingPattern)
+        else {
+            return out;
+        };
+        let NodeData::BindingPattern(bp) = &pattern.data else {
+            return out;
+        };
+        for e in bp.elements.nodes.iter() {
+            if Arc::ptr_eq(e, elem) {
+                continue;
+            }
+            let NodeData::BindingElement(be) = &e.data else {
+                continue;
+            };
+            if let Some(pn) = &be.property_name {
+                match &pn.data {
+                    NodeData::Identifier(i) => out.push(i.text.clone()),
+                    NodeData::StringLiteral(s) => out.push(s.text.clone()),
+                    NodeData::NumericLiteral(n) => out.push(n.text.clone()),
+                    _ => {}
+                }
+            } else if let Some(n) = &be.name
+                && n.kind == tsox_frontend::ast::SyntaxKind::Identifier
+            {
+                out.push(n.text().to_string());
+            }
+        }
+        out
     }
 
     pub(crate) fn with_declaring_file_context<T>(

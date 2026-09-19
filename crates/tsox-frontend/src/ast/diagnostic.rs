@@ -71,6 +71,9 @@ impl DiagnosticsCollection {
 
     pub fn add(&self, diagnostic: Diagnostic) {
         let mut inner = self.inner.lock().unwrap();
+        if Self::is_duplicate(&inner, &diagnostic) {
+            return;
+        }
         inner.count += 1;
         if let Some(file) = &diagnostic.file {
             let file_name = file.file_name.clone();
@@ -83,6 +86,60 @@ impl DiagnosticsCollection {
         } else {
             inner.non_file_diagnostics.push(diagnostic);
             inner.non_file_diagnostics_sorted = false;
+        }
+    }
+
+    /// Go DiagnosticsCollection.Add：同 file+loc+code 且全等（消息/实参/链/related）
+    /// 的诊断只保留第一条
+    fn is_duplicate(inner: &DiagnosticsCollectionInner, diagnostic: &Diagnostic) -> bool {
+        let candidates: &[Diagnostic] = match diagnostic.file.as_ref() {
+            Some(file) => inner
+                .file_diagnostics
+                .get(&file.file_name)
+                .map(|bucket| bucket.as_slice())
+                .unwrap_or(&[]),
+            None => &inner.non_file_diagnostics,
+        };
+        candidates
+            .iter()
+            .any(|d| d.loc == diagnostic.loc && d.code == diagnostic.code && equal_diagnostics(d, diagnostic))
+    }
+
+    pub fn add_or_append_related(&self, mut diagnostic: Diagnostic) {
+        let mut inner = self.inner.lock().unwrap();
+        let file_name = diagnostic.file.as_ref().map(|f| f.file_name.clone());
+        let matches = |d: &Diagnostic| {
+            d.code == diagnostic.code
+                && d.loc == diagnostic.loc
+                && d.file.as_ref().map(|f| f.file_name.as_str()) == file_name.as_deref()
+        };
+        let mut appended = false;
+        {
+            let existing = match file_name.as_ref() {
+                Some(name) => inner
+                    .file_diagnostics
+                    .get_mut(name)
+                    .and_then(|bucket| bucket.iter_mut().find(|d| matches(d))),
+                None => inner.non_file_diagnostics.iter_mut().find(|d| matches(d)),
+            };
+            if let Some(existing) = existing {
+                let related = std::mem::take(&mut diagnostic.related_information);
+                for rel in related {
+                    let already = existing.related_information.iter().any(|r| {
+                        r.loc == rel.loc
+                            && r.file.as_ref().map(|f| f.file_name.as_str())
+                                == rel.file.as_ref().map(|f| f.file_name.as_str())
+                    });
+                    if !already {
+                        existing.related_information.push(rel);
+                    }
+                }
+                appended = true;
+            }
+        }
+        if !appended {
+            drop(inner);
+            self.add(diagnostic);
         }
     }
 
@@ -139,4 +196,33 @@ impl Diagnostic {
             skipped_on_no_emit: self.skipped_on_no_emit,
         }
     }
+}
+
+/// Go EqualDiagnostics：消息身份（key+实参）+ 位置 + 类别 + 链 + related 全等
+fn equal_diagnostics(a: &Diagnostic, b: &Diagnostic) -> bool {
+    a.message_key == b.message_key
+        && a.message_args == b.message_args
+        && a.category == b.category
+        && a.message_chain.len() == b.message_chain.len()
+        && a
+            .message_chain
+            .iter()
+            .zip(b.message_chain.iter())
+            .all(|(x, y)| {
+                x.loc == y.loc
+                    && x.code == y.code
+                    && x.message_key == y.message_key
+                    && x.message_args == y.message_args
+            })
+        && a.related_information.len() == b.related_information.len()
+        && a
+            .related_information
+            .iter()
+            .zip(b.related_information.iter())
+            .all(|(x, y)| {
+                x.loc == y.loc
+                    && x.code == y.code
+                    && x.message_key == y.message_key
+                    && x.message_args == y.message_args
+            })
 }

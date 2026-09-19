@@ -38,6 +38,10 @@ impl Checker {
 
         self.check_export_assignment_conflicts(&statements);
 
+        if file.external_module_indicator.is_some() {
+            self.check_export_star_ambiguity(&file_node);
+        }
+
         self.check_declaration_diagnostics(&statements);
 
         self.check_unused_identifiers_in_file(&file_node);

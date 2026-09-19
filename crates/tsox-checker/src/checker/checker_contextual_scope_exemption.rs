@@ -59,10 +59,48 @@ impl Checker {
             }
             let mut cur = node.parent();
             let mut exempt = false;
-            while let Some(a) = cur {
+            'walk: while let Some(a) = cur {
                 if let Some(dcont) = &decl_container {
                     if Arc::ptr_eq(&a, dcont) {
                         break;
+                    }
+                }
+                // Go isUsedInFunctionOrInstanceProperty 装饰器分支：装饰器
+                // 表达式整体位于方法/参数装饰器内时，改从被装饰成员的容器续走，
+                // 不把宿主方法当函数边界豁免
+                if let Some(parent) = a.parent()
+                    && parent.kind == SyntaxKind::Decorator
+                    && let tsox_frontend::ast::NodeData::Decorator(d) = &parent.data
+                    && Arc::ptr_eq(&d.expression, &a)
+                {
+                    match parent.parent().map(|decorated| (Arc::clone(&decorated), decorated.kind))
+                    {
+                        Some((decorated, SyntaxKind::MethodDeclaration)) => {
+                            cur = decorated.parent();
+                            continue 'walk;
+                        }
+                        Some((decorated, SyntaxKind::Parameter)) => {
+                            let mut boundary = decorated.parent();
+                            let mut landed: Option<Arc<Node>> = None;
+                            while let Some(b) = boundary {
+                                landed = Some(Arc::clone(&b));
+                                if matches!(
+                                    b.kind,
+                                    SyntaxKind::MethodDeclaration
+                                        | SyntaxKind::Constructor
+                                        | SyntaxKind::GetAccessor
+                                        | SyntaxKind::SetAccessor
+                                        | SyntaxKind::ClassDeclaration
+                                        | SyntaxKind::ClassExpression
+                                ) {
+                                    break;
+                                }
+                                boundary = b.parent();
+                            }
+                            cur = landed.and_then(|b| b.parent());
+                            continue 'walk;
+                        }
+                        _ => {}
                     }
                 }
                 if is_fn_like(&a) {

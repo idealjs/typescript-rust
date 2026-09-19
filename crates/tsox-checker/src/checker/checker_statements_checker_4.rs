@@ -5,6 +5,63 @@ use crate::checker::checker_statements::*;
 impl Checker {
     pub(crate) fn check_variable_declaration(&mut self, node: &Arc<Node>) {
         self.check_grammar_variable_declaration(node);
+        // Go checkVariableLikeDeclaration：var 合并的二级声明须与主声明类型
+        // 一致（TS2403 + related "'x' was also declared here"）
+        {
+            let sym = self.program.symbol_map().symbol_of(node).cloned();
+            if let Some(sym) = sym
+                && sym.declarations.len() > 1
+                && let Some(primary) = &sym.value_declaration
+                && !Arc::ptr_eq(primary, node)
+                && node.kind == SyntaxKind::VariableDeclaration
+                && primary.kind == SyntaxKind::VariableDeclaration
+            {
+                let secondary_type = match &node.data {
+                    tsox_frontend::ast::NodeData::VariableDeclaration(d) => {
+                        d.type_node.as_ref().map(|tn| self.get_type_from_type_node(tn))
+                    }
+                    _ => None,
+                };
+                let primary_type = match &primary.data {
+                    tsox_frontend::ast::NodeData::VariableDeclaration(d) => {
+                        d.type_node.as_ref().map(|tn| self.get_type_from_type_node(tn))
+                    }
+                    _ => None,
+                };
+                if let (Some(st), Some(pt)) = (secondary_type, primary_type) {
+                    let sw = self.get_widened_type(&st);
+                    let pw = self.get_widened_type(&pt);
+                    let primary_name_loc = primary.name().map(|n| n.loc);
+                    if !self.is_type_identical_to(&pw, &sw) {
+                        if let tsox_frontend::ast::NodeData::VariableDeclaration(d) = &node.data {
+                            let mut diag = tsox_frontend::ast::Diagnostic::new(
+                                self.current_file.clone(),
+                                d.name.loc,
+                                tsox_core::diagnostics::messages_generated::
+                                    SUBSEQUENT_VARIABLE_DECLARATIONS_MUST_HAVE_THE_SAME_TYPE_VARIABLE_0_MUST_BE_OF_TYPE_1_BUT_HERE_HAS_TYPE_2,
+                                vec![
+                                    d.name.text().to_string(),
+                                    self.type_to_string(&pw),
+                                    self.type_to_string(&sw),
+                                ],
+                            );
+                            if let Some(loc) = primary_name_loc {
+                                diag.related_information.push(
+                                    tsox_frontend::ast::Diagnostic::new(
+                                        self.current_file.clone(),
+                                        loc,
+                                        tsox_core::diagnostics::messages_generated::
+                                            X_0_WAS_ALSO_DECLARED_HERE,
+                                        vec![d.name.text().to_string()],
+                                    ),
+                                );
+                            }
+                            self.diagnostics.add(diag);
+                        }
+                    }
+                }
+            }
+        }
         if let tsox_frontend::ast::NodeData::VariableDeclaration(data) = &node.data {
             if data.initializer.is_none() {
                 let is_const = node
@@ -47,16 +104,24 @@ impl Checker {
                 if is_const && !in_for_in_of && !is_ambient {
                     let file = self.current_file.clone();
                     let name_loc = data.name.loc;
-                    self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
-                        file,
-                        name_loc,
-                        tsox_core::diagnostics::messages_generated::X_0_DECLARATIONS_MUST_BE_INITIALIZED,
-                        vec!["const".to_string()],
-                    ));
+                    let already = self.diagnostics.get_all().iter().any(|d| {
+                        d.code == 1155
+                            && d.loc.pos() == name_loc.pos()
+                            && d.file.as_ref().map(|f| f.file_name.as_str())
+                                == file.as_ref().map(|f| f.file_name.as_str())
+                    });
+                    if !already {
+                        self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                            file,
+                            name_loc,
+                            tsox_core::diagnostics::messages_generated::X_0_DECLARATIONS_MUST_BE_INITIALIZED,
+                            vec!["const".to_string()],
+                        ));
+                    }
                 }
             }
 
-            if data.initializer.is_some() && data.name.kind == SyntaxKind::Identifier {
+            if data.name.kind == SyntaxKind::Identifier {
                 let list_is_var = node.parent().as_ref().is_none_or(|l| {
                     !(l.flags.contains(NodeFlags::Let) || l.flags.contains(NodeFlags::Const))
                 });
@@ -74,7 +139,14 @@ impl Checker {
                         && let Some(list) = vd.parent().as_ref()
                         && list.kind == SyntaxKind::VariableDeclarationList
                     {
-                        let container = list.parent().and_then(|s| s.parent());
+                        // Go：container 仅在 VariableStatement 路径取（for-in/of 头
+                        // 声明不在 VariableStatement 下 → container 为空 → 必报）
+                        let container = list
+                            .parent()
+                            .and_then(|s| {
+                                (s.kind == SyntaxKind::VariableStatement).then(|| s.clone())
+                            })
+                            .and_then(|s| s.parent());
                         let names_share_scope = container.is_some_and(|c| {
                             c.kind == SyntaxKind::ModuleBlock
                                 || c.kind == SyntaxKind::ModuleDeclaration
@@ -176,16 +248,20 @@ impl Checker {
                             file,
                             loc,
                             OBJECT_LITERAL_MAY_ONLY_SPECIFY_KNOWN_PROPERTIES_AND_0_DOES_NOT_EXIST_IN_TYPE_1,
-                            vec![excess_name, annot_str],
+                            vec![
+                                crate::checker::property_name_for_display(&excess_name),
+                                annot_str,
+                            ],
                         ));
                         reported_error = true;
                     }
 
                     if !assignable && !reported_error {
+                        let name_node = Arc::clone(&data.name);
                         self.check_type_assignable_to_and_optionally_elaborate(
                             &init_type,
                             &annotation_type,
-                            Some(node),
+                            Some(&name_node),
                             Some(init),
                             None,
                             None,
@@ -193,7 +269,12 @@ impl Checker {
                     }
                     annotation_type
                 }
-                (Some(type_node), None) => self.get_type_from_type_node(type_node),
+                (Some(type_node), None) => {
+                    // Go checkVariableDeclaration：注解类型走完整检查
+                    //（计算名 TS2304/TS2464 等）
+                    self.check_type_annotation(type_node);
+                    self.get_type_from_type_node(type_node)
+                }
                 (None, Some(init)) => {
                     if data.name.kind == SyntaxKind::ArrayBindingPattern {
                         let init_type = if init.kind == SyntaxKind::Identifier
@@ -315,6 +396,38 @@ impl Checker {
                     .get_or_default(&symbol)
                     .resolved_type = Some(resolved_type);
             }
+
+            // Go checkVariableLikeDeclaration：绑定模式名逐元素急切解析
+            //（TS2339/TS2488 等在声明检查期发出）
+            if matches!(
+                data.name.kind,
+                SyntaxKind::ObjectBindingPattern | SyntaxKind::ArrayBindingPattern
+            ) {
+                self.check_binding_pattern_element_types(&data.name);
+            }
+        }
+    }
+
+    pub(crate) fn check_binding_pattern_element_types(&mut self, pattern: &Arc<Node>) {
+        let tsox_frontend::ast::NodeData::BindingPattern(bp) = &pattern.data else {
+            return;
+        };
+        for element in bp.elements.iter() {
+            if let tsox_frontend::ast::NodeData::BindingElement(be) = &element.data {
+                // rest 元素类型是“剩余属性”对象，不做属性查找，也不产生 TS2339
+                if be.dot_dot_dot_token.is_some() {
+                    continue;
+                }
+                if let Some(name) = &be.name
+                    && matches!(
+                        name.kind,
+                        SyntaxKind::ObjectBindingPattern | SyntaxKind::ArrayBindingPattern
+                    )
+                {
+                    self.check_binding_pattern_element_types(name);
+                }
+            }
+            let _ = self.binding_element_type(&element);
         }
     }
 

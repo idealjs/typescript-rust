@@ -94,12 +94,19 @@ impl Parser {
             if !s.has_preceding_line_break() && s.token() == SyntaxKind::OpenBraceToken {
                 let pos = self.token_pos();
                 self.next_token();
+                // Go parseClassStaticBlockBody：静态块体 Yield 关、Await 开
+                let prev_yield = self.yield_context;
+                let prev_await = self.await_context;
+                self.yield_context = false;
+                self.await_context = true;
                 let body = self.parse_block_ex(true);
+                self.yield_context = prev_yield;
+                self.await_context = prev_await;
                 let end = body.end();
                 return Arc::new(Node::with_loc(
                     SyntaxKind::ClassStaticBlockDeclaration,
                     NodeData::ClassStaticBlockDeclaration(ClassStaticBlockDeclarationData {
-                        modifiers: None,
+                        modifiers,
                         body,
                     }),
                     TextRange::new(pos, end),
@@ -138,9 +145,12 @@ impl Parser {
 
             let prev_yield = self.yield_context;
             let prev_await = self.await_context;
-            if asterisk_token.is_some() {
-                self.yield_context = true;
-            }
+            // Go parseMethodDeclaration：整个签名+体在 generator/async 上下文
+            let method_is_async = modifiers.as_ref().is_some_and(|ml| {
+                ml.list.nodes.iter().any(|m| m.kind == SyntaxKind::AsyncKeyword)
+            });
+            self.yield_context = asterisk_token.is_some();
+            self.await_context = method_is_async;
 
             let parameters = self.parse_parameter_list();
             let type_node = self.parse_optional_return_type();
@@ -188,7 +198,15 @@ impl Parser {
         let type_node = self.parse_optional_type_annotation();
         let initializer = if self.token == SyntaxKind::EqualsToken {
             self.next_token();
-            Some(self.parse_assignment_expression())
+            // Go parsePropertyDeclaration：初始化器有隐式函数边界，yield/await 关
+            let saved_yield = self.yield_context;
+            let saved_await = self.await_context;
+            self.yield_context = false;
+            self.await_context = false;
+            let init = self.parse_assignment_expression();
+            self.yield_context = saved_yield;
+            self.await_context = saved_await;
+            Some(init)
         } else {
             None
         };

@@ -82,11 +82,13 @@ impl Checker {
             }
         }
 
-        if symbol.flags.contains(SymbolFlags::ValueModule)
+        if (symbol.flags.contains(SymbolFlags::ValueModule)
             && (symbol.flags.contains(SymbolFlags::Function)
                 || symbol.flags.contains(SymbolFlags::Class)
                 || symbol.flags.contains(SymbolFlags::RegularEnum)
-                || symbol.flags.contains(SymbolFlags::ConstEnum))
+                || symbol.flags.contains(SymbolFlags::ConstEnum)))
+            || (symbol.flags.contains(SymbolFlags::NamespaceModule)
+                && symbol.flags.contains(SymbolFlags::Function))
         {
             return self.get_type_of_merged_namespace_symbol(symbol);
         }
@@ -113,6 +115,49 @@ impl Checker {
                 && let Some(ref t) = links.resolved_type
             {
                 return Arc::clone(t);
+            }
+            // Go getTypeOfFuncClassEnumModule：符号有多声明（过载）时类型是
+            // 各声明函数类型的联合；方法侧等价为收集全部无实现体签名
+            let method_decls: Vec<Arc<Node>> = symbol
+                .declarations
+                .iter()
+                .filter(|d| d.kind == SyntaxKind::MethodDeclaration)
+                .cloned()
+                .collect();
+            let overload_sigs: Vec<Arc<Signature>> = {
+                let mut sigs: Vec<Arc<Signature>> = Vec::new();
+                for d in &method_decls {
+                    let tsox_frontend::ast::NodeData::MethodDeclaration(md) = &d.data else {
+                        continue;
+                    };
+                    if md.body.is_some() {
+                        continue;
+                    }
+                    self.push_scope(d);
+                    let saved_stack = std::mem::take(&mut self.type_argument_stack);
+                    let saved_frames = std::mem::take(&mut self.type_argument_name_frames);
+                    let return_type = match md.type_node.as_ref() {
+                        Some(tn) => self.get_type_from_type_node(tn),
+                        None => self.get_any_type(),
+                    };
+                    let sig = self.build_signature_from_function_like_type_node(
+                        &md.parameters,
+                        return_type,
+                        false,
+                        None,
+                        Some(Arc::clone(d)),
+                    );
+                    self.type_argument_name_frames = saved_frames;
+                    self.type_argument_stack = saved_stack;
+                    self.pop_scope();
+                    sigs.push(sig);
+                }
+                sigs
+            };
+            if overload_sigs.len() > 1 {
+                let t = self.create_function_or_constructor_type(overload_sigs, false);
+                self.value_symbol_links.get_or_default(symbol).resolved_type = Some(Arc::clone(&t));
+                return t;
             }
             self.push_scope(decl);
             // 符号类型是声明形式：重建时与进行中的实例化映射隔离，防止类型参数被外部绑定污染缓存

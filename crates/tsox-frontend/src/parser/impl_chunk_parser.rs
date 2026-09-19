@@ -213,6 +213,18 @@ impl Parser {
             crate::scanner::DiagnosticKind::UnterminatedStringLiteral => {
                 tsox_core::diagnostics::UNTERMINATED_STRING_LITERAL
             }
+            crate::scanner::DiagnosticKind::HexadecimalDigitExpected => {
+                tsox_core::diagnostics::HEXADECIMAL_DIGIT_EXPECTED
+            }
+            crate::scanner::DiagnosticKind::UnexpectedEndOfText => {
+                tsox_core::diagnostics::UNEXPECTED_END_OF_TEXT
+            }
+            crate::scanner::DiagnosticKind::UnicodeEscapeOutOfRange => {
+                tsox_core::diagnostics::AN_EXTENDED_UNICODE_ESCAPE_VALUE_MUST_BE_BETWEEN_0X0_AND_0X10FFFF_INCLUSIVE
+            }
+            crate::scanner::DiagnosticKind::UnterminatedUnicodeEscape => {
+                tsox_core::diagnostics::UNTERMINATED_UNICODE_ESCAPE_SEQUENCE
+            }
             crate::scanner::DiagnosticKind::UnterminatedTemplateLiteral => {
                 tsox_core::diagnostics::UNTERMINATED_TEMPLATE_LITERAL
             }
@@ -238,6 +250,7 @@ impl Parser {
                 tsox_core::diagnostics::NUMERIC_SEPARATORS_ARE_NOT_ALLOWED_HERE
             }
             crate::scanner::DiagnosticKind::RegexMessage(msg) => msg,
+            crate::scanner::DiagnosticKind::RegexMessageWithArg(msg, _arg) => msg,
         };
         let args: Vec<String> = match err.kind {
             crate::scanner::DiagnosticKind::OctalLiteralNotAllowed => {
@@ -247,6 +260,7 @@ impl Parser {
                 let digits = octal_digits.strip_prefix('0').unwrap_or(octal_digits);
                 vec![format!("0o{digits}")]
             }
+            crate::scanner::DiagnosticKind::RegexMessageWithArg(_, arg) => vec![arg.to_string()],
             _ => Vec::new(),
         };
         let arg_refs: Vec<&str> = args.iter().map(|s| s.as_str()).collect();

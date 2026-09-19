@@ -68,10 +68,13 @@ impl Checker {
             }
             SyntaxKind::VariableStatement => {
                 if let tsox_frontend::ast::NodeData::VariableStatement(data) = &node.data {
-                    self.check_grammar_variable_declaration_list(&data.declaration_list);
-                    self.check_variable_declaration_list(&data.declaration_list);
-
                     self.check_grammar_modifiers(node);
+                    let list_has_grammar_error =
+                        self.check_grammar_variable_declaration_list(&data.declaration_list);
+                    if !list_has_grammar_error {
+                        self.check_grammar_for_disallowed_block_scoped_variable_statement(node);
+                    }
+                    self.check_variable_declaration_list(&data.declaration_list);
 
                     if let tsox_frontend::ast::NodeData::VariableDeclarationList(list) =
                         &data.declaration_list.data
@@ -152,11 +155,60 @@ impl Checker {
             SyntaxKind::ForInStatement | SyntaxKind::ForOfStatement => {
                 self.push_scope(node);
                 if let tsox_frontend::ast::NodeData::ForInOrOfStatement(data) = &node.data {
-                    if node.kind == SyntaxKind::ForOfStatement && data.await_modifier.is_none() {
-                        self.check_for_of_iterated_type(node, &data.expression);
+                    self.check_grammar_for_in_or_for_of_statement(node);
+                    if node.kind == SyntaxKind::ForOfStatement {
+                        if let Some(await_modifier) = &data.await_modifier {
+                            let container = crate::checker::utilities_get_assignment_target::
+                                get_containing_function_or_class_static_block(node);
+                            if container
+                                .as_ref()
+                                .is_some_and(|c| c.kind == SyntaxKind::ClassStaticBlockDeclaration)
+                            {
+                                self.diagnostics.add(
+                                    tsox_frontend::ast::Diagnostic::new(
+                                        self.current_file.clone(),
+                                        await_modifier.loc,
+                                        tsox_core::diagnostics::messages_generated::
+                                            X_FOR_AWAIT_LOOPS_CANNOT_BE_USED_INSIDE_A_CLASS_STATIC_BLOCK,
+                                        Vec::new(),
+                                    ),
+                                );
+                            }
+                        }
+                        self.check_expression(&data.expression);
+                        let iterated = self.check_right_hand_side_of_for_of(node);
+                        if data.initializer.kind == SyntaxKind::VariableDeclarationList {
+                            self.check_variable_declaration_list(&data.initializer);
+                        } else {
+                            let var_expr = Arc::clone(&data.initializer);
+                            if matches!(
+                                var_expr.kind,
+                                SyntaxKind::ArrayLiteralExpression
+                                    | SyntaxKind::ObjectLiteralExpression
+                            ) {
+                                let source =
+                                    iterated.unwrap_or_else(|| self.error_type());
+                                self.check_destructuring_assignment(&var_expr, &source);
+                            } else {
+                                self.check_expression(&var_expr);
+                                let left_type = self.get_type_of_node(&var_expr);
+                                self.check_for_of_reference_expression(&var_expr);
+                                if let Some(iterated) = &iterated {
+                                    self.check_type_assignable_to_and_optionally_elaborate(
+                                        iterated,
+                                        &left_type,
+                                        Some(&var_expr),
+                                        Some(&data.expression),
+                                        None,
+                                        None,
+                                    );
+                                }
+                            }
+                        }
+                    } else {
+                        self.check_for_initializer(&data.initializer);
+                        self.check_expression(&data.expression);
                     }
-                    self.check_for_initializer(&data.initializer);
-                    self.check_expression(&data.expression);
                     self.break_continue_context_stack
                         .push(BreakContinueContext {
                             kind: BreakContinueContextKind::Loop,
@@ -344,6 +396,30 @@ impl Checker {
                 if let tsox_frontend::ast::NodeData::ModuleBlock(data) = &node.data {
                     for stmt in data.statements.iter() {
                         self.check_statement(stmt);
+                    }
+                }
+            }
+            SyntaxKind::WithStatement => {
+                // Go checkWithStatement：body 不检查（with 块内一切符号
+                // 按 any，TS2410）；span 从 with 关键字到 body 起点
+                if let tsox_frontend::ast::NodeData::WithStatement(data) = &node.data {
+                    self.check_expression(&data.expression);
+                    if !self
+                        .current_file
+                        .as_ref()
+                        .is_some_and(|f| f.has_parse_diagnostics)
+                    {
+                        let loc = tsox_core::core::text::TextRange::new(
+                            node.loc.pos(),
+                            data.statement.loc.pos(),
+                        );
+                        self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                            self.current_file.clone(),
+                            loc,
+                            tsox_core::diagnostics::messages_generated::
+                                THE_WITH_STATEMENT_IS_NOT_SUPPORTED_ALL_SYMBOLS_IN_A_WITH_BLOCK_WILL_HAVE_TYPE_ANY,
+                            Vec::new(),
+                        ));
                     }
                 }
             }

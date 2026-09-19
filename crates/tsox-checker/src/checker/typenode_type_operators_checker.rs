@@ -42,6 +42,17 @@ impl Checker {
                             });
                         }
                     }
+                    // readonly T[] 的数组形态：带 IsReadonlyArray 标志的数组实例。
+                    // 不能经 ReadonlyArray 接口实例化承载：lib 自身成员
+                    // （flatMap 的 U | readonly U[] 等）会在接口解析期自引用重入，
+                    // 触发降级使实例化永不上缓存
+                    if self.is_array_type(&inner)
+                        && let Some(element) = inner
+                            .as_object()
+                            .and_then(|o| o.type_arguments.first().cloned())
+                    {
+                        return self.create_array_type_ex(element, true);
+                    }
                     inner
                 }
                 _ => self.error_type(),

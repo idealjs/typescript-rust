@@ -36,7 +36,7 @@ impl Checker {
             let source_str = self.type_to_string(&expr_base);
             let target_str = self.type_to_string(&target_type);
             let file = self.current_file.clone();
-            let mut diag = tsox_frontend::ast::Diagnostic::new(
+            let diag = tsox_frontend::ast::Diagnostic::new(
                 file,
                 node.loc,
                 tsox_core::diagnostics::messages_generated::
@@ -47,14 +47,16 @@ impl Checker {
             if let Some((prop_loc, prop_name, elem_target_str)) =
                 self.assertion_excess_detail(&expr, &expr_base, &target_type)
             {
-                diag.loc = prop_loc;
-                diag.message_chain.push(tsox_frontend::ast::Diagnostic::new(
-                    None,
+                // Go 基线：excess 属性错误单独呈现（无 2352 转换头）
+                let file = self.current_file.clone();
+                self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                    file,
                     prop_loc,
                     tsox_core::diagnostics::messages_generated::
                         OBJECT_LITERAL_MAY_ONLY_SPECIFY_KNOWN_PROPERTIES_AND_0_DOES_NOT_EXIST_IN_TYPE_1,
                     vec![prop_name, elem_target_str],
                 ));
+                return;
             }
             self.diagnostics.add(diag);
         }
@@ -86,7 +88,11 @@ impl Checker {
         let prop_name = self.get_excess_property_name(&elem_source, &elem_target)?;
         let prop_loc = self.find_object_literal_property_name_node(&literal_node, &prop_name)?;
         let elem_target_str = self.type_to_string(&elem_target);
-        Some((prop_loc, prop_name, elem_target_str))
+        Some((
+            prop_loc,
+            crate::checker::property_name_for_display(&prop_name),
+            elem_target_str,
+        ))
     }
 
     pub(crate) fn element_type_of(&self, t: &Arc<Type>) -> Option<Arc<Type>> {
@@ -118,6 +124,16 @@ impl Checker {
         }
     }
 
+    pub(crate) fn is_entity_name_expression(node: &Arc<Node>) -> bool {
+        if node.kind == SyntaxKind::Identifier {
+            return true;
+        }
+        if let tsox_frontend::ast::NodeData::PropertyAccessExpression(pa) = &node.data {
+            return pa.name.kind == SyntaxKind::Identifier && Self::is_entity_name_expression(&pa.expression);
+        }
+        false
+    }
+
     pub(crate) fn check_interface_members(&mut self, members: &NodeList) {
         {
             let mut seen: std::collections::HashMap<String, Vec<&Arc<Node>>> =
@@ -129,6 +145,36 @@ impl Checker {
                         | SyntaxKind::NumericLiteral
                         | SyntaxKind::Identifier
                         | SyntaxKind::PrivateIdentifier => name_node.text().to_string(),
+                        // Go getEffectivePropertyNameForPropertyNameNode：仅字面量
+                        // 与 well-known 计算名可作去重键，其余跳过；计算键与恰好
+                        // 同文的转义字面量键分属不同命名空间（Go binder 对计算名
+                        // 走匿名符号，二者不构成重复）
+                        SyntaxKind::ComputedPropertyName => {
+                            let key = match &name_node.data {
+                                tsox_frontend::ast::NodeData::ComputedPropertyName(cd) => {
+                                    crate::binder::symbols_binder_4::well_known_symbol_member_name(
+                                        &cd.expression,
+                                    )
+                                    .map(|internal| format!("c:{internal}"))
+                                    .or_else(|| {
+                                        if matches!(
+                                            cd.expression.kind,
+                                            SyntaxKind::StringLiteral
+                                                | SyntaxKind::NumericLiteral
+                                        ) {
+                                            Some(format!("l:{}", cd.expression.text()))
+                                        } else {
+                                            None
+                                        }
+                                    })
+                                }
+                                _ => None,
+                            };
+                            match key {
+                                Some(k) => k,
+                                None => continue,
+                            }
+                        }
                         _ => continue,
                     };
                     seen.entry(name).or_default().push(member);
@@ -144,7 +190,18 @@ impl Checker {
                 if group.len() > 1 && !all_methods && !accessor_pair {
                     for m in group {
                         if let Some(name_node) = m.name() {
-                            let name = name_node.text().to_string();
+                            let name = match &name_node.data {
+                                tsox_frontend::ast::NodeData::ComputedPropertyName(cd) => {
+                                    crate::binder::symbols_binder_4::well_known_symbol_member_name(
+                                        &cd.expression,
+                                    )
+                                    .map(|internal| {
+                                        crate::checker::property_name_for_display(&internal)
+                                    })
+                                    .unwrap_or_else(|| name_node.text().to_string())
+                                }
+                                _ => name_node.text().to_string(),
+                            };
                             let file = self.current_file.clone();
                             self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
                                 file,
@@ -158,7 +215,20 @@ impl Checker {
             }
         }
         for member in members.iter() {
+            // 接口成员的计算名：解析表达式（TS2304）+
+            // Go checkGrammarForInvalidDynamicName（TS1166/1169 族）
+            if let Some(name) = Self::member_name_node(member)
+                && name.kind == SyntaxKind::ComputedPropertyName
+            {
+                self.check_computed_property_name(&name);
+                self.check_member_dynamic_name_grammar(member);
+            }
+            // Go checkGrammarModifiers：接口成员的非法修饰符（TS1070 等）
+            self.check_grammar_modifiers(member);
             match member.kind {
+                SyntaxKind::IndexSignature => {
+                    self.check_grammar_index_signature(member);
+                }
                 SyntaxKind::MethodSignature => {
                     let tsox_frontend::ast::NodeData::MethodSignatureDeclaration(d) = &member.data
                     else {

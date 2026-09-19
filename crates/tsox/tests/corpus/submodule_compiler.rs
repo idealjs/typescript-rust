@@ -424,7 +424,7 @@ fn process_case(content: &str, basename: &str) -> Vec<ConfigOutcome> {
                             tsconfig.as_ref().map(|(c, _)| c.file_names.as_slice()),
                             &parsed.symlinks,
                         );
-                        render_errors_baseline(&diags, program_len)
+                        render_errors_baseline(&diags, program_len, compiler_options.pretty.is_true())
                     }) {
                         Ok(actual) => CaseOutcome::Output(actual),
                         Err(payload) => {
@@ -1248,7 +1248,15 @@ fn build_and_check(
     (all, program_len)
 }
 
-fn render_errors_baseline(diags: &[Diagnostic], program_len: usize) -> String {
+fn render_errors_baseline(diags: &[Diagnostic], program_len: usize, pretty: bool) -> String {
+    // tsc .errors.txt 基线不含纯 suggestion（allowUnreachableCode 未设置时
+    // 的 TS7027 等仅编辑器提示）
+    let owned: Vec<Diagnostic> = diags
+        .iter()
+        .filter(|d| d.category != tsox_core::diagnostics::Category::Suggestion)
+        .cloned()
+        .collect();
+    let diags: &[Diagnostic] = &owned;
     if diags.is_empty() {
         return NO_CONTENT.to_string();
     }
@@ -1284,11 +1292,17 @@ fn render_errors_baseline(diags: &[Diagnostic], program_len: usize) -> String {
 
     let mut out = String::new();
     for (_, _, _, _, _, d) in keyed {
-        let mut line = format_diagnostic_compact(d, None);
+        let mut line = if pretty {
+            tsox_frontend::diagnosticwriter::format_diagnostic_pretty(d, None)
+        } else {
+            format_diagnostic_compact(d, None)
+        };
 
         line = line.replace("/proj/", "");
         out.push_str(&line);
-        out.push('\n');
+        if !pretty {
+            out.push('\n');
+        }
     }
     if !globals.is_empty() {
         out.push('\n');

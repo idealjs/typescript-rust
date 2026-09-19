@@ -50,6 +50,78 @@ impl Checker {
         self.type_argument_stack.push(mapping);
     }
 
+    /// 实例化语境（接口带实参解析成员期，type_argument_stack 非空）中，
+    /// 声明的类型参数集合生成新实例：约束经容器实参代入（Go instantiateSymbol
+    /// 的约束代入），符号不变（推断按符号等价路由）
+    pub(crate) fn instantiate_declaration_type_parameters(
+        &mut self,
+        tps: Vec<Arc<Type>>,
+    ) -> Vec<Arc<Type>> {
+        if self.type_argument_stack.is_empty() {
+            return tps;
+        }
+        let mut frame_pairs: Vec<(*const Symbol, Arc<Type>)> = Vec::new();
+        for frame in self.type_argument_stack.iter().rev() {
+            for (k, v) in frame.iter() {
+                frame_pairs.push((*k, Arc::clone(v)));
+            }
+        }
+        tps.into_iter()
+            .map(|tp| {
+                let constraint = match &tp.data {
+                    TypeData::TypeParameter(d) => d.constraint.clone(),
+                    _ => None,
+                };
+                let Some(constraint) = constraint else {
+                    return tp;
+                };
+                let mut free: Vec<Arc<Type>> = Vec::new();
+                self.collect_free_type_parameters_deep(&constraint, &mut free);
+                let mut mapping_params: Vec<Arc<Type>> = Vec::new();
+                let mut mapping_args: Vec<Arc<Type>> = Vec::new();
+                for f in &free {
+                    if let Some(sym) = &f.symbol {
+                        let key = Arc::as_ptr(sym) as *const Symbol;
+                        if let Some(v) = frame_pairs
+                            .iter()
+                            .find(|(k, _)| *k == key)
+                            .map(|(_, v)| Arc::clone(v))
+                        {
+                            mapping_params.push(Arc::clone(f));
+                            mapping_args.push(v);
+                        }
+                    }
+                }
+                if mapping_params.is_empty() {
+                    return tp;
+                }
+                let substituted = self.substitute_infer_type_parameters(
+                    &constraint,
+                    &mapping_params,
+                    &mapping_args,
+                );
+                if Arc::ptr_eq(&substituted, &constraint) {
+                    return tp;
+                }
+                Arc::new(Type {
+                    flags: tp.flags,
+                    object_flags: tp.object_flags,
+                    id: crate::checker::types::next_type_id(),
+                    symbol: tp.symbol.clone(),
+                    alias: None,
+                    data: TypeData::TypeParameter(TypeParameterData {
+                        constrained: ConstrainedTypeData::default(),
+                        constraint: Some(substituted),
+                        target: None,
+                        mapper: None,
+                        is_this_type: false,
+                        resolved_default_type: OnceLock::new(),
+                    }),
+                })
+            })
+            .collect()
+    }
+
     pub(crate) fn collect_interface_base_types(
         &mut self,
         interface_decls: &[Arc<Node>],

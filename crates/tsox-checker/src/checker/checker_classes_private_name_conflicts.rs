@@ -57,9 +57,14 @@ impl Checker {
                     _ => "",
                 };
                 let mine = kind_of(node);
+                let i_am_static = node.has_syntactic_modifier(ModifierFlags::Static);
+                // tsc：同名成员仅在相同 staticness 下冲突，static 与实例同名合法
                 let mut theirs_all_prop = true;
                 let dup = cd.members.iter().any(|m| {
                     if Arc::ptr_eq(m, node) || m.loc.pos() >= node.loc.pos() {
+                        return false;
+                    }
+                    if m.has_syntactic_modifier(ModifierFlags::Static) != i_am_static {
                         return false;
                     }
                     let name_match = match &m.data {
@@ -90,11 +95,13 @@ impl Checker {
 
                 let earlier_has_prop = cd.members.iter().any(|m| {
                     m.loc.pos() < node.loc.pos()
+                        && m.has_syntactic_modifier(ModifierFlags::Static) == i_am_static
                         && matches!(&m.data, tsox_frontend::ast::NodeData::PropertyDeclaration(d) if d.name.text() == my_name)
                 });
 
                 let earlier_has_method = cd.members.iter().any(|m| {
                     m.loc.pos() < node.loc.pos()
+                        && m.has_syntactic_modifier(ModifierFlags::Static) == i_am_static
                         && matches!(&m.data, tsox_frontend::ast::NodeData::MethodDeclaration(d) if d.name.text() == my_name)
                 });
                 let report_here = match mine {
@@ -125,6 +132,7 @@ impl Checker {
                 if dup && matches!(mine, "method-body" | "method-sig") && theirs_all_prop {
                     if let Some(earlier) = cd.members.iter().find(|m| {
                         m.loc.pos() < node.loc.pos()
+                            && m.has_syntactic_modifier(ModifierFlags::Static) == i_am_static
                             && matches!(&m.data, tsox_frontend::ast::NodeData::PropertyDeclaration(d) if d.name.text() == my_name)
                     }) {
                         let earlier_loc = earlier
@@ -150,6 +158,7 @@ impl Checker {
                 if dup && mine == "prop" {
                     let first = cd.members.iter().find(|m| {
                         m.loc.pos() < node.loc.pos()
+                            && m.has_syntactic_modifier(ModifierFlags::Static) == i_am_static
                             && match &m.data {
                                 tsox_frontend::ast::NodeData::PropertyDeclaration(d) => {
                                     d.name.text() == my_name

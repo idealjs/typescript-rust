@@ -47,7 +47,7 @@ impl Checker {
             tsox_frontend::ast::NodeData::ClassExpression(d) => Some(Arc::clone(&d.members)),
             _ => None,
         };
-        if let Some(member_list) = class_members {
+        if let Some(member_list) = &class_members {
             for member in member_list.iter() {
                 if !member.has_syntactic_modifier(ModifierFlags::Static) {
                     continue;
@@ -112,8 +112,22 @@ impl Checker {
                 }
             }
         }
+        // 类内 static 索引签名挂构造侧类型（Go getTypeOfSymbol 静态分支）
+        let mut index_infos: Vec<Arc<crate::checker::IndexInfo>> = Vec::new();
+        if let Some(member_list) = &class_members {
+            for member in member_list.iter() {
+                if member.kind == SyntaxKind::IndexSignature
+                    && member.has_syntactic_modifier(ModifierFlags::Static)
+                {
+                    let mut infos: Vec<Arc<crate::checker::IndexInfo>> = Vec::new();
+                    self.add_index_signature_member(member, &mut infos);
+                    index_infos.extend(infos);
+                }
+            }
+        }
+
         self.class_statics_resolution_stack.pop();
-        if members.is_empty() {
+        if members.is_empty() && index_infos.is_empty() {
             return;
         }
         let t_mut = Arc::as_ptr(ctor_type) as *mut crate::checker::types::Type;
@@ -121,6 +135,9 @@ impl Checker {
             if let TypeData::Object(obj) = &mut (*t_mut).data {
                 obj.structured.members = members;
                 obj.structured.properties = properties;
+                if !index_infos.is_empty() {
+                    obj.structured.index_infos.extend(index_infos);
+                }
             }
         }
     }

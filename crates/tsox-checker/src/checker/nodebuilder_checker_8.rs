@@ -168,7 +168,12 @@ impl Checker {
             let elem = &obj_data.type_arguments[0];
             let elem_str = self.type_to_string_ex(elem, flags);
             let symbol_name = t.symbol.as_ref().map(|s| s.name.as_str()).unwrap_or("");
-            if symbol_name == "ReadonlyArray" {
+            if symbol_name == "ReadonlyArray"
+                || (symbol_name == "Array"
+                    && t.object_flags.contains(
+                        crate::checker::types::ObjectFlags::IsReadonlyArray,
+                    ))
+            {
                 return format!("readonly {}[]", self.maybe_parenthesize_array_element_ex(elem, flags));
             }
             if flags.contains(TypeFormatFlags::WRITE_ARRAY_AS_GENERIC) {

@@ -56,6 +56,18 @@ impl Checker {
                         &X_0_MODIFIER_CANNOT_APPEAR_ON_A_PARAMETER,
                         &["export".to_string()],
                     ));
+                } else if block_scope_kind == NodeFlags::Using {
+                    return Some(self.grammar_error_on_node_with_args(
+                        modifier,
+                        &X_0_MODIFIER_CANNOT_APPEAR_ON_A_USING_DECLARATION,
+                        &["export".to_string()],
+                    ));
+                } else if block_scope_kind == NodeFlags::AwaitUsing {
+                    return Some(self.grammar_error_on_node_with_args(
+                        modifier,
+                        &X_0_MODIFIER_CANNOT_APPEAR_ON_AN_AWAIT_USING_DECLARATION,
+                        &["export".to_string()],
+                    ));
                 }
                 *flags |= ModifierFlags::Export;
             }
@@ -107,6 +119,18 @@ impl Checker {
                     return Some(self.grammar_error_on_node_with_args(
                         modifier,
                         &X_0_MODIFIER_CANNOT_APPEAR_ON_A_PARAMETER,
+                        &["declare".to_string()],
+                    ));
+                } else if block_scope_kind == NodeFlags::Using {
+                    return Some(self.grammar_error_on_node_with_args(
+                        modifier,
+                        &X_0_MODIFIER_CANNOT_APPEAR_ON_A_USING_DECLARATION,
+                        &["declare".to_string()],
+                    ));
+                } else if block_scope_kind == NodeFlags::AwaitUsing {
+                    return Some(self.grammar_error_on_node_with_args(
+                        modifier,
+                        &X_0_MODIFIER_CANNOT_APPEAR_ON_AN_AWAIT_USING_DECLARATION,
                         &["declare".to_string()],
                     ));
                 }
@@ -163,6 +187,15 @@ impl Checker {
                             modifier,
                             &X_0_MODIFIER_CANNOT_BE_USED_WITH_1_MODIFIER,
                             &["private".to_string(), "abstract".to_string()],
+                        ));
+                    }
+                    if flags.contains(ModifierFlags::Override)
+                        && !modifier.flags.contains(NodeFlags::Reparsed)
+                    {
+                        return Some(self.grammar_error_on_node_with_args(
+                            modifier,
+                            &X_0_MODIFIER_MUST_PRECEDE_1_MODIFIER,
+                            &["abstract".to_string(), "override".to_string()],
                         ));
                     }
                 }

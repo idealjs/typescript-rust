@@ -51,7 +51,7 @@ impl Checker {
 
     pub fn infer_call_type_arguments(
         &mut self,
-        node: &Arc<Node>,
+        _node: &Arc<Node>,
         signature: &Arc<Signature>,
         args: &[Arc<Node>],
     ) -> Vec<Arc<Type>> {
@@ -65,6 +65,6 @@ impl Checker {
             .collect();
         let mut context = InferenceContext::new(inferences);
         context.signature = Some(Arc::clone(signature));
-        self.infer_type_arguments(node, signature, args, &mut context)
+        self.infer_type_arguments(_node, signature, args, &mut context)
     }
 }

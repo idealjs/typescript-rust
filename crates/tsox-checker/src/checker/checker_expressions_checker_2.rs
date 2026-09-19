@@ -268,6 +268,16 @@ impl Checker {
                 }
             }
             SyntaxKind::MethodDeclaration | SyntaxKind::GetAccessor | SyntaxKind::SetAccessor => {
+                // 字面量位方法的参数上下文定型（Go checkFunctionLikeExpression 的
+                // contextuallyTypedParameterCount：经成员名查上下文签名）
+                if node.kind == SyntaxKind::MethodDeclaration
+                    && let tsox_frontend::ast::NodeData::MethodDeclaration(d) = &node.data
+                {
+                    let contextual_count = self
+                        .get_contextual_signature(node)
+                        .map_or(0, |sig| sig.parameters.len());
+                    self.check_parameter_implicit_any(node, &d.parameters, contextual_count);
+                }
                 self.check_class_member(node);
             }
             _ => {

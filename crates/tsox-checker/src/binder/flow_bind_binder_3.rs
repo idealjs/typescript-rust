@@ -291,6 +291,11 @@ impl Binder {
                 self.bind(expr);
             }
         }
+        if let Some(rt) = &self.current_return_target
+            && let Some(current) = &self.current_flow
+        {
+            self.add_antecedent_to_flow(rt, current);
+        }
         self.current_flow = Some(self.unreachable_flow());
         self.has_explicit_return = true;
         self.has_flow_effects = true;

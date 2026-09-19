@@ -3,6 +3,50 @@
 use crate::checker::relater_probing::*;
 
 impl Checker {
+
+    fn substitute_type_parameter_constraints(
+        &mut self,
+        tps: &[Arc<Type>],
+        params: &[Arc<Type>],
+        substitutions: &[Arc<Type>],
+    ) -> Vec<Arc<Type>> {
+        tps.iter()
+            .map(|tp| {
+                let crate::checker::types::TypeData::TypeParameter(tpd) = &tp.data else {
+                    return Arc::clone(tp);
+                };
+                let new_constraint = tpd.constraint.as_ref().map(|c| {
+                    self.substitute_infer_type_parameters(c, params, substitutions)
+                });
+                let unchanged = tpd
+                    .constraint
+                    .as_ref()
+                    .zip(new_constraint.as_ref())
+                    .is_some_and(|(o, n)| Arc::ptr_eq(o, n))
+                    || tpd.constraint.is_none();
+                if unchanged {
+                    return Arc::clone(tp);
+                }
+                let mut rebuilt = Type::new(
+                    tp.flags,
+                    crate::checker::types::TypeData::TypeParameter(
+                        crate::checker::types::TypeParameterData {
+                            constrained: Default::default(),
+                            constraint: new_constraint,
+                            target: tpd.target.clone(),
+                            mapper: tpd.mapper.clone(),
+                            is_this_type: tpd.is_this_type,
+                            resolved_default_type: std::sync::OnceLock::new(),
+                        },
+                    ),
+                );
+                rebuilt.object_flags = tp.object_flags;
+                rebuilt.symbol = tp.symbol.clone();
+                Arc::new(rebuilt)
+            })
+            .collect()
+    }
+
     pub(crate) fn substitute_infer_object(
         &mut self,
         t: &Arc<Type>,
@@ -11,7 +55,6 @@ impl Checker {
         substitutions: &[Arc<Type>],
     ) -> Arc<Type> {
         if t.object_flags.contains(ObjectFlags::Reference)
-            && o.target.is_none()
             && o.type_arguments.len() == 1
             && t.symbol.as_ref().is_some_and(|s| {
                 self.globals
@@ -25,7 +68,9 @@ impl Checker {
             if Arc::ptr_eq(&new_elem, &o.type_arguments[0]) {
                 return Arc::clone(t);
             }
-            return self.create_array_type(new_elem);
+            // readonly 标志随实例重建保持（U | readonly U[] 代入 U 后仍是 readonly）
+            let readonly = t.object_flags.contains(ObjectFlags::IsReadonlyArray);
+            return self.create_array_type_ex(new_elem, readonly);
         }
 
         if !o.type_arguments.is_empty() {
@@ -73,8 +118,18 @@ impl Checker {
                     .signatures
                     .iter()
                     .map(|sig| {
-                        let Some(old_inst) = sig.instantiated_parameter_types.as_ref() else {
-                            return Arc::clone(sig);
+                        let owned_inst: Vec<Arc<Type>>;
+                        let old_inst: &[Arc<Type>] = match sig.instantiated_parameter_types.as_ref()
+                        {
+                            Some(inst) => inst,
+                            None => {
+                                owned_inst = sig
+                                    .parameters
+                                    .iter()
+                                    .map(|p| self.get_type_of_symbol(p))
+                                    .collect();
+                                &owned_inst
+                            }
                         };
                         let new_inst: Vec<Arc<Type>> = old_inst
                             .iter()
@@ -86,7 +141,15 @@ impl Checker {
                             .iter()
                             .zip(new_inst.iter())
                             .any(|(old, new)| !Arc::ptr_eq(old, new));
-                        if !changed {
+                        let return_changed = self
+                            .get_return_type_of_signature(sig)
+                            .is_some_and(|rt| {
+                                let sub = self.substitute_infer_type_parameters(
+                                    &rt, params, substitutions,
+                                );
+                                !Arc::ptr_eq(&sub, &rt)
+                            });
+                        if !changed && !return_changed {
                             return Arc::clone(sig);
                         }
                         let mut inst = Signature::new();
@@ -97,11 +160,17 @@ impl Checker {
                         inst.target = sig.target.clone();
                         inst.parameters = sig.parameters.clone();
                         inst.this_parameter = sig.this_parameter.clone();
-                        inst.type_parameters = sig.type_parameters.clone();
+                        inst.type_parameters = self.substitute_type_parameter_constraints(
+                            &sig.type_parameters,
+                            params,
+                            substitutions,
+                        );
                         inst.resolved_type_predicate = sig.resolved_type_predicate.clone();
                         inst.instantiated_parameter_types = Some(new_inst);
                         if let Some(rt) = self.get_return_type_of_signature(sig) {
-                            let _ = inst.resolved_return_type.set(rt);
+                            let new_rt =
+                                self.substitute_infer_type_parameters(&rt, params, substitutions);
+                            let _ = inst.resolved_return_type.set(new_rt);
                         }
                         Arc::new(inst)
                     })
@@ -185,7 +254,11 @@ impl Checker {
                 inst.target = Some(Arc::clone(sig));
                 inst.parameters = sig.parameters.clone();
                 inst.this_parameter = sig.this_parameter.clone();
-                inst.type_parameters = sig.type_parameters.clone();
+                inst.type_parameters = self.substitute_type_parameter_constraints(
+                    &sig.type_parameters,
+                    params,
+                    substitutions,
+                );
                 inst.resolved_type_predicate = sig.resolved_type_predicate.clone();
                 inst.instantiated_parameter_types = Some(new_params);
                 if let Some(nr) = new_return {

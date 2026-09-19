@@ -31,7 +31,14 @@ impl Checker {
         for decl in &symbol.declarations {
             if let NodeData::TypeParameterDeclaration(data) = &decl.data {
                 if let Some(constraint_node) = &data.constraint {
+                    // 约束按声明形态解析并缓存：清空进行中的实例化映射，
+                    // 否则首个实例化语境（如 ReadonlyArray<string> 的成员解析）
+                    // 会把代入后的约束烤进符号缓存，污染后续所有实例
+                    let saved_stack = std::mem::take(&mut self.type_argument_stack);
+                    let saved_frames = std::mem::take(&mut self.type_argument_name_frames);
                     constraint = Some(self.get_type_from_type_node(constraint_node));
+                    self.type_argument_stack = saved_stack;
+                    self.type_argument_name_frames = saved_frames;
                 }
                 break;
             }

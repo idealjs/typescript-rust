@@ -107,9 +107,14 @@ impl Checker {
                             let sf = self.program.get_source_file(&path)?;
                             self.program.symbol_map().symbol_of(&sf.node).cloned()
                         })?;
-                    // 记录显示用 specifier（模块类型显示 typeof import("spec")）
-                    self.module_display_specifiers
-                        .insert(module_sym.id(), spec.clone());
+                    // 记录显示用 specifier（模块类型显示 typeof import("name")，
+                    // Go 打印模块名去扩展，非原始 specifier）
+                    self.module_display_specifiers.insert(
+                        module_sym.id(),
+                        crate::checker::nodebuilder::module_specifier_of_name(
+                            &module_sym.name,
+                        ),
+                    );
                     return Some(self.get_type_of_symbol(&module_sym));
                 }
                 cur = n.parent();

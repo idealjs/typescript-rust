@@ -56,6 +56,20 @@ impl<'a> RegExpParser<'a> {
         });
     }
 
+    pub(super) fn error_arg(
+        &mut self,
+        msg: tsox_core::diagnostics::Message,
+        pos: usize,
+        length: usize,
+        arg: char,
+    ) {
+        self.errors.push(ScannerError {
+            kind: DiagnosticKind::RegexMessageWithArg(msg, arg),
+            pos,
+            length,
+        });
+    }
+
     pub(super) fn scan_expected_char(&mut self, ch: char) {
         if self.char() == ch {
             self.inc_pos(1);

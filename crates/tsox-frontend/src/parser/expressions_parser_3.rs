@@ -77,11 +77,17 @@ impl Parser {
 
         let equals_greater_than_token = self.create_token_node();
         self.next_token();
+        let saved_yield = self.yield_context;
+        let saved_await = self.await_context;
+        self.yield_context = false;
+        self.await_context = false;
         let body = if self.token == SyntaxKind::OpenBraceToken {
             self.parse_block_ex(true)
         } else {
             self.parse_assignment_expression()
         };
+        self.yield_context = saved_yield;
+        self.await_context = saved_await;
         let end = body.end();
         Some(Arc::new(Node::with_loc(
             SyntaxKind::ArrowFunction,
@@ -124,13 +130,16 @@ impl Parser {
         let equals_greater_than_token = self.create_token_node();
         self.expect(SyntaxKind::EqualsGreaterThanToken);
         let saved_await = self.await_context;
+        let saved_yield = self.yield_context;
         self.await_context = true;
+        self.yield_context = false;
         let body = if self.token == SyntaxKind::OpenBraceToken {
             self.parse_block_ex(true)
         } else {
             self.parse_assignment_expression()
         };
         self.await_context = saved_await;
+        self.yield_context = saved_yield;
         let end = body.end();
         Arc::new(Node::with_loc(
             SyntaxKind::ArrowFunction,
@@ -153,11 +162,17 @@ impl Parser {
         let type_node = self.parse_optional_return_type();
         let equals_greater_than_token = self.create_token_node();
         self.expect(SyntaxKind::EqualsGreaterThanToken);
+        let saved_yield = self.yield_context;
+        let saved_await = self.await_context;
+        self.yield_context = false;
+        self.await_context = false;
         let body = if self.token == SyntaxKind::OpenBraceToken {
             self.parse_block_ex(true)
         } else {
             self.parse_assignment_expression()
         };
+        self.yield_context = saved_yield;
+        self.await_context = saved_await;
         let end = body.end();
         Arc::new(Node::with_loc(
             SyntaxKind::ArrowFunction,
@@ -176,6 +191,10 @@ impl Parser {
 
     pub(crate) fn parse_simple_arrow_function(&mut self, identifier: Arc<Node>) -> Arc<Node> {
         let pos = identifier.pos();
+        let outer_yield = self.yield_context;
+        let outer_await = self.await_context;
+        self.yield_context = false;
+        self.await_context = false;
         let parameter = Arc::new(Node::with_loc(
             SyntaxKind::Parameter,
             NodeData::ParameterDeclaration(ParameterDeclarationData {
@@ -199,6 +218,8 @@ impl Parser {
         } else {
             self.parse_assignment_expression()
         };
+        self.yield_context = outer_yield;
+        self.await_context = outer_await;
         let end = body.end();
         Arc::new(Node::with_loc(
             SyntaxKind::ArrowFunction,

@@ -89,6 +89,29 @@ impl Program {
             });
         }
         diagnostics.extend(check_diagnostics);
+        {
+            // 键含文件名：多文件同偏移同码的诊断（exportNamespace7 的
+            // c/e 两份 TS1362）不可跨文件互吞
+            let mut seen: std::collections::HashSet<(usize, usize, i32, String, String)> =
+                std::collections::HashSet::new();
+            let mut deduped: Vec<Diagnostic> = Vec::with_capacity(diagnostics.len());
+            for d in diagnostics.drain(..) {
+                let key = (
+                    d.loc.pos(),
+                    d.loc.end(),
+                    d.code,
+                    d.message_args.join("\u{1}"),
+                    d.file
+                        .as_ref()
+                        .map(|f| f.file_name.clone())
+                        .unwrap_or_default(),
+                );
+                if seen.insert(key) {
+                    deduped.push(d);
+                }
+            }
+            diagnostics = deduped;
+        }
 
         diagnostics.retain(|d| self.includes_semantic_diagnostic(d));
         diagnostics

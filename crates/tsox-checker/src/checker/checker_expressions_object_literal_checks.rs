@@ -2,6 +2,39 @@
 
 use crate::checker::checker_expressions::*;
 
+
+// 自动编号枚举成员值：首个有显式初值之前的成员按序号，其后递增
+fn enum_member_auto_value(member: &Arc<Node>) -> Option<i64> {
+    let enum_decl = member.parent()?;
+    let members = match &enum_decl.data {
+        tsox_frontend::ast::NodeData::EnumDeclaration(d) => &d.members,
+        _ => return None,
+    };
+    let mut next: i64 = 0;
+    for m in members.iter() {
+        let has_init = match &m.data {
+            tsox_frontend::ast::NodeData::EnumMember(em) => em.initializer.is_some(),
+            _ => false,
+        };
+        if Arc::ptr_eq(m, member) {
+            return Some(next);
+        }
+        if has_init {
+            if let tsox_frontend::ast::NodeData::EnumMember(em) = &m.data
+                && let Some(init) = &em.initializer
+                && init.kind == SyntaxKind::NumericLiteral
+            {
+                next = init.text().parse().unwrap_or(next + 1);
+            } else {
+                next += 1;
+            }
+        } else {
+            next += 1;
+        }
+    }
+    None
+}
+
 impl Checker {
     pub fn check_object_literal_expression(&mut self, node: &Arc<Node>) {
         if let tsox_frontend::ast::NodeData::ObjectLiteralExpression(data) = &node.data {
@@ -77,13 +110,61 @@ impl Checker {
                                     }
                                 }
                                 SyntaxKind::PropertyAccessExpression => {
-                                    let sym = self.resolve_qualified_symbol(&expr);
-                                    match sym.as_ref().and_then(|s| s.value_declaration.clone()) {
-                                        Some(decl) => match self.get_constant_value(&decl) {
-                                            Some(v) => v,
-                                            None => continue,
-                                        },
-                                        None => continue,
+                                    // Go getEffectivePropertyNameForPropertyNameNode：
+                                    // `Symbol.<知名符号>` 计算键取内部名参与判重
+                                    if let Some(internal) =
+                                        crate::binder::symbols_binder_4::well_known_symbol_member_name(&expr)
+                                    {
+                                        internal
+                                    } else {
+                                        let sym = self.resolve_qualified_symbol(&expr);
+                                        let decl = sym.as_ref().and_then(|s| s.value_declaration.clone());
+                                        let Some(decl) = decl else {
+                                            continue;
+                                        };
+                                        if let Some(v) = self.get_constant_value(&decl) {
+                                            v
+                                        } else if decl.kind == SyntaxKind::EnumMember {
+                                            // 自动编号枚举成员按序取值（Go 常量键仍参与判重）
+                                            match enum_member_auto_value(&decl) {
+                                                Some(v) => v.to_string(),
+                                                None => continue,
+                                            }
+                                        } else if let tsox_frontend::ast::NodeData::VariableDeclaration(vd) =
+                                            &decl.data
+                                            && let Some(init) = &vd.initializer
+                                            && matches!(
+                                                init.kind,
+                                                SyntaxKind::NumericLiteral | SyntaxKind::StringLiteral
+                                            )
+                                        {
+                                            // 命名空间限定的 const 变量（keys.n）取字面量初值
+                                            init.text().to_string()
+                                        } else {
+                                            continue;
+                                        }
+                                    }
+                                }
+                                SyntaxKind::Identifier => {
+                                    let sym = self.resolve_identifier(&expr);
+                                    let decl = sym.as_ref().and_then(|s| s.value_declaration.clone());
+                                    let Some(decl) = decl else {
+                                        continue;
+                                    };
+                                    // const 变量取字面量初值（enum 成员走既有常量通道）
+                                    if let tsox_frontend::ast::NodeData::VariableDeclaration(vd) =
+                                        &decl.data
+                                        && let Some(init) = &vd.initializer
+                                        && matches!(
+                                            init.kind,
+                                            SyntaxKind::NumericLiteral | SyntaxKind::StringLiteral
+                                        )
+                                    {
+                                        init.text().to_string()
+                                    } else if let Some(v) = self.get_constant_value(&decl) {
+                                        v
+                                    } else {
+                                        continue;
                                     }
                                 }
                                 _ => continue,
@@ -103,21 +184,60 @@ impl Checker {
                             matches!(p.kind, SyntaxKind::GetAccessor | SyntaxKind::SetAccessor)
                         }) && group.len() == 2;
                         if group.len() > 1 && !accessor_pair {
+                            let all_accessors = group.iter().all(|p| {
+                                matches!(p.kind, SyntaxKind::GetAccessor | SyntaxKind::SetAccessor)
+                            });
+                            // Go binder：重复访问器走 Duplicate identifier 全员报点，
+                            // 且同类访问器重复另报 TS1118（重复的那个上）
+                            let mut seen_get = false;
+                            let mut seen_set = false;
                             for (i, prop) in group.iter().enumerate() {
-                                if i == 0 {
+                                let Some(name_node) = prop.name() else {
                                     continue;
-                                }
-                                if let Some(name_node) = prop.name() {
-                                    let name = name_node.text().to_string();
-                                    let file = self.current_file.clone();
+                                };
+                                let name = name_node.text().to_string();
+                                let file = self.current_file.clone();
+                                if all_accessors {
                                     self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
                                         file,
                                         name_node.loc,
-                                        tsox_core::diagnostics::messages_generated::
-                                            AN_OBJECT_LITERAL_CANNOT_HAVE_MULTIPLE_PROPERTIES_WITH_THE_SAME_NAME,
-                                        vec![name],
+                                        tsox_core::diagnostics::messages_generated::DUPLICATE_IDENTIFIER_0,
+                                        vec![name.clone()],
                                     ));
+                                    let dup_of_kind = match prop.kind {
+                                        SyntaxKind::GetAccessor => {
+                                            let d = seen_get;
+                                            seen_get = true;
+                                            d
+                                        }
+                                        SyntaxKind::SetAccessor => {
+                                            let d = seen_set;
+                                            seen_set = true;
+                                            d
+                                        }
+                                        _ => false,
+                                    };
+                                    if dup_of_kind {
+                                        self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                                            self.current_file.clone(),
+                                            name_node.loc,
+                                            tsox_core::diagnostics::messages_generated::
+                                                AN_OBJECT_LITERAL_CANNOT_HAVE_MULTIPLE_GET_SLASHSET_ACCESSORS_WITH_THE_SAME_NAME,
+                                            vec![name],
+                                        ));
+                                    }
+                                    continue;
                                 }
+                                if i == 0 {
+                                    continue;
+                                }
+                                self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                                    file,
+                                    name_node.loc,
+                                    tsox_core::diagnostics::messages_generated::
+                                        AN_OBJECT_LITERAL_CANNOT_HAVE_MULTIPLE_PROPERTIES_WITH_THE_SAME_NAME,
+                                    vec![name],
+                                ));
                             }
                         }
                     }

@@ -15,6 +15,12 @@ impl Checker {
         let mut members: Vec<(String, Arc<Symbol>)> = symbol
             .exports
             .iter()
+            .filter(|(_, v)| {
+                // type-only 导出别名不属于模块实例的值成员
+                !(v.flags.contains(SymbolFlags::Alias)
+                    && !v.flags.intersects(SymbolFlags::VALUE.union(SymbolFlags::Class))
+                    && self.is_type_only_alias_declaration(v))
+            })
             .map(|(k, v)| (k.clone(), Arc::clone(v)))
             .collect();
 
@@ -76,7 +82,10 @@ impl Checker {
                             && let NodeData::NamedExports(ne) = &clause.data
                         {
                             for el in ne.elements.iter() {
-                                if let NodeData::ExportSpecifier(spec) = &el.data {
+                                if let NodeData::ExportSpecifier(spec) = &el.data
+                                    // type-only 导出不属于模块实例的值成员
+                                    && !(d.is_type_only || spec.is_type_only)
+                                {
                                     let exported =
                                         spec.name.text().trim_matches(['"', '\'', '`']).to_string();
                                     let local = spec
@@ -156,7 +165,9 @@ impl Checker {
                     && let Some(module_spec) = &d.module_specifier
                 {
                     for el in ne.elements.iter() {
-                        if let NodeData::ExportSpecifier(spec) = &el.data {
+                        if let NodeData::ExportSpecifier(spec) = &el.data
+                            && !(d.is_type_only || spec.is_type_only)
+                        {
                             let exported =
                                 spec.name.text().trim_matches(['"', '\'', '`']).to_string();
                             let imported = spec

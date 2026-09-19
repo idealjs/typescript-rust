@@ -37,6 +37,46 @@ impl Binder {
 
         match node.kind {
             SyntaxKind::VariableDeclaration => {
+                // Go bindWorker KindCatchClause：catch 变量名 eval/arguments
+                // 报 TS1100（tsgo 无条件）
+                if node
+                    .parent()
+                    .as_ref()
+                    .is_some_and(|p| p.kind == SyntaxKind::CatchClause)
+                    && let Some(name) = node.name()
+                    && name.kind == SyntaxKind::Identifier
+                    && matches!(name.text(), "eval" | "arguments")
+                {
+                    self.symbol_map.binder_diagnostics.push(Diagnostic::new(
+                        self.current_source_file.clone(),
+                        name.loc,
+                        tsox_core::diagnostics::messages_generated::
+                            INVALID_USE_OF_0_IN_STRICT_MODE,
+                        vec![name.text().to_string()],
+                    ));
+                }
+                // Go bindVariableDeclaration：非 ambient 变量名 eval/arguments
+                // 报 TS1100/1210（按类/模块语境选消息）
+                if !node.flags.contains(tsox_frontend::ast::NodeFlags::Ambient)
+                    && !self
+                        .current_source_file
+                        .as_ref()
+                        .is_some_and(|f| f.is_declaration_file)
+                    && let Some(name) = node.name()
+                    && name.kind == SyntaxKind::Identifier
+                    && matches!(name.text(), "eval" | "arguments")
+                {
+                    let msg = strict_mode_eval_or_arguments_message(
+                        node,
+                        self.current_source_file.as_ref(),
+                    );
+                    self.symbol_map.binder_diagnostics.push(Diagnostic::new(
+                        self.current_source_file.clone(),
+                        name.loc,
+                        msg,
+                        vec![name.text().to_string()],
+                    ));
+                }
                 // Go bindVariableDeclarationOrBindingElement：JS 里
                 // `var x = require("...")` 绑为别名（目标是模块符号）
                 if self.current_source_file.as_ref().is_some_and(|f| {
@@ -58,6 +98,28 @@ impl Binder {
             }
             SyntaxKind::VariableStatement => {}
             SyntaxKind::FunctionDeclaration => {
+                // Go checkStrictModeFunctionName：非 ambient 函数名
+                // eval/arguments 报 TS1100（tsgo 无条件）
+                if !node.flags.contains(tsox_frontend::ast::NodeFlags::Ambient)
+                    && !self
+                        .current_source_file
+                        .as_ref()
+                        .is_some_and(|f| f.is_declaration_file)
+                    && let Some(name) = node.name()
+                    && name.kind == SyntaxKind::Identifier
+                    && matches!(name.text(), "eval" | "arguments")
+                {
+                    let msg = strict_mode_eval_or_arguments_message(
+                        node,
+                        self.current_source_file.as_ref(),
+                    );
+                    self.symbol_map.binder_diagnostics.push(Diagnostic::new(
+                        self.current_source_file.clone(),
+                        name.loc,
+                        msg,
+                        vec![name.text().to_string()],
+                    ));
+                }
                 self.declare_symbol(node, SymbolFlags::Function, SymbolFlags::VALUE);
             }
             SyntaxKind::FunctionExpression => {
@@ -68,6 +130,26 @@ impl Binder {
                     _ => None,
                 }
                 .unwrap_or_else(|| INTERNAL_SYMBOL_NAME_FUNCTION.to_string());
+                if !node.flags.contains(tsox_frontend::ast::NodeFlags::Ambient)
+                    && !self
+                        .current_source_file
+                        .as_ref()
+                        .is_some_and(|f| f.is_declaration_file)
+                    && let Some(name_node) = node.name()
+                    && name_node.kind == SyntaxKind::Identifier
+                    && matches!(name_node.text(), "eval" | "arguments")
+                {
+                    let msg = strict_mode_eval_or_arguments_message(
+                        node,
+                        self.current_source_file.as_ref(),
+                    );
+                    self.symbol_map.binder_diagnostics.push(Diagnostic::new(
+                        self.current_source_file.clone(),
+                        name_node.loc,
+                        msg,
+                        vec![name_node.text().to_string()],
+                    ));
+                }
                 self.bind_anonymous_declaration(node, SymbolFlags::Function, &name);
             }
             SyntaxKind::ArrowFunction => {
@@ -126,6 +208,28 @@ impl Binder {
                 self.bind_module_declaration(node);
             }
             SyntaxKind::Parameter => {
+                // Go bindParameter：非 ambient 参数名 eval/arguments 报
+                // TS1100（tsgo 无条件）
+                if !node.flags.contains(tsox_frontend::ast::NodeFlags::Ambient)
+                    && !self
+                        .current_source_file
+                        .as_ref()
+                        .is_some_and(|f| f.is_declaration_file)
+                    && let Some(name) = node.name()
+                    && name.kind == SyntaxKind::Identifier
+                    && matches!(name.text(), "eval" | "arguments")
+                {
+                    let msg = strict_mode_eval_or_arguments_message(
+                        node,
+                        self.current_source_file.as_ref(),
+                    );
+                    self.symbol_map.binder_diagnostics.push(Diagnostic::new(
+                        self.current_source_file.clone(),
+                        name.loc,
+                        msg,
+                        vec![name.text().to_string()],
+                    ));
+                }
                 let report_2371 = |b: &mut Self, loc: tsox_core::core::text::TextRange| {
                     b.symbol_map.binder_diagnostics.push(Diagnostic::new(
                         b.current_source_file.clone(),
@@ -266,7 +370,26 @@ impl Binder {
             return;
         }
 
-        let container_flags = get_container_flags(node.kind);
+        let mut container_flags = get_container_flags(node.kind);
+        // Go getContainerFlags 的 Block 特判：函数体/类静态块体不是块作用域容器，
+        // 其声明与参数同域（同名 let 与参数冲突）
+        if node.kind == SyntaxKind::Block
+            && node.parent().is_some_and(|p| {
+                matches!(
+                    p.kind,
+                    SyntaxKind::FunctionDeclaration
+                        | SyntaxKind::FunctionExpression
+                        | SyntaxKind::ArrowFunction
+                        | SyntaxKind::MethodDeclaration
+                        | SyntaxKind::Constructor
+                        | SyntaxKind::GetAccessor
+                        | SyntaxKind::SetAccessor
+                        | SyntaxKind::ClassStaticBlockDeclaration
+                )
+            })
+        {
+            container_flags = ContainerFlags::NONE;
+        }
         if node.kind == SyntaxKind::PropertyDeclaration
             && matches!(&node.data, NodeData::PropertyDeclaration(d) if d.initializer.is_some())
         {
@@ -317,4 +440,18 @@ fn is_variable_declaration_initialized_to_require(node: &Arc<Node>) -> bool {
                 SyntaxKind::StringLiteral | SyntaxKind::NoSubstitutionTemplateLiteral
             )
         })
+}
+
+fn strict_mode_eval_or_arguments_message(
+    node: &Arc<Node>,
+    file: Option<&Arc<tsox_frontend::ast::SourceFile>>,
+) -> tsox_core::diagnostics::Message {
+    if tsox_frontend::ast::utilities::get_containing_class(node).is_some() {
+        tsox_core::diagnostics::messages_generated::CODE_CONTAINED_IN_A_CLASS_IS_EVALUATED_IN_JAVASCRIPT_S_STRICT_MODE_WHICH_DOES_NOT_ALLOW_THIS_USE_OF_0_FOR_MORE_INFORMATION_SEE_HTTPS_COLON_SLASH_SLASHDEVELOPER_MOZILLA_ORG_SLASHEN_US_SLASHDOCS_SLASHWEB_SLASHJAVASCRIPT_SLASHREFERENCE_SLASHSTRICT_MODE
+    } else if file.is_some_and(|f| f.external_module_indicator.is_some()) {
+        tsox_core::diagnostics::messages_generated::
+            INVALID_USE_OF_0_MODULES_ARE_AUTOMATICALLY_IN_STRICT_MODE
+    } else {
+        tsox_core::diagnostics::messages_generated::INVALID_USE_OF_0_IN_STRICT_MODE
+    }
 }

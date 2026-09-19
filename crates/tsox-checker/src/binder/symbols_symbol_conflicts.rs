@@ -4,6 +4,12 @@ use crate::binder::symbols::*;
 
 impl Binder {
     // Go declareSymbol 冲突路径：报所有既有声明名 + 当前声明名的 Duplicate identifier
+    pub(crate) fn probe_tag(&self, tag: &str) {
+        if std::env::var_os("TSOX_DEBUG_DUP").is_some() {
+            eprintln!("[dup] {} file={}", tag, self.current_source_file.as_ref().map(|f| f.file_name.clone()).unwrap_or_default());
+        }
+    }
+
     pub(crate) fn report_duplicate_identifier_all(
         &mut self,
         node: &Arc<Node>,
@@ -22,7 +28,7 @@ impl Binder {
                 b.current_source_file.clone(),
                 name_node.loc,
                 DUPLICATE_IDENTIFIER_0,
-                vec![name.to_string()],
+                vec![crate::checker::property_name_for_display(name)],
             ));
         };
         for d in &existing.declarations {
@@ -43,6 +49,7 @@ impl Binder {
             && includes.contains(SymbolFlags::BlockScopedVariable);
         if !name.is_empty() {
             let report_all = |b: &mut Self, message: &'static tsox_core::diagnostics::Message| {
+                b.probe_tag(&format!("report_all {}", message.code));
                 let push = |b: &mut Self, loc: tsox_core::core::text::TextRange| {
                     if b.symbol_map
                         .binder_diagnostics

@@ -189,27 +189,22 @@ impl Checker {
         let contextual_type = self.get_contextual_type(&object_literal, _context_flags)?;
 
         let name = match &node.data {
-            NodeData::PropertyAssignment(data) => match &data.name.data {
-                NodeData::Identifier(id) => Some(id.text.clone()),
-                NodeData::StringLiteral(s) => Some(s.text.clone()),
-                // 计算属性名 `[Foo]`：按标识符文本查上下文成员
-                //（Go getContextualTypeForObjectLiteralElement 的
-                // getLiteralTypeFromPropertyName + findApplicableIndexInfo 通道，
-                // 映射型成员经索引信息命中；此处以文本键等价）
-                NodeData::ComputedPropertyName(cd)
-                    if matches!(&cd.expression.data, NodeData::Identifier(_)) =>
-                {
-                    match &cd.expression.data {
-                        NodeData::Identifier(id) => Some(id.text.clone()),
-                        _ => None,
-                    }
-                }
-                _ => None,
-            },
-            NodeData::ShorthandPropertyAssignment(data) => match &data.name.data {
-                NodeData::Identifier(id) => Some(id.text.clone()),
-                _ => None,
-            },
+            // Go getContextualTypeForObjectLiteralElement：统一走
+            // getLiteralTypeFromPropertyName（well-known `Symbol.x` 计算名映射
+            // 为内部名 `__@x`，与 binder 成员键一致）
+            NodeData::PropertyAssignment(data) => {
+                let name = self.get_property_name_from_node(&data.name);
+                (!name.is_empty()).then_some(name)
+            }
+            NodeData::ShorthandPropertyAssignment(data) => {
+                let name = self.get_property_name_from_node(&data.name);
+                (!name.is_empty()).then_some(name)
+            }
+            // 方法成员 `m(n) { }` 的上下文型 = 字面量上下文的同名属性
+            NodeData::MethodDeclaration(data) => {
+                let name = self.get_property_name_from_node(&data.name);
+                (!name.is_empty()).then_some(name)
+            }
             _ => None,
         }?;
 
@@ -218,25 +213,120 @@ impl Checker {
 
     pub(crate) fn get_contextual_type_for_array_literal_element(
         &mut self,
-        _node: &tsox_frontend::ast::Node,
+        node: &tsox_frontend::ast::Node,
         parent: &Arc<tsox_frontend::ast::Node>,
         _context_flags: ContextFlags,
     ) -> Option<Arc<Type>> {
         let contextual_type = self.get_contextual_type(parent, _context_flags)?;
 
-        let type_args = self.get_type_arguments(&contextual_type);
-        if !type_args.is_empty() {
-            return Some(Arc::clone(&type_args[0]));
-        }
+        let elements = match &parent.data {
+            tsox_frontend::ast::NodeData::ArrayLiteralExpression(data) => &data.elements,
+            _ => return None,
+        };
+        let index = elements.iter().position(|e| e.id() == node.id())?;
+        let length = elements.len() as i64;
+        let first_spread = elements
+            .iter()
+            .position(|e| e.kind == tsox_frontend::ast::SyntaxKind::SpreadElement)
+            .map(|i| i as i64)
+            .unwrap_or(-1);
+        let last_spread = elements
+            .iter()
+            .rposition(|e| e.kind == tsox_frontend::ast::SyntaxKind::SpreadElement)
+            .map(|i| i as i64)
+            .unwrap_or(-1);
 
-        if let Some(structured) = contextual_type.as_structured() {
-            for index_info in &structured.index_infos {
-                if let Some(ref value_type) = index_info.value_type {
-                    return Some(Arc::clone(value_type));
-                }
+        let constituents: Vec<Arc<Type>> = match &contextual_type.data {
+            TypeData::Union(u) => u
+                .union_or_intersection
+                .types
+                .iter()
+                .filter(|c| {
+                    !c.flags.intersects(crate::checker::types::TypeFlags::Null | crate::checker::types::TypeFlags::Undefined)
+                })
+                .cloned()
+                .collect(),
+            _ => vec![Arc::clone(&contextual_type)],
+        };
+
+        let mut results: Vec<Arc<Type>> = Vec::new();
+        for c in constituents {
+            if let Some(rt) =
+                self.contextual_element_of_constituent(&c, index, length, first_spread, last_spread)
+            {
+                results.push(rt);
             }
         }
+        match results.len() {
+            0 => None,
+            1 => Some(results.into_iter().next().unwrap()),
+            _ => Some(self.get_union_type(results)),
+        }
+    }
 
+    fn contextual_element_of_constituent(
+        &mut self,
+        t: &Arc<Type>,
+        index: usize,
+        length: i64,
+        first_spread: i64,
+        last_spread: i64,
+    ) -> Option<Arc<Type>> {
+        if crate::checker::utilities::is_tuple_type(t) {
+            let element_types = Self::tuple_type_arguments(t);
+            let (fixed_length, combined_flags) = match &t.data {
+                TypeData::Tuple(tuple) => (tuple.fixed_length, tuple.combined_flags),
+                _ => return None,
+            };
+            let idx = index as i64;
+            if (first_spread < 0 || idx < first_spread) && idx < fixed_length as i64 {
+                return element_types.get(index).cloned();
+            }
+            let mut offset = 0;
+            if length >= 0 && (last_spread < 0 || idx > last_spread) {
+                offset = length - idx;
+            }
+            let mut fixed_end_length = 0;
+            if offset > 0 && combined_flags.intersects(crate::checker::types::ELEMENT_FLAGS_VARIABLE)
+            {
+                fixed_end_length = Self::end_fixed_element_count(t) as i64;
+            }
+            if offset > 0 && offset <= fixed_end_length {
+                return element_types
+                    .get(element_types.len() - offset as usize)
+                    .cloned();
+            }
+            let mut tuple_index = fixed_length as i64;
+            if first_spread >= 0 {
+                tuple_index = tuple_index.min(first_spread);
+            }
+            let mut end_skip_count = fixed_end_length;
+            if length >= 0 && last_spread >= 0 {
+                end_skip_count = end_skip_count.min(length - last_spread);
+            }
+            let start = (tuple_index.max(0) as usize).min(element_types.len());
+            let end = ((element_types.len() as i64 - end_skip_count.max(0)).max(0) as usize)
+                .min(element_types.len());
+            if start < end {
+                let middle: Vec<Arc<Type>> = element_types[start..end].to_vec();
+                return Some(self.get_union_type(middle));
+            }
+            return None;
+        }
+        let idx = index as i64;
+        if first_spread < 0 || idx < first_spread {
+            if let Some(prop) =
+                self.get_type_of_property_of_contextual_type(t, &index.to_string())
+            {
+                return Some(prop);
+            }
+        }
+        if let Some(elem) = self.get_type_arguments(t).into_iter().next() {
+            return Some(elem);
+        }
+        if self.is_array_type(t) {
+            return Some(self.get_array_element_type(t));
+        }
         None
     }
 

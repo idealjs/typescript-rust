@@ -173,6 +173,14 @@ pub fn is_fresh_object_literal_type(t: &Type) -> bool {
     t.flags.contains(TypeFlags::Object) && t.object_flags.contains(ObjectFlags::FreshLiteral)
 }
 
+/// Go symbolToString：well-known symbol 内部名 `__@x` 的显示形式 `[Symbol.x]`
+pub fn property_name_for_display(name: &str) -> String {
+    match name.strip_prefix("__@") {
+        Some(stripped) => format!("[Symbol.{stripped}]"),
+        None => name.to_string(),
+    }
+}
+
 pub fn is_object_literal_type(t: &Type) -> bool {
     t.flags.contains(TypeFlags::Object) && t.object_flags.contains(ObjectFlags::ObjectLiteral)
 }

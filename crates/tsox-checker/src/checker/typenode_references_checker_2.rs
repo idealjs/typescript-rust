@@ -225,12 +225,29 @@ impl Checker {
             return instance_type;
         }
         if symbol.flags.contains(SymbolFlags::Interface) {
-            // tsc getTypeFromClassOrInterfaceReference：无实参引用且类型参数带默认值时按默认值实例化
-            if type_arguments.is_none() {
-                let defaults = self.interface_default_type_arguments(&symbol);
-                if !defaults.is_empty() {
-                    return self.resolve_interface_type_ex(&symbol, Some(defaults));
+            // tsc getTypeFromClassOrInterfaceReference：无实参引用且类型参数带默认值时按默认值实例化；
+            // 部分实参（如 Iterator<T> 少于 TReturn/TNext）补声明默认值
+            //（Go getTypeArguments 的默认填充语义）
+            let declared_tp_count = self.declared_type_parameter_types(&symbol).len();
+            match &type_arguments {
+                None => {
+                    let defaults = self.interface_default_type_arguments(&symbol);
+                    if !defaults.is_empty() {
+                        return self.resolve_interface_type_ex(&symbol, Some(defaults));
+                    }
                 }
+                Some(nodes) if nodes.len() < declared_tp_count => {
+                    let defaults = self.interface_default_type_arguments(&symbol);
+                    if !defaults.is_empty() && nodes.len() < defaults.len() {
+                        let mut args: Vec<Arc<Type>> = nodes
+                            .iter()
+                            .map(|a| self.get_type_from_type_node(a))
+                            .collect();
+                        args.extend(defaults[nodes.len()..].iter().cloned());
+                        return self.resolve_interface_type_ex(&symbol, Some(args));
+                    }
+                }
+                _ => {}
             }
             return self.resolve_interface_type(&symbol, type_arguments);
         }
@@ -299,7 +316,7 @@ impl Checker {
         self.resolve_type_alias_reference(&symbol, type_arguments)
     }
 
-    fn interface_default_type_arguments(&mut self, symbol: &Arc<Symbol>) -> Vec<Arc<Type>> {
+    pub(crate) fn interface_default_type_arguments(&mut self, symbol: &Arc<Symbol>) -> Vec<Arc<Type>> {
         let decl = symbol.declarations.iter().find(|d| {
             matches!(d.data, NodeData::InterfaceDeclaration(_))
         });

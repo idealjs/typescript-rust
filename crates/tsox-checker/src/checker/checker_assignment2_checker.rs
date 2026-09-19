@@ -127,14 +127,17 @@ impl Checker {
             }
         };
 
-        let _ = self.check_type_assignable_to_and_optionally_elaborate(
-            &right_type,
-            &left_type,
-            Some(target),
-            Some(&data.right),
-            None,
-            None,
-        );
+        if !self.is_type_assignable_to(&right_type, &left_type) {
+            let report_type = self.assignment_report_type(target, &left_type);
+            let _ = self.check_type_assignable_to_and_optionally_elaborate(
+                &right_type,
+                &report_type,
+                Some(target),
+                Some(&data.right),
+                None,
+                None,
+            );
+        }
     }
 
     pub(crate) fn write_type_of_property_symbol(
@@ -151,9 +154,52 @@ impl Checker {
             && let tsox_frontend::ast::NodeData::ParameterDeclaration(pd) = &param.data
             && let Some(tn) = &pd.type_node
         {
-            return self.get_type_from_type_node(tn);
+            let t = self.get_type_from_type_node(tn);
+            let mapped = self
+                .value_symbol_links
+                .get(prop)
+                .and_then(|l| l.mapper.clone())
+                .map(|m| m.map(&t))
+                .unwrap_or(t);
+            return mapped;
         }
         self.get_type_of_symbol(prop)
+    }
+
+    // setter 目标的赋值报错文案：联合写类型去掉 undefined 成员
+    // （Go getFlowTypeOfAccessExpression 对确定性写路径的 removeMissingType）
+    fn assignment_report_type(&mut self, target: &Arc<Node>, write_type: &Arc<Type>) -> Arc<Type> {
+        let has_setter = match &target.data {
+            tsox_frontend::ast::NodeData::PropertyAccessExpression(pa) => {
+                let obj_type = self.get_type_of_node(&pa.expression);
+                self.get_property_of_type(&obj_type, &pa.name.text())
+                    .is_some_and(|s| s.flags.contains(SymbolFlags::SetAccessor))
+            }
+            tsox_frontend::ast::NodeData::ElementAccessExpression(ea)
+                if Self::element_access_property_key(&ea.argument_expression).is_some() =>
+            {
+                let obj_type = self.get_type_of_node(&ea.expression);
+                let name = Self::element_access_property_key(&ea.argument_expression).unwrap();
+                self.get_property_of_type(&obj_type, &name)
+                    .is_some_and(|s| s.flags.contains(SymbolFlags::SetAccessor))
+            }
+            _ => false,
+        };
+        if !has_setter {
+            return Arc::clone(write_type);
+        }
+        if let crate::checker::types::TypeData::Union(u) = &write_type.data {
+            let kept: Vec<&Arc<Type>> = u
+                .union_or_intersection
+                .types
+                .iter()
+                .filter(|t| !t.flags.contains(TypeFlags::Undefined))
+                .collect();
+            if kept.len() == 1 && kept.len() < u.union_or_intersection.types.len() {
+                return Arc::clone(kept[0]);
+            }
+        }
+        Arc::clone(write_type)
     }
 
     pub(crate) fn assignment_target_type(&mut self, target: &Arc<Node>) -> Option<Arc<Type>> {
@@ -178,10 +224,9 @@ impl Checker {
                     .map(|sym| self.write_type_of_property_symbol(&sym))
             }
             tsox_frontend::ast::NodeData::ElementAccessExpression(ea) => {
-                if ea.argument_expression.kind == SyntaxKind::StringLiteral {
+                if let Some(name) = Self::element_access_property_key(&ea.argument_expression) {
                     let obj_type = self.get_type_of_node(&ea.expression);
-                    let name = ea.argument_expression.text();
-                    if let Some(prop) = self.get_property_of_type(&obj_type, name) {
+                    if let Some(prop) = self.get_property_of_type(&obj_type, &name) {
                         return Some(self.write_type_of_property_symbol(&prop));
                     }
                 }
@@ -219,6 +264,14 @@ impl Checker {
                     .is_some()
             }
             _ => false,
+        }
+    }
+
+    /// 元素访问的属性键：字符串字面量按文本，`Symbol.<well-known>` 按内部名
+    fn element_access_property_key(arg: &Arc<Node>) -> Option<String> {
+        match arg.kind {
+            SyntaxKind::StringLiteral => Some(arg.text().to_string()),
+            _ => crate::binder::symbols_binder_4::well_known_symbol_member_name(arg),
         }
     }
 

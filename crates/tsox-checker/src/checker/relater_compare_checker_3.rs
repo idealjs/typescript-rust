@@ -148,6 +148,14 @@ impl Checker {
                 entry.message,
                 entry.args.clone(),
             );
+            if let Some(rel) = &entry.related {
+                d.related_information.push(tsox_frontend::ast::Diagnostic::new(
+                    rel.file.clone(),
+                    rel.loc,
+                    rel.message,
+                    rel.args.clone(),
+                ));
+            }
             if let Some(child) = diagnostic.take() {
                 d.message_chain = vec![child];
             }

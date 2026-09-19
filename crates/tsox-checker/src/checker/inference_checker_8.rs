@@ -20,25 +20,13 @@ impl Checker {
             }
         }
 
-        // Go inferFromObjectTypes 的元组分支：元组对元组按元素位推断
+        // Go inferFromObjectTypes 的元组分支：元组/数组对元组按元素位推断
         //（元素存于 element_infos，get_type_arguments 不覆盖 Tuple 形态）
-        if let (TypeData::Tuple(st), TypeData::Tuple(tt)) = (&source.data, &target.data) {
-            let src_elems: Vec<Arc<Type>> = st
-                .element_infos
-                .iter()
-                .filter_map(|e| e.type_.clone())
-                .collect();
-            let tgt_elems: Vec<Arc<Type>> = tt
-                .element_infos
-                .iter()
-                .filter_map(|e| e.type_.clone())
-                .collect();
-            if src_elems.len() == tgt_elems.len() && !tgt_elems.is_empty() {
-                for (s, t) in src_elems.into_iter().zip(tgt_elems) {
-                    self.infer_from_types(state, &s, &t);
-                }
-                return;
-            }
+        let source_is_tuple = crate::checker::utilities::is_tuple_type(source);
+        let target_is_tuple = crate::checker::utilities::is_tuple_type(target);
+        if (source_is_tuple || self.is_array_type(source)) && target_is_tuple {
+            self.infer_from_tuple_elements(state, source, target);
+            return;
         }
 
         let source_args = self.get_type_arguments(source);
@@ -87,6 +75,193 @@ impl Checker {
         let count = source_types.len().min(target_types.len());
         for i in 0..count {
             self.infer_from_types(state, &source_types[i], &target_types[i]);
+        }
+    }
+
+    fn tuple_structure_matching(s: &Arc<Type>, t: &Arc<Type>) -> bool {
+        let (TypeData::Tuple(sd), TypeData::Tuple(td)) = (&s.data, &t.data) else {
+            return false;
+        };
+        if sd.element_infos.len() != td.element_infos.len() {
+            return false;
+        }
+        sd.element_infos
+            .iter()
+            .zip(td.element_infos.iter())
+            .all(|(se, te)| {
+                se.flags.intersects(crate::checker::types::ELEMENT_FLAGS_VARIABLE)
+                    == te.flags.intersects(crate::checker::types::ELEMENT_FLAGS_VARIABLE)
+            })
+    }
+
+    pub(crate) fn end_fixed_element_count(t: &Arc<Type>) -> usize {
+        match &t.data {
+            TypeData::Tuple(tuple) => {
+                let infos = &tuple.element_infos;
+                for i in (0..infos.len()).rev() {
+                    if !infos[i].flags.intersects(crate::checker::types::ELEMENT_FLAGS_FIXED) {
+                        return infos.len() - i - 1;
+                    }
+                }
+                infos.len()
+            }
+            _ => 0,
+        }
+    }
+
+    fn infer_from_tuple_elements(
+        &mut self,
+        state: &mut InferenceState,
+        source: &Arc<Type>,
+        target: &Arc<Type>,
+    ) {
+        let source_is_tuple = crate::checker::utilities::is_tuple_type(source);
+        let source_args = if source_is_tuple {
+            Self::tuple_type_arguments(source)
+        } else {
+            self.get_type_arguments(source)
+        };
+        let target_args = Self::tuple_type_arguments(target);
+        let source_arity = source_args.len();
+        let target_arity = target_args.len();
+        if source_arity == 0 || target_arity == 0 {
+            self.infer_from_index_types(state, source, target);
+            return;
+        }
+        let target_flags: Vec<crate::checker::types::ElementFlags> = match &target.data {
+            TypeData::Tuple(tuple) => tuple.element_infos.iter().map(|e| e.flags).collect(),
+            _ => Vec::new(),
+        };
+        let source_flags: Vec<crate::checker::types::ElementFlags> = match &source.data {
+            TypeData::Tuple(tuple) => tuple.element_infos.iter().map(|e| e.flags).collect(),
+            _ => Vec::new(),
+        };
+
+        if source_is_tuple && Self::tuple_structure_matching(source, target) {
+            for i in 0..target_arity.min(source_arity) {
+                self.infer_from_types(state, &source_args[i], &target_args[i]);
+            }
+            return;
+        }
+
+        let start_length = if source_is_tuple {
+            let source_fixed = match &source.data {
+                TypeData::Tuple(tuple) => tuple.fixed_length,
+                _ => 0,
+            };
+            let target_fixed = match &target.data {
+                TypeData::Tuple(tuple) => tuple.fixed_length,
+                _ => 0,
+            };
+            source_fixed.min(target_fixed)
+        } else {
+            0
+        };
+        let target_variable = matches!(&target.data, TypeData::Tuple(t)
+            if t.combined_flags.intersects(crate::checker::types::ELEMENT_FLAGS_VARIABLE));
+        let end_length = if source_is_tuple && target_variable {
+            Self::end_fixed_element_count(source).min(Self::end_fixed_element_count(target))
+        } else {
+            0
+        };
+
+        for i in 0..start_length {
+            self.infer_from_types(state, &source_args[i], &target_args[i]);
+        }
+
+        if !source_is_tuple {
+            let rest_type = self.get_array_element_type(source);
+            self.infer_rest_element_to_target(
+                state,
+                &rest_type,
+                &target_args,
+                &target_flags,
+                start_length,
+                end_length,
+            );
+        } else {
+            let source_single_rest = source_arity - start_length - end_length == 1
+                && source_flags
+                    .get(start_length)
+                    .is_some_and(|f| f.contains(crate::checker::types::ElementFlags::Rest));
+            if source_single_rest {
+                let rest_type = Arc::clone(&source_args[start_length]);
+                self.infer_rest_element_to_target(
+                    state,
+                    &rest_type,
+                    &target_args,
+                    &target_flags,
+                    start_length,
+                    end_length,
+                );
+            } else {
+                let middle_length = target_arity.saturating_sub(start_length + end_length);
+                if middle_length == 1
+                    && target_flags
+                        .get(start_length)
+                        .is_some_and(|f| f.contains(crate::checker::types::ElementFlags::Variadic))
+                {
+                    let middle_start = start_length.min(source_arity);
+                    let middle_end = (source_arity - end_length).max(middle_start);
+                    let middle_infos: Vec<crate::checker::types::TupleElementInfo> =
+                        source_flags[middle_start..middle_end]
+                            .iter()
+                            .map(|f| crate::checker::types::TupleElementInfo {
+                                label: None,
+                                flags: *f,
+                                labeled_declaration: None,
+                                type_: None,
+                            })
+                            .collect();
+                    let slice = self.create_tuple_type_ex(
+                        source_args[middle_start..middle_end].to_vec(),
+                        middle_infos,
+                        false,
+                    );
+                    self.infer_from_types(state, &slice, &target_args[start_length]);
+                } else if middle_length == 1
+                    && target_flags
+                        .get(start_length)
+                        .is_some_and(|f| f.contains(crate::checker::types::ElementFlags::Rest))
+                {
+                    let middle_start = start_length.min(source_arity);
+                    let middle_end = (source_arity - end_length).max(middle_start);
+                    if middle_start < middle_end {
+                        let middle: Vec<Arc<Type>> =
+                            source_args[middle_start..middle_end].to_vec();
+                        let rest_type = self.get_union_type(middle);
+                        self.infer_from_types(state, &rest_type, &target_args[start_length]);
+                    }
+                }
+            }
+        }
+
+        for i in 0..end_length {
+            let s = &source_args[source_arity - i - 1];
+            let t = &target_args[target_arity - i - 1];
+            self.infer_from_types(state, s, t);
+        }
+    }
+
+    fn infer_rest_element_to_target(
+        &mut self,
+        state: &mut InferenceState,
+        rest_type: &Arc<Type>,
+        target_args: &[Arc<Type>],
+        target_flags: &[crate::checker::types::ElementFlags],
+        start_length: usize,
+        end_length: usize,
+    ) {
+        for i in start_length..target_args.len().saturating_sub(end_length) {
+            let t = if target_flags
+                .get(i)
+                .is_some_and(|f| f.contains(crate::checker::types::ElementFlags::Variadic))
+            {
+                self.create_array_type(Arc::clone(rest_type))
+            } else {
+                Arc::clone(rest_type)
+            };
+            self.infer_from_types(state, &t, &target_args[i]);
         }
     }
 
@@ -191,8 +366,22 @@ impl Checker {
         }
         state.bivariant = save_biv;
 
-        // Go applyToReturnTypes：仅当 target 返回类型含类型变量时才推断
-        // （此前无条件推断会向无类型变量的 target 灌入垃圾候选）
+        // Go applyToReturnTypes：目标签名带类型谓词且源谓词 kind/参数位匹配时，
+        // 由源谓词类型推断目标谓词类型（find<S extends T>(... => value is S) 的
+        // S 推断来源），命中后不再走常规返回位推断
+        let target_pred = self.compute_type_predicate_of_signature(target);
+        let source_pred = self.compute_type_predicate_of_signature(source);
+        if let (Some(tp), Some(sp)) = (target_pred, source_pred)
+            && tp.kind == sp.kind
+            && tp.parameter_index == sp.parameter_index
+            && tp.t.is_some()
+            && sp.t.is_some()
+        {
+            let sp_t = sp.t.unwrap();
+            let tp_t = tp.t.unwrap();
+            self.infer_from_types(state, &sp_t, &tp_t);
+            return;
+        }
         let st = self.get_return_type_of_signature(source);
         let tt = self.get_return_type_of_signature(target);
         if let (Some(st), Some(tt)) = (st, tt) {

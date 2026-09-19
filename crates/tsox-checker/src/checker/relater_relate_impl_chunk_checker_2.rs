@@ -81,10 +81,28 @@ impl Checker {
         );
     }
 
+    pub(crate) fn relater_report_error_with_related(
+        &mut self,
+        message: tsox_core::diagnostics::Message,
+        args: Vec<String>,
+        related: Option<crate::checker::relater_relation::ChainRelated>,
+    ) {
+        self.relater_report_error_impl(message, args, related)
+    }
+
     pub(crate) fn relater_report_error(
         &mut self,
         message: tsox_core::diagnostics::Message,
         args: Vec<String>,
+    ) {
+        self.relater_report_error_impl(message, args, None)
+    }
+
+    fn relater_report_error_impl(
+        &mut self,
+        message: tsox_core::diagnostics::Message,
+        args: Vec<String>,
+        related: Option<crate::checker::relater_relation::ChainRelated>,
     ) {
         use tsox_core::diagnostics::messages_generated as msg;
         if !self.relater_chain_active {
@@ -117,6 +135,7 @@ impl Checker {
                     self.relater_error_chain.push(RelaterChainEntry {
                         message: msg::THE_TYPES_RETURNED_BY_0_ARE_INCOMPATIBLE_BETWEEN_THESE_TYPES,
                         args: vec![arg],
+                        related: None,
                     });
                     return;
                 }
@@ -132,13 +151,37 @@ impl Checker {
                     self.relater_error_chain.push(RelaterChainEntry {
                         message: msg::THE_TYPES_OF_0_ARE_INCOMPATIBLE_BETWEEN_THESE_TYPES,
                         args: vec![dotted],
+                        related: None,
                     });
                     return;
                 }
             }
         }
-        self.relater_error_chain
-            .push(RelaterChainEntry { message, args });
+        if let Some(last) = self.relater_error_chain.last()
+            && last.message.key == message.key
+            && last.args == args
+        {
+            return;
+        }
+        // Go reportFailureRules：TYPE_0 行在其链下一位是实参匹配的缺属性行时
+        // 抑制（嵌套层 headMessage 为 nil，转换/接口实现例外不适用）
+        if message.key == msg::TYPE_0_IS_NOT_ASSIGNABLE_TO_TYPE_1.key && args.len() == 2 {
+            if let Some(last) = self.relater_error_chain.last() {
+                let suppressed = (last.message.key == msg::PROPERTY_0_IS_MISSING_IN_TYPE_1_BUT_REQUIRED_IN_TYPE_2.key
+                    && last.args.len() == 3
+                    && last.args[1] == args[0]
+                    && last.args[2] == args[1])
+                    || (last.args.len() >= 2
+                        && (last.message.key == msg::TYPE_0_IS_MISSING_THE_FOLLOWING_PROPERTIES_FROM_TYPE_1_COLON_2.key
+                            || last.message.key == msg::TYPE_0_IS_MISSING_THE_FOLLOWING_PROPERTIES_FROM_TYPE_1_COLON_2_AND_3_MORE.key)
+                        && last.args[0] == args[0]
+                        && last.args[1] == args[1]);
+                if suppressed {
+                    return;
+                }
+            }
+        }
+        self.relater_error_chain.push(RelaterChainEntry { message, args, related });
     }
 
     pub(crate) fn chain_property_arg_name(&self, prop: &Arc<tsox_frontend::ast::Symbol>) -> String {
@@ -157,7 +200,7 @@ impl Checker {
                 return f.text[start..end].to_string();
             }
         }
-        prop.name.clone()
+        crate::checker::property_name_for_display(&prop.name)
     }
 
     pub(crate) fn push_relation_head_with_tp_note(

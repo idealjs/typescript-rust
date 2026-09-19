@@ -121,6 +121,16 @@ pub struct RelationCacheKey {
 pub struct RelaterChainEntry {
     pub message: tsox_core::diagnostics::Message,
     pub args: Vec<String>,
+    /// Go 缺属性行的 related info（X_0_IS_DECLARED_HERE 挂声明节点）
+    pub related: Option<crate::checker::relater_relation::ChainRelated>,
+}
+
+#[derive(Debug, Clone)]
+pub struct ChainRelated {
+    pub file: Option<std::sync::Arc<tsox_frontend::ast::SourceFile>>,
+    pub loc: tsox_core::core::text::TextRange,
+    pub message: tsox_core::diagnostics::Message,
+    pub args: Vec<String>,
 }
 
 #[derive(Debug)]

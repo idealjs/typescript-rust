@@ -37,7 +37,20 @@ impl Checker {
                     | SyntaxKind::EnumDeclaration
             )
         });
-        if self.is_scope_exempt(node, declaration_for_scope) {
+        // 类装饰器用法在 Go 里走 isBlockScopedNameDeclaredBeforeUse 的类分支，
+        // 不进入 isUsedInFunctionOrInstanceProperty 豁免，先行短路
+        let class_like_declaration = declaration_for_scope.is_some_and(|d| {
+            matches!(
+                d.kind,
+                SyntaxKind::ClassDeclaration | SyntaxKind::ClassExpression
+            )
+        });
+        let class_decorator_or_computed = class_like_declaration
+            && self.usage_in_class_computed_name_or_decorator(
+                declaration_for_scope.unwrap(),
+                node,
+            );
+        if !class_decorator_or_computed && self.is_scope_exempt(node, declaration_for_scope) {
             return;
         }
 
@@ -76,7 +89,8 @@ impl Checker {
                 .unwrap_or(declaration.pos()),
             _ => declaration.pos(),
         };
-        if decl_name_pos <= node.pos() {
+        // 类节点 pos 含装饰器：用法在该类计算名/装饰器内时不算声明先于使用（Go 类分支）
+        if !class_decorator_or_computed && decl_name_pos <= node.pos() {
             let inside_own_initializer = {
                 let mut cur = declaration.parent();
                 let mut found = false;

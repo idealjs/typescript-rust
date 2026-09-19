@@ -65,7 +65,10 @@ impl Checker {
                 let window = &text[lo.min(text.len())..(start + 6).min(text.len())];
                 window.contains("const")
             });
-        is_const_enum && enum_decl_count > 0 && !self.compiler_options.isolated_modules.is_true()
+        is_const_enum
+            && enum_decl_count > 0
+            && !self.compiler_options.isolated_modules.is_true()
+            && !self.compiler_options.verbatim_module_syntax.is_true()
     }
 
     pub(crate) fn is_used_in_type_position(&self, node: &Arc<Node>) -> bool {
@@ -108,7 +111,6 @@ impl Checker {
                         | SyntaxKind::FunctionType
                         | SyntaxKind::ConstructorType
                         | SyntaxKind::QualifiedName
-                        | SyntaxKind::HeritageClause
                 ) {
                     hit = true;
                     break;

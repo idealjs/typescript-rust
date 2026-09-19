@@ -143,16 +143,42 @@ impl Checker {
                 let own_result = self.build_interface_type_from_members(&merged_list);
                 self.in_static_member_type = saved_static;
                 if has_type_args {
-                    let tp_types: Vec<Arc<Type>> = tp_symbols
+                    // 增强声明的同名 T 是独立符号：实例化标记须覆盖全部声明，
+                    // 否则增强成员（如 es2015 Array.find）的类型参数悬空
+                    let sym_map = self.program.symbol_map();
+                    let mut all_tp_symbols: Vec<Arc<Symbol>> = tp_symbols.clone();
+                    let mut all_args: Vec<Arc<Type>> = arg_types.clone();
+                    for decl in interface_decls.iter().skip(1) {
+                        let NodeData::InterfaceDeclaration(d) = &decl.data else {
+                            continue;
+                        };
+                        let Some(tps) = &d.type_parameters else {
+                            continue;
+                        };
+                        for (i, tp) in tps.iter().enumerate() {
+                            let Some(tp_sym) = sym_map.symbol_of(tp) else {
+                                continue;
+                            };
+                            if all_tp_symbols.iter().any(|a| Arc::ptr_eq(a, tp_sym)) {
+                                continue;
+                            }
+                            let Some(arg) = arg_types.get(i) else {
+                                continue;
+                            };
+                            all_tp_symbols.push(Arc::clone(tp_sym));
+                            all_args.push(Arc::clone(arg));
+                        }
+                    }
+                    let all_tp_types: Vec<Arc<Type>> = all_tp_symbols
                         .iter()
                         .map(|s| self.get_type_parameter_from_symbol(s))
                         .collect();
                     self.mark_structured_members_instantiated(
                         &own_result,
                         symbol,
-                        &tp_symbols,
-                        &tp_types,
-                        &arg_types,
+                        &all_tp_symbols,
+                        &all_tp_types,
+                        &all_args,
                     );
                 }
 
@@ -180,6 +206,12 @@ impl Checker {
                 };
 
                 if !has_type_args && !base_types.is_empty() {
+                    self.report_interface_simultaneous_extends(
+                        symbol,
+                        &interface_decls,
+                        &own_result,
+                        &base_types,
+                    );
                     self.report_interface_extends_incompatibilities(
                         symbol,
                         &interface_decls,

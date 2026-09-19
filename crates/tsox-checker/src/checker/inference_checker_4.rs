@@ -167,6 +167,9 @@ impl Checker {
             SyntaxKind::ArrowFunction | SyntaxKind::ReturnStatement => {
                 self.get_contextual_type_for_return_expression(node, _context_flags)
             }
+            // Go getContextualTypeForYieldOperand：yield 操作数的上下文取
+            // 所在函数上下文返回型的 yield 迭代型（yield* 合成 Generator）
+            SyntaxKind::YieldExpression => self.get_contextual_type_for_yield_operand(&parent),
             SyntaxKind::CallExpression | SyntaxKind::NewExpression => {
                 self.get_contextual_type_for_argument(&parent, node)
             }
@@ -183,6 +186,12 @@ impl Checker {
             }
             SyntaxKind::PropertyAssignment | SyntaxKind::ShorthandPropertyAssignment => {
                 self.get_contextual_type_for_object_literal_element(&parent, _context_flags)
+            }
+            // 对象字面量方法成员：方法节点自身的上下文型（参数定型经此）
+            SyntaxKind::ObjectLiteralExpression
+                if node.kind == SyntaxKind::MethodDeclaration =>
+            {
+                self.get_contextual_type_for_object_literal_element(node, _context_flags)
             }
             SyntaxKind::ArrayLiteralExpression => {
                 self.get_contextual_type_for_array_literal_element(node, &parent, _context_flags)

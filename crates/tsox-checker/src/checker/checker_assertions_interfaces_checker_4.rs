@@ -44,6 +44,35 @@ impl Checker {
             return;
         }
 
+        // Go checkIndexConstraints 尾部：number 索引值型须可赋给 string 索引值型
+        //（TS2413，static 侧经由构造类型同样触发）
+        let string_index = index_infos.iter().find(|i| {
+            i.key_type
+                .as_ref()
+                .is_some_and(|k| k.flags.contains(TypeFlags::String))
+        });
+        let number_index = index_infos.iter().find(|i| {
+            i.key_type
+                .as_ref()
+                .is_some_and(|k| k.flags.contains(TypeFlags::Number))
+        });
+        if let (Some(si), Some(ni)) = (string_index, number_index)
+            && let (Some(sv), Some(nv)) = (si.value_type.as_ref(), ni.value_type.as_ref())
+            && !self.is_type_assignable_to(nv, sv)
+            && let Some(num_decl) = ni.declaration.as_ref()
+        {
+            let name_loc = num_decl.loc;
+            let sv_str = self.type_to_string(sv);
+            let nv_str = self.type_to_string(nv);
+            self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                self.current_file.clone(),
+                name_loc,
+                tsox_core::diagnostics::messages_generated::
+                    X_0_INDEX_TYPE_1_IS_NOT_ASSIGNABLE_TO_2_INDEX_TYPE_3,
+                vec!["number".to_string(), nv_str, "string".to_string(), sv_str],
+            ));
+        }
+
         let local_index: Option<Arc<crate::checker::IndexInfo>> = index_infos
             .iter()
             .find(|info| {

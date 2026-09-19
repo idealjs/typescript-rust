@@ -137,7 +137,31 @@ impl Checker {
         }
 
         let mut clause_hits: Vec<(String, Option<String>)> = Vec::new();
+        let mut ns_export_target: Option<Arc<Symbol>> = None;
+        let mut star_specs: Vec<String> = Vec::new();
         self.for_each_module_statement(module_sym, |stmt| {
+            if let tsox_frontend::ast::NodeData::ExportDeclaration(d) = &stmt.data
+                && d.export_clause.is_none()
+                && let Some(spec) = d.module_specifier.as_ref()
+            {
+                star_specs.push(spec.text().trim_matches(['"', '\'', '`']).to_string());
+            }
+            if let tsox_frontend::ast::NodeData::ExportDeclaration(d) = &stmt.data
+                && let Some(clause) = &d.export_clause
+                && clause.kind == SyntaxKind::NamespaceExport
+                && tsox_frontend::ast::node_data_generated::node_name(clause)
+                    .is_some_and(|n| n.text() == name)
+                && let Some(spec) = d.module_specifier.as_ref()
+            {
+                // export * as a from '...'：成员名映射目标模块符号（命名空间对象）
+                if let Some(text) = self.resolve_module_spec_from(
+                    module_sym,
+                    spec.text().trim_matches(['"', '\'', '`']),
+                ) {
+                    ns_export_target = Some(text);
+                }
+                return true;
+            }
             if let tsox_frontend::ast::NodeData::ExportDeclaration(d) = &stmt.data
                 && let Some(clause) = &d.export_clause
                 && let tsox_frontend::ast::NodeData::NamedExports(ne) = &clause.data
@@ -166,6 +190,23 @@ impl Checker {
             }
             false
         });
+        if let Some(target) = ns_export_target {
+            return Some(target);
+        }
+        // 普通 `export * from '...'`：递归星号目标查名（具名/本地优先已保证）
+        for spec in star_specs {
+            let Some(target) = self
+                .resolve_module_spec_from(module_sym, &spec)
+                .or_else(|| self.resolve_module_file_symbol(&spec))
+            else {
+                continue;
+            };
+            if let Some(found) =
+                self.resolve_module_member_symbol(&target, name, depth - 1)
+            {
+                return Some(found);
+            }
+        }
         for (imported, module_text) in clause_hits {
             let target_module = match module_text {
                 None => Arc::clone(module_sym),

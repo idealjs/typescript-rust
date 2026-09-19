@@ -13,7 +13,29 @@ use tsox_frontend::ast::{
 impl Checker {
     /// Go checkThisExpression 的类型解析主干（诊断与 flow 收窄不在此层）
     pub(crate) fn this_expression_type(&mut self, node: &Arc<Node>) -> Arc<Type> {
+        // Go checkThisInStaticClassFieldInitializerInDecoratedClass：
+        // legacy 装饰器类的 static 属性初始化器禁用 this（TS2816）
         let container = get_this_container(node, false, false);
+        if container.kind == SyntaxKind::PropertyDeclaration
+            && container.has_syntactic_modifier(tsox_frontend::ast::ModifierFlags::Static)
+            && self.legacy_decorators
+            && let Some(parent_cls) = container.parent()
+            && self
+                .get_combined_modifier_flags(&parent_cls)
+                .contains(tsox_frontend::ast::ModifierFlags::Decorator)
+            && let tsox_frontend::ast::NodeData::PropertyDeclaration(pd) = &container.data
+            && let Some(init) = &pd.initializer
+            && init.loc.pos() <= node.loc.pos()
+            && node.loc.pos() <= init.loc.end()
+        {
+            self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                self.current_file.clone(),
+                node.loc,
+                tsox_core::diagnostics::messages_generated::
+                    CANNOT_USE_THIS_IN_A_STATIC_PROPERTY_INITIALIZER_OF_A_DECORATED_CLASS,
+                Vec::new(),
+            ));
+        }
         if is_function_like_kind(container.kind)
             && (!is_in_parameter_initializer_before_containing_function(node)
                 || get_this_parameter(&container).is_some())
@@ -28,7 +50,9 @@ impl Checker {
         if let Some(parent) = container.parent()
             && is_class_like(&parent)
         {
-            if has_static_modifier(&container) {
+            // Go ast.IsStatic：static 修饰符或类静态块本体
+            if has_static_modifier(&container) || container.kind == SyntaxKind::ClassStaticBlockDeclaration
+            {
                 return self.get_type_of_class_declaration(&parent);
             }
             let instance = self.container_instance_type_of(&parent);

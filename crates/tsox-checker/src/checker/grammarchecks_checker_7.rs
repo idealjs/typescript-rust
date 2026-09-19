@@ -9,39 +9,45 @@ impl Checker {
             NodeData::ContinueStatement(data) => data.label.as_ref(),
             _ => None,
         };
-        let target_label_text = target_label.map(|l| l.text().to_string());
         let is_break = node.kind == SyntaxKind::BreakStatement;
 
-        for ctx in self.break_continue_context_stack.iter().rev() {
-            match ctx.kind {
-                crate::checker::BreakContinueContextKind::Function => {
-                    return self
-                        .grammar_error_on_node(node, &JUMP_TARGET_CANNOT_CROSS_FUNCTION_BOUNDARY);
-                }
-                crate::checker::BreakContinueContextKind::Labeled => {
-                    if let Some(label_text) = &target_label_text {
-                        if ctx.label.as_deref() == Some(label_text.as_str()) {
-                            if !is_break && !ctx.is_iteration {
-                                return self.grammar_error_on_node(
-                                    node,
-                                    &A_CONTINUE_STATEMENT_CAN_ONLY_JUMP_TO_A_LABEL_OF_AN_ENCLOSING_ITERATION_STATEMENT,
-                                );
-                            }
-                            return false;
+        let mut current = Some(Arc::clone(node));
+        while let Some(cur) = current {
+            if tsox_frontend::ast::is_function_like_or_class_static_block_declaration(&cur) {
+                return self
+                    .grammar_error_on_node(node, &JUMP_TARGET_CANNOT_CROSS_FUNCTION_BOUNDARY);
+            }
+            match cur.kind {
+                SyntaxKind::LabeledStatement => {
+                    if let Some(label) = target_label
+                        && let NodeData::LabeledStatement(data) = &cur.data
+                        && data.label.text() == label.text()
+                    {
+                        let misplaced_continue = !is_break
+                            && !tsox_frontend::ast::is_iteration_statement(&data.statement, true);
+                        if misplaced_continue {
+                            return self.grammar_error_on_node(
+                                node,
+                                &A_CONTINUE_STATEMENT_CAN_ONLY_JUMP_TO_A_LABEL_OF_AN_ENCLOSING_ITERATION_STATEMENT,
+                            );
                         }
-                    }
-                }
-                crate::checker::BreakContinueContextKind::Loop => {
-                    if target_label.is_none() {
                         return false;
                     }
                 }
-                crate::checker::BreakContinueContextKind::Switch => {
+                SyntaxKind::SwitchStatement => {
                     if is_break && target_label.is_none() {
                         return false;
                     }
                 }
+                _ => {
+                    if target_label.is_none()
+                        && tsox_frontend::ast::is_iteration_statement(&cur, false)
+                    {
+                        return false;
+                    }
+                }
             }
+            current = cur.parent();
         }
 
         let message = if target_label.is_some() {
@@ -155,7 +161,10 @@ impl Checker {
                 }
                 if matches!(
                     a.kind,
-                    SyntaxKind::SourceFile | SyntaxKind::Block | SyntaxKind::ModuleBlock
+                    SyntaxKind::SourceFile
+                        | SyntaxKind::Block
+                        | SyntaxKind::ClassDeclaration
+                        | SyntaxKind::FunctionDeclaration
                 ) {
                     break;
                 }

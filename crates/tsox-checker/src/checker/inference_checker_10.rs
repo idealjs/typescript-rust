@@ -231,20 +231,27 @@ impl Checker {
                 self.get_contextual_type_for_argument_ex(&parent, node, _context_flags)
             }
 
-            SyntaxKind::TypeAssertionExpression => {
-                if let tsox_frontend::ast::NodeData::TypeAssertion(d) = &parent.data {
-                    Some(self.get_type_from_type_node(&d.type_node))
-                } else {
-                    None
+            // Go getContextualType：断言/as 表达式的内表达式以断言目标类型为
+            // 上下文（const 断言除外，透传外层）
+            SyntaxKind::TypeAssertionExpression | SyntaxKind::AsExpression => {
+                let type_node = match &parent.data {
+                    tsox_frontend::ast::NodeData::TypeAssertion(d) => Some(&d.type_node),
+                    tsox_frontend::ast::NodeData::AsExpression(d) => Some(&d.type_node),
+                    _ => None,
+                }?;
+                if parent.kind == SyntaxKind::AsExpression
+                    && matches!(
+                        &type_node.data,
+                        tsox_frontend::ast::NodeData::TypeReferenceNode(r)
+                            if r.type_arguments.is_none()
+                                && matches!(&r.type_name.data, tsox_frontend::ast::NodeData::Identifier(id) if id.text == "const")
+                    )
+                {
+                    return self.get_contextual_type(&parent, _context_flags);
                 }
+                Some(self.get_type_from_type_node(type_node))
             }
-            SyntaxKind::AsExpression => {
-                if let tsox_frontend::ast::NodeData::AsExpression(d) = &parent.data {
-                    Some(self.get_type_from_type_node(&d.type_node))
-                } else {
-                    None
-                }
-            }
+
             SyntaxKind::SatisfiesExpression => {
                 if let tsox_frontend::ast::NodeData::SatisfiesExpression(d) = &parent.data {
                     Some(self.get_type_from_type_node(&d.type_node))
@@ -252,11 +259,18 @@ impl Checker {
                     None
                 }
             }
+            SyntaxKind::YieldExpression => self.get_contextual_type_for_yield_operand(&parent),
             SyntaxKind::BinaryExpression => {
                 self.get_contextual_type_for_binary_operand(node, _context_flags)
             }
             SyntaxKind::PropertyAssignment | SyntaxKind::ShorthandPropertyAssignment => {
                 self.get_contextual_type_for_object_literal_element(&parent, _context_flags)
+            }
+            // 对象字面量方法成员：方法节点自身的上下文型（参数定型经此）
+            SyntaxKind::ObjectLiteralExpression
+                if node.kind == SyntaxKind::MethodDeclaration =>
+            {
+                self.get_contextual_type_for_object_literal_element(node, _context_flags)
             }
             SyntaxKind::JsxExpression => self.get_contextual_type_for_jsx_expression(node, _context_flags),
             SyntaxKind::ArrayLiteralExpression => {

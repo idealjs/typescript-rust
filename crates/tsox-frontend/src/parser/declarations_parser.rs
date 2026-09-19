@@ -71,6 +71,14 @@ impl Parser {
             SyntaxKind::VarKeyword | SyntaxKind::LetKeyword | SyntaxKind::ConstKeyword => {
                 self.parse_variable_statement_with_modifiers(modifiers)
             }
+            // Go parseDeclarationWorker：export/declare 修饰后允许 using 与
+            // await using 声明（await 仅在 await using 形态时作声明头）
+            SyntaxKind::UsingKeyword => {
+                self.parse_variable_statement_with_modifiers(modifiers)
+            }
+            SyntaxKind::AwaitKeyword if self.is_await_using_declaration() => {
+                self.parse_variable_statement_with_modifiers(modifiers)
+            }
             SyntaxKind::ImportKeyword => {
                 self.parse_import_equals_declaration_with_modifiers(modifiers)
             }
@@ -127,8 +135,8 @@ impl Parser {
             .as_ref()
             .map(|m| m.flags().contains(ModifierFlags::Async))
             .unwrap_or(false);
-        let name = if self.is_identifier() {
-            Some(self.parse_identifier())
+        let name = if self.is_binding_identifier() {
+            Some(self.parse_binding_identifier_with_private_diagnostic(None))
         } else {
             None
         };
@@ -179,8 +187,8 @@ impl Parser {
     ) -> Arc<Node> {
         let pos = Self::declaration_start(&modifiers, self.token_pos());
         self.next_token();
-        let name = if self.is_identifier() {
-            Some(self.parse_identifier())
+        let name = if self.is_binding_identifier() {
+            Some(self.parse_binding_identifier_with_private_diagnostic(None))
         } else {
             None
         };

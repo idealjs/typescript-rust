@@ -3,7 +3,7 @@
 use crate::checker::checker_impl_chunk::*;
 
 impl Checker {
-    pub(crate) fn merge_global_symbols(dst: &Arc<Symbol>, src: &Arc<Symbol>) {
+    pub(crate) fn merge_global_symbols(&mut self, dst: &Arc<Symbol>, src: &Arc<Symbol>) {
         let dst_mut = Arc::as_ptr(dst) as *mut Symbol;
         unsafe {
             (*dst_mut).flags |= src.flags;
@@ -20,8 +20,12 @@ impl Checker {
                 (*dst_mut).value_declaration = src.value_declaration.clone();
             }
             for (name, member) in src.members.entries.iter() {
-                match (*dst_mut).members.entries.get(name) {
-                    Some(existing) => Self::merge_global_symbols(existing, member),
+                match (*dst_mut).members.entries.get(name).cloned() {
+                    Some(existing) => {
+                        if !self.report_global_merge_conflict(&existing, member) {
+                            self.merge_global_symbols(&existing, member);
+                        }
+                    }
                     None => {
                         (*dst_mut)
                             .members
@@ -31,8 +35,12 @@ impl Checker {
                 }
             }
             for (name, export) in src.exports.entries.iter() {
-                match (*dst_mut).exports.entries.get(name) {
-                    Some(existing) => Self::merge_global_symbols(existing, export),
+                match (*dst_mut).exports.entries.get(name).cloned() {
+                    Some(existing) => {
+                        if !self.report_global_merge_conflict(&existing, export) {
+                            self.merge_global_symbols(&existing, export);
+                        }
+                    }
                     None => {
                         (*dst_mut)
                             .exports
@@ -45,32 +53,34 @@ impl Checker {
     }
 
     pub(crate) fn populate_globals(&mut self) {
-        for file in &self.files {
-            if file.external_module_indicator.is_some() {
-                continue;
-            }
-
+        let script_files: Vec<Arc<SourceFile>> = self
+            .files
+            .iter()
+            .filter(|f| f.external_module_indicator.is_none())
+            .cloned()
+            .collect();
+        for file in &script_files {
             let symbol_map = self.program.symbol_map();
+            let mut member_entries: Vec<(String, Arc<Symbol>)> = Vec::new();
+            let mut local_entries: Vec<(String, Arc<Symbol>)> = Vec::new();
             if let Some(file_sym) = symbol_map.symbol_of(&file.node) {
-                for (name, sym) in file_sym.members.iter() {
-                    match self.globals.get(name) {
-                        Some(existing) => Self::merge_global_symbols(existing, sym),
-                        None => {
-                            self.globals.insert(name.clone(), Arc::clone(sym));
-                        }
-                    }
+                for (k, v) in file_sym.members.iter() {
+                    member_entries.push((k.clone(), Arc::clone(v)));
                 }
-
                 if let Some(locals) = symbol_map.locals_of(&file.node) {
-                    for (name, sym) in locals.iter() {
-                        match self.globals.get(name) {
-                            Some(existing) => Self::merge_global_symbols(existing, sym),
-                            None => {
-                                self.globals.insert(name.clone(), Arc::clone(sym));
-                            }
-                        }
+                    for (k, v) in locals.iter() {
+                        local_entries.push((k.clone(), Arc::clone(v)));
                     }
                 }
+            }
+            // Go createGlobals 只并各文件 exports；别名（import 子句）留在文件
+            // 局部表，不参与全局合并
+            for (name, sym) in member_entries
+                .into_iter()
+                .chain(local_entries)
+                .filter(|(_, sym)| !sym.flags.contains(SymbolFlags::Alias))
+            {
+                self.merge_global_entry(&name, &sym);
             }
         }
 
@@ -100,6 +110,7 @@ impl Checker {
             }
         }
 
+        let mut global_aug_members: Vec<(String, Arc<Symbol>)> = Vec::new();
         for file in &self.files {
             for aug_name in &file.module_augmentations {
                 let Some(module_node) = aug_name.parent() else {
@@ -109,15 +120,14 @@ impl Checker {
                     continue;
                 }
                 let symbol_map = self.program.symbol_map();
-                let mut aug_members: Vec<(String, Arc<Symbol>)> = Vec::new();
                 if let Some(module_sym) = symbol_map.symbol_of(&module_node) {
-                    aug_members.extend(
+                    global_aug_members.extend(
                         module_sym
                             .exports
                             .iter()
                             .map(|(k, v)| (k.clone(), Arc::clone(v))),
                     );
-                    aug_members.extend(
+                    global_aug_members.extend(
                         module_sym
                             .members
                             .iter()
@@ -125,15 +135,20 @@ impl Checker {
                     );
                 }
                 if let Some(locals) = symbol_map.locals_of(&module_node) {
-                    aug_members.extend(locals.iter().map(|(k, v)| (k.clone(), Arc::clone(v))));
+                    global_aug_members.extend(locals.iter().map(|(k, v)| (k.clone(), Arc::clone(v))));
                 }
-                for (name, sym) in aug_members {
-                    match self.globals.get(&name) {
-                        Some(existing) => Self::merge_global_symbols(existing, &sym),
-                        None => {
-                            self.globals.insert(name, sym);
-                        }
+            }
+        }
+        for (name, sym) in global_aug_members {
+            let existing = self.globals.get(&name).cloned();
+            match existing {
+                Some(existing) => {
+                    if !self.report_global_merge_conflict(&existing, &sym) {
+                        self.merge_global_symbols(&existing, &sym);
                     }
+                }
+                None => {
+                    self.globals.insert(name, sym);
                 }
             }
         }

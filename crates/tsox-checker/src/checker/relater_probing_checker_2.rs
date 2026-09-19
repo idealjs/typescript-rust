@@ -205,8 +205,11 @@ impl Checker {
                 {
                     return Arc::clone(t);
                 }
-                if o.target.is_none() && o.type_arguments.len() == 1 && self.is_array_type(t) {
-                    return self.create_array_type(Arc::clone(&new_args[0]));
+                if o.type_arguments.len() == 1 && self.is_array_type(t) {
+                    let readonly = t
+                        .object_flags
+                        .contains(crate::checker::types::ObjectFlags::IsReadonlyArray);
+                    return self.create_array_type_ex(Arc::clone(&new_args[0]), readonly);
                 }
                 let mut rebuilt = Type::new(
                     t.flags,

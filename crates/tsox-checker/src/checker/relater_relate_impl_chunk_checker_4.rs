@@ -85,14 +85,24 @@ impl Checker {
         }
 
         if s.contains(TypeFlags::Object) && t.contains(TypeFlags::Object) {
+            // ReadonlyArray<T> 接口实例归一化为 readonly 标志数组（与 readonly T[]
+            // 同表示）：数组关系走元素协变快路径，避免逐成员结构比较在
+            // 递归泛型（every/flatMap/concat 互相引用）上实例漂移失效
+            let source = self
+                .normalize_readonly_array_instance(source)
+                .unwrap_or_else(|| Arc::clone(source));
+            let target = self
+                .normalize_readonly_array_instance(target)
+                .unwrap_or_else(|| Arc::clone(target));
+
             if let (Some(ss), Some(ts)) = (&source.symbol, &target.symbol)
                 && ss.id() == ts.id()
                 && ss
                     .flags
                     .intersects(SymbolFlags::Interface | SymbolFlags::Class)
             {
-                let source_args = self.get_type_arguments(source);
-                let target_args = self.get_type_arguments(target);
+                let source_args = self.get_type_arguments(&source);
+                let target_args = self.get_type_arguments(&target);
                 if source_args.is_empty() && target_args.is_empty() {
                     return true;
                 }
@@ -107,22 +117,22 @@ impl Checker {
                 }
             }
 
-            if self.is_array_type(source) && self.is_array_type(target) {
-                return self.is_array_type_related_to(source, target, relation);
+            if self.is_array_type(&source) && self.is_array_type(&target) {
+                return self.is_array_type_related_to(&source, &target, relation);
             }
 
-            if self.is_tuple_type(source) && self.is_tuple_type(target) {
-                return self.is_tuple_type_related_to(source, target, relation);
+            if self.is_tuple_type(&source) && self.is_tuple_type(&target) {
+                return self.is_tuple_type_related_to(&source, &target, relation);
             }
 
-            if let Some(result) = self.generic_type_reference_related_to(source, target, relation) {
+            if let Some(result) = self.generic_type_reference_related_to(&source, &target, relation) {
                 if result.is_true() {
                     return true;
                 }
                 // False 不提前返回：方差是加速判定，错误细化须走结构比较
                 //（Int<string> 与 Int<number> 经属性 val 报 TYPES_OF_PROPERTY）
             }
-            return self.is_object_type_related_to(source, target, relation);
+            return self.is_object_type_related_to(&source, &target, relation);
         }
 
         if s.contains(TypeFlags::TypeParameter)
@@ -282,9 +292,68 @@ impl Checker {
             return self.is_object_type_related_to(source, target, relation);
         }
 
+        // readonly → 可变按赋值/子类型关系拒绝（可变 → readonly 放行，
+        // 元素协变照常）
+        let source_ro = source.object_flags.contains(ObjectFlags::IsReadonlyArray);
+        let target_ro = target.object_flags.contains(ObjectFlags::IsReadonlyArray);
+        if source_ro
+            && !target_ro
+            && matches!(
+                relation,
+                RelationKind::Assignable | RelationKind::Subtype | RelationKind::StrictSubtype
+            )
+        {
+            return false;
+        }
+
         let source_elem = &source_args[0];
         let target_elem = &target_args[0];
-        self.is_type_related_to(source_elem, target_elem, relation)
+        let related = self.is_type_related_to(source_elem, target_elem, relation);
+        if !related && self.relater_chain_active {
+            let elem_source_str = self.type_to_string(source_elem);
+            let elem_target_str = self.type_to_string(target_elem);
+            self.relater_report_error(
+                tsox_core::diagnostics::messages_generated::TYPE_0_IS_NOT_ASSIGNABLE_TO_TYPE_1,
+                vec![elem_source_str, elem_target_str],
+            );
+        }
+        related
+    }
+
+    /// Array/ReadonlyArray 接口实例（含关系判定中途惰性解析的 Anonymous 形态）
+    /// → 驻留数组实例（readonly 语义由 IsReadonlyArray 标志承载）；
+    /// 其余类型原样返回。符号比对带名字等价兜底：lib 文件的符号存在双副本
+    /// 实例漂移（globals 与类型引用解析不同 Arc），ptr_eq 会漏
+    pub(crate) fn normalize_readonly_array_instance(
+        &mut self,
+        t: &Arc<Type>,
+    ) -> Option<Arc<Type>> {
+        if !t.flags.contains(TypeFlags::Object) {
+            return None;
+        }
+        let args_len = t.as_object()?.type_arguments.len();
+        if args_len != 1 {
+            return None;
+        }
+        let symbol = t.symbol.as_ref()?;
+        let array_sym = self.globals.get("Array")?;
+        let readonly_sym = self.globals.get("ReadonlyArray")?;
+        let is_ro_symbol = Arc::ptr_eq(symbol, readonly_sym)
+            || (symbol.name == readonly_sym.name
+                && symbol.flags.contains(SymbolFlags::Interface));
+        let is_array_symbol = Arc::ptr_eq(symbol, array_sym)
+            || (symbol.name == array_sym.name
+                && symbol.flags.contains(SymbolFlags::Interface));
+        let readonly = if is_ro_symbol {
+            true
+        } else if is_array_symbol {
+            t.object_flags
+                .contains(crate::checker::types::ObjectFlags::IsReadonlyArray)
+        } else {
+            return None;
+        };
+        let element = Arc::clone(&t.as_object()?.type_arguments[0]);
+        Some(self.create_array_type_ex(element, readonly))
     }
 }
 

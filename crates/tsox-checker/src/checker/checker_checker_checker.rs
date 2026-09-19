@@ -117,6 +117,7 @@ pub struct Checker {
         *const tsox_frontend::ast::Symbol,
         *const tsox_frontend::ast::Node,
     )>,
+    pub interface_simultaneous_reported: std::collections::HashSet<*const tsox_frontend::ast::Symbol>,
     pub indexed_access_2538_reported: std::collections::HashSet<*const tsox_frontend::ast::Node>,
     pub arith_operand_error_nodes: std::collections::HashSet<*const tsox_frontend::ast::Node>,
     pub computed_property_name_checked: std::collections::HashSet<*const tsox_frontend::ast::Node>,
@@ -192,6 +193,7 @@ pub struct Checker {
         std::collections::HashMap<Vec<usize>, (Vec<Arc<Type>>, Arc<Type>)>,
     pub array_type_parameter_symbols: Option<Vec<Arc<tsox_frontend::ast::Symbol>>>,
     pub array_member_type_cache: std::collections::HashMap<(usize, usize), Arc<Type>>,
+    pub array_type_intern_cache: std::collections::HashMap<(u32, bool), Arc<Type>>,
     pub instantiated_member_type_cache:
         std::collections::HashMap<(usize, usize), (Arc<Type>, Arc<Type>)>,
     pub instantiated_member_type_cache_limit: usize,

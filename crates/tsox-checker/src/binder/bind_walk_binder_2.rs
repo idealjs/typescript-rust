@@ -285,7 +285,9 @@ impl Binder {
             self.parent_symbol = Some(Arc::clone(sym));
         }
 
-        let is_function_like = flags.contains(ContainerFlags::IS_FUNCTION_LIKE);
+        let is_static_block = node.kind == SyntaxKind::ClassStaticBlockDeclaration;
+        let is_function_like =
+            flags.contains(ContainerFlags::IS_FUNCTION_LIKE) && !is_static_block;
         let prev_flow = if is_function_like {
             self.current_flow.take()
         } else {
@@ -293,6 +295,42 @@ impl Binder {
         };
         if is_function_like {
             self.current_flow = Some(Arc::new(FlowNode::new(FlowFlags::START)));
+        }
+        // Go bindWorker 控制流容器分支：进入时清空跳转目标/活跃标签/返回目标，
+        // 静态块按 IIFE 处理（不重置 currentFlow，挂 return 分支标签）
+        let static_block_return = if is_static_block {
+            Some(Self::new_flow_accumulator())
+        } else {
+            None
+        };
+        let save_jump_reset = is_control_flow_jump_reset_container(node.kind);
+        let save_break = if save_jump_reset {
+            self.current_break_target.take()
+        } else {
+            None
+        };
+        let save_continue = if save_jump_reset {
+            self.current_continue_target.take()
+        } else {
+            None
+        };
+        let save_labels = if save_jump_reset {
+            self.active_label_list.take()
+        } else {
+            None
+        };
+        let save_return = if save_jump_reset {
+            self.current_return_target.take()
+        } else {
+            None
+        };
+        let save_exception = if save_jump_reset {
+            self.current_exception_target.take()
+        } else {
+            None
+        };
+        if let Some(rl) = &static_block_return {
+            self.current_return_target = Some(Arc::clone(rl));
         }
 
         if node.kind == SyntaxKind::FunctionExpression {
@@ -311,8 +349,23 @@ impl Binder {
 
         self.bind_children(node);
 
+        if let Some(rl) = &static_block_return {
+            if let Some(current) = &self.current_flow {
+                self.add_antecedent_to_flow(rl, current);
+            }
+            let finished = Self::finish_flow_node(rl, &self.unreachable_flow());
+            self.symbol_map.set_flow_node(node, Arc::clone(&finished));
+            self.current_flow = Some(finished);
+        }
         if is_function_like {
             self.current_flow = prev_flow;
+        }
+        if save_jump_reset {
+            self.current_break_target = save_break;
+            self.current_continue_target = save_continue;
+            self.active_label_list = save_labels;
+            self.current_return_target = save_return;
+            self.current_exception_target = save_exception;
         }
 
         self.container = prev_container;

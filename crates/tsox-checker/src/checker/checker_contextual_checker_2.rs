@@ -77,34 +77,32 @@ impl Checker {
             };
             target = inner;
         }
-        match target.kind {
-            SyntaxKind::Identifier => {
-                let strict = self
-                    .program
-                    .options()
-                    .get_strict_option_value(self.program.options().always_strict)
-                    || self
-                        .current_file
-                        .as_ref()
-                        .is_some_and(|f| f.external_module_indicator.is_some());
-                if strict {
-                    self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
-                        self.current_file.clone(),
-                        target.loc,
-                        tsox_core::diagnostics::messages_generated::
-                            X_DELETE_CANNOT_BE_CALLED_ON_AN_IDENTIFIER_IN_STRICT_MODE,
-                        vec![],
-                    ));
-                }
+        // Go checkDeleteExpression：非访问表达式操作数一律 TS2703；
+        // identifier 另由 binder TS1102（tsgo 无条件）先行
+        if !matches!(
+            target.kind,
+            SyntaxKind::PropertyAccessExpression | SyntaxKind::ElementAccessExpression
+        ) {
+            if target.kind == SyntaxKind::Identifier {
                 self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
                     self.current_file.clone(),
                     target.loc,
                     tsox_core::diagnostics::messages_generated::
-                        THE_OPERAND_OF_A_DELETE_OPERATOR_MUST_BE_A_PROPERTY_REFERENCE,
+                        X_DELETE_CANNOT_BE_CALLED_ON_AN_IDENTIFIER_IN_STRICT_MODE,
                     vec![],
                 ));
             }
-            SyntaxKind::PropertyAccessExpression | SyntaxKind::ElementAccessExpression => {
+            self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                self.current_file.clone(),
+                target.loc,
+                tsox_core::diagnostics::messages_generated::
+                    THE_OPERAND_OF_A_DELETE_OPERATOR_MUST_BE_A_PROPERTY_REFERENCE,
+                vec![],
+            ));
+            return;
+        }
+        {
+            {
                 let (obj_expr, name, _name_loc) = match &target.data {
                     tsox_frontend::ast::NodeData::PropertyAccessExpression(d) => {
                         (&d.expression, d.name.text().to_string(), d.name.loc)
@@ -175,36 +173,50 @@ impl Checker {
                             .find(|p| p.name == name)
                             .map(|p| Arc::clone(p))
                     });
+                    let eopt = self
+                        .compiler_options
+                        .exact_optional_property_types
+                        .is_true();
+                    // Go checkDeleteExpressionMustBeOptional：any/unknown/never 跳过；
+                    // eOPT 只认 Optional 标志，否则按类型含 undefined 判定
                     let deletable = prop.as_ref().is_some_and(|p| {
+                        let t = self.get_type_of_symbol(p);
+                        if t.flags.intersects(TypeFlags::Any | TypeFlags::Unknown | TypeFlags::Never)
+                        {
+                            return true;
+                        }
                         if p.flags.contains(SymbolFlags::Optional) {
                             return true;
                         }
-                        let t = self.get_type_of_symbol(p);
-                        t.flags.intersects(
-                            TypeFlags::Undefined
-                                | TypeFlags::Any
-                                | TypeFlags::Unknown
-                                | TypeFlags::Never,
-                        ) || match &t.data {
-                            crate::checker::TypeData::Union(u) => {
-                                u.union_or_intersection.types.iter().any(|m| {
-                                    m.flags.intersects(
-                                        TypeFlags::Undefined
-                                            | TypeFlags::Any
-                                            | TypeFlags::Unknown
-                                            | TypeFlags::Never,
-                                    )
-                                })
-                            }
-                            _ => false,
+                        if eopt {
+                            return false;
                         }
+                        t.flags.intersects(TypeFlags::Undefined)
+                            || match &t.data {
+                                crate::checker::TypeData::Union(u) => u
+                                    .union_or_intersection
+                                    .types
+                                    .iter()
+                                    .any(|m| {
+                                        m.flags.intersects(
+                                            TypeFlags::Undefined | TypeFlags::Never,
+                                        )
+                                    }),
+                                _ => false,
+                            }
                     }) || obj_type.as_structured().is_some_and(|s| {
                         s.index_infos.iter().any(|info| {
                             info.key_type
                                 .as_ref()
                                 .is_some_and(|k| k.flags.contains(TypeFlags::String))
                         })
-                    });
+                    })
+                        // 参数化映射型（{[P in K]: ...}）等价索引签名（同
+                        // has_property_of_type 的映射型分支）
+                        || matches!(&obj_type.data, crate::checker::TypeData::Mapped(m) if m.type_parameter.is_some())
+                        || self
+                            .get_applicable_index_info(&obj_type, &self.string_type())
+                            .is_some();
                     if !deletable {
                         self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
                             self.current_file.clone(),
@@ -216,7 +228,6 @@ impl Checker {
                     }
                 }
             }
-            _ => {}
         }
     }
 

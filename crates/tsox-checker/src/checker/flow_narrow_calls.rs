@@ -266,18 +266,100 @@ impl Checker {
     }
 
     pub(crate) fn narrow_by_truthiness(&self, type_: &Arc<Type>, kind: NarrowKind) -> Arc<Type> {
-        match kind {
-            NarrowKind::TrueBranch => {
-                let falsy_flags = TypeFlags::Undefined
-                    | TypeFlags::Null
-                    | TypeFlags::Void
-                    | TypeFlags::BooleanLiteral
-                    | TypeFlags::StringLiteral
-                    | TypeFlags::NumberLiteral;
-                self.remove_falsy_from_union(type_, falsy_flags)
-            }
-            NarrowKind::FalseBranch => self.filter_to_falsy(type_),
+        let constituents = self.constituent_types(type_);
+        let kept: Vec<Arc<Type>> = constituents
+            .into_iter()
+            .filter(|t| match kind {
+                NarrowKind::TrueBranch => self.has_truthy_fact(t),
+                NarrowKind::FalseBranch => self.has_falsy_fact(t),
+            })
+            .collect();
+        if kept.is_empty() {
+            return self.never_type();
         }
+        if kept.len() == 1 {
+            return kept.into_iter().next().expect("exactly one");
+        }
+        self.flow_union_of(&kept)
+    }
+
+    // Go getTypeFactsWorker 的 Truthy 位：字面量按值判定，非字面
+    // number/string/bigint/boolean/enum 与 symbol/object/any 均持有
+    pub(crate) fn has_truthy_fact(&self, t: &Arc<Type>) -> bool {
+        let flags = t.flags;
+        if flags.contains(TypeFlags::Never)
+            || flags.intersects(TypeFlags::Undefined | TypeFlags::Null | TypeFlags::Void)
+        {
+            return false;
+        }
+        if flags.contains(TypeFlags::BooleanLiteral) {
+            return matches!(&t.data, TypeData::Literal(lit)
+                if matches!(lit.value, LiteralValue::Boolean(true)));
+        }
+        if flags.contains(TypeFlags::StringLiteral) {
+            return matches!(&t.data, TypeData::Literal(lit)
+                if matches!(&lit.value, LiteralValue::String(s) if !s.is_empty()));
+        }
+        if flags.contains(TypeFlags::NumberLiteral) {
+            return matches!(&t.data, TypeData::Literal(lit)
+                if matches!(&lit.value, LiteralValue::Number(n) if n.0 != 0.0));
+        }
+        if flags.contains(TypeFlags::BigIntLiteral) {
+            return matches!(&t.data, TypeData::Literal(lit)
+                if matches!(&lit.value, LiteralValue::BigInt(b) if !b.is_zero()));
+        }
+        true
+    }
+
+    // Go getTypeFactsWorker 的 Falsy 位：非字面 number/string/bigint/boolean/enum
+    // 双持有（两分支都保留）；symbol/object/nonPrimitive 仅非 strict 持有；
+    // any/unknown/类型参数等 instantiable 走 UnknownFacts（全持有）
+    pub(crate) fn has_falsy_fact(&self, t: &Arc<Type>) -> bool {
+        let flags = t.flags;
+        if flags.contains(TypeFlags::Never) {
+            return false;
+        }
+        if flags.intersects(TypeFlags::Undefined | TypeFlags::Null | TypeFlags::Void) {
+            return true;
+        }
+        if flags.contains(TypeFlags::BooleanLiteral) {
+            return matches!(&t.data, TypeData::Literal(lit)
+                if matches!(lit.value, LiteralValue::Boolean(false)));
+        }
+        if flags.contains(TypeFlags::StringLiteral) {
+            return matches!(&t.data, TypeData::Literal(lit)
+                if matches!(&lit.value, LiteralValue::String(s) if s.is_empty()));
+        }
+        if flags.contains(TypeFlags::NumberLiteral) {
+            return matches!(&t.data, TypeData::Literal(lit)
+                if matches!(&lit.value, LiteralValue::Number(n) if n.0 == 0.0));
+        }
+        if flags.contains(TypeFlags::BigIntLiteral) {
+            return matches!(&t.data, TypeData::Literal(lit)
+                if matches!(&lit.value, LiteralValue::BigInt(b) if b.is_zero()));
+        }
+        if flags.intersects(
+            TypeFlags::Number
+                | TypeFlags::String
+                | TypeFlags::StringMapping
+                | TypeFlags::TemplateLiteral
+                | TypeFlags::BigInt
+                | TypeFlags::Boolean
+                | TypeFlags::Enum
+                | TypeFlags::EnumLiteral,
+        ) {
+            return true;
+        }
+        if flags.intersects(
+            TypeFlags::ESSymbol
+                | TypeFlags::UniqueESSymbol
+                | TypeFlags::Object
+                | TypeFlags::NonPrimitive
+                | TypeFlags::Intersection,
+        ) {
+            return !self.strict_null_checks;
+        }
+        true
     }
 
     pub(crate) fn narrow_by_optionality(
@@ -311,7 +393,7 @@ impl Checker {
 }
 
 /// 谓词型中的多态 this 按接收者当前型替换（Go 调用签名实例化后的形态）
-fn substitute_this_type(
+pub(crate) fn substitute_this_type(
     checker: &mut Checker,
     t: &Arc<Type>,
     replacement: &Arc<Type>,

@@ -223,6 +223,14 @@ impl Binder {
             return true;
         }
 
+        // Go declareSymbol：Method excludes 不含 Method 位，同名方法过载
+        //（含 MethodSignature）合并进同一符号的 declarations
+        if existing_flags.contains(SymbolFlags::Method)
+            && new_flags.contains(SymbolFlags::Method)
+        {
+            return true;
+        }
+
         if (existing_flags.contains(SymbolFlags::RegularEnum)
             || existing_flags.contains(SymbolFlags::ConstEnum))
             && (new_flags.contains(SymbolFlags::RegularEnum)

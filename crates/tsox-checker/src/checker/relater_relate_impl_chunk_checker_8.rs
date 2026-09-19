@@ -148,6 +148,7 @@ impl Checker {
         }
 
         let mut missing_props: Vec<String> = Vec::new();
+        let mut missing_prop_syms: Vec<Option<Arc<tsox_frontend::ast::Symbol>>> = Vec::new();
 
         // Go 元组的表面成员含 Array<any> 的 length/push 等（getPropertiesOfType
         // 对元组并入数组接口成员）；裸元组（members 空）与裸数组同样回退
@@ -173,6 +174,7 @@ impl Checker {
                             continue;
                         }
                         missing_props.push(target_prop.name.clone());
+                        missing_prop_syms.push(Some(Arc::clone(target_prop)));
                         continue;
                     }
                 }
@@ -218,9 +220,11 @@ impl Checker {
                             );
                         } else {
                             let private_side = if src_mod.intersects(ModifierFlags::Private) {
-                                self.type_to_string(source)
+                                let norm = self.single_base_for_non_augmenting_subtype(source);
+                                self.type_to_string(&norm)
                             } else {
-                                self.type_to_string(target)
+                                let norm = self.single_base_for_non_augmenting_subtype(target);
+                                self.type_to_string(&norm)
                             };
                             let public_side = if src_mod.intersects(ModifierFlags::Private) {
                                 self.type_to_string(target)
@@ -281,10 +285,23 @@ impl Checker {
             let source_str = self.type_to_string(source);
             let target_str = self.type_to_string(target);
             if missing_props.len() == 1 {
-                self.relater_report_error(
+                let display =
+                    crate::checker::property_name_for_display(&missing_props[0]);
+                self.relater_report_error_with_related(
                     tsox_core::diagnostics::messages_generated::
                         PROPERTY_0_IS_MISSING_IN_TYPE_1_BUT_REQUIRED_IN_TYPE_2,
-                    vec![missing_props[0].clone(), source_str, target_str],
+                    vec![display.clone(), source_str, target_str],
+                    missing_prop_syms[0].as_ref().and_then(|sym| {
+                        sym.declarations.first().map(|d| {
+                            crate::checker::relater_relation::ChainRelated {
+                                file: self.get_source_file_of_node(d),
+                                loc: d.loc,
+                                message: tsox_core::diagnostics::messages_generated::
+                                    X_0_IS_DECLARED_HERE,
+                                args: vec![display],
+                            }
+                        })
+                    }),
                 );
             } else if missing_props.len() <= 5 {
                 self.relater_report_error(

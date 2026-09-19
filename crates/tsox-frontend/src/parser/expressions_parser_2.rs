@@ -68,10 +68,23 @@ impl Parser {
 
     pub(crate) fn is_parenthesized_arrow_function(&self) -> bool {
         let mut scanner = self.scanner.clone();
+        let second = scanner.scan();
+        // Go nextIsParenthesizedArrowFunctionExpression：`(xxx` 的 xxx 既非
+        // 标识符（含 await 在 [Await] 上下文）也非 this/模式/修饰符时不是箭头
+        if second != SyntaxKind::CloseParenToken
+            && second != SyntaxKind::OpenBracketToken
+            && second != SyntaxKind::OpenBraceToken
+            && second != SyntaxKind::DotDotDotToken
+            && second != SyntaxKind::ThisKeyword
+            && !crate::ast::node_data_generated::is_modifier_kind(second)
+            && !self.token_is_identifier_in_context(second)
+        {
+            return false;
+        }
         let mut depth = 1usize;
         let mut scanned_tokens = 0usize;
+        let mut token = second;
         loop {
-            let token = scanner.scan();
             scanned_tokens += 1;
             match token {
                 SyntaxKind::EndOfFile => return false,
@@ -100,7 +113,21 @@ impl Parser {
                 }
                 _ => {}
             }
+            token = scanner.scan();
         }
+    }
+
+    pub(crate) fn token_is_identifier_in_context(&self, token: SyntaxKind) -> bool {
+        if token == SyntaxKind::YieldKeyword && self.yield_context {
+            return false;
+        }
+        if token == SyntaxKind::AwaitKeyword && self.await_context {
+            return false;
+        }
+        if crate::parser::binary_precedence::is_reserved_word_kind(token) {
+            return false;
+        }
+        token == SyntaxKind::Identifier || crate::parser::binary_precedence::is_keyword(token)
     }
 
     pub(crate) fn scanner_reaches_arrow_before_line_end(scanner: &mut Scanner) -> bool {
@@ -200,13 +227,16 @@ impl Parser {
         let equals_greater_than_token = self.create_token_node();
         self.expect(SyntaxKind::EqualsGreaterThanToken);
         let saved_await = self.await_context;
+        let saved_yield = self.yield_context;
         self.await_context = true;
+        self.yield_context = false;
         let body = if self.token == SyntaxKind::OpenBraceToken {
             self.parse_block_ex(true)
         } else {
             self.parse_assignment_expression()
         };
         self.await_context = saved_await;
+        self.yield_context = saved_yield;
         let end = body.end();
         Arc::new(Node::with_loc(
             SyntaxKind::ArrowFunction,

@@ -18,11 +18,13 @@ impl Checker {
             | SyntaxKind::FalseKeyword
             | SyntaxKind::NullKeyword
             | SyntaxKind::ThisKeyword
-            | SyntaxKind::SuperKeyword
             | SyntaxKind::RegularExpressionLiteral
             | SyntaxKind::NoSubstitutionTemplateLiteral => {}
             SyntaxKind::MetaProperty => {
                 let _ = self.get_type_of_node(node);
+            }
+            SyntaxKind::SuperKeyword => {
+                self.check_super_expression(node);
             }
             SyntaxKind::BinaryExpression => {
                 self.check_binary_expression(node);
@@ -66,12 +68,28 @@ impl Checker {
                     self.enclosing_class_stack.push(Arc::clone(node));
 
                     self.push_scope(node);
+                    self.check_node_decorators(node);
 
                     let this_type = self.build_class_instance_type_with_base(node);
                     self.this_type_stack.push(this_type);
+                    // 类表达式 extends 基类是值位置：走完整表达式检查（tsc checkClassExpression）
+                    if let Some(heritage) = &data.heritage_clauses {
+                        for clause in heritage.iter() {
+                            if let tsox_frontend::ast::NodeData::HeritageClause(hc) = &clause.data
+                                && hc.token == SyntaxKind::ExtendsKeyword
+                            {
+                                for type_ref in hc.types.iter() {
+                                    if let tsox_frontend::ast::NodeData::ExpressionWithTypeArguments(ewa) = &type_ref.data {
+                                        self.check_expression(&ewa.expression);
+                                    }
+                                }
+                            }
+                        }
+                    }
                     for member in data.members.iter() {
                         self.check_class_member(member);
                     }
+                    self.check_members_for_override_modifier(node);
                     self.this_type_stack.pop();
                     self.pop_scope();
                     self.enclosing_class_stack.pop();
@@ -109,6 +127,9 @@ impl Checker {
                         self.report_possibly_null_or_undefined(&data.expression, &obj_type, false);
                     }
                 }
+                // Go checkElementAccessExpression：求取表达式类型以触发
+                // 索引键类型检查（TS2538）
+                self.get_type_of_node(node);
             }
             SyntaxKind::ConditionalExpression => {
                 if let tsox_frontend::ast::NodeData::ConditionalExpression(data) = &node.data {
@@ -160,6 +181,63 @@ impl Checker {
                     }
                     if let Some(expr) = &data.expression {
                         self.check_expression(expr);
+                    }
+                    self.check_yield_expression_assignability(node);
+                    // Go getNextTypeOfYieldExpression：无返回注解的生成器里
+                    // yield 结果为 any 且表达式未被使用时报 TS7057（noImplicitAny）
+                    if self.compiler_options.no_implicit_any.is_true()
+                        && self.yield_container_of(node).is_some_and(|c| {
+                            c.is_generator && c.return_type_node.is_none()
+                        })
+                    {
+                        // Go expressionResultIsUnused：表达式语句/void/for 头位
+                        // 之外即「被使用」，被使用且无上下文型才报
+                        let mut p = node.parent();
+                        let mut unused = false;
+                        while let Some(parent) = p {
+                            match parent.kind {
+                                SyntaxKind::ExpressionStatement
+                                | SyntaxKind::VoidExpression => {
+                                    unused = true;
+                                    break;
+                                }
+                                SyntaxKind::ParenthesizedExpression => p = parent.parent(),
+                                _ => break,
+                            }
+                        }
+                        // Go：有上下文型（含计算属性名位的 string|number|symbol
+                        // 约束）时不报
+                        let in_computed_name = {
+                            let mut cur = node.parent();
+                            let mut hit = false;
+                            while let Some(a) = cur {
+                                if matches!(a.kind, SyntaxKind::ComputedPropertyName | SyntaxKind::Decorator) {
+                                    hit = true;
+                                    break;
+                                }
+                                if matches!(
+                                    a.kind,
+                                    SyntaxKind::ObjectLiteralExpression | SyntaxKind::ClassDeclaration | SyntaxKind::ClassExpression
+                                ) {
+                                    break;
+                                }
+                                cur = a.parent();
+                            }
+                            hit
+                        };
+                        let has_contextual = in_computed_name
+                            || self
+                                .get_contextual_type(node, crate::checker::types::ContextFlags::None)
+                                .is_some_and(|t| !t.flags.contains(TypeFlags::Any));
+                        if !unused && !has_contextual {
+                            self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                                self.current_file.clone(),
+                                node.loc,
+                                tsox_core::diagnostics::messages_generated::
+                                    X_YIELD_EXPRESSION_IMPLICITLY_RESULTS_IN_AN_ANY_TYPE_BECAUSE_ITS_CONTAINING_GENERATOR_LACKS_A_RETURN_TYPE_ANNOTATION,
+                                vec![],
+                            ));
+                        }
                     }
                 }
             }
@@ -298,7 +376,23 @@ impl Checker {
     /// 在非模块文件报「文件无 import/export，考虑加空 export」（TS1375）；
     /// 模块文件按 module/target 组合报 TS1378（es2022+ 模块且 es2017+ 目标
     /// 才允许）
+    /// Go checkGrammarAwaitOrAwaitUsing（await 表达式形态）：class static block
+    /// 无条件禁用（先于 AwaitContext 检查）；非 await 上下文再走顶层/模块门槛
     pub(crate) fn check_await_expression_grammar(&mut self, node: &Arc<Node>) {
+        let container = crate::checker::utilities_get_assignment_target::
+            get_containing_function_or_class_static_block(node);
+        if container.as_ref().is_some_and(|c| {
+            c.kind == SyntaxKind::ClassStaticBlockDeclaration
+        }) {
+            self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                self.current_file.clone(),
+                node.loc,
+                tsox_core::diagnostics::messages_generated::
+                    X_AWAIT_EXPRESSION_CANNOT_BE_USED_INSIDE_A_CLASS_STATIC_BLOCK,
+                vec![],
+            ));
+            return;
+        }
         if node.flags.contains(NodeFlags::AwaitContext) {
             return;
         }

@@ -66,29 +66,25 @@ impl Checker {
     }
 
     pub(crate) fn declared_type_parameter_types(&mut self, symbol: &Arc<Symbol>) -> Vec<Arc<Type>> {
-        let decl = symbol.declarations.iter().find(|d| {
-            matches!(
-                d.data,
-                NodeData::InterfaceDeclaration(_) | NodeData::ClassDeclaration(_)
-            )
-        });
-        let Some(decl) = decl else {
-            return Vec::new();
-        };
-        let tps = match &decl.data {
-            NodeData::InterfaceDeclaration(d) => d.type_parameters.as_ref(),
-            NodeData::ClassDeclaration(d) => d.type_parameters.as_ref(),
-            _ => None,
-        };
-        let Some(tps) = tps else {
-            return Vec::new();
-        };
+        // 全部声明的类型参数（interface 增强文件的同名 T 是独立符号，须一并
+        // 纳入代入表，否则增强成员的类型参数悬空）
         let tp_syms: Vec<Arc<Symbol>> = {
             let sym_map = self.program.symbol_map();
-            tps.iter()
+            symbol
+                .declarations
+                .iter()
+                .filter_map(|decl| match &decl.data {
+                    NodeData::InterfaceDeclaration(d) => d.type_parameters.as_ref(),
+                    NodeData::ClassDeclaration(d) => d.type_parameters.as_ref(),
+                    _ => None,
+                })
+                .flat_map(|tps| tps.iter())
                 .filter_map(|tp| sym_map.symbol_of(tp).map(Arc::clone))
                 .collect()
         };
+        if tp_syms.is_empty() {
+            return Vec::new();
+        }
 
         self.push_ts2304_suppression();
         let types = tp_syms

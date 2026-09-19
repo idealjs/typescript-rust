@@ -153,6 +153,10 @@ impl Parser {
     ) -> Arc<Node> {
         self.next_token();
         let name = self.parse_property_name();
+        let saved_yield = self.yield_context;
+        let saved_await = self.await_context;
+        self.yield_context = false;
+        self.await_context = false;
         let type_parameters = self.parse_optional_type_parameters();
         let parameters = self.parse_parameter_list();
         let type_node = self.parse_optional_return_type();
@@ -162,6 +166,8 @@ impl Parser {
             self.parse_semicolon();
             None
         };
+        self.yield_context = saved_yield;
+        self.await_context = saved_await;
 
         let end = body
             .as_ref()

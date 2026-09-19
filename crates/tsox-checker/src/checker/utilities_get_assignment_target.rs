@@ -65,8 +65,27 @@ pub(crate) fn get_assignment_target(node: &Arc<Node>) -> Option<Arc<Node>> {
                 let on_path = Arc::as_ptr(&for_stmt.initializer) == Arc::as_ptr(&current);
                 return if on_path { Some(parent) } else { None };
             }
-            tsox_frontend::ast::NodeData::ParenthesizedExpression(_) => {
+            tsox_frontend::ast::NodeData::ParenthesizedExpression(_)
+            | tsox_frontend::ast::NodeData::ArrayLiteralExpression(_)
+            | tsox_frontend::ast::NodeData::SpreadElement(_)
+            | tsox_frontend::ast::NodeData::NonNullExpression(_) => {
                 current = parent;
+            }
+            tsox_frontend::ast::NodeData::SpreadAssignment(_) => {
+                current = parent.parent()?;
+            }
+            tsox_frontend::ast::NodeData::ShorthandPropertyAssignment(sa) => {
+                if !std::ptr::eq(sa.name.as_ref() as *const Node, current.as_ref() as *const Node)
+                {
+                    return None;
+                }
+                current = parent.parent()?;
+            }
+            tsox_frontend::ast::NodeData::PropertyAssignment(pa) => {
+                if std::ptr::eq(pa.name.as_ref() as *const Node, current.as_ref() as *const Node) {
+                    return None;
+                }
+                current = parent.parent()?;
             }
             _ => return None,
         }

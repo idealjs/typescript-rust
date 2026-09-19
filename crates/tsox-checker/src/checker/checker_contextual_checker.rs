@@ -119,7 +119,10 @@ impl Checker {
                     self.current_file.clone(),
                     loc,
                     OBJECT_LITERAL_MAY_ONLY_SPECIFY_KNOWN_PROPERTIES_AND_0_DOES_NOT_EXIST_IN_TYPE_1,
-                    vec![excess, tgt_str],
+                    vec![
+                        crate::checker::property_name_for_display(&excess),
+                        tgt_str,
+                    ],
                 ));
                 return;
             }

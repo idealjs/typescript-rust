@@ -143,11 +143,7 @@ impl Scanner {
         }
         if !terminated {
             self.token_flags |= TOKEN_FLAGS_UNTERMINATED;
-            self.report_error(
-                DiagnosticKind::UnterminatedStringLiteral,
-                self.token_pos,
-                self.pos - self.token_pos,
-            );
+            self.report_error(DiagnosticKind::UnterminatedStringLiteral, self.pos, 0);
         }
         self.token_end = self.pos;
         self.token = SyntaxKind::StringLiteral;
@@ -157,6 +153,7 @@ impl Scanner {
     pub(crate) fn scan_escape_sequence(&mut self) {
         self.pos += 1;
         if self.pos >= self.end {
+            self.report_error(DiagnosticKind::UnexpectedEndOfText, self.pos, 0);
             return;
         }
         let c = self.text.as_bytes()[self.pos] as char;
@@ -211,6 +208,7 @@ impl Scanner {
                     self.token_flags |= TOKEN_FLAGS_HEX_ESCAPE;
                 } else {
                     self.token_flags |= TOKEN_FLAGS_CONTAINS_INVALID_ESCAPE;
+                    self.report_error(DiagnosticKind::HexadecimalDigitExpected, self.pos, 0);
                 }
             }
             'u' => {
@@ -223,15 +221,43 @@ impl Scanner {
                         self.pos += 1;
                     }
                     let has_hex = self.pos > hex_start;
-                    let closed =
-                        self.pos < self.end && self.text.as_bytes()[self.pos] as char == '}';
-                    if closed {
-                        self.pos += 1;
-                    }
-                    if has_hex && closed {
-                        self.token_flags |= TOKEN_FLAGS_EXTENDED_UNICODE_ESCAPE;
-                    } else {
+                    if !has_hex {
                         self.token_flags |= TOKEN_FLAGS_CONTAINS_INVALID_ESCAPE;
+                        self.report_error(DiagnosticKind::HexadecimalDigitExpected, self.pos, 0);
+                    } else {
+                        let digits = &self.text[hex_start..self.pos];
+                        let value = u64::from_str_radix(digits, 16).unwrap_or(u64::MAX);
+                        let mut invalid = false;
+                        if value > 0x10FFFF {
+                            self.report_error(
+                                DiagnosticKind::UnicodeEscapeOutOfRange,
+                                hex_start,
+                                self.pos - hex_start,
+                            );
+                            invalid = true;
+                        }
+                        if self.pos >= self.end {
+                            self.report_error(
+                                DiagnosticKind::UnexpectedEndOfText,
+                                self.pos,
+                                0,
+                            );
+                            invalid = true;
+                        } else if self.text.as_bytes()[self.pos] as char == '}' {
+                            self.pos += 1;
+                        } else {
+                            self.report_error(
+                                DiagnosticKind::UnterminatedUnicodeEscape,
+                                self.pos,
+                                0,
+                            );
+                            invalid = true;
+                        }
+                        if invalid {
+                            self.token_flags |= TOKEN_FLAGS_CONTAINS_INVALID_ESCAPE;
+                        } else {
+                            self.token_flags |= TOKEN_FLAGS_EXTENDED_UNICODE_ESCAPE;
+                        }
                     }
                 } else {
                     let mut digit_count = 0;
@@ -249,6 +275,7 @@ impl Scanner {
                         self.token_flags |= TOKEN_FLAGS_UNICODE_ESCAPE;
                     } else {
                         self.token_flags |= TOKEN_FLAGS_CONTAINS_INVALID_ESCAPE;
+                        self.report_error(DiagnosticKind::HexadecimalDigitExpected, self.pos, 0);
                     }
                 }
             }

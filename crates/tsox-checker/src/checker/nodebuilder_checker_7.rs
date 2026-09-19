@@ -306,6 +306,23 @@ impl Checker {
             return self.reference_to_string(t, flags);
         }
 
+        // Go typeToString：实例化别名的对象结果（Partial<Foo> 展开体）按别名
+        // 呈现，先于成员展开
+        if let Some(alias) = &t.alias
+            && let Some(sym) = &alias.symbol
+            && !matches!(&t.data, TypeData::Mapped(_) | TypeData::Conditional(_))
+        {
+            let args: Vec<String> = alias
+                .type_arguments
+                .iter()
+                .map(|a| self.type_to_string_ex(a, flags))
+                .collect();
+            if args.is_empty() {
+                return sym.name.clone();
+            }
+            return format!("{}<{}>", sym.name, args.join(", "));
+        }
+
         if let Some(structured) = t.as_structured() {
             // Go createTypeNodeFromObjectType：仅当无属性/索引签名且恰好一条调用
             // （或构造）签名时才输出裸函数形态，否则保留完整对象字面量

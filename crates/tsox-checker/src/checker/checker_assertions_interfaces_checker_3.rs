@@ -61,14 +61,17 @@ impl Checker {
             if Arc::ptr_eq(s, eq_decl) {
                 return false;
             }
-            let value_declaring = matches!(
-                s.kind,
+            let value_declaring = match s.kind {
+                SyntaxKind::ModuleDeclaration => {
+                    tsox_frontend::ast::utilities::get_module_instance_state(s)
+                        != tsox_frontend::ast::utilities::ModuleInstanceState::NonInstantiated
+                }
                 SyntaxKind::ClassDeclaration
-                    | SyntaxKind::FunctionDeclaration
-                    | SyntaxKind::EnumDeclaration
-                    | SyntaxKind::VariableStatement
-                    | SyntaxKind::ModuleDeclaration
-            );
+                | SyntaxKind::FunctionDeclaration
+                | SyntaxKind::EnumDeclaration
+                | SyntaxKind::VariableStatement => true,
+                _ => false,
+            };
             value_declaring && s.has_syntactic_modifier(ModifierFlags::Export)
         });
         if has_other_value_export {
@@ -81,8 +84,54 @@ impl Checker {
                 Vec::new(),
             );
             self.diagnostics.add(diagnostic);
+            return;
+        }
+
+        // Go hasShadowedNamespace：export= 指向含类型/命名空间成员的命名空间，
+        // 且模块自身也导出类型/命名空间成员 → 同样报 TS2309
+        let eq_symbol = self
+            .program
+            .symbol_map()
+            .symbol_of(eq_decl)
+            .cloned();
+        let target = eq_symbol.map(|s| self.resolve_export_equals_target(&s));
+        let target_has_type = target.as_ref().is_some_and(|t| {
+            t.flags.intersects(SymbolFlags::NAMESPACE)
+                && t
+                    .exports
+                    .iter()
+                    .chain(t.members.iter())
+                    .any(|(_, m)| m.flags.intersects(SymbolFlags::TYPE | SymbolFlags::NAMESPACE))
+        });
+        if !target_has_type {
+            return;
+        }
+        let module_has_type = statements.iter().any(|s| {
+            if Arc::ptr_eq(s, eq_decl) || !s.has_syntactic_modifier(ModifierFlags::Export) {
+                return false;
+            }
+            matches!(
+                s.kind,
+                SyntaxKind::TypeAliasDeclaration
+                    | SyntaxKind::InterfaceDeclaration
+                    | SyntaxKind::EnumDeclaration
+                    | SyntaxKind::ClassDeclaration
+                    | SyntaxKind::ModuleDeclaration
+            )
+        });
+        if module_has_type {
+            let file = self.current_file.clone();
+            let diagnostic = tsox_frontend::ast::Diagnostic::new(
+                file,
+                eq_decl.loc,
+                tsox_core::diagnostics::messages_generated::
+                    AN_EXPORT_ASSIGNMENT_CANNOT_BE_USED_IN_A_MODULE_WITH_OTHER_EXPORTED_ELEMENTS,
+                Vec::new(),
+            );
+            self.diagnostics.add(diagnostic);
         }
     }
+
 
     pub(crate) fn check_reserved_type_name(
         &mut self,
@@ -143,20 +192,25 @@ impl Checker {
     }
 
     pub(crate) fn check_computed_property_name(&mut self, name: &Arc<Node>) {
+        self.check_computed_property_name_type(name);
+    }
+
+    // Go checkComputedPropertyName：返回表达式类型（isLateBindableName 复用）
+    pub(crate) fn check_computed_property_name_type(
+        &mut self,
+        name: &Arc<Node>,
+    ) -> std::sync::Arc<crate::checker::types::Type> {
         if name.kind != SyntaxKind::ComputedPropertyName {
-            return;
+            return self.error_type();
         }
-        if !self
+        let first_visit = self
             .computed_property_name_checked
-            .insert(Arc::as_ptr(name))
-        {
-            return;
-        }
+            .insert(Arc::as_ptr(name));
         let expr = match &name.data {
             tsox_frontend::ast::NodeData::ComputedPropertyName(data) => {
                 Arc::clone(&data.expression)
             }
-            _ => return,
+            _ => return self.error_type(),
         };
 
         let invalid_in_form = matches!(&expr.data, tsox_frontend::ast::NodeData::BinaryExpression(b)
@@ -176,7 +230,7 @@ impl Checker {
                 })
             });
         if invalid_in_form {
-            return;
+            return self.error_type();
         }
 
         self.check_expression(&expr);
@@ -196,7 +250,7 @@ impl Checker {
                 ]);
                 !self.is_type_assignable_to(&t, &target)
             });
-        if bad {
+        if bad && first_visit {
             let file = self.current_file.clone();
             self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
                 file,
@@ -205,6 +259,66 @@ impl Checker {
                     A_COMPUTED_PROPERTY_NAME_MUST_BE_OF_TYPE_STRING_NUMBER_SYMBOL_OR_ANY,
                 vec![],
             ));
+        }
+        t
+    }
+
+    // Go checkGrammarProperty/checkGrammarMethod 的动态名分支：
+    // 按成员容器选消息（class property/method-overload/ambient/interface）
+    pub(crate) fn check_member_dynamic_name_grammar(&mut self, member: &Arc<Node>) {
+        let Some(name) = Self::member_name_node(member) else {
+            return;
+        };
+        if name.kind != SyntaxKind::ComputedPropertyName {
+            return;
+        }
+        let Some(container) = member.parent() else {
+            return;
+        };
+        match container.kind {
+            SyntaxKind::ClassDeclaration | SyntaxKind::ClassExpression => match member.kind {
+                SyntaxKind::PropertyDeclaration | SyntaxKind::PropertySignature => {
+                    self.check_grammar_for_invalid_dynamic_name(
+                        &name,
+                        &tsox_core::diagnostics::messages_generated::
+                            A_COMPUTED_PROPERTY_NAME_IN_A_CLASS_PROPERTY_DECLARATION_MUST_HAVE_A_SIMPLE_LITERAL_TYPE_OR_A_UNIQUE_SYMBOL_TYPE,
+                    );
+                }
+                SyntaxKind::MethodDeclaration => {
+                    let ambient = member.flags.contains(
+                        tsox_frontend::ast::NodeFlags::Ambient,
+                    ) || self
+                        .current_file
+                        .as_ref()
+                        .is_some_and(|f| f.is_declaration_file);
+                    let has_body = matches!(
+                        &member.data,
+                        tsox_frontend::ast::NodeData::MethodDeclaration(m) if m.body.is_some()
+                    );
+                    if ambient {
+                        self.check_grammar_for_invalid_dynamic_name(
+                            &name,
+                            &tsox_core::diagnostics::messages_generated::
+                                A_COMPUTED_PROPERTY_NAME_IN_AN_AMBIENT_CONTEXT_MUST_REFER_TO_AN_EXPRESSION_WHOSE_TYPE_IS_A_LITERAL_TYPE_OR_A_UNIQUE_SYMBOL_TYPE,
+                        );
+                    } else if !has_body {
+                        self.check_grammar_for_invalid_dynamic_name(
+                            &name,
+                            &tsox_core::diagnostics::messages_generated::
+                                A_COMPUTED_PROPERTY_NAME_IN_A_METHOD_OVERLOAD_MUST_REFER_TO_AN_EXPRESSION_WHOSE_TYPE_IS_A_LITERAL_TYPE_OR_A_UNIQUE_SYMBOL_TYPE,
+                        );
+                    }
+                }
+                _ => {}
+            },
+            SyntaxKind::InterfaceDeclaration => {
+                self.check_grammar_for_invalid_dynamic_name(
+                    &name,
+                    &tsox_core::diagnostics::messages_generated::
+                        A_COMPUTED_PROPERTY_NAME_IN_AN_INTERFACE_MUST_REFER_TO_AN_EXPRESSION_WHOSE_TYPE_IS_A_LITERAL_TYPE_OR_A_UNIQUE_SYMBOL_TYPE,
+                );
+            }
+            _ => {}
         }
     }
 

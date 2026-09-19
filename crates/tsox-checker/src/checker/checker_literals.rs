@@ -249,6 +249,8 @@ impl Checker {
         None
     }
 
+
+
     fn target_has_property(&self, t: &Arc<Type>, name: &str) -> bool {
         if matches!(&t.data, TypeData::Mapped(m) if m.type_parameter.is_some()) {
             return true;
@@ -289,73 +291,5 @@ impl Checker {
             tsox_frontend::ast::NodeData::NumericLiteral(data) => data.text.parse::<f64>().ok(),
             _ => None,
         }
-    }
-
-    pub(crate) fn get_type_of_array_literal(&mut self, node: &Arc<Node>) -> Arc<Type> {
-        let elements = match &node.data {
-            tsox_frontend::ast::NodeData::ArrayLiteralExpression(data) => &data.elements,
-            _ => return self.get_any_type(),
-        };
-        if elements.is_empty() {
-            // Go：strictNullChecks 用 implicitNeverType；非严格用 undefinedWideningType
-            // （widening 标志使推断结果最终 widen 为 any，如 _.all([], ...) → T=any）
-            let elem = if self.strict_null_checks {
-                self.never_type()
-            } else {
-                self.nullish_widening_type(self.undefined_type())
-            };
-            return self.create_array_type(elem);
-        }
-
-        let mut element_types: Vec<Arc<Type>> = Vec::new();
-        for elem in elements.iter() {
-            if elem.kind == SyntaxKind::SpreadElement {
-                return self.create_array_type(self.get_any_type());
-            }
-            // Go checkArrayLiteral：元素参与 best common supertype 的 subtype reduction。
-            // fresh literal widen（[1] → number[]）；null/undefined 保持原始形态参与
-            // 缩减（null ⊑ 其他成员时被移除），不做先行 widen
-            let t = self.get_type_of_node(elem);
-            let widened = if crate::checker::is_object_literal_type(&t) {
-                self.widen_initializer_type(&t)
-            } else if t.flags.intersects(
-                TypeFlags::Null | TypeFlags::Undefined,
-            ) {
-                t
-            } else {
-                self.get_widened_type(&t)
-            };
-            element_types.push(widened);
-        }
-
-        // Go getUnionTypeWorker：subtype reduction 移除可赋给其他成员的类型
-        // （非严格下 null/undefined ⊑ 任何类型，先被移除）
-        let reduced = self.remove_subtype_redundant_members(element_types);
-        if reduced.is_empty() {
-            // 全部成员互删（如 [null, undefined]）：Go 空集返回 nullWideningType → any
-            return self.create_array_type(self.get_any_type());
-        }
-        if reduced.len() == 1 {
-            // 剩余成员是 null/undefined（widening）时终局 widen 为 any（[null] → any[]）
-            let only = &reduced[0];
-            if !self.strict_null_checks
-                && only
-                    .flags
-                    .intersects(TypeFlags::Null | TypeFlags::Undefined)
-            {
-                return self.create_array_type(self.get_any_type());
-            }
-            return self.create_array_type(Arc::clone(only));
-        }
-        let has_nullable = reduced
-            .iter()
-            .any(|t| t.flags.intersects(TypeFlags::Null | TypeFlags::Undefined));
-        let elem_union = self.get_union_type(reduced);
-        // 非严格下联合含剩余 null/undefined 时终局 widen 为 any
-        if !self.strict_null_checks && has_nullable {
-            let elem_any = self.get_any_type();
-            return self.create_array_type(elem_any);
-        }
-        self.create_array_type(elem_union)
     }
 }

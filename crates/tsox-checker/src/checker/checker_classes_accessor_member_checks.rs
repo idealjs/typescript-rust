@@ -10,6 +10,44 @@ impl Checker {
             self.check_computed_property_name(&name);
         }
 
+        // Go checkMethodDeclaration/checkConstructorDeclaration 尾段：合并符号上
+        // 检查重复实现/过载一致性/实现缺失（每符号一次）
+        // Go：checkFunctionOrConstructorSymbol 仅类成员（对象字面量方法走
+        // checkObjectLiteralMethod，无此检查）
+        let in_class = node
+            .parent()
+            .is_some_and(|p| matches!(p.kind, SyntaxKind::ClassDeclaration | SyntaxKind::ClassExpression));
+        // Go hasBindableName：动态名（非字面量、非 well-known 计算名）成员
+        // 跳过合并符号检查（不报 TS2391/TS2393 族）
+        let bindable_name = node.name().is_some_and(|n| {
+            if n.kind == SyntaxKind::ComputedPropertyName {
+                match &n.data {
+                    tsox_frontend::ast::NodeData::ComputedPropertyName(cd) => {
+                        crate::binder::symbols_binder_4::well_known_symbol_member_name(&cd.expression)
+                            .is_some()
+                            || matches!(
+                                cd.expression.kind,
+                                SyntaxKind::StringLiteral | SyntaxKind::NumericLiteral
+                            )
+                    }
+                    _ => false,
+                }
+            } else {
+                true
+            }
+        });
+        if in_class
+            && bindable_name
+            && matches!(
+            node.kind,
+            SyntaxKind::MethodDeclaration | SyntaxKind::Constructor | SyntaxKind::GetAccessor | SyntaxKind::SetAccessor
+        ) && let Some(symbol) = self
+            .get_symbol_of_declaration(node)
+            .filter(|_| !node.flags.contains(NodeFlags::JavaScriptFile))
+        {
+            self.check_function_or_constructor_symbol(&symbol);
+        }
+
         let (body, type_node, parameters): (
             Option<Arc<Node>>,
             Option<Arc<Node>>,
@@ -72,7 +110,19 @@ impl Checker {
                 node.kind,
                 SyntaxKind::MethodDeclaration | SyntaxKind::Constructor
             ) {
-                self.check_parameter_implicit_any(node, params, 0);
+                // 对象字面量位方法：参数上下文计数经成员名查上下文签名
+                //（Go checkFunctionLikeExpression 的 contextuallyTypedParameterCount）
+                let contextual_count = if node.kind == SyntaxKind::MethodDeclaration
+                    && node
+                        .parent()
+                        .is_some_and(|p| p.kind == SyntaxKind::ObjectLiteralExpression)
+                {
+                    self.get_contextual_signature(node)
+                        .map_or(0, |sig| sig.parameters.len())
+                } else {
+                    0
+                };
+                self.check_parameter_implicit_any(node, params, contextual_count);
             }
             for p in params.iter() {
                 if let tsox_frontend::ast::NodeData::ParameterDeclaration(pd) = &p.data

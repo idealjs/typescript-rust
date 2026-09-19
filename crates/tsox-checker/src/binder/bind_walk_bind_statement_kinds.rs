@@ -83,6 +83,26 @@ impl Binder {
                 self.bind_call_expression_flow(node);
             }
             SyntaxKind::BinaryExpression => {
+                // Go checkStrictModeBinaryExpression：赋值左侧 eval/arguments
+                // 无条件报 TS1100/1101（tsgo 行为，sloppy 同报）
+                if let NodeData::BinaryExpression(bin) = &node.data
+                    && is_assignment_operator(bin.operator_token.kind)
+                    && bin.left.kind == SyntaxKind::Identifier
+                    && matches!(bin.left.text(), "eval" | "arguments")
+                    && !crate::binder::bind_walk::Binder::is_in_for_in_or_of_head(&bin.left)
+                    && !self.strict_eval_diag_exists(
+                        bin.left.loc,
+                        bin.left.text().to_string(),
+                    )
+                {
+                    self.symbol_map.binder_diagnostics.push(Diagnostic::new(
+                        self.current_source_file.clone(),
+                        bin.left.loc,
+                        tsox_core::diagnostics::messages_generated::
+                            INVALID_USE_OF_0_IN_STRICT_MODE,
+                        vec![bin.left.text().to_string()],
+                    ));
+                }
                 match crate::binder::get_assignment_declaration_kind(node) {
                     crate::binder::bind_js_assignment_declarations::JsDeclarationKind::ModuleExports => {
                         self.bind_module_exports_assignment(node);
@@ -171,8 +191,71 @@ impl Binder {
                     }
                 }
             }
+            SyntaxKind::PostfixUnaryExpression => {
+                if let NodeData::PostfixUnaryExpression(post) = &node.data
+                    && !self.strict_eval_diag_exists(
+                        post.operand.loc,
+                        post.operand.text().to_string(),
+                    )
+                    && matches!(
+                        post.operator,
+                        SyntaxKind::PlusPlusToken | SyntaxKind::MinusMinusToken
+                    )
+                    && post.operand.kind == SyntaxKind::Identifier
+                    && matches!(post.operand.text(), "eval" | "arguments")
+                {
+                    self.symbol_map.binder_diagnostics.push(Diagnostic::new(
+                        self.current_source_file.clone(),
+                        post.operand.loc,
+                        tsox_core::diagnostics::messages_generated::
+                            INVALID_USE_OF_0_IN_STRICT_MODE,
+                        vec![post.operand.text().to_string()],
+                    ));
+                }
+            }
+            SyntaxKind::PrefixUnaryExpression => {
+                if let NodeData::PrefixUnaryExpression(pre) = &node.data
+                    && !self.strict_eval_diag_exists(
+                        pre.operand.loc,
+                        pre.operand.text().to_string(),
+                    )
+                    && matches!(pre.operator, SyntaxKind::PlusPlusToken | SyntaxKind::MinusMinusToken)
+                    && pre.operand.kind == SyntaxKind::Identifier
+                    && matches!(pre.operand.text(), "eval" | "arguments")
+                {
+                    self.symbol_map.binder_diagnostics.push(Diagnostic::new(
+                        self.current_source_file.clone(),
+                        pre.operand.loc,
+                        tsox_core::diagnostics::messages_generated::
+                            INVALID_USE_OF_0_IN_STRICT_MODE,
+                        vec![pre.operand.text().to_string()],
+                    ));
+                }
+            }
+            SyntaxKind::WithStatement => {
+                // Go checkStrictModeWithStatement：with 无条件报 TS1101
+                //（tsgo oracle 实证 sloppy 同报）；span 取首 token，
+                // 与 checker 的 TS2410（宽 span）保持参考基线排序
+                let loc = tsox_core::core::text::TextRange::new(node.loc.pos(), node.loc.pos() + 4);
+                self.symbol_map.binder_diagnostics.push(Diagnostic::new(
+                    self.current_source_file.clone(),
+                    loc,
+                    tsox_core::diagnostics::messages_generated::
+                        X_WITH_STATEMENTS_ARE_NOT_ALLOWED_IN_STRICT_MODE,
+                    vec![],
+                ));
+            }
             _ => {}
         }
         false
+    }
+}
+
+impl Binder {
+    fn strict_eval_diag_exists(&self, loc: tsox_core::core::text::TextRange, text: String) -> bool {
+        self.symbol_map
+            .binder_diagnostics
+            .iter()
+            .any(|d| d.code == 1100 && d.loc == loc && d.message_args.first() == Some(&text))
     }
 }

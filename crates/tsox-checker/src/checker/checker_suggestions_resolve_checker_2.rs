@@ -200,7 +200,20 @@ impl Checker {
                 .or_else(|| symbol.members.get(text))
                 .cloned()
                 .or_else(|| self.ambient_namespace_local(&symbol, text))
-                .or_else(|| self.object_literal_export_member(&symbol, text));
+                .or_else(|| self.object_literal_export_member(&symbol, text))
+                .or_else(|| {
+                    // 文件模块的星号导出链兜底（export * / export type * 的
+                    // 成员在 exports 表外）
+                    if symbol.flags.intersects(
+                        SymbolFlags::ValueModule | SymbolFlags::NamespaceModule,
+                    ) || symbol.declarations.iter().any(|d| {
+                        d.kind == SyntaxKind::SourceFile
+                    }) {
+                        self.resolve_module_member_symbol(&symbol, text, 8)
+                    } else {
+                        None
+                    }
+                });
 
             if next.is_none()
                 && let Some(ea_sym) = symbol.exports.get("export=")

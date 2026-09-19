@@ -160,21 +160,31 @@ impl Checker {
             if !missing.is_empty() {
                 let file = self.current_file.clone();
                 let name_loc = data.name.as_ref().map(|n| n.loc).unwrap_or(node.loc);
-                self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
-                    file,
-                    name_loc,
-                    tsox_core::diagnostics::messages_generated::
-                        NON_ABSTRACT_CLASS_0_IS_MISSING_IMPLEMENTATIONS_FOR_THE_FOLLOWING_MEMBERS_OF_1_COLON_2,
-                    vec![
-                        class_name.clone(),
-                        base_name.clone(),
-                        missing
-                            .iter()
-                            .map(|m| format!("'{m}'"))
-                            .collect::<Vec<_>>()
-                            .join(", "),
-                    ],
-                ));
+                if missing.len() == 1 {
+                    self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                        file,
+                        name_loc,
+                        tsox_core::diagnostics::messages_generated::
+                            NON_ABSTRACT_CLASS_0_DOES_NOT_IMPLEMENT_INHERITED_ABSTRACT_MEMBER_1_FROM_CLASS_2,
+                        vec![class_name.clone(), missing[0].clone(), base_name.clone()],
+                    ));
+                } else {
+                    self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                        file,
+                        name_loc,
+                        tsox_core::diagnostics::messages_generated::
+                            NON_ABSTRACT_CLASS_0_IS_MISSING_IMPLEMENTATIONS_FOR_THE_FOLLOWING_MEMBERS_OF_1_COLON_2,
+                        vec![
+                            class_name.clone(),
+                            base_name.clone(),
+                            missing
+                                .iter()
+                                .map(|m| format!("'{m}'"))
+                                .collect::<Vec<_>>()
+                                .join(", "),
+                        ],
+                    ));
+                }
             }
         }
 
@@ -242,8 +252,8 @@ impl Checker {
         name_node: &Arc<Node>,
         own_type: Option<Arc<Type>>,
         base_node: &Arc<Node>,
-        class_name: &str,
-        base_name: &str,
+        _class_name: &str,
+        _base_name: &str,
     ) {
         let Some(own_type) = own_type else { return };
         {
@@ -269,21 +279,11 @@ impl Checker {
                 return;
             };
             let base_type = self.get_type_from_type_node(&base_tn);
+            // TS2416 由 check_heritage_clause 的 Go 对齐实现（含错误链）发射，
+            // 此遗留路径不再重复报
             if !own_type.flags.contains(TypeFlags::Any)
                 && !self.is_type_assignable_to(&own_type, &base_type)
             {
-                let file = self.current_file.clone();
-                self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
-                    file,
-                    name_node.loc,
-                    tsox_core::diagnostics::messages_generated::
-                        PROPERTY_0_IN_TYPE_1_IS_NOT_ASSIGNABLE_TO_THE_SAME_PROPERTY_IN_BASE_TYPE_2,
-                    vec![
-                        prop_name,
-                        class_name.to_string(),
-                        base_name.to_string(),
-                    ],
-                ));
             }
         }
     }

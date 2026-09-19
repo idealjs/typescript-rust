@@ -50,17 +50,86 @@ pub fn format_diagnostic_compact(diag: &Diagnostic, locale: Option<&Locale>) -> 
 }
 
 pub fn format_diagnostic_pretty(diag: &Diagnostic, locale: Option<&Locale>) -> String {
+    let cat_color = match diag.category {
+        Category::Error => "91",
+        Category::Warning => "93",
+        _ => "96",
+    };
     let mut out = String::new();
     if let Some(file) = &diag.file {
         let (line, col) = line_and_character(&file.line_map, &file.text, diag.loc.pos());
-        out.push_str(&format!("{}:{}:{} - ", file.file_name, line + 1, col + 1));
+        out.push_str(&format!(
+            "\x1b[96m{}\x1b[0m:\x1b[93m{}\x1b[0m:\x1b[93m{}\x1b[0m - ",
+            file.file_name,
+            line + 1,
+            col + 1
+        ));
     }
-    out.push_str(&format!("{} TS{}: ", diag.category.name(), diag.code));
+    out.push_str(&format!(
+        "\x1b[{cat_color}m{}\x1b[0m\x1b[90m TS{}: \x1b[0m",
+        diag.category.name(),
+        diag.code
+    ));
     out.push_str(&message_text(diag, locale));
+    out.push('\n');
     if let Some(file) = &diag.file {
         out.push('\n');
-        out.push_str(&code_snippet(file, diag.loc.pos(), diag.loc.len()));
+        out.push_str(&pretty_code_frame(file, diag.loc.pos(), diag.loc.len(), cat_color, 0));
     }
+    for rel in &diag.related_information {
+        out.push('\n');
+        out.push_str("  ");
+        if let Some(file) = &rel.file {
+            let (line, col) = line_and_character(&file.line_map, &file.text, rel.loc.pos());
+            out.push_str(&format!(
+                "\x1b[96m{}\x1b[0m:\x1b[93m{}\x1b[0m:\x1b[93m{}\x1b[0m - ",
+                file.file_name,
+                line + 1,
+                col + 1
+            ));
+        }
+        out.push_str(&message_text(rel, locale));
+        out.push('\n');
+        if let Some(file) = &rel.file {
+            out.push_str(&pretty_code_frame(file, rel.loc.pos(), rel.loc.len(), "96", 4));
+        }
+    }
+    out.push('\n');
+    out
+}
+
+pub(crate) fn pretty_code_frame(
+    file: &SourceFile,
+    pos: usize,
+    len: usize,
+    squiggle_color: &str,
+    indent: usize,
+) -> String {
+    let text = &file.text;
+    let (line, col) = line_and_character(&file.line_map, text, pos);
+    let line_start = file.line_map.line_starts.get(line).copied().unwrap_or(0) as usize;
+    let line_end = text[line_start..]
+        .find('\n')
+        .map(|i| line_start + i)
+        .unwrap_or(text.len());
+    let line_no = (line + 1).to_string();
+    let gutter_pad = " ".repeat(line_no.len());
+    let squiggle_len = len.max(1);
+    let line_text = text[line_start..line_end]
+        .trim_end_matches('\r')
+        .replace('\t', " ");
+    let mut out = String::new();
+    out.push_str(&format!(
+        "{}\x1b[7m{line_no}\x1b[0m {}\n",
+        " ".repeat(indent),
+        line_text
+    ));
+    out.push_str(&format!(
+        "{}\x1b[7m{gutter_pad}\x1b[0m \x1b[{squiggle_color}m{}{}\x1b[0m\n",
+        " ".repeat(indent),
+        " ".repeat(col),
+        "~".repeat(squiggle_len)
+    ));
     out
 }
 

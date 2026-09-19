@@ -86,6 +86,7 @@ impl Parser {
                 );
             }
             ParsingContext::ObjectLiteralMembers => {
+                eprintln!("[1136] UNCONDITIONAL TRACE");
                 self.parse_error_at_current_token(
                     tsox_core::diagnostics::PROPERTY_ASSIGNMENT_EXPECTED,
                     &[],
@@ -221,7 +222,15 @@ impl Parser {
                     break;
                 }
 
-                self.expect(SyntaxKind::CommaToken);
+                // Go parseDelimitedList：枚举成员分隔符缺失用 TS1357 专用消息
+                if context == ParsingContext::EnumMembers {
+                    self.parse_error_at_current_token(
+                        tsox_core::diagnostics::AN_ENUM_MEMBER_NAME_MUST_BE_FOLLOWED_BY_A_OR,
+                        &[],
+                    );
+                } else {
+                    self.expect(SyntaxKind::CommaToken);
+                }
 
                 if element_start == self.token_pos() {
                     self.next_token();

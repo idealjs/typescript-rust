@@ -70,16 +70,56 @@ impl Binder {
                         }
                     }
                 }
+            } else if var_hoist_container.is_none()
+                && let Some(block_container) = &self.block_scope_container
+                && self
+                    .container
+                    .as_ref()
+                    .is_none_or(|c| c.id() != block_container.id())
+            {
+                let locals = self
+                    .symbol_map
+                    .locals
+                    .entry(block_container.id())
+                    .or_insert_with(SymbolTable::new);
+                locals.insert(name.to_string(), Arc::clone(symbol));
+            } else if is_function_like_locals_container(container.kind) {
+                // Go declareSymbolAndAddToSymbolTable 的函数类容器分支：
+                // 进容器节点 locals、parent 不挂。插进容器符号 members 会让
+                // 重载声明的同名类型参数相互覆盖（符号表是按名字索引的）
+                let locals = self
+                    .symbol_map
+                    .locals
+                    .entry(container.id())
+                    .or_insert_with(SymbolTable::new);
+                locals.insert(name.to_string(), Arc::clone(&symbol));
             } else if let Some(parent_sym) = &self.parent_symbol {
                 let parent_sym_mut = Arc::as_ptr(parent_sym) as *mut Symbol;
                 let symbol_mut = Arc::as_ptr(symbol) as *mut Symbol;
                 unsafe {
+                    // Go declareClassMember：类的 static 成员进 parentSymbol.Exports
+                    //（与实例成员分表，同名 static/实例为两个符号）
+                    let parent_is_class = parent_sym.declarations.iter().any(|d| {
+                        matches!(
+                            d.kind,
+                            SyntaxKind::ClassDeclaration | SyntaxKind::ClassExpression
+                        )
+                    });
+                    let is_static_member = node.has_syntactic_modifier(ModifierFlags::Static)
+                        && matches!(
+                            node.kind,
+                            SyntaxKind::PropertyDeclaration
+                                | SyntaxKind::MethodDeclaration
+                                | SyntaxKind::GetAccessor
+                                | SyntaxKind::SetAccessor
+                        );
                     // export 语境的别名进 exports 表（对齐 Go declareModuleMember），
                     // 其余本地声明进 members
                     if matches!(
                         node.kind,
                         SyntaxKind::ExportSpecifier | SyntaxKind::NamespaceExportDeclaration
-                    ) {
+                    ) || (parent_is_class && is_static_member)
+                    {
                         (*parent_sym_mut)
                             .exports
                             .insert(name.to_string(), Arc::clone(symbol));

@@ -36,6 +36,71 @@ impl Checker {
         }));
     }
 
+    /// Go getTypeOfAccessors 的成员级解析序：getter 注解 → setter 参数注解 →
+    /// getter 体返回推断（加宽）；均无则 any
+    pub(crate) fn resolve_accessor_pair_type(
+        &mut self,
+        accessor: &Arc<Node>,
+    ) -> Arc<Type> {
+        let class = accessor.parent();
+        let getter = class.as_ref().and_then(|cls| {
+            Self::class_members_of(cls).iter().find(|m| {
+                m.kind == SyntaxKind::GetAccessor && Self::member_names_match(m, accessor)
+            })
+        });
+        let setter = class.as_ref().and_then(|cls| {
+            Self::class_members_of(cls).iter().find(|m| {
+                m.kind == SyntaxKind::SetAccessor && Self::member_names_match(m, accessor)
+            })
+        });
+        if let Some(g) = getter
+            && let tsox_frontend::ast::NodeData::GetAccessorDeclaration(gd) = &g.data
+            && let Some(tn) = &gd.type_node
+        {
+            return self.get_type_from_type_node(tn);
+        }
+        if let Some(s) = setter
+            && let tsox_frontend::ast::NodeData::SetAccessorDeclaration(sd) = &s.data
+            && let Some(param) = sd.parameters.iter().next()
+            && let tsox_frontend::ast::NodeData::ParameterDeclaration(pd) = &param.data
+            && let Some(tn) = &pd.type_node
+        {
+            return self.get_type_from_type_node(tn);
+        }
+        if let Some(g) = getter
+            && let tsox_frontend::ast::NodeData::GetAccessorDeclaration(gd) = &g.data
+            && let Some(body) = &gd.body
+        {
+            let inferred = self.infer_method_return_type(&Some(Arc::clone(body)));
+            return self.get_widened_type(&inferred);
+        }
+        self.get_any_type()
+    }
+
+    /// Go 判定同一成员：标识符按文本、well-known 计算名按内部名
+    fn member_names_match(a: &Arc<Node>, b: &Arc<Node>) -> bool {
+        let key = |n: &Arc<Node>| -> Option<String> {
+            let name = n.name()?;
+            match name.kind {
+                SyntaxKind::Identifier | SyntaxKind::StringLiteral | SyntaxKind::NumericLiteral => {
+                    Some(name.text().to_string())
+                }
+                SyntaxKind::ComputedPropertyName => {
+                    let tsox_frontend::ast::NodeData::ComputedPropertyName(cd) = &name.data
+                    else {
+                        return None;
+                    };
+                    crate::binder::symbols_binder_4::well_known_symbol_member_name(&cd.expression)
+                }
+                _ => None,
+            }
+        };
+        match (key(a), key(b)) {
+            (Some(x), Some(y)) => x == y,
+            _ => false,
+        }
+    }
+
     pub(crate) fn add_get_accessor_member(
         &mut self,
         member: &Arc<Node>,
@@ -53,10 +118,7 @@ impl Checker {
             return;
         }
 
-        let prop_type = match data.type_node.as_ref() {
-            Some(tn) => self.get_type_from_type_node(tn),
-            None => self.get_any_type(),
-        };
+        let prop_type = self.resolve_accessor_pair_type(member);
         match symbol_table.get(&name).cloned() {
             Some(existing) => {
                 let existing_mut = Arc::as_ptr(&existing) as *mut Symbol;
@@ -129,6 +191,23 @@ impl Checker {
                 unsafe {
                     (*existing_mut).flags |= SymbolFlags::SetAccessor;
                     (*existing_mut).declarations.push(Arc::clone(member));
+                }
+                // getter 已建型则不覆盖（Go 解析序 getter 优先）；
+                // setter 单独存在时用其参数注解
+                let already_typed = self
+                    .value_symbol_links
+                    .get(&existing)
+                    .and_then(|l| l.resolved_type.clone())
+                    .is_some_and(|t| !t.flags.contains(TypeFlags::Any));
+                if !already_typed {
+                    let prop_type = self.resolve_accessor_pair_type(member);
+                    self.value_symbol_links.insert(
+                        &existing,
+                        ValueSymbolLinks {
+                            resolved_type: Some(prop_type),
+                            ..Default::default()
+                        },
+                    );
                 }
             }
             None => {

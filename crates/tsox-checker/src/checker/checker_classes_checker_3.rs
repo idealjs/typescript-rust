@@ -10,6 +10,7 @@ impl Checker {
     ) -> bool {
         let name_text = match &name_node.data {
             tsox_frontend::ast::NodeData::Identifier(d) => d.text.as_str(),
+            tsox_frontend::ast::NodeData::PrivateIdentifier(d) => d.text.as_str(),
             _ => return false,
         };
 
@@ -48,6 +49,9 @@ impl Checker {
             tsox_frontend::ast::NodeData::PropertyAccessExpression(data) => {
                 if data.expression.kind == SyntaxKind::ThisKeyword {
                     if let tsox_frontend::ast::NodeData::Identifier(id) = &data.name.data {
+                        return id.text == name;
+                    }
+                    if let tsox_frontend::ast::NodeData::PrivateIdentifier(id) = &data.name.data {
                         return id.text == name;
                     }
                 }

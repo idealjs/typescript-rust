@@ -200,6 +200,13 @@ impl Checker {
                         ) {
                             self.check_accessor_in_type_context(member);
                         }
+                        // Go checkTypeLiteral → checkSourceElements：成员计算名
+                        // 须解析表达式（TS2304/TS2464）
+                        if let Some(name) = member.name()
+                            && name.kind == SyntaxKind::ComputedPropertyName
+                        {
+                            self.check_computed_property_name(&name);
+                        }
                     }
                 }
             }

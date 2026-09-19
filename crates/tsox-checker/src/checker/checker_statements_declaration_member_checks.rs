@@ -18,8 +18,9 @@ impl Checker {
         }
 
         self.push_scope(node);
+        self.check_node_decorators(node);
 
-        let this_type = self.build_class_instance_type_with_base(node);
+        let this_type = self.class_declared_type_with_cycle_check(node);
         self.this_type_stack.push(this_type);
 
         self.enclosing_class_stack.push(Arc::clone(node));
@@ -47,8 +48,14 @@ impl Checker {
 
             if let Some(this_type) = self.this_type_stack.last().cloned() {
                 self.check_index_constraints(&this_type, node);
+                // Go checkClassDeclaration：static 索引签名同样过 number⊑string
+                // 约束（构造侧类型）
+                let static_type = self.get_type_of_class_declaration(node);
+                self.check_index_constraints(&static_type, node);
             }
             self.check_class_heritage_members(node);
+
+            self.check_members_for_override_modifier(node);
 
             self.check_property_initialization(node);
         }
@@ -133,6 +140,22 @@ impl Checker {
     }
 
     pub fn check_return_statement(&mut self, node: &Arc<Node>) {
+        let container = crate::checker::utilities_get_assignment_target::
+            get_containing_function_or_class_static_block(node);
+        if container
+            .as_ref()
+            .is_some_and(|c| c.kind == SyntaxKind::ClassStaticBlockDeclaration)
+        {
+            let file = self.current_file.clone();
+            self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                file,
+                node.loc,
+                tsox_core::diagnostics::messages_generated::
+                    A_RETURN_STATEMENT_CANNOT_BE_USED_INSIDE_A_CLASS_STATIC_BLOCK,
+                Vec::new(),
+            ));
+            return;
+        }
         if self.function_scope_count == 0 && self.arrow_function_scope_count == 0 {
             let file = self.current_file.clone();
             self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
@@ -144,10 +167,25 @@ impl Checker {
                 ));
         }
         if let tsox_frontend::ast::NodeData::ReturnStatement(data) = &node.data {
+            // Go unwrapReturnType：生成器 return 比对注解返回型的 TReturn
+            //（async 生成器再 awaited），而非整个注解类型；容器缺失
+            //（accessor/构造器等非生成器容器）时透传期望型
+            let unwrap_if_generator = |c: &mut Self, expected: Option<Arc<Type>>| -> Option<Arc<Type>> {
+                let expected = expected?;
+                match c.yield_container_of(node) {
+                    Some(container) if container.is_generator => {
+                        Some(c.unwrap_generator_return_type(&expected, container.is_async))
+                    }
+                    _ => Some(expected),
+                }
+            };
             if let Some(expr) = &data.expression {
                 self.check_expression(expr);
 
-                let expected = self.return_type_stack.last().and_then(|opt| opt.clone());
+                let expected = unwrap_if_generator(
+                    self,
+                    self.return_type_stack.last().and_then(|opt| opt.clone()),
+                );
                 if let Some(expected) = expected {
                     let actual = self.get_type_of_node(expr);
 
@@ -172,7 +210,10 @@ impl Checker {
                     }
                 }
             } else {
-                let expected = self.return_type_stack.last().and_then(|opt| opt.clone());
+                let expected = unwrap_if_generator(
+                    self,
+                    self.return_type_stack.last().and_then(|opt| opt.clone()),
+                );
                 if let Some(expected) = expected {
                     if !expected.flags.contains(TypeFlags::Void)
                         && !expected.flags.contains(TypeFlags::Undefined)

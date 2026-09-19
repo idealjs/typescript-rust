@@ -26,27 +26,31 @@ impl Checker {
         if !all_failed {
             return false;
         }
+        // Go reportCallResolutionErrors：candidatesForArgumentError 非空时取
+        // 最后一个候选的实参错误链；候选数 >1 时包「最后一个过载给出如下错误」
         let file = self.current_file.clone();
         let anchor = entries.first().map(|d| d.loc).unwrap_or(node.loc);
-        let mut chain: Vec<tsox_frontend::ast::Diagnostic> = Vec::new();
-        for (i, (entry, sig)) in entries.into_iter().zip(signatures.iter()).enumerate() {
-            let sig_str = self.signature_display_colon(sig, "");
-            let mut d = tsox_frontend::ast::Diagnostic::new(
-                file.clone(),
-                anchor,
-                tsox_core::diagnostics::messages_generated::OVERLOAD_0_OF_1_2_GAVE_THE_FOLLOWING_ERROR,
-                vec![(i + 1).to_string(), signatures.len().to_string(), sig_str],
-            );
-            d.message_chain = vec![entry];
-            chain.push(d);
-        }
+        let last_entry = entries
+            .pop()
+            .expect("all_failed implies at least one entry");
         let mut head = tsox_frontend::ast::Diagnostic::new(
             file,
             anchor,
             tsox_core::diagnostics::messages_generated::NO_OVERLOAD_MATCHES_THIS_CALL,
             Vec::new(),
         );
-        head.message_chain = chain;
+        if signatures.len() > 1 {
+            let mut last_overload = tsox_frontend::ast::Diagnostic::new(
+                None,
+                anchor,
+                tsox_core::diagnostics::messages_generated::THE_LAST_OVERLOAD_GAVE_THE_FOLLOWING_ERROR,
+                Vec::new(),
+            );
+            last_overload.message_chain = vec![last_entry];
+            head.message_chain = vec![last_overload];
+        } else {
+            head.message_chain = vec![last_entry];
+        }
         self.diagnostics.add(head);
         true
     }
@@ -151,6 +155,27 @@ impl Checker {
         }
         None
     }
+    fn call_receiver_type(&mut self, callee: &Arc<Node>) -> Option<Arc<Type>> {
+        let mut cur = Arc::clone(callee);
+        while cur.kind == tsox_frontend::ast::SyntaxKind::ParenthesizedExpression {
+            cur = match &cur.data {
+                tsox_frontend::ast::NodeData::ParenthesizedExpression(d) => {
+                    Arc::clone(&d.expression)
+                }
+                _ => return None,
+            };
+        }
+        match &cur.data {
+            tsox_frontend::ast::NodeData::PropertyAccessExpression(d) => {
+                Some(self.get_type_of_node(&d.expression))
+            }
+            tsox_frontend::ast::NodeData::ElementAccessExpression(d) => {
+                Some(self.get_type_of_node(&d.expression))
+            }
+            _ => None,
+        }
+    }
+
     pub(crate) fn get_return_type_of_call_expression(&mut self, node: &Arc<Node>) -> Arc<Type> {
         let callee = match &node.data {
             tsox_frontend::ast::NodeData::CallExpression(data) => {
@@ -163,6 +188,8 @@ impl Checker {
             _ => None,
         };
         let callee_type = self.get_type_of_node(&callee.0);
+        // 多态 this 返回位：lib 形如 sort(): this —— 返回型以接收者类型实例化
+        let receiver_type: Option<Arc<Type>> = self.call_receiver_type(&callee.0);
         if let Some(structured) = callee_type.as_structured() {
             let signatures = structured.call_signatures();
             if signatures.is_empty() {
@@ -192,7 +219,14 @@ impl Checker {
                 Some(c) => c,
                 None => &signatures[matching_idx.unwrap_or(0)],
             };
-            if let Some(rt) = self.get_return_type_of_signature(sig) {
+            if let Some(mut rt) = self.get_return_type_of_signature(sig) {
+                if matches!(
+                    &rt.data,
+                    crate::checker::types::TypeData::TypeParameter(tp) if tp.is_this_type
+                ) && let Some(receiver) = &receiver_type
+                {
+                    rt = crate::checker::flow_narrow_calls::substitute_this_type(self, &rt, receiver);
+                }
                 if !sig.type_parameters.is_empty() {
                     let args: Vec<Arc<Node>> = callee.1.iter().cloned().collect();
                     let inferred = match &explicit_type_args {
@@ -283,12 +317,15 @@ impl Checker {
                     if let Some(type_args) = &explicit_type_args
                         && let Some(class_sym) = rt.symbol.clone()
                     {
-                        let tps = self.declared_type_parameter_types(&class_sym);
                         let arg_types: Vec<Arc<Type>> = type_args
                             .iter()
                             .map(|t| self.get_type_from_type_node(t))
                             .collect();
-                        if !tps.is_empty() && tps.len() == arg_types.len() {
+                        // 实参对位按首个声明的类型参数表：增强声明的同名 T
+                        // 是独立符号，并集计数会让 Set<T> 的显式实参挂不上
+                        let expected =
+                            self.first_declared_type_parameter_count(&class_sym);
+                        if expected != 0 && expected == arg_types.len() {
                             return self.attach_explicit_type_arguments_cached(&rt, arg_types);
                         }
                     }

@@ -81,7 +81,12 @@ impl Checker {
         }
 
         for prop in &structured.properties {
-            let name = prop.name.clone();
+            // Go symbolToString：well-known symbol 内部名 __@x 渲染为 [Symbol.x]
+            let name = if let Some(stripped) = prop.name.strip_prefix("__@") {
+                format!("[Symbol.{stripped}]")
+            } else {
+                prop.name.clone()
+            };
 
             let name = if prop.declarations.iter().any(|d| {
                 d.name()
@@ -511,9 +516,34 @@ impl Checker {
         };
 
         if let Some(obj) = obj_data {
+            if obj.type_arguments.len() == 1
+                && (sym.name == "Array" || sym.name == "ReadonlyArray")
+            {
+                return self.reference_to_string(t, flags);
+            }
             if !obj.type_arguments.is_empty() {
-                let args: Vec<String> = obj
-                    .type_arguments
+                // Go nodebuilder：Iterable/IterableIterator/AsyncIterable/
+                // AsyncIterableIterator 的尾随默认实参在显示中省略
+                let mut arg_count = obj.type_arguments.len();
+                if matches!(
+                    sym.name.as_str(),
+                    "Iterable" | "IterableIterator" | "AsyncIterable" | "AsyncIterableIterator"
+                ) {
+                    let defaults = self.interface_default_type_arguments(&Arc::clone(sym));
+                    if defaults.len() == arg_count {
+                        while arg_count > 0 {
+                            let arg_str =
+                                self.type_to_string_ex(&obj.type_arguments[arg_count - 1], flags);
+                            let default_str =
+                                self.type_to_string_ex(&defaults[arg_count - 1], flags);
+                            if arg_str != default_str {
+                                break;
+                            }
+                            arg_count -= 1;
+                        }
+                    }
+                }
+                let args: Vec<String> = obj.type_arguments[..arg_count]
                     .iter()
                     .map(|ty| self.type_to_string_ex(ty, flags))
                     .collect();

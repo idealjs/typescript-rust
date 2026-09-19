@@ -89,6 +89,7 @@ bitflags! {
         const IdenticalBaseTypeExists                    = 1 << 28;
         const UnresolvedMembers                          = 1 << 29;
         const FromTypeNode                                = 1 << 30;
+        const IsReadonlyArray                             = 1 << 31;
         const IsGenericTypeComputed                      = 1 << 22;
         const IsGenericObjectType                        = 1 << 23;
         const IsGenericIndexType                         = 1 << 24;

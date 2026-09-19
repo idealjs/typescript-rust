@@ -19,12 +19,107 @@ impl Binder {
         }
     }
 
+    // Go declareClassMember：类容器内 static 成员入 exports 表、实例成员入
+    // members 表，同名不同 staticness 永不相交；单表架构下以“同 staticness
+    // 子集的声明标志”参与冲突判定，None 表示非类容器（用整符号标志）
+    pub(crate) fn class_member_same_static_flags(
+        &self,
+        node: &Arc<Node>,
+        existing: &Arc<Symbol>,
+    ) -> Option<SymbolFlags> {
+        let container = self.container.as_ref()?;
+        if !matches!(
+            container.kind,
+            SyntaxKind::ClassDeclaration | SyntaxKind::ClassExpression
+        ) {
+            return None;
+        }
+        let node_static = node.has_syntactic_modifier(tsox_frontend::ast::ModifierFlags::Static);
+        Some(
+            existing
+                .declarations
+                .iter()
+                .filter(|d| {
+                    d.has_syntactic_modifier(tsox_frontend::ast::ModifierFlags::Static)
+                        == node_static
+                })
+                .map(|d| Self::member_includes_flags(d.kind))
+                .fold(SymbolFlags::empty(), |a, b| a | b),
+        )
+    }
+
+    fn member_includes_flags(kind: SyntaxKind) -> SymbolFlags {
+        match kind {
+            SyntaxKind::PropertyDeclaration
+            | SyntaxKind::PropertySignature
+            | SyntaxKind::PropertyAssignment => SymbolFlags::Property,
+            SyntaxKind::MethodDeclaration | SyntaxKind::MethodSignature => SymbolFlags::Method,
+            SyntaxKind::GetAccessor => SymbolFlags::GetAccessor,
+            SyntaxKind::SetAccessor => SymbolFlags::SetAccessor,
+            _ => SymbolFlags::empty(),
+        }
+    }
+
+    // Go HasDynamicName：计算名且表达式非字符串/数值字面量（well-known
+    // Symbol.x 亦算动态名，但本仓模型以 __@x 键保持合并语义，故排除）
+    fn is_dynamic_nonliteral_computed_member(node: &Arc<Node>) -> bool {
+        if !matches!(
+            node.kind,
+            SyntaxKind::PropertyDeclaration
+                | SyntaxKind::MethodDeclaration
+                | SyntaxKind::GetAccessor
+                | SyntaxKind::SetAccessor
+                | SyntaxKind::PropertySignature
+                | SyntaxKind::MethodSignature
+                | SyntaxKind::PropertyAssignment
+        ) {
+            return false;
+        }
+        let Some(name) = node.name() else {
+            return false;
+        };
+        if name.kind != SyntaxKind::ComputedPropertyName {
+            return false;
+        }
+        if let tsox_frontend::ast::NodeData::ComputedPropertyName(cd) = &name.data {
+            if crate::binder::symbols_binder_4::well_known_symbol_member_name(&cd.expression)
+                .is_some()
+            {
+                return false;
+            }
+            !matches!(
+                cd.expression.kind,
+                SyntaxKind::StringLiteral | SyntaxKind::NumericLiteral
+            )
+        } else {
+            false
+        }
+    }
+
     pub(crate) fn declare_symbol(
         &mut self,
         node: &Arc<Node>,
         includes: SymbolFlags,
         _excludes: SymbolFlags,
     ) -> Arc<Symbol> {
+        // Go bindPropertyOrMethodOrAccessor 的 HasDynamicName 分支：非字面量
+        // 计算名成员走 bindAnonymousDeclaration（__computed 匿名符号，不入表、
+        // 不合并、不冲突）
+        if Self::is_dynamic_nonliteral_computed_member(node) {
+            let symbol = self.new_symbol(includes, "__computed");
+            let symbol_mut = Arc::as_ptr(&symbol) as *mut Symbol;
+            unsafe {
+                (*symbol_mut).declarations.push(Arc::clone(node));
+                if (*symbol_mut).value_declaration.is_none()
+                    && includes.intersects(SymbolFlags::VALUE)
+                {
+                    (*symbol_mut).value_declaration = Some(Arc::clone(node));
+                }
+            }
+            self.symbol_map.set_symbol(node, Arc::clone(&symbol));
+            return symbol;
+        }
+
         let name = self.get_declaration_name(node);
 
         let var_hoist_container: Option<Arc<Node>> =
@@ -63,12 +158,56 @@ impl Binder {
                 } else {
                     locals_hit()
                 }
+            } else if var_hoist_container.is_none()
+                && let Some(block_container) = &self.block_scope_container
+                && self
+                    .container
+                    .as_ref()
+                    .is_none_or(|c| c.id() != block_container.id())
+            {
+                let container_id = block_container.id();
+                self.symbol_map
+                    .locals
+                    .get(&container_id)
+                    .and_then(|l| l.get(&name).cloned())
+            } else if self
+                .container
+                .as_ref()
+                .is_some_and(|c| is_function_like_locals_container(c.kind))
+            {
+                let container_id = self.container.as_ref().unwrap().id();
+                self.symbol_map
+                    .locals
+                    .get(&container_id)
+                    .and_then(|l| l.get(&name).cloned())
             } else if let Some(parent_sym) = &self.parent_symbol {
-                parent_sym
-                    .members
-                    .get(&name)
-                    .cloned()
-                    .or_else(|| parent_sym.exports.get(&name).cloned())
+                // Go declareClassMember 按 staticness 分表：实例成员查 members、
+                // static 成员查 exports，同名 static/实例不合并
+                let node_is_static_member = node.has_syntactic_modifier(ModifierFlags::Static)
+                    && matches!(
+                        node.kind,
+                        SyntaxKind::PropertyDeclaration
+                            | SyntaxKind::MethodDeclaration
+                            | SyntaxKind::GetAccessor
+                            | SyntaxKind::SetAccessor
+                    );
+                let parent_is_class = parent_sym.declarations.iter().any(|d| {
+                    matches!(
+                        d.kind,
+                        SyntaxKind::ClassDeclaration | SyntaxKind::ClassExpression
+                    )
+                });
+                if parent_is_class && node_is_static_member {
+                    parent_sym.exports.get(&name).cloned()
+                } else if parent_is_class {
+                    parent_sym.members.get(&name).cloned()
+                } else {
+                    parent_sym
+                        .members
+                        .get(&name)
+                        .cloned()
+                        .or_else(|| parent_sym.exports.get(&name).cloned())
+                }
             } else if let Some(hoist) = &var_hoist_container {
                 match hoist.kind {
                     SyntaxKind::SourceFile | SyntaxKind::ModuleDeclaration => self
@@ -97,19 +236,24 @@ impl Binder {
         let mut conflicted = false;
 
         if let Some(existing) = existing {
-            // Go binder declareSymbol 冲突表：按声明类别 excludes 判定冲突
-            // （method 与 accessor 互斥、property 与 accessor 互斥等），
+            // Go binder 各声明类别的 excludes（值成员互斥表），
             // 冲突时报所有既有声明 + 当前声明的 Duplicate identifier，且不合并符号
             let excludes = Self::excludes_for_declaration(node.kind);
+            // Go declareClassMember 按 staticness 分表：冲突判定只看同 staticness
+            // 子集的声明；无同 staticness 声明（跨表）则永无冲突
+            let same_static_flags = self.class_member_same_static_flags(node, &existing);
+            let staticness_split = same_static_flags == Some(SymbolFlags::empty());
+            let comparison_flags = same_static_flags.unwrap_or(existing.flags);
             let assignment_merge_exception = (includes.contains(SymbolFlags::FunctionScopedVariable)
                 && existing.flags.contains(SymbolFlags::Assignment))
                 || (includes.contains(SymbolFlags::Assignment)
                     && existing
                         .flags
                         .contains(SymbolFlags::FunctionScopedVariable));
-            if !excludes.is_empty()
+            if !staticness_split
+                && !excludes.is_empty()
                 && !name.is_empty()
-                && existing.flags.intersects(excludes)
+                && comparison_flags.intersects(excludes)
                 && !assignment_merge_exception
             {
                 self.report_duplicate_identifier_all(node, &existing, &name);

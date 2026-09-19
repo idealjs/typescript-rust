@@ -47,7 +47,69 @@ impl Checker {
         false
     }
 
-    pub fn check_grammar_for_in_or_for_of_statement(&mut self, _node: &Arc<Node>) -> bool {
+    pub fn check_grammar_for_in_or_for_of_statement(&mut self, node: &Arc<Node>) -> bool {
+        use tsox_core::diagnostics::messages_generated as msg;
+        let tsox_frontend::ast::NodeData::ForInOrOfStatement(data) = &node.data else {
+            return false;
+        };
+        let is_for_of = node.kind == SyntaxKind::ForOfStatement;
+
+        // for (async of ...)：LHS 裸 async 标识符禁止（无 await context 旗标时）
+        if is_for_of
+            && tsox_frontend::ast::is_identifier(&data.initializer)
+            && data.initializer.text() == "async"
+        {
+            return self.grammar_error_on_node(
+                &data.initializer,
+                &msg::THE_LEFT_HAND_SIDE_OF_A_FOR_OF_STATEMENT_MAY_NOT_BE_ASYNC,
+            );
+        }
+
+        if data.initializer.kind != SyntaxKind::VariableDeclarationList {
+            return false;
+        }
+        let list = Arc::clone(&data.initializer);
+        if self.check_grammar_variable_declaration_list(&list) {
+            return true;
+        }
+        let tsox_frontend::ast::NodeData::VariableDeclarationList(list_data) = &list.data else {
+            return false;
+        };
+        let declarations = &list_data.declarations.nodes;
+        if declarations.is_empty() {
+            return false;
+        }
+        if declarations.len() > 1 {
+            let diagnostic = if is_for_of {
+                &msg::ONLY_A_SINGLE_VARIABLE_DECLARATION_IS_ALLOWED_IN_A_FOR_OF_STATEMENT
+            } else {
+                &msg::ONLY_A_SINGLE_VARIABLE_DECLARATION_IS_ALLOWED_IN_A_FOR_IN_STATEMENT
+            };
+            return self.grammar_error_on_first_token(&declarations[1], diagnostic);
+        }
+        let tsox_frontend::ast::NodeData::VariableDeclaration(first) = &declarations[0].data else {
+            return false;
+        };
+        if let Some(initializer) = &first.initializer {
+            let _ = initializer;
+            let diagnostic = if is_for_of {
+                &msg::THE_VARIABLE_DECLARATION_OF_A_FOR_OF_STATEMENT_CANNOT_HAVE_AN_INITIALIZER
+            } else {
+                &msg::THE_VARIABLE_DECLARATION_OF_A_FOR_IN_STATEMENT_CANNOT_HAVE_AN_INITIALIZER
+            };
+            let name = first.name.clone();
+            return self.grammar_error_on_node(&name, diagnostic);
+        }
+        if let Some(type_node) = &first.type_node {
+            let _ = type_node;
+            let diagnostic = if is_for_of {
+                &msg::THE_LEFT_HAND_SIDE_OF_A_FOR_OF_STATEMENT_CANNOT_USE_A_TYPE_ANNOTATION
+            } else {
+                &msg::THE_LEFT_HAND_SIDE_OF_A_FOR_IN_STATEMENT_CANNOT_USE_A_TYPE_ANNOTATION
+            };
+            let node = declarations[0].clone();
+            return self.grammar_error_on_node(&node, diagnostic);
+        }
         false
     }
 
@@ -65,14 +127,64 @@ impl Checker {
 
     pub fn check_grammar_for_invalid_dynamic_name(
         &mut self,
-        _node: &Arc<Node>,
-        _message: &Message,
+        node: &Arc<Node>,
+        message: &Message,
     ) -> bool {
+        if !self.is_non_bindable_dynamic_name(node) {
+            return false;
+        }
+        let expression = match &node.data {
+            tsox_frontend::ast::NodeData::ElementAccessExpression(eae) => {
+                Self::skip_parentheses(&eae.argument_expression)
+            }
+            tsox_frontend::ast::NodeData::ComputedPropertyName(d) => Arc::clone(&d.expression),
+            _ => return false,
+        };
+
+        if !tsox_frontend::ast::is_entity_name_expression(&expression) {
+            return self.grammar_error_on_node(node, message);
+        }
+
         false
     }
 
-    pub fn is_non_bindable_dynamic_name(&self, _node: &Arc<Node>) -> bool {
-        false
+    // Go isNonBindableDynamicName：动态名且不可迟绑定
+    pub fn is_non_bindable_dynamic_name(&mut self, node: &Arc<Node>) -> bool {
+        self.is_dynamic_name(node) && !self.is_late_bindable_name(node)
+    }
+
+    // Go IsDynamicName：计算名/元素访问，表达式非字面量且非有符号数字字面量
+    fn is_dynamic_name(&self, name: &Arc<Node>) -> bool {
+        let expr = match &name.data {
+            tsox_frontend::ast::NodeData::ComputedPropertyName(d) => Arc::clone(&d.expression),
+            tsox_frontend::ast::NodeData::ElementAccessExpression(d) => {
+                Self::skip_parentheses(&d.argument_expression)
+            }
+            _ => return false,
+        };
+        !tsox_frontend::ast::is_string_or_numeric_literal_like(&expr)
+            && !is_signed_numeric_literal(&expr)
+    }
+
+    // Go isLateBindableName：实体名表达式且其类型可作属性名
+    //（字面量型或 unique symbol）
+    fn is_late_bindable_name(&mut self, node: &Arc<Node>) -> bool {
+        let expr = match &node.data {
+            tsox_frontend::ast::NodeData::ComputedPropertyName(d) => Arc::clone(&d.expression),
+            tsox_frontend::ast::NodeData::ElementAccessExpression(d) => {
+                Arc::clone(&d.argument_expression)
+            }
+            _ => return false,
+        };
+        if !tsox_frontend::ast::is_entity_name_expression(&expr) {
+            return false;
+        }
+        let t = if node.kind == SyntaxKind::ComputedPropertyName {
+            self.check_computed_property_name_type(node)
+        } else {
+            self.get_type_of_node(&expr)
+        };
+        crate::checker::utilities::is_type_usable_as_property_name(&t)
     }
 
     pub fn check_grammar_method(&mut self, _node: &Arc<Node>) -> bool {
@@ -100,13 +212,58 @@ impl Checker {
 
     pub fn check_grammar_for_disallowed_block_scoped_variable_statement(
         &mut self,
-        _node: &Arc<Node>,
+        node: &Arc<Node>,
     ) -> bool {
-        false
+        let Some(parent) = node.parent() else {
+            return false;
+        };
+        if self.container_allows_block_scoped_variable(&parent) {
+            return false;
+        }
+        let tsox_frontend::ast::NodeData::VariableStatement(data) = &node.data else {
+            return false;
+        };
+        let flags = self.get_combined_node_flags(&data.declaration_list)
+            & NodeFlags::BlockScoped;
+        if flags.is_empty() {
+            return false;
+        }
+        let keyword = if flags == NodeFlags::AwaitUsing {
+            "await using"
+        } else if flags.contains(NodeFlags::Using) {
+            "using"
+        } else if flags.contains(NodeFlags::Const) {
+            "const"
+        } else if flags.contains(NodeFlags::Let) {
+            "let"
+        } else {
+            return false;
+        };
+        self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+            self.current_file.clone(),
+            node.loc,
+            tsox_core::diagnostics::messages_generated::
+                X_0_DECLARATIONS_CAN_ONLY_BE_DECLARED_INSIDE_A_BLOCK,
+            vec![keyword.to_string()],
+        ));
+        true
     }
 
-    pub fn container_allows_block_scoped_variable(&self, _parent: &Arc<Node>) -> bool {
-        false
+    pub fn container_allows_block_scoped_variable(&self, parent: &Arc<Node>) -> bool {
+        match parent.kind {
+            SyntaxKind::IfStatement
+            | SyntaxKind::DoStatement
+            | SyntaxKind::WhileStatement
+            | SyntaxKind::WithStatement
+            | SyntaxKind::ForStatement
+            | SyntaxKind::ForInStatement
+            | SyntaxKind::ForOfStatement => false,
+            SyntaxKind::LabeledStatement => parent
+                .parent()
+                .as_ref()
+                .is_some_and(|p| self.container_allows_block_scoped_variable(p)),
+            _ => true,
+        }
     }
 
     pub fn check_grammar_meta_property(&mut self, _node: &Arc<Node>) -> bool {
@@ -188,6 +345,16 @@ pub(crate) fn is_comma_sequence(node: &Arc<Node>) -> bool {
         NodeData::BinaryExpression(data) => data.operator_token.kind == SyntaxKind::CommaToken,
         _ => false,
     }
+}
+
+// Go isSignedNumericLiteral：+/- 一元后随数字字面量
+fn is_signed_numeric_literal(node: &Arc<Node>) -> bool {
+    matches!(
+        &node.data,
+        NodeData::PrefixUnaryExpression(p)
+            if matches!(p.operator, SyntaxKind::PlusToken | SyntaxKind::MinusToken)
+                && p.operand.kind == SyntaxKind::NumericLiteral
+    )
 }
 
 

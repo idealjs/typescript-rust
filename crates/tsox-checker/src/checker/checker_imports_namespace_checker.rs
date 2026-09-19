@@ -14,6 +14,14 @@ impl Checker {
                 cur = n.parent();
                 continue;
             }
+            // 装饰器延迟求值：yield 语境取被装饰实体之外的函数
+            //（类成员装饰器跳过成员、类装饰器跳过类）
+            if n.kind == SyntaxKind::Decorator
+                && let Some(decorated) = n.parent()
+            {
+                cur = decorated.parent();
+                continue;
+            }
             match &n.data {
                 tsox_frontend::ast::NodeData::FunctionDeclaration(d) => {
                     return d.asterisk_token.is_some();
@@ -28,7 +36,11 @@ impl Checker {
                 tsox_frontend::ast::NodeData::ArrowFunction(_)
                 | tsox_frontend::ast::NodeData::GetAccessorDeclaration(_)
                 | tsox_frontend::ast::NodeData::SetAccessorDeclaration(_)
-                | tsox_frontend::ast::NodeData::ConstructorDeclaration(_) => return false,
+                | tsox_frontend::ast::NodeData::ConstructorDeclaration(_)
+                // 类字段初始化器/静态块是独立容器：其中的 yield 不在生成器上下文
+                | tsox_frontend::ast::NodeData::PropertyDeclaration(_)
+                | tsox_frontend::ast::NodeData::PropertySignatureDeclaration(_)
+                | tsox_frontend::ast::NodeData::ClassStaticBlockDeclaration(_) => return false,
                 _ => {}
             }
             cur = n.parent();
@@ -95,19 +107,10 @@ impl Checker {
                 {
                     return internal;
                 }
-                let file = self
-                    .get_source_file_of_node(node)
-                    .or_else(|| self.current_file.clone());
-                let Some(file) = file else {
-                    return String::new();
-                };
-                let pos = node.loc.pos();
-                let end = node.loc.end();
-                if pos < end && end <= file.text.len() {
-                    file.text[pos..end].to_string()
-                } else {
-                    String::new()
-                }
+                // Go：其余计算名在类型层无可用键（unique symbol 走 Identifier
+                // 路径），返回空名使成员跳过——源文本键会产生伪属性
+                //（如 `Symbol.nonsense` 报错后仍占位，触发多余缺属性诊断）
+                String::new()
             }
             _ => node.text().to_string(),
         }

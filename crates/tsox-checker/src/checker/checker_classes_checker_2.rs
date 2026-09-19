@@ -70,10 +70,69 @@ impl Checker {
         instance
     }
 
+    fn resolve_entity_name_class_symbol(&mut self, expr: &Arc<Node>) -> Option<Arc<Symbol>> {
+        match expr.kind {
+            SyntaxKind::Identifier => self.resolve_identifier(expr),
+            SyntaxKind::PropertyAccessExpression => {
+                let tsox_frontend::ast::NodeData::PropertyAccessExpression(d) = &expr.data else {
+                    return None;
+                };
+                let base = self.resolve_entity_name_class_symbol(&d.expression)?;
+                let name = d.name.text();
+                base.members
+                    .get(name)
+                    .cloned()
+                    .or_else(|| base.exports.get(name).cloned())
+            }
+            _ => None,
+        }
+    }
+
+    pub(crate) fn class_declared_type_with_cycle_check(&mut self, node: &Arc<Node>) -> Arc<Type> {
+        let Some(symbol) = self.program.symbol_map().symbol_of(node).cloned() else {
+            return self.build_class_instance_type_with_base(node);
+        };
+        let key = Arc::as_ptr(&symbol) as *const tsox_frontend::ast::Symbol;
+        if !self.push_type_resolution(key, TypeResolutionProperty::ResolvedBaseTypes) {
+            return self.build_class_instance_type_with_base(node);
+        }
+        let instance = self.build_class_instance_type_with_base(node);
+        if !self.pop_type_resolution() {
+            self.emit_ts2506(node, &symbol);
+        }
+        instance
+    }
+
+    fn emit_ts2506(&mut self, class_node: &Arc<Node>, symbol: &Arc<Symbol>) {
+        let class_name_loc = match &class_node.data {
+            tsox_frontend::ast::NodeData::ClassDeclaration(cd) => cd
+                .name
+                .as_ref()
+                .map(|n| n.loc)
+                .unwrap_or(class_node.loc),
+            _ => class_node.loc,
+        };
+        let file = self.get_source_file_of_node(class_node);
+        self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+            file,
+            class_name_loc,
+            tsox_core::diagnostics::messages_generated::
+                X_0_IS_REFERENCED_DIRECTLY_OR_INDIRECTLY_IN_ITS_OWN_BASE_EXPRESSION,
+            vec![symbol.name.clone()],
+        ));
+    }
+
     pub(crate) fn resolve_base_class_instance_type(&mut self, type_ref: &Arc<Node>) -> Arc<Type> {
         if let tsox_frontend::ast::NodeData::ExpressionWithTypeArguments(data) = &type_ref.data {
-            if data.expression.kind == SyntaxKind::Identifier {
-                if let Some(symbol) = self.resolve_identifier(&data.expression) {
+            let entity_symbol = match data.expression.kind {
+                SyntaxKind::Identifier => self.resolve_identifier(&data.expression),
+                SyntaxKind::PropertyAccessExpression => {
+                    self.resolve_entity_name_class_symbol(&data.expression)
+                }
+                _ => None,
+            };
+            if let Some(symbol) = entity_symbol {
+                {
                     if symbol.flags.contains(SymbolFlags::Class) {
                         if self.type_resolution_stack.len() >= 200 {
                             return self.get_any_type();
@@ -142,7 +201,10 @@ impl Checker {
                                 self.pop_scope();
                                 i
                             };
-                            self.pop_type_resolution();
+                            let ok = self.pop_type_resolution();
+                            if !ok {
+                                self.emit_ts2506(&class_node, &symbol);
+                            }
                             return instance;
                         }
                     }

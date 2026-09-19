@@ -217,12 +217,13 @@ impl Parser {
             let text = self.scanner.token_text().to_string();
             let pos = self.token_pos();
             self.next_token();
-            Arc::new(Node::with_loc(
+            Arc::new(Node::with_loc_flags(
                 SyntaxKind::Identifier,
                 NodeData::Identifier(crate::ast::IdentifierData {
                     text,
                 }),
                 TextRange::new(pos, self.token_pos()),
+                self.context_flags_now(),
             ))
         } else {
             self.parse_identifier()

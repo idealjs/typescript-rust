@@ -26,6 +26,12 @@ impl Binder {
             && get_module_instance_state(node) == ModuleInstanceState::NonInstantiated
             && existing.flags == SymbolFlags::BlockScopedVariable;
 
+        // Go declareSymbol：类成员只要未触发 excludes 冲突即并入既有符号
+        // （get/set 对、static/实例分表合并等），跨 staticness 子集恒并入
+        let same_static_flags = self.class_member_same_static_flags(node, existing);
+        let staticness_split = same_static_flags == Some(SymbolFlags::empty());
+        let class_member_merge = same_static_flags.is_some();
+
         let import_export_alias_merge = includes.contains(SymbolFlags::Alias)
             && existing.flags.contains(SymbolFlags::Alias)
             && {
@@ -36,7 +42,10 @@ impl Binder {
                     .all(|d| d.kind == SyntaxKind::ExportSpecifier);
                 node_is_spec != existing_all_spec
             };
-        if self.can_merge_symbols(existing.flags, includes)
+        let comparison_flags = same_static_flags.unwrap_or(existing.flags);
+        if staticness_split
+            || class_member_merge
+            || self.can_merge_symbols(comparison_flags, includes)
             || var_var_merge
             || ns_var_merge
             || var_ns_merge

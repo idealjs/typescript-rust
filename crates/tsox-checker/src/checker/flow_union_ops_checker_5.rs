@@ -98,8 +98,13 @@ impl Checker {
                 match for_stmt.kind {
                     SyntaxKind::ForInStatement => Some(self.string_type()),
                     SyntaxKind::ForOfStatement => {
+                        let for_await = data.await_modifier.is_some();
                         let rhs = self.get_type_of_node(&data.expression);
-                        Some(self.iterated_element_type(&rhs))
+                        Some(self.check_iterated_type_or_element_type(
+                            crate::checker::checker_iteration::IterationUse::ForOf { for_await },
+                            &rhs,
+                            None,
+                        ))
                     }
                     _ => None,
                 }
@@ -108,10 +113,39 @@ impl Checker {
                 let pattern = Arc::clone(expr.parent().as_ref()?);
                 let pattern_parent = Arc::clone(pattern.parent().as_ref()?);
                 let parent_type = self.initial_type_of_declaration(&pattern_parent);
+                let diagnostics_allowed = !self.in_ambient_declaration_context();
                 let mut t = match (&parent_type, pattern.kind) {
                     (Some(parent_type), SyntaxKind::ObjectBindingPattern) => {
+                        // rest 元素：剩余属性对象，不做属性查找、不产生 TS2339
+                        if be.dot_dot_dot_token.is_some() {
+                            return Some(self.rest_element_type(expr, &parent_type));
+                        }
                         match Self::binding_element_property_name(expr) {
-                            Some(name) => self.get_property_type_of_type(parent_type, &name),
+                            Some(name) => {
+                                let t = self.get_property_type_of_type(parent_type, &name);
+                                if t.is_none()
+                                    && diagnostics_allowed
+                                    && !parent_type.flags.intersects(
+                                        TypeFlags::Any
+                                            | TypeFlags::Unknown
+                                            | TypeFlags::Never,
+                                    )
+                                    && !crate::checker::utilities::is_type_error(parent_type)
+                                {
+                                    let display =
+                                        self.boxed_declared_type_for_display(parent_type);
+                                    let type_str = self.type_to_string(&display);
+                                    let name_node = Self::binding_element_name_node(expr);
+                                    self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                                        self.current_file.clone(),
+                                        name_node.unwrap_or_else(|| Arc::clone(&pattern)).loc,
+                                        tsox_core::diagnostics::messages_generated::
+                                            PROPERTY_0_DOES_NOT_EXIST_ON_TYPE_1,
+                                        vec![name.clone(), type_str],
+                                    ));
+                                }
+                                t
+                            }
                             None => None,
                         }
                     }
@@ -119,8 +153,36 @@ impl Checker {
                         if be.dot_dot_dot_token.is_none() =>
                     {
                         match Self::binding_element_index(&pattern, expr) {
-                            Some(index) => self.destructured_array_element_type(parent_type, index),
+                            Some(index) => self.destructured_array_element_type(
+                                parent_type,
+                                index,
+                                diagnostics_allowed.then(|| &pattern),
+                            ),
                             None => None,
+                        }
+                    }
+                    (Some(parent_type), SyntaxKind::ArrayBindingPattern) => {
+                        let element = self.check_iterated_type_or_element_type(
+                            crate::checker::checker_iteration::IterationUse::Destructuring,
+                            parent_type,
+                            None,
+                        );
+                        if self.is_tuple_type(parent_type) {
+                            let mut rest: Vec<Arc<Type>> = Vec::new();
+                            let mut index = Self::binding_element_index(&pattern, expr)
+                                .unwrap_or(0);
+                            while let Some(t) = self.get_tuple_element_type(parent_type, index) {
+                                rest.push(t);
+                                index += 1;
+                            }
+                            let element_t = if rest.is_empty() {
+                                self.never_type()
+                            } else {
+                                self.get_union_type(rest)
+                            };
+                            Some(self.create_array_type(element_t))
+                        } else {
+                            Some(self.create_array_type(element))
                         }
                     }
                     _ => None,
@@ -153,6 +215,58 @@ impl Checker {
         be.name.as_ref().map(|n| n.text().to_string())
     }
 
+    pub(crate) fn binding_element_name_node(element: &Arc<Node>) -> Option<Arc<Node>> {
+        let NodeData::BindingElement(be) = &element.data else {
+            return None;
+        };
+        be.property_name.clone().or_else(|| be.name.clone())
+    }
+
+    pub(crate) fn in_ambient_declaration_context(&self) -> bool {
+        self.ambient_context_depth > 0
+            || self
+                .current_file
+                .as_ref()
+                .is_some_and(|f| f.is_declaration_file)
+    }
+
+    /// Go getApparentType：原始类型装箱显示为全局接口声明型（渲染名 Number 等）
+    pub(crate) fn boxed_declared_type_for_display(&mut self, t: &Arc<Type>) -> Arc<Type> {
+        use crate::checker::types::TYPE_FLAGS_ENUM_LIKE;
+        let name = if t.flags.intersects(
+            TypeFlags::String
+                | TypeFlags::StringLiteral
+                | TypeFlags::Index
+                | TypeFlags::TemplateLiteral
+                | TypeFlags::StringMapping,
+        ) {
+            "String"
+        } else if t.flags.intersects(TypeFlags::Number | TypeFlags::NumberLiteral | TypeFlags::EnumLiteral)
+            || (t.flags.intersects(TYPE_FLAGS_ENUM_LIKE) && !t.flags.intersects(TypeFlags::String))
+        {
+            "Number"
+        } else if t.flags.intersects(TypeFlags::Boolean | TypeFlags::BooleanLiteral) {
+            "Boolean"
+        } else if t.flags.intersects(TypeFlags::BigInt | TypeFlags::BigIntLiteral) {
+            "BigInt"
+        } else if t.flags.intersects(TypeFlags::ESSymbol | TypeFlags::UniqueESSymbol) {
+            "Symbol"
+        } else {
+            return Arc::clone(t);
+        };
+        match self.globals.get(name).cloned() {
+            Some(sym) => {
+                let declared = self.get_declared_type_of_symbol(&sym);
+                if declared.symbol.is_some() {
+                    declared
+                } else {
+                    Arc::clone(t)
+                }
+            }
+            None => Arc::clone(t),
+        }
+    }
+
     pub(crate) fn binding_element_index(pattern: &Arc<Node>, element: &Arc<Node>) -> Option<usize> {
         let NodeData::BindingPattern(data) = &pattern.data else {
             return None;
@@ -167,42 +281,19 @@ impl Checker {
         &mut self,
         parent_type: &Arc<Type>,
         index: usize,
+        error_node: Option<&Arc<Node>>,
     ) -> Option<Arc<Type>> {
         if self.is_tuple_type(parent_type) {
             return self.get_tuple_element_type(parent_type, index);
         }
-        if self.is_array_type(parent_type) {
+        if self.is_array_like_type(parent_type) {
             return Some(self.get_array_element_type(parent_type));
         }
-        Some(self.get_any_type())
-    }
-
-    pub(crate) fn iterated_element_type(&mut self, rhs: &Arc<Type>) -> Arc<Type> {
-        if rhs.is_union() {
-            let parts: Vec<Arc<Type>> = self
-                .constituent_types(rhs)
-                .into_iter()
-                .map(|c| self.iterated_element_type(&c))
-                .filter(|t| !t.flags.contains(TypeFlags::Never))
-                .collect();
-            if parts.is_empty() {
-                return self.get_any_type();
-            }
-            if parts.len() == 1 {
-                return parts.into_iter().next().expect("exactly one");
-            }
-            return self.get_union_type(parts);
-        }
-        if self.is_array_type(rhs) {
-            return self.get_array_element_type(rhs);
-        }
-        if rhs
-            .flags
-            .intersects(TypeFlags::String | TypeFlags::StringLiteral)
-        {
-            return self.string_type();
-        }
-        self.get_any_type()
+        Some(self.check_iterated_type_or_element_type(
+            crate::checker::checker_iteration::IterationUse::Destructuring,
+            parent_type,
+            error_node,
+        ))
     }
 
     pub(crate) fn for_in_or_of_statement_of(decl: &Arc<Node>) -> Option<Arc<Node>> {
@@ -304,7 +395,17 @@ impl Checker {
                 return member;
             }
         }
-        None
+        // Go getPropertyOfTypeEx：普通成员未命中时回退全局 Object 接口成员
+        //（对象字面量查 toString 等由此命中，缺失属性报告因此不含 Object 原型成员）
+        self.global_object_member(name)
+    }
+
+    fn global_object_member(&mut self, name: &str) -> Option<Arc<Symbol>> {
+        let obj_sym = self.globals.get("Object").cloned()?;
+        let obj_type = self.get_declared_type_of_symbol(&obj_sym);
+        obj_type
+            .as_structured()
+            .and_then(|s| s.members.get(name).cloned())
     }
 
     pub(crate) fn unresolved_interface_symbol_of(&self, t: &Arc<Type>) -> Option<Arc<Symbol>> {

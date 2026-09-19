@@ -112,7 +112,15 @@ impl Checker {
         }
         let fn_type = self.create_function_or_constructor_type(vec![sig], false);
         // tsc 接口方法成员：SymbolFlags.Method + 方法签名声明（quick info (method) 身份用）
-        let mut symbol = Symbol::new(SymbolFlags::Property | SymbolFlags::Method, name.clone());
+        let mut flags = SymbolFlags::Property | SymbolFlags::Method;
+        if data
+            .postfix_token
+            .as_ref()
+            .is_some_and(|t| t.kind == SyntaxKind::QuestionToken)
+        {
+            flags |= SymbolFlags::Optional;
+        }
+        let mut symbol = Symbol::new(flags, name.clone());
         symbol.declarations.push(Arc::clone(&member));
         let symbol = Arc::new(symbol);
         self.value_symbol_links.insert(
@@ -249,6 +257,8 @@ impl Checker {
                     !Self::function_body_has_explicit_return(b)
                 }) {
                     self.void_type()
+                } else if data.body.is_some() {
+                    self.infer_method_return_type(&data.body)
                 } else {
                     self.get_any_type()
                 }
@@ -292,7 +302,15 @@ impl Checker {
             return;
         }
         let fn_type = self.create_function_or_constructor_type(vec![sig], false);
-        let mut symbol = Symbol::new(SymbolFlags::Property, name.clone());
+        let mut flags = SymbolFlags::Property;
+        if data
+            .postfix_token
+            .as_ref()
+            .is_some_and(|t| t.kind == SyntaxKind::QuestionToken)
+        {
+            flags |= SymbolFlags::Optional;
+        }
+        let mut symbol = Symbol::new(flags, name.clone());
 
         symbol.declarations.push(Arc::clone(member));
         let symbol = Arc::new(symbol);

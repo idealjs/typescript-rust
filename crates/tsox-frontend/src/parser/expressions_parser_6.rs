@@ -10,10 +10,11 @@ impl Parser {
                 let pos = self.token_pos();
                 let end = self.token_end();
                 self.next_token();
-                Arc::new(Node::with_loc(
+                Arc::new(Node::with_loc_flags(
                     SyntaxKind::Identifier,
                     NodeData::Identifier(IdentifierData { text }),
                     TextRange::new(pos, end),
+                    self.context_flags_now(),
                 ))
             }
             SyntaxKind::NumericLiteral => {
@@ -147,10 +148,11 @@ impl Parser {
             let pos = self.token_pos();
             let end = self.token_end();
             self.next_token();
-            Arc::new(Node::with_loc(
+            Arc::new(Node::with_loc_flags(
                 SyntaxKind::Identifier,
                 NodeData::Identifier(IdentifierData { text }),
                 TextRange::new(pos, end),
+                self.context_flags_now(),
             ))
         } else {
             // Go createIdentifierWithDiagnostic：报 Expression expected 后返回

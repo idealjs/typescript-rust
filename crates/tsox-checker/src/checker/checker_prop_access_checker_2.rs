@@ -30,6 +30,10 @@ impl Checker {
             return;
         }
 
+        if let Some(prop) = self.get_property_of_type(&obj_type, name_text) {
+            self.check_property_not_used_before_declaration(&prop, node, name);
+        }
+
         if let Some(structured) = obj_type.as_structured() {
             if let Some(member_symbol) = structured.members.get(name_text) {
                 let in_ctor = self.in_ctor_body_stack.last() == Some(&true);
@@ -55,31 +59,6 @@ impl Checker {
                     self.diagnostics.add(diagnostic);
                 }
 
-                if in_prop_init
-                    && obj_expr.kind == SyntaxKind::ThisKeyword
-                    && get_assignment_target_kind(node) == AssignmentKind::None
-                    && let Some(prop_decl) = member_symbol.declarations.iter().find(|d| {
-                        d.kind == SyntaxKind::PropertyDeclaration
-                            && !d.has_syntactic_modifier(ModifierFlags::Static)
-                    })
-                {
-                    let asserted = matches!(
-                        &prop_decl.data,
-                        tsox_frontend::ast::NodeData::PropertyDeclaration(d) if d.postfix_token.is_some()
-                    );
-                    let uninitialized = !prop_decl_has_initializer(prop_decl) && !asserted;
-                    let later = later_sibling_property(node, prop_decl);
-                    if uninitialized || later {
-                        let file = self.current_file.clone();
-                        self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
-                            file,
-                            name.loc,
-                            tsox_core::diagnostics::messages_generated::
-                                PROPERTY_0_IS_USED_BEFORE_ITS_INITIALIZATION,
-                            vec![name_text.to_string()],
-                        ));
-                    }
-                }
                 if let Some(declaring_class) = self.declaring_class_of_member(member_symbol) {
                     let is_private =
                         crate::checker::exports::get_declaration_modifier_flags_from_symbol_ex(

@@ -15,6 +15,14 @@ impl Checker {
         self.check_duplicate_function_implementations(node);
 
         self.check_overload_implementation_follows(node);
+
+        // Go checkFunctionDeclaration：合并符号上检查重复实现/过载一致性
+        //（每符号一次；本节点轮到其声明序列末位时由 once-guard 收敛）
+        if !node.flags.contains(NodeFlags::JavaScriptFile)
+            && let Some(symbol) = self.get_symbol_of_declaration(node)
+        {
+            self.check_function_or_constructor_symbol(&symbol);
+        }
         if let tsox_frontend::ast::NodeData::FunctionDeclaration(data) = &node.data {
             if let Some(tps) = &data.type_parameters {
                 let _ = tps;
@@ -33,6 +41,7 @@ impl Checker {
             }
             if let Some(tn) = &data.type_node {
                 self.check_type_annotation(tn);
+                self.check_generator_return_annotation(node, tn);
             }
 
             if self.no_implicit_any
@@ -117,6 +126,21 @@ impl Checker {
         let declared_return = match &node.data {
             tsox_frontend::ast::NodeData::FunctionDeclaration(data) => {
                 let is_async = node.has_syntactic_modifier(ModifierFlags::Async);
+                // Go checkSignatureDeclaration：生成器注解返回 void 报 TS2505
+                if data.asterisk_token.is_some()
+                    && let Some(tn) = data.type_node.as_ref()
+                {
+                    let raw = self.get_type_from_type_node(tn);
+                    if raw.flags.contains(TypeFlags::Void) {
+                        self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                            self.current_file.clone(),
+                            tn.loc,
+                            tsox_core::diagnostics::messages_generated::
+                                A_GENERATOR_CANNOT_HAVE_A_VOID_TYPE_ANNOTATION,
+                            vec![],
+                        ));
+                    }
+                }
                 data.type_node
                     .as_ref()
                     .map(|tn| self.get_type_from_type_node(tn))

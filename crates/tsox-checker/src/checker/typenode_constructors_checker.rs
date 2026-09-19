@@ -123,12 +123,22 @@ impl Checker {
         if types.len() == 1 {
             return types.into_iter().next().expect("exactly one");
         }
+        // Go createIntersectionType：相同/结构等价的成分去重（同一类型自交化简）
+        let mut deduped: Vec<Arc<Type>> = Vec::with_capacity(types.len());
+        for t in types {
+            if !deduped.iter().any(|d| shallow_type_eq(d, &t)) {
+                deduped.push(t);
+            }
+        }
+        if deduped.len() == 1 {
+            return deduped.into_iter().next().expect("exactly one");
+        }
         Arc::new(Type::new(
             TypeFlags::Intersection,
             TypeData::Intersection(IntersectionTypeData {
                 union_or_intersection: UnionOrIntersectionTypeData {
                     structured: StructuredTypeData::default(),
-                    types,
+                    types: deduped,
                 },
                 resolved_apparent_type: std::sync::OnceLock::new(),
                 unique_literal_filled_instantiation: std::sync::OnceLock::new(),
@@ -138,13 +148,36 @@ impl Checker {
     }
 
     pub(crate) fn create_array_type(&mut self, element_type: Arc<Type>) -> Arc<Type> {
+        self.create_array_type_ex(element_type, false)
+    }
+
+    /// readonly T[] 的数组形态：带 IsReadonlyArray 标志的数组实例（tsc 映射为
+    /// ReadonlyArray<T> 引用；这里以标志承载 readonly 语义，成员仍共用 Array 声明，
+    /// 关系判定按元素协变 + readonly→可变拒绝处理）
+    pub(crate) fn create_array_type_ex(
+        &mut self,
+        element_type: Arc<Type>,
+        readonly: bool,
+    ) -> Arc<Type> {
         let Some(array_symbol) = self.globals.get("Array").cloned() else {
             return self.get_any_type();
         };
+        // 按元素实例驻留（tsc getTypeFromArrayType）：同一元素类型只建一个
+        // 数组实例，关系判定的进行中配对检测才能命中循环引用
+        // （never[] → ReadonlyArray<number> 走 every/flatMap 成员结构比较时
+        // 会递归回到同一对类型）
+        let intern_key = (element_type.id, readonly);
+        if let Some(cached) = self.array_type_intern_cache.get(&intern_key) {
+            return Arc::clone(cached);
+        }
         let target = self.get_declared_type_of_symbol(&array_symbol);
-        Arc::new(Type {
+        let mut object_flags = ObjectFlags::Reference;
+        if readonly {
+            object_flags |= ObjectFlags::IsReadonlyArray;
+        }
+        let array_type = Arc::new(Type {
             flags: TypeFlags::Object,
-            object_flags: ObjectFlags::Reference,
+            object_flags,
             id: crate::checker::types::next_type_id(),
             symbol: Some(array_symbol),
             alias: None,
@@ -154,32 +187,32 @@ impl Checker {
                 mapper: None,
                 type_arguments: vec![element_type],
             }),
-        })
+        });
+        self.array_type_intern_cache
+            .insert(intern_key, Arc::clone(&array_type));
+        array_type
     }
 
     pub(crate) fn array_type_parameter_symbols(&mut self) -> Vec<Arc<Symbol>> {
         if let Some(cached) = &self.array_type_parameter_symbols {
             return cached.clone();
         }
+        // 全部 interface 声明的类型参数符号（es5 主声明 + es2015+ 各增强
+        // 文件的同名 T 都是独立符号，代入须一网打尽）
         let collected = self
             .globals
             .get("Array")
-            .and_then(|sym| {
-                let decl = sym
-                    .declarations
-                    .iter()
-                    .find(|d| matches!(d.data, NodeData::InterfaceDeclaration(_)))?;
-                let NodeData::InterfaceDeclaration(d) = &decl.data else {
-                    return None;
-                };
+            .map(|sym| {
                 let sym_map = self.program.symbol_map();
-                Some(
-                    d.type_parameters
-                        .as_ref()?
-                        .iter()
-                        .filter_map(|tp| sym_map.symbol_of(tp).map(Arc::clone))
-                        .collect::<Vec<_>>(),
-                )
+                sym.declarations
+                    .iter()
+                    .filter_map(|decl| match &decl.data {
+                        NodeData::InterfaceDeclaration(d) => d.type_parameters.as_ref(),
+                        _ => None,
+                    })
+                    .flat_map(|tps| tps.iter())
+                    .filter_map(|tp| sym_map.symbol_of(tp).map(Arc::clone))
+                    .collect::<Vec<_>>()
             })
             .unwrap_or_default();
         self.array_type_parameter_symbols = Some(collected.clone());
@@ -229,6 +262,7 @@ impl Checker {
             .and_then(|d| d.as_structured())
             .and_then(|s| s.members.get(&member.name).cloned())
             .map(|synthetic| self.get_type_of_symbol(&synthetic))?;
+
         let key = (
             Arc::as_ptr(&element) as *const crate::checker::types::Type as usize,
             Arc::as_ptr(member) as *const tsox_frontend::ast::Symbol as usize,
@@ -364,4 +398,27 @@ pub(crate) fn uniform_enum_symbol(types: &[Arc<Type>]) -> Option<Arc<Symbol>> {
         }
     });
     uniform.then_some(parent).flatten()
+}
+
+fn shallow_type_eq(a: &Type, b: &Type) -> bool {
+    if a.id == b.id {
+        return true;
+    }
+    if a.flags != b.flags
+        || a.symbol.as_ref().map(|s| Arc::as_ptr(s))
+            != b.symbol.as_ref().map(|s| Arc::as_ptr(s))
+    {
+        return false;
+    }
+    match (&a.data, &b.data) {
+        (crate::checker::types::TypeData::Object(oa), crate::checker::types::TypeData::Object(ob)) => {
+            oa.type_arguments.len() == ob.type_arguments.len()
+                && oa
+                    .type_arguments
+                    .iter()
+                    .zip(ob.type_arguments.iter())
+                    .all(|(x, y)| x.id == y.id)
+        }
+        _ => false,
+    }
 }

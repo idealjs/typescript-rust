@@ -258,21 +258,6 @@ pub(crate) fn class_declaration_name(class: &Arc<Node>) -> Option<String> {
     None
 }
 
-pub(crate) fn prop_decl_has_initializer(decl: &Arc<Node>) -> bool {
-    matches!(&decl.data, tsox_frontend::ast::NodeData::PropertyDeclaration(d) if d.initializer.is_some())
-}
-
-pub(crate) fn later_sibling_property(node: &Arc<Node>, prop_decl: &Arc<Node>) -> bool {
-    let mut cur = node.parent();
-    while let Some(a) = cur {
-        if a.kind == SyntaxKind::PropertyDeclaration {
-            return prop_decl.loc.pos() > a.loc.pos();
-        }
-        cur = a.parent();
-    }
-    false
-}
-
 #[derive(Debug, PartialEq, Eq)]
 pub(crate) enum ModuleMemberLookup {
     Found,

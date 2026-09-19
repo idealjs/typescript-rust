@@ -73,6 +73,7 @@ impl Checker {
             self.check_binary_relational_operator_error(node, data);
             use tsox_frontend::ast::SyntaxKind::*;
 
+            let mut readonly_index_reported = false;
             if data.operator_token.kind == EqualsToken
                 && data.left.kind == SyntaxKind::PropertyAccessExpression
             {
@@ -88,6 +89,53 @@ impl Checker {
                             CANNOT_ASSIGN_TO_0_BECAUSE_IT_IS_A_READ_ONLY_PROPERTY,
                             vec![name_text.to_string()],
                         ));
+                    } else if self.is_readonly_index_write(&obj_type, name_text) {
+                        // Go errorIfWritingToReadonlyIndex（点访问落 string 索引）：
+                        // 只报 2542，写类型检查照 Go checkReferenceExpression 阻断
+                        let type_name = self.type_to_string(&obj_type);
+                        let file = self.current_file.clone();
+                        self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                            file,
+                            data.left.loc,
+                            tsox_core::diagnostics::messages_generated::
+                                INDEX_SIGNATURE_IN_TYPE_0_ONLY_PERMITS_READING,
+                            vec![type_name],
+                        ));
+                        readonly_index_reported = true;
+                    }
+                }
+            }
+            if Self::is_assignment_operator(data.operator_token.kind)
+                && data.left.kind == SyntaxKind::ElementAccessExpression
+            {
+                if let tsox_frontend::ast::NodeData::ElementAccessExpression(ea) = &data.left.data
+                {
+                    let obj_type = self.get_type_of_node(&ea.expression);
+                    let (arg_name, key_flags) = match &ea.argument_expression.data {
+                        tsox_frontend::ast::NodeData::StringLiteral(sl) => {
+                            (Some(sl.text.clone()), TypeFlags::String)
+                        }
+                        tsox_frontend::ast::NodeData::Identifier(id) => {
+                            (Some(id.text.clone()), TypeFlags::String)
+                        }
+                        tsox_frontend::ast::NodeData::NumericLiteral(nl) => {
+                            (Some(nl.text.clone()), TypeFlags::Number)
+                        }
+                        _ => (None, TypeFlags::String),
+                    };
+                    if let Some(arg_name) = arg_name
+                        && self.is_readonly_index_write_kind(&obj_type, &arg_name, key_flags)
+                    {
+                        let type_name = self.type_to_string(&obj_type);
+                        let file = self.current_file.clone();
+                        self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                            file,
+                            data.left.loc,
+                            tsox_core::diagnostics::messages_generated::
+                                INDEX_SIGNATURE_IN_TYPE_0_ONLY_PERMITS_READING,
+                            vec![type_name],
+                        ));
+                        readonly_index_reported = true;
                     }
                 }
             }
@@ -147,6 +195,17 @@ impl Checker {
                 }
             }
 
+            if data.operator_token.kind == EqualsToken
+                && matches!(
+                    data.left.kind,
+                    SyntaxKind::ArrayLiteralExpression | SyntaxKind::ObjectLiteralExpression
+                )
+            {
+                let rhs_type = self.get_type_of_node(&data.right);
+                self.check_destructuring_assignment(&data.left, &rhs_type);
+                assigned_target_blocks_type_check = true;
+            }
+
             if Self::is_assignment_operator(data.operator_token.kind)
                 && data.left.kind == SyntaxKind::Identifier
             {
@@ -188,6 +247,7 @@ impl Checker {
 
             if Self::is_assignment_operator(data.operator_token.kind)
                 && !assigned_target_blocks_type_check
+                && !readonly_index_reported
             {
                 self.check_assignment_compat(node, data);
             }

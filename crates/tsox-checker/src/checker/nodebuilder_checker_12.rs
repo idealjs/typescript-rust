@@ -2187,6 +2187,10 @@ impl Checker {
             ) => Arc::clone(tn),
             _ => return None,
         };
+        // Go 错误显示：变量 typeof 查询注解按结构展开（别名/枚举名保留）
+        if tn.kind == tsox_frontend::ast::SyntaxKind::TypeQuery {
+            return None;
+        }
         self.equivalent_annotation_text(&tn, resolved)
     }
 

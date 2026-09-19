@@ -178,10 +178,11 @@ impl Checker {
             .iter()
             .filter_map(|tp| self.program.symbol_map().symbol_of(tp).map(Arc::clone))
             .collect();
-        symbols
+        let tps: Vec<Arc<Type>> = symbols
             .iter()
             .map(|s| self.get_type_parameter_from_symbol(s))
-            .collect()
+            .collect();
+        self.instantiate_declaration_type_parameters(tps)
     }
 
     pub fn create_function_or_constructor_type(
@@ -321,5 +322,129 @@ impl Checker {
         };
 
         self.get_widened_type(&inferred)
+    }
+
+    /// Go getWidenedTypeForVariableLikeDeclaration 的绑定模式分支：
+    /// 数组模式 → 元组（默认值取加宽型，rest 元素成数组尾）；对象模式 → 匿名对象
+    pub fn implied_type_for_binding_pattern(&mut self, pattern: &Arc<Node>) -> Arc<Type> {
+        match &pattern.data {
+            NodeData::BindingPattern(bp) => match pattern.kind {
+                SyntaxKind::ArrayBindingPattern => {
+                    let mut element_types: Vec<Arc<Type>> = Vec::new();
+                    let mut infos: Vec<TupleElementInfo> = Vec::new();
+                    for el in bp.elements.iter() {
+                        if el.kind == SyntaxKind::OmittedExpression {
+                            element_types.push(self.any_type());
+                            infos.push(TupleElementInfo {
+                                label: None,
+                                flags: ElementFlags::Optional,
+                                labeled_declaration: None,
+                                type_: None,
+                            });
+                            continue;
+                        }
+                        let NodeData::BindingElement(bd) = &el.data else {
+                            element_types.push(self.any_type());
+                            infos.push(TupleElementInfo {
+                                label: None,
+                                flags: ElementFlags::Required,
+                                labeled_declaration: None,
+                                type_: None,
+                            });
+                            continue;
+                        };
+                        let (t, optional) = match &bd.initializer {
+                            Some(init) => {
+                                let it = self.get_type_of_node(init);
+                                (self.get_widened_type(&it), true)
+                            }
+                            None => (self.any_type(), false),
+                        };
+                        let elem = if bd.dot_dot_dot_token.is_some() {
+                            let rest_arr = self.create_array_type(Arc::clone(&t));
+                            infos.push(TupleElementInfo {
+                                label: None,
+                                flags: ElementFlags::Rest,
+                                labeled_declaration: None,
+                                type_: Some(Arc::clone(&rest_arr)),
+                            });
+                            rest_arr
+                        } else {
+                            infos.push(TupleElementInfo {
+                                label: None,
+                                flags: if optional {
+                                    ElementFlags::Optional
+                                } else {
+                                    ElementFlags::Required
+                                },
+                                labeled_declaration: None,
+                                type_: Some(Arc::clone(&t)),
+                            });
+                            t
+                        };
+                        element_types.push(elem);
+                    }
+                    self.create_tuple_type_ex(element_types, infos, false)
+                }
+                SyntaxKind::ObjectBindingPattern => {
+                    let mut symbol_table = SymbolTable::new();
+                    let mut props: Vec<Arc<Symbol>> = Vec::new();
+                    for el in bp.elements.iter() {
+                        let NodeData::BindingElement(bd) = &el.data else {
+                            continue;
+                        };
+                        let key = bd
+                            .property_name
+                            .as_ref()
+                            .map(|p| p.text().to_string())
+                            .or_else(|| bd.name.as_ref().map(|n| n.text().to_string()))
+                            .unwrap_or_default();
+                        if key.is_empty() {
+                            continue;
+                        }
+                        let (t, optional) = match &bd.initializer {
+                            Some(init) => {
+                                let it = self.get_type_of_node(init);
+                                (self.get_widened_type(&it), true)
+                            }
+                            None => (self.any_type(), false),
+                        };
+                        let mut flags = SymbolFlags::Property;
+                        if optional {
+                            flags |= SymbolFlags::Optional;
+                        }
+                        let mut sym = Symbol::new(flags, key.clone());
+                        sym.declarations.push(Arc::clone(el));
+                        let sym = Arc::new(sym);
+                        self.value_symbol_links.insert(
+                            &sym,
+                            ValueSymbolLinks {
+                                resolved_type: Some(t),
+                                ..Default::default()
+                            },
+                        );
+                        symbol_table.insert(key, Arc::clone(&sym));
+                        props.push(sym);
+                    }
+                    Arc::new(Type {
+                        flags: TypeFlags::Object,
+                        object_flags: ObjectFlags::Anonymous,
+                        id: crate::checker::types::next_type_id(),
+                        symbol: None,
+                        alias: None,
+                        data: TypeData::Object(ObjectTypeData {
+                            structured: StructuredTypeData {
+                                members: symbol_table,
+                                properties: props,
+                                ..Default::default()
+                            },
+                            ..Default::default()
+                        }),
+                    })
+                }
+                _ => self.get_any_type(),
+            },
+            _ => self.get_any_type(),
+        }
     }
 }

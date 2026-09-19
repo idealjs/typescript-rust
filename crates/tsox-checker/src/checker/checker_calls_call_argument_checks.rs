@@ -3,6 +3,27 @@
 use crate::checker::checker_calls::*;
 
 impl Checker {
+    /// 显式类型实参的期望数量：按首个声明的类型参数表。增强声明的同名 T
+    /// 是独立符号，按并集计数会让 Set<T>（4 处增强）虚报 4 个
+    pub(crate) fn first_declared_type_parameter_count(
+        &self,
+        class_sym: &Arc<tsox_frontend::ast::Symbol>,
+    ) -> usize {
+        class_sym
+            .declarations
+            .iter()
+            .find_map(|d| match &d.data {
+                tsox_frontend::ast::NodeData::InterfaceDeclaration(i) => {
+                    i.type_parameters.as_ref().map(|t| t.len())
+                }
+                tsox_frontend::ast::NodeData::ClassDeclaration(c) => {
+                    c.type_parameters.as_ref().map(|t| t.len())
+                }
+                _ => None,
+            })
+            .unwrap_or(0)
+    }
+
     pub(crate) fn check_explicit_type_argument_count(
         &mut self,
         node: &Arc<Node>,
@@ -16,11 +37,12 @@ impl Checker {
             self.get_return_type_of_signature(&sig)
                 .and_then(|rt| rt.symbol.clone())
                 .map(|class_sym| {
-                    let tps = self.declared_type_parameter_types(&class_sym);
-                    if tps.is_empty() {
+                    let first_decl_count =
+                        self.first_declared_type_parameter_count(&class_sym);
+                    if first_decl_count == 0 {
                         sig.type_parameters.len()
                     } else {
-                        tps.len()
+                        first_decl_count
                     }
                 })
                 .unwrap_or_else(|| sig.type_parameters.len())
@@ -101,12 +123,15 @@ impl Checker {
                 self.check_contextual_elements(arg, &pt, arg.loc);
             }
             // 上下文敏感实参（箭头/函数表达式含无注解参数）：用固定后的参数类型重定型，
-            // 与 infer_type_arguments 两阶段一致（节点缓存的类型是未固定形态）
-            let arg_type = if !sig.type_parameters.is_empty()
-                && !inferred_types.is_empty()
-                && self.is_context_sensitive(arg)
-            {
-                self.type_of_context_sensitive_arg(arg, &param_type)
+            // 与 infer_type_arguments 两阶段一致（节点缓存的类型是未固定形态）；
+            // 泛型 callee 的实参在 walk 期被 check_call_arg_with_context 跳过
+            //（防未固定 T 污染），此处定型完成后补跑表达式检查（体内语句诊断）
+            let arg_type = if self.is_context_sensitive(arg) {
+                let t = self.type_of_context_sensitive_arg(arg, &param_type);
+                if !sig.type_parameters.is_empty() {
+                    self.check_expression(arg);
+                }
+                t
             } else {
                 self.get_type_of_node(arg)
             };

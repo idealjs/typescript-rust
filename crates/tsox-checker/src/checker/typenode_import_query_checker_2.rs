@@ -8,6 +8,37 @@ impl Checker {
             return self.error_type();
         };
 
+        // Go checkExpressionWithTypeArguments：`typeof this`/`typeof this.x` 的
+        // this 根部按 this 表达式求值（静态块/静态成员=构造侧类型）
+        {
+            let mut leftmost = &d.expr_name;
+            let mut segments: Vec<Arc<Node>> = Vec::new();
+            loop {
+                match &leftmost.data {
+                    NodeData::QualifiedName(q) => {
+                        segments.push(Arc::clone(&q.right));
+                        leftmost = &q.left;
+                    }
+                    _ => break,
+                }
+            }
+            if leftmost.kind == SyntaxKind::Identifier && leftmost.text() == "this" {
+                let mut t = self.this_expression_type(&d.expr_name);
+                for seg in segments.iter().rev() {
+                    let name = self.node_text(seg);
+                    match self.get_property_of_type(&t, &name) {
+                        Some(prop) => t = self.get_type_of_symbol(&prop),
+                        None => {
+                            report_unresolved(self, seg);
+                            return self.error_type();
+                        }
+                    }
+                }
+                let widened = self.get_widened_type(&t);
+                return self.get_regular_type_of_literal_type(&widened);
+            }
+        }
+
         fn report_unresolved(c: &mut Checker, seg: &Arc<Node>) {
             if c.ts2304_reporting_allowed_for(seg) {
                 use tsox_core::diagnostics::messages_generated::CANNOT_FIND_NAME_0;
@@ -33,10 +64,18 @@ impl Checker {
         } else {
             match self.resolve_qualified_symbol(&d.expr_name) {
                 Some(s) => s,
-                None => {
-                    report_unresolved(self, &d.expr_name);
-                    return self.error_type();
-                }
+                // Go checkExpressionWithTypeArguments：限定名按值位解析最左实体后
+                // 逐段取属性类型（`typeof Symbol.obs` 全局扩充成员）
+                None => match self.resolve_qualified_via_property_chain(&d.expr_name) {
+                    Some(t) => {
+                        let widened = self.get_widened_type(&t);
+                        return self.get_regular_type_of_literal_type(&widened);
+                    }
+                    None => {
+                        report_unresolved(self, &d.expr_name);
+                        return self.error_type();
+                    }
+                },
             }
         };
 
@@ -215,5 +254,49 @@ impl Checker {
             return t;
         }
         self.error_type()
+    }
+
+    /// Go checkExpressionWithTypeArguments 的限定名回退：最左 Identifier 按
+    /// 值位解析，其余段作为属性逐段取类型（`typeof Symbol.obs` 全局扩充成员）
+    pub(crate) fn resolve_qualified_via_property_chain(
+        &mut self,
+        entity: &Arc<Node>,
+    ) -> Option<Arc<Type>> {
+        let mut segments: Vec<Arc<Node>> = Vec::new();
+        let mut leftmost = entity;
+        loop {
+            match &leftmost.data {
+                NodeData::QualifiedName(q) => {
+                    segments.push(Arc::clone(&q.right));
+                    leftmost = &q.left;
+                }
+                _ => break,
+            }
+        }
+        if leftmost.kind != SyntaxKind::Identifier {
+            return None;
+        }
+        let base = self.resolve_identifier(leftmost)?;
+        let base_type = self
+            .value_symbol_links
+            .get(&base)
+            .and_then(|l| l.resolved_type.clone())
+            .or_else(|| {
+                if base
+                    .flags
+                    .intersects(SymbolFlags::FunctionScopedVariable | SymbolFlags::BlockScopedVariable)
+                {
+                    Some(self.get_type_of_symbol(&base))
+                } else {
+                    None
+                }
+            })?;
+        let mut t = base_type;
+        for seg in segments.iter().rev() {
+            let name = self.get_property_name_from_node(seg);
+            let prop = self.get_property_of_type(&t, &name)?;
+            t = self.get_type_of_symbol(&prop);
+        }
+        Some(t)
     }
 }

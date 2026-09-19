@@ -9,7 +9,9 @@ impl Checker {
         symbol: &Arc<Symbol>,
         name: &str,
     ) {
-        if is_assignment_target(node) {
+        if crate::checker::utilities::get_assignment_target_kind(node)
+            == crate::checker::utilities::AssignmentKind::Definite
+        {
             return;
         }
 
@@ -27,27 +29,26 @@ impl Checker {
         }
 
         let declaration = symbol.value_declaration.as_ref().or_else(|| {
-            symbol
-                .declarations
-                .iter()
-                .find(|d| d.kind == SyntaxKind::VariableDeclaration)
+            symbol.declarations.iter().find(|d| {
+                matches!(
+                    d.kind,
+                    SyntaxKind::VariableDeclaration | SyntaxKind::BindingElement
+                )
+            })
         });
         let Some(declaration) = declaration else {
             return;
         };
 
-        let tsox_frontend::ast::NodeData::VariableDeclaration(vd) = &declaration.data else {
-            return;
-        };
-
-        if vd.type_node.is_none() && vd.initializer.is_none() {
-            return;
-        }
-
+        // 纯声明（let x;）auto 型走下面类型守卫；此处只拦 ambient/断言声明
+        let has_exclamation = matches!(
+            &declaration.data,
+            tsox_frontend::ast::NodeData::VariableDeclaration(vd) if vd.exclamation_token.is_some()
+        );
         if self
             .get_combined_modifier_flags(declaration)
             .contains(ModifierFlags::Ambient)
-            || vd.exclamation_token.is_some()
+            || has_exclamation
         {
             return;
         }

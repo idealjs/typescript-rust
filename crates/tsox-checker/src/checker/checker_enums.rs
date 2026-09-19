@@ -13,6 +13,23 @@ use crate::checker::checker::*;
 impl Checker {
     pub(crate) fn check_enum_member(&mut self, node: &Arc<Node>) {
         if let tsox_frontend::ast::NodeData::EnumMember(data) = &node.data {
+            // Go checkEnumDeclaration → checkSourceElements：枚举成员计算名
+            // 急切检查（表达式 TS2304/TS2464 + 非字面量 TS1164）
+            let name = &data.name;
+            if name.kind == SyntaxKind::ComputedPropertyName {
+                if let NodeData::ComputedPropertyName(cd) = &name.data
+                    && !tsox_frontend::ast::is_string_or_numeric_literal_like(&cd.expression)
+                {
+                    let file = self.current_file.clone();
+                    self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                        file,
+                        name.loc,
+                        tsox_core::diagnostics::messages_generated::
+                            COMPUTED_PROPERTY_NAMES_ARE_NOT_ALLOWED_IN_ENUMS,
+                        vec![],
+                    ));
+                }
+            }
             if let Some(init) = &data.initializer {
                 self.check_expression(init);
 
@@ -129,6 +146,20 @@ impl Checker {
         auto_value: Option<f64>,
         _previous: Option<&Arc<Node>>,
     ) -> EvalResult {
+        // Go computeEnumMemberValue：非字面量计算名报 TS1164
+        if let Some(name) = member.name()
+            && name.kind == SyntaxKind::ComputedPropertyName
+            && let tsox_frontend::ast::NodeData::ComputedPropertyName(cd) = &name.data
+            && !tsox_frontend::ast::is_string_or_numeric_literal_like(&cd.expression)
+        {
+            self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                self.current_file.clone(),
+                name.loc,
+                tsox_core::diagnostics::messages_generated::
+                    COMPUTED_PROPERTY_NAMES_ARE_NOT_ALLOWED_IN_ENUMS,
+                vec![],
+            ));
+        }
         let has_initializer =
             matches!(&member.data, NodeData::EnumMember(d) if d.initializer.is_some());
         if has_initializer {

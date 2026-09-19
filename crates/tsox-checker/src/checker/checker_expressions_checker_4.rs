@@ -77,6 +77,49 @@ impl Checker {
                 .parent()
                 .as_ref()
                 .is_some_and(|p| p.kind == SyntaxKind::ExportAssignment);
+
+            // Go resolveEntityName 尾段：值位引用 type-only 别名报 TS1362/1363
+            //（getTypeOnlyAliasDeclarationEx 沿别名链回溯，export-star 中转亦可命中）
+            if symbol.flags.contains(SymbolFlags::Alias)
+                && !symbol.flags.contains(SymbolFlags::VALUE)
+                && !is_type_position_use_site(node)
+            {
+                if let Some((type_only_decl, is_export_form)) =
+                    self.type_only_alias_value_declaration(&symbol)
+                {
+                    let message = if is_export_form {
+                        tsox_core::diagnostics::messages_generated::
+                            X_0_CANNOT_BE_USED_AS_A_VALUE_BECAUSE_IT_WAS_EXPORTED_USING_EXPORT_TYPE
+                    } else {
+                        tsox_core::diagnostics::messages_generated::
+                            X_0_CANNOT_BE_USED_AS_A_VALUE_BECAUSE_IT_WAS_IMPORTED_USING_IMPORT_TYPE
+                    };
+                    let mut diag = tsox_frontend::ast::Diagnostic::new(
+                        self.current_file.clone(),
+                        node.loc,
+                        message,
+                        vec![name.to_string()],
+                    );
+                    let related_message = if is_export_form {
+                        tsox_core::diagnostics::messages_generated::X_0_WAS_EXPORTED_HERE
+                    } else {
+                        tsox_core::diagnostics::messages_generated::X_0_WAS_IMPORTED_HERE
+                    };
+                    let related_file = self
+                        .get_source_file_of_node(&type_only_decl)
+                        .or_else(|| self.current_file.clone());
+                    diag.related_information
+                        .push(tsox_frontend::ast::Diagnostic::new(
+                            related_file,
+                            type_only_decl.loc,
+                            related_message,
+                            vec![name.to_string()],
+                        ));
+                    self.diagnostics.add(diag);
+                    return;
+                }
+            }
+
             let base = self.resolve_alias_base(Arc::clone(&symbol));
 
             let is_true_namespace = base.declarations.iter().any(|d| {
@@ -278,4 +321,18 @@ impl Checker {
         let mut super_seen = false;
         visit(self, body, &mut super_seen);
     }
+}
+
+fn is_type_position_use_site(node: &Arc<Node>) -> bool {
+    let mut cur = node.parent();
+    while let Some(p) = cur {
+        match p.kind {
+            SyntaxKind::TypeReference
+            | SyntaxKind::TypeQuery
+            | SyntaxKind::ImportType
+            | SyntaxKind::QualifiedName => return true,
+            _ => break,
+        }
+    }
+    false
 }

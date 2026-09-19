@@ -12,6 +12,8 @@ impl Parser {
                 | SyntaxKind::FunctionKeyword
                 | SyntaxKind::ClassKeyword
                 | SyntaxKind::EnumKeyword => return true,
+                SyntaxKind::UsingKeyword => return self.is_using_declaration(),
+                SyntaxKind::AwaitKeyword => return self.is_await_using_declaration(),
                 SyntaxKind::InterfaceKeyword | SyntaxKind::TypeKeyword => {
                     return self.next_token_is_identifier_on_same_line();
                 }
@@ -95,8 +97,21 @@ impl Parser {
     }
 
     pub(crate) fn is_identifier(&self) -> bool {
-        // Go isIdentifier：token > LastReservedWord（保留字不可作标识符，
-        // yield/await/上下文关键字可以）
+        // Go isIdentifier：yield 在 [Yield] 上下文、await 在 [Await] 上下文
+        // 视为关键字不可作标识符；绑定位走 isBindingIdentifier（binder 再拒绝）
+        if self.token == SyntaxKind::YieldKeyword && self.yield_context {
+            return false;
+        }
+        if self.token == SyntaxKind::AwaitKeyword && self.await_context {
+            return false;
+        }
+        if is_reserved_word_kind(self.token) {
+            return false;
+        }
+        self.token == SyntaxKind::Identifier || is_keyword(self.token)
+    }
+
+    pub(crate) fn is_binding_identifier(&self) -> bool {
         if is_reserved_word_kind(self.token) {
             return false;
         }
@@ -104,7 +119,7 @@ impl Parser {
     }
 
     pub(crate) fn is_binding_identifier_or_pattern(&self) -> bool {
-        self.is_identifier()
+        self.is_binding_identifier()
             || self.token == SyntaxKind::PrivateIdentifier
             || self.token == SyntaxKind::OpenBracketToken
             || self.token == SyntaxKind::OpenBraceToken
@@ -205,8 +220,41 @@ impl Parser {
             || self.token == SyntaxKind::PrivateIdentifier
     }
 
+
+    /// Go parser contextFlags：节点创建时的 await/yield 上下文
+    pub(crate) fn context_flags_now(&self) -> crate::ast::node_flags::NodeFlags {
+        let mut flags = crate::ast::node_flags::NodeFlags::empty();
+        if self.await_context {
+            flags |= crate::ast::node_flags::NodeFlags::AwaitContext;
+        }
+        if self.yield_context {
+            flags |= crate::ast::node_flags::NodeFlags::YieldContext;
+        }
+        flags
+    }
+
     pub(crate) fn parse_identifier(&mut self) -> Arc<Node> {
         self.parse_identifier_with_private_diagnostic(None)
+    }
+
+    /// Go parseBindingIdentifier：绑定位的 await/yield 一律放行（binder 报 TS1359）
+    pub(crate) fn parse_binding_identifier_with_private_diagnostic(
+        &mut self,
+        private_msg: Option<&'static tsox_core::diagnostics::Message>,
+    ) -> Arc<Node> {
+        if self.is_binding_identifier() {
+            let text = self.scanner.token_value();
+            let pos = self.token_pos();
+            let end = self.token_end();
+            self.next_token();
+            return Arc::new(Node::with_loc_flags(
+                SyntaxKind::Identifier,
+                NodeData::Identifier(IdentifierData { text }),
+                TextRange::new(pos, end),
+                self.context_flags_now(),
+            ));
+        }
+        self.parse_identifier_with_private_diagnostic(private_msg)
     }
 
     pub(crate) fn parse_identifier_with_private_diagnostic(
@@ -237,10 +285,11 @@ impl Parser {
         let pos = self.token_pos();
         let end = self.token_end();
         self.next_token();
-        Arc::new(Node::with_loc(
+        Arc::new(Node::with_loc_flags(
             SyntaxKind::Identifier,
             NodeData::Identifier(IdentifierData { text }),
             TextRange::new(pos, end),
+            self.context_flags_now(),
         ))
     }
 
@@ -366,6 +415,7 @@ impl Parser {
             SyntaxKind::AsyncKeyword => ModifierFlags::Async,
             SyntaxKind::ConstKeyword => ModifierFlags::Const,
             SyntaxKind::AccessorKeyword => ModifierFlags::Accessor,
+            SyntaxKind::OverrideKeyword => ModifierFlags::Override,
             _ => ModifierFlags::empty(),
         }
     }

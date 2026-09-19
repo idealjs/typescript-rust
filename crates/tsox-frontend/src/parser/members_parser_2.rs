@@ -186,6 +186,7 @@ impl Parser {
                 | SyntaxKind::PrivateKeyword
                 | SyntaxKind::ProtectedKeyword
                 | SyntaxKind::AbstractKeyword
+                | SyntaxKind::OverrideKeyword
         ) {
             let mut s = self.scanner.clone();
             s.scan();
