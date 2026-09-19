@@ -255,18 +255,32 @@ impl Checker {
                                 );
                             }
                             self.interface_extends_reported.insert(dedup_key);
-                            let base_name = base
-                                .symbol
-                                .as_ref()
-                                .map(|s| s.name.clone())
-                                .unwrap_or_default();
+                            let derived_display = {
+                                let tps = interface_decls.iter().find_map(|d| {
+                                    match &d.data {
+                                        NodeData::InterfaceDeclaration(d) => {
+                                            d.type_parameters.clone()
+                                        }
+                                        _ => None,
+                                    }
+                                });
+                                self.generic_display_name(&symbol.name, tps.as_ref())
+                            };
+                            let base_display =
+                                self.node_source_text(type_ref_node).unwrap_or_else(|| {
+                                    base
+                                        .symbol
+                                        .as_ref()
+                                        .map(|s| s.name.clone())
+                                        .unwrap_or_default()
+                                });
                             let file = self.current_file.clone();
                             let mut diag = tsox_frontend::ast::Diagnostic::new(
                                         file,
                                         name_loc,
                                         tsox_core::diagnostics::messages_generated::
                                             INTERFACE_0_INCORRECTLY_EXTENDS_INTERFACE_1,
-                                        vec![symbol.name.clone(), base_name],
+                                        vec![derived_display, base_display],
                                     );
 
                             let dt_str = self.type_to_string(&dt);

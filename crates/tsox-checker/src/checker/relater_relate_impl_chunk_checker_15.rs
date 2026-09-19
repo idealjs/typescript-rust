@@ -230,25 +230,6 @@ impl Checker {
         let related = self
             .signatures_related_to(source, target, SignatureKind::Construct, relation)
             .is_true();
-        if !related && self.relater_chain_active {
-            let source_sigs = self.get_signatures_of_type(source, SignatureKind::Construct);
-            let target_sigs = self.get_signatures_of_type(target, SignatureKind::Construct);
-            if let (Some(ss), Some(ts)) = (source_sigs.first(), target_sigs.first())
-                && ss.min_argument_count.max(0) as usize > ts.parameters.len()
-            {
-                let s_str = self.signature_display_arrow(ss, "new ");
-                let t_str = self.signature_display_arrow(ts, "new ");
-                self.relater_report_error(
-                    tsox_core::diagnostics::messages_generated::TYPE_0_IS_NOT_ASSIGNABLE_TO_TYPE_1,
-                    vec![s_str, t_str],
-                );
-                self.relater_report_error(
-                    tsox_core::diagnostics::messages_generated::
-                        TYPES_OF_CONSTRUCT_SIGNATURES_ARE_INCOMPATIBLE,
-                    vec![],
-                );
-            }
-        }
         related
     }
 

@@ -398,6 +398,50 @@ impl Checker {
         }
     }
 
+    pub(crate) fn generic_display_name(
+        &self,
+        name: &str,
+        type_parameters: Option<&Arc<tsox_frontend::ast::NodeList>>,
+    ) -> String {
+        let Some(tps) = type_parameters else {
+            return name.to_string();
+        };
+        let names: Vec<&str> = tps
+            .nodes
+            .iter()
+            .filter_map(|tp| match &tp.data {
+                tsox_frontend::ast::NodeData::TypeParameterDeclaration(d) => {
+                    Some(d.name.text())
+                }
+                _ => None,
+            })
+            .collect();
+        if names.is_empty() {
+            name.to_string()
+        } else {
+            format!("{name}<{}>", names.join(", "))
+        }
+    }
+
+    pub(crate) fn extends_heritage_expr_of(
+        &self,
+        class_node: &Arc<Node>,
+    ) -> Option<Arc<Node>> {
+        let heritage = match &class_node.data {
+            tsox_frontend::ast::NodeData::ClassDeclaration(data) => data.heritage_clauses.clone(),
+            tsox_frontend::ast::NodeData::ClassExpression(data) => data.heritage_clauses.clone(),
+            _ => return None,
+        };
+        heritage?.iter().find_map(|clause| {
+            if let tsox_frontend::ast::NodeData::HeritageClause(hc) = &clause.data
+                && hc.token == SyntaxKind::ExtendsKeyword
+            {
+                return hc.types.iter().next().cloned();
+            }
+            None
+        })
+    }
+
     pub(crate) fn class_member_static_by_name(
         &self,
         class: &Arc<Node>,

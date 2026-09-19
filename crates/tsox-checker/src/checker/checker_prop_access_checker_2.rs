@@ -121,6 +121,11 @@ impl Checker {
         let display_type = if obj_type.flags.contains(TypeFlags::IndexedAccess) {
             self.constraint_of_indexed_access(&obj_type)
                 .unwrap_or_else(|| Arc::clone(&obj_type))
+        } else if crate::checker::mapper::is_this_type_parameter(&obj_type)
+            && let crate::checker::types::TypeData::TypeParameter(tp) = &obj_type.data
+            && let Some(constraint) = &tp.constraint
+        {
+            Arc::clone(constraint)
         } else {
             Arc::clone(&obj_type)
         };

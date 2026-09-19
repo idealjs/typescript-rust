@@ -151,7 +151,11 @@ impl Checker {
             .as_ref()
             .map(|n| n.text().to_string())
             .unwrap_or_default();
-        let base_name = Self::class_name_text(&base_node);
+        let class_name = self.generic_display_name(&class_name, data.type_parameters.as_ref());
+        let base_name = self
+            .extends_heritage_expr_of(node)
+            .and_then(|e| self.node_source_text(&e))
+            .unwrap_or_else(|| Self::class_name_text(&base_node));
 
         if !node.has_syntactic_modifier(ModifierFlags::Abstract) {
             let mut missing: Vec<String> = Vec::new();
