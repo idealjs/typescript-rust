@@ -235,8 +235,22 @@ impl Checker {
                     let assignable = self.is_type_assignable_to(&init_type, &annotation_type);
                     let mut reported_error = false;
 
-                    if let Some(excess_name) =
-                        self.get_excess_property_name(&init_type, &annotation_type)
+                    let mut init_node: &Arc<Node> = init;
+                    while init_node.kind == SyntaxKind::ParenthesizedExpression {
+                        let inner = match &init_node.data {
+                            tsox_frontend::ast::NodeData::ParenthesizedExpression(p) => {
+                                Some(&p.expression)
+                            }
+                            _ => None,
+                        };
+                        match inner {
+                            Some(i) => init_node = i,
+                            None => break,
+                        }
+                    }
+                    if init_node.kind == SyntaxKind::ObjectLiteralExpression
+                        && let Some(excess_name) =
+                            self.get_excess_property_name(&init_type, &annotation_type)
                     {
                         let file = self.current_file.clone();
                         let annot_str = self.type_to_string(&annotation_type);

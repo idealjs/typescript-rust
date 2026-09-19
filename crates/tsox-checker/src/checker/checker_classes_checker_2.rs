@@ -66,6 +66,14 @@ impl Checker {
             .iter()
             .map(|s| self.get_type_parameter_from_symbol(s))
             .collect();
+        if !arg_types.is_empty() {
+            let instance_mut = Arc::as_ptr(&instance) as *mut crate::checker::types::Type;
+            unsafe {
+                if let crate::checker::types::TypeData::Object(o) = &mut (*instance_mut).data {
+                    o.type_arguments = arg_types.to_vec();
+                }
+            }
+        }
         self.mark_structured_members_instantiated(&instance, symbol, class_tps, &tp_types, arg_types);
         instance
     }

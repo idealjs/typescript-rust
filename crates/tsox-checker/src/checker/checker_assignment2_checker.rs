@@ -142,8 +142,10 @@ impl Checker {
 
     pub(crate) fn write_type_of_property_symbol(
         &mut self,
+        owner: Option<&Arc<Type>>,
         prop: &Arc<tsox_frontend::ast::Symbol>,
     ) -> Arc<Type> {
+        let mut t = None;
         if prop.flags.contains(SymbolFlags::SetAccessor)
             && let Some(setter) = prop
                 .declarations
@@ -154,16 +156,33 @@ impl Checker {
             && let tsox_frontend::ast::NodeData::ParameterDeclaration(pd) = &param.data
             && let Some(tn) = &pd.type_node
         {
-            let t = self.get_type_from_type_node(tn);
+            let raw = self.get_type_from_type_node(tn);
             let mapped = self
                 .value_symbol_links
                 .get(prop)
                 .and_then(|l| l.mapper.clone())
-                .map(|m| m.map(&t))
-                .unwrap_or(t);
-            return mapped;
+                .map(|m| m.map(&raw))
+                .unwrap_or(raw);
+            t = Some(mapped);
         }
-        self.get_type_of_symbol(prop)
+        let base = t.unwrap_or_else(|| self.get_type_of_symbol(prop));
+        let Some(owner) = owner else {
+            return base;
+        };
+        let Some(obj) = owner.as_object() else {
+            return base;
+        };
+        if obj.type_arguments.is_empty() {
+            return base;
+        }
+        let Some(owner_sym) = owner.symbol.clone() else {
+            return base;
+        };
+        let decl_tps = self.declared_type_parameter_types(&owner_sym);
+        if decl_tps.is_empty() || decl_tps.len() != obj.type_arguments.len() {
+            return base;
+        }
+        self.substitute_infer_type_parameters(&base, &decl_tps, &obj.type_arguments)
     }
 
     // setter 目标的赋值报错文案：联合写类型去掉 undefined 成员
@@ -221,13 +240,13 @@ impl Checker {
                 let obj_type = self.get_type_of_node(&pa.expression);
 
                 self.get_property_of_type(&obj_type, &pa.name.text())
-                    .map(|sym| self.write_type_of_property_symbol(&sym))
+                    .map(|sym| self.write_type_of_property_symbol(Some(&obj_type), &sym))
             }
             tsox_frontend::ast::NodeData::ElementAccessExpression(ea) => {
                 if let Some(name) = Self::element_access_property_key(&ea.argument_expression) {
                     let obj_type = self.get_type_of_node(&ea.expression);
                     if let Some(prop) = self.get_property_of_type(&obj_type, &name) {
-                        return Some(self.write_type_of_property_symbol(&prop));
+                        return Some(self.write_type_of_property_symbol(Some(&obj_type), &prop));
                     }
                 }
                 let obj_type = self.get_type_of_node(&ea.expression);

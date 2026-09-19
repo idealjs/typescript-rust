@@ -226,8 +226,7 @@ impl Checker {
                 if let Some(target) = self.declared_annotation_type_of(&data.left) {
                     if matches!(
                         data.right.kind,
-                        SyntaxKind::ObjectLiteralExpression
-                            | SyntaxKind::ArrayLiteralExpression
+                        SyntaxKind::ArrayLiteralExpression
                             | SyntaxKind::TypeAssertionExpression
                             | SyntaxKind::AsExpression
                     ) {

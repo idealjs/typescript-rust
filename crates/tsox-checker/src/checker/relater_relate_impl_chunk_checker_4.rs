@@ -143,14 +143,6 @@ impl Checker {
             return true;
         }
 
-        if t.contains(TypeFlags::TypeParameter) {
-            if let Some(constraint) = self.get_constraint_of_type_parameter(target) {
-                if self.is_type_related_to(source, &constraint, relation) {
-                    return true;
-                }
-            }
-        }
-
         if t.contains(TypeFlags::IndexedAccess) {
             if let TypeData::IndexedAccess(target_access) = &target.data {
                 if s.contains(TypeFlags::IndexedAccess)

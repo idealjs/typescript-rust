@@ -101,6 +101,24 @@ impl Checker {
         }
 
         if t.contains(TypeFlags::Union) {
+            if s == TypeFlags::Boolean
+                && target
+                    .as_union_or_intersection()
+                    .is_some_and(|ui| {
+                        ui.types.iter().any(|m| m.flags.contains(TypeFlags::BooleanLiteral))
+                    })
+            {
+                let false_t = self.false_type();
+                let true_t = self.true_type();
+                let saved_chain_active = self.relater_chain_active;
+                self.relater_chain_active = false;
+                let distributed = self.is_type_related_to(&false_t, target, relation)
+                    && self.is_type_related_to(&true_t, target, relation);
+                self.relater_chain_active = saved_chain_active;
+                if distributed {
+                    return true;
+                }
+            }
             return self.type_related_to_some_type(source, target, relation);
         }
 

@@ -19,7 +19,7 @@ impl Checker {
             let inferable_symbol_kinds = sf.intersects(
                 SymbolFlags::ObjectLiteral
                     | SymbolFlags::TypeLiteral
-                    | SymbolFlags::EnumMember
+                    | SymbolFlags::ENUM
                     | SymbolFlags::ValueModule,
             );
             if inferable_symbol_kinds
@@ -52,6 +52,7 @@ impl Checker {
         target_info: &IndexInfo,
         relation: RelationKind,
     ) -> Ternary {
+        use tsox_core::diagnostics::messages_generated as msg;
         let Some(target_key) = target_info.key_type.as_ref() else {
             return Ternary::True;
         };
@@ -68,8 +69,24 @@ impl Checker {
                 continue;
             }
             let prop_type = self.get_type_of_symbol(&prop);
-            let related = self.compare_types(prop_type, Arc::clone(&target_value), relation, false);
+            let compared = if self.exact_optional_property_types
+                || prop_type.flags.contains(TypeFlags::Undefined)
+                || target_key.flags.contains(TypeFlags::Number)
+                || !prop.flags.contains(SymbolFlags::Optional)
+            {
+                prop_type
+            } else {
+                self.remove_undefined_from_union(&prop_type)
+            };
+            let related = self.compare_types(compared, Arc::clone(&target_value), relation, false);
             if related.is_false() {
+                if self.relater_chain_active {
+                    let name = crate::checker::property_name_for_display(&prop.name);
+                    self.relater_report_error(
+                        msg::PROPERTY_0_IS_INCOMPATIBLE_WITH_INDEX_SIGNATURE,
+                        vec![name],
+                    );
+                }
                 return Ternary::False;
             }
             result = result.and(related);

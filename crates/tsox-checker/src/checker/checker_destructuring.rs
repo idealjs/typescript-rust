@@ -246,7 +246,7 @@ impl Checker {
             })
     }
 
-    fn remove_undefined_from_union(&mut self, t: &Arc<Type>) -> Arc<Type> {
+    pub(crate) fn remove_undefined_from_union(&mut self, t: &Arc<Type>) -> Arc<Type> {
         if !t.is_union() {
             return Arc::clone(t);
         }

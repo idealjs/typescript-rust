@@ -248,7 +248,12 @@ impl Checker {
 
     pub fn get_base_constraint_of_type(&self, t: &Arc<Type>) -> Option<Arc<Type>> {
         match &t.data {
-            TypeData::TypeParameter(tp) => tp.constrained.resolved_base_constraint.get().cloned(),
+            TypeData::TypeParameter(tp) => tp
+                .constrained
+                .resolved_base_constraint
+                .get()
+                .cloned()
+                .or_else(|| tp.constraint.clone()),
             TypeData::Conditional(ct) => ct.constrained.resolved_base_constraint.get().cloned(),
             TypeData::IndexedAccess(ia) => ia.constrained.resolved_base_constraint.get().cloned(),
             TypeData::Index(it) => it.constrained.resolved_base_constraint.get().cloned(),

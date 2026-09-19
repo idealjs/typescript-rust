@@ -92,8 +92,16 @@ impl Checker {
             None => tsox_core::diagnostics::messages_generated::TYPE_0_IS_NOT_ASSIGNABLE_TO_TYPE_1,
         };
 
+        use tsox_core::diagnostics::messages_generated as msg;
+        let head_is_conversion_or_impl = head == msg::CLASS_0_INCORRECTLY_IMPLEMENTS_INTERFACE_1
+            || head == msg::CLASS_0_INCORRECTLY_IMPLEMENTS_CLASS_1_DID_YOU_MEAN_TO_EXTEND_1_AND_INHERIT_ITS_MEMBERS_AS_A_SUBCLASS
+            || head == msg::CONVERSION_OF_TYPE_0_TO_TYPE_1_MAY_BE_A_MISTAKE_BECAUSE_NEITHER_TYPE_SUFFICIENTLY_OVERLAPS_WITH_THE_OTHER_IF_THIS_WAS_INTENTIONAL_CONVERT_THE_EXPRESSION_TO_UNKNOWN_FIRST
+            || head == msg::ITS_INSTANCE_TYPE_0_IS_NOT_A_VALID_JSX_ELEMENT
+            || head == msg::ITS_RETURN_TYPE_0_IS_NOT_A_VALID_JSX_ELEMENT
+            || head == msg::ITS_ELEMENT_TYPE_0_IS_NOT_A_VALID_JSX_ELEMENT;
+
         let mut suppress_head = false;
-        if head_message.is_none()
+        if !head_is_conversion_or_impl
             && let Some(entry) = self.relater_error_chain.last()
         {
             let m = entry.message;

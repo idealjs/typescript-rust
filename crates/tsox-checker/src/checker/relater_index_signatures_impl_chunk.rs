@@ -214,26 +214,20 @@ impl Checker {
         key_type: &Arc<Type>,
     ) -> Option<Arc<IndexInfo>> {
         let infos = self.get_index_infos_of_type(source);
+        let mut string_index: Option<Arc<IndexInfo>> = None;
         for info in infos {
-            if let Some(info_key) = &info.key_type {
-                if Arc::ptr_eq(info_key, key_type) {
-                    return Some(info);
-                }
-
-                if info_key.flags.contains(TypeFlags::Number)
-                    && key_type.flags.contains(TypeFlags::String)
-                {
-                    return Some(info);
-                }
-
-                if info_key.flags.contains(TypeFlags::String)
-                    && key_type.flags.contains(TypeFlags::Number)
-                {
-                    return Some(info);
-                }
+            let Some(info_key) = &info.key_type else {
+                continue;
+            };
+            if info_key.flags == TypeFlags::String {
+                string_index = Some(info);
+                continue;
+            }
+            if Arc::ptr_eq(info_key, key_type) || info_key.flags == key_type.flags {
+                return Some(info);
             }
         }
-        None
+        string_index.filter(|_| key_type.flags.intersects(TypeFlags::String | TypeFlags::Number))
     }
 
     pub fn is_generic_mapped_type(&self, t: &Arc<Type>) -> bool {

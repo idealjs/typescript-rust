@@ -41,6 +41,7 @@ impl Checker {
                     let sink = MemberSink {
                         members: &mut obj.structured.members,
                         props: &mut obj.structured.properties,
+                        index_infos: &mut obj.structured.index_infos,
                     };
                     self.fill_members_into(sink, members);
                 }
@@ -77,6 +78,7 @@ impl Checker {
                         let sink = MemberSink {
                             members: &mut obj.structured.members,
                             props: &mut obj.structured.properties,
+                            index_infos: &mut obj.structured.index_infos,
                         };
                         self.fill_members_into(sink, &list);
                     }
@@ -197,6 +199,9 @@ impl Checker {
                 NodeData::ConstructorDeclaration(_) => {
                     self.add_constructor_properties(member, tbl, props);
                 }
+                NodeData::IndexSignatureDeclaration(_) => unsafe {
+                    self.add_index_signature_member(member, &mut *sink.index_infos);
+                },
                 _ => {}
             }
         }
@@ -206,4 +211,5 @@ impl Checker {
 pub(crate) struct MemberSink {
     pub(crate) members: *mut SymbolTable,
     pub(crate) props: *mut Vec<Arc<Symbol>>,
+    pub(crate) index_infos: *mut Vec<Arc<crate::checker::IndexInfo>>,
 }
