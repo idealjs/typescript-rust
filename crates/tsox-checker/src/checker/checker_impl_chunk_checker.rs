@@ -150,6 +150,7 @@ impl Checker {
             jsx_implicit_namespace: HashMap::new(),
             pending_jsx_2875: None,
             relater_error_chain: Vec::new(),
+            relater_excess_error_node: None,
             relater_chain_active: false,
             relater_depth: 0,
             deferred_constraint_depth: 0,

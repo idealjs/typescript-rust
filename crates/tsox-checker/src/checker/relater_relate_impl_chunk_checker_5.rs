@@ -123,7 +123,15 @@ impl Checker {
         }
 
         if t.contains(TypeFlags::Intersection) {
-            return self.type_related_to_each_type(source, target, relation);
+            let outer_depth = self.relater_intersection_target_depth;
+            let related = self.type_related_to_each_type(source, target, relation);
+            if related
+                && outer_depth == 0
+                && s.intersects(TypeFlags::Object | TypeFlags::Intersection)
+            {
+                return self.extra_intersection_properties_check(source, target, relation);
+            }
+            return related;
         }
 
         if s.contains(TypeFlags::Intersection) {
@@ -154,6 +162,64 @@ impl Checker {
         }
 
         false
+    }
+
+    pub(crate) fn extra_intersection_properties_check(
+        &mut self,
+        source: &Arc<Type>,
+        target: &Arc<Type>,
+        relation: RelationKind,
+    ) -> bool {
+        let saved_depth = self.relater_intersection_target_depth;
+        self.relater_intersection_target_depth = 0;
+        let ok = self
+            .extra_intersection_properties_check_inner(source, target, relation);
+        self.relater_intersection_target_depth = saved_depth;
+        ok
+    }
+
+    fn extra_intersection_properties_check_inner(
+        &mut self,
+        source: &Arc<Type>,
+        target: &Arc<Type>,
+        relation: RelationKind,
+    ) -> bool {
+        let source_props = self.get_properties_of_type(source);
+        if !source_props.is_empty()
+            && relation != RelationKind::Comparable
+            && self.is_weak_type(target)
+            && !self.has_common_properties(source, target, false)
+        {
+            let source_str = self.type_to_string(source);
+            let target_str = self.type_to_string(target);
+            self.relater_report_error(
+                tsox_core::diagnostics::messages_generated::TYPE_0_HAS_NO_PROPERTIES_IN_COMMON_WITH_TYPE_1,
+                vec![source_str, target_str],
+            );
+            return false;
+        }
+        let target_props = self.get_properties_of_type(target);
+        for target_prop in target_props {
+            let Some(source_prop) = self.get_property_of_type(source, &target_prop.name) else {
+                continue;
+            };
+            let source_type = self.substituted_member_type_of(source, &source_prop);
+            let target_type = self.substituted_member_type_of(target, &target_prop);
+            if !self.is_type_related_to(&source_type, &target_type, relation) {
+                self.relater_report_error(
+                    tsox_core::diagnostics::messages_generated::TYPES_OF_PROPERTY_0_ARE_INCOMPATIBLE,
+                    vec![self.chain_property_arg_name(&target_prop)],
+                );
+                return false;
+            }
+        }
+        if crate::checker::is_object_literal_type(source)
+            && source.object_flags.contains(crate::checker::types::ObjectFlags::FreshLiteral)
+            && !self.is_index_signatures_related_to(source, target, relation)
+        {
+            return false;
+        }
+        true
     }
 
     pub(crate) fn intersection_source_structurally_related(

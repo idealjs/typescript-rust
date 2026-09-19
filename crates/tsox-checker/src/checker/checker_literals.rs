@@ -197,7 +197,8 @@ impl Checker {
         for (name, t, decl) in prop_pairs {
             let mut sym = Symbol::new(SymbolFlags::Property, name.clone());
             if let Some(d) = decl {
-                sym.declarations.push(d);
+                sym.declarations.push(Arc::clone(&d));
+                sym.value_declaration = Some(d);
             }
             let symbol = Arc::new(sym);
             members.insert(name, Arc::clone(&symbol));
@@ -215,7 +216,10 @@ impl Checker {
         let literal_symbol = self.program.symbol_map().symbol_of(node).map(Arc::clone);
         Arc::new(Type {
             flags: TypeFlags::Object,
-            object_flags: ObjectFlags::Anonymous | ObjectFlags::ObjectLiteral,
+            object_flags: ObjectFlags::Anonymous
+                | ObjectFlags::ObjectLiteral
+                | ObjectFlags::FreshLiteral
+                | ObjectFlags::ContainsObjectOrArrayLiteral,
             id: crate::checker::types::next_type_id(),
             symbol: literal_symbol,
             alias: None,
@@ -259,7 +263,7 @@ impl Checker {
 
     // Go isTypeSubsetOf(globalObjectType, target)：Object/object 成分出现即
     // 视为全局 Object 型的容器
-    fn target_admits_any_properties(&self, t: &Arc<Type>) -> bool {
+    pub(crate) fn target_admits_any_properties(&self, t: &Arc<Type>) -> bool {
         if t.flags.contains(TypeFlags::NonPrimitive) {
             return true;
         }

@@ -107,6 +107,11 @@ pub const OBJECT_FLAGS_CLASS_OR_INTERFACE: ObjectFlags =
 pub const OBJECT_FLAGS_REQUIRES_WIDENING: ObjectFlags = ObjectFlags::from_bits_truncate(
     ObjectFlags::ContainsWideningType.bits() | ObjectFlags::ContainsObjectOrArrayLiteral.bits(),
 );
+pub fn regular_literal_object_flags(original: ObjectFlags) -> ObjectFlags {
+    ObjectFlags::Anonymous
+        | ObjectFlags::ObjectLiteral
+        | (original & (ObjectFlags::JSLiteral | ObjectFlags::NonInferrableType))
+}
 pub const OBJECT_FLAGS_PROPAGATING_FLAGS: ObjectFlags = ObjectFlags::from_bits_truncate(
     ObjectFlags::ContainsWideningType.bits()
         | ObjectFlags::ContainsObjectOrArrayLiteral.bits()

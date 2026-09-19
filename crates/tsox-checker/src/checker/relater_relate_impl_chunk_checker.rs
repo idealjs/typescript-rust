@@ -196,7 +196,16 @@ impl Checker {
             source_id: source.id,
             target_id: target.id,
             relation,
+            intersection_target: self.relater_intersection_target_depth > 0,
         };
+
+        if crate::checker::is_object_literal_type(&source)
+            && source.object_flags.contains(ObjectFlags::FreshLiteral)
+            && self.relater_intersection_target_depth == 0
+            && self.has_excess_properties(&source, &target, relation)
+        {
+            return false;
+        }
 
         if self.relation_in_progress.contains(&key) {
             return true;

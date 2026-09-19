@@ -756,6 +756,15 @@ impl Checker {
             .parent()
             .is_some_and(|p| p.kind == tsox_frontend::ast::SyntaxKind::ArrayBindingPattern);
         if is_array_pattern {
+            if t.is_union()
+                && let Some(members) = t.types()
+            {
+                let mapped: Vec<Arc<Type>> = members
+                    .iter()
+                    .map(|m| self.rest_element_type(elem, m))
+                    .collect();
+                return self.get_union_type(mapped);
+            }
             if self.is_tuple_type(t) {
                 let index = elem
                     .parent()

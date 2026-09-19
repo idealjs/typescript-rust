@@ -276,6 +276,7 @@ pub(crate) mod relater_conditional_checker_2;
 pub(crate) mod relater_index_signatures;
 pub(crate) mod relater_index_signatures_impl_chunk;
 pub(crate) mod relater_index_signatures_impl_chunk_2;
+pub(crate) mod relater_excess_property;
 pub(crate) mod relater_predicates;
 pub(crate) mod relater_probing;
 pub(crate) mod relater_probing_checker;

@@ -98,6 +98,7 @@ pub struct Checker {
     pub jsx_implicit_namespace: HashMap<usize, Option<Arc<Symbol>>>,
     pub pending_jsx_2875: Option<(tsox_core::core::text::TextRange, String)>,
     pub relater_error_chain: Vec<RelaterChainEntry>,
+    pub relater_excess_error_node: Option<Arc<tsox_frontend::ast::Node>>,
     pub relater_chain_active: bool,
     pub relater_depth: u32,
     pub deferred_constraint_depth: u32,

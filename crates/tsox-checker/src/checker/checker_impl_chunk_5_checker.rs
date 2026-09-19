@@ -332,6 +332,11 @@ impl Checker {
             if let Some(widened) = self.widen_object_literal_properties(t) {
                 return widened;
             }
+            if t.object_flags.contains(ObjectFlags::FreshLiteral) {
+                if let Some(regular) = self.regular_object_literal_type(t) {
+                    return regular;
+                }
+            }
         }
 
         if let TypeData::Union(union_data) = &t.data {
@@ -441,6 +446,8 @@ impl Checker {
                 let np = Arc::as_ptr(&new_prop) as *mut Symbol;
                 unsafe {
                     (*np).check_flags = prop.check_flags;
+                    (*np).declarations = prop.declarations.clone();
+                    (*np).value_declaration = prop.value_declaration.clone();
                 }
             }
             self.value_symbol_links.insert(
@@ -458,7 +465,7 @@ impl Checker {
         }
         Some(Arc::new(Type {
             flags: t.flags,
-            object_flags: t.object_flags,
+            object_flags: crate::checker::types::regular_literal_object_flags(t.object_flags),
             id: crate::checker::types::next_type_id(),
             symbol: t.symbol.clone(),
             alias: None,
@@ -466,6 +473,36 @@ impl Checker {
                 structured: StructuredTypeData {
                     members,
                     properties: props,
+                    index_infos: obj.structured.index_infos.clone(),
+                    ..Default::default()
+                },
+                target: None,
+                mapper: None,
+                type_arguments: Vec::new(),
+            }),
+        }))
+    }
+
+    fn regular_object_literal_type(&mut self, t: &Arc<Type>) -> Option<Arc<Type>> {
+        let obj = match &t.data {
+            TypeData::Object(o) => o,
+            _ => return None,
+        };
+        let mut members = SymbolTable::new();
+        for prop in &obj.structured.properties {
+            members.insert(prop.name.clone(), Arc::clone(prop));
+        }
+        Some(Arc::new(Type {
+            flags: t.flags,
+            object_flags: crate::checker::types::regular_literal_object_flags(t.object_flags),
+            id: crate::checker::types::next_type_id(),
+            symbol: t.symbol.clone(),
+            alias: None,
+            data: TypeData::Object(ObjectTypeData {
+                structured: StructuredTypeData {
+                    members,
+                    properties: obj.structured.properties.clone(),
+                    index_infos: obj.structured.index_infos.clone(),
                     ..Default::default()
                 },
                 target: None,

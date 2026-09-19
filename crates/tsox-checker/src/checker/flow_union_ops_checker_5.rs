@@ -395,6 +395,15 @@ impl Checker {
         if let Some(sym) = self.get_property_of_type_cached(t, name) {
             return Some(sym);
         }
+        // Go 元组的数字名成员来自位置元素符号（createTupleTargetType 的
+        // "0"/"1" 成员），不可落到索引签名合成（那是全部元素的并集）
+        if let crate::checker::types::TypeData::Tuple(_) = &t.data
+            && let Ok(index) = name.parse::<usize>()
+        {
+            if let Some(elem) = self.get_tuple_element_type(t, index) {
+                return Some(self.synthetic_property_of_type(name, elem));
+            }
+        }
         // Go getPropertyOfObjectType：声明成员未命中时按索引签名合成属性
         //（数字名配 number 索引，非数字名配 string 索引）
         if let Some(structured) = t.as_structured()
