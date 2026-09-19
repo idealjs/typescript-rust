@@ -229,6 +229,7 @@ impl Scanner {
             self.scan_number_fragment_with_sep(false, false);
         }
 
+        let fixed_part_end = self.pos;
         if self.pos < self.end {
             let c = self.text.as_bytes()[self.pos] as char;
             if c == 'e' || c == 'E' {
@@ -239,7 +240,12 @@ impl Scanner {
                         self.pos += 1;
                     }
                 }
+                let exp_start = self.pos;
                 self.scan_number_fragment_with_sep(false, false);
+                // Go scanNumber：指数部分无数字报 TS1124
+                if self.pos == exp_start {
+                    self.report_error(DiagnosticKind::DigitExpected, self.pos, 0);
+                }
                 self.token_flags |= TOKEN_FLAGS_SCIENTIFIC;
             }
         }
@@ -252,16 +258,66 @@ impl Scanner {
             );
         }
 
-        if self.pos < self.end && self.text.as_bytes()[self.pos] as char == 'n' {
+        let mut result = SyntaxKind::NumericLiteral;
+        if self.pos < self.end
+            && self.text.as_bytes()[self.pos] as char == 'n'
+            && fixed_part_end == self.pos
+        {
             self.pos += 1;
             self.token_end = self.pos;
             self.token = SyntaxKind::BigIntLiteral;
-            return self.token;
+            result = SyntaxKind::BigIntLiteral;
+        }
+
+        // Go scanNumber 尾段：数字后紧跟标识符起始字符，
+        // 单独 n 处理 bigint 指数/小数报错，其余报 TS1351
+        if self.pos < self.end {
+            let c = self.text[self.pos..].chars().next().unwrap();
+            if is_identifier_start(c) {
+                let id_start = self.pos;
+                while self.pos < self.end {
+                    let ch = self.text[self.pos..].chars().next().unwrap();
+                    if is_identifier_part(ch) {
+                        self.pos += ch.len_utf8();
+                    } else {
+                        break;
+                    }
+                }
+                let id = &self.text[id_start..self.pos];
+                if result != SyntaxKind::BigIntLiteral && id == "n" {
+                    if token_flags_contains(self.token_flags, TOKEN_FLAGS_SCIENTIFIC) {
+                        self.report_error(
+                            DiagnosticKind::BigIntExponentialNotation,
+                            start,
+                            self.pos - start,
+                        );
+                        self.token_end = self.pos;
+                        self.token = result;
+                        return self.token;
+                    }
+                    if fixed_part_end < id_start {
+                        self.report_error(
+                            DiagnosticKind::BigIntMustBeInteger,
+                            start,
+                            self.pos - start,
+                        );
+                        self.token_end = self.pos;
+                        self.token = result;
+                        return self.token;
+                    }
+                }
+                self.report_error(
+                    DiagnosticKind::IdentifierFollowsNumeric,
+                    id_start,
+                    self.pos - id_start,
+                );
+                self.pos = id_start;
+            }
         }
 
         let _ = start;
         self.token_end = self.pos;
-        self.token = SyntaxKind::NumericLiteral;
+        self.token = result;
         self.token
     }
 }

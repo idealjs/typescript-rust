@@ -4,14 +4,28 @@ use crate::parser::members::*;
 
 impl Parser {
     pub(crate) fn parse_template_expression(&mut self) -> Arc<Node> {
+        self.parse_template_expression_ex(false)
+    }
+
+    pub(crate) fn parse_template_expression_ex(&mut self, is_tagged: bool) -> Arc<Node> {
         let pos = self.token_pos();
+        // Go parseTemplateHead：非 tagged 且 token 带非法转义时重扫报告
+        if !is_tagged
+            && crate::scanner::token_flags_intersects(
+                self.scanner.token_flags(),
+                crate::scanner::TOKEN_FLAGS_CONTAINS_INVALID_ESCAPE,
+            )
+        {
+            self.scanner.re_scan_template_head_token(false);
+            self.drain_scanner_errors();
+        }
         let head = self.create_token_node();
         self.next_token();
         let mut spans = Vec::new();
         loop {
             let expression = self.allow_in(|p| p.parse_expression());
             let literal = if self.token == SyntaxKind::CloseBraceToken {
-                self.next_template_token();
+                self.next_template_token_ex(is_tagged);
                 self.create_token_node()
             } else {
                 break;

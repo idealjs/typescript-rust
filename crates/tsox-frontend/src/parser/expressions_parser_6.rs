@@ -60,6 +60,15 @@ impl Parser {
                 ))
             }
             SyntaxKind::NoSubstitutionTemplateLiteral => {
+                // Go parseTemplateLiteral(isTaggedTemplate=false)：非法转义
+                // 存在时重扫报告 TS1487/1488
+                if crate::scanner::token_flags_intersects(
+                    self.scanner.token_flags(),
+                    crate::scanner::TOKEN_FLAGS_CONTAINS_INVALID_ESCAPE,
+                ) {
+                    self.scanner.re_scan_template_head_token(false);
+                    self.drain_scanner_errors();
+                }
                 let text = self.scanner.token_value();
                 let pos = self.token_pos();
                 let end = self.token_end();
