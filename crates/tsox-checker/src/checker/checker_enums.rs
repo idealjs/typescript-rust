@@ -123,54 +123,7 @@ impl Checker {
                 vec![],
             ));
         }
-        if let Some(name) = member.name() {
-            let numeric_name_text = |n: &Arc<Node>| -> Option<String> {
-                let normalized_numeric = |raw: String| {
-                    tsox_core::jsnum::Number::from_string(&raw).to_string()
-                };
-                match n.kind {
-                    SyntaxKind::StringLiteral | SyntaxKind::NoSubstitutionTemplateLiteral => self
-                        .node_source_text(n)
-                        .map(|s| s.trim_matches(|c| c == '"' || c == '\'').to_string()),
-                    SyntaxKind::NumericLiteral => {
-                        self.node_source_text(n).map(normalized_numeric)
-                    }
-                    SyntaxKind::ComputedPropertyName => {
-                        let tsox_frontend::ast::NodeData::ComputedPropertyName(cd) = &n.data
-                        else {
-                            return None;
-                        };
-                        match cd.expression.kind {
-                            SyntaxKind::StringLiteral | SyntaxKind::NoSubstitutionTemplateLiteral => self
-                                .node_source_text(&cd.expression)
-                                .map(|s| s.trim_matches(|c| c == '"' || c == '\'').to_string()),
-                            SyntaxKind::NumericLiteral => {
-                                self.node_source_text(&cd.expression).map(normalized_numeric)
-                            }
-                            _ => None,
-                        }
-                    }
-                    _ => None,
-                }
-            };
-            let is_numeric_name = name.kind == SyntaxKind::BigIntLiteral
-                || numeric_name_text(name).is_some_and(|t| {
-                    !t.is_empty()
-                        && t != "Infinity"
-                        && t != "-Infinity"
-                        && t != "NaN"
-                        && tsox_core::jsnum::Number::from_string(&t).to_string() == t
-                });
-            if is_numeric_name {
-                self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
-                    self.current_file.clone(),
-                    name.loc,
-                    tsox_core::diagnostics::messages_generated::
-                        AN_ENUM_MEMBER_CANNOT_HAVE_A_NUMERIC_NAME,
-                    vec![],
-                ));
-            }
-        }
+        self.check_enum_member_numeric_name(member);
         let has_initializer =
             matches!(&member.data, NodeData::EnumMember(d) if d.initializer.is_some());
         if has_initializer {
