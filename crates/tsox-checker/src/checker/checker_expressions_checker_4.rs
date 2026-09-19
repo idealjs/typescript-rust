@@ -299,6 +299,16 @@ impl Checker {
             }
         } else if let Some(msg) = Self::cannot_find_name_message_for(name, Some(node)) {
             tsox_frontend::ast::Diagnostic::new(file, node.loc, *msg, vec![name.to_string()])
+        } else if let Some(lib) =
+            crate::checker::checker_lib_feature_map::suggested_lib_for_name(name)
+        {
+            tsox_frontend::ast::Diagnostic::new(
+                file,
+                node.loc,
+                tsox_core::diagnostics::messages_generated::
+                    CANNOT_FIND_NAME_0_DO_YOU_NEED_TO_CHANGE_YOUR_TARGET_LIBRARY_TRY_CHANGING_THE_LIB_COMPILER_OPTION_TO_1_OR_LATER,
+                vec![name.to_string(), lib.to_string()],
+            )
         } else if let Some(suggestion) = self.find_name_suggestion(name, SymbolFlags::VALUE) {
             tsox_frontend::ast::Diagnostic::new(
                 file,

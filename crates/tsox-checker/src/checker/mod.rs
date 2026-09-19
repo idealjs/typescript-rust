@@ -122,6 +122,7 @@ pub(crate) mod checker_modules_checker_5;
 pub(crate) mod checker_object_literal_is_destructuring_target;
 pub(crate) mod checker_operators;
 pub(crate) mod checker_operators_relational;
+pub(crate) mod checker_lib_feature_map;
 pub(crate) mod checker_prop_access;
 pub(crate) mod checker_prop_access_checker;
 pub(crate) mod checker_prop_access_checker_2;
