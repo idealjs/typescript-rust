@@ -229,17 +229,16 @@ impl Checker {
 
     pub(crate) fn get_type_of_identifier(&mut self, node: &Arc<Node>) -> Arc<Type> {
         if let Some(symbol) = self.resolve_identifier(node) {
-            {
-                let effective = if symbol.flags.intersects(SymbolFlags::Alias) {
-                    self.resolve_alias_base(Arc::clone(&symbol))
-                } else {
-                    Arc::clone(&symbol)
-                };
-                if effective.flags.contains(SymbolFlags::NamespaceModule)
+            let module_without_value = if symbol.flags.intersects(SymbolFlags::Alias) {
+                let effective = self.resolve_alias_base(Arc::clone(&symbol));
+                effective.flags.contains(SymbolFlags::NamespaceModule)
                     && !effective.flags.contains(SymbolFlags::ValueModule)
-                {
-                    return self.error_type();
-                }
+            } else {
+                symbol.flags.contains(SymbolFlags::NamespaceModule)
+                    && !symbol.flags.contains(SymbolFlags::ValueModule)
+            };
+            if module_without_value {
+                return self.error_type();
             }
             if symbol.flags == SymbolFlags::Alias {
                 if let Some(t) = self.type_of_imported_symbol(&symbol) {

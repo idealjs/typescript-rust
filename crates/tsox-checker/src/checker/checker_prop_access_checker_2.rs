@@ -36,6 +36,23 @@ impl Checker {
 
         if let Some(structured) = obj_type.as_structured() {
             if let Some(member_symbol) = structured.members.get(name_text) {
+                // TS2855：super 访问基类实例字段（字段在实例上而非原型）不可达，
+                // 优先于 private/protected 可访问性错误
+                if obj_expr.kind == SyntaxKind::SuperKeyword
+                    && member_symbol
+                        .declarations
+                        .iter()
+                        .any(|d| d.kind == SyntaxKind::PropertyDeclaration)
+                {
+                    self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                        self.current_file.clone(),
+                        name.loc,
+                        tsox_core::diagnostics::messages_generated::
+                            CLASS_FIELD_0_DEFINED_BY_THE_PARENT_CLASS_IS_NOT_ACCESSIBLE_IN_THE_CHILD_CLASS_VIA_SUPER,
+                        vec![name_text.to_string()],
+                    ));
+                    return;
+                }
                 let in_ctor = self.in_ctor_body_stack.last() == Some(&true);
                 let in_prop_init = !in_ctor && self.access_in_property_initializer(node);
                 if obj_expr.kind == SyntaxKind::ThisKeyword
@@ -209,6 +226,33 @@ impl Checker {
             }
             best
         });
+        let static_hit = display_type.symbol.as_ref().and_then(|sym| {
+            sym.declarations.iter().find_map(|d| match &d.data {
+                tsox_frontend::ast::NodeData::ClassDeclaration(cd) => cd.members.iter().find(|m| {
+                    m.name().is_some_and(|n| n.text() == name_text)
+                        && m.has_syntactic_modifier(ModifierFlags::Static)
+                }),
+                tsox_frontend::ast::NodeData::ClassExpression(cd) => cd.members.iter().find(|m| {
+                    m.name().is_some_and(|n| n.text() == name_text)
+                        && m.has_syntactic_modifier(ModifierFlags::Static)
+                }),
+                _ => None,
+            })
+        });
+        if static_hit.is_some() {
+            self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                file,
+                name.loc,
+                tsox_core::diagnostics::messages_generated::
+                    PROPERTY_0_DOES_NOT_EXIST_ON_TYPE_1_DID_YOU_MEAN_TO_ACCESS_THE_STATIC_MEMBER_2_INSTEAD,
+                vec![
+                    name_text.to_string(),
+                    type_str.clone(),
+                    format!("{type_str}.{name_text}"),
+                ],
+            ));
+            return;
+        }
         if let Some(sugg) = suggestion {
             self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
                 file,

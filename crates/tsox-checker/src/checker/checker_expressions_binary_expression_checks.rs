@@ -162,11 +162,29 @@ impl Checker {
                 assigned_target_blocks_type_check = true;
             }
 
-            if Self::is_assignment_operator(data.operator_token.kind)
-                && data.left.kind == SyntaxKind::Identifier
-            {
-                let name_text = data.left.text().to_string();
-                if let Some(sym) = self.resolve_identifier(&data.left)
+            if Self::is_assignment_operator(data.operator_token.kind) && {
+                let mut target: &Arc<Node> = &data.left;
+                while target.kind == SyntaxKind::ParenthesizedExpression {
+                    target = match &target.data {
+                        tsox_frontend::ast::NodeData::ParenthesizedExpression(p) => {
+                            &p.expression
+                        }
+                        _ => break,
+                    };
+                }
+                target.kind == SyntaxKind::Identifier
+            } {
+                let mut ident_node: &Arc<Node> = &data.left;
+                while ident_node.kind == SyntaxKind::ParenthesizedExpression {
+                    ident_node = match &ident_node.data {
+                        tsox_frontend::ast::NodeData::ParenthesizedExpression(p) => {
+                            &p.expression
+                        }
+                        _ => break,
+                    };
+                }
+                let name_text = ident_node.text().to_string();
+                if let Some(sym) = self.resolve_identifier(ident_node)
                     && let base = self.resolve_alias_base(sym)
                 {
                     let msg = if base.flags.contains(SymbolFlags::Class) {
@@ -175,6 +193,9 @@ impl Checker {
                     } else if base.flags.intersects(SymbolFlags::ENUM) {
                         Some(tsox_core::diagnostics::messages_generated::
                                 CANNOT_ASSIGN_TO_0_BECAUSE_IT_IS_AN_ENUM)
+                    } else if base.flags.intersects(SymbolFlags::MODULE) {
+                        Some(tsox_core::diagnostics::messages_generated::
+                                CANNOT_ASSIGN_TO_0_BECAUSE_IT_IS_A_NAMESPACE)
                     } else if base.flags.contains(SymbolFlags::Function) {
                         Some(tsox_core::diagnostics::messages_generated::
                                 CANNOT_ASSIGN_TO_0_BECAUSE_IT_IS_A_FUNCTION)
@@ -185,7 +206,7 @@ impl Checker {
                         let file = self.current_file.clone();
                         self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
                             file,
-                            data.left.loc,
+                            ident_node.loc,
                             msg,
                             vec![name_text],
                         ));
