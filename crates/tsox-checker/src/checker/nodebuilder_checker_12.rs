@@ -2191,6 +2191,11 @@ impl Checker {
         if tn.kind == tsox_frontend::ast::SyntaxKind::TypeQuery {
             return None;
         }
+        // 对象字面量注解不按源文本复用：tsc 打印机统一成员分隔符（`; ` 与
+        // 尾随 `;`），源文本书写风格（无分号）不保留
+        if tn.kind == tsox_frontend::ast::SyntaxKind::TypeLiteral {
+            return None;
+        }
         self.equivalent_annotation_text(&tn, resolved)
     }
 

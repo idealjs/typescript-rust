@@ -304,10 +304,7 @@ impl Checker {
                     } else {
                         ""
                     };
-                    if param
-                        .flags
-                        .contains(tsox_frontend::ast::SymbolFlags::Optional)
-                    {
+                    if param_declared_optional(param) {
                         format!("{prefix}{name}?: {type_str}")
                     } else {
                         format!("{prefix}{name}: {type_str}")
@@ -323,22 +320,80 @@ impl Checker {
         let ret_str = self.type_to_string_ex(&ret_type, flags);
 
         let tp_prefix = self.signature_type_param_prefix(sig);
+        let this_param = sig
+            .this_parameter
+            .as_ref()
+            .filter(|p| !p.name.is_empty())
+            .map(|p| {
+                let t = self.get_type_of_symbol(p);
+                let type_str = self.type_to_string_ex(&t, flags);
+                format!("this: {type_str}")
+            });
+        let params = match this_param {
+            Some(this) => {
+                let mut v = vec![this];
+                v.extend(params);
+                v
+            }
+            None => params,
+        };
         format!("{new_prefix}{tp_prefix}({}) => {}", params.join(", "), ret_str)
     }
 
-    pub(crate) fn signature_type_param_prefix(&self, sig: &Arc<Signature>) -> String {
+    pub(crate) fn signature_type_param_prefix(&mut self, sig: &Arc<Signature>) -> String {
         if sig.type_parameters.is_empty() {
             return String::new();
         }
-        let names: Vec<String> = sig
+        let parts: Vec<String> = sig
             .type_parameters
             .iter()
-            .filter_map(|tp| tp.symbol.as_ref().map(|s| s.name.clone()))
+            .map(|tp| self.type_param_decl_string(tp))
             .collect();
-        if names.is_empty() {
+        if parts.is_empty() {
             String::new()
         } else {
-            format!("<{}>", names.join(", "))
+            format!("<{}>", parts.join(", "))
         }
     }
+
+    fn type_param_decl_string(&mut self, tp: &Arc<Type>) -> String {
+        let Some(sym) = &tp.symbol else {
+            return "T".to_string();
+        };
+        let mut s = sym.name.clone();
+        if let TypeData::TypeParameter(tpd) = &tp.data
+            && let Some(constraint) = &tpd.constraint
+        {
+            let c = self.type_to_string(constraint);
+            if !c.is_empty() {
+                s.push_str(" extends ");
+                s.push_str(&c);
+            }
+        }
+        if let TypeData::TypeParameter(tpd) = &tp.data
+            && let Some(default) = tpd.resolved_default_type.get()
+        {
+            let d = self.type_to_string(default);
+            if !d.is_empty() {
+                s.push_str(" = ");
+                s.push_str(&d);
+            }
+        }
+        s
+    }
+}
+
+pub(crate) fn param_declared_optional(param: &Arc<Symbol>) -> bool {
+    if param
+        .flags
+        .contains(tsox_frontend::ast::SymbolFlags::Optional)
+    {
+        return true;
+    }
+    param.declarations.iter().any(|d| match &d.data {
+        tsox_frontend::ast::NodeData::ParameterDeclaration(pd) => {
+            pd.question_token.is_some() || pd.initializer.is_some()
+        }
+        _ => false,
+    })
 }

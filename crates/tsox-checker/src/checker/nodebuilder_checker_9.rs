@@ -29,10 +29,7 @@ impl Checker {
                     } else {
                         ""
                     };
-                    if param
-                        .flags
-                        .contains(tsox_frontend::ast::SymbolFlags::Optional)
-                    {
+                    if crate::checker::nodebuilder_checker_8::param_declared_optional(param) {
                         format!("{prefix}{name}?: {type_str}")
                     } else {
                         format!("{prefix}{name}: {type_str}")
@@ -597,7 +594,11 @@ impl Checker {
             // 类实例（含与命名空间合并的类）：typeof 前缀只给静态侧（构造
             // 签名所在），实例侧按符号名显示（Go typeToString 同）；命名空间
             // 内类同尾部分支给限定名（d.D）
-            return self.namespace_qualified_name(sym);
+            return format!(
+                "{}{}",
+                self.namespace_qualified_name(sym),
+                self.declared_type_param_suffix(t, sym)
+            );
         }
 
         if sym.flags.contains(SymbolFlags::ValueModule) {
@@ -629,10 +630,50 @@ impl Checker {
             return self
                 .namespace_qualifier_of(sym)
                 .map(|q| format!("{q}.{}", sym.name))
-                .unwrap_or_else(|| sym.name.clone());
+                .unwrap_or_else(|| sym.name.clone())
+                + &self.declared_type_param_suffix(t, sym);
         }
 
-        sym.name.clone()
+        format!(
+            "{}{}",
+            sym.name.clone(),
+            self.declared_type_param_suffix(t, sym)
+        )
+    }
+
+    fn declared_type_param_suffix(&self, t: &Arc<Type>, sym: &Arc<Symbol>) -> String {
+        let empty_args = match &t.data {
+            TypeData::Object(o) => o.type_arguments.is_empty(),
+            TypeData::Interface(i) => i.object.type_arguments.is_empty(),
+            _ => true,
+        };
+        if !empty_args {
+            return String::new();
+        }
+        let mut names: Vec<String> = Vec::new();
+        for decl in &sym.declarations {
+            let tps = match &decl.data {
+                NodeData::ClassDeclaration(d) => d.type_parameters.as_ref(),
+                NodeData::ClassExpression(d) => d.type_parameters.as_ref(),
+                NodeData::InterfaceDeclaration(d) => d.type_parameters.as_ref(),
+                NodeData::TypeAliasDeclaration(d) => d.type_parameters.as_ref(),
+                _ => continue,
+            };
+            let Some(tps) = tps else { continue };
+            for tp in tps.nodes.iter() {
+                if let NodeData::TypeParameterDeclaration(tpd) = &tp.data {
+                    let name = tpd.name.text().to_string();
+                    if !names.contains(&name) {
+                        names.push(name);
+                    }
+                }
+            }
+        }
+        if names.is_empty() {
+            String::new()
+        } else {
+            format!("<{}>", names.join(", "))
+        }
     }
 
     fn namespace_qualified_name(&mut self, sym: &Arc<Symbol>) -> String {

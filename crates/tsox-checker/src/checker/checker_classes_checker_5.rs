@@ -278,12 +278,6 @@ impl Checker {
                                     }
                                 }
                                 if !issued_member_error {
-                                    let class_name = cd
-                                        .name
-                                        .as_ref()
-                                        .map(|n| n.text().to_string())
-                                        .unwrap_or_default();
-                                    let base_name = self.type_to_string(&base_type);
                                     let error_loc = cd
                                         .name
                                         .as_ref()
@@ -294,7 +288,7 @@ impl Checker {
                                         error_loc,
                                         tsox_core::diagnostics::messages_generated::
                                             CLASS_0_INCORRECTLY_EXTENDS_BASE_CLASS_1,
-                                        vec![class_name, base_name],
+                                        vec![instance_str.clone(), base_str.clone()],
                                     );
                                     let mut child: Option<tsox_frontend::ast::Diagnostic> =
                                         None;
@@ -485,13 +479,9 @@ impl Checker {
             tsox_frontend::ast::NodeData::ClassDeclaration(d) => d,
             _ => return,
         };
-        let class_name = class_data
-            .name
-            .as_ref()
-            .map(|n| n.text().to_string())
-            .unwrap_or_default();
 
         let instance_type = self.build_class_instance_type_with_base(&class_node);
+        let class_name = self.type_to_string(&instance_type);
 
         for type_ref in data.types.iter() {
             let interface_type = self.get_type_from_heritage_type_reference(type_ref);
