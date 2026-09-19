@@ -281,7 +281,7 @@ impl Checker {
     }
 
     pub fn get_type_name_for_error_display(&mut self, t: &Arc<Type>) -> String {
-        crate::checker::utilities::type_to_string(t)
+        self.type_to_string(t)
     }
 
     pub fn symbol_value_declaration_is_context_sensitive(&mut self, _symbol: &Arc<Symbol>) -> bool {
