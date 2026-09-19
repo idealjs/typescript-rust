@@ -122,7 +122,19 @@ impl Checker {
                 }
                 found
             };
-            if !inside_own_initializer {
+            // Go isImmediatelyUsedInInitializerOfBlockScopedVariable 尾分支：
+            // for-in/of 声明的用法落在语句表达式内视同初始化式
+            let inside_for_in_of_expression = declaration
+                .parent()
+                .as_ref()
+                .and_then(|l| l.parent())
+                .is_some_and(|stmt| {
+                    matches!(stmt.kind, SyntaxKind::ForInStatement | SyntaxKind::ForOfStatement)
+                        && stmt
+                            .expression()
+                            .is_some_and(|e| e.loc.contains(node.loc.pos()))
+                });
+            if !inside_own_initializer && !inside_for_in_of_expression {
                 return;
             }
         }

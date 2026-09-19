@@ -36,6 +36,11 @@ impl Checker {
                 return name == "length" || self.is_array_mutation_method(name);
             }
 
+            // Go getTupleBaseType：元组的属性存在性经 Array<元素并集> 基类型判定
+            if self.is_tuple_type(t) {
+                return name == "length" || self.global_interface_has_property("Array", name);
+            }
+
             if t.object_flags.contains(ObjectFlags::Anonymous)
                 && structured.call_signature_count > 0
                 && self.global_interface_has_property("Function", name)

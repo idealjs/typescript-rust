@@ -41,7 +41,25 @@ impl Checker {
         } else {
             SignatureKind::Call
         };
-        let signatures = self.get_signatures_of_type(&expression_type, kind);
+        // Go getUnionSignatures 的上下文取用近似：联合 callee 的调用签名取
+        // 首个含签名的成分（成分序即声明序，RegExpMatchArray | [] 的 map 取前者）
+        let signatures = if expression_type.is_union() {
+            let mut sigs: Vec<Arc<Signature>> = Vec::new();
+            if let Some(constituents) = expression_type.types().map(|ts| ts.to_vec()) {
+                for c in constituents {
+                    if c.flags.intersects(TypeFlags::Undefined | TypeFlags::Null) {
+                        continue;
+                    }
+                    sigs = self.get_signatures_of_type(&c, kind);
+                    if !sigs.is_empty() {
+                        break;
+                    }
+                }
+            }
+            sigs
+        } else {
+            self.get_signatures_of_type(&expression_type, kind)
+        };
 
         // 全重载不可适用时用联合签名（参数位=各重载并集，Go
         // getCandidateForOverloadFailure → createUnionOfSignaturesForOverloadFailure）；

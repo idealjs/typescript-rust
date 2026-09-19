@@ -225,7 +225,8 @@ impl Checker {
         member: &Arc<Symbol>,
     ) -> Option<Arc<Type>> {
         let is_evolving = obj_type.object_flags.contains(ObjectFlags::EvolvingArray);
-        if !self.is_array_type(obj_type) && !is_evolving {
+        let is_tuple = matches!(&obj_type.data, TypeData::Tuple(_));
+        if !self.is_array_type(obj_type) && !is_evolving && !is_tuple {
             return None;
         }
         if let Some(structured) = obj_type.as_structured()
@@ -241,6 +242,9 @@ impl Checker {
             TypeData::EvolvingArray(e) => {
                 e.element_type.clone().unwrap_or_else(|| self.never_type())
             }
+            // Go getTupleBaseType：元素并集作 Array 的类型实参（变长元素按
+            // number 索引访问拍平）
+            TypeData::Tuple(t) => self.tuple_base_element_type(t),
             _ => return None,
         };
 
@@ -302,6 +306,23 @@ impl Checker {
         self.array_member_type_cache
             .insert(key, Arc::clone(&substituted));
         Some(substituted)
+    }
+
+    pub(crate) fn tuple_base_element_type(&mut self, tuple: &TupleTypeData) -> Arc<Type> {
+        let number = self.number_type();
+        let parts: Vec<Arc<Type>> = tuple
+            .element_infos
+            .iter()
+            .filter_map(|info| {
+                let t = info.type_.clone()?;
+                if info.flags.contains(ElementFlags::Variadic) {
+                    Some(self.get_indexed_access_type(&t, &number))
+                } else {
+                    Some(t)
+                }
+            })
+            .collect();
+        self.get_union_type(parts)
     }
 
     pub(crate) fn declared_array_member_symbol(&mut self, name: &str) -> Option<Arc<Symbol>> {

@@ -40,6 +40,31 @@ impl Checker {
             return;
         };
 
+        // 自初始化式内引用：解析期环路径返回 any（Go reportCircularityError），
+        // assumeInitialized 短路
+        {
+            let mut cur = node.parent();
+            let mut inside_own = false;
+            while let Some(a) = cur {
+                if Arc::ptr_eq(&a, declaration) {
+                    inside_own = true;
+                    break;
+                }
+                if matches!(
+                    a.kind,
+                    SyntaxKind::FunctionDeclaration
+                        | SyntaxKind::FunctionExpression
+                        | SyntaxKind::ArrowFunction
+                ) {
+                    break;
+                }
+                cur = a.parent();
+            }
+            if inside_own {
+                return;
+            }
+        }
+
         // 纯声明（let x;）auto 型走下面类型守卫；此处只拦 ambient/断言声明
         let has_exclamation = matches!(
             &declaration.data,

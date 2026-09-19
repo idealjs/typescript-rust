@@ -67,16 +67,39 @@ impl Checker {
             }
         }
         let obj_type = self.get_type_of_node(obj_expr);
+        let effective_arg = self.effective_index_arg_type(arg_expr);
 
         if obj_type.flags.contains(TypeFlags::Union)
             && let Some(members) = obj_type.types().map(|ts| ts.to_vec())
         {
+            let dynamic = effective_arg
+                .flags
+                .intersects(TypeFlags::String | TypeFlags::Number)
+                && !effective_arg.flags.intersects(
+                    TypeFlags::Any | TypeFlags::StringLiteral | TypeFlags::NumberLiteral,
+                );
+            let non_any: Vec<&Arc<Type>> = members
+                .iter()
+                .filter(|m| !m.flags.contains(TypeFlags::Any))
+                .collect();
+            if dynamic
+                && !non_any.is_empty()
+                && !non_any.iter().all(|m| {
+                    self.member_allows_dynamic_index(
+                        m,
+                        effective_arg.flags.contains(TypeFlags::String),
+                    )
+                })
+            {
+                self.report_element_access_implicit_any(node, &obj_type, arg_expr, &effective_arg);
+                return self.get_any_type();
+            }
             let mut elem_types: Vec<Arc<Type>> = Vec::new();
             for m in &members {
                 if m.flags.contains(TypeFlags::Any) {
                     continue;
                 }
-                let t = self.element_access_result_type(node, m, arg_expr);
+                let t = self.element_access_result_type(node, m, arg_expr, &effective_arg);
                 if !t.flags.contains(TypeFlags::Any) {
                     elem_types.push(t);
                 }
@@ -86,7 +109,31 @@ impl Checker {
             }
             return self.get_any_type();
         }
-        self.element_access_result_type(node, &obj_type, arg_expr)
+        self.element_access_result_type(node, &obj_type, arg_expr, &effective_arg)
+    }
+
+    fn member_allows_dynamic_index(&self, m: &Arc<Type>, want_string: bool) -> bool {
+        if m.flags.intersects(TypeFlags::Any | TypeFlags::Unknown | TypeFlags::Never) {
+            return true;
+        }
+        let has = |string: bool| {
+            m.as_structured().is_some_and(|s| {
+                s.index_infos.iter().any(|info| {
+                    info.key_type
+                        .as_ref()
+                        .is_some_and(|k| k.flags.contains(if string {
+                            TypeFlags::String
+                        } else {
+                            TypeFlags::Number
+                        }))
+                })
+            })
+        };
+        if want_string {
+            has(true)
+        } else {
+            has(false) || self.is_array_type(m) || has(true)
+        }
     }
 
     fn element_access_result_type(
@@ -94,6 +141,7 @@ impl Checker {
         node: &Arc<Node>,
         obj_type: &Arc<Type>,
         arg_expr: &Arc<Node>,
+        effective_arg: &Arc<Type>,
     ) -> Arc<Type> {
         if self.is_tuple_type(obj_type) {
             if let Some(index) = self.get_constant_numeric_value(arg_expr) {
@@ -106,6 +154,14 @@ impl Checker {
         }
 
         if self.is_array_type(obj_type) {
+            if !effective_arg.flags.intersects(
+                TypeFlags::Number
+                    | TypeFlags::NumberLiteral
+                    | TypeFlags::Any
+                    | TypeFlags::EnumLiteral,
+            ) {
+                self.report_element_access_implicit_any(node, obj_type, arg_expr, effective_arg);
+            }
             return self.get_array_element_type(obj_type);
         }
 
@@ -138,10 +194,9 @@ impl Checker {
                     })
                 });
             let arg_is_number = matches!(arg_expr.kind, SyntaxKind::NumericLiteral)
-                || self
-                    .get_type_of_node(arg_expr)
-                    .flags
-                    .intersects(TypeFlags::Number | TypeFlags::NumberLiteral | TypeFlags::EnumLiteral);
+                || effective_arg.flags.intersects(
+                    TypeFlags::Number | TypeFlags::NumberLiteral | TypeFlags::EnumLiteral,
+                );
             if arg_is_number && !all_string_members {
                 let s = self.string_type();
                 return self.flow_type_of_access_expression(node, None, s);
@@ -163,14 +218,7 @@ impl Checker {
             }
         }
 
+        self.report_element_access_implicit_any(node, obj_type, arg_expr, effective_arg);
         self.get_any_type()
-    }
-
-    fn literal_element_access_name(&self, arg: &Arc<Node>) -> Option<String> {
-        match &arg.data {
-            tsox_frontend::ast::NodeData::StringLiteral(data) => Some(data.text.clone()),
-            tsox_frontend::ast::NodeData::NumericLiteral(data) => Some(data.text.clone()),
-            _ => None,
-        }
     }
 }

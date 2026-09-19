@@ -192,6 +192,9 @@ impl Checker {
         {
             if let Some(links) = self.value_symbol_links.get(symbol) {
                 if let Some(ref t) = links.resolved_type {
+                    if crate::checker::utilities::is_type_error(t) {
+                        return self.report_circularity_error(symbol);
+                    }
                     return Arc::clone(t);
                 }
             }

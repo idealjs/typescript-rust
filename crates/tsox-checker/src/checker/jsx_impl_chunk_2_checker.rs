@@ -91,9 +91,65 @@ impl Checker {
                     }
                 }
 
-                _ => None,
+                _ => {
+                    // Go getJsxNamespace：经典模式的命名空间名 = jsxFactory
+                    //（pragma/选项）首段，否则 reactNamespace；解析该名字取其
+                    // JSX 成员（import 别名/合并命名空间皆可命中）
+                    let namespace_name = self
+                        .local_jsx_pragma_factory("jsx")
+                        .or_else(|| self.local_jsx_pragma_factory("jsxFactory"))
+                        .and_then(|f| f.split('.').next().map(str::to_string))
+                        .or_else(|| {
+                            let factory = self.compiler_options.jsx_factory.clone();
+                            (!factory.is_empty()).then(|| {
+                                factory
+                                    .split('.')
+                                    .next()
+                                    .unwrap_or_default()
+                                    .to_string()
+                            })
+                        })
+                        .or_else(|| {
+                            let ns = self.compiler_options.react_namespace.clone();
+                            (!ns.is_empty()).then_some(ns)
+                        });
+                    match namespace_name
+                        .and_then(|ns| self.jsx_namespace_container_symbol(&ns))
+                    {
+                        Some(container) => container
+                            .exports
+                            .get(JsxNames::JSX)
+                            .or_else(|| container.members.get(JsxNames::JSX))
+                            .cloned(),
+                        None => None,
+                    }
+                }
             };
         self.jsx_implicit_namespace.insert(file_id, resolved);
+    }
+
+    fn jsx_namespace_container_symbol(
+        &mut self,
+        name: &str,
+    ) -> Option<Arc<tsox_frontend::ast::Symbol>> {
+        let symbol_map = self.program.symbol_map();
+        for &container_id in self.scope_stack.iter().rev() {
+            let found = symbol_map
+                .locals
+                .get(&container_id)
+                .and_then(|locals| locals.get(name))
+                .or_else(|| {
+                    symbol_map
+                        .symbols
+                        .get(&container_id)
+                        .and_then(|cs| cs.members.get(name))
+                })
+                .cloned();
+            if let Some(sym) = found {
+                return Some(self.resolve_alias_base(sym));
+            }
+        }
+        None
     }
 
     pub(crate) fn resolve_jsx_runtime_by_path(
@@ -143,7 +199,16 @@ impl Checker {
             .or_else(|| intrinsic_elements.exports.get(&tag_text));
 
         if member.is_none() {
-            let intrinsic_type = self.get_type_of_symbol(&intrinsic_elements);
+            // Go getApplicableIndexInfo：接口解析合并基类型索引签名
+            //（IntrinsicElements extends Record<string, any> 命中 string 键）
+            let resolved = self.resolve_interface_type(&intrinsic_elements, None);
+            let intrinsic_type = if resolved.flags.contains(crate::checker::types::TypeFlags::Any)
+                || resolved.as_structured().is_none()
+            {
+                self.get_type_of_symbol(&intrinsic_elements)
+            } else {
+                resolved
+            };
             let has_index_signature = !self
                 .get_index_infos_of_type(&intrinsic_type)
                 .is_empty();
