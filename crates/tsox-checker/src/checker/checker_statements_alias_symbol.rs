@@ -30,10 +30,18 @@ impl Checker {
                 }
             }
             NodeData::ExportDeclaration(d) => {
-                if let Some(clause) = &d.export_clause
-                    && clause.kind == SyntaxKind::NamespaceExport
-                {
-                    self.check_alias_symbol(clause);
+                if let Some(clause) = &d.export_clause {
+                    match &clause.data {
+                        NodeData::NamespaceExport(_) => self.check_alias_symbol(clause),
+                        // Go checkExportDeclaration：NamedExports 逐 specifier
+                        // 走 checkExportSpecifier（含 TS2661 全局导出检查）
+                        NodeData::NamedExports(ne) => {
+                            for el in ne.elements.iter() {
+                                self.check_alias_symbol(el);
+                            }
+                        }
+                        _ => {}
+                    }
                 }
             }
             NodeData::ImportEqualsDeclaration(_)
@@ -45,6 +53,22 @@ impl Checker {
     }
 
     pub fn check_alias_symbol(&mut self, node: &Arc<Node>) {
+        // Go checkExportSpecifier：无 from 的 export {X} 解析到全局声明
+        //（globalThis/undefined/非模块文件顶层）报 TS2661
+        if node.kind == SyntaxKind::ExportSpecifier
+            && !export_specifier_has_module_specifier(node)
+            && let Some(exported) = property_name_or_name(node)
+            && exported.kind == SyntaxKind::Identifier
+            && let Some(sym) = self.resolve_identifier(&exported)
+            && self.symbol_is_global_declaration(&sym)
+        {
+            self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                self.current_file.clone(),
+                exported.loc,
+                CANNOT_EXPORT_0_ONLY_LOCAL_DECLARATIONS_CAN_BE_EXPORTED_FROM_A_MODULE,
+                vec![exported.text().to_string()],
+            ));
+        }
         let Some(symbol) = self.program.symbol_map().symbol_of(node).cloned() else {
             return;
         };
@@ -85,7 +109,13 @@ impl Checker {
             excluded_meanings |= SymbolFlags::NAMESPACE;
         }
 
-        if target_flags.intersects(excluded_meanings) {
+        if target_flags.intersects(excluded_meanings)
+            // Go checkAliasSymbol：无 from 的 export {X} 命中全局声明时本地
+            // 别名是纯 Alias（excluded meanings 为空），不报导出冲突
+            && !(node.kind == SyntaxKind::ExportSpecifier
+                && !export_specifier_has_module_specifier(node)
+                && self.symbol_is_global_declaration(&target))
+        {
             let message = if node.kind == SyntaxKind::ExportSpecifier {
                 EXPORT_DECLARATION_CONFLICTS_WITH_EXPORTED_DECLARATION_OF_0
             } else {
@@ -169,6 +199,44 @@ impl Checker {
             X_0_IS_A_TYPE_AND_CANNOT_BE_IMPORTED_IN_JAVASCRIPT_FILES_USE_1_IN_A_JSDOC_TYPE_ANNOTATION,
             vec![identifier_text, import_text],
         ));
+    }
+}
+
+// Go checkExportSpecifier 的 hasModuleSpecifier：父 ExportDeclaration 带 from
+fn export_specifier_has_module_specifier(node: &Arc<Node>) -> bool {
+    node.parent()
+        .and_then(|clause| clause.parent())
+        .and_then(|export_decl| match &export_decl.data {
+            NodeData::ExportDeclaration(d) => d.module_specifier.as_ref().map(|s| {
+                matches!(
+                    s.kind,
+                    SyntaxKind::StringLiteral | SyntaxKind::NoSubstitutionTemplateLiteral
+                )
+            }),
+            _ => None,
+        })
+        .unwrap_or(false)
+}
+
+impl Checker {
+    // Go checkExportSpecifier：解析命中 undefined/globalThis 符号，或首声明
+    // 位于非模块文件（全局源文件）顶层
+    fn symbol_is_global_declaration(&self, sym: &Arc<Symbol>) -> bool {
+        if self
+            .undefined_symbol
+            .as_ref()
+            .is_some_and(|u| Arc::ptr_eq(u, sym))
+            || self
+                .global_this_symbol
+                .as_ref()
+                .is_some_and(|g| Arc::ptr_eq(g, sym))
+        {
+            return true;
+        }
+        sym.declarations.first().is_some_and(|d| {
+            self.get_source_file_of_node(d)
+                .is_some_and(|f| f.external_module_indicator.is_none())
+        })
     }
 }
 
