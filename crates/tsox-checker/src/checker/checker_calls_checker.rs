@@ -67,6 +67,12 @@ impl Checker {
         let min_count = self.get_min_argument_count(sig);
         let max_count = self.get_parameter_count(sig);
         let has_rest = self.has_effective_rest_parameter(sig);
+        // Go getArgumentArityError：min<max 且无 rest 时参数计数展示为区间
+        let parameter_range = if has_rest || min_count >= max_count {
+            min_count.to_string()
+        } else {
+            format!("{min_count}-{max_count}")
+        };
 
         if !has_rest && arg_count > max_count {
             let file = self.current_file.clone();
@@ -75,7 +81,7 @@ impl Checker {
                 file,
                 loc,
                 EXPECTED_0_ARGUMENTS_BUT_GOT_1,
-                vec![min_count.to_string(), arg_count.to_string()],
+                vec![parameter_range, arg_count.to_string()],
             ));
             return false;
         }
@@ -92,16 +98,16 @@ impl Checker {
             } else {
                 callee_expr.loc
             };
-            let message = if has_rest {
-                EXPECTED_AT_LEAST_0_ARGUMENTS_BUT_GOT_1
+            let (message, count_arg) = if has_rest {
+                (EXPECTED_AT_LEAST_0_ARGUMENTS_BUT_GOT_1, min_count.to_string())
             } else {
-                EXPECTED_0_ARGUMENTS_BUT_GOT_1
+                (EXPECTED_0_ARGUMENTS_BUT_GOT_1, parameter_range)
             };
             self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
                 file,
                 error_loc,
                 message,
-                vec![min_count.to_string(), arg_count.to_string()],
+                vec![count_arg, arg_count.to_string()],
             ));
             return false;
         }

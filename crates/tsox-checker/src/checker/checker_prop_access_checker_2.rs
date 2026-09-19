@@ -126,6 +126,12 @@ impl Checker {
             && let Some(constraint) = &tp.constraint
         {
             Arc::clone(constraint)
+        } else if obj_type.is_type_parameter()
+            && let crate::checker::types::TypeData::TypeParameter(tp) = &obj_type.data
+            && let Some(constraint) = &tp.constraint
+        {
+            // 泛型约束上的属性访问按 apparent type 报（Go 报错用基约束）
+            Arc::clone(constraint)
         } else {
             Arc::clone(&obj_type)
         };
@@ -134,10 +140,11 @@ impl Checker {
             .symbol
             .as_ref()
             .is_some_and(|s| s.flags.intersects(tsox_frontend::ast::SymbolFlags::ENUM))
+            && matches!(&display_type.data, crate::checker::types::TypeData::Object(_))
         {
             type_str = format!(
                 "typeof {}",
-                display_type.symbol.as_ref().unwrap().name
+                self.namespace_qualified_name(display_type.symbol.as_ref().unwrap())
             );
         }
 

@@ -29,6 +29,19 @@ impl Checker {
             return name.to_string();
         }
 
+        if let Some(sym) = t.symbol.as_ref()
+            && t.flags.contains(TypeFlags::EnumLiteral)
+            && !t.flags.contains(TypeFlags::Union)
+        {
+            // 枚举字面量类型按「枚举.成员」展示（Go typeToString 走符号链）
+            let member = sym.name.clone();
+            let qualifier = sym
+                .parent()
+                .map(|p| format!("{}.", self.namespace_qualified_name(&p)))
+                .unwrap_or_default();
+            return format!("{qualifier}{member}");
+        }
+
         if let Some(val) = t.literal_value() {
             return self.literal_value_to_string(val);
         }

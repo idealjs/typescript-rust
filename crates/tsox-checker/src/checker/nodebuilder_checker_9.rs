@@ -501,9 +501,9 @@ impl Checker {
     ) -> String {
         if sym.flags.contains(SymbolFlags::ENUM) {
             if matches!(&t.data, TypeData::Object(_)) {
-                return format!("typeof {}", sym.name);
+                return format!("typeof {}", self.namespace_qualified_name(sym));
             }
-            return sym.name.clone();
+            return self.namespace_qualified_name(sym);
         }
 
         let obj_data = match &t.data {
@@ -676,7 +676,7 @@ impl Checker {
         }
     }
 
-    fn namespace_qualified_name(&mut self, sym: &Arc<Symbol>) -> String {
+    pub(crate) fn namespace_qualified_name(&mut self, sym: &Arc<Symbol>) -> String {
         if sym
             .parent()
             .as_ref()
