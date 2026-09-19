@@ -3,6 +3,25 @@
 use crate::checker::checker_prop_access::*;
 
 impl Checker {
+    /// Go typeHasStaticProperty：在实例类型符号的静态侧（含继承基类静态）
+    /// 命中属性且其值声明带 static 修饰
+    pub(crate) fn type_has_static_property(
+        &mut self,
+        prop_name: &str,
+        containing_type: &Arc<crate::checker::types::Type>,
+    ) -> bool {
+        let Some(sym) = containing_type.symbol.clone() else {
+            return false;
+        };
+        let static_side = self.get_type_of_symbol(&sym);
+        let Some(prop) = self.get_property_of_type(&static_side, prop_name) else {
+            return false;
+        };
+        prop.value_declaration
+            .as_ref()
+            .is_some_and(|d| d.has_syntactic_modifier(ModifierFlags::Static))
+    }
+
     pub(crate) fn global_constructor_value_has_property(
         &mut self,
         obj_expr: &Arc<Node>,

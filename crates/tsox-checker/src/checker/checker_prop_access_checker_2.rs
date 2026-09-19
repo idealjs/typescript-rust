@@ -226,20 +226,8 @@ impl Checker {
             }
             best
         });
-        let static_hit = display_type.symbol.as_ref().and_then(|sym| {
-            sym.declarations.iter().find_map(|d| match &d.data {
-                tsox_frontend::ast::NodeData::ClassDeclaration(cd) => cd.members.iter().find(|m| {
-                    m.name().is_some_and(|n| n.text() == name_text)
-                        && m.has_syntactic_modifier(ModifierFlags::Static)
-                }),
-                tsox_frontend::ast::NodeData::ClassExpression(cd) => cd.members.iter().find(|m| {
-                    m.name().is_some_and(|n| n.text() == name_text)
-                        && m.has_syntactic_modifier(ModifierFlags::Static)
-                }),
-                _ => None,
-            })
-        });
-        if static_hit.is_some() {
+        let static_hit = self.type_has_static_property(name_text, &display_type);
+        if static_hit {
             self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
                 file,
                 name.loc,
