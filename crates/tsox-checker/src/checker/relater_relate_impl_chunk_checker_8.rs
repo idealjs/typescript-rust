@@ -310,7 +310,7 @@ impl Checker {
                     vec![
                         source_str,
                         target_str,
-                        missing_props.join(", "),
+                        crate::checker::property_names_for_display(&missing_props),
                     ],
                 );
             } else {
@@ -320,7 +320,7 @@ impl Checker {
                     vec![
                         source_str,
                         target_str,
-                        missing_props[..4].join(", "),
+                        crate::checker::property_names_for_display(&missing_props[..4]),
                         (missing_props.len() - 4).to_string(),
                     ],
                 );

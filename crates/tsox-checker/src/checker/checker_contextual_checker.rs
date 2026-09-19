@@ -96,14 +96,14 @@ impl Checker {
                     file,
                     anchor,
                     PROPERTY_0_IS_MISSING_IN_TYPE_1_BUT_REQUIRED_IN_TYPE_2,
-                    vec![missing[0].clone(), src_str, tgt_str],
+                    vec![crate::checker::property_name_for_display(&missing[0]), src_str, tgt_str],
                 ));
             } else if missing.len() > 1 {
                 self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
                     file,
                     anchor,
                     TYPE_0_IS_MISSING_THE_FOLLOWING_PROPERTIES_FROM_TYPE_1_COLON_2,
-                    vec![src_str, tgt_str, missing.join(", ")],
+                    vec![src_str, tgt_str, crate::checker::property_names_for_display(&missing)],
                 ));
             }
             return;
@@ -135,14 +135,14 @@ impl Checker {
                     file,
                     missing_anchor,
                     PROPERTY_0_IS_MISSING_IN_TYPE_1_BUT_REQUIRED_IN_TYPE_2,
-                    vec![missing[0].clone(), src_str, tgt_str],
+                    vec![crate::checker::property_name_for_display(&missing[0]), src_str, tgt_str],
                 ));
             } else if missing.len() > 1 {
                 self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
                     file,
                     missing_anchor,
                     TYPE_0_IS_MISSING_THE_FOLLOWING_PROPERTIES_FROM_TYPE_1_COLON_2,
-                    vec![src_str, tgt_str, missing.join(", ")],
+                    vec![src_str, tgt_str, crate::checker::property_names_for_display(&missing)],
                 ));
             }
             return;

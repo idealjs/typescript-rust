@@ -3,13 +3,49 @@
 use crate::checker::relater_compare::*;
 
 impl Checker {
+    // Go findMostOverlappyType：以 keyof 交集的 unit 数量选最佳匹配的联合成分
     pub fn find_most_overlappy_type(
         &mut self,
         source: &Arc<Type>,
         union_target: &Arc<Type>,
     ) -> Option<Arc<Type>> {
-        let _ = (source, union_target);
-        None
+        let ui = union_target.as_union_or_intersection()?;
+        let non_instantiable_primitive = TYPE_FLAGS_PRIMITIVE
+            | TypeFlags::TypeParameter
+            | TypeFlags::IndexedAccess
+            | TypeFlags::Conditional;
+        if source.flags.intersects(non_instantiable_primitive) {
+            return None;
+        }
+        let mut best: Option<Arc<Type>> = None;
+        let mut matching_count = 0usize;
+        for t in &ui.types {
+            if t.flags.intersects(non_instantiable_primitive) {
+                continue;
+            }
+            let source_idx = self.get_index_type(source);
+            let target_idx = self.get_index_type(t);
+            if source_idx.flags.contains(TypeFlags::Index)
+                && source_idx.flags == target_idx.flags
+            {
+                return Some(Arc::clone(t));
+            }
+            let source_keys = self.string_literal_values(&source_idx);
+            let target_keys = self.string_literal_values(&target_idx);
+            let length = source_keys
+                .iter()
+                .filter(|k| target_keys.contains(k))
+                .count();
+            if !source_keys.is_empty() && length == source_keys.len() && length == target_keys.len()
+            {
+                return Some(Arc::clone(t));
+            }
+            if length >= matching_count && length > 0 {
+                best = Some(Arc::clone(t));
+                matching_count = length;
+            }
+        }
+        best
     }
 
     pub fn find_best_type_for_object_literal(

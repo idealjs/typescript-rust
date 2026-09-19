@@ -181,6 +181,14 @@ pub fn property_name_for_display(name: &str) -> String {
     }
 }
 
+pub fn property_names_for_display(names: &[String]) -> String {
+    names
+        .iter()
+        .map(|n| property_name_for_display(n))
+        .collect::<Vec<_>>()
+        .join(", ")
+}
+
 pub fn is_object_literal_type(t: &Type) -> bool {
     t.flags.contains(TypeFlags::Object) && t.object_flags.contains(ObjectFlags::ObjectLiteral)
 }

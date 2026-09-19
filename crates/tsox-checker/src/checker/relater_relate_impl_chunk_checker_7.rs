@@ -4,7 +4,7 @@ use crate::checker::relater_relate_impl_chunk::*;
 
 impl Checker {
     pub(crate) fn get_best_matching_type_for_error(
-        &self,
+        &mut self,
         source: &Arc<Type>,
         target: &Arc<Type>,
     ) -> Option<Arc<Type>> {
@@ -70,7 +70,8 @@ impl Checker {
                 }
             }
         }
-        None
+
+        self.find_most_overlappy_type(source, target)
     }
 
     pub(crate) fn type_related_to_each_type(
