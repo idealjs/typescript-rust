@@ -46,7 +46,6 @@ impl Binder {
                 *message,
                 args.unwrap_or_default(),
             ));
-            ));
         };
         for d in &existing.declarations {
             push(self, d);
