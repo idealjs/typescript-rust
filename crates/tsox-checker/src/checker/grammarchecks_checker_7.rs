@@ -184,10 +184,17 @@ impl Checker {
                         .map(|p| is_binding_pattern(p))
                         .unwrap_or(false);
                     if !parent_is_binding_pattern {
-                        return self.grammar_error_on_node(
+                        let reported = self.grammar_error_on_node(
                             node,
                             &A_DESTRUCTURING_DECLARATION_MUST_HAVE_AN_INITIALIZER,
                         );
+                        if data.type_node.is_none() {
+                            // Go getTypeForBindingElement：无初始化式且无注解的
+                            // 解构声明，各绑定元素经 widenTypeForVariableLikeDeclaration
+                            // 报 TS7031（按位置序在 TS1182 之后）
+                            self.report_implicit_any_binding_elements(&data.name);
+                        }
+                        return reported;
                     }
                 }
 

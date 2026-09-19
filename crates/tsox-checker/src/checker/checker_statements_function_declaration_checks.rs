@@ -33,6 +33,9 @@ impl Checker {
 
             self.check_parameter_implicit_any(node, &data.parameters, 0);
             for p in data.parameters.iter() {
+                // Go checkParameterInitializer：参数默认初始化式按表达式检查
+                //（内嵌箭头的隐式 any 参数由此覆盖）
+                self.check_parameter_default_initializer(p);
                 if let tsox_frontend::ast::NodeData::ParameterDeclaration(pd) = &p.data
                     && let Some(pt) = &pd.type_node
                 {
