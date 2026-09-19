@@ -48,6 +48,9 @@ impl Checker {
         let Some(symbol) = self.program.symbol_map().symbol_of(node).cloned() else {
             return;
         };
+        if node.kind == SyntaxKind::ImportEqualsDeclaration {
+            self.report_import_equals_entity_name_failure(node);
+        }
         let Some(target) = self.resolve_alias_by_declaration(&symbol) else {
             return;
         };
@@ -243,4 +246,85 @@ fn is_require_or_import_callee(callee: &Arc<Node>) -> bool {
         return true;
     }
     matches!(&callee.data, NodeData::Identifier(i) if i.text == "require")
+}
+
+impl Checker {
+    // Go resolveAlias→resolveEntityName：import = Ns.M 限定名按 exports 表
+    // 逐段解析（成员局部声明不算导出），缺失段报 TS2694；ambient 模块
+    // 上下文内不报
+    pub(crate) fn report_import_equals_entity_name_failure(&mut self, node: &Arc<Node>) {
+        if self.ambient_context_depth != 0 {
+            return;
+        }
+        let NodeData::ImportEqualsDeclaration(d) = &node.data else {
+            return;
+        };
+        let mut segments: Vec<Arc<Node>> = Vec::new();
+        let mut cur = &d.module_reference;
+        loop {
+            match &cur.data {
+                NodeData::QualifiedName(q) => {
+                    segments.insert(0, Arc::clone(&q.right));
+                    cur = &q.left;
+                }
+                NodeData::Identifier(_) => {
+                    segments.insert(0, Arc::clone(cur));
+                    break;
+                }
+                _ => return,
+            }
+        }
+        if segments.len() < 2 {
+            return;
+        }
+        let Some(mut symbol) = self.resolve_identifier(&segments[0]).map(|s| self.resolve_alias_base(s))
+        else {
+            return;
+        };
+        if !symbol.flags.intersects(SymbolFlags::NAMESPACE) {
+            return;
+        }
+        let mut ns_path = segments[0].text().to_string();
+        for (i, seg) in segments.iter().enumerate().skip(1) {
+            let text = seg.text();
+            let next = symbol.exports.get(text).cloned();
+            match next {
+                Some(found) => {
+                    if i + 1 < segments.len() {
+                        symbol = self.resolve_alias_base(found);
+                        ns_path = format!("{ns_path}.{text}");
+                    }
+                }
+                None => {
+                    if self
+                        .get_source_file_of_node(node)
+                        .or_else(|| self.current_file.clone())
+                        .is_some_and(|f| !f.file_name.starts_with("bundled://"))
+                    {
+                        // Go checkAndReportErrorForUsingNamespaceAsTypeOrValue：
+                        // 非实例化 namespace 在值位被引用（左段）报 TS2708
+                        if !self.declaration_is_ambient(node)
+                            && !symbol.flags.intersects(SymbolFlags::VALUE)
+                        {
+                            self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                                self.current_file.clone(),
+                                segments[0].loc,
+                                tsox_core::diagnostics::messages_generated::
+                                    CANNOT_USE_NAMESPACE_0_AS_A_VALUE,
+                                vec![segments[0].text().to_string()],
+                            ));
+                        }
+                        self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                            self.current_file.clone(),
+                            seg.loc,
+                            tsox_core::diagnostics::messages_generated::
+                                NAMESPACE_0_HAS_NO_EXPORTED_MEMBER_1,
+                            vec![ns_path, text.to_string()],
+                        ));
+                    }
+                    return;
+                }
+            }
+        }
+    }
 }

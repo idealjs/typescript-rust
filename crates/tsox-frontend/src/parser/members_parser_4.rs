@@ -18,6 +18,7 @@ impl Parser {
 
         let mut decorators: Vec<Arc<Node>> = Vec::new();
         let mut modifiers: Vec<(SyntaxKind, usize, usize)> = Vec::new();
+        let mut has_static_modifier = false;
         loop {
             if self.token == SyntaxKind::AtToken {
                 decorators.push(self.parse_decorator());
@@ -38,16 +39,24 @@ impl Parser {
                     | SyntaxKind::ExportKeyword
                     | SyntaxKind::DefaultKeyword
                     | SyntaxKind::DeclareKeyword
+                    | SyntaxKind::InKeyword
+                    | SyntaxKind::OutKeyword
             ) {
                 break;
             }
 
             let mut s = self.scanner.clone();
             s.scan();
-            if s.has_preceding_line_break() {
+            // Go nextTokenCanFollowModifier：static 分支无同行要求
+            if s.has_preceding_line_break() && self.token != SyntaxKind::StaticKeyword {
                 break;
             }
             if self.token == SyntaxKind::StaticKeyword && s.token() == SyntaxKind::OpenBraceToken {
+                break;
+            }
+            // Go tryParseModifier：已见 static 后第二个 static 不再作修饰符
+            //（落为成员名，交由缺分号路径报 TS1434）
+            if self.token == SyntaxKind::StaticKeyword && has_static_modifier {
                 break;
             }
 
@@ -75,6 +84,9 @@ impl Parser {
                 break;
             }
             let kind = self.token;
+            if kind == SyntaxKind::StaticKeyword {
+                has_static_modifier = true;
+            }
             let mpos = self.token_pos();
             let mend = self.token_end();
             self.next_token();

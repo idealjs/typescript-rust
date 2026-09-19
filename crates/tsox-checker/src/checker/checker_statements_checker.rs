@@ -325,6 +325,8 @@ impl Checker {
                     self.check_import_declaration_grammar(node);
                 }
                 if node.kind == SyntaxKind::ImportEqualsDeclaration {
+                    // Go checkImportEqualsDeclaration：先跑修饰符文法
+                    self.check_grammar_modifiers(node);
                     self.check_import_equals_esm_grammar(node);
                 }
                 // Go checkExportDeclaration/checkImportEqualsDeclaration：

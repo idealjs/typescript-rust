@@ -56,31 +56,26 @@ impl Parser {
                 if self.token == SyntaxKind::Unknown {
                     return;
                 }
-
-                let expression_text = if node.kind == SyntaxKind::Identifier {
-                    node.text().to_string()
-                } else {
-                    String::new()
-                };
-                let followed_by_identifier = {
-                    let text = self.scanner.text();
-                    let mut i = node.end();
-                    let bytes = text.as_bytes();
-                    while i < bytes.len() && (bytes[i] == b' ' || bytes[i] == b'\t') {
-                        i += 1;
-                    }
-                    i < bytes.len()
-                        && (bytes[i].is_ascii_alphabetic() || bytes[i] == b'_' || bytes[i] == b'$')
-                };
-                if !expression_text.is_empty() && followed_by_identifier {
-                    let lower = expression_text.to_ascii_lowercase();
-                    let mut best: Option<(usize, String)> = None;
+                // Go GetSpellingSuggestion：精确匹配跳过，长度差超
+                // max(2, len*0.34) 跳过，距离预算 floor(len*0.4)+0.9
+                let runes = expression_text.chars().collect::<Vec<_>>();
+                let max_len_diff = std::cmp::max(2, (runes.len() as f64 * 0.34) as usize);
+                let mut best: Option<(usize, String)> = None;
+                if !expression_text.is_empty() {
                     for kw in KEYWORD_SUGGESTIONS {
-                        if kw.len() <= 2 {
+                        let kw_runes = kw.chars().collect::<Vec<_>>();
+                        let max_len = kw_runes.len().max(runes.len());
+                        let min_len = kw_runes.len().min(runes.len());
+                        if max_len.saturating_sub(min_len) > max_len_diff {
                             continue;
                         }
-                        let d =
-                            tsox_core::stringutil::edit_distance(&lower, &kw.to_ascii_lowercase());
+                        if *kw == expression_text {
+                            continue;
+                        }
+                        if kw_runes.len() < 3 {
+                            continue;
+                        }
+                        let d = tsox_core::stringutil::edit_distance(&expression_text, kw);
                         let budget = (expression_text.len() as f64 * 0.4).floor() + 0.9;
                         if d as f64 > budget {
                             continue;
@@ -89,38 +84,38 @@ impl Parser {
                             best = Some((d, kw.to_string()));
                         }
                     }
+                }
 
-                    let space_sugg = best
-                        .is_none()
-                        .then(|| {
-                            KEYWORD_SUGGESTIONS
-                                .iter()
-                                .find(|kw| {
-                                    kw.len() > 2
-                                        && expression_text.len() > kw.len() + 2
-                                        && expression_text.starts_with(*kw)
-                                })
-                                .map(|kw| format!("{kw} {}", &expression_text[kw.len()..]))
-                        })
-                        .flatten();
-                    if let Some((_, sugg)) = best {
-                        self.parse_error_at(
-                            pos,
-                            node.end(),
-                            tsox_core::diagnostics::UNKNOWN_KEYWORD_OR_IDENTIFIER_DID_YOU_MEAN_0,
-                            &[&sugg],
-                        );
-                        return;
-                    }
-                    if let Some(sugg) = space_sugg {
-                        self.parse_error_at(
-                            pos,
-                            node.end(),
-                            tsox_core::diagnostics::UNKNOWN_KEYWORD_OR_IDENTIFIER_DID_YOU_MEAN_0,
-                            &[&sugg],
-                        );
-                        return;
-                    }
+                let space_sugg = best
+                    .is_none()
+                    .then(|| {
+                        KEYWORD_SUGGESTIONS
+                            .iter()
+                            .find(|kw| {
+                                kw.len() > 2
+                                    && expression_text.len() > kw.len() + 2
+                                    && expression_text.starts_with(*kw)
+                            })
+                            .map(|kw| format!("{kw} {}", &expression_text[kw.len()..]))
+                    })
+                    .flatten();
+                if let Some((_, sugg)) = best {
+                    self.parse_error_at(
+                        pos,
+                        node.end(),
+                        tsox_core::diagnostics::UNKNOWN_KEYWORD_OR_IDENTIFIER_DID_YOU_MEAN_0,
+                        &[&sugg],
+                    );
+                    return;
+                }
+                if let Some(sugg) = space_sugg {
+                    self.parse_error_at(
+                        pos,
+                        node.end(),
+                        tsox_core::diagnostics::UNKNOWN_KEYWORD_OR_IDENTIFIER_DID_YOU_MEAN_0,
+                        &[&sugg],
+                    );
+                    return;
                 }
                 self.parse_error_at(
                     pos,
