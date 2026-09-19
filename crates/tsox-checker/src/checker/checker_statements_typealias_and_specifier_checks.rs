@@ -58,6 +58,7 @@ impl Checker {
         if node.kind == SyntaxKind::TypeAliasDeclaration
             && let tsox_frontend::ast::NodeData::TypeAliasDeclaration(d) = &node.data
         {
+            self.check_exports_on_merged_declarations(node);
             self.check_type_annotation(&d.type_node);
 
             if !self

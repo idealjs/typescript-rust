@@ -7,6 +7,7 @@ impl Checker {
         self.check_exports_on_merged_declarations(node);
         self.check_grammar_modifiers(node);
         self.check_grammar_class_declaration_heritage_clauses(node);
+        self.check_exports_on_merged_declarations(node);
 
         if node.name().is_none() && !node.has_syntactic_modifier(ModifierFlags::Default) {
             self.grammar_error_on_first_token(
@@ -112,6 +113,8 @@ impl Checker {
 
     pub fn check_enum_declaration(&mut self, node: &Arc<Node>) {
         self.check_grammar_modifiers(node);
+        self.check_exports_on_merged_declarations(node);
+        self.compute_enum_member_values(node);
 
         if let tsox_frontend::ast::NodeData::EnumDeclaration(data) = &node.data {
             self.check_cjs_reserved_top_level_name(node, &data.name);

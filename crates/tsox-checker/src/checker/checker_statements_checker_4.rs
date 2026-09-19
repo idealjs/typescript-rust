@@ -4,81 +4,10 @@ use crate::checker::checker_statements::*;
 
 impl Checker {
     pub(crate) fn check_variable_declaration(&mut self, node: &Arc<Node>) {
-        if node.kind == SyntaxKind::VariableDeclaration {
-            self.check_exports_on_merged_declarations(node);
-        }
         self.check_grammar_variable_declaration(node);
+        self.check_exports_on_merged_declarations(node);
         if let Some(name) = node.name() {
             self.check_cjs_reserved_top_level_name(node, &name);
-        }
-        // Go checkVariableLikeDeclaration：var 合并的二级声明须与主声明类型
-        // 一致（TS2403 + related "'x' was also declared here"）
-        {
-            let sym = self.program.symbol_map().symbol_of(node).cloned();
-            // Go 模块容器本地/导出分表：不同导出性的声明不经此类型一致性
-            // 检查（TS2395 另行处理）
-            let node_exported = self
-                .get_combined_modifier_flags(node)
-                .contains(ModifierFlags::Export);
-            let mixed_exportness = sym.as_ref().is_some_and(|s| {
-                s.declarations.iter().any(|d| {
-                    self.get_combined_modifier_flags(d).contains(ModifierFlags::Export)
-                        != node_exported
-                })
-            });
-            if let Some(sym) = sym
-                && !mixed_exportness
-                && sym.declarations.len() > 1
-                && let Some(primary) = &sym.value_declaration
-                && !Arc::ptr_eq(primary, node)
-                && node.kind == SyntaxKind::VariableDeclaration
-                && primary.kind == SyntaxKind::VariableDeclaration
-            {
-                let secondary_type = match &node.data {
-                    tsox_frontend::ast::NodeData::VariableDeclaration(d) => {
-                        d.type_node.as_ref().map(|tn| self.get_type_from_type_node(tn))
-                    }
-                    _ => None,
-                };
-                let primary_type = match &primary.data {
-                    tsox_frontend::ast::NodeData::VariableDeclaration(d) => {
-                        d.type_node.as_ref().map(|tn| self.get_type_from_type_node(tn))
-                    }
-                    _ => None,
-                };
-                if let (Some(st), Some(pt)) = (secondary_type, primary_type) {
-                    let sw = self.get_widened_type(&st);
-                    let pw = self.get_widened_type(&pt);
-                    let primary_name_loc = primary.name().map(|n| n.loc);
-                    if !self.is_type_identical_to(&pw, &sw) {
-                        if let tsox_frontend::ast::NodeData::VariableDeclaration(d) = &node.data {
-                            let mut diag = tsox_frontend::ast::Diagnostic::new(
-                                self.current_file.clone(),
-                                d.name.loc,
-                                tsox_core::diagnostics::messages_generated::
-                                    SUBSEQUENT_VARIABLE_DECLARATIONS_MUST_HAVE_THE_SAME_TYPE_VARIABLE_0_MUST_BE_OF_TYPE_1_BUT_HERE_HAS_TYPE_2,
-                                vec![
-                                    d.name.text().to_string(),
-                                    self.type_to_string(&pw),
-                                    self.type_to_string(&sw),
-                                ],
-                            );
-                            if let Some(loc) = primary_name_loc {
-                                diag.related_information.push(
-                                    tsox_frontend::ast::Diagnostic::new(
-                                        self.current_file.clone(),
-                                        loc,
-                                        tsox_core::diagnostics::messages_generated::
-                                            X_0_WAS_ALSO_DECLARED_HERE,
-                                        vec![d.name.text().to_string()],
-                                    ),
-                                );
-                            }
-                            self.diagnostics.add(diag);
-                        }
-                    }
-                }
-            }
         }
         if let tsox_frontend::ast::NodeData::VariableDeclaration(data) = &node.data {
             if data.initializer.is_none() {
@@ -389,19 +318,44 @@ impl Checker {
                 },
             };
 
-            if let Some(symbol) = self.resolve_identifier(&data.name) {
-                // Go 模块容器本地/导出分表：不同导出性的声明不经此类型一致性检查
-                let node_exported = self
-                    .get_combined_modifier_flags(node)
-                    .contains(ModifierFlags::Export);
-                let mixed_exportness = symbol.declarations.iter().any(|d| {
-                    self.get_combined_modifier_flags(d).contains(ModifierFlags::Export)
-                        != node_exported
-                });
-                let primary = symbol.value_declaration.clone();
+            if let Some(mut symbol) = self.resolve_identifier(&data.name) {
+                // Go createGlobals：script 文件顶层声明并入全局符号（跨文件
+                // 合并视图挂在 globals 表中的首个文件符号上）
+                let at_script_top_level = node
+                    .parent()
+                    .and_then(|l| l.parent())
+                    .is_some_and(|g| g.kind == SyntaxKind::VariableStatement)
+                    && node
+                        .parent()
+                        .and_then(|l| l.parent())
+                        .and_then(|s| s.parent())
+                        .is_some_and(|sf| sf.kind == SyntaxKind::SourceFile)
+                    && self
+                        .current_file
+                        .as_ref()
+                        .is_none_or(|f| f.external_module_indicator.is_none());
+                if at_script_top_level
+                    && let Some(merged) = self.globals.get(data.name.text())
+                    && merged
+                        .declarations
+                        .iter()
+                        .any(|d| Arc::ptr_eq(d, node))
+                {
+                    symbol = Arc::clone(merged);
+                }
+                // Go 分表语义：exports 与 locals 各有独立 ValueDeclaration，
+                // 仅同导出性的首个声明参与二级声明类型一致性比较
+                let node_exported = self.effective_export_default_flags(node).0;
+                let primary = symbol
+                    .declarations
+                    .iter()
+                    .find(|d| {
+                        d.kind == SyntaxKind::VariableDeclaration
+                            && self.effective_export_default_flags(d).0 == node_exported
+                    })
+                    .cloned();
                 if let Some(primary) = primary
                     && !Arc::ptr_eq(&primary, node)
-                    && !mixed_exportness
                     && symbol.declarations.len() > 1
                     && symbol.flags.intersects(
                         SymbolFlags::FunctionScopedVariable | SymbolFlags::BlockScopedVariable,

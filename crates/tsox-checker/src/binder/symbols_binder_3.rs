@@ -186,13 +186,12 @@ impl Binder {
         if new_flags.contains(SymbolFlags::NamespaceModule) {
             return true;
         }
-        // 镜像：既有非实例化 namespace（纯类型导出）与后续值意义声明
-        //（const/let/var/function/class）合并（namespace N + const N；
-        // Go 变量 excludes=Value 与 NamespaceModule 不相交，declareSymbol
-        // 无条件合并；type alias 的 excludes=Type 含 namespace 位仍冲突）
+        // 镜像：既有非实例化 namespace（纯类型导出）与任何后续声明合并
+        //（Go NamespaceModule 位不属于任何 excludes 集合：VALUE/TYPE 并集均
+        // 不含它，declareSymbol 无 excludes 冲突即无条件合并；interface/
+        // type alias/值声明与 namespace 的声明位互不重叠）
         if existing_flags.contains(SymbolFlags::NamespaceModule)
             && !existing_flags.contains(SymbolFlags::ValueModule)
-            && new_flags.intersects(SymbolFlags::VALUE)
         {
             return true;
         }

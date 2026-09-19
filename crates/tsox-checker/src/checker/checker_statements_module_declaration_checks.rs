@@ -9,6 +9,7 @@ impl Checker {
             self.check_cjs_reserved_top_level_name(node, &node.name().unwrap());
         }
         self.check_grammar_modifiers(node);
+        self.check_exports_on_merged_declarations(node);
 
         // Go checkModuleDeclaration：global 增强诊断
         if tsox_frontend::ast::is_global_scope_augmentation(node) {

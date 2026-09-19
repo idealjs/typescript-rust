@@ -128,7 +128,6 @@ pub(crate) mod checker_object_literal_is_destructuring_target;
 pub(crate) mod checker_operators;
 pub(crate) mod checker_operators_relational;
 pub(crate) mod checker_lib_feature_map;
-pub(crate) mod checker_merged_exports;
 pub(crate) mod checker_prop_access;
 pub(crate) mod checker_prop_access_checker;
 pub(crate) mod checker_prop_access_checker_2;
@@ -379,6 +378,8 @@ pub(crate) mod utilities_has_only_expression_initialization;
 pub(crate) mod utilities_is_optional_symbol;
 pub(crate) mod utilities_is_private_within_ambient;
 pub(crate) mod checker_class_dup_declarations;
+pub(crate) mod checker_merged_declaration_exports;
+pub(crate) mod checker_enum_numeric_names;
 #[cfg(test)]
 pub(crate) mod utilities_tests;
 pub(crate) mod utilities_token_is_identifier_or_keyword;

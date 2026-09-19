@@ -73,7 +73,7 @@ impl Checker {
             .unwrap_or_else(EvalResult::none)
     }
 
-    fn compute_enum_member_values(&mut self, node: &Arc<Node>) {
+    pub(crate) fn compute_enum_member_values(&mut self, node: &Arc<Node>) {
         let already = self
             .node_links
             .get(node)
@@ -123,6 +123,7 @@ impl Checker {
                 vec![],
             ));
         }
+        self.check_enum_member_numeric_name(member);
         let has_initializer =
             matches!(&member.data, NodeData::EnumMember(d) if d.initializer.is_some());
         if has_initializer {
