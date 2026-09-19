@@ -32,6 +32,7 @@ impl Checker {
         });
         self.class_instance_type_cache
             .insert(node_id, Arc::clone(&own_type));
+        self.class_build_in_progress.insert(node_id);
 
         {
             let own_mut = Arc::as_ptr(&own_type) as *mut crate::checker::types::Type;
@@ -88,6 +89,22 @@ impl Checker {
         }
 
         let mut base_type: Option<Arc<Type>> = None;
+        let has_extends = heritage_clauses.as_ref().is_some_and(|h| {
+            h.iter().any(|clause| {
+                matches!(
+                    &clause.data,
+                    tsox_frontend::ast::NodeData::HeritageClause(hc)
+                        if hc.token == SyntaxKind::ExtendsKeyword
+                )
+            })
+        });
+        let base_guard_pushed = has_extends
+            && own_type.symbol.as_ref().is_some_and(|sym| {
+                self.push_type_resolution(
+                    Arc::as_ptr(sym) as *const tsox_frontend::ast::Symbol,
+                    TypeResolutionProperty::ResolvedBaseTypes,
+                )
+            });
         if let Some(ref heritage) = heritage_clauses {
             for clause in heritage.iter() {
                 if let tsox_frontend::ast::NodeData::HeritageClause(hc) = &clause.data {
@@ -100,27 +117,84 @@ impl Checker {
                 }
             }
         }
+        if base_guard_pushed && !self.pop_type_resolution() {
+            if let Some(sym) = own_type.symbol.clone() {
+                self.emit_ts2506(node, &sym);
+            }
+        }
         if let Some(base) = base_type {
-            // 就地合并：成员填期的早前引用（自引用返回型等）持有的是壳本身，
-            // 合并结果必须写回同一 Arc，否则早前引用永远看不到基类成员
-            let merged = self.merge_instance_types(&own_type, &base);
-            if !Arc::ptr_eq(&merged, &own_type)
-                && let Some(merged_struct) = merged.as_structured()
-            {
-                unsafe {
-                    let ptr = Arc::as_ptr(&own_type) as *mut crate::checker::types::Type;
-                    if let crate::checker::types::TypeData::Object(obj) = &mut (*ptr).data {
-                        obj.structured.members = merged_struct.members.clone();
-                        obj.structured.properties = merged_struct.properties.clone();
-                        obj.structured.index_infos = merged_struct.index_infos.clone();
-                        obj.structured.signatures = merged_struct.signatures.clone();
-                        obj.structured.call_signature_count = merged_struct.call_signature_count;
-                    }
+            let base_still_building = base
+                .symbol
+                .as_ref()
+                .and_then(|s| {
+                    s.declarations
+                        .iter()
+                        .find(|d| matches!(d.data, NodeData::ClassDeclaration(_)))
+                })
+                .is_some_and(|d| self.class_build_in_progress.contains(&d.id()));
+            if base_still_building {
+                self.pending_base_merges.push((node_id, base));
+            } else {
+                self.merge_base_into_shell(&own_type, &base);
+            }
+        }
+        self.class_build_in_progress.remove(&node_id);
+        self.drain_pending_base_merges();
+        self.class_instance_type_cache.insert(node_id, Arc::clone(&own_type));
+        own_type
+    }
+
+    fn merge_base_into_shell(&mut self, own_type: &Arc<Type>, base: &Arc<Type>) {
+        // 就地合并：成员填期的早前引用（自引用返回型等）持有的是壳本身，
+        // 合并结果必须写回同一 Arc，否则早前引用永远看不到基类成员
+        let merged = self.merge_instance_types(own_type, base);
+        if !Arc::ptr_eq(&merged, own_type)
+            && let Some(merged_struct) = merged.as_structured()
+        {
+            unsafe {
+                let ptr = Arc::as_ptr(own_type) as *mut crate::checker::types::Type;
+                if let crate::checker::types::TypeData::Object(obj) = &mut (*ptr).data {
+                    obj.structured.members = merged_struct.members.clone();
+                    obj.structured.properties = merged_struct.properties.clone();
+                    obj.structured.index_infos = merged_struct.index_infos.clone();
+                    obj.structured.signatures = merged_struct.signatures.clone();
+                    obj.structured.call_signature_count = merged_struct.call_signature_count;
                 }
             }
         }
-        self.class_instance_type_cache.insert(node_id, Arc::clone(&own_type));
-        own_type
+    }
+
+    fn base_merge_ready(&self, base: &Arc<Type>) -> bool {
+        let Some(sym) = base.symbol.as_ref() else {
+            return true;
+        };
+        let Some(decl) = sym
+            .declarations
+            .iter()
+            .find(|d| matches!(d.data, NodeData::ClassDeclaration(_)))
+        else {
+            return true;
+        };
+        let id = decl.id();
+        !self.class_build_in_progress.contains(&id)
+            && !self.pending_base_merges.iter().any(|(d, _)| *d == id)
+    }
+
+    fn drain_pending_base_merges(&mut self) {
+        loop {
+            let Some(idx) = self
+                .pending_base_merges
+                .iter()
+                .position(|(_, base)| self.base_merge_ready(base))
+            else {
+                break;
+            };
+            let (derived_id, base) = self.pending_base_merges.remove(idx);
+            let Some(derived) = self.class_instance_type_cache.get(&derived_id).cloned() else {
+                continue;
+            };
+            self.merge_base_into_shell(&derived, &base);
+        }
     }
 
     pub(crate) fn single_base_for_non_augmenting_subtype(&mut self, t: &Arc<Type>) -> Arc<Type> {

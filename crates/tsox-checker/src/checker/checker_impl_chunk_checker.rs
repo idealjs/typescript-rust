@@ -247,6 +247,8 @@ impl Checker {
             typequery_instantiation_cache: std::collections::HashMap::new(),
             attached_type_args_cache: std::collections::HashMap::new(),
             filling_class_members: std::collections::HashSet::new(),
+            class_build_in_progress: std::collections::HashSet::new(),
+            pending_base_merges: Vec::new(),
             array_type_parameter_symbols: None,
             array_member_type_cache: std::collections::HashMap::new(),
             array_type_intern_cache: std::collections::HashMap::new(),

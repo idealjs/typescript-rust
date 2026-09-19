@@ -21,6 +21,22 @@ pub(crate) fn ast_get_combined_modifier_flags(node: &Arc<Node>) -> ModifierFlags
 }
 
 impl Checker {
+    pub fn mark_type_resolution_cycle(
+        &mut self,
+        target: *const Symbol,
+        property: TypeResolutionProperty,
+    ) {
+        if let Some(idx) = self
+            .type_resolution_stack
+            .iter()
+            .rposition(|entry| entry.target == target && entry.property == property)
+        {
+            for entry in &mut self.type_resolution_stack[idx..] {
+                entry.result = false;
+            }
+        }
+    }
+
     pub fn push_type_resolution(
         &mut self,
         target: *const Symbol,
@@ -31,10 +47,8 @@ impl Checker {
             .iter()
             .rposition(|entry| entry.target == target && entry.property == property);
 
-        if let Some(idx) = cycle_start {
-            for entry in &mut self.type_resolution_stack[idx..] {
-                entry.result = false;
-            }
+        if cycle_start.is_some() {
+            self.mark_type_resolution_cycle(target, property);
             false
         } else {
             self.type_resolution_stack.push(TypeResolutionEntry {
