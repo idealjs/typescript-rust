@@ -14,6 +14,8 @@ impl Checker {
         self.check_private_name_conflicts(node);
         self.check_member_dynamic_name_grammar(node);
 
+        self.check_static_member_class_type_params(node);
+
         match node.kind {
             SyntaxKind::PropertyDeclaration => {
                 if let tsox_frontend::ast::NodeData::PropertyDeclaration(data) = &node.data {
@@ -65,14 +67,6 @@ impl Checker {
                         ));
                     }
 
-                    if node.has_syntactic_modifier(ModifierFlags::Static) {
-                        if let Some(type_node) = &data.type_node {
-                            let prev = self.in_static_member_type;
-                            self.in_static_member_type = true;
-                            let _ = self.get_type_from_type_node(type_node);
-                            self.in_static_member_type = prev;
-                        }
-                    }
                     if let Some(tn) = &data.type_node {
                         self.check_type_annotation(tn);
                     }

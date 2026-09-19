@@ -58,6 +58,7 @@ pub(crate) mod checker_declaration_diagnostics;
 pub(crate) mod checker_classes_checker_3;
 pub(crate) mod checker_classes_checker_4;
 pub(crate) mod checker_classes_checker_5;
+pub(crate) mod checker_classes_static_type_params;
 pub(crate) mod checker_classes_private_name_conflicts;
 pub(crate) mod checker_contextual;
 pub(crate) mod checker_contextual_checker;
