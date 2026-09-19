@@ -25,6 +25,8 @@ impl Checker {
 
         self.enclosing_class_stack.push(Arc::clone(node));
 
+        self.check_class_type_for_duplicate_declarations(node);
+
         if let tsox_frontend::ast::NodeData::ClassDeclaration(data) = &node.data {
             if let Some(heritage) = &data.heritage_clauses {
                 for clause in heritage.iter() {

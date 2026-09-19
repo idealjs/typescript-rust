@@ -307,6 +307,7 @@ impl Checker {
                         &data.name,
                         &tsox_core::diagnostics::messages_generated::INTERFACE_NAME_CANNOT_BE_0,
                     );
+                    self.check_class_type_for_duplicate_declarations(node);
                     self.check_interface_members(&data.members);
                 }
 

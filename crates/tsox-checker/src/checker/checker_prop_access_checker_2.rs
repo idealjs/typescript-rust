@@ -97,6 +97,12 @@ impl Checker {
             return;
         }
 
+        // Go resolveAccessExpression：typeof globalThis 上的属性访问无索引签名，
+        // 命中全局符号且为 block-scoped 才报 2339，否则静默返回 any
+        if self.global_this_property_access_error(&obj_type, name_text, name) {
+            return;
+        }
+
         if obj_expr.kind == SyntaxKind::Identifier
             && let Some(sym) = self.resolve_identifier(obj_expr)
         {
@@ -184,6 +190,39 @@ impl Checker {
                 vec![name_text.to_string(), type_str],
             ));
         }
+    }
+
+    pub(crate) fn global_this_property_access_error(
+        &mut self,
+        obj_type: &Arc<Type>,
+        name_text: &str,
+        name: &Arc<Node>,
+    ) -> bool {
+        if self
+            .global_this_symbol
+            .as_ref()
+            .is_some_and(|gt| obj_type.symbol.as_ref().is_some_and(|s| Arc::ptr_eq(s, gt)))
+        {
+            let block_scoped_hit = self.globals.get(name_text).is_some_and(|sym| {
+                sym.flags.intersects(
+                    tsox_frontend::ast::SymbolFlags::BlockScopedVariable
+                        | tsox_frontend::ast::SymbolFlags::Class
+                        | tsox_frontend::ast::SymbolFlags::ENUM,
+                )
+            });
+            if block_scoped_hit {
+                let file = self.current_file.clone();
+                let type_str = self.type_to_string(obj_type);
+                self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                    file,
+                    name.loc,
+                    PROPERTY_0_DOES_NOT_EXIST_ON_TYPE_1,
+                    vec![name_text.to_string(), type_str],
+                ));
+            }
+            return true;
+        }
+        false
     }
 
     pub(crate) fn report_possibly_null_or_undefined(

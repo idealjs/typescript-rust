@@ -161,6 +161,11 @@ impl Binder {
         {
             return internal;
         }
+        // Go scanner 对十进制数字字面量 tokenValue 归一化
+        // （jsnum.FromString().String()），符号名以归一化形态入表（0.0 与 0 同名）
+        if name.kind == SyntaxKind::NumericLiteral {
+            return tsox_core::jsnum::Number::from_string(&self.node_text(name)).to_string();
+        }
         self.node_text(name)
     }
 }

@@ -11,6 +11,9 @@ impl Checker {
             return t;
         }
 
+        if matches!(&node.data, NodeData::TypeLiteralNode(_)) {
+            self.check_type_literal_duplicate_declarations(node);
+        }
         self.cache_type(node, self.error_type());
         let result = match &node.data {
             NodeData::TypeLiteralNode(data) => {

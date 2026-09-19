@@ -331,6 +331,11 @@ impl Checker {
         if t.is_union() || t.is_intersection() {
             return self.get_union_or_intersection_property(t, name);
         }
+        // Go globalThisSymbol.Exports 即 globals 表：typeof globalThis 的成员
+        // 直接取 globals
+        if let Some(sym) = self.global_this_export_of_type(t, name) {
+            return Some(sym);
+        }
         // 挂起的条件类型（checkType 已具体时）先解析再取成员
         if matches!(&t.data, crate::checker::types::TypeData::Conditional(_))
             && let Some(resolved) = self.resolve_conditional_type(t)

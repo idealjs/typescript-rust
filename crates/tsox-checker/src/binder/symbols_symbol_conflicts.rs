@@ -16,19 +16,35 @@ impl Binder {
         existing: &Arc<Symbol>,
         name: &str,
     ) {
+        self.report_declaration_conflict_all(node, existing, Some(name), &DUPLICATE_IDENTIFIER_0);
+    }
+
+    // Go declareSymbol 冲突路径：报所有既有声明名 + 当前声明名，
+    // 消息按既有符号位选择（enum > block-scoped > duplicate identifier）
+    pub(crate) fn report_declaration_conflict_all(
+        &mut self,
+        node: &Arc<Node>,
+        existing: &Arc<Symbol>,
+        name: Option<&str>,
+        message: &'static tsox_core::diagnostics::Message,
+    ) {
         let push = |b: &mut Self, n: &Arc<Node>| {
             let name_node = tsox_frontend::ast::utilities::get_name_of_declaration(n)
                 .unwrap_or_else(|| Arc::clone(n));
-            if b.symbol_map.binder_diagnostics.iter().any(|d| {
-                d.loc == name_node.loc && d.code == DUPLICATE_IDENTIFIER_0.code
-            }) {
+            if b
+                .symbol_map
+                .binder_diagnostics
+                .iter()
+                .any(|d| d.loc == name_node.loc && d.code == message.code)
+            {
                 return;
             }
+            let args = name.map(|n| vec![crate::checker::property_name_for_display(n)]);
             b.symbol_map.binder_diagnostics.push(Diagnostic::new(
                 b.current_source_file.clone(),
                 name_node.loc,
-                DUPLICATE_IDENTIFIER_0,
-                vec![crate::checker::property_name_for_display(name)],
+                *message,
+                args.unwrap_or_default(),
             ));
         };
         for d in &existing.declarations {

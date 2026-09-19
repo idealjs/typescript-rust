@@ -7,7 +7,7 @@ impl Binder {
         &mut self,
         node: &Arc<Node>,
         includes: SymbolFlags,
-        _excludes: SymbolFlags,
+        excludes: SymbolFlags,
         target: DeclareTarget,
     ) -> Arc<Symbol> {
         let name = self.get_declaration_name(node);
@@ -36,6 +36,51 @@ impl Binder {
         };
 
         if let Some(existing) = existing {
+            // Go declareSymbol 冲突路径：existing 与 excludes 相交时报所有既有
+            // 声明 + 当前声明，且不合并、不替换表内既有符号
+            let assignment_merge_exception = (includes.contains(SymbolFlags::FunctionScopedVariable)
+                && existing.flags.contains(SymbolFlags::Assignment))
+                || (includes.contains(SymbolFlags::Assignment)
+                    && existing
+                        .flags
+                        .contains(SymbolFlags::FunctionScopedVariable));
+            if !name.is_empty()
+                && !excludes.is_empty()
+                && existing.flags.intersects(excludes)
+                && !assignment_merge_exception
+            {
+                if existing.flags.intersects(SymbolFlags::ENUM)
+                    || includes.intersects(SymbolFlags::ENUM)
+                {
+                    self.report_declaration_conflict_all(
+                        node,
+                        &existing,
+                        None,
+                        &tsox_core::diagnostics::messages_generated::ENUM_DECLARATIONS_CAN_ONLY_MERGE_WITH_NAMESPACE_OR_OTHER_ENUM_DECLARATIONS,
+                    );
+                } else if existing.flags.contains(SymbolFlags::BlockScopedVariable) {
+                    self.report_declaration_conflict_all(
+                        node,
+                        &existing,
+                        Some(&name),
+                        &CANNOT_REDECLARE_BLOCK_SCOPED_VARIABLE_0,
+                    );
+                } else {
+                    self.report_duplicate_identifier_all(node, &existing, &name);
+                }
+                let symbol = self.new_symbol(includes, name.clone());
+                let symbol_mut = Arc::as_ptr(&symbol) as *mut Symbol;
+                unsafe {
+                    (*symbol_mut).declarations.push(Arc::clone(node));
+                    if (*symbol_mut).value_declaration.is_none()
+                        && includes.intersects(SymbolFlags::VALUE)
+                    {
+                        (*symbol_mut).value_declaration = Some(Arc::clone(node));
+                    }
+                }
+                self.symbol_map.set_symbol(node, Arc::clone(&symbol));
+                return symbol;
+            }
             if self.can_merge_symbols(existing.flags, includes) {
                 let existing_mut = Arc::as_ptr(&existing) as *mut Symbol;
                 unsafe {
@@ -215,6 +260,19 @@ impl Binder {
             if can_merge_with_ns {
                 return true;
             }
+        }
+
+        // Go declareSymbol：var 对 var（FSVExcludes 不含 FSV）、属性/访问器
+        // 同组（Property/Accessor excludes 互不含对方位）无冲突即合并
+        if existing_flags.intersects(SymbolFlags::VARIABLE)
+            && new_flags.intersects(SymbolFlags::VARIABLE)
+        {
+            return true;
+        }
+        if existing_flags.intersects(SymbolFlags::PROPERTY_OR_ACCESSOR)
+            && new_flags.intersects(SymbolFlags::PROPERTY_OR_ACCESSOR)
+        {
+            return true;
         }
 
         if existing_flags.contains(SymbolFlags::Function)

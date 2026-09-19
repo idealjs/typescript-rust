@@ -3,6 +3,33 @@
 use crate::checker::checker_suggestions_resolve::*;
 
 impl Checker {
+    // Go globalThisSymbol.Exports 即 globals 表（引用共享）；单表架构下以
+    // 符号同一性判定后直接查 globals
+    pub(crate) fn global_this_export(
+        &self,
+        symbol: &Arc<Symbol>,
+        name: &str,
+    ) -> Option<Arc<Symbol>> {
+        if self
+            .global_this_symbol
+            .as_ref()
+            .is_some_and(|gt| Arc::ptr_eq(gt, symbol))
+        {
+            self.globals.get(name).cloned()
+        } else {
+            None
+        }
+    }
+
+    pub(crate) fn global_this_export_of_type(
+        &self,
+        t: &Arc<crate::checker::types::Type>,
+        name: &str,
+    ) -> Option<Arc<Symbol>> {
+        let symbol = t.symbol.as_ref()?;
+        self.global_this_export(symbol, name)
+    }
+
     pub(crate) fn ambient_namespace_locals_visible(&self, ns: &Arc<Symbol>) -> bool {
         if std::env::var_os("TSOX_NO_AMBIENT").is_some() {
             return false;

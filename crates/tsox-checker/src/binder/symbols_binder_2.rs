@@ -3,20 +3,70 @@
 use crate::binder::symbols::*;
 
 impl Binder {
-    // Go binder 各声明类别的 excludes（值成员互斥表）
-    fn excludes_for_declaration(kind: SyntaxKind) -> SymbolFlags {
-        let value = SymbolFlags::VALUE;
-        match kind {
-            SyntaxKind::MethodDeclaration | SyntaxKind::MethodSignature => {
-                value & !SymbolFlags::Method
-            }
-            SyntaxKind::GetAccessor => value & !(SymbolFlags::SetAccessor | SymbolFlags::Property),
-            SyntaxKind::SetAccessor => value & !(SymbolFlags::GetAccessor | SymbolFlags::Property),
-            SyntaxKind::PropertyDeclaration
-            | SyntaxKind::PropertySignature
-            | SyntaxKind::PropertyAssignment => value & !SymbolFlags::Property,
-            _ => SymbolFlags::empty(),
+    // Go binder 各声明类别的 excludes（bindWorker 各 case 的 includes/excludes 配对）
+    fn excludes_for_declaration(node: &Arc<Node>, includes: SymbolFlags) -> SymbolFlags {
+        if node.kind == SyntaxKind::Parameter
+            || node.kind == SyntaxKind::BindingElement && Self::is_part_of_parameter_declaration(node)
+        {
+            return SymbolFlags::ParameterExcludes;
         }
+        if node.kind == SyntaxKind::MethodDeclaration
+            && node.parent().is_some_and(|p| p.kind == SyntaxKind::ObjectLiteralExpression)
+        {
+            return SymbolFlags::VALUE;
+        }
+        if includes.contains(SymbolFlags::FunctionScopedVariable) {
+            return SymbolFlags::FunctionScopedVariableExcludes;
+        }
+        if includes.contains(SymbolFlags::BlockScopedVariable) {
+            return SymbolFlags::BlockScopedVariableExcludes;
+        }
+        if includes.contains(SymbolFlags::Function) {
+            return SymbolFlags::FunctionExcludes;
+        }
+        if includes.contains(SymbolFlags::Class) {
+            return SymbolFlags::ClassExcludes;
+        }
+        if includes.contains(SymbolFlags::Interface) {
+            return SymbolFlags::InterfaceExcludes;
+        }
+        if includes.contains(SymbolFlags::ConstEnum) {
+            return SymbolFlags::ConstEnumExcludes;
+        }
+        if includes.contains(SymbolFlags::RegularEnum) {
+            return SymbolFlags::RegularEnumExcludes;
+        }
+        if includes.contains(SymbolFlags::ValueModule) {
+            return SymbolFlags::ValueModuleExcludes;
+        }
+        if includes.contains(SymbolFlags::NamespaceModule) {
+            return SymbolFlags::NamespaceModuleExcludes;
+        }
+        if includes.contains(SymbolFlags::TypeAlias) {
+            return SymbolFlags::TypeAliasExcludes;
+        }
+        if includes.contains(SymbolFlags::TypeParameter) {
+            return SymbolFlags::TypeParameterExcludes;
+        }
+        if includes.contains(SymbolFlags::Method) {
+            return SymbolFlags::MethodExcludes;
+        }
+        if includes.contains(SymbolFlags::Property) {
+            return SymbolFlags::PropertyExcludes;
+        }
+        if includes.contains(SymbolFlags::GetAccessor) {
+            return SymbolFlags::GetAccessorExcludes;
+        }
+        if includes.contains(SymbolFlags::SetAccessor) {
+            return SymbolFlags::SetAccessorExcludes;
+        }
+        if includes.contains(SymbolFlags::EnumMember) {
+            return SymbolFlags::EnumMemberExcludes;
+        }
+        if includes.contains(SymbolFlags::Alias) {
+            return SymbolFlags::AliasExcludes;
+        }
+        SymbolFlags::empty()
     }
 
     // Go declareClassMember：类容器内 static 成员入 exports 表、实例成员入
@@ -26,7 +76,7 @@ impl Binder {
         &self,
         node: &Arc<Node>,
         existing: &Arc<Symbol>,
-    ) -> Option<SymbolFlags> {
+    ) -> Option<(SymbolFlags, SymbolFlags)> {
         let container = self.container.as_ref()?;
         if !matches!(
             container.kind,
@@ -35,17 +85,40 @@ impl Binder {
             return None;
         }
         let node_static = node.has_syntactic_modifier(tsox_frontend::ast::ModifierFlags::Static);
-        Some(
-            existing
-                .declarations
-                .iter()
-                .filter(|d| {
-                    d.has_syntactic_modifier(tsox_frontend::ast::ModifierFlags::Static)
-                        == node_static
-                })
-                .map(|d| Self::member_includes_flags(d.kind))
-                .fold(SymbolFlags::empty(), |a, b| a | b),
-        )
+        let mut same = SymbolFlags::empty();
+        let mut other = SymbolFlags::empty();
+        for d in existing.declarations.iter() {
+            let fold = if d.has_syntactic_modifier(tsox_frontend::ast::ModifierFlags::Static)
+                == node_static
+            {
+                &mut same
+            } else {
+                &mut other
+            };
+            *fold |= Self::member_includes_flags(d.kind);
+        }
+        Some((same, other))
+    }
+
+    // Go IsPartOfParameterDeclaration：沿父链先遇到 Parameter 即参数解构内
+    fn is_part_of_parameter_declaration(node: &Arc<Node>) -> bool {
+        let mut cur = node.parent();
+        while let Some(p) = cur {
+            match p.kind {
+                SyntaxKind::Parameter => return true,
+                SyntaxKind::SourceFile
+                | SyntaxKind::Block
+                | SyntaxKind::FunctionDeclaration
+                | SyntaxKind::FunctionExpression
+                | SyntaxKind::ArrowFunction
+                | SyntaxKind::MethodDeclaration
+                | SyntaxKind::Constructor
+                | SyntaxKind::GetAccessor
+                | SyntaxKind::SetAccessor => return false,
+                _ => cur = p.parent(),
+            }
+        }
+        false
     }
 
     fn member_includes_flags(kind: SyntaxKind) -> SymbolFlags {
@@ -236,14 +309,21 @@ impl Binder {
         let mut conflicted = false;
 
         if let Some(existing) = existing {
-            // Go binder 各声明类别的 excludes（值成员互斥表），
-            // 冲突时报所有既有声明 + 当前声明的 Duplicate identifier，且不合并符号
-            let excludes = Self::excludes_for_declaration(node.kind);
+            // Go declareSymbol 冲突路径：excludes 互斥表（bindWorker 配对），
+            // 冲突时报所有既有声明 + 当前声明，且不合并符号、不替换表内既有符号
+            let excludes = Self::excludes_for_declaration(node, includes);
             // Go declareClassMember 按 staticness 分表：冲突判定只看同 staticness
             // 子集的声明；无同 staticness 声明（跨表）则永无冲突
             let same_static_flags = self.class_member_same_static_flags(node, &existing);
-            let staticness_split = same_static_flags == Some(SymbolFlags::empty());
-            let comparison_flags = same_static_flags.unwrap_or(existing.flags);
+            let staticness_split = same_static_flags
+                .map(|(same, _)| same == SymbolFlags::empty())
+                .unwrap_or(false);
+            // Go 以 symbol.Flags 判冲突（含访问器满标记位）：剔除跨 staticness
+            // 子集贡献后使用整符号标志
+            let comparison_flags = match same_static_flags {
+                Some((_, other)) => existing.flags & !other,
+                None => existing.flags,
+            };
             let assignment_merge_exception = (includes.contains(SymbolFlags::FunctionScopedVariable)
                 && existing.flags.contains(SymbolFlags::Assignment))
                 || (includes.contains(SymbolFlags::Assignment)
@@ -256,7 +336,25 @@ impl Binder {
                 && comparison_flags.intersects(excludes)
                 && !assignment_merge_exception
             {
-                self.report_duplicate_identifier_all(node, &existing, &name);
+                if comparison_flags.intersects(SymbolFlags::ENUM)
+                    || includes.intersects(SymbolFlags::ENUM)
+                {
+                    self.report_declaration_conflict_all(
+                        node,
+                        &existing,
+                        None,
+                        &tsox_core::diagnostics::messages_generated::ENUM_DECLARATIONS_CAN_ONLY_MERGE_WITH_NAMESPACE_OR_OTHER_ENUM_DECLARATIONS,
+                    );
+                } else if comparison_flags.contains(SymbolFlags::BlockScopedVariable) {
+                    self.report_declaration_conflict_all(
+                        node,
+                        &existing,
+                        Some(&name),
+                        &CANNOT_REDECLARE_BLOCK_SCOPED_VARIABLE_0,
+                    );
+                } else {
+                    self.report_duplicate_identifier_all(node, &existing, &name);
+                }
                 if existing.flags.intersects(SymbolFlags::ACCESSOR)
                     && (existing.flags & SymbolFlags::ACCESSOR) != (includes & SymbolFlags::ACCESSOR)
                 {
@@ -277,7 +375,6 @@ impl Binder {
                         }
                     }
                 }
-                self.insert_symbol_into_container(node, &symbol, &name, &var_hoist_container);
                 self.symbol_map.set_symbol(node, Arc::clone(&symbol));
                 return symbol;
             }

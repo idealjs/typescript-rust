@@ -199,6 +199,7 @@ impl Checker {
                 .get(text)
                 .or_else(|| symbol.members.get(text))
                 .cloned()
+                .or_else(|| self.global_this_export(&symbol, text))
                 .or_else(|| self.ambient_namespace_local(&symbol, text))
                 .or_else(|| self.object_literal_export_member(&symbol, text))
                 .or_else(|| {

@@ -134,30 +134,37 @@ impl Checker {
         if t.flags
             .intersects(TypeFlags::String | TypeFlags::StringLiteral)
         {
-            return self.global_interface_has_property("String", name);
+            return self.global_interface_has_property("String", name)
+                || self.global_interface_has_property("Object", name);
         }
 
         if t.flags
             .intersects(TypeFlags::Number | TypeFlags::NumberLiteral)
         {
-            return self.global_interface_has_property("Number", name);
+            return self.global_interface_has_property("Number", name)
+                || self.global_interface_has_property("Object", name);
         }
 
         if t.flags
             .intersects(TypeFlags::Boolean | TypeFlags::BooleanLiteral)
         {
-            return self.global_interface_has_property("Boolean", name);
+            return self.global_interface_has_property("Boolean", name)
+                || self.global_interface_has_property("Object", name);
         }
 
         if t.flags
             .intersects(TypeFlags::BigInt | TypeFlags::BigIntLiteral)
         {
-            return self.global_interface_has_property("BigInt", name);
+            return self.global_interface_has_property("BigInt", name)
+                || self.global_interface_has_property("Object", name);
         }
 
-        if t.flags
-            .intersects(TypeFlags::ESSymbol | TypeFlags::Void | TypeFlags::UniqueESSymbol)
-        {
+        if t.flags.intersects(TypeFlags::ESSymbol | TypeFlags::UniqueESSymbol) {
+            return self.global_interface_has_property("Symbol", name)
+                || self.global_interface_has_property("Object", name);
+        }
+
+        if t.flags.contains(TypeFlags::Void) {
             return false;
         }
 

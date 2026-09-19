@@ -71,174 +71,95 @@ impl Checker {
 
             if !is_destructuring_assignment_target {
                 {
-                    let mut seen: std::collections::HashMap<String, Vec<&Arc<Node>>> =
+                    // Go checkGrammarObjectLiteralExpression：按声明顺序
+                    // 记录首个 kind，后续按组合报 2300/1117/1118/1119，
+                    // 1118/1119 后停止该对象字面量的后续检查
+                    const MEANING_METHOD: u8 = 1;
+                    const MEANING_PROPERTY: u8 = 2;
+                    const MEANING_GET: u8 = 4;
+                    const MEANING_SET: u8 = 8;
+                    const MEANING_ACCESSORS: u8 = MEANING_GET | MEANING_SET;
+                    let parse_errors = self
+                        .current_file
+                        .as_ref()
+                        .is_some_and(|f| f.has_parse_diagnostics);
+                    let mut seen_kinds: std::collections::HashMap<String, u8> =
                         std::collections::HashMap::new();
                     for prop in data.properties.iter() {
-                        let Some(name_node) = prop.name() else {
+                        let Some(name_node) = prop.name() else { continue };
+                        let current_kind = match prop.kind {
+                            SyntaxKind::PropertyAssignment
+                            | SyntaxKind::ShorthandPropertyAssignment => MEANING_PROPERTY,
+                            SyntaxKind::MethodDeclaration => MEANING_METHOD,
+                            SyntaxKind::GetAccessor => MEANING_GET,
+                            SyntaxKind::SetAccessor => MEANING_SET,
+                            _ => continue,
+                        };
+                        let key = self.object_literal_member_key(&name_node);
+                        let Some(key) = key else { continue };
+                        let existing_kind = seen_kinds.get(&key).copied().unwrap_or(0);
+                        if existing_kind == 0 {
+                            seen_kinds.insert(key, current_kind);
                             continue;
-                        };
-                        let name = if name_node.kind == SyntaxKind::ComputedPropertyName {
-                            let expr = match &name_node.data {
-                                tsox_frontend::ast::NodeData::ComputedPropertyName(c) => {
-                                    Arc::clone(&c.expression)
-                                }
-                                _ => Arc::clone(name_node),
-                            };
-                            match expr.kind {
-                                // Go getEffectivePropertyNameForPropertyNameNode：
-                                // 普通标识符计算键类型非字面量/唯一符号时不可静态定名，
-                                // 不参与重复名检测
-                                SyntaxKind::NumericLiteral | SyntaxKind::StringLiteral => {
-                                    expr.text().to_string()
-                                }
-                                SyntaxKind::PrefixUnaryExpression => {
-                                    let tsox_frontend::ast::NodeData::PrefixUnaryExpression(u) =
-                                        &expr.data
-                                    else {
-                                        continue;
-                                    };
-                                    let sign = if u.operator == SyntaxKind::MinusToken {
-                                        "-"
-                                    } else {
-                                        ""
-                                    };
-                                    match &u.operand.data {
-                                        tsox_frontend::ast::NodeData::NumericLiteral(n) => {
-                                            format!("{sign}{}", n.text)
-                                        }
-                                        _ => continue,
-                                    }
-                                }
-                                SyntaxKind::PropertyAccessExpression => {
-                                    // Go getEffectivePropertyNameForPropertyNameNode：
-                                    // `Symbol.<知名符号>` 计算键取内部名参与判重
-                                    if let Some(internal) =
-                                        crate::binder::symbols_binder_4::well_known_symbol_member_name(&expr)
-                                    {
-                                        internal
-                                    } else {
-                                        let sym = self.resolve_qualified_symbol(&expr);
-                                        let decl = sym.as_ref().and_then(|s| s.value_declaration.clone());
-                                        let Some(decl) = decl else {
-                                            continue;
-                                        };
-                                        if let Some(v) = self.get_constant_value(&decl) {
-                                            v
-                                        } else if decl.kind == SyntaxKind::EnumMember {
-                                            // 自动编号枚举成员按序取值（Go 常量键仍参与判重）
-                                            match enum_member_auto_value(&decl) {
-                                                Some(v) => v.to_string(),
-                                                None => continue,
-                                            }
-                                        } else if let tsox_frontend::ast::NodeData::VariableDeclaration(vd) =
-                                            &decl.data
-                                            && let Some(init) = &vd.initializer
-                                            && matches!(
-                                                init.kind,
-                                                SyntaxKind::NumericLiteral | SyntaxKind::StringLiteral
-                                            )
-                                        {
-                                            // 命名空间限定的 const 变量（keys.n）取字面量初值
-                                            init.text().to_string()
-                                        } else {
-                                            continue;
-                                        }
-                                    }
-                                }
-                                SyntaxKind::Identifier => {
-                                    let sym = self.resolve_identifier(&expr);
-                                    let decl = sym.as_ref().and_then(|s| s.value_declaration.clone());
-                                    let Some(decl) = decl else {
-                                        continue;
-                                    };
-                                    // const 变量取字面量初值（enum 成员走既有常量通道）
-                                    if let tsox_frontend::ast::NodeData::VariableDeclaration(vd) =
-                                        &decl.data
-                                        && let Some(init) = &vd.initializer
-                                        && matches!(
-                                            init.kind,
-                                            SyntaxKind::NumericLiteral | SyntaxKind::StringLiteral
-                                        )
-                                    {
-                                        init.text().to_string()
-                                    } else if let Some(v) = self.get_constant_value(&decl) {
-                                        v
-                                    } else {
-                                        continue;
-                                    }
-                                }
-                                _ => continue,
-                            }
-                        } else {
-                            match name_node.kind {
-                                SyntaxKind::StringLiteral
-                                | SyntaxKind::NumericLiteral
-                                | SyntaxKind::Identifier => name_node.text().to_string(),
-                                _ => continue,
-                            }
-                        };
-                        seen.entry(name).or_default().push(prop);
-                    }
-                    for (_, group) in seen.iter() {
-                        let accessor_pair = group.iter().all(|p| {
-                            matches!(p.kind, SyntaxKind::GetAccessor | SyntaxKind::SetAccessor)
-                        }) && group.len() == 2;
-                        if group.len() > 1 && !accessor_pair {
-                            let all_accessors = group.iter().all(|p| {
-                                matches!(p.kind, SyntaxKind::GetAccessor | SyntaxKind::SetAccessor)
-                            });
-                            // Go binder：重复访问器走 Duplicate identifier 全员报点，
-                            // 且同类访问器重复另报 TS1118（重复的那个上）
-                            let mut seen_get = false;
-                            let mut seen_set = false;
-                            for (i, prop) in group.iter().enumerate() {
-                                let Some(name_node) = prop.name() else {
-                                    continue;
-                                };
-                                let name = name_node.text().to_string();
-                                let file = self.current_file.clone();
-                                if all_accessors {
-                                    self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
-                                        file,
-                                        name_node.loc,
-                                        tsox_core::diagnostics::messages_generated::DUPLICATE_IDENTIFIER_0,
-                                        vec![name.clone()],
-                                    ));
-                                    let dup_of_kind = match prop.kind {
-                                        SyntaxKind::GetAccessor => {
-                                            let d = seen_get;
-                                            seen_get = true;
-                                            d
-                                        }
-                                        SyntaxKind::SetAccessor => {
-                                            let d = seen_set;
-                                            seen_set = true;
-                                            d
-                                        }
-                                        _ => false,
-                                    };
-                                    if dup_of_kind {
-                                        self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
-                                            self.current_file.clone(),
-                                            name_node.loc,
-                                            tsox_core::diagnostics::messages_generated::
-                                                AN_OBJECT_LITERAL_CANNOT_HAVE_MULTIPLE_GET_SLASHSET_ACCESSORS_WITH_THE_SAME_NAME,
-                                            vec![name],
-                                        ));
-                                    }
-                                    continue;
-                                }
-                                if i == 0 {
-                                    continue;
-                                }
+                        }
+                        let raw_name = self
+                            .node_source_text(&name_node)
+                            .unwrap_or_else(|| name_node.text().to_string());
+                        let mut stop = false;
+                        if current_kind & MEANING_METHOD != 0
+                            && existing_kind & MEANING_METHOD != 0
+                        {
+                            if !parse_errors {
                                 self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
-                                    file,
+                                    self.current_file.clone(),
+                                    name_node.loc,
+                                    tsox_core::diagnostics::messages_generated::DUPLICATE_IDENTIFIER_0,
+                                    vec![raw_name],
+                                ));
+                            }
+                        } else if current_kind & MEANING_PROPERTY != 0
+                            && existing_kind & MEANING_PROPERTY != 0
+                        {
+                            if !parse_errors {
+                                self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                                    self.current_file.clone(),
                                     name_node.loc,
                                     tsox_core::diagnostics::messages_generated::
                                         AN_OBJECT_LITERAL_CANNOT_HAVE_MULTIPLE_PROPERTIES_WITH_THE_SAME_NAME,
-                                    vec![name],
+                                    vec![raw_name],
                                 ));
                             }
+                        } else if current_kind & MEANING_ACCESSORS != 0
+                            && existing_kind & MEANING_ACCESSORS != 0
+                        {
+                            if existing_kind != MEANING_ACCESSORS
+                                && current_kind != existing_kind
+                            {
+                                seen_kinds.insert(key, current_kind | existing_kind);
+                            } else {
+                                if !parse_errors {
+                                    self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                                        self.current_file.clone(),
+                                        name_node.loc,
+                                        tsox_core::diagnostics::messages_generated::
+                                            AN_OBJECT_LITERAL_CANNOT_HAVE_MULTIPLE_GET_SLASHSET_ACCESSORS_WITH_THE_SAME_NAME,
+                                        vec![],
+                                    ));
+                                }
+                                stop = true;
+                            }
+                        } else if !parse_errors {
+                            self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                                self.current_file.clone(),
+                                name_node.loc,
+                                tsox_core::diagnostics::messages_generated::
+                                    AN_OBJECT_LITERAL_CANNOT_HAVE_PROPERTY_AND_ACCESSOR_WITH_THE_SAME_NAME,
+                                vec![],
+                            ));
+                            stop = true;
+                        }
+                        if stop {
+                            break;
                         }
                     }
                 }
@@ -323,6 +244,88 @@ impl Checker {
                 if method_like && this_typed {
                     self.this_type_stack.pop();
                 }
+            }
+        }
+    }
+}
+
+impl Checker {
+    // Go getEffectivePropertyNameForPropertyNameNode：对象字面量成员的
+    // 静态定名键（常量折叠计算键、字面量键），不可定名返回 None
+    fn object_literal_member_key(&mut self, name_node: &Arc<Node>) -> Option<String> {
+        if name_node.kind == SyntaxKind::ComputedPropertyName {
+            let expr = match &name_node.data {
+                tsox_frontend::ast::NodeData::ComputedPropertyName(c) => Arc::clone(&c.expression),
+                _ => Arc::clone(name_node),
+            };
+            match expr.kind {
+                SyntaxKind::NumericLiteral | SyntaxKind::StringLiteral => {
+                    Some(expr.text().to_string())
+                }
+                SyntaxKind::PrefixUnaryExpression => {
+                    let tsox_frontend::ast::NodeData::PrefixUnaryExpression(u) = &expr.data else {
+                        return None;
+                    };
+                    let sign = if u.operator == SyntaxKind::MinusToken { "-" } else { "" };
+                    match &u.operand.data {
+                        tsox_frontend::ast::NodeData::NumericLiteral(n) => {
+                            Some(format!("{sign}{}", n.text))
+                        }
+                        _ => None,
+                    }
+                }
+                SyntaxKind::PropertyAccessExpression => {
+                    if let Some(internal) =
+                        crate::binder::symbols_binder_4::well_known_symbol_member_name(&expr)
+                    {
+                        return Some(internal);
+                    }
+                    let sym = self.resolve_qualified_symbol(&expr);
+                    let decl = sym.as_ref().and_then(|s| s.value_declaration.clone());
+                    let Some(decl) = decl else { return None };
+                    if let Some(v) = self.get_constant_value(&decl) {
+                        Some(v)
+                    } else if decl.kind == SyntaxKind::EnumMember {
+                        enum_member_auto_value(&decl).map(|v| v.to_string())
+                    } else if let tsox_frontend::ast::NodeData::VariableDeclaration(vd) = &decl.data
+                        && let Some(init) = &vd.initializer
+                        && matches!(
+                            init.kind,
+                            SyntaxKind::NumericLiteral | SyntaxKind::StringLiteral
+                        )
+                    {
+                        Some(init.text().to_string())
+                    } else {
+                        None
+                    }
+                }
+                SyntaxKind::Identifier => {
+                    let sym = self.resolve_identifier(&expr);
+                    let decl = sym.as_ref().and_then(|s| s.value_declaration.clone());
+                    let Some(decl) = decl else { return None };
+                    if let tsox_frontend::ast::NodeData::VariableDeclaration(vd) = &decl.data
+                        && let Some(init) = &vd.initializer
+                        && matches!(
+                            init.kind,
+                            SyntaxKind::NumericLiteral | SyntaxKind::StringLiteral
+                        )
+                    {
+                        Some(init.text().to_string())
+                    } else {
+                        self.get_constant_value(&decl)
+                    }
+                }
+                _ => None,
+            }
+        } else {
+            match name_node.kind {
+                SyntaxKind::NumericLiteral => Some(
+                    tsox_core::jsnum::Number::from_string(name_node.text()).to_string(),
+                ),
+                SyntaxKind::StringLiteral | SyntaxKind::Identifier => {
+                    Some(name_node.text().to_string())
+                }
+                _ => None,
             }
         }
     }

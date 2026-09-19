@@ -104,6 +104,11 @@ impl Checker {
             .intersects(TypeFlags::BigInt | TypeFlags::BigIntLiteral)
         {
             Some("BigInt")
+        } else if t
+            .flags
+            .intersects(TypeFlags::ESSymbol | TypeFlags::UniqueESSymbol)
+        {
+            Some("Symbol")
         } else {
             None
         }
