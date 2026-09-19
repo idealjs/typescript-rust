@@ -33,12 +33,15 @@ impl Checker {
     ) -> bool {
         use tsox_core::diagnostics::messages_generated as msg;
         let signatures = self.get_signatures_of_type(source, kind);
+        let saved_chain_active = self.relater_chain_active;
+        self.relater_chain_active = false;
         let has_matching_return = signatures.iter().any(|sig| {
             self.get_return_type_of_signature(sig).is_some_and(|rt| {
                 !(rt.flags.contains(TypeFlags::Any) || rt.flags.contains(TypeFlags::Never))
                     && self.is_type_related_to(&rt, target, relation)
             })
         });
+        self.relater_chain_active = saved_chain_active;
         if !has_matching_return {
             return false;
         }
@@ -121,7 +124,11 @@ impl Checker {
             return false;
         }
         let target_return = self.get_union_type(target_returns);
-        if self.is_type_related_to(&source_return, &target_return, relation) {
+        let saved_chain_active = self.relater_chain_active;
+        self.relater_chain_active = false;
+        let related = self.is_type_related_to(&source_return, &target_return, relation);
+        self.relater_chain_active = saved_chain_active;
+        if related {
             return false;
         }
         if self.elaborate_error(
@@ -166,16 +173,21 @@ impl Checker {
                     .get_type_of_property_of_type(&source_return, "then")
                     .is_none()
                 && let Some(promise) = self.create_promise_of(&source_return)
-                && self.is_type_related_to(&promise, &target_return, relation)
             {
-                diagnostic
-                    .related_information
-                    .push(tsox_frontend::ast::Diagnostic::new(
-                        diagnostic.file.clone(),
-                        node.loc,
-                        msg::DID_YOU_MEAN_TO_MARK_THIS_FUNCTION_AS_ASYNC,
-                        vec![],
-                    ));
+                let saved_chain_active = self.relater_chain_active;
+                self.relater_chain_active = false;
+                let promise_related = self.is_type_related_to(&promise, &target_return, relation);
+                self.relater_chain_active = saved_chain_active;
+                if promise_related {
+                    diagnostic
+                        .related_information
+                        .push(tsox_frontend::ast::Diagnostic::new(
+                            diagnostic.file.clone(),
+                            node.loc,
+                            msg::DID_YOU_MEAN_TO_MARK_THIS_FUNCTION_AS_ASYNC,
+                            vec![],
+                        ));
+                }
             }
             match out {
                 Some(o) => o.push(diagnostic),
