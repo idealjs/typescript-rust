@@ -377,15 +377,26 @@ impl Checker {
         ];
         let symbol_map = self.program.symbol_map();
         for cand in candidates {
-            if let Some(sf) = self
+            let sf = self
                 .program
                 .source_files()
                 .iter()
                 .find(|f| f.file_name == cand)
-            {
-                if let Some(sym) = symbol_map.symbol_of(&sf.node) {
-                    return Some(Arc::clone(sym));
-                }
+                .cloned()
+                .or_else(|| {
+                    let real = self.program.canonicalize_path(&cand);
+                    if real != cand {
+                        self.program
+                            .source_files()
+                            .iter()
+                            .find(|f| f.file_name == real)
+                            .cloned()
+                    } else {
+                        None
+                    }
+                });
+            if let Some(sym) = sf.and_then(|sf| symbol_map.symbol_of(&sf.node).cloned()) {
+                return Some(sym);
             }
         }
         None

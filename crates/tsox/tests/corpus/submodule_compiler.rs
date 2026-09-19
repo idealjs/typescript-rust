@@ -1154,22 +1154,31 @@ fn build_and_check(
         }
     }
 
-    // Go harnessutil：@symlink 路径挂为指向 unit 内容的链接。解析器无
-    // realpath 语义，同一内容插入多个路径即符合「2 个 symlink 视为
-    // 2 个不同文件」的用例语义
+    // Go harnessutil：@symlink/@link 挂为指向真实 unit 的符号链接（InMemoryFS
+    // 原生支持，resolver 列目录与读取均穿透；program 侧按 realpath 规范化
+    // 回真实路径，同一文件不会重复加载）
     for (link, unit_name) in symlinks {
-        let Some(content) = units
-            .iter()
-            .find(|u| u.name == *unit_name)
-            .map(|u| u.content.clone())
-        else {
-            continue;
+        let target_abs = if tsox_core::tspath::is_rooted_disk_path(unit_name) {
+            tsox_core::tspath::normalize_path(unit_name)
+        } else {
+            tsox_core::tspath::normalize_path(&format!("/proj/{unit_name}"))
         };
         let link_abs = if tsox_core::tspath::is_rooted_disk_path(link) {
             tsox_core::tspath::normalize_path(link)
         } else {
             tsox_core::tspath::normalize_path(&format!("/proj/{link}"))
         };
+        let target_exists = units.iter().any(|u| {
+            let abs = if tsox_core::tspath::is_rooted_disk_path(&u.name) {
+                u.name.clone()
+            } else {
+                format!("/proj/{}", u.name)
+            };
+            abs == target_abs || abs.starts_with(&format!("{target_abs}/"))
+        });
+        if !target_exists {
+            continue;
+        }
         let mut link_parent = tsox_core::tspath::get_directory_path(&link_abs);
         while !link_parent.is_empty() {
             fs.insert_dir(&link_parent);
@@ -1179,7 +1188,7 @@ fn build_and_check(
             }
             link_parent = next;
         }
-        fs.insert_file(&link_abs, &content);
+        fs.create_symlink(&link_abs, &target_abs);
     }
 
     let bf = Arc::new(BundledFS::new(fs.clone()));

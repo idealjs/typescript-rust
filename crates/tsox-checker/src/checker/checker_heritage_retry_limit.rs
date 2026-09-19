@@ -61,6 +61,10 @@ pub trait Program: Send + Sync {
         None
     }
 
+    fn canonicalize_path(&self, path: &str) -> String {
+        path.to_string()
+    }
+
     fn get_source_file_for_resolved_module(&self, _resolved_path: &str) -> Option<Arc<SourceFile>> {
         None
     }

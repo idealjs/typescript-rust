@@ -118,6 +118,16 @@ pub fn split_units(content: &str, default_name: &str) -> ParsedCase {
                         }
                     }
                 }
+                // Go harnessutil @link：<源> -> <链接路径>，源可为目录前缀
+                "link" => {
+                    if let Some((src, dst)) = value.split_once("->") {
+                        let src = src.trim();
+                        let dst = dst.trim();
+                        if !src.is_empty() && !dst.is_empty() {
+                            symlinks.push((dst.to_string(), src.to_string()));
+                        }
+                    }
+                }
                 _ => {
 
                     settings

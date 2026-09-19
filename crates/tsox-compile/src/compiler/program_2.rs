@@ -211,11 +211,15 @@ impl Program {
                     let is_resolved = resolved.as_ref().map(|m| m.is_resolved()).unwrap_or(false);
                     if is_resolved {
                         let resolved_module = resolved.unwrap();
-                        let resolved_path = resolved_module.resolved_file_name.as_str();
-                        if visited.insert(resolved_path.to_string()) {
+                        // Go tsc 默认 preserveSymlinks=false：解析结果经 realpath
+                        // 规范化回真实路径，符号链接目标与原文件合一
+                        let resolved_path = host
+                            .fs()
+                            .realpath(resolved_module.resolved_file_name.as_str());
+                        if visited.insert(resolved_path.clone()) {
                             let pre = source_files.len();
                             load_source_file_with_references(
-                                resolved_path,
+                                &resolved_path,
                                 host.as_ref(),
                                 &mut source_files,
                                 &mut by_name,
