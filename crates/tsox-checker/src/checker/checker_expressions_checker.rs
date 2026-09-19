@@ -99,6 +99,10 @@ impl Checker {
             }
             SyntaxKind::CallExpression => {
                 if let tsox_frontend::ast::NodeData::CallExpression(data) = &node.data {
+                    // Go checkCallExpression：空类型实参列表报 TS1099
+                    if let Some(args) = &data.type_arguments {
+                        self.check_grammar_type_arguments(node, args);
+                    }
                     self.check_expression(&data.expression);
                     for (i, arg) in data.arguments.iter().enumerate() {
                         self.check_call_arg_with_context(&data.expression, i, arg);
@@ -108,6 +112,11 @@ impl Checker {
                 self.check_dynamic_import_extension_rules(node);
             }
             SyntaxKind::NewExpression => {
+                if let tsox_frontend::ast::NodeData::NewExpression(data) = &node.data
+                    && let Some(args) = &data.type_arguments
+                {
+                    self.check_grammar_type_arguments(node, args);
+                }
                 self.check_new_expression(node);
             }
             SyntaxKind::QualifiedName => {

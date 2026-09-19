@@ -6,6 +6,9 @@ impl Checker {
     pub(crate) fn check_class_member(&mut self, node: &Arc<Node>) {
         self.check_grammar_modifiers(node);
         self.check_node_decorators(node);
+        if node.kind == SyntaxKind::IndexSignature {
+            self.check_grammar_index_signature(node);
+        }
 
         if node.kind == SyntaxKind::Constructor {
             self.check_multiple_constructor_implementations(node);
