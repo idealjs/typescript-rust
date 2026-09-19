@@ -7,6 +7,14 @@ impl Checker {
         self.check_grammar_modifiers(node);
         self.check_grammar_class_declaration_heritage_clauses(node);
 
+        if node.name().is_none() && !node.has_syntactic_modifier(ModifierFlags::Default) {
+            self.grammar_error_on_first_token(
+                node,
+                &tsox_core::diagnostics::messages_generated::
+                    A_CLASS_DECLARATION_WITHOUT_THE_DEFAULT_MODIFIER_MUST_HAVE_A_NAME,
+            );
+        }
+
         if let tsox_frontend::ast::NodeData::ClassDeclaration(data) = &node.data {
             if let Some(name) = &data.name {
                 self.check_reserved_type_name(
