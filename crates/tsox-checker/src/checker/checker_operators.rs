@@ -146,7 +146,7 @@ impl Checker {
                 let file = self.current_file.clone();
                 self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
                     file,
-                    node.loc,
+                    data.operator_token.loc,
                     tsox_core::diagnostics::messages_generated::
                         THE_0_OPERATOR_IS_NOT_ALLOWED_FOR_BOOLEAN_TYPES_CONSIDER_USING_1_INSTEAD,
                     vec![Self::op_display(op).to_string(), sugg.to_string()],

@@ -288,7 +288,8 @@ impl Parser {
                 let octal_digits = token_text.strip_prefix('-').unwrap_or(token_text);
                 let digits = octal_digits.strip_prefix('0').unwrap_or(octal_digits);
                 let val = i64::from_str_radix(digits, 8).unwrap_or(0);
-                vec![format!("0o{val:o}")]
+                let sign = if token_text.starts_with('-') { "-" } else { "" };
+                vec![format!("{sign}0o{val:o}")]
             }
             crate::scanner::DiagnosticKind::RegexMessageWithArg(_, arg) => vec![arg.to_string()],
             crate::scanner::DiagnosticKind::OctalEscapeSequenceNotAllowed => {

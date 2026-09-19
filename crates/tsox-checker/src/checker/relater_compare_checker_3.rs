@@ -67,7 +67,9 @@ impl Checker {
             .unwrap_or_else(|| Arc::clone(target));
         let source_str = self.type_to_string(source);
         let target_str = self.type_to_string(&displayed_target);
-        let (head_source, head_target) = if self.type_could_have_top_level_singleton_types(target) {
+        let (mut head_source, mut head_target) = if self
+            .type_could_have_top_level_singleton_types(target)
+        {
             (source_str.clone(), target_str.clone())
         } else if crate::checker::is_fresh_literal_type(source)
             || source.flags.intersects(TYPE_FLAGS_LITERAL)
@@ -87,8 +89,17 @@ impl Checker {
         let head = match head_message {
             Some(m) => *m,
             None if head_source == head_target => {
-                tsox_core::diagnostics::messages_generated::
-                    TYPE_0_IS_NOT_ASSIGNABLE_TO_TYPE_1_TWO_DIFFERENT_TYPES_WITH_THIS_NAME_EXIST_BUT_THEY_ARE_UNRELATED
+                // Go getTypeNamesForErrorDisplay：同名不同型改用全限定显示
+                let fq_source = self.fully_qualified_type_string(source);
+                let fq_target = self.fully_qualified_type_string(&displayed_target);
+                if fq_source != fq_target {
+                    head_source = fq_source;
+                    head_target = fq_target;
+                    tsox_core::diagnostics::messages_generated::TYPE_0_IS_NOT_ASSIGNABLE_TO_TYPE_1
+                } else {
+                    tsox_core::diagnostics::messages_generated::
+                        TYPE_0_IS_NOT_ASSIGNABLE_TO_TYPE_1_TWO_DIFFERENT_TYPES_WITH_THIS_NAME_EXIST_BUT_THEY_ARE_UNRELATED
+                }
             }
             None => tsox_core::diagnostics::messages_generated::TYPE_0_IS_NOT_ASSIGNABLE_TO_TYPE_1,
         };

@@ -241,6 +241,7 @@ pub(crate) mod jsx_impl_chunk_2_checker_3;
 pub(crate) mod jsx_parse_isolated_entity_name;
 #[cfg(test)]
 pub(crate) mod mapper_tests;
+pub(crate) mod nodebuilder_alias_display;
 pub(crate) mod nodebuilder_checker_10;
 pub(crate) mod nodebuilder_checker_11;
 pub(crate) mod nodebuilder_checker_12;

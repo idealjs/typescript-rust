@@ -194,6 +194,7 @@ impl Checker {
             return Arc::clone(t);
         }
         let result = self.build_mapped_type(node);
+        self.attach_alias_for_type_node(node, &result);
         if self.type_argument_stack.is_empty() {
             self.cache_type(node, result.clone());
         }
@@ -209,6 +210,7 @@ impl Checker {
             return t;
         }
         let result = self.build_conditional_type(node);
+        self.attach_alias_for_type_node(node, &result);
         self.cache_type(node, result.clone());
         result
     }

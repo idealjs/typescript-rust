@@ -2196,7 +2196,43 @@ impl Checker {
         if tn.kind == tsox_frontend::ast::SyntaxKind::TypeLiteral {
             return None;
         }
-        self.equivalent_annotation_text(&tn, resolved)
+        // Go nodebuilder：箭头函数/函数表达式的可选参数注解复用时忽略
+        // 合成的 `| undefined`（等价比较按剥除后的类型）
+        let resolved = self.strip_param_optionality_undefined(param, resolved);
+        self.equivalent_annotation_text(&tn, &resolved)
+    }
+
+    // Go nodebuilder 对箭头函数/函数表达式参数复用源注解打印：可选参数
+    // 合成的 `| undefined` 不出现在输出里（注解自身含 undefined 除外）
+    pub(crate) fn strip_param_optionality_undefined(
+        &mut self,
+        param: &Arc<Symbol>,
+        t: &Arc<Type>,
+    ) -> Arc<Type> {
+        if !crate::checker::nodebuilder::param_declared_optional(param)
+            || !t.flags.contains(TypeFlags::Union)
+        {
+            return Arc::clone(t);
+        }
+        let Some(decl) = param.declarations.first() else {
+            return Arc::clone(t);
+        };
+        let tsox_frontend::ast::NodeData::ParameterDeclaration(pd) = &decl.data else {
+            return Arc::clone(t);
+        };
+        if pd.type_node.is_none() {
+            return Arc::clone(t);
+        }
+        let Some(parent) = decl.parent() else {
+            return Arc::clone(t);
+        };
+        if !matches!(
+            parent.kind,
+            tsox_frontend::ast::SyntaxKind::ArrowFunction | tsox_frontend::ast::SyntaxKind::FunctionExpression
+        ) {
+            return Arc::clone(t);
+        }
+        self.remove_undefined_from_union(t)
     }
 
     /// 声明注解与解析类型等价（按类型 id）时返回注解源文本（保留引号风格）

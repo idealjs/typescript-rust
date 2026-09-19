@@ -105,6 +105,24 @@ impl Checker {
                 return Some(t);
             }
             NodeData::EnumMember(_) => {
+                // Go getTypeOfEnumMember → getDeclaredTypeOfEnumMember：成员值
+                // 类型是枚举字面型（Foo.a），由枚举声明型解析填充成员链接
+                if let Some(enum_decl) = decl.parent()
+                    && let Some(enum_sym) = self
+                        .program
+                        .symbol_map()
+                        .symbol_of(&enum_decl)
+                        .map(Arc::clone)
+                {
+                    self.resolve_enum_type(&enum_sym);
+                    if let Some(t) = self
+                        .value_symbol_links
+                        .get(symbol)
+                        .and_then(|l| l.resolved_type.clone())
+                    {
+                        return Some(t);
+                    }
+                }
                 let value = self.get_enum_member_value(&decl).value?;
                 let t = match value {
                     tsox_frontend::evaluator::EvalValue::String(s) => {
@@ -665,11 +683,11 @@ impl Checker {
                         let display = self.boxed_declared_type_for_display(&t);
                         let type_str = self.type_to_string(&display);
                         let key_str = self.type_to_string(&name_expr_type);
-                        let name_node = Self::binding_element_name_node(elem)
-                            .unwrap_or_else(|| Arc::clone(elem));
+                        // Go 报错锚定计算名内的表达式节点
+                        let anchor_loc = cd.expression.loc;
                         self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
                             self.current_file.clone(),
-                            name_node.loc,
+                            anchor_loc,
                             tsox_core::diagnostics::messages_generated::
                                 TYPE_0_HAS_NO_MATCHING_INDEX_SIGNATURE_FOR_TYPE_1,
                             vec![type_str, key_str],

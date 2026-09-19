@@ -59,6 +59,7 @@ impl Checker {
             member_types.push(self.get_type_from_type_node(member));
         }
         let result = self.get_union_type(member_types);
+        self.attach_alias_for_type_node(node, &result);
         self.cache_type(node, result.clone());
         result
     }
@@ -106,6 +107,7 @@ impl Checker {
             }
         }
         let result = self.get_intersection_type(member_types);
+        self.attach_alias_for_type_node(node, &result);
         self.cache_type(node, result.clone());
         result
     }

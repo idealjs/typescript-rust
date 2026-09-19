@@ -135,6 +135,7 @@ impl Checker {
                     let param_type = self
                         .signature_instantiated_param_type(sig, i)
                         .unwrap_or_else(|| self.get_type_of_symbol(param));
+                    let param_type = self.strip_param_optionality_undefined(param, &param_type);
 
                     let optional = param.flags.contains(SymbolFlags::Optional)
                         || param.declarations.iter().any(|d| {

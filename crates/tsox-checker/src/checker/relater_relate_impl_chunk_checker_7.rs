@@ -3,12 +3,65 @@
 use crate::checker::relater_relate_impl_chunk::*;
 
 impl Checker {
+    pub(crate) fn find_matching_discriminant_constituent(
+        &mut self,
+        source: &Arc<Type>,
+        target: &Arc<Type>,
+    ) -> Option<Arc<Type>> {
+        if !source.flags.contains(TypeFlags::Object) {
+            return None;
+        }
+        let ui = target.as_union_or_intersection()?;
+        if ui.types.len() < 2
+            || !ui
+                .types
+                .iter()
+                .all(|t| t.flags.contains(TypeFlags::Object))
+        {
+            return None;
+        }
+        for prop in self.get_properties_of_type(source) {
+            let prop_type = self.get_type_of_symbol(&prop);
+            if !crate::checker::utilities::is_unit_type(&prop_type) {
+                continue;
+            }
+            let mut matching = Vec::new();
+            let mut distinct_seen = false;
+            for t in &ui.types {
+                let Some(cprop) = self.get_property_of_type(t, &prop.name) else {
+                    matching.clear();
+                    break;
+                };
+                let cprop_type = self.get_type_of_symbol(&cprop);
+                if !crate::checker::utilities::is_unit_type(&cprop_type) {
+                    matching.clear();
+                    break;
+                }
+                if Arc::ptr_eq(&cprop_type, &prop_type)
+                    || cprop_type.id == prop_type.id
+                {
+                    matching.push(Arc::clone(t));
+                } else {
+                    distinct_seen = true;
+                }
+            }
+            if distinct_seen && matching.len() == 1 {
+                return matching.into_iter().next();
+            }
+        }
+        None
+    }
+
     pub(crate) fn get_best_matching_type_for_error(
-        &self,
+        &mut self,
         source: &Arc<Type>,
         target: &Arc<Type>,
     ) -> Option<Arc<Type>> {
         let ui = target.as_union_or_intersection()?;
+
+        if let Some(t) = self.find_matching_discriminant_constituent(source, target) {
+            return Some(t);
+        }
 
         if source
             .object_flags
@@ -70,7 +123,8 @@ impl Checker {
                 }
             }
         }
-        None
+
+        self.find_most_overlappy_type(source, target)
     }
 
     pub(crate) fn type_related_to_each_type(
