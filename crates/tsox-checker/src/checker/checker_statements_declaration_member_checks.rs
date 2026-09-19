@@ -105,6 +105,7 @@ impl Checker {
         self.check_grammar_modifiers(node);
 
         if let tsox_frontend::ast::NodeData::EnumDeclaration(data) = &node.data {
+            self.check_cjs_reserved_top_level_name(node, &data.name);
             self.check_reserved_type_name(
                 &data.name,
                 &tsox_core::diagnostics::messages_generated::ENUM_NAME_CANNOT_BE_0,

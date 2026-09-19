@@ -5,6 +5,9 @@ use crate::checker::checker_statements::*;
 impl Checker {
     pub(crate) fn check_variable_declaration(&mut self, node: &Arc<Node>) {
         self.check_grammar_variable_declaration(node);
+        if let Some(name) = node.name() {
+            self.check_cjs_reserved_top_level_name(node, &name);
+        }
         // Go checkVariableLikeDeclaration：var 合并的二级声明须与主声明类型
         // 一致（TS2403 + related "'x' was also declared here"）
         {
