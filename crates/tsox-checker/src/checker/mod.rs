@@ -348,6 +348,7 @@ pub(crate) mod typenode_template_mapped_checker;
 pub(crate) mod typenode_template_mapped_checker_2;
 #[cfg(test)]
 pub(crate) mod typenode_tests;
+pub(crate) mod typenode_type_argument_constraints;
 pub(crate) mod typenode_type_node_references_names;
 pub(crate) mod typenode_type_operators;
 pub(crate) mod typenode_type_operators_checker;
