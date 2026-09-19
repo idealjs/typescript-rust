@@ -169,6 +169,20 @@ impl Checker {
                         .iter()
                         .find(|d| d.kind == SyntaxKind::ExportAssignment)
                         .cloned();
+                    let is_entity_expression = entity_decl.as_deref().is_some_and(|d| {
+                        let tsox_frontend::ast::NodeData::ExportAssignment(ea) = &d.data else {
+                            return false;
+                        };
+                        ea.is_export_equals
+                            && matches!(
+                                ea.expression.kind,
+                                SyntaxKind::Identifier | SyntaxKind::QualifiedName
+                            )
+                    });
+                    if !is_entity_expression {
+                        let eq = Arc::clone(eq);
+                        return Some(self.get_type_of_symbol(&eq));
+                    }
                     let scope_decl = module_sym
                         .declarations
                         .iter()
