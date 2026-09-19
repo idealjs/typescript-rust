@@ -395,7 +395,7 @@ fn is_type_position_use_site(node: &Arc<Node>) -> bool {
 
 impl Checker {
     // Go isExportAssignmentExpressionName（utilities.go）
-    fn is_export_assignment_expression_name(node: &Arc<Node>) -> bool {
+    pub(crate) fn is_export_assignment_expression_name(node: &Arc<Node>) -> bool {
         let mut current = Some(Arc::clone(node));
         while let Some(c) = &current
             && matches!(

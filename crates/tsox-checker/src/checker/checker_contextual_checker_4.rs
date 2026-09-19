@@ -13,6 +13,10 @@ impl Checker {
             return;
         }
 
+        if Self::is_export_assignment_expression_name(node) {
+            return;
+        }
+
         if self.has_const_enum_declarations(symbol) {
             return;
         }
@@ -76,6 +80,10 @@ impl Checker {
         if self
             .get_combined_modifier_flags(declaration)
             .contains(ModifierFlags::Ambient)
+            || self.ambient_ancestor(declaration)
+            || self
+                .get_source_file_of_node(declaration)
+                .is_some_and(|f| f.is_declaration_file)
         {
             return;
         }
