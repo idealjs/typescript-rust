@@ -66,6 +66,7 @@ pub(crate) mod checker_contextual_checker_3;
 pub(crate) mod checker_contextual_checker_4;
 pub(crate) mod checker_contextual_checker_5;
 pub(crate) mod checker_contextual_scope_exemption;
+pub(crate) mod checker_circularity;
 pub(crate) mod checker_contextual_used_before_declaration_guards;
 pub(crate) mod checker_element_access;
 pub(crate) mod checker_enums;
