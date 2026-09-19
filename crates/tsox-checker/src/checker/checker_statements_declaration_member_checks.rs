@@ -21,7 +21,7 @@ impl Checker {
         self.push_scope(node);
         self.check_node_decorators(node);
 
-        let this_type = self.class_declared_type_with_cycle_check(node);
+        let this_type = self.build_class_instance_type_with_base(node);
         self.this_type_stack.push(this_type);
 
         self.enclosing_class_stack.push(Arc::clone(node));
@@ -105,6 +105,7 @@ impl Checker {
         self.check_grammar_modifiers(node);
 
         if let tsox_frontend::ast::NodeData::EnumDeclaration(data) = &node.data {
+            self.check_cjs_reserved_top_level_name(node, &data.name);
             self.check_reserved_type_name(
                 &data.name,
                 &tsox_core::diagnostics::messages_generated::ENUM_NAME_CANNOT_BE_0,

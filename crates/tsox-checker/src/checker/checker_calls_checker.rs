@@ -297,13 +297,23 @@ impl Checker {
         }
         let callee_type = self.get_type_of_node(callee_expr);
 
+        let mut callee_type = callee_type;
         if !is_new {
             let optional_call = matches!(
                 &node.data,
                 tsox_frontend::ast::NodeData::CallExpression(d) if d.question_dot_token.is_some()
             );
-            if !optional_call {
-                self.report_possibly_null_or_undefined(callee_expr, &callee_type, true);
+            if !optional_call
+                && self.report_possibly_null_or_undefined(callee_expr, &callee_type, true)
+            {
+                let non_nullable = self.remove_nullable_from_union(&callee_type);
+                if non_nullable
+                    .flags
+                    .intersects(TypeFlags::Null | TypeFlags::Undefined | TypeFlags::Never)
+                {
+                    return;
+                }
+                callee_type = non_nullable;
             }
         }
         self.check_call_arguments_against(node, &callee_type, &arguments, callee_expr, is_new);

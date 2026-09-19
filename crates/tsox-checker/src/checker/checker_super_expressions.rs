@@ -1,4 +1,7 @@
 use crate::checker::checker::*;
+use crate::checker::checker_classes::{
+    class_decl_extends_null, class_extends_heritage_element,
+};
 use tsox_frontend::ast::{Node, NodeData, SyntaxKind, is_class_like};
 
 impl Checker {
@@ -7,7 +10,8 @@ impl Checker {
         let is_call_expression = node
             .parent()
             .is_some_and(|p| matches!(&p.data, NodeData::CallExpression(c) if Arc::ptr_eq(&c.expression, node)));
-        let mut container = get_super_container(node, true);
+        let immediate_container = get_super_container(node, true);
+        let mut container = immediate_container.clone();
         if !is_call_expression {
             while container
                 .as_ref()
@@ -51,6 +55,7 @@ impl Checker {
             )
         });
         if legal {
+            self.check_legal_super_expression(node, &immediate_container, &container, is_call_expression);
             return;
         }
         let in_computed_name = node.parent().is_some_and(|mut p| loop {
@@ -93,9 +98,66 @@ impl Checker {
             ));
         }
     }
+        // Go checkSuperExpression 合法分支尾段：TS17011/TS2335/TS2336
+        fn check_legal_super_expression(
+            &mut self,
+            node: &Arc<Node>,
+            immediate_container: &Option<Arc<Node>>,
+            container: &Option<Arc<Node>>,
+            is_call_expression: bool,
+        ) {
+            if !is_call_expression
+                && let Some(immediate) = immediate_container
+                && immediate.kind == SyntaxKind::Constructor
+            {
+                self.check_this_before_super(
+                    node,
+                    immediate,
+                    tsox_core::diagnostics::messages_generated::
+                        X_SUPER_MUST_BE_CALLED_BEFORE_ACCESSING_A_PROPERTY_OF_SUPER_IN_THE_CONSTRUCTOR_OF_A_DERIVED_CLASS,
+                );
+            }
+            let Some(container) = container.as_ref() else {
+                return;
+            };
+            let Some(container_parent) = container.parent() else {
+                return;
+            };
+            if container_parent.kind == SyntaxKind::ObjectLiteralExpression {
+                return;
+            }
+            if !is_class_like(container_parent.as_ref()) {
+                return;
+            }
+            if class_extends_heritage_element(&container_parent).is_none() {
+                self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                    self.current_file.clone(),
+                    node.loc,
+                    tsox_core::diagnostics::messages_generated::
+                        X_SUPER_CAN_ONLY_BE_REFERENCED_IN_A_DERIVED_CLASS,
+                    Vec::new(),
+                ));
+                return;
+            }
+            if class_decl_extends_null(&container_parent) {
+                return;
+            }
+            if container.kind == SyntaxKind::Constructor
+                && is_in_constructor_argument_initializer(node, container)
+            {
+                self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                    self.current_file.clone(),
+                    node.loc,
+                    tsox_core::diagnostics::messages_generated::
+                        X_SUPER_CANNOT_BE_REFERENCED_IN_CONSTRUCTOR_ARGUMENTS,
+                    Vec::new(),
+                ));
+            }
+        }
 }
 
 // Go ast.GetSuperContainer
+
 pub(crate) fn get_super_container(node: &Arc<Node>, stop_on_functions: bool) -> Option<Arc<Node>> {
     let mut current = node.parent()?;
     loop {
@@ -154,4 +216,22 @@ fn is_class_element_kind(kind: SyntaxKind) -> bool {
             | SyntaxKind::GetAccessor
             | SyntaxKind::SetAccessor
     )
+}
+
+// Go isInConstructorArgumentInitializer：super 位于构造器参数初始化器中
+//（遇函数声明即止）
+fn is_in_constructor_argument_initializer(node: &Arc<Node>, ctor: &Arc<Node>) -> bool {
+    let mut current = node.parent();
+    while let Some(n) = current {
+        if tsox_frontend::ast::is_function_like_declaration(&n) {
+            return false;
+        }
+        if n.kind == SyntaxKind::Parameter
+            && n.parent().is_some_and(|p| Arc::ptr_eq(&p, ctor))
+        {
+            return true;
+        }
+        current = n.parent();
+    }
+    false
 }

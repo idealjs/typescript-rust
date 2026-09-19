@@ -34,8 +34,17 @@ impl Checker {
             ));
         }
         let t = self.this_expression_type(node);
-        let captured_by_arrow =
-            get_this_container(node, true, true).kind == SyntaxKind::ArrowFunction;
+        let arrow_container = get_this_container(node, true, true);
+        let captured_by_arrow = arrow_container.kind == SyntaxKind::ArrowFunction;
+        // Go checkThisExpression：构造器中 this 先于 super() → TS17009
+        if arrow_container.kind == SyntaxKind::Constructor {
+            self.check_this_before_super(
+                node,
+                &arrow_container,
+                tsox_core::diagnostics::messages_generated::
+                    X_SUPER_MUST_BE_CALLED_BEFORE_ACCESSING_THIS_IN_THE_CONSTRUCTOR_OF_A_DERIVED_CLASS,
+            );
+        }
         if self.no_implicit_this
             && captured_by_arrow
             && t.symbol.as_ref().is_some_and(|s| {

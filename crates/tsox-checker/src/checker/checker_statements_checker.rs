@@ -318,6 +318,9 @@ impl Checker {
                 self.check_import_ambient_rules(node);
                 self.check_import_equals_conflicts(node);
                 self.check_alias_symbol_bindings(node);
+                if let Some(name) = node.name() {
+                    self.check_cjs_reserved_top_level_name(node, &name);
+                }
                 self.check_node_next_extension_rules(node);
             }
             SyntaxKind::EnumDeclaration => {

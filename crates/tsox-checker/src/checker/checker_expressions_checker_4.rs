@@ -323,60 +323,6 @@ impl Checker {
         };
         self.diagnostics.add(diagnostic);
     }
-
-    pub(crate) fn check_super_before_this(&mut self, body: &Arc<Node>) {
-        fn visit(c: &mut Checker, n: &Arc<Node>, super_seen: &mut bool) {
-            if n.kind == SyntaxKind::ThisKeyword {
-                if !*super_seen {
-                    let file = c.current_file.clone();
-                    c.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
-                        file,
-                        n.loc,
-                        tsox_core::diagnostics::messages_generated::
-                            X_SUPER_MUST_BE_CALLED_BEFORE_ACCESSING_THIS_IN_THE_CONSTRUCTOR_OF_A_DERIVED_CLASS,
-                        vec![],
-                    ));
-                }
-                return;
-            }
-
-            if n.kind == SyntaxKind::CallExpression
-                && let tsox_frontend::ast::NodeData::CallExpression(call) = &n.data
-                && call.expression.kind == SyntaxKind::SuperKeyword
-            {
-                for arg in call.arguments.iter() {
-                    visit(c, arg, super_seen);
-                }
-                *super_seen = true;
-                return;
-            }
-
-            if matches!(
-                n.kind,
-                SyntaxKind::FunctionDeclaration
-                    | SyntaxKind::FunctionExpression
-                    | SyntaxKind::ArrowFunction
-                    | SyntaxKind::MethodDeclaration
-                    | SyntaxKind::GetAccessor
-                    | SyntaxKind::SetAccessor
-            ) {
-                return;
-            }
-
-            if matches!(
-                n.kind,
-                SyntaxKind::ClassDeclaration | SyntaxKind::ClassExpression
-            ) {
-                return;
-            }
-            tsox_frontend::ast::node_data_generated::for_each_child(n, |child| {
-                visit(c, child, super_seen);
-                false
-            });
-        }
-        let mut super_seen = false;
-        visit(self, body, &mut super_seen);
-    }
 }
 
 fn is_type_position_use_site(node: &Arc<Node>) -> bool {

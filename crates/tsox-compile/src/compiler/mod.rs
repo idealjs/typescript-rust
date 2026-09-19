@@ -20,6 +20,7 @@ pub(crate) mod extract_reference_types_directives;
 pub(crate) mod impl_chunk;
 pub(crate) mod import_resolution_mode_override;
 pub(crate) mod program_2;
+pub(crate) mod reference_path_directives;
 pub(crate) mod program_3;
 #[allow(unused_imports)]
 pub use compiler_host_2::*;
@@ -31,6 +32,8 @@ pub use impl_chunk::*;
 pub use import_resolution_mode_override::*;
 #[allow(unused_imports)]
 pub use program_2::*;
+#[allow(unused_imports)]
+pub use reference_path_directives::*;
 #[allow(unused_imports)]
 pub use program_3::*;
 #[cfg(test)]

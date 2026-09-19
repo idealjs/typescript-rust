@@ -5,7 +5,8 @@ use super::*;
 pub(crate) fn extract_reference_types_directives(text: &str) -> Vec<ReferenceTypesDirective> {
     let mut types = Vec::new();
     let mut line_start = 0usize;
-    for raw_line in text.split('\n') {
+    let mask = code_line_mask(text);
+    for (idx, raw_line) in text.split('\n').enumerate() {
         let line = raw_line.strip_suffix('\r').unwrap_or(raw_line);
         let trimmed = line.trim_start();
         let leading = line.len() - trimmed.len();
@@ -13,6 +14,10 @@ pub(crate) fn extract_reference_types_directives(text: &str) -> Vec<ReferenceTyp
             line_start += raw_line.len() + 1;
             continue;
         };
+        if !mask.get(idx).copied().unwrap_or(true) {
+            line_start += raw_line.len() + 1;
+            continue;
+        }
 
         for quote in ['"', '\''] {
             let marker = format!("types={quote}");

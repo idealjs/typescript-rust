@@ -135,6 +135,10 @@ impl Checker {
                     }
                 }
             }
+            // Go checkSignatureDeclaration：参数初始化器作为表达式检查
+            for p in params.iter() {
+                self.check_parameter_default_initializer(p);
+            }
         }
         if let Some(tn) = &type_node {
             self.check_type_annotation(tn);
@@ -165,13 +169,8 @@ impl Checker {
             }
         }
         if let Some(body) = body {
-            if node.kind == SyntaxKind::Constructor
-                && self
-                    .enclosing_class_stack
-                    .last()
-                    .is_some_and(|c| self.extends_base_of(c).is_some())
-            {
-                self.check_super_before_this(&body);
+            if node.kind == SyntaxKind::Constructor {
+                self.check_constructor_super_calls(node, &body);
             }
 
             let is_static = node.has_syntactic_modifier(ModifierFlags::Static);

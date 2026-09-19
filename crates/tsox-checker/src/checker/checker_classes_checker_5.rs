@@ -167,6 +167,8 @@ impl Checker {
                     let base_type = self.get_type_from_heritage_type_reference(type_ref);
                     self.pop_ts2304_suppression();
 
+                    self.check_base_constructor_type(&ewa.expression);
+
                     // Go checkClassDeclaration：派生实例型须可赋给基类实例型，
                     // 否则 TS2415（成员级错误链随附，含私有分离说明）
                     if !base_type.flags.contains(TypeFlags::Any) {

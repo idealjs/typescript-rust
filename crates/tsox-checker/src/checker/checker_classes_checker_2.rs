@@ -90,7 +90,7 @@ impl Checker {
         instance
     }
 
-    fn resolve_entity_name_class_symbol(&mut self, expr: &Arc<Node>) -> Option<Arc<Symbol>> {
+    pub(crate) fn resolve_entity_name_class_symbol(&mut self, expr: &Arc<Node>) -> Option<Arc<Symbol>> {
         match expr.kind {
             SyntaxKind::Identifier => self.resolve_identifier(expr),
             SyntaxKind::PropertyAccessExpression => {
@@ -108,22 +108,7 @@ impl Checker {
         }
     }
 
-    pub(crate) fn class_declared_type_with_cycle_check(&mut self, node: &Arc<Node>) -> Arc<Type> {
-        let Some(symbol) = self.program.symbol_map().symbol_of(node).cloned() else {
-            return self.build_class_instance_type_with_base(node);
-        };
-        let key = Arc::as_ptr(&symbol) as *const tsox_frontend::ast::Symbol;
-        if !self.push_type_resolution(key, TypeResolutionProperty::ResolvedBaseTypes) {
-            return self.build_class_instance_type_with_base(node);
-        }
-        let instance = self.build_class_instance_type_with_base(node);
-        if !self.pop_type_resolution() {
-            self.emit_ts2506(node, &symbol);
-        }
-        instance
-    }
-
-    fn emit_ts2506(&mut self, class_node: &Arc<Node>, symbol: &Arc<Symbol>) {
+    pub(crate) fn emit_ts2506(&mut self, class_node: &Arc<Node>, symbol: &Arc<Symbol>) {
         let class_name_loc = match &class_node.data {
             tsox_frontend::ast::NodeData::ClassDeclaration(cd) => cd
                 .name
@@ -165,10 +150,11 @@ impl Checker {
                             .cloned()
                         {
                             let key = Arc::as_ptr(&symbol) as *const tsox_frontend::ast::Symbol;
-                            if !self.push_type_resolution(
-                                key,
-                                TypeResolutionProperty::ResolvedBaseTypes,
-                            ) {
+                            if self.is_resolving(key, TypeResolutionProperty::ResolvedBaseTypes) {
+                                self.mark_type_resolution_cycle(
+                                    key,
+                                    TypeResolutionProperty::ResolvedBaseTypes,
+                                );
                                 return self.get_any_type();
                             }
 
@@ -221,10 +207,6 @@ impl Checker {
                                 self.pop_scope();
                                 i
                             };
-                            let ok = self.pop_type_resolution();
-                            if !ok {
-                                self.emit_ts2506(&class_node, &symbol);
-                            }
                             return instance;
                         }
                     }

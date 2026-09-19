@@ -83,6 +83,7 @@ impl Checker {
                                 for type_ref in hc.types.iter() {
                                     if let tsox_frontend::ast::NodeData::ExpressionWithTypeArguments(ewa) = &type_ref.data {
                                         self.check_expression(&ewa.expression);
+                                        self.check_base_constructor_type(&ewa.expression);
                                     }
                                 }
                             }
@@ -91,6 +92,7 @@ impl Checker {
                     for member in data.members.iter() {
                         self.check_class_member(member);
                     }
+                    self.check_mixin_constructor_type(node);
                     self.check_members_for_override_modifier(node);
                     self.this_type_stack.pop();
                     self.pop_scope();

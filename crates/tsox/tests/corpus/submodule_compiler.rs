@@ -1046,9 +1046,9 @@ fn mount_test_lib_fixtures(fs: &Arc<InMemoryFS>) {
 
 fn unit_abs_path(unit_name: &str) -> String {
     if tsox_core::tspath::is_rooted_disk_path(unit_name) {
-        unit_name.to_string()
+        tsox_core::tspath::normalize_path(unit_name)
     } else {
-        format!("/proj/{}", unit_name)
+        tsox_core::tspath::normalize_path(&format!("/proj/{}", unit_name))
     }
 }
 
@@ -1126,11 +1126,7 @@ fn build_and_check(
     let mut file_names: Vec<String> = Vec::new();
     for unit in units {
 
-        let abs = if tsox_core::tspath::is_rooted_disk_path(&unit.name) {
-            unit.name.clone()
-        } else {
-            format!("/proj/{}", unit.name)
-        };
+        let abs = unit_abs_path(&unit.name);
 
         let mut parent = tsox_core::tspath::get_directory_path(&abs);
         while !parent.is_empty() {

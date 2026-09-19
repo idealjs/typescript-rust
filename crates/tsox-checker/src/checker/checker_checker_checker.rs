@@ -190,6 +190,8 @@ pub struct Checker {
     pub attached_type_args_cache:
         std::collections::HashMap<Vec<usize>, (Arc<Type>, Vec<Arc<Type>>, Arc<Type>)>,
     pub filling_class_members: std::collections::HashSet<u64>,
+    pub class_build_in_progress: std::collections::HashSet<u64>,
+    pub pending_base_merges: Vec<(u64, Arc<Type>)>,
     pub typequery_instantiation_cache:
         std::collections::HashMap<Vec<usize>, (Vec<Arc<Type>>, Arc<Type>)>,
     pub array_type_parameter_symbols: Option<Vec<Arc<tsox_frontend::ast::Symbol>>>,

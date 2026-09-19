@@ -19,6 +19,9 @@ pub use crate::checker::checker_classes_checker_5::*;
 pub use crate::checker::checker_parameter_implicit_any::*;
 #[allow(unused_imports)]
 pub use crate::checker::checker_classes_static_type_params::*;
+pub use crate::checker::checker_classes_ctor_super_calls::*;
+#[allow(unused_imports)]
+pub use crate::checker::checker_classes_base_ctor_check::*;
 #[allow(unused_imports)]
 pub use crate::checker::checker_classes_private_name_conflicts::*;
 pub(crate) use std::collections::HashMap;

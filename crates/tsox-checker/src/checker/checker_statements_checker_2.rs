@@ -71,6 +71,13 @@ impl Checker {
         if self.declaration_is_ambient(node) {
             return;
         }
+        // Go：非实例化 namespace 不做此检查
+        if node.kind == SyntaxKind::ModuleDeclaration
+            && tsox_frontend::ast::utilities::get_module_instance_state(node)
+                != tsox_frontend::ast::utilities::ModuleInstanceState::Instantiated
+        {
+            return;
+        }
         let emit_format = self.program.get_emit_module_format_of_file(&file.file_name);
         let text = name.text().to_string();
         if text == "require" || text == "exports" {
@@ -101,6 +108,24 @@ impl Checker {
                 tsox_core::diagnostics::messages_generated::
                     IDENTIFIER_EXPECTED_ESMODULE_IS_RESERVED_AS_AN_EXPORTED_MARKER_WHEN_TRANSFORMING_ECMASCRIPT_MODULES,
                 Vec::new(),
+            ));
+        } else if text == "Object"
+            && !matches!(
+                node.kind,
+                SyntaxKind::ClassDeclaration | SyntaxKind::ClassExpression
+            )
+        {
+            // Go checkCollisionWithGlobalObjectInGeneratedCode：CommonJS 下
+            // 顶层 Object 名保留
+            if emit_format != ModuleKind::CommonJS {
+                return;
+            }
+            self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                self.current_file.clone(),
+                name.loc,
+                tsox_core::diagnostics::messages_generated::
+                    DUPLICATE_IDENTIFIER_0_COMPILER_RESERVES_NAME_1_IN_TOP_LEVEL_SCOPE_OF_A_MODULE,
+                vec![text.clone(), text],
             ));
         } else if text == "Object" && node.kind == SyntaxKind::ClassDeclaration {
             if emit_format != ModuleKind::CommonJS {

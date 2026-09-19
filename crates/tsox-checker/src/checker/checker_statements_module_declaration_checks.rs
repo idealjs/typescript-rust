@@ -4,6 +4,9 @@ use crate::checker::checker_statements::*;
 
 impl Checker {
     pub fn check_module_declaration(&mut self, node: &Arc<Node>) {
+        if node.name().is_some_and(|n| n.kind == SyntaxKind::Identifier) {
+            self.check_cjs_reserved_top_level_name(node, &node.name().unwrap());
+        }
         self.check_grammar_modifiers(node);
 
         // Go checkModuleDeclaration：global 增强诊断

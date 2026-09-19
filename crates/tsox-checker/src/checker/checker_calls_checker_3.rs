@@ -100,6 +100,7 @@ impl Checker {
 
         if !sig.type_parameters.is_empty() || Self::has_explicit_type_arguments(node) {
             self.check_explicit_type_argument_count(node, &sig, is_new, callee_type);
+            self.check_call_type_argument_constraints(node, &sig);
         }
 
         // 调用位显式类型实参：直接用作代入（Go inferTypeArguments 显式实参

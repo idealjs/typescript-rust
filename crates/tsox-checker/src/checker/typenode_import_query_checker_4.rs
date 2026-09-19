@@ -263,7 +263,14 @@ impl Checker {
                 target_meaning,
                 None,
             ) {
-                Some(current) => self.resolve_import_symbol_type(&current, target_meaning),
+                Some(current) => {
+                    // Go checkTypeReferenceOrImport（ImportType 位）：显式
+                    // 类型实参的约束满足检查（TS2344）
+                    if let Some(ta) = &d.type_arguments {
+                        self.check_type_reference_argument_constraints_on(node, ta, &current);
+                    }
+                    self.resolve_import_symbol_type(&current, target_meaning)
+                }
                 None => return placeholder,
             }
         } else {
@@ -295,6 +302,89 @@ impl Checker {
                 t
             }
             None => placeholder,
+        }
+    }
+
+
+    // Go checkTypeArgumentConstraints 的 ImportType 位：按目标符号声明的
+    // 类型参数约束逐实参检查
+    pub(crate) fn check_type_reference_argument_constraints_on(
+        &mut self,
+        node: &Arc<Node>,
+        type_args: &Arc<tsox_frontend::ast::NodeList>,
+        symbol: &Arc<Symbol>,
+    ) {
+        let params: Vec<Arc<Node>> = symbol
+            .declarations
+            .iter()
+            .find_map(|decl| {
+                let tps = match &decl.data {
+                    NodeData::InterfaceDeclaration(i) => i.type_parameters.as_ref(),
+                    NodeData::ClassDeclaration(c) => c.type_parameters.as_ref(),
+                    NodeData::TypeAliasDeclaration(t) => t.type_parameters.as_ref(),
+                    _ => None,
+                }?;
+                Some(tps.iter().cloned().collect())
+            })
+            .unwrap_or_default();
+        if params.is_empty() || type_args.nodes.is_empty() {
+            return;
+        }
+        let arg_types: Vec<Arc<Type>> = type_args
+            .iter()
+            .map(|t| self.get_type_from_type_node(t))
+            .collect();
+        for (i, arg_node) in type_args.iter().enumerate() {
+            let Some(param) = params.get(i) else { continue };
+            let NodeData::TypeParameterDeclaration(pd) = &param.data else {
+                continue;
+            };
+            let Some(constraint_node) = &pd.constraint else {
+                continue;
+            };
+            let constraint_type = self.get_type_from_type_node(constraint_node);
+            if constraint_type
+                .flags
+                .intersects(TypeFlags::Any | TypeFlags::Never)
+                || self.is_error_type(&constraint_type)
+            {
+                continue;
+            }
+            let arg_type = Arc::clone(&arg_types[i]);
+            if arg_type.flags.intersects(TypeFlags::Any | TypeFlags::Never) {
+                continue;
+            }
+            let tp_types: Vec<Arc<Type>> = {
+                let sym_map = self.program.symbol_map();
+                let tp_syms: Vec<Arc<Symbol>> = params
+                    .iter()
+                    .filter_map(|tp| sym_map.symbol_of(tp).map(Arc::clone))
+                    .collect();
+                tp_syms
+                    .iter()
+                    .map(|s| self.get_type_parameter_from_symbol(s))
+                    .collect()
+            };
+            let constraint_type =
+                self.substitute_infer_type_parameters(&constraint_type, &tp_types, &arg_types);
+            if crate::checker::checker_calls_type_arg_constraints::keeps_unsubstituted_type_parameter(&constraint_type) {
+                continue;
+            }
+            if self.is_type_assignable_to(&arg_type, &constraint_type) {
+                continue;
+            }
+            let file = self
+                .get_source_file_of_node(node)
+                .or_else(|| self.current_file.clone());
+            let arg_str = self.type_to_string(&arg_type);
+            let constraint_str = self.type_to_string(&constraint_type);
+            self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                file,
+                arg_node.loc,
+                tsox_core::diagnostics::messages_generated::TYPE_0_DOES_NOT_SATISFY_THE_CONSTRAINT_1,
+                vec![arg_str, constraint_str],
+            ));
+            break;
         }
     }
 
