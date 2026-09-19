@@ -85,14 +85,14 @@ impl Checker {
                 prop.name.clone()
             };
 
-            let name = if prop.declarations.iter().any(|d| {
-                d.name()
-                    .is_some_and(|n| n.kind == SyntaxKind::StringLiteral)
-            }) {
-                format!("\"{name}\"")
-            } else {
-                name
-            };
+            // Go nodebuilder：成员名按 isIdentifierText 决定是否加引号
+            let name =
+                if crate::checker::checker_get_excluded_symbol_flags::is_valid_identifier_text(&name)
+                {
+                    name
+                } else {
+                    format!("\"{name}\"")
+                };
             let prop_type = self.get_type_of_symbol(prop);
             // 可选成员的 "?:" 已表达 undefined：显示剥掉烘焙的 undefined 成分
             let prop_type = if prop.flags.contains(SymbolFlags::Optional) {

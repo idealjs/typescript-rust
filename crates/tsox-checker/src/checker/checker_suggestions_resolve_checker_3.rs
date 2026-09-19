@@ -158,6 +158,37 @@ impl Checker {
                 cur = parent;
             }
         }
+        // Go getTargetOfExportAssignment：export default X / export = X 的
+        // 别名目标 = 表达式在所在模块作用域解析出的符号
+        if let Some(decl) = symbol
+            .declarations
+            .iter()
+            .find(|d| d.kind == SyntaxKind::ExportAssignment)
+            && let tsox_frontend::ast::NodeData::ExportAssignment(ea) = &decl.data
+            && matches!(
+                ea.expression.kind,
+                SyntaxKind::Identifier | SyntaxKind::QualifiedName
+            )
+            && let Some(scope) = decl
+                .parent()
+                .filter(|p| p.kind == SyntaxKind::SourceFile)
+                .or_else(|| {
+                    decl.parent().and_then(|p| {
+                        if p.kind == SyntaxKind::ModuleBlock {
+                            p.parent()
+                        } else {
+                            None
+                        }
+                    })
+                })
+        {
+            self.push_scope(&scope);
+            let target = self.resolve_qualified_symbol(&ea.expression);
+            self.pop_scope();
+            if let Some(target) = target {
+                return target;
+            }
+        }
         if let Some(decl) = symbol
             .declarations
             .iter()

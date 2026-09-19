@@ -73,13 +73,13 @@ impl Checker {
                 prop.name.clone()
             };
 
-            let name = if prop.declarations.iter().any(|d| {
-                d.name()
-                    .is_some_and(|n| n.kind == SyntaxKind::StringLiteral)
-            }) {
-                format!("\"{name}\"")
-            } else {
+            // Go nodebuilder：成员名按 isIdentifierText 决定是否加引号
+            //（default 等关键字仍可作属性名裸打印）
+            let name = if crate::checker::checker_get_excluded_symbol_flags::is_valid_identifier_text(&name)
+            {
                 name
+            } else {
+                format!("\"{name}\"")
             };
             let prop_type = self.get_type_of_symbol(prop);
 
