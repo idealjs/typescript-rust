@@ -3,11 +3,7 @@
 use crate::checker::typenode_references::*;
 
 impl Checker {
-    pub(crate) fn resolve_type_parameter_reference(
-        &mut self,
-        symbol: &Arc<Symbol>,
-        type_name: &Arc<Node>,
-    ) -> Arc<Type> {
+    pub(crate) fn resolve_type_parameter_reference(&mut self, symbol: &Arc<Symbol>) -> Arc<Type> {
         let key = Arc::as_ptr(symbol) as *const tsox_frontend::ast::Symbol;
         for map in self.type_argument_stack.iter().rev() {
             if let Some(t) = map.get(&key) {

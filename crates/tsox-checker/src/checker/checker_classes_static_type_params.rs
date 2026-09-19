@@ -40,6 +40,26 @@ impl Checker {
         }
     }
 
+    /// Go getSymbolFlags：沿别名链逐级 OR 标志；链断（目标未解析）时
+    /// 保留已收集部分
+    pub(crate) fn symbol_flags_with_alias_chain(&mut self, symbol: &Arc<Symbol>) -> SymbolFlags {
+        let mut flags = symbol.flags;
+        let mut cur = Arc::clone(symbol);
+        let mut guard = 0;
+        while cur.flags.intersects(tsox_frontend::ast::SymbolFlags::Alias) && guard < 10 {
+            let Some(next) = self.follow_alias_resolving(&cur) else {
+                break;
+            };
+            if Arc::ptr_eq(&next, &cur) {
+                break;
+            }
+            flags |= next.flags;
+            cur = next;
+            guard += 1;
+        }
+        flags
+    }
+
     /// Go resolveName 上溯链的静态成员违规判定：从类型名向上，中途任何
     /// 容器 locals 命中同名（如方法自有类型参数）即无违规；类/接口 members
     /// 命中时按进入类的那一跳是否为 static 成员定夺；未命中继续上溯

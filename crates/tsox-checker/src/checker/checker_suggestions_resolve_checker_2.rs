@@ -134,7 +134,7 @@ impl Checker {
                 None => Err((Arc::clone(name), String::new(), String::new())),
             },
             tsox_frontend::ast::NodeData::QualifiedName(data) => {
-                self.resolve_qualified_tail(&data.left, &data.right)
+                self.resolve_qualified_tail(&data.left, &data.right, true)
             }
 
             tsox_frontend::ast::NodeData::PropertyAccessExpression(pa) => {
@@ -148,7 +148,7 @@ impl Checker {
                         | SyntaxKind::QualifiedName
                         | SyntaxKind::PropertyAccessExpression
                 ) {
-                    self.resolve_qualified_tail(base, &pa.name)
+                    self.resolve_qualified_tail(base, &pa.name, false)
                 } else {
                     Err((Arc::clone(name), String::new(), String::new()))
                 }
@@ -161,10 +161,22 @@ impl Checker {
         &mut self,
         left: &Arc<Node>,
         right: &Arc<Node>,
+        entity_name_ctx: bool,
     ) -> Result<Arc<Symbol>, (Arc<Node>, String, String)> {
         {
             let mut symbol = self.resolve_qualified_symbol_traced(left)?;
             let path_so_far = qualified_name_text(left);
+            // Go resolveQualifiedName：限定名左侧一律按 Namespace 含义解析
+            //（Go SymbolFlagsNamespace 含 Enum），实体名语境失败报 2503
+            if entity_name_ctx {
+                let chain_flags = self.symbol_flags_with_alias_chain(&symbol);
+                if !chain_flags.intersects(
+                    tsox_frontend::ast::SymbolFlags::NAMESPACE
+                        | tsox_frontend::ast::SymbolFlags::ENUM,
+                ) {
+                    return Err((Arc::clone(left), String::new(), String::new()));
+                }
+            }
             symbol = self.resolve_alias_base(symbol);
             // re-export 链（import { foo } → export { foo } → import * as foo）
             // 需循环 follow 到终点（namespace import 符号）才能查成员
