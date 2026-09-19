@@ -348,7 +348,7 @@ impl Checker {
                 let expr = &data.expression;
                 match &expr.data {
                     tsox_frontend::ast::NodeData::StringLiteral(s) => {
-                        Some(self.get_string_literal_type(&s.text))
+                        Some(self.literal_type_for_property_name_text(&s.text))
                     }
                     tsox_frontend::ast::NodeData::NumericLiteral(n) => Some(
                         self.get_number_literal_type(tsox_core::jsnum::Number::from_string(
@@ -359,23 +359,26 @@ impl Checker {
                 }
             }
             tsox_frontend::ast::NodeData::Identifier(data) => {
-                if let Ok(_) = data.text.parse::<f64>() {
-                    Some(
-                        self.get_number_literal_type(tsox_core::jsnum::Number::from_string(
-                            &data.text,
-                        )),
-                    )
-                } else {
-                    Some(self.get_string_literal_type(&data.text))
-                }
+                Some(self.literal_type_for_property_name_text(&data.text))
             }
             tsox_frontend::ast::NodeData::StringLiteral(data) => {
-                Some(self.get_string_literal_type(&data.text))
+                Some(self.literal_type_for_property_name_text(&data.text))
             }
             tsox_frontend::ast::NodeData::NumericLiteral(data) => Some(
                 self.get_number_literal_type(tsox_core::jsnum::Number::from_string(&data.text)),
             ),
             _ => None,
+        }
+    }
+
+    // Go isNumericLiteralName：ToString(ToNumber(text)) == text 时属性名是
+    // 数字名（含 Infinity/-Infinity/NaN，不含 +Infinity 前缀形式），
+    // 索引约束按数字字面量键参与
+    fn literal_type_for_property_name_text(&mut self, text: &str) -> Arc<Type> {
+        if tsox_core::jsnum::Number::from_string(text).to_string() == text {
+            self.get_number_literal_type(tsox_core::jsnum::Number::from_string(text))
+        } else {
+            self.get_string_literal_type(text)
         }
     }
 
@@ -389,7 +392,13 @@ impl Checker {
                 return format!("[{inner}]");
             }
         }
-        name.text().to_string()
+        let text = name.text().to_string();
+        // Go symbolToString：源文本为字符串字面量的属性名带引号展示
+        if name.kind == SyntaxKind::StringLiteral {
+            format!("\"{text}\"")
+        } else {
+            text
+        }
     }
 
     pub(crate) fn node_source_text(&self, node: &Arc<Node>) -> Option<String> {
