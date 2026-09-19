@@ -59,15 +59,48 @@ impl Checker {
             && !export_specifier_has_module_specifier(node)
             && let Some(exported) = property_name_or_name(node)
             && exported.kind == SyntaxKind::Identifier
-            && let Some(sym) = self.resolve_identifier(&exported)
-            && self.symbol_is_global_declaration(&sym)
         {
-            self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
-                self.current_file.clone(),
-                exported.loc,
-                CANNOT_EXPORT_0_ONLY_LOCAL_DECLARATIONS_CAN_BE_EXPORTED_FROM_A_MODULE,
-                vec![exported.text().to_string()],
-            ));
+            match self.resolve_identifier(&exported) {
+                Some(sym) => {
+                    if self.symbol_is_global_declaration(&sym) {
+                        self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                            self.current_file.clone(),
+                            exported.loc,
+                            CANNOT_EXPORT_0_ONLY_LOCAL_DECLARATIONS_CAN_BE_EXPORTED_FROM_A_MODULE,
+                            vec![exported.text().to_string()],
+                        ));
+                    }
+                }
+                // Go getTargetOfExportSpecifier 解析失败报 Cannot find name
+                //（带拼写建议，onFailedToResolveSymbol）
+                None => {
+                    let name_text = exported.text();
+                    let suggestion = self.find_name_suggestion(
+                        name_text,
+                        SymbolFlags::VALUE
+                            | SymbolFlags::TYPE
+                            | SymbolFlags::NAMESPACE
+                            | SymbolFlags::Alias,
+                    );
+                    let message = if suggestion.is_some() {
+                        tsox_core::diagnostics::messages_generated::CANNOT_FIND_NAME_0_DID_YOU_MEAN_1
+                    } else {
+                        tsox_core::diagnostics::messages_generated::CANNOT_FIND_NAME_0
+                    };
+                    self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                        self.current_file.clone(),
+                        exported.loc,
+                        message,
+                        {
+                            let mut args = vec![name_text.to_string()];
+                            if let Some(s) = suggestion {
+                                args.push(s);
+                            }
+                            args
+                        },
+                    ));
+                }
+            }
         }
         let Some(symbol) = self.program.symbol_map().symbol_of(node).cloned() else {
             return;

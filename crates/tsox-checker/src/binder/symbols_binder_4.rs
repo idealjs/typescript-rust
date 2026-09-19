@@ -161,6 +161,19 @@ impl Binder {
         {
             return internal;
         }
+        // Go getDeclarationName：字符串/数字字面量计算名按字面量名入表
+        //（字符串保留引号，数字归一化），否则不同计算名会全部坍缩为空名
+        if name.kind == SyntaxKind::ComputedPropertyName
+            && let NodeData::ComputedPropertyName(cd) = &name.data
+            && matches!(
+                cd.expression.kind,
+                SyntaxKind::StringLiteral
+                    | SyntaxKind::NumericLiteral
+                    | SyntaxKind::NoSubstitutionTemplateLiteral
+            )
+        {
+            return self.member_name_text(&cd.expression);
+        }
         // Go scanner 对十进制数字字面量 tokenValue 归一化
         // （jsnum.FromString().String()），符号名以归一化形态入表（0.0 与 0 同名）
         if name.kind == SyntaxKind::NumericLiteral {
