@@ -101,6 +101,10 @@ impl Checker {
             }
             SyntaxKind::CallExpression => {
                 if let tsox_frontend::ast::NodeData::CallExpression(data) = &node.data {
+                    // Go checkCallExpression：空类型实参列表报 TS1099
+                    if let Some(args) = &data.type_arguments {
+                        self.check_grammar_type_arguments(node, args);
+                    }
                     self.check_expression(&data.expression);
                     for (i, arg) in data.arguments.iter().enumerate() {
                         self.check_call_arg_with_context(&data.expression, i, arg);
@@ -110,6 +114,11 @@ impl Checker {
                 self.check_dynamic_import_extension_rules(node);
             }
             SyntaxKind::NewExpression => {
+                if let tsox_frontend::ast::NodeData::NewExpression(data) = &node.data
+                    && let Some(args) = &data.type_arguments
+                {
+                    self.check_grammar_type_arguments(node, args);
+                }
                 self.check_new_expression(node);
             }
             SyntaxKind::QualifiedName => {
@@ -400,6 +409,9 @@ impl Checker {
         if node.flags.contains(NodeFlags::AwaitContext) {
             return;
         }
+        if self.check_await_expression_in_non_async_context(node) {
+            return;
+        }
         if self.is_within_function_like(node) {
             return;
         }
@@ -419,7 +431,7 @@ impl Checker {
             return;
         }
         let module_ok = matches!(
-            self.compiler_options.module,
+            self.compiler_options.get_emit_module_kind(),
             tsox_core::core::compiler_options::ModuleKind::ES2022
                 | tsox_core::core::compiler_options::ModuleKind::ESNext
                 | tsox_core::core::compiler_options::ModuleKind::System

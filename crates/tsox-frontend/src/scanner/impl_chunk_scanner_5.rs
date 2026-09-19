@@ -4,6 +4,12 @@ use crate::scanner::impl_chunk::*;
 
 impl Scanner {
     pub(crate) fn scan_template(&mut self) -> SyntaxKind {
+        self.scan_template_ex(false)
+    }
+
+    /// Go scanTemplateAndSetTokenValue(shouldEmitInvalidEscapeError)：
+    /// 非 tagged 模板的非法转义即时报告，tagged 模板延迟（实际不报）
+    pub(crate) fn scan_template_ex(&mut self, report_escape_errors: bool) -> SyntaxKind {
         self.pos += 1;
         let mut has_substitution = false;
         let mut terminated = false;
@@ -24,7 +30,7 @@ impl Scanner {
                 break;
             }
             if c == '\\' {
-                self.scan_escape_sequence();
+                self.scan_escape_sequence(report_escape_errors);
                 continue;
             }
             self.pos += 1;
@@ -203,5 +209,16 @@ impl Scanner {
             }
             _ => None,
         }
+    }
+}
+
+impl Scanner {
+    /// Go ReScanTemplateToken(isTaggedTemplate)：回到 token 起点重扫整段模板
+    pub fn re_scan_template_head_token(&mut self, is_tagged: bool) -> SyntaxKind {
+        self.pos = self.token_pos;
+        self.token_pos = self.pos;
+        self.full_start_pos = self.pos;
+        self.token_flags = TOKEN_FLAGS_NONE;
+        self.scan_template_ex(!is_tagged)
     }
 }

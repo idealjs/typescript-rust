@@ -1,6 +1,7 @@
 #![allow(unused_imports)]
 
 use crate::checker::grammarchecks::*;
+use tsox_frontend::ast::is_binding_pattern;
 
 impl Checker {
     pub(crate) fn check_modifier_tail_positions(
@@ -52,6 +53,25 @@ impl Checker {
                     last_declare,
                     &A_0_MODIFIER_CANNOT_BE_USED_WITH_AN_IMPORT_DECLARATION,
                     &["declare".to_string()],
+                );
+            }
+        }
+
+        if node.kind == SyntaxKind::Parameter
+            && flags.intersects(ModifierFlags::ParameterPropertyModifier)
+        {
+            if let Some(name) = node.name() && is_binding_pattern(&name) {
+                return self.grammar_error_on_node(
+                    node,
+                    &A_PARAMETER_PROPERTY_MAY_NOT_BE_DECLARED_USING_A_BINDING_PATTERN,
+                );
+            }
+            if let NodeData::ParameterDeclaration(d) = &node.data
+                && d.dot_dot_dot_token.is_some()
+            {
+                return self.grammar_error_on_node(
+                    node,
+                    &A_PARAMETER_PROPERTY_CANNOT_BE_DECLARED_USING_A_REST_PARAMETER,
                 );
             }
         }

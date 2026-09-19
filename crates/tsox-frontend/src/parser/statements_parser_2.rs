@@ -9,12 +9,13 @@ impl Parser {
         let expression = if !self.has_preceding_line_break() {
             self.parse_expression()
         } else {
+            let pos = self.node_pos();
             Arc::new(Node::with_loc(
                 SyntaxKind::Identifier,
                 NodeData::Identifier(IdentifierData {
                     text: String::new(),
                 }),
-                TextRange::new(self.token_pos(), self.token_pos()),
+                TextRange::new(pos, pos),
             ))
         };
 

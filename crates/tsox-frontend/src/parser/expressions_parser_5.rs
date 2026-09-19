@@ -210,7 +210,7 @@ impl Parser {
                 TextRange::new(pos, end),
             ))
         } else {
-            self.parse_template_expression()
+            self.parse_template_expression_ex(true)
         }
     }
 

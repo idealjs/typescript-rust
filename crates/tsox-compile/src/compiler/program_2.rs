@@ -27,6 +27,50 @@ impl Program {
             )));
         }
 
+        if options.emit_declaration_only.is_true() && !options.get_emit_declarations() {
+            diagnostics.push(Arc::new(Diagnostic::new(
+                None,
+                TextRange::default(),
+                tsox_core::diagnostics::messages_generated::
+                    OPTION_0_CANNOT_BE_SPECIFIED_WITHOUT_SPECIFYING_OPTION_1_OR_OPTION_2,
+                vec![
+                    "emitDeclarationOnly".to_string(),
+                    "declaration".to_string(),
+                    "composite".to_string(),
+                ],
+            )));
+        }
+
+        if options.declaration_map.is_true() && !options.get_emit_declarations() {
+            diagnostics.push(Arc::new(Diagnostic::new(
+                None,
+                TextRange::default(),
+                tsox_core::diagnostics::messages_generated::
+                    OPTION_0_CANNOT_BE_SPECIFIED_WITHOUT_SPECIFYING_OPTION_1_OR_OPTION_2,
+                vec![
+                    "declarationMap".to_string(),
+                    "declaration".to_string(),
+                    "composite".to_string(),
+                ],
+            )));
+        }
+
+        if options.isolated_declarations.is_true() {
+            if !options.get_emit_declarations() {
+                diagnostics.push(Arc::new(Diagnostic::new(
+                    None,
+                    TextRange::default(),
+                    tsox_core::diagnostics::messages_generated::
+                        OPTION_0_CANNOT_BE_SPECIFIED_WITHOUT_SPECIFYING_OPTION_1_OR_OPTION_2,
+                    vec![
+                        "isolatedDeclarations".to_string(),
+                        "declaration".to_string(),
+                        "composite".to_string(),
+                    ],
+                )));
+            }
+        }
+
         if !opts.config.file_names.is_empty() && !options.no_lib.is_true() {
             let lib_names = default_lib_file_names(&options);
             let mut visited: std::collections::HashSet<String> = std::collections::HashSet::new();

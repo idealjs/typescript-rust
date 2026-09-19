@@ -16,6 +16,8 @@ impl Parser {
             ));
         }
 
+        let element_modifiers = self.parse_object_literal_element_modifiers();
+
         if self.token == SyntaxKind::GetKeyword || self.token == SyntaxKind::SetKeyword {
             let mut s = self.scanner.clone();
             s.scan();
@@ -42,7 +44,7 @@ impl Parser {
                     SyntaxKind::GetKeyword => Arc::new(Node::with_loc(
                         SyntaxKind::GetAccessor,
                         NodeData::GetAccessorDeclaration(GetAccessorDeclarationData {
-                            modifiers: None,
+                            modifiers: element_modifiers,
                             name,
                             type_parameters,
                             parameters,
@@ -55,7 +57,7 @@ impl Parser {
                     _ => Arc::new(Node::with_loc(
                         SyntaxKind::SetAccessor,
                         NodeData::SetAccessorDeclaration(SetAccessorDeclarationData {
-                            modifiers: None,
+                            modifiers: element_modifiers,
                             name,
                             type_parameters,
                             parameters,
@@ -76,10 +78,13 @@ impl Parser {
 
         let asterisk_token = self.parse_optional_token(SyntaxKind::AsteriskToken);
 
-        // Go parseObjectLiteralElement：shorthand 仅限名字位是标识符
-        //（await 在 [Await] 上下文非标识符，走属性名+期望 ':' 的报错路径）
         let name_was_identifier = self.is_identifier();
         let name = self.parse_property_name();
+        let obj_postfix_token = self.parse_optional_token(SyntaxKind::QuestionToken);
+        let obj_postfix_token = match obj_postfix_token {
+            Some(t) => Some(t),
+            None => self.parse_optional_token(SyntaxKind::ExclamationToken),
+        };
         if self.token == SyntaxKind::OpenParenToken
             || self.token == SyntaxKind::LessThanToken
             || asterisk_token.is_some()
@@ -99,10 +104,10 @@ impl Parser {
             return Arc::new(Node::with_loc(
                 SyntaxKind::MethodDeclaration,
                 NodeData::MethodDeclaration(MethodDeclarationData {
-                    modifiers: None,
+                    modifiers: element_modifiers,
                     asterisk_token,
                     name,
-                    postfix_token: None,
+                    postfix_token: obj_postfix_token,
                     type_parameters,
                     parameters,
                     type_node,
@@ -120,9 +125,9 @@ impl Parser {
             Arc::new(Node::with_loc(
                 SyntaxKind::PropertyAssignment,
                 NodeData::PropertyAssignment(PropertyAssignmentData {
-                    modifiers: None,
+                    modifiers: element_modifiers,
                     name,
-                    postfix_token: None,
+                    postfix_token: obj_postfix_token,
                     type_node: Arc::new(Node::with_loc(
                         SyntaxKind::Unknown,
                         NodeData::Token,
@@ -134,17 +139,15 @@ impl Parser {
             ))
         } else {
             if !name_was_identifier {
-                // Go parseObjectLiteralElement：非 shorthand 时期望 ':'，
-                // 失败后仍按 PropertyAssignment（解析初始化器）恢复
                 self.expect(SyntaxKind::ColonToken);
                 let initializer = self.allow_in(|p| p.parse_assignment_expression());
                 let end = initializer.end();
                 return Arc::new(Node::with_loc(
                     SyntaxKind::PropertyAssignment,
                     NodeData::PropertyAssignment(PropertyAssignmentData {
-                        modifiers: None,
+                        modifiers: element_modifiers,
                         name,
-                        postfix_token: None,
+                        postfix_token: obj_postfix_token,
                         type_node: Arc::new(Node::with_loc(
                             SyntaxKind::Unknown,
                             NodeData::Token,
@@ -168,9 +171,9 @@ impl Parser {
             Arc::new(Node::with_loc(
                 SyntaxKind::ShorthandPropertyAssignment,
                 NodeData::ShorthandPropertyAssignment(ShorthandPropertyAssignmentData {
-                    modifiers: None,
+                    modifiers: element_modifiers,
                     name,
-                    postfix_token: None,
+                    postfix_token: obj_postfix_token,
                     type_node: Arc::new(Node::with_loc(
                         SyntaxKind::Unknown,
                         NodeData::Token,

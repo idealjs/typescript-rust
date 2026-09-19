@@ -14,9 +14,21 @@ impl Checker {
         };
 
         {
+            // Go checkElementAccessExpression：对象侧为 any/错误类型时
+            // 跳过索引类型约束检查（TS2538）
+            let obj_precheck = self.get_type_of_node(obj_expr);
+            let skip_index_check = obj_precheck.flags.intersects(TypeFlags::Any);
             let arg_type = self.get_type_of_node(arg_expr);
 
-            let is_type_param_or_union_of = arg_type.is_type_parameter()
+            let is_type_param_or_union_of = if skip_index_check {
+                true
+            } else {
+                arg_type.is_type_parameter()
+                    || (arg_type.is_union()
+                        && arg_type
+                            .types()
+                            .is_some_and(|ts| ts.iter().all(|t| t.is_type_parameter())))
+            };
                 || (arg_type.is_union()
                     && arg_type
                         .types()

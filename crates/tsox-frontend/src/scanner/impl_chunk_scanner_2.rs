@@ -264,6 +264,10 @@ impl Scanner {
     }
 
     pub fn scan_template_continuation(&mut self) -> SyntaxKind {
+        self.scan_template_continuation_ex(false)
+    }
+
+    pub fn scan_template_continuation_ex(&mut self, report_escape_errors: bool) -> SyntaxKind {
         self.preceding_line_break = false;
         self.token_flags = TOKEN_FLAGS_NONE;
         // Go ReScanTemplateToken：从 `}` 的 tokenStart 重扫，模板段 token 覆盖 `}`
@@ -295,7 +299,7 @@ impl Scanner {
                 self.preceding_line_break = true;
             }
             if c == '\\' {
-                self.pos = (self.pos + 2).min(self.end);
+                self.scan_escape_sequence(report_escape_errors);
                 continue;
             }
             self.pos += 1;

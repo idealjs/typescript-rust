@@ -184,6 +184,7 @@ impl Checker {
             if !in_bundled_lib
                 && !is_export_assignment_name
                 && !base.flags.intersects(SymbolFlags::VALUE)
+                && base.flags.intersects(SymbolFlags::TYPE)
                 && self
                     .resolve_identifier_with_meaning(node, SymbolFlags::VALUE)
                     .is_none()

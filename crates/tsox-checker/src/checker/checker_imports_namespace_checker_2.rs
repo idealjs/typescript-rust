@@ -111,6 +111,42 @@ impl Checker {
         false
     }
 
+    /// Go getTargetOfModuleDefault：default 导出符号解析；export default <entity>
+    /// 的 Alias 跟随其实体目标，export= 模块回落合成 default（resolveExternalModuleSymbol）
+    pub(crate) fn resolve_default_export_target(
+        &mut self,
+        module_sym: &Arc<Symbol>,
+    ) -> Option<Arc<Symbol>> {
+        let mut target = self.resolve_module_member_symbol(module_sym, "default", 8);
+        if target.is_none() {
+            let export_eq = module_sym
+                .exports
+                .get(tsox_frontend::ast::INTERNAL_SYMBOL_NAME_EXPORT_EQUALS)
+                .cloned();
+            if let Some(ee) = export_eq {
+                let resolved = self.resolve_export_equals_target(&ee);
+                if resolved.flags.intersects(SymbolFlags::VALUE) {
+                    target = Some(resolved);
+                }
+            }
+        }
+        for _ in 0..4 {
+            let cur = target.clone()?;
+            let is_default_alias = cur.flags.contains(SymbolFlags::Alias)
+                && cur.declarations.iter().any(|d| {
+                    matches!(&d.data, NodeData::ExportAssignment(ea) if !ea.is_export_equals)
+                });
+            if !is_default_alias {
+                break;
+            }
+            match self.resolve_export_assignment_target(&cur) {
+                Some(next) if !Arc::ptr_eq(&next, &cur) => target = Some(next),
+                _ => break,
+            }
+        }
+        target
+    }
+
     pub(crate) fn resolve_module_member_symbol(
         &mut self,
         module_sym: &Arc<Symbol>,

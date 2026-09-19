@@ -351,6 +351,23 @@ impl Checker {
         let NodeData::ParameterDeclaration(pd) = &parameter.data else {
             return false;
         };
+        // Go checkGrammarForDisallowedTrailingComma
+        if let Some(last) = params.nodes.last()
+            && let Some(file) = self.current_file.clone()
+        {
+            let comma_pos =
+                tsox_frontend::scanner::skip_trivia(&file.text, last.loc.end());
+            if comma_pos < params.loc.end()
+                && file.text.as_bytes().get(comma_pos) == Some(&b',')
+            {
+                self.grammar_error_at_pos(
+                    &params.nodes[0],
+                    params.loc.end() - 1,
+                    1,
+                    &msg::AN_INDEX_SIGNATURE_CANNOT_HAVE_A_TRAILING_COMMA,
+                );
+            }
+        }
         if let Some(rest) = &pd.dot_dot_dot_token {
             return self.grammar_error_on_node(rest, &msg::AN_INDEX_SIGNATURE_CANNOT_HAVE_A_REST_PARAMETER);
         }
@@ -455,18 +472,39 @@ impl Checker {
 
     pub fn check_grammar_for_at_least_one_type_argument(
         &mut self,
-        _node: &Arc<Node>,
-        _type_arguments: &tsox_frontend::ast::NodeList,
+        node: &Arc<Node>,
+        type_arguments: &tsox_frontend::ast::NodeList,
     ) -> bool {
-        false
+        use tsox_core::diagnostics::messages_generated as msg;
+        if !type_arguments.nodes.is_empty() {
+            return false;
+        }
+        let Some(file) = self
+            .get_source_file_of_node(node)
+            .or_else(|| self.current_file.clone())
+        else {
+            return false;
+        };
+        if file.has_parse_diagnostics {
+            return false;
+        }
+        // 解析器空列表 loc 从 `<` 起（Go 从 `<` 后起，Pos-len("<") 同位）
+        let start = type_arguments.loc.pos();
+        let end = tsox_frontend::scanner::skip_trivia(&file.text, type_arguments.loc.end()) + 1;
+        self.grammar_error_at_pos(
+            &file.node,
+            start,
+            end.saturating_sub(start),
+            &msg::TYPE_ARGUMENT_LIST_CANNOT_BE_EMPTY,
+        )
     }
 
     pub fn check_grammar_type_arguments(
         &mut self,
-        _node: &Arc<Node>,
-        _type_arguments: &tsox_frontend::ast::NodeList,
+        node: &Arc<Node>,
+        type_arguments: &tsox_frontend::ast::NodeList,
     ) -> bool {
-        false
+        self.check_grammar_for_at_least_one_type_argument(node, type_arguments)
     }
 
     pub fn check_grammar_tagged_template_chain(&mut self, _node: &Arc<Node>) -> bool {

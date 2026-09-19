@@ -13,6 +13,14 @@ impl Checker {
 
         if matches!(&node.data, NodeData::TypeLiteralNode(_)) {
             self.check_type_literal_duplicate_declarations(node);
+            // Go checkSignatureDeclaration：类型字面量成员的索引签名文法
+            if let NodeData::TypeLiteralNode(data) = &node.data {
+                for member in data.members.iter() {
+                    if member.kind == SyntaxKind::IndexSignature {
+                        self.check_grammar_index_signature(member);
+                    }
+                }
+            }
         }
         self.cache_type(node, self.error_type());
         let result = match &node.data {

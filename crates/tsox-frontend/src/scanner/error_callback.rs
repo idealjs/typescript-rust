@@ -32,6 +32,18 @@ pub enum DiagnosticKind {
 
     RegexMessage(tsox_core::diagnostics::Message),
     RegexMessageWithArg(tsox_core::diagnostics::Message, char),
+
+    OctalEscapeSequenceNotAllowed,
+
+    EscapeSequenceNotAllowed,
+
+    IdentifierFollowsNumeric,
+
+    BigIntExponentialNotation,
+
+    BigIntMustBeInteger,
+
+    DigitExpected,
 }
 
 pub type TokenFlags = u32;

@@ -6,6 +6,9 @@ impl Checker {
     pub(crate) fn check_class_member(&mut self, node: &Arc<Node>) {
         self.check_grammar_modifiers(node);
         self.check_node_decorators(node);
+        if node.kind == SyntaxKind::IndexSignature {
+            self.check_grammar_index_signature(node);
+        }
 
         if node.kind == SyntaxKind::Constructor {
             self.check_multiple_constructor_implementations(node);
@@ -53,6 +56,44 @@ impl Checker {
                                 MEMBER_0_IMPLICITLY_HAS_AN_1_TYPE,
                             vec![data.name.text().to_string(), "any".to_string()],
                         ));
+                    }
+
+                    if ambient && let Some(init) = &data.initializer {
+                        let is_simple_literal = match init.kind {
+                            SyntaxKind::StringLiteral
+                            | SyntaxKind::NumericLiteral
+                            | SyntaxKind::BigIntLiteral
+                            | SyntaxKind::NoSubstitutionTemplateLiteral
+                            | SyntaxKind::TrueKeyword
+                            | SyntaxKind::FalseKeyword => true,
+                            SyntaxKind::PropertyAccessExpression
+                            | SyntaxKind::ElementAccessExpression => true,
+                            _ => false,
+                        };
+                        let readonly = node.has_syntactic_modifier(ModifierFlags::Readonly);
+                        let message = if readonly && data.type_node.is_none() {
+                            if is_simple_literal {
+                                None
+                            } else {
+                                Some(
+                                    tsox_core::diagnostics::messages_generated::
+                                        A_CONST_INITIALIZER_IN_AN_AMBIENT_CONTEXT_MUST_BE_A_STRING_OR_NUMERIC_LITERAL_OR_LITERAL_ENUM_REFERENCE,
+                                )
+                            }
+                        } else {
+                            Some(
+                                tsox_core::diagnostics::messages_generated::
+                                    INITIALIZERS_ARE_NOT_ALLOWED_IN_AMBIENT_CONTEXTS,
+                            )
+                        };
+                        if let Some(message) = message {
+                            self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                                self.current_file.clone(),
+                                init.loc,
+                                message,
+                                vec![],
+                            ));
+                        }
                     }
 
                     if node.has_syntactic_modifier(ModifierFlags::Abstract)

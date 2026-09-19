@@ -260,16 +260,50 @@ impl Parser {
             }
             crate::scanner::DiagnosticKind::RegexMessage(msg) => msg,
             crate::scanner::DiagnosticKind::RegexMessageWithArg(msg, _arg) => msg,
+            crate::scanner::DiagnosticKind::OctalEscapeSequenceNotAllowed => {
+                tsox_core::diagnostics::OCTAL_ESCAPE_SEQUENCES_ARE_NOT_ALLOWED_USE_THE_SYNTAX_0
+            }
+            crate::scanner::DiagnosticKind::EscapeSequenceNotAllowed => {
+                tsox_core::diagnostics::ESCAPE_SEQUENCE_0_IS_NOT_ALLOWED
+            }
+            crate::scanner::DiagnosticKind::IdentifierFollowsNumeric => {
+                tsox_core::diagnostics::AN_IDENTIFIER_OR_KEYWORD_CANNOT_IMMEDIATELY_FOLLOW_A_NUMERIC_LITERAL
+            }
+            crate::scanner::DiagnosticKind::BigIntExponentialNotation => {
+                tsox_core::diagnostics::A_BIGINT_LITERAL_CANNOT_USE_EXPONENTIAL_NOTATION
+            }
+            crate::scanner::DiagnosticKind::BigIntMustBeInteger => {
+                tsox_core::diagnostics::A_BIGINT_LITERAL_MUST_BE_AN_INTEGER
+            }
+            crate::scanner::DiagnosticKind::DigitExpected => {
+                tsox_core::diagnostics::DIGIT_EXPECTED
+            }
         };
         let args: Vec<String> = match err.kind {
             crate::scanner::DiagnosticKind::OctalLiteralNotAllowed => {
+                // Go scanNumber：suggestion = "0o" + FormatInt(val, 8)，
+                // 前导零被规范化
                 let token_text = &self.scanner.text()
                     [err.pos..(err.pos + err.length).min(self.scanner.text().len())];
                 let octal_digits = token_text.strip_prefix('-').unwrap_or(token_text);
                 let digits = octal_digits.strip_prefix('0').unwrap_or(octal_digits);
-                vec![format!("0o{digits}")]
+                let val = i64::from_str_radix(digits, 8).unwrap_or(0);
+                vec![format!("0o{val:o}")]
             }
             crate::scanner::DiagnosticKind::RegexMessageWithArg(_, arg) => vec![arg.to_string()],
+            crate::scanner::DiagnosticKind::OctalEscapeSequenceNotAllowed => {
+                let token_text = &self.scanner.text()
+                    [err.pos..(err.pos + err.length).min(self.scanner.text().len())];
+                let digits = token_text.strip_prefix('\\').unwrap_or(token_text);
+                let code = i64::from_str_radix(digits, 8).unwrap_or(0);
+                vec![format!("\\x{:02x}", code)]
+            }
+            crate::scanner::DiagnosticKind::EscapeSequenceNotAllowed => {
+                let token_text = self.scanner.text()
+                    [err.pos..(err.pos + err.length).min(self.scanner.text().len())]
+                    .to_string();
+                vec![token_text]
+            }
             _ => Vec::new(),
         };
         let arg_refs: Vec<&str> = args.iter().map(|s| s.as_str()).collect();
@@ -299,7 +333,11 @@ impl Parser {
     }
 
     pub(crate) fn next_template_token(&mut self) -> SyntaxKind {
-        self.token = self.scanner.scan_template_continuation();
+        self.next_template_token_ex(false)
+    }
+
+    pub(crate) fn next_template_token_ex(&mut self, is_tagged: bool) -> SyntaxKind {
+        self.token = self.scanner.scan_template_continuation_ex(!is_tagged);
         self.drain_scanner_errors();
         self.token
     }
