@@ -22,6 +22,8 @@ impl Checker {
         self.current_file_id = file_id;
         self.current_file_symbol = source_file_symbol;
 
+        self.check_grammar_source_file(&file_arc);
+
         self.push_scope(&file_node);
 
         let statements: Vec<Arc<Node>> = match &file_node.data {

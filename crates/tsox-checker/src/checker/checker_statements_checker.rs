@@ -23,43 +23,11 @@ impl Checker {
 
         self.type_instantiation_count = 0;
 
-        if self.ambient_context_depth > 0
-            && !matches!(
-                node.kind,
-                SyntaxKind::VariableStatement
-                    | SyntaxKind::FunctionDeclaration
-                    | SyntaxKind::ClassDeclaration
-                    | SyntaxKind::InterfaceDeclaration
-                    | SyntaxKind::TypeAliasDeclaration
-                    | SyntaxKind::EnumDeclaration
-                    | SyntaxKind::ModuleDeclaration
-                    | SyntaxKind::ImportDeclaration
-                    | SyntaxKind::ImportEqualsDeclaration
-                    | SyntaxKind::ExportDeclaration
-                    | SyntaxKind::ExportAssignment
-                    | SyntaxKind::NamespaceExportDeclaration
-            )
-            && node.parent().as_ref().is_some_and(|p| {
-                matches!(
-                    p.kind,
-                    SyntaxKind::Block | SyntaxKind::ModuleBlock | SyntaxKind::SourceFile
-                )
-            })
-            && !Self::inside_function_body(node)
-        {
-            let block_id = node.parent().as_ref().unwrap().id();
-            if !self.ambient_ts1036_reported_blocks.contains(&block_id) {
-                self.ambient_ts1036_reported_blocks.insert(block_id);
-                let file = self.current_file.clone();
-                self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
-                    file,
-                    node.loc,
-                    tsox_core::diagnostics::messages_generated::
-                        STATEMENTS_ARE_NOT_ALLOWED_IN_AMBIENT_CONTEXTS,
-                    Vec::new(),
-                ));
-            }
-        }
+        let ambient_reported = if Self::statement_kind_takes_ambient_check(node.kind) {
+            self.check_grammar_statement_in_ambient_context(node)
+        } else {
+            false
+        };
         match node.kind {
             SyntaxKind::ExpressionStatement => {
                 if let tsox_frontend::ast::NodeData::ExpressionStatement(data) = &node.data {
@@ -221,7 +189,9 @@ impl Checker {
                 self.pop_scope();
             }
             SyntaxKind::ReturnStatement => {
-                self.check_return_statement(node);
+                if !ambient_reported {
+                    self.check_return_statement(node);
+                }
             }
             SyntaxKind::Block => {
                 self.push_scope(node);
@@ -388,7 +358,9 @@ impl Checker {
                 }
             }
             SyntaxKind::BreakStatement | SyntaxKind::ContinueStatement => {
-                self.check_grammar_break_or_continue_statement(node);
+                if !ambient_reported {
+                    self.check_grammar_break_or_continue_statement(node);
+                }
             }
             SyntaxKind::VariableDeclaration => {
                 self.check_variable_declaration(node);

@@ -290,31 +290,6 @@ impl Checker {
         false
     }
 
-    pub fn check_grammar_top_level_element_for_required_declare_modifier(
-        &mut self,
-        _node: &Arc<Node>,
-    ) -> bool {
-        false
-    }
-
-    pub fn check_grammar_top_level_elements_for_required_declare_modifier(
-        &mut self,
-        _file: &Arc<tsox_frontend::ast::SourceFile>,
-    ) -> bool {
-        false
-    }
-
-    pub fn check_grammar_source_file(
-        &mut self,
-        _node: &Arc<tsox_frontend::ast::SourceFile>,
-    ) -> bool {
-        false
-    }
-
-    pub fn check_grammar_statement_in_ambient_context(&mut self, _node: &Arc<Node>) -> bool {
-        false
-    }
-
     pub fn check_grammar_numeric_literal(&mut self, _node: &Arc<Node>) {}
 
     pub fn check_grammar_big_int_literal(&mut self, _node: &Arc<Node>) -> bool {

@@ -133,6 +133,19 @@ impl Checker {
                         &X_0_MODIFIER_CANNOT_APPEAR_ON_AN_AWAIT_USING_DECLARATION,
                         &["declare".to_string()],
                     ));
+                } else if node
+                    .parent()
+                    .as_ref()
+                    .is_some_and(|p| p.kind == SyntaxKind::ModuleBlock)
+                    && node
+                        .parent()
+                        .as_ref()
+                        .is_some_and(|p| self.node_in_ambient_context(p))
+                {
+                    return Some(self.grammar_error_on_node(
+                        modifier,
+                        &A_DECLARE_MODIFIER_CANNOT_BE_USED_IN_AN_ALREADY_AMBIENT_CONTEXT,
+                    ));
                 }
                 *flags |= ModifierFlags::Ambient;
                 *last_declare = Some(Arc::clone(modifier));

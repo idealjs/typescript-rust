@@ -222,7 +222,7 @@ pub struct Checker {
     pub enclosing_class_stack: Vec<Arc<Node>>,
     pub this_container_stack: Vec<ThisContainerKind>,
     pub ambient_context_depth: usize,
-    pub(crate) ambient_ts1036_reported_blocks: std::collections::HashSet<u64>,
+    pub(crate) ambient_statement_reported: std::collections::HashSet<u64>,
     pub namespace_value_depth: u8,
     pub accessor_pair_return_hint: Option<Arc<Type>>,
     pub call_arg_arrow_context: Vec<usize>,

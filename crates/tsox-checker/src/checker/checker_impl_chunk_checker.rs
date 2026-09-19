@@ -275,7 +275,7 @@ impl Checker {
             break_continue_context_stack: Vec::new(),
             this_container_stack: Vec::new(),
             ambient_context_depth: 0,
-            ambient_ts1036_reported_blocks: std::collections::HashSet::new(),
+            ambient_statement_reported: std::collections::HashSet::new(),
             namespace_value_depth: 0,
             accessor_pair_return_hint: None,
             this_type_stack: Vec::new(),
