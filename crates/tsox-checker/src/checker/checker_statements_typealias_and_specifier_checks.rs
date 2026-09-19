@@ -16,6 +16,15 @@ impl Checker {
             self.check_module_specifier_members(node);
             self.check_module_export_names(node);
         }
+        if node.kind == SyntaxKind::ImportDeclaration
+            && self.ambient_context_depth == 0
+            && self
+                .current_file
+                .as_ref()
+                .is_none_or(|f| !f.file_name.starts_with("bundled://"))
+        {
+            self.check_import_untyped_module(node);
+        }
 
         if matches!(
             node.kind,

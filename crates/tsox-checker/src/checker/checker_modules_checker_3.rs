@@ -85,6 +85,68 @@ impl Checker {
         }
     }
 
+    pub(crate) fn check_import_untyped_module(&mut self, node: &Arc<Node>) {
+        use tsox_core::core::compiler_options::ModuleKind;
+
+        let NodeData::ImportDeclaration(d) = &node.data else {
+            return;
+        };
+        if d.import_clause.is_none() {
+            return;
+        }
+        let Some(file) = self.current_file.clone() else {
+            return;
+        };
+        let spec = d
+            .module_specifier
+            .text()
+            .trim_matches(['"', '\'', '`'])
+            .to_string();
+        if self.resolve_module_file_symbol(&spec).is_some() {
+            return;
+        }
+        let Some(path) =
+            self.program
+                .resolve_external_module_path(&spec, &file.file_name, ModuleKind::None)
+        else {
+            return;
+        };
+        let lower = path.to_ascii_lowercase();
+        let ts_or_json = lower.ends_with(".ts")
+            || lower.ends_with(".tsx")
+            || lower.ends_with(".mts")
+            || lower.ends_with(".cts")
+            || lower.ends_with(".json");
+        if ts_or_json {
+            return;
+        }
+        if !self.no_implicit_any {
+            return;
+        }
+        let mut diag = tsox_frontend::ast::Diagnostic::new(
+            self.current_file.clone(),
+            d.module_specifier.loc,
+            tsox_core::diagnostics::messages_generated::
+                COULD_NOT_FIND_A_DECLARATION_FILE_FOR_MODULE_0_1_IMPLICITLY_HAS_AN_ANY_TYPE,
+            vec![spec.clone(), path],
+        );
+        let types_pkg = if let Some(rest) = spec.strip_prefix('@')
+            && let Some((scope, name)) = rest.split_once('/')
+        {
+            format!("{scope}__{name}")
+        } else {
+            spec.clone()
+        };
+        diag.related_information.push(tsox_frontend::ast::Diagnostic::new(
+            self.current_file.clone(),
+            d.module_specifier.loc,
+            tsox_core::diagnostics::messages_generated::
+                TRY_NPM_I_SAVE_DEV_TYPES_SLASH_1_IF_IT_EXISTS_OR_ADD_A_NEW_DECLARATION_D_TS_FILE_CONTAINING_DECLARE_MODULE_0,
+            vec![spec, types_pkg],
+        ));
+        self.diagnostics.add(diag);
+    }
+
     pub(crate) fn check_module_specifier_members(&mut self, node: &Arc<Node>) {
         use tsox_frontend::ast::NodeData;
 
