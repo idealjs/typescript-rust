@@ -91,8 +91,43 @@ impl Checker {
         source: &Arc<Type>,
         target: &Arc<Type>,
         relation: RelationKind,
-        out: Option<&mut Vec<tsox_frontend::ast::Diagnostic>>,
+        mut out: Option<&mut Vec<tsox_frontend::ast::Diagnostic>>,
     ) -> bool {
+        self.elaborate_error_with_head(expr, source, target, relation, None, out)
+    }
+
+    pub(crate) fn elaborate_error_with_head(
+        &mut self,
+        expr: &Arc<tsox_frontend::ast::Node>,
+        source: &Arc<Type>,
+        target: &Arc<Type>,
+        relation: RelationKind,
+        head_message: Option<&tsox_core::diagnostics::Message>,
+        mut out: Option<&mut Vec<tsox_frontend::ast::Diagnostic>>,
+    ) -> bool {
+        // Go elaborateError：泛型条件目标不细化
+        if self.is_or_has_generic_conditional(target) {
+            return false;
+        }
+        if self.elaborate_did_you_mean_to_call_or_construct(
+            expr,
+            source,
+            target,
+            relation,
+            crate::checker::types::SignatureKind::Construct,
+            head_message,
+            out.as_deref_mut(),
+        ) || self.elaborate_did_you_mean_to_call_or_construct(
+            expr,
+            source,
+            target,
+            relation,
+            crate::checker::types::SignatureKind::Call,
+            head_message,
+            out.as_deref_mut(),
+        ) {
+            return true;
+        }
         match expr.kind {
             tsox_frontend::ast::SyntaxKind::ParenthesizedExpression => {
                 let inner = match &expr.data {
@@ -103,11 +138,65 @@ impl Checker {
                 };
                 self.elaborate_error(&inner, source, target, relation, out)
             }
+            tsox_frontend::ast::SyntaxKind::AsExpression => {
+                let is_const_assertion = match &expr.data {
+                    tsox_frontend::ast::NodeData::AsExpression(d) => {
+                        d.type_node.kind == tsox_frontend::ast::SyntaxKind::TypeReference
+                            && matches!(&d.type_node.data,
+                                tsox_frontend::ast::NodeData::TypeReferenceNode(tr)
+                                    if tr.type_name.text() == "const")
+                    }
+                    _ => false,
+                };
+                if is_const_assertion {
+                    let inner = match &expr.data {
+                        tsox_frontend::ast::NodeData::AsExpression(d) => {
+                            Arc::clone(&d.expression)
+                        }
+                        _ => return false,
+                    };
+                    return self.elaborate_error(&inner, source, target, relation, out);
+                }
+                false
+            }
+            tsox_frontend::ast::SyntaxKind::JsxExpression => {
+                let inner = match &expr.data {
+                    tsox_frontend::ast::NodeData::JsxExpression(d) => d.expression.clone(),
+                    _ => None,
+                };
+                match inner {
+                    Some(inner) => self.elaborate_error(&inner, source, target, relation, out),
+                    None => false,
+                }
+            }
+            tsox_frontend::ast::SyntaxKind::BinaryExpression => {
+                let inner = match &expr.data {
+                    tsox_frontend::ast::NodeData::BinaryExpression(d) => {
+                        if matches!(
+                            d.operator_token.kind,
+                            tsox_frontend::ast::SyntaxKind::EqualsToken
+                                | tsox_frontend::ast::SyntaxKind::CommaToken
+                        ) {
+                            Some(Arc::clone(&d.right))
+                        } else {
+                            None
+                        }
+                    }
+                    _ => None,
+                };
+                match inner {
+                    Some(inner) => self.elaborate_error(&inner, source, target, relation, out),
+                    None => false,
+                }
+            }
             tsox_frontend::ast::SyntaxKind::ObjectLiteralExpression => {
                 self.elaborate_object_literal(expr, source, target, relation, out)
             }
             tsox_frontend::ast::SyntaxKind::ArrayLiteralExpression => {
                 self.elaborate_array_literal(expr, source, target, relation, out)
+            }
+            tsox_frontend::ast::SyntaxKind::ArrowFunction => {
+                self.elaborate_arrow_function(expr, source, target, relation, out)
             }
             _ => false,
         }

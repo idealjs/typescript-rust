@@ -210,11 +210,14 @@ impl Checker {
             );
             props.push(symbol);
         }
+        // Go checkObjectLiteral createObjectLiteralType：newAnonymousType(node.Symbol())
+        // 挂 binder 对象字面量符号（SymbolFlagsObjectLiteral），索引签名推断依赖它
+        let literal_symbol = self.program.symbol_map().symbol_of(node).map(Arc::clone);
         Arc::new(Type {
             flags: TypeFlags::Object,
             object_flags: ObjectFlags::Anonymous | ObjectFlags::ObjectLiteral,
             id: crate::checker::types::next_type_id(),
-            symbol: None,
+            symbol: literal_symbol,
             alias: None,
             data: TypeData::Object(ObjectTypeData {
                 structured: StructuredTypeData {

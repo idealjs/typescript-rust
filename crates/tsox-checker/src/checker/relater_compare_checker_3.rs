@@ -45,11 +45,12 @@ impl Checker {
         }
 
         if let Some(expr) = expr
-            && self.elaborate_error(
+            && self.elaborate_error_with_head(
                 expr,
                 source,
                 target,
                 relation,
+                head_message,
                 diagnostic_output.as_deref_mut(),
             )
         {

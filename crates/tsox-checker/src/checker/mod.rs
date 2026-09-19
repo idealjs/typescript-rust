@@ -255,6 +255,7 @@ pub(crate) mod relater_compare_checker_2;
 pub(crate) mod relater_compare_checker_3;
 pub(crate) mod relater_compare_checker_4;
 pub(crate) mod relater_compare_checker_5;
+pub(crate) mod relater_compare_checker_6;
 pub(crate) mod relater_conditional;
 pub(crate) mod relater_conditional_checker;
 pub(crate) mod relater_conditional_checker_2;
