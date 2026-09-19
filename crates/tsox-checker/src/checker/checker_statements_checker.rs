@@ -311,6 +311,9 @@ impl Checker {
             | SyntaxKind::NamespaceExportDeclaration
             | SyntaxKind::ExportSpecifier
             | SyntaxKind::ImportSpecifier => {
+                if node.kind == SyntaxKind::ImportDeclaration {
+                    self.check_import_declaration_grammar(node);
+                }
                 self.check_type_alias_and_specifiers(node);
                 self.check_import_ambient_rules(node);
                 self.check_import_equals_conflicts(node);
@@ -321,6 +324,7 @@ impl Checker {
                 self.check_enum_declaration(node);
             }
             SyntaxKind::ExportAssignment => {
+                self.check_export_assignment_grammar(node);
                 if let tsox_frontend::ast::NodeData::ExportAssignment(data) = &node.data {
                     self.check_expression(&data.expression);
                 }

@@ -3,6 +3,42 @@
 use crate::checker::checker_statements::*;
 
 impl Checker {
+    pub fn check_export_assignment_grammar(&mut self, node: &Arc<Node>) {
+        let tsox_frontend::ast::NodeData::ExportAssignment(d) = &node.data else {
+            return;
+        };
+        let Some(modifiers) = &d.modifiers else {
+            return;
+        };
+        if modifiers.nodes.is_empty() {
+            return;
+        }
+        if !self.check_grammar_modifiers(node) {
+            self.grammar_error_on_node(
+                &modifiers.nodes[0],
+                &AN_EXPORT_ASSIGNMENT_CANNOT_HAVE_MODIFIERS,
+            );
+        }
+    }
+
+    pub fn check_import_declaration_grammar(&mut self, node: &Arc<Node>) {
+        let tsox_frontend::ast::NodeData::ImportDeclaration(d) = &node.data else {
+            return;
+        };
+        let Some(modifiers) = &d.modifiers else {
+            return;
+        };
+        if modifiers.nodes.is_empty() {
+            return;
+        }
+        if !self.check_grammar_modifiers(node) {
+            self.grammar_error_on_node(
+                &modifiers.nodes[0],
+                &AN_IMPORT_DECLARATION_CANNOT_HAVE_MODIFIERS,
+            );
+        }
+    }
+
     pub fn check_import_ambient_rules(&mut self, node: &Arc<Node>) {
         if self.ambient_context_depth == 0 {
             let emit_format_cjs = self.current_file.as_ref().is_some_and(|f| {

@@ -34,6 +34,17 @@ impl Parser {
         Arc::new(ModifierList::new(nodes, flags))
     }
 
+    pub(crate) fn make_optional_modifier_list(
+        &self,
+        modifiers: &[(SyntaxKind, usize, usize)],
+    ) -> Option<Arc<ModifierList>> {
+        if modifiers.is_empty() {
+            None
+        } else {
+            Some(self.make_modifier_list(modifiers.to_vec()))
+        }
+    }
+
     pub(crate) fn make_modifier_list_with_decorators(
         &self,
         modifiers: Vec<(SyntaxKind, usize, usize)>,

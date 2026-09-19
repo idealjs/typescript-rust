@@ -49,6 +49,7 @@ impl Parser {
             modifiers.push((kind, pos, end));
         }
 
+        let pre_modifiers = modifiers.clone();
         let modifiers = Some(if decorators.is_empty() {
             self.make_modifier_list(modifiers)
         } else {
@@ -80,7 +81,11 @@ impl Parser {
                 self.parse_variable_statement_with_modifiers(modifiers)
             }
             SyntaxKind::ImportKeyword => {
-                self.parse_import_equals_declaration_with_modifiers(modifiers)
+                let pos = Self::declaration_start(&modifiers, self.token_pos());
+                self.parse_import_declaration_with_modifiers(pos, modifiers)
+            }
+            SyntaxKind::ExportKeyword => {
+                self.parse_export_declaration_with_pre(pre_modifiers)
             }
             _ => {
                 // Go parseDeclarationWorker：装饰器/修饰符后无声明 → 保留在
@@ -107,16 +112,6 @@ impl Parser {
                 self.parse_expression_statement()
             }
         }
-    }
-
-    pub(crate) fn parse_import_equals_declaration_with_modifiers(
-        &mut self,
-        modifiers: Option<Arc<ModifierList>>,
-    ) -> Arc<Node> {
-        let pos = Self::declaration_start(&modifiers, self.token_pos());
-        self.next_token();
-        let name = self.parse_identifier();
-        self.parse_import_equals_tail(pos, modifiers, name, false)
     }
 
     pub(crate) fn parse_function_declaration(&mut self) -> Arc<Node> {

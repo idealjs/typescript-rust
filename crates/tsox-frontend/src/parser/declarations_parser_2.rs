@@ -173,6 +173,14 @@ impl Parser {
 
     pub(crate) fn parse_import_declaration(&mut self) -> Arc<Node> {
         let pos = self.token_pos();
+        self.parse_import_declaration_with_modifiers(pos, None)
+    }
+
+    pub(crate) fn parse_import_declaration_with_modifiers(
+        &mut self,
+        pos: usize,
+        modifiers: Option<Arc<ModifierList>>,
+    ) -> Arc<Node> {
         self.next_token();
 
         let after_import_pos = self.token_pos();
@@ -222,7 +230,12 @@ impl Parser {
                 && phase_modifier != Some(SyntaxKind::DeferKeyword)
             {
                 let is_type_only = phase_modifier == Some(SyntaxKind::TypeKeyword);
-                return self.parse_import_equals_declaration(pos, id.clone(), is_type_only);
+                return self.parse_import_equals_with_modifiers(
+                    pos,
+                    modifiers,
+                    id.clone(),
+                    is_type_only,
+                );
             }
         }
 
@@ -235,13 +248,23 @@ impl Parser {
         Arc::new(Node::with_loc(
             SyntaxKind::ImportDeclaration,
             NodeData::ImportDeclaration(ImportDeclarationData {
-                modifiers: None,
+                modifiers,
                 import_clause,
                 module_specifier,
                 attributes,
             }),
             TextRange::new(pos, end),
         ))
+    }
+
+    pub(crate) fn parse_import_equals_with_modifiers(
+        &mut self,
+        pos: usize,
+        modifiers: Option<Arc<ModifierList>>,
+        name: Arc<Node>,
+        is_type_only: bool,
+    ) -> Arc<Node> {
+        self.parse_import_equals_tail(pos, modifiers, name, is_type_only)
     }
 
     pub(crate) fn token_after_import_definitely_produces_import_declaration(&self) -> bool {
