@@ -4,7 +4,14 @@ use crate::checker::typenode_references::*;
 
 impl Checker {
     pub(crate) fn resolve_namespace_type(&mut self, symbol: &Arc<Symbol>) -> Arc<Type> {
-        if let Some(cached) = self
+        // namespace+interface 合并符号：接口声明类型（type_alias_links）与
+        // 模块实例类型（值侧）分离缓存，避免互相污染
+        let merged_with_type_meaning = symbol.flags.contains(SymbolFlags::Interface);
+        if merged_with_type_meaning {
+            if let Some(cached) = self.merged_ns_instance_type_cache.get(&symbol.id()) {
+                return Arc::clone(cached);
+            }
+        } else if let Some(cached) = self
             .type_alias_links
             .get(symbol)
             .and_then(|l| l.declared_type.clone())
@@ -258,7 +265,12 @@ impl Checker {
                 ..Default::default()
             }),
         });
-        self.type_alias_links.get_or_default(symbol).declared_type = Some(Arc::clone(&result));
+        if merged_with_type_meaning {
+            self.merged_ns_instance_type_cache
+                .insert(symbol.id(), Arc::clone(&result));
+        } else {
+            self.type_alias_links.get_or_default(symbol).declared_type = Some(Arc::clone(&result));
+        }
         result
     }
 }

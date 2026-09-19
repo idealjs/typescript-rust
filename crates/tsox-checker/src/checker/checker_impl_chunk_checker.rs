@@ -238,6 +238,7 @@ impl Checker {
             global_promise_type: OnceLock::new(),
             array_type_cache: std::collections::HashMap::new(),
             interface_instantiation_cache: std::collections::HashMap::new(),
+            merged_ns_instance_type_cache: std::collections::HashMap::new(),
             pending_interface_shells: std::collections::HashMap::new(),
             allow_unused_labels,
             within_unreachable_code: false,

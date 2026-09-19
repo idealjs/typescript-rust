@@ -185,6 +185,7 @@ pub struct Checker {
     pub array_type_cache: std::collections::HashMap<(usize, usize), Arc<Type>>,
     pub interface_instantiation_cache:
         std::collections::HashMap<Vec<usize>, (Vec<Arc<Type>>, Arc<Type>)>,
+    pub merged_ns_instance_type_cache: std::collections::HashMap<u64, Arc<Type>>,
     pub pending_interface_shells: std::collections::HashMap<usize, Arc<Type>>,
     pub attached_type_args_cache:
         std::collections::HashMap<Vec<usize>, (Arc<Type>, Vec<Arc<Type>>, Arc<Type>)>,
