@@ -59,18 +59,36 @@ impl Checker {
         if let (Some(si), Some(ni)) = (string_index, number_index)
             && let (Some(sv), Some(nv)) = (si.value_type.as_ref(), ni.value_type.as_ref())
             && !self.is_type_assignable_to(nv, sv)
-            && let Some(num_decl) = ni.declaration.as_ref()
         {
-            let name_loc = num_decl.loc;
-            let sv_str = self.type_to_string(sv);
-            let nv_str = self.type_to_string(nv);
-            self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
-                self.current_file.clone(),
-                name_loc,
-                tsox_core::diagnostics::messages_generated::
-                    X_0_INDEX_TYPE_1_IS_NOT_ASSIGNABLE_TO_2_INDEX_TYPE_3,
-                vec!["number".to_string(), nv_str, "string".to_string(), sv_str],
-            ));
+            // Go checkIndexConstraintForIndexSignature：错误锚点取本类型符号
+            // 内声明的那个索引签名（number 优先，其次 string），都非本地则不报
+            let parent_in_type = |d: &Arc<Node>| -> bool {
+                d.parent().is_some_and(|p| {
+                    t.symbol
+                        .as_ref()
+                        .is_some_and(|sym| sym.declarations.iter().any(|dd| Arc::ptr_eq(dd, &p)))
+                })
+            };
+            let num_local = ni.declaration.as_ref().is_some_and(parent_in_type);
+            let str_local = si.declaration.as_ref().is_some_and(parent_in_type);
+            let anchor = if num_local {
+                ni.declaration.as_ref().map(|d| d.loc)
+            } else if str_local {
+                si.declaration.as_ref().map(|d| d.loc)
+            } else {
+                None
+            };
+            if let Some(name_loc) = anchor {
+                let sv_str = self.type_to_string(sv);
+                let nv_str = self.type_to_string(nv);
+                self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                    self.current_file.clone(),
+                    name_loc,
+                    tsox_core::diagnostics::messages_generated::
+                        X_0_INDEX_TYPE_1_IS_NOT_ASSIGNABLE_TO_2_INDEX_TYPE_3,
+                    vec!["number".to_string(), nv_str, "string".to_string(), sv_str],
+                ));
+            }
         }
 
         let local_index: Option<Arc<crate::checker::IndexInfo>> = index_infos

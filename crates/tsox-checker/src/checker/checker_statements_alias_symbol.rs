@@ -91,9 +91,11 @@ impl Checker {
             } else {
                 IMPORT_DECLARATION_CONFLICTS_WITH_LOCAL_DECLARATION_OF_0
             };
+            // Go：锚定 import 的名字节点（默认导入名/命名空间导入名/导入别名）
+            let anchor_loc = Self::import_conflict_anchor(node);
             self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
                 self.current_file.clone(),
-                node.loc,
+                anchor_loc,
                 message,
                 vec![symbol.name.clone()],
             ));
@@ -169,6 +171,45 @@ impl Checker {
             X_0_IS_A_TYPE_AND_CANNOT_BE_IMPORTED_IN_JAVASCRIPT_FILES_USE_1_IN_A_JSDOC_TYPE_ANNOTATION,
             vec![identifier_text, import_text],
         ));
+    }
+
+    fn import_conflict_anchor(node: &Arc<Node>) -> tsox_core::core::text::TextRange {
+        match &node.data {
+            NodeData::ImportDeclaration(d) => {
+                let mut name: Option<Arc<Node>> = None;
+                if let Some(clause) = &d.import_clause
+                    && let NodeData::ImportClause(ic) = &clause.data
+                {
+                    if let Some(n) = &ic.name {
+                        name = Some(Arc::clone(n));
+                    } else if let Some(nb) = &ic.named_bindings {
+                        match &nb.data {
+                            NodeData::NamespaceImport(ns) => name = Some(Arc::clone(&ns.name)),
+                            NodeData::NamedImports(ni) => {
+                                if let Some(first) = ni.elements.iter().next() {
+                                    name = Some(Arc::clone(first));
+                                }
+                            }
+                            _ => {}
+                        }
+                    }
+                }
+                name.map(|n| n.loc).unwrap_or(node.loc)
+            }
+            NodeData::ImportEqualsDeclaration(d) => d.name.loc,
+            NodeData::NamespaceImport(d) => d.name.loc,
+            NodeData::ImportClause(d) => {
+                if let Some(n) = &d.name {
+                    n.loc
+                } else if let Some(nb) = &d.named_bindings {
+                    Self::import_conflict_anchor(nb)
+                } else {
+                    node.loc
+                }
+            }
+            NodeData::ImportSpecifier(_) => node.loc,
+            _ => node.loc,
+        }
     }
 }
 

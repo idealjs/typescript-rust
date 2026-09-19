@@ -652,11 +652,11 @@ impl Checker {
                         let display = self.boxed_declared_type_for_display(&t);
                         let type_str = self.type_to_string(&display);
                         let key_str = self.type_to_string(&name_expr_type);
-                        let name_node = Self::binding_element_name_node(elem)
-                            .unwrap_or_else(|| Arc::clone(elem));
+                        // Go 报错锚定计算名内的表达式节点
+                        let anchor_loc = cd.expression.loc;
                         self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
                             self.current_file.clone(),
-                            name_node.loc,
+                            anchor_loc,
                             tsox_core::diagnostics::messages_generated::
                                 TYPE_0_HAS_NO_MATCHING_INDEX_SIGNATURE_FOR_TYPE_1,
                             vec![type_str, key_str],
