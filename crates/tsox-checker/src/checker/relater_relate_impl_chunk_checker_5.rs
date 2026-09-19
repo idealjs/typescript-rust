@@ -199,8 +199,7 @@ impl Checker {
             if !self.should_report_unmatched_property_error(source, target) {
                 return false;
             }
-            let source_str = self.type_to_string(source);
-            let target_str = self.type_to_string(target);
+            let (source_str, target_str) = self.get_type_names_for_error_display(source, target);
             if missing_props.len() == 1 {
                 self.relater_report_error(
                     tsox_core::diagnostics::messages_generated::

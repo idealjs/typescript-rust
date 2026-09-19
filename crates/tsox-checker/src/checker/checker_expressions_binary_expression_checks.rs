@@ -292,8 +292,9 @@ impl Checker {
                     && !right_type.flags.intersects(skip_flags)
                     && !self.are_types_comparable(&left_type, &right_type)
                 {
-                    let left_str = self.type_to_string(&left_type);
-                    let right_str = self.type_to_string(&right_type);
+                    // Go：同名不同型时用全限定名消歧
+                    let (left_str, right_str) =
+                        self.get_type_names_for_error_display(&left_type, &right_type);
                     self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
                             self.current_file.clone(),
                             node.loc,

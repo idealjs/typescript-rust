@@ -1,6 +1,7 @@
 #![allow(unused_imports)]
 
 use crate::checker::relater_compare::*;
+use tsox_frontend::ast::SyntaxKind;
 
 impl Checker {
     // Go findMostOverlappyType：以 keyof 交集的 unit 数量选最佳匹配的联合成分
@@ -170,10 +171,113 @@ impl Checker {
         left: &Arc<Type>,
         right: &Arc<Type>,
     ) -> (String, String) {
-        (
-            self.get_type_name_for_error_display(left),
-            self.get_type_name_for_error_display(right),
-        )
+        // Go getTypeNamesForErrorDisplay：两侧显示名相同（同名不同型）时
+        // 改用全限定形式消歧
+        let left_str = self.get_type_name_for_error_display(left);
+        let right_str = self.get_type_name_for_error_display(right);
+        if left_str == right_str {
+            return (
+                self.fully_qualified_type_string(left),
+                self.fully_qualified_type_string(right),
+            );
+        }
+        (left_str, right_str)
+    }
+
+    // Go typeToString(TypeFormatFlags.UseFullyQualifiedType)：沿符号 parent
+    // 链拼点分全限定名；外部模块文件符号输出 import("name")，ambient 模块
+    // 名去引号
+    pub fn fully_qualified_type_string(&mut self, t: &Arc<Type>) -> String {
+        if t.flags.contains(TypeFlags::Union)
+            && let Some(ui) = t.as_union_or_intersection()
+            && ui.types.len() > 1
+            && ui
+                .types
+                .iter()
+                .all(|c| c.flags.contains(TypeFlags::EnumLiteral))
+        {
+            if let Some(sym) = &t.symbol {
+                return self.symbol_fqn(sym);
+            }
+        }
+        if let Some(alias) = &t.alias
+            && let Some(alias_sym) = &alias.symbol
+        {
+            let name = self.symbol_fqn(alias_sym);
+            if !alias.type_arguments.is_empty() {
+                let rendered: Vec<String> = alias
+                    .type_arguments
+                    .iter()
+                    .map(|a| self.type_to_string(a))
+                    .collect();
+                return format!("{name}<{}>", rendered.join(", "));
+            }
+            return name;
+        }
+        if let Some(sym) = &t.symbol {
+            let name = self.symbol_fqn(sym);
+            if let Some(args) = self.reference_type_arguments(t) {
+                let rendered: Vec<String> = args.iter().map(|a| self.type_to_string(a)).collect();
+                return format!("{name}<{}>", rendered.join(", "));
+            }
+            return name;
+        }
+        self.type_to_string(t)
+    }
+
+    fn symbol_fqn(&self, sym: &Arc<Symbol>) -> String {
+        let mut parts: Vec<String> = Vec::new();
+        let mut cur = Some(Arc::clone(sym));
+        while let Some(s) = cur {
+            if s.declarations
+                .iter()
+                .any(|d| d.kind == SyntaxKind::SourceFile)
+            {
+                if let Some(decl) = s
+                    .declarations
+                    .iter()
+                    .find(|d| d.kind == SyntaxKind::SourceFile)
+                    && let Some(sf) = self.get_source_file_of_node(decl)
+                    && (sf.external_module_indicator.is_some()
+                        || sf.common_js_module_indicator.is_some())
+                {
+                    let module = crate::checker::nodebuilder::module_specifier_of_name(&s.name);
+                    let suffix = parts.iter().rev().cloned().collect::<Vec<_>>().join(".");
+                    return if suffix.is_empty() {
+                        format!("import(\"{module}\")")
+                    } else {
+                        format!("import(\"{module}\").{suffix}")
+                    };
+                }
+                break;
+            }
+            if s.declarations
+                .iter()
+                .any(|d| d.kind == SyntaxKind::ModuleDeclaration)
+                && s.name.starts_with('"')
+            {
+                let module = s.name.trim_matches('"').to_string();
+                let suffix = parts.iter().rev().cloned().collect::<Vec<_>>().join(".");
+                return if suffix.is_empty() {
+                    module
+                } else {
+                    format!("{module}.{suffix}")
+                };
+            }
+            parts.push(s.name.clone());
+            cur = s.parent();
+        }
+        parts.reverse();
+        parts.join(".")
+    }
+
+    fn reference_type_arguments(&self, t: &Arc<Type>) -> Option<Vec<Arc<Type>>> {
+        match &t.data {
+            TypeData::Object(o) if !o.type_arguments.is_empty() => {
+                Some(o.type_arguments.iter().cloned().collect())
+            }
+            _ => None,
+        }
     }
 
     pub fn get_type_name_for_error_display(&mut self, t: &Arc<Type>) -> String {
