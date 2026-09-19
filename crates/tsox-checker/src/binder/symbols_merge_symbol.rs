@@ -3,6 +3,28 @@
 use crate::binder::symbols::*;
 
 impl Binder {
+    // Go 模块容器本地/导出分表的合并面：同名不同导出性的声明并入同一
+    // 符号（checker 的 TS2395 依赖合并声明集），不做 binder 冲突报告
+    pub(crate) fn append_declaration_to_existing_symbol(
+        &mut self,
+        node: &Arc<Node>,
+        existing: &Arc<Symbol>,
+        includes: SymbolFlags,
+    ) -> Option<Arc<Symbol>> {
+        let existing_mut = Arc::as_ptr(existing) as *mut Symbol;
+        unsafe {
+            (*existing_mut).declarations.push(Arc::clone(node));
+            (*existing_mut).flags |= includes;
+            if (*existing_mut).value_declaration.is_none()
+                && includes.intersects(SymbolFlags::VALUE)
+            {
+                (*existing_mut).value_declaration = Some(Arc::clone(node));
+            }
+        }
+        self.symbol_map.set_symbol(node, Arc::clone(existing));
+        Some(Arc::clone(existing))
+    }
+
     pub(crate) fn merge_into_existing_symbol(
         &mut self,
         node: &Arc<Node>,

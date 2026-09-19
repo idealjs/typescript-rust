@@ -4,6 +4,7 @@ use crate::checker::checker_statements::*;
 
 impl Checker {
     pub fn check_module_declaration(&mut self, node: &Arc<Node>) {
+        self.check_exports_on_merged_declarations(node);
         self.check_grammar_modifiers(node);
 
         // Go checkModuleDeclaration：global 增强诊断
