@@ -40,6 +40,21 @@ impl Checker {
             self.check_module_format_mismatch(node);
         }
 
+        if node.kind == SyntaxKind::TypeAliasDeclaration {
+            self.check_grammar_modifiers(node);
+            if let Some(parent) = node.parent()
+                && !self.container_allows_block_scoped_variable(&parent)
+                && let Some(name) = node.name()
+            {
+                self.grammar_error_on_node_with_args(
+                    &name,
+                    &tsox_core::diagnostics::messages_generated::
+                        X_0_DECLARATIONS_CAN_ONLY_BE_DECLARED_INSIDE_A_BLOCK,
+                    &["type".to_string()],
+                );
+            }
+        }
+
         if node.kind == SyntaxKind::TypeAliasDeclaration
             && let tsox_frontend::ast::NodeData::TypeAliasDeclaration(d) = &node.data
         {

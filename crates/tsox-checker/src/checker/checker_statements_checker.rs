@@ -299,6 +299,17 @@ impl Checker {
                 if !self.check_grammar_modifiers(node) {
                     self.check_grammar_interface_declaration(node);
                 }
+                if let Some(parent) = node.parent()
+                    && !self.container_allows_block_scoped_variable(&parent)
+                    && let Some(name) = node.name()
+                {
+                    self.grammar_error_on_node_with_args(
+                        &name,
+                        &tsox_core::diagnostics::messages_generated::
+                            X_0_DECLARATIONS_CAN_ONLY_BE_DECLARED_INSIDE_A_BLOCK,
+                        &["interface".to_string()],
+                    );
+                }
 
                 if let tsox_frontend::ast::NodeData::InterfaceDeclaration(data) = &node.data {
                     self.check_reserved_type_name(
