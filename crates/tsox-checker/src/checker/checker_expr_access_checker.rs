@@ -112,9 +112,27 @@ impl Checker {
 
                 CommaToken => self.get_type_of_node(&data.right),
 
-                EqualsToken
-                | PlusEqualsToken
-                | MinusEqualsToken
+                EqualsToken => self.get_type_of_node(&data.right),
+
+                PlusEqualsToken => {
+                    let left_type = self.get_type_of_node(&data.left);
+                    let lt = self.get_base_type_of_literal_type(&left_type);
+                    let rt = self.get_type_of_node(&data.right);
+                    let string_like = |t: &Arc<Type>| {
+                        t.flags
+                            .intersects(TypeFlags::String | TypeFlags::StringLiteral)
+                    };
+                    if string_like(&lt) || string_like(&rt) {
+                        self.string_type()
+                    } else if lt.flags.contains(TypeFlags::Any) || rt.flags.contains(TypeFlags::Any)
+                    {
+                        self.get_any_type()
+                    } else {
+                        self.number_type()
+                    }
+                }
+
+                MinusEqualsToken
                 | AsteriskEqualsToken
                 | SlashEqualsToken
                 | PercentEqualsToken
@@ -124,7 +142,7 @@ impl Checker {
                 | GreaterThanGreaterThanGreaterThanEqualsToken
                 | AmpersandEqualsToken
                 | BarEqualsToken
-                | CaretEqualsToken => self.get_type_of_node(&data.right),
+                | CaretEqualsToken => self.number_type(),
                 _ => self.get_any_type(),
             }
         } else {
